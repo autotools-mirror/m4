@@ -20,48 +20,14 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-# serial 5
-
-# AC_LIBTOOL_COMPILER_OPTION(MESSAGE, VARIABLE-NAME, FLAGS,
-#		[OUTPUT-FILE], [ACTION-SUCCESS], [ACTION-FAILURE])
-# ----------------------------------------------------------------
-# Check whether the given compiler option works
-ifdef([AC_LIBTOOL_COMPILER_OPTION], [],
-[AC_DEFUN([AC_LIBTOOL_COMPILER_OPTION],
-  [AC_CACHE_CHECK([$1], [$2],
-    [$2=no
-    ifelse([$4], , [ac_outfile=conftest.$ac_objext], [ac_outfile=$4])
-     save_CFLAGS="$CFLAGS"
-     CFLAGS="$CFLAGS $3"
-     echo "$lt_simple_compile_test_code" > conftest.$ac_ext
-     if (eval $ac_compile 2>conftest.err) && test -s $ac_outfile; then
-       # The compiler can only warn and ignore the option if not recognized
-       # So say no if there are warnings
-       if test -s conftest.err; then
-         # Append any errors to the config.log.
-         cat conftest.err 1>&AS_MESSAGE_LOG_FD
-       else
-         $2=yes
-       fi
-     fi
-     $rm conftest*
-     CFLAGS="$save_CFLAGS"
-   ])
-
-  if test x"[$]$2" = xyes; then
-      ifelse([$5], , :, [$5])
-  else
-      ifelse([$6], , :, [$6])
-  fi
-  ])
-])# AC_LIBTOOL_COMPILER_OPTION
-
+# serial 6
 
 # M4_AC_CHECK_DEBUGGING
 # ---------------------
 # Debugging Support
 AC_DEFUN([M4_AC_CHECK_DEBUGGING],
 [AC_REQUIRE([AC_PROG_CC])
+AC_REQUIRE([AC_LIBTOOL_COMPILER_OPTION])
 AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],
                            [build for debugging [default=no]])])
 AC_MSG_CHECKING(for compilation debug mode)
@@ -77,7 +43,7 @@ if test "X$enable_debug" = Xyes; then
       [Define this to enable additional runtime debugging])
   if test "$GCC" = yes; then
     case "$CFLAGS" in
-      *-O* ) CFLAGS=`echo $CFLAGS | sed 's/-O[[^ ]]* / /;s/-O[[^ ]]*$//'` ;;
+      *-O* ) CFLAGS=`echo $CFLAGS | $SED 's/-O[[^ ]]* / /;s/-O[[^ ]]*$//'` ;;
     esac
     case "$CFLAGS" in
         *-g* ) ;;
@@ -110,12 +76,12 @@ else
   AC_ENABLE_SHARED
   case "$CFLAGS" in
     *-g* ) CFLAGS=`echo "$CFLAGS" |\
-               sed -e 's/ -g / /g;s/ -g$//;s/^-g //g;s/^-g$//'`
+               $SED -e 's/ -g / /g;s/ -g$//;s/^-g //g;s/^-g$//'`
            ;;
   esac
   case "$CXXFLAGS" in
     *-g* ) CXXFLAGS=`echo "$CXXFLAGS" |\
-               sed -e 's/ -g / /g;s/ -g$//;s/^-g //g;s/^-g$//'`
+               $SED -e 's/ -g / /g;s/ -g$//;s/^-g //g;s/^-g$//'`
            ;;
   esac
 fi
