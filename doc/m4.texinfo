@@ -3269,7 +3269,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4: input.m4: 7: Bad expression in eval: foo / 6
+@error{}m4: input.m4: 7: Warning: eval: bad expression: foo / 6
 @result{}
 eval(foo/6)
 @result{}111

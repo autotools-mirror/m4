@@ -518,8 +518,8 @@ cmp_term (eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad comparison operator in cmp_term ()")));
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
 	  abort ();
 	}
     }
@@ -563,8 +563,8 @@ shift_term (eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad shift operator in shift_term ()")));
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
 	  abort ();
 	}
     }
@@ -621,7 +621,11 @@ mult_term (eval_token et, number *v1)
     return er;
 
   numb_init(v2);
-  while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO || op == RATIO)
+  while (op = eval_lex (&v2),
+	 op == TIMES
+	 || op == DIVIDE
+	 || op == MODULO
+	 || op == RATIO)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
@@ -662,7 +666,7 @@ mult_term (eval_token et, number *v1)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    _("INTERNAL ERROR: Bad operator in mult_term ()")));
+		    "INTERNAL ERROR: Bad operator in mult_term ()"));
 	  abort ();
 	}
     }
@@ -780,7 +784,8 @@ m4_evaluate (struct obstack *obs, int argc, m4_token **argv)
   if (radix <= 1 || radix > 36)
     {
       M4ERROR ((warning_status, 0,
-		_("Radix in eval out of range (radix = %d)"), radix));
+		_("Warning: %s: radix out of range: %d"),
+		M4ARG(0), radix));
       return;
     }
 
@@ -790,7 +795,8 @@ m4_evaluate (struct obstack *obs, int argc, m4_token **argv)
   if (min <= 0)
     {
       M4ERROR ((warning_status, 0,
-		_("Negative width to eval")));
+		_("Warning: %s: negative width: %d"),
+		M4ARG(0), min));
       return;
     }
 
@@ -811,45 +817,50 @@ m4_evaluate (struct obstack *obs, int argc, m4_token **argv)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (missing right parenthesis): %s"),
-		M4ARG (1)));
+		_("Warning: %s: missing right parenthesis: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-		_("Bad expression in eval: %s"), M4ARG (1)));
+		_("Warning: %s: bad expression: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (bad input): %s"), M4ARG (1)));
+		_("Warning: %s: bad input: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (excess input): %s"), M4ARG (1)));
+		_("Warning: %s: excess input: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-		_("Divide by zero in eval: %s"), M4ARG (1)));
+		_("Warning: %s: divide by zero: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-		_("Modulo by zero in eval: %s"), M4ARG (1)));
+		_("Warning: %s: modulo by zero: %s"),
+		M4ARG (0), M4ARG (1)));
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad error code in evaluate ()")));
+		"INTERNAL ERROR: Bad error code in evaluate ()"));
       abort ();
     }
 
   if (err == NO_ERROR)
-    numb_obstack(obs, val, radix, min);
+    numb_obstack (obs, val, radix, min);
 
-  numb_fini(val);
+  numb_fini (val);
 }
 
 static void
@@ -859,23 +870,25 @@ numb_pow (number *x, const number *y)
 
   number ans, yy;
 
-  numb_init(ans);
-  numb_set_si(&ans,1);
+  numb_init (ans);
+  numb_set_si (&ans, 1);
 
-  numb_init(yy);
-  numb_set(yy,*y);
+  numb_init (yy);
+  numb_set (yy, *y);
 
-  if (numb_negativep(yy)) {
-    numb_invert(*x);
-    numb_negate(yy);
-  }
+  if (numb_negativep (yy))
+    {
+      numb_invert (*x);
+      numb_negate (yy);
+    }
 
-  while (numb_positivep(yy)) {
-    numb_times(ans,*x);
-    numb_decr(yy);
-  }
-  numb_set(*x,ans);
+  while (numb_positivep (yy))
+    {
+      numb_times (ans, *x);
+      numb_decr (yy);
+    }
+  numb_set (*x, ans);
 
-  numb_fini(ans);
-  numb_fini(yy);
+  numb_fini (ans);
+  numb_fini (yy);
 }

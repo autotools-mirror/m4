@@ -1,5 +1,12 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* modules/evalparse.c: Save translators' time: don't translate
+	internal error messages.
+	(m4_evaluate): Simplify/normalize error messages.
+	* doc/m4.texinfo (Eval): Adjust.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* m4/macro.c (expand_macro): Let m4_bad_argc handle the cases
 	where no checking is needed.
 	* m4/utility.c (m4_bad_argc): Use the usual (argc, argv, ...)
