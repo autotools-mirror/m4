@@ -59,10 +59,36 @@ for any of these ideas or if you have others to add.
 
 * FEATURES OR PROBLEMS
 
-  + m4 should keep an ``execution stack'' of macros, which could applications
+  + m4 should keep an ``execution stack'' of macros, which applications could
     use in their error messages.
 
   + Implement discarding comment delimiters with the syntax table.
+
+  + Implement qindir.  Like indir, except that the result of the macro call
+    is not expanded.  Because the input stack might contain a file or a
+    string, it is probably best achieved by making note that the TOS input
+    should be copied rather than rescanned.
+
+      $ echo "a'b" > f
+      $ m4
+      define(a,z)dnl
+      include(f)dnl
+      z'b
+      indir(`include', f)dnl
+      z'b
+      qindir(`include', f)dnl
+      a'b
+      patsubst(qindir(`include', f), b, x)
+      z'x
+
+  + Use the TOS input quoting for qindir to fix this bug:
+
+      define(`x', -'-)
+      define(y, defn(`x'))
+      y
+      --'
+    --
+    Stepan Kasal <kasal@ucw.cz>
 
   + The $ used in user defined macros cannot be changed through
     changesyntax.  It should be handled as a modifier.

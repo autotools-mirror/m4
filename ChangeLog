@@ -1,3 +1,8 @@
+2005-02-08  Gary V. Vaughan  <gary@gnu.org>
+
+	* TODO: Add qindir requirement, and defn bug.
+	From Stepan Kasal  <kasal@ucw.cz>
+
 2005-02-08  Stepan Kasal  <kasal@ucw.cz>
 
 	* TODO: Add ``execution stack'', fix a typo.
