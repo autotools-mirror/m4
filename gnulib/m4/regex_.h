@@ -1,27 +1,27 @@
 /* Definitions for data structures and routines for the regular
-   expression library, version 0.12.
-   Copyright (C) 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
+   expression library.
+   Copyright (C) 1985,1989-93,1995-98,2000,2001,2002,2003
+   Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
 
-   This file is part of the GNU C Library.  Its master source is NOT part of
-   the C library, however.  The master source lives in /gd/gnu/lib.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
-
-   The GNU C Library is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation,
+   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef _REGEX_H
 #define _REGEX_H 1
+
+#include <sys/types.h>
 
 /* Allow the use in C++ code.  */
 #ifdef __cplusplus
@@ -160,6 +160,15 @@ typedef unsigned long int reg_syntax_t;
    this bit set, and it won't affect anything in the normal case. */
 #define RE_DEBUG (RE_NO_GNU_OPS << 1)
 
+/* If this bit is set, a syntactically invalid interval is treated as
+   a string of ordinary characters.  For example, the ERE 'a{1' is
+   treated as 'a\{1'.  */
+#define RE_INVALID_INTERVAL_ORD (RE_DEBUG << 1)
+
+/* If this bit is set, then ignore case when matching.
+   If not set, then case is significant.  */
+#define RE_ICASE (RE_INVALID_INTERVAL_ORD << 1)
+
 /* This global variable defines the particular regexp syntax to use (for
    some interfaces).  When a regexp is compiled, the syntax used is
    stored in the pattern buffer, so changing this does not affect
@@ -181,7 +190,8 @@ extern reg_syntax_t re_syntax_options;
 
 #define RE_SYNTAX_GNU_AWK						\
   ((RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DEBUG)	\
-   & ~(RE_DOT_NOT_NULL | RE_INTERVALS | RE_CONTEXT_INDEP_OPS))
+   & ~(RE_DOT_NOT_NULL | RE_INTERVALS | RE_CONTEXT_INDEP_OPS		\
+       | RE_CONTEXT_INVALID_OPS ))
 
 #define RE_SYNTAX_POSIX_AWK 						\
   (RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS		\
@@ -199,7 +209,8 @@ extern reg_syntax_t re_syntax_options;
    | RE_NO_BK_VBAR)
 
 #define RE_SYNTAX_POSIX_EGREP						\
-  (RE_SYNTAX_EGREP | RE_INTERVALS | RE_NO_BK_BRACES)
+  (RE_SYNTAX_EGREP | RE_INTERVALS | RE_NO_BK_BRACES			\
+   | RE_INVALID_INTERVAL_ORD)
 
 /* P1003.2/D11.2, section 4.20.7.1, lines 5078ff.  */
 #define RE_SYNTAX_ED RE_SYNTAX_POSIX_BASIC
@@ -221,13 +232,13 @@ extern reg_syntax_t re_syntax_options;
   (_RE_SYNTAX_POSIX_COMMON | RE_LIMITED_OPS)
 
 #define RE_SYNTAX_POSIX_EXTENDED					\
-  (_RE_SYNTAX_POSIX_COMMON | RE_CONTEXT_INDEP_ANCHORS			\
-   | RE_CONTEXT_INDEP_OPS  | RE_NO_BK_BRACES				\
-   | RE_NO_BK_PARENS       | RE_NO_BK_VBAR				\
-   | RE_UNMATCHED_RIGHT_PAREN_ORD)
+  (_RE_SYNTAX_POSIX_COMMON  | RE_CONTEXT_INDEP_ANCHORS			\
+   | RE_CONTEXT_INDEP_OPS   | RE_NO_BK_BRACES				\
+   | RE_NO_BK_PARENS        | RE_NO_BK_VBAR				\
+   | RE_CONTEXT_INVALID_OPS | RE_UNMATCHED_RIGHT_PAREN_ORD)
 
-/* Differs from ..._POSIX_EXTENDED in that RE_CONTEXT_INVALID_OPS
-   replaces RE_CONTEXT_INDEP_OPS and RE_NO_BK_REFS is added.  */
+/* Differs from ..._POSIX_EXTENDED in that RE_CONTEXT_INDEP_OPS is
+   removed and RE_NO_BK_REFS is added.  */
 #define RE_SYNTAX_POSIX_MINIMAL_EXTENDED				\
   (_RE_SYNTAX_POSIX_COMMON  | RE_CONTEXT_INDEP_ANCHORS			\
    | RE_CONTEXT_INVALID_OPS | RE_NO_BK_BRACES				\
@@ -423,38 +434,21 @@ typedef struct
 
 /* Declarations for routines.  */
 
-/* To avoid duplicating every routine declaration -- once with a
-   prototype (if we are ANSI), and once without (if we aren't) -- we
-   use the following macro to declare argument types.  This
-   unfortunately clutters up the declarations a bit, but I think it's
-   worth it.  */
-
-#if __STDC__
-
-# define _RE_ARGS(args) args
-
-#else /* not __STDC__ */
-
-# define _RE_ARGS(args) ()
-
-#endif /* not __STDC__ */
-
 /* Sets the current default syntax to SYNTAX, and return the old syntax.
    You can also simply assign to the `re_syntax_options' variable.  */
-extern reg_syntax_t re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
+extern reg_syntax_t re_set_syntax (reg_syntax_t syntax);
 
 /* Compile the regular expression PATTERN, with length LENGTH
    and syntax given by the global `re_syntax_options', into the buffer
    BUFFER.  Return NULL if successful, and an error string if not.  */
-extern const char *re_compile_pattern
-  _RE_ARGS ((const char *pattern, size_t length,
-             struct re_pattern_buffer *buffer));
+extern const char *re_compile_pattern (const char *pattern, size_t length,
+				       struct re_pattern_buffer *buffer);
 
 
 /* Compile a fastmap for the compiled pattern in BUFFER; used to
    accelerate searches.  Return 0 if successful and -2 if was an
    internal error.  */
-extern int re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
+extern int re_compile_fastmap (struct re_pattern_buffer *buffer);
 
 
 /* Search in the string STRING (with length LENGTH) for the pattern
@@ -462,31 +456,29 @@ extern int re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
    characters.  Return the starting position of the match, -1 for no
    match, or -2 for an internal error.  Also return register
    information in REGS (if REGS and BUFFER->no_sub are nonzero).  */
-extern int re_search
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string,
-            int length, int start, int range, struct re_registers *regs));
+extern int re_search (struct re_pattern_buffer *buffer, const char *string,
+		      int length, int start, int range,
+		      struct re_registers *regs);
 
 
 /* Like `re_search', but search in the concatenation of STRING1 and
    STRING2.  Also, stop searching at index START + STOP.  */
-extern int re_search_2
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string1,
-             int length1, const char *string2, int length2,
-             int start, int range, struct re_registers *regs, int stop));
+extern int re_search_2 (struct re_pattern_buffer *buffer, const char *string1,
+			int length1, const char *string2, int length2,
+			int start, int range, struct re_registers *regs,
+			int stop);
 
 
 /* Like `re_search', but return how many characters in STRING the regexp
    in BUFFER matched, starting at position START.  */
-extern int re_match
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string,
-             int length, int start, struct re_registers *regs));
+extern int re_match (struct re_pattern_buffer *buffer, const char *string,
+		     int length, int start, struct re_registers *regs);
 
 
 /* Relates to `re_match' as `re_search_2' relates to `re_search'.  */
-extern int re_match_2
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string1,
-             int length1, const char *string2, int length2,
-             int start, struct re_registers *regs, int stop));
+extern int re_match_2 (struct re_pattern_buffer *buffer, const char *string1,
+		       int length1, const char *string2, int length2,
+		       int start, struct re_registers *regs, int stop);
 
 
 /* Set REGS to hold NUM_REGS registers, storing them in STARTS and
@@ -501,30 +493,52 @@ extern int re_match_2
    Unless this function is called, the first search or match using
    PATTERN_BUFFER will allocate its own register data, without
    freeing the old data.  */
-extern void re_set_registers
-  _RE_ARGS ((struct re_pattern_buffer *buffer, struct re_registers *regs,
-             unsigned num_regs, regoff_t *starts, regoff_t *ends));
+extern void re_set_registers (struct re_pattern_buffer *buffer,
+			      struct re_registers *regs, unsigned num_regs,
+			      regoff_t *starts, regoff_t *ends);
 
 #if defined _REGEX_RE_COMP || defined _LIBC
 # ifndef _CRAY
 /* 4.2 bsd compatibility.  */
-extern char *re_comp _RE_ARGS ((const char *));
-extern int re_exec _RE_ARGS ((const char *));
+extern char *re_comp (const char *);
+extern int re_exec (const char *);
+# endif
+#endif
+
+/* GCC 2.95 and later have "__restrict"; C99 compilers have
+   "restrict", and "configure" may have defined "restrict".  */
+#ifndef __restrict
+# if ! (2 < __GNUC__ || (2 == __GNUC__ && 95 <= __GNUC_MINOR__))
+#  if defined restrict || 199901L <= __STDC_VERSION__
+#   define __restrict restrict
+#  else
+#   define __restrict
+#  endif
+# endif
+#endif
+/* gcc 3.1 and up support the [restrict] syntax.  */
+#ifndef __restrict_arr
+# if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#  define __restrict_arr __restrict
+# else
+#  define __restrict_arr
 # endif
 #endif
 
 /* POSIX compatibility.  */
-extern int regcomp _RE_ARGS ((regex_t *__preg, const char *__pattern,
-			      int __cflags));
+extern int regcomp (regex_t *__restrict __preg,
+		    const char *__restrict __pattern,
+		    int __cflags);
 
-extern int regexec _RE_ARGS ((const regex_t *__preg,
-			      const char *__string, size_t __nmatch,
-			      regmatch_t __pmatch[], int __eflags));
+extern int regexec (const regex_t *__restrict __preg,
+		    const char *__restrict __string, size_t __nmatch,
+		    regmatch_t __pmatch[__restrict_arr],
+		    int __eflags);
 
-extern size_t regerror _RE_ARGS ((int __errcode, const regex_t *__preg,
-				  char *__errbuf, size_t __errbuf_size));
+extern size_t regerror (int __errcode, const regex_t *__preg,
+			char *__errbuf, size_t __errbuf_size);
 
-extern void regfree _RE_ARGS ((regex_t *__preg));
+extern void regfree (regex_t *__preg);
 
 
 #ifdef __cplusplus

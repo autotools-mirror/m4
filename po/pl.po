@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -214,7 +214,7 @@ msgstr "Nie mogê zrobiæ stat na danych przetwarzanych"
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
@@ -447,7 +447,8 @@ msgstr ""
 "      --version                wy¶wietl informacjê o wersji i zakoñcz\n"
 "  -e, --intercative            nie buforuj wyj¶cia, ignoruj przerwania\n"
 "  -E, --fatal-warnings         zatrzymaj siê po pierwszym ostrz¿eniu\n"
-"  -Q, --quiet, --silent        nie pokazuj niektórych ostrze¿eñ dla wbudowanych\n"
+"  -Q, --quiet, --silent        nie pokazuj niektórych ostrze¿eñ dla "
+"wbudowanych\n"
 "  -P, --prefix-builtins        dodaj zawsze `m4_' przez wszystkimi "
 "wbudowanymi\n"
 
@@ -487,7 +488,8 @@ msgstr ""
 "\n"
 "Sterowanie ograniczeniami:\n"
 "  -G, --traditional            wy³±cz wszystkie rozszrzenia GNU\n"
-"  -H, --hashzize=PIERWSZA      ustaw rozmiar tablicy mieszaj±cej dla symboli\n"
+"  -H, --hashzize=PIERWSZA      ustaw rozmiar tablicy mieszaj±cej dla "
+"symboli\n"
 "  -L, --nesting-limit=LICZBA   zmieñ sztuczny limit zag³ebieñ\n"
 
 #: src/main.c:125
@@ -623,7 +625,9 @@ msgstr ".  Sprawd¼ czy nie dosz³o do nieskoñczonej rekursji.\n"
 #, fuzzy
 #~ msgid ""
 #~ "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
-#~ msgstr "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych! (trace_pre ())"
+#~ msgstr ""
+#~ "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych! "
+#~ "(trace_pre ())"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"

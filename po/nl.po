@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -215,7 +215,7 @@ msgstr "Cannot stat diversion"
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"

@@ -25,8 +25,8 @@ noinst_LTLIBRARIES	= libgnu.la
 libgnu_la_SOURCES	=
 libgnu_la_LIBADD	= $(LTLIBOBJS) $(LTLIBINTL)
 
-pkginclude_HEADERS	= $(GETTEXT_H) $(OBSTACK_H) $(STDBOOL_H)
-EXTRA_HEADERS		= gettext.h obstack.h stdbool.h
+pkginclude_HEADERS	= $(GETTEXT_H) $(OBSTACK_H) $(REGEX_H) $(STDBOOL_H)
+EXTRA_HEADERS		= gettext.h obstack.h regex.h stdbool.h
 EXTRA_DIST		=
 
 MOSTLYCLEANFILES	=
@@ -76,6 +76,17 @@ MOSTLYCLEANFILES += obstack.h
 
 ## progname:
 libgnu_la_SOURCES += progname.c progname.h
+
+
+## regex: (not in gnulib yet)
+BUILT_SOURCES += $(REGEX_H)
+EXTRA_DIST += regex_.h
+
+all-local $(lib_OBJECTS): $(REGEX_H)
+regex.h: regex_.h
+	rm -f $@ && $(LN_S) regex_.h $@
+
+MOSTLYCLEANFILES += regex.h
 
 
 ## stdbool:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -126,7 +126,8 @@ msgstr "FEHLER: Dateiende in Argumentliste"
 #: m4/macro.c:230
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
-msgstr "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
+msgstr ""
+"FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
 
 #: m4/macro.c:425
 #, c-format
@@ -218,7 +219,7 @@ msgstr "Kann `stat' nicht auf Umleitung anwenden"
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
@@ -354,7 +355,9 @@ msgstr "Fehlerhafte eingefrorene Datei"
 #: src/freeze.c:484
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
-msgstr "»%s« aus eingefrorener Datei nicht in Tabelle der eingebauten Funktionen gefunden!"
+msgstr ""
+"»%s« aus eingefrorener Datei nicht in Tabelle der eingebauten Funktionen "
+"gefunden!"
 
 #: src/getopt.c:677
 #, c-format
@@ -450,8 +453,10 @@ msgstr ""
 "      --version                zeige Versionsinformation an und beende\n"
 "  -e, --interactive            keine Ausgabepufferung, ignoriere Interrupts\n"
 "  -E, --fatal-warnings         beende Ausführung nach erster Warnung\n"
-"  -Q, --quiet, --silent        unterdrücke Warnungen bei eingebauten Funktionen\n"
-"  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute Funktionen\n"
+"  -Q, --quiet, --silent        unterdrücke Warnungen bei eingebauten "
+"Funktionen\n"
+"  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute "
+"Funktionen\n"
 
 #: src/main.c:105
 #, fuzzy, c-format
@@ -496,7 +501,8 @@ msgstr ""
 "Setze Grenzen:\n"
 "  -G, --traditional            schalte alle GNU Erweiterungen aus\n"
 "  -H, --hashsize=PRIMZAHL      setze Größe der Symbol-Hashtabelle\n"
-"  -L, --nesting-limit=NUMMER   setze künstliche Grenze für Schachtelungstiefe\n"
+"  -L, --nesting-limit=NUMMER   setze künstliche Grenze für "
+"Schachtelungstiefe\n"
 
 #: src/main.c:125
 msgid ""
@@ -734,7 +740,8 @@ msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 #~ msgstr "INTERNER FEHLER: Falscher Symboltyp in m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
-#~ msgstr "  -W, --word-regexp=REGEXP     benutze REGEXP für Makronamensyntax\n"
+#~ msgstr ""
+#~ "  -W, --word-regexp=REGEXP     benutze REGEXP für Makronamensyntax\n"
 
 #~ msgid "Non-numeric argument to %s"
 #~ msgstr "Nicht-numerisches Argument in %s"
@@ -782,7 +789,8 @@ msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 #~ msgstr "Warnung: Zu wenig Argumente für eingebaute Funktion »%s«"
 
 #~ msgid "Warning: Excess arguments to built-in `%s' ignored"
-#~ msgstr "Warnung: Überschüssige Argumente für eingebaute Funktion »%s« ignoriert"
+#~ msgstr ""
+#~ "Warnung: Überschüssige Argumente für eingebaute Funktion »%s« ignoriert"
 
 #~ msgid "Non-numeric argument to built-in `%s'"
 #~ msgstr "Nicht-numerisches Argument in eingebauter Funktion »%s«"

@@ -1,5 +1,18 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* gnulib/m4/regex.c, gnulib/m4/regex_.h, gnulib/config/regex.m4:
+	Import regex module from CVS gnulib.
+	* gnulib/config/restrict.m4: Ditto for dependee module restrict.
+	* config/m4-regex.m4 (m4_REGEX): Wrap gnulib/config/regex.m4, but
+	do extra substitutions for Makefile.
+	* configure.ac: Use it.
+	* gnulib/m4/Makefile.am: Maybe install regex.h after linking it
+	from regex_.h if necessary.
+	* m4/system_.h: Include the correct version of regex.h.
+	* m4/regex.c, m4/regex.h, config/regex.m4: Removed legacy
+	version.
+	* po/POTFILES.in: Use new location of regex.c.
+
 	* gnulib/m4/Makefile.am (EXTRA_DIST): Removed malloc.c and
 	realloc.c: automake distributes these files already.
 

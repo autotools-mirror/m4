@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -229,7 +229,7 @@ msgid "diversion too large"
 msgstr ""
 
 # , c-format
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Hledán soubor `%s', nalezen soubor `%s'"
@@ -488,7 +488,8 @@ msgstr ""
 "  -E, --fatal-warnings          skonèí po prvním varování\n"
 "  -Q, --quiet, --silent         potlaèí nìkterá varování týkající se\n"
 "                                vestavìných maker\n"
-"  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix `m4_'\n"
+"  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
+"`m4_'\n"
 
 #: src/main.c:105
 #, c-format
@@ -528,7 +529,8 @@ msgstr ""
 "\n"
 "Nastavení limitù:\n"
 "  -G, --traditional             vypne roz¹íøení GNU\n"
-"  -H, --hashsize=PRVOÈÍSLO      velikost hash tabulky pro vyhledávání symbolù\n"
+"  -H, --hashsize=PRVOÈÍSLO      velikost hash tabulky pro vyhledávání "
+"symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
 #: src/main.c:125
@@ -559,7 +561,8 @@ msgstr ""
 "  -t, --trace=MAKRO             sleduje MAKRO, kdy¾ je definováno\n"
 "  -l, --arglength=POÈET         reguluje poèet výstupních informací\n"
 "                                ze sledování maker\n"
-"  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do SOUBORU\n"
+"  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
+"SOUBORU\n"
 
 #: src/main.c:139
 msgid ""
@@ -597,7 +600,8 @@ msgid ""
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 "\n"
-"Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní vstup.\n"
+"Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
+"vstup.\n"
 
 #: src/main.c:159
 msgid ""
@@ -647,7 +651,8 @@ msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
 msgstr ""
-"Neoprávnìný pøístup do pamìti (SIGSEGV). Jedná se buï o pøeteèení zásobníku,\n"
+"Neoprávnìný pøístup do pamìti (SIGSEGV). Jedná se buï o pøeteèení "
+"zásobníku,\n"
 "nebo o chybu "
 
 #: src/stackovf.c:204
@@ -743,7 +748,8 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "VNITØNÍ CHYBA: ¹patný chybový kód v evaluate ()"
 
 #~ msgid "INTERNAL ERROR: Builtin not found in builtin table!"
-#~ msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
+#~ msgstr ""
+#~ "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
@@ -774,7 +780,9 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "VNITØNÍ CHYBA: ¹patný typ symbolu v m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
-#~ msgstr "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí REGVÝR\n"
+#~ msgstr ""
+#~ "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí "
+#~ "REGVÝR\n"
 
 # , c-format
 #~ msgid "Non-numeric argument to %s"
@@ -816,7 +824,8 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "CHYBA: modul `%s' nelze nalézt"
 
 #~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
-#~ msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
+#~ msgstr ""
+#~ "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
 # , c-format
 #, fuzzy
@@ -834,7 +843,9 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 
 # , c-format
 #~ msgid "Warning: Excess arguments to built-in `%s' ignored"
-#~ msgstr "Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou ignorovány"
+#~ msgstr ""
+#~ "Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou "
+#~ "ignorovány"
 
 # , c-format
 #~ msgid "Non-numeric argument to built-in `%s'"

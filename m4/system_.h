@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <sys/types.h>
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
+@INCLUDE_REGEX_H@
 @INCLUDE_STDBOOL_H@
 #include <m4/xalloc.h>
 #include <m4/xstrndup.h>

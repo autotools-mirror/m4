@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU M4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 2002-11-04 13:19+0100\n"
 "Last-Translator: full name <email@address>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -214,7 +214,7 @@ msgstr "Impossibile effettuare la `stat' per la deviazione"
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "La ricerca del percorso per `%s' ha trovato `%s'"

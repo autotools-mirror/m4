@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-10 11:06+0100\n"
+"POT-Creation-Date: 2003-09-12 13:22+0100\n"
 "PO-Revision-Date: 1999-03-28 18:56 +02:00\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -215,7 +215,7 @@ msgstr "Kan inte ta status på avledningen"
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:155
+#: m4/path.c:154
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"
@@ -517,7 +517,8 @@ msgstr ""
 "                               (inga FLAGGOR tolkas som \"aeq\")\n"
 "  -t, --trace=NAMN             spåra NAMN när den blir definierad\n"
 "  -l, --arglength=ANTAL        begränsa makrospårningsstorleken\n"
-"  -o, --error-output=FIL       avled felsöknings och spårutskrifter till FIL\n"
+"  -o, --error-output=FIL       avled felsöknings och spårutskrifter till "
+"FIL\n"
 
 #: src/main.c:139
 msgid ""
