@@ -142,7 +142,7 @@ static	int   file_peek			(void);
 static	int   file_read			(void);
 static	void  file_unget		(int ch);
 static	void  file_clean		(void);
-static	void  init_macro_token		(m4_token *td);
+static	void  init_builtin_token	(m4_token *td);
 static	int   macro_peek		(void);
 static	int   macro_read		(void);
 static	int   match_input		(const unsigned char *s);
@@ -592,15 +592,15 @@ m4_pop_wrapup (void)
   return TRUE;
 }
 
-/* When a MACRO token is seen, next_token () uses init_macro_token
+/* When a MACRO token is seen, next_token () uses init_builtin_token
    to retrieve the value of the function pointer.  */
 static void
-init_macro_token (m4_token *td)
+init_builtin_token (m4_token *td)
 {
   if (isp->funcs->read_func != macro_read)
     {
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad call to init_macro_token ()")));
+		_("INTERNAL ERROR: Bad call to init_builtin_token ()")));
       abort ();
     }
 
@@ -1034,7 +1034,7 @@ m4_next_token (m4_token *td)
 
     if (ch == CHAR_MACRO)		/* MACRO TOKEN */
       {
-	init_macro_token (td);
+	init_builtin_token (td);
 	(void) next_char ();
 #ifdef DEBUG_INPUT
 	print_token("next_token", M4_TOKEN_MACDEF, td);

@@ -1,5 +1,8 @@
 2001-10-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/input.c (init_builtin_token):  Renamed from init_macro_token,
+	since we call these things builtins in the rest of the code!
+
 	* modules/gnu.c (m4_regexp_compile): s/%0/%s/
 
 2001-10-12  Gary V. Vaughan  <gary@gnu.org>
