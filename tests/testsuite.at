@@ -1,4 +1,4 @@
-# Process this file with autom4te to create testsuite. -*- Autoconf -*-
+# Process this file with autom4te to create testsuite. -*- Autotest -*-
 
 # Test suite for GNU M4.
 # Copyright 2001 Free Software Foundation, Inc.

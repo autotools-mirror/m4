@@ -1,4 +1,4 @@
-# Hand crafted tests for GNU M4.                               -*- Autoconf -*-
+# Hand crafted tests for GNU M4.                               -*- Autotest -*-
 # Copyright 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -132,11 +132,11 @@ AT_CLEANUP
 
 
 
-## ---------------- ##
-## discard-comments ##
-## ---------------- ##
+## ------------------ ##
+## Discard comments.  ##
+## ------------------ ##
 
-AT_SETUP([discard-comments])
+AT_SETUP([Discard comments])
 
 AT_DATA([[in]],
 [[This is not a comment # but this is.
@@ -148,7 +148,7 @@ comment
  --> ends.
 ]])
 
-AT_CHECK_M4([in], 0,
+AT_CHECK_M4([-c in], 0,
 [[This is not a comment This should not disappear.
 
 html  ends.
@@ -471,7 +471,7 @@ AT_SETUP([include])
 AT_DATA([[expout]],
 [[Beginning.
 
-Intermidiate
+Intermediate
 include test file.
 
 
@@ -485,7 +485,7 @@ AT_DATA([[experr]],
 m4: ../examples/include.m4: 6: Cannot open NOFILE: No such file or directory
 ]])
 
-AT_CHECK_M4([examples/include.m4], 0, expout, experr)
+AT_CHECK_M4([-I $top_srcdir/examples examples/include.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -1181,7 +1181,8 @@ AT_CLEANUP
 
 AT_SETUP([undivert])
 
-AT_CHECK_M4([examples/undivert.m4], 0,
+# undivert.m4 `include's a file from examples/.
+AT_CHECK_M4([-I $top_srcdir/examples examples/undivert.m4], 0,
 [[
 # undiverted file.
 This is to be undiverted soon.

@@ -36,11 +36,9 @@ check-local: atconfig $(TESTSUITE)
 	$(SHELL) $(srcdir)/$(TESTSUITE)
 
 $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
-# FIXME: Stupid Akim TM forgot to bring generate.awk...
-#	rm -f $@
-#	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
-#	mv $@t $@
-	touch $@
+	rm -f $@ $@t
+	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
+	mv $@t $@
 
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.

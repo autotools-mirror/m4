@@ -1,5 +1,13 @@
 2001-08-20  Akim Demaille  <akim@epita.fr>
 
+	* examples/include.m4: Typo.
+	* tests/generate.awk: Really add it.
+	* tests/Makefile.am: Adjust.
+	* tests/others.at (Discard comments): It sure fails without `-c'.
+	(include, undivert): Add -I examples/.
+
+2001-08-20  Akim Demaille  <akim@epita.fr>
+
 	Use sprintf, not ecft and friends since it is standard, portable,
 	simplifies the code, and since the latter is even deprecated
 	according to the GNU libc documentation.
