@@ -1,3 +1,38 @@
+Sat Dec  3 20:45:31 1994  Francois Pinard  (pinard@icule)
+
+	* Prerelease 1.4.1.
+
+	* Makefile.in (realclean-local): Delete stamp-h.in.
+
+	* configure.in, {,src,lib}/Makefile.in, src/m4.h, src/m4.c:
+	Localize, adapting from how it is done in sharutils.
+
+	* fr.tt: New file, for French.
+
+	* configure.in, {,*/}Makefile.in, acconfig.h, src/m4.c,
+	src/freeze.c: Rename PRODUCT to PACKAGE.
+
+Sat Nov 26 04:15:57 1994  Francois Pinard  (pinard@icule)
+
+	* configure.in: Check for <libintl.h> and <locale.h>.
+	* src/m4.h, src/builtin.c, src/debug.c, src/eval.c, src/macro.c,
+	src/stackovf.c: Rename _ to __P.
+	* src/m4.h: Declare _ as a macro returning its argument, or else,
+	include <libintl.h> and declare _ as gettext.
+	* src/m4.c: Possibly include <locale.h> and call setlocale.
+	* src/m4.c, src/builtin.c, src/debug.c, src/eval.c, src/freeze.c,
+	src/input.c, src/macro.c, src/output.c, src/path.c,
+	src/stackovf.c, src/symtab.c: Use _ macro over all localizable
+	strings.
+
+Mon Nov  7 11:25:12 1994  Francois Pinard  (pinard@icule)
+
+	* doc/Makefile.in (stamp-vti): Use new -r option to date.
+
+	* configure.in: Put --with-gmp in place, in prevision for John
+	Gerard's work.
+	* acconfig.h: Document WITH_GMP.
+
 Sat Nov  5 15:52:47 1994  Francois Pinard  (pinard@icule)
 
 	* Release 1.4.
@@ -672,12 +707,6 @@ Sun Jun  5 16:25:19 1994  Francois Pinard  (pinard@icule)
 
 	* m4.h (_): Change argument from `x' to `Args'.
 
-Wed May  4 23:59:39 1994  Francois Pinard  (pinard@icule)
-
-	* Makefile.in: Remove all occurrences of $(MFLAGS), which were
-	bringing more evil than good on a few systems.
-	Reported by Greg A. Woods.	
-
 Fri Apr 22 15:59:35 1994  Francois Pinard  (pinard@icule)
 
 	* m4.h: Rename Args() to _().
@@ -1097,7 +1126,6 @@ Wed Dec 23 12:46:55 1992  Francois Pinard  (pinard at icule)
 
 	* Makefile.in (clean): Remove clutter from ansi2knr.
 	Reported by Pierre Gaumond.
-	Reported by Greg A. Woods.
 
 Sun Dec 20 10:40:20 1992  Francois Pinard  (pinard at icule)
 

@@ -128,7 +128,7 @@ path_search (const char *dir)
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
-	    DEBUG_MESSAGE (("path search for `%s' found `%s'", dir, name));
+	    DEBUG_MESSAGE ((_("Path search for `%s' found `%s'"), dir, name));
 	  break;
 	}
     }

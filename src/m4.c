@@ -21,8 +21,6 @@
 #include <getopt.h>
 #include <sys/signal.h>
 
-static void usage _((int));
-
 /* Operate interactively (-e).  */
 static int interactive = 0;
 
@@ -105,7 +103,7 @@ static void
 stackovf_handler (void)
 {
   M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: Stack overflow.  (Infinite define recursion?)"));
+	    _("ERROR: Stack overflow.  (Infinite define recursion?)")));
 }
 
 #endif /* USE_STACKOV */
@@ -132,11 +130,12 @@ static void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    fprintf (stderr, "Try `%s --help' for more information.\n", program_name);
+    fprintf (stderr, _("Try `%s --help' for more information.\n"),
+	     program_name);
   else
     {
-      printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
-      fputs ("\
+      printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
+      fputs (_("\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -146,43 +145,43 @@ Operation modes:\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n",
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"),
 	     stdout);
 #ifdef ENABLE_CHANGEWORD
-      fputs ("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n",
+      fputs (_("\
+  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"),
 	     stdout);
 #endif
-      fputs ("\
+      fputs (_("\
 \n\
 Preprocessor features:\n\
   -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n",
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n",
+  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n",
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Debugging:\n\
   -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -t, --trace=NAME             trace NAME when it will be defined\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n",
+  -o, --error-output=FILE      redirect debug and trace output\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 FLAGS is any of:\n\
   t   trace for all macro calls, not only traceon'ed\n\
@@ -195,11 +194,11 @@ FLAGS is any of:\n\
   l   say current input line number\n\
   p   show results of path searches\n\
   i   show changes in input files\n\
-  V   shorthand for all of the above flags\n",
+  V   shorthand for all of the above flags\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n",
+If no FILE or if FILE is `-', standard input is read.\n"),
 	     stdout);
     }
   exit (status);
@@ -258,6 +257,7 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
 
   program_name = argv[0];
+  setlocale (LC_ALL, "");
 
   include_init ();
   debug_init ();
@@ -352,7 +352,7 @@ main (int argc, char *const *argv, char *const *envp)
 	debug_level = debug_decode (optarg);
 	if (debug_level < 0)
 	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
+	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
 	    debug_level = 0;
 	  }
 	break;
@@ -379,7 +379,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s\n", PRODUCT, VERSION);
+      printf ("GNU %s %s\n", PACKAGE, VERSION);
       exit (EXIT_SUCCESS);
     }
 
@@ -431,7 +431,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad code in deferred arguments"));
+		    _("INTERNAL ERROR: Bad code in deferred arguments")));
 	  abort ();
 	}
 

@@ -187,7 +187,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Illegal mode to symbol_lookup ()"));
+		_("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
       abort ();
     }
 }
@@ -240,7 +240,7 @@ symtab_debug (void)
       s = lookup_symbol (text, SYMBOL_LOOKUP);
 
       if (s == NULL)
-	printf ("Name `%s' is unknown\n", text);
+	printf (_("Name `%s' is unknown\n"), text);
 
       if (delete)
 	(void) lookup_symbol (text, SYMBOL_DELETE);

@@ -54,20 +54,20 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term _((eval_token, eval_t *));
-static eval_error logical_and_term _((eval_token, eval_t *));
-static eval_error or_term _((eval_token, eval_t *));
-static eval_error xor_term _((eval_token, eval_t *));
-static eval_error and_term _((eval_token, eval_t *));
-static eval_error not_term _((eval_token, eval_t *));
-static eval_error logical_not_term _((eval_token, eval_t *));
-static eval_error cmp_term _((eval_token, eval_t *));
-static eval_error shift_term _((eval_token, eval_t *));
-static eval_error add_term _((eval_token, eval_t *));
-static eval_error mult_term _((eval_token, eval_t *));
-static eval_error exp_term _((eval_token, eval_t *));
-static eval_error unary_term _((eval_token, eval_t *));
-static eval_error simple_term _((eval_token, eval_t *));
+static eval_error logical_or_term __P ((eval_token, eval_t *));
+static eval_error logical_and_term __P ((eval_token, eval_t *));
+static eval_error or_term __P ((eval_token, eval_t *));
+static eval_error xor_term __P ((eval_token, eval_t *));
+static eval_error and_term __P ((eval_token, eval_t *));
+static eval_error not_term __P ((eval_token, eval_t *));
+static eval_error logical_not_term __P ((eval_token, eval_t *));
+static eval_error cmp_term __P ((eval_token, eval_t *));
+static eval_error shift_term __P ((eval_token, eval_t *));
+static eval_error add_term __P ((eval_token, eval_t *));
+static eval_error mult_term __P ((eval_token, eval_t *));
+static eval_error exp_term __P ((eval_token, eval_t *));
+static eval_error unary_term __P ((eval_token, eval_t *));
+static eval_error simple_term __P ((eval_token, eval_t *));
 
 /*--------------------.
 | Lexical functions.  |
@@ -274,38 +274,38 @@ evaluate (const char *expr, eval_t *val)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (missing right parenthesis): %s",
+		_("Bad expression in eval (missing right parenthesis): %s"),
 		expr));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval: %s", expr));
+		_("Bad expression in eval: %s"), expr));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (bad input): %s", expr));
+		_("Bad expression in eval (bad input): %s"), expr));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (excess input): %s", expr));
+		_("Bad expression in eval (excess input): %s"), expr));
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-		"Divide by zero in eval: %s", expr));
+		_("Divide by zero in eval: %s"), expr));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-		"Modulo by zero in eval: %s", expr));
+		_("Modulo by zero in eval: %s"), expr));
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad error code in evaluate ()"));
+		_("INTERNAL ERROR: Bad error code in evaluate ()")));
       abort ();
     }
 
@@ -544,8 +544,8 @@ cmp_term (eval_token et, eval_t *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad comparison operator in cmp_term ()")));
 	  abort ();
 	}
     }
@@ -587,8 +587,8 @@ shift_term (eval_token et, eval_t *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad shift operator in shift_term ()")));
 	  abort ();
 	}
     }
@@ -671,7 +671,7 @@ mult_term (eval_token et, eval_t *v1)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad operator in mult_term ()"));
+		    _("INTERNAL ERROR: Bad operator in mult_term ()")));
 	  abort ();
 	}
     }

@@ -16,10 +16,6 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* We use <config.h> instead of "config.h" so that a compilation
-   using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
-   (which it would do because it found this file in $srcdir).  */
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -30,12 +26,6 @@
 # define voidstar void *
 #else
 # define voidstar char *
-#endif
-
-#ifdef PROTOTYPES
-# define _(Args) Args
-#else
-# define _(Args) ()
 #endif
 
 #include <stdio.h>
@@ -109,6 +99,23 @@ typedef int boolean;
 #endif
 
 char *mktemp ();
+
+#ifndef __P
+# ifdef PROTOTYPES
+#  define __P(Args) Args
+# else
+#  define __P(Args) ()
+# endif
+#endif
+
+#if HAVE_LOCALE_H
+# include <locale.h>
+#else
+# define setlocale(Category, Locale)
+#endif
+
+#include <libintl.h>
+#define _(Text) gettext ((Text))
 
 /* Various declarations.  */
 
@@ -120,15 +127,15 @@ struct string
 typedef struct string STRING;
 
 /* Memory allocation.  */
-voidstar xmalloc _((unsigned int));
-voidstar xrealloc _((voidstar , unsigned int));
-void xfree _((voidstar));
-char *xstrdup _((const char *));
+voidstar xmalloc __P ((unsigned int));
+voidstar xrealloc __P ((voidstar , unsigned int));
+void xfree __P ((voidstar));
+char *xstrdup __P ((const char *));
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree
 
 /* Other library routines.  */
-void error _((int, int, const char *, ...));
+void error __P ((int, int, const char *, ...));
 
 /* Those must come first.  */
 typedef void builtin_func ();
@@ -154,11 +161,11 @@ extern const char *user_word_regexp;	/* -W */
 #define M4ERROR(Arglist) \
   (reference_error (), error Arglist)
 
-void reference_error _((void));
+void reference_error __P ((void));
 
 #ifdef USE_STACKOVF
-void setup_stackovf_trap _((char *const *, char *const *,
-			    void (*handler) (void)));
+void setup_stackovf_trap __P ((char *const *, char *const *,
+			       void (*handler) (void)));
 #endif
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -245,15 +252,15 @@ extern FILE *debug;
     }								\
   while (0)
 
-void debug_init _((void));
-int debug_decode _((const char *));
-void debug_flush_files _((void));
-boolean debug_set_output _((const char *));
-void debug_message_prefix _((void));
+void debug_init __P ((void));
+int debug_decode __P ((const char *));
+void debug_flush_files __P ((void));
+boolean debug_set_output __P ((const char *));
+void debug_message_prefix __P ((void));
 
-void trace_prepre _((const char *, int));
-void trace_pre _((const char *, int, int, token_data **));
-void trace_post _((const char *, int, int, token_data **, const char *));
+void trace_prepre __P ((const char *, int));
+void trace_pre __P ((const char *, int, int, token_data **));
+void trace_post __P ((const char *, int, int, token_data **, const char *));
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -309,18 +316,18 @@ struct token_data
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
 
-void input_init _((void));
-int peek_input _((void));
-token_type next_token _((token_data *));
-void skip_line _((void));
+void input_init __P ((void));
+int peek_input __P ((void));
+token_type next_token __P ((token_data *));
+void skip_line __P ((void));
 
 /* push back input */
-void push_file _((FILE *, const char *));
-void push_macro _((builtin_func *, boolean));
-struct obstack *push_string_init _((void));
-const char *push_string_finish _((void));
-void push_wrapup _((const char *));
-boolean pop_wrapup _((void));
+void push_file __P ((FILE *, const char *));
+void push_macro __P ((builtin_func *, boolean));
+struct obstack *push_string_init __P ((void));
+const char *push_string_finish __P ((void));
+void push_wrapup __P ((const char *));
+boolean pop_wrapup __P ((void));
 
 /* current input file, and line */
 extern const char *current_file;
@@ -335,22 +342,22 @@ extern STRING lquote, rquote;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-void set_quotes _((const char *, const char *));
-void set_comment _((const char *, const char *));
+void set_quotes __P ((const char *, const char *));
+void set_comment __P ((const char *, const char *));
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp _((const char *));
+void set_word_regexp __P ((const char *));
 #endif
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
 extern int output_current_line;
 
-void output_init _((void));
-void shipout_text _((struct obstack *, const char *, int));
-void make_diversion _((int));
-void insert_diversion _((int));
-void insert_file _((FILE *));
-void freeze_diversions _((FILE *));
+void output_init __P ((void));
+void shipout_text __P ((struct obstack *, const char *, int));
+void make_diversion __P ((int));
+void insert_diversion __P ((int));
+void insert_file __P ((FILE *));
+void freeze_diversions __P ((FILE *));
 
 /* File symtab.c  --- symbol table definitions.  */
 
@@ -395,14 +402,14 @@ typedef void hack_symbol ();
 
 extern symbol **symtab;
 
-void symtab_init _((void));
-symbol *lookup_symbol _((const char *, symbol_lookup));
-void hack_all_symbols _((hack_symbol *, const char *));
+void symtab_init __P ((void));
+symbol *lookup_symbol __P ((const char *, symbol_lookup));
+void hack_all_symbols __P ((hack_symbol *, const char *));
 
 /* File: macro.c  --- macro expansion.  */
 
-void expand_input _((void));
-void call_macro _((symbol *, int, token_data **, struct obstack *));
+void expand_input __P ((void));
+void call_macro __P ((symbol *, int, token_data **, struct obstack *));
 
 /* File: builtin.c  --- builtins.  */
 
@@ -425,21 +432,22 @@ struct predefined
 typedef struct builtin builtin;
 typedef struct predefined predefined;
 
-void builtin_init _((void));
-void define_builtin _((const char *, const builtin *, symbol_lookup, boolean));
-void define_user_macro _((const char *, const char *, symbol_lookup));
-void undivert_all _((void));
-void expand_user_macro _((struct obstack *, symbol *, int, token_data **));
+void builtin_init __P ((void));
+void define_builtin __P ((const char *, const builtin *, symbol_lookup,
+			  boolean));
+void define_user_macro __P ((const char *, const char *, symbol_lookup));
+void undivert_all __P ((void));
+void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **));
 
-const builtin *find_builtin_by_addr _((builtin_func *));
-const builtin *find_builtin_by_name _((const char *));
+const builtin *find_builtin_by_addr __P ((builtin_func *));
+const builtin *find_builtin_by_name __P ((const char *));
 
 /* File: path.c  --- path search for include files.  */
 
-void include_init _((void));
-void include_env_init _((void));
-void add_include_directory _((const char *));
-FILE *path_search _((const char *));
+void include_init __P ((void));
+void include_env_init __P ((void));
+void add_include_directory __P ((const char *));
+FILE *path_search __P ((const char *));
 
 /* File: eval.c  --- expression evaluation.  */
 
@@ -447,16 +455,16 @@ FILE *path_search _((const char *));
 typedef int eval_t;
 typedef unsigned int unsigned_eval_t;
 
-boolean evaluate _((const char *, eval_t *));
+boolean evaluate __P ((const char *, eval_t *));
 
 /* File: format.c  --- printf like formatting.  */
 
-void format _((struct obstack *, int, token_data **));
+void format __P ((struct obstack *, int, token_data **));
 
 /* File: freeze.c --- frozen state files.  */
 
-void produce_frozen_state _((const char *));
-void reload_frozen_state _((const char *));
+void produce_frozen_state __P ((const char *));
+void reload_frozen_state __P ((const char *));
 
 /* Debugging the memory allocator.  */
 

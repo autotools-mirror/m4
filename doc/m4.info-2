@@ -1,5 +1,5 @@
-This is Info file m4.info, produced by Makeinfo-1.55 from the input
-file m4.texinfo.
+This is Info file m4.info, produced by Makeinfo version 1.68 from the
+input file m4.texinfo.
 
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
@@ -255,8 +255,8 @@ Then, the `m4' version:
      =>@a
 
    In the TeX example, the first line defines a macro `a' to print the
-message `Hello'.  The second line defines @ to be usable instead of \
-as an escape character.  The third line defines \ to be a normal
+message `Hello'.  The second line defines <@> to be usable instead of
+<\> as an escape character.  The third line defines <\> to be a normal
 printing character, not an escape.  The fourth line invokes the macro
 `a'.  So, when TeX is run on this file, it displays the message `Hello'.
 
@@ -1293,32 +1293,32 @@ Search Path::.).
 a frozen file one one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU `m4'.  These
 are simple (editable) text files, made up of directives, each starting
-with a capital letter and ending with a newline (NL).  Wherever a
+with a capital letter and ending with a newline (<NL>).  Wherever a
 directive is expected, the character `#' introduces a comment line,
 empty lines are also ignored.  In the following descriptions, LENGTHs
 always refer to corresponding STRINGs.  Numbers are always expressed in
 decimal.  The directives are:
 
-`V NUMBER NL'
+`V NUMBER <NL>'
      Confirms the format of the file.  NUMBER should be 1.
 
-`C LENGTH1 , LENGTH2 NL STRING1 STRING2 NL'
+`C LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
      Uses STRING1 and STRING2 as the beginning comment and end comment
      strings.
 
-`Q LENGTH1 , LENGTH2 NL STRING1 STRING2 NL'
+`Q LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
      Uses STRING1 and STRING2 as the beginning quote and end quote
      strings.
 
-`F LENGTH1 , LENGTH2 NL STRING1 STRING2 NL'
+`F LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
      Defines, through `pushdef', a definition for STRING1 expanding to
      the function whose builtin name is STRING2.
 
-`T LENGTH1 , LENGTH2 NL STRING1 STRING2 NL'
+`T LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
      Defines, though `pushdef', a definition for STRING1 expanding to
      the text given by STRING2.
 
-`D NUMBER, LENGTH NL STRING NL'
+`D NUMBER, LENGTH <NL> STRING <NL>'
      Selects diversion NUMBER, making it current, then copy STRING in
      the current diversion.  NUMBER may be a negative number for a
      non-existing diversion.  To merely specify an active selection,

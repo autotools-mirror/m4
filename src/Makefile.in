@@ -1,122 +1,385 @@
-# Makefile for GNU m4 sources.
-# Copyright (C) 1994 Free Software Foundation, Inc.
+# Makefile.in generated automatically by automake 1.3 from Makefile.am
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
 # This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-PRODUCT = @PRODUCT@
-VERSION = @VERSION@
 
 SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
 
-CC = @CC@
-CFLAGS = @CFLAGS@
-CPPFLAGS = @CPPFLAGS@
-DEFS = @DEFS@
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DISTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
-LDFLAGS = @LDFLAGS@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AWK = @AWK@
+CATOBJEXT = @CATOBJEXT@
+CC = @CC@
+DATADIRNAME = @DATADIRNAME@
+GENCAT = @GENCAT@
+GLOCALE = @GLOCALE@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLLIBS = @INTLLIBS@
+INTLOBJS = @INTLOBJS@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
+NM = @NM@
+PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
+RANLIB = @RANLIB@
+U = @U@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
+VERSION = @VERSION@
+l = @l@
+
+AUTOMAKE_OPTIONS = ansi2knr
+CATALOGS = fr.msg
 LIBS = @LIBS@
 STACKOVF = @STACKOVF@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-transform = @program_transform_name@
-bindir = $(exec_prefix)/bin
+bin_PROGRAMS = m4
 
-COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(CC) $(LDFLAGS) -o $@
+INCLUDES = -I$(top_srcdir) -I$(srcdir) -I$(top_srcdir)/lib
+
+m4_SOURCES = m4.c m4.h builtin.c debug.c eval.c format.c freeze.c input.c \
+	macro.c output.c path.c symtab.c stackovf.c
+
+m4_LDADD = ../lib/libm4.a @INTLLIBS@
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../config.h
+CONFIG_CLEAN_FILES = 
+PROGRAMS =  $(bin_PROGRAMS)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+ANSI2KNR = @ANSI2KNR@
+m4_OBJECTS =  m4$U.o builtin$U.o debug$U.o eval$U.o format$U.o \
+freeze$U.o input$U.o macro$U.o output$U.o path$U.o symtab$U.o \
+stackovf$U.o
+m4_DEPENDENCIES =  ../lib/libm4.a
+m4_LDFLAGS = 
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP = --best
+SOURCES = $(m4_SOURCES)
+OBJECTS = $(m4_OBJECTS)
+
+all: Makefile $(ANSI2KNR) $(PROGRAMS)
 
 .SUFFIXES:
-.SUFFIXES: .c .o
+.SUFFIXES: .S .c .lo .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps src/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-binPROGRAMS:
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+distclean-binPROGRAMS:
+
+maintainer-clean-binPROGRAMS:
+
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+	done
+
 .c.o:
-	$(COMPILE) $<
+	$(COMPILE) -c $<
 
-ANSI2KNR = @ANSI2KNR@
-O = .@U@o
+.s.o:
+	$(COMPILE) -c $<
 
-.SUFFIXES: ._c ._o
-.c._c:
-	./ansi2knr --varargs $< > $@
-._c._o:
-	@echo $(COMPILE) $<
-	@rm -f _$*.c
-	@ln $< _$*.c && $(COMPILE) _$*.c && mv _$*.o $@ && rm _$*.c
-.c._o:
-	./ansi2knr --varargs $< > $*._c
-	@echo $(COMPILE) $*._c
-	@rm -f _$*.c
-	@ln $*._c _$*.c && $(COMPILE) _$*.c && mv _$*.o $@ && rm _$*.c
+.S.o:
+	$(COMPILE) -c $<
 
-INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/../lib
+mostlyclean-compile:
+	-rm -f *.o core *.core
 
-HEADERS = m4.h
-SOURCES = m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
-macro.c output.c path.c stackovf.c symtab.c 
-OBJECTS = m4$O builtin$O debug$O eval$O format$O freeze$O input$O \
-macro$O output$O path$O $(STACKOVF) symtab$O
+clean-compile:
 
-DISTFILES = Makefile.in ansi2knr.c ansi2knr.1 $(HEADERS) $(SOURCES) \
-TAGS
+distclean-compile:
+	-rm -f *.tab.c
 
-all: m4
+maintainer-clean-compile:
 
-m4: $(OBJECTS) ../lib/libm4.a
-	$(LINK) $(OBJECTS) ../lib/libm4.a $(LIBS)
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-$(OBJECTS): $(ANSI2KNR) ../config.h m4.h ../lib/obstack.h
-builtin$O: ../lib/regex.h
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+mostlyclean-krextra:
+
+clean-krextra:
+	-rm -f ansi2knr
+
+distclean-krextra:
+
+maintainer-clean-krextra:
 ansi2knr: ansi2knr.o
 	$(LINK) ansi2knr.o $(LIBS)
+ansi2knr.o: $(CONFIG_HEADER)
 
-install: all
-	$(srcdir)/../mkinstalldirs $(bindir)
-	$(INSTALL_PROGRAM) m4 $(bindir)/`echo m4 | sed '$(transform)'`
 
-uninstall:
-	rm -f $(bindir)/`echo m4 | sed '$(transform)'`
+mostlyclean-kr:
+	-rm -f *_.c
+
+clean-kr:
+
+distclean-kr:
+
+maintainer-clean-kr:
+
+m4: $(m4_OBJECTS) $(m4_DEPENDENCIES)
+	@rm -f m4
+	$(LINK) $(m4_LDFLAGS) $(m4_OBJECTS) $(m4_LDADD) $(LIBS)
+builtin_.c: builtin.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/builtin.c; then echo $(srcdir)/builtin.c; else echo builtin.c; fi` | $(ANSI2KNR) builtin_.c
+debug_.c: debug.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/debug.c; then echo $(srcdir)/debug.c; else echo debug.c; fi` | $(ANSI2KNR) debug_.c
+eval_.c: eval.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/eval.c; then echo $(srcdir)/eval.c; else echo eval.c; fi` | $(ANSI2KNR) eval_.c
+format_.c: format.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/format.c; then echo $(srcdir)/format.c; else echo format.c; fi` | $(ANSI2KNR) format_.c
+freeze_.c: freeze.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/freeze.c; then echo $(srcdir)/freeze.c; else echo freeze.c; fi` | $(ANSI2KNR) freeze_.c
+input_.c: input.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/input.c; then echo $(srcdir)/input.c; else echo input.c; fi` | $(ANSI2KNR) input_.c
+m4_.c: m4.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/m4.c; then echo $(srcdir)/m4.c; else echo m4.c; fi` | $(ANSI2KNR) m4_.c
+macro_.c: macro.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/macro.c; then echo $(srcdir)/macro.c; else echo macro.c; fi` | $(ANSI2KNR) macro_.c
+output_.c: output.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/output.c; then echo $(srcdir)/output.c; else echo output.c; fi` | $(ANSI2KNR) output_.c
+path_.c: path.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/path.c; then echo $(srcdir)/path.c; else echo path.c; fi` | $(ANSI2KNR) path_.c
+stackovf_.c: stackovf.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/stackovf.c; then echo $(srcdir)/stackovf.c; else echo stackovf.c; fi` | $(ANSI2KNR) stackovf_.c
+symtab_.c: symtab.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/symtab.c; then echo $(srcdir)/symtab.c; else echo symtab.c; fi` | $(ANSI2KNR) symtab_.c
+builtin_.o builtin_.lo debug_.o debug_.lo eval_.o eval_.lo format_.o \
+format_.lo freeze_.o freeze_.lo input_.o input_.lo m4_.o m4_.lo \
+macro_.o macro_.lo output_.o output_.lo path_.o path_.lo stackovf_.o \
+stackovf_.lo symtab_.o symtab_.lo : $(ANSI2KNR)
 
 tags: TAGS
 
-TAGS: $(HEADERS) $(SOURCES)
-	cd $(srcdir) && etags -i ../lib/TAGS $(HEADERS) $(SOURCES)
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
 
-mostlyclean:
-	rm -f *.o *._c *._o core core.*
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
 
-clean: mostlyclean
-	rm -f m4
+mostlyclean-tags:
 
-distclean: clean
-	rm -f Makefile ansi2knr
+clean-tags:
 
-realclean: distclean
-	rm -f TAGS
+distclean-tags:
+	-rm -f TAGS ID
 
-dist: $(DISTFILES)
-	@echo "Copying distribution files"
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = src
+
+distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/src 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/src; \
+	  d=$(srcdir); \
+	  test -f $(distdir)/$$file \
+	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
+builtin.o: builtin.c m4.h ../config.h ../lib/obstack.h ../lib/regex.h
+debug.o: debug.c m4.h ../config.h ../lib/obstack.h
+eval.o: eval.c m4.h ../config.h ../lib/obstack.h
+format.o: format.c m4.h ../config.h ../lib/obstack.h
+freeze.o: freeze.c m4.h ../config.h ../lib/obstack.h
+input.o: input.c m4.h ../config.h ../lib/obstack.h
+m4.o: m4.c m4.h ../config.h ../lib/obstack.h ../lib/getopt.h
+macro.o: macro.c m4.h ../config.h ../lib/obstack.h
+output.o: output.c m4.h ../config.h ../lib/obstack.h
+path.o: path.c m4.h ../config.h ../lib/obstack.h
+stackovf.o: stackovf.c m4.h ../config.h ../lib/obstack.h
+symtab.o: symtab.c m4.h ../config.h ../lib/obstack.h
 
-Makefile: Makefile.in ../config.status
-	cd .. && CONFIG_FILES=src/$@ CONFIG_HEADERS= ./config.status
+info:
+dvi:
+check: all
+	$(MAKE)
+installcheck:
+install-exec: install-binPROGRAMS
+	@$(NORMAL_INSTALL)
 
-# Tell versions [3.59,3.63) of GNU make not to export all variables.
+install-data: 
+	@$(NORMAL_INSTALL)
+
+install: install-exec install-data all
+	@:
+
+uninstall: uninstall-binPROGRAMS
+
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+installdirs:
+	$(mkinstalldirs)  $(DATADIR)$(bindir)
+
+
+mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+
+clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+
+maintainer-clean-generic:
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+mostlyclean:  mostlyclean-binPROGRAMS mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-krextra mostlyclean-kr \
+		mostlyclean-tags mostlyclean-generic
+
+clean:  clean-binPROGRAMS clean-compile clean-libtool clean-krextra \
+		clean-kr clean-tags clean-generic mostlyclean
+
+distclean:  distclean-binPROGRAMS distclean-compile distclean-libtool \
+		distclean-krextra distclean-kr distclean-tags \
+		distclean-generic clean
+	-rm -f config.status
+	-rm -f libtool
+
+maintainer-clean:  maintainer-clean-binPROGRAMS maintainer-clean-compile \
+		maintainer-clean-libtool maintainer-clean-krextra \
+		maintainer-clean-kr maintainer-clean-tags \
+		maintainer-clean-generic distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+.PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
+maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool mostlyclean-krextra \
+distclean-krextra clean-krextra maintainer-clean-krextra mostlyclean-kr \
+distclean-kr clean-kr maintainer-clean-kr tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
+installcheck install-exec install-data install uninstall all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -139,7 +139,6 @@ Introduction and preliminaries
 
 * Intro::                       Introduction to @code{m4}
 * History::                     Historical references
-
 * Invoking m4::                 Invoking @code{m4}
 * Bugs::                        Problems and bugs
 * Manual::                      Using this manual

@@ -5,29 +5,25 @@
 undefine([changeword])
 
 AC_INIT(src/m4.c)
-AC_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-PRODUCT=m4
-VERSION=1.4
-AC_DEFINE_UNQUOTED(PRODUCT, "$PRODUCT")
-AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
-AC_SUBST(PRODUCT)
-AC_SUBST(VERSION)
+AM_INIT_AUTOMAKE(m4,1.4c)
 
+AC_CHECK_PROG(GLOCALE, extract-msgs, yes, no)
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+AM_PROG_LIBTOOL
 
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
-fp_C_PROTOTYPES
+AM_C_PROTOTYPES
 AC_C_CONST
 
-AC_CHECK_HEADERS(limits.h memory.h siginfo.h string.h unistd.h)
+AC_CHECK_HEADERS(limits.h locale.h memory.h siginfo.h string.h unistd.h)
 AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
@@ -81,8 +77,24 @@ else
   AC_MSG_RESULT(no)
 fi], [AC_MSG_RESULT(no)])
 
-fp_WITH_DMALLOC
+AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
+AC_ARG_WITH(gmp,
+[  --with-gmp              use gmp for extended and fractional arithmetic], 
+[if test "$withval" = yes; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(WITH_GMP)
+  LIBS="$LIBS -lgmp"
+else
+  AC_MSG_RESULT(no)
+fi], [AC_MSG_RESULT(no)])
 
-AC_OUTPUT(Makefile doc/Makefile lib/Makefile src/Makefile \
+AM_WITH_DMALLOC
+AM_GNU_GETTEXT
+ALL_LINGUAS=""
+AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
+
+AC_OUTPUT(Makefile intl/Makefile po/Makefile.in doc/Makefile lib/Makefile src/Makefile \
 checks/Makefile examples/Makefile,
-[test -z "$CONFIG_HEADERS" || date > stamp-h])
+[sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile; \
+test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
+

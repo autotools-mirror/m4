@@ -1,6 +1,13 @@
 GNU m4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
+Version 1.4a - October 1997, by Erick Branderhorst
+* Standardized package from automake support.
+
+Version 1.4.x
+
+* Implement a GNU message catalog for French.
+
 Version 1.4 - October 1994, by Franc,ois Pinard
 
 (No user visible changes)

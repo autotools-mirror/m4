@@ -1,9 +1,0 @@
-dnl ../doc/m4.texinfo:2056: Origin of test
-define(`test', `$1$2$3')
-dnl @result{}
-test(a, b, c)
-dnl @result{}abc
-changesyntax(`O         ')
-dnl @result{}
-test(a, b, c)
-dnl @result{}a b c

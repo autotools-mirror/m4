@@ -1,9 +1,0 @@
-dnl ../doc/m4.texinfo:2075: Origin of test
-define(`@', `TEST')
-dnl @result{}
-@
-dnl @result{}@
-changesyntax(`A@')
-dnl @result{}
-@
-dnl @result{}TEST

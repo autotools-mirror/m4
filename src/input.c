@@ -171,7 +171,7 @@ push_file (FILE *fp, const char *title)
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
-    DEBUG_MESSAGE1 ("input read from %s", title);
+    DEBUG_MESSAGE1 (_("Input read from %s"), title);
 
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
@@ -228,7 +228,7 @@ push_string_init (void)
   if (next != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Recursive push_string!"));
+		_("INTERNAL ERROR: Recursive push_string!")));
       abort ();
     }
 
@@ -308,7 +308,7 @@ pop_input (void)
 
     case INPUT_FILE:
       if (debug_level & DEBUG_TRACE_INPUT)
-	DEBUG_MESSAGE2 ("input reverted to %s, line %d",
+	DEBUG_MESSAGE2 (_("Input reverted to %s, line %d"),
 			isp->u.u_f.name, isp->u.u_f.lineno);
 
       fclose (isp->u.u_f.file);
@@ -322,7 +322,7 @@ pop_input (void)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Input stack botch in pop_input ()"));
+		_("INTERNAL ERROR: Input stack botch in pop_input ()")));
       abort ();
     }
   obstack_free (current_input, isp);
@@ -361,7 +361,7 @@ init_macro_token (token_data *td)
   if (isp->type != INPUT_MACRO)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad call to init_macro_token ()"));
+		_("INTERNAL ERROR: Bad call to init_macro_token ()")));
       abort ();
     }
 
@@ -410,7 +410,7 @@ peek_input (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in peek_input ()"));
+		    _("INTERNAL ERROR: Input stack botch in peek_input ()")));
 	  abort ();
 	}
       /* End of input source --- pop one level.  */
@@ -467,7 +467,7 @@ next_char (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in next_char ()"));
+		    _("INTERNAL ERROR: Input stack botch in next_char ()")));
 	  abort ();
 	}
 
@@ -547,7 +547,7 @@ match_input (const char *s)
 void
 input_init (void)
 {
-  current_file = "NONE";
+  current_file = _("NONE");
   current_line = 0;
 
   obstack_init (&token_stack);
@@ -634,7 +634,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"Bad regular expression `%s': %s", regexp, msg));
+		_("Bad regular expression `%s': %s"), regexp, msg));
       return;
     }
 
@@ -774,7 +774,7 @@ next_token (token_data *td)
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
 	    M4ERROR ((EXIT_FAILURE, 0,
-		      "ERROR: EOF in string"));
+		      _("ERROR: EOF in string")));
 
 	  if (MATCH (ch, rquote.string))
 	    {

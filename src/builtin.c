@@ -32,7 +32,7 @@ extern FILE *popen ();
    builtin.  */
 
 #define DECLARE(name) \
-  static void name _((struct obstack *, int, token_data **))
+  static void name __P ((struct obstack *, int, token_data **))
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
@@ -269,13 +269,13 @@ bad_argc (token_data *name, int argc, int min, int max)
     {
       if (!suppress_warnings)
 	M4ERROR ((warning_status, 0,
-		  "Warning: Too few arguments to built-in `%s'",
+		  _("Warning: Too few arguments to built-in `%s'"),
 		  TOKEN_DATA_TEXT (name)));
       isbad = TRUE;
     }
   else if (max > 0 && argc > max && !suppress_warnings)
     M4ERROR ((warning_status, 0,
-	      "Warning: Excess arguments to built-in `%s' ignored",
+	      _("Warning: Excess arguments to built-in `%s' ignored"),
 	      TOKEN_DATA_TEXT (name)));
 
   return isbad;
@@ -295,7 +295,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
   if (*arg == 0 || (*valuep = strtol (arg, &endp, 10), *endp != 0))
     {
       M4ERROR ((warning_status, 0,
-		"Non-numeric argument to built-in `%s'",
+		_("Non-numeric argument to built-in `%s'"),
 		TOKEN_DATA_TEXT (macro)));
       return FALSE;
     }
@@ -435,7 +435,7 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad token data type in define_macro ()"));
+		_("INTERNAL ERROR: Bad token data type in define_macro ()")));
       abort ();
     }
   return;
@@ -605,7 +605,7 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 	    dump_symbol (s, &data);
 	  else
 	    M4ERROR ((warning_status, 0,
-		      "Undefined name %s", TOKEN_DATA_TEXT (argv[i])));
+		      _("Undefined name %s"), TOKEN_DATA_TEXT (argv[i])));
 	}
     }
 
@@ -633,16 +633,16 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 	  bp = find_builtin_by_addr (SYMBOL_FUNC (data.base[0]));
 	  if (bp == NULL)
 	    {
-	      M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Builtin not found in builtin table!"));
+	      M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Builtin not found in builtin table!")));
 	      abort ();
 	    }
 	  DEBUG_PRINT1 ("<%s>\n", bp->name);
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad token data type in m4_dumpdef ()")));
 	  abort ();
 	  break;
 	}
@@ -668,7 +668,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
   bp = find_builtin_by_name (name);
   if (bp == NULL)
     M4ERROR ((warning_status, 0,
-	      "Undefined name %s", name));
+	      _("Undefined name %s"), name));
   else
     (*bp->func) (obs, argc - 1, argv + 1);
 }
@@ -692,7 +692,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   s = lookup_symbol (name, SYMBOL_LOOKUP);
   if (s == NULL)
     M4ERROR ((warning_status, 0,
-	      "Undefined macro `%s'", name));
+	      _("Undefined macro `%s'"), name));
   else
     call_macro (s, argc - 1, argv + 1, obs);
 }
@@ -732,7 +732,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad symbol type in m4_defn ()"));
+		_("INTERNAL ERROR: Bad symbol type in m4_defn ()")));
       abort ();
     }
 }
@@ -769,7 +769,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   if (pin == NULL)
     {
       M4ERROR ((warning_status, errno,
-		"Cannot open pipe to command \"%s\"", ARG (1)));
+		_("Cannot open pipe to command `%s'"), ARG (1)));
       sysval = 0xff << 8;
     }
   else
@@ -808,7 +808,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (radix <= 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
-		"Radix in eval out of range (radix = %d)", radix));
+		_("Radix in eval out of range (radix = %d)"), radix));
       return;
     }
 
@@ -817,7 +817,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if  (min <= 0)
     {
       M4ERROR ((warning_status, 0,
-		"Negative width to eval"));
+		_("Negative width to eval")));
       return;
     }
 
@@ -922,7 +922,8 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 	  insert_diversion (file);
 	else if (no_gnu_extensions)
 	  M4ERROR ((warning_status, 0,
-		    "Non-numeric argument to %s", TOKEN_DATA_TEXT (argv[0])));
+		    _("Non-numeric argument to %s"),
+		    TOKEN_DATA_TEXT (argv[0])));
 	else
 	  {
 	    fp = path_search (ARG (i));
@@ -933,7 +934,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 	      }
 	    else
 	      M4ERROR ((warning_status, errno,
-			"Cannot undivert %s", ARG (i)));
+			_("Cannot undivert %s"), ARG (i)));
 	  }
       }
 }
@@ -1039,7 +1040,7 @@ include (int argc, token_data **argv, boolean silent)
     {
       if (!silent)
 	M4ERROR ((warning_status, errno,
-		  "Cannot open %s", ARG (1)));
+		  _("Cannot open %s"), ARG (1)));
       return;
     }
 
@@ -1184,7 +1185,7 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
 	  set_trace (s, (char *) obs);
 	else
 	  M4ERROR ((warning_status, 0,
-		    "Undefined name %s", TOKEN_DATA_TEXT (argv[i])));
+		    _("Undefined name %s"), TOKEN_DATA_TEXT (argv[i])));
       }
 }
 
@@ -1208,7 +1209,7 @@ m4_traceoff (struct obstack *obs, int argc, token_data **argv)
 	  set_trace (s, NULL);
 	else
 	  M4ERROR ((warning_status, 0,
-		    "Undefined name %s", TOKEN_DATA_TEXT (argv[i])));
+		    _("Undefined name %s"), TOKEN_DATA_TEXT (argv[i])));
       }
 }
 
@@ -1244,7 +1245,7 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
 
       if (new_debug_level < 0)
 	M4ERROR ((warning_status, 0,
-		  "Debugmode: bad debug flags: `%s'", ARG (1)));
+		  _("Debugmode: bad debug flags: `%s'"), ARG (1)));
       else
 	{
 	  switch (change_flag)
@@ -1280,7 +1281,7 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
     debug_set_output (NULL);
   else if (!debug_set_output (ARG (1)))
     M4ERROR ((warning_status, errno,
-	      "Cannot set error file: %s", ARG (1)));
+	      _("Cannot set error file: %s"), ARG (1)));
 }
 
 /* This section contains text processing macros: "len", "index",
@@ -1497,8 +1498,8 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	case '0':
 	  if (!substitute_warned)
 	    {
-	      M4ERROR ((warning_status, 0, "\
-WARNING: \\0 will disappear, use \\& instead in replacements"));
+	      M4ERROR ((warning_status, 0, _("\
+WARNING: \\0 will disappear, use \\& instead in replacements")));
 	      substitute_warned = 1;
 	    }
 	  /* Fall through.  */
@@ -1558,7 +1559,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"Bad regular expression: `%s': %s", regexp, msg));
+		_("Bad regular expression: `%s': %s"), regexp, msg));
       return;
     }
 
@@ -1569,7 +1570,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   if (startpos  == -2)
     {
       M4ERROR ((warning_status, 0,
-		"Error matching regular expression \"%s\"", regexp));
+		_("Error matching regular expression `%s'"), regexp));
       return;
     }
 
@@ -1618,7 +1619,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"Bad regular expression `%s': %s", regexp, msg));
+		_("Bad regular expression `%s': %s"), regexp, msg));
       if (buf.buffer != NULL)
 	xfree (buf.buffer);
       return;
@@ -1642,7 +1643,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
 	  if (matchpos == -2)
 	    M4ERROR ((warning_status, 0,
-		      "Error matching regular expression \"%s\"", regexp));
+		      _("Error matching regular expression `%s'"), regexp));
 	  else if (offset < length)
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;

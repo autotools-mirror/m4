@@ -1,5 +1,5 @@
-This is Info file m4.info, produced by Makeinfo-1.55 from the input
-file m4.texinfo.
+This is Info file m4.info, produced by Makeinfo version 1.68 from the
+input file m4.texinfo.
 
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4.  It is now to be considered stable, future
+   This is release 1.4c.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -85,7 +85,6 @@ Introduction and preliminaries
 
 * Intro::                       Introduction to `m4'
 * History::                     Historical references
-
 * Invoking m4::                 Invoking `m4'
 * Bugs::                        Problems and bugs
 * Manual::                      Using this manual

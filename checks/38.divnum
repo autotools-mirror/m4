@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:2328: Origin of test
+dnl ../doc/m4.texinfo:2327: Origin of test
 Initial divnum
 dnl @result{}Initial 0
 divert(1)

@@ -34,7 +34,7 @@ static struct obstack trace;
 
 extern int expansion_level;
 
-static void debug_set_file _((FILE *));
+static void debug_set_file __P ((FILE *));
 
 /*----------------------------------.
 | Initialise the debugging module.  |
@@ -376,16 +376,16 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
+		  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())")));
 		  abort ();
 		}
 	      trace_format ("<%s>", bp->name);
 	      break;
 
 	    default:
-	      M4ERROR ((warning_status, 0,
-			"INTERNAL ERROR: Bad token data type (trace_pre ())"));
+	      M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad token data type (trace_pre ())")));
 	      abort ();
 	    }
 

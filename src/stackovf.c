@@ -76,7 +76,10 @@
 
 #define DEBUG_STACKOVF
 
+
 #include "m4.h"			/* stdlib.h, xmalloc() */
+
+#ifdef USE_STACKOVF
 
 #include <assert.h>
 #include <sys/time.h>
@@ -105,7 +108,7 @@
 #endif
 
 /* Giving a hand to ansi2knr...  */
-typedef void (*handler_t) _((void));
+typedef void (*handler_t) __P ((void));
 
 static const char *stackbot;
 static const char *stackend;
@@ -162,7 +165,7 @@ process_sigsegv (int signo, const char *p)
 	  /* sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 	     if the stack limit has not been reached.  */
 
-	  write (2, "VMEM limit exceeded?\n", 21);
+	  write (2, _("VMEM limit exceeded?\n"), 21);
 	  p = PARAM_STACKOVF;
 	}
       if (diff >= -STACKOVF_DETECT && diff <= STACKOVF_DETECT)
@@ -184,12 +187,12 @@ process_sigsegv (int signo, const char *p)
     {
       const char *cp;
 
-      cp = "\
+      cp = _("\
 Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\
-occurred, or there is a bug in ";
+occurred, or there is a bug in ");
       write (2, cp, strlen (cp));
       write (2, arg0, strlen (arg0));
-      cp = ".  Check for possible infinite recursion.\n";
+      cp = _(".  Check for possible infinite recursion.\n");
       write (2, cp, strlen (cp));
     }
 
@@ -356,7 +359,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #if HAVE_SIGACTION && defined(SA_ONSTACK)
 
   sigaction (SIGSEGV, NULL, &act);
-  act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
+  act.sa_handler = (RETSIGTYPE (*) __P ((int))) sigsegv_handler;
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK 
 #ifdef SA_RESETHAND
@@ -390,3 +393,5 @@ Error - Do not know how to catch signals on an alternate stack...
 #endif /* HAVE_SIGALTSTACK && defined(SA_ONSTACK) */
 
 }
+
+#endif /* USE_STACKOVF */
