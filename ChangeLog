@@ -1,5 +1,15 @@
 2001-08-14  Gary V. Vaughan  <gary@gnu.org>
 
+	* bootstrap: Rewritten to play nicely with Autoconf 2.5x.
+	* configure.in (MY_NAME, MY_VERSION): Define these once, and feed
+	them to AC_INIT and AM_INIT_AUTOMAKE.
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove `gnits' which would
+	disallow MY_NAME and MY_VERSION arguments to AM_INIT_AUTOMAKE.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Don't choke on
+	shell variable m4_cv_func_obstack_h.
+	* tests/defs (M4): Be more careful about relative path to libtool
+	script and m4 binary by using $srcdir.
+
 	* src/main.c (main): Use lt_dlinsertsearchdir to prepend -M
 	optargs to the existing libltdl search path.
 	* acinclude.m4: Regenerate from latest libtool,m4 and ltdl.m4.

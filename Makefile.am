@@ -19,7 +19,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-AUTOMAKE_OPTIONS = 1.4 gnits
+AUTOMAKE_OPTIONS = 1.4
 
 EXTRA_DIST	= bootstrap
 

@@ -31,13 +31,14 @@ AC_PREREQ(2.52)
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([M4_AC_FUNC_OBSTACK],
 [AC_CHECK_HEADER(obstack.h)
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_cv_func_obstack])])dnl
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_obstack_h])])dnl
 AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
                [AC_TRY_LINK([#include "obstack.h"],
 	                    [struct obstack *mem;obstack_free(mem,(char *) 0)],
 	                    m4_cv_func_obstack=yes,
 	                    m4_cv_func_obstack=no)])
 OBSTACK_H=
-ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_obstack_h])])dnl
 m4_obstack_h=m4/obstack.h
 rm -f $m4_obstack_h
 if test $m4_cv_func_obstack = yes; then

@@ -7,18 +7,15 @@ auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.in | sed 's/^.*(\([^)]*\)).*$/\1/'`
 
 rm -f config.cache
 
-# shtoolize -q -I ./$auxdir -o ./shtool echo move install mkdir version && \
-# libtoolize -f -c || exit 1
- gettextize -f -c  || exit 1
 aclocal -I ./$auxdir  || exit 1
+# shtoolize -q -I ./$auxdir echo move install mkdir version || exit 1
+# libtoolize -f -c || exit 1
+# gettextize -f -c  || exit 1
+touch config-h.in
+automake --add-missing --copy || exit 1
+autoconf || exit 1
 autoheader || exit 1
 
-touch ./$auxdir/ltconfig
-automake --add-missing --copy || { rm ./$auxdir/ltconfig && exit 1; }
-rm ./$auxdir/ltconfig
-
-autoconf -l ./$auxdir || exit 1
-
-cd tests && AWK=${AWK-awk} ./get_them ../doc/m4.texinfo
+( cd tests; ${SHELL-/bin/sh} ./get-them ../doc/m4.texinfo; )
 
 exit 0
