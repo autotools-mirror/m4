@@ -1,3 +1,7 @@
+2001-08-17  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/module.c: Fixup some errors in the description comment.
+
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
 	* tests/others.at (iso8859): Specify the path to the M4 test file.

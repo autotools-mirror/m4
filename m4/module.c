@@ -60,21 +60,21 @@
  * are installed into the M4 symbol table with m4_macro_table_install().
  *
  * Each time a module is loaded, the module function 
- * "void m4_init_module (struct obstack *obs)" is called, if defined.
- * Any value stored in IBS by this function becomes the expansion of the
- * macro which called it.  Before M4 exits, all modules are unloaded and
- * the function "void m4_finish_module (struct obstack *obs)" is called,
- * if defined.  It is safe to load the same module several times:  the
- * init and finish functions will also be called multiple times in this
- * case.
+ * "void m4_init_module (lt_dlhandle handle, struct obstack *obs)" is
+ * called, if defined.  Any value stored in OBS by this function becomes
+ * the expansion of the macro which called it.  Before M4 exits, all 
+ * modules are unloaded and the function
+ * "void m4_finish_module (lt_dlhandle handle, struct obstack *obs)" is
+ * called, if defined.  It is safe to load the same module several times:
+ * the init and finish functions will also be called multiple times in 
+ * this case.
  *
  * To unload a module, use m4_module_unload(). which uses
- * m4_builtin_table_uninstall() and m4_macro_table_uninstall() to remove
- * the builtins defined by the unloaded module from the symbol table.  If
- * the module has been loaded several times with calls to 
- * m4_module_load, then the module will not be unloaded until the same
- * number of calls to m4_module_unload() have been made (nor will the
- * symbol table be purged).
+ * m4_remove_table_reference_symbols() to remove the builtins defined by
+ * the unloaded module from the symbol table.  If the module has been
+ * loaded several times with calls to m4_module_load, then the module will
+ * not be unloaded until the same number of calls to m4_module_unload()
+ * have been made (nor will the symbol table be purged).
  **/
 
 #define M4_BUILTIN_SYMBOL	"m4_builtin_table"
