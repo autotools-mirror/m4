@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 04 Free Software Foundation, Inc.
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-  
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -26,7 +26,7 @@
    Unread input are organised in a stack, implemented with an obstack.
    Each input source is described by a "struct input_block".  The obstack
    is "input_stack".  The top of the input stack is "isp".
-   
+
    The macro "m4wrap" places the text to be saved on another input stack,
    on the obstack "wrapup_stack", whose top is "wsp".  When EOF is seen
    on normal input (eg, when "input_stack" is empty), input is switched
@@ -34,7 +34,7 @@
    current input stack, whether it be "input_stack" or "wrapup_stack",
    are done through a pointer "current_input", which points to either
    "input_stack" or "wrapup_stack".
-   
+
    Pushing new input on the input stack is done by push_file (),
    push_string (), push_wrapup () (for wrapup text), and push_macro ()
    (for macro definitions).  Because macro expansion needs direct access
@@ -43,13 +43,13 @@
    to the current input stack, and push_string_finish (), which return a
    pointer to the final text.  The input_block *next is used to manage
    the coordination between the different push routines.
-   
+
    The current file and line number are stored in two global variables,
    for use by the error handling functions in m4.c.  Whenever a file
    input_block is pushed, the current file name and line number is saved
    in the input_block, and the two variables are reset to match the new
    input file.  */
- 
+
 #ifdef ENABLE_CHANGEWORD
 #include "regex.h"
 #endif
@@ -140,7 +140,7 @@ STRING lquote;
 /* Comment chars.  */
 STRING bcomm;
 STRING ecomm;
- 
+
 #ifdef ENABLE_CHANGEWORD
 
 #define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
@@ -424,10 +424,17 @@ peek_input (void)
 | they do not get wrong, due to lookahead.  The token consisting of a	   |
 | newline alone is taken as belonging to the line it ends, and the current |
 | line number is not incremented until the next character is read.	   |
+| 99.9% of all calls will read from a string, so factor that out into a    |
+| macro for speed.                                                         |
 `-------------------------------------------------------------------------*/
 
+#define next_char() \
+  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]		\
+   ? *isp->u.u_s.string++						\
+   : next_char_1 ())
+
 static int
-next_char (void)
+next_char_1 (void)
 {
   register int ch;
 

@@ -1,3 +1,12 @@
+2004-09-09  Andreas Schwab  <schwab@suse.de>
+
+	Refactoring of the string read case in next_char provides about a
+	20% speedup of M4 as typically used by autoconf:
+
+	* src/input.c (next_char_1): Renamed from next_char.
+	(next_char): New macro.
+	* NEWS: Updated.
+
 2004-08-21  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.in (VERSION): Bump to 1.4.2a.
