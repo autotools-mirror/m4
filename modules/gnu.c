@@ -145,7 +145,7 @@ M4BUILTIN_HANDLER (indir)
   if (m4_bad_argc (argv[0], argc, 2, -1))
     return;
 
-  symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);
+  symbol = m4_symbol_lookup (name);
   if (symbol == NULL)
     M4ERROR ((warning_status, 0,
 	      _("Undefined name `%s'"), name));

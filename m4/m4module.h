@@ -104,8 +104,12 @@ extern const m4_builtin *m4_builtin_find_by_func (
 
 extern m4_hash *m4_symtab;
 
-extern void	m4_symtab_init		(void);
-extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup_t);
+extern void	  m4_symtab_init		(void);
+extern m4_symbol *m4_symbol_lookup	(const char *);
+extern m4_symbol *m4_symbol_pushdef	(const char *);
+extern m4_symbol *m4_symbol_insert	(const char *);
+extern void       m4_symbol_popdef	(const char *);
+extern void       m4_symbol_delete	(const char *);
 extern int	m4_symtab_apply	(m4_symtab_apply_func *, void *);
 extern void	m4_remove_table_reference_symbols (lt_dlhandle);
 

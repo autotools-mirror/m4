@@ -212,7 +212,7 @@ M4BUILTIN_HANDLER (ifdef)
 
   if (m4_bad_argc (argv[0], argc, 3, 4))
     return;
-  symbol = m4_lookup_symbol (M4ARG (1), M4_SYMBOL_LOOKUP);
+  symbol = m4_symbol_lookup (M4ARG (1));
 
   if (symbol)
     result = M4ARG (2);
@@ -279,7 +279,7 @@ M4BUILTIN_HANDLER (dumpdef)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      m4_symbol *symbol = m4_lookup_symbol (data.base[0], M4_SYMBOL_LOOKUP);
+      m4_symbol *symbol = m4_symbol_lookup (data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
       switch (M4_SYMBOL_TYPE (symbol))
@@ -322,7 +322,7 @@ M4BUILTIN_HANDLER (defn)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  symbol = m4_lookup_symbol (M4ARG (1), M4_SYMBOL_LOOKUP);
+  symbol = m4_symbol_lookup (M4ARG (1));
   if (symbol == NULL)
     return;
 
@@ -629,7 +629,7 @@ M4BUILTIN_HANDLER (traceon)
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
-	m4_symbol *symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);
+	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
 	  set_trace (name, symbol, (char *) obs);
 	else
@@ -648,7 +648,7 @@ M4BUILTIN_HANDLER (traceoff)
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
-	m4_symbol *symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);
+	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
 	  set_trace (name, symbol, NULL);
 	else

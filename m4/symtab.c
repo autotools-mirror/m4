@@ -35,8 +35,8 @@
 static size_t	m4_symtab_hash		(const void *key);
 static int	m4_symtab_cmp		(const void *key, const void *try);
 static void	m4_token_data_delete	(m4_token_data *data);
-static void	m4_symbol_popdef	(m4_symbol *symbol);
-static void	m4_symbol_delete	(m4_symbol *symbol);
+static void	m4_symbol_pop		(m4_symbol *symbol);
+static void	m4_symbol_del		(m4_symbol *symbol);
 
 
 /* Pointer to symbol table.  */
@@ -89,14 +89,14 @@ m4_token_data_delete (m4_token_data *data)
 }
 
 void
-m4_symbol_popdef (m4_symbol *symbol)
+m4_symbol_pop (m4_symbol *symbol)
 {
   m4_token_data *stale;
 
   assert (symbol);
   assert (M4_SYMBOL_DATA_NEXT (symbol));
 
-  stale			= M4_SYMBOL_DATA (symbol);
+  stale				= M4_SYMBOL_DATA (symbol);
   M4_SYMBOL_DATA (symbol)	= M4_TOKEN_DATA_NEXT (stale);
 
 #ifndef NDEBUG
@@ -107,12 +107,12 @@ m4_symbol_popdef (m4_symbol *symbol)
 
 /* Free all storage associated with a symbol.  */
 void
-m4_symbol_delete (m4_symbol *symbol)
+m4_symbol_del (m4_symbol *symbol)
 {
   assert (symbol);
 
   while (M4_SYMBOL_DATA_NEXT (symbol))
-    m4_symbol_popdef (symbol);
+    m4_symbol_pop (symbol);
 
   assert (M4_SYMBOL_DATA_NEXT (symbol) == 0);
 
@@ -123,97 +123,140 @@ m4_symbol_delete (m4_symbol *symbol)
   XFREE (symbol);
 }
 
-/* Search in, and manipulation of the symbol table, are all done by
-   m4_lookup_symbol ().  It basically hashes NAME to a list in the symbol
-   table, and searched this list for the first occurence of a symbol with
-   the name.
 
-   The MODE parameter determines what m4_lookup_symbol () will do.  It can
-   either just do a lookup, do a lookup and insert if not present, do an
-   insertion even if the name is already in the list, delete the first
-   occurrence of the name on the list or delete all occurences of the name
-   on the list.  */
+/* Dispatch on all the following 5 functions.
+
+   Search in, and manipulation of the symbol table, are all done by
+   m4_lookup_symbol ().  It basically hashes NAME to a list in the
+   symbol table, and searched this list for the first occurence of a
+   symbol with the name.
+
+   The MODE parameter determines what m4_lookup_symbol () will do.  It
+   can either just do a lookup, do a lookup and insert if not present,
+   do an insertion even if the name is already in the list, delete the
+   first occurrence of the name on the list or delete all occurences
+   of the name on the list.  */
 m4_symbol *
 m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
-
   switch (mode)
     {
     case M4_SYMBOL_LOOKUP:
-      /* If just searching, return status of search.  */
-      return psymbol ? *psymbol : 0;
+      return m4_symbol_lookup (name);
 
     case M4_SYMBOL_INSERT:
-      /* Return the symbol, if the name was found in the table.
-	 Otherwise, just insert the name, and return the new symbol.  */
-      if (psymbol)
-	return *psymbol;
-      /* NOBREAK */
+      return m4_symbol_insert (name);
 
     case M4_SYMBOL_PUSHDEF:
-      /* Insert a name in the symbol table.  If there is already a symbol
-	 with the name, push the new value on top of the value stack for
-	 this symbol.  */
-      {
-	m4_symbol *symbol		= 0;
-	m4_token_data *value		= XCALLOC (m4_token_data, 1);
-
-	if (psymbol)
-	  {
-	    symbol = *psymbol;
-	    M4_TOKEN_DATA_NEXT (value)= M4_SYMBOL_DATA (symbol);
-	  }
-	else
-	  symbol = XCALLOC (m4_symbol, 1);
-
-	M4_SYMBOL_DATA (symbol)	= value;
-	M4_SYMBOL_TYPE (symbol)	= M4_TOKEN_VOID;
-
-	if (!psymbol)
-	  m4_hash_insert (m4_symtab, xstrdup (name), symbol);
-
-	return symbol;
-      }
+      return m4_symbol_pushdef (name);
 
     case M4_SYMBOL_POPDEF:
-      /* Delete the first occurence of a symbol with NAME.  */
-      if (psymbol)
-	{
-	  if (M4_SYMBOL_DATA_NEXT (*psymbol))
-	    m4_symbol_popdef (*psymbol);
-	  else
-	    {
-	      xfree (m4_hash_remove (m4_symtab, name));
-	      m4_symbol_delete (*psymbol);
-	    }
-	}
+      m4_symbol_popdef (name);
       return 0;
 
     case M4_SYMBOL_DELETE:
-      /* Delete all occurences of symbols with NAME.  */
-      if (psymbol)
-	{
-	  xfree (m4_hash_remove (m4_symtab, name));
-	  m4_symbol_delete (*psymbol);
-	}
-      else
-	M4ERROR ((warning_status, 0,
-		  _("INTERNAL ERROR: Attempt to delete non-existant symbol: %s"),
-		  name));
+      m4_symbol_delete (name);
       return 0;
     }
 
   M4ERROR ((warning_status, 0,
-	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup_t (%s, %d)"),
+	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup (%s, %d)"),
 	    name, mode));
   abort ();
   /*NOTREACHED*/
   return 0;
 }
 
-/* The following function removes from the symbol table, every symbol
-   that references the given module handle.  */
+
+/* Return the symbol associated to NAME, or else NULL.  */
+m4_symbol *
+m4_symbol_lookup (const char *name)
+{
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+
+  /* If just searching, return status of search.  */
+  return psymbol ? *psymbol : 0;
+}
+
+
+/* Push a new slot associted to NAME, and return it.  */
+m4_symbol *
+m4_symbol_pushdef (const char *name)
+{
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+
+  /* Insert a name in the symbol table.  If there is already a symbol
+     with the name, push the new value on top of the value stack for
+     this symbol.  */
+  m4_symbol *symbol    = 0;
+  m4_token_data *value = XCALLOC (m4_token_data, 1);
+
+  if (psymbol)
+    {
+      symbol = *psymbol;
+      M4_TOKEN_DATA_NEXT (value) = M4_SYMBOL_DATA (symbol);
+    }
+  else
+    symbol = XCALLOC (m4_symbol, 1);
+
+  M4_SYMBOL_DATA (symbol)	= value;
+  M4_SYMBOL_TYPE (symbol)	= M4_TOKEN_VOID;
+
+  if (!psymbol)
+    m4_hash_insert (m4_symtab, xstrdup (name), symbol);
+
+  return symbol;
+}
+
+
+/* Return a slot associated to NAME, creating it if needed.  */
+m4_symbol *
+m4_symbol_insert (const char *name)
+{
+  return (m4_symbol *) (m4_symbol_lookup (name) || m4_symbol_pushdef (name));
+}
+
+
+/* Remove the topmost definition associated to NAME.  */
+void
+m4_symbol_popdef (const char *name)
+{
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+
+  if (!psymbol)
+    M4ERROR ((warning_status, 0,
+	      "INTERNAL ERROR: m4_symbol_popdef (%s)", name));
+
+  if (M4_SYMBOL_DATA_NEXT (*psymbol))
+    m4_symbol_pop (*psymbol);
+  else
+    {
+      xfree (m4_hash_remove (m4_symtab, name));
+      m4_symbol_del (*psymbol);
+    }
+}
+
+
+/* Remove all the definitions associated with NAME.  */
+void
+m4_symbol_delete (const char *name)
+{
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+
+  if (!psymbol)
+    M4ERROR ((warning_status, 0,
+	      "INTERNAL ERROR: m4_symbol_delete (%s)", name));
+
+  if (psymbol)
+    {
+      xfree (m4_hash_remove (m4_symtab, name));
+      m4_symbol_del (*psymbol);
+    }
+}
+
+
+/* Remove every symbol that references the given module handle from
+   the symbol table.  */
 void
 m4_remove_table_reference_symbols (lt_dlhandle handle)
 {
@@ -244,11 +287,11 @@ m4_remove_table_reference_symbols (lt_dlhandle handle)
       if (M4_SYMBOL_HANDLE (symbol) == handle)
 	{
 	  if (M4_SYMBOL_DATA_NEXT (symbol))
-	    m4_symbol_popdef (symbol);
+	    m4_symbol_pop (symbol);
 	  else
 	    {
 	      xfree (m4_hash_remove (m4_symtab, m4_hash_iterator_key (place)));
-	      m4_symbol_delete (symbol);
+	      m4_symbol_del (symbol);
 	    }
 	}
     }
