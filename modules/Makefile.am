@@ -40,9 +40,9 @@ if USE_GMP
 pkglibexec_LTLIBRARIES += mpeval.la
 endif
 
-gnu_la_SOURCES = gnu.c
+gnu_la_SOURCES       = gnu.c
 EXTRA_gnu_la_SOURCES = format.c
-gnu_la_LDFLAGS = -module
+gnu_la_LDFLAGS       = -module
 
 load_la_SOURCES = load.c
 load_la_LDFLAGS = -module
@@ -78,4 +78,3 @@ time_la_LDFLAGS = -module
 BUILT_SOURCES = perlxsi.c
 perlxsi.c:
 	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c
-

@@ -303,10 +303,6 @@ extern void	m4_debug_message_prefix (m4 *);
 	}						} M4_STMT_END
 
 
-/* Exit code from last "syscmd" command.  */
-extern int m4_sysval;
-
-
 
 /* --- SYNTAX TABLE DEFINITIONS --- */
 

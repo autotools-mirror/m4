@@ -337,6 +337,10 @@ M4BUILTIN_HANDLER (defn)
 
 /* This section contains macros to handle the builtins "syscmd"
    and "sysval".  */
+
+/* Exit code from last "syscmd" command (also used by gnu module).  */
+int m4_sysval = 0;
+
 M4BUILTIN_HANDLER (syscmd)
 {
   m4_debug_flush_files (context);

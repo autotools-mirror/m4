@@ -503,6 +503,9 @@ M4BUILTIN_HANDLER (syncoutput)
 /**
  * esyscmd(SHELL-COMMAND)
  **/
+
+extern int m4_sysval;
+
 M4BUILTIN_HANDLER (esyscmd)
 {
   FILE *pin;

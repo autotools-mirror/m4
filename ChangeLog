@@ -1,3 +1,24 @@
+2003-07-24  Gary V. Vaughan  <gary@gnu.org>
+
+	An experiment: There is loads of code in libm4 which should be in
+	the m4 module, but is also used by another module. Just because
+	some linkers won't cope with calls across dynamic runtime loaded
+	objects I initially left the code in libm4.  It will tidy the
+	module api immensely if this code moves to the right place, I just
+	need to remember to invent a suitable calling mechanism at some
+	point.  For now, only modules that are statically linked and
+	preloaded will get this treatment, so the only platforms that will
+	break are those that require all symbols to be resolved at link
+	time.
+
+	* TODO: Reminder that what I am doing could reduce portability
+	unless I do something more robust later.
+	* m4/m4module.h (m4_sysval): No longer exported from libm4.
+	* m4/utility.c (m4_sysval): No longer declared in libm4.
+	* modules/Makefile.am: Reformatting.
+	* modules/m4.c (m4_sysval): Declare it at place of use.
+	* modules/gnu.c (m4_sysval): Import it for use in esyscmd.
+
 2003-07-23  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4module.h: Reformatting and rearranging lines a bit.

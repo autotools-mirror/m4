@@ -26,8 +26,6 @@
 
 static int dumpdef_cmp (const void *s1, const void *s2);
 
-/* Exit code from last "syscmd" command.  */
-int m4_sysval = 0;
 
 
 /* Give friendly warnings if a builtin macro is passed an
