@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-10-13 08:32+0200\n"
+"POT-Creation-Date: 2001-10-15 11:00+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -152,16 +152,6 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
-#: m4/debug.c:356
-#, fuzzy
-msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
-msgstr "ERRORE INTERNO: Operatore errato in mult_term ()"
-
-#: m4/debug.c:364
-#, fuzzy
-msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
-msgstr "ERRORE INTERNO: Tipo dato `token' errato in define_macro ()"
-
 #: m4/input.c:319
 #, c-format
 msgid "Input reverted to %s, line %d"
@@ -172,52 +162,22 @@ msgstr "Ingresso ripristinato su %s, linea %d"
 msgid "Input read from %s"
 msgstr "Errore di lettura da %s"
 
-#: m4/input.c:499
-msgid "INTERNAL ERROR: Recursive push_string!"
-msgstr "ERRORE INTERNO: Utilizzo ricorsivo di push_string!"
-
-#: m4/input.c:603
-#, fuzzy
-msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
-msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
-
-#: m4/input.c:642
-msgid "INTERNAL ERROR: Input stack botch in next_char ()"
-msgstr "ERRORE INTERNO: Stack di ingresso corrotto in next_char ()"
-
-#: m4/input.c:676
-#, fuzzy
-msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
-msgstr "ERRORE INTERNO: Stack di ingresso corrotto in peek_input ()"
-
-#: m4/input.c:766
+#: m4/input.c:769
 msgid "NONE"
 msgstr "NESSUNO"
 
-#: m4/input.c:986
+#: m4/input.c:989
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Nome `%s' non definito"
 
-#: m4/input.c:1113 m4/input.c:1140
+#: m4/input.c:1116 m4/input.c:1143
 msgid "ERROR: EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
-
-#: m4/macro.c:92
-msgid "INTERNAL ERROR: Bad token type in expand_token ()"
-msgstr "ERRORE INTERNO: Tipo `token' errato in expand_token ()"
 
 #: m4/macro.c:157
 msgid "ERROR: EOF in argument list"
 msgstr "ERRORE: Fine prematura della lista di argomenti"
-
-#: m4/macro.c:172
-msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
-msgstr ""
-
-#: m4/macro.c:246
-msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
-msgstr "ERRORE INTERNO: Tipo simbolo errato in call_macro ()"
 
 #: m4/macro.c:272
 #, c-format
@@ -319,63 +279,45 @@ msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
 msgid "Name `%s' is unknown\n"
 msgstr "Il nome `%s'  sconosciuto\n"
 
-#: modules/evalparse.c:521
-#, fuzzy
-msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
-msgstr "ERRORE INTERNO: Tipo simbolo errato in m4_defn ()"
+#: modules/evalparse.c:787
+#, fuzzy, c-format
+msgid "Warning: %s: radix out of range: %d"
+msgstr "Nome `%s' non definito"
 
-#: modules/evalparse.c:566
-#, fuzzy
-msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
-msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
-
-#: modules/evalparse.c:665
-#, fuzzy
-msgid "INTERNAL ERROR: Bad operator in mult_term ()"
-msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
-
-#: modules/evalparse.c:783
-#, c-format
-msgid "Radix in eval out of range (radix = %d)"
-msgstr "Base fuori intervallo in `eval' (base = %d)"
-
-#: modules/evalparse.c:793
-msgid "Negative width to eval"
-msgstr "Larghezza negativa in `eval'"
-
-#: modules/evalparse.c:814
-#, c-format
-msgid "Bad expression in eval (missing right parenthesis): %s"
-msgstr "Espressione errata in `eval' (manca la parentesi destra): %s"
+#: modules/evalparse.c:798
+#, fuzzy, c-format
+msgid "Warning: %s: negative width: %d"
+msgstr "Nome `%s' non definito"
 
 #: modules/evalparse.c:820
 #, fuzzy, c-format
-msgid "Bad expression in eval: %s"
-msgstr "Espressione errata in `eval' (testo errato): %s"
+msgid "Warning: %s: missing right parenthesis: %s"
+msgstr "Espressione errata in `eval' (manca la parentesi destra): %s"
 
-#: modules/evalparse.c:825
-#, c-format
-msgid "Bad expression in eval (bad input): %s"
-msgstr "Espressione errata in `eval' (testo errato): %s"
+#: modules/evalparse.c:826
+#, fuzzy, c-format
+msgid "Warning: %s: bad expression: %s"
+msgstr "Nome `%s' non definito"
 
-#: modules/evalparse.c:830
-#, c-format
-msgid "Bad expression in eval (excess input): %s"
-msgstr "Espressione errata in `eval' (testo in eccesso): %s"
+#: modules/evalparse.c:832
+#, fuzzy, c-format
+msgid "Warning: %s: bad input: %s"
+msgstr "Nome `%s' non definito"
 
-#: modules/evalparse.c:835
-#, c-format
-msgid "Divide by zero in eval: %s"
-msgstr "Divisione per zero in `eval': %s"
+#: modules/evalparse.c:838
+#, fuzzy, c-format
+msgid "Warning: %s: excess input: %s"
+msgstr "Nome `%s' non definito"
 
-#: modules/evalparse.c:840
-#, c-format
-msgid "Modulo by zero in eval: %s"
-msgstr "Modulo zero in `eval': %s"
+#: modules/evalparse.c:844
+#, fuzzy, c-format
+msgid "Warning: %s: divide by zero: %s"
+msgstr "Nome `%s' non definito"
 
-#: modules/evalparse.c:845
-msgid "INTERNAL ERROR: Bad error code in evaluate ()"
-msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
+#: modules/evalparse.c:850
+#, fuzzy, c-format
+msgid "Warning: %s: modulo by zero: %s"
+msgstr "Nome `%s' non definito"
 
 #: modules/gnu.c:144
 #, c-format
@@ -402,17 +344,17 @@ msgstr "Impossibile aprire l' archivio di errore: %s"
 msgid "%s: bad regular expression `%s': %s"
 msgstr "Espressione regolare errata `%s': %s"
 
-#: modules/gnu.c:325 modules/gnu.c:404
+#: modules/gnu.c:325 modules/gnu.c:401
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
-#: modules/gnu.c:511
+#: modules/gnu.c:508
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Impossibile aprire una `pipe' per il comando `%s'"
 
-#: modules/gnu.c:579
+#: modules/gnu.c:576
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
@@ -421,18 +363,18 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:343 modules/m4.c:611
-#: modules/m4.c:631
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:616
+#: modules/m4.c:636
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/m4.c:451
+#: modules/m4.c:456
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
 
-#: modules/m4.c:510 src/freeze.c:385
+#: modules/m4.c:515 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
@@ -441,15 +383,6 @@ msgstr "Impossibile aprire %s"
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Espressione errata in `eval': %s"
-
-#: src/freeze.c:161
-msgid "INTERNAL ERROR: Builtin not found in builtin table!"
-msgstr ""
-
-#: src/freeze.c:183
-#, fuzzy
-msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
-msgstr "ERRORE INTERNO: Tipo dato `token' errato in define_macro ()"
 
 #: src/freeze.c:274
 msgid "Expecting line feed in frozen file"
@@ -607,10 +540,6 @@ msgid ""
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/main.c:456
-msgid "INTERNAL ERROR: Bad code in deferred arguments"
-msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
-
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
 #: src/stackovf.c:177
@@ -626,6 +555,79 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Controllare una possibile ricorsione infinita.\n"
+
+#, fuzzy
+#~ msgid ""
+#~ "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
+#~ msgstr "ERRORE INTERNO: Operatore errato in mult_term ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
+#~ msgstr "ERRORE INTERNO: Tipo dato `token' errato in define_macro ()"
+
+#~ msgid "INTERNAL ERROR: Recursive push_string!"
+#~ msgstr "ERRORE INTERNO: Utilizzo ricorsivo di push_string!"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
+#~ msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
+
+#~ msgid "INTERNAL ERROR: Input stack botch in next_char ()"
+#~ msgstr "ERRORE INTERNO: Stack di ingresso corrotto in next_char ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
+#~ msgstr "ERRORE INTERNO: Stack di ingresso corrotto in peek_input ()"
+
+#~ msgid "INTERNAL ERROR: Bad token type in expand_token ()"
+#~ msgstr "ERRORE INTERNO: Tipo `token' errato in expand_token ()"
+
+#~ msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
+#~ msgstr "ERRORE INTERNO: Tipo simbolo errato in call_macro ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+#~ msgstr "ERRORE INTERNO: Tipo simbolo errato in m4_defn ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+#~ msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+#~ msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
+
+#~ msgid "Radix in eval out of range (radix = %d)"
+#~ msgstr "Base fuori intervallo in `eval' (base = %d)"
+
+#~ msgid "Negative width to eval"
+#~ msgstr "Larghezza negativa in `eval'"
+
+#, fuzzy
+#~ msgid "Bad expression in eval: %s"
+#~ msgstr "Espressione errata in `eval' (testo errato): %s"
+
+#~ msgid "Bad expression in eval (bad input): %s"
+#~ msgstr "Espressione errata in `eval' (testo errato): %s"
+
+#~ msgid "Bad expression in eval (excess input): %s"
+#~ msgstr "Espressione errata in `eval' (testo in eccesso): %s"
+
+#~ msgid "Divide by zero in eval: %s"
+#~ msgstr "Divisione per zero in `eval': %s"
+
+#~ msgid "Modulo by zero in eval: %s"
+#~ msgstr "Modulo zero in `eval': %s"
+
+#~ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+#~ msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
+#~ msgstr "ERRORE INTERNO: Tipo dato `token' errato in define_macro ()"
+
+#~ msgid "INTERNAL ERROR: Bad code in deferred arguments"
+#~ msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
 
 #~ msgid "Error matching regular expression `%s'"
 #~ msgstr "Errore nel confronto dell' espressione regolare `%s'"

@@ -816,30 +816,30 @@ m4_syntax_init (void)
 {
   int ch;
 
-  for (ch = 256; --ch > 0; )
+  for (ch = 256; --ch > 0;)
     {
       if (ch == '(')
-	set_syntax_internal(M4_SYNTAX_OPEN, ch);
+	set_syntax_internal (M4_SYNTAX_OPEN, ch);
       else if (ch == ')')
-	set_syntax_internal(M4_SYNTAX_CLOSE, ch);
+	set_syntax_internal (M4_SYNTAX_CLOSE, ch);
       else if (ch == ',')
-	set_syntax_internal(M4_SYNTAX_COMMA, ch);
-      else if (isspace(ch))
-	set_syntax_internal(M4_SYNTAX_SPACE, ch);
-      else if (isalpha(ch) || ch == '_')
-	set_syntax_internal(M4_SYNTAX_ALPHA, ch);
-      else if (isdigit(ch))
-	set_syntax_internal(M4_SYNTAX_NUM, ch);
+	set_syntax_internal (M4_SYNTAX_COMMA, ch);
+      else if (isspace (ch))
+	set_syntax_internal (M4_SYNTAX_SPACE, ch);
+      else if (isalpha (ch) || ch == '_')
+	set_syntax_internal (M4_SYNTAX_ALPHA, ch);
+      else if (isdigit (ch))
+	set_syntax_internal (M4_SYNTAX_NUM, ch);
       else
-	set_syntax_internal(M4_SYNTAX_OTHER, ch);
+	set_syntax_internal (M4_SYNTAX_OTHER, ch);
     }
   /* set_syntax_internal(M4_SYNTAX_IGNORE, 0); */
 
   /* Default quotes and comment delimiters are always one char */
-  set_syntax_internal(M4_SYNTAX_LQUOTE, lquote.string[0]);
-  set_syntax_internal(M4_SYNTAX_RQUOTE, rquote.string[0]);
-  set_syntax_internal(M4_SYNTAX_BCOMM, bcomm.string[0]);
-  set_syntax_internal(M4_SYNTAX_ECOMM, ecomm.string[0]);
+  set_syntax_internal (M4_SYNTAX_LQUOTE, lquote.string[0]);
+  set_syntax_internal (M4_SYNTAX_RQUOTE, rquote.string[0]);
+  set_syntax_internal (M4_SYNTAX_BCOMM, bcomm.string[0]);
+  set_syntax_internal (M4_SYNTAX_ECOMM, ecomm.string[0]);
 }
 
 int
@@ -882,7 +882,7 @@ check_use_macro_escape (void)
 
   use_macro_escape = FALSE;
   for (ch = 256; --ch >= 0; )
-    if (M4_IS_ESCAPE(ch))
+    if (M4_IS_ESCAPE (ch))
       use_macro_escape = TRUE;
 }
 
@@ -895,9 +895,9 @@ void
 m4_set_quotes (const char *lq, const char *rq)
 {
   int ch;
-  for (ch = 256; --ch >= 0; )	/* changequote overrides syntax_table */
-    if (M4_IS_LQUOTE(ch) || M4_IS_RQUOTE(ch))
-      unset_syntax_attribute(M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE, ch);
+  for (ch = 256; --ch >= 0;)	/* changequote overrides syntax_table */
+    if (M4_IS_LQUOTE (ch) || M4_IS_RQUOTE (ch))
+      unset_syntax_attribute (M4_SYNTAX_LQUOTE | M4_SYNTAX_RQUOTE, ch);
 
   xfree (lquote.string);
   xfree (rquote.string);
@@ -911,21 +911,21 @@ m4_set_quotes (const char *lq, const char *rq)
 
   if (single_quotes)
     {
-      set_syntax_internal(M4_SYNTAX_LQUOTE, lquote.string[0]);
-      set_syntax_internal(M4_SYNTAX_RQUOTE, rquote.string[0]);
+      set_syntax_internal (M4_SYNTAX_LQUOTE, lquote.string[0]);
+      set_syntax_internal (M4_SYNTAX_RQUOTE, rquote.string[0]);
     }
 
   if (use_macro_escape)
-    check_use_macro_escape();
+    check_use_macro_escape ();
 }
 
 void
 m4_set_comment (const char *bc, const char *ec)
 {
   int ch;
-  for (ch = 256; --ch >= 0; )	/* changecom overrides syntax_table */
-    if (M4_IS_BCOMM(ch) || M4_IS_ECOMM(ch))
-      unset_syntax_attribute(M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM, ch);
+  for (ch = 256; --ch >= 0;)	/* changecom overrides syntax_table */
+    if (M4_IS_BCOMM (ch) || M4_IS_ECOMM (ch))
+      unset_syntax_attribute (M4_SYNTAX_BCOMM | M4_SYNTAX_ECOMM, ch);
 
   xfree (bcomm.string);
   xfree (ecomm.string);
@@ -939,12 +939,12 @@ m4_set_comment (const char *bc, const char *ec)
 
   if (single_comments)
     {
-      set_syntax_internal(M4_SYNTAX_BCOMM, bcomm.string[0]);
-      set_syntax_internal(M4_SYNTAX_ECOMM, ecomm.string[0]);
+      set_syntax_internal (M4_SYNTAX_BCOMM, bcomm.string[0]);
+      set_syntax_internal (M4_SYNTAX_ECOMM, ecomm.string[0]);
     }
 
   if (use_macro_escape)
-    check_use_macro_escape();
+    check_use_macro_escape ();
 }
 
 /* Functions to manipulate the syntax table.  */
@@ -1040,7 +1040,7 @@ m4_next_token (m4_token *td)
 	init_builtin_token (td);
 	(void) next_char ();
 #ifdef DEBUG_INPUT
-	print_token("next_token", M4_TOKEN_MACDEF, td);
+	print_token ("next_token", M4_TOKEN_MACDEF, td);
 #endif
 	return M4_TOKEN_MACDEF;
       }

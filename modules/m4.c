@@ -533,8 +533,7 @@ M4BUILTIN_HANDLER (sinclude)
 }
 
 
-/* More miscellaneous builtins -- "maketemp", "errprint", "__file__" and
-   "__line__".  The last two are GNU specific.  */
+/* More miscellaneous builtins -- "maketemp", "errprint".  */
 
 /* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)

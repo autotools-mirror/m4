@@ -1,3 +1,7 @@
+2001-10-18  Akim Demaille  <akim@epita.fr>
+
+	* m4/input.c, modules/m4.c: Formatting changes.
+
 2001-10-17  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap: s/configure.in/configure.ac/

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-10-13 08:32+0200\n"
+"POT-Creation-Date: 2001-10-15 11:00+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -153,20 +153,6 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "正規表現が定義されていません。"
 
-#: m4/debug.c:356
-#, fuzzy
-msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
-msgstr ""
-"内部エラー：`Builtin' というビルトインマクロはありません。\n"
-"            (関数 trace_pre () がこのエラーメッセージを出しています。) "
-
-#: m4/debug.c:364
-#, fuzzy
-msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
-msgstr ""
-"内部エラー：トークンデータの種類が不正です。\n"
-"            (関数 trace_pre () がこのエラーメッセージを出しています。)"
-
 #: m4/input.c:319
 #, c-format
 msgid "Input reverted to %s, line %d"
@@ -177,52 +163,22 @@ msgstr "ファイル %s, %d 行目から入力し直します。"
 msgid "Input read from %s"
 msgstr "%s からの入力を読み込みます。"
 
-#: m4/input.c:499
-msgid "INTERNAL ERROR: Recursive push_string!"
-msgstr "内部エラー：再帰的に文字列を push しています。"
-
-#: m4/input.c:603
-#, fuzzy
-msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
-msgstr "内部エラー：関数 init_macro_token () が不正に呼ばれています。"
-
-#: m4/input.c:642
-msgid "INTERNAL ERROR: Input stack botch in next_char ()"
-msgstr "内部エラー：関数 next_char () 内でスタックの入力に失敗しています。"
-
-#: m4/input.c:676
-#, fuzzy
-msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
-msgstr "内部エラー：関数 peek_input () 内でスタックの入力に失敗しています。"
-
-#: m4/input.c:766
+#: m4/input.c:769
 msgid "NONE"
 msgstr "なし"
 
-#: m4/input.c:986
+#: m4/input.c:989
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "`%s' は定義されていません。"
 
-#: m4/input.c:1113 m4/input.c:1140
+#: m4/input.c:1116 m4/input.c:1143
 msgid "ERROR: EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
-
-#: m4/macro.c:92
-msgid "INTERNAL ERROR: Bad token type in expand_token ()"
-msgstr "内部エラー：関数 expand_token () 内のトークンの種類が不正です。"
 
 #: m4/macro.c:157
 msgid "ERROR: EOF in argument list"
 msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
-
-#: m4/macro.c:172
-msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
-msgstr "内部エラー：関数 expand_argument () のトークンの種類が不正です。"
-
-#: m4/macro.c:246
-msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
-msgstr "内部エラー：関数 call_macro () 内のシンボルの種類が不正です。"
 
 #: m4/macro.c:272
 #, c-format
@@ -328,64 +284,45 @@ msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
 msgid "Name `%s' is unknown\n"
 msgstr "`%s' は定義されていません。\n"
 
-#: modules/evalparse.c:521
-msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
-msgstr "内部エラー：関数 cmp_term () の比較演算子が不正です。"
+#: modules/evalparse.c:787
+#, fuzzy, c-format
+msgid "Warning: %s: radix out of range: %d"
+msgstr "`%s' は定義されていません。"
 
-#: modules/evalparse.c:566
-msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
-msgstr "内部エラー：shift_term () のシフト演算子が不正です。"
-
-#: modules/evalparse.c:665
-msgid "INTERNAL ERROR: Bad operator in mult_term ()"
-msgstr "内部エラー：関数 mult_term () 内の演算子が不正です。"
-
-#: modules/evalparse.c:783
-#, c-format
-msgid "Radix in eval out of range (radix = %d)"
-msgstr "eval の基数 ( %d 進法) の桁数が許容範囲外にあります。"
-
-#: modules/evalparse.c:793
-msgid "Negative width to eval"
-msgstr "eval の出力桁数が負数になっています。"
-
-#: modules/evalparse.c:814
-#, c-format
-msgid "Bad expression in eval (missing right parenthesis): %s"
-msgstr "eval で %s という不正な表現が用いられています (閉じ括弧がありません)。"
+#: modules/evalparse.c:798
+#, fuzzy, c-format
+msgid "Warning: %s: negative width: %d"
+msgstr "`%s' は定義されていません。"
 
 #: modules/evalparse.c:820
 #, fuzzy, c-format
-msgid "Bad expression in eval: %s"
-msgstr ""
-"eval で `%s' という不正な表現が用いられています \n"
-"            (入力データが正しくありません)。"
+msgid "Warning: %s: missing right parenthesis: %s"
+msgstr "eval で %s という不正な表現が用いられています (閉じ括弧がありません)。"
 
-#: modules/evalparse.c:825
-#, c-format
-msgid "Bad expression in eval (bad input): %s"
-msgstr ""
-"eval で `%s' という不正な表現が用いられています \n"
-"            (入力データが正しくありません)。"
+#: modules/evalparse.c:826
+#, fuzzy, c-format
+msgid "Warning: %s: bad expression: %s"
+msgstr "`%s' は定義されていません。"
 
-#: modules/evalparse.c:830
-#, c-format
-msgid "Bad expression in eval (excess input): %s"
-msgstr "eval で %s という不正な式が用いられています (入力データが多過ぎます)。"
+#: modules/evalparse.c:832
+#, fuzzy, c-format
+msgid "Warning: %s: bad input: %s"
+msgstr "`%s' は定義されていません。"
 
-#: modules/evalparse.c:835
-#, c-format
-msgid "Divide by zero in eval: %s"
-msgstr "`%s' という表現で、0 による割算が行われています。"
+#: modules/evalparse.c:838
+#, fuzzy, c-format
+msgid "Warning: %s: excess input: %s"
+msgstr "`%s' は定義されていません。"
 
-#: modules/evalparse.c:840
-#, c-format
-msgid "Modulo by zero in eval: %s"
-msgstr "`%s' という eval で、基数が 0 になっています。"
+#: modules/evalparse.c:844
+#, fuzzy, c-format
+msgid "Warning: %s: divide by zero: %s"
+msgstr "`%s' は定義されていません。"
 
-#: modules/evalparse.c:845
-msgid "INTERNAL ERROR: Bad error code in evaluate ()"
-msgstr "内部エラー：関数 evaluate () 内のエラーコードが不正です。"
+#: modules/evalparse.c:850
+#, fuzzy, c-format
+msgid "Warning: %s: modulo by zero: %s"
+msgstr "`%s' は定義されていません。"
 
 #: modules/gnu.c:144
 #, c-format
@@ -412,17 +349,17 @@ msgstr "`%s' をエラーログファイルとしてセットできません。"
 msgid "%s: bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
 
-#: modules/gnu.c:325 modules/gnu.c:404
+#: modules/gnu.c:325 modules/gnu.c:401
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "正規表現 %s のマッチングに失敗しました。"
 
-#: modules/gnu.c:511
+#: modules/gnu.c:508
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "コマンド `%s' へのパイプがオープンできません。"
 
-#: modules/gnu.c:579
+#: modules/gnu.c:576
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
@@ -431,18 +368,18 @@ msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:343 modules/m4.c:611
-#: modules/m4.c:631
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:616
+#: modules/m4.c:636
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/m4.c:451
+#: modules/m4.c:456
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:510 src/freeze.c:385
+#: modules/m4.c:515 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
@@ -451,15 +388,6 @@ msgstr "`%s' をオープンできません。"
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "eval で %s という不正な式が用いられています。"
-
-#: src/freeze.c:161
-msgid "INTERNAL ERROR: Builtin not found in builtin table!"
-msgstr "内部エラー：`Built-in' というビルトインマクロはありません。"
-
-#: src/freeze.c:183
-#, fuzzy
-msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
-msgstr "内部エラー：関数 freeze_one_symbol () のトークンデータの種類が不正です。"
 
 #: src/freeze.c:274
 msgid "Expecting line feed in frozen file"
@@ -675,10 +603,6 @@ msgid ""
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/main.c:456
-msgid "INTERNAL ERROR: Bad code in deferred arguments"
-msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
-
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
 #: src/stackovf.c:177
@@ -697,6 +621,90 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  無限の再帰呼び出しが行われていないかどうかチェックして下さい。\n"
+
+#, fuzzy
+#~ msgid ""
+#~ "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
+#~ msgstr ""
+#~ "内部エラー：`Builtin' というビルトインマクロはありません。\n"
+#~ "            (関数 trace_pre () がこのエラーメッセージを出しています。) "
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
+#~ msgstr ""
+#~ "内部エラー：トークンデータの種類が不正です。\n"
+#~ "            (関数 trace_pre () がこのエラーメッセージを出しています。)"
+
+#~ msgid "INTERNAL ERROR: Recursive push_string!"
+#~ msgstr "内部エラー：再帰的に文字列を push しています。"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
+#~ msgstr "内部エラー：関数 init_macro_token () が不正に呼ばれています。"
+
+#~ msgid "INTERNAL ERROR: Input stack botch in next_char ()"
+#~ msgstr "内部エラー：関数 next_char () 内でスタックの入力に失敗しています。"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
+#~ msgstr "内部エラー：関数 peek_input () 内でスタックの入力に失敗しています。"
+
+#~ msgid "INTERNAL ERROR: Bad token type in expand_token ()"
+#~ msgstr "内部エラー：関数 expand_token () 内のトークンの種類が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
+#~ msgstr "内部エラー：関数 expand_argument () のトークンの種類が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
+#~ msgstr "内部エラー：関数 call_macro () 内のシンボルの種類が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+#~ msgstr "内部エラー：関数 cmp_term () の比較演算子が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+#~ msgstr "内部エラー：shift_term () のシフト演算子が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+#~ msgstr "内部エラー：関数 mult_term () 内の演算子が不正です。"
+
+#~ msgid "Radix in eval out of range (radix = %d)"
+#~ msgstr "eval の基数 ( %d 進法) の桁数が許容範囲外にあります。"
+
+#~ msgid "Negative width to eval"
+#~ msgstr "eval の出力桁数が負数になっています。"
+
+#, fuzzy
+#~ msgid "Bad expression in eval: %s"
+#~ msgstr ""
+#~ "eval で `%s' という不正な表現が用いられています \n"
+#~ "            (入力データが正しくありません)。"
+
+#~ msgid "Bad expression in eval (bad input): %s"
+#~ msgstr ""
+#~ "eval で `%s' という不正な表現が用いられています \n"
+#~ "            (入力データが正しくありません)。"
+
+#~ msgid "Bad expression in eval (excess input): %s"
+#~ msgstr "eval で %s という不正な式が用いられています (入力データが多過ぎます)。"
+
+#~ msgid "Divide by zero in eval: %s"
+#~ msgstr "`%s' という表現で、0 による割算が行われています。"
+
+#~ msgid "Modulo by zero in eval: %s"
+#~ msgstr "`%s' という eval で、基数が 0 になっています。"
+
+#~ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+#~ msgstr "内部エラー：関数 evaluate () 内のエラーコードが不正です。"
+
+#~ msgid "INTERNAL ERROR: Builtin not found in builtin table!"
+#~ msgstr "内部エラー：`Built-in' というビルトインマクロはありません。"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
+#~ msgstr "内部エラー：関数 freeze_one_symbol () のトークンデータの種類が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad code in deferred arguments"
+#~ msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
 
 #~ msgid "Error matching regular expression `%s'"
 #~ msgstr "正規表現 %s のマッチングに失敗しました。"
