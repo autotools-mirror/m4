@@ -1,5 +1,12 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* gnulib/m4/strtol.c, gnulib/config/strtol.m4: Import strtol
+	module from CVS gnulib.
+	* configure.ac (AC_REPLACE_FUNCS): Remove strtol.
+	(gl_FUNC_STRTOL): In favour of the module macro.
+
+2003-09-12  Gary V. Vaughan  <gary@gnu.org>
+
 	Replace the getopt code with CVS gnulib getopt.  The source files
 	detect whether they are in a glibc environment and preprocess away
 	all of the code if there is a system getopt, so we can compile

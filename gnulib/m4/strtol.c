@@ -1,21 +1,21 @@
 /* Convert string representation of a number into an integer value.
-   Copyright (C) 1991,92,94,95,96,97,98,99 Free Software Foundation, Inc.
-   This file is part of the GNU C Library.
+   Copyright (C) 1991, 92, 94, 95, 96, 97, 98, 99 Free Software Foundation, Inc.
+   NOTE: The canonical source of this file is maintained with the GNU C
+   Library.  Bugs can be reported to bug-glibc@gnu.org.
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by the
+   Free Software Foundation; either version 2, or (at your option) any
+   later version.
 
-   The GNU C Library is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -131,6 +131,31 @@ extern int errno;
 # define STRTOL_LONG_MIN LONG_LONG_MIN
 # define STRTOL_LONG_MAX LONG_LONG_MAX
 # define STRTOL_ULONG_MAX ULONG_LONG_MAX
+
+/* The extra casts work around common compiler bugs,
+   e.g. Cray C 5.0.3.0 when t == time_t.  */
+# ifndef TYPE_SIGNED
+#  define TYPE_SIGNED(t) (! ((t) 0 < (t) -1))
+# endif
+# ifndef TYPE_MINIMUM
+#  define TYPE_MINIMUM(t) ((t) (TYPE_SIGNED (t) \
+				? ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1) \
+				: (t) 0))
+# endif
+# ifndef TYPE_MAXIMUM
+#  define TYPE_MAXIMUM(t) ((t) (~ (t) 0 - TYPE_MINIMUM (t)))
+# endif
+
+# ifndef ULONG_LONG_MAX
+#  define ULONG_LONG_MAX TYPE_MAXIMUM (unsigned long long)
+# endif
+# ifndef LONG_LONG_MAX
+#  define LONG_LONG_MAX TYPE_MAXIMUM (long long int)
+# endif
+# ifndef LONG_LONG_MIN
+#  define LONG_LONG_MIN TYPE_MINIMUM (long long int)
+# endif
+
 # if __GNUC__ == 2 && __GNUC_MINOR__ < 7
    /* Work around gcc bug with using this constant.  */
    static const unsigned long long int maxquad = ULONG_LONG_MAX;
@@ -185,15 +210,15 @@ extern int errno;
 #  define ISALPHA(Ch) iswalpha (Ch)
 #  define TOUPPER(Ch) towupper (Ch)
 # endif
+#else
+# if defined STDC_HEADERS || (!defined isascii && !defined HAVE_ISASCII)
+#  define IN_CTYPE_DOMAIN(c) 1
 # else
-#  if defined STDC_HEADERS || (!defined isascii && !defined HAVE_ISASCII)
-#   define IN_CTYPE_DOMAIN(c) 1
-#  else
-#   define IN_CTYPE_DOMAIN(c) isascii(c)
-#  endif
-#  define L_(Ch) Ch
-#  define UCHAR_TYPE unsigned char
-#  define STRING_TYPE char
+#  define IN_CTYPE_DOMAIN(c) isascii(c)
+# endif
+# define L_(Ch) Ch
+# define UCHAR_TYPE unsigned char
+# define STRING_TYPE char
 # ifdef USE_IN_EXTENDED_LOCALE_MODEL
 #  define ISSPACE(Ch) __isspace_l ((Ch), loc)
 #  define ISALPHA(Ch) __isalpha_l ((Ch), loc)
@@ -205,7 +230,9 @@ extern int errno;
 # endif
 #endif
 
-#ifdef __STDC__
+/* For compilers which are ansi but don't define __STDC__, like SGI
+   Irix-4.0.5 cc, also check whether PROTOTYPES is defined. */
+#if defined (__STDC__) || defined (PROTOTYPES)
 # define INTERNAL(X) INTERNAL1(X)
 # define INTERNAL1(X) __##X##_internal
 # define WEAKNAME(X) WEAKNAME1(X)
@@ -344,60 +371,27 @@ INTERNAL (strtol) (nptr, endptr, base, group LOCALE_PARAM)
 
   overflow = 0;
   i = 0;
-  c = *s;
-  if (sizeof (long int) != sizeof (LONG int))
+  for (c = *s; c != L_('\0'); c = *++s)
     {
-      unsigned long int j = 0;
-      unsigned long int jmax = ULONG_MAX / base;
-
-      for (;c != L_('\0'); c = *++s)
+      if (s == end)
+	break;
+      if (c >= L_('0') && c <= L_('9'))
+	c -= L_('0');
+      else if (ISALPHA (c))
+	c = TOUPPER (c) - L_('A') + 10;
+      else
+	break;
+      if ((int) c >= base)
+	break;
+      /* Check for overflow.  */
+      if (i > cutoff || (i == cutoff && c > cutlim))
+	overflow = 1;
+      else
 	{
-	  if (s == end)
-	    break;
-	  if (c >= L_('0') && c <= L_('9'))
-	    c -= L_('0');
-	  else if (ISALPHA (c))
-	    c = TOUPPER (c) - L_('A') + 10;
-	  else
-	    break;
-	  if ((int) c >= base)
-	    break;
-	  /* Note that we never can have an overflow.  */
-	  else if (j >= jmax)
-	    {
-	      /* We have an overflow.  Now use the long representation.  */
-	      i = (unsigned LONG int) j;
-	      goto use_long;
-	    }
-	  else
-	    j = j * (unsigned long int) base + c;
+	  i *= (unsigned LONG int) base;
+	  i += c;
 	}
-
-      i = (unsigned LONG int) j;
     }
-  else
-    for (;c != L_('\0'); c = *++s)
-      {
-	if (s == end)
-	  break;
-	if (c >= L_('0') && c <= L_('9'))
-	  c -= L_('0');
-	else if (ISALPHA (c))
-	  c = TOUPPER (c) - L_('A') + 10;
-	else
-	  break;
-	if ((int) c >= base)
-	  break;
-	/* Check for overflow.  */
-	if (i > cutoff || (i == cutoff && c > cutlim))
-	  overflow = 1;
-	else
-	  {
-	  use_long:
-	    i *= (unsigned LONG int) base;
-	    i += c;
-	  }
-      }
 
   /* Check if anything actually happened.  */
   if (s == save)
