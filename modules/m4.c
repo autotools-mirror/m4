@@ -555,7 +555,8 @@ M4BUILTIN_HANDLER (m4exit)
   if (argc == 2  && !m4_numeric_arg (argc, argv, 1, &exit_code))
     exit_code = 0;
 
-  m4_module_close_all (obs);
+  /* Ensure any module exit callbacks are executed.  */
+  m4__module_exit ();
 
   exit (exit_code);
 }

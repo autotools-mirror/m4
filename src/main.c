@@ -102,12 +102,12 @@ Operation modes:\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"),
 	     stdout);
-      fputs (_("\
+      printf (_("\
 \n\
 Dynamic loading features:\n\
   -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
-  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
-	     stdout);
+  -m, --load-module=MODULE          load dynamic MODULE from %s\n"),
+	     USER_MODULE_PATH_ENV);
       fputs (_("\
 \n\
 Preprocessor features:\n\
@@ -225,7 +225,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   LTDL_SET_PRELOADED_SYMBOLS();
 
-  m4_module_init ();
+  m4__module_init ();
   m4_debug_init ();
   m4_include_init ();
   m4_symtab_init ();
@@ -521,13 +521,12 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
       m4_undivert_all ();
     }
 
-  m4_module_unload_all ();
-
   /* The remaining cleanup functions systematically free all of the
      memory we still have pointers to.  By definition, if there is
      anything left when we're done: it was caused by a memory leak.
      Strictly, we don't need to do this, but it makes leak detection
      a whole lot easier!  */
+  m4__module_exit ();
   m4_symtab_exit ();
   m4_syntax_exit ();
   m4_output_exit ();

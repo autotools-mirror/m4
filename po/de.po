@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-05-30 14:35+0100\n"
+"POT-Creation-Date: 2003-06-11 17:47+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -152,23 +152,33 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: m4/input.c:233
+#: m4/builtin.c:175
+#, c-format
+msgid "Error: %s: syntax error in parameter list at char `%c'"
+msgstr ""
+
+#: m4/builtin.c:196
+#, fuzzy, c-format
+msgid "Warning: %s: unterminated parameter list"
+msgstr "Name %s nicht definiert"
+
+#: m4/input.c:234
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Eingabe zurückgenommen zu %s, Zeile %d"
 
-#: m4/input.c:261
+#: m4/input.c:262
 #, c-format
 msgid "Input read from %s"
 msgstr "Eingabe gelesen von %s"
 
 # This is the name of the input file when there is no current input file.
 # Is this ever printed in a message?
-#: m4/input.c:680
+#: m4/input.c:687
 msgid "NONE"
 msgstr "NONE"
 
-#: m4/input.c:840 m4/input.c:870
+#: m4/input.c:847 m4/input.c:877
 #, fuzzy
 msgid "EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
@@ -178,11 +188,16 @@ msgstr "FEHLER: Dateiende in Zeichenkette"
 msgid "EOF in argument list"
 msgstr "FEHLER: Dateiende in Argumentliste"
 
-#: m4/macro.c:272
+#: m4/macro.c:273
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
+
+#: m4/macro.c:397
+#, c-format
+msgid "Error: %s: unterminated parameter reference: %s"
+msgstr ""
 
 #: m4/module.c:159
 msgid "unknown error"
@@ -279,7 +294,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
 
-#: m4/symtab.c:386
+#: m4/symtab.c:393
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Name »%s« ist unbekannt\n"
@@ -368,18 +383,18 @@ msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
-#: modules/m4.c:635
+#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
+#: modules/m4.c:625
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/m4.c:456
+#: modules/m4.c:446
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Kann Umleitung %s nicht aufheben"
 
-#: modules/m4.c:515 src/freeze.c:385
+#: modules/m4.c:505 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"
@@ -398,16 +413,16 @@ msgstr "Erwarte Zeilenumbruch in eingefrorener Datei"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Erwarte Zeichen »%c« in eingefrorener Datei"
 
-#: src/freeze.c:358 src/freeze.c:541
+#: src/freeze.c:358 src/freeze.c:549
 msgid "Premature end of frozen file"
 msgstr "Vorzeitiges Ende der eingefrorenen Datei"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
-#: src/freeze.c:639
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
+#: src/freeze.c:647
 msgid "Ill-formated frozen file"
 msgstr "Fehlerhafte eingefrorene Datei"
 
-#: src/freeze.c:488
+#: src/freeze.c:496
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-05-30 14:35+0100\n"
+"POT-Creation-Date: 2003-06-11 17:47+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -150,21 +150,31 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Нет предшедствующего регулярного выражения"
 
-#: m4/input.c:233
+#: m4/builtin.c:175
+#, c-format
+msgid "Error: %s: syntax error in parameter list at char `%c'"
+msgstr ""
+
+#: m4/builtin.c:196
+#, fuzzy, c-format
+msgid "Warning: %s: unterminated parameter list"
+msgstr "Имя %s неопределено"
+
+#: m4/input.c:234
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ввод перенаправлен в %s , строка %d"
 
-#: m4/input.c:261
+#: m4/input.c:262
 #, c-format
 msgid "Input read from %s"
 msgstr "Ввод из %s"
 
-#: m4/input.c:680
+#: m4/input.c:687
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: m4/input.c:840 m4/input.c:870
+#: m4/input.c:847 m4/input.c:877
 #, fuzzy
 msgid "EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
@@ -174,11 +184,16 @@ msgstr "ОШИБКА: Конец файла в строке"
 msgid "EOF in argument list"
 msgstr "ОШИБКА: Конец файла в списке аргументов"
 
-#: m4/macro.c:272
+#: m4/macro.c:273
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "ОШИБКА: Лимит рекурсии %d исчерпан, используйте -L<N> чтобы изменить его"
+
+#: m4/macro.c:397
+#, c-format
+msgid "Error: %s: unterminated parameter reference: %s"
+msgstr ""
 
 #: m4/module.c:159
 msgid "unknown error"
@@ -276,7 +291,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
-#: m4/symtab.c:386
+#: m4/symtab.c:393
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
@@ -365,18 +380,18 @@ msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ОШИБКА: модуль `%s' не найден"
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
-#: modules/m4.c:635
+#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
+#: modules/m4.c:625
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Имя %s неопределено"
 
-#: modules/m4.c:456
+#: modules/m4.c:446
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: modules/m4.c:515 src/freeze.c:385
+#: modules/m4.c:505 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
@@ -395,16 +410,16 @@ msgstr "Ожидается перевод строки в файле-образе памяти"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ожидается символ '%c' в файле-образе памяти"
 
-#: src/freeze.c:358 src/freeze.c:541
+#: src/freeze.c:358 src/freeze.c:549
 msgid "Premature end of frozen file"
 msgstr "Преждевременный конец файла-образа памяти"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
-#: src/freeze.c:639
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
+#: src/freeze.c:647
 msgid "Ill-formated frozen file"
 msgstr "Неверный формат файла-образа памяти"
 
-#: src/freeze.c:488
+#: src/freeze.c:496
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"

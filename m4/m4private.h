@@ -27,6 +27,20 @@
 #include <assert.h>
 #include <m4module.h>
 
+
+/* --- MODULE MANAGEMENT --- */
+
+#define USER_MODULE_PATH_ENV	"M4MODPATH"
+#define BUILTIN_SYMBOL		"m4_builtin_table"
+#define MACRO_SYMBOL		"m4_macro_table"
+#define INIT_SYMBOL		"m4_init_module"
+#define FINISH_SYMBOL		"m4_finish_module"
+
+extern void	    m4__module_init (void);
+extern lt_dlhandle  m4__module_open (const char *name, struct obstack *obs);
+extern void	    m4__module_exit (void);
+
+
 /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
 extern boolean m4__single_quotes;
 

@@ -517,7 +517,7 @@ reload_frozen_state (const char *name)
 	GET_STRING (file, string[0], allocated[0], number[0]);
 	VALIDATE ('\n');
 
-	m4_module_open (string[0], NULL);
+	m4__module_open (string[0], NULL);
 
 	break;
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU M4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-05-30 14:35+0100\n"
+"POT-Creation-Date: 2003-06-11 17:47+0100\n"
 "PO-Revision-Date: 2002-11-04 13:19+0100\n"
 "Last-Translator: full name <email@address>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -150,21 +150,31 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
-#: m4/input.c:233
+#: m4/builtin.c:175
+#, c-format
+msgid "Error: %s: syntax error in parameter list at char `%c'"
+msgstr ""
+
+#: m4/builtin.c:196
+#, fuzzy, c-format
+msgid "Warning: %s: unterminated parameter list"
+msgstr "Nome `%s' non definito"
+
+#: m4/input.c:234
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ingresso ripristinato su %s, linea %d"
 
-#: m4/input.c:261
+#: m4/input.c:262
 #, c-format
 msgid "Input read from %s"
 msgstr "Errore di lettura da %s"
 
-#: m4/input.c:680
+#: m4/input.c:687
 msgid "NONE"
 msgstr "NESSUNO"
 
-#: m4/input.c:840 m4/input.c:870
+#: m4/input.c:847 m4/input.c:877
 #, fuzzy
 msgid "EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
@@ -174,9 +184,14 @@ msgstr "ERRORE: Fine prematura di una stringa"
 msgid "EOF in argument list"
 msgstr "ERRORE: Fine prematura della lista di argomenti"
 
-#: m4/macro.c:272
+#: m4/macro.c:273
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
+msgstr ""
+
+#: m4/macro.c:397
+#, c-format
+msgid "Error: %s: unterminated parameter reference: %s"
 msgstr ""
 
 #: m4/module.c:159
@@ -274,7 +289,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
 
-#: m4/symtab.c:386
+#: m4/symtab.c:393
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Il nome `%s'  sconosciuto\n"
@@ -363,18 +378,18 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
-#: modules/m4.c:635
+#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
+#: modules/m4.c:625
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/m4.c:456
+#: modules/m4.c:446
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
 
-#: modules/m4.c:515 src/freeze.c:385
+#: modules/m4.c:505 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
@@ -393,16 +408,16 @@ msgstr "Atteso il carattere di fine linea in archivio congelato"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Atteso il carattere `%c' in archivio congelato"
 
-#: src/freeze.c:358 src/freeze.c:541
+#: src/freeze.c:358 src/freeze.c:549
 msgid "Premature end of frozen file"
 msgstr "Fine prematura dell' archivio congelato"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
-#: src/freeze.c:639
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
+#: src/freeze.c:647
 msgid "Ill-formated frozen file"
 msgstr "Archivio congelato malformato"
 
-#: src/freeze.c:488
+#: src/freeze.c:496
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""

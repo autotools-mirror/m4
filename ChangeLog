@@ -1,5 +1,38 @@
 2003-06-12  Gary V. Vaughan  <gary@gnu.org>
 
+	Refactoring modules to rationalise the API into an external
+	documented (eventually!) API for use by modules in the `m4_'
+	namespace declared in m4/m4module.h, an internal API between the
+	source files we ship (including our shipped modules) in the `m4__'
+	namespace declared in m4/m4private.h and making the rest as
+	cohesive as possible with liberal use of the `static' keyword.
+	This change represents an audit to m4/module.c along these
+	guidelines.
+
+	* m4/m4module.h (m4_module_close_all, m4_module_find_by_builtin):
+	Removed.  No longer used.
+	(m4_module_close): Removed prototypes.
+	(m4_module_init, m4_module_open, m4_module_unload_all): Removed
+	from the exported module api...
+	* m4/m4private.h (m4__module_init, m4__module_open)
+	(m4__module_exit): ...and renamed and added to the internal api.
+	Changed all callers.
+	(BUILTIN_SYMBOL, MACRO_SYMBOL, INIT_SYMBOL, FINISH_SYMBOL):
+	Centralised definitions after renaming...
+	* m4/module.c (M4_BUILTIN_SYMBOL, M4_MACRO_SYMBOL, M4_INIT_SYMBOL)
+	(M4_FINISH_SYMBOL): ...and removing from here.
+	(m4_module_dlerror, m4_module_remove, m4_module_close)
+	(m4_caller_id): Not exported at all, so renamed to module_dlerror,
+	module_remove, module_close and caller_id.
+	(MODULE_SELF_NAME): New macro to make reporting self errors
+	easier.
+	(m4_module_load, module_close, module_remove): Use it.
+	* m4/m4private.h (USER_MODULE_PATH_ENV): Macro to hold "M4MODPATH"
+	name.
+	* src/main.c (main): Use it.
+
+2003-06-12  Gary V. Vaughan  <gary@gnu.org>
+
 	* README: Remove references to --enable-changeword, which has been
 	removed from the code.
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-05-30 14:35+0100\n"
+"POT-Creation-Date: 2003-06-11 17:47+0100\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -150,21 +150,31 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fout overeenkomen reguliere expressies `%s'"
 
-#: m4/input.c:233
+#: m4/builtin.c:175
+#, c-format
+msgid "Error: %s: syntax error in parameter list at char `%c'"
+msgstr ""
+
+#: m4/builtin.c:196
+#, fuzzy, c-format
+msgid "Warning: %s: unterminated parameter list"
+msgstr "Ongedefinieerde naam %s"
+
+#: m4/input.c:234
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Invoer reverted naar %s, lijn %d"
 
-#: m4/input.c:261
+#: m4/input.c:262
 #, c-format
 msgid "Input read from %s"
 msgstr "Invoer gelezen vanuit %s"
 
-#: m4/input.c:680
+#: m4/input.c:687
 msgid "NONE"
 msgstr "GEEN"
 
-#: m4/input.c:840 m4/input.c:870
+#: m4/input.c:847 m4/input.c:877
 #, fuzzy
 msgid "EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
@@ -174,11 +184,16 @@ msgstr "FOUT: Einde van bestand teken in string"
 msgid "EOF in argument list"
 msgstr "FOUT: Einde van bestand teken in argumentenlijst"
 
-#: m4/macro.c:272
+#: m4/macro.c:273
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FOUT: Recursie limiet of %d overschreden, gebruik -L<N> om dit te wijzigen"
+
+#: m4/macro.c:397
+#, c-format
+msgid "Error: %s: unterminated parameter reference: %s"
+msgstr ""
 
 #: m4/module.c:159
 msgid "unknown error"
@@ -275,7 +290,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"
 
-#: m4/symtab.c:386
+#: m4/symtab.c:393
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
@@ -364,18 +379,18 @@ msgstr "LET OP: \\0 zal verdwijnen, gebruik hiervoor \\& als vervanging"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
-#: modules/m4.c:635
+#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
+#: modules/m4.c:625
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Ongedefinieerde naam %s"
 
-#: modules/m4.c:456
+#: modules/m4.c:446
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
-#: modules/m4.c:515 src/freeze.c:385
+#: modules/m4.c:505 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"
@@ -394,16 +409,16 @@ msgstr "Verwacht nieuwe regel in gefixeerd bestand"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Verwacht karakter `%c' in gefixeerd bestand"
 
-#: src/freeze.c:358 src/freeze.c:541
+#: src/freeze.c:358 src/freeze.c:549
 msgid "Premature end of frozen file"
 msgstr "Voorbarig einde van gefixeerd bestand"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
-#: src/freeze.c:639
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
+#: src/freeze.c:647
 msgid "Ill-formated frozen file"
 msgstr "Slecht geformateerd gefixeerd bestand"
 
-#: src/freeze.c:488
+#: src/freeze.c:496
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' van gefixeerd bestand niet gevonden in functie tabel!"

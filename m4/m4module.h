@@ -35,7 +35,7 @@ typedef struct m4_symbol	m4_symbol;
 typedef struct m4_token		m4_token;
 
 
-typedef void m4_builtin_func (struct obstack *, int, struct m4_token **);
+typedef void m4_builtin_func (struct obstack *, int, m4_token **);
 typedef void *m4_module_func (const char *);
 
 typedef struct {
@@ -62,20 +62,12 @@ typedef struct {
 typedef void m4_module_init_func   (lt_dlhandle, struct obstack*);
 typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
 
-extern void	    m4_module_init   (void);
 extern lt_dlhandle  m4_module_load   (const char*, struct obstack*);
 extern void	    m4_module_unload (const char*, struct obstack*);
-extern void	    m4_module_unload_all (void);
-extern lt_dlhandle  m4_module_open   (const char*, struct obstack*);
-extern void	    m4_module_close  (lt_dlhandle, struct obstack*);
-extern void	    m4_module_close_all (struct obstack*);
 
 extern const char  *m4_module_name     (lt_dlhandle);
 extern m4_builtin  *m4_module_builtins (lt_dlhandle);
 extern m4_macro	   *m4_module_macros   (lt_dlhandle);
-
-extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
-
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
