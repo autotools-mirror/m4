@@ -24,27 +24,27 @@
 
 #define ARG_INT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atoi (M4ARG (-1))))
 
 #define ARG_UINT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned int) atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned int) atoi (M4ARG (-1))))
 
 #define ARG_LONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atol (M4ARG (-1))))
 
 #define ARG_ULONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned long) atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned long) atol (M4ARG (-1))))
 
 #define ARG_STR(argc, argv) \
 	((argc == 0) ? "" : \
-	 (--argc, argv++, M4_TOKEN_DATA_TEXT (argv[-1])))
+	 (--argc, argv++, M4ARG (-1)))
 
 #define ARG_DOUBLE(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atof (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atof (M4ARG (-1))))
 
 
 /* The main formatting function.  Output is placed on the obstack OBS, the

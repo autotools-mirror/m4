@@ -76,12 +76,10 @@ BEGIN {
            if (output || error)
              {
                fatal("while getting file " file      \
-                     " found output = " output ","  \
-                     " found error = " error);
-
+		     " found output = " output ","  \
+		     " found error = " error);
              }
            input = normalize(input);
-           printf ("# FOO: %s\n", file);
            printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
         }
       else
@@ -165,6 +163,6 @@ function new_test(input, status, output, error) {
 }
 
 function fatal(msg) {
-  print "generate.awk: " msg > "/dev/stderr"
+  print "generate.awk: " FILENAME ":" NR ": " msg > "/dev/stderr"
   exit 1
 }

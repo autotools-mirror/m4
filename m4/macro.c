@@ -344,7 +344,7 @@ m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc,
 	      text = endp;
 	    }
 	  if (i < argc)
-	    m4_shipout_string (obs, M4_TOKEN_DATA_TEXT (argv[i]), 0, FALSE);
+	    m4_shipout_string (obs, M4ARG (i), 0, FALSE);
 	  break;
 
 	case '#':		/* number of arguments */

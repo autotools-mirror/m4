@@ -1,5 +1,13 @@
 2001-10-01  Akim Demaille  <akim@epita.fr>
 
+	* tests/generate.awk: Remove debugging code.
+	(fatal): Specify the current location.
+
+	* m4/debug.c, m4/macro.c, m4/utility.c, modules/format.c,
+	* modules/gnu.c, modules/m4.c: Use M4ARG.
+
+2001-10-01  Akim Demaille  <akim@epita.fr>
+
 	* modules/gnu.c (RE_SYNTAX_BRE, RE_SYNTAX_ERE): New.
 	(m4_regexp_compile): New.
 	(regexp, patsubst): Use it.

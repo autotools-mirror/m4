@@ -536,8 +536,8 @@ M4BUILTIN_HANDLER (changequote)
   if (m4_bad_argc (argv[0], argc, 1, 3))
     return;
 
-  m4_set_quotes ((argc >= 2) ? M4_TOKEN_DATA_TEXT (argv[1]) : NULL,
-	     (argc >= 3) ? M4_TOKEN_DATA_TEXT (argv[2]) : NULL);
+  m4_set_quotes ((argc >= 2) ? M4ARG (1) : NULL,
+		 (argc >= 3) ? M4ARG (2) : NULL);
 }
 
 /* Change the current comment delimiters.  The function set_comment ()
@@ -550,8 +550,7 @@ M4BUILTIN_HANDLER (changecom)
   if (argc == 1)
     m4_set_comment ("", "");	/* disable comments */
   else
-    m4_set_comment (M4_TOKEN_DATA_TEXT (argv[1]),
-		    (argc >= 3) ? M4_TOKEN_DATA_TEXT (argv[2]) : NULL);
+    m4_set_comment (M4ARG (1), (argc >= 3) ? M4ARG (2) : NULL);
 }
 
 

@@ -185,8 +185,8 @@ M4BUILTIN_HANDLER (changesyntax)
 
   for (i = 1; i < argc; i++)
     {
-      m4_set_syntax (*M4_TOKEN_DATA_TEXT (argv[i]),
-		     m4_expand_ranges (M4_TOKEN_DATA_TEXT (argv[i])+1, obs));
+      m4_set_syntax (*M4ARG (i),
+		     m4_expand_ranges (M4ARG (i)+1, obs));
     }
 }
 
@@ -461,15 +461,13 @@ M4BUILTIN_HANDLER (syncoutput)
   if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
-  if (M4_TOKEN_DATA_TEXT(argv[1])[0] == '0'
-      || M4_TOKEN_DATA_TEXT(argv[1])[0] == 'n'
-      || (M4_TOKEN_DATA_TEXT(argv[1])[0] == 'o'
-	  && M4_TOKEN_DATA_TEXT(argv[1])[1] == 'f'))
+  if (   M4ARG (1)[0] == '0'
+      || M4ARG (1)[0] == 'n'
+      || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
     sync_output = 0;
-  else if (M4_TOKEN_DATA_TEXT(argv[1])[0] == '1'
-	   || M4_TOKEN_DATA_TEXT(argv[1])[0] == 'y'
-	   || (M4_TOKEN_DATA_TEXT(argv[1])[0] == 'o'
-	       && M4_TOKEN_DATA_TEXT(argv[1])[1] == 'n'))
+  else if (   M4ARG (1)[0] == '1'
+	   || M4ARG (1)[0] == 'y'
+	   || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
     sync_output = 1;
 }
 

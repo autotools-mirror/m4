@@ -16,7 +16,7 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 ## 02111-1307  USA
 
-# The next line is needed by `others.at:esyscmd'
+# The next line is needed by `generated.at:esyscmd'
 #  Ty Coon, President of Vice
 
 EXTRA_DIST = generate.awk atlocal.in \
@@ -44,12 +44,10 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
 	mv $@t $@
 
-# FIXME: Autom4te is not complete yet, and lacks a means to find
-# the lib files.
 AUTOM4TE = autom4te
+AUTOTEST = $(AUTOM4TE) --language=autotest
 $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
-	$(AUTOM4TE) --language=autotest -I $(srcdir) testsuite.at -o $@.tmp
-	mv $@.tmp $@
+	$(AUTOM4TE) -I $(srcdir) testsuite.at -o $@
 
 # Run the test suite on the *installed* tree.
 installcheck-local:

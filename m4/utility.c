@@ -168,7 +168,7 @@ m4_dump_args (struct obstack *obs, int argc, m4_token_data **argv,
       if (i > 1)
 	obstack_grow (obs, sep, len);
 
-      m4_shipout_string (obs, M4_TOKEN_DATA_TEXT (argv[i]), 0, quoted);
+      m4_shipout_string (obs, M4ARG (i), 0, quoted);
     }
 }
 
@@ -259,9 +259,9 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_symbol_lookup (M4_TOKEN_DATA_TEXT (argv[i]));
+	  symbol = m4_symbol_lookup (M4ARG (i));
 	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
-	    m4_dump_symbol (M4_TOKEN_DATA_TEXT (argv[i]), symbol, data);
+	    m4_dump_symbol (M4ARG (i), symbol, data);
 	  else if (complain)
 	    M4WARN ((warning_status, 0,
 		     _("Warning: %s: undefined name: %s"),

@@ -346,7 +346,7 @@ m4_trace_pre (const char *name, int id, int argc, m4_token_data **argv)
 	  switch (M4_TOKEN_DATA_TYPE (argv[i]))
 	    {
 	    case M4_TOKEN_TEXT:
-	      m4_trace_format ("%l%S%r", M4_TOKEN_DATA_TEXT (argv[i]));
+	      m4_trace_format ("%l%S%r", M4ARG (i));
 	      break;
 
 	    case M4_TOKEN_FUNC:
