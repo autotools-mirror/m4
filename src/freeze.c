@@ -162,9 +162,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, m4_symbol *sym
     }
   else if (m4_is_symbol_func (symbol))
     {
-      const m4_builtin *bp = m4_builtin_find_by_func
-		(m4_get_module_builtin_table (SYMBOL_HANDLE (symbol)),
-		 m4_get_symbol_func (symbol));
+      const m4_builtin *bp = m4_builtin_find_by_func (SYMBOL_HANDLE (symbol),
+						m4_get_symbol_func (symbol));
 
       if (bp == NULL)
 	return "INTERNAL ERROR: Builtin not found in builtin table!";
@@ -456,23 +455,13 @@ reload_frozen_state (m4 *context, const char *name)
 
 	/* Enter a macro having a builtin function as a definition.  */
 	{
-	  lt_dlhandle handle = 0;
-	  m4_builtin *bt = NULL;
+	  lt_dlhandle handle   = 0;
 
 	  if (number[2] > 0)
-	    {
-	      while ((handle = lt_dlhandle_next (handle)))
-		if (strcmp (m4_get_module_name (handle), string[2]) == 0)
-		  break;
+	    handle = lt_dlhandle_find (string[2]);
 
-	      if (handle)
-		{
-		  bt = m4_get_module_builtin_table (handle);
-		}
-	    }
-
-	  if (bt)
-	    bp = m4_builtin_find_by_name (bt, string[1]);
+	  if (handle)
+	    bp = m4_builtin_find_by_name (handle, string[1]);
 
 	  if (bp)
 	    {
@@ -666,9 +655,7 @@ reload_frozen_state (m4 *context, const char *name)
 	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)
-	    while ((handle = lt_dlhandle_next (handle)))
-	      if (strcmp (m4_get_module_name (handle), string[2]) == 0)
-		break;
+	    handle = lt_dlhandle_find (string[2]);
 
 	  m4_set_symbol_value_text (token, xstrdup (string[1]));
 	  VALUE_HANDLE (token)		= handle;

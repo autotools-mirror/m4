@@ -333,6 +333,52 @@ AT_CHECK_M4([-m load input.m4], 0, expout, experr)
 AT_CLEANUP
 
 
+
+## ----------------------- ##
+## module symbol importing ##
+## ----------------------- ##
+
+# Importing a symbol from a not yet loaded module
+
+AT_SETUP([modules: importing])
+
+AT_DATA([[input.m4]],
+[[import
+load(`import')
+import
+unload(`modtest')
+import
+symbol_fail
+module_fail
+]])
+
+AT_DATA([[expout]],
+[[import
+
+import::import called.
+
+import::import called.
+import::symbol_fail called.
+]])
+
+AT_DATA([[experr]],
+[[Test module loaded.
+
+TRUE
+Test module unloaded.
+Test module loaded.
+
+TRUE
+m4: input.m4: 6: Warning: cannot load symbol `no_such' from module `modtest'
+m4: input.m4: 7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
+]])
+
+AT_CHECK_M4([-m load input.m4], 1, expout, experr)
+
+AT_CLEANUP
+
+
+
 ## -------------------- ##
 ## trace module symbols ##
 ## -------------------- ##

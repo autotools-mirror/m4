@@ -79,19 +79,14 @@
 
 #define MODULE_SELF_NAME	"!myself!"
 
-typedef struct {
-  m4_builtin    *builtin_table;
-  m4_macro	*macro_table;
-} module_data;
-
 static const char*  module_dlerror (void);
 static int	    module_remove  (m4 *context, lt_dlhandle handle,
 				    m4_obstack *obs);
 static void	    module_close   (m4 *context, lt_dlhandle handle,
 				    m4_obstack *obs);
 
-static void set_module_macro_table   (m4*, lt_dlhandle, const m4_macro*);
-static void set_module_builtin_table (m4*, lt_dlhandle, const m4_builtin*);
+static const m4_builtin * install_builtin_table (m4*, lt_dlhandle);
+static const m4_macro *   install_macro_table   (m4*, lt_dlhandle);
 
 static lt_dlcaller_id caller_id = 0;
 
@@ -107,93 +102,112 @@ m4_get_module_name (lt_dlhandle handle)
   return info ? info->name : 0;
 }
 
-m4_builtin *
-m4_get_module_builtin_table (lt_dlhandle handle)
+void *
+m4_module_import (m4 *context, const char *module_name,
+		  const char *symbol_name, m4_obstack *obs)
 {
-  module_data *data;
+  lt_dlhandle	handle		= lt_dlhandle_find (module_name);
+  lt_ptr	symbol_address	= 0;
 
-  assert (handle);
+  /* Try to load the module if it is not yet available (errors are
+     diagnosed by m4_module_load).  */
+  if (!handle)
+    handle = m4_module_load (context, module_name, obs);
 
-  data = lt_dlcaller_get_data (caller_id, handle);
+  if (handle)
+    {
+      symbol_address = lt_dlsym (handle, symbol_name);
 
-  return data ? data->builtin_table : 0;
+      if (!symbol_address)
+	M4ERROR ((m4_get_warning_status_opt (context), 0,
+		  _("Warning: cannot load symbol `%s' from module `%s'"),
+		    symbol_name, module_name));
+    }
+
+  return (void *) symbol_address;
 }
 
-static void
-set_module_builtin_table (m4 *context, lt_dlhandle handle,
-			  const m4_builtin *table)
+static const m4_builtin *
+install_builtin_table (m4 *context, lt_dlhandle handle)
 {
   const m4_builtin *bp;
 
   assert (context);
   assert (handle);
-  assert (table);
 
-  for (bp = table; bp->name != NULL; bp++)
+  bp = (const m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
+  if (bp)
     {
-      m4_symbol_value *value = m4_symbol_value_create ();
-      char *	name;
-
-      m4_set_symbol_value_func (value, bp->func);
-      VALUE_HANDLE (value)	= handle;
-      VALUE_MIN_ARGS (value)	= bp->min_args;
-      VALUE_MAX_ARGS (value)	= bp->max_args;
-
-      if (bp->groks_macro_args)
-	BIT_SET (VALUE_FLAGS (value), VALUE_MACRO_ARGS_BIT);
-      if (bp->blind_if_no_args)
-	BIT_SET (VALUE_FLAGS (value), VALUE_BLIND_ARGS_BIT);
-
-      if (m4_get_prefix_builtins_opt (context))
+      for (; bp->name != NULL; bp++)
 	{
-	  static const char prefix[] = "m4_";
-	  size_t len = strlen (prefix) + strlen (bp->name);
+	  m4_symbol_value *value = m4_symbol_value_create ();
+	  char *	   name;
 
-	  name = (char *) xmalloc (1+ len);
-	  snprintf (name, 1+ len, "%s%s", prefix, bp->name);
+	  m4_set_symbol_value_func (value, bp->func);
+	  VALUE_HANDLE   (value)	= handle;
+	  VALUE_MIN_ARGS (value)	= bp->min_args;
+	  VALUE_MAX_ARGS (value)	= bp->max_args;
+
+	  if (bp->groks_macro_args)
+	    BIT_SET (VALUE_FLAGS (value), VALUE_MACRO_ARGS_BIT);
+	  if (bp->blind_if_no_args)
+	    BIT_SET (VALUE_FLAGS (value), VALUE_BLIND_ARGS_BIT);
+
+	  if (m4_get_prefix_builtins_opt (context))
+	    {
+	      static const char prefix[] = "m4_";
+	      size_t len = strlen (prefix) + strlen (bp->name);
+
+	      name = (char *) xmalloc (1+ len);
+	      snprintf (name, 1+ len, "%s%s", prefix, bp->name);
+	    }
+	  else
+	    name = (char *) bp->name;
+
+	  m4_symbol_pushdef (M4SYMTAB, name, value);
+
+	  if (m4_get_prefix_builtins_opt (context))
+	    xfree (name);
 	}
-      else
-	name = (char *) bp->name;
 
-
-      m4_symbol_pushdef (M4SYMTAB, name, value);
-
-      if (m4_get_prefix_builtins_opt (context))
-	xfree (name);
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: builtins loaded",
+			m4_get_module_name (handle));
+#endif /* DEBUG_MODULES */
     }
+
+  return bp;
 }
 
-m4_macro *
-m4_get_module_macro_table (lt_dlhandle handle)
-{
-  module_data *data;
-
-  assert (handle);
-
-  data = lt_dlcaller_get_data (caller_id, handle);
-
-  return data ? data->macro_table : 0;
-}
-
-static void
-set_module_macro_table (m4 *context, lt_dlhandle handle,
-			   const m4_macro *table)
+static const m4_macro *
+install_macro_table (m4 *context, lt_dlhandle handle)
 {
   const m4_macro *mp;
 
   assert (context);
   assert (handle);
-  assert (table);
 
-  for (mp = table; mp->name != NULL; mp++)
+  mp = (const m4_macro *) lt_dlsym (handle, MACRO_SYMBOL);
+
+  if (mp)
     {
-      m4_symbol_value *value = m4_symbol_value_create ();
+      for (; mp->name != NULL; mp++)
+	{
+	  m4_symbol_value *value = m4_symbol_value_create ();
 
-      m4_set_symbol_value_text (value, xstrdup (mp->value));
-      VALUE_HANDLE (value) = handle;
+	  m4_set_symbol_value_text (value, xstrdup (mp->value));
+	  VALUE_HANDLE (value) = handle;
 
-      m4_symbol_pushdef (M4SYMTAB, mp->name, value);
+	  m4_symbol_pushdef (M4SYMTAB, mp->name, value);
+	}
+
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: macros loaded",
+			m4_get_module_name (handle));
+#endif /* DEBUG_MODULES */
     }
+
+  return mp;
 }
 
 lt_dlhandle
@@ -201,46 +215,26 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
   const lt_dlhandle handle = m4__module_open (context, name, obs);
 
-  /* If name is not set we are getting a reflective handle, but we
-     might need to display an error message later so we set an appropriate
-     value here.  */
-  if (!name)
-    name = MODULE_SELF_NAME;
-
   if (handle)
     {
       const lt_dlinfo  *info	= lt_dlgetinfo (handle);
 
       if (!info)
 	{
+	  /* If name is not set we are getting a reflective handle, but we
+	     need to display an error message so we set an appropriate
+	     value here.  */
+	  if (!name)
+	    name = MODULE_SELF_NAME;
+
 	  M4ERROR ((m4_get_warning_status_opt (context), 0,
 		    _("Warning: cannot load module `%s': %s"),
 		    name, module_dlerror ()));
 	}
       else if (info->ref_count == 1)
 	{
-	  const m4_builtin *builtin_table
-	    = m4_get_module_builtin_table (handle);
-	  const m4_macro   *macro_table
-	    = m4_get_module_macro_table (handle);
-
-	  /* Install the macro functions.  */
-	  if (builtin_table)
-	    {
-	      set_module_builtin_table (context, handle, builtin_table);
-#ifdef DEBUG_MODULES
-	      M4_DEBUG_MESSAGE1("module %s: builtins loaded", name);
-#endif /* DEBUG_MODULES */
-	    }
-
-	  /* Install the user macros. */
-	  if (macro_table)
-	    {
-	      set_module_macro_table (context, handle, macro_table);
-#ifdef DEBUG_MODULES
-	      M4_DEBUG_MESSAGE1("module %s: macros loaded", name);
-#endif /* DEBUG_MODULES */
-	    }
+	  install_builtin_table (context, handle);
+	  install_macro_table (context, handle);
 	}
     }
 
@@ -254,12 +248,10 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
   lt_dlhandle	handle  = 0;
   int		errors	= 0;
 
-  /* Scan the list for the first module with a matching name.  */
-  while ((handle = lt_dlhandle_next (handle)))
-    {
-      if (name && (strcmp (name, m4_get_module_name (handle)) == 0))
-	break;
-    }
+  assert (context);
+
+  if (name)
+    handle = lt_dlhandle_find (name);
 
   if (!handle)
     {
@@ -358,22 +350,22 @@ lt_dlhandle
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
   lt_dlhandle		handle		= lt_dlopenext (name);
-  m4_module_init_func  *init_func	= 0;
-  m4_builtin	       *builtin_table		= 0;
-  m4_macro	       *macro_table		= 0;
+  m4_module_init_func *	init_func	= 0;
+
+  assert (context);
+  assert (caller_id);
 
   if (handle)
     {
-#ifdef DEBUG_MODULES
       const lt_dlinfo *info = lt_dlgetinfo (handle);
-      M4_DEBUG_MESSAGE2("module %s: opening at %s", name, info->filename);
+
+      /* If we have a handle, there must be handle info.  */
+      assert (info);
+
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE2("module %s: opening at %s",
+			name ? name : MODULE_SELF_NAME, info->filename);
 #endif
-
-      /* Find the builtin table in the opened module. */
-      builtin_table = (m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
-
-      /* Find the macro table in the opened module. */
-      macro_table = (m4_macro *) lt_dlsym (handle, MACRO_SYMBOL);
 
       /* Find and run any initialising function in the opened module,
 	 each time the module is opened.  */
@@ -386,6 +378,20 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  M4_DEBUG_MESSAGE1("module %s: init hook called", name);
 #endif /* DEBUG_MODULES */
 	}
+
+      if (!init_func
+	  && !lt_dlsym (handle, FINISH_SYMBOL)
+	  && !lt_dlsym (handle, BUILTIN_SYMBOL)
+	  && !lt_dlsym (handle, MACRO_SYMBOL))
+	{
+	    M4ERROR ((EXIT_FAILURE, 0,
+		      _("module `%s' has no entry points"),
+		      name));
+	}
+
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: opened", name);
+#endif /* DEBUG_MODULES */
     }
   else
     {
@@ -393,48 +399,6 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
       M4ERROR ((EXIT_FAILURE, 0,
 		_("cannot open module `%s': %s"),
 		name, module_dlerror ()));
-    }
-
-  if (!builtin_table && !macro_table && !init_func)
-    {
-      /* Since we don't use it here, only check for the finish hook
-	 if we were about to diagnose a module with no entry points.  */
-      if (!lt_dlsym (handle, FINISH_SYMBOL))
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("module `%s' has no entry points"),
-		  name));
-    }
-
-  /* If the module was correctly opened and has the necessary
-     symbols, then store some client data for the new module
-     on the first open only.  */
-  if (handle)
-    {
-      const lt_dlinfo  *info	= lt_dlgetinfo (handle);
-
-      if (info && (info->ref_count == 1))
-	{
-	  module_data *data	= XMALLOC (module_data, 1);
-	  module_data *stale	= 0;
-
-	  data->builtin_table	= builtin_table;
-	  data->macro_table	= macro_table;
-
-	  stale = lt_dlcaller_set_data (caller_id, handle, data);
-
-	  if (stale)
-	    {
-	      xfree (stale);
-
-	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			_("Warning: overiding stale caller data in module `%s'"),
-			name));
-	    }
-
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s: opened", name);
-#endif /* DEBUG_MODULES */
-	}
     }
 
   return handle;
@@ -450,15 +414,6 @@ m4__module_exit (m4 *context)
     {
       lt_dlhandle      pending	= handle;
       const lt_dlinfo *info	= lt_dlgetinfo (pending);
-
-      /* We are *really* shutting down here, so freeing the module
-	 data is required.  */
-      if (info)
-	{
-	  module_data *stale
-	    = lt_dlcaller_set_data (caller_id, handle, 0);
-	  XFREE (stale);
-	}
 
       /* If we are about to unload the final reference, move on to the
 	 next handle before we unload the current one.  */
@@ -519,17 +474,6 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
   if (!lt_dlisresident (handle))
     {
-      const lt_dlinfo  *info	= lt_dlgetinfo (handle);
-
-      /* When we are about to unload the module for the final
-	 time, be sure to release any client data memory.  */
-      if (info && (info->ref_count == 1))
-	{
-	  module_data *stale
-	    = lt_dlcaller_set_data (caller_id, handle, 0);
-	  XFREE (stale);
-	}
-
       errors = lt_dlclose (handle);
       if (!errors)
 	{

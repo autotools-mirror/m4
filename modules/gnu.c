@@ -90,7 +90,7 @@ int errno;
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, min, max)  M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -452,29 +452,30 @@ M4BUILTIN_HANDLER (epatsubst)
 /* Implementation of "symbols".  It builds up a table of pointers to
    symbols, sorts it and ships out the symbol names.  */
 
-/* TODO:  Import this through the m4_export list of m4 module.  */
-extern void m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
-			     m4_symbol_value **argv, boolean complain);
-
 /**
  * symbols([...])
  **/
 M4BUILTIN_HANDLER (symbols)
 {
-  m4_dump_symbol_data data;
-  m4_obstack data_obs;
+  M4_MODULE_IMPORT (m4, m4_dump_symbols);
 
-  obstack_init (&data_obs);
-  data.obs = &data_obs;
-  m4_dump_symbols (context, &data, argc, argv, FALSE);
-
-  for (; data.size > 0; --data.size, data.base++)
+  if (m4_dump_symbols)
     {
-      m4_shipout_string (context, obs, data.base[0], 0, TRUE);
-      if (data.size > 1)
-	obstack_1grow (obs, ',');
+      m4_dump_symbol_data data;
+      m4_obstack data_obs;
+
+      obstack_init (&data_obs);
+      data.obs = &data_obs;
+      m4_dump_symbols (context, &data, argc, argv, FALSE);
+
+      for (; data.size > 0; --data.size, data.base++)
+	{
+	  m4_shipout_string (context, obs, data.base[0], 0, TRUE);
+	  if (data.size > 1)
+	    obstack_1grow (obs, ',');
+	}
+      obstack_free (&data_obs, NULL);
     }
-  obstack_free (&data_obs, NULL);
 }
 
 
@@ -506,28 +507,30 @@ M4BUILTIN_HANDLER (syncoutput)
  * esyscmd(SHELL-COMMAND)
  **/
 
-/* TODO:  Import these through the m4_export list of m4 module.  */
-extern int  m4_sysval;
-extern void m4_sysval_flush (m4 *);
-
 M4BUILTIN_HANDLER (esyscmd)
 {
-  FILE *pin;
-  int ch;
+  M4_MODULE_IMPORT (m4, m4_set_sysval);
+  M4_MODULE_IMPORT (m4, m4_sysval_flush);
 
-  m4_sysval_flush (context);
-  pin = popen (M4ARG (1), "r");
-  if (pin == NULL)
+  if (m4_set_sysval && m4_sysval_flush)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), errno,
-		_("Cannot open pipe to command `%s'"), M4ARG (1)));
-      m4_sysval = 0xff << 8;
-    }
-  else
-    {
-      while ((ch = getc (pin)) != EOF)
-	obstack_1grow (obs, (char) ch);
-      m4_sysval = pclose (pin);
+      FILE *pin;
+      int ch;
+
+      m4_sysval_flush (context);
+      pin = popen (M4ARG (1), "r");
+      if (pin == NULL)
+	{
+	  M4ERROR ((m4_get_warning_status_opt (context), errno,
+		    _("Cannot open pipe to command `%s'"), M4ARG (1)));
+	  m4_set_sysval (0xff << 8);
+	}
+      else
+	{
+	  while ((ch = getc (pin)) != EOF)
+	    obstack_1grow (obs, (char) ch);
+	  m4_set_sysval (pclose (pin));
+	}
     }
 }
 

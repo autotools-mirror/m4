@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -49,20 +49,9 @@ extern int errno;
 #define m4_export_table		m4_LTX_m4_export_table
 #define m4_builtin_table	m4_LTX_m4_builtin_table
 
-/* Exit code from last "syscmd" command.  */
-int  m4_sysval = 0;
-
-void m4_sysval_flush (m4 *context);
-void m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
-		      m4_symbol_value **argv, boolean complain);
-
-m4_export m4_export_table[] = {
-  { "m4_sysval",		&m4_sysval },
-  { "m4_sysval_flush",		&m4_sysval_flush },
-  { "m4_dump_symbols",		&m4_dump_symbols },
-
-  { NULL,			NULL }
-};
+#define m4_set_sysval		m4_LTX_m4_set_sysval
+#define m4_sysval_flush		m4_LTX_m4_sysval_flush
+#define m4_dump_symbols		m4_LTX_m4_dump_symbols
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -422,6 +411,15 @@ M4BUILTIN_HANDLER (defn)
 
 /* This section contains macros to handle the builtins "syscmd"
    and "sysval".  */
+
+/* Exit code from last "syscmd" command.  */
+int  m4_sysval = 0;
+
+void
+m4_set_sysval (int value)
+{
+  m4_sysval = value;
+}
 
 void
 m4_sysval_flush (m4 *context)

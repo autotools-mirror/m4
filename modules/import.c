@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,15 +25,13 @@
 
 #include <assert.h>
 
-#define m4_builtin_table	modtest_LTX_m4_builtin_table
-#define m4_macro_table		modtest_LTX_m4_macro_table
-
-#define export_test		modtest_LTX_export_test
-
+#define m4_builtin_table	import_LTX_m4_builtin_table
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (test,		FALSE,	FALSE,	1,	1)
+	BUILTIN (import,	FALSE,	FALSE,	1,	2)	\
+	BUILTIN (symbol_fail,	FALSE,	FALSE,	1,	2)	\
+	BUILTIN (module_fail,	FALSE,	FALSE,	1,	2)
 
 #define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
@@ -50,60 +48,55 @@ m4_builtin m4_builtin_table[] =
   { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
-m4_macro m4_macro_table[] =
-{
-  /* name		text */
-  { "__test__",		"`modtest'" },
-  { 0,			0 },
-};
-
 
 
-/**
- * modtest()
- **/
-M4INIT_HANDLER (modtest)
-{
-  const char *s = "Test module loaded.";
-
-  /* Don't depend on OBS so that the traces are the same when used
-     directly, or via a frozen file.  */
-  fprintf (stderr, "%s\n", s);
-}
-
+typedef boolean export_test_func (const char *);
+typedef boolean no_such_func (const char *);
 
 /**
- * modtest()
+ * import()
  **/
-M4FINISH_HANDLER (modtest)
+M4BUILTIN_HANDLER (import)
 {
-  const char *s = "Test module unloaded.";
+  M4_MODULE_IMPORT (modtest, export_test);
 
-  /* Don't depend on OBS so that the traces are the same when used
-     directly, or via a frozen file.  */
-  fprintf (stderr, "%s\n", s);
-}
-
-
-/**
- * test()
- **/
-M4BUILTIN_HANDLER (test)
-{
-  const char *s = "Test module called.";
+  const char *s = "`import'::`import' called.";
 
   assert (obs != 0);
   obstack_grow (obs, s, strlen(s));
+
+  if (export_test && export_test (M4ARG (1)))
+    fprintf (stderr, "TRUE\n");
 }
 
+/**
+ * symbol_fail()
+ **/
+M4BUILTIN_HANDLER (symbol_fail)
+{
+  M4_MODULE_IMPORT (modtest, no_such);
+
+  const char *s = "`import'::`symbol_fail' called.";
+
+  assert (obs != 0);
+  obstack_grow (obs, s, strlen(s));
+
+  if (no_such && no_such (M4ARG (1)))
+    fprintf (stderr, "TRUE\n");
+}
 
 /**
- * export_test()
+ * module_fail()
  **/
-boolean
-export_test (const char *foo)
+M4BUILTIN_HANDLER (module_fail)
 {
-  if (foo)
-    fprintf (stderr, "%s\n", foo);
-  return (boolean) (foo != 0);
+  M4_MODULE_IMPORT (no_such, no_such);
+
+  const char *s = "`import'::`module_fail' called.";
+
+  assert (obs != 0);
+  obstack_grow (obs, s, strlen(s));
+
+  if (no_such && no_such (M4ARG (1)))
+    fprintf (stderr, "TRUE\n");
 }

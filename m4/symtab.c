@@ -524,8 +524,7 @@ static void *dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 	break;
 
       case M4_SYMBOL_FUNC:
-	bp = m4_builtin_find_by_func (m4_get_module_builtin_table (handle),
-				      m4_get_symbol_func (symbol));
+	bp = m4_builtin_find_by_func (handle, m4_get_symbol_func (symbol));
 	fprintf (stderr, "<%s>",
 		 bp ? bp->name : "!ERROR!");
 	break;

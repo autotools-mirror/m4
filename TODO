@@ -108,20 +108,6 @@ for any of these ideas or if you have others to add.
     asked to load a frozen file that requires versions of modules with
     interface versions unsupported by the current release.
 
-  + Some liberties are take with preloaded modules using one another's
-    symbols.  This only works (portably) because the modules that do it
-    (m4.so and gnu.so) are both statically linked into the core.  Need to
-    investigate how this can be supported for any module, on platforms that
-    don't support backlinking.  Maybe exporting symbol name/address pairs
-    into a table maintained by libm4, and only using module symbols through
-    that table in other modules.
-
-  + On a related note, modules should be able to declare that they require
-    other modules to be loaded before they can work -- and the module loader
-    should take care of that.  Should such required modules be fully loaded
-    into the symbol table?  Or merely loaded into memory so that the C level
-    code is callable?
-
   + Setting of the module search path within m4 scripts:
 
 	append(__modulepath__, `/some/modules/live/here')

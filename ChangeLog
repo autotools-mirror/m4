@@ -1,3 +1,60 @@
+2003-08-11  Gary V. Vaughan  <gary@gnu.org>
+
+	Libltdl already has an excellent mechanism for accessing C symbols
+	in modules.  Lets use that!  Remove all the exporting cruft and
+	just use lt_dlsym in conjunction with a few conventions to
+	simplify module writers' jobs.  Also removed the table address
+	caching code and otherwise simplified the module loader quite a
+	bit.  To access exported symbols in other modules, first the
+	exporting module must name the symbols <modname>_LTX_<symname>,
+	and the importing module must define a function type called
+	<symname>_func.  The importer then adds
+	M4_MODULE_IMPORT(<modname>, <symname>) at the top of any function
+	that wishes to call out to the exported functions.  Care must be
+	taken that <symname> is non-NULL in the importing module incase
+	M4_MODULE_IMPORT fails, but otherwise it can be called as if the
+	definition was in the importers source.  Study
+	`modules/{gnu.c,m4.{c,h}' for a model example.  At the moment,
+	m4_module_import will attempt to automatically load a module
+	required for symbol access if it is not loaded already.
+
+	* TODO: Removed the items fixed in this delta.
+	* m4/ltdl.c (lt_dlhandle_find): New function to find a handle by
+	module name.
+	* m4/ltdl.h (lt_dlhandle_find): Declare it.
+	* m4/module.c (m4_module_unload): Use it.
+	* src/freeze.c (reload_frozen_state): Ditto.
+	* m4/m4module.h (m4_export): Deleted.  Removed all references.
+	(M4_MODULE_IMPORT): New user convenience macro for importing
+	arbitrary symbols from other modules.
+	* m4/module.c (m4_module_import): New function to service
+	M4_MODULE_IMPORT macro.
+	(module_data): Removed.  Looking up the tables on demand with
+	lt_dlsym, rather than caching their addresses here simplifies the
+	code substantially.
+	(m4_get_module_builtin_table, m4_get_module_macro_table):
+	Removed.  Changed all callers.
+	(set_module_macro_table, set_module_builtin_table): Renamed to
+	install_macro_table and install_builtin_table respectively, and
+	simplified now that the cache is no more.
+	* modules/gnu.c (builtin_symbols): Use this new mechanism to
+	import m4_dump_symbols from the m4 module.
+	(builtin_esyscmd): Likewise for m4_set_sysval and
+	m4_sysval_flush.
+	* modules/m4.c (m4_export_table): Removed.  Functions are
+	addressed with the new mechanism which doesn't need this.
+	(m4_set_sysval): New exported accessor function to prevent
+	problems with variable access on inferior architectures.
+	* modules/m4.h (m4_sysval_flush_func, m4_set_sysval_func)
+	(m4_dump_symbols_func): Typedefs required by M4_MODULE_IMPORT so
+	that we can have some type safety.
+	* modules/modtest.c (export_test): C level exported function for
+	testing the new import mechanism.
+	* modules/import.c: New file for the import end of the test.
+	* modules/Makefile.am (pkglibexec_LTLIBRARIES): Added import.la.
+	* tests/modules.at: New test cases for intermodule symbol
+	importing.
+
 2003-08-07  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4module.c (m4_string): Moved from here...

@@ -36,7 +36,7 @@ AM_LDFLAGS = -no-undefined
 pkgmodinc_HEADERS = m4.h
 pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la \
 			  traditional.la perl.la \
-			  modtest.la shadow.la stdlib.la time.la
+			  modtest.la shadow.la import.la stdlib.la time.la
 
 if USE_GMP
 pkglibexec_LTLIBRARIES += mpeval.la
@@ -63,6 +63,9 @@ traditional_la_LDFLAGS = -module
 
 modtest_la_SOURCES = modtest.c
 modtest_la_LDFLAGS = -module
+
+import_la_SOURCES = import.c
+import_la_LDFLAGS = -module
 
 perl_la_SOURCES = perl.c
 perl_la_CFLAGS = `perl -MExtUtils::Embed -e ccopts`

@@ -29,26 +29,31 @@ BEGIN_C_DECLS
 
 
 
-/* Various declarations.  */
+/* --- MODULE AUTHOR DECLARATIONS --- */
 
 typedef struct m4		m4;
-typedef struct obstack		m4_obstack;
+typedef struct m4_builtin	m4_builtin;
+typedef struct m4_macro		m4_macro;
 typedef struct m4_symbol_value	m4_symbol_value;
+
+typedef struct obstack		m4_obstack;
+typedef lt_dlsymlist		m4_export;
+
 typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
 
-typedef struct {
+struct m4_builtin
+{
   const char *	    name;
   m4_builtin_func * func;
   boolean	    groks_macro_args, blind_if_no_args;
   int		    min_args, max_args;
-} m4_builtin;
+};
 
-typedef struct {
+struct m4_macro
+{
   const char *name;
   const char *value;
-} m4_macro;
-
-typedef lt_dlsymlist m4_export;
+};
 
 
 #define M4BUILTIN(name) 					\
@@ -70,6 +75,10 @@ typedef lt_dlsymlist m4_export;
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
+
+#define M4_MODULE_IMPORT(M, S)					\
+  CONC(S, _func) *S = (CONC(S, _func) *)	 		\
+	m4_module_import (context, STR(M), STR(S), obs)
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
@@ -143,12 +152,12 @@ m4_context_opt_bit_table
 typedef void m4_module_init_func   (m4 *, lt_dlhandle, m4_obstack*);
 typedef void m4_module_finish_func (m4 *, lt_dlhandle, m4_obstack*);
 
-extern lt_dlhandle  m4_module_load   (m4 *, const char*, m4_obstack*);
-extern void	    m4_module_unload (m4 *, const char*, m4_obstack*);
+extern lt_dlhandle  m4_module_load     (m4 *, const char*, m4_obstack*);
+extern void	    m4_module_unload   (m4 *, const char*, m4_obstack*);
+extern void *	    m4_module_import   (m4 *, const char*, const char*,
+					m4_obstack*);
 
-extern const char  *m4_get_module_name		(lt_dlhandle);
-extern m4_builtin  *m4_get_module_builtin_table	(lt_dlhandle);
-extern m4_macro	   *m4_get_module_macro_table	(lt_dlhandle);
+extern const char * m4_get_module_name (lt_dlhandle);
 
 
 
@@ -207,10 +216,9 @@ extern void		m4_set_symbol_value_func  (m4_symbol_value *,
 
 /* --- BUILTIN MANAGEMENT --- */
 
-extern const m4_builtin *m4_builtin_find_by_name (
-				const m4_builtin *, const char *);
-extern const m4_builtin *m4_builtin_find_by_func (
-				const m4_builtin *, m4_builtin_func *);
+extern const m4_builtin *m4_builtin_find_by_name (lt_dlhandle, const char *);
+extern const m4_builtin *m4_builtin_find_by_func (lt_dlhandle,
+						  m4_builtin_func *);
 
 
 

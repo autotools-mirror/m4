@@ -169,7 +169,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
 #ifdef DEBUG_INCL
 
 static void
-include_dump (void)
+include_dump (m4 *context)
 {
   m4__search_path *incl;
 

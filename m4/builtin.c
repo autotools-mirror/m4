@@ -23,44 +23,50 @@
 #include "m4.h"
 #include "m4private.h"
 
-/* Find the builtin, which has NAME.  If BP argument is supplied
-   then search only in table BP.  */
+/* Find the builtin which has NAME.  If HANDLE argument is supplied
+   then search only in HANDLE's builtin table.  */
 const m4_builtin *
-m4_builtin_find_by_name (const m4_builtin *bp, const char *name)
+m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 {
-  lt_dlhandle	handle	= NULL;
+  lt_dlhandle cur = handle ? handle : lt_dlhandle_next (0);
 
-  while ((handle = lt_dlhandle_next (handle)))
+  do
     {
-      m4_builtin *builtin = m4_get_module_builtin_table (handle);
+      const m4_builtin *builtin =
+	(const m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
 
-      if (builtin && (bp == NULL || bp == builtin))
+      if (builtin)
 	{
 	  for (; builtin->name != NULL; builtin++)
-	    if (strcmp (builtin->name, name) == 0)
+	    if (!strcmp (builtin->name, name))
 	      return builtin;
 	}
     }
+  while (!handle && (cur = lt_dlhandle_next (cur)));
 
-  return NULL;
+  return 0;
 }
 
+/* Find the builtin which has FUNC.  If HANDLE argument is supplied
+   then search only in HANDLE's builtin table.  */
 const m4_builtin *
-m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
+m4_builtin_find_by_func (lt_dlhandle handle, m4_builtin_func *func)
 {
-  lt_dlhandle	handle	= NULL;
+  lt_dlhandle cur = handle ? handle : lt_dlhandle_next (0);
 
-  while ((handle = lt_dlhandle_next (handle)))
+  do
     {
-      m4_builtin *builtin = m4_get_module_builtin_table (handle);
+      const m4_builtin *builtin =
+	(const m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
 
-      if (builtin && (bp == NULL || bp == builtin))
+      if (builtin)
 	{
 	  for (; builtin->name != NULL; builtin++)
 	    if (builtin->func == func)
 	      return builtin;
 	}
     }
+  while (!handle && (cur = lt_dlhandle_next (cur)));
 
-  return NULL;
+  return 0;
 }
