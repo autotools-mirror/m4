@@ -25,7 +25,7 @@
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([M4_AC_FUNC_OBSTACK],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
-AC_CHECK_HEADER(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
+AC_CHECK_HEADERS(stddef.h string.h obstack.h, [], [], [AC_INCLUDES_DEFAULT])
 m4_pattern_allow([^m4_cv_func_obstack$])dnl
 m4_pattern_allow([^m4_obstack_h$])dnl
 
@@ -57,17 +57,18 @@ else
   # The system does not provide obstack.h, or the user has specified
   # to build without it.  Unfortunately we can't leave an obstack.h
   # file around anywhere in the include path if the system also
-  # provides an implementation: So we ship m4/gnu-obstack.h, and link
+  # provides an implementation: So we ship m4/obstack_.h, and link
   # it to m4/obstack.h here (to substitute the missing system supplied
   # version).  Hence, `#include <m4/obstack.h>' will work.
   INCLUDE_OBSTACK_H='#include <m4/obstack.h>'
-  AC_CONFIG_LINKS($m4_obstack_h:${top_srcdir}/m4/gnu-obstack.h)
+  AC_CONFIG_LINKS($m4_obstack_h:m4/obstack_.h)
 
   if test x"$ac_cv_header_obstack_h" != xyes; then
     OBSTACK_H=obstack.h
   fi
 
   # In the absence of a system implementation, we must compile our own:
+  AC_CHECK_HEADERS(stdlib.h, [], [], [AC_INCLUDES_DEFAULT])
   AC_LIBOBJ(obstack)
 
 fi

@@ -1,5 +1,14 @@
 2003-08-29  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/gnu-obstack.h: Updated from CVS gnulib.  For consistency with
+	the other gnulib imports, renamed to m4/obstack_.h.
+	* m4/obstack.c: Updated from CVS gnulib.
+	* m4/Makefile.am (EXTRA_HEADERS): Adjust.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Merge in additional
+	header tests from gnulib obstack module.  AC_CONFIG_LINKS knows
+	about vpath already, and $top_srcdir upsets CVS Automake, so the
+	$top_srcdir reference was removed.
+
 	* m4/system-h.in: For consistency with the gnulib imports, renamed
 	to m4/system_.h.
 	* m4/Makefile (EXTRA_HEADERS): Adjust.
