@@ -1085,7 +1085,7 @@
 
 2001-08-07  Akim Demaille  <akim@epita.fr>
 
-	* config/gnu-obstacks.m4: New.
+	* config/gnu-obstack.m4: New.
 
 2001-08-07  Akim Demaille  <akim@epita.fr>
 
