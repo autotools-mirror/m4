@@ -71,7 +71,7 @@ AC_MSG_CHECKING(for modules to preload)
   DLPREOPEN=
 
   AC_ARG_WITH([modules],
-    [AC_HELP_STRING([--with-modules=MODULES]
+    [AC_HELP_STRING([--with-modules=MODULES],
                     [preload MODULES @<:@default: $m4_default_preload@:>@])],
     [use_modules="$withval"],
     [use_modules="$m4_default_preload"])

@@ -1,3 +1,8 @@
+2001-10-07  Gary Vaughan  <gary@gnu.org>
+
+	* configure.ac (--with-modules): Forgot a comma in the
+	AC_HELP_STRING parameter list.
+
 2001-10-05  Gary Vaughan  <gary@gnu.org>
 
 	* bootstrap: Remove aclocal.m4t when it is no longer required.
