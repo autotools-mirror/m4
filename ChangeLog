@@ -1,5 +1,9 @@
 2003-06-26  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/module.c (m4_set_module_macro_table)
+	(m4_set_module_builtin_table): Declarations weren't changed when
+	definitions were renamed on 2003-06-19.
+
 	* m4/hash.c (m4_hash_resize): ifdefed out.  This function is
 	neither used nor particularly appropriate since it exposes the
 	internal workings of the hash module.  I haven't yet decided

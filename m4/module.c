@@ -90,8 +90,8 @@ static int	    module_remove  (m4 *context, lt_dlhandle handle,
 static void	    module_close   (m4 *context, lt_dlhandle handle,
 				    struct obstack *obs);
 
-static void m4_set_module_macro_table   (m4*, lt_dlhandle, const m4_macro*);
-static void m4_set_module_builtin_table (m4*, lt_dlhandle, const m4_builtin*);
+static void set_module_macro_table   (m4*, lt_dlhandle, const m4_macro*);
+static void set_module_builtin_table (m4*, lt_dlhandle, const m4_builtin*);
 
 static lt_dlcaller_id caller_id = 0;
 
