@@ -59,14 +59,14 @@
  * names to the expansion text.  Any macros defined in `m4_macro_table'
  * are installed into the M4 symbol table with m4_macro_table_install().
  *
- * Each time a module is loaded, the module function 
+ * Each time a module is loaded, the module function
  * "void m4_init_module (lt_dlhandle handle, struct obstack *obs)" is
  * called, if defined.  Any value stored in OBS by this function becomes
- * the expansion of the macro which called it.  Before M4 exits, all 
+ * the expansion of the macro which called it.  Before M4 exits, all
  * modules are unloaded and the function
  * "void m4_finish_module (lt_dlhandle handle, struct obstack *obs)" is
  * called, if defined.  It is safe to load the same module several times:
- * the init and finish functions will also be called multiple times in 
+ * the init and finish functions will also be called multiple times in
  * this case.
  *
  * To unload a module, use m4_module_unload(). which uses
@@ -169,7 +169,7 @@ void
 m4_module_init (void)
 {
   int errors = 0;
-  
+
   /* Do this only once!  If we already have a caller_id, then the
      module system has already been initialised.  */
   if (m4_caller_id)
@@ -205,7 +205,7 @@ m4_module_init (void)
 	  ++errors;
 	}
     }
-  
+
   if (!errors)
     errors = lt_dlsetsearchpath (MODULE_PATH);
 
@@ -294,7 +294,7 @@ m4_module_open (const char *name, struct obstack *obs)
   if (handle)
     {
       const lt_dlinfo  *info	= lt_dlgetinfo (handle);
-      
+
       if (info && (info->ref_count == 1))
 	{
 	  m4_module_data *data  = XMALLOC (m4_module_data, 1);
@@ -308,7 +308,7 @@ m4_module_open (const char *name, struct obstack *obs)
 	  if (stale)
 	    {
 	      xfree (stale);
-	  
+
 	      M4ERROR ((warning_status, 0,
 			_("Warning: overiding stale caller data in module `%s'"),
 			name));
@@ -344,7 +344,7 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
       M4_DEBUG_MESSAGE1("module %s: finish hook called", name);
 #endif /* DEBUG_MODULES */
     }
-      
+
   if (!lt_dlisresident (handle))
     {
       const lt_dlinfo  *info	= lt_dlgetinfo (handle);
@@ -377,7 +377,7 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
 		_("ERROR: cannot close module `%s': %s"),
 		name, m4_module_dlerror ()));
     }
-  
+
   xfree (name);
 }
 

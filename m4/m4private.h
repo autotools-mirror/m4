@@ -33,47 +33,58 @@ struct m4_module_data {
 };
 
 
-struct m4_token_data {
-  m4_token_data	*	next;
-  m4_token_data_t	type;
-  boolean		traced;
-  boolean		macro_args;
-  boolean		blind_no_args;
+/* m4_token.flags bit masks:  */
+
+#define TOKEN_MACRO_ARGS_BIT		(1 << 0)
+#define TOKEN_BLIND_ARGS_BIT		(1 << 1)
+
+
+struct m4_token {
+  m4_token *	next;
   lt_dlhandle		handle;
+  int			flags;
+
+  m4_data_t		type;
   union {
     char *		text;
     m4_builtin_func *	func;
   } u;
 };
 
-#define M4_TOKEN_DATA_NEXT(Td)		((Td)->next)
-#define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
-#define M4_TOKEN_TRACED(Td)		((Td)->traced)
-#define M4_TOKEN_MACRO_ARGS(Td)		((Td)->macro_args)
-#define M4_TOKEN_BLIND_NO_ARGS(Td)	((Td)->blind_no_args)
-#define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
-#define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.text)
-#define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.func)
+#define TOKEN_NEXT(T)		((T)->next)
+#define TOKEN_HANDLE(T) 	((T)->handle)
+#define TOKEN_FLAGS(T)		((T)->flags)
+#define TOKEN_TYPE(T)		((T)->type)
+#define TOKEN_TEXT(T)		((T)->u.text)
+#define TOKEN_FUNC(T)		((T)->u.func)
+
+#define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
+#define BIT_SET(flags, bit)	((flags) |= (bit))
+#define BIT_RESET(flags, bit)	((flags) &= ~(bit))
+
 
 /* Redefine the exported function to this faster
    macro based version for internal use by the m4 code. */
 #undef M4ARG
-#define M4ARG(i)	(argc > (i) ? M4_TOKEN_DATA_TEXT (argv[i]) : "")
+#define M4ARG(i)	(argc > (i) ? TOKEN_TEXT (argv[i]) : "")
+
 
 struct m4_symbol
 {
-  m4_token_data *data;
+  boolean	traced;
+  m4_token *	token;
 };
 
-#define M4_SYMBOL_DATA(S)	   ((S)->data)
-#define M4_SYMBOL_DATA_NEXT(S)	   (M4_TOKEN_DATA_NEXT (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_TYPE(S)	   (M4_TOKEN_DATA_TYPE (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_TRACED(S)	   (M4_TOKEN_TRACED (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_MACRO_ARGS(S)	   (M4_TOKEN_MACRO_ARGS (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_BLIND_NO_ARGS(S) (M4_TOKEN_BLIND_NO_ARGS (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_TEXT(S)	   (M4_TOKEN_DATA_TEXT (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_FUNC(S)	   (M4_TOKEN_DATA_FUNC (M4_SYMBOL_DATA(S)))
-#define M4_SYMBOL_HANDLE(S)	   (M4_TOKEN_DATA_HANDLE (M4_SYMBOL_DATA(S)))
+#define SYMBOL_TRACED(S)	((S)->traced)
+#define SYMBOL_TOKEN(S)		((S)->token)
+
+#define SYMBOL_NEXT(S)		(TOKEN_NEXT   (SYMBOL_TOKEN (S)))
+#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE (SYMBOL_TOKEN (S)))
+#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS  (SYMBOL_TOKEN (S)))
+#define SYMBOL_TYPE(S)		(TOKEN_TYPE   (SYMBOL_TOKEN (S)))
+#define SYMBOL_TEXT(S)		(TOKEN_TEXT   (SYMBOL_TOKEN (S)))
+#define SYMBOL_FUNC(S)		(TOKEN_FUNC   (SYMBOL_TOKEN (S)))
+
 
 
 /* Debugging the memory allocator.  */

@@ -50,10 +50,10 @@
 /* The main formatting function.  Output is placed on the obstack OBS, the
    first argument in ARGV is the formatting string, and the rest is
    arguments for the string.  */
-void format (struct obstack *obs, int argc, m4_token_data **argv);
+void format (struct obstack *obs, int argc, m4_token **argv);
 
 void
-format (struct obstack *obs, int argc, m4_token_data **argv)
+format (struct obstack *obs, int argc, m4_token **argv)
 {
   char *fmt;			/* format control string */
   const char *fstart;		/* beginning of current format spec */

@@ -119,7 +119,10 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
-static void substitute (struct obstack *obs, const char *victim, const char *repl, struct re_registers *regs);
+static void substitute (struct obstack *obs, const char *victim,
+			const char *repl, struct re_registers *regs);
+static void m4_patsubst_do (struct obstack *obs, int argc, m4_token **argv,
+			    int syntax);
 
 
 /* The builtin "builtin" allows calls to builtin macros, even if their
@@ -310,7 +313,7 @@ m4_regexp_compile (const char *caller,
  **/
 
 static void
-m4_regexp_do (struct obstack *obs, int argc, m4_token_data **argv,
+m4_regexp_do (struct obstack *obs, int argc, m4_token **argv,
 	      int syntax)
 {
   const char *victim;		/* first argument */
@@ -377,7 +380,8 @@ M4BUILTIN_HANDLER (eregexp)
 /**
  * patsubst(STRING, REGEXP, [REPLACEMENT])
  **/
-m4_patsubst_do (struct obstack *obs, int argc, m4_token_data **argv,
+static void
+m4_patsubst_do (struct obstack *obs, int argc, m4_token **argv,
 		int syntax)
 {
   const char *victim;		/* first argument */
@@ -498,7 +502,7 @@ M4BUILTIN_HANDLER (syncoutput)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (   M4ARG (1)[0] == '0'

@@ -794,10 +794,7 @@ AT_DATA([[expout]],
 
 AT_DATA([[experr]],
 [[m4trace: -1- define(`my_define', <define>)
-m4trace: -1- my_define(`foo', `bar')
-m4trace: -1- my_define(`define', <define>)
 m4trace: -1- define(`my_define', <define>)
-m4trace: -1- my_define(`foo', `bar')
 m4trace: -1- define(`foo', `bar')
 ]])
 
@@ -859,10 +856,7 @@ AT_DATA([[expout]],
 
 AT_DATA([[experr]],
 [[m4trace: -1- define(`my_define', <define>)
-m4trace: -1- my_define(`foo', `bar')
-m4trace: -1- my_define(`define', <define>)
 m4trace: -1- define(`my_define', <define>)
-m4trace: -1- my_define(`foo', `bar')
 m4trace: -1- define(`foo', `bar')
 ]])
 

@@ -331,3 +331,43 @@ Test module unloaded.
 AT_CHECK_M4([-m load input.m4], 0, expout, experr)
 
 AT_CLEANUP
+
+
+## -------------------- ##
+## trace module symbols ##
+## -------------------- ##
+
+# The trace bit should not be lost if a builtin is unloaded from
+# memory and then redefined by a subsequent load.
+
+AT_SETUP([modules: trace])
+
+AT_DATA([[input.m4]],
+[[test
+load(`shadow')
+test
+unload(`shadow')
+test
+load(`shadow')
+test
+]])
+
+AT_DATA([[expout]],
+[[test
+Shadow module loaded.
+Shadow::test called.
+
+test
+Shadow module loaded.
+Shadow::test called.
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- test -> `Shadow::`test' called.'
+m4trace: -1- test -> `Shadow::`test' called.'
+]])
+
+
+AT_CHECK_M4([-m load -t test input.m4], 0, expout, experr)
+
+AT_CLEANUP

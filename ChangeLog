@@ -1,4 +1,44 @@
-2001-10-07  Gary Vaughan  <gary@gnu.org>
+2001-10-10  Gary V. Vaughan  <gary@gnu.org>
+
+	The trace semantics now attach the trace bit to a symbol name.
+	For as long as a traceon(`foo') is active, calls to foo will be
+	traced regardless of intervening undefines or module unloads.
+	Fixed the flag propogation issues differently to the fixes
+	reverted with the last attempt at nailing down trace:
+
+	* m4/m4private.h:  This file is not visible outside of the m4
+	source tree, so I removed all the `M4_' and `m4_' prefixes to save
+	on typing.  Updated all clients.
+	(m4_token): New typedef contains the fields that need to be passed
+	around with the low level tokeniser.
+	(m4_token_data):  Removed.
+	(m4_symbol): Now contains the traced flag again.
+	* m4/symtab.c:  Rewritten again.  Now we don't remove symbols with
+	the trace bit set.  This change is contained entirely within this
+	module and doesn't leak out into the callers.  Updated all
+	clients.
+	(m4_symbol_builtin, m4_symbol_macro):  Adjusted to make use of the
+	new fields in m4_token.  Updated all clients.
+	* m4/builtin.c (m4_builtin_pushdef):  Needs a flags argument so
+	that `groks_macro_args' and `blind_if_no_args' flags are retained
+	when defn() results are passed around in m4 code.  Updated all
+	callers.
+	(m4_builtin_define): Ditto.
+	(m4_macro_pushdef, m4_macro_define): Ditto.
+	* m4/input.c (struct input_block): Add a flags field to facilitate
+	the above.
+	(m4_push_macro):  ...use it.
+	(init_macro_token):  Retrieve it.
+	(m4_next_token): Initialise it.
+	* m4/macro.c (expand_argument):  Copy it.
+	* m4/m4module.h: Adjust.
+	* tests/builtins.at:  Adjust the expected output of the trace
+	tests to reflect the change in semantics.
+	* tests/modules.at (modules: trace):  Check that unloading a
+	module which supplies a traced symbol definition doesn't lose te
+	trace bit.
+
+2001-10-07  Gary V. Vaughan  <gary@gnu.org>
 
 	* modules/gnu.c (m4_macro_table): Display the timetamp when
 	expanding __m4_version__.
@@ -6,7 +46,7 @@
 	* configure.ac (--with-modules): Forgot a comma in the
 	AC_HELP_STRING parameter list.
 
-2001-10-05  Gary Vaughan  <gary@gnu.org>
+2001-10-05  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap: Remove aclocal.m4t when it is no longer required.
 
@@ -23,7 +63,7 @@
 	* config/gmp.m4 (_AC_LIB_GMP): In order to read the content of a
 	variable in shell scripts, one uses `$'...
 
-2001-10-04  Gary Vaughan  <gary@gnu.org>
+2001-10-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.ac: `rm -f $m4_getopt_h' was lost.
 

@@ -142,7 +142,7 @@ static	int   file_peek			(void);
 static	int   file_read			(void);
 static	void  file_unget		(int ch);
 static	void  file_clean		(void);
-static	void  init_macro_token		(m4_token_data *td);
+static	void  init_macro_token		(m4_token *td);
 static	int   macro_peek		(void);
 static	int   macro_read		(void);
 static	int   match_input		(const unsigned char *s);
@@ -197,6 +197,7 @@ struct input_block
 	{
 	  m4_builtin_func *func;/* pointer to macros function */
 	  lt_dlhandle handle;	/* originating module */
+	  int flags;		/* flags associated with the builtin */
 	  boolean traced;	/* TRUE iff builtin is traced */
 	  boolean read;		/* TRUE iff block has been read */
 	}
@@ -389,8 +390,7 @@ static struct input_funcs macro_funcs = {
 };
 
 void
-m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
-	       boolean traced)
+m4_push_macro (m4_builtin_func *func, lt_dlhandle handle, int flags)
 {
   input_block *i;
 
@@ -404,10 +404,10 @@ m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
 				     sizeof (struct input_block));
   i->funcs = &macro_funcs;
 
-  i->u.u_m.func = func;
-  i->u.u_m.handle = handle;
-  i->u.u_m.traced = traced;
-  i->u.u_m.read = FALSE;
+  i->u.u_m.func		= func;
+  i->u.u_m.handle	= handle;
+  i->u.u_m.flags	= flags;
+  i->u.u_m.read		= FALSE;
 
   i->prev = isp;
   isp = i;
@@ -594,7 +594,7 @@ m4_pop_wrapup (void)
 /* When a MACRO token is seen, next_token () uses init_macro_token
    to retrieve the value of the function pointer.  */
 static void
-init_macro_token (m4_token_data *td)
+init_macro_token (m4_token *td)
 {
   if (isp->funcs->read_func != macro_read)
     {
@@ -603,10 +603,10 @@ init_macro_token (m4_token_data *td)
       abort ();
     }
 
-  M4_TOKEN_DATA_TYPE (td) = M4_TOKEN_FUNC;
-  M4_TOKEN_DATA_FUNC (td) = isp->u.u_m.func;
-  M4_TOKEN_DATA_HANDLE (td) = isp->u.u_m.handle;
-  M4_TOKEN_TRACED (td) = isp->u.u_m.traced;
+  TOKEN_TYPE (td)	= M4_TOKEN_FUNC;
+  TOKEN_FUNC (td)	= isp->u.u_m.func;
+  TOKEN_HANDLE (td)	= isp->u.u_m.handle;
+  TOKEN_FLAGS (td)	= isp->u.u_m.flags;
 }
 
 
@@ -1009,7 +1009,7 @@ m4_set_syntax (char key, const unsigned char *chars)
    The storage pointed to by the fields in TD is therefore subject to
    change the next time next_token () is called.	 */
 m4_token_t
-m4_next_token (m4_token_data *td)
+m4_next_token (m4_token *td)
 {
   int ch;
   int quote_level;
@@ -1200,8 +1200,10 @@ m4_next_token (m4_token_data *td)
 
   obstack_1grow (&token_stack, '\0');
 
-  M4_TOKEN_DATA_TYPE (td) = M4_TOKEN_TEXT;
-  M4_TOKEN_DATA_TEXT (td) = obstack_finish (&token_stack);
+  TOKEN_TYPE (td)	= M4_TOKEN_TEXT;
+  TOKEN_TEXT (td)	= obstack_finish (&token_stack);
+  TOKEN_HANDLE (td)	= NULL;
+  TOKEN_FLAGS (td)	= 0x0;
 
 #ifdef DEBUG_INPUT
   print_token("next_token", type, td);
@@ -1216,37 +1218,37 @@ m4_next_token (m4_token_data *td)
 static	void  lex_debug	(void);
 
 int
-m4_print_token (const char *s, m4_token_t t, m4_token_data *td)
+m4_print_token (const char *s, m4_token_t t, m4_token *td)
 {
   fprintf (stderr, "%s: ", s);
   switch (t)
     {				/* TOKSW */
     case M4_TOKEN_SIMPLE:
-      fprintf (stderr, "char\t\"%s\"\n", M4_TOKEN_DATA_TEXT (td));
+      fprintf (stderr,	"char\t\"%s\"\n",	TOKEN_TEXT (td));
       break;
 
     case M4_TOKEN_WORD:
-      fprintf (stderr, "word\t\"%s\"\n", M4_TOKEN_DATA_TEXT (td));
+      fprintf (stderr,	"word\t\"%s\"\n",	TOKEN_TEXT (td));
       break;
 
     case M4_TOKEN_STRING:
-      fprintf (stderr, "string\t\"%s\"\n", M4_TOKEN_DATA_TEXT (td));
+      fprintf (stderr,	"string\t\"%s\"\n",	TOKEN_TEXT (td));
       break;
 
     case M4_TOKEN_SPACE:
-      fprintf (stderr, "space\t\"%s\"\n", M4_TOKEN_DATA_TEXT (td));
+      fprintf (stderr,	"space\t\"%s\"\n",	TOKEN_TEXT (td));
       break;
 
     case M4_TOKEN_MACDEF:
-      fprintf (stderr, "macro 0x%x\n", (int)M4_TOKEN_DATA_FUNC (td));
+      fprintf (stderr,	"macro 0x%x\n", 	(int) TOKEN_FUNC (td));
       break;
 
     case M4_TOKEN_EOF:
-      fprintf (stderr, "eof\n");
+      fprintf (stderr,	"eof\n");
       break;
 
     case M4_TOKEN_NONE:
-      fprintf (stderr, "none\n");
+      fprintf (stderr,	"none\n");
       break;
     }
   return 0;
@@ -1256,7 +1258,7 @@ static void
 lex_debug (void)
 {
   m4_token_t t;
-  m4_token_data td;
+  m4_token td;
 
   while ((t = next_token (&td)) != NULL)
     print_token ("lex", t, &td);

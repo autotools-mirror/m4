@@ -130,22 +130,22 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
     {
       const char   *symbol_name	= (const char *) m4_hash_iterator_key (place);
       m4_symbol	   *symbol	= m4_hash_iterator_value (place);
-      lt_dlhandle   handle	= M4_SYMBOL_HANDLE (symbol);
+      lt_dlhandle   handle	= SYMBOL_HANDLE (symbol);
       const char   *module_name	= handle ? m4_module_name (handle) : NULL;
       const m4_builtin *bp;
 
-      switch (M4_SYMBOL_TYPE (symbol))
+      switch (SYMBOL_TYPE (symbol))
 	{
 	case M4_TOKEN_TEXT:
 	  fprintf (file, "T%lu,%lu",
 		   (unsigned long) strlen (symbol_name),
-		   (unsigned long) strlen (M4_SYMBOL_TEXT (symbol)));
+		   (unsigned long) strlen (SYMBOL_TEXT (symbol)));
 	  if (handle)
 	    fprintf (file, ",%lu", (unsigned long) strlen (module_name));
 	  fputc ('\n', file);
 
 	  fputs (symbol_name, file);
-	  fputs (M4_SYMBOL_TEXT (symbol), file);
+	  fputs (SYMBOL_TEXT (symbol), file);
 	  if (handle)
 	    fputs (module_name, file);
 	  fputc ('\n', file);
@@ -153,8 +153,8 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 
 	case M4_TOKEN_FUNC:
 	  bp = m4_builtin_find_by_func
-	    	(m4_module_builtins (M4_SYMBOL_HANDLE(symbol)),
-		 M4_SYMBOL_FUNC (symbol));
+	    	(m4_module_builtins (SYMBOL_HANDLE (symbol)),
+		 SYMBOL_FUNC (symbol));
 
 	  if (bp == NULL)
 	    {
@@ -472,7 +472,16 @@ reload_frozen_state (const char *name)
 	    bp = m4_builtin_find_by_name (bt, string[1]);
 
 	  if (bp)
-	    m4_builtin_pushdef (string[0], handle, bp);
+	    {
+	      int flags = 0;
+
+	      if (bp->groks_macro_args)
+		BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
+	      if (bp->blind_if_no_args)
+		BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
+
+	      m4_builtin_pushdef (string[0], handle, bp->func, flags);
+	    }
 	  else
 	    M4ERROR ((warning_status, 0,
 		      _("`%s' from frozen file not found in builtin table!"),
@@ -647,7 +656,7 @@ reload_frozen_state (const char *name)
 	      if (strcmp (m4_module_name (handle), string[2]) == 0)
 		break;
 
-	  m4_macro_pushdef (string[0], handle, string[1]);
+	  m4_macro_pushdef (string[0], handle, string[1], 0);
 	}
 	break;
 

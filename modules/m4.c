@@ -92,7 +92,7 @@ typedef unsigned long int unumber;
 #endif
 
 
-static void	include		(int argc, m4_token_data **argv,
+static void	include		(int argc, m4_token **argv,
 				 boolean silent);
 static int	set_trace	(const char *name, m4_symbol *symbol,
 				 void *data);
@@ -151,42 +151,25 @@ M4BUILTIN_HANDLER (define)
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
 
-  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
     {
-      m4_macro_define (M4ARG (1), NULL, "");
+      m4_macro_define (M4ARG (1), NULL, "", 0);
       return;
     }
 
-  switch (M4_TOKEN_DATA_TYPE (argv[2]))
+  switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_define (M4ARG (1), NULL, M4ARG (2));
+      m4_macro_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
+		       TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]));
       return;
 
     case M4_TOKEN_FUNC:
-      {
-	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
-	const m4_builtin  *builtin = 0;
-	m4_symbol *symbol = 0;
-
-	/* If we find a TOKEN_FUNC with no defining module, then
-	   somewhere along the way we have lost the module handle.  */
-	assert (handle);
-
-	/* FIXME: Why go to all this effort just to find the macro_args
-	   and blind_no_args flags?  May as well carry these around with
-	   the traced flag, and save a _lot_ of lookup time.  */
-	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
-					   M4_TOKEN_DATA_FUNC (argv[2]));
-
-	symbol = m4_builtin_define (M4ARG (1), handle, builtin);
-
-	/* Be sure to propogate the flags from the TOKEN_FUNC.  */
-	M4_SYMBOL_TRACED (symbol) = M4_TOKEN_TRACED (argv[2]);
-      }
+      m4_builtin_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
+			 TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]));
       return;
     }
 
@@ -211,35 +194,25 @@ M4BUILTIN_HANDLER (pushdef)
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
 
-  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
     {
-      m4_macro_pushdef (M4ARG (1), NULL, "");
+      m4_macro_pushdef (M4ARG (1), NULL, "", 0);
       return;
     }
 
-  switch (M4_TOKEN_DATA_TYPE (argv[2]))
+  switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_pushdef (M4ARG (1), NULL, M4ARG (2));
+      m4_macro_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
+			TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]));
       return;
 
     case M4_TOKEN_FUNC:
-      {
-	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
-	const m4_builtin  *builtin = 0;
-
-	/* If we find a TOKEN_FUNC with no defining module, then
-	   somewhere along the way we have lost the module handle.  */
-	assert (handle);
-
-	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
-					   M4_TOKEN_DATA_FUNC (argv[2]));
-
-	m4_builtin_pushdef (M4ARG (1), handle, builtin);
-      }
+      m4_builtin_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
+			  TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]));
       return;
     }
 
@@ -341,21 +314,21 @@ M4BUILTIN_HANDLER (dumpdef)
       m4_symbol *symbol = m4_symbol_lookup (data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
-      assert (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT
-	      || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
-	      || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_VOID);
-      switch (M4_SYMBOL_TYPE (symbol))
+      assert (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT
+	      || SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
+	      || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID);
+      switch (SYMBOL_TYPE (symbol))
 	{
 	case M4_TOKEN_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
-		     lquote.string, M4_SYMBOL_TEXT (symbol), rquote.string);
+		     lquote.string, SYMBOL_TEXT (symbol), rquote.string);
 	  else
-	    fprintf (stderr, "%s\n", M4_SYMBOL_TEXT (symbol));
+	    fprintf (stderr, "%s\n", SYMBOL_TEXT (symbol));
 	  break;
 
 	case M4_TOKEN_FUNC:
-	  bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (symbol));
+	  bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (symbol));
 	  assert (bp);
 	  fprintf (stderr, "<%s>\n", bp->name);
 	  break;
@@ -385,15 +358,15 @@ M4BUILTIN_HANDLER (defn)
       return;
     }
 
-  switch (M4_SYMBOL_TYPE (symbol))
+  switch (SYMBOL_TYPE (symbol))
     {
     case M4_TOKEN_TEXT:
-      m4_shipout_string(obs, M4_SYMBOL_TEXT (symbol), 0, TRUE);
+      m4_shipout_string(obs, SYMBOL_TEXT (symbol), 0, TRUE);
       return;
 
     case M4_TOKEN_FUNC:
-      m4_push_macro (M4_SYMBOL_FUNC (symbol), M4_SYMBOL_HANDLE (symbol),
-		     M4_SYMBOL_TRACED (symbol));
+      m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_HANDLE (symbol),
+		     SYMBOL_FLAGS (symbol));
       return;
 
     case M4_TOKEN_VOID:
@@ -561,7 +534,7 @@ M4BUILTIN_HANDLER (changecom)
 /* Generic include function.  Include the file given by the first argument,
    if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
 static void
-include (int argc, m4_token_data **argv, boolean silent)
+include (int argc, m4_token **argv, boolean silent)
 {
   FILE *fp;
   char *name = NULL;
@@ -660,7 +633,7 @@ M4BUILTIN_HANDLER (m4wrap)
 static int
 set_trace (const char *name, m4_symbol *symbol, void *data)
 {
-  M4_SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
+  SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
   return 0;
 }
 
