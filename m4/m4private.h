@@ -36,6 +36,7 @@ struct m4_module_data {
 struct m4_token_data {
   m4_token_data	*	next;
   m4_token_data_t	type;
+  boolean		traced;
   boolean		macro_args;
   boolean		blind_no_args;
   lt_dlhandle		handle;
@@ -47,6 +48,7 @@ struct m4_token_data {
 
 #define M4_TOKEN_DATA_NEXT(Td)		((Td)->next)
 #define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
+#define M4_TOKEN_TRACED(Td)		((Td)->traced)
 #define M4_TOKEN_MACRO_ARGS(Td)		((Td)->macro_args)
 #define M4_TOKEN_BLIND_NO_ARGS(Td)	((Td)->blind_no_args)
 #define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
@@ -60,14 +62,13 @@ struct m4_token_data {
 
 struct m4_symbol
 {
-  boolean traced;
   m4_token_data *data;
 };
 
-#define M4_SYMBOL_TRACED(S)	   ((S)->traced)
 #define M4_SYMBOL_DATA(S)	   ((S)->data)
 #define M4_SYMBOL_DATA_NEXT(S)	   (M4_TOKEN_DATA_NEXT (M4_SYMBOL_DATA(S)))
 #define M4_SYMBOL_TYPE(S)	   (M4_TOKEN_DATA_TYPE (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TRACED(S)	   (M4_TOKEN_TRACED (M4_SYMBOL_DATA(S)))
 #define M4_SYMBOL_MACRO_ARGS(S)	   (M4_TOKEN_MACRO_ARGS (M4_SYMBOL_DATA(S)))
 #define M4_SYMBOL_BLIND_NO_ARGS(S) (M4_TOKEN_BLIND_NO_ARGS (M4_SYMBOL_DATA(S)))
 #define M4_SYMBOL_TEXT(S)	   (M4_TOKEN_DATA_TEXT (M4_SYMBOL_DATA(S)))

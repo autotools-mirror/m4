@@ -150,15 +150,22 @@ M4BUILTIN_HANDLER (define)
       {
 	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
 	const m4_builtin  *builtin = 0;
+	m4_symbol *symbol = 0;
 
 	/* If we find a TOKEN_FUNC with no defining module, then
 	   somewhere along the way we have lost the module handle.  */
 	assert (handle);
 
+	/* FIXME: Why go to all this effort just to find the macro_args
+	   and blind_no_args flags?  May as well carry these around with
+	   the traced flag, and save a _lot_ of lookup time.  */
 	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
 					   M4_TOKEN_DATA_FUNC (argv[2]));
 
-	m4_builtin_define (M4ARG (1), handle, builtin);
+	symbol = m4_builtin_define (M4ARG (1), handle, builtin);
+
+	/* Be sure to propogate the flags from the TOKEN_FUNC.  */
+	M4_SYMBOL_TRACED (symbol) = M4_TOKEN_TRACED (argv[2]);
       }
       return;
     }

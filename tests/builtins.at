@@ -736,6 +736,142 @@ AT_CLEANUP
 
 
 
+## ------ ##
+## trace2 ##
+## ------ ##
+
+AT_SETUP([trace2])
+
+AT_DATA([[trace2.m4]],
+[[traceon(`define')
+debugmode(`aeq')
+
+# copy the `define' builtin definition to another symbol
+define(`my_define', defn(`define'))
+
+# delete the original
+undefine(`define')
+
+# Does it work?
+my_define(`foo', `bar')
+
+# Use the new definition to redefine the original symbol
+my_define(`define', defn(`my_define'))
+
+# Torture the flag propogation
+undefine(`my_define')
+define(`my_define', defn(`define'))
+
+# There are now 2 symbols pointing to the same builtin function
+my_define(`foo', `bar')
+define(`foo', `bar')
+]])
+
+AT_DATA([[expout]],
+[[
+
+
+# copy the `define' builtin definition to another symbol
+
+
+# delete the original
+
+
+# Does it work?
+
+
+# Use the new definition to redefine the original symbol
+
+
+# Torture the flag propogation
+
+
+
+# There are now 2 symbols pointing to the same builtin function
+
+
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- define(`my_define', <define>)
+m4trace: -1- my_define(`foo', `bar')
+m4trace: -1- my_define(`define', <define>)
+m4trace: -1- define(`my_define', <define>)
+m4trace: -1- my_define(`foo', `bar')
+m4trace: -1- define(`foo', `bar')
+]])
+
+AT_CHECK_M4([trace2.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## trace3 ##
+## ------ ##
+
+AT_SETUP([trace3])
+
+AT_DATA([[trace3.m4]],
+[[# copy the `define' builtin definition to another symbol
+define(`my_define', defn(`define'))
+
+# delete the original
+undefine(`define')
+
+# Does it work?
+my_define(`foo', `bar')
+
+# Use the new definition to redefine the original symbol
+my_define(`define', defn(`my_define'))
+
+# Torture the flag propogation
+undefine(`my_define')
+define(`my_define', defn(`define'))
+
+# There are now 2 symbols pointing to the same builtin function
+my_define(`foo', `bar')
+define(`foo', `bar')
+]])
+
+AT_DATA([[expout]],
+[[# copy the `define' builtin definition to another symbol
+
+
+# delete the original
+
+
+# Does it work?
+
+
+# Use the new definition to redefine the original symbol
+
+
+# Torture the flag propogation
+
+
+
+# There are now 2 symbols pointing to the same builtin function
+
+
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- define(`my_define', <define>)
+m4trace: -1- my_define(`foo', `bar')
+m4trace: -1- my_define(`define', <define>)
+m4trace: -1- define(`my_define', <define>)
+m4trace: -1- my_define(`foo', `bar')
+m4trace: -1- define(`foo', `bar')
+]])
+
+AT_CHECK_M4([-t define -daeq trace3.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
 ## -------- ##
 ## translit ##
 ## -------- ##

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-07 10:50+0200\n"
+"POT-Creation-Date: 2001-09-12 09:16+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -181,25 +181,25 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Рекурсивная push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный вызов init_macro_token ()"
 
-#: m4/input.c:639
+#: m4/input.c:638
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в next_char ()"
 
-#: m4/input.c:673
+#: m4/input.c:672
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
 
-#: m4/input.c:763
+#: m4/input.c:762
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: m4/input.c:971
+#: m4/input.c:970
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Неопределенный синтаксический код %c"
 
-#: m4/input.c:1098 m4/input.c:1125
+#: m4/input.c:1097 m4/input.c:1124
 msgid "ERROR: EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
 
@@ -211,15 +211,15 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в expand_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "ОШИБКА: Конец файла в списке аргументов"
 
-#: m4/macro.c:177
+#: m4/macro.c:176
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в expand_argument ()"
 
-#: m4/macro.c:249
+#: m4/macro.c:248
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в call_macro ()"
 
-#: m4/macro.c:275
+#: m4/macro.c:274
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -311,7 +311,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
-#: m4/symtab.c:339
+#: m4/symtab.c:346
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
@@ -360,23 +360,18 @@ msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ОШИБКА: модуль `%s' не найден"
 
-#: modules/m4.c:173
-#, fuzzy
-msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
-msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в define_macro ()"
-
-#: modules/m4.c:191 modules/m4.c:207 modules/m4.c:333 modules/m4.c:643
-#: modules/m4.c:663
+#: modules/m4.c:177 modules/m4.c:229 modules/m4.c:357 modules/m4.c:667
+#: modules/m4.c:687
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Имя %s неопределено"
 
-#: modules/m4.c:463
+#: modules/m4.c:487
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: modules/m4.c:535 src/freeze.c:385
+#: modules/m4.c:559 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
@@ -635,6 +630,10 @@ msgstr ""
 #: src/stackovf.c:203
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ". Проверка на возможную бесконечную рекурсию.\n"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
+#~ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в define_macro ()"
 
 #~ msgid " (options:"
 #~ msgstr " (ключи:"

@@ -1,3 +1,18 @@
+2001-09-18  Gary V. Vaughan  <gary@gnu.org>
+
+	The `traced' flag needs to be attached to the definition of a
+	symbol rather than the current symbol containing the definition.
+	Implementing this showed up some long standing post 1.4 bugs in
+	flag propogation which I also fixed.
+
+	* m4/m4private.h (struct m4_symbol): Remove the traced flag.
+	(struct m4_token_data): And add it back in here.
+	* m4/input.c (init_macro_token): Propogate the traced flag
+	correctly.
+	* m4/macro.c (expand_argument): Ditto.
+	* tests/builtins.at (trace2, trace3): New tests based on Akim's
+	sadistic email ;-)
+
 2001-09-08  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4private.h (struct m4_token_data): Simplified by removing
