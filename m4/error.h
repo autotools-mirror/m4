@@ -1,5 +1,5 @@
 /* Declaration for error-reporting function
-   Copyright (C) 1995-1997, 2000 Free Software Foundation, Inc.
+   Copyright 1995-1997, 2000 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.  Its master source is NOT part of
    the C library, however.  The master source lives in /gd/gnu/lib.
@@ -21,8 +21,8 @@
 
 /* Modified for GNU m4 by Gary V. Vaughan <gary@gnu.org> */
 
-#ifndef _ERROR_H
-#define _ERROR_H 1
+#ifndef M4_ERROR_H
+#define M4_ERROR_H 1
 
 #include <m4/system.h>
 
@@ -74,5 +74,5 @@ M4_SCOPE int error_one_per_line;
 
 END_C_DECLS
 
-#endif /* !_ERROR_H */
+#endif /* !M4_ERROR_H */
 

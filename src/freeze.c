@@ -1,32 +1,41 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-  
+   the Free Software Foundation; either version 2 of the License, or 
+   (at your option) any later version.
+ 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+ 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307  USA
 */
 
 /* This module handles frozen files.  */
 
+#include "m4.h"
 #include "m4private.h"
 #include "m4/obstack.h"
+
+static	int   decode_char	    M4_PARAMS((FILE *in));
+static	void  issue_expect_message  M4_PARAMS((int expected));
+static	int   produce_char_dump     M4_PARAMS((char *buf, int ch));
+static	void  produce_syntax_dump   M4_PARAMS((FILE *file, char ch, int mask));
 
 /*------------------------------------------------.
 | Produce a frozen state to the given file NAME.  |
 `------------------------------------------------*/
 
-int
-produce_char_dump (char *buf, int ch)
+static int
+produce_char_dump (buf, ch)
+     char *buf;
+     int ch;
 {
   char *p = buf;
   int digit;
@@ -66,11 +75,14 @@ produce_char_dump (char *buf, int ch)
 
 #define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
 
-void
-produce_syntax_dump (FILE *file, char ch, int mask)
+static void
+produce_syntax_dump (file, ch, mask)
+     FILE *file;
+     char ch;
+     int mask;
 {
   char buf[1+ MAX_CHAR_LENGTH * sizeof (m4_syntax_table)];
-  int code = syntax_code (ch);
+  int code = m4_syntax_code (ch);
   int count = 0;
   int offset = 0;
   int i;
@@ -94,12 +106,13 @@ produce_syntax_dump (FILE *file, char ch, int mask)
 }
   
 void
-produce_frozen_state (const char *name)
+produce_frozen_state (name)
+     const char *name;
 {
   FILE *file;
   int h;
-  symbol *sym;
-  const struct m4_builtin *bp;
+  m4_symbol *symbol;
+  const m4_builtin *bp;
 
   if (file = fopen (name, "w"), !file)
     {
@@ -115,26 +128,26 @@ produce_frozen_state (const char *name)
 
   /* Dump quote delimiters.  */
 
-  if (strcmp (m4_lquote.string, M4_DEF_LQUOTE)
-      || strcmp (m4_rquote.string, M4_DEF_RQUOTE))
+  if (strcmp (lquote.string, DEF_LQUOTE)
+      || strcmp (rquote.string, DEF_RQUOTE))
     {
       fprintf (file, "Q%lu,%lu\n",
-	       (unsigned long) m4_lquote.length,
-	       (unsigned long) m4_rquote.length);
-      fputs (m4_lquote.string, file);
-      fputs (m4_rquote.string, file);
+	       (unsigned long) lquote.length,
+	       (unsigned long) rquote.length);
+      fputs (lquote.string, file);
+      fputs (rquote.string, file);
       fputc ('\n', file);
     }
 
   /* Dump comment delimiters.  */
 
-  if (strcmp (m4_bcomm.string, M4_DEF_BCOMM) || strcmp (m4_ecomm.string, M4_DEF_ECOMM))
+  if (strcmp (bcomm.string, DEF_BCOMM) || strcmp (ecomm.string, DEF_ECOMM))
     {
       fprintf (file, "C%lu,%lu\n",
-	       (unsigned long) m4_bcomm.length,
-	       (unsigned long) m4_ecomm.length);
-      fputs (m4_bcomm.string, file);
-      fputs (m4_ecomm.string, file);
+	       (unsigned long) bcomm.length,
+	       (unsigned long) ecomm.length);
+      fputs (bcomm.string, file);
+      fputs (ecomm.string, file);
       fputc ('\n', file);
     }
 
@@ -163,8 +176,8 @@ produce_frozen_state (const char *name)
   {
     m4_module *module;
 
-    modules = list_reverse (modules);
-    for (module = (m4_module *) modules;
+    m4_modules = list_reverse (m4_modules);
+    for (module = (m4_module *) m4_modules;
 	 module; module = (m4_module *) LIST_NEXT (module))
       {
 	fprintf (file, "M%lu\n",
@@ -172,7 +185,7 @@ produce_frozen_state (const char *name)
 	fputs (module->modname, file);
 	fputc ('\n', file);
       }
-    modules = list_reverse (modules);
+    m4_modules = list_reverse (m4_modules);
   }
 #endif
 
@@ -180,33 +193,28 @@ produce_frozen_state (const char *name)
 
   for (h = 0; h < hash_table_size; h++)
     {
-#if WITH_MODULES
-      m4_module **pmodule;
-#endif
       const char *modname = NULL;
 
       /* Process all entries in one bucket, from the last to the first.
 	 This order ensures that, at reload time, pushdef's will be
 	 executed with the oldest definitions first.  */
 
-      symtab[h] = (symbol *) list_reverse ((List *) symtab[h]);
-      for (sym = symtab[h]; sym; sym = SYMBOL_NEXT (sym))
+      m4_symtab[h] = (m4_symbol *) list_reverse ((List *) m4_symtab[h]);
+      for (symbol = m4_symtab[h]; symbol; symbol = SYMBOL_NEXT (symbol))
 	{
-	  switch (SYMBOL_TYPE (sym))
+	  switch (SYMBOL_TYPE (symbol))
 	    {
 	    case M4_TOKEN_TEXT:
 	      fprintf (file, "T%lu,%lu\n",
-		       (unsigned long) strlen (SYMBOL_NAME (sym)),
-		       (unsigned long) strlen (SYMBOL_TEXT (sym)));
-	      fputs (SYMBOL_NAME (sym), file);
-	      fputs (SYMBOL_TEXT (sym), file);
+		       (unsigned long) strlen (SYMBOL_NAME (symbol)),
+		       (unsigned long) strlen (SYMBOL_TEXT (symbol)));
+	      fputs (SYMBOL_NAME (symbol), file);
+	      fputs (SYMBOL_TEXT (symbol), file);
 	      fputc ('\n', file);
 	      break;
 
 	    case M4_TOKEN_FUNC:
-	      bp = (struct m4_builtin *) list_find (builtin_tables,
-					(VOID *) SYMBOL_FUNC (sym),
-					builtin_table_func_find);
+	      bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (symbol));
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, _("\
@@ -214,16 +222,15 @@ INTERNAL ERROR: Builtin not found in builtin table!")));
 		  abort ();
 		}
 	      fprintf (file, "F%lu",
-		       (unsigned long) strlen (SYMBOL_NAME (sym)));
+		       (unsigned long) strlen (SYMBOL_NAME (symbol)));
 		
 #ifdef WITH_MODULES
-	      pmodule = (m4_module **) list_find (builtin_tables,
-						  (VOID *) bp,
-						  builtin_table_module_find);
-	      if (pmodule && *pmodule)
-		modname = (*pmodule)->modname;
+	      /* FIXME:
+	      modname = bp->module->modname;
+	      */
+	      modname = "BOGUS!";
 #endif
-	      if (modname || (strcmp (SYMBOL_NAME (sym), bp->name) != 0))
+	      if (modname || (strcmp (SYMBOL_NAME (symbol), bp->name) != 0))
 		{
 		    fprintf (file, ",%lu",
 			     (unsigned long) strlen (bp->name));
@@ -235,8 +242,8 @@ INTERNAL ERROR: Builtin not found in builtin table!")));
 		}
 	      fputc ('\n', file);
 
-	      fputs (SYMBOL_NAME (sym), file);
-	      if (modname || (strcmp (SYMBOL_NAME (sym), bp->name) != 0))
+	      fputs (SYMBOL_NAME (symbol), file);
+	      if (modname || (strcmp (SYMBOL_NAME (symbol), bp->name) != 0))
 		fputs (bp->name, file);
 	      if (modname)
 		fputs (modname, file);
@@ -253,13 +260,13 @@ INTERNAL ERROR: Bad token data type in freeze_one_symbol ()")));
 
       /* Reverse the bucket once more, putting it back as it was.  */
 
-      symtab[h] = (symbol *) list_reverse ((List *) symtab[h]);
+      m4_symtab[h] = (m4_symbol *) list_reverse ((List *) m4_symtab[h]);
     }
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
 
-  freeze_diversions (file);
+  m4_freeze_diversions (file);
 
   /* All done.  */
 
@@ -272,7 +279,8 @@ INTERNAL ERROR: Bad token data type in freeze_one_symbol ()")));
 `----------------------------------------------------------------------*/
 
 static void
-issue_expect_message (int expected)
+issue_expect_message (expected)
+     int expected;
 {
   if (expected == '\n')
     M4ERROR ((EXIT_FAILURE, 0, _("Expecting line feed in frozen file")));
@@ -289,8 +297,9 @@ issue_expect_message (int expected)
    form ``\nnn'' are converted, and returned.  EOF is returned if the end
    of file is reached whilst reading the character.  */
 
-int
-decode_char (FILE *in)
+static int
+decode_char (in)
+     FILE *in;
 {
   int ch = fgetc (in);
 
@@ -327,17 +336,18 @@ decode_char (FILE *in)
 /* We are seeking speed, here.  */
 
 void
-reload_frozen_state (const char *name)
+reload_frozen_state (name)
+     const char *name;
 {
   FILE *file;
   int version;
   int character;
   int operation;
-  char syntax_code;
+  char syntax;
   unsigned char *string[3];
   int allocated[3];
   int number[3];
-  const struct m4_builtin *bp;
+  const m4_builtin *bp;
 
 #define GET_CHARACTER \
   (character = getc (file))
@@ -386,7 +396,7 @@ reload_frozen_state (const char *name)
     }								\
   while (0)
 
-  file = path_search (name, (char **)NULL);
+  file = m4_path_search (name, (char **)NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, _("Cannot open %s"), name));
 
@@ -475,26 +485,26 @@ reload_frozen_state (const char *name)
 	/* Enter a macro having a builtin function as a definition.  */
 
 	{
-	  struct m4_builtin *bt = NULL;
+	  m4_builtin *bt = NULL;
 #if WITH_MODULES
 	  if (number[2] > 0)
 	    {
 	      const m4_module *module;
 
-	      module = (m4_module *) list_find (modules, string[2],
-						module_modname_find);
+	      module = (m4_module *) list_find (m4_modules, string[2],
+						m4_module_modname_find);
 	      if (module)
 		bt = module->bp;
 	    }
 #endif /* WITH_MODULES */
 
 	  if (number[1] > 0)
-	    bp = find_builtin_by_name (bt, string[1]);
+	    bp = m4_builtin_find_by_name (bt, string[1]);
 	  else
-	    bp = find_builtin_by_name (bt, string[0]);
+	    bp = m4_builtin_find_by_name (bt, string[0]);
 	    
 	  if (bp)
-	    define_builtin (string[0], bp, SYMBOL_PUSHDEF, 0);
+	    m4_builtin_define (string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
 	    M4ERROR ((warning_status, 0, _("\
 `%s' from frozen file not found in builtin table!"),
@@ -522,12 +532,8 @@ reload_frozen_state (const char *name)
 	GET_STRING (file, string[0], allocated[0], number[0]);
 	VALIDATE ('\n');
 	
-	{
-	  struct obstack dummy;
-	  obstack_init (&dummy);
-	  module_load (string[0], &dummy, SYMBOL_IGNORE);
-	  obstack_free (&dummy, NULL);
-	}
+	m4_module_load (string[0], NULL);
+		
 #else  /* !WITH_MODULES */
 	M4ERROR ((EXIT_FAILURE, 0, _("Module support not compiled in")));
 #endif /* !WITH_MODULES */
@@ -542,7 +548,7 @@ reload_frozen_state (const char *name)
 	  }
 
 	GET_CHARACTER;
-	syntax_code = character;
+	syntax = character;
 	GET_CHARACTER;
 	GET_NUMBER (number[0]);
 	VALIDATE ('\n');
@@ -565,7 +571,7 @@ reload_frozen_state (const char *name)
 	  }
 	string[0][number[0]] = '\0';
 	
-	set_syntax (syntax_code, string[0]);
+	m4_set_syntax (syntax, string[0]);
 	break;
 
       case 'C':
@@ -606,30 +612,30 @@ reload_frozen_state (const char *name)
 
 	    /* Change comment strings.  */
 
-	    set_comment (string[0], string[1]);
+	    m4_set_comment (string[0], string[1]);
 	    break;
 
 	  case 'D':
 
 	    /* Select a diversion and add a string to it.  */
 
-	    make_diversion (number[0]);
+	    m4_make_diversion (number[0]);
 	    if (number[1] > 0)
-	      shipout_text (NULL, string[1], number[1]);
+	      m4_shipout_text (NULL, string[1], number[1]);
 	    break;
 
 	  case 'T':
 
 	    /* Enter a macro having an expansion text as a definition.  */
 
-	    define_macro (string[0], string[1], SYMBOL_PUSHDEF);
+	    m4_macro_define (string[0], string[1], M4_SYMBOL_PUSHDEF);
 	    break;
 
 	  case 'Q':
 
 	    /* Change quote strings.  */
 
-	    set_quotes (string[0], string[1]);
+	    m4_set_quotes (string[0], string[1]);
 	    break;
 
 	  default:

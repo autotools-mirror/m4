@@ -9,7 +9,7 @@ for any of these ideas or if you have others to add.
 
   + The test case `other-tests/stackovf.test' does not work.
 
-  + Some characters, such as dollar, are still hardcoded, and do not
+  + Some characters, such as comma, are still hardcoded, and does not
     follow changes in the syntax table.
 
   + sigstack/sigaltstack and ENOSYS
@@ -68,6 +68,11 @@ for any of these ideas or if you have others to add.
 	maintaining the string lengths, and avoiding strlen, strcpy,
 	etc.).
 
+  + The symbol table needs a complete reimplementation, so that it tracks
+    the module responsible for each of the symbols it contains.  This would
+    not only speed up module unloading immensely, but simplfy the code
+    considerably too.
+
 * MODULE SPECIFIC ISSUES
 
   + There is a bug if two module are installed and the second overrides a
@@ -78,21 +83,9 @@ for any of these ideas or if you have others to add.
   + Some way of linking a module statically is needed, for systems
     without support for dynamic loading.
 
-  + Need a test to check whether a module is currently loaded, so
-    that optional command line loaded modules can be safely unloaded:
-
-	ifelse(__modules__, `foo', unloadmodule(`foo'))
-  ***DONE
-
   + Setting of the module search path within m4 scripts:
 
 	append(__modulepath__, `/some/modules/live/here')
-
-  + It should be possible to add `user_macros' from a module.
-  ***DONE
-
-  + Gnu extensions should be pulled out into a module.  The -G option would
-    suppress automatic loading of this module.
 
   + Module autoloader.  This would allow an m4 core with no builtins except
     for loadmodule().  A default startup script would mark the recognised

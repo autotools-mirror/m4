@@ -1,6 +1,6 @@
 /* Definitions for data structures and routines for the regular
    expression library, version 0.12.
-   Copyright (C) 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
+   Copyright 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.  Its master source is NOT part of
    the C library, however.  The master source lives in /gd/gnu/lib.

@@ -21,7 +21,7 @@ Implementation details are in ../src/module.c
 
 A module is a compiled shared object, i.e., modules are written in C and
 then compiled.  The compiled file can then be loaded into a running m4
-process by calling the builtin "loadmodule", or by calling m4 with the
+process by calling the builtin "load", or by calling m4 with the
 `-m' or `--load-module' options on the command line.  This will give GNU
 m4 access to any system feature with a C interface.
 
@@ -60,7 +60,7 @@ If a module defines the symbol "m4_init_module", it is supposed to be a
 function with a prototype of "void m4_init_module(struct obstack *obs)",
 and it will be called as soon as the module is loaded.  Any non-finished
 object left on the obstack will be the expansion of the call of the
-builtin "loadmodule". The obstack pointer might be NULL (in the future).
+builtin "load". The obstack pointer might be NULL (in the future).
 
 If a module defines the symbol "m4_finish_module", it is supposed to be
 a function with a prototype of "void m4_finish_module(void)", and it

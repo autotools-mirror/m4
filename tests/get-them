@@ -67,7 +67,7 @@ BEGIN {
     printthem(error, e, "okerr");
     printf ("\n") >> file;
     if (include_flag == 1) printf ("M4PATH=$srcdir ") >> file;
-    printf ("$M4 -d in >out") >> file;
+    printf ("$M4 -M ../../modules -d in >out") >> file;
     if (error_flag == 1) printf (" 2>err") >> file;
     if (error_flag == 1) printf ("\nsed -e \"s,^[^:]*[lt-]*m4[.ex]*:,m4:,\" err >sederr && mv sederr err") >> file;
     printf ("\n\n$CMP -s out ok") >> file;

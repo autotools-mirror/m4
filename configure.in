@@ -1,42 +1,61 @@
 # Configure template for GNU m4.
-# Copyright (C) 1991-2000 Free Software Foundation, Inc.
-# Process this file with autoconf to produce a configure script.
+# Copyright 1991-1994, 2000 Free Software Foundation, Inc.
+#  
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or 
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+# 02111-1307  USA
 
 undefine([changeword])
 
-AC_INIT(src/m4.c)
-AM_CONFIG_HEADER(config.h)
-AC_ARG_PROGRAM
+AC_INIT(src/m4.h)
+AC_CONFIG_AUX_DIR(config)
+AM_CONFIG_HEADER(config.h:config-h.in)
 
 AM_INIT_AUTOMAKE(m4,1.4p)
+
+AC_PROG_CC
+AC_ISC_POSIX
+AM_PROG_CC_STDC
+AC_PROG_CPP
+AC_PROG_CC_C_O
+
+AM_GNU_GETTEXT
+
+AC_ARG_PROGRAM
 
 ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST(pkglibexecdir)
 
-AC_PROG_AWK
-AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
-AC_PATH_PROG(PERL,perl)
-
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-AC_EXEEXT
-AM_C_PROTOTYPES
-AC_C_CONST
-
 AM_ENABLE_SHARED
-AM_DISABLE_STATIC
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 
+AC_PROG_AWK
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PATH_PROG(PERL,perl)
+
+AM_C_PROTOTYPES
+AC_C_CONST
+M4_AC_CHECK_DEBUGGING
+
 AC_LIB_LTDL
 
-AC_CHECK_HEADERS(limits.h locale.h memory.h siginfo.h string.h unistd.h)
+AC_CHECK_HEADERS(limits.h locale.h memory.h siginfo.h string.h unistd.h errno.h)
 AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
@@ -51,18 +70,13 @@ case "$host" in
 esac
 AC_SUBST(LIBM4_DLL_IMPORT)
 
-AC_CHECK_FUNCS(bzero calloc mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile)
+AC_CHECK_FUNCS(bzero calloc mkstemp mktemp sigaction sigaltstack sigstack sigvec strerror tmpfile)
 
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
-
 M4OBJS=
-AC_CHECK_FUNC(getopt_long, private_getopt=:, private_getopt=false)
-if $private_getopt; then
-  AC_LINK_FILES(src/getopt-h.in, src/getopt.h)
-  M4OBJS="getopt1.o getopt.o"
-fi
+AC_CHECK_FUNC(getopt_long, , [M4OBJS="getopt1.o getopt.o"])
 AC_SUBST(M4OBJS)
 jm_PREREQ_ERROR
 
@@ -160,7 +174,6 @@ AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 AM_WITH_GMP
 
 AM_WITH_DMALLOC
-AM_GNU_GETTEXT
 
 if test "$USE_INCLUDED_LIBINTL" = yes; then
   INTLINCL='-I$(top_srcdir)/intl'
@@ -171,17 +184,15 @@ fi
 
 dnl AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
-LTLIBOBJS=`echo "$LIBOBJS" | sed 's,.o ,.lo ,g;s,.o$,.lo,'`
+Xsed="sed -e s/^X//"
+LTLIBOBJS=`echo X"$LIBOBJS" | \
+[$Xsed -e 's,\.[^.]* ,.lo ,g;s,\.[^.]*$,.lo,']`
 AC_SUBST(LTLIBOBJS)
 
-# This no-op line works around a bug in automake 1.4:
-# it doesn't recognize the assignment to LIBOBJS
-# in acm4/malloc.m4 and acm4/realloc.m4.
-# : LIBOBJS="$LIBOBJS malloc.o realloc.o"
+AC_SUBST(ac_aux_dir)
 
 AC_OUTPUT(
 Makefile
-acm4/Makefile
 intl/Makefile
 po/Makefile.in
 doc/Makefile

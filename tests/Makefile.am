@@ -1,3 +1,21 @@
+## This file is part of GNU m4
+## Copyright 2000 Free Software Foundation, Inc.
+##  
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or 
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+## 02111-1307  USA
+
 # The next line is needed by `./esyscmd.1.test'
 #  Ty Coon, President of Vice
 # The previous line is needed by `./esyscmd.1.test'
@@ -95,7 +113,7 @@ OTHER_FILES = \
 	other-tests/discard-comments.m4 \
 	other-tests/sync-lines.m4
 
-all: stamp-TESTS
+check: stamp-TESTS
 
 stamp-TESTS: $(srcdir)/get-them $(top_srcdir)/doc/m4.texinfo
 	cd $(srcdir) \

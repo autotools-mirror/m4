@@ -1,5 +1,5 @@
 /* xmalloc.c -- malloc with out of memory checking
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 2000 
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 2000 
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify

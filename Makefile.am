@@ -1,20 +1,67 @@
-AUTOMAKE_OPTIONS = 1.4 # gnits
+## Makefile.am -- Process this file with automake to produce Makefile.in
+##
+## Copyright 2000 Free Software Foundation
+## 
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+## 
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with this program; see the file COPYING.  If not, write to
+## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+## Boston, MA 02111-1307, USA.
+##
+## Written by Gary V. Vaughan <gary@gnu.org>
 
-ACLOCAL_AMFLAGS=-I acm4
+AUTOMAKE_OPTIONS = 1.4 gnits
 
-# A list of all the files in the current directory which can be regenerated
-MAINTAINERCLEANFILES = ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
-	config.guess config.h.in config.sub configure install-sh \
-	ltconfig ltmain.sh missing mkinstalldirs stamp-h.in \
-	po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
+EXTRA_DIST	= bootstrap
 
-SUBDIRS = acm4 intl po m4 modules src tests examples doc
-# DIST_SUBDIRS = acm4 intl po m4 libltdl src doc tests examples modules
+auxdir		= $(top_srcdir)/$(ac_aux_dir)
+
+AUX_DIST	= $(auxdir)/config.guess $(auxdir)/config.sub \
+		  $(auxdir)/install-sh $(auxdir)/ltmain.sh \
+		  $(auxdir)/missing $(auxdir)/mkinstalldirs
+AUX_DIST_EXTRA	= $(auxdir)/error.m4 $(auxdir)/gmp.m4 $(auxdir)/regex.m4
+
+ACLOCAL_AMFLAGS	= -I $(auxdir)
+
+SUBDIRS			= intl po m4 modules src tests examples doc .
+MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
+			  config.h.in configure ltmain.sh stamp-h.in \
+			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id \
+			  $(AUX_DIST)
+
+
+##                                                                      ##
+##                   --- RULES FOR THE MAINTAINER ---                   ##
+##           You shouldn't need to touch anything below here.           ##
+##              (mostly copied from automake/Makefile.am)               ##
+##                                                                      ##
+
+CVS	= cvs # set it to `:' to avoid CVS operations at dist time
+
+dist-hook:
+	(cd $(distdir) && mkdir $(auxdir))
+	for file in $(AUX_DIST) $(AUX_DIST_EXTRA); do \
+	  cp $$file $(distdir)/$$file; \
+	done
 
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.
-cvs-dist: # distcheck # maintainer-check
-	cvs -q tag `echo "Release-$(VERSION)" | sed 's/\./-/g'`
+cvs-dist: distcheck # maintainer-check
+	@if sed '1,2d;3q' $(srcdir)/NEWS | grep -e $(VERSION)" > dev/null; \
+	  echo "NEWS not updatedl not releasing" 1>&2; \
+	  exit 1;
+	fi
+	cd $(srcdir) && \
+	  $(CVS) -q tag `echo "Release-$(VERSION)" | sed 's/\./-/g'`
 	$(MAKE) dist
 
 cvs-diff:

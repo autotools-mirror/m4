@@ -1,19 +1,20 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation; either version 2 of the License, or 
+   (at your option) any later version.
+ 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+ 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307  USA
 */
 
 /**
@@ -23,6 +24,22 @@
 
 #ifndef M4_SYSTEM_H
 #define M4_SYSTEM_H 1
+
+/* I have yet to see a system that doesn't have these... */
+#include <stdio.h>
+#include <sys/types.h>
+
+/* This is okay in an installed file, because it will not change the
+   behaviour of the including program whether ENABLE_NLS is defined
+   or not.  */
+#ifndef _
+#  ifdef ENABLE_NLS
+#    include <libintl.h>
+#    define _(Text) gettext ((Text))
+#  else
+#    define _(Text) (Text)
+#  endif
+#endif
 
 
 /* All header files should be inside BEGIN_C_DECLS ... END_C_DECLS, so
@@ -187,6 +204,23 @@ typedef int m4_boolean;
 #ifndef boolean
 #  define boolean m4_boolean
 #endif
+
+
+
+/* Memory allocation.  */
+#define XCALLOC(type, num)	((type *) xcalloc ((num), sizeof(type)))
+#define XMALLOC(type, num)	((type *) xmalloc ((num) * sizeof(type)))
+#define XREALLOC(type, p, num)	((type *) xrealloc ((p), (num) * sizeof(type)))
+#define XFREE(stale)				M4_STMT_START {		\
+  	if (stale) { free ((VOID *) stale);  stale = 0; }		\
+						} M4_STMT_END
+
+extern VOID *xcalloc  M4_PARAMS((size_t n, size_t s));
+extern VOID *xmalloc  M4_PARAMS((size_t n));
+extern VOID *xrealloc M4_PARAMS((VOID *p, size_t n));
+extern void  xfree    M4_PARAMS((VOID *stale));
+
+extern char *xstrdup  M4_PARAMS((const char *string));
 
 END_C_DECLS
 

@@ -3,7 +3,7 @@
    "Keep this file name-space clean" means, talk to drepper@gnu.org
    before changing it!
 
-   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
+   Copyright 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
    	Free Software Foundation, Inc.
 
    The GNU C Library is free software; you can redistribute it and/or

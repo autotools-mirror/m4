@@ -1,3 +1,79 @@
+2000-11-24  Gary V. Vaughan  <gary@gnu.org>
+
+	* AUTHORS:  Added my details.
+	* TODO: updated.
+	* NEWS: updated.
+	* bootstrap: temporary update until released libtool catches up.
+
+	* All files:  Use new GNU GPL copyright blurb with current contact
+	address.
+
+	* configure.in (LTLIBOBJS): Use canonical code for calculation of
+	this variable.
+
+	* config: renamed acm4 directory to config to be more like
+	other autoconfiscated packages.
+
+	* configure.in (M4_AC_CHECK_DEBUGGING): Use it.
+	* config/debug.m4:  New file implementing configure macros to add
+	suitable debug flags to the compiler invocation.
+
+	* modules/load.c:  New file implementing the ``load'' and
+	``unload'' builtins.
+	* tests/get-them:  Set the module search directory to the modules
+	build directory in generated tests.
+	* modules/shadow.test: ditto.
+	* modules/modtest.test: ditto.
+	* modules/modpath1.test: ditto.
+	* modules/modpath2.test: ditto.
+	* modules/modpath3.test: ditto.
+	* modules/modpath4.test: ditto.
+	* modules/modtest.test: ditto.
+	* modules/modfreeze.test: ditto.
+	* modules/unload.test: ditto.
+	
+	* modules/changeword.c:  New file implementing the ``changeword''
+	builtin as a loadable module.
+	* modules/mpeval.c:  New file implementing the ``mpeval'' builtin
+	as a loadable module.
+	
+	* src/main.c (main):  Load the gnu module if m4 was started
+	normally -- i.e. without the -G option.
+	* modules/gnu.c:  New file implementing a new loadable module wuth
+	definitions for all the gnu extension builtins.
+	* modules/format.c:  Moved here from src/format.c.  Now included
+	directly by gnu.c.
+	
+	* src/main.c (main):  Load the traditional module if m4 was
+	started in `no_gnu_extensions' mode.
+	* modules/traditional.c:  New file implementing the ``unix'' macro,
+	required when m4 is executed in traditional mode, as a loadable
+	module.
+	
+	* src/main.c:  Renamed from m4.c to avoid confusion with
+	modules/m4.c.
+	(main):  Always load the m4 module.
+	* modules/m4.c:  New file implementing a new loadable module with
+	definitions for all m4 builtins that are not gnu extensions.
+	
+	* m4/Makefile.am:  Adjusted to take new files below into account.
+	* m4/m4module.h: Prototypes for exported functions and types moved
+	to this directory from the src directory. 
+	* m4/m4private.h: Moved here from src/m4private.h to facilitate
+	the migration of all builtin implementations to loadable modules.
+	* m4/macro.c: Moved this file here from the src directory,
+	renaming all exported symbols to use the prefix ``m4_''.
+	* m4/builtin.c: ditto.
+	* m4/module.c: ditto.
+	* m4/symtab.c: ditto.
+	* m4/debug.c: ditto.
+	* m4/input.c: ditto.
+	* m4/output.c: ditto.
+	* m4/path.c: ditto.
+	* m4/ltdl.h, m4/ltdl.c: ditto.
+	* m4/utility.c: Odd functions moved here from files in the src
+	directory to facilitate builtin migration.
+
 2000-08-12  Gary V. Vaughan  <gary@gnu.org>
 
 	* src/builtin.c (dump_symbols): Use "Undefined name `%s'" for

@@ -1,16 +1,13 @@
 GNU m4 NEWS - History of user-visible changes.             -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
 
-Version beta 1.4p - August 2000
+Version beta 1.4p - November 2000
 
-* The names of all currently loaded modules are held in the macro
-  __m4_modules__.
- 
-* The module code has been rewritten to use libltdl, the libtool dynamic
-  loader, which means GNU m4 can now load (and unload) modules just about
-  anywhere which it can be built.  This includes obscure hosts such as
-  cygwin and BeOS, and also on hosts which do not have shared libraries,
-  through preloading (see libtool manual) and GNU dld.
+* M4 has no builtins or macros in core, they are all loaded from modules
+  at startup.
+
+* Loadable modules can define new builtin functions or text expansion
+  macros. 
 
 * New builtin `load' to dynamically load modules which can define new
   builtins and user macros.
@@ -18,13 +15,20 @@ Version beta 1.4p - August 2000
 * New builtin `unload' to remove loaded modules (and the builtins and user
   macros they define) from the running m4 interpreter.
 
+* The names of all currently loaded modules are returned by the new
+  builtin, ``modules''.
+ 
+* The module code has been rewritten to use libltdl, the libtool dynamic
+  loader, which means GNU m4 can now load (and unload) modules just about
+  anywhere which it can be built.  This includes obscure hosts such as
+  cygwin and BeOS, and also on hosts which do not have shared libraries,
+  through preloading (see libtool manual) and GNU dld.
+
 * Modules can now be built without the m4 source being available using the
   installed m4module.h header file (and some other headers that it includes
   for you), and the installed libm4.la libtool library.  All symbols
   exported from libm4.la have a prefix of `m4_' or `M4_'.  See the modules
   directory for examples of usage.
-
-* The macro `__modules__' contains a list of all loaded module names.
 
 * A new V2 format for frozen files that saves module and syntax information.
  
