@@ -31,6 +31,7 @@ mkinstalldirs					\
 texinfo.tex
 
 EXTRA_DIST = 					\
+atconfig.m4					\
 debug.m4					\
 gmp.m4						\
 gnu-obstack.m4					\

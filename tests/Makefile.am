@@ -19,14 +19,13 @@
 # The next line is needed by `others.at:esyscmd'
 #  Ty Coon, President of Vice
 
-EXTRA_DIST = mkconfig.sh foo incl.m4 atconfig.in generate.awk \
-	defs $(OTHER_FILES) $(TESTSUITE_SOURCES) $(TESTSUITE)
+EXTRA_DIST = generate.awk atlocal.in \
+	$(OTHER_FILES) $(TESTSUITE_SOURCES) $(TESTSUITE)
 
-MAINTAINERCLEANFILES = Makefile.in generated.at config.m4 config.sh \
-	$(TESTSUITE)
+MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
 OTHER_FILES = \
-	iso8859.m4 \
+	iso8859.m4 incl.m4 foo \
 	stackovf.test
 
 TESTSUITE_SOURCES = testsuite.at others.at generated.at

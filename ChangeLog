@@ -1,5 +1,19 @@
 2001-08-20  Akim Demaille  <akim@epita.fr>
 
+	* config/atconfig.m4: New, until part of Autoconf per se.
+	* configure.in (AT_CONFIG): Use it.
+	Adjust.
+	* tests/mkconfig.sh, tests/atconfig.in, tests/defs: Remove.
+	* tests/atlocal.in: New.
+	* tests/generate.awk: For the time being, the empty quadrigraph is
+	`@__@'.
+	* tests/others.at (changeword, gmp): Check the configuration
+	variable against `yes'.
+	* tests/testsuite.at (dnl): Allow it, as it's used all over the
+	place.
+
+2001-08-20  Akim Demaille  <akim@epita.fr>
+
 	* m4/utility.c (m4_numeric_arg): Spell out the culprit.
 	* modules/m4.c (undivert): Disable the possibility of undiverting
 	several files at once: it is not documented, it is inconsistent

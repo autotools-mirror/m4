@@ -31,7 +31,8 @@ AT_CHECK([[sed -e 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' \
 ])
 
 
-
+# We use `dnl' in zillions of places...
+m4_pattern_allow([^dnl$])
 
 AT_INIT([$M4])
 

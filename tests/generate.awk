@@ -97,7 +97,7 @@ function normalize(contents,    i, lines, n, line, res) {
       gsub ("@[{]", "{", line);
       gsub ("@}", "}", line);
       gsub ("@@", "@", line);
-      gsub ("@comment.*", "@\"\"@", line);
+      gsub ("@comment.*", "@__@", line);
 
       # Some of the examples have improperly balanced square brackets.
       gsub ("[[]", "@<:@", line);

@@ -44,7 +44,7 @@ AT_CLEANUP
 AT_SETUP([changeword])
 
 # cannot perform test without --enable-changeword
-AT_CHECK([test -z "$ENABLE_CHANGEWORD" && exit 77])
+AT_CHECK([test "$ENABLE_CHANGEWORD" = yes || exit 77])
 
 AT_DATA([[in]],
 [[define(1, 0)
@@ -283,7 +283,7 @@ AT_CLEANUP
 AT_SETUP([gmp])
 
 # cannot perform test without --with-gmp
-AT_CHECK([test -z "$WITH_GMP" && exit 77])
+AT_CHECK([test "$WITH_GMP" = yes || exit 77])
 
 AT_DATA([[in]],
 [[divert(-1)
