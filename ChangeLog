@@ -1,3 +1,11 @@
+2001-08-20  Akim Demaille  <akim@epita.fr>
+
+	Use sprintf, not ecft and friends since it is standard, portable,
+	simplifies the code, and since the latter is even deprecated
+	according to the GNU libc documentation.
+
+	* modules/format.c: Drop evct support.
+
 2001-08-19  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/debug.m4 (M4_AC_CHECK_DEBUGGING): Cleaned up.  Don't test
