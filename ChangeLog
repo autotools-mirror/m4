@@ -1,3 +1,8 @@
+2001-09-03  Gary V. Vaughan  <gary@gnu.org>
+
+	* config/debug.m4 (AC_LIBTOOL_COMPILER_OPTION): Provide a fallback
+	implementation for the cvs impaired libtool user.
+
 2001-09-03  Akim Demaille  <akim@epita.fr>
 
 	* m4/symtab.c (m4_lookup_symbol): Give more details when reporting

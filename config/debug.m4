@@ -20,7 +20,42 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-# serial 4
+# serial 5
+
+# AC_LIBTOOL_COMPILER_OPTION(MESSAGE, VARIABLE-NAME, FLAGS,
+#		[OUTPUT-FILE], [ACTION-SUCCESS], [ACTION-FAILURE])
+# ----------------------------------------------------------------
+# Check whether the given compiler option works
+ifdef([AC_LIBTOOL_COMPILER_OPTION], [],
+[AC_DEFUN([AC_LIBTOOL_COMPILER_OPTION],
+  [AC_CACHE_CHECK([$1], [$2],
+    [$2=no
+    ifelse([$4], , [ac_outfile=conftest.$ac_objext], [ac_outfile=$4])
+     save_CFLAGS="$CFLAGS"
+     CFLAGS="$CFLAGS $3"
+     echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+     if (eval $ac_compile 2>conftest.err) && test -s $ac_outfile; then
+       # The compiler can only warn and ignore the option if not recognized
+       # So say no if there are warnings
+       if test -s conftest.err; then
+         # Append any errors to the config.log.
+         cat conftest.err 1>&AS_MESSAGE_LOG_FD
+       else
+         $2=yes
+       fi
+     fi
+     $rm conftest*
+     CFLAGS="$save_CFLAGS"
+   ])
+
+  if test x"[$]$2" = xyes; then
+      ifelse([$5], , :, [$5])
+  else
+      ifelse([$6], , :, [$6])
+  fi
+  ])
+])# AC_LIBTOOL_COMPILER_OPTION
+
 
 # M4_AC_CHECK_DEBUGGING
 # ---------------------
