@@ -36,8 +36,7 @@ LIBS = $(top_builddir)/m4/libm4.la
 AM_LDFLAGS = -no-undefined
 
 pkgmodinclude_HEADERS	= m4.h
-pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la \
-			  traditional.la perl.la \
+pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la traditional.la \
 			  modtest.la shadow.la import.la stdlib.la time.la
 
 if USE_GMP
