@@ -169,7 +169,6 @@ expand_argument (struct obstack *obs, m4_token_data *argp)
 	      M4_TOKEN_DATA_TYPE (argp) = M4_TOKEN_FUNC;
 	      M4_TOKEN_DATA_HANDLE (argp) = M4_TOKEN_DATA_HANDLE (&td);
 	      M4_TOKEN_DATA_FUNC (argp) = M4_TOKEN_DATA_FUNC (&td);
-	      M4_TOKEN_DATA_FUNC_TRACED (argp) = M4_TOKEN_DATA_FUNC_TRACED (&td);
 	    }
 	  break;
 

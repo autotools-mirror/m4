@@ -1,5 +1,14 @@
 2001-09-08  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4private.h (struct m4_token_data): Simplified by removing
+	the redundant `traced' flag, and one level of structure nesting.
+	(M4_TOKEN_DATA_FUNC_TRACED): Removed.
+	* m4/input.c (init_macro_token): No need to initialise removed
+	`traced' field.
+	* m4/macro.c (expand_argument): No need to copy it either.
+	* m4/utility.c (m4_token_data_func_traced): Or provide an access
+	function.
+
 	* m4/hash.c (m4_hash_bucket_insert): Symbol shadowing is no longer
 	dependant on multiple symbols with the same key, so preserving
 	relative symbol order in each bucket during resizing is no longer

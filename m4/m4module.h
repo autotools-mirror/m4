@@ -130,7 +130,6 @@ typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
 extern m4_token_data_t  m4_token_data_type	  (m4_token_data*);
 extern char	       *m4_token_data_text	  (m4_token_data*);
 extern m4_builtin_func *m4_token_data_func	  (m4_token_data*);
-extern boolean		m4_token_data_func_traced (m4_token_data*);
 
 
 #define M4ARG(i)	(argc > (i) ? m4_token_data_text (argv[i]) : "")

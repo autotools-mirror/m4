@@ -96,12 +96,6 @@ m4_token_data_func (m4_token_data *name)
   return M4_TOKEN_DATA_FUNC(name);
 }
 
-boolean
-m4_token_data_func_traced (m4_token_data *name)
-{
-  return M4_TOKEN_DATA_FUNC_TRACED(name);
-}
-
 
 
 /* Give friendly warnings if a builtin macro is passed an inappropriate

@@ -605,7 +605,6 @@ init_macro_token (m4_token_data *td)
 
   M4_TOKEN_DATA_TYPE (td) = M4_TOKEN_FUNC;
   M4_TOKEN_DATA_FUNC (td) = isp->u.u_m.func;
-  M4_TOKEN_DATA_FUNC_TRACED (td) = isp->u.u_m.traced;
   M4_TOKEN_DATA_HANDLE (td) = isp->u.u_m.handle;
 }
 

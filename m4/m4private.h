@@ -40,13 +40,8 @@ struct m4_token_data {
   boolean		blind_no_args;
   lt_dlhandle		handle;
   union {
-    struct {
-	char *		text;
-    } u_t;
-    struct {
-	m4_builtin_func	*func;
-	boolean	 	traced;
-    } u_f;
+    char *		text;
+    m4_builtin_func *	func;
   } u;
 };
 
@@ -55,9 +50,8 @@ struct m4_token_data {
 #define M4_TOKEN_MACRO_ARGS(Td)		((Td)->macro_args)
 #define M4_TOKEN_BLIND_NO_ARGS(Td)	((Td)->blind_no_args)
 #define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
-#define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
-#define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
-#define M4_TOKEN_DATA_FUNC_TRACED(Td) 	((Td)->u.u_f.traced)
+#define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.text)
+#define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.func)
 
 /* Redefine the exported function to this faster
    macro based version for internal use by the m4 code. */
