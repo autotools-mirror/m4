@@ -1,3 +1,9 @@
+2001-09-05  Akim Demaille  <akim@epita.fr>
+
+	* m4/m4module.h (m4_symbol_lookup): Remove M4_SYMBOL_IGNORE,
+	unused.
+	* m4/symtab.c (m4_lookup_symbol): Adjust.
+
 2001-09-03  Gary V. Vaughan  <gary@gnu.org>
 
 	Bootstrap will now work with Libtool 1.4.1 or higher:

@@ -57,7 +57,6 @@ typedef enum
   M4_SYMBOL_DELETE,
   M4_SYMBOL_PUSHDEF,
   M4_SYMBOL_POPDEF,
-  M4_SYMBOL_IGNORE
 } m4_symbol_lookup;
 
 typedef struct {
