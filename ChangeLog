@@ -1,3 +1,8 @@
+2001-09-30  Gary V. Vaughan  <gary@gnu.org>
+
+	* TODO: stackovf.c is basically broken.
+	Reported by Marc Espie <espie@schutzenberger.liafa.jussieu.fr>
+
 2001-09-28  Akim Demaille  <akim@epita.fr>
 
 	* tests/Makefile.am (EXTRA_DIST): `m4' is not to be shipped.

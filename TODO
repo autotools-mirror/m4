@@ -30,6 +30,21 @@ for any of these ideas or if you have others to add.
       Joseph S. Myers
       jsm28@cam.ac.uk
 
+  + stack overflow is basically broken
+
+    The routines to detect stack overflow throuh segv  are basically
+    broken. The idea may be fine, but it ends up calling a sigv handler
+    that uses gettext, printf, stdout... all of which are definitely NOT
+    sig-safe.  Pity, because the hardcode routine is basically very careful
+    to use write(2), to avoid this.
+
+    I haven't checked that translation magic is signal-safe.
+    - I doubt it;
+    - stdio is not signal-safe in any kind of portable setting anyways.
+    --
+    Marc Espie
+    espie@schutzenberger.liafa.jussieu.fr
+
   + ~/src/ace % m4 --trace undefine -dV                       nostromo Err 1$
     m4 debug: NONE: 0: input read from stdin
     undefine(`undefine')
