@@ -1,5 +1,11 @@
 2003-09-16  Gary V. Vaughan  <gary@gnu.org>
 
+	* gnulib/m4/version-etc.c, gnulib/m4/version-etc.h: Import
+	version-etc module from CVS gnulib.
+	* po/POTFILES.in: Add gnulib/m4/version-etc.c.
+	* src/Makefile.am: Build it.
+	* src/main.c: Use it.
+
 	* gnulib/m4/exit.h: Import exit module from CVS gnulib.
 	* gnulib/m4/Makefile.am (pkginclude_HEADERS): Add exit.h.
 	* m4/system_.h: Don't define EXIT_SUCCESS and FAILURE, include

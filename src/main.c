@@ -21,8 +21,9 @@
 
 #include "m4.h"
 #include "m4private.h"
-#include "m4/progname.h"
 #include "m4/getopt.h"
+#include "m4/progname.h"
+#include "m4/version-etc.h"
 
 static void print_program_name_CB (void);
 
@@ -217,8 +218,14 @@ main (int argc, char *const *argv, char *const *envp)
 
   int exit_status;
 
+  /* Initialise gnulib error module.  */
   set_program_name (argv[0]);
   error_print_progname = print_program_name_CB;
+
+  /* Initialise gnulib version-etc module.  
+     Do *not* mark this string for translation.  */
+  version_etc_copyright	=
+    "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc.";
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
@@ -367,17 +374,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s%s\n", PACKAGE, VERSION, TIMESTAMP);
-      fputs (_("Written by Rene' Seindal and Gary V. Vaughan.\n"), stdout);
-      putc ('\n', stdout);
-
-      fputs (_("Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."), stdout);
-      putc ('\n', stdout);
-
-      fputs (_("\
-This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
-	 stdout);
+      version_etc (stdout, NULL, "GNU " PACKAGE, VERSION TIMESTAMP,
+		   _("Written by Rene' Seindal and Gary V. Vaughan."));
       exit (EXIT_SUCCESS);
     }
 

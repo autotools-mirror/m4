@@ -26,6 +26,8 @@ bin_PROGRAMS		= m4
 m4_SOURCES		= $(top_srcdir)/gnulib/m4/getopt.c	\
 			  $(top_srcdir)/gnulib/m4/getopt1.c	\
 			  $(top_srcdir)/gnulib/m4/getopt.h	\
+			  $(top_srcdir)/gnulib/m4/version-etc.c	\
+			  $(top_srcdir)/gnulib/m4/version-etc.h	\
 			  main.c m4.h freeze.c stackovf.c
 m4_LDADD		= $(top_builddir)/m4/libm4.la
 m4_LDFLAGS		= -no-undefined -export-dynamic $(DLPREOPEN)
