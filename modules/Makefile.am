@@ -18,7 +18,6 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-DISTCLEANFILES = perlxsi.c
 MAINTAINERCLEANFILES = Makefile.in
 
 testsubdir		= testSubDir
@@ -32,8 +31,8 @@ EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 AM_CPPFLAGS	= -I$(top_builddir) -I$(top_srcdir) \
 		  -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
-LIBS = $(top_builddir)/m4/libm4.la
-AM_LDFLAGS = -no-undefined
+AM_LDFLAGS 	= -no-undefined -module
+LIBS		= $(top_builddir)/m4/libm4.la
 
 pkgmodinclude_HEADERS	= m4.h
 pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la traditional.la \
@@ -41,56 +40,19 @@ pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la traditional.la \
 
 if USE_GMP
 pkglibexec_LTLIBRARIES += mpeval.la
+EXTRA_mpeval_la_SOURCES	= evalparse.c
+mpeval_la_LIBADD	= $(LIBADD_GMP)
 endif
 
-gnu_la_SOURCES		= gnu.c
 EXTRA_gnu_la_SOURCES	= format.c
-gnu_la_LDFLAGS		= -module
-gnu_la_LIBADD		= $(LTLIBINTL)
-
-load_la_SOURCES	= load.c
-load_la_LDFLAGS	= -module
-load_la_LIBADD	= $(LTLIBINTL)
-
-m4_la_SOURCES		= m4.c
 EXTRA_m4_la_SOURCES	= evalparse.c
-m4_la_LDFLAGS		= -module
-m4_la_LIBADD		= $(LTLIBINTL)
 
-mpeval_la_SOURCES	= mpeval.c
-EXTRA_mpeval_la_SOURCES	= evalparse.c
-mpeval_la_LDFLAGS	= -module
-mpeval_la_LIBADD	= $(LIBADD_GMP) $(LTLIBINTL)
 
-traditional_la_SOURCES	= traditional.c
-traditional_la_LDFLAGS	= -module
-traditional_la_LIBADD	= $(LTLIBINTL)
-
-modtest_la_SOURCES	= modtest.c
-modtest_la_LDFLAGS	= -module
-modtest_la_LIBADD	= $(LTLIBINTL)
-
-import_la_SOURCES	= import.c
-import_la_LDFLAGS	= -module
-import_la_LIBADD	= $(LTLIBINTL)
-
-perl_la_SOURCES	= perl.c
-perl_la_CFLAGS	= `perl -MExtUtils::Embed -e ccopts`
-perl_la_LDFLAGS	= -module `perl -MExtUtils::Embed -e ldopts`
-perl_la_LIBADDD	= $(LTLIBINTL)
-
-shadow_la_SOURCES	= shadow.c
-shadow_la_LDFLAGS	= -module
-shadow_la_LIBADD	= $(LTLIBINTL)
-
-stdlib_la_SOURCES	= stdlib.c
-stdlib_la_LDFLAGS	= -module
-stdlib_la_LIBADD	= $(LTLIBINTL)
-
-time_la_SOURCES	= time.c
-time_la_LDFLAGS	= -module
-time_la_LIBADD	= $(LTLIBINTL)
-
-BUILT_SOURCES = perlxsi.c
-perlxsi.c:
-	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c
+## Disabled for now.  It is too fragile to be useful.
+## pkglibexec_LTLIBRARIES += perl.la
+##perl_la_CFLAGS		= `perl -MExtUtils::Embed -e ccopts`
+##perl_la_LDFLAGS		= `perl -MExtUtils::Embed -e ldopts`
+##BUILT_SOURCES 		= perlxsi.c
+##DISTCLEANFILES 		= $(BUILT_SOURCES)
+##perlxsi.c:
+##	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c

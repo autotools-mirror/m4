@@ -87,7 +87,7 @@ AC_SUBST(DLPREOPEN)
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.7a dist-bzip2])
+AM_INIT_AUTOMAKE([1.7g dist-bzip2])
 
 
 

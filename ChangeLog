@@ -1,3 +1,23 @@
+2003-12-01  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.ac (AM_INIT_AUTOMAKE): Require 1.7g...
+	* modules/Makefile.am (gnu_la_SOURCES, load_la_SOURCES,
+	m4_la_SOURCES, traditional_la_SOURCES, modtest_la_SOURCES,
+	shadow_la_SOURCES, import_la_SOURCES, stdlib_la_SOURCES,
+	time_la_SOURCES): ...so that these are defaulted correctly, and
+	can be removed from this file.
+	(AM_LDFLAGS): Add -module...
+	(gnu_la_LDFLAGS, load_la_LDFLAGS, m4_la_LDFLAGS,
+	traditional_la_LDFLAGS, modtest_la_LDFLAGS, shadow_la_LDFLAGS,
+	import_la_LDFLAGS, stdlib_la_LDFLAGS, time_la_LDFLAGS): ...so that
+	the individual settings can be removed.
+	* m4/Makefile.am (libm4_la_LIBADD): Add $(LTLIBINTL) here once...
+	* module/Makefile.am (gnu_la_LIBADD, load_la_LIBADD,
+	m4_la_LIBADD, traditional_la_LIBADD, modtest_la_LIBADD,
+	shadow_la_LIBADD, import_la_LIBADD, stdlib_la_LIBADD,
+	time_la_LIBADD): ...so that these are picked up as a deplib of
+	libm4 and don't need to be set explicitly.
+
 2003-11-18  Gary V. Vaughan  <gary@gnu.org>
 
 	* modules/Makefile.am (pkglibexec_LTLIBRARIES): Remove perl.la

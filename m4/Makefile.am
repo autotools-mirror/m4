@@ -16,15 +16,16 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-AM_LDFLAGS 	= -no-undefined -export-dynamic
 AM_CPPFLAGS	= -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
 		  -I$(top_builddir) -I$(top_srcdir) $(INTLINCL)
+AM_LDFLAGS 	= -no-undefined -export-dynamic
 
 lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c hash.c input.c \
 			  ltdl.c m4.c m4private.h macro.c module.c output.c \
 			  path.c symtab.c syntax.c utility.c
-libm4_la_LIBADD		= $(top_builddir)/gnulib/m4/libgnu.la $(LIBADD_DL)
+libm4_la_LIBADD		= $(top_builddir)/gnulib/m4/libgnu.la \
+			  $(LTLIBINTL) $(LIBADD_DL)
 
 module.o module.lo: module.c pathconf.h
 pathconf.h: Makefile
