@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-09-18 14:34+0200\n"
+"POT-Creation-Date: 2001-09-20 10:25+0200\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -155,14 +155,14 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: m4/debug.c:350
+#: m4/debug.c:356
 #, fuzzy
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
 msgstr ""
 "INTERNER FEHLER: Eingebaute Funktion nicht in Tabelle gefunden! (trace_pre "
 "())"
 
-#: m4/debug.c:358
+#: m4/debug.c:364
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "INTERNER FEHLER: Falscher Datentyp des Tokens (trace_pre ())"
@@ -185,12 +185,12 @@ msgstr "INTERNER FEHLER: Rekursives push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "INTERNER FEHLER: Falscher Aufruf von init_macro_token ()"
 
-#: m4/input.c:640
+#: m4/input.c:639
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr ""
 "INTERNER FEHLER: Kellerspeicher der Eingabe durcheinander in next_char ()"
 
-#: m4/input.c:674
+#: m4/input.c:673
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr ""
@@ -198,16 +198,16 @@ msgstr ""
 
 # This is the name of the input file when there is no current input file.
 # Is this ever printed in a message?
-#: m4/input.c:764
+#: m4/input.c:763
 msgid "NONE"
 msgstr "NONE"
 
-#: m4/input.c:972
+#: m4/input.c:983
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Syntaxzeichen %c nicht definiert."
 
-#: m4/input.c:1099 m4/input.c:1126
+#: m4/input.c:1110 m4/input.c:1137
 msgid "ERROR: EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
 
@@ -233,83 +233,88 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
 
-#: m4/module.c:157
+#: m4/module.c:159
 msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:176
+#: m4/module.c:178
 msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:194
+#: m4/module.c:198
 msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:221
+#: m4/module.c:225
 #, fuzzy, c-format
 msgid "ERROR: failed to initialise module loader: %s"
 msgstr "FEHLER: Kann Modul »%s« nicht finden: %s"
 
-#: m4/module.c:273
+#: m4/module.c:277
 #, fuzzy, c-format
 msgid "ERROR: cannot open module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:283
+#: m4/module.c:287
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:309
+#: m4/module.c:313
 #, c-format
 msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:371
+#: m4/module.c:377
 #, fuzzy, c-format
 msgid "ERROR: cannot close module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:393
+#: m4/module.c:405
 #, fuzzy, c-format
 msgid "ERROR: cannot close modules: %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:410
+#: m4/module.c:422
 #, fuzzy, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:457
+#: m4/module.c:509
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:496
+#: m4/module.c:520
 #, fuzzy, c-format
 msgid "ERROR: cannot unload module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/output.c:279
+#: m4/module.c:559
+#, fuzzy, c-format
+msgid "ERROR: cannot unload all modules: %s"
+msgstr "FEHLER: Kann Module »%s« nicht finden."
+
+#: m4/output.c:287
 msgid "ERROR: Cannot create temporary file for diversion"
 msgstr "FEHLER: Kann keine temporäre Datei für Umleitung erzeugen"
 
-#: m4/output.c:289
+#: m4/output.c:297
 msgid "ERROR: Cannot flush diversion to temporary file"
 msgstr "FEHLER: Kann Umleitung nicht in temporäre Datei ausgeben"
 
-#: m4/output.c:367
+#: m4/output.c:375
 msgid "ERROR: Copying inserted file"
 msgstr "FEHLER: Während Kopieren einer eingefügten Datei"
 
-#: m4/output.c:572
+#: m4/output.c:580
 msgid "ERROR: Reading inserted file"
 msgstr "FEHLER: Während Lesen einer eingefügten Datei"
 
-#: m4/output.c:664
+#: m4/output.c:672
 msgid "Cannot stat diversion"
 msgstr "Kann `stat' nicht auf Umleitung anwenden"
 
-#: m4/output.c:667
+#: m4/output.c:675
 msgid "Diversion too large"
 msgstr ""
 
@@ -318,7 +323,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
 
-#: m4/symtab.c:346
+#: m4/symtab.c:361
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Name »%s« ist unbekannt\n"
@@ -383,15 +388,10 @@ msgstr "Kann Umleitung %s nicht aufheben"
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:198
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Falscher Ausdruck in `eval': %s"
-
-#: modules/mpeval.c:442
-#, c-format
-msgid "%s support was not compiled in"
-msgstr ""
 
 #: src/freeze.c:161
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
@@ -629,11 +629,11 @@ msgstr "INTERNER FEHLER: Falscher Kode in zurückgestellten Argumenten"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:176
+#: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"
 msgstr "VMEM Beschränkung überschritten?\n"
 
-#: src/stackovf.c:198
+#: src/stackovf.c:199
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -641,7 +641,7 @@ msgstr ""
 "Verletzung der Speichergrenzen festgestellt (SIGSEGV). Entweder ist ein\n"
 "Stacküberlauf aufgetreten, oder es gibt einen Fehler in "
 
-#: src/stackovf.c:203
+#: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 

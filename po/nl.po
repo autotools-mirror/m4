@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-09-18 14:34+0200\n"
+"POT-Creation-Date: 2001-09-20 10:25+0200\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -153,14 +153,14 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fout overeenkomen reguliere expressies `%s'"
 
-#: m4/debug.c:350
+#: m4/debug.c:356
 #, fuzzy
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
 msgstr ""
 "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel! (trace_pre "
 "())"
 
-#: m4/debug.c:358
+#: m4/debug.c:364
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "INTERNE FOUT: Onjuiste teken data type (trace_pre ())"
@@ -183,25 +183,25 @@ msgstr "INTERNE FOUT: Recursieve push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "INTERNE FOUT: Onjuiste aanroep naar init_macro_token ()"
 
-#: m4/input.c:640
+#: m4/input.c:639
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "INTERNE FOUT: Invoer stapel botch in next_char ()"
 
-#: m4/input.c:674
+#: m4/input.c:673
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "INTERNE FOUT: Invoer stapel botch in peek_input ()"
 
-#: m4/input.c:764
+#: m4/input.c:763
 msgid "NONE"
 msgstr "GEEN"
 
-#: m4/input.c:972
+#: m4/input.c:983
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Ongedefinieerde syntax code %c"
 
-#: m4/input.c:1099 m4/input.c:1126
+#: m4/input.c:1110 m4/input.c:1137
 msgid "ERROR: EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
 
@@ -227,83 +227,88 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FOUT: Recursie limiet of %d overschreden, gebruik -L<N> om dit te wijzigen"
 
-#: m4/module.c:157
+#: m4/module.c:159
 msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:176
+#: m4/module.c:178
 msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:194
+#: m4/module.c:198
 msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:221
+#: m4/module.c:225
 #, c-format
 msgid "ERROR: failed to initialise module loader: %s"
 msgstr ""
 
-#: m4/module.c:273
+#: m4/module.c:277
 #, c-format
 msgid "ERROR: cannot open module `%s': %s"
 msgstr ""
 
-#: m4/module.c:283
+#: m4/module.c:287
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:309
+#: m4/module.c:313
 #, c-format
 msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:371
+#: m4/module.c:377
 #, c-format
 msgid "ERROR: cannot close module `%s': %s"
 msgstr ""
 
-#: m4/module.c:393
+#: m4/module.c:405
 #, c-format
 msgid "ERROR: cannot close modules: %s"
 msgstr ""
 
-#: m4/module.c:410
+#: m4/module.c:422
 #, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr ""
 
-#: m4/module.c:457
+#: m4/module.c:509
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:496
+#: m4/module.c:520
 #, c-format
 msgid "ERROR: cannot unload module `%s': %s"
 msgstr ""
 
-#: m4/output.c:279
+#: m4/module.c:559
+#, c-format
+msgid "ERROR: cannot unload all modules: %s"
+msgstr ""
+
+#: m4/output.c:287
 msgid "ERROR: Cannot create temporary file for diversion"
 msgstr "FOUT: Kan geen tijdelijk bestand aanmaken voor diversion"
 
-#: m4/output.c:289
+#: m4/output.c:297
 msgid "ERROR: Cannot flush diversion to temporary file"
 msgstr "FOUT: Kan diversion niet flushen naar tijdelijk bestand"
 
-#: m4/output.c:367
+#: m4/output.c:375
 msgid "ERROR: Copying inserted file"
 msgstr "FOUT: Kopieren ingevoegde bestanden"
 
-#: m4/output.c:572
+#: m4/output.c:580
 msgid "ERROR: Reading inserted file"
 msgstr "FOUT: Lezen ingevoegd bestand"
 
-#: m4/output.c:664
+#: m4/output.c:672
 msgid "Cannot stat diversion"
 msgstr "Cannot stat diversion"
 
-#: m4/output.c:667
+#: m4/output.c:675
 msgid "Diversion too large"
 msgstr ""
 
@@ -312,7 +317,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"
 
-#: m4/symtab.c:346
+#: m4/symtab.c:361
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
@@ -377,15 +382,10 @@ msgstr "Cannot undivert %s"
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:198
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Onjuist expressie in evaluatie: %s"
-
-#: modules/mpeval.c:442
-#, c-format
-msgid "%s support was not compiled in"
-msgstr ""
 
 #: src/freeze.c:161
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
@@ -617,11 +617,11 @@ msgstr "INTERNE FOUT: Onjuiste code in afgeleide argumenten"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:176
+#: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"
 msgstr "VMEM limiet overschreden?\n"
 
-#: src/stackovf.c:198
+#: src/stackovf.c:199
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -629,7 +629,7 @@ msgstr ""
 "Geheugen bounds violation gedetecteerd (SIGSEGV).  Een stack overflow \n"
 "is opgetreden, of er is een fout in "
 
-#: src/stackovf.c:203
+#: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Kontroleer voor mogelijk oneindige recusie.\n"
 

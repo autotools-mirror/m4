@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-09-18 14:34+0200\n"
+"POT-Creation-Date: 2001-09-20 10:25+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -153,14 +153,14 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: m4/debug.c:350
+#: m4/debug.c:356
 #, fuzzy
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Εσωδομημένο δεν βρέθηκε στο πίνακα εσωδομημένων! "
 "(trace_pre ())"
 
-#: m4/debug.c:358
+#: m4/debug.c:364
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου (trace_pre ())"
@@ -183,25 +183,25 @@ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αναδρομικό push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Κακή κλήση στο init_macro_token ()"
 
-#: m4/input.c:640
+#: m4/input.c:639
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο next_char ()"
 
-#: m4/input.c:674
+#: m4/input.c:673
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο peek_input ()"
 
-#: m4/input.c:764
+#: m4/input.c:763
 msgid "NONE"
 msgstr "ΚΑΝΕΝΑ"
 
-#: m4/input.c:972
+#: m4/input.c:983
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Μη ορισμένος κώδικας σύνταξης %c"
 
-#: m4/input.c:1099 m4/input.c:1126
+#: m4/input.c:1110 m4/input.c:1137
 msgid "ERROR: EOF in string"
 msgstr "ΣΦΑΛΜΑ: EOF στο αλφαριθμητικό"
 
@@ -228,83 +228,88 @@ msgstr ""
 "ΣΦΑΛΜΑ: Το όριο αναδρομής %d ξεπεράστηκε, κάντε χρήση του -L<N> για να το "
 "αλλάξετε"
 
-#: m4/module.c:157
+#: m4/module.c:159
 msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:176
+#: m4/module.c:178
 msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:194
+#: m4/module.c:198
 msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:221
+#: m4/module.c:225
 #, fuzzy, c-format
 msgid "ERROR: failed to initialise module loader: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
 
-#: m4/module.c:273
+#: m4/module.c:277
 #, fuzzy, c-format
 msgid "ERROR: cannot open module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: m4/module.c:283
+#: m4/module.c:287
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:309
+#: m4/module.c:313
 #, c-format
 msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:371
+#: m4/module.c:377
 #, fuzzy, c-format
 msgid "ERROR: cannot close module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: m4/module.c:393
+#: m4/module.c:405
 #, fuzzy, c-format
 msgid "ERROR: cannot close modules: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: m4/module.c:410
+#: m4/module.c:422
 #, fuzzy, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: m4/module.c:457
+#: m4/module.c:509
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:496
+#: m4/module.c:520
 #, fuzzy, c-format
 msgid "ERROR: cannot unload module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: m4/output.c:279
+#: m4/module.c:559
+#, fuzzy, c-format
+msgid "ERROR: cannot unload all modules: %s"
+msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
+
+#: m4/output.c:287
 msgid "ERROR: Cannot create temporary file for diversion"
 msgstr "ΣΦΑΛΜΑ: Αδυναμία δημιουργίας προσωρινού αρχείου για αλλαγή"
 
-#: m4/output.c:289
+#: m4/output.c:297
 msgid "ERROR: Cannot flush diversion to temporary file"
 msgstr "ΣΦΑΛΜΑ: Αδυναμία αποστολής αλλαγής στο προσωρινό αρχείο"
 
-#: m4/output.c:367
+#: m4/output.c:375
 msgid "ERROR: Copying inserted file"
 msgstr "ΣΦΑΛΜΑ: Αντιγραγή εισερχομένου αρχείου"
 
-#: m4/output.c:572
+#: m4/output.c:580
 msgid "ERROR: Reading inserted file"
 msgstr "ΣΦΑΛΜΑ: Ανάγνωση εισερχομένου αρχείου"
 
-#: m4/output.c:664
+#: m4/output.c:672
 msgid "Cannot stat diversion"
 msgstr "Αδυναμία προσπέλασης του αρχείου της αλλαγής"
 
-#: m4/output.c:667
+#: m4/output.c:675
 msgid "Diversion too large"
 msgstr ""
 
@@ -313,7 +318,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
-#: m4/symtab.c:346
+#: m4/symtab.c:361
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
@@ -380,15 +385,10 @@ msgstr "Αδυναμία επαναφοράς του %s"
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:198
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Λάθος έκφραση στην αποτίμηση: %s"
-
-#: modules/mpeval.c:442
-#, c-format
-msgid "%s support was not compiled in"
-msgstr ""
 
 #: src/freeze.c:161
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
@@ -625,11 +625,11 @@ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κωδικός στα αναφερόμενα ορίσματα"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:176
+#: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"
 msgstr "Το όριο της εικονική μνήμης εξαντλήθηκε;\n"
 
-#: src/stackovf.c:198
+#: src/stackovf.c:199
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -638,7 +638,7 @@ msgstr ""
 "στοίβας\n"
 "είτε υπάρχει σφάλμα προγράμματος στο "
 
-#: src/stackovf.c:203
+#: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
 
