@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -155,26 +155,21 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Erreur d'appariement pour l'expressio régulière «%s»"
 
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Entrée reprise de %s, ligne %d"
 
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Entrée lue de %s"
 
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "AUCUN"
 
-#: m4/input.c:989
-#, fuzzy, c-format
-msgid "Undefined syntax code %c"
-msgstr "Nom «%s» non-défini"
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "ERREUR: Fin-de-fichier dans la chaîne"
@@ -284,7 +279,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "La fouille du chemin pour «%s» trouve «%s»"
 
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Le nom «%s» est inconnu\n"
@@ -620,6 +615,10 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Vérifier une récursion hors contrôle.\n"
+
+#, fuzzy
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Nom «%s» non-défini"
 
 #, fuzzy
 #~ msgid ""

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -155,28 +155,23 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Eingabe zurückgenommen zu %s, Zeile %d"
 
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Eingabe gelesen von %s"
 
 # This is the name of the input file when there is no current input file.
 # Is this ever printed in a message?
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "NONE"
 
-#: m4/input.c:989
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Syntaxzeichen %c nicht definiert."
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
@@ -287,7 +282,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
 
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Name »%s« ist unbekannt\n"
@@ -636,6 +631,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
+
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Syntaxzeichen %c nicht definiert."
 
 #, fuzzy
 #~ msgid ""

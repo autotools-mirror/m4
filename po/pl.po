@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -153,27 +153,21 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
 
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Dane wej¶ciowe wycofane do %s, linia %d"
 
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Dane wej¶ciowe przeczytane z %s"
 
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "¯ADEN"
 
-# hm - rzm
-#: m4/input.c:989
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Niezdefiniowany kod sk³adniowy %c"
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "B£¡D: EOF w ³añcuchu"
@@ -283,7 +277,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
 
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Nazwa `%s' jest nieznana\n"
@@ -620,6 +614,10 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Sprawd¼ czy nie dosz³o do nieskoñczonej rekursji.\n"
+
+# hm - rzm
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Niezdefiniowany kod sk³adniowy %c"
 
 #, fuzzy
 #~ msgid ""

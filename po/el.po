@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -153,26 +153,21 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Η είσοδος επαναφέρθηκε στο %s, γραμμή %d"
 
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Η είσοδος αναγνώστηκε από το %s"
 
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "ΚΑΝΕΝΑ"
 
-#: m4/input.c:989
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Μη ορισμένος κώδικας σύνταξης %c"
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "ΣΦΑΛΜΑ: EOF στο αλφαριθμητικό"
@@ -284,7 +279,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
@@ -634,6 +629,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
+
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Μη ορισμένος κώδικας σύνταξης %c"
 
 #, fuzzy
 #~ msgid ""

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -153,26 +153,21 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Нет предшедствующего регулярного выражения"
 
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ввод перенаправлен в %s , строка %d"
 
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Ввод из %s"
 
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: m4/input.c:989
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Неопределенный синтаксический код %c"
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
@@ -284,7 +279,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
@@ -626,6 +621,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ". Проверка на возможную бесконечную рекурсию.\n"
+
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Неопределенный синтаксический код %c"
 
 #, fuzzy
 #~ msgid ""

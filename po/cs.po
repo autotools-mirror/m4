@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-19 19:39+0200\n"
+"POT-Creation-Date: 2002-10-29 11:25+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -158,28 +158,22 @@ msgid "No previous regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 # , c-format
-#: m4/input.c:319
+#: m4/input.c:233
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Vstup èten z %s, øádku %d"
 
 # , c-format
-#: m4/input.c:347
+#: m4/input.c:261
 #, c-format
 msgid "Input read from %s"
 msgstr "Vstup èten z %s"
 
-#: m4/input.c:769
+#: m4/input.c:680
 msgid "NONE"
 msgstr "®ÁDNÝ"
 
-# , c-format
-#: m4/input.c:989
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Syntaktický kód %c není definován"
-
-#: m4/input.c:1119 m4/input.c:1149
+#: m4/input.c:840 m4/input.c:870
 #, fuzzy
 msgid "EOF in string"
 msgstr "CHYBA: EOF v øetìzci"
@@ -299,7 +293,7 @@ msgid "Path search for `%s' found `%s'"
 msgstr "Hledán soubor `%s', nalezen soubor `%s'"
 
 # , c-format
-#: m4/symtab.c:414
+#: m4/symtab.c:386
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Jméno `%s' není známo\n"
@@ -669,6 +663,10 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
+
+# , c-format
+#~ msgid "Undefined syntax code %c"
+#~ msgstr "Syntaktický kód %c není definován"
 
 #, fuzzy
 #~ msgid ""
