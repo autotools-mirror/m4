@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 2000 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -111,7 +111,7 @@ typedef mpq_t number;
 extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
 					 const int radix, int min));
 static void numb_initialise M4_PARAMS((void));
-static void numb_obstack M4_PARAMS((struct obstack *obs, const number value, 
+static void numb_obstack M4_PARAMS((struct obstack *obs, const number value,
 				    const int radix, int min));
 static void mpq2mpz M4_PARAMS((mpz_t z, const number q, const char *noisily));
 static void mpz2mpq M4_PARAMS((number q, const mpz_t z));
@@ -145,7 +145,7 @@ numb_initialise ()
 
   numb_init(numb_ZERO);
   numb_set_si(&numb_ZERO,0);
- 
+
   numb_init(numb_ONE);
   numb_set_si(&numb_ONE,1);
 

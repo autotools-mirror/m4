@@ -1,16 +1,16 @@
 /* list.c -- maintain lists of types with forward pointer fields
    Copyright 2000 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -60,7 +60,7 @@ list_delete (head, delete)
       (*delete) (head);
       head = next;
     }
- 
+
   return NULL;
 }
 
@@ -80,7 +80,7 @@ list_remove (phead, match, find)
 {
   List *stale = NULL;
   VOID *result = NULL;
-  
+
 #if DEBUG
   if (!find)
     error (EXIT_FAILURE, 0,
@@ -157,7 +157,7 @@ list_find (head, match, find)
      ListCompare *find;
 {
   VOID *result = NULL;
-  
+
 #if DEBUG
   if (!find)
     error (EXIT_FAILURE, 0,
@@ -172,14 +172,14 @@ list_find (head, match, find)
     }
 
   return result;
-}  
+}
 
 size_t
 list_length (head)
      List *head;
 {
   size_t n;
-  
+
   for (n = 0; head; ++n)
     head = LIST_NEXT (head);
 

@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -62,7 +62,7 @@ produce_char_dump (buf, ch)
 	  *p++ = '\\';
 	  *p++ = '\\';
 	  break;
-	  
+
 	default:
 	  *p++ = ch;
 	  break;
@@ -104,7 +104,7 @@ produce_syntax_dump (file, ch, mask)
   if (offset)
       fprintf (file, "S%c%d\n%s\n", ch, count, buf);
 }
-  
+
 void
 produce_frozen_state (name)
      const char *name;
@@ -211,7 +211,7 @@ produce_frozen_state (name)
 	      if (module)
 		fprintf (file, ",%lu", (unsigned long) strlen (modname));
 	      fputc ('\n', file);
-			 
+
 	      fputs (symbol_name, file);
 	      fputs (SYMBOL_TEXT (symbol), file);
 	      if (module)
@@ -240,7 +240,7 @@ INTERNAL ERROR: Builtin not found in builtin table!")));
 						    m4_module_find_by_builtin);
 		  modname = module ? module->modname : NULL;
 		}
-	  
+
 	      if (module)
 		fprintf (file, ",%lu",
 			 (unsigned long) strlen (modname));
@@ -441,7 +441,7 @@ reload_frozen_state (name)
 	VALIDATE (',');
 	GET_CHARACTER;
 	GET_NUMBER (number[1]);
-	
+
 	if ((character == ',') && (version > 1))
 	  {
 	    /* 'F' operator accepts an optional third argument for
@@ -458,10 +458,10 @@ reload_frozen_state (name)
 	    /* 3 argument 'F' operations are invalid for format version 1.  */
 	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
 	  }
-	
+
 	VALIDATE ('\n');
 
-	
+
 	/* Get string contents.  */
 
 	GET_STRING (file, string[0], allocated[0], number[0]);
@@ -469,7 +469,7 @@ reload_frozen_state (name)
 	if ((number[2] > 0)  && (version > 1))
 	  GET_STRING (file, string[2], allocated[2], number[2]);
 	VALIDATE ('\n');
-      
+
 	/* Enter a macro having a builtin function as a definition.  */
 
 	{
@@ -485,7 +485,7 @@ reload_frozen_state (name)
 	    }
 
 	  bp = m4_builtin_find_by_name (bt, string[1]);
-	    
+
 	  if (bp)
 	    m4_builtin_define (module, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
@@ -513,9 +513,9 @@ reload_frozen_state (name)
 	VALIDATE ('\n');
 	GET_STRING (file, string[0], allocated[0], number[0]);
 	VALIDATE ('\n');
-	
+
 	m4_module_load (string[0], NULL);
-		
+
 	break;
 
       case 'S':
@@ -544,12 +544,12 @@ reload_frozen_state (name)
 		if (ch < 0)
 		  M4ERROR ((EXIT_FAILURE, 0,
 			    _("Premature end of frozen file")));
-		
+
 		string[0][i] = (unsigned char) ch;
 	      }
 	  }
 	string[0][number[0]] = '\0';
-	
+
 	m4_set_syntax (syntax, string[0]);
 	break;
 
@@ -581,7 +581,7 @@ reload_frozen_state (name)
 	GET_STRING (file, string[1], allocated[1], number[1]);
 	GET_CHARACTER;
 	VALIDATE ('\n');
-      
+
 	/* Act according to operation letter.  */
 
 	switch (operation)
@@ -616,7 +616,7 @@ reload_frozen_state (name)
 	    break;
 	  }
 	break;
-	
+
       case 'T':
 	GET_CHARACTER;
 
@@ -643,7 +643,7 @@ reload_frozen_state (name)
 	    /* 3 argument 'T' operations are invalid for format version 1.  */
 	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
 	  }
-	  
+
 	VALIDATE ('\n');
 
 	/* Get string contents.  */
@@ -652,7 +652,7 @@ reload_frozen_state (name)
 	if ((number[2] > 0)  && (version > 1))
 	  GET_STRING (file, string[2], allocated[2], number[2]);
 	VALIDATE ('\n');
-      
+
 	/* Enter a macro having an expansion text as a definition.  */
 	{
 	  const m4_module *module;
@@ -664,7 +664,7 @@ reload_frozen_state (name)
 	  m4_macro_define (module, string[0], string[1], M4_SYMBOL_PUSHDEF);
 	}
 	break;
-	
+
       case 'V':
 
 	/* Validate and save format version.  Only `1' and `2'

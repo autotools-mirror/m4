@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -254,7 +254,7 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
   LTDL_SET_PRELOADED_SYMBOLS();
-  
+
   m4_module_init ();
   m4_debug_init ();
   m4_include_init ();
@@ -438,7 +438,7 @@ main (int argc, char *const *argv, char *const *envp)
       m4_module_install ("m4");
       m4_module_install (no_gnu_extensions ? "traditional" : "gnu");
     }
-  
+
   /* Import environment variables as macros.  The definition are
      preprended to the macro definition list, so -U can override
      environment variables. */
@@ -491,7 +491,7 @@ main (int argc, char *const *argv, char *const *envp)
 	case 'm':
 	  m4_module_install (defines->macro);
 	  break;
-	
+
 	default:
 	  M4ERROR ((warning_status, 0,
 		    _("INTERNAL ERROR: Bad code in deferred arguments")));

@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989, 90, 91, 92, 93, 94, 98 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -49,14 +49,14 @@ extern int errno;
 
 /* Size of buffer size to use while copying files.  */
 #define COPY_BUFFER_SIZE (32 * 512)
- 
+
 #ifdef HAVE_TMPFILE
 extern FILE *tmpfile ();
 #endif
 
 /* Output functions.  Most of the complexity is for handling cpp like
    sync lines.
-  
+
    This code is fairly entangled with the code in input.c, and maybe it
    belongs there?  */
 
@@ -141,7 +141,7 @@ mkstemp (tmpl)
 
 #else /* not HAVE_MKTEMP */
 
-/* 
+/*
  * Here's a quick implementation of mkstemp() for systems that don't
  * have mktemp() such as QNX 4. Also included is a mktemp() impl. It's
  * vulnerable to races, just like the real thing.
@@ -688,7 +688,7 @@ m4_freeze_diversions (file)
   int divnum;
   struct diversion *diversion;
   struct stat file_stat;
-  
+
   saved_number = m4_current_diversion;
   last_inserted = 0;
   m4_make_diversion (0);

@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989-1994, 1998, 99 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -27,10 +27,10 @@
 #define DEBUG_MODULES  /* Define this to see runtime debug info. */
 #undef DEBUG_MODULES
 
-/* 
+/*
  * This file implements dynamic modules in GNU m4.  A module is a
  * compiled shared object, that can be linked into GNU m4 at run
- * time. Information about creating modules is in ../modules/README. 
+ * time. Information about creating modules is in ../modules/README.
  *
  * The current implementation uses libltdl, which is in turn can load
  * modules using either dlopen(3) (exists on GNU/Linux, OSF, Solaris,
@@ -124,9 +124,9 @@ m4_module_find_by_modname (elt, match)
 
   if (strcmp (module->modname, (char *) match) == 0)
     return (VOID *) module;
-  
+
   return NULL;
-}  
+}
 
 VOID *
 m4_module_find_by_builtin (elt, match)
@@ -149,7 +149,7 @@ m4_module_find_by_builtin (elt, match)
   return NULL;
 }
 
-/* 
+/*
  * Initialisation.  Currently the module search path in path.c is
  * initialised from M4MODPATH.  Only absolute path names are accepted to
  * prevent the path search of the dlopen library from finding wrong
@@ -180,11 +180,11 @@ m4_module_init ()
 #ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE("Module system initialised.");
 #endif /* DEBUG_MODULES */
- 
+
       if (path != NULL)
 	errors = lt_dladdsearchdir(path);
     }
-    
+
   if (errors == 0)
     errors = lt_dladdsearchdir(MODULE_PATH);
 
@@ -197,7 +197,7 @@ m4_module_init ()
     }
 }
 
-/* 
+/*
  * Load a module.  MODNAME can be a absolute file name or, if relative,
  * it is searched for in the module path.  The module is unloaded in
  * case of error.
@@ -239,7 +239,7 @@ m4_module_load (modname, obs)
 
 	  /* increment the load counter */
 	  module->ref_count++;
-	  
+
 #ifdef DEBUG_MODULES
 	  M4_DEBUG_MESSAGE2("module %s: now has %d references.",
 			 modname, module->ref_count);
@@ -290,7 +290,7 @@ m4_module_load (modname, obs)
   if (handle)
     {
       module = XMALLOC (m4_module, 1);
-      
+
 #ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE1("module %s: loaded ok", modname);
 #endif /* DEBUG_MODULES */
@@ -340,8 +340,8 @@ m4_module_install (modname)
 }
 
 
-/* 
- * Unload a module.  
+/*
+ * Unload a module.
  */
 void
 m4_module_unload (modname, obs)
@@ -366,7 +366,7 @@ m4_module_unload (modname, obs)
 	}
       prev = cur;
     }
-  
+
   if (handle == NULL)
     {
       M4ERROR ((warning_status, 0,
@@ -437,7 +437,7 @@ m4_module_unload (modname, obs)
 	    prev->next = (List *) module->next;
 	  else
 	    m4_modules = (List *) module->next;
-      
+
 	  xfree (module->modname);
 	  xfree (module);
 	}

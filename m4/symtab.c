@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -118,51 +118,51 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	}
 
       /* If just searching, return status of search.  */
-      
+
       if (mode == M4_SYMBOL_LOOKUP)
       return cmp == 0 ? symbol : NULL;
-      
+
       /* Symbol not found.  */
-      
+
       spp = (prev != NULL) ?  &prev->next : &m4_symtab[h];
-      
+
       switch (mode)
 	{
-	  
+
 	case M4_SYMBOL_INSERT:
-	  
+
 	  /* Return the symbol, if the name was found in the table.
 	   Otherwise, just insert the name, and return the new symbol.  */
-	  
+
 	  if (cmp == 0 && symbol != NULL)
 	  return symbol;
 	  /* Fall through.  */
-	  
+
 	case M4_SYMBOL_PUSHDEF:
-	  
+
 	  /* Insert a name in the symbol table.  If there is already a symbol
 	   with the name, insert this in front of it, and mark the old
 	   symbol as "shadowed".  */
-	  
+
 	  symbol = XMALLOC (m4_symbol, 1);
 	  SYMBOL_TYPE (symbol) = M4_TOKEN_VOID;
 	  SYMBOL_TRACED (symbol) = SYMBOL_SHADOWED (symbol) = FALSE;
 	  SYMBOL_NAME (symbol) = xstrdup (name);
-	  
+
 	  SYMBOL_NEXT (symbol) = *spp;
 	  (*spp) = symbol;
-	  
+
 	  if (mode == M4_SYMBOL_PUSHDEF && cmp == 0)
 	    {
 	      SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = TRUE;
 	      SYMBOL_TRACED (symbol) = SYMBOL_TRACED (SYMBOL_NEXT (symbol));
 	    }
 	  return symbol;
-	  
+
 	case M4_SYMBOL_DELETE:
-	  
+
 	  /* Delete all occurences of symbols with NAME.  */
-	  
+
 	  if (cmp != 0 || symbol == NULL)
 	  return NULL;
 	  do
@@ -173,11 +173,11 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	    }
 	  while (symbol != NULL && strcmp (name, SYMBOL_NAME (symbol)) == 0);
 	  return NULL;
-	  
+
 	case M4_SYMBOL_POPDEF:
-	  
+
 	  /* Delete the first occurence of a symbol with NAME.  */
-	  
+
 	  if (cmp != 0 || symbol == NULL)
 	  return NULL;
 	  if (SYMBOL_NEXT (symbol) != NULL && cmp == 0)
@@ -185,7 +185,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	  *spp = SYMBOL_NEXT (symbol);
 	  free_symbol (symbol);
 	  return NULL;
-	  
+
 	default:
 	  M4ERROR ((warning_status, 0,
 		    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()")));
@@ -195,7 +195,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 
   return NULL;
 }
-  
+
 /*--------------------------------------------------------------------.
  | The following function removes from the symbol table, every symbol |
  | that references a function in the given builtin table.             |
@@ -210,7 +210,7 @@ m4_remove_table_reference_symbols (builtins, macros)
 {
   m4_symbol *symbol;
   int h;
-      
+
   /* Look in each bucket of the hashtable... */
   for (h = 0; h < hash_table_size; h++)
     {
@@ -236,11 +236,11 @@ m4_remove_table_reference_symbols (builtins, macros)
 			SYMBOL_NEXT (prev) = SYMBOL_NEXT (symbol);
 		      else
 			m4_symtab[h] = SYMBOL_NEXT (symbol);
-		      
+
 		      /* Unshadow any symbol that this one had shadowed. */
 		      if (SYMBOL_NEXT (symbol) != NULL)
 			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
-		      
+
 		      free_symbol (symbol);
 
 		      /* Maintain the loop invariant. */
@@ -248,7 +248,7 @@ m4_remove_table_reference_symbols (builtins, macros)
 		    }
 	      }
 	      break;
-	      
+
 	    case M4_TOKEN_TEXT:
 	      /* For symbol macros referencing a value in
 		 PREDEFINED_TABLE.  */
@@ -262,11 +262,11 @@ m4_remove_table_reference_symbols (builtins, macros)
 			SYMBOL_NEXT (prev) = SYMBOL_NEXT (symbol);
 		      else
 			m4_symtab[h] = SYMBOL_NEXT (symbol);
-		      
+
 		      /* Unshadow any symbol that this one had shadowed. */
 		      if (SYMBOL_NEXT (symbol) != NULL)
 			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
-		      
+
 		      free_symbol (symbol);
 
 		      /* Maintain the loop invariant. */
@@ -274,7 +274,7 @@ m4_remove_table_reference_symbols (builtins, macros)
 		    }
 	      }
 	      break;
-		
+
 	    default:
 	      /*NOWORK*/
 	      break;

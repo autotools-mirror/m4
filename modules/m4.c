@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 2000 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -108,9 +108,9 @@ boolean m4_resident_module = TRUE;
 
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
-   
+
 	void m4_MACRONAME (struct obstack *obs, int argc, char *argv[]);
-   
+
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
    individual arguments to the macro.  Please note that in general

@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -29,7 +29,7 @@
 #define DEBUG_SYNTAX
 #undef DEBUG_SYNTAX
 
-/* 
+/*
    Unread input can be either files, that should be read (eg. included
    files), strings, which should be rescanned (eg. macro expansion
    text), single characters or quoted macro definitions (as returned by
@@ -44,7 +44,7 @@
    input_block.  When a input_block is exausted, its reader returns
    CHAR_RETRY which causes the input_block to be popped from the
    input_stack.
-   
+
    The macro "m4wrap" places the text to be saved on another input stack,
    on the obstack "wrapup_stack", whose top is "wsp".  When EOF is seen
    on normal input (eg, when "input_stack" is empty), input is switched
@@ -52,7 +52,7 @@
    current input stack, whether it be "input_stack" or "wrapup_stack",
    are done through a pointer "current_input", which points to either
    "input_stack" or "wrapup_stack".
-   
+
    Pushing new input on the input stack is done by push_file (),
    push_string (), push_single () or push_wrapup () (for wrapup text),
    and push_macro () (for macro definitions).  Because macro expansion
@@ -62,7 +62,7 @@
    (), which return a pointer to the final text.  The input_block *next
    is used to manage the coordination between the different push
    routines.
-   
+
    The current file and line number are stored in two global variables,
    for use by the error handling functions in m4.c.  Whenever a file
    input_block is pushed, the current file name and line number is saved
@@ -126,7 +126,7 @@
    M4_SYNTAX_LQUOTE	Reads all until balanced M4_SYNTAX_RQUOTE
 
    M4_SYNTAX_OTHER	and M4_SYNTAX_NUM
-			Reads all M4_SYNTAX_OTHER and M4_SYNTAX_NUM 
+			Reads all M4_SYNTAX_OTHER and M4_SYNTAX_NUM
    M4_SYNTAX_SPACE	Reads all M4_SYNTAX_SPACE
    M4_SYNTAX_ACTIVE	Returns a single char as a word
    the rest		Returned as a single char
@@ -911,7 +911,7 @@ m4_syntax_code (ch)
     case 'S': case 's': code = M4_SYNTAX_SPACE;  break;
     case 'W': case 'w': code = M4_SYNTAX_ALPHA;  break;
     case 'D': case 'd': code = M4_SYNTAX_NUM;    break;
-      
+
     case '(': code = M4_SYNTAX_OPEN;   break;
     case ')': code = M4_SYNTAX_CLOSE;  break;
     case ',': code = M4_SYNTAX_COMMA;  break;
@@ -1025,7 +1025,7 @@ set_syntax_internal (code, ch)
     m4_syntax_table[ch] = code;
 
 #ifdef DEBUG_SYNTAX
-  fprintf(stderr, "Set syntax %o %c = %04X\n", 
+  fprintf(stderr, "Set syntax %o %c = %04X\n",
 	  ch, isprint(ch) ? ch : '-',
 	  m4_syntax_table[ch]);
 #endif
@@ -1040,7 +1040,7 @@ unset_syntax_attribute (code, ch)
     m4_syntax_table[ch] &= ~code;
 
 #ifdef DEBUG_SYNTAX
-  fprintf(stderr, "Unset syntax %o %c = %04X\n", 
+  fprintf(stderr, "Unset syntax %o %c = %04X\n",
 	  ch, isprint(ch) ? ch : '-',
 	  m4_syntax_table[ch]);
 #endif
@@ -1272,7 +1272,7 @@ m4_next_token (td)
 
 #endif /* ENABLE_CHANGEWORD */
 
-			
+
     else if (M4_IS_LQUOTE(ch))		/* QUOTED STRING, SINGLE QUOTES */
       {
 	quote_level = 1;
@@ -1332,7 +1332,7 @@ m4_next_token (td)
 
 	if (M4_IS_OTHER(ch) || M4_IS_NUM(ch))
 	  {
-	    while ((ch = next_char()) != CHAR_EOF 
+	    while ((ch = next_char()) != CHAR_EOF
 		   && (M4_IS_OTHER(ch) || M4_IS_NUM(ch)))
 	      obstack_1grow (&token_stack, ch);
 
