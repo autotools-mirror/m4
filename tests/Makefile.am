@@ -54,4 +54,4 @@ $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
 
 # Run the test suite on the *installed* tree.
 installcheck-local:
-	$(SHELL) $(srcdir)/$(TESTSUITE) AUTOTEST_PATH=$$dc_install_base/bin
+	$(SHELL) $(srcdir)/$(TESTSUITE) AUTOTEST_PATH=$(exec_prefix)/bin

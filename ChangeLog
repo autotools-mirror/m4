@@ -1,5 +1,14 @@
 2001-08-27  Akim Demaille  <akim@epita.fr>
 
+	* tests/Makefile.am (installcheck-local): Don't use
+	`dc_install_base' which is not visible here, but `exec_prefix'
+	which is clearly the RT anyway.
+	* tests/testsuite.at (AT_CHECK_M4): Don't pass -M here since it is
+	related to testing a now installed m4.
+	* tests/m4: Do it here.
+
+2001-08-27  Akim Demaille  <akim@epita.fr>
+
 	* tests/others.at (indir): Formatting change.
 
 2001-08-27  Akim Demaille  <akim@epita.fr>
