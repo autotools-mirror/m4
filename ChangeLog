@@ -2,6 +2,7 @@
 
 	* m4/symtab.c (m4_symtab_remove_module_references):  Renamed as
 	this from m4_remove_table_reference_symbols().
+	* m4/m4module.h, m4/module.c: Updated all references.
 
 2001-09-07  Akim Demaille  <akim@epita.fr>
 

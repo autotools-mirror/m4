@@ -70,7 +70,7 @@
  * this case.
  *
  * To unload a module, use m4_module_unload(). which uses
- * m4_remove_table_reference_symbols() to remove the builtins defined by
+ * m4_symtab_remove_module_references() to remove the builtins defined by
  * the unloaded module from the symbol table.  If the module has been
  * loaded several times with calls to m4_module_load, then the module will
  * not be unloaded until the same number of calls to m4_module_unload()
@@ -479,7 +479,7 @@ m4_module_unload (const char *name, struct obstack *obs)
 	     equal to 1.  If m4_module_close is called again on a
 	     resident module after the references have already been
 	     removed, we needn't try to remove them again!  */
-	  m4_remove_table_reference_symbols (handle);
+	  m4_symtab_remove_module_references (handle);
 
 #ifdef DEBUG_MODULES
 	  M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);

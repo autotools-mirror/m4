@@ -240,7 +240,7 @@ m4_symbol_delete (const char *name)
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
 void
-m4_remove_table_reference_symbols (lt_dlhandle handle)
+m4_symtab_remove_module_references (lt_dlhandle handle)
 {
   m4_hash_iterator *place = 0;
 

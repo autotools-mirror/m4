@@ -103,7 +103,7 @@ extern m4_symbol *m4_symbol_insert	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
 extern int	m4_symtab_apply	(m4_symtab_apply_func *, void *);
-extern void	m4_remove_table_reference_symbols (lt_dlhandle);
+extern void	m4_symtab_remove_module_references (lt_dlhandle);
 
 
 /* Various different token types.  */
