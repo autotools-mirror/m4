@@ -324,6 +324,7 @@ m4_get_hash_length (m4_hash *hash)
   return HASH_LENGTH (hash);
 }
 
+#if 0
 /* Force the number of buckets to be the given value.  You probably ought
    not to be using this function once the table has been in use, since
    the maximum density algorithm will grow the number of buckets back to
@@ -355,6 +356,7 @@ m4_hash_resize (m4_hash *hash, size_t size)
 
   XFREE (original_buckets);
 }
+#endif
 
 /* If the node density breaks the threshold, increase the size of
    HASH and repopulate with the original nodes.  */

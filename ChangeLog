@@ -1,3 +1,10 @@
+2003-06-26  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/hash.c (m4_hash_resize): ifdefed out.  This function is
+	neither used nor particularly appropriate since it exposes the
+	internal workings of the hash module.  I haven't yet decided
+	whether to remove it entirely.
+
 2003-06-20  Gary V. Vaughan  <gary@gnu.org>
 
 	Two related changes, and a huge knockon effect throughout the
