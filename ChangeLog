@@ -1,5 +1,12 @@
 2001-10-01  Akim Demaille  <akim@epita.fr>
 
+	* tests/generate.awk: Tag the tests with `documentation'.
+	* tests/modules.at (AT_CHECK_M4_MODTEST): New.
+	Use the make the existing modtest tests more uniform, and complete
+	the set of possibilities.
+
+2001-10-01  Akim Demaille  <akim@epita.fr>
+
 	* config/gmp.m4: Consult the user before using GMP: use
 	--without-gmp.
 	* configure.ac: Adjust.

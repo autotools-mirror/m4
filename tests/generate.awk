@@ -140,7 +140,8 @@ function new_group(node) {
   printf ("## %s.  ##\n", node);
   printf ("## %s ##\n", banner);
   printf ("\n");
-  printf ("AT_SETUP([[%s]])\n\n", node);
+  printf ("AT_SETUP([[%s]])\n", node);
+  printf ("AT_KEYWORDS([[documentation]])\n\n");
 }
 
 function new_test(input, status, output, error) {
