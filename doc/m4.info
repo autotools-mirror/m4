@@ -1,11 +1,11 @@
-This is m4.info, produced by makeinfo version 4.7 from m4.texinfo.
+This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
 
 INFO-DIR-SECTION GNU programming tools
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
 END-INFO-DIR-ENTRY
 
-   This file documents GNU M4 1.4.3.
+   This file documents GNU M4 1.4.3a.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
 Software Foundation, Inc.
@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4.3.  It is now to be considered stable, future
+   This is release 1.4.3a.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -152,7 +152,7 @@ Diverting and undiverting output
 Macros for text handling
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2077,7 +2077,7 @@ ways, extracting substrings, searching, substituting, and so on.
 * Menu:
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2085,7 +2085,7 @@ ways, extracting substrings, searching, substituting, and so on.
 * Format::                      Formatting strings (printf-like)
 
 
-File: m4.info,  Node: Len,  Next: Index,  Prev: Text handling,  Up: Text handling
+File: m4.info,  Node: Len,  Next: Index macro,  Prev: Text handling,  Up: Text handling
 
 10.1 Calculating length of strings
 ==================================
@@ -2104,7 +2104,7 @@ which expands to the length of STRING, as a decimal number.
    The builtin macro `len' is recognized only when given arguments.
 
 
-File: m4.info,  Node: Index,  Next: Regexp,  Prev: Len,  Up: Text handling
+File: m4.info,  Node: Index macro,  Next: Regexp,  Prev: Len,  Up: Text handling
 
 10.2 Searching for substrings
 =============================
@@ -2125,7 +2125,7 @@ not occur in STRING, `index' expands to `-1'.
    The builtin macro `index' is recognized only when given arguments.
 
 
-File: m4.info,  Node: Regexp,  Next: Substr,  Prev: Index,  Up: Text handling
+File: m4.info,  Node: Regexp,  Next: Substr,  Prev: Index macro,  Up: Text handling
 
 10.3 Searching for regular expressions
 ======================================
@@ -3094,7 +3094,7 @@ characters removed in the index.
 * ifelse:                                Ifelse.               (line  6)
 * include:                               Include.              (line  6)
 * incr:                                  Incr.                 (line  6)
-* index:                                 Index.                (line  6)
+* index:                                 Index macro.          (line  6)
 * indir:                                 Indir.                (line  6)
 * len:                                   Len.                  (line  6)
 * line:                                  Errprint.             (line 26)
@@ -3120,81 +3120,81 @@ characters removed in the index.
 
 
 Tag Table:
-Node: Top984
-Node: Preliminaries6982
-Node: Intro7708
-Node: History9322
-Node: Invoking m410248
-Node: Bugs17049
-Node: Manual18322
-Node: Syntax19693
-Node: Names20281
-Node: Quoted strings20659
-Node: Other tokens21249
-Node: Comments21471
-Node: Macros22139
-Node: Invocation22633
-Node: Inhibiting Invocation23449
-Node: Macro Arguments26600
-Node: Quoting Arguments27869
-Node: Macro expansion28679
-Node: Definitions29347
-Node: Define30124
-Node: Arguments30940
-Node: Pseudo Arguments32425
-Node: Undefine34281
-Node: Defn34948
-Node: Pushdef36110
-Node: Indir37951
-Node: Builtin38720
-Node: Conditionals39171
-Node: Ifdef39879
-Node: Ifelse40653
-Node: Loops42424
-Node: Debugging45701
-Node: Dumpdef46281
-Node: Trace47135
-Node: Debug Levels48520
-Node: Debug Output50910
-Node: Input Control51437
-Node: Dnl51975
-Node: Changequote53107
-Node: Changecom54478
-Node: Changeword55769
-Node: M4wrap58986
-Node: File Inclusion60195
-Node: Include60512
-Node: Search Path62447
-Node: Diversions63238
-Node: Divert64476
-Node: Undivert65613
-Node: Divnum67552
-Node: Cleardiv68102
-Node: Text handling69143
-Node: Len69866
-Node: Index70271
-Node: Regexp70863
-Node: Substr71961
-Node: Translit72588
-Node: Patsubst74038
-Node: Format76138
-Node: Arithmetic77634
-Node: Incr78082
-Node: Eval78593
-Node: UNIX commands81599
-Node: Syscmd82073
-Node: Esyscmd82794
-Node: Sysval83747
-Node: Maketemp84161
-Node: Miscellaneous84911
-Node: Errprint85283
-Node: M4exit86285
-Node: Frozen files87079
-Node: Compatibility92002
-Node: Extensions92623
-Node: Incompatibilities94986
-Node: Other Incompat95435
-Node: Concept index97605
-Node: Macro index107456
+Node: Top985
+Node: Preliminaries6984
+Node: Intro7710
+Node: History9324
+Node: Invoking m410250
+Node: Bugs17051
+Node: Manual18324
+Node: Syntax19695
+Node: Names20283
+Node: Quoted strings20661
+Node: Other tokens21251
+Node: Comments21473
+Node: Macros22141
+Node: Invocation22635
+Node: Inhibiting Invocation23451
+Node: Macro Arguments26602
+Node: Quoting Arguments27871
+Node: Macro expansion28681
+Node: Definitions29349
+Node: Define30126
+Node: Arguments30942
+Node: Pseudo Arguments32427
+Node: Undefine34283
+Node: Defn34950
+Node: Pushdef36112
+Node: Indir37953
+Node: Builtin38722
+Node: Conditionals39173
+Node: Ifdef39881
+Node: Ifelse40655
+Node: Loops42426
+Node: Debugging45703
+Node: Dumpdef46283
+Node: Trace47137
+Node: Debug Levels48522
+Node: Debug Output50912
+Node: Input Control51439
+Node: Dnl51977
+Node: Changequote53109
+Node: Changecom54480
+Node: Changeword55771
+Node: M4wrap58988
+Node: File Inclusion60197
+Node: Include60514
+Node: Search Path62449
+Node: Diversions63240
+Node: Divert64478
+Node: Undivert65615
+Node: Divnum67554
+Node: Cleardiv68104
+Node: Text handling69145
+Node: Len69868
+Node: Index macro70279
+Node: Regexp70877
+Node: Substr71981
+Node: Translit72608
+Node: Patsubst74058
+Node: Format76158
+Node: Arithmetic77654
+Node: Incr78102
+Node: Eval78613
+Node: UNIX commands81619
+Node: Syscmd82093
+Node: Esyscmd82814
+Node: Sysval83767
+Node: Maketemp84181
+Node: Miscellaneous84931
+Node: Errprint85303
+Node: M4exit86305
+Node: Frozen files87099
+Node: Compatibility92022
+Node: Extensions92643
+Node: Incompatibilities95006
+Node: Other Incompat95455
+Node: Concept index97625
+Node: Macro index107476
 
 End Tag Table
