@@ -42,12 +42,16 @@
    of fluff in these functions to make sure that such symbols (with empty
    value stacks) are invisible to the users of this module.  */
 
-#define M4_SYMTAB_DEFAULT_SIZE 2047
+#define M4_SYMTAB_DEFAULT_SIZE		2047
+#define M4_ARG_SIGNATURE_DEFAULT_SIZE	7
 
-static int	symbol_destroy		(m4_hash *hash, const void *name,
+static m4_symbol *symtab_fetch		(m4_symtab*, const char *);
+static void	  symbol_popval		(m4_symbol *symbol);
+static int	  symbol_destroy	(m4_hash *hash, const void *name,
 					 void *symbol, void *ignored);
-static int	arg_destroy		(m4_hash *hash, const void *name,
+static int	  arg_destroy		(m4_hash *hash, const void *name,
 					 void *arg, void *ignored);
+static m4_hash *  arg_signature_parse	(const char *name, const char *param);
 
 
 
@@ -71,6 +75,28 @@ m4_symtab_delete (m4_symtab *symtab)
   m4_hash_delete ((m4_hash *) symtab);
 }
 
+static m4_symbol *
+symtab_fetch (m4_symtab *symtab, const char *name)
+{
+  m4_symbol **psymbol;
+  m4_symbol *symbol;
+
+  assert (symtab);
+  assert (name);
+
+  psymbol = (m4_symbol **) m4_hash_lookup ((m4_hash *) symtab, name);
+  if (psymbol)
+    {
+      symbol = *psymbol;
+    }
+  else
+    {
+      symbol = XCALLOC (m4_symbol, 1);
+      m4_hash_insert ((m4_hash *) symtab, xstrdup (name), symbol);
+    }
+
+  return symbol;
+}
 
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
@@ -155,46 +181,60 @@ m4_symbol_lookup (m4_symtab *symtab, const char *name)
 
 
 /* Insert NAME into the symbol table.  If there is already a symbol
-   associated with NAME, push the new value on top of the value stack
+   associated with NAME, push the new VALUE on top of the value stack
    for this symbol.  Otherwise create a new association.  */
 m4_symbol *
-m4_symbol_pushdef (m4_symtab *symtab, const char *name)
+m4_symbol_pushdef (m4_symtab *symtab, const char *name, m4_token *value)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup ((m4_hash *) symtab,
-						       name);
+  m4_symbol *symbol;
 
-  m4_symbol *symbol = 0;
-  m4_token *value   = XCALLOC (m4_token, 1);
+  assert (symtab);
+  assert (name);
+  assert (value);
 
-  if (psymbol)
-    {
-      symbol = *psymbol;
-      TOKEN_NEXT (value) = SYMBOL_TOKEN (symbol);
-    }
-  else
-    symbol = XCALLOC (m4_symbol, 1);
-
+  symbol 		= symtab_fetch (symtab, name);
+  TOKEN_NEXT (value)	= SYMBOL_TOKEN (symbol);
   SYMBOL_TOKEN (symbol)	= value;
-  SYMBOL_TYPE (symbol)	= M4_TOKEN_VOID;
 
-  if (!psymbol)
-    m4_hash_insert ((m4_hash *) symtab, xstrdup (name), symbol);
+  assert (SYMBOL_TOKEN (symbol));
 
   return symbol;
 }
 
-
 /* Return the symbol associated with NAME in the symbol table, creating
-   a new symbol if necessary.  */
+   a new symbol if necessary.  In either case set the symbol's VALUE.  */
 m4_symbol *
-m4_symbol_define (m4_symtab *symtab, const char *name)
+m4_symbol_define (m4_symtab *symtab, const char *name, m4_token *value)
 {
-  m4_symbol *symbol = m4_symbol_lookup (symtab, name);
+  m4_symbol *symbol;
 
-  if (symbol)
-    return symbol;
+  assert (symtab);
+  assert (name);
+  assert (value);
 
-  return m4_symbol_pushdef (symtab, name);
+  symbol = symtab_fetch (symtab, name);
+  if (SYMBOL_TOKEN (symbol))
+    symbol_popval (symbol);
+
+  TOKEN_NEXT (value)	= SYMBOL_TOKEN (symbol);
+  SYMBOL_TOKEN (symbol)	= value;
+
+  assert (SYMBOL_TOKEN (symbol));
+
+  return symbol;
+}
+
+void
+m4_set_symbol_traced (m4_symtab *symtab, const char *name)
+{
+  m4_symbol *symbol;
+
+  assert (symtab);
+  assert (name);
+
+  symbol = symtab_fetch (symtab, name);
+
+  SYMBOL_TRACED (symbol) = TRUE;
 }
 
 
@@ -206,26 +246,10 @@ m4_symbol_popdef (m4_symtab *symtab, const char *name)
 {
   m4_symbol **psymbol	= (m4_symbol **) m4_hash_lookup ((m4_hash *) symtab,
 							 name);
-  m4_token  *stale	= NULL;
-
   assert (psymbol);
   assert (*psymbol);
 
-  stale = SYMBOL_TOKEN (*psymbol);
-
-  if (stale)
-    {
-      SYMBOL_TOKEN (*psymbol) = TOKEN_NEXT (stale);
-
-      if (TOKEN_ARG_SIGNATURE (stale))
-	{
-	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale), arg_destroy, NULL);
-	  m4_hash_delete (TOKEN_ARG_SIGNATURE (stale));
-	}
-      if (TOKEN_TYPE (stale) == M4_TOKEN_TEXT)
-	XFREE (TOKEN_TEXT (stale));
-      XFREE (stale);
-    }
+  symbol_popval (*psymbol);
 
   /* Only remove the hash table entry if the last value in the
      symbol value stack was successfully removed.  */
@@ -237,6 +261,30 @@ m4_symbol_popdef (m4_symtab *symtab, const char *name)
       }
 }
 
+
+static void
+symbol_popval (m4_symbol *symbol)
+{
+  m4_token  *stale;
+
+  assert (symbol);
+
+  stale = SYMBOL_TOKEN (symbol);
+
+  if (stale)
+    {
+      SYMBOL_TOKEN (symbol) = TOKEN_NEXT (stale);
+
+      if (TOKEN_ARG_SIGNATURE (stale))
+	{
+	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale), arg_destroy, NULL);
+	  m4_hash_delete (TOKEN_ARG_SIGNATURE (stale));
+	}
+      if (TOKEN_TYPE (stale) == M4_TOKEN_TEXT)
+	XFREE (TOKEN_TEXT (stale));
+      XFREE (stale);
+    }
+}
 
 /* Callback used by m4_symbol_popdef () to release the memory used
    by values in the arg_signature hash.  */
@@ -256,67 +304,162 @@ arg_destroy (m4_hash *hash, const void *name, void *arg, void *ignored)
   return 0;
 }
 
-
-/* Set the type and value of a symbol according to the passed
-   arguments.  This function is usually passed a newly pushdef()d symbol
-   that is already interned in the symbol table.  The traced bit should
-   be appropriately set by the caller.  */
+#if 0
 m4_symbol *
-m4__symbol_set_builtin (m4_symbol *symbol, m4_token *token)
+m4_symbol_push_token (m4_symtab *symtab, const char *name, m4_token *token)
 {
-  assert (symbol);
+  m4_token *next;
+
+  assert (symtab);
+  assert (name);
   assert (token);
-  assert (TOKEN_FUNC (token));
-  assert (TOKEN_HANDLE (token));
-  assert (TOKEN_TYPE (token) == M4_TOKEN_FUNC);
 
-  if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (symbol));
+  /* If it's a function, it must have come from a module.  */
+  assert ((TOKEN_TYPE (token) != M4_TOKEN_FUNC) || TOKEN_HANDLE (token));
 
-  SYMBOL_TYPE (symbol)		= TOKEN_TYPE (token);
-  SYMBOL_FUNC (symbol)		= TOKEN_FUNC (token);
-  SYMBOL_HANDLE (symbol)	= TOKEN_HANDLE (token);
-  SYMBOL_FLAGS (symbol)		= TOKEN_FLAGS (token);
-  SYMBOL_ARG_SIGNATURE (symbol)	= TOKEN_ARG_SIGNATURE (token);
-  SYMBOL_MIN_ARGS (symbol)	= TOKEN_MIN_ARGS (token);
-  SYMBOL_MAX_ARGS (symbol)	= TOKEN_MAX_ARGS (token);
+#if M4PARAMS
+  const char *openp  = NULL;
+  const char *params = NULL;
+
+  if (!no_gnu_extensions)
+    {
+      /* If name contains an open paren, then parse before that paren
+	 as the actual name, and the rest as a formal parameter list.  */
+      size_t len = 0;
+      for (openp = name; *openp && !M4_IS_OPEN (*openp); ++openp)
+	++len;
+
+      if (*openp)
+	{
+	  name   = xstrzdup (name, len);
+	  params = 1+ openp;
+	}
+    }
+
+  if (params)
+    {
+      /* Make a hash table to map formal parameter names to
+	 argv offsets, and store that in the symbol's token.  */
+      TOKEN_ARG_SIGNATURE (token) = arg_signature_parse (name, params);
+    }
+#endif
+
+  SYMBOL_TOKEN (symbol) = token;
+
+#if M4PARAMS
+  /* If we split name on open paren, free the copied substring.  */
+  if (params)
+    xfree ((char *) name);
+#endif
 
   return symbol;
 }
+#endif
 
-/* ...and similarly for macro valued symbols.  */
-m4_symbol *
-m4__symbol_set_macro (m4_symbol *symbol, m4_token *token)
+void
+m4_token_copy (m4_token *dest, m4_token *src)
 {
-  assert (symbol);
-  assert (TOKEN_TEXT (token));
-  assert (TOKEN_TYPE (token) == M4_TOKEN_TEXT);
+  m4_token *next;
 
-  if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (symbol));
+  assert (dest);
+  assert (src);
 
-  SYMBOL_TYPE (symbol)		= TOKEN_TYPE (token);
-  SYMBOL_TEXT (symbol) 		= xstrdup (TOKEN_TEXT (token));
-  SYMBOL_HANDLE (symbol) 	= TOKEN_HANDLE (token);
-  SYMBOL_FLAGS (symbol)		= TOKEN_FLAGS (token);
-  SYMBOL_ARG_SIGNATURE (symbol)	= TOKEN_ARG_SIGNATURE (token);
-  SYMBOL_MIN_ARGS (symbol)	= TOKEN_MIN_ARGS (token);
-  SYMBOL_MAX_ARGS (symbol)	= TOKEN_MAX_ARGS (token);
+  if (TOKEN_TYPE (dest) == M4_TOKEN_TEXT)
+    xfree (TOKEN_TEXT (dest));
 
-  return symbol;
+#if M4PARAMS
+  if (TOKEN_ARG_SIGNATURE (dest))
+    {
+      m4_hash_apply (TOKEN_ARG_SIGNATURE (dest), arg_destroy, NULL);
+      m4_hash_delete (TOKEN_ARG_SIGNATURE (dest));
+    }
+#endif
+
+  /* Copy the token contents over, being careful to preserve
+     the next pointer.  */
+  next = TOKEN_NEXT (dest);
+  bcopy (src, dest, sizeof (m4_token));
+  TOKEN_NEXT (dest) = next;
+
+  /* Caller is supposed to free text token strings, so we have to
+     copy the string not just its address in that case.  */
+  if (TOKEN_TYPE (src) == M4_TOKEN_TEXT)
+    TOKEN_TEXT (dest) = xstrdup (TOKEN_TEXT (src));
+
+#if M4PARAMS
+  if (TOKEN_ARG_SIGNATURE (src))
+    TOKEN_ARG_SIGNATURE (dest) = m4_hash_dup (TOKEN_ARG_SIGNATURE (token));
+#endif
 }
 
+#if M4PARAMS
+static m4_hash *
+arg_signature_parse (const char *name, const char *params)
+{
+  m4_hash *arg_signature;
+  const char *commap;
+  int offset;
+
+  assert (params);
+
+  arg_signature = m4_hash_new (M4_ARG_SIGNATURE_DEFAULT_SIZE,
+			m4_hash_string_hash, m4_hash_string_cmp);
+
+  for (offset = 1; *params && !M4_IS_CLOSE (*params); ++offset)
+    {
+      size_t len = 0;
+
+      /* Skip leading whitespace.  */
+      while (M4_IS_SPACE (*params))
+	++params;
+
+      for (commap = params; *commap && M4_IS_IDENT (*commap); ++commap)
+	++len;
+
+      /* Skip trailing whitespace.  */
+      while (M4_IS_SPACE (*commap))
+	++commap;
+
+      if (!M4_IS_COMMA (*commap) && !M4_IS_CLOSE (*commap))
+	M4ERROR ((EXIT_FAILURE, 0,
+		  _("Error: %s: syntax error in parameter list at char `%c'"),
+		  name, *commap));
+
+      /* Skip parameter delimiter.  */
+      if (M4_IS_COMMA (*commap))
+	++commap;
+
+      if (len)
+	{
+	  struct m4_token_arg *arg = XCALLOC (struct m4_token_arg, 1);
+
+	  TOKEN_ARG_INDEX (arg) = offset;
+
+	  m4_hash_insert (arg_signature, xstrzdup (params, len), arg);
+
+	  params = commap;
+	}
+    }
+
+  if (!M4_IS_CLOSE (*commap))
+    M4WARN ((warning_status, 0,
+	     _("Warning: %s: unterminated parameter list"), name));
+
+  return arg_signature;
+}
+#endif
 
 
 
 #ifdef DEBUG_SYM
 
-static int  symtab_print_list (const void *name, void *symbol, void *ignored);
-static void symtab_debug      (void)
-static void symtab_dump	      (void);
+static int  symtab_print_list (m4_hash *hash, const void *name, void *symbol,
+			       void *ignored);
+static void symtab_debug      (m4_symtab *symtab);
+static void symtab_dump	      (m4_symtab *symtab);
 
 static void
-symtab_dump (void)
+symtab_dump (m4_symtab *symtab)
 {
   m4_hash_iterator *place = 0;
 
@@ -385,9 +528,9 @@ symtab_debug (m4_symtab *symtab)
 	printf (_("Name `%s' is unknown\n"), text);
 
       if (delete)
-	(void) m4_symbol_delete (symtab, text);
+	m4_symbol_delete (symtab, text);
       else
-	(void) m4_symbol_define (symtab, text);
+	symtab_fetch (symtab, text);
     }
   m4_symtab_apply (symtab, symtab_print_list, NULL);
 }

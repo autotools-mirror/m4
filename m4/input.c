@@ -953,16 +953,6 @@ m4_next_token (m4_token *td)
   return type;
 }
 
-void
-m4_token_copy (m4_token *dest, m4_token *src)
-{
-  TOKEN_TYPE (dest)	= TOKEN_TYPE (src);
-  TOKEN_FUNC (dest)	= TOKEN_FUNC (src);
-  TOKEN_HANDLE (dest)   = TOKEN_HANDLE (src);
-  TOKEN_FLAGS (dest)    = TOKEN_FLAGS (src);
-  TOKEN_MIN_ARGS (dest) = TOKEN_MIN_ARGS (src);
-  TOKEN_MAX_ARGS (dest) = TOKEN_MAX_ARGS (src);
-}
 
 
 #ifdef DEBUG_INPUT

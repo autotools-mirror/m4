@@ -111,7 +111,7 @@ expand_token (m4 *context, struct obstack *obs,
    caller.  It skips leading whitespace, and reads and expands tokens,
    until it finds a comma or a right parenthesis at the same level of
    parentheses.  It returns a flag indicating whether the argument read is
-   the last for the active macro call.  The arguments are build on the
+   the last for the active macro call.  The arguments are built on the
    obstack OBS, indirectly through expand_token ().	 */
 static boolean
 expand_argument (m4 *context, struct obstack *obs, m4_token *argp)

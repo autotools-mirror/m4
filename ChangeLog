@@ -1,3 +1,47 @@
+2003-06-17  Gary V. Vaughan  <gary@gnu.org>
+
+	Still refactoring furiously.  This delta represents a change in
+	semantics to symtab.c.  Instead of building temporary m4_tokens
+	in the caller, and copying fields in the methods, we now create
+	the actual m4_token for hashing in the caller so the methods just
+	slot them in directly.  Also, this means that we don't lookup a
+	symbol and get back an allocated but VOID token to copy fields
+	into, we create the token we want to push and pass that to
+	m4_symbol_define or m4_symbol_pushdef.  And that's it.  There are
+	a few other small changes to stop knowledge of the implementation
+	of symtab.c leaking out into other files.
+
+	* m4/macro.c (expand_argument): Comment typo corrected.
+	* m4/symtab.c (symtab_fetch): New function to fetch the address of
+	an interned symbol.
+	(m4_symbol_pushdef): Take an extra value parameter and use this
+	directly as the new top of the value stack.  All callers changed
+	to build a token and pass responsibility for memory in, rather
+	than copying as we used to.
+	(m4_symbol_define): Also use the new value parameter directly as a
+	replacement for the top of the value stack.  All callers changed
+	to build a token as above.
+	(m4_set_symbol_traced): New function to set the traced bit on the
+	named symbol, creating it if necessary.
+	(symbol_popval): The guts of the old m4_symbol_popdef.
+	(m4_symbol_popdef): Use it.
+	* m4/builtin.c (m4_symbol_set_token): Removed,
+	(m4__symbol_set_builtin, m4__symbol_set_macro): Removed and
+	replaced...
+	* m4/module.c (m4_set_module_builtin_table)
+	(m4_set_module_macro_table): ...with these more orthogonal
+	functions.
+	* m4/m4module.h (m4_macro_pushdef, m4_macro_define)
+	(m4_builtin_pushdef, m4_builtin_define): Removed.  No longer
+	required.
+	* m4/builtin.c (M4_ARG_SIGNATURE_DEFAULT_SIZE)
+	(m4_arg_signature_parse): Moved...
+	* m4/symtab.c: ...to here.
+	* m4/input.c (m4_token_copy): Arghh... I'm amazed this didn't
+	screw something up. Moved...
+	* m4/symtab.c (m4_token_copy): ...to here, and fixed so that it
+	actually does a proper deep copy of source to dest.
+
 2003-06-16  Gary V. Vaughan  <gary@gnu.org>
 
 	Further refactoring to stabilise the module API.  Renaming some

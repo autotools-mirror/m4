@@ -60,11 +60,12 @@ typedef struct {
 
 /* --- CONTEXT MANAGEMENT --- */
 
-extern m4 *m4_create (void);
-extern void m4_delete (m4 *);
-extern m4_symtab *m4_get_symtab (m4 *);
+extern m4 *	  m4_create	(void);
+extern void	  m4_delete	(m4 *);
+extern m4_symtab *m4_get_symtab	(m4 *);
 
 #define M4SYMTAB	(m4_get_symtab (context))
+
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -75,15 +76,21 @@ typedef void m4_module_finish_func (m4 *, lt_dlhandle, struct obstack*);
 extern lt_dlhandle  m4_module_load   (m4 *, const char*, struct obstack*);
 extern void	    m4_module_unload (m4 *, const char*, struct obstack*);
 
-extern const char  *m4_get_module_name     (lt_dlhandle);
-extern m4_builtin  *m4_get_module_builtin_table (lt_dlhandle);
-extern m4_macro	   *m4_get_module_macro_table   (lt_dlhandle);
+extern const char  *m4_get_module_name		(lt_dlhandle);
+extern m4_builtin  *m4_get_module_builtin_table	(lt_dlhandle);
+extern m4_macro	   *m4_get_module_macro_table	(lt_dlhandle);
+
+extern void	m4_set_module_macro_table   (m4 *context, lt_dlhandle handle,
+					     const m4_macro *table);
+extern void	m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
+					     const m4_builtin *table);
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
 
-typedef int m4_symtab_apply_func (m4_symtab *symtab, const void *key, void *value, void *data);
+typedef int m4_symtab_apply_func (m4_symtab *symtab, const void *key,
+				  void *value, void *data);
 
 extern m4_symtab *m4_symtab_create  (size_t);
 extern void	  m4_symtab_delete  (m4_symtab*);
@@ -92,15 +99,18 @@ extern int	  m4_symtab_apply   (m4_symtab*, m4_symtab_apply_func*, void*);
 #define m4_symtab_apply(symtab, func, userdata)				\
  (m4_hash_apply ((m4_hash*)(symtab), (m4_hash_apply_func*)(func), (userdata)))
 
+
 extern m4_symbol *m4_symbol_lookup  (m4_symtab*, const char *);
-extern m4_symbol *m4_symbol_pushdef (m4_symtab*, const char *);
-extern m4_symbol *m4_symbol_define  (m4_symtab*, const char *);
+extern m4_symbol *m4_symbol_pushdef (m4_symtab*, const char *, m4_token *);
+extern m4_symbol *m4_symbol_define  (m4_symtab*, const char *, m4_token *);
 extern void       m4_symbol_popdef  (m4_symtab*, const char *);
 extern void       m4_symbol_delete  (m4_symtab*, const char *);
 
 #define m4_symbol_delete(symtab, name)			M4_STMT_START {	\
 	while (m4_symbol_lookup ((symtab), (name)))			\
  	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
+
+extern void	  m4_set_symbol_traced (m4_symtab*, const char *);
 
 
 /* Various different token types.  */
@@ -126,39 +136,10 @@ typedef enum {
 
 /* --- MACRO (and builtin) MANAGEMENT --- */
 
-extern m4_symbol *m4_symbol_set_token (m4 *context, const char *name,
-			m4_symbol_type type, m4_token *token,
-			m4_symbol *(*getter) (m4_symtab *, const char *),
-			m4_symbol *(*setter) (m4_symbol *, m4_token *));
-
-extern void	  m4_set_module_macro_table   (m4 *context, lt_dlhandle handle,
-					    const m4_macro *table);
-extern void	  m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
-					    const m4_builtin *table);
-
 extern const m4_builtin *m4_builtin_find_by_name (
 				const m4_builtin *, const char *);
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
-
-
-/* These 2 functions are not part of the documented API, but we need to
-   declare them here so that the macros below will work.  */
-extern m4_symbol *m4__symbol_set_builtin (m4_symbol*, m4_token*);
-extern m4_symbol *m4__symbol_set_macro	 (m4_symbol*, m4_token*);
-
-#define m4_macro_pushdef(context, name, macro)				    \
-	m4_symbol_set_token ((context), (name), M4_TOKEN_TEXT, (macro),	    \
-			 m4_symbol_pushdef, m4__symbol_set_macro)
-#define m4_macro_define(context, name, macro)				    \
-	m4_symbol_set_token ((context), (name), M4_TOKEN_TEXT, (macro),	    \
-			 m4_symbol_define, m4__symbol_set_macro)
-#define m4_builtin_pushdef(context, name, builtin)			    \
-	m4_symbol_set_token ((context), (name), M4_TOKEN_FUNC, (builtin),   \
-			 m4_symbol_pushdef, m4__symbol_set_builtin)
-#define m4_builtin_define(context, name, builtin)			    \
-	m4_symbol_set_token ((context), (name), M4_TOKEN_FUNC, (builtin),   \
-			 m4_symbol_define, m4__symbol_set_builtin)
 
 extern m4__token_type	m4_token_get_type (m4_token *);
 extern char	       *m4_token_text	  (m4_token *);

@@ -121,19 +121,25 @@ m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
 			     const m4_builtin *table)
 {
   const m4_builtin *bp;
-  m4_token token;
 
   assert (handle);
   assert (table);
 
-  bzero (&token, sizeof (m4_token));
-  TOKEN_TYPE (&token)		= M4_TOKEN_FUNC;
-  TOKEN_HANDLE (&token)		= handle;
-
   for (bp = table; bp->name != NULL; bp++)
     {
-      int flags = 0;
-      char *name;
+      m4_token *token = XCALLOC (m4_token, 1);
+      char *	name;
+
+      TOKEN_TYPE (token)	= M4_TOKEN_FUNC;
+      TOKEN_FUNC (token)	= bp->func;
+      TOKEN_HANDLE (token)	= handle;
+      TOKEN_MIN_ARGS (token)	= bp->min_args;
+      TOKEN_MAX_ARGS (token)	= bp->max_args;
+
+      if (bp->groks_macro_args)
+	BIT_SET (TOKEN_FLAGS (token), TOKEN_MACRO_ARGS_BIT);
+      if (bp->blind_if_no_args)
+	BIT_SET (TOKEN_FLAGS (token), TOKEN_BLIND_ARGS_BIT);
 
       if (prefix_all_builtins)
 	{
@@ -146,15 +152,8 @@ m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
       else
 	name = (char *) bp->name;
 
-      if (bp->groks_macro_args) BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
-      if (bp->blind_if_no_args) BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
 
-      TOKEN_FUNC (&token)	= bp->func;
-      TOKEN_FLAGS (&token)	= flags;
-      TOKEN_MIN_ARGS (&token)	= bp->min_args;
-      TOKEN_MAX_ARGS (&token)	= bp->max_args;
-
-      m4_builtin_pushdef (context, name, &token);
+      m4_symbol_pushdef (M4SYMTAB, name, token);
 
       if (prefix_all_builtins)
 	xfree (name);
@@ -174,19 +173,20 @@ m4_get_module_macro_table (lt_dlhandle handle)
 }
 
 void
-m4_set_module_macro_table (m4 *context, lt_dlhandle handle, const m4_macro *table)
+m4_set_module_macro_table (m4 *context, lt_dlhandle handle,
+			   const m4_macro *table)
 {
   const m4_macro *mp;
-  m4_token token;
-
-  bzero (&token, sizeof (m4_token));
-  TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
-  TOKEN_HANDLE (&token)		= handle;
 
   for (mp = table; mp->name != NULL; mp++)
     {
-      TOKEN_TEXT (&token)	= (char *) mp->value;
-      m4_macro_pushdef (context, mp->name, &token);
+      m4_token *token = XCALLOC (m4_token, 1);
+
+      TOKEN_TYPE (token)	= M4_TOKEN_TEXT;
+      TOKEN_TEXT (token)	= xstrdup (mp->value);
+      TOKEN_HANDLE (token)	= handle;
+
+      m4_symbol_pushdef (M4SYMTAB, mp->name, token);
     }
 }
 

@@ -473,23 +473,20 @@ reload_frozen_state (m4 *context, const char *name)
 
 	  if (bp)
 	    {
-	      m4_token token;
-	      int flags = 0;
+	      m4_token *token = XCALLOC (m4_token, 1);
 
 	      if (bp->groks_macro_args)
-		BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
+		BIT_SET (TOKEN_FLAGS (token), TOKEN_MACRO_ARGS_BIT);
 	      if (bp->blind_if_no_args)
-		BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
+		BIT_SET (TOKEN_FLAGS (token), TOKEN_BLIND_ARGS_BIT);
 
-	      bzero (&token, sizeof (m4_token));
-	      TOKEN_TYPE (&token)	= M4_TOKEN_FUNC;
-	      TOKEN_FUNC (&token)	= bp->func;
-	      TOKEN_HANDLE (&token)	= handle;
-	      TOKEN_FLAGS (&token)	= flags;
-	      TOKEN_MIN_ARGS (&token)	= bp->min_args;
-	      TOKEN_MAX_ARGS (&token)	= bp->max_args;
+	      TOKEN_TYPE (token)	= M4_TOKEN_FUNC;
+	      TOKEN_FUNC (token)	= bp->func;
+	      TOKEN_HANDLE (token)	= handle;
+	      TOKEN_MIN_ARGS (token)	= bp->min_args;
+	      TOKEN_MAX_ARGS (token)	= bp->max_args;
 
-	      m4_builtin_pushdef (context, string[0], &token);
+	      m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	    }
 	  else
 	    M4ERROR ((warning_status, 0,
@@ -658,7 +655,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	/* Enter a macro having an expansion text as a definition.  */
 	{
-	  m4_token token;
+	  m4_token *token = XCALLOC (m4_token, 1);
 	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)
@@ -666,13 +663,12 @@ reload_frozen_state (m4 *context, const char *name)
 	      if (strcmp (m4_get_module_name (handle), string[2]) == 0)
 		break;
 
-	  bzero (&token, sizeof (m4_token));
-	  TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
-	  TOKEN_TEXT (&token)		= string[1];
-	  TOKEN_HANDLE (&token)		= handle;
-	  TOKEN_MAX_ARGS (&token)	= -1;
+	  TOKEN_TYPE (token)		= M4_TOKEN_TEXT;
+	  TOKEN_TEXT (token)		= xstrdup (string[1]);
+	  TOKEN_HANDLE (token)		= handle;
+	  TOKEN_MAX_ARGS (token)	= -1;
 
-	  m4_macro_pushdef (context, string[0], &token);
+	  m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	}
 	break;
 

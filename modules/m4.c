@@ -148,28 +148,23 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
-    return;
-
-  if (argc == 2)
+  if (TOKEN_TYPE (argv[1]) == M4_TOKEN_TEXT)
     {
-      m4_macro_define (context, M4ARG (1), NULL);
-      return;
+      m4_token *token = XCALLOC (m4_token, 1);
+
+      if (argc == 2)
+	{
+	  TOKEN_TYPE (token) = M4_TOKEN_TEXT;
+	  TOKEN_TEXT (token) = xstrdup ("");
+	}
+      else
+	{
+	  m4_token_copy (token, argv[2]);
+	  TOKEN_NEXT (token) = NULL;
+	}
+
+      m4_symbol_define (M4SYMTAB, M4ARG (1), token);
     }
-
-  switch (TOKEN_TYPE (argv[2]))
-    {
-    case M4_TOKEN_TEXT:
-      m4_macro_define (context, M4ARG (1), argv[2]);
-      return;
-
-    case M4_TOKEN_FUNC:
-      m4_builtin_define (context, M4ARG (1), argv[2]);
-      return;
-    }
-
-  /*NOTREACHED*/
-  assert (0);
 }
 
 M4BUILTIN_HANDLER (undefine)
@@ -183,28 +178,23 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
-    return;
-
-  if (argc == 2)
+  if (TOKEN_TYPE (argv[1]) == M4_TOKEN_TEXT)
     {
-      m4_macro_pushdef (context, M4ARG (1), NULL);
-      return;
+      m4_token *token = XCALLOC (m4_token, 1);
+
+      if (argc == 2)
+	{
+	  TOKEN_TYPE (token) = M4_TOKEN_TEXT;
+	  TOKEN_TEXT (token) = xstrdup ("");
+	}
+      else
+	{
+	  m4_token_copy (token, argv[2]);
+	  TOKEN_NEXT (token) = NULL;
+	}
+
+      m4_symbol_pushdef (M4SYMTAB, M4ARG (1), token);
     }
-
-  switch (TOKEN_TYPE (argv[2]))
-    {
-    case M4_TOKEN_TEXT:
-      m4_macro_pushdef (context, M4ARG (1), argv[2]);
-      return;
-
-    case M4_TOKEN_FUNC:
-      m4_builtin_pushdef (context, M4ARG (1), argv[2]);
-      return;
-    }
-
-  /*NOTREACHED*/
-  assert (0);
 }
 
 M4BUILTIN_HANDLER (popdef)

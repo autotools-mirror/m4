@@ -420,11 +420,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
   /* Handle deferred command line macro definitions.  Must come after
      initialisation of the symbol table.  */
   {
-    m4_token token;
-
-    bzero (&token, sizeof (token));
-    TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
-
     defines = head;
 
     while (defines != NULL)
@@ -436,13 +431,19 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	switch (defines->code)
 	  {
 	  case 'D':
-	    macro_value = strchr (defines->macro, '=');
-	    if (macro_value == NULL)
-	      macro_value = "";
-	    else
-	      *macro_value++ = '\0';
-	    TOKEN_TEXT (&token) = macro_value;
-	    m4_macro_define (context, defines->macro, &token);
+	    {
+	      m4_token *token = XCALLOC (m4_token, 1);
+
+	      macro_value = strchr (defines->macro, '=');
+	      if (macro_value == NULL)
+		macro_value = "";
+	      else
+		*macro_value++ = '\0';
+	      TOKEN_TEXT (token) = xstrdup (macro_value);
+	      TOKEN_TYPE (token) = M4_TOKEN_TEXT;
+
+	      m4_symbol_pushdef (M4SYMTAB, defines->macro, token);
+	    }
 	    break;
 
 	  case 'U':
@@ -450,8 +451,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    break;
 
 	  case 't':
-	    symbol = m4_symbol_define (M4SYMTAB, defines->macro);
-	    SYMBOL_TRACED (symbol) = TRUE;
+	    m4_set_symbol_traced (M4SYMTAB, defines->macro);
 	    break;
 
 	  case 'm':
