@@ -1,3 +1,6 @@
+*.pot
+*.gmo
+*.mo
 Makefile.in.in
 stamp-cat-id
 cat-id-tbl.c
