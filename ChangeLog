@@ -1,7 +1,16 @@
 2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
-	* configure.in (VERSION): Bump to 1.4.3.
-	* News: Describe 1.4.3's changes.
+	* configure.ac (AC_INIT): Bump to 1.4.3a.
+
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	Release 1.4.3:
+
+	* configure.in (AC_INIT): Bump to 1.4.3.
+	* NEWS: Describe 1.4.3's changes.
+
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
 	* Makefile.maint: New file with release rules, from CVS libtool.
 	* Makefile.in (DISTFILES): Add Makefile.maint.
 	* INSTALL, install-sh, doc/texinfo.tex: Updated to latest
