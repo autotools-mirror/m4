@@ -78,6 +78,7 @@ for any of these ideas or if you have others to add.
       z'b
       qindir(`include', f)dnl
       a'b
+      define(b,NONO)dnl
       patsubst(qindir(`include', f), b, x)
       z'x
 
