@@ -1,7 +1,8 @@
 gnulib/m4/getopt.c
 gnulib/m4/obstack.c
-gnulib/m4/xmalloc.c
 gnulib/m4/regex.c
+gnulib/m4/version-etc.c
+gnulib/m4/xmalloc.c
 m4/builtin.c
 m4/debug.c
 m4/input.c
