@@ -658,9 +658,7 @@ M4BUILTIN_HANDLER (m4exit)
   if (argc == 2  && !m4_numeric_arg (argv[0], M4ARG (1), &exit_code))
     exit_code = 0;
 
-#ifdef WITH_MODULES
   m4_module_unload_all();
-#endif /* WITH_MODULES */
 
   exit (exit_code);
 }

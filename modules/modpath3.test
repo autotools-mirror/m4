@@ -22,9 +22,6 @@
 . ${srcdir}/defs
 . ${builddir}/../tests/config.sh
 
-# cannot perform test without --with-modules
-test -z "$WITH_MODULES" && exit 77
-
 cat <<'EOF' >in
 test
 Dumpdef: dumpdef(`test')

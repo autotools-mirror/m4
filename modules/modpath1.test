@@ -22,9 +22,6 @@
 . ${srcdir}/defs
 . ${builddir}/../tests/config.sh
 
-# cannot perform test without --with-modules
-test -z "$WITH_MODULES" && exit 77
-
 cat ${srcdir}/modtest.m4 >in
 
 cat <<'EOF' >ok

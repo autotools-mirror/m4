@@ -171,7 +171,6 @@ produce_frozen_state (name)
   produce_syntax_dump (file, 'B', 0);
   produce_syntax_dump (file, 'E', 0);
 
-#if WITH_MODULES
   /* Dump all loaded modules.  */
   {
     m4_module *module;
@@ -187,7 +186,6 @@ produce_frozen_state (name)
       }
     m4_modules = list_reverse (m4_modules);
   }
-#endif
 
   /* Dump all symbols.  */
 
@@ -224,12 +222,11 @@ INTERNAL ERROR: Builtin not found in builtin table!")));
 	      fprintf (file, "F%lu",
 		       (unsigned long) strlen (SYMBOL_NAME (symbol)));
 		
-#ifdef WITH_MODULES
 	      /* FIXME:
 	      modname = bp->module->modname;
 	      */
 	      modname = "BOGUS!";
-#endif
+
 	      if (modname || (strcmp (SYMBOL_NAME (symbol), bp->name) != 0))
 		{
 		    fprintf (file, ",%lu",
@@ -486,7 +483,7 @@ reload_frozen_state (name)
 
 	{
 	  m4_builtin *bt = NULL;
-#if WITH_MODULES
+
 	  if (number[2] > 0)
 	    {
 	      const m4_module *module;
@@ -496,7 +493,6 @@ reload_frozen_state (name)
 	      if (module)
 		bt = module->bp;
 	    }
-#endif /* WITH_MODULES */
 
 	  if (number[1] > 0)
 	    bp = m4_builtin_find_by_name (bt, string[1]);
@@ -525,7 +521,6 @@ reload_frozen_state (name)
 	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
 	  }
 
-#if WITH_MODULES
 	GET_CHARACTER;
 	GET_NUMBER (number[0]);
 	VALIDATE ('\n');
@@ -534,9 +529,6 @@ reload_frozen_state (name)
 	
 	m4_module_load (string[0], NULL);
 		
-#else  /* !WITH_MODULES */
-	M4ERROR ((EXIT_FAILURE, 0, _("Module support not compiled in")));
-#endif /* !WITH_MODULES */
 	break;
 
       case 'S':

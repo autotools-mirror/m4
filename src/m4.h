@@ -93,9 +93,7 @@ char *mktemp ();
 # define setlocale(Category, Locale)
 #endif
 
-#if WITH_MODULES
-#  include "ltdl.h"
-#endif
+#include "ltdl.h"
 
 /* Error handling.  */
 #ifdef USE_STACKOVF

@@ -24,10 +24,6 @@
 #include "m4private.h"
 #include "error.h"
 
-#ifdef WITH_MODULES
-#  include "ltdl.h"
-#endif /* WITH_MODULES */
-
 void print_program_name M4_PARAMS((void));
 
 
@@ -118,14 +114,12 @@ Operation modes:\n\
   -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"),
 	     stdout);
 #endif
-#ifdef WITH_MODULES
       fputs (_("\
 \n\
 Dynamic loading features:\n\
   -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
   -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
 	     stdout);
-#endif
       fputs (_("\
 \n\
 Preprocessor features:\n\
@@ -196,10 +190,8 @@ static const struct option long_options[] =
   {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'e'},
-#ifdef WITH_MODULES
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
-#endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
@@ -235,7 +227,7 @@ static const struct option long_options[] =
 #  define MODULEPATH_SHORTOPT	""
 #endif
 
-#define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULEPATH_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULE_SHORTOPT/**/"o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:m:o:st:"
 #include <dlfcn.h>
 
 int
@@ -260,16 +252,12 @@ main (int argc, char *const *argv, char *const *envp)
   textdomain(PACKAGE);
 #endif
 
-#ifdef WITH_MODULES
   LTDL_SET_PRELOADED_SYMBOLS();
-#endif
   
   m4_debug_init ();
   m4_include_init ();
   m4_symtab_init ();
-#ifdef WITH_MODULES
   m4_module_init ();
-#endif
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -301,9 +289,7 @@ main (int argc, char *const *argv, char *const *envp)
       case 'D':
       case 'U':
       case 't':
-#ifdef WITH_MODULES
       case 'm':
-#endif /* WITH_MODULES */
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	new = (macro_definition *) xmalloc (sizeof (macro_definition));
@@ -344,7 +330,6 @@ main (int argc, char *const *argv, char *const *envp)
       case 'L':
 	nesting_limit = atoi (optarg);
 	break;
-#ifdef WITH_MODULES
       case 'M':
 	if (lt_dladdsearchdir (optarg) != 0)
 	  {
@@ -359,7 +344,6 @@ main (int argc, char *const *argv, char *const *envp)
 			optarg, dlerror));
 	  }
 	break;
-#endif /* WITH_MODULES */
 
       case 'P':
 	prefix_all_builtins = 1;
@@ -415,11 +399,8 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       printf ("GNU %s %s", PACKAGE, VERSION);
-#if defined(WITH_MODULES) || defined(WITH_GMP) || defined(ENABLE_CHANGEWORD)
+#if defined(WITH_GMP) || defined(ENABLE_CHANGEWORD)
       fputs(_(" (options:"), stdout);
-#ifdef WITH_MODULES
-      fputs(" modules", stdout);
-#endif /* WITH_MODULES */
 #ifdef WITH_GMP
       fputs(" gmp", stdout);
 #endif /* WITH_GMP */
@@ -427,7 +408,7 @@ main (int argc, char *const *argv, char *const *envp)
       fputs(" changeword", stdout);
 #endif /* ENABLE_CHANGEWORD */
       fputs(")", stdout);
-#endif /* defined WITH_MODULES || WITH_GMP || ENABLE_CHANGEWORD */
+#endif /* defined WITH_GMP || ENABLE_CHANGEWORD */
       fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }
@@ -501,11 +482,9 @@ main (int argc, char *const *argv, char *const *envp)
 	  SYMBOL_TRACED (symbol) = TRUE;
 	  break;
 
-#ifdef WITH_MODULES
 	case 'm':
 	  m4_module_install (defines->macro);
 	  break;
-#endif /* WITH_MODULES */
 	
 	default:
 	  M4ERROR ((warning_status, 0,
@@ -572,9 +551,7 @@ main (int argc, char *const *argv, char *const *envp)
       m4_undivert_all ();
     }
 
-#ifdef WITH_MODULES
   m4_module_unload_all();
-#endif /* WITH_MODULES */
 
   exit (exit_status);
 }

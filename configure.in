@@ -155,27 +155,25 @@ else
   AC_MSG_RESULT(no)
 fi], [AC_MSG_RESULT(no)])
 
-AC_MSG_CHECKING(if support for dynamic modules is wanted)
+AC_MSG_CHECKING(for modules to preload)
+m4_default_preload="m4 traditional gnu"
 AC_ARG_WITH(modules,
-[  --with-modules[=MODULES] add support for dynamic modules],
-[use_modules="$withval"], [use_modules=no])
+[  --with-modules=MODULES preload MODULES [default: $m4_default_preload]],
+[use_modules="$withval"], [use_modules="$m4_default_preload"])
 test -z "$use_modules" && use_modules=no
 DLPREOPEN="-dlpreopen force"
 if test "$use_modules" = no; then
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT(none)
 else
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT($use_modules)
   if test "$use_modules" != yes; then
     DLPREOPEN=
     for module in $use_modules; do
-      DLPREOPEN="$DLPREOPEN -dlopen ../modules/$module.la"
+      DLPREOPEN="$DLPREOPEN -dlpreopen ../modules/$module.la"
     done
   fi
 fi
 AC_SUBST(DLPREOPEN)
-AM_CONDITIONAL(WITH_MODULES, test "$use_modules" != no)
-test "$use_modules" != no && AC_DEFINE(WITH_MODULES, 1,
-[Define this if you want dynamic module support]) 
 
 dnl This is for the modules
 AC_STRUCT_TM
