@@ -43,6 +43,13 @@ typedef struct {
     size_t length;		/* length of the string */
 } m4_string;
 
+/* Operation modes for m4_lookup_symbol ().  */
+typedef enum
+{
+  M4_SYMBOL_INSERT,
+  M4_SYMBOL_PUSHDEF
+} m4_symbol_lookup_t;
+
 typedef struct {
   const char *name;
   const char *value;
@@ -75,8 +82,9 @@ extern void m4_macro_define		(const lt_dlhandle,
 extern void m4_macro_table_install	(
 				const lt_dlhandle, const m4_macro *);
 
-extern void m4_builtin_pushdef		(const lt_dlhandle,
-				const char *, const m4_builtin *, boolean);
+extern void m4_builtin_define		(const lt_dlhandle,
+				const char *, const m4_builtin *,
+				m4_symbol_lookup_t, boolean);
 extern void m4_builtin_table_install	(
 				const lt_dlhandle, const m4_builtin *);
 
@@ -88,13 +96,14 @@ extern const m4_builtin *m4_builtin_find_by_func (
 extern m4_hash *m4_symtab;
 
 extern void	  m4_symtab_init		(void);
+extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup_t);
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
 extern m4_symbol *m4_symbol_insert	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
 extern int	m4_symtab_apply	(m4_symtab_apply_func *, void *);
-extern void	m4_symtab_remove_module_references (lt_dlhandle);
+extern void	m4_remove_table_reference_symbols (lt_dlhandle);
 
 
 /* Various different token types.  */

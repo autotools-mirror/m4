@@ -124,6 +124,36 @@ m4_symbol_del (m4_symbol *symbol)
 }
 
 
+/* Dispatch on all the following 5 functions.
+
+   Search in, and manipulation of the symbol table, are all done by
+   m4_lookup_symbol ().  It basically hashes NAME to a list in the
+   symbol table, and searched this list for the first occurence of a
+   symbol with the name.
+
+   The MODE parameter determines what m4_lookup_symbol () will do.  It
+   can either just do a lookup, do a lookup and insert if not present,
+   do an insertion even if the name is already in the list, delete the
+   first occurrence of the name on the list or delete all occurences
+   of the name on the list.  */
+m4_symbol *
+m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
+{
+  switch (mode)
+    {
+    case M4_SYMBOL_INSERT:
+      return m4_symbol_insert (name);
+
+    case M4_SYMBOL_PUSHDEF:
+      return m4_symbol_pushdef (name);
+    }
+
+  assert (0);
+  /*NOTREACHED*/
+  return 0;
+}
+
+
 /* Return the symbol associated to NAME, or else NULL.  */
 m4_symbol *
 m4_symbol_lookup (const char *name)
@@ -210,7 +240,7 @@ m4_symbol_delete (const char *name)
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
 void
-m4_symtab_remove_module_references (lt_dlhandle handle)
+m4_remove_table_reference_symbols (lt_dlhandle handle)
 {
   m4_hash_iterator *place = 0;
 

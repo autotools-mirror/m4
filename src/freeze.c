@@ -472,7 +472,7 @@ reload_frozen_state (const char *name)
 	    bp = m4_builtin_find_by_name (bt, string[1]);
 
 	  if (bp)
-	    m4_builtin_pushdef (handle, string[0], bp, 0);
+	    m4_builtin_define (handle, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
 	    M4ERROR ((warning_status, 0,
 		      _("`%s' from frozen file not found in builtin table!"),
