@@ -17,10 +17,7 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-BUILT_SOURCES		= $(OBSTACK_H)
-
 CLEANFILES		= pathconf.h
-MOSTLYCLEANFILES	= obstack.h
 MAINTAINERCLEANFILES	= Makefile.in
 
 MODULE_PATH		= $(pkglibexecdir)
@@ -32,10 +29,10 @@ INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
 
 include_HEADERS	= m4module.h
 noinst_HEADERS	= m4private.h
-pkginc_HEADERS	= error.h hash.h ltdl.h regex.h system.h $(OBSTACK_H)
-EXTRA_HEADERS	= system_.h obstack_.h
+pkginc_HEADERS	= error.h hash.h ltdl.h regex.h system.h
+EXTRA_HEADERS	= system_.h
 
-EXTRA_DIST = $(EXTRA_HEADERS) obstack.c
+EXTRA_DIST = $(EXTRA_HEADERS)
 
 lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c \
@@ -46,23 +43,39 @@ libm4_la_LIBADD		= $(LTLIBOBJS) $(LTLIBINTL) $(LIBADD_DL)
 module.o module.lo: $(srcdir)/module.c pathconf.h
 pathconf.h: Makefile
 	@echo "#define MODULE_PATH \"${MODULE_PATH}\"" > pathconf.h
+system.h: $(OBSTACK_H)
 
 # This file needs to be regenerated at configure time.
 dist-hook:
 	rm -f $(distdir)/system.h
 
 
-gnulib_srcdir		= $(top_srcdir)/gnulib/lib
+# --------------------------- @
+# Adapted for gnulib obstack. #
+# --------------------------- @
+
+gnulib_srcdir	= $(top_srcdir)/gnulib/lib
+
+BUILT_SOURCES	= $(OBSTACK_C) $(OBSTACK_H)
+DISTCLEANFILES	= obstack.c obstack.h
+
+pkginc_HEADERS	+= $(OBSTACK_H)
+
+all-local $(lib_OBJECTS): $(OBSTACK_C) $(OBSTACK_H)
+obstack.c: $(gnulib_srcdir)/obstack.c
+	rm -f $@ && $(LN_S) $(gnulib_srcdir)/$@ $@
+obstack.h: $(gnulib_srcdir)/obstack.h
+	rm -f $@ && $(LN_S) $(gnulib_srcdir)/$@ $@
 
 
 # ------------------------------------------------ #
 # Adapted from gnulib/modules/stdbool:Makefile.am. #
 # ------------------------------------------------ #
 
-BUILT_SOURCES += $(STDBOOL_H)
-MOSTLYCLEANFILES += stdbool.h stdbool.h-t
+BUILT_SOURCES	+= $(STDBOOL_H)
+DISTCLEANFILES	+= stdbool.h stdbool.h-t
 
-pkginc_HEADERS += $(STDBOOL_H)
+pkginc_HEADERS	+= $(STDBOOL_H)
 
 # We need the following in order to create an <stdbool.h> when the system
 # doesn't have one that works.

@@ -23,9 +23,13 @@ gnulib_macrodir	= $(srcdir)/m4
 gnulib_srcdir	= $(srcdir)/lib
 
 GNULIB_SRCS	=				\
+$(gnulib_srcdir)/obstack.c			\
+$(gnulib_srcdir)/obstack.h			\
 $(gnulib_srcdir)/stdbool_.h
 
 GNULIB_MACROS	=				\
+$(gnulib_macrodir)/obstack.m4			\
+$(gnulib_macrodir)/onceonly_2_57.m4		\
 $(gnulib_macrodir)/stdbool.m4
 
 EXTRA_DIST	= $(GNULIB_SRCS) $(GNULIB_MACROS)

@@ -60,7 +60,7 @@ SPECIFIC_MACROS =				\
 $(srcdir)/debug.m4				\
 $(srcdir)/error.m4				\
 $(srcdir)/gmp.m4				\
-$(srcdir)/gnu-obstack.m4			\
+$(srcdir)/m4-obstack.m4				\
 $(srcdir)/regex.m4				\
 $(srcdir)/stackovf.m4
 

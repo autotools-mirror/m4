@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-02 17:24+0100\n"
+"POT-Creation-Date: 2003-09-04 16:21+0100\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -14,62 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=EUC\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/getopt.c:677
-#, c-format
-msgid "%s: option `%s' is ambiguous\n"
-msgstr "%s: `%s' は不明瞭なオプション名です。\n"
-
-#: src/getopt.c:702
-#, c-format
-msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
-
-#: src/getopt.c:707
-#, c-format
-msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr "%s: オプション `%c%s' は引数を取ることができません。\n"
-
-#: src/getopt.c:725 src/getopt.c:898
-#, c-format
-msgid "%s: option `%s' requires an argument\n"
-msgstr "%s: オプション `%s' は引数を必要とします。\n"
-
-#: src/getopt.c:754
-#, c-format
-msgid "%s: unrecognized option `--%s'\n"
-msgstr "%s: --%s は認識されないオプションです。\n"
-
-#: src/getopt.c:758
-#, c-format
-msgid "%s: unrecognized option `%c%s'\n"
-msgstr "%s: %c%s は認識されないオプションです。\n"
-
-#: src/getopt.c:784
-#, c-format
-msgid "%s: illegal option -- %c\n"
-msgstr "%s: %c は不正オプションです。\n"
-
-#: src/getopt.c:787
-#, c-format
-msgid "%s: invalid option -- %c\n"
-msgstr "%s: %c は無効なオプションです。\n"
-
-#: src/getopt.c:817 src/getopt.c:947
-#, c-format
-msgid "%s: option requires an argument -- %c\n"
-msgstr "%s: %c オプションには引数が必要です。\n"
-
-#: src/getopt.c:864
-#, fuzzy, c-format
-msgid "%s: option `-W %s' is ambiguous\n"
-msgstr "%s: `%s' は不明瞭なオプション名です。\n"
-
-#: src/getopt.c:882
-#, fuzzy, c-format
-msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
-
-#: m4/obstack.c:487 m4/obstack.c:490
+#: gnulib/lib/obstack.c:487 gnulib/lib/obstack.c:490
 #, fuzzy
 msgid "memory exhausted"
 msgstr "メモリが残っていません。"
@@ -410,6 +355,61 @@ msgstr "内部エラー：凍結ファイルのフォーマットが不正です。"
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
+
+#: src/getopt.c:677
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: `%s' は不明瞭なオプション名です。\n"
+
+#: src/getopt.c:702
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
+
+#: src/getopt.c:707
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: オプション `%c%s' は引数を取ることができません。\n"
+
+#: src/getopt.c:725 src/getopt.c:898
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: オプション `%s' は引数を必要とします。\n"
+
+#: src/getopt.c:754
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: --%s は認識されないオプションです。\n"
+
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: %c%s は認識されないオプションです。\n"
+
+#: src/getopt.c:784
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: %c は不正オプションです。\n"
+
+#: src/getopt.c:787
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: %c は無効なオプションです。\n"
+
+#: src/getopt.c:817 src/getopt.c:947
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: %c オプションには引数が必要です。\n"
+
+#: src/getopt.c:864
+#, fuzzy, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: `%s' は不明瞭なオプション名です。\n"
+
+#: src/getopt.c:882
+#, fuzzy, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
 #: src/main.c:83
 #, fuzzy

@@ -1,5 +1,24 @@
 2003-09-04  Gary V. Vaughan  <gary@gnu.org>
 
+	Migrate the obstack support into the gnulib directories for easy
+	synchronisation with upstream files in gnulib:
+
+	* config/gnu-obstack.m4: Moved from here...
+	* config/m4-obstack.m4: ...to here.
+	* config/Makefile.am (SPECIFIC_MACROS): Adjust.
+	* m4/obstack.c, m4/obstack_.h: Moved from here...
+	* gnulib/obstack.c, gnulib/obstack.h: ...to here.
+	* po/POTFILES.in: Adjust.
+	* gnulib/Makefile.am (GNULIB_SRCS, GNULIB_MACROS): Adjust.
+	* m4/Makefile.am: Add a whole new section to link the obstack
+	sources from the gnulib tree if necessary.
+	* gnulib/m4/onceonly_2_57.m4, gnulib/m4/obstack.m4: New macros
+	from gnulib.
+	* config/m4-obstack.m4: Rewrite as a wrapper for
+	gnulib/m4/obstack.m4.
+
+2003-09-04  Gary V. Vaughan  <gary@gnu.org>
+
 	GNU M4 currently builds with a number of files adapted from
 	upstream sources.  Recently the gnulib project on savannah.gnu.org
 	has pulled together a great many of these externally maintained

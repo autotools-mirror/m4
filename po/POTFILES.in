@@ -1,5 +1,4 @@
-src/getopt.c
-m4/obstack.c
+gnulib/lib/obstack.c
 m4/regex.c
 m4/xmalloc.c
 m4/builtin.c
@@ -19,5 +18,6 @@ modules/mpeval.c
 modules/perl.c
 modules/traditional.c
 src/freeze.c
+src/getopt.c
 src/main.c
 src/stackovf.c

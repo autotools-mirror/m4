@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-02 17:24+0100\n"
+"POT-Creation-Date: 2003-09-04 16:21+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -14,62 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/getopt.c:677
-#, c-format
-msgid "%s: option `%s' is ambiguous\n"
-msgstr "%s: опция `%s' неоднозначна\n"
-
-#: src/getopt.c:702
-#, c-format
-msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr "%s: у опции `--%s' не должно быть аргументов\n"
-
-#: src/getopt.c:707
-#, c-format
-msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr "%s: у опции `%c%s' не должно быть аргументов\n"
-
-#: src/getopt.c:725 src/getopt.c:898
-#, c-format
-msgid "%s: option `%s' requires an argument\n"
-msgstr "%s: у опции `%s' должен быть аргумент\n"
-
-#: src/getopt.c:754
-#, c-format
-msgid "%s: unrecognized option `--%s'\n"
-msgstr "%s: неизвестная опция `--%s'\n"
-
-#: src/getopt.c:758
-#, c-format
-msgid "%s: unrecognized option `%c%s'\n"
-msgstr "%s: неизвестная опция '%c%s'\n"
-
-#: src/getopt.c:784
-#, c-format
-msgid "%s: illegal option -- %c\n"
-msgstr "%s: запрещенная опция -- %c\n"
-
-#: src/getopt.c:787
-#, c-format
-msgid "%s: invalid option -- %c\n"
-msgstr "%s: неверная опция -- %c\n"
-
-#: src/getopt.c:817 src/getopt.c:947
-#, c-format
-msgid "%s: option requires an argument -- %c\n"
-msgstr "%s: опции необходим аргумент -- %c\n"
-
-#: src/getopt.c:864
-#, fuzzy, c-format
-msgid "%s: option `-W %s' is ambiguous\n"
-msgstr "%s: опция `%s' неоднозначна\n"
-
-#: src/getopt.c:882
-#, fuzzy, c-format
-msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr "%s: у опции `--%s' не должно быть аргументов\n"
-
-#: m4/obstack.c:487 m4/obstack.c:490
+#: gnulib/lib/obstack.c:487 gnulib/lib/obstack.c:490
 #, fuzzy
 msgid "memory exhausted"
 msgstr "Память исчерпана"
@@ -408,6 +353,61 @@ msgstr "Неверный формат файла-образа памяти"
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"
+
+#: src/getopt.c:677
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: опция `%s' неоднозначна\n"
+
+#: src/getopt.c:702
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: у опции `--%s' не должно быть аргументов\n"
+
+#: src/getopt.c:707
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: у опции `%c%s' не должно быть аргументов\n"
+
+#: src/getopt.c:725 src/getopt.c:898
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: у опции `%s' должен быть аргумент\n"
+
+#: src/getopt.c:754
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: неизвестная опция `--%s'\n"
+
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: неизвестная опция '%c%s'\n"
+
+#: src/getopt.c:784
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: запрещенная опция -- %c\n"
+
+#: src/getopt.c:787
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: неверная опция -- %c\n"
+
+#: src/getopt.c:817 src/getopt.c:947
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: опции необходим аргумент -- %c\n"
+
+#: src/getopt.c:864
+#, fuzzy, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: опция `%s' неоднозначна\n"
+
+#: src/getopt.c:882
+#, fuzzy, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: у опции `--%s' не должно быть аргументов\n"
 
 #: src/main.c:83
 #, fuzzy

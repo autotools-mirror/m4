@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-02 17:24+0100\n"
+"POT-Creation-Date: 2003-09-04 16:21+0100\n"
 "PO-Revision-Date: 1999-03-28 18:56 +02:00\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -15,62 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/getopt.c:677
-#, c-format
-msgid "%s: option `%s' is ambiguous\n"
-msgstr ""
-
-#: src/getopt.c:702
-#, c-format
-msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr ""
-
-#: src/getopt.c:707
-#, c-format
-msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr ""
-
-#: src/getopt.c:725 src/getopt.c:898
-#, c-format
-msgid "%s: option `%s' requires an argument\n"
-msgstr ""
-
-#: src/getopt.c:754
-#, c-format
-msgid "%s: unrecognized option `--%s'\n"
-msgstr ""
-
-#: src/getopt.c:758
-#, c-format
-msgid "%s: unrecognized option `%c%s'\n"
-msgstr ""
-
-#: src/getopt.c:784
-#, c-format
-msgid "%s: illegal option -- %c\n"
-msgstr ""
-
-#: src/getopt.c:787
-#, c-format
-msgid "%s: invalid option -- %c\n"
-msgstr ""
-
-#: src/getopt.c:817 src/getopt.c:947
-#, c-format
-msgid "%s: option requires an argument -- %c\n"
-msgstr ""
-
-#: src/getopt.c:864
-#, c-format
-msgid "%s: option `-W %s' is ambiguous\n"
-msgstr ""
-
-#: src/getopt.c:882
-#, c-format
-msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr ""
-
-#: m4/obstack.c:487 m4/obstack.c:490
+#: gnulib/lib/obstack.c:487 gnulib/lib/obstack.c:490
 msgid "memory exhausted"
 msgstr ""
 
@@ -407,6 +352,61 @@ msgstr "Korrupt fryst fil"
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "\"%s\" från fryst fil hittades inte i tabellen för inbyggda makron!"
+
+#: src/getopt.c:677
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr ""
+
+#: src/getopt.c:702
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr ""
+
+#: src/getopt.c:707
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr ""
+
+#: src/getopt.c:725 src/getopt.c:898
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr ""
+
+#: src/getopt.c:754
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr ""
+
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr ""
+
+#: src/getopt.c:784
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr ""
+
+#: src/getopt.c:787
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr ""
+
+#: src/getopt.c:817 src/getopt.c:947
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr ""
+
+#: src/getopt.c:864
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr ""
+
+#: src/getopt.c:882
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr ""
 
 #: src/main.c:83
 #, fuzzy
