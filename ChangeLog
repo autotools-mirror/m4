@@ -1,5 +1,8 @@
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
+	* modules/perl.c (builtin_perleval):  Use PL_na for
+	compatibility with perl-5.6.
+
 	* src/main.c (main):  It is now safe to
 	``m4_module_install("m4")'', without tripping over the m4
 	binary itself!
