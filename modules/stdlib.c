@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <pwd.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef TM_IN_SYS_TIME
+#if TM_IN_SYS_TIME
 #  include <sys/time.h>
 #else
 #  include <time.h>
@@ -67,7 +67,6 @@ m4_builtin m4_builtin_table[] =
 
   { 0, 0, FALSE, FALSE },
 };
-
 
 /**
  * getcwd()
@@ -80,10 +79,10 @@ M4BUILTIN_HANDLER (getcwd)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  bp = getcwd(buf, sizeof buf);
+  bp = getcwd (buf, sizeof buf);
 
   if (bp != NULL)		/* in case of error return null string */
-    m4_shipout_string (obs, buf, 0 , FALSE);
+    m4_shipout_string (obs, buf, 0, FALSE);
 }
 
 /**
@@ -96,7 +95,7 @@ M4BUILTIN_HANDLER (getenv)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  env = getenv((char*)M4ARG(1));
+  env = getenv (M4ARG (1));
 
   if (env != NULL)
     m4_shipout_string (obs, env, 0, FALSE);
@@ -113,19 +112,19 @@ M4BUILTIN_HANDLER (setenv)
     return;
 
   if (argc == 4)
-    if (!m4_numeric_arg(argv[0], (char*)M4ARG(3), &overwrite))
+    if (!m4_numeric_arg (argv[0], M4ARG (3), &overwrite))
       return;
 
-#ifdef HAVE_SETENV
-  setenv((char*)M4ARG(1), (char*)M4ARG(2), overwrite);
+#if HAVE_SETENV
+  setenv (M4ARG (1), M4ARG (2), overwrite);
 #else
-#ifdef HAVE_PUTENV
-  if (!overwrite && getenv ((char*)M4ARG(1)) != NULL)
+#if HAVE_PUTENV
+  if (!overwrite && getenv (M4ARG (1)) != NULL)
     return;
 
-  obstack_grow (obs, (char*)M4ARG(1), strlen ((char*)M4ARG(1)));
+  obstack_grow (obs, M4ARG (1), strlen (M4ARG (1)));
   obstack_1grow (obs, '=');
-  obstack_grow (obs, (char*)M4ARG(2), strlen ((char*)M4ARG(2)));
+  obstack_grow (obs, M4ARG (2), strlen (M4ARG (2)));
   obstack_1grow (obs, '\0');
 
   {
@@ -144,8 +143,8 @@ M4BUILTIN_HANDLER (unsetenv)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-#ifdef HAVE_UNSETENV
-  unsetenv ((char*)M4ARG(1));
+#if HAVE_UNSETENV
+  unsetenv (M4ARG (1));
 #endif /* HAVE_UNSETENV */
 }
 
@@ -173,7 +172,7 @@ M4BUILTIN_HANDLER (getpid)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  m4_shipout_int(obs, getpid());
+  m4_shipout_int (obs, getpid ());
 }
 
 /**
@@ -184,7 +183,7 @@ M4BUILTIN_HANDLER (getppid)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  m4_shipout_int(obs, getppid());
+  m4_shipout_int (obs, getppid ());
 }
 
 /**
@@ -197,7 +196,7 @@ M4BUILTIN_HANDLER (getpwnam)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  pw = getpwnam((char*)M4ARG(1));
+  pw = getpwnam (M4ARG (1));
 
   if (pw != NULL)
     {
@@ -205,9 +204,9 @@ M4BUILTIN_HANDLER (getpwnam)
       obstack_1grow (obs, ',');
       m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_int(obs, pw->pw_uid);
+      m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
-      m4_shipout_int(obs, pw->pw_gid);
+      m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
       m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
@@ -228,10 +227,10 @@ M4BUILTIN_HANDLER (getpwuid)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!m4_numeric_arg(argv[0], (char*)M4ARG(1), &uid))
+  if (!m4_numeric_arg (argv[0], M4ARG (1), &uid))
     return;
 
-  pw = getpwuid(uid);
+  pw = getpwuid (uid);
 
   if (pw != NULL)
     {
@@ -239,9 +238,9 @@ M4BUILTIN_HANDLER (getpwuid)
       obstack_1grow (obs, ',');
       m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_int(obs, pw->pw_uid);
+      m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
-      m4_shipout_int(obs, pw->pw_gid);
+      m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
       m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
@@ -261,7 +260,7 @@ M4BUILTIN_HANDLER (hostname)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  if (gethostname(buf, sizeof buf) < 0)
+  if (gethostname (buf, sizeof buf) < 0)
     return;
 
   m4_shipout_string (obs, buf, 0, FALSE);
@@ -275,7 +274,7 @@ M4BUILTIN_HANDLER (rand)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  m4_shipout_int(obs, rand());
+  m4_shipout_int (obs, rand ());
 }
 
 /**
@@ -289,14 +288,14 @@ M4BUILTIN_HANDLER (srand)
     return;
 
   if (argc == 1)
-    seed = time(0L) * getpid();
+    seed = time (0L) * getpid ();
   else
     {
-      if (!m4_numeric_arg(argv[0], (char*)M4ARG(1), &seed))
+      if (!m4_numeric_arg (argv[0], M4ARG (1), &seed))
 	return;
     }
 
-  srand(seed);
+  srand (seed);
 }
 
 /**
@@ -309,7 +308,7 @@ M4BUILTIN_HANDLER (uname)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  if (uname(&ut) == 0)
+  if (uname (&ut) == 0)
     {
       m4_shipout_string (obs, ut.sysname, 0, TRUE);
       obstack_1grow (obs, ',');
@@ -331,5 +330,5 @@ M4BUILTIN_HANDLER (getuid)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  m4_shipout_int(obs, getuid());
+  m4_shipout_int (obs, getuid ());
 }

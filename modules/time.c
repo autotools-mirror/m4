@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,16 +17,16 @@
    02111-1307  USA
 */
 
-#ifdef HAVE_CONFIG_H
+#if HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
 #include <stdio.h>
 
-#ifdef TM_IN_SYS_TIME
-#include <sys/time.h>
+#if TM_IN_SYS_TIME
+#  include <sys/time.h>
 #else
-#include <time.h>
+#  include <time.h>
 #endif /* TM_IN_SYS_TIME */
 
 #include <m4module.h>
@@ -48,10 +48,10 @@
 
 #define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
   builtin_functions
-# ifdef HAVE_MKTIME
+# if HAVE_MKTIME
   mktime_functions
 # endif
-# ifdef HAVE_STRFTIME
+# if HAVE_STRFTIME
   strftime_functions
 # endif
 #undef BUILTIN
@@ -62,23 +62,21 @@ m4_builtin m4_builtin_table[] =
 	{ STR(handler), CONC(builtin_, handler), macros, blind },
 
   builtin_functions
-# ifdef HAVE_MKTIME
+# if HAVE_MKTIME
   mktime_functions
 # endif
-# ifdef HAVE_STRFTIME
+# if HAVE_STRFTIME
   strftime_functions
 # endif
 #undef BUILTIN
 
   { 0, 0, FALSE, FALSE },
 };
-
 
-
 /**
  * currenttime()
  **/
-M4BUILTIN_HANDLER(currenttime)
+M4BUILTIN_HANDLER (currenttime)
 {
   char buf[64];
   time_t now;
@@ -87,8 +85,8 @@ M4BUILTIN_HANDLER(currenttime)
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  now = time(0L);
-  l = sprintf(buf, "%ld", now);
+  now = time (0L);
+  l = sprintf (buf, "%ld", now);
 
   obstack_grow (obs, buf, l);
 }
@@ -96,7 +94,7 @@ M4BUILTIN_HANDLER(currenttime)
 /**
  * ctime([SECONDS])
  **/
-M4BUILTIN_HANDLER(ctime)
+M4BUILTIN_HANDLER (ctime)
 {
   time_t t;
 
@@ -104,80 +102,80 @@ M4BUILTIN_HANDLER(ctime)
     return;
 
   if (argc == 2)
-    m4_numeric_arg(argv[0], (char*)M4ARG(1), (int *)&t);
+    m4_numeric_arg (argv[0], M4ARG (1), (int *) &t);
   else
-    t = time(0L);
+    t = time (0L);
 
-  obstack_grow (obs, ctime(&t), 24);
+  obstack_grow (obs, ctime (&t), 24);
 }
 
 static void
-format_tm(struct obstack *obs, struct tm *tm)
+format_tm (struct obstack *obs, struct tm *tm)
 {
-  m4_shipout_int(obs, tm->tm_sec);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_sec);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_min);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_min);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_hour);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_hour);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_mday);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_mday);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_mon);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_mon);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_year);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_year);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_wday);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_wday);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_yday);
-  obstack_1grow(obs, ',');
+  m4_shipout_int (obs, tm->tm_yday);
+  obstack_1grow (obs, ',');
 
-  m4_shipout_int(obs, tm->tm_isdst);
+  m4_shipout_int (obs, tm->tm_isdst);
 }
 
 /**
  * gmtime(SECONDS)
  **/
-M4BUILTIN_HANDLER(gmtime)
+M4BUILTIN_HANDLER (gmtime)
 {
   time_t t;
 
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], M4ARG (1), (int *) &t))
     return;
 
-  format_tm(obs, gmtime(&t));
+  format_tm (obs, gmtime (&t));
 }
 
 /**
  * localtime(SECONDS)
  **/
-M4BUILTIN_HANDLER(localtime)
+M4BUILTIN_HANDLER (localtime)
 {
   time_t t;
 
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], M4ARG (1), (int *) &t))
     return;
 
-  format_tm(obs, localtime(&t));
+  format_tm (obs, localtime (&t));
 }
 
-#ifdef HAVE_MKTIME
+#if HAVE_MKTIME
 /**
  * mktime(SEC, MIN, HOUR, MDAY, MONTH, YEAR, [ISDST])
  **/
-M4BUILTIN_HANDLER(mktime)
+M4BUILTIN_HANDLER (mktime)
 {
   struct tm tm;
   time_t t;
@@ -185,32 +183,32 @@ M4BUILTIN_HANDLER(mktime)
   if (m4_bad_argc (argv[0], argc, 7, 8))
     return;
 
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), &tm.tm_sec))
+  if (!m4_numeric_arg (argv[0], M4ARG (1), &tm.tm_sec))
     return;
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), &tm.tm_min))
+  if (!m4_numeric_arg (argv[0], M4ARG (2), &tm.tm_min))
     return;
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(3), &tm.tm_hour))
+  if (!m4_numeric_arg (argv[0], M4ARG (3), &tm.tm_hour))
     return;
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(4), &tm.tm_mday))
+  if (!m4_numeric_arg (argv[0], M4ARG (4), &tm.tm_mday))
     return;
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(5), &tm.tm_mon))
+  if (!m4_numeric_arg (argv[0], M4ARG (5), &tm.tm_mon))
     return;
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(6), &tm.tm_year))
+  if (!m4_numeric_arg (argv[0], M4ARG (6), &tm.tm_year))
     return;
-  if (M4ARG(7) && !m4_numeric_arg (argv[0], (char*)M4ARG(7), &tm.tm_isdst))
+  if (M4ARG (7) && !m4_numeric_arg (argv[0], M4ARG (7), &tm.tm_isdst))
     return;
 
-  t = mktime(&tm);
+  t = mktime (&tm);
 
-  m4_shipout_int(obs, t);
+  m4_shipout_int (obs, t);
 }
 #endif /* HAVE_MKTIME */
 
-#ifdef HAVE_STRFTIME
+#if HAVE_STRFTIME
 /**
  * strftime(FORMAT, SECONDS)
  **/
-M4BUILTIN_HANDLER(strftime)
+M4BUILTIN_HANDLER (strftime)
 {
   struct tm *tm;
   time_t t;
@@ -220,13 +218,13 @@ M4BUILTIN_HANDLER(strftime)
   if (m4_bad_argc (argv[0], argc, 3, 3))
     return;
 
-  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), (int *)&t))
+  if (!m4_numeric_arg (argv[0], M4ARG (2), (int *) &t))
     return;
 
-  tm = localtime(&t);
+  tm = localtime (&t);
 
-  buf = (char *) obstack_alloc(obs, 1024);
-  l = strftime(buf, 1024, (char*)M4ARG(1), tm);
-  obstack_grow(obs, buf, l);
+  buf = (char *) obstack_alloc (obs, 1024);
+  l = strftime (buf, 1024, M4ARG (1), tm);
+  obstack_grow (obs, buf, l);
 }
 #endif /* HAVE_STRFTIME */

@@ -1,5 +1,9 @@
 2001-09-07  Akim Demaille  <akim@epita.fr>
 
+	* modules/stdlib.c, modules/times.c: Misc cleanups.
+
+2001-09-07  Akim Demaille  <akim@epita.fr>
+
 	* configure.in: We now need Autoconf 2.52e.
 	* m4/m4module.h (m4_symbol_lookup_t): Remove `M4_SYMBOL_POPDEF'
 	and `M4_SYMBOL_DELETE'.
