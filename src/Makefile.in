@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-PRODUCT = @PRODUCT@
+PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
 SHELL = /bin/sh
@@ -65,7 +65,7 @@ INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/../lib
 
 HEADERS = m4.h
 SOURCES = m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
-macro.c output.c path.c stackovf.c symtab.c 
+macro.c output.c path.c stackovf.c symtab.c
 OBJECTS = m4$O builtin$O debug$O eval$O format$O freeze$O input$O \
 macro$O output$O path$O $(STACKOVF) symtab$O
 
@@ -110,8 +110,8 @@ realclean: distclean
 dist: $(DISTFILES)
 	@echo "Copying distribution files"
 	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/src 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/src; \
+	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/src 2> /dev/null \
+	    || cp -p $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/src; \
 	done
 
 Makefile: Makefile.in ../config.status

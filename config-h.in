@@ -1,40 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
-/* Special definitions for GNU m4, processed by autoheader.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
-   Francois Pinard <pinard@iro.umontreal.ca>, 1993.
-*/
-
-/* Define to 1 if the changeword(REGEXP) functionnality is wanted.  */
-#undef ENABLE_CHANGEWORD
-
-/* Define to 1 if you have ecvt(3), fcvt(3) and gcvt(3), define to 2 if
-   these are declared in <stdlib.h>.  */
-#undef HAVE_EFGCVT
-
-/* Define to 1 if #include <signal.h> declares struct sigcontext */
-#undef HAVE_SIGCONTEXT
-
-/* Define to the name of the distribution.  */
-#undef PRODUCT
-
-/* Define to 1 if ANSI function prototypes are usable.  */
-#undef PROTOTYPES
-
-/* Define to int if rlim_t is not defined in sys/resource.h */
-#undef rlim_t
-
-/* Define to struct sigaltstack if stack_t is not defined in sys/signal.h */
-#undef stack_t
-
-/* Define to 1 if using stack overflow detection.  */
-#undef USE_STACKOVF
-
-/* Define to the version of the distribution.  */
-#undef VERSION
-
-/* Define to 1 for better use of the debugging malloc library.  See 
-   site ftp.antaire.com in antaire/src, file dmalloc/dmalloc.tar.gz.  */
-#undef WITH_DMALLOC
+/* config-h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
@@ -43,6 +7,11 @@
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* 
+   [Define], [to], [1], [if], [the], [changeword(REGEXP)], [functionality], [is], [wanted]
+   */
+#undef ENABLE_CHANGEWORD
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
@@ -56,6 +25,10 @@
 
 /* Define to 1 if you have the `ecvt' function. */
 #undef HAVE_ECVT
+
+/* Define to 1 if you have ecvt(3), fcvt(3) and gcvt(3). Define to 2 if they
+   are declared in stdlib.h */
+#undef HAVE_EFGCVT
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -74,6 +47,10 @@
 
 /* Define to 1 if you have the `sigaltstack' function. */
 #undef HAVE_SIGALTSTACK
+
+/* [Define], [to], [1], [if], [signal.h], [declares], [struct], [sigcontext]
+   */
+#undef HAVE_SIGCONTEXT
 
 /* Define to 1 if you have the <siginfo.h> header file. */
 #undef HAVE_SIGINFO_H
@@ -138,6 +115,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define to 1 if ANSI function prototypes are available */
+#undef PROTOTYPES
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -151,6 +131,12 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define to 1 if using stack overflow detection */
+#undef USE_STACKOVF
+
+/* Define to 1 if malloc debugging is enabled */
+#undef WITH_DMALLOC
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
@@ -172,5 +158,15 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
+/* 
+   [Define], [to], [int], [if], [rlim_t], [is], [not], [defined], [in], [sys/resource.h]
+   */
+#undef rlim_t
+
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
+
+/* 
+   [Define], [to], [struct], [sigaltstack], [if], [stack_t], [is], [not], [in], [sys/signal.h]
+   */
+#undef stack_t

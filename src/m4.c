@@ -389,7 +389,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s\n", PRODUCT, VERSION);
+      printf ("%s\n", PACKAGE_STRING);
       exit (EXIT_SUCCESS);
     }
 

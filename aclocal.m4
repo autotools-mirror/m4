@@ -57,7 +57,7 @@ AC_DEFUN(fp_C_PROTOTYPES,
 AC_MSG_CHECKING([for function prototypes])
 if test "$ac_cv_prog_cc_stdc" != no; then
   AC_MSG_RESULT(yes)
-  AC_DEFINE(PROTOTYPES)
+  AC_DEFINE(PROTOTYPES, 1, Define to 1 if ANSI function prototypes are available)
   U= ANSI2KNR=
 else
   AC_MSG_RESULT(no)
@@ -76,7 +76,7 @@ AC_ARG_WITH(dmalloc,
                           @/ftp.antaire.com:antaire/src/dmalloc.],
 [if test "$withval" = yes; then
   AC_MSG_RESULT(yes)
-  AC_DEFINE(WITH_DMALLOC)
+  AC_DEFINE(WITH_DMALLOC, 1, Define to 1 if malloc debugging is enabled)
   LIBS="$LIBS -ldmalloc"
   LDFLAGS="$LDFLAGS -g"
 else

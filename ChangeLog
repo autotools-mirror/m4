@@ -1,3 +1,29 @@
+2005-02-03  Gary V. Vaughan  <gary@gnu.org>
+
+	Modernise the configury a little to prevent spurious errors from
+	Autoconf-2.59's autoreconf:
+
+	* config.h.in: Renamed to...
+	* config-h.in: ...this to better support DOS 8.3 file systems.
+	* acconfig.h: Removed.
+	* configure.in: Renamed to...
+	* configure.ac: ...this, and AC_DEFINE used to declare config.h
+	entry comments.  Slight reorganisation and reformatting.
+	* aclocal.m4: Use third argument to AC_DEFINE to declare config.h
+	entry comments.
+	(AC_INIT): Use a modern 3 argument call.
+	* Makefile.in, checks/Makefile.in, doc/Makefile.in,
+	examples/Makefile.in, lib/Makefile.in, src/Makefile.in:
+	s/PRODUCT/PACKAGE/g.
+	* Makefile.in (DISTFILES): Removed acconfig.h, configure.in,
+	config.h.in.  Added configure.ac, config-h.in.
+	(stamp-h.in): Removed acconfig.h from dependencies.
+	(configure): Depends on configure.ac, not configure.in.
+	* doc/Makefile.in (stamp-vti): Ditto.
+	* src/freeze.c (produce_frozen_state), src/m4.c (main): Adjust for
+	difference between PRODUCT="m4" and PACKAGE="GNU M4".
+	* configure: Regenerated.
+
 2005-02-03  Noah Misch  <noah@cs.caltech.edu>
 
 	* src/output.c (mkstemp): Make non-static, and build regardless of

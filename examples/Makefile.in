@@ -1,5 +1,5 @@
 # Makefile for GNU m4 examples.
-# Copyright (C) 1994 Free Software Foundation, Inc.
+# Copyright (C) 1994, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-PRODUCT = @PRODUCT@
+PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
 SHELL = /bin/sh
@@ -48,8 +48,8 @@ realclean: distclean
 dist: $(DISTFILES)
 	@echo "Copying distribution files"
 	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/examples 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/examples; \
+	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/examples 2> /dev/null \
+	    || cp -p $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/examples; \
 	done
 
 Makefile: Makefile.in ../config.status

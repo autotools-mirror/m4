@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-PRODUCT = @PRODUCT@
+PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
 SHELL = /bin/sh
@@ -80,8 +80,8 @@ realclean: distclean
 dist: $(DISTFILES)
 	@echo "Copying distribution files"
 	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/lib 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PRODUCT)-$(VERSION)/lib; \
+	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/lib 2> /dev/null \
+	    || cp -p $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/lib; \
 	done
 
 Makefile: Makefile.in ../config.status
