@@ -514,8 +514,7 @@ m4_shipout_string (struct obstack *obs, const char *s, int len,
    available file descriptors (each overflowing diversion uses one).  */
 
 void
-m4_make_diversion (divnum)
-     int divnum;
+m4_make_diversion (int divnum)
 {
   struct diversion *diversion;
 
@@ -561,8 +560,7 @@ m4_make_diversion (divnum)
    diversions are handled.  This allows files to be included, without
    having them rescanned by m4.  */
 void
-m4_insert_file (file)
-     FILE *file;
+m4_insert_file (FILE *file)
 {
   char buffer[COPY_BUFFER_SIZE];
   size_t length;
@@ -586,8 +584,7 @@ m4_insert_file (file)
    diversion is NOT placed on the expansion obstack, because it must not
    be rescanned.  When the file is closed, it is deleted by the system.  */
 void
-m4_insert_diversion (divnum)
-     int divnum;
+m4_insert_diversion (int divnum)
 {
   struct diversion *diversion;
 
@@ -646,8 +643,7 @@ m4_undivert_all ()
 
 /* Produce all diversion information in frozen format on FILE.  */
 void
-m4_freeze_diversions (file)
-     FILE *file;
+m4_freeze_diversions (FILE *file)
 {
   int saved_number;
   int last_inserted;

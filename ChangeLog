@@ -1,3 +1,8 @@
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
+	* m4/output.c (m4_make_diversion, m4_insert_file)
+	(m4_insert_diversion, +m4_freeze_diversions): Ansify.
+
 2001-10-12  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/input.c (init_builtin_token):  Renamed from init_macro_token,
