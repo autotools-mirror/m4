@@ -23,10 +23,10 @@ MAINTAINERCLEANFILES =				\
 Makefile.in					\
 ltmain.sh					\
 texinfo.tex					\
-$(STANDARD_MACROS)				\
+$(ACLOCAL_MACROS)				\
 $(STANDARD_TOOLS)
 
-STANDARD_MACROS =				\
+ACLOCAL_MACROS =				\
 auxdir.m4					\
 ccstdc.m4					\
 codeset.m4					\
@@ -66,7 +66,7 @@ gmp.m4						\
 gnu-obstack.m4					\
 stackovf.m4
 
-list-standard-macros:
-	@echo $(STANDARD_MACROS)
+spy:
+	@echo $($(SPIED))
 
-EXTRA_DIST = $(SPECIFIC_MACROS) $(STANDARD_MACROS)
+EXTRA_DIST = $(SPECIFIC_MACROS) $(ACLOCAL_MACROS)

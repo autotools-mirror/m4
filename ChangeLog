@@ -1,3 +1,13 @@
+2001-08-30  Akim Demaille  <akim@epita.fr>
+
+	* bootstrap.sh: Create aclocal.m4 instead of modifying it.
+	This also help having a single list of m4 files: in
+	config/Makefile.am.
+	* config/Makefile.am (STANDARD_MACROS): Rename as...
+	(ACLOCAL_MACROS): this.
+	(list-standard-macros): Remove.
+	(spy): New.
+
 2001-08-29  Gary V. Vaughan  <gary@gnu.org>
 
 	In an attempt to moderate my egomania...
