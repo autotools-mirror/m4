@@ -1,5 +1,8 @@
 2005-02-03  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.ac (AC_DEFINE): Fix overquoting of description
+	argument.
+
 	* src/m4.h (__CYGWIN__, WIN32): Canonicalise Windows and Cygwin
 	recognition macros.
 	* src/freeze.c (produce_frozen_state): Use \n line-endings even

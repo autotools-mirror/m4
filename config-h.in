@@ -8,9 +8,7 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* 
-   [Define], [to], [1], [if], [the], [changeword(REGEXP)], [functionality], [is], [wanted]
-   */
+/* Define to 1 if the changeword(REGEXP) functionality is wanted */
 #undef ENABLE_CHANGEWORD
 
 /* Define to 1 if you have `alloca', as a function or macro. */
@@ -48,8 +46,7 @@
 /* Define to 1 if you have the `sigaltstack' function. */
 #undef HAVE_SIGALTSTACK
 
-/* [Define], [to], [1], [if], [signal.h], [declares], [struct], [sigcontext]
-   */
+/* Define to 1 if signal.h declares struct sigcontext */
 #undef HAVE_SIGCONTEXT
 
 /* Define to 1 if you have the <siginfo.h> header file. */
@@ -158,15 +155,11 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
-/* 
-   [Define], [to], [int], [if], [rlim_t], [is], [not], [defined], [in], [sys/resource.h]
-   */
+/* Define to int if rlim_t is not defined in sys/resource.h */
 #undef rlim_t
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
 
-/* 
-   [Define], [to], [struct], [sigaltstack], [if], [stack_t], [is], [not], [in], [sys/signal.h]
-   */
+/* Define to struct sigaltstack if stack_t is not in sys/signal.h */
 #undef stack_t

@@ -86,15 +86,15 @@ if test "$use_stackovf" = yes; then
   AC_SUBST(STACKOVF)
   AC_EGREP_HEADER([rlim_t], [sys/resource.h], [],
     [AC_DEFINE([rlim_t], [int],
-      [[Define to int if rlim_t is not defined in sys/resource.h]])
+      [Define to int if rlim_t is not defined in sys/resource.h])
   ])
   AC_EGREP_HEADER([stack_t], [signal.h], [],
     [AC_DEFINE([stack_t], [struct sigaltstack],
-      [[Define to struct sigaltstack if stack_t is not in sys/signal.h]])
+      [Define to struct sigaltstack if stack_t is not in sys/signal.h])
   ])
   AC_EGREP_HEADER([sigcontext], [signal.h],
     [AC_DEFINE([HAVE_SIGCONTEXT], [1],
-      [[Define to 1 if signal.h declares struct sigcontext]])
+      [Define to 1 if signal.h declares struct sigcontext])
   ])
 fi
 
@@ -104,7 +104,7 @@ AC_ARG_ENABLE([changeword],
   [if test "$enableval" = yes; then
     AC_MSG_RESULT(yes)
     AC_DEFINE([ENABLE_CHANGEWORD], [1],
-      [[Define to 1 if the changeword(REGEXP) functionality is wanted]])
+      [Define to 1 if the changeword(REGEXP) functionality is wanted])
   else
     AC_MSG_RESULT(no)
   fi], [AC_MSG_RESULT(no)])
