@@ -43,18 +43,18 @@
 	* tests/other-tests/capitalize.test, tests/other-tests/comments.test,
 	tests/other-tests/ddivert.test, tests/other-tests/debug.test,
 	tests/other-tests/esyscmd.test, tests/other-tests/exp.test,
-	tests/other-tests/foreach.test, tests/other-tests/forloop.test, 
+	tests/other-tests/foreach.test, tests/other-tests/forloop.test,
 	tests/other-tests/frozen.m4, tests/other-tests/fstab.test,
 	tests/other-tests/hanoi.test, tests/other-tests/include.test,
 	tests/other-tests/indir.test, tests/other-tests/misc.test,
 	tests/other-tests/modfreeze.test, tests/other-tests/modpath1.test,
 	tests/other-tests/modpath2.test, tests/other-tests/modpath3.test,
-	tests/other-tests/modpath4.test, tests/other-tests/modtest.test, 
+	tests/other-tests/modpath4.test, tests/other-tests/modtest.test,
 	tests/other-tests/multiquotes.test, tests/other-tests/patsubst.test,
 	tests/other-tests/pushpop.test, tests/other-tests/regexp.test,
 	tests/other-tests/reverse.test, tests/other-tests/shadow.test,
-	tests/other-tests/sysv-args.test, tests/other-tests/trace.test, 
-	tests/other-tests/translit.test, tests/other-tests/undivert.test, 
+	tests/other-tests/sysv-args.test, tests/other-tests/trace.test,
+	tests/other-tests/translit.test, tests/other-tests/undivert.test,
 	tests/other-tests/unfrozen.m4, tests/other-tests/unload.test,
 	tests/other-tests/wrap.test:  New tests based on the contents
 	of the tests removed below.
@@ -62,7 +62,7 @@
 	reflect removed tests.
 	* examples/defs,modules/defs: Removed.
 	* examples/capitalize.test, examples/comments.test,
-	examples/ddivert.test, examples/debug.test, 
+	examples/ddivert.test, examples/debug.test,
 	examples/esyscmd.test, examples/exp.test,
 	examples/foreach.test, examples/forloop.test,
 	examples/fstab.test, examples/hanoi.test,
@@ -208,7 +208,7 @@
 	into eval.c at compile time.
 	* m4/m4module.h (m4_evaluate): Added prototype.
 	* src/m4.h (evaluate): Removed prototype.
-	
+
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
 	* modules/perl.c (builtin_perleval):  Use PL_na for
@@ -267,34 +267,34 @@
 	* modules/modtest.test: ditto.
 	* modules/modfreeze.test: ditto.
 	* modules/unload.test: ditto.
-	
+
 	* modules/changeword.c:  New file implementing the ``changeword''
 	builtin as a loadable module.
 	* modules/mpeval.c:  New file implementing the ``mpeval'' builtin
 	as a loadable module.
-	
+
 	* src/main.c (main):  Load the gnu module if m4 was started
 	normally -- i.e. without the -G option.
 	* modules/gnu.c:  New file implementing a new loadable module wuth
 	definitions for all the gnu extension builtins.
 	* modules/format.c:  Moved here from src/format.c.  Now included
 	directly by gnu.c.
-	
+
 	* src/main.c (main):  Load the traditional module if m4 was
 	started in `no_gnu_extensions' mode.
 	* modules/traditional.c:  New file implementing the ``unix'' macro,
 	required when m4 is executed in traditional mode, as a loadable
 	module.
-	
+
 	* src/main.c:  Renamed from m4.c to avoid confusion with
 	modules/m4.c.
 	(main):  Always load the m4 module.
 	* modules/m4.c:  New file implementing a new loadable module with
 	definitions for all m4 builtins that are not gnu extensions.
-	
+
 	* m4/Makefile.am:  Adjusted to take new files below into account.
 	* m4/m4module.h: Prototypes for exported functions and types moved
-	to this directory from the src directory. 
+	to this directory from the src directory.
 	* m4/m4private.h: Moved here from src/m4private.h to facilitate
 	the migration of all builtin implementations to loadable modules.
 	* m4/macro.c: Moved this file here from the src directory,
@@ -321,7 +321,7 @@
 
 	* m4/Makefile.am (pkgincdir):  Deleted.  Use automake's built in
 	pkgincludedir instead.
-	
+
 	* m4/m4module.h (rquote): Renamed with a prefix of `m4_' since
 	it is exported globally.  Fixed all references.
 	(lquote): ditto.
@@ -332,12 +332,12 @@
 	(DEF_LQUOTE): ditto.
 	(DEF_BCOMM): ditto.
 	(DEF_ECOMM): ditto.
-	
+
 2000-07-28  Gary V. Vaughan  <gary@gnu.org>
 
 	* NEWS: updated.
 	* TODO: updated.
-	
+
 	* configure.in (AC_CHECK_FUNCS): added bzero and calloc.
 	(AC_OUTPUT): touch stamp-h.in, not stamp-h.
 
@@ -374,7 +374,7 @@
 	* src/builtin.c (builtin_tables): Use list container.
 	* src/module.c (symtab): ditto.
 	* src/symtab.c (symtab): ditto.
-	
+
 	* m4/system.h: New file for common preprocessor definitions.
 	* m4/Makefile.am (pkginc_HEADERS): install system.h.
 	* m4/error.c: Use system.h in place of inline preprocessor.
@@ -382,7 +382,7 @@
 	* m4/module.c: ditto.
 	* m4/module.h: ditto.
 	* m4/xmalloc.c: ditto.
-	
+
 	* m4/error.h (error_one_per_line): Make M4_GLOBAL_DATA for WIN32
 	compatibility.
 	* m4/xmalloc.c (xmalloc_exit_failure): ditto.
@@ -435,7 +435,7 @@
 	(TOKEN_WORD): ditto.
 	(TOKEN_SIMPLE): ditto.
 	(TOKEN_MACDEF): ditto.
-	
+
 	* m4/m4module.h (voidstar): Removed in favour of `VOID' for
 	consistency.  Fixed all references.
 	(STRING): Renamed to `m4_string' for consistency, and because if
@@ -443,13 +443,13 @@
 	(token_type): Renamed to `m4_token_t' for the same reasons.
 	(token_data_type): Renamed to `m4_token_data_t' for the same
 	reasons.
-	
+
 	* m4/m4module.h (XCALLOC): Wrapper macro which handles type
 	sizes.
 	(XMALLOC): ditto.
 	(XREALLOC): ditto.
 	(XFREE): Wrapper macro which avoids freeing NULL pointers.
-	
+
 	* m4/m4module.h (m4_macro):  New type for module defined user
 	macros.
 	* modules/modtest.c (m4_macro_table):  Define module user macros.
@@ -485,7 +485,7 @@
 	* modules/perl.c: New module.
 	* modules/perl.m4: Example of using it.
 	* modules/Makefile.am (perl_la_SOURCES):  Build new perl module.
-	
+
 	* src/m4.c (main): Assume interactive mode if STDIN is connected
 	to a tty.
 	Changed startup sequence slightly so that syntax is not
@@ -508,7 +508,7 @@
 	* src/symtab.c (remove_table_reference_symbols): remove all symbol
 	table entries which refer to a given builtin table.
 	* src/builtin.c (remove_tables): Use it!
-	
+
 2000-07-13  Thomas Tanner  <tanner@ffii.org>
 
 	* Makefile.am (SUBDIRS): we need modules/ for "make dist"
@@ -572,7 +572,7 @@
 	* src/m4.h: use GNU standard #if HAVE_CONFIG_H ideom.
 
 	* m4/m4private.h: ...is not a public header, so moved to src.
-	Add `#include <config.h>', `#define _COMPILING_M4' and 
+	Add `#include <config.h>', `#define _COMPILING_M4' and
 	`#include "m4.h".
 	* m4/Makefile.am (noinst_HEADERS): remove m4private.h.
 	* src/Makefile.am (noinst_HEADERS): add m4private.h.
@@ -607,7 +607,7 @@
 	* m4/m4obstack.c: Renamed obstack.c, and fix #includes.
 	* m4/m4regex.c: Renamed regex.c, and fix #includes.
 
-	* lib: moved to m4 to easily support header installation to 
+	* lib: moved to m4 to easily support header installation to
 	$prefix/include/m4.
 	* Makefile.am (SUBDIRS): renamed lib dir to m4.
 	* configure.in (AC_OUTPUT): reference m4/Makefile.in.
@@ -631,7 +631,7 @@
 	* modules/modpath3.test: ditto.
 	* modules/modpath4.test: ditto.
 
-	Without these changes lt_dlopen("test") attempts to 
+	Without these changes lt_dlopen("test") attempts to
 	LoadLibrary("/bin/test") on Windows, which although harmless
 	generates a spurious error message which spoils most of the tests:
 	* modules/Makefile.am (EXTRA_DIST): s/test.m4 /modtest.m4 /
@@ -699,7 +699,7 @@
 
 	* configure.in (AC_LIBTOOL_WIN32_DLL): Declare that m4 has been
 	ported to compile shared libs.
-	
+
 	* configure.in (LIBM4_DLL_IMPORT): Discover whether we need to
 	use `__declspec(dllimport)' when linking libm4.la on win32.
 	* src/Makefile.am (m4_LDFLAGS): Use dllimport if necessary.
@@ -708,7 +708,7 @@
 	implementation of getopt_long.
 	* src/Makefile.am (m4_LDADD): Link the getopt objects into the
 	main binary here, as opposed to the module library in lib/libm4.la.
-	
+
 	1999-06-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* modules/README: Updated to describe the improved libltdl based
@@ -728,14 +728,14 @@
 	builtin.c but not exported to modules built from the installed
 	m4module.h since it's size changes depending on compile time
 	options.
-	
+
 	* src/m4.h: Lots of stuff moved to lib/m4module.h.
 
 	* lib/m4module.h: New file to define the interface available when
 	compiling m4 modules.
 	* lib/m4module.c: Moved parts of builtin.c, and m4.c which are
 	necessary for module compilation into this new file.
-	
+
 	* lib/Makefile.am (include_HEADERS): install headers (renamed to
 	avoid nameclash with other system headers) necessary for compiling
 	modules.
@@ -752,7 +752,7 @@
 	implementation it ends up linking against.
 	(jm_WITH_REGEX):  Include regex into libm4 unconditionally for
 	the same reason.
-	
+
 	1999-05-18  Gary V. Vaughan  <gary@gnu.org>
 
 	* examples/misc.test: Don't run this test on machines which don't
@@ -765,7 +765,7 @@
 	in generated tests.
 	* tests/other-tests/*.test: ditto.
 	* examples/*.test: ditto.
-	
+
 	* tests/defs (M4): use libtool execute mode.
 	* examples/defs (M4): ditto.
 
@@ -804,7 +804,7 @@
 	file cannot be read instead of EXIT_SUCCESS.
 
 	* src/builtin.c (m4_indir): Changed error message to help
-	translators (from Akim Demaille <demaille@inf.enst.fr>). 
+	translators (from Akim Demaille <demaille@inf.enst.fr>).
 
 	* lib/obstack.[hc], getopt*.[ch]: Updated to newest version from
 	Cygnus.
@@ -916,12 +916,12 @@
 	(module_init()): Do this the first time we load a module instead;
 	if the module subsystem is broken normal m4 scripts can still run.
 	* src/m4.h (install_builtin_table): is now exported.
-	
+
 1999-03-26  Gary V. Vaughan  <gary@gnu.org>
 
 	* src/module.c: removed.  No longer required.
 	* po/POTFILES.in: removed src/module.c.
-	
+
 	* Makefile.am (MAINTAINERCLEANFILES): Remove all the files that
 	the bootstrap script can recreate.
 	* acm4/Makefile.am (MAINTAINERCLEANFILES): ditto.
@@ -932,20 +932,20 @@
 	* modules/Makefile.am (MAINTAINERCLEANFILES): ditto.
 	* src/Makefile.am (MAINTAINERCLEANFILES): ditto.
 	* tests/Makefile.am (MAINTAINERCLEANFILES): ditto.
-	
+
 	* acinclude.m4: removed.  `aclocal -I acm4' handles this much
 	better.
 	* acm4/Makefile.am (ACINCLUDE_M4): ditto.
 	* acm4/gettext.m4: removed.  It causes a multiple definition vs.
 	the installed gettext.m4 file when running aclocal.
-	
+
 1999-03-25  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.in (AM_INIT_AUTOMAKE): bumped version number to
 	distinguish this from the last prerelease.
 	(AC_LIBLTDL_CONVENIENCE):  build libltdl as a convenience library
 	in its own subdirectory.
-	
+
 	* modules/Makefile.am (*_SOURCES): renamed to use libtool's "no
 	lib prefix on a module" feature.
 	(LDFLAGS): Added `-module -avoid-version' flags to build
@@ -961,7 +961,7 @@
 	* modules/test.c (m4_macro_table, m4_init_module,
 	m4_finish_module): ditto.
 	* modules/time.c (m4_macro_table): ditto.
-	
+
 	* bootstrap: New file.  Runs all the autoutils in the right order
 	after a fresh checkout, or a make maintainer-clean.
 
@@ -976,7 +976,7 @@
 	(Symbols): New node, documenting symbols.
 	(direntry): Modernize.
 
-	
+
 1998-12-11  Rene' Seindal  <rene@seindal.dk>
 
 	* src/builtin.c (predefined_tab): New predefined macros
@@ -1118,7 +1118,7 @@
 	use of the regexp to dump core.
 
 	* src/module.c (module_load): Changed error message to conform to
-	standards. 
+	standards.
 
 	* src/m4.c (usage): Added message about reporting bugs.
 
@@ -1157,7 +1157,7 @@
 	* modules/stdlib.c: New module `stdlib' defining some standard
 	functions: getcwd, getlogin, getpid, getppid, getuid, getpwnam,
 	getpwuid, hostname, rand, srand, getenv, setenv, unsetenv, uname.
-	
+
 	* src/builtin.c (shipout_string): New convenience function for
 	builtins and modules.
 
@@ -1193,7 +1193,7 @@
 
 	* tests/Makefile.am (GENERATED_TESTS): Added new
 	generated-tests/changesy.8.test
-	
+
 	* doc/m4.texinfo (Changesyntax): Documentation for escape
 	syntax class.
 
@@ -1220,7 +1220,7 @@
 	* Prerelease 1.4k.
 
 	* tests/Makefile.am (GENERATED_TESTS): Renamed gentest to
-	generated-tests. 
+	generated-tests.
 
 	* tests/Makefile.am (OTHER_TESTS, OTHER_FILES): Added manually
 	maintained tests in tests/other-tests.  These currently tests for
@@ -1230,7 +1230,7 @@
 	* examples/Makefile.am (TESTS): Added tests for all example files.
 
 	* examples/mktests.sh: New file.  Help program for creating test
-	files. 
+	files.
 
 	* tests/mkconfig.sh: New file to generate tests/config.m4 and
 	tests/config.sh.  This is for tests of configure selectable

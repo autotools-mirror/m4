@@ -1,3 +1,13 @@
+2001-08-05  gettextize  <bug-gnu-utils@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.10.39.
+
+2001-08-05  gettextize  <bug-gnu-utils@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.10.39.
+	* cat-id-tbl.c: Remove file.
+	* stamp-cat-id: Remove file.
+
 1999-10-13  Rene' Seindal  <rene@seindal.dk>
 
 	* cs.po: Czech translation added.
