@@ -1,5 +1,10 @@
 2003-08-29  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/system-h.in: For consistency with the gnulib imports, renamed
+	to m4/system_.h.
+	* m4/Makefile (EXTRA_HEADERS): Adjust.
+	* configure.ac (AC_CONFIG_FILES): Adjust.
+
 	* m4/stdbool_.h: New file from gnulib for systems without their
 	own.
 	* m4/Makefile.am: Add snippets from gnulib for C99 bool support.

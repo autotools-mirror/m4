@@ -213,6 +213,6 @@ AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 ## Outputs. ##
 ## -------- ##
 AC_CONFIG_FILES(Makefile config/Makefile doc/Makefile m4/Makefile
-                m4/system.h:m4/system-h.in src/Makefile modules/Makefile
+                m4/system.h:m4/system_.h src/Makefile modules/Makefile
 		tests/Makefile tests/atlocal examples/Makefile)
 AC_OUTPUT

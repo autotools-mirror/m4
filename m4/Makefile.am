@@ -33,7 +33,7 @@ INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
 include_HEADERS	= m4module.h
 noinst_HEADERS	= m4private.h
 pkginc_HEADERS	= error.h hash.h ltdl.h regex.h system.h $(OBSTACK_H)
-EXTRA_HEADERS	= system-h.in gnu-obstack.h
+EXTRA_HEADERS	= system_.h gnu-obstack.h
 
 EXTRA_DIST = $(EXTRA_HEADERS) obstack.c
 
