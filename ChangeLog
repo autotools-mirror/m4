@@ -1,5 +1,8 @@
 2003-09-09  Gary V. Vaughan  <gary@gnu.org>
 
+	* bootstrap: Revert 2003-09-04 patch now that CVS autoconf and
+	automake have been fixed.
+
 	* config/m4-obstack.m4 (m4_FUNC_OBSTACK): D'oh! Now that we wrap
 	gl_OBSTACK, which in turn calls AC_FUNC_OBSTACK, don't rerun bits
 	of code originally snarfed from AC_FUNC_OBSTACK!!! While I'm here

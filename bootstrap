@@ -10,6 +10,4 @@ autoreconf -fvi
   ${AWK-awk} -f ./generate.awk ../doc/m4.texinfo > generated.at
 )
 
-rm -f ./aclocal.m4t
-
 exit 0
