@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-09-22 18:21+0200\n"
+"POT-Creation-Date: 2001-09-30 15:13+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-22 18:21+0200\n"
+"POT-Creation-Date: 2001-09-30 15:13+0100\n"
 "PO-Revision-Date: 1999-03-28 18:56 +02:00\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"

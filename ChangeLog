@@ -1,5 +1,17 @@
 2001-09-30  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.in: Moved to...
+	* configure.ac: ...here.  Added a libtool like timestamped
+	banner, and tidied up the libltdl cruft.
+	* config/mkstamp: Script to extract a timestamp from ChangeLog.
+	* modules/Makefile.am (INCLTDL):  Removed.  This is required
+	only when libltdl is configured in a subdirectory.
+	* src/Makefile.am: Ditto.
+	(LIBADD_DL):  No need to add this again, libtool already knows
+	that libm4.la depends on it.
+	* m4/Makefile.am: Automake sets variables from AC_SUBST.  Use
+	them.
+
 	* TODO: stackovf.c is basically broken.
 	Reported by Marc Espie <espie@schutzenberger.liafa.jussieu.fr>
 
@@ -4077,3 +4089,6 @@
 1990-01-22  René Seindal <seindal@diku.dk>
 
 	* Initial beta release.  Release 0.50, manual 0.05.
+
+
+	$Revision$ $Date$

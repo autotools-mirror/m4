@@ -71,4 +71,4 @@ stackovf.m4
 spy:
 	@echo $($(SPIED))
 
-EXTRA_DIST = $(SPECIFIC_MACROS) $(ACLOCAL_MACROS)
+EXTRA_DIST = mkstamp $(SPECIFIC_MACROS) $(ACLOCAL_MACROS)
