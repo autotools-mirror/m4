@@ -374,8 +374,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      version_etc (stdout, NULL, "GNU " PACKAGE, VERSION TIMESTAMP,
-		   "Rene' Seindal", "Gary V. Vaughan", NULL);
+      version_etc (stdout, NULL, "GNU " PACKAGE TIMESTAMP,
+		   VERSION, "Rene' Seindal", "Gary V. Vaughan", NULL);
       exit (EXIT_SUCCESS);
     }
 

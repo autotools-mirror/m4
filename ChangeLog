@@ -1,5 +1,14 @@
 2003-12-01  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/mkstamp: Updated from CVS libtool.
+	* configure.ac: Generate a gnu coding standards compliant version
+	number, and use it for the banner.
+	* Makefile.am (stamp-vcl): New rules to force m4 to be regenerated
+	mhen the TIMESTAMP changes in ChangeLog, but the file modification
+	time doesn't (e.g. in cvs commit).  Otherwise dist tarballs will
+	contain the previous version number.
+	* src/main.c: Make --version output conform to the GNU standard.
+
 	* configure.ac (AM_INIT_AUTOMAKE): Require 1.7g...
 	* modules/Makefile.am (gnu_la_SOURCES, load_la_SOURCES,
 	m4_la_SOURCES, traditional_la_SOURCES, modtest_la_SOURCES,

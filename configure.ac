@@ -38,7 +38,8 @@ TIMESTAMP=
 case AC_PACKAGE_VERSION in
   *[[acegikmoqsuwy]])
     TIMESTAMP=`$CONFIG_SHELL config/mkstamp < $srcdir/ChangeLog`
-    AS_BOX([Configuring AC_PACKAGE_TARNAME AC_PACKAGE_VERSION$TIMESTAMP])
+    test -z "$TIMESTAMP" || TIMESTAMP=" (Build:$TIMESTAMP)"
+    AS_BOX([Configuring AC_PACKAGE_TARNAME][$TIMESTAMP AC_PACKAGE_VERSION])
     echo
     ;;
 esac

@@ -29,6 +29,21 @@ MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 			  config-h.in configure stamp-h.in \
 			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 
+# Make sure config.status is regenerated when the version timestamp changes
+MKSTAMP = $(SHELL) $(top_srcdir)/config/mkstamp
+CONFIG_STATUS_DEPENDENCIES = stamp-vcl
+stamp-vcl: vcl.tmp $(top_srcdir)/ChangeLog
+vcl.tmp:
+	@dir=.; test -f $$dir/stamp-vcl || dir=$(srcdir); \
+	set `$(MKSTAMP) < $(top_srcdir)/ChangeLog`; \
+	echo "$$1" > vcl.tmp; \
+	cmp -s vcl.tmp $$dir/stamp-vcl \
+## If mkstamp does not match $(srcdir)/stamp-vcl, we still put the new one
+## in the current dir, incase $(srcdir) is not writable.  The dir selection
+## at the top of this rule takes care of prefering the right one on
+## subsequent runs.
+	  || (echo "Updating stamp-vcl"; cp vcl.tmp ./stamp-vcl)
+	-@rm -f vcl.tmp
 
 ##                                                                      ##
 ##                   --- RULES FOR THE MAINTAINER ---                   ##
