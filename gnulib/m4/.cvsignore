@@ -1,0 +1,8 @@
+*.o
+*.lo
+*.la
+obstack.h
+.deps
+.libs
+Makefile
+Makefile.in

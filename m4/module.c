@@ -17,7 +17,6 @@
    02111-1307  USA
 */
 
-#include "m4.h"
 #include "pathconf.h"
 #include "ltdl.h"
 #include "m4private.h"

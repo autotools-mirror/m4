@@ -21,7 +21,6 @@
 #  include <config.h>
 #endif
 
-#include "m4.h"
 #include "m4private.h"
 
 

@@ -1,5 +1,40 @@
 2003-09-05  Gary V. Vaughan  <gary@gnu.org>
 
+	We can't mirror the gnulib directory structure here, since we need
+	to be able to eg. `#include <m4/obstack.h>' from our source files,
+	which is much easier if the local obstack.h is created in a
+	directory named m4.  Rather than trying to symlink everything into
+	the m4 directory, now we build a libtool convenience library from
+	the sources we get from gnulib and link that with libm4.la:
+
+	* gnulib/config/extensions.m4: Imported from CVS gnulib.
+	* gnulib/config/unlocked-io.m4: Ditto.
+	* gnulib/m4/unlocked-io.h: Ditto.
+	* gnulib/m4/obstack.m4, gnulib/m4/onceonly_2_57.m4,
+	gnulib/m4/stdbool.m4: All moved to gnulib/config directory.
+	* gnulib/lib/obstack.c, gnulib/lib/obstack_.h,
+	gnulib/lib/stdbool_.h: All moved to gnulib/m4 directory.
+	* m4/strtol.c, m4/xmalloc.c, m4/xstrdup.c, m4/xstrzdup.c: Ditto.
+	* m4/Makefile.am: Adjust.
+	* gnulib/Makefile.am (EXTRA_DIST): Name just the additional gnulib
+	macros we redistribute.
+	* gnulib/m4/Makefile.am: New file.  Build libgnu.la convenience
+	library among others.
+	(GNULIB_SRCS, GNULIB_MACROS): Removed.
+	* Makefile.am (ACLOCAL_AMFLAGS): Adjust.
+	* config/m4-obstack.m4: Adjust.
+	* po/POTFILES.in: Adjust.
+	* configure.ac: Reformatting.  Call newly imported gnulib macros.
+	* m4/builtin.c, m4/macro.c, m4/module.c, m4/utility.c: Removed
+	bogus calls of `#include "m4.h"'.
+	* Makefile.am: INCLUDES has been deprecated in favour of
+	AM_CPPFLAGS.
+	* m4/Makefile.am: Ditto.
+	* modules/Makefile.am: Ditto.
+	* src/Makefile.am: Ditto.
+
+2003-09-05  Gary V. Vaughan  <gary@gnu.org>
+
 	* config/Makefile.am: Reverting yesterdays patch for VPATH builds.
 
 2003-09-04  Gary V. Vaughan  <gary@gnu.org>

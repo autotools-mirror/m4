@@ -23,7 +23,6 @@
 
 #include <stdarg.h>
 
-#include "m4.h"
 #include "m4private.h"
 
 static void    collect_arguments (m4 *context, const char *name,

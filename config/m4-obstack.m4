@@ -29,8 +29,6 @@ AC_DEFUN([M4_AC_FUNC_OBSTACK],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
 AC_REQUIRE([gl_OBSTACK])
 m4_pattern_allow([^m4_cv_func_obstack$])dnl
-m4_pattern_allow([^m4_obstack_c$])dnl
-m4_pattern_allow([^m4_obstack_h$])dnl
 
 AC_CHECK_HEADERS(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
 
@@ -49,10 +47,6 @@ else
 fi
 
 OBSTACK_H=
-OBSTACK_C=
-m4_obstack_h=m4/obstack.h
-m4_obstack_c=m4/obstack.c
-rm -f $m4_obstack_c $m4_obstack_h
 if test $m4_cv_func_obstack = yes; then
 
   # The system provides obstack.h, `#include <obstack.h>' will work
@@ -68,17 +62,12 @@ else
   # it to m4/obstack.h at Make time (to substitute the missing system
   # supplied version).  Hence, `#include <m4/obstack.h>' will work.
   INCLUDE_OBSTACK_H='#include <m4/obstack.h>'
-
-  if test x"$ac_cv_header_obstack_h" != xyes; then
-    OBSTACK_H=obstack.h
-    OBSTACK_C=obstack.c
-  fi
+  OBSTACK_H=obstack.h
 
   # In the absence of a system implementation, we must compile our own:
   AC_LIBOBJ(obstack)
 
 fi
 AC_SUBST(OBSTACK_H)
-AC_SUBST(OBSTACK_C)
 AC_SUBST(INCLUDE_OBSTACK_H)
 ])# M4_AC_FUNC_OBSTACK

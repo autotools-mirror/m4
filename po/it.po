@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU M4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-04 16:21+0100\n"
+"POT-Creation-Date: 2003-09-05 19:04+0100\n"
 "PO-Revision-Date: 2002-11-04 13:19+0100\n"
 "Last-Translator: full name <email@address>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -14,8 +14,12 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gnulib/lib/obstack.c:487 gnulib/lib/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
 msgid "memory exhausted"
+msgstr ""
+
+#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
+msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1021
@@ -67,10 +71,6 @@ msgstr ""
 msgid "Invalid range end"
 msgstr ""
 
-#: m4/regex.c:1057 m4/xmalloc.c:80
-msgid "Memory exhausted"
-msgstr ""
-
 #: m4/regex.c:1060
 #, fuzzy
 msgid "Invalid preceding regular expression"
@@ -114,73 +114,73 @@ msgstr "NESSUNO"
 msgid "EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
 
-#: m4/macro.c:185
+#: m4/macro.c:184
 #, fuzzy
 msgid "EOF in argument list"
 msgstr "ERRORE: Fine prematura della lista di argomenti"
 
-#: m4/macro.c:231
+#: m4/macro.c:230
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 
-#: m4/macro.c:426
+#: m4/macro.c:425
 #, c-format
 msgid "Error: %s: unterminated parameter reference: %s"
 msgstr ""
 
-#: m4/module.c:123
+#: m4/module.c:122
 #, c-format
 msgid "Warning: cannot load symbol `%s' from module `%s'"
 msgstr ""
 
-#: m4/module.c:231
+#: m4/module.c:230
 #, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr ""
 
-#: m4/module.c:258
+#: m4/module.c:257
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:269
+#: m4/module.c:268
 #, c-format
 msgid "cannot unload module `%s': %s"
 msgstr ""
 
-#: m4/module.c:290
+#: m4/module.c:289
 msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:310
+#: m4/module.c:309
 msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:337
+#: m4/module.c:336
 #, c-format
 msgid "failed to initialise module loader: %s"
 msgstr ""
 
-#: m4/module.c:388
+#: m4/module.c:387
 #, c-format
 msgid "module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:400
+#: m4/module.c:399
 #, fuzzy, c-format
 msgid "cannot open module `%s': %s"
 msgstr "Impossibile aprire %s"
 
-#: m4/module.c:432
+#: m4/module.c:431
 #, c-format
 msgid "cannot unload all modules: %s"
 msgstr ""
 
-#: m4/module.c:445
+#: m4/module.c:444
 msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:493
+#: m4/module.c:492
 #, fuzzy, c-format
 msgid "cannot close module `%s': %s"
 msgstr "Impossibile aprire l' archivio di errore: %s"

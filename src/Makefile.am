@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright (C) 2000 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -18,19 +18,20 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-CLEANFILES = m4$(EXEEXT)
-MAINTAINERCLEANFILES = Makefile.in
-
-INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
+AM_CPPFLAGS	= -I$(top_builddir) -I$(top_srcdir) \
+		  -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
 
-noinst_HEADERS = gnu-getopt.h
+bin_PROGRAMS		= m4
+m4_SOURCES		= main.c m4.h freeze.c stackovf.c
+EXTRA_m4_SOURCES	= getopt.c getopt1.c
 
-bin_PROGRAMS = m4
-m4_SOURCES = main.c m4.h freeze.c stackovf.c
-EXTRA_m4_SOURCES = getopt.c getopt1.c
-
-m4_LDADD = $(M4OBJS) $(top_builddir)/m4/libm4.la $(INTLLIBS)
-m4_LDFLAGS = -no-undefined -export-dynamic $(DLPREOPEN)
+m4_LDADD		= $(M4OBJS) $(top_builddir)/m4/libm4.la $(INTLLIBS)
+m4_LDFLAGS		= -no-undefined -export-dynamic $(DLPREOPEN)
 
 $(bin_PROGRAMS): $(M4OBJS)
+
+noinst_HEADERS		= gnu-getopt.h
+
+CLEANFILES		= m4$(EXEEXT)
+MAINTAINERCLEANFILES	= Makefile.in

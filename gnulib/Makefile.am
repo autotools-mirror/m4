@@ -1,6 +1,5 @@
-## Makefile.am -- Process this file with automake to produce Makefile.in
-##
-## Copyright (C) 2003 Free Software Foundation
+## This file is part of GNU m4
+## Copyright (C) 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -19,17 +18,11 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-gnulib_macrodir	= $(srcdir)/m4
-gnulib_srcdir	= $(srcdir)/lib
+SUBDIRS		= m4
 
-GNULIB_SRCS	=				\
-$(gnulib_srcdir)/obstack.c			\
-$(gnulib_srcdir)/obstack.h			\
-$(gnulib_srcdir)/stdbool_.h
-
-GNULIB_MACROS	=				\
-$(gnulib_macrodir)/obstack.m4			\
-$(gnulib_macrodir)/onceonly_2_57.m4		\
-$(gnulib_macrodir)/stdbool.m4
-
-EXTRA_DIST	= $(GNULIB_SRCS) $(GNULIB_MACROS)
+EXTRA_DIST	=				\
+config/extensions.m4				\
+config/obstack.m4				\
+config/onceonly_2_57.m4				\
+config/stdbool.m4				\
+config/unlocked-io.m4

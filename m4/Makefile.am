@@ -1,5 +1,4 @@
-## Makefile.am -- Process this file with automake to produce Makefile.in
-##
+## This file is part of GNU m4
 ## Copyright (C) 2000, 2001, 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -17,69 +16,29 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-CLEANFILES		= pathconf.h
-MAINTAINERCLEANFILES	= Makefile.in
-
-MODULE_PATH		= $(pkglibexecdir)
-pkgincdir		= $(includedir)/@PACKAGE@
-
 AM_LDFLAGS 	= -no-undefined -export-dynamic
-INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
-		  -I$(top_builddir)/src -I$(top_srcdir)/src $(INTLINCL)
-
-include_HEADERS	= m4module.h
-noinst_HEADERS	= m4private.h
-pkginc_HEADERS	= error.h hash.h ltdl.h regex.h system.h
-EXTRA_HEADERS	= system_.h
-
-EXTRA_DIST = $(EXTRA_HEADERS)
+AM_CPPFLAGS	= -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
+		  -I$(top_builddir) -I$(top_srcdir) $(INTLINCL)
 
 lib_LTLIBRARIES		= libm4.la
-libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c \
-			  input.c ltdl.c m4.c macro.c module.c output.c \
+libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c input.c \
+			  ltdl.c m4.c m4private.h macro.c module.c output.c \
 			  path.c regex.c symtab.c syntax.c utility.c
-libm4_la_LIBADD		= $(LTLIBOBJS) $(LTLIBINTL) $(LIBADD_DL)
+libm4_la_LIBADD		= $(top_builddir)/gnulib/m4/libgnu.la $(LIBADD_DL)
 
-module.o module.lo: $(srcdir)/module.c pathconf.h
+MODULE_PATH = $(pkglibexecdir)
+module.o module.lo: module.c pathconf.h
 pathconf.h: Makefile
 	@echo "#define MODULE_PATH \"${MODULE_PATH}\"" > pathconf.h
-system.h: $(OBSTACK_H)
 
+EXTRA_DIST	= system_.h
 # This file needs to be regenerated at configure time.
 dist-hook:
 	rm -f $(distdir)/system.h
 
+pkgincdir	= $(includedir)/@PACKAGE@
+pkginc_HEADERS	= error.h hash.h ltdl.h regex.h system.h
+include_HEADERS	= m4module.h
 
-# --------------------------- @
-# Adapted for gnulib obstack. #
-# --------------------------- @
-
-gnulib_srcdir	= $(top_srcdir)/gnulib/lib
-
-BUILT_SOURCES	= $(OBSTACK_C) $(OBSTACK_H)
-DISTCLEANFILES	= obstack.c obstack.h
-
-pkginc_HEADERS	+= $(OBSTACK_H)
-
-all-local $(lib_OBJECTS): $(OBSTACK_C) $(OBSTACK_H)
-obstack.c: $(gnulib_srcdir)/obstack.c
-	rm -f $@ && $(LN_S) $(gnulib_srcdir)/$@ $@
-obstack.h: $(gnulib_srcdir)/obstack.h
-	rm -f $@ && $(LN_S) $(gnulib_srcdir)/$@ $@
-
-
-# ------------------------------------------------ #
-# Adapted from gnulib/modules/stdbool:Makefile.am. #
-# ------------------------------------------------ #
-
-BUILT_SOURCES	+= $(STDBOOL_H)
-DISTCLEANFILES	+= stdbool.h stdbool.h-t
-
-pkginc_HEADERS	+= $(STDBOOL_H)
-
-# We need the following in order to create an <stdbool.h> when the system
-# doesn't have one that works.
-all-local $(lib_OBJECTS): $(STDBOOL_H)
-stdbool.h: $(gnulib_srcdir)/stdbool_.h
-	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(gnulib_srcdir)/stdbool_.h > $@-t
-	mv $@-t $@
+CLEANFILES		= pathconf.h
+MAINTAINERCLEANFILES	= Makefile.in

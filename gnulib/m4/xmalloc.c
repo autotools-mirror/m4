@@ -34,8 +34,6 @@
 # define _(Text) Text
 #endif
 
-#include "system.h"
-
 /* If this file fails to compile because your machine has no memset()
    function, you should ensure that either HAVE_CALLOC or HAVE_BZERO
    are defined in config.h */

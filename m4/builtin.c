@@ -20,7 +20,6 @@
 /* Code for all builtin macros, initialisation of symbol table, and
    expansion of user defined macros.  */
 
-#include "m4.h"
 #include "m4private.h"
 
 /* Find the builtin which has NAME.  If HANDLE argument is supplied

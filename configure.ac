@@ -97,6 +97,7 @@ AM_INIT_AUTOMAKE([1.7.1 dist-bzip2])
 ## C compiler checks. ##
 ## ------------------ ##
 AC_PROG_CC
+jm_FUNC_GLIBC_UNLOCKED_IO
 AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
@@ -137,7 +138,6 @@ AC_CONFIG_FILES(po/Makefile.in)
 
 
 
-
 ## ------------------------ ##
 ## Other external programs. ##
 ## ------------------------ ##
@@ -145,6 +145,16 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PATH_PROG(PERL,perl)
 AC_PROG_AWK
+
+
+
+## --------------------------- ##
+## C compiler characteristics. ##
+## --------------------------- ##
+AM_C_PROTOTYPES
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_CHECK_SIZEOF([long long int])
 
 
 
@@ -161,15 +171,6 @@ else
   INCLUDE_STDBOOL_H='#include <m4/stdbool.h>'
 fi
 AC_SUBST([INCLUDE_STDBOOL_H])
-
-
-## --------------------------- ##
-## C compiler characteristics. ##
-## --------------------------- ##
-AM_C_PROTOTYPES
-AC_C_CONST
-AC_TYPE_SIZE_T
-AC_CHECK_SIZEOF([long long int])
 
 
 
@@ -217,6 +218,7 @@ AC_CONFIG_FILES([Makefile
 		doc/Makefile
 		examples/Makefile
 		gnulib/Makefile
+		gnulib/m4/Makefile
 		m4/Makefile
 		m4/system.h:m4/system_.h
 		modules/Makefile
@@ -224,4 +226,5 @@ AC_CONFIG_FILES([Makefile
 		tests/Makefile
 		tests/atlocal
 ])
+
 AC_OUTPUT

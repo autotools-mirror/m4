@@ -28,7 +28,8 @@ ETAGS_ARGS = --regex='/M4BUILTIN_HANDLER[ \t]*(\([^)]*\)/\1/'
 
 EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 
-INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
+AM_CPPFLAGS	= -I$(top_builddir) -I$(top_srcdir) \
+		  -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
 LIBS = $(top_builddir)/m4/libm4.la
 AM_LDFLAGS = -no-undefined

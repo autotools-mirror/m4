@@ -1,6 +1,6 @@
-gnulib/lib/obstack.c
+gnulib/m4/obstack.c
+gnulib/m4/xmalloc.c
 m4/regex.c
-m4/xmalloc.c
 m4/builtin.c
 m4/debug.c
 m4/input.c
