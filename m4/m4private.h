@@ -39,9 +39,6 @@ struct m4_token_data {
   union {
     struct {
 	char *text;
-#ifdef ENABLE_CHANGEWORD
-	char *original_text;
-#endif
     } u_t;
     struct {
 	m4_builtin_func *func;
@@ -53,9 +50,6 @@ struct m4_token_data {
 #define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
 #define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
 #define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
-#ifdef ENABLE_CHANGEWORD
-#  define M4_TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
-#endif
 #define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
 #define M4_TOKEN_DATA_FUNC_TRACED(Td) 	((Td)->u.u_f.traced)
 

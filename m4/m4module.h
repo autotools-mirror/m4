@@ -137,7 +137,6 @@ typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
 
 extern m4_token_data_t  m4_token_data_type	  (m4_token_data*);
 extern char	       *m4_token_data_text	  (m4_token_data*);
-extern char	       *m4_token_data_orig_text	  (m4_token_data*);
 extern m4_builtin_func *m4_token_data_func	  (m4_token_data*);
 extern boolean		m4_token_data_func_traced (m4_token_data*);
 
@@ -180,7 +179,6 @@ int suppress_warnings;		/* -Q */
 int warning_status;		/* -E */
 int nesting_limit;		/* -L */
 int discard_comments;		/* -c */
-const char *user_word_regexp;	/* -W */
 
 /* left and right quote, begin and end comment */
 m4_string lquote;
@@ -395,9 +393,6 @@ extern	boolean	m4_pop_wrapup	(void);
 extern	void	m4_set_quotes	(const char *, const char *);
 extern	void	m4_set_comment	(const char *, const char *);
 extern	void	m4_set_syntax	(char, const unsigned char *);
-#ifdef ENABLE_CHANGEWORD
-extern	void	m4_set_word_regexp (const char *);
-#endif
 
 int m4_current_diversion;
 int m4_output_current_line;

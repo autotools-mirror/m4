@@ -1,3 +1,23 @@
+2001-08-30  Gary V. Vaughan  <gary@gnu.org>
+
+	The experimental `changeword' feature never took off, and has
+	no obvious advantages over `changesyntax' to compensate the
+	enormous speed penalty it carries:
+	* configure.in (ENABLE_CHANGEWORD): Removed.
+	* m4/m4module.h (m4_set_word_regexp): Removed.
+	* m4/m4private.h (m4_token_data): Removed original_text field.
+	* m4/utility.c (m4_token_data_orig_text): Removed.
+	* m4/input,c: Removed all conditional ENABLE_CHANGEWORD code.
+	* m4/macro.c: Ditto.
+	* src/main.c: Ditto.
+	* modules/Makefile.am (changeword.la): Removed.
+	* modules/changeword.c: File removed.
+	* doc/m4.texinfo: References to changeword and --word-regexp
+	removed.
+	* po/POTFILES.in: modules/changeword.c removed.
+	* tests/atlocal.in (ENABLE_CHANGEWORD): Removed.
+	* tests/builtins.at (changeword): Test removed.
+
 2001-08-30  Akim Demaille  <akim@epita.fr>
 
 	* bootstrap.sh: Create aclocal.m4 instead of modifying it.
@@ -15,7 +35,7 @@
 
 	* tests/generate.awk: When making substitutions to "@&t@", either
 	"&" or "\&" in the substitution string argument to gsub refer back
-	to the matched text.  "@\\t@" seems to work though, Tests 43 and
+	to the matched text.  "@\\&t@" seems to work though, Tests 43 and
 	67 now pass for me.
 
 2001-08-29  Akim Demaille  <akim@epita.fr>

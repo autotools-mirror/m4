@@ -76,13 +76,8 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 	      && SYMBOL_BLIND_NO_ARGS (symbol)
 	      && !M4_IS_OPEN(m4_peek_input ())))
 	{
-#ifdef ENABLE_CHANGEWORD
-	  m4_shipout_text (obs, M4_TOKEN_DATA_ORIG_TEXT (td),
-			   strlen (M4_TOKEN_DATA_ORIG_TEXT (td)));
-#else
 	  m4_shipout_text (obs, M4_TOKEN_DATA_TEXT (td),
 			   strlen (M4_TOKEN_DATA_TEXT (td)));
-#endif
 	}
       else
 	expand_macro (symbol);

@@ -102,11 +102,6 @@ Operation modes:\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"),
 	     stdout);
-#ifdef ENABLE_CHANGEWORD
-      fputs (_("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"),
-	     stdout);
-#endif
       fputs (_("\
 \n\
 Dynamic loading features:\n\
@@ -205,11 +200,6 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#ifdef ENABLE_CHANGEWORD
-#  define CHANGEWORD_SHORTOPT	"W:"
-#else
-#  define CHANGEWORD_SHORTOPT	""
-#endif
 #ifdef WITH_MODULES
 #  define MODULE_SHORTOPT	"m:"
 #  define MODULEPATH_SHORTOPT	"M:"
@@ -218,7 +208,7 @@ static const struct option long_options[] =
 #  define MODULEPATH_SHORTOPT	""
 #endif
 
-#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":bcd::el:m:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:st:"
 
 #include <dlfcn.h>
 
@@ -349,12 +339,6 @@ main (int argc, char *const *argv, char *const *envp)
 	frozen_file_to_read = optarg;
 	break;
 
-#ifdef ENABLE_CHANGEWORD
-      case 'W':
-	user_word_regexp = optarg;
-	break;
-#endif
-
       case 'b':
 	interactive = FALSE;
 	break;
@@ -395,16 +379,11 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       printf ("GNU %s %s", PACKAGE, VERSION);
-#if defined(WITH_GMP) || defined(ENABLE_CHANGEWORD)
+#if defined(WITH_GMP)
       fputs(_(" (options:"), stdout);
-#ifdef WITH_GMP
       fputs(" gmp", stdout);
-#endif /* WITH_GMP */
-#ifdef ENABLE_CHANGEWORD
-      fputs(" changeword", stdout);
-#endif /* ENABLE_CHANGEWORD */
       fputs(")", stdout);
-#endif /* defined WITH_GMP || ENABLE_CHANGEWORD */
+#endif /* WITH_GMP */
       fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }

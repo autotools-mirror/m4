@@ -137,10 +137,6 @@
    that a string is parsed equally whether there is a $ or not.  The
    character $ is used by convention in user macros.  */
 
-#ifdef ENABLE_CHANGEWORD
-#  include "regex.h"
-#endif
-
 static	void  check_use_macro_escape	(void);
 static	int   file_peek			(void);
 static	int   file_read			(void);
@@ -260,17 +256,6 @@ static boolean single_comments;
 
 /* TRUE iff some character has M4_SYNTAX_ESCAPE */
 static boolean use_macro_escape;
-
-#ifdef ENABLE_CHANGEWORD
-
-#define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
-
-static char *word_start;
-static struct re_pattern_buffer word_regexp;
-static int default_word_regexp;
-static struct re_registers regs;
-
-#endif /* ENABLE_CHANGEWORD */
 
 
 
@@ -806,13 +791,6 @@ m4_input_init (void)
   single_comments = TRUE;
 
   use_macro_escape = FALSE;
-
-#ifdef ENABLE_CHANGEWORD
-  if (user_word_regexp)
-    m4_set_word_regexp (user_word_regexp);
-  else
-    m4_set_word_regexp (DEFAULT_WORD_REGEXP);
-#endif
 }
 
 void
@@ -1005,49 +983,6 @@ m4_set_syntax (char key, const unsigned char *chars)
     check_use_macro_escape();
 }
 
-#ifdef ENABLE_CHANGEWORD
-
-void
-m4_set_word_regexp (const char *regexp)
-{
-  int i;
-  char test[2];
-  const char *msg;
-  static struct re_pattern_buffer new_regexp;
-
-  if (!strcmp (regexp, DEFAULT_WORD_REGEXP))
-    {
-      default_word_regexp = TRUE;
-      return;
-    }
-
-  msg = re_compile_pattern (regexp, strlen (regexp), &new_regexp);
-
-  if (msg != NULL)
-    {
-      M4ERROR ((warning_status, 0,
-		_("Bad regular expression `%s': %s"), regexp, msg));
-      return;
-    }
-
-  default_word_regexp = FALSE;
-
-  word_regexp = new_regexp;
-
-  if (word_start == NULL)
-    word_start = xmalloc (256);
-
-  word_start[0] = '\0';
-  test[1] = '\0';
-  for (i = 1; i < 256; i++)
-    {
-      test[0] = i;
-      if (re_search (&word_regexp, test, 1, 0, 0, &regs) >= 0)
-	strcat (word_start, test);
-    }
-}
-
-#endif /* ENABLE_CHANGEWORD */
 
 
 /* Parse and return a single token from the input stream.  A token can
@@ -1067,10 +1002,6 @@ m4_next_token (m4_token_data *td)
   int ch;
   int quote_level;
   m4_token_t type;
-#ifdef ENABLE_CHANGEWORD
-  int startpos;
-  char *orig_text = 0;
-#endif
 
   do {
     obstack_free (&token_stack, token_bottom);
@@ -1144,11 +1075,7 @@ m4_next_token (m4_token_data *td)
 	    type = M4_TOKEN_SIMPLE;	/* escape before eof */
 	  }
       }
-    else if (
-#ifdef ENABLE_CHANGEWORD
-	     default_word_regexp &&
-#endif
-	     (M4_IS_ALPHA (ch)))
+    else if (M4_IS_ALPHA (ch))
       {
 	obstack_1grow (&token_stack, ch);
 	while ((ch = next_char ()) != CHAR_EOF && (M4_IS_ALNUM(ch)))
@@ -1160,46 +1087,6 @@ m4_next_token (m4_token_data *td)
 
 	type = use_macro_escape ? M4_TOKEN_STRING : M4_TOKEN_WORD;
       }
-
-#ifdef ENABLE_CHANGEWORD
-
-    else if (!default_word_regexp && strchr (word_start, ch))
-      {
-	obstack_1grow (&token_stack, ch);
-	while (1)
-	  {
-	    ch = m4_peek_input ();
-	    if (ch == CHAR_EOF)
-	      break;
-	    obstack_1grow (&token_stack, ch);
-	    startpos = re_search (&word_regexp, obstack_base (&token_stack),
-				  obstack_object_size (&token_stack), 0, 0,
-				  &regs);
-	    if (startpos != 0 ||
-		regs.end [0] != obstack_object_size (&token_stack))
-	      {
-		*(((char *) obstack_base (&token_stack)
-		   + obstack_object_size (&token_stack)) - 1) = '\0';
-		break;
-	      }
-	    next_char ();
-	  }
-
-	obstack_1grow (&token_stack, '\0');
-	orig_text = obstack_finish (&token_stack);
-
-	if (regs.start[1] != -1)
-	  obstack_grow (&token_stack,orig_text + regs.start[1],
-			regs.end[1] - regs.start[1]);
-	else
-	  obstack_grow (&token_stack, orig_text,regs.end[0]);
-
-	type = M4_TOKEN_WORD;
-      }
-
-#endif /* ENABLE_CHANGEWORD */
-
-
     else if (M4_IS_LQUOTE(ch))		/* QUOTED STRING, SINGLE QUOTES */
       {
 	quote_level = 1;
@@ -1303,12 +1190,6 @@ m4_next_token (m4_token_data *td)
 
   M4_TOKEN_DATA_TYPE (td) = M4_TOKEN_TEXT;
   M4_TOKEN_DATA_TEXT (td) = obstack_finish (&token_stack);
-
-#ifdef ENABLE_CHANGEWORD
-  if (orig_text == NULL)
-    orig_text = M4_TOKEN_DATA_TEXT (td);
-  M4_TOKEN_DATA_ORIG_TEXT (td) = orig_text;
-#endif
 
 #ifdef DEBUG_INPUT
   print_token("next_token", type, td);

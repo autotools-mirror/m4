@@ -177,7 +177,6 @@ Input control
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
 * Changesyntax::                Changing the lexical structure of the input
-* Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving input until end of input
 
 File inclusion
@@ -359,12 +358,6 @@ Internally modify @emph{all} builtin macro names so they all start with
 the prefix @samp{m4_}.  For example, using this option, one should write
 @samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
 instead of @samp{__file__}.
-
-@item -W @var{REGEXP}
-@itemx --word-regexp=@var{REGEXP}
-Use an alternative syntax for macro names.  This experimental
-option might not be present on all GNU @code{m4} installations.
-(@pxref{Changeword} and @ref{Experiments}).
 
 @item -M @var{DIRECTORY}
 @itemx --module-directory=@var{DIRECTORY}
@@ -823,11 +816,6 @@ There is also a command line option (@code{--prefix-builtins}, or
 by @samp{m4_} for them to be recognized.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.
-
-If your version of GNU @code{m4} has the @code{changeword} feature
-compiled in, you have far more flexibility in specifying the
-syntax of macro names, both builtin and user-defined.  @xref{Changeword},
-for more information on this experimental feature.
 
 Of course, the simplest way to prevent a name from being interpreted
 as a call to an existing macro is to quote it.  The remainder of
@@ -1844,7 +1832,6 @@ to @code{m4}.
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
 * Changesyntax::                Changing the lexical structure of the input
-* Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving input until end of input
 @end menu
 
@@ -2299,126 +2286,6 @@ macro calls.
 
 
 
-
-@node Changeword
-@section Changing the lexical structure of words
-
-@cindex lexical structure of words
-@cindex words, lexical structure of
-@quotation
-The macro @code{changeword} and all associated functionality is
-experimental (@pxref{Experiments}).  It is only available if the
-@code{--enable-changeword} option was given to @code{configure}, at GNU
-@code{m4} installation time.  The functionality might change or even go
-away in the future.  @emph{Do not rely on it}.  Please direct your
-comments about it the same way you would do for bugs.
-@end quotation
-
-@deffn {Builtin (changeword)} changeword (@var{regexp})
-A file being processed by @code{m4} is split into quoted strings, words
-(potential macro names) and simple tokens (any other single character).
-Initially a word is defined by the following regular expression:
-
-@comment ignore
-@example
-[_a-zA-Z][_a-zA-Z0-9]*
-@end example
-
-Using @code{changeword}, you can change this regular expression.
-
-The expansion of @code{changeword} is void.
-@end deffn
-
-Relaxing @code{m4}'s lexical rules might be useful (for example) if you
-wanted to apply translations to a file of numbers:
-
-@comment ignore
-@example
-changeword(`[_a-zA-Z0-9]+')
-define(`1', `0')
-1
-@result{}
-0
-@result{}0
-@end example
-
-The syntax for regular expressions is the same as in GNU Emacs.
-@xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
-Manual}.
-
-Tightening the lexical rules is less useful, because it will generally
-make some of the builtins unavailable.  You could use it to prevent
-accidental call of builtins, for example:
-
-@comment ignore
-@example
-define(`_indir', defn(`indir'))
-changeword(`_[_a-zA-Z0-9]*')
-esyscmd(`foo')
-_indir(`esyscmd', `ls')
-@end example
-
-Because @code{m4} constructs its words a character at a time, there
-is a restriction on the regular expressions that may be passed to
-@code{changeword}.  This is that if your regular expression accepts
-@samp{foo}, it must also accept @samp{f} and @samp{fo}.
-
-@code{changeword} has another function.  If the regular expression
-supplied contains any subexpressions in parentheses, then text outside
-the first of these is discarded before symbol lookup.  So:
-
-@comment ignore
-@example
-changecom(`/*', `*/')
-changeword(`#\([_a-zA-Z0-9]*\)')
-#esyscmd(`ls')
-@end example
-
-@code{m4} now requires a @samp{#} mark at the beginning of every
-macro invocation, so one can use @code{m4} to preprocess shell
-scripts without getting @code{shift} commands swallowed, and plain
-text without losing various common words.
-
-@code{m4}'s macro substitution is based on text, while @TeX{}'s is based
-on tokens.  @code{changeword} can throw this difference into relief.  For
-example, here is the same idea represented in @TeX{} and @code{m4}.
-First, the @TeX{} version:
-
-@comment ignore
-@example
-\def\a@{\message@{Hello@}@}
-\catcode`\@@=0
-\catcode`\\=12
-@@a
-@result{}@@bye
-@end example
-
-@noindent
-Then, the @code{m4} version:
-
-@comment ignore
-@example
-define(`a', `errprint(`Hello')')
-changeword(`@@\([_a-zA-Z0-9]*\)')
-@@a
-@result{}errprint(Hello)
-@end example
-
-In the @TeX{} example, the first line defines a macro @code{a} to
-print the message @samp{Hello}.  The second line defines @key{@@} to
-be usable instead of @key{\} as an escape character.  The third line
-defines @key{\} to be a normal printing character, not an escape.
-The fourth line invokes the macro @code{a}.  So, when @TeX{} is run
-on this file, it displays the message @samp{Hello}.
-
-When the @code{m4} example is passed through @code{m4}, it outputs
-@samp{errprint(Hello)}.  The reason for this is that @TeX{} does
-lexical analysis of macro definition when the macro is @emph{defined}.
-@code{m4} just stores the text, postponing the lexical analysis until
-the macro is @emph{used}.
-
-You should note that using @code{changeword} will slow @code{m4} down
-by a factor of about seven.
 
 @node M4wrap
 @section Saving input
@@ -2918,17 +2785,6 @@ library, the builtin will generate an error if called.  @xref{Mpeval},
 for more details.  The module also defines the following macro:
 
 @deffn {Macro (mpeval)} __gmp__
-Expands to the empty string.
-@end deffn
-
-@item changeword
-This module provides the implementation for the experimental
-@code{changeword} feature.  Use of this builtin requires special compile
-time support from the GNU @code{m4} binary and will generate an error if
-that support was not compiled in for some reason.  @xref{Changeword},
-for more details.  The module also defines the following macro:
-
-@deffn {Macro (changeword)} __changeword__
 Expands to the empty string.
 @end deffn
 
@@ -3690,7 +3546,7 @@ m4 -F file1.m4f file1.m4 file2.m4 file3.m4 file4.m4
 
 Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
-macros is not handled, nor the current setting of @code{changeword}.
+macros is not handled.
 Also, interactions for some options of @code{m4} being used in one call
 and not for the next, have not been fully analyzed yet.  On the other
 end, you may be confident that stacks of @code{pushdef}'ed definitions
@@ -3964,22 +3820,6 @@ No compile time option is needed for @code{changesyntax}.
 The implementation does not seem to slow down @code{m4}, more likely the
 contrary.
 
-
-@section Changeword
-
-An experimental feature, which would improve @code{m4} usefulness,
-allows for changing the syntax for what is a @dfn{word} in @code{m4}.
-You should use:
-
-@comment ignore
-@example
-./configure --enable-changeword
-@end example
-
-@noindent
-if you want this feature compiled in.  The current implementation
-slows down @code{m4} considerably and is hardly acceptable.  So, it
-might go away, do not count on it yet.
 
 @section Multiple precision arithmetic
 

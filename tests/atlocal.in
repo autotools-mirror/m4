@@ -5,4 +5,3 @@
 
 # Some tests cannot be performed with all the configurations.
 WITH_GMP=@WITH_GMP@
-ENABLE_CHANGEWORD=@ENABLE_CHANGEWORD@

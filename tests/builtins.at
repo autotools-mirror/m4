@@ -19,34 +19,6 @@
 AT_BANNER([Torturing builtins.])
 
 
-## ---------- ##
-## changeword ##
-## ---------- ##
-
-AT_SETUP([[changeword]])
-
-# cannot perform test without --enable-changeword
-AT_CHECK([test "$ENABLE_CHANGEWORD" = yes || exit 77])
-
-AT_DATA([[in]],
-[[define(1, 0)
-1
-changeword(`[_a-zA-Z0-9]+')
-1
-]])
-
-AT_CHECK_M4([in], 0,
-[[
-1
-
-0
-]])
-
-AT_CLEANUP
-
-
-
-
 ## ------- ##
 ## ddivert ##
 ## ------- ##

@@ -62,9 +62,6 @@ int warning_status = 0;
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 250;
 
-/* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = NULL;
-
 /* If nonzero, comments are discarded in the token parser.  */
 int discard_comments = 0;
 
@@ -94,16 +91,6 @@ char *
 m4_token_data_text (m4_token_data *name)
 {
     return M4_TOKEN_DATA_TEXT(name);
-}
-
-char *
-m4_token_data_orig_text (m4_token_data *name)
-{
-#ifdef ENABLE_CHANGEWORD
-    return M4_TOKEN_DATA_ORIG_TEXT(name);
-#else
-    return NULL;
-#endif
 }
 
 m4_builtin_func *
@@ -258,7 +245,7 @@ m4_dump_symbol (m4_symbol *symbol, struct m4_dump_symbol_data *data)
 /* If there are no arguments, build a sorted list of all defined,
    un-shadowed, symbols, otherwise, only the specified symbols.  */
 void
-m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, 
+m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 		 m4_token_data **argv, boolean complain)
 {
   data->base = (m4_symbol **) obstack_base (data->obs);
