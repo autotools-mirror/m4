@@ -1,3 +1,16 @@
+2003-06-18  Gary V. Vaughan  <gary@gnu.org>
+
+	Tidy up style of hash.[ch] in accordance with doc/STYLE.
+
+	* m4/hash.c: Internal symbol renaming and formatting.
+	(m4_hash_dup): New function to facilitate deep copies of hash
+	tables.
+	(m4_hash_apply_func): Returns a void* now, which is a richer type
+	for returning exceptions (NULL means keep going).
+	(m4_hash_apply): Ditto.
+	* m4/hash.h: Declare exported symbols with an explicit extern.
+	Reformated.
+
 2003-06-17  Gary V. Vaughan  <gary@gnu.org>
 
 	Still refactoring furiously.  This delta represents a change in
