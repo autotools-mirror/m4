@@ -1,7 +1,7 @@
 #                                                            -*- Autoconf -*-
 # stackovf.m4 -- how do we deal with stack overflow?
 #
-# Copyright 2000, 2003 Gary V. Vaughan <gary@gnu.org>
+# Copyright (C) 2000, 2003 Gary V. Vaughan <gary@gnu.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -1,5 +1,5 @@
 /* Declaration for error-reporting function
-   Copyright 1995-1997, 2000, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1995-1997, 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.  Its master source is NOT part of
    the C library, however.  The master source lives in /gd/gnu/lib.

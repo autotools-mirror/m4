@@ -1,7 +1,7 @@
 ##                                                           -*- Autoconf -*-
 ## debug.m4 -- massage compiler flags for debugging/optimisation
 ##
-## Copyright 1999-2000 Ralf S. Engelschall
+## Copyright (C) 1999-2000 Ralf S. Engelschall
 ## Written by <rse@engelschall.com>
 ## Modified for M4 by Gary V. Vaughan <gary@gnu.org>
 ##

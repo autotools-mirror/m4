@@ -1,5 +1,55 @@
 2003-08-27  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/debug.m4: `perl -pi.bak -e 's/(Copyright) (\d)/$1 (C) $2/g'`
+	* config/gmp.m4: Ditto.
+	* config/gnu-obstack.m4: Ditto.
+	* config/stackovf.m4: Ditto.
+	* m4/builtin.c: Ditto.
+	* m4/debug.c: Ditto.
+	* m4/error.c: Ditto.
+	* m4/error.h: Ditto.
+	* m4/gnu-obstack.h: Ditto.
+	* m4/hash.c: Ditto.
+	* m4/hash.h: Ditto.
+	* m4/input.c: Ditto.
+	* m4/m4.c: Ditto.
+	* m4/m4module.h: Ditto.
+	* m4/m4private.h: Ditto.
+	* m4/macro.c: Ditto.
+	* m4/module.c: Ditto.
+	* m4/obstack.c: Ditto.
+	* m4/output.c: Ditto.
+	* m4/path.c: Ditto.
+	* m4/regex.c: Ditto.
+	* m4/regex.h: Ditto.
+	* m4/strtol.c: Ditto.
+	* m4/symtab.c: Ditto.
+	* m4/syntax.c: Ditto.
+	* m4/utility.c: Ditto.
+	* m4/xmalloc.c: Ditto.
+	* m4/xstrdup.c: Ditto.
+	* m4/xstrzdup.c: Ditto.
+	* modules/evalparse.c: Ditto.
+	* modules/format.c: Ditto.
+	* modules/gnu.c: Ditto.
+	* modules/import.c: Ditto.
+	* modules/load.c: Ditto.
+	* modules/m4.c: Ditto.
+	* modules/m4.h: Ditto.
+	* modules/modtest.c: Ditto.
+	* modules/mpeval.c: Ditto.
+	* modules/perl.c: Ditto.
+	* modules/shadow.c: Ditto.
+	* modules/stdlib.c: Ditto.
+	* modules/time.c: Ditto.
+	* modules/traditional.c: Ditto.
+	* src/freeze.c: Ditto.
+	* src/getopt.c: Ditto.
+	* src/getopt1.c: Ditto.
+	* src/m4.h: Ditto.
+	* src/main.c: Ditto.
+	* src/stackovf.c: Ditto.
+
 	* config/gmp.m4 (M4_AC_LIB_GMP): Use AC_INCLUDES_DEFAULT:
 	ac_default_headers is an autoconf internal variable.
 	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Ditto.

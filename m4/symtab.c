@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -380,7 +380,7 @@ main (int argc, char *const *argv, char *const *envp)
       fputs (_("Written by Rene' Seindal and Gary V. Vaughan.\n"), stdout);
       putc ('\n', stdout);
 
-      fputs (_("Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."), stdout);
+      fputs (_("Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."), stdout);
       putc ('\n', stdout);
 
       fputs (_("\
