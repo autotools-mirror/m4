@@ -1,0 +1,864 @@
+# Hand crafted tests for GNU M4.                               -*- Autotest -*-
+# Copyright 2001 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+
+AT_BANNER([Torturing builtins.])
+
+
+## ---------- ##
+## changeword ##
+## ---------- ##
+
+AT_SETUP([[changeword]])
+
+# cannot perform test without --enable-changeword
+AT_CHECK([test "$ENABLE_CHANGEWORD" = yes || exit 77])
+
+AT_DATA([[in]],
+[[define(1, 0)
+1
+changeword(`[_a-zA-Z0-9]+')
+1
+]])
+
+AT_CHECK_M4([in], 0,
+[[
+1
+
+0
+]])
+
+AT_CLEANUP
+
+
+
+
+## ------- ##
+## ddivert ##
+## ------- ##
+
+AT_SETUP([ddivert])
+
+AT_DATA([[ddivert.m4]],
+[[divert(1)Text diverted a first time.
+divert(0)undivert(1)dnl
+divert(1)Text diverted a second time.
+divert(0)undivert(1)dnl
+]])
+
+AT_CHECK_M4([ddivert.m4], 0,
+[[Text diverted a first time.
+Text diverted a second time.
+]])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## debug ##
+## ----- ##
+
+AT_SETUP([debug])
+
+AT_DATA([[debug.m4]],
+[[define(`countdown', `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')')
+debugmode(`aeqc')
+traceon(`countdown')
+countdown(2)
+]])
+
+AT_DATA([[expout]],
+[[
+
+
+2 1 0 Liftoff
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- countdown ...
+m4trace: -1- countdown(`2') -> ???
+m4trace: -1- countdown(...) -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`1') -> ???
+m4trace: -1- countdown(...) -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`0') -> ???
+m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
+]])
+
+AT_CHECK_M4([debug.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## esyscmd ##
+## ------- ##
+
+AT_SETUP([esyscmd])
+
+AT_DATA([[esyscmd.m4]],
+[[# Cannot use real hostname program because test would fail
+define(`hostname', esyscmd(`echo www.gnu.org'))dnl
+`hostname = >>'hostname`<<'
+define(`hostname',
+pushdef(`_tmp', `$1')_tmp(translit(esyscmd(`echo www.gnu.org'), `.', `,'))`'popdef(`_tmp'))dnl
+`hostname = >>'hostname`<<'
+]])
+
+AT_CHECK_M4([esyscmd.m4], 0,
+[[# Cannot use real hostname program because test would fail
+hostname = >>www.gnu.org
+<<
+hostname = >>www<<
+]])
+
+AT_CLEANUP
+
+
+
+## --- ##
+## exp ##
+## --- ##
+
+AT_SETUP([exp])
+
+AT_DATA([[exp.m4]],
+[[define(`countdown', `$1
+ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Done')')dnl
+countdown(7)
+]])
+
+AT_CHECK_M4([exp.m4], 0,
+[[7
+6
+5
+4
+3
+2
+1
+0
+Done
+]])
+
+AT_CLEANUP
+
+
+
+## --- ##
+## gmp ##
+## --- ##
+
+AT_SETUP([gmp])
+
+# cannot perform test without --with-gmp
+AT_CHECK([test "$WITH_GMP" = yes || exit 77])
+
+AT_DATA([[in]],
+[[divert(-1)
+# forloop(i, from, to, stmt)
+
+define(`forloop', `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`_forloop',
+       `$4`'ifelse($1, `$3', ,
+			 `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+divert
+forloop(`x', 1, 100, `2**x = mpeval(2**x)
+')
+]])
+
+AT_DATA([[expout]],
+[[
+2**1 = 2
+2**2 = 4
+2**3 = 8
+2**4 = 16
+2**5 = 32
+2**6 = 64
+2**7 = 128
+2**8 = 256
+2**9 = 512
+2**10 = 1024
+2**11 = 2048
+2**12 = 4096
+2**13 = 8192
+2**14 = 16384
+2**15 = 32768
+2**16 = 65536
+2**17 = 131072
+2**18 = 262144
+2**19 = 524288
+2**20 = 1048576
+2**21 = 2097152
+2**22 = 4194304
+2**23 = 8388608
+2**24 = 16777216
+2**25 = 33554432
+2**26 = 67108864
+2**27 = 134217728
+2**28 = 268435456
+2**29 = 536870912
+2**30 = 1073741824
+2**31 = 2147483648
+2**32 = 4294967296
+2**33 = 8589934592
+2**34 = 17179869184
+2**35 = 34359738368
+2**36 = 68719476736
+2**37 = 137438953472
+2**38 = 274877906944
+2**39 = 549755813888
+2**40 = 1099511627776
+2**41 = 2199023255552
+2**42 = 4398046511104
+2**43 = 8796093022208
+2**44 = 17592186044416
+2**45 = 35184372088832
+2**46 = 70368744177664
+2**47 = 140737488355328
+2**48 = 281474976710656
+2**49 = 562949953421312
+2**50 = 1125899906842624
+2**51 = 2251799813685248
+2**52 = 4503599627370496
+2**53 = 9007199254740992
+2**54 = 18014398509481984
+2**55 = 36028797018963968
+2**56 = 72057594037927936
+2**57 = 144115188075855872
+2**58 = 288230376151711744
+2**59 = 576460752303423488
+2**60 = 1152921504606846976
+2**61 = 2305843009213693952
+2**62 = 4611686018427387904
+2**63 = 9223372036854775808
+2**64 = 18446744073709551616
+2**65 = 36893488147419103232
+2**66 = 73786976294838206464
+2**67 = 147573952589676412928
+2**68 = 295147905179352825856
+2**69 = 590295810358705651712
+2**70 = 1180591620717411303424
+2**71 = 2361183241434822606848
+2**72 = 4722366482869645213696
+2**73 = 9444732965739290427392
+2**74 = 18889465931478580854784
+2**75 = 37778931862957161709568
+2**76 = 75557863725914323419136
+2**77 = 151115727451828646838272
+2**78 = 302231454903657293676544
+2**79 = 604462909807314587353088
+2**80 = 1208925819614629174706176
+2**81 = 2417851639229258349412352
+2**82 = 4835703278458516698824704
+2**83 = 9671406556917033397649408
+2**84 = 19342813113834066795298816
+2**85 = 38685626227668133590597632
+2**86 = 77371252455336267181195264
+2**87 = 154742504910672534362390528
+2**88 = 309485009821345068724781056
+2**89 = 618970019642690137449562112
+2**90 = 1237940039285380274899124224
+2**91 = 2475880078570760549798248448
+2**92 = 4951760157141521099596496896
+2**93 = 9903520314283042199192993792
+2**94 = 19807040628566084398385987584
+2**95 = 39614081257132168796771975168
+2**96 = 79228162514264337593543950336
+2**97 = 158456325028528675187087900672
+2**98 = 316912650057057350374175801344
+2**99 = 633825300114114700748351602688
+2**100 = 1267650600228229401496703205376
+
+]])
+
+AT_CHECK_M4([-m mpeval in], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## include ##
+## ------- ##
+
+AT_SETUP([include])
+
+AT_DATA([[include.m4]],
+[[Beginning.
+include(`NOFILE')
+Intermediate
+include(`incl-test.m4')
+After
+include(`NOFILE')
+very late
+]])
+
+AT_DATA([[incl-test.m4]],
+[[dnl noauto
+`include test file.'
+define()
+]])
+
+AT_DATA([[expout]],
+[[Beginning.
+
+Intermediate
+include test file.
+
+
+After
+
+very late
+]])
+
+AT_DATA([[experr]],
+[[m4: include.m4: 2: Cannot open NOFILE: No such file or directory
+m4: include.m4: 6: Cannot open NOFILE: No such file or directory
+]])
+
+AT_CHECK_M4([include.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## indir ##
+## ----- ##
+
+AT_SETUP([indir])
+
+AT_DATA([[indir.m4]],
+[[define(`%%$$##', `>>>$0<<< cnt $#')
+
+# indir(`%%$$##', nonsense, nonsense)
+indir(`%%$$##', nonsense, nonsense)
+
+# indir(`indir', `%%$$##', nonsense)
+indir(`indir', `%%$$##', nonsense)
+
+# indir(`indir', `indir', `indir', `indir', `%%$$##')
+indir(`indir', `indir', `indir', `indir', `%%$$##')
+]])
+
+AT_DATA([[expout]],
+[[
+
+# indir(`%%$$##', nonsense, nonsense)
+>>>%%$$##<<< cnt 2
+
+# indir(`indir', `%%$$##', nonsense)
+>>>%%$$##<<< cnt 1
+
+# indir(`indir', `indir', `indir', `indir', `%%$$##')
+>>>%%$$##<<< cnt 0
+]])
+
+AT_CHECK_M4([indir.m4], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ----------- ##
+## multiquotes ##
+## ----------- ##
+
+AT_SETUP([multiquotes])
+
+AT_DATA([[multiquotes.m4]],
+[[traceon
+changequote([,])dnl
+changequote([``], [''])dnl
+````traceon''''
+define(``foo'', ````FOO'''')dnl
+dumpdef(``foo'')dnl
+changequote(``!'', ``!'')dnl
+!foo!
+foo
+dumpdef(!foo!)dnl
+define(!bar!, !BAR!)
+bar
+changequote(!>*>*>*>*>!, !<*<*<*<*<!)dnl five of each
+>*>*>*>*>foo bar<*<*<*<*<
+foo bar
+>*>*>*>*>*>*><*<*<*<*<*<*<
+dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)dnl
+]])
+
+AT_DATA([[expout]],
+[[
+``traceon''
+foo
+``FOO''
+
+BAR
+foo bar
+``FOO'' BAR
+*>*>*<*<
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- changequote(`[', `]')
+m4trace: -1- dnl
+m4trace: -1- changequote([``], [''])
+m4trace: -1- dnl
+m4trace: -1- define(``foo'', ````FOO'''')
+m4trace: -1- dnl
+foo:	````FOO''''
+m4trace: -1- dumpdef(``foo'')
+m4trace: -1- dnl
+m4trace: -1- changequote(``!'', ``!'')
+m4trace: -1- dnl
+foo:	!``FOO''!
+m4trace: -1- dumpdef(!foo!)
+m4trace: -1- dnl
+m4trace: -1- define(!bar!, !BAR!)
+m4trace: -1- changequote(!>*>*>*>*>!, !<*<*<*<*<!)
+m4trace: -1- dnl
+bar:	>*>*>*>*>BAR<*<*<*<*<
+foo:	>*>*>*>*>``FOO''<*<*<*<*<
+m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)
+m4trace: -1- dnl
+]])
+
+AT_CHECK_M4([multiquotes.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## patsubst ##
+## -------- ##
+
+AT_SETUP([patsubst])
+
+AT_DATA([[patsubst.m4]],
+[[# traceon(`patsubst')
+patsubst(`GNUs not Unix.', `^', `OBS: ')
+patsubst(`GNUs not Unix.', `\<', `OBS: ')
+patsubst(`GNUs not Unix.', `\<\w', `\0=')
+patsubst(`GNUs not Unix.', `\w*', `(\0)')
+patsubst(`GNUs not Unix.', `\w+', `(\0)')
+patsubst(`GNUs not Unix.', `\w+')
+patsubst(`GNUs	 not  	 Unix.', `[ 	]+', ` ')
+]])
+
+AT_DATA([[expout]],
+[[# traceon(`patsubst')
+OBS: GNUs not Unix.
+OBS: GNUs OBS: not OBS: Unix.
+G=NUs n=ot U=nix.
+(GNUs)() (not)() (Unix)().
+(GNUs) (not) (Unix).
+  .
+GNUs not Unix.
+]])
+
+AT_DATA([[experr]],
+[[m4: patsubst.m4: 4: WARNING: \0 will disappear, use \& instead in replacements
+]])
+
+AT_CHECK_M4([patsubst.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ---------------- ##
+## pushdef/popdef.  ##
+## ---------------- ##
+
+AT_SETUP([pushdef/popdef])
+
+AT_DATA([[pushpop.m4]],
+[[divert(-1)
+pushdef(`hej', `def 1.')
+dumpdef(`hej')
+pushdef(`hej', `def 2.')
+dumpdef(`hej')
+pushdef(`hej', `def 3.')
+dumpdef(`hej')
+pushdef(`hej', `def 4.')
+dumpdef(`hej')
+
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+
+dumpdef(`mac2')
+popdef(`mac2')
+dumpdef(`mac2')
+]])
+
+AT_CHECK_M4([pushpop.m4], 0, [],
+[[hej:	`def 1.'
+hej:	`def 2.'
+hej:	`def 3.'
+hej:	`def 4.'
+hej:	`def 3.'
+hej:	`def 2.'
+hej:	`def 1.'
+m4: pushpop.m4: 18: Undefined name hej
+m4: pushpop.m4: 20: Undefined name hej
+m4: pushpop.m4: 23: Undefined name mac2
+m4: pushpop.m4: 25: Undefined name mac2
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## regexp ##
+## ------ ##
+
+AT_SETUP([regexp])
+
+AT_DATA([[regexp.m4]],
+[[traceon(`regexp')dnl
+regexp(`hej med dig', `.*', `>>\0<<')
+regexp(`hej med dig', `\w*', `>>\0<<')
+regexp(`hej med dig', `.+', `>>\0<<')
+regexp(`hej med dig', `m\w+', `>>\0<<')
+regexp(`hej med dig', `m\(.*\)', `>>\0<< >>\1<<')
+
+regexp(`hej med dig', `.*')
+regexp(`hej med dig', `\w*')
+regexp(`hej med dig', `.+')
+regexp(`hej med dig', `m\w+')
+regexp(`hej med dig', `m\(.*\)')
+]])
+
+AT_DATA([[expout]],
+[[>>hej med dig<<
+>>hej<<
+>>hej med dig<<
+>>med<<
+>>med dig<< >>ed dig<<
+
+0
+0
+0
+4
+4
+]])
+
+AT_DATA([[experr]],
+[[m4: regexp.m4: 2: WARNING: \0 will disappear, use \& instead in replacements
+m4trace: -1- regexp(`hej med dig', `.*', `>>\0<<') -> `>>hej med dig<<'
+m4trace: -1- regexp(`hej med dig', `\w*', `>>\0<<') -> `>>hej<<'
+m4trace: -1- regexp(`hej med dig', `.+', `>>\0<<') -> `>>hej med dig<<'
+m4trace: -1- regexp(`hej med dig', `m\w+', `>>\0<<') -> `>>med<<'
+m4trace: -1- regexp(`hej med dig', `m\(.*\)', `>>\0<< >>\1<<') -> `>>med dig<< >>ed dig<<'
+m4trace: -1- regexp(`hej med dig', `.*') -> `0'
+m4trace: -1- regexp(`hej med dig', `\w*') -> `0'
+m4trace: -1- regexp(`hej med dig', `.+') -> `0'
+m4trace: -1- regexp(`hej med dig', `m\w+') -> `4'
+m4trace: -1- regexp(`hej med dig', `m\(.*\)') -> `4'
+]])
+
+AT_CHECK_M4([regexp.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ------------ ##
+## sync-lines.  ##
+## ------------ ##
+
+AT_SETUP([sync-lines])
+
+AT_DATA([[in]],
+[[syncoutput(on)dnl
+# Several input lines, expanding to one
+define(`foo', ``foo' line one.
+`foo' line two.
+`foo' line three.') xyz
+foo
+# Several input lines, expanding to none
+define(`foo', ``foo' line one.
+`foo' line two.
+`foo' line three.')dnl
+# one input line, expanding to several output lines
+foo foo
+]])
+
+AT_CHECK_M4([[in]], 0,
+[[#line 2 "in"
+# Several input lines, expanding to one
+#line 5
+ xyz
+foo line one.
+#line 6
+foo line two.
+#line 6
+foo line three.
+# Several input lines, expanding to none
+#line 11
+# one input line, expanding to several output lines
+foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three. foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three.
+]])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## trace ##
+## ----- ##
+
+AT_SETUP([trace])
+
+AT_DATA([[trace.m4]],
+[[divert(-1)
+
+# move(from, to)
+define(`move', `Move one disk from `$1' to `$2'.
+')
+
+# _hanoi (cnt, from, to, aux)
+define(`_hanoi', `ifelse(eval(`$1'<=1), 1, `move($2, $3)',
+`_hanoi(decr($1), $2, $4, $3)move($2, $3)_hanoi(decr($1), $4, $3, $2)')')
+
+# hanoi (cnt)
+define(`hanoi', `_hanoi(`$1', source, destination, auxilliary)')
+divert`'dnl
+
+# Debugmode t
+debugmode(`t')
+hanoi(2)
+
+# Debugmode taeq
+debugmode(`taeq')
+hanoi(2)
+
+# Debugmode OFF
+debugmode
+hanoi(2)
+
+# Debugmode ae
+debugmode(`ae')
+traceon(`move', `_hanoi')
+hanoi(2)
+]])
+
+AT_DATA([[expout]],
+[[
+# Debugmode t
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode taeq
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode OFF
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode ae
+
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- hanoi
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -2- decr
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -1- move
+m4trace: -1- move
+m4trace: -2- decr
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -1- move
+
+m4trace: -1- hanoi(`2') -> `_hanoi(`2', source, destination, auxilliary)'
+m4trace: -1- _hanoi(`2', `source', `destination', `auxilliary') -> `ifelse(eval(`2'<=1), 1, `move(source, destination)',
+`_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)')'
+m4trace: -2- eval(`2<=1') -> `0'
+m4trace: -1- ifelse(`0', `1', `move(source, destination)', `_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)') -> `_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)'
+m4trace: -2- decr(`2') -> `1'
+m4trace: -1- _hanoi(`1', `source', `auxilliary', `destination') -> `ifelse(eval(`1'<=1), 1, `move(source, auxilliary)',
+`_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)')'
+m4trace: -2- eval(`1<=1') -> `1'
+m4trace: -1- ifelse(`1', `1', `move(source, auxilliary)', `_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)') -> `move(source, auxilliary)'
+m4trace: -1- move(`source', `auxilliary') -> `Move one disk from `source' to `auxilliary'.
+'
+m4trace: -1- move(`source', `destination') -> `Move one disk from `source' to `destination'.
+'
+m4trace: -2- decr(`2') -> `1'
+m4trace: -1- _hanoi(`1', `auxilliary', `destination', `source') -> `ifelse(eval(`1'<=1), 1, `move(auxilliary, destination)',
+`_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)')'
+m4trace: -2- eval(`1<=1') -> `1'
+m4trace: -1- ifelse(`1', `1', `move(auxilliary, destination)', `_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)') -> `move(auxilliary, destination)'
+m4trace: -1- move(`auxilliary', `destination') -> `Move one disk from `auxilliary' to `destination'.
+'
+m4trace: -1- debugmode
+m4trace: -1- _hanoi(2, source, destination, auxilliary) -> ifelse(eval(`2'<=1), 1, `move(source, destination)',
+`_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)')
+m4trace: -1- _hanoi(1, source, auxilliary, destination) -> ifelse(eval(`1'<=1), 1, `move(source, auxilliary)',
+`_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)')
+m4trace: -1- move(source, auxilliary) -> Move one disk from `source' to `auxilliary'.
+
+m4trace: -1- move(source, destination) -> Move one disk from `source' to `destination'.
+
+m4trace: -1- _hanoi(1, auxilliary, destination, source) -> ifelse(eval(`1'<=1), 1, `move(auxilliary, destination)',
+`_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)')
+m4trace: -1- move(auxilliary, destination) -> Move one disk from `auxilliary' to `destination'.
+
+]])
+
+AT_CHECK_M4([trace.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## translit ##
+## -------- ##
+
+AT_SETUP([translit])
+
+AT_DATA([[translit.m4]],
+[[# traceon(`translit')dnl
+translit(`GNUs not Unix', `a-z')
+translit(`GNUs not Unix', `a-z', `A-Z')
+translit(`GNUs not Unix', `A-Z', `a-z')
+translit(`GNUs not Unix', `A-Z')
+translit(`a-z', `a-')
+translit(`A-Z', `A-Z-', `-A-Z')
+translit(`GNUs not Unix', `Z-A', `a-z')
+]])
+
+AT_CHECK_M4([translit.m4], 0,
+[[# traceon(`translit')dnl
+GNU  U
+GNUS NOT UNIX
+gnus not unix
+s not nix
+z
+-ZY
+tmfs not fnix
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## undivert ##
+## -------- ##
+
+AT_SETUP([undivert])
+
+AT_DATA([[undivert.m4]],
+[[define(`undiverted', `UNDIVERTED')
+# undiverted file.
+undivert(`undivert.incl')
+# included file.
+include(`undivert.incl')
+]])
+
+AT_DATA([[undivert.incl]],
+[[This is to be undiverted soon.
+]])
+
+AT_CHECK_M4([undivert.m4], 0,
+[[
+# undiverted file.
+This is to be undiverted soon.
+
+# included file.
+This is to be UNDIVERTED soon.
+
+]])
+
+AT_CLEANUP
+
+
+
+## ---- ##
+## wrap ##
+## ---- ##
+
+AT_SETUP([wrap])
+
+AT_DATA([[wrap.m4]],
+[[divert(-1)
+m4wrap(`Wrapper no. 1
+')
+
+m4wrap(`Wrapper no. 2
+m4wrap(`Wrapper no. 3
+m4wrap(`Wrapper no. 4
+')')')
+divert
+No. 33: The End.
+]])
+
+AT_CHECK_M4([wrap.m4], 0,
+[[
+No. 33: The End.
+Wrapper no. 2
+Wrapper no. 1
+Wrapper no. 3
+Wrapper no. 4
+]])
+
+AT_CLEANUP

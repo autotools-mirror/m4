@@ -1,5 +1,14 @@
 2001-08-29  Akim Demaille  <akim@epita.fr>
 
+	* tests/others.at (changeword, ddivert, debug, esyscmd, exp, gmp)
+	(include, indir, multiquotes, patsubst, pushdef/popdef, regexp)
+	(sync-lines, trace, translit, undivert, wrap): Move to...
+	* tests/builtins.at: this new file.
+	* tests/others.at (Discard comments, import-environment): Move to...
+	* tests/options.at: this new file.
+
+2001-08-29  Akim Demaille  <akim@epita.fr>
+
 	* tests/others.at (Freezing modules)
 	(--module-directory: absolute path, modpath2, modpath3)
 	(M4MODPATH: absolute path, modtest, shadow, unload): Move to...

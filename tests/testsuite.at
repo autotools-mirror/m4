@@ -53,6 +53,12 @@ m4_pattern_allow([^dnl$])
 
 AT_INIT([m4])
 
+# Torturing builtins.
+m4_include([builtins.at])
+
+# Options.
+m4_include([options.at])
+
 # Hand crafted tests.
 m4_include([others.at])
 
