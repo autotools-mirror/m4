@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 04 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 04, 05 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -622,11 +622,21 @@ set_comment (const char *bc, const char *ec)
 #ifdef ENABLE_CHANGEWORD
 
 void
+init_pattern_buffer (struct re_pattern_buffer *buf)
+{
+  buf->translate = 0;
+  buf->fastmap = 0;
+  buf->buffer = 0;
+  buf->allocated = 0;
+}
+
+void
 set_word_regexp (const char *regexp)
 {
   int i;
   char test[2];
   const char *msg;
+  struct re_pattern_buffer new_word_regexp;
 
   if (!strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
@@ -634,9 +644,10 @@ set_word_regexp (const char *regexp)
       return;
     }
 
-  default_word_regexp = FALSE;
-
-  msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  /* Dry run to see whether the new expression is compilable.  */
+  init_pattern_buffer (&new_word_regexp);
+  msg = re_compile_pattern (regexp, strlen (regexp), &new_word_regexp);
+  regfree (&new_word_regexp);
 
   if (msg != NULL)
     {
@@ -644,6 +655,19 @@ set_word_regexp (const char *regexp)
 		"Bad regular expression `%s': %s", regexp, msg));
       return;
     }
+
+  /* If compilation worked, retry using the word_regexp struct.
+     Can't rely on struct assigns working, so redo the compilation.  */
+  msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+
+  if (msg != NULL)
+    {
+      M4ERROR ((EXIT_FAILURE, 0,
+		"Internal error: Expression recompilation `%s': %s",
+		regexp, msg));
+    }
+
+  default_word_regexp = FALSE;
 
   if (word_start == NULL)
     word_start = xmalloc (256);

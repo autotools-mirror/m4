@@ -1,5 +1,11 @@
 2005-02-04  Gary V. Vaughan  <gary@gnu.org>
 
+	* lib/regex.c, lib/regex.h: Updated from gnulib.
+	* src/input.c (set_word_regexp):  Don't change the word_regexp
+	unless it compiles correctly.
+	* NEWS: Updated.
+	Reported by Frank Schwidom <schwidom@impernet.de>
+
 	* Makefile.in (stamp-h): Regenerate config.h properly.
 
 2005-02-03  Gary V. Vaughan  <gary@gnu.org>
