@@ -1,5 +1,13 @@
 2003-07-15  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/input.c (CHAR_EOF, CHAR_BUILTIN, CHAR_RETRY): These token
+	values are returned as part of the internal interface, so they
+	need to be moved...
+	* m4/private.h: ...to here.
+	* m4/macro.c (expand_token): Check for out of range
+	m4_peek_input() results before looking up in the syntax table.
+	(collect_arguments): Ditto.
+
 	* NEWS: Note `$' syntax class.
 
 2003-07-08  Paul Eggert  <eggert@twinsun.com> and

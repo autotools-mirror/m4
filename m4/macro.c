@@ -78,6 +78,7 @@ expand_token (m4 *context, struct obstack *obs,
     case M4_TOKEN_WORD:
       {
 	char *textp = text;
+	int ch;
 
 	if (M4_IS_ESCAPE (M4SYNTAX, *textp))
 	  ++textp;
@@ -87,7 +88,8 @@ expand_token (m4 *context, struct obstack *obs,
 	    || symbol->value->type == M4_SYMBOL_VOID
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
-		&& !M4_IS_OPEN (M4SYNTAX, m4_peek_input (context))))
+		&& (ch = m4_peek_input (context)) < CHAR_EOF
+		&& !M4_IS_OPEN (M4SYNTAX, ch)))
 	  {
 	    m4_shipout_text (context, obs, text, strlen (text));
 	  }
@@ -270,7 +272,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
   ch = m4_peek_input (context);
-  if (M4_IS_OPEN (M4SYNTAX, ch))
+  if ((ch < CHAR_EOF) && M4_IS_OPEN (M4SYNTAX, ch))
     {
       m4__next_token (context, &token);		/* gobble parenthesis */
       do

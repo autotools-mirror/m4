@@ -170,9 +170,6 @@ static input_block *next;
 /* Flag for next_char () to increment m4_current_line.  */
 static boolean start_of_input_line;
 
-#define CHAR_EOF	256	/* character return on EOF */
-#define CHAR_BUILTIN	257	/* character return for BUILTIN token */
-#define CHAR_RETRY	258	/* character return for end of input block */
 
 
 

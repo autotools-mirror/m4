@@ -186,6 +186,10 @@ extern void	m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 
 /* --- SYNTAX TABLE MANAGEMENT --- */
 
+#define CHAR_EOF	256	/* character return on EOF */
+#define CHAR_BUILTIN	257	/* character return for BUILTIN token */
+#define CHAR_RETRY	258	/* character return for end of input block */
+
 #define DEF_LQUOTE "`"
 #define DEF_RQUOTE "\'"
 #define DEF_BCOMM "#"
