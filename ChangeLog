@@ -1,3 +1,7 @@
+2005-02-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* Makefile.in (stamp-h): Regenerate config.h properly.
+
 2005-02-03  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.ac (AC_DEFINE): Fix overquoting of description
