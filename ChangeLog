@@ -1,3 +1,77 @@
+2001-08-16  Gary V. Vaughan  <gary@gnu.org>
+
+	m4_modules are no more, we use lt_dlhandles directly and let
+	latest libltdl features manage the list of loaded modules.
+	* acinclude.m4: Regenerated.
+	* m4/ltdl.c: Updated from master copy.
+	* m4/module.c: Reimplemented to take advantage of advances in
+	libltdl.
+	* m4/builtin.c (m4_builtin_find_by_name): Traverse loaded module
+	list with lt_dlhandle_next.
+	(m4_builtin_find_by_func): Ditto.
+	(m4_builtin_table_install): Use lt_dlhandle.
+	(m4_macro_define): Ditto.
+	(m4_macro_table_install): Ditto.
+	m4/module.h: Prototype new module management API.
+	(m4_modules): No longer required.
+	(m4_module_init_t, m4_module_finish_t): POSIX namespace
+	violations, renamed to...
+	(m4_module_init_func, m4_module_finish_func): ...these,
+	respectively.
+	(M4INIT_HANDLER): Clean way to declare init functions in modules.
+	(M4FINISH_HANDLER):  And similarly for finish functions.
+	* m4/system.h (_CONC): Used by M4INIT_HANDLER and M4FINISH_HANDLER
+	-- Add indirection to the CONC macro so that arguments are
+	correctly expanded.
+	* modules/modtest.c (m4_init_module):  Replaced with M4INIT_HANDLER.
+	* modules/shadow.c (m4_init_module):  Ditto.
+	Due to new init function semantics, be careful to perform the
+	initialisation only on first load.
+	* modules/perl.c (m4_init_module):  Ditto. And Ditto.
+	(m4_finish_module): Replaced with M4FINISH_HANDLER.
+	Due to new finish function semantics, be careful to perform the
+	finalisation only on first load.
+	* m4/m4private.h (m4_module): Removed in favour of...
+	(m4_module_data): ...structure without all the wrapper fields.
+	Instances of this new structure are stored associated lt_dlhandles
+	with lt_dlcaller_data_set().
+	* m4/builtin.c (m4_builtin_define): Takes a handle argument
+	instead of the old module argument.
+	(m4_builtin_table_install): Ditto.
+	* modules/load.c (m4_resident_module):  Removed.  This is no
+	longer implemented as a magic symbol...
+	* modules/m4.c (m4_resident_module): Ditto.
+	* modules/load.c (M4INIT_HANDLER): ...the module init function now
+	uses the ltdl api to make the module resident.
+	* modules/m4.c (M4INIT_HANDLER): Ditto.
+	* modules/load.c (builtin_modules): Traverse the loaded module
+	list with lt_dlhandle_next.
+	(builtin_load): Much simplified in light of the reimplemented
+	module loader.
+	* src/freeze.c (produce_module_dump):  Cleaned up and optimised in
+	light of the m4/module.c rewrite.
+	(produce_symbol_dump): Ditto.
+	(reload_frozen_state): Ditto.
+	* m4/list.c, m4/list.h: Files deleted.  No longer required.
+	* m4/Makefile.am (pkginc_HEADERS): Delete list.h reference.
+	(libm4_la_SOURCES): Delete list.c reference.
+	* m4/m4private.h (m4_token_data):  Add a handle field.  This
+	eliminates many of the searches to find the handle associated with
+	various tokens that are passed between functions.
+	(struct m4_symbol):  Removed the module field.  The
+	module association does not belong with the symbol...
+	* m4/input.c (struct m4_builtin): ...it belongs with the builtin
+	that the module implementation code is from.  Added a handle
+	field.
+	(m4_push_macro): Add a `handle' argument.  Changed all callers.
+	(init_macro_token):  Set the `handle' field for the
+	m4_token_data.
+	* m4/macro.c (expand_argument): Copy the new handle field during
+	reassignment.
+	* modules/m4.c (macro_install): Use the new handle field to
+	optimise the search for the correct builtin structure, and pass
+	the handle details to m4_builtin_define.
+
 2001-08-15  Akim Demaille  <akim@epita.fr>
 
 	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Be sure `m4/' exists

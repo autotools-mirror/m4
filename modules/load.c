@@ -27,7 +27,6 @@
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	load_LTX_m4_builtin_table
 #define m4_macro_table		load_LTX_m4_macro_table
-#define m4_resident_module	load_LTX_m4_resident_module
 
 
 /* Maintain each of the builtins implemented in this modules along
@@ -66,10 +65,20 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
+
 /* This module cannot be safely unloaded from memory, incase the unload
    is triggered by the unload builtin, and the module is removed while
    unload is in progress.  */
-boolean m4_resident_module = TRUE;
+M4INIT_HANDLER (load)
+{
+  if (handle)
+    if (lt_dlmakeresident (handle) != 0)
+      {
+	M4ERROR ((warning_status, 0,
+		  _("Warning: cannot make module `%s' resident: %s"),
+		  m4_module_name (handle), lt_dlerror ()));
+      }
+}
 
 
 
@@ -83,45 +92,30 @@ boolean m4_resident_module = TRUE;
    loaded modules.  */
 M4BUILTIN_HANDLER (modules)
 {
-  List *p = m4_modules;
+  lt_dlhandle handle = lt_dlhandle_next (NULL);
 
   if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  while (p)
-    {
-      m4_shipout_string (obs, m4_module_name ((m4_module *) p), 0, TRUE);
-      p = LIST_NEXT (p);
+  if (handle)
+    do
+      {
+	m4_shipout_string (obs, m4_module_name (handle), 0, TRUE);
 
-      if (p)
-	obstack_1grow (obs, ',');
-    }
+	if ((handle = lt_dlhandle_next (handle)))
+	  obstack_1grow (obs, ',');
+      }
+    while (handle);
 }
 
 /* Load the named module and install the builtins and macros
    exported by that module.  */
 M4BUILTIN_HANDLER (load)
 {
-  const m4_module *module;
-
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  module = m4_module_load (M4ARG(1), obs);
-
-  if (module && module->ref_count == 1)
-    {
-      const m4_builtin *bp	= m4_module_builtins (module);
-      const m4_macro *mp	= m4_module_macros (module);
-
-      /* Install the builtin functions.  */
-      if (bp)
-	m4_builtin_table_install (module, bp);
-
-      /* Install the user macros. */
-      if (mp)
-	m4_macro_table_install (module, mp);
-    }
+  m4_module_load (M4ARG(1), obs);
 }
 
 /* Remove all builtins and macros installed by the named module,

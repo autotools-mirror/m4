@@ -27,9 +27,6 @@
 
 #define m4_builtin_table	shadow_LTX_m4_builtin_table
 #define m4_macro_table		shadow_LTX_m4_macro_table
-#define m4_init_module		shadow_LTX_m4_init_module
-
-void m4_init_module M4_PARAMS((struct obstack *obs));
 
 /*		function	macros	blind */
 #define builtin_functions			\
@@ -58,11 +55,18 @@ m4_macro m4_macro_table[] =
   { 0,			0 },
 };
 
-void
-m4_init_module (struct obstack *obs)
+
+
+M4INIT_HANDLER (shadow)
 {
-  char *s = "Shadow module loaded.";
-  if (obs != 0)
+  const lt_dlinfo *info = 0;
+  const char *s = "Shadow module loaded.";
+
+  if (handle)
+    info = lt_dlgetinfo (handle);
+  
+  /* Only display the message on first load.  */
+  if (obs && info && (info->ref_count == 1))
     obstack_grow (obs, s, strlen(s));
 }
 

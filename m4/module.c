@@ -17,8 +17,6 @@
    02111-1307  USA
 */
 
-#define MODULES_UNINITIALISED -4444
-
 #include "m4.h"
 #include "pathconf.h"
 #include "ltdl.h"
@@ -28,485 +26,488 @@
 #undef DEBUG_MODULES
 
 /*
- * This file implements dynamic modules in GNU m4.  A module is a
- * compiled shared object, that can be linked into GNU m4 at run
+ * This file implements dynamic modules in GNU M4.  A module is a
+ * compiled shared object, that can be loaded into GNU M4 at run
  * time. Information about creating modules is in ../modules/README.
  *
- * The current implementation uses libltdl, which is in turn can load
- * modules using either dlopen(3) (exists on GNU/Linux, OSF, Solaris,
- * SunOS), shl_load(3) (exists on HPUX), LoadLibrary(3) (exists on
+ * This implementation uses libltdl, which is in turn can open modules
+ * using either dlopen(3) (exists on GNU/Linux, OSF, Solaris, SunOS and
+ * others), shl_load(3) (exists on HPUX), LoadLibrary(3) (exists on
  * Windows, cygwin, OS/2), load_add_on(3) (exists on BeOS), and can
- * also fall back to dld_link(3) from libdld or lt_dlpreload(3) from
+ * also fall back to dld_link(3) from GNU libdld or lt_dlpreload from
  * libtool if shared libraries are not available on the host machine.
  *
- * A m4 module need only define one external symbol, called
- * `m4_builtin_table'.  This symbol should point to a table of `m4_builtin'.
- * This table is pushed on a list of builtin tables and each definition
- * therein is added to the symbol table.
+ * An M4 module will usually define an external symbol called
+ * `m4_builtin_table'.  This symbol points to a table of `m4_builtin'.
+ * The table is pushed on an internal stack of builtin tables, each
+ * definition therein is added to the symbol table.
  *
- * The code implementing loadable modules is modest.  It is divided
- * between the files builtin.c (user interface and support for multiple
- * builtin tables) and this file (OS dependant routines).
- *
- * To load a module, use `load(modulename)'.  The function
- * `builtin_load' calls m4_module_load() in this file, which uses
- * libltdl to find the module in the module search path.  This
- * path is initialised from the environment variable M4MODPATH, or if
- * not set, initalised to a configuration time default.  This
- * function reads the libtool .la file to get the real library name
- * (which can be system dependent) and returns NULL on failure and a
- * non-NULL void* on success.  If successful lt_dlopen returns the
- * value of this void*, which is a handle for the vm segment mapped.
- * Module_load() checks to see if the module is already loaded, and if
- * not, retrieves the symbol `m4_builtin_table' and returns it's value to
- * m4_loadmodule().  This pointer should be an m4_builtin*, which is
- * installed using install_builtin_table().
+ * To load a module, call m4_module_load(), which uses the libltdl
+ * API to find the module in the module search path.  The search
+ * path is initialised from the environment variable M4MODPATH, followed
+ * by the configuration time default where the modules shipped with M4
+ * itself are installed.  Libltdl reads the libtool .la file to
+ * get the real library name (which can be system dependent), returning
+ * NULL on failure or else a libtool module handle for the newly mapped
+ * vm segment containing the module code.  If the module is not already
+ * loaded, m4_module_load() retrieves the value of the symbol
+ * `m4_builtin_table', which is installed using m4_builtin_table_install().
  *
  * In addition to builtin functions, you can also define static macro
  * expansions in the `m4_macro_table' symbol.  If you define this symbol
  * in your modules, it should be an array of `m4_macro's, mapping macro
- * names to the expansion text.
+ * names to the expansion text.  Any macros defined in `m4_macro_table'
+ * are installed into the M4 symbol table with m4_macro_table_install().
  *
- * When a module is loaded, the function "void m4_init_module(struct
- * obstack *obs)" is called, if defined.  Any non NULL return value of
- * this function will be the expansion of "load".  Before program
- * exit, all modules are unloaded and the function "void
- * m4_finish_module(void)" is called, if defined.  It is
- * safe to load the same module several times.
+ * Each time a module is loaded, the module function 
+ * "void m4_init_module (struct obstack *obs)" is called, if defined.
+ * Any value stored in IBS by this function becomes the expansion of the
+ * macro which called it.  Before M4 exits, all modules are unloaded and
+ * the function "void m4_finish_module (struct obstack *obs)" is called,
+ * if defined.  It is safe to load the same module several times:  the
+ * init and finish functions will also be called multiple times in this
+ * case.
  *
- * To unload a module, use `unload(modulename)'.  The function
- * `m4_unload' calls m4_module_unload() in this file, which uses
- * remove_builtin_table() to remove the builtins defined by the
- * unloaded module from the symbol table.  If the module has been loaded
- * several times with calls to `load(modulename)', then the module
- * will not be unloaded until the same number of calls to unload
- * have been made (nor will the builtin table be purged, nor the finish
- * function called).  If the module is successfully unloaded, and it
- * defined a function called `m4_finish_module', that function will be
- * called last of all.
- *
- * Modules loaded from the command line (with the `-m' switch) can be
- * removed with unload too.
- *
- * When m4 exits, it will unload every remaining loaded module, calling
- * any `m4_finish_module' functions they defined before closing.
+ * To unload a module, use m4_module_unload(). which uses
+ * m4_builtin_table_uninstall() and m4_macro_table_uninstall() to remove
+ * the builtins defined by the unloaded module from the symbol table.  If
+ * the module has been loaded several times with calls to 
+ * m4_module_load, then the module will not be unloaded until the same
+ * number of calls to m4_module_unload() have been made (nor will the
+ * symbol table be purged).
  **/
 
-M4_GLOBAL_DATA List *m4_modules;
+#define M4_BUILTIN_SYMBOL	"m4_builtin_table"
+#define M4_MACRO_SYMBOL		"m4_macro_table"
+#define M4_INIT_SYMBOL		"m4_init_module"
+#define M4_FINISH_SYMBOL	"m4_finish_module"
+
+static const char*  m4_module_dlerror	M4_PARAMS((void));
+
+static lt_dlcaller_id m4_caller_id = 0;
 
 const char *
-m4_module_name (module)
-     const m4_module *module;
+m4_module_name (handle)
+     const lt_dlhandle handle;
 {
-  return module ? module->modname : NULL;
+  const lt_dlinfo *info;
+
+  assert (handle);
+
+  info = lt_dlgetinfo (handle);
+
+  return info ? info->name : 0;
 }
 
-const m4_builtin *
-m4_module_builtins (module)
-     const m4_module *module;
+m4_builtin *
+m4_module_builtins (handle)
+     const lt_dlhandle handle;
 {
-  return module ? module->bp : NULL;
+  m4_module_data *data;
+
+  assert (handle);
+
+  data = (m4_module_data *) lt_dlcaller_get_data (m4_caller_id, handle);
+
+  return data ? data->bp : 0;
 }
 
-const m4_macro *
-m4_module_macros (module)
-     const m4_module *module;
+m4_macro *
+m4_module_macros (handle)
+     const lt_dlhandle handle;
 {
-  return module ? module->mp : NULL;
+  m4_module_data *data;
+
+  assert (handle);
+
+  data = (m4_module_data *) lt_dlcaller_get_data (m4_caller_id, handle);
+
+  return data ? data->mp : 0;
 }
 
-VOID *
-m4_module_find_by_modname (elt, match)
-     List *elt;
-     VOID *match;
+lt_dlhandle
+m4_module_find_by_builtin (match)
+     const m4_builtin *match;
 {
-  const m4_module *module = (const m4_module *) elt;
+  lt_dlhandle	  handle = 0;
 
-  if (strcmp (module->modname, (char *) match) == 0)
-    return (VOID *) module;
-
-  return NULL;
-}
-
-VOID *
-m4_module_find_by_builtin (elt, match)
-     List *elt;
-     VOID *match;
-{
-  const m4_module *module = (const m4_module *) elt;
-
-  if (module && module->bp)
+  while ((handle = lt_dlhandle_next (handle)))
     {
-      const m4_builtin *bp;
+      m4_module_data *data
+	= (m4_module_data *) lt_dlcaller_get_data (m4_caller_id, handle);
 
-      for (bp = &module->bp[0]; bp->name; ++bp)
+      if (data && data->bp)
 	{
-	  if (bp == (const m4_builtin *) match)
-	    return (VOID *) module;
+	  const m4_builtin *bp;
+
+	  for (bp = &data->bp[0]; bp->name; ++bp)
+	    if (bp == match)
+	      goto found;
 	}
     }
 
-  return NULL;
+ found:
+  return handle;
 }
 
-/*
- * Initialisation.  Currently the module search path in path.c is
- * initialised from M4MODPATH.  Only absolute path names are accepted to
- * prevent the path search of the dlopen library from finding wrong
- * files.
- */
+
+
+const char *
+m4_module_dlerror ()
+{
+  const char *dlerror = lt_dlerror ();
+
+  if (!dlerror)
+    dlerror = _("unknown error");
+
+  return dlerror;
+}
+
+/* Initialisation.  Currently the module search path in path.c is
+   initialised from M4MODPATH.  Only absolute path names are accepted to
+   prevent the path search of the dlopen library from finding wrong
+   files. */
 void
 m4_module_init ()
 {
-  static int errors = MODULES_UNINITIALISED;
-
-  /* Do this only once! */
-  if (errors != MODULES_UNINITIALISED)
-    return;
+  int errors = 0;
+  
+  /* Do this only once!  If we already have a caller_id, then the
+     module system has already been initialised.  */
+  if (m4_caller_id)
+    {
+      M4ERROR ((warning_status, 0,
+		_("Warning: multiple module loader initialisations")));
+      return;
+    }
 
   /* initialise libltdl's memory management. */
   lt_dlmalloc = xmalloc;
-  lt_dlfree = xfree;
+  lt_dlfree   = xfree;
 
-  errors = lt_dlinit();
+  errors      = lt_dlinit ();
 
-  /* If the user set M4MODPATH, then use that as the start of libltdls
-   * module search path, else fall back on the default.
-   */
-  if (errors == 0)
+  /* Register with libltdl for a key to store client data against
+     ltdl module handles.  */
+  if (!errors)
     {
-      char *path = getenv("M4MODPATH");
+      m4_caller_id = lt_dlcaller_register ();
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE("Module system initialised.");
-#endif /* DEBUG_MODULES */
-
-      if (path != NULL)
-	errors = lt_dladdsearchdir(path);
-    }
-
-  if (errors == 0)
-    errors = lt_dladdsearchdir(MODULE_PATH);
-
-  if (errors != 0)
-    {
-      /* Couldn't initialise the module system; diagnose and exit. */
-      const char *dlerror = lt_dlerror();
-      M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: failed to initialise modules: %s"), dlerror));
-    }
-}
-
-/*
- * Load a module.  MODNAME can be a absolute file name or, if relative,
- * it is searched for in the module path.  The module is unloaded in
- * case of error.
- */
-
-static VOID *
-module_handle_find (elt, match)
-     List *elt;
-     VOID *match;
-{
-  m4_module *module = (m4_module *) elt;
-  if (module->handle == match)
-    return (VOID *) module;
-
-  return NULL;
-}
-
-const m4_module *
-m4_module_load (modname, obs)
-     const char *modname;
-     struct obstack *obs;
-{
-  lt_dlhandle	    handle	= NULL;
-  m4_module_init_t *init_func	= NULL;
-  m4_module	   *module	= NULL;
-  m4_builtin	   *bp		= NULL;
-  m4_macro	   *mp		= NULL;
-
-  /* Dynamically load the named module. */
-  handle = lt_dlopenext (modname);
-
-  if (handle)
-    {
-      module = (m4_module *) list_find (m4_modules, handle,
-					module_handle_find);
-      if (module)
+      if (!m4_caller_id)
 	{
-	  lt_dlclose (handle); /* close the duplicate copy */
+	  const char *error_msg = _("libltdl client registration failed");
 
-	  /* increment the load counter */
-	  module->ref_count++;
+	  lt_dlseterror (lt_dladderror (error_msg));
 
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE2("module %s: now has %d references.",
-			 modname, module->ref_count);
-#endif /* DEBUG_MODULES */
-	  return module;
+	  /* No need to check error statuses from the calls above -- If
+	     either fails for some reason, a diagnostic will be set for
+	     lt_dlerror() anyway.  */
+	  ++errors;
 	}
     }
+  
+  if (!errors)
+    errors = lt_dlsetsearchpath (MODULE_PATH);
 
+  /* If the user set M4MODPATH, then use that as the start of the module
+     search path.  */
+  if (!errors)
+    {
+      char *path = getenv ("M4MODPATH");
+
+      if (path)
+	errors = lt_dlinsertsearchdir (lt_dlgetsearchpath (), path);
+    }
+
+  /* Couldn't initialise the module system; diagnose and exit.  */
+  if (errors)
+    M4ERROR ((EXIT_FAILURE, 0,
+	      _("ERROR: failed to initialise module loader: %s"),
+	      m4_module_dlerror ()));
+
+#ifdef DEBUG_MODULES
+  M4_DEBUG_MESSAGE ("Module loader initialised.");
+#endif /* DEBUG_MODULES */
+}
+
+
+/* Load a module.  MODNAME can be a absolute file name or, if relative,
+   it is searched for in the module path.  The module is unloaded in
+   case of error.  */
+const lt_dlhandle
+m4_module_open (name, obs)
+     const char *name;
+     struct obstack *obs;
+{
+  lt_dlhandle		handle		= 0;
+  m4_module_init_func  *init_func	= 0;
+  m4_builtin	       *bp		= 0;
+  m4_macro	       *mp		= 0;
+
+  /* Dynamically open the named module. */
+  handle = lt_dlopenext (name);
 
   if (handle)
     {
-      /* Find the builtin table in the loaded module. */
-      bp = (m4_builtin *) lt_dlsym (handle, "m4_builtin_table");
+#ifdef DEBUG_MODULES
+      const lt_dlinfo *info = lt_dlgetinfo (handle);
+      M4_DEBUG_MESSAGE2("module %s: opening at %s", name, info->filename);
+#endif
 
-      /* Find the macro table in the loaded module. */
-      mp = (m4_macro *) lt_dlsym (handle, "m4_macro_table");
+      /* Find the builtin table in the opened module. */
+      bp = (m4_builtin *) lt_dlsym (handle, M4_BUILTIN_SYMBOL);
 
-      /* Find and run the initialising function in the loaded module
-       * (if any).
-       */
-      init_func = (m4_module_init_t*) lt_dlsym (handle, "m4_init_module");
-      if (init_func != NULL)
-	(*init_func) (obs);
+      /* Find the macro table in the opened module. */
+      mp = (m4_macro *) lt_dlsym (handle, M4_MACRO_SYMBOL);
+
+      /* Find and run any initialising function in the opened module,
+	 each time the module is opened.  */
+      init_func = (m4_module_init_func *) lt_dlsym (handle, M4_INIT_SYMBOL);
+      if (init_func)
+	{
+	  (*init_func) (handle, obs);
+
+#ifdef DEBUG_MODULES
+	  M4_DEBUG_MESSAGE1("module %s: init hook called", name);
+#endif /* DEBUG_MODULES */
+	}
     }
   else
     {
-      /* Couldn't load the module; diagnose and exit. */
-      const char *dlerror = lt_dlerror();
-      if (dlerror == NULL)
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("ERROR: cannot load module: `%s'"), modname));
-      else
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("ERROR: cannot load module: `%s': %s"),
-		  modname, dlerror));
+      /* Couldn't open the module; diagnose and exit. */
+      M4ERROR ((EXIT_FAILURE, 0,
+		_("ERROR: cannot open module `%s': %s"),
+		name, m4_module_dlerror ()));
     }
 
   if (!bp && !mp && !init_func)
     {
-      M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: module `%s' has no entry points"), modname));
+      /* Since we don't use it here, only check for the finish hook
+	 if we were about to diagnose a module with no entry points.  */
+      if (!lt_dlsym (handle, M4_FINISH_SYMBOL))
+	M4ERROR ((EXIT_FAILURE, 0,
+		  _("ERROR: module `%s' has no entry points"),
+		  name));
     }
 
-  /* If the module was correctly loaded and has the necessary
-   * symbols, then update our internal tables to remember the
-   * new module.
-   */
+  /* If the module was correctly opened and has the necessary
+     symbols, then store some client data for the new module
+     on the first open only.  */
   if (handle)
     {
-      module = XMALLOC (m4_module, 1);
+      const lt_dlinfo  *info	= lt_dlgetinfo (handle);
+      
+      if (info && (info->ref_count == 1))
+	{
+	  m4_module_data *data  = XMALLOC (m4_module_data, 1);
+	  m4_module_data *stale = 0;
+
+	  data->bp	= bp;
+	  data->mp	= mp;
+
+	  stale = lt_dlcaller_set_data (m4_caller_id, handle, data);
+
+	  if (stale)
+	    {
+	      xfree (stale);
+	  
+	      M4ERROR ((warning_status, 0,
+			_("Warning: overiding stale caller data in module `%s'"),
+			name));
+	    }
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: loaded ok", modname);
+	  M4_DEBUG_MESSAGE1("module %s: opened", name);
 #endif /* DEBUG_MODULES */
-
-      module->modname	= xstrdup (modname);
-      module->handle	= handle;
-      module->bp	= bp;
-      module->mp	= mp;
-      module->ref_count = 1;
-
-      m4_modules	= list_cons ((List *) module, m4_modules);
-    }
-
-  if (module)
-    {
-      boolean m4_resident_module
-	= (boolean) lt_dlsym (handle, "m4_resident_module");
-
-      if (m4_resident_module)
-	{
-	  lt_dlmakeresident (handle);
 	}
     }
 
-  return module;
+  return handle;
 }
 
 void
-m4_module_install (modname)
-     const char *modname;
-{
-  const m4_module *module = m4_module_load (modname, NULL);
-
-  if (module)
-    {
-      const m4_builtin *bp	= m4_module_builtins (module);
-      const m4_macro *mp	= m4_module_macros (module);
-
-      /* Install the macro functions.  */
-      if (bp)
-	m4_builtin_table_install (module, bp);
-
-      /* Install the user macros. */
-      if (mp)
-	m4_macro_table_install (module, mp);
-    }
-}
-
-
-/*
- * Unload a module.
- */
-void
-m4_module_unload (modname, obs)
-     const char *modname;
+m4_module_close (handle, obs)
+     lt_dlhandle handle;
      struct obstack *obs;
 {
-  m4_module_finish_t *finish_func;
-  int		errors	= 0;
-  lt_dlhandle	handle	= NULL;
-  m4_module    *module	= NULL;
-  List		*cur	= NULL;
-  List		*prev	= NULL;
+  m4_module_finish_func *finish_func	= 0;
+  const char		*name		= 0;
+  int			 errors		= 0;
+  
+  assert (handle);
+  name = m4_module_name (handle);
 
-  /* Scan the list for the first module with a matching modname field. */
-  for (cur = m4_modules; cur != NULL; cur = LIST_NEXT (cur))
+  /* Run any finishing function for the opened module. */
+  finish_func = (m4_module_finish_func *) lt_dlsym (handle, M4_FINISH_SYMBOL);
+
+  if (finish_func)
     {
-      module = (m4_module *) cur;
-      if (modname != NULL && strcmp (modname, module->modname) == 0)
+      (*finish_func) (handle, obs);
+
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: finish hook called", name);
+#endif /* DEBUG_MODULES */
+    }
+      
+  if (!lt_dlisresident (handle))
+    {
+      {
+	const lt_dlinfo  *info	= lt_dlgetinfo (handle);
+
+	/* When we are about to unload the module for the final
+	   time, be sure to release any client data memory.  */
+	if (info && (info->ref_count == 1))
+	  {
+	    m4_module_data *stale
+	      = lt_dlcaller_set_data (m4_caller_id, handle, 0);
+	    xfree (stale);
+	  }
+      }
+
+      errors = lt_dlclose (handle);
+      if (!errors)
 	{
-	  handle = module->handle;
-	  break;
+#ifdef DEBUG_MODULES
+	  M4_DEBUG_MESSAGE1("module %s: closed", name);
+#endif /* DEBUG_MODULES */
 	}
-      prev = cur;
     }
 
-  if (handle == NULL)
+  if (errors)
     {
-      M4ERROR ((warning_status, 0,
-		_("ERROR: cannot close module: %s is not loaded."), modname));
-      return;
+      M4ERROR ((EXIT_FAILURE, 0,
+		_("ERROR: cannot close module `%s': %s"),
+		name, m4_module_dlerror ()));
+    }
+}
+
+void
+m4_module_close_all (obs)
+     struct obstack *obs;
+{
+  lt_dlhandle	handle	= lt_dlhandle_next (0);
+
+  while (handle)
+    {
+      /* Be careful not to reference each handle after it has been
+	 closed, even to find the address of the next handle.  */
+      lt_dlhandle pending = handle;
+      handle = lt_dlhandle_next (handle);
+      m4_module_close (pending, obs);
     }
 
-  /* Only do the actual unload when the number of calls to unload this
-     module is equal to the number of times it was loaded. */
-  --module->ref_count;
-  if (module->ref_count > 0)
+  if (lt_dlexit() != 0)
     {
+      M4ERROR ((EXIT_FAILURE, 0,
+		_("ERROR: cannot close modules: %s"),
+		m4_module_dlerror ()));
+    }
+}
+
+lt_dlhandle
+m4_module_load (name, obs)
+     const char *name;
+     struct obstack *obs;
+{
+  const lt_dlhandle handle = m4_module_open (name, obs);
+
+  if (handle)
+    {
+      const lt_dlinfo  *info	= lt_dlgetinfo (handle);
+
+      if (!info)
+	{
+	  M4ERROR ((warning_status, 0,
+		    _("Warning: cannot load module `%s': %s"),
+		    name, m4_module_dlerror ()));
+	}
+      else if (info->ref_count == 1)
+	{
+	  const m4_builtin *bp	= m4_module_builtins (handle);
+	  const m4_macro   *mp	= m4_module_macros (handle);
+
+	  /* Install the macro functions.  */
+	  if (bp)
+	    {
+	      m4_builtin_table_install (handle, bp);
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE2("module %s: now has %d references.",
-		     modname, module->ref_count);
+	      M4_DEBUG_MESSAGE1("module %s: builtins loaded", name);
 #endif /* DEBUG_MODULES */
-      return;
-    }
+	    }
 
-  if (module->ref_count == 0)
-    {
-      /* Remove the table references only when ref_count is *exactly* equal
-	 to 0.  If m4_module_unload is called again on a resideent module
-	 after the references have already been removed, we needn't try to
-	 remove them again!  */
-      m4_remove_table_reference_symbols (module->bp, module->mp);
-
+	  /* Install the user macros. */
+	  if (mp)
+	    {
+	      m4_macro_table_install (handle, mp);
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: builtins undefined", modname);
+	      M4_DEBUG_MESSAGE1("module %s: macros loaded", name);
 #endif /* DEBUG_MODULES */
+	    }
+	}
     }
 
-  if (lt_dlisresident (handle))
+  return handle;
+}
+
+/* Unload a module.  */
+void
+m4_module_unload (name, obs)
+     const char *name;
+     struct obstack *obs;
+{
+  lt_dlhandle	handle	= 0;
+  int		errors	= 0;
+
+  /* Scan the list for the first module with a matching name.  */
+  while ((handle = lt_dlhandle_next (handle)))
     {
-      /* Fix up reference count for resident modules, for the next
-	 call to m4_module_unload(). */
-      module->ref_count = 0;
+      if (name && (strcmp (name, m4_module_name (handle)) == 0))
+	break;
+    }
+
+  if (!handle)
+    {
+      const char *error_msg = _("module not loaded");
+
+      lt_dlseterror (lt_dladderror (error_msg));
+      ++errors;
     }
   else
     {
-      /* Run the finishing function for the loaded module. */
-      finish_func
-	= (m4_module_finish_t *) lt_dlsym (handle, "m4_finish_module");
+      const lt_dlinfo *info = lt_dlgetinfo (handle);
 
-      if (finish_func != NULL)
-	(*finish_func)();
-
-      errors = lt_dlclose (handle);
-      if (errors != 0)
-	{
-	  const char *dlerror = lt_dlerror();
-
-	  if (dlerror == NULL)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close module: `%s'"), modname));
-	  else
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close module: `%s': %s"),
-		      modname, dlerror));
-	}
-      else
+      /* Only do the actual close when the number of calls to close this
+	 module is equal to the number of times it was opened. */
+      if (info->ref_count > 1)
 	{
 #ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
+	  M4_DEBUG_MESSAGE2("module %s: now has %d references.",
+			    name, info->ref_count -1);
 #endif /* DEBUG_MODULES */
+	}
 
-	  if (prev)
-	    prev->next = (List *) module->next;
-	  else
-	    m4_modules = (List *) module->next;
+      if (info->ref_count == 1)
+	{
+	  /* Remove the table references only when ref_count is *exactly*
+	     equal to 1.  If m4_module_close is called again on a
+	     resident module after the references have already been
+	     removed, we needn't try to remove them again!  */
+	  m4_remove_table_reference_symbols (m4_module_builtins (handle),
+					     m4_module_macros (handle));
 
-	  xfree (module->modname);
-	  xfree (module);
+#ifdef DEBUG_MODULES
+	  M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);
+#endif /* DEBUG_MODULES */
 	}
     }
-}
 
-void
-m4_module_unload_all ()
-{
-  int errors = 0;
-  m4_module *module;
-  m4_module_finish_t *finish_func;
+  if (!errors)
+    m4_module_close (handle, obs);
 
-  /* Find and run the finishing function for each loaded module. */
-  while (m4_modules != NULL)
+  if (errors)
     {
-      module = (m4_module *) m4_modules;
-
-      finish_func = (m4_module_finish_t*)
-	lt_dlsym(module->handle, "m4_finish_module");
-
-      if (finish_func != NULL)
-	{
-	  (*finish_func)();
-
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s finish hook called", module->modname);
-#endif /* DEBUG_MODULES */
-	}
-
-      errors = lt_dlclose (module->handle);
-      if (errors != 0)
-	break;
-
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
-#endif /* DEBUG_MODULES */
-
-      m4_modules = LIST_NEXT (m4_modules);
-      xfree(module->modname);
-      xfree(module);
-    }
-
-  if (errors != 0)
-    errors = lt_dlexit();
-
-  if (errors != 0)
-    {
-      const char *dlerror = lt_dlerror();
-      if (m4_modules == NULL)
-        {
-          if (dlerror == NULL)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close modules")));
-	  else
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close modules: %s"),
-		      dlerror));
-	}
-      else
-        {
-	  if (dlerror == NULL)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close module: `%s'"),
-		      module->modname));
-	  else
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: cannot close module: `%s': %s"),
-		      module->modname, dlerror));
-	}
+      M4ERROR ((EXIT_FAILURE, 0,
+		_("ERROR: cannot unload module `%s': %s"),
+		name, m4_module_dlerror ()));
     }
 }

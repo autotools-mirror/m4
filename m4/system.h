@@ -142,6 +142,24 @@ BEGIN_C_DECLS
 #  endif
 #endif
 
+
+
+/* Take advantage of GNU C compiler source level optimisation hints,
+   using portable macros.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#else
+#  define M4_GNUC_ATTRIBUTE(args)
+#endif  /* __GNUC__ */
+
+#define M4_GNUC_PRINTF(fmt, arg) M4_GNUC_ATTRIBUTE((format (printf, fmt, arg)))
+#define M4_GNUC_SCANF(fmt, arg)	M4_GNUC_ATTRIBUTE((format (scanf, fmt, arg)))
+#define M4_GNUC_FORMAT(arg_idx)	M4_GNUC_ATTRIBUTE((format_arg (arg_idx)))
+#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE((noreturn))
+#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE((const))
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((unused))
+
+
 
 #if !defined __PRETTY_FUNCTION__
 #  define __PRETTY_FUNCTION__	"<unknown>"
@@ -163,8 +181,9 @@ BEGIN_C_DECLS
 
 /* Preprocessor token manipulation.  */
 
-/* The extra indirection to the _STR macro is required so that if the
-   argument to STR() is a macro, it will be expanded before being quoted.   */
+/* The extra indirection to the _STR and _CONC macros is required so that
+   if the arguments to STR() (or CONC()) are themselves macros, they will
+   be expanded before being quoted.   */
 #ifndef STR
 #  if __STDC__
 #    define _STR(arg)	#arg
@@ -176,10 +195,11 @@ BEGIN_C_DECLS
 
 #ifndef CONC
 #  if __STDC__
-#    define CONC(a, b)	a##b
+#    define _CONC(a, b)	a##b
 #  else
-#    define CONC(a, b)	a/**/b
+#    define _CONC(a, b)	a/**/b
 #  endif
+#  define CONC(a, b)	_CONC(a, b)
 #endif
 
 

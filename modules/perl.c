@@ -29,11 +29,6 @@
 
 #define m4_builtin_table	perl_LTX_m4_builtin_table
 #define m4_macro_table		perl_LTX_m4_macro_table
-#define m4_init_module		perl_LTX_m4_init_module
-#define m4_finish_module	perl_LTX_m4_finish_module
-
-void m4_init_module	M4_PARAMS((struct obstack *obs));
-void m4_finish_module	M4_PARAMS((void));
 
 /*		function	macros	blind */
 #define builtin_functions			\
@@ -62,27 +57,44 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
+
+
 static PerlInterpreter *my_perl;
 
 extern void xs_init (void);
 
-void
-m4_init_module (struct obstack *obs)
+M4INIT_HANDLER (perl)
 {
+  const lt_dlinfo *info = 0;
   char *embedding[] = { "", "-e", "0" };
 
-  my_perl = perl_alloc ();
-  perl_construct (my_perl);
+  if (handle)
+    info = lt_dlgetinfo (handle);
 
-  perl_parse (my_perl, xs_init, 3, embedding, NULL);
-  perl_run (my_perl);
+  /* Start up a perl parser, when loaded for the first time.  */
+  if (info && (info->ref_count == 1))
+    {
+      my_perl = perl_alloc ();
+      perl_construct (my_perl);
+
+      perl_parse (my_perl, xs_init, 3, embedding, NULL);
+      perl_run (my_perl);
+    }
 }
 
-void
-m4_finish_module(void)
+M4FINISH_HANDLER (perl)
 {
-  perl_destruct (my_perl);
-  perl_free (my_perl);
+  const lt_dlinfo *info = 0;
+
+  if (handle)
+    info = lt_dlgetinfo (handle);
+
+  /* Recycle the perl parser, when unloaded for the last time.  */
+  if (info && (info->ref_count == 1))
+    {
+      perl_destruct (my_perl);
+      perl_free (my_perl);
+    }
 }
 
 

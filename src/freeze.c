@@ -28,10 +28,14 @@
 #include "m4.h"
 #include "m4private.h"
 
-static	int   decode_char	    M4_PARAMS((FILE *in));
-static	void  issue_expect_message  M4_PARAMS((int expected));
-static	int   produce_char_dump     M4_PARAMS((char *buf, int ch));
-static	void  produce_syntax_dump   M4_PARAMS((FILE *file, char ch, int mask));
+static	int   decode_char	   M4_PARAMS((FILE *in));
+static	void  issue_expect_message M4_PARAMS((int expected));
+static	int   produce_char_dump    M4_PARAMS((char *buf, int ch));
+static	void  produce_syntax_dump  M4_PARAMS((FILE *file, char ch, int mask));
+static	void  produce_module_dump  M4_PARAMS((FILE *file, lt_dlhandle handle));
+static	void  produce_symbol_dump  M4_PARAMS((FILE *file,
+					      const m4_symbol *bucke));
+
 
 /*------------------------------------------------.
 | Produce a frozen state to the given file NAME.  |
@@ -110,14 +114,101 @@ produce_syntax_dump (file, ch, mask)
       fprintf (file, "S%c%d\n%s\n", ch, count, buf);
 }
 
+/* The modules must be dumped in the order in which they will be
+   reloaded from the frozen file.  libltdl stores handles in a push
+   down stack, so we need to dump them in the reverse order to that.  */
+void
+produce_module_dump (file, handle)
+     FILE *file;
+     lt_dlhandle handle;
+{
+  lt_dlhandle pending = handle;
+  const char *name = m4_module_name (pending);
+
+  handle = lt_dlhandle_next (handle);
+  if (handle)
+    produce_module_dump (file, handle);
+  
+  fprintf (file, "M%lu\n", (unsigned long) strlen (name));
+  fputs (name, file);
+  fputc ('\n', file);
+}
+
+/* Process all entries in one bucket, from the last to the first.
+   This order ensures that, at reload time, pushdef's will be
+   executed with the oldest definitions first.  */
+void
+produce_symbol_dump (file, bucket)
+     FILE *file;
+     const m4_symbol *bucket;
+{
+  const m4_symbol *pending = bucket;
+  lt_dlhandle	handle		= SYMBOL_HANDLE (pending);
+  const char   *symbol_name	= SYMBOL_NAME (pending);
+  const char   *module_name	= handle ? m4_module_name (handle) : NULL;
+  const m4_builtin *bp;
+
+  bucket = SYMBOL_NEXT (bucket);
+  if (bucket)
+    produce_symbol_dump (file, bucket);
+  
+  switch (SYMBOL_TYPE (pending))
+    {
+    case M4_TOKEN_TEXT:
+      fprintf (file, "T%lu,%lu",
+	       (unsigned long) strlen (symbol_name),
+	       (unsigned long) strlen (SYMBOL_TEXT (pending)));
+      if (handle)
+	fprintf (file, ",%lu", (unsigned long) strlen (module_name));
+      fputc ('\n', file);
+
+      fputs (symbol_name, file);
+      fputs (SYMBOL_TEXT (pending), file);
+      if (handle)
+	fputs (module_name, file);
+      fputc ('\n', file);
+      break;
+
+    case M4_TOKEN_FUNC:
+      bp = m4_builtin_find_by_func (m4_module_builtins(SYMBOL_HANDLE(pending)),
+				    SYMBOL_FUNC (pending));
+      if (bp == NULL)
+	{
+	  M4ERROR ((warning_status, 0,
+		    _("INTERNAL ERROR: Builtin not found in builtin table!")));
+	  abort ();
+	}
+
+      fprintf (file, "F%lu,%lu",
+	       (unsigned long) strlen (symbol_name),
+	       (unsigned long) strlen (bp->name));
+
+      if (handle)
+	fprintf (file, ",%lu",
+		 (unsigned long) strlen (module_name));
+      fputc ('\n', file);
+
+      fputs (symbol_name, file);
+      fputs (bp->name, file);
+      if (handle)
+	fputs (module_name, file);
+      fputc ('\n', file);
+      break;
+
+    default:
+      M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad token data type in produce_symbol_dump ()")));
+      abort ();
+      break;
+    }
+}
+
 void
 produce_frozen_state (name)
      const char *name;
 {
   FILE *file;
   int h;
-  m4_symbol *symbol;
-  const m4_builtin *bp;
 
   if (file = fopen (name, "w"), !file)
     {
@@ -177,99 +268,12 @@ produce_frozen_state (name)
   produce_syntax_dump (file, 'E', 0);
 
   /* Dump all loaded modules.  */
-  {
-    m4_module *module;
-
-    m4_modules = list_reverse (m4_modules);
-    for (module = (m4_module *) m4_modules;
-	 module; module = (m4_module *) LIST_NEXT (module))
-      {
-	fprintf (file, "M%lu\n",
-		 (unsigned long) strlen (module->modname));
-	fputs (module->modname, file);
-	fputc ('\n', file);
-      }
-    m4_modules = list_reverse (m4_modules);
-  }
+  produce_module_dump (file, lt_dlhandle_next (0));
 
   /* Dump all symbols.  */
-
   for (h = 0; h < hash_table_size; h++)
-    {
-      /* Process all entries in one bucket, from the last to the first.
-	 This order ensures that, at reload time, pushdef's will be
-	 executed with the oldest definitions first.  */
-
-      m4_symtab[h] = (m4_symbol *) list_reverse ((List *) m4_symtab[h]);
-      for (symbol = m4_symtab[h]; symbol; symbol = SYMBOL_NEXT (symbol))
-	{
-	  const m4_module *module = SYMBOL_MODULE (symbol);
-	  const char *symbol_name = SYMBOL_NAME (symbol);
-	  const char *modname     = module ? module->modname : NULL;
-
-	  switch (SYMBOL_TYPE (symbol))
-	    {
-	    case M4_TOKEN_TEXT:
-	      fprintf (file, "T%lu,%lu",
-		       (unsigned long) strlen (symbol_name),
-		       (unsigned long) strlen (SYMBOL_TEXT (symbol)));
-	      if (module)
-		fprintf (file, ",%lu", (unsigned long) strlen (modname));
-	      fputc ('\n', file);
-
-	      fputs (symbol_name, file);
-	      fputs (SYMBOL_TEXT (symbol), file);
-	      if (module)
-		fputs (modname, file);
-	      fputc ('\n', file);
-	      break;
-
-	    case M4_TOKEN_FUNC:
-	      bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (symbol));
-	      if (bp == NULL)
-		{
-		  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Builtin not found in builtin table!")));
-		  abort ();
-		}
-
-	      fprintf (file, "F%lu,%lu",
-		       (unsigned long) strlen (symbol_name),
-		       (unsigned long) strlen (bp->name));
-
-	      /* Search for the module that supplied the builtin, if the
-		 m4_symbol has no entry.  */
-	      if (!module)
-		{
-		  module = (m4_module *) list_find (m4_modules, (VOID *) bp,
-						    m4_module_find_by_builtin);
-		  modname = module ? module->modname : NULL;
-		}
-
-	      if (module)
-		fprintf (file, ",%lu",
-			 (unsigned long) strlen (modname));
-	      fputc ('\n', file);
-
-	      fputs (symbol_name, file);
-	      fputs (bp->name, file);
-	      if (module)
-		fputs (modname, file);
-	      fputc ('\n', file);
-	      break;
-
-	    default:
-	      M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type in freeze_one_symbol ()")));
-	      abort ();
-	      break;
-	    }
-	}
-
-      /* Reverse the bucket once more, putting it back as it was.  */
-
-      m4_symtab[h] = (m4_symbol *) list_reverse ((List *) m4_symtab[h]);
-    }
+    if (m4_symtab[h])
+      produce_symbol_dump (file, m4_symtab[h]);
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
@@ -476,26 +480,30 @@ reload_frozen_state (name)
 	VALIDATE ('\n');
 
 	/* Enter a macro having a builtin function as a definition.  */
-
 	{
-	  const m4_module *module;
+	  lt_dlhandle handle = 0;
 	  m4_builtin *bt = NULL;
 
 	  if (number[2] > 0)
 	    {
-	      module = (m4_module *) list_find (m4_modules, string[2],
-						m4_module_find_by_modname);
-	      if (module)
-		bt = module->bp;
+	      while ((handle = lt_dlhandle_next (handle)))
+		if (strcmp (m4_module_name (handle), string[2]) == 0)
+		  break;
+
+	      if (handle)
+		{
+		  bt = m4_module_builtins (handle);
+		}
 	    }
 
-	  bp = m4_builtin_find_by_name (bt, string[1]);
+	  if (bt)
+	    bp = m4_builtin_find_by_name (bt, string[1]);
 
 	  if (bp)
-	    m4_builtin_define (module, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
+	    m4_builtin_define (handle, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
-	    M4ERROR ((warning_status, 0, _("\
-`%s' from frozen file not found in builtin table!"),
+	    M4ERROR ((warning_status, 0, 
+		      _("`%s' from frozen file not found in builtin table!"),
 		      string[0]));
 	}
 	break;
@@ -519,7 +527,7 @@ reload_frozen_state (name)
 	GET_STRING (file, string[0], allocated[0], number[0]);
 	VALIDATE ('\n');
 
-	m4_module_load (string[0], NULL);
+	m4_module_open (string[0], NULL);
 
 	break;
 
@@ -660,13 +668,14 @@ reload_frozen_state (name)
 
 	/* Enter a macro having an expansion text as a definition.  */
 	{
-	  const m4_module *module;
+	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)
-	    module = (m4_module *) list_find (m4_modules, string[2],
-					      m4_module_find_by_modname);
+	    while ((handle = lt_dlhandle_next (handle)))
+	      if (strcmp (m4_module_name (handle), string[2]) == 0)
+		break;
 
-	  m4_macro_define (module, string[0], string[1], M4_SYMBOL_PUSHDEF);
+	  m4_macro_define (handle, string[0], string[1], M4_SYMBOL_PUSHDEF);
 	}
 	break;
 

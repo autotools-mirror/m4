@@ -37,7 +37,7 @@ BEGIN_C_DECLS
 /* Various declarations.  */
 
 typedef struct m4_symbol m4_symbol;
-typedef struct m4_module m4_module;
+typedef struct m4_module_data m4_module_data;
 typedef struct m4_token_data m4_token_data;
 
 typedef void m4_builtin_func M4_PARAMS((struct obstack *, int,
@@ -75,42 +75,34 @@ typedef struct {
 } m4_builtin;
 
 
-/* This list is used to check for repeated loading of the same modules,
-   and expanding the __modules__ macro.  */
+extern void	    m4_module_init   M4_PARAMS((void));
+extern lt_dlhandle  m4_module_load   M4_PARAMS((const char*, struct obstack*));
+extern void	    m4_module_unload M4_PARAMS((const char*, struct obstack*));
+extern lt_dlhandle  m4_module_open   M4_PARAMS((const char*, struct obstack*));
+extern void	    m4_module_close  M4_PARAMS((lt_dlhandle, struct obstack*));
+extern void	    m4_module_close_all M4_PARAMS((struct obstack*));
 
-M4_SCOPE List *m4_modules;
+extern const char  *m4_module_name     M4_PARAMS((lt_dlhandle));
+extern m4_builtin  *m4_module_builtins M4_PARAMS((lt_dlhandle));
+extern m4_macro	   *m4_module_macros   M4_PARAMS((lt_dlhandle));
 
-extern void		m4_module_init	M4_PARAMS((void));
-extern const m4_module *m4_module_load	M4_PARAMS((const char *,
-						   struct obstack *));
-extern void		m4_module_install M4_PARAMS((const char *));
-
-extern void		m4_module_unload M4_PARAMS((const char *,
-						    struct obstack *));
-extern void		m4_module_unload_all M4_PARAMS((void));
-
-extern const char      *m4_module_name M4_PARAMS((const m4_module *module));
-extern const m4_builtin *m4_module_builtins M4_PARAMS((const m4_module *module));
-extern const m4_macro  *m4_module_macros M4_PARAMS((const m4_module *module));
+extern lt_dlhandle  m4_module_find_by_builtin M4_PARAMS((const m4_builtin*));
 
 
-extern VOID	       *m4_module_find_by_modname M4_PARAMS((List *, VOID *));
-extern VOID	       *m4_module_find_by_builtin M4_PARAMS((List *, VOID *));
-
-extern	void	m4_macro_define		M4_PARAMS((const m4_module *,
+extern void m4_macro_define		M4_PARAMS((const lt_dlhandle,
 				const char *, const char *, m4_symbol_lookup));
-extern	void	m4_macro_table_install	M4_PARAMS((
-				const m4_module *, const m4_macro *));
+extern void m4_macro_table_install	M4_PARAMS((
+				const lt_dlhandle, const m4_macro *));
 
-
-extern	void	m4_builtin_define		M4_PARAMS((const m4_module *,
+extern void m4_builtin_define		M4_PARAMS((const lt_dlhandle,
 				const char *, const m4_builtin *,
 				m4_symbol_lookup, boolean));
-extern	void	m4_builtin_table_install	M4_PARAMS((
-				const m4_module *, const m4_builtin *));
-extern	const m4_builtin *m4_builtin_find_by_name M4_PARAMS((
+extern void m4_builtin_table_install	M4_PARAMS((
+				const lt_dlhandle, const m4_builtin *));
+
+extern const m4_builtin *m4_builtin_find_by_name M4_PARAMS((
 				const m4_builtin *, const char *));
-extern	const m4_builtin *m4_builtin_find_by_func M4_PARAMS((
+extern const m4_builtin *m4_builtin_find_by_func M4_PARAMS((
 				const m4_builtin *, m4_builtin_func *));
 
 extern m4_symbol **m4_symtab;
@@ -142,14 +134,15 @@ typedef enum {
   M4_TOKEN_FUNC
 } m4_token_data_t;
 
-typedef void m4_module_init_t M4_PARAMS((struct obstack *));
-typedef void m4_module_finish_t M4_PARAMS((void));
+typedef void m4_module_init_func   M4_PARAMS((lt_dlhandle, struct obstack*));
+typedef void m4_module_finish_func M4_PARAMS((lt_dlhandle, struct obstack*));
 
-m4_token_data_t m4_token_data_type M4_PARAMS((m4_token_data *));
-char *m4_token_data_text M4_PARAMS((m4_token_data *));
-char *m4_token_data_orig_text M4_PARAMS((m4_token_data *));
-m4_builtin_func *m4_token_data_func M4_PARAMS((m4_token_data *));
-boolean m4_token_data_func_traced M4_PARAMS((m4_token_data *));
+extern m4_token_data_t  m4_token_data_type	  M4_PARAMS((m4_token_data*));
+extern char	       *m4_token_data_text	  M4_PARAMS((m4_token_data*));
+extern char	       *m4_token_data_orig_text	  M4_PARAMS((m4_token_data*));
+extern m4_builtin_func *m4_token_data_func	  M4_PARAMS((m4_token_data*));
+extern boolean		m4_token_data_func_traced M4_PARAMS((m4_token_data*));
+
 
 #define M4ARG(i)	(argc > (i) ? m4_token_data_text (argv[i]) : "")
 
@@ -160,6 +153,14 @@ boolean m4_token_data_func_traced M4_PARAMS((m4_token_data *));
 #define M4BUILTIN_HANDLER(name) 				\
   static void CONC(builtin_, name) (obs, argc, argv)		\
 	struct obstack *obs; int argc; m4_token_data **argv;
+
+#define M4INIT_HANDLER(name)					\
+  void CONC(name, CONC(_LTX_, m4_init_module)) (handle, obs)	\
+	lt_dlhandle handle; struct obstack *obs;
+
+#define M4FINISH_HANDLER(name)					\
+  void CONC(name, CONC(_LTX_, m4_finish_module)) (handle, obs)	\
+	lt_dlhandle handle; struct obstack *obs;
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
@@ -386,7 +387,8 @@ extern	void	m4_skip_line	M4_PARAMS((void));
 /* push back input */
 extern	void	m4_push_file	M4_PARAMS((FILE *, const char *));
 extern	void	m4_push_single	M4_PARAMS((int ch));
-extern	void	m4_push_macro	M4_PARAMS((m4_builtin_func *, boolean));
+extern	void	m4_push_macro	M4_PARAMS((m4_builtin_func *, lt_dlhandle, 
+					   boolean));
 extern	struct obstack *m4_push_string_init M4_PARAMS((void));
 extern	const char *m4_push_string_finish M4_PARAMS((void));
 extern	void	m4_push_wrapup	M4_PARAMS((const char *));

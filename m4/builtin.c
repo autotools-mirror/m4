@@ -38,11 +38,11 @@ m4_builtin_find_by_name (bp, name)
      const m4_builtin *bp;
      const char *name;
 {
-  List *module;
+  lt_dlhandle	handle	= NULL;
 
-  for (module = m4_modules; module != NULL; module = LIST_NEXT (module))
+  while ((handle = lt_dlhandle_next (handle)))
     {
-      m4_builtin *builtin = ((m4_module *) module)->bp;
+      m4_builtin *builtin = m4_module_builtins (handle);
 
       if (builtin && (bp == NULL || bp == builtin))
 	{
@@ -54,16 +54,17 @@ m4_builtin_find_by_name (bp, name)
 
   return NULL;
 }
+
 const m4_builtin *
 m4_builtin_find_by_func (bp, func)
      const m4_builtin *bp;
      m4_builtin_func *func;
 {
-  List *module;
+  lt_dlhandle	handle	= NULL;
 
-  for (module = m4_modules; module != NULL; module = LIST_NEXT (module))
+  while ((handle = lt_dlhandle_next (handle)))
     {
-      m4_builtin *builtin = ((m4_module *) module)->bp;
+      m4_builtin *builtin = m4_module_builtins (handle);
 
       if (builtin && (bp == NULL || bp == builtin))
 	{
@@ -84,8 +85,8 @@ m4_builtin_find_by_func (bp, func)
 `-------------------------------------------------------------------------*/
 
 void
-m4_builtin_define (module, name, bp, mode, traced)
-     const m4_module *module;
+m4_builtin_define (handle, name, bp, mode, traced)
+     const lt_dlhandle handle;
      const char	*name;
      const m4_builtin *bp;
      m4_symbol_lookup mode;
@@ -99,7 +100,7 @@ m4_builtin_define (module, name, bp, mode, traced)
       if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
         xfree (SYMBOL_TEXT (symbol));
 
-      SYMBOL_MODULE (symbol)		= module;
+      SYMBOL_HANDLE (symbol)		= handle;
       SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
       SYMBOL_MACRO_ARGS (symbol)	= bp->groks_macro_args;
       SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
@@ -109,8 +110,8 @@ m4_builtin_define (module, name, bp, mode, traced)
 }
 
 void
-m4_builtin_table_install (module, table)
-     const m4_module *module;
+m4_builtin_table_install (handle, table)
+     const lt_dlhandle handle;
      const m4_builtin *table;
 {
   const m4_builtin *bp;
@@ -122,11 +123,11 @@ m4_builtin_table_install (module, table)
 	string = (char *) xmalloc (strlen (bp->name) + 4);
 	strcpy (string, "m4_");
 	strcat (string, bp->name);
-	m4_builtin_define (module, string, bp, M4_SYMBOL_PUSHDEF, FALSE);
+	m4_builtin_define (handle, string, bp, M4_SYMBOL_PUSHDEF, FALSE);
 	free (string);
       }
     else
-      m4_builtin_define (module, bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
+      m4_builtin_define (handle, bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
 }
 
 /*-------------------------------------------------------------------------.
@@ -136,8 +137,8 @@ m4_builtin_table_install (module, table)
 `-------------------------------------------------------------------------*/
 
 void
-m4_macro_define (module, name, text, mode)
-     const m4_module *module;
+m4_macro_define (handle, name, text, mode)
+     const lt_dlhandle handle;
      const char *name;
      const char *text;
      m4_symbol_lookup mode;
@@ -150,7 +151,7 @@ m4_macro_define (module, name, text, mode)
       if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
         xfree (SYMBOL_TEXT (symbol));
 
-      SYMBOL_MODULE (symbol) 		= module;
+      SYMBOL_HANDLE (symbol) 		= handle;
       SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
       SYMBOL_MACRO_ARGS (symbol)	= FALSE;
       SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
@@ -160,12 +161,12 @@ m4_macro_define (module, name, text, mode)
 }
 
 void
-m4_macro_table_install (module, table)
-     const m4_module *module;
+m4_macro_table_install (handle, table)
+     const lt_dlhandle handle;
      const m4_macro *table;
 {
   const m4_macro *mp;
 
   for (mp = table; mp->name != NULL; mp++)
-    m4_macro_define (module, mp->name, mp->value, M4_SYMBOL_PUSHDEF);
+    m4_macro_define (handle, mp->name, mp->value, M4_SYMBOL_PUSHDEF);
 }

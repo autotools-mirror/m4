@@ -28,15 +28,15 @@ INCLUDES	= -I$(top_srcdir) -I$(top_srcdir)/src @INTLINCL@
 
 include_HEADERS	= m4module.h
 noinst_HEADERS	= m4private.h
-pkginc_HEADERS	= error.h list.h ltdl.h regex.h system.h @OBSTACK_H@
+pkginc_HEADERS	= error.h ltdl.h regex.h system.h @OBSTACK_H@
 EXTRA_HEADERS	= gnu-obstack.h
 
 EXTRA_DIST = $(EXTRA_HEADERS) obstack.c
 
 lib_LTLIBRARIES		= libm4.la
-libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c \
-			  input.c list.c ltdl.c macro.c module.c \
-			  output.c path.c regex.c symtab.c utility.c
+libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c input.c \
+			  ltdl.c macro.c module.c output.c path.c \
+			  regex.c symtab.c utility.c
 EXTRA_libm4_la_SOURCES	= evalparse.c
 libm4_la_LIBADD		= @LTLIBOBJS@ @LIBADD_DL@
 

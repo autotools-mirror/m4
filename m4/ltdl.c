@@ -451,13 +451,13 @@ argz_create_sep (str, delim, pargz, pargz_len)
 
   /* Make a copy of STR, but replacing each occurence of
      DELIM with '\0'.  */
-  argz_len = LT_STRLEN (str);
+  argz_len = 1+ LT_STRLEN (str);
   if (argz_len)
     {
       const char *p;
       char *q;
 
-      argz = LT_DLMALLOC (char, 1+ argz_len);
+      argz = LT_DLMALLOC (char, argz_len);
       if (!argz)
 	return ENOMEM;
 
@@ -475,6 +475,8 @@ argz_create_sep (str, delim, pargz, pargz_len)
 	  else
 	    *q++ = *p;
 	}
+      /* Copy terminating LT_EOS_CHAR.  */
+      *q = *p;
     }
 
   /* If ARGZ_LEN has shrunk to nothing, release ARGZ's memory.  */
@@ -613,7 +615,8 @@ argz_stringify (argz, argz_len, sep)
 
   if (sep)
     {
-      while (--argz_len >= 0)
+      --argz_len;		/* don't stringify the terminating EOS */
+      while (--argz_len > 0)
 	{
 	  if (argz[argz_len] == LT_EOS_CHAR)
 	    argz[argz_len] = sep;
@@ -824,12 +827,12 @@ lt_dlseterror (errindex)
   else if (errindex < LT_ERROR_MAX)
     {
       /* No error setting the error message! */
-      LT_DLMUTEX_SETERROR (lt_dlerror_strings[errorcount]);
+      LT_DLMUTEX_SETERROR (lt_dlerror_strings[errindex]);
     }
   else
     {
       /* No error setting the error message! */
-      LT_DLMUTEX_SETERROR (user_error_strings[errorcount - LT_ERROR_MAX]);
+      LT_DLMUTEX_SETERROR (user_error_strings[errindex - LT_ERROR_MAX]);
     }
 
   LT_DLMUTEX_UNLOCK ();
@@ -3504,7 +3507,7 @@ lt_dlhandle
 lt_dlhandle_next (place)
      lt_dlhandle place;
 {
-  return place ? place->next : (lt_dlhandle) 0;
+  return place ? place->next : handles;
 }
 
 int
@@ -3538,7 +3541,7 @@ lt_dlforeach (func, data)
 lt_dlcaller_id
 lt_dlcaller_register ()
 {
-  static int last_caller_id = -1;
+  static lt_dlcaller_id last_caller_id = 0;
   int result;
 
   LT_DLMUTEX_LOCK ();
@@ -3547,8 +3550,6 @@ lt_dlcaller_register ()
 
   return result;
 }
-
-#define N_ELEMENTS(a)	(sizeof(a) / sizeof(*(a)))
 
 lt_ptr
 lt_dlcaller_set_data (key, handle, data)
@@ -3565,7 +3566,8 @@ lt_dlcaller_set_data (key, handle, data)
   LT_DLMUTEX_LOCK ();
 
   if (handle->caller_data)
-    n_elements = N_ELEMENTS (handle->caller_data);
+    while (handle->caller_data[n_elements].key)
+      ++n_elements;
 
   for (i = 0; i < n_elements; ++i)
     {
@@ -3577,11 +3579,11 @@ lt_dlcaller_set_data (key, handle, data)
     }
 
   /* Ensure that there is enough room in this handle's caller_data
-     array to accept a new element.  */
+     array to accept a new element (and an empty end marker).  */
   if (i == n_elements)
     {
       lt_caller_data *temp
-	= LT_DLREALLOC (lt_caller_data, handle->caller_data, 1+ n_elements);
+	= LT_DLREALLOC (lt_caller_data, handle->caller_data, 2+ n_elements);
 
       if (!temp)
 	{
@@ -3593,6 +3595,7 @@ lt_dlcaller_set_data (key, handle, data)
 
       /* We only need this if we needed to allocate a new caller_data.  */
       handle->caller_data[i].key  = key;
+      handle->caller_data[1+ i].key = 0;
     }
 
   handle->caller_data[i].data = data;
@@ -3609,19 +3612,15 @@ lt_dlcaller_get_data  (key, handle)
      lt_dlhandle handle;
 {
   lt_ptr result = (lt_ptr) 0;
-  int n_elements = 0;
 
   /* This needs to be locked so that the caller data isn't updated by
      another thread part way through this function.  */
   LT_DLMUTEX_LOCK ();
 
-  if (handle->caller_data)
-    n_elements = N_ELEMENTS (handle->caller_data);
-
   /* Locate the index of the element with a matching KEY.  */
   {
     int i;
-    for (i = 0; i < n_elements; ++i)
+    for (i = 0; handle->caller_data[i].key; ++i)
       {
 	if (handle->caller_data[i].key == key)
 	  {

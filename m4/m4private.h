@@ -24,20 +24,18 @@
 #  include <config.h>
 #endif
 
+#include <assert.h>
 #include <m4module.h>
 
-struct m4_module {
-  struct m4_module  *next;	/* previously loaded module */
-  char		    *modname;	/* name of this module */
-  lt_dlhandle	     handle;	/* libltdl module handle */
+struct m4_module_data {
   m4_builtin	    *bp;	/* `m4_builtin_table' address */
   m4_macro	    *mp;	/* `m4_macro_table' address */
-  unsigned int	     ref_count;	/* number of times module_load was called */
 };
 
 
 struct m4_token_data {
   m4_token_data_t type;
+  lt_dlhandle handle;
   union {
     struct {
 	char *text;
@@ -53,6 +51,7 @@ struct m4_token_data {
 };
 
 #define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
+#define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
 #define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
 #ifdef ENABLE_CHANGEWORD
 #  define M4_TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
@@ -60,7 +59,7 @@ struct m4_token_data {
 #define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
 #define M4_TOKEN_DATA_FUNC_TRACED(Td) 	((Td)->u.u_f.traced)
 
-/* Redefine the exported function using macro to this faster
+/* Redefine the exported function to this faster
    macro based version for internal use by the m4 code. */
 #undef M4ARG
 #define M4ARG(i)	(argc > (i) ? M4_TOKEN_DATA_TEXT (argv[i]) : "")
@@ -75,7 +74,6 @@ struct m4_symbol
 
   char *name;
   m4_token_data data;
-  const m4_module *module;
 };
 
 #define SYMBOL_NEXT(S)		((S)->next)
@@ -83,11 +81,11 @@ struct m4_symbol
 #define SYMBOL_SHADOWED(S)	((S)->shadowed)
 #define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
-#define SYMBOL_MODULE(S)	((S)->module)
 #define SYMBOL_NAME(S)		((S)->name)
 #define SYMBOL_TYPE(S)		(M4_TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)		(M4_TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_FUNC(S)		(M4_TOKEN_DATA_FUNC (&(S)->data))
+#define SYMBOL_HANDLE(S)	(M4_TOKEN_DATA_HANDLE(&(S)->data))
 
 
 /* Debugging the memory allocator.  */

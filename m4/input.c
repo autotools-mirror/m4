@@ -200,6 +200,7 @@ struct input_block
       struct
 	{
 	  m4_builtin_func *func;/* pointer to macros function */
+	  lt_dlhandle handle;	/* originating module */
 	  boolean traced;	/* TRUE iff builtin is traced */
 	  boolean read;		/* TRUE iff block has been read */
 	}
@@ -411,8 +412,9 @@ static struct input_funcs macro_funcs = {
 };
 
 void
-m4_push_macro (func, traced)
+m4_push_macro (func, handle, traced)
      m4_builtin_func *func;
+     lt_dlhandle handle;
      boolean traced;
 {
   input_block *i;
@@ -428,6 +430,7 @@ m4_push_macro (func, traced)
   i->funcs = &macro_funcs;
 
   i->u.u_m.func = func;
+  i->u.u_m.handle = handle;
   i->u.u_m.traced = traced;
   i->u.u_m.read = FALSE;
 
@@ -652,7 +655,7 @@ init_macro_token (td)
   M4_TOKEN_DATA_TYPE (td) = M4_TOKEN_FUNC;
   M4_TOKEN_DATA_FUNC (td) = isp->u.u_m.func;
   M4_TOKEN_DATA_FUNC_TRACED (td) = isp->u.u_m.traced;
-
+  M4_TOKEN_DATA_HANDLE (td) = isp->u.u_m.handle;
 }
 
 

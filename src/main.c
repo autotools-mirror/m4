@@ -435,9 +435,9 @@ main (int argc, char *const *argv, char *const *envp)
     }
   else
     {
-      m4_syntax_init    ();
-      m4_module_install ("m4");
-      m4_module_install (no_gnu_extensions ? "traditional" : "gnu");
+      m4_syntax_init ();
+      m4_module_load ("m4", 0);
+      m4_module_load (no_gnu_extensions ? "traditional" : "gnu", 0);
     }
 
   /* Import environment variables as macros.  The definition are
@@ -490,7 +490,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'm':
-	  m4_module_install (defines->macro);
+	  m4_module_load (defines->macro, 0);
 	  break;
 
 	default:
@@ -558,7 +558,10 @@ main (int argc, char *const *argv, char *const *envp)
       m4_undivert_all ();
     }
 
-  m4_module_unload_all();
+  {
+    struct obstack *obs = 0;
+    m4_module_close_all (obs);
+  }
 
   exit (exit_status);
 }

@@ -25,9 +25,6 @@
 
 #define m4_builtin_table	modtest_LTX_m4_builtin_table
 #define m4_macro_table		modtest_LTX_m4_macro_table
-#define m4_init_module		modtest_LTX_m4_init_module
-
-void m4_init_module M4_PARAMS((struct obstack *obs));
 
 /*		function	macros	blind */
 #define builtin_functions			\
@@ -55,8 +52,9 @@ m4_macro m4_macro_table[] =
   { 0,			0 },
 };
 
-void
-m4_init_module (struct obstack *obs)
+
+
+M4INIT_HANDLER (modtest)
 {
   char *s = "Test module loaded.";
 

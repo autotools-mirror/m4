@@ -42,7 +42,6 @@ extern int errno;
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	m4_LTX_m4_builtin_table
-#define m4_resident_module	m4_LTX_m4_resident_module
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -99,17 +98,28 @@ m4_builtin m4_builtin_table[] =
   { 0, 0, FALSE, FALSE },
 };
 
+
+
 /* This module cannot be safely unloaded from memory, incase the unload
    is triggered by m4exit, and the module is removed while m4exit is in
    progress.  */
-boolean m4_resident_module = TRUE;
+M4INIT_HANDLER (m4)
+{
+  if (handle)
+    if (lt_dlmakeresident (handle) != 0)
+      {
+	M4ERROR ((warning_status, 0,
+		  _("Warning: cannot make module `%s' resident: %s"),
+		  m4_module_name (handle), lt_dlerror ()));
+      }
+}
 
 
 
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
-	void m4_MACRONAME (struct obstack *obs, int argc, char *argv[]);
+	void builtin_MACRONAME (struct obstack *obs, int argc, char *argv[]);
 
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
@@ -129,8 +139,6 @@ macro_install (argc, argv, mode)
      m4_token_data **argv;
      m4_symbol_lookup mode;
 {
-  const m4_builtin *bp;
-
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
 
@@ -150,10 +158,20 @@ macro_install (argc, argv, mode)
       break;
 
     case M4_TOKEN_FUNC:
-      bp = m4_builtin_find_by_func (NULL, M4_TOKEN_DATA_FUNC (argv[2]));
-      if (bp)
-	m4_builtin_define (NULL, M4ARG (1), bp, mode,
+      {
+	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
+	const m4_builtin  *builtin = 0;
+
+	/* If we find a TOKEN_FUNC with no defining module, then
+	   somewhere along the way we have lost the module handle.  */
+	assert (handle);
+
+	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
+					   M4_TOKEN_DATA_FUNC (argv[2]));
+
+	m4_builtin_define (handle, M4ARG (1), builtin, mode,
 			   M4_TOKEN_DATA_FUNC_TRACED (argv[2]));
+      }
       break;
 
     default:
@@ -326,7 +344,8 @@ M4BUILTIN_HANDLER (defn)
       break;
 
     case M4_TOKEN_FUNC:
-      m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_TRACED (symbol));
+      m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_HANDLE (symbol),
+		     SYMBOL_TRACED (symbol));
       break;
 
     case M4_TOKEN_VOID:
@@ -626,7 +645,7 @@ M4BUILTIN_HANDLER (m4exit)
   if (argc == 2  && !m4_numeric_arg (argv[0], M4ARG (1), &exit_code))
     exit_code = 0;
 
-  m4_module_unload_all();
+  m4_module_close_all (obs);
 
   exit (exit_code);
 }
