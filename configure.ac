@@ -192,7 +192,7 @@ M4_AC_SYS_STACKOVF
 M4OBJS=
 m4_pattern_allow([^m4_getopt_h$])
 m4_getopt_h=src/getopt.h
-rm -f
+rm -f $m4_getopt_h
 AC_CHECK_FUNC([getopt_long], [],
     [M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
     AC_CONFIG_LINKS([$m4_getopt_h:src/gnu-getopt.h])])

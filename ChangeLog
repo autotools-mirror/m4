@@ -1,9 +1,13 @@
+2001-10-04  Gary Vaughan  <gary@gnu.org>
+
+	* configure.ac: `rm -f $m4_getopt_h' was lost.
+
 2001-10-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.ac (TIMESTAMP): Display with AS_BOX at configure
 	time.  Define it for config.h in order to...
 	* src/main.c (main): ...display the timestamp for --version.
-	
+
 2001-10-04  Akim Demaille  <akim@epita.fr>
 
 	* modules/gnu.c (m4_regexp_do, m4_patsubst_do): Extracted from
