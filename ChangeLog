@@ -1,3 +1,7 @@
+2001-08-28  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap (generate.awk): Generate test cases with new script.
+
 2001-08-27  Akim Demaille  <akim@epita.fr>
 
 	* tests/Makefile.am (installcheck-local): Don't use

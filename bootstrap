@@ -39,6 +39,9 @@ automake --add-missing --copy || exit 1
 autoconf || exit 1
 autoheader || exit 1
 
-( cd tests; ${SHELL-/bin/sh} ./get-them ../doc/m4.texinfo; )
+(
+  cd tests
+  ${AWK-awk} -f ./generate.awk ../doc/m4.texinfo > generated.at
+)
 
 exit 0
