@@ -179,7 +179,7 @@ m4_module_init (void)
 
   /* initialise libltdl's memory management. */
   lt_dlmalloc = xmalloc;
-  lt_dlfree   = xfree;
+  lt_dlfree   = (void (*)(void*)) xfree;
 
   errors      = lt_dlinit ();
 
@@ -479,8 +479,7 @@ m4_module_unload (const char *name, struct obstack *obs)
 	     equal to 1.  If m4_module_close is called again on a
 	     resident module after the references have already been
 	     removed, we needn't try to remove them again!  */
-	  m4_remove_table_reference_symbols (m4_module_builtins (handle),
-					     m4_module_macros (handle));
+	  m4_remove_table_reference_symbols (handle);
 
 #ifdef DEBUG_MODULES
 	  M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);

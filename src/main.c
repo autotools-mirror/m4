@@ -120,7 +120,6 @@ Preprocessor features:\n\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
-  -H, --hashsize=PRIME         set symbol lookup hash table size\n\
   -L, --nesting-limit=NUMBER   change artificial nesting limit\n"),
 	     stdout);
       fputs (_("\
@@ -263,6 +262,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'B':			/* compatibility junk */
+      case 'H':
       case 'N':
       case 'S':
       case 'T':
@@ -297,12 +297,6 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'G':
 	no_gnu_extensions = 1;
-	break;
-
-      case 'H':
-	hash_table_size = atoi (optarg);
-	if (hash_table_size <= 0)
-	  hash_table_size = HASHMAX;
 	break;
 
       case 'I':

@@ -279,24 +279,25 @@ M4BUILTIN_HANDLER (dumpdef)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      fprintf (stderr, "%s:\t", M4_SYMBOL_NAME (data.base[0]));
+      m4_symbol *symbol = m4_lookup_symbol (data.base[0], M4_SYMBOL_LOOKUP);
 
-      switch (M4_SYMBOL_TYPE (data.base[0]))
+      fprintf (stderr, "%s:\t", data.base[0]);
+      switch (M4_SYMBOL_TYPE (symbol))
 	{
 	case M4_TOKEN_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
-		     lquote.string, M4_SYMBOL_TEXT (data.base[0]), rquote.string);
+		     lquote.string, M4_SYMBOL_TEXT (symbol), rquote.string);
 	  else
-	    fprintf (stderr, "%s\n", M4_SYMBOL_TEXT (data.base[0]));
+	    fprintf (stderr, "%s\n", M4_SYMBOL_TEXT (symbol));
 	  break;
 
 	case M4_TOKEN_FUNC:
-	  bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (data.base[0]));
+	  bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (symbol));
 	  if (bp == NULL)
 	    {
 	      M4ERROR ((warning_status, 0,
-			_("Undefined name `%s'"), M4_SYMBOL_NAME (data.base[0])));
+			_("Undefined name `%s'"), data.base[0]));
 	      abort ();
 	    }
 	  fprintf (stderr, "<%s>\n", bp->name);
@@ -608,48 +609,50 @@ M4BUILTIN_HANDLER (m4wrap)
 /* Set_trace () is used by "traceon" and "traceoff" to enable and disable
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
-static void
-set_trace (m4_symbol *symbol, const char *data)
+static int
+set_trace (const char *name, m4_symbol *symbol, void *data);
+
+static int
+set_trace (const char *name, m4_symbol *symbol, void *data)
 {
   M4_SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
+  return 0;
 }
 
 M4BUILTIN_HANDLER (traceon)
 {
-  m4_symbol *symbol;
   int i;
 
   if (argc == 1)
-    m4_hack_all_symbols (set_trace, (char *) obs);
+    m4_symtab_apply (set_trace, (char *) obs);
   else
     for (i = 1; i < argc; i++)
       {
-	symbol = m4_lookup_symbol (M4_TOKEN_DATA_TEXT (argv[i]), M4_SYMBOL_LOOKUP);
+	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
+	m4_symbol *symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);
 	if (symbol != NULL)
-	  set_trace (symbol, (char *) obs);
+	  set_trace (name, symbol, (char *) obs);
 	else
-	  M4ERROR ((warning_status, 0,
-		    _("Undefined name %s"), M4_TOKEN_DATA_TEXT (argv[i])));
+	  M4ERROR ((warning_status, 0, _("Undefined name %s"), name));
       }
 }
 
 /* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
-  m4_symbol *symbol;
   int i;
 
   if (argc == 1)
-    m4_hack_all_symbols (set_trace, NULL);
+    m4_symtab_apply (set_trace, NULL);
   else
     for (i = 1; i < argc; i++)
       {
-	symbol = m4_lookup_symbol (M4_TOKEN_DATA_TEXT (argv[i]), M4_SYMBOL_LOOKUP);
+	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
+	m4_symbol *symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);
 	if (symbol != NULL)
-	  set_trace (symbol, NULL);
+	  set_trace (name, symbol, NULL);
 	else
-	  M4ERROR ((warning_status, 0,
-		    _("Undefined name %s"), M4_TOKEN_DATA_TEXT (argv[i])));
+	  M4ERROR ((warning_status, 0, _("Undefined name %s"), name));
       }
 }
 

@@ -129,12 +129,12 @@ BEGIN_C_DECLS
    if the arguments to STR() (or CONC()) are themselves macros, they will
    be expanded before being quoted.   */
 #ifndef STR
-#    define _STR(arg)	#arg
+#  define _STR(arg)	#arg
 #  define STR(arg)	_STR(arg)
 #endif
 
 #ifndef CONC
-#    define _CONC(a, b)	a##b
+#  define _CONC(a, b)	a##b
 #  define CONC(a, b)	_CONC(a, b)
 #endif
 
@@ -167,12 +167,12 @@ typedef int m4_boolean;
 #define XCALLOC(type, num)	((type *) xcalloc ((num), sizeof(type)))
 #define XMALLOC(type, num)	((type *) xmalloc ((num) * sizeof(type)))
 #define XREALLOC(type, p, num)	((type *) xrealloc ((p), (num) * sizeof(type)))
-#define XFREE(p)      M4_STMT_START { if (p) free (p); (p) = 0; } M4_STMT_END
+#define XFREE(p)      		((p) = xfree (p))
 
 extern void *xcalloc  (size_t n, size_t s);
 extern void *xmalloc  (size_t n);
 extern void *xrealloc (void *p, size_t n);
-extern void  xfree    (void *stale);
+extern void *xfree    (void *stale);
 
 extern char *xstrdup  (const char *string);
 

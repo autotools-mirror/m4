@@ -1,5 +1,56 @@
 2001-09-01  Gary V. Vaughan  <gary@gnu.org>
 
+	The shadowing mechanism and, infact, the whole symbol table
+	implementation was creaking under the weight of the features piled
+	on top of it.  We now have a separate hash table module which will
+	dynamically resize to keep symbol density withing good performace
+	limits, and a new symtab module layered above it.  Symbol lookups
+	are now marginally more efficient (since the shadowed flag is no
+	longer required) and symbol removal, such as on module unload, is
+	considerably faster due to a reorganisation of the data structures
+	used in symtab.c.
+
+	* src/main.c (main):  Don't mention `-H'.
+	* doc/m4.texinfo (Invoking m4): Document that -H no longer has any
+	effect.
+	* NEWS: Updated.
+	* m4/hash.c: New generalised dynamic hash table data structure
+	management module.
+	* m4/hash.h: Public interface.
+	* m4/Makefile.am (pkginc_HEADERS): Add hash.h.
+	(libm4_la_SOURCES): Add hash.c.
+	* m4/symtab.c: More or less rewritten from scratch, within the
+	bounds of the previous API.
+	(m4_symtab_apply): A cleaner version of the old hack_all_symbols
+	call.  Updated all callers.
+	* m4/m4module.c: #include <m4/hash.h>, and changed all affected
+	declarations to reflect API changes.
+	(M4INIT): Generate a declaration too, to avoid the warning with
+	--enable-debug builds.
+	(M4FINISH): Ditto.
+	(HASHMAX): Removed.
+	* m4/utility.c (hash_table_size):  Removed.
+	(m4_dump_symbols): Rewritten to build and qsort an array of symbol
+	names, which are then looked up by builtin_dumpdef() as necessary.
+	This implies a small speedup in builtin_symbols(), which discarded
+	all of the symbol info under the old call.
+	* m4/m4private.h (m4_symbol): Removed shadowed flag -- symbol
+	shadowing is implicit in respect to the new data structures.
+	symbol names are no longer duplicated here, they are stored in the
+	key field of the hash table.
+	Moved macro_args and blind_no_args...
+	(m4_token_data): ...to here.
+	m4/macro.c (expand_macro):  Added a name argument since the symbol
+	name is no longer copied into each struct m4_symbol.  Modified all
+	callers.
+	(collect_arguments):  Ditto.
+	* modules/m4.c (set_trace): Ditto.
+	* modules/gnu.c (builtin_symbols): Updated.
+	* src/freeze.c (produce_symbol_dump): Much improved in light of
+	the improved symbol table layout.
+
+2001-09-01  Gary V. Vaughan  <gary@gnu.org>
+
 	* m4/m4private.h (SYMBOL_NEXT): Move into m4's name space; renamed
 	to M4_SYMBOL_NEXT.
 	(SYMBOL_TRACED): Similarly renamed by prefixing with `M4_'.

@@ -131,7 +131,7 @@ m4_macro_define (const lt_dlhandle handle, const char *name,
       if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
         xfree (M4_SYMBOL_TEXT (symbol));
 
-      M4_SYMBOL_HANDLE (symbol) 		= handle;
+      M4_SYMBOL_HANDLE (symbol) 	= handle;
       M4_SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
       M4_SYMBOL_MACRO_ARGS (symbol)	= FALSE;
       M4_SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;

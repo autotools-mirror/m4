@@ -3,6 +3,10 @@ Copyright 1992, 1993, 1994, 1998, 2000, 2001 Free Software Foundation, Inc.
 
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
+* `m4 --hashsize' and `-H' are still accepted, but have no effect.  M4
+  will grow its internal symbol table if the symbol density is having
+  an effect on performance.
+
 * `configure --without-modules' will build an m4 binary with no preloaded
   modules.  At startup it will search for and load modules `m4' and either
   `gnu' or `traditional'.  This mode of operation can be used for

@@ -33,7 +33,7 @@ static	void  issue_expect_message (int expected);
 static	int   produce_char_dump    (char *buf, int ch);
 static	void  produce_syntax_dump  (FILE *file, char ch, int mask);
 static	void  produce_module_dump  (FILE *file, lt_dlhandle handle);
-static	void  produce_symbol_dump  (FILE *file, const m4_symbol *bucke);
+static	void  produce_symbol_dump  (FILE *file, m4_hash *hash);
 
 
 /* Produce a frozen state to the given file NAME. */
@@ -117,7 +117,7 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
   handle = lt_dlhandle_next (handle);
   if (handle)
     produce_module_dump (file, handle);
-  
+
   fprintf (file, "M%lu\n", (unsigned long) strlen (name));
   fputs (name, file);
   fputc ('\n', file);
@@ -127,66 +127,69 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
    This order ensures that, at reload time, pushdef's will be
    executed with the oldest definitions first.  */
 void
-produce_symbol_dump (FILE *file, const m4_symbol *bucket)
+produce_symbol_dump (FILE *file, m4_hash *hash)
 {
-  const m4_symbol *pending = bucket;
-  lt_dlhandle	handle		= M4_SYMBOL_HANDLE (pending);
-  const char   *symbol_name	= M4_SYMBOL_NAME (pending);
-  const char   *module_name	= handle ? m4_module_name (handle) : NULL;
-  const m4_builtin *bp;
+  m4_hash_iterator *place	= 0;
 
-  bucket = M4_SYMBOL_NEXT (bucket);
-  if (bucket)
-    produce_symbol_dump (file, bucket);
-  
-  switch (M4_SYMBOL_TYPE (pending))
+  while ((place = m4_hash_iterator_next (hash, place)))
     {
-    case M4_TOKEN_TEXT:
-      fprintf (file, "T%lu,%lu",
-	       (unsigned long) strlen (symbol_name),
-	       (unsigned long) strlen (M4_SYMBOL_TEXT (pending)));
-      if (handle)
-	fprintf (file, ",%lu", (unsigned long) strlen (module_name));
-      fputc ('\n', file);
+      const char   *symbol_name	= m4_hash_iterator_key (place);
+      m4_symbol	   *symbol	= m4_hash_iterator_value (place);
+      lt_dlhandle   handle	= M4_SYMBOL_HANDLE (symbol);
+      const char   *module_name	= handle ? m4_module_name (handle) : NULL;
+      const m4_builtin *bp;
 
-      fputs (symbol_name, file);
-      fputs (M4_SYMBOL_TEXT (pending), file);
-      if (handle)
-	fputs (module_name, file);
-      fputc ('\n', file);
-      break;
-
-    case M4_TOKEN_FUNC:
-      bp = m4_builtin_find_by_func (m4_module_builtins(M4_SYMBOL_HANDLE(pending)),
-				    M4_SYMBOL_FUNC (pending));
-      if (bp == NULL)
+      switch (M4_SYMBOL_TYPE (symbol))
 	{
-	  M4ERROR ((warning_status, 0,
-		    _("INTERNAL ERROR: Builtin not found in builtin table!")));
-	  abort ();
-	}
+	case M4_TOKEN_TEXT:
+	  fprintf (file, "T%lu,%lu",
+		   (unsigned long) strlen (symbol_name),
+		   (unsigned long) strlen (M4_SYMBOL_TEXT (symbol)));
+	  if (handle)
+	    fprintf (file, ",%lu", (unsigned long) strlen (module_name));
+	  fputc ('\n', file);
 
-      fprintf (file, "F%lu,%lu",
-	       (unsigned long) strlen (symbol_name),
-	       (unsigned long) strlen (bp->name));
+	  fputs (symbol_name, file);
+	  fputs (M4_SYMBOL_TEXT (symbol), file);
+	  if (handle)
+	    fputs (module_name, file);
+	  fputc ('\n', file);
+	  break;
 
-      if (handle)
-	fprintf (file, ",%lu",
-		 (unsigned long) strlen (module_name));
-      fputc ('\n', file);
+	case M4_TOKEN_FUNC:
+	  bp = m4_builtin_find_by_func
+	    	(m4_module_builtins (M4_SYMBOL_HANDLE(symbol)),
+		 M4_SYMBOL_FUNC (symbol));
 
-      fputs (symbol_name, file);
-      fputs (bp->name, file);
-      if (handle)
-	fputs (module_name, file);
-      fputc ('\n', file);
-      break;
+	  if (bp == NULL)
+	    {
+	      M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Builtin not found in builtin table!")));
+	      abort ();
+	    }
 
-    default:
-      M4ERROR ((warning_status, 0, _("\
+	  fprintf (file, "F%lu,%lu",
+		   (unsigned long) strlen (symbol_name),
+		   (unsigned long) strlen (bp->name));
+
+	  if (handle)
+	    fprintf (file, ",%lu",
+		     (unsigned long) strlen (module_name));
+	  fputc ('\n', file);
+
+	  fputs (symbol_name, file);
+	  fputs (bp->name, file);
+	  if (handle)
+	    fputs (module_name, file);
+	  fputc ('\n', file);
+	  break;
+
+	default:
+	  M4ERROR ((warning_status, 0, _("\
 INTERNAL ERROR: Bad token data type in produce_symbol_dump ()")));
-      abort ();
-      break;
+	  abort ();
+	  break;
+	}
     }
 }
 
@@ -194,7 +197,6 @@ void
 produce_frozen_state (const char *name)
 {
   FILE *file;
-  int h;
 
   if (file = fopen (name, "w"), !file)
     {
@@ -257,13 +259,10 @@ produce_frozen_state (const char *name)
   produce_module_dump (file, lt_dlhandle_next (0));
 
   /* Dump all symbols.  */
-  for (h = 0; h < hash_table_size; h++)
-    if (m4_symtab[h])
-      produce_symbol_dump (file, m4_symtab[h]);
+  produce_symbol_dump (file, m4_symtab);
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
-
   m4_freeze_diversions (file);
 
   /* All done.  */
@@ -480,7 +479,7 @@ reload_frozen_state (const char *name)
 	  if (bp)
 	    m4_builtin_define (handle, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
-	    M4ERROR ((warning_status, 0, 
+	    M4ERROR ((warning_status, 0,
 		      _("`%s' from frozen file not found in builtin table!"),
 		      string[0]));
 	}

@@ -29,6 +29,7 @@
 #include <m4/error.h>
 #include <m4/ltdl.h>
 #include <m4/system.h>
+#include <m4/hash.h>
 
 BEGIN_C_DECLS
 
@@ -41,8 +42,7 @@ typedef struct m4_token_data m4_token_data;
 
 typedef void m4_builtin_func (struct obstack *, int, struct m4_token_data **);
 typedef void *m4_module_func (const char *);
-typedef void m4_hack_symbol ();
-
+typedef int m4_symtab_apply_func (const char *name, m4_symbol *symbol, void *data);
 
 typedef struct {
     unsigned char *string;	/* characters of the string */
@@ -103,15 +103,12 @@ extern const m4_builtin *m4_builtin_find_by_name (
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
 
-extern m4_symbol **m4_symtab;
+extern m4_hash *m4_symtab;
 
 extern void	m4_symtab_init		(void);
-extern m4_symbol *m4_lookup_symbol	(const char *,
-						   m4_symbol_lookup);
-extern void	m4_hack_all_symbols	(m4_hack_symbol *,
-						   const char *);
-extern void	m4_remove_table_reference_symbols (
-						m4_builtin *, m4_macro *);
+extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup);
+extern int	m4_symtab_apply	(m4_symtab_apply_func *, void *);
+extern void	m4_remove_table_reference_symbols (lt_dlhandle);
 
 
 /* Various different token types.  */
@@ -145,24 +142,26 @@ extern boolean		m4_token_data_func_traced (m4_token_data*);
 
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
-  (struct obstack *, int , m4_token_data **);
+  	(struct obstack *, int , m4_token_data **);
 
 #define M4BUILTIN_HANDLER(name) 				\
   static void CONC(builtin_, name) (obs, argc, argv)		\
 	struct obstack *obs; int argc; m4_token_data **argv;
 
 #define M4INIT_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_init_module)) (handle, obs)	\
-	lt_dlhandle handle; struct obstack *obs;
+  void CONC(name, CONC(_LTX_, m4_init_module)) 			\
+	(lt_dlhandle handle, struct obstack *obs);		\
+  void CONC(name, CONC(_LTX_, m4_init_module)) 			\
+	(lt_dlhandle handle, struct obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_finish_module)) (handle, obs)	\
-	lt_dlhandle handle; struct obstack *obs;
+  void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
+	(lt_dlhandle handle, struct obstack *obs);		\
+  void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
+	(lt_dlhandle handle, struct obstack *obs)
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
-
-#define HASHMAX 509		/* default, overridden by -Hsize */
 
 /* The name this program was run with. */
 const char *program_name;
@@ -381,6 +380,7 @@ extern	m4_token_t m4_next_token (m4_token_data *);
 extern	void	m4_skip_line	(void);
 
 /* push back input */
+
 extern	void	m4_push_file	(FILE *, const char *);
 extern	void	m4_push_single	(int ch);
 extern	void	m4_push_macro	(m4_builtin_func *, lt_dlhandle,
@@ -439,11 +439,11 @@ extern	void	m4_search_path_add (struct m4_search_path_info *, const char *);
 struct m4_dump_symbol_data
 {
   struct obstack *obs;		/* obstack for table */
-  m4_symbol **base;		/* base of table */
+  const char **base;		/* base of table */
   int size;			/* size of table */
 };
 
-extern void m4_dump_symbol (m4_symbol *symbol, struct m4_dump_symbol_data *data);
+extern int m4_dump_symbol (const char *name, m4_symbol *symbol, void *data);
 extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_token_data **argv, boolean complain);
 
 

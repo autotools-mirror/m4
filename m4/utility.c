@@ -41,9 +41,6 @@ int sync_output = 0;
 /* Debug (-d[flags]).  */
 int debug_level = 0;
 
-/* Hash table size (should be a prime) (-Hsize).  */
-int hash_table_size = HASHMAX;
-
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
 
@@ -84,29 +81,29 @@ m4_string ecomm;
 m4_token_data_t
 m4_token_data_type (m4_token_data *name)
 {
-    return M4_TOKEN_DATA_TYPE(name);
+  return M4_TOKEN_DATA_TYPE(name);
 }
 
 char *
 m4_token_data_text (m4_token_data *name)
 {
-    return M4_TOKEN_DATA_TEXT(name);
+  return M4_TOKEN_DATA_TEXT(name);
 }
 
 m4_builtin_func *
 m4_token_data_func (m4_token_data *name)
 {
-    return M4_TOKEN_DATA_FUNC(name);
+  return M4_TOKEN_DATA_FUNC(name);
 }
 
 boolean
 m4_token_data_func_traced (m4_token_data *name)
 {
-    return M4_TOKEN_DATA_FUNC_TRACED(name);
+  return M4_TOKEN_DATA_FUNC_TRACED(name);
 }
 
-
 
+
 /* Give friendly warnings if a builtin macro is passed an inappropriate
    number of arguments.  NAME is macro name for messages, ARGC is actual
    number of arguments, MIN is the minimum number of acceptable arguments,
@@ -225,35 +222,39 @@ m4_expand_ranges (const char *s, struct obstack *obs)
 static int
 dumpdef_cmp (const void *s1, const void *s2)
 {
-  return strcmp (M4_SYMBOL_NAME (* (m4_symbol *const *) s1),
-		 M4_SYMBOL_NAME (* (m4_symbol *const *) s2));
+  return strcmp (*(const char **) s1, *(const char **) s2);
 }
 
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
-   table of all defined, un-shadowed, symbols.  */
-void
-m4_dump_symbol (m4_symbol *symbol, struct m4_dump_symbol_data *data)
+   table of all defined symbol names.  */
+int
+m4_dump_symbol (const char *name, m4_symbol *symbol, void *data)
 {
-  if (!M4_SYMBOL_SHADOWED (symbol) && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
+  if (M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
     {
-      obstack_blank (data->obs, sizeof (m4_symbol *));
-      data->base = (m4_symbol **) obstack_base (data->obs);
-      data->base[data->size++] = symbol;
+      struct m4_dump_symbol_data *symbol_data
+	= (struct m4_dump_symbol_data *) data;
+
+      obstack_blank (symbol_data->obs, sizeof (const char *));
+      symbol_data->base = (const char **) obstack_base (symbol_data->obs);
+      symbol_data->base[symbol_data->size++] = name;
     }
+
+  return 0;
 }
 
-/* If there are no arguments, build a sorted list of all defined,
-   un-shadowed, symbols, otherwise, only the specified symbols.  */
+/* If there are no arguments, build a sorted list of all defined
+   symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 		 m4_token_data **argv, boolean complain)
 {
-  data->base = (m4_symbol **) obstack_base (data->obs);
+  data->base = (const char **) obstack_base (data->obs);
   data->size = 0;
 
   if (argc == 1)
     {
-      m4_hack_all_symbols (m4_dump_symbol, (char *) data);
+      m4_symtab_apply (m4_dump_symbol, data);
     }
   else
     {
@@ -264,7 +265,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 	{
 	  symbol = m4_lookup_symbol (M4_TOKEN_DATA_TEXT (argv[i]), M4_SYMBOL_LOOKUP);
 	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
-	    m4_dump_symbol (symbol, data);
+	    m4_dump_symbol (M4_TOKEN_DATA_TEXT (argv[i]), symbol, data);
 	  else if (complain)
 	    M4ERROR ((warning_status, 0,
 		      _("Undefined name %s"), M4_TOKEN_DATA_TEXT (argv[i])));
@@ -272,5 +273,5 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
     }
 
   obstack_finish (data->obs);
-  qsort ((char *) data->base, data->size, sizeof (m4_symbol *), dumpdef_cmp);
+  qsort ((void *) data->base, data->size, sizeof (const char *), dumpdef_cmp);
 }

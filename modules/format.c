@@ -118,13 +118,13 @@ format (struct obstack *obs, int argc, m4_token_data **argv)
 	  width = ARG_INT (argc, argv);
 	  fmt++;
 	}
-      else if (isdigit (*fmt))
+      else if (isdigit ((int) *fmt))
 	{
 	  do
 	    {
 	      fmt++;
 	    }
-	  while (isdigit (*fmt));
+	  while (isdigit ((int) *fmt));
 	}
 
       /* Maximum precision.  */
@@ -136,13 +136,13 @@ format (struct obstack *obs, int argc, m4_token_data **argv)
 	      prec = ARG_INT (argc, argv);
 	      ++fmt;
 	    }
-	  else if (isdigit (*fmt))
+	  else if (isdigit ((int) *fmt))
 	    {
 	      do
 		{
 		  fmt++;
 		}
-	      while (isdigit (*fmt));
+	      while (isdigit ((int) *fmt));
 	    }
 	}
 

@@ -402,10 +402,10 @@ System V version.  @xref{Compatibility}, for a list of these.
 
 @item -H @var{N}
 @itemx --hashsize=@var{N}
-Make the internal hash table for symbol lookup be @var{N} entries big.
-The number should be prime.  The default is 509 entries.  It should not
-be necessary to increase this value, unless you define an excessive
-number of macros.
+These options are present only for compatibility with previous
+versions of GNU @code{m4}, and were controlling the number of slots
+in the symbol table.  They do nothing, because the size is not fixed
+anymore.
 
 @item -L @var{N}
 @itemx --nesting-limit=@var{N}

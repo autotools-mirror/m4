@@ -34,20 +34,26 @@ struct m4_module_data {
 
 
 struct m4_token_data {
-  m4_token_data_t type;
-  lt_dlhandle handle;
+  m4_token_data	*	next;
+  m4_token_data_t	type;
+  boolean		macro_args;
+  boolean		blind_no_args;
+  lt_dlhandle		handle;
   union {
     struct {
-	char *text;
+	char *		text;
     } u_t;
     struct {
-	m4_builtin_func *func;
-	boolean traced;
+	m4_builtin_func	*func;
+	boolean	 	traced;
     } u_f;
   } u;
 };
 
+#define M4_TOKEN_DATA_NEXT(Td)		((Td)->next)
 #define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
+#define M4_TOKEN_MACRO_ARGS(Td)		((Td)->macro_args)
+#define M4_TOKEN_BLIND_NO_ARGS(Td)	((Td)->blind_no_args)
 #define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
 #define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
 #define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
@@ -60,26 +66,19 @@ struct m4_token_data {
 
 struct m4_symbol
 {
-  struct m4_symbol *next;
   boolean traced;
-  boolean shadowed;
-  boolean macro_args;
-  boolean blind_no_args;
-
-  char *name;
-  m4_token_data data;
+  m4_token_data *data;
 };
 
-#define M4_SYMBOL_NEXT(S)		((S)->next)
-#define M4_SYMBOL_TRACED(S)		((S)->traced)
-#define M4_SYMBOL_SHADOWED(S)		((S)->shadowed)
-#define M4_SYMBOL_MACRO_ARGS(S)		((S)->macro_args)
-#define M4_SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
-#define M4_SYMBOL_NAME(S)		((S)->name)
-#define M4_SYMBOL_TYPE(S)		(M4_TOKEN_DATA_TYPE (&(S)->data))
-#define M4_SYMBOL_TEXT(S)		(M4_TOKEN_DATA_TEXT (&(S)->data))
-#define M4_SYMBOL_FUNC(S)		(M4_TOKEN_DATA_FUNC (&(S)->data))
-#define M4_SYMBOL_HANDLE(S)		(M4_TOKEN_DATA_HANDLE(&(S)->data))
+#define M4_SYMBOL_TRACED(S)	   ((S)->traced)
+#define M4_SYMBOL_DATA(S)	   ((S)->data)
+#define M4_SYMBOL_DATA_NEXT(S)	   (M4_TOKEN_DATA_NEXT (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TYPE(S)	   (M4_TOKEN_DATA_TYPE (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_MACRO_ARGS(S)	   (M4_TOKEN_MACRO_ARGS (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_BLIND_NO_ARGS(S) (M4_TOKEN_BLIND_NO_ARGS (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TEXT(S)	   (M4_TOKEN_DATA_TEXT (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_FUNC(S)	   (M4_TOKEN_DATA_FUNC (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_HANDLE(S)	   (M4_TOKEN_DATA_HANDLE (M4_SYMBOL_DATA(S)))
 
 
 /* Debugging the memory allocator.  */
@@ -94,8 +93,8 @@ struct m4_symbol
 #if DEBUG
 # define DEBUG_INPUT
 # define DEBUG_MACRO
-/* # define DEBUG_SYM */
-/* # define DEBUG_INCL */
+# define DEBUG_SYM
+# define DEBUG_INCL
 # define DEBUG_MODULE
 #endif
 

@@ -131,10 +131,11 @@ xrealloc (p, n)
 }
 
 /* Don't free NULL pointers. */
-void
+void *
 xfree (stale)
      void *stale;
 {
   if (stale)
     free (stale);
+  return 0;
 }
