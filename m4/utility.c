@@ -24,8 +24,6 @@
 #include "m4.h"
 #include "m4private.h"
 
-static int dumpdef_cmp (const void *s1, const void *s2);
-
 
 
 /* Give friendly warnings if a builtin macro is passed an

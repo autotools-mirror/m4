@@ -1,4 +1,8 @@
-2003-07-29  Gary V. Vaughan  <gary@gnu.org)
+2003-08-07  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/utility.c (dumpdef_cmp): Removed stale declaration.
+
+2003-07-29  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4module.h (M4_DEFAULT_NESTING_LIMIT): This value is
 	already available to module writers through
