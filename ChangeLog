@@ -1,3 +1,8 @@
+2001-08-09  Yuji Minejima  <ggb01164@nifty.ne.jp>
+
+	* doc/m4.texinfo: Fix some typos, and apply some small
+	clarifications.
+
 2001-08-09  Andreas Schwab  <schwab@suse.de>
 
 	* src/main.c (main): Fix improper uses of error (missing format

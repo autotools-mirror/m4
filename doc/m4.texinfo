@@ -94,7 +94,7 @@ the distribution).
 
 * Macros::                      How to invoke macros
 * Definitions::                 How to define new macros
-* Conditionals::                Conditionals and loops
+* Conditionals::                Conditionals, loops an recursions
 
 * Debugging::                   How to debug macros and input
 
@@ -538,7 +538,7 @@ say what you expected to occur; this will help us decide whether the
 problem was really in the documentation.
 
 Once you've got a precise problem, send e-mail to (Internet)
-@file{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
+@email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
 you are using.  You can get this information with the command @samp{m4
 --version}.
 
@@ -2385,7 +2385,7 @@ First, the @TeX{} version:
 \def\a@{\message@{Hello@}@}
 \catcode`\@@=0
 \catcode`\\=12
-@result{}@@a
+@@a
 @result{}@@bye
 @end example
 
@@ -2396,7 +2396,8 @@ Then, the @code{m4} version:
 @example
 define(a, `errprint(`Hello')')
 changeword(`@@\([_a-zA-Z0-9]*\)')
-@result{}@@a
+@@a
+@result{}errprint(Hello)
 @end example
 
 In the @TeX{} example, the first line defines a macro @code{a} to
@@ -3066,7 +3067,7 @@ The builtin macro @code{translit} is recognized only when given
 arguments.
 @end deffn
 
-It is not an error for the last character in the range to be `larger'
+It is not an error for the last character in the range to be `smaller'
 than the first.  In that case, the range runs backwards, i.e.,
 @samp{9-0} means the string @samp{9876543210}.
 
