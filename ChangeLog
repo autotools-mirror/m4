@@ -91,7 +91,7 @@
 	* modules/Makefile.am (AM_CPPFLAGS) [cygwin*]: Ditto.
 
 2001-08-20  Gary V. Vaughan  <gary@gnu.org>
- 
+
 	Ansify the source.  Previously we had a mix, where my code was
 	in a K&R compatible style, and the preexisting code was in ANSI
 	style.  Nothing is lost wrt release 1.4 by reverting to ANSI,
@@ -99,7 +99,7 @@
 
 	* m4/system.h:  Remove M4_PARAMS macro and all users.  Remove
 	VOID macro and all users.
-	* m4/m4module.h:  Ansify function prototypes and headers.  
+	* m4/m4module.h:  Ansify function prototypes and headers.
 	* m4/builtin.c:  Ditto.
 	* m4/evalparse.c:  Ditto.
 	* m4/input.c:  Ditto.
@@ -116,7 +116,7 @@
 	* src/freeze.c:  Ditto.
 	* src/m4.h:  Ditto.
 	* src/main.c:  Ditto.
- 
+
 2001-08-20  Akim Demaille  <akim@epita.fr>
 
 	* config/atconfig.m4: s/EOF/ATEOF/, so that configure can be
@@ -314,7 +314,7 @@
 	(m4_pattern_allow): As it exists in 2.50, just use it.
 	(AC_OUTPUT): Split in AC_CONFIG_FILES and AC_CONFIG_COMMANDS.
 	Don't handle Gettext's duties, let it handle them.
-	* config/gnu-obstack.h: Use m4_pattern_allow directly.
+	* config/gnu-obstack.m4: Use m4_pattern_allow directly.
 
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
