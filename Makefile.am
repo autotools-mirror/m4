@@ -19,14 +19,14 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-EXTRA_DIST	= bootstrap
+EXTRA_DIST	= bootstrap config/mkstamp
 
 ## There is currently no means with Automake not to run aclocal.
 ACLOCAL_AMFLAGS = -I gnulib/config -I config
 
-SUBDIRS			= po gnulib config m4 modules src tests examples doc .
+SUBDIRS			= po gnulib m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
-			  config-h.in configure ltmain.sh stamp-h.in \
+			  config-h.in configure stamp-h.in \
 			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 
 

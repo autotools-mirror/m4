@@ -213,7 +213,6 @@ AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 ## Outputs. ##
 ## -------- ##
 AC_CONFIG_FILES([Makefile
-		config/Makefile
 		doc/Makefile
 		examples/Makefile
 		gnulib/Makefile
