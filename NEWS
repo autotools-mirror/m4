@@ -1,7 +1,7 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
-Copyright 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
+Copyright 1992, 1993, 1994, 1998, 2000, 2001 Free Software Foundation, Inc.
 
-Version beta 1.4p - November 2000, by Gary V. Vaughan
+Version beta 1.4q - August 2001, by Gary V. Vaughan
 
 * `configure --without-modules' will build an m4 binary with no preloaded
   modules.  At startup it will search for and load modules `m4' and either

@@ -1,3 +1,13 @@
+2001-08-15  Akim Demaille  <akim@epita.fr>
+
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Be sure `m4/' exists
+	when creating `m4/obstack.h'.
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Pass top_srcdir and
+	top_builddir.
+	* tests/defs: Make them absolute.
+	(CDPATH) Neutralize.
+	* tests/gethem: Use them.
+
 2001-08-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/ltmain.sh: Doh!  Import again for a quoting fix that

@@ -18,11 +18,16 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-#serial 3
+#serial 4
 
-# FIXME: This is not portable I guess.  There is no reason for all
-# the CPP in the world to support #include_next.  So?  Copy the
-# actual content of obstack.h if CPP does not support 'include_next'?
+# FIXME: This might not be portable...  When obstack.h is found, we
+# want to use the system's obstack.h.  But we don't want to install
+# config.h, so we _need_ m4/obstack.h.  The current proposal is based
+# on `#include_next', which is certainly not portable, but chances are
+# very high that a system with a proper obstack implementation has a
+# good compiler.  It might be chimeric to try some more robust
+# solution.  One such solution would be to hard code the _path_ of the
+# native obstack.h into an `#include' in our obstack.h.
 
 AC_PREREQ(2.52)
 
@@ -43,6 +48,9 @@ m4_obstack_h=m4/obstack.h
 rm -f $m4_obstack_h
 if test $m4_cv_func_obstack = yes; then
   AC_DEFINE(HAVE_OBSTACK, 1, [Define if libc includes obstacks.])
+  # We are in the core of configure, when build directories do not
+  # exist yet, as they are created by config.status.
+  test -d m4 || mkdir m4
   cat >$m4_obstack_h <<EOF
 /* The native header works properly. */
 #include_next <obstack.h>
