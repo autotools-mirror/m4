@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-09-12 09:16+0100\n"
+"POT-Creation-Date: 2001-09-18 14:34+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -183,25 +183,25 @@ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αναδρομικό push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Κακή κλήση στο init_macro_token ()"
 
-#: m4/input.c:638
+#: m4/input.c:640
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο next_char ()"
 
-#: m4/input.c:672
+#: m4/input.c:674
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο peek_input ()"
 
-#: m4/input.c:762
+#: m4/input.c:764
 msgid "NONE"
 msgstr "ΚΑΝΕΝΑ"
 
-#: m4/input.c:970
+#: m4/input.c:972
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Μη ορισμένος κώδικας σύνταξης %c"
 
-#: m4/input.c:1097 m4/input.c:1124
+#: m4/input.c:1099 m4/input.c:1126
 msgid "ERROR: EOF in string"
 msgstr "ΣΦΑΛΜΑ: EOF στο αλφαριθμητικό"
 
@@ -213,15 +213,15 @@ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος είδος αντικειμένου στο expand_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "ΣΦΑΛΜΑ: EOF στη λίστα ορισμάτων"
 
-#: m4/macro.c:176
+#: m4/macro.c:177
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος είδος αντικειμένου στο expand_argument ()"
 
-#: m4/macro.c:248
+#: m4/macro.c:249
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος είδος συμβόλου στο call_macro ()"
 
-#: m4/macro.c:274
+#: m4/macro.c:275
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -364,18 +364,18 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: modules/m4.c:177 modules/m4.c:229 modules/m4.c:357 modules/m4.c:667
-#: modules/m4.c:687
+#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
+#: modules/m4.c:694
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/m4.c:487
+#: modules/m4.c:494
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Αδυναμία επαναφοράς του %s"
 
-#: modules/m4.c:559 src/freeze.c:385
+#: modules/m4.c:566 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-09-12 09:16+0100\n"
+"POT-Creation-Date: 2001-09-18 14:34+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -185,25 +185,25 @@ msgstr "内部エラー：再帰的に文字列を push しています。"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "内部エラー：関数 init_macro_token () が不正に呼ばれています。"
 
-#: m4/input.c:638
+#: m4/input.c:640
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "内部エラー：関数 next_char () 内でスタックの入力に失敗しています。"
 
-#: m4/input.c:672
+#: m4/input.c:674
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "内部エラー：関数 peek_input () 内でスタックの入力に失敗しています。"
 
-#: m4/input.c:762
+#: m4/input.c:764
 msgid "NONE"
 msgstr "なし"
 
-#: m4/input.c:970
+#: m4/input.c:972
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "`%s' は定義されていません。"
 
-#: m4/input.c:1097 m4/input.c:1124
+#: m4/input.c:1099 m4/input.c:1126
 msgid "ERROR: EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
@@ -215,15 +215,15 @@ msgstr "内部エラー：関数 expand_token () 内のトークンの種類が不正です。"
 msgid "ERROR: EOF in argument list"
 msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
 
-#: m4/macro.c:176
+#: m4/macro.c:177
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "内部エラー：関数 expand_argument () のトークンの種類が不正です。"
 
-#: m4/macro.c:248
+#: m4/macro.c:249
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "内部エラー：関数 call_macro () 内のシンボルの種類が不正です。"
 
-#: m4/macro.c:274
+#: m4/macro.c:275
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -366,18 +366,18 @@ msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:177 modules/m4.c:229 modules/m4.c:357 modules/m4.c:667
-#: modules/m4.c:687
+#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
+#: modules/m4.c:694
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/m4.c:487
+#: modules/m4.c:494
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:559 src/freeze.c:385
+#: modules/m4.c:566 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"

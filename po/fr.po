@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-09-12 09:16+0100\n"
+"POT-Creation-Date: 2001-09-18 14:34+0200\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -183,25 +183,25 @@ msgstr "ERREUR INTERNE: Utilisation récursive de push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ERREUR INTERNE: Mauvais appel à init_macro_token ()"
 
-#: m4/input.c:638
+#: m4/input.c:640
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans next_char ()"
 
-#: m4/input.c:672
+#: m4/input.c:674
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans peek_input ()"
 
-#: m4/input.c:762
+#: m4/input.c:764
 msgid "NONE"
 msgstr "AUCUN"
 
-#: m4/input.c:970
+#: m4/input.c:972
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Nom «%s» non-défini"
 
-#: m4/input.c:1097 m4/input.c:1124
+#: m4/input.c:1099 m4/input.c:1126
 msgid "ERROR: EOF in string"
 msgstr "ERREUR: Fin-de-fichier dans la chaîne"
 
@@ -213,15 +213,15 @@ msgstr "ERREUR: Débordement de pile.  (Récursion hors contrôle sur «define»?)"
 msgid "ERROR: EOF in argument list"
 msgstr "ERREUR: Fin-de-fichier dans la liste d'arguments"
 
-#: m4/macro.c:176
+#: m4/macro.c:177
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "ERREUR INTERNE: Mauvais type de données pour lexème dans expand_argument ()"
 
-#: m4/macro.c:248
+#: m4/macro.c:249
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ERREUR INTERNE: Mauvais type de symbole dans call_macro ()"
 
-#: m4/macro.c:274
+#: m4/macro.c:275
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "ERREUR: Limite de récursion %d dépassée, la changer par -L<N>"
@@ -360,18 +360,18 @@ msgstr "ATTENTION: \\\\0 disparaîtra, utiliser \\\\& plutôt pour les remplacemen
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:177 modules/m4.c:229 modules/m4.c:357 modules/m4.c:667
-#: modules/m4.c:687
+#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
+#: modules/m4.c:694
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Nom «%s» non-défini"
 
-#: modules/m4.c:487
+#: modules/m4.c:494
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Incapble de ramener la diversion %s"
 
-#: modules/m4.c:559 src/freeze.c:385
+#: modules/m4.c:566 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Incapable d'ouvrir %s"

@@ -1,3 +1,8 @@
+2001-09-18  Akim Demaille  <akim@epita.fr>
+
+	* tests/Makefile.am (package.m4): New.
+	* tests/testsuite.at: Adjust AT_INIT and AT_VICTIMS.
+
 2001-09-20  Gary V. Vaughan  <gary@gnu.org>
 
 	More cleanup.  After the last patch, m4_symbol holds nothing but

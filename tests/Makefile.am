@@ -47,10 +47,24 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.
 AUTOM4TE = autom4te
-$(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
+$(srcdir)/$(TESTSUITE): package.m4 $(TESTSUITE_AT)
 	$(AUTOM4TE) --language=autotest -I $(srcdir) testsuite.at -o $@.tmp
 	mv $@.tmp $@
 
 # Run the test suite on the *installed* tree.
 installcheck-local:
 	$(SHELL) $(srcdir)/$(TESTSUITE) AUTOTEST_PATH=$(exec_prefix)/bin
+
+## ------------ ##
+## package.m4.  ##
+## ------------ ##
+
+package.m4: $(top_srcdir)/configure.in
+	{					\
+	  echo '# Signature of the current package.'; \
+	  echo 'm4_define([PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
+	  echo 'm4_define([PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \
+	  echo 'm4_define([PACKAGE_VERSION],   [@PACKAGE_VERSION@])'; \
+	  echo 'm4_define([PACKAGE_STRING],    [@PACKAGE_STRING@])'; \
+	  echo 'm4_define([PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	} >package.m4

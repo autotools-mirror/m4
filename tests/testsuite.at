@@ -45,13 +45,14 @@ AT_CLEANUP
 # We use `dnl' in zillions of places...
 m4_pattern_allow([^dnl$])
 
-
+# We exercise m4.
+AT_VICTIMS([m4])
 
 ## ----------- ##
 ## The suite.  ##
 ## ----------- ##
 
-AT_INIT([m4])
+AT_INIT([GNU M4], [bug-m4@gnu.org])
 
 # Torturing builtins.
 m4_include([builtins.at])

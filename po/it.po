@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-09-12 09:16+0100\n"
+"POT-Creation-Date: 2001-09-18 14:34+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -180,25 +180,25 @@ msgstr "ERRORE INTERNO: Utilizzo ricorsivo di push_string!"
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
 
-#: m4/input.c:638
+#: m4/input.c:640
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ERRORE INTERNO: Stack di ingresso corrotto in next_char ()"
 
-#: m4/input.c:672
+#: m4/input.c:674
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ERRORE INTERNO: Stack di ingresso corrotto in peek_input ()"
 
-#: m4/input.c:762
+#: m4/input.c:764
 msgid "NONE"
 msgstr "NESSUNO"
 
-#: m4/input.c:970
+#: m4/input.c:972
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Nome `%s' non definito"
 
-#: m4/input.c:1097 m4/input.c:1124
+#: m4/input.c:1099 m4/input.c:1126
 msgid "ERROR: EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
 
@@ -210,15 +210,15 @@ msgstr "ERRORE INTERNO: Tipo `token' errato in expand_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "ERRORE: Fine prematura della lista di argomenti"
 
-#: m4/macro.c:176
+#: m4/macro.c:177
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr ""
 
-#: m4/macro.c:248
+#: m4/macro.c:249
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ERRORE INTERNO: Tipo simbolo errato in call_macro ()"
 
-#: m4/macro.c:274
+#: m4/macro.c:275
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -357,18 +357,18 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:177 modules/m4.c:229 modules/m4.c:357 modules/m4.c:667
-#: modules/m4.c:687
+#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
+#: modules/m4.c:694
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/m4.c:487
+#: modules/m4.c:494
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
 
-#: modules/m4.c:559 src/freeze.c:385
+#: modules/m4.c:566 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
