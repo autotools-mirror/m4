@@ -80,12 +80,11 @@ M4_GLOBAL_DATA m4_string bcomm;
 M4_GLOBAL_DATA m4_string ecomm;
 
 
-/*------------------------------------------------------------------------.
-| Addressable function versions of the macros defined in m4private.h.     |
-| Since they are functions the caller does not need access to the         |
-| internal data structure, so they are safe to export for use in          |
-| external modules.                                                       |
-`------------------------------------------------------------------------*/
+
+/* Addressable function versions of the macros defined in m4private.h.
+   Since they are functions the caller does not need access to the
+   internal data structure, so they are safe to export for use in
+   external modules.  */
 m4_token_data_t
 m4_token_data_type (m4_token_data *name)
 {
@@ -121,14 +120,12 @@ m4_token_data_func_traced (m4_token_data *name)
 }
 
 
-/*------------------------------------------------------------------------.
-| Give friendly warnings if a builtin macro is passed an inappropriate	  |
-| number of arguments.  NAME is macro name for messages, ARGC is actual	  |
-| number of arguments, MIN is the minimum number of acceptable arguments, |
-| negative if not applicable, MAX is the maximum number, negative if not  |
-| applicable.								  |
-`------------------------------------------------------------------------*/
 
+/* Give friendly warnings if a builtin macro is passed an inappropriate
+   number of arguments.  NAME is macro name for messages, ARGC is actual
+   number of arguments, MIN is the minimum number of acceptable arguments,
+   negative if not applicable, MAX is the maximum number, negative if not
+   applicable.  */
 boolean
 m4_bad_argc (m4_token_data *name, int argc, int min, int max)
 {
@@ -158,11 +155,9 @@ m4_skip_space (const char *arg)
   return arg;
 }
 
-/*--------------------------------------------------------------------------.
-| The function m4_numeric_arg () converts ARG to an int pointed to by       |
-| VALUEP. If the conversion fails, print error message for macro MACRO.     |
-| Return TRUE iff conversion succeeds.					    |
-`--------------------------------------------------------------------------*/
+/* The function m4_numeric_arg () converts ARG to an int pointed to by
+   VALUEP. If the conversion fails, print error message for macro MACRO.
+   Return TRUE iff conversion succeeds.  */
 boolean
 m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 {
@@ -180,11 +175,8 @@ m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 }
 
 
-/*----------------------------------------------------------------------.
-| Print ARGC arguments from the table ARGV to obstack OBS, separated by |
-| SEP, and quoted by the current quotes, if QUOTED is TRUE.	        |
-`----------------------------------------------------------------------*/
-
+/* Print ARGC arguments from the table ARGV to obstack OBS, separated by
+   SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
 m4_dump_args (obs, argc, argv, sep, quoted)
      struct obstack *obs;
@@ -205,16 +197,13 @@ m4_dump_args (obs, argc, argv, sep, quoted)
     }
 }
 
-/*------------------------------------------------------------------------.
-| For "translit", ranges are allowed in the second and third argument.	  |
-| They are expanded in the following function, and the expanded strings,  |
-| without any ranges left, are used to translate the characters of the	  |
-| first argument.  A single - (dash) can be included in the strings by	  |
-| being the first or the last character in the string.  If the first	  |
-| character in a range is after the first in the character set, the range |
-| is made backwards, thus 9-0 is the string 9876543210.			  |
-`------------------------------------------------------------------------*/
-
+/* For "translit", ranges are allowed in the second and third argument.
+   They are expanded in the following function, and the expanded strings,
+   without any ranges left, are used to translate the characters of the
+   first argument.  A single - (dash) can be included in the strings by
+   being the first or the last character in the string.  If the first
+   character in a range is after the first in the character set, the range
+   is made backwards, thus 9-0 is the string 9876543210.  */
 const char *
 m4_expand_ranges (const char *s, struct obstack *obs)
 {
@@ -250,10 +239,7 @@ m4_expand_ranges (const char *s, struct obstack *obs)
   return obstack_finish (obs);
 }
 
-/*------------------------------------------------------------------------.
-| qsort comparison routine, for sorting the table made in m4_dumpdef ().  |
-`------------------------------------------------------------------------*/
-
+/* qsort comparison routine, for sorting the table made in m4_dumpdef ().  */
 static int
 dumpdef_cmp (s1, s2)
      const VOID *s1;
@@ -263,11 +249,8 @@ dumpdef_cmp (s1, s2)
 		 SYMBOL_NAME (* (m4_symbol *const *) s2));
 }
 
-/*---------------------------------------------------------------------.
-| The function dump_symbol () is for use by "dumpdef".  It builds up a |
-| table of all defined, un-shadowed, symbols.			       |
-`---------------------------------------------------------------------*/
-
+/* The function dump_symbol () is for use by "dumpdef".  It builds up a
+   table of all defined, un-shadowed, symbols.  */
 void
 m4_dump_symbol (symbol, data)
      m4_symbol *symbol;
@@ -281,11 +264,8 @@ m4_dump_symbol (symbol, data)
     }
 }
 
-/*------------------------------------------------------------------------.
-| If there are no arguments, build a sorted list of all defined,          |
-| un-shadowed, symbols, otherwise, only the specified symbols.            |
-`------------------------------------------------------------------------*/
-
+/* If there are no arguments, build a sorted list of all defined,
+   un-shadowed, symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (data, argc, argv, complain)
      struct m4_dump_symbol_data *data;
@@ -319,4 +299,3 @@ m4_dump_symbols (data, argc, argv, complain)
   obstack_finish (data->obs);
   qsort ((char *) data->base, data->size, sizeof (m4_symbol *), dumpdef_cmp);
 }
-

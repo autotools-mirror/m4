@@ -52,11 +52,8 @@ typedef struct macro_definition
 
 /* Error handling functions.  */
 
-/*----------------------------------------------------------------------.
-| Print program name, source file and line reference on standard        |
-| error, as a prefix for error messages.  Flush standard output first.  |
-`----------------------------------------------------------------------*/
-
+/* Print program name, source file and line reference on standard
+   error, as a prefix for error messages.  Flush standard output first.  */
 void
 print_program_name (void)
 {
@@ -69,10 +66,7 @@ print_program_name (void)
 
 #ifdef USE_STACKOVF
 
-/*---------------------------------------.
-| Tell user stack overflowed and abort.	 |
-`---------------------------------------*/
-
+/* Tell user stack overflowed and abort.  */
 static void
 stackovf_handler (void)
 {
@@ -84,10 +78,7 @@ stackovf_handler (void)
 
 
 
-/*---------------------------------------------.
-| Print a usage message and exit with STATUS.  |
-`---------------------------------------------*/
-
+/* Print a usage message and exit with STATUS.  */
 static void
 usage (int status)
 {
@@ -176,10 +167,7 @@ If no FILE or if FILE is `-', standard input is read.\n"),
   exit (status);
 }
 
-/*--------------------------------------.
-| Decode options and launch execution.  |
-`--------------------------------------*/
-
+/* Decode options and launch execution.  */
 static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},

@@ -97,9 +97,10 @@ static int output_unused;	/* current value of (size - used) */
 /* Number of input line we are generating output for.  */
 M4_GLOBAL_DATA int m4_output_current_line;
 
-/*------------------------.
-| Output initialisation.  |
-`------------------------*/
+
+
+
+/* --- OUTPUT INITIALISATION --- */
 
 void
 m4_output_init ()
@@ -230,15 +231,12 @@ tmpfile ()
 
 #endif /* not HAVE_TMPFILE */
 
-/*-----------------------------------------------------------------------.
-| Reorganize in-memory diversion buffers so the current diversion can	 |
-| accomodate LENGTH more characters without further reorganization.  The |
-| current diversion buffer is made bigger if possible.  But to make room |
-| for a bigger buffer, one of the in-memory diversion buffers might have |
-| to be flushed to a newly created temporary file.  This flushed buffer	 |
-| might well be the current one.					 |
-`-----------------------------------------------------------------------*/
-
+/* Reorganize in-memory diversion buffers so the current diversion can
+   accomodate LENGTH more characters without further reorganization.  The
+   current diversion buffer is made bigger if possible.  But to make room
+   for a bigger buffer, one of the in-memory diversion buffers might have
+   to be flushed to a newly created temporary file.  This flushed buffer
+   might well be the current one.  */
 static void
 make_room_for (length)
      int length;
@@ -339,11 +337,8 @@ make_room_for (length)
     }
 }
 
-/*------------------------------------------------------------------------.
-| Output one character CHAR, when it is known that it goes to a diversion |
-| file or an in-memory diversion buffer.				  |
-`------------------------------------------------------------------------*/
-
+/* Output one character CHAR, when it is known that it goes to a diversion
+   file or an in-memory diversion buffer.  */
 #define OUTPUT_CHARACTER(Char) \
   if (output_file)							\
     putc ((Char), output_file);						\
@@ -367,11 +362,8 @@ output_character_helper (character)
     }
 }
 
-/*------------------------------------------------------------------------.
-| Output one TEXT having LENGTH characters, when it is known that it goes |
-| to a diversion file or an in-memory diversion buffer.			  |
-`------------------------------------------------------------------------*/
-
+/* Output one TEXT having LENGTH characters, when it is known that it goes
+   to a diversion file or an in-memory diversion buffer.  */
 static void
 output_text (text, length)
      const char *text;
@@ -396,18 +388,15 @@ output_text (text, length)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Add some text into an obstack OBS, taken from TEXT, having LENGTH	   |
-| characters.  If OBS is NULL, rather output the text to an external file  |
-| or an in-memory diversion buffer.  If OBS is NULL, and there is no	   |
-| output file, the text is discarded.					   |
-| 									   |
-| If we are generating sync lines, the output have to be examined, because |
-| we need to know how much output each input line generates.  In general,  |
-| sync lines are output whenever a single input lines generates several	   |
-| output lines, or when several input lines does not generate any output.  |
-`-------------------------------------------------------------------------*/
+/* Add some text into an obstack OBS, taken from TEXT, having LENGTH
+   characters.  If OBS is NULL, rather output the text to an external file
+   or an in-memory diversion buffer.  If OBS is NULL, and there is no
+   output file, the text is discarded.
 
+   If we are generating sync lines, the output have to be examined, because
+   we need to know how much output each input line generates.  In general,
+   sync lines are output whenever a single input lines generates several
+   output lines, or when several input lines does not generate any output.  */
 void
 m4_shipout_text (obs, text, length)
      struct obstack *obs;
@@ -494,11 +483,8 @@ m4_shipout_text (obs, text, length)
 	  start_of_output_line = TRUE;
       }
 }
-/*----------------------------------------------------------------------.
-| Format an int VAL, and stuff it into an obstack OBS.  Used for macros |
-| expanding to numbers.						        |
-`----------------------------------------------------------------------*/
-
+/* Format an int VAL, and stuff it into an obstack OBS.  Used for macros
+   expanding to numbers.  */
 void
 m4_shipout_int (struct obstack *obs, int val)
 {
@@ -524,13 +510,12 @@ m4_shipout_string (struct obstack *obs, const char *s, int len, boolean quoted)
     obstack_grow (obs, rquote.string, rquote.length);
 }
 
-
-/* Functions for use by diversions.  */
 
-/*--------------------------------------------------------------------------.
-| Make a file for diversion DIVNUM, and install it in the diversion table.  |
-| Grow the size of the diversion table as needed.			    |
-`--------------------------------------------------------------------------*/
+
+/* --- FUNCTIONS FOR USE BY DIVERSIONS --- */
+
+/* Make a file for diversion DIVNUM, and install it in the diversion table.
+   Grow the size of the diversion table as needed.  */
 
 /* The number of possible diversions is limited only by memory and
    available file descriptors (each overflowing diversion uses one).  */
@@ -579,12 +564,9 @@ m4_make_diversion (divnum)
   m4_output_current_line = -1;
 }
 
-/*-------------------------------------------------------------------.
-| Insert a FILE into the current output file, in the same manner     |
-| diversions are handled.  This allows files to be included, without |
-| having them rescanned by m4.					     |
-`-------------------------------------------------------------------*/
-
+/* Insert a FILE into the current output file, in the same manner
+   diversions are handled.  This allows files to be included, without
+   having them rescanned by m4.  */
 void
 m4_insert_file (file)
      FILE *file;
@@ -607,12 +589,9 @@ m4_insert_file (file)
       output_text (buffer, length);
 }
 
-/*-------------------------------------------------------------------------.
-| Insert diversion number DIVNUM into the current output file.  The	   |
-| diversion is NOT placed on the expansion obstack, because it must not be |
-| rescanned.  When the file is closed, it is deleted by the system.	   |
-`-------------------------------------------------------------------------*/
-
+/* Insert diversion number DIVNUM into the current output file.  The
+   diversion is NOT placed on the expansion obstack, because it must not
+   be rescanned.  When the file is closed, it is deleted by the system.  */
 void
 m4_insert_diversion (divnum)
      int divnum;
@@ -661,11 +640,8 @@ m4_insert_diversion (divnum)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Get back all diversions.  This is done just before exiting from main (), |
-| and from m4_undivert (), if called without arguments.			   |
-`-------------------------------------------------------------------------*/
-
+/* Get back all diversions.  This is done just before exiting from main (),
+   and from m4_undivert (), if called without arguments.  */
 void
 m4_undivert_all ()
 {
@@ -675,10 +651,7 @@ m4_undivert_all ()
     m4_insert_diversion (divnum);
 }
 
-/*-------------------------------------------------------------.
-| Produce all diversion information in frozen format on FILE.  |
-`-------------------------------------------------------------*/
-
+/* Produce all diversion information in frozen format on FILE.  */
 void
 m4_freeze_diversions (file)
      FILE *file;

@@ -37,10 +37,7 @@ static	void  produce_symbol_dump  M4_PARAMS((FILE *file,
 					      const m4_symbol *bucke));
 
 
-/*------------------------------------------------.
-| Produce a frozen state to the given file NAME.  |
-`------------------------------------------------*/
-
+/* Produce a frozen state to the given file NAME. */
 static int
 produce_char_dump (buf, ch)
      char *buf;
@@ -286,10 +283,7 @@ produce_frozen_state (name)
   fclose (file);
 }
 
-/*----------------------------------------------------------------------.
-| Issue a message saying that some character is an EXPECTED character.  |
-`----------------------------------------------------------------------*/
-
+/* Issue a message saying that some character is an EXPECTED character. */
 static void
 issue_expect_message (expected)
      int expected;
@@ -301,9 +295,7 @@ issue_expect_message (expected)
 	      expected));
 }
 
-/*-------------------------------------------------.
-| Reload a frozen state from the given file NAME.  |
-`-------------------------------------------------*/
+/* Reload a frozen state from the given file NAME. */
 
 /* Read the next character from the IN stream.  Octal characters of the
    form ``\nnn'' are converted, and returned.  EOF is returned if the end

@@ -274,18 +274,15 @@ static struct re_registers regs;
 
 
 
-/*---------------------------------------------------------------------.
-| push_file () pushes an input file on the input stack, saving the     |
-| current file name and line number.  If next is non-NULL, this push   |
-| invalidates a call to push_string_init (), whose storage are	       |
-| consequentely released.					       |
-| 								       |
-| file_read () manages line numbers for error messages, so they do not |
-| get wrong, due to lookahead.  The token consisting of a newline      |
-| alone is taken as belonging to the line it ends, and the current     |
-| line number is not incremented until the next character is read.     |
-`---------------------------------------------------------------------*/
+/* push_file () pushes an input file on the input stack, saving the
+  current file name and line number.  If next is non-NULL, this push
+  invalidates a call to push_string_init (), whose storage are
+  consequentely released.
 
+  file_read () manages line numbers for error messages, so they do not
+  get wrong, due to lookahead.  The token consisting of a newline
+  alone is taken as belonging to the line it ends, and the current
+  line number is not incremented until the next character is read.  */
 static int
 file_peek ()
 {
@@ -382,12 +379,9 @@ m4_push_file (fp, title)
   isp = i;
 }
 
-/*-------------------------------------------------------------------------.
-| push_macro () pushes a builtin macros definition on the input stack.  If |
-| next is non-NULL, this push invalidates a call to push_string_init (),   |
-| whose storage are consequentely released.				   |
-`-------------------------------------------------------------------------*/
-
+/* push_macro () pushes a builtin macros definition on the input stack.  If
+   next is non-NULL, this push invalidates a call to push_string_init (),
+   whose storage are consequentely released.  */
 static int
 macro_peek ()
 {
@@ -438,10 +432,7 @@ m4_push_macro (func, handle, traced)
   isp = i;
 }
 
-/*------------------------------------------------.
-| * Push a single character on to the input stack |
-`------------------------------------------------*/
-
+/* Push a single character on to the input stack.  */
 static int
 single_peek ()
 {
@@ -486,11 +477,8 @@ m4_push_single (ch)
   isp = i;
 }
 
-/*------------------------------------------------------------------.
-| First half of push_string ().  The pointer next points to the new |
-| input_block.							    |
-`------------------------------------------------------------------*/
-
+/* First half of push_string ().  The pointer next points to the new
+   input_block.  */
 static int
 string_peek ()
 {
@@ -539,14 +527,12 @@ m4_push_string_init ()
   return current_input;
 }
 
-/*------------------------------------------------------------------------.
-| Last half of push_string ().  If next is now NULL, a call to push_file  |
-| () has invalidated the previous call to push_string_init (), so we just |
-| give up.  If the new object is void, we do not push it.  The function	  |
-| push_string_finish () returns a pointer to the finished object.  This	  |
-| pointer is only for temporary use, since reading the next token might	  |
-| release the memory used for the object.				  |
-`------------------------------------------------------------------------*/
+/* Last half of push_string ().  If next is now NULL, a call to push_file
+   () has invalidated the previous call to push_string_init (), so we just
+   give up.  If the new object is void, we do not push it.  The function
+   push_string_finish () returns a pointer to the finished object.  This
+   pointer is only for temporary use, since reading the next token might
+   release the memory used for the object.  */
 
 const char *
 m4_push_string_finish ()
@@ -571,14 +557,11 @@ m4_push_string_finish ()
   return ret;
 }
 
-/*--------------------------------------------------------------------------.
-| The function push_wrapup () pushes a string on the wrapup stack.  When    |
-| he normal input stack gets empty, the wrapup stack will become the input  |
-| stack, and push_string () and push_file () will operate on wrapup_stack.  |
-| Push_wrapup should be done as push_string (), but this will suffice, as   |
-| long as arguments to m4_m4wrap () are moderate in size.		    |
-`--------------------------------------------------------------------------*/
-
+/* The function push_wrapup () pushes a string on the wrapup stack.  When
+   the normal input stack gets empty, the wrapup stack will become the input
+   stack, and push_string () and push_file () will operate on wrapup_stack.
+   Push_wrapup should be done as push_string (), but this will suffice, as
+   long as arguments to m4_m4wrap () are moderate in size.  */
 void
 m4_push_wrapup (s)
      const char *s;
@@ -596,13 +579,10 @@ m4_push_wrapup (s)
 }
 
 
-/*-------------------------------------------------------------------------.
-| The function pop_input () pops one level of input sources.  If the	   |
-| popped input_block is a file, m4_current_file and m4_current_line are    |
-| reset to the saved values before the memory for the input_block are	   |
-| released.								   |
-`-------------------------------------------------------------------------*/
-
+/* The function pop_input () pops one level of input sources.  If the
+   popped input_block is a file, m4_current_file and m4_current_line are
+   reset to the saved values before the memory for the input_block are
+   released.  */
 static void
 pop_input ()
 {
@@ -617,12 +597,9 @@ pop_input ()
   isp = tmp;
 }
 
-/*------------------------------------------------------------------------.
-| To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
-| Since wrapup text can install new wrapup text, pop_wrapup () returns	  |
-| FALSE when there is no wrapup text on the stack, and TRUE otherwise.	  |
-`------------------------------------------------------------------------*/
-
+/* To switch input over to the wrapup stack, main () calls pop_wrapup
+   Since wrapup text can install new wrapup text, pop_wrapup () returns
+   FALSE when there is no wrapup text on the stack, and TRUE otherwise.  */
 boolean
 m4_pop_wrapup (void)
 {
@@ -636,11 +613,8 @@ m4_pop_wrapup (void)
   return TRUE;
 }
 
-/*-------------------------------------------------------------------.
-| When a MACRO token is seen, next_token () uses init_macro_token () |
-| to retrieve the value of the function pointer.		     |
-`-------------------------------------------------------------------*/
-
+/* When a MACRO token is seen, next_token () uses init_macro_token
+   to retrieve the value of the function pointer.  */
 static void
 init_macro_token (td)
      m4_token_data *td;
@@ -659,12 +633,9 @@ init_macro_token (td)
 }
 
 
-/*---------------------------------------------------------------.
-| Low level input is done a character at a time.  The function	 |
-| next_char () is used to read and advance the input to the next |
-| character.							 |
-`---------------------------------------------------------------*/
-
+/* Low level input is done a character at a time.  The function
+   next_char () is used to read and advance the input to the next
+   character.  */
 static int
 next_char ()
 {
@@ -697,12 +668,9 @@ next_char ()
     }
 }
 
-/*--------------------------------------------------------------------.
-| The function peek_input () is used to look at the next character in |
-| the input stream.  At any given time, it reads from the input_block |
-| on the top of the current input stack.			      |
-`--------------------------------------------------------------------*/
-
+/* The function peek_input () is used to look at the next character in
+   the input stream.  At any given time, it reads from the input_block
+   on the top of the current input stack.  */
 int
 m4_peek_input ()
 {
@@ -734,11 +702,8 @@ m4_peek_input ()
     }
 }
 
-/*---------------------------------------------------------------.
-| The function unget_input () puts back a character on the input |
-| stack, using an existing input_block if possible		 |
-`---------------------------------------------------------------*/
-
+/* The function unget_input () puts back a character on the input
+   stack, using an existing input_block if possible.  */
 static void
 unget_input (ch)
      int ch;
@@ -749,11 +714,8 @@ unget_input (ch)
     m4_push_single(ch);
 }
 
-/*------------------------------------------------------------------------.
-| skip_line () simply discards all immediately following characters, upto |
-| the first newline.  It is only used from m4_dnl ().			  |
-`------------------------------------------------------------------------*/
-
+/* skip_line () simply discards all immediately following characters, upto
+   the first newline.  It is only used from m4_dnl ().  */
 void
 m4_skip_line ()
 {
@@ -764,17 +726,15 @@ m4_skip_line ()
 }
 
 
-/*---------------------------------------------------------------------.
-|   This function is for matching a string against a prefix of the     |
-| input stream.  If the string matches the input, the input is	       |
-| discarded, otherwise the characters read are pushed back again.  The |
-| function is used only when multicharacter quotes or comment	       |
-| delimiters are used.						       |
-| 								       |
-|   All strings herein should be unsigned.  Otherwise sign-extension   |
-| of individual chars might break quotes with 8-bit chars in it.       |
-`---------------------------------------------------------------------*/
 
+/* This function is for matching a string against a prefix of the
+   input stream.  If the string matches the input, the input is
+   discarded, otherwise the characters read are pushed back again.
+   The function is used only when multicharacter quotes or comment
+   delimiters are used.
+
+   All strings herein should be unsigned.  Otherwise sign-extension
+   of individual chars might break quotes with 8-bit chars in it.  */
 static int
 match_input (s)
      const unsigned char *s;
@@ -806,13 +766,10 @@ match_input (s)
   return 0;
 }
 
-/*------------------------------------------------------------------------.
-| The macro MATCH() is used to match a string against the input.  The	  |
-| first character is handled inline, for speed.  Hopefully, this will not |
-| hurt efficiency too much when single character quotes and comment	  |
-| delimiters are used.							  |
-`------------------------------------------------------------------------*/
-
+/* The macro MATCH() is used to match a string against the input.  The
+  first character is handled inline, for speed.  Hopefully, this will not
+  hurt efficiency too much when single character quotes and comment
+  delimiters are used.  */
 #define MATCH(ch, s) \
   ((s)[0] == (ch) \
    && (ch) != '\0' \
@@ -820,10 +777,8 @@ match_input (s)
        || (match_input ((s) + 1) ? (ch) = m4_peek_input (), 1 : 0)))
 
 
-/*----------------------------------------------------------.
-| Inititialise input stacks, and quote/comment characters.  |
-`----------------------------------------------------------*/
 
+/* Inititialise input stacks, and quote/comment characters.  */
 static void set_syntax_internal M4_PARAMS((int code, int ch));
 static void unset_syntax_attribute M4_PARAMS((int code, int ch));
 
@@ -947,12 +902,10 @@ check_use_macro_escape ()
 }
 
 
-/*---------------------------------------------------------------------.
-| Functions for setting quotes and comment delimiters.  Used by	       |
-| m4_changecom () and m4_changequote ().  Both functions overrides the |
-| syntax_table to maintain compatibility.			       |
-`---------------------------------------------------------------------*/
 
+/* Functions for setting quotes and comment delimiters.  Used by
+   m4_changecom () and m4_changequote ().  Both functions overrides the
+   syntax_table to maintain compatibility.  */
 void
 m4_set_quotes (lq, rq)
      const char *lq;
@@ -1013,10 +966,7 @@ m4_set_comment (bc, ec)
     check_use_macro_escape();
 }
 
-/*-------------------------------------------.
-| Functions to manipulate the syntax table.  |
-`-------------------------------------------*/
-
+/* Functions to manipulate the syntax table.  */
 static void
 set_syntax_internal (code, ch)
      int code;
@@ -1122,20 +1072,17 @@ m4_set_word_regexp (regexp)
 #endif /* ENABLE_CHANGEWORD */
 
 
-/*-------------------------------------------------------------------------.
-| Parse and return a single token from the input stream.  A token can	   |
-| either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_STRING |
-| for a quoted string; TOKEN_WORD for something that is a potential macro  |
-| name; and TOKEN_SIMPLE for any single character that is not a part of	   |
-| any of the previous types.						   |
-| 									   |
-| Next_token () return the token type, and passes back a pointer to the	   |
-| token data through TD.  The token text is collected on the obstack	   |
-| token_stack, which never contains more than one token text at a time.	   |
-| The storage pointed to by the fields in TD is therefore subject to	   |
-| change the next time next_token () is called.				   |
-`-------------------------------------------------------------------------*/
+/* Parse and return a single token from the input stream.  A token can
+   either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_STRING
+   for a quoted string; TOKEN_WORD for something that is a potential macro
+   name; and TOKEN_SIMPLE for any single character that is not a part of
+   any of the previous types.
 
+   Next_token () return the token type, and passes back a pointer to the
+   token data through TD.  The token text is collected on the obstack
+   token_stack, which never contains more than one token text at a time.
+   The storage pointed to by the fields in TD is therefore subject to
+   change the next time next_token () is called.	 */
 m4_token_t
 m4_next_token (td)
      m4_token_data *td;

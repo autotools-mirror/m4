@@ -54,6 +54,9 @@ m4_macro m4_macro_table[] =
 
 
 
+/**
+ * modtest()
+ **/
 M4INIT_HANDLER (modtest)
 {
   char *s = "Test module loaded.";
@@ -63,12 +66,13 @@ M4INIT_HANDLER (modtest)
 }
 
 
-
-/*-------.
-| test() |
-`-------*/
+/**
+ * test()
+ **/
 M4BUILTIN_HANDLER (test)
 {
   char *s = "Test module called.";
+
+  if (obs != 0)
   obstack_grow (obs, s, strlen(s));
 }

@@ -92,9 +92,9 @@ static eval_error unary_term M4_PARAMS((eval_token, number *));
 static eval_error simple_term M4_PARAMS((eval_token, number *));
 static void numb_pow M4_PARAMS((number *x, const number *y));
 
-/*--------------------.
-| Lexical functions.  |
-`--------------------*/
+
+
+/* --- LEXICAL FUNCTIONS --- */
 
 /* Pointer to next character of input text.  */
 static const unsigned char *eval_text;
@@ -288,10 +288,7 @@ eval_lex (number *val)
     }
 }
 
-/*---------------------------------------.
-| Main entry point, called from "eval".	 |
-`---------------------------------------*/
-
+/* Main entry point, called from "eval".  */
 boolean
 m4_evaluate (struct obstack *obs, const char *expr, const int radix, int min)
 {
@@ -358,10 +355,7 @@ m4_evaluate (struct obstack *obs, const char *expr, const int radix, int min)
   return (boolean) (err != NO_ERROR);
 }
 
-/*---------------------------.
-| Recursive descent parser.  |
-`---------------------------*/
-
+/* Recursive descent parser.  */
 static eval_error
 logical_or_term (eval_token et, number *v1)
 {

@@ -32,10 +32,8 @@
 
 #include "m4private.h"
 
-/*----------------------------------------------------------------------.
-| Initialise the symbol table, by allocating the necessary storage, and |
-| zeroing all the entries.					        |
-`----------------------------------------------------------------------*/
+/* Initialise the symbol table, by allocating the necessary storage, and
+   zeroing all the entries.  */
 
 /* Pointer to symbol table.  */
 m4_symbol **m4_symtab;
@@ -52,10 +50,7 @@ m4_symtab_init ()
     *symbol++ = NULL;
 }
 
-/*--------------------------------------------------.
-| Return a hashvalue for a string, from GNU-emacs.  |
-`--------------------------------------------------*/
-
+/* Return a hashvalue for a string, from GNU-emacs.  */
 static int
 hash (const char *s)
 {
@@ -74,10 +69,7 @@ hash (const char *s)
   return val % hash_table_size;
 }
 
-/*--------------------------------------------.
-| Free all storage associated with a symbol.  |
-`--------------------------------------------*/
-
+/* Free all storage associated with a symbol.  */
 static void
 free_symbol (m4_symbol *symbol)
 {
@@ -88,19 +80,16 @@ free_symbol (m4_symbol *symbol)
   xfree ((VOID *) symbol);
 }
 
-/*------------------------------------------------------------------------.
-| Search in, and manipulation of the symbol table, are all done by	  |
-| m4_lookup_symbol ().  It basically hashes NAME to a list in the symbol  |
-| table, and searched this list for the first occurence of a symbol with  |
-| the name.								  |
-| 									  |
-| The MODE parameter determines what m4_lookup_symbol () will do.  It can |
-| either just do a lookup, do a lookup and insert if not present, do an	  |
-| insertion even if the name is already in the list, delete the first	  |
-| occurrence of the name on the list or delete all occurences of the name |
-| on the list.								  |
-`------------------------------------------------------------------------*/
+/* Search in, and manipulation of the symbol table, are all done by
+   m4_lookup_symbol ().  It basically hashes NAME to a list in the symbol
+   table, and searched this list for the first occurence of a symbol with
+   the name.
 
+   The MODE parameter determines what m4_lookup_symbol () will do.  It can
+   either just do a lookup, do a lookup and insert if not present, do an
+   insertion even if the name is already in the list, delete the first
+   occurrence of the name on the list or delete all occurences of the name
+   on the list.  */
 m4_symbol *
 m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 {
@@ -197,18 +186,15 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
   return NULL;
 }
 
-/*--------------------------------------------------------------------.
- | The following function removes from the symbol table, every symbol |
- | that references a function in the given builtin table.             |
- `-------------------------------------------------------------------*/
-
-/* FIXME:  This can be reimplemented to work much faster now that each
-   symtab entry carries a reference to its defining module.  */
+/* The following function removes from the symbol table, every symbol
+   that references a function in the given builtin table.  */
 void
 m4_remove_table_reference_symbols (builtins, macros)
      m4_builtin *builtins;
      m4_macro *macros;
 {
+  /* FIXME:  This can be reimplemented to work much faster now that each
+     symtab entry carries a reference to its defining module.  */
   m4_symbol *symbol;
   int h;
 
@@ -284,14 +270,11 @@ m4_remove_table_reference_symbols (builtins, macros)
     }
 }
 
-/*----------------------------------------------------------------------.
-| The following function is used for the cases, where we want to do     |
-| something to each and every symbol in the table.  The function        |
-| hack_all_symbols () traverses the symbol table, and calls a specified |
-| function FUNC for each symbol in the table.  FUNC is called with a    |
-| pointer to the symbol, and the DATA argument.			        |
-`----------------------------------------------------------------------*/
-
+/* The following function is used for the cases, where we want to do
+   something to each and every symbol in the table.  The function
+   hack_all_symbols () traverses the symbol table, and calls a specified
+   function FUNC for each symbol in the table.  FUNC is called with a
+   pointer to the symbol, and the DATA argument.  */
 void
 m4_hack_all_symbols (func, data)
      m4_hack_symbol *func;

@@ -126,12 +126,10 @@ M4INIT_HANDLER (m4)
    individual arguments to the macro.  Please note that in general
    argv[argc] != NULL.  */
 
-/*-------------------------------------------------------------------------.
-| The function macro_install is common for the builtins "define",	   |
-| "undefine", "pushdef" and "popdef".  ARGC and ARGV is as for the caller, |
-| and MODE argument determines how the macro name is entered into the	   |
-| symbol table.								   |
-`-------------------------------------------------------------------------*/
+/* The function macro_install is common for the builtins "define",
+   "undefine", "pushdef" and "popdef".  ARGC and ARGV is as for the caller,
+   and MODE argument determines how the macro name is entered into the
+   symbol table.  */
 
 static void
 macro_install (argc, argv, mode)
@@ -207,9 +205,8 @@ M4BUILTIN_HANDLER (popdef)
 }
 
 
-/*---------------------.
-| Conditionals of m4.  |
-`---------------------*/
+
+/* --- CONDITIONALS OF M4 --- */
 
 M4BUILTIN_HANDLER (ifdef)
 {
@@ -272,12 +269,9 @@ M4BUILTIN_HANDLER (ifelse)
   obstack_grow (obs, result, strlen (result));
 }
 
-
-/*-------------------------------------------------------------------------.
-| Implementation of "dumpdef" itself.  It builds up a table of pointers to |
-| symbols, sorts it and prints the sorted table.			   |
-`-------------------------------------------------------------------------*/
 
+/* Implementation of "dumpdef" itself.  It builds up a table of pointers to
+   symbols, sorts it and prints the sorted table.  */
 M4BUILTIN_HANDLER (dumpdef)
 {
   struct m4_dump_symbol_data data;
@@ -320,12 +314,9 @@ INTERNAL ERROR: Bad token data type in m4_dumpdef ()")));
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The macro "defn" returns the quoted definition of the macro named by the |
-| first argument.  If the macro is builtin, it will push a special	   |
-| macro-definition token on the input stack.				   |
-`-------------------------------------------------------------------------*/
-
+/* The macro "defn" returns the quoted definition of the macro named by
+   the first argument.  If the macro is builtin, it will push a special
+   macro-definition token on the input stack.  */
 M4BUILTIN_HANDLER (defn)
 {
   m4_symbol *symbol;
@@ -359,11 +350,8 @@ M4BUILTIN_HANDLER (defn)
 }
 
 
-/*------------------------------------------------------------------------.
-| This section contains macros to handle the builtins "syscmd", "esyscmd" |
-| and "sysval".  "esyscmd" is GNU specific.				  |
-`------------------------------------------------------------------------*/
-
+/* This section contains macros to handle the builtins "syscmd"
+   and "sysval".  */
 M4BUILTIN_HANDLER (syscmd)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
@@ -379,13 +367,10 @@ M4BUILTIN_HANDLER (sysval)
   m4_shipout_int (obs, (m4_sysval >> 8) & 0xff);
 }
 
-
-/*----------------------------------------------------------------------.
-| This section contains the top level code for the "eval" builtin.  The |
-| actual work is done in the function m4_evaluate (), which lives in	|
-| eval.c.								|
-`----------------------------------------------------------------------*/
 
+/* This section contains the top level code for the "eval" builtin.  The
+   actual work is done in the function m4_evaluate (), which lives in
+   eval.c.  */
 M4BUILTIN_HANDLER (eval)
 {
   m4_do_eval(obs, argc, argv, m4_evaluate);
@@ -421,11 +406,8 @@ M4BUILTIN_HANDLER (decr)
 /* This section contains the macros "divert", "undivert" and "divnum" for
    handling diversion.  The utility functions used lives in output.c.  */
 
-/*-----------------------------------------------------------------------.
-| Divert further output to the diversion given by ARGV[1].  Out of range |
-| means discard further output.						 |
-`-----------------------------------------------------------------------*/
-
+/* Divert further output to the diversion given by ARGV[1].  Out of range
+   means discard further output.  */
 M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
@@ -439,10 +421,7 @@ M4BUILTIN_HANDLER (divert)
   m4_make_diversion (i);
 }
 
-/*-----------------------------------------------------.
-| Expand to the current diversion number, -1 if none.  |
-`-----------------------------------------------------*/
-
+/* Expand to the current diversion number, -1 if none.  */
 M4BUILTIN_HANDLER (divnum)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -450,13 +429,10 @@ M4BUILTIN_HANDLER (divnum)
   m4_shipout_int (obs, m4_current_diversion);
 }
 
-/*-----------------------------------------------------------------------.
-| Bring back the diversion given by the argument list.  If none is	 |
-| specified, bring back all diversions.  GNU specific is the option of	 |
-| undiverting named files, by passing a non-numeric argument to undivert |
-| ().									 |
-`-----------------------------------------------------------------------*/
-
+/* Bring back the diversion given by the argument list.  If none is
+   specified, bring back all diversions.  GNU specific is the option of
+   undiverting named files, by passing a non-numeric argument to
+   undivert().  */
 M4BUILTIN_HANDLER (undivert)
 {
   int i, file;
@@ -489,17 +465,12 @@ M4BUILTIN_HANDLER (undivert)
 }
 
 
-/*-------------------------------------------------------------------.
-| This section contains various macros, which does not fall into any |
-| specific group.  These are "dnl", "shift", "changequote",	     |
-| "changecom" and "changesyntax".				     |
-`-------------------------------------------------------------------*/
+/* This section contains various macros, which does not fall into
+   any specific group.  These are "dnl", "shift", "changequote",
+   "changecom" and "changesyntax"  */
 
-/*------------------------------------------------------------------------.
-| Delete all subsequent whitespace from input.  The function skip_line () |
-| lives in input.c.							  |
-`------------------------------------------------------------------------*/
-
+/* Delete all subsequent whitespace from input.  The function skip_line ()
+   lives in input.c.  */
 M4BUILTIN_HANDLER (dnl)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -508,20 +479,14 @@ M4BUILTIN_HANDLER (dnl)
   m4_skip_line ();
 }
 
-/*-------------------------------------------------------------------------.
-| Shift all argument one to the left, discarding the first argument.  Each |
-| output argument is quoted with the current quotes.			   |
-`-------------------------------------------------------------------------*/
-
+/* Shift all argument one to the left, discarding the first argument.  Each
+   output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
   m4_dump_args (obs, argc - 1, argv + 1, ",", TRUE);
 }
 
-/*--------------------------------------------------------------------------.
-| Change the current quotes.  The function set_quotes () lives in input.c.  |
-`--------------------------------------------------------------------------*/
-
+/* Change the current quotes.  The function set_quotes () lives in input.c.  */
 M4BUILTIN_HANDLER (changequote)
 {
   if (m4_bad_argc (argv[0], argc, 1, 3))
@@ -531,11 +496,8 @@ M4BUILTIN_HANDLER (changequote)
 	     (argc >= 3) ? M4_TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
 
-/*--------------------------------------------------------------------.
-| Change the current comment delimiters.  The function set_comment () |
-| lives in input.c.						      |
-`--------------------------------------------------------------------*/
-
+/* Change the current comment delimiters.  The function set_comment ()
+   lives in input.c.  */
 M4BUILTIN_HANDLER (changecom)
 {
   if (m4_bad_argc (argv[0], argc, 1, 3))
@@ -553,11 +515,8 @@ M4BUILTIN_HANDLER (changecom)
    and "sinclude".  This differs from bringing back diversions, in that
    the input is scanned before being copied to the output.  */
 
-/*-------------------------------------------------------------------------.
-| Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccesible files iff SILENT is FALSE.	   |
-`-------------------------------------------------------------------------*/
-
+/* Generic include function.  Include the file given by the first argument,
+   if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
 static void
 include (int argc, m4_token_data **argv, boolean silent)
 {
@@ -580,19 +539,13 @@ include (int argc, m4_token_data **argv, boolean silent)
   xfree (name);
 }
 
-/*------------------------------------------------.
-| Include a file, complaining in case of errors.  |
-`------------------------------------------------*/
-
+/* Include a file, complaining in case of errors.  */
 M4BUILTIN_HANDLER (include)
 {
   include (argc, argv, FALSE);
 }
 
-/*----------------------------------.
-| Include a file, ignoring errors.  |
-`----------------------------------*/
-
+/* Include a file, ignoring errors.  */
 M4BUILTIN_HANDLER (sinclude)
 {
   include (argc, argv, TRUE);
@@ -602,10 +555,7 @@ M4BUILTIN_HANDLER (sinclude)
 /* More miscellaneous builtins -- "maketemp", "errprint", "__file__" and
    "__line__".  The last two are GNU specific.  */
 
-/*------------------------------------------------------------------.
-| Use the first argument as at template for a temporary file name.  |
-`------------------------------------------------------------------*/
-
+/* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
@@ -614,10 +564,7 @@ M4BUILTIN_HANDLER (maketemp)
   m4_shipout_string (obs, M4ARG (1), 0, FALSE);
 }
 
-/*----------------------------------------.
-| Print all arguments on standard error.  |
-`----------------------------------------*/
-
+/* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
   m4_dump_args (obs, argc, argv, " ", FALSE);
@@ -631,11 +578,8 @@ M4BUILTIN_HANDLER (errprint)
    EOF is seen, and tracing macro calls.  That is: "m4exit", "m4wrap",
    "traceon" and "traceoff".  */
 
-/*-------------------------------------------------------------------------.
-| Exit immediately, with exitcode specified by the first argument, 0 if no |
-| arguments are present.						   |
-`-------------------------------------------------------------------------*/
-
+/* Exit immediately, with exitcode specified by the first argument, 0 if no
+   arguments are present.  */
 M4BUILTIN_HANDLER (m4exit)
 {
   int exit_code = 0;
@@ -650,12 +594,9 @@ M4BUILTIN_HANDLER (m4exit)
   exit (exit_code);
 }
 
-/*-------------------------------------------------------------------------.
-| Save the argument text until EOF has been seen, allowing for user	   |
-| specified cleanup action.  GNU version saves all arguments, the standard |
-| version only the first.						   |
-`-------------------------------------------------------------------------*/
-
+/* Save the argument text until EOF has been seen, allowing for user
+   specified cleanup action.  GNU version saves all arguments, the standard
+   version only the first.  */
 M4BUILTIN_HANDLER (m4wrap)
 {
   if (no_gnu_extensions)
@@ -670,12 +611,9 @@ M4BUILTIN_HANDLER (m4wrap)
    Tracing is disabled by default, when a macro is defined.  This can be
    overridden by the "t" debug flag.  */
 
-/*-----------------------------------------------------------------------.
-| Set_trace () is used by "traceon" and "traceoff" to enable and disable |
-| tracing of a macro.  It disables tracing if DATA is NULL, otherwise it |
-| enable tracing.							 |
-`-----------------------------------------------------------------------*/
-
+/* Set_trace () is used by "traceon" and "traceoff" to enable and disable
+   tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
+   enable tracing.  */
 static void
 set_trace (m4_symbol *symbol, const char *data)
 {
@@ -701,10 +639,7 @@ M4BUILTIN_HANDLER (traceon)
       }
 }
 
-/*------------------------------------------------------------------------.
-| Disable tracing of all specified macros, or all, if none is specified.  |
-`------------------------------------------------------------------------*/
-
+/* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
   m4_symbol *symbol;
@@ -729,10 +664,7 @@ M4BUILTIN_HANDLER (traceoff)
    "substr", "translit", "format", "regexp" and "patsubst".  The last
    three are GNU specific.  */
 
-/*---------------------------------------------.
-| Expand to the length of the first argument.  |
-`---------------------------------------------*/
-
+/* Expand to the length of the first argument.  */
 M4BUILTIN_HANDLER (len)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
@@ -740,11 +672,8 @@ M4BUILTIN_HANDLER (len)
   m4_shipout_int (obs, strlen (M4ARG (1)));
 }
 
-/*-------------------------------------------------------------------------.
-| The macro expands to the first index of the second argument in the first |
-| argument.								   |
-`-------------------------------------------------------------------------*/
-
+/* The macro expands to the first index of the second argument in the first
+   argument.  */
 M4BUILTIN_HANDLER (index)
 {
   const char *cp, *last;
@@ -768,13 +697,10 @@ M4BUILTIN_HANDLER (index)
   m4_shipout_int (obs, retval);
 }
 
-/*-------------------------------------------------------------------------.
-| The macro "substr" extracts substrings from the first argument, starting |
-| from the index given by the second argument, extending for a length	   |
-| given by the third argument.  If the third argument is missing, the	   |
-| substring extends to the end of the first argument.			   |
-`-------------------------------------------------------------------------*/
-
+/* The macro "substr" extracts substrings from the first argument, starting
+   from the index given by the second argument, extending for a length
+   given by the third argument.  If the third argument is missing, the
+   substring extends to the end of the first argument.  */
 M4BUILTIN_HANDLER (substr)
 {
   int start, length, avail;
@@ -798,14 +724,11 @@ M4BUILTIN_HANDLER (substr)
 }
 
 
-/*----------------------------------------------------------------------.
-| The macro "translit" translates all characters in the first argument, |
-| which are present in the second argument, into the corresponding      |
-| character from the third argument.  If the third argument is shorter  |
-| than the second, the extra characters in the second argument, are     |
-| deleted from the first (pueh).				        |
-`----------------------------------------------------------------------*/
-
+/* The macro "translit" translates all characters in the first argument,
+   which are present in the second argument, into the corresponding
+   character from the third argument.  If the third argument is shorter
+   than the second, the extra characters in the second argument, are
+   deleted from the first (pueh)  */
 M4BUILTIN_HANDLER (translit)
 {
   register const char *data, *tmp;

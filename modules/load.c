@@ -82,16 +82,17 @@ M4INIT_HANDLER (load)
 
 
 
-/*------------------------------------------------------------.
-| Loading external module at runtime.                         |
-| The following functions provide the implementation for each |
-| of the m4 builtins declared in `m4_builtin_table[]' above.  |
-`------------------------------------------------------------*/
+/* Loading an external module at runtime.
+   The following functions provide the implementation for each
+   of the m4 builtins declared in `m4_builtin_table[]' above.  */
 
-/* The expansion of this builtin is a comma separated list of
-   loaded modules.  */
+/**
+ * modules()
+ **/
 M4BUILTIN_HANDLER (modules)
 {
+  /* The expansion of this builtin is a comma separated list of
+     loaded modules.  */
   lt_dlhandle handle = lt_dlhandle_next (NULL);
 
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -108,22 +109,28 @@ M4BUILTIN_HANDLER (modules)
     while (handle);
 }
 
-/* Load the named module and install the builtins and macros
-   exported by that module.  */
+/**
+ * load(MODULE-NAME)
+ **/
 M4BUILTIN_HANDLER (load)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
+  /* Load the named module and install the builtins and macros
+     exported by that module.  */
   m4_module_load (M4ARG(1), obs);
 }
 
-/* Remove all builtins and macros installed by the named module,
-   and then unload the module from memory entirely.  */
+/**
+ * unload(MODULE-NAME)
+ **/
 M4BUILTIN_HANDLER (unload)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
+  /* Remove all builtins and macros installed by the named module,
+     and then unload the module from memory entirely.  */
   m4_module_unload (M4ARG(1), obs);
 }

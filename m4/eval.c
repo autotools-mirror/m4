@@ -92,14 +92,12 @@ numb_initialise(void)
 }
 
 
-/*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ascii representation in |
-| radix RADIX.								  |
-`------------------------------------------------------------------------*/
-
 /* Digits for number to ascii conversions.  */
 static char const ntoa_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
+
+/* The function ntoa () converts VALUE to a signed ascii representation in
+   radix RADIX.  */
 static const char *
 ntoa (number value, int radix)
 {

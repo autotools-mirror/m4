@@ -69,9 +69,9 @@ m4_builtin m4_builtin_table[] =
 };
 
 
-/*---------.
-| getcwd() |
-`---------*/
+/**
+ * getcwd()
+ **/
 M4BUILTIN_HANDLER (getcwd)
 {
   char buf[1024];
@@ -86,9 +86,9 @@ M4BUILTIN_HANDLER (getcwd)
     m4_shipout_string (obs, buf, 0 , FALSE);
 }
 
-/*-------------.
-| getenv(NAME) |
-`-------------*/
+/**
+ * getenv(NAME)
+ **/
 M4BUILTIN_HANDLER (getenv)
 {
   char *env;
@@ -102,9 +102,9 @@ M4BUILTIN_HANDLER (getenv)
     m4_shipout_string (obs, env, 0, FALSE);
 }
 
-/*---------------------------------.
-| setenv(NAME, VALUE, [OVERWRITE]) |
-`---------------------------------*/
+/**
+ * setenv(NAME, VALUE, [OVERWRITE])
+ **/
 M4BUILTIN_HANDLER (setenv)
 {
   int overwrite = 1;
@@ -136,12 +136,11 @@ M4BUILTIN_HANDLER (setenv)
 #endif /* HAVE_SETENV */
 }
 
-/*---------------.
-| unsetenv(NAME) |
-`---------------*/
+/**
+ * unsetenv(NAME)
+ **/
 M4BUILTIN_HANDLER (unsetenv)
 {
-
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -150,9 +149,9 @@ M4BUILTIN_HANDLER (unsetenv)
 #endif /* HAVE_UNSETENV */
 }
 
-/*-----------.
-| getlogin() |
-`-----------*/
+/**
+ * getlogin()
+ **/
 M4BUILTIN_HANDLER (getlogin)
 {
   char *login;
@@ -166,9 +165,9 @@ M4BUILTIN_HANDLER (getlogin)
     m4_shipout_string (obs, login, 0, FALSE);
 }
 
-/*---------.
-| getpid() |
-`---------*/
+/**
+ * getpid()
+ **/
 M4BUILTIN_HANDLER (getpid)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -177,9 +176,9 @@ M4BUILTIN_HANDLER (getpid)
   m4_shipout_int(obs, getpid());
 }
 
-/*----------.
-| getppid() |
-`----------*/
+/**
+ * getppid()
+ **/
 M4BUILTIN_HANDLER (getppid)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -188,9 +187,9 @@ M4BUILTIN_HANDLER (getppid)
   m4_shipout_int(obs, getppid());
 }
 
-/*---------------.
-| getpwnam(NAME) |
-`---------------*/
+/**
+ * getpwnam(NAME)
+ **/
 M4BUILTIN_HANDLER (getpwnam)
 {
   struct passwd *pw;
@@ -218,9 +217,9 @@ M4BUILTIN_HANDLER (getpwnam)
     }
 }
 
-/*--------------.
-| getpwuid(UID) |
-`--------------*/
+/**
+ * getpwuid(UID)
+ **/
 M4BUILTIN_HANDLER (getpwuid)
 {
   struct passwd *pw;
@@ -252,9 +251,9 @@ M4BUILTIN_HANDLER (getpwuid)
     }
 }
 
-/*-----------.
-| hostname() |
-`-----------*/
+/**
+ * hostname()
+ **/
 M4BUILTIN_HANDLER (hostname)
 {
   char buf[1024];
@@ -268,9 +267,9 @@ M4BUILTIN_HANDLER (hostname)
   m4_shipout_string (obs, buf, 0, FALSE);
 }
 
-/*-------.
-| rand() |
-`-------*/
+/**
+ * rand()
+ **/
 M4BUILTIN_HANDLER (rand)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -279,9 +278,9 @@ M4BUILTIN_HANDLER (rand)
   m4_shipout_int(obs, rand());
 }
 
-/*--------.
-| srand() |
-`--------*/
+/**
+ * srand()
+ **/
 M4BUILTIN_HANDLER (srand)
 {
   int seed;
@@ -300,9 +299,9 @@ M4BUILTIN_HANDLER (srand)
   srand(seed);
 }
 
-/*--------.
-| uname() |
-`--------*/
+/**
+ * uname()
+ **/
 M4BUILTIN_HANDLER (uname)
 {
   struct utsname ut;
@@ -324,9 +323,9 @@ M4BUILTIN_HANDLER (uname)
     }
 }
 
-/*---------.
-| getuid() |
-`---------*/
+/**
+ * getuid()
+ **/
 M4BUILTIN_HANDLER (getuid)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))

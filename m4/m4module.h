@@ -313,9 +313,9 @@ void m4_expand_input M4_PARAMS((void));
 void m4_call_macro M4_PARAMS((m4_symbol *, int, m4_token_data **, struct obstack *));
 void m4_process_macro M4_PARAMS((struct obstack *obs, m4_symbol *symbol, int argc, m4_token_data **argv));
 
-/*--------------------------.
-| Syntax table definitions. |
-`--------------------------*/
+
+
+/* --- SYNTAX TABLE DEFINITIONS --- */
 
 /* These are simple values, not bit masks.  There is no overlap. */
 #define M4_SYNTAX_OTHER		(0x0000)
@@ -452,8 +452,10 @@ struct m4_dump_symbol_data
 extern void m4_dump_symbol M4_PARAMS((m4_symbol *symbol, struct m4_dump_symbol_data *data));
 extern void m4_dump_symbols M4_PARAMS((struct m4_dump_symbol_data *data, int argc, m4_token_data **argv, boolean complain));
 
+
+
 
-/* File: eval.c  --- expression evaluation.  */
+/* --- EXPRESSION EVALUATION --- */
 
 typedef boolean (*m4_eval_func) M4_PARAMS((struct obstack *obs,
 				const char *expr, const int radix, int min));

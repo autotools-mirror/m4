@@ -72,18 +72,18 @@ M4INIT_HANDLER (shadow)
 
 
 
-/*---------.
-| shadow() |
-`---------*/
+/**
+ * shadow()
+ **/
 M4BUILTIN_HANDLER (shadow)
 {
   char *s = "Shadow::`shadow' called.";
   obstack_grow (obs, s, strlen(s));
 }
 
-/*-------.
-| test() |
-`-------*/
+/**
+ * test()
+ **/
 M4BUILTIN_HANDLER (test)
 {
   char *s = "Shadow::`test' called.";

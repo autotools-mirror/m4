@@ -4,6 +4,32 @@
 	for `-pipe' here...
 	* configure.in: ...do it here instead.
 
+	* c-boxes.el: Deleted.
+	* m4/builtin.c: Reformat box comments to be closer to GNU
+	standards.
+	* m4/debug.c:  Ditto.
+	* m4/eval.c:  Ditto.
+	* m4/evalparse.c:  Ditto.
+	* m4/input.c:  Ditto.
+	* m4/m4module.h:  Ditto.
+	* m4/macro.c:  Ditto.
+	* m4/output.c:  Ditto.
+	* m4/symtab.c:  Ditto.
+	* m4/utility.c:  Ditto.
+	* modules/changeword.c:  Ditto.
+	* modules/format.c:  Ditto.
+	* modules/gnu.c:  Ditto.
+	* modules/load.c:  Ditto.
+	* modules/m4.c:  Ditto.
+	* modules/modtest.c:  Ditto.
+	* modules/mpeval.c:  Ditto.
+	* modules/perl.c:  Ditto.
+	* modules/shadow.c:  Ditto.
+	* modules/stdlib.c:  Ditto.
+	* modules/time.c:  Ditto.
+	* src/freeze.c:  Ditto.
+	* src/main.c:  Ditto.
+
 2001-08-17  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/module.c: Fixup some errors in the description comment.

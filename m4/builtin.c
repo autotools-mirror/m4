@@ -28,11 +28,8 @@ extern int pclose ();
 
 
 
-/*--------------------------------------------------------------.
-| Find the builtin, which has NAME.  If BP argument is supplied |
-| then search only in table BP.                                 |
-`--------------------------------------------------------------*/
-
+/* Find the builtin, which has NAME.  If BP argument is supplied
+   then search only in table BP.  */
 const m4_builtin *
 m4_builtin_find_by_name (bp, name)
      const m4_builtin *bp;
@@ -77,13 +74,10 @@ m4_builtin_find_by_func (bp, func)
   return NULL;
 }
 
-
-/*-------------------------------------------------------------------------.
-| Install a builtin macro with name NAME, bound to the C function given in |
-| BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether	   |
-| NAME is to be traced.							   |
-`-------------------------------------------------------------------------*/
 
+/* Install a builtin macro with name NAME, bound to the C function given in
+   BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether
+   NAME is to be traced.  */
 void
 m4_builtin_define (handle, name, bp, mode, traced)
      const lt_dlhandle handle;
@@ -130,12 +124,9 @@ m4_builtin_table_install (handle, table)
       m4_builtin_define (handle, bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
 }
 
-/*-------------------------------------------------------------------------.
-| Define a predefined or user-defined macro, with name NAME, and expansion |
-| TEXT.  MODE destinguishes between the "define" and the "pushdef" case.   |
-| It is also used from main ().						   |
-`-------------------------------------------------------------------------*/
-
+/* Define a predefined or user-defined macro, with name NAME, and expansion
+   TEXT.  MODE destinguishes between the "define" and the "pushdef" case.
+   It is also used from main ().  */
 void
 m4_macro_define (handle, name, text, mode)
      const lt_dlhandle handle;

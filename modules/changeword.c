@@ -64,22 +64,27 @@ m4_macro m4_macro_table[] =
 };
 
 
-/*-----------------------------------------------------------------------.
-| Change the regular expression used for breaking the input into words.	 |
-| The function set_word_regexp () lives in input.c.			 |
-`-----------------------------------------------------------------------*/
 
-/* Change the regular expression used to recognise words in the input.  */
+/* Change the regular expression used for breaking the input into words.
+   The function set_word_regexp () lives in input.c.  */
+
+/**
+ * changeword(REGEXP)
+ **/
 M4BUILTIN_HANDLER (changeword)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
+  /* Change the regular expression used to recognise words in the input.  */
   m4_set_word_regexp (M4ARG (1));
 }
 
 #else
 
+/**
+ * changeword(REGEXP)
+ **/
 M4BUILTIN_HANDLER (changeword)
 {
   M4ERROR ((EXIT_FAILURE, 0,

@@ -126,6 +126,9 @@ static void numb_rshift M4_PARAMS((number *x, const number *y));
 
 
 
+/**
+ * mpeval(EXPRESSION)
+ **/
 M4BUILTIN_HANDLER (mpeval)
 {
   m4_do_eval(obs, argc, argv, m4_mp_evaluate);
@@ -452,6 +455,9 @@ numb_rshift (x, y)
 
 #else
 
+/**
+ * mpeval()
+ **/
 M4BUILTIN_HANDLER (mpeval)
 {
   M4ERROR ((EXIT_FAILURE, 0,

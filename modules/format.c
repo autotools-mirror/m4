@@ -64,10 +64,7 @@ ulong_to_str (register unsigned long val, char *str, int base,
   return s;
 }
 
-/*-----------------------------------------.
-| Clear trailing zeroes, return argument.  |
-`-----------------------------------------*/
-
+/* Clear trailing zeroes, return argument.  */
 static char *
 clr0 (char *s)
 {
@@ -107,12 +104,9 @@ clr0 (char *s)
 	 (--argc, argv++, atof (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 
-/*------------------------------------------------------------------------.
-| The main formatting function.  Output is placed on the obstack OBS, the |
-| first argument in ARGV is the formatting string, and the rest is	  |
-| arguments for the string.						  |
-`------------------------------------------------------------------------*/
-
+/* The main formatting function.  Output is placed on the obstack OBS, the
+   first argument in ARGV is the formatting string, and the rest is
+   arguments for the string.  */
 void format M4_PARAMS((struct obstack *obs, int argc, m4_token_data **argv));
 
 void

@@ -104,12 +104,13 @@ m4_macro m4_macro_table[] =
 static void substitute M4_PARAMS((struct obstack *obs, const char *victim, const char *repl, struct re_registers *regs));
 
 
-/*---------------------------------------------------------------------.
-| The builtin "builtin" allows calls to builtin macros, even if their  |
-| definition has been overridden or shadowed.  It is thus possible to  |
-| redefine builtins, and still access their original definition.       |
-`---------------------------------------------------------------------*/
+/* The builtin "builtin" allows calls to builtin macros, even if their
+   definition has been overridden or shadowed.  It is thus possible to
+   redefine builtins, and still access their original definition.  */
 
+/**
+ * builtin(MACRO, [...])
+ **/
 M4BUILTIN_HANDLER (builtin)
 {
   const m4_builtin *bp = NULL;
@@ -128,13 +129,14 @@ M4BUILTIN_HANDLER (builtin)
 }
 
 
-/*------------------------------------------------------------------------.
-| The builtin "indir" allows indirect calls to macros, even if their name |
-| is not a proper macro name.  It is thus possible to define macros with  |
-| ill-formed names for internal use in larger macro packages.  This macro |
-| is not available in compatibility mode.				  |
-`------------------------------------------------------------------------*/
+/* The builtin "indir" allows indirect calls to macros, even if their name
+   is not a proper macro name.  It is thus possible to define macros with
+   ill-formed names for internal use in larger macro packages.  This macro
+   is not available in compatibility mode.  */
 
+/**
+ * indir(MACRO, [...])
+ **/
 M4BUILTIN_HANDLER (indir)
 {
   m4_symbol *symbol;
@@ -151,14 +153,15 @@ M4BUILTIN_HANDLER (indir)
     m4_call_macro (symbol, argc - 1, argv + 1, obs);
 }
 
-/*-------------------------------------------------------------------.
-| Change the current input syntax.  The function set_syntax () lives |
-| in input.c.  For compability reasons, this function is not called, |
-| if not followed by an SYNTAX_OPEN.  Also, any changes to comment   |
-| delimiters and quotes made here will be overridden by a call to    |
-| `changecom' or `changequote'.					     |
-`-------------------------------------------------------------------*/
+/* Change the current input syntax.  The function set_syntax () lives
+   in input.c.  For compability reasons, this function is not called,
+   if not followed by an SYNTAX_OPEN.  Also, any changes to comment
+   delimiters and quotes made here will be overridden by a call to
+   `changecom' or `changequote'.  */
 
+/**
+ * changesyntax(SYNTAX-SPEC, ...)
+ **/
 M4BUILTIN_HANDLER (changesyntax)
 {
   int i;
@@ -173,12 +176,13 @@ M4BUILTIN_HANDLER (changesyntax)
     }
 }
 
-/*----------------------------------------------------------------------.
-| On-the-fly control of the format of the tracing output.  It takes one |
-| argument, which is a character string like given to the -d option, or |
-| none in which case the debug_level is zeroed.			        |
-`----------------------------------------------------------------------*/
+/* On-the-fly control of the format of the tracing output.  It takes one
+   argument, which is a character string like given to the -d option, or
+   none in which case the debug_level is zeroed.  */
 
+/**
+ * debugmode([FLAGS])
+ **/
 M4BUILTIN_HANDLER (debugmode)
 {
   int new_debug_level;
@@ -225,11 +229,12 @@ M4BUILTIN_HANDLER (debugmode)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Specify the destination of the debugging output.  With one argument, the |
-| argument is taken as a file name, with no arguments, revert to stderr.   |
-`-------------------------------------------------------------------------*/
+/* Specify the destination of the debugging output.  With one argument, the
+   argument is taken as a file name, with no arguments, revert to stderr.  */
 
+/**
+ * debugfile([FILENAME])
+ **/
 M4BUILTIN_HANDLER (debugfile)
 {
   if (m4_bad_argc (argv[0], argc, 1, 2))
@@ -242,13 +247,14 @@ M4BUILTIN_HANDLER (debugfile)
 	      _("Cannot set error file: %s"), M4ARG (1)));
 }
 
-/*--------------------------------------------------------------------------.
-| Regular expression version of index.  Given two arguments, expand to the  |
-| index of the first match of the second argument (a regexp) in the first.  |
-| Expand to -1 if here is no match.  Given a third argument, is changes	    |
-| the expansion to this argument.					    |
-`--------------------------------------------------------------------------*/
+/* Regular expression version of index.  Given two arguments, expand to the
+   index of the first match of the second argument (a regexp) in the first.
+   Expand to -1 if here is no match.  Given a third argument, is changes
+   the expansion to this argument.  */
 
+/**
+ * regexp(STRING, REGEXP, [REPLACEMENT])
+ **/
 M4BUILTIN_HANDLER (regexp)
 {
   const char *victim;		/* first argument */
@@ -302,13 +308,14 @@ M4BUILTIN_HANDLER (regexp)
   return;
 }
 
-/*--------------------------------------------------------------------------.
-| Substitute all matches of a regexp occuring in a string.  Each match of   |
-| the second argument (a regexp) in the first argument is changed to the    |
-| third argument, with \& substituted by the matched text, and \N	    |
-| substituted by the text matched by the Nth parenthesized sub-expression.  |
-`--------------------------------------------------------------------------*/
+/* Substitute all matches of a regexp occuring in a string.  Each match of
+   the second argument (a regexp) in the first argument is changed to the
+   third argument, with \& substituted by the matched text, and \N
+   substituted by the text matched by the Nth parenthesized sub-expression.  */
 
+/**
+ * patsubst(STRING, REGEXP, [REPLACEMENT])
+ **/
 M4BUILTIN_HANDLER (patsubst)
 {
   const char *victim;		/* first argument */
@@ -388,11 +395,12 @@ M4BUILTIN_HANDLER (patsubst)
   return;
 }
 
-/*-------------------------------------------------------------------------.
-| Implementation of "symbols" itself.  It builds up a table of pointers to |
-| symbols, sorts it and ships out the symbols name.			   |
-`-------------------------------------------------------------------------*/
+/* Implementation of "symbols" itself.  It builds up a table of pointers to
+   symbols, sorts it and ships out the symbols name.  */
 
+/**
+ * symbols([...])
+ **/
 M4BUILTIN_HANDLER (symbols)
 {
   struct m4_dump_symbol_data data;
@@ -412,14 +420,14 @@ M4BUILTIN_HANDLER (symbols)
 }
 
 
-/*------------------------------------------------------------------------.
-| This contains macro which implements syncoutput() which takes one arg   |
-|   1, on, yes - turn on sync lines                                       |
-|   0, off, no - turn off sync lines                                      |
-|   everything else is silently ignored                                   |
-|                                                                         |
-`------------------------------------------------------------------------*/
+/* This contains macro which implements syncoutput() which takes one arg
+     1, on, yes - turn on sync lines
+     0, off, no - turn off sync lines
+     everything else is silently ignored  */
 
+/**
+ * syncoutput(SYNC?)
+ **/
 M4BUILTIN_HANDLER (syncoutput)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
@@ -440,6 +448,10 @@ M4BUILTIN_HANDLER (syncoutput)
     sync_output = 1;
 }
 
+
+/**
+ * esyscmd(SHELL-COMMAND)
+ **/
 M4BUILTIN_HANDLER (esyscmd)
 {
   FILE *pin;
@@ -464,16 +476,21 @@ M4BUILTIN_HANDLER (esyscmd)
     }
 }
 
-/*----------------------------------------------------------------------.
-| Frontend for printf like formatting.  The function format () lives in |
-| the file format.c.						        |
-`----------------------------------------------------------------------*/
+/* Frontend for printf like formatting.  The function format () lives in
+   the file format.c.  */
 
+/**
+ * format(FORMAT-STRING, [...])
+ **/
 M4BUILTIN_HANDLER (format)
 {
   format (obs, argc - 1, argv + 1);
 }
 
+
+/**
+ * __file__
+ **/
 M4BUILTIN_HANDLER (__file__)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -482,6 +499,10 @@ M4BUILTIN_HANDLER (__file__)
   m4_shipout_string (obs, m4_current_file, 0, TRUE);
 }
 
+
+/**
+ * __line__
+ **/
 M4BUILTIN_HANDLER (__line__)
 {
   if (m4_bad_argc (argv[0], argc, 1, 1))
@@ -489,15 +510,12 @@ M4BUILTIN_HANDLER (__line__)
   m4_shipout_int (obs, m4_current_line);
 }
 
-/*-------------------------------------------------------------------------.
-| Function to perform substitution by regular expressions.  Used by the	   |
-| builtins regexp and patsubst.  The changed text is placed on the	   |
-| obstack.  The substitution is REPL, with \& substituted by this part of  |
-| VICTIM matched by the last whole regular expression, taken from REGS[0], |
-| and \N substituted by the text matched by the Nth parenthesized	   |
-| sub-expression, taken from REGS[N].					   |
-`-------------------------------------------------------------------------*/
-
+/* Function to perform substitution by regular expressions.  Used by the
+   builtins regexp and patsubst.  The changed text is placed on the
+   obstack.  The substitution is REPL, with \& substituted by this part of
+   VICTIM matched by the last whole regular expression, taken from REGS[0],
+   and \N substituted by the text matched by the Nth parenthesized
+   sub-expression, taken from REGS[N].  */
 static int substitute_warned = 0;
 
 static void

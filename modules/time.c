@@ -75,9 +75,9 @@ m4_builtin m4_builtin_table[] =
 
 
 
-/*--------------.
-| currenttime() |
-`--------------*/
+/**
+ * currenttime()
+ **/
 M4BUILTIN_HANDLER(currenttime)
 {
   char buf[64];
@@ -93,9 +93,9 @@ M4BUILTIN_HANDLER(currenttime)
   obstack_grow (obs, buf, l);
 }
 
-/*-----------------.
-| ctime([SECONDS]) |
-`-----------------*/
+/**
+ * ctime([SECONDS])
+ **/
 M4BUILTIN_HANDLER(ctime)
 {
   time_t t;
@@ -141,9 +141,9 @@ format_tm(struct obstack *obs, struct tm *tm)
   m4_shipout_int(obs, tm->tm_isdst);
 }
 
-/*----------------.
-| gmtime(SECONDS) |
-`----------------*/
+/**
+ * gmtime(SECONDS)
+ **/
 M4BUILTIN_HANDLER(gmtime)
 {
   time_t t;
@@ -157,9 +157,9 @@ M4BUILTIN_HANDLER(gmtime)
   format_tm(obs, gmtime(&t));
 }
 
-/*-------------------.
-| localtime(SECONDS) |
-`-------------------*/
+/**
+ * localtime(SECONDS)
+ **/
 M4BUILTIN_HANDLER(localtime)
 {
   time_t t;
@@ -174,9 +174,9 @@ M4BUILTIN_HANDLER(localtime)
 }
 
 #ifdef HAVE_MKTIME
-/*---------------------------------------------------.
-| mktime(SEC, MIN, HOUR, MDAY, MONTH, YEAR, [ISDST]) |
-`---------------------------------------------------*/
+/**
+ * mktime(SEC, MIN, HOUR, MDAY, MONTH, YEAR, [ISDST])
+ **/
 M4BUILTIN_HANDLER(mktime)
 {
   struct tm tm;
@@ -207,9 +207,9 @@ M4BUILTIN_HANDLER(mktime)
 #endif /* HAVE_MKTIME */
 
 #ifdef HAVE_STRFTIME
-/*--------------------------.
-| strftime(FORMAT, SECONDS) |
-`--------------------------*/
+/**
+ * strftime(FORMAT, SECONDS)
+ **/
 M4BUILTIN_HANDLER(strftime)
 {
   struct tm *tm;

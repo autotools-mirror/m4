@@ -99,9 +99,9 @@ M4FINISH_HANDLER (perl)
 
 
 
-/*----------------------------.
-| perleval([PERLCODE], [...]) |
-`----------------------------*/
+/**
+ * perleval([PERLCODE], [...])
+ **/
 M4BUILTIN_HANDLER (perleval)
 {
   SV *val;

@@ -32,10 +32,7 @@ M4_GLOBAL_DATA int m4_expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
 
-/*----------------------------------------------------------------------.
-| This function read all input, and expands each token, one at a time.  |
-`----------------------------------------------------------------------*/
-
+/* This function read all input, and expands each token, one at a time.  */
 void
 m4_expand_input (void)
 {
@@ -47,13 +44,10 @@ m4_expand_input (void)
 }
 
 
-/*------------------------------------------------------------------------.
-| Expand one token, according to its type.  Potential macro names	  |
-| (TOKEN_WORD) are looked up in the symbol table, to see if they have a	  |
-| macro definition.  If they have, they are expanded as macros, otherwise |
-| the text are just copied to the output.				  |
-`------------------------------------------------------------------------*/
-
+/* Expand one token, according to its type.  Potential macro names
+   (TOKEN_WORD) are looked up in the symbol table, to see if they have a
+   macro definition.  If they have, they are expanded as macros, otherwise
+   the text are just copied to the output.  */
 static void
 expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 {
@@ -102,16 +96,13 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 }
 
 
-/*-------------------------------------------------------------------------.
-| This function parses one argument to a macro call.  It expects the first |
-| left parenthesis, or the separating comma to have been read by the	   |
-| caller.  It skips leading whitespace, and reads and expands tokens,	   |
-| until it finds a comma or an right parenthesis at the same level of	   |
-| parentheses.  It returns a flag indicating whether the argument read are |
-| the last for the active macro call.  The argument are build on the	   |
-| obstack OBS, indirectly through expand_token ().			   |
-`-------------------------------------------------------------------------*/
-
+/* This function parses one argument to a macro call.  It expects the first
+   left parenthesis, or the separating comma to have been read by the
+   caller.  It skips leading whitespace, and reads and expands tokens,
+   until it finds a comma or an right parenthesis at the same level of
+   parentheses.  It returns a flag indicating whether the argument read are
+   the last for the active macro call.  The argument are build on the
+   obstack OBS, indirectly through expand_token ().	 */
 static boolean
 expand_argument (struct obstack *obs, m4_token_data *argp)
 {
@@ -191,12 +182,9 @@ INTERNAL ERROR: Bad token type in expand_argument ()")));
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Collect all the arguments to a call of the macro SYM.  The arguments are |
-| stored on the obstack ARGUMENTS and a table of pointers to the arguments |
-| on the obstack ARGPTR.						   |
-`-------------------------------------------------------------------------*/
-
+/* Collect all the arguments to a call of the macro SYM.  The arguments are
+   stored on the obstack ARGUMENTS and a table of pointers to the arguments
+   on the obstack ARGPTR.  */
 static void
 collect_arguments (m4_symbol *symbol, struct obstack *argptr,
 		   struct obstack *arguments)
@@ -234,16 +222,13 @@ collect_arguments (m4_symbol *symbol, struct obstack *argptr,
 }
 
 
-/*-------------------------------------------------------------------.
-| The actual call of a macro is handled by m4_call_macro ().         |
-| m4_call_macro () is passed a symbol SYM, whose type is used to     |
-| call either a builtin function, or the user macro expansion        |
-| function expand_predefine () (lives in builtin.c).  There are ARGC |
-| arguments to the call, stored in the ARGV table.  The expansion is |
-| left on the obstack EXPANSION.  Macro tracing is also handled      |
-| here.                                                              |
-`-------------------------------------------------------------------*/
 
+/* The actual call of a macro is handled by m4_call_macro ().
+   m4_call_macro () is passed a symbol SYM, whose type is used to
+   call either a builtin function, or the user macro expansion
+   function expand_predefine () (lives in builtin.c).  There are ARGC
+   arguments to the call, stored in the ARGV table.  The expansion is
+   left on the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_call_macro (m4_symbol *symbol, int argc, m4_token_data **argv,
 	       struct obstack *expansion)
@@ -265,16 +250,13 @@ m4_call_macro (m4_symbol *symbol, int argc, m4_token_data **argv,
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The macro expansion is handled by expand_macro ().  It parses the	   |
-| arguments, using collect_arguments (), and builds a table of pointers to |
-| the arguments.  The arguments themselves are stored on a local obstack.  |
-| Expand_macro () uses call_macro () to do the call of the macro.	   |
-| 									   |
-| Expand_macro () is potentially recursive, since it calls expand_argument |
-| (), which might call expand_token (), which might call expand_macro ().  |
-`-------------------------------------------------------------------------*/
+/* The macro expansion is handled by expand_macro ().  It parses the
+   arguments, using collect_arguments (), and builds a table of pointers to
+   the arguments.  The arguments themselves are stored on a local obstack.
+   Expand_macro () uses call_macro () to do the call of the macro.
 
+   Expand_macro () is potentially recursive, since it calls expand_argument
+   (), which might call expand_token (), which might call expand_macro ().  */
 static void
 expand_macro (m4_symbol *symbol)
 {
@@ -325,14 +307,11 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   obstack_free (&argptr, NULL);
 }
 
-/*-------------------------------------------------------------------------.
-| This function handles all expansion of user defined and predefined	   |
-| macros.  It is called with an obstack OBS, where the macros expansion	   |
-| will be placed, as an unfinished object.  SYMBOL points to the macro	   |
-| definition, giving the expansion text.  ARGC and ARGV are the arguments, |
-| as usual.								   |
-`-------------------------------------------------------------------------*/
-
+/* This function handles all expansion of user defined and predefined
+   macros.  It is called with an obstack OBS, where the macros expansion
+   will be placed, as an unfinished object.  SYMBOL points to the macro
+   definition, giving the expansion text.  ARGC and ARGV are the arguments,
+   as usual.  */
 void
 m4_process_macro (obs, symbol, argc, argv)
      struct obstack *obs;
