@@ -26,6 +26,7 @@ fp_C_PROTOTYPES
 AC_C_CONST
 
 AC_CHECK_HEADERS(limits.h memory.h siginfo.h string.h unistd.h)
+AC_CHECK_HEADERS(signal.h sys/signal.h, break)
 AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
