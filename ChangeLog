@@ -5,12 +5,10 @@
 	(test): The `if' is an `assert'.
 	* tests/modules.at: Adjust.
 
-	
 2001-10-04  Akim Demaille  <akim@epita.fr>
 
 	* m4/utility.c (m4_bad_argc): Detail the mismatches.
 
-	
 2001-10-01  Akim Demaille  <akim@epita.fr>
 
 	* tests/generate.awk: Tag the tests with `documentation'.

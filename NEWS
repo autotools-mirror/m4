@@ -3,6 +3,8 @@ Copyright 1992, 1993, 1994, 1998, 2000, 2001 Free Software Foundation, Inc.
 
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
+* Support for the experimental `changeword' has been dropped.
+
 * `m4 --hashsize' and `-H' are still accepted, but have no effect.  M4
   will grow its internal symbol table if the symbol density is having
   an effect on performance.
@@ -13,9 +15,9 @@ Version beta 1.4q - August 2001, by Gary V. Vaughan
   development and debugging of the base modules without the need to
   recompile all of m4 with each modification.
 
-* `configure --with-modules="gnu m4 traditional load changeword"', for
-  example, will build an m4 binary with the named modules preloaded, ready
-  to be activated (even on static lib only machines) with the `-m' option
+* `configure --with-modules="gnu m4 traditional load"', for example,
+  will build an m4 binary with the named modules preloaded, ready to
+  be activated (even on static lib only machines) with the `-m' option
   or using the `load' builtin.
 
 * M4 has no builtins or macros in core, they are all loaded from modules
