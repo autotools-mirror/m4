@@ -114,7 +114,7 @@ m4_macro m4_macro_table[] =
   { "__unix__",			"" },
 #endif
   { "__gnu__",			"" },
-  { "__m4_version__",		VERSION },
+  { "__m4_version__",		VERSION/**/TIMESTAMP },
 
   { 0, 0 },
 };

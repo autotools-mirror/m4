@@ -1,5 +1,8 @@
 2001-10-07  Gary Vaughan  <gary@gnu.org>
 
+	* modules/gnu.c (m4_macro_table): Display the timetamp when
+	expanding __m4_version__.
+
 	* configure.ac (--with-modules): Forgot a comma in the
 	AC_HELP_STRING parameter list.
 
