@@ -1,3 +1,28 @@
+2004-06-17  Gary V. Vaughan  <gary@gnu.org>
+
+	Tweaking to enable compilation with latest CVS libtool and
+	libltdl.  We can't just dump the library files directly into the
+	m4 directory anymore now that libltdl is built from pieces itself:
+
+	* bootstrap: Rewritten to use latest libtoolize sanely, and to
+	set up libltdl subdirectory.
+	* configure.ac (AC_CONFIG_AUX_DIR): Point to our own, not the
+	gnulib subdirectory's config.
+	(TIMESTAMP): Use $ac_aux_dir for VPATH builds.
+	(m4_pattern_forbid): Remove the cruft to deal with renamed jm_
+	macros from gnulib.
+	(AC_LIB_LTDL): Latest libltdl is a sub-project with its own
+	configure.ac, so use AC_WITH_LTDL instead.
+	* Makefile.am (SUBDIRS): Add libltdl.
+	* acm4/m4-regex.m4 (jm_INCLUDED_REGEX): Updated.  gnulib now uses
+	gl_INCLUDED_REGEX.
+	* m4/Makefile.am (AM_CPPFLAGS): Add INCLTDL.
+	(libm4_la_SOURCES): Remove ltdl.c and ltdl.h.
+	(libm4_la_LIBADD): Add LIBLTDL.
+	* m4/ltdl.c, m4/ltdl.h: Removed.
+	* m4/m4module.h: Include canonical ltdl.h.
+	* po/*.po: Updated.
+
 2004-06-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* gnulib/import: Now updates makefile fragments, and configure.ac.

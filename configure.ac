@@ -23,7 +23,7 @@
 AC_INIT([GNU m4], [1.4q], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_AUX_DIR([gnulib/config])
+AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_LIBOBJ_DIR([gnulib/m4])
 AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_CONFIG_TESTDIR([tests])
@@ -37,7 +37,7 @@ AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 TIMESTAMP=
 case AC_PACKAGE_VERSION in
   *[[acegikmoqsuwy]])
-    TIMESTAMP=`$CONFIG_SHELL config/mkstamp < $srcdir/ChangeLog`
+    TIMESTAMP=`$CONFIG_SHELL $ac_aux_dir/mkstamp < $srcdir/ChangeLog`
     test -z "$TIMESTAMP" || TIMESTAMP=" (Build:$TIMESTAMP)"
     AS_BOX([Configuring AC_PACKAGE_TARNAME][$TIMESTAMP AC_PACKAGE_VERSION])
     echo
@@ -54,10 +54,10 @@ AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
 m4_pattern_allow([^m4_cv_])
 
 # We use some of Jim's macros.
-m4_pattern_forbid([^jm_])
-m4_pattern_allow([^jm_cv_])
-m4_pattern_allow([^jm_ac_cv_])
-m4_pattern_allow([^jm_with_])
+dnl m4_pattern_forbid([^jm_])
+dnl m4_pattern_allow([^jm_cv_])
+dnl m4_pattern_allow([^jm_ac_cv_])
+dnl m4_pattern_allow([^jm_with_])
 
 AC_MSG_CHECKING(for modules to preload)
   m4_pattern_allow([^m4_default_preload$])
@@ -127,7 +127,7 @@ esac
 ## Libtool initialisation. ##
 ## ----------------------- ##
 LT_INIT([shared dlopen win32-dll])
-AC_LIB_LTDL
+AC_WITH_LTDL
 
 AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 

@@ -1,13 +1,48 @@
-#! /bin/sh -x
+#! /bin/sh
 
 # helps bootstrapping M4, when checked out from CVS
 # requires GNU Autoconf, GNU Automake, GNU Gettext and GNU Libtool
 
-autoreconf -f -v -i
+: ${AWK="awk"}
+: ${SED="sed"}
+: ${RM="rm -f"}
+
+ltdldir=libltdl
+
+dirname="s,/[^/]*$,,"
+basename="s,^.*/,,g"
+
+# Work around backward compatibility issue on IRIX 6.5. On IRIX 6.4+, sh
+# is ksh but when the shell is invoked as "sh" and the current value of
+# the _XPG environment variable is not equal to 1 (one), the special
+# positional parameter $0, within a function call, is the name of the
+# function.
+progpath="$0"
+
+# The name of this program:
+progname=`echo "$progpath" | $SED "$basename"`
+
+# func_echo arg...
+# Echo program name prefixed message.
+func_echo ()
+{
+    echo $progname: ${1+"$@"}
+}
+
+
+$RM -r "$ltdldir"
+func_echo "running: libtoolize --ltdl --force --verbose --copy"
+libtoolize --ltdl --force --verbose --copy
+mkdir "$ltdldir/m4"
+mkdir "$ltdldir/config"
+
+func_echo "running: autoreconf --force --verbose --install"
+autoreconf --force --verbose --install
 
 (
+  func_echo "generating testsuite"
   cd tests
-  ${AWK-awk} -f ./generate.awk ../doc/m4.texinfo > generated.at
+  $AWK -f ./generate.awk ../doc/m4.texinfo > generated.at
 )
 
 exit 0

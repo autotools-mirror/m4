@@ -26,7 +26,7 @@
 # ---------------------------
 # Use the installed regex if it is good enough.
 AC_DEFUN([m4_REGEX],
-[jm_INCLUDED_REGEX([$1])
+[gl_INCLUDED_REGEX([$1])
 if test $ac_use_included_regex = no; then
   # The system provides a good regex.  `#include <regex.h>' will work.
   INCLUDE_REGEX_H='#include <regex.h>'

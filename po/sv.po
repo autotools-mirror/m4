@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-11-13 12:56+0000\n"
+"POT-Creation-Date: 2004-06-17 12:20+0100\n"
 "PO-Revision-Date: 1999-03-28 18:56 +02:00\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -15,140 +15,140 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gnulib/m4/getopt.c:629 gnulib/m4/getopt.c:641
+#: gnulib/m4/getopt.c:570 gnulib/m4/getopt.c:589
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:674 gnulib/m4/getopt.c:678
+#: gnulib/m4/getopt.c:622 gnulib/m4/getopt.c:626
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:687 gnulib/m4/getopt.c:692
+#: gnulib/m4/getopt.c:635 gnulib/m4/getopt.c:640
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:728 gnulib/m4/getopt.c:741 gnulib/m4/getopt.c:1030
-#: gnulib/m4/getopt.c:1043
+#: gnulib/m4/getopt.c:686 gnulib/m4/getopt.c:708 gnulib/m4/getopt.c:1039
+#: gnulib/m4/getopt.c:1061
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:779 gnulib/m4/getopt.c:782
+#: gnulib/m4/getopt.c:746 gnulib/m4/getopt.c:749
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:790 gnulib/m4/getopt.c:793
+#: gnulib/m4/getopt.c:757 gnulib/m4/getopt.c:760
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:840 gnulib/m4/getopt.c:843
+#: gnulib/m4/getopt.c:815 gnulib/m4/getopt.c:818
 #, c-format
 msgid "%s: illegal option -- %c\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:849 gnulib/m4/getopt.c:852
+#: gnulib/m4/getopt.c:824 gnulib/m4/getopt.c:827
 #, c-format
 msgid "%s: invalid option -- %c\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:899 gnulib/m4/getopt.c:910 gnulib/m4/getopt.c:1096
-#: gnulib/m4/getopt.c:1109
+#: gnulib/m4/getopt.c:882 gnulib/m4/getopt.c:901 gnulib/m4/getopt.c:1114
+#: gnulib/m4/getopt.c:1135
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:962 gnulib/m4/getopt.c:973
+#: gnulib/m4/getopt.c:954 gnulib/m4/getopt.c:973
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
 msgstr ""
 
-#: gnulib/m4/getopt.c:997 gnulib/m4/getopt.c:1009
+#: gnulib/m4/getopt.c:997 gnulib/m4/getopt.c:1018
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: gnulib/m4/obstack.c:403 gnulib/m4/obstack.c:406 gnulib/m4/xmalloc.c:53
+#: gnulib/m4/obstack.c:417 gnulib/m4/obstack.c:420 gnulib/m4/xmalloc.c:45
 msgid "memory exhausted"
 msgstr ""
 
-#: gnulib/m4/regex.c:1302
+#: gnulib/m4/regex.c:1296
 msgid "Success"
 msgstr ""
 
-#: gnulib/m4/regex.c:1305
+#: gnulib/m4/regex.c:1299
 msgid "No match"
 msgstr ""
 
-#: gnulib/m4/regex.c:1308
+#: gnulib/m4/regex.c:1302
 #, fuzzy
 msgid "Invalid regular expression"
 msgstr "Otillåtet reguljäruttryck \"%s\": %s"
 
-#: gnulib/m4/regex.c:1311
+#: gnulib/m4/regex.c:1305
 msgid "Invalid collation character"
 msgstr ""
 
-#: gnulib/m4/regex.c:1314
+#: gnulib/m4/regex.c:1308
 msgid "Invalid character class name"
 msgstr ""
 
-#: gnulib/m4/regex.c:1317
+#: gnulib/m4/regex.c:1311
 msgid "Trailing backslash"
 msgstr ""
 
-#: gnulib/m4/regex.c:1320
+#: gnulib/m4/regex.c:1314
 msgid "Invalid back reference"
 msgstr ""
 
-#: gnulib/m4/regex.c:1323
+#: gnulib/m4/regex.c:1317
 msgid "Unmatched [ or [^"
 msgstr ""
 
-#: gnulib/m4/regex.c:1326
+#: gnulib/m4/regex.c:1320
 msgid "Unmatched ( or \\("
 msgstr ""
 
-#: gnulib/m4/regex.c:1329
+#: gnulib/m4/regex.c:1323
 msgid "Unmatched \\{"
 msgstr ""
 
-#: gnulib/m4/regex.c:1332
+#: gnulib/m4/regex.c:1326
 msgid "Invalid content of \\{\\}"
 msgstr ""
 
-#: gnulib/m4/regex.c:1335
+#: gnulib/m4/regex.c:1329
 msgid "Invalid range end"
 msgstr ""
 
-#: gnulib/m4/regex.c:1338
+#: gnulib/m4/regex.c:1332
 msgid "Memory exhausted"
 msgstr ""
 
-#: gnulib/m4/regex.c:1341
+#: gnulib/m4/regex.c:1335
 #, fuzzy
 msgid "Invalid preceding regular expression"
 msgstr "Fel när reguljäruttrycket \"%s\" matchades"
 
-#: gnulib/m4/regex.c:1344
+#: gnulib/m4/regex.c:1338
 #, fuzzy
 msgid "Premature end of regular expression"
 msgstr "För tidigt filslut i fryst fil"
 
-#: gnulib/m4/regex.c:1347
+#: gnulib/m4/regex.c:1341
 #, fuzzy
 msgid "Regular expression too big"
 msgstr "Otillåtet reguljäruttryck \"%s\": %s"
 
-#: gnulib/m4/regex.c:1350
+#: gnulib/m4/regex.c:1344
 msgid "Unmatched ) or \\)"
 msgstr ""
 
-#: gnulib/m4/regex.c:7915
+#: gnulib/m4/regex.c:7909
 #, fuzzy
 msgid "No previous regular expression"
 msgstr "Fel när reguljäruttrycket \"%s\" matchades"
