@@ -31,6 +31,7 @@ AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_CC_C_O
+M4_AC_CHECK_DEBUGGING
 
 # Gettext.
 ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
@@ -45,6 +46,15 @@ AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 
+case "$CFLAGS" in
+  *-pipe* ) ;;
+        * ) AC_LIBTOOL_COMPILER_OPTION([if $compiler supports -pipe],
+                [m4_cv_prog_compiler_pipe],
+                [-pipe -c conftest.$ac_ext], [],
+                [CFLAGS="$CFLAGS -pipe"])
+              ;;
+esac
+
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
@@ -52,7 +62,6 @@ AC_PATH_PROG(PERL,perl)
 
 AM_C_PROTOTYPES
 AC_C_CONST
-M4_AC_CHECK_DEBUGGING
 
 AC_LIB_LTDL
 
