@@ -593,7 +593,7 @@ M4BUILTIN_HANDLER (traceon)
   int i;
 
   if (argc == 1)
-    m4_hash_apply (m4_symtab, set_trace, (void *) obs);
+    m4_symtab_apply (set_trace, (void *) obs);
   else
     for (i = 1; i < argc; i++)
       {
@@ -613,7 +613,7 @@ M4BUILTIN_HANDLER (traceoff)
   int i;
 
   if (argc == 1)
-    m4_hash_apply (m4_symtab, set_trace, NULL);
+    m4_symtab_apply (set_trace, NULL);
   else
     for (i = 1; i < argc; i++)
       {

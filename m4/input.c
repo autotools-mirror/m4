@@ -742,12 +742,12 @@ m4_input_exit (void)
    token_stack, which never contains more than one token text at a time.
    The storage pointed to by the fields in TD is therefore subject to
    change the next time next_token () is called.	 */
-m4_token_t
+m4__token_type
 m4_next_token (m4_token *td)
 {
   int ch;
   int quote_level;
-  m4_token_t type;
+  m4__token_type type;
 
   do {
     obstack_free (&token_stack, token_bottom);
@@ -970,29 +970,29 @@ m4_token_copy (m4_token *dest, m4_token *src)
 static	void  lex_debug	(void);
 
 int
-m4_print_token (const char *s, m4_token_t t, m4_token *td)
+m4_print_token (const char *s, m4__token_type type, m4_token *token)
 {
   fprintf (stderr, "%s: ", s);
-  switch (t)
+  switch (type)
     {				/* TOKSW */
     case M4_TOKEN_SIMPLE:
-      fprintf (stderr,	"char\t\"%s\"\n",	TOKEN_TEXT (td));
+      fprintf (stderr,	"char\t\"%s\"\n",	TOKEN_TEXT (token));
       break;
 
     case M4_TOKEN_WORD:
-      fprintf (stderr,	"word\t\"%s\"\n",	TOKEN_TEXT (td));
+      fprintf (stderr,	"word\t\"%s\"\n",	TOKEN_TEXT (token));
       break;
 
     case M4_TOKEN_STRING:
-      fprintf (stderr,	"string\t\"%s\"\n",	TOKEN_TEXT (td));
+      fprintf (stderr,	"string\t\"%s\"\n",	TOKEN_TEXT (token));
       break;
 
     case M4_TOKEN_SPACE:
-      fprintf (stderr,	"space\t\"%s\"\n",	TOKEN_TEXT (td));
+      fprintf (stderr,	"space\t\"%s\"\n",	TOKEN_TEXT (token));
       break;
 
     case M4_TOKEN_MACDEF:
-      fprintf (stderr,	"builtin 0x%x\n", 	(int) TOKEN_FUNC (td));
+      fprintf (stderr,	"builtin 0x%x\n", 	(int) TOKEN_FUNC (token));
       break;
 
     case M4_TOKEN_EOF:
@@ -1009,10 +1009,10 @@ m4_print_token (const char *s, m4_token_t t, m4_token *td)
 static void
 lex_debug (void)
 {
-  m4_token_t t;
-  m4_token td;
+  m4__token_type type;
+  m4_token token;
 
-  while ((t = next_token (&td)) != NULL)
-    print_token ("lex", t, &td);
+  while ((type = next_token (&token)) != NULL)
+    print_token ("lex", type, &token);
 }
 #endif

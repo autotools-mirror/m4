@@ -254,7 +254,7 @@ produce_frozen_state (const char *name)
   produce_module_dump (file, lt_dlhandle_next (0));
 
   /* Dump all symbols.  */
-  produce_symbol_dump (file, m4_symtab);
+  produce_symbol_dump (file, m4__symtab);
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */

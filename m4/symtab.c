@@ -44,13 +44,13 @@
 
 #define M4_SYMTAB_DEFAULT_SIZE 2047
 
-static int	m4_symbol_destroy	(const void *name, void *symbol,
-					 void *symtab);
-static int	m4_arg_destroy		(const void *name, void *arg,
+static int	symbol_destroy		(const void *name, void *symbol,
+					 void *ignored);
+static int	arg_destroy		(const void *name, void *arg,
 					 void *arg_signature);
 
 /* Pointer to symbol table.  */
-m4_hash *m4_symtab = 0;
+m4_hash *m4__symtab = 0;
 
 
 
@@ -60,27 +60,26 @@ m4_hash *m4_symtab = 0;
    These functions are used to manage a symbol table as a whole.  */
 
 void
-m4_symtab_init (void)
+m4__symtab_init (void)
 {
-  m4_symtab = m4_hash_new (M4_SYMTAB_DEFAULT_SIZE,
-			   m4_hash_string_hash, m4_hash_string_cmp);
+  m4__symtab = m4_hash_new (M4_SYMTAB_DEFAULT_SIZE,
+			    m4_hash_string_hash, m4_hash_string_cmp);
 }
-
 
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
 void
-m4_symtab_remove_module_references (lt_dlhandle handle)
+m4__symtab_remove_module_references (lt_dlhandle handle)
 {
   m4_hash_iterator *place = 0;
 
   assert (handle);
 
    /* Traverse each symbol name in the hash table.  */
-  while ((place = m4_hash_iterator_next (m4_symtab, place)))
+  while ((place = m4_hash_iterator_next (m4__symtab, place)))
     {
       m4_symbol *symbol = (m4_symbol *) m4_hash_iterator_value (place);
-      m4_token *data = SYMBOL_TOKEN (symbol);
+      m4_token  *data   = SYMBOL_TOKEN (symbol);
 
       /* For symbols that have token data... */
       if (data)
@@ -111,25 +110,25 @@ m4_symtab_remove_module_references (lt_dlhandle handle)
 
 /* Release all of the memory used by the symbol table.  */
 void
-m4_symtab_exit (void)
+m4__symtab_exit (void)
 {
-  m4_hash_apply  (m4_symtab, m4_symbol_destroy, m4_symtab);
-  m4_hash_delete (m4_symtab);
+  m4_hash_apply  (m4__symtab, symbol_destroy, NULL);
+  m4_hash_delete (m4__symtab);
   m4_hash_exit   ();
 }
 
-/* This callback is used exclusively by m4_symtab_exit(), to cleanup
+/* This callback is used exclusively by m4__symtab_exit(), to cleanup
    the memory used by the symbol table.  As such, the trace bit is reset
    on every symbol so that m4_symbol_popdef() doesn't try to preserve
    the table entry.  */
 static int
-m4_symbol_destroy (const void *name, void *symbol, void *symtab)
+symbol_destroy (const void *name, void *symbol, void *ignored)
 {
   char *key = xstrdup ((char *) name);
 
   SYMBOL_TRACED ((m4_symbol *) symbol) = FALSE;
 
-  while (key && m4_hash_lookup ((m4_hash *) symtab, key))
+  while (key && m4_hash_lookup (m4__symtab, key))
     m4_symbol_popdef (key);
 
   XFREE (key);
@@ -148,7 +147,7 @@ m4_symbol_destroy (const void *name, void *symbol, void *symtab)
 m4_symbol *
 m4_symbol_lookup (const char *name)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4__symtab, name);
 
   /* If just searching, return status of search -- if only an empty
      struct is returned, that is treated as a failed lookup.  */
@@ -162,7 +161,7 @@ m4_symbol_lookup (const char *name)
 m4_symbol *
 m4_symbol_pushdef (const char *name)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4__symtab, name);
 
   m4_symbol *symbol = 0;
   m4_token *value   = XCALLOC (m4_token, 1);
@@ -179,7 +178,7 @@ m4_symbol_pushdef (const char *name)
   SYMBOL_TYPE (symbol)	= M4_TOKEN_VOID;
 
   if (!psymbol)
-    m4_hash_insert (m4_symtab, xstrdup (name), symbol);
+    m4_hash_insert (m4__symtab, xstrdup (name), symbol);
 
   return symbol;
 }
@@ -205,7 +204,7 @@ m4_symbol_define (const char *name)
 void
 m4_symbol_popdef (const char *name)
 {
-  m4_symbol **psymbol	= (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+  m4_symbol **psymbol	= (m4_symbol **) m4_hash_lookup (m4__symtab, name);
   m4_token  *stale	= NULL;
 
   assert (psymbol);
@@ -220,7 +219,7 @@ m4_symbol_popdef (const char *name)
       if (TOKEN_ARG_SIGNATURE (stale))
 	{
 	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale),
-			 m4_arg_destroy, TOKEN_ARG_SIGNATURE (stale));
+			 arg_destroy, TOKEN_ARG_SIGNATURE (stale));
 	  m4_hash_delete (TOKEN_ARG_SIGNATURE (stale));
 	}
       if (TOKEN_TYPE (stale) == M4_TOKEN_TEXT)
@@ -234,23 +233,15 @@ m4_symbol_popdef (const char *name)
     if (no_gnu_extensions || !SYMBOL_TRACED (*psymbol))
       {
 	XFREE (*psymbol);
-	xfree (m4_hash_remove (m4_symtab, name));
+	xfree (m4_hash_remove (m4__symtab, name));
       }
 }
 
 
-/* Pop all values from the symbol associated with NAME.  */
-void
-m4_symbol_delete (const char *name)
-{
-  while (m4_symbol_lookup (name))
-    m4_symbol_popdef (name);
-}
-
 /* Callback used by m4_symbol_popdef () to release the memory used
    by values in the arg_signature hash.  */
 static int
-m4_arg_destroy (const void *name, void *arg, void *arg_signature)
+arg_destroy (const void *name, void *arg, void *arg_signature)
 {
   struct m4_token_arg *token_arg = (struct m4_token_arg *) arg;
 
@@ -271,7 +262,7 @@ m4_arg_destroy (const void *name, void *arg, void *arg_signature)
    that is already interned in the symbol table.  The traced bit should
    be appropriately set by the caller.  */
 m4_symbol *
-m4_symbol_builtin (m4_symbol *symbol, m4_token *token)
+m4__symbol_set_builtin (m4_symbol *symbol, m4_token *token)
 {
   assert (symbol);
   assert (token);
@@ -295,7 +286,7 @@ m4_symbol_builtin (m4_symbol *symbol, m4_token *token)
 
 /* ...and similarly for macro valued symbols.  */
 m4_symbol *
-m4_symbol_macro (m4_symbol *symbol, m4_token *token)
+m4__symbol_set_macro (m4_symbol *symbol, m4_token *token)
 {
   assert (symbol);
   assert (TOKEN_TEXT (token));
@@ -320,15 +311,16 @@ m4_symbol_macro (m4_symbol *symbol, m4_token *token)
 
 #ifdef DEBUG_SYM
 
-static int symtab_print_list (const void *name, void *symbol, void *ignored);
-static void symtab_dump (void);
+static int  symtab_print_list (const void *name, void *symbol, void *ignored);
+static void symtab_debug      (void)
+static void symtab_dump	      (void);
 
 static void
 symtab_dump (void)
 {
   m4_hash_iterator *place = 0;
 
-  while ((place = m4_hash_iterator_next (m4_symtab, place)))
+  while ((place = m4_hash_iterator_next (m4__symtab, place)))
     {
       const char   *symbol_name	= (const char *) m4_hash_iterator_key (place);
       m4_symbol	   *symbol	= m4_hash_iterator_value (place);
@@ -368,15 +360,15 @@ symtab_dump (void)
 static void
 symtab_debug (void)
 {
-  m4_token_t t;
+  m4__token_type type;
   m4_token token;
   const char *text;
-  m4_symbol *s;
+  m4_symbol *symbol;
   int delete;
 
-  while ((t = m4_next_token (&token)) != M4_TOKEN_EOF)
+  while ((type = m4_next_token (&token)) != M4_TOKEN_EOF)
     {
-      if (t != M4_TOKEN_WORD)
+      if (type != M4_TOKEN_WORD)
 	continue;
       text = TOKEN_TEXT (&token);
       if (*text == '_')
@@ -387,9 +379,9 @@ symtab_debug (void)
       else
 	delete = 0;
 
-      s = m4_symbol_lookup (text);
+      symbol = m4_symbol_lookup (text);
 
-      if (s == NULL)
+      if (symbol == NULL)
 	printf (_("Name `%s' is unknown\n"), text);
 
       if (delete)
@@ -397,7 +389,7 @@ symtab_debug (void)
       else
 	(void) m4_symbol_define (text);
     }
-  m4_hash_apply (m4_symtab, symtab_print_list, NULL);
+  m4_symtab_apply (symtab_print_list, NULL);
 }
 
 static int
@@ -411,3 +403,21 @@ symtab_print_list (const void *name, void *symbol, void *ignored)
 }
 
 #endif /* DEBUG_SYM */
+
+/* Define these functions at the end, so that calls in the file use the
+   faster macro version from m4private.h.  */
+#undef m4_symtab_apply
+int
+m4_symtab_apply (m4_symtab_apply_func *func, void *data)
+{
+  return m4_hash_apply (m4__symtab, (m4_hash_apply_func *) func, data);
+}
+
+/* Pop all values from the symbol associated with NAME.  */
+#undef m4_symbol_delete
+void
+m4_symbol_delete (const char *name)
+{
+  while (m4_symbol_lookup (name))
+    m4_symbol_popdef (name);
+}

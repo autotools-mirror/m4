@@ -41,6 +41,19 @@ extern lt_dlhandle  m4__module_open (const char *name, struct obstack *obs);
 extern void	    m4__module_exit (void);
 
 
+
+/* --- SYMBOL TABLE MANAGEMENT --- */
+
+extern m4_hash *m4__symtab;
+
+#define m4_symtab_apply(func, data)				\
+	m4_hash_apply (m4__symtab, (m4_hash_apply_func *)(func), (data))
+
+extern void	m4__symtab_init				(void);
+extern void	m4__symtab_remove_module_references	(lt_dlhandle);
+extern void	m4__symtab_exit				(void);
+
+
 /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
 extern boolean m4__single_quotes;
 
@@ -78,7 +91,7 @@ struct m4_token {
   m4_hash *		arg_signature;
   int			min_args, max_args;
 
-  m4_data_t		type;
+  m4_symbol_type	type;
   union {
     char *		text;
     m4_builtin_func *	func;

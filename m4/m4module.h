@@ -72,19 +72,21 @@ extern m4_macro	   *m4_module_macros   (lt_dlhandle);
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
-extern m4_hash *m4_symtab;
 
-extern void	m4_symtab_init		(void);
-extern void	m4_symtab_remove_module_references (lt_dlhandle);
-extern void	m4_symtab_exit		(void);
+typedef struct m4_symtab m4_symtab;
+
+typedef int m4_symtab_apply_func (const void *key, void *value, void *data);
+
+extern int	  m4_symtab_apply	(m4_symtab_apply_func*, void*);
 
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
 extern m4_symbol *m4_symbol_define	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
-extern m4_symbol *m4_symbol_builtin	(m4_symbol *symbol, m4_token *token);
-extern m4_symbol *m4_symbol_macro	(m4_symbol *symbol, m4_token *token);
+
+#define m4_symbol_delete(name)						\
+	while (m4_symbol_lookup (name)) m4_symbol_popdef (name)
 
 
 /* Various different token types.  */
@@ -96,21 +98,21 @@ typedef enum {
   M4_TOKEN_WORD,		/* an identifier */
   M4_TOKEN_SIMPLE,		/* a single character */
   M4_TOKEN_MACDEF		/* a macros definition (see "defn") */
-} m4_token_t;
+} m4__token_type;
 
 /* The data for a token, a macro argument, and a macro definition.  */
 typedef enum {
   M4_TOKEN_VOID,
   M4_TOKEN_TEXT,
   M4_TOKEN_FUNC
-} m4_data_t;
+} m4_symbol_type;
 
 
 
 
 /* --- MACRO (and builtin) MANAGEMENT --- */
 
-extern m4_symbol *m4_symbol_token (const char *name, m4_data_t type,
+extern m4_symbol *m4_symbol_token (const char *name, m4_symbol_type type,
 			m4_token *token,
 			m4_symbol *(*getter) (const char *name),
 			m4_symbol *(*setter) (m4_symbol *, m4_token *));
@@ -125,20 +127,26 @@ extern const m4_builtin *m4_builtin_find_by_name (
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
 
+
+/* These 2 functions are not part of the documented API, but we need to
+   declare them here so that the macros below will work.  */
+extern m4_symbol *m4__symbol_set_builtin (m4_symbol*, m4_token*);
+extern m4_symbol *m4__symbol_set_macro	 (m4_symbol*, m4_token*);
+
 #define m4_macro_pushdef(name, macro)					\
 	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
-			 m4_symbol_pushdef, m4_symbol_macro)
+			 m4_symbol_pushdef, m4__symbol_set_macro)
 #define m4_macro_define(name, macro)					\
 	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
-			 m4_symbol_define, m4_symbol_macro)
+			 m4_symbol_define, m4__symbol_set_macro)
 #define m4_builtin_pushdef(name, builtin)				\
 	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
-			 m4_symbol_pushdef, m4_symbol_builtin)
+			 m4_symbol_pushdef, m4__symbol_set_builtin)
 #define m4_builtin_define(name, builtin)				\
 	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
-			 m4_symbol_define, m4_symbol_builtin)
+			 m4_symbol_define, m4__symbol_set_builtin)
 
-extern m4_token_t	m4_token_type	  (m4_token *);
+extern m4__token_type	m4_token_get_type (m4_token *);
 extern char	       *m4_token_text	  (m4_token *);
 extern m4_builtin_func *m4_token_func	  (m4_token *);
 
@@ -404,7 +412,7 @@ extern int m4_current_line;
 extern	void	m4_input_init	(void);
 extern	void	m4_input_exit	(void);
 extern	int	m4_peek_input	(void);
-extern	m4_token_t m4_next_token (m4_token *);
+extern	m4__token_type m4_next_token (m4_token *);
 extern	void	m4_token_copy	(m4_token *dest, m4_token *src);
 extern	void	m4_skip_line	(void);
 

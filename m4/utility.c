@@ -75,8 +75,8 @@ m4_string ecomm;
    Since they are functions the caller does not need access to the
    internal data structure, so they are safe to export for use in
    external modules.  */
-m4_token_t
-m4_token_type (m4_token *name)
+m4__token_type
+m4_token_get_type (m4_token *name)
 {
   return TOKEN_TYPE (name);
 }
@@ -248,7 +248,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
   if (argc == 1)
     {
-      m4_hash_apply (m4_symtab, m4_dump_symbol, data);
+      m4_symtab_apply (m4_dump_symbol, data);
     }
   else
     {

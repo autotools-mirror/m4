@@ -25,7 +25,7 @@
 #include "m4private.h"
 
 static void expand_macro (const char *name, m4_symbol *);
-static void expand_token (struct obstack *, m4_token_t, m4_token *);
+static void expand_token (struct obstack *, m4__token_type, m4_token *);
 
 /* Current recursion level in expand_macro ().  */
 int m4_expansion_level = 0;
@@ -37,7 +37,7 @@ static int macro_call_id = 0;
 void
 m4_expand_input (void)
 {
-  m4_token_t type;
+  m4__token_type type;
   m4_token token;
 
   while ((type = m4_next_token (&token)) != M4_TOKEN_EOF)
@@ -50,7 +50,7 @@ m4_expand_input (void)
    macro definition.  If they have, they are expanded as macros, otherwise
    the text are just copied to the output.  */
 static void
-expand_token (struct obstack *obs, m4_token_t type, m4_token *token)
+expand_token (struct obstack *obs, m4__token_type type, m4_token *token)
 {
   m4_symbol *symbol;
   char *text = xstrdup (TOKEN_TEXT (token));
@@ -108,7 +108,7 @@ expand_token (struct obstack *obs, m4_token_t type, m4_token *token)
 static boolean
 expand_argument (struct obstack *obs, m4_token *argp)
 {
-  m4_token_t type;
+  m4__token_type type;
   m4_token token;
   char *text;
   int paren_level = 0;

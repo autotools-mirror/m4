@@ -228,7 +228,7 @@ main (int argc, char *const *argv, char *const *envp)
   m4__module_init ();
   m4_debug_init ();
   m4_include_init ();
-  m4_symtab_init ();
+  m4__symtab_init ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -527,7 +527,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
      Strictly, we don't need to do this, but it makes leak detection
      a whole lot easier!  */
   m4__module_exit ();
-  m4_symtab_exit ();
+  m4__symtab_exit ();
   m4_syntax_exit ();
   m4_output_exit ();
   m4_input_exit ();

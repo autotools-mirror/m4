@@ -72,7 +72,7 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 }
 
 m4_symbol *
-m4_symbol_token (const char *name, m4_data_t type, m4_token *token,
+m4_symbol_token (const char *name, m4_symbol_type type, m4_token *token,
 		 m4_symbol *(*getter) (const char *name),
 		 m4_symbol *(*setter) (m4_symbol *, m4_token *))
 {
