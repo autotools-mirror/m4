@@ -1,3 +1,8 @@
+2005-03-11  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>  (tiny change)
+
+	* tests/Makefile (clean-local): Ignore testsuite cleanup
+	failures.
+
 2005-03-11  Per Bothner  <per@bothner.com>  (tiny change)
 
 	* tests/Makefile (clean-local): Only run the testsuite cleanup
@@ -24,7 +29,7 @@
 	* acm4/m4-error.m4 (INCLUDE_ERROR_H): Likewise.
 	* acm4/m4-obstack.m4 (INCLUDE_OBSTACK_H): Likewise.
 	* acm4/m4-regex.m4 (INCLUDE_REGEX_H): Likewise.
-	* m4/system_.h: Likewise, in non-configured includes. 
+	* m4/system_.h: Likewise, in non-configured includes.
 
 2004-10-14  Noah Misch  <noah@cs.caltech.edu>,
 	    Gary V. Vaughan  <gary@gnu.org>

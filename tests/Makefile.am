@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2005 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ check-local: atconfig $(TESTSUITE)
 	$(SHELL) $(srcdir)/$(TESTSUITE)
 
 clean-local:
-	test -f $(srcdir)/$(TESTSUITE) && \
+	-test -f $(srcdir)/$(TESTSUITE) && \
 	  $(srcdir)/$(TESTSUITE) --clean
 
 # Using variables so that this snippet is not too wide and can
