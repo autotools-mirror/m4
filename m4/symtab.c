@@ -156,10 +156,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
       return 0;
     }
 
-  M4ERROR ((warning_status, 0,
-	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup (%s, %d)"),
-	    name, mode));
-  abort ();
+  assert (0);
   /*NOTREACHED*/
   return 0;
 }
@@ -224,9 +221,7 @@ m4_symbol_popdef (const char *name)
 {
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
 
-  if (!psymbol)
-    M4ERROR ((warning_status, 0,
-	      "INTERNAL ERROR: m4_symbol_popdef (%s)", name));
+  assert (psymbol);
 
   if (M4_SYMBOL_DATA_NEXT (*psymbol))
     m4_symbol_pop (*psymbol);
@@ -244,15 +239,9 @@ m4_symbol_delete (const char *name)
 {
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
 
-  if (!psymbol)
-    M4ERROR ((warning_status, 0,
-	      "INTERNAL ERROR: m4_symbol_delete (%s)", name));
-
-  if (psymbol)
-    {
-      xfree (m4_hash_remove (m4_symtab, name));
-      m4_symbol_del (*psymbol);
-    }
+  assert (psymbol);
+  xfree (m4_hash_remove (m4_symtab, name));
+  m4_symbol_del (*psymbol);
 }
 
 

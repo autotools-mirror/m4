@@ -480,13 +480,9 @@ popdef(`hej')
 dumpdef(`hej')
 popdef(`hej')
 dumpdef(`hej')
-popdef(`hej')
-dumpdef(`hej')
-popdef(`hej')
 
 dumpdef(`mac2')
 popdef(`mac2')
-dumpdef(`mac2')
 ]])
 
 AT_CHECK_M4([pushpop.m4], 0, [],
@@ -497,10 +493,9 @@ hej:	`def 4.'
 hej:	`def 3.'
 hej:	`def 2.'
 hej:	`def 1.'
-m4: pushpop.m4: 18: Undefined name hej
-m4: pushpop.m4: 20: Undefined name hej
-m4: pushpop.m4: 23: Undefined name mac2
-m4: pushpop.m4: 25: Undefined name mac2
+m4: pushpop.m4: 18: Warning: dumpdef: undefined name: hej
+m4: pushpop.m4: 20: Warning: dumpdef: undefined name: mac2
+m4: pushpop.m4: 21: Warning: popdef: undefined name: mac2
 ]])
 
 AT_CLEANUP

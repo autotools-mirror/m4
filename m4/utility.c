@@ -112,22 +112,24 @@ m4_token_data_func_traced (m4_token_data *name)
 boolean
 m4_bad_argc (m4_token_data *name, int argc, int min, int max)
 {
-  boolean isbad = FALSE;
-
   if (min > 0 && argc < min)
     {
-      if (!suppress_warnings)
-	M4ERROR ((warning_status, 0,
-		  _("Warning: Too few arguments to builtin `%s'"),
-		  M4_TOKEN_DATA_TEXT (name)));
-      isbad = TRUE;
+      M4WARN ((warning_status, 0,
+	       _("Warning: %s: too few arguments"),
+	       M4_TOKEN_DATA_TEXT (name)));
+      return TRUE;
     }
-  else if (max > 0 && argc > max && !suppress_warnings)
-    M4ERROR ((warning_status, 0,
-	      _("Warning: Excess arguments to builtin `%s' ignored"),
-	      M4_TOKEN_DATA_TEXT (name)));
 
-  return isbad;
+  if (max > 0 && argc > max)
+    {
+      M4WARN ((warning_status, 0,
+	       _("Warning: %s: too many arguments (ignored)"),
+	       M4_TOKEN_DATA_TEXT (name)));
+      /* Return FALSE, otherwise it is not exactly `ignored'. */
+      return FALSE;
+    }
+
+  return FALSE;
 }
 
 const char *
@@ -149,9 +151,9 @@ m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
   if (*arg == 0 || (*valuep = strtol (m4_skip_space (arg), &endp, 10),
 		    *m4_skip_space (endp) != 0))
     {
-      M4ERROR ((warning_status, 0,
-		_("Non-numeric argument to `%s': %s"),
-		M4_TOKEN_DATA_TEXT (macro), arg));
+      M4WARN ((warning_status, 0,
+	       _("Warning: %s: non-numeric argument: %s"),
+	       M4_TOKEN_DATA_TEXT (macro), arg));
       return FALSE;
     }
   return TRUE;
@@ -267,8 +269,9 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
 	    m4_dump_symbol (M4_TOKEN_DATA_TEXT (argv[i]), symbol, data);
 	  else if (complain)
-	    M4ERROR ((warning_status, 0,
-		      _("Undefined name %s"), M4_TOKEN_DATA_TEXT (argv[i])));
+	    M4WARN ((warning_status, 0,
+		     _("Warning: %s: undefined name: %s"),
+		     M4ARG (0), M4ARG (i)));
 	}
     }
 

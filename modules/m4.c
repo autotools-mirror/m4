@@ -186,7 +186,12 @@ M4BUILTIN_HANDLER (undefine)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
-  m4_lookup_symbol (M4ARG (1), M4_SYMBOL_DELETE);
+
+  if (!m4_symbol_lookup (M4ARG (1)))
+    M4WARN ((warning_status, 0,
+	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
+  else
+    m4_symbol_delete (M4ARG (1));
 }
 
 M4BUILTIN_HANDLER (pushdef)
@@ -198,7 +203,11 @@ M4BUILTIN_HANDLER (popdef)
 {
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
-  m4_lookup_symbol (M4ARG (1), M4_SYMBOL_POPDEF);
+  if (!m4_symbol_lookup (M4ARG (1)))
+    M4WARN ((warning_status, 0,
+	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
+  else
+    m4_symbol_popdef (M4ARG (1));
 }
 
 
@@ -282,6 +291,9 @@ M4BUILTIN_HANDLER (dumpdef)
       m4_symbol *symbol = m4_symbol_lookup (data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
+      assert (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT
+	      || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
+	      || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_VOID);
       switch (M4_SYMBOL_TYPE (symbol))
 	{
 	case M4_TOKEN_TEXT:
@@ -294,19 +306,12 @@ M4BUILTIN_HANDLER (dumpdef)
 
 	case M4_TOKEN_FUNC:
 	  bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (symbol));
-	  if (bp == NULL)
-	    {
-	      M4ERROR ((warning_status, 0,
-			_("Undefined name `%s'"), data.base[0]));
-	      abort ();
-	    }
+	  assert (bp);
 	  fprintf (stderr, "<%s>\n", bp->name);
 	  break;
 
-	default:
-	  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type in m4_dumpdef ()")));
-	  abort ();
+	case M4_TOKEN_VOID:
+	  assert (!"VOID token in m4_dumpdef");
 	  break;
 	}
     }
@@ -324,27 +329,29 @@ M4BUILTIN_HANDLER (defn)
 
   symbol = m4_symbol_lookup (M4ARG (1));
   if (symbol == NULL)
-    return;
+    {
+      M4WARN ((warning_status, 0,
+	       _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
+      return;
+    }
 
   switch (M4_SYMBOL_TYPE (symbol))
     {
     case M4_TOKEN_TEXT:
       m4_shipout_string(obs, M4_SYMBOL_TEXT (symbol), 0, TRUE);
-      break;
+      return;
 
     case M4_TOKEN_FUNC:
       m4_push_macro (M4_SYMBOL_FUNC (symbol), M4_SYMBOL_HANDLE (symbol),
 		     M4_SYMBOL_TRACED (symbol));
-      break;
+      return;
 
     case M4_TOKEN_VOID:
-      break;
-
-    default:
-      M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad symbol type in m4_defn ()")));
-      abort ();
+      assert (!"VOID token in m4_dumpdef");
+      return;
     }
+
+  assert (!"Bad token data type in m4_defn");
 }
 
 
@@ -628,12 +635,13 @@ M4BUILTIN_HANDLER (traceon)
   else
     for (i = 1; i < argc; i++)
       {
-	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
+	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
 	  set_trace (name, symbol, (char *) obs);
 	else
-	  M4ERROR ((warning_status, 0, _("Undefined name %s"), name));
+	  M4WARN ((warning_status, 0,
+		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
       }
 }
 
@@ -647,12 +655,13 @@ M4BUILTIN_HANDLER (traceoff)
   else
     for (i = 1; i < argc; i++)
       {
-	const char *name = M4_TOKEN_DATA_TEXT (argv[i]);
+	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
 	  set_trace (name, symbol, NULL);
 	else
-	  M4ERROR ((warning_status, 0, _("Undefined name %s"), name));
+	  M4WARN ((warning_status, 0,
+		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
       }
 }
 

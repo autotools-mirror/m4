@@ -104,6 +104,7 @@ extern const m4_builtin *m4_builtin_find_by_func (
 extern m4_hash *m4_symtab;
 
 extern void	  m4_symtab_init		(void);
+extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup_t);
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
 extern m4_symbol *m4_symbol_insert	(const char *);
@@ -164,6 +165,13 @@ extern boolean		m4_token_data_func_traced (m4_token_data*);
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
+#define M4WARN(Arglist) \
+  do								\
+    {								\
+       if (!suppress_warnings)                                  \
+         M4ERROR (Arglist);					\
+    }								\
+  while (0)
 
 /* The name this program was run with. */
 const char *program_name;
