@@ -1,4 +1,4 @@
-## Makefile.maint -- Makefile rules for libtool maintainers -*-Makefile-*-
+## Makefile.maint -- Makefile rules for m4 maintainers -*-Makefile-*-
 ##
 ## Copyright (C) 2004, 2005 Free Software Foundation
 ##
@@ -42,7 +42,6 @@ cvs-release: version-check prev-tarball cvs-news fetch cvs-commit cvs-dist delta
 	echo " *** $$xdeltaname, $$xdeltaname.sig and";\
 	echo " *** $$xdeltaname.directive.asc to either"
 	echo " *** /incoming/alpha or /incoming/ftp on ftp-upload.gnu.org."
-	echo " *** You might need to upload manual.html to webcvs/libtool."
 
 .PHONY: version-check
 version-check:
@@ -65,7 +64,7 @@ prev-tarball:
 
 # TSDEPS will be defined to TSDEPS_DIST at `make dist' time
 TSDEPS =
-TSDEPS_DIST = ChangeLog m4/libtool.m4
+TSDEPS_DIST = ChangeLog
 CVS = cvs # set it to `:' to avoid CVS operations
 
 .PHONY: timestamps update-timestamps
@@ -79,7 +78,7 @@ update-timestamps:
 .PHONY: cvs-news
 cvs-news:
 ## Make sure the NEWS file is up-to-date:
-	@if sed '1,2d;3q' $(srcdir)/NEWS | grep -e "$(VERSION)" >/dev/null; \
+	@if sed '1,3d;4q' $(srcdir)/NEWS | grep -e "$(VERSION)" >/dev/null; \
 	then :; \
 	else \
 	  echo "NEWS not updated; not releasing" 1>&2; \
@@ -106,7 +105,9 @@ fetch:
 	(cd Fetchdir && \
 	$(WGETSGO)/autoconf/autoconf/INSTALL; \
 	$(WGETSGO)/automake/automake/lib/install-sh; \
-	$(WGETSGO)/texinfo/texinfo/doc/texinfo.tex )
+	$(WGETSGO)/texinfo/texinfo/doc/texinfo.tex; \
+	$(WGETSGO)/texinfo/texinfo/util/gendocs.sh; \
+	$(WGETSGO)/texinfo/texinfo/util/gendocs_template; )
 ## Don't exit after test because we want to give as many errors as
 ## possible.
 	@stat=0; for file in $(FETCHFILES); do \
@@ -133,13 +134,13 @@ cvs-commit: cvs-news
 .PHONY: cvs-dist
 cvs-dist: cvs-news timestamps
 ## Build the distribution:
-	$(MAKE) distcheck
+	$(MAKE) dist
 ## Finally, if everything was successful, tag the release
 	cd $(srcdir) \
-	  && $(CVS) -q tag `echo "release-$(VERSION)" | sed 's/\./-/g'`
+	  && $(CVS) -q tag `echo "release-$(VERSION)" | sed 's/\./_/g'`
 ## Generate signatures and directives for FSF ftp-upload:
 	for suffix in .gz .bz2; do \
-	  ofile="$(PACKAGE)-$(VERSION).tar.$$suffix"; \
+	  ofile="$(PACKAGE)-$(VERSION).tar$$suffix"; \
 	  $(GPG) --detach-sign $$ofile \
 	  && echo "directory: $(PACKAGE)" > $$ofile.directive \
 	  && $(GPG) --clearsign $$ofile.directive \
@@ -209,7 +210,12 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 
 .PHONY: web-manual
 web-manual:
-	@$(LN_S) $(top_srcdir)/doc/libtool.texi doc/manual.texi
-	$(TEXI2HTML) -I doc -monolithic -number -verbose doc/manual.texi
-	@mv doc/manual.html manual.html
-	@rm -f doc/manual.texi
+	@ln -s `cd $(srcdir) && pwd`/doc/$(PACKAGE).texinfo doc/$(PACKAGE).texi
+	@ln -s `cd $(srcdir) && pwd`/doc/version.texi doc/version.texi
+	@ln -s `pwd`/Fetchdir/gendocs.sh doc/gendocs.sh
+	@ln -s `pwd`/Fetchdir/gendocs_template doc/gendocs_template
+	@cd doc; \
+	  $(SHELL) ./gendocs.sh $(PACKAGE) "GNU $(PACKAGE) - GNU macro processor"
+	@rm -rf doc/$(PACKAGE).texi doc/version.texi doc/gendocs* manual
+	@mv -f doc/manual .
+	@echo " *** Upload the manual directory to web-cvs."

@@ -114,6 +114,7 @@ dist: $(DISTFILES)
 	done
 	chmod -R a+r $(PACKAGE)-$(VERSION)
 	tar chozf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
+	tar chojf $(PACKAGE)-$(VERSION).tar.bz2 $(PACKAGE)-$(VERSION)
 	rm -rf $(PACKAGE)-$(VERSION)
 
 # For an explanation of the following Makefile rules, see node

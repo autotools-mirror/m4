@@ -1,3 +1,22 @@
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
+	Changes needed to automate the release process for 1.4.3:
+
+	* Makefile.in (dist): Make .tar.bz2 tarball too.
+	* Makefile.maint (TSDEPS_DIST): Remove m4/libtool.m4.
+	(cvs-news): Look 1 line further down for NEWS release number.
+	(cvs-dist): We don't use automake, so make dist is fine.
+	Remove double . before suffixes.
+	(cvs-release): Don't mention manual.html.
+	(fetch): Get latest gendocs files.
+	(web-manual): Rewritten to use gendoc for multiformat manuals.
+	* doc/gendocs.sh: Don't save an old version in m4 CVS!
+	* doc/m4.texinfo (Index): HFS+ (the file system on my Mac) is case
+	preserving, but case insensitive, so generating html docs per node
+	clashes between Index.html, the node file, and index.html, the
+	top-level of the document tree...
+	(Index macro): ...so renamed to this.  Changed all references.
+
 2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* configure.ac (AC_INIT): Bump to 1.4.3a.

@@ -208,7 +208,7 @@ Diverting and undiverting output
 Macros for text handling
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2392,7 +2392,7 @@ various ways, extracting substrings, searching, substituting, and so on.
 
 @menu
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2400,7 +2400,7 @@ various ways, extracting substrings, searching, substituting, and so on.
 * Format::                      Formatting strings (printf-like)
 @end menu
 
-@node Len, Index, Text handling, Text handling
+@node Len, Index macro, Text handling, Text handling
 @section Calculating length of strings
 
 @cindex length of strings
@@ -2425,7 +2425,7 @@ len(`abcdef')
 
 The builtin macro @code{len} is recognized only when given arguments.
 
-@node Index, Regexp, Len, Text handling
+@node Index macro, Regexp, Len, Text handling
 @section Searching for substrings
 
 @findex index
@@ -2451,7 +2451,7 @@ index(`gnus, gnats, and armadillos', `dag')
 
 The builtin macro @code{index} is recognized only when given arguments.
 
-@node Regexp, Substr, Index, Text handling
+@node Regexp, Substr, Index macro, Text handling
 @section Searching for regular expressions
 
 @cindex regular expressions
