@@ -22,4 +22,5 @@
 EXTRA_DIST = 					\
 debug.m4					\
 gmp.m4						\
+gnu-obstacks.m4					\
 stackovf.m4
