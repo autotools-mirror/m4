@@ -1,3 +1,9 @@
+2001-04-08  Roderick Koehle <Roderick.Koehle@infineon.com>
+
+	* modules/format.c (format):  Formatting for %f was not
+	interpreting the position of the decimal point correctly for
+	whole numbers.
+
 2000-12-01  Gary V. Vaughan  <gary@gnu.org>
 
 	* TODO:  Removed m4exit bug.

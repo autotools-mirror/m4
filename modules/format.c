@@ -456,8 +456,10 @@ format (obs, argc, argv)
 	      }
 	    else
 	      {
-		while (--decpt >= 0)
+		while (*t && --decpt >= 0)
 		  *s++ = *t++;
+		while (--decpt>=0)
+		  *s++ = '0';
 		if (n > 0 || alternate)
 		  *s++ = '.';
 	      }
