@@ -9,13 +9,13 @@ rm -f config.cache
 
 # shtoolize -q -I ./$auxdir -o ./shtool echo move install mkdir version && \
 # libtoolize -f -c || exit 1
-# gettextize -f -c  || exit 1
+ gettextize -f -c  || exit 1
 aclocal -I ./$auxdir  || exit 1
 autoheader || exit 1
 
-touch ltconfig
+touch ./$aux_dir/ltconfig
 automake --add-missing --copy || { rm ltconfig && exit 1; }
-rm ltconfig
+rm ./$aux_dir/ltconfig
 
 autoconf -l ./$auxdir || exit 1
 
