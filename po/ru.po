@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-05 10:19+0200\n"
+"POT-Creation-Date: 2001-09-06 18:16+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -376,7 +376,7 @@ msgstr "Имя %s неопределено"
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: modules/m4.c:536 src/freeze.c:390
+#: modules/m4.c:536 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
@@ -391,35 +391,35 @@ msgstr "Неверное выражение: %s"
 msgid "%s support was not compiled in"
 msgstr ""
 
-#: src/freeze.c:166
+#: src/freeze.c:161
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена!"
 
-#: src/freeze.c:188
+#: src/freeze.c:183
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в freeze_one_symbol ()"
 
-#: src/freeze.c:279
+#: src/freeze.c:274
 msgid "Expecting line feed in frozen file"
 msgstr "Ожидается перевод строки в файле-образе памяти"
 
-#: src/freeze.c:281
+#: src/freeze.c:276
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ожидается символ '%c' в файле-образе памяти"
 
-#: src/freeze.c:363 src/freeze.c:536
+#: src/freeze.c:358 src/freeze.c:531
 msgid "Premature end of frozen file"
 msgstr "Преждевременный конец файла-образа памяти"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:403 src/freeze.c:445 src/freeze.c:498 src/freeze.c:516
-#: src/freeze.c:634
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:493 src/freeze.c:511
+#: src/freeze.c:629
 msgid "Ill-formated frozen file"
 msgstr "Неверный формат файла-образа памяти"
 
-#: src/freeze.c:483
+#: src/freeze.c:478
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"
@@ -600,11 +600,21 @@ msgstr ""
 msgid "Bad debug flags: `%s'"
 msgstr "Неверный флаг отладки: '%s'"
 
-#: src/main.c:369
-msgid " (options:"
-msgstr " (ключи:"
+#: src/main.c:368
+msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
+msgstr ""
 
-#: src/main.c:452
+#: src/main.c:371
+msgid "Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."
+msgstr ""
+
+#: src/main.c:374
+msgid ""
+"This is free software; see the source for copying conditions.  There is NO\n"
+"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+msgstr ""
+
+#: src/main.c:456
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код в косвенных аргументах"
 
@@ -625,6 +635,9 @@ msgstr ""
 #: src/stackovf.c:203
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ". Проверка на возможную бесконечную рекурсию.\n"
+
+#~ msgid " (options:"
+#~ msgstr " (ключи:"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"

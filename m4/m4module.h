@@ -20,15 +20,9 @@
 #ifndef M4MODULE_H
 #define M4MODULE_H 1
 
-#if HAVE_OBSTACK
-#  include <obstack.h>
-#else
-#  include <m4/obstack.h>
-#endif
-
+#include <m4/system.h>
 #include <m4/error.h>
 #include <m4/ltdl.h>
-#include <m4/system.h>
 #include <m4/hash.h>
 
 BEGIN_C_DECLS

@@ -19,12 +19,7 @@
 
 /* This module handles frozen files.  */
 
-#if HAVE_OBSTACK
-#  include <obstack.h>
-#else
-#  include <m4/obstack.h>
-#endif
-
+#include "m4/system.h"
 #include "m4.h"
 #include "m4private.h"
 

@@ -1,3 +1,31 @@
+2001-09-06  Gary V. Vaughan  <gary@gnu.org>
+
+	Fix the obstack.h problem once and for all!  At configure time we
+	can test for a system supplied obstack.h:  depending on the
+	result, we now generate system.h with an #include of the correct
+	header.  As a bonus, I've also added a --with-included-obstack,
+	incase the user doesn't like the system obstack for some
+	reason... and also we can test the shipped obstack on a system
+	that has oe of its own.  We also now need to be careful to add
+	build directories to the include search path, since the generated
+	system.h will be in the build tree.
+
+	* configure.in (AC_CONFIG_FILES): Generate system.h from
+	system-h.in.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Determine whether to
+	include the system obstack header or the copy shipped with M4.
+	Allow the user to override configure and force the build to use
+	the shipped version.
+	* m4/system-h.in: New file, template for...
+	* m4/system.h: ...this.  Now deleted.
+	* m4/m4module.h: Include system.h before everything else.
+	* src/freeze.c: Ditto.
+	* m4/Makefile.am (dist-hook): Remove generated system.h.
+	(INCLUDES): Check builddir for generated headers before checking
+	srcdir.
+	* modules/Makefile.am (INCLUDES): Ditto.
+	* src/Makefile.am (INCLUDES): Ditto.
+
 2001-09-05  Gary V. Vaughan  <gary@gnu.org>
 
 	* TODO: Remove the items that have been addressed already.

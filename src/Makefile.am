@@ -21,7 +21,8 @@
 CLEANFILES = m4$(EXEEXT)
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
+INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
+		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
 
 noinst_HEADERS = gnu-getopt.h
 

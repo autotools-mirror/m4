@@ -18,6 +18,8 @@
 */
 
 /**
+ * @configure_generated@
+ *
  * This file is installed, so cannot rely on the contents of config.h.
  * It works best if included _after_ system headers.
  **/
@@ -28,6 +30,7 @@
 /* I have yet to see a system that doesn't have these... */
 #include <stdio.h>
 #include <sys/types.h>
+#include @INCLUDE_OBSTACK_H@
 
 /* This is okay in an installed file, because it will not change the
    behaviour of the including program whether ENABLE_NLS is defined

@@ -140,7 +140,7 @@ AC_SUBST(ac_aux_dir)
 
 # Outputs.
 AC_CONFIG_FILES(Makefile config/Makefile doc/Makefile m4/Makefile
-                src/Makefile modules/Makefile tests/Makefile
-                examples/Makefile)
+                m4/system.h:m4/system-h.in src/Makefile modules/Makefile
+		tests/Makefile examples/Makefile)
 
 AC_OUTPUT
