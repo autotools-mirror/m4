@@ -335,9 +335,7 @@ main (int argc, char *const *argv, char *const *envp)
 	nesting_limit = atoi (optarg);
 	break;
       case 'M':
-	{
-	  const char *search_path = lt_dlgetsearchpath ();
-	  if (lt_dlsetsearchpath (optarg) != 0)
+	if (lt_dlinsertsearchdir (lt_dlgetsearchpath(), optarg) != 0)
 	  {
 	    const char *dlerr = lt_dlerror();
 	    if (dlerr == NULL)
@@ -349,9 +347,6 @@ main (int argc, char *const *argv, char *const *envp)
 			_("ERROR: failed to add search directory `%s': %s"),
 			optarg, dlerr));
 	  }
-	  if (search_path)
-	    lt_dladdsearchdir (search_path);
-	}
 	break;
 
       case 'P':
