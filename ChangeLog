@@ -1,5 +1,10 @@
 2001-09-27  Akim Demaille  <akim@epita.fr>
 
+	* tests/m4.in: Don't use short options.
+	Simplify the stderr signature normalization.
+
+2001-09-27  Akim Demaille  <akim@epita.fr>
+
 	tests/m4 shall be position independent.
 
 	* tests/m4.in: New.
