@@ -284,7 +284,7 @@ make_room_for (int length)
       selected_diversion->file = tmpfile ();
       if (selected_diversion->file == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
-		  _("ERROR: Cannot create temporary file for diversion")));
+		  _("cannot create temporary file for diversion")));
 
       if (selected_diversion->used > 0)
 	{
@@ -294,7 +294,7 @@ make_room_for (int length)
 			  selected_diversion->file);
 	  if (count != 1)
 	    M4ERROR ((EXIT_FAILURE, errno,
-		      _("ERROR: Cannot flush diversion to temporary file")));
+		      _("cannot flush diversion to temporary file")));
 	}
 
       /* Reclaim the buffer space for other diversions.  */
@@ -372,7 +372,7 @@ output_text (const char *text, int length)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-	M4ERROR ((EXIT_FAILURE, errno, _("ERROR: Copying inserted file")));
+	M4ERROR ((EXIT_FAILURE, errno, _("copying inserted file")));
     }
   else
     {
@@ -575,7 +575,7 @@ m4_insert_file (FILE *file)
   while (length = read (fileno (file), buffer, COPY_BUFFER_SIZE),
 	 length != 0)
     if (length == (size_t) -1)
-      M4ERROR ((EXIT_FAILURE, errno, _("ERROR: Reading inserted file")));
+      M4ERROR ((EXIT_FAILURE, errno, _("reading inserted file")));
     else
       output_text (buffer, length);
 }
@@ -665,10 +665,10 @@ m4_freeze_diversions (FILE *file)
 	    {
 	      fflush (diversion->file);
 	      if (fstat (fileno (diversion->file), &file_stat) < 0)
-		M4ERROR ((EXIT_FAILURE, errno, _("Cannot stat diversion")));
+		M4ERROR ((EXIT_FAILURE, errno, _("cannot stat diversion")));
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long) file_stat.st_size)
-		M4ERROR ((EXIT_FAILURE, errno, _("Diversion too large")));
+		M4ERROR ((EXIT_FAILURE, errno, _("diversion too large")));
 	      fprintf (file, "D%d,%lu", divnum,
 		       (unsigned long) file_stat.st_size);
 	    }

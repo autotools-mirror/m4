@@ -222,7 +222,7 @@ m4_module_init (void)
   /* Couldn't initialise the module system; diagnose and exit.  */
   if (errors)
     M4ERROR ((EXIT_FAILURE, 0,
-	      _("ERROR: failed to initialise module loader: %s"),
+	      _("failed to initialise module loader: %s"),
 	      m4_module_dlerror ()));
 
 #ifdef DEBUG_MODULES
@@ -274,7 +274,7 @@ m4_module_open (const char *name, struct obstack *obs)
     {
       /* Couldn't open the module; diagnose and exit. */
       M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: cannot open module `%s': %s"),
+		_("cannot open module `%s': %s"),
 		name, m4_module_dlerror ()));
     }
 
@@ -284,7 +284,7 @@ m4_module_open (const char *name, struct obstack *obs)
 	 if we were about to diagnose a module with no entry points.  */
       if (!lt_dlsym (handle, M4_FINISH_SYMBOL))
 	M4ERROR ((EXIT_FAILURE, 0,
-		  _("ERROR: module `%s' has no entry points"),
+		  _("module `%s' has no entry points"),
 		  name));
     }
 
@@ -374,7 +374,7 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
   if (errors)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: cannot close module `%s': %s"),
+		_("cannot close module `%s': %s"),
 		name, m4_module_dlerror ()));
     }
 
@@ -402,7 +402,7 @@ m4_module_close_all (struct obstack *obs)
   if (lt_dlexit() != 0)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: cannot close modules: %s"),
+		_("cannot close modules: %s"),
 		m4_module_dlerror ()));
     }
 }
@@ -517,7 +517,7 @@ m4_module_unload (const char *name, struct obstack *obs)
   if (errors)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: cannot unload module `%s': %s"),
+		_("cannot unload module `%s': %s"),
 		name, m4_module_dlerror ()));
     }
 }
@@ -556,7 +556,7 @@ m4_module_unload_all (void)
   if (errors)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		_("ERROR: cannot unload all modules: %s"),
+		_("cannot unload all modules: %s"),
 		m4_module_dlerror ()));
     }
 }

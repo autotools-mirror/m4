@@ -71,7 +71,7 @@ static void
 stackovf_handler (void)
 {
   M4ERROR ((EXIT_FAILURE, 0,
-	    _("ERROR: Stack overflow.  (Infinite define recursion?)")));
+	    _("Stack overflow.  (Infinite define recursion?)")));
 }
 
 #endif /* USE_STACKOV */
@@ -304,11 +304,11 @@ main (int argc, char *const *argv, char *const *envp)
 	    const char *dlerr = lt_dlerror();
 	    if (dlerr == NULL)
 	      M4ERROR ((EXIT_FAILURE, 0,
-			_("ERROR: failed to add search directory `%s'"),
+			_("failed to add search directory `%s'"),
 			optarg));
 	    else
 	      M4ERROR ((EXIT_FAILURE, 0,
-			_("ERROR: failed to add search directory `%s': %s"),
+			_("failed to add search directory `%s': %s"),
 			optarg, dlerr));
 	  }
 	break;

@@ -1,5 +1,9 @@
 2001-10-19  Akim Demaille  <akim@epita.fr>
 
+	* m4/module.c, m4/output.c, src/main.c: Normalize error messages.
+
+2001-10-19  Akim Demaille  <akim@epita.fr>
+
 	* m4/input.c (m4_next_token): Display where was opened what is
 	not closed.
 
