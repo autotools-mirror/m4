@@ -394,7 +394,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'o':
 	if (!m4_debug_set_output (optarg))
-	  error (0, errno, optarg);
+	  error (0, errno, "%s", optarg);
 	break;
 
       case 's':
@@ -530,7 +530,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    fp = m4_path_search (argv[optind], &filename);
 	    if (fp == NULL)
 	      {
-		error (0, errno, argv[optind]);
+		error (0, errno, "%s", argv[optind]);
 		exit_status = EXIT_FAILURE;
 		continue;
 	      }
