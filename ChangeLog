@@ -1,3 +1,11 @@
+2003-07-29  Gary V. Vaughan  <gary@gnu.org)
+
+	* m4/m4module.h (M4_DEFAULT_NESTING_LIMIT): This value is
+	already available to module writers through
+	m4_{get,set}_nesting_limit_opt(), so moved from here...
+	* m4/m4.c (DEFAULT_NESTING_LIMIT): ...to here and renamed.
+	(m4_create): Use it.
+
 2003-07-28  Gary V. Vaughan  <gary@gnu.org>
 
 	Aside from auditing path.c for m4module.h api obfuscation, this

@@ -20,6 +20,9 @@
 
 #include "m4private.h"
 
+#define DEFAULT_NESTING_LIMIT	250
+
+
 m4 *
 m4_create (void)
 {
@@ -31,9 +34,9 @@ m4_create (void)
   context->debug_file	 = stderr;
   obstack_init (&context->trace_messages);
 
-  context->nesting_limit = M4_DEFAULT_NESTING_LIMIT;
+  context->nesting_limit = DEFAULT_NESTING_LIMIT;
 
-  context->search_path		  = XCALLOC (m4__search_path_info, 1);
+  context->search_path	 = XCALLOC (m4__search_path_info, 1);
 
   return context;
 }

@@ -27,8 +27,6 @@
 
 BEGIN_C_DECLS
 
-#define M4_DEFAULT_NESTING_LIMIT	250
-
 
 
 /* Various declarations.  */
