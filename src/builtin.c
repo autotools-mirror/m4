@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 98 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,19 +20,15 @@
    expansion of user defined macros.  */
 
 #include "m4.h"
+#include "builtin.h"
 
 extern FILE *popen ();
 
 #include "regex.h"
 
-#define ARG(i)	(argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
-
 /* Initialisation of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialisation, and by the "builtin"
    builtin.  */
-
-#define DECLARE(name) \
-  static void name __P ((struct obstack *, int, token_data **))
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
@@ -63,6 +59,9 @@ DECLARE (m4_incr);
 DECLARE (m4_index);
 DECLARE (m4_indir);
 DECLARE (m4_len);
+#ifdef WITH_MODULES
+DECLARE (m4_loadmodule);
+#endif /* WITH_MODULES */
 DECLARE (m4_m4exit);
 DECLARE (m4_m4wrap);
 DECLARE (m4_maketemp);
@@ -119,6 +118,9 @@ builtin_tab[] =
   { "index",		FALSE,	FALSE,	TRUE,	m4_index },
   { "indir",		TRUE,	FALSE,	FALSE,	m4_indir },
   { "len",		FALSE,	FALSE,	TRUE,	m4_len },
+#ifdef WITH_MODULES
+  { "loadmodule",	TRUE,	FALSE,	TRUE,	m4_loadmodule },
+#endif /* WITH_MODULES */
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
   { "m4wrap",		FALSE,	FALSE,	FALSE,	m4_m4wrap },
   { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
@@ -149,7 +151,23 @@ predefined_tab[] =
 
   { NULL,	NULL,		NULL },
 };
+
 
+/*------------------------------------------------------------------.
+| If dynamic modules are enabled, more builtin tables can be active |
+| at a time.  This implements a list of tables of builtins.	    |
+`------------------------------------------------------------------*/
+
+struct builtin_table
+{
+  struct builtin_table *next;
+  builtin *table;
+};
+
+typedef struct builtin_table builtin_table;
+
+static builtin_table *builtin_tables = NULL;
+
 /*----------------------------------------.
 | Find the builtin, which lives on ADDR.  |
 `----------------------------------------*/
@@ -157,11 +175,13 @@ predefined_tab[] =
 const builtin *
 find_builtin_by_addr (builtin_func *func)
 {
+  const builtin_table *bt;
   const builtin *bp;
 
-  for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
-    if (bp->func == func)
-      return bp;
+  for (bt = builtin_tables; bt != NULL; bt = bt->next)
+    for (bp = bt->table; bp->name != NULL; bp++)
+      if (bp->func == func)
+	return bp;
   return NULL;
 }
 
@@ -172,13 +192,16 @@ find_builtin_by_addr (builtin_func *func)
 const builtin *
 find_builtin_by_name (const char *name)
 {
+  const builtin_table *bt;
   const builtin *bp;
 
-  for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
-    if (strcmp (bp->name, name) == 0)
-      return bp;
+  for (bt = builtin_tables; bt != NULL; bt = bt->next)
+    for (bp = bt->table; bp->name != NULL; bp++)
+      if (strcmp (bp->name, name) == 0)
+	return bp;
   return NULL;
 }
+
 
 /*-------------------------------------------------------------------------.
 | Install a builtin macro with name NAME, bound to the C function given in |
@@ -199,6 +222,37 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
   SYMBOL_FUNC (sym) = bp->func;
   SYMBOL_TRACED (sym) = traced;
 }
+
+/*------------------------------.
+| Install a new builtin_table.  |
+`------------------------------*/
+
+static void
+install_builtin_table (builtin *table)
+{
+  builtin_table *bt;
+  const builtin *bp;
+  char *string;
+
+  bt = (builtin_table *)xmalloc(sizeof(struct builtin_table));
+  bt->next = builtin_tables;
+  bt->table = table;
+  builtin_tables = bt;
+
+  for (bp = table; bp->name != NULL; bp++)
+    if (!no_gnu_extensions || !bp->gnu_extension)
+      if (prefix_all_builtins)
+	{
+	  string = (char *) xmalloc (strlen (bp->name) + 4);
+	  strcpy (string, "m4_");
+	  strcat (string, bp->name);
+	  define_builtin (string, bp, SYMBOL_INSERT, FALSE);
+	  free (string);
+	}
+      else
+	define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+}
+
 
 /*-------------------------------------------------------------------------.
 | Define a predefined or user-defined macro, with name NAME, and expansion |
@@ -226,22 +280,9 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 void
 builtin_init (void)
 {
-  const builtin *bp;
   const predefined *pp;
-  char *string;
 
-  for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
-    if (!no_gnu_extensions || !bp->gnu_extension)
-      if (prefix_all_builtins)
-	{
-	  string = (char *) xmalloc (strlen (bp->name) + 4);
-	  strcpy (string, "m4_");
-	  strcat (string, bp->name);
-	  define_builtin (string, bp, SYMBOL_INSERT, FALSE);
-	  free (string);
-	}
-      else
-	define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+  install_builtin_table (builtin_tab);
 
   for (pp = &predefined_tab[0]; pp->func != NULL; pp++)
     if (no_gnu_extensions)
@@ -264,7 +305,7 @@ builtin_init (void)
 | applicable.								  |
 `------------------------------------------------------------------------*/
 
-static boolean
+boolean
 bad_argc (token_data *name, int argc, int min, int max)
 {
   boolean isbad = FALSE;
@@ -290,7 +331,7 @@ bad_argc (token_data *name, int argc, int min, int max)
 | If the conversion fails, print error message for macro MACRO.  Return	    |
 | TRUE iff conversion succeeds.						    |
 `--------------------------------------------------------------------------*/
-static const char *
+const char *
 skip_space (const char *arg)
 {
   while (IS_SPACE(*arg))
@@ -298,7 +339,7 @@ skip_space (const char *arg)
   return arg;
 }
 
-static boolean
+boolean
 numeric_arg (token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
@@ -319,7 +360,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 | expanding to numbers.						        |
 `----------------------------------------------------------------------*/
 
-static void
+void
 shipout_int (struct obstack *obs, int val)
 {
   char buf[128];
@@ -439,6 +480,31 @@ m4_popdef (struct obstack *obs, int argc, token_data **argv)
     return;
   lookup_symbol (ARG (1), SYMBOL_POPDEF);
 }
+
+
+/*-------------------------------------.
+| Loading external module at runtime.  |
+`-------------------------------------*/
+
+#ifdef WITH_MODULES
+
+static void
+m4_loadmodule (struct obstack *obs, int argc, token_data **argv)
+{
+  builtin *bp;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  bp = module_load (ARG (1), obs);
+
+  if (bp != NULL)
+    install_builtin_table(bp);
+}
+
+
+#endif /* WITH_MODULES */
+
 
 /*---------------------.
 | Conditionals of m4.  |
@@ -1205,6 +1271,10 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
     return;
   if (argc == 2  && !numeric_arg (argv[0], ARG (1), &exit_code))
     exit_code = 0;
+
+#ifdef WITH_MODULES
+  module_unload_all();
+#endif /* WITH_MODULES */
 
   exit (exit_code);
 }

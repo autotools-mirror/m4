@@ -47,7 +47,7 @@ m4trace: -1- concat
 m4trace: -1- concat
 EOF
 
-M4PATH=$srcdir $M4 in >out 2>err
+M4PATH=$srcdir:$srcdir/../examples $M4 in >out 2>err
 sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
 
 $CMP -s out ok && $CMP -s err okerr

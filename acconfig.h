@@ -38,6 +38,9 @@
 /* Define to 1 if the GNU multiple precision library should be used.  */
 #undef WITH_GMP
 
+/* Define to 1 if the -ldl library should be used .  */
+#undef WITH_MODULES
+
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS
 

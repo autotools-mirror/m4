@@ -219,6 +219,9 @@ static const struct option long_options[] =
   {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'e'},
+#ifdef WITH_MODULES
+  {"module", required_argument, NULL, 'M'},
+#endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
@@ -262,8 +265,13 @@ main (int argc, char *const *argv, char *const *envp)
   textdomain(PACKAGE);
 #endif
 
-  include_init ();
   debug_init ();
+  include_init ();
+
+#ifdef WITH_MODULES
+  module_init ();
+#endif /* WITH_MODULES */
+
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
 #endif
@@ -328,7 +336,6 @@ main (int argc, char *const *argv, char *const *envp)
       case 'I':
 	add_include_directory (optarg);
 	break;
-
       case 'L':
 	nesting_limit = atoi (optarg);
 	break;
@@ -491,6 +498,10 @@ main (int argc, char *const *argv, char *const *envp)
       make_diversion (0);
       undivert_all ();
     }
+
+#ifdef WITH_MODULES
+  module_unload_all();
+#endif /* WITH_MODULES */
 
   exit (EXIT_SUCCESS);
 }

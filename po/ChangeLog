@@ -1,3 +1,9 @@
+1998-10-04  Rene' Seindal  <rene@seindal.dk>
+
+	* pl.po: Polish translation added.
+
+	* POTFILES.in: src/module.c added.
+
 1998-05-23  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
 
 	* nl.po: Dutch translation by Erick Branderhorst.

@@ -536,6 +536,28 @@ void format __P ((struct obstack *, int, token_data **));
 void produce_frozen_state __P ((const char *));
 void reload_frozen_state __P ((const char *));
 
+
+
+/* File: module.c --- dynamic modules */
+
+typedef void module_init_t (struct obstack *obs);
+typedef void module_finish_t (void);
+
+#ifdef WITH_MODULES
+
+typedef voidstar module_func (const char *);
+
+void module_init (void);
+void module_unload_all (void);
+
+builtin *module_load (const char *modname, struct obstack *obs);
+
+/* These are really in path.c */
+void module_env_init (void);
+void add_module_directory (const char *dir);
+voidstar module_search (const char *dir, module_func *try);
+#endif /* WITH_MODULES */
+
 
 /* Debugging the memory allocator.  */
 
@@ -551,6 +573,7 @@ void reload_frozen_state __P ((const char *));
 # define DEBUG_MACRO
 # define DEBUG_SYM
 # define DEBUG_INCL
+# define DEBUG_MODULE
 #endif
 
 #endif /* M4_H */

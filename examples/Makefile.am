@@ -1,15 +1,12 @@
-EXTRA_DIST = $(pkgdata_DATA) $(TESTS) defs
+EXTRA_DIST = $(pkgdata_DATA)
 
 pkgdata_DATA = capitalize.m4 comments.m4 ddivert.m4 debug.m4 esyscmd.m4 \
 	exp.m4 file.m4 foreach.m4 forloop.m4 fstab.m4 hanoi.m4 incl-test.m4 \
 	include.m4 indir.m4 misc.m4 multiquotes.m4 patsubst.m4 pushpop.m4 \
 	regexp.m4 reverse.m4 stackovf.sh sync-lines.m4 sysv-args.m4 trace.m4 \
-	translit.m4 undivert.incl undivert.m4 wrap.m4 iso8859.m4
-
-TESTS = comments.test ddivert.test debug.test iso8859.test \
+	translit.m4 undivert.incl undivert.m4 wrap.m4 iso8859.m4 \
+	\
+	comments.test ddivert.test debug.test iso8859.test \
 	reverse.test sysv-args.test wrap.test
 
 all:
-
-defs: $(top_srcdir)/tests/defs
-	cp $(top_srcdir)/tests/defs $@

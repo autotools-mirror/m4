@@ -77,7 +77,7 @@ Preprocessor features:\n\
   -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-#ifdef SHOW_DEPENDENCIES", 55},
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n", 55},
   {"\
 \n\
 Limits control:\n\
@@ -113,22 +113,20 @@ FLAGS is any of:\n\
   {"\
 \n\
 If no FILE or if FILE is `-', standard input is read.\n", 60},
-  {"\
-\n\
-Report bugs to <m4-bugs@gnu.org>.\n", 61},
-  {"Bad debug flags: `%s'", 62},
-  {"INTERNAL ERROR: Bad code in deferred arguments", 63},
-  {"INTERNAL ERROR: Bad token type in expand_token ()", 64},
-  {"ERROR: EOF in argument list", 65},
-  {"INTERNAL ERROR: Bad token type in expand_argument ()", 66},
-  {"INTERNAL ERROR: Bad symbol type in call_macro ()", 67},
-  {"ERROR: Recursion limit of %d exceeded, use -L<N> to change it", 68},
-  {"ERROR: Cannot create temporary file for diversion", 69},
-  {"ERROR: Cannot flush diversion to temporary file", 70},
-  {"ERROR: Copying inserted file", 71},
-  {"ERROR: Reading inserted file", 72},
-  {"Cannot stat diversion", 73},
-  {"Path search for `%s' found `%s'", 74},
+  {"Bad debug flags: `%s'", 61},
+  {"INTERNAL ERROR: Bad code in deferred arguments", 62},
+  {"INTERNAL ERROR: Bad token type in expand_token ()", 63},
+  {"ERROR: EOF in argument list", 64},
+  {"INTERNAL ERROR: Bad token type in expand_argument ()", 65},
+  {"INTERNAL ERROR: Bad symbol type in call_macro ()", 66},
+  {"ERROR: Recursion limit of %d exceeded, use -L<N> to change it", 67},
+  {"ERROR: Cannot create temporary file for diversion", 68},
+  {"ERROR: Cannot flush diversion to temporary file", 69},
+  {"ERROR: Copying inserted file", 70},
+  {"ERROR: Reading inserted file", 71},
+  {"Cannot stat diversion", 72},
+  {"Path search for `%s' found `%s'", 73},
+  {"Module search for `%s' found `%s'", 74},
   {"VMEM limit exceeded?\n", 75},
   {"\
 Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\

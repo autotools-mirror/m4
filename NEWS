@@ -1,7 +1,7 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
-Version 1.5 (1.4h) - August 1998, Erick Branderhorst and Rene' Seindal
+Version beta 1.4i - October 1998, by Erick Branderhorst and Rene' Seindal
 
 * GNU m4 now uses gettext to support internationalization.
 
@@ -22,9 +22,16 @@ Version 1.5 (1.4h) - August 1998, Erick Branderhorst and Rene' Seindal
 * Sync lines can be turned on and off with the `syncoutput' builtin.  The
   builtin `syncoutput' is a GNU extension.
 
+* New experimental feature: dynamically loadable modules.  New builtin
+  `loadmodules' loads shared libraries, that can define new builtin
+  macros, ie, new macros can be written in C.  Depends on the dlopen()
+  interface, and is currently only tested on Linux.  Enabled at configure
+  time with `--with-modules'.  Documentation is in src/module.c and
+  module/README. 
+
 * Implement a GNU message catalog for French (Franc,ois Pinard).
 
-Bugs fixed in 1.5
+Bugs fixed
 
 * All 8-bit characters can now be used for quotes.
 

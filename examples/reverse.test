@@ -15,6 +15,6 @@ cat <<\EOF >ok
 `hej, med, dig' => dig, med, hej
 EOF
 
-M4PATH=$srcdir $M4 -d in >out
+M4PATH=$srcdir:$srcdir/../examples $M4 -d in >out
 
 $CMP -s out ok

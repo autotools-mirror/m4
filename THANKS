@@ -5,6 +5,8 @@ further contributed to GNU m4 by reporting problems, suggesting
 various improvements or submitting actual code.  Here is a list of
 these people.  Help me keep it complete and exempt of errors.
 
+
+
 Akiko Matsushita	matusita@sra.co.jp
 Alan Magnuson		awm@osc.edu
 Alexander Lehmann	alex@hal.rhein-main.de
@@ -22,6 +24,7 @@ David J. MacKenzie	djm@uunet.uu.net
 Erez Zadok		ezk@cs.columbia.edu
 Eric Allman		eric@cs.berkeley.edu
 Eric Backus		ericb@lsid.hp.com
+Erick Branderhorst	Erick.Branderhorst@asml.nl
 Franc,ois Pinard	pinard@iro.umontreal.ca
 Geoff Russell		grussell@guest.adelaide.edu.au
 Greg A. Woods		woods@web.apc.org
@@ -34,6 +37,7 @@ Jim Kingdom		kingdon@cygnus.com
 Jim Meyering		meyering@acm.org
 Joel Sherrill		jsherril@uahcs2.cs.uah.edu
 John David Anglin	dave@hiauly1.hia.nrc.ca
+John Gerard Malecki	johnm@artisan.com
 Joseph E. Sacco		jsacco@ssl.com
 Karl Berry		karl@cs.umb.edu
 Karl Vogel		vogelke@c-17igp.wpafb.af.mil
@@ -45,7 +49,7 @@ Mark Seiden		mis@seiden.com
 Matthias Rabe		rabe@mathematik.uni-bielefeld.de
 Michael Fetterman	mafetter@ichips.intel.com
 Michael L. Welcome	welcome@bigbird.llnl.gov
-Mike Howard 		mike@clove.com
+Mike Howard		mike@clove.com
 Mike Lijewski		lijewski@theory.tc.cornell.edu
 Nick S. Kanakakorn	skanan@otl.scu.edu
 Nicolas Pioch		pioch@inf.enst.fr
@@ -53,9 +57,10 @@ Noah Friedman		friedman@gnu.ai.mit.edu
 Pete Chown		pete.chown@dale.dircon.co.uk
 Pierre Gaumond		gaumondp@ere.umontreal.ca
 Pierre Mathieu		mathieu@geod.emr.ca
-Robert Bernstein	rocky@panix.com
+Rafael Corvalan		rafael@club-internet.fr 
 Rene' Seindal		rene@seindal.dk
 Richard Stallman	rms@gnu.ai.mit.edu
+Robert Bernstein	rocky@panix.com
 Roland H. Pesch		roland@wrs.com
 Roland McGrath		roland@gnu.ai.mit.edu
 Scott Bartram		deneb!scottb
@@ -63,11 +68,12 @@ Simon Leinen		simon@lia.di.epfl.ch
 Skip Montanaro		skip@automatrix.com
 Stephen Perkins		perkins@cps.msu.edu
 Steve Williamson	willy@uinpla.npl.uiuc.edu
+Terry Jones		terry@teclata.es
 Thorsten Ohl		ohl@physics.harvard.edu
 Tom McConnell		tmcconne@sedona.intel.com
 Tom Quinn		trq@dionysos.thphys.ox.ac.uk
 Tom Tromey		tromey@cns.caltech.edu
-Ulrich Drepper		drepper@ira.uka.de
+Ulrich Drepper		drepper@cygnus.com
 Vern Paxson		vern@ee.lbl.gov
 Vivek P. Singhal	singhal@cs.utexas.edu
 Walter Wong		wcw+@cmu.edu

@@ -13,6 +13,10 @@ case "$srcdir" in
  /*)
     ;;
 
+ .)
+    srcdir=".."
+    ;;
+
  *)
     srcdir="../$srcdir"
     ;;

@@ -1,3 +1,73 @@
+1998-10-04  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4i.
+
+	* configure.in (ALL_LINGUAS): Added Polish pl.po
+
+1998-10-03  Rene' Seindal  <rene@seindal.dk>
+
+	* Many files: Incorporated changes to implement dynamic modules.
+	Detailed comments in src/modules.c and modules/README
+
+	* src/module.c: New file, implements the OS dependant parts of
+	dynamic module loading.
+
+	* src/Makefile.am (m4_SOURCES): Added module.c
+
+	* src/builtin.h: New file, declares some functions from builtin.c
+	that are of use for other modules (shipout_int, numeric_arg,
+	skip_space, bad_argc), and the macros ARG() and DECLARE().
+
+	* src/builtin.c (install_builtin_table): New function.  Each
+	module brings in a builtin_table, which is pushed on a stack.
+	(struct builtin_table): New struct for list of builtin_tables.
+	(m4_loadmodule): New function to implement builtin "loadmodule".
+	(shipout_int): No longer static, to be used by modules.
+	(numeric_arg): do.
+	(skip_space): do.
+	(bad_argc): do.
+	(builtin_init): changed to call install_builtin_table()
+	(find_builtin_by_name): Now searches all builtin_tables
+	(find_builtin_by_addr): do.
+
+	* src/path.c: Reorganised to allow for two search paths, one for
+	include files and one for modules.
+
+	* src/m4.h: Added declarations for new functions in module.c and
+	in path.c.
+
+	* src/m4.c (main): Added call to module_init().
+
+	* modules: New directory with a few demo modules.
+
+	* Makefile.am (EXTRA_DIST): Added modules/* since modules/ is not
+	in SUBDIRS.
+
+	* configure.in: Added modules/Makefile to AC_OUTPUT.
+
+	* configure.in: Added code to implement --with-modules.  Tests for
+	<dlfcn.h> and -ldl.
+
+	* acconfig.h: Added WITH_MODULES
+
+1998-10-02  Rene' Seindal  <rene@seindal.dk>
+
+	* examples/Makefile.am (pkgdata_DATA): Removed special target for
+	check and variables TESTS.  These tests are now run from the
+	tests/ directory.
+
+	* tests/Makefile.am (OTHER_TESTS): Added tests from the example/
+	directory.  The files stay there but the tests are run from the
+	tests/ directory.
+
+	* tests/Makefile.am (EXTRA_DIST): Added run-test.
+
+	* tests/run-test: New file.  Run a test manually
+
+	* tests/Makefile.am, tests/get_them: Moved automatically generated
+	tests (from the manual) to sub directory tests/gentest/.  The
+	tests/ directory had gotten a bit messy.
+
 1998-09-06  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
 
 	* examples/{comments,ddivert,debug,iso8859,reverse,sysv-args,\
