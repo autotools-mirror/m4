@@ -16,9 +16,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-# sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
-
-
 
 ## ---------- ##
 ## capitalize ##
@@ -551,7 +548,7 @@ Comparing strings: MATCH
 This will be seen.
 ]])
 
-AT_CHECK_M4([iso8859.m4], 0, expout)
+AT_CHECK_M4([tests/iso8859.m4], 0, expout)
 
 AT_CLEANUP
 
