@@ -281,6 +281,7 @@ enum token_type
 {
   TOKEN_EOF,			/* end of file */
   TOKEN_STRING,			/* a quoted string */
+  TOKEN_SPACE,			/* whitespace */
   TOKEN_WORD,			/* an identifier */
   TOKEN_SIMPLE,			/* a single character */
   TOKEN_MACDEF			/* a macros definition (see "defn") */

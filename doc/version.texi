@@ -1,3 +1,3 @@
-@set UPDATED 4 October 1998
-@set EDITION 1.4i
-@set VERSION 1.4i
+@set UPDATED 6 October 1998
+@set EDITION 1.4j
+@set VERSION 1.4j

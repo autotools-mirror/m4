@@ -6,7 +6,7 @@
 
 FILE=${1-/dev/null}
 
-rm -f gentest/*.m4 2>/dev/null
+rm -f gentest/*.test 2>/dev/null
 
 ${AWK-gawk} '
 
@@ -53,7 +53,7 @@ BEGIN {
     error_flag = 0;
     i = 0;
     include_flag = 0;
-    file = sprintf("gentest/%s.%d.m4", node, seq);
+    file = sprintf("gentest/%s.%d.test", node, seq);
     printf ("#!/bin/sh\n\n") > file;
     printf ("# %s is part of the GNU m4 testsuite\n", file) >> file;
     printf ("# generated from example in %s line %d\n\n", FILENAME, NR) >>file;
@@ -111,4 +111,4 @@ function printthem(thearray, thecounter, thefile) {
 
 ' $FILE >/dev/null
 
-chmod +x gentest/*.m4
+chmod +x gentest/*.test

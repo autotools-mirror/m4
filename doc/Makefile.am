@@ -10,7 +10,8 @@ PERL = @PERL@
 	@if test -f ../src/$*; then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(PERL) $(srcdir)/helptoman.pl ../src/$* > $@-tmp; \
-	  mv $@-tmp $(srcdir)/$@; \
+	  cmp $@-tmp $(srcdir)/$@ || cp $@-tmp $(srcdir)/$@; \
+	  rm -f $@-tmp; \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
 	  echo "         Retry once the program executable will be ready."; \

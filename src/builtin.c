@@ -168,6 +168,17 @@ typedef struct builtin_table builtin_table;
 
 static builtin_table *builtin_tables = NULL;
 
+static void
+push_builtin_table (builtin *table)
+{
+  builtin_table *bt;
+
+  bt = (builtin_table *)xmalloc(sizeof(struct builtin_table));
+  bt->next = builtin_tables;
+  bt->table = table;
+  builtin_tables = bt;
+}
+
 /*----------------------------------------.
 | Find the builtin, which lives on ADDR.  |
 `----------------------------------------*/
@@ -194,6 +205,10 @@ find_builtin_by_name (const char *name)
 {
   const builtin_table *bt;
   const builtin *bp;
+
+  /* This is necessary to load frozen files */
+  if (builtin_tables == NULL)
+    push_builtin_table (builtin_tab);
 
   for (bt = builtin_tables; bt != NULL; bt = bt->next)
     for (bp = bt->table; bp->name != NULL; bp++)
@@ -230,14 +245,10 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
 static void
 install_builtin_table (builtin *table)
 {
-  builtin_table *bt;
   const builtin *bp;
   char *string;
 
-  bt = (builtin_table *)xmalloc(sizeof(struct builtin_table));
-  bt->next = builtin_tables;
-  bt->table = table;
-  builtin_tables = bt;
+  push_builtin_table(table);
 
   for (bp = table; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)

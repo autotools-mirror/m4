@@ -8,7 +8,7 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4i)
+AM_INIT_AUTOMAKE(m4,1.4j)
 ALL_LINGUAS="de fr it ja nl pl ru sv"
 
 AC_PROG_AWK

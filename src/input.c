@@ -88,9 +88,12 @@
    SYNTAX_ECOMM		A single characters end comment delimiter
 
    Besides adding new facilities, the use of a syntax table will reduce
-   the number of calls to next_token ().  Now SYNTAX_OTHER characters
-   can be returned as a single token, since next_token () knows they
-   have no special syntactical meaning to m4.
+   the number of calls to next_token ().  Now groups of OTHER, NUM and
+   SPACE characters can be returned as a single token, since next_token
+   () knows they have no special syntactical meaning to m4.  This is,
+   however, only possible if only single character quotes comments
+   comments are used, because otherwise the quote and comment characters
+   will not show up in the syntax-table.
 
    Having a syntax table allows new facilities.  The new builtin
    "changesyntax" allows the the user to change the category of any
@@ -1172,7 +1175,7 @@ next_token (token_data *td)
 	}
       type = TOKEN_STRING;
     }
-  else				/* EVERYTHING ELSE */
+  else if (single_quotes && single_comments) /* EVERYTHING ELSE */
     {
       obstack_1grow (&token_stack, ch);
 
@@ -1196,8 +1199,21 @@ next_token (token_data *td)
 	      if (ch != CHAR_EOF)
 		unget_input(ch);
 	    }
-	  type = TOKEN_STRING;
+	  type = TOKEN_SPACE;
 	}
+      else if (IS_ACTIVE(ch))
+	type = TOKEN_WORD;
+      else
+	type = TOKEN_SIMPLE;
+    }
+  else  /* EVERYTHING ELSE */
+    {
+      obstack_1grow (&token_stack, ch);
+
+      if (IS_OTHER(ch) || IS_NUM(ch))
+	type = TOKEN_STRING;
+      else if (IS_SPACE(ch))
+	type = TOKEN_SPACE;
       else if (IS_ACTIVE(ch))
 	type = TOKEN_WORD;
       else
@@ -1242,6 +1258,10 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_STRING:
       fprintf (stderr, "string\t\"%s\"\n", TOKEN_DATA_TEXT (td));
+      break;
+
+    case TOKEN_SPACE:
+      fprintf (stderr, "space\t\"%s\"\n", TOKEN_DATA_TEXT (td));
       break;
 
     case TOKEN_MACDEF:

@@ -1,3 +1,29 @@
+1998-10-07  Rene' Seindal  <rene@seindal.dk>
+
+	* tests/Makefile.am (GENERATED_TESTS): Changed .m4 extension to
+	.test, as the files are no longer just m4 input.
+
+	* tests/get-them (FILE): Changed .m4 extension to .test.
+
+	* src/m4.h (token_type): New token type TOKEN_SPACE introduced.
+	Otherwise quoted strings with leading whitespace first in a macro
+	argument would be eliminated.
+
+	* src/macro.c (expand_token): Handles new token type TOKEN_SPACE.
+	(expand_argument): Do.
+
+	* src/input.c (next_token): SPACE and NUM/OTHER characters are only
+	grouped together iff both quote and comment strings are single
+	character.  Otherwise they might include a comment/quote leader.
+	(next_token): Returns new token type TOKEN_SPACE.
+
+	* src/builtin.c (push_builtin_table): New function to push a
+	builtin_table on the stack without installing its contents.
+	(find_builtin_by_name): Added call to push_builtin_table() if
+	reading frozen files.  Otherwise the builtins named in the frozen
+	files could not be found.
+	(install_builtin_table): Changed to use push_builtin_table()
+
 1998-10-04  Rene' Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4i.

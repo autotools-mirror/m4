@@ -9,6 +9,9 @@ for any of these ideas or if you have others to add.
   + Changes in the syntax_table are not saved to frozen files (René
     Seindal).
 
+  + Information about loaded modules is not saved to frozen files (René
+    Seindal).
+
   + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
   + The $ used in user defined macros cannot be changed through
@@ -22,6 +25,11 @@ for any of these ideas or if you have others to add.
 
   + An escape character (like in TeX) should be definable through the
     syntax table (René Seindal).
+
+  + Sort out all the weird forms of interaction between changesyntax,
+    changecom and changequote.  What happens if you install a quote with
+    changequote and removes it with changesyntax and vice versa (René
+    Seindal).
 
 * Optimization and clean up
 

@@ -65,6 +65,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
+    case TOKEN_SPACE:
       shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
       break;
 
@@ -120,7 +121,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
       t = next_token (&td);
     }
-  while (t == TOKEN_STRING && IS_SPACE (*TOKEN_DATA_TEXT (&td)));
+  while (t == TOKEN_SPACE);
 
   paren_level = 0;
 
@@ -159,6 +160,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  break;
 
 	case TOKEN_WORD:
+	case TOKEN_SPACE:
 	case TOKEN_STRING:
 	  expand_token (obs, t, &td);
 	  break;

@@ -28,7 +28,7 @@ translation approved by the Foundation.
 Indirect:
 m4.info-1: 973
 m4.info-2: 49992
-m4.info-3: 97841
+m4.info-3: 97837
 
 Tag Table:
 (Indirect)
@@ -74,44 +74,44 @@ Node: Dnl54889
 Node: Changequote56015
 Node: Changecom57379
 Node: Changesyntax58665
-Node: Changeword64939
-Node: M4wrap68174
-Node: File Inclusion69376
-Node: Include69692
-Node: Search Path71711
-Node: Diversions72498
-Node: Divert73735
-Node: Undivert74867
-Node: Divnum76838
-Node: Cleardiv77383
-Node: Text handling78438
-Node: Len79158
-Node: Index79556
-Node: Regexp80141
-Node: Substr81232
-Node: Translit81852
-Node: Patsubst83295
-Node: Format85386
-Node: Arithmetic86875
-Node: Incr87332
-Node: Eval87836
-Node: UNIX commands91442
-Node: Syscmd91913
-Node: Esyscmd92626
-Node: Sysval93574
-Node: Maketemp93981
-Node: Miscellaneous95038
-Node: Errprint95469
-Node: M4exit96451
-Node: Syncoutput97249
-Node: Frozen files97841
-Node: Compatibility102760
-Node: Extensions103376
-Node: Incompatibilities105846
-Node: Other Incompat106288
-Node: Experiments108451
-Node: Answers109958
-Node: Concept index110590
-Node: Macro index118011
+Node: Changeword64935
+Node: M4wrap68170
+Node: File Inclusion69372
+Node: Include69688
+Node: Search Path71707
+Node: Diversions72494
+Node: Divert73731
+Node: Undivert74863
+Node: Divnum76834
+Node: Cleardiv77379
+Node: Text handling78434
+Node: Len79154
+Node: Index79552
+Node: Regexp80137
+Node: Substr81228
+Node: Translit81848
+Node: Patsubst83291
+Node: Format85382
+Node: Arithmetic86871
+Node: Incr87328
+Node: Eval87832
+Node: UNIX commands91438
+Node: Syscmd91909
+Node: Esyscmd92622
+Node: Sysval93570
+Node: Maketemp93977
+Node: Miscellaneous95034
+Node: Errprint95465
+Node: M4exit96447
+Node: Syncoutput97245
+Node: Frozen files97837
+Node: Compatibility102756
+Node: Extensions103372
+Node: Incompatibilities105842
+Node: Other Incompat106284
+Node: Experiments108447
+Node: Answers109954
+Node: Concept index110586
+Node: Macro index118007
 
 End Tag Table

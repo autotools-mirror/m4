@@ -2243,7 +2243,7 @@ test(<<testing]>>)
 test([testing>>])
 @result{}==testing>>==
 test([<<testing>>])
-@result{}==<<testing>>==
+@result{}==testing==
 @end example
 
 @noindent

@@ -1,7 +1,7 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
-Version beta 1.4i - October 1998, by Erick Branderhorst and Rene' Seindal
+Version beta 1.4j - October 1998, by Erick Branderhorst and Rene' Seindal
 
 * GNU m4 now uses gettext to support internationalization.
 

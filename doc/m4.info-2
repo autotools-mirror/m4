@@ -524,7 +524,7 @@ character quote and vice versa.  The same goes for comment delimiters.
      test([testing>>])
      =>==testing>>==
      test([<<testing>>])
-     =>==<<testing>>==
+     =>==testing==
 
 Note how it is possible to have both long and short quotes, if
 `changequote' is used before `changesyntax'.
