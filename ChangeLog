@@ -1,5 +1,10 @@
 2001-09-08  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/hash.c (m4_hash_bucket_insert): Symbol shadowing is no longer
+	dependant on multiple symbols with the same key, so preserving
+	relative symbol order in each bucket during resizing is no longer
+	required.  The resize function is considerably faster as a result.
+
 	* m4/m4module.h, m4/builtin.c, m4/symtab.c:
 	s/m4_symbol_insert/m4_symbol_define/g;
 	s/m4_builtin_insert/m4_builtin_define/g;

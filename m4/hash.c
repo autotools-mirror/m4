@@ -21,7 +21,6 @@
 /* TODO:
    - Use an obstack to manage the node memory.
    - Implement the macroized magic values with the API.
-   - Have each node be a pushdown stack to eliminate the shadowed flag.
  */
 
 #include "hash.h"
@@ -343,26 +342,25 @@ m4_hash_maybe_grow (m4_hash *hash)
     }
 }
 
-/* Carefully insert each node in BUCKET into HASH.  The nodes are
-   inserted in reverse order to preserve the relative ordering of
-   all sets of nodes with the same key.  */
+/* Insert each node in BUCKET into HASH.  Relative ordering of nodes
+   is not preserved.  */
 void
 m4_hash_bucket_insert (m4_hash *hash, m4_hash_node *bucket)
 {
   assert (hash);
   assert (bucket);
 
-  if (M4_HASH_NODE_NEXT (bucket))
+  do
     {
-      /* Recurse to the end of the list.  */
-      m4_hash_bucket_insert (hash, M4_HASH_NODE_NEXT (bucket));
+      m4_hash_node *next = M4_HASH_NODE_NEXT (bucket);
 
-      /* Break links as the stack unwinds.  */
+      /* Break link to rest of the bucket before reinserting.  */
       M4_HASH_NODE_NEXT (bucket) = 0;
-    }
+      m4_hash_node_insert (hash, bucket);
 
-  /* Insert each node, from last to first, as the stack unwinds.  */
-  m4_hash_node_insert (hash, bucket);
+      bucket = next;
+    }
+  while (bucket);
 }
 
 
