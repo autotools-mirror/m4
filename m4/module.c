@@ -304,6 +304,17 @@ m4_module_load (modname, obs)
       m4_modules	= list_cons ((List *) module, m4_modules);
     }
 
+  if (module)
+    {
+      boolean m4_resident_module
+	= (boolean) lt_dlsym (handle, "m4_resident_module");
+
+      if (m4_resident_module)
+	{
+	  lt_dlmakeresident (handle);
+	}
+    }
+
   return module;
 }
 
@@ -365,7 +376,8 @@ m4_module_unload (modname, obs)
 
   /* Only do the actual unload when the number of calls to unload this
      module is equal to the number of times it was loaded. */
-  if (--module->ref_count > 0)
+  --module->ref_count;
+  if (module->ref_count > 0)
     {
 #ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE2("module %s: now has %d references.",
@@ -373,44 +385,62 @@ m4_module_unload (modname, obs)
 #endif /* DEBUG_MODULES */
       return;
     }
-  
-  m4_remove_table_reference_symbols (module->bp, module->mp);
+
+  if (module->ref_count == 0)
+    {
+      /* Remove the table references only when ref_count is *exactly* equal
+	 to 0.  If m4_module_unload is called again on a resideent module
+	 after the references have already been removed, we needn't try to
+	 remove them again!  */
+      m4_remove_table_reference_symbols (module->bp, module->mp);
 
 #ifdef DEBUG_MODULES
-  M4_DEBUG_MESSAGE1("module %s: builtins undefined", modname);
+      M4_DEBUG_MESSAGE1("module %s: builtins undefined", modname);
 #endif /* DEBUG_MODULES */
-  
-  /* Run the finishing function for the loaded module. */
-  finish_func = (m4_module_finish_t *) lt_dlsym (handle, "m4_finish_module");
-  if (finish_func != NULL)
-      (*finish_func)();
+    }
 
-  errors = lt_dlclose (handle);
-  if (errors != 0)
+  if (lt_dlisresident (handle))
     {
-      const char *dlerror = lt_dlerror();
-
-      if (dlerror == NULL)
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("ERROR: cannot close module: `%s'"), modname));
-      else
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("ERROR: cannot close module: `%s': %s"),
-		  modname, dlerror));
+      /* Fix up reference count for resident modules, for the next
+	 call to m4_module_unload(). */
+      module->ref_count = 0;
     }
   else
     {
+      /* Run the finishing function for the loaded module. */
+      finish_func
+	= (m4_module_finish_t *) lt_dlsym (handle, "m4_finish_module");
+
+      if (finish_func != NULL)
+	(*finish_func)();
+
+      errors = lt_dlclose (handle);
+      if (errors != 0)
+	{
+	  const char *dlerror = lt_dlerror();
+
+	  if (dlerror == NULL)
+	    M4ERROR ((EXIT_FAILURE, 0,
+		      _("ERROR: cannot close module: `%s'"), modname));
+	  else
+	    M4ERROR ((EXIT_FAILURE, 0,
+		      _("ERROR: cannot close module: `%s': %s"),
+		      modname, dlerror));
+	}
+      else
+	{
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
+	  M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
 #endif /* DEBUG_MODULES */
 
-      if (prev)
-	prev->next = (List *) module->next;
-      else
-	m4_modules = (List *) module->next;
+	  if (prev)
+	    prev->next = (List *) module->next;
+	  else
+	    m4_modules = (List *) module->next;
       
-      xfree (module->modname);
-      xfree (module);
+	  xfree (module->modname);
+	  xfree (module);
+	}
     }
 }
 

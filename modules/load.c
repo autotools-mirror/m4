@@ -27,6 +27,7 @@
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	load_LTX_m4_builtin_table
 #define m4_macro_table		load_LTX_m4_macro_table
+#define m4_resident_module	load_LTX_m4_resident_module
 
 
 /* Maintain each of the builtins implemented in this modules along
@@ -64,6 +65,12 @@ m4_macro m4_macro_table[] =
   { "__modules__",		"" },
   { 0, 0 },
 };
+
+/* This module cannot be safely unloaded from memory, incase the unload
+   is triggered by the unload builtin, and the module is removed while
+   unload is in progress.  */
+boolean m4_resident_module = TRUE;
+
 
 
 /*------------------------------------------------------------.

@@ -1,3 +1,16 @@
+2000-12-01  Gary V. Vaughan  <gary@gnu.org>
+
+	* TODO:  Removed m4exit bug.
+	* modules/load.c (m4_resident_module): Make this module resident.
+	* module/m4.c (m4_resident_module): Ditto.
+	* m4/modules.c (m4_module_load):  Use new ltdl resident modules
+	feature to mark modules as resident if they export
+	`m4_resident_module' as TRUE.
+	(m4_module_unload): Do not remove resident modules, and take care
+	with symbol insertion and deletion with resident modules.
+	* m4/ltdl.c, m4/ltdl.h: Update to latest unreleased versions to
+	use resident modules feature.
+
 2000-11-30  Gary V. Vaughan  <gary@gnu.org>
 
 	* TODO: Updated.  Removed some cruft that has since been fixed

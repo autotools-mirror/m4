@@ -8,10 +8,6 @@ for any of these ideas or if you have others to add.
 
   + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
-  + m4exit.1.test fails due to the m4_module_unload_all call unloading
-    the m4 module (which contains the code for m4exit()) before the handler
-    has finished executing.
-
   + The test case `other-tests/stackovf.test' does not work.
 
   + Some characters, such as comma, are still hardcoded, and do not
@@ -119,5 +115,3 @@ for any of these ideas or if you have others to add.
 
   + The perl module should only be built if a suitable perl interpreter
     is found on the build machine.
-
-  + All this stuff needs documenting in m4.texinfo.

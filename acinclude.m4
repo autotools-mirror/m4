@@ -147,6 +147,12 @@ _LT_AC_LTCONFIG_HACK
 
 ])
 
+# _LT_AC_CHECK_DLFCN
+# --------------------
+AC_DEFUN(_LT_AC_CHECK_DLFCN,
+[AC_CHECK_HEADERS(dlfcn.h)
+])# _LT_AC_CHECK_DLFCN
+
 # AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE
 # ---------------------------------
 AC_DEFUN([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE],
@@ -496,8 +502,187 @@ AC_SUBST(ECHO)
 AC_DIVERT_POP
 ])# _LT_AC_PROG_ECHO_BACKSLASH
 
+# _LT_AC_TRY_DLOPEN_SELF (ACTION-IF-TRUE, ACTION-IF-TRUE-W-USCORE,
+#                           ACTION-IF-FALSE, ACTION-IF-CROSS-COMPILING)
+# ------------------------------------------------------------------
+AC_DEFUN(_LT_AC_TRY_DLOPEN_SELF,
+[if test "$cross_compiling" = yes; then :
+  [$4]
+else
+  AC_REQUIRE([_LT_AC_CHECK_DLFCN])dnl
+  lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+  lt_status=$lt_dlunknown
+  cat > conftest.$ac_ext <<EOF
+[#line __oline__ "configure"
+#include "confdefs.h"
+
+#if HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+
+#include <stdio.h>
+
+#ifdef RTLD_GLOBAL
+#  define LT_DLGLOBAL		RTLD_GLOBAL
+#else
+#  ifdef DL_GLOBAL
+#    define LT_DLGLOBAL		DL_GLOBAL
+#  else
+#    define LT_DLGLOBAL		0
+#  endif
+#endif
+
+/* We may have to define LT_DLLAZY_OR_NOW in the command line if we
+   find out it does not work in some platform. */
+#ifndef LT_DLLAZY_OR_NOW
+#  ifdef RTLD_LAZY
+#    define LT_DLLAZY_OR_NOW		RTLD_LAZY
+#  else
+#    ifdef DL_LAZY
+#      define LT_DLLAZY_OR_NOW		DL_LAZY
+#    else
+#      ifdef RTLD_NOW
+#        define LT_DLLAZY_OR_NOW	RTLD_NOW
+#      else
+#        ifdef DL_NOW
+#          define LT_DLLAZY_OR_NOW	DL_NOW
+#        else
+#          define LT_DLLAZY_OR_NOW	0
+#        endif
+#      endif
+#    endif
+#  endif
+#endif
+
+#ifdef __cplusplus
+extern "C" void exit (int);
+#endif
+
+fnord() { int i=42;}
+main ()
+{ 
+  void *self = dlopen (0, LT_DLGLOBAL|LT_DLLAZY_OR_NOW);
+  int status = $lt_dlunknown;
+
+  if (self)
+    {
+      if (dlsym (self,"fnord"))       status = $lt_dlno_uscore;
+      else if (dlsym( self,"_fnord")) status = $lt_dlneed_uscore;
+      dlclose (self);
+    }
+
+    exit (status);
+}]
+EOF
+  if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext} 2>/dev/null; then
+    (./conftest; exit; ) 2>/dev/null
+    lt_status=$?
+    case x$lt_status in
+      x$lt_dlno_uscore) $1 ;;
+      x$lt_dlneed_uscore) $2 ;;
+      x$lt_unknown|x*) $3 ;;
+    esac
+  else :
+    # compilation failed
+    $3
+  fi
+fi
+rm -fr conftest*
+])# _LT_AC_TRY_DLOPEN_SELF
+
+# AC_LIBTOOL_DLOPEN_SELF
+# -------------------
+AC_DEFUN(AC_LIBTOOL_DLOPEN_SELF,
+[if test "x$enable_dlopen" != xyes; then
+  enable_dlopen=unknown
+  enable_dlopen_self=unknown
+  enable_dlopen_self_static=unknown
+else
+  lt_cv_dlopen=no
+  lt_cv_dlopen_libs=
+
+  case "$host_os" in
+  beos*)
+    lt_cv_dlopen="load_add_on"
+    lt_cv_dlopen_libs=
+    lt_cv_dlopen_self=yes
+    ;;
+
+  cygwin* | mingw* | pw32*)
+    lt_cv_dlopen="LoadLibrary"
+    lt_cv_dlopen_libs=
+   ;;
+
+  *)
+    AC_CHECK_LIB(dl, dlopen,  [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
+      [AC_CHECK_FUNC(dlopen, lt_cv_dlopen="dlopen",
+        [AC_CHECK_FUNC(shl_load, lt_cv_dlopen="shl_load",
+          [AC_CHECK_LIB(svld, dlopen,
+	    [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
+            [AC_CHECK_LIB(dld, shl_load,
+              [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-dld"])
+	    ])
+          ])
+        ])
+      ])
+    ;;
+  esac
+
+  if test "x$lt_cv_dlopen" != xno; then
+    enable_dlopen=yes
+  else
+    enable_dlopen=no
+  fi
+
+  case "$lt_cv_dlopen" in
+  dlopen)
+    save_CPPFLAGS="$CPP_FLAGS"
+    AC_REQUIRE([_LT_AC_CHECK_DLFCN])dnl
+    test "x$ac_cv_header_dlfcn_h" = xyes && CPPFLAGS="$CPPFLAGS -DHAVE_DLFCN_H"
+
+    save_LDFLAGS="$LDFLAGS"
+    eval LDFLAGS=\"\$LDFLAGS $export_dynamic_flag_spec\"
+
+    save_LIBS="$LIBS"
+    LIBS="$lt_cv_dlopen_libs $LIBS"
+
+    AC_CACHE_CHECK([whether a program can dlopen itself],
+	  lt_cv_dlopen_self, [dnl
+	  _LT_AC_TRY_DLOPEN_SELF(
+	    lt_cv_dlopen_self=yes, lt_cv_dlopen_self=yes,
+	    lt_cv_dlopen_self=no, lt_cv_dlopen_self=cross)
+    ])
+
+    if test "x$lt_cv_dlopen_self" = xyes; then
+      LDFLAGS="$LDFLAGS $link_static_flag"
+      AC_CACHE_CHECK([whether a statically linked program can dlopen itself],
+    	  lt_cv_dlopen_self_static, [dnl
+	  _LT_AC_TRY_DLOPEN_SELF(
+	    lt_cv_dlopen_self_static=yes, lt_cv_dlopen_self_static=yes,
+	    lt_cv_dlopen_self_static=no,  lt_cv_dlopen_self_static=cross)
+      ])
+    fi
+
+    CPPFLAGS="$save_CPPFLAGS"
+    LDFLAGS="$save_LDFLAGS"
+    LIBS="$save_LIBS"
+    ;;
+  esac  
+
+  case "$lt_cv_dlopen_self" in
+  yes|no) enable_dlopen_self=$lt_cv_dlopen_self ;;
+  *) enable_dlopen_self=unknown ;;
+  esac
+
+  case "$lt_cv_dlopen_self_static" in
+  yes|no) enable_dlopen_self_static=$lt_cv_dlopen_self_static ;;
+  *) enable_dlopen_self_static=unknown ;;
+  esac
+fi
+])# AC_LIBTOOL_DLOPEN_SELF
+
 AC_DEFUN([_LT_AC_LTCONFIG_HACK],
-[AC_REQUIRE([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE])
+[AC_REQUIRE([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE])dnl
 # Sed substitution that helps us do robust quoting.  It backslashifies
 # metacharacters that are still active within double-quoted strings.
 Xsed='sed -e s/^X//'
@@ -1562,9 +1747,6 @@ beos*)
   library_names_spec='${libname}.so'
   dynamic_linker="$host_os ld.so"
   shlibpath_var=LIBRARY_PATH
-  lt_cv_dlopen="load_add_on"
-  lt_cv_dlopen_libs=
-  lt_cv_dlopen_self=yes
   ;;
 
 bsdi4*)
@@ -1594,8 +1776,6 @@ cygwin* | mingw* | pw32*)
   dynamic_linker='Win32 ld.exe'
   # FIXME: first we should search . and the directory the executable is in
   shlibpath_var=PATH
-  lt_cv_dlopen="LoadLibrary"
-  lt_cv_dlopen_libs=
   ;;
 
 freebsd1*)
@@ -1867,157 +2047,7 @@ if test "$ac_cv_prog_gcc" = yes; then
   variables_saved_for_relink="$variables_saved_for_relink GCC_EXEC_PREFIX COMPILER_PATH LIBRARY_PATH"
 fi
 
-## FIXME: this should be a separate macro
-##
-if test "x$enable_dlopen" != xyes; then
-  enable_dlopen=unknown
-  enable_dlopen_self=unknown
-  enable_dlopen_self_static=unknown
-else
-  lt_cv_dlopen=no
-  lt_cv_dlopen_libs=
-  AC_CHECK_LIB(dl, dlopen,  [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
-    [AC_CHECK_FUNC(dlopen, lt_cv_dlopen="dlopen",
-      [AC_CHECK_FUNC(shl_load, lt_cv_dlopen="shl_load",
-        [AC_CHECK_LIB(svld, dlopen,
-	  [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
-            [AC_CHECK_LIB(dld, shl_load,
-              [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-dld"])
-	  ])
-	])
-      ])
-    ])
-
-  if test "x$lt_cv_dlopen" != xno; then
-    enable_dlopen=yes
-  else
-    enable_dlopen=no
-  fi
-
-  case "$lt_cv_dlopen" in
-  dlopen)
-    save_CPPFLAGS="$CPP_FLAGS"
-    save_LDFLAGS="$LD_FLAGS"
-    save_LIBS="$LIBS"
-    AC_CHECK_HEADER(dlfcn.h, CPPFLAGS="$CPPFLAGS -DHAVE_DLFCN_H")
-    eval LDFLAGS=\"\$LDFLAGS $export_dynamic_flag_spec\"
-    LIBS="$lt_cv_dlopen_libs $LIBS"
-
-    AC_MSG_CHECKING([whether a program can dlopen itself])
-    AC_TRY_RUN([
-#if HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-
-#include <stdio.h>
-
-#ifdef RTLD_GLOBAL
-# define LTDL_GLOBAL	RTLD_GLOBAL
-#else
-# ifdef DL_GLOBAL
-#  define LTDL_GLOBAL	DL_GLOBAL
-# else
-#  define LTDL_GLOBAL	0
-# endif
-#endif
-
-/* We may have to define LTDL_LAZY_OR_NOW in the command line if we
-   find out it does not work in some platform. */
-#ifndef LTDL_LAZY_OR_NOW
-# ifdef RTLD_LAZY
-#  define LTDL_LAZY_OR_NOW	RTLD_LAZY
-# else
-#  ifdef DL_LAZY
-#   define LTDL_LAZY_OR_NOW	DL_LAZY
-#  else
-#   ifdef RTLD_NOW
-#    define LTDL_LAZY_OR_NOW	RTLD_NOW
-#   else
-#    ifdef DL_NOW
-#     define LTDL_LAZY_OR_NOW	DL_NOW
-#    else
-#     define LTDL_LAZY_OR_NOW	0
-#    endif
-#   endif
-#  endif
-# endif
-#endif
-
-fnord() { int i=42;}
-main() { void *self, *ptr1, *ptr2; self=dlopen(0,LTDL_GLOBAL|LTDL_LAZY_OR_NOW);
-    if(self) { ptr1=dlsym(self,"fnord"); ptr2=dlsym(self,"_fnord");
-	       if(ptr1 || ptr2) { dlclose(self); exit(0); } } exit(1); }
-], lt_cv_dlopen_self=yes, lt_cv_dlopen_self=no, lt_cv_dlopen_self=cross)
-    AC_MSG_RESULT([$lt_cv_dlopen_self])
-
-    if test "$lt_cv_dlopen_self" = yes; then
-      LDFLAGS="$LDFLAGS $link_static_flag"
-      AC_MSG_CHECKING([whether a statically linked program can dlopen itself])
-      AC_TRY_RUN([
-#if HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-
-#include <stdio.h>
-
-#ifdef RTLD_GLOBAL
-# define LTDL_GLOBAL	RTLD_GLOBAL
-#else
-# ifdef DL_GLOBAL
-#  define LTDL_GLOBAL	DL_GLOBAL
-# else
-#  define LTDL_GLOBAL	0
-# endif
-#endif
-
-/* We may have to define LTDL_LAZY_OR_NOW in the command line if we
-   find out it does not work in some platform. */
-#ifndef LTDL_LAZY_OR_NOW
-# ifdef RTLD_LAZY
-#  define LTDL_LAZY_OR_NOW	RTLD_LAZY
-# else
-#  ifdef DL_LAZY
-#   define LTDL_LAZY_OR_NOW	DL_LAZY
-#  else
-#   ifdef RTLD_NOW
-#    define LTDL_LAZY_OR_NOW	RTLD_NOW
-#   else
-#    ifdef DL_NOW
-#     define LTDL_LAZY_OR_NOW	DL_NOW
-#    else
-#     define LTDL_LAZY_OR_NOW	0
-#    endif
-#   endif
-#  endif
-# endif
-#endif
-
-fnord() { int i=42;}
-main() { void *self, *ptr1, *ptr2; self=dlopen(0,LTDL_GLOBAL|LTDL_LAZY_OR_NOW);
-    if(self) { ptr1=dlsym(self,"fnord"); ptr2=dlsym(self,"_fnord");
-    if(ptr1 || ptr2) { dlclose(self); exit(0); } } exit(1); }
-], lt_cv_dlopen_self_static=yes, lt_cv_dlopen_self_static=no,
-   lt_cv_dlopen_self_static=cross)
-      AC_MSG_RESULT([$lt_cv_dlopen_self_static])
-    fi
-    CPPFLAGS="$save_CPPFLAGS"
-    LDFLAGS="$save_LDFLAGS"
-    LIBS="$save_LIBS"
-    ;;
-  esac
-
-  case "$lt_cv_dlopen_self" in
-  yes|no) enable_dlopen_self=$lt_cv_dlopen_self ;;
-  *) enable_dlopen_self=unknown ;;
-  esac
-
-  case "$lt_cv_dlopen_self_static" in
-  yes|no) enable_dlopen_self_static=$lt_cv_dlopen_self_static ;;
-  *) enable_dlopen_self_static=unknown ;;
-  esac
-fi
-##
-## END FIXME
+AC_LIBTOOL_DLOPEN_SELF
 
 ## FIXME: this should be a separate macro
 ##
@@ -3190,7 +3220,7 @@ ifelse([AC_DISABLE_FAST_INSTALL])
 ## configuration script generated by Autoconf, you may include it under
 ## the same distribution terms that you use for the rest of that program.
 
-# serial 1 AC_LIB_LTDL
+# serial 2 AC_LIB_LTDL
 
 # AC_LIB_LTDL
 # -----------
@@ -3203,8 +3233,9 @@ AC_REQUIRE([AC_C_INLINE])dnl
 # Perform all the checks necessary for compilation of the ltdl objects
 #  -- including compiler checks (above) and header checks (below).
 AC_REQUIRE([AC_HEADER_STDC])dnl
+AC_REQUIRE([_LT_AC_CHECK_DLFCN])dnl
 
-AC_CHECK_HEADERS(malloc.h memory.h stdlib.h stdio.h ctype.h dlfcn.h dl.h dld.h)
+AC_CHECK_HEADERS(malloc.h memory.h stdlib.h stdio.h ctype.h dl.h dld.h)
 AC_CHECK_HEADERS(string.h strings.h, break)
 AC_CHECK_FUNCS(strchr index, break)
 AC_CHECK_FUNCS(strrchr rindex, break)
@@ -3389,12 +3420,13 @@ if AC_TRY_EVAL(ac_compile); then
   fi
 else
   echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
+  cat conftest.c >&AC_FD_CC
 fi
 rm -rf conftest*
 ])
 AC_MSG_RESULT($ac_cv_sys_symbol_underscore)
 ])# AC_LTDL_SYMBOL_USCORE
+
 
 # AC_LTDL_DLSYM_USCORE
 # --------------------
@@ -3405,52 +3437,11 @@ if test x"$ac_cv_sys_symbol_underscore" = xyes; then
      test x"$ac_cv_lib_dl_dlopen" = xyes ; then
 	AC_CACHE_CHECK([whether we have to add an underscore for dlsym],
 		libltdl_cv_need_uscore, [dnl
-		AC_TRY_RUN([
-#if HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-
-#include <stdio.h>
-
-#ifdef RTLD_GLOBAL
-# define LTDL_GLOBAL	RTLD_GLOBAL
-#else
-# ifdef DL_GLOBAL
-#  define LTDL_GLOBAL	DL_GLOBAL
-# else
-#  define LTDL_GLOBAL	0
-# endif
-#endif
-
-/* We may have to define LTDL_LAZY_OR_NOW in the command line if we
-   find out it does not work in some platform. */
-#ifndef LTDL_LAZY_OR_NOW
-# ifdef RTLD_LAZY
-#  define LTDL_LAZY_OR_NOW	RTLD_LAZY
-# else
-#  ifdef DL_LAZY
-#   define LTDL_LAZY_OR_NOW	DL_LAZY
-#  else
-#   ifdef RTLD_NOW
-#    define LTDL_LAZY_OR_NOW	RTLD_NOW
-#   else
-#    ifdef DL_NOW
-#     define LTDL_LAZY_OR_NOW	DL_NOW
-#    else
-#     define LTDL_LAZY_OR_NOW	0
-#    endif
-#   endif
-#  endif
-# endif
-#endif
-
-fnord() { int i=42;}
-main() { void *self, *ptr1, *ptr2; self=dlopen(0,LTDL_GLOBAL|LTDL_LAZY_OR_NOW);
-    if(self) { ptr1=dlsym(self,"fnord"); ptr2=dlsym(self,"_fnord");
-	       if(ptr1 && !ptr2) { dlclose(self); exit(0); } } exit(1); }
-],	libltdl_cv_need_uscore=no, libltdl_cv_need_uscore=yes,
-	libltdl_cv_need_uscore=cross
-)])
+		libltdl_cv_need_uscore=unknown
+		_LT_AC_TRY_DLOPEN_SELF(
+		  libltdl_cv_need_uscore=no, libltdl_cv_need_uscore=yes,
+		  [],			     libltdl_cv_need_uscore=cross)
+	])
   fi
 fi
 
@@ -3459,4 +3450,3 @@ if test x"$libltdl_cv_need_uscore" = xyes; then
     [Define if dlsym() requires a leading underscode in symbol names. ])
 fi
 ])# AC_LTDL_DLSYM_USCORE
-

@@ -42,7 +42,7 @@ extern int errno;
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	m4_LTX_m4_builtin_table
-
+#define m4_resident_module	m4_LTX_m4_resident_module
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -98,6 +98,11 @@ m4_builtin m4_builtin_table[] =
 
   { 0, 0, FALSE, FALSE },
 };
+
+/* This module cannot be safely unloaded from memory, incase the unload
+   is triggered by m4exit, and the module is removed while m4exit is in
+   progress.  */
+boolean m4_resident_module = TRUE;
 
 
 
