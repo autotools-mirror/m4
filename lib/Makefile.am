@@ -7,6 +7,6 @@ libm4_a_SOURCES = getopt.h obstack.h regex.h regex.c getopt.c \
 
 noinst_HEADERS = getopt.h error.h getdate.h
 
-libm4_a_LIBADD = 
-libm4_a_DEPENDENCIES = # $(libfu_a_LIBADD)
+# libm4_a_LIBADD = 
+# libm4_a_DEPENDENCIES = # $(libfu_a_LIBADD)
 

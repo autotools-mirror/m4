@@ -57,15 +57,13 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-host_alias = @host_alias@
-host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 GENCAT = @GENCAT@
-GLOCALE = @GLOCALE@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GT_NO = @GT_NO@
@@ -75,13 +73,9 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
-LD = @LD@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
@@ -93,14 +87,18 @@ USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 l = @l@
 
-EXTRA_DIST = capitalize.m4 comments.m4 ddivert.m4 \
-debug.m4 esyscmd.m4 exp.m4 file.m4 foreach.m4 forloop.m4 fstab.m4 \
-hanoi.m4 incl-test.m4 include.m4 indir.m4 misc.m4 multiquotes.m4 \
-patsubst.m4 pushpop.m4 regexp.m4 reverse.m4 stackovf.sh sync-lines.m4 \
-sysv-args.m4 trace.m4 translit.m4 undivert.incl undivert.m4 wrap.m4
+EXTRA_DIST = $(pkgdata_DATA)
+
+pkgdata_DATA = capitalize.m4 comments.m4 ddivert.m4 debug.m4 esyscmd.m4 \
+	exp.m4 file.m4 foreach.m4 forloop.m4 fstab.m4 hanoi.m4 incl-test.m4 \
+	include.m4 indir.m4 misc.m4 multiquotes.m4 patsubst.m4 pushpop.m4 \
+	regexp.m4 reverse.m4 stackovf.sh sync-lines.m4 sysv-args.m4 trace.m4 \
+	translit.m4 undivert.incl undivert.m4 wrap.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
+DATA =  $(pkgdata_DATA)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -108,7 +106,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP = --best
-all: Makefile
+all: Makefile $(DATA)
 
 .SUFFIXES:
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
@@ -118,6 +116,25 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
+
+install-pkgdataDATA: $(pkgdata_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	@list='$(pkgdata_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-pkgdataDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(pkgdata_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(pkgdatadir)/$$p; \
+	done
 tags: TAGS
 TAGS:
 
@@ -141,17 +158,18 @@ installcheck:
 install-exec: 
 	@$(NORMAL_INSTALL)
 
-install-data: 
+install-data: install-pkgdataDATA
 	@$(NORMAL_INSTALL)
 
 install: install-exec install-data all
 	@:
 
-uninstall: 
+uninstall: uninstall-pkgdataDATA
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs:
+	$(mkinstalldirs)  $(DATADIR)$(pkgdatadir)
 
 
 mostlyclean-generic:
@@ -174,16 +192,15 @@ clean:  clean-generic mostlyclean
 
 distclean:  distclean-generic clean
 	-rm -f config.status
-	-rm -f libtool
 
 maintainer-clean:  maintainer-clean-generic distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-.PHONY: tags distdir info dvi installcheck install-exec install-data \
-install uninstall all installdirs mostlyclean-generic distclean-generic \
-clean-generic maintainer-clean-generic clean mostlyclean distclean \
-maintainer-clean
+.PHONY: uninstall-pkgdataDATA install-pkgdataDATA tags distdir info dvi \
+installcheck install-exec install-data install uninstall all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

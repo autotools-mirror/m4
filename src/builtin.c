@@ -1559,7 +1559,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		_("Bad regular expression: `%s': %s"), regexp, msg));
+		_("Bad regular expression `%s': %s"), regexp, msg));
       return;
     }
 

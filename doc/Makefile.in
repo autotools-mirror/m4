@@ -57,15 +57,13 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-host_alias = @host_alias@
-host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 GENCAT = @GENCAT@
-GLOCALE = @GLOCALE@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GT_NO = @GT_NO@
@@ -75,13 +73,9 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
-LD = @LD@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
@@ -313,7 +307,6 @@ clean:  clean-vti clean-aminfo clean-generic mostlyclean
 
 distclean:  distclean-vti distclean-aminfo distclean-generic clean
 	-rm -f config.status
-	-rm -f libtool
 
 maintainer-clean:  maintainer-clean-vti maintainer-clean-aminfo \
 		maintainer-clean-generic distclean

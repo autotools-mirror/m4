@@ -1,3 +1,28 @@
+1998-05-22  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* Prerelease 1.4d.
+
+	* src/m4.c: #include <signal.h> not <sys/signal.h>.
+
+	* src/Makefile.am: CFLAGS = -Wall @CFLAGS@.
+
+	* checks/Makefile.am: explicit list tests in CHECKS.
+
+	* configure.in, {,src,doc,lib,examples,checks}/Makefile.am,
+	src/{ansi2knr.{1,c}} doc/{m4.texinfo,mdate-sh}, missing,
+	mkinstalldirs, install-sh: Added automake (1.3) support.
+
+	* lib/{alloca.c,error.{c,h},get{date.h,opt.{c,h},opt1.c},
+	obstack.{c,h},regex.{c,h},strtol.c,xmalloc.c,xstrdup.c}:
+	Used libitize (0.4) to update.
+
+	* configure.in, ABOUT-NLS, intl/*, po/*: Added gettextize
+	(0.10.25) support. Removed LOCALE, fr.msg, m4.cod and adjusted
+	README accordingly.
+
+	* src/stackovf.c: #ifdef USE_STACKOVF ... #endif to (de-)activate
+	stack overflow functionality.
+
 Sat Dec  3 20:45:31 1994  Francois Pinard  (pinard@icule)
 
 	* Prerelease 1.4.1.

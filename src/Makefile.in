@@ -57,14 +57,13 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-host_alias = @host_alias@
-host_triplet = @host@
 AWK = @AWK@
+CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 GENCAT = @GENCAT@
-GLOCALE = @GLOCALE@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GT_NO = @GT_NO@
@@ -74,17 +73,14 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
-LD = @LD@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
@@ -92,9 +88,9 @@ VERSION = @VERSION@
 l = @l@
 
 AUTOMAKE_OPTIONS = ansi2knr
-CATALOGS = fr.msg
+
 LIBS = @LIBS@
-STACKOVF = @STACKOVF@
+CFLAGS = -Wall @CFLAGS@
 
 bin_PROGRAMS = m4
 
@@ -119,10 +115,8 @@ freeze$U.o input$U.o macro$U.o output$U.o path$U.o symtab$U.o \
 stackovf$U.o
 m4_DEPENDENCIES =  ../lib/libm4.a
 m4_LDFLAGS = 
-CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
 
 
@@ -136,7 +130,7 @@ OBJECTS = $(m4_OBJECTS)
 all: Makefile $(ANSI2KNR) $(PROGRAMS)
 
 .SUFFIXES:
-.SUFFIXES: .S .c .lo .o .s
+.SUFFIXES: .S .c .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps src/Makefile
 
@@ -159,8 +153,8 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
 	  else :; fi; \
 	done
 
@@ -188,25 +182,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 maintainer-clean-compile:
-
-.c.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.s.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.S.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
 
 mostlyclean-krextra:
 
@@ -257,10 +232,8 @@ stackovf_.c: stackovf.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/stackovf.c; then echo $(srcdir)/stackovf.c; else echo stackovf.c; fi` | $(ANSI2KNR) stackovf_.c
 symtab_.c: symtab.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) `if test -f $(srcdir)/symtab.c; then echo $(srcdir)/symtab.c; else echo symtab.c; fi` | $(ANSI2KNR) symtab_.c
-builtin_.o builtin_.lo debug_.o debug_.lo eval_.o eval_.lo format_.o \
-format_.lo freeze_.o freeze_.lo input_.o input_.lo m4_.o m4_.lo \
-macro_.o macro_.lo output_.o output_.lo path_.o path_.lo stackovf_.o \
-stackovf_.lo symtab_.o symtab_.lo : $(ANSI2KNR)
+builtin_.o debug_.o eval_.o format_.o freeze_.o input_.o m4_.o macro_.o \
+output_.o path_.o stackovf_.o symtab_.o : $(ANSI2KNR)
 
 tags: TAGS
 
@@ -348,35 +321,32 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean:  mostlyclean-binPROGRAMS mostlyclean-compile \
-		mostlyclean-libtool mostlyclean-krextra mostlyclean-kr \
-		mostlyclean-tags mostlyclean-generic
+		mostlyclean-krextra mostlyclean-kr mostlyclean-tags \
+		mostlyclean-generic
 
-clean:  clean-binPROGRAMS clean-compile clean-libtool clean-krextra \
-		clean-kr clean-tags clean-generic mostlyclean
+clean:  clean-binPROGRAMS clean-compile clean-krextra clean-kr \
+		clean-tags clean-generic mostlyclean
 
-distclean:  distclean-binPROGRAMS distclean-compile distclean-libtool \
-		distclean-krextra distclean-kr distclean-tags \
-		distclean-generic clean
+distclean:  distclean-binPROGRAMS distclean-compile distclean-krextra \
+		distclean-kr distclean-tags distclean-generic clean
 	-rm -f config.status
-	-rm -f libtool
 
 maintainer-clean:  maintainer-clean-binPROGRAMS maintainer-clean-compile \
-		maintainer-clean-libtool maintainer-clean-krextra \
-		maintainer-clean-kr maintainer-clean-tags \
-		maintainer-clean-generic distclean
+		maintainer-clean-krextra maintainer-clean-kr \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool mostlyclean-krextra \
-distclean-krextra clean-krextra maintainer-clean-krextra mostlyclean-kr \
-distclean-kr clean-kr maintainer-clean-kr tags mostlyclean-tags \
-distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
-installcheck install-exec install-data install uninstall all \
-installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-compile mostlyclean-krextra distclean-krextra \
+clean-krextra maintainer-clean-krextra mostlyclean-kr distclean-kr \
+clean-kr maintainer-clean-kr tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir info dvi installcheck \
+install-exec install-data install uninstall all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 

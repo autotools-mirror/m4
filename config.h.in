@@ -176,6 +176,9 @@
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
 
+/* Define if you have the strdup function.  */
+#undef HAVE_STRDUP
+
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
 
@@ -214,9 +217,6 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
-
-/* Define if you have the <values.h> header file.  */
-#undef HAVE_VALUES_H
 
 /* Define if you have the i library (-li).  */
 #undef HAVE_LIBI

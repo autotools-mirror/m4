@@ -6,7 +6,6 @@
 @c %**end of header
 
 @include version.texi
-
 @ifinfo
 @set Francois Franc,ois
 @end ifinfo

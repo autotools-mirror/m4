@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:1227: Origin of test
+dnl ../doc/m4.texinfo:1226: Origin of test
 define(`foo', `Expansion one.')
 dnl @result{}
 foo

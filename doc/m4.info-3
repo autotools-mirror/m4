@@ -32,8 +32,8 @@ Concept index
 
 * Menu:
 
-* arguments to macros:                   Macro Arguments.
 * Arguments to macros:                   Arguments.
+* arguments to macros:                   Macro Arguments.
 * arguments to macros, special:          Pseudo Arguments.
 * arguments, quoted macro:               Quoting Arguments.
 * arithmetic:                            Arithmetic.
@@ -87,22 +87,22 @@ Concept index
 * forloops:                              Loops.
 * formatted output:                      Format.
 * frozen files for fast loading:         Frozen files.
-* GNU extensions <1>:                    Undivert.
-* GNU extensions <2>:                    Indir.
-* GNU extensions <3>:                    Regexp.
-* GNU extensions <4>:                    Search Path.
-* GNU extensions <5>:                    Esyscmd.
-* GNU extensions <6>:                    Builtin.
-* GNU extensions <7>:                    Arguments.
-* GNU extensions <8>:                    Extensions.
-* GNU extensions <9>:                    Patsubst.
-* GNU extensions <10>:                   Format.
-* GNU extensions <11>:                   Frozen files.
-* GNU extensions <12>:                   Debug Output.
-* GNU extensions:                        Debug Levels.
+* GNU extensions <1>:                    Extensions.
+* GNU extensions <2>:                    Frozen files.
+* GNU extensions <3>:                    Esyscmd.
+* GNU extensions <4>:                    Format.
+* GNU extensions <5>:                    Patsubst.
+* GNU extensions <6>:                    Regexp.
+* GNU extensions <7>:                    Undivert.
+* GNU extensions <8>:                    Search Path.
+* GNU extensions <9>:                    Debug Output.
+* GNU extensions <10>:                   Debug Levels.
+* GNU extensions <11>:                   Builtin.
+* GNU extensions <12>:                   Indir.
+* GNU extensions:                        Arguments.
 * included files, search path for:       Search Path.
-* inclusion, of files <1>:               File Inclusion.
-* inclusion, of files:                   Undivert.
+* inclusion, of files <1>:               Undivert.
+* inclusion, of files:                   File Inclusion.
 * increment operator:                    Incr.
 * indirect call of builtins:             Builtin.
 * indirect call of macros:               Indir.
@@ -144,8 +144,8 @@ Concept index
 * quoted string:                         Quoted strings.
 * recursive macros:                      Loops.
 * redefinition of macros, temporary:     Pushdef.
-* regular expressions <1>:               Regexp.
-* regular expressions:                   Patsubst.
+* regular expressions <1>:               Patsubst.
+* regular expressions:                   Regexp.
 * reloading a frozen file:               Frozen files.
 * renaming macros:                       Defn.
 * running UNIX commands:                 UNIX commands.

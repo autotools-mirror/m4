@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:3081: Origin of test
+dnl ../doc/m4.texinfo:3080: Origin of test
 define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 dnl @result{}

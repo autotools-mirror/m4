@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = ansi2knr
-CATALOGS = fr.msg
+
 LIBS = @LIBS@
-STACKOVF = @STACKOVF@
+CFLAGS = -Wall @CFLAGS@
 
 bin_PROGRAMS = m4
 

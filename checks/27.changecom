@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:1858: Origin of test
+dnl ../doc/m4.texinfo:1857: Origin of test
 define(`comment', `COMMENT')
 dnl @result{}
 # A normal comment

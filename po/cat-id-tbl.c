@@ -8,9 +8,57 @@
 
 const struct _msg_ent _msg_tbl[] = {
   {"", 1},
-  {"ERROR: Stack overflow.  (Infinite define recursion?)", 2},
-  {"Try `%s --help' for more information.\n", 3},
-  {"Usage: %s [OPTION]... [FILE]...\n", 4},
+  {"Warning: Too few arguments to built-in `%s'", 2},
+  {"Warning: Excess arguments to built-in `%s' ignored", 3},
+  {"Non-numeric argument to built-in `%s'", 4},
+  {"INTERNAL ERROR: Bad token data type in define_macro ()", 5},
+  {"Undefined name %s", 6},
+  {"INTERNAL ERROR: Builtin not found in builtin table!", 7},
+  {"INTERNAL ERROR: Bad token data type in m4_dumpdef ()", 8},
+  {"Undefined macro `%s'", 9},
+  {"INTERNAL ERROR: Bad symbol type in m4_defn ()", 10},
+  {"Cannot open pipe to command `%s'", 11},
+  {"Radix in eval out of range (radix = %d)", 12},
+  {"Negative width to eval", 13},
+  {"Non-numeric argument to %s", 14},
+  {"Cannot undivert %s", 15},
+  {"Cannot open %s", 16},
+  {"Debugmode: bad debug flags: `%s'", 17},
+  {"Cannot set error file: %s", 18},
+  {"WARNING: \\0 will disappear, use \\& instead in replacements", 19},
+  {"Bad regular expression `%s': %s", 20},
+  {"Error matching regular expression `%s'", 21},
+  {"INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())", 22},
+  {"INTERNAL ERROR: Bad token data type (trace_pre ())", 23},
+  {"Bad expression in eval (missing right parenthesis): %s", 24},
+  {"Bad expression in eval: %s", 25},
+  {"Bad expression in eval (bad input): %s", 26},
+  {"Bad expression in eval (excess input): %s", 27},
+  {"Divide by zero in eval: %s", 28},
+  {"Modulo by zero in eval: %s", 29},
+  {"INTERNAL ERROR: Bad error code in evaluate ()", 30},
+  {"INTERNAL ERROR: Bad comparison operator in cmp_term ()", 31},
+  {"INTERNAL ERROR: Bad shift operator in shift_term ()", 32},
+  {"INTERNAL ERROR: Bad operator in mult_term ()", 33},
+  {"INTERNAL ERROR: Built-in not found in builtin table!", 34},
+  {"INTERNAL ERROR: Bad token data type in freeze_one_symbol ()", 35},
+  {"Expecting line feed in frozen file", 36},
+  {"Expecting character `%c' in frozen file", 37},
+  {"Ill-formated frozen file", 38},
+  {"Premature end of frozen file", 39},
+  {"`%s' from frozen file not found in builtin table!", 40},
+  {"Input read from %s", 41},
+  {"INTERNAL ERROR: Recursive push_string!", 42},
+  {"Input reverted to %s, line %d", 43},
+  {"INTERNAL ERROR: Input stack botch in pop_input ()", 44},
+  {"INTERNAL ERROR: Bad call to init_macro_token ()", 45},
+  {"INTERNAL ERROR: Input stack botch in peek_input ()", 46},
+  {"INTERNAL ERROR: Input stack botch in next_char ()", 47},
+  {"NONE", 48},
+  {"ERROR: EOF in string", 49},
+  {"ERROR: Stack overflow.  (Infinite define recursion?)", 50},
+  {"Try `%s --help' for more information.\n", 51},
+  {"Usage: %s [OPTION]... [FILE]...\n", 52},
   {"\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
@@ -21,33 +69,33 @@ Operation modes:\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n", 5},
-  {"  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n", 6},
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n", 53},
+  {"  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n", 54},
   {"\
 \n\
 Preprocessor features:\n\
   -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n", 7},
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n", 55},
   {"\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n", 8},
+  -L, --nesting-limit=NUMBER   change artificial nesting limit\n", 56},
   {"\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n", 9},
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n", 57},
   {"\
 \n\
 Debugging:\n\
   -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -t, --trace=NAME             trace NAME when it will be defined\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n", 10},
+  -o, --error-output=FILE      redirect debug and trace output\n", 58},
   {"\
 \n\
 FLAGS is any of:\n\
@@ -61,12 +109,30 @@ FLAGS is any of:\n\
   l   say current input line number\n\
   p   show results of path searches\n\
   i   show changes in input files\n\
-  V   shorthand for all of the above flags\n", 11},
+  V   shorthand for all of the above flags\n", 59},
   {"\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n", 12},
-  {"Bad debug flags: `%s'", 13},
-  {"INTERNAL ERROR: Bad code in deferred arguments", 14},
+If no FILE or if FILE is `-', standard input is read.\n", 60},
+  {"Bad debug flags: `%s'", 61},
+  {"INTERNAL ERROR: Bad code in deferred arguments", 62},
+  {"INTERNAL ERROR: Bad token type in expand_token ()", 63},
+  {"ERROR: EOF in argument list", 64},
+  {"INTERNAL ERROR: Bad token type in expand_argument ()", 65},
+  {"INTERNAL ERROR: Bad symbol type in call_macro ()", 66},
+  {"ERROR: Recursion limit of %d exceeded, use -L<N> to change it", 67},
+  {"ERROR: Cannot create temporary file for diversion", 68},
+  {"ERROR: Cannot flush diversion to temporary file", 69},
+  {"ERROR: Copying inserted file", 70},
+  {"ERROR: Reading inserted file", 71},
+  {"Cannot stat diversion", 72},
+  {"Path search for `%s' found `%s'", 73},
+  {"VMEM limit exceeded?\n", 74},
+  {"\
+Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\
+occurred, or there is a bug in ", 75},
+  {".  Check for possible infinite recursion.\n", 76},
+  {"INTERNAL ERROR: Illegal mode to symbol_lookup ()", 77},
+  {"Name `%s' is unknown\n", 78},
 };
 
-int _msg_tbl_length = 14;
+int _msg_tbl_length = 78;

@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:2415: Origin of test
+dnl ../doc/m4.texinfo:2414: Origin of test
 len()
 dnl @result{}0
 len(`abcdef')

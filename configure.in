@@ -8,14 +8,15 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4c)
+AM_INIT_AUTOMAKE(m4,1.4d)
+ALL_LINGUAS="fr nl"
 
-AC_CHECK_PROG(GLOCALE, extract-msgs, yes, no)
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AM_PROG_LIBTOOL
+AC_PROG_RANLIB
+dnl AM_PROG_LIBTOOL
 
 AC_AIX
 AC_ISC_POSIX
@@ -90,11 +91,9 @@ fi], [AC_MSG_RESULT(no)])
 
 AM_WITH_DMALLOC
 AM_GNU_GETTEXT
-ALL_LINGUAS=""
-AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
+dnl AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
-AC_OUTPUT(Makefile intl/Makefile po/Makefile.in doc/Makefile lib/Makefile src/Makefile \
-checks/Makefile examples/Makefile,
+AC_OUTPUT(Makefile intl/Makefile po/Makefile.in doc/Makefile lib/Makefile \
+src/Makefile checks/Makefile examples/Makefile, \
 [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile; \
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
-

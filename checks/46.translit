@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:2552: Origin of test
+dnl ../doc/m4.texinfo:2551: Origin of test
 translit(`GNUs not Unix', `A-Z')
 dnl @result{}s not nix
 translit(`GNUs not Unix', `a-z', `A-Z')

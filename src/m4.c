@@ -19,7 +19,7 @@
 #include "m4.h"
 
 #include <getopt.h>
-#include <sys/signal.h>
+#include <signal.h>
 
 /* Operate interactively (-e).  */
 static int interactive = 0;
