@@ -1,3 +1,29 @@
+2003-09-10  Gary V. Vaughan  <gary@gnu.org>
+
+	Import the xalloc module from CVS gnulib, along with its
+	dependencies: exitfail, malloc and realloc. We had different
+	semantics for our XFREE and a function xfree() not supplied by
+	gnulib, so also a bit of work to keep everything running
+	smoothly:
+
+	* configure.ac (AC_REPLACE_FUNCS): Removed xmalloc and xstrdup.
+	(gl_XALLOC): Use gnulib equivalents.
+	* gnulib/config/exitfail.m4, gnulib/m4/exitfail.h,
+	gnulib/m4/exitfail.c: Import exitfail module from CVS gnulib.
+	* gnulib/config/malloc.m4, gnulib/m4/malloc.c: Ditto wrt malloc.
+	* gnulib/config/realloc.m4, gnulib/m4/realloc.c: Ditto wrt
+	realloc.
+	* gnulib/config/xalloc.m4, gnulib/m4/xalloc.h,
+	gnulib/m4/xmalloc.c, gnulib/m4/xstrdup.c: Ditto wrt xalloc.
+	* gnulib/m4/Makefile.am: Add fragment from gnulib for newly
+	imported modules.
+	(pkgincdir): Removed.  Use pkgincludedir instead.
+	* m4/m4private.h (XFREE): xfree already checks for NULL.
+	* m4/system_.h: Use xalloc module, and remove macros already
+	supplied by xalloc.h.
+	* m4/utility.c (xfree): xalloc does not yet implement xfree, so
+	moved the old definition from m4/xmalloc.c to here for now.
+
 2003-09-09  Gary V. Vaughan  <gary@gnu.org>
 
 	Import the error and progname modules from CVS gnulib.  Our old

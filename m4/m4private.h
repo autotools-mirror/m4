@@ -287,7 +287,7 @@ struct m4__search_path_info {
 
 /* Dmalloc expects us to use a void returning xfree.  */
 #  undef XFREE
-#  define XFREE(p)	if (p) xfree (p)
+#  define XFREE(p)	(xfree (p))
 
 #endif /* WITH_DMALLOC */
 

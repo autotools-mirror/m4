@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-05 19:04+0100\n"
+"POT-Creation-Date: 2003-09-10 11:06+0100\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -14,13 +14,9 @@ msgstr ""
 "Content-Type: text/plain; charset=EUC\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 #, fuzzy
 msgid "memory exhausted"
-msgstr "メモリが残っていません。"
-
-#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
-msgid "Memory exhausted"
 msgstr "メモリが残っていません。"
 
 #: m4/regex.c:1021
@@ -71,6 +67,10 @@ msgstr ""
 #: m4/regex.c:1054
 msgid "Invalid range end"
 msgstr ""
+
+#: m4/regex.c:1057
+msgid "Memory exhausted"
+msgstr "メモリが残っていません。"
 
 #: m4/regex.c:1060
 #, fuzzy
@@ -411,24 +411,24 @@ msgstr "%s: `%s' は不明瞭なオプション名です。\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
-#: src/main.c:83
+#: src/main.c:74
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 "エラー: スタックがオーバーフローを起こしています。\n"
 "        (無限に再帰的定義をしていませんか？)"
 
-#: src/main.c:95
+#: src/main.c:86
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "詳しくは `%s --help' の出力を御覧下さい。\n"
 
-#: src/main.c:99
+#: src/main.c:90
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "使用方法: %s [オプション]...[ファイル名]\n"
 
-#: src/main.c:100
+#: src/main.c:91
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -454,7 +454,7 @@ msgstr ""
 "  -Q, --quiet, --silent        いくつかのビルトインコマンドの警告を抑制します。\n"
 "  -P, --prefix-builtins        全てのビルトインマクロに `m4_' という接頭辞を                               強制的に追加します。\n"
 
-#: src/main.c:114
+#: src/main.c:105
 #, c-format
 msgid ""
 "\n"
@@ -463,7 +463,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:120
+#: src/main.c:111
 #, fuzzy
 msgid ""
 "\n"
@@ -482,7 +482,7 @@ msgstr ""
 "  -U, --undefine=NAME           NAME の定義を取り消します。\n"
 "  -s, --synclines               行番号とファイル名の行を生成します。\n"
 
-#: src/main.c:128
+#: src/main.c:119
 #, fuzzy
 msgid ""
 "\n"
@@ -497,7 +497,7 @@ msgstr ""
 "                                セットします。\n"
 "   -L, --nesting-limit=NUNBER   マクロのネスト回数の上限値を人為的に変更します。\n"
 
-#: src/main.c:134
+#: src/main.c:125
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -509,7 +509,7 @@ msgstr ""
 "   -R, --reload-state=FILE      最初に指定された FILE から\n"
 "                                凍結された定義をロードします\n"
 
-#: src/main.c:140
+#: src/main.c:131
 msgid ""
 "\n"
 "Debugging:\n"
@@ -527,7 +527,7 @@ msgstr ""
 "   -o, --error-output=FILE      デバッグとトレースの出力を FILE に\n"
 "                                リダイレクトします。\n"
 
-#: src/main.c:148
+#: src/main.c:139
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -559,7 +559,7 @@ msgstr ""
 "   i   入力ファイルに生じた変化を表示します。\n"
 "   V   上記の全ての FLAG を指定することを意味します。\n"
 
-#: src/main.c:163
+#: src/main.c:154
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -568,36 +568,36 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/main.c:168
+#: src/main.c:159
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:319
+#: src/main.c:310
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:323
+#: src/main.c:314
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:352
+#: src/main.c:343
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/main.c:380
+#: src/main.c:371
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:374
 msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:386
+#: src/main.c:377
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"

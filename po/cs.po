@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-05 19:04+0100\n"
+"POT-Creation-Date: 2003-09-10 11:06+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -14,12 +14,8 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 msgid "memory exhausted"
-msgstr ""
-
-#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
-msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1021
@@ -70,6 +66,10 @@ msgstr ""
 
 #: m4/regex.c:1054
 msgid "Invalid range end"
+msgstr ""
+
+#: m4/regex.c:1057
+msgid "Memory exhausted"
 msgstr ""
 
 # , c-format
@@ -445,24 +445,24 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: src/main.c:83
+#: src/main.c:74
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "CHYBA: Pøeteèení zásobníku. (nekoneèná rekurze makra define?)"
 
 # , c-format
-#: src/main.c:95
+#: src/main.c:86
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Více informací získáte pøíkazem `%s --help'.\n"
 
 # , c-format
-#: src/main.c:99
+#: src/main.c:90
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Pou¾ití: %s [PØEPÍNAÈ]... [SOUBOR]...\n"
 
-#: src/main.c:100
+#: src/main.c:91
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -488,10 +488,9 @@ msgstr ""
 "  -E, --fatal-warnings          skonèí po prvním varování\n"
 "  -Q, --quiet, --silent         potlaèí nìkterá varování týkající se\n"
 "                                vestavìných maker\n"
-"  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
-"`m4_'\n"
+"  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix `m4_'\n"
 
-#: src/main.c:114
+#: src/main.c:105
 #, c-format
 msgid ""
 "\n"
@@ -500,7 +499,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:120
+#: src/main.c:111
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -518,7 +517,7 @@ msgstr ""
 "  -U, --undefine=MAKRO          sma¾e vestavìné MAKRO\n"
 "  -s, --synclines               vlo¾í øádky tvaru `#line ÈÍSLO \"SOUBOR\"'\n"
 
-#: src/main.c:128
+#: src/main.c:119
 #, fuzzy
 msgid ""
 "\n"
@@ -529,11 +528,10 @@ msgstr ""
 "\n"
 "Nastavení limitù:\n"
 "  -G, --traditional             vypne roz¹íøení GNU\n"
-"  -H, --hashsize=PRVOÈÍSLO      velikost hash tabulky pro vyhledávání "
-"symbolù\n"
+"  -H, --hashsize=PRVOÈÍSLO      velikost hash tabulky pro vyhledávání symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
-#: src/main.c:134
+#: src/main.c:125
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -545,7 +543,7 @@ msgstr ""
 "  -F, --freeze-state=SOUBOR     pøi ukonèení ulo¾í zmrazený stav do SOUBORU\n"
 "  -R, --reload-state=SOUBOR     pøi startu naète zmrazený stav ze SOUBORU\n"
 
-#: src/main.c:140
+#: src/main.c:131
 msgid ""
 "\n"
 "Debugging:\n"
@@ -561,10 +559,9 @@ msgstr ""
 "  -t, --trace=MAKRO             sleduje MAKRO, kdy¾ je definováno\n"
 "  -l, --arglength=POÈET         reguluje poèet výstupních informací\n"
 "                                ze sledování maker\n"
-"  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
-"SOUBORU\n"
+"  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do SOUBORU\n"
 
-#: src/main.c:148
+#: src/main.c:139
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -594,16 +591,15 @@ msgstr ""
 "  i   vypí¹e informace o ka¾dé zmìnì vstupního souboru\n"
 "  V   zkratka pro v¹echny vý¹e uvedené volby\n"
 
-#: src/main.c:163
+#: src/main.c:154
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 "\n"
-"Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
-"vstup.\n"
+"Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní vstup.\n"
 
-#: src/main.c:168
+#: src/main.c:159
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -612,31 +608,31 @@ msgstr ""
 "Chyby v programu oznamujte na adrese <bug-m4@gnu.org> (anglicky).\n"
 "Pøipomínky k pøekladu zasílejte na adresu <cs@li.org> (èesky).\n"
 
-#: src/main.c:319
+#: src/main.c:310
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:323
+#: src/main.c:314
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 # , c-format
-#: src/main.c:352
+#: src/main.c:343
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "©patné ladící volby: `%s'"
 
-#: src/main.c:380
+#: src/main.c:371
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:374
 msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:386
+#: src/main.c:377
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -651,8 +647,7 @@ msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
 msgstr ""
-"Neoprávnìný pøístup do pamìti (SIGSEGV). Jedná se buï o pøeteèení "
-"zásobníku,\n"
+"Neoprávnìný pøístup do pamìti (SIGSEGV). Jedná se buï o pøeteèení zásobníku,\n"
 "nebo o chybu "
 
 #: src/stackovf.c:204
@@ -748,8 +743,7 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "VNITØNÍ CHYBA: ¹patný chybový kód v evaluate ()"
 
 #~ msgid "INTERNAL ERROR: Builtin not found in builtin table!"
-#~ msgstr ""
-#~ "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
+#~ msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
@@ -780,9 +774,7 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "VNITØNÍ CHYBA: ¹patný typ symbolu v m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
-#~ msgstr ""
-#~ "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí "
-#~ "REGVÝR\n"
+#~ msgstr "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí REGVÝR\n"
 
 # , c-format
 #~ msgid "Non-numeric argument to %s"
@@ -824,8 +816,7 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 #~ msgstr "CHYBA: modul `%s' nelze nalézt"
 
 #~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
-#~ msgstr ""
-#~ "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
+#~ msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
 # , c-format
 #, fuzzy
@@ -843,9 +834,7 @@ msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 
 # , c-format
 #~ msgid "Warning: Excess arguments to built-in `%s' ignored"
-#~ msgstr ""
-#~ "Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou "
-#~ "ignorovány"
+#~ msgstr "Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou ignorovány"
 
 # , c-format
 #~ msgid "Non-numeric argument to built-in `%s'"

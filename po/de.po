@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-05 19:04+0100\n"
+"POT-Creation-Date: 2003-09-10 11:06+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -16,12 +16,8 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 msgid "memory exhausted"
-msgstr ""
-
-#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
-msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1021
@@ -71,6 +67,10 @@ msgstr ""
 
 #: m4/regex.c:1054
 msgid "Invalid range end"
+msgstr ""
+
+#: m4/regex.c:1057
+msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1060
@@ -126,8 +126,7 @@ msgstr "FEHLER: Dateiende in Argumentliste"
 #: m4/macro.c:230
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
-msgstr ""
-"FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
+msgstr "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
 
 #: m4/macro.c:425
 #, c-format
@@ -355,9 +354,7 @@ msgstr "Fehlerhafte eingefrorene Datei"
 #: src/freeze.c:484
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
-msgstr ""
-"»%s« aus eingefrorener Datei nicht in Tabelle der eingebauten Funktionen "
-"gefunden!"
+msgstr "»%s« aus eingefrorener Datei nicht in Tabelle der eingebauten Funktionen gefunden!"
 
 #: src/getopt.c:677
 #, c-format
@@ -414,22 +411,22 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: src/main.c:83
+#: src/main.c:74
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "FEHLER: Keller voll.  (Unendliche `define' Rekursion?)"
 
-#: src/main.c:95
+#: src/main.c:86
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "»%s --help« zeigt weitere Informationen.\n"
 
-#: src/main.c:99
+#: src/main.c:90
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Aufruf: %s [OPTION]... [DATEI]...\n"
 
-#: src/main.c:100
+#: src/main.c:91
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -453,12 +450,10 @@ msgstr ""
 "      --version                zeige Versionsinformation an und beende\n"
 "  -e, --interactive            keine Ausgabepufferung, ignoriere Interrupts\n"
 "  -E, --fatal-warnings         beende Ausführung nach erster Warnung\n"
-"  -Q, --quiet, --silent        unterdrücke Warnungen bei eingebauten "
-"Funktionen\n"
-"  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute "
-"Funktionen\n"
+"  -Q, --quiet, --silent        unterdrücke Warnungen bei eingebauten Funktionen\n"
+"  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute Funktionen\n"
 
-#: src/main.c:114
+#: src/main.c:105
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -472,7 +467,7 @@ msgstr ""
 "hinzu\n"
 "  -M, --load-module=MODULE            lade dynamisches MODULE aus M4MODPATH\n"
 
-#: src/main.c:120
+#: src/main.c:111
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -489,7 +484,7 @@ msgstr ""
 "  -U, --undefine=NAME          lösche eingebaute Funktion NAME\n"
 "  -s, --synclines              erzeuge `#line NR \"DATEI\"' Zeilen\n"
 
-#: src/main.c:128
+#: src/main.c:119
 #, fuzzy
 msgid ""
 "\n"
@@ -501,10 +496,9 @@ msgstr ""
 "Setze Grenzen:\n"
 "  -G, --traditional            schalte alle GNU Erweiterungen aus\n"
 "  -H, --hashsize=PRIMZAHL      setze Größe der Symbol-Hashtabelle\n"
-"  -L, --nesting-limit=NUMMER   setze künstliche Grenze für "
-"Schachtelungstiefe\n"
+"  -L, --nesting-limit=NUMMER   setze künstliche Grenze für Schachtelungstiefe\n"
 
-#: src/main.c:134
+#: src/main.c:125
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -518,7 +512,7 @@ msgstr ""
 "  -R, --reload-state=DATEI     lade zu Beginn Zustand von eingefrorener "
 "DATEI\n"
 
-#: src/main.c:140
+#: src/main.c:131
 msgid ""
 "\n"
 "Debugging:\n"
@@ -536,7 +530,7 @@ msgstr ""
 "  -o, --error-output=DATEI     leite Debug- und Verfolgungsausgaben nach "
 "DATEI\n"
 
-#: src/main.c:148
+#: src/main.c:139
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -566,7 +560,7 @@ msgstr ""
 "  i   gebe Veränderungen der Eingabedatei aus\n"
 "  V   Kurzform für alle Flags oben zusammen\n"
 
-#: src/main.c:163
+#: src/main.c:154
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -574,7 +568,7 @@ msgstr ""
 "\n"
 "Ohne DATEI oder wenn DATEI `-' ist, wird die Standardeingabe gelesen\n"
 
-#: src/main.c:168
+#: src/main.c:159
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -582,30 +576,30 @@ msgstr ""
 "\n"
 "Probleme und Fehler an <bug-m4@gnu.org>.\n"
 
-#: src/main.c:319
+#: src/main.c:310
 #, fuzzy, c-format
 msgid "failed to add search directory `%s'"
 msgstr "FEHLER: konnte Suchpfad `%s' nicht hinzufügen"
 
-#: src/main.c:323
+#: src/main.c:314
 #, fuzzy, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr "FEHLER: konnte Suchpfad `%s' nicht hinzufügen: %s"
 
-#: src/main.c:352
+#: src/main.c:343
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Falsche Debug Flags: »%s«"
 
-#: src/main.c:380
+#: src/main.c:371
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:374
 msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:386
+#: src/main.c:377
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -740,8 +734,7 @@ msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 #~ msgstr "INTERNER FEHLER: Falscher Symboltyp in m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
-#~ msgstr ""
-#~ "  -W, --word-regexp=REGEXP     benutze REGEXP für Makronamensyntax\n"
+#~ msgstr "  -W, --word-regexp=REGEXP     benutze REGEXP für Makronamensyntax\n"
 
 #~ msgid "Non-numeric argument to %s"
 #~ msgstr "Nicht-numerisches Argument in %s"
@@ -789,8 +782,7 @@ msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 #~ msgstr "Warnung: Zu wenig Argumente für eingebaute Funktion »%s«"
 
 #~ msgid "Warning: Excess arguments to built-in `%s' ignored"
-#~ msgstr ""
-#~ "Warnung: Überschüssige Argumente für eingebaute Funktion »%s« ignoriert"
+#~ msgstr "Warnung: Überschüssige Argumente für eingebaute Funktion »%s« ignoriert"
 
 #~ msgid "Non-numeric argument to built-in `%s'"
 #~ msgstr "Nicht-numerisches Argument in eingebauter Funktion »%s«"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-05 19:04+0100\n"
+"POT-Creation-Date: 2003-09-10 11:06+0100\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -14,13 +14,9 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 #, fuzzy
 msgid "memory exhausted"
-msgstr "Память исчерпана"
-
-#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
-msgid "Memory exhausted"
 msgstr "Память исчерпана"
 
 #: m4/regex.c:1021
@@ -72,6 +68,10 @@ msgstr ""
 msgid "Invalid range end"
 msgstr ""
 
+#: m4/regex.c:1057
+msgid "Memory exhausted"
+msgstr "Память исчерпана"
+
 #: m4/regex.c:1060
 #, fuzzy
 msgid "Invalid preceding regular expression"
@@ -122,8 +122,7 @@ msgstr "ОШИБКА: Конец файла в списке аргументов"
 #: m4/macro.c:230
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
-msgstr ""
-"ОШИБКА: Лимит рекурсии %d исчерпан, используйте -L<N> чтобы изменить его"
+msgstr "ОШИБКА: Лимит рекурсии %d исчерпан, используйте -L<N> чтобы изменить его"
 
 #: m4/macro.c:425
 #, c-format
@@ -189,8 +188,7 @@ msgstr "ОШИБКА: модуль `%s' не найден"
 #: m4/output.c:287
 #, fuzzy
 msgid "cannot create temporary file for diversion"
-msgstr ""
-"ОШИБКА: Ошибка создания временного файла для разветвления макрообработки"
+msgstr "ОШИБКА: Ошибка создания временного файла для разветвления макрообработки"
 
 #: m4/output.c:297
 #, fuzzy
@@ -409,22 +407,22 @@ msgstr "%s: опция `%s' неоднозначна\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: у опции `--%s' не должно быть аргументов\n"
 
-#: src/main.c:83
+#: src/main.c:74
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "ОШИБКА: Переполнение стека. (Бесконечное рекурсивное определение?)"
 
-#: src/main.c:95
+#: src/main.c:86
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Попробуйте '%s --help' для информации.\n"
 
-#: src/main.c:99
+#: src/main.c:90
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Использование: %s [OPTION]... [FILE]...\n"
 
-#: src/main.c:100
+#: src/main.c:91
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -440,21 +438,17 @@ msgid ""
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
 "  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
 msgstr ""
-"Обязательные или необязательные аргументы для длинных опции таковы и для "
-"коротких\n"
+"Обязательные или необязательные аргументы для длинных опции таковы и для коротких\n"
 "\n"
 "Режимы работы:\n"
 "      --help                   показать помощь и выйти\n"
 "      --version                вывести информацию о версии и выйти\n"
-"  -e, --interactive            небуферизованный вывод, игнорировать "
-"прерывания\n"
+"  -e, --interactive            небуферизованный вывод, игнорировать прерывания\n"
 "  -E, --fatal-warnings         остановиться после первого предупреждения\n"
-"  -Q, --quiet, --silent        подавлять предупреждения для встроенных "
-"функций\n"
-"  -P, --prefix-builtins        добавлять префикс `m4_' для всех встроенных "
-"функций\n"
+"  -Q, --quiet, --silent        подавлять предупреждения для встроенных функций\n"
+"  -P, --prefix-builtins        добавлять префикс `m4_' для всех встроенных функций\n"
 
-#: src/main.c:114
+#: src/main.c:105
 #, c-format
 msgid ""
 "\n"
@@ -463,7 +457,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:120
+#: src/main.c:111
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -479,7 +473,7 @@ msgstr ""
 "  -U, --undefine=NAME          удалить встроенную функцию NAME\n"
 "  -s, --synclines              генерировать строки `#line NO \"FILE\"'\n"
 
-#: src/main.c:128
+#: src/main.c:119
 #, fuzzy
 msgid ""
 "\n"
@@ -490,12 +484,10 @@ msgstr ""
 "\n"
 "Ограничения:\n"
 "  -G, --traditional            подавлять все GNU расширения\n"
-"  -H, --hashsize=PRIME         установить размер хэш-таблицы для поиска "
-"символов\n"
-"  -L, --nesting-limit=NUMBER   изменить предел глубины интелектуального "
-"поиска\n"
+"  -H, --hashsize=PRIME         установить размер хэш-таблицы для поиска символов\n"
+"  -L, --nesting-limit=NUMBER   изменить предел глубины интелектуального поиска\n"
 
-#: src/main.c:134
+#: src/main.c:125
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -507,7 +499,7 @@ msgstr ""
 "  -F, --freeze-state=FILE      в конце создать образ памяти для FILE\n"
 "  -R, --reload-state=FILE      в начале загружать образ памяти для FILE\n"
 
-#: src/main.c:140
+#: src/main.c:131
 msgid ""
 "\n"
 "Debugging:\n"
@@ -518,14 +510,12 @@ msgid ""
 msgstr ""
 "\n"
 "Отладка:\n"
-"  -d, --debug=[FLAGS]          установить уровень отладки (по умолчанию "
-"FLAGS=`aeq')\n"
+"  -d, --debug=[FLAGS]          установить уровень отладки (по умолчанию FLAGS=`aeq')\n"
 "  -t, --trace=NAME             трассировать NAME когда оно будет определено\n"
 "  -l, --arglength=NUM          установить размер трассировки для макроса\n"
-"  -o, --error-output=FILE      перенаправить отладочный и трассировочный "
-"вывод в файл FILE\n"
+"  -o, --error-output=FILE      перенаправить отладочный и трассировочный вывод в файл FILE\n"
 
-#: src/main.c:148
+#: src/main.c:139
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -548,15 +538,14 @@ msgstr ""
 "  e   показывать макрорасширение\n"
 "  q   заключать значения в кавычки по необходимости, с a или e флагами\n"
 "  c   показывать перед сбором , после сбора и после вызова\n"
-"  x   добавлять уникальный идентификатор вызова макроса, используется вместе "
-"с флагом c\n"
+"  x   добавлять уникальный идентификатор вызова макроса, используется вместе с флагом c\n"
 "  f   выводить текущее имя входного файла\n"
 "  l   выводить номер текущей строчки\n"
 "  p   показывать результаты поиска по путям\n"
 "  i   показывать изменения во входных файлах\n"
 "  V   сокращение для всех флагов вместе\n"
 
-#: src/main.c:163
+#: src/main.c:154
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -564,7 +553,7 @@ msgstr ""
 "\n"
 "Если FILE не существует или FILE это `-', используется стандартный вход.\n"
 
-#: src/main.c:168
+#: src/main.c:159
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -572,30 +561,30 @@ msgstr ""
 "\n"
 "Посылайте отчеты об ошибках на <bug-m4@gnu.org>.\n"
 
-#: src/main.c:319
+#: src/main.c:310
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:323
+#: src/main.c:314
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:352
+#: src/main.c:343
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Неверный флаг отладки: '%s'"
 
-#: src/main.c:380
+#: src/main.c:371
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:374
 msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:386
+#: src/main.c:377
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -725,9 +714,7 @@ msgstr ". Проверка на возможную бесконечную рекурсию.\n"
 #~ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
-#~ msgstr ""
-#~ "  -W, --word-regexp=REGEXP     использовать REGEXP для синтаксиса имен "
-#~ "макросов\n"
+#~ msgstr "  -W, --word-regexp=REGEXP     использовать REGEXP для синтаксиса имен макросов\n"
 
 #~ msgid "Non-numeric argument to %s"
 #~ msgstr "Нечисловой аргумент для %s"
@@ -775,9 +762,7 @@ msgstr ". Проверка на возможную бесконечную рекурсию.\n"
 #~ msgstr "Предупреждение: Слишком мало аргументов для встроенной лексемы '%s'"
 
 #~ msgid "Warning: Excess arguments to built-in `%s' ignored"
-#~ msgstr ""
-#~ "Предупреждение: Избыточные аргументы для встроенной лексемы '%s' "
-#~ "проигнорированы"
+#~ msgstr "Предупреждение: Избыточные аргументы для встроенной лексемы '%s' проигнорированы"
 
 #~ msgid "Non-numeric argument to built-in `%s'"
 #~ msgstr "Не числовой аргумент для встроенной лексемы '%s'"

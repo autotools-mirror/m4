@@ -29,6 +29,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  include <config.h>
 #endif
 
+#if WITH_DMALLOC
+#  undef malloc
+#  undef realloc
+#endif
+
 #if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
@@ -131,7 +136,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #endif
 
 
-
 
 /* --- WINDOWS SUPPORT --- */
 
@@ -211,14 +215,11 @@ static char   *lt_estrdup	LT_PARAMS((const char *str));
 static lt_ptr lt_emalloc	LT_PARAMS((size_t size));
 static lt_ptr lt_erealloc	LT_PARAMS((lt_ptr addr, size_t size));
 
-/* static lt_ptr rpl_realloc	LT_PARAMS((lt_ptr ptr, size_t size)); */
-#define rpl_realloc realloc
-
 /* These are the pointers that can be changed by the caller:  */
 LT_GLOBAL_DATA lt_ptr (*lt_dlmalloc)	LT_PARAMS((size_t size))
  			= (lt_ptr (*) LT_PARAMS((size_t))) malloc;
 LT_GLOBAL_DATA lt_ptr (*lt_dlrealloc)	LT_PARAMS((lt_ptr ptr, size_t size))
- 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) rpl_realloc;
+ 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) realloc;
 LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
  			= (void (*) LT_PARAMS((lt_ptr))) free;
 
@@ -237,7 +238,7 @@ LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
 #else
 
 #define LT_DLMALLOC(tp, n)	((tp *) lt_dlmalloc ((n) * sizeof(tp)))
-#define LT_DLREALLOC(tp, p, n)	((tp *) rpl_realloc ((p), (n) * sizeof(tp)))
+#define LT_DLREALLOC(tp, p, n)	((tp *) lt_dlrealloc ((p), (n) * sizeof(tp)))
 #define LT_DLFREE(p)						\
 	LT_STMT_START { if (p) (p) = (lt_dlfree (p), (lt_ptr) 0); } LT_STMT_END
 

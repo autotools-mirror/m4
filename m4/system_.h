@@ -27,12 +27,13 @@
 #ifndef M4_SYSTEM_H
 #define M4_SYSTEM_H 1
 
-/* I have yet to see a system that doesn't have these... */
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_STDBOOL_H@
+#include <m4/xalloc.h>
 
 /* This is okay in an installed file, because it will not change the
    behaviour of the including program whether ENABLE_NLS is defined
@@ -151,20 +152,12 @@ BEGIN_C_DECLS
 #  define EXIT_FAILURE	1
 #endif
 
-
 
-/* Memory allocation.  */
-#define XCALLOC(type, num)	((type *) xcalloc ((num), sizeof(type)))
-#define XMALLOC(type, num)	((type *) xmalloc ((num) * sizeof(type)))
-#define XREALLOC(type, p, num)	((type *) xrealloc ((p), (num) * sizeof(type)))
-#define XFREE(p)      		((p) = xfree (p))
+/* FIXME: macros to ease transition to gnulib xalloc.h API */
+#undef XFREE
+#define XFREE(Var)	((Var) = xfree (Var))
 
-extern void *xcalloc  (size_t n, size_t s);
-extern void *xmalloc  (size_t n);
-extern void *xrealloc (void *p, size_t n);
-extern void *xfree    (void *stale);
-
-extern char *xstrdup  (const char *string);
+extern void *xfree (void *stale);
 extern char *xstrzdup (const char *string, size_t len);
 
 END_C_DECLS

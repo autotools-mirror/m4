@@ -25,8 +25,7 @@ noinst_LTLIBRARIES	= libgnu.la
 libgnu_la_SOURCES	=
 libgnu_la_LIBADD	= $(LTLIBOBJS) $(LTLIBINTL)
 
-pkgincdir		= $(includedir)/@PACKAGE@
-pkginc_HEADERS		= $(GETTEXT_H) $(OBSTACK_H) $(STDBOOL_H)
+pkginclude_HEADERS	= $(GETTEXT_H) $(OBSTACK_H) $(STDBOOL_H)
 EXTRA_HEADERS		= gettext.h obstack.h stdbool.h
 EXTRA_DIST		=
 
@@ -49,6 +48,10 @@ error.h: error_.h
 MOSTLYCLEANFILES += error.h
 
 
+## exitfail:
+libgnu_la_SOURCES += exitfail.c exitfail.h
+
+
 ## gettext: (not yet in gnulib)
 BUILT_SOURCES += $(GETTEXT_H)
 EXTRA_DIST += gettext_.h
@@ -58,6 +61,10 @@ gettext.h: gettext_.h
 	rm -f $@ && $(LN_S) gettext_.h $@
 
 MOSTLYCLEANFILES += gettext.h
+
+
+## malloc: (not yet in gnulib)
+EXTRA_DIST += malloc.c
 
 
 ## obstack: (not yet in gnulib)
@@ -73,6 +80,10 @@ MOSTLYCLEANFILES += obstack.h
 
 ## progname:
 libgnu_la_SOURCES += progname.c progname.h
+
+
+## realloc: (not yet in gnulib)
+EXTRA_DIST += realloc.c
 
 
 ## stdbool:
@@ -91,3 +102,8 @@ MOSTLYCLEANFILES += stdbool.h stdbool.h-t
 
 ## unlocked-io:
 libgnu_la_SOURCES += unlocked-io.h
+
+
+## xalloc (not from gnulib):
+libgnu_la_SOURCES += xmalloc.c xstrdup.c
+pkginclude_HEADERS += xalloc.h

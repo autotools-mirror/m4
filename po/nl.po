@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-05 19:04+0100\n"
+"POT-Creation-Date: 2003-09-10 11:06+0100\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -14,12 +14,8 @@ msgstr ""
 "Content-Type: text/plain; charset=\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490
+#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 msgid "memory exhausted"
-msgstr ""
-
-#: gnulib/m4/xmalloc.c:78 m4/regex.c:1057
-msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1021
@@ -69,6 +65,10 @@ msgstr ""
 
 #: m4/regex.c:1054
 msgid "Invalid range end"
+msgstr ""
+
+#: m4/regex.c:1057
+msgid "Memory exhausted"
 msgstr ""
 
 #: m4/regex.c:1060
@@ -408,22 +408,22 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: src/main.c:83
+#: src/main.c:74
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "FOUT: Stapel overflow.  (Infinite define recursion?)"
 
-#: src/main.c:95
+#: src/main.c:86
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Probeer `%s --help' voor meer informatie.\n"
 
-#: src/main.c:99
+#: src/main.c:90
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Gebruik: %s [OPTIE]... [BESTAND]...\n"
 
-#: src/main.c:100
+#: src/main.c:91
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -452,7 +452,7 @@ msgstr ""
 "  -P, --prefix-builtins        forceer een `m4_' voorvoegsel voor alle \n"
 "                               ingebouwde functies\n"
 
-#: src/main.c:114
+#: src/main.c:105
 #, c-format
 msgid ""
 "\n"
@@ -461,7 +461,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:120
+#: src/main.c:111
 #, fuzzy
 msgid ""
 "\n"
@@ -480,7 +480,7 @@ msgstr ""
 "  -U, --undefine=NAME          verwijder ingebouwde functie NAME\n"
 "  -s, --synclines              genereer `#line NO \"FILE\"' regel\n"
 
-#: src/main.c:128
+#: src/main.c:119
 #, fuzzy
 msgid ""
 "\n"
@@ -494,7 +494,7 @@ msgstr ""
 "  -H, --hashsize=PRIME         stel symbolen opzoek hash tabel grootte\n"
 "  -L, --nesting-limit=NUMBER   verander kunstmatige nesting limiet\n"
 
-#: src/main.c:134
+#: src/main.c:125
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -508,7 +508,7 @@ msgstr ""
 "  -R, --reload-state=FILE      herlaad een gefixeerde staat van BESTAND\n"
 "                               aan het begin\n"
 
-#: src/main.c:140
+#: src/main.c:131
 msgid ""
 "\n"
 "Debugging:\n"
@@ -525,7 +525,7 @@ msgstr ""
 "  -l, --arglength=NUM          restrict macro traceer grootte\n"
 "  -o, --error-output=FILE      redirect debug en traceer uitvoer\n"
 
-#: src/main.c:148
+#: src/main.c:139
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -555,7 +555,7 @@ msgstr ""
 "  i   show changes in input files\n"
 "  V   shorthand for all of the above flags\n"
 
-#: src/main.c:163
+#: src/main.c:154
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -563,7 +563,7 @@ msgstr ""
 "\n"
 "Als geen BESTAND of als BESTAND `-' is, standaard invoer wordt gelezen.\n"
 
-#: src/main.c:168
+#: src/main.c:159
 #, fuzzy
 msgid ""
 "\n"
@@ -572,30 +572,30 @@ msgstr ""
 "\n"
 "Meld fouten via <m4-bugs@gnu.org>.\n"
 
-#: src/main.c:319
+#: src/main.c:310
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:323
+#: src/main.c:314
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:352
+#: src/main.c:343
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Onjuiste debug vlaggen: `%s'"
 
-#: src/main.c:380
+#: src/main.c:371
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:374
 msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:386
+#: src/main.c:377
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
