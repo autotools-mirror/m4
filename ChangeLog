@@ -1,5 +1,7 @@
 2001-08-14  Gary V. Vaughan  <gary@gnu.org>
 
+	* acconfig.h: Removed.  No longer required.
+
 	* bootstrap: Rewritten to play nicely with Autoconf 2.5x.
 	* configure.in (MY_NAME, MY_VERSION): Define these once, and feed
 	them to AC_INIT and AM_INIT_AUTOMAKE.
