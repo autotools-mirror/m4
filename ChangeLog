@@ -1,5 +1,23 @@
 2003-06-13  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/hash.c (m4_hash_apply): Pass an initial hash table parameter
+	to the callback.  Callbacks should not need to hardcode the
+	hashtable they are working from, nor should we have to waste the
+	userdata parameter to pass the table in.
+	* m4/hash.h (m4_hash_apply_func): Require the initial table
+	parameter.
+	* m4/symtab.c (symtab_destroy): Use the passed table instead
+	of hardcoding m4__symtab.
+	(m4_symbol_popdef): Don't use the userdata parameter to pass the
+	table to arg_destroy.
+	(arg_destroy): Use the hash parameter, ignore userdata.
+	* modules/m4.c (set_trace): Make it fit the m4_hash_apply_func
+	prototype.
+	(traceon, traceoff): Call set_trace with the extra initial
+	parameter.
+
+2003-06-13  Gary V. Vaughan  <gary@gnu.org>
+
 	More refactoring to stabilise the module api, this time for
 	symtab.c.  Additionally, start to pay attention to function names
 	that don't contain a verb like they should.

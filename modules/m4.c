@@ -94,8 +94,8 @@ typedef unsigned long int unumber;
 
 static void	include		(int argc, m4_token **argv,
 				 boolean silent);
-static int	set_trace	(const void *ignored, void *symbol,
-				 void *data);
+static int	set_trace	(m4_hash *hash, const void *ignored,
+				 void *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(struct obstack *obs, const number value,
 				 const int radix, int min);
@@ -582,9 +582,10 @@ M4BUILTIN_HANDLER (m4wrap)
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
 static int
-set_trace (const void *ignored, void *symbol, void *data)
+set_trace (m4_hash *hash, const void *ignored, void *symbol,
+	   void *userdata)
 {
-  SYMBOL_TRACED ((m4_symbol *) symbol) = (boolean) (data != NULL);
+  SYMBOL_TRACED ((m4_symbol *) symbol) = (boolean) (userdata != NULL);
   return 0;
 }
 
@@ -600,7 +601,7 @@ M4BUILTIN_HANDLER (traceon)
 	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
-	  set_trace (name, symbol, (char *) obs);
+	  set_trace (NULL, NULL, symbol, (char *) obs);
 	else
 	  M4WARN ((warning_status, 0,
 		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
@@ -620,7 +621,7 @@ M4BUILTIN_HANDLER (traceoff)
 	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (name);
 	if (symbol != NULL)
-	  set_trace (name, symbol, NULL);
+	  set_trace (NULL, NULL, symbol, NULL);
 	else
 	  M4WARN ((warning_status, 0,
 		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));

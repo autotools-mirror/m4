@@ -518,7 +518,7 @@ m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *data)
 
   while ((place = m4_hash_iterator_next (hash, place)))
     {
-      result = (*func) (m4_hash_iterator_key (place),
+      result = (*func) (hash, m4_hash_iterator_key (place),
 			m4_hash_iterator_value (place), data);
 
       if (result != 0)

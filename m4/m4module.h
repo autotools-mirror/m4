@@ -75,7 +75,7 @@ extern m4_macro	   *m4_module_macros   (lt_dlhandle);
 
 typedef struct m4_symtab m4_symtab;
 
-typedef int m4_symtab_apply_func (const void *key, void *value, void *data);
+typedef int m4_symtab_apply_func (m4_hash *hash, const void *key, void *value, void *data);
 
 extern int	  m4_symtab_apply	(m4_symtab_apply_func*, void*);
 

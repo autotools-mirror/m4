@@ -44,10 +44,10 @@
 
 #define M4_SYMTAB_DEFAULT_SIZE 2047
 
-static int	symbol_destroy		(const void *name, void *symbol,
-					 void *ignored);
-static int	arg_destroy		(const void *name, void *arg,
-					 void *arg_signature);
+static int	symbol_destroy		(m4_hash *hash, const void *name,
+					 void *symbol, void *ignored);
+static int	arg_destroy		(m4_hash *hash, const void *name,
+					 void *arg, void *ignored);
 
 /* Pointer to symbol table.  */
 m4_hash *m4__symtab = 0;
@@ -122,13 +122,13 @@ m4__symtab_exit (void)
    on every symbol so that m4_symbol_popdef() doesn't try to preserve
    the table entry.  */
 static int
-symbol_destroy (const void *name, void *symbol, void *ignored)
+symbol_destroy (m4_hash *hash, const void *name, void *symbol, void *ignored)
 {
   char *key = xstrdup ((char *) name);
 
   SYMBOL_TRACED ((m4_symbol *) symbol) = FALSE;
 
-  while (key && m4_hash_lookup (m4__symtab, key))
+  while (key && m4_hash_lookup (hash, key))
     m4_symbol_popdef (key);
 
   XFREE (key);
@@ -218,8 +218,7 @@ m4_symbol_popdef (const char *name)
 
       if (TOKEN_ARG_SIGNATURE (stale))
 	{
-	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale),
-			 arg_destroy, TOKEN_ARG_SIGNATURE (stale));
+	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale), arg_destroy, NULL);
 	  m4_hash_delete (TOKEN_ARG_SIGNATURE (stale));
 	}
       if (TOKEN_TYPE (stale) == M4_TOKEN_TEXT)
@@ -241,17 +240,17 @@ m4_symbol_popdef (const char *name)
 /* Callback used by m4_symbol_popdef () to release the memory used
    by values in the arg_signature hash.  */
 static int
-arg_destroy (const void *name, void *arg, void *arg_signature)
+arg_destroy (m4_hash *hash, const void *name, void *arg, void *ignored)
 {
   struct m4_token_arg *token_arg = (struct m4_token_arg *) arg;
 
   assert (name);
-  assert (arg_signature);
+  assert (hash);
 
   if (TOKEN_ARG_DEFAULT (token_arg))
     XFREE (TOKEN_ARG_DEFAULT (token_arg));
   xfree (token_arg);
-  xfree (m4_hash_remove ((m4_hash *) arg_signature, (const char *) name));
+  xfree (m4_hash_remove (hash, (const char *) name));
 
   return 0;
 }
@@ -408,9 +407,9 @@ symtab_print_list (const void *name, void *symbol, void *ignored)
    faster macro version from m4private.h.  */
 #undef m4_symtab_apply
 int
-m4_symtab_apply (m4_symtab_apply_func *func, void *data)
+m4_symtab_apply (m4_symtab_apply_func *func, void *userdata)
 {
-  return m4_hash_apply (m4__symtab, (m4_hash_apply_func *) func, data);
+  return m4_hash_apply (m4__symtab, (m4_hash_apply_func *) func, userdata);
 }
 
 /* Pop all values from the symbol associated with NAME.  */

@@ -55,7 +55,8 @@ int		m4_hash_string_cmp  (const void *key, const void *try);
 
 
 typedef struct m4_hash_iterator m4_hash_iterator;
-typedef int m4_hash_apply_func (const void *key, void *value, void *data);
+typedef int m4_hash_apply_func  (m4_hash *hash, const void *key, void *value,
+				 void *userdata);
 
 m4_hash_iterator *	m4_hash_iterator_next	(const m4_hash *hash,
 						 m4_hash_iterator *place);
@@ -64,7 +65,7 @@ void *			m4_hash_iterator_value	(m4_hash_iterator *place);
 
 int			m4_hash_apply		(m4_hash *hash,
 						 m4_hash_apply_func *func,
-						 void *data);
+						 void *userdata);
 
 END_C_DECLS
 
