@@ -165,12 +165,7 @@ expand_argument (struct obstack *obs, m4_token *argp)
 
 	case M4_TOKEN_MACDEF:
 	  if (obstack_object_size (obs) == 0)
-	    {
-	      TOKEN_TYPE (argp)	  = M4_TOKEN_FUNC;
-	      TOKEN_FUNC (argp)	  = TOKEN_FUNC (&td);
-	      TOKEN_HANDLE (argp) = TOKEN_HANDLE (&td);
-	      TOKEN_FLAGS (argp)  = TOKEN_FLAGS (&td);
-	    }
+	    m4_token_copy (argp, &td);
 	  break;
 
 	default:
@@ -298,7 +293,17 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
     m4_trace_pre (name, my_call_id, argc, argv);
 
   expansion = m4_push_string_init ();
-  m4_call_macro (symbol, argc, argv, expansion);
+  {
+    boolean bad_args = FALSE;
+
+    /* If argument limits are set for this builtin, check them and
+       only call the builtin handler if the check passes.  */
+    if ((SYMBOL_MIN_ARGS (symbol) > 0) || (SYMBOL_MAX_ARGS (symbol) > 0))
+      bad_args = m4_bad_argc (argv[0], argc, SYMBOL_MIN_ARGS (symbol),
+			     SYMBOL_MAX_ARGS (symbol));
+    if (!bad_args)
+      m4_call_macro (symbol, argc, argv, expansion);
+  }
   expanded = m4_push_string_finish ();
 
   if (traced)

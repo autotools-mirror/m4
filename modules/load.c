@@ -32,15 +32,15 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind */
+		function	macros	blind minargs maxargs */
 #define builtin_functions			\
-	BUILTIN(modules,	FALSE,	FALSE )	\
-	BUILTIN(load,		FALSE,	TRUE  )	\
-	BUILTIN(unload,		FALSE,	TRUE  )
+	BUILTIN(modules,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN(load,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(unload,		FALSE,	TRUE,	2,	2  )	\
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -48,12 +48,12 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
 
@@ -95,9 +95,6 @@ M4BUILTIN_HANDLER (modules)
      loaded modules.  */
   lt_dlhandle handle = lt_dlhandle_next (NULL);
 
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   if (handle)
     do
       {
@@ -114,9 +111,6 @@ M4BUILTIN_HANDLER (modules)
  **/
 M4BUILTIN_HANDLER (load)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   /* Load the named module and install the builtins and macros
      exported by that module.  */
   m4_module_load (M4ARG(1), obs);
@@ -127,9 +121,6 @@ M4BUILTIN_HANDLER (load)
  **/
 M4BUILTIN_HANDLER (unload)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   /* Remove all builtins and macros installed by the named module,
      and then unload the module from memory entirely.  */
   m4_module_unload (M4ARG(1), obs);

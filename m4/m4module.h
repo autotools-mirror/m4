@@ -50,10 +50,10 @@ typedef struct {
 } m4_macro;
 
 typedef struct {
-  const char	   *name;
-  m4_builtin_func  *func;
-  boolean	    groks_macro_args;
-  boolean	    blind_if_no_args;
+  const char *	    name;
+  m4_builtin_func * func;
+  boolean	    groks_macro_args, blind_if_no_args;
+  int		    min_args, max_args;
 } m4_builtin;
 
 
@@ -73,16 +73,20 @@ extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 
 
 extern m4_symbol *m4_macro_pushdef	(const char *name, lt_dlhandle handle,
-					 const char *text, int flags);
+					 const char *text, int flags,
+					 int min_args, int max_args);
 extern m4_symbol *m4_macro_define	(const char *name, lt_dlhandle handle,
-					 const char *text, int flags);
+					 const char *text, int flags,
+					 int min_args, int max_args);
 extern void	  m4_macro_table_install (lt_dlhandle handle,
 					  const m4_macro *table);
 
 extern m4_symbol *m4_builtin_pushdef	(const char *name, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags);
+					 m4_builtin_func *func, int flags,
+					 int min_args, int max_args);
 extern m4_symbol *m4_builtin_define	(const char *name, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags);
+					 m4_builtin_func *func, int flags,
+					 int min_args, int max_args);
 extern void	  m4_builtin_table_install (lt_dlhandle handle,
 					 const m4_builtin *table);
 
@@ -104,9 +108,11 @@ extern m4_symbol *m4_symbol_define	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
 extern void	  m4_symbol_builtin	(m4_symbol *symbol, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags);
+					 m4_builtin_func *func, int flags,
+					 int min_args, int max_args);
 extern void	  m4_symbol_macro	(m4_symbol *symbol, lt_dlhandle handle,
-					 const char *text, int flags);
+					 const char *text, int flags,
+					 int min_args, int max_args);
 
 
 /* Various different token types.  */
@@ -382,6 +388,7 @@ extern	void	m4_input_exit	(void);
 extern	void	m4_syntax_init	(void);
 extern	int	m4_peek_input	(void);
 extern	m4_token_t m4_next_token (m4_token *);
+extern	void	m4_token_copy	(m4_token *dest, m4_token *src);
 extern	void	m4_skip_line	(void);
 
 /* push back input */

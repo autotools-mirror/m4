@@ -36,36 +36,37 @@
 
 #define m4_builtin_table	stdlib_LTX_m4_builtin_table
 
-/*		function	macros	blind */
-#define builtin_functions			\
-	BUILTIN (getcwd,	FALSE,	FALSE)	\
-	BUILTIN (getenv,	FALSE,	TRUE)	\
-	BUILTIN (getlogin,	FALSE,	FALSE)	\
-	BUILTIN (getpid,	FALSE,	FALSE)	\
-	BUILTIN (getppid,	FALSE,	FALSE)	\
-	BUILTIN (getuid,	FALSE,	FALSE)	\
-	BUILTIN (getpwnam,	FALSE,	TRUE)	\
-	BUILTIN (getpwuid,	FALSE,	TRUE)	\
-	BUILTIN (hostname,	FALSE,	FALSE)	\
-	BUILTIN (rand,		FALSE,	FALSE)	\
-	BUILTIN (srand,		FALSE,	FALSE)	\
-	BUILTIN (setenv,	FALSE,	TRUE)	\
-	BUILTIN (unsetenv,	FALSE,	TRUE)	\
-	BUILTIN (uname,		FALSE,	FALSE)
+/*		function	macros	blind minargs maxargs */
+#define builtin_functions					\
+	BUILTIN (getcwd,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getenv,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (getlogin,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getpid,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getppid,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getuid,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getpwnam,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (getpwuid,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (hostname,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (rand,		FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (srand,		FALSE,	FALSE,	1,	2  )	\
+	BUILTIN (setenv,	FALSE,	TRUE,	3,	4  )	\
+	BUILTIN (unsetenv,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (uname,		FALSE,	FALSE,	1,	1  )	\
 
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler);
+
+#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler);
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
 
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
 /**
@@ -75,9 +76,6 @@ M4BUILTIN_HANDLER (getcwd)
 {
   char buf[1024];
   char *bp;
-
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
 
   bp = getcwd (buf, sizeof buf);
 
@@ -92,9 +90,6 @@ M4BUILTIN_HANDLER (getenv)
 {
   char *env;
 
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   env = getenv (M4ARG (1));
 
   if (env != NULL)
@@ -107,9 +102,6 @@ M4BUILTIN_HANDLER (getenv)
 M4BUILTIN_HANDLER (setenv)
 {
   int overwrite = 1;
-
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
 
   if (argc == 4)
     if (!m4_numeric_arg (argv[0], M4ARG (3), &overwrite))
@@ -140,8 +132,6 @@ M4BUILTIN_HANDLER (setenv)
  **/
 M4BUILTIN_HANDLER (unsetenv)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
 #if HAVE_UNSETENV
   unsetenv (M4ARG (1));
@@ -155,9 +145,6 @@ M4BUILTIN_HANDLER (getlogin)
 {
   char *login;
 
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   login = getlogin ();
 
   if (login != NULL)
@@ -169,9 +156,6 @@ M4BUILTIN_HANDLER (getlogin)
  **/
 M4BUILTIN_HANDLER (getpid)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_shipout_int (obs, getpid ());
 }
 
@@ -180,9 +164,6 @@ M4BUILTIN_HANDLER (getpid)
  **/
 M4BUILTIN_HANDLER (getppid)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_shipout_int (obs, getppid ());
 }
 
@@ -192,9 +173,6 @@ M4BUILTIN_HANDLER (getppid)
 M4BUILTIN_HANDLER (getpwnam)
 {
   struct passwd *pw;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   pw = getpwnam (M4ARG (1));
 
@@ -223,9 +201,6 @@ M4BUILTIN_HANDLER (getpwuid)
 {
   struct passwd *pw;
   int uid;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   if (!m4_numeric_arg (argv[0], M4ARG (1), &uid))
     return;
@@ -257,9 +232,6 @@ M4BUILTIN_HANDLER (hostname)
 {
   char buf[1024];
 
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   if (gethostname (buf, sizeof buf) < 0)
     return;
 
@@ -271,9 +243,6 @@ M4BUILTIN_HANDLER (hostname)
  **/
 M4BUILTIN_HANDLER (rand)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_shipout_int (obs, rand ());
 }
 
@@ -283,9 +252,6 @@ M4BUILTIN_HANDLER (rand)
 M4BUILTIN_HANDLER (srand)
 {
   int seed;
-
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
 
   if (argc == 1)
     seed = time (0L) * getpid ();
@@ -304,9 +270,6 @@ M4BUILTIN_HANDLER (srand)
 M4BUILTIN_HANDLER (uname)
 {
   struct utsname ut;
-
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
 
   if (uname (&ut) == 0)
     {
@@ -327,8 +290,5 @@ M4BUILTIN_HANDLER (uname)
  **/
 M4BUILTIN_HANDLER (getuid)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_shipout_int (obs, getuid ());
 }

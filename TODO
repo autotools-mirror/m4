@@ -84,6 +84,10 @@ for any of these ideas or if you have others to add.
 	maintaining the string lengths, and avoiding strlen, strcpy,
 	etc.).
 
+  + The argument count limits are handled for all tokens passed around by
+    the internals:  we should enable attaching these values to text macros
+    too.
+
 * MODULE SPECIFIC ISSUES
 
   + Some way of linking a module statically is needed, for systems

@@ -1,3 +1,42 @@
+2001-10-12  Gary V. Vaughan  <gary@gnu.org>
+
+	Rather than forcing each builtin definition to manage its own
+	argument range checking, tabulate the maxima and minima for all
+	builtins in each module.  This forces us to consider what the
+	valid ranges for each builtin should be, and moves the checking
+	code out of each builtin implementation and into the builtin
+	caller infrastructure.
+
+	* m4/m4module.h (struct m4_builtin): Add argument minima and
+	maxima.
+	* m4/m4private.h (struct m4_token): Reflect them here too.
+	* m4/input.c (struct input_block): ...and here.
+	(m4_token_copy): New function for token copying.
+	(init_macro_token): Copy them from a token to the input stack.
+	(m4_next_token): Don't forget to initialise them for text
+	macros.
+	* m4/macro.c (expand_argument): Use m4_token_copy, and also
+	check argument counts before calling the builtin handler.
+	* m4/symtab.c (m4_symbol_builtin): Take minima and maxima params.
+	(m4_symbol_macro): Likewise.
+	* m4/builtin.c (m4_builtin_pushdef): Add min_args and max_args
+	parameters.  Updated all callers.
+	(m4_builtin_define): Ditto.
+	(m4_macro_pushdef, m4_macro_define): Ditto.
+	* m4/symtab.c (m4_symbol_builtin, m4_symbol_define): Ditto.
+	* modules/evalparse.c:  Declare argument counts for defined
+	builtins and remove explicit calls to m4_bad_argc().
+	* modules/gnu.c: Ditto.
+	* modules/load.c: Ditto.
+	* modules/m4.c: Ditto.
+	* modules/modtest.c: Ditto.
+	* modules/mpeval.c: Ditto.
+	* modules/perl.c: Ditto.
+	* modules/shadow.c: Ditto.
+	* modules/stdlib.c: Ditto.
+	* modules/time.c: Ditto.
+	* TODO: Updated.
+
 2001-10-10  Gary V. Vaughan  <gary@gnu.org>
 
 	The trace semantics now attach the trace bit to a symbol name.

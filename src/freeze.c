@@ -480,7 +480,8 @@ reload_frozen_state (const char *name)
 	      if (bp->blind_if_no_args)
 		BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
 
-	      m4_builtin_pushdef (string[0], handle, bp->func, flags);
+	      m4_builtin_pushdef (string[0], handle, bp->func, flags,
+				  bp->min_args, bp->max_args);
 	    }
 	  else
 	    M4ERROR ((warning_status, 0,
@@ -656,7 +657,7 @@ reload_frozen_state (const char *name)
 	      if (strcmp (m4_module_name (handle), string[2]) == 0)
 		break;
 
-	  m4_macro_pushdef (string[0], handle, string[1], 0);
+	  m4_macro_pushdef (string[0], handle, string[1], 0, 0, -1);
 	}
 	break;
 

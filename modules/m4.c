@@ -46,40 +46,40 @@ extern int errno;
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind */
+		function	macros	blind minargs maxargs */
 #define builtin_functions			\
-	BUILTIN(changecom,	FALSE,	FALSE )	\
-	BUILTIN(changequote,	FALSE,	FALSE )	\
-	BUILTIN(decr,		FALSE,	TRUE  )	\
-	BUILTIN(define,		TRUE,	TRUE  )	\
-	BUILTIN(defn,		FALSE,	TRUE  )	\
-	BUILTIN(divert,		FALSE,	FALSE )	\
-	BUILTIN(divnum,		FALSE,	FALSE )	\
-	BUILTIN(dnl,		FALSE,	FALSE )	\
-	BUILTIN(dumpdef,	FALSE,	FALSE )	\
-	BUILTIN(errprint,	FALSE,	FALSE )	\
-	BUILTIN(eval,		FALSE,	TRUE  )	\
-	BUILTIN(ifdef,		FALSE,	TRUE  )	\
-	BUILTIN(ifelse,		FALSE,	TRUE  )	\
-	BUILTIN(include,	FALSE,	TRUE  )	\
-	BUILTIN(incr,		FALSE,	TRUE  )	\
-	BUILTIN(index,		FALSE,	TRUE  )	\
-	BUILTIN(len,		FALSE,	TRUE  )	\
-	BUILTIN(m4exit,		FALSE,	FALSE )	\
-	BUILTIN(m4wrap,		FALSE,	FALSE )	\
-	BUILTIN(maketemp,	FALSE,	TRUE  )	\
-	BUILTIN(popdef,		FALSE,	TRUE  )	\
-	BUILTIN(pushdef,	TRUE,	TRUE  )	\
-	BUILTIN(shift,		FALSE,	FALSE )	\
-	BUILTIN(sinclude,	FALSE,	TRUE  )	\
-	BUILTIN(substr,		FALSE,	TRUE  )	\
-	BUILTIN(syscmd,		FALSE,	TRUE  )	\
-	BUILTIN(sysval,		FALSE,	FALSE )	\
-	BUILTIN(traceoff,	FALSE,	FALSE )	\
-	BUILTIN(traceon,	FALSE,	FALSE )	\
-	BUILTIN(translit,	FALSE,	TRUE  )	\
-	BUILTIN(undefine,	FALSE,	TRUE  )	\
-	BUILTIN(undivert,	FALSE,	FALSE )
+	BUILTIN(changecom,	FALSE,	FALSE,	1,	3  )	\
+	BUILTIN(changequote,	FALSE,	FALSE,	1,	3  )	\
+	BUILTIN(decr,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(define,		TRUE,	TRUE,	2,	3  )	\
+	BUILTIN(defn,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(divert,		FALSE,	FALSE,	1,	2  )	\
+	BUILTIN(divnum,		FALSE,	FALSE,	1,	1  )	\
+	BUILTIN(dnl,		FALSE,	FALSE,	1,	1  )	\
+	BUILTIN(dumpdef,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(errprint,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(eval,		FALSE,	TRUE,	2,	4  )	\
+	BUILTIN(ifdef,		FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(ifelse,		FALSE,	TRUE,	4,	-1 )	\
+	BUILTIN(include,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(incr,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(index,		FALSE,	TRUE,	3,	3  )	\
+	BUILTIN(len,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(m4exit,		FALSE,	FALSE,	1,	2  )	\
+	BUILTIN(m4wrap,		FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(maketemp,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(popdef,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(pushdef,	TRUE,	TRUE,	2,	3  )	\
+	BUILTIN(shift,		FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(sinclude,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(substr,		FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(syscmd,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(sysval,		FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(traceoff,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(traceon,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(translit,	FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(undefine,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(undivert,	FALSE,	FALSE,	0,	-1 )	\
 
 
 #if defined(SIZEOF_LONG_LONG_INT) && SIZEOF_LONG_LONG_INT > 0
@@ -102,7 +102,7 @@ static void	numb_obstack	(struct obstack *obs, const number value,
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -110,12 +110,12 @@ static void	numb_obstack	(struct obstack *obs, const number value,
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
 
@@ -148,15 +148,12 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 3))
-    return;
-
   if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
     {
-      m4_macro_define (M4ARG (1), NULL, "", 0);
+      m4_macro_define (M4ARG (1), NULL, "", 0, 0, -1);
       return;
     }
 
@@ -164,12 +161,14 @@ M4BUILTIN_HANDLER (define)
     {
     case M4_TOKEN_TEXT:
       m4_macro_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
-		       TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]));
+		       TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]),
+		       TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
       return;
 
     case M4_TOKEN_FUNC:
       m4_builtin_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			 TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]));
+			 TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]),
+			 TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
       return;
     }
 
@@ -179,9 +178,6 @@ M4BUILTIN_HANDLER (define)
 
 M4BUILTIN_HANDLER (undefine)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   if (!m4_symbol_lookup (M4ARG (1)))
     M4WARN ((warning_status, 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
@@ -191,15 +187,12 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 3))
-    return;
-
   if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
     {
-      m4_macro_pushdef (M4ARG (1), NULL, "", 0);
+      m4_macro_pushdef (M4ARG (1), NULL, "", 0, 0, -1);
       return;
     }
 
@@ -207,12 +200,14 @@ M4BUILTIN_HANDLER (pushdef)
     {
     case M4_TOKEN_TEXT:
       m4_macro_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]));
+			TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]),
+			TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
       return;
 
     case M4_TOKEN_FUNC:
       m4_builtin_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			  TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]));
+			  TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]),
+			  TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
       return;
     }
 
@@ -222,8 +217,6 @@ M4BUILTIN_HANDLER (pushdef)
 
 M4BUILTIN_HANDLER (popdef)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
   if (!m4_symbol_lookup (M4ARG (1)))
     M4WARN ((warning_status, 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
@@ -242,8 +235,6 @@ M4BUILTIN_HANDLER (ifdef)
   m4_symbol *symbol;
   const char *result;
 
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
   symbol = m4_symbol_lookup (M4ARG (1));
 
   if (symbol)
@@ -264,8 +255,6 @@ M4BUILTIN_HANDLER (ifelse)
   if (argc == 2)
     return;
 
-  if (m4_bad_argc (argv[0], argc, 4, -1))
-    return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     m4_bad_argc (argv[0], (argc + 2) % 3, -1, 1);
@@ -347,9 +336,6 @@ M4BUILTIN_HANDLER (defn)
 {
   m4_symbol *symbol;
 
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   symbol = m4_symbol_lookup (M4ARG (1));
   if (symbol == NULL)
     {
@@ -382,9 +368,6 @@ M4BUILTIN_HANDLER (defn)
    and "sysval".  */
 M4BUILTIN_HANDLER (syscmd)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   m4_debug_flush_files ();
   m4_sysval = system (M4ARG (1));
 }
@@ -400,9 +383,6 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   if (!m4_numeric_arg (argv[0], M4ARG (1), &value))
     return;
 
@@ -412,9 +392,6 @@ M4BUILTIN_HANDLER (incr)
 M4BUILTIN_HANDLER (decr)
 {
   int value;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   if (!m4_numeric_arg (argv[0], M4ARG (1), &value))
     return;
@@ -432,9 +409,6 @@ M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
 
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
-
   if (argc == 2 && !m4_numeric_arg (argv[0], M4ARG (1), &i))
     return;
 
@@ -444,8 +418,6 @@ M4BUILTIN_HANDLER (divert)
 /* Expand to the current diversion number, -1 if none.  */
 M4BUILTIN_HANDLER (divnum)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
   m4_shipout_int (obs, m4_current_diversion);
 }
 
@@ -490,9 +462,6 @@ M4BUILTIN_HANDLER (undivert)
    lives in input.c.  */
 M4BUILTIN_HANDLER (dnl)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_skip_line ();
 }
 
@@ -506,9 +475,6 @@ M4BUILTIN_HANDLER (shift)
 /* Change the current quotes.  The function set_quotes () lives in input.c.  */
 M4BUILTIN_HANDLER (changequote)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 3))
-    return;
-
   m4_set_quotes ((argc >= 2) ? M4ARG (1) : NULL,
 		 (argc >= 3) ? M4ARG (2) : NULL);
 }
@@ -517,9 +483,6 @@ M4BUILTIN_HANDLER (changequote)
    lives in input.c.  */
 M4BUILTIN_HANDLER (changecom)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 3))
-    return;
-
   if (argc == 1)
     m4_set_comment ("", "");	/* disable comments */
   else
@@ -538,9 +501,6 @@ include (int argc, m4_token **argv, boolean silent)
 {
   FILE *fp;
   char *name = NULL;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   fp = m4_path_search (M4ARG (1), &name);
   if (fp == NULL)
@@ -574,8 +534,6 @@ M4BUILTIN_HANDLER (sinclude)
 /* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
   mktemp (M4ARG (1));
   m4_shipout_string (obs, M4ARG (1), 0, FALSE);
 }
@@ -600,8 +558,6 @@ M4BUILTIN_HANDLER (m4exit)
 {
   int exit_code = 0;
 
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
   if (argc == 2  && !m4_numeric_arg (argv[0], M4ARG (1), &exit_code))
     exit_code = 0;
 
@@ -684,8 +640,6 @@ M4BUILTIN_HANDLER (traceoff)
 /* Expand to the length of the first argument.  */
 M4BUILTIN_HANDLER (len)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
   m4_shipout_int (obs, strlen (M4ARG (1)));
 }
 
@@ -695,9 +649,6 @@ M4BUILTIN_HANDLER (index)
 {
   const char *cp, *last;
   int l1, l2, retval;
-
-  if (m4_bad_argc (argv[0], argc, 3, 3))
-    return;
 
   l1 = strlen (M4ARG (1));
   l2 = strlen (M4ARG (2));
@@ -721,9 +672,6 @@ M4BUILTIN_HANDLER (index)
 M4BUILTIN_HANDLER (substr)
 {
   int start, length, avail;
-
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
 
   length = avail = strlen (M4ARG (1));
   if (!m4_numeric_arg (argv[0], M4ARG (2), &start))
@@ -751,9 +699,6 @@ M4BUILTIN_HANDLER (translit)
   register const char *data, *tmp;
   const char *from, *to;
   int tolen;
-
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
 
   from = M4ARG (2);
   if (strchr (from, '-') != NULL)

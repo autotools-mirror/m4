@@ -435,7 +435,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    macro_value = "";
 	  else
 	    *macro_value++ = '\0';
-	  m4_macro_define (defines->macro, NULL, macro_value, 0x0);
+	  m4_macro_define (defines->macro, NULL, macro_value, 0x0, 0, -1);
 	  break;
 
 	case 'U':

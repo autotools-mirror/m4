@@ -33,20 +33,21 @@
 
 #define m4_builtin_table	time_LTX_m4_builtin_table
 
-/*		function	macros	blind */
-#define builtin_functions			\
-	BUILTIN (currenttime,	FALSE,	FALSE)	\
-	BUILTIN (ctime,		FALSE,	FALSE)	\
-	BUILTIN (gmtime,	FALSE,	TRUE)	\
-	BUILTIN (localtime,	FALSE,	TRUE)
+/*		function	macros	blind minargs maxargs */
+#define builtin_functions					\
+	BUILTIN (currenttime,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (ctime,		FALSE,	FALSE,	1,	2  )	\
+	BUILTIN (gmtime,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (localtime,	FALSE,	TRUE,	2,	2  )	\
 
-#define mktime_functions			\
-	BUILTIN (mktime,	FALSE,	TRUE)
+#define mktime_functions					\
+	BUILTIN (mktime,	FALSE,	TRUE,	7,	8  )	\
 
-#define strftime_functions			\
-	BUILTIN (strftime,	FALSE,	TRUE)
+#define strftime_functions					\
+	BUILTIN (strftime,	FALSE,	TRUE,	3,	3  )	\
 
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+
+#define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
   builtin_functions
 # if HAVE_MKTIME
   mktime_functions
@@ -58,8 +59,8 @@
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
 
   builtin_functions
 # if HAVE_MKTIME
@@ -82,9 +83,6 @@ M4BUILTIN_HANDLER (currenttime)
   time_t now;
   int l;
 
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   now = time (0L);
   l = sprintf (buf, "%ld", now);
 
@@ -97,9 +95,6 @@ M4BUILTIN_HANDLER (currenttime)
 M4BUILTIN_HANDLER (ctime)
 {
   time_t t;
-
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
 
   if (argc == 2)
     m4_numeric_arg (argv[0], M4ARG (1), (int *) &t);
@@ -146,9 +141,6 @@ M4BUILTIN_HANDLER (gmtime)
 {
   time_t t;
 
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   if (!m4_numeric_arg (argv[0], M4ARG (1), (int *) &t))
     return;
 
@@ -161,9 +153,6 @@ M4BUILTIN_HANDLER (gmtime)
 M4BUILTIN_HANDLER (localtime)
 {
   time_t t;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   if (!m4_numeric_arg (argv[0], M4ARG (1), (int *) &t))
     return;
@@ -179,9 +168,6 @@ M4BUILTIN_HANDLER (mktime)
 {
   struct tm tm;
   time_t t;
-
-  if (m4_bad_argc (argv[0], argc, 7, 8))
-    return;
 
   if (!m4_numeric_arg (argv[0], M4ARG (1), &tm.tm_sec))
     return;
@@ -214,9 +200,6 @@ M4BUILTIN_HANDLER (strftime)
   time_t t;
   char *buf;
   int l;
-
-  if (m4_bad_argc (argv[0], argc, 3, 3))
-    return;
 
   if (!m4_numeric_arg (argv[0], M4ARG (2), (int *) &t))
     return;

@@ -67,27 +67,27 @@ int errno;
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind */
+		function	macros	blind argmin  argmax */
 #define builtin_functions			\
-	BUILTIN(__file__,	FALSE,	FALSE )	\
-	BUILTIN(__line__,	FALSE,	FALSE )	\
-	BUILTIN(builtin,	FALSE,	TRUE  )	\
-	BUILTIN(changesyntax,	FALSE,	TRUE  )	\
-	BUILTIN(debugmode,	FALSE,	FALSE )	\
-	BUILTIN(debugfile,	FALSE,	FALSE )	\
-	BUILTIN(eregexp,	FALSE,	TRUE  )	\
-	BUILTIN(epatsubst,	FALSE,	TRUE  )	\
-	BUILTIN(esyscmd,	FALSE,	TRUE  )	\
-	BUILTIN(format,		FALSE,	TRUE  )	\
-	BUILTIN(indir,		FALSE,	TRUE  )	\
-	BUILTIN(patsubst,	FALSE,	TRUE  )	\
-	BUILTIN(regexp,		FALSE,	TRUE  )	\
-	BUILTIN(symbols,	FALSE,	FALSE )	\
-	BUILTIN(syncoutput,	FALSE,  TRUE  )	\
+	BUILTIN(__file__,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN(__line__,	FALSE,	FALSE,	1,	1  )	\
+	BUILTIN(builtin,	FALSE,	TRUE,	2,	-1 )	\
+	BUILTIN(changesyntax,	FALSE,	TRUE,	1,	-1 )	\
+	BUILTIN(debugmode,	FALSE,	FALSE,	1,	2  )	\
+	BUILTIN(debugfile,	FALSE,	FALSE,	1,	2  )	\
+	BUILTIN(eregexp,	FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(epatsubst,	FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(esyscmd,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(format,		FALSE,	TRUE,	2,	-1 )	\
+	BUILTIN(indir,		FALSE,	TRUE,	2,	-1 )	\
+	BUILTIN(patsubst,	FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(regexp,		FALSE,	TRUE,	3,	4  )	\
+	BUILTIN(symbols,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(syncoutput,	FALSE,  TRUE,	2,	2  )	\
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -95,12 +95,12 @@ int errno;
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
 
@@ -137,9 +137,6 @@ M4BUILTIN_HANDLER (builtin)
   const m4_builtin *bp = NULL;
   const char *name = M4ARG (1);
 
-  if (m4_bad_argc (argv[0], argc, 2, -1))
-    return;
-
   bp = m4_builtin_find_by_name (NULL, name);
 
   if (bp == NULL)
@@ -163,9 +160,6 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *symbol;
   const char *name = M4ARG (1);
 
-  if (m4_bad_argc (argv[0], argc, 2, -1))
-    return;
-
   symbol = m4_symbol_lookup (name);
   if (symbol == NULL)
     M4ERROR ((warning_status, 0,
@@ -187,9 +181,6 @@ M4BUILTIN_HANDLER (changesyntax)
 {
   int i;
 
-  if (m4_bad_argc (argv[0], argc, 1, -1))
-    return;
-
   for (i = 1; i < argc; i++)
     {
       m4_set_syntax (*M4ARG (i),
@@ -208,9 +199,6 @@ M4BUILTIN_HANDLER (debugmode)
 {
   int new_debug_level;
   int change_flag;
-
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
 
   if (argc == 1)
     debug_level = 0;
@@ -258,9 +246,6 @@ M4BUILTIN_HANDLER (debugmode)
  **/
 M4BUILTIN_HANDLER (debugfile)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 2))
-    return;
-
   if (argc == 1)
     m4_debug_set_output (NULL);
   else if (!m4_debug_set_output (M4ARG (1)))
@@ -323,9 +308,6 @@ m4_regexp_do (struct obstack *obs, int argc, m4_token **argv,
   struct re_registers regs;	/* for subexpression matches */
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
-
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
 
   victim = M4ARG (1);
   regexp = M4ARG (2);
@@ -499,9 +481,6 @@ M4BUILTIN_HANDLER (symbols)
  **/
 M4BUILTIN_HANDLER (syncoutput)
 {
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
-
   if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
@@ -523,9 +502,6 @@ M4BUILTIN_HANDLER (esyscmd)
 {
   FILE *pin;
   int ch;
-
-  if (m4_bad_argc (argv[0], argc, 2, 2))
-    return;
 
   m4_debug_flush_files ();
   pin = popen (M4ARG (1), "r");
@@ -560,9 +536,6 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (__file__)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
-
   m4_shipout_string (obs, m4_current_file, 0, TRUE);
 }
 
@@ -572,8 +545,6 @@ M4BUILTIN_HANDLER (__file__)
  **/
 M4BUILTIN_HANDLER (__line__)
 {
-  if (m4_bad_argc (argv[0], argc, 1, 1))
-    return;
   m4_shipout_int (obs, m4_current_line);
 }
 

@@ -198,6 +198,7 @@ struct input_block
 	  m4_builtin_func *func;/* pointer to macros function */
 	  lt_dlhandle handle;	/* originating module */
 	  int flags;		/* flags associated with the builtin */
+	  int min_args, max_args; /* argv maxima and minima for the builtin. */
 	  boolean traced;	/* TRUE iff builtin is traced */
 	  boolean read;		/* TRUE iff block has been read */
 	}
@@ -607,6 +608,8 @@ init_macro_token (m4_token *td)
   TOKEN_FUNC (td)	= isp->u.u_m.func;
   TOKEN_HANDLE (td)	= isp->u.u_m.handle;
   TOKEN_FLAGS (td)	= isp->u.u_m.flags;
+  TOKEN_MIN_ARGS (td)	= isp->u.u_m.min_args;
+  TOKEN_MAX_ARGS (td)	= isp->u.u_m.max_args;
 }
 
 
@@ -1204,12 +1207,25 @@ m4_next_token (m4_token *td)
   TOKEN_TEXT (td)	= obstack_finish (&token_stack);
   TOKEN_HANDLE (td)	= NULL;
   TOKEN_FLAGS (td)	= 0x0;
+  TOKEN_MIN_ARGS (td)	= -1;
+  TOKEN_MAX_ARGS (td)	= -1;
 
 #ifdef DEBUG_INPUT
   print_token("next_token", type, td);
 #endif
 
   return type;
+}
+
+void
+m4_token_copy (m4_token *dest, m4_token *src)
+{
+  TOKEN_TYPE (dest)	= TOKEN_TYPE (src);
+  TOKEN_FUNC (dest)	= TOKEN_FUNC (src);
+  TOKEN_HANDLE (dest)   = TOKEN_HANDLE (src);
+  TOKEN_FLAGS (dest)    = TOKEN_FLAGS (src);
+  TOKEN_MIN_ARGS (dest) = TOKEN_MIN_ARGS (src);
+  TOKEN_MAX_ARGS (dest) = TOKEN_MAX_ARGS (src);
 }
 
 

@@ -28,23 +28,23 @@
 #define m4_builtin_table	modtest_LTX_m4_builtin_table
 #define m4_macro_table		modtest_LTX_m4_macro_table
 
-/*		function	macros	blind */
-#define builtin_functions			\
-	BUILTIN (test,		FALSE,	FALSE)
+/*		function	macros	blind minargs maxargs */
+#define builtin_functions					\
+	BUILTIN (test,		FALSE,	FALSE,	1,	1)
 
-#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind },
+#define BUILTIN(handler, macros, blind, min, max)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
 
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, FALSE, FALSE, 0, 0 },
 };
 
 m4_macro m4_macro_table[] =

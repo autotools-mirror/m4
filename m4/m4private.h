@@ -43,6 +43,7 @@ struct m4_token {
   m4_token *	next;
   lt_dlhandle		handle;
   int			flags;
+  int			min_args, max_args;
 
   m4_data_t		type;
   union {
@@ -54,6 +55,8 @@ struct m4_token {
 #define TOKEN_NEXT(T)		((T)->next)
 #define TOKEN_HANDLE(T) 	((T)->handle)
 #define TOKEN_FLAGS(T)		((T)->flags)
+#define TOKEN_MIN_ARGS(T)	((T)->min_args)
+#define TOKEN_MAX_ARGS(T)	((T)->max_args)
 #define TOKEN_TYPE(T)		((T)->type)
 #define TOKEN_TEXT(T)		((T)->u.text)
 #define TOKEN_FUNC(T)		((T)->u.func)
@@ -78,12 +81,14 @@ struct m4_symbol
 #define SYMBOL_TRACED(S)	((S)->traced)
 #define SYMBOL_TOKEN(S)		((S)->token)
 
-#define SYMBOL_NEXT(S)		(TOKEN_NEXT   (SYMBOL_TOKEN (S)))
-#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE (SYMBOL_TOKEN (S)))
-#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS  (SYMBOL_TOKEN (S)))
-#define SYMBOL_TYPE(S)		(TOKEN_TYPE   (SYMBOL_TOKEN (S)))
-#define SYMBOL_TEXT(S)		(TOKEN_TEXT   (SYMBOL_TOKEN (S)))
-#define SYMBOL_FUNC(S)		(TOKEN_FUNC   (SYMBOL_TOKEN (S)))
+#define SYMBOL_NEXT(S)		(TOKEN_NEXT     (SYMBOL_TOKEN (S)))
+#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE   (SYMBOL_TOKEN (S)))
+#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS    (SYMBOL_TOKEN (S)))
+#define SYMBOL_MIN_ARGS(S)	(TOKEN_MIN_ARGS (SYMBOL_TOKEN (S)))
+#define SYMBOL_MAX_ARGS(S)	(TOKEN_MAX_ARGS (SYMBOL_TOKEN (S)))
+#define SYMBOL_TYPE(S)		(TOKEN_TYPE     (SYMBOL_TOKEN (S)))
+#define SYMBOL_TEXT(S)		(TOKEN_TEXT     (SYMBOL_TOKEN (S)))
+#define SYMBOL_FUNC(S)		(TOKEN_FUNC     (SYMBOL_TOKEN (S)))
 
 
 

@@ -295,7 +295,8 @@ m4_symbol_delete (const char *name)
    be appropriately set by the caller.  */
 void
 m4_symbol_builtin (m4_symbol *symbol, lt_dlhandle handle,
-		   m4_builtin_func *func, int flags)
+		   m4_builtin_func *func, int flags,
+		   int min_args, int max_args)
 {
   assert (symbol);
   assert (handle);
@@ -308,12 +309,14 @@ m4_symbol_builtin (m4_symbol *symbol, lt_dlhandle handle,
   SYMBOL_FUNC (symbol)		= func;
   SYMBOL_HANDLE (symbol)	= handle;
   SYMBOL_FLAGS (symbol)		= flags;
+  SYMBOL_MIN_ARGS (symbol)	= min_args;
+  SYMBOL_MAX_ARGS (symbol)	= max_args;
 }
 
 /* ...and similarly for macro valued symbols.  */
 void
 m4_symbol_macro (m4_symbol *symbol, lt_dlhandle handle,
-		 const char *text, int flags)
+		 const char *text, int flags, int min_args, int max_args)
 {
   assert (symbol);
 
@@ -323,7 +326,9 @@ m4_symbol_macro (m4_symbol *symbol, lt_dlhandle handle,
   SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
   SYMBOL_TEXT (symbol) 		= xstrdup (text);
   SYMBOL_HANDLE (symbol) 	= handle;
-  SYMBOL_FLAGS (symbol)		= 0;
+  SYMBOL_FLAGS (symbol)		= flags;
+  SYMBOL_MIN_ARGS (symbol)	= min_args;
+  SYMBOL_MAX_ARGS (symbol)	= max_args;
 }
 
 

@@ -72,7 +72,8 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 
 m4_symbol *
 m4_builtin_pushdef (const char *name, lt_dlhandle handle,
-		    m4_builtin_func *func, int flags)
+		    m4_builtin_func *func, int flags, int min_args,
+		    int max_args)
 {
   m4_symbol *symbol;
 
@@ -83,14 +84,15 @@ m4_builtin_pushdef (const char *name, lt_dlhandle handle,
   symbol = m4_symbol_pushdef (name);
 
   if (symbol)
-    m4_symbol_builtin (symbol, handle, func, flags);
+    m4_symbol_builtin (symbol, handle, func, flags, min_args, max_args);
 
   return symbol;
 }
 
 m4_symbol *
 m4_builtin_define (const char *name, lt_dlhandle handle,
-		   m4_builtin_func *func, int flags)
+		   m4_builtin_func *func, int flags,
+		   int min_args, int max_args)
 {
   m4_symbol *symbol;
 
@@ -101,7 +103,7 @@ m4_builtin_define (const char *name, lt_dlhandle handle,
   symbol = m4_symbol_define (name);
 
   if (symbol)
-    m4_symbol_builtin (symbol, handle, func, flags);
+    m4_symbol_builtin (symbol, handle, func, flags, min_args, max_args);
 
   return symbol;
 }
@@ -133,7 +135,8 @@ m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
       if (bp->groks_macro_args) BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
       if (bp->blind_if_no_args) BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
 
-      m4_builtin_pushdef (key, handle, bp->func, flags);
+      m4_builtin_pushdef (key, handle, bp->func, flags,
+			  bp->min_args, bp->max_args);
 
       if (prefix_all_builtins)
 	xfree (key);
@@ -142,7 +145,7 @@ m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
 
 m4_symbol *
 m4_macro_pushdef (const char *name, lt_dlhandle handle, const char *text,
-		  int flags)
+		  int flags, int min_args, int max_args)
 {
   m4_symbol *symbol;
 
@@ -152,14 +155,14 @@ m4_macro_pushdef (const char *name, lt_dlhandle handle, const char *text,
   symbol = m4_symbol_pushdef (name);
 
   if (symbol)
-    m4_symbol_macro (symbol, handle, text, flags);
+    m4_symbol_macro (symbol, handle, text, flags, min_args, max_args);
 
   return symbol;
 }
 
 m4_symbol *
 m4_macro_define (const char *name, lt_dlhandle handle, const char *text,
-		 int flags)
+		 int flags, int min_args, int max_args)
 {
   m4_symbol *symbol;
 
@@ -169,7 +172,7 @@ m4_macro_define (const char *name, lt_dlhandle handle, const char *text,
   symbol = m4_symbol_define (name);
 
   if (symbol)
-    m4_symbol_macro (symbol, handle, text, flags);
+    m4_symbol_macro (symbol, handle, text, flags, min_args, max_args);
 
   return symbol;
 }
@@ -181,5 +184,5 @@ m4_macro_table_install (lt_dlhandle handle, const m4_macro *table)
   const m4_macro *mp;
 
   for (mp = table; mp->name != NULL; mp++)
-    m4_macro_pushdef (mp->name, handle, mp->value, 0);
+    m4_macro_pushdef (mp->name, handle, mp->value, 0, 0, -1);
 }
