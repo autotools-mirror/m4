@@ -130,35 +130,35 @@ void
 produce_symbol_dump (FILE *file, const m4_symbol *bucket)
 {
   const m4_symbol *pending = bucket;
-  lt_dlhandle	handle		= SYMBOL_HANDLE (pending);
-  const char   *symbol_name	= SYMBOL_NAME (pending);
+  lt_dlhandle	handle		= M4_SYMBOL_HANDLE (pending);
+  const char   *symbol_name	= M4_SYMBOL_NAME (pending);
   const char   *module_name	= handle ? m4_module_name (handle) : NULL;
   const m4_builtin *bp;
 
-  bucket = SYMBOL_NEXT (bucket);
+  bucket = M4_SYMBOL_NEXT (bucket);
   if (bucket)
     produce_symbol_dump (file, bucket);
   
-  switch (SYMBOL_TYPE (pending))
+  switch (M4_SYMBOL_TYPE (pending))
     {
     case M4_TOKEN_TEXT:
       fprintf (file, "T%lu,%lu",
 	       (unsigned long) strlen (symbol_name),
-	       (unsigned long) strlen (SYMBOL_TEXT (pending)));
+	       (unsigned long) strlen (M4_SYMBOL_TEXT (pending)));
       if (handle)
 	fprintf (file, ",%lu", (unsigned long) strlen (module_name));
       fputc ('\n', file);
 
       fputs (symbol_name, file);
-      fputs (SYMBOL_TEXT (pending), file);
+      fputs (M4_SYMBOL_TEXT (pending), file);
       if (handle)
 	fputs (module_name, file);
       fputc ('\n', file);
       break;
 
     case M4_TOKEN_FUNC:
-      bp = m4_builtin_find_by_func (m4_module_builtins(SYMBOL_HANDLE(pending)),
-				    SYMBOL_FUNC (pending));
+      bp = m4_builtin_find_by_func (m4_module_builtins(M4_SYMBOL_HANDLE(pending)),
+				    M4_SYMBOL_FUNC (pending));
       if (bp == NULL)
 	{
 	  M4ERROR ((warning_status, 0,

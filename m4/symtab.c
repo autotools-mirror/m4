@@ -73,10 +73,10 @@ hash (const char *s)
 static void
 free_symbol (m4_symbol *symbol)
 {
-  if (SYMBOL_NAME (symbol))
-    xfree (SYMBOL_NAME (symbol));
-  if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (symbol));
+  if (M4_SYMBOL_NAME (symbol))
+    xfree (M4_SYMBOL_NAME (symbol));
+  if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
+    xfree (M4_SYMBOL_TEXT (symbol));
   xfree ((void *) symbol);
 }
 
@@ -102,7 +102,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 
       for (prev = NULL; symbol != NULL; prev = symbol, symbol = symbol->next)
 	{
-	  cmp = strcmp (SYMBOL_NAME (symbol), name);
+	  cmp = strcmp (M4_SYMBOL_NAME (symbol), name);
 	  if (cmp >= 0)
 	    break;
 	}
@@ -135,17 +135,17 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	     symbol as "shadowed".  */
 
 	  symbol = XMALLOC (m4_symbol, 1);
-	  SYMBOL_TYPE (symbol) = M4_TOKEN_VOID;
-	  SYMBOL_TRACED (symbol) = SYMBOL_SHADOWED (symbol) = FALSE;
-	  SYMBOL_NAME (symbol) = xstrdup (name);
+	  M4_SYMBOL_TYPE (symbol) = M4_TOKEN_VOID;
+	  M4_SYMBOL_TRACED (symbol) = M4_SYMBOL_SHADOWED (symbol) = FALSE;
+	  M4_SYMBOL_NAME (symbol) = xstrdup (name);
 
-	  SYMBOL_NEXT (symbol) = *spp;
+	  M4_SYMBOL_NEXT (symbol) = *spp;
 	  (*spp) = symbol;
 
 	  if (mode == M4_SYMBOL_PUSHDEF && cmp == 0)
 	    {
-	      SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = TRUE;
-	      SYMBOL_TRACED (symbol) = SYMBOL_TRACED (SYMBOL_NEXT (symbol));
+	      M4_SYMBOL_SHADOWED (M4_SYMBOL_NEXT (symbol)) = TRUE;
+	      M4_SYMBOL_TRACED (symbol) = M4_SYMBOL_TRACED (M4_SYMBOL_NEXT (symbol));
 	    }
 	  return symbol;
 
@@ -157,11 +157,11 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	    return NULL;
 	  do
 	    {
-	      *spp = SYMBOL_NEXT (symbol);
+	      *spp = M4_SYMBOL_NEXT (symbol);
 	      free_symbol (symbol);
 	      symbol = *spp;
 	    }
-	  while (symbol != NULL && strcmp (name, SYMBOL_NAME (symbol)) == 0);
+	  while (symbol != NULL && strcmp (name, M4_SYMBOL_NAME (symbol)) == 0);
 	  return NULL;
 
 	case M4_SYMBOL_POPDEF:
@@ -170,9 +170,9 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 
 	  if (cmp != 0 || symbol == NULL)
 	    return NULL;
-	  if (SYMBOL_NEXT (symbol) != NULL && cmp == 0)
-	    SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
-	  *spp = SYMBOL_NEXT (symbol);
+	  if (M4_SYMBOL_NEXT (symbol) != NULL && cmp == 0)
+	    M4_SYMBOL_SHADOWED (M4_SYMBOL_NEXT (symbol)) = FALSE;
+	  *spp = M4_SYMBOL_NEXT (symbol);
 	  free_symbol (symbol);
 	  return NULL;
 
@@ -205,9 +205,9 @@ m4_remove_table_reference_symbols (m4_builtin *builtins, m4_macro *macros)
       /* And each symbol in each hash bucket... */
       for (symbol = m4_symtab[h]; symbol != NULL; prev = symbol, symbol = next)
 	{
-	  next = SYMBOL_NEXT (symbol);
+	  next = M4_SYMBOL_NEXT (symbol);
 
-	  switch (SYMBOL_TYPE (symbol))
+	  switch (M4_SYMBOL_TYPE (symbol))
 	    {
 	    case M4_TOKEN_FUNC:
 	      /* For symbol functions referencing a function in
@@ -215,16 +215,16 @@ m4_remove_table_reference_symbols (m4_builtin *builtins, m4_macro *macros)
 	      {
 		const m4_builtin *bp;
 		for (bp = builtins; symbol && bp && bp->name != NULL; ++bp)
-		  if (SYMBOL_FUNC (symbol) == bp->func)
+		  if (M4_SYMBOL_FUNC (symbol) == bp->func)
 		    {
 		      if (prev)
-			SYMBOL_NEXT (prev) = SYMBOL_NEXT (symbol);
+			M4_SYMBOL_NEXT (prev) = M4_SYMBOL_NEXT (symbol);
 		      else
-			m4_symtab[h] = SYMBOL_NEXT (symbol);
+			m4_symtab[h] = M4_SYMBOL_NEXT (symbol);
 
 		      /* Unshadow any symbol that this one had shadowed. */
-		      if (SYMBOL_NEXT (symbol) != NULL)
-			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
+		      if (M4_SYMBOL_NEXT (symbol) != NULL)
+			M4_SYMBOL_SHADOWED (M4_SYMBOL_NEXT (symbol)) = FALSE;
 
 		      free_symbol (symbol);
 
@@ -240,17 +240,17 @@ m4_remove_table_reference_symbols (m4_builtin *builtins, m4_macro *macros)
 	      {
 		const m4_macro *mp;
 		for (mp = macros; symbol && mp && mp->name; mp++)
-		  if ((strcmp(SYMBOL_NAME (symbol), mp->name) == 0)
-		      && (strcmp (SYMBOL_TEXT (symbol), mp->value) == 0))
+		  if ((strcmp(M4_SYMBOL_NAME (symbol), mp->name) == 0)
+		      && (strcmp (M4_SYMBOL_TEXT (symbol), mp->value) == 0))
 		    {
 		      if (prev)
-			SYMBOL_NEXT (prev) = SYMBOL_NEXT (symbol);
+			M4_SYMBOL_NEXT (prev) = M4_SYMBOL_NEXT (symbol);
 		      else
-			m4_symtab[h] = SYMBOL_NEXT (symbol);
+			m4_symtab[h] = M4_SYMBOL_NEXT (symbol);
 
 		      /* Unshadow any symbol that this one had shadowed. */
-		      if (SYMBOL_NEXT (symbol) != NULL)
-			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
+		      if (M4_SYMBOL_NEXT (symbol) != NULL)
+			M4_SYMBOL_SHADOWED (M4_SYMBOL_NEXT (symbol)) = FALSE;
 
 		      free_symbol (symbol);
 
@@ -280,7 +280,7 @@ m4_hack_all_symbols (m4_hack_symbol *func, const char *data)
   m4_symbol *symbol;
 
   for (h = 0; h < hash_table_size; h++)
-    for (symbol = m4_symtab[h]; symbol != NULL; symbol = SYMBOL_NEXT (symbol))
+    for (symbol = m4_symtab[h]; symbol != NULL; symbol = M4_SYMBOL_NEXT (symbol))
       (*func) (symbol, data);
 }
 
@@ -329,9 +329,9 @@ symtab_print_list (int i)
   printf ("Symbol dump #%d:\n", i);
   for (symbol = m4_symtab[i]; symbol != NULL; symbol = symbol->next)
     printf ("\tname %s, addr 0x%x, next 0x%x, flags%s%s\n",
-	   SYMBOL_NAME (symbol), symbol, symbol->next,
-	   SYMBOL_TRACED (symbol) ? " traced" : "",
-	   SYMBOL_SHADOWED (symbol) ? " shadowed" : "");
+	   M4_SYMBOL_NAME (symbol), symbol, symbol->next,
+	   M4_SYMBOL_TRACED (symbol) ? " traced" : "",
+	   M4_SYMBOL_SHADOWED (symbol) ? " shadowed" : "");
 }
 
 #endif /* DEBUG_SYM */

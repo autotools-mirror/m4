@@ -70,16 +70,16 @@ struct m4_symbol
   m4_token_data data;
 };
 
-#define SYMBOL_NEXT(S)		((S)->next)
-#define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_SHADOWED(S)	((S)->shadowed)
-#define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
-#define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
-#define SYMBOL_NAME(S)		((S)->name)
-#define SYMBOL_TYPE(S)		(M4_TOKEN_DATA_TYPE (&(S)->data))
-#define SYMBOL_TEXT(S)		(M4_TOKEN_DATA_TEXT (&(S)->data))
-#define SYMBOL_FUNC(S)		(M4_TOKEN_DATA_FUNC (&(S)->data))
-#define SYMBOL_HANDLE(S)	(M4_TOKEN_DATA_HANDLE(&(S)->data))
+#define M4_SYMBOL_NEXT(S)		((S)->next)
+#define M4_SYMBOL_TRACED(S)		((S)->traced)
+#define M4_SYMBOL_SHADOWED(S)		((S)->shadowed)
+#define M4_SYMBOL_MACRO_ARGS(S)		((S)->macro_args)
+#define M4_SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
+#define M4_SYMBOL_NAME(S)		((S)->name)
+#define M4_SYMBOL_TYPE(S)		(M4_TOKEN_DATA_TYPE (&(S)->data))
+#define M4_SYMBOL_TEXT(S)		(M4_TOKEN_DATA_TEXT (&(S)->data))
+#define M4_SYMBOL_FUNC(S)		(M4_TOKEN_DATA_FUNC (&(S)->data))
+#define M4_SYMBOL_HANDLE(S)		(M4_TOKEN_DATA_HANDLE(&(S)->data))
 
 
 /* Debugging the memory allocator.  */

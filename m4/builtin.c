@@ -72,7 +72,7 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 
 
 /* Install a builtin macro with name NAME, bound to the C function given in
-   BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether
+   BP.  MODE is M4_SYMBOL_INSERT or M4_SYMBOL_PUSHDEF.  TRACED defines whether
    NAME is to be traced.  */
 void
 m4_builtin_define (const lt_dlhandle handle, const char *name,
@@ -84,15 +84,15 @@ m4_builtin_define (const lt_dlhandle handle, const char *name,
   symbol = m4_lookup_symbol (name, mode);
   if (symbol)
     {
-      if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-        xfree (SYMBOL_TEXT (symbol));
+      if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
+        xfree (M4_SYMBOL_TEXT (symbol));
 
-      SYMBOL_HANDLE (symbol)		= handle;
-      SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
-      SYMBOL_MACRO_ARGS (symbol)	= bp->groks_macro_args;
-      SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
-      SYMBOL_FUNC (symbol)		= bp->func;
-      SYMBOL_TRACED (symbol)		= traced;
+      M4_SYMBOL_HANDLE (symbol)		= handle;
+      M4_SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
+      M4_SYMBOL_MACRO_ARGS (symbol)	= bp->groks_macro_args;
+      M4_SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
+      M4_SYMBOL_FUNC (symbol)		= bp->func;
+      M4_SYMBOL_TRACED (symbol)		= traced;
     }
 }
 
@@ -128,15 +128,15 @@ m4_macro_define (const lt_dlhandle handle, const char *name,
   symbol = m4_lookup_symbol (name, mode);
   if (symbol)
     {
-      if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-        xfree (SYMBOL_TEXT (symbol));
+      if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
+        xfree (M4_SYMBOL_TEXT (symbol));
 
-      SYMBOL_HANDLE (symbol) 		= handle;
-      SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
-      SYMBOL_MACRO_ARGS (symbol)	= FALSE;
-      SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
-      SYMBOL_TEXT (symbol) 		= xstrdup (text);
-      /* Do not reset SYMBOL_TRACED as it means that --trace would be
+      M4_SYMBOL_HANDLE (symbol) 		= handle;
+      M4_SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
+      M4_SYMBOL_MACRO_ARGS (symbol)	= FALSE;
+      M4_SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
+      M4_SYMBOL_TEXT (symbol) 		= xstrdup (text);
+      /* Do not reset M4_SYMBOL_TRACED as it means that --trace would be
 	 usable only for existing macros.  m4_lookup_symbol takes care
 	 of its proper initialization.  */
     }

@@ -71,9 +71,9 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 	text++;
 
       symbol = m4_lookup_symbol (text, M4_SYMBOL_LOOKUP);
-      if (symbol == NULL || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
-	  || (SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
-	      && SYMBOL_BLIND_NO_ARGS (symbol)
+      if (symbol == NULL || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
+	  || (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
+	      && M4_SYMBOL_BLIND_NO_ARGS (symbol)
 	      && !M4_IS_OPEN(m4_peek_input ())))
 	{
 	  m4_shipout_text (obs, M4_TOKEN_DATA_TEXT (td),
@@ -188,10 +188,10 @@ collect_arguments (m4_symbol *symbol, struct obstack *argptr,
   m4_token_data td;
   m4_token_data *tdp;
   boolean more_args;
-  boolean groks_macro_args = SYMBOL_MACRO_ARGS (symbol);
+  boolean groks_macro_args = M4_SYMBOL_MACRO_ARGS (symbol);
 
   M4_TOKEN_DATA_TYPE (&td) = M4_TOKEN_TEXT;
-  M4_TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (symbol);
+  M4_TOKEN_DATA_TEXT (&td) = M4_SYMBOL_NAME (symbol);
   tdp = (m4_token_data *) obstack_copy (arguments, (void *) &td, sizeof (td));
   obstack_grow (argptr, (void *) &tdp, sizeof (tdp));
 
@@ -228,10 +228,10 @@ void
 m4_call_macro (m4_symbol *symbol, int argc, m4_token_data **argv,
 	       struct obstack *expansion)
 {
-  switch (SYMBOL_TYPE (symbol))
+  switch (M4_SYMBOL_TYPE (symbol))
     {
     case M4_TOKEN_FUNC:
-      (*SYMBOL_FUNC (symbol)) (expansion, argc, argv);
+      (*M4_SYMBOL_FUNC (symbol)) (expansion, argc, argv);
       break;
 
     case M4_TOKEN_TEXT:
@@ -273,13 +273,13 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (boolean) ((debug_level & M4_DEBUG_TRACE_ALL) || SYMBOL_TRACED (symbol));
+  traced = (boolean) ((debug_level & M4_DEBUG_TRACE_ALL) || M4_SYMBOL_TRACED (symbol));
 
   obstack_init (&argptr);
   obstack_init (&arguments);
 
   if (traced && (debug_level & M4_DEBUG_TRACE_CALL))
-    m4_trace_prepre (SYMBOL_NAME (symbol), my_call_id);
+    m4_trace_prepre (M4_SYMBOL_NAME (symbol), my_call_id);
 
   collect_arguments (symbol, &argptr, &arguments);
 
@@ -287,14 +287,14 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   argv = (m4_token_data **) obstack_finish (&argptr);
 
   if (traced)
-    m4_trace_pre (SYMBOL_NAME (symbol), my_call_id, argc, argv);
+    m4_trace_pre (M4_SYMBOL_NAME (symbol), my_call_id, argc, argv);
 
   expansion = m4_push_string_init ();
   m4_call_macro (symbol, argc, argv, expansion);
   expanded = m4_push_string_finish ();
 
   if (traced)
-    m4_trace_post (SYMBOL_NAME (symbol), my_call_id, argc, argv, expanded);
+    m4_trace_post (M4_SYMBOL_NAME (symbol), my_call_id, argc, argv, expanded);
 
   --m4_expansion_level;
 
@@ -314,7 +314,7 @@ m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc,
   const unsigned char *text;
   int i;
 
-  for (text = SYMBOL_TEXT (symbol); *text != '\0';)
+  for (text = M4_SYMBOL_TEXT (symbol); *text != '\0';)
     {
       if (*text != '$')
 	{

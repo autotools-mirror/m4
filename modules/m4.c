@@ -279,24 +279,24 @@ M4BUILTIN_HANDLER (dumpdef)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      fprintf (stderr, "%s:\t", SYMBOL_NAME (data.base[0]));
+      fprintf (stderr, "%s:\t", M4_SYMBOL_NAME (data.base[0]));
 
-      switch (SYMBOL_TYPE (data.base[0]))
+      switch (M4_SYMBOL_TYPE (data.base[0]))
 	{
 	case M4_TOKEN_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
-		     lquote.string, SYMBOL_TEXT (data.base[0]), rquote.string);
+		     lquote.string, M4_SYMBOL_TEXT (data.base[0]), rquote.string);
 	  else
-	    fprintf (stderr, "%s\n", SYMBOL_TEXT (data.base[0]));
+	    fprintf (stderr, "%s\n", M4_SYMBOL_TEXT (data.base[0]));
 	  break;
 
 	case M4_TOKEN_FUNC:
-	  bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (data.base[0]));
+	  bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (data.base[0]));
 	  if (bp == NULL)
 	    {
 	      M4ERROR ((warning_status, 0,
-			_("Undefined name `%s'"), SYMBOL_NAME (data.base[0])));
+			_("Undefined name `%s'"), M4_SYMBOL_NAME (data.base[0])));
 	      abort ();
 	    }
 	  fprintf (stderr, "<%s>\n", bp->name);
@@ -325,15 +325,15 @@ M4BUILTIN_HANDLER (defn)
   if (symbol == NULL)
     return;
 
-  switch (SYMBOL_TYPE (symbol))
+  switch (M4_SYMBOL_TYPE (symbol))
     {
     case M4_TOKEN_TEXT:
-      m4_shipout_string(obs, SYMBOL_TEXT (symbol), 0, TRUE);
+      m4_shipout_string(obs, M4_SYMBOL_TEXT (symbol), 0, TRUE);
       break;
 
     case M4_TOKEN_FUNC:
-      m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_HANDLE (symbol),
-		     SYMBOL_TRACED (symbol));
+      m4_push_macro (M4_SYMBOL_FUNC (symbol), M4_SYMBOL_HANDLE (symbol),
+		     M4_SYMBOL_TRACED (symbol));
       break;
 
     case M4_TOKEN_VOID:
@@ -611,7 +611,7 @@ M4BUILTIN_HANDLER (m4wrap)
 static void
 set_trace (m4_symbol *symbol, const char *data)
 {
-  SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
+  M4_SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
 }
 
 M4BUILTIN_HANDLER (traceon)

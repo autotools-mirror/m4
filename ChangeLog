@@ -1,5 +1,15 @@
 2001-09-01  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4private.h (SYMBOL_NEXT): Move into m4's name space; renamed
+	to M4_SYMBOL_NEXT.
+	(SYMBOL_TRACED): Similarly renamed by prefixing with `M4_'.
+	(SYMBOL_SHADOWED, SYMBOL_MACRO_ARGS, SYMBOL_BLIND_NO_ARGS,
+	SYMBOL_NAME, SYMBOL_TYPE, SYMBOL_TEXT, SYMBOL_FUNC,
+	SYMBOL_HANDLE): Ditto.
+	* m4/builtin.c, m4/macro.c, m4/symtab.c, m4/utility.c,
+	modules/gnu.c, modules/m4.c, src/freeze.c,
+	src/main.c:  Updated all references.
+
 	* src/Makefile.am (m4_SOURCES): Don't list $(M4OBJS) here, since
 	Automake 1.5 chokes on dynamic source file lists,  Besides, it is
 	already listed in m4_LDADD... how did that ever used to work?

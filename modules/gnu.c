@@ -412,7 +412,7 @@ M4BUILTIN_HANDLER (symbols)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      m4_shipout_string (obs, SYMBOL_NAME (data.base[0]), 0, TRUE);
+      m4_shipout_string (obs, M4_SYMBOL_NAME (data.base[0]), 0, TRUE);
       if (data.size > 1)
 	obstack_1grow (obs, ',');
     }

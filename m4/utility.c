@@ -225,8 +225,8 @@ m4_expand_ranges (const char *s, struct obstack *obs)
 static int
 dumpdef_cmp (const void *s1, const void *s2)
 {
-  return strcmp (SYMBOL_NAME (* (m4_symbol *const *) s1),
-		 SYMBOL_NAME (* (m4_symbol *const *) s2));
+  return strcmp (M4_SYMBOL_NAME (* (m4_symbol *const *) s1),
+		 M4_SYMBOL_NAME (* (m4_symbol *const *) s2));
 }
 
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
@@ -234,7 +234,7 @@ dumpdef_cmp (const void *s1, const void *s2)
 void
 m4_dump_symbol (m4_symbol *symbol, struct m4_dump_symbol_data *data)
 {
-  if (!SYMBOL_SHADOWED (symbol) && SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
+  if (!M4_SYMBOL_SHADOWED (symbol) && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
     {
       obstack_blank (data->obs, sizeof (m4_symbol *));
       data->base = (m4_symbol **) obstack_base (data->obs);
@@ -263,7 +263,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
       for (i = 1; i < argc; i++)
 	{
 	  symbol = m4_lookup_symbol (M4_TOKEN_DATA_TEXT (argv[i]), M4_SYMBOL_LOOKUP);
-	  if (symbol != NULL && SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
+	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
 	    m4_dump_symbol (symbol, data);
 	  else if (complain)
 	    M4ERROR ((warning_status, 0,

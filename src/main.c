@@ -454,7 +454,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case 't':
 	  symbol = m4_lookup_symbol (defines->macro, M4_SYMBOL_INSERT);
-	  SYMBOL_TRACED (symbol) = TRUE;
+	  M4_SYMBOL_TRACED (symbol) = TRUE;
 	  break;
 
 	case 'm':
