@@ -44,6 +44,12 @@ m4_debug_init (void)
   obstack_init (&trace);
 }
 
+void
+m4_debug_exit (void)
+{
+  obstack_free (&trace, NULL);
+}
+
 
 
 /* Function to decode the debugging flags OPTS.  Used by main while
@@ -320,7 +326,7 @@ m4_trace_prepre (const char *name, int id)
 /* Format the parts of a trace line, that can be made before the macro is
    actually expanded.  Used from expand_macro ().  */
 void
-m4_trace_pre (const char *name, int id, int argc, m4_token_data **argv)
+m4_trace_pre (const char *name, int id, int argc, m4_symbol **argv)
 {
   int i;
   const m4_builtin *bp;
@@ -337,14 +343,14 @@ m4_trace_pre (const char *name, int id, int argc, m4_token_data **argv)
 	  if (i != 1)
 	    m4_trace_format (", ");
 
-	  switch (M4_TOKEN_DATA_TYPE (argv[i]))
+	  switch (M4_SYMBOL_TYPE (argv[i]))
 	    {
 	    case M4_TOKEN_TEXT:
-	      m4_trace_format ("%l%S%r", M4_TOKEN_DATA_TEXT (argv[i]));
+	      m4_trace_format ("%l%S%r", M4_SYMBOL_TEXT (argv[i]));
 	      break;
 
 	    case M4_TOKEN_FUNC:
-	      bp = m4_builtin_find_by_func (NULL, M4_TOKEN_DATA_FUNC(argv[i]));
+	      bp = m4_builtin_find_by_func (NULL, M4_SYMBOL_FUNC (argv[i]));
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, _("\
@@ -374,7 +380,7 @@ INTERNAL ERROR: Bad token data type (m4_trace_pre ())")));
 /* Format the final part of a trace line and print it all.  Used from
    expand_macro ().  */
 void
-m4_trace_post (const char *name, int id, int argc, m4_token_data **argv,
+m4_trace_post (const char *name, int id, int argc, m4_symbol **argv,
 	    const char *expanded)
 {
   if (debug_level & M4_DEBUG_TRACE_CALL)

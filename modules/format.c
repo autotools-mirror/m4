@@ -24,36 +24,36 @@
 
 #define ARG_INT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atoi (M4_SYMBOL_TEXT (argv[-1]))))
 
 #define ARG_UINT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned int) atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned int) atoi (M4_SYMBOL_TEXT (argv[-1]))))
 
 #define ARG_LONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atol (M4_SYMBOL_TEXT (argv[-1]))))
 
 #define ARG_ULONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned long) atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned long) atol (M4_SYMBOL_TEXT (argv[-1]))))
 
 #define ARG_STR(argc, argv) \
 	((argc == 0) ? "" : \
-	 (--argc, argv++, M4_TOKEN_DATA_TEXT (argv[-1])))
+	 (--argc, argv++, M4_SYMBOL_TEXT (argv[-1])))
 
 #define ARG_DOUBLE(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atof (M4_TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atof (M4_SYMBOL_TEXT (argv[-1]))))
 
 
 /* The main formatting function.  Output is placed on the obstack OBS, the
    first argument in ARGV is the formatting string, and the rest is
    arguments for the string.  */
-void format (struct obstack *obs, int argc, m4_token_data **argv);
+void format (struct obstack *obs, int argc, m4_symbol **argv);
 
 void
-format (struct obstack *obs, int argc, m4_token_data **argv)
+format (struct obstack *obs, int argc, m4_symbol **argv)
 {
   char *fmt;			/* format control string */
   const char *fstart;		/* beginning of current format spec */

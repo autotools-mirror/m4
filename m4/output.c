@@ -105,7 +105,7 @@ int m4_output_current_line;
 void
 m4_output_init (void)
 {
-  diversion_table = (struct diversion *) xmalloc (sizeof (struct diversion));
+  diversion_table = XMALLOC (struct diversion, 1);
   diversions = 1;
   diversion_table[0].file = stdout;
   diversion_table[0].buffer = NULL;
@@ -119,6 +119,14 @@ m4_output_init (void)
   output_cursor = NULL;
   output_unused = 0;
 }
+
+void
+m4_output_exit (void)
+{
+  assert (diversions = 1);
+  XFREE (diversion_table);
+}
+
 
 #ifdef HAVE_MKTEMP
 #ifndef HAVE_MKSTEMP
@@ -683,4 +691,3 @@ m4_freeze_diversions (file)
   if (saved_number != last_inserted)
     fprintf (file, "D%d,0\n\n", saved_number);
 }
-

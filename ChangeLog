@@ -1,3 +1,50 @@
+2001-09-20  Gary V. Vaughan  <gary@gnu.org>
+
+	More cleanup.  After the last patch, m4_symbol holds nothing but
+	the head of a chain of m4_token_data.  So I have removed the old
+	m4_symbol, so that m4_token_data chains are stored directly in the
+	value cell of a hash table node.  But there's more... m4_symbol
+	was a more natural name for the symbol value cell, and now that it
+	is gone I have renamed the former m4_token_data structure to
+	m4_symbol.  This change turned out to be a pig to get right, since
+	the original code didn't need to modify the value cell itself,
+	since changing the chain happened inside the m4_symbol that used
+	to be returned -- I had to pass the address of the value cell
+	across various function calls, incase the head value changed.  I
+	also tightened up the memory management to help me find a nasty
+	memory corruption bug that took me all night to track down...
+
+	* m4/m4private.h (struct m4_symbol): Removed.
+	(struct m4_token_data): Renamed to `struct m4_symbol'.  Updated
+	all references.
+	* m4/hash.c (m4_hash_iterator_value): Return the address of the
+	value cell.  Updated all callers.
+	* m4/symtab.c: Took advantage of the simplification in the data
+	structures to rewrite a lot of this file more simply.  There is
+	still some room for optimisation here, but we should tackle that
+	systematically closer to the release.
+
+	* m4/ltdl.c: Added dmalloc support, and fixed some memory leaks it
+	revealed.  This version is ahead of CVS libtool until I get chance
+	to flush my changes.
+	* m4/module.c (m4_module_remove): New function that holds the core
+	of the old m4_module_unload.
+	(m4_module_unload): Use it.
+	(m4_module_unload_all): When we know the modules will never be
+	used again (i.e. on exit), free up as much module memory as
+	possible.  There are still some artifacts from resident modules
+	living inside ltdl.c, but everything else is freed.
+	* m4/debug.c (m4_debug_exit): Free memory allocated in
+	m4_debug_init().
+	* m4/input.c (m4_input_exit): Ditto wrt m4_input_init().
+	* m4/output.c (m4_output_exit): Ditto wrt m4_output_init ().
+	* src/stackovf.c (stackovf_exit): Ditto wrt setup_stackovf_trap ().
+	* m4/m4module.h: Updated prototypes.
+	* m4/hash.c (m4_hash_exit): Free the nodes on the free list.
+	* m4/hash.h: Updated prototypes.
+	* src/main.c (main): Use all these new functions to clean up as
+	much memory as possible before exit.
+
 2001-09-18  Gary V. Vaughan  <gary@gnu.org>
 
 	The `traced' flag needs to be attached to the definition of a

@@ -271,8 +271,9 @@ m4_hash_remove (m4_hash *hash, const void *key)
 
 /* Return the address of the value field of the first node in
    HASH that has a matching KEY.  The address is returned so that
-   an explicit 0 value can be distinguihed from a failed lookup
-   (also 0).  */
+   an explicit 0 value can be distinguished from a failed lookup
+   (also 0).  Fortuitously for M4, this also means that the value
+   field can be changed `in situ' to implement a value stack.  */
 void **
 m4_hash_lookup (m4_hash *hash, const void *key)
 {
@@ -363,6 +364,17 @@ m4_hash_bucket_insert (m4_hash *hash, m4_hash_node *bucket)
   while (bucket);
 }
 
+void
+m4_hash_exit (void)
+{
+  while (m4_hash_node_free_list)
+    {
+      m4_hash_node *stale = m4_hash_node_free_list;
+      m4_hash_node_free_list = M4_HASH_NODE_NEXT (stale);
+      xfree (stale);
+    }
+}
+
 
 
 struct m4_hash_iterator
@@ -448,10 +460,10 @@ m4_hash_iterator_key (m4_hash_iterator *place)
   return M4_HASH_NODE_KEY (M4_ITERATOR_PLACE (place));
 }
 
-void *
+void **
 m4_hash_iterator_value (m4_hash_iterator *place)
 {
   assert (place);
 
-  return M4_HASH_NODE_VAL (M4_ITERATOR_PLACE (place));
+  return &M4_HASH_NODE_VAL (M4_ITERATOR_PLACE (place));
 }

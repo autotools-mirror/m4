@@ -32,9 +32,8 @@ BEGIN_C_DECLS
 
 typedef struct m4_symbol m4_symbol;
 typedef struct m4_module_data m4_module_data;
-typedef struct m4_token_data m4_token_data;
 
-typedef void m4_builtin_func (struct obstack *, int, struct m4_token_data **);
+typedef void m4_builtin_func (struct obstack *, int, struct m4_symbol **);
 typedef void *m4_module_func (const char *);
 typedef int m4_symtab_apply_func (const char *name, m4_symbol *symbol, void *data);
 
@@ -56,12 +55,13 @@ typedef struct {
 } m4_builtin;
 
 
-extern void	    m4_module_init   (void);
-extern lt_dlhandle  m4_module_load   (const char*, struct obstack*);
-extern void	    m4_module_unload (const char*, struct obstack*);
-extern lt_dlhandle  m4_module_open   (const char*, struct obstack*);
-extern void	    m4_module_close  (lt_dlhandle, struct obstack*);
-extern void	    m4_module_close_all (struct obstack*);
+extern void	    m4_module_init	(void);
+extern lt_dlhandle  m4_module_load	(const char*, struct obstack*);
+extern void	    m4_module_unload	(const char*, struct obstack*);
+extern void	    m4_module_unload_all (void);
+extern lt_dlhandle  m4_module_open	(const char*, struct obstack*);
+extern void	    m4_module_close	(lt_dlhandle, struct obstack*);
+extern void	    m4_module_close_all	(struct obstack*);
 
 extern const char  *m4_module_name     (lt_dlhandle);
 extern m4_builtin  *m4_module_builtins (lt_dlhandle);
@@ -94,6 +94,7 @@ extern m4_hash *m4_symtab;
 extern void	m4_symtab_init		(void);
 extern int	m4_symtab_apply		(m4_symtab_apply_func *, void *);
 extern void	m4_symtab_remove_module_references (lt_dlhandle);
+extern void	m4_symtab_exit		(void);
 
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
@@ -127,20 +128,20 @@ typedef enum {
 typedef void m4_module_init_func   (lt_dlhandle, struct obstack*);
 typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
 
-extern m4_token_data_t  m4_token_data_type	  (m4_token_data*);
-extern char	       *m4_token_data_text	  (m4_token_data*);
-extern m4_builtin_func *m4_token_data_func	  (m4_token_data*);
+extern m4_token_data_t  m4_symbol_type	  (m4_symbol*);
+extern char	       *m4_symbol_text	  (m4_symbol*);
+extern m4_builtin_func *m4_symbol_func	  (m4_symbol*);
 
 
-#define M4ARG(i)	(argc > (i) ? m4_token_data_text (argv[i]) : "")
+#define M4ARG(i)	(argc > (i) ? m4_symbol_text (argv[i]) : "")
 
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
-  	(struct obstack *, int , m4_token_data **);
+  	(struct obstack *, int , m4_symbol **);
 
 #define M4BUILTIN_HANDLER(name) 				\
   static void CONC(builtin_, name) (obs, argc, argv)		\
-	struct obstack *obs; int argc; m4_token_data **argv;
+	struct obstack *obs; int argc; m4_symbol **argv;
 
 #define M4INIT_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_init_module)) 			\
@@ -192,12 +193,12 @@ m4_string ecomm;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-boolean m4_bad_argc (m4_token_data *, int, int, int);
+boolean m4_bad_argc (m4_symbol *, int, int, int);
 const char *m4_skip_space (const char *);
-boolean m4_numeric_arg (m4_token_data *, const char *, int *);
+boolean m4_numeric_arg (m4_symbol *, const char *, int *);
 void m4_shipout_int (struct obstack *, int);
 void m4_shipout_string (struct obstack*, const char*, int, boolean);
-void m4_dump_args (struct obstack *obs, int argc, m4_token_data **argv, const char *sep, boolean quoted);
+void m4_dump_args (struct obstack *obs, int argc, m4_symbol **argv, const char *sep, boolean quoted);
 
 
 FILE *m4_debug;
@@ -291,14 +292,15 @@ FILE *m4_debug;
   while (0)
 
 void m4_debug_init (void);
+void m4_debug_exit (void);
 int m4_debug_decode (const char *);
 void m4_debug_flush_files (void);
 boolean m4_debug_set_output (const char *);
 void m4_debug_message_prefix (void);
 
 void m4_trace_prepre (const char *, int);
-void m4_trace_pre (const char *, int, int, m4_token_data **);
-void m4_trace_post (const char *, int, int, m4_token_data **,
+void m4_trace_pre (const char *, int, int, m4_symbol **);
+void m4_trace_post (const char *, int, int, m4_symbol **,
 			   const char *);
 
 /* Exit code from last "syscmd" command.  */
@@ -307,8 +309,8 @@ int m4_expansion_level;
 
 const char *m4_expand_ranges (const char *s, struct obstack *obs);
 void m4_expand_input (void);
-void m4_call_macro (m4_symbol *, int, m4_token_data **, struct obstack *);
-void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_token_data **argv);
+void m4_call_macro (m4_symbol *, int, m4_symbol **, struct obstack *);
+void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_symbol **argv);
 
 
 
@@ -375,9 +377,10 @@ int m4_current_line;
 
 extern	int	m4_syntax_code	(char ch);
 extern	void	m4_input_init	(void);
+extern	void	m4_input_exit	(void);
 extern	void	m4_syntax_init	(void);
 extern	int	m4_peek_input	(void);
-extern	m4_token_t m4_next_token (m4_token_data *);
+extern	m4_token_t m4_next_token (m4_symbol *);
 extern	void	m4_skip_line	(void);
 
 /* push back input */
@@ -399,6 +402,7 @@ int m4_current_diversion;
 int m4_output_current_line;
 
 extern	void	m4_output_init	(void);
+extern	void	m4_output_exit	(void);
 extern	void	m4_shipout_text	(struct obstack *, const char *, int);
 extern	void	m4_make_diversion (int);
 extern	void	m4_insert_diversion (int);
@@ -445,7 +449,7 @@ struct m4_dump_symbol_data
 };
 
 extern int m4_dump_symbol (const char *name, m4_symbol *symbol, void *data);
-extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_token_data **argv, boolean complain);
+extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_symbol **argv, boolean complain);
 
 
 
@@ -457,7 +461,7 @@ typedef boolean (*m4_eval_func) (struct obstack *obs,
 
 extern boolean m4_evaluate (struct obstack *obs,
 				      const char *, const int radix, int min);
-extern void m4_do_eval (struct obstack *obs, int argc, m4_token_data **argv, m4_eval_func func);
+extern void m4_do_eval (struct obstack *obs, int argc, m4_symbol **argv, m4_eval_func func);
 
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree

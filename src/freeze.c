@@ -128,8 +128,8 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 
   while ((place = m4_hash_iterator_next (hash, place)))
     {
-      const char   *symbol_name	= m4_hash_iterator_key (place);
-      m4_symbol	   *symbol	= m4_hash_iterator_value (place);
+      const char   *symbol_name	= (const char *)m4_hash_iterator_key (place);
+      m4_symbol	   *symbol	= *(m4_symbol **)m4_hash_iterator_value(place);
       lt_dlhandle   handle	= M4_SYMBOL_HANDLE (symbol);
       const char   *module_name	= handle ? m4_module_name (handle) : NULL;
       const m4_builtin *bp;

@@ -843,8 +843,7 @@ simple_term (eval_token et, number *v1)
 
 void
 m4_do_eval (struct obstack *obs,
-	    int argc, m4_token_data **argv,
-	    m4_eval_func func)
+	    int argc, m4_symbol **argv, m4_eval_func func)
 {
   int radix = 10;
   int min = 1;
