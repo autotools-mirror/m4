@@ -21,9 +21,9 @@
 
 #include "m4.h"
 #include "m4private.h"
-#include "m4/getopt.h"
-#include "m4/progname.h"
-#include "m4/version-etc.h"
+#include "gnu/getopt.h"
+#include "gnu/progname.h"
+#include "gnu/version-etc.h"
 
 static void print_program_name_CB (void);
 

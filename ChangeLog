@@ -1,5 +1,7 @@
 2004-09-23  Gary V. Vaughan  <gary@gnu.org>
 
+	* src/main.c: Include gnulib files from the correct directory.
+
 	* gnulib/*: Don't store any of the gnulib files in arch, as they
 	generate spurious changes.
 	* Makefile.am (ACLOCAL_AMFLAGS): Remove gnulib/acm4 since the
