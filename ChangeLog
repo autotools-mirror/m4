@@ -1,5 +1,10 @@
 2001-10-19  Akim Demaille  <akim@epita.fr>
 
+	* m4/input.c (m4_next_token): Display where was opened what is
+	not closed.
+
+2001-10-19  Akim Demaille  <akim@epita.fr>
+
 	* m4/macro.c (expand_argument): Display where was opened what is
 	not closed.
 

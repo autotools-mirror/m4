@@ -1107,13 +1107,16 @@ m4_next_token (m4_token *td)
       }
     else if (M4_IS_LQUOTE(ch))		/* QUOTED STRING, SINGLE QUOTES */
       {
+	const char *current_file = m4_current_file;
+	int current_line = m4_current_line;
 	quote_level = 1;
 	while (1)
 	  {
 	    ch = next_char ();
 	    if (ch == CHAR_EOF)
-	      M4ERROR ((EXIT_FAILURE, 0,
-			_("ERROR: EOF in string")));
+	      error_at_line (EXIT_FAILURE, 0,
+			      current_file, current_line,
+			      _("EOF in string"));
 
 	    if (M4_IS_RQUOTE(ch))
 	      {
@@ -1134,14 +1137,16 @@ m4_next_token (m4_token *td)
 					/* QUOTED STRING, LONGER QUOTES */
     else if (!single_quotes && MATCH (ch, lquote.string))
       {
+	const char *current_file = m4_current_file;
+	int current_line = m4_current_line;
 	quote_level = 1;
 	while (1)
 	  {
 	    ch = next_char ();
 	    if (ch == CHAR_EOF)
-	      M4ERROR ((EXIT_FAILURE, 0,
-			_("ERROR: EOF in string")));
-
+	      error_at_line (EXIT_FAILURE, 0,
+			      current_file, current_line,
+			      _("EOF in string"));
 	    if (MATCH (ch, rquote.string))
 	      {
 		if (--quote_level == 0)
