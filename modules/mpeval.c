@@ -109,7 +109,7 @@ m4_macro m4_macro_table[] =
 typedef mpq_t number;
 
 static void numb_initialise (void);
-static void numb_obstack (struct obstack *obs, const number value,
+static void numb_obstack (m4_obstack *obs, const number value,
 			  const int radix, int min);
 static void mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily);
 static void mpz2mpq (number q, const mpz_t z);
@@ -144,7 +144,7 @@ numb_initialise (void)
 }
 
 static void
-numb_obstack (struct obstack *obs, const number value, const int radix,
+numb_obstack (m4_obstack *obs, const number value, const int radix,
 	      int min)
 {
   const char *s;

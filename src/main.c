@@ -503,7 +503,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
   if (optind == argc)
     {
       m4_push_file (context, stdin, "stdin");
-      m4_expand_input (context);
+      m4_macro_expand_input (context);
     }
   else
     for (; optind < argc; optind++)
@@ -525,14 +525,14 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 		xfree (filename);
 	      }
 	  }
-	m4_expand_input (context);
+	m4_macro_expand_input (context);
       }
 #undef NEXTARG
 
   /* Now handle wrapup text.  */
 
   while (m4_pop_wrapup ())
-    m4_expand_input (context);
+    m4_macro_expand_input (context);
 
   if (frozen_file_to_write)
     produce_frozen_state (context, frozen_file_to_write);

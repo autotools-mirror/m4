@@ -144,16 +144,16 @@ const char *m4_current_file;
 int m4_current_line;
 
 /* Obstack for storing individual tokens.  */
-static struct obstack token_stack;
+static m4_obstack token_stack;
 
 /* Normal input stack.  */
-static struct obstack input_stack;
+static m4_obstack input_stack;
 
 /* Wrapup input stack.  */
-static struct obstack wrapup_stack;
+static m4_obstack wrapup_stack;
 
 /* Input or wrapup.  */
-static struct obstack *current_input;
+static m4_obstack *current_input;
 
 /* Bottom of token_stack, for obstack_free.  */
 static char *token_bottom;
@@ -408,7 +408,7 @@ static struct input_funcs string_funcs = {
   string_peek, string_read, string_unget, NULL
 };
 
-struct obstack *
+m4_obstack *
 m4_push_string_init (m4 *context)
 {
   if (next != NULL)
@@ -640,7 +640,7 @@ match_input (m4 *context, const unsigned char *s)
   int n;			/* number of characters matched */
   int ch;			/* input character */
   const unsigned char *t;
-  struct obstack *st;
+  m4_obstack *st;
 
   ch = m4_peek_input (context);
   if (ch != *s)

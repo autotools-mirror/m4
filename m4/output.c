@@ -392,7 +392,7 @@ output_text (const char *text, int length)
    sync lines are output whenever a single input lines generates several
    output lines, or when several input lines does not generate any output.  */
 void
-m4_shipout_text (m4 *context, struct obstack *obs,
+m4_shipout_text (m4 *context, m4_obstack *obs,
 		 const char *text, int length)
 {
   static boolean start_of_output_line = TRUE;
@@ -479,7 +479,7 @@ m4_shipout_text (m4 *context, struct obstack *obs,
 /* Format an int VAL, and stuff it into an obstack OBS.  Used for macros
    expanding to numbers.  */
 void
-m4_shipout_int (struct obstack *obs, int val)
+m4_shipout_int (m4_obstack *obs, int val)
 {
   char buf[128];
 
@@ -488,7 +488,7 @@ m4_shipout_int (struct obstack *obs, int val)
 }
 
 void
-m4_shipout_string (m4 *context, struct obstack *obs, const char *s, int len,
+m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, int len,
 		   boolean quoted)
 {
   if (s == NULL)

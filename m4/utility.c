@@ -91,7 +91,7 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
    SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
-m4_dump_args (m4 *context, struct obstack *obs, int argc,
+m4_dump_args (m4 *context, m4_obstack *obs, int argc,
 	      m4_symbol_value **argv, const char *sep, boolean quoted)
 {
   int i;
@@ -114,7 +114,7 @@ m4_dump_args (m4 *context, struct obstack *obs, int argc,
    character in a range is after the first in the character set, the range
    is made backwards, thus 9-0 is the string 9876543210.  */
 const char *
-m4_expand_ranges (const char *s, struct obstack *obs)
+m4_expand_ranges (const char *s, m4_obstack *obs)
 {
   char from;
   char to;

@@ -1,5 +1,15 @@
 2003-07-23  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4module.h: Reformatting and rearranging lines a bit.
+	(m4_obstack): Save typing by typedefing `struct obstack'.  Changed
+	all users.
+	(m4_call_macro, m4_expand_input): Renamed...
+	(m4_macro_call, m4_macro_expand_input): ...to these.  Changed all
+	callers.
+	(m4_expansion_level, m4_process_macro): Moved...
+	* m4/macro.c (expansion_level, process_macro): ...to here, and
+	made static.
+
 	* m4/m4module.h (program_name): Not used by modules at all, so
 	moved...
 	* src/main.c (program_name): ...to here.

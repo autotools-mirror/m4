@@ -101,7 +101,7 @@ static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 static void *	set_trace_CB	(m4_symbol_table *symtab, const char *ignored,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
-static void	numb_obstack	(struct obstack *obs, const number value,
+static void	numb_obstack	(m4_obstack *obs, const number value,
 				 const int radix, int min);
 
 
@@ -143,7 +143,7 @@ M4INIT_HANDLER (m4)
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
-	void builtin_MACRONAME (struct obstack *obs, int argc, char *argv[]);
+	void builtin_MACRONAME (m4_obstack *obs, int argc, char *argv[]);
 
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
@@ -803,7 +803,7 @@ ntoa (number value, int radix)
 }
 
 static void
-numb_obstack(struct obstack *obs, const number value,
+numb_obstack(m4_obstack *obs, const number value,
 	     const int radix, int min)
 {
   const char *s = ntoa (value, radix);

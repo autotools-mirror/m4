@@ -121,9 +121,9 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
-static void substitute (m4 *context, struct obstack *obs, const char *victim,
+static void substitute (m4 *context, m4_obstack *obs, const char *victim,
 			const char *repl, struct re_registers *regs);
-static void m4_patsubst_do (m4 *context, struct obstack *obs, int argc,
+static void m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 			    m4_symbol_value **argv, int syntax);
 
 
@@ -159,15 +159,14 @@ M4BUILTIN_HANDLER (builtin)
  **/
 M4BUILTIN_HANDLER (indir)
 {
-  m4_symbol *symbol;
-  const char *name = M4ARG (1);
+  const char * name   = M4ARG (1);
+  m4_symbol *  symbol = m4_symbol_lookup (M4SYMTAB, name);
 
-  symbol = m4_symbol_lookup (M4SYMTAB, name);
   if (symbol == NULL)
     M4ERROR ((m4_get_warning_status_opt (context), 0,
 	      _("Undefined name `%s'"), name));
   else
-    m4_call_macro (context, symbol, obs, argc - 1, argv + 1);
+    m4_macro_call (context, symbol, obs, argc - 1, argv + 1);
 }
 
 /* Change the current input syntax.  The function set_syntax () lives
@@ -307,7 +306,7 @@ m4_regexp_compile (m4 *context, const char *caller,
  **/
 
 static void
-m4_regexp_do (m4 *context, struct obstack *obs, int argc,
+m4_regexp_do (m4 *context, m4_obstack *obs, int argc,
 	      m4_symbol_value **argv, int syntax)
 {
   const char *victim;		/* first argument */
@@ -372,7 +371,7 @@ M4BUILTIN_HANDLER (eregexp)
  * patsubst(STRING, REGEXP, [REPLACEMENT])
  **/
 static void
-m4_patsubst_do (m4 *context, struct obstack *obs, int argc,
+m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 		m4_symbol_value **argv, int syntax)
 {
   const char *victim;		/* first argument */
@@ -461,7 +460,7 @@ M4BUILTIN_HANDLER (epatsubst)
 M4BUILTIN_HANDLER (symbols)
 {
   struct m4_dump_symbol_data data;
-  struct obstack data_obs;
+  m4_obstack data_obs;
 
   obstack_init (&data_obs);
   data.obs = &data_obs;
@@ -563,7 +562,7 @@ M4BUILTIN_HANDLER (__line__)
 static int substitute_warned = 0;
 
 static void
-substitute (m4 *context, struct obstack *obs, const char *victim,
+substitute (m4 *context, m4_obstack *obs, const char *victim,
 	    const char *repl, struct re_registers *regs)
 {
   register unsigned int ch;

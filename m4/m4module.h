@@ -34,13 +34,9 @@ BEGIN_C_DECLS
 /* Various declarations.  */
 
 typedef struct m4		m4;
+typedef struct obstack		m4_obstack;
 typedef struct m4_symbol_value	m4_symbol_value;
-typedef void m4_builtin_func (m4 *, struct obstack *, int, m4_symbol_value **);
-
-typedef struct {
-  const char *name;
-  const char *value;
-} m4_macro;
+typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
 
 typedef struct {
   const char *	    name;
@@ -49,28 +45,48 @@ typedef struct {
   int		    min_args, max_args;
 } m4_builtin;
 
+typedef struct {
+  const char *name;
+  const char *value;
+} m4_macro;
+
+typedef struct {
+    unsigned char *string;	/* characters of the string */
+    size_t length;		/* length of the string */
+} m4_string;
+
 
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
-   (m4 *context, struct obstack *obs, int argc, m4_symbol_value **argv);
+   (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv);
 
 #define M4BUILTIN_HANDLER(name) 				\
   static void CONC(builtin_, name)				\
-   (m4 *context, struct obstack *obs, int argc, m4_symbol_value **argv)
+   (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 
 #define M4INIT_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_init_module)) 			\
-	(m4 *context, lt_dlhandle handle, struct obstack *obs);	\
+	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_init_module)) 			\
-	(m4 *context, lt_dlhandle handle, struct obstack *obs)
+	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
-	(m4 *context, lt_dlhandle handle, struct obstack *obs);	\
+	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
-	(m4 *context, lt_dlhandle handle, struct obstack *obs)
+	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
+
+extern boolean 	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
+				       int, int);
+extern const char * m4_skip_space     (m4 *, const char *);
+extern boolean	    m4_numeric_arg    (m4 *, int, m4_symbol_value **,
+				       int, int *);
+extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
+				       m4_symbol_value **, const char *,
+				       boolean);
+extern const char * m4_expand_ranges  (const char *, m4_obstack *);
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
@@ -93,7 +109,7 @@ extern void		m4_delete	(m4 *);
 	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
-	M4FIELD(struct obstack,	   trace_messages, trace_messages)	\
+	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,	 warning_status_opt,	   warning_status)	\
 	M4FIELD(boolean, no_gnu_extensions_opt,    no_gnu_extensions)	\
 	M4FIELD(int,	 nesting_limit_opt,	   nesting_limit)	\
@@ -129,11 +145,11 @@ m4_context_opt_bit_table
 
 /* --- MODULE MANAGEMENT --- */
 
-typedef void m4_module_init_func   (m4 *, lt_dlhandle, struct obstack*);
-typedef void m4_module_finish_func (m4 *, lt_dlhandle, struct obstack*);
+typedef void m4_module_init_func   (m4 *, lt_dlhandle, m4_obstack*);
+typedef void m4_module_finish_func (m4 *, lt_dlhandle, m4_obstack*);
 
-extern lt_dlhandle  m4_module_load   (m4 *, const char*, struct obstack*);
-extern void	    m4_module_unload (m4 *, const char*, struct obstack*);
+extern lt_dlhandle  m4_module_load   (m4 *, const char*, m4_obstack*);
+extern void	    m4_module_unload (m4 *, const char*, m4_obstack*);
 
 extern const char  *m4_get_module_name		(lt_dlhandle);
 extern m4_builtin  *m4_get_module_builtin_table	(lt_dlhandle);
@@ -149,11 +165,14 @@ typedef void *m4_symtab_apply_func (m4_symbol_table *symtab, const char *key,
 
 extern m4_symbol_table *m4_symtab_create  (size_t, boolean *);
 extern void	  m4_symtab_delete  (m4_symbol_table*);
-extern void *	  m4_symtab_apply   (m4_symbol_table*, m4_symtab_apply_func*, void*);
+extern void *	  m4_symtab_apply   (m4_symbol_table*, m4_symtab_apply_func*,
+				     void*);
 
 extern m4_symbol *m4_symbol_lookup  (m4_symbol_table*, const char *);
-extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*, const char *, m4_symbol_value *);
-extern m4_symbol *m4_symbol_define  (m4_symbol_table*, const char *, m4_symbol_value *);
+extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*,
+				     const char *, m4_symbol_value *);
+extern m4_symbol *m4_symbol_define  (m4_symbol_table*,
+				     const char *, m4_symbol_value *);
 extern void       m4_symbol_popdef  (m4_symbol_table*, const char *);
 extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
 
@@ -164,7 +183,8 @@ extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
 extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern boolean		m4_get_symbol_traced	  (m4_symbol*);
 extern boolean		m4_set_symbol_traced	  (m4_symbol*, boolean);
-extern boolean		m4_set_symbol_name_traced (m4_symbol_table*, const char *);
+extern boolean		m4_set_symbol_name_traced (m4_symbol_table*,
+						   const char *);
 
 #define m4_is_symbol_text(symbol)					\
 	(m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
@@ -189,25 +209,20 @@ extern void		m4_set_symbol_value_func  (m4_symbol_value *,
 
 
 
-/* --- MACRO (and builtin) MANAGEMENT --- */
+/* --- BUILTIN MANAGEMENT --- */
 
 extern const m4_builtin *m4_builtin_find_by_name (
 				const m4_builtin *, const char *);
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
 
-/* left and right quote, begin and end comment */
-typedef struct {
-    unsigned char *string;	/* characters of the string */
-    size_t length;		/* length of the string */
-} m4_string;
 
-extern boolean m4_bad_argc (m4 *, int, m4_symbol_value **, int, int);
-extern const char *m4_skip_space (m4 *, const char *);
-extern boolean m4_numeric_arg (m4 *, int, m4_symbol_value **, int, int *);
-extern void m4_shipout_int (struct obstack *, int);
-extern void m4_shipout_string (m4 *, struct obstack*, const char*, int, boolean);
-extern void m4_dump_args (m4 *, struct obstack *obs, int argc, m4_symbol_value **argv, const char *sep, boolean quoted);
+
+/* --- MACRO MANAGEMENT --- */
+
+extern void 	   m4_macro_expand_input (m4 *);
+extern void	   m4_macro_call	 (m4 *, m4_symbol *, m4_obstack *,
+					  int, m4_symbol_value **);
 
 
 
@@ -243,6 +258,13 @@ enum {
 /* default flags -- equiv: aeq */
 #define M4_DEBUG_TRACE_DEFAULT		\
 	(M4_DEBUG_TRACE_ARGS|M4_DEBUG_TRACE_EXPANSION|M4_DEBUG_TRACE_QUOTE)
+
+#define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
+
+extern int	m4_debug_decode		(m4 *, const char *);
+extern void	m4_debug_flush_files	(m4 *);
+extern boolean	m4_debug_set_output	(m4 *, const char *);
+extern void	m4_debug_message_prefix (m4 *);
 
 #define M4_DEBUG_PRINT1(C, Fmt, Arg1) 			M4_STMT_START {	\
       if (m4_get_debug_file (C) != NULL)				\
@@ -280,26 +302,9 @@ enum {
 	  putc ('\n', m4_get_debug_file (C));				\
 	}						} M4_STMT_END
 
-#define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
-
-extern int m4_debug_decode (m4 *context, const char *);
-extern void m4_debug_flush_files (m4 *context);
-extern boolean m4_debug_set_output (m4 *context, const char *);
-extern void m4_debug_message_prefix (m4 *context);
-
 
 /* Exit code from last "syscmd" command.  */
 extern int m4_sysval;
-extern int m4_expansion_level;
-
-extern const char *m4_expand_ranges (const char *s, struct obstack *obs);
-extern void 	   m4_expand_input  (m4 *context);
-extern void	   m4_call_macro    (m4 *context, m4_symbol *symbol,
-				     struct obstack *obs, int argc,
-				     m4_symbol_value **argv);
-extern void	   m4_process_macro (m4 *context, m4_symbol *symbol,
-				     struct obstack *obs, int argc,
-				     m4_symbol_value **argv);
 
 
 
@@ -351,9 +356,13 @@ enum {
 #define m4_has_syntax(S,C,T)	((m4_syntab((S),(C)) & (T)) > 0)
 #define m4_is_syntax(S,C,T)	((m4_syntab((S),(C)) & M4_SYNTAX_VALUE) == (T))
 
+extern void	m4_set_quotes	(m4_syntax_table*, const char*, const char*);
+extern void	m4_set_comment	(m4_syntax_table*, const char*, const char*);
+extern int	m4_set_syntax	(m4_syntax_table*, char, const unsigned char*);
+
 
 
-/* --- TOKENISATION AND INPUT --- */
+/* --- INPUT TOKENISATION --- */
 
 /* current input file, and line */
 extern const char *m4_current_file;
@@ -369,31 +378,35 @@ extern	void	m4_skip_line	(m4 *context);
 extern	void	m4_push_file	(m4 *context, FILE *, const char *);
 extern	void	m4_push_single	(int ch);
 extern	void	m4_push_builtin	(m4_symbol_value *);
-extern	struct obstack *m4_push_string_init (m4 *context);
+extern	m4_obstack *m4_push_string_init (m4 *context);
 extern	const char *m4_push_string_finish (void);
 extern	void	m4_push_wrapup	(const char *);
 extern	boolean	m4_pop_wrapup	(void);
 
-extern	void	m4_set_quotes	(m4_syntax_table *, const char *, const char *);
-extern	void	m4_set_comment	(m4_syntax_table *, const char *, const char *);
-extern	int	m4_set_syntax	(m4_syntax_table *, char, const unsigned char *);
+
+
+/* --- OUTPUT MANAGEMENT --- */
 
 extern int m4_current_diversion;
 extern int m4_output_current_line;
 
-extern	void	m4_output_init	(void);
-extern	void	m4_output_exit	(void);
-extern	void	m4_shipout_text	(m4 *, struct obstack *, const char *, int);
-extern	void	m4_make_diversion (int);
-extern	void	m4_insert_diversion (int);
-extern	void	m4_insert_file	(FILE *);
-extern	void	m4_freeze_diversions (FILE *);
-extern	void	m4_undivert_all	(void);
+extern void	m4_output_init	  (void);
+extern void	m4_output_exit	  (void);
+extern void	m4_shipout_text	  (m4 *, m4_obstack *, const char *, int);
+extern void	m4_shipout_int    (m4_obstack *, int);
+extern void	m4_shipout_string (m4 *, m4_obstack *, const char *,
+				   int, boolean);
 
-extern	void	m4_include_init (void);
-extern	void	m4_include_env_init (m4 *context);
-extern	void	m4_add_include_directory (m4 *context, const char *);
-extern	FILE   *m4_path_search (m4 *context, const char *, char **);
+extern void	m4_make_diversion    (int);
+extern void	m4_insert_diversion  (int);
+extern void	m4_insert_file	     (FILE *);
+extern void	m4_freeze_diversions (FILE *);
+extern void	m4_undivert_all	     (void);
+
+extern void	m4_include_init          (void);
+extern void	m4_include_env_init      (m4 *);
+extern void	m4_add_include_directory (m4 *, const char *);
+extern FILE *   m4_path_search           (m4 *, const char *, char **);
 
 /* These are for other search paths */
 
@@ -423,7 +436,7 @@ extern	void	m4_search_path_add (struct m4_search_path_info *, const char *);
 
 struct m4_dump_symbol_data
 {
-  struct obstack *obs;		/* obstack for table */
+  m4_obstack *obs;		/* obstack for table */
   const char **base;		/* base of table */
   int size;			/* size of table */
 };

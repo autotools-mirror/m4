@@ -46,7 +46,7 @@ struct m4 {
   m4_syntax_table *syntax;
 
   FILE *	 debug_file;		/* File for debugging output.  */
-  struct obstack trace_messages;
+  m4_obstack trace_messages;
 
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
@@ -101,7 +101,7 @@ struct m4 {
 
 extern void	    m4__module_init (m4 *context);
 extern lt_dlhandle  m4__module_open (m4 *context, const char *name,
-				     struct obstack *obs);
+				     m4_obstack *obs);
 extern void	    m4__module_exit (m4 *context);
 
 

@@ -105,7 +105,7 @@ M4BUILTIN_HANDLER (ctime)
 }
 
 static void
-format_tm (struct obstack *obs, struct tm *tm)
+format_tm (m4_obstack *obs, struct tm *tm)
 {
   m4_shipout_int (obs, tm->tm_sec);
   obstack_1grow (obs, ',');

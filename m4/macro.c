@@ -27,41 +27,45 @@
 #include "m4private.h"
 
 static void    collect_arguments (m4 *context, const char *name,
-				  m4_symbol *symbol, struct obstack *argptr,
-				  struct obstack *arguments);
+				  m4_symbol *symbol, m4_obstack *argptr,
+				  m4_obstack *arguments);
 static void    expand_macro      (m4 *context, const char *name,
 				  m4_symbol *symbol);
-static void    expand_token      (m4 *context, struct obstack *obs,
+static void    expand_token      (m4 *context, m4_obstack *obs,
 				  m4__token_type type, m4_symbol_value *token);
-static boolean expand_argument   (m4 *context, struct obstack *obs,
+static boolean expand_argument   (m4 *context, m4_obstack *obs,
 				  m4_symbol_value *argp);
+
+static void    process_macro	 (m4 *context, m4_symbol *symbol,
+				  m4_obstack *expansion, int argc,
+				  m4_symbol_value **argv);
 
 static void    trace_prepre	 (m4 *context, const char *, int);
 static void    trace_pre	 (m4 *context, const char *, int, int,
 				  m4_symbol_value **);
 static void    trace_post	 (m4 *context, const char *, int, int,
 				  m4_symbol_value **, const char *);
-static void    trace_format	 (m4 *, const char *, ...)
+static void    trace_format	 (m4 *context, const char *fmt, ...)
      							M4_GNUC_PRINTF(2, 3);
 static void    trace_header	 (m4 *, int);
 static void    trace_flush	 (m4 *);
 
 
 /* Current recursion level in expand_macro ().  */
-int m4_expansion_level = 0;
+static int expansion_level = 0;
 
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
 
 /* This function reads all input, and expands each token, one at a time.  */
 void
-m4_expand_input (m4 *context)
+m4_macro_expand_input (m4 *context)
 {
   m4__token_type type;
   m4_symbol_value token;
 
   while ((type = m4__next_token (context, &token)) != M4_TOKEN_EOF)
-    expand_token (context, (struct obstack *) NULL, type, &token);
+    expand_token (context, (m4_obstack *) NULL, type, &token);
 }
 
 
@@ -70,7 +74,7 @@ m4_expand_input (m4 *context)
    macro definition.  If they have, they are expanded as macros, otherwise
    the text are just copied to the output.  */
 static void
-expand_token (m4 *context, struct obstack *obs,
+expand_token (m4 *context, m4_obstack *obs,
 	      m4__token_type type, m4_symbol_value *token)
 {
   m4_symbol *symbol;
@@ -129,7 +133,7 @@ expand_token (m4 *context, struct obstack *obs,
    the last for the active macro call.  The arguments are built on the
    obstack OBS, indirectly through expand_token ().	 */
 static boolean
-expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
+expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
   m4_symbol_value token;
@@ -213,17 +217,17 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
 static void
 expand_macro (m4 *context, const char *name, m4_symbol *symbol)
 {
-  struct obstack arguments;
-  struct obstack argptr;
+  m4_obstack arguments;
+  m4_obstack argptr;
   m4_symbol_value **argv;
   int argc;
-  struct obstack *expansion;
+  m4_obstack *expansion;
   const char *expanded;
   boolean traced;
   int my_call_id;
 
-  m4_expansion_level++;
-  if (m4_expansion_level > m4_get_nesting_limit_opt (context))
+  expansion_level++;
+  if (expansion_level > m4_get_nesting_limit_opt (context))
     M4ERROR ((EXIT_FAILURE, 0, _("\
 ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context)));
@@ -251,13 +255,13 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   expansion = m4_push_string_init (context);
   if (!m4_bad_argc (context, argc, argv,
 		    SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
-    m4_call_macro (context, symbol, expansion, argc, argv);
+    m4_macro_call (context, symbol, expansion, argc, argv);
   expanded = m4_push_string_finish ();
 
   if (traced)
     trace_post (context, name, my_call_id, argc, argv, expanded);
 
-  --m4_expansion_level;
+  --expansion_level;
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
@@ -268,7 +272,7 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
    to the arguments on the obstack ARGPTR.  */
 static void
 collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
-		   struct obstack *argptr, struct obstack *arguments)
+		   m4_obstack *argptr, m4_obstack *arguments)
 {
   int ch;			/* lookahead for ( */
   m4_symbol_value token;
@@ -304,19 +308,19 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 }
 
 
-/* The actual call of a macro is handled by m4_call_macro ().
-   m4_call_macro () is passed a SYMBOL, whose type is used to
+/* The actual call of a macro is handled by m4_macro_call ().
+   m4_macro_call () is passed a SYMBOL, whose type is used to
    call either a builtin function, or the user macro expansion
-   function m4_process_macro ().  There are ARGC arguments to
+   function process_macro ().  There are ARGC arguments to
    the call, stored in the ARGV table.  The expansion is left on
    the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
-m4_call_macro (m4 *context, m4_symbol *symbol, struct obstack *expansion,
+m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
 	       int argc, m4_symbol_value **argv)
 {
   if (m4_is_symbol_text (symbol))
     {
-      m4_process_macro (context, symbol, expansion, argc, argv);
+      process_macro (context, symbol, expansion, argc, argv);
     }
   else if (m4_is_symbol_func (symbol))
     {
@@ -335,9 +339,9 @@ m4_call_macro (m4 *context, m4_symbol *symbol, struct obstack *expansion,
    will be placed, as an unfinished object.  SYMBOL points to the macro
    definition, giving the expansion text.  ARGC and ARGV are the arguments,
    as usual.  */
-void
-m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
-		  int argc, m4_symbol_value **argv)
+static void
+process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
+	       int argc, m4_symbol_value **argv)
 {
   const unsigned char *text;
   int i;
@@ -522,7 +526,7 @@ trace_header (m4 *context, int id)
     trace_format (context, "%s:", m4_current_file);
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
     trace_format (context, "%d:", m4_current_line);
-  trace_format (context, " -%d- ", m4_expansion_level);
+  trace_format (context, " -%d- ", expansion_level);
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALLID))
     trace_format (context, "id %d: ", id);
 }

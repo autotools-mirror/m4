@@ -86,9 +86,9 @@ typedef struct {
 
 static const char*  module_dlerror (void);
 static int	    module_remove  (m4 *context, lt_dlhandle handle,
-				    struct obstack *obs);
+				    m4_obstack *obs);
 static void	    module_close   (m4 *context, lt_dlhandle handle,
-				    struct obstack *obs);
+				    m4_obstack *obs);
 
 static void set_module_macro_table   (m4*, lt_dlhandle, const m4_macro*);
 static void set_module_builtin_table (m4*, lt_dlhandle, const m4_builtin*);
@@ -197,7 +197,7 @@ set_module_macro_table (m4 *context, lt_dlhandle handle,
 }
 
 lt_dlhandle
-m4_module_load (m4 *context, const char *name, struct obstack *obs)
+m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
   const lt_dlhandle handle = m4__module_open (context, name, obs);
 
@@ -249,7 +249,7 @@ m4_module_load (m4 *context, const char *name, struct obstack *obs)
 
 /* Unload a module.  */
 void
-m4_module_unload (m4 *context, const char *name, struct obstack *obs)
+m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 {
   lt_dlhandle	handle  = 0;
   int		errors	= 0;
@@ -355,7 +355,7 @@ m4__module_init (m4 *context)
    it is searched for in the module path.  The module is unloaded in
    case of error.  */
 lt_dlhandle
-m4__module_open (m4 *context, const char *name, struct obstack *obs)
+m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
   lt_dlhandle		handle		= lt_dlopenext (name);
   m4_module_init_func  *init_func	= 0;
@@ -493,7 +493,7 @@ module_dlerror (void)
 }
 
 static void
-module_close (m4 *context, lt_dlhandle handle, struct obstack *obs)
+module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 {
   m4_module_finish_func *finish_func;
   const char		*name;
@@ -554,7 +554,7 @@ module_close (m4 *context, lt_dlhandle handle, struct obstack *obs)
 }
 
 static int
-module_remove (m4 *context, lt_dlhandle handle, struct obstack *obs)
+module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 {
   const lt_dlinfo *info;
   int		   errors	= 0;
