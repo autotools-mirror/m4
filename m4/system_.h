@@ -18,7 +18,7 @@
 */
 
 /**
- * @configure_generated@
+ * @configure_output@
  *
  * This file is installed, so cannot rely on the contents of config.h.
  * It works best if included _after_ system headers.
@@ -33,7 +33,14 @@
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_REGEX_H@
+
+/* These are not in m4's namespace so for safety undefine any errant
+   definitions before including stdbool.h.  */
+#undef bool
+#undef false
+#undef true
 @INCLUDE_STDBOOL_H@
+
 #include <m4/exit.h>
 #include <m4/xalloc.h>
 #include <m4/xstrndup.h>
@@ -146,10 +153,6 @@ BEGIN_C_DECLS
 #  define _CONC(a, b)	a##b
 #  define CONC(a, b)	_CONC(a, b)
 #endif
-
-
-
-#define DELETE(Expr)	((Expr) = (free (Expr), (void *) 0))
 
 END_C_DECLS
 

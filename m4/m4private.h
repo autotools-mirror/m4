@@ -312,6 +312,13 @@ struct m4__search_path_info {
 	  putc ('\n', m4_get_debug_file (C));				\
 	}						} M4_STMT_END
 
+
+
+
+/* Convenience macro to zero a variable after freeing it.  */
+#define DELETE(Expr)	((Expr) = (free (Expr), (void *) 0))
+
+
 #if DEBUG
 # define DEBUG_INPUT
 # define DEBUG_MACRO

@@ -1,4 +1,19 @@
-2003-09-15  Paul Eggert  <eggert@twinsun.com>
+2003-10-10  Gary V. Vaughan  <gary@gnu.org>
+
+	Tru64UNIX perl is sloppy with namespace pollution.  This patch is
+	careful not to trip over the mess:
+
+	* modules/perl.c: Some builds of perl install headers that contain
+	`#define try __builtin_try'.  Be sure to undefine that macro
+	before `m4/hash.h' gets included, which uses the `try' symbol.
+	* m4/system_.h: Similarly for `bool'.  Undefine `bool', `true' and
+	`false' before including `stdbool.h'.
+	(DELETE):  This symbol is not in m4's namespace, and is in any
+	case only used internally...
+	* m4/m4private.h (DELETE): ...so move it to here.
+	Reported by Martin MOKREJS <mmokrejs@natur.cuni.cz>
+
+2003-10-08  Paul Eggert  <eggert@twinsun.com>
 
 	Don't use XMALLOC and XCALLOC.  Once we install the
 	corresponding patch into gnulib, this will fix some

@@ -23,6 +23,7 @@
 #undef PACKAGE
 
 #include "perlxsi.c"			/* Perl stuff */
+#undef try
 #undef _
 
 #include <m4module.h>
