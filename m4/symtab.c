@@ -67,7 +67,7 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 m4_symbol_table *
 m4_symtab_create (size_t size, bool *nuke_trace_bit)
 {
-  m4_symbol_table *symtab = xmalloc (sizeof m4_symbol_table);
+  m4_symbol_table *symtab = xmalloc (sizeof *symtab);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);

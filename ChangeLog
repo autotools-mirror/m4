@@ -1,3 +1,8 @@
+2003-11-18  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/symtab.c (m4_symtab_create): Fix a careless use of sizeof.
+	* m4/path.c (search_path_add): Ditto.
+
 2003-11-13  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.ac (AC_LIBTOOL_TAGS): Don't include shell code for
