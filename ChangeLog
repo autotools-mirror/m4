@@ -1,5 +1,22 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	Replace the getopt code with CVS gnulib getopt.  The source files
+	detect whether they are in a glibc environment and preprocess away
+	all of the code if there is a system getopt, so we can compile
+	them into the m4 executable unconditionally:
+
+	* gnulib/m4/getopt.c, gnulib/m4/getopt1.c, gnulib/m4/getopt.h,
+	gnulib/config/getopt.m4: Import getopt module from CVS gnulib.
+	* configure.ac (gl_GETOPT): Use this instead of homebrew inline
+	macros.
+	* src/getopt.c, src/getopt1.c, src/gnu-getopt.h: Removed old
+	version.
+	* src/Makefile.am: Adjust.
+	* src/main.c: Always include our shipped getopt.h.
+	* po/POTFILES.in: Use new location of getopt.c.
+
+2003-09-12  Gary V. Vaughan  <gary@gnu.org>
+
 	* configure.ac (AC_CONFIG_FILES): Remove config/Makefile.
 	* config/Makefile.am: Removed.  Automake 1.8 distributes the files
 	in this directory automatically.

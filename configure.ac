@@ -56,6 +56,7 @@ m4_pattern_allow([^m4_cv_])
 m4_pattern_forbid([^jm_])
 m4_pattern_allow([^jm_cv_])
 m4_pattern_allow([^jm_ac_cv_])
+m4_pattern_allow([^jm_with_])
 
 AC_MSG_CHECKING(for modules to preload)
   m4_pattern_allow([^m4_default_preload$])
@@ -181,22 +182,13 @@ AC_FUNC_VPRINTF
 
 AM_WITH_DMALLOC
 
+gl_GETOPT
 gl_XALLOC
 gl_XSTRNDUP
 m4_ERROR
 m4_OBSTACK
 m4_REGEX([gnulib/m4/regex.c])
 m4_SYS_STACKOVF
-
-M4OBJS=
-m4_pattern_allow([^m4_getopt_h$])
-m4_getopt_h=src/getopt.h
-rm -f $m4_getopt_h
-AC_CHECK_FUNC([getopt_long], [],
-    [M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
-    AC_CONFIG_LINKS([$m4_getopt_h:src/gnu-getopt.h])])
-AC_SUBST([M4OBJS])
-
 
 # This is for the modules
 AC_STRUCT_TM

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-12 13:22+0100\n"
+"POT-Creation-Date: 2003-09-12 15:21+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -14,87 +14,144 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: gnulib/m4/getopt.c:629 gnulib/m4/getopt.c:641
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:674 gnulib/m4/getopt.c:678
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:687 gnulib/m4/getopt.c:692
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:728 gnulib/m4/getopt.c:741 gnulib/m4/getopt.c:1030
+#: gnulib/m4/getopt.c:1043
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:779 gnulib/m4/getopt.c:782
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:790 gnulib/m4/getopt.c:793
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:840 gnulib/m4/getopt.c:843
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:849 gnulib/m4/getopt.c:852
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:899 gnulib/m4/getopt.c:910 gnulib/m4/getopt.c:1096
+#: gnulib/m4/getopt.c:1109
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:962 gnulib/m4/getopt.c:973
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr ""
+
+#: gnulib/m4/getopt.c:997 gnulib/m4/getopt.c:1009
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr ""
+
 #: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
 msgid "memory exhausted"
 msgstr ""
 
-#: m4/regex.c:1021
+#: gnulib/m4/regex.c:1302
 msgid "Success"
 msgstr ""
 
-#: m4/regex.c:1024
+#: gnulib/m4/regex.c:1305
 msgid "No match"
 msgstr ""
 
 # , c-format
-#: m4/regex.c:1027
+#: gnulib/m4/regex.c:1308
 #, fuzzy
 msgid "Invalid regular expression"
 msgstr "©patný regulární výraz `%s': %s"
 
-#: m4/regex.c:1030
+#: gnulib/m4/regex.c:1311
 msgid "Invalid collation character"
 msgstr ""
 
-#: m4/regex.c:1033
+#: gnulib/m4/regex.c:1314
 msgid "Invalid character class name"
 msgstr ""
 
-#: m4/regex.c:1036
+#: gnulib/m4/regex.c:1317
 msgid "Trailing backslash"
 msgstr ""
 
-#: m4/regex.c:1039
+#: gnulib/m4/regex.c:1320
 msgid "Invalid back reference"
 msgstr ""
 
-#: m4/regex.c:1042
+#: gnulib/m4/regex.c:1323
 msgid "Unmatched [ or [^"
 msgstr ""
 
-#: m4/regex.c:1045
+#: gnulib/m4/regex.c:1326
 msgid "Unmatched ( or \\("
 msgstr ""
 
-#: m4/regex.c:1048
+#: gnulib/m4/regex.c:1329
 msgid "Unmatched \\{"
 msgstr ""
 
-#: m4/regex.c:1051
+#: gnulib/m4/regex.c:1332
 msgid "Invalid content of \\{\\}"
 msgstr ""
 
-#: m4/regex.c:1054
+#: gnulib/m4/regex.c:1335
 msgid "Invalid range end"
 msgstr ""
 
-#: m4/regex.c:1057
+#: gnulib/m4/regex.c:1338
 msgid "Memory exhausted"
 msgstr ""
 
 # , c-format
-#: m4/regex.c:1060
+#: gnulib/m4/regex.c:1341
 #, fuzzy
 msgid "Invalid preceding regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
-#: m4/regex.c:1063
+#: gnulib/m4/regex.c:1344
 #, fuzzy
 msgid "Premature end of regular expression"
 msgstr "Pøedèasný konec zmrazeného souboru"
 
 # , c-format
-#: m4/regex.c:1066
+#: gnulib/m4/regex.c:1347
 #, fuzzy
 msgid "Regular expression too big"
 msgstr "©patný regulární výraz `%s': %s"
 
-#: m4/regex.c:1069
+#: gnulib/m4/regex.c:1350
 msgid "Unmatched ) or \\)"
 msgstr ""
 
 # , c-format
-#: m4/regex.c:5566
+#: gnulib/m4/regex.c:7915
 #, fuzzy
 msgid "No previous regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
@@ -389,61 +446,6 @@ msgstr "©patný formát zmrazeného souboru"
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' ze zmrazeného souboru nenalezeno v tabulce vestavìných maker!"
-
-#: src/getopt.c:677
-#, c-format
-msgid "%s: option `%s' is ambiguous\n"
-msgstr ""
-
-#: src/getopt.c:702
-#, c-format
-msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr ""
-
-#: src/getopt.c:707
-#, c-format
-msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr ""
-
-#: src/getopt.c:725 src/getopt.c:898
-#, c-format
-msgid "%s: option `%s' requires an argument\n"
-msgstr ""
-
-#: src/getopt.c:754
-#, c-format
-msgid "%s: unrecognized option `--%s'\n"
-msgstr ""
-
-#: src/getopt.c:758
-#, c-format
-msgid "%s: unrecognized option `%c%s'\n"
-msgstr ""
-
-#: src/getopt.c:784
-#, c-format
-msgid "%s: illegal option -- %c\n"
-msgstr ""
-
-#: src/getopt.c:787
-#, c-format
-msgid "%s: invalid option -- %c\n"
-msgstr ""
-
-#: src/getopt.c:817 src/getopt.c:947
-#, c-format
-msgid "%s: option requires an argument -- %c\n"
-msgstr ""
-
-#: src/getopt.c:864
-#, c-format
-msgid "%s: option `-W %s' is ambiguous\n"
-msgstr ""
-
-#: src/getopt.c:882
-#, c-format
-msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr ""
 
 #: src/main.c:74
 #, fuzzy

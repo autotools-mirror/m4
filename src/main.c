@@ -17,12 +17,12 @@
    02111-1307  USA
 */
 
-#include <getopt.h>
 #include <signal.h>
 
 #include "m4.h"
 #include "m4private.h"
 #include "m4/progname.h"
+#include "m4/getopt.h"
 
 static void print_program_name_CB (void);
 
