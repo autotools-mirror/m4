@@ -1,3 +1,10 @@
+2003-08-14  Gary V. Vaughan  <gary@gnu.org>
+
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Now we can pass make
+	variables to the testsuite shell.  Set the value of USE_GMP so
+	that the gmp test will run!
+	(check-local, clean-local): Use the TESTS_ENVIRONMENT variable.
+
 2003-08-11  Gary V. Vaughan  <gary@gnu.org>
 
 	Libltdl already has an excellent mechanism for accessing C symbols
