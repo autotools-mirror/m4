@@ -122,10 +122,113 @@ documentation.  However@dots{}
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
- --- The Detailed Node Listing ---
+@detailmenu --- The Detailed Node Listing ---
 
 Introduction and preliminaries
 
+* Intro::                       Introduction to @code{m4}
+* History::                     Historical references
+* Invoking m4::                 Invoking @code{m4}
+* Bugs::                        Problems and bugs
+* Manual::                      Using this manual
+
+Lexical and syntactic conventions
+
+* Names::                       Macro names
+* Quoted strings::              Quoting input to m4
+* Other tokens::                Other kinds of input tokens
+* Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
+
+How to invoke macros
+
+* Invocation::                  Macro invocation
+* Inhibiting Invocation::       Preventing macro invocation
+* Macro Arguments::             Macro arguments
+* Quoting Arguments::           On Quoting Arguments to macros
+* Macro expansion::             Expanding macros
+
+How to define new macros
+
+* Define::                      Defining a new macro
+* Arguments::                   Arguments to macros
+* Pseudo Arguments::            Pseudo arguments to macros
+* Undefine::                    Deleting a macro
+* Defn::                        Renaming macros
+* Pushdef::                     Temporarily redefining macros
+
+* Indir::                       Indirect call of macros
+* Builtin::                     Indirect call of builtins
+
+Conditionals, loops and recursion
+
+* Ifdef::                       Testing if a macro is defined
+* Ifelse::                      If-else construct, or multibranch
+* Loops::                       Loops and recursion in m4
+
+How to debug macros and input
+
+* Dumpdef::                     Displaying macro definitions
+* Trace::                       Tracing macro calls
+* Debug Levels::                Controlling debugging output
+* Debug Output::                Saving debugging output
+
+Input control
+
+* Dnl::                         Deleting whitespace in input
+* Changequote::                 Changing the quote characters
+* Changecom::                   Changing the comment delimiters
+* Changesyntax::                Changing the lexical structure of the input
+* Changeword::                  Changing the lexical structure of words
+* M4wrap::                      Saving input until end of input
+
+File inclusion
+
+* Include::                     Including named files
+* Search Path::                 Searching for include files
+
+Diverting and undiverting output
+
+* Divert::                      Diverting output
+* Undivert::                    Undiverting output
+* Divnum::                      Diversion numbers
+* Cleardiv::                    Discarding diverted text
+
+Macros for text handling
+
+* Len::                         Calculating length of strings
+* Index::                       Searching for substrings
+* Regexp::                      Searching for regular expressions
+* Substr::                      Extracting substrings
+* Translit::                    Translating characters
+* Patsubst::                    Substituting text by regular expression
+* Format::                      Formatting strings (printf-like)
+
+Macros for doing arithmetic
+
+* Incr::                        Decrement and increment operators
+* Eval::                        Evaluating integer or rational expressions
+
+Running UNIX commands
+
+* Syscmd::                      Executing simple commands
+* Esyscmd::                     Reading the output of commands
+* Sysval::                      Exit codes
+* Maketemp::                    Making names for temporary files
+
+Miscellaneous builtin macros
+
+* Errprint::                    Printing error messages
+* M4exit::                      Exiting from m4
+* Syncoutput::                  Turning on and off sync lines
+
+Compatibility with other versions of @code{m4}
+
+* Extensions::                  Extensions in GNU m4
+* Incompatibilities::           Facilities in System V m4 not in GNU m4
+* Other Incompat::              Other incompatibilities
+
+@end detailmenu
 @end menu
 
 @end ifinfo
@@ -1150,7 +1253,7 @@ define(`string', `The macro dnl is very useful
 ')
 @result{}
 string
-@result{}The macro 
+@result{}The macro @comment
 defn(`string')
 @result{}The macro dnl is very useful
 @result{}
@@ -2024,7 +2127,7 @@ With @code{changesyntax} we can modify the meaning of a word.
 define(`test.1', `TEST ONE')
 @result{}
 __file__
-@result{}31.changesynta
+@result{}in
 changesyntax(`O_', `W.')
 @result{}
 __file__
@@ -2352,7 +2455,7 @@ does not.
 @example
 include(`no-such-file')
 @result{}
-@error{}39.include:2: m4: Cannot open no-such-file: No such file or directory
+@error{}in:1: m4: Cannot open no-such-file: No such file or directory
 sinclude(`no-such-file')
 @result{}
 @end example
@@ -2888,7 +2991,7 @@ patsubst(`GNUs not Unix', `\w*', `(\&)')
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not 
+@result{}GN not @comment
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
@@ -3108,7 +3211,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo'/6)
-@error{}60.eval:14: m4: Bad expression in eval: foo/6
+@error{}in:7: m4: Bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3211,10 +3314,10 @@ Assume you are positioned into the @file{checks} directory of GNU
 @code{m4} distribution, then:
 
 @example
-define(`vice', `esyscmd(grep Vice ../COPYING)')
+define(`vice', `esyscmd(grep Vice ../Makefile)')
 @result{}
 vice
-@result{}  Ty Coon, President of Vice
+@result{}#  Ty Coon, President of Vice
 @result{}
 @end example
 
@@ -3349,7 +3452,7 @@ current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `Input error
 ')
-@error{}m4:65.errprint:2: Input error
+@error{}m4:in:1: Input error
 @result{}
 @end example
 
@@ -3374,7 +3477,7 @@ define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: 66.m4exit: 5: fatal error: This is a BAD one, buster
+@error{}m4: in: 3: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
@@ -3547,7 +3650,7 @@ at reload time, however this may not be produced from within @code{m4}.
 @cindex compatibility
 This chapter describes the differences between this implementation of
 @code{m4}, and the implementation found under UNIX, notably System V,
-Release 3.  
+Release 3.
 
 There are also differences in BSD flavors of @code{m4}.  No attempt
 is made to summarize these here.

@@ -1,13 +1,13 @@
 # Swedish messages for m4
 # Copyright (C) 1996 Free Software Foundation, Inc.
 # <Jan.Djarv@mbox200.swipnet.se>, 1996.
-# $Revision: 1.1.1.2 $
+# $Revision: 1.1.1.3 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-08-10 06:45+0200\n"
-"PO-Revision-Date: $Date: 2000/02/17 03:07:04 $\n"
+"POT-Creation-Date: 1998-09-08 09:33+0200\n"
+"PO-Revision-Date: $Date: 2000/02/17 03:07:20 $\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -254,22 +254,22 @@ msgstr "INGET"
 msgid "ERROR: EOF in string"
 msgstr "FEL: Filslut i sträng"
 
-#: src/m4.c:106
+#: src/m4.c:111
 #, fuzzy
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "FEL: Stacken flödar över. (Oändlig rekursion?)"
 
-#: src/m4.c:133
+#: src/m4.c:138
 #, fuzzy, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Försök med \"%s --help\" för mer information.\n"
 
-#: src/m4.c:137
+#: src/m4.c:142
 #, fuzzy, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Användning: %s [FLAGGA]... [FIL]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:143
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -295,12 +295,12 @@ msgstr ""
 "makron\n"
 "  -P, --prefix-builtins        alla inbyggda makron börjar med `m4_'\n"
 
-#: src/m4.c:151
+#: src/m4.c:156
 #, fuzzy
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=REGEXP     använd REGEXP som makronamnsyntax\n"
 
-#: src/m4.c:155
+#: src/m4.c:160
 #, fuzzy
 msgid ""
 "\n"
@@ -308,7 +308,7 @@ msgid ""
 "  -I, --include=DIRECTORY      search this directory second for includes\n"
 "  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
 "  -U, --undefine=NAME          delete builtin NAME\n"
-"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+"#ifdef SHOW_DEPENDENCIES"
 msgstr ""
 "\n"
 "Förprocessorstyrning:\n"
@@ -317,7 +317,7 @@ msgstr ""
 "  -U, --undefine=NAMN          ta bort inbyggt makro\n"
 "  -s, --synclines              generera `#line NNN \"FIL\"' rader\n"
 
-#: src/m4.c:163
+#: src/m4.c:171
 #, fuzzy
 msgid ""
 "\n"
@@ -332,7 +332,7 @@ msgstr ""
 "  -H, --hashsize=PRIMTAL       sätt storlek på symboltabellen\n"
 "  -L, --nesting-limit=NUMMER   ändra artificiell nästningsnivå\n"
 
-#: src/m4.c:170
+#: src/m4.c:178
 #, fuzzy
 msgid ""
 "\n"
@@ -345,7 +345,7 @@ msgstr ""
 "  -F, --freeze-state=FIL       spara fryst tillstånd i FIL i slutet\n"
 "  -R, --reload-state=FIL       läs fryst tillstånd från FIL i början\n"
 
-#: src/m4.c:176
+#: src/m4.c:184
 #, fuzzy
 msgid ""
 "\n"
@@ -364,7 +364,7 @@ msgstr ""
 "  -o, --error-output=FIL       avled felsöknings och spårutskrifter till "
 "FIL\n"
 
-#: src/m4.c:184
+#: src/m4.c:192
 #, fuzzy
 msgid ""
 "\n"
@@ -395,7 +395,7 @@ msgstr ""
 "  i   visa byten av infil\n"
 "  V   förkortning för alla ovanstående flaggor\n"
 
-#: src/m4.c:199
+#: src/m4.c:207
 #, fuzzy
 msgid ""
 "\n"
@@ -404,12 +404,18 @@ msgstr ""
 "\n"
 "Om ingen FIL anges eller om FIL är `-', så läses standard in.\n"
 
-#: src/m4.c:358
+#: src/m4.c:211
+msgid ""
+"\n"
+"Report bugs to <m4-bugs@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:379
 #, fuzzy, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Okänd felsökningsflagga \"%s\""
 
-#: src/m4.c:437
+#: src/m4.c:458
 #, fuzzy
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNT FEL: Otillåten kod i argument"
@@ -464,7 +470,7 @@ msgstr "FEL: Läsning av insatt fil"
 msgid "Cannot stat diversion"
 msgstr "Kan inte ta status på avledningen"
 
-#: src/path.c:131
+#: src/path.c:138
 #, fuzzy, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"

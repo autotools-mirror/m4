@@ -15,9 +15,10 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
 /* AIX requires this to be the first thing in the file. */
 #if defined (_AIX) && !defined (REGEX_MALLOC)
@@ -500,7 +501,7 @@ typedef enum
   } while (0)
 
 #ifdef DEBUG
-static void extract_number _RE_ARGS ((int *dest, unsigned char *source));
+static void extract_number _RE_ARGS((int *dest, unsigned char *source));
 static void
 extract_number (dest, source)
     int *dest;
@@ -528,8 +529,8 @@ extract_number (dest, source)
   } while (0)
 
 #ifdef DEBUG
-static void extract_number_and_incr _RE_ARGS ((int *destination,
-					       unsigned char **source));
+static void extract_number_and_incr _RE_ARGS((int *destination,
+				       unsigned char **source));
 static void
 extract_number_and_incr (destination, source)
     int *destination;
@@ -614,7 +615,6 @@ print_partial_compiled_pattern (start, end)
     unsigned char *end;
 {
   int mcnt, mcnt2;
-  unsigned char *p1;
   unsigned char *p = start;
   unsigned char *pend = end;
 
@@ -756,23 +756,20 @@ print_partial_compiled_pattern (start, end)
 
         case succeed_n:
           extract_number_and_incr (&mcnt, &p);
-	  p1 = p + mcnt;
           extract_number_and_incr (&mcnt2, &p);
-	  printf ("/succeed_n to %d, %d times", p1 - start, mcnt2);
+	  printf ("/succeed_n to %d, %d times", p + mcnt - start, mcnt2);
           break;
 
         case jump_n:
           extract_number_and_incr (&mcnt, &p);
-	  p1 = p + mcnt;
           extract_number_and_incr (&mcnt2, &p);
-	  printf ("/jump_n to %d, %d times", p1 - start, mcnt2);
+	  printf ("/jump_n to %d, %d times", p + mcnt - start, mcnt2);
           break;
 
         case set_number_at:
           extract_number_and_incr (&mcnt, &p);
-	  p1 = p + mcnt;
           extract_number_and_incr (&mcnt2, &p);
-	  printf ("/set_number_at location %d to %d", p1 - start, mcnt2);
+	  printf ("/set_number_at location %d to %d", p + mcnt - start, mcnt2);
           break;
 
         case wordbound:
@@ -850,8 +847,7 @@ print_compiled_pattern (bufp)
   unsigned char *buffer = bufp->buffer;
 
   print_partial_compiled_pattern (buffer, buffer + bufp->used);
-  printf ("%ld bytes used/%ld bytes allocated.\n",
-	  bufp->used, bufp->allocated);
+  printf ("%d bytes used/%d bytes allocated.\n", bufp->used, bufp->allocated);
 
   if (bufp->fastmap_accurate && bufp->fastmap)
     {
@@ -866,7 +862,7 @@ print_compiled_pattern (bufp)
   printf ("no_sub: %d\t", bufp->no_sub);
   printf ("not_bol: %d\t", bufp->not_bol);
   printf ("not_eol: %d\t", bufp->not_eol);
-  printf ("syntax: %lx\n", bufp->syntax);
+  printf ("syntax: %d\n", bufp->syntax);
   /* Perhaps we should print the translate table?  */
 }
 
@@ -879,7 +875,7 @@ print_double_string (where, string1, size1, string2, size2)
     int size1;
     int size2;
 {
-  int this_char;
+  unsigned this_char;
 
   if (where == NULL)
     printf ("(null)");
@@ -900,9 +896,9 @@ print_double_string (where, string1, size1, string2, size2)
 
 void
 printchar (c)
-     int c;
+    int c;
 {
-  putc (c, stderr);
+    putc(c, stderr);
 }
 
 #else /* not DEBUG */
@@ -942,6 +938,12 @@ re_set_syntax (syntax)
   reg_syntax_t ret = re_syntax_options;
 
   re_syntax_options = syntax;
+#ifdef DEBUG
+  if (syntax & RE_DEBUG)
+    debug = 1;
+  else if (debug) /* was on but now is not */
+    debug = 0;
+#endif /* DEBUG */
   return ret;
 }
 
@@ -1022,13 +1024,15 @@ static const char *re_error_msgid[] =
 #endif
 
 /* Roughly the maximum number of failure points on the stack.  Would be
-   exactly that if always used MAX_FAILURE_SPACE each time we failed.
+   exactly that if always used MAX_FAILURE_ITEMS items each time we failed.
    This is a variable only so users of regex can assign to it; we never
    change it ourselves.  */
 
 #ifdef INT_IS_16BIT
 
 #if defined (MATCH_MAY_ALLOCATE)
+/* 4400 was enough to cause a crash on Alpha OSF/1,
+   whose default stack limit is 2mb.  */
 long re_max_failures = 4000;
 #else
 long re_max_failures = 2000;
@@ -1046,7 +1050,7 @@ typedef struct
 {
   fail_stack_elt_t *stack;
   unsigned long size;
-  unsigned long avail;                 /* Offset of next open position.  */
+  unsigned long avail;			/* Offset of next open position.  */
 } fail_stack_type;
 
 #else /* not INT_IS_16BIT */
@@ -1054,7 +1058,7 @@ typedef struct
 #if defined (MATCH_MAY_ALLOCATE)
 /* 4400 was enough to cause a crash on Alpha OSF/1,
    whose default stack limit is 2mb.  */
-int re_max_failures = 4000;
+int re_max_failures = 20000;
 #else
 int re_max_failures = 2000;
 #endif
@@ -1187,8 +1191,8 @@ typedef struct
     char *destination;							\
     /* Must be int, so when we don't save any registers, the arithmetic	\
        of 0 + -1 isn't done as unsigned.  */				\
-    /* Can't be int, since there is not a shred of a guarantee that int	\
-       is wide enough to hold a value of something to which pointer can	\
+    /* Can't be int, since there is not a shred of a guarantee that int \
+       is wide enough to hold a value of something to which pointer can \
        be assigned */							\
     s_reg_t this_reg;							\
     									\
@@ -1246,7 +1250,7 @@ typedef struct
     DEBUG_PRINT2 ("  Pushing high active reg: %d\n", highest_active_reg);\
     PUSH_FAILURE_INT (highest_active_reg);				\
 									\
-    DEBUG_PRINT2 ("  Pushing pattern 0x%x:\n", pattern_place);		\
+    DEBUG_PRINT2 ("  Pushing pattern 0x%x: ", pattern_place);		\
     DEBUG_PRINT_COMPILED_PATTERN (bufp, pattern_place, pend);		\
     PUSH_FAILURE_POINTER (pattern_place);				\
 									\
@@ -1330,7 +1334,7 @@ typedef struct
   DEBUG_PRINT1 ("'\n");							\
 									\
   pat = (unsigned char *) POP_FAILURE_POINTER ();			\
-  DEBUG_PRINT2 ("  Popping pattern 0x%x:\n", pat);			\
+  DEBUG_PRINT2 ("  Popping pattern 0x%x: ", pat);			\
   DEBUG_PRINT_COMPILED_PATTERN (bufp, pat, pend);			\
 									\
   /* Restore register info.  */						\
@@ -1433,25 +1437,25 @@ static char reg_unset_dummy;
 
 /* Subroutine declarations and macros for regex_compile.  */
 
-static reg_errcode_t regex_compile _RE_ARGS ((const char *pattern, size_t size,
-					      reg_syntax_t syntax,
-					      struct re_pattern_buffer *bufp));
-static void store_op1 _RE_ARGS ((re_opcode_t op, unsigned char *loc, int arg));
-static void store_op2 _RE_ARGS ((re_opcode_t op, unsigned char *loc,
-				 int arg1, int arg2));
-static void insert_op1 _RE_ARGS ((re_opcode_t op, unsigned char *loc,
-				  int arg, unsigned char *end));
-static void insert_op2 _RE_ARGS ((re_opcode_t op, unsigned char *loc,
-				  int arg1, int arg2, unsigned char *end));
-static boolean at_begline_loc_p _RE_ARGS ((const char *pattern, const char *p,
-					   reg_syntax_t syntax));
-static boolean at_endline_loc_p _RE_ARGS ((const char *p, const char *pend,
-					   reg_syntax_t syntax));
-static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
-					      const char *pend,
-					      char *translate,
-					      reg_syntax_t syntax,
-					      unsigned char *b));
+static reg_errcode_t regex_compile _RE_ARGS((const char *pattern, size_t size,
+					     reg_syntax_t syntax,
+					     struct re_pattern_buffer *bufp));
+static void store_op1 _RE_ARGS((re_opcode_t op, unsigned char *loc, int arg));
+static void store_op2 _RE_ARGS((re_opcode_t op, unsigned char *loc,
+				int arg1, int arg2));
+static void insert_op1 _RE_ARGS((re_opcode_t op, unsigned char *loc,
+				 int arg, unsigned char *end));
+static void insert_op2 _RE_ARGS((re_opcode_t op, unsigned char *loc,
+				 int arg1, int arg2, unsigned char *end));
+static boolean at_begline_loc_p _RE_ARGS((const char *pattern, const char *p,
+					  reg_syntax_t syntax));
+static boolean at_endline_loc_p _RE_ARGS((const char *p, const char *pend,
+					  reg_syntax_t syntax));
+static reg_errcode_t compile_range _RE_ARGS((const char **p_ptr,
+					     const char *pend,
+					     char *translate,
+					     reg_syntax_t syntax,
+					     unsigned char *b));
 
 /* Fetch the next character in the uncompiled pattern---translating it
    if necessary.  Also cast from a signed character in the constant
@@ -1526,19 +1530,19 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
 /* Store a jump with opcode OP at LOC to location TO.  We store a
    relative address offset by the three bytes the jump itself occupies.  */
 #define STORE_JUMP(op, loc, to) \
-  store_op1 (op, loc, (int) ((to) - (loc) - 3))
+  store_op1 (op, loc, (int)((to) - (loc) - 3))
 
 /* Likewise, for a two-argument jump.  */
 #define STORE_JUMP2(op, loc, to, arg) \
-  store_op2 (op, loc, (int) ((to) - (loc) - 3), arg)
+  store_op2 (op, loc, (int)((to) - (loc) - 3), arg)
 
 /* Like `STORE_JUMP', but for inserting.  Assume `b' is the buffer end.  */
 #define INSERT_JUMP(op, loc, to) \
-  insert_op1 (op, loc, (int) ((to) - (loc) - 3), b)
+  insert_op1 (op, loc, (int)((to) - (loc) - 3), b)
 
 /* Like `STORE_JUMP2', but for inserting.  Assume `b' is the buffer end.  */
 #define INSERT_JUMP2(op, loc, to, arg) \
-  insert_op2 (op, loc, (int) ((to) - (loc) - 3), arg, b)
+  insert_op2 (op, loc, (int)((to) - (loc) - 3), arg, b)
 
 
 /* This is not an arbitrary limit: the arguments which represent offsets
@@ -1554,7 +1558,7 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
    The REALLOC define eliminates a flurry of conversion warnings,
    but is not required. */
 #define MAX_BUF_SIZE  65500L
-#define REALLOC(p,s) realloc ((p), (size_t) (s))
+#define REALLOC(p,s) realloc((p), (size_t) (s))
 #else
 #define MAX_BUF_SIZE (1L << 16)
 #define REALLOC(p,s) realloc ((p), (s))
@@ -1572,7 +1576,7 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
     bufp->allocated <<= 1;						\
     if (bufp->allocated > MAX_BUF_SIZE)					\
       bufp->allocated = MAX_BUF_SIZE; 					\
-    bufp->buffer = (unsigned char *) REALLOC (bufp->buffer, bufp->allocated);\
+    bufp->buffer = (unsigned char *) REALLOC(bufp->buffer, bufp->allocated);\
     if (bufp->buffer == NULL)						\
       return REG_ESPACE;						\
     /* If the buffer moved, move all the pointers into it.  */		\
@@ -1715,9 +1719,9 @@ regex_grow_registers (num_regs)
 
 #endif /* not MATCH_MAY_ALLOCATE */
 
-static boolean group_in_compile_stack _RE_ARGS ((compile_stack_type
-						 compile_stack,
-						 regnum_t regnum));
+static boolean group_in_compile_stack _RE_ARGS((compile_stack_type
+						compile_stack,
+						regnum_t regnum));
 
 /* `regex_compile' compiles PATTERN (of length SIZE) according to SYNTAX.
    Returns one of error codes defined in `regex.h', or zero for success.
@@ -2185,8 +2189,8 @@ regex_compile (pattern, size, syntax, bufp)
                                 || (is_upper  && ISUPPER (ch))
                                 || (is_xdigit && ISXDIGIT (ch)))
 			      SET_LIST_BIT (ch);
-			    if (   translate && (is_upper || is_lower)
-				&& (ISUPPER (ch) || ISLOWER (ch)))
+ 			    if (   translate && (is_upper || is_lower)
+                                && (ISUPPER(ch) || ISLOWER(ch)))
 			      SET_LIST_BIT (ch);
                           }
                         had_char_class = true;
@@ -2614,7 +2618,7 @@ regex_compile (pattern, size, syntax, bufp)
 
             case 'w':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               laststart = b;
               BUF_PUSH (wordchar);
               break;
@@ -2622,7 +2626,7 @@ regex_compile (pattern, size, syntax, bufp)
 
             case 'W':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               laststart = b;
               BUF_PUSH (notwordchar);
               break;
@@ -2630,37 +2634,37 @@ regex_compile (pattern, size, syntax, bufp)
 
             case '<':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (wordbeg);
               break;
 
             case '>':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (wordend);
               break;
 
             case 'b':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (wordbound);
               break;
 
             case 'B':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (notwordbound);
               break;
 
             case '`':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (begbuf);
               break;
 
             case '\'':
 	      if (re_syntax_options & RE_NO_GNU_OPS)
-		goto normal_char;
+               goto normal_char;
               BUF_PUSH (endbuf);
               break;
 
@@ -2675,7 +2679,7 @@ regex_compile (pattern, size, syntax, bufp)
                 FREE_STACK_RETURN (REG_ESUBREG);
 
               /* Can't back reference to a subexpression if inside of it.  */
-              if (group_in_compile_stack (compile_stack, (regnum_t) c1))
+              if (group_in_compile_stack (compile_stack, (regnum_t)c1))
                 goto normal_char;
 
               laststart = b;
@@ -3547,12 +3551,14 @@ re_search_2 (bufp, string1, size1, string2, size2, startpos, range, regs, stop)
            : (d) == string2 - 1 ? *(end1 - 1) : *(d))			\
    == Sword)
 
+/* Disabled due to a compiler bug -- see comment at case wordbound */
+#if 0
 /* Test if the character before D and the one at D differ with respect
    to being word-constituent.  */
 #define AT_WORD_BOUNDARY(d)						\
   (AT_STRINGS_BEG (d) || AT_STRINGS_END (d)				\
    || WORDCHAR_P (d - 1) != WORDCHAR_P (d))
-
+#endif
 
 /* Free everything we malloc.  */
 #ifdef MATCH_MAY_ALLOCATE
@@ -3607,17 +3613,17 @@ re_match (bufp, string, size, pos, regs)
 }
 #endif /* not emacs */
 
-static boolean group_match_null_string_p _RE_ARGS ((unsigned char **p,
-						    unsigned char *end,
+static boolean group_match_null_string_p _RE_ARGS((unsigned char **p,
+						   unsigned char *end,
+					    register_info_type *reg_info));
+static boolean alt_match_null_string_p _RE_ARGS((unsigned char *p,
+						 unsigned char *end,
+					  register_info_type *reg_info));
+static boolean common_op_match_null_string_p _RE_ARGS((unsigned char **p,
+						       unsigned char *end,
 						register_info_type *reg_info));
-static boolean alt_match_null_string_p _RE_ARGS ((unsigned char *p,
-						  unsigned char *end,
-						register_info_type *reg_info));
-static boolean common_op_match_null_string_p _RE_ARGS ((unsigned char **p,
-							unsigned char *end,
-						register_info_type *reg_info));
-static int bcmp_translate _RE_ARGS ((const char *s1, const char *s2,
-				     int len, char *translate));
+static int bcmp_translate _RE_ARGS((const char *s1, const char *s2,
+				    int len, char *translate));
 
 /* re_match_2 matches the compiled pattern in BUFP against the
    the (virtual) concatenation of STRING1 and STRING2 (of length SIZE1
@@ -3883,7 +3889,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
       dend = end_match_2;
     }
 
-  DEBUG_PRINT1 ("The compiled pattern is:\n");
+  DEBUG_PRINT1 ("The compiled pattern is: ");
   DEBUG_PRINT_COMPILED_PATTERN (bufp, p, pend);
   DEBUG_PRINT1 ("The string to match is: `");
   DEBUG_PRINT_DOUBLE_STRING (d, string1, size1, string2, size2);
@@ -3894,11 +3900,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
      fails at this starting point in the input data.  */
   for (;;)
     {
-#ifdef _LIBC
-      DEBUG_PRINT2 ("\n%p: ", p);
-#else
       DEBUG_PRINT2 ("\n0x%x: ", p);
-#endif
 
       if (p == pend)
 	{ /* End of pattern means we might have succeeded.  */
@@ -4477,11 +4479,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
           DEBUG_PRINT1 ("EXECUTING on_failure_keep_string_jump");
 
           EXTRACT_NUMBER_AND_INCR (mcnt, p);
-#ifdef _LIBC
-          DEBUG_PRINT3 (" %d (to %p):\n", mcnt, p + mcnt);
-#else
           DEBUG_PRINT3 (" %d (to 0x%x):\n", mcnt, p + mcnt);
-#endif
 
           PUSH_FAILURE_POINT (p + mcnt, NULL, -2);
           break;
@@ -4504,11 +4502,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
           DEBUG_PRINT1 ("EXECUTING on_failure_jump");
 
           EXTRACT_NUMBER_AND_INCR (mcnt, p);
-#ifdef _LIBC
-          DEBUG_PRINT3 (" %d (to %p)", mcnt, p + mcnt);
-#else
           DEBUG_PRINT3 (" %d (to 0x%x)", mcnt, p + mcnt);
-#endif
 
           /* If this on_failure_jump comes right before a group (i.e.,
              the original * applied to a group), save the information
@@ -4721,25 +4715,16 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                                dummy_low_reg, dummy_high_reg,
                                reg_dummy, reg_dummy, reg_info_dummy);
           }
-
-	unconditional_jump:
-#ifdef _LIBC
-	  DEBUG_PRINT2 ("\n%p: ", p);
-#else
-	  DEBUG_PRINT2 ("\n0x%x: ", p);
-#endif
           /* Note fall through.  */
+
 
         /* Unconditionally jump (without popping any failure points).  */
         case jump:
+	unconditional_jump:
 	  EXTRACT_NUMBER_AND_INCR (mcnt, p);	/* Get the amount to jump.  */
           DEBUG_PRINT2 ("EXECUTING jump %d ", mcnt);
 	  p += mcnt;				/* Do the jump.  */
-#ifdef _LIBC
-          DEBUG_PRINT2 ("(to %p).\n", p);
-#else
           DEBUG_PRINT2 ("(to 0x%x).\n", p);
-#endif
 	  break;
 
 
@@ -4788,19 +4773,11 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                mcnt--;
 	       p += 2;
                STORE_NUMBER_AND_INCR (p, mcnt);
-#ifdef _LIBC
-               DEBUG_PRINT3 ("  Setting %p to %d.\n", p - 2, mcnt);
-#else
-               DEBUG_PRINT3 ("  Setting 0x%x to %d.\n", p - 2, mcnt);
-#endif
+               DEBUG_PRINT3 ("  Setting 0x%x to %d.\n", p, mcnt);
             }
 	  else if (mcnt == 0)
             {
-#ifdef _LIBC
-              DEBUG_PRINT2 ("  Setting two bytes from %p to no_op.\n", p+2);
-#else
               DEBUG_PRINT2 ("  Setting two bytes from 0x%x to no_op.\n", p+2);
-#endif
 	      p[2] = (unsigned char) no_op;
               p[3] = (unsigned char) no_op;
               goto on_failure;
@@ -4816,11 +4793,6 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
             {
                mcnt--;
                STORE_NUMBER (p + 2, mcnt);
-#ifdef _LIBC
-               DEBUG_PRINT3 ("  Setting %p to %d.\n", p + 2, mcnt);
-#else
-               DEBUG_PRINT3 ("  Setting 0x%x to %d.\n", p + 2, mcnt);
-#endif
 	       goto unconditional_jump;
             }
           /* If don't have to jump any more, skip over the rest of command.  */
@@ -4835,11 +4807,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
             EXTRACT_NUMBER_AND_INCR (mcnt, p);
             p1 = p + mcnt;
             EXTRACT_NUMBER_AND_INCR (mcnt, p);
-#ifdef _LIBC
-            DEBUG_PRINT3 ("  Setting %p to %d.\n", p1, mcnt);
-#else
             DEBUG_PRINT3 ("  Setting 0x%x to %d.\n", p1, mcnt);
-#endif
 	    STORE_NUMBER (p1, mcnt);
             break;
           }
@@ -5351,7 +5319,13 @@ re_compile_pattern (pattern, length, bufp)
 /* BSD has one and only one pattern buffer.  */
 static struct re_pattern_buffer re_comp_buf;
 
-char * weak_function
+char *
+#ifdef _LIBC
+/* Make these definitions weak in libc, so POSIX programs can redefine
+   these names if they don't use our functions, and still use
+   regcomp/regexec below without link errors.  */
+weak_function
+#endif
 re_comp (s)
     const char *s;
 {
@@ -5392,7 +5366,10 @@ re_comp (s)
 }
 
 
-int weak_function
+int
+#ifdef _LIBC
+weak_function
+#endif
 re_exec (s)
     const char *s;
 {
@@ -5646,3 +5623,11 @@ regfree (preg)
 }
 
 #endif /* not emacs  */
+
+/*
+Local variables:
+make-backup-files: t
+version-control: t
+trim-versions-without-asking: nil
+End:
+*/

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-08-10 06:45+0200\n"
+"POT-Creation-Date: 1998-09-08 09:33+0200\n"
 "PO-Revision-Date: 1996-09-30 10:38 GMT+0100\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -240,21 +240,21 @@ msgstr "NONE"
 msgid "ERROR: EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
 
-#: src/m4.c:106
+#: src/m4.c:111
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "FEHLER: Keller voll.  (Unendliche `define' Rekursion?)"
 
-#: src/m4.c:133
+#: src/m4.c:138
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "`%s --help' zeigt weitere Informationen.\n"
 
-#: src/m4.c:137
+#: src/m4.c:142
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Aufruf: %s [OPTION]... [DATEI]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:143
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -280,18 +280,19 @@ msgstr ""
 "  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute "
 "Funktionen\n"
 
-#: src/m4.c:151
+#: src/m4.c:156
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=REGEXP     benutze REGEXP für Makronamensyntax\n"
 
-#: src/m4.c:155
+#: src/m4.c:160
+#, fuzzy
 msgid ""
 "\n"
 "Preprocessor features:\n"
 "  -I, --include=DIRECTORY      search this directory second for includes\n"
 "  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
 "  -U, --undefine=NAME          delete builtin NAME\n"
-"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+"#ifdef SHOW_DEPENDENCIES"
 msgstr ""
 "\n"
 "Präprozessoreigenschaften:\n"
@@ -301,7 +302,7 @@ msgstr ""
 "  -U, --undefine=NAME          lösche eingebaute Funktion NAME\n"
 "  -s, --synclines              erzeuge `#line NR \"DATEI\"' Zeilen\n"
 
-#: src/m4.c:163
+#: src/m4.c:171
 msgid ""
 "\n"
 "Limits control:\n"
@@ -316,7 +317,7 @@ msgstr ""
 "  -L, --nesting-limit=NUMMER   setze künstliche Grenze für "
 "Schachtelungstiefe\n"
 
-#: src/m4.c:170
+#: src/m4.c:178
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -330,7 +331,7 @@ msgstr ""
 "  -R, --reload-state=DATEI     lade zu Beginn Zustand von eingefrorener "
 "DATEI\n"
 
-#: src/m4.c:176
+#: src/m4.c:184
 msgid ""
 "\n"
 "Debugging:\n"
@@ -348,7 +349,7 @@ msgstr ""
 "  -o, --error-output=DATEI     leite Debug- und Verfolgungsausgaben nach "
 "DATEI\n"
 
-#: src/m4.c:184
+#: src/m4.c:192
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -378,7 +379,7 @@ msgstr ""
 "  i   gebe Veränderungen der Eingabedatei aus\n"
 "  V   Kurzform für alle Flags oben zusammen\n"
 
-#: src/m4.c:199
+#: src/m4.c:207
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -386,12 +387,18 @@ msgstr ""
 "\n"
 "Ohne DATEI oder wenn DATEI `-' ist, wird die Standardeingabe gelesen\n"
 
-#: src/m4.c:358
+#: src/m4.c:211
+msgid ""
+"\n"
+"Report bugs to <m4-bugs@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:379
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Falsche Debug Flags: `%s'"
 
-#: src/m4.c:437
+#: src/m4.c:458
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNER FEHLER: Falscher Kode in zurückgestellten Argumenten"
 
@@ -437,7 +444,7 @@ msgstr "FEHLER: Während Lesen einer eingefügten Datei"
 msgid "Cannot stat diversion"
 msgstr "Kann `stat' nicht auf Umleitung anwenden"
 
-#: src/path.c:131
+#: src/path.c:138
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach `%s' hat `%s' gefunden"

@@ -134,6 +134,9 @@
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 
+/* Define if you have the doprnt function.  */
+#undef HAVE_DOPRNT
+
 /* Define if you have the ecvt function.  */
 #undef HAVE_ECVT
 
@@ -148,6 +151,9 @@
 
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP
+
+/* Define if you have the obstack function.  */
+#undef HAVE_OBSTACK
 
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
@@ -185,11 +191,23 @@
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
 
+/* Define if you have the strerror_r function.  */
+#undef HAVE_STRERROR_R
+
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
 /* Define if you have the tmpfile function.  */
 #undef HAVE_TMPFILE
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define if you have the xmalloc function.  */
+#undef HAVE_XMALLOC
+
+/* Define if you have the xstrdup function.  */
+#undef HAVE_XSTRDUP
 
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H

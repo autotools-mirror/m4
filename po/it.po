@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 1998-08-10 06:45+0200\n"
+"POT-Creation-Date: 1998-09-08 09:33+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -231,21 +231,21 @@ msgstr "NESSUNO"
 msgid "ERROR: EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
 
-#: src/m4.c:106
+#: src/m4.c:111
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "ERRORE: Stack overflow.  (Ricorsione infinita in `define'?)"
 
-#: src/m4.c:133
+#: src/m4.c:138
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Per ulteriori informazioni provare `%s --help'.\n"
 
-#: src/m4.c:137
+#: src/m4.c:142
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Usage: %s [OPZIONE]... [ARCHIVIO]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:143
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -259,21 +259,21 @@ msgid ""
 "  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
 msgstr ""
 
-#: src/m4.c:151
+#: src/m4.c:156
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 
-#: src/m4.c:155
+#: src/m4.c:160
 msgid ""
 "\n"
 "Preprocessor features:\n"
 "  -I, --include=DIRECTORY      search this directory second for includes\n"
 "  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
 "  -U, --undefine=NAME          delete builtin NAME\n"
-"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+"#ifdef SHOW_DEPENDENCIES"
 msgstr ""
 
-#: src/m4.c:163
+#: src/m4.c:171
 msgid ""
 "\n"
 "Limits control:\n"
@@ -282,7 +282,7 @@ msgid ""
 "  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
 msgstr ""
 
-#: src/m4.c:170
+#: src/m4.c:178
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -290,7 +290,7 @@ msgid ""
 "  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
 msgstr ""
 
-#: src/m4.c:176
+#: src/m4.c:184
 msgid ""
 "\n"
 "Debugging:\n"
@@ -300,7 +300,7 @@ msgid ""
 "  -o, --error-output=FILE      redirect debug and trace output\n"
 msgstr ""
 
-#: src/m4.c:184
+#: src/m4.c:192
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -317,18 +317,24 @@ msgid ""
 "  V   shorthand for all of the above flags\n"
 msgstr ""
 
-#: src/m4.c:199
+#: src/m4.c:207
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 
-#: src/m4.c:358
+#: src/m4.c:211
+msgid ""
+"\n"
+"Report bugs to <m4-bugs@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:379
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Indicatori di debug errati: `%s'"
 
-#: src/m4.c:437
+#: src/m4.c:458
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
 
@@ -373,7 +379,7 @@ msgstr "ERRORE: Leggendo archivio inserito"
 msgid "Cannot stat diversion"
 msgstr "Impossibile effettuare la `stat' per la deviazione"
 
-#: src/path.c:131
+#: src/path.c:138
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "La ricerca del percorso per `%s' ha trovato `%s'"

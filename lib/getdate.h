@@ -14,33 +14,33 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifdef HAVE_CONFIG_H
+#if HAVE_CONFIG_H
 # include <config.h>
 #endif
 
-# ifndef PARAMS
-#  if defined (__GNUC__) || __STDC__
-#   define PARAMS(args) args
-#  else
-#   define PARAMS(args) ()
-#  endif
+#ifndef PARAMS
+# if defined (__GNUC__) || __STDC__
+#  define PARAMS(Args) Args
+# else
+#  define PARAMS(Args) ()
 # endif
+#endif
 
-#if defined (vms)
+#ifdef vms
 # include <types.h>
 # include <time.h>
 #else
 # include <sys/types.h>
-# ifdef TIME_WITH_SYS_TIME
+# if TIME_WITH_SYS_TIME
 #  include <sys/time.h>
 #  include <time.h>
 # else
-#  ifdef HAVE_SYS_TIME_H
+#  if HAVE_SYS_TIME_H
 #   include <sys/time.h>
 #  else
 #   include <time.h>
 #  endif
 # endif
-#endif /* defined (vms) */
+#endif
 
 time_t get_date PARAMS ((const char *p, const time_t *now));

@@ -25,6 +25,139 @@ versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
 
 
+File: m4.info,  Node: Frozen files,  Next: Compatibility,  Prev: Miscellaneous,  Up: Top
+
+Fast loading of frozen states
+*****************************
+
+   Some bigger `m4' applications may be built over a common base
+containing hundreds of definitions and other costly initializations.
+Usually, the common base is kept in one or more declarative files,
+which files are listed on each `m4' invocation prior to the user's
+input file, or else, `include''d from this input file.
+
+   Reading the common base of a big application, over and over again,
+may be time consuming.  GNU `m4' offers some machinery to speed up the
+start of an application using lengthy common bases.  Presume the user
+repeatedly uses:
+
+     m4 base.m4 input.m4
+
+with a varying contents of `input.m4', but a rather fixed contents for
+`base.m4'.  Then, the user might rather execute:
+
+     m4 -F base.m4f base.m4
+
+once, and further execute, as often as needed:
+
+     m4 -R base.m4f input.m4
+
+with the varying input.  The first call, containing the `-F' option,
+only reads and executes file `base.m4', so defining various application
+macros and computing other initializations.  Only once the input file
+`base.m4' has been completely processed, GNU `m4' produces on
+`base.m4f' a "frozen" file, that is, a file which contains a kind of
+snapshot of the `m4' internal state.
+
+   Later calls, containing the `-R' option, are able to reload the
+internal state of `m4''s memory, from `base.m4f', *prior* to reading
+any other input files.  By this mean, instead of starting with a virgin
+copy of `m4', input will be read after having effectively recovered the
+effect of a prior run.  In our example, the effect is the same as if
+file `base.m4' has been read anew.  However, this effect is achieved a
+lot faster.
+
+   Only one frozen file may be created or read in any one `m4'
+invocation.  It is not possible to recover two frozen files at once.
+However, frozen files may be updated incrementally, through using `-R'
+and `-F' options simultaneously.  For example, if some care is taken,
+the command:
+
+     m4 file1.m4 file2.m4 file3.m4 file4.m4
+
+could be broken down in the following sequence, accumulating the same
+output:
+
+     m4 -F file1.m4f file1.m4
+     m4 -R file1.m4f -F file2.m4f file2.m4
+     m4 -R file2.m4f -F file3.m4f file3.m4
+     m4 -R file3.m4f file4.m4
+
+   Some care is necessary because not every effort has been made for
+this to work in all cases.  In particular, the trace attribute of
+macros is not handled, nor the current setting of `changeword'.  Also,
+interactions for some options of `m4' being used in one call and not
+for the next, have not been fully analyzed yet.  On the other end, you
+may be confident that stacks of `pushdef''ed definitions are handled
+correctly, so are `undefine''d or renamed builtins, changed strings for
+quotes or comments.
+
+   When an `m4' run is to be frozen, the automatic undiversion which
+takes place at end of execution is inhibited.  Instead, all positively
+numbered diversions are saved into the frozen file.  The active
+diversion number is also transmitted.
+
+   A frozen file to be reloaded need not reside in the current
+directory.  It is looked up the same way as an `include' file (*note
+Search Path::.).
+
+   Frozen files are sharable across architectures.  It is safe to write
+a frozen file on one machine and read it on another, given that the
+second machine uses the same, or a newer version of GNU `m4'.  These
+are simple (editable) text files, made up of directives, each starting
+with a capital letter and ending with a newline (<NL>).  Wherever a
+directive is expected, the character `#' introduces a comment line,
+empty lines are also ignored.  In the following descriptions, LENGTHs
+always refer to corresponding STRINGs.  Numbers are always expressed in
+decimal.  The directives are:
+
+`V NUMBER <NL>'
+     Confirms the format of the file.  NUMBER should be 1.
+
+`C LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
+     Uses STRING1 and STRING2 as the beginning comment and end comment
+     strings.
+
+`Q LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
+     Uses STRING1 and STRING2 as the beginning quote and end quote
+     strings.
+
+`F LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
+     Defines, through `pushdef', a definition for STRING1 expanding to
+     the function whose builtin name is STRING2.
+
+`T LENGTH1 , LENGTH2 <NL> STRING1 STRING2 <NL>'
+     Defines, though `pushdef', a definition for STRING1 expanding to
+     the text given by STRING2.
+
+`D NUMBER, LENGTH <NL> STRING <NL>'
+     Selects diversion NUMBER, making it current, then copy STRING in
+     the current diversion.  NUMBER may be a negative number for a
+     non-existing diversion.  To merely specify an active selection,
+     use this command with an empty STRING.  With 0 as the diversion
+     NUMBER, STRING will be issued on standard output at reload time,
+     however this may not be produced from within `m4'.
+
+
+File: m4.info,  Node: Compatibility,  Next: Experiments,  Prev: Frozen files,  Up: Top
+
+Compatibility with other versions of `m4'
+*****************************************
+
+   This chapter describes the differences between this implementation of
+`m4', and the implementation found under UNIX, notably System V,
+Release 3.
+
+   There are also differences in BSD flavors of `m4'.  No attempt is
+made to summarize these here.
+
+* Menu:
+
+* Extensions::                  Extensions in GNU m4
+* Incompatibilities::           Facilities in System V m4 not in GNU m4
+* Other Incompat::              Other incompatibilities
+
+
 File: m4.info,  Node: Extensions,  Next: Incompatibilities,  Prev: Compatibility,  Up: Compatibility
 
 Extensions in GNU `m4'

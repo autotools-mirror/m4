@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 1998-08-10 06:45+0200\n"
+"POT-Creation-Date: 1998-09-08 09:33+0200\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -80,9 +80,9 @@ msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
 #: src/builtin.c:1066
-#, fuzzy, c-format
+#, c-format
 msgid "Undefined syntax code %c"
-msgstr "Ongedefinieerde naam %s"
+msgstr "Ongedefinieerde syntax code %c"
 
 #: src/builtin.c:1116 src/freeze.c:207
 #, c-format
@@ -233,21 +233,21 @@ msgstr "GEEN"
 msgid "ERROR: EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
 
-#: src/m4.c:106
+#: src/m4.c:111
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "FOUT: Stapel overflow.  (Infinite define recursion?)"
 
-#: src/m4.c:133
+#: src/m4.c:138
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Probeer `%s --help' voor meer informatie.\n"
 
-#: src/m4.c:137
+#: src/m4.c:142
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Gebruik: %s [OPTIE]... [BESTAND]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:143
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -273,18 +273,19 @@ msgstr ""
 "  -P, --prefix-builtins        forceer een `m4_' voorvoegsel voor alle \n"
 "                               ingebouwde functies\n"
 
-#: src/m4.c:151
+#: src/m4.c:156
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=REGEXP     gebruik REGEXP voor macro naam syntax\n"
 
-#: src/m4.c:155
+#: src/m4.c:160
+#, fuzzy
 msgid ""
 "\n"
 "Preprocessor features:\n"
 "  -I, --include=DIRECTORY      search this directory second for includes\n"
 "  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
 "  -U, --undefine=NAME          delete builtin NAME\n"
-"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+"#ifdef SHOW_DEPENDENCIES"
 msgstr ""
 "\n"
 "Voorbewerkings features:\n"
@@ -295,7 +296,7 @@ msgstr ""
 "  -U, --undefine=NAME          verwijder ingebouwde functie NAME\n"
 "  -s, --synclines              genereer `#line NO \"FILE\"' regel\n"
 
-#: src/m4.c:163
+#: src/m4.c:171
 msgid ""
 "\n"
 "Limits control:\n"
@@ -309,7 +310,7 @@ msgstr ""
 "  -H, --hashsize=PRIME         stel symbolen opzoek hash tabel grootte\n"
 "  -L, --nesting-limit=NUMBER   verander kunstmatige nesting limiet\n"
 
-#: src/m4.c:170
+#: src/m4.c:178
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -323,7 +324,7 @@ msgstr ""
 "  -R, --reload-state=FILE      herlaad een gefixeerde staat van BESTAND\n"
 "                               aan het begin\n"
 
-#: src/m4.c:176
+#: src/m4.c:184
 msgid ""
 "\n"
 "Debugging:\n"
@@ -340,7 +341,7 @@ msgstr ""
 "  -l, --arglength=NUM          restrict macro traceer grootte\n"
 "  -o, --error-output=FILE      redirect debug en traceer uitvoer\n"
 
-#: src/m4.c:184
+#: src/m4.c:192
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -357,10 +358,10 @@ msgid ""
 "  V   shorthand for all of the above flags\n"
 msgstr ""
 "\n"
-"FLAGS is any of:\n"
-"  t   trace for all macro calls, not only traceon'ed\n"
-"  a   show actual arguments\n"
-"  e   show expansion\n"
+"VLAG is een van:\n"
+"  t   traceer voor alle macro aanroepen, niet alleen `traceon'ed\n"
+"  a   toon huidige argumenten\n"
+"  e   toon expansie\n"
 "  q   quote values as necessary, with a or e flag\n"
 "  c   show before collect, after collect and after call\n"
 "  x   add a unique macro call id, useful with c flag\n"
@@ -370,7 +371,7 @@ msgstr ""
 "  i   show changes in input files\n"
 "  V   shorthand for all of the above flags\n"
 
-#: src/m4.c:199
+#: src/m4.c:207
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -378,12 +379,20 @@ msgstr ""
 "\n"
 "Als geen BESTAND of als BESTAND `-' is, standaard invoer wordt gelezen.\n"
 
-#: src/m4.c:358
+#: src/m4.c:211
+msgid ""
+"\n"
+"Report bugs to <m4-bugs@gnu.org>.\n"
+msgstr ""
+"\n"
+"Meld fouten via <m4-bugs@gnu.org>.\n"
+
+#: src/m4.c:379
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Onjuiste debug vlaggen: `%s'"
 
-#: src/m4.c:437
+#: src/m4.c:458
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNE FOUT: Onjuiste code in afgeleide argumenten"
 
@@ -429,7 +438,7 @@ msgstr "FOUT: Lezen ingevoegd bestand"
 msgid "Cannot stat diversion"
 msgstr "Cannot stat diversion"
 
-#: src/path.c:131
+#: src/path.c:138
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"
@@ -460,9 +469,3 @@ msgstr "INTERNE FOUT: Ongeldige mode voor symbol_lookup ()"
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
-
-#~ msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
-#~ msgstr "INTERNE FOUT: Invoer stapel botch in pop_input ()"
-
-#~ msgid "Bad regular expression: `%s': %s"
-#~ msgstr "Onjuiste reguliere expressie: `%s': %s"

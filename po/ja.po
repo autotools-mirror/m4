@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 1998-08-10 06:45+0200\n"
+"POT-Creation-Date: 1998-09-08 09:33+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -237,23 +237,23 @@ msgstr "なし"
 msgid "ERROR: EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
-#: src/m4.c:106
+#: src/m4.c:111
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 "エラー: スタックがオーバーフローを起こしています。\n"
 "        (無限に再帰的定義をしていませんか？)"
 
-#: src/m4.c:133
+#: src/m4.c:138
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "詳しくは `%s --help' の出力を御覧下さい。\n"
 
-#: src/m4.c:137
+#: src/m4.c:142
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "使用方法: %s [オプション]...[ファイル名]\n"
 
-#: src/m4.c:138
+#: src/m4.c:143
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -279,20 +279,21 @@ msgstr ""
 "  -P, --prefix-builtins        全てのビルトインマクロに `m4_' という接頭辞を "
 "                              強制的に追加します。\n"
 
-#: src/m4.c:151
+#: src/m4.c:156
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "-W, --word-regexp=REGEXP   マクロ名のシンタックスに REGEXP を                "
 "                       正規表現として用います。\n"
 
-#: src/m4.c:155
+#: src/m4.c:160
+#, fuzzy
 msgid ""
 "\n"
 "Preprocessor features:\n"
 "  -I, --include=DIRECTORY      search this directory second for includes\n"
 "  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
 "  -U, --undefine=NAME          delete builtin NAME\n"
-"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+"#ifdef SHOW_DEPENDENCIES"
 msgstr ""
 "\n"
 "プリプロセッサ機能:\n"
@@ -304,7 +305,7 @@ msgstr ""
 "  -U, --undefine=NAME           NAME の定義を取り消します。\n"
 "  -s, --synclines               行番号とファイル名の行を生成します。\n"
 
-#: src/m4.c:163
+#: src/m4.c:171
 msgid ""
 "\n"
 "Limits control:\n"
@@ -320,7 +321,7 @@ msgstr ""
 "   -L, --nesting-limit=NUNBER   "
 "マクロのネスト回数の上限値を人為的に変更します。\n"
 
-#: src/m4.c:170
+#: src/m4.c:178
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -333,7 +334,7 @@ msgstr ""
 "   -R, --reload-state=FILE      最初に指定された FILE から\n"
 "                                凍結された定義をロードします\n"
 
-#: src/m4.c:176
+#: src/m4.c:184
 msgid ""
 "\n"
 "Debugging:\n"
@@ -351,7 +352,7 @@ msgstr ""
 "   -o, --error-output=FILE      デバッグとトレースの出力を FILE に\n"
 "                                リダイレクトします。\n"
 
-#: src/m4.c:184
+#: src/m4.c:192
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -383,7 +384,7 @@ msgstr ""
 "   i   入力ファイルに生じた変化を表示します。\n"
 "   V   上記の全ての FLAG を指定することを意味します。\n"
 
-#: src/m4.c:199
+#: src/m4.c:207
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -392,12 +393,18 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/m4.c:358
+#: src/m4.c:211
+msgid ""
+"\n"
+"Report bugs to <m4-bugs@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:379
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/m4.c:437
+#: src/m4.c:458
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
 
@@ -446,7 +453,7 @@ msgstr ""
 "divert のためのファイルのステータスを得ることができません。\n"
 "        (stat できません。)"
 
-#: src/path.c:131
+#: src/path.c:138
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"

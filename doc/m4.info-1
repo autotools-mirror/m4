@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4f.  It is now to be considered stable, future
+   This is release 1.4h.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -73,9 +73,110 @@ documentation.  However...
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
- -- The Detailed Node Listing --
 
 Introduction and preliminaries
+
+* Intro::                       Introduction to `m4'
+* History::                     Historical references
+* Invoking m4::                 Invoking `m4'
+* Bugs::                        Problems and bugs
+* Manual::                      Using this manual
+
+Lexical and syntactic conventions
+
+* Names::                       Macro names
+* Quoted strings::              Quoting input to m4
+* Other tokens::                Other kinds of input tokens
+* Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
+
+How to invoke macros
+
+* Invocation::                  Macro invocation
+* Inhibiting Invocation::       Preventing macro invocation
+* Macro Arguments::             Macro arguments
+* Quoting Arguments::           On Quoting Arguments to macros
+* Macro expansion::             Expanding macros
+
+How to define new macros
+
+* Define::                      Defining a new macro
+* Arguments::                   Arguments to macros
+* Pseudo Arguments::            Pseudo arguments to macros
+* Undefine::                    Deleting a macro
+* Defn::                        Renaming macros
+* Pushdef::                     Temporarily redefining macros
+
+* Indir::                       Indirect call of macros
+* Builtin::                     Indirect call of builtins
+
+Conditionals, loops and recursion
+
+* Ifdef::                       Testing if a macro is defined
+* Ifelse::                      If-else construct, or multibranch
+* Loops::                       Loops and recursion in m4
+
+How to debug macros and input
+
+* Dumpdef::                     Displaying macro definitions
+* Trace::                       Tracing macro calls
+* Debug Levels::                Controlling debugging output
+* Debug Output::                Saving debugging output
+
+Input control
+
+* Dnl::                         Deleting whitespace in input
+* Changequote::                 Changing the quote characters
+* Changecom::                   Changing the comment delimiters
+* Changesyntax::                Changing the lexical structure of the input
+* Changeword::                  Changing the lexical structure of words
+* M4wrap::                      Saving input until end of input
+
+File inclusion
+
+* Include::                     Including named files
+* Search Path::                 Searching for include files
+
+Diverting and undiverting output
+
+* Divert::                      Diverting output
+* Undivert::                    Undiverting output
+* Divnum::                      Diversion numbers
+* Cleardiv::                    Discarding diverted text
+
+Macros for text handling
+
+* Len::                         Calculating length of strings
+* Index::                       Searching for substrings
+* Regexp::                      Searching for regular expressions
+* Substr::                      Extracting substrings
+* Translit::                    Translating characters
+* Patsubst::                    Substituting text by regular expression
+* Format::                      Formatting strings (printf-like)
+
+Macros for doing arithmetic
+
+* Incr::                        Decrement and increment operators
+* Eval::                        Evaluating integer or rational expressions
+
+Running UNIX commands
+
+* Syscmd::                      Executing simple commands
+* Esyscmd::                     Reading the output of commands
+* Sysval::                      Exit codes
+* Maketemp::                    Making names for temporary files
+
+Miscellaneous builtin macros
+
+* Errprint::                    Printing error messages
+* M4exit::                      Exiting from m4
+* Syncoutput::                  Turning on and off sync lines
+
+Compatibility with other versions of `m4'
+
+* Extensions::                  Extensions in GNU m4
+* Incompatibilities::           Facilities in System V m4 not in GNU m4
+* Other Incompat::              Other incompatibilities
 
 
 File: m4.info,  Node: Preliminaries,  Next: Syntax,  Prev: Top,  Up: Top
@@ -1006,8 +1107,7 @@ to avoid unwanted expansion of the text:
      ')
      =>
      string
-     =>The macro
-     defn(`string')
+     =>The macro defn(`string')
      =>The macro dnl is very useful
      =>
 
@@ -1363,134 +1463,4 @@ the standard error output.
 
    *Note Debug Levels:: for information on controlling the details of
 the display.
-
-
-File: m4.info,  Node: Trace,  Next: Debug Levels,  Prev: Dumpdef,  Up: Debugging
-
-Tracing macro calls
-===================
-
-   It is possible to trace macro calls and expansions through the
-builtins `traceon' and `traceoff':
-
-     traceon(...)
-     traceoff(...)
-
-When called without any arguments, `traceon' and `traceoff' will turn
-tracing on and off, respectively,  for all defined macros.  When called
-with arguments, only the named macros are affected.
-
-   The expansion of `traceon' and `traceoff' is void.
-
-   Whenever a traced macro is called and the arguments have been
-collected, the call is displayed.  If the expansion of the macro call
-is not void, the expansion can be displayed after the call.  The output
-is printed directly on the standard error output.
-
-     define(`foo', `Hello World.')
-     =>
-     define(`echo', `$@')
-     =>
-     traceon(`foo', `echo')
-     =>
-     foo
-     error-->m4trace: -1- foo -> `Hello World.'
-     =>Hello World.
-     echo(gnus, and gnats)
-     error-->m4trace: -1- echo(`gnus', `and gnats') -> ``gnus',`and gnats''
-     =>gnus,and gnats
-
-   The number between dashes is the depth of the expansion.  It is one
-most of the time, signifying an expansion at the outermost level, but it
-increases when macro arguments contain unquoted macro calls.
-
-   *Note Debug Levels:: for information on controlling the details of
-the display.
-
-
-File: m4.info,  Node: Debug Levels,  Next: Debug Output,  Prev: Trace,  Up: Debugging
-
-Controlling debugging output
-============================
-
-   The `-d' option to `m4' controls the amount of details presented,
-when using the macros described in the preceding sections.
-
-   The FLAGS following the option can be one or more of the following:
-
-`t'
-     Trace all macro calls made in this invocation of `m4'.
-
-`a'
-     Show the actual arguments in each macro call.  This applies to all
-     macro calls if the `t' flag is used, otherwise only the macros
-     covered by calls of `traceon'.
-
-`e'
-     Show the expansion of each macro call, if it is not void.  This
-     applies to all macro calls if the `t' flag is used, otherwise only
-     the macros covered by calls of `traceon'.
-
-`q'
-     Quote actual arguments and macro expansions in the display with the
-     current quotes.
-
-`c'
-     Show several trace lines for each macro call.  A line is shown
-     when the macro is seen, but before the arguments are collected; a
-     second line when the arguments have been collected and a third
-     line after the call has completed.
-
-`x'
-     Add a unique `macro call id' to each line of the trace output.
-     This is useful in connection with the `c' flag above.
-
-`f'
-     Show the name of the current input file in each trace output line.
-
-`l'
-     Show the the current input line number in each trace output line.
-
-`p'
-     Print a message when a named file is found through the path search
-     mecanism (*note Search Path::.), giving the actual filename used.
-
-`i'
-     Print a message each time the current input file is changed,
-     giving file name and input line number.
-
-`V'
-     A shorthand for all of the above flags.
-
-   If no flags are specified with the `-d' option, the default is
-`aeq'. The examples in the previous two sections assumed the default
-flags.
-
-   There is a builtin macro `debugmode', which allows on-the-fly
-control of the debugging output format:
-
-     debugmode(opt FLAGS)
-
-The argument FLAGS should be a subset of the letters listed above.  As
-special cases, if the argument starts with a `+', the flags are added
-to the current debug flags, and if it starts with a `-', they are
-removed.  If no argument is present, the debugging flags are set to
-zero (as if no `-d' was given), and with an empty argument the flags
-are reset to the default.
-
-
-File: m4.info,  Node: Debug Output,  Prev: Debug Levels,  Up: Debugging
-
-Saving debugging output
-=======================
-
-   Debug and tracing output can be redirected to files using either the
-`-o' option to `m4', or with the builtin macro `debugfile':
-
-     debugfile(opt FILENAME)
-
-will send all further debug and trace output to FILENAME.  If FILENAME
-is empty, debug and trace output are discarded and if `debugfile' is
-called without any arguments, debug and trace output are sent to the
-standard error output.
 

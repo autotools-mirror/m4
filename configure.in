@@ -1,5 +1,5 @@
 # Configure template for GNU m4.
-# Copyright (C) 1991, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1991-1998 Free Software Foundation, Inc.
 # Process this file with autoconf to produce a configure script.
 
 undefine([changeword])
@@ -8,7 +8,7 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4f)
+AM_INIT_AUTOMAKE(m4,1.4h)
 ALL_LINGUAS="de fr it ja nl ru sv"
 
 AC_PROG_AWK
@@ -17,6 +17,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 dnl AM_PROG_LIBTOOL
+AC_PATH_PROG(PERL,perl)
 
 AC_AIX
 AC_ISC_POSIX
@@ -30,12 +31,17 @@ AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS(mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile)
+
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
-AC_REPLACE_FUNCS(strtol)
+AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
+AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+jm_WITH_REGEX
+jm_PREREQ_ERROR
+
 AC_MSG_CHECKING(ecvt declaration)
 AC_EGREP_HEADER(ecvt, stdlib.h,
-  [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_EFGCVT, 2)], 
+  [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_EFGCVT, 2)],
   [AC_MSG_RESULT(no); AC_CHECK_FUNCS(ecvt)])
 
 AC_MSG_CHECKING(if stack overflow is detectable)
@@ -80,13 +86,13 @@ fi], [AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
 AC_ARG_WITH(gmp,
-[  --with-gmp              use gmp for extended and fractional arithmetic], 
+[  --with-gmp              use gmp for extended and fractional arithmetic],
 [use_gmp=$withval], [use_gmp=no])
 AC_MSG_RESULT($use_gmp)
 
 if test "$use_gmp" = yes; then
   LIBS="$LIBS -lgmp"
-  AC_CHECK_HEADER([gmp.h], 
+  AC_CHECK_HEADER([gmp.h],
     [AC_CACHE_CHECK([for mpq_init in libgmp], ac_cv_func_mpq_init_libgmp,
        [AC_TRY_LINK([#include <gmp.h>],
 	  [mpq_t x; (void)mpq_init(x)],
@@ -111,7 +117,9 @@ AM_WITH_DMALLOC
 AM_GNU_GETTEXT
 dnl AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
-AC_OUTPUT(Makefile intl/Makefile po/Makefile.in doc/Makefile lib/Makefile \
-src/Makefile checks/Makefile examples/Makefile, \
+AC_OUTPUT(Makefile acm4/Makefile intl/Makefile po/Makefile.in doc/Makefile \
+lib/Makefile src/Makefile tests/Makefile examples/Makefile, \
 [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile; \
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
+
+

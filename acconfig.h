@@ -67,3 +67,5 @@
 
 /* Define to 1 if using the `glocale' package for message catalogs.  */
 #undef WITH_CATALOGS
+
+#undef WITH_REGEX

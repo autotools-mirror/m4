@@ -1,6 +1,7 @@
 /* Definitions for data structures and routines for the regular
    expression library, version 0.12.
-   Copyright (C) 1985,89,90,91,92,93,95,96,97 Free Software Foundation, Inc.
+
+   Copyright (C) 1985, 89,90,91,92,93,95,96,97 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,17 +13,13 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
 #ifndef __REGEXP_LIBRARY_H__
 #define __REGEXP_LIBRARY_H__
-
-/* Allow the use in C++ code.  */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* POSIX says that <sys/types.h> must be included (by the caller) before
    <regex.h>.  */
@@ -33,23 +30,24 @@ extern "C" {
 #include <stddef.h>
 #endif
 
+
 /* The following two types have to be signed and unsigned integer type
    wide enough to hold a value of a pointer.  For most ANSI compilers
    ptrdiff_t and size_t should be likely OK.  Still size of these two
    types is 2 for Microsoft C.  Ugh... */
-typedef long int s_reg_t;
-typedef unsigned long int active_reg_t;
+typedef long s_reg_t;
+typedef unsigned long active_reg_t;
 
 /* The following bits are used to determine the regexp syntax we
    recognize.  The set/not-set meanings are chosen so that Emacs syntax
    remains the value 0.  The bits are given in alphabetical order, and
    the definitions shifted by one from the previous bit; thus, when we
    add or remove a bit, only one other definition need change.  */
-typedef unsigned long int reg_syntax_t;
+typedef unsigned long reg_syntax_t;
 
 /* If this bit is not set, then \ inside a bracket expression is literal.
    If set, then such a \ quotes the following character.  */
-#define RE_BACKSLASH_ESCAPE_IN_LISTS ((unsigned long int) 1)
+#define RE_BACKSLASH_ESCAPE_IN_LISTS (1L)
 
 /* If this bit is not set, then + and ? are operators, and \+ and \? are
      literals.
@@ -140,13 +138,21 @@ typedef unsigned long int reg_syntax_t;
    If not set, then an unmatched ) is invalid.  */
 #define RE_UNMATCHED_RIGHT_PAREN_ORD (RE_NO_EMPTY_RANGES << 1)
 
+/* If this bit is set, do not process the GNU regex operators.
+   IF not set, then the GNU regex operators are recognized. */
+#define RE_NO_GNU_OPS (RE_UNMATCHED_RIGHT_PAREN_ORD << 1)
+
 /* If this bit is set, succeed as soon as we match the whole pattern,
    without further backtracking.  */
-#define RE_NO_POSIX_BACKTRACKING (RE_UNMATCHED_RIGHT_PAREN_ORD << 1)
+#define RE_NO_POSIX_BACKTRACKING (RE_NO_GNU_OPS << 1)
 
-/* If this bit is set, do not process the GNU regex operators.
-   If not set, then the GNU regex operators are recognized. */
-#define RE_NO_GNU_OPS (RE_NO_POSIX_BACKTRACKING << 1)
+/* If this bit is set, turn on internal regex debugging.
+   If not set, and debugging was on, turn it off.
+   This only works if regex.c is compiled -DDEBUG.
+   We define this bit always, so that all that's needed to turn on
+   debugging is to recompile regex.c; the calling code can always have
+   this bit set, and it won't affect anything in the normal case. */
+#define RE_DEBUG (RE_NO_POSIX_BACKTRACKING << 1)
 
 /* This global variable defines the particular regexp syntax to use (for
    some interfaces).  When a regexp is compiled, the syntax used is
@@ -161,18 +167,19 @@ extern reg_syntax_t re_syntax_options;
 #define RE_SYNTAX_EMACS 0
 
 #define RE_SYNTAX_AWK							\
-  (RE_BACKSLASH_ESCAPE_IN_LISTS   | RE_DOT_NOT_NULL			\
-   | RE_NO_BK_PARENS              | RE_NO_BK_REFS			\
-   | RE_NO_BK_VBAR                | RE_NO_EMPTY_RANGES			\
-   | RE_DOT_NEWLINE							\
+  (RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DOT_NOT_NULL			\
+   | RE_NO_BK_PARENS            | RE_NO_BK_REFS				\
+   | RE_NO_BK_VBAR              | RE_NO_EMPTY_RANGES			\
+   | RE_DOT_NEWLINE		| RE_CONTEXT_INDEP_ANCHORS		\
    | RE_UNMATCHED_RIGHT_PAREN_ORD | RE_NO_GNU_OPS)
 
-#define RE_SYNTAX_GNU_AWK						\
-  ((RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS)		\
-   & ~(RE_DOT_NOT_NULL | RE_INTERVALS))
+#define RE_SYNTAX_GNU_AWK 						\
+  ((RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DEBUG) \
+    & ~(RE_DOT_NOT_NULL|RE_INTERVALS|RE_CONTEXT_INDEP_OPS))
 
 #define RE_SYNTAX_POSIX_AWK 						\
-  (RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS | RE_NO_GNU_OPS)
+  (RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS		\
+   | RE_INTERVALS	    | RE_NO_GNU_OPS)
 
 #define RE_SYNTAX_GREP							\
   (RE_BK_PLUS_QM              | RE_CHAR_CLASSES				\
@@ -228,8 +235,8 @@ extern reg_syntax_t re_syntax_options;
 #ifdef RE_DUP_MAX
 #undef RE_DUP_MAX
 #endif
-/* If sizeof(int) == 2, then ((1 << 15) - 1) overflows.  */
-#define RE_DUP_MAX (0x7fff)
+/* if sizeof(int) == 2, then ((1 << 15) - 1) overflows  */
+#define RE_DUP_MAX  (0x7fff)
 
 
 /* POSIX `cflags' bits (i.e., information for `regcomp').  */
@@ -505,11 +512,6 @@ extern size_t regerror
   _RE_ARGS ((int errcode, const regex_t *preg, char *errbuf,
              size_t errbuf_size));
 extern void regfree _RE_ARGS ((regex_t *preg));
-
-
-#ifdef __cplusplus
-}
-#endif	/* C++ */
 
 #endif /* not __REGEXP_LIBRARY_H__ */
 
