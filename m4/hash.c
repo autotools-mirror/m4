@@ -94,10 +94,10 @@ m4_hash_new (size_t size, m4_hash_hash_func *hash_func,
   if (size == 0)
     size = M4_HASH_DEFAULT_SIZE;
 
-  hash			= XMALLOC (m4_hash, 1);
+  hash			= xmalloc (sizeof *hash);
   HASH_SIZE (hash)	= size;
   HASH_LENGTH (hash)	= 0;
-  HASH_BUCKETS (hash)	= XCALLOC (hash_node *, size);
+  HASH_BUCKETS (hash)	= xcalloc (size, sizeof HASH_BUCKETS (hash));
   HASH_HASH_FUNC (hash)	= hash_func;
   HASH_CMP_FUNC (hash)	= cmp_func;
 
@@ -178,7 +178,7 @@ node_new (const void *key, void *value)
     }
   else
     {
-      node	= XMALLOC (hash_node, 1);
+      node	= xmalloc (sizeof *node);
     }
 
   assert (node);
@@ -345,7 +345,7 @@ m4_hash_resize (m4_hash *hash, size_t size)
   original_buckets	= HASH_BUCKETS (hash);
 
   HASH_SIZE (hash)	= size;
-  HASH_BUCKETS (hash)= XCALLOC (hash_node *, size);
+  HASH_BUCKETS (hash)   = xcalloc (size, sizeof HASH_BUCKETS (hash));
 
   {
     size_t i;
@@ -376,7 +376,7 @@ maybe_grow (m4_hash *hash)
 
       /* HASH sizes are always 1 less than a power of 2.  */
       HASH_SIZE (hash)    = (2* (1+ original_size)) -1;
-      HASH_BUCKETS (hash) = XCALLOC (hash_node *, hash->size);
+      HASH_BUCKETS (hash) = xcalloc (hash->size, sizeof HASH_BUCKETS (hash));
 
       {
 	size_t i;
@@ -447,7 +447,7 @@ m4_get_hash_iterator_next (const m4_hash *hash, m4_hash_iterator *place)
   /* On the first iteration, allocate an iterator.  */
   if (!place)
     {
-      place = XCALLOC (m4_hash_iterator, 1);
+      place = xcalloc (1, sizeof *place);
       ITERATOR_HASH (place) = hash;
     }
 

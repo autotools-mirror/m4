@@ -1,3 +1,21 @@
+2003-09-15  Paul Eggert  <eggert@twinsun.com>
+
+	Don't use XMALLOC and XCALLOC.  Once we install the
+	corresponding patch into gnulib, this will fix some
+	address-calculation overflow bugs on hosts where calloc (A, B)
+	returns garbage when A*B overflows.
+
+	* m4/hash.c (m4_hash_new, node_new, m4_hash_resize,
+	maybe_grow, m4_get_hash_iterator_next): Replace XMALLOC with
+	xmalloc, XCALLOC with xcalloc.
+	* m4/m4.c (m4_create): Likewise.
+	* m4/m4private.h (m4_symbol_value_create): Likewise.
+	* m4/output.c (m4_output_init): Likewise.
+	* m4/symtab.c (symtab_fetch, m4_set_symbol_traced): Likewise.
+	* m4/syntax.c (remove_syntax_attribute): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/main.c (main): Likewise.
+
 2003-10-07  Gary V. Vaughan  <gary@gnu.org>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Search in the new acm4 and

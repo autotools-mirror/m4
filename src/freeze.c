@@ -465,7 +465,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	  if (bp)
 	    {
-	      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+	      m4_symbol_value *token = xcalloc (1, sizeof *token);
 
 	      if (bp->groks_macro_args)
 		BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
@@ -651,7 +651,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	/* Enter a macro having an expansion text as a definition.  */
 	{
-	  m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+	  m4_symbol_value *token = xcalloc (1, sizeof *token);
 	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)

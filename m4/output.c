@@ -105,7 +105,7 @@ int m4_output_current_line;
 void
 m4_output_init (void)
 {
-  diversion_table = XMALLOC (struct diversion, 1);
+  diversion_table = xmalloc (sizeof *diversion_table);
   diversions = 1;
   diversion_table[0].file = stdout;
   diversion_table[0].buffer = NULL;

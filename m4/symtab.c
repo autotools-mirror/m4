@@ -127,7 +127,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
     }
   else
     {
-      symbol = XCALLOC (m4_symbol, 1);
+      symbol = xcalloc (1, sizeof *symbol);
       m4_hash_insert (symtab->table, xstrdup (name), symbol);
     }
 
@@ -414,7 +414,7 @@ m4_set_symbol_traced (m4_symbol *symbol, bool value)
 m4_symbol_value *
 m4_symbol_value_create (void)
 {
-  return XCALLOC (m4_symbol_value, 1);
+  return xcalloc (1, sizeof (m4_symbol_value));
 }
 
 #undef m4_get_symbol_value

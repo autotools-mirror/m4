@@ -275,7 +275,7 @@ main (int argc, char *const *argv, char *const *envp)
       case 'm':
 	/* Arguments that cannot be handled until later are accumulated.  */
 
-	new = XMALLOC (macro_definition, 1);
+	new = xmalloc (sizeof *new);
 	new->code = optchar;
 	new->macro = optarg;
 	new->next = NULL;
@@ -417,7 +417,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       for (env = envp; *env != NULL; env++)
 	{
-	  new = XMALLOC (macro_definition, 1);
+	  new = xmalloc (sizeof *new);
 	  new->code = 'D';
 	  new->macro = *env;
 	  new->next = head;
