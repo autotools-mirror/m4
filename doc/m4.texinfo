@@ -2117,7 +2117,7 @@ With @code{changesyntax} we can modify the meaning of a word.
 define(`test.1', `TEST ONE')
 @result{}
 __file__
-@result{}in
+@result{}input.m4
 changesyntax(`O_', `W.')
 @result{}
 __file__
@@ -2361,13 +2361,13 @@ only when given arguments.
 @example
 include(`no-such-file')
 @result{}
-@error{}m4: in: 1: Cannot open no-such-file: No such file or directory
+@error{}m4: input.m4: 1: Cannot open no-such-file: No such file or directory
 sinclude(`no-such-file')
 @result{}
 @end example
 
 Assume in the following that the file @file{incl.m4} contains the lines:
-@comment ignore
+@comment file: incl.m4
 @example
 Include file start
 foo
@@ -2570,7 +2570,15 @@ GNU @code{m4} allows named files to be undiverted.  Given a non-numeric
 argument, the contents of the file named will be copied, uninterpreted, to
 the current output.  This complements the builtin @code{include}
 (@pxref{Include}).  To illustrate the difference, assume the file
-@file{foo} contains the word @samp{bar}:
+@file{foo} contains:
+
+@comment file: foo
+@example
+bar
+@end example
+
+@noindent
+then
 
 @example
 define(`bar', `BAR')
@@ -3178,7 +3186,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4: in: 7: Bad expression in eval: foo / 6
+@error{}m4: input.m4: 7: Bad expression in eval: foo / 6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3404,7 +3412,7 @@ the current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `Input error
 ')
-@error{}m4:in:1: Input error
+@error{}m4:input.m4:1: Input error
 @result{}
 @end example
 @end deffn
@@ -3427,7 +3435,7 @@ define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: in: 3: fatal error: This is a BAD one, buster
+@error{}m4: input.m4: 3: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro

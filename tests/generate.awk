@@ -42,6 +42,10 @@ BEGIN {
   seq = 0;
 }
 
+/^@comment file: / {
+  file = $3;
+}
+
 /^@comment ignore$/ {
   getline;
   next;
@@ -59,20 +63,40 @@ BEGIN {
     {
       if (seq == 0)
         new_group(node);
-      seq++;
-      printf ("# From example in %s line %d.\n\n", FILENAME, NR)
+      if (!file)
+        seq++;
+      printf ("# %s:%d\n", FILENAME, NR)
       next;
     }
-  else if ($0 ~ /^@end example$/)
+
+  if ($0 ~ /^@end example$/)
     {
-      new_test(input, status, output, error);
-      status = 0;
-      input = output = error = "";
+      if (file != "")
+        {
+           if (output || error)
+             {
+               fatal("while getting file " file      \
+                     " found output = " output ","  \
+                     " found error = " error);
+
+             }
+           input = normalize(input);
+           printf ("# FOO: %s\n", file);
+           printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
+        }
+      else
+        {
+           new_test(input, status, output, error);
+           status = 0;
+        }
+      file = input = output = error = "";
       next;
     }
-  else if ($0 ~ /^\^D$/)
+
+  if ($0 ~ /^\^D$/)
     next;
-  else if ($0 ~ /^@result\{\}/)
+
+  if ($0 ~ /^@result\{\}/)
     output = output $0 "\n";
   else if ($0 ~ /^@error\{\}/)
     error = error $0 "\n";
@@ -126,9 +150,9 @@ function new_test(input, status, output, error) {
   output = normalize(output);
   error = normalize(error);
 
-  printf ("AT_DATA([[in]],\n[[%s]])\n\n", input);
+  printf ("AT_DATA([[input.m4]],\n[[%s]])\n\n", input);
   # Some of these tests `include' files from tests/.
-  printf ("AT_CHECK_M4([[-I $srcdir in]], %s,", status);
+  printf ("AT_CHECK_M4([[input.m4]], %s,", status);
   if (output)
     printf ("\n[[%s]]", output);
   else
@@ -138,4 +162,9 @@ function new_test(input, status, output, error) {
   else
     printf (")");
   printf ("\n\n");
+}
+
+function fatal(msg) {
+  print "generate.awk: " msg > "/dev/stderr"
+  exit 1
 }

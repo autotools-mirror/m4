@@ -26,8 +26,7 @@ DISTCLEANFILES       = atconfig atlocal
 MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
 OTHER_FILES = \
-	iso8859.m4 incl.m4 foo \
-	stackovf.test
+	iso8859.m4 stackovf.test
 
 TESTSUITE_AT = \
 	testsuite.at \
