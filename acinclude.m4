@@ -446,6 +446,15 @@ AC_DEFUN(AM_WITH_GMP,
     AC_CHECK_SIZEOF(long long int, 0)
   fi
   ])
+# Written by René Seindal (rene@seindal.dk)
+#
+# This file can be copied and used freely without restrictions.  It can
+# be used in projects which are not available under the GNU Public License
+# but which still want to provide support for the GNU gettext functionality.
+# Please note that the actual code is *not* freely available.
+
+# serial 1
+
 
 AC_DEFUN(AM_WITH_MODULES,
   [AC_MSG_CHECKING(if support for dynamic modules is wanted)
@@ -455,6 +464,7 @@ AC_DEFUN(AM_WITH_MODULES,
   AC_MSG_RESULT($use_modules)
 
   if test "$use_modules" = yes; then
+    dnl We might no have it anyway, after all.
     with_modules=no
 
     dnl Test for dlopen in libc
@@ -489,7 +499,7 @@ AC_DEFUN(AM_WITH_MODULES,
        if test "$ac_cv_lib_dld_shl_load" = yes; then
 	  with_modules=yes
 
-	  LIBS="$LIBS -ldld"
+#	  LIBS="$LIBS -ldld"
 	  AC_DEFINE(HAVE_SHL_LOAD,1)
        fi
     fi
@@ -500,6 +510,8 @@ AC_DEFUN(AM_WITH_MODULES,
 
       MODULES_DIR=modules
       MODULE_PATH="${pkglibexecdir}"
+
+      AC_DEFINE(WITH_MODULES, 1)
     fi
 
     AC_SUBST(DLLDFLAGS)
@@ -507,4 +519,5 @@ AC_DEFUN(AM_WITH_MODULES,
     AC_SUBST(MODULE_PATH)
   fi
   ])
+
 

@@ -22,7 +22,11 @@
 #include <pwd.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef TM_IN_SYS_TIME
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 #include <sys/utsname.h>
 #include <sys/types.h>
 
@@ -108,7 +112,22 @@ m4_setenv (struct obstack *obs, int argc, token_data **argv)
     if (!numeric_arg(argv[0], ARG(3), &overwrite))
       return;
 
+#ifdef HAVE_SETENV
   setenv(ARG(1), ARG(2), overwrite);
+#else
+#ifdef HAVE_PUTENV
+  if (!overwrite && getenv (ARG(1)) != NULL)
+    return;
+
+  obstack_grow (obs, ARG(1), strlen (ARG(1)));
+  obstack_1grow (obs, '=');
+  obstack_grow (obs, ARG(2), strlen (ARG(2)));
+  obstack_1grow (obs, '\0');
+
+  env = obstack_finish (obs);
+  putenv (env);
+#endif /* HAVE_PUTENV */
+#endif /* HAVE_SETENV */
 }
 
 static void
@@ -119,7 +138,9 @@ m4_unsetenv (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  unsetenv(ARG(1));
+#ifdef HAVE_UNSETENV
+  unsetenv (ARG(1));
+#endif /* HAVE_UNSETENV */
 }
 
 static void
@@ -130,7 +151,7 @@ m4_getlogin (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 1))
     return;
 
-  login =  getlogin();
+  login = getlogin ();
 
   if (login != NULL)
     shipout_string (obs, login, 0, FALSE);

@@ -744,7 +744,7 @@ include a file, if it exists, expanding to nothing if it does not.
 
      include(`no-such-file')
      =>
-     error-->in:1: m4: Cannot open no-such-file: No such file or directory
+     error-->m4: in: 1: Cannot open no-such-file: No such file or directory
      sinclude(`no-such-file')
      =>
 
@@ -1276,6 +1276,7 @@ decrement operations.
 
 * Incr::                        Decrement and increment operators
 * Eval::                        Evaluating integer or rational expressions
+* Mpeval::
 
 
 File: m4.info,  Node: Incr,  Next: Eval,  Prev: Arithmetic,  Up: Arithmetic
@@ -1301,7 +1302,7 @@ decremented, respectively, by one.
 arguments.
 
 
-File: m4.info,  Node: Eval,  Prev: Incr,  Up: Arithmetic
+File: m4.info,  Node: Eval,  Next: Mpeval,  Prev: Incr,  Up: Arithmetic
 
 Evaluating integer or rational expressions
 ==========================================
@@ -1371,17 +1372,8 @@ then the digits making the number.  For any radix, the digits are `0',
 Lower and upper case letters can be used interchangeably in numbers
 prefixes and as number digits.
 
-   Calculations are done in 32 bit, but `m4' will use wider integers if
-available.
-
-   When compiled with a multiple precision arithmetic library (*note
-Experiments::.), numbers may be of any length.  The `:' operator
-rationally divides two numbers and canonicalizes the result.  The `/'
-operator always returns the quotient of the division.  To convert a
-rational value to integral, divide (`/') by 1.  Some operators such as
-`%', `<<', `>>', `~', `&', `|' and `^' operate only on integers and
-will truncate any rational remainder.  `**' assumes that the exponent
-is integral.
+   Calculations are done in at lease 32 bit, but `m4' will use wider
+integers if available.
 
    Parentheses may be used to group subexpressions whenever needed.
 For the relational operators, a true relation returns `1', and a false
@@ -1402,7 +1394,7 @@ relation return `0'.
      define(`foo', `666')
      =>
      eval(`foo'/6)
-     error-->in:7: m4: Bad expression in eval: foo/6
+     error-->m4: in: 7: Bad expression in eval: foo/6
      =>
      eval(foo/6)
      =>111
@@ -1432,6 +1424,25 @@ requested width.
    Take note that RADIX cannot be larger than 36.
 
    The builtin macro `eval' is recognized only when given arguments.
+
+
+File: m4.info,  Node: Mpeval,  Prev: Eval,  Up: Arithmetic
+
+Multiple precision arithmetic
+=============================
+
+   When `m4' is compiled with a multiple precision arithmetic library
+(*note Experiments::.), a builtin `mpeval' is defined.
+
+   It is almost identical to `eval', except the calculations are done
+with infinite precision.  Numbers may be of any length.
+
+   The `:' operator rationally divides two numbers and canonicalizes
+the result.  The `/' operator always returns the quotient of the
+division.  To convert a rational value to integral, divide (`/') by 1.
+Some operators such as `%', `<<', `>>', `~', `&', `|' and `^' operate
+only on integers and will truncate any rational remainder.  `**'
+assumes that the exponent is integral.
 
 
 File: m4.info,  Node: UNIX commands,  Next: Miscellaneous,  Prev: Arithmetic,  Up: Top

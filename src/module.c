@@ -20,6 +20,8 @@
 
 #ifdef WITH_MODULES
 
+#include "pathconf.h"
+
 #define DEBUG_MODULES
 #undef DEBUG_MODULES
 
@@ -28,9 +30,11 @@
  * compiled shared object, that can be linked into GNU m4 at run
  * time. Information about creating modules is in ../modules/README. 
  *
- * The current implementation uses dlopen(3).  To enable this
- * experimental feature give configure the `--with-modules' switch.
- * This implementation is only tested on Linux.
+ * The current implementation uses either dlopen(3) (exists on
+ * GNU/Linux, OSF, Solaris, SunOS) or shl_load(3) (exists on HPUX).  To
+ * enable this experimental feature give configure the `--with-modules'
+ * switch.  This implementation is only tested on GNU/Linux, OSF,
+ * Solaris, SunOS and HPUX.
  *
  * A m4 module need only define one external symbol, called
  * `m4_macro_table'.  This symbol should point to a table of `struct
@@ -39,22 +43,21 @@
  * symbol table.
  *
  * The code implementing loadable modules is modest.  It is divided
- * between the files path.c (search in module path), builtin.c (user
- * interface and support for multiple builtin tables) and this file (OS
- * dependant routines).
+ * between the files builtin.c (user interface and support for multiple
+ * builtin tables) and this file (OS dependant routines).
  *
- * To load a module, use `loadmodule(modulename.so)', where .so is the
- * normal extention for shared object files.  The function
+ * To load a module, use `loadmodule(modulename)'.  The function
  * `m4_loadmodule' calls module_load() in this file, which uses
- * module_search() in path.c to find the module in the module search
- * path.  This path is initialised from the environment variable
- * M4MODPATH, and cannot be modified in any way.  Module_search()
- * constructs absolute file names and calls module_try_load() in this
- * file.  This function returns NULL on failure and a non-NULL void* on
- * success.  If succesful module_search() returns the value of this
- * void*, which is a handle for the vm segment mapped.  Module_load()
- * checks to see if the module is alreay loaded, and if not, retrives
- * the symbol `m4_macro_table' and returns it's value to
+ * module_search() to find the module in the module search path.  This
+ * path is initialised from the environment variable M4MODPATH, or if
+ * not set, initalised to a configuration time default.  Module_search()
+ * constructs absolute file names and calls module_try_load().  This
+ * function reads the libtool .la file to get the real library name
+ * (which can be system dependent) and returns NULL on failure and a
+ * non-NULL void* on success.  If succesful module_search() returns the
+ * value of this void*, which is a handle for the vm segment mapped.
+ * Module_load() checks to see if the module is alreay loaded, and if
+ * not, retrives the symbol `m4_macro_table' and returns it's value to
  * m4_loadmodule().  This pointer should be a builtin*, which is
  * installed using install_builtin_table().
  *
@@ -68,77 +71,129 @@
  * safe to load the same module several times, it has no effect.
  **/
 
+static const char *dynamic_error_message = NULL;
+
+static const char *
+dynamic_error ()
+{
+  return dynamic_error_message;
+}
+
+
 #if defined (HAVE_SHL_LOAD)
 
 #include <dl.h>
 
-voidstar
+static voidstar
 dynamic_load (const char *modname)
 {
-  return shl_load (modname, BIND_IMMEDIATE, 0L);
+  voidstar handle;
+
+  dynamic_error_message = NULL;
+
+  handle = shl_load (modname, BIND_IMMEDIATE, 0L);
+  if (handle == NULL)
+    dynamic_error_message = strerror (errno);
+
+  return handle;
 }
 
-void
+static void
 dynamic_unload (voidstar handle)
 {
   shl_unload ((shl_t)handle);
 }
 
-voidstar
+static voidstar
 dynamic_find_data (voidstar handle, const char *symbol)
 {
   voidstar addr;
+  shl_t *hp = (shl_t *)&handle;
 
-  /* XXX TYPE_PROCEDURE is probably wrong here, as it is a data pointer */
-  shl_findsym ((shl_t)handle, symbol, TYPE_PROCEDURE, (voidstar)&addr);
-  return addr;
+  dynamic_error_message = NULL;
+
+  if (!shl_findsym (hp, symbol, TYPE_DATA, (voidstar)&addr))
+    {
+      dynamic_error_message = strerror (errno);
+      return addr;
+    }
+  else
+    return NULL;
 }
 
-voidstar
+static voidstar
 dynamic_find_func (voidstar handle, const char *symbol)
 {
   voidstar addr;
+  shl_t *hp = (shl_t *)&handle;
 
-  shl_findsym ((shl_t)handle, symbol, TYPE_PROCEDURE, (voidstar)&addr);
-  return addr;
+  dynamic_error_message = NULL;
+
+  if (!shl_findsym (hp, symbol, TYPE_PROCEDURE, (voidstar)&addr))
+    {
+      dynamic_error_message = strerror (errno);
+      return addr;
+    }
+  else
+    return NULL;
 }
 
 #else  /* HAVE_DLOPEN */
 
 #include <dlfcn.h>
 
-voidstar
+static voidstar
 dynamic_load (const char *modname)
 {
-  return dlopen (modname, RTLD_NOW);
+  voidstar handle;
+
+  dynamic_error_message = NULL;
+
+  handle = dlopen (modname, RTLD_NOW);
+  if (handle == NULL)
+    dynamic_error_message = dlerror ();
+
+  return handle;
 }
 
-void
+static void
 dynamic_unload(voidstar handle)
 {
   dlclose (handle);
 }
 
-voidstar
+static voidstar
 dynamic_find_data (voidstar handle, const char *symbol)
 {
-  return dlsym (handle, symbol);
+  voidstar sym;
+
+  dynamic_error_message = NULL;
+
+  sym = dlsym (handle, symbol);
+  if (sym == NULL)
+    dynamic_error_message = dlerror ();
+
+  return sym;
 }
 
-voidstar
+static voidstar
 dynamic_find_func (voidstar handle, const char *symbol)
 {
-  return dlsym (handle, symbol);
+  return dynamic_find_data (handle, symbol);
 }
 
 #endif /* HAVE_DLOPEN */
 
 
 
-
+
 /* 
  * The rest of the code should be common for all interfaces. 
  */
+
+/* module search path */
+
+static struct search_path_info *modpath; /* the list of module directories */
 
 
 /* This list is used to check for repeated loading of the same modules.  */
@@ -162,21 +217,108 @@ static module_list *modules;
 void
 module_init (void)
 {
-  module_env_init ();
+  char *path;
+
+  modpath = search_path_info_new ();
+
+  if (no_gnu_extensions)
+    return;
+
+  path = getenv ("M4MODPATH");
+  if (path == NULL)
+    search_path_add (modpath, MODULE_PATH);
+  else
+    search_path_env_init (modpath, path, TRUE);
+
 }
 
 /* 
- * Attempt to load a module with a absolute file name.  It is used as a
- * callback from module_search() in path.c.
+ * This function will try to find the .la file which libtool have made
+ * for the library, lookup the dlname='xxx' line and load that file from
+ * the same directory.  The argument FILE is a pointer to the file name
+ * part of the PATH buffer.  The PATH buffer should be large enough for
+ * file name changes needed to find the library file.  These are:
+ * MODNAME -> libMODNAME.la -> dlname from file.
  */
-voidstar
-module_try_load (const char *modname)
+
+static voidstar
+module_try_load (char *path, char *file)
 {
-  return dynamic_load (modname);
+  FILE *fp;
+  char buf[1024];
+  char *tmp;
+
+  /* Find libFILE.la file by libtool */
+  sprintf (buf, "lib%s.la", file);
+  strcpy (file, buf);
+
+  fp = fopen (path, "r");
+  if (fp == NULL)
+    return NULL;
+
+  /* Search file for true library name */
+  while (fgets (buf, sizeof buf, fp) != NULL)
+    {
+      if (strncmp (buf, "dlname='", 8) == 0)
+	{
+	  tmp = strrchr (buf, '\'');
+	  if (tmp != NULL) {
+	    *tmp = '\0';
+	    strcpy (file, buf+8);
+
+	    fclose (fp);
+	    return dynamic_load (path);
+	  }
+	}
+    }
+
+  fclose (fp);
+  return NULL;
 }
 
+static voidstar
+module_search (const char *modname)
+{
+  voidstar value = NULL;
+  struct search_path *incl;
+  char *name;			/* buffer for constructed name */
 
-void
+  /* If absolute, modname is a filename.  */
+  if (*modname == '/')
+    {
+      name = xstrdup (modname);
+      value = module_try_load (name, strrchr (name, '/')+1);
+      xfree (name);
+      return value;
+    }
+
+  /* Allocate buffer for mangling path, extra for shlib naming conventions */
+  name = (char *) xmalloc (modpath->max_length + 1 + strlen (modname) +1+64);
+
+  for (incl = modpath->list; incl != NULL; incl = incl->next)
+    {
+      strncpy (name, incl->dir, incl->len);
+      name[incl->len] = '/';
+      strcpy (name + incl->len + 1, modname);
+
+#ifdef DEBUG_MODULE
+      fprintf (stderr, "module_search (%s) -- trying %s\n", modname, name);
+#endif
+
+      value = module_try_load (name, name + incl->len + 1);
+      if (value != NULL)
+	{
+	  if (debug_level & DEBUG_TRACE_PATH)
+	    DEBUG_MESSAGE2 (_("Module search for `%s' found `%s'"),
+			    modname, name);
+	  break;
+	}
+    }
+  xfree (name);
+  return value;
+}
+
+static void
 module_unload(voidstar handle)
 {
   dynamic_unload (handle);
@@ -199,11 +341,16 @@ module_load (const char *modname, struct obstack *obs)
   builtin *btab;
   module_init_t *init_func;
 
-  handle = module_search(modname, module_try_load);
+  handle = module_search (modname);
   if (handle == NULL)
     {
-      M4ERROR ((EXIT_FAILURE, 0, 
-		_("ERROR: cannot find module `%s'"), modname));
+      if (dynamic_error ())
+	M4ERROR ((EXIT_FAILURE, 0, 
+		  _("ERROR: cannot find module `%s': %s"), 
+		  modname, dynamic_error ()));
+      else
+	M4ERROR ((EXIT_FAILURE, 0, 
+		  _("ERROR: cannot find module `%s'"), modname));
     }
 
   for (list = modules; list != NULL; list = list->next)

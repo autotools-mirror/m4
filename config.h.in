@@ -29,6 +29,9 @@
 /* Define if you have a working `mmap' system call.  */
 #undef HAVE_MMAP
 
+/* Define if you have the strftime function.  */
+#undef HAVE_STRFTIME
+
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF
 
@@ -66,6 +69,9 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
+/* Define if your <sys/time.h> declares struct tm.  */
+#undef TM_IN_SYS_TIME
+
 /* Define to 1 if the changeword(REGEXP) functionnality is wanted.  */
 #undef ENABLE_CHANGEWORD
 
@@ -100,6 +106,9 @@
 
 /* Define to 1 if the GNU multiple precision library should be used.  */
 #undef WITH_GMP
+
+/* Define to 1 if there is support for dynamic loading of modules.  */
+#undef WITH_MODULES
 
 /* Define to 1 if the -ldl library should be used .  */
 #undef HAVE_DLOPEN
@@ -137,6 +146,9 @@
 /* Define if you have the __argz_stringify function.  */
 #undef HAVE___ARGZ_STRINGIFY
 
+/* Define if you have the clearenv function.  */
+#undef HAVE_CLEARENV
+
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 
@@ -152,11 +164,17 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
+
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
 /* Define if you have the mkstemp function.  */
 #undef HAVE_MKSTEMP
+
+/* Define if you have the mktime function.  */
+#undef HAVE_MKTIME
 
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP
@@ -208,6 +226,12 @@
 
 /* Define if you have the tmpfile function.  */
 #undef HAVE_TMPFILE
+
+/* Define if you have the uname function.  */
+#undef HAVE_UNAME
+
+/* Define if you have the unsetenv function.  */
+#undef HAVE_UNSETENV
 
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF

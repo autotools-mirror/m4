@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/regexp.2.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 2919
+# generated from example in ../doc/m4.texinfo line 2929
 
 . ${srcdir}/defs
 

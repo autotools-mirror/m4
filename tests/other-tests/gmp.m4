@@ -6,5 +6,5 @@ define(`_forloop',
        `$4`'ifelse($1, `$3', ,
 			 `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
 divert
-forloop(`x', 1, 100, `2**x = eval(2**x)
+forloop(`x', 1, 100, `2**x = mpeval(2**x)
 ')

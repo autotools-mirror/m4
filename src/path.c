@@ -16,82 +16,60 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Handling of path search of included files via the builtins "include"
-   and "sinclude" (and "loadmodule" if configured).  */
+   and "sinclude".  */
 
 #include "m4.h"
 
-#ifdef WITH_MODULES
-#include "pathconf.h"
-#endif /* WITH_MODULES */
-
-struct includes
-{
-  struct includes *next;	/* next directory to search */
-  const char *dir;		/* directory */
-  int len;
-};
-
-typedef struct includes includes;
-
-struct include_list
-{
-  includes *list;		/* the list of path directories */
-  includes *list_end;		/* the end of same */
-  int max_length;		/* length of longest directory name */
-};
-
-typedef struct include_list include_list;
-
-static include_list dirpath;	/* the list of path directories */
-
-#ifdef WITH_MODULES
-static include_list modpath;	/* the list of module directories */
-#endif /* WITH_MODULES */
+static struct search_path_info dirpath; /* the list of path directories */
 
 
-void
-include_init (void)
-{
-  dirpath.list = NULL;
-  dirpath.list_end = NULL;
-  dirpath.max_length = 0;
+/*
+ * Generel functions for search paths
+ */
 
-#ifdef WITH_MODULES
-  modpath.list = NULL;
-  modpath.list_end = NULL;
-  modpath.max_length = 0;
-#endif /* WITH_MODULES */
+struct search_path_info *
+search_path_info_new (void)
+{
+  struct search_path_info *info;
+
+  info = (struct search_path_info *)
+    xmalloc (sizeof (struct search_path_info));
+  info->list = NULL;
+  info->list_end = NULL;
+  info->max_length = 0;
+
+  return info;
 }
 
-static void
-include_directory (struct include_list *list, const char *dir)
+void
+search_path_add (struct search_path_info *info, const char *dir)
 {
-  includes *incl;
+  search_path *path;
 
   if (*dir == '\0')
     dir = ".";
 
-  incl = (includes *) xmalloc (sizeof (struct includes));
-  incl->next = NULL;
-  incl->len = strlen (dir);
-  incl->dir = xstrdup (dir);
+  path = (struct search_path *) xmalloc (sizeof (struct search_path));
+  path->next = NULL;
+  path->len = strlen (dir);
+  path->dir = xstrdup (dir);
 
-  if (incl->len > list->max_length) /* remember len of longest directory */
-    list->max_length = incl->len;
+  if (path->len > info->max_length) /* remember len of longest directory */
+    info->max_length = path->len;
 
-  if (list->list_end == NULL)
-    list->list = incl;
+  if (info->list_end == NULL)
+    info->list = path;
   else
-    list->list_end->next = incl;
-  list->list_end = incl;
+    info->list_end->next = path;
+  info->list_end = path;
 }
 
-static void
-env_init (struct include_list *list, char *path, boolean abs)
+void
+search_path_env_init (struct search_path_info *info, char *path, boolean abs)
 {
   char *path_end;
 
-  if (path == NULL)
+  if (info == NULL || path == NULL)
     return;
 
   do
@@ -100,10 +78,19 @@ env_init (struct include_list *list, char *path, boolean abs)
       if (path_end)
 	*path_end = '\0';
       if (!abs || *path == '/')
-	include_directory (list, path);
+	search_path_add (info, path);
       path = path_end + 1;
     }
   while (path_end);
+}
+
+
+void
+include_init (void)
+{
+  dirpath.list = NULL;
+  dirpath.list_end = NULL;
+  dirpath.max_length = 0;
 }
 
 
@@ -115,7 +102,7 @@ include_env_init (void)
   if (no_gnu_extensions)
     return;
 
-  env_init (&dirpath, getenv ("M4PATH"), FALSE);
+  search_path_env_init (&dirpath, getenv ("M4PATH"), FALSE);
 }
 
 void
@@ -124,7 +111,7 @@ add_include_directory (const char *dir)
   if (no_gnu_extensions)
     return;
 
-  include_directory (&dirpath, dir);
+  search_path_add (&dirpath, dir);
 
 #ifdef DEBUG_INCL
   fprintf (stderr, "add_include_directory (%s);\n", dir);
@@ -135,7 +122,7 @@ FILE *
 path_search (const char *dir, char **expanded_name)
 {
   FILE *fp;
-  includes *incl;
+  struct search_path *incl;
   char *name;			/* buffer for constructed name */
 
   /* Look in current working directory first.  */
@@ -193,70 +180,3 @@ include_dump (void)
 }
 
 #endif /* DEBUG_INCL */
-
-
-/* Functions for module search path */
-
-#ifdef WITH_MODULES
-
-void
-module_env_init (void)
-{
-  if (no_gnu_extensions)
-    return;
-
-  include_directory (&modpath, MODULE_PATH);
-  env_init (&modpath, getenv ("M4MODPATH"), TRUE);
-}
-
-void
-add_module_directory (const char *dir)
-{
-  if (no_gnu_extensions)
-    return;
-
-  if (*dir == '/')
-    include_directory (&modpath, dir);
-
-#ifdef DEBUG_INCL
-  fprintf (stderr, "add_module_directory (%s);\n", dir);
-#endif
-}
-
-voidstar
-module_search (const char *modname, module_func *try)
-{
-  voidstar value = NULL;
-  includes *incl;
-  char *name;			/* buffer for constructed name */
-
-  /* If absolute, modname is a filename.  */
-  if (*modname == '/')
-    return (*try) (modname);
-
-  name = (char *) xmalloc (modpath.max_length + 1 + strlen (modname) + 1);
-
-  for (incl = modpath.list; incl != NULL; incl = incl->next)
-    {
-      strncpy (name, incl->dir, incl->len);
-      name[incl->len] = '/';
-      strcpy (name + incl->len + 1, modname);
-
-#ifdef DEBUG_MODULE
-      fprintf (stderr, "module_search (%s) -- trying %s\n", modname, name);
-#endif
-
-      value = (*try) (name);
-      if (value != NULL)
-	{
-	  if (debug_level & DEBUG_TRACE_PATH)
-	    DEBUG_MESSAGE2 (_("Module search for `%s' found `%s'"),
-			    modname, name);
-	  break;
-	}
-    }
-  xfree (name);
-  return value;
-}
-
-#endif /* WITH_MODULES */

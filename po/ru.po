@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-11-18 12:55+0100\n"
+"POT-Creation-Date: 1998-11-29 04:20+0100\n"
 "PO-Revision-Date: 1997-07-12 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -12,103 +12,103 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/builtin.c:329
+#: src/builtin.c:337
 #, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr "Предупреждение: Слишком мало аргументов для встроенной лексемы '%s'"
 
-#: src/builtin.c:335
+#: src/builtin.c:343
 #, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr ""
 "Предупреждение: Избыточные аргументы для встроенной лексемы '%s' "
 "проигнорированы"
 
-#: src/builtin.c:363
+#: src/builtin.c:371
 #, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr "Не числовой аргумент для встроенной лексемы '%s'"
 
-#: src/builtin.c:474
+#: src/builtin.c:482
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в define_macro ()"
 
-#: src/builtin.c:669 src/builtin.c:732 src/builtin.c:1358 src/builtin.c:1382
+#: src/builtin.c:677 src/builtin.c:740 src/builtin.c:1383 src/builtin.c:1407
 #, c-format
 msgid "Undefined name %s"
 msgstr "Имя %s неопределено"
 
-#: src/builtin.c:697
+#: src/builtin.c:705
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена!"
 
-#: src/builtin.c:705
+#: src/builtin.c:713
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в m4_dumpdef ()"
 
-#: src/builtin.c:756
+#: src/builtin.c:764
 #, c-format
 msgid "Undefined macro `%s'"
 msgstr "Неопределенный макрос '%s'"
 
-#: src/builtin.c:794
+#: src/builtin.c:802
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в m4_defn ()"
 
-#: src/builtin.c:860
+#: src/builtin.c:868
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Невозможно открыть канал для комманды '%s'"
 
-#: src/builtin.c:897
+#: src/builtin.c:908
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Радикс в выражении выходит за пределы (radix = %d)"
 
-#: src/builtin.c:906
+#: src/builtin.c:917
 msgid "Negative width to eval"
 msgstr "Отрицательная ширина"
 
-#: src/builtin.c:998
+#: src/builtin.c:1023
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Не числовой аргумент для %s"
 
-#: src/builtin.c:1010
+#: src/builtin.c:1035
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: src/builtin.c:1158
+#: src/builtin.c:1183
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Имя %s неопределено"
 
-#: src/builtin.c:1209 src/freeze.c:207
+#: src/builtin.c:1234 src/freeze.c:207
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
 
-#: src/builtin.c:1418
+#: src/builtin.c:1443
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Режим отладки: неверный флаг отладки: '%s'"
 
-#: src/builtin.c:1454
+#: src/builtin.c:1479
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Невозможно назначить файл ошибок %s"
 
-#: src/builtin.c:1671
+#: src/builtin.c:1696
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
+#: src/builtin.c:1757 src/builtin.c:1817 src/input.c:1012
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
 
-#: src/builtin.c:1743 src/builtin.c:1816
+#: src/builtin.c:1768 src/builtin.c:1841
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Ошибка сопоставления регулярного выражения '%s'"
@@ -121,49 +121,49 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена! (trace_pre ())"
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы (trace_pre ())"
 
-#: src/eval.c:297
+#: src/eval.c:309
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "Неверное выражение (отсутствует правые скобки): %s"
 
-#: src/eval.c:303
+#: src/eval.c:315
 #, c-format
 msgid "Bad expression in eval: %s"
 msgstr "Неверное выражение: %s"
 
-#: src/eval.c:308
+#: src/eval.c:320
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "Неверное выражение (bad input): %s"
 
-#: src/eval.c:313
+#: src/eval.c:325
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "Неверное выражение (excess input): %s"
 
-#: src/eval.c:318
+#: src/eval.c:330
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Деление на ноль в выражении: %s"
 
-#: src/eval.c:323
+#: src/eval.c:335
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Модульное деление на ноль в выражении: %s"
 
-#: src/eval.c:328
+#: src/eval.c:340
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 
-#: src/eval.c:582
+#: src/eval.c:594
 msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверное сравнение в cmp_term ()"
 
-#: src/eval.c:627
+#: src/eval.c:639
 msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор сдвига в shift_term ()"
 
-#: src/eval.c:726
+#: src/eval.c:738
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор в mult_term ()"
 
@@ -197,55 +197,55 @@ msgstr "Преждевременный конец файла-образа памяти"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"
 
-#: src/input.c:315
+#: src/input.c:318
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ввод перенаправлен в %s , строка %d"
 
-#: src/input.c:343
+#: src/input.c:346
 #, c-format
 msgid "Input read from %s"
 msgstr "Ввод из %s"
 
-#: src/input.c:503
+#: src/input.c:506
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Рекурсивная push_string!"
 
-#: src/input.c:620
+#: src/input.c:623
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный вызов init_macro_token ()"
 
-#: src/input.c:660
+#: src/input.c:663
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в next_char ()"
 
-#: src/input.c:697
+#: src/input.c:700
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
 
-#: src/input.c:800
+#: src/input.c:803
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: src/input.c:1193 src/input.c:1220
+#: src/input.c:1197 src/input.c:1224
 msgid "ERROR: EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
 
-#: src/m4.c:106
+#: src/m4.c:117
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "ОШИБКА: Переполнение стека. (Бесконечное рекурсивное определение?)"
 
-#: src/m4.c:133
+#: src/m4.c:144
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Попробуйте '%s --help' для информации.\n"
 
-#: src/m4.c:137
+#: src/m4.c:148
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Использование: %s [OPTION]... [FILE]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:149
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -272,13 +272,13 @@ msgstr ""
 "  -P, --prefix-builtins        добавлять префикс `m4_' для всех встроенных "
 "функций\n"
 
-#: src/m4.c:151
+#: src/m4.c:162
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "  -W, --word-regexp=REGEXP     использовать REGEXP для синтаксиса имен "
 "макросов\n"
 
-#: src/m4.c:155
+#: src/m4.c:166
 #, fuzzy
 msgid ""
 "\n"
@@ -295,7 +295,7 @@ msgstr ""
 "  -U, --undefine=NAME          удалить встроенную функцию NAME\n"
 "  -s, --synclines              генерировать строки `#line NO \"FILE\"'\n"
 
-#: src/m4.c:163
+#: src/m4.c:174
 msgid ""
 "\n"
 "Limits control:\n"
@@ -311,7 +311,7 @@ msgstr ""
 "  -L, --nesting-limit=NUMBER   изменить предел глубины интелектуального "
 "поиска\n"
 
-#: src/m4.c:170
+#: src/m4.c:181
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -323,7 +323,7 @@ msgstr ""
 "  -F, --freeze-state=FILE      в конце создать образ памяти для FILE\n"
 "  -R, --reload-state=FILE      в начале загружать образ памяти для FILE\n"
 
-#: src/m4.c:176
+#: src/m4.c:187
 msgid ""
 "\n"
 "Debugging:\n"
@@ -341,7 +341,7 @@ msgstr ""
 "  -o, --error-output=FILE      перенаправить отладочный и трассировочный "
 "вывод в файл FILE\n"
 
-#: src/m4.c:184
+#: src/m4.c:195
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -372,7 +372,7 @@ msgstr ""
 "  i   показывать изменения во входных файлах\n"
 "  V   сокращение для всех флагов вместе\n"
 
-#: src/m4.c:199
+#: src/m4.c:210
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -380,18 +380,22 @@ msgstr ""
 "\n"
 "Если FILE не существует или FILE это `-', используется стандартный вход.\n"
 
-#: src/m4.c:204
+#: src/m4.c:215
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/m4.c:368
+#: src/m4.c:388
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Неверный флаг отладки: '%s'"
 
-#: src/m4.c:447
+#: src/m4.c:417
+msgid " (options:"
+msgstr ""
+
+#: src/m4.c:500
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код в косвенных аргументах"
 
@@ -417,7 +421,17 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "ОШИБКА: Лимит рекурсии %d исчерпан, используйте -L<N> чтобы изменить его"
 
-#: src/module.c:206
+#: src/module.c:312
+#, fuzzy, c-format
+msgid "Module search for `%s' found `%s'"
+msgstr "Путь поиска для `%s' найден `%s'"
+
+#: src/module.c:349
+#, c-format
+msgid "ERROR: cannot find module `%s': %s"
+msgstr ""
+
+#: src/module.c:353
 #, c-format
 msgid "ERROR: cannot find module `%s'"
 msgstr ""
@@ -442,14 +456,9 @@ msgstr "ОШИБКА: Читаю вставленный файл"
 msgid "Cannot stat diversion"
 msgstr "Невозможно подсчитать разветвление"
 
-#: src/path.c:170
+#: src/path.c:157
 #, c-format
 msgid "Path search for `%s' found `%s'"
-msgstr "Путь поиска для `%s' найден `%s'"
-
-#: src/path.c:253
-#, fuzzy, c-format
-msgid "Module search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even

@@ -7,7 +7,7 @@
 cat ${srcdir}/other-tests/iso8859.m4 > in
 
 cat <<\EOF >ok
-# Texting quotes
+# Testing quotes
 DEFINE			
 CHANGEQUOTE(«,»)	
 0 TEST			# TEST

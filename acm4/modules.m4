@@ -51,7 +51,7 @@ AC_DEFUN(AM_WITH_MODULES,
        if test "$ac_cv_lib_dld_shl_load" = yes; then
 	  with_modules=yes
 
-	  LIBS="$LIBS -ldld"
+#	  LIBS="$LIBS -ldld"
 	  AC_DEFINE(HAVE_SHL_LOAD,1)
        fi
     fi
@@ -62,6 +62,8 @@ AC_DEFUN(AM_WITH_MODULES,
 
       MODULES_DIR=modules
       MODULE_PATH="${pkglibexecdir}"
+
+      AC_DEFINE(WITH_MODULES, 1)
     fi
 
     AC_SUBST(DLLDFLAGS)

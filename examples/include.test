@@ -19,10 +19,10 @@ very late
 EOF
 
 cat <<\EOF >okerr
-in:2: m4: Cannot open NOFILE: No such file or directory
-in:6: m4: Cannot open NOFILE: No such file or directory
+m4: in: 2: Cannot open NOFILE: No such file or directory
+m4: in: 6: Cannot open NOFILE: No such file or directory
 EOF
 
 M4PATH=$srcdir:$srcdir/../tests $M4 -d in >out 2>err
-sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+sed -e "s,../../src/m4: ,m4: ," err >sederr && mv sederr err
 $CMP -s out ok && $CMP -s err okerr

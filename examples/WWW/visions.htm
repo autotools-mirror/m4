@@ -3,7 +3,7 @@
 <HEAD>
 <TITLE>GNU m4 - The Road Ahead</TITLE> 
 <META NAME="AUTHOR" CONTENT="René Seindal"> 
-<META NAME="GENERATOR" CONTENT="GNU m4 1.4l">  
+<META NAME="GENERATOR" CONTENT="GNU m4 1.4n">  
 </HEAD>
  <BODY text="#000000" bgcolor="#FFCC99" link="#0000EF" alink="#FF0000" vlink="#51188E">
 <TABLE cellpadding=5 width="100%">
@@ -22,6 +22,14 @@
 
 
 
+
+
+
+
+
+
+
+
 <TABLE align=left valign=top columns=1>
 <TR>
 <TD bgcolor="#CC6600">
@@ -36,7 +44,9 @@
 <TD>
 
 <FONT size=-1><P>
-<B><A HREF="whatis.htm">What is m4</A></B>
+<B><A HREF="whatis.htm">What is m4</A><BR>
+<A HREF="features.htm">Features</A><BR>
+<A HREF="uses.htm">Uses of m4</A></B>
 </P>
 </FONT>
 
@@ -44,23 +54,7 @@
 
 </TR>
  <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="features.htm">Features</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="uses.htm">Uses of m4</A></B>
-</P>
-</FONT>
+<TD height=5>
 
 </TD>
 
@@ -86,6 +80,12 @@
 
 </TR>
  <TR>
+<TD height=5>
+
+</TD>
+
+</TR>
+ <TR>
 <TD bgcolor="#CC6600">
 <P>
 <B>Source files</B>
@@ -98,7 +98,12 @@
 <TD>
 
 <FONT size=-1><P>
-<B><A HREF="readme.htm">README</A></B>
+<B><A HREF="readme.htm">README</A><BR>
+<A HREF="todo.htm">TODO</A><BR>
+<A HREF="news.htm">NEWS</A><BR>
+<A HREF="changelog.htm">ChangeLog</A><BR>
+<A HREF="thanks.htm">Contributors</A><BR>
+<A HREF="m4/">Browse it</A></B>
 </P>
 </FONT>
 
@@ -106,56 +111,7 @@
 
 </TR>
  <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="todo.htm">TODO</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="news.htm">NEWS</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="changelog.htm">ChangeLog</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="thanks.htm">Contributors</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="m4/">Browse it</A></B>
-</P>
-</FONT>
+<TD height=5>
 
 </TD>
 
@@ -173,7 +129,8 @@
 <TD>
 
 <FONT size=-1><P>
-<B><A HREF="modules.htm">Modules</A></B>
+<B><A HREF="modules.htm">Modules</A><BR>
+<A HREF="visions.htm">Visions</A></B>
 </P>
 </FONT>
 
@@ -181,12 +138,7 @@
 
 </TR>
  <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="visions.htm">Visions</A></B>
-</P>
-</FONT>
+<TD height=5>
 
 </TD>
 
@@ -204,7 +156,10 @@
 <TD>
 
 <FONT size=-1><P>
-<B><A HREF="lists.htm">Mailing-lists</A></B>
+<B><A HREF="lists.htm">Mailing-lists</A><BR>
+<A HREF="feedback.htm">Feedback</A><BR>
+<A HREF="download.htm">Download</A><BR>
+<A HREF="bugs.htm">Known bugs</A></B>
 </P>
 </FONT>
 
@@ -212,23 +167,7 @@
 
 </TR>
  <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="feedback.htm">Feedback</A></B>
-</P>
-</FONT>
-
-</TD>
-
-</TR>
- <TR>
-<TD>
-
-<FONT size=-1><P>
-<B><A HREF="download.htm">Download</A></B>
-</P>
-</FONT>
+<TD height=5>
 
 </TD>
 
@@ -259,38 +198,389 @@
 
 
 
+
+
+
  
 </TD>
  <TD align=left valign=top width="90%">
 
 
-<H2>Possible features for future versions</H2>
+<H2>Ideas for future versions of GNU m4</H2>
 
+
+<P>
+Here are some ideas and suggestion for the future of GNU m4, large
+and small.  The order here is fairly random.
+</P>
 
 
 <UL>
-<LI> <P>
-Guile can be used as an extension language so complicated macros can be
-written in Scheme while still maintaining the m4 interface.
-</P>
 
 
-<LI><P>
-A kind of super-quotes can be added quotes that aren't stripped
-when read as are normal quotes. These quotes should be stripped when
-output. In that way text can be super-quote and consequently passed
-untouched to the output.  It is a bit like comments but there the
-quotes are removed before output.
-</P>
+<LI> <A HREF="#guile">Guile as an extension language.</A>
+
+
+
+
+
+<LI> <A HREF="#utf8">UTF-8 or wide characters.</A>
+
+
+
+
+
+<LI> <A HREF="#pquote">Syntax: persistent quotes.</A>
+
+
+
+
+
+
+
+<LI> <A HREF="#comment2">Syntax: removable comments.</A>
+
+
+
+
+
+
+
+<LI> <A HREF="#comment1">Option:  remove comments.</A>
+
+
+
+
+
+
+<LI> <A HREF="#deps">Option: show dependencies.</A>
+
+
+
+
+
+<LI> <A HREF="#safer">Option: render GNU m4 safer.</A>
+
+
+
+
+
+
+<LI> <A HREF="#import">Option: import environment.</A>
+
+
+
+
+
+
+<LI> <A HREF="#m4expand">Builtin: quote expanded text.</A>
+
+
+
+
+
+
+<LI> <A HREF="#perl">Module: embedded perl.</A>
+
+
+
+
+
+
+<LI> <A HREF="#output">Module: better output control.</A>
+
+
+
+
+
+
+<LI> <A HREF="#require">Module: require/provide functionality.</A>
+
+
+
 
 
 
 </UL>
 
 
+
+
 <P>
 See also the <A HREF="todo.htm">TODO</A> file.
 </P>
+
+
+
+<HR align=center width=50%><A NAME="guile">
+<H2>Guile as an extension language</H2>
+</A><P>
+<A HREF="http://www.red-bean.com/guile/">Guile</A> can be used as an
+extension language so complicated macros can be written in Scheme while
+still maintaining the m4 interface.  It will require some changes to the
+base code, as guile cannot be used from a module.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Guile as an extension language" >volunteer</A>?
+</P>
+ <!-- \originator([René Seindal], [rene@seindal]) -->
+
+<HR align=center width=50%><A NAME="utf8">
+<H2>UTF-8 or wide characters</H2>
+</A><P>
+GNU m4 should be able to handle UTF-8 input or wide characters so
+it can be more usable for different environments.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: UTF-8 or wide characters" >volunteer</A>?
+</P>
+ <!-- \originator([François Pinard]) -->
+
+<HR align=center width=50%><A NAME="pquote">
+<H2>Syntax: persistent quotes</H2>
+</A><P>
+Persistent quotes is a way of getting text unharmed through m4's
+processing.  While normal quotes are stripped when a quoted string is
+read, the persistent quotes are removed just before being output.  This
+will ensure that the quoted text is always output verbatim.
+</P>
+
+
+<P>
+The bulk of the changes will be in the parser (in input.c function
+next_token).  Persistent quotes cannot be nested, they must balance
+within a normally quoted string, but normal quotes need not balance
+within persistent quotes (neither within persistent quotes within normal
+quotes).  The quotes should be removed before being shipped out (in
+macro.c).
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Syntax: persistent quotes" >volunteer</A>?
+</P>
+ <!-- \originator([Keith Bostic]) -->
+
+<HR align=center width=50%><A NAME="comment2">
+<H2>Syntax: removable comments</H2>
+</A><P>
+With the syntax table a category for discardable comments can be
+defined, causing that type of comments to be discarded.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Syntax: removable comments" >volunteer</A>?
+</P>
+
+
+<HR align=center width=50%><A NAME="comment1">
+<H2>Option:  remove comments</H2>
+</A><P>
+There should be an option (--discard-comments) to get m4 to discard
+comments instead of passing them to the output.
+</P>
+  
+
+<P>
+Done in version 1.4n
+</P>
+
+
+<HR align=center width=50%><A NAME="deps">
+<H2>Option: show dependencies</H2>
+</A><P>
+There should be an options to generate makefile dependencies for an
+M4 input file.
+</P>
+
+
+<P>
+It is not enough to scan the files for includes, as file names can
+be generated and builtins renamed.  To make it work, m4 will have to do
+a complete run of the input file, discard the output and print the
+dependencies instead.
+</P>
+
+
+<P>
+It cannot be made to work in all cases when input file names are
+generated on the fly.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Option: show dependencies" >volunteer</A>?
+</P>
+  <!-- \originator([Erick Branderhorst]) -->
+
+<HR align=center width=50%><A NAME="safer">
+<H2>Option: render GNU m4 safer</H2>
+</A><P>
+There should be a --safer option that disables all functions, that
+could compromise system security if used by root.  It will have to
+include various functions, such as file inclusion, sub shells, module
+loading, ...
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Option: render GNU m4 safer" >volunteer</A>?
+</P>
+  <!-- \originator([Santiago Vila]) -->
+
+<HR align=center width=50%><A NAME="import">
+<H2>Option: import environment</H2>
+</A><P>
+An option to defined each environment variable as a macro on
+startup would be useful in many cases.
+</P>
+
+
+<P>
+Done in version 1.4n
+</P>
+  <!-- \originator([René Seindal]) -->
+
+<HR align=center width=50%><A NAME="m4expand">
+<H2>Builtin: quote expanded text</H2>
+</A><P>
+A builtin to quote expanded text would be useful.  Now it is not
+possible to quote the expansion of a macro; the macro itself has to
+provide the quotes.  Some builtins return quoted strings, others
+don't.
+</P>
+
+
+<P>
+A possible solution is a build in macro that takes one argument.  It
+expands this argument fully and returns the quoted expansion.
+</P>
+
+
+<P>
+It will require changes to input handling and macro expansion code.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Builtin: quote expanded text" >volunteer</A>?
+</P>
+  <!-- \originator([Axel Boldt]) -->
+
+<HR align=center width=50%><A NAME="perl">
+<H2>Module: embedded perl</H2>
+</A><P>
+Perl could be embedded in m4, giving users a powerful programming
+language for writing macros.  A single builtin "perleval" could do the
+job.  First argument could be a perl function and the rest arguments.
+The return value of the function as a string would be the expansion.
+</P>
+
+
+<P>
+The perl interpreter should be set up when the module is loaded and
+closed down before m4 exits, using the appropriate hooks in the module
+interface.
+</P>
+
+
+<P>
+A perl module could potentially give users access to any facility
+perl has access to, such as databases.
+</P>
+
+
+<P>
+On systems with perl compiled as a shared library the size penalty
+would be minimal.
+</P>
+
+
+<P>
+(It might not be workable as a module, as it will need to link with non-shared libraries.  Don't know how it can be fixed.  (RS))
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Module: embedded perl" >volunteer</A>?
+</P>
+ <!-- \originator([René Seindal]) -->
+
+<HR align=center width=50%><A NAME="output">
+<H2>Module: better output control</H2>
+</A><P>
+It has been suggested a couple of times that it should be possible
+to divert to named files, in order to create several output files.
+</P>
+
+
+<P>
+I think this a bit a misunderstanding.  Diversion are inteded to be
+brought back later, ie, they are temporary and recoverable.  Output
+text, on the other hand, once output it is lost (for m4).  Therefore
+better output control should be made in a different way.
+</P>
+
+
+<P>
+My suggestion is a set of builtins defined by a module:
+</P>
+
+
+<PRE>setoutput(file)
+appendoutput(file)
+pipeoutput(command)</PRE>
+
+<P>
+With these output can be directed better, diversion can be sent to
+different files, and groups of files can be built by a single m4 run.
+Calling <TT>setoutput</TT> without arguments should resume output to
+standard output.
+</P>
+
+
+<P>
+(Admittedly, diversion 0 (standard output) has always been
+different, as it cannot be undiverted.)
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Module: better output control" >volunteer</A>?
+</P>
+ <!-- \originator([René Seindal]) -->
+
+<HR align=center width=50%><A NAME="require">
+<H2>Module: require/provide functionality</H2>
+</A><P>
+Two new builtins <TT>require</TT> and <TT>provide</TT> could provide a
+handy interface to include.  It has proven difficult to write these
+robustly as normal macros.  As an example, the files <TT>test.m4</TT> and
+<TT>../test.m4</TT> could be the same file or different files depending on
+the search path.
+</P>
+
+
+<P>
+There is no-one working on this now.  Do you want
+to <A HREF="mailto:m4-feedback@seindal.dk?subject=GNU m4: Module: require/provide functionality" >volunteer</A>?
+</P>
+ <!-- \originator([Terry Jones]) -->
+
 
 
 

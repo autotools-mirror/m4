@@ -16,3 +16,13 @@ all: *.htm
 	fi
 
 *.htm: m4lib/*.m4
+
+changelog.htm: m4/ChangeLog
+readme.htm: m4/README
+todo.htm: m4/TODO
+news.htm: m4/NEWS
+modules.htm: m4/modules/README
+
+.PHONY: man
+man:
+	cd man; $(MAKE)

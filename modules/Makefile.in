@@ -78,6 +78,7 @@ GT_YES = @GT_YES@
 INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
 INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
+INTLINCL = @INTLINCL@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 LD = @LD@
@@ -106,7 +107,7 @@ pkglibexec_LTLIBRARIES = libtest.la libtime.la libstdlib.la
 
 EXTRA_DIST = test.m4 time.m4 stdlib.m4
 
-INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib
+INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib @INTLINCL@
 
 libtest_la_SOURCES = test.c
 libtime_la_SOURCES = time.c
@@ -114,6 +115,12 @@ libstdlib_la_SOURCES = stdlib.c
 
 LIBS = 
 LDFLAGS = @DLLDFLAGS@
+
+# libperl_la_SOURCES = perl.c perlxsi.c
+libperl_la_OBJECTS = perl.lo
+
+libperl_la_CFLAGS = `perl -MExtUtils::Embed -e ccopts`
+PERLLDFLAGS = `perl -MExtUtils::Embed -e ldopts`
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -165,6 +172,22 @@ clean-pkglibexecLTLIBRARIES:
 distclean-pkglibexecLTLIBRARIES:
 
 maintainer-clean-pkglibexecLTLIBRARIES:
+
+install-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
+	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(pkglibexecdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(pkglibexecdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-pkglibexecLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(pkglibexecdir)/$$p; \
+	done
 
 .c.o:
 	$(COMPILE) -c $<
@@ -249,9 +272,13 @@ distdir: $(DISTFILES)
 	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
 	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
+perl.lo perl.o: perl.c perlxsi.c ../src/m4.h ../config.h \
+	../lib/obstack.h ../src/builtin.h
+perlxsi.lo perlxsi.o: perlxsi.c
 stdlib.lo stdlib.o: stdlib.c ../src/m4.h ../config.h ../lib/obstack.h \
 	../src/builtin.h
-test.o: test.c ../src/m4.h ../config.h ../lib/obstack.h ../src/builtin.h
+test.lo test.o: test.c ../src/m4.h ../config.h ../lib/obstack.h \
+	../src/builtin.h
 time.lo time.o: time.c ../src/m4.h ../config.h ../lib/obstack.h \
 	../src/builtin.h
 
@@ -318,27 +345,18 @@ clean-generic maintainer-clean-generic clean mostlyclean distclean \
 maintainer-clean
 
 
-install-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
-	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
-          module=`echo "$$p" | sed -e 's/^lib\(.*\)\.la/\1/'`; \
-	  lib=.libs/lib$$module.so.0.0.0; \
-	  if test -f $$lib; then \
-	    echo "${INSTALL} $$lib $(DESTDIR)$(pkglibexecdir)/$$module"; \
-	    ${INSTALL} $$lib $(DESTDIR)$(pkglibexecdir)/$$module; \
-	  else :; fi; \
-	done
+perlxsi.c:
+	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c
 
-uninstall-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
-          module=`echo "$$p" | sed -e 's/^lib\(.*\)\.la/\1/'`; \
-	  if test -f $$lib; then \
-	    echo "rm -f $(DESTDIR)$(pkglibexecdir)/$$module"; \
-	    rm -f $(DESTDIR)$(pkglibexecdir)/$$module; \
-	  else :; fi; \
-	done
+perl.lo: perl.c perlxsi.c
+	@echo '$(LTCOMPILE) $(libperl_la_CFLAGS) -c perl.c'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).p $(libperl_la_CFLAGS) -c perl.c
+	@-sed -e 's/^\([^:]*\)\.o:/\1.lo \1.o:/' \
+	  < .deps/$(*F).p > .deps/$(*F).P
+	@-rm -f .deps/$(*F).p
+
+libperl.la: $(libperl_la_OBJECTS) $(libperl_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(libperl_la_LDFLAGS) $(PERLLDFLAGS) $(libperl_la_OBJECTS) $(libperl_la_LIBADD) $(LIBS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

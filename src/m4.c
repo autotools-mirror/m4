@@ -71,6 +71,12 @@ static int show_help = 0;
 /* If nonzero, print the version on standard output and exit.  */
 static int show_version = 0;
 
+/* If nonzero, import the environment as macros.  */
+static int import_environment = 0;
+
+/* If nonzero, comments are discarded in the token parser.  */
+int discard_comments = 0;
+
 struct macro_definition
 {
   struct macro_definition *next;
@@ -81,17 +87,22 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/*-------------------------------------------------------------------------.
-| Print source and line reference on standard error, as a prefix for error |
-| messages.  Flush standard output first.				   |
-`-------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------.
+| Print program name, source file and line reference on standard        |
+| error, as a prefix for error messages.  Flush standard output first.  |
+`----------------------------------------------------------------------*/
+
+#include <error.h>
 
 void
-reference_error (void)
+print_program_name (void)
 {
   fflush (stdout);
-  fprintf (stderr, "%s:%d: ", current_file, current_line);
+  fprintf (stderr, "%s: ", program_name);
+  if (current_line != 0)
+    fprintf (stderr, "%s: %d: ", current_file, current_line);
 }
+
 
 #ifdef USE_STACKOVF
 
@@ -214,6 +225,7 @@ static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
+  {"discard-comments", no_argument, NULL, 'c'},
   {"diversions", required_argument, NULL, 'N'},
   {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -222,7 +234,7 @@ static const struct option long_options[] =
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'e'},
 #ifdef WITH_MODULES
-  {"module", required_argument, NULL, 'M'},
+  {"load-module", required_argument, NULL, 'M'},
 #endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
@@ -232,6 +244,8 @@ static const struct option long_options[] =
   {"synclines", no_argument, NULL, 's'},
   {"traditional", no_argument, NULL, 'G'},
   {"word-regexp", required_argument, NULL, 'W'},
+
+  {"import-environment", no_argument, &import_environment, 1},
 
   {"help", no_argument, &show_help, 1},
   {"version", no_argument, &show_version, 1},
@@ -245,9 +259,9 @@ static const struct option long_options[] =
 };
 
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:cd::el:o:st:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:cd::el:o:st:"
 #endif
 
 int
@@ -263,6 +277,8 @@ main (int argc, char *const *argv, char *const *envp)
   char *filename;
 
   program_name = argv[0];
+  error_print_progname = print_program_name;
+
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
   textdomain(PACKAGE);
@@ -361,6 +377,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 #endif
 
+      case 'c':
+	discard_comments = 1;
+	break;
+
       case 'd':
 	debug_level = debug_decode (optarg);
 	if (debug_level < 0)
@@ -392,14 +412,26 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s\n", PACKAGE, VERSION);
+      printf ("GNU %s %s", PACKAGE, VERSION);
+#if defined(WITH_MODULES) || defined(WITH_GMP) || defined(ENABLE_CHANGEWORD)
+      fputs(_(" (options:"), stdout);
+#ifdef WITH_MODULES
+      fputs(" modules", stdout);
+#endif /* WITH_MODULES */
+#ifdef WITH_GMP
+      fputs(" gmp", stdout);
+#endif /* WITH_GMP */
+#ifdef ENABLE_CHANGEWORD
+      fputs(" changeword", stdout);
+#endif /* ENABLE_CHANGEWORD */
+      fputs(")", stdout);
+#endif /* defined WITH_MODULES || WITH_GMP || ENABLE_CHANGEWORD */
+      fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }
 
   if (show_help)
     usage (EXIT_SUCCESS);
-
-  defines = head;
 
   /* Do the basic initialisations.  */
 
@@ -413,8 +445,29 @@ main (int argc, char *const *argv, char *const *envp)
   else
     builtin_init ();
 
+
+  /* Import environment variables as macros.  The definition are
+     preprended to the macro definition list, so -U can override
+     environment variables. */
+
+  if (import_environment)
+    {
+      char *const *env;
+
+      for (env = envp; *env != NULL; env++)
+	{
+	  new = (macro_definition *) xmalloc (sizeof (macro_definition));
+	  new->code = 'D';
+	  new->macro = *env;
+	  new->next = head;
+	  head = new;
+	}
+    }
+
   /* Handle deferred command line macro definitions.  Must come after
      initialisation of the symbol table.  */
+
+  defines = head;
 
   while (defines != NULL)
     {

@@ -38,13 +38,13 @@ echo EOF
 if [ -s testSubDir/err ]; then
     echo
     echo 'cat <<\EOF >okerr'
-    sed -e "s, $M4:, m4:," testSubDir/err
+    sed -e "s,$M4: ,m4: ," testSubDir/err
     echo EOF
 fi
 
 echo
 echo 'M4PATH=$srcdir:$srcdir/../tests $M4 -d in >out 2>err'
-echo 'sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err'
+echo 'sed -e "s,../../src/m4: ,m4: ," err >sederr && mv sederr err'
 
 if [ -s testSubDir/err ]; then
     echo '$CMP -s out ok && $CMP -s err okerr'

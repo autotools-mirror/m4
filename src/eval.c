@@ -21,8 +21,20 @@
    its own scanner, and a recursive descent parser.  The only entry point
    is evaluate ().  */
 
+/* If configured --with-gmp this file is compiled twice.  For the normal
+   eval() it is compiled without -DUSE_GMP, for the gmp enhanced eval()
+   it is compiled with -DUSE_GMP (and implicitly -DWITH_GMP). */
+
+/* Everything in this file and in numb.c should be declared static,
+   except evaluate, handled here. */
+
+#ifdef USE_GMP
+#define evaluate mp_evaluate
+#endif
+
 #include "m4.h"
-#include "numb.h"
+
+#include "numb.c"
 
 /* Evaluates token types.  */
 
@@ -75,14 +87,14 @@ static eval_error simple_term __P ((eval_token, eval_t *));
 `--------------------*/
 
 /* Pointer to next character of input text.  */
-static const char *eval_text;
+static const unsigned char *eval_text;
 
 /* Value of eval_text, from before last call of eval_lex ().  This is so we
    can back up, if we have read too much.  */
-static const char *last_text;
+static const unsigned char *last_text;
 
 static void
-eval_init_lex (const char *text)
+eval_init_lex (const unsigned char *text)
 {
   eval_text = text;
   last_text = NULL;
@@ -824,3 +836,4 @@ simple_term (eval_token et, eval_t *v1)
     }
   return NO_ERROR;
 }
+

@@ -117,7 +117,7 @@ format (struct obstack *obs, int argc, token_data **argv)
 {
 #ifdef HAVE_EFGCVT
 
-  const char *fmt;		/* format control string */
+  const unsigned char *fmt;	/* format control string */
   int c;			/* a simple character */
   char fc;			/* format code */
 

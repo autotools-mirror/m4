@@ -27,91 +27,92 @@ translation approved by the Foundation.
 
 Indirect:
 m4.info-1: 973
-m4.info-2: 50118
-m4.info-3: 99156
+m4.info-2: 50410
+m4.info-3: 99746
 
 Tag Table:
 (Indirect)
 Node: Top973
-Node: Preliminaries7061
-Node: Intro7786
-Node: History9394
-Node: Invoking m410309
-Node: Bugs17174
-Node: Manual18375
-Node: Syntax19742
-Node: Names20580
-Node: Quoted strings21193
-Node: Other tokens21777
-Node: Comments21994
-Node: Input processing22681
-Node: Macros23834
-Node: Invocation24327
-Node: Inhibiting Invocation25138
-Node: Macro Arguments28283
-Node: Quoting Arguments29598
-Node: Macro expansion30403
-Node: Definitions31066
-Node: Define31843
-Node: Arguments33397
-Node: Pseudo Arguments34878
-Node: Undefine36729
-Node: Defn37391
-Node: Pushdef38861
-Node: Indir40920
-Node: Builtin41698
-Node: Conditionals42142
-Node: Ifdef42849
-Node: Ifelse43618
-Node: Loops45400
-Node: Debugging48692
-Node: Dumpdef49270
-Node: Trace50118
-Node: Debug Levels51497
-Node: Debug Output53883
-Node: Input Control54403
-Node: Dnl55016
-Node: Changequote56142
-Node: Changecom57506
-Node: Changesyntax58792
-Node: Changeword66041
-Node: M4wrap69417
-Node: File Inclusion70619
-Node: Include70935
-Node: Search Path72954
-Node: Diversions73741
-Node: Divert74978
-Node: Undivert76110
-Node: Divnum78081
-Node: Cleardiv78626
-Node: Text handling79681
-Node: Len80401
-Node: Index80799
-Node: Regexp81384
-Node: Substr82475
-Node: Translit83095
-Node: Patsubst84538
-Node: Format86629
-Node: Arithmetic88191
-Node: Incr88648
-Node: Eval89152
-Node: UNIX commands92758
-Node: Syscmd93229
-Node: Esyscmd93942
-Node: Sysval94890
-Node: Maketemp95295
-Node: Miscellaneous96353
-Node: Errprint96784
-Node: M4exit97766
-Node: Syncoutput98564
-Node: Frozen files99156
-Node: Compatibility104075
-Node: Extensions104691
-Node: Incompatibilities107161
-Node: Other Incompat107603
-Node: Experiments109768
-Node: Answers111275
-Node: Concept index111907
-Node: Macro index119328
+Node: Preliminaries7105
+Node: Intro7830
+Node: History9438
+Node: Invoking m410353
+Node: Bugs17466
+Node: Manual18667
+Node: Syntax20034
+Node: Names20872
+Node: Quoted strings21485
+Node: Other tokens22069
+Node: Comments22286
+Node: Input processing22973
+Node: Macros24126
+Node: Invocation24619
+Node: Inhibiting Invocation25430
+Node: Macro Arguments28575
+Node: Quoting Arguments29890
+Node: Macro expansion30695
+Node: Definitions31358
+Node: Define32135
+Node: Arguments33689
+Node: Pseudo Arguments35170
+Node: Undefine37021
+Node: Defn37683
+Node: Pushdef39153
+Node: Indir41212
+Node: Builtin41990
+Node: Conditionals42434
+Node: Ifdef43141
+Node: Ifelse43910
+Node: Loops45692
+Node: Debugging48984
+Node: Dumpdef49562
+Node: Trace50410
+Node: Debug Levels51789
+Node: Debug Output54175
+Node: Input Control54695
+Node: Dnl55308
+Node: Changequote56434
+Node: Changecom57798
+Node: Changesyntax59084
+Node: Changeword66333
+Node: M4wrap69709
+Node: File Inclusion70911
+Node: Include71227
+Node: Search Path73247
+Node: Diversions74034
+Node: Divert75271
+Node: Undivert76403
+Node: Divnum78374
+Node: Cleardiv78919
+Node: Text handling79974
+Node: Len80694
+Node: Index81092
+Node: Regexp81677
+Node: Substr82768
+Node: Translit83388
+Node: Patsubst84831
+Node: Format86922
+Node: Arithmetic88484
+Node: Incr88952
+Node: Eval89456
+Node: Mpeval92592
+Node: UNIX commands93348
+Node: Syscmd93819
+Node: Esyscmd94532
+Node: Sysval95480
+Node: Maketemp95885
+Node: Miscellaneous96943
+Node: Errprint97374
+Node: M4exit98356
+Node: Syncoutput99154
+Node: Frozen files99746
+Node: Compatibility104665
+Node: Extensions105281
+Node: Incompatibilities107751
+Node: Other Incompat108193
+Node: Experiments110358
+Node: Answers111865
+Node: Concept index112497
+Node: Macro index119918
 
 End Tag Table

@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is BETA release 1.4m.  This is a development release, and is as
+   This is BETA release 1.4n.  This is a development release, and is as
 such prone to bugs, crashes, unforeseen features, incomplete
 documentation, ... therefore, use at your own peril.  In case of
 problems, please do not hesitate to report them (see the README file in
@@ -75,6 +75,7 @@ the distribution).
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
+ -- The Detailed Node Listing --
 
 Introduction and preliminaries
 
@@ -160,6 +161,7 @@ Macros for doing arithmetic
 
 * Incr::                        Decrement and increment operators
 * Eval::                        Evaluating integer or rational expressions
+* Mpeval::
 
 Running UNIX commands
 
@@ -318,6 +320,10 @@ options:
      Makes this invocation of `m4' interactive.  This means that all
      output will be unbuffered, and interrupts will be ignored.
 
+`-c'
+`--discard-comments'
+     Discard all comments instead of copying them to the output.
+
 `-s'
 `--synclines'
      Generate synchronisation lines, for use by the C preprocessor or
@@ -430,6 +436,10 @@ using the `-D' and `-U' options.  They have the following format:
 `--reload-state FILE'
      Before execution starts, recover the internal state from the
      specified frozen FILE (*note Frozen files::.).
+
+`--import-environment'
+     Imports every variable in the environment as a macro.  This is done
+     before `-D' and `-U', so these can change the macros.
 
    The remaining arguments on the command line are taken to be input
 file names.  If no names are present, the standard input is read.  A

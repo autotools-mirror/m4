@@ -41,6 +41,9 @@
 /* Define to 1 if the GNU multiple precision library should be used.  */
 #undef WITH_GMP
 
+/* Define to 1 if there is support for dynamic loading of modules.  */
+#undef WITH_MODULES
+
 /* Define to 1 if the -ldl library should be used .  */
 #undef HAVE_DLOPEN
 

@@ -48,3 +48,24 @@ The semicolons are just to get GNU Emacs C mode to indent properly.
 \define([showlink], [\link($1, $1)]);
 \define([mailto], [\link(mailto:$1, $1)]);
 
+
+<!-- These macros are for having first a simple toc and later a more
+thorough description of each item -->
+
+\define([_items], [])
+
+\define([register_item], [\define([H_$1], [$2])
+\define([T_$1], [$3])
+\define([_items], \defn([_items])[\print_item([$1])])])
+
+\define([print_item], [
+\define([_item], \defn([H_$1]))\dnl
+\hr([align=center width=50%])\dnl
+\target([$1], [\h2([\indir([H_$1])])])\dnl
+\indir([T_$1])\dnl
+])
+
+\define([print_items], [\indir([_items])])
+
+\define([item], [\li \link([[#]$1], [$2.])
+\register_item([$1], [$2], [$3])])

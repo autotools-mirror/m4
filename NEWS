@@ -1,6 +1,32 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
+Version beta 1.4n - November 1998, by Rene' Seindal
+
+* The module code has been reorganised yet again, and now compiles
+  correctly on GNU/Linux, HPUX 9 and 10, SunOS 5 and Solaris 5.
+
+* When configured --with-gmp a new builtin `mpeval' is now defined.  The
+  builtin `eval' retains its normal behaviour.
+
+* m4 --version also shows which options were used for compilation, such as:
+  "GNU m4 1.4n (options: modules gmp changeword)"
+
+* New option --import-environment defines all environment variables as
+  macros.  This is done before -D and -U are handled, so the macros can be
+  changed through these options.
+
+* Error messages now always print program name before input file name as
+  specified by GNU coding standards.  Reported by Akim Demaille
+  <demaille@inf.enst.fr>.
+
+* Bug fixed: "undivert(0)" could cause m4 to read standard output.  A call
+  of "undivert(0)" is now silently ignored.
+
+* Bug fixed: when compiling --with-included-gettext, <libintl.h> wasn't
+  found in intl/ directory.  Reported by Andrew Bettison
+  <andrewb@zip.com.au>.
+
 Version beta 1.4m - November 1998, by Rene' Seindal
 
 * Using libtool for compiling modules and for linking main app.

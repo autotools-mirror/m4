@@ -65,6 +65,9 @@ DECLARE (m4_loadmodule);
 DECLARE (m4_m4exit);
 DECLARE (m4_m4wrap);
 DECLARE (m4_maketemp);
+#ifdef WITH_GMP
+DECLARE (m4_mpeval);
+#endif /* WITH_GMP */
 DECLARE (m4_patsubst);
 DECLARE (m4_popdef);
 DECLARE (m4_pushdef);
@@ -124,6 +127,9 @@ builtin_tab[] =
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
   { "m4wrap",		FALSE,	FALSE,	FALSE,	m4_m4wrap },
   { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
+#ifdef WITH_GMP
+  { "mpeval",		TRUE,	FALSE,	TRUE,	m4_mpeval },
+#endif /* WITH_GMP */
   { "patsubst",		TRUE,	FALSE,	TRUE,	m4_patsubst },
   { "popdef",		FALSE,	FALSE,	TRUE,	m4_popdef },
   { "pushdef",		FALSE,	TRUE,	TRUE,	m4_pushdef },
@@ -253,16 +259,18 @@ install_builtin_table (builtin *table)
 
   for (bp = table; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
-      if (prefix_all_builtins)
-	{
-	  string = (char *) xmalloc (strlen (bp->name) + 4);
-	  strcpy (string, "m4_");
-	  strcat (string, bp->name);
-	  define_builtin (string, bp, SYMBOL_INSERT, FALSE);
-	  free (string);
-	}
-      else
-	define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+      {
+	if (prefix_all_builtins)
+	  {
+	    string = (char *) xmalloc (strlen (bp->name) + 4);
+	    strcpy (string, "m4_");
+	    strcat (string, bp->name);
+	    define_builtin (string, bp, SYMBOL_INSERT, FALSE);
+	    free (string);
+	  }
+	else
+	  define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+      }
 }
 
 
@@ -879,8 +887,11 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 | actual work is done in the function evaluate (), which lives in eval.c.  |
 `-------------------------------------------------------------------------*/
 
+typedef boolean (*eval_func)(struct obstack *obs, const char *expr, 
+			     const int radix, int min);
+
 static void
-m4_eval (struct obstack *obs, int argc, token_data **argv)
+do_eval (struct obstack *obs, int argc, token_data **argv, eval_func func)
 {
   int radix = 10;
   int min = 1;
@@ -907,9 +918,23 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  if (evaluate (obs, ARG (1), radix, min))
+  if ((*func) (obs, ARG (1), radix, min))
     return;
 }
+
+static void
+m4_eval (struct obstack *obs, int argc, token_data **argv)
+{
+  do_eval(obs, argc, argv, evaluate);
+}
+
+#ifdef WITH_GMP
+static void
+m4_mpeval (struct obstack *obs, int argc, token_data **argv)
+{
+  do_eval(obs, argc, argv, mp_evaluate);
+}
+#endif /* WITH_GMP */
 
 static void
 m4_incr (struct obstack *obs, int argc, token_data **argv)
@@ -1854,7 +1879,7 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, token_data **argv)
 {
-  const char *text;
+  const unsigned char *text;
   int i;
 
   for (text = SYMBOL_TEXT (sym); *text != '\0';)

@@ -17,21 +17,21 @@
 */
 
 /* This file contains the functions to evaluate integer or multiple
-   precision expressions for the "eval" macro.
-   */
+ * precision expressions for the "eval" macro.
+ */
 
-#include "m4.h"
+/* THIS FILE IS INTENDED FOR INCLUSION IN eval.c NOT FOR COMPILATION */
+
 #include "numb.h"
 
+#ifdef USE_GMP
 
-#ifdef WITH_GMP
-
-eval_t numb_ZERO;
-eval_t numb_ONE;
+static eval_t numb_ZERO;
+static eval_t numb_ONE;
 
 static int numb_initialised = 0;
 
-void
+static void
 numb_initialise(void) {
   if (numb_initialised)
     return;
@@ -45,7 +45,7 @@ numb_initialise(void) {
   numb_initialised = 1;
 }
 
-void
+static void
 numb_obstack(struct obstack *obs, const eval_t value, 
 	     const int radix, int min)
 {
@@ -99,7 +99,7 @@ mpz2mpq(eval_t q, const mpz_t z)
   mpq_set_num(q,z);
 }
 
-void
+static void
 numb_divide(eval_t *x, const eval_t *y)
 {
    mpq_t qres;
@@ -116,7 +116,7 @@ numb_divide(eval_t *x, const eval_t *y)
    mpz_clear(zres);
 }
 
-void
+static void
 numb_modulo(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -140,7 +140,7 @@ numb_modulo(eval_t *x, const eval_t *y)
    mpz_clear(res);
 }
 
-void
+static void
 numb_and(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -164,7 +164,7 @@ numb_and(eval_t *x, const eval_t *y)
    mpz_clear(res);
 }
 
-void
+static void
 numb_ior(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -188,7 +188,7 @@ numb_ior(eval_t *x, const eval_t *y)
    mpz_clear(res);
 }
 
-void
+static void
 numb_eor(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -235,7 +235,7 @@ numb_eor(eval_t *x, const eval_t *y)
    mpz_clear(res);
 }
 
-void
+static void
 numb_not(eval_t *x)
 {
    mpz_t xx, res;
@@ -254,7 +254,7 @@ numb_not(eval_t *x)
    mpz_clear(res);
 }
 
-void
+static void
 numb_lshift(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -285,7 +285,7 @@ numb_lshift(eval_t *x, const eval_t *y)
    mpz_clear(res);
 }
 
-void
+static void
 numb_rshift(eval_t *x, const eval_t *y)
 {
    mpz_t xx, yy, res;
@@ -317,9 +317,9 @@ numb_rshift(eval_t *x, const eval_t *y)
 }
 
 
-#else  /* WITH_GMP */
+#else  /* USE_GMP */
 
-void
+static void
 numb_initialise(void) 
 {
   ;
@@ -367,7 +367,7 @@ ntoa (eval_t value, int radix)
   return s;
 }
 
-void
+static void
 numb_obstack(struct obstack *obs, const eval_t value,
 	     const int radix, int min)
 {
@@ -386,10 +386,10 @@ numb_obstack(struct obstack *obs, const eval_t value,
 }
 
 
-#endif /* WITH_GMP */
+#endif /* USE_GMP */
 
 
-void
+static void
 numb_pow (eval_t *x, const eval_t *y)
 {
   /* y should be integral */

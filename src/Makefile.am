@@ -8,11 +8,13 @@ MODULE_PATH=@MODULE_PATH@
 
 bin_PROGRAMS = m4
 
-INCLUDES = -I$(top_srcdir)/lib
+INCLUDES = -I$(top_srcdir)/lib @INTLINCL@
 
-m4_SOURCES = m4.c m4.h builtin.c builtin.h debug.c eval.c numb.c numb.h \
+m4_SOURCES = m4.c m4.h builtin.c builtin.h debug.c eval.c evalmp.c \
 	format.c freeze.c input.c macro.c output.c path.c symtab.c \
 	stackovf.c module.c
+
+EXTRA_m4_SOURCES = numb.c numb.h
 
 m4_LDADD = ../lib/libm4.a @INTLLIBS@
 m4_LDFLAGS = @DLLDFLAGS@

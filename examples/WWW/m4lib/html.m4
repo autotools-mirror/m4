@@ -68,8 +68,8 @@
 \define([td], [\large_container([$0], $@)])
 \define([th], [\large_container([$0], $@)])
 
-\define([link], [<A HREF="$1">\shift($@)</A>])
-\define([target], [<A NAME="$1">\shift($@)</A>])
+\define([link], [<A HREF="$1">\shift($*)</A>])
+\define([target], [<A NAME="$1">\shift($*)</A>])
 
 \define([font], [\n\container([$0], $@)\n])
 
@@ -82,11 +82,14 @@
 
 \define([p], [\large_simple_container([$0], $@)])
 
+\define([hr], [\simple_tag([$0], $@)])
 
 \define([ul], [\large_container([$0], $@)])
 \define([ol], [\large_container([$0], $@)])
 
 \define([li], [\simple_tag([$0], $@)])
+
+\define([blockquote], [\large_simple_container([$0], $@)])
 
 \define([dl], [\large_simple_container([$0], $@)])
 \define([dt], [\simple_container([$0], $@)])

@@ -80,11 +80,15 @@ OTHER_TESTS = \
 	other-tests/gmp.test \
 	other-tests/iso8859.test \
 	other-tests/sync-lines.test \
+	other-tests/import-environment.test \
+	other-tests/discard-comments.test \
 	other-tests/stackovf.test
 
 OTHER_FILES = \
 	other-tests/gmp.m4 \
 	other-tests/iso8859.m4 \
+	other-tests/import-environment.m4 \
+	other-tests/discard-comments.m4 \
 	other-tests/sync-lines.m4
 
 all: stamp-TESTS

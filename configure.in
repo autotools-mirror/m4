@@ -8,7 +8,7 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4m)
+AM_INIT_AUTOMAKE(m4,1.4n)
 ALL_LINGUAS="de fr it ja nl pl ru sv"
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
@@ -18,7 +18,6 @@ AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_PATH_PROG(PERL,perl)
 
 AM_ENABLE_SHARED
@@ -91,10 +90,26 @@ else
 fi], [AC_MSG_RESULT(no)])
 
 AM_WITH_MODULES
+
+dnl This is for the modules
+AC_STRUCT_TM
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS(getcwd gethostname mktime uname)
+AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
+
+
 AM_WITH_GMP
 
 AM_WITH_DMALLOC
 AM_GNU_GETTEXT
+
+if test "$USE_INCLUDED_LIBINTL" = yes; then
+  INTLINCL='-I$(top_srcdir)/intl'
+
+  AC_SUBST(INTLINCL)
+fi
+
+
 dnl AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
 AC_OUTPUT(Makefile acm4/Makefile intl/Makefile po/Makefile.in doc/Makefile \

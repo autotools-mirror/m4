@@ -20,8 +20,11 @@
 
 #include "m4.h"
 
-#define DEBUG_INPUT_
-#define DEBUG_SYNTAX_
+#define DEBUG_INPUT
+#undef DEBUG_INPUT
+
+#define DEBUG_SYNTAX
+#undef DEBUG_SYNTAX
 
 /* 
    Unread input can be either files, that should be read (eg. included
@@ -1055,231 +1058,232 @@ next_token (token_data *td)
   char *orig_text = 0;
 #endif
 
-  obstack_free (&token_stack, token_bottom);
-  obstack_1grow (&token_stack, '\0');
-  token_bottom = obstack_finish (&token_stack);
+  do {
+    obstack_free (&token_stack, token_bottom);
+    obstack_1grow (&token_stack, '\0');
+    token_bottom = obstack_finish (&token_stack);
 
-  ch = peek_input ();
-  if (ch == CHAR_EOF)		/* EOF */
-    {
+    ch = peek_input ();
+    if (ch == CHAR_EOF)			/* EOF */
+      {
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "next_token -> EOF\n");
+	fprintf (stderr, "next_token -> EOF\n");
 #endif
-      return TOKEN_EOF;
-    }
+	return TOKEN_EOF;
+      }
 
-  if (ch == CHAR_MACRO)		/* MACRO TOKEN */
-    {
-      init_macro_token (td);
-      (void) next_char ();
+    if (ch == CHAR_MACRO)		/* MACRO TOKEN */
+      {
+	init_macro_token (td);
+	(void) next_char ();
 #ifdef DEBUG_INPUT
-      print_token("next_token", TOKEN_MACDEF, td);
+	print_token("next_token", TOKEN_MACDEF, td);
 #endif
-      return TOKEN_MACDEF;
-    }
+	return TOKEN_MACDEF;
+      }
 
-  (void) next_char ();
-  if (IS_BCOMM(ch))		/* COMMENT, SHORT DELIM */
-    {
-      obstack_1grow (&token_stack, ch);
-      while ((ch = next_char ()) != CHAR_EOF && !IS_ECOMM(ch))
+    (void) next_char ();
+    if (IS_BCOMM(ch))			/* COMMENT, SHORT DELIM */
+      {
 	obstack_1grow (&token_stack, ch);
-      if (ch != CHAR_EOF)
+	while ((ch = next_char ()) != CHAR_EOF && !IS_ECOMM(ch))
+	  obstack_1grow (&token_stack, ch);
+	if (ch != CHAR_EOF)
+	  obstack_1grow (&token_stack, ch);
+	type = discard_comments ? TOKEN_NONE : TOKEN_STRING;
+      }
+					/* COMMENT, LONGER DELIM */
+    else if (!single_comments && MATCH (ch, bcomm.string))
+      {
+	obstack_grow (&token_stack, bcomm.string, bcomm.length);
+	while ((ch = next_char ()) != CHAR_EOF && !MATCH (ch, ecomm.string))
+	  obstack_1grow (&token_stack, ch);
+	if (ch != CHAR_EOF)
+	  obstack_grow (&token_stack, ecomm.string, ecomm.length);
+	type = discard_comments ? TOKEN_NONE : TOKEN_STRING;
+      }
+    else if (IS_ESCAPE(ch))		/* ESCAPED WORD */
+      {
 	obstack_1grow (&token_stack, ch);
-      type = TOKEN_STRING;
-    }
-				/* COMMENT, LONGER DELIM */
-  else if (!single_comments && MATCH (ch, bcomm.string))
-    {
-      obstack_grow (&token_stack, bcomm.string, bcomm.length);
-      while ((ch = next_char ()) != CHAR_EOF && !MATCH (ch, ecomm.string))
-	obstack_1grow (&token_stack, ch);
-      if (ch != CHAR_EOF)
-	obstack_grow (&token_stack, ecomm.string, ecomm.length);
-      type = TOKEN_STRING;
-    }
-  else if (IS_ESCAPE(ch))	/* ESCAPED WORD */
-    {
-      obstack_1grow (&token_stack, ch);
-      if ((ch = next_char ()) != CHAR_EOF)
-	{
-	  if (IS_ALPHA(ch))
-	    {
-	      obstack_1grow (&token_stack, ch);
-	      while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
-		{
-		  obstack_1grow (&token_stack, ch);
-		}
+	if ((ch = next_char ()) != CHAR_EOF)
+	  {
+	    if (IS_ALPHA(ch))
+	      {
+		obstack_1grow (&token_stack, ch);
+		while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
+		  {
+		    obstack_1grow (&token_stack, ch);
+		  }
 
-	      if (ch != CHAR_EOF)
-		unget_input(ch);
-	    }
-	  else
-	    {
-	      obstack_1grow (&token_stack, ch);
-	    }
+		if (ch != CHAR_EOF)
+		  unget_input(ch);
+	      }
+	    else
+	      {
+		obstack_1grow (&token_stack, ch);
+	      }
 
-	  type = TOKEN_WORD;
-	}
-      else
-	{
-	  type = TOKEN_SIMPLE;	/* escape before eof */
-	}
-    }
-  else if (
+	    type = TOKEN_WORD;
+	  }
+	else
+	  {
+	    type = TOKEN_SIMPLE;	/* escape before eof */
+	  }
+      }
+    else if (
 #ifdef ENABLE_CHANGEWORD
-	   default_word_regexp &&
+	     default_word_regexp &&
 #endif
-	   (IS_ALPHA (ch)))
-    {
-      obstack_1grow (&token_stack, ch);
-      while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
-	{
-	  obstack_1grow (&token_stack, ch);
-	}
-      if (ch != CHAR_EOF)
-	unget_input(ch);
+	     (IS_ALPHA (ch)))
+      {
+	obstack_1grow (&token_stack, ch);
+	while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
+	  {
+	    obstack_1grow (&token_stack, ch);
+	  }
+	if (ch != CHAR_EOF)
+	  unget_input(ch);
 
-      type = use_macro_escape ? TOKEN_STRING : TOKEN_WORD;
-    }
+	type = use_macro_escape ? TOKEN_STRING : TOKEN_WORD;
+      }
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && strchr (word_start, ch))
-    {
-      obstack_1grow (&token_stack, ch);
-      while (1)
-        {
-	  ch = peek_input ();
-	  if (ch == CHAR_EOF)
-	    break;
-	  obstack_1grow (&token_stack, ch);
-	  startpos = re_search (&word_regexp, obstack_base (&token_stack),
-				obstack_object_size (&token_stack), 0, 0,
-				&regs);
-	  if (startpos != 0 ||
-	      regs.end [0] != obstack_object_size (&token_stack))
-	    {
-	      *(((char *) obstack_base (&token_stack)
-		 + obstack_object_size (&token_stack)) - 1) = '\0';
+    else if (!default_word_regexp && strchr (word_start, ch))
+      {
+	obstack_1grow (&token_stack, ch);
+	while (1)
+	  {
+	    ch = peek_input ();
+	    if (ch == CHAR_EOF)
 	      break;
-	    }
-	  next_char ();
-	}
+	    obstack_1grow (&token_stack, ch);
+	    startpos = re_search (&word_regexp, obstack_base (&token_stack),
+				  obstack_object_size (&token_stack), 0, 0,
+				  &regs);
+	    if (startpos != 0 ||
+		regs.end [0] != obstack_object_size (&token_stack))
+	      {
+		*(((char *) obstack_base (&token_stack)
+		   + obstack_object_size (&token_stack)) - 1) = '\0';
+		break;
+	      }
+	    next_char ();
+	  }
 
-      obstack_1grow (&token_stack, '\0');
-      orig_text = obstack_finish (&token_stack);
+	obstack_1grow (&token_stack, '\0');
+	orig_text = obstack_finish (&token_stack);
 
-      if (regs.start[1] != -1)
-	obstack_grow (&token_stack,orig_text + regs.start[1],
-		      regs.end[1] - regs.start[1]);
-      else
-	obstack_grow (&token_stack, orig_text,regs.end[0]);
+	if (regs.start[1] != -1)
+	  obstack_grow (&token_stack,orig_text + regs.start[1],
+			regs.end[1] - regs.start[1]);
+	else
+	  obstack_grow (&token_stack, orig_text,regs.end[0]);
 
-      type = TOKEN_WORD;
-    }
+	type = TOKEN_WORD;
+      }
 
 #endif /* ENABLE_CHANGEWORD */
 
 			
-  else if (IS_LQUOTE(ch)) /* QUOTED STRING, SINGLE QUOTES */
-    {
-      quote_level = 1;
-      while (1)
-	{
-	  ch = next_char ();
-	  if (ch == CHAR_EOF)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: EOF in string")));
+    else if (IS_LQUOTE(ch))		/* QUOTED STRING, SINGLE QUOTES */
+      {
+	quote_level = 1;
+	while (1)
+	  {
+	    ch = next_char ();
+	    if (ch == CHAR_EOF)
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: EOF in string")));
 
-	  if (IS_RQUOTE(ch))
-	    {
-	      if (--quote_level == 0)
-		break;
-	      obstack_1grow (&token_stack, ch);
-	    }
-	  else if (IS_LQUOTE(ch))
-	    {
-	      quote_level++;
-	      obstack_1grow (&token_stack, ch);
-	    }
-	  else
-	    obstack_1grow (&token_stack, ch);
-	}
-      type = TOKEN_STRING;
-    }
-				/* QUOTED STRING, LONGER QUOTES */
-  else if (!single_quotes && MATCH (ch, lquote.string))
-    {
-      quote_level = 1;
-      while (1)
-	{
-	  ch = next_char ();
-	  if (ch == CHAR_EOF)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("ERROR: EOF in string")));
-
-	  if (MATCH (ch, rquote.string))
-	    {
-	      if (--quote_level == 0)
-		break;
-	      obstack_grow (&token_stack, rquote.string, rquote.length);
-	    }
-	  else if (MATCH (ch, lquote.string))
-	    {
-	      quote_level++;
-	      obstack_grow (&token_stack, lquote.string, lquote.length);
-	    }
-	  else
-	    obstack_1grow (&token_stack, ch);
-	}
-      type = TOKEN_STRING;
-    }
-  else if (single_quotes && single_comments) /* EVERYTHING ELSE */
-    {
-      obstack_1grow (&token_stack, ch);
-
-      if (IS_OTHER(ch) || IS_NUM(ch))
-	{
-	  while ((ch = next_char()) != CHAR_EOF 
-		 && (IS_OTHER(ch) || IS_NUM(ch)))
-	    obstack_1grow (&token_stack, ch);
-
-	  if (ch != CHAR_EOF)
-	    unget_input(ch);
-	  type = TOKEN_STRING;
-	}
-      else if (IS_SPACE(ch))
-	{
-	  if (!interactive)
-	    {
-	      while ((ch = next_char()) != CHAR_EOF && IS_SPACE(ch))
+	    if (IS_RQUOTE(ch))
+	      {
+		if (--quote_level == 0)
+		  break;
 		obstack_1grow (&token_stack, ch);
-
-	      if (ch != CHAR_EOF)
-		unget_input(ch);
-	    }
-	  type = TOKEN_SPACE;
-	}
-      else if (IS_ACTIVE(ch))
-	type = TOKEN_WORD;
-      else
-	type = TOKEN_SIMPLE;
-    }
-  else  /* EVERYTHING ELSE */
-    {
-      obstack_1grow (&token_stack, ch);
-
-      if (IS_OTHER(ch) || IS_NUM(ch))
+	      }
+	    else if (IS_LQUOTE(ch))
+	      {
+		quote_level++;
+		obstack_1grow (&token_stack, ch);
+	      }
+	    else
+	      obstack_1grow (&token_stack, ch);
+	  }
 	type = TOKEN_STRING;
-      else if (IS_SPACE(ch))
-	type = TOKEN_SPACE;
-      else if (IS_ACTIVE(ch))
-	type = TOKEN_WORD;
-      else
-	type = TOKEN_SIMPLE;
-    }
-  
+      }
+					/* QUOTED STRING, LONGER QUOTES */
+    else if (!single_quotes && MATCH (ch, lquote.string))
+      {
+	quote_level = 1;
+	while (1)
+	  {
+	    ch = next_char ();
+	    if (ch == CHAR_EOF)
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: EOF in string")));
+
+	    if (MATCH (ch, rquote.string))
+	      {
+		if (--quote_level == 0)
+		  break;
+		obstack_grow (&token_stack, rquote.string, rquote.length);
+	      }
+	    else if (MATCH (ch, lquote.string))
+	      {
+		quote_level++;
+		obstack_grow (&token_stack, lquote.string, lquote.length);
+	      }
+	    else
+	      obstack_1grow (&token_stack, ch);
+	  }
+	type = TOKEN_STRING;
+      }
+    else if (single_quotes && single_comments) /* EVERYTHING ELSE */
+      {
+	obstack_1grow (&token_stack, ch);
+
+	if (IS_OTHER(ch) || IS_NUM(ch))
+	  {
+	    while ((ch = next_char()) != CHAR_EOF 
+		   && (IS_OTHER(ch) || IS_NUM(ch)))
+	      obstack_1grow (&token_stack, ch);
+
+	    if (ch != CHAR_EOF)
+	      unget_input(ch);
+	    type = TOKEN_STRING;
+	  }
+	else if (IS_SPACE(ch))
+	  {
+	    if (!interactive)
+	      {
+		while ((ch = next_char()) != CHAR_EOF && IS_SPACE(ch))
+		  obstack_1grow (&token_stack, ch);
+
+		if (ch != CHAR_EOF)
+		  unget_input(ch);
+	      }
+	    type = TOKEN_SPACE;
+	  }
+	else if (IS_ACTIVE(ch))
+	  type = TOKEN_WORD;
+	else
+	  type = TOKEN_SIMPLE;
+      }
+    else				/* EVERYTHING ELSE */
+      {
+	obstack_1grow (&token_stack, ch);
+
+	if (IS_OTHER(ch) || IS_NUM(ch))
+	  type = TOKEN_STRING;
+	else if (IS_SPACE(ch))
+	  type = TOKEN_SPACE;
+	else if (IS_ACTIVE(ch))
+	  type = TOKEN_WORD;
+	else
+	  type = TOKEN_SIMPLE;
+      }
+  } while (type == TOKEN_NONE);
 
   obstack_1grow (&token_stack, '\0');
 
@@ -1330,6 +1334,10 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_EOF:
       fprintf (stderr, "eof\n");
+      break;
+
+    case TOKEN_NONE:
+      fprintf (stderr, "none\n");
       break;
     }
   return 0;

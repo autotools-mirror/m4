@@ -128,7 +128,8 @@ the distribution).
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
-@detailmenu --- The Detailed Node Listing ---
+@detailmenu
+ --- The Detailed Node Listing ---
 
 Introduction and preliminaries
 
@@ -214,6 +215,7 @@ Macros for doing arithmetic
 
 * Incr::                        Decrement and increment operators
 * Eval::                        Evaluating integer or rational expressions
+* Mpeval::                      
 
 Running UNIX commands
 
@@ -372,6 +374,10 @@ the current working directory.  @xref{Search Path} for more details.
 Makes this invocation of @code{m4} interactive.  This means that all
 output will be unbuffered, and interrupts will be ignored.
 
+@item -c
+@itemx --discard-comments
+Discard all comments instead of copying them to the output.
+
 @item -s
 @itemx --synclines
 Generate synchronisation lines, for use by the C preprocessor or other
@@ -489,6 +495,10 @@ Once execution is finished, write out the frozen state on the specified
 @itemx --reload-state @var{file}
 Before execution starts, recover the internal state from the specified
 frozen @var{file} (@pxref{Frozen files}).
+
+@item --import-environment
+Imports every variable in the environment as a macro.  This is done
+before @code{-D} and @code{-U}, so these can change the macros.
 
 @end table
 
@@ -2508,7 +2518,7 @@ does not.
 @example
 include(`no-such-file')
 @result{}
-@error{}in:1: m4: Cannot open no-such-file: No such file or directory
+@error{}m4: in: 1: Cannot open no-such-file: No such file or directory
 sinclude(`no-such-file')
 @result{}
 @end example
@@ -3134,6 +3144,7 @@ decrement operations.
 @menu
 * Incr::                        Decrement and increment operators
 * Eval::                        Evaluating integer or rational expressions
+* Mpeval::                      
 @end menu
 
 @node Incr, Eval, Arithmetic, Arithmetic
@@ -3166,7 +3177,7 @@ decr(7)
 The builtin macros @code{incr} and @code{decr} are recognized only when
 given arguments.
 
-@node Eval,  , Incr, Arithmetic
+@node Eval, Mpeval, Incr, Arithmetic
 @section Evaluating integer or rational expressions
 
 @cindex integer expression evaluation
@@ -3232,17 +3243,8 @@ then the digits making the number.  For any radix, the digits are
 @samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
 can be used interchangeably in numbers prefixes and as number digits.
 
-Calculations are done in 32 bit, but @code{m4} will use wider integers
-if available.
-
-When compiled with a multiple precision arithmetic library
-(@pxref{Experiments}), numbers may be of any length.  The @code{:}
-operator rationally divides two numbers and canonicalizes the result.
-The @code{/} operator always returns the quotient of the division.  To
-convert a rational value to integral, divide (@code{/}) by 1.  Some
-operators such as @code{%}, @code{<<}, @code{>>}, @code{~}, @code{&},
-@code{|} and @code{^} operate only on integers and will truncate any
-rational remainder.  @code{**} assumes that the exponent is integral.
+Calculations are done in at lease 32 bit, but @code{m4} will use wider
+integers if available.
 
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
@@ -3264,7 +3266,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo'/6)
-@error{}in:7: m4: Bad expression in eval: foo/6
+@error{}m4: in: 7: Bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3297,6 +3299,25 @@ eval(-666, 6, 10)
 Take note that @var{radix} cannot be larger than 36.
 
 The builtin macro @code{eval} is recognized only when given arguments.
+
+@node Mpeval,  , Eval, Arithmetic
+@comment  node-name,  next,  previous,  up
+@section Multiple precision arithmetic
+
+When @code{m4} is compiled with a multiple precision arithmetic library
+(@pxref{Experiments}), a builtin @code{mpeval} is defined.  
+
+It is almost identical to @code{eval}, except the calculations are done
+with infinite precision.  Numbers may be of any length.
+
+The @code{:} operator rationally divides two numbers and canonicalizes
+the result.  The @code{/} operator always returns the quotient of the
+division.  To convert a rational value to integral, divide (@code{/}) by
+1.  Some operators such as @code{%}, @code{<<}, @code{>>}, @code{~},
+@code{&}, @code{|} and @code{^} operate only on integers and will
+truncate any rational remainder.  @code{**} assumes that the exponent is
+integral.
+
 
 @node UNIX commands, Miscellaneous, Arithmetic, Top
 @chapter Running UNIX commands

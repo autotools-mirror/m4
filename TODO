@@ -4,18 +4,7 @@ Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
 
 
-* Features or problems
-
-  + GMP eval() should be enables if the library is present, maybe by
-    providing two different versions of eval().  That way users can
-    choose whether to use gmp on an individual basis.
-
-  + There should be a way ot have m4 discard comments instead of
-    outputting them.
-
-  + Implement discarding comment delimiters with the syntax table.
-
-  + The module system is still rudimentary (see below)
+* KNOWN BUGS
 
   + Changes in the syntax_table are not saved to frozen files.
 
@@ -23,13 +12,38 @@ for any of these ideas or if you have others to add.
 
   + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
+  + The test case `other-tests/stackovf.test' does not work.
+
+  + sigstack/sigaltstack and ENOSYS
+
+      When sigstack or sigaltstack fail with errno == ENOSYS, m4 should
+      fall back silently to not using an alternate signal stack.
+      Otherwise, problems arise in at least the following case: glibc
+      2.1 test releases, built with Linux 2.1 headers (as recommended
+      for glibc 2.1), so the library has sigstack and sigaltstack, but
+      run with a Linux 2.0 kernel, so the kernel support is not present
+      and ENOSYS is returned.
+
+      (GNU m4 1.4k, built with glibc 2.0.100 (itself built with Linux
+      2.1.126 headers), and running on Linux 2.0.36pre15.)
+
+      -- 
+      Joseph S. Myers
+      jsm28@cam.ac.uk
+
+
+
+* FEATURES OR PROBLEMS
+
+  + Implement discarding comment delimiters with the syntax table.
+
+  + The module system is still rudimentary (see below)
+
   + The $ used in user defined macros cannot be changed through
     changesyntax.  It should be handled as a modifier.
 
   + Make show include dependencies like gcc so targets are updated
     when their (included) input files are updated (Erick B).
-
-  + The test case `other-tests/stackovf.test' does not work.
 
   + Sort out all the weird forms of interaction between changesyntax,
     changecom and changequote.  What happens if you install a quote with
@@ -38,7 +52,8 @@ for any of these ideas or if you have others to add.
   + Add support for wide character sets.
 
 
-* Optimization and clean up
+
+* OPTIMIZATION AND CLEAN UP
 
   + Have NULs go really undisturbed through GNU m4
 	GNU m4 is lousy regarding NULs in streams (this would require
@@ -46,10 +61,12 @@ for any of these ideas or if you have others to add.
 	etc.).
 
 
-* Module specific issues
+
+* MODULE SPECIFIC ISSUES
 
-  + Support for other DL interfaces besides dlopen, such as dld and
-    hpux is still missing.
+  + Support for other DL interfaces besides dlopen and shl_load.
+    Currently it compiles and works on HPUX (v9,v10), SunOS (v5),
+    Solaris (v5) and GNU/Linux (v2.0).
 
   + Modules should be loadable from the command line with something like
     `-M module.so' o `--load-module=module.so'.  M4 should abort if it

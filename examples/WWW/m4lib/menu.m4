@@ -1,35 +1,70 @@
+
 \pushdef([header], [\tr([\td([\C_BG3], [\p([\b([$1])])])])])
-\pushdef([row], [\tr([\td([\font([size=-1], [\p([\b([\link([$1], [$2])])])])])])])
+
+\pushdef([separator], [\tr([\td([height=5], [])])])
+
+\pushdef([_row], [\link([$1], [$2])])
+
+\pushdef([_rows], 
+  [\ifelse($#, 0, [],
+           $#, 1, [],
+           $#, 2, [\_row([$1], [$2])],
+           $#, 3, [\_row([$1], [$2])],
+           [\_row([$1], [$2])\br\n\_rows(\shift(\shift($@)))])])
+
+\pushdef([rows], [\tr([\td([\font([size=-1], 
+				  \p([\b([\_rows($@)])]))])])])
 
 \table([align=left valign=top columns=1],
        [\header([Generel info])],
-       [\row([whatis.htm], [What is m4])],
-       [\row([features.htm], [Features])],
-       [\row([uses.htm], [Uses of m4])],
+       [\rows(
+	   [whatis.htm], [What is m4],
+	   [features.htm], [Features],
+	   [uses.htm], [Uses of m4],
+	   )],
+       [\separator],
 
        [\header([Documentation])],
-       [\row([man/m4_toc.html], [Manual])],
+       [\rows(
+	   [man/m4_toc.html], [Manual],
+	   )],
+       [\separator],
 
        [\header([Source files])],
-       [\row([readme.htm], [README])],
-       [\row([todo.htm], [TODO])],
-       [\row([news.htm], [NEWS])],
-       [\row([changelog.htm], [ChangeLog])],
-       [\row([thanks.htm], [Contributors])],
-       [\row([m4/], [Browse it])],
+       [\rows(
+	   [readme.htm], [README],
+	   [todo.htm], [TODO],
+	   [news.htm], [NEWS],
+	   [changelog.htm], [ChangeLog],
+	   [thanks.htm], [Contributors],
+	   [m4/], [Browse it],
+	   )],
+       [\separator],
 
        [\header([The Future])],
-       [\row([modules.htm], [Modules])],
-       [\row([visions.htm], [Visions])],
+       [\rows(
+	   [modules.htm], [Modules],
+	   [visions.htm], [Visions],
+	   )],
+       [\separator],
 
        [\header([Development])],
-       [\row([lists.htm], [Mailing-lists])],
-       [\row([feedback.htm], [Feedback])],
-       [\row([download.htm], [Download])],
+       [\rows(
+	   [lists.htm], [Mailing-lists],
+	   [feedback.htm], [Feedback],
+	   [download.htm], [Download],
+	   [bugs.htm], [Known bugs],
+	   )],
+       [\separator],
 
        [\header([Examples])],
-       [\row([thissite.htm], [This site])],
+       [\rows(
+	   [thissite.htm], [This site],
+	   )],
        )
 
 \popdef([header])
-\popdef([row])
+\popdef([rows])
+\popdef([_rows])
+\popdef([_row])
+\popdef([separator])

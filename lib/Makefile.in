@@ -74,6 +74,7 @@ GT_YES = @GT_YES@
 INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
 INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
+INTLINCL = @INTLINCL@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 LD = @LD@
@@ -99,6 +100,8 @@ l = @l@
 pkglibexecdir = @pkglibexecdir@
 
 noinst_LIBRARIES = libm4.a
+
+INCLUDES = @INTLINCL@
 
 libm4_a_SOURCES = error.c
 

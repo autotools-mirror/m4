@@ -488,7 +488,7 @@ insert_diversion (int divnum)
 
   /* Do not care about unexisting diversions.  */
 
-  if (divnum < 0 || divnum >= diversions)
+  if (divnum <= 0 || divnum >= diversions)
     return;
 
   /* Also avoid undiverting into self.  */

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# import-environment.test is part of the GNU m4 testsuite
+
+. ${srcdir}/defs
+
+TEST='This is an environment variable'
+export TEST
+
+ZAPPED='This is an environment variable which we will delete'
+export ZAPPED
+
+OVERRIDE='This is an environment variable which we will change'
+export OVERRIDE
+
+cat ${srcdir}/other-tests/import-environment.m4 >in
+
+cat <<\EOF >ok
+TEST=This is an environment variable
+LANGUAGE=C
+ZAPPED=ZAPPED
+OVERRIDE=It is changed.
+EOF
+
+M4PATH=$srcdir:$srcdir/other-tests \
+$M4 --import-environment -UZAPPED -DOVERRIDE='It is changed.' -d in >out 2>err
+sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+$CMP -s out ok

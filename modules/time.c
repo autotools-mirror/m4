@@ -19,14 +19,24 @@
 #include <m4.h>
 #include <builtin.h>
 
+#ifdef TM_IN_SYS_TIME
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif /* TM_IN_SYS_TIME */
 
 DECLARE(m4_currenttime);
 DECLARE(m4_ctime);
 DECLARE(m4_gmtime);
 DECLARE(m4_localtime);
+
+#ifdef HAVE_MKTIME
 DECLARE(m4_mktime);
+#endif /* HAVE_MKTIME */
+
+#ifdef HAVE_STRFTIME
 DECLARE(m4_strftime);
+#endif /* HAVE_STRFTIME */
 
 #undef DECLARE
 
@@ -37,8 +47,12 @@ builtin m4_macro_table[] =
   { "ctime",		TRUE,	FALSE,	FALSE,	m4_ctime },
   { "gmtime",		TRUE,	FALSE,	TRUE,	m4_gmtime },
   { "localtime",	TRUE,	FALSE,	TRUE,	m4_localtime },
+#ifdef HAVE_MKTIME
   { "mktime",		TRUE,	FALSE,	TRUE,	m4_mktime },
+#endif /* HAVE_MKTIME */
+#ifdef HAVE_STRFTIME
   { "strftime",		TRUE,	FALSE,	TRUE,	m4_strftime },
+#endif /* HAVE_STRFTIME */
   { 0,			FALSE,	FALSE,	FALSE,	0 },
 };
 
@@ -138,6 +152,7 @@ m4_localtime (struct obstack *obs, int argc, token_data **argv)
   format_tm(obs, localtime(&t));
 }
 
+#ifdef HAVE_MKTIME
 /*-------------------------------------------.
 | mktime(sec,min,hour,mday,month,year,isdst) |
 `-------------------------------------------*/
@@ -170,7 +185,9 @@ m4_mktime (struct obstack *obs, int argc, token_data **argv)
 
   shipout_int(obs, t);
 }
+#endif /* HAVE_MKTIME */
 
+#ifdef HAVE_STRFTIME
 static void
 m4_strftime (struct obstack *obs, int argc, token_data **argv)
 {
@@ -191,3 +208,4 @@ m4_strftime (struct obstack *obs, int argc, token_data **argv)
   l = strftime(buf, 1024, ARG(1), tm);
   obstack_grow(obs, buf, l);
 }
+#endif /* HAVE_STRFTIME */

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 1998-11-18 12:55+0100\n"
+"POT-Creation-Date: 1998-11-29 04:20+0100\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -12,103 +12,103 @@ msgstr ""
 "Files: ../lib/regex.c ../lib/xmalloc.c\n"
 "Update on Fri Jun 30 21:00:27 MET 1995 \n"
 
-#: src/builtin.c:329
+#: src/builtin.c:337
 #, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr "Attenzione: Troppo pochi argomenti per la funzione predefinita `%s'"
 
-#: src/builtin.c:335
+#: src/builtin.c:343
 #, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr ""
 "Attenzione: Gli argumenti in eccesso alla funzione predefinita `%s' sono "
 "ignorati"
 
-#: src/builtin.c:363
+#: src/builtin.c:371
 #, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr "Argumento non numerico a funzione predefinita `%s'"
 
-#: src/builtin.c:474
+#: src/builtin.c:482
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "ERRORE INTERNO: Tipo dato `token' errato in define_macro ()"
 
-#: src/builtin.c:669 src/builtin.c:732 src/builtin.c:1358 src/builtin.c:1382
+#: src/builtin.c:677 src/builtin.c:740 src/builtin.c:1383 src/builtin.c:1407
 #, c-format
 msgid "Undefined name %s"
 msgstr "Nome `%s' non definito"
 
-#: src/builtin.c:697
+#: src/builtin.c:705
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr ""
 
-#: src/builtin.c:705
+#: src/builtin.c:713
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr ""
 
-#: src/builtin.c:756
+#: src/builtin.c:764
 #, c-format
 msgid "Undefined macro `%s'"
 msgstr "Macro `%s' non definita"
 
-#: src/builtin.c:794
+#: src/builtin.c:802
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "ERRORE INTERNO: Tipo simbolo errato in m4_defn ()"
 
-#: src/builtin.c:860
+#: src/builtin.c:868
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Impossibile aprire una `pipe' per il comando `%s'"
 
-#: src/builtin.c:897
+#: src/builtin.c:908
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Base fuori intervallo in `eval' (base = %d)"
 
-#: src/builtin.c:906
+#: src/builtin.c:917
 msgid "Negative width to eval"
 msgstr "Larghezza negativa in `eval'"
 
-#: src/builtin.c:998
+#: src/builtin.c:1023
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Argumento non numerico a %s"
 
-#: src/builtin.c:1010
+#: src/builtin.c:1035
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
 
-#: src/builtin.c:1158
+#: src/builtin.c:1183
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Nome `%s' non definito"
 
-#: src/builtin.c:1209 src/freeze.c:207
+#: src/builtin.c:1234 src/freeze.c:207
 #, c-format
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
 
-#: src/builtin.c:1418
+#: src/builtin.c:1443
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Modalità di debug: indicatori di debug errati: `%s'"
 
-#: src/builtin.c:1454
+#: src/builtin.c:1479
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Impossibile aprire l' archivio di errore: %s"
 
-#: src/builtin.c:1671
+#: src/builtin.c:1696
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
+#: src/builtin.c:1757 src/builtin.c:1817 src/input.c:1012
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Espressione regolare errata `%s': %s"
 
-#: src/builtin.c:1743 src/builtin.c:1816
+#: src/builtin.c:1768 src/builtin.c:1841
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
@@ -121,49 +121,49 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr ""
 
-#: src/eval.c:297
+#: src/eval.c:309
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "Espressione errata in `eval' (manca la parentesi destra): %s"
 
-#: src/eval.c:303
+#: src/eval.c:315
 #, c-format
 msgid "Bad expression in eval: %s"
 msgstr "Espressione errata in `eval': %s"
 
-#: src/eval.c:308
+#: src/eval.c:320
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "Espressione errata in `eval' (testo errato): %s"
 
-#: src/eval.c:313
+#: src/eval.c:325
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "Espressione errata in `eval' (testo in eccesso): %s"
 
-#: src/eval.c:318
+#: src/eval.c:330
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Divisione per zero in `eval': %s"
 
-#: src/eval.c:323
+#: src/eval.c:335
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Modulo zero in `eval': %s"
 
-#: src/eval.c:328
+#: src/eval.c:340
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
 
-#: src/eval.c:582
+#: src/eval.c:594
 msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
 msgstr ""
 
-#: src/eval.c:627
+#: src/eval.c:639
 msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
 msgstr ""
 
-#: src/eval.c:726
+#: src/eval.c:738
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "ERRORE INTERNO: Operatore errato in mult_term ()"
 
@@ -197,55 +197,55 @@ msgstr "Fine prematura dell' archivio congelato"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
 
-#: src/input.c:315
+#: src/input.c:318
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ingresso ripristinato su %s, linea %d"
 
-#: src/input.c:343
+#: src/input.c:346
 #, c-format
 msgid "Input read from %s"
 msgstr "Errore di lettura da %s"
 
-#: src/input.c:503
+#: src/input.c:506
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "ERRORE INTERNO: Utilizzo ricorsivo di push_string!"
 
-#: src/input.c:620
+#: src/input.c:623
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ERRORE INTERNO: Chiamata errata a init_macro_token ()"
 
-#: src/input.c:660
+#: src/input.c:663
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ERRORE INTERNO: Stack di ingresso corrotto in next_char ()"
 
-#: src/input.c:697
+#: src/input.c:700
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "ERRORE INTERNO: Stack di ingresso corrotto in peek_input ()"
 
-#: src/input.c:800
+#: src/input.c:803
 msgid "NONE"
 msgstr "NESSUNO"
 
-#: src/input.c:1193 src/input.c:1220
+#: src/input.c:1197 src/input.c:1224
 msgid "ERROR: EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
 
-#: src/m4.c:106
+#: src/m4.c:117
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "ERRORE: Stack overflow.  (Ricorsione infinita in `define'?)"
 
-#: src/m4.c:133
+#: src/m4.c:144
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Per ulteriori informazioni provare `%s --help'.\n"
 
-#: src/m4.c:137
+#: src/m4.c:148
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Usage: %s [OPZIONE]... [ARCHIVIO]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:149
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -259,11 +259,11 @@ msgid ""
 "  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
 msgstr ""
 
-#: src/m4.c:151
+#: src/m4.c:162
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 
-#: src/m4.c:155
+#: src/m4.c:166
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -273,7 +273,7 @@ msgid ""
 "  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
 msgstr ""
 
-#: src/m4.c:163
+#: src/m4.c:174
 msgid ""
 "\n"
 "Limits control:\n"
@@ -282,7 +282,7 @@ msgid ""
 "  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
 msgstr ""
 
-#: src/m4.c:170
+#: src/m4.c:181
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -290,7 +290,7 @@ msgid ""
 "  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
 msgstr ""
 
-#: src/m4.c:176
+#: src/m4.c:187
 msgid ""
 "\n"
 "Debugging:\n"
@@ -300,7 +300,7 @@ msgid ""
 "  -o, --error-output=FILE      redirect debug and trace output\n"
 msgstr ""
 
-#: src/m4.c:184
+#: src/m4.c:195
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -317,24 +317,28 @@ msgid ""
 "  V   shorthand for all of the above flags\n"
 msgstr ""
 
-#: src/m4.c:199
+#: src/m4.c:210
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 
-#: src/m4.c:204
+#: src/m4.c:215
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/m4.c:368
+#: src/m4.c:388
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Indicatori di debug errati: `%s'"
 
-#: src/m4.c:447
+#: src/m4.c:417
+msgid " (options:"
+msgstr ""
+
+#: src/m4.c:500
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
 
@@ -359,7 +363,17 @@ msgstr "ERRORE INTERNO: Tipo simbolo errato in call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 
-#: src/module.c:206
+#: src/module.c:312
+#, fuzzy, c-format
+msgid "Module search for `%s' found `%s'"
+msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
+
+#: src/module.c:349
+#, c-format
+msgid "ERROR: cannot find module `%s': %s"
+msgstr ""
+
+#: src/module.c:353
 #, c-format
 msgid "ERROR: cannot find module `%s'"
 msgstr ""
@@ -384,14 +398,9 @@ msgstr "ERRORE: Leggendo archivio inserito"
 msgid "Cannot stat diversion"
 msgstr "Impossibile effettuare la `stat' per la deviazione"
 
-#: src/path.c:170
+#: src/path.c:157
 #, c-format
 msgid "Path search for `%s' found `%s'"
-msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
-
-#: src/path.c:253
-#, fuzzy, c-format
-msgid "Module search for `%s' found `%s'"
 msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even

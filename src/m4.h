@@ -163,15 +163,13 @@ extern int max_debug_argument_length;	/* -l */
 extern int suppress_warnings;		/* -Q */
 extern int warning_status;		/* -E */
 extern int nesting_limit;		/* -L */
+extern int discard_comments;		/* -c */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;	/* -W */
 #endif
 
 /* Error handling.  */
-#define M4ERROR(Arglist) \
-  (reference_error (), error Arglist)
-
-void reference_error __P ((void));
+#define M4ERROR(Arglist) (error Arglist)
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap __P ((char *const *, char *const *,
@@ -280,6 +278,7 @@ void trace_post __P ((const char *, int, int, token_data **, const char *));
 enum token_type
 {
   TOKEN_EOF,			/* end of file */
+  TOKEN_NONE,			/* discardable token */
   TOKEN_STRING,			/* a quoted string */
   TOKEN_SPACE,			/* whitespace */
   TOKEN_WORD,			/* an identifier */
@@ -522,11 +521,39 @@ void include_env_init __P ((void));
 void add_include_directory __P ((const char *));
 FILE *path_search __P ((const char *, char **));
 
+/* These are for other search paths */
+
+struct search_path
+{
+  struct search_path *next;	/* next directory to search */
+  const char *dir;		/* directory */
+  int len;
+};
+
+typedef struct search_path search_path;
+
+struct search_path_info
+{
+  search_path *list;		/* the list of path directories */
+  search_path *list_end;	/* the end of same */
+  int max_length;		/* length of longest directory name */
+};
+
+struct search_path_info *search_path_info_new __P((void));
+void search_path_env_init __P ((struct search_path_info *, char *, boolean));
+void search_path_add __P ((struct search_path_info *, const char *));
+
+
 
 /* File: eval.c  --- expression evaluation.  */
 
 boolean evaluate __P ((struct obstack *obs,
 		       const char *, const int radix, int min));
+
+#ifdef WITH_GMP
+boolean mp_evaluate __P ((struct obstack *obs,
+			  const char *, const int radix, int min));
+#endif /* WITH_GMP */
 
 
 /* File: format.c  --- printf like formatting.  */
@@ -543,14 +570,10 @@ void reload_frozen_state __P ((const char *));
 
 /* File: module.c --- dynamic modules */
 
+#ifdef WITH_MODULES
+
 typedef void module_init_t (struct obstack *obs);
 typedef void module_finish_t (void);
-
-#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
-#define WITH_MODULES
-#endif
-
-#ifdef WITH_MODULES
 
 typedef voidstar module_func (const char *);
 
@@ -559,10 +582,6 @@ void module_unload_all (void);
 
 builtin *module_load (const char *modname, struct obstack *obs);
 
-/* These are really in path.c */
-void module_env_init (void);
-void add_module_directory (const char *dir);
-voidstar module_search (const char *dir, module_func *try);
 #endif /* WITH_MODULES */
 
 
