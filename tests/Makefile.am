@@ -57,7 +57,8 @@ check-local: atconfig $(TESTSUITE)
 	$(SHELL) $(srcdir)/$(TESTSUITE)
 
 clean-local:
-	$(srcdir)/testsuite --clean
+	test -f $(srcdir)/$(TESTSUITE) && \
+	  $(srcdir)/$(TESTSUITE) --clean
 
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.

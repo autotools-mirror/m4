@@ -1,3 +1,8 @@
+2005-03-11  Per Bothner  <per@bothner.com>  (tiny change)
+
+	* tests/Makefile (clean-local): Only run the testsuite cleanup
+	if the testsuite has been generated.
+
 2005-02-11  Stepan Kasal  <kasal@ucw.cz>
 
 	* TODO: slight clarification of the example of qindir usage.
