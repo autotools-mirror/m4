@@ -1,5 +1,30 @@
 2000-11-29  Gary V. Vaughan  <gary@gnu.org>
 
+	Move the implementation of GMP support for the mpeval() builtin
+	into a loadable module that depends on libgmp.  mpeval() and
+	eval() share a common parser, now in m4/evalparser.c; the code
+	in m4/numb.c and m4/numb.h is now physically split between
+	m4/eval.c (the eval() backend) and modules/mpeval.c (the
+	mpeval() backend), rather than being differentiated by cpp
+	macros and multiple inclusion.  The mpeval module is always
+	built but will generate an diagnostic if it is used from an
+	installation that didn't link in the gmp library.
+	* modules/Makefile.am: build and install the new mpeval module.
+	* modules/mpeval.c: Now contains the former parts of m4/numb.c
+	and m4/numb.h that are required for gmp support in mpeval().
+	* m4/Makefile.am (libm4_la_SOURCES): Removed evalmp.c.
+	* m4/evalmp.c:  Removed.
+	* m4/m4module.h: Removed conditional prototype for
+	m4_mp_evaluate().
+	* m4/eval.c: Rewritten.  Contains the former parts of m4/numb.c
+	and m4/numb.h that do not rely on gmp.
+	* m4/evalparse.c:  New file, contains the shared parts of the
+	eval() and evalmp() parser implementations, and is no longer
+	unencumbered by cpp magic to uncover the right parts.
+	* m4/numb.h:  Removed.  It's former contents are split between
+	m4/eval.c and modules/mpeval.c.
+	* m4/numb.c: ditto.
+
 	* tests/other-tests/changeword.test: New test.  Rudimentary
 	testing of changeword builtin runs only if --wnable-changeword
 	was used at configure time.

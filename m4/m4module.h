@@ -453,11 +453,6 @@ extern void m4_dump_symbols M4_PARAMS((struct m4_dump_symbol_data *data, int arg
 extern boolean m4_evaluate M4_PARAMS((struct obstack *obs,
 				      const char *, const int radix, int min));
 
-#ifdef WITH_GMP
-extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
-					 const int radix, int min));
-#endif /* WITH_GMP */
-
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree
 

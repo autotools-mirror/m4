@@ -22,6 +22,47 @@
 #endif
 
 #include <m4module.h>
+#include "m4private.h"
+
+#if WITH_GMP
+#  include "gmp.h"
+
+#  define numb_set(ans,i) mpq_set(ans,i)
+#  define numb_set_si(ans,i) mpq_set_si(*(ans),(long)i,(unsigned long)1)
+
+#  define numb_init(x) mpq_init((x))
+#  define numb_fini(x) mpq_clear((x))
+
+#  define numb_zerop(x)     (mpq_cmp(x,numb_ZERO) == 0)
+#  define numb_positivep(x) (mpq_cmp(x,numb_ZERO) >  0)
+#  define numb_negativep(x) (mpq_cmp(x,numb_ZERO) <  0)
+
+#  define numb_eq(x,y) numb_set(x,mpq_cmp(x,y)==0? numb_ONE: numb_ZERO)
+#  define numb_ne(x,y) numb_set(x,mpq_cmp(x,y)!=0? numb_ONE: numb_ZERO)
+#  define numb_lt(x,y) numb_set(x,mpq_cmp(x,y)< 0? numb_ONE: numb_ZERO)
+#  define numb_le(x,y) numb_set(x,mpq_cmp(x,y)<=0? numb_ONE: numb_ZERO)
+#  define numb_gt(x,y) numb_set(x,mpq_cmp(x,y)> 0? numb_ONE: numb_ZERO)
+#  define numb_ge(x,y) numb_set(x,mpq_cmp(x,y)>=0? numb_ONE: numb_ZERO)
+
+#  define numb_lnot(x)   numb_set(x,numb_zerop(x)? numb_ONE: numb_ZERO)
+#  define numb_lior(x,y) numb_set(x,numb_zerop(x)? y: numb_ONE)
+#  define numb_land(x,y) numb_set(x,numb_zerop(x)? numb_ZERO: y)
+
+#  define reduce1(f1,x) \
+{ number T; mpq_init(T); f1(T,x);   mpq_set(x,T); mpq_clear(T); }
+#  define reduce2(f2,x,y) \
+{ number T; mpq_init(T); f2(T,(x),(y)); mpq_set((x),T); mpq_clear(T); }
+
+#  define numb_plus(x,y)  reduce2(mpq_add,x,y)
+#  define numb_minus(x,y) reduce2(mpq_sub,x,y)
+#  define numb_negate(x)  reduce1(mpq_neg,x)
+
+#  define numb_times(x,y) reduce2(mpq_mul,x,y)
+#  define numb_ratio(x,y) reduce2(mpq_div,x,y)
+#  define numb_invert(x)  reduce1(mpq_inv,x)
+
+#  define numb_decr(n) numb_minus(n,numb_ONE)
+#endif /* WITH_GMP */
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	mpeval_LTX_m4_builtin_table
@@ -54,6 +95,7 @@ m4_builtin m4_builtin_table[] =
 };
 
 
+#if WITH_GMP
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
@@ -63,8 +105,358 @@ m4_macro m4_macro_table[] =
 };
 
 
+/* number should be at least 32 bits.  */
+typedef mpq_t number;
+
+extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
+					 const int radix, int min));
+static void numb_initialise M4_PARAMS((void));
+static void numb_obstack M4_PARAMS((struct obstack *obs, const number value, 
+				    const int radix, int min));
+static void mpq2mpz M4_PARAMS((mpz_t z, const number q, const char *noisily));
+static void mpz2mpq M4_PARAMS((number q, const mpz_t z));
+static void numb_divide M4_PARAMS((number *x, const number *y));
+static void numb_modulo M4_PARAMS((number *x, const number *y));
+static void numb_and M4_PARAMS((number *x, const number *y));
+static void numb_ior M4_PARAMS((number *x, const number *y));
+static void numb_eor M4_PARAMS((number *x, const number *y));
+static void numb_not M4_PARAMS((number *x));
+static void numb_lshift M4_PARAMS((number *x, const number *y));
+static void numb_rshift M4_PARAMS((number *x, const number *y));
+
+
 
 M4BUILTIN_HANDLER (mpeval)
 {
-  do_eval(obs, argc, argv, mp_evaluate);
+  do_eval(obs, argc, argv, m4_mp_evaluate);
 }
+
+
+static number numb_ZERO;
+static number numb_ONE;
+
+static int numb_initialised = 0;
+
+static void
+numb_initialise ()
+{
+  if (numb_initialised)
+    return;
+
+  numb_init(numb_ZERO);
+  numb_set_si(&numb_ZERO,0);
+ 
+  numb_init(numb_ONE);
+  numb_set_si(&numb_ONE,1);
+
+  numb_initialised = 1;
+}
+
+static void
+numb_obstack(obs, value, radix, min)
+     struct obstack *obs;
+     const number value;
+     const int radix;
+     int min;
+{
+  const char *s;
+
+  mpz_t i;
+  mpz_init(i);
+
+  mpq_get_num(i,value);
+  s = mpz_get_str((char *)0, radix, i);
+
+  if (*s == '-')
+    {
+      obstack_1grow (obs, '-');
+      min--;
+      s++;
+    }
+  for (min -= strlen (s); --min >= 0;)
+    obstack_1grow (obs, '0');
+
+  obstack_grow (obs, s, strlen (s));
+
+  mpq_get_den(i,value);
+  if (mpz_cmp_si(i,(long)1)!=0) {
+    obstack_1grow (obs, ':');
+    s = mpz_get_str((char *)0, radix, i);
+    obstack_grow (obs, s, strlen (s));
+  }
+
+  mpz_clear(i);
+}
+
+#define NOISY ""
+#define QUIET (char *)0
+
+static void
+mpq2mpz (z, q, noisily)
+     mpz_t z;
+     const number q;
+     const char *noisily;
+{
+  if (noisily && mpz_cmp_si (mpq_denref (q), (long) 1) != 0)
+    {
+      M4ERROR((warning_status, 0,
+	       _("Loss of precision in eval: %s"), noisily));
+    }
+
+  mpz_div (z, mpq_numref (q), mpq_denref (q));
+}
+
+static void
+mpz2mpq (q, z)
+     number q;
+     const mpz_t z;
+{
+  mpq_set_si  (q, (long) 0, (unsigned long) 1);
+  mpq_set_num (q, z);
+}
+
+static void
+numb_divide (x, y)
+     number *x;
+     const number *y;
+{
+   mpq_t qres;
+   mpz_t zres;
+
+   mpq_init(qres);
+   mpq_div(qres,*x,*y);
+
+   mpz_init(zres);
+   mpz_div(zres,mpq_numref(qres),mpq_denref(qres));
+   mpq_clear(qres);
+
+   mpz2mpq(*x,zres);
+   mpz_clear(zres);
+}
+
+static void
+numb_modulo (x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+   mpz_mod(res,xx,yy);
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_and(x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+   mpz_and(res,xx,yy);
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_ior (x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+   mpz_ior(res,xx,yy);
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_eor (x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+
+#if 0
+   mpz_xor(res,xx,yy);
+#else  /* 0 */
+   /* a^b = (a|b) & !(a&b) */
+   {
+     mpz_t and_ab, ior_ab, nand_ab;
+
+     mpz_init(ior_ab);
+     mpz_ior(ior_ab,xx,yy);
+
+     mpz_init(and_ab);
+     mpz_and(and_ab,xx,yy);
+
+     mpz_init(nand_ab);
+     mpz_com(nand_ab,and_ab);
+
+     mpz_and(res,ior_ab,nand_ab);
+
+     mpz_clear(and_ab);
+     mpz_clear(ior_ab);
+     mpz_clear(nand_ab);
+   }
+#endif /* 0 */
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_not (x)
+     number *x;
+{
+   mpz_t xx, res;
+
+  /* x should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(res);
+   mpz_com(res,xx);
+
+   mpz_clear(xx);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_lshift (x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+   { /* bug: need to determine if y is too big or negative */
+     long int exp = mpz_get_si(yy);
+     if (exp >= 0) {
+       mpz_mul_2exp(res,xx,(unsigned)exp);
+     } else {
+       mpz_div_2exp(res,xx,(unsigned)-exp);
+     }
+   }
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+static void
+numb_rshift (x, y)
+     number *x;
+     const number *y;
+{
+   mpz_t xx, yy, res;
+
+  /* x should be integral */
+  /* y should be integral */
+
+   mpz_init(xx);
+   mpq2mpz(xx,*x,NOISY);
+
+   mpz_init(yy);
+   mpq2mpz(yy,*y,NOISY);
+
+   mpz_init(res);
+   { /* bug: need to determine if y is too big or negative */
+     long int exp = mpz_get_si(yy);
+     if (exp >= 0) {
+       mpz_div_2exp(res,xx,(unsigned)exp);
+     } else {
+       mpz_mul_2exp(res,xx,(unsigned)-exp);
+     }
+   }
+
+   mpz_clear(xx);
+   mpz_clear(yy);
+
+   mpz2mpq(*x,res);
+   mpz_clear(res);
+}
+
+#define m4_evaluate m4_mp_evaluate
+#include "evalparse.c"
+
+#else
+
+M4BUILTIN_HANDLER (mpeval)
+{
+  M4ERROR ((EXIT_FAILURE, 0,
+	    _("%s support was not compiled in"), M4ARG(0)));
+  abort ();
+}
+
+#endif /* !WITH_GMP */

@@ -32,10 +32,10 @@ pkginc_HEADERS	= error.h list.h ltdl.h regex.h system.h @OBSTACK_H@
 EXTRA_HEADERS	= gnu-obstack.h
 
 lib_LTLIBRARIES		= libm4.la
-libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c evalmp.c \
+libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c \
 			  input.c list.c ltdl.c macro.c module.c \
 			  output.c path.c regex.c symtab.c utility.c
-EXTRA_libm4_la_SOURCES	= numb.c numb.h
+EXTRA_libm4_la_SOURCES	= evalparse.c
 libm4_la_LIBADD		= @LTLIBOBJS@ @LIBADD_DL@
 
 module.o module.lo: $(srcdir)/module.c pathconf.h
