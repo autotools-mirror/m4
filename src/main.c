@@ -357,6 +357,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'b':
 	interactive = FALSE;
+	break;
 
       case 'c':
 	discard_comments = TRUE;

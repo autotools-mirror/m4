@@ -51,3 +51,7 @@ $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
 	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@.tmp
 	chmod +x $@.tmp
 	mv $@.tmp $@
+
+# Run the test suite on the *installed* tree.
+installcheck-local:
+	$(SHELL) $(srcdir)/$(TESTSUITE) AUTOTEST_PATH=$$dc_install_base/bin

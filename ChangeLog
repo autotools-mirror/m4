@@ -1,5 +1,15 @@
 2001-08-27  Akim Demaille  <akim@epita.fr>
 
+	* tests/Makefile.am (installcheck-local): New.
+	* tests/testsuite.at (AT_CHECK_M4): Pass `-b' so that C-c works on
+	the test suite.
+	Prefer options over envvars.
+	* src/main.c (main): First bug caught by the test suite (yeah!):
+	--batch lacked a `break' which resulted in an accidental
+	invocation of --discard-comments.
+
+2001-08-27  Akim Demaille  <akim@epita.fr>
+
 	* tests/others.at (capitalize, changeword, comments, ddivert)
 	(debug, esyscmd, exp, foreach, forloop, fstab, hanoi, include)
 	(misc, multiquotes, patsubst, pushdef/popdef, regexp, reverse)
