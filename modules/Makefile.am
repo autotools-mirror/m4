@@ -34,8 +34,11 @@ INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
 LIBS = $(top_builddir)/m4/libm4.la
 LDFLAGS = -no-undefined
 
-pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la traditional.la \
+pkglibexec_LTLIBRARIES	= changeword.la gnu.la load.la m4.la traditional.la \
 			  modtest.la perl.la shadow.la stdlib.la time.la
+
+changeword_la_SOURCES = changeword.c
+changeword_la_LDFLAGS = -module
 
 gnu_la_SOURCES = gnu.c
 EXTRA_gnu_la_SOURCES = format.c

@@ -22,6 +22,7 @@
 #endif
 
 #include <m4module.h>
+#include "m4private.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	changeword_LTX_m4_builtin_table
@@ -53,7 +54,7 @@ m4_builtin m4_builtin_table[] =
   { 0, 0, FALSE, FALSE },
 };
 
-
+#if ENABLE_CHANGEWORD
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
@@ -74,5 +75,16 @@ M4BUILTIN_HANDLER (changeword)
   if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  set_word_regexp (M4_TOKEN_DATA_TEXT (argv[1]));
+  m4_set_word_regexp (M4ARG (1));
 }
+
+#else
+
+M4BUILTIN_HANDLER (changeword)
+{
+  M4ERROR ((EXIT_FAILURE, 0,
+	    _("%s support was not compiled in"), M4ARG(0)));
+  abort ();
+}
+
+#endif /* !ENABLE_CHANGEWORD */

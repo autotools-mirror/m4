@@ -861,9 +861,9 @@ m4_input_init ()
 
 #ifdef ENABLE_CHANGEWORD
   if (user_word_regexp)
-    set_word_regexp (user_word_regexp);
+    m4_set_word_regexp (user_word_regexp);
   else
-    set_word_regexp (DEFAULT_WORD_REGEXP);
+    m4_set_word_regexp (DEFAULT_WORD_REGEXP);
 #endif
 }
 

@@ -99,6 +99,7 @@ GENERATED_TESTS = \
 	generated-tests/undivert.3.test
 
 OTHER_TESTS = \
+	other-tests/changeword.test \
 	other-tests/gmp.test \
 	other-tests/iso8859.test \
 	other-tests/sync-lines.test \

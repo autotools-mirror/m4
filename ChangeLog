@@ -1,3 +1,17 @@
+2000-11-29  Gary V. Vaughan  <gary@gnu.org>
+
+	* tests/other-tests/changeword.test: New test.  Rudimentary
+	testing of changeword builtin runs only if --wnable-changeword
+	was used at configure time.
+	* tests/mkconfig.sh: Solaris sed (at least) does not parse nested
+	alternation correctly.  Split into two expressions to compensate.
+	* m4/input.c (m4_input_init): Use m4_ prefix on m4_set_word_regexp.
+	* modules/Makefile.am: Build changeword module.
+	* modules/changeword.c (m4_macro_table): Define __m4_changeword__
+	only when --enable-changeword was passed to configure.
+	(builtin_changeword): If --enable-changeword was not used, then
+	report that changeword() builtin has no support in m4 binary.
+
 2000-11-28  Gary V. Vaughan  <gary@gnu.org>
 
 	* src/main.c (main): Fixed a particularly nasty bug is
