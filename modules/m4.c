@@ -96,10 +96,10 @@ typedef unsigned long int unumber;
 #endif
 
 
-static void	include		(int argc, m4_symbol_value **argv,
+static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 boolean silent);
-static void *	set_trace	(m4_hash *hash, const void *ignored,
-				 void *symbol, void *userdata);
+static void *	set_trace_CB	(m4_symtab *symtab, const char *ignored,
+				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(struct obstack *obs, const number value,
 				 const int radix, int min);
@@ -132,7 +132,7 @@ M4INIT_HANDLER (m4)
   if (handle)
     if (lt_dlmakeresident (handle) != 0)
       {
-	M4ERROR ((warning_status, 0,
+	M4ERROR ((m4_get_warning_status_opt (context), 0,
 		  _("Warning: cannot make module `%s' resident: %s"),
 		  m4_get_module_name (handle), lt_dlerror ()));
       }
@@ -168,7 +168,7 @@ M4BUILTIN_HANDLER (define)
 M4BUILTIN_HANDLER (undefine)
 {
   if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    M4WARN ((warning_status, 0,
+    M4WARN ((m4_get_warning_status_opt (context), 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
   else
     m4_symbol_delete (M4SYMTAB, M4ARG (1));
@@ -192,7 +192,7 @@ M4BUILTIN_HANDLER (pushdef)
 M4BUILTIN_HANDLER (popdef)
 {
   if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    M4WARN ((warning_status, 0,
+    M4WARN ((m4_get_warning_status_opt (context), 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
   else
     m4_symbol_popdef (M4SYMTAB, M4ARG (1));
@@ -231,11 +231,11 @@ M4BUILTIN_HANDLER (ifelse)
   if (argc == 2)
     return;
 
-  if (m4_bad_argc (argc, argv, 4, -1))
+  if (m4_bad_argc (context, argc, argv, 4, -1))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    m4_bad_argc ((argc + 2) % 3, argv, -1, 1);
+    m4_bad_argc (context, (argc + 2) % 3, argv, -1, 1);
 
   argv++;
   argc--;
@@ -284,7 +284,7 @@ M4BUILTIN_HANDLER (dumpdef)
 
       if (m4_is_symbol_text (symbol))
 	{
-	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
+	  if (m4_get_debug_level_opt (context) & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
 		     lquote.string, m4_get_symbol_text (symbol),
 		     rquote.string);
@@ -315,7 +315,7 @@ M4BUILTIN_HANDLER (defn)
   symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (1));
   if (symbol == NULL)
     {
-      M4WARN ((warning_status, 0,
+      M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
       return;
     }
@@ -348,7 +348,7 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (!m4_numeric_arg (argc, argv, 1, &value))
+  if (!m4_numeric_arg (context, argc, argv, 1, &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -358,7 +358,7 @@ M4BUILTIN_HANDLER (decr)
 {
   int value;
 
-  if (!m4_numeric_arg (argc, argv, 1, &value))
+  if (!m4_numeric_arg (context, argc, argv, 1, &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -374,7 +374,7 @@ M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
 
-  if (argc == 2 && !m4_numeric_arg (argc, argv, 1, &i))
+  if (argc == 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
   m4_make_diversion (i);
@@ -401,18 +401,18 @@ M4BUILTIN_HANDLER (undivert)
     {
       if (sscanf (M4ARG (1), "%d", &i) == 1)
 	m4_insert_diversion (i);
-      else if (no_gnu_extensions)
-	m4_numeric_arg (argc, argv, 1, &i);
+      else if (m4_get_no_gnu_extensions_opt (context))
+	m4_numeric_arg (context, argc, argv, 1, &i);
       else
 	{
-	  FILE *fp = m4_path_search (M4ARG (1), (char **) NULL);
+	  FILE *fp = m4_path_search (context, M4ARG (1), (char **) NULL);
 	  if (fp != NULL)
 	    {
 	      m4_insert_file (fp);
 	      fclose (fp);
 	    }
 	  else
-	    M4ERROR ((warning_status, errno,
+	    M4ERROR ((m4_get_warning_status_opt (context), errno,
 		      _("Cannot undivert %s"), M4ARG (1)));
 	}
     }
@@ -427,7 +427,7 @@ M4BUILTIN_HANDLER (undivert)
    lives in input.c.  */
 M4BUILTIN_HANDLER (dnl)
 {
-  m4_skip_line ();
+  m4_skip_line (context);
 }
 
 /* Shift all argument one to the left, discarding the first argument.  Each
@@ -462,34 +462,34 @@ M4BUILTIN_HANDLER (changecom)
 /* Generic include function.  Include the file given by the first argument,
    if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
 static void
-include (int argc, m4_symbol_value **argv, boolean silent)
+include (m4 *context, int argc, m4_symbol_value **argv, boolean silent)
 {
   FILE *fp;
   char *name = NULL;
 
-  fp = m4_path_search (M4ARG (1), &name);
+  fp = m4_path_search (context, M4ARG (1), &name);
   if (fp == NULL)
     {
       if (!silent)
-	M4ERROR ((warning_status, errno,
+	M4ERROR ((m4_get_warning_status_opt (context), errno,
 		  _("Cannot open %s"), M4ARG (1)));
       return;
     }
 
-  m4_push_file (fp, name);
+  m4_push_file (context, fp, name);
   xfree (name);
 }
 
 /* Include a file, complaining in case of errors.  */
 M4BUILTIN_HANDLER (include)
 {
-  include (argc, argv, FALSE);
+  include (context, argc, argv, FALSE);
 }
 
 /* Include a file, ignoring errors.  */
 M4BUILTIN_HANDLER (sinclude)
 {
-  include (argc, argv, TRUE);
+  include (context, argc, argv, TRUE);
 }
 
 
@@ -522,7 +522,7 @@ M4BUILTIN_HANDLER (m4exit)
 {
   int exit_code = 0;
 
-  if (argc == 2  && !m4_numeric_arg (argc, argv, 1, &exit_code))
+  if (argc == 2  && !m4_numeric_arg (context, argc, argv, 1, &exit_code))
     exit_code = 0;
 
   /* Ensure any module exit callbacks are executed.  */
@@ -536,7 +536,7 @@ M4BUILTIN_HANDLER (m4exit)
    version only the first.  */
 M4BUILTIN_HANDLER (m4wrap)
 {
-  if (no_gnu_extensions)
+  if (m4_get_no_gnu_extensions_opt (context))
     m4_shipout_string (obs, M4ARG (1), 0, FALSE);
   else
     m4_dump_args (obs, argc, argv, " ", FALSE);
@@ -552,10 +552,10 @@ M4BUILTIN_HANDLER (m4wrap)
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
 static void *
-set_trace (m4_hash *hash, const void *ignored, void *symbol,
+set_trace_CB (m4_symtab *hash, const char *ignored, m4_symbol *symbol,
 	   void *userdata)
 {
-  m4_set_symbol_traced ((m4_symbol *) symbol, (boolean) (userdata != NULL));
+  m4_set_symbol_traced (symbol, (boolean) (userdata != NULL));
   return NULL;
 }
 
@@ -564,16 +564,16 @@ M4BUILTIN_HANDLER (traceon)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (M4SYMTAB, set_trace, (void *) obs);
+    m4_symtab_apply (M4SYMTAB, set_trace_CB, (void *) obs);
   else
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 	if (symbol != NULL)
-	  set_trace (NULL, NULL, symbol, (char *) obs);
+	  set_trace_CB (NULL, NULL, symbol, (char *) obs);
 	else
-	  M4WARN ((warning_status, 0,
+	  M4WARN ((m4_get_warning_status_opt (context), 0,
 		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
       }
 }
@@ -584,16 +584,16 @@ M4BUILTIN_HANDLER (traceoff)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (M4SYMTAB, set_trace, NULL);
+    m4_symtab_apply (M4SYMTAB, set_trace_CB, NULL);
   else
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4ARG (i);
 	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 	if (symbol != NULL)
-	  set_trace (NULL, NULL, symbol, NULL);
+	  set_trace_CB (NULL, NULL, symbol, NULL);
 	else
-	  M4WARN ((warning_status, 0,
+	  M4WARN ((m4_get_warning_status_opt (context), 0,
 		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
       }
 }
@@ -640,10 +640,10 @@ M4BUILTIN_HANDLER (substr)
   int start, length, avail;
 
   length = avail = strlen (M4ARG (1));
-  if (!m4_numeric_arg (argc, argv, 2, &start))
+  if (!m4_numeric_arg (context, argc, argv, 2, &start))
     return;
 
-  if (argc == 4 && !m4_numeric_arg (argc, argv, 3, &length))
+  if (argc == 4 && !m4_numeric_arg (context, argc, argv, 3, &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)
@@ -738,10 +738,10 @@ M4BUILTIN_HANDLER (translit)
 #define numb_lior(x,y) ((x) = ((x) || (y)))
 #define numb_land(x,y) ((x) = ((x) && (y)))
 
-#define numb_not(x)   (*(x) = int2numb(~numb2int(*(x))))
-#define numb_eor(x,y) (*(x) = int2numb(numb2int(*(x)) ^ numb2int(*(y))))
-#define numb_ior(x,y) (*(x) = int2numb(numb2int(*(x)) | numb2int(*(y))))
-#define numb_and(x,y) (*(x) = int2numb(numb2int(*(x)) & numb2int(*(y))))
+#define numb_not(c,x)   (*(x) = int2numb(~numb2int(*(x))))
+#define numb_eor(c,x,y) (*(x) = int2numb(numb2int(*(x)) ^ numb2int(*(y))))
+#define numb_ior(c,x,y) (*(x) = int2numb(numb2int(*(x)) | numb2int(*(y))))
+#define numb_and(c,x,y) (*(x) = int2numb(numb2int(*(x)) & numb2int(*(y))))
 
 #define numb_plus(x,y)  ((x) = ((x) + (y)))
 #define numb_minus(x,y) ((x) = ((x) - (y)))
@@ -750,11 +750,11 @@ M4BUILTIN_HANDLER (translit)
 #define numb_times(x,y)  ((x) = ((x) * (y)))
 #define numb_ratio(x,y)  ((x) = ((x) / ((y))))
 #define numb_divide(x,y) (*(x) = (*(x) / (*(y))))
-#define numb_modulo(x,y) (*(x) = (*(x) % *(y)))
+#define numb_modulo(c,x,y) (*(x) = (*(x) % *(y)))
 #define numb_invert(x)   ((x) = 1 / (x))
 
-#define numb_lshift(x,y) (*(x) = (*(x) << *(y)))
-#define numb_rshift(x,y) (*(x) = (*(x) >> *(y)))
+#define numb_lshift(c,x,y) (*(x) = (*(x) << *(y)))
+#define numb_rshift(c,x,y) (*(x) = (*(x) >> *(y)))
 
 
 /* The function ntoa () converts VALUE to a signed ascii representation in

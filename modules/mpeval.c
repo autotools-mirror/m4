@@ -111,16 +111,16 @@ typedef mpq_t number;
 static void numb_initialise (void);
 static void numb_obstack (struct obstack *obs, const number value,
 			  const int radix, int min);
-static void mpq2mpz (mpz_t z, const number q, const char *noisily);
+static void mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily);
 static void mpz2mpq (number q, const mpz_t z);
 static void numb_divide (number *x, const number *y);
-static void numb_modulo (number *x, const number *y);
-static void numb_and (number *x, const number *y);
-static void numb_ior (number *x, const number *y);
-static void numb_eor (number *x, const number *y);
-static void numb_not (number *x);
-static void numb_lshift (number *x, const number *y);
-static void numb_rshift (number *x, const number *y);
+static void numb_modulo (m4 *context, number *x, const number *y);
+static void numb_and (m4 *context, number *x, const number *y);
+static void numb_ior (m4 *context, number *x, const number *y);
+static void numb_eor (m4 *context, number *x, const number *y);
+static void numb_not (m4 *context, number *x);
+static void numb_lshift (m4 *context, number *x, const number *y);
+static void numb_rshift (m4 *context, number *x, const number *y);
 
 
 static number numb_ZERO;
@@ -181,11 +181,11 @@ numb_obstack (struct obstack *obs, const number value, const int radix,
 #define QUIET (char *)0
 
 static void
-mpq2mpz (mpz_t z, const number q, const char *noisily)
+mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily)
 {
   if (noisily && mpz_cmp_si (mpq_denref (q), (long) 1) != 0)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Loss of precision in eval: %s"), noisily));
     }
 
@@ -217,7 +217,7 @@ numb_divide (number * x, const number * y)
 }
 
 static void
-numb_modulo (number * x, const number * y)
+numb_modulo (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -225,10 +225,10 @@ numb_modulo (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
   mpz_mod (res, xx, yy);
@@ -241,7 +241,7 @@ numb_modulo (number * x, const number * y)
 }
 
 static void
-numb_and (number * x, const number * y)
+numb_and (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -249,10 +249,10 @@ numb_and (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
   mpz_and (res, xx, yy);
@@ -265,7 +265,7 @@ numb_and (number * x, const number * y)
 }
 
 static void
-numb_ior (number * x, const number * y)
+numb_ior (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -273,10 +273,10 @@ numb_ior (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
   mpz_ior (res, xx, yy);
@@ -289,7 +289,7 @@ numb_ior (number * x, const number * y)
 }
 
 static void
-numb_eor (number * x, const number * y)
+numb_eor (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -297,10 +297,10 @@ numb_eor (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
 
@@ -336,14 +336,14 @@ numb_eor (number * x, const number * y)
 }
 
 static void
-numb_not (number * x)
+numb_not (m4 *context, number * x)
 {
   mpz_t xx, res;
 
   /* x should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (res);
   mpz_com (res, xx);
@@ -355,7 +355,7 @@ numb_not (number * x)
 }
 
 static void
-numb_lshift (number * x, const number * y)
+numb_lshift (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -363,10 +363,10 @@ numb_lshift (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
   {
@@ -390,7 +390,7 @@ numb_lshift (number * x, const number * y)
 }
 
 static void
-numb_rshift (number * x, const number * y)
+numb_rshift (m4 *context, number * x, const number * y)
 {
   mpz_t xx, yy, res;
 
@@ -398,10 +398,10 @@ numb_rshift (number * x, const number * y)
   /* y should be integral */
 
   mpz_init (xx);
-  mpq2mpz (xx, *x, NOISY);
+  mpq2mpz (context, xx, *x, NOISY);
 
   mpz_init (yy);
-  mpq2mpz (yy, *y, NOISY);
+  mpq2mpz (context, yy, *y, NOISY);
 
   mpz_init (res);
   {

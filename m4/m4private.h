@@ -42,12 +42,43 @@ typedef enum {
 /* --- CONTEXT MANAGEMENT --- */
 
 struct m4 {
-  m4_symtab *symtab;
+  m4_symtab *	symtab;
+
+  /* Option flags  (set in src/main.c).  */
+  int		warning_status;			/* -E */
+  boolean	no_gnu_extensions;		/* -G */
+  int		nesting_limit;			/* -L */
+  int		debug_level;			/* -d */
+  int		max_debug_arg_length;		/* -l */
+  int		opt_flags;
 };
 
+#define M4_OPT_PREFIX_BUILTINS_BIT	(1 << 0) /* -P */
+#define M4_OPT_SUPPRESS_WARN_BIT	(1 << 1) /* -Q */
+#define M4_OPT_DISCARD_COMMENTS_BIT	(1 << 2) /* -c */
+#define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
+#define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
+
 #ifdef NDEBUG
-#  define m4_get_symtab(context)	((context)->symtab)
+#  define m4_get_symtab(C)			((C)->symtab)
+#  define m4_get_warning_status_opt(C)		((C)->warning_status)
+#  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
+#  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)
+#  define m4_get_debug_level_opt(C)		((C)->debug_level)
+#  define m4_get_max_debug_arg_length_opt(C)	((C)->max_debug_arg_length)
+
+#  define m4_get_prefix_builtins_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_PREFIX_BUILTINS_BIT))
+#  define m4_get_suppress_warnings_opt(C)				\
+		(BIT_TEST((C)->opt_flags, M4_OPT_SUPPRESS_WARN_BIT))
+#  define m4_get_discard_comments_opt(C)				\
+		(BIT_TEST((C)->opt_flags, M4_OPT_DISCARD_COMMENTS_BIT))
+#  define m4_get_interactive_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_INTERACTIVE_BIT))
+#  define m4_get_sync_output_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_SYNC_OUTPUT_BIT))
 #endif
+
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -58,7 +89,7 @@ struct m4 {
 #define INIT_SYMBOL		"m4_init_module"
 #define FINISH_SYMBOL		"m4_finish_module"
 
-extern void	    m4__module_init (void);
+extern void	    m4__module_init (m4 *context);
 extern lt_dlhandle  m4__module_open (m4 *context, const char *name,
 				     struct obstack *obs);
 extern void	    m4__module_exit (m4 *context);
@@ -168,7 +199,7 @@ typedef enum {
   M4_TOKEN_MACDEF		/* a macros definition (see "defn") */
 } m4__token_type;
 
-extern	m4__token_type m4__next_token (m4_symbol_value *);
+extern	m4__token_type m4__next_token (m4 *context, m4_symbol_value *);
 
 
 

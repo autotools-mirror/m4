@@ -74,7 +74,7 @@ M4INIT_HANDLER (load)
   if (handle)
     if (lt_dlmakeresident (handle) != 0)
       {
-	M4ERROR ((warning_status, 0,
+	M4ERROR ((m4_get_warning_status_opt (context), 0,
 		  _("Warning: cannot make module `%s' resident: %s"),
 		  m4_get_module_name (handle), lt_dlerror ()));
       }

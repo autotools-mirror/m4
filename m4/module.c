@@ -121,7 +121,7 @@ m4_get_module_builtin_table (lt_dlhandle handle)
 
 static void
 set_module_builtin_table (m4 *context, lt_dlhandle handle,
-			     const m4_builtin *table)
+			  const m4_builtin *table)
 {
   const m4_builtin *bp;
 
@@ -144,7 +144,7 @@ set_module_builtin_table (m4 *context, lt_dlhandle handle,
       if (bp->blind_if_no_args)
 	BIT_SET (VALUE_FLAGS (value), VALUE_BLIND_ARGS_BIT);
 
-      if (prefix_all_builtins)
+      if (m4_get_prefix_builtins_opt (context))
 	{
 	  static const char prefix[] = "m4_";
 	  size_t len = strlen (prefix) + strlen (bp->name);
@@ -158,7 +158,7 @@ set_module_builtin_table (m4 *context, lt_dlhandle handle,
 
       m4_symbol_pushdef (M4SYMTAB, name, value);
 
-      if (prefix_all_builtins)
+      if (m4_get_prefix_builtins_opt (context))
 	xfree (name);
     }
 }
@@ -213,7 +213,7 @@ m4_module_load (m4 *context, const char *name, struct obstack *obs)
 
       if (!info)
 	{
-	  M4ERROR ((warning_status, 0,
+	  M4ERROR ((m4_get_warning_status_opt (context), 0,
 		    _("Warning: cannot load module `%s': %s"),
 		    name, module_dlerror ()));
 	}
@@ -286,7 +286,7 @@ m4_module_unload (m4 *context, const char *name, struct obstack *obs)
    prevent the path search of the dlopen library from finding wrong
    files. */
 void
-m4__module_init (void)
+m4__module_init (m4 *context)
 {
   int errors = 0;
 
@@ -294,7 +294,7 @@ m4__module_init (void)
      module system has already been initialised.  */
   if (caller_id)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: multiple module loader initialisations")));
       return;
     }
@@ -426,7 +426,7 @@ m4__module_open (m4 *context, const char *name, struct obstack *obs)
 	    {
 	      xfree (stale);
 
-	      M4ERROR ((warning_status, 0,
+	      M4ERROR ((m4_get_warning_status_opt (context), 0,
 			_("Warning: overiding stale caller data in module `%s'"),
 			name));
 	    }

@@ -23,9 +23,10 @@
 m4 *
 m4_create (void)
 {
-  m4 *context = XMALLOC (m4, 1);
+  m4 *context = XCALLOC (m4, 1);
 
-  context->symtab = m4_symtab_create (0);
+  context->symtab = m4_symtab_create (0, &context->no_gnu_extensions);
+  context->nesting_limit = M4_DEFAULT_NESTING_LIMIT;
 
   return context;
 }
@@ -48,3 +49,59 @@ m4_get_symtab (m4 *context)
   assert (context);
   return context->symtab;
 }
+
+
+
+/* Use the preprocessor to generate the repetitive bit twiddling functions
+   for us.  */
+#undef m4_get_warning_status_opt
+#undef m4_get_no_gnu_extensions_opt
+#undef m4_get_nesting_limit_opt
+#undef m4_get_debug_level_opt
+#undef m4_get_max_debug_arg_length_opt
+#undef m4_get_prefix_builtins_opt
+#undef m4_get_suppress_warnings_opt
+#undef m4_get_discard_comments_opt
+#undef m4_get_interactive_opt
+#undef m4_get_sync_output_opt
+
+
+#define M4FIELD(type, name)						\
+	type CONC(m4_get_, CONC(name, _opt)) (m4 *context)		\
+	{								\
+	  assert (context);						\
+	  return context->name;						\
+	}
+m4_context_field_table
+#undef M4FIELD
+
+#define M4FIELD(type, name)						\
+	type CONC(m4_set_, CONC(name, _opt)) (m4 *context, type value)	\
+	{								\
+	  assert (context);						\
+	  return context->name = value;					\
+	}
+m4_context_field_table
+#undef M4FIELD
+
+#define M4OPT_BIT(bit, base) 						\
+	boolean CONC(m4_get_, base) (m4 *context)			\
+	{								\
+	  assert (context);						\
+	  return BIT_TEST (context->opt_flags, (bit));			\
+	}
+m4_context_opt_bit_table
+#undef M4OPT_BIT
+
+#define M4OPT_BIT(bit, base) 						\
+	boolean CONC(m4_set_, base) (m4 *context, boolean value)	\
+	{								\
+	  assert (context);						\
+	  if (value)							\
+	     BIT_SET   (context->opt_flags, (bit));			\
+	  else								\
+	     BIT_RESET (context->opt_flags, (bit));			\
+	  return value;							\
+	}
+m4_context_opt_bit_table
+#undef M4OPT_BIT

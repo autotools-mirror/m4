@@ -121,10 +121,10 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
-static void substitute (struct obstack *obs, const char *victim,
+static void substitute (m4 *context, struct obstack *obs, const char *victim,
 			const char *repl, struct re_registers *regs);
-static void m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
-			    int syntax);
+static void m4_patsubst_do (m4 *context, struct obstack *obs, int argc,
+			    m4_symbol_value **argv, int syntax);
 
 
 /* The builtin "builtin" allows calls to builtin macros, even if their
@@ -142,7 +142,7 @@ M4BUILTIN_HANDLER (builtin)
   bp = m4_builtin_find_by_name (NULL, name);
 
   if (bp == NULL)
-    M4ERROR ((warning_status, 0,
+    M4ERROR ((m4_get_warning_status_opt (context), 0,
 	      _("Undefined name %s"), name));
   else
     (*bp->func) (context, obs, argc - 1, argv + 1);
@@ -164,10 +164,10 @@ M4BUILTIN_HANDLER (indir)
 
   symbol = m4_symbol_lookup (M4SYMTAB, name);
   if (symbol == NULL)
-    M4ERROR ((warning_status, 0,
+    M4ERROR ((m4_get_warning_status_opt (context), 0,
 	      _("Undefined name `%s'"), name));
   else
-    m4_call_macro (symbol, context, obs, argc - 1, argv + 1);
+    m4_call_macro (context, symbol, obs, argc - 1, argv + 1);
 }
 
 /* Change the current input syntax.  The function set_syntax () lives
@@ -185,7 +185,7 @@ M4BUILTIN_HANDLER (changesyntax)
 
   for (i = 1; i < argc; i++)
     {
-      m4_set_syntax (*M4ARG (i),
+      m4_set_syntax (context, *M4ARG (i),
 		     m4_expand_ranges (M4ARG (i)+1, obs));
     }
 }
@@ -199,11 +199,12 @@ M4BUILTIN_HANDLER (changesyntax)
  **/
 M4BUILTIN_HANDLER (debugmode)
 {
+  int debug_level = m4_get_debug_level_opt (context);
   int new_debug_level;
   int change_flag;
 
   if (argc == 1)
-    debug_level = 0;
+    m4_set_debug_level_opt (context, 0);
   else
     {
       if (M4ARG (1)[0] == '+' || M4ARG (1)[0] == '-')
@@ -218,22 +219,22 @@ M4BUILTIN_HANDLER (debugmode)
 	}
 
       if (new_debug_level < 0)
-	M4ERROR ((warning_status, 0,
+	M4ERROR ((m4_get_warning_status_opt (context), 0,
 		  _("Debugmode: bad debug flags: `%s'"), M4ARG (1)));
       else
 	{
 	  switch (change_flag)
 	    {
 	    case 0:
-	      debug_level = new_debug_level;
+	      m4_set_debug_level_opt (context, new_debug_level);
 	      break;
 
 	    case '+':
-	      debug_level |= new_debug_level;
+	      m4_set_debug_level_opt (context, debug_level | new_debug_level);
 	      break;
 
 	    case '-':
-	      debug_level &= ~new_debug_level;
+	      m4_set_debug_level_opt (context, debug_level & ~new_debug_level);
 	      break;
 	    }
 	}
@@ -251,7 +252,7 @@ M4BUILTIN_HANDLER (debugfile)
   if (argc == 1)
     m4_debug_set_output (NULL);
   else if (!m4_debug_set_output (M4ARG (1)))
-    M4ERROR ((warning_status, errno,
+    M4ERROR ((m4_get_warning_status_opt (context), errno,
 	      _("Cannot set error file: %s"), M4ARG (1)));
 }
 
@@ -260,7 +261,7 @@ M4BUILTIN_HANDLER (debugfile)
    Report errors on behalf of CALLER.  */
 
 static struct re_pattern_buffer *
-m4_regexp_compile (const char *caller,
+m4_regexp_compile (m4 *context, const char *caller,
 		   const char *regexp, int syntax)
 {
   static struct re_pattern_buffer buf;	/* compiled regular expression */
@@ -281,7 +282,7 @@ m4_regexp_compile (const char *caller,
 
   if (msg != NULL)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("%s: bad regular expression `%s': %s"),
 		caller, regexp, msg));
       return NULL;
@@ -300,8 +301,8 @@ m4_regexp_compile (const char *caller,
  **/
 
 static void
-m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
-	      int syntax)
+m4_regexp_do (m4 *context, struct obstack *obs, int argc,
+	      m4_symbol_value **argv, int syntax)
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
@@ -314,7 +315,7 @@ m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
   victim = M4ARG (1);
   regexp = M4ARG (2);
 
-  buf = m4_regexp_compile (M4ARG(0), regexp, syntax);
+  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
   if (!buf)
     return;
 
@@ -323,7 +324,7 @@ m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 
   if (startpos  == -2)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("%s: error matching regular expression `%s'"),
 		M4ARG (0), regexp));
       return;
@@ -332,7 +333,7 @@ m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
   if (argc == 3)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (obs, victim, M4ARG (3), &regs);
+    substitute (context, obs, victim, M4ARG (3), &regs);
 
   return;
 }
@@ -343,7 +344,7 @@ m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
  **/
 M4BUILTIN_HANDLER (regexp)
 {
-  m4_regexp_do (obs, argc, argv, RE_SYNTAX_BRE);
+  m4_regexp_do (context, obs, argc, argv, RE_SYNTAX_BRE);
 }
 
 /**
@@ -351,7 +352,7 @@ M4BUILTIN_HANDLER (regexp)
  **/
 M4BUILTIN_HANDLER (eregexp)
 {
-  m4_regexp_do (obs, argc, argv, RE_SYNTAX_ERE);
+  m4_regexp_do (context, obs, argc, argv, RE_SYNTAX_ERE);
 }
 
 
@@ -365,8 +366,8 @@ M4BUILTIN_HANDLER (eregexp)
  * patsubst(STRING, REGEXP, [REPLACEMENT])
  **/
 static void
-m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
-		int syntax)
+m4_patsubst_do (m4 *context, struct obstack *obs, int argc,
+		m4_symbol_value **argv, int syntax)
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
@@ -381,7 +382,7 @@ m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
   victim = M4ARG (1);
   length = strlen (victim);
 
-  buf = m4_regexp_compile (M4ARG(0), regexp, syntax);
+  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
   if (!buf)
     return;
 
@@ -399,7 +400,7 @@ m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 	     copied verbatim.  */
 
 	  if (matchpos == -2)
-	    M4ERROR ((warning_status, 0,
+	    M4ERROR ((m4_get_warning_status_opt (context), 0,
 		      _("%s: error matching regular expression `%s'"),
 		      M4ARG (0), regexp));
 	  else if (offset < length)
@@ -414,7 +415,7 @@ m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (obs, victim, M4ARG (3), &regs);
+      substitute (context, obs, victim, M4ARG (3), &regs);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
@@ -434,7 +435,7 @@ m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
  **/
 M4BUILTIN_HANDLER (patsubst)
 {
-  m4_patsubst_do (obs, argc, argv, RE_SYNTAX_BRE);
+  m4_patsubst_do (context, obs, argc, argv, RE_SYNTAX_BRE);
 }
 
 /**
@@ -442,7 +443,7 @@ M4BUILTIN_HANDLER (patsubst)
  **/
 M4BUILTIN_HANDLER (epatsubst)
 {
-  m4_patsubst_do (obs, argc, argv, RE_SYNTAX_ERE);
+  m4_patsubst_do (context, obs, argc, argv, RE_SYNTAX_ERE);
 }
 
 /* Implementation of "symbols" itself.  It builds up a table of pointers to
@@ -485,11 +486,11 @@ M4BUILTIN_HANDLER (syncoutput)
       if (   M4ARG (1)[0] == '0'
 	  || M4ARG (1)[0] == 'n'
 	  || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
-	sync_output = 0;
+	m4_set_sync_output_opt (context, FALSE);
       else if (   M4ARG (1)[0] == '1'
 	       || M4ARG (1)[0] == 'y'
 	       || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
-	sync_output = 1;
+	m4_set_sync_output_opt (context, TRUE);
     }
 }
 
@@ -506,7 +507,7 @@ M4BUILTIN_HANDLER (esyscmd)
   pin = popen (M4ARG (1), "r");
   if (pin == NULL)
     {
-      M4ERROR ((warning_status, errno,
+      M4ERROR ((m4_get_warning_status_opt (context), errno,
 		_("Cannot open pipe to command `%s'"), M4ARG (1)));
       m4_sysval = 0xff << 8;
     }
@@ -556,8 +557,8 @@ M4BUILTIN_HANDLER (__line__)
 static int substitute_warned = 0;
 
 static void
-substitute (struct obstack *obs, const char *victim, const char *repl,
-	    struct re_registers *regs)
+substitute (m4 *context, struct obstack *obs, const char *victim,
+	    const char *repl, struct re_registers *regs)
 {
   register unsigned int ch;
 
@@ -575,7 +576,7 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	case '0':
 	  if (!substitute_warned)
 	    {
-	      M4ERROR ((warning_status, 0, _("\
+	      M4ERROR ((m4_get_warning_status_opt (context), 0, _("\
 WARNING: \\0 will disappear, use \\& instead in replacements")));
 	      substitute_warned = 1;
 	    }

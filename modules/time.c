@@ -97,7 +97,7 @@ M4BUILTIN_HANDLER (ctime)
   time_t t;
 
   if (argc == 2)
-    m4_numeric_arg (argc, argv, 1, (int *) &t);
+    m4_numeric_arg (context, argc, argv, 1, (int *) &t);
   else
     t = time (0L);
 
@@ -141,7 +141,7 @@ M4BUILTIN_HANDLER (gmtime)
 {
   time_t t;
 
-  if (!m4_numeric_arg (argc, argv, 1, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 1, (int *) &t))
     return;
 
   format_tm (obs, gmtime (&t));
@@ -154,7 +154,7 @@ M4BUILTIN_HANDLER (localtime)
 {
   time_t t;
 
-  if (!m4_numeric_arg (argc, argv, 1, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 1, (int *) &t))
     return;
 
   format_tm (obs, localtime (&t));
@@ -169,19 +169,19 @@ M4BUILTIN_HANDLER (mktime)
   struct tm tm;
   time_t t;
 
-  if (!m4_numeric_arg (argc, argv, 1, &tm.tm_sec))
+  if (!m4_numeric_arg (context, argc, argv, 1, &tm.tm_sec))
     return;
-  if (!m4_numeric_arg (argc, argv, 2, &tm.tm_min))
+  if (!m4_numeric_arg (context, argc, argv, 2, &tm.tm_min))
     return;
-  if (!m4_numeric_arg (argc, argv, 3, &tm.tm_hour))
+  if (!m4_numeric_arg (context, argc, argv, 3, &tm.tm_hour))
     return;
-  if (!m4_numeric_arg (argc, argv, 4, &tm.tm_mday))
+  if (!m4_numeric_arg (context, argc, argv, 4, &tm.tm_mday))
     return;
-  if (!m4_numeric_arg (argc, argv, 5, &tm.tm_mon))
+  if (!m4_numeric_arg (context, argc, argv, 5, &tm.tm_mon))
     return;
-  if (!m4_numeric_arg (argc, argv, 6, &tm.tm_year))
+  if (!m4_numeric_arg (context, argc, argv, 6, &tm.tm_year))
     return;
-  if (M4ARG (7) && !m4_numeric_arg (argc, argv, 7, &tm.tm_isdst))
+  if (M4ARG (7) && !m4_numeric_arg (context, argc, argv, 7, &tm.tm_isdst))
     return;
 
   t = mktime (&tm);
@@ -201,7 +201,7 @@ M4BUILTIN_HANDLER (strftime)
   char *buf;
   int l;
 
-  if (!m4_numeric_arg (argc, argv, 2, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 2, (int *) &t))
     return;
 
   tm = localtime (&t);

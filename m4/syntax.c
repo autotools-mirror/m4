@@ -268,7 +268,7 @@ unset_syntax_attribute (int code, int ch)
 }
 
 void
-m4_set_syntax (char key, const unsigned char *chars)
+m4_set_syntax (m4 *context, char key, const unsigned char *chars)
 {
   int ch, code;
 
@@ -276,7 +276,7 @@ m4_set_syntax (char key, const unsigned char *chars)
 
   if ((code < 0) && (key != '\0'))
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Undefined syntax code %c"), key));
       return;
     }

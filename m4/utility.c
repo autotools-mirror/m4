@@ -29,36 +29,6 @@ static int dumpdef_cmp (const void *s1, const void *s2);
 /* Exit code from last "syscmd" command.  */
 int m4_sysval = 0;
 
-/* Operate interactively (-e).  */
-int interactive = 0;
-
-/* Enable sync output for /lib/cpp (-s).  */
-int sync_output = 0;
-
-/* Debug (-d[flags]).  */
-int debug_level = 0;
-
-/* Disable GNU extensions (-G).  */
-int no_gnu_extensions = 0;
-
-/* Prefix all builtin functions by `m4_'.  */
-int prefix_all_builtins = 0;
-
-/* Max length of arguments in trace output (-lsize).  */
-int max_debug_argument_length = 0;
-
-/* Suppress warnings about missing arguments.  */
-int suppress_warnings = 0;
-
-/* If not zero, then value of exit status for warning diagnostics.  */
-int warning_status = 0;
-
-/* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 250;
-
-/* If nonzero, comments are discarded in the token parser.  */
-int discard_comments = 0;
-
 /* input syntax table. */
 unsigned short m4_syntax_table[256];
 
@@ -77,11 +47,11 @@ m4_string ecomm;
    applicable, MAX is the maximum number, negative if not applicable.
    ARGC, MIN, and MAX count ARGV[0], the name of the macro.  */
 boolean
-m4_bad_argc (int argc, m4_symbol_value **argv, int min, int max)
+m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
 {
   if (min > 0 && argc < min)
     {
-      M4WARN ((warning_status, 0,
+      M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: too few arguments: %d < %d"),
 	       M4ARG (0), argc - 1, min - 1));
       return TRUE;
@@ -89,7 +59,7 @@ m4_bad_argc (int argc, m4_symbol_value **argv, int min, int max)
 
   if (max > 0 && argc > max)
     {
-      M4WARN ((warning_status, 0,
+      M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: too many arguments (ignored): %d > %d"),
 	       M4ARG (0), argc - 1, max - 1));
       /* Return FALSE, otherwise it is not exactly `ignored'. */
@@ -111,7 +81,8 @@ m4_skip_space (const char *arg)
    VALUEP. If the conversion fails, print error message for macro.
    Return TRUE iff conversion succeeds.  */
 boolean
-m4_numeric_arg (int argc, m4_symbol_value **argv, int arg, int *valuep)
+m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
+		int arg, int *valuep)
 {
   char *endp;
 
@@ -119,7 +90,7 @@ m4_numeric_arg (int argc, m4_symbol_value **argv, int arg, int *valuep)
       || (*valuep = strtol (m4_skip_space (M4ARG (arg)), &endp, 10),
 	  *m4_skip_space (endp) != 0))
     {
-      M4WARN ((warning_status, 0,
+      M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: argument %d non-numeric: %s"),
 	       M4ARG (0), arg - 1, M4ARG (arg)));
       return FALSE;
@@ -197,20 +168,25 @@ dumpdef_cmp (const void *s1, const void *s2)
 
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
    table of all defined symbol names.  */
-int
-m4_dump_symbol (const void *name, void *symbol, void *data)
+void *
+m4_dump_symbol_CB (m4_symtab *ignored, const char *name, m4_symbol *symbol,
+		   void *userdata)
 {
-  if (((m4_symbol *) symbol)->value->type != M4_SYMBOL_VOID)
+  assert (name);
+  assert (symbol);
+  assert (symbol->value);
+
+  if (symbol->value->type != M4_SYMBOL_VOID)
     {
       struct m4_dump_symbol_data *symbol_data
-	= (struct m4_dump_symbol_data *) data;
+	= (struct m4_dump_symbol_data *) userdata;
 
       obstack_blank (symbol_data->obs, sizeof (const char *));
       symbol_data->base = (const char **) obstack_base (symbol_data->obs);
       symbol_data->base[symbol_data->size++] = (const char *) name;
     }
 
-  return 0;
+  return NULL;
 }
 
 /* If there are no arguments, build a sorted list of all defined
@@ -224,7 +200,7 @@ m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
 
   if (argc == 1)
     {
-      m4_symtab_apply (M4SYMTAB, m4_dump_symbol, data);
+      m4_symtab_apply (M4SYMTAB, m4_dump_symbol_CB, data);
     }
   else
     {
@@ -235,9 +211,9 @@ m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
 	{
 	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
 	  if (symbol != NULL && symbol->value->type != M4_SYMBOL_VOID)
-	    m4_dump_symbol (M4ARG (i), symbol, data);
+	    m4_dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	  else if (complain)
-	    M4WARN ((warning_status, 0,
+	    M4WARN ((m4_get_warning_status_opt (context), 0,
 		     _("Warning: %s: undefined name: %s"),
 		     M4ARG (0), M4ARG (i)));
 	}

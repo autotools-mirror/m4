@@ -392,7 +392,8 @@ output_text (const char *text, int length)
    sync lines are output whenever a single input lines generates several
    output lines, or when several input lines does not generate any output.  */
 void
-m4_shipout_text (struct obstack *obs, const char *text, int length)
+m4_shipout_text (m4 *context, struct obstack *obs,
+		 const char *text, int length)
 {
   static boolean start_of_output_line = TRUE;
   char line[20];
@@ -413,7 +414,7 @@ m4_shipout_text (struct obstack *obs, const char *text, int length)
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 
-  if (!sync_output)
+  if (!m4_get_sync_output_opt (context))
     switch (length)
       {
 

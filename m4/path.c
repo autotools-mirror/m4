@@ -117,18 +117,18 @@ m4_include_init (void)
 /* Functions for normal input path search */
 
 void
-m4_include_env_init (void)
+m4_include_env_init (m4 *context)
 {
-  if (no_gnu_extensions)
+  if (m4_get_no_gnu_extensions_opt (context))
     return;
 
   m4_search_path_env_init (&dirpath, getenv ("M4PATH"), FALSE);
 }
 
 void
-m4_add_include_directory (const char *dir)
+m4_add_include_directory (m4 *context, const char *dir)
 {
-  if (no_gnu_extensions)
+  if (m4_get_no_gnu_extensions_opt (context))
     return;
 
   m4_search_path_add (&dirpath, dir);
@@ -139,7 +139,7 @@ m4_add_include_directory (const char *dir)
 }
 
 FILE *
-m4_path_search (const char *dir, char **expanded_name)
+m4_path_search (m4 *context, const char *dir, char **expanded_name)
 {
   FILE *fp;
   struct m4_search_path *incl;
@@ -155,7 +155,7 @@ m4_path_search (const char *dir, char **expanded_name)
     }
 
   /* If file not found, and filename absolute, fail.  */
-  if (*dir == '/' || no_gnu_extensions)
+  if (*dir == '/' || m4_get_no_gnu_extensions_opt (context))
     return NULL;
 
   name = (char *) xmalloc (dirpath.max_length + 1 + strlen (dir) + 1);
@@ -173,8 +173,9 @@ m4_path_search (const char *dir, char **expanded_name)
       fp = fopen (name, "r");
       if (fp != NULL)
 	{
-	  if (debug_level & M4_DEBUG_TRACE_PATH)
-	    M4_DEBUG_MESSAGE2 (_("Path search for `%s' found `%s'"), dir, name);
+	  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_PATH))
+	    M4_DEBUG_MESSAGE2 (context, _("Path search for `%s' found `%s'"),
+			       dir, name);
 
 	  if (expanded_name != NULL)
 	    *expanded_name = xstrdup (name);

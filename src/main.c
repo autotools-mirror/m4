@@ -227,18 +227,18 @@ main (int argc, char *const *argv, char *const *envp)
 
   LTDL_SET_PRELOADED_SYMBOLS();
 
-  m4__module_init ();
+  context = m4_create ();
+
+  m4__module_init (context);
   m4_debug_init ();
   m4_include_init ();
-
-  context = m4_create ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
 #endif
 
   if (isatty (STDIN_FILENO))
-    interactive = TRUE;
+    m4_set_interactive_opt (context, TRUE);
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 
@@ -281,7 +281,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	warning_status = EXIT_FAILURE;
+	m4_set_warning_status_opt (context, EXIT_FAILURE);
 	break;
 
       case 'F':
@@ -289,15 +289,15 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'G':
-	no_gnu_extensions = 1;
+	m4_set_no_gnu_extensions_opt (context, TRUE);
 	break;
 
       case 'I':
-	m4_add_include_directory (optarg);
+	m4_add_include_directory (context, optarg);
 	break;
 
       case 'L':
-	nesting_limit = atoi (optarg);
+	m4_set_nesting_limit_opt (context, atoi (optarg));
 	break;
       case 'M':
 	if (lt_dlinsertsearchdir (lt_dlgetsearchpath(), optarg) != 0)
@@ -315,11 +315,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'P':
-	prefix_all_builtins = 1;
+	m4_set_prefix_builtins_opt (context, TRUE);
 	break;
 
       case 'Q':
-	suppress_warnings = 1;
+	m4_set_suppress_warnings_opt (context, TRUE);
 	break;
 
       case 'R':
@@ -327,30 +327,30 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'b':
-	interactive = FALSE;
+	m4_set_interactive_opt (context, FALSE);
 	break;
 
       case 'c':
-	discard_comments = TRUE;
+	m4_set_discard_comments_opt (context, TRUE);
 	break;
 
       case 'd':
-	debug_level = m4_debug_decode (optarg);
-	if (debug_level < 0)
+	m4_set_debug_level_opt (context, m4_debug_decode (optarg));
+	if (m4_get_debug_level_opt (context) < 0)
 	  {
 	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
-	    debug_level = 0;
+	    m4_set_debug_level_opt (context, 0);
 	  }
 	break;
 
       case 'e':
-	interactive = TRUE;
+	m4_set_interactive_opt (context, TRUE);
 	break;
 
       case 'l':
-	max_debug_argument_length = atoi (optarg);
-	if (max_debug_argument_length <= 0)
-	  max_debug_argument_length = 0;
+	m4_set_max_debug_arg_length_opt (context, atoi (optarg));
+	if (m4_get_max_debug_arg_length_opt (context) <= 0)
+	  m4_set_max_debug_arg_length_opt (context, 0);
 	break;
 
       case 'o':
@@ -359,7 +359,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 's':
-	sync_output = 1;
+	m4_set_sync_output_opt (context, TRUE);
 	break;
       }
 
@@ -386,7 +386,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
   m4_input_init ();
   m4_output_init ();
-  m4_include_env_init ();
+  m4_include_env_init (context);
 
   if (frozen_file_to_read)
     {
@@ -396,7 +396,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
     {
       m4_syntax_init ();
       m4_module_load (context, "m4", 0);
-      m4_module_load (context, no_gnu_extensions ? "traditional" : "gnu", 0);
+      if (m4_get_no_gnu_extensions_opt (context))
+	m4_module_load (context, "traditional", 0);
+      else
+	m4_module_load (context, "gnu", 0);
     }
 
   /* Import environment variables as macros.  The definition are
@@ -458,7 +461,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    break;
 
 	  default:
-	    M4ERROR ((warning_status, 0,
+	    M4ERROR ((m4_get_warning_status_opt (context), 0,
 		      "INTERNAL ERROR: Bad code in deferred arguments"));
 	    abort ();
 	  }
@@ -471,7 +474,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
   /* Interactive mode means unbuffered output, and interrupts ignored.  */
 
-  if (interactive)
+  if (m4_get_interactive_opt (context))
     {
       signal (SIGINT, SIG_IGN);
       setbuf (stdout, (char *) NULL);
@@ -483,17 +486,17 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
   exit_status = EXIT_SUCCESS;
   if (optind == argc)
     {
-      m4_push_file (stdin, "stdin");
+      m4_push_file (context, stdin, "stdin");
       m4_expand_input (context);
     }
   else
     for (; optind < argc; optind++)
       {
 	if (strcmp (argv[optind], "-") == 0)
-	  m4_push_file (stdin, "stdin");
+	  m4_push_file (context, stdin, "stdin");
 	else
 	  {
-	    fp = m4_path_search (argv[optind], &filename);
+	    fp = m4_path_search (context, argv[optind], &filename);
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
@@ -502,7 +505,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	      }
 	    else
 	      {
-		m4_push_file (fp, filename);
+		m4_push_file (context, fp, filename);
 		xfree (filename);
 	      }
 	  }

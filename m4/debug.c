@@ -189,12 +189,12 @@ m4_debug_set_output (const char *name)
 
 /* Print the header of a one-line debug message, starting by "m4 debug".  */
 void
-m4_debug_message_prefix (void)
+m4_debug_message_prefix (m4 *context)
 {
   fprintf (m4_debug, "m4 debug: ");
-  if (debug_level & M4_DEBUG_TRACE_FILE)
+  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_FILE))
     fprintf (m4_debug, "%s: ", m4_current_file);
-  if (debug_level & M4_DEBUG_TRACE_LINE)
+  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_LINE))
     fprintf (m4_debug, "%d: ", m4_current_line);
 }
 
@@ -210,10 +210,10 @@ m4_debug_message_prefix (void)
   left quote) and %r (optional right quote).  */
 #if (defined __STDC__ && __STDC__) || defined PROTOTYPES
 static void
-m4_trace_format (const char *fmt, ...)
+m4_trace_format (m4 *context, const char *fmt, ...)
 #else
 static void
-m4_trace_format (va_alist)
+m4_trace_format (m4 *context, va_alist)
      va_dcl
 #endif
 {
@@ -248,7 +248,7 @@ m4_trace_format (va_alist)
       switch (*fmt++)
 	{
 	case 'S':
-	  maxlen = max_debug_argument_length;
+	  maxlen = m4_get_max_debug_arg_length_opt (context);
 	  /* fall through */
 
 	case 's':
@@ -256,11 +256,15 @@ m4_trace_format (va_alist)
 	  break;
 
 	case 'l':
-	  s = (debug_level & M4_DEBUG_TRACE_QUOTE) ? (char *)lquote.string : "";
+	  s = BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_QUOTE)
+	    	? (char *) lquote.string
+	    	: "";
 	  break;
 
 	case 'r':
-	  s = (debug_level & M4_DEBUG_TRACE_QUOTE) ? (char *)rquote.string : "";
+	  s = BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_QUOTE)
+	    	? (char *) rquote.string
+	    	: "";
 	  break;
 
 	case 'd':
@@ -289,16 +293,16 @@ m4_trace_format (va_alist)
 
 /* Format the standard header attached to all tracing output lines.  */
 static void
-m4_trace_header (int id)
+m4_trace_header (m4 *context, int id)
 {
-  m4_trace_format ("m4trace:");
-  if (debug_level & M4_DEBUG_TRACE_FILE)
-    m4_trace_format ("%s:", m4_current_file);
-  if (debug_level & M4_DEBUG_TRACE_LINE)
-    m4_trace_format ("%d:", m4_current_line);
-  m4_trace_format (" -%d- ", m4_expansion_level);
-  if (debug_level & M4_DEBUG_TRACE_CALLID)
-    m4_trace_format ("id %d: ", id);
+  m4_trace_format (context, "m4trace:");
+  if (BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_FILE))
+    m4_trace_format (context, "%s:", m4_current_file);
+  if (BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_LINE))
+    m4_trace_format (context, "%d:", m4_current_line);
+  m4_trace_format (context, " -%d- ", m4_expansion_level);
+  if (BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_CALLID))
+    m4_trace_format (context, "id %d: ", id);
 }
 
 /* Print current tracing line, and clear the obstack.  */
@@ -316,36 +320,38 @@ m4_trace_flush (void)
 /* Do pre-argument-collction tracing for macro NAME.  Used from
    expand_macro ().  */
 void
-m4_trace_prepre (const char *name, int id)
+m4_trace_prepre (m4 *context, const char *name, int id)
 {
-  m4_trace_header (id);
-  m4_trace_format ("%s ...", name);
+  m4_trace_header (context, id);
+  m4_trace_format (context, "%s ...", name);
   m4_trace_flush ();
 }
 
 /* Format the parts of a trace line, that can be made before the macro is
    actually expanded.  Used from expand_macro ().  */
 void
-m4_trace_pre (const char *name, int id, int argc, m4_symbol_value **argv)
+m4_trace_pre (m4 *context, const char *name, int id,
+	      int argc, m4_symbol_value **argv)
 {
   int i;
   const m4_builtin *bp;
 
-  m4_trace_header (id);
-  m4_trace_format ("%s", name);
+  m4_trace_header (context, id);
+  m4_trace_format (context, "%s", name);
 
-  if (argc > 1 && (debug_level & M4_DEBUG_TRACE_ARGS))
+  if (argc > 1
+      && BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_ARGS))
     {
-      m4_trace_format ("(");
+      m4_trace_format (context, "(");
 
       for (i = 1; i < argc; i++)
 	{
 	  if (i != 1)
-	    m4_trace_format (", ");
+	    m4_trace_format (context, ", ");
 
 	  if (m4_is_symbol_value_text (argv[i]))
 	    {
-	      m4_trace_format ("%l%S%r", M4ARG (i));
+	      m4_trace_format (context, "%l%S%r", M4ARG (i));
 	    }
 	  else if (m4_is_symbol_value_func (argv[i]))
 	    {
@@ -353,25 +359,25 @@ m4_trace_pre (const char *name, int id, int argc, m4_symbol_value **argv)
 					    m4_get_symbol_value_func(argv[i]));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, "\
+		  M4ERROR ((m4_get_warning_status_opt (context), 0, "\
 INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"));
 		  abort ();
 		}
-	      m4_trace_format ("<%s>", bp->name);
+	      m4_trace_format (context, "<%s>", bp->name);
 	    }
 	  else
 	    {
-	      M4ERROR ((warning_status, 0,
+	      M4ERROR ((m4_get_warning_status_opt (context), 0,
 			"INTERNAL ERROR: Bad token data type (m4_trace_pre ())"));
 	      abort ();
 	    }
 	}
-      m4_trace_format (")");
+      m4_trace_format (context, ")");
     }
 
-  if (debug_level & M4_DEBUG_TRACE_CALL)
+  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_CALL))
     {
-      m4_trace_format (" -> ???");
+      m4_trace_format (context, " -> ???");
       m4_trace_flush ();
     }
 }
@@ -379,16 +385,20 @@ INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"));
 /* Format the final part of a trace line and print it all.  Used from
    expand_macro ().  */
 void
-m4_trace_post (const char *name, int id,
+m4_trace_post (m4 *context, const char *name, int id,
 	       int argc, m4_symbol_value **argv, const char *expanded)
 {
-  if (debug_level & M4_DEBUG_TRACE_CALL)
+  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_CALL))
     {
-      m4_trace_header (id);
-      m4_trace_format ("%s%s", name, (argc > 1) ? "(...)" : "");
+      m4_trace_header (context, id);
+      m4_trace_format (context, "%s%s", name, (argc > 1) ? "(...)" : "");
     }
 
-  if (expanded && (debug_level & M4_DEBUG_TRACE_EXPANSION))
-    m4_trace_format (" -> %l%S%r", expanded);
+  if (expanded && (BIT_TEST (m4_get_debug_level_opt (context),
+			     M4_DEBUG_TRACE_EXPANSION)))
+    {
+      m4_trace_format (context, " -> %l%S%r", expanded);
+    }
+
   m4_trace_flush ();
 }

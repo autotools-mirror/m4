@@ -66,20 +66,20 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term   (eval_token, number *);
-static eval_error logical_and_term  (eval_token, number *);
-static eval_error or_term	    (eval_token, number *);
-static eval_error xor_term	    (eval_token, number *);
-static eval_error and_term	    (eval_token, number *);
-static eval_error not_term	    (eval_token, number *);
-static eval_error logical_not_term  (eval_token, number *);
-static eval_error cmp_term	    (eval_token, number *);
-static eval_error shift_term	    (eval_token, number *);
-static eval_error add_term	    (eval_token, number *);
-static eval_error mult_term	    (eval_token, number *);
-static eval_error exp_term	    (eval_token, number *);
-static eval_error unary_term	    (eval_token, number *);
-static eval_error simple_term	    (eval_token, number *);
+static eval_error logical_or_term   (m4 *, eval_token, number *);
+static eval_error logical_and_term  (m4 *, eval_token, number *);
+static eval_error or_term	    (m4 *, eval_token, number *);
+static eval_error xor_term	    (m4 *, eval_token, number *);
+static eval_error and_term	    (m4 *, eval_token, number *);
+static eval_error not_term	    (m4 *, eval_token, number *);
+static eval_error logical_not_term  (m4 *, eval_token, number *);
+static eval_error cmp_term	    (m4 *, eval_token, number *);
+static eval_error shift_term	    (m4 *, eval_token, number *);
+static eval_error add_term	    (m4 *, eval_token, number *);
+static eval_error mult_term	    (m4 *, eval_token, number *);
+static eval_error exp_term	    (m4 *, eval_token, number *);
+static eval_error unary_term	    (m4 *, eval_token, number *);
+static eval_error simple_term	    (m4 *, eval_token, number *);
 static void	  numb_pow	    (number *x, const number *y);
 
 
@@ -280,12 +280,12 @@ eval_lex (number *val)
 
 /* Recursive descent parser.  */
 static eval_error
-logical_or_term (eval_token et, number *v1)
+logical_or_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
 
-  if ((er = logical_and_term (et, v1)) != NO_ERROR)
+  if ((er = logical_and_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -295,7 +295,7 @@ logical_or_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = logical_and_term (et, &v2)) != NO_ERROR)
+      if ((er = logical_and_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       numb_lior(*v1,v2);
@@ -309,12 +309,12 @@ logical_or_term (eval_token et, number *v1)
 }
 
 static eval_error
-logical_and_term (eval_token et, number *v1)
+logical_and_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
 
-  if ((er = or_term (et, v1)) != NO_ERROR)
+  if ((er = or_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -324,7 +324,7 @@ logical_and_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = or_term (et, &v2)) != NO_ERROR)
+      if ((er = or_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       numb_land(*v1,v2);
@@ -338,12 +338,12 @@ logical_and_term (eval_token et, number *v1)
 }
 
 static eval_error
-or_term (eval_token et, number *v1)
+or_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
 
-  if ((er = xor_term (et, v1)) != NO_ERROR)
+  if ((er = xor_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -353,10 +353,10 @@ or_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = xor_term (et, &v2)) != NO_ERROR)
+      if ((er = xor_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_ior(v1, (const number *)&v2);
+      numb_ior(context, v1, (const number *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -367,12 +367,12 @@ or_term (eval_token et, number *v1)
 }
 
 static eval_error
-xor_term (eval_token et, number *v1)
+xor_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
 
-  if ((er = and_term (et, v1)) != NO_ERROR)
+  if ((er = and_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -382,10 +382,10 @@ xor_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = and_term (et, &v2)) != NO_ERROR)
+      if ((er = and_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_eor(v1, (const number *)&v2);
+      numb_eor(context, v1, (const number *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -396,12 +396,12 @@ xor_term (eval_token et, number *v1)
 }
 
 static eval_error
-and_term (eval_token et, number *v1)
+and_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
 
-  if ((er = not_term (et, v1)) != NO_ERROR)
+  if ((er = not_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -411,10 +411,10 @@ and_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = not_term (et, &v2)) != NO_ERROR)
+      if ((er = not_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_and(v1, (const number *)&v2);
+      numb_and(context, v1, (const number *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -425,7 +425,7 @@ and_term (eval_token et, number *v1)
 }
 
 static eval_error
-not_term (eval_token et, number *v1)
+not_term (m4 *context, eval_token et, number *v1)
 {
   eval_error er;
 
@@ -435,19 +435,19 @@ not_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = not_term (et, v1)) != NO_ERROR)
+      if ((er = not_term (context, et, v1)) != NO_ERROR)
 	return er;
-      numb_not(v1);
+      numb_not(context, v1);
     }
   else
-    if ((er = logical_not_term (et, v1)) != NO_ERROR)
+    if ((er = logical_not_term (context, et, v1)) != NO_ERROR)
       return er;
 
   return NO_ERROR;
 }
 
 static eval_error
-logical_not_term (eval_token et, number *v1)
+logical_not_term (m4 *context, eval_token et, number *v1)
 {
   eval_error er;
 
@@ -457,25 +457,25 @@ logical_not_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = logical_not_term (et, v1)) != NO_ERROR)
+      if ((er = logical_not_term (context, et, v1)) != NO_ERROR)
 	return er;
       numb_lnot(*v1);
     }
   else
-    if ((er = cmp_term (et, v1)) != NO_ERROR)
+    if ((er = cmp_term (context, et, v1)) != NO_ERROR)
       return er;
 
   return NO_ERROR;
 }
 
 static eval_error
-cmp_term (eval_token et, number *v1)
+cmp_term (m4 *context, eval_token et, number *v1)
 {
   eval_token op;
   number v2;
   eval_error er;
 
-  if ((er = shift_term (et, v1)) != NO_ERROR)
+  if ((er = shift_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -488,7 +488,7 @@ cmp_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = shift_term (et, &v2)) != NO_ERROR)
+      if ((er = shift_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       switch (op)
@@ -518,7 +518,7 @@ cmp_term (eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
+	  M4ERROR ((m4_get_warning_status_opt (context), 0,
 		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
 	  abort ();
 	}
@@ -532,13 +532,13 @@ cmp_term (eval_token et, number *v1)
 }
 
 static eval_error
-shift_term (eval_token et, number *v1)
+shift_term (m4 *context, eval_token et, number *v1)
 {
   eval_token op;
   number v2;
   eval_error er;
 
-  if ((er = add_term (et, v1)) != NO_ERROR)
+  if ((er = add_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -549,21 +549,21 @@ shift_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = add_term (et, &v2)) != NO_ERROR)
+      if ((er = add_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       switch (op)
 	{
 	case LSHIFT:
-	  numb_lshift(v1, (const number *)&v2);
+	  numb_lshift(context, v1, (const number *)&v2);
 	  break;
 
 	case RSHIFT:
-	  numb_rshift(v1, (const number *)&v2);
+	  numb_rshift(context, v1, (const number *)&v2);
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
+	  M4ERROR ((m4_get_warning_status_opt (context), 0,
 		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
 	  abort ();
 	}
@@ -577,13 +577,13 @@ shift_term (eval_token et, number *v1)
 }
 
 static eval_error
-add_term (eval_token et, number *v1)
+add_term (m4 *context, eval_token et, number *v1)
 {
   eval_token op;
   number v2;
   eval_error er;
 
-  if ((er = mult_term (et, v1)) != NO_ERROR)
+  if ((er = mult_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -593,7 +593,7 @@ add_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = mult_term (et, &v2)) != NO_ERROR)
+      if ((er = mult_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       if (op == PLUS) {
@@ -611,13 +611,13 @@ add_term (eval_token et, number *v1)
 }
 
 static eval_error
-mult_term (eval_token et, number *v1)
+mult_term (m4 *context, eval_token et, number *v1)
 {
   eval_token op;
   number v2;
   eval_error er;
 
-  if ((er = exp_term (et, v1)) != NO_ERROR)
+  if ((er = exp_term (context, et, v1)) != NO_ERROR)
     return er;
 
   numb_init(v2);
@@ -631,7 +631,7 @@ mult_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = exp_term (et, &v2)) != NO_ERROR)
+      if ((er = exp_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       switch (op)
@@ -660,12 +660,12 @@ mult_term (eval_token et, number *v1)
 	  if (numb_zerop(v2))
 	    return MODULO_ZERO;
 	  else {
-	    numb_modulo(v1, (const number *)&v2);
+	    numb_modulo(context, v1, (const number *)&v2);
 	  }
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
+	  M4ERROR ((m4_get_warning_status_opt (context), 0,
 		    "INTERNAL ERROR: Bad operator in mult_term ()"));
 	  abort ();
 	}
@@ -679,13 +679,13 @@ mult_term (eval_token et, number *v1)
 }
 
 static eval_error
-exp_term (eval_token et, number *v1)
+exp_term (m4 *context, eval_token et, number *v1)
 {
   number result;
   number v2;
   eval_error er;
 
-  if ((er = unary_term (et, v1)) != NO_ERROR)
+  if ((er = unary_term (context, et, v1)) != NO_ERROR)
     return er;
   memcpy(&result, v1, sizeof(number));
 
@@ -696,7 +696,7 @@ exp_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = exp_term (et, &v2)) != NO_ERROR)
+      if ((er = exp_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
       numb_pow(v1, (const number *)&v2);
@@ -710,7 +710,7 @@ exp_term (eval_token et, number *v1)
 }
 
 static eval_error
-unary_term (eval_token et, number *v1)
+unary_term (m4 *context, eval_token et, number *v1)
 {
   eval_token et2 = et;
   eval_error er;
@@ -721,21 +721,21 @@ unary_term (eval_token et, number *v1)
       if (et2 == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = simple_term (et2, v1)) != NO_ERROR)
+      if ((er = simple_term (context, et2, v1)) != NO_ERROR)
 	return er;
 
       if (et == MINUS)
 	numb_negate(*v1);
     }
   else
-    if ((er = simple_term (et, v1)) != NO_ERROR)
+    if ((er = simple_term (context, et, v1)) != NO_ERROR)
       return er;
 
   return NO_ERROR;
 }
 
 static eval_error
-simple_term (eval_token et, number *v1)
+simple_term (m4 *context, eval_token et, number *v1)
 {
   number v2;
   eval_error er;
@@ -747,7 +747,7 @@ simple_term (eval_token et, number *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = logical_or_term (et, v1)) != NO_ERROR)
+      if ((er = logical_or_term (context, et, v1)) != NO_ERROR)
 	return er;
 
       et = eval_lex (&v2);
@@ -778,23 +778,23 @@ m4_evaluate (m4 *context, struct obstack *obs, int argc, m4_symbol_value **argv)
   eval_token	et;
   eval_error	err;
 
-  if (argc >= 3 && !m4_numeric_arg (argc, argv, 2, &radix))
+  if (argc >= 3 && !m4_numeric_arg (context, argc, argv, 2, &radix))
     return;
 
   if (radix <= 1 || radix > 36)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: radix out of range: %d"),
 		M4ARG(0), radix));
       return;
     }
 
-  if (argc >= 4 && !m4_numeric_arg (argc, argv, 3, &min))
+  if (argc >= 4 && !m4_numeric_arg (context, argc, argv, 3, &min))
     return;
 
   if (min <= 0)
     {
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: negative width: %d"),
 		M4ARG(0), min));
       return;
@@ -805,7 +805,7 @@ m4_evaluate (m4 *context, struct obstack *obs, int argc, m4_symbol_value **argv)
 
   numb_init(val);
   et = eval_lex (&val);
-  err = logical_or_term (et, &val);
+  err = logical_or_term (context, et, &val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     err = EXCESS_INPUT;
@@ -816,43 +816,43 @@ m4_evaluate (m4 *context, struct obstack *obs, int argc, m4_symbol_value **argv)
       break;
 
     case MISSING_RIGHT:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: missing right parenthesis: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     case SYNTAX_ERROR:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: bad expression: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     case UNKNOWN_INPUT:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: bad input: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     case EXCESS_INPUT:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: excess input: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     case DIVIDE_ZERO:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: divide by zero: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     case MODULO_ZERO:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: %s: modulo by zero: %s"),
 		M4ARG (0), M4ARG (1)));
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
 		"INTERNAL ERROR: Bad error code in evaluate ()"));
       abort ();
     }
