@@ -27,6 +27,19 @@
 #include <assert.h>
 #include <m4module.h>
 
+
+
+/* --- CONTEXT MANAGEMENT --- */
+
+struct m4 {
+  m4_symtab *symtab;
+};
+
+#define M4_SYMTAB(context) ((context)->symtab)
+
+#define m4_get_symtab(context)	((context)->symtab)
+
+
 
 /* --- MODULE MANAGEMENT --- */
 
@@ -37,21 +50,17 @@
 #define FINISH_SYMBOL		"m4_finish_module"
 
 extern void	    m4__module_init (void);
-extern lt_dlhandle  m4__module_open (const char *name, struct obstack *obs);
-extern void	    m4__module_exit (void);
+extern lt_dlhandle  m4__module_open (m4 *context, const char *name,
+				     struct obstack *obs);
+extern void	    m4__module_exit (m4 *context);
 
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
-extern m4_hash *m4__symtab;
-
-#define m4_symtab_apply(func, data)				\
-	m4_hash_apply (m4__symtab, (m4_hash_apply_func *)(func), (data))
-
-extern void	m4__symtab_init				(void);
-extern void	m4__symtab_remove_module_references	(lt_dlhandle);
-extern void	m4__symtab_exit				(void);
+extern void	m4__symtab_init			    (void);
+extern void	m4__symtab_remove_module_references (m4_symtab*, lt_dlhandle);
+extern void	m4__symtab_exit			    (void);
 
 
 /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */

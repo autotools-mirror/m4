@@ -113,7 +113,7 @@ M4BUILTIN_HANDLER (load)
 {
   /* Load the named module and install the builtins and macros
      exported by that module.  */
-  m4_module_load (M4ARG(1), obs);
+  m4_module_load (context, M4ARG(1), obs);
 }
 
 /**
@@ -123,5 +123,5 @@ M4BUILTIN_HANDLER (unload)
 {
   /* Remove all builtins and macros installed by the named module,
      and then unload the module from memory entirely.  */
-  m4_module_unload (M4ARG(1), obs);
+  m4_module_unload (context, M4ARG(1), obs);
 }

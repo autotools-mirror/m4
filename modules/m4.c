@@ -153,18 +153,18 @@ M4BUILTIN_HANDLER (define)
 
   if (argc == 2)
     {
-      m4_macro_define (M4ARG (1), NULL);
+      m4_macro_define (context, M4ARG (1), NULL);
       return;
     }
 
   switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_define (M4ARG (1), argv[2]);
+      m4_macro_define (context, M4ARG (1), argv[2]);
       return;
 
     case M4_TOKEN_FUNC:
-      m4_builtin_define (M4ARG (1), argv[2]);
+      m4_builtin_define (context, M4ARG (1), argv[2]);
       return;
     }
 
@@ -174,11 +174,11 @@ M4BUILTIN_HANDLER (define)
 
 M4BUILTIN_HANDLER (undefine)
 {
-  if (!m4_symbol_lookup (M4ARG (1)))
+  if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
     M4WARN ((warning_status, 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
   else
-    m4_symbol_delete (M4ARG (1));
+    m4_symbol_delete (M4SYMTAB, M4ARG (1));
 }
 
 M4BUILTIN_HANDLER (pushdef)
@@ -188,18 +188,18 @@ M4BUILTIN_HANDLER (pushdef)
 
   if (argc == 2)
     {
-      m4_macro_pushdef (M4ARG (1), NULL);
+      m4_macro_pushdef (context, M4ARG (1), NULL);
       return;
     }
 
   switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_pushdef (M4ARG (1), argv[2]);
+      m4_macro_pushdef (context, M4ARG (1), argv[2]);
       return;
 
     case M4_TOKEN_FUNC:
-      m4_builtin_pushdef (M4ARG (1), argv[2]);
+      m4_builtin_pushdef (context, M4ARG (1), argv[2]);
       return;
     }
 
@@ -209,11 +209,11 @@ M4BUILTIN_HANDLER (pushdef)
 
 M4BUILTIN_HANDLER (popdef)
 {
-  if (!m4_symbol_lookup (M4ARG (1)))
+  if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
     M4WARN ((warning_status, 0,
 	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
   else
-    m4_symbol_popdef (M4ARG (1));
+    m4_symbol_popdef (M4SYMTAB, M4ARG (1));
 }
 
 
@@ -227,7 +227,7 @@ M4BUILTIN_HANDLER (ifdef)
   m4_symbol *symbol;
   const char *result;
 
-  symbol = m4_symbol_lookup (M4ARG (1));
+  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (1));
 
   if (symbol)
     result = M4ARG (2);
@@ -292,11 +292,11 @@ M4BUILTIN_HANDLER (dumpdef)
   const m4_builtin *bp;
 
   data.obs = obs;
-  m4_dump_symbols (&data, argc, argv, TRUE);
+  m4_dump_symbols (context, &data, argc, argv, TRUE);
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      m4_symbol *symbol = m4_symbol_lookup (data.base[0]);
+      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
       assert (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT
@@ -332,7 +332,7 @@ M4BUILTIN_HANDLER (defn)
 {
   m4_symbol *symbol;
 
-  symbol = m4_symbol_lookup (M4ARG (1));
+  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (1));
   if (symbol == NULL)
     {
       M4WARN ((warning_status, 0,
@@ -556,7 +556,7 @@ M4BUILTIN_HANDLER (m4exit)
     exit_code = 0;
 
   /* Ensure any module exit callbacks are executed.  */
-  m4__module_exit ();
+  m4__module_exit (context);
 
   exit (exit_code);
 }
@@ -594,12 +594,12 @@ M4BUILTIN_HANDLER (traceon)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (set_trace, (void *) obs);
+    m4_symtab_apply (M4SYMTAB, set_trace, (void *) obs);
   else
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4ARG (i);
-	m4_symbol *symbol = m4_symbol_lookup (name);
+	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 	if (symbol != NULL)
 	  set_trace (NULL, NULL, symbol, (char *) obs);
 	else
@@ -614,12 +614,12 @@ M4BUILTIN_HANDLER (traceoff)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (set_trace, NULL);
+    m4_symtab_apply (M4SYMTAB, set_trace, NULL);
   else
     for (i = 1; i < argc; i++)
       {
 	const char *name = M4ARG (i);
-	m4_symbol *symbol = m4_symbol_lookup (name);
+	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 	if (symbol != NULL)
 	  set_trace (NULL, NULL, symbol, NULL);
 	else

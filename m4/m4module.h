@@ -30,12 +30,14 @@ BEGIN_C_DECLS
 
 /* Various declarations.  */
 
+typedef struct m4		m4;
 typedef struct m4_module_data	m4_module_data;
 typedef struct m4_symbol	m4_symbol;
 typedef struct m4_token		m4_token;
+typedef struct m4_hash		m4_symtab;
 
 
-typedef void m4_builtin_func (struct obstack *, int, m4_token **);
+typedef void m4_builtin_func (m4 *, struct obstack *, int, m4_token **);
 typedef void *m4_module_func (const char *);
 
 typedef struct {
@@ -57,13 +59,22 @@ typedef struct {
 
 
 
+/* --- CONTEXT MANAGEMENT --- */
+
+extern m4 *m4_create (void);
+extern void m4_delete (m4 *);
+extern m4_symtab *m4_get_symtab (m4 *);
+
+#define M4SYMTAB	(m4_get_symtab (context))
+
+
 /* --- MODULE MANAGEMENT --- */
 
-typedef void m4_module_init_func   (lt_dlhandle, struct obstack*);
-typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
+typedef void m4_module_init_func   (m4 *, lt_dlhandle, struct obstack*);
+typedef void m4_module_finish_func (m4 *, lt_dlhandle, struct obstack*);
 
-extern lt_dlhandle  m4_module_load   (const char*, struct obstack*);
-extern void	    m4_module_unload (const char*, struct obstack*);
+extern lt_dlhandle  m4_module_load   (m4 *, const char*, struct obstack*);
+extern void	    m4_module_unload (m4 *, const char*, struct obstack*);
 
 extern const char  *m4_module_name     (lt_dlhandle);
 extern m4_builtin  *m4_module_builtins (lt_dlhandle);
@@ -73,20 +84,24 @@ extern m4_macro	   *m4_module_macros   (lt_dlhandle);
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
 
-typedef struct m4_symtab m4_symtab;
+typedef int m4_symtab_apply_func (m4_symtab *symtab, const void *key, void *value, void *data);
 
-typedef int m4_symtab_apply_func (m4_hash *hash, const void *key, void *value, void *data);
+extern m4_symtab *m4_symtab_create  (size_t);
+extern void	  m4_symtab_delete  (m4_symtab*);
+extern int	  m4_symtab_apply   (m4_symtab*, m4_symtab_apply_func*, void*);
 
-extern int	  m4_symtab_apply	(m4_symtab_apply_func*, void*);
+#define m4_symtab_apply(symtab, func, userdata)				\
+ (m4_hash_apply ((m4_hash*)(symtab), (m4_hash_apply_func*)(func), (userdata)))
 
-extern m4_symbol *m4_symbol_lookup	(const char *);
-extern m4_symbol *m4_symbol_pushdef	(const char *);
-extern m4_symbol *m4_symbol_define	(const char *);
-extern void       m4_symbol_popdef	(const char *);
-extern void       m4_symbol_delete	(const char *);
+extern m4_symbol *m4_symbol_lookup  (m4_symtab*, const char *);
+extern m4_symbol *m4_symbol_pushdef (m4_symtab*, const char *);
+extern m4_symbol *m4_symbol_define  (m4_symtab*, const char *);
+extern void       m4_symbol_popdef  (m4_symtab*, const char *);
+extern void       m4_symbol_delete  (m4_symtab*, const char *);
 
-#define m4_symbol_delete(name)						\
-	while (m4_symbol_lookup (name)) m4_symbol_popdef (name)
+#define m4_symbol_delete(symtab, name)			M4_STMT_START {	\
+	while (m4_symbol_lookup ((symtab), (name)))			\
+ 	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
 
 
 /* Various different token types.  */
@@ -112,15 +127,15 @@ typedef enum {
 
 /* --- MACRO (and builtin) MANAGEMENT --- */
 
-extern m4_symbol *m4_symbol_token (const char *name, m4_symbol_type type,
-			m4_token *token,
-			m4_symbol *(*getter) (const char *name),
+extern m4_symbol *m4_symbol_set_token (m4 *context, const char *name,
+			m4_symbol_type type, m4_token *token,
+			m4_symbol *(*getter) (m4_symtab *, const char *),
 			m4_symbol *(*setter) (m4_symbol *, m4_token *));
 
-extern void	  m4_macro_table_install (lt_dlhandle handle,
-					  const m4_macro *table);
-extern void	  m4_builtin_table_install (lt_dlhandle handle,
-					 const m4_builtin *table);
+extern void	  m4_macro_table_install   (m4 *context, lt_dlhandle handle,
+					    const m4_macro *table);
+extern void	  m4_builtin_table_install (m4 *context, lt_dlhandle handle,
+					    const m4_builtin *table);
 
 extern const m4_builtin *m4_builtin_find_by_name (
 				const m4_builtin *, const char *);
@@ -133,17 +148,17 @@ extern const m4_builtin *m4_builtin_find_by_func (
 extern m4_symbol *m4__symbol_set_builtin (m4_symbol*, m4_token*);
 extern m4_symbol *m4__symbol_set_macro	 (m4_symbol*, m4_token*);
 
-#define m4_macro_pushdef(name, macro)					\
-	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
+#define m4_macro_pushdef(context, name, macro)				    \
+	m4_symbol_set_token ((context), (name), M4_TOKEN_TEXT, (macro),	    \
 			 m4_symbol_pushdef, m4__symbol_set_macro)
-#define m4_macro_define(name, macro)					\
-	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
+#define m4_macro_define(context, name, macro)				    \
+	m4_symbol_set_token ((context), (name), M4_TOKEN_TEXT, (macro),	    \
 			 m4_symbol_define, m4__symbol_set_macro)
-#define m4_builtin_pushdef(name, builtin)				\
-	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
+#define m4_builtin_pushdef(context, name, builtin)			    \
+	m4_symbol_set_token ((context), (name), M4_TOKEN_FUNC, (builtin),   \
 			 m4_symbol_pushdef, m4__symbol_set_builtin)
-#define m4_builtin_define(name, builtin)				\
-	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
+#define m4_builtin_define(context, name, builtin)			    \
+	m4_symbol_set_token ((context), (name), M4_TOKEN_FUNC, (builtin),   \
 			 m4_symbol_define, m4__symbol_set_builtin)
 
 extern m4__token_type	m4_token_get_type (m4_token *);
@@ -154,23 +169,23 @@ extern m4_builtin_func *m4_token_func	  (m4_token *);
 
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
-  	(struct obstack *, int , m4_token **);
+   (m4 *context, struct obstack *obs, int argc, m4_token **argv);
 
 #define M4BUILTIN_HANDLER(name) 				\
-  static void CONC(builtin_, name) (obs, argc, argv)		\
-	struct obstack *obs; int argc; m4_token **argv;
+  static void CONC(builtin_, name)				\
+   (m4 *context, struct obstack *obs, int argc, m4_token **argv)
 
 #define M4INIT_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_init_module)) 			\
-	(lt_dlhandle handle, struct obstack *obs);		\
+	(m4 *context, lt_dlhandle handle, struct obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_init_module)) 			\
-	(lt_dlhandle handle, struct obstack *obs)
+	(m4 *context, lt_dlhandle handle, struct obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
-	(lt_dlhandle handle, struct obstack *obs);		\
+	(m4 *context, lt_dlhandle handle, struct obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
-	(lt_dlhandle handle, struct obstack *obs)
+	(m4 *context, lt_dlhandle handle, struct obstack *obs)
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
@@ -332,9 +347,13 @@ extern int m4_sysval;
 extern int m4_expansion_level;
 
 extern const char *m4_expand_ranges (const char *s, struct obstack *obs);
-extern void m4_expand_input (void);
-extern void m4_call_macro (m4_symbol *, int, m4_token **, struct obstack *);
-extern void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_token **argv);
+extern void 	   m4_expand_input  (m4 *context);
+extern void	   m4_call_macro    (m4_symbol *symbol, m4 *context,
+				     struct obstack *obs, int argc,
+				     m4_token **argv);
+extern void	   m4_process_macro (m4_symbol *symbol, m4 *context,
+				     struct obstack *obs, int argc,
+				     m4_token **argv);
 
 
 
@@ -481,7 +500,7 @@ struct m4_dump_symbol_data
 };
 
 extern int m4_dump_symbol (const void *name, void *symbol, void *data);
-extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_token **argv, boolean complain);
+extern void m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc, m4_token **argv, boolean complain);
 
 
 

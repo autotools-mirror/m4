@@ -105,7 +105,7 @@ void stackovf_exit (void);
 
 /* File: freeze.c --- frozen state files.  */
 
-void produce_frozen_state (const char *);
-void reload_frozen_state  (const char *);
+void produce_frozen_state (m4 *context, const char *);
+void reload_frozen_state  (m4 *context, const char *);
 
 #endif /* M4_H */

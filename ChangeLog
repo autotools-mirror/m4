@@ -1,3 +1,54 @@
+2003-06-16  Gary V. Vaughan  <gary@gnu.org>
+
+	Begin work on lifting the curse of the global variables.  To start
+	with create a `struct m4' context container, and replace
+	`m4__symtab' with `context->symtab' throughout.  This means
+	initialising a context container in main, and adjusting many
+	functions between main and the module entry points so that the
+	container gets passed through.  It would have been nice to
+	defer this until after 1.5, but it has a major effect on the
+	user's module writing ABI, so it needs to be addressed now - at
+	least in the areas that impact the ABI.  An interrelatated change
+	in the symtab API removes the dependency on a global symbol table,
+	and instead focuses on a passed table (from the context
+	container).
+
+	* TODO: Reminders for finishing context functionality.
+	* m4/Makefile.am (libm4_la_SOURCES): Add m4.c.
+	* m4/m4.c: New file. Manage new struct m4 objects to eliminate
+	global variables and eventually allow m4 to be reentrant.
+	* m4/m4private.h (m4): Define the new structure here...
+	(M4_SYMTAB, m4_get_symtab): ...so we can have fast accessors that
+	don't carry the overhead of a function call.
+	* m4/m4module.h: Prototype extern functions from m4/m4.c.
+	(m4): Declare type for new struct m4 objects.
+	(M4SYMTAB): User macro to ease finding the symbol table for the
+	current context for module developers.
+	(m4_symbol_token): Renamed to m4_symbol_set_token which contains a
+	verb.
+	(M4_BUILTIN, m4_builtin_func, M4_BUILTIN_HANDLER)
+	(m4_builtin_define, m4_builtin_pushdef, m4_builtin_table_install)
+	(m4_call_macro, m4_dump_symbols, m4_expand_input)
+	(M4_FINISH_HANDLER, M4_INIT_HANDLE, m4_macro_define)
+	(m4_macro_pushdef, m4_macro_table_install, m4_module_load)
+	(m4_module_unload, m4_process_macro, m4_symbol_set_token): Add an
+	m4* context parameter. Changed definitions and all callers.
+	(m4_symtab): Alias for m4_hash to decouple the
+	m4_symtab api from m4_hash.
+	(m4_symtab_apply, m4_symtab_apply_func): Use m4_symtab instead of
+	m4_hash.
+	(m4_symtab_create): New function to return an initialised
+	m4_symtab.
+	(m4_symtab_delete): New function to delete an m4_symtab's memory.
+	(m4_symbol_define, m4_symbol_delete, m4_symbol_lookup)
+	(m4_symbol_popdef, m4_symbol_pushdef): Add an m4_symtab parameter
+	instead of simply using the global m4__symtab.  Changed
+	definitions and all callers.
+	* m4/m4private.h (m4__symtab_remove_module_references): Ditto.
+	* m4/symtab.c (m4__symtab_init, m4__symtab_exit): Removed.
+	* src/main.c (main): Create a context and use that instead of the
+	former global m4__symtab.
+
 2003-06-13  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/hash.c (m4_hash_apply): Pass an initial hash table parameter

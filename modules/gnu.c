@@ -27,7 +27,6 @@
 #  include <stdlib.h>
 #endif
 
-/* Need this here so that `M4_SCOPE' is defined before use.  */
 #include "m4module.h"
 
 #if HAVE_ERRNO_H
@@ -143,7 +142,7 @@ M4BUILTIN_HANDLER (builtin)
     M4ERROR ((warning_status, 0,
 	      _("Undefined name %s"), name));
   else
-    (*bp->func) (obs, argc - 1, argv + 1);
+    (*bp->func) (context, obs, argc - 1, argv + 1);
 }
 
 
@@ -160,12 +159,12 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *symbol;
   const char *name = M4ARG (1);
 
-  symbol = m4_symbol_lookup (name);
+  symbol = m4_symbol_lookup (M4SYMTAB, name);
   if (symbol == NULL)
     M4ERROR ((warning_status, 0,
 	      _("Undefined name `%s'"), name));
   else
-    m4_call_macro (symbol, argc - 1, argv + 1, obs);
+    m4_call_macro (symbol, context, obs, argc - 1, argv + 1);
 }
 
 /* Change the current input syntax.  The function set_syntax () lives
@@ -456,7 +455,7 @@ M4BUILTIN_HANDLER (symbols)
 
   obstack_init (&data_obs);
   data.obs = &data_obs;
-  m4_dump_symbols (&data, argc, argv, FALSE);
+  m4_dump_symbols (context, &data, argc, argv, FALSE);
 
   for (; data.size > 0; --data.size, data.base++)
     {

@@ -189,7 +189,7 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 }
 
 void
-produce_frozen_state (const char *name)
+produce_frozen_state (m4 *context, const char *name)
 {
   FILE *file;
 
@@ -254,7 +254,7 @@ produce_frozen_state (const char *name)
   produce_module_dump (file, lt_dlhandle_next (0));
 
   /* Dump all symbols.  */
-  produce_symbol_dump (file, m4__symtab);
+  produce_symbol_dump (file, M4SYMTAB);
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
@@ -321,7 +321,7 @@ decode_char (FILE *in)
 /* We are seeking speed, here.  */
 
 void
-reload_frozen_state (const char *name)
+reload_frozen_state (m4 *context, const char *name)
 {
   FILE *file;
   int version;
@@ -489,7 +489,7 @@ reload_frozen_state (const char *name)
 	      TOKEN_MIN_ARGS (&token)	= bp->min_args;
 	      TOKEN_MAX_ARGS (&token)	= bp->max_args;
 
-	      m4_builtin_pushdef (string[0], &token);
+	      m4_builtin_pushdef (context, string[0], &token);
 	    }
 	  else
 	    M4ERROR ((warning_status, 0,
@@ -517,7 +517,7 @@ reload_frozen_state (const char *name)
 	GET_STRING (file, string[0], allocated[0], number[0]);
 	VALIDATE ('\n');
 
-	m4__module_open (string[0], NULL);
+	m4__module_open (context, string[0], NULL);
 
 	break;
 
@@ -672,7 +672,7 @@ reload_frozen_state (const char *name)
 	  TOKEN_HANDLE (&token)		= handle;
 	  TOKEN_MAX_ARGS (&token)	= -1;
 
-	  m4_macro_pushdef (string[0], &token);
+	  m4_macro_pushdef (context, string[0], &token);
 	}
 	break;
 

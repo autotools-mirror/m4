@@ -213,6 +213,8 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
   char *filename;
 
+  m4 *context;
+
   int exit_status;
 
   program_name = argv[0];
@@ -228,7 +230,8 @@ main (int argc, char *const *argv, char *const *envp)
   m4__module_init ();
   m4_debug_init ();
   m4_include_init ();
-  m4__symtab_init ();
+
+  context = m4_create ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -387,13 +390,13 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
   if (frozen_file_to_read)
     {
-      reload_frozen_state (frozen_file_to_read);
+      reload_frozen_state (context, frozen_file_to_read);
     }
   else
     {
       m4_syntax_init ();
-      m4_module_load ("m4", 0);
-      m4_module_load (no_gnu_extensions ? "traditional" : "gnu", 0);
+      m4_module_load (context, "m4", 0);
+      m4_module_load (context, no_gnu_extensions ? "traditional" : "gnu", 0);
     }
 
   /* Import environment variables as macros.  The definition are
@@ -439,20 +442,20 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    else
 	      *macro_value++ = '\0';
 	    TOKEN_TEXT (&token) = macro_value;
-	    m4_macro_define (defines->macro, &token);
+	    m4_macro_define (context, defines->macro, &token);
 	    break;
 
 	  case 'U':
-	    m4_symbol_delete (defines->macro);
+	    m4_symbol_delete (M4SYMTAB, defines->macro);
 	    break;
 
 	  case 't':
-	    symbol = m4_symbol_define (defines->macro);
+	    symbol = m4_symbol_define (M4SYMTAB, defines->macro);
 	    SYMBOL_TRACED (symbol) = TRUE;
 	    break;
 
 	  case 'm':
-	    m4_module_load (defines->macro, 0);
+	    m4_module_load (context, defines->macro, 0);
 	    break;
 
 	  default:
@@ -482,7 +485,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
   if (optind == argc)
     {
       m4_push_file (stdin, "stdin");
-      m4_expand_input ();
+      m4_expand_input (context);
     }
   else
     for (; optind < argc; optind++)
@@ -504,17 +507,17 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 		xfree (filename);
 	      }
 	  }
-	m4_expand_input ();
+	m4_expand_input (context);
       }
 #undef NEXTARG
 
   /* Now handle wrapup text.  */
 
   while (m4_pop_wrapup ())
-    m4_expand_input ();
+    m4_expand_input (context);
 
   if (frozen_file_to_write)
-    produce_frozen_state (frozen_file_to_write);
+    produce_frozen_state (context, frozen_file_to_write);
   else
     {
       m4_make_diversion (0);
@@ -526,12 +529,16 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
      anything left when we're done: it was caused by a memory leak.
      Strictly, we don't need to do this, but it makes leak detection
      a whole lot easier!  */
-  m4__module_exit ();
-  m4__symtab_exit ();
+
+  m4__module_exit (context);
   m4_syntax_exit ();
   m4_output_exit ();
   m4_input_exit ();
   m4_debug_exit ();
+
+  m4_delete (context);
+
+  m4_hash_exit ();
 
 #ifdef USE_STACKOVF
   stackovf_exit ();

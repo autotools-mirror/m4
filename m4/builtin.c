@@ -72,9 +72,10 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 }
 
 m4_symbol *
-m4_symbol_token (const char *name, m4_symbol_type type, m4_token *token,
-		 m4_symbol *(*getter) (const char *name),
-		 m4_symbol *(*setter) (m4_symbol *, m4_token *))
+m4_symbol_set_token (m4 *context, const char *name, m4_symbol_type type,
+		     m4_token *token,
+		     m4_symbol *(*getter) (m4_symtab *, const char *),
+		     m4_symbol *(*setter) (m4_symbol *, m4_token *))
 {
   const char *openp  = NULL;
   const char *params = NULL;
@@ -102,7 +103,7 @@ m4_symbol_token (const char *name, m4_symbol_type type, m4_token *token,
     }
 
   /* Get a symbol table entry for the name.  */
-  symbol = (*getter) (name);
+  symbol = (*getter) (M4SYMTAB, name);
 
   if (symbol)
     {
@@ -148,14 +149,14 @@ m4_arg_signature_parse (const char *name, const char *params)
 {
   m4_hash *arg_signature;
   const char *commap;
-  int index;
+  int offset;
 
   assert (params);
 
   arg_signature = m4_hash_new (M4_ARG_SIGNATURE_DEFAULT_SIZE,
 			m4_hash_string_hash, m4_hash_string_cmp);
 
-  for (index = 1; *params && !M4_IS_CLOSE (*params); ++index)
+  for (offset = 1; *params && !M4_IS_CLOSE (*params); ++offset)
     {
       size_t len = 0;
 
@@ -183,7 +184,7 @@ m4_arg_signature_parse (const char *name, const char *params)
 	{
 	  struct m4_token_arg *arg = XCALLOC (struct m4_token_arg, 1);
 
-	  TOKEN_ARG_INDEX (arg) = index;
+	  TOKEN_ARG_INDEX (arg) = offset;
 
 	  m4_hash_insert (arg_signature, xstrzdup (params, len), arg);
 
@@ -199,7 +200,8 @@ m4_arg_signature_parse (const char *name, const char *params)
 }
 
 void
-m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
+m4_builtin_table_install (m4 *context, lt_dlhandle handle,
+			  const m4_builtin *table)
 {
   const m4_builtin *bp;
   m4_token token;
@@ -235,7 +237,7 @@ m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
       TOKEN_MIN_ARGS (&token)	= bp->min_args;
       TOKEN_MAX_ARGS (&token)	= bp->max_args;
 
-      m4_builtin_pushdef (name, &token);
+      m4_builtin_pushdef (context, name, &token);
 
       if (prefix_all_builtins)
 	xfree (name);
@@ -243,7 +245,7 @@ m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
 }
 
 void
-m4_macro_table_install (lt_dlhandle handle, const m4_macro *table)
+m4_macro_table_install (m4 *context, lt_dlhandle handle, const m4_macro *table)
 {
   const m4_macro *mp;
   m4_token token;
@@ -255,6 +257,6 @@ m4_macro_table_install (lt_dlhandle handle, const m4_macro *table)
   for (mp = table; mp->name != NULL; mp++)
     {
       TOKEN_TEXT (&token)	= (char *) mp->value;
-      m4_macro_pushdef (mp->name, &token);
+      m4_macro_pushdef (context, mp->name, &token);
     }
 }

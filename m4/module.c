@@ -80,8 +80,10 @@
 #define MODULE_SELF_NAME	"!myself!"
 
 static const char*  module_dlerror (void);
-static int	    module_remove  (lt_dlhandle handle, struct obstack *obs);
-static void	    module_close   (lt_dlhandle handle, struct obstack *obs);
+static int	    module_remove  (m4 *context, lt_dlhandle handle,
+				    struct obstack *obs);
+static void	    module_close   (m4 *context, lt_dlhandle handle,
+				    struct obstack *obs);
 
 static lt_dlcaller_id caller_id = 0;
 
@@ -122,9 +124,9 @@ m4_module_macros (lt_dlhandle handle)
 }
 
 lt_dlhandle
-m4_module_load (const char *name, struct obstack *obs)
+m4_module_load (m4 *context, const char *name, struct obstack *obs)
 {
-  const lt_dlhandle handle = m4__module_open (name, obs);
+  const lt_dlhandle handle = m4__module_open (context, name, obs);
 
   /* If name is not set we are getting a reflective handle, but we
      might need to display an error message later so we set an appropriate
@@ -150,7 +152,7 @@ m4_module_load (const char *name, struct obstack *obs)
 	  /* Install the macro functions.  */
 	  if (bp)
 	    {
-	      m4_builtin_table_install (handle, bp);
+	      m4_builtin_table_install (context, handle, bp);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: builtins loaded", name);
 #endif /* DEBUG_MODULES */
@@ -159,7 +161,7 @@ m4_module_load (const char *name, struct obstack *obs)
 	  /* Install the user macros. */
 	  if (mp)
 	    {
-	      m4_macro_table_install (handle, mp);
+	      m4_macro_table_install (context, handle, mp);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: macros loaded", name);
 #endif /* DEBUG_MODULES */
@@ -172,7 +174,7 @@ m4_module_load (const char *name, struct obstack *obs)
 
 /* Unload a module.  */
 void
-m4_module_unload (const char *name, struct obstack *obs)
+m4_module_unload (m4 *context, const char *name, struct obstack *obs)
 {
   lt_dlhandle	handle  = 0;
   int		errors	= 0;
@@ -192,7 +194,7 @@ m4_module_unload (const char *name, struct obstack *obs)
       ++errors;
     }
   else
-    errors = module_remove (handle, obs);
+    errors = module_remove (context, handle, obs);
 
   if (errors)
     {
@@ -278,7 +280,7 @@ m4__module_init (void)
    it is searched for in the module path.  The module is unloaded in
    case of error.  */
 lt_dlhandle
-m4__module_open (const char *name, struct obstack *obs)
+m4__module_open (m4 *context, const char *name, struct obstack *obs)
 {
   lt_dlhandle		handle		= lt_dlopenext (name);
   m4_module_init_func  *init_func	= 0;
@@ -303,7 +305,7 @@ m4__module_open (const char *name, struct obstack *obs)
       init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
       if (init_func)
 	{
-	  (*init_func) (handle, obs);
+	  (*init_func) (context, handle, obs);
 
 #ifdef DEBUG_MODULES
 	  M4_DEBUG_MESSAGE1("module %s: init hook called", name);
@@ -364,7 +366,7 @@ m4__module_open (const char *name, struct obstack *obs)
 }
 
 void
-m4__module_exit (void)
+m4__module_exit (m4 *context)
 {
   lt_dlhandle	handle	= lt_dlhandle_next (0);
   int		errors	= 0;
@@ -388,7 +390,7 @@ m4__module_exit (void)
       if (info->ref_count <= 1)
 	handle = lt_dlhandle_next (pending);
 
-      errors = module_remove (pending, 0);
+      errors = module_remove (context, pending, 0);
     }
 
   if (!errors)
@@ -416,10 +418,10 @@ module_dlerror (void)
 }
 
 static void
-module_close (lt_dlhandle handle, struct obstack *obs)
+module_close (m4 *context, lt_dlhandle handle, struct obstack *obs)
 {
   m4_module_finish_func *finish_func;
-  char			*name;
+  const char		*name;
   int			 errors		= 0;
 
   assert (handle);
@@ -433,7 +435,7 @@ module_close (lt_dlhandle handle, struct obstack *obs)
 
   if (finish_func)
     {
-      (*finish_func) (handle, obs);
+      (*finish_func) (context, handle, obs);
 
 #ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE1("module %s: finish hook called", name);
@@ -473,11 +475,11 @@ module_close (lt_dlhandle handle, struct obstack *obs)
 		name, module_dlerror ()));
     }
 
-  xfree (name);
+  xfree ((void *) name);
 }
 
 static int
-module_remove (lt_dlhandle handle, struct obstack *obs)
+module_remove (m4 *context, lt_dlhandle handle, struct obstack *obs)
 {
   const lt_dlinfo *info;
   int		   errors	= 0;
@@ -513,7 +515,7 @@ module_remove (lt_dlhandle handle, struct obstack *obs)
 	 equal to 1.  If module_close is called again on a
 	 resident module after the references have already been
 	 removed, we needn't try to remove them again!  */
-      m4__symtab_remove_module_references (handle);
+      m4__symtab_remove_module_references (M4SYMTAB, handle);
 
 #ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);
@@ -521,7 +523,7 @@ module_remove (lt_dlhandle handle, struct obstack *obs)
     }
 
   if (!errors)
-    module_close (handle, obs);
+    module_close (context, handle, obs);
 
   return errors;
 }

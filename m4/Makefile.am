@@ -37,7 +37,7 @@ EXTRA_DIST = $(EXTRA_HEADERS) obstack.c
 
 lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c \
-			  input.c ltdl.c macro.c module.c output.c \
+			  input.c ltdl.c m4.c macro.c module.c output.c \
 			  path.c regex.c symtab.c syntax.c utility.c
 libm4_la_LIBADD		= $(LTLIBOBJS) $(LTLIBINTL) $(LIBADD_DL)
 

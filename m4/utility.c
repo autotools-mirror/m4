@@ -240,7 +240,7 @@ m4_dump_symbol (const void *name, void *symbol, void *data)
 /* If there are no arguments, build a sorted list of all defined
    symbols, otherwise, only the specified symbols.  */
 void
-m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
+m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
 		 m4_token **argv, boolean complain)
 {
   data->base = (const char **) obstack_base (data->obs);
@@ -248,7 +248,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
   if (argc == 1)
     {
-      m4_symtab_apply (m4_dump_symbol, data);
+      m4_symtab_apply (M4SYMTAB, m4_dump_symbol, data);
     }
   else
     {
@@ -257,7 +257,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_symbol_lookup (M4ARG (i));
+	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
 	  if (symbol != NULL && SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
 	    m4_dump_symbol (M4ARG (i), symbol, data);
 	  else if (complain)

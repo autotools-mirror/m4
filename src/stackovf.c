@@ -343,7 +343,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_flags = 0;
     if (sigaltstack (&ss, (stack_t *) 0) < 0)
       {
-	xfree (stackbuf);
+	xfree ((void *) stackbuf);
 	error (1, errno, "sigaltstack");
       }
   }
@@ -414,7 +414,7 @@ Error - Do not know how to catch signals on an alternate stack...
 void
 stackovf_exit (void)
 {
-  XFREE (stackbuf);
+  XFREE ((void *) stackbuf);
 }
 
 #endif /* USE_STACKOVF */

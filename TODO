@@ -88,6 +88,10 @@ for any of these ideas or if you have others to add.
     the internals:  we should enable attaching these values to text macros
     too.
 
+  + The context parameter is just a placeholder for formerly global state.
+    We should be making the library reentrant so that multiple instances
+    of m4 can be run in the same process at the same time.
+
 * MODULE SPECIFIC ISSUES
 
   + Some way of linking a module statically is needed, for systems
@@ -107,6 +111,10 @@ for any of these ideas or if you have others to add.
     set of builtins for autoload from the installed module directory on first
     use.  A new cli parameter would inhibit initialisation from this script,
     so that customised m4 interpreters could be built on the fly!
+
+  + The module loader needs to differentiate between modules that are in
+    memory and modules that are loaded (i.e. visible) from various context
+    structures.
 
   + The perl module should only be built if a suitable perl interpreter
     is found on the build machine.
