@@ -1,3 +1,32 @@
+2003-07-08  Paul Eggert  <eggert@twinsun.com> and
+	    Gary V. Vaughan  <gary@gnu.org>
+
+	Conform to POSIX if the POSIXLY_CORRECT environment is set.
+        --traditional `define' now smashes all the definitions.
+
+	* NEWS: Explain this.
+	* doc/m4.texinfo (Defn): `defn' takes any number of arguments.
+	(Extensions): Explain that extensions that are incompatible with
+	POSIX are disabled if POSIXLY_CORRECT is set.
+	(Incompatibilities): Remove.
+	(Define, Other Incompat): Explain difference
+	between GNU and POSIX behavior of define, pushdef, popdef.
+	* m4/m4.c (m4_get_posixly_correct_opt): New undef.
+	* m4/m4module.h (m4_context_opt_bit_table): Add POSIXLY_CORRECT entry.
+	* m4/m4private.h (M4_OPT_POSIXLY_CORRECT_BIT): New macro.
+	(m4_get_posixly_correct_opt): New macro.
+	* m4/m4macro.c (m4_process_macro): Disable $10, $abc etc. if
+	POSIXLY_CORRECT.
+	* modules/m4.c (builtin_functions): defn now takes any number of args.
+	(builtin_define): Smash all the definitions if
+	POSIXLY_CORRECT.
+	(builtin_defn)): Allow any number of arguments.
+	(builtin_undivert): Do not allow nonnumeric arguments
+	if POSIXLY_CORRECT.
+	* src/main.c (main): Set posixly-correct behavior if either
+	POSIXLY_CORRECT is set, or if -G is given.
+	* tests/builtins.at: New test for smashed definitions.
+
 2003-06-27  Gary V. Vaughan  <gary@gnu.org>
 
 	* doc/m4.texinfo (Changesyntax): Document Dollar syntax class.

@@ -56,7 +56,7 @@ extern int errno;
 	BUILTIN(changequote,	FALSE,	FALSE,	1,	3  )	\
 	BUILTIN(decr,		FALSE,	TRUE,	2,	2  )	\
 	BUILTIN(define,		TRUE,	TRUE,	2,	3  )	\
-	BUILTIN(defn,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(defn,		FALSE,	TRUE,	0,	-1 )	\
 	BUILTIN(divert,		FALSE,	FALSE,	1,	2  )	\
 	BUILTIN(divnum,		FALSE,	FALSE,	1,	1  )	\
 	BUILTIN(dnl,		FALSE,	FALSE,	1,	1  )	\
@@ -160,6 +160,9 @@ M4BUILTIN_HANDLER (define)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
 	m4_symbol_value_copy (value, argv[2]);
+
+      if (m4_get_posixly_correct_opt (context))
+	m4_symbol_delete (M4SYMTAB, M4ARG (1));
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
@@ -311,22 +314,24 @@ M4BUILTIN_HANDLER (dumpdef)
    macro-definition token on the input stack.  */
 M4BUILTIN_HANDLER (defn)
 {
-  m4_symbol *symbol;
+  int i;
 
-  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (1));
-  if (symbol == NULL)
+  for (i = 1; i < argc; i++)
     {
-      M4WARN ((m4_get_warning_status_opt (context), 0,
-	       _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
-      return;
-    }
+      const char *name = m4_get_symbol_value_text (argv[i]);
+      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
-  if (m4_is_symbol_text (symbol))
-    m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, TRUE);
-  else if (m4_is_symbol_func (symbol))
-    m4_push_builtin (m4_get_symbol_value (symbol));
-  else
-    assert (!"Bad token data type in m4_defn");
+      if (!symbol)
+	M4WARN ((m4_get_warning_status_opt (context), 0,
+		 _("Warning: %s: undefined name: %s"),
+		 m4_get_symbol_value_text (argv[0]), name));
+      else if (m4_is_symbol_text (symbol))
+	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, TRUE);
+      else if (m4_is_symbol_func (symbol))
+	m4_push_builtin (m4_get_symbol_value (symbol));
+      else
+	assert (!"Bad token data type in m4_defn");
+    }
 }
 
 
@@ -402,7 +407,7 @@ M4BUILTIN_HANDLER (undivert)
     {
       if (sscanf (M4ARG (1), "%d", &i) == 1)
 	m4_insert_diversion (i);
-      else if (m4_get_no_gnu_extensions_opt (context))
+      else if (m4_get_posixly_correct_opt (context))
 	m4_numeric_arg (context, argc, argv, 1, &i);
       else
 	{

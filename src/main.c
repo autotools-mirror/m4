@@ -240,6 +240,9 @@ main (int argc, char *const *argv, char *const *envp)
   if (isatty (STDIN_FILENO))
     m4_set_interactive_opt (context, TRUE);
 
+  if (getenv ("POSIXLY_CORRECT"))
+    m4_set_posixly_correct_opt (context, TRUE);
+
   /* First, we decode the arguments, to size up tables and stuff.  */
 
   head = tail = NULL;
@@ -290,6 +293,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'G':
 	m4_set_no_gnu_extensions_opt (context, TRUE);
+	m4_set_posixly_correct_opt (context, TRUE);
 	break;
 
       case 'I':

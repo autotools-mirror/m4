@@ -20,6 +20,44 @@ AT_BANNER([Torturing builtins.])
 
 
 ## ------ ##
+## define ##
+## ------ ##
+
+AT_SETUP([[define]])
+
+AT_DATA([[define.m4]],
+[[undefine(`macro')dnl
+pushdef(`macro', `base value')dnl
+pushdef(`macro', `hello, world')dnl
+pushdef(`macro', `top value')dnl
+define(`macro', `new value')dnl
+macro.
+popdef(`macro')dnl
+macro.
+popdef(`macro')dnl
+macro.
+]])
+
+AT_CHECK_M4([define.m4], 0,
+[[new value.
+hello, world.
+base value.
+]], [[m4: define.m4: 1: Warning: undefine: undefined name: macro
+]])
+
+AT_CHECK_M4([--traditional define.m4], 0,
+[[new value.
+macro.
+macro.
+]], [[m4: define.m4: 1: Warning: undefine: undefined name: macro
+m4: define.m4: 9: Warning: popdef: undefined name: macro
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
 ## divert ##
 ## ------ ##
 

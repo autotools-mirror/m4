@@ -343,7 +343,7 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
-	  if (m4_get_no_gnu_extensions_opt (context) || !isdigit(text[1]))
+	  if (m4_get_posixly_correct_opt (context) || !isdigit(text[1]))
 	    {
 	      i = *text++ - '0';
 	    }
@@ -369,7 +369,7 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
 	  break;
 
 	default:
-	  if (m4_get_no_gnu_extensions_opt (context)
+	  if (m4_get_posixly_correct_opt (context)
 	      || !SYMBOL_ARG_SIGNATURE (symbol))
 	    {
 	      obstack_1grow (obs, ch);

@@ -62,6 +62,7 @@ m4_delete (m4 *context)
 #undef m4_get_discard_comments_opt
 #undef m4_get_interactive_opt
 #undef m4_get_sync_output_opt
+#undef m4_get_posixly_correct_opt
 
 
 #define M4FIELD(type, base, field)					\

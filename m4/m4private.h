@@ -59,6 +59,7 @@ struct m4 {
 #define M4_OPT_DISCARD_COMMENTS_BIT	(1 << 2) /* -c */
 #define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
 #define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
+#define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
 
 #ifdef NDEBUG
 #  define m4_get_symbol_table(C)		((C)->symtab)
@@ -79,6 +80,8 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_INTERACTIVE_BIT))
 #  define m4_get_sync_output_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_SYNC_OUTPUT_BIT))
+#  define m4_get_posixly_correct_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #endif
 
 

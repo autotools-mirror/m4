@@ -235,7 +235,6 @@ Miscellaneous builtin macros
 Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU m4
-* Incompatibilities::           Facilities in System V m4 not in GNU m4
 * Other Incompat::              Other incompatibilities
 
 @end detailmenu
@@ -1032,6 +1031,14 @@ a part of the macro definition, and it is consequently copied to
 the output.  This can be avoided by use of the macro @code{dnl}.
 @xref{Dnl}, for details.
 
+@cindex GNU extensions
+GNU @code{m4} normally replaces only the @emph{topmost} definition of a
+macro if it has several definitions from @code{pushdef}.
+@xref{Pushdef, , Temporarily redefining macros}, for an explanation of
+@code{pushdef}.  Some other UNIX implementations replace all definitions
+of a macro with @code{define}.
+@xref{Other Incompat, , Other incompatibilities}, for more details.
+
 The first argument to @code{define} does not have to be a simple word.
 It can be any text string.  A macro with a non standard name cannot be
 invoked in the normal way, as the name is not recognised.  It can only
@@ -1244,6 +1251,11 @@ If @var{name} is a builtin, the expansion is a special token, which
 points to the builtin's internal definition.  This token is only
 meaningful as the second argument to @code{define} (and @code{pushdef}),
 and is ignored in any other context.
+
+@code{defn} can be given any number of arguments; it expands to the
+concatenation of the quoted definitions of each argument.  The
+usefulness of this behavior is unclear, but @acronym{POSIX} requires
+it.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -3761,7 +3773,6 @@ is made to summarize these here.
 
 @menu
 * Extensions::                  Extensions in GNU m4
-* Incompatibilities::           Facilities in System V m4 not in GNU m4
 * Other Incompat::              Other incompatibilities
 @end menu
 
@@ -3769,10 +3780,16 @@ is made to summarize these here.
 @section Extensions in GNU @code{m4}
 
 @cindex GNU extensions
+@cindex @acronym{POSIX}
+@cindex @env{POSIXLY_CORRECT}
 This version of @code{m4} contains a few facilities, that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
 using the @samp{-G} command line option, unless overridden by other
 command line options.
+Most of these extensions are compatible with
+@uref{http://www.unix.org/single_unix_specification/,
+@acronym{POSIX}}; the few exceptions are suppressed if the
+@env{POSIXLY_CORRECT} environment variable is set.
 
 @itemize @bullet
 @item
@@ -3780,6 +3797,8 @@ In the @code{$}@var{n} notation for macro arguments, @var{n} can contain
 several digits, while the System V @code{m4} only accepts one digit.
 This allows macros in GNU @code{m4} to take any number of arguments, and
 not only nine (@pxref{Arguments}).
+@acronym{POSIX} does not allow this extension, so it is disabled if
+@env{POSIXLY_CORRECT} is set.
 
 @item
 Files included with @code{include} and @code{sinclude} are sought in a
@@ -3790,6 +3809,8 @@ directory.  The search path is specified by the @samp{-I} option and the
 @item
 Arguments to @code{undivert} can be non-numeric, in which case the named
 file will be included uninterpreted in the output (@pxref{Undivert}).
+@acronym{POSIX} does not allow this extension, so it is disabled if
+@env{POSIXLY_CORRECT} is set.
 
 @item
 Formatted output is supported through the @code{format} builtin, which
@@ -3846,18 +3867,6 @@ description of these options.
 Also, the debugging and tracing facilities in GNU @code{m4} are much
 more extensive than in most other versions of @code{m4}.
 
-@node Incompatibilities
-@section Facilities in System V @code{m4} not in GNU @code{m4}
-
-The version of @code{m4} from System V contains a few facilities that
-have not been implemented in GNU @code{m4} yet.
-
-@itemize @bullet
-@item
-System V @code{m4} supports multiple arguments to @code{defn}.  This is
-not implemented in GNU @code{m4}.  Its usefulness is unclear to me.
-@end itemize
-
 @node Other Incompat
 @section Other incompatibilities
 
@@ -3908,6 +3917,15 @@ name would be a useless limitation.  Of course, this leaves more rope
 for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.
+
+@item
+Some implementations of @code{m4} (Solaris for example) conform to
+@acronym{POSIX}, which requires @code{define(@var{macro})} to behave
+like @code{undefine(@var{macro})pushdef(@var{macro})}.  Other
+implementations, including GNU @code{m4} without the @samp{-G} option
+and without @env{POSIXLY_CORRECT} set, treat
+@code{define(@var{macro})} as
+@code{popdef(@var{macro})pushdef(@var{macro})}.
 
 @item
 @findex __gnu__

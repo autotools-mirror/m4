@@ -1,6 +1,16 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
 Copyright 1992, 1993, 1994, 1998, 2000, 2001 Free Software Foundation, Inc.
 
+Version beta 1.4r - ???, by ???
+
+* If the POSIXLY_CORRECT environment variable is set, m4 now disables
+  GNU extensions that are incompatible with POSIX.
+
+* POSIXLY_CORRECT and `m4 --traditional' now makes the `define' builtin
+  replace all `pushdef'ed values of a macro, as POSIX requires.
+
+* The `defn' builtin now allows any number of arguments, as POSIX requires.
+
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
 * Support for the experimental `changeword' has been dropped.

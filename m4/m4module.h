@@ -105,6 +105,7 @@ extern void		m4_delete	(m4 *);
 	M4OPT_BIT(M4_OPT_DISCARD_COMMENTS_BIT,	discard_comments_opt)	\
 	M4OPT_BIT(M4_OPT_INTERACTIVE_BIT,	interactive_opt)	\
 	M4OPT_BIT(M4_OPT_SYNC_OUTPUT_BIT,	sync_output_opt)	\
+	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
 
 
 #define M4FIELD(type, base, field)					\
