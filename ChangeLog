@@ -1,5 +1,8 @@
 2003-09-09  Gary V. Vaughan  <gary@gnu.org>
 
+	* gnulib/m4/Makefile.am (MOSTLYCLEANFILES): Typo
+	s/gettext_.h/gettext.h/.
+
 	* bootstrap: Revert 2003-09-04 patch now that CVS autoconf and
 	automake have been fixed.
 

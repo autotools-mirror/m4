@@ -46,7 +46,7 @@ all-local $(lib_OBJECTS): $(GETTEXT_H)
 gettext.h: gettext_.h
 	rm -f $@ && $(LN_S) gettext_.h $@
 
-MOSTLYCLEANFILES += gettext_.h
+MOSTLYCLEANFILES += gettext.h
 
 
 ## obstack: (not yet in gnulib)
