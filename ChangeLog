@@ -1,3 +1,10 @@
+2001-08-29  Gary V. Vaughan  <gary@gnu.org>
+
+	* tests/generate.awk: When making substitutions to "@&t@", either
+	"&" or "\&" in the substitution string argument to gsub refer back
+	to the matched text.  "@\\t@" seems to work though, Tests 43 and
+	67 now pass for me.
+
 2001-08-29  Akim Demaille  <akim@epita.fr>
 
 	* tests/others.at (changeword, ddivert, debug, esyscmd, exp, gmp)
