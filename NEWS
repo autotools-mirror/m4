@@ -11,6 +11,8 @@ Version beta 1.4r - ???, by ???
 
 * The `defn' builtin now allows any number of arguments, as POSIX requires.
 
+* The '$' syntax class is now enabled.  See the info docs for examples.
+
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
 * Support for the experimental `changeword' has been dropped.

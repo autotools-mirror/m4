@@ -1,3 +1,7 @@
+2003-07-15  Gary V. Vaughan  <gary@gnu.org>
+
+	* NEWS: Note `$' syntax class.
+
 2003-07-08  Paul Eggert  <eggert@twinsun.com> and
 	    Gary V. Vaughan  <gary@gnu.org>
 
