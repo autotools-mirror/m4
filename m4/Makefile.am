@@ -23,7 +23,7 @@ MAINTAINERCLEANFILES	= Makefile.in
 MODULE_PATH		= $(pkglibexecdir)
 pkgincdir		= $(includedir)/@PACKAGE@
 
-LDFLAGS 	= -no-undefined -export-dynamic @DLLDFLAGS@
+LDFLAGS 	= -no-undefined -export-dynamic
 INCLUDES	= -I$(top_srcdir) -I$(top_srcdir)/src @INTLINCL@
 
 include_HEADERS	= m4module.h
@@ -34,7 +34,7 @@ lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c error.c input.c list.c \
 			  ltdl.c macro.c module.c obstack.c output.c \
 			  path.c regex.c symtab.c utility.c
-libm4_la_LIBADD		= @LTLIBOBJS@
+libm4_la_LIBADD		= @LTLIBOBJS@ @LIBADD_DL@
 
 module.o module.lo: $(srcdir)/module.c pathconf.h
 pathconf.h: Makefile

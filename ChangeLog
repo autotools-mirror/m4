@@ -1,5 +1,8 @@
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/Makefile.am (libm4_la_LIBADD): New magic -- we are
+	supposed to be using @LIBADD_DL@; @DLLDFLAGS@ is dead.
+
 	* configure.in: Figure out whether to use the installed
 	getopt.h or the supplied one.
 	* src/Makefile.am: ditto.
