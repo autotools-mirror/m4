@@ -58,7 +58,7 @@ at_c=''
 
 srcdir='@srcdir@'
 top_srcdir='@top_srcdir@'
-: ${top_builddir=$top_srcdir}
+top_builddir='..'
 AUTOTEST_PATH='../bin'
 
 SHELL=${CONFIG_SHELL-'/bin/sh'}

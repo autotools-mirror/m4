@@ -26,7 +26,7 @@
 
 AT_SETUP([capitalize])
 
-AT_CHECK_M4([../examples/capitalize.m4], 0,
+AT_CHECK_M4([examples/capitalize.m4], 0,
 [[
 
 CONVERT TO UPPER CASE
@@ -56,7 +56,7 @@ changeword(`[_a-zA-Z0-9]+')
 1
 ]])
 
-AT_CHECK([$M4 -M ../../modules -m changeword -d in], 0,
+AT_CHECK_M4([in], 0,
 [[
 1
 
@@ -74,7 +74,7 @@ AT_CLEANUP
 
 AT_SETUP([comments])
 
-AT_CHECK_M4([../examples/comments.m4], 0,
+AT_CHECK_M4([examples/comments.m4], 0,
 [[# An ordinary comment
 
 # A comment in a macro
@@ -95,7 +95,7 @@ AT_CLEANUP
 
 AT_SETUP([ddivert])
 
-AT_CHECK_M4([../examples/ddivert.m4], 0,
+AT_CHECK_M4([examples/ddivert.m4], 0,
 [[Text diverted a first time.
 Text diverted a second time.
 ]])
@@ -129,7 +129,7 @@ m4trace: -1- countdown(`0') -> ???
 m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
 ]])
 
-AT_CHECK_M4([../examples/debug.m4], 0, expout, experr)
+AT_CHECK_M4([examples/debug.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -151,7 +151,7 @@ comment
  --> ends.
 ]])
 
-AT_CHECK([$M4 -c -M ../../modules -d in], 0,
+AT_CHECK_M4([in], 0,
 [[This is not a comment This should not disappear.
 
 html  ends.
@@ -167,7 +167,7 @@ AT_CLEANUP
 
 AT_SETUP([esyscmd])
 
-AT_CHECK_M4([../examples/esyscmd.m4], 0,
+AT_CHECK_M4([examples/esyscmd.m4], 0,
 [[# Cannot use real hostname program because test would fail
 hostname = >>www.gnu.org
 <<
@@ -184,7 +184,7 @@ AT_CLEANUP
 
 AT_SETUP([exp])
 
-AT_CHECK_M4([../examples/exp.m4], 0,
+AT_CHECK_M4([examples/exp.m4], 0,
 [[7
 6
 5
@@ -206,7 +206,7 @@ AT_CLEANUP
 
 AT_SETUP([foreach])
 
-AT_CHECK_M4([../examples/foreach.m4], 0,
+AT_CHECK_M4([examples/foreach.m4], 0,
 [[
 Word was: foo
 Word was: bar
@@ -240,7 +240,7 @@ AT_CLEANUP
 
 AT_SETUP([forloop])
 
-AT_CHECK_M4([../examples/forloop.m4], 0,
+AT_CHECK_M4([examples/forloop.m4], 0,
 [[
 2**1 = 2
 2**2 = 4
@@ -265,7 +265,7 @@ AT_CLEANUP
 
 AT_SETUP([fstab])
 
-AT_CHECK_M4([../examples/fstab.m4], 0,
+AT_CHECK_M4([examples/fstab.m4], 0,
 [[
 
 
@@ -406,7 +406,7 @@ AT_DATA([[expout]],
 
 ]])
 
-AT_CHECK([$M4 -M ../../modules -m mpeval -d in], 0, expout)
+AT_CHECK_M4([-m mpeval in], 0, expout)
 
 AT_CLEANUP
 
@@ -418,7 +418,7 @@ AT_CLEANUP
 
 AT_SETUP([hanoi])
 
-AT_CHECK_M4([../examples/hanoi.m4], 0,
+AT_CHECK_M4([examples/hanoi.m4], 0,
 [[
 Move one disk from source to destination.
 Move one disk from source to auxilliary.
@@ -455,7 +455,7 @@ export ZAPPED
 OVERRIDE='This is an environment variable which we will change'
 export OVERRIDE
 
-AT_CHECK([$M4 -M ../../modules --import-environment -UZAPPED -DOVERRIDE='It is changed.' -d in], 0,
+AT_CHECK_M4([--import-environment -UZAPPED -DOVERRIDE='It is changed.' in], 0,
 [[TEST=This is an environment variable
 ZAPPED=ZAPPED
 OVERRIDE=It is changed.
@@ -488,7 +488,7 @@ AT_DATA([[experr]],
 m4: ../examples/include.m4: 6: Cannot open NOFILE: No such file or directory
 ]])
 
-AT_CHECK_M4([../examples/include.m4], 0, expout, experr)
+AT_CHECK_M4([examples/include.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -513,7 +513,7 @@ AT_DATA([[expout]],
 >>>%%$$##<<< cnt 0
 ]])
 
-AT_CHECK_M4([../examples/indir.m4], 0, expout)
+AT_CHECK_M4([examples/indir.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -551,7 +551,7 @@ Comparing strings: MATCH
 This will be seen.
 ]])
 
-AT_CHECK([$M4 -M ../../modules -d iso8859.m4], 0, expout)
+AT_CHECK_M4([iso8859.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -569,7 +569,7 @@ AT_SETUP([misc])
 
 EOF]
 
-AT_CHECK_M4([../examples/misc.m4], 0, expout)
+AT_CHECK_M4([examples/misc.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -604,19 +604,19 @@ test3
 
 # First generate the `expout' ouput by running over the sources before
 # freezeing.
-AT_CHECK([$M4 -M ../../modules -m load -d frozen.m4 unfrozen.m4], 0,
-         [stdout], [stderr])
+AT_CHECK_M4([-m load frozen.m4 unfrozen.m4], 0,
+            [stdout], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
-AT_CHECK([$M4 -M ../../modules -m load -d -F frozen.m4f frozen.m4], 0,
-         [ignore], [ignore])
+AT_CHECK_M4([-m load -F frozen.m4f frozen.m4], 0,
+            [ignore], [ignore])
 
 # Now rerun the original sequence, but using the frozen file.
-AT_CHECK([$M4 -M ../../modules -d -R frozen.m4f unfrozen.m4], 0,
-         [expout], [experr])
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], 0,
+            [expout], [experr])
 
 AT_CLEANUP
 
@@ -629,7 +629,7 @@ AT_CLEANUP
 
 AT_SETUP([--module-directory: absolute path])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $top_builddir/modules; pwd` -m load -d ../modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir $M4 -M `cd $top_builddir/modules; pwd` -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -648,7 +648,7 @@ AT_CLEANUP
 
 AT_SETUP([modpath2])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests LTDL_LIBRARY_PATH=../../modules $M4 -m load -d ../modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir LTDL_LIBRARY_PATH=$top_builddir/modules $M4 -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -672,7 +672,7 @@ AT_DATA([[in]],
 Dumpdef: dumpdef(`test').
 ]])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -m load -m modtest -M ../../modules -d in], 0,
+AT_CHECK([$M4 -m load -m modtest -M $top_builddir/modules -d in], 0,
 [[Test module called.
 Dumpdef: .
 ]],
@@ -690,7 +690,7 @@ AT_CLEANUP
 
 AT_SETUP([M4MODPATH: absolute path])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests M4MODPATH=`cd $top_builddir/modules; pwd` $M4 -m load -d ../modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir M4MODPATH=`cd $top_builddir/modules; pwd` $M4 -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -709,7 +709,7 @@ AT_CLEANUP
 
 AT_SETUP([modtest])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M ../../modules -m load -d ../modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir $M4 -M $top_builddir/modules -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -763,7 +763,7 @@ m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)
 m4trace: -1- dnl
 ]])
 
-AT_CHECK_M4([../examples/multiquotes.m4], 0, expout, experr)
+AT_CHECK_M4([examples/multiquotes.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -790,7 +790,7 @@ AT_DATA([[experr]],
 [[m4: ../examples/patsubst.m4: 4: WARNING: \0 will disappear, use \& instead in replacements
 ]])
 
-AT_CHECK_M4([../examples/patsubst.m4], 0, expout, experr)
+AT_CHECK_M4([examples/patsubst.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -802,7 +802,7 @@ AT_CLEANUP
 
 AT_SETUP([pushdef/popdef])
 
-AT_CHECK_M4([../examples/pushpop.m4], 0, [],
+AT_CHECK_M4([examples/pushpop.m4], 0, [],
 [[hej:	`def 1.'
 hej:	`def 2.'
 hej:	`def 3.'
@@ -854,7 +854,7 @@ m4trace: -1- regexp(`hej med dig', `m\w+') -> `4'
 m4trace: -1- regexp(`hej med dig', `m\(.*\)') -> `4'
 ]])
 
-AT_CHECK_M4([../examples/regexp.m4], 0, expout, experr)
+AT_CHECK_M4([examples/regexp.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -866,7 +866,7 @@ AT_CLEANUP
 
 AT_SETUP([reverse])
 
-AT_CHECK_M4([../examples/reverse.m4], 0,
+AT_CHECK_M4([examples/reverse.m4], 0,
 [[
 `' => .
 `hej' => hej.
@@ -953,8 +953,8 @@ test:	<test>
 shadow:	<shadow>
 ]])
 
-AT_CHECK([$M4 -M ../../modules -m load -d ../modules/shadow.m4], 0,
-         expout, experr)
+AT_CHECK_M4([-m load modules/shadow.m4], 0,
+            [expout], [experr])
 
 AT_CLEANUP
 
@@ -981,7 +981,7 @@ define(`foo', ``foo' line one.
 foo foo
 ]])
 
-AT_CHECK([[$M4 -M ../../modules -d in]], 0,
+AT_CHECK_M4([[in]], 0,
 [[#line 2 "in"
 # Several input lines, expanding to one
 #line 5
@@ -1054,7 +1054,7 @@ m4trace: -1- concat(`silly', `arguments') -> `ifelse(1, 2, `silly', `silly` 'con
 m4trace: -1- concat(`arguments') -> `ifelse(1, 1, `arguments', `arguments` 'concat(shift(`arguments'))')'
 ]])
 
-AT_CHECK_M4([../examples/sysv-args.m4], 0, [expout], [experr])
+AT_CHECK_M4([examples/sysv-args.m4], 0, [expout], [experr])
 
 AT_CLEANUP
 
@@ -1151,7 +1151,7 @@ m4trace: -1- move(auxilliary, destination) -> Move one disk from `auxilliary' to
 
 ]])
 
-AT_CHECK_M4([../examples/trace.m4], 0, expout, experr)
+AT_CHECK_M4([examples/trace.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -1163,7 +1163,7 @@ AT_CLEANUP
 
 AT_SETUP([translit])
 
-AT_CHECK_M4([../examples/translit.m4], 0,
+AT_CHECK_M4([examples/translit.m4], 0,
 [[# traceon(`translit')dnl
 GNU  U
 GNUS NOT UNIX
@@ -1184,7 +1184,7 @@ AT_CLEANUP
 
 AT_SETUP([undivert])
 
-AT_CHECK_M4([../examples/undivert.m4], 0,
+AT_CHECK_M4([examples/undivert.m4], 0,
 [[
 # undiverted file.
 This is to be undiverted soon.
@@ -1251,7 +1251,7 @@ test
 __test__
 ]])
 
-AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M ../../modules -m load -d in], 0, expout)
+AT_CHECK_M4([-m load in], 0, expout)
 
 AT_CLEANUP
 
@@ -1263,7 +1263,7 @@ AT_CLEANUP
 
 AT_SETUP([wrap])
 
-AT_CHECK_M4([../examples/wrap.m4], 0,
+AT_CHECK_M4([examples/wrap.m4], 0,
 [[
 No. 33: The End.
 Wrapper no. 2

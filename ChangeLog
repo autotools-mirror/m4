@@ -1,5 +1,13 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* tests/testsuite.at (AT_CHECK_M4): Anchor M4PATH in $top_srcdir.
+	* tests/others.at: Adjust input files paths.
+	* tests/atconfig.in: Set top_builddir.
+	* tests/Makefile.am: Adjust.
+	`testsuite' is in src, not build.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* tests/Makefile.am (EXTRA_DIST): Ship generate.awk.
 	(generate.at): Install a temporary hack until the actual
 	generate.awk is added to the repository.

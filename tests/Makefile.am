@@ -33,7 +33,7 @@ TESTSUITE_SOURCES = testsuite.at others.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
-	top_builddir=$(top_builddir) $(SHELL) $(TESTSUITE)
+	$(SHELL) $(srcdir)/$(TESTSUITE)
 
 $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 # FIXME: Stupid Akim TM forgot to bring generate.awk...

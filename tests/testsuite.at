@@ -21,15 +21,19 @@
 # AT_CHECK_M4(FLAGS, [EXIT-STATUS = 0], STDOUT, STDERR)
 # -----------------------------------------------------
 m4_define([AT_CHECK_M4],
-[AT_CHECK([M4PATH=$srcdir:$srcdir/../examples $M4 -M ../../modules -d $1],
+[AT_CHECK([M4PATH=$top_srcdir $M4 -M $top_builddir/modules -d $1],
           [m4_default([$2], [0])],
           [$3], [stderr])
 AT_CHECK([[sed 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' stderr >&2]], 0, [], [$4])
 ])
 
-# Hand crafted tests.
+
+
 
 AT_INIT([$M4])
 
+# Hand crafted tests.
 m4_include([others.at])
+
+# From the documention.
 m4_include([generated.at])
