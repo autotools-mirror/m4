@@ -23,7 +23,21 @@
 
 AT_SETUP([capitalize])
 
-AT_CHECK_M4([examples/capitalize.m4], 0,
+AT_DATA([[capitalize.m4]],
+[[dnl
+dnl convert to upper- resp. lowercase
+define(`upcase', `translit(`$*', `a-z', `A-Z')')
+define(`downcase', `translit(`$*', `A-Z', `a-z')')
+upcase(`Convert to upper case')
+downcase(`Convert To LOWER Case')
+dnl
+dnl capitalize a single word
+define(`capitalize1', `regexp(`$1', `^\(\w\)\(\w*\)', `upcase(`\1')`'downcase(`\2')')')
+define(`capitalize', `patsubst(`$1', `\w+', ``'capitalize1(`\&')')')
+capitalize(`This sentence should be capitalized')
+]])
+
+AT_CHECK_M4([capitalize.m4], 0,
 [[
 
 CONVERT TO UPPER CASE
@@ -41,7 +55,7 @@ AT_CLEANUP
 ## changeword ##
 ## ---------- ##
 
-AT_SETUP([changeword])
+AT_SETUP([[changeword]])
 
 # cannot perform test without --enable-changeword
 AT_CHECK([test "$ENABLE_CHANGEWORD" = yes || exit 77])
@@ -71,7 +85,17 @@ AT_CLEANUP
 
 AT_SETUP([comments])
 
-AT_CHECK_M4([examples/comments.m4], 0,
+AT_DATA([[comments.m4]],
+[[# An ordinary comment
+define(`foo', # A comment in a macro
+`Macro `foo' expansion')
+foo
+define(`comment', `*** Macro `comment' expansion ***')
+changecom(`@', `@')
+foo
+]])
+
+AT_CHECK_M4([comments.m4], 0,
 [[# An ordinary comment
 
 # A comment in a macro
@@ -92,7 +116,14 @@ AT_CLEANUP
 
 AT_SETUP([ddivert])
 
-AT_CHECK_M4([examples/ddivert.m4], 0,
+AT_DATA([[ddivert.m4]],
+[[divert(1)Text diverted a first time.
+divert(0)undivert(1)dnl
+divert(1)Text diverted a second time.
+divert(0)undivert(1)dnl
+]])
+
+AT_CHECK_M4([ddivert.m4], 0,
 [[Text diverted a first time.
 Text diverted a second time.
 ]])
@@ -106,6 +137,13 @@ AT_CLEANUP
 ## ----- ##
 
 AT_SETUP([debug])
+
+AT_DATA([[debug.m4]],
+[[define(`countdown', `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')')
+debugmode(`aeqc')
+traceon(`countdown')
+countdown(2)
+]])
 
 AT_DATA([[expout]],
 [[
@@ -126,7 +164,7 @@ m4trace: -1- countdown(`0') -> ???
 m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
 ]])
 
-AT_CHECK_M4([examples/debug.m4], 0, expout, experr)
+AT_CHECK_M4([debug.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -164,7 +202,16 @@ AT_CLEANUP
 
 AT_SETUP([esyscmd])
 
-AT_CHECK_M4([examples/esyscmd.m4], 0,
+AT_DATA([[esyscmd.m4]],
+[[# Cannot use real hostname program because test would fail
+define(`hostname', esyscmd(`echo www.gnu.org'))dnl
+`hostname = >>'hostname`<<'
+define(`hostname',
+pushdef(`_tmp', `$1')_tmp(translit(esyscmd(`echo www.gnu.org'), `.', `,'))`'popdef(`_tmp'))dnl
+`hostname = >>'hostname`<<'
+]])
+
+AT_CHECK_M4([esyscmd.m4], 0,
 [[# Cannot use real hostname program because test would fail
 hostname = >>www.gnu.org
 <<
@@ -181,7 +228,13 @@ AT_CLEANUP
 
 AT_SETUP([exp])
 
-AT_CHECK_M4([examples/exp.m4], 0,
+AT_DATA([[exp.m4]],
+[[define(`countdown', `$1
+ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Done')')dnl
+countdown(7)
+]])
+
+AT_CHECK_M4([exp.m4], 0,
 [[7
 6
 5
@@ -203,7 +256,39 @@ AT_CLEANUP
 
 AT_SETUP([foreach])
 
-AT_CHECK_M4([examples/foreach.m4], 0,
+AT_DATA([[foreach.m4]],
+[[divert(-1)
+# foreach(x, (item_1, item_2, ..., item_n), stmt)
+define(`foreach', `pushdef(`$1', `')_foreach($@)popdef(`$1')')
+define(`_arg1', ``$1'')
+define(`_foreach',
+       `ifelse($2, `()', ,
+               `define(`$1', `_arg1$2')$3`'_foreach(`$1', `(shift$2)', `$3')')')
+
+# traceon(`define', `foreach', `_foreach', `ifelse')
+
+define(a, 1)
+define(b, 2)
+define(c, 3)
+divert
+foreach(`x', `(foo, bar, foobar)', `Word was: x
+')
+
+# Quote torture from Akim Demaille <akim@epita.fr>
+foreach(`x', `(`a', `(b', `c)')', `Word was: x
+')
+
+# Something more complex, from Pierre Gaumond <gaumondp@ere.umontreal.ca>.
+define(`case', `  $1)
+    $2=" -$1";;
+')dnl
+define(`_cat', `$1$2')dnl
+`case' "$1" in
+foreach(`x', ((a, vara), (b, varb), (c, varc)), `_cat(`case', x)')dnl
+esac
+]])
+
+AT_CHECK_M4([foreach.m4], 0,
 [[
 Word was: foo
 Word was: bar
@@ -237,7 +322,20 @@ AT_CLEANUP
 
 AT_SETUP([forloop])
 
-AT_CHECK_M4([examples/forloop.m4], 0,
+AT_DATA([[forloop.m4]],
+[[divert(-1)
+# forloop(i, from, to, stmt)
+
+define(`forloop', `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`_forloop',
+       `$4`'ifelse($1, `$3', ,
+			 `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+divert
+forloop(`x', 1, 10, `2**x = eval(2**x)
+')
+]])
+
+AT_CHECK_M4([forloop.m4], 0,
 [[
 2**1 = 2
 2**2 = 4
@@ -262,7 +360,17 @@ AT_CLEANUP
 
 AT_SETUP([fstab])
 
-AT_CHECK_M4([examples/fstab.m4], 0,
+AT_DATA([[fstab.m4]],
+[[define(`concat', `translit(``$*'', ` 	')')
+define(`fsent', `format(`%-25s %-16s nfs    %-16s 0 0', `$1:$2', `$3', concat$4)')
+
+fsent(freja, /home/gevn, /home/gevn, (rw, soft, bg, grpid))
+fsent(freja, /home/freja, /home/freja, (rw, soft, grpid))
+fsent(rimfaxe, /home/rimfaxe, /home/rimfaxe, (rw, soft, bg))
+
+]])
+
+AT_CHECK_M4([fstab.m4], 0,
 [[
 
 
@@ -415,7 +523,27 @@ AT_CLEANUP
 
 AT_SETUP([hanoi])
 
-AT_CHECK_M4([examples/hanoi.m4], 0,
+AT_DATA([[hanoi.m4]],
+[[divert(-1)
+
+# move(from, to)
+define(`move', `Move one disk from `$1' to `$2'.
+')
+
+# _hanoi (cnt, from, to, aux)
+define(`_hanoi', `ifelse(eval(`$1'<=1), 1, `move($2, $3)',
+`_hanoi(decr($1), $2, $4, $3)move($2, $3)_hanoi(decr($1), $4, $3, $2)')')
+
+# hanoi (cnt)
+define(`hanoi', `_hanoi(`$1', source, destination, auxilliary)')
+
+# traceon(`move', `_hanoi', `decr')
+divert`'dnl
+
+hanoi(3)
+]])
+
+AT_CHECK_M4([hanoi.m4], 0,
 [[
 Move one disk from source to destination.
 Move one disk from source to auxilliary.
@@ -468,6 +596,22 @@ AT_CLEANUP
 
 AT_SETUP([include])
 
+AT_DATA([[include.m4]],
+[[Beginning.
+include(`NOFILE')
+Intermediate
+include(`incl-test.m4')
+After
+include(`NOFILE')
+very late
+]])
+
+AT_DATA([[incl-test.m4]],
+[[dnl noauto
+`include test file.'
+define()
+]])
+
 AT_DATA([[expout]],
 [[Beginning.
 
@@ -481,11 +625,11 @@ very late
 ]])
 
 AT_DATA([[experr]],
-[[m4: ../examples/include.m4: 2: Cannot open NOFILE: No such file or directory
-m4: ../examples/include.m4: 6: Cannot open NOFILE: No such file or directory
+[[m4: include.m4: 2: Cannot open NOFILE: No such file or directory
+m4: include.m4: 6: Cannot open NOFILE: No such file or directory
 ]])
 
-AT_CHECK_M4([-I $top_srcdir/examples examples/include.m4], 0, expout, experr)
+AT_CHECK_M4([include.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -510,7 +654,20 @@ AT_DATA([[expout]],
 >>>%%$$##<<< cnt 0
 ]])
 
-AT_CHECK_M4([examples/indir.m4], 0, expout)
+AT_DATA([[indir.m4]],
+[[define(`%%$$##', `>>>$0<<< cnt $#')
+
+# indir(`%%$$##', nonsens, nonsens)
+indir(`%%$$##', nonsens, nonsens)
+
+# indir(`indir', `%%$$##', nonsens)
+indir(`indir', `%%$$##', nonsens)
+
+# indir(`indir', `indir', `indir', `indir', `%%$$##')
+indir(`indir', `indir', `indir', `indir', `%%$$##')
+]])
+
+AT_CHECK_M4([indir.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -566,7 +723,18 @@ AT_SETUP([misc])
 
 EOF]
 
-AT_CHECK_M4([examples/misc.m4], 0, expout)
+AT_DATA([[misc.m4]],
+[[divert(-1)
+define(`USER', `root')
+define(`TMP', maketemp(`/tmp/hejXXXXXX'))
+syscmd(`grep "^'USER`:" /etc/passwd | awk -F: "{print \$3}"'  > TMP)
+define(`UID', include(TMP))
+syscmd(`rm -f' TMP)
+divert
+UID
+]])
+
+AT_CHECK_M4([misc.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -724,6 +892,26 @@ AT_CLEANUP
 
 AT_SETUP([multiquotes])
 
+AT_DATA([[multiquotes.m4]],
+[[traceon
+changequote([,])dnl
+changequote([``], [''])dnl
+````traceon''''
+define(``foo'', ````FOO'''')dnl
+dumpdef(``foo'')dnl
+changequote(``!'', ``!'')dnl
+!foo!
+foo
+dumpdef(!foo!)dnl
+define(!bar!, !BAR!)
+bar
+changequote(!>*>*>*>*>!, !<*<*<*<*<!)dnl five of each
+>*>*>*>*>foo bar<*<*<*<*<
+foo bar
+>*>*>*>*>*>*><*<*<*<*<*<*<
+dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)dnl
+]])
+
 AT_DATA([[expout]],
 [[
 ``traceon''
@@ -760,7 +948,7 @@ m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)
 m4trace: -1- dnl
 ]])
 
-AT_CHECK_M4([examples/multiquotes.m4], 0, expout, experr)
+AT_CHECK_M4([multiquotes.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -771,6 +959,17 @@ AT_CLEANUP
 ## -------- ##
 
 AT_SETUP([patsubst])
+
+AT_DATA([[patsubst.m4]],
+[[# traceon(`patsubst')
+patsubst(`GNUs not Unix.', `^', `OBS: ')
+patsubst(`GNUs not Unix.', `\<', `OBS: ')
+patsubst(`GNUs not Unix.', `\<\w', `\0=')
+patsubst(`GNUs not Unix.', `\w*', `(\0)')
+patsubst(`GNUs not Unix.', `\w+', `(\0)')
+patsubst(`GNUs not Unix.', `\w+')
+patsubst(`GNUs	 not  	 Unix.', `[ 	]+', ` ')
+]])
 
 AT_DATA([[expout]],
 [[# traceon(`patsubst')
@@ -784,10 +983,10 @@ GNUs not Unix.
 ]])
 
 AT_DATA([[experr]],
-[[m4: ../examples/patsubst.m4: 4: WARNING: \0 will disappear, use \& instead in replacements
+[[m4: patsubst.m4: 4: WARNING: \0 will disappear, use \& instead in replacements
 ]])
 
-AT_CHECK_M4([examples/patsubst.m4], 0, expout, experr)
+AT_CHECK_M4([patsubst.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -799,7 +998,35 @@ AT_CLEANUP
 
 AT_SETUP([pushdef/popdef])
 
-AT_CHECK_M4([examples/pushpop.m4], 0, [],
+AT_DATA([[pushpop.m4]],
+[[divert(-1)
+pushdef(`hej', `def 1.')
+dumpdef(`hej')
+pushdef(`hej', `def 2.')
+dumpdef(`hej')
+pushdef(`hej', `def 3.')
+dumpdef(`hej')
+pushdef(`hej', `def 4.')
+dumpdef(`hej')
+
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+dumpdef(`hej')
+popdef(`hej')
+
+dumpdef(`mac2')
+popdef(`mac2')
+dumpdef(`mac2')
+]])
+
+AT_CHECK_M4([pushpop.m4], 0, [],
 [[hej:	`def 1.'
 hej:	`def 2.'
 hej:	`def 3.'
@@ -807,10 +1034,10 @@ hej:	`def 4.'
 hej:	`def 3.'
 hej:	`def 2.'
 hej:	`def 1.'
-m4: ../examples/pushpop.m4: 18: Undefined name hej
-m4: ../examples/pushpop.m4: 20: Undefined name hej
-m4: ../examples/pushpop.m4: 23: Undefined name mac2
-m4: ../examples/pushpop.m4: 25: Undefined name mac2
+m4: pushpop.m4: 18: Undefined name hej
+m4: pushpop.m4: 20: Undefined name hej
+m4: pushpop.m4: 23: Undefined name mac2
+m4: pushpop.m4: 25: Undefined name mac2
 ]])
 
 AT_CLEANUP
@@ -822,6 +1049,21 @@ AT_CLEANUP
 ## ------ ##
 
 AT_SETUP([regexp])
+
+AT_DATA([[regexp.m4]],
+[[traceon(`regexp')dnl
+regexp(`hej med dig', `.*', `>>\0<<')
+regexp(`hej med dig', `\w*', `>>\0<<')
+regexp(`hej med dig', `.+', `>>\0<<')
+regexp(`hej med dig', `m\w+', `>>\0<<')
+regexp(`hej med dig', `m\(.*\)', `>>\0<< >>\1<<')
+
+regexp(`hej med dig', `.*')
+regexp(`hej med dig', `\w*')
+regexp(`hej med dig', `.+')
+regexp(`hej med dig', `m\w+')
+regexp(`hej med dig', `m\(.*\)')
+]])
 
 AT_DATA([[expout]],
 [[>>hej med dig<<
@@ -838,7 +1080,7 @@ AT_DATA([[expout]],
 ]])
 
 AT_DATA([[experr]],
-[[m4: ../examples/regexp.m4: 2: WARNING: \0 will disappear, use \& instead in replacements
+[[m4: regexp.m4: 2: WARNING: \0 will disappear, use \& instead in replacements
 m4trace: -1- regexp(`hej med dig', `.*', `>>\0<<') -> `>>hej med dig<<'
 m4trace: -1- regexp(`hej med dig', `\w*', `>>\0<<') -> `>>hej<<'
 m4trace: -1- regexp(`hej med dig', `.+', `>>\0<<') -> `>>hej med dig<<'
@@ -851,7 +1093,7 @@ m4trace: -1- regexp(`hej med dig', `m\w+') -> `4'
 m4trace: -1- regexp(`hej med dig', `m\(.*\)') -> `4'
 ]])
 
-AT_CHECK_M4([examples/regexp.m4], 0, expout, experr)
+AT_CHECK_M4([regexp.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -863,7 +1105,14 @@ AT_CLEANUP
 
 AT_SETUP([reverse])
 
-AT_CHECK_M4([examples/reverse.m4], 0,
+AT_DATA([[reverse.m4]],
+[[define(`reverse', `ifelse(eval($# > 1), 1, `reverse(shift($@)), `$1'', ``$1'')')
+``'' => reverse.
+``hej'' => reverse(hej).
+``hej, med, dig'' => reverse(hej, med, dig).
+]])
+
+AT_CHECK_M4([reverse.m4], 0,
 [[
 `' => .
 `hej' => hej.
@@ -1012,6 +1261,23 @@ AT_CLEANUP
 
 AT_SETUP([sysv-args])
 
+AT_DATA([[sysv-args.m4]],
+[[divert(-1)
+define(`nargs', `$#')
+define(`concat', `ifelse(1, $#, `$1', `$1` 'concat(shift($@))')')
+traceon(`concat', `nargs')
+divert
+
+nargs
+nargs()
+nargs(1,2,3,4,5,6)
+
+concat()
+concat(`hej', `med', `dig')
+concat(`hej', `med', `dig', `en gang igen')
+concat(an, awful, lot, of, argument, at, least, more, that, ten, silly, arguments)
+]])
+
 AT_DATA([[expout]],
 [[
 
@@ -1051,7 +1317,7 @@ m4trace: -1- concat(`silly', `arguments') -> `ifelse(1, 2, `silly', `silly` 'con
 m4trace: -1- concat(`arguments') -> `ifelse(1, 1, `arguments', `arguments` 'concat(shift(`arguments'))')'
 ]])
 
-AT_CHECK_M4([examples/sysv-args.m4], 0, [expout], [experr])
+AT_CHECK_M4([sysv-args.m4], 0, [expout], [experr])
 
 AT_CLEANUP
 
@@ -1062,6 +1328,39 @@ AT_CLEANUP
 ## ----- ##
 
 AT_SETUP([trace])
+
+AT_DATA([[trace.m4]],
+[[divert(-1)
+
+# move(from, to)
+define(`move', `Move one disk from `$1' to `$2'.
+')
+
+# _hanoi (cnt, from, to, aux)
+define(`_hanoi', `ifelse(eval(`$1'<=1), 1, `move($2, $3)',
+`_hanoi(decr($1), $2, $4, $3)move($2, $3)_hanoi(decr($1), $4, $3, $2)')')
+
+# hanoi (cnt)
+define(`hanoi', `_hanoi(`$1', source, destination, auxilliary)')
+divert`'dnl
+
+# Debugmode t
+debugmode(`t')
+hanoi(2)
+
+# Debugmode taeq
+debugmode(`taeq')
+hanoi(2)
+
+# Debugmode OFF
+debugmode
+hanoi(2)
+
+# Debugmode ae
+debugmode(`ae')
+traceon(`move', `_hanoi')
+hanoi(2)
+]])
 
 AT_DATA([[expout]],
 [[
@@ -1148,7 +1447,7 @@ m4trace: -1- move(auxilliary, destination) -> Move one disk from `auxilliary' to
 
 ]])
 
-AT_CHECK_M4([examples/trace.m4], 0, expout, experr)
+AT_CHECK_M4([trace.m4], 0, expout, experr)
 
 AT_CLEANUP
 
@@ -1160,7 +1459,18 @@ AT_CLEANUP
 
 AT_SETUP([translit])
 
-AT_CHECK_M4([examples/translit.m4], 0,
+AT_DATA([[translit.m4]],
+[[# traceon(`translit')dnl
+translit(`GNUs not Unix', `a-z')
+translit(`GNUs not Unix', `a-z', `A-Z')
+translit(`GNUs not Unix', `A-Z', `a-z')
+translit(`GNUs not Unix', `A-Z')
+translit(`a-z', `a-')
+translit(`A-Z', `A-Z-', `-A-Z')
+translit(`GNUs not Unix', `Z-A', `a-z')
+]])
+
+AT_CHECK_M4([translit.m4], 0,
 [[# traceon(`translit')dnl
 GNU  U
 GNUS NOT UNIX
@@ -1181,8 +1491,19 @@ AT_CLEANUP
 
 AT_SETUP([undivert])
 
-# undivert.m4 `include's a file from examples/.
-AT_CHECK_M4([-I $top_srcdir/examples examples/undivert.m4], 0,
+AT_DATA([[undivert.m4]],
+[[define(`undiverted', `UNDIVERTED')
+# undiverted file.
+undivert(`undivert.incl')
+# included file.
+include(`undivert.incl')
+]])
+
+AT_DATA([[undivert.incl]],
+[[This is to be undiverted soon.
+]])
+
+AT_CHECK_M4([undivert.m4], 0,
 [[
 # undiverted file.
 This is to be undiverted soon.

@@ -1,5 +1,13 @@
 2001-08-27  Akim Demaille  <akim@epita.fr>
 
+	* tests/others.at (capitalize, changeword, comments, ddivert)
+	(debug, esyscmd, exp, foreach, forloop, fstab, hanoi, include)
+	(misc, multiquotes, patsubst, pushdef/popdef, regexp, reverse)
+	(sysv-args, trace, translit, undivert): Don't rely on files in
+	examples/: AT_DATA them.
+
+2001-08-27  Akim Demaille  <akim@epita.fr>
+
 	Let the test suite use a wrapper around the not installed m4 to
 	pretend it is (installed).
 
