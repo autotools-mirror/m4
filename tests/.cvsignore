@@ -3,3 +3,13 @@ config.sh
 testSubDir
 Makefile
 Makefile.in
+at-*
+atconfig
+autom4te.cache
+debug-*.sh
+frozen.m4f
+generated.at
+in
+stderr
+testsuite
+*.log log
