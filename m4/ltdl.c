@@ -29,11 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  include <config.h>
 #endif
 
-#if WITH_DMALLOC
-#  undef malloc
-#  undef realloc
-#endif
-
 #if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
@@ -42,8 +37,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  include <stdio.h>
 #endif
 
+/* Include the header defining malloc.  On K&R C compilers,
+   that's <malloc.h>, on ANSI C and ISO C compilers, that's <stdlib.h>.  */
 #if HAVE_STDLIB_H
 #  include <stdlib.h>
+#else
+#  if HAVE_MALLOC_H
+#    include <malloc.h>
+#  endif
 #endif
 
 #if HAVE_STRING_H
@@ -58,65 +59,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  include <ctype.h>
 #endif
 
-#if HAVE_MALLOC_H
-#  include <malloc.h>
-#endif
-
 #if HAVE_MEMORY_H
 #  include <memory.h>
 #endif
 
 #if HAVE_ERRNO_H
 #  include <errno.h>
-#endif
-
-
-#ifndef __WINDOWS__
-#  ifdef __WIN32__
-#    define __WINDOWS__
-#  endif
-#endif
-
-
-#undef LT_USE_POSIX_DIRENT
-#ifdef HAVE_CLOSEDIR
-#  ifdef HAVE_OPENDIR
-#    ifdef HAVE_READDIR
-#      ifdef HAVE_DIRENT_H
-#        define LT_USE_POSIX_DIRENT
-#      endif /* HAVE_DIRENT_H */
-#    endif /* HAVE_READDIR */
-#  endif /* HAVE_OPENDIR */
-#endif /* HAVE_CLOSEDIR */
-
-
-#undef LT_USE_WINDOWS_DIRENT_EMULATION
-#ifndef LT_USE_POSIX_DIRENT
-#  ifdef __WINDOWS__
-#    define LT_USE_WINDOWS_DIRENT_EMULATION
-#  endif /* __WINDOWS__ */
-#endif /* LT_USE_POSIX_DIRENT */
-
-
-#ifdef LT_USE_POSIX_DIRENT
-#  include <dirent.h>
-#  define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
-#else
-#  ifdef LT_USE_WINDOWS_DIRENT_EMULATION
-#    define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
-#  else
-#    define dirent direct
-#    define LT_D_NAMLEN(dirent) ((dirent)->d_namlen)
-#    if HAVE_SYS_NDIR_H
-#      include <sys/ndir.h>
-#    endif
-#    if HAVE_SYS_DIR_H
-#      include <sys/dir.h>
-#    endif
-#    if HAVE_NDIR_H
-#      include <ndir.h>
-#    endif
-#  endif
 #endif
 
 #if HAVE_ARGZ_H
@@ -131,9 +79,35 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 
 #include "ltdl.h"
 
+#if defined(HAVE_CLOSEDIR) && defined(HAVE_OPENDIR) && defined(HAVE_READDIR) && defined(HAVE_DIRENT_H)
+/* We have a fully operational dirent subsystem.  */
+# include <dirent.h>
+# define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
+
+#elif !defined(__WINDOWS__)
+/* We are not on windows, so we can get the same functionality from the
+   `direct' API.  */
+# define dirent direct
+# define LT_D_NAMLEN(dirent) ((dirent)->d_namlen)
+# if HAVE_SYS_NDIR_H
+#   include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#   include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#   include <ndir.h>
+# endif
+
+#else  /* __WINDOWS__ */
+/* Use some wrapper code to emulate dirent on windows..  */
+# define LT_USE_WINDOWS_DIRENT_EMULATION
+#endif
+
 #if WITH_DMALLOC
 #  include <dmalloc.h>
 #endif
+
 
 
 
@@ -148,34 +122,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 
 /* fopen() mode flags for reading a text file */
 #undef	LT_READTEXT_MODE
-#ifdef __WINDOWS__
+#if defined(__WINDOWS__) || defined(__CYGWIN__)
 #  define LT_READTEXT_MODE "rt"
 #else
 #  define LT_READTEXT_MODE "r"
 #endif
 
-#ifdef LT_USE_WINDOWS_DIRENT_EMULATION
-
-#include <windows.h>
-
-#define dirent lt_dirent
-#define DIR lt_DIR
-
-struct dirent
-{
-  char d_name[2048];
-  int  d_namlen;
-};
-
-typedef struct _DIR
-{
-  HANDLE hSearch;
-  WIN32_FIND_DATA Win32FindData;
-  BOOL firsttime;
-  struct dirent file_info;
-} DIR;
-
-#endif /* LT_USE_WINDOWS_DIRENT_EMULATION */
 
 
 /* --- MANIFEST CONSTANTS --- */
@@ -215,11 +167,14 @@ static char   *lt_estrdup	LT_PARAMS((const char *str));
 static lt_ptr lt_emalloc	LT_PARAMS((size_t size));
 static lt_ptr lt_erealloc	LT_PARAMS((lt_ptr addr, size_t size));
 
+/* static lt_ptr rpl_realloc	LT_PARAMS((lt_ptr ptr, size_t size)); */
+#define rpl_realloc realloc
+
 /* These are the pointers that can be changed by the caller:  */
 LT_GLOBAL_DATA lt_ptr (*lt_dlmalloc)	LT_PARAMS((size_t size))
  			= (lt_ptr (*) LT_PARAMS((size_t))) malloc;
 LT_GLOBAL_DATA lt_ptr (*lt_dlrealloc)	LT_PARAMS((lt_ptr ptr, size_t size))
- 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) realloc;
+ 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) rpl_realloc;
 LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
  			= (void (*) LT_PARAMS((lt_ptr))) free;
 
@@ -426,17 +381,37 @@ memmove (dest, src, size)
 
 #endif /* !HAVE_MEMMOVE */
 
-#ifdef LT_USE_WINDOWS_DIRENT_EMULATION
+# if LT_USE_WINDOWS_DIRENT_EMULATION
+
+# include <windows.h>
+
+# define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
+# define dirent lt_dirent
+# define DIR lt_DIR
+
+struct dirent
+{
+  char d_name[2048];
+  int  d_namlen;
+};
+
+typedef struct _DIR
+{
+  HANDLE hSearch;
+  WIN32_FIND_DATA Win32FindData;
+  BOOL firsttime;
+  struct dirent file_info;
+} DIR;
 
 static void closedir LT_PARAMS((DIR *entry));
 
 static void
-closedir(entry)
-  DIR *entry;
+closedir (entry)
+    DIR *entry;
 {
-  assert(entry != (DIR *) NULL);
-  FindClose(entry->hSearch);
-  lt_dlfree((lt_ptr)entry);
+  assert (entry != (DIR *) NULL);
+  FindClose (entry->hSearch);
+  lt_dlfree ((lt_ptr) entry);
 }
 
 
@@ -444,58 +419,65 @@ static DIR * opendir LT_PARAMS((const char *path));
 
 static DIR*
 opendir (path)
-  const char *path;
+    const char *path;
 {
   char file_specification[LT_FILENAME_MAX];
   DIR *entry;
 
-  assert(path != (char *) NULL);
-  (void) strncpy(file_specification,path,LT_FILENAME_MAX-1);
-  (void) strcat(file_specification,"\\");
-  entry = LT_DLMALLOC (DIR,sizeof(DIR));
+  assert (path != (char *) NULL);
+  (void) strncpy (file_specification, path, LT_FILENAME_MAX-1);
+  (void) strcat (file_specification, "\\");
+  entry = LT_DLMALLOC (DIR, sizeof(DIR));
   if (entry != (DIR *) 0)
     {
-      entry->firsttime = true;
-      entry->hSearch = FindFirstFile(file_specification,&entry->Win32FindData);
+      entry->firsttime = TRUE;
+      entry->hSearch = FindFirstFile (file_specification,
+				      &entry->Win32FindData);
     }
+
   if (entry->hSearch == INVALID_HANDLE_VALUE)
     {
-      (void) strcat(file_specification,"\\*.*");
-      entry->hSearch = FindFirstFile(file_specification,&entry->Win32FindData);
+      (void) strcat (file_specification, "\\*.*");
+      entry->hSearch = FindFirstFile (file_specification,
+				      &entry->Win32FindData);
       if (entry->hSearch == INVALID_HANDLE_VALUE)
         {
           LT_DLFREE (entry);
           return (DIR *) 0;
         }
     }
-  return(entry);
+
+  return entry;
 }
 
 
 static struct dirent *readdir LT_PARAMS((DIR *entry));
 
-static struct dirent *readdir(entry)
-  DIR *entry;
+static struct dirent *
+readdir (entry)
+    DIR *entry;
 {
-  int
-    status;
+  int status;
 
   if (entry == (DIR *) 0)
-    return((struct dirent *) 0);
+    return (struct dirent *) 0;
+
   if (!entry->firsttime)
     {
-      status = FindNextFile(entry->hSearch,&entry->Win32FindData);
+      status = FindNextFile (entry->hSearch, &entry->Win32FindData);
       if (status == 0)
-        return((struct dirent *) 0);
+        return (struct dirent *) 0;
     }
-  entry->firsttime = false;
-  (void) strncpy(entry->file_info.d_name,entry->Win32FindData.cFileName,
-    LT_FILENAME_MAX-1);
-  entry->file_info.d_namlen = strlen(entry->file_info.d_name);
-  return(&entry->file_info);
-}
 
-#endif /* LT_USE_WINDOWS_DIRENT_EMULATION */
+  entry->firsttime = FALSE;
+  (void) strncpy (entry->file_info.d_name, entry->Win32FindData.cFileName,
+		  LT_FILENAME_MAX - 1);
+  entry->file_info.d_namlen = strlen (entry->file_info.d_name);
+
+  return &entry->file_info;
+}
+#endif /* !LT_USE_WINDOWS_DIRENT_EMULATION */
+
 
 /* According to Alexandre Oliva <oliva@lsd.ic.unicamp.br>,
     ``realloc is not entirely portable''
@@ -1017,7 +999,7 @@ lt_erealloc (addr, size)
      lt_ptr addr;
      size_t size;
 {
-  lt_ptr mem = realloc (addr, size);
+  lt_ptr mem = lt_dlrealloc (addr, size);
   if (size && !mem)
     LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
   return mem;
@@ -1289,7 +1271,7 @@ static struct lt_user_dlloader sys_shl = {
 
 /* --- LOADLIBRARY() INTERFACE LOADER --- */
 
-#ifdef __WINDOWS__
+#if defined(__WINDOWS__) || defined(__CYGWIN__)
 
 /* dynamic linking for Win32 */
 
@@ -1581,6 +1563,10 @@ static struct lt_user_dlloader sys_dld = {
 
 
 #if HAVE_MACH_O_DYLD_H
+#if !defined(__APPLE_CC__) && !defined(__MWERKS__) && !defined(__private_extern__)
+/* Is this correct? Does it still function properly? */
+#define __private_extern__ extern
+#endif
 # include <mach-o/dyld.h>
 #endif
 #include <mach-o/getsect.h>
@@ -1588,11 +1574,11 @@ static struct lt_user_dlloader sys_dld = {
 /* We have to put some stuff here that isn't in older dyld.h files */
 #ifndef ENUM_DYLD_BOOL
 # define ENUM_DYLD_BOOL
-# undef false
-# undef true
+# undef FALSE
+# undef TRUE
  enum DYLD_BOOL {
-    false,
-    true
+    FALSE,
+    TRUE
  };
 #endif
 #ifndef LC_REQ_DYLD
@@ -1867,6 +1853,7 @@ sys_dyld_sym (loader_data, module, symbol)
   	NSSymbol *nssym = 0;
   	void *unused;
   	const struct mach_header *mh=NULL;
+  	char saveError[256] = "Symbol not found";
   	if (module == (lt_module)-1)
   	{
   		_dyld_lookup_and_bind(symbol,(unsigned long*)&address,&unused);
@@ -1897,12 +1884,14 @@ sys_dyld_sym (loader_data, module, symbol)
 	}
 	if (!nssym)
 	{
+		strncpy(saveError, lt_int_dyld_error(LT_DLSTRERROR(SYMBOL_NOT_FOUND)), 255);
+		saveError[255] = 0;
 		if (!mh) mh=lt_int_dyld_get_mach_header_from_nsmodule(module);
 		nssym = lt_int_dyld_NSlookupSymbolInLinkedLibs(symbol,mh);
 	}
 	if (!nssym)
 	{
-		LT_DLMUTEX_SETERROR (lt_int_dyld_error(LT_DLSTRERROR(SYMBOL_NOT_FOUND)));
+		LT_DLMUTEX_SETERROR (saveError);
 		return NULL;
 	}
 	return NSAddressOfSymbol(nssym);
@@ -2194,26 +2183,31 @@ lt_dlinit ()
       handles = 0;
       user_search_path = 0; /* empty search path */
 
-#if HAVE_LIBDL
-      errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dl, "dlopen");
-#endif
-#if HAVE_SHL_LOAD
-      errors += lt_dlloader_add (lt_dlloader_next (0), &sys_shl, "dlopen");
-#endif
-#ifdef __WINDOWS__
-      errors += lt_dlloader_add (lt_dlloader_next (0), &sys_wll, "dlopen");
-#endif
-#ifdef __BEOS__
-      errors += lt_dlloader_add (lt_dlloader_next (0), &sys_bedl, "dlopen");
-#endif
+      /* Append the available loaders to the internal list in the order
+	 they should be used -- if the first fails, then try again with
+	 the next loader in the chain.  */
+#     define LOADER_APPEND 0
+
+      errors += lt_dlloader_add (LOADER_APPEND, &presym,   "dlpreload");
 #if HAVE_DLD
-      errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dld, "dld");
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_dld,  "dld");
 #endif
 #if HAVE_DYLD
-       errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dyld, "dyld");
-       errors += sys_dyld_init();
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_dyld, "dyld");
+      errors += sys_dyld_init();
 #endif
-      errors += lt_dlloader_add (lt_dlloader_next (0), &presym, "dlpreload");
+#ifdef __BEOS__
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_bedl, "dlopen");
+#endif
+#if HAVE_SHL_LOAD
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_shl,  "dlopen");
+#endif
+#if HAVE_LIBDL
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_dl,   "dlopen");
+#endif
+#if defined(__WINDOWS__) || defined(__CYGWIN__)
+      errors += lt_dlloader_add (LOADER_APPEND, &sys_wll,  "dlopen");
+#endif
 
       if (presym_init (presym.dlloader_data))
 	{
@@ -3918,7 +3912,7 @@ lt_dlerror ()
   LT_DLMUTEX_GETERROR (error);
   LT_DLMUTEX_SETERROR (0);
 
-  return error ? error : LT_DLSTRERROR (UNKNOWN);
+  return error ? error : NULL;
 }
 
 static int
@@ -4143,11 +4137,14 @@ lt_dlhandle_find (module_name)
   lt_dlhandle cur = handles;
 
   if (cur)
-    do
-      {
-	if (cur->info.name && strcmp (cur->info.name, module_name) == 0)
-	  break;
-      } while (cur = cur->next);
+    {
+      do
+	{
+	  if (cur->info.name && strcmp (cur->info.name, module_name) == 0)
+	    break;
+	}
+      while ((cur = cur->next));
+    }
 
   return cur;
 }

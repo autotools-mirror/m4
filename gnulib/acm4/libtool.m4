@@ -46,15 +46,13 @@ AC_DEFUN([AC_PROG_LIBTOOL],
 # ----------------
 AC_DEFUN([_AC_PROG_LIBTOOL],
 [AC_REQUIRE([AC_LIBTOOL_SETUP])dnl
+AC_REQUIRE([_LT_PROG_LTMAIN])dnl
 AC_BEFORE([$0],[AC_LIBTOOL_CXX])dnl
 AC_BEFORE([$0],[AC_LIBTOOL_F77])dnl
 AC_BEFORE([$0],[AC_LIBTOOL_GCJ])dnl
 
 # This can be used to rebuild libtool when needed
-for LIBTOOL_DEPS in "$ac_aux_dir/ltmain.sh" "config/ltmain.sh" "./ltmain.sh"
-do
-  test -f "$LIBTOOL_DEPS" && break
-done
+LIBTOOL_DEPS="$ltmain"
 
 # Always use our own libtool.
 LIBTOOL='$(SHELL) $(top_builddir)/libtool'
@@ -63,6 +61,20 @@ AC_SUBST(LIBTOOL)dnl
 # Prevent multiple expansion
 define([AC_PROG_LIBTOOL], [])
 ])# _AC_PROG_LIBTOOL
+
+
+# _LT_PROG_LTMAIN
+# ---------------
+# In libtool itself `ltmain.sh' is in the build tree, but everything else
+# ships it in the source tree, for completeness, if we find a copy in the
+# build tree use that before falling back to auxdir.
+AC_DEFUN([_LT_PROG_LTMAIN],
+[case $ac_aux_dir in
+  $srcdir)   ltmain=./ltmain.sh ;;
+  $srcdir/*) ltmain=`expr "$ac_aux_dir" : "$srcdir/\(.*\)"`/ltmain.sh ;;
+esac
+test -f "$ltmain" || ltmain="$ac_aux_dir/ltmain.sh"
+])# _LT_PROG_LTMAIN
 
 
 # AC_LIBTOOL_SETUP
@@ -207,7 +219,7 @@ test -z "$pic_mode" && pic_mode=default
 # Use C for the default configuration in the libtool script
 AC_LIBTOOL_LANG_C_CONFIG
 _LT_AC_TAG_CONFIG
-dnl _LT_CONFIG_COMMANDS
+_LT_CONFIG_COMMANDS
 ])# AC_LIBTOOL_SETUP
 
 
@@ -257,8 +269,8 @@ _LT_CONFIG_LIBTOOL_INIT([$2])
 # -------------------
 # Send accumulated output to $CONFIG_STATUS.
 m4_define([_LT_CONFIG_COMMANDS],
-[AC_CONFIG_COMMANDS([libtool-bogus],
-    [_LT_OUTPUT_LIBTOOL_COMMANDS],  [_LT_OUTPUT_LIBTOOL_INIT])
+[AC_CONFIG_COMMANDS([libtool],
+    [_LT_OUTPUT_LIBTOOL_COMMANDS], [_LT_OUTPUT_LIBTOOL_INIT])
 ])
 
 
@@ -1488,6 +1500,12 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
+  # Append ld.so.conf contents to the search path
+  if test -f /etc/ld.so.conf; then
+    lt_ld_extra=`$SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' /etc/ld.so.conf`
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
+  fi
+
   # We used to test for /lib/ld.so.1 and disable shared libraries on
   # powerpc, because MkLinux only supported shared libraries with the
   # GNU dynamic linker.  Since this was broken with cross compilers,
@@ -1714,11 +1732,8 @@ m4_define([_LT_AC_TAG_CONFIG],
       m4_exit(1)])
   ])
 
-  AC_CONFIG_COMMANDS([libtool-tags], [
-    for ltmain in "$ac_aux_dir/ltmain.sh" "config/ltmain.sh" "./ltmain.sh"
-    do
-      test -f "$ltmain" && break
-    done
+  _LT_CONFIG_SAVE_COMMANDS([
+    _LT_PROG_LTMAIN
     if test -f "$ltmain"; then
       if test ! -f "${ofile}"; then
         AC_MSG_ERROR([output file `$ofile' does not exist])
@@ -2051,6 +2066,7 @@ else
 fi
 test -z "$LD" && AC_MSG_ERROR([no acceptable ld found in \$PATH])
 AC_PROG_LD_GNU
+AC_SUBST([LD])
 ])# AC_PROG_LD
 
 
@@ -2321,6 +2337,7 @@ else
   test -z "$lt_cv_path_NM" && lt_cv_path_NM=nm
 fi])
 NM="$lt_cv_path_NM"
+AC_SUBST([NM])
 ])# AC_PROG_NM
 
 
@@ -3820,7 +3837,7 @@ m4_define([_LT_CONFIG_STATUS_DECLARE],
 # add code to config.status for appending the configuration named by
 # TAGNAME from the matching tagged config vars.
 m4_define([AC_LIBTOOL_CONFIG],
-[AC_CONFIG_COMMANDS([libtool]$1, [
+[_LT_CONFIG_SAVE_COMMANDS([
   # See if we are running on zsh, and set the options which allow our
   # commands through without removal of \ escapes.
   if test -n "${ZSH_VERSION+set}" ; then
@@ -3830,11 +3847,9 @@ m4_define([AC_LIBTOOL_CONFIG],
   m4_if([$1], [],
       [cfgfile="${ofile}T"
       trap "$rm \"$cfgfile\"; exit 1" 1 2 15
-      $rm -f "$cfgfile"
-      AC_MSG_NOTICE([creating $ofile])],
-    [cfgfile="$ofile"
-    AC_MSG_NOTICE([appending configuration tag `$1' to $ofile])
-  ])
+      $rm -f "$cfgfile"],
+    [cfgfile="$ofile"]
+  )
 
   cat <<_LT_EOF >> "$cfgfile"
 m4_if([$1], [],
@@ -4199,14 +4214,7 @@ _LT_EOF
     ;;
   esac
 
-  # In libtool itself `ltmain.sh' is in the build tree, but everything else
-  # ships it in the source tree, so we test for the general case first, but
-  # have hardcoded special cases for building libtool and libltdl:
-  for ltmain in "$ac_aux_dir/ltmain.sh" "config/ltmain.sh" "./ltmain.sh"
-  do
-    test -f "$ltmain" && break
-  done
-
+  _LT_PROG_LTMAIN
   # We use sed instead of cat because bash on DJGPP gets confused if
   # if finds mixed CR/LF and LF-only lines.  Since sed operates in
   # text mode, it properly converts lines to CR/LF.  This bash problem
@@ -5913,13 +5921,13 @@ m4_define([_LT_AC_TAGVAR], [m4_if([$2], [], [$1], [$1_$2])])
 
 
 # old names
-AC_DEFUN([AM_PROG_LIBTOOL],   [AC_PROG_LIBTOOL])
-AC_DEFUN([AM_ENABLE_SHARED],  [AC_ENABLE_SHARED($@)])
-AC_DEFUN([AM_ENABLE_STATIC],  [AC_ENABLE_STATIC($@)])
-AC_DEFUN([AM_DISABLE_SHARED], [AC_DISABLE_SHARED($@)])
-AC_DEFUN([AM_DISABLE_STATIC], [AC_DISABLE_STATIC($@)])
-AC_DEFUN([AM_PROG_LD],        [AC_PROG_LD])
-AC_DEFUN([AM_PROG_NM],        [AC_PROG_NM])
+AU_DEFUN([AM_PROG_LIBTOOL],   [AC_PROG_LIBTOOL])
+AU_DEFUN([AM_ENABLE_SHARED],  [AC_ENABLE_SHARED($@)])
+AU_DEFUN([AM_ENABLE_STATIC],  [AC_ENABLE_STATIC($@)])
+AU_DEFUN([AM_DISABLE_SHARED], [AC_DISABLE_SHARED($@)])
+AU_DEFUN([AM_DISABLE_STATIC], [AC_DISABLE_STATIC($@)])
+AU_DEFUN([AM_PROG_LD],        [AC_PROG_LD])
+AU_DEFUN([AM_PROG_NM],        [AC_PROG_NM])
 
 # This is just to silence aclocal about the macro not being used
 m4_if([AC_DISABLE_FAST_INSTALL])
@@ -5993,6 +6001,7 @@ for lt_ac_sed in $lt_ac_sed_list /usr/xpg4/bin/sed; do
   done
 done
 SED=$lt_cv_path_SED
+AC_SUBST([SED])
 ])
 AC_MSG_RESULT([$SED])
 ])
