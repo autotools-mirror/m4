@@ -32,11 +32,15 @@ Version beta 1.4q - August 2001, by Gary V. Vaughan
 * New builtin `unload' to remove loaded modules (and the builtins and user
   macros they define) from the running m4 interpreter.
 
+* New builtins `eregexp' and `epatsubst' to use Extended Regular Expressions
+  syntax in lieu of Basic Regular Expressions as used by `regexp' and
+  `patsubst'.
+
 * The names of all currently loaded modules are returned by the new
   builtin, ``modules''.
- 
+
 * Loadable modules can define new builtin functions or text expansion
-  macros. 
+  macros.
 
 * The module code has been rewritten to use libltdl, the libtool dynamic
   loader, which means GNU m4 can now load (and unload) modules just about
@@ -51,7 +55,7 @@ Version beta 1.4q - August 2001, by Gary V. Vaughan
   directory for examples of usage.
 
 * A new V2 format for frozen files that saves module and syntax information.
- 
+
 Version beta 1.4o - January 2000, by Rene' Seindal
 
 * Modules can be loaded from the command line with --load-module
@@ -140,7 +144,7 @@ Version beta 1.4k - November 1998, by Erick Branderhorst and Rene' Seindal
   macros, ie, new macros can be written in C.  Depends on the dlopen()
   interface, and is currently only tested on Linux.  Enabled at configure
   time with `--with-modules'.  Documentation is in src/module.c and
-  module/README. 
+  module/README.
 
 * Implement a GNU message catalog for French (Franc,ois Pinard).
 

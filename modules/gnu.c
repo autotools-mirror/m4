@@ -45,7 +45,9 @@ int errno;
 #define RE_SYNTAX_ERE \
   (/* Allow char classes. */					\
     RE_CHAR_CLASSES						\
-  /* Be picky. */						\
+  /* Anchors are OK in groups. */				\
+  | RE_CONTEXT_INDEP_ANCHORS					\
+  /* Be picky, `/^?/', for instance, makes no sense. */		\
   | RE_CONTEXT_INVALID_OPS					\
   /* Allow intervals with `{' and `}', forbid invalid ranges. */\
   | RE_INTERVALS | RE_NO_BK_BRACES | RE_NO_EMPTY_RANGES		\
@@ -73,6 +75,8 @@ int errno;
 	BUILTIN(changesyntax,	FALSE,	TRUE  )	\
 	BUILTIN(debugmode,	FALSE,	FALSE )	\
 	BUILTIN(debugfile,	FALSE,	FALSE )	\
+	BUILTIN(eregexp,	FALSE,	TRUE  )	\
+	BUILTIN(epatsubst,	FALSE,	TRUE  )	\
 	BUILTIN(esyscmd,	FALSE,	TRUE  )	\
 	BUILTIN(format,		FALSE,	TRUE  )	\
 	BUILTIN(indir,		FALSE,	TRUE  )	\
@@ -304,11 +308,13 @@ m4_regexp_compile (const char *caller,
 /**
  * regexp(STRING, REGEXP, [REPLACEMENT])
  **/
-M4BUILTIN_HANDLER (regexp)
+
+static void
+m4_regexp_do (struct obstack *obs, int argc, m4_token_data **argv,
+	      int syntax)
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
-  const char *repl;		/* replacement string */
 
   struct re_pattern_buffer *buf;/* compiled regular expression */
   struct re_registers regs;	/* for subexpression matches */
@@ -321,7 +327,7 @@ M4BUILTIN_HANDLER (regexp)
   victim = M4ARG (1);
   regexp = M4ARG (2);
 
-  buf = m4_regexp_compile (M4ARG(0), regexp, RE_SYNTAX_BRE);
+  buf = m4_regexp_compile (M4ARG(0), regexp, syntax);
   if (!buf)
     return;
 
@@ -331,20 +337,37 @@ M4BUILTIN_HANDLER (regexp)
   if (startpos  == -2)
     {
       M4ERROR ((warning_status, 0,
-		_("Error matching regular expression `%s'"), regexp));
+		_("%s: error matching regular expression `%s'"),
+		M4ARG (0), regexp));
       return;
     }
 
   if (argc == 3)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    {
-      repl = M4ARG (3);
-      substitute (obs, victim, repl, &regs);
-    }
+    substitute (obs, victim, M4ARG (3), &regs);
 
   return;
 }
+
+
+/**
+ * regexp(STRING, REGEXP, [REPLACEMENT])
+ **/
+M4BUILTIN_HANDLER (regexp)
+{
+  m4_regexp_do (obs, argc, argv, RE_SYNTAX_BRE);
+}
+
+/**
+ * regexp(STRING, REGEXP, [REPLACEMENT])
+ **/
+M4BUILTIN_HANDLER (eregexp)
+{
+  m4_regexp_do (obs, argc, argv, RE_SYNTAX_ERE);
+}
+
+
 
 /* Substitute all matches of a regexp occuring in a string.  Each match of
    the second argument (a regexp) in the first argument is changed to the
@@ -354,7 +377,8 @@ M4BUILTIN_HANDLER (regexp)
 /**
  * patsubst(STRING, REGEXP, [REPLACEMENT])
  **/
-M4BUILTIN_HANDLER (patsubst)
+m4_patsubst_do (struct obstack *obs, int argc, m4_token_data **argv,
+		int syntax)
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
@@ -372,7 +396,7 @@ M4BUILTIN_HANDLER (patsubst)
   victim = M4ARG (1);
   length = strlen (victim);
 
-  buf = m4_regexp_compile (M4ARG(0), regexp, RE_SYNTAX_BRE);
+  buf = m4_regexp_compile (M4ARG(0), regexp, syntax);
   if (!buf)
     return;
 
@@ -418,6 +442,22 @@ M4BUILTIN_HANDLER (patsubst)
   obstack_1grow (obs, '\0');
 
   return;
+}
+
+/**
+ * patsubst(STRING, REGEXP, [REPLACEMENT])
+ **/
+M4BUILTIN_HANDLER (patsubst)
+{
+  m4_patsubst_do (obs, argc, argv, RE_SYNTAX_BRE);
+}
+
+/**
+ * patsubst(STRING, REGEXP, [REPLACEMENT])
+ **/
+M4BUILTIN_HANDLER (epatsubst)
+{
+  m4_patsubst_do (obs, argc, argv, RE_SYNTAX_ERE);
 }
 
 /* Implementation of "symbols" itself.  It builds up a table of pointers to

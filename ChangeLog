@@ -1,5 +1,15 @@
 2001-10-04  Akim Demaille  <akim@epita.fr>
 
+	* modules/gnu.c (m4_regexp_do, m4_patsubst_do): Extracted from
+	previous builtins `regexp' and `patsubst'.
+	(regexp, patsubst): Use them.
+	(eregexp, epatsubst): New builtins.
+	* doc/m4.texinfo (Patsubst, Regexp): Rename and complete as...
+	(Epatsubst and Patsubst, Eregexp and Regexp): these.
+	(Extensions): More info on REs.
+
+2001-10-04  Akim Demaille  <akim@epita.fr>
+
 	* modules/modtest.c (init_handler): Consistently output to stderr.
 	(finish_handler): New.
 	(test): The `if' is an `assert'.
