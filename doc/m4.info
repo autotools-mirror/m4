@@ -41,7 +41,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4.1.  It is now to be considered stable, future
+   This is release 1.4.2.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -2923,8 +2923,8 @@ Concept index
  [index ]
 * Menu:
 
-* Arguments to macros:                   Arguments.           (line   6)
 * arguments to macros:                   Macro Arguments.     (line   6)
+* Arguments to macros:                   Arguments.           (line   6)
 * arguments to macros, special:          Pseudo Arguments.    (line   6)
 * arguments, quoted macro:               Quoting Arguments.   (line   6)
 * arithmetic:                            Arithmetic.          (line   6)
@@ -2970,8 +2970,8 @@ Concept index
 * expressions, evaluation of integer:    Eval.                (line   6)
 * extracting substrings:                 Substr.              (line   6)
 * fast loading of frozen files:          Frozen files.        (line   6)
-* file inclusion <1>:                    Undivert.            (line  53)
-* file inclusion:                        File Inclusion.      (line   6)
+* file inclusion <1>:                    File Inclusion.      (line   6)
+* file inclusion:                        Undivert.            (line  53)
 * filenames, on the command line:        Invoking m4.         (line 176)
 * files, diverting output to:            Divert.              (line   6)
 * files, names of temporary:             Maketemp.            (line   6)
@@ -2979,21 +2979,21 @@ Concept index
 * formatted output:                      Format.              (line   6)
 * frozen files for fast loading:         Frozen files.        (line   6)
 * GNU extensions <1>:                    Extensions.          (line   6)
-* GNU extensions <2>:                    Frozen files.        (line   6)
-* GNU extensions <3>:                    Esyscmd.             (line   6)
-* GNU extensions <4>:                    Format.              (line   6)
-* GNU extensions <5>:                    Patsubst.            (line   6)
-* GNU extensions <6>:                    Regexp.              (line   6)
+* GNU extensions <2>:                    Debug Levels.        (line  59)
+* GNU extensions <3>:                    Debug Output.        (line   6)
+* GNU extensions <4>:                    Frozen files.        (line   6)
+* GNU extensions <5>:                    Format.              (line   6)
+* GNU extensions <6>:                    Patsubst.            (line   6)
 * GNU extensions <7>:                    Undivert.            (line  53)
-* GNU extensions <8>:                    Search Path.         (line   6)
-* GNU extensions <9>:                    Debug Output.        (line   6)
-* GNU extensions <10>:                   Debug Levels.        (line  59)
+* GNU extensions <8>:                    Arguments.           (line  28)
+* GNU extensions <9>:                    Esyscmd.             (line   6)
+* GNU extensions <10>:                   Regexp.              (line   6)
 * GNU extensions <11>:                   Builtin.             (line   6)
-* GNU extensions <12>:                   Indir.               (line   6)
-* GNU extensions:                        Arguments.           (line  28)
+* GNU extensions <12>:                   Search Path.         (line   6)
+* GNU extensions:                        Indir.               (line   6)
 * included files, search path for:       Search Path.         (line   6)
-* inclusion, of files <1>:               Undivert.            (line  53)
-* inclusion, of files:                   File Inclusion.      (line   6)
+* inclusion, of files <1>:               File Inclusion.      (line   6)
+* inclusion, of files:                   Undivert.            (line  53)
 * increment operator:                    Incr.                (line   6)
 * indirect call of builtins:             Builtin.             (line   6)
 * indirect call of macros:               Indir.               (line   6)
@@ -3035,8 +3035,8 @@ Concept index
 * quoted string:                         Quoted strings.      (line   6)
 * recursive macros:                      Loops.               (line   6)
 * redefinition of macros, temporary:     Pushdef.             (line   6)
-* regular expressions <1>:               Patsubst.            (line   6)
-* regular expressions:                   Regexp.              (line   6)
+* regular expressions <1>:               Regexp.              (line   6)
+* regular expressions:                   Patsubst.            (line   6)
 * reloading a frozen file:               Frozen files.        (line   6)
 * renaming macros:                       Defn.                (line   6)
 * running UNIX commands:                 UNIX commands.       (line   6)
