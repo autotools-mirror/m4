@@ -1,5 +1,10 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* m4/symtab.c (m4_hack_all_symbols, m4_lookup_symbol): Formatting
+	changes.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* m4/builtin.c (m4_macro_define): Do not reset SYMBOL_TRACED.
 
 2001-08-17  Akim Demaille  <akim@epita.fr>

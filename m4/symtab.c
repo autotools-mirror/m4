@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -114,13 +115,13 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	{
 	  cmp = strcmp (SYMBOL_NAME (symbol), name);
 	  if (cmp >= 0)
-	  break;
+	    break;
 	}
 
       /* If just searching, return status of search.  */
 
       if (mode == M4_SYMBOL_LOOKUP)
-      return cmp == 0 ? symbol : NULL;
+	return cmp == 0 ? symbol : NULL;
 
       /* Symbol not found.  */
 
@@ -132,17 +133,17 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	case M4_SYMBOL_INSERT:
 
 	  /* Return the symbol, if the name was found in the table.
-	   Otherwise, just insert the name, and return the new symbol.  */
+	     Otherwise, just insert the name, and return the new symbol.  */
 
 	  if (cmp == 0 && symbol != NULL)
-	  return symbol;
+	    return symbol;
 	  /* Fall through.  */
 
 	case M4_SYMBOL_PUSHDEF:
 
 	  /* Insert a name in the symbol table.  If there is already a symbol
-	   with the name, insert this in front of it, and mark the old
-	   symbol as "shadowed".  */
+	     with the name, insert this in front of it, and mark the old
+	     symbol as "shadowed".  */
 
 	  symbol = XMALLOC (m4_symbol, 1);
 	  SYMBOL_TYPE (symbol) = M4_TOKEN_VOID;
@@ -164,7 +165,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	  /* Delete all occurences of symbols with NAME.  */
 
 	  if (cmp != 0 || symbol == NULL)
-	  return NULL;
+	    return NULL;
 	  do
 	    {
 	      *spp = SYMBOL_NEXT (symbol);
@@ -179,9 +180,9 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	  /* Delete the first occurence of a symbol with NAME.  */
 
 	  if (cmp != 0 || symbol == NULL)
-	  return NULL;
+	    return NULL;
 	  if (SYMBOL_NEXT (symbol) != NULL && cmp == 0)
-	  SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
+	    SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
 	  *spp = SYMBOL_NEXT (symbol);
 	  free_symbol (symbol);
 	  return NULL;
@@ -300,10 +301,8 @@ m4_hack_all_symbols (func, data)
   m4_symbol *symbol;
 
   for (h = 0; h < hash_table_size; h++)
-    {
-      for (symbol = m4_symtab[h]; symbol != NULL; symbol = SYMBOL_NEXT (symbol))
-	(*func) (symbol, data);
-    }
+    for (symbol = m4_symtab[h]; symbol != NULL; symbol = SYMBOL_NEXT (symbol))
+      (*func) (symbol, data);
 }
 
 #ifdef DEBUG_SYM
