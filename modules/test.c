@@ -19,6 +19,10 @@
 #include <m4.h>				/* These are obligatory */
 #include <builtin.h>
 
+#define m4_macro_table		test_LTX_m4_macro_table
+#define m4_init_module		test_LTX_m4_init_module
+#define m4_finish_module	test_LTX_m4_finish_module
+
 module_init_t m4_init_module;		/* initialisation function */
 module_finish_t m4_finish_module;	/* cleanup function */
 

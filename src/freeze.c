@@ -69,7 +69,9 @@ produce_frozen_state (const char *name)
 
   if (strcmp (lquote.string, DEF_LQUOTE) || strcmp (rquote.string, DEF_RQUOTE))
     {
-      fprintf (file, "Q%d,%d\n", (int) lquote.length, (int) rquote.length);
+      fprintf (file, "Q%lu,%lu\n",
+	       (unsigned long) lquote.length,
+	       (unsigned long) rquote.length);
       fputs (lquote.string, file);
       fputs (rquote.string, file);
       fputc ('\n', file);
@@ -79,7 +81,9 @@ produce_frozen_state (const char *name)
 
   if (strcmp (bcomm.string, DEF_BCOMM) || strcmp (ecomm.string, DEF_ECOMM))
     {
-      fprintf (file, "C%d,%d\n", (int) bcomm.length, (int) ecomm.length);
+      fprintf (file, "C%lu,%lu\n",
+	       (unsigned long) bcomm.length,
+	       (unsigned long) ecomm.length);
       fputs (bcomm.string, file);
       fputs (ecomm.string, file);
       fputc ('\n', file);
@@ -100,9 +104,9 @@ produce_frozen_state (const char *name)
 	  switch (SYMBOL_TYPE (sym))
 	    {
 	    case TOKEN_TEXT:
-	      fprintf (file, "T%d,%d\n",
-		       (int) strlen (SYMBOL_NAME (sym)),
-		       (int) strlen (SYMBOL_TEXT (sym)));
+	      fprintf (file, "T%lu,%lu\n",
+		       (unsigned long) strlen (SYMBOL_NAME (sym)),
+		       (unsigned long) strlen (SYMBOL_TEXT (sym)));
 	      fputs (SYMBOL_NAME (sym), file);
 	      fputs (SYMBOL_TEXT (sym), file);
 	      fputc ('\n', file);
@@ -116,9 +120,9 @@ produce_frozen_state (const char *name)
 INTERNAL ERROR: Built-in not found in builtin table!")));
 		  abort ();
 		}
-	      fprintf (file, "F%d,%d\n",
-		       (int) strlen (SYMBOL_NAME (sym)),
-		       (int) strlen (bp->name));
+	      fprintf (file, "F%lu,%lu\n",
+		       (unsigned long) strlen (SYMBOL_NAME (sym)),
+		       (unsigned long) strlen (bp->name));
 	      fputs (SYMBOL_NAME (sym), file);
 	      fputs (bp->name, file);
 	      fputc ('\n', file);

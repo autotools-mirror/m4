@@ -21,6 +21,10 @@
 #include <getopt.h>
 #include <signal.h>
 
+#ifdef WITH_MODULES
+#include "ltdl.h"
+#endif /* WITH_MODULES */
+
 /* Operate interactively (-e).  */
 int interactive = 0;
 
@@ -92,8 +96,6 @@ typedef struct macro_definition macro_definition;
 | error, as a prefix for error messages.  Flush standard output first.  |
 `----------------------------------------------------------------------*/
 
-#include <error.h>
-
 void
 print_program_name (void)
 {
@@ -161,6 +163,14 @@ Operation modes:\n\
 #ifdef ENABLE_CHANGEWORD
       fputs (_("\
   -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"),
+	     stdout);
+#endif
+#ifdef WITH_MODULES
+      fputs (_("\
+\n\
+Dynamic loading features:\n\
+  -m, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
+  -M, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
 	     stdout);
 #endif
       fputs (_("\
@@ -235,6 +245,7 @@ static const struct option long_options[] =
   {"interactive", no_argument, NULL, 'e'},
 #ifdef WITH_MODULES
   {"load-module", required_argument, NULL, 'M'},
+  {"module-directory", required_argument, NULL, 'm'},
 #endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
@@ -259,10 +270,19 @@ static const struct option long_options[] =
 };
 
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:cd::el:o:st:"
+#  define CHANGEWORD_SHORTOPT	"W:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:cd::el:o:st:"
+#  define CHANGEWORD_SHORTOPT	""
 #endif
+#ifdef WITH_MODULES
+#  define MODULE_SHORTOPT	"M:"
+#  define MODULEPATH_SHORTOPT	"m:"
+#else
+#  define MODULE_SHORTOPT	""
+#  define MODULEPATH_SHORTOPT	""
+#endif
+
+#define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULE_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULEPATH_SHORTOPT/**/"o:st:"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -276,6 +296,8 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
   char *filename;
 
+  int exit_status;
+
   program_name = argv[0];
   error_print_progname = print_program_name;
 
@@ -286,10 +308,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   debug_init ();
   include_init ();
-
-#ifdef WITH_MODULES
-  module_init ();
-#endif /* WITH_MODULES */
+  symtab_init ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -355,10 +374,17 @@ main (int argc, char *const *argv, char *const *envp)
       case 'I':
 	add_include_directory (optarg);
 	break;
+
       case 'L':
 	nesting_limit = atoi (optarg);
 	break;
 
+#ifdef WITH_MODULES
+      case 'M':
+	module_load (optarg, NULL);
+	break;
+#endif /* WITH_MODULES */
+	
       case 'P':
 	prefix_all_builtins = 1;
 	break;
@@ -400,6 +426,23 @@ main (int argc, char *const *argv, char *const *envp)
 	  max_debug_argument_length = 0;
 	break;
 
+#ifdef WITH_MODULES
+      case 'm':
+	  if (lt_dladdsearchdir (optarg) != 0)
+	    {
+	      const char *dlerror = lt_dlerror();
+	      if (dlerror == NULL)
+		  M4ERROR ((EXIT_FAILURE, 0,
+			    _("ERROR: failed to add search directory `%s'"),
+			    optarg));
+	      else
+		  M4ERROR ((EXIT_FAILURE, 0,
+			   _("ERROR: failed to add search directory `%s': %s"),
+			    optarg, dlerror));
+	    }
+	  break;
+#endif /* WITH_MODULES */
+
       case 'o':
 	if (!debug_set_output (optarg))
 	  error (0, errno, optarg);
@@ -437,7 +480,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   input_init ();
   output_init ();
-  symtab_init ();
   include_env_init ();
 
   if (frozen_file_to_read)
@@ -517,6 +559,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Handle the various input files.  Each file is pushed on the input,
      and the input read.  Wrapup text is handled separately later.  */
 
+  exit_status = EXIT_SUCCESS;
   if (optind == argc)
     {
       push_file (stdin, "stdin");
@@ -533,6 +576,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    if (fp == NULL)
 	      {
 		error (0, errno, argv[optind]);
+		exit_status = EXIT_FAILURE;
 		continue;
 	      }
 	    else
@@ -562,5 +606,5 @@ main (int argc, char *const *argv, char *const *envp)
   module_unload_all();
 #endif /* WITH_MODULES */
 
-  exit (EXIT_SUCCESS);
+  exit (exit_status);
 }

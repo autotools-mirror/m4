@@ -52,7 +52,7 @@ build in macros. Modules can also override existing build in macros.)
 \dt(\b(Better control of sync-lines generation.))
 
 \dd(\p(The new build in macro 'syncoutput' allows better control of the
-generation of sync-lines.&nbsp; They can no be turned on or off at
+generation of sync-lines. They can now be turned on or off at
 will.))
 
 )

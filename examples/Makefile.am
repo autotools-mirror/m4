@@ -1,5 +1,7 @@
 EXTRA_DIST = $(pkgdata_DATA) $(TESTS) defs mktests.sh $(WEB_SITE)
 
+MAINTAINERCLEANFILES = Makefile.in
+
 WEB_SITE = WWW/*.htm WWW/Makefile WWW/m4lib/*.m4
 
 pkgdata_DATA = \

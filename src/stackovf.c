@@ -110,6 +110,13 @@
 /* Giving a hand to ansi2knr...  */
 typedef void (*handler_t) __P ((void));
 
+#if defined(__ultrix) && defined(__vax)
+extern char *sbrk __P ((int));
+extern int getrlimit __P ((int, struct rlimit *));
+extern int sigstack __P ((struct sigstack *, struct sigstack *));
+extern int sigvec __P ((int, struct sigvec *, struct sigvec *));
+#endif
+
 static const char *stackbot;
 static const char *stackend;
 static const char *arg0;
@@ -328,7 +335,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     stack_t ss;
 
     ss.ss_size = SIGSTKSZ;
-    ss.ss_sp = xmalloc ((unsigned) ss.ss_size);
+    ss.ss_sp = xmalloc (ss.ss_size);
     ss.ss_flags = 0;
     if (sigaltstack (&ss, (stack_t *) 0) < 0)
       error (1, errno, "sigaltstack");
@@ -375,7 +382,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #else /* not HAVE_SIGACTION */
 #if HAVE_SIGVEC && defined(SV_ONSTACK)
 
-  vec.sv_handler = (RETSIGTYPE (*)_ ((int))) sigsegv_handler;
+  vec.sv_handler = (RETSIGTYPE (*) __P ((int))) sigsegv_handler;
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK
 #ifdef SV_RESETHAND

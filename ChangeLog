@@ -1,3 +1,201 @@
+2000-01-10  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4o.
+
+	* TODO, NEWS: Cleaned up and updated.
+
+	* src/m4.c (main): New variable exit_status for exit status in
+	case of unreadable files.  Now m4 will exit with EXIT_FAILURE if a
+	file cannot be read instead of EXIT_SUCCESS.
+
+	* src/builtin.c (m4_indir): Changed error message to help
+	translators (from Akim Demaille <demaille@inf.enst.fr>). 
+
+	* lib/obstack.[hc], getopt*.[ch]: Updated to newest version from
+	Cygnus.
+
+	* lib/error.[hc], lib/regex.[hc], lib/strtol.c: Updated to version
+	from glic 2.1.2.
+
+	* src/input.c (match_input): Reordering of code, to avoid multiple
+	calls to push_string_init() from obstack_grow(), which can happen
+	with some compilers (found and fixed by James Bonfield
+	<jkb@mrc-lmb.cam.ac.uk>).
+
+	* src/stackovf.c: Added prototypes for ultrix.
+	(setup_stackovf_trap): Added __P to cast.
+	(Both reported by John David Anglin <dave@hiauly1.hia.nrc.ca>)
+
+2000-01-09  Rene' Seindal  <rene@seindal.dk>
+
+	* doc/m4.texinfo (Changequote): Added comment about changing
+	quotes when the old quote is a part of the new.
+
+	* src/builtin.c (expand_ranges): Added break after trailing dash.
+	This caused misbehavious on some systems (found and fixed by Akim
+	Demaille <demaille@inf.enst.fr>).
+
+	* AUTHORS: Thomas Tanner included
+
+	* acconfig.h: Added entry for ss_sp (see below).
+
+	* configure.in (use_stackovf): Added check for stack_t with member
+	ss_base instead of ss_sp (BSDI notably).  (Reported by Paul Eggert
+	<eggert@twinsun.com>).
+
+	* doc/m4.texinfo (Frozen files): Added a simpler example for
+	generating frozen files from several input files.
+
+1999-11-14  Paul Eggert  <eggert@twinsun.com>
+
+        * po/POTFILES.in: Add lib/getopt.c, lib/obstack.c,
+        lib/regex.c, lib/xmalloc.c.
+
+1999-11-10  Rene' Seindal  <rene@seindal.dk>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Passes -I acm4 to aclocal.
+
+	* src/module.c: reindented.
+	(module_load): return if this is a repeated load of same module.
+	(module_init): slight change of logic to avoid repeated
+	initialisation debug messages.
+
+	* Makefile.am (DIST_SUBDIRS): Added to ensure modules/ is included
+	in the distribution.
+
+	* modules/Makefile.am (test_la_LDFLAGS): set to -module to silence
+	automake warnings about missing lib prefix.
+	(time_la_LDFLAGS): ditto
+	(stdlib_la_LDFLAGS): ditto
+
+1999-11-10  Paul Eggert  <eggert@twinsun.com>
+
+        * src/m4.h: Include error.h, since our macros use error.
+        * src/m4.c: Don't need to include error.h.
+
+1999-11-09  Paul Eggert  <eggert@twinsun.com>
+
+        * src/m4.h (voidstar): Define to void * if __STDC__ is defined
+        and zero, as Solaris 7 cc does.
+        (bcopy): Remove macro; no longer needed with new obstack.h.
+
+        * src/output.c (freeze_diversions): Don't assume that a
+        diversion size can fit in `int'.  Check for diversion file
+        size too large to be printed with `unsigned long'.
+
+        * src/Makefile.am (CFLAGS): Omit -Wall.
+
+        * src/stackovf.c (setup_stackovf_trap): Remove cast to unsigned.
+
+        * src/debug.c (trace_format):
+        Use ANSI C if (defined __STDC__ && __STDC__) || defined PROTOTYPES.
+
+        * src/freeze.c (produce_frozen_state):
+        Don't assume string lengths fit in int.
+
+1999-10-13  Rene' Seindal  <rene@seindal.dk>
+
+	* configure.in (ALL_LINGUAS): Added Greek translation (el).
+	(ALL_LINGUAS): Added Czech translation (cs).
+
+1999-03-30  Gary V. Vaughan  <gvaughan@oranda.demon.co.uk>
+
+	* src/builtin.c: moved module loading functions into...
+	* src/module.c: entirely new implementation using libltdl.
+	* po/POTFILES.in: added src/module.c.
+	* modules/Makefile.am (LTLIBRARIES): Removed lib prefix as these
+	are modules, not linktime libraries.
+	(LDFLAGS): added -no-undefined -module and -avoid-version flags.
+	* modules/stdlib.c (m4_macro_table): use <name>_LTX collision
+	avoidance on exported symbols.
+	* modules/test.c (m4_macro_table, m4_init_module,
+	m4_finish_module): ditto.
+	* modules/time.c (m4_macro_table): ditto.
+
+	* modules/time2.m4: new file which requires command line loading
+	of modules.
+	* src/m4.c (--load-module): dynamically load named runtime module
+	into running executable before reading the source.
+	(--module-directory): prepend a directory to the module search
+	path.
+	(module_init()): Do this the first time we load a module instead;
+	if the module subsystem is broken normal m4 scripts can still run.
+	* src/m4.h (install_builtin_table): is now exported.
+	
+1999-03-26  Gary V. Vaughan  <gvaughan@oranda.demon.co.uk>
+
+	* src/module.c: removed.  No longer required.
+	* po/POTFILES.in: removed src/module.c.
+	
+	* Makefile.am (MAINTAINERCLEANFILES): Remove all the files that
+	the bootstrap script can recreate.
+	* acm4/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* doc/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* examples/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* lib/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	(AUTOMAKE_OPTIONS): reduced strictness to allow COPYING.LIB.
+	* modules/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* src/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* tests/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	
+	* acinclude.m4: removed.  `aclocal -I acm4' handles this much
+	better.
+	* acm4/Makefile.am (ACINCLUDE_M4): ditto.
+	* acm4/gettext.m4: removed.  It causes a multiple definition vs.
+	the installed gettext.m4 file when running aclocal.
+	
+1999-03-25  Gary V. Vaughan  <gvaughan@oranda.demon.co.uk>
+
+	* configure.in (AM_INIT_AUTOMAKE): bumped version number to
+	distinguish this from the last prerelease.
+	(AC_LIBLTDL_CONVENIENCE):  build libltdl as a convenience library
+	in its own subdirectory.
+	
+	* modules/Makefile.am (*_SOURCES): renamed to use libtool's "no
+	lib prefix on a module" feature.
+	(LDFLAGS): Added `-module -avoid-version' flags to build
+	versionless module libraries.
+	* src/builtin.c (m4_load_module): use libltdl.
+	(module_unload_all): use libltdl.
+	* src/m4.c (module_init): initialise module loading on demand for
+	better diagnostics, and so that m4 will still work even if
+	the module code is broken.
+	* src/m4.h (module_init): removed.  No longer relevant.
+	* modules/stdlib.c (m4_macro_table): use stdlib_LTX_ prefix on
+	exported symbols for compatibility with dlpreopening.
+	* modules/test.c (m4_macro_table, m4_init_module,
+	m4_finish_module): ditto.
+	* modules/time.c (m4_macro_table): ditto.
+	
+	* bootstrap: New file.  Runs all the autoutils in the right order
+	after a fresh checkout, or a make maintainer-clean.
+
+1999-02-18  Akim Demaille  <demaille@inf.enst.fr>
+
+	* src/builtin.c (dump_symbols): New function, factorising common
+	content of m4_dumpdef and m4_symbols.
+	(m4_dumpdef): Use it.
+	(m4_symbols): New function, implementing `symbols'.  Use it.
+	* doc/m4.texinfo: Fixed missing commas after @xref, so that the
+ 	file compile with modern makeinfo.
+	(Symbols): New node, documenting symbols.
+	(direntry): Modernize.
+
+	
+1998-12-11  Rene' Seindal  <rene@seindal.dk>
+
+	* src/builtin.c (predefined_tab): New predefined macros
+	__m4_changeword__, __m4_gmp__ and __m4_modules__ for testing for
+	configure time options.
+
+1998-12-01  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+        * src/module.c (module_try_load): Don't try to be clever and
+        overwrite argument string.  Instead allocate all constructed
+        strings locally, since they can have arbitrary lengths.  Make
+        arguments pointers to const.
+        (module_search): Simplify due to above change.
+
 1998-11-29  Rene' Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4n.

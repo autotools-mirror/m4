@@ -39,7 +39,9 @@ extern long atol ();
 extern double atof ();
 #endif /* STDC_HEADERS */
 
+#ifndef min
 #define min(a, b)	((a) < (b) ? (a) : (b))
+#endif
 
 static char const digits[] = "0123456789abcdef";
 static char const Digits[] = "0123456789ABCDEF";

@@ -30,11 +30,11 @@
 
 
 
-boolean bad_argc (token_data *name, int argc, int min, int max);
-const char *skip_space (const char *arg);
+boolean bad_argc __P ((token_data *name, int argc, int min, int max));
+const char *skip_space __P ((const char *arg));
 
-boolean numeric_arg (token_data *macro, const char *arg, int *valuep);
-void shipout_int (struct obstack *obs, int val);
-void shipout_string (struct obstack *obs, const char *s, int len, boolean quoted);
+boolean numeric_arg __P ((token_data *macro, const char *arg, int *valuep));
+void shipout_int __P ((struct obstack *obs, int val));
+void shipout_string __P ((struct obstack *obs, const char *s, int len, boolean quoted));
 
 #endif /* BUILTIN_H */

@@ -27,7 +27,7 @@ development version contains among other things (browse the
   \li Various bug-fixes.
 ])
 
-\p([A new release is expected ready for December 1998.])
+\p([A new release is expected ready for Spring 2000.])
 
 \p([GNU \tt(m4) 1.4 is from october 1994 and can be considered stable.])
 

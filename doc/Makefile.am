@@ -4,6 +4,8 @@ man_MANS = m4.1
 
 EXTRA_DIST = helptoman.pl # $(MANS)
 
+MAINTAINERCLEANFILES = Makefile.in mdate-sh texinfo.tex m4.1
+
 PERL = @PERL@
 
 %.1: helptoman.pl ../src/$*

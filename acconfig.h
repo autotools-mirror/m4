@@ -1,5 +1,5 @@
 /* Special definitions for GNU m4, processed by autoheader.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2000 Free Software Foundation, Inc.
    Francois Pinard <pinard@iro.umontreal.ca>, 1993.
 */
 
@@ -27,6 +27,9 @@
 
 /* Define to struct sigaltstack if stack_t is not defined in sys/signal.h */
 #undef stack_t
+
+/* Define to ss_base if stack_t has ss_base instead of ss_sp */
+#undef ss_sp
 
 /* Define to 1 if using stack overflow detection.  */
 #undef USE_STACKOVF

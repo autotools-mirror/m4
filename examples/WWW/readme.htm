@@ -1,4 +1,4 @@
-<DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 TRANSITIONAL//EN">
+<!DOCTYPE html public "-//w3c//dtd html 4.0 transitional//en">
 <HTML>
 <HEAD>
 <TITLE>GNU m4 - README</TITLE> 
@@ -8,7 +8,7 @@
  <BODY text="#000000" bgcolor="#FFCC99" link="#0000EF" alink="#FF0000" vlink="#51188E">
 <TABLE cellpadding=5 width="100%">
 <TR align=left valign=bottom>
-<TD align=center valign=center colspan="3" width="100%" bgcolor="#FF9900">
+<TD align=center valign=middle colspan="3" width="100%" bgcolor="#FF9900">
 
 <H1>GNU m4</H1>
  
@@ -30,11 +30,11 @@
 
 
 
-<TABLE align=left valign=top columns=1>
+<TABLE >
 <TR>
 <TD bgcolor="#CC6600">
 <P>
-<B>Generel info</B>
+<B>General info</B>
 </P>
 
 </TD>
@@ -42,13 +42,13 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="whatis.htm">What is m4</A><BR>
+<FONT size=-1><B><A HREF="whatis.htm">What is m4</A><BR>
 <A HREF="features.htm">Features</A><BR>
-<A HREF="uses.htm">Uses of m4</A></B>
+<A HREF="uses.htm">Uses of m4</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -70,11 +70,11 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="man/m4_toc.html">Manual</A></B>
+<FONT size=-1><B><A HREF="man/m4_toc.html">Manual</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -96,16 +96,16 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="readme.htm">README</A><BR>
+<FONT size=-1><B><A HREF="readme.htm">README</A><BR>
 <A HREF="todo.htm">TODO</A><BR>
 <A HREF="news.htm">NEWS</A><BR>
 <A HREF="changelog.htm">ChangeLog</A><BR>
 <A HREF="thanks.htm">Contributors</A><BR>
-<A HREF="m4/">Browse it</A></B>
+<A HREF="m4/">Browse it</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -127,12 +127,12 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="modules.htm">Modules</A><BR>
-<A HREF="visions.htm">Visions</A></B>
+<FONT size=-1><B><A HREF="modules.htm">Modules</A><BR>
+<A HREF="visions.htm">Visions</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -154,14 +154,14 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="lists.htm">Mailing-lists</A><BR>
+<FONT size=-1><B><A HREF="lists.htm">Mailing-lists</A><BR>
 <A HREF="feedback.htm">Feedback</A><BR>
 <A HREF="download.htm">Download</A><BR>
-<A HREF="bugs.htm">Known bugs</A></B>
+<A HREF="bugs.htm">Known bugs</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -183,11 +183,11 @@
 </TR>
  <TR>
 <TD>
+<P>
 
-<FONT size=-1><P>
-<B><A HREF="thissite.htm">This site</A></B>
+<FONT size=-1><B><A HREF="thissite.htm">This site</A></B></FONT>
+
 </P>
-</FONT>
 
 </TD>
 
@@ -215,6 +215,8 @@ running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 
 GNU `m4' has been originally written by René Seindal, from Denmark.
 
+GNU `m4' has a web site at http://www.seindal.dk/rene/gnu/.
+
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
 
@@ -230,8 +232,8 @@ See file `NEWS' for a list of major changes in the current release.
 See file `THANKS' for a list of contributors.
 
 By using `./configure --with-gmp, you get multiple precision integral
-and rational arithmetic in eval.  The implementation depends on the GNU
-gmp v2 library.
+and rational arithmetic using mpeval.  The implementation depends on the
+GNU gmp v2 library.
 
 By using `./configure --with-modules, you get the possibility of using
 dynamic modules.  The implementation depends on dlopen(3) interface.

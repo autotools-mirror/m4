@@ -1,53 +1,59 @@
 /* Definitions for data structures and routines for the regular
    expression library, version 0.12.
+   Copyright (C) 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
 
-   Copyright (C) 1985, 89,90,91,92,93,95,96,97 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.  Its master source is NOT part of
+   the C library, however.  The master source lives in /gd/gnu/lib.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public License as
+   published by the Free Software Foundation; either version 2 of the
+   License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   The GNU C Library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-   USA.  */
+   You should have received a copy of the GNU Library General Public
+   License along with the GNU C Library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-#ifndef __REGEXP_LIBRARY_H__
-#define __REGEXP_LIBRARY_H__
+#ifndef _REGEX_H
+#define _REGEX_H 1
+
+/* Allow the use in C++ code.  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* POSIX says that <sys/types.h> must be included (by the caller) before
    <regex.h>.  */
 
-#if !defined (_POSIX_C_SOURCE) && !defined (_POSIX_SOURCE) && defined (VMS)
+#if !defined _POSIX_C_SOURCE && !defined _POSIX_SOURCE && defined VMS
 /* VMS doesn't have `size_t' in <sys/types.h>, even though POSIX says it
    should be there.  */
-#include <stddef.h>
+# include <stddef.h>
 #endif
-
 
 /* The following two types have to be signed and unsigned integer type
    wide enough to hold a value of a pointer.  For most ANSI compilers
    ptrdiff_t and size_t should be likely OK.  Still size of these two
    types is 2 for Microsoft C.  Ugh... */
-typedef long s_reg_t;
-typedef unsigned long active_reg_t;
+typedef long int s_reg_t;
+typedef unsigned long int active_reg_t;
 
 /* The following bits are used to determine the regexp syntax we
    recognize.  The set/not-set meanings are chosen so that Emacs syntax
    remains the value 0.  The bits are given in alphabetical order, and
    the definitions shifted by one from the previous bit; thus, when we
    add or remove a bit, only one other definition need change.  */
-typedef unsigned long reg_syntax_t;
+typedef unsigned long int reg_syntax_t;
 
 /* If this bit is not set, then \ inside a bracket expression is literal.
    If set, then such a \ quotes the following character.  */
-#define RE_BACKSLASH_ESCAPE_IN_LISTS (1L)
+#define RE_BACKSLASH_ESCAPE_IN_LISTS ((unsigned long int) 1)
 
 /* If this bit is not set, then + and ? are operators, and \+ and \? are
      literals.
@@ -138,13 +144,13 @@ typedef unsigned long reg_syntax_t;
    If not set, then an unmatched ) is invalid.  */
 #define RE_UNMATCHED_RIGHT_PAREN_ORD (RE_NO_EMPTY_RANGES << 1)
 
-/* If this bit is set, do not process the GNU regex operators.
-   IF not set, then the GNU regex operators are recognized. */
-#define RE_NO_GNU_OPS (RE_UNMATCHED_RIGHT_PAREN_ORD << 1)
-
 /* If this bit is set, succeed as soon as we match the whole pattern,
    without further backtracking.  */
-#define RE_NO_POSIX_BACKTRACKING (RE_NO_GNU_OPS << 1)
+#define RE_NO_POSIX_BACKTRACKING (RE_UNMATCHED_RIGHT_PAREN_ORD << 1)
+
+/* If this bit is set, do not process the GNU regex operators.
+   If not set, then the GNU regex operators are recognized. */
+#define RE_NO_GNU_OPS (RE_NO_POSIX_BACKTRACKING << 1)
 
 /* If this bit is set, turn on internal regex debugging.
    If not set, and debugging was on, turn it off.
@@ -152,7 +158,7 @@ typedef unsigned long reg_syntax_t;
    We define this bit always, so that all that's needed to turn on
    debugging is to recompile regex.c; the calling code can always have
    this bit set, and it won't affect anything in the normal case. */
-#define RE_DEBUG (RE_NO_POSIX_BACKTRACKING << 1)
+#define RE_DEBUG (RE_NO_GNU_OPS << 1)
 
 /* This global variable defines the particular regexp syntax to use (for
    some interfaces).  When a regexp is compiled, the syntax used is
@@ -167,15 +173,15 @@ extern reg_syntax_t re_syntax_options;
 #define RE_SYNTAX_EMACS 0
 
 #define RE_SYNTAX_AWK							\
-  (RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DOT_NOT_NULL			\
-   | RE_NO_BK_PARENS            | RE_NO_BK_REFS				\
-   | RE_NO_BK_VBAR              | RE_NO_EMPTY_RANGES			\
-   | RE_DOT_NEWLINE		| RE_CONTEXT_INDEP_ANCHORS		\
+  (RE_BACKSLASH_ESCAPE_IN_LISTS   | RE_DOT_NOT_NULL			\
+   | RE_NO_BK_PARENS              | RE_NO_BK_REFS			\
+   | RE_NO_BK_VBAR                | RE_NO_EMPTY_RANGES			\
+   | RE_DOT_NEWLINE		  | RE_CONTEXT_INDEP_ANCHORS		\
    | RE_UNMATCHED_RIGHT_PAREN_ORD | RE_NO_GNU_OPS)
 
-#define RE_SYNTAX_GNU_AWK 						\
-  ((RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DEBUG) \
-    & ~(RE_DOT_NOT_NULL|RE_INTERVALS|RE_CONTEXT_INDEP_OPS))
+#define RE_SYNTAX_GNU_AWK						\
+  ((RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DEBUG)	\
+   & ~(RE_DOT_NOT_NULL | RE_INTERVALS | RE_CONTEXT_INDEP_OPS))
 
 #define RE_SYNTAX_POSIX_AWK 						\
   (RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS		\
@@ -233,10 +239,10 @@ extern reg_syntax_t re_syntax_options;
    (erroneously) define this in other header files, but we want our
    value, so remove any previous define.  */
 #ifdef RE_DUP_MAX
-#undef RE_DUP_MAX
+# undef RE_DUP_MAX
 #endif
-/* if sizeof(int) == 2, then ((1 << 15) - 1) overflows  */
-#define RE_DUP_MAX  (0x7fff)
+/* If sizeof(int) == 2, then ((1 << 15) - 1) overflows.  */
+#define RE_DUP_MAX (0x7fff)
 
 
 /* POSIX `cflags' bits (i.e., information for `regcomp').  */
@@ -276,6 +282,10 @@ extern reg_syntax_t re_syntax_options;
    `re_error_msg' table in regex.c.  */
 typedef enum
 {
+#ifdef _XOPEN_SOURCE
+  REG_ENOSYS = -1,	/* This will never happen for this implementation.  */
+#endif
+
   REG_NOERROR = 0,	/* Success.  */
   REG_NOMATCH,		/* Didn't find a match (for regexec).  */
 
@@ -307,7 +317,7 @@ typedef enum
    private to the regex routines.  */
 
 #ifndef RE_TRANSLATE_TYPE
-#define RE_TRANSLATE_TYPE char *
+# define RE_TRANSLATE_TYPE char *
 #endif
 
 struct re_pattern_buffer
@@ -319,10 +329,10 @@ struct re_pattern_buffer
   unsigned char *buffer;
 
 	/* Number of bytes to which `buffer' points.  */
-  unsigned long allocated;
+  unsigned long int allocated;
 
 	/* Number of bytes actually used in `buffer'.  */
-  unsigned long used;
+  unsigned long int used;
 
         /* Syntax setting with which the pattern was compiled.  */
   reg_syntax_t syntax;
@@ -398,7 +408,7 @@ struct re_registers
    `re_match_2' returns information about at least this many registers
    the first time a `regs' structure is passed.  */
 #ifndef RE_NREGS
-#define RE_NREGS 30
+# define RE_NREGS 30
 #endif
 
 
@@ -421,11 +431,11 @@ typedef struct
 
 #if __STDC__
 
-#define _RE_ARGS(args) args
+# define _RE_ARGS(args) args
 
 #else /* not __STDC__ */
 
-#define _RE_ARGS(args) ()
+# define _RE_ARGS(args) ()
 
 #endif /* not __STDC__ */
 
@@ -495,25 +505,33 @@ extern void re_set_registers
   _RE_ARGS ((struct re_pattern_buffer *buffer, struct re_registers *regs,
              unsigned num_regs, regoff_t *starts, regoff_t *ends));
 
-#ifdef _REGEX_RE_COMP
-#ifndef _CRAY
+#if defined _REGEX_RE_COMP || defined _LIBC
+# ifndef _CRAY
 /* 4.2 bsd compatibility.  */
 extern char *re_comp _RE_ARGS ((const char *));
 extern int re_exec _RE_ARGS ((const char *));
-#endif
+# endif
 #endif
 
 /* POSIX compatibility.  */
-extern int regcomp _RE_ARGS ((regex_t *preg, const char *pattern, int cflags));
-extern int regexec
-  _RE_ARGS ((const regex_t *preg, const char *string, size_t nmatch,
-             regmatch_t pmatch[], int eflags));
-extern size_t regerror
-  _RE_ARGS ((int errcode, const regex_t *preg, char *errbuf,
-             size_t errbuf_size));
-extern void regfree _RE_ARGS ((regex_t *preg));
+extern int regcomp _RE_ARGS ((regex_t *__preg, const char *__pattern,
+			      int __cflags));
 
-#endif /* not __REGEXP_LIBRARY_H__ */
+extern int regexec _RE_ARGS ((const regex_t *__preg,
+			      const char *__string, size_t __nmatch,
+			      regmatch_t __pmatch[], int __eflags));
+
+extern size_t regerror _RE_ARGS ((int __errcode, const regex_t *__preg,
+				  char *__errbuf, size_t __errbuf_size));
+
+extern void regfree _RE_ARGS ((regex_t *__preg));
+
+
+#ifdef __cplusplus
+}
+#endif	/* C++ */
+
+#endif /* regex.h */
 
 /*
 Local variables:

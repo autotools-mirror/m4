@@ -30,6 +30,8 @@
 #include <sys/utsname.h>
 #include <sys/types.h>
 
+#define m4_macro_table stdlib_LTX_m4_macro_table
+
 DECLARE(m4_getcwd);
 DECLARE(m4_getlogin);
 DECLARE(m4_getpid);

@@ -82,27 +82,17 @@
 /* Define to 1 if #include <signal.h> declares struct sigcontext */
 #undef HAVE_SIGCONTEXT
 
-/* Define to the name of the distribution.  */
-#undef PACKAGE
-
-/* Define to 1 if ANSI function prototypes are usable.  */
-#undef PROTOTYPES
-
 /* Define to int if rlim_t is not defined in sys/resource.h */
 #undef rlim_t
 
 /* Define to struct sigaltstack if stack_t is not defined in sys/signal.h */
 #undef stack_t
 
+/* Define to ss_base if stack_t has ss_base instead of ss_sp */
+#undef ss_sp
+
 /* Define to 1 if using stack overflow detection.  */
 #undef USE_STACKOVF
-
-/* Define to the version of the distribution.  */
-#undef VERSION
-
-/* Define to 1 for better use of the debugging malloc library.  See 
-   site ftp.antaire.com in antaire/src, file dmalloc/dmalloc.tar.gz.  */
-#undef WITH_DMALLOC
 
 /* Define to 1 if the GNU multiple precision library should be used.  */
 #undef WITH_GMP
@@ -130,9 +120,6 @@
 
 /* Define to 1 if stpcpy function is available.  */
 #undef HAVE_STPCPY
-
-/* Define to 1 if ANSI function prototypes are usable.  */
-#undef PROTOTYPES
 
 /* The number of bytes in a long long int.  */
 #undef SIZEOF_LONG_LONG_INT
@@ -280,3 +267,16 @@
 
 /* Define if you have the i library (-li).  */
 #undef HAVE_LIBI
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+
+/* Define if compiler has function prototypes */
+#undef PROTOTYPES
+
+/* Define if using the dmalloc debugging malloc package */
+#undef WITH_DMALLOC
+

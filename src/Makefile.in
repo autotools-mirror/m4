@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.3b from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -11,7 +11,7 @@
 # PARTICULAR PURPOSE.
 
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -46,7 +46,7 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
@@ -59,6 +59,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AS = @AS@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
@@ -66,6 +67,7 @@ CC = @CC@
 CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
+DLLTOOL = @DLLTOOL@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -85,6 +87,7 @@ MKINSTALLDIRS = @MKINSTALLDIRS@
 MODULES_DIR = @MODULES_DIR@
 MSGFMT = @MSGFMT@
 NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
@@ -100,23 +103,24 @@ pkglibexecdir = @pkglibexecdir@
 
 AUTOMAKE_OPTIONS = ansi2knr
 
+MAINTAINERCLEANFILES = Makefile.in ansi2knr.c ansi2knr.1 pathconf.h
+
 LIBS = @LIBS@
 
-CFLAGS = -Wall @CFLAGS@
+CFLAGS = @CFLAGS@
 
-MODULE_PATH=@MODULE_PATH@
+MODULE_PATH = @MODULE_PATH@
 
 bin_PROGRAMS = m4
 
-INCLUDES = -I$(top_srcdir)/lib @INTLINCL@
+INCLUDES = -I$(top_srcdir)/libltdl -I$(top_srcdir)/lib @INTLINCL@
 
-m4_SOURCES = m4.c m4.h builtin.c builtin.h debug.c eval.c evalmp.c \
-	format.c freeze.c input.c macro.c output.c path.c symtab.c \
-	stackovf.c module.c
+m4_SOURCES = m4.c m4.h builtin.c builtin.h debug.c eval.c evalmp.c 	format.c freeze.c input.c macro.c output.c path.c symtab.c 	stackovf.c module.c
+
 
 EXTRA_m4_SOURCES = numb.c numb.h
 
-m4_LDADD = ../lib/libm4.a @INTLLIBS@
+m4_LDADD = ../libltdl/libltdlc.la ../lib/libm4.a @INTLLIBS@
 m4_LDFLAGS = @DLLDFLAGS@
 
 EXTRA_DIST = 
@@ -133,25 +137,25 @@ ANSI2KNR = @ANSI2KNR@
 m4_OBJECTS =  m4$U.o builtin$U.o debug$U.o eval$U.o evalmp$U.o \
 format$U.o freeze$U.o input$U.o macro$U.o output$U.o path$U.o \
 symtab$U.o stackovf$U.o module$U.o
-m4_DEPENDENCIES =  ../lib/libm4.a
+m4_DEPENDENCIES =  ../libltdl/libltdlc.la ../lib/libm4.a
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
-GZIP = --best
+GZIP_ENV = --best
 SOURCES = $(m4_SOURCES) $(EXTRA_m4_SOURCES)
 OBJECTS = $(m4_OBJECTS)
 
-all: Makefile $(ANSI2KNR) $(PROGRAMS)
-
+all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .lo .o .s
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps src/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -248,35 +252,35 @@ m4: $(m4_OBJECTS) $(m4_DEPENDENCIES)
 	@rm -f m4
 	$(LINK) $(m4_LDFLAGS) $(m4_OBJECTS) $(m4_LDADD) $(LIBS)
 builtin_.c: builtin.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/builtin.c; then echo $(srcdir)/builtin.c; else echo builtin.c; fi` | $(ANSI2KNR) > builtin_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/builtin.c; then echo $(srcdir)/builtin.c; else echo builtin.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > builtin_.c
 debug_.c: debug.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/debug.c; then echo $(srcdir)/debug.c; else echo debug.c; fi` | $(ANSI2KNR) > debug_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/debug.c; then echo $(srcdir)/debug.c; else echo debug.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > debug_.c
 eval_.c: eval.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/eval.c; then echo $(srcdir)/eval.c; else echo eval.c; fi` | $(ANSI2KNR) > eval_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/eval.c; then echo $(srcdir)/eval.c; else echo eval.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > eval_.c
 evalmp_.c: evalmp.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/evalmp.c; then echo $(srcdir)/evalmp.c; else echo evalmp.c; fi` | $(ANSI2KNR) > evalmp_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/evalmp.c; then echo $(srcdir)/evalmp.c; else echo evalmp.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > evalmp_.c
 format_.c: format.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/format.c; then echo $(srcdir)/format.c; else echo format.c; fi` | $(ANSI2KNR) > format_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/format.c; then echo $(srcdir)/format.c; else echo format.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > format_.c
 freeze_.c: freeze.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/freeze.c; then echo $(srcdir)/freeze.c; else echo freeze.c; fi` | $(ANSI2KNR) > freeze_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/freeze.c; then echo $(srcdir)/freeze.c; else echo freeze.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > freeze_.c
 input_.c: input.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/input.c; then echo $(srcdir)/input.c; else echo input.c; fi` | $(ANSI2KNR) > input_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/input.c; then echo $(srcdir)/input.c; else echo input.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > input_.c
 m4_.c: m4.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4.c; then echo $(srcdir)/m4.c; else echo m4.c; fi` | $(ANSI2KNR) > m4_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4.c; then echo $(srcdir)/m4.c; else echo m4.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > m4_.c
 macro_.c: macro.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/macro.c; then echo $(srcdir)/macro.c; else echo macro.c; fi` | $(ANSI2KNR) > macro_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/macro.c; then echo $(srcdir)/macro.c; else echo macro.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > macro_.c
 module_.c: module.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/module.c; then echo $(srcdir)/module.c; else echo module.c; fi` | $(ANSI2KNR) > module_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/module.c; then echo $(srcdir)/module.c; else echo module.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > module_.c
 numb_.c: numb.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/numb.c; then echo $(srcdir)/numb.c; else echo numb.c; fi` | $(ANSI2KNR) > numb_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/numb.c; then echo $(srcdir)/numb.c; else echo numb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > numb_.c
 output_.c: output.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/output.c; then echo $(srcdir)/output.c; else echo output.c; fi` | $(ANSI2KNR) > output_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/output.c; then echo $(srcdir)/output.c; else echo output.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > output_.c
 path_.c: path.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/path.c; then echo $(srcdir)/path.c; else echo path.c; fi` | $(ANSI2KNR) > path_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/path.c; then echo $(srcdir)/path.c; else echo path.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > path_.c
 stackovf_.c: stackovf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/stackovf.c; then echo $(srcdir)/stackovf.c; else echo stackovf.c; fi` | $(ANSI2KNR) > stackovf_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/stackovf.c; then echo $(srcdir)/stackovf.c; else echo stackovf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > stackovf_.c
 symtab_.c: symtab.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/symtab.c; then echo $(srcdir)/symtab.c; else echo symtab.c; fi` | $(ANSI2KNR) > symtab_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/symtab.c; then echo $(srcdir)/symtab.c; else echo symtab.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > symtab_.c
 builtin_.o builtin_.lo debug_.o debug_.lo eval_.o eval_.lo evalmp_.o \
 evalmp_.lo format_.o format_.lo freeze_.o freeze_.lo input_.o input_.lo \
 m4_.o m4_.lo macro_.o macro_.lo module_.o module_.lo numb_.o numb_.lo \
@@ -286,8 +290,12 @@ symtab_.o symtab_.lo : $(ANSI2KNR)
 tags: TAGS
 
 ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
 	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
+	  && mkid -f$$here/ID $$unique $(LISP)
 
 TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
@@ -315,48 +323,38 @@ subdir = src
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
 	done
-builtin.o: builtin.c m4.h ../config.h ../lib/obstack.h builtin.h \
-	../lib/regex.h
-debug.o: debug.c m4.h ../config.h ../lib/obstack.h
-eval.o: eval.c m4.h ../config.h ../lib/obstack.h numb.c numb.h
-evalmp.o: evalmp.c m4.h ../config.h ../lib/obstack.h eval.c numb.c \
-	numb.h
-format.o: format.c m4.h ../config.h ../lib/obstack.h
-freeze.o: freeze.c m4.h ../config.h ../lib/obstack.h
-input.o: input.c m4.h ../config.h ../lib/obstack.h
-m4.o: m4.c m4.h ../config.h ../lib/obstack.h ../lib/getopt.h \
-	../lib/error.h
-macro.o: macro.c m4.h ../config.h ../lib/obstack.h
-module.o: module.c m4.h ../config.h ../lib/obstack.h pathconf.h
-mpeval.o: mpeval.c m4.h ../config.h ../lib/obstack.h eval.c numb.c \
-	numb.h
-numb.o: numb.c m4.h ../config.h ../lib/obstack.h numb.h
-output.o: output.c m4.h ../config.h ../lib/obstack.h
-path.o: path.c m4.h ../config.h ../lib/obstack.h
-stackovf.o: stackovf.c m4.h ../config.h ../lib/obstack.h
-symtab.o: symtab.c m4.h ../config.h ../lib/obstack.h
 
-info:
-dvi:
-check: all
-installcheck:
-install-exec: install-binPROGRAMS
-	@$(NORMAL_INSTALL)
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am: install-binPROGRAMS
+install-exec: install-exec-am
 
-install-data: 
-	@$(NORMAL_INSTALL)
+install-data-am:
+install-data: install-data-am
 
-install: install-exec install-data all
-	@:
-
-uninstall: uninstall-binPROGRAMS
-
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-binPROGRAMS
+uninstall: uninstall-am
+all-am: Makefile $(ANSI2KNR) $(PROGRAMS)
+all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
 	$(mkinstalldirs)  $(DESTDIR)$(bindir)
 
@@ -370,25 +368,34 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean:  mostlyclean-binPROGRAMS mostlyclean-compile \
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-krextra mostlyclean-kr \
 		mostlyclean-tags mostlyclean-generic
 
-clean:  clean-binPROGRAMS clean-compile clean-libtool clean-krextra \
-		clean-kr clean-tags clean-generic mostlyclean
+mostlyclean: mostlyclean-am
 
-distclean:  distclean-binPROGRAMS distclean-compile distclean-libtool \
+clean-am:  clean-binPROGRAMS clean-compile clean-libtool clean-krextra \
+		clean-kr clean-tags clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-binPROGRAMS distclean-compile distclean-libtool \
 		distclean-krextra distclean-kr distclean-tags \
-		distclean-generic clean
-	-rm -f config.status
+		distclean-generic clean-am
 	-rm -f libtool
 
-maintainer-clean:  maintainer-clean-binPROGRAMS maintainer-clean-compile \
-		maintainer-clean-libtool maintainer-clean-krextra \
-		maintainer-clean-kr maintainer-clean-tags \
-		maintainer-clean-generic distclean
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-binPROGRAMS \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-krextra maintainer-clean-kr \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
 
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
@@ -397,9 +404,11 @@ maintainer-clean-compile mostlyclean-libtool distclean-libtool \
 clean-libtool maintainer-clean-libtool mostlyclean-krextra \
 distclean-krextra clean-krextra maintainer-clean-krextra mostlyclean-kr \
 distclean-kr clean-kr maintainer-clean-kr tags mostlyclean-tags \
-distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
-installcheck install-exec install-data install uninstall all \
-installdirs mostlyclean-generic distclean-generic clean-generic \
+distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/changesy.3.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 2180
+# generated from example in ../doc/m4.texinfo line 2212
 
 . ${srcdir}/defs
 

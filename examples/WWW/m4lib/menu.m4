@@ -12,11 +12,10 @@
            $#, 3, [\_row([$1], [$2])],
            [\_row([$1], [$2])\br\n\_rows(\shift(\shift($@)))])])
 
-\pushdef([rows], [\tr([\td([\font([size=-1], 
-				  \p([\b([\_rows($@)])]))])])])
+\pushdef([rows], [\tr([\td([\p([\font([size=-1], [\b([\_rows($@)])])])])])])
 
-\table([align=left valign=top columns=1],
-       [\header([Generel info])],
+\table([],
+       [\header([General info])],
        [\rows(
 	   [whatis.htm], [What is m4],
 	   [features.htm], [Features],

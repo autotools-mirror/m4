@@ -6,7 +6,7 @@ include(`setup.m4')
 \divert(1)
 
 \p([This GNU m4 site is maintained by René Seindal,
-(\mailto(rene@seindal)).])
+(\mailto(rene@seindal.dk)).])
 
 \p([All files are generated using GNU m4 \__m4_version__.  You can view
 the \link(m4lib/, source files).  They are very simple.  They use some
@@ -20,7 +20,7 @@ changesyntax.  \i(This is a new feature in m4 1.4l).])
 
 \p([Some fairly general macros to generate various HTML construct are
 found in \showlink(m4lib/html.m4).  There are macros for simple tags,
-containers with and with attributes, links and a few utility macros.])
+containers with and without attributes, links and a few utility macros.])
 
 \p([The visual aspects of the pages are in \showlink(m4lib/layout.m4).
 The macros herein generate the complete HTML structure for the pages.

@@ -140,10 +140,10 @@
 
 struct input_funcs
 {
-  int (*peek_func)(void);	/* function to peek input */
-  int (*read_func)(void);	/* function to read input */
-  void (*unget_func)(int);	/* function to unread input */
-  void (*clean_func)(void);	/* function to clean up */
+  int (*peek_func) __P((void));		/* function to peek input */
+  int (*read_func) __P((void));		/* function to read input */
+  void (*unget_func) __P((int));	/* function to unread input */
+  void (*clean_func) __P((void));	/* function to clean up */
 };
 
 struct input_block
@@ -641,7 +641,7 @@ static int
 next_char (void)
 {
   int ch;
-  int (*f)(void);
+  int (*f) __P ((void));
 
   while (1)
     {
@@ -679,7 +679,7 @@ int
 peek_input (void)
 {
   int ch;
-  int (*f)(void);
+  int (*f) __P((void));
 
   while (1)
     {
@@ -752,6 +752,7 @@ match_input (const unsigned char *s)
   int n;			/* number of characters matched */
   int ch;			/* input character */
   const unsigned char *t;
+  struct obstack *st;
 
   ch = peek_input ();
   if (ch != *s)
@@ -769,7 +770,8 @@ match_input (const unsigned char *s)
     }
 
   /* Failed, push back input.  */
-  obstack_grow (push_string_init (), t, n);
+  st = push_string_init ();
+  obstack_grow (st, t, n);
   push_string_finish ();
   return 0;
 }
@@ -792,8 +794,8 @@ match_input (const unsigned char *s)
 | Inititialise input stacks, and quote/comment characters.  |
 `----------------------------------------------------------*/
 
-static void set_syntax_internal (int code, int ch);
-static void unset_syntax_attribute (int code, int ch);
+static void set_syntax_internal __P ((int code, int ch));
+static void unset_syntax_attribute __P ((int code, int ch));
 
 void
 input_init (void)

@@ -43,7 +43,7 @@
 \popdef([_tag])\dnl
 ])
 
-\define([doctype], [\simple_tag([$0], $@)])
+\define([doctype], [\simple_tag([!DOCTYPE], $@)])
 
 \define([html], [\large_simple_container([$0], $@)])
 \define([head], [\large_simple_container([$0], $@)])

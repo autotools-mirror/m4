@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.3b from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -15,7 +15,7 @@
 # change the names when installing.
 
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -50,7 +50,7 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
@@ -63,6 +63,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AS = @AS@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
@@ -70,6 +71,7 @@ CC = @CC@
 CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
+DLLTOOL = @DLLTOOL@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -90,6 +92,7 @@ MODULES_DIR = @MODULES_DIR@
 MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
 NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
@@ -103,18 +106,24 @@ VERSION = @VERSION@
 l = @l@
 pkglibexecdir = @pkglibexecdir@
 
-pkglibexec_LTLIBRARIES = libtest.la libtime.la libstdlib.la
+MAINTAINERCLEANFILES = Makefile.in
+
+pkglibexec_LTLIBRARIES = test.la time.la stdlib.la
 
 EXTRA_DIST = test.m4 time.m4 stdlib.m4
 
 INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib @INTLINCL@
 
-libtest_la_SOURCES = test.c
-libtime_la_SOURCES = time.c
-libstdlib_la_SOURCES = stdlib.c
+test_la_SOURCES = test.c
+time_la_SOURCES = time.c
+stdlib_la_SOURCES = stdlib.c
+
+test_la_LDFLAGS = -module
+time_la_LDFLAGS = -module
+stdlib_la_LDFLAGS = -module
 
 LIBS = 
-LDFLAGS = @DLLDFLAGS@
+LDFLAGS = -no-undefined -module -avoid-version @DLLDFLAGS@
 
 # libperl_la_SOURCES = perl.c perlxsi.c
 libperl_la_OBJECTS = perl.lo
@@ -129,34 +138,31 @@ LTLIBRARIES =  $(pkglibexec_LTLIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
-libtest_la_LDFLAGS = 
-libtest_la_LIBADD = 
-libtest_la_OBJECTS =  test.lo
-libtime_la_LDFLAGS = 
-libtime_la_LIBADD = 
-libtime_la_OBJECTS =  time.lo
-libstdlib_la_LDFLAGS = 
-libstdlib_la_LIBADD = 
-libstdlib_la_OBJECTS =  stdlib.lo
+test_la_LIBADD = 
+test_la_OBJECTS =  test.lo
+time_la_LIBADD = 
+time_la_OBJECTS =  time.lo
+stdlib_la_LIBADD = 
+stdlib_la_OBJECTS =  stdlib.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README Makefile.am Makefile.in TODO
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
-GZIP = --best
-SOURCES = $(libtest_la_SOURCES) $(libtime_la_SOURCES) $(libstdlib_la_SOURCES)
-OBJECTS = $(libtest_la_OBJECTS) $(libtime_la_OBJECTS) $(libstdlib_la_OBJECTS)
+GZIP_ENV = --best
+SOURCES = $(test_la_SOURCES) $(time_la_SOURCES) $(stdlib_la_SOURCES)
+OBJECTS = $(test_la_OBJECTS) $(time_la_OBJECTS) $(stdlib_la_OBJECTS)
 
-all: Makefile $(LTLIBRARIES)
-
+all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .lo .o .s
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modules/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -178,8 +184,8 @@ install-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
 	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
 	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(pkglibexecdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(pkglibexecdir)/$$p; \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(pkglibexecdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(pkglibexecdir)/$$p; \
 	  else :; fi; \
 	done
 
@@ -227,20 +233,24 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-libtest.la: $(libtest_la_OBJECTS) $(libtest_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkglibexecdir) $(libtest_la_LDFLAGS) $(libtest_la_OBJECTS) $(libtest_la_LIBADD) $(LIBS)
+test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(test_la_LDFLAGS) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 
-libtime.la: $(libtime_la_OBJECTS) $(libtime_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkglibexecdir) $(libtime_la_LDFLAGS) $(libtime_la_OBJECTS) $(libtime_la_LIBADD) $(LIBS)
+time.la: $(time_la_OBJECTS) $(time_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(time_la_LDFLAGS) $(time_la_OBJECTS) $(time_la_LIBADD) $(LIBS)
 
-libstdlib.la: $(libstdlib_la_OBJECTS) $(libstdlib_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkglibexecdir) $(libstdlib_la_LDFLAGS) $(libstdlib_la_OBJECTS) $(libstdlib_la_LIBADD) $(LIBS)
+stdlib.la: $(stdlib_la_OBJECTS) $(stdlib_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(stdlib_la_LDFLAGS) $(stdlib_la_OBJECTS) $(stdlib_la_LIBADD) $(LIBS)
 
 tags: TAGS
 
 ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
 	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
+	  && mkid -f$$here/ID $$unique $(LISP)
 
 TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
@@ -268,37 +278,38 @@ subdir = modules
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
 	done
-perl.lo perl.o: perl.c perlxsi.c ../src/m4.h ../config.h \
-	../lib/obstack.h ../src/builtin.h
-perlxsi.lo perlxsi.o: perlxsi.c
-stdlib.lo stdlib.o: stdlib.c ../src/m4.h ../config.h ../lib/obstack.h \
-	../src/builtin.h
-test.lo test.o: test.c ../src/m4.h ../config.h ../lib/obstack.h \
-	../src/builtin.h
-time.lo time.o: time.c ../src/m4.h ../config.h ../lib/obstack.h \
-	../src/builtin.h
 
-info:
-dvi:
-check: all
-installcheck:
-install-exec: install-pkglibexecLTLIBRARIES
-	@$(NORMAL_INSTALL)
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am: install-pkglibexecLTLIBRARIES
+install-exec: install-exec-am
 
-install-data: 
-	@$(NORMAL_INSTALL)
+install-data-am:
+install-data: install-data-am
 
-install: install-exec install-data all
-	@:
-
-uninstall: uninstall-pkglibexecLTLIBRARIES
-
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-pkglibexecLTLIBRARIES
+uninstall: uninstall-am
+all-am: Makefile $(LTLIBRARIES)
+all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
 	$(mkinstalldirs)  $(DESTDIR)$(pkglibexecdir)
 
@@ -312,25 +323,33 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean:  mostlyclean-pkglibexecLTLIBRARIES mostlyclean-compile \
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+mostlyclean-am:  mostlyclean-pkglibexecLTLIBRARIES mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-tags \
 		mostlyclean-generic
 
-clean:  clean-pkglibexecLTLIBRARIES clean-compile clean-libtool \
-		clean-tags clean-generic mostlyclean
+mostlyclean: mostlyclean-am
 
-distclean:  distclean-pkglibexecLTLIBRARIES distclean-compile \
+clean-am:  clean-pkglibexecLTLIBRARIES clean-compile clean-libtool \
+		clean-tags clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-pkglibexecLTLIBRARIES distclean-compile \
 		distclean-libtool distclean-tags distclean-generic \
-		clean
-	-rm -f config.status
+		clean-am
 	-rm -f libtool
 
-maintainer-clean:  maintainer-clean-pkglibexecLTLIBRARIES \
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-pkglibexecLTLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
 		maintainer-clean-tags maintainer-clean-generic \
-		distclean
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
 
 .PHONY: mostlyclean-pkglibexecLTLIBRARIES \
 distclean-pkglibexecLTLIBRARIES clean-pkglibexecLTLIBRARIES \
@@ -339,10 +358,11 @@ install-pkglibexecLTLIBRARIES mostlyclean-compile distclean-compile \
 clean-compile maintainer-clean-compile mostlyclean-libtool \
 distclean-libtool clean-libtool maintainer-clean-libtool tags \
 mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
-distdir info dvi installcheck install-exec install-data install \
-uninstall all installdirs mostlyclean-generic distclean-generic \
-clean-generic maintainer-clean-generic clean mostlyclean distclean \
-maintainer-clean
+distdir info-am info dvi-am dvi check check-am installcheck-am \
+installcheck install-exec-am install-exec install-data-am install-data \
+install-am install uninstall-am uninstall all-redirect all-am all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 perlxsi.c:

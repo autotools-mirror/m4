@@ -1,14 +1,15 @@
 This is Info file m4.info, produced by Makeinfo version 1.68 from the
 input file m4.texinfo.
 
+INFO-DIR-SECTION Text Processing Tools
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
 END-INFO-DIR-ENTRY
 
    This file documents the GNU `m4' utility.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998 Free Software
-Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000
+Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -26,93 +27,94 @@ translation approved by the Foundation.
 
 
 Indirect:
-m4.info-1: 973
-m4.info-2: 50410
-m4.info-3: 99746
+m4.info-1: 1024
+m4.info-2: 50285
+m4.info-3: 100109
 
 Tag Table:
 (Indirect)
-Node: Top973
-Node: Preliminaries7105
-Node: Intro7830
-Node: History9438
-Node: Invoking m410353
-Node: Bugs17466
-Node: Manual18667
-Node: Syntax20034
-Node: Names20872
-Node: Quoted strings21485
-Node: Other tokens22069
-Node: Comments22286
-Node: Input processing22973
-Node: Macros24126
-Node: Invocation24619
-Node: Inhibiting Invocation25430
-Node: Macro Arguments28575
-Node: Quoting Arguments29890
-Node: Macro expansion30695
-Node: Definitions31358
-Node: Define32135
-Node: Arguments33689
-Node: Pseudo Arguments35170
-Node: Undefine37021
-Node: Defn37683
-Node: Pushdef39153
-Node: Indir41212
-Node: Builtin41990
-Node: Conditionals42434
-Node: Ifdef43141
-Node: Ifelse43910
-Node: Loops45692
-Node: Debugging48984
-Node: Dumpdef49562
-Node: Trace50410
-Node: Debug Levels51789
-Node: Debug Output54175
-Node: Input Control54695
-Node: Dnl55308
-Node: Changequote56434
-Node: Changecom57798
-Node: Changesyntax59084
-Node: Changeword66333
-Node: M4wrap69709
-Node: File Inclusion70911
-Node: Include71227
-Node: Search Path73247
-Node: Diversions74034
-Node: Divert75271
-Node: Undivert76403
-Node: Divnum78374
-Node: Cleardiv78919
-Node: Text handling79974
-Node: Len80694
-Node: Index81092
-Node: Regexp81677
-Node: Substr82768
-Node: Translit83388
-Node: Patsubst84831
-Node: Format86922
-Node: Arithmetic88484
-Node: Incr88952
-Node: Eval89456
-Node: Mpeval92592
-Node: UNIX commands93348
-Node: Syscmd93819
-Node: Esyscmd94532
-Node: Sysval95480
-Node: Maketemp95885
-Node: Miscellaneous96943
-Node: Errprint97374
-Node: M4exit98356
-Node: Syncoutput99154
-Node: Frozen files99746
-Node: Compatibility104665
-Node: Extensions105281
-Node: Incompatibilities107751
-Node: Other Incompat108193
-Node: Experiments110358
-Node: Answers111865
-Node: Concept index112497
-Node: Macro index119918
+Node: Top1024
+Node: Preliminaries7188
+Node: Intro7913
+Node: History9522
+Node: Invoking m410437
+Node: Bugs17555
+Node: Manual18756
+Node: Syntax20123
+Node: Names20961
+Node: Quoted strings21605
+Node: Other tokens22190
+Node: Comments22407
+Node: Input processing23095
+Node: Macros24248
+Node: Invocation24741
+Node: Inhibiting Invocation25552
+Node: Macro Arguments28698
+Node: Quoting Arguments30013
+Node: Macro expansion30818
+Node: Definitions31481
+Node: Define32323
+Node: Arguments33877
+Node: Pseudo Arguments35358
+Node: Undefine37209
+Node: Defn37871
+Node: Pushdef39341
+Node: Indir41400
+Node: Builtin42178
+Node: Symbols42638
+Node: Conditionals43157
+Node: Ifdef43864
+Node: Ifelse44633
+Node: Loops46415
+Node: Debugging49707
+Node: Dumpdef50285
+Node: Trace51134
+Node: Debug Levels52514
+Node: Debug Output54900
+Node: Input Control55420
+Node: Dnl56033
+Node: Changequote57159
+Node: Changecom58746
+Node: Changesyntax60032
+Node: Changeword67280
+Node: M4wrap70663
+Node: File Inclusion71865
+Node: Include72181
+Node: Search Path74201
+Node: Diversions74988
+Node: Divert76225
+Node: Undivert77357
+Node: Divnum79328
+Node: Cleardiv79873
+Node: Text handling80928
+Node: Len81648
+Node: Index82046
+Node: Regexp82631
+Node: Substr83722
+Node: Translit84342
+Node: Patsubst85785
+Node: Format87876
+Node: Arithmetic89438
+Node: Incr89906
+Node: Eval90410
+Node: Mpeval93546
+Node: UNIX commands94302
+Node: Syscmd94773
+Node: Esyscmd95487
+Node: Sysval96435
+Node: Maketemp96840
+Node: Miscellaneous97898
+Node: Errprint98329
+Node: M4exit99311
+Node: Syncoutput100109
+Node: Frozen files100700
+Node: Compatibility105762
+Node: Extensions106378
+Node: Incompatibilities108848
+Node: Other Incompat109290
+Node: Experiments111455
+Node: Answers112962
+Node: Concept index113594
+Node: Macro index121115
 
 End Tag Table

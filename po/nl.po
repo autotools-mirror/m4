@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 1998-11-29 04:20+0100\n"
+"POT-Creation-Date: 2000-01-10 05:27+0100\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -13,113 +13,253 @@ msgstr ""
 "Content-Type: text/plain; charset=\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/builtin.c:337
+#: lib/getopt.c:677
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr ""
+
+#: lib/getopt.c:702
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr ""
+
+#: lib/getopt.c:707
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr ""
+
+#: lib/getopt.c:725 lib/getopt.c:898
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr ""
+
+#. --option
+#: lib/getopt.c:754
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr ""
+
+#. +option or -option
+#: lib/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr ""
+
+#. 1003.2 specifies the format of this message.
+#: lib/getopt.c:784
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr ""
+
+#: lib/getopt.c:787
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr ""
+
+#. 1003.2 specifies the format of this message.
+#: lib/getopt.c:817 lib/getopt.c:947
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr ""
+
+#: lib/getopt.c:864
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr ""
+
+#: lib/getopt.c:882
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr ""
+
+#: lib/obstack.c:471
+msgid "memory exhausted"
+msgstr ""
+
+#: lib/regex.c:1019
+msgid "Success"
+msgstr ""
+
+#: lib/regex.c:1022
+msgid "No match"
+msgstr ""
+
+#: lib/regex.c:1025
+#, fuzzy
+msgid "Invalid regular expression"
+msgstr "Onjuiste reguliere expressie `%s': %s"
+
+#: lib/regex.c:1028
+msgid "Invalid collation character"
+msgstr ""
+
+#: lib/regex.c:1031
+msgid "Invalid character class name"
+msgstr ""
+
+#: lib/regex.c:1034
+msgid "Trailing backslash"
+msgstr ""
+
+#: lib/regex.c:1037
+msgid "Invalid back reference"
+msgstr ""
+
+#: lib/regex.c:1040
+msgid "Unmatched [ or [^"
+msgstr ""
+
+#: lib/regex.c:1043
+msgid "Unmatched ( or \\("
+msgstr ""
+
+#: lib/regex.c:1046
+msgid "Unmatched \\{"
+msgstr ""
+
+#: lib/regex.c:1049
+msgid "Invalid content of \\{\\}"
+msgstr ""
+
+#: lib/regex.c:1052
+msgid "Invalid range end"
+msgstr ""
+
+#: lib/regex.c:1055 lib/xmalloc.c:82
+msgid "Memory exhausted"
+msgstr ""
+
+#: lib/regex.c:1058
+#, fuzzy
+msgid "Invalid preceding regular expression"
+msgstr "Fout overeenkomen reguliere expressies `%s'"
+
+#: lib/regex.c:1061
+#, fuzzy
+msgid "Premature end of regular expression"
+msgstr "Voorbarig einde van gefixeerd bestand"
+
+#: lib/regex.c:1064
+#, fuzzy
+msgid "Regular expression too big"
+msgstr "Onjuiste reguliere expressie `%s': %s"
+
+#: lib/regex.c:1067
+msgid "Unmatched ) or \\)"
+msgstr ""
+
+#: lib/regex.c:5564
+#, fuzzy
+msgid "No previous regular expression"
+msgstr "Fout overeenkomen reguliere expressies `%s'"
+
+#: src/builtin.c:349
 #, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr "Let op: Te weinig argument voor ingebouwde functie `%s'"
 
-#: src/builtin.c:343
+#: src/builtin.c:355
 #, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr ""
 "Let op: Overbodige argumenten voor ingebouwde functie `%s' worden genegeerd"
 
-#: src/builtin.c:371
+#: src/builtin.c:383
 #, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr "Niet numeriek argument voor ingebouwde functie `%s'"
 
-#: src/builtin.c:482
+#: src/builtin.c:494
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in define_macro ()"
 
-#: src/builtin.c:677 src/builtin.c:740 src/builtin.c:1383 src/builtin.c:1407
+#: src/builtin.c:681 src/builtin.c:780 src/builtin.c:1423 src/builtin.c:1447
 #, c-format
 msgid "Undefined name %s"
 msgstr "Ongedefinieerde naam %s"
 
-#: src/builtin.c:705
+#: src/builtin.c:721
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel!"
 
-#: src/builtin.c:713
+#: src/builtin.c:729
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in m4_dumpdef ()"
 
-#: src/builtin.c:764
-#, c-format
-msgid "Undefined macro `%s'"
-msgstr "Ongedefinieerde macro `%s'"
+#: src/builtin.c:804
+#, fuzzy, c-format
+msgid "Undefined name `%s'"
+msgstr "Ongedefinieerde naam %s"
 
-#: src/builtin.c:802
+#: src/builtin.c:842
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "INTERNE FOUT: Onjuist symbool type in m4_defn ()"
 
-#: src/builtin.c:868
+#: src/builtin.c:908
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Kan geen pijp openen voor commando `%s'"
 
-#: src/builtin.c:908
+#: src/builtin.c:948
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Radix in evaluatie buiten bereik (radix = %d)"
 
-#: src/builtin.c:917
+#: src/builtin.c:957
 msgid "Negative width to eval"
 msgstr "Negatieve breedte te evalueren"
 
-#: src/builtin.c:1023
+#: src/builtin.c:1063
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Niet numeriek argument voor %s"
 
-#: src/builtin.c:1035
+#: src/builtin.c:1075
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
-#: src/builtin.c:1183
+#: src/builtin.c:1223
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Ongedefinieerde syntax code %c"
 
-#: src/builtin.c:1234 src/freeze.c:207
+#: src/builtin.c:1274 src/freeze.c:211
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"
 
-#: src/builtin.c:1443
+#: src/builtin.c:1483
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debugmode: onjuiste debug vlaggen: `%s'"
 
-#: src/builtin.c:1479
+#: src/builtin.c:1519
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kan fout bestand niet instellen: %s"
 
-#: src/builtin.c:1696
+#: src/builtin.c:1740
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "LET OP: \\0 zal verdwijnen, gebruik hiervoor \\& als vervanging"
 
-#: src/builtin.c:1757 src/builtin.c:1817 src/input.c:1012
+#: src/builtin.c:1801 src/builtin.c:1861 src/input.c:1014
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Onjuiste reguliere expressie `%s': %s"
 
-#: src/builtin.c:1768 src/builtin.c:1841
+#: src/builtin.c:1812 src/builtin.c:1885
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Fout overeenkomen reguliere expressies `%s'"
 
-#: src/debug.c:379
+#: src/debug.c:380
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
 msgstr ""
 "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel! (trace_pre "
 "())"
 
-#: src/debug.c:387
+#: src/debug.c:388
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "INTERNE FOUT: Onjuiste teken data type (trace_pre ())"
 
@@ -169,32 +309,32 @@ msgstr "INTERNE FOUT: Onjuiste schuif operator in shift_term ()"
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "INTERNE FOUT: Onjuiste operator in mult_term ()"
 
-#: src/freeze.c:115
+#: src/freeze.c:119
 msgid "INTERNAL ERROR: Built-in not found in builtin table!"
 msgstr "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel!"
 
-#: src/freeze.c:128
+#: src/freeze.c:132
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in freeze_one_symbol ()"
 
-#: src/freeze.c:159
+#: src/freeze.c:163
 msgid "Expecting line feed in frozen file"
 msgstr "Verwacht nieuwe regel in gefixeerd bestand"
 
-#: src/freeze.c:161
+#: src/freeze.c:165
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Verwacht karakter `%c' in gefixeerd bestand"
 
-#: src/freeze.c:218
+#: src/freeze.c:222
 msgid "Ill-formated frozen file"
 msgstr "Slecht geformateerd gefixeerd bestand"
 
-#: src/freeze.c:273 src/freeze.c:289
+#: src/freeze.c:277 src/freeze.c:293
 msgid "Premature end of frozen file"
 msgstr "Voorbarig einde van gefixeerd bestand"
 
-#: src/freeze.c:323
+#: src/freeze.c:327
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' van gefixeerd bestand niet gevonden in functie tabel!"
@@ -225,29 +365,29 @@ msgstr "INTERNE FOUT: Invoer stapel botch in next_char ()"
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "INTERNE FOUT: Invoer stapel botch in peek_input ()"
 
-#: src/input.c:803
+#: src/input.c:805
 msgid "NONE"
 msgstr "GEEN"
 
-#: src/input.c:1197 src/input.c:1224
+#: src/input.c:1199 src/input.c:1226
 msgid "ERROR: EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
 
-#: src/m4.c:117
+#: src/m4.c:119
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "FOUT: Stapel overflow.  (Infinite define recursion?)"
 
-#: src/m4.c:144
+#: src/m4.c:146
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Probeer `%s --help' voor meer informatie.\n"
 
-#: src/m4.c:148
+#: src/m4.c:150
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Gebruik: %s [OPTIE]... [BESTAND]...\n"
 
-#: src/m4.c:149
+#: src/m4.c:151
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -273,11 +413,19 @@ msgstr ""
 "  -P, --prefix-builtins        forceer een `m4_' voorvoegsel voor alle \n"
 "                               ingebouwde functies\n"
 
-#: src/m4.c:162
+#: src/m4.c:164
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=REGEXP     gebruik REGEXP voor macro naam syntax\n"
 
-#: src/m4.c:166
+#: src/m4.c:169
+msgid ""
+"\n"
+"Dynamic loading features:\n"
+"  -m, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
+"  -M, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+msgstr ""
+
+#: src/m4.c:176
 #, fuzzy
 msgid ""
 "\n"
@@ -296,7 +444,7 @@ msgstr ""
 "  -U, --undefine=NAME          verwijder ingebouwde functie NAME\n"
 "  -s, --synclines              genereer `#line NO \"FILE\"' regel\n"
 
-#: src/m4.c:174
+#: src/m4.c:184
 msgid ""
 "\n"
 "Limits control:\n"
@@ -310,7 +458,7 @@ msgstr ""
 "  -H, --hashsize=PRIME         stel symbolen opzoek hash tabel grootte\n"
 "  -L, --nesting-limit=NUMBER   verander kunstmatige nesting limiet\n"
 
-#: src/m4.c:181
+#: src/m4.c:191
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -324,7 +472,7 @@ msgstr ""
 "  -R, --reload-state=FILE      herlaad een gefixeerde staat van BESTAND\n"
 "                               aan het begin\n"
 
-#: src/m4.c:187
+#: src/m4.c:197
 msgid ""
 "\n"
 "Debugging:\n"
@@ -341,7 +489,7 @@ msgstr ""
 "  -l, --arglength=NUM          restrict macro traceer grootte\n"
 "  -o, --error-output=FILE      redirect debug en traceer uitvoer\n"
 
-#: src/m4.c:195
+#: src/m4.c:205
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -371,7 +519,7 @@ msgstr ""
 "  i   show changes in input files\n"
 "  V   shorthand for all of the above flags\n"
 
-#: src/m4.c:210
+#: src/m4.c:220
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -379,7 +527,7 @@ msgstr ""
 "\n"
 "Als geen BESTAND of als BESTAND `-' is, standaard invoer wordt gelezen.\n"
 
-#: src/m4.c:215
+#: src/m4.c:225
 #, fuzzy
 msgid ""
 "\n"
@@ -388,16 +536,26 @@ msgstr ""
 "\n"
 "Meld fouten via <m4-bugs@gnu.org>.\n"
 
-#: src/m4.c:388
+#: src/m4.c:414
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Onjuiste debug vlaggen: `%s'"
 
-#: src/m4.c:417
+#: src/m4.c:436
+#, c-format
+msgid "ERROR: failed to add search directory `%s'"
+msgstr ""
+
+#: src/m4.c:440
+#, c-format
+msgid "ERROR: failed to add search directory `%s': %s"
+msgstr ""
+
+#: src/m4.c:460
 msgid " (options:"
 msgstr ""
 
-#: src/m4.c:500
+#: src/m4.c:542
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNE FOUT: Onjuiste code in afgeleide argumenten"
 
@@ -423,40 +581,63 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FOUT: Recursie limiet of %d overschreden, gebruik -L<N> om dit te wijzigen"
 
-#: src/module.c:312
-#, fuzzy, c-format
-msgid "Module search for `%s' found `%s'"
-msgstr "Zoeken naar `%s' via PATH levert `%s'"
-
-#: src/module.c:349
+#: src/module.c:123
 #, c-format
-msgid "ERROR: cannot find module `%s': %s"
+msgid "ERROR: failed to initialise modules: %s"
 msgstr ""
 
-#: src/module.c:353
+#: src/module.c:221
 #, c-format
-msgid "ERROR: cannot find module `%s'"
+msgid "ERROR: cannot find module: `%s'"
 msgstr ""
 
-#: src/output.c:198
+#: src/module.c:224
+#, c-format
+msgid "ERROR: cannot find module: `%s': %s"
+msgstr ""
+
+#: src/module.c:274
+msgid "ERROR: cannot close modules"
+msgstr ""
+
+#: src/module.c:277
+#, c-format
+msgid "ERROR: cannot cannot close modules: %s"
+msgstr ""
+
+#: src/module.c:284
+#, c-format
+msgid "ERROR: cannot close module: `%s'"
+msgstr ""
+
+#: src/module.c:288
+#, c-format
+msgid "ERROR: cannot cannot close module: `%s': %s"
+msgstr ""
+
+#: src/output.c:262
 msgid "ERROR: Cannot create temporary file for diversion"
 msgstr "FOUT: Kan geen tijdelijk bestand aanmaken voor diversion"
 
-#: src/output.c:208
+#: src/output.c:272
 msgid "ERROR: Cannot flush diversion to temporary file"
 msgstr "FOUT: Kan diversion niet flushen naar tijdelijk bestand"
 
-#: src/output.c:292
+#: src/output.c:356
 msgid "ERROR: Copying inserted file"
 msgstr "FOUT: Kopieren ingevoegde bestanden"
 
-#: src/output.c:473
+#: src/output.c:537
 msgid "ERROR: Reading inserted file"
 msgstr "FOUT: Lezen ingevoegd bestand"
 
-#: src/output.c:572
+#: src/output.c:636
 msgid "Cannot stat diversion"
 msgstr "Cannot stat diversion"
+
+#: src/output.c:639
+msgid "Diversion too large"
+msgstr ""
 
 #: src/path.c:157
 #, c-format
@@ -465,11 +646,11 @@ msgstr "Zoeken naar `%s' via PATH levert `%s'"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:168
+#: src/stackovf.c:175
 msgid "VMEM limit exceeded?\n"
 msgstr "VMEM limiet overschreden?\n"
 
-#: src/stackovf.c:190
+#: src/stackovf.c:197
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -477,7 +658,7 @@ msgstr ""
 "Geheugen bounds violation gedetecteerd (SIGSEGV).  Een stack overflow \n"
 "is opgetreden, of er is een fout in "
 
-#: src/stackovf.c:195
+#: src/stackovf.c:202
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Kontroleer voor mogelijk oneindige recusie.\n"
 
@@ -489,3 +670,10 @@ msgstr "INTERNE FOUT: Ongeldige mode voor symbol_lookup ()"
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
+
+#~ msgid "Undefined macro `%s'"
+#~ msgstr "Ongedefinieerde macro `%s'"
+
+#, fuzzy
+#~ msgid "Module search for `%s' found `%s'"
+#~ msgstr "Zoeken naar `%s' via PATH levert `%s'"

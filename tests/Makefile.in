@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.3b from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -15,7 +15,7 @@
 # The previous line is needed by `./esyscmd.1.test'
 
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -50,7 +50,7 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
@@ -63,6 +63,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AS = @AS@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
@@ -70,6 +71,7 @@ CC = @CC@
 CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
+DLLTOOL = @DLLTOOL@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -90,6 +92,7 @@ MODULES_DIR = @MODULES_DIR@
 MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
 NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
@@ -103,94 +106,22 @@ VERSION = @VERSION@
 l = @l@
 pkglibexecdir = @pkglibexecdir@
 
-EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS \
-	defs $(TESTS) $(OTHER_FILES)
+EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS 	defs $(TESTS) $(OTHER_FILES)
+
+
+MAINTAINERCLEANFILES = Makefile.in $(GENERATED_TESTS) config.m4 config.sh 	stamp-TESTS
+
 
 TESTS = $(GENERATED_TESTS) $(OTHER_TESTS)
 
-GENERATED_TESTS = \
-	generated-tests/argument.1.test \
-	generated-tests/argument.2.test \
-	generated-tests/argument.3.test \
-	generated-tests/argument.4.test \
-	generated-tests/changeco.1.test \
-	generated-tests/changeco.2.test \
-	generated-tests/changequ.1.test \
-	generated-tests/changequ.2.test \
-	generated-tests/changequ.3.test \
-	generated-tests/changesy.1.test \
-	generated-tests/changesy.2.test \
-	generated-tests/changesy.3.test \
-	generated-tests/changesy.4.test \
-	generated-tests/changesy.5.test \
-	generated-tests/changesy.6.test \
-	generated-tests/changesy.7.test \
-	generated-tests/changesy.8.test \
-	generated-tests/cleardiv.1.test \
-	generated-tests/cleardiv.2.test \
-	generated-tests/define.1.test \
-	generated-tests/define.2.test \
-	generated-tests/defn.1.test \
-	generated-tests/defn.2.test \
-	generated-tests/divert.1.test \
-	generated-tests/divert.2.test \
-	generated-tests/divnum.1.test \
-	generated-tests/dnl.1.test \
-	generated-tests/dumpdef.1.test \
-	generated-tests/errprint.1.test \
-	generated-tests/errprint.2.test \
-	generated-tests/esyscmd.1.test \
-	generated-tests/eval.1.test \
-	generated-tests/eval.2.test \
-	generated-tests/format.1.test \
-	generated-tests/ifdef.1.test \
-	generated-tests/ifelse.1.test \
-	generated-tests/ifelse.2.test \
-	generated-tests/include.1.test \
-	generated-tests/include.2.test \
-	generated-tests/include.3.test \
-	generated-tests/incr.1.test \
-	generated-tests/index.1.test \
-	generated-tests/indir.1.test \
-	generated-tests/len.1.test \
-	generated-tests/loops.1.test \
-	generated-tests/loops.2.test \
-	generated-tests/m4exit.1.test \
-	generated-tests/m4wrap.1.test \
-	generated-tests/patsubst.1.test \
-	generated-tests/patsubst.2.test \
-	generated-tests/pseudoar.1.test \
-	generated-tests/pseudoar.2.test \
-	generated-tests/pseudoar.3.test \
-	generated-tests/pseudoar.4.test \
-	generated-tests/pseudoar.5.test \
-	generated-tests/pushdef.1.test \
-	generated-tests/pushdef.2.test \
-	generated-tests/regexp.1.test \
-	generated-tests/regexp.2.test \
-	generated-tests/substr.1.test \
-	generated-tests/sysval.1.test \
-	generated-tests/trace.1.test \
-	generated-tests/translit.1.test \
-	generated-tests/undefine.1.test \
-	generated-tests/undivert.1.test \
-	generated-tests/undivert.2.test \
-	generated-tests/undivert.3.test
+GENERATED_TESTS =  	generated-tests/argument.1.test 	generated-tests/argument.2.test 	generated-tests/argument.3.test 	generated-tests/argument.4.test 	generated-tests/changeco.1.test 	generated-tests/changeco.2.test 	generated-tests/changequ.1.test 	generated-tests/changequ.2.test 	generated-tests/changequ.3.test 	generated-tests/changesy.1.test 	generated-tests/changesy.2.test 	generated-tests/changesy.3.test 	generated-tests/changesy.4.test 	generated-tests/changesy.5.test 	generated-tests/changesy.6.test 	generated-tests/changesy.7.test 	generated-tests/changesy.8.test 	generated-tests/cleardiv.1.test 	generated-tests/cleardiv.2.test 	generated-tests/define.1.test 	generated-tests/define.2.test 	generated-tests/defn.1.test 	generated-tests/defn.2.test 	generated-tests/divert.1.test 	generated-tests/divert.2.test 	generated-tests/divnum.1.test 	generated-tests/dnl.1.test 	generated-tests/dumpdef.1.test 	generated-tests/errprint.1.test 	generated-tests/errprint.2.test 	generated-tests/esyscmd.1.test 	generated-tests/eval.1.test 	generated-tests/eval.2.test 	generated-tests/format.1.test 	generated-tests/ifdef.1.test 	generated-tests/ifelse.1.test 	generated-tests/ifelse.2.test 	generated-tests/include.1.test 	generated-tests/include.2.test 	generated-tests/include.3.test 	generated-tests/incr.1.test 	generated-tests/index.1.test 	generated-tests/indir.1.test 	generated-tests/len.1.test 	generated-tests/loops.1.test 	generated-tests/loops.2.test 	generated-tests/m4exit.1.test 	generated-tests/m4wrap.1.test 	generated-tests/patsubst.1.test 	generated-tests/patsubst.2.test 	generated-tests/pseudoar.1.test 	generated-tests/pseudoar.2.test 	generated-tests/pseudoar.3.test 	generated-tests/pseudoar.4.test 	generated-tests/pseudoar.5.test 	generated-tests/pushdef.1.test 	generated-tests/pushdef.2.test 	generated-tests/regexp.1.test 	generated-tests/regexp.2.test 	generated-tests/substr.1.test 	generated-tests/symbols.1.test 	generated-tests/sysval.1.test 	generated-tests/trace.1.test 	generated-tests/translit.1.test 	generated-tests/undefine.1.test 	generated-tests/undivert.1.test 	generated-tests/undivert.2.test 	generated-tests/undivert.3.test
 
-OTHER_TESTS = \
-	other-tests/gmp.test \
-	other-tests/iso8859.test \
-	other-tests/sync-lines.test \
-	other-tests/import-environment.test \
-	other-tests/discard-comments.test \
-	other-tests/stackovf.test
 
-OTHER_FILES = \
-	other-tests/gmp.m4 \
-	other-tests/iso8859.m4 \
-	other-tests/import-environment.m4 \
-	other-tests/discard-comments.m4 \
-	other-tests/sync-lines.m4
+OTHER_TESTS =  	other-tests/gmp.test 	other-tests/iso8859.test 	other-tests/sync-lines.test 	other-tests/import-environment.test 	other-tests/discard-comments.test 	other-tests/stackovf.test
+
+
+OTHER_FILES =  	other-tests/gmp.m4 	other-tests/iso8859.m4 	other-tests/import-environment.m4 	other-tests/discard-comments.m4 	other-tests/sync-lines.m4
+
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -200,11 +131,10 @@ DIST_COMMON =  Makefile.am Makefile.in
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
-GZIP = --best
-all: Makefile
-
+GZIP_ENV = --best
+all: all-redirect
 .SUFFIXES:
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps tests/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -223,9 +153,13 @@ distdir: $(DISTFILES)
 	$(mkinstalldirs) $(distdir)/generated-tests $(distdir)/other-tests
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
 	done
 check-TESTS: $(TESTS)
 	@failed=0; all=0; \
@@ -252,24 +186,30 @@ check-TESTS: $(TESTS)
 	echo "$$banner"; \
 	echo "$$dashes"; \
 	test "$$failed" -eq 0
-info:
-dvi:
-check: all
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
-installcheck:
-install-exec: 
-	@$(NORMAL_INSTALL)
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
 
-install-data: 
-	@$(NORMAL_INSTALL)
+install-data-am:
+install-data: install-data-am
 
-install: install-exec install-data all
-	@:
-
-uninstall: 
-
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile
+all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
 
 
@@ -282,20 +222,30 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean:  mostlyclean-generic
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+mostlyclean-am:  mostlyclean-generic
 
-clean:  clean-generic mostlyclean
+mostlyclean: mostlyclean-am
 
-distclean:  distclean-generic clean
-	-rm -f config.status
+clean-am:  clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-generic clean-am
 	-rm -f libtool
 
-maintainer-clean:  maintainer-clean-generic distclean
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-.PHONY: tags distdir check-TESTS info dvi installcheck install-exec \
-install-data install uninstall all installdirs mostlyclean-generic \
+maintainer-clean: maintainer-clean-am
+
+.PHONY: tags distdir check-TESTS info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 

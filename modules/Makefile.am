@@ -2,18 +2,24 @@
 # to pretend we are compiling shared libraries (which we are) and then
 # change the names when installing.
 
-pkglibexec_LTLIBRARIES = libtest.la libtime.la libstdlib.la
+MAINTAINERCLEANFILES = Makefile.in
+
+pkglibexec_LTLIBRARIES = test.la time.la stdlib.la
 
 EXTRA_DIST = test.m4 time.m4 stdlib.m4
 
 INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib @INTLINCL@
 
-libtest_la_SOURCES = test.c
-libtime_la_SOURCES = time.c
-libstdlib_la_SOURCES = stdlib.c
+test_la_SOURCES = test.c
+time_la_SOURCES = time.c
+stdlib_la_SOURCES = stdlib.c
+
+test_la_LDFLAGS = -module
+time_la_LDFLAGS = -module
+stdlib_la_LDFLAGS = -module
 
 LIBS = 
-LDFLAGS = @DLLDFLAGS@
+LDFLAGS = -no-undefined -module -avoid-version @DLLDFLAGS@
 
 # libperl_la_SOURCES = perl.c perlxsi.c
 libperl_la_OBJECTS = perl.lo

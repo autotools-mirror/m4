@@ -25,6 +25,8 @@
 #include <time.h>
 #endif /* TM_IN_SYS_TIME */
 
+#define m4_macro_table time_LTX_m4_macro_table
+
 DECLARE(m4_currenttime);
 DECLARE(m4_ctime);
 DECLARE(m4_gmtime);

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 98 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 98, 99, 2000 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ DECLARE (m4_regexp);
 DECLARE (m4_shift);
 DECLARE (m4_sinclude);
 DECLARE (m4_substr);
+DECLARE (m4_symbols);
 DECLARE (m4_syncoutput);
 DECLARE (m4_syscmd);
 DECLARE (m4_sysval);
@@ -137,7 +138,8 @@ builtin_tab[] =
   { "shift",		FALSE,	FALSE,	FALSE,	m4_shift },
   { "sinclude",		FALSE,	FALSE,	TRUE,	m4_sinclude },
   { "substr",		FALSE,	FALSE,	TRUE,	m4_substr },
-  { "syncoutput",       TRUE,   FALSE,  TRUE,   m4_syncoutput },
+  { "symbols",		TRUE,	FALSE,	FALSE,	m4_symbols },
+  { "syncoutput",	TRUE,   FALSE,  TRUE,   m4_syncoutput },
   { "syscmd",		FALSE,	FALSE,	TRUE,	m4_syscmd },
   { "sysval",		FALSE,	FALSE,	FALSE,	m4_sysval },
   { "traceoff",		FALSE,	FALSE,	FALSE,	m4_traceoff },
@@ -155,6 +157,16 @@ predefined_tab[] =
   { "unix",	"__unix__",	"" },
   { NULL,	"__gnu__",	"" },
   { NULL,	"__m4_version__", VERSION },
+
+#ifdef ENABLE_CHANGEWORD
+  { NULL,	"__m4_changeword__", "" },
+#endif /* ENABLE_CHANGEWORD */
+#ifdef WITH_GMP
+  { NULL,	"__m4_gmp__", "" },
+#endif /* WITH_GMP */
+#ifdef WITH_MODULES
+  { NULL,	"__m4_modules__", "" },
+#endif /* WITH_MODULES */
 
   { NULL,	NULL,		NULL },
 };
@@ -249,7 +261,7 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
 | Install a new builtin_table.  |
 `------------------------------*/
 
-static void
+void
 install_builtin_table (builtin *table)
 {
   const builtin *bp;
@@ -514,26 +526,20 @@ m4_popdef (struct obstack *obs, int argc, token_data **argv)
 }
 
 
+#ifdef WITH_MODULES
+
 /*-------------------------------------.
 | Loading external module at runtime.  |
 `-------------------------------------*/
 
-#ifdef WITH_MODULES
-
 static void
 m4_loadmodule (struct obstack *obs, int argc, token_data **argv)
 {
-  builtin *bp;
-
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  bp = module_load (ARG (1), obs);
-
-  if (bp != NULL)
-    install_builtin_table(bp);
-}
-
+  module_load (ARG(1), obs);
+}  
 
 #endif /* WITH_MODULES */
 
@@ -644,6 +650,42 @@ dumpdef_cmp (const voidstar s1, const voidstar s2)
 		 SYMBOL_NAME (* (symbol *const *) s2));
 }
 
+/*------------------------------------------------------------------------.
+| If there are no arguments, build a sorted list of all defined,          |
+| un-shadowed, symbols, otherwise, only the specified symbols.            |
+`------------------------------------------------------------------------*/
+
+static void
+dump_symbols (struct dump_symbol_data *data, int argc, token_data **argv,
+	      boolean complain)
+{
+  data->base = (symbol **) obstack_base (data->obs);
+  data->size = 0;
+
+  if (argc == 1)
+    {
+      hack_all_symbols (dump_symbol, (char *) data);
+    }
+  else
+    {
+      int i;
+      symbol *s;
+
+      for (i = 1; i < argc; i++)
+	{
+	  s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
+	    dump_symbol (s, data);
+	  else if (complain)
+	    M4ERROR ((warning_status, 0,
+		      _("Undefined name %s"), TOKEN_DATA_TEXT (argv[i])));
+	}
+    }
+
+  obstack_finish (data->obs);
+  qsort ((char *) data->base, data->size, sizeof (symbol *), dumpdef_cmp);
+}
+
 /*-------------------------------------------------------------------------.
 | Implementation of "dumpdef" itself.  It builds up a table of pointers to |
 | symbols, sorts it and prints the sorted table.			   |
@@ -652,37 +694,11 @@ dumpdef_cmp (const voidstar s1, const voidstar s2)
 static void
 m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 {
-  symbol *s;
-  int i;
   struct dump_symbol_data data;
   const builtin *bp;
 
   data.obs = obs;
-  data.base = (symbol **) obstack_base (obs);
-  data.size = 0;
-
-  if (argc == 1)
-    {
-      hack_all_symbols (dump_symbol, (char *) &data);
-    }
-  else
-    {
-      for (i = 1; i < argc; i++)
-	{
-	  s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
-	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
-	    dump_symbol (s, &data);
-	  else
-	    M4ERROR ((warning_status, 0,
-		      _("Undefined name %s"), TOKEN_DATA_TEXT (argv[i])));
-	}
-    }
-
-  /* Make table of symbols invisible to expand_macro ().  */
-
-  (void) obstack_finish (obs);
-
-  qsort ((char *) data.base, data.size, sizeof (symbol *), dumpdef_cmp);
+  dump_symbols (&data, argc, argv, TRUE);
 
   for (; data.size > 0; --data.size, data.base++)
     {
@@ -716,6 +732,30 @@ INTERNAL ERROR: Bad token data type in m4_dumpdef ()")));
 	  break;
 	}
     }
+}
+
+/*-------------------------------------------------------------------------.
+| Implementation of "symbols" itself.  It builds up a table of pointers to |
+| symbols, sorts it and ships out the symbols name.			   |
+`-------------------------------------------------------------------------*/
+
+static void
+m4_symbols (struct obstack *obs, int argc, token_data **argv)
+{
+  struct dump_symbol_data data;
+  struct obstack data_obs;
+
+  obstack_init (&data_obs);
+  data.obs = &data_obs;
+  dump_symbols (&data, argc, argv, FALSE);
+
+  for (; data.size > 0; --data.size, data.base++)
+    {
+      shipout_string (obs, SYMBOL_NAME (data.base[0]), 0, TRUE);
+      if (data.size > 1)
+	obstack_1grow (obs, ',');
+    }
+  obstack_free (&data_obs, NULL);
 }
 
 /*---------------------------------------------------------------------.
@@ -761,7 +801,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   s = lookup_symbol (name, SYMBOL_LOOKUP);
   if (s == NULL)
     M4ERROR ((warning_status, 0,
-	      _("Undefined macro `%s'"), name));
+	      _("Undefined name `%s'"), name));
   else
     call_macro (s, argc - 1, argv + 1, obs);
 }
@@ -769,7 +809,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
 /*-------------------------------------------------------------------------.
 | The macro "defn" returns the quoted definition of the macro named by the |
 | first argument.  If the macro is builtin, it will push a special	   |
-| macro-definition token on ht input stack.				   |
+| macro-definition token on the input stack.				   |
 `-------------------------------------------------------------------------*/
 
 static void
@@ -887,8 +927,8 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 | actual work is done in the function evaluate (), which lives in eval.c.  |
 `-------------------------------------------------------------------------*/
 
-typedef boolean (*eval_func)(struct obstack *obs, const char *expr, 
-			     const int radix, int min);
+typedef boolean (*eval_func) __P ((struct obstack *obs, const char *expr, 
+				   const int radix, int min));
 
 static void
 do_eval (struct obstack *obs, int argc, token_data **argv, eval_func func)
@@ -1109,7 +1149,7 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------*/
 
 /* expand_ranges () from m4_translit () are used here. */
-static const char *expand_ranges (const char *s, struct obstack *obs);
+static const char *expand_ranges __P ((const char *s, struct obstack *obs));
 
 static void
 m4_changesyntax (struct obstack *obs, int argc, token_data **argv)
@@ -1576,7 +1616,11 @@ expand_ranges (const char *s, struct obstack *obs)
 	{
 	  to = *++s;
 	  if (to == '\0')
-	    obstack_1grow (obs, '-'); /* trailing dash */
+	    {
+              /* trailing dash */
+              obstack_1grow (obs, '-');
+              break;
+	    }
 	  else if (from <= to)
 	    {
 	      while (from++ < to)

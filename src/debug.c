@@ -20,7 +20,7 @@
 
 #include <sys/stat.h>
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -220,15 +220,16 @@ debug_message_prefix (void)
 | left quote) and %r (optional right quote).			       |
 `---------------------------------------------------------------------*/
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
 static void
 trace_format (const char *fmt, ...)
 #else
 static void
-trace_format (...)
+trace_format (va_alist)
+     va_dcl
 #endif
 {
-#if ! __STDC__
+#if ! ((defined __STDC__ && __STDC__) || defined PROTOTYPES)
   const char *fmt;
 #endif
   va_list args;
@@ -240,7 +241,7 @@ trace_format (...)
   int slen;
   int maxlen;
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
   va_start (args, fmt);
 #else
   va_start (args);

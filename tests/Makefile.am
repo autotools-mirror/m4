@@ -5,6 +5,9 @@
 EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS \
 	defs $(TESTS) $(OTHER_FILES)
 
+MAINTAINERCLEANFILES = Makefile.in $(GENERATED_TESTS) config.m4 config.sh \
+	stamp-TESTS
+
 TESTS = $(GENERATED_TESTS) $(OTHER_TESTS)
 
 GENERATED_TESTS = \
@@ -68,6 +71,7 @@ GENERATED_TESTS = \
 	generated-tests/regexp.1.test \
 	generated-tests/regexp.2.test \
 	generated-tests/substr.1.test \
+	generated-tests/symbols.1.test \
 	generated-tests/sysval.1.test \
 	generated-tests/trace.1.test \
 	generated-tests/translit.1.test \

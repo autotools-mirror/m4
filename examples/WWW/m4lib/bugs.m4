@@ -50,3 +50,4 @@ returns ENOSYS.  It should silently revert to default behaviour.])
 [\p([])
 
 ])
+\undivert

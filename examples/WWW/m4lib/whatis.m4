@@ -38,6 +38,11 @@ compulsive programmers.])
 \p([Autoconf needs GNU m4 for generating `configure' scripts, but not for
 running them.])
 
+\p([GNU m4 is a Unix program.  It is designed to work in a Unix-like
+environment.  GNU m4 1.4 has, however, been ported to DJGPP, the GNU C
+compiler for DOS/Windows.  These files are present in the
+\link(download.htm, download area).])
+
 \divert(0)\dnl
 \DO_LAYOUT([\undivert(1)])
 \divert(-1)

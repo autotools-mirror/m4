@@ -1,14 +1,15 @@
 This is Info file m4.info, produced by Makeinfo version 1.68 from the
 input file m4.texinfo.
 
+INFO-DIR-SECTION Text Processing Tools
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
 END-INFO-DIR-ENTRY
 
    This file documents the GNU `m4' utility.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998 Free Software
-Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000
+Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -23,6 +24,38 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
+
+
+File: m4.info,  Node: Dumpdef,  Next: Trace,  Prev: Debugging,  Up: Debugging
+
+Displaying macro definitions
+============================
+
+   If you want to see what a name expands into, you can use the builtin
+`dumpdef':
+
+     dumpdef(...)
+
+which accepts any number of arguments.  If called without any arguments,
+it displays the definitions of all known names, otherwise it displays
+the definitions of the names given.  The output is printed directly on
+the standard error output.
+
+   The expansion of `dumpdef' is void.
+
+     define(`foo', `Hello world.')
+     =>
+     dumpdef(`foo')
+     error-->foo:	`Hello world.'
+     =>
+     dumpdef(`define')
+     error-->define:	<define>
+     =>
+
+   The last example shows how builtin macros definitions are displayed.
+
+   *Note Debug Levels::, for information on controlling the details of
+the display.
 
 
 File: m4.info,  Node: Trace,  Next: Debug Levels,  Prev: Dumpdef,  Up: Debugging
@@ -64,7 +97,7 @@ is printed directly on the standard error output.
 most of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.
 
-   *Note Debug Levels:: for information on controlling the details of
+   *Note Debug Levels::, for information on controlling the details of
 the display.
 
 
@@ -250,6 +283,11 @@ quoting mechanism, leaving no way to quote text.
 
    There is no way in `m4' to quote a string containing an unmatched
 left quote, except using `changequote' to change the current quotes.
+
+   If the quotes should be changed from, say, `[' to `[[', temporary
+quote characters have to be defined.  To achieve this, two calls of
+`changequote' must be made, one for the temporary quotes and one for
+the new quotes.
 
    Neither quote string should start with a letter or `_' (underscore),
 as they will be confused with names in the input.  Doing so disables
@@ -469,7 +507,7 @@ changing the syntax categories we can avoid it.
 It is not yet possible to redefine the `$' used to indicate macro
 arguments in user defined macros.
 
-   Macro calls can be given a TeX- or texinfo like syntax using an
+   Macro calls can be given a TeX or Texinfo like syntax using an
 escape.  If one or more characters are defined as escapes macro names
 are only recognised if preceded by an escape character.
 
@@ -503,9 +541,9 @@ They and the escape character are simply output.
      \# \foo # Comment \foo
      =>No comment bar # Comment \foo
 
-   Active characters are known from TeX.  In `m4' a active character is
-always seen as a one-letter word, and so, if it has a macro definition,
-the macro will be called.
+   Active characters are known from TeX.  In `m4' an active character
+is always seen as a one-letter word, and so, if it has a macro
+definition, the macro will be called.
 
      define(`@', `TEST')
      =>
@@ -571,7 +609,7 @@ Note how it is possible to have both long and short quotes, if
 `changequote' is used before `changesyntax'.
 
    The syntax table is initialiased to be backwards compatible, so if
-you never calls `changesyntax', nothing will have changed.
+you never call `changesyntax', nothing will have changed.
 
    Debugging output continue to use `(', `,' and `)' to show macro
 calls.
@@ -604,8 +642,9 @@ apply translations to a file of numbers:
 
      changeword(`[_a-zA-Z0-9]+')
      define(1, 0)
-     =>
      1
+     =>
+     0
      =>0
 
    The syntax for regular expressions is the same as in GNU Emacs.
@@ -1474,7 +1513,7 @@ which executes SHELL-COMMAND as a shell command.
 
    The expansion of `syscmd' is void, *not* the output from
 SHELL-COMMAND!  Output or error messages from SHELL-COMMAND are not
-read by `m4'.  *Note Esyscmd:: if you need to process the command
+read by `m4'.  *Note Esyscmd::, if you need to process the command
 output.
 
    Prior to executing the command, `m4' flushes its output buffers.
@@ -1641,22 +1680,4 @@ the exit code is zero.
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
 (*note M4wrap::.) is not reread.
-
-
-File: m4.info,  Node: Syncoutput,  Prev: M4exit,  Up: Miscellaneous
-
-Turning sync lines on and off within `m4'
-=========================================
-
-   If you need to toggle sync lines on and off while processing macros,
-or to insure that they are off or on, you may do so using `syncoutput'.
-
-   `syncoutput(1)', `syncoutput(on)', and `syncoutput(yes)' causes
-`m4'] to emit sync lines of the form: `#line <number> ["<filename>"]'.
-
-   `syncoutput(0)', `syncoutput(off)', and `syncoutput(no)' turn them
-off.
-
-   All other arguments are ignored as is `syncoutput' without
-parenthesis.
 

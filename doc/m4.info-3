@@ -1,14 +1,15 @@
 This is Info file m4.info, produced by Makeinfo version 1.68 from the
 input file m4.texinfo.
 
+INFO-DIR-SECTION Text Processing Tools
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
 END-INFO-DIR-ENTRY
 
    This file documents the GNU `m4' utility.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998 Free Software
-Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000
+Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -23,6 +24,24 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
+
+
+File: m4.info,  Node: Syncoutput,  Prev: M4exit,  Up: Miscellaneous
+
+Turning sync lines on and off within `m4'
+=========================================
+
+   If you need to toggle sync lines on and off while processing macros,
+or to insure that they are off or on, you may do so using `syncoutput'.
+
+   `syncoutput(1)', `syncoutput(on)', and `syncoutput(yes)' causes `m4'
+to emit sync lines of the form: `#line <number> ["<filename>"]'.
+
+   `syncoutput(0)', `syncoutput(off)', and `syncoutput(no)' turn them
+off.
+
+   All other arguments are ignored as is `syncoutput' without
+parenthesis.
 
 
 File: m4.info,  Node: Frozen files,  Next: Compatibility,  Prev: Miscellaneous,  Up: Top
@@ -82,6 +101,11 @@ output:
      m4 -R file1.m4f -F file2.m4f file2.m4
      m4 -R file2.m4f -F file3.m4f file3.m4
      m4 -R file3.m4f file4.m4
+
+   This could also be done in a simple way, if everything has been
+prepared before:
+
+     m4 -F file1.m4f file1.m4 file2.m4 file3.m4 file4.m4
 
    Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
@@ -424,8 +448,9 @@ Concept index
 * GNU extensions <9>:                    Changesyntax.
 * GNU extensions <10>:                   Debug Output.
 * GNU extensions <11>:                   Debug Levels.
-* GNU extensions <12>:                   Builtin.
-* GNU extensions <13>:                   Indir.
+* GNU extensions <12>:                   Symbols.
+* GNU extensions <13>:                   Builtin.
+* GNU extensions <14>:                   Indir.
 * GNU extensions:                        Arguments.
 * included files, search path for:       Search Path.
 * inclusion, of files <1>:               Undivert.
@@ -448,6 +473,7 @@ Concept index
 * macro definitions, on the command line: Invoking m4.
 * macro expansion, tracing:              Trace.
 * macro invocation:                      Invocation.
+* macro names:                           Symbols.
 * macros, arguments to <1>:              Arguments.
 * macros, arguments to:                  Macro Arguments.
 * macros, displaying definitions:        Dumpdef.
@@ -549,6 +575,7 @@ these characters removed in the index.
 * shift:                                 Loops.
 * sinclude:                              Include.
 * substr:                                Substr.
+* symbols:                               Symbols.
 * syncoutput:                            Syncoutput.
 * syscmd:                                Syscmd.
 * sysval:                                Sysval.

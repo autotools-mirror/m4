@@ -1,5 +1,14 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
-Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
+
+Version beta 1.4o - January 2000, by Rene' Seindal
+
+* Modules can be loaded from the command line with --load-module
+
+* Modules now use libtool's wrapper libltdl.
+
+* Bug fixes.
+
 
 Version beta 1.4n - November 1998, by Rene' Seindal
 

@@ -1,4 +1,8 @@
 ## Process this file with automake to produce Makefile.in
+AUTOMAKE_OPTIONS = gnu ../src/ansi2knr
+
+MAINTAINERCLEANFILES = Makefile.in
+
 noinst_LIBRARIES = libm4.a
 
 INCLUDES = @INTLINCL@

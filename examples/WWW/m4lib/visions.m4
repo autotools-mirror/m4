@@ -217,6 +217,7 @@ the search path.])
 \DO_LAYOUT([\undivert(1)])
 \divert(-1)
 
+\divert(3)saljdfnaskdjfndsa\divert(-1)
 
 
 
@@ -227,3 +228,5 @@ the search path.])
 
 \noone
 ])
+
+\undivert

@@ -25,7 +25,7 @@
 
 #include <sys/types.h>
 
-#if __STDC__
+#ifdef __STDC__
 # define voidstar void *
 #else
 # define voidstar char *
@@ -42,10 +42,6 @@
 # include <string.h>
 # if !defined (STDC_HEADERS) && defined (HAVE_MEMORY_H)
 #  include <memory.h>
-# endif
-/* This is for obstack code -- should live in obstack.h.  */
-# ifndef bcopy
-#  define bcopy(S, D, N) memcpy ((D), (S), (N))
 # endif
 #else
 # include <strings.h>
@@ -169,6 +165,7 @@ extern const char *user_word_regexp;	/* -W */
 #endif
 
 /* Error handling.  */
+#include "error.h"
 #define M4ERROR(Arglist) (error Arglist)
 
 #ifdef USE_STACKOVF
@@ -510,6 +507,7 @@ void define_user_macro __P ((const char *, const char *, symbol_lookup));
 void undivert_all __P ((void));
 void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **));
 
+void install_builtin_table (builtin *table);
 const builtin *find_builtin_by_addr __P ((builtin_func *));
 const builtin *find_builtin_by_name __P ((const char *));
 
@@ -577,10 +575,8 @@ typedef void module_finish_t (void);
 
 typedef voidstar module_func (const char *);
 
-void module_init (void);
+void module_load (const char *modname, struct obstack *obs);
 void module_unload_all (void);
-
-builtin *module_load (const char *modname, struct obstack *obs);
 
 #endif /* WITH_MODULES */
 
