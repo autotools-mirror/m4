@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -373,7 +373,7 @@ msgstr "Argumento non numerico a %s"
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
 
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
@@ -383,34 +383,34 @@ msgstr "Impossibile aprire %s"
 msgid "Loss of precision in eval: %s"
 msgstr "Espressione errata in `eval': %s"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr ""
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr ""
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "Atteso il carattere di fine linea in archivio congelato"
 
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Atteso il carattere `%c' in archivio congelato"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "Fine prematura dell' archivio congelato"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "Archivio congelato malformato"
 
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
@@ -438,17 +438,18 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
 "  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
 msgstr ""
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -456,7 +457,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -466,7 +467,7 @@ msgid ""
 "  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
 msgstr ""
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -475,7 +476,7 @@ msgid ""
 "  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
 msgstr ""
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -483,7 +484,7 @@ msgid ""
 "  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
 msgstr ""
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -493,7 +494,7 @@ msgid ""
 "  -o, --error-output=FILE      redirect debug and trace output\n"
 msgstr ""
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -510,38 +511,38 @@ msgid ""
 "  V   shorthand for all of the above flags\n"
 msgstr ""
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 
-#: src/main.c:173
+#: src/main.c:174
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Indicatori di debug errati: `%s'"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
 

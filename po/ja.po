@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -382,7 +382,7 @@ msgstr "`%s' に数字でない引数が渡されています。"
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
@@ -392,34 +392,34 @@ msgstr "`%s' をオープンできません。"
 msgid "Loss of precision in eval: %s"
 msgstr "eval で %s という不正な式が用いられています。"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "内部エラー：`Built-in' というビルトインマクロはありません。"
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "内部エラー：関数 freeze_one_symbol () のトークンデータの種類が不正です。"
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "凍結ファイル内で改行コードを期待しています。"
 
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "凍結ファイル内で文字 `%c' を期待しています。"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "凍結ファイルの EOF が早く来過ぎています。"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "内部エラー：凍結ファイルのフォーマットが不正です。"
 
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
@@ -450,6 +450,7 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
@@ -465,11 +466,11 @@ msgstr ""
 "  -Q, --quiet, --silent        いくつかのビルトインコマンドの警告を抑制します。\n"
 "  -P, --prefix-builtins        全てのビルトインマクロに `m4_' という接頭辞を                               強制的に追加します。\n"
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "-W, --word-regexp=REGEXP   マクロ名のシンタックスに REGEXP を                                       正規表現として用います。\n"
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -477,7 +478,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 #, fuzzy
 msgid ""
 "\n"
@@ -496,7 +497,7 @@ msgstr ""
 "  -U, --undefine=NAME           NAME の定義を取り消します。\n"
 "  -s, --synclines               行番号とファイル名の行を生成します。\n"
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -511,7 +512,7 @@ msgstr ""
 "                                セットします。\n"
 "   -L, --nesting-limit=NUNBER   マクロのネスト回数の上限値を人為的に変更します。\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -523,7 +524,7 @@ msgstr ""
 "   -R, --reload-state=FILE      最初に指定された FILE から\n"
 "                                凍結された定義をロードします\n"
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -541,7 +542,7 @@ msgstr ""
 "   -o, --error-output=FILE      デバッグとトレースの出力を FILE に\n"
 "                                リダイレクトします。\n"
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -573,7 +574,7 @@ msgstr ""
 "   i   入力ファイルに生じた変化を表示します。\n"
 "   V   上記の全ての FLAG を指定することを意味します。\n"
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -582,32 +583,32 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/main.c:173
+#: src/main.c:174
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
 

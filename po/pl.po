@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -378,7 +378,7 @@ msgstr "Nienumeryczny argument dla %s"
 msgid "Cannot undivert %s"
 msgstr "Nie mogê przetowrzyæ z powrotem %s"
 
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "Nie mogê otworzyæ %s"
@@ -388,34 +388,34 @@ msgstr "Nie mogê otworzyæ %s"
 msgid "Loss of precision in eval: %s"
 msgstr "B³êdne wyra¿enie w eval: %s"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych!"
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny typ danych tokenu w freeze_one_symbol ()"
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "Oczekiwany line fedd w pliku zamro¿onym"
 
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Oczekiwany znak `%c' w pliku zamro¿onym"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "Przedwczesny koniec pliku zamro¿onego"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "¬le sformatowy plik zamro¿ony"
 
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' z pliku zamro¿onego nie znalezione w tablicy wbudowanych!"
@@ -444,6 +444,7 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
@@ -462,11 +463,11 @@ msgstr ""
 "  -P, --prefix-builtins        dodaj zawsze `m4_' przez wszystkimi "
 "wbudowanymi\n"
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=WYR_REGUL  u¿yj WYR_REGUL w sk³adni nazw makr\n"
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -474,7 +475,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -490,7 +491,7 @@ msgstr ""
 "  -U, --undefine=NAZWA         skasuj wbudowan± NAZWÊ\n"
 "  -s, --synclines              generuj linie `#line NR \"PLIK\"\n"
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -505,7 +506,7 @@ msgstr ""
 "symboli\n"
 "  -L, --nesting-limit=LICZBA   zmieñ sztuczny limit zag³ebieñ\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -517,7 +518,7 @@ msgstr ""
 "  -F, --freeze-state=PLIK      zapisz zamro¿ony PLIK stanu na koñcu\n"
 "  -R, --reload-state=PLIK      za³aduj zamro¿ony PLIK stanu na pocz±tku\n"
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -533,7 +534,7 @@ msgstr ""
 "  -l, --arglength=ILE          ogranicz rozmiar ¶ledzenia makr\n"
 "  -o, --error-output=PLIK      przekieruj wyniki debugowania i ¶ledzenia\n"
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -563,7 +564,7 @@ msgstr ""
 "  i   poka¿ zmiany plików wej¶ciowych\n"
 "  V   skrót do wszystkich powy¿szych flag\n"
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -571,7 +572,7 @@ msgstr ""
 "\n"
 "Je¿eli brak PLIKu lub PLIK to `-', czytane jest std. wej¶cie.\n"
 
-#: src/main.c:173
+#: src/main.c:174
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -579,26 +580,26 @@ msgstr ""
 "\n"
 "Raporty o b³êdach wysy³aj do bug-m4@gnu.org.\n"
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "B³êdne flagi debugowania: `%s'"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr " (opcje:"
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod w od³o¿onych argumentach"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -405,7 +405,7 @@ msgid "Cannot undivert %s"
 msgstr "Chyba pøi volání makra undivert pro %s"
 
 # , c-format
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "%s nelze otevøít"
@@ -416,36 +416,36 @@ msgstr "%s nelze otevøít"
 msgid "Loss of precision in eval: %s"
 msgstr "©patný výraz v makru eval: %s"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu ve freeze_one_symbol ()"
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván LF"
 
 # , c-format
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván znak `%c'"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "Pøedèasný konec zmrazeného souboru"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "©patný formát zmrazeného souboru"
 
 # , c-format
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' ze zmrazeného souboru nenalezeno v tabulce vestavìných maker!"
@@ -476,6 +476,7 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
@@ -494,12 +495,12 @@ msgstr ""
 "  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
 "`m4_'\n"
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí REGVÝR\n"
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -507,7 +508,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -525,7 +526,7 @@ msgstr ""
 "  -U, --undefine=MAKRO          sma¾e vestavìné MAKRO\n"
 "  -s, --synclines               vlo¾í øádky tvaru `#line ÈÍSLO \"SOUBOR\"'\n"
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -540,7 +541,7 @@ msgstr ""
 "symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -552,7 +553,7 @@ msgstr ""
 "  -F, --freeze-state=SOUBOR     pøi ukonèení ulo¾í zmrazený stav do SOUBORU\n"
 "  -R, --reload-state=SOUBOR     pøi startu naète zmrazený stav ze SOUBORU\n"
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -571,7 +572,7 @@ msgstr ""
 "  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
 "SOUBORU\n"
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -601,7 +602,7 @@ msgstr ""
 "  i   vypí¹e informace o ka¾dé zmìnì vstupního souboru\n"
 "  V   zkratka pro v¹echny vý¹e uvedené volby\n"
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -610,7 +611,7 @@ msgstr ""
 "Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
 "vstup.\n"
 
-#: src/main.c:173
+#: src/main.c:174
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -619,27 +620,27 @@ msgstr ""
 "Chyby v programu oznamujte na adrese <bug-m4@gnu.org> (anglicky).\n"
 "Pøipomínky k pøekladu zasílejte na adresu <cs@li.org> (èesky).\n"
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
 # , c-format
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "©patné ladící volby: `%s'"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr " (pøelo¾eno s volbami:"
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "VNITØNÍ CHYBA: ¹patný kód v odlo¾ených argumentech"
 

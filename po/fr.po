@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -376,7 +376,7 @@ msgstr "Argument non-numérique pour %s"
 msgid "Cannot undivert %s"
 msgstr "Incapble de ramener la diversion %s"
 
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "Incapable d'ouvrir %s"
@@ -386,34 +386,34 @@ msgstr "Incapable d'ouvrir %s"
 msgid "Loss of precision in eval: %s"
 msgstr "Mauvaise expression dans «eval»: %s"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis!"
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "ERREUR INTERNE: Mauvais type de donnée pour lexème dans freeze_one_symbol ()"
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "Fin-de-ligne attendue du fichier figé"
 
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Caractère «%c» attendu du fichier figé"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "Fin prématurée de fichier figé"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "Fichier figé difforme"
 
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "«%s» dans le fichier figé est introuvable dans la table des prédéfinis!"
@@ -442,6 +442,7 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
@@ -459,12 +460,12 @@ msgstr ""
 "  -Q, --quiet, --silent        inhiber certains diagnostics prédéfinis\n"
 "  -P, --prefix-builtins        préfixer tous les prédéfinis par «m4_»\n"
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "  -W, --word-regexp=REGEXP     utiliser REGEXP pour les noms de macro\n"
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -472,7 +473,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 #, fuzzy
 msgid ""
 "\n"
@@ -489,7 +490,7 @@ msgstr ""
 "  -U, --undefine=NOM           éliminer le NOM prédéfini\n"
 "  -s, --synclines              engendrer des lignes «#line NNN \\\"FICHIER\\\"»\n"
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -504,7 +505,7 @@ msgstr ""
 "  -L, --nesting-limit=NOMBRE   modifier la limite artificielle "
 "d'imbrication\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -516,7 +517,7 @@ msgstr ""
 "  -F, --freeze-state=FICHIER   produire un FICHIER figé à la fin\n"
 "  -R, --reload-state=FICHIER   recharger un FICHIER figé au départ\n"
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -533,7 +534,7 @@ msgstr ""
 "  -o, --error-output=FICHIER   rediriger la sortie de trace et mise-au-"
 "point\n"
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -563,7 +564,7 @@ msgstr ""
 "  i   afficher les modifications dans les fichiers d'entrée\n"
 "  V   abbréviation commode pour toutes les options précédentes à la fois\n"
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -571,32 +572,32 @@ msgstr ""
 "\n"
 "Si aucun FICHIER ou si FICHIER vaut «-», lit l'entrée standard.\n"
 
-#: src/main.c:173
+#: src/main.c:174
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Mauvais indicateurs de mise-au-point: «%s»"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERREUR INTERNE: Mauvais code dans les arguments différés"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-08-10 12:35+0200\n"
+"POT-Creation-Date: 2001-08-15 11:56+0200\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -377,7 +377,7 @@ msgstr "Niet numeriek argument voor %s"
 msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
-#: modules/m4.c:556 src/freeze.c:404
+#: modules/m4.c:556 src/freeze.c:409
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"
@@ -387,34 +387,34 @@ msgstr "Kan %s niet openen"
 msgid "Loss of precision in eval: %s"
 msgstr "Onjuist expressie in evaluatie: %s"
 
-#: src/freeze.c:226
+#: src/freeze.c:231
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel!"
 
-#: src/freeze.c:257
+#: src/freeze.c:262
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in freeze_one_symbol ()"
 
-#: src/freeze.c:289
+#: src/freeze.c:294
 msgid "Expecting line feed in frozen file"
 msgstr "Verwacht nieuwe regel in gefixeerd bestand"
 
-#: src/freeze.c:291
+#: src/freeze.c:296
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Verwacht karakter `%c' in gefixeerd bestand"
 
-#: src/freeze.c:377 src/freeze.c:546
+#: src/freeze.c:382 src/freeze.c:551
 msgid "Premature end of frozen file"
 msgstr "Voorbarig einde van gefixeerd bestand"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
-#: src/freeze.c:644
+#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
+#: src/freeze.c:649
 msgid "Ill-formated frozen file"
 msgstr "Slecht geformateerd gefixeerd bestand"
 
-#: src/freeze.c:492
+#: src/freeze.c:497
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' van gefixeerd bestand niet gevonden in functie tabel!"
@@ -443,6 +443,7 @@ msgid ""
 "      --help                   display this help and exit\n"
 "      --version                output version information and exit\n"
 "  -c, --discard-comments       do not copy comments to the output\n"
+"  -b, --batch                  buffer output, process interrupts\n"
 "  -e, --interactive            unbuffer output, ignore interrupts\n"
 "  -E, --fatal-warnings         stop execution after first warning\n"
 "  -Q, --quiet, --silent        suppress some warnings for builtins\n"
@@ -461,11 +462,11 @@ msgstr ""
 "  -P, --prefix-builtins        forceer een `m4_' voorvoegsel voor alle \n"
 "                               ingebouwde functies\n"
 
-#: src/main.c:114
+#: src/main.c:115
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=REGEXP     gebruik REGEXP voor macro naam syntax\n"
 
-#: src/main.c:118
+#: src/main.c:119
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -473,7 +474,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/main.c:124
+#: src/main.c:125
 #, fuzzy
 msgid ""
 "\n"
@@ -492,7 +493,7 @@ msgstr ""
 "  -U, --undefine=NAME          verwijder ingebouwde functie NAME\n"
 "  -s, --synclines              genereer `#line NO \"FILE\"' regel\n"
 
-#: src/main.c:132
+#: src/main.c:133
 msgid ""
 "\n"
 "Limits control:\n"
@@ -506,7 +507,7 @@ msgstr ""
 "  -H, --hashsize=PRIME         stel symbolen opzoek hash tabel grootte\n"
 "  -L, --nesting-limit=NUMBER   verander kunstmatige nesting limiet\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -520,7 +521,7 @@ msgstr ""
 "  -R, --reload-state=FILE      herlaad een gefixeerde staat van BESTAND\n"
 "                               aan het begin\n"
 
-#: src/main.c:145
+#: src/main.c:146
 msgid ""
 "\n"
 "Debugging:\n"
@@ -537,7 +538,7 @@ msgstr ""
 "  -l, --arglength=NUM          restrict macro traceer grootte\n"
 "  -o, --error-output=FILE      redirect debug en traceer uitvoer\n"
 
-#: src/main.c:153
+#: src/main.c:154
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -567,7 +568,7 @@ msgstr ""
 "  i   show changes in input files\n"
 "  V   shorthand for all of the above flags\n"
 
-#: src/main.c:168
+#: src/main.c:169
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -575,7 +576,7 @@ msgstr ""
 "\n"
 "Als geen BESTAND of als BESTAND `-' is, standaard invoer wordt gelezen.\n"
 
-#: src/main.c:173
+#: src/main.c:174
 #, fuzzy
 msgid ""
 "\n"
@@ -584,26 +585,26 @@ msgstr ""
 "\n"
 "Meld fouten via <m4-bugs@gnu.org>.\n"
 
-#: src/main.c:342
+#: src/main.c:343
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:347
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:381
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Onjuiste debug vlaggen: `%s'"
 
-#: src/main.c:409
+#: src/main.c:410
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:497
+#: src/main.c:498
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNE FOUT: Onjuiste code in afgeleide argumenten"
 
