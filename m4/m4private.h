@@ -58,9 +58,7 @@ extern void	    m4__module_exit (m4 *context);
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
-extern void	m4__symtab_init			    (void);
 extern void	m4__symtab_remove_module_references (m4_symtab*, lt_dlhandle);
-extern void	m4__symtab_exit			    (void);
 
 
 /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
@@ -72,23 +70,23 @@ extern boolean m4__single_comments;
 /* TRUE iff some character has M4_SYNTAX_ESCAPE */
 extern boolean m4__use_macro_escape;
 
-struct m4_token_arg {
+struct m4_symbol_arg {
   int		index;
   int		flags;
   char *	default_val;
 };
 
-#define TOKEN_ARG_INDEX(A)	((A)->index)
-#define TOKEN_ARG_FLAGS(A)	((A)->flags)
-#define TOKEN_ARG_DEFAULT(A)	((A)->default_val)
+#define SYMBOL_ARG_INDEX(A)	((A)->index)
+#define SYMBOL_ARG_FLAGS(A)	((A)->flags)
+#define SYMBOL_ARG_DEFAULT(A)	((A)->default_val)
 
-/* m4_token_arg.flags bit masks:  */
+/* m4_symbol_arg.flags bit masks:  */
 
-#define TOKEN_ARG_REST_BIT	(1 << 0)
-#define TOKEN_ARG_KEY_BIT	(1 << 1)
+#define SYMBOL_ARG_REST_BIT	(1 << 0)
+#define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-struct m4_token {
-  m4_token *	next;
+struct m4_symbol_value {
+  m4_symbol_value *	next;
   lt_dlhandle		handle;
   int			flags;
 
@@ -102,20 +100,20 @@ struct m4_token {
   } u;
 };
 
-#define TOKEN_NEXT(T)		((T)->next)
-#define TOKEN_HANDLE(T) 	((T)->handle)
-#define TOKEN_FLAGS(T)		((T)->flags)
-#define TOKEN_ARG_SIGNATURE(T) 	((T)->arg_signature)
-#define TOKEN_MIN_ARGS(T)	((T)->min_args)
-#define TOKEN_MAX_ARGS(T)	((T)->max_args)
-#define TOKEN_TYPE(T)		((T)->type)
-#define TOKEN_TEXT(T)		((T)->u.text)
-#define TOKEN_FUNC(T)		((T)->u.func)
+#define VALUE_NEXT(T)		((T)->next)
+#define VALUE_HANDLE(T) 	((T)->handle)
+#define VALUE_FLAGS(T)		((T)->flags)
+#define VALUE_ARG_SIGNATURE(T) 	((T)->arg_signature)
+#define VALUE_MIN_ARGS(T)	((T)->min_args)
+#define VALUE_MAX_ARGS(T)	((T)->max_args)
+#define VALUE_TYPE(T)		((T)->type)
+#define VALUE_TEXT(T)		((T)->u.text)
+#define VALUE_FUNC(T)		((T)->u.func)
 
-/* m4_token.flags bit masks:  */
+/* m4_symbol_value.flags bit masks:  */
 
-#define TOKEN_MACRO_ARGS_BIT		(1 << 0)
-#define TOKEN_BLIND_ARGS_BIT		(1 << 1)
+#define VALUE_MACRO_ARGS_BIT	(1 << 0)
+#define VALUE_BLIND_ARGS_BIT	(1 << 1)
 
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
 #define BIT_SET(flags, bit)	((flags) |= (bit))
@@ -125,27 +123,41 @@ struct m4_token {
 /* Redefine the exported function to this faster
    macro based version for internal use by the m4 code. */
 #undef M4ARG
-#define M4ARG(i)	(argc > (i) ? TOKEN_TEXT (argv[i]) : "")
+#define M4ARG(i)	(argc > (i) ? VALUE_TEXT (argv[i]) : "")
 
 
 struct m4_symbol
 {
-  boolean	traced;
-  m4_token *	token;
+  boolean		traced;
+  m4_symbol_value *	value;
 };
 
 #define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_TOKEN(S)		((S)->token)
+#define SYMBOL_VALUE(S)		((S)->value)
 
-#define SYMBOL_NEXT(S)		(TOKEN_NEXT          (SYMBOL_TOKEN (S)))
-#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE        (SYMBOL_TOKEN (S)))
-#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS         (SYMBOL_TOKEN (S)))
-#define SYMBOL_ARG_SIGNATURE(S)	(TOKEN_ARG_SIGNATURE (SYMBOL_TOKEN (S)))
-#define SYMBOL_MIN_ARGS(S)	(TOKEN_MIN_ARGS      (SYMBOL_TOKEN (S)))
-#define SYMBOL_MAX_ARGS(S)	(TOKEN_MAX_ARGS      (SYMBOL_TOKEN (S)))
-#define SYMBOL_TYPE(S)		(TOKEN_TYPE          (SYMBOL_TOKEN (S)))
-#define SYMBOL_TEXT(S)		(TOKEN_TEXT          (SYMBOL_TOKEN (S)))
-#define SYMBOL_FUNC(S)		(TOKEN_FUNC          (SYMBOL_TOKEN (S)))
+#define SYMBOL_NEXT(S)		(VALUE_NEXT          (SYMBOL_VALUE (S)))
+#define SYMBOL_HANDLE(S)	(VALUE_HANDLE        (SYMBOL_VALUE (S)))
+#define SYMBOL_FLAGS(S)		(VALUE_FLAGS         (SYMBOL_VALUE (S)))
+#define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE (SYMBOL_VALUE (S)))
+#define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      (SYMBOL_VALUE (S)))
+#define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      (SYMBOL_VALUE (S)))
+#define SYMBOL_TYPE(S)		(VALUE_TYPE          (SYMBOL_VALUE (S)))
+#define SYMBOL_TEXT(S)		(VALUE_TEXT          (SYMBOL_VALUE (S)))
+#define SYMBOL_FUNC(S)		(VALUE_FUNC          (SYMBOL_VALUE (S)))
+
+
+/* Various different token types.  */
+typedef enum {
+  M4_TOKEN_EOF,			/* end of file */
+  M4_TOKEN_NONE,		/* discardable token */
+  M4_TOKEN_STRING,		/* a quoted string */
+  M4_TOKEN_SPACE,		/* whitespace */
+  M4_TOKEN_WORD,		/* an identifier */
+  M4_TOKEN_SIMPLE,		/* a single character */
+  M4_TOKEN_MACDEF		/* a macros definition (see "defn") */
+} m4__token_type;
+
+extern	m4__token_type m4__next_token (m4_symbol_value *);
 
 
 

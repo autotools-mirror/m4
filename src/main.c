@@ -432,15 +432,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	  {
 	  case 'D':
 	    {
-	      m4_token *token = XCALLOC (m4_token, 1);
+	      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
 
 	      macro_value = strchr (defines->macro, '=');
 	      if (macro_value == NULL)
 		macro_value = "";
 	      else
 		*macro_value++ = '\0';
-	      TOKEN_TEXT (token) = xstrdup (macro_value);
-	      TOKEN_TYPE (token) = M4_TOKEN_TEXT;
+	      VALUE_TEXT (token) = xstrdup (macro_value);
+	      VALUE_TYPE (token) = M4_SYMBOL_TEXT;
 
 	      m4_symbol_pushdef (M4SYMTAB, defines->macro, token);
 	    }

@@ -1,5 +1,35 @@
 2003-06-18  Gary V. Vaughan  <gary@gnu.org>
 
+	Renamed some of the types and their accessors to make more sense.
+	Now we have a SYMTAB in which we store SYMBOLs, and each SYMBOL
+	has a stack of SYMBOL_VALUEs.
+
+	* m4/m4module.h (m4_token, m4_get_token_type, m4_get_token_text)
+	(m4_get_token_func, m4_token_copy): Renamed to m4_symbol_value,
+	m4_get_symbol_value_type,  m4_get_symbol_value_text,
+	m4_get_symbol_value_func and m4_symbol_value_copy respectively.
+	Changed all callers.
+	(m4_symbol_type): s/M4_TOKEN_/M4_SYMBOL_/
+	(m4_get_token_type): Renamed
+	* m4/input.c (m4_next_token): Renamed to m4__next_token, and moved
+	to the internal api.
+	* m4/m4private.h: s/TOKEN_ARG_/SYMBOL_ARG_/
+	s/TOKEN_/VALUE_/
+	(m4__symtab_init, m4__symtab_exit): Removed prototypes.
+	(m4_token_arg): Renamed to m4_symbol_arg. Changed all callers.
+	(m4__token_type): Moved here from m4module.h.
+	(m4__next_token): Renamed from m4_next_token.
+	* m4/symtab.c: Removed some of the parameterised macro support
+	functions for modularisation later.
+	(m4_token_copy): Renamed to m4_symbol_value_copy, and use new
+	m4_hash_dup to perform a true deep copy of the SRC.
+	(arg_copy): Callback for m4_symbol_value_copy.
+	* utility.c (m4_token_get_type, m4_token_text, m4_token_func):
+	Renamed to m4_get_symbol_value_type, m4_get_symbol_value_text and
+	m4_get_symbol_value_func.  Changed all callers.
+
+2003-06-18  Gary V. Vaughan  <gary@gnu.org>
+
 	Tidy up style of hash.[ch] in accordance with doc/STYLE.
 
 	* m4/hash.c: Internal symbol renaming and formatting.

@@ -126,17 +126,17 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 {
   m4_hash_iterator *place	= 0;
 
-  while ((place = m4_hash_iterator_next (hash, place)))
+  while ((place = m4_get_hash_iterator_next (hash, place)))
     {
-      const char   *symbol_name	= (const char *) m4_hash_iterator_key (place);
-      m4_symbol	   *symbol	= m4_hash_iterator_value (place);
+      const char   *symbol_name	= (const char *) m4_get_hash_iterator_key (place);
+      m4_symbol	   *symbol	= m4_get_hash_iterator_value (place);
       lt_dlhandle   handle	= SYMBOL_HANDLE (symbol);
       const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
       const m4_builtin *bp;
 
       switch (SYMBOL_TYPE (symbol))
 	{
-	case M4_TOKEN_TEXT:
+	case M4_SYMBOL_TEXT:
 	  fprintf (file, "T%lu,%lu",
 		   (unsigned long) strlen (symbol_name),
 		   (unsigned long) strlen (SYMBOL_TEXT (symbol)));
@@ -151,7 +151,7 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 	  fputc ('\n', file);
 	  break;
 
-	case M4_TOKEN_FUNC:
+	case M4_SYMBOL_FUNC:
 	  bp = m4_builtin_find_by_func
 	    	(m4_get_module_builtin_table (SYMBOL_HANDLE (symbol)),
 		 SYMBOL_FUNC (symbol));
@@ -473,18 +473,18 @@ reload_frozen_state (m4 *context, const char *name)
 
 	  if (bp)
 	    {
-	      m4_token *token = XCALLOC (m4_token, 1);
+	      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
 
 	      if (bp->groks_macro_args)
-		BIT_SET (TOKEN_FLAGS (token), TOKEN_MACRO_ARGS_BIT);
+		BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
 	      if (bp->blind_if_no_args)
-		BIT_SET (TOKEN_FLAGS (token), TOKEN_BLIND_ARGS_BIT);
+		BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
 
-	      TOKEN_TYPE (token)	= M4_TOKEN_FUNC;
-	      TOKEN_FUNC (token)	= bp->func;
-	      TOKEN_HANDLE (token)	= handle;
-	      TOKEN_MIN_ARGS (token)	= bp->min_args;
-	      TOKEN_MAX_ARGS (token)	= bp->max_args;
+	      VALUE_TYPE (token)	= M4_SYMBOL_FUNC;
+	      VALUE_FUNC (token)	= bp->func;
+	      VALUE_HANDLE (token)	= handle;
+	      VALUE_MIN_ARGS (token)	= bp->min_args;
+	      VALUE_MAX_ARGS (token)	= bp->max_args;
 
 	      m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	    }
@@ -655,7 +655,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	/* Enter a macro having an expansion text as a definition.  */
 	{
-	  m4_token *token = XCALLOC (m4_token, 1);
+	  m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
 	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)
@@ -663,10 +663,10 @@ reload_frozen_state (m4 *context, const char *name)
 	      if (strcmp (m4_get_module_name (handle), string[2]) == 0)
 		break;
 
-	  TOKEN_TYPE (token)		= M4_TOKEN_TEXT;
-	  TOKEN_TEXT (token)		= xstrdup (string[1]);
-	  TOKEN_HANDLE (token)		= handle;
-	  TOKEN_MAX_ARGS (token)	= -1;
+	  VALUE_TYPE (token)		= M4_SYMBOL_TEXT;
+	  VALUE_TEXT (token)		= xstrdup (string[1]);
+	  VALUE_HANDLE (token)		= handle;
+	  VALUE_MAX_ARGS (token)	= -1;
 
 	  m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	}

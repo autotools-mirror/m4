@@ -75,22 +75,22 @@ m4_string ecomm;
    Since they are functions the caller does not need access to the
    internal data structure, so they are safe to export for use in
    external modules.  */
-m4__token_type
-m4_token_get_type (m4_token *name)
+m4_symbol_type
+m4_get_symbol_value_type (m4_symbol_value *name)
 {
-  return TOKEN_TYPE (name);
+  return VALUE_TYPE (name);
 }
 
 char *
-m4_token_text (m4_token *name)
+m4_get_symbol_value_text (m4_symbol_value *name)
 {
-  return TOKEN_TEXT (name);
+  return VALUE_TEXT (name);
 }
 
 m4_builtin_func *
-m4_token_func (m4_token *name)
+m4_get_symbol_value_func (m4_symbol_value *name)
 {
-  return TOKEN_FUNC (name);
+  return VALUE_FUNC (name);
 }
 
 
@@ -101,7 +101,7 @@ m4_token_func (m4_token *name)
    applicable, MAX is the maximum number, negative if not applicable.
    ARGC, MIN, and MAX count ARGV[0], the name of the macro.  */
 boolean
-m4_bad_argc (int argc, m4_token **argv, int min, int max)
+m4_bad_argc (int argc, m4_symbol_value **argv, int min, int max)
 {
   if (min > 0 && argc < min)
     {
@@ -135,7 +135,7 @@ m4_skip_space (const char *arg)
    VALUEP. If the conversion fails, print error message for macro.
    Return TRUE iff conversion succeeds.  */
 boolean
-m4_numeric_arg (int argc, m4_token **argv, int arg, int *valuep)
+m4_numeric_arg (int argc, m4_symbol_value **argv, int arg, int *valuep)
 {
   char *endp;
 
@@ -155,7 +155,7 @@ m4_numeric_arg (int argc, m4_token **argv, int arg, int *valuep)
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
    SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
-m4_dump_args (struct obstack *obs, int argc, m4_token **argv,
+m4_dump_args (struct obstack *obs, int argc, m4_symbol_value **argv,
 	      const char *sep, boolean quoted)
 {
   int i;
@@ -224,7 +224,7 @@ dumpdef_cmp (const void *s1, const void *s2)
 int
 m4_dump_symbol (const void *name, void *symbol, void *data)
 {
-  if (SYMBOL_TYPE ((m4_symbol *) symbol) != M4_TOKEN_VOID)
+  if (SYMBOL_TYPE ((m4_symbol *) symbol) != M4_SYMBOL_VOID)
     {
       struct m4_dump_symbol_data *symbol_data
 	= (struct m4_dump_symbol_data *) data;
@@ -241,7 +241,7 @@ m4_dump_symbol (const void *name, void *symbol, void *data)
    symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
-		 m4_token **argv, boolean complain)
+		 m4_symbol_value **argv, boolean complain)
 {
   data->base = (const char **) obstack_base (data->obs);
   data->size = 0;
@@ -258,7 +258,7 @@ m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
       for (i = 1; i < argc; i++)
 	{
 	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
-	  if (symbol != NULL && SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
+	  if (symbol != NULL && SYMBOL_TYPE (symbol) != M4_SYMBOL_VOID)
 	    m4_dump_symbol (M4ARG (i), symbol, data);
 	  else if (complain)
 	    M4WARN ((warning_status, 0,

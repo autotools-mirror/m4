@@ -30,9 +30,9 @@ static void    collect_arguments (m4 *context, const char *name,
 static void    expand_macro      (m4 *context, const char *name,
 				  m4_symbol *symbol);
 static void    expand_token      (m4 *context, struct obstack *obs,
-				  m4__token_type type, m4_token *token);
+				  m4__token_type type, m4_symbol_value *token);
 static boolean expand_argument   (m4 *context, struct obstack *obs,
-				  m4_token *argp);
+				  m4_symbol_value *argp);
 
 /* Current recursion level in expand_macro ().  */
 int m4_expansion_level = 0;
@@ -45,9 +45,9 @@ void
 m4_expand_input (m4 *context)
 {
   m4__token_type type;
-  m4_token token;
+  m4_symbol_value token;
 
-  while ((type = m4_next_token (&token)) != M4_TOKEN_EOF)
+  while ((type = m4__next_token (&token)) != M4_TOKEN_EOF)
     expand_token (context, (struct obstack *) NULL, type, &token);
 }
 
@@ -58,10 +58,10 @@ m4_expand_input (m4 *context)
    the text are just copied to the output.  */
 static void
 expand_token (m4 *context, struct obstack *obs,
-	      m4__token_type type, m4_token *token)
+	      m4__token_type type, m4_symbol_value *token)
 {
   m4_symbol *symbol;
-  char *text = xstrdup (TOKEN_TEXT (token));
+  char *text = xstrdup (VALUE_TEXT (token));
 
   switch (type)
     {				/* TOKSW */
@@ -84,9 +84,9 @@ expand_token (m4 *context, struct obstack *obs,
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
 	if (symbol == NULL
-	    || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
-	    || (SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
-		&& BIT_TEST (SYMBOL_FLAGS (symbol), TOKEN_BLIND_ARGS_BIT)
+	    || SYMBOL_TYPE (symbol) == M4_SYMBOL_VOID
+	    || (SYMBOL_TYPE (symbol) == M4_SYMBOL_FUNC
+		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& !M4_IS_OPEN (m4_peek_input ())))
 	  {
 	    m4_shipout_text (obs, text, strlen (text));
@@ -114,21 +114,21 @@ expand_token (m4 *context, struct obstack *obs,
    the last for the active macro call.  The arguments are built on the
    obstack OBS, indirectly through expand_token ().	 */
 static boolean
-expand_argument (m4 *context, struct obstack *obs, m4_token *argp)
+expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
-  m4_token token;
+  m4_symbol_value token;
   char *text;
   int paren_level = 0;
   const char *current_file = m4_current_file;
   int current_line = m4_current_line;
 
-  TOKEN_TYPE (argp) = M4_TOKEN_VOID;
+  VALUE_TYPE (argp) = M4_SYMBOL_VOID;
 
   /* Skip leading white space.  */
   do
     {
-      type = m4_next_token (&token);
+      type = m4__next_token (&token);
     }
   while (type == M4_TOKEN_SPACE);
 
@@ -137,7 +137,7 @@ expand_argument (m4 *context, struct obstack *obs, m4_token *argp)
       switch (type)
 	{			/* TOKSW */
 	case M4_TOKEN_SIMPLE:
-	  text = TOKEN_TEXT (&token);
+	  text = VALUE_TEXT (&token);
 	  if ((M4_IS_COMMA (*text) || M4_IS_CLOSE (*text)) && paren_level == 0)
 	    {
 
@@ -145,12 +145,12 @@ expand_argument (m4 *context, struct obstack *obs, m4_token *argp)
 	      obstack_1grow (obs, '\0');
 	      text = obstack_finish (obs);
 
-	      if (TOKEN_TYPE (argp) == M4_TOKEN_VOID)
+	      if (VALUE_TYPE (argp) == M4_SYMBOL_VOID)
 		{
-		  TOKEN_TYPE (argp) = M4_TOKEN_TEXT;
-		  TOKEN_TEXT (argp) = text;
+		  VALUE_TYPE (argp) = M4_SYMBOL_TEXT;
+		  VALUE_TEXT (argp) = text;
 		}
-	      return (boolean) (M4_IS_COMMA (*TOKEN_TEXT (&token)));
+	      return (boolean) (M4_IS_COMMA (*VALUE_TEXT (&token)));
 	    }
 
 	  if (M4_IS_OPEN (*text))
@@ -173,7 +173,7 @@ expand_argument (m4 *context, struct obstack *obs, m4_token *argp)
 
 	case M4_TOKEN_MACDEF:
 	  if (obstack_object_size (obs) == 0)
-	    m4_token_copy (argp, &token);
+	    m4_symbol_value_copy (argp, &token);
 	  break;
 
 	default:
@@ -182,7 +182,7 @@ expand_argument (m4 *context, struct obstack *obs, m4_token *argp)
 	  abort ();
 	}
 
-      type = m4_next_token (&token);
+      type = m4__next_token (&token);
     }
 }
 
@@ -199,7 +199,7 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
 {
   struct obstack arguments;
   struct obstack argptr;
-  m4_token **argv;
+  m4_symbol_value **argv;
   int argc;
   struct obstack *expansion;
   const char *expanded;
@@ -225,8 +225,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 
   collect_arguments (context, name, symbol, &argptr, &arguments);
 
-  argc = obstack_object_size (&argptr) / sizeof (m4_token *);
-  argv = (m4_token **) obstack_finish (&argptr);
+  argc = obstack_object_size (&argptr) / sizeof (m4_symbol_value *);
+  argv = (m4_symbol_value **) obstack_finish (&argptr);
 
   if (traced)
     m4_trace_pre (name, my_call_id, argc, argv);
@@ -254,33 +254,33 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 		   struct obstack *argptr, struct obstack *arguments)
 {
   int ch;			/* lookahead for ( */
-  m4_token token;
-  m4_token *tokenp;
+  m4_symbol_value token;
+  m4_symbol_value *tokenp;
   boolean more_args;
   boolean groks_macro_args;
 
-  groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), TOKEN_MACRO_ARGS_BIT);
+  groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
-  TOKEN_TYPE (&token) = M4_TOKEN_TEXT;
-  TOKEN_TEXT (&token) = (char *) name;
-  tokenp = (m4_token *) obstack_copy (arguments, (void *) &token,
+  VALUE_TYPE (&token) = M4_SYMBOL_TEXT;
+  VALUE_TEXT (&token) = (char *) name;
+  tokenp = (m4_symbol_value *) obstack_copy (arguments, (void *) &token,
 				      sizeof (token));
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
   ch = m4_peek_input ();
   if (M4_IS_OPEN(ch))
     {
-      m4_next_token (&token);		/* gobble parenthesis */
+      m4__next_token (&token);		/* gobble parenthesis */
       do
 	{
 	  more_args = expand_argument (context, arguments, &token);
 
-	  if (!groks_macro_args && TOKEN_TYPE (&token) == M4_TOKEN_FUNC)
+	  if (!groks_macro_args && VALUE_TYPE (&token) == M4_SYMBOL_FUNC)
 	    {
-	      TOKEN_TYPE (&token) = M4_TOKEN_TEXT;
-	      TOKEN_TEXT (&token) = "";
+	      VALUE_TYPE (&token) = M4_SYMBOL_TEXT;
+	      VALUE_TEXT (&token) = "";
 	    }
-	  tokenp = (m4_token *)
+	  tokenp = (m4_symbol_value *)
 	    obstack_copy (arguments, (void *) &token, sizeof (token));
 	  obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 	}
@@ -297,19 +297,19 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
    the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_call_macro (m4_symbol *symbol, m4 *context, struct obstack *expansion,
-	       int argc, m4_token **argv)
+	       int argc, m4_symbol_value **argv)
 {
   switch (SYMBOL_TYPE (symbol))
     {
-    case M4_TOKEN_FUNC:
+    case M4_SYMBOL_FUNC:
       (*SYMBOL_FUNC (symbol)) (context, expansion, argc, argv);
       break;
 
-    case M4_TOKEN_TEXT:
+    case M4_SYMBOL_TEXT:
       m4_process_macro (symbol, context, expansion, argc, argv);
       break;
 
-    case M4_TOKEN_VOID:
+    case M4_SYMBOL_VOID:
       M4ERROR ((warning_status, 0,
 		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
       abort ();
@@ -323,7 +323,7 @@ m4_call_macro (m4_symbol *symbol, m4 *context, struct obstack *expansion,
    as usual.  */
 void
 m4_process_macro (m4_symbol *symbol, m4 *context, struct obstack *obs,
-		  int argc, m4_token **argv)
+		  int argc, m4_symbol_value **argv)
 {
   const unsigned char *text;
   int i;
@@ -383,13 +383,13 @@ m4_process_macro (m4_symbol *symbol, m4 *context, struct obstack *obs,
 
 	      if (*endp)
 		{
-		  struct m4_token_arg **arg
-		    = (struct m4_token_arg **)
+		  struct m4_symbol_arg **arg
+		    = (struct m4_symbol_arg **)
 		      m4_hash_lookup (SYMBOL_ARG_SIGNATURE (symbol), key);
 
 		  if (arg)
 		    {
-		      i = TOKEN_ARG_INDEX (*arg);
+		      i = SYMBOL_ARG_INDEX (*arg);
 
 		      if (i < argc)
 			m4_shipout_string (obs, M4ARG (i), 0, FALSE);

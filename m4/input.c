@@ -70,7 +70,7 @@ static	int   file_peek			(void);
 static	int   file_read			(void);
 static	void  file_unget		(int ch);
 static	void  file_clean		(void);
-static	void  init_builtin_token	(m4_token *td);
+static	void  init_builtin_token	(m4_symbol_value *token);
 static	int   builtin_peek		(void);
 static	int   builtin_read		(void);
 static	int   match_input		(const unsigned char *s);
@@ -306,12 +306,12 @@ static struct input_funcs builtin_funcs = {
 };
 
 void
-m4_push_builtin (m4_token *td)
+m4_push_builtin (m4_symbol_value *token)
 {
   input_block *i;
 
   /* Make sure we were passed a builtin function type token.  */
-  assert (TOKEN_TYPE (td) == M4_TOKEN_FUNC);
+  assert (VALUE_TYPE (token) == M4_SYMBOL_FUNC);
 
   if (next != NULL)
     {
@@ -323,12 +323,12 @@ m4_push_builtin (m4_token *td)
 				     sizeof (struct input_block));
   i->funcs = &builtin_funcs;
 
-  i->u.u_b.func		= TOKEN_FUNC (td);
-  i->u.u_b.handle	= TOKEN_HANDLE (td);
-  i->u.u_b.arg_signature= TOKEN_ARG_SIGNATURE (td);
-  i->u.u_b.min_args	= TOKEN_MIN_ARGS (td);
-  i->u.u_b.max_args	= TOKEN_MAX_ARGS (td);
-  i->u.u_b.flags	= TOKEN_FLAGS (td);
+  i->u.u_b.func		= VALUE_FUNC (token);
+  i->u.u_b.handle	= VALUE_HANDLE (token);
+  i->u.u_b.arg_signature= VALUE_ARG_SIGNATURE (token);
+  i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
+  i->u.u_b.max_args	= VALUE_MAX_ARGS (token);
+  i->u.u_b.flags	= VALUE_FLAGS (token);
   i->u.u_b.read		= FALSE;
 
   i->prev = isp;
@@ -518,7 +518,7 @@ m4_pop_wrapup (void)
 /* When a BUILTIN token is seen, next_token () uses init_builtin_token
    to retrieve the value of the function pointer.  */
 static void
-init_builtin_token (m4_token *td)
+init_builtin_token (m4_symbol_value *token)
 {
   if (isp->funcs->read_func != builtin_read)
     {
@@ -527,13 +527,13 @@ init_builtin_token (m4_token *td)
       abort ();
     }
 
-  TOKEN_TYPE (td)		= M4_TOKEN_FUNC;
-  TOKEN_FUNC (td)		= isp->u.u_b.func;
-  TOKEN_HANDLE (td)		= isp->u.u_b.handle;
-  TOKEN_FLAGS (td)		= isp->u.u_b.flags;
-  TOKEN_ARG_SIGNATURE(td)	= isp->u.u_b.arg_signature;
-  TOKEN_MIN_ARGS (td)		= isp->u.u_b.min_args;
-  TOKEN_MAX_ARGS (td)		= isp->u.u_b.max_args;
+  VALUE_TYPE (token)		= M4_SYMBOL_FUNC;
+  VALUE_FUNC (token)		= isp->u.u_b.func;
+  VALUE_HANDLE (token)		= isp->u.u_b.handle;
+  VALUE_FLAGS (token)		= isp->u.u_b.flags;
+  VALUE_ARG_SIGNATURE(token)	= isp->u.u_b.arg_signature;
+  VALUE_MIN_ARGS (token)	= isp->u.u_b.min_args;
+  VALUE_MAX_ARGS (token)	= isp->u.u_b.max_args;
 }
 
 
@@ -738,12 +738,12 @@ m4_input_exit (void)
    that is not a part of any of the previous types.
 
    M4_next_token () returns the token type, and passes back a pointer to the
-   token data through TD.  The token text is collected on the obstack
+   token data through VALUE.  The token text is collected on the obstack
    token_stack, which never contains more than one token text at a time.
-   The storage pointed to by the fields in TD is therefore subject to
+   The storage pointed to by the fields in VALUE is therefore subject to
    change the next time next_token () is called.	 */
 m4__token_type
-m4_next_token (m4_token *td)
+m4__next_token (m4_symbol_value *token)
 {
   int ch;
   int quote_level;
@@ -765,10 +765,10 @@ m4_next_token (m4_token *td)
 
     if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
       {
-	init_builtin_token (td);
+	init_builtin_token (token);
 	(void) next_char ();
 #ifdef DEBUG_INPUT
-	print_token ("next_token", M4_TOKEN_MACDEF, td);
+	print_token ("next_token", M4_TOKEN_MACDEF, token);
 #endif
 	return M4_TOKEN_MACDEF;
       }
@@ -939,15 +939,15 @@ m4_next_token (m4_token *td)
 
   obstack_1grow (&token_stack, '\0');
 
-  bzero (td, sizeof (m4_token));
+  bzero (token, sizeof (m4_symbol_value));
 
-  TOKEN_TYPE (td)	= M4_TOKEN_TEXT;
-  TOKEN_TEXT (td)	= obstack_finish (&token_stack);
-  TOKEN_MIN_ARGS (td)	= -1;
-  TOKEN_MAX_ARGS (td)	= -1;
+  VALUE_TYPE (token)	= M4_SYMBOL_TEXT;
+  VALUE_TEXT (token)	= obstack_finish (&token_stack);
+  VALUE_MIN_ARGS (token)	= -1;
+  VALUE_MAX_ARGS (token)	= -1;
 
 #ifdef DEBUG_INPUT
-  print_token("next_token", type, td);
+  print_token("next_token", type, token);
 #endif
 
   return type;
@@ -960,29 +960,29 @@ m4_next_token (m4_token *td)
 static	void  lex_debug	(void);
 
 int
-m4_print_token (const char *s, m4__token_type type, m4_token *token)
+m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
 {
   fprintf (stderr, "%s: ", s);
   switch (type)
     {				/* TOKSW */
     case M4_TOKEN_SIMPLE:
-      fprintf (stderr,	"char\t\"%s\"\n",	TOKEN_TEXT (token));
+      fprintf (stderr,	"char\t\"%s\"\n",	VALUE_TEXT (token));
       break;
 
     case M4_TOKEN_WORD:
-      fprintf (stderr,	"word\t\"%s\"\n",	TOKEN_TEXT (token));
+      fprintf (stderr,	"word\t\"%s\"\n",	VALUE_TEXT (token));
       break;
 
     case M4_TOKEN_STRING:
-      fprintf (stderr,	"string\t\"%s\"\n",	TOKEN_TEXT (token));
+      fprintf (stderr,	"string\t\"%s\"\n",	VALUE_TEXT (token));
       break;
 
     case M4_TOKEN_SPACE:
-      fprintf (stderr,	"space\t\"%s\"\n",	TOKEN_TEXT (token));
+      fprintf (stderr,	"space\t\"%s\"\n",	VALUE_TEXT (token));
       break;
 
     case M4_TOKEN_MACDEF:
-      fprintf (stderr,	"builtin 0x%x\n", 	(int) TOKEN_FUNC (token));
+      fprintf (stderr,	"builtin 0x%x\n", 	(int) VALUE_FUNC (token));
       break;
 
     case M4_TOKEN_EOF:
@@ -1000,7 +1000,7 @@ static void
 lex_debug (void)
 {
   m4__token_type type;
-  m4_token token;
+  m4_symbol_value token;
 
   while ((type = next_token (&token)) != NULL)
     print_token ("lex", type, &token);

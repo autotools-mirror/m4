@@ -120,7 +120,7 @@ m4_macro m4_macro_table[] =
 
 static void substitute (struct obstack *obs, const char *victim,
 			const char *repl, struct re_registers *regs);
-static void m4_patsubst_do (struct obstack *obs, int argc, m4_token **argv,
+static void m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 			    int syntax);
 
 
@@ -297,7 +297,7 @@ m4_regexp_compile (const char *caller,
  **/
 
 static void
-m4_regexp_do (struct obstack *obs, int argc, m4_token **argv,
+m4_regexp_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 	      int syntax)
 {
   const char *victim;		/* first argument */
@@ -362,7 +362,7 @@ M4BUILTIN_HANDLER (eregexp)
  * patsubst(STRING, REGEXP, [REPLACEMENT])
  **/
 static void
-m4_patsubst_do (struct obstack *obs, int argc, m4_token **argv,
+m4_patsubst_do (struct obstack *obs, int argc, m4_symbol_value **argv,
 		int syntax)
 {
   const char *victim;		/* first argument */
@@ -477,7 +477,7 @@ M4BUILTIN_HANDLER (symbols)
  **/
 M4BUILTIN_HANDLER (syncoutput)
 {
-  if (TOKEN_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (VALUE_TYPE (argv[1]) != M4_SYMBOL_TEXT)
     return;
 
   if (   M4ARG (1)[0] == '0'

@@ -92,7 +92,7 @@ typedef unsigned long int unumber;
 #endif
 
 
-static void	include		(int argc, m4_token **argv,
+static void	include		(int argc, m4_symbol_value **argv,
 				 boolean silent);
 static int	set_trace	(m4_hash *hash, const void *ignored,
 				 void *symbol, void *userdata);
@@ -148,19 +148,19 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (TOKEN_TYPE (argv[1]) == M4_TOKEN_TEXT)
+  if (VALUE_TYPE (argv[1]) == M4_SYMBOL_TEXT)
     {
-      m4_token *token = XCALLOC (m4_token, 1);
+      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
 
       if (argc == 2)
 	{
-	  TOKEN_TYPE (token) = M4_TOKEN_TEXT;
-	  TOKEN_TEXT (token) = xstrdup ("");
+	  VALUE_TYPE (token) = M4_SYMBOL_TEXT;
+	  VALUE_TEXT (token) = xstrdup ("");
 	}
       else
 	{
-	  m4_token_copy (token, argv[2]);
-	  TOKEN_NEXT (token) = NULL;
+	  m4_symbol_value_copy (token, argv[2]);
+	  VALUE_NEXT (token) = NULL;
 	}
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), token);
@@ -178,19 +178,19 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (TOKEN_TYPE (argv[1]) == M4_TOKEN_TEXT)
+  if (VALUE_TYPE (argv[1]) == M4_SYMBOL_TEXT)
     {
-      m4_token *token = XCALLOC (m4_token, 1);
+      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
 
       if (argc == 2)
 	{
-	  TOKEN_TYPE (token) = M4_TOKEN_TEXT;
-	  TOKEN_TEXT (token) = xstrdup ("");
+	  VALUE_TYPE (token) = M4_SYMBOL_TEXT;
+	  VALUE_TEXT (token) = xstrdup ("");
 	}
       else
 	{
-	  m4_token_copy (token, argv[2]);
-	  TOKEN_NEXT (token) = NULL;
+	  m4_symbol_value_copy (token, argv[2]);
+	  VALUE_NEXT (token) = NULL;
 	}
 
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), token);
@@ -289,12 +289,12 @@ M4BUILTIN_HANDLER (dumpdef)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
-      assert (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT
-	      || SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
-	      || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID);
+      assert (SYMBOL_TYPE (symbol) == M4_SYMBOL_TEXT
+	      || SYMBOL_TYPE (symbol) == M4_SYMBOL_FUNC
+	      || SYMBOL_TYPE (symbol) == M4_SYMBOL_VOID);
       switch (SYMBOL_TYPE (symbol))
 	{
-	case M4_TOKEN_TEXT:
+	case M4_SYMBOL_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
 		     lquote.string, SYMBOL_TEXT (symbol), rquote.string);
@@ -302,13 +302,13 @@ M4BUILTIN_HANDLER (dumpdef)
 	    fprintf (stderr, "%s\n", SYMBOL_TEXT (symbol));
 	  break;
 
-	case M4_TOKEN_FUNC:
+	case M4_SYMBOL_FUNC:
 	  bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (symbol));
 	  assert (bp);
 	  fprintf (stderr, "<%s>\n", bp->name);
 	  break;
 
-	case M4_TOKEN_VOID:
+	case M4_SYMBOL_VOID:
 	  assert (!"VOID token in m4_dumpdef");
 	  break;
 	}
@@ -332,15 +332,15 @@ M4BUILTIN_HANDLER (defn)
 
   switch (SYMBOL_TYPE (symbol))
     {
-    case M4_TOKEN_TEXT:
+    case M4_SYMBOL_TEXT:
       m4_shipout_string (obs, SYMBOL_TEXT (symbol), 0, TRUE);
       return;
 
-    case M4_TOKEN_FUNC:
-      m4_push_builtin (SYMBOL_TOKEN (symbol));
+    case M4_SYMBOL_FUNC:
+      m4_push_builtin (SYMBOL_VALUE (symbol));
       return;
 
-    case M4_TOKEN_VOID:
+    case M4_SYMBOL_VOID:
       assert (!"VOID token in m4_dumpdef");
       return;
     }
@@ -482,7 +482,7 @@ M4BUILTIN_HANDLER (changecom)
 /* Generic include function.  Include the file given by the first argument,
    if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
 static void
-include (int argc, m4_token **argv, boolean silent)
+include (int argc, m4_symbol_value **argv, boolean silent)
 {
   FILE *fp;
   char *name = NULL;
