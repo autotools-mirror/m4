@@ -59,7 +59,7 @@ m4_builtin m4_builtin_table[] =
 m4_macro m4_macro_table[] =
 {
   /* name			text */
-  { "__m4_changeword__",	"" },
+  { "__changeword__",		"" },
   { 0, 0 },
 };
 

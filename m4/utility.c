@@ -138,13 +138,13 @@ m4_bad_argc (m4_token_data *name, int argc, int min, int max)
     {
       if (!suppress_warnings)
 	M4ERROR ((warning_status, 0,
-		  _("Warning: Too few arguments to built-in `%s'"),
+		  _("Warning: Too few arguments to builtin `%s'"),
 		  M4_TOKEN_DATA_TEXT (name)));
       isbad = TRUE;
     }
   else if (max > 0 && argc > max && !suppress_warnings)
     M4ERROR ((warning_status, 0,
-	      _("Warning: Excess arguments to built-in `%s' ignored"),
+	      _("Warning: Excess arguments to builtin `%s' ignored"),
 	      M4_TOKEN_DATA_TEXT (name)));
 
   return isbad;
@@ -172,7 +172,7 @@ m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 		    *m4_skip_space(endp) != 0))
     {
       M4ERROR ((warning_status, 0,
-		_("Non-numeric argument to built-in `%s'"),
+		_("Non-numeric argument to builtin `%s'"),
 		M4_TOKEN_DATA_TEXT (macro)));
       return FALSE;
     }

@@ -1,4 +1,5 @@
-* TODO file for GNU m4				-*- indented-text -*-
+GNU m4 TODO - Tasks that need implementing.		-*- outline -*-
+Copyright 2000 Free Software Foundation, Inc.
 
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
@@ -7,9 +8,13 @@ for any of these ideas or if you have others to add.
 
   + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
+  + m4exit.1.test fails due to the m4_module_unload_all call unloading
+    the m4 module (which contains the code for m4exit()) before the handler
+    has finished executing.
+
   + The test case `other-tests/stackovf.test' does not work.
 
-  + Some characters, such as comma, are still hardcoded, and does not
+  + Some characters, such as comma, are still hardcoded, and do not
     follow changes in the syntax table.
 
   + sigstack/sigaltstack and ENOSYS
@@ -51,8 +56,8 @@ for any of these ideas or if you have others to add.
   + If configured --with-gmp for multiple precision arithmetic there are
     some warnings, but it passes the tests.
 
-  + Make show include dependencies like gcc so targets are updated
-    when their (included) input files are updated (Erick B).
+  + Make m4 show include dependencies like gcc so Makefile targets are
+    updated When their (included) input files are updated (Erick B).
 
   + Sort out all the weird forms of interaction between changesyntax,
     changecom and changequote.  What happens if you install a quote with
@@ -73,24 +78,46 @@ for any of these ideas or if you have others to add.
     not only speed up module unloading immensely, but simplfy the code
     considerably too.
 
-* MODULE SPECIFIC ISSUES
+  + Much of the code could be improved by providing a resizing hash table
+    ADT, and  wrapping symtab and the various searchable internal
+    structures around it.
 
-  + There is a bug if two module are installed and the second overrides a
-    symbol from the first.  If the first module is unloaded before the second,
-    the top symbol is removed leaving the shadowed symbol which now points
-    to the unloaded module!
+  + --with-gmp is surplus to requirements, mpeval should always be built --
+    either with libgmp if it is available, or else without it.  Whether
+    or not to use mpeval is then determined at runtime, if the user tries
+    to `load(`mpeval')'.
+
+  + The `shadowed' flag in every symbol is only used by m4_dump_symbol(),
+    and could be determined instead by the presence of an identically
+    named symbol immediately proir to this one in the hash bucket.  So
+    doing would slow down dumpdef, but speed up the rest of the symbol
+    handling code, and reduce the memory overhead per symbol.
+
+
+* MODULE SPECIFIC ISSUES
 
   + Some way of linking a module statically is needed, for systems
     without support for dynamic loading.
 
+  + Some sort of module interface versioning system needs to be implemented
+    in the module loader and the freezer so that m4 can tell if it is being
+    asked to load a frozen file that requires versions of modules with
+    interface versions unsupported by the current release.
+
   + Setting of the module search path within m4 scripts:
 
 	append(__modulepath__, `/some/modules/live/here')
+
+  + m4_finish_module should take an obstack argument to allow a module
+    to pass an expansion back to the caller.
 
   + Module autoloader.  This would allow an m4 core with no builtins except
     for loadmodule().  A default startup script would mark the recognised
     set of builtins for autoload from the installed module directory on first
     use.  A new cli parameter would inhibit initialisation from this script,
     so that customised m4 interpreters could be built on the fly!
+
+  + The perl module should only be built if a suitable perl interpreter
+    is found on the build machine.
 
   + All this stuff needs documenting in m4.texinfo.

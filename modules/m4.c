@@ -362,44 +362,9 @@ M4BUILTIN_HANDLER (sysval)
 | eval.c.								|
 `----------------------------------------------------------------------*/
 
-typedef boolean (*eval_func) M4_PARAMS((struct obstack *obs, const char *expr, 
-					const int radix, int min));
-
-static void
-do_eval (struct obstack *obs, int argc, m4_token_data **argv, eval_func func)
-{
-  int radix = 10;
-  int min = 1;
-
-  if (m4_bad_argc (argv[0], argc, 2, 4))
-    return;
-
-  if (argc >= 3 && !m4_numeric_arg (argv[0], M4ARG (2), &radix))
-    return;
-
-  if (radix <= 1 || radix > 36)
-    {
-      M4ERROR ((warning_status, 0,
-		_("Radix in eval out of range (radix = %d)"), radix));
-      return;
-    }
-
-  if (argc >= 4 && !m4_numeric_arg (argv[0], M4ARG (3), &min))
-    return;
-  if  (min <= 0)
-    {
-      M4ERROR ((warning_status, 0,
-		_("Negative width to eval")));
-      return;
-    }
-
-  if ((*func) (obs, M4ARG (1), radix, min))
-    return;
-}
-
 M4BUILTIN_HANDLER (eval)
 {
-  do_eval(obs, argc, argv, m4_evaluate);
+  m4_do_eval(obs, argc, argv, m4_evaluate);
 }
 
 M4BUILTIN_HANDLER (incr)

@@ -60,6 +60,7 @@ m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
+  /* name			text */
   { "__modules__",		"" },
   { 0, 0 },
 };

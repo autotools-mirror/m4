@@ -450,8 +450,12 @@ extern void m4_dump_symbols M4_PARAMS((struct m4_dump_symbol_data *data, int arg
 
 /* File: eval.c  --- expression evaluation.  */
 
+typedef boolean (*m4_eval_func) M4_PARAMS((struct obstack *obs,
+				const char *expr, const int radix, int min));
+
 extern boolean m4_evaluate M4_PARAMS((struct obstack *obs,
 				      const char *, const int radix, int min));
+extern void m4_do_eval M4_PARAMS((struct obstack *obs, int argc, m4_token_data **argv, m4_eval_func func));
 
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree

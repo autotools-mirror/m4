@@ -61,7 +61,7 @@ M4_SCOPE int errno;
 	BUILTIN(debugfile,	FALSE,	FALSE )	\
 	BUILTIN(esyscmd,	FALSE,	TRUE  )	\
 	BUILTIN(format,		FALSE,	TRUE  )	\
-	BUILTIN(indir,		FALSE,	FALSE )	\
+	BUILTIN(indir,		FALSE,	TRUE  )	\
 	BUILTIN(patsubst,	FALSE,	TRUE  )	\
 	BUILTIN(regexp,		FALSE,	TRUE  )	\
 	BUILTIN(symbols,	FALSE,	FALSE )	\
@@ -140,7 +140,7 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *symbol;
   const char *name = M4ARG (1);
 
-  if (m4_bad_argc (argv[0], argc, 1, -1))
+  if (m4_bad_argc (argv[0], argc, 2, -1))
     return;
 
   symbol = m4_lookup_symbol (name, M4_SYMBOL_LOOKUP);

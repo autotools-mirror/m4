@@ -28,6 +28,7 @@
 #include <m4module.h>
 
 #define m4_builtin_table	perl_LTX_m4_builtin_table
+#define m4_macro_table		perl_LTX_m4_macro_table
 #define m4_init_module		perl_LTX_m4_init_module
 #define m4_finish_module	perl_LTX_m4_finish_module
 
@@ -51,6 +52,14 @@ m4_builtin m4_builtin_table[] =
 #undef BUILTIN
 
   { 0, 0, FALSE, FALSE },
+};
+
+/* A table for mapping m4 symbol names to simple expansion text. */
+m4_macro m4_macro_table[] =
+{
+  /* name			text */
+  { "__perleval__",		"" },
+  { 0, 0 },
 };
 
 static PerlInterpreter *my_perl;

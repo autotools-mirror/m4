@@ -1,3 +1,19 @@
+2000-11-30  Gary V. Vaughan  <gary@gnu.org>
+
+	* TODO: Updated.  Removed some cruft that has since been fixed
+	or implemented.  Added some more entries.
+	* NEWS: Updated.
+	* README: Updated.
+	* modules/README: Updated.
+	* doc/m4.texinfo: Updated.
+
+	* modules/gnu.c (builtin_functions): Make indir orthogonal to
+	builtin, in that each is recognised as a macro only with parameters
+	(builtin_indir): Passing 0 arguments is now an error, as with
+	builtin.
+
+	* src/main.c (usage): Added missing description of `-c' option.
+
 2000-11-29  Gary V. Vaughan  <gary@gnu.org>
 
 	Consolidate the myriad of dispersed test scripts into the

@@ -104,6 +104,7 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
+  -c, --discard-comments       do not copy comments to the output\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\

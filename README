@@ -1,7 +1,7 @@
 GNU `m4' is an implementation of the traditional Unix macro
 processor.  It is mostly SVR4 compatible, although it has some
 extensions (for example, handling more than 9 positional parameters
-to macros).  `m4' also has built-in functions for including files,
+to macros).  `m4' also has builtin functions for including files,
 running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 `m4' for generating `configure' scripts, but not for running them.
 
@@ -21,20 +21,27 @@ See file `COPYING' for copying conditions.
 See file `INSTALL' for compilation and installation instructions.
 See file `ABOUT-NLS' for how to customize this program to your language.
 See file `NEWS' for a list of major changes in the current release.
+See file `AUTHORS' for the names of maintainers.
 See file `THANKS' for a list of contributors.
 
 By using `./configure --with-gmp, you get multiple precision integral
 and rational arithmetic using mpeval.  The implementation depends on the
 GNU gmp v2 library.
 
-By using `./configure --with-modules, you get the possibility of using
-dynamic modules.  The implementation uses libltdl interface, details of
+By using `./configure --with-modules=`foo bar baz', you get an m4 with only
+the named modules preloaded.  The default modules (preloaded if you do not
+use this option) are sufficient to do the job of GNU m4-1.4.  Additional
+modules may be desirable, or necessary if libltdl does not support your
+host architecture.  The implementation uses libltdl interface, details of
 which are in the libtool manual.  See file `modules/README' for a more
 detailed description.
 
-By using `./configure --enable-changeword', you get an experimental
+By using `./configure --enable-changeword', you get an m4 with a
+significantly slower parser, but with support for an experimental
 feature which allows for changing the syntax of what is a "word" in
-`m4'.  THIS WILL PROBABLY GO AWAY, so don't count on it.  Some of the
+`m4'.  An m4 built this way provides the `--word-regexp' (-W) option,
+and a working `changeword' macro if you also load the `changeword'
+module.  THIS WILL PROBABLY GO AWAY, so don't count on it.  Some of the
 same things can be achieved with `changesyntax' at a much better speed.
 
 By using `./configure --with-dmalloc', GNU m4 is linked with Gray

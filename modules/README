@@ -1,6 +1,4 @@
-This directory contains demonstration modules for GNU m4.  
-
-Nothing in this directory is built by default.
+This directory contains all bundled modules for GNU m4.  
 
 Note that as of this writing, an unreleased version of libtool from the
 CVS trunk is required to be able to compile the example modules, since they
@@ -11,33 +9,32 @@ you live on the bleeding edge) is released this will become a non-issue.
 The bottom line is that you shouldn't libtoolize this distribution unless
 you know what you are doing!
 
-Dynamic modules is a experimental feature of GNU m4.
+Dynamic modules are only available if the host operating system provides
+one (or more!) of libltdl's required APIs.
 
-Dynamic modules are only available if GNU m4 was configured with
---with-modules and if the operating system provides one (or more!) of
-libltdl's required APIs.
-
-Implementation details are in ../src/module.c
+Implementation details are in ../m4/module.c
 
 A module is a compiled shared object, i.e., modules are written in C and
 then compiled.  The compiled file can then be loaded into a running m4
-process by calling the builtin "load", or by calling m4 with the
-`-m' or `--load-module' options on the command line.  This will give GNU
-m4 access to any system feature with a C interface.
+process by calling m4 with the `-m' or `--load-module' options on the
+command line, or by calling the builtin "load" (itself implemented by the
+module `load').  This will give GNU m4 potential access to any system
+feature with a C interface. 
 
 Modules are searched for in M4MODPATH, if set, else in a module directory
-defined at configure time, default /usr/local/libexec/m4.  Extra directories
+defined at configure time, default $prefix/libexec/m4.  Extra directories
 can also be added to the search patch by specifying them on the command
 line with the `-M' or `--module-directory' options.
 
 A module extends GNU m4 by defining new builtins, It can define builtins
-with the same names as existing builtins, which will then be
-unavailable.  A module cannot redefine internal functions of GNU m4,
-such as the input parser or argument handling.
+with the same names as existing builtins, which will shadow the existing
+builtins, making them temporarily unavailable.  A module cannot redefine
+internal functions of GNU m4, such as the input parser or argument handling
+(yet!).
 
 Each module should include the installed header file,
 `$prefix/include/m4module.h'.  This will define all the necessary macros,
-type declarations and function prototypes required.
+type declarations and function prototypes required to implement a module.
 
 The module system uses libtool's libltdl for dynamic module loading, and
 that in turn requires that any non-static symbols in the module to be
@@ -51,35 +48,36 @@ a module, "mymod", we would add the following to the top of the source file:
 `#define m4_macro_table mymod_LTX_m4_macro_table'.  See the included modules
 for more examples.
 
-Each module *must* define the symbol "m4_macro_table" as a pointer to a
-table of "struct builtin" (defined in m4module.h).  The table ends with an
-entry with name == NULL.  The builtins described in the table will be
-defined by GNU m4 as were they normal builtins.
+Each module *must* define one or more entry points from the following:
+"m4_builtin_table", "m4_macro_table" and "m4_init_module".  The symbol
+"m4_builtin_table" is a pointer to a table of "m4_builtin" (defined in
+m4module.h), listing each new builtin that it implements.  The symbol
+"m4_macro_table", is a pointer to a table of "m4)macro", listing each
+text macro initialised by the module.  These tables end with an
+entry where name == NULL.
 
 If a module defines the symbol "m4_init_module", it is supposed to be a
-function with a prototype of "void m4_init_module(struct obstack *obs)",
+function with a prototype of "void m4_init_module (struct obstack *obs)",
 and it will be called as soon as the module is loaded.  Any non-finished
 object left on the obstack will be the expansion of the call of the
-builtin "load". The obstack pointer might be NULL (in the future).
+builtin "load".  The obstack pointer might be NULL (in the future).
 
 If a module defines the symbol "m4_finish_module", it is supposed to be
-a function with a prototype of "void m4_finish_module(void)", and it
-will be called just before GNU m4 exits.  This will allow a module to
-clean up before exit.  There is no way of communicating information to
-the user, as GNU m4 exits immeidately afterwards.
+a function with a prototype of "void m4_finish_module (void)", and it
+will be called just before the module is unloaded or GNU m4 exits.  This
+will allow a module to clean up before exit.  There is no way of
+communicating information to the user, as GNU m4 exits immediately
+afterwards.
 
-No other symbols will be used by GNU m4.  Other external symbols within
-the module are private and should be declared `static' so that they will
-not be accessible to GNU m4 or to other modules.
+No other symbols will be used by GNU m4.  All other symbols within the
+module are private and should be declared `static' so that they will not
+be accessible to GNU m4 or to other modules.
 
 Modules are allowed to call external functions already defined within
 the GNU m4module library.  These have prototypes in m4module.h.
 
-
-A complete, though silly, example is found in test.c.  A more
-interesting example is in time.c or in stdlib.c.  Loading and unloading
-of modules, and symbol namespace resolution stratgies are illustrated by
-shadow.c and shadow.m4.
+Loading and unloading of modules, and symbol namespace resolution
+strategies are illustrated by shadow.c and shadow.m4.
 
 To try the demos, compile with `make' and run them with the commands as:
 
@@ -92,5 +90,3 @@ or
 or in the case of time2.m4
 
   ../src/m4 -M `pwd` -m time time2.m4
-
-

@@ -826,6 +826,41 @@ simple_term (eval_token et, number *v1)
   return NO_ERROR;
 }
 
+void
+m4_do_eval (obs, argc, argv, func)
+     struct obstack *obs;
+     int argc;
+     m4_token_data **argv;
+     m4_eval_func func;
+{
+  int radix = 10;
+  int min = 1;
+
+  if (m4_bad_argc (argv[0], argc, 2, 4))
+    return;
+
+  if (argc >= 3 && !m4_numeric_arg (argv[0], M4ARG (2), &radix))
+    return;
+
+  if (radix <= 1 || radix > 36)
+    {
+      M4ERROR ((warning_status, 0,
+		_("Radix in eval out of range (radix = %d)"), radix));
+      return;
+    }
+
+  if (argc >= 4 && !m4_numeric_arg (argv[0], M4ARG (3), &min))
+    return;
+  if  (min <= 0)
+    {
+      M4ERROR ((warning_status, 0,
+		_("Negative width to eval")));
+      return;
+    }
+
+  if ((*func) (obs, M4ARG (1), radix, min))
+    return;
+}
 
 static void
 numb_pow (number *x, const number *y)

@@ -100,7 +100,7 @@ m4_builtin m4_builtin_table[] =
 m4_macro m4_macro_table[] =
 {
   /* name			text */
-  { "__m4_gmp__",		"" },
+  { "__gmp__",			"" },
   { 0, 0 },
 };
 
@@ -128,7 +128,7 @@ static void numb_rshift M4_PARAMS((number *x, const number *y));
 
 M4BUILTIN_HANDLER (mpeval)
 {
-  do_eval(obs, argc, argv, m4_mp_evaluate);
+  m4_do_eval(obs, argc, argv, m4_mp_evaluate);
 }
 
 

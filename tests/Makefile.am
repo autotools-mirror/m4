@@ -72,6 +72,8 @@ GENERATED_TESTS = \
 	generated-tests/incr.1.test \
 	generated-tests/index.1.test \
 	generated-tests/indir.1.test \
+	generated-tests/inhibiti.1.test \
+	generated-tests/inhibiti.2.test \
 	generated-tests/len.1.test \
 	generated-tests/loops.1.test \
 	generated-tests/loops.2.test \

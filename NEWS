@@ -1,13 +1,24 @@
-GNU m4 NEWS - History of user-visible changes.             -*-indented-text-*-
-Copyright (C) 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
+GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
+Copyright 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
 
-Version beta 1.4p - November 2000
+Version beta 1.4p - November 2000, by Gary V. Vaughan
+
+* `configure --without-modules' will build an m4 binary with no preloaded
+  modules.  At startup it will search for and load modules `m4' and either
+  `gnu' or `traditional'.  This mode of operation can be used for
+  development and debugging of the base modules without the need to
+  recompile all of m4 with each modification.
+
+* `configure --with-modules="gnu m4 traditional load changeword"', for
+  example, will build an m4 binary with the named modules preloaded, ready
+  to be activated (even on static lib only machines) with the `-m' option
+  or using the `load' builtin.
 
 * M4 has no builtins or macros in core, they are all loaded from modules
-  at startup.
-
-* Loadable modules can define new builtin functions or text expansion
-  macros. 
+  at startup.  This means that modules are no longer optional, though
+  the standard build will statically link the modules `m4', `gnu' and
+  `traditional', so even on machines with no ltdl support, all of the
+  functionality from previous releases is available.
 
 * New builtin `load' to dynamically load modules which can define new
   builtins and user macros.
@@ -18,6 +29,9 @@ Version beta 1.4p - November 2000
 * The names of all currently loaded modules are returned by the new
   builtin, ``modules''.
  
+* Loadable modules can define new builtin functions or text expansion
+  macros. 
+
 * The module code has been rewritten to use libltdl, the libtool dynamic
   loader, which means GNU m4 can now load (and unload) modules just about
   anywhere which it can be built.  This includes obscure hosts such as
@@ -257,7 +271,7 @@ Version 1.0 - October 1991, by Rene' Seindal
 * Uses GNU getopt(), with long option names.
 
 * The -Q/+quiet option is added, which suppresses warnings about missing
-or superflous arguments to built-in macros.
+or superflous arguments to builtin macros.
 
 * Added default options via the M4OPTS environment variable.
 
