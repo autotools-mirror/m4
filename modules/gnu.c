@@ -41,8 +41,6 @@ int errno;
 #  include "m4private.h"
 #endif
 
-#include "regex.h"
-
 #define RE_SYNTAX_BRE RE_SYNTAX_EMACS
 
 #define RE_SYNTAX_ERE \

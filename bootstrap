@@ -3,7 +3,7 @@
 # helps bootstrapping M4, when checked out from CVS
 # requires GNU Autoconf, GNU Automake, GNU Gettext and GNU Libtool
 
-autoreconf -fvi
+autoreconf -f -v -i
 
 (
   cd tests

@@ -46,12 +46,6 @@ doesn't handle optional arguments properly.  The best way to get around
 this is to force the build to use the included getopt files like this,
 `ac_cv_func_getopt_long=no ./configure`.
 
-The Windows dll mechanism conflicts with the requirements of NLS, so
-you should use `./configure --disable-nls' on these machines.  The problem
-is that an internationalised libm4.dll requires libintl.a to resolve its
-unbound symbols at compile time.  On real operating systems, linking
-libintl.a into the m4 binary and using -export-dynamic is good enough. 
-
 Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
 is an adequate description of the problem: your input, what you
 expected, what you got, and why this is wrong.  Diffs are welcome, but

@@ -52,8 +52,8 @@ EXTRA_DIST += stdbool_.h
 # We need the following in order to create an <stdbool.h> when the system
 # doesn't have one that works.
 all-local $(lib_OBJECTS): $(STDBOOL_H)
-stdbool.h: $(gnulib_srcdir)/stdbool_.h
-	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(gnulib_srcdir)/stdbool_.h > $@-t
+stdbool.h: $(srcdir)/stdbool_.h
+	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool_.h > $@-t
 	mv $@-t $@
 
 MOSTLYCLEANFILES += stdbool.h stdbool.h-t

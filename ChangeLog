@@ -1,3 +1,20 @@
+2003-09-15  Charles Wilson  <cygwin@cwilson.fastmail.fm>,
+	    Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap: Separate options.
+	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.12.1.
+	* gnulib/m4/Makefile.am (stdbool.h): Use srcdir, gnulib_srcdir is
+	not set.
+	* modules/Makefile.am (gnu_la_LIBADD, load_la_LIBADD)
+	(m4_la_LIBADD, mpeval_la_LIBADD, traditianal_la_LIBADD)
+	(modtest_la_LIBADD, import_la_LIBADD, perl_la_LIBADD)
+	(shadow_la_LIBADD, stdlib_la_LIBADD, time_la_LIBADD): Add
+	$(LTLIBINTL) for gettext support on cygwin.
+	* src/Makefile.am (m4_LDADD): Remove $(INTLLIBS), since we now
+	have $(LTLIBINTL) from the preloaded module la files.
+	* README: Remove the warning about using --disable-nls on Windows
+	machines.
+
 2003-09-15  Gary V. Vaughan  <gary@gnu.org>
 
 	* gnulib/m4/regex.c:  s/<regex.h>/"regex.h"/ or else the compiler

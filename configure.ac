@@ -131,7 +131,7 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## Gettext support. ##
 ## ---------------- ##
 AM_GNU_GETTEXT(external, need-ngettext)
-AM_GNU_GETTEXT_VERSION(0.12)
+AM_GNU_GETTEXT_VERSION(0.12.1)
 m4_GNU_GETTEXT
 
 

@@ -27,7 +27,7 @@ m4_SOURCES		= $(top_srcdir)/gnulib/m4/getopt.c	\
 			  $(top_srcdir)/gnulib/m4/getopt1.c	\
 			  $(top_srcdir)/gnulib/m4/getopt.h	\
 			  main.c m4.h freeze.c stackovf.c
-m4_LDADD		= $(top_builddir)/m4/libm4.la $(INTLLIBS)
+m4_LDADD		= $(top_builddir)/m4/libm4.la
 m4_LDFLAGS		= -no-undefined -export-dynamic $(DLPREOPEN)
 
 CLEANFILES		= m4$(EXEEXT)

@@ -44,43 +44,53 @@ if USE_GMP
 pkglibexec_LTLIBRARIES += mpeval.la
 endif
 
-gnu_la_SOURCES       = gnu.c
-EXTRA_gnu_la_SOURCES = format.c
-gnu_la_LDFLAGS       = -module
+gnu_la_SOURCES		= gnu.c
+EXTRA_gnu_la_SOURCES	= format.c
+gnu_la_LDFLAGS		= -module
+gnu_la_LIBADD		= $(LTLIBINTL)
 
-load_la_SOURCES = load.c
-load_la_LDFLAGS = -module
+load_la_SOURCES	= load.c
+load_la_LDFLAGS	= -module
+load_la_LIBADD	= $(LTLIBINTL)
 
 m4_la_SOURCES		= m4.c
 EXTRA_m4_la_SOURCES	= evalparse.c
 m4_la_LDFLAGS		= -module
+m4_la_LIBADD		= $(LTLIBINTL)
 
 mpeval_la_SOURCES	= mpeval.c
 EXTRA_mpeval_la_SOURCES	= evalparse.c
 mpeval_la_LDFLAGS	= -module
-mpeval_la_LIBADD	= $(LIBADD_GMP)
+mpeval_la_LIBADD	= $(LIBADD_GMP) $(LTLIBINTL)
 
-traditional_la_SOURCES = traditional.c
-traditional_la_LDFLAGS = -module
+traditional_la_SOURCES	= traditional.c
+traditional_la_LDFLAGS	= -module
+traditional_la_LIBADD	= $(LTLIBINTL)
 
-modtest_la_SOURCES = modtest.c
-modtest_la_LDFLAGS = -module
+modtest_la_SOURCES	= modtest.c
+modtest_la_LDFLAGS	= -module
+modtest_la_LIBADD	= $(LTLIBINTL)
 
-import_la_SOURCES = import.c
-import_la_LDFLAGS = -module
+import_la_SOURCES	= import.c
+import_la_LDFLAGS	= -module
+import_la_LIBADD	= $(LTLIBINTL)
 
-perl_la_SOURCES = perl.c
-perl_la_CFLAGS = `perl -MExtUtils::Embed -e ccopts`
-perl_la_LDFLAGS = -module `perl -MExtUtils::Embed -e ldopts`
+perl_la_SOURCES	= perl.c
+perl_la_CFLAGS	= `perl -MExtUtils::Embed -e ccopts`
+perl_la_LDFLAGS	= -module `perl -MExtUtils::Embed -e ldopts`
+perl_la_LIBADDD	= $(LTLIBINTL)
 
-shadow_la_SOURCES = shadow.c
-shadow_la_LDFLAGS = -module
+shadow_la_SOURCES	= shadow.c
+shadow_la_LDFLAGS	= -module
+shadow_la_LIBADD	= $(LTLIBINTL)
 
-stdlib_la_SOURCES = stdlib.c
-stdlib_la_LDFLAGS = -module
+stdlib_la_SOURCES	= stdlib.c
+stdlib_la_LDFLAGS	= -module
+stdlib_la_LIBADD	= $(LTLIBINTL)
 
-time_la_SOURCES = time.c
-time_la_LDFLAGS = -module
+time_la_SOURCES	= time.c
+time_la_LDFLAGS	= -module
+time_la_LIBADD	= $(LTLIBINTL)
 
 BUILT_SOURCES = perlxsi.c
 perlxsi.c:
