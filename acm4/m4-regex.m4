@@ -19,7 +19,7 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-# serial 2
+# serial 3
 
 # m4_REGEX([path/to/regex.c])
 # ---------------------------
@@ -27,17 +27,10 @@
 AC_DEFUN([m4_REGEX],
 [AC_BEFORE([gl_REGEX], [m4_REGEX])
 if test $ac_use_included_regex = no; then
-  # The system provides a good regex.  `#include <regex.h>' will work.
   INCLUDE_REGEX_H='#include <regex.h>'
   REGEX_H=
 else
-  # The system does not provide regex.h, or the user has specified
-  # to build without it.  Unfortunately we can't leave an regex.h
-  # file around anywhere in the include path if the system also
-  # provides an implementation: So we ship regex_.h, and link it to
-  # m4/regex.h at Make time (to substitute the missing system supplied
-  # version).  Hence, `#include <m4/regex.h>' will work.
-  INCLUDE_REGEX_H='#include <m4/regex.h>'
+  INCLUDE_REGEX_H='#include <gnu/regex.h>'
   REGEX_H=regex.h
 fi
 AC_SUBST(REGEX_H)

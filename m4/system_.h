@@ -42,9 +42,9 @@
 #undef true
 @INCLUDE_STDBOOL_H@
 
-#include <m4/exit.h>
-#include <m4/xalloc.h>
-#include <m4/xstrndup.h>
+#include <gnu/exit.h>
+#include <gnu/xalloc.h>
+#include <gnu/xstrndup.h>
 
 /* This is okay in an installed file, because it will not change the
    behaviour of the including program whether ENABLE_NLS is defined

@@ -19,7 +19,7 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-# serial 2
+# serial 3
 
 # m4_ERROR
 # --------
@@ -34,7 +34,7 @@ AC_SUBST(ERROR_H)
 if test $ac_cv_header_error_h = yes; then
   INCLUDE_ERROR_H='#include <error.h>'
 else
-  INCLUDE_ERROR_H='#include <m4/error.h>'
+  INCLUDE_ERROR_H='#include <gnu/error.h>'
 fi
 AC_SUBST([INCLUDE_ERROR_H])
 ])# m4_ERROR

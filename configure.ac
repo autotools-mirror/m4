@@ -178,7 +178,7 @@ AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
 else
-  INCLUDE_STDBOOL_H='#include <m4/stdbool.h>'
+  INCLUDE_STDBOOL_H='#include <gnu/stdbool.h>'
 fi
 AC_SUBST([INCLUDE_STDBOOL_H])
 

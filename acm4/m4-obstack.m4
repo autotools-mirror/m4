@@ -19,13 +19,13 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-# serial 8
+# serial 9
 
 # m4_OBSTACK
 # ----------
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([m4_OBSTACK],
-[AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
+[AC_PREREQ(2.56)dnl We use the compiler based header checking in 2.56
 AC_BEFORE([gl_OBSTACK], [m4_OBSTACK])
 AC_ARG_WITH([included-obstack],
     [AC_HELP_STRING([--with-included-obstack],
@@ -39,16 +39,9 @@ fi
 
 OBSTACK_H=
 if test $ac_cv_func_obstack = yes; then
-  # The system provides obstack.h, `#include <obstack.h>' will work
   INCLUDE_OBSTACK_H='#include <obstack.h>'
 else
-  # The system does not provide obstack.h, or the user has specified
-  # to build without it.  Unfortunately we can't leave an obstack.h
-  # file around anywhere in the include path if the system also
-  # provides an implementation: So we ship gnulib/lib/obstack.h, and link
-  # it to m4/obstack.h at Make time (to substitute the missing system
-  # supplied version).  Hence, `#include <m4/obstack.h>' will work.
-  INCLUDE_OBSTACK_H='#include <m4/obstack.h>'
+  INCLUDE_OBSTACK_H='#include <gnu/obstack.h>'
   OBSTACK_H=obstack.h
 fi
 AC_SUBST(OBSTACK_H)

@@ -1,3 +1,12 @@
+2004-12-24  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (INCLUDE_STDBOOL_H): Account for gnulib's move
+	to the gnu subdirectory.
+	* acm4/m4-error.m4 (INCLUDE_ERROR_H): Likewise.
+	* acm4/m4-obstack.m4 (INCLUDE_OBSTACK_H): Likewise.
+	* acm4/m4-regex.m4 (INCLUDE_REGEX_H): Likewise.
+	* m4/system_.h: Likewise, in non-configured includes. 
+
 2004-10-14  Noah Misch  <noah@cs.caltech.edu>,
 	    Gary V. Vaughan  <gary@gnu.org>
 
