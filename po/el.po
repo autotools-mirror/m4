@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-09-20 10:25+0200\n"
+"POT-Creation-Date: 2001-09-22 18:21+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -323,6 +323,61 @@ msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
 
+#: modules/evalparse.c:521
+msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής σύγκρισης στο cmp_term ()"
+
+#: modules/evalparse.c:566
+msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής ολίσθησης στο shift_term ()"
+
+#: modules/evalparse.c:665
+msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής στο mult_term ()"
+
+#: modules/evalparse.c:786
+#, c-format
+msgid "Radix in eval out of range (radix = %d)"
+msgstr "Η βάση στην αποτίμηση είναι εκτός ορίου (βάση = %d)"
+
+#: modules/evalparse.c:796
+msgid "Negative width to eval"
+msgstr "Αρνητικό πλάτος στην αποτίμηση"
+
+#: modules/evalparse.c:817
+#, c-format
+msgid "Bad expression in eval (missing right parenthesis): %s"
+msgstr "Λάθος έκφραση στην αποτίμηση (λείπει δεξιά παρένθεση): %s"
+
+#: modules/evalparse.c:823
+#, fuzzy, c-format
+msgid "Bad expression in eval: %s"
+msgstr "Λάθος έκφραση στην αποτίμηση (λάθος είσοδος): %s"
+
+#: modules/evalparse.c:828
+#, c-format
+msgid "Bad expression in eval (bad input): %s"
+msgstr "Λάθος έκφραση στην αποτίμηση (λάθος είσοδος): %s"
+
+#: modules/evalparse.c:833
+#, c-format
+msgid "Bad expression in eval (excess input): %s"
+msgstr "Λάθος έκφραση στην αποτίμηση (υπερβολική είσοδος): %s"
+
+#: modules/evalparse.c:838
+#, c-format
+msgid "Divide by zero in eval: %s"
+msgstr "Διαίρεση με μηδέν στην αποτίμηση: %s"
+
+#: modules/evalparse.c:843
+#, c-format
+msgid "Modulo by zero in eval: %s"
+msgstr "Υπόλοιπο με μηδέν στην αποτίμηση: %s"
+
+#: modules/evalparse.c:848
+msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κώδικας σφάλματος στην evaluate ()"
+
 #: modules/gnu.c:126
 #, c-format
 msgid "Undefined name %s"
@@ -364,28 +419,28 @@ msgstr ""
 "ΠΡΟΕΙΔΟΠΟΙΗΣΗ: Το \\0 θα εξαφανιστεί, κάνετε χρήση του \\& αντίθετα στις "
 "αντικαταστάσεις"
 
-#: modules/load.c:78 modules/m4.c:112
+#: modules/load.c:78 modules/m4.c:131
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
-#: modules/m4.c:694
+#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/m4.c:494
+#: modules/m4.c:505
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Αδυναμία επαναφοράς του %s"
 
-#: modules/m4.c:566 src/freeze.c:385
+#: modules/m4.c:577 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"
 
-#: modules/mpeval.c:198
+#: modules/mpeval.c:201
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Λάθος έκφραση στην αποτίμηση: %s"
@@ -684,39 +739,6 @@ msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
 #, fuzzy
 #~ msgid "ERROR: cannot close modules"
 #~ msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
-
-#~ msgid "Radix in eval out of range (radix = %d)"
-#~ msgstr "Η βάση στην αποτίμηση είναι εκτός ορίου (βάση = %d)"
-
-#~ msgid "Negative width to eval"
-#~ msgstr "Αρνητικό πλάτος στην αποτίμηση"
-
-#~ msgid "Bad expression in eval (missing right parenthesis): %s"
-#~ msgstr "Λάθος έκφραση στην αποτίμηση (λείπει δεξιά παρένθεση): %s"
-
-#~ msgid "Bad expression in eval (bad input): %s"
-#~ msgstr "Λάθος έκφραση στην αποτίμηση (λάθος είσοδος): %s"
-
-#~ msgid "Bad expression in eval (excess input): %s"
-#~ msgstr "Λάθος έκφραση στην αποτίμηση (υπερβολική είσοδος): %s"
-
-#~ msgid "Divide by zero in eval: %s"
-#~ msgstr "Διαίρεση με μηδέν στην αποτίμηση: %s"
-
-#~ msgid "Modulo by zero in eval: %s"
-#~ msgstr "Υπόλοιπο με μηδέν στην αποτίμηση: %s"
-
-#~ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
-#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κώδικας σφάλματος στην evaluate ()"
-
-#~ msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
-#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής σύγκρισης στο cmp_term ()"
-
-#~ msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
-#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής ολίσθησης στο shift_term ()"
-
-#~ msgid "INTERNAL ERROR: Bad operator in mult_term ()"
-#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής στο mult_term ()"
 
 #, fuzzy
 #~ msgid "ERROR: cannot find module: `%s'"

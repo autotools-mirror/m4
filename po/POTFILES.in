@@ -4,13 +4,13 @@ m4/regex.c
 m4/xmalloc.c
 m4/builtin.c
 m4/debug.c
-m4/eval.c
 m4/input.c
 m4/macro.c
 m4/module.c
 m4/output.c
 m4/path.c
 m4/symtab.c
+modules/evalparse.c
 modules/format.c
 modules/gnu.c
 modules/load.c

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-09-20 10:25+0200\n"
+"POT-Creation-Date: 2001-09-22 18:21+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -327,6 +327,65 @@ msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
 msgid "Name `%s' is unknown\n"
 msgstr "`%s' は定義されていません。\n"
 
+#: modules/evalparse.c:521
+msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+msgstr "内部エラー：関数 cmp_term () の比較演算子が不正です。"
+
+#: modules/evalparse.c:566
+msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+msgstr "内部エラー：shift_term () のシフト演算子が不正です。"
+
+#: modules/evalparse.c:665
+msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+msgstr "内部エラー：関数 mult_term () 内の演算子が不正です。"
+
+#: modules/evalparse.c:786
+#, c-format
+msgid "Radix in eval out of range (radix = %d)"
+msgstr "eval の基数 ( %d 進法) の桁数が許容範囲外にあります。"
+
+#: modules/evalparse.c:796
+msgid "Negative width to eval"
+msgstr "eval の出力桁数が負数になっています。"
+
+#: modules/evalparse.c:817
+#, c-format
+msgid "Bad expression in eval (missing right parenthesis): %s"
+msgstr "eval で %s という不正な表現が用いられています (閉じ括弧がありません)。"
+
+#: modules/evalparse.c:823
+#, fuzzy, c-format
+msgid "Bad expression in eval: %s"
+msgstr ""
+"eval で `%s' という不正な表現が用いられています \n"
+"            (入力データが正しくありません)。"
+
+#: modules/evalparse.c:828
+#, c-format
+msgid "Bad expression in eval (bad input): %s"
+msgstr ""
+"eval で `%s' という不正な表現が用いられています \n"
+"            (入力データが正しくありません)。"
+
+#: modules/evalparse.c:833
+#, c-format
+msgid "Bad expression in eval (excess input): %s"
+msgstr "eval で %s という不正な式が用いられています (入力データが多過ぎます)。"
+
+#: modules/evalparse.c:838
+#, c-format
+msgid "Divide by zero in eval: %s"
+msgstr "`%s' という表現で、0 による割算が行われています。"
+
+#: modules/evalparse.c:843
+#, c-format
+msgid "Modulo by zero in eval: %s"
+msgstr "`%s' という eval で、基数が 0 になっています。"
+
+#: modules/evalparse.c:848
+msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+msgstr "内部エラー：関数 evaluate () 内のエラーコードが不正です。"
+
 #: modules/gnu.c:126
 #, c-format
 msgid "Undefined name %s"
@@ -366,28 +425,28 @@ msgstr "コマンド `%s' へのパイプがオープンできません。"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
-#: modules/load.c:78 modules/m4.c:112
+#: modules/load.c:78 modules/m4.c:131
 #, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:184 modules/m4.c:236 modules/m4.c:364 modules/m4.c:674
-#: modules/m4.c:694
+#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/m4.c:494
+#: modules/m4.c:505
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:566 src/freeze.c:385
+#: modules/m4.c:577 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
 
-#: modules/mpeval.c:198
+#: modules/mpeval.c:201
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "eval で %s という不正な式が用いられています。"
@@ -657,41 +716,6 @@ msgstr ".  無限の再帰呼び出しが行われていないかどうかチェックして下さい。\n"
 
 #~ msgid "Non-numeric argument to %s"
 #~ msgstr "`%s' に数字でない引数が渡されています。"
-
-#~ msgid "Radix in eval out of range (radix = %d)"
-#~ msgstr "eval の基数 ( %d 進法) の桁数が許容範囲外にあります。"
-
-#~ msgid "Negative width to eval"
-#~ msgstr "eval の出力桁数が負数になっています。"
-
-#~ msgid "Bad expression in eval (missing right parenthesis): %s"
-#~ msgstr "eval で %s という不正な表現が用いられています (閉じ括弧がありません)。"
-
-#~ msgid "Bad expression in eval (bad input): %s"
-#~ msgstr ""
-#~ "eval で `%s' という不正な表現が用いられています \n"
-#~ "            (入力データが正しくありません)。"
-
-#~ msgid "Bad expression in eval (excess input): %s"
-#~ msgstr "eval で %s という不正な式が用いられています (入力データが多過ぎます)。"
-
-#~ msgid "Divide by zero in eval: %s"
-#~ msgstr "`%s' という表現で、0 による割算が行われています。"
-
-#~ msgid "Modulo by zero in eval: %s"
-#~ msgstr "`%s' という eval で、基数が 0 になっています。"
-
-#~ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
-#~ msgstr "内部エラー：関数 evaluate () 内のエラーコードが不正です。"
-
-#~ msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
-#~ msgstr "内部エラー：関数 cmp_term () の比較演算子が不正です。"
-
-#~ msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
-#~ msgstr "内部エラー：shift_term () のシフト演算子が不正です。"
-
-#~ msgid "INTERNAL ERROR: Bad operator in mult_term ()"
-#~ msgstr "内部エラー：関数 mult_term () 内の演算子が不正です。"
 
 #~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
 #~ msgstr "内部エラー：`Built-in' というビルトインマクロはありません。"
