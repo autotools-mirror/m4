@@ -5,7 +5,7 @@
 
 find . -name autom4te.cache | xargs rm -rf
 
-auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.in | sed 's/^.*(\([^)]*\)).*$/\1/'`
+auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.ac | sed 's/^.*(\([^)]*\)).*$/\1/'`
 
 rm -f config.cache
 rm aclocal.m4
