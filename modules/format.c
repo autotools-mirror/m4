@@ -17,12 +17,6 @@
    02111-1307  USA
 */
 
-#include <ctype.h>
-
-#if HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-
 /* printf like formatting for m4.  */
 
 #ifdef HAVE_EFGCVT

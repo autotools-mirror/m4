@@ -75,7 +75,7 @@ struct m4_symbol
 
   char *name;
   m4_token_data data;
-  m4_module *module;
+  const m4_module *module;
 };
 
 #define SYMBOL_NEXT(S)		((S)->next)
@@ -83,9 +83,28 @@ struct m4_symbol
 #define SYMBOL_SHADOWED(S)	((S)->shadowed)
 #define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
+#define SYMBOL_MODULE(S)	((S)->module)
 #define SYMBOL_NAME(S)		((S)->name)
 #define SYMBOL_TYPE(S)		(M4_TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)		(M4_TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_FUNC(S)		(M4_TOKEN_DATA_FUNC (&(S)->data))
+
+
+/* Debugging the memory allocator.  */
+
+#if WITH_DMALLOC
+# define DMALLOC_FUNC_CHECK
+# include <dmalloc.h>
+#endif
+
+/* Other debug stuff.  */
+
+#if DEBUG
+# define DEBUG_INPUT
+# define DEBUG_MACRO
+/* # define DEBUG_SYM */
+/* # define DEBUG_INCL */
+# define DEBUG_MODULE
+#endif
 
 #endif /* m4private.h */

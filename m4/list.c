@@ -25,6 +25,7 @@
 
 #include "list.h"
 #include "error.h"
+#include "m4private.h"
 
 #ifndef NULL
 #  define NULL	0

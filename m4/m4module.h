@@ -71,10 +71,6 @@ typedef struct {
 } m4_builtin;
 
 
-#define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
-
-
 /* This list is used to check for repeated loading of the same modules,
    and expanding the __modules__ macro.  */
 
@@ -94,22 +90,20 @@ extern const m4_builtin *m4_module_builtins M4_PARAMS((const m4_module *module))
 extern const m4_macro  *m4_module_macros M4_PARAMS((const m4_module *module));
 
 
-extern VOID	       *m4_module_modname_find M4_PARAMS((List *, VOID *));
-extern const m4_module *m4_find_module_by_builtin_addr M4_PARAMS((
-					const m4_builtin *));
+extern VOID	       *m4_module_find_by_modname M4_PARAMS((List *, VOID *));
+extern VOID	       *m4_module_find_by_builtin M4_PARAMS((List *, VOID *));
 
-
-extern	void	m4_macro_define		M4_PARAMS((
+extern	void	m4_macro_define		M4_PARAMS((const m4_module *,
 				const char *, const char *, m4_symbol_lookup));
 extern	void	m4_macro_table_install	M4_PARAMS((
-				const struct m4_module *, const m4_macro *));
+				const m4_module *, const m4_macro *));
 
 
-extern	void	m4_builtin_define		M4_PARAMS((
+extern	void	m4_builtin_define		M4_PARAMS((const m4_module *,
 				const char *, const m4_builtin *,
 				m4_symbol_lookup, boolean));
 extern	void	m4_builtin_table_install	M4_PARAMS((
-				const struct m4_module *, const m4_builtin *));
+				const m4_module *, const m4_builtin *));
 extern	const m4_builtin *m4_builtin_find_by_name M4_PARAMS((
 				const m4_builtin *, const char *));
 extern	const m4_builtin *m4_builtin_find_by_func M4_PARAMS((
@@ -463,6 +457,9 @@ extern boolean m4_evaluate M4_PARAMS((struct obstack *obs,
 extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
 					 const int radix, int min));
 #endif /* WITH_GMP */
+
+#define obstack_chunk_alloc	xmalloc
+#define obstack_chunk_free	xfree
 
 END_C_DECLS
 

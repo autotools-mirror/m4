@@ -339,7 +339,10 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_sp = xmalloc (ss.ss_size);
     ss.ss_flags = 0;
     if (sigaltstack (&ss, (stack_t *) 0) < 0)
-      error (1, errno, "sigaltstack");
+      {
+	xfree (ss.ss_sp);
+	error (1, errno, "sigaltstack");
+      }
   }
 
 #else /* not HAVE_SIGALTSTACK || not HAVE_SIGINFO_H && not HAVE_SIGINFO_T && HAVE_SIGSTACK */
@@ -352,7 +355,10 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
-      error (1, errno, "sigstack");
+      {
+	xfree (stackbuf);
+	error (1, errno, "sigstack");
+      }
   }
 
 #else /* not HAVE_SIGSTACK */

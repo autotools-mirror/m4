@@ -254,10 +254,10 @@ main (int argc, char *const *argv, char *const *envp)
 
   LTDL_SET_PRELOADED_SYMBOLS();
   
+  m4_module_init ();
   m4_debug_init ();
   m4_include_init ();
   m4_symtab_init ();
-  m4_module_init ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -331,18 +331,23 @@ main (int argc, char *const *argv, char *const *envp)
 	nesting_limit = atoi (optarg);
 	break;
       case 'M':
-	if (lt_dladdsearchdir (optarg) != 0)
+	{
+	  const char *search_path = lt_dlgetsearchpath ();
+	  if (lt_dlsetsearchpath (optarg) != 0)
 	  {
-	    const char *dlerror = lt_dlerror();
-	    if (dlerror == NULL)
+	    const char *dlerr = lt_dlerror();
+	    if (dlerr == NULL)
 	      M4ERROR ((EXIT_FAILURE, 0,
 			_("ERROR: failed to add search directory `%s'"),
 			optarg));
 	    else
 	      M4ERROR ((EXIT_FAILURE, 0,
 			_("ERROR: failed to add search directory `%s': %s"),
-			optarg, dlerror));
+			optarg, dlerr));
 	  }
+	  if (search_path)
+	    lt_dladdsearchdir (search_path);
+	}
 	break;
 
       case 'P':
@@ -470,7 +475,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    macro_value = "";
 	  else
 	    *macro_value++ = '\0';
-	  m4_macro_define (defines->macro, macro_value, M4_SYMBOL_INSERT);
+	  m4_macro_define (NULL, defines->macro, macro_value, M4_SYMBOL_INSERT);
 	  break;
 
 	case 'U':

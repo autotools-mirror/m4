@@ -84,7 +84,8 @@ m4_builtin_find_by_func (bp, func)
 `-------------------------------------------------------------------------*/
 
 void
-m4_builtin_define (name, bp, mode, traced)
+m4_builtin_define (module, name, bp, mode, traced)
+     const m4_module *module;
      const char	*name;
      const m4_builtin *bp;
      m4_symbol_lookup mode;
@@ -98,6 +99,7 @@ m4_builtin_define (name, bp, mode, traced)
       if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
         xfree (SYMBOL_TEXT (symbol));
 
+      SYMBOL_MODULE (symbol)		= module;
       SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
       SYMBOL_MACRO_ARGS (symbol)	= bp->groks_macro_args;
       SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
@@ -120,11 +122,11 @@ m4_builtin_table_install (module, table)
 	string = (char *) xmalloc (strlen (bp->name) + 4);
 	strcpy (string, "m4_");
 	strcat (string, bp->name);
-	m4_builtin_define (string, bp, M4_SYMBOL_PUSHDEF, FALSE);
+	m4_builtin_define (module, string, bp, M4_SYMBOL_PUSHDEF, FALSE);
 	free (string);
       }
     else
-      m4_builtin_define (bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
+      m4_builtin_define (module, bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
 }
 
 /*-------------------------------------------------------------------------.
@@ -134,7 +136,8 @@ m4_builtin_table_install (module, table)
 `-------------------------------------------------------------------------*/
 
 void
-m4_macro_define (name, text, mode)
+m4_macro_define (module, name, text, mode)
+     const m4_module *module;
      const char *name;
      const char *text;
      m4_symbol_lookup mode;
@@ -147,8 +150,12 @@ m4_macro_define (name, text, mode)
       if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
         xfree (SYMBOL_TEXT (symbol));
 
-      SYMBOL_TYPE (symbol) = M4_TOKEN_TEXT;
-      SYMBOL_TEXT (symbol) = xstrdup (text);
+      SYMBOL_MODULE (symbol) 		= module;
+      SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
+      SYMBOL_MACRO_ARGS (symbol)	= FALSE;
+      SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
+      SYMBOL_TEXT (symbol) 		= xstrdup (text);
+      SYMBOL_TRACED (symbol)		= FALSE;
     }
 }
 
@@ -160,5 +167,5 @@ m4_macro_table_install (module, table)
   const m4_macro *mp;
 
   for (mp = table; mp->name != NULL; mp++)
-    m4_macro_define (mp->name, mp->value, M4_SYMBOL_PUSHDEF);
+    m4_macro_define (module, mp->name, mp->value, M4_SYMBOL_PUSHDEF);
 }

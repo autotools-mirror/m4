@@ -20,9 +20,9 @@
 #define MODULES_UNINITIALISED -4444
 
 #include "m4.h"
-#include "m4private.h"
 #include "pathconf.h"
 #include "ltdl.h"
+#include "m4private.h"
 
 #define DEBUG_MODULES  /* Define this to see runtime debug info. */
 #undef DEBUG_MODULES
@@ -37,14 +37,12 @@
  * SunOS), shl_load(3) (exists on HPUX), LoadLibrary(3) (exists on
  * Windows, cygwin, OS/2), load_add_on(3) (exists on BeOS), and can
  * also fall back to dld_link(3) from libdld or lt_dlpreload(3) from
- * libtool if shared libraries are not available on the host machine.  To
- * enable this experimental feature give configure the `--with-modules'
- * switch.
+ * libtool if shared libraries are not available on the host machine.
  *
  * A m4 module need only define one external symbol, called
- * `m4_builtin_table'.  This symbol should point to a table of `struct
- * m4_builtin'.  This table is pushed on a list of builtin tables and
- * each definition therein is added to the symbol table.
+ * `m4_builtin_table'.  This symbol should point to a table of `m4_builtin'.
+ * This table is pushed on a list of builtin tables and each definition
+ * therein is added to the symbol table.
  *
  * The code implementing loadable modules is modest.  It is divided
  * between the files builtin.c (user interface and support for multiple
@@ -118,7 +116,7 @@ m4_module_macros (module)
 }
 
 VOID *
-m4_module_modname_find (elt, match)
+m4_module_find_by_modname (elt, match)
      List *elt;
      VOID *match;
 {
@@ -130,6 +128,26 @@ m4_module_modname_find (elt, match)
   return NULL;
 }  
 
+VOID *
+m4_module_find_by_builtin (elt, match)
+     List *elt;
+     VOID *match;
+{
+  const m4_module *module = (const m4_module *) elt;
+
+  if (module && module->bp)
+    {
+      const m4_builtin *bp;
+
+      for (bp = &module->bp[0]; bp->name; ++bp)
+	{
+	  if (bp == (const m4_builtin *) match)
+	    return (VOID *) module;
+	}
+    }
+
+  return NULL;
+}
 
 /* 
  * Initialisation.  Currently the module search path in path.c is
@@ -160,7 +178,7 @@ m4_module_init ()
       char *path = getenv("M4MODPATH");
 
 #ifdef DEBUG_MODULES
-      DEBUG_MESSAGE("Module system initialised.");
+      M4_DEBUG_MESSAGE("Module system initialised.");
 #endif /* DEBUG_MODULES */
  
       if (path != NULL)
@@ -223,7 +241,7 @@ m4_module_load (modname, obs)
 	  module->ref_count++;
 	  
 #ifdef DEBUG_MODULES
-	  DEBUG_MESSAGE2("module %s: now has %d references.",
+	  M4_DEBUG_MESSAGE2("module %s: now has %d references.",
 			 modname, module->ref_count);
 #endif /* DEBUG_MODULES */
 	  return module;
@@ -274,7 +292,7 @@ m4_module_load (modname, obs)
       module = XMALLOC (m4_module, 1);
       
 #ifdef DEBUG_MODULES
-      DEBUG_MESSAGE1("module %s: loaded ok", modname);
+      M4_DEBUG_MESSAGE1("module %s: loaded ok", modname);
 #endif /* DEBUG_MODULES */
 
       module->modname	= xstrdup (modname);
@@ -350,7 +368,7 @@ m4_module_unload (modname, obs)
   if (--module->ref_count > 0)
     {
 #ifdef DEBUG_MODULES
-      DEBUG_MESSAGE2("module %s: now has %d references.",
+      M4_DEBUG_MESSAGE2("module %s: now has %d references.",
 		     modname, module->ref_count);
 #endif /* DEBUG_MODULES */
       return;
@@ -359,7 +377,7 @@ m4_module_unload (modname, obs)
   m4_remove_table_reference_symbols (module->bp, module->mp);
 
 #ifdef DEBUG_MODULES
-  DEBUG_MESSAGE1("module %s: builtins undefined", modname);
+  M4_DEBUG_MESSAGE1("module %s: builtins undefined", modname);
 #endif /* DEBUG_MODULES */
   
   /* Run the finishing function for the loaded module. */
@@ -383,7 +401,7 @@ m4_module_unload (modname, obs)
   else
     {
 #ifdef DEBUG_MODULES
-      DEBUG_MESSAGE1("module %s unloaded", module->modname);
+      M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
 #endif /* DEBUG_MODULES */
 
       if (prev)
@@ -416,7 +434,7 @@ m4_module_unload_all ()
 	  (*finish_func)();
 
 #ifdef DEBUG_MODULES
-	  DEBUG_MESSAGE1("module %s finish hook called", m4_modules->modname);
+	  M4_DEBUG_MESSAGE1("module %s finish hook called", module->modname);
 #endif /* DEBUG_MODULES */
 	}
 
@@ -425,7 +443,7 @@ m4_module_unload_all ()
 	break;
 
 #ifdef DEBUG_MODULES
-      DEBUG_MESSAGE1("module %s unloaded", m4_modules->modname);
+      M4_DEBUG_MESSAGE1("module %s unloaded", module->modname);
 #endif /* DEBUG_MODULES */
 
       m4_modules = LIST_NEXT (m4_modules);

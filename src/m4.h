@@ -53,8 +53,8 @@ void bcopy ();
 # endif
 #endif
 
-#ifdef STDC_HEADERS
-# include <stdlib.h>
+#if STDC_HEADERS || HAVE_STDLIB_H
+#  include <stdlib.h>
 #else /* not STDC_HEADERS */
 
 voidstar malloc ();
@@ -106,24 +106,5 @@ void setup_stackovf_trap M4_PARAMS((char *const *, char *const *,
 
 void produce_frozen_state M4_PARAMS((const char *));
 void reload_frozen_state M4_PARAMS((const char *));
-
-
-
-/* Debugging the memory allocator.  */
-
-#ifdef WITH_DMALLOC
-# define DMALLOC_FUNC_CHECK
-# include <dmalloc.h>
-#endif
-
-/* Other debug stuff.  */
-
-#ifdef DEBUG
-# define DEBUG_INPUT
-# define DEBUG_MACRO
-/* # define DEBUG_SYM */
-/* # define DEBUG_INCL */
-# define DEBUG_MODULE
-#endif
 
 #endif /* M4_H */

@@ -84,12 +84,30 @@ echo linking src/gnu-getopt.h to $m4_getopt
 $LN_S ./gnu-getopt.h $m4_getopt])
 AC_SUBST(M4OBJS)
 
+
+# Use the libc supplied version of obstacks if available
+AC_CHECK_HEADER(obstack.h)
+AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
+               [AC_TRY_LINK([#include "obstack.h"],
+	                    [struct obstack *mem;obstack_free(mem,(char *) 0)],
+	                    m4_cv_func_obstack=yes,
+	                    m4_cv_func_obstack=no)])
+OBSTACK_H=
 m4_obstack=m4/obstack.h
 rm -f $m4_obstack
-AC_CHECK_FUNC(obstack_init, [],
-[LIBOBJS="$LIBOBJS obstack.$ac_objext"
-echo linking src/gnu-obstack.h to $m4_obstack
-$LN_S ./gnu-obstack.h $m4_obstack])
+if test $m4_cv_func_obstack = yes; then
+  AC_DEFINE(HAVE_OBSTACK, 1, [Define if libc includes obstacks])
+else
+  LIBOBJS="$LIBOBJS obstack.$ac_objext"
+  echo linking src/gnu-obstack.h to $m4_obstack
+  $LN_S ./gnu-obstack.h $m4_obstack
+
+  if test x"$ac_cv_header_obstack_h" != xyes; then
+    OBSTACK_H=obstack.h
+  fi
+fi
+AC_SUBST(OBSTACK_H)
+
 
 jm_PREREQ_ERROR
 

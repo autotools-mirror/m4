@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-27 23:19+0000\n"
+"POT-Creation-Date: 2000-11-29 00:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,7 +125,7 @@ msgstr ""
 msgid "Invalid range end"
 msgstr ""
 
-#: m4/regex.c:1057 m4/xmalloc.c:82
+#: m4/regex.c:1057 m4/xmalloc.c:80
 msgid "Memory exhausted"
 msgstr ""
 
@@ -238,7 +238,7 @@ msgstr ""
 msgid "Undefined syntax code %c"
 msgstr ""
 
-#: m4/input.c:1098 modules/gnu.c:271 modules/gnu.c:330
+#: m4/input.c:1098 modules/gnu.c:279 modules/gnu.c:338
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr ""
@@ -268,46 +268,46 @@ msgstr ""
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 
-#: m4/module.c:178
+#: m4/module.c:196
 #, c-format
 msgid "ERROR: failed to initialise modules: %s"
 msgstr ""
 
-#: m4/module.c:255
+#: m4/module.c:273
 #, c-format
 msgid "ERROR: cannot load module: `%s'"
 msgstr ""
 
-#: m4/module.c:258
+#: m4/module.c:276
 #, c-format
 msgid "ERROR: cannot load module: `%s': %s"
 msgstr ""
 
-#: m4/module.c:265
+#: m4/module.c:283
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:344
+#: m4/module.c:362
 #, c-format
 msgid "ERROR: cannot close module: %s is not loaded."
 msgstr ""
 
-#: m4/module.c:377 m4/module.c:456
+#: m4/module.c:395 m4/module.c:474
 #, c-format
 msgid "ERROR: cannot close module: `%s'"
 msgstr ""
 
-#: m4/module.c:380 m4/module.c:460
+#: m4/module.c:398 m4/module.c:478
 #, c-format
 msgid "ERROR: cannot close module: `%s': %s"
 msgstr ""
 
-#: m4/module.c:446
+#: m4/module.c:464
 msgid "ERROR: cannot close modules"
 msgstr ""
 
-#: m4/module.c:449
+#: m4/module.c:467
 #, c-format
 msgid "ERROR: cannot close modules: %s"
 msgstr ""
@@ -345,42 +345,42 @@ msgstr ""
 msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
 msgstr ""
 
-#: m4/symtab.c:331
+#: m4/symtab.c:339
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr ""
 
-#: modules/gnu.c:117 modules/m4.c:713 modules/m4.c:736
+#: modules/gnu.c:125 modules/m4.c:711 modules/m4.c:734
 #, c-format
 msgid "Undefined name %s"
 msgstr ""
 
-#: modules/gnu.c:141 modules/m4.c:287
+#: modules/gnu.c:149 modules/m4.c:285
 #, c-format
 msgid "Undefined name `%s'"
 msgstr ""
 
-#: modules/gnu.c:199
+#: modules/gnu.c:207
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr ""
 
-#: modules/gnu.c:234
+#: modules/gnu.c:242
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr ""
 
-#: modules/gnu.c:282 modules/gnu.c:354
+#: modules/gnu.c:290 modules/gnu.c:362
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr ""
 
-#: modules/gnu.c:448
+#: modules/gnu.c:456
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr ""
 
-#: modules/gnu.c:515
+#: modules/gnu.c:523
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
@@ -388,67 +388,67 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr ""
 
-#: modules/m4.c:294
+#: modules/m4.c:292
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr ""
 
-#: modules/m4.c:334
+#: modules/m4.c:332
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr ""
 
-#: modules/m4.c:385
+#: modules/m4.c:383
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr ""
 
-#: modules/m4.c:394
+#: modules/m4.c:392
 msgid "Negative width to eval"
 msgstr ""
 
-#: modules/m4.c:487
+#: modules/m4.c:485
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr ""
 
-#: modules/m4.c:499
+#: modules/m4.c:497
 #, c-format
 msgid "Cannot undivert %s"
 msgstr ""
 
-#: modules/m4.c:588 src/freeze.c:398
+#: modules/m4.c:586 src/freeze.c:404
 #, c-format
 msgid "Cannot open %s"
 msgstr ""
 
-#: src/freeze.c:218
+#: src/freeze.c:226
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr ""
 
-#: src/freeze.c:251
+#: src/freeze.c:257
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr ""
 
-#: src/freeze.c:283
+#: src/freeze.c:289
 msgid "Expecting line feed in frozen file"
 msgstr ""
 
-#: src/freeze.c:285
+#: src/freeze.c:291
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr ""
 
-#. 1 argument 'F' operations are invalid for format version 1
-#: src/freeze.c:411 src/freeze.c:450 src/freeze.c:467 src/freeze.c:521
-#: src/freeze.c:539
+#. 3 argument 'F' operations are invalid for format version 1.
+#: src/freeze.c:417 src/freeze.c:459 src/freeze.c:508 src/freeze.c:526
+#: src/freeze.c:644
 msgid "Ill-formated frozen file"
 msgstr ""
 
-#: src/freeze.c:505
+#: src/freeze.c:492
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
 
-#: src/freeze.c:559
+#: src/freeze.c:546
 msgid "Premature end of frozen file"
 msgstr ""
 
@@ -558,26 +558,26 @@ msgid ""
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:339
+#: src/main.c:341
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:343
+#: src/main.c:345
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:374
+#: src/main.c:379
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr ""
 
-#: src/main.c:403
+#: src/main.c:408
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:491
+#: src/main.c:496
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr ""
 

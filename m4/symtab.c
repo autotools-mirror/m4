@@ -201,6 +201,8 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
  | that references a function in the given builtin table.             |
  `-------------------------------------------------------------------*/
 
+/* FIXME:  This can be reimplemented to work much faster now that each
+   symtab entry carries a reference to its defining module.  */
 void
 m4_remove_table_reference_symbols (builtins, macros)
      m4_builtin *builtins;
@@ -227,7 +229,7 @@ m4_remove_table_reference_symbols (builtins, macros)
 		 BUILTIN_TABLE.  */
 	      {
 		const m4_builtin *bp;
-		for (bp = builtins; bp->name != NULL; ++bp)
+		for (bp = builtins; symbol && bp && bp->name != NULL; ++bp)
 		  if (SYMBOL_FUNC (symbol) == bp->func)
 		    {
 		      if (prev)
@@ -240,6 +242,9 @@ m4_remove_table_reference_symbols (builtins, macros)
 			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
 		      
 		      free_symbol (symbol);
+
+		      /* Maintain the loop invariant. */
+		      symbol = prev;
 		    }
 	      }
 	      break;
@@ -249,7 +254,7 @@ m4_remove_table_reference_symbols (builtins, macros)
 		 PREDEFINED_TABLE.  */
 	      {
 		const m4_macro *mp;
-		for (mp = macros; mp && mp->name; mp++)
+		for (mp = macros; symbol && mp && mp->name; mp++)
 		  if ((strcmp(SYMBOL_NAME (symbol), mp->name) == 0)
 		      && (strcmp (SYMBOL_TEXT (symbol), mp->value) == 0))
 		    {
@@ -263,6 +268,9 @@ m4_remove_table_reference_symbols (builtins, macros)
 			SYMBOL_SHADOWED (SYMBOL_NEXT (symbol)) = FALSE;
 		      
 		      free_symbol (symbol);
+
+		      /* Maintain the loop invariant. */
+		      symbol = prev;
 		    }
 	      }
 	      break;

@@ -32,13 +32,13 @@
 extern int errno;
 #endif
 
+#include <m4module.h>
+
 /* Include this header for speed, which gives us direct access to
    the fields of internal structures at the expense of maintaining
    interface/implementation separation.   The builtins in this file
    are the core of m4 and must be optimised for speed.  */
 #include "m4private.h"
-
-#include <m4module.h>
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	m4_LTX_m4_builtin_table
@@ -134,20 +134,20 @@ macro_install (argc, argv, mode)
 
   if (argc == 2)
     {
-      m4_macro_define (M4ARG (1), "", mode);
+      m4_macro_define (NULL, M4ARG (1), "", mode);
       return;
     }
 
   switch (M4_TOKEN_DATA_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_define (M4ARG (1), M4ARG (2), mode);
+      m4_macro_define (NULL, M4ARG (1), M4ARG (2), mode);
       break;
 
     case M4_TOKEN_FUNC:
       bp = m4_builtin_find_by_func (NULL, M4_TOKEN_DATA_FUNC (argv[2]));
       if (bp)
-	m4_builtin_define (M4ARG (1), bp, mode,
+	m4_builtin_define (NULL, M4ARG (1), bp, mode,
 			   M4_TOKEN_DATA_FUNC_TRACED (argv[2]));
       break;
 
@@ -211,7 +211,6 @@ M4BUILTIN_HANDLER (ifdef)
 M4BUILTIN_HANDLER (ifelse)
 {
   const char *result;
-  m4_token_data *argv0;
 
   if (argc == 2)
     return;
@@ -222,7 +221,6 @@ M4BUILTIN_HANDLER (ifelse)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     m4_bad_argc (argv[0], (argc + 2) % 3, -1, 1);
 
-  argv0 = argv[0];
   argv++;
   argc--;
 

@@ -21,8 +21,14 @@
 #  include <config.h>
 #endif
 
+#include <ctype.h>
+
+#if HAVE_STDLIB_H
+#  include <stdlib.h>
+#endif
+
+/* Need this here so that `M4_SCOPE' is defined before use.  */
 #include "m4module.h"
-#include "m4private.h"
 
 #if HAVE_ERRNO_H
 #  include <errno.h>
@@ -31,9 +37,11 @@
 M4_SCOPE int errno;
 #endif
 
+#include "m4private.h"
 #include "regex.h"
 
 #include "format.c"
+
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table

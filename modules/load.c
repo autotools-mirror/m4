@@ -22,6 +22,7 @@
 #endif
 
 #include <m4module.h>
+#include "m4private.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	load_LTX_m4_builtin_table
@@ -100,7 +101,7 @@ M4BUILTIN_HANDLER (load)
 
   module = m4_module_load (M4ARG(1), obs);
 
-  if (module)
+  if (module && module->ref_count == 1)
     {
       const m4_builtin *bp	= m4_module_builtins (module);
       const m4_macro *mp	= m4_module_macros (module);

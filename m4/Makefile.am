@@ -27,8 +27,9 @@ LDFLAGS 	= -no-undefined -export-dynamic
 INCLUDES	= -I$(top_srcdir) -I$(top_srcdir)/src @INTLINCL@
 
 include_HEADERS	= m4module.h
-pkginc_HEADERS	= error.h list.h ltdl.h obstack.h regex.h system.h
 noinst_HEADERS	= m4private.h
+pkginc_HEADERS	= error.h list.h ltdl.h regex.h system.h @OBSTACK_H@
+EXTRA_HEADERS	= gnu-obstack.h
 
 lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c evalmp.c \

@@ -13,10 +13,12 @@ rm -f config.cache
 aclocal -I ./$auxdir  || exit 1
 autoheader || exit 1
 
-touch ./$aux_dir/ltconfig
-automake --add-missing --copy || { rm ltconfig && exit 1; }
-rm ./$aux_dir/ltconfig
+touch ./$auxdir/ltconfig
+automake --add-missing --copy || { rm ./$auxdir/ltconfig && exit 1; }
+rm ./$auxdir/ltconfig
 
 autoconf -l ./$auxdir || exit 1
+
+cd tests && AWK=${AWK-awk} ./get_them ../doc/m4.texinfo
 
 exit 0

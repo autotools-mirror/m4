@@ -23,10 +23,10 @@
 . ${builddir}/../tests/config.sh
 
 # First generate the `ok' ouput by running over the sources before freezeing
-M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -d frozen.m4 unfrozen.m4 >ok 2>okerr
+M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -m load -d frozen.m4 unfrozen.m4 >ok 2>okerr
 
 # Now freeze the first source file
-M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -d -F frozen.m4f frozen.m4 >/dev/null 2>&1
+M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -m load -d -F frozen.m4f frozen.m4 >/dev/null 2>&1
 
 # Now rerun the original sequence, but using the frozen file
 M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -d -R frozen.m4f unfrozen.m4  >out 2>err

@@ -34,7 +34,7 @@ ACLOCAL_AMFLAGS	= -I $(auxdir)
 
 SUBDIRS			= intl po m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
-			  config.h.in configure ltmain.sh stamp-h.in \
+			  config-h.in configure ltmain.sh stamp-h.in \
 			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id \
 			  $(AUX_DIST)
 

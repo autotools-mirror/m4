@@ -191,8 +191,6 @@ produce_frozen_state (name)
 
   for (h = 0; h < hash_table_size; h++)
     {
-      const char *modname = NULL;
-
       /* Process all entries in one bucket, from the last to the first.
 	 This order ensures that, at reload time, pushdef's will be
 	 executed with the oldest definitions first.  */
@@ -200,14 +198,24 @@ produce_frozen_state (name)
       m4_symtab[h] = (m4_symbol *) list_reverse ((List *) m4_symtab[h]);
       for (symbol = m4_symtab[h]; symbol; symbol = SYMBOL_NEXT (symbol))
 	{
+	  const m4_module *module = SYMBOL_MODULE (symbol);
+	  const char *symbol_name = SYMBOL_NAME (symbol);
+	  const char *modname     = module ? module->modname : NULL;
+
 	  switch (SYMBOL_TYPE (symbol))
 	    {
 	    case M4_TOKEN_TEXT:
-	      fprintf (file, "T%lu,%lu\n",
-		       (unsigned long) strlen (SYMBOL_NAME (symbol)),
+	      fprintf (file, "T%lu,%lu",
+		       (unsigned long) strlen (symbol_name),
 		       (unsigned long) strlen (SYMBOL_TEXT (symbol)));
-	      fputs (SYMBOL_NAME (symbol), file);
+	      if (module)
+		fprintf (file, ",%lu", (unsigned long) strlen (modname));
+	      fputc ('\n', file);
+			 
+	      fputs (symbol_name, file);
 	      fputs (SYMBOL_TEXT (symbol), file);
+	      if (module)
+		fputs (modname, file);
 	      fputc ('\n', file);
 	      break;
 
@@ -219,30 +227,28 @@ produce_frozen_state (name)
 INTERNAL ERROR: Builtin not found in builtin table!")));
 		  abort ();
 		}
-	      fprintf (file, "F%lu",
-		       (unsigned long) strlen (SYMBOL_NAME (symbol)));
-		
-	      /* FIXME:
-	      modname = bp->module->modname;
-	      */
-	      modname = "BOGUS!";
 
-	      if (modname || (strcmp (SYMBOL_NAME (symbol), bp->name) != 0))
+	      fprintf (file, "F%lu,%lu",
+		       (unsigned long) strlen (symbol_name),
+		       (unsigned long) strlen (bp->name));
+
+	      /* Search for the module that supplied the builtin, if the
+		 m4_symbol has no entry.  */
+	      if (!module)
 		{
-		    fprintf (file, ",%lu",
-			     (unsigned long) strlen (bp->name));
+		  module = (m4_module *) list_find (m4_modules, (VOID *) bp,
+						    m4_module_find_by_builtin);
+		  modname = module ? module->modname : NULL;
 		}
-	      if (modname)
-		{
-		  fprintf (file, ",%lu",
-			   (unsigned long) strlen (modname));
-		}
+	  
+	      if (module)
+		fprintf (file, ",%lu",
+			 (unsigned long) strlen (modname));
 	      fputc ('\n', file);
 
-	      fputs (SYMBOL_NAME (symbol), file);
-	      if (modname || (strcmp (SYMBOL_NAME (symbol), bp->name) != 0))
-		fputs (bp->name, file);
-	      if (modname)
+	      fputs (symbol_name, file);
+	      fputs (bp->name, file);
+	      if (module)
 		fputs (modname, file);
 	      fputc ('\n', file);
 	      break;
@@ -432,23 +438,9 @@ reload_frozen_state (name)
 	/* Get string lengths. */
 
 	GET_NUMBER (number[0]);
-	if ((character == ',') || (version < 2))
-	  {
-	    /* Second argument to 'F' operator is optional for format
-	       versions 2 or later. */
-	    VALIDATE (',');
-	    GET_CHARACTER;
-	    GET_NUMBER (number[1]);
-	  }
-	else if (version > 1)
-	  {
-	    number[1] = 0;
-	  }
-	else
-	  {
-	    /* 1 argument 'F' operations are invalid for format version 1 */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
-	  }
+	VALIDATE (',');
+	GET_CHARACTER;
+	GET_NUMBER (number[1]);
 	
 	if ((character == ',') && (version > 1))
 	  {
@@ -473,8 +465,7 @@ reload_frozen_state (name)
 	/* Get string contents.  */
 
 	GET_STRING (file, string[0], allocated[0], number[0]);
-	if ((number[1] > 0) || (version < 2))
-	  GET_STRING (file, string[1], allocated[1], number[1]);
+	GET_STRING (file, string[1], allocated[1], number[1]);
 	if ((number[2] > 0)  && (version > 1))
 	  GET_STRING (file, string[2], allocated[2], number[2]);
 	VALIDATE ('\n');
@@ -482,25 +473,21 @@ reload_frozen_state (name)
 	/* Enter a macro having a builtin function as a definition.  */
 
 	{
+	  const m4_module *module;
 	  m4_builtin *bt = NULL;
 
 	  if (number[2] > 0)
 	    {
-	      const m4_module *module;
-
 	      module = (m4_module *) list_find (m4_modules, string[2],
-						m4_module_modname_find);
+						m4_module_find_by_modname);
 	      if (module)
 		bt = module->bp;
 	    }
 
-	  if (number[1] > 0)
-	    bp = m4_builtin_find_by_name (bt, string[1]);
-	  else
-	    bp = m4_builtin_find_by_name (bt, string[0]);
+	  bp = m4_builtin_find_by_name (bt, string[1]);
 	    
 	  if (bp)
-	    m4_builtin_define (string[0], bp, M4_SYMBOL_PUSHDEF, 0);
+	    m4_builtin_define (module, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
 	  else
 	    M4ERROR ((warning_status, 0, _("\
 `%s' from frozen file not found in builtin table!"),
@@ -568,7 +555,6 @@ reload_frozen_state (name)
 
       case 'C':
       case 'D':
-      case 'T':
       case 'Q':
 	operation = character;
 	GET_CHARACTER;
@@ -616,13 +602,6 @@ reload_frozen_state (name)
 	      m4_shipout_text (NULL, string[1], number[1]);
 	    break;
 
-	  case 'T':
-
-	    /* Enter a macro having an expansion text as a definition.  */
-
-	    m4_macro_define (string[0], string[1], M4_SYMBOL_PUSHDEF);
-	    break;
-
 	  case 'Q':
 
 	    /* Change quote strings.  */
@@ -636,6 +615,54 @@ reload_frozen_state (name)
 
 	    break;
 	  }
+	break;
+	
+      case 'T':
+	GET_CHARACTER;
+
+	/* Get string lengths. */
+
+	GET_NUMBER (number[0]);
+	VALIDATE (',');
+	GET_CHARACTER;
+	GET_NUMBER (number[1]);
+
+	if ((character == ',') && (version > 1))
+	  {
+	    /* 'T' operator accepts an optional third argument for
+	       format versions 2 or later.  */
+	    GET_CHARACTER;
+	    GET_NUMBER (number[2]);
+	  }
+	else if (version > 1)
+	  {
+	    number[2] = 0;
+	  }
+	else
+	  {
+	    /* 3 argument 'T' operations are invalid for format version 1.  */
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	  }
+	  
+	VALIDATE ('\n');
+
+	/* Get string contents.  */
+	GET_STRING (file, string[0], allocated[0], number[0]);
+	GET_STRING (file, string[1], allocated[1], number[1]);
+	if ((number[2] > 0)  && (version > 1))
+	  GET_STRING (file, string[2], allocated[2], number[2]);
+	VALIDATE ('\n');
+      
+	/* Enter a macro having an expansion text as a definition.  */
+	{
+	  const m4_module *module;
+
+	  if (number[2] > 0)
+	    module = (m4_module *) list_find (m4_modules, string[2],
+					      m4_module_find_by_modname);
+
+	  m4_macro_define (module, string[0], string[1], M4_SYMBOL_PUSHDEF);
+	}
 	break;
 	
       case 'V':

@@ -1,4 +1,49 @@
+2000-11-28  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/main.c (main): Fixed a particularly nasty bug is
+	user_search_path setting -- the -M flag processing must be
+	extremely careful with search path ordering, or else the default
+	installed module directory (possibly containing modules from a
+	previous release) is placed earlier in the search path than any -M
+	arguments (which are relied upon to load uninstalled modules with
+	most of the tests in the regresion suite).
+
+	* modules/load.c (builtin_load):  Nasty hack to prevent adding
+	symbols to symtab again if a module is loaded more than once.
+	* modules/m4.c (builtin_ifelse): removed unused variable argv0.
+
+	* m4/symtab.c (m4_remove_table_reference_symbols):  Fixed a
+	possible NULL pointer dereference.
+
+	* m4/module.c (m4_module_find_by_modname): Renamed from
+	m4_module_modname_find.   Fixed all references.
+	(m4_module_find_by_builtin):  New function.
+
+	* modules/modfreeze.test: load the `load' module with each
+	invocation.
+	* src/freeze.c (produce_frozen_state): Simplified in light of
+	module field in m4_symbol.  Allow a third argument for text macros
+	to name the originating module.
+	(reload_frozen_state): ditto.
+	* m4/m4module.h:  Fixup prototypes.
+	* m4/builtin.h (m4_builtin_define): Add a module argument so
+	that symbols can be registered against the defining module.
+	(m4_macro_define): ditto.
+	* m4/m4private.h (m4_symbol): Make the module field const to save
+	on casting in the rest of the code.
+	(SYMBOL_MODULE): New macro.
+
+	* m4/symtab.c (m4_remove_table_reference_symbols): Fixed stupid
+	symbol reference maintenance bugs when removing a symbol from the
+	symtab.
+
+	* src/stackovf.c (setup_stackovf_trap): Fixed some memory leaks.
+
 2000-11-27  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (m4_cv_func_obstack): A better check for whether
+	libc has an obstack implementation.
+	* m4/Makefile.am (EXTRA_libm4_la_SOURCES): add gnu-obstack.h.
 
 	* configure.in (--with-modules): Changed semantics.  This
 	option is now used to list modules to be preopened.

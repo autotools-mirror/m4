@@ -36,8 +36,6 @@
 
 #include "system.h"
 
-#ifndef WITH_DMALLOC
-
 /* If this file fails to compile because your machine has no memset()
    function, you should ensure that either HAVE_CALLOC or HAVE_BZERO
    are defined in config.h */
@@ -140,5 +138,3 @@ xfree (stale)
   if (stale)
     free (stale);
 }
-
-#endif /* !WITH_DMALLOC */
