@@ -26,8 +26,8 @@ libgnu_la_SOURCES	=
 libgnu_la_LIBADD	= $(LTLIBOBJS) $(LTLIBINTL)
 
 pkgincdir		= $(includedir)/@PACKAGE@
-pkginc_HEADERS		= $(OBSTACK_H) $(STDBOOL_H)
-EXTRA_HEADERS		= obstack.h stdbool.h
+pkginc_HEADERS		= $(GETTEXT_H) $(OBSTACK_H) $(STDBOOL_H)
+EXTRA_HEADERS		= gettext.h obstack.h stdbool.h
 EXTRA_DIST		=
 
 MOSTLYCLEANFILES	=
@@ -37,6 +37,17 @@ MAINTAINERCLEANFILES	= Makefile.in
 # --------------------------- #
 # Gnulib Makefile.am snippets #
 # --------------------------- #
+
+## gettext: (not yet in gnulib)
+BUILT_SOURCES += $(GETTEXT_H)
+EXTRA_DIST += gettext_.h
+
+all-local $(lib_OBJECTS): $(GETTEXT_H)
+gettext.h: gettext_.h
+	rm -f $@ && $(LN_S) gettext_.h $@
+
+MOSTLYCLEANFILES += gettext_.h
+
 
 ## obstack: (not yet in gnulib)
 BUILT_SOURCES += $(OBSTACK_H)

@@ -20,12 +20,12 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
-# serial 6
+# serial 7
 
-# M4_AC_CHECK_DEBUGGING
-# ---------------------
+# m4_CHECK_DEBUGGING
+# ------------------
 # Debugging Support
-AC_DEFUN([M4_AC_CHECK_DEBUGGING],
+AC_DEFUN([m4_CHECK_DEBUGGING],
 [AC_REQUIRE([AC_PROG_CC])
 AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],
                            [build for debugging [default=no]])])
@@ -84,4 +84,4 @@ else
            ;;
   esac
 fi
-])# M4_AC_CHECK_DEBUGGING
+])# m4_CHECK_DEBUGGING

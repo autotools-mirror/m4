@@ -26,25 +26,6 @@ texinfo.tex					\
 $(ACLOCAL_MACROS)				\
 $(STANDARD_TOOLS)
 
-ACLOCAL_MACROS =				\
-codeset.m4					\
-gettext.m4					\
-glibc21.m4					\
-iconv.m4					\
-intdiv0.m4					\
-inttypes-pri.m4					\
-inttypes.m4					\
-inttypes_h.m4					\
-isc-posix.m4					\
-lcmessage.m4					\
-lib-ld.m4  					\
-lib-link.m4					\
-lib-prefix.m4					\
-progtest.m4					\
-stdint_h.m4					\
-uintmax_t.m4					\
-ulonglong.m4
-
 STANDARD_TOOLS =				\
 compile						\
 config.guess					\
@@ -70,4 +51,4 @@ mkstamp
 spy:
 	@echo $($(SPIED))
 
-EXTRA_DIST = $(ACLOCAL_MACROS) $(SPECIFIC_MACROS) $(SPECIFIC_TOOLS)
+EXTRA_DIST = $(SPECIFIC_MACROS) $(SPECIFIC_TOOLS)

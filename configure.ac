@@ -23,9 +23,10 @@
 AC_INIT([GNU m4], [1.4q], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_HEADERS(config.h:config-h.in)
-AC_CONFIG_TESTDIR(tests)
+AC_CONFIG_AUX_DIR([gnulib/config])
+AC_CONFIG_LIBOBJ_DIR([gnulib/m4])
+AC_CONFIG_HEADERS([config.h:config-h.in])
+AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
@@ -36,7 +37,7 @@ AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 TIMESTAMP=
 case AC_PACKAGE_VERSION in
   *[[acegikmoqsuwy]])
-    TIMESTAMP=`$CONFIG_SHELL $ac_aux_dir/mkstamp < $srcdir/ChangeLog`
+    TIMESTAMP=`$CONFIG_SHELL config/mkstamp < $srcdir/ChangeLog`
     AS_BOX([Configuring AC_PACKAGE_TARNAME AC_PACKAGE_VERSION$TIMESTAMP])
     echo
     ;;
@@ -58,7 +59,6 @@ m4_pattern_allow([^jm_ac_cv_])
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST([pkglibexecdir])
-AC_SUBST([ac_aux_dir])
 
 AC_MSG_CHECKING(for modules to preload)
   m4_pattern_allow([^m4_default_preload$])
@@ -89,7 +89,7 @@ AC_SUBST(DLPREOPEN)
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.7.1 dist-bzip2])
+AM_INIT_AUTOMAKE([1.7a dist-bzip2])
 
 
 
@@ -102,7 +102,7 @@ AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_CC_C_O
-M4_AC_CHECK_DEBUGGING
+m4_CHECK_DEBUGGING
 
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
@@ -133,8 +133,8 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## Gettext support. ##
 ## ---------------- ##
 AM_GNU_GETTEXT(external, need-ngettext)
-AM_GNU_GETTEXT_VERSION(0.11.5)
-AC_CONFIG_FILES(po/Makefile.in)
+AM_GNU_GETTEXT_VERSION(0.12)
+m4_GNU_GETTEXT
 
 
 
@@ -186,8 +186,8 @@ AM_WITH_DMALLOC
 
 jm_PREREQ_ERROR
 
-M4_AC_FUNC_OBSTACK
-M4_AC_SYS_STACKOVF
+m4_FUNC_OBSTACK
+m4_SYS_STACKOVF
 
 M4OBJS=
 m4_pattern_allow([^m4_getopt_h$])
@@ -205,7 +205,7 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(getcwd gethostname mktime uname)
 AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 
-M4_AC_LIB_GMP
+m4_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 
 

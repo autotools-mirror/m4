@@ -2,7 +2,7 @@
 
 dnl Derived from code in GNU grep.
 
-AC_DEFUN(jm_WITH_REGEX,
+AC_DEFUN([jm_WITH_REGEX],
   [
     dnl Even packages that don't use regex.c can use this macro.
     dnl Of course, for them it doesn't do anything.

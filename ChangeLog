@@ -1,3 +1,55 @@
+2003-09-09  Gary V. Vaughan  <gary@gnu.org>
+
+	The gnulib obstack module requires the gnulib gettext module for
+	systems that do not have GNU gettext installed.  Because we use
+	-Ignulib/m4 in our Makefiles it is not safe to drop gettext.h in
+	that directory incase it clashes with the system gettext.h.  This
+	delta uses gettext_.h and extra rules in the Makefile to make a
+	link to gettext.h when needed:
+
+	* Makefile.am (auxdir): Removed.  No longer used.
+	* configure.ac (ac_aux_dir): Removed AC_SUBST.  No longer used.
+	(TIMESTAMP): List path to `mkstamp' literally, as ac_aux_dir has
+	moved.
+	(AC_CONFIG_LIBOBJ_DIR): Declare this for possible future single
+	Makefile based build.
+	(AC_CONFIG_AUX_DIR): Now we use gnulib/config where the majority
+	of the macros are kept.
+	* Makefile.am (ACLOCAL_MFLAGS): Search gnulib/config first.
+	* configure.ac (AM_INIT_AUTOMAKE): Require 1.7a.
+	* config/Makefile (ACLOCAL_MACROS): Removed.  Automake 1.7a
+	distributes these automatically.
+	* config/regex.m4 (jm_WITH_REGEX): Fixed underquoting to prevent
+	warning from automake-1.7a.
+	* config/debug.m4 (M4_AC_CHECK_DEBUGGING): Renamed to
+	m4_CHECK_DEBUGGING for consistency with gnulib prefixes.  Changed
+	all callers.
+	* config/m4-obstack.m4 (M4_AC_FUNC_OBSTACK): Ditto
+	wrt. m4_FUNC_OBSTACK.
+	* config/stackovf.m4 (M4_AC_SYS_STACKOVF): Ditto
+	wrt. m4_sys_STACKOVF.
+	* config/gmp.m4 (_M4_AC_LIB_GMP, M4_AC_LIB_GMP): Ditto
+	wrt. _m4_LIB_GMP, m4_LIB_GMP.
+	(ac_gmp_save_LIBS, ac_cv_using_lib_gmp): Don't use autoconf's
+	namespace.  Renamed to m4_gmp_save_LIBS and m4_cv_using_lib_gmp
+	respectively.
+	* config/m4-gettext.m4: New file to set GETTEXT_H appropriately.
+	* gnulib/m4/Makefile.am: Added a new block to make an appropriate
+	gettext.h link on deficient systems.
+	(pkginc_HEADERS): Mention $(GETTEXT_H).
+	(EXTRA_HEADERS): Mention gettext.h.
+	* gnulib/config/gettext_.h: New file from gnulib's gettext.h.
+	* gnulib/config/codeset.m4, gnulib/config/gettext.m4,
+	gnulib/config/glibc21.m4, gnulib/config/iconv.m4,
+	gnulib/config/intdiv.m4, gnulib/config/inttypes-pri.m4,
+	gnulib/config/inttypes.m4, gnulib/config/inttypes_h.m4,
+	gnulib/config/isc-posix.m4, gnulib/config/lcmessage.m4,
+	gnulib/config/lib-ld.m4, gnulib/config/lib-link.m4,
+	gnulib/config/lib-prefix.m4, gnulib/config/nls.m4,
+	gnulib/config/po.m4, gnulib/config/progtest.m4,
+	gnulib/config/stdint_h.m4, gnulib/config/uintmax_t.m4,
+	gnulib/config/ulonglong.m4: Imported from CVS gnulib.
+
 2003-09-05  Gary V. Vaughan  <gary@gnu.org>
 
 	We can't mirror the gnulib directory structure here, since we need

@@ -21,10 +21,8 @@
 
 EXTRA_DIST	= bootstrap
 
-auxdir		= $(top_srcdir)/$(ac_aux_dir)
-
 ## There is currently no means with Automake not to run aclocal.
-ACLOCAL_AMFLAGS = -I config -I gnulib/config
+ACLOCAL_AMFLAGS = -I gnulib/config -I config
 
 SUBDIRS			= po gnulib config m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \

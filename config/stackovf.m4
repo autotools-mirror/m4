@@ -18,11 +18,11 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-# serial 1
+# serial 2
 
-# M4_AC_SYS_STACKOVF
-# ------------------
-AC_DEFUN([M4_AC_SYS_STACKOVF],
+# m4_SYS_STACKOVF
+# ---------------
+AC_DEFUN([m4_SYS_STACKOVF],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
 AC_REQUIRE([AC_TYPE_SIGNAL])dnl
 
@@ -72,4 +72,4 @@ if test "$use_stackovf" = yes; then
 	    AC_DEFINE(ss_sp, ss_base,
 	    [Define to ss_base if stack_t has ss_base instead of ss_sp.]))
 fi
-])# M4_AC_SYS_STACKOVF
+])# m4_SYS_STACKOVF
