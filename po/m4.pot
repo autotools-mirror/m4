@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-24 01:10+0000\n"
+"POT-Creation-Date: 2000-11-25 00:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -149,221 +149,328 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr ""
 
-#: src/builtin.c:487
-msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
+#: m4/debug.c:380
+msgid "INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"
 msgstr ""
 
-#: src/builtin.c:696 src/builtin.c:798 src/builtin.c:821 src/builtin.c:1349
-#: src/builtin.c:1373
+#: m4/debug.c:388
+msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
+msgstr ""
+
+#: m4/input.c:334
 #, c-format
-msgid "Undefined name `%s'"
+msgid "Input reverted to %s, line %d"
 msgstr ""
 
-#: src/builtin.c:739 src/freeze.c:212
-msgid "INTERNAL ERROR: Builtin not found in builtin table!"
-msgstr ""
-
-#: src/builtin.c:747
-msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
-msgstr ""
-
-#: src/builtin.c:858
-msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
-msgstr ""
-
-#: src/builtin.c:921
+#: m4/input.c:364
 #, c-format
-msgid "Cannot open pipe to command `%s'"
+msgid "Input read from %s"
 msgstr ""
 
-#: src/builtin.c:960
+#: m4/input.c:528
+msgid "INTERNAL ERROR: Recursive push_string!"
+msgstr ""
+
+#: m4/input.c:648
+msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
+msgstr ""
+
+#: m4/input.c:688
+msgid "INTERNAL ERROR: Input stack botch in next_char ()"
+msgstr ""
+
+#: m4/input.c:725
+msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
+msgstr ""
+
+#: m4/input.c:830
+msgid "NONE"
+msgstr ""
+
+#: m4/input.c:1061
 #, c-format
-msgid "Radix in eval out of range (radix = %d)"
+msgid "Undefined syntax code %c"
 msgstr ""
 
-#: src/builtin.c:969
-msgid "Negative width to eval"
-msgstr ""
-
-#: src/builtin.c:1068
-#, c-format
-msgid "Non-numeric argument to %s"
-msgstr ""
-
-#: src/builtin.c:1080
-#, c-format
-msgid "Cannot undivert %s"
-msgstr ""
-
-#: src/builtin.c:1209 src/freeze.c:391
-#, c-format
-msgid "Cannot open %s"
-msgstr ""
-
-#: src/builtin.c:1409
-#, c-format
-msgid "Debugmode: bad debug flags: `%s'"
-msgstr ""
-
-#: src/builtin.c:1444
-#, c-format
-msgid "Cannot set error file: %s"
-msgstr ""
-
-#: src/builtin.c:1660
-msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
-msgstr ""
-
-#: src/builtin.c:1720 src/builtin.c:1779 src/input.c:1051
+#: m4/input.c:1098 modules/gnu.c:271 modules/gnu.c:330
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr ""
 
-#: src/builtin.c:1731 src/builtin.c:1803
+#: m4/input.c:1284 m4/input.c:1311
+msgid "ERROR: EOF in string"
+msgstr ""
+
+#: m4/macro.c:99
+msgid "INTERNAL ERROR: Bad token type in expand_token ()"
+msgstr ""
+
+#: m4/macro.c:165
+msgid "ERROR: EOF in argument list"
+msgstr ""
+
+#: m4/macro.c:184
+msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
+msgstr ""
+
+#: m4/macro.c:261
+msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
+msgstr ""
+
+#: m4/macro.c:290
+#, c-format
+msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
+msgstr ""
+
+#: m4/module.c:178
+#, c-format
+msgid "ERROR: failed to initialise modules: %s"
+msgstr ""
+
+#: m4/module.c:255
+#, c-format
+msgid "ERROR: cannot load module: `%s'"
+msgstr ""
+
+#: m4/module.c:258
+#, c-format
+msgid "ERROR: cannot load module: `%s': %s"
+msgstr ""
+
+#: m4/module.c:265
+#, c-format
+msgid "ERROR: module `%s' has no entry points"
+msgstr ""
+
+#: m4/module.c:344
+#, c-format
+msgid "ERROR: cannot close module: %s is not loaded."
+msgstr ""
+
+#: m4/module.c:377 m4/module.c:456
+#, c-format
+msgid "ERROR: cannot close module: `%s'"
+msgstr ""
+
+#: m4/module.c:380 m4/module.c:460
+#, c-format
+msgid "ERROR: cannot close module: `%s': %s"
+msgstr ""
+
+#: m4/module.c:446
+msgid "ERROR: cannot close modules"
+msgstr ""
+
+#: m4/module.c:449
+#, c-format
+msgid "ERROR: cannot close modules: %s"
+msgstr ""
+
+#: m4/output.c:292
+msgid "ERROR: Cannot create temporary file for diversion"
+msgstr ""
+
+#: m4/output.c:302
+msgid "ERROR: Cannot flush diversion to temporary file"
+msgstr ""
+
+#: m4/output.c:389
+msgid "ERROR: Copying inserted file"
+msgstr ""
+
+#: m4/output.c:605
+msgid "ERROR: Reading inserted file"
+msgstr ""
+
+#: m4/output.c:706
+msgid "Cannot stat diversion"
+msgstr ""
+
+#: m4/output.c:709
+msgid "Diversion too large"
+msgstr ""
+
+#: m4/path.c:184
+#, c-format
+msgid "Path search for `%s' found `%s'"
+msgstr ""
+
+#: m4/symtab.c:191
+msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
+msgstr ""
+
+#: m4/symtab.c:331
+#, c-format
+msgid "Name `%s' is unknown\n"
+msgstr ""
+
+#: modules/gnu.c:117 modules/m4.c:715 modules/m4.c:738
+#, c-format
+msgid "Undefined name %s"
+msgstr ""
+
+#: modules/gnu.c:141 modules/m4.c:287
+#, c-format
+msgid "Undefined name `%s'"
+msgstr ""
+
+#: modules/gnu.c:199
+#, c-format
+msgid "Debugmode: bad debug flags: `%s'"
+msgstr ""
+
+#: modules/gnu.c:234
+#, c-format
+msgid "Cannot set error file: %s"
+msgstr ""
+
+#: modules/gnu.c:282 modules/gnu.c:354
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr ""
 
-#: src/debug.c:382
-msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
+#: modules/gnu.c:448
+#, c-format
+msgid "Cannot open pipe to command `%s'"
 msgstr ""
 
-#: src/debug.c:390
-msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
+#: modules/gnu.c:515
+msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
-#: src/eval.c:309
+#: modules/m4.c:156
+msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
+msgstr ""
+
+#: modules/m4.c:294
+msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
+msgstr ""
+
+#: modules/m4.c:334
+msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
+msgstr ""
+
+#: modules/m4.c:384
+#, c-format
+msgid "Radix in eval out of range (radix = %d)"
+msgstr ""
+
+#: modules/m4.c:393
+msgid "Negative width to eval"
+msgstr ""
+
+#: modules/m4.c:487
+#, c-format
+msgid "Non-numeric argument to %s"
+msgstr ""
+
+#: modules/m4.c:499
+#, c-format
+msgid "Cannot undivert %s"
+msgstr ""
+
+#: modules/m4.c:588 src/freeze.c:401
+#, c-format
+msgid "Cannot open %s"
+msgstr ""
+
+#: src/eval.c:311
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr ""
 
-#: src/eval.c:315
+#: src/eval.c:317
 #, c-format
 msgid "Bad expression in eval: %s"
 msgstr ""
 
-#: src/eval.c:320
+#: src/eval.c:322
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr ""
 
-#: src/eval.c:325
+#: src/eval.c:327
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr ""
 
-#: src/eval.c:330
+#: src/eval.c:332
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr ""
 
-#: src/eval.c:335
+#: src/eval.c:337
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr ""
 
-#: src/eval.c:340
+#: src/eval.c:342
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr ""
 
-#: src/eval.c:594
+#: src/eval.c:596
 msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
 msgstr ""
 
-#: src/eval.c:639
+#: src/eval.c:641
 msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
 msgstr ""
 
-#: src/eval.c:738
+#: src/eval.c:740
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr ""
 
-#: src/freeze.c:247
+#: src/freeze.c:220
+msgid "INTERNAL ERROR: Builtin not found in builtin table!"
+msgstr ""
+
+#: src/freeze.c:254
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr ""
 
-#: src/freeze.c:278
+#: src/freeze.c:286
 msgid "Expecting line feed in frozen file"
 msgstr ""
 
-#: src/freeze.c:280
+#: src/freeze.c:288
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr ""
 
 #. 1 argument 'F' operations are invalid for format version 1
-#: src/freeze.c:404 src/freeze.c:443 src/freeze.c:460 src/freeze.c:515
-#: src/freeze.c:541
+#: src/freeze.c:414 src/freeze.c:453 src/freeze.c:470 src/freeze.c:525
+#: src/freeze.c:547
 msgid "Ill-formated frozen file"
 msgstr ""
 
-#: src/freeze.c:499
+#: src/freeze.c:509
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
 
-#: src/freeze.c:532
+#: src/freeze.c:538
 msgid "Module support not compiled in"
 msgstr ""
 
-#: src/freeze.c:561
+#: src/freeze.c:567
 msgid "Premature end of frozen file"
 msgstr ""
 
-#: src/input.c:310
-#, c-format
-msgid "Input reverted to %s, line %d"
-msgstr ""
-
-#: src/input.c:338
-#, c-format
-msgid "Input read from %s"
-msgstr ""
-
-#: src/input.c:498
-msgid "INTERNAL ERROR: Recursive push_string!"
-msgstr ""
-
-#: src/input.c:615
-msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
-msgstr ""
-
-#: src/input.c:655
-msgid "INTERNAL ERROR: Input stack botch in next_char ()"
-msgstr ""
-
-#: src/input.c:692
-msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
-msgstr ""
-
-#: src/input.c:795
-msgid "NONE"
-msgstr ""
-
-#: src/input.c:1015
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr ""
-
-#: src/input.c:1236 src/input.c:1263
-msgid "ERROR: EOF in string"
-msgstr ""
-
-#: src/m4.c:79
+#: src/main.c:84
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 
-#: src/m4.c:94
+#: src/main.c:99
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr ""
 
-#: src/m4.c:98
+#: src/main.c:103
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr ""
 
-#: src/m4.c:99
+#: src/main.c:104
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -377,11 +484,11 @@ msgid ""
 "  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
 msgstr ""
 
-#: src/m4.c:112
+#: src/main.c:117
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 
-#: src/m4.c:117
+#: src/main.c:122
 msgid ""
 "\n"
 "Dynamic loading features:\n"
@@ -389,7 +496,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/m4.c:124
+#: src/main.c:129
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -399,7 +506,7 @@ msgid ""
 "  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
 msgstr ""
 
-#: src/m4.c:132
+#: src/main.c:137
 msgid ""
 "\n"
 "Limits control:\n"
@@ -408,7 +515,7 @@ msgid ""
 "  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
 msgstr ""
 
-#: src/m4.c:139
+#: src/main.c:144
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -416,7 +523,7 @@ msgid ""
 "  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
 msgstr ""
 
-#: src/m4.c:145
+#: src/main.c:150
 msgid ""
 "\n"
 "Debugging:\n"
@@ -426,7 +533,7 @@ msgid ""
 "  -o, --error-output=FILE      redirect debug and trace output\n"
 msgstr ""
 
-#: src/m4.c:153
+#: src/main.c:158
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -443,156 +550,53 @@ msgid ""
 "  V   shorthand for all of the above flags\n"
 msgstr ""
 
-#: src/m4.c:168
+#: src/main.c:173
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 
-#: src/m4.c:173
+#: src/main.c:178
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/m4.c:348
+#: src/main.c:353
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/m4.c:352
+#: src/main.c:357
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/m4.c:384
+#: src/main.c:389
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr ""
 
-#: src/m4.c:413
+#: src/main.c:418
 msgid " (options:"
 msgstr ""
 
-#: src/m4.c:507
+#: src/main.c:513
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
-msgstr ""
-
-#: src/macro.c:97
-msgid "INTERNAL ERROR: Bad token type in expand_token ()"
-msgstr ""
-
-#: src/macro.c:163
-msgid "ERROR: EOF in argument list"
-msgstr ""
-
-#: src/macro.c:182
-msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
-msgstr ""
-
-#: src/macro.c:259
-msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
-msgstr ""
-
-#: src/macro.c:288
-#, c-format
-msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
-msgstr ""
-
-#: src/module.c:230
-#, c-format
-msgid "ERROR: failed to initialise modules: %s"
-msgstr ""
-
-#: src/module.c:358
-#, c-format
-msgid "ERROR: cannot find module: `%s'"
-msgstr ""
-
-#: src/module.c:361
-#, c-format
-msgid "ERROR: cannot find module: `%s': %s"
-msgstr ""
-
-#: src/module.c:393
-#, c-format
-msgid "ERROR: cannot close module: %s is not loaded."
-msgstr ""
-
-#: src/module.c:412
-#, c-format
-msgid "ERROR: cannot unload module builtins: `%s'"
-msgstr ""
-
-#: src/module.c:435 src/module.c:514
-#, c-format
-msgid "ERROR: cannot close module: `%s'"
-msgstr ""
-
-#: src/module.c:438 src/module.c:518
-#, c-format
-msgid "ERROR: cannot close module: `%s': %s"
-msgstr ""
-
-#: src/module.c:504
-msgid "ERROR: cannot close modules"
-msgstr ""
-
-#: src/module.c:507
-#, c-format
-msgid "ERROR: cannot close modules: %s"
-msgstr ""
-
-#: src/output.c:262
-msgid "ERROR: Cannot create temporary file for diversion"
-msgstr ""
-
-#: src/output.c:272
-msgid "ERROR: Cannot flush diversion to temporary file"
-msgstr ""
-
-#: src/output.c:356
-msgid "ERROR: Copying inserted file"
-msgstr ""
-
-#: src/output.c:537
-msgid "ERROR: Reading inserted file"
-msgstr ""
-
-#: src/output.c:636
-msgid "Cannot stat diversion"
-msgstr ""
-
-#: src/output.c:639
-msgid "Diversion too large"
-msgstr ""
-
-#: src/path.c:157
-#, c-format
-msgid "Path search for `%s' found `%s'"
 msgstr ""
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:174
+#: src/stackovf.c:176
 msgid "VMEM limit exceeded?\n"
 msgstr ""
 
-#: src/stackovf.c:196
+#: src/stackovf.c:198
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
 msgstr ""
 
-#: src/stackovf.c:201
+#: src/stackovf.c:203
 msgid ".  Check for possible infinite recursion.\n"
-msgstr ""
-
-#: src/symtab.c:190
-msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
-msgstr ""
-
-#: src/symtab.c:322
-#, c-format
-msgid "Name `%s' is unknown\n"
 msgstr ""
