@@ -1,5 +1,7 @@
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
+	* po/POTFILES.in: List files in their new positions.
+
 	* config/ltmain.sh:  This needs to be checked in to match the
 	libtool macros copied to acinclude.m4 (until a released
 	libtool copes with m4's needs).
