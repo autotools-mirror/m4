@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-15 11:00+0200\n"
+"POT-Creation-Date: 2001-10-19 17:39+0200\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -173,12 +173,14 @@ msgstr "¯ADEN"
 msgid "Undefined syntax code %c"
 msgstr "Niezdefiniowany kod sk³adniowy %c"
 
-#: m4/input.c:1116 m4/input.c:1143
-msgid "ERROR: EOF in string"
+#: m4/input.c:1119 m4/input.c:1149
+#, fuzzy
+msgid "EOF in string"
 msgstr "B£¡D: EOF w ³añcuchu"
 
 #: m4/macro.c:157
-msgid "ERROR: EOF in argument list"
+#, fuzzy
+msgid "EOF in argument list"
 msgstr "B£¡D: EOF w li¶cie argumentów"
 
 #: m4/macro.c:272
@@ -200,17 +202,17 @@ msgstr ""
 
 #: m4/module.c:225
 #, fuzzy, c-format
-msgid "ERROR: failed to initialise module loader: %s"
+msgid "failed to initialise module loader: %s"
 msgstr "B£¡D: nie mo¿na znale¿æ modu³u `%s': %s"
 
 #: m4/module.c:277
 #, fuzzy, c-format
-msgid "ERROR: cannot open module `%s': %s"
+msgid "cannot open module `%s': %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
 #: m4/module.c:287
 #, c-format
-msgid "ERROR: module `%s' has no entry points"
+msgid "module `%s' has no entry points"
 msgstr ""
 
 #: m4/module.c:313
@@ -220,12 +222,12 @@ msgstr ""
 
 #: m4/module.c:377
 #, fuzzy, c-format
-msgid "ERROR: cannot close module `%s': %s"
+msgid "cannot close module `%s': %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
 #: m4/module.c:405
 #, fuzzy, c-format
-msgid "ERROR: cannot close modules: %s"
+msgid "cannot close modules: %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
 #: m4/module.c:422
@@ -239,36 +241,41 @@ msgstr ""
 
 #: m4/module.c:520
 #, fuzzy, c-format
-msgid "ERROR: cannot unload module `%s': %s"
+msgid "cannot unload module `%s': %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
 #: m4/module.c:559
 #, fuzzy, c-format
-msgid "ERROR: cannot unload all modules: %s"
+msgid "cannot unload all modules: %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
 #: m4/output.c:287
-msgid "ERROR: Cannot create temporary file for diversion"
+#, fuzzy
+msgid "cannot create temporary file for diversion"
 msgstr "B£¡D: Nie mogê utworzyæ plików tymczasowych dla przetwarzania"
 
 #: m4/output.c:297
-msgid "ERROR: Cannot flush diversion to temporary file"
+#, fuzzy
+msgid "cannot flush diversion to temporary file"
 msgstr "B£¡D: Nie mogê zapisac zmian przetwarzania do pliku tymczasowego"
 
 #: m4/output.c:375
-msgid "ERROR: Copying inserted file"
+#, fuzzy
+msgid "copying inserted file"
 msgstr "B£¡D: Kopiowanie w³o¿onego pliku"
 
 #: m4/output.c:578
-msgid "ERROR: Reading inserted file"
+#, fuzzy
+msgid "reading inserted file"
 msgstr "B£¡D: Czytanie w³o¿onego pliku"
 
 #: m4/output.c:668
-msgid "Cannot stat diversion"
+#, fuzzy
+msgid "cannot stat diversion"
 msgstr "Nie mogê zrobiæ stat na danych przetwarzanych"
 
 #: m4/output.c:671
-msgid "Diversion too large"
+msgid "diversion too large"
 msgstr ""
 
 #: m4/path.c:177
@@ -276,7 +283,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
 
-#: m4/symtab.c:409
+#: m4/symtab.c:414
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Nazwa `%s' jest nieznana\n"
@@ -365,8 +372,8 @@ msgstr "UWAGA: \\0 zniknie, w podstawieniach u¿yj zamiast tego \\&"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:616
-#: modules/m4.c:636
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
+#: modules/m4.c:635
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Niezdefiniowana nazwa %s"
@@ -411,7 +418,8 @@ msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' z pliku zamro¿onego nie znalezione w tablicy wbudowanych!"
 
 #: src/main.c:74
-msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
+#, fuzzy
+msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "B£¡D: Przepe³nienie stosu.  (Nieskoñczona rekursja definicji?)"
 
 #: src/main.c:86
@@ -568,12 +576,12 @@ msgstr ""
 
 #: src/main.c:307
 #, c-format
-msgid "ERROR: failed to add search directory `%s'"
+msgid "failed to add search directory `%s'"
 msgstr ""
 
 #: src/main.c:311
 #, c-format
-msgid "ERROR: failed to add search directory `%s': %s"
+msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 #: src/main.c:340

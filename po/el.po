@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-10-15 11:00+0200\n"
+"POT-Creation-Date: 2001-10-19 17:39+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -172,12 +172,14 @@ msgstr "ΚΑΝΕΝΑ"
 msgid "Undefined syntax code %c"
 msgstr "Μη ορισμένος κώδικας σύνταξης %c"
 
-#: m4/input.c:1116 m4/input.c:1143
-msgid "ERROR: EOF in string"
+#: m4/input.c:1119 m4/input.c:1149
+#, fuzzy
+msgid "EOF in string"
 msgstr "ΣΦΑΛΜΑ: EOF στο αλφαριθμητικό"
 
 #: m4/macro.c:157
-msgid "ERROR: EOF in argument list"
+#, fuzzy
+msgid "EOF in argument list"
 msgstr "ΣΦΑΛΜΑ: EOF στη λίστα ορισμάτων"
 
 #: m4/macro.c:272
@@ -201,17 +203,17 @@ msgstr ""
 
 #: m4/module.c:225
 #, fuzzy, c-format
-msgid "ERROR: failed to initialise module loader: %s"
+msgid "failed to initialise module loader: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
 
 #: m4/module.c:277
 #, fuzzy, c-format
-msgid "ERROR: cannot open module `%s': %s"
+msgid "cannot open module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: m4/module.c:287
 #, c-format
-msgid "ERROR: module `%s' has no entry points"
+msgid "module `%s' has no entry points"
 msgstr ""
 
 #: m4/module.c:313
@@ -221,12 +223,12 @@ msgstr ""
 
 #: m4/module.c:377
 #, fuzzy, c-format
-msgid "ERROR: cannot close module `%s': %s"
+msgid "cannot close module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: m4/module.c:405
 #, fuzzy, c-format
-msgid "ERROR: cannot close modules: %s"
+msgid "cannot close modules: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: m4/module.c:422
@@ -240,36 +242,41 @@ msgstr ""
 
 #: m4/module.c:520
 #, fuzzy, c-format
-msgid "ERROR: cannot unload module `%s': %s"
+msgid "cannot unload module `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: m4/module.c:559
 #, fuzzy, c-format
-msgid "ERROR: cannot unload all modules: %s"
+msgid "cannot unload all modules: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: m4/output.c:287
-msgid "ERROR: Cannot create temporary file for diversion"
+#, fuzzy
+msgid "cannot create temporary file for diversion"
 msgstr "ΣΦΑΛΜΑ: Αδυναμία δημιουργίας προσωρινού αρχείου για αλλαγή"
 
 #: m4/output.c:297
-msgid "ERROR: Cannot flush diversion to temporary file"
+#, fuzzy
+msgid "cannot flush diversion to temporary file"
 msgstr "ΣΦΑΛΜΑ: Αδυναμία αποστολής αλλαγής στο προσωρινό αρχείο"
 
 #: m4/output.c:375
-msgid "ERROR: Copying inserted file"
+#, fuzzy
+msgid "copying inserted file"
 msgstr "ΣΦΑΛΜΑ: Αντιγραγή εισερχομένου αρχείου"
 
 #: m4/output.c:578
-msgid "ERROR: Reading inserted file"
+#, fuzzy
+msgid "reading inserted file"
 msgstr "ΣΦΑΛΜΑ: Ανάγνωση εισερχομένου αρχείου"
 
 #: m4/output.c:668
-msgid "Cannot stat diversion"
+#, fuzzy
+msgid "cannot stat diversion"
 msgstr "Αδυναμία προσπέλασης του αρχείου της αλλαγής"
 
 #: m4/output.c:671
-msgid "Diversion too large"
+msgid "diversion too large"
 msgstr ""
 
 #: m4/path.c:177
@@ -277,7 +284,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
-#: m4/symtab.c:409
+#: m4/symtab.c:414
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
@@ -368,8 +375,8 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:616
-#: modules/m4.c:636
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
+#: modules/m4.c:635
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Μη ορισμένο όνομα %s"
@@ -414,7 +421,8 @@ msgid "`%s' from frozen file not found in builtin table!"
 msgstr "το `%s' από παγωμένο αρχείο δε βρέθηκε στον πίνακα εσωδομημένων"
 
 #: src/main.c:74
-msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
+#, fuzzy
+msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "ΣΦΑΛΜΑ: Υπερχείληση στοίβας. (Αναδρομή απείρου βάθους;)"
 
 #: src/main.c:86
@@ -581,12 +589,12 @@ msgstr ""
 
 #: src/main.c:307
 #, c-format
-msgid "ERROR: failed to add search directory `%s'"
+msgid "failed to add search directory `%s'"
 msgstr ""
 
 #: src/main.c:311
 #, c-format
-msgid "ERROR: failed to add search directory `%s': %s"
+msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 #: src/main.c:340

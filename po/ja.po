@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-10-15 11:00+0200\n"
+"POT-Creation-Date: 2001-10-19 17:39+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -172,12 +172,14 @@ msgstr "なし"
 msgid "Undefined syntax code %c"
 msgstr "`%s' は定義されていません。"
 
-#: m4/input.c:1116 m4/input.c:1143
-msgid "ERROR: EOF in string"
+#: m4/input.c:1119 m4/input.c:1149
+#, fuzzy
+msgid "EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
 #: m4/macro.c:157
-msgid "ERROR: EOF in argument list"
+#, fuzzy
+msgid "EOF in argument list"
 msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
 
 #: m4/macro.c:272
@@ -201,17 +203,17 @@ msgstr ""
 
 #: m4/module.c:225
 #, c-format
-msgid "ERROR: failed to initialise module loader: %s"
+msgid "failed to initialise module loader: %s"
 msgstr ""
 
 #: m4/module.c:277
-#, c-format
-msgid "ERROR: cannot open module `%s': %s"
-msgstr ""
+#, fuzzy, c-format
+msgid "cannot open module `%s': %s"
+msgstr "`%s' をオープンできません。"
 
 #: m4/module.c:287
 #, c-format
-msgid "ERROR: module `%s' has no entry points"
+msgid "module `%s' has no entry points"
 msgstr ""
 
 #: m4/module.c:313
@@ -220,14 +222,14 @@ msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
 #: m4/module.c:377
-#, c-format
-msgid "ERROR: cannot close module `%s': %s"
-msgstr ""
+#, fuzzy, c-format
+msgid "cannot close module `%s': %s"
+msgstr "`%s' をエラーログファイルとしてセットできません。"
 
 #: m4/module.c:405
-#, c-format
-msgid "ERROR: cannot close modules: %s"
-msgstr ""
+#, fuzzy, c-format
+msgid "cannot close modules: %s"
+msgstr "`%s' をエラーログファイルとしてセットできません。"
 
 #: m4/module.c:422
 #, c-format
@@ -240,38 +242,43 @@ msgstr ""
 
 #: m4/module.c:520
 #, c-format
-msgid "ERROR: cannot unload module `%s': %s"
+msgid "cannot unload module `%s': %s"
 msgstr ""
 
 #: m4/module.c:559
 #, c-format
-msgid "ERROR: cannot unload all modules: %s"
+msgid "cannot unload all modules: %s"
 msgstr ""
 
 #: m4/output.c:287
-msgid "ERROR: Cannot create temporary file for diversion"
+#, fuzzy
+msgid "cannot create temporary file for diversion"
 msgstr "エラー: divert のためのテンポラリファイルが作成できません。"
 
 #: m4/output.c:297
-msgid "ERROR: Cannot flush diversion to temporary file"
+#, fuzzy
+msgid "cannot flush diversion to temporary file"
 msgstr "エラー: テンポラリファイルに divert すべき内容を write できません。"
 
 #: m4/output.c:375
-msgid "ERROR: Copying inserted file"
+#, fuzzy
+msgid "copying inserted file"
 msgstr "エラー: 挿入されるべきファイルをコピー中です。"
 
 #: m4/output.c:578
-msgid "ERROR: Reading inserted file"
+#, fuzzy
+msgid "reading inserted file"
 msgstr "エラー: 挿入されるべきファイルをリード中です。"
 
 #: m4/output.c:668
-msgid "Cannot stat diversion"
+#, fuzzy
+msgid "cannot stat diversion"
 msgstr ""
 "divert のためのファイルのステータスを得ることができません。\n"
 "        (stat できません。)"
 
 #: m4/output.c:671
-msgid "Diversion too large"
+msgid "diversion too large"
 msgstr ""
 
 #: m4/path.c:177
@@ -279,7 +286,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
 
-#: m4/symtab.c:409
+#: m4/symtab.c:414
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "`%s' は定義されていません。\n"
@@ -368,8 +375,8 @@ msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:616
-#: modules/m4.c:636
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:347 modules/m4.c:615
+#: modules/m4.c:635
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "`%s' は定義されていません。"
@@ -414,7 +421,8 @@ msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
 
 #: src/main.c:74
-msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
+#, fuzzy
+msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 "エラー: スタックがオーバーフローを起こしています。\n"
 "        (無限に再帰的定義をしていませんか？)"
@@ -576,12 +584,12 @@ msgstr ""
 
 #: src/main.c:307
 #, c-format
-msgid "ERROR: failed to add search directory `%s'"
+msgid "failed to add search directory `%s'"
 msgstr ""
 
 #: src/main.c:311
 #, c-format
-msgid "ERROR: failed to add search directory `%s': %s"
+msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 #: src/main.c:340
