@@ -73,7 +73,7 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 	if (M4_IS_ESCAPE(*p))
 	  ++p;
 
-	symbol = m4_lookup_symbol (p, M4_SYMBOL_LOOKUP);
+	symbol = m4_symbol_lookup (p);
 	if (symbol == NULL || M4_SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
 	    || (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
 		&& M4_SYMBOL_BLIND_NO_ARGS (symbol)

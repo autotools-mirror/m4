@@ -141,9 +141,6 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
 {
   switch (mode)
     {
-    case M4_SYMBOL_LOOKUP:
-      return m4_symbol_lookup (name);
-
     case M4_SYMBOL_INSERT:
       return m4_symbol_insert (name);
 
@@ -351,7 +348,7 @@ symtab_debug (void)
       else
 	delete = 0;
 
-      s = m4_lookup_symbol (text, M4_SYMBOL_LOOKUP);
+      s = m4_symbol_lookup (text);
 
       if (s == NULL)
 	printf (_("Name `%s' is unknown\n"), text);

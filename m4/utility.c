@@ -263,7 +263,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_lookup_symbol (M4_TOKEN_DATA_TEXT (argv[i]), M4_SYMBOL_LOOKUP);
+	  symbol = m4_symbol_lookup (M4_TOKEN_DATA_TEXT (argv[i]));
 	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
 	    m4_dump_symbol (M4_TOKEN_DATA_TEXT (argv[i]), symbol, data);
 	  else if (complain)

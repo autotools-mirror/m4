@@ -1,5 +1,11 @@
 2001-09-05  Akim Demaille  <akim@epita.fr>
 
+	* m4/m4module.h (m4_symbol_lookup): Remove M4_SYMBOL_LOOKUP.
+	* m4/macro.c, m4/symtab.c: Adjust.
+
+	
+2001-09-05  Akim Demaille  <akim@epita.fr>
+
 	* m4/symtab.c (m4_symbol_popdef, m4_symbol_delete): Rename as...
 	(m4_symbol_pop, m4_symbol_del): this.
 	(m4_symbol_lookup, m4_symbol_pushdef, m4_symbol_insert)

@@ -52,7 +52,6 @@ typedef struct {
 /* Operation modes for m4_lookup_symbol ().  */
 typedef enum
 {
-  M4_SYMBOL_LOOKUP,
   M4_SYMBOL_INSERT,
   M4_SYMBOL_DELETE,
   M4_SYMBOL_PUSHDEF,
