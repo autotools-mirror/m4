@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -383,47 +383,42 @@ msgstr "Modulo Null in `eval': %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "INTERNER FEHLER: Falscher Fehlerkode in evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debugmodus: falsche Debug Flags: »%s«"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kann Fehlerdatei nicht vorbereiten: %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "Falscher regulärer Ausdruck »%s«: %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Kann keine `pipe' für Kommando »%s« öffnen"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 
@@ -704,6 +699,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -376,47 +376,42 @@ msgstr "Modulo zero in `eval': %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Nome `%s' non definito"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Modalit di debug: indicatori di debug errati: `%s'"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Impossibile aprire l' archivio di errore: %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "Espressione regolare errata `%s': %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Errore nel confronto dell' espressione regolare `%s'"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Impossibile aprire una `pipe' per il comando `%s'"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
@@ -630,6 +625,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Controllare una possibile ricorsione infinita.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -401,54 +401,48 @@ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "VNITØNÍ CHYBA: ¹patný chybový kód v evaluate ()"
 
 # , c-format
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Ladící mód: ¹patné ladící volby: `%s'"
 
 # , c-format
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Chybový soubor %s nelze pou¾ít"
 
 # , c-format
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "©patný regulární výraz `%s': %s"
 
 # , c-format
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
-
-# , c-format
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 # , c-format
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Rouru do pøíkazu `%s' nelze otevøít"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 
@@ -735,6 +729,10 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
+
+# , c-format
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

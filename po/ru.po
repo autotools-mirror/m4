@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -376,47 +376,42 @@ msgstr "Модульное деление на ноль в выражении: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Режим отладки: неверный флаг отладки: '%s'"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Невозможно назначить файл ошибок %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Ошибка сопоставления регулярного выражения '%s'"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Ошибка сопоставления регулярного выражения '%s'"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Невозможно открыть канал для комманды '%s'"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
@@ -690,6 +685,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ". Проверка на возможную бесконечную рекурсию.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Ошибка сопоставления регулярного выражения '%s'"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -377,47 +377,42 @@ msgstr "Modulo zero w eval: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod b³êdu w evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Tryb debugowania: z³e flagi debugowania: `%s'"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Nie mogê ustawiæ pliku b³êdów: %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "B³êdne wyra¿enie regularne `%s': %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Nie mogê otworzyæ potoku do komendy `%s'"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "UWAGA: \\0 zniknie, w podstawieniach u¿yj zamiast tego \\&"
 
@@ -686,6 +681,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Sprawd¼ czy nie dosz³o do nieskoñczonej rekursji.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

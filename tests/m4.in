@@ -1,5 +1,5 @@
 #! /bin/sh
-# @configure_generated@
+# @configure_input@
 # Wrapper around a non installed m4 to make it work as an installed one.
 
 "@top_buildpath@/src/m4" \
@@ -7,7 +7,13 @@
       ${1+"$@"} 2>/tmp/m4-$$
 status=$?
 # Normalize stderr.
-sed 's,^[lt-]*m4[.ex]*:,m4:,' /tmp/m4-$$ >&2
+# - If configure --disable-shared, then src/m4 is a real program,
+#   neutralize the full path display
+# - otherwise, it is a  libtool wrapper, relying on PATH to execute the
+#   actual program, either lt-m4, or m4.
+#
+# - In both cases, beware of .exe.
+sed 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' /tmp/m4-$$ >&2
 rm /tmp/m4-$$
 
 exit $status

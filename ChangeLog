@@ -1,3 +1,20 @@
+2001-10-05  Akim Demaille  <akim@epita.fr>
+
+	* tests/Makefile.am: Adjust for gnuprog2.
+	* tests/m4.in: There can be a leading path.
+	* tests/modules.at (AT_CHECK_M4_MODTEST): No need for $4 and $5.
+	* tests/testsuite.at: Adjust to the most recent Autotest.
+	(AT_CHECK_M4_FILTER): Fix and rename as...
+	(AT_TEST_M4): this.
+	* tests/others.at: Use it.
+
+<<<<<<< ChangeLog
+2001-10-04  Akim Demaille  <akim@epita.fr>
+
+	* config/gmp.m4 (_AC_LIB_GMP): In order to read the content of a
+	variable in shell scripts, one uses `$'...
+
+=======
 2001-10-04  Gary Vaughan  <gary@gnu.org>
 
 	* configure.ac: `rm -f $m4_getopt_h' was lost.
@@ -8,6 +25,7 @@
 	time.  Define it for config.h in order to...
 	* src/main.c (main): ...display the timestamp for --version.
 
+>>>>>>> 1.131
 2001-10-04  Akim Demaille  <akim@epita.fr>
 
 	* modules/gnu.c (m4_regexp_do, m4_patsubst_do): Extracted from

@@ -23,9 +23,7 @@ AT_BANNER([Composite macros.])
 ## capitalize ##
 ## ---------- ##
 
-AT_SETUP([capitalize])
-
-AT_DATA([[capitalize.m4]],
+AT_TEST_M4([Capitalize],
 [[dnl
 dnl convert to upper- resp. lowercase
 define(`upcase', `translit(`$*', `a-z', `A-Z')')
@@ -37,9 +35,7 @@ dnl capitalize a single word
 define(`capitalize1', `regexp(`$1', `^\(\w\)\(\w*\)', `upcase(`\1')`'downcase(`\2')')')
 define(`capitalize', `patsubst(`$1', `\w+', ``'capitalize1(`\&')')')
 capitalize(`This sentence should be capitalized')
-]])
-
-AT_CHECK_M4([capitalize.m4], 0,
+]],
 [[
 
 CONVERT TO UPPER CASE
@@ -49,17 +45,13 @@ convert to lower case
 This Sentence Should Be Capitalized
 ]])
 
-AT_CLEANUP
-
 
 
 ## -------- ##
 ## comments ##
 ## -------- ##
 
-AT_SETUP([comments])
-
-AT_DATA([[comments.m4]],
+AT_TEST_M4([Comments],
 [[# An ordinary comment
 define(`foo', # A comment in a macro
 `Macro `foo' expansion')
@@ -67,9 +59,7 @@ foo
 define(`comment', `*** Macro `comment' expansion ***')
 changecom(`@', `@')
 foo
-]])
-
-AT_CHECK_M4([comments.m4], 0,
+]],
 [[# An ordinary comment
 
 # A comment in a macro
@@ -79,8 +69,6 @@ Macro foo expansion
 # A *** Macro comment expansion *** in a macro
 Macro foo expansion
 ]])
-
-AT_CLEANUP
 
 
 

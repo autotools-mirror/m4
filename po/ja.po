@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -386,47 +386,42 @@ msgstr "`%s' という eval で、基数が 0 になっています。"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "内部エラー：関数 evaluate () 内のエラーコードが不正です。"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "debugmode マクロにおいて %s は不正なデバッグオプションです。"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "`%s' をエラーログファイルとしてセットできません。"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "正規表現 %s のマッチングに失敗しました。"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "正規表現 %s のマッチングに失敗しました。"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "コマンド `%s' へのパイプがオープンできません。"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
@@ -701,6 +696,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  無限の再帰呼び出しが行われていないかどうかチェックして下さい。\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "正規表現 %s のマッチングに失敗しました。"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

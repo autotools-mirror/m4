@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -376,47 +376,42 @@ msgstr "Module par zéro dans «eval»: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ERREUR INTERNE: Mauvais code d'erreur dans evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Nom «%s» non-défini"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Nom «%s» non-défini"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debugmode: mauvais indicateurs de mise-au-point: «%s»"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Incapable de préparer le fichier d'erreurs: %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "Mauvaise expression régulière «%s»: %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Erreur d'appariement pour l'expressio régulière «%s»"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Erreur d'appariement pour l'expressio régulière «%s»"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Incapable d'ouvrir un «pipe» pour la commande «%s»"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ATTENTION: \\\\0 disparaîtra, utiliser \\\\& plutôt pour les remplacements"
 
@@ -684,6 +679,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Vérifier une récursion hors contrôle.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Erreur d'appariement pour l'expressio régulière «%s»"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"

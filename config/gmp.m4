@@ -23,7 +23,7 @@ m4_define([_AC_LIB_GMP],
 [  --without-gmp           don't use GNU multiple precision arithmetic library],
 [use_gmp=$withval], [use_gmp=yes])
 
-case $use_gmp:LIBADD_GMP:$ac_cv_header_gmp_h in
+case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
   *::yes)
     AC_MSG_WARN([gmp library not found or does not appear to work
                  but `gmp.h' is present])

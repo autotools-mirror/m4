@@ -39,9 +39,12 @@ check-local: atconfig $(TESTSUITE)
 clean-local:
 	$(srcdir)/testsuite --clean
 
-$(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
-	rm -f $@ $@t
-	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
+# Using variables so that this snippet is not too wide and can
+# be used as is in Texinfo @example/@end example.
+m4_texinfo  = $(top_srcdir)/doc/m4.texinfo
+generate    = $(AWK) -f $(srcdir)/generate.awk
+$(srcdir)/generated.at: $(srcdir)/generate.awk $(m4_texinfo)
+	$(generate) $(m4_texinfo) >$@t
 	mv $@t $@
 
 AUTOM4TE = autom4te

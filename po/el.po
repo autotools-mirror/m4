@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-10-01 09:52+0200\n"
+"POT-Creation-Date: 2001-10-04 10:25+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -378,47 +378,42 @@ msgstr "Υπόλοιπο με μηδέν στην αποτίμηση: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κώδικας σφάλματος στην evaluate ()"
 
-#: modules/gnu.c:140
+#: modules/gnu.c:144
 #, c-format
 msgid "Undefined name %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/gnu.c:165
+#: modules/gnu.c:169
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/gnu.c:225
+#: modules/gnu.c:229
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Κατάσταση αποσφαλμάτωσης: λάθος σημαίες αποσφαλμάτωσης: `%s'"
 
-#: modules/gnu.c:261
+#: modules/gnu.c:265
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Αδυναμία ρύθμισης του αρχείου σφαλμάτων: %s"
 
-#: modules/gnu.c:291
+#: modules/gnu.c:295
 #, fuzzy
 msgid "%0: bad regular expression `%s': %s"
 msgstr "Λάθος κανονική έκφραση `%s': %s"
 
-#: modules/gnu.c:334
-#, c-format
-msgid "Error matching regular expression `%s'"
-msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
-
-#: modules/gnu.c:394
+#: modules/gnu.c:340 modules/gnu.c:418
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: modules/gnu.c:491
+#: modules/gnu.c:531
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Αδυναμία ανοίγματος σωλήνωσης στην εντολή `%s'"
 
-#: modules/gnu.c:564
+#: modules/gnu.c:604
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 "ΠΡΟΕΙΔΟΠΟΙΗΣΗ: Το \\0 θα εξαφανιστεί, κάνετε χρήση του \\& αντίθετα στις "
@@ -701,6 +696,9 @@ msgstr ""
 #: src/stackovf.c:204
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
+
+#~ msgid "Error matching regular expression `%s'"
+#~ msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
 #, fuzzy
 #~ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
