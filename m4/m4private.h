@@ -41,13 +41,6 @@ struct m4_module_data {
   m4_macro	    *mp;	/* `m4_macro_table' address */
 };
 
-
-/* m4_token.flags bit masks:  */
-
-#define TOKEN_MACRO_ARGS_BIT		(1 << 0)
-#define TOKEN_BLIND_ARGS_BIT		(1 << 1)
-
-
 struct m4_token {
   m4_token *	next;
   lt_dlhandle		handle;
@@ -70,6 +63,11 @@ struct m4_token {
 #define TOKEN_TEXT(T)		((T)->u.text)
 #define TOKEN_FUNC(T)		((T)->u.func)
 
+/* m4_token.flags bit masks:  */
+
+#define TOKEN_MACRO_ARGS_BIT		(1 << 0)
+#define TOKEN_BLIND_ARGS_BIT		(1 << 1)
+
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
 #define BIT_SET(flags, bit)	((flags) |= (bit))
 #define BIT_RESET(flags, bit)	((flags) &= ~(bit))
@@ -90,14 +88,14 @@ struct m4_symbol
 #define SYMBOL_TRACED(S)	((S)->traced)
 #define SYMBOL_TOKEN(S)		((S)->token)
 
-#define SYMBOL_NEXT(S)		(TOKEN_NEXT     (SYMBOL_TOKEN (S)))
-#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE   (SYMBOL_TOKEN (S)))
-#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS    (SYMBOL_TOKEN (S)))
-#define SYMBOL_MIN_ARGS(S)	(TOKEN_MIN_ARGS (SYMBOL_TOKEN (S)))
-#define SYMBOL_MAX_ARGS(S)	(TOKEN_MAX_ARGS (SYMBOL_TOKEN (S)))
-#define SYMBOL_TYPE(S)		(TOKEN_TYPE     (SYMBOL_TOKEN (S)))
-#define SYMBOL_TEXT(S)		(TOKEN_TEXT     (SYMBOL_TOKEN (S)))
-#define SYMBOL_FUNC(S)		(TOKEN_FUNC     (SYMBOL_TOKEN (S)))
+#define SYMBOL_NEXT(S)		(TOKEN_NEXT          (SYMBOL_TOKEN (S)))
+#define SYMBOL_HANDLE(S)	(TOKEN_HANDLE        (SYMBOL_TOKEN (S)))
+#define SYMBOL_FLAGS(S)		(TOKEN_FLAGS         (SYMBOL_TOKEN (S)))
+#define SYMBOL_MIN_ARGS(S)	(TOKEN_MIN_ARGS      (SYMBOL_TOKEN (S)))
+#define SYMBOL_MAX_ARGS(S)	(TOKEN_MAX_ARGS      (SYMBOL_TOKEN (S)))
+#define SYMBOL_TYPE(S)		(TOKEN_TYPE          (SYMBOL_TOKEN (S)))
+#define SYMBOL_TEXT(S)		(TOKEN_TEXT          (SYMBOL_TOKEN (S)))
+#define SYMBOL_FUNC(S)		(TOKEN_FUNC          (SYMBOL_TOKEN (S)))
 
 
 

@@ -29,7 +29,7 @@
 /*
    Unread input can be either files, that should be read (eg. included
    files), strings, which should be rescanned (eg. macro expansion
-   text), single characters or quoted macro definitions (as returned by
+   text), single characters or quoted builtin definitions (as returned by
    the builtin "defn").  Unread input are organised in a stack,
    implemented with an obstack.  Each input source is described by a
    "struct input_block".  The obstack is "input_stack".  The top of the
@@ -50,15 +50,15 @@
    are done through a pointer "current_input", which points to either
    "input_stack" or "wrapup_stack".
 
-   Pushing new input on the input stack is done by push_file (),
-   push_string (), push_single () or push_wrapup () (for wrapup text),
-   and push_macro () (for macro definitions).  Because macro expansion
-   needs direct access to the current input obstack (for optimisation),
-   push_string () are split in two functions, push_string_init (), which
-   returns a pointer to the current input stack, and push_string_finish
-   (), which return a pointer to the final text.  The input_block *next
-   is used to manage the coordination between the different push
-   routines.
+   Pushing new input on the input stack is done by m4_push_file (),
+   m4_push_string (), m4_push_single () or m4_push_wrapup () (for wrapup
+   text), and m4_push_builtin () (for builtin definitions).  Because
+   macro expansion needs direct access to the current input obstack (for
+   optimisation), m4_push_string () are split in two functions,
+   push_string_init (), which returns a pointer to the current input
+   stack, and push_string_finish (), which return a pointer to the final
+   text.  The input_block *next is used to manage the coordination
+   between the different push routines.
 
    The current file and line number are stored in two global variables,
    for use by the error handling functions in m4.c.  Whenever a file
@@ -71,8 +71,8 @@ static	int   file_read			(void);
 static	void  file_unget		(int ch);
 static	void  file_clean		(void);
 static	void  init_builtin_token	(m4_token *td);
-static	int   macro_peek		(void);
-static	int   macro_read		(void);
+static	int   builtin_peek		(void);
+static	int   builtin_read		(void);
 static	int   match_input		(const unsigned char *s);
 static	int   next_char			(void);
 static	void  pop_input			(void);
@@ -121,14 +121,15 @@ struct input_block
       u_f;
       struct
 	{
-	  m4_builtin_func *func;/* pointer to macros function */
-	  lt_dlhandle handle;	/* originating module */
-	  int flags;		/* flags associated with the builtin */
+	  m4_builtin_func *func;  /* pointer to builtins function. */
+	  lt_dlhandle handle;	  /* originating module. */
+	  int flags;		  /* flags associated with the builtin. */
+	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  int min_args, max_args; /* argv maxima and minima for the builtin. */
-	  boolean traced;	/* TRUE iff builtin is traced */
-	  boolean read;		/* TRUE iff block has been read */
+	  boolean traced;	  /* TRUE iff builtin is traced. */
+	  boolean read;		  /* TRUE iff block has been read. */
 	}
-      u_m;
+      u_b;
     }
   u;
 };
@@ -163,21 +164,21 @@ static input_block *isp;
 /* Pointer to top of wrapup_stack.  */
 static input_block *wsp;
 
-/* Aux. for handling split push_string ().  */
+/* Aux. for handling split m4_push_string ().  */
 static input_block *next;
 
 /* Flag for next_char () to increment m4_current_line.  */
 static boolean start_of_input_line;
 
 #define CHAR_EOF	256	/* character return on EOF */
-#define CHAR_MACRO	257	/* character return for MACRO token */
+#define CHAR_BUILTIN	257	/* character return for BUILTIN token */
 #define CHAR_RETRY	258	/* character return for end of input block */
 
 
 
-/* push_file () pushes an input file on the input stack, saving the
+/* m4_push_file () pushes an input file on the input stack, saving the
   current file name and line number.  If next is non-NULL, this push
-  invalidates a call to push_string_init (), whose storage are
+  invalidates a call to m4_push_string_init (), whose storage are
   consequentely released.
 
   file_read () manages line numbers for error messages, so they do not
@@ -278,37 +279,39 @@ m4_push_file (FILE *fp, const char *title)
   isp = i;
 }
 
-/* push_macro () pushes a builtin macros definition on the input stack.  If
-   next is non-NULL, this push invalidates a call to push_string_init (),
+/* m4_push_builtin () pushes a builtins definition on the input stack.  If
+   next is non-NULL, this push invalidates a call to m4_push_string_init (),
    whose storage are consequentely released.  */
 static int
-macro_peek (void)
+builtin_peek (void)
 {
-  if (isp->u.u_m.read == TRUE)
+  if (isp->u.u_b.read == TRUE)
     return CHAR_RETRY;
 
-  return CHAR_MACRO;
+  return CHAR_BUILTIN;
 }
 
 static int
-macro_read (void)
+builtin_read (void)
 {
-  if (isp->u.u_m.read == TRUE)
+  if (isp->u.u_b.read == TRUE)
     return CHAR_RETRY;
 
-  isp->u.u_m.read = TRUE;
-  return CHAR_MACRO;
+  isp->u.u_b.read = TRUE;
+  return CHAR_BUILTIN;
 }
 
-static struct input_funcs macro_funcs = {
-  macro_peek, macro_read, NULL, NULL
+static struct input_funcs builtin_funcs = {
+  builtin_peek, builtin_read, NULL, NULL
 };
 
 void
-m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
-	       int min, int max, int flags)
+m4_push_builtin (m4_token *td)
 {
   input_block *i;
+
+  /* Make sure we were passed a builtin function type token.  */
+  assert (TOKEN_TYPE (td) == M4_TOKEN_FUNC);
 
   if (next != NULL)
     {
@@ -318,14 +321,14 @@ m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
 
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
-  i->funcs = &macro_funcs;
+  i->funcs = &builtin_funcs;
 
-  i->u.u_m.func		= func;
-  i->u.u_m.handle	= handle;
-  i->u.u_m.min_args	= min;
-  i->u.u_m.max_args	= max;
-  i->u.u_m.flags	= flags;
-  i->u.u_m.read		= FALSE;
+  i->u.u_b.func		= TOKEN_FUNC (td);
+  i->u.u_b.handle	= TOKEN_HANDLE (td);
+  i->u.u_b.min_args	= TOKEN_MIN_ARGS (td);
+  i->u.u_b.max_args	= TOKEN_MAX_ARGS (td);
+  i->u.u_b.flags	= TOKEN_FLAGS (td);
+  i->u.u_b.read		= FALSE;
 
   i->prev = isp;
   isp = i;
@@ -375,7 +378,7 @@ m4_push_single (int ch)
   isp = i;
 }
 
-/* First half of push_string ().  The pointer next points to the new
+/* First half of m4_push_string ().  The pointer next points to the new
    input_block.  */
 static int
 string_peek (void)
@@ -413,7 +416,7 @@ m4_push_string_init (void)
   if (next != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Recursive push_string!"));
+		"INTERNAL ERROR: Recursive m4_push_string!"));
       abort ();
     }
 
@@ -424,12 +427,13 @@ m4_push_string_init (void)
   return current_input;
 }
 
-/* Last half of push_string ().  If next is now NULL, a call to push_file
-   () has invalidated the previous call to push_string_init (), so we just
-   give up.  If the new object is void, we do not push it.  The function
-   push_string_finish () returns a pointer to the finished object.  This
-   pointer is only for temporary use, since reading the next token might
-   release the memory used for the object.  */
+/* Last half of m4_push_string ().  If next is now NULL, a call to
+   m4_push_file () has invalidated the previous call to
+   m4_push_string_init (), so we just give up.  If the new object is
+   void, we do not push it.  The function m4_push_string_finish ()
+   returns a pointer to the finished object.  This pointer is only for
+   temporary use, since reading the next token might release the memory
+   used for the object.  */
 
 const char *
 m4_push_string_finish (void)
@@ -454,11 +458,12 @@ m4_push_string_finish (void)
   return ret;
 }
 
-/* The function push_wrapup () pushes a string on the wrapup stack.  When
-   the normal input stack gets empty, the wrapup stack will become the input
-   stack, and push_string () and push_file () will operate on wrapup_stack.
-   Push_wrapup should be done as push_string (), but this will suffice, as
-   long as arguments to m4_m4wrap () are moderate in size.  */
+/* The function m4_push_wrapup () pushes a string on the wrapup stack.
+   When the normal input stack gets empty, the wrapup stack will become
+   the input stack, and m4_push_string () and m4_push_file () will
+   operate on wrapup_stack.  M4_push_wrapup should be done as
+   m4_push_string (), but this will suffice, as long as arguments to
+   m4_m4wrap () are moderate in size.  */
 void
 m4_push_wrapup (const char *s)
 {
@@ -488,7 +493,7 @@ pop_input (void)
     (*isp->funcs->clean_func)();
 
   obstack_free (current_input, isp);
-  next = NULL;			/* might be set in push_string_init () */
+  next = NULL;			/* might be set in m4_push_string_init () */
 
   isp = tmp;
 }
@@ -509,24 +514,24 @@ m4_pop_wrapup (void)
   return TRUE;
 }
 
-/* When a MACRO token is seen, next_token () uses init_builtin_token
+/* When a BUILTIN token is seen, next_token () uses init_builtin_token
    to retrieve the value of the function pointer.  */
 static void
 init_builtin_token (m4_token *td)
 {
-  if (isp->funcs->read_func != macro_read)
+  if (isp->funcs->read_func != builtin_read)
     {
       M4ERROR ((warning_status, 0,
 		"INTERNAL ERROR: Bad call to init_builtin_token ()"));
       abort ();
     }
 
-  TOKEN_TYPE (td)	= M4_TOKEN_FUNC;
-  TOKEN_FUNC (td)	= isp->u.u_m.func;
-  TOKEN_HANDLE (td)	= isp->u.u_m.handle;
-  TOKEN_FLAGS (td)	= isp->u.u_m.flags;
-  TOKEN_MIN_ARGS (td)	= isp->u.u_m.min_args;
-  TOKEN_MAX_ARGS (td)	= isp->u.u_m.max_args;
+  TOKEN_TYPE (td)		= M4_TOKEN_FUNC;
+  TOKEN_FUNC (td)		= isp->u.u_b.func;
+  TOKEN_HANDLE (td)		= isp->u.u_b.handle;
+  TOKEN_FLAGS (td)		= isp->u.u_b.flags;
+  TOKEN_MIN_ARGS (td)		= isp->u.u_b.min_args;
+  TOKEN_MAX_ARGS (td)		= isp->u.u_b.max_args;
 }
 
 
@@ -756,7 +761,7 @@ m4_next_token (m4_token *td)
 	return M4_TOKEN_EOF;
       }
 
-    if (ch == CHAR_MACRO)		/* MACRO TOKEN */
+    if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
       {
 	init_builtin_token (td);
 	(void) next_char ();
@@ -932,10 +937,10 @@ m4_next_token (m4_token *td)
 
   obstack_1grow (&token_stack, '\0');
 
+  bzero (td, sizeof (m4_token));
+
   TOKEN_TYPE (td)	= M4_TOKEN_TEXT;
   TOKEN_TEXT (td)	= obstack_finish (&token_stack);
-  TOKEN_HANDLE (td)	= NULL;
-  TOKEN_FLAGS (td)	= 0x0;
   TOKEN_MIN_ARGS (td)	= -1;
   TOKEN_MAX_ARGS (td)	= -1;
 
@@ -985,7 +990,7 @@ m4_print_token (const char *s, m4_token_t t, m4_token *td)
       break;
 
     case M4_TOKEN_MACDEF:
-      fprintf (stderr,	"macro 0x%x\n", 	(int) TOKEN_FUNC (td));
+      fprintf (stderr,	"builtin 0x%x\n", 	(int) TOKEN_FUNC (td));
       break;
 
     case M4_TOKEN_EOF:

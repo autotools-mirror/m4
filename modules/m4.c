@@ -355,9 +355,7 @@ M4BUILTIN_HANDLER (defn)
       return;
 
     case M4_TOKEN_FUNC:
-      m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_HANDLE (symbol),
-		     SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol),
-		     SYMBOL_FLAGS (symbol));
+      m4_push_builtin (SYMBOL_TOKEN (symbol));
       return;
 
     case M4_TOKEN_VOID:

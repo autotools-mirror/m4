@@ -417,7 +417,7 @@ extern	void	m4_skip_line	(void);
 
 extern	void	m4_push_file	(FILE *, const char *);
 extern	void	m4_push_single	(int ch);
-extern	void	m4_push_macro	(m4_builtin_func *, lt_dlhandle, int, int, int);
+extern	void	m4_push_builtin	(m4_token *);
 extern	struct obstack *m4_push_string_init (void);
 extern	const char *m4_push_string_finish (void);
 extern	void	m4_push_wrapup	(const char *);

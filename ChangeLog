@@ -1,3 +1,18 @@
+2003-06-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/input.c: Updated various bitrotted comments.
+	(m4_push_builtin): Just pass the whole m4_token, rather than
+	extracting all the fields in the caller.  This also allows us to
+	check the token type for consistency.
+	(macro_funcs, macro_peek, macro_read, m4_push_macro, CHAR_MACRO):
+	Renamed to builtin_funcs, builtin_peek, builtin_read,
+	m4_push_builtin and CHAR_BUILTIN for consistency with the rest of
+	the code.  Changed all callers.
+	(struct input_block): Similarly renamed u_m member to u_b, and
+	changed all callers.
+	(m4_next_token): Use bzero to initialise the data fields.
+	* m4/m4module (m4_push_macro): Renamed to m4_push_builtin.
+
 2003-05-29  Gary V. Vaughan  <gary@gnu.org>
 
 	These changes were necessary to get m4 to build on my iBook
