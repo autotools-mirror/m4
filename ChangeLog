@@ -1,5 +1,15 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* m4/macro.c (expand_macro): Let m4_bad_argc handle the cases
+	where no checking is needed.
+	* m4/utility.c (m4_bad_argc): Use the usual (argc, argv, ...)
+	interface instead of (name, argc...).
+	Adjust callers.
+	* modules/gnu.c (m4_patsubst_do): Don't check argc, done
+	elsewhere.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* m4/utility.c (m4_bad_argc): Display user argument counts, i.e.,
 	exclude the builtin name from the count.
 	* modules/m4.c (ifelse): Do not use the regular argc mechanism, as

@@ -200,7 +200,7 @@ m4_string ecomm;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-boolean m4_bad_argc (m4_token *, int, int, int);
+boolean m4_bad_argc (int, m4_token **, int, int);
 const char *m4_skip_space (const char *);
 boolean m4_numeric_arg (m4_token *, const char *, int *);
 void m4_shipout_int (struct obstack *, int);

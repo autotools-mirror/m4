@@ -257,11 +257,11 @@ M4BUILTIN_HANDLER (ifelse)
   if (argc == 2)
     return;
 
-  if (m4_bad_argc (argv[0], argc, 4, -1))
+  if (m4_bad_argc (argc, argv, 4, -1))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    m4_bad_argc (argv[0], (argc + 2) % 3, -1, 1);
+    m4_bad_argc ((argc + 2) % 3, argv, -1, 1);
 
   argv++;
   argc--;

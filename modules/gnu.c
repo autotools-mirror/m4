@@ -375,9 +375,6 @@ m4_patsubst_do (struct obstack *obs, int argc, m4_token **argv,
   int offset;			/* current match offset */
   int length;			/* length of first argument */
 
-  if (m4_bad_argc (argv[0], argc, 3, 4))
-    return;
-
   regexp = M4ARG (2);
   victim = M4ARG (1);
   length = strlen (victim);

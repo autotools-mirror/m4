@@ -294,14 +294,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 
   expansion = m4_push_string_init ();
   {
-    boolean bad_args = FALSE;
-
-    /* If argument limits are set for this builtin, check them and
-       only call the builtin handler if the check passes.  */
-    if ((SYMBOL_MIN_ARGS (symbol) > 0) || (SYMBOL_MAX_ARGS (symbol) > 0))
-      bad_args = m4_bad_argc (argv[0], argc, SYMBOL_MIN_ARGS (symbol),
-			     SYMBOL_MAX_ARGS (symbol));
-    if (!bad_args)
+    if (!m4_bad_argc (argc, argv,
+		      SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
       m4_call_macro (symbol, argc, argv, expansion);
   }
   expanded = m4_push_string_finish ();
