@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2002-10-29 11:25+0100\n"
+"POT-Creation-Date: 2002-11-04 15:29+0100\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -35,19 +35,16 @@ msgstr ""
 msgid "%s: option `%s' requires an argument\n"
 msgstr ""
 
-#. --option
 #: src/getopt.c:754
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
 msgstr ""
 
-#. +option or -option
 #: src/getopt.c:758
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
 msgstr ""
 
-#. 1003.2 specifies the format of this message.
 #: src/getopt.c:784
 #, c-format
 msgid "%s: illegal option -- %c\n"
@@ -58,7 +55,6 @@ msgstr ""
 msgid "%s: invalid option -- %c\n"
 msgstr ""
 
-#. 1003.2 specifies the format of this message.
 #: src/getopt.c:817 src/getopt.c:947
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
@@ -402,7 +398,6 @@ msgstr "Caractère «%c» attendu du fichier figé"
 msgid "Premature end of frozen file"
 msgstr "Fin prématurée de fichier figé"
 
-#. 3 argument 'F' operations are invalid for format version 1.
 #: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
 #: src/freeze.c:639
 msgid "Ill-formated frozen file"
@@ -598,8 +593,6 @@ msgid ""
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
-#. if the stack limit has not been reached.
 #: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"
 msgstr "Limit VMEM outrepassée?\n"
