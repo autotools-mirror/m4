@@ -2,7 +2,7 @@ config.m4
 config.sh
 Makefile
 Makefile.in
-at-* atconfig atclocal
+at-* atconfig atlocal
 autom4te.cache
 debug-*.sh
 frozen.m4f

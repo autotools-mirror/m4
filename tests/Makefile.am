@@ -22,6 +22,7 @@
 EXTRA_DIST = generate.awk atlocal.in \
 	$(OTHER_FILES) $(TESTSUITE_AT) $(TESTSUITE)
 
+DISTCLEANFILES       = atconfig atlocal
 MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
 OTHER_FILES = \
@@ -33,6 +34,9 @@ TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
 	$(SHELL) $(srcdir)/$(TESTSUITE)
+
+clean-local:
+	$(srcdir)/testsuite --clean
 
 $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 	rm -f $@ $@t
@@ -47,6 +51,3 @@ $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
 	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@.tmp
 	chmod +x $@.tmp
 	mv $@.tmp $@
-
-# Junk created by the testsuite.
-CLEANFILES = at-* atconfig atlocal frozen.m4f testsuite.log

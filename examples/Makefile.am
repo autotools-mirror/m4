@@ -1,22 +1,22 @@
 ## This file is part of GNU m4
-## Copyright 2000 Free Software Foundation, Inc.
-##  
+## Copyright 2000, 2001 Free Software Foundation, Inc.
+##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or 
+## the Free Software Foundation; either version 2 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 ## 02111-1307  USA
 
-EXTRA_DIST = $(pkgdata_DATA) mktests.sh $(WEB_SITE)
+EXTRA_DIST = $(WEB_SITE)
 
 MAINTAINERCLEANFILES = Makefile.in
 
@@ -47,8 +47,8 @@ WEB_SITE = \
 	WWW/m4lib/uses.m4 \
 	WWW/m4lib/visions.m4 \
 	WWW/m4lib/whatis.m4
-	
-pkgdata_DATA = \
+
+dist_pkgdata_DATA = \
 	capitalize.m4 \
 	comments.m4 \
 	ddivert.m4 \
