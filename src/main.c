@@ -105,6 +105,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
   -c, --discard-comments       do not copy comments to the output\n\
+  -b, --batch                  buffer output, process interrupts\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
@@ -182,6 +183,7 @@ If no FILE or if FILE is `-', standard input is read.\n"),
 static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
+  {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
   {"discard-comments", no_argument, NULL, 'c'},
   {"diversions", required_argument, NULL, 'N'},
@@ -228,7 +230,8 @@ static const struct option long_options[] =
 #  define MODULEPATH_SHORTOPT	""
 #endif
 
-#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:m:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":bcd::el:m:o:st:"
+
 #include <dlfcn.h>
 
 int
@@ -369,8 +372,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 #endif
 
+      case 'b':
+	interactive = FALSE;
+
       case 'c':
-	discard_comments = 1;
+	discard_comments = TRUE;
 	break;
 
       case 'd':
@@ -383,7 +389,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	interactive = 1;
+	interactive = TRUE;
 	break;
 
       case 'l':

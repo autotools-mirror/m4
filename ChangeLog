@@ -1,3 +1,8 @@
+2001-08-11  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/main.c (main): Add `-b' (for `batch') mode switch to force
+	interactive mode off.
+
 2001-08-10  Akim Demaille  <akim@epita.fr>
 
 	* configure.in: Require Autoconf 2.52.
