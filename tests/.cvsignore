@@ -12,3 +12,5 @@ testsuite
 *.log log
 m4
 package.m4
+testsuite.dir
+

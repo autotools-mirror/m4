@@ -1,3 +1,4 @@
+.patch_number
 ABOUT-NLS
 aclocal.m4 aclocal.m4t
 autom4te.cache
@@ -8,12 +9,14 @@ config.log
 config.status
 configure
 COPYING
+cscope.*
 INSTALL
 intl
 libtool
 m4-*
 Makefile
 Makefile.in
+patches
 *.patch *.log
 stamp-h
 stamp-h1

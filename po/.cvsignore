@@ -1,6 +1,14 @@
 *.pot
 *.gmo
+*.header
+*.sin
 *.mo
+Makevars.template
+Rules-quot
+boldquot.sed
+quot.sed
+remove-potcdate.sed
+stamp-po
 Makefile.in.in
 stamp-cat-id
 cat-id-tbl.c
