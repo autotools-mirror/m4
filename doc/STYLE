@@ -54,15 +54,27 @@ following restrictions on coding style apply:
     maybe also fast macro versions of the same), and private fields will
     not export accessors at all.  However, there should be non-exported
     (or at least in the `m4__' namespace) accessor functions for even the
-    private fields of an ADI to aid possible later refactoring.
+    private fields of an ADT to aid possible later refactoring.
 
 * ARCHITECTURE
 
-  + There are three groups of sources in subdirectories: `m4' contains
-    the functionality for libm4 and enables the user to write modules;
-    `modules' implements the builtin macros for the m4 binary; `src' is
-    a small wrapper program which links libm4 and loads initial modules
-    to implement the m4 engine.
+  + There are four groups of sources in subdirectories: `gnulib' contains
+    the files maintained outside of m4, as a portability layer when building
+    the souce for non-glibc2 machines; `m4' contains the functionality for
+    libm4 and enables the user to write modules; `modules' implements the
+    builtin macros for the m4 binary; `src' is a small wrapper program
+    which links libm4 and loads initial modules to implement the m4 engine.
+
+  + The headers in gnulib/m4 need to be managed carefully: gnulib/m4 headers
+    can be included by other files in the same directory using `#include
+    "file.h"', and from files in other directories with `#include
+    <m4/file.h>'.  The include path to invocations of the compiler from
+    various Makefile.am are set to prevent the possibility of picking up
+    an m4/file.h when the system file.h (e.g stdbool.h) is present.  This,
+    in turn means the replacement headers can live in gnulib/m4 without
+    suffering a renaming scheme at configure time.  Don't break with the
+    `#include' convention, or the compile will go wrong in hard to debug
+    ways on some platforms.
 
   + Low coupling.  Classes (and in C, by this I mean files of functions)
     should not rely on a web of other classes to be useful, they should

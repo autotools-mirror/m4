@@ -1,5 +1,13 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* doc/STYLE: Document the gnulib header naming conventions, and
+	#include policy.
+	* gnulib/m4/error_.h, gnulib/m4/gettext_.h, gnulib/m4/obstack_.h,
+	gnulib/m4/regex_.h: Renamed to gnulib/m4/error.h,
+	gnulib/m4/gettext.h, gnulib/m4/obstack.h, gnulib/m4/regex.h
+	respectively.
+	* gnulib/m4/Makefile.am: Remove the rules to build these headers.
+
 	* gnulib/m4/strtol.c, gnulib/config/strtol.m4: Import strtol
 	module from CVS gnulib.
 	* configure.ac (AC_REPLACE_FUNCS): Remove strtol.
