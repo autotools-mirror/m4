@@ -47,7 +47,7 @@ test3
 ]])
 
 # First generate the `expout' ouput by running over the sources before
-# freezeing.
+# freezing.
 AT_CHECK_M4([-m load frozen.m4 unfrozen.m4], 0,
             [stdout], [stderr])
 
