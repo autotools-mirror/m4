@@ -1,5 +1,11 @@
 2002-05-28  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/hash.c (m4_hash_resize): New function.
+	* m4/hash.h: Add prototype.
+	* m4/symtab.c (m4_symtab_init):  Use it.  This could do with some
+	benchmarking to find a good value for, say, autoconf.  This is
+	already a little quicker than before for me.
+
 	* m4/symtab.c (m4_symtab_hash, m4_symtab_cmp): Moved from here...
 	* m4/hash.c (m4_hash_string_hash, m4_hash_string_cmp): .. to here,
 	and reenamed.

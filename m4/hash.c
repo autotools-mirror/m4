@@ -311,6 +311,38 @@ m4_hash_length (m4_hash *hash)
   return M4_HASH_LENGTH (hash);
 }
 
+/* Force the number of buckets to be the given value.  You probably ought
+   not to be using this function once the table has been in use, since
+   the maximum density algorithm will grow the number of buckets back to
+   what was there before if you try to shrink the table.  It is useful
+   to set a smaller or larger initial size if you know in advance what
+   order of magnitude of entries will be in the table.  Be aware that
+   the efficiency of the lookup and grow features require that the size
+   always be 1 less than a power of 2.  */
+void
+m4_hash_resize (m4_hash *hash, size_t size)
+{
+  m4_hash_node **original_buckets;
+  size_t original_size;
+
+  assert (hash);
+
+  original_size		= M4_HASH_SIZE (hash);
+  original_buckets	= M4_HASH_BUCKETS (hash);
+
+  M4_HASH_SIZE (hash)	= size;
+  M4_HASH_BUCKETS (hash)= XCALLOC (m4_hash_node *, size);
+
+  {
+    size_t i;
+    for (i = 0; i < original_size; ++i)
+      if (original_buckets[i])
+	m4_hash_bucket_insert (hash, original_buckets[i]);
+  }
+
+  XFREE (original_buckets);
+}
+
 /* If the node density breaks the threshold, increase the size of
    HASH and repopulate with the original nodes.  */
 void

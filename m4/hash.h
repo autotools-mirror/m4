@@ -44,6 +44,7 @@ void		m4_hash_insert	(m4_hash *hash, const void *key, void *value);
 void *		m4_hash_remove	(m4_hash *hash, const void *key);
 void **		m4_hash_lookup	(m4_hash *hash, const void *key);
 size_t		m4_hash_length	(m4_hash *hash);
+void		m4_hash_resize	(m4_hash *hash, size_t size);
 void		m4_hash_exit	(void);
 
 

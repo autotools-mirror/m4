@@ -59,6 +59,7 @@ void
 m4_symtab_init (void)
 {
   m4_symtab = m4_hash_new (m4_hash_string_hash, m4_hash_string_cmp);
+  m4_hash_resize (m4_symtab, 2047);
 }
 
 /* The following function is used for the cases where we want to do
