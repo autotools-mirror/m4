@@ -212,6 +212,11 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
+typedef struct {
+    unsigned char *string;	/* characters of the string */
+    size_t length;		/* length of the string */
+} m4_string;
+
 struct m4_syntax_table {
   /* Please read the comment at the top of input.c for details */
   unsigned short table[256];

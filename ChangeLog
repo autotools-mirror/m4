@@ -1,5 +1,8 @@
 2003-08-07  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4module.c (m4_string): Moved from here...
+	* m4/m4private.c (m4_string): ...to here.
+
 	* m4/utility.c (dumpdef_cmp): Removed stale declaration.
 
 2003-07-29  Gary V. Vaughan  <gary@gnu.org>

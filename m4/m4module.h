@@ -48,11 +48,6 @@ typedef struct {
   const char *value;
 } m4_macro;
 
-typedef struct {
-    unsigned char *string;	/* characters of the string */
-    size_t length;		/* length of the string */
-} m4_string;
-
 typedef lt_dlsymlist m4_export;
 
 
