@@ -36,14 +36,6 @@ host architecture.  The implementation uses libltdl interface, details of
 which are in the libtool manual.  See file `modules/README' for a more
 detailed description.
 
-By using `./configure --enable-changeword', you get an m4 with a
-significantly slower parser, but with support for an experimental
-feature which allows for changing the syntax of what is a "word" in
-`m4'.  An m4 built this way provides the `--word-regexp' (-W) option,
-and a working `changeword' macro if you also load the `changeword'
-module.  THIS WILL PROBABLY GO AWAY, so don't count on it.  Some of the
-same things can be achieved with `changesyntax' at a much better speed.
-
 By using `./configure --with-dmalloc', GNU m4 is linked with Gray
 Watson's dmalloc package.  It is a debugging option for finding memory
 management problems.  Gray Watson's dmalloc package is available at

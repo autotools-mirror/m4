@@ -1,3 +1,8 @@
+2003-06-12  Gary V. Vaughan  <gary@gnu.org>
+
+	* README: Remove references to --enable-changeword, which has been
+	removed from the code.
+
 2003-06-11  Gary V. Vaughan  <gary@gnu.org>
 
 	Getting rid of the annoying bug with configure --enable-debug,
