@@ -134,7 +134,7 @@ m4_symbol_delete (m4_symbol *symbol)
    occurrence of the name on the list or delete all occurences of the name
    on the list.  */
 m4_symbol *
-m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
+m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
 {
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
 
@@ -205,7 +205,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
     }
 
   M4ERROR ((warning_status, 0,
-	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup (%s, %d)"),
+	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup_t (%s, %d)"),
 	    name, mode));
   abort ();
   /*NOTREACHED*/

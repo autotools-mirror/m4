@@ -57,7 +57,7 @@ typedef enum
   M4_SYMBOL_DELETE,
   M4_SYMBOL_PUSHDEF,
   M4_SYMBOL_POPDEF,
-} m4_symbol_lookup;
+} m4_symbol_lookup_t;
 
 typedef struct {
   const char *name;
@@ -87,13 +87,13 @@ extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 
 
 extern void m4_macro_define		(const lt_dlhandle,
-				const char *, const char *, m4_symbol_lookup);
+				const char *, const char *, m4_symbol_lookup_t);
 extern void m4_macro_table_install	(
 				const lt_dlhandle, const m4_macro *);
 
 extern void m4_builtin_define		(const lt_dlhandle,
 				const char *, const m4_builtin *,
-				m4_symbol_lookup, boolean);
+				m4_symbol_lookup_t, boolean);
 extern void m4_builtin_table_install	(
 				const lt_dlhandle, const m4_builtin *);
 
@@ -105,7 +105,7 @@ extern const m4_builtin *m4_builtin_find_by_func (
 extern m4_hash *m4_symtab;
 
 extern void	m4_symtab_init		(void);
-extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup);
+extern m4_symbol *m4_lookup_symbol	(const char *, m4_symbol_lookup_t);
 extern int	m4_symtab_apply	(m4_symtab_apply_func *, void *);
 extern void	m4_remove_table_reference_symbols (lt_dlhandle);
 

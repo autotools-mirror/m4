@@ -76,7 +76,7 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
    NAME is to be traced.  */
 void
 m4_builtin_define (const lt_dlhandle handle, const char *name,
-		   const m4_builtin *bp, m4_symbol_lookup mode,
+		   const m4_builtin *bp, m4_symbol_lookup_t mode,
 		   boolean traced)
 {
   m4_symbol *symbol;
@@ -121,7 +121,7 @@ m4_builtin_table_install (const lt_dlhandle handle,
    It is also used from main ().  */
 void
 m4_macro_define (const lt_dlhandle handle, const char *name,
-		 const char *text, m4_symbol_lookup mode)
+		 const char *text, m4_symbol_lookup_t mode)
 {
   m4_symbol *symbol;
 
