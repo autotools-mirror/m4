@@ -1,5 +1,11 @@
 2000-11-27  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/ltdl.c: Upgraded to latest bleeding edge version again.
+	On Solaris-2.5 (at least) the native dlopen implementation
+	gets confused about m4.o when looking for module "m4".  This
+	version always looks for .la an .$lib_ext suffixed names first
+	to work around the problem.  Sigh.
+
 	* po/POTFILES.in: Take account of these file movements.
 	* src/Makefile.am (m4_SOURCES): removed eval.c.
 	(EXTRA_m4_SOURCES): removed numb.c and numb.h.

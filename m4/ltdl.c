@@ -1179,6 +1179,7 @@ tryall_dlopen (handle, filename)
       lt_user_data data = loader->dlloader_data;
 
       cur->module = loader->module_open (data, filename);
+
       if (cur->module != 0)
 	{
 	  break;
@@ -2051,13 +2052,6 @@ lt_dlopenext (filename)
       return 0;
     }
 
-  /* try the normal file name */
-  handle = lt_dlopen (filename);
-  if (handle)
-    {
-      return handle;
-    }
-  
   /* try "filename.la" */
   tmp = (char*) lt_dlmalloc (len+4);
   if (!tmp)
@@ -2103,6 +2097,13 @@ lt_dlopenext (filename)
     }
 #endif	
 
+  /* try the normal file name */
+  handle = lt_dlopen (filename);
+  if (handle)
+    {
+      return handle;
+    }
+  
   last_error = LT_DLSTRERROR (FILE_NOT_FOUND);
   lt_dlfree (tmp);
   return 0;
