@@ -2,7 +2,7 @@
 
 	* lib/regex.c, lib/regex.h:  Reverted gnulib update, which broke
 	on Cygwin.
-	Reported by Eric Blake <ericblake@comcast.net>
+	Reported by Eric Blake <ebb9@byu.net>
 
 2005-02-04  Gary V. Vaughan  <gary@gnu.org>
 
