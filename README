@@ -41,6 +41,12 @@ Watson's dmalloc package.  It is a debugging option for finding memory
 management problems.  Gray Watson's dmalloc package is available at
 ftp://ftp.letters.com/src/dmalloc/dmalloc.tar.gz.
 
+GNU M4 uses GNU Libtool in order to build shared libraries on a
+variety of systems.  While this is very nice for making usable
+binaries, it can be a pain when trying to debug a program. For that
+reason, compilation of shared libraries can be turned off by
+specifying the `--disable-shared' option to `configure'.
+
 When compiling on cygwin (b20.1 at least), the cygwin getopt build
 doesn't handle optional arguments properly.  The best way to get around
 this is to force the build to use the included getopt files like this,

@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2004 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -31,10 +31,10 @@ MAINTAINERCLEANFILES = Makefile.in m4.1
 
 PERL = @PERL@
 
-%.1: helptoman.pl ../src/$*
-	@if test -f ../src/$*; then \
+%.1: helptoman.pl $(top_builddir)/src/$*
+	@if test -f $(top_builddir)/src/$*; then \
 	  echo "Updating the \`man' page \`$@'"; \
-	  $(PERL) $(srcdir)/helptoman.pl ../src/$* > $@-tmp; \
+	  $(PERL) $(srcdir)/helptoman.pl $(top_builddir)/src/$* > $@-tmp; \
 	  cmp -s $@-tmp $(srcdir)/$@ || cp $@-tmp $(srcdir)/$@; \
 	  rm -f $@-tmp; \
 	else \

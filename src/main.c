@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -225,7 +225,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Initialise gnulib version-etc module.
      Do *not* mark this string for translation.  */
   version_etc_copyright	=
-    "Copyright (C) 2003 Free Software Foundation, Inc.";
+    "Copyright (C) 2004 Free Software Foundation, Inc.";
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS

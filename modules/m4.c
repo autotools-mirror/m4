@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@
 
 #if HAVE_STDLIB_H
 #  include <stdlib.h>
+#endif
+
+#if HAVE_UNISTD_H
+#  include <unistd.h>
 #endif
 
 #if HAVE_ERRNO_H
@@ -53,6 +57,12 @@ extern int errno;
 #define m4_sysval_flush		m4_LTX_m4_sysval_flush
 #define m4_dump_symbols		m4_LTX_m4_dump_symbols
 #define m4_expand_ranges	m4_LTX_m4_expand_ranges
+
+extern void m4_set_sysval    (int value);
+extern void m4_sysval_flush  (m4 *context);
+extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
+			      m4_symbol_value **argv, bool complain);
+extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -155,6 +155,7 @@ extern void *	    m4_module_import   (m4 *, const char*, const char*,
 					m4_obstack*);
 
 extern const char * m4_get_module_name (lt_dlhandle);
+extern void	    m4__module_exit    (m4 *context);
 
 
 

@@ -31,10 +31,8 @@ func_echo ()
 
 
 $RM -r "$ltdldir"
-func_echo "running: libtoolize --ltdl --force --verbose --copy"
-libtoolize --ltdl --force --verbose --copy
-mkdir "$ltdldir/m4"
-mkdir "$ltdldir/config"
+func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --quiet --copy"
+libtoolize --ltdl="$ltdldir" --force --quiet --copy
 
 func_echo "running: autoreconf --force --verbose --install"
 autoreconf --force --verbose --install

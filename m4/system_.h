@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <sys/types.h>
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@

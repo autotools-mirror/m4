@@ -1,3 +1,32 @@
+2004-07-15  Gary V. Vaughan  <gary@gnu.org>
+
+	Latest CVS libtool can preload modules in libraries, including
+	its own module loaders!  Tweak m4 so that it doesn't try to treat
+	libltdl's module loaders as m4 modules when freezing and on exit:
+
+	* gnulib/acm4/*.m4: Don't store these files in arch since they
+	generate spurious changes.
+	* bootstrap: Simplify initial libtoolize call, since CVS
+	libtoolize is smarter these days.
+	* doc/Makefile.am (%.1): Make the helptoman call work with a VPATH
+	build.
+	* m4/module.h (m4__module_exit): Missing declaration.
+	* m4/m4private.h (m4__module_next): New function declaration.
+	* m4/module.c (m4__module_next): lt_dlhandle_{firs,nex}t
+	encapsulation.  Changed all callers.
+	(m4__module_interface): New function to verify m4 loadable module
+	interfaces.
+	(m4__module_init): Register the interface validator.
+	(m4__module_exit): Only close my own modules.
+	* modules/m4.c (unistd.h): Provide missing declaration.
+	(m4_set_sysval, m4_sysval_flush, m4_dump_symbols)
+	(m4_expand_ranges): More missing declarations.
+	* modules/modtest.c (export_test): Ditto.
+	* src/Makefile.am (AM_CPPFLAGS): Add libltdl directory.
+	* src/main.c (main): Bump copyright year.
+	* tests/modules.at: Fix sed syntax error.
+
+
 2004-06-17  Gary V. Vaughan  <gary@gnu.org>
 
 	Tweaking to enable compilation with latest CVS libtool and

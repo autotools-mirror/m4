@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 04 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -110,10 +110,9 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
 void
 produce_module_dump (FILE *file, lt_dlhandle handle)
 {
-  lt_dlhandle pending = handle;
-  const char *name = m4_get_module_name (pending);
+  const char *name = m4_get_module_name (handle);
 
-  handle = lt_dlhandle_next (handle);
+  handle = m4__module_next (handle);
   if (handle)
     produce_module_dump (file, handle);
 
@@ -253,7 +252,7 @@ produce_frozen_state (m4 *context, const char *name)
   produce_syntax_dump (file, M4SYNTAX, 'E');
 
   /* Dump all loaded modules.  */
-  produce_module_dump (file, lt_dlhandle_next (0));
+  produce_module_dump (file, m4__module_next (0));
 
   /* Dump all symbols.  */
   produce_symbol_dump (context, file, M4SYMTAB);

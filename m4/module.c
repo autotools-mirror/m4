@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1998, 1999, 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1998, 1999, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  * compiled shared object, that can be loaded into GNU M4 at run
  * time. Information about creating modules is in ../modules/README.
  *
-  * This implementation uses libltdl, which is in turn can open modules
+ * This implementation uses libltdl, which is in turn can open modules
  * using either dlopen(3) (exists on GNU/Linux, OSF, Solaris, SunOS and
  * others), shl_load(3) (exists on HPUX), LoadLibrary(3) (exists on
  * Windows, cygwin, OS/2), load_add_on(3) (exists on BeOS), NSAddImage
@@ -86,6 +86,9 @@ static void	    module_close   (m4 *context, lt_dlhandle handle,
 
 static const m4_builtin * install_builtin_table (m4*, lt_dlhandle);
 static const m4_macro *   install_macro_table   (m4*, lt_dlhandle);
+
+static int	    m4__module_interface	(lt_dlhandle handle,
+						 const char *id_string);
 
 static lt_dlcaller_id caller_id = 0;
 
@@ -272,6 +275,26 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 
 
 
+static int
+m4__module_interface (lt_dlhandle handle, const char *id_string)
+{
+  /* A valid m4 module must provide at least one of these symbols.  */
+  return !(lt_dlsym (handle, INIT_SYMBOL)
+	   || lt_dlsym (handle, FINISH_SYMBOL)
+	   || lt_dlsym (handle, BUILTIN_SYMBOL)
+	   || lt_dlsym (handle, MACRO_SYMBOL));
+}
+
+
+/* Return successive loaded modules that pass the interface test registered
+   with the caller id.  */
+lt_dlhandle
+m4__module_next (lt_dlhandle handle)
+{
+  return handle ? lt_dlhandle_next (handle) : lt_dlhandle_first (caller_id);
+}
+
+
 /* Initialisation.  Currently the module search path in path.c is
    initialised from M4MODPATH.  Only absolute path names are accepted to
    prevent the path search of the dlopen library from finding wrong
@@ -290,19 +313,13 @@ m4__module_init (m4 *context)
       return;
     }
 
-#if !WITH_DMALLOC
-  /* initialise libltdl's memory management. */
-  lt_dlmalloc = xmalloc;
-  lt_dlfree   = free;
-#endif
-
   errors      = lt_dlinit ();
 
   /* Register with libltdl for a key to store client data against
      ltdl module handles.  */
   if (!errors)
     {
-      caller_id = lt_dlcaller_register ();
+      caller_id = lt_dlcaller_register ("m4 libm4", m4__module_interface);
 
       if (!caller_id)
 	{
@@ -406,7 +423,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 void
 m4__module_exit (m4 *context)
 {
-  lt_dlhandle	handle	= lt_dlhandle_next (0);
+  lt_dlhandle	handle	= lt_dlhandle_first (caller_id);
   int		errors	= 0;
 
   while (handle && !errors)

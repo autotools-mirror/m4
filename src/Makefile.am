@@ -19,6 +19,7 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 AM_CPPFLAGS	= -I$(top_builddir) -I$(top_srcdir) \
+		  -I$(top_builddir)/libltdl -I$(top_srcdir)/libltdl \
 		  -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
 
