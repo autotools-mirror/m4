@@ -1,3 +1,10 @@
+2002-05-28  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/symtab.c (m4_symtab_hash, m4_symtab_cmp): Moved from here...
+	* m4/hash.c (m4_hash_string_hash, m4_hash_string_cmp): .. to here,
+	and reenamed.
+	* m4/hash.h: Adjust prototypes.
+
 2002-01-22  Akim Demaille  <akim@epita.fr>
 
 	* bootstrap (aclocal_apilibdir): New, to cope with Automake's new

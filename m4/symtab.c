@@ -42,8 +42,6 @@
    of fluff in these functions to make sure that such symbols (with empty
    value stacks) are invisible to the users of this module.  */
 
-static size_t	m4_symtab_hash		(const void *key);
-static int	m4_symtab_cmp		(const void *key, const void *try);
 static int	m4_symbol_destroy	(const char *name, m4_symbol *symbol,
 					 void *data);
 
@@ -60,7 +58,7 @@ m4_hash *m4_symtab = 0;
 void
 m4_symtab_init (void)
 {
-  m4_symtab = m4_hash_new (m4_symtab_hash, m4_symtab_cmp);
+  m4_symtab = m4_hash_new (m4_hash_string_hash, m4_hash_string_cmp);
 }
 
 /* The following function is used for the cases where we want to do
@@ -160,33 +158,6 @@ m4_symbol_destroy (const char *name, m4_symbol *symbol, void *data)
 
   return 0;
 }
-
-/* Return a hash value for a string, from GNU Emacs.  */
-static size_t
-m4_symtab_hash (const void *key)
-{
-  int val = 0;
-  const char *ptr = (const char *) key;
-  char ch;
-
-  while ((ch = *ptr++) != '\0')
-    {
-      if (ch >= 0140)
-	ch -= 40;
-      val = ((val << 3) + (val >> 28) + ch);
-    };
-  val = (val < 0) ? -val : val;
-  return val;
-}
-
-/* Comparison function for hash keys -- used by the underlying
-   hash table ADT when searching for a key match during name lookup.  */
-static int
-m4_symtab_cmp (const void *key, const void *try)
-{
-  return (strcmp ((const char *) key, (const char *) try));
-}
-
 
 
 

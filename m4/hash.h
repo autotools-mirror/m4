@@ -48,6 +48,11 @@ void		m4_hash_exit	(void);
 
 
 
+size_t		m4_hash_string_hash (const void *key);
+int		m4_hash_string_cmp  (const void *key, const void *try);
+
+
+
 typedef struct m4_hash_iterator m4_hash_iterator;
 
 m4_hash_iterator *	m4_hash_iterator_next	(const m4_hash *hash,
@@ -57,4 +62,4 @@ void *			m4_hash_iterator_value	(m4_hash_iterator *place);
 
 END_C_DECLS
 
-#endif /* M4_HASH_H */
+#endif /* !M4_HASH_H */

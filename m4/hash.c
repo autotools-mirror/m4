@@ -374,7 +374,7 @@ m4_hash_exit (void)
       xfree (stale);
     }
 }
- 
+
 
 
 struct m4_hash_iterator
@@ -466,4 +466,34 @@ m4_hash_iterator_value (m4_hash_iterator *place)
   assert (place);
 
   return M4_HASH_NODE_VAL (M4_ITERATOR_PLACE (place));
+}
+
+
+/* Using a string as the hash key is common enough that we provide
+   implementations here for use in client hash table routines.  */
+
+/* Return a hash value for a string, from GNU Emacs.  */
+size_t
+m4_hash_string_hash (const void *key)
+{
+  int val = 0;
+  const char *ptr = (const char *) key;
+  char ch;
+
+  while ((ch = *ptr++) != '\0')
+    {
+      if (ch >= 0140)
+	ch -= 40;
+      val = ((val << 3) + (val >> 28) + ch);
+    };
+  val = (val < 0) ? -val : val;
+  return val;
+}
+
+/* Comparison function for hash keys -- used by the underlying
+   hash table ADT when searching for a key match during name lookup.  */
+int
+m4_hash_string_cmp (const void *key, const void *try)
+{
+  return (strcmp ((const char *) key, (const char *) try));
 }
