@@ -52,7 +52,7 @@ AT_VICTIMS([m4])
 ## The suite.  ##
 ## ----------- ##
 
-AT_INIT([GNU M4], [bug-m4@gnu.org])
+AT_INIT
 
 # Torturing builtins.
 m4_include([builtins.at])

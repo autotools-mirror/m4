@@ -1,3 +1,12 @@
+2001-09-27  Akim Demaille  <akim@epita.fr>
+
+	tests/m4 shall be position independent.
+
+	* tests/m4.in: New.
+	* tests/m4: Remove.
+	* tests/testsuite.at: No args to AT_INIT.
+	* configure.in, tests/Makefile.am: Adjust.
+
 2001-09-22  Akim Demaille  <akim@epita.fr>
 
 	Autotest has changed again.

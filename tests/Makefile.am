@@ -22,7 +22,7 @@
 EXTRA_DIST = generate.awk atlocal.in m4 \
 	$(OTHER_FILES) $(TESTSUITE_AT) $(TESTSUITE)
 
-DISTCLEANFILES       = atconfig atlocal package.m4
+DISTCLEANFILES       = atconfig atlocal package.m4 m4
 MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
 OTHER_FILES = \
