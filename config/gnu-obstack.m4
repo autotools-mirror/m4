@@ -18,7 +18,7 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-#serial 4
+# serial 5
 
 # FIXME: This might not be portable...  When obstack.h is found, we
 # want to use the system's obstack.h.  But we don't want to install
@@ -36,8 +36,8 @@ AC_PREREQ(2.52)
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([M4_AC_FUNC_OBSTACK],
 [AC_CHECK_HEADER(obstack.h)
-ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_cv_func_obstack])])dnl
-ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_obstack_h])])dnl
+m4_pattern_allow([^m4_cv_func_obstack$])dnl
+m4_pattern_allow([^m4_obstack_h$])dnl
 AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
                [AC_TRY_LINK([#include "obstack.h"],
 	                    [struct obstack *mem;obstack_free(mem,(char *) 0)],

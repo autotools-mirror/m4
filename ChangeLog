@@ -1,5 +1,9 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	Really apply the patch ``Drop Autoconf 2.13 compatibility.''
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* doc/m4.texinfo: Promote proper quotation.
 
 2001-08-17  Akim Demaille  <akim@epita.fr>
