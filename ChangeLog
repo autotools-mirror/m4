@@ -1,5 +1,12 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* tests/Makefile.am (EXTRA_DIST): Ship generate.awk.
+	(generate.at): Install a temporary hack until the actual
+	generate.awk is added to the repository.
+	* tests/atconfig.in: New.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	Really apply the patch ``Drop Autoconf 2.13 compatibility.''
 
 2001-08-17  Akim Demaille  <akim@epita.fr>

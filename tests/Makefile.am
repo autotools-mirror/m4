@@ -19,8 +19,8 @@
 # The next line is needed by `others.at:esyscmd'
 #  Ty Coon, President of Vice
 
-EXTRA_DIST = mkconfig.sh foo incl.m4 \
-	defs $(TESTS) $(OTHER_FILES) $(TESTSUITE_SOURCES) $(TESTSUITE)
+EXTRA_DIST = mkconfig.sh foo incl.m4 atconfig.in generate.awk \
+	defs $(OTHER_FILES) $(TESTSUITE_SOURCES) $(TESTSUITE)
 
 MAINTAINERCLEANFILES = Makefile.in generated.at config.m4 config.sh \
 	$(TESTSUITE)
@@ -33,12 +33,14 @@ TESTSUITE_SOURCES = testsuite.at others.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
-	$(SHELL) $(TESTSUITE)
+	top_builddir=$(top_builddir) $(SHELL) $(TESTSUITE)
 
 $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
-	rm -f $@
-	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
-	mv $@t $@
+# FIXME: Stupid Akim TM forgot to bring generate.awk...
+#	rm -f $@
+#	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
+#	mv $@t $@
+	touch $@
 
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.
