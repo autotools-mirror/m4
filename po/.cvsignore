@@ -5,5 +5,5 @@ Makefile.in.in
 stamp-cat-id
 cat-id-tbl.c
 POTFILES
-po/Makefile
-po/Makefile.in
+Makefile
+Makefile.in
