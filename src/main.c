@@ -524,6 +524,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
      Strictly, we don't need to do this, but it makes leak detection
      a whole lot easier!  */
   m4_symtab_exit ();
+  m4_syntax_exit ();
   m4_output_exit ();
   m4_input_exit ();
   m4_debug_exit ();

@@ -1,5 +1,27 @@
 2002-05-29  Gary V. Vaughan  <gary@gnu.org>
 
+	Preparations for refactoring syntax tables to allow reverse
+	lookups [fetch me a M4_SYNTAX_OPEN], without compromising the
+	speed of normal lookups in an array of unsigned short.
+
+	* m4/input.c (single_quotes, single_comments, use_macro_escape):
+	Moved from here...
+	* m4/m4private.h (m4__single_quotes, m4__single_comments,
+	m4__use_macro_escape): ...to here, and renamed.  The `m4__' prefix
+	is for internal symbols which unavoidably pollute the global
+	namespace, but are not published APIs.
+	Adjusted all callers.
+	* m4/input.c (m4_syntax_init, m4_syntax_code, m4_set_quotes,
+	m4_set_comment, m4_set_syntax, set_syntax_internal,
+	unset_syntax_attribute): Moved from this file...
+	* m4/syntax.c: New. ...to this file.
+	Also added an m4_syntax_exit stub for orthogonality.
+	* src/main.c (main): Use it.
+	* m4/Makefile.am (libm4_la_SOURCES): Add syntax.c.
+	* m4/m4module.h: Reformatting.  New prototypes.
+
+2002-05-29  Gary V. Vaughan  <gary@gnu.org>
+
 	* bootstrap (aclocal_apiversion): The aclocal apiversion is
 	distinct from the automake release number (in that the apiversion
 	apparently has no micro-version-component).

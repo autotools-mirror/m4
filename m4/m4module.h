@@ -57,6 +57,12 @@ typedef struct {
 } m4_builtin;
 
 
+
+/* --- MODULE MANAGEMENT --- */
+
+typedef void m4_module_init_func   (lt_dlhandle, struct obstack*);
+typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
+
 extern void	    m4_module_init   (void);
 extern lt_dlhandle  m4_module_load   (const char*, struct obstack*);
 extern void	    m4_module_unload (const char*, struct obstack*);
@@ -71,6 +77,9 @@ extern m4_macro	   *m4_module_macros   (lt_dlhandle);
 
 extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 
+
+
+/* --- MACRO (and builtin) MANAGEMENT --- */
 
 extern m4_symbol *m4_macro_pushdef	(const char *name, lt_dlhandle handle,
 					 const char *text, int flags,
@@ -94,6 +103,10 @@ extern const m4_builtin *m4_builtin_find_by_name (
 				const m4_builtin *, const char *);
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
+
+
+
+/* --- SYMBOL TABLE MANAGEMENT --- */
 
 extern m4_hash *m4_symtab;
 
@@ -132,9 +145,6 @@ typedef enum {
   M4_TOKEN_TEXT,
   M4_TOKEN_FUNC
 } m4_data_t;
-
-typedef void m4_module_init_func   (lt_dlhandle, struct obstack*);
-typedef void m4_module_finish_func (lt_dlhandle, struct obstack*);
 
 extern m4_token_t	m4_token_type	  (m4_token *);
 extern char	       *m4_token_text	  (m4_token *);
@@ -207,6 +217,9 @@ void m4_shipout_int (struct obstack *, int);
 void m4_shipout_string (struct obstack*, const char*, int, boolean);
 void m4_dump_args (struct obstack *obs, int argc, m4_token **argv, const char *sep, boolean quoted);
 
+
+
+/* --- RUNTIME DEBUGGING --- */
 
 FILE *m4_debug;
 
@@ -323,6 +336,13 @@ void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_toke
 
 /* --- SYNTAX TABLE DEFINITIONS --- */
 
+/* Please read the comment at the top of input.c for details */
+unsigned short m4_syntax_table[256];
+
+extern	void	m4_syntax_init	(void);
+extern	void	m4_syntax_exit	(void);
+extern	int	m4_syntax_code	(char ch);
+
 /* These are simple values, not bit masks.  There is no overlap. */
 #define M4_SYNTAX_OTHER		(0x0000)
 
@@ -352,40 +372,38 @@ void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_toke
 #define M4_SYNTAX_VALUE		(0x00FF|M4_SYNTAX_LQUOTE|M4_SYNTAX_BCOMM)
 #define M4_SYNTAX_MASKS		(0xFF00)
 
+#define m4__syntax(ch)	m4_syntax_table[(int)(ch)]
+
+#define M4_IS_OTHER(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_OTHER)
+#define M4_IS_IGNORE(ch) ((m4__syntax(ch)) == M4_SYNTAX_IGNORE)
+#define M4_IS_SPACE(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_SPACE)
+
+#define M4_IS_OPEN(ch)   ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_OPEN)
+#define M4_IS_CLOSE(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_CLOSE)
+#define M4_IS_COMMA(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_COMMA)
+#define M4_IS_DOLLAR(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_DOLLAR)
+#define M4_IS_ACTIVE(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ACTIVE)
+
+#define M4_IS_ESCAPE(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ESCAPE)
+#define M4_IS_ALPHA(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ALPHA)
+#define M4_IS_NUM(ch)    ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_NUM)
+#define M4_IS_ALNUM(ch)  (((m4__syntax(ch)) & M4_SYNTAX_ALNUM) != 0)
+
+#define M4_IS_LQUOTE(ch) (m4__syntax(ch) & M4_SYNTAX_LQUOTE)
+#define M4_IS_RQUOTE(ch) (m4__syntax(ch) & M4_SYNTAX_RQUOTE)
+#define M4_IS_BCOMM(ch)  (m4__syntax(ch) & M4_SYNTAX_BCOMM)
+#define M4_IS_ECOMM(ch)  (m4__syntax(ch) & M4_SYNTAX_ECOMM)
+
+
 
-#define m4_syntax(ch)	m4_syntax_table[(int)(ch)]
-
-#define M4_IS_OTHER(ch)  ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_OTHER)
-#define M4_IS_IGNORE(ch) ((m4_syntax(ch)) == M4_SYNTAX_IGNORE)
-#define M4_IS_SPACE(ch)  ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_SPACE)
-
-#define M4_IS_OPEN(ch)   ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_OPEN)
-#define M4_IS_CLOSE(ch)  ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_CLOSE)
-#define M4_IS_COMMA(ch)  ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_COMMA)
-#define M4_IS_DOLLAR(ch) ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_DOLLAR)
-#define M4_IS_ACTIVE(ch) ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ACTIVE)
-
-#define M4_IS_ESCAPE(ch) ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ESCAPE)
-#define M4_IS_ALPHA(ch)  ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ALPHA)
-#define M4_IS_NUM(ch)    ((m4_syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_NUM)
-#define M4_IS_ALNUM(ch)  (((m4_syntax(ch)) & M4_SYNTAX_ALNUM) != 0)
-
-#define M4_IS_LQUOTE(ch) (m4_syntax(ch) & M4_SYNTAX_LQUOTE)
-#define M4_IS_RQUOTE(ch) (m4_syntax(ch) & M4_SYNTAX_RQUOTE)
-#define M4_IS_BCOMM(ch)  (m4_syntax(ch) & M4_SYNTAX_BCOMM)
-#define M4_IS_ECOMM(ch)  (m4_syntax(ch) & M4_SYNTAX_ECOMM)
-
-/* Please read the comment at the top of input.c for details */
-unsigned short m4_syntax_table[256];
+/* --- TOKENISATION AND INPUT --- */
 
 /* current input file, and line */
 const char *m4_current_file;
 int m4_current_line;
 
-extern	int	m4_syntax_code	(char ch);
 extern	void	m4_input_init	(void);
 extern	void	m4_input_exit	(void);
-extern	void	m4_syntax_init	(void);
 extern	int	m4_peek_input	(void);
 extern	m4_token_t m4_next_token (m4_token *);
 extern	void	m4_token_copy	(m4_token *dest, m4_token *src);
