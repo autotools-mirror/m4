@@ -1,6 +1,8 @@
 GNU m4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004 Free Software Foundation, Inc.
 
+Version 1.4.2 - ???, by ???
+
 Version 1.4.1 - June 2004, by Paul Eggert
 
 * maketemp now creates an empty file with the given name, instead of merely

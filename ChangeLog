@@ -1,3 +1,8 @@
+2004-06-09  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (VERSION): Bump to 1.4.1a.
+	* NEWS: Place holder for next stable release.
+
 2004-06-03  Paul Eggert  <eggert@cs.ucla.edu>
 
 	* Release 1.4.1.
