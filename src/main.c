@@ -416,49 +416,56 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
   /* Handle deferred command line macro definitions.  Must come after
      initialisation of the symbol table.  */
+  {
+    m4_token token;
 
-  defines = head;
+    bzero (&token, sizeof (token));
+    TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
 
-  while (defines != NULL)
-    {
-      macro_definition *next;
-      char *macro_value;
-      m4_symbol *symbol;
+    defines = head;
 
-      switch (defines->code)
-	{
-	case 'D':
-	  macro_value = strchr (defines->macro, '=');
-	  if (macro_value == NULL)
-	    macro_value = "";
-	  else
-	    *macro_value++ = '\0';
-	  m4_macro_define (defines->macro, NULL, macro_value, 0x0, 0, -1);
-	  break;
+    while (defines != NULL)
+      {
+	macro_definition *next;
+	char *macro_value;
+	m4_symbol *symbol;
 
-	case 'U':
-	  m4_symbol_delete (defines->macro);
-	  break;
+	switch (defines->code)
+	  {
+	  case 'D':
+	    macro_value = strchr (defines->macro, '=');
+	    if (macro_value == NULL)
+	      macro_value = "";
+	    else
+	      *macro_value++ = '\0';
+	    TOKEN_TEXT (&token) = macro_value;
+	    m4_macro_define (defines->macro, &token);
+	    break;
 
-	case 't':
-	  symbol = m4_symbol_define (defines->macro);
-	  SYMBOL_TRACED (symbol) = TRUE;
-	  break;
+	  case 'U':
+	    m4_symbol_delete (defines->macro);
+	    break;
 
-	case 'm':
-	  m4_module_load (defines->macro, 0);
-	  break;
+	  case 't':
+	    symbol = m4_symbol_define (defines->macro);
+	    SYMBOL_TRACED (symbol) = TRUE;
+	    break;
 
-	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad code in deferred arguments"));
-	  abort ();
-	}
+	  case 'm':
+	    m4_module_load (defines->macro, 0);
+	    break;
 
-      next = defines->next;
-      xfree ((void *) defines);
-      defines = next;
-    }
+	  default:
+	    M4ERROR ((warning_status, 0,
+		      "INTERNAL ERROR: Bad code in deferred arguments"));
+	    abort ();
+	  }
+
+	next = defines->next;
+	xfree ((void *) defines);
+	defines = next;
+      }
+  }
 
   /* Interactive mode means unbuffered output, and interrupts ignored.  */
 

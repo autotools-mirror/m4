@@ -153,22 +153,18 @@ M4BUILTIN_HANDLER (define)
 
   if (argc == 2)
     {
-      m4_macro_define (M4ARG (1), NULL, "", 0, 0, -1);
+      m4_macro_define (M4ARG (1), NULL);
       return;
     }
 
   switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
-		       TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]),
-		       TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
+      m4_macro_define (M4ARG (1), argv[2]);
       return;
 
     case M4_TOKEN_FUNC:
-      m4_builtin_define (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			 TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]),
-			 TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
+      m4_builtin_define (M4ARG (1), argv[2]);
       return;
     }
 
@@ -192,22 +188,18 @@ M4BUILTIN_HANDLER (pushdef)
 
   if (argc == 2)
     {
-      m4_macro_pushdef (M4ARG (1), NULL, "", 0, 0, -1);
+      m4_macro_pushdef (M4ARG (1), NULL);
       return;
     }
 
   switch (TOKEN_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			TOKEN_TEXT (argv[2]), TOKEN_FLAGS (argv[2]),
-			TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
+      m4_macro_pushdef (M4ARG (1), argv[2]);
       return;
 
     case M4_TOKEN_FUNC:
-      m4_builtin_pushdef (M4ARG (1), TOKEN_HANDLE (argv[2]),
-			  TOKEN_FUNC (argv[2]), TOKEN_FLAGS (argv[2]),
-			  TOKEN_MIN_ARGS (argv[2]), TOKEN_MAX_ARGS (argv[2]));
+      m4_builtin_pushdef (M4ARG (1), argv[2]);
       return;
     }
 

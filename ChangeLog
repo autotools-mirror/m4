@@ -1,5 +1,26 @@
 2003-06-05  Gary V. Vaughan  <gary@gnu.org>
 
+	Begin preparations for supporting formal parameters in m4 macros.
+
+	* m4/m4private.h (struct m4_token_arg): Placeholder for holding
+	the details of a formal parameter.
+	(m4_token): Add an arg_signature member to hold a hash table for
+	looking up formal parameters.
+	* m4/input.c: Update more bitrotted comments.
+	(m4_push_builtin): Initialise arg_signature member.
+	(init_builtin_token): Copy arg_signature member.
+	* m4/m4module.h (m4_builtin_pushdef, m4_builtin_define)
+	(m4_macro_pushdef, m4_macro_define): Rewritten as macros to
+	replace...
+	* m4/builtin.c (m4_builtin_pushdef, m4_builtin_define)
+	(m4_macro_pushdef, m4_macro_define): ...these, And...
+	(m4_symbol_token): ...wrapped around this new function, which
+	vastly simplifies the arguments required by the functions it
+	replaces.
+	Changed all callers.
+
+2003-06-05  Gary V. Vaughan  <gary@gnu.org>
+
 	* m4/macro.c: Format changes.
 
 2003-06-04  Gary V. Vaughan  <gary@gnu.org>

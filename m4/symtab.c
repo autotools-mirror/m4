@@ -270,42 +270,49 @@ m4_symbol_delete (const char *name)
    arguments.  This function is usually passed a newly pushdef()d symbol
    that is already interned in the symbol table.  The traced bit should
    be appropriately set by the caller.  */
-void
-m4_symbol_builtin (m4_symbol *symbol, lt_dlhandle handle,
-		   m4_builtin_func *func, int flags,
-		   int min_args, int max_args)
+m4_symbol *
+m4_symbol_builtin (m4_symbol *symbol, m4_token *token)
 {
   assert (symbol);
-  assert (handle);
-  assert (func);
+  assert (token);
+  assert (TOKEN_FUNC (token));
+  assert (TOKEN_HANDLE (token));
+  assert (TOKEN_TYPE (token) == M4_TOKEN_FUNC);
 
   if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
     xfree (SYMBOL_TEXT (symbol));
 
-  SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
-  SYMBOL_FUNC (symbol)		= func;
-  SYMBOL_HANDLE (symbol)	= handle;
-  SYMBOL_FLAGS (symbol)		= flags;
-  SYMBOL_MIN_ARGS (symbol)	= min_args;
-  SYMBOL_MAX_ARGS (symbol)	= max_args;
+  SYMBOL_TYPE (symbol)		= TOKEN_TYPE (token);
+  SYMBOL_FUNC (symbol)		= TOKEN_FUNC (token);
+  SYMBOL_HANDLE (symbol)	= TOKEN_HANDLE (token);
+  SYMBOL_FLAGS (symbol)		= TOKEN_FLAGS (token);
+  SYMBOL_ARG_SIGNATURE (symbol)	= TOKEN_ARG_SIGNATURE (token);
+  SYMBOL_MIN_ARGS (symbol)	= TOKEN_MIN_ARGS (token);
+  SYMBOL_MAX_ARGS (symbol)	= TOKEN_MAX_ARGS (token);
+
+  return symbol;
 }
 
 /* ...and similarly for macro valued symbols.  */
-void
-m4_symbol_macro (m4_symbol *symbol, lt_dlhandle handle,
-		 const char *text, int flags, int min_args, int max_args)
+m4_symbol *
+m4_symbol_macro (m4_symbol *symbol, m4_token *token)
 {
   assert (symbol);
+  assert (TOKEN_TEXT (token));
+  assert (TOKEN_TYPE (token) == M4_TOKEN_TEXT);
 
   if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
     xfree (SYMBOL_TEXT (symbol));
 
-  SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
-  SYMBOL_TEXT (symbol) 		= xstrdup (text);
-  SYMBOL_HANDLE (symbol) 	= handle;
-  SYMBOL_FLAGS (symbol)		= flags;
-  SYMBOL_MIN_ARGS (symbol)	= min_args;
-  SYMBOL_MAX_ARGS (symbol)	= max_args;
+  SYMBOL_TYPE (symbol)		= TOKEN_TYPE (token);
+  SYMBOL_TEXT (symbol) 		= xstrdup (TOKEN_TEXT (token));
+  SYMBOL_HANDLE (symbol) 	= TOKEN_HANDLE (token);
+  SYMBOL_FLAGS (symbol)		= TOKEN_FLAGS (token);
+  SYMBOL_ARG_SIGNATURE (symbol)	= TOKEN_ARG_SIGNATURE (token);
+  SYMBOL_MIN_ARGS (symbol)	= TOKEN_MIN_ARGS (token);
+  SYMBOL_MAX_ARGS (symbol)	= TOKEN_MAX_ARGS (token);
+
+  return symbol;
 }
 
 

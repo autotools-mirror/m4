@@ -71,39 +71,43 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 }
 
 m4_symbol *
-m4_builtin_pushdef (const char *name, lt_dlhandle handle,
-		    m4_builtin_func *func, int flags, int min_args,
-		    int max_args)
+m4_symbol_token (const char *name, m4_data_t type, m4_token *token,
+		 m4_symbol *(*getter) (const char *name),
+		 m4_symbol *(*setter) (m4_symbol *, m4_token *))
 {
   m4_symbol *symbol;
 
   assert (name);
-  assert (handle);
-  assert (func);
+  assert (!token || (TOKEN_TYPE (token) == type));
+  assert (getter);
+  assert (setter);
 
-  symbol = m4_symbol_pushdef (name);
-
-  if (symbol)
-    m4_symbol_builtin (symbol, handle, func, flags, min_args, max_args);
-
-  return symbol;
-}
-
-m4_symbol *
-m4_builtin_define (const char *name, lt_dlhandle handle,
-		   m4_builtin_func *func, int flags,
-		   int min_args, int max_args)
-{
-  m4_symbol *symbol;
-
-  assert (name);
-  assert (handle);
-  assert (func);
-
-  symbol = m4_symbol_define (name);
+  symbol = (*getter) (name);
 
   if (symbol)
-    m4_symbol_builtin (symbol, handle, func, flags, min_args, max_args);
+    {
+      m4_token empty;
+
+      if (!token)
+	{
+	  bzero (&empty, sizeof (m4_token));
+	  TOKEN_TYPE (&empty) = type;
+	  switch (type)
+	    {
+	    case M4_TOKEN_TEXT:
+	      TOKEN_TEXT (&empty) = "";
+	      break;
+
+	    case M4_TOKEN_FUNC:
+	    case M4_TOKEN_VOID:
+	      break;
+	    }
+
+	  token = &empty;
+	}
+
+      (*setter) (symbol, token);
+    }
 
   return symbol;
 }
@@ -112,77 +116,59 @@ void
 m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
 {
   const m4_builtin *bp;
+  m4_token token;
 
   assert (handle);
   assert (table);
 
+  bzero (&token, sizeof (m4_token));
+  TOKEN_TYPE (&token)		= M4_TOKEN_FUNC;
+  TOKEN_HANDLE (&token)		= handle;
+
   for (bp = table; bp->name != NULL; bp++)
     {
       int flags = 0;
-      char *key;
+      char *name;
 
       if (prefix_all_builtins)
 	{
 	  static const char prefix[] = "m4_";
 	  size_t len = strlen (prefix) + strlen (bp->name);
 
-	  key = (char *) xmalloc (1+ len);
-	  snprintf (key, 1+ len, "%s%s", prefix, bp->name);
+	  name = (char *) xmalloc (1+ len);
+	  snprintf (name, 1+ len, "%s%s", prefix, bp->name);
 	}
       else
-	key = (char *) bp->name;
+	name = (char *) bp->name;
 
       if (bp->groks_macro_args) BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
       if (bp->blind_if_no_args) BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
 
-      m4_builtin_pushdef (key, handle, bp->func, flags,
-			  bp->min_args, bp->max_args);
+      TOKEN_FUNC (&token)	= bp->func;
+      TOKEN_FLAGS (&token)	= flags;
+      TOKEN_MIN_ARGS (&token)	= bp->min_args;
+      TOKEN_MAX_ARGS (&token)	= bp->max_args;
+
+      m4_builtin_pushdef (name, &token);
 
       if (prefix_all_builtins)
-	xfree (key);
+	xfree (name);
     }
 }
-
-m4_symbol *
-m4_macro_pushdef (const char *name, lt_dlhandle handle, const char *text,
-		  int flags, int min_args, int max_args)
-{
-  m4_symbol *symbol;
-
-  assert (name);
-  assert (text);
-
-  symbol = m4_symbol_pushdef (name);
-
-  if (symbol)
-    m4_symbol_macro (symbol, handle, text, flags, min_args, max_args);
-
-  return symbol;
-}
-
-m4_symbol *
-m4_macro_define (const char *name, lt_dlhandle handle, const char *text,
-		 int flags, int min_args, int max_args)
-{
-  m4_symbol *symbol;
-
-  assert (name);
-  assert (text);
-
-  symbol = m4_symbol_define (name);
-
-  if (symbol)
-    m4_symbol_macro (symbol, handle, text, flags, min_args, max_args);
-
-  return symbol;
-}
-
 
 void
 m4_macro_table_install (lt_dlhandle handle, const m4_macro *table)
 {
   const m4_macro *mp;
+  m4_token token;
+
+  bzero (&token, sizeof (m4_token));
+  TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
+  TOKEN_HANDLE (&token)		= handle;
 
   for (mp = table; mp->name != NULL; mp++)
-    m4_macro_pushdef (mp->name, handle, mp->value, 0, 0, -1);
+    {
+      TOKEN_TEXT (&token)	= (char *) mp->value;
+      m4_macro_pushdef (mp->name, &token);
+    }
 }

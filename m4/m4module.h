@@ -79,33 +79,6 @@ extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 
 
 
-/* --- MACRO (and builtin) MANAGEMENT --- */
-
-extern m4_symbol *m4_macro_pushdef	(const char *name, lt_dlhandle handle,
-					 const char *text, int flags,
-					 int min_args, int max_args);
-extern m4_symbol *m4_macro_define	(const char *name, lt_dlhandle handle,
-					 const char *text, int flags,
-					 int min_args, int max_args);
-extern void	  m4_macro_table_install (lt_dlhandle handle,
-					  const m4_macro *table);
-
-extern m4_symbol *m4_builtin_pushdef	(const char *name, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags,
-					 int min_args, int max_args);
-extern m4_symbol *m4_builtin_define	(const char *name, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags,
-					 int min_args, int max_args);
-extern void	  m4_builtin_table_install (lt_dlhandle handle,
-					 const m4_builtin *table);
-
-extern const m4_builtin *m4_builtin_find_by_name (
-				const m4_builtin *, const char *);
-extern const m4_builtin *m4_builtin_find_by_func (
-				const m4_builtin *, m4_builtin_func *);
-
-
-
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
 extern m4_hash *m4_symtab;
@@ -120,12 +93,8 @@ extern m4_symbol *m4_symbol_pushdef	(const char *);
 extern m4_symbol *m4_symbol_define	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
-extern void	  m4_symbol_builtin	(m4_symbol *symbol, lt_dlhandle handle,
-					 m4_builtin_func *func, int flags,
-					 int min_args, int max_args);
-extern void	  m4_symbol_macro	(m4_symbol *symbol, lt_dlhandle handle,
-					 const char *text, int flags,
-					 int min_args, int max_args);
+extern m4_symbol *m4_symbol_builtin	(m4_symbol *symbol, m4_token *token);
+extern m4_symbol *m4_symbol_macro	(m4_symbol *symbol, m4_token *token);
 
 
 /* Various different token types.  */
@@ -145,6 +114,39 @@ typedef enum {
   M4_TOKEN_TEXT,
   M4_TOKEN_FUNC
 } m4_data_t;
+
+
+
+
+/* --- MACRO (and builtin) MANAGEMENT --- */
+
+extern m4_symbol *m4_symbol_token (const char *name, m4_data_t type,
+			m4_token *token,
+			m4_symbol *(*getter) (const char *name),
+			m4_symbol *(*setter) (m4_symbol *, m4_token *));
+
+extern void	  m4_macro_table_install (lt_dlhandle handle,
+					  const m4_macro *table);
+extern void	  m4_builtin_table_install (lt_dlhandle handle,
+					 const m4_builtin *table);
+
+extern const m4_builtin *m4_builtin_find_by_name (
+				const m4_builtin *, const char *);
+extern const m4_builtin *m4_builtin_find_by_func (
+				const m4_builtin *, m4_builtin_func *);
+
+#define m4_macro_pushdef(name, macro)					\
+	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
+			 m4_symbol_pushdef, m4_symbol_macro)
+#define m4_macro_define(name, macro)					\
+	m4_symbol_token ((name), M4_TOKEN_TEXT, (macro), 		\
+			 m4_symbol_define, m4_symbol_macro)
+#define m4_builtin_pushdef(name, builtin)				\
+	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
+			 m4_symbol_pushdef, m4_symbol_builtin)
+#define m4_builtin_define(name, builtin)				\
+	m4_symbol_token ((name), M4_TOKEN_FUNC, (builtin), 		\
+			 m4_symbol_define, m4_symbol_builtin)
 
 extern m4_token_t	m4_token_type	  (m4_token *);
 extern char	       *m4_token_text	  (m4_token *);

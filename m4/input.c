@@ -325,6 +325,7 @@ m4_push_builtin (m4_token *td)
 
   i->u.u_b.func		= TOKEN_FUNC (td);
   i->u.u_b.handle	= TOKEN_HANDLE (td);
+  i->u.u_b.arg_signature= TOKEN_ARG_SIGNATURE (td);
   i->u.u_b.min_args	= TOKEN_MIN_ARGS (td);
   i->u.u_b.max_args	= TOKEN_MAX_ARGS (td);
   i->u.u_b.flags	= TOKEN_FLAGS (td);
@@ -530,6 +531,7 @@ init_builtin_token (m4_token *td)
   TOKEN_FUNC (td)		= isp->u.u_b.func;
   TOKEN_HANDLE (td)		= isp->u.u_b.handle;
   TOKEN_FLAGS (td)		= isp->u.u_b.flags;
+  TOKEN_ARG_SIGNATURE(td)	= isp->u.u_b.arg_signature;
   TOKEN_MIN_ARGS (td)		= isp->u.u_b.min_args;
   TOKEN_MAX_ARGS (td)		= isp->u.u_b.max_args;
 }
@@ -570,7 +572,7 @@ next_char (void)
     }
 }
 
-/* The function peek_input () is used to look at the next character in
+/* The function m4_peek_input () is used to look at the next character in
    the input stream.  At any given time, it reads from the input_block
    on the top of the current input stack.  */
 int
@@ -730,12 +732,12 @@ m4_input_exit (void)
 
 
 /* Parse and return a single token from the input stream.  A token can
-   either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_STRING
-   for a quoted string; TOKEN_WORD for something that is a potential macro
-   name; and TOKEN_SIMPLE for any single character that is not a part of
-   any of the previous types.
+   either be M4_TOKEN_EOF, if the input_stack is empty; it can be
+   M4_TOKEN_STRING for a quoted string; M4_TOKEN_WORD for something that
+   is a potential macro name; and M4_TOKEN_SIMPLE for any single character
+   that is not a part of any of the previous types.
 
-   Next_token () return the token type, and passes back a pointer to the
+   M4_next_token () returns the token type, and passes back a pointer to the
    token data through TD.  The token text is collected on the obstack
    token_stack, which never contains more than one token text at a time.
    The storage pointed to by the fields in TD is therefore subject to
