@@ -1,5 +1,12 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* m4/utility.c (m4_numeric_arg): Use the usual (argc, argv, ...)
+	interface instead of (name, argc...).
+	Upon failure, specify which argument was guilty.
+	Adjust callers.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* modules/evalparse.c: Save translators' time: don't translate
 	internal error messages.
 	(m4_evaluate): Simplify/normalize error messages.

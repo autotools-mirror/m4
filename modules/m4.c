@@ -387,7 +387,7 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (!m4_numeric_arg (argv[0], M4ARG (1), &value))
+  if (!m4_numeric_arg (argc, argv, 1, &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -397,7 +397,7 @@ M4BUILTIN_HANDLER (decr)
 {
   int value;
 
-  if (!m4_numeric_arg (argv[0], M4ARG (1), &value))
+  if (!m4_numeric_arg (argc, argv, 1, &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -413,7 +413,7 @@ M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
 
-  if (argc == 2 && !m4_numeric_arg (argv[0], M4ARG (1), &i))
+  if (argc == 2 && !m4_numeric_arg (argc, argv, 1, &i))
     return;
 
   m4_make_diversion (i);
@@ -441,7 +441,7 @@ M4BUILTIN_HANDLER (undivert)
       if (sscanf (M4ARG (1), "%d", &i) == 1)
 	m4_insert_diversion (i);
       else if (no_gnu_extensions)
-	m4_numeric_arg (argv[0], M4ARG (1), &i);
+	m4_numeric_arg (argc, argv, 1, &i);
       else
 	{
 	  FILE *fp = m4_path_search (M4ARG (1), (char **) NULL);
@@ -562,7 +562,7 @@ M4BUILTIN_HANDLER (m4exit)
 {
   int exit_code = 0;
 
-  if (argc == 2  && !m4_numeric_arg (argv[0], M4ARG (1), &exit_code))
+  if (argc == 2  && !m4_numeric_arg (argc, argv, 1, &exit_code))
     exit_code = 0;
 
   m4_module_close_all (obs);
@@ -678,10 +678,10 @@ M4BUILTIN_HANDLER (substr)
   int start, length, avail;
 
   length = avail = strlen (M4ARG (1));
-  if (!m4_numeric_arg (argv[0], M4ARG (2), &start))
+  if (!m4_numeric_arg (argc, argv, 2, &start))
     return;
 
-  if (argc == 4 && !m4_numeric_arg (argv[0], M4ARG (3), &length))
+  if (argc == 4 && !m4_numeric_arg (argc, argv, 3, &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)

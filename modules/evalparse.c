@@ -778,7 +778,7 @@ m4_evaluate (struct obstack *obs, int argc, m4_token **argv)
   eval_token	et;
   eval_error	err;
 
-  if (argc >= 3 && !m4_numeric_arg (argv[0], M4ARG (2), &radix))
+  if (argc >= 3 && !m4_numeric_arg (argc, argv, 2, &radix))
     return;
 
   if (radix <= 1 || radix > 36)
@@ -789,7 +789,7 @@ m4_evaluate (struct obstack *obs, int argc, m4_token **argv)
       return;
     }
 
-  if (argc >= 4 && !m4_numeric_arg (argv[0], M4ARG (3), &min))
+  if (argc >= 4 && !m4_numeric_arg (argc, argv, 3, &min))
     return;
 
   if (min <= 0)

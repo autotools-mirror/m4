@@ -202,7 +202,7 @@ m4_string ecomm;
 
 boolean m4_bad_argc (int, m4_token **, int, int);
 const char *m4_skip_space (const char *);
-boolean m4_numeric_arg (m4_token *, const char *, int *);
+boolean m4_numeric_arg (int, m4_token **, int, int *);
 void m4_shipout_int (struct obstack *, int);
 void m4_shipout_string (struct obstack*, const char*, int, boolean);
 void m4_dump_args (struct obstack *obs, int argc, m4_token **argv, const char *sep, boolean quoted);

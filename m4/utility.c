@@ -138,16 +138,17 @@ m4_skip_space (const char *arg)
    VALUEP. If the conversion fails, print error message for macro MACRO.
    Return TRUE iff conversion succeeds.  */
 boolean
-m4_numeric_arg (m4_token *macro, const char *arg, int *valuep)
+m4_numeric_arg (int argc, m4_token **argv, int arg, int *valuep)
 {
   char *endp;
 
-  if (*arg == 0 || (*valuep = strtol (m4_skip_space (arg), &endp, 10),
-		    *m4_skip_space (endp) != 0))
+  if (*M4ARG (arg) == 0
+      || (*valuep = strtol (m4_skip_space (M4ARG (arg)), &endp, 10),
+	  *m4_skip_space (endp) != 0))
     {
       M4WARN ((warning_status, 0,
-	       _("Warning: %s: non-numeric argument: %s"),
-	       TOKEN_TEXT (macro), arg));
+	       _("Warning: %s: argument %d non-numeric: %s"),
+	       M4ARG (0), arg - 1, M4ARG (arg)));
       return FALSE;
     }
   return TRUE;
