@@ -1,3 +1,8 @@
+2003-09-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap: CVS autoreconf leaves file droppings.  Remove
+	aclocal.m4t incase autoreconf doesn't.
+
 2003-08-29  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/gnu-obstack.h: Updated from CVS gnulib.  For consistency with
