@@ -203,7 +203,7 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(getcwd gethostname mktime uname)
 AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 
-AC_LIB_GMP
+M4_AC_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 
 

@@ -18,7 +18,7 @@
 
 # serial 6
 
-m4_define([_AC_LIB_GMP],
+m4_define([_M4_AC_LIB_GMP],
 [AC_ARG_WITH(gmp,
 [  --without-gmp           don't use GNU multiple precision arithmetic library],
 [use_gmp=$withval], [use_gmp=yes])
@@ -40,11 +40,12 @@ case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
     ac_cv_using_lib_gmp=no
     ;;
 esac
-])# _AC_LIB_GMP
+])# _M4_AC_LIB_GMP
 
 
-AC_DEFUN([AC_LIB_GMP],
-[AC_CHECK_HEADERS([gmp.h])
+AC_DEFUN([M4_AC_LIB_GMP],
+[AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
+AC_CHECK_HEADERS([gmp.h], [], [], $ac_default_headers)
 # Some versions of gmp provide mpq_init as a macro, so we need to
 # include the header file, otherwise the detection will fail.
 ac_gmp_save_LIBS="$LIBS"
@@ -59,7 +60,7 @@ AC_SUBST([LIBADD_GMP])
 
 AC_CACHE_CHECK([if using GNU multiple precision arithmetic library],
                [ac_cv_using_lib_gmp],
-               [_AC_LIB_GMP])
+               [_M4_AC_LIB_GMP])
 
 # Don't try to link in libgmp if we are not using it after the last call
 if test "$ac_cv_using_lib_gmp" = yes; then
@@ -68,4 +69,4 @@ if test "$ac_cv_using_lib_gmp" = yes; then
 fi
 
 AC_SUBST([USE_GMP], [$ac_cv_using_lib_gmp])
-])# AC_LIB_GMP
+])# M4_AC_LIB_GMP

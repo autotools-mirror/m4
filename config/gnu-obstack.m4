@@ -1,7 +1,7 @@
 #                                                            -*- Autoconf -*-
 # gnu-obstack.m4 -- the libc supplied version of obstacks if available.
 #
-# Copyright 2000, 2001 Gary V. Vaughan <gary@gnu.org>
+# Copyright 2000, 2001, 2003 Gary V. Vaughan <gary@gnu.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,12 @@
 
 # serial 6
 
-AC_PREREQ(2.52)
-
 # M4_AC_FUNC_OBSTACK
 # ------------------
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([M4_AC_FUNC_OBSTACK],
-[AC_CHECK_HEADER(obstack.h)
+[AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
+AC_CHECK_HEADER(obstack.h, [], [], $ac_default_headers)
 m4_pattern_allow([^m4_cv_func_obstack$])dnl
 m4_pattern_allow([^m4_obstack_h$])dnl
 
