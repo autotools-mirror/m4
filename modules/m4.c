@@ -132,10 +132,7 @@ M4INIT_HANDLER (m4)
    symbol table.  */
 
 static void
-macro_install (argc, argv, mode)
-     int argc;
-     m4_token_data **argv;
-     m4_symbol_lookup mode;
+macro_install (int argc, m4_token_data **argv, m4_symbol_lookup mode)
 {
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;

@@ -24,7 +24,7 @@
 #include "m4private.h"
 #include "error.h"
 
-void print_program_name M4_PARAMS((void));
+void print_program_name (void);
 
 
 /* Name of frozen file to digest after initialization.  */
@@ -488,7 +488,7 @@ main (int argc, char *const *argv, char *const *envp)
 	}
 
       next = defines->next;
-      xfree ((VOID *) defines);
+      xfree ((void *) defines);
       defines = next;
     }
 

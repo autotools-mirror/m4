@@ -24,7 +24,7 @@
 #include "m4.h"
 #include "m4private.h"
 
-static int dumpdef_cmp M4_PARAMS((const VOID *s1, const VOID *s2));
+static int dumpdef_cmp (const void *s1, const void *s2);
 
 /* The name this program was run with. */
 M4_GLOBAL_DATA const char *program_name;
@@ -79,7 +79,6 @@ M4_GLOBAL_DATA m4_string lquote;
 M4_GLOBAL_DATA m4_string bcomm;
 M4_GLOBAL_DATA m4_string ecomm;
 
-
 
 /* Addressable function versions of the macros defined in m4private.h.
    Since they are functions the caller does not need access to the
@@ -178,12 +177,8 @@ m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
    SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
-m4_dump_args (obs, argc, argv, sep, quoted)
-     struct obstack *obs;
-     int argc;
-     m4_token_data **argv;
-     const char *sep;
-     boolean quoted;
+m4_dump_args (struct obstack *obs, int argc, m4_token_data **argv,
+	      const char *sep, boolean quoted)
 {
   int i;
   size_t len = strlen (sep);
@@ -193,7 +188,7 @@ m4_dump_args (obs, argc, argv, sep, quoted)
       if (i > 1)
 	obstack_grow (obs, sep, len);
 
-      m4_shipout_string(obs, M4_TOKEN_DATA_TEXT (argv[i]), 0, quoted);
+      m4_shipout_string (obs, M4_TOKEN_DATA_TEXT (argv[i]), 0, quoted);
     }
 }
 
@@ -241,9 +236,7 @@ m4_expand_ranges (const char *s, struct obstack *obs)
 
 /* qsort comparison routine, for sorting the table made in m4_dumpdef ().  */
 static int
-dumpdef_cmp (s1, s2)
-     const VOID *s1;
-     const VOID *s2;
+dumpdef_cmp (const void *s1, const void *s2)
 {
   return strcmp (SYMBOL_NAME (* (m4_symbol *const *) s1),
 		 SYMBOL_NAME (* (m4_symbol *const *) s2));
@@ -252,9 +245,7 @@ dumpdef_cmp (s1, s2)
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
    table of all defined, un-shadowed, symbols.  */
 void
-m4_dump_symbol (symbol, data)
-     m4_symbol *symbol;
-     struct m4_dump_symbol_data *data;
+m4_dump_symbol (m4_symbol *symbol, struct m4_dump_symbol_data *data)
 {
   if (!SYMBOL_SHADOWED (symbol) && SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
     {
@@ -267,11 +258,8 @@ m4_dump_symbol (symbol, data)
 /* If there are no arguments, build a sorted list of all defined,
    un-shadowed, symbols, otherwise, only the specified symbols.  */
 void
-m4_dump_symbols (data, argc, argv, complain)
-     struct m4_dump_symbol_data *data;
-     int argc;
-     m4_token_data **argv;
-     boolean complain;
+m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, 
+		 m4_token_data **argv, boolean complain)
 {
   data->base = (m4_symbol **) obstack_base (data->obs);
   data->size = 0;

@@ -82,13 +82,12 @@
 #define M4_INIT_SYMBOL		"m4_init_module"
 #define M4_FINISH_SYMBOL	"m4_finish_module"
 
-static const char*  m4_module_dlerror	M4_PARAMS((void));
+static const char*  m4_module_dlerror	(void);
 
 static lt_dlcaller_id m4_caller_id = 0;
 
 const char *
-m4_module_name (handle)
-     const lt_dlhandle handle;
+m4_module_name (lt_dlhandle handle)
 {
   const lt_dlinfo *info;
 
@@ -100,8 +99,7 @@ m4_module_name (handle)
 }
 
 m4_builtin *
-m4_module_builtins (handle)
-     const lt_dlhandle handle;
+m4_module_builtins (lt_dlhandle handle)
 {
   m4_module_data *data;
 
@@ -113,8 +111,7 @@ m4_module_builtins (handle)
 }
 
 m4_macro *
-m4_module_macros (handle)
-     const lt_dlhandle handle;
+m4_module_macros (lt_dlhandle handle)
 {
   m4_module_data *data;
 
@@ -126,8 +123,7 @@ m4_module_macros (handle)
 }
 
 lt_dlhandle
-m4_module_find_by_builtin (match)
-     const m4_builtin *match;
+m4_module_find_by_builtin (const m4_builtin *match)
 {
   lt_dlhandle	  handle = 0;
 
@@ -153,7 +149,7 @@ m4_module_find_by_builtin (match)
 
 
 const char *
-m4_module_dlerror ()
+m4_module_dlerror (void)
 {
   const char *dlerror = lt_dlerror ();
 
@@ -168,7 +164,7 @@ m4_module_dlerror ()
    prevent the path search of the dlopen library from finding wrong
    files. */
 void
-m4_module_init ()
+m4_module_init (void)
 {
   int errors = 0;
   
@@ -234,10 +230,8 @@ m4_module_init ()
 /* Load a module.  MODNAME can be a absolute file name or, if relative,
    it is searched for in the module path.  The module is unloaded in
    case of error.  */
-const lt_dlhandle
-m4_module_open (name, obs)
-     const char *name;
-     struct obstack *obs;
+lt_dlhandle
+m4_module_open (const char *name, struct obstack *obs)
 {
   lt_dlhandle		handle		= 0;
   m4_module_init_func  *init_func	= 0;
@@ -326,9 +320,7 @@ m4_module_open (name, obs)
 }
 
 void
-m4_module_close (handle, obs)
-     lt_dlhandle handle;
-     struct obstack *obs;
+m4_module_close (lt_dlhandle handle, struct obstack *obs)
 {
   m4_module_finish_func *finish_func	= 0;
   const char		*name		= 0;
@@ -382,8 +374,7 @@ m4_module_close (handle, obs)
 }
 
 void
-m4_module_close_all (obs)
-     struct obstack *obs;
+m4_module_close_all (struct obstack *obs)
 {
   lt_dlhandle	handle	= lt_dlhandle_next (0);
 
@@ -405,9 +396,7 @@ m4_module_close_all (obs)
 }
 
 lt_dlhandle
-m4_module_load (name, obs)
-     const char *name;
-     struct obstack *obs;
+m4_module_load (const char *name, struct obstack *obs)
 {
   const lt_dlhandle handle = m4_module_open (name, obs);
 
@@ -451,9 +440,7 @@ m4_module_load (name, obs)
 
 /* Unload a module.  */
 void
-m4_module_unload (name, obs)
-     const char *name;
-     struct obstack *obs;
+m4_module_unload (const char *name, struct obstack *obs)
 {
   lt_dlhandle	handle	= 0;
   int		errors	= 0;

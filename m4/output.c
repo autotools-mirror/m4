@@ -103,7 +103,7 @@ M4_GLOBAL_DATA int m4_output_current_line;
 /* --- OUTPUT INITIALISATION --- */
 
 void
-m4_output_init ()
+m4_output_init (void)
 {
   diversion_table = (struct diversion *) xmalloc (sizeof (struct diversion));
   diversions = 1;
@@ -128,11 +128,8 @@ m4_output_init ()
 
 #include <fcntl.h>
 
-static int mkstemp M4_PARAMS((const char *tmpl));
-
 static int
-mkstemp (tmpl)
-     const char *tmpl;
+mkstemp (const char *tmpl)
 {
   mktemp (tmpl);
   return open (tmpl, O_RDWR | O_TRUNC | O_CREAT, 0600);
@@ -149,12 +146,8 @@ mkstemp (tmpl)
  */
 #include <fcntl.h>
 
-char   *mktemp		M4_PARAMS((char *tmpl));
-int	mkstemp		M4_PARAMS((char *tmpl));
-
 int
-mkstemp (tmpl)
-     char *tmpl;
+mkstemp (char *tmpl)
 {
   char *xes;
   pid_t pid;
@@ -191,8 +184,7 @@ mkstemp (tmpl)
 }
 
 char *
-mktemp (tmpl)
-     char *tmpl;
+mktemp (char *tmpl)
 {
   int fd;
 
@@ -212,10 +204,8 @@ mktemp (tmpl)
 
 /* Implement tmpfile(3) for non-USG systems.  */
 
-static FILE *tmpfile M4_PARAMS((void));
-
 static FILE *
-tmpfile ()
+tmpfile (void)
 {
   char buf[32];
   int fd;
@@ -238,8 +228,7 @@ tmpfile ()
    to be flushed to a newly created temporary file.  This flushed buffer
    might well be the current one.  */
 static void
-make_room_for (length)
-     int length;
+make_room_for (int length)
 {
   int wanted_size;
 
@@ -348,8 +337,7 @@ make_room_for (length)
     (output_unused--, *output_cursor++ = (Char))
 
 static void
-output_character_helper (character)
-     int character;
+output_character_helper (int character)
 {
   make_room_for (1);
 
@@ -365,9 +353,7 @@ output_character_helper (character)
 /* Output one TEXT having LENGTH characters, when it is known that it goes
    to a diversion file or an in-memory diversion buffer.  */
 static void
-output_text (text, length)
-     const char *text;
-     int length;
+output_text (const char *text, int length)
 {
   int count;
 
@@ -398,10 +384,7 @@ output_text (text, length)
    sync lines are output whenever a single input lines generates several
    output lines, or when several input lines does not generate any output.  */
 void
-m4_shipout_text (obs, text, length)
-     struct obstack *obs;
-     const char *text;
-     int length;
+m4_shipout_text (struct obstack *obs, const char *text, int length)
 {
   static boolean start_of_output_line = TRUE;
   char line[20];
@@ -483,6 +466,7 @@ m4_shipout_text (obs, text, length)
 	  start_of_output_line = TRUE;
       }
 }
+
 /* Format an int VAL, and stuff it into an obstack OBS.  Used for macros
    expanding to numbers.  */
 void
@@ -495,7 +479,8 @@ m4_shipout_int (struct obstack *obs, int val)
 }
 
 void
-m4_shipout_string (struct obstack *obs, const char *s, int len, boolean quoted)
+m4_shipout_string (struct obstack *obs, const char *s, int len,
+		   boolean quoted)
 {
   if (s == NULL)
     s = "";

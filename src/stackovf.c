@@ -109,13 +109,13 @@
 #endif
 
 /* Giving a hand to ansi2knr...  */
-typedef void (*handler_t) M4_PARAMS((void));
+typedef void (*handler_t) (void);
 
 #if defined(__ultrix) && defined(__vax)
-extern char *sbrk M4_PARAMS((int));
-extern int getrlimit M4_PARAMS((int, struct rlimit *));
-extern int sigstack M4_PARAMS((struct sigstack *, struct sigstack *));
-extern int sigvec M4_PARAMS((int, struct sigvec *, struct sigvec *));
+extern char    *sbrk		(int);
+extern int	getrlimit	(int, struct rlimit *);
+extern int	sigstack	(struct sigstack *, struct sigstack *);
+extern int	sigvec		(int, struct sigvec *, struct sigvec *);
 #endif
 
 static const char *stackbot;
@@ -373,7 +373,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #if HAVE_SIGACTION && defined(SA_ONSTACK)
 
   sigaction (SIGSEGV, NULL, &act);
-  act.sa_handler = (RETSIGTYPE (*) M4_PARAMS((int))) sigsegv_handler;
+  act.sa_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK
 #ifdef SA_RESETHAND
@@ -389,7 +389,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #else /* not HAVE_SIGACTION */
 #if HAVE_SIGVEC && defined(SV_ONSTACK)
 
-  vec.sv_handler = (RETSIGTYPE (*) M4_PARAMS((int))) sigsegv_handler;
+  vec.sv_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK
 #ifdef SV_RESETHAND

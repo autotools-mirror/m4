@@ -76,21 +76,21 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term M4_PARAMS((eval_token, number *));
-static eval_error logical_and_term M4_PARAMS((eval_token, number *));
-static eval_error or_term M4_PARAMS((eval_token, number *));
-static eval_error xor_term M4_PARAMS((eval_token, number *));
-static eval_error and_term M4_PARAMS((eval_token, number *));
-static eval_error not_term M4_PARAMS((eval_token, number *));
-static eval_error logical_not_term M4_PARAMS((eval_token, number *));
-static eval_error cmp_term M4_PARAMS((eval_token, number *));
-static eval_error shift_term M4_PARAMS((eval_token, number *));
-static eval_error add_term M4_PARAMS((eval_token, number *));
-static eval_error mult_term M4_PARAMS((eval_token, number *));
-static eval_error exp_term M4_PARAMS((eval_token, number *));
-static eval_error unary_term M4_PARAMS((eval_token, number *));
-static eval_error simple_term M4_PARAMS((eval_token, number *));
-static void numb_pow M4_PARAMS((number *x, const number *y));
+static eval_error logical_or_term   (eval_token, number *);
+static eval_error logical_and_term  (eval_token, number *);
+static eval_error or_term	    (eval_token, number *);
+static eval_error xor_term	    (eval_token, number *);
+static eval_error and_term	    (eval_token, number *);
+static eval_error not_term	    (eval_token, number *);
+static eval_error logical_not_term  (eval_token, number *);
+static eval_error cmp_term	    (eval_token, number *);
+static eval_error shift_term	    (eval_token, number *);
+static eval_error add_term	    (eval_token, number *);
+static eval_error mult_term	    (eval_token, number *);
+static eval_error exp_term	    (eval_token, number *);
+static eval_error unary_term	    (eval_token, number *);
+static eval_error simple_term	    (eval_token, number *);
+static void	  numb_pow	    (number *x, const number *y);
 
 
 

@@ -39,7 +39,7 @@
 m4_symbol **m4_symtab;
 
 void
-m4_symtab_init ()
+m4_symtab_init (void)
 {
   int i;
   m4_symbol **symbol;
@@ -77,7 +77,7 @@ free_symbol (m4_symbol *symbol)
     xfree (SYMBOL_NAME (symbol));
   if (SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
     xfree (SYMBOL_TEXT (symbol));
-  xfree ((VOID *) symbol);
+  xfree ((void *) symbol);
 }
 
 /* Search in, and manipulation of the symbol table, are all done by
@@ -189,9 +189,7 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 /* The following function removes from the symbol table, every symbol
    that references a function in the given builtin table.  */
 void
-m4_remove_table_reference_symbols (builtins, macros)
-     m4_builtin *builtins;
-     m4_macro *macros;
+m4_remove_table_reference_symbols (m4_builtin *builtins, m4_macro *macros)
 {
   /* FIXME:  This can be reimplemented to work much faster now that each
      symtab entry carries a reference to its defining module.  */
@@ -276,9 +274,7 @@ m4_remove_table_reference_symbols (builtins, macros)
    function FUNC for each symbol in the table.  FUNC is called with a
    pointer to the symbol, and the DATA argument.  */
 void
-m4_hack_all_symbols (func, data)
-     m4_hack_symbol *func;
-     const char *data;
+m4_hack_all_symbols (m4_hack_symbol *func, const char *data)
 {
   int h;
   m4_symbol *symbol;
@@ -290,11 +286,8 @@ m4_hack_all_symbols (func, data)
 
 #ifdef DEBUG_SYM
 
-static void symtab_debug M4_PARAMS((void));
-static void symtab_print_list M4_PARAMS((int i));
-
 static void
-symtab_debug ()
+symtab_debug (void)
 {
   m4_token_data_t t;
   m4_token_data td;
@@ -329,8 +322,7 @@ symtab_debug ()
 }
 
 static void
-symtab_print_list (i)
-     int i;
+symtab_print_list (int i)
 {
   m4_symbol *symbol;
 

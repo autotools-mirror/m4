@@ -28,20 +28,17 @@
 #include "m4.h"
 #include "m4private.h"
 
-static	int   decode_char	   M4_PARAMS((FILE *in));
-static	void  issue_expect_message M4_PARAMS((int expected));
-static	int   produce_char_dump    M4_PARAMS((char *buf, int ch));
-static	void  produce_syntax_dump  M4_PARAMS((FILE *file, char ch, int mask));
-static	void  produce_module_dump  M4_PARAMS((FILE *file, lt_dlhandle handle));
-static	void  produce_symbol_dump  M4_PARAMS((FILE *file,
-					      const m4_symbol *bucke));
+static	int   decode_char	   (FILE *in);
+static	void  issue_expect_message (int expected);
+static	int   produce_char_dump    (char *buf, int ch);
+static	void  produce_syntax_dump  (FILE *file, char ch, int mask);
+static	void  produce_module_dump  (FILE *file, lt_dlhandle handle);
+static	void  produce_symbol_dump  (FILE *file, const m4_symbol *bucke);
 
 
 /* Produce a frozen state to the given file NAME. */
 static int
-produce_char_dump (buf, ch)
-     char *buf;
-     int ch;
+produce_char_dump (char *buf, int ch)
 {
   char *p = buf;
   int digit;
@@ -82,10 +79,7 @@ produce_char_dump (buf, ch)
 #define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
 
 static void
-produce_syntax_dump (file, ch, mask)
-     FILE *file;
-     char ch;
-     int mask;
+produce_syntax_dump (FILE *file, char ch, int mask)
 {
   char buf[1+ MAX_CHAR_LENGTH * sizeof (m4_syntax_table)];
   int code = m4_syntax_code (ch);
@@ -115,9 +109,7 @@ produce_syntax_dump (file, ch, mask)
    reloaded from the frozen file.  libltdl stores handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
 void
-produce_module_dump (file, handle)
-     FILE *file;
-     lt_dlhandle handle;
+produce_module_dump (FILE *file, lt_dlhandle handle)
 {
   lt_dlhandle pending = handle;
   const char *name = m4_module_name (pending);
@@ -135,9 +127,7 @@ produce_module_dump (file, handle)
    This order ensures that, at reload time, pushdef's will be
    executed with the oldest definitions first.  */
 void
-produce_symbol_dump (file, bucket)
-     FILE *file;
-     const m4_symbol *bucket;
+produce_symbol_dump (FILE *file, const m4_symbol *bucket)
 {
   const m4_symbol *pending = bucket;
   lt_dlhandle	handle		= SYMBOL_HANDLE (pending);
@@ -201,8 +191,7 @@ INTERNAL ERROR: Bad token data type in produce_symbol_dump ()")));
 }
 
 void
-produce_frozen_state (name)
-     const char *name;
+produce_frozen_state (const char *name)
 {
   FILE *file;
   int h;
@@ -285,8 +274,7 @@ produce_frozen_state (name)
 
 /* Issue a message saying that some character is an EXPECTED character. */
 static void
-issue_expect_message (expected)
-     int expected;
+issue_expect_message (int expected)
 {
   if (expected == '\n')
     M4ERROR ((EXIT_FAILURE, 0, _("Expecting line feed in frozen file")));
@@ -302,8 +290,7 @@ issue_expect_message (expected)
    of file is reached whilst reading the character.  */
 
 static int
-decode_char (in)
-     FILE *in;
+decode_char (FILE *in)
 {
   int ch = fgetc (in);
 
@@ -340,8 +327,7 @@ decode_char (in)
 /* We are seeking speed, here.  */
 
 void
-reload_frozen_state (name)
-     const char *name;
+reload_frozen_state (const char *name)
 {
   FILE *file;
   int version;

@@ -141,32 +141,32 @@
 #  include "regex.h"
 #endif
 
-static	void  check_use_macro_escape	M4_PARAMS((void));
-static	int   file_peek			M4_PARAMS((void));
-static	int   file_read			M4_PARAMS((void));
-static	void  file_unget		M4_PARAMS((int ch));
-static	void  file_clean		M4_PARAMS((void));
-static	void  init_macro_token		M4_PARAMS((m4_token_data *td));
-static	int   macro_peek		M4_PARAMS((void));
-static	int   macro_read		M4_PARAMS((void));
-static	int   match_input		M4_PARAMS((const unsigned char *s));
-static	int   next_char			M4_PARAMS((void));
-static	void  pop_input			M4_PARAMS((void));
-static	void  set_syntax_internal	M4_PARAMS((int code, int ch));
-static	int   single_peek		M4_PARAMS((void));
-static	int   single_read		M4_PARAMS((void));
-static	int   string_peek		M4_PARAMS((void));
-static	int   string_read		M4_PARAMS((void));
-static	void  string_unget		M4_PARAMS((int ch));
-static	void  unget_input		M4_PARAMS((int ch));
-static	void  unset_syntax_attribute	M4_PARAMS((int code, int ch));
+static	void  check_use_macro_escape	(void);
+static	int   file_peek			(void);
+static	int   file_read			(void);
+static	void  file_unget		(int ch);
+static	void  file_clean		(void);
+static	void  init_macro_token		(m4_token_data *td);
+static	int   macro_peek		(void);
+static	int   macro_read		(void);
+static	int   match_input		(const unsigned char *s);
+static	int   next_char			(void);
+static	void  pop_input			(void);
+static	void  set_syntax_internal	(int code, int ch);
+static	int   single_peek		(void);
+static	int   single_read		(void);
+static	int   string_peek		(void);
+static	int   string_read		(void);
+static	void  string_unget		(int ch);
+static	void  unget_input		(int ch);
+static	void  unset_syntax_attribute	(int code, int ch);
 
 struct input_funcs
 {
-  int (*peek_func) M4_PARAMS((void));	/* function to peek input */
-  int (*read_func) M4_PARAMS((void));	/* function to read input */
-  void (*unget_func) M4_PARAMS((int));	/* function to unread input */
-  void (*clean_func) M4_PARAMS((void));	/* function to clean up */
+  int (*peek_func) (void);	/* function to peek input */
+  int (*read_func) (void);	/* function to read input */
+  void (*unget_func) (int);	/* function to unread input */
+  void (*clean_func) (void);	/* function to clean up */
 };
 
 struct input_block
@@ -284,7 +284,7 @@ static struct re_registers regs;
   alone is taken as belonging to the line it ends, and the current
   line number is not incremented until the next character is read.  */
 static int
-file_peek ()
+file_peek (void)
 {
   int ch;
 
@@ -297,7 +297,7 @@ file_peek ()
 }
 
 static int
-file_read ()
+file_read (void)
 {
   int ch;
 
@@ -326,7 +326,7 @@ file_unget (ch)
 }
 
 static void
-file_clean ()
+file_clean (void)
 {
   if (debug_level & M4_DEBUG_TRACE_INPUT)
     M4_DEBUG_MESSAGE2 (_("Input reverted to %s, line %d"),
@@ -346,9 +346,7 @@ static struct input_funcs file_funcs = {
 };
 
 void
-m4_push_file (fp, title)
-     FILE *fp;
-     const char *title;
+m4_push_file (FILE *fp, const char *title)
 {
   input_block *i;
 
@@ -383,7 +381,7 @@ m4_push_file (fp, title)
    next is non-NULL, this push invalidates a call to push_string_init (),
    whose storage are consequentely released.  */
 static int
-macro_peek ()
+macro_peek (void)
 {
   if (isp->u.u_m.read == TRUE)
     return CHAR_RETRY;
@@ -392,7 +390,7 @@ macro_peek ()
 }
 
 static int
-macro_read ()
+macro_read (void)
 {
   if (isp->u.u_m.read == TRUE)
     return CHAR_RETRY;
@@ -406,10 +404,8 @@ static struct input_funcs macro_funcs = {
 };
 
 void
-m4_push_macro (func, handle, traced)
-     m4_builtin_func *func;
-     lt_dlhandle handle;
-     boolean traced;
+m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
+	       boolean traced)
 {
   input_block *i;
 
@@ -434,13 +430,13 @@ m4_push_macro (func, handle, traced)
 
 /* Push a single character on to the input stack.  */
 static int
-single_peek ()
+single_peek (void)
 {
   return isp->u.u_c.ch;
 }
 
 static int
-single_read ()
+single_read (void)
 {
   int ch = isp->u.u_c.ch;
 
@@ -455,8 +451,7 @@ static struct input_funcs single_funcs = {
 };
 
 void
-m4_push_single (ch)
-     int ch;
+m4_push_single (int ch)
 {
   input_block *i;
 
@@ -480,7 +475,7 @@ m4_push_single (ch)
 /* First half of push_string ().  The pointer next points to the new
    input_block.  */
 static int
-string_peek ()
+string_peek (void)
 {
   int ch = *isp->u.u_s.current;
 
@@ -488,7 +483,7 @@ string_peek ()
 }
 
 static int
-string_read ()
+string_read (void)
 {
   int ch = *isp->u.u_s.current++;
 
@@ -497,8 +492,7 @@ string_read ()
 }
 
 static void
-string_unget (ch)
-     int ch;
+string_unget (int ch)
 {
   if (isp->u.u_s.current > isp->u.u_s.start)
     *--isp->u.u_s.current = ch;
@@ -511,7 +505,7 @@ static struct input_funcs string_funcs = {
 };
 
 struct obstack *
-m4_push_string_init ()
+m4_push_string_init (void)
 {
   if (next != NULL)
     {
@@ -535,7 +529,7 @@ m4_push_string_init ()
    release the memory used for the object.  */
 
 const char *
-m4_push_string_finish ()
+m4_push_string_finish (void)
 {
   const char *ret = NULL;
 
@@ -563,8 +557,7 @@ m4_push_string_finish ()
    Push_wrapup should be done as push_string (), but this will suffice, as
    long as arguments to m4_m4wrap () are moderate in size.  */
 void
-m4_push_wrapup (s)
-     const char *s;
+m4_push_wrapup (const char *s)
 {
   input_block *i = (input_block *) obstack_alloc (&wrapup_stack,
 						  sizeof (struct input_block));
@@ -584,7 +577,7 @@ m4_push_wrapup (s)
    reset to the saved values before the memory for the input_block are
    released.  */
 static void
-pop_input ()
+pop_input (void)
 {
   input_block *tmp = isp->prev;
 
@@ -616,8 +609,7 @@ m4_pop_wrapup (void)
 /* When a MACRO token is seen, next_token () uses init_macro_token
    to retrieve the value of the function pointer.  */
 static void
-init_macro_token (td)
-     m4_token_data *td;
+init_macro_token (m4_token_data *td)
 {
   if (isp->funcs->read_func != macro_read)
     {
@@ -637,10 +629,10 @@ init_macro_token (td)
    next_char () is used to read and advance the input to the next
    character.  */
 static int
-next_char ()
+next_char (void)
 {
   int ch;
-  int (*f) M4_PARAMS((void));
+  int (*f) (void);
 
   while (1)
     {
@@ -672,10 +664,10 @@ next_char ()
    the input stream.  At any given time, it reads from the input_block
    on the top of the current input stack.  */
 int
-m4_peek_input ()
+m4_peek_input (void)
 {
   int ch;
-  int (*f) M4_PARAMS((void));
+  int (*f) (void);
 
   while (1)
     {
@@ -705,8 +697,7 @@ m4_peek_input ()
 /* The function unget_input () puts back a character on the input
    stack, using an existing input_block if possible.  */
 static void
-unget_input (ch)
-     int ch;
+unget_input (int ch)
 {
   if (isp != NULL && isp->funcs->unget_func != NULL)
     (*isp->funcs->unget_func)(ch);
@@ -717,7 +708,7 @@ unget_input (ch)
 /* skip_line () simply discards all immediately following characters, upto
    the first newline.  It is only used from m4_dnl ().  */
 void
-m4_skip_line ()
+m4_skip_line (void)
 {
   int ch;
 
@@ -736,8 +727,7 @@ m4_skip_line ()
    All strings herein should be unsigned.  Otherwise sign-extension
    of individual chars might break quotes with 8-bit chars in it.  */
 static int
-match_input (s)
-     const unsigned char *s;
+match_input (const unsigned char *s)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
@@ -779,11 +769,11 @@ match_input (s)
 
 
 /* Inititialise input stacks, and quote/comment characters.  */
-static void set_syntax_internal M4_PARAMS((int code, int ch));
-static void unset_syntax_attribute M4_PARAMS((int code, int ch));
+static void set_syntax_internal	    (int code, int ch);
+static void unset_syntax_attribute  (int code, int ch);
 
 void
-m4_input_init ()
+m4_input_init (void)
 {
   m4_current_file = _("NONE");
   m4_current_line = 0;
@@ -826,7 +816,7 @@ m4_input_init ()
 }
 
 void
-m4_syntax_init ()
+m4_syntax_init (void)
 {
   int ch;
 
@@ -857,8 +847,7 @@ m4_syntax_init ()
 }
 
 int
-m4_syntax_code (ch)
-     char ch;
+m4_syntax_code (char ch)
 {
   int code;
 
@@ -891,7 +880,7 @@ m4_syntax_code (ch)
 }
 
 static void
-check_use_macro_escape ()
+check_use_macro_escape (void)
 {
   int ch;
 
@@ -907,9 +896,7 @@ check_use_macro_escape ()
    m4_changecom () and m4_changequote ().  Both functions overrides the
    syntax_table to maintain compatibility.  */
 void
-m4_set_quotes (lq, rq)
-     const char *lq;
-     const char *rq;
+m4_set_quotes (const char *lq, const char *rq)
 {
   int ch;
   for (ch = 256; --ch >= 0; )	/* changequote overrides syntax_table */
@@ -937,9 +924,7 @@ m4_set_quotes (lq, rq)
 }
 
 void
-m4_set_comment (bc, ec)
-     const char *bc;
-     const char *ec;
+m4_set_comment (const char *bc, const char *ec)
 {
   int ch;
   for (ch = 256; --ch >= 0; )	/* changecom overrides syntax_table */
@@ -968,9 +953,7 @@ m4_set_comment (bc, ec)
 
 /* Functions to manipulate the syntax table.  */
 static void
-set_syntax_internal (code, ch)
-     int code;
-     int ch;
+set_syntax_internal (int code, int ch)
 {
   if (code & M4_SYNTAX_MASKS)
     m4_syntax_table[ch] |= code;
@@ -985,9 +968,7 @@ set_syntax_internal (code, ch)
 }
 
 static void
-unset_syntax_attribute (code, ch)
-     int code;
-     int ch;
+unset_syntax_attribute (int code, int ch)
 {
   if (code & M4_SYNTAX_MASKS)
     m4_syntax_table[ch] &= ~code;
@@ -1000,9 +981,7 @@ unset_syntax_attribute (code, ch)
 }
 
 void
-m4_set_syntax (key, chars)
-     char key;
-     const unsigned char *chars;
+m4_set_syntax (char key, const unsigned char *chars)
 {
   int ch, code;
 
@@ -1029,8 +1008,7 @@ m4_set_syntax (key, chars)
 #ifdef ENABLE_CHANGEWORD
 
 void
-m4_set_word_regexp (regexp)
-     const char *regexp;
+m4_set_word_regexp (const char *regexp)
 {
   int i;
   char test[2];
@@ -1084,8 +1062,7 @@ m4_set_word_regexp (regexp)
    The storage pointed to by the fields in TD is therefore subject to
    change the next time next_token () is called.	 */
 m4_token_t
-m4_next_token (td)
-     m4_token_data *td;
+m4_next_token (m4_token_data *td)
 {
   int ch;
   int quote_level;
@@ -1343,13 +1320,10 @@ m4_next_token (td)
 
 #ifdef DEBUG_INPUT
 
-static	void  lex_debug	M4_PARAMS((void));
+static	void  lex_debug	(void);
 
 int
-m4_print_token (s, t, td)
-     const char *s;
-     m4_token_t t;
-     m4_token_data *td;
+m4_print_token (const char *s, m4_token_t t, m4_token_data *td)
 {
   fprintf (stderr, "%s: ", s);
   switch (t)
@@ -1386,7 +1360,7 @@ m4_print_token (s, t, td)
 }
 
 static void
-lex_debug ()
+lex_debug (void)
 {
   m4_token_t t;
   m4_token_data td;

@@ -23,8 +23,8 @@
 #include "m4.h"
 #include "m4private.h"
 
-static void expand_macro M4_PARAMS((m4_symbol *));
-static void expand_token M4_PARAMS((struct obstack *, m4_token_t, m4_token_data *));
+static void expand_macro (m4_symbol *);
+static void expand_token (struct obstack *, m4_token_t, m4_token_data *);
 
 /* Current recursion level in expand_macro ().  */
 M4_GLOBAL_DATA int m4_expansion_level = 0;
@@ -197,8 +197,8 @@ collect_arguments (m4_symbol *symbol, struct obstack *argptr,
 
   M4_TOKEN_DATA_TYPE (&td) = M4_TOKEN_TEXT;
   M4_TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (symbol);
-  tdp = (m4_token_data *) obstack_copy (arguments, (VOID *) &td, sizeof (td));
-  obstack_grow (argptr, (VOID *) &tdp, sizeof (tdp));
+  tdp = (m4_token_data *) obstack_copy (arguments, (void *) &td, sizeof (td));
+  obstack_grow (argptr, (void *) &tdp, sizeof (tdp));
 
   ch = m4_peek_input ();
   if (M4_IS_OPEN(ch))
@@ -214,8 +214,8 @@ collect_arguments (m4_symbol *symbol, struct obstack *argptr,
 	      M4_TOKEN_DATA_TEXT (&td) = "";
 	    }
 	  tdp = (m4_token_data *)
-	    obstack_copy (arguments, (VOID *) &td, sizeof (td));
-	  obstack_grow (argptr, (VOID *) &tdp, sizeof (tdp));
+	    obstack_copy (arguments, (void *) &td, sizeof (td));
+	  obstack_grow (argptr, (void *) &tdp, sizeof (tdp));
 	}
       while (more_args);
     }
@@ -313,11 +313,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
    definition, giving the expansion text.  ARGC and ARGV are the arguments,
    as usual.  */
 void
-m4_process_macro (obs, symbol, argc, argv)
-     struct obstack *obs;
-     m4_symbol *symbol;
-     int argc;
-     m4_token_data **argv;
+m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc,
+		  m4_token_data **argv)
 {
   const unsigned char *text;
   int i;

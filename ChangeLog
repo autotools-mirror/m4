@@ -1,3 +1,30 @@
+2001-08-20  Gary V. Vaughan  <gary@gnu.org>
+ 
+	Ansify the source.  Previously we had a mix, where my code was
+	in a K&R compatible style, and the preexisting code was in ANSI
+	style.  Nothing is lost wrt release 1.4 by reverting to ANSI,
+	and now the code base is much cleaner.
+
+	* m4/system.h:  Remove M4_PARAMS macro and all users.  Remove
+	VOID macro and all users.
+	* m4/m4module.h:  Ansify function prototypes and headers.  
+	* m4/builtin.c:  Ditto.
+	* m4/evalparse.c:  Ditto.
+	* m4/input.c:  Ditto.
+	* m4/macro.c:  Ditto.
+	* m4/module.c:  Ditto.
+	* m4/output.c:  Ditto.
+	* m4/path.c:  Ditto.
+	* m4/symtab.c:  Ditto.
+	* m4/utility.c:  Ditto.
+	* modules/format.c:  Ditto.
+	* modules/gnu.c:  Ditto.
+	* modules/m4.c:  Ditto.
+	* modules/mpeval.c:  Ditto.
+	* src/freeze.c:  Ditto.
+	* src/m4.h:  Ditto.
+	* src/main.c:  Ditto.
+ 
 2001-08-20  Akim Demaille  <akim@epita.fr>
 
 	* config/atconfig.m4: s/EOF/ATEOF/, so that configure can be

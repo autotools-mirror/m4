@@ -34,7 +34,7 @@ M4_GLOBAL_DATA FILE *m4_debug = NULL;
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
-static void m4_debug_set_file M4_PARAMS((FILE *));
+static void m4_debug_set_file (FILE *);
 
 /* Initialise the debugging module.  */
 void
@@ -44,8 +44,8 @@ m4_debug_init (void)
   obstack_init (&trace);
 }
 
-
 
+
 /* Function to decode the debugging flags OPTS.  Used by main while
    processing option -d, and by the builtin debugmode ().  */
 int

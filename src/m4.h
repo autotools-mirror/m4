@@ -97,14 +97,14 @@ char *mktemp ();
 
 /* Error handling.  */
 #ifdef USE_STACKOVF
-void setup_stackovf_trap M4_PARAMS((char *const *, char *const *,
-				    void (*handler) (void)));
+void setup_stackovf_trap (char *const *, char *const *,
+			  void (*handler) (void));
 #endif
 
 
 /* File: freeze.c --- frozen state files.  */
 
-void produce_frozen_state M4_PARAMS((const char *));
-void reload_frozen_state M4_PARAMS((const char *));
+void produce_frozen_state (const char *);
+void reload_frozen_state  (const char *);
 
 #endif /* M4_H */

@@ -108,21 +108,22 @@ m4_macro m4_macro_table[] =
 /* number should be at least 32 bits.  */
 typedef mpq_t number;
 
-extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
-					 const int radix, int min));
-static void numb_initialise M4_PARAMS((void));
-static void numb_obstack M4_PARAMS((struct obstack *obs, const number value,
-				    const int radix, int min));
-static void mpq2mpz M4_PARAMS((mpz_t z, const number q, const char *noisily));
-static void mpz2mpq M4_PARAMS((number q, const mpz_t z));
-static void numb_divide M4_PARAMS((number *x, const number *y));
-static void numb_modulo M4_PARAMS((number *x, const number *y));
-static void numb_and M4_PARAMS((number *x, const number *y));
-static void numb_ior M4_PARAMS((number *x, const number *y));
-static void numb_eor M4_PARAMS((number *x, const number *y));
-static void numb_not M4_PARAMS((number *x));
-static void numb_lshift M4_PARAMS((number *x, const number *y));
-static void numb_rshift M4_PARAMS((number *x, const number *y));
+extern boolean m4_mp_evaluate	(struct obstack *obs, const char *,
+				 const int radix, int min);
+static void numb_initialise	(void);
+static void numb_obstack	(struct obstack *obs, const number value,
+				 const int radix, int min);
+static void mpq2mpz		(mpz_t z, const number q,
+				 const char *noisily);
+static void mpz2mpq		(number q, const mpz_t z);
+static void numb_divide		(number *x, const number *y);
+static void numb_modulo		(number *x, const number *y);
+static void numb_and		(number *x, const number *y);
+static void numb_ior		(number *x, const number *y);
+static void numb_eor		(number *x, const number *y);
+static void numb_not		(number *x);
+static void numb_lshift		(number *x, const number *y);
+static void numb_rshift		(number *x, const number *y);
 
 
 
@@ -141,7 +142,7 @@ static number numb_ONE;
 static int numb_initialised = 0;
 
 static void
-numb_initialise ()
+numb_initialise (void)
 {
   if (numb_initialised)
     return;
@@ -156,11 +157,8 @@ numb_initialise ()
 }
 
 static void
-numb_obstack(obs, value, radix, min)
-     struct obstack *obs;
-     const number value;
-     const int radix;
-     int min;
+numb_obstack (struct obstack *obs, const number value, const int radix,
+	      int min)
 {
   const char *s;
 
@@ -195,10 +193,7 @@ numb_obstack(obs, value, radix, min)
 #define QUIET (char *)0
 
 static void
-mpq2mpz (z, q, noisily)
-     mpz_t z;
-     const number q;
-     const char *noisily;
+mpq2mpz (mpz_t z, const number q, const char *noisily)
 {
   if (noisily && mpz_cmp_si (mpq_denref (q), (long) 1) != 0)
     {
@@ -210,18 +205,14 @@ mpq2mpz (z, q, noisily)
 }
 
 static void
-mpz2mpq (q, z)
-     number q;
-     const mpz_t z;
+mpz2mpq (number q, const mpz_t z)
 {
   mpq_set_si  (q, (long) 0, (unsigned long) 1);
   mpq_set_num (q, z);
 }
 
 static void
-numb_divide (x, y)
-     number *x;
-     const number *y;
+numb_divide (number *x, const number *y)
 {
    mpq_t qres;
    mpz_t zres;
@@ -238,9 +229,7 @@ numb_divide (x, y)
 }
 
 static void
-numb_modulo (x, y)
-     number *x;
-     const number *y;
+numb_modulo (number *x, const number *y)
 {
    mpz_t xx, yy, res;
 
@@ -264,9 +253,7 @@ numb_modulo (x, y)
 }
 
 static void
-numb_and(x, y)
-     number *x;
-     const number *y;
+numb_and(number *x, const number *y)
 {
    mpz_t xx, yy, res;
 
@@ -290,9 +277,7 @@ numb_and(x, y)
 }
 
 static void
-numb_ior (x, y)
-     number *x;
-     const number *y;
+numb_ior (number *x, const number *y)
 {
    mpz_t xx, yy, res;
 
@@ -316,9 +301,7 @@ numb_ior (x, y)
 }
 
 static void
-numb_eor (x, y)
-     number *x;
-     const number *y;
+numb_eor (number *x, const number *y)
 {
    mpz_t xx, yy, res;
 
@@ -365,8 +348,7 @@ numb_eor (x, y)
 }
 
 static void
-numb_not (x)
-     number *x;
+numb_not (number *x)
 {
    mpz_t xx, res;
 
@@ -385,9 +367,7 @@ numb_not (x)
 }
 
 static void
-numb_lshift (x, y)
-     number *x;
-     const number *y;
+numb_lshift (number *x, const number *y)
 {
    mpz_t xx, yy, res;
 
@@ -418,9 +398,7 @@ numb_lshift (x, y)
 }
 
 static void
-numb_rshift (x, y)
-     number *x;
-     const number *y;
+numb_rshift (number *x, const number *y)
 {
    mpz_t xx, yy, res;
 

@@ -31,9 +31,7 @@ extern int pclose ();
 /* Find the builtin, which has NAME.  If BP argument is supplied
    then search only in table BP.  */
 const m4_builtin *
-m4_builtin_find_by_name (bp, name)
-     const m4_builtin *bp;
-     const char *name;
+m4_builtin_find_by_name (const m4_builtin *bp, const char *name)
 {
   lt_dlhandle	handle	= NULL;
 
@@ -53,9 +51,7 @@ m4_builtin_find_by_name (bp, name)
 }
 
 const m4_builtin *
-m4_builtin_find_by_func (bp, func)
-     const m4_builtin *bp;
-     m4_builtin_func *func;
+m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 {
   lt_dlhandle	handle	= NULL;
 
@@ -79,12 +75,9 @@ m4_builtin_find_by_func (bp, func)
    BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether
    NAME is to be traced.  */
 void
-m4_builtin_define (handle, name, bp, mode, traced)
-     const lt_dlhandle handle;
-     const char	*name;
-     const m4_builtin *bp;
-     m4_symbol_lookup mode;
-     boolean traced;
+m4_builtin_define (const lt_dlhandle handle, const char *name,
+		   const m4_builtin *bp, m4_symbol_lookup mode,
+		   boolean traced)
 {
   m4_symbol *symbol;
 
@@ -104,9 +97,8 @@ m4_builtin_define (handle, name, bp, mode, traced)
 }
 
 void
-m4_builtin_table_install (handle, table)
-     const lt_dlhandle handle;
-     const m4_builtin *table;
+m4_builtin_table_install (const lt_dlhandle handle,
+			  const m4_builtin *table)
 {
   const m4_builtin *bp;
   char *string;
@@ -128,11 +120,8 @@ m4_builtin_table_install (handle, table)
    TEXT.  MODE destinguishes between the "define" and the "pushdef" case.
    It is also used from main ().  */
 void
-m4_macro_define (handle, name, text, mode)
-     const lt_dlhandle handle;
-     const char *name;
-     const char *text;
-     m4_symbol_lookup mode;
+m4_macro_define (const lt_dlhandle handle, const char *name,
+		 const char *text, m4_symbol_lookup mode)
 {
   m4_symbol *symbol;
 
@@ -154,9 +143,7 @@ m4_macro_define (handle, name, text, mode)
 }
 
 void
-m4_macro_table_install (handle, table)
-     const lt_dlhandle handle;
-     const m4_macro *table;
+m4_macro_table_install (const lt_dlhandle handle, const m4_macro *table)
 {
   const m4_macro *mp;
 

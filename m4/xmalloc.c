@@ -44,14 +44,14 @@
 #endif
 
 #ifndef STDC_HEADERS
-VOID *calloc  ();
-VOID *malloc  ();
-VOID *realloc ();
+void *calloc  ();
+void *malloc  ();
+void *realloc ();
 void free     ();
 #endif
 
 /* Prototypes for functions defined here.  */
-static VOID *fixup_null_alloc (size_t n);
+static void *fixup_null_alloc (size_t n);
 
 
 /* Exit value when the requested amount of memory is not available.
@@ -67,11 +67,11 @@ extern void error (int, int, const char *, ...);
 extern void error ();
 #endif
 
-static VOID *
+static void *
 fixup_null_alloc (n)
      size_t n;
 {
-  VOID *p;
+  void *p;
 
   p = 0;
   if (n == 0)
@@ -83,11 +83,11 @@ fixup_null_alloc (n)
 
 /* Allocate N bytes of memory dynamically, with error checking.  */
 
-VOID *
+void *
 xmalloc (n)
      size_t n;
 {
-  VOID *p;
+  void *p;
 
   p = malloc (n);
   if (p == 0)
@@ -97,11 +97,11 @@ xmalloc (n)
 
 /* Allocate memory for N elements of S bytes, with error checking.  */
 
-VOID *
+void *
 xcalloc (n, s)
      size_t n, s;
 {
-  VOID *p;
+  void *p;
 #if HAVE_CALLOC
   p = calloc (n, s);
   if (p == 0)
@@ -117,9 +117,9 @@ xcalloc (n, s)
    with error checking.
    If P is NULL, run xmalloc.  */
 
-VOID *
+void *
 xrealloc (p, n)
-     VOID *p;
+     void *p;
      size_t n;
 {
   if (p == 0)
@@ -133,7 +133,7 @@ xrealloc (p, n)
 /* Don't free NULL pointers. */
 void
 xfree (stale)
-     VOID *stale;
+     void *stale;
 {
   if (stale)
     free (stale);

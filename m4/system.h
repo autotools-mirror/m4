@@ -112,18 +112,6 @@ BEGIN_C_DECLS
 
 
 
-/* M4_PARAMS is a macro used to wrap function prototypes, so that compilers
-   that don't understand ANSI C prototypes still work, and ANSI C
-   compilers can issue warnings about type mismatches. */
-#undef M4_PARAMS
-#if defined (__STDC__) || defined (_AIX) || (defined (__mips) && defined (_SYSTYPE_SVR4)) || defined(WIN32) || defined(__cplusplus)
-# define M4_PARAMS(protos)	protos
-#else
-# define M4_PARAMS(protos)	()
-#endif
-
-
-
 /* M4_STMT_START/END are used to create macros which expand to a
    a single compound statement in a portable way, but crucially in
    a way sympathetic to the compiler to maximise optimisation.  */
@@ -166,39 +154,18 @@ BEGIN_C_DECLS
 #endif
 
 
-
-/* Using ``VOID *'' for untyped pointers prevents pre-ANSI compilers
-   from choking.  */
-#ifndef VOID
-#  if __STDC__
-#    define VOID void
-#  else
-#    define VOID char
-#  endif
-#endif
-
-
-
 /* Preprocessor token manipulation.  */
 
 /* The extra indirection to the _STR and _CONC macros is required so that
    if the arguments to STR() (or CONC()) are themselves macros, they will
    be expanded before being quoted.   */
 #ifndef STR
-#  if __STDC__
 #    define _STR(arg)	#arg
-#  else
-#    define _STR(arg)	"arg"
-#  endif
 #  define STR(arg)	_STR(arg)
 #endif
 
 #ifndef CONC
-#  if __STDC__
 #    define _CONC(a, b)	a##b
-#  else
-#    define _CONC(a, b)	a/**/b
-#  endif
 #  define CONC(a, b)	_CONC(a, b)
 #endif
 
@@ -231,16 +198,14 @@ typedef int m4_boolean;
 #define XCALLOC(type, num)	((type *) xcalloc ((num), sizeof(type)))
 #define XMALLOC(type, num)	((type *) xmalloc ((num) * sizeof(type)))
 #define XREALLOC(type, p, num)	((type *) xrealloc ((p), (num) * sizeof(type)))
-#define XFREE(stale)				M4_STMT_START {		\
-  	if (stale) { free ((VOID *) stale);  stale = 0; }		\
-						} M4_STMT_END
+#define XFREE(p)      M4_STMT_START { if (p) free (p); (p) = 0; } M4_STMT_END
 
-extern VOID *xcalloc  M4_PARAMS((size_t n, size_t s));
-extern VOID *xmalloc  M4_PARAMS((size_t n));
-extern VOID *xrealloc M4_PARAMS((VOID *p, size_t n));
-extern void  xfree    M4_PARAMS((VOID *stale));
+extern void *xcalloc  (size_t n, size_t s);
+extern void *xmalloc  (size_t n);
+extern void *xrealloc (void *p, size_t n);
+extern void  xfree    (void *stale);
 
-extern char *xstrdup  M4_PARAMS((const char *string));
+extern char *xstrdup  (const char *string);
 
 END_C_DECLS
 

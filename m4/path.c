@@ -47,7 +47,7 @@ static struct m4_search_path_info dirpath; /* the list of path directories */
  */
 
 struct m4_search_path_info *
-m4_search_path_info_new ()
+m4_search_path_info_new (void)
 {
   struct m4_search_path_info *info;
 
@@ -61,9 +61,7 @@ m4_search_path_info_new ()
 }
 
 void
-m4_search_path_add (info, dir)
-     struct m4_search_path_info *info;
-     const char *dir;
+m4_search_path_add (struct m4_search_path_info *info, const char *dir)
 {
   m4_search_path *path;
 
@@ -86,10 +84,8 @@ m4_search_path_add (info, dir)
 }
 
 void
-m4_search_path_env_init (info, path, isabs)
-     struct m4_search_path_info *info;
-     char *path;
-     boolean isabs;
+m4_search_path_env_init (struct m4_search_path_info *info, char *path,
+			 boolean isabs)
 {
   char *path_end;
 
@@ -110,7 +106,7 @@ m4_search_path_env_init (info, path, isabs)
 
 
 void
-m4_include_init ()
+m4_include_init (void)
 {
   dirpath.list = NULL;
   dirpath.list_end = NULL;
@@ -121,7 +117,7 @@ m4_include_init ()
 /* Functions for normal input path search */
 
 void
-m4_include_env_init ()
+m4_include_env_init (void)
 {
   if (no_gnu_extensions)
     return;
@@ -130,8 +126,7 @@ m4_include_env_init ()
 }
 
 void
-m4_add_include_directory (dir)
-     const char *dir;
+m4_add_include_directory (const char *dir)
 {
   if (no_gnu_extensions)
     return;
@@ -144,9 +139,7 @@ m4_add_include_directory (dir)
 }
 
 FILE *
-m4_path_search (dir, expanded_name)
-     const char *dir;
-     char **expanded_name;
+m4_path_search (const char *dir, char **expanded_name)
 {
   FILE *fp;
   struct m4_search_path *incl;
@@ -196,10 +189,8 @@ m4_path_search (dir, expanded_name)
 
 #ifdef DEBUG_INCL
 
-static void include_dump M4_PARAMS((void));
-
 static void
-include_dump ()
+include_dump (void)
 {
   struct m4_search_path *incl;
 

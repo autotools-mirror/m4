@@ -101,7 +101,7 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
-static void substitute M4_PARAMS((struct obstack *obs, const char *victim, const char *repl, struct re_registers *regs));
+static void substitute (struct obstack *obs, const char *victim, const char *repl, struct re_registers *regs);
 
 
 /* The builtin "builtin" allows calls to builtin macros, even if their
