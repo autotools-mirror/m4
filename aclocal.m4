@@ -270,6 +270,8 @@ fi], [AC_MSG_RESULT(no)])
 # but which still want to provide support for the GNU gettext functionality.
 # Please note that the actual code is *not* freely available.
 
+# Modified for GNU m4 by René Seindal (rene@seindal.dk)
+
 # serial 5
 
 AC_DEFUN(AM_WITH_NLS,
@@ -310,12 +312,10 @@ AC_DEFUN(AM_WITH_NLS,
 
 	   if test "$gt_cv_func_gettext_libc" != "yes"; then
 	     AC_CHECK_LIB(intl, bindtextdomain,
-	       [AC_CACHE_CHECK([for gettext in libintl],
-		 gt_cv_func_gettext_libintl,
-		 [AC_CHECK_LIB(intl, gettext,
-		  gt_cv_func_gettext_libintl=yes,
-		  gt_cv_func_gettext_libintl=no)],
-		 gt_cv_func_gettext_libintl=no)])
+		[AC_CHECK_LIB(intl, gettext,
+		  [LIBS="$LIBS -lintl"
+		   gt_cv_func_gettext_libintl=yes],
+		  [gt_cv_func_gettext_libintl=no])])
 	   fi
 
 	   if test "$gt_cv_func_gettext_libc" = "yes" \

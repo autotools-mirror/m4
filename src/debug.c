@@ -267,11 +267,11 @@ trace_format (...)
 	  break;
 
 	case 'l':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? lquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? (char *)lquote.string : "";
 	  break;
 
 	case 'r':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? rquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? (char *)rquote.string : "";
 	  break;
 
 	case 'd':

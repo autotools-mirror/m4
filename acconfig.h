@@ -59,6 +59,9 @@
 /* Define to 1 if ANSI function prototypes are usable.  */
 #undef PROTOTYPES
 
+/* Define to the sizeof(long long int) if supported */
+#undef SIZEOF_LONG_LONG_INT
+
 /* Path to directory containing system wide message catalog sources.  */
 #undef STD_INC_PATH
 

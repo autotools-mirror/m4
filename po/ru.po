@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-08-03 17:14+0200\n"
+"POT-Creation-Date: 1998-08-10 06:45+0200\n"
 "PO-Revision-Date: 1997-07-12 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -12,46 +12,46 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/builtin.c:272
+#: src/builtin.c:276
 #, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr "Предупреждение: Слишком мало аргументов для встроенной лексемы '%s'"
 
-#: src/builtin.c:278
+#: src/builtin.c:282
 #, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr ""
 "Предупреждение: Избыточные аргументы для встроенной лексемы '%s' "
 "проигнорированы"
 
-#: src/builtin.c:298
+#: src/builtin.c:310
 #, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr "Не числовой аргумент для встроенной лексемы '%s'"
 
-#: src/builtin.c:438
+#: src/builtin.c:409
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в define_macro ()"
 
-#: src/builtin.c:608 src/builtin.c:671 src/builtin.c:1188 src/builtin.c:1212
+#: src/builtin.c:579 src/builtin.c:642 src/builtin.c:1261 src/builtin.c:1285
 #, c-format
 msgid "Undefined name %s"
 msgstr "Имя %s неопределено"
 
-#: src/builtin.c:636
+#: src/builtin.c:607
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена!"
 
-#: src/builtin.c:644
+#: src/builtin.c:615
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в m4_dumpdef ()"
 
-#: src/builtin.c:695
+#: src/builtin.c:666
 #, c-format
 msgid "Undefined macro `%s'"
 msgstr "Неопределенный макрос '%s'"
 
-#: src/builtin.c:735
+#: src/builtin.c:706
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в m4_defn ()"
 
@@ -60,50 +60,55 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в m4_defn ()"
 msgid "Cannot open pipe to command `%s'"
 msgstr "Невозможно открыть канал для комманды '%s'"
 
-#: src/builtin.c:811
+#: src/builtin.c:809
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Радикс в выражении выходит за пределы (radix = %d)"
 
-#: src/builtin.c:820
+#: src/builtin.c:818
 msgid "Negative width to eval"
 msgstr "Отрицательная ширина"
 
-#: src/builtin.c:925
+#: src/builtin.c:910
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Не числовой аргумент для %s"
 
-#: src/builtin.c:937
+#: src/builtin.c:922
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: src/builtin.c:1043 src/freeze.c:207
+#: src/builtin.c:1066
+#, fuzzy, c-format
+msgid "Undefined syntax code %c"
+msgstr "Имя %s неопределено"
+
+#: src/builtin.c:1116 src/freeze.c:207
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
 
-#: src/builtin.c:1248
+#: src/builtin.c:1321
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Режим отладки: неверный флаг отладки: '%s'"
 
-#: src/builtin.c:1284
+#: src/builtin.c:1357
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Невозможно назначить файл ошибок %s"
 
-#: src/builtin.c:1501
+#: src/builtin.c:1574
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
-#: src/builtin.c:1562 src/builtin.c:1622 src/input.c:637
+#: src/builtin.c:1635 src/builtin.c:1695 src/input.c:979
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
 
-#: src/builtin.c:1573 src/builtin.c:1646
+#: src/builtin.c:1646 src/builtin.c:1719
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Ошибка сопоставления регулярного выражения '%s'"
@@ -116,49 +121,49 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена! (trace_pre ())"
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы (trace_pre ())"
 
-#: src/eval.c:277
+#: src/eval.c:297
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "Неверное выражение (отсутствует правые скобки): %s"
 
-#: src/eval.c:283
+#: src/eval.c:303
 #, c-format
 msgid "Bad expression in eval: %s"
 msgstr "Неверное выражение: %s"
 
-#: src/eval.c:288
+#: src/eval.c:308
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "Неверное выражение (bad input): %s"
 
-#: src/eval.c:293
+#: src/eval.c:313
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "Неверное выражение (excess input): %s"
 
-#: src/eval.c:298
+#: src/eval.c:318
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Деление на ноль в выражении: %s"
 
-#: src/eval.c:303
+#: src/eval.c:323
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Модульное деление на ноль в выражении: %s"
 
-#: src/eval.c:308
+#: src/eval.c:328
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 
-#: src/eval.c:547
+#: src/eval.c:582
 msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверное сравнение в cmp_term ()"
 
-#: src/eval.c:590
+#: src/eval.c:627
 msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор сдвига в shift_term ()"
 
-#: src/eval.c:674
+#: src/eval.c:726
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор в mult_term ()"
 
@@ -192,41 +197,37 @@ msgstr "Преждевременный конец файла-образа памяти"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"
 
-#: src/input.c:174
-#, c-format
-msgid "Input read from %s"
-msgstr "Ввод из %s"
-
-#: src/input.c:231
-msgid "INTERNAL ERROR: Recursive push_string!"
-msgstr "ВНУТРЕННЯЯ ОШИБКА: Рекурсивная push_string!"
-
-#: src/input.c:311
+#: src/input.c:306
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ввод перенаправлен в %s , строка %d"
 
-#: src/input.c:325
-msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
-msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в pop_input ()"
+#: src/input.c:334
+#, c-format
+msgid "Input read from %s"
+msgstr "Ввод из %s"
 
-#: src/input.c:364
+#: src/input.c:494
+msgid "INTERNAL ERROR: Recursive push_string!"
+msgstr "ВНУТРЕННЯЯ ОШИБКА: Рекурсивная push_string!"
+
+#: src/input.c:611
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный вызов init_macro_token ()"
 
-#: src/input.c:413
-msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
-msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
-
-#: src/input.c:470
+#: src/input.c:651
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в next_char ()"
 
-#: src/input.c:550
+#: src/input.c:688
+msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
+msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
+
+#: src/input.c:791
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: src/input.c:777
+#: src/input.c:1130 src/input.c:1157
 msgid "ERROR: EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
 
@@ -460,6 +461,9 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: неверный режим для symbol_lookup ()"
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
+
+#~ msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
+#~ msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в pop_input ()"
 
 #~ msgid "Bad regular expression: `%s': %s"
 #~ msgstr "Неверное регулярное выражение: '%s': %s"

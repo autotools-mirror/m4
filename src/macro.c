@@ -73,7 +73,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
 	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
 	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_input () != '('))
+	      && !IS_OPEN(peek_input ())))
 	{
 #ifdef ENABLE_CHANGEWORD
 	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
@@ -120,7 +120,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
       t = next_token (&td);
     }
-  while (t == TOKEN_SIMPLE && isspace (*TOKEN_DATA_TEXT (&td)));
+  while (t == TOKEN_STRING && IS_SPACE (*TOKEN_DATA_TEXT (&td)));
 
   paren_level = 0;
 
@@ -131,7 +131,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	{			/* TOKSW */
 	case TOKEN_SIMPLE:
 	  text = TOKEN_DATA_TEXT (&td);
-	  if ((*text == ',' || *text == ')') && paren_level == 0)
+	  if ((IS_COMMA(*text) || IS_CLOSE(*text)) && paren_level == 0)
 	    {
 
 	      /* The argument MUST be finished, whether we want it or not.  */
@@ -143,12 +143,12 @@ expand_argument (struct obstack *obs, token_data *argp)
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 		  TOKEN_DATA_TEXT (argp) = text;
 		}
-	      return (boolean) (*TOKEN_DATA_TEXT (&td) == ',');
+	      return (boolean) (IS_COMMA(*TOKEN_DATA_TEXT (&td)));
 	    }
 
-	  if (*text == '(')
+	  if (IS_OPEN(*text))
 	    paren_level++;
-	  else if (*text == ')')
+	  else if (IS_CLOSE(*text))
 	    paren_level--;
 	  expand_token (obs, t, &td);
 	  break;
@@ -204,7 +204,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
   obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
   ch = peek_input ();
-  if (ch == '(')
+  if (IS_OPEN(ch))
     {
       next_token (&td);		/* gobble parenthesis */
       do

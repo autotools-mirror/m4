@@ -26,6 +26,10 @@ By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
 `m4'.  This might go away, so don't count on it yet.
 
+By using `./configure --with-gmp, you get an multiple precision integral
+and rational arithmetic in eval.  The implementation depends on GNU gmp
+v2.  This might go away, so don't count on it yet.
+
 Send bug reports to `bug-gnu-utils@prep.ai.mit.edu'.  A bug report is
 an adequate description of the problem: your input, what you expected,
 what you got, and why this is wrong.  Diffs are welcome, but they only

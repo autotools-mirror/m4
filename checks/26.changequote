@@ -1,9 +1,7 @@
-dnl ../doc/m4.texinfo:1817: Origin of test
-define(`foo', `Macro `FOO'.')
+dnl ../doc/m4.texinfo:1793: Origin of test
+changequote([, ])
 dnl @result{}
-changequote(, )
+define([foo], [Macro [foo].])
 dnl @result{}
 foo
-dnl @result{}Macro `FOO'.
-`foo'
-dnl @result{}`Macro `FOO'.'
+dnl @result{}Macro foo.

@@ -98,6 +98,9 @@
    site ftp.antaire.com in antaire/src, file dmalloc/dmalloc.tar.gz.  */
 #undef WITH_DMALLOC
 
+/* Define to 1 if the GNU multiple precision library should be used.  */
+#undef WITH_GMP
+
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS
 
@@ -115,6 +118,9 @@
 
 /* Define to 1 if ANSI function prototypes are usable.  */
 #undef PROTOTYPES
+
+/* The number of bytes in a long long int.  */
+#undef SIZEOF_LONG_LONG_INT
 
 /* Define if you have the __argz_count function.  */
 #undef HAVE___ARGZ_COUNT

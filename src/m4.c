@@ -22,7 +22,7 @@
 #include <signal.h>
 
 /* Operate interactively (-e).  */
-static int interactive = 0;
+int interactive = 0;
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;

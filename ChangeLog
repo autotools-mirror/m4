@@ -1,3 +1,43 @@
+1998-08-10  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4f
+
+	* doc/m4.texinfo (Changesyntax): Added documentation for the macro
+	"changesyntax".
+
+	* src/builtin.c (m4_changesyntax): Added builtin macro
+	"changesyntax" to modify the syntax table.
+
+	* src/input.c, src/m4.h, src/macro.c: Implemented an input syntax
+	table.  All categories are assigned a syntax code and tokens are
+	read according to this table.
+
+1998-08-09  Rene' Seindal  <rene@seindal.dk>
+
+	* src/numb.{c,h}: New files, implements multiple precision eval
+	using GNU gmp.  Originally submitted by John Gerard Makecki
+	(johnm@vlibs.com), later modified.  Tested with GNU gmp 2.0.2.
+
+	* doc/m4.texinfo (Eval): Added documentation for multiple
+	precision arithmetic library support.
+
+	* src/m4.{c,h}, src/eval.c, src/builtin.c, configure.in: Changes
+	to accommodate multiple precision eval.
+
+1998-08-07  Rene' Seindal  <rene@seindal.dk>
+
+	* src/input.c (MATCH, match_input), src/m4.h: changed definition
+	of comment and quote strings to `unsigned int' to allow eight bit
+	chars (reported by andrewb@zip.com.au (Andrew Bettison)).
+
+	* src/builtin.c, doc/m4.texinfo: Builtin `syncoutput' added by
+	patch from Mike Howard <mike@clove.com>
+
+1998-08-06  Rene' Seindal  <rene@seindal.dk>
+
+	* gettext.m4: corrected AM_WITH_NLS to handle use of installed
+	-lintl.
+
 1998-08-03  Rene' Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4e
@@ -5,11 +45,11 @@
 	* src/m4.h: Added ifdef ENABLE_NLS around include of <libintl.h>
 	and _ macro.  M4 now builds with --disable-nls.
 
-	* src/m4.c (main): reintroduced textdomain(PAKCAGE) to get gettext
+	* src/m4.c (main): reintroduced textdomain(PACKAGE) to get gettext
 	to look for right message catalogs.  Call indef'ed by ENABLE_NLS.
 
-	* configure.in (ALL_LINGUAS): Added complete list of
-	translations: de fr it ja nl ru sv.
+	* configure.in (ALL_LINGUAS): Added complete list of translations:
+	de fr it ja nl ru sv.
 
 1998-05-22  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
 

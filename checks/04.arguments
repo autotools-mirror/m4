@@ -1,5 +1,7 @@
-dnl ../doc/m4.texinfo:991: Origin of test
-define(`test', ``Macro name: $0'')
+dnl ../doc/m4.texinfo:944: Origin of test
+define(`exch', `$2, $1')
 dnl @result{}
-test
-dnl @result{}Macro name: test
+define(exch(``expansion text'', ``macro''))
+dnl @result{}
+macro
+dnl @result{}expansion text

@@ -22,6 +22,7 @@
    is evaluate ().  */
 
 #include "m4.h"
+#include "numb.h"
 
 /* Evaluates token types.  */
 
@@ -30,7 +31,7 @@ typedef enum eval_token
     ERROR,
     PLUS, MINUS,
     EXPONENT,
-    TIMES, DIVIDE, MODULO,
+    TIMES, DIVIDE, MODULO, RATIO,
     EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
     LSHIFT, RSHIFT,
     LNOT, LAND, LOR,
@@ -145,7 +146,7 @@ eval_lex (eval_t *val)
       else
 	base = 10;
 
-      (*val) = 0;
+      numb_set_si(val,0);
       for (; *eval_text; eval_text++)
 	{
 	  if (isdigit (*eval_text))
@@ -160,7 +161,20 @@ eval_lex (eval_t *val)
 	  if (digit >= base)
 	    break;
 
-	  (*val) = (*val) * base + digit;
+	  { /* (*val) = (*val) * base; */
+	    eval_t xbase;
+	    numb_init(xbase);
+	    numb_set_si(&xbase,base);
+	    numb_times(*val,xbase);
+	    numb_fini(xbase);
+	  }
+	  { /* (*val) = (*val) + digit; */
+	    eval_t xdigit;
+	    numb_init(xdigit);
+	    numb_set_si(&xdigit,digit);
+	    numb_plus(*val,xdigit);
+	    numb_fini(xdigit);
+	  }
 	}
       return NUMBER;
     }
@@ -183,6 +197,8 @@ eval_lex (eval_t *val)
       return DIVIDE;
     case '%':
       return MODULO;
+    case ':':
+      return RATIO;
     case '=':
       if (*eval_text == '=')
 	eval_text++;
@@ -255,14 +271,18 @@ eval_lex (eval_t *val)
 `---------------------------------------*/
 
 boolean
-evaluate (const char *expr, eval_t *val)
+evaluate (struct obstack *obs, const char *expr, const int radix, int min)
 {
+  eval_t val;
   eval_token et;
   eval_error err;
 
+  numb_initialise();
   eval_init_lex (expr);
-  et = eval_lex (val);
-  err = logical_or_term (et, val);
+
+  numb_init(val);
+  et = eval_lex (&val);
+  err = logical_or_term (et, &val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     err = EXCESS_INPUT;
@@ -309,6 +329,10 @@ evaluate (const char *expr, eval_t *val)
       abort ();
     }
 
+  if (err == NO_ERROR)
+    numb_obstack(obs, val, radix, min);
+
+  numb_fini(val);
   return (boolean) (err != NO_ERROR);
 }
 
@@ -325,6 +349,7 @@ logical_or_term (eval_token et, eval_t *v1)
   if ((er = logical_and_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == LOR)
     {
       et = eval_lex (&v2);
@@ -334,8 +359,9 @@ logical_or_term (eval_token et, eval_t *v1)
       if ((er = logical_and_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 || v2;
+      numb_lior(*v1,v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -352,6 +378,7 @@ logical_and_term (eval_token et, eval_t *v1)
   if ((er = or_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == LAND)
     {
       et = eval_lex (&v2);
@@ -361,8 +388,9 @@ logical_and_term (eval_token et, eval_t *v1)
       if ((er = or_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 && v2;
+      numb_land(*v1,v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -379,6 +407,7 @@ or_term (eval_token et, eval_t *v1)
   if ((er = xor_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == OR)
     {
       et = eval_lex (&v2);
@@ -388,8 +417,9 @@ or_term (eval_token et, eval_t *v1)
       if ((er = xor_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 | v2;
+      numb_ior(v1,&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -406,6 +436,7 @@ xor_term (eval_token et, eval_t *v1)
   if ((er = and_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == XOR)
     {
       et = eval_lex (&v2);
@@ -415,8 +446,9 @@ xor_term (eval_token et, eval_t *v1)
       if ((er = and_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 ^ v2;
+      numb_eor(v1,&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -433,6 +465,7 @@ and_term (eval_token et, eval_t *v1)
   if ((er = not_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == AND)
     {
       et = eval_lex (&v2);
@@ -442,8 +475,9 @@ and_term (eval_token et, eval_t *v1)
       if ((er = not_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 & v2;
+      numb_and(v1,&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -464,7 +498,7 @@ not_term (eval_token et, eval_t *v1)
 
       if ((er = not_term (et, v1)) != NO_ERROR)
 	return er;
-      *v1 = ~*v1;
+      numb_not(v1);
     }
   else
     if ((er = logical_not_term (et, v1)) != NO_ERROR)
@@ -486,7 +520,7 @@ logical_not_term (eval_token et, eval_t *v1)
 
       if ((er = logical_not_term (et, v1)) != NO_ERROR)
 	return er;
-      *v1 = !*v1;
+      numb_lnot(*v1);
     }
   else
     if ((er = cmp_term (et, v1)) != NO_ERROR)
@@ -505,6 +539,7 @@ cmp_term (eval_token et, eval_t *v1)
   if ((er = shift_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == EQ || op == NOTEQ
 	 || op == GT || op == GTEQ
 	 || op == LS || op == LSEQ)
@@ -520,27 +555,27 @@ cmp_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case EQ:
-	  *v1 = *v1 == v2;
+	  numb_eq(*v1,v2);
 	  break;
 
 	case NOTEQ:
-	  *v1 = *v1 != v2;
+	  numb_ne(*v1,v2);
 	  break;
 
 	case GT:
-	  *v1 = *v1 > v2;
+	  numb_gt(*v1,v2);
 	  break;
 
 	case GTEQ:
-	  *v1 = *v1 >= v2;
+	  numb_ge(*v1,v2);
 	  break;
 
 	case LS:
-	  *v1 = *v1 < v2;
+	  numb_lt(*v1,v2);
 	  break;
 
 	case LSEQ:
-	  *v1 = *v1 <= v2;
+	  numb_le(*v1,v2);
 	  break;
 
 	default:
@@ -549,6 +584,7 @@ INTERNAL ERROR: Bad comparison operator in cmp_term ()")));
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -566,6 +602,7 @@ shift_term (eval_token et, eval_t *v1)
   if ((er = add_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == LSHIFT || op == RSHIFT)
     {
 
@@ -579,11 +616,11 @@ shift_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case LSHIFT:
-	  *v1 = *v1 << v2;
+	  numb_lshift(v1,&v2);
 	  break;
 
 	case RSHIFT:
-	  *v1 = *v1 >> v2;
+	  numb_rshift(v1,&v2);
 	  break;
 
 	default:
@@ -592,6 +629,7 @@ INTERNAL ERROR: Bad shift operator in shift_term ()")));
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -609,6 +647,7 @@ add_term (eval_token et, eval_t *v1)
   if ((er = mult_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == PLUS || op == MINUS)
     {
       et = eval_lex (&v2);
@@ -618,11 +657,13 @@ add_term (eval_token et, eval_t *v1)
       if ((er = mult_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      if (op == PLUS)
-	*v1 = *v1 + v2;
-      else
-	*v1 = *v1 - v2;
+      if (op == PLUS) {
+	numb_plus(*v1,v2);
+      } else {
+	numb_minus(*v1,v2);
+      }
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -640,7 +681,8 @@ mult_term (eval_token et, eval_t *v1)
   if ((er = exp_term (et, v1)) != NO_ERROR)
     return er;
 
-  while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO)
+  numb_init(v2);
+  while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO || op == RATIO)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
@@ -652,21 +694,31 @@ mult_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case TIMES:
-	  *v1 = *v1 * v2;
+	  numb_times(*v1,v2);
 	  break;
 
 	case DIVIDE:
-	  if (v2 == 0)
+	  if (numb_zerop(v2))
 	    return DIVIDE_ZERO;
-	  else
-	    *v1 = *v1 / v2;
+	  else {
+	    numb_divide(v1,&v2);
+	  }
+	  break;
+
+	case RATIO:
+	  if (numb_zerop(v2))
+	    return DIVIDE_ZERO;
+	  else {
+	    numb_ratio(*v1,v2);
+	  }
 	  break;
 
 	case MODULO:
-	  if (v2 == 0)
+	  if (numb_zerop(v2))
 	    return MODULO_ZERO;
-	  else
-	    *v1 = *v1 % v2;
+	  else {
+	    numb_modulo(v1,&v2);
+	  }
 	  break;
 
 	default:
@@ -675,6 +727,7 @@ mult_term (eval_token et, eval_t *v1)
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -685,14 +738,15 @@ mult_term (eval_token et, eval_t *v1)
 static eval_error
 exp_term (eval_token et, eval_t *v1)
 {
-  register eval_t result;
+  eval_t result;
   eval_t v2;
   eval_error er;
 
   if ((er = unary_term (et, v1)) != NO_ERROR)
     return er;
-  result = *v1;
+  memcpy(&result, v1, sizeof(eval_t));
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == EXPONENT)
     {
       et = eval_lex (&v2);
@@ -702,11 +756,9 @@ exp_term (eval_token et, eval_t *v1)
       if ((er = exp_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      result = 1;
-      while (v2-- > 0)
-	result *= *v1;
-      *v1 = result;
+      numb_pow(v1,&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -730,7 +782,7 @@ unary_term (eval_token et, eval_t *v1)
 	return er;
 
       if (et == MINUS)
-	*v1 = -*v1;
+	numb_negate(*v1);
     }
   else
     if ((er = simple_term (et, v1)) != NO_ERROR)

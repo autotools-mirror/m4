@@ -89,7 +89,7 @@ l = @l@
 
 SUBDIRS=intl po doc lib src checks examples
 
-EXTRA_DIST = c-boxes.el  # Franc,ois, is this still needed? (EB)
+EXTRA_DIST = gettext.m4 c-boxes.el  # Franc,ois, is this still needed? (EB)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h

@@ -58,6 +58,8 @@ BEGIN {
     prefix = "dnl ";
   else
     prefix = "";
+  gsub("@{", "{", $0);
+  gsub("@}", "}", $0);
   gsub("@@", "@", $0);
   printf("%s%s\n", prefix, $0) >> file;
 }

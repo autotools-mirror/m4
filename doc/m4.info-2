@@ -25,22 +25,6 @@ versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
 
 
-File: m4.info,  Node: Debug Output,  Prev: Debug Levels,  Up: Debugging
-
-Saving debugging output
-=======================
-
-   Debug and tracing output can be redirected to files using either the
-`-o' option to `m4', or with the builtin macro `debugfile':
-
-     debugfile(opt FILENAME)
-
-will send all further debug and trace output to FILENAME.  If FILENAME
-is empty, debug and trace output are discarded and if `debugfile' is
-called without any arguments, debug and trace output are sent to the
-standard error output.
-
-
 File: m4.info,  Node: Input Control,  Next: File Inclusion,  Prev: Debugging,  Up: Top
 
 Input control
@@ -54,6 +38,7 @@ input to `m4'.
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
+* Changesyntax::                Changing the lexical structure of the input
 * Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving input until end of input
 
@@ -141,7 +126,7 @@ as they will be confused with names in the input.  Doing so disables
 the quoting mechanism.
 
 
-File: m4.info,  Node: Changecom,  Next: Changeword,  Prev: Changequote,  Up: Input Control
+File: m4.info,  Node: Changecom,  Next: Changesyntax,  Prev: Changequote,  Up: Input Control
 
 Changing comment delimiters
 ===========================
@@ -184,17 +169,257 @@ mechanism completely.
      =># Not a COMMENT anymore
 
 
-File: m4.info,  Node: Changeword,  Next: M4wrap,  Prev: Changecom,  Up: Input Control
+File: m4.info,  Node: Changesyntax,  Next: Changeword,  Prev: Changecom,  Up: Input Control
+
+Changing the lexical structure of the input
+===========================================
+
+     The macro `changesyntax' and all associated functionality is
+     experimental (*note Experiments::.).  The functionality might
+     change in the future.  Please direct your comments about it the
+     same way you would do for bugs.
+
+   The input to `m4' is read character per character, and these
+characters are grouped together to form input tokens (such as macro
+names, strings, comments, etc.).
+
+   Each token is parsed according to certain rules.  For example, a
+macro name starts with a letter or `_' and consists of the longest
+possible string of letters, `_' and digits.  But who is to decide what
+characters are letters, digits, quotes, white space?  Earlier the
+operating system decided, now you do.
+
+   Input characters belong to different categories:
+
+"Letters"
+     Characters that start a macro name.  The default is the letters as
+     defined by the operating system and the character `_'.
+
+"Digits"
+     Characters that, together with the letters, form the remainder of a
+     macro name.  The default is the ten digits `0'...`9'.
+
+"White space"
+     Characters that should be trimmed from the beginning of each
+     argument to a macro call.  The default is `SPC', `TAB', `newline'
+     and possibly others as defined by the operating system.
+
+"Open parenthesis"
+     Characters that open the argument list of a macro call.  Default
+     is `('.
+
+"Close parenthesis"
+     Characters that close the argument list of a macro call.  Default
+     is `)'.
+
+"Argument separator"
+     Characters that separate the arguments of a macro call.  Default
+     is `,'.
+
+"Other"
+     Characters that have no special syntactical meaning to `m4'.
+     Default is all characters expect those in the categories above.
+
+"Active"
+     Characters that themselves, alone, form macro names.  No default.
+
+Each character can, besides the basic syntax category, have some syntax
+attributes.  These are:
+
+"Left quote"
+     The characters that start a quoted string.  Default is ``'.  Basic
+     syntax category is `Other'.
+
+"Right quote"
+     The characters that end a quoted string.  Default is `''.  Basic
+     syntax category is `Other'.
+
+"Begin comment"
+     The characters that begin a comment.  Default is `#'.  Basic syntax
+     category is `Other'.
+
+"End comment"
+     The characters that end a comment.  Default is `newline'.  Basic
+     syntax category is `White space'.
+
+The builtin macro `changesyntax' is used to change the way `m4' parses
+the input stream into tokens.
+
+     changesyntax(SYNTAX-SPEC, ...)
+
+The SYNTAX-SPEC is a string, whose first characters determines the
+syntax category of the other characters.   Character ranges are expanded
+as for *Note Translit::.  If there are no other characters, *all*
+characters are given the syntax code.
+
+   The characters for the syntax categories are:
+
+`W'
+     Letters
+
+`D'
+     Digits
+
+`S'
+     White space
+
+`('
+     Open parenthesis
+
+`)'
+     Close parenthesis
+
+`,'
+     Argument separator
+
+`O'
+     Other
+
+`A'
+     Active
+
+`L'
+     Left quote
+
+`R'
+     Right quote
+
+`B'
+     Begin comment
+
+`E'
+     End comment
+
+`'
+With `changesyntax' we can modify the meaning of a word.
+
+     define(`test.1', `TEST ONE')
+     =>
+     __file__
+     =>31.changesynta
+     changesyntax(`O_', `W.')
+     =>
+     __file__
+     =>__file__
+     test.1
+     =>TEST ONE
+
+Another possibility is to change the syntax of a macro call.
+
+     define(`test', `$#')
+     =>
+     test(a, b, c)
+     =>3
+     changesyntax(`(<', `,|', `)>', `O(,)')
+     =>
+     test(a, b, c)
+     =>0(a, b, c)
+     test<a|b|c>
+     =>3
+
+Leading spaces are always removed from macro arguments in `m4', but by
+changing the syntax categories we can avoid it.
+
+     define(`test', `$1$2$3')
+     =>
+     test(a, b, c)
+     =>abc
+     changesyntax(`O         ')
+     =>
+     test(a, b, c)
+     =>a b c
+
+It is not yet possible to redefine the `$' used to indicate macro
+arguments in user defined macros.
+
+   Active characters are known from TeX.  In `m4' a active character is
+always seen as a one-letter word, and so, if it has a macro definition,
+che macro will be called.
+
+     define(`@', `TEST')
+     =>
+     @
+     =>@
+     changesyntax(`A@')
+     =>
+     @
+     =>TEST
+
+   There is obviously an overlap with `changecom' and `changequote'.
+Comment delimiters and quotes can now be defined in two different ways.
+To avoid incompatibilites, if the quotes are set with `changequote',
+all characters marked in the syntax table as quotes will be unmarked,
+leaving only one set of defined quotes as before.  Since the quotes are
+syntax attributes rather than syntax categories, the old quotes simply
+revert to their old category.  If the quotes are set with
+`changesyntax', other characters marked as quotes are left untouched,
+resulting in at least two sets of quotes.  This applies to comment
+delimiters as well, *mutatis mutandis*.
+
+     define(`test', `TEST')
+     =>
+     changesyntax(`L<', `R>')
+     =>
+     <test>
+     =>test
+     `test>
+     =>test
+     changequote(<[>, `]')
+     =>
+     <test>
+     =><TEST>
+     [test]
+     =>test
+
+If categories, that form single character tokens, contain several
+characters, all are treated as equal.  Any open parenthesis will match
+any close parenthesis, etc.
+
+     changesyntax(`({<', `)}>', `,;:', `O(,)')
+     =>
+     eval{2**4-1; 2 : 8>
+     =>00001111
+
+This is not so for long quotes, which cannot be matched by single
+character quote and vice versa.  The same goes for comment delimiters.
+
+     define(`test', `==$1==')
+     =>
+     changequote(`<<', `>>')
+     =>
+     changesyntax(<<L[>>, <<R]>>)
+     =>
+     test(<<testing]>>)
+     =>==testing]==
+     test([testing>>])
+     =>==testing>>==
+     test([<<testing>>])
+     =>==<<testing>>==
+
+Note how it is possible to have both long and short quotes, if
+`changequote' is used before `changesyntax'.
+
+   The syntax table is initialiased to be backwards compatible, so if
+you never calls `changesyntax', nothing will have changed.
+
+   Debugging output continue to use `(', `,' and `)' to show macro
+calls.
+
+   The builtin macros `changesyntax' is recognized only when given
+arguments.
+
+
+File: m4.info,  Node: Changeword,  Next: M4wrap,  Prev: Changesyntax,  Up: Input Control
 
 Changing the lexical structure of words
 =======================================
 
-     The macro `changeword' and all associated functionnality is
-     experimental.  It is only available if the `--enable-changeword'
-     option was given to `configure', at GNU `m4' installation time.
-     The functionnality might change or even go away in the future.
-     *Do not rely on it*.  Please direct your comments about it the
-     same way you would do for bugs.
+     The macro `changeword' and all associated functionality is
+     experimental (*note Experiments::.).  It is only available if the
+     `--enable-changeword' option was given to `configure', at GNU `m4'
+     installation time.  The functionality might change or even go away
+     in the future.  *Do not rely on it*.  Please direct your comments
+     about it the same way you would do for bugs.
 
    A file being processed by `m4' is split into quoted strings, words
 (potential macro names) and simple tokens (any other single character).
@@ -343,7 +568,7 @@ include a file, if it exists, expanding to nothing if it does not.
 
      include(`no-such-file')
      =>
-     error-->30.include:2: m4: Cannot open no-such-file: No such file or directory
+     error-->39.include:2: m4: Cannot open no-such-file: No such file or directory
      sinclude(`no-such-file')
      =>
 
@@ -380,6 +605,9 @@ is an example, which defines `bar' to expand to the contents of
    This use of `include' is not trivial, though, as files can contain
 quotes, commas and parentheses, which can interfere with the way the
 `m4' parser works.
+
+   In GNU `m4', an alternative method of reading files is using *Note
+Undivert:: on a named file.
 
    The builtin macros `include' and `sinclude' are recognized only when
 given arguments.
@@ -486,9 +714,9 @@ Undiverting output
 
      undivert(opt NUMBER, ...)
 
-which undiverts the diversions given by the arguments, in the order
-given.  If no arguments are supplied, all diversions are undiverted, in
-numerical order.
+which reinserts the diverted output given by the arguments into the
+current output stream, in the order given.  If no arguments are
+supplied, all diversions are undiverted, in numerical order.
 
    The expansion of `undivert' is void.
 
@@ -604,7 +832,7 @@ No output is produced at all.
 
    It is called just like `undivert', but the effect is to clear the
 diversions, given by the arguments.  (This macro has a nasty bug!  You
-should try to see if you can find it and correct it.)
+should try to see if you can find it and correct it.   *Note Answers::.)
 
 
 File: m4.info,  Node: Text handling,  Next: Arithmetic,  Prev: Diversions,  Up: Top
@@ -869,7 +1097,7 @@ decrement operations.
 * Menu:
 
 * Incr::                        Decrement and increment operators
-* Eval::                        Evaluating integer expressions
+* Eval::                        Evaluating integer or rational expressions
 
 
 File: m4.info,  Node: Incr,  Next: Eval,  Prev: Arithmetic,  Up: Arithmetic
@@ -897,8 +1125,8 @@ arguments.
 
 File: m4.info,  Node: Eval,  Prev: Incr,  Up: Arithmetic
 
-Evaluating integer expressions
-==============================
+Evaluating integer or rational expressions
+==========================================
 
    Integer expressions are evaluated with `eval':
 
@@ -915,8 +1143,8 @@ decreasing precedence.
 `**'
      Exponentiation
 
-`*  /  %'
-     Multiplication, division and modulo
+`*  /  %  :'
+     Multiplication, division, modulo and ratio
 
 `+  -'
      Addition and subtraction
@@ -965,6 +1193,18 @@ then the digits making the number.  For any radix, the digits are `0',
 Lower and upper case letters can be used interchangeably in numbers
 prefixes and as number digits.
 
+   Calculations are done in 32 bit, but `m4' will use wider integers if
+available.
+
+   When compiled with a multiple precision arithmetic library (*note
+Experiments::.), numbers may be of any length.  The `:' operator
+rationally divides two numbers and canonicalizes the result.  The `/'
+operator always returns the quotient of the division.  To convert a
+rational value to integral, divide (`/') by 1.  Some operators such as
+`%', `<<', `>>', `~', `&', `|' and `^' operate only on integers and
+will truncate any rational remainder.  `**' assumes that the exponent
+is integral.
+
    Parentheses may be used to group subexpressions whenever needed.
 For the relational operators, a true relation returns `1', and a false
 relation return `0'.
@@ -984,7 +1224,7 @@ relation return `0'.
      define(`foo', `666')
      =>
      eval(`foo'/6)
-     error-->51.eval:14: m4: Bad expression in eval: foo/6
+     error-->60.eval:14: m4: Bad expression in eval: foo/6
      =>
      eval(foo/6)
      =>111
@@ -1148,6 +1388,7 @@ any of the previous chapters.
 
 * Errprint::                    Printing error messages
 * M4exit::                      Exiting from m4
+* Syncoutput::                  Turning on and off sync lines
 
 
 File: m4.info,  Node: Errprint,  Next: M4exit,  Prev: Miscellaneous,  Up: Miscellaneous
@@ -1184,11 +1425,11 @@ current input line number in that file.
 
      errprint(`m4:'__file__:__line__: `Input error
      ')
-     error-->m4:56.errprint:2: Input error
+     error-->m4:65.errprint:2: Input error
      =>
 
 
-File: m4.info,  Node: M4exit,  Prev: Errprint,  Up: Miscellaneous
+File: m4.info,  Node: M4exit,  Next: Syncoutput,  Prev: Errprint,  Up: Miscellaneous
 
 Exiting from `m4'
 =================
@@ -1205,12 +1446,30 @@ the exit code is zero.
      ')m4exit(1)')
      =>
      fatal_error(`This is a BAD one, buster')
-     error-->m4: 57.m4exit: 5: fatal error: This is a BAD one, buster
+     error-->m4: 66.m4exit: 5: fatal error: This is a BAD one, buster
 
    After this macro call, `m4' will exit with exit code 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
 (*note M4wrap::.) is not reread.
+
+
+File: m4.info,  Node: Syncoutput,  Prev: M4exit,  Up: Miscellaneous
+
+Turning sync lines on and off within `m4'
+=========================================
+
+   If you need to toggle sync lines on and off while processing macros,
+or to insure that they are off or on, you may do so using `syncoutput'.
+
+   `syncoutput(1)', `syncoutput(on)', and `syncoutput(yes)' causes
+`m4'] to emit sync lines of the form: `#line <number> ["<filename>"]'.
+
+   `syncoutput(0)', `syncoutput(off)', and `syncoutput(no)' turn them
+off.
+
+   All other arguments are ignored as is `syncoutput' without
+parenthesis.
 
 
 File: m4.info,  Node: Frozen files,  Next: Compatibility,  Prev: Miscellaneous,  Up: Top
@@ -1290,7 +1549,7 @@ directory.  It is looked up the same way as an `include' file (*note
 Search Path::.).
 
    Frozen files are sharable across architectures.  It is safe to write
-a frozen file one one machine and read it on another, given that the
+a frozen file on one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU `m4'.  These
 are simple (editable) text files, made up of directives, each starting
 with a capital letter and ending with a newline (<NL>).  Wherever a
@@ -1327,7 +1586,7 @@ decimal.  The directives are:
      however this may not be produced from within `m4'.
 
 
-File: m4.info,  Node: Compatibility,  Next: Concept index,  Prev: Frozen files,  Up: Top
+File: m4.info,  Node: Compatibility,  Next: Experiments,  Prev: Frozen files,  Up: Top
 
 Compatibility with other versions of `m4'
 *****************************************
@@ -1344,125 +1603,4 @@ made to summarize these here.
 * Extensions::                  Extensions in GNU m4
 * Incompatibilities::           Facilities in System V m4 not in GNU m4
 * Other Incompat::              Other incompatibilities
-
-
-File: m4.info,  Node: Extensions,  Next: Incompatibilities,  Prev: Compatibility,  Up: Compatibility
-
-Extensions in GNU `m4'
-======================
-
-   This version of `m4' contains a few facilities, that do not exist in
-System V `m4'.  These extra facilities are all suppressed by using the
-`-G' command line option, unless overridden by other command line
-options.
-
-   * In the `$'N notation for macro arguments, N can contain several
-     digits, while the System V `m4' only accepts one digit.  This
-     allows macros in GNU `m4' to take any number of arguments, and not
-     only nine (*note Arguments::.).
-
-   * Files included with `include' and `sinclude' are sought in a user
-     specified search path, if they are not found in the working
-     directory.  The search path is specified by the `-I' option and the
-     `M4PATH' environment variable (*note Search Path::.).
-
-   * Arguments to `undivert' can be non-numeric, in which case the named
-     file will be included uninterpreted in the output (*note
-     Undivert::.).
-
-   * Formatted output is supported through the `format' builtin, which
-     is modeled after the C library function `printf' (*note Format::.).
-
-   * Searches and text substitution through regular expressions are
-     supported by the `regexp' (*note Regexp::.) and `patsubst' (*note
-     Patsubst::.) builtins.
-
-   * The output of shell commands can be read into `m4' with `esyscmd'
-     (*note Esyscmd::.).
-
-   * There is indirect access to any builtin macro with `builtin'
-     (*note Builtin::.).
-
-   * Macros can be called indirectly through `indir' (*note Indir::.).
-
-   * The name of the current input file and the current input line
-     number are accessible through the builtins `__file__' and
-     `__line__' (*note Errprint::.).
-
-   * The format of the output from `dumpdef' and macro tracing can be
-     controlled with `debugmode' (*note Debug Levels::.).
-
-   * The destination of trace and debug output can be controlled with
-     `debugfile' (*note Debug Output::.).
-
-   In addition to the above extensions, GNU `m4' implements the
-following command line options: `-F', `-G', `-I', `-L', `-R', `-V',
-`-W', `-d', `-l', `-o' and `-t'.  *Note Invoking m4::, for a
-description of these options.
-
-   Also, the debugging and tracing facilities in GNU `m4' are much more
-extensive than in most other versions of `m4'.
-
-
-File: m4.info,  Node: Incompatibilities,  Next: Other Incompat,  Prev: Extensions,  Up: Compatibility
-
-Facilities in System V `m4' not in GNU `m4'
-===========================================
-
-   The version of `m4' from System V contains a few facilities that
-have not been implemented in GNU `m4' yet.
-
-   * System V `m4' supports multiple arguments to `defn'.  This is not
-     implemented in GNU `m4'.  Its usefulness is unclear to me.
-
-
-File: m4.info,  Node: Other Incompat,  Prev: Incompatibilities,  Up: Compatibility
-
-Other incompatibilities
-=======================
-
-   There are a few other incompatibilities between this implementation
-of `m4', and the System V version.
-
-   * GNU `m4' implements sync lines differently from System V `m4',
-     when text is being diverted.  GNU `m4' outputs the sync lines when
-     the text is being diverted, and System V `m4' when the diverted
-     text is being brought back.
-
-     The problem is which lines and filenames should be attached to
-     text that is being, or has been, diverted.  System V `m4' regards
-     all the diverted text as being generated by the source line
-     containing the `undivert' call, whereas GNU `m4' regards the
-     diverted text as being generated at the time it is diverted.
-
-     I expect the sync line option to be used mostly when using `m4' as
-     a front end to a compiler.  If a diverted line causes a compiler
-     error, the error messages should most probably refer to the place
-     where the diversion were made, and not where it was inserted again.
-
-   * GNU `m4' makes no attempt at prohiting autoreferential definitions
-     like:
-
-          define(`x', `x')
-          define(`x', `x ')
-
-     There is nothing inherently wrong with defining `x' to return `x'.
-     The wrong thing is to expand `x' unquoted.  In `m4', one might
-     use macros to hold strings, as we do for variables in other
-     programming languages, further checking them with:
-
-          ifelse(defn(`HOLDER'), `VALUE', ...)
-
-     In cases like this one, an interdiction for a macro to hold its own
-     name would be a useless limitation.  Of course, this leave more
-     rope for the GNU `m4' user to hang himself!  Rescanning hangs may
-     be avoided through careful programming, a little like for endless
-     loops in traditional programming languages.
-
-   * GNU `m4' without `-G' option will define the macro `__gnu__' to
-     expand to the empty string.
-
-     On UNIX systems, GNU `m4' without the `-G' option will define the
-     macro `__unix__', otherwise the macro `unix'.  Both will expand to
-     the empty string.
 

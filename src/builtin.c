@@ -39,6 +39,7 @@ DECLARE (m4___line__);
 DECLARE (m4_builtin);
 DECLARE (m4_changecom);
 DECLARE (m4_changequote);
+DECLARE (m4_changesyntax);
 #ifdef ENABLE_CHANGEWORD
 DECLARE (m4_changeword);
 #endif
@@ -72,6 +73,7 @@ DECLARE (m4_regexp);
 DECLARE (m4_shift);
 DECLARE (m4_sinclude);
 DECLARE (m4_substr);
+DECLARE (m4_syncoutput);
 DECLARE (m4_syscmd);
 DECLARE (m4_sysval);
 DECLARE (m4_traceoff);
@@ -93,6 +95,7 @@ builtin_tab[] =
   { "builtin",		TRUE,	FALSE,	TRUE,	m4_builtin },
   { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
   { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
+  { "changesyntax",	TRUE,	FALSE,	TRUE,	m4_changesyntax },
 #ifdef ENABLE_CHANGEWORD
   { "changeword",	TRUE,	FALSE,	FALSE,	m4_changeword },
 #endif
@@ -126,6 +129,7 @@ builtin_tab[] =
   { "shift",		FALSE,	FALSE,	FALSE,	m4_shift },
   { "sinclude",		FALSE,	FALSE,	TRUE,	m4_sinclude },
   { "substr",		FALSE,	FALSE,	TRUE,	m4_substr },
+  { "syncoutput",       TRUE,   FALSE,  TRUE,   m4_syncoutput },
   { "syscmd",		FALSE,	FALSE,	TRUE,	m4_syscmd },
   { "sysval",		FALSE,	FALSE,	FALSE,	m4_sysval },
   { "traceoff",		FALSE,	FALSE,	FALSE,	m4_traceoff },
@@ -286,13 +290,21 @@ bad_argc (token_data *name, int argc, int min, int max)
 | If the conversion fails, print error message for macro MACRO.  Return	    |
 | TRUE iff conversion succeeds.						    |
 `--------------------------------------------------------------------------*/
+static const char *
+skip_space (const char *arg)
+{
+  while (IS_SPACE(*arg))
+    arg++;
+  return arg;
+}
 
 static boolean
 numeric_arg (token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
 
-  if (*arg == 0 || (*valuep = strtol (arg, &endp, 10), *endp != 0))
+  if (*arg == 0 || (*valuep = strtol (skip_space(arg), &endp, 10), 
+		    *skip_space(endp) != 0))
     {
       M4ERROR ((warning_status, 0,
 		_("Non-numeric argument to built-in `%s'"),
@@ -300,47 +312,6 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
       return FALSE;
     }
   return TRUE;
-}
-
-/*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ascii representation in |
-| radix RADIX.								  |
-`------------------------------------------------------------------------*/
-
-/* Digits for number to ascii conversions.  */
-static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-static const char *
-ntoa (register eval_t value, int radix)
-{
-  boolean negative;
-  unsigned_eval_t uvalue;
-  static char str[256];
-  register char *s = &str[sizeof str];
-
-  *--s = '\0';
-
-  if (value < 0)
-    {
-      negative = TRUE;
-      uvalue = (unsigned_eval_t) -value;
-    }
-  else
-    {
-      negative = FALSE;
-      uvalue = (unsigned_eval_t) value;
-    }
-
-  do
-    {
-      *--s = digits[uvalue % radix];
-      uvalue /= radix;
-    }
-  while (uvalue > 0);
-
-  if (negative)
-    *--s = '-';
-  return s;
 }
 
 /*----------------------------------------------------------------------.
@@ -351,10 +322,10 @@ ntoa (register eval_t value, int radix)
 static void
 shipout_int (struct obstack *obs, int val)
 {
-  const char *s;
+  char buf[128];
 
-  s = ntoa ((eval_t) val, 10);
-  obstack_grow (obs, s, strlen (s));
+  sprintf(buf, "%d", val);
+  obstack_grow (obs, buf, strlen (buf));
 }
 
 /*----------------------------------------------------------------------.
@@ -738,6 +709,35 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 }
 
 /*------------------------------------------------------------------------.
+| This contains macro which implements syncoutput() which takes one arg   |
+|   1, on, yes - turn on sync lines                                       |
+|   0, off, no - turn off sync lines                                      |
+|   everything else is silently ignored                                   |
+|                                                                         |
+`------------------------------------------------------------------------*/
+
+static void
+m4_syncoutput (struct obstack *obs, int argc, token_data **argv)
+{
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+    return;
+
+  if (TOKEN_DATA_TEXT(argv[1])[0] == '0'
+      || TOKEN_DATA_TEXT(argv[1])[0] == 'n'
+      || (TOKEN_DATA_TEXT(argv[1])[0] == 'o'
+	  && TOKEN_DATA_TEXT(argv[1])[1] == 'f'))
+    sync_output = 0;
+  else if (TOKEN_DATA_TEXT(argv[1])[0] == '1'
+	   || TOKEN_DATA_TEXT(argv[1])[0] == 'y'
+	   || (TOKEN_DATA_TEXT(argv[1])[0] == 'o'
+	       && TOKEN_DATA_TEXT(argv[1])[1] == 'n'))
+    sync_output = 1;
+}
+
+/*------------------------------------------------------------------------.
 | This section contains macros to handle the builtins "syscmd", "esyscmd" |
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
@@ -794,10 +794,8 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  eval_t value;
   int radix = 10;
   int min = 1;
-  const char *s;
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
@@ -805,7 +803,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (argc >= 3 && !numeric_arg (argv[0], ARG (2), &radix))
     return;
 
-  if (radix <= 1 || radix > (int) strlen (digits))
+  if (radix <= 1 || radix > 36)
     {
       M4ERROR ((warning_status, 0,
 		_("Radix in eval out of range (radix = %d)"), radix));
@@ -821,21 +819,8 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  if (evaluate (ARG (1), &value))
+  if (evaluate (obs, ARG (1), radix, min))
     return;
-
-  s = ntoa (value, radix);
-
-  if (*s == '-')
-    {
-      obstack_1grow (obs, '-');
-      min--;
-      s++;
-    }
-  for (min -= strlen (s); --min >= 0;)
-    obstack_1grow (obs, '0');
-
-  obstack_grow (obs, s, strlen (s));
 }
 
 static void
@@ -939,9 +924,11 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
       }
 }
 
-/* This section contains various macros, which does not fall into any
-   specific group.  These are "dnl", "shift", "changequote", "changecom"
-   and "changeword".  */
+/*-------------------------------------------------------------------.
+| This section contains various macros, which does not fall into any |
+| specific group.  These are "dnl", "shift", "changequote",	     |
+| "changecom", "changesyntax" and "changeword".			     |
+`-------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------.
 | Delete all subsequent whitespace from input.  The function skip_line () |
@@ -998,6 +985,92 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
   else
     set_comment (TOKEN_DATA_TEXT (argv[1]),
 		(argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
+}
+
+/*-------------------------------------------------------------------.
+| Change the current input syntax.  The function set_syntax () lives |
+| in input.c.  For compability reasons, this function is not called, |
+| if not followed by an SYNTAX_OPEN.  Also, any changes to comment   |
+| delimiters and quotes made here will be overridden by a call to    |
+| `changecom' or `changequote'.					     |
+`-------------------------------------------------------------------*/
+
+/* expand_ranges () from m4_translit () are used here. */
+static const char *expand_ranges (const char *s, struct obstack *obs);
+
+static void
+m4_changesyntax (struct obstack *obs, int argc, token_data **argv)
+{
+  int i;
+  int code;
+
+  if (bad_argc (argv[0], argc, 1, -1))
+    return;
+
+  for (i = 1; i < argc; i++)
+    {
+      switch (*TOKEN_DATA_TEXT (argv[i])) {
+      case 'I': case 'i':
+	code = SYNTAX_IGNORE;
+	break;
+      case 'O': case 'o':
+	code = SYNTAX_OTHER;
+	break;
+      case 'S': case 's':
+	code = SYNTAX_SPACE;
+	break;
+      case 'W': case 'w':
+	code = SYNTAX_ALPHA;
+	break;
+      case 'D': case 'd':
+	code = SYNTAX_NUM;
+	break;
+
+      case '(':
+	code = SYNTAX_OPEN;
+	break;
+      case ')':
+	code = SYNTAX_CLOSE;
+	break;
+      case ',':
+	code = SYNTAX_COMMA;
+	break;
+#if 0				/* not yet used */
+      case '$':
+	code = SYNTAX_DOLLAR;
+	break;
+#endif
+
+      case 'L': case 'l':
+	code = SYNTAX_LQUOTE;
+	break;
+      case 'R': case 'r':
+	code = SYNTAX_RQUOTE;
+	break;
+      case 'B': case 'b':
+	code = SYNTAX_BCOMM;
+	break;
+      case 'E': case 'e':
+	code = SYNTAX_ECOMM;
+	break;
+
+      case 'A': case 'a':
+	code = SYNTAX_ACTIVE;
+	break;
+
+      case '\0':
+	code = -1;
+	break;
+      default:
+	M4ERROR ((warning_status, 0,
+		  _("Undefined syntax code %c"), *TOKEN_DATA_TEXT (argv[i])));
+	code = -1;
+      }
+
+      if (code >= 0)
+	  set_syntax (code, 
+		      expand_ranges (TOKEN_DATA_TEXT (argv[i])+1, obs));
+    }
 }
 
 #ifdef ENABLE_CHANGEWORD
@@ -1684,7 +1757,7 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, token_data **argv)
 {
-  register const char *text;
+  const char *text;
   int i;
 
   for (text = SYMBOL_TEXT (sym); *text != '\0';)
@@ -1700,14 +1773,15 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
-	  if (no_gnu_extensions)
+	  if (no_gnu_extensions || !isdigit(text[1]))
 	    {
 	      i = *text++ - '0';
 	    }
 	  else
 	    {
-	      for (i = 0; isdigit (*text); text++)
-		i = i*10 + (*text - '0');
+	      char *endp;
+	      i = (int)strtol (text, &endp, 10);
+	      text = endp;
 	    }
 	  if (i < argc)
 	    obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),

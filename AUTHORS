@@ -18,3 +18,9 @@ Added:  stackovf.c tests/stackovf_test.sh
 M4      Pete Chown      (UK, 1972)      6/28/94
 Assigns changes to M4 (builtin.c, input.c, m4.h, m4.texinfo, macro.c).
 
+M4	John Gerard Makecki	US,1954		4/24/95
+Assigns changes. (m4.c,eval.c, builtin.c,m4.h; new- numb.h,mumb.c)
+johnm@vlibs.com
+
+M4	VLSI Libraries Inc.	4/24/95
+Disclaims changes by John Gerard Makecki.

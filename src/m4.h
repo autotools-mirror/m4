@@ -16,6 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef M4_H
+#define M4_H
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -126,7 +129,7 @@ char *mktemp ();
 
 struct string
   {
-    char *string;		/* characters of the string */
+    unsigned char *string;	/* characters of the string */
     size_t length;		/* length of the string */
   };
 typedef struct string STRING;
@@ -145,10 +148,12 @@ void error __P ((int, int, const char *, ...));
 /* Those must come first.  */
 typedef void builtin_func ();
 typedef struct token_data token_data;
+
 
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
+extern int interactive;			/* -e */
 extern int sync_output;			/* -s */
 extern int debug_level;			/* -d */
 extern int hash_table_size;		/* -H */
@@ -172,6 +177,7 @@ void reference_error __P ((void));
 void setup_stackovf_trap __P ((char *const *, char *const *,
 			       void (*handler) (void)));
 #endif
+
 
 /* File: debug.c  --- debugging and tracing function.  */
 
@@ -266,6 +272,7 @@ void debug_message_prefix __P ((void));
 void trace_prepre __P ((const char *, int));
 void trace_pre __P ((const char *, int, int, token_data **));
 void trace_post __P ((const char *, int, int, token_data **, const char *));
+
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -347,11 +354,65 @@ extern STRING lquote, rquote;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
+/* Syntax table definitions. */
+/* Please read the comment at the top of input.c for details */
+extern unsigned short syntax_table[256];
+
+/* These are simple values, not bit masks.  There is no overlap. */
+#define SYNTAX_OTHER	(0x0000)
+
+#define SYNTAX_IGNORE	(0x0001)
+#define SYNTAX_SPACE	(0x0002)
+#define SYNTAX_OPEN	(0x0003)
+#define SYNTAX_CLOSE	(0x0004)
+#define SYNTAX_COMMA	(0x0005)
+#define SYNTAX_DOLLAR	(0x0006) /* not used yet */
+#define SYNTAX_ACTIVE	(0x0007)
+
+/* These are values to be assigned to syntax table entries, but they are
+   used as bit masks with IS_ALNUM.*/
+#define SYNTAX_ALPHA	(0x0010)
+#define SYNTAX_NUM	(0x0020)
+#define SYNTAX_ALNUM	(SYNTAX_ALPHA|SYNTAX_NUM)
+
+/* These are bit masks to AND with other categories.  
+   See input.c for details. */
+#define SYNTAX_LQUOTE	(0x0100)
+#define SYNTAX_RQUOTE	(0x0200)
+#define SYNTAX_BCOMM	(0x0400)
+#define SYNTAX_ECOMM	(0x0800)
+
+/* These bits define the syntax code of a character */
+#define SYNTAX_VALUE	(0x00FF|SYNTAX_LQUOTE|SYNTAX_BCOMM)
+#define SYNTAX_MASKS	(0xFF00)
+
+#define IS_OTHER(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OTHER)
+#define IS_IGNORE(ch) ((syntax_table[(int)(ch)]) == SYNTAX_IGNORE)
+#define IS_SPACE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_SPACE)
+
+#define IS_OPEN(ch)   ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OPEN)
+#define IS_CLOSE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_CLOSE)
+#define IS_COMMA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_COMMA)
+#define IS_DOLLAR(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_DOLLAR)
+#define IS_ACTIVE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ACTIVE)
+
+#define IS_ALPHA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ALPHA)
+#define IS_NUM(ch)    ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_NUM)
+#define IS_ALNUM(ch)  (((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0)
+
+#define IS_LQUOTE(ch) (syntax_table[(int)(ch)] & SYNTAX_LQUOTE)
+#define IS_RQUOTE(ch) (syntax_table[(int)(ch)] & SYNTAX_RQUOTE)
+#define IS_BCOMM(ch)  (syntax_table[(int)(ch)] & SYNTAX_BCOMM)
+#define IS_ECOMM(ch)  (syntax_table[(int)(ch)] & SYNTAX_ECOMM)
+
+
 void set_quotes __P ((const char *, const char *));
 void set_comment __P ((const char *, const char *));
+void set_syntax __P ((int, const char *));
 #ifdef ENABLE_CHANGEWORD
 void set_word_regexp __P ((const char *));
 #endif
+
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
@@ -363,6 +424,7 @@ void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));
 void freeze_diversions __P ((FILE *));
+
 
 /* File symtab.c  --- symbol table definitions.  */
 
@@ -410,11 +472,13 @@ extern symbol **symtab;
 void symtab_init __P ((void));
 symbol *lookup_symbol __P ((const char *, symbol_lookup));
 void hack_all_symbols __P ((hack_symbol *, const char *));
+
 
 /* File: macro.c  --- macro expansion.  */
 
 void expand_input __P ((void));
 void call_macro __P ((symbol *, int, token_data **, struct obstack *));
+
 
 /* File: builtin.c  --- builtins.  */
 
@@ -446,6 +510,7 @@ void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **));
 
 const builtin *find_builtin_by_addr __P ((builtin_func *));
 const builtin *find_builtin_by_name __P ((const char *));
+
 
 /* File: path.c  --- path search for include files.  */
 
@@ -453,23 +518,24 @@ void include_init __P ((void));
 void include_env_init __P ((void));
 void add_include_directory __P ((const char *));
 FILE *path_search __P ((const char *));
+
 
 /* File: eval.c  --- expression evaluation.  */
 
-/* eval_t and unsigned_eval_t should be at least 32 bits.  */
-typedef int eval_t;
-typedef unsigned int unsigned_eval_t;
+boolean evaluate __P ((struct obstack *obs,
+		       const char *, const int radix, int min));
 
-boolean evaluate __P ((const char *, eval_t *));
 
 /* File: format.c  --- printf like formatting.  */
 
 void format __P ((struct obstack *, int, token_data **));
+
 
 /* File: freeze.c --- frozen state files.  */
 
 void produce_frozen_state __P ((const char *));
 void reload_frozen_state __P ((const char *));
+
 
 /* Debugging the memory allocator.  */
 
@@ -486,3 +552,5 @@ void reload_frozen_state __P ((const char *));
 # define DEBUG_SYM
 # define DEBUG_INCL
 #endif
+
+#endif /* M4_H */
