@@ -1,5 +1,10 @@
 2001-09-03  Akim Demaille  <akim@epita.fr>
 
+	* src/main.c (MODULE_SHORTOPT, MODULEPATH_SHORTOPT): Remove, there
+	is no such thing as `WITH_MODULES'.
+
+2001-09-03  Akim Demaille  <akim@epita.fr>
+
 	Improve the test suite's selfcontainedness.
 
 	* doc/m4.texinfo: Let `input.m4' be the input file, not `in'.

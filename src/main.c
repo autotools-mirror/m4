@@ -199,14 +199,6 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#ifdef WITH_MODULES
-#  define MODULE_SHORTOPT	"m:"
-#  define MODULEPATH_SHORTOPT	"M:"
-#else
-#  define MODULE_SHORTOPT	""
-#  define MODULEPATH_SHORTOPT	""
-#endif
-
 #define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:st:"
 
 #include <dlfcn.h>
