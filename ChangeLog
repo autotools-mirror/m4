@@ -1,3 +1,12 @@
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	* configure.in (VERSION): Bump to 1.4.3.
+	* News: Describe 1.4.3's changes.
+	* Makefile.maint: New file with release rules, from CVS libtool.
+	* Makefile.in (DISTFILES): Add Makefile.maint.
+	* INSTALL, install-sh, doc/texinfo.tex: Updated to latest
+	canonical versions.
+
 2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
 
 	* doc/m4.texinfo (Patsubst): Re-add trailing space required by

@@ -1,8 +1,9 @@
 GNU m4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005 Free Software Foundation, Inc.
 
-Version 1.4.3 - ??? 2005, by ???
+Version 1.4.3 - March 2005, by Gary V. Vaughan
 
+* DESTDIR installs now work correctly.
 * Don't segfault with uncompilable regexps to changeword().
 * Always use \n line-endings for frozen files (fixes a cygwin bug).
 * Portability fix for systems lacking mkstemp(3).
