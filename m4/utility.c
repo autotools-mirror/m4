@@ -163,12 +163,12 @@ m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
 
-  if (*arg == 0 || (*valuep = strtol (m4_skip_space(arg), &endp, 10),
-		    *m4_skip_space(endp) != 0))
+  if (*arg == 0 || (*valuep = strtol (m4_skip_space (arg), &endp, 10),
+		    *m4_skip_space (endp) != 0))
     {
       M4ERROR ((warning_status, 0,
-		_("Non-numeric argument to builtin `%s'"),
-		M4_TOKEN_DATA_TEXT (macro)));
+		_("Non-numeric argument to `%s': %s"),
+		M4_TOKEN_DATA_TEXT (macro), arg));
       return FALSE;
     }
   return TRUE;

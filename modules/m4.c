@@ -430,38 +430,35 @@ M4BUILTIN_HANDLER (divnum)
 }
 
 /* Bring back the diversion given by the argument list.  If none is
-   specified, bring back all diversions.  GNU specific is the option of
-   undiverting named files, by passing a non-numeric argument to
-   undivert().  */
+   specified, bring back all diversions.  GNU specific is the option
+   of undiverting the named file, by passing a non-numeric argument to
+   undivert ().  */
+
 M4BUILTIN_HANDLER (undivert)
 {
-  int i, file;
-  FILE *fp;
+  int i = 0;
 
   if (argc == 1)
     m4_undivert_all ();
   else
-    for (i = 1; i < argc; i++)
-      {
-	if (sscanf (M4ARG (i), "%d", &file) == 1)
-	  m4_insert_diversion (file);
-	else if (no_gnu_extensions)
-	  M4ERROR ((warning_status, 0,
-		    _("Non-numeric argument to %s"),
-		    M4_TOKEN_DATA_TEXT (argv[0])));
-	else
-	  {
-	    fp = m4_path_search (M4ARG (i), (char **)NULL);
-	    if (fp != NULL)
-	      {
-		m4_insert_file (fp);
-		fclose (fp);
-	      }
-	    else
-	      M4ERROR ((warning_status, errno,
-			_("Cannot undivert %s"), M4ARG (i)));
-	  }
-      }
+    {
+      if (sscanf (M4ARG (1), "%d", &i) == 1)
+	m4_insert_diversion (i);
+      else if (no_gnu_extensions)
+	m4_numeric_arg (argv[0], M4ARG (1), &i);
+      else
+	{
+	  FILE *fp = m4_path_search (M4ARG (1), (char **) NULL);
+	  if (fp != NULL)
+	    {
+	      m4_insert_file (fp);
+	      fclose (fp);
+	    }
+	  else
+	    M4ERROR ((warning_status, errno,
+		      _("Cannot undivert %s"), M4ARG (1)));
+	}
+    }
 }
 
 

@@ -1,5 +1,15 @@
 2001-08-20  Akim Demaille  <akim@epita.fr>
 
+	* m4/utility.c (m4_numeric_arg): Spell out the culprit.
+	* modules/m4.c (undivert): Disable the possibility of undiverting
+	several files at once: it is not documented, it is inconsistent
+	with the other macros, it can be straightforwardly mocked by
+	several invocations, and most importantly, it prevents the
+	possibility of other kinds of extension.
+	Use `m4_numeric_arg'.
+
+2001-08-20  Akim Demaille  <akim@epita.fr>
+
 	* examples/include.m4: Typo.
 	* tests/generate.awk: Really add it.
 	* tests/Makefile.am: Adjust.
