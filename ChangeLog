@@ -1,5 +1,17 @@
 2001-08-27  Akim Demaille  <akim@epita.fr>
 
+	Let the test suite use a wrapper around the not installed m4 to
+	pretend it is (installed).
+
+	* bootstrap (aclocal.m4): Output AC_SUBST's and AM_CONDITIONAL's in
+	such a way that m4 does not process them.
+	* configure.in: The package name seems to be `m4', not `M4'.
+	* tests/m4: New.
+	* tests/atlocal.in (at_package, M4): Remove.
+	* tests/testsuite.at, tests/others.at: Use m4, not $M4.
+
+2001-08-27  Akim Demaille  <akim@epita.fr>
+
 	* tests/Makefile.am (CLEANFILES): Remove.
 	(DISTCLEANFILES, clean-local): New.
 	* examples/mktests.sh: Remove.

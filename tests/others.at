@@ -626,7 +626,7 @@ AT_CLEANUP([frozen.m4f])
 
 AT_SETUP([--module-directory: absolute path])
 
-AT_CHECK([M4PATH=$top_srcdir $M4 -M `cd $top_builddir/modules; pwd` -m load -d modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir m4 -M `cd $top_builddir/modules; pwd` -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -645,7 +645,7 @@ AT_CLEANUP
 
 AT_SETUP([modpath2])
 
-AT_CHECK([M4PATH=$top_srcdir LTDL_LIBRARY_PATH=$top_builddir/modules $M4 -m load -d modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir LTDL_LIBRARY_PATH=$top_builddir/modules m4 -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -669,7 +669,7 @@ AT_DATA([[in]],
 Dumpdef: dumpdef(`test').
 ]])
 
-AT_CHECK([$M4 -m load -m modtest -M $top_builddir/modules -d in], 0,
+AT_CHECK([m4 -m load -m modtest -M $top_builddir/modules -d in], 0,
 [[Test module called.
 Dumpdef: .
 ]],
@@ -687,7 +687,7 @@ AT_CLEANUP
 
 AT_SETUP([M4MODPATH: absolute path])
 
-AT_CHECK([M4PATH=$top_srcdir M4MODPATH=`cd $top_builddir/modules; pwd` $M4 -m load -d modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir M4MODPATH=`cd $top_builddir/modules; pwd` m4 -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .
@@ -706,7 +706,7 @@ AT_CLEANUP
 
 AT_SETUP([modtest])
 
-AT_CHECK([M4PATH=$top_srcdir $M4 -M $top_builddir/modules -m load -d modules/modtest.m4], 0,
+AT_CHECK([M4PATH=$top_srcdir m4 -M $top_builddir/modules -m load -d modules/modtest.m4], 0,
 [[Test module loaded.
 Test module called.
 Dumpdef: .

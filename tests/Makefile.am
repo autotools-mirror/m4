@@ -19,7 +19,7 @@
 # The next line is needed by `others.at:esyscmd'
 #  Ty Coon, President of Vice
 
-EXTRA_DIST = generate.awk atlocal.in \
+EXTRA_DIST = generate.awk atlocal.in m4 \
 	$(OTHER_FILES) $(TESTSUITE_AT) $(TESTSUITE)
 
 DISTCLEANFILES       = atconfig atlocal

@@ -16,14 +16,18 @@ do
 done
 
 # Automake understands nothing to our aclocal and misses all its
-# AC_SUBST...
+# AC_SUBST...  Output them, but in a way that makes m4 ignore then.
 (
   set -e
   sed -n '1,/# Help Automake understand includes./p' aclocal.m4
-  echo "# It doesn't see AC_SUBSTs."
-  autoconf -t AC_SUBST:'AC_SUBST([$1])' | sort -u
-  echo "# It doesn't see AM_CONDITIONALs."
-  autoconf -t AM_CONDITIONAL:'AM_CONDITIONAL([$1])' | sort -u
+  echo "ifelse("
+  echo "  ["
+  echo "    # It doesn't see AC_SUBSTs."
+  autoconf -t AC_SUBST:'    AC_SUBST([$1])' | sort -u
+  echo "    # It doesn't see AM_CONDITIONALs."
+  autoconf -t AM_CONDITIONAL:'    AM_CONDITIONAL([$1])' | sort -u
+  echo "  ]"
+  echo ")"
 ) >aclocal.m4t
 mv aclocal.m4t aclocal.m4
 

@@ -3,12 +3,6 @@
 # Configurable variable values for M4 test suite.
 # Copyright 2000, 2001 Free Software Foundation, Inc.
 
-# We overwrite at_package, because Autotest expects `M4', not `m4'.
-at_package='GNU m4'
-
-# See how GNU m4 should be run.  No options as default.
-test -z "$M4" &&
-  M4="${SHELL} $top_builddir/libtool --mode=execute $top_builddir/src/m4"
-
+# Some tests cannot be performed with all the configurations.
 WITH_GMP=@WITH_GMP@
 ENABLE_CHANGEWORD=@ENABLE_CHANGEWORD@

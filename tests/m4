@@ -1,0 +1,16 @@
+#! /bin/sh
+
+# Wrapper around a non installed m4 to make it work as an installed one.
+
+. ./atconfig
+test -f atlocal && . ./atlocal
+
+${SHELL} $top_builddir/libtool --mode=execute \
+         $top_builddir/src/m4 ${1+"$@"} 2>/tmp/m4-$$
+status=$?
+
+# Normalize stderr.
+sed 's,^[^:]*[lt-]*m4[.ex]*:,m4:,;s,m4: ../../,m4: ../,' /tmp/m4-$$ >&2
+rm /tmp/m4-$$
+
+exit $status
