@@ -1,3 +1,15 @@
+2001-10-16  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/symtab.c (m4_symbol_destroy): This function calls
+	m4_symbol_popdef, which recycles a symbols memory when the last
+	definition is popped.  Since we were passing the address of the
+	symbol name found in the symbol table, and it was being removed
+	partway through m4_symbol_destroy() we were referencing freed
+	memory for the balance of the function.  Now we take a copy of the
+	symbol name tring and use that as a key into the symbol
+	table... that way if the original symbol name is freed, the copy
+	is still valid.
+
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
 	* m4/ltdl.c: Update.

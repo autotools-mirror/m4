@@ -80,6 +80,7 @@ m4_symtab_apply (m4_symtab_apply_func *func, void *data)
     {
       const char *name	= (const char *) m4_hash_iterator_key (place);
       m4_symbol *symbol = (m4_symbol *) m4_hash_iterator_value (place);
+
       result = (*func) (name, symbol, data);
 
       if (result != 0)
@@ -148,10 +149,14 @@ m4_symtab_exit (void)
 static int
 m4_symbol_destroy (const char *name, m4_symbol *symbol, void *data)
 {
+  char *key = xstrdup (name);
+
   SYMBOL_TRACED (symbol) = FALSE;
 
-  while (m4_hash_lookup (m4_symtab, name))
-    m4_symbol_popdef (name);
+  while (key && m4_hash_lookup (m4_symtab, key))
+    m4_symbol_popdef (key);
+
+  XFREE (key);
 
   return 0;
 }
