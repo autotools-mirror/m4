@@ -1,3 +1,9 @@
+2004-02-29  Gary V. Vaughan  <gary@gnu.org>
+
+	* config/mailnotify: New file for mailing commit notifications,
+	imported from cvs-utils.
+	* commit: Updated from cvs-utils and tweaked for m4.
+
 2003-12-01  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/mkstamp: Updated from CVS libtool.
