@@ -70,83 +70,110 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
   return NULL;
 }
 
-
-/* Install a builtin macro with name NAME, bound to the C function given in
-   BP.  MODE is M4_SYMBOL_INSERT or M4_SYMBOL_PUSHDEF.  TRACED defines whether
-   NAME is to be traced.  */
-void
-m4_builtin_define (const lt_dlhandle handle, const char *name,
-		   const m4_builtin *bp, m4_symbol_lookup_t mode,
-		   boolean traced)
+m4_symbol *
+m4_builtin_pushdef (const char *name, lt_dlhandle handle,
+		    const m4_builtin *bp)
 {
   m4_symbol *symbol;
 
-  symbol = m4_lookup_symbol (name, mode);
-  if (symbol)
-    {
-      if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-        xfree (M4_SYMBOL_TEXT (symbol));
+  assert (name);
+  assert (handle);
+  assert (bp);
 
-      M4_SYMBOL_HANDLE (symbol)		= handle;
-      M4_SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
-      M4_SYMBOL_MACRO_ARGS (symbol)	= bp->groks_macro_args;
-      M4_SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
-      M4_SYMBOL_FUNC (symbol)		= bp->func;
-      M4_SYMBOL_TRACED (symbol)		= traced;
-    }
+  symbol = m4_symbol_pushdef (name);
+
+  if (symbol)
+    m4_symbol_builtin (symbol, handle, bp);
+
+  return symbol;
+}
+
+m4_symbol *
+m4_builtin_insert (const char *name, lt_dlhandle handle,
+		    const m4_builtin *bp)
+{
+  m4_symbol *symbol;
+
+  assert (name);
+  assert (handle);
+  assert (bp);
+
+  symbol = m4_symbol_insert (name);
+
+  if (symbol)
+    m4_symbol_builtin (symbol, handle, bp);
+
+  return symbol;
 }
 
 void
-m4_builtin_table_install (const lt_dlhandle handle,
-			  const m4_builtin *table)
+m4_builtin_table_install (lt_dlhandle handle, const m4_builtin *table)
 {
   const m4_builtin *bp;
-  char *string;
+
+  assert (handle);
+  assert (table);
 
   for (bp = table; bp->name != NULL; bp++)
-    if (prefix_all_builtins)
-      {
-	string = (char *) xmalloc (strlen (bp->name) + 4);
-	strcpy (string, "m4_");
-	strcat (string, bp->name);
-	m4_builtin_define (handle, string, bp, M4_SYMBOL_PUSHDEF, FALSE);
-	free (string);
-      }
-    else
-      m4_builtin_define (handle, bp->name, bp, M4_SYMBOL_PUSHDEF, FALSE);
-}
-
-/* Define a predefined or user-defined macro, with name NAME, and expansion
-   TEXT.  MODE destinguishes between the "define" and the "pushdef" case.
-   It is also used from main ().  */
-void
-m4_macro_define (const lt_dlhandle handle, const char *name,
-		 const char *text, m4_symbol_lookup_t mode)
-{
-  m4_symbol *symbol;
-
-  symbol = m4_lookup_symbol (name, mode);
-  if (symbol)
     {
-      if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
-        xfree (M4_SYMBOL_TEXT (symbol));
+      char *key;
 
-      M4_SYMBOL_HANDLE (symbol) 	= handle;
-      M4_SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
-      M4_SYMBOL_MACRO_ARGS (symbol)	= FALSE;
-      M4_SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
-      M4_SYMBOL_TEXT (symbol) 		= xstrdup (text);
-      /* Do not reset M4_SYMBOL_TRACED as it means that --trace would be
-	 usable only for existing macros.  m4_lookup_symbol takes care
-	 of its proper initialization.  */
+      if (prefix_all_builtins)
+	{
+	  static const char prefix[] = "m4_";
+	  size_t len = strlen (prefix) + strlen (bp->name);
+
+	  key = (char *) xmalloc (1+ len);
+	  snprintf (key, 1+ len, "%s%s", prefix, bp->name);
+	}
+      else
+	key = (char *) bp->name;
+
+      m4_builtin_pushdef (key, handle, bp);
+
+      if (prefix_all_builtins)
+	xfree (key);
     }
 }
 
+m4_symbol *
+m4_macro_pushdef (const char *name, lt_dlhandle handle, const char *text)
+{
+  m4_symbol *symbol;
+
+  assert (name);
+  assert (text);
+
+  symbol = m4_symbol_pushdef (name);
+
+  if (symbol)
+    m4_symbol_macro (symbol, handle, text);
+
+  return symbol;
+}
+
+m4_symbol *
+m4_macro_insert (const char *name, lt_dlhandle handle, const char *text)
+{
+  m4_symbol *symbol;
+
+  assert (name);
+  assert (text);
+
+  symbol = m4_symbol_insert (name);
+
+  if (symbol)
+    m4_symbol_macro (symbol, handle, text);
+
+  return symbol;
+}
+
+
 void
-m4_macro_table_install (const lt_dlhandle handle, const m4_macro *table)
+m4_macro_table_install (lt_dlhandle handle, const m4_macro *table)
 {
   const m4_macro *mp;
 
   for (mp = table; mp->name != NULL; mp++)
-    m4_macro_define (handle, mp->name, mp->value, M4_SYMBOL_PUSHDEF);
+    m4_macro_pushdef (mp->name, handle, mp->value);
 }

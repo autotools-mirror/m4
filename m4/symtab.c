@@ -19,15 +19,12 @@
 */
 
 /* This file handles all the low level work around the symbol table.  The
-   symbol table is a simple chained hash table.  Each symbol is described
-   by a struct symbol, which is placed in the hash table based upon the
-   symbol name.  Symbols that hash to the same entry in the table are
-   kept on a list, sorted by name.  As a special case, to facilitate the
-   "pushdef" and "popdef" builtins, a symbol can be several times in the
-   symbol table, one for each definition.  Since the name is the same,
-   all the entries for the symbol will be on the same list, and will
-   also, because the list is sorted, be adjacent.  All the entries for a
-   name are simply ordered on the list by age.  The current definition
+   symbol table is an abstract hash table type implemented in hash.c.  Each
+   symbol is represented by `struct m4_symbol', which is stored in the hash
+   table keyed by the symbol name.  As a special case, to facilitate the
+   "pushdef" and "popdef" builtins, the value stored against each key us a
+   stack of `struct m4_symbol'. All the value entries for a symbol name are
+   simply ordered on the stack by age.  The most recently pushed definition
    will then always be the first found.  */
 
 #include "m4private.h"
@@ -124,36 +121,7 @@ m4_symbol_del (m4_symbol *symbol)
 }
 
 
-/* Dispatch on all the following 5 functions.
-
-   Search in, and manipulation of the symbol table, are all done by
-   m4_lookup_symbol ().  It basically hashes NAME to a list in the
-   symbol table, and searched this list for the first occurence of a
-   symbol with the name.
-
-   The MODE parameter determines what m4_lookup_symbol () will do.  It
-   can either just do a lookup, do a lookup and insert if not present,
-   do an insertion even if the name is already in the list, delete the
-   first occurrence of the name on the list or delete all occurences
-   of the name on the list.  */
-m4_symbol *
-m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
-{
-  switch (mode)
-    {
-    case M4_SYMBOL_INSERT:
-      return m4_symbol_insert (name);
-
-    case M4_SYMBOL_PUSHDEF:
-      return m4_symbol_pushdef (name);
-    }
-
-  assert (0);
-  /*NOTREACHED*/
-  return 0;
-}
-
-
+
 /* Return the symbol associated to NAME, or else NULL.  */
 m4_symbol *
 m4_symbol_lookup (const char *name)
@@ -236,6 +204,45 @@ m4_symbol_delete (const char *name)
   m4_symbol_del (*psymbol);
 }
 
+
+void
+m4_symbol_builtin (m4_symbol *symbol, lt_dlhandle handle,
+		   const m4_builtin *bp)
+{
+  assert (symbol);
+  assert (handle);
+  assert (bp);
+
+  if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
+    xfree (M4_SYMBOL_TEXT (symbol));
+
+  M4_SYMBOL_HANDLE (symbol)		= handle;
+  M4_SYMBOL_TYPE (symbol)		= M4_TOKEN_FUNC;
+  M4_SYMBOL_MACRO_ARGS (symbol)		= bp->groks_macro_args;
+  M4_SYMBOL_BLIND_NO_ARGS (symbol)	= bp->blind_if_no_args;
+  M4_SYMBOL_FUNC (symbol)		= bp->func;
+  /* Do not reset M4_SYMBOL_TRACED as it means that --trace would be
+     usable only for existing macros.  m4_symbol_lookup takes care
+     of its proper initialisation.  */
+}
+
+void
+m4_symbol_macro (m4_symbol *symbol, lt_dlhandle handle, const char *text)
+{
+  assert (symbol);
+
+  if (M4_SYMBOL_TYPE (symbol) == M4_TOKEN_TEXT)
+    xfree (M4_SYMBOL_TEXT (symbol));
+
+  M4_SYMBOL_HANDLE (symbol) 		= handle;
+  M4_SYMBOL_TYPE (symbol) 		= M4_TOKEN_TEXT;
+  M4_SYMBOL_MACRO_ARGS (symbol)		= FALSE;
+  M4_SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
+  M4_SYMBOL_TEXT (symbol) 		= xstrdup (text);
+  /* Do not reset M4_SYMBOL_TRACED as it means that --trace would be
+     usable only for existing macros.  m4_symbol_lookup takes care
+     of its proper initialisation.  */
+}
 
 /* Remove every symbol that references the given module handle from
    the symbol table.  */

@@ -126,12 +126,7 @@ M4INIT_HANDLER (m4)
    individual arguments to the macro.  Please note that in general
    argv[argc] != NULL.  */
 
-/* The function macro_install is common for the builtins "define" and
-   "pushdef".  ARGC and ARGV is as for the caller, and MODE argument
-   determines how the macro name is entered into the symbol table.  */
-
-static void
-macro_install (int argc, m4_token_data **argv, m4_symbol_lookup_t mode)
+M4BUILTIN_HANDLER (define)
 {
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
@@ -141,15 +136,15 @@ macro_install (int argc, m4_token_data **argv, m4_symbol_lookup_t mode)
 
   if (argc == 2)
     {
-      m4_macro_define (NULL, M4ARG (1), "", mode);
+      m4_macro_insert (M4ARG (1), NULL, "");
       return;
     }
 
   switch (M4_TOKEN_DATA_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_define (NULL, M4ARG (1), M4ARG (2), mode);
-      break;
+      m4_macro_insert (M4ARG (1), NULL, M4ARG (2));
+      return;
 
     case M4_TOKEN_FUNC:
       {
@@ -163,22 +158,13 @@ macro_install (int argc, m4_token_data **argv, m4_symbol_lookup_t mode)
 	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
 					   M4_TOKEN_DATA_FUNC (argv[2]));
 
-	m4_builtin_define (handle, M4ARG (1), builtin, mode,
-			   M4_TOKEN_DATA_FUNC_TRACED (argv[2]));
+	m4_builtin_insert (M4ARG (1), handle, builtin);
       }
-      break;
-
-    default:
-      M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad token data type in install_macro ()")));
-      abort ();
+      return;
     }
-  return;
-}
 
-M4BUILTIN_HANDLER (define)
-{
-  macro_install (argc, argv, M4_SYMBOL_INSERT);
+  /*NOTREACHED*/
+  assert (0);
 }
 
 M4BUILTIN_HANDLER (undefine)
@@ -195,7 +181,43 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  macro_install (argc, argv,  M4_SYMBOL_PUSHDEF);
+  if (m4_bad_argc (argv[0], argc, 2, 3))
+    return;
+
+  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
+    return;
+
+  if (argc == 2)
+    {
+      m4_macro_pushdef (M4ARG (1), NULL, "");
+      return;
+    }
+
+  switch (M4_TOKEN_DATA_TYPE (argv[2]))
+    {
+    case M4_TOKEN_TEXT:
+      m4_macro_pushdef (M4ARG (1), NULL, M4ARG (2));
+      return;
+
+    case M4_TOKEN_FUNC:
+      {
+	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
+	const m4_builtin  *builtin = 0;
+
+	/* If we find a TOKEN_FUNC with no defining module, then
+	   somewhere along the way we have lost the module handle.  */
+	assert (handle);
+
+	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
+					   M4_TOKEN_DATA_FUNC (argv[2]));
+
+	m4_builtin_pushdef (M4ARG (1), handle, builtin);
+      }
+      return;
+    }
+
+  /*NOTREACHED*/
+  assert (0);
 }
 
 M4BUILTIN_HANDLER (popdef)
@@ -209,9 +231,11 @@ M4BUILTIN_HANDLER (popdef)
     m4_symbol_popdef (M4ARG (1));
 }
 
-
 
+
+
 /* --- CONDITIONALS OF M4 --- */
+
 
 M4BUILTIN_HANDLER (ifdef)
 {

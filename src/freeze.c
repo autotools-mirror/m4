@@ -472,7 +472,7 @@ reload_frozen_state (const char *name)
 	    bp = m4_builtin_find_by_name (bt, string[1]);
 
 	  if (bp)
-	    m4_builtin_define (handle, string[0], bp, M4_SYMBOL_PUSHDEF, 0);
+	    m4_builtin_pushdef (string[0], handle, bp);
 	  else
 	    M4ERROR ((warning_status, 0,
 		      _("`%s' from frozen file not found in builtin table!"),
@@ -647,7 +647,7 @@ reload_frozen_state (const char *name)
 	      if (strcmp (m4_module_name (handle), string[2]) == 0)
 		break;
 
-	  m4_macro_define (handle, string[0], string[1], M4_SYMBOL_PUSHDEF);
+	  m4_macro_pushdef (string[0], handle, string[1]);
 	}
 	break;
 

@@ -1,5 +1,21 @@
 2001-09-08  Gary V. Vaughan  <gary@gnu.org>
 
+	Get rid of m4_symbol_lookup_t entirely.  With Akim's earlier
+	commits, the m4_lookup_symbol dispatch function is split into
+	specialised functions that must be called directly.
+
+	* m4/m4module.h (m4_symbol_lookup_t): Removed.
+	* m4/symtab.c (m4_lookup_symbol): Removed.
+	(m4_symbol_builtin, m4_symbol_macro): New functions.
+	* m4/builtin.c (m4_builtin_define): Split into...
+	(m4_builtin_pushdef, m4_builtin_insert): ...these.
+	(m4_macro_define): Split into...
+	(m4_macro_pushdef, m4_macro_insert): ...these.
+	* src/main.c (main): Set command line macros from `-D' parameters
+	using `m4_macro_define'.
+
+2001-09-08  Gary V. Vaughan  <gary@gnu.org>
+
 	* m4/symtab.c (m4_symtab_remove_module_references):  Renamed as
 	this from m4_remove_table_reference_symbols().
 	* m4/m4module.h, m4/module.c: Updated all references.
