@@ -37,7 +37,6 @@ typedef struct m4_token		m4_token;
 
 typedef void m4_builtin_func (struct obstack *, int, struct m4_token **);
 typedef void *m4_module_func (const char *);
-typedef int m4_symtab_apply_func (const char *name, m4_symbol *symbol, void *data);
 
 typedef struct {
     unsigned char *string;	/* characters of the string */
@@ -84,7 +83,6 @@ extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 extern m4_hash *m4_symtab;
 
 extern void	m4_symtab_init		(void);
-extern int	m4_symtab_apply		(m4_symtab_apply_func *, void *);
 extern void	m4_symtab_remove_module_references (lt_dlhandle);
 extern void	m4_symtab_exit		(void);
 
@@ -360,6 +358,7 @@ extern	int	m4_syntax_code	(char ch);
 #define M4_SYNTAX_DOLLAR	(0x0006) /* not used yet */
 #define M4_SYNTAX_ACTIVE	(0x0007)
 #define M4_SYNTAX_ESCAPE	(0x0008)
+#define M4_SYNTAX_ASSIGN	(0x0009)
 
 /* These are values to be assigned to syntax table entries, but they are
    used as bit masks with M4_IS_ALNUM.*/
@@ -389,8 +388,9 @@ extern	int	m4_syntax_code	(char ch);
 #define M4_IS_COMMA(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_COMMA)
 #define M4_IS_DOLLAR(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_DOLLAR)
 #define M4_IS_ACTIVE(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ACTIVE)
-
 #define M4_IS_ESCAPE(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ESCAPE)
+#define M4_IS_ASSIGN(ch) ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ASSIGN)
+
 #define M4_IS_ALPHA(ch)  ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_ALPHA)
 #define M4_IS_NUM(ch)    ((m4__syntax(ch)&M4_SYNTAX_VALUE) == M4_SYNTAX_NUM)
 #define M4_IS_ALNUM(ch)  (((m4__syntax(ch)) & M4_SYNTAX_ALNUM) != 0)
@@ -400,6 +400,7 @@ extern	int	m4_syntax_code	(char ch);
 #define M4_IS_BCOMM(ch)  (m4__syntax(ch) & M4_SYNTAX_BCOMM)
 #define M4_IS_ECOMM(ch)  (m4__syntax(ch) & M4_SYNTAX_ECOMM)
 
+#define M4_IS_IDENT(ch)	 (M4_IS_OTHER(ch) || M4_IS_ALNUM(ch))
 
 
 /* --- TOKENISATION AND INPUT --- */
@@ -479,7 +480,7 @@ struct m4_dump_symbol_data
   int size;			/* size of table */
 };
 
-extern int m4_dump_symbol (const char *name, m4_symbol *symbol, void *data);
+extern int m4_dump_symbol (const void *name, void *symbol, void *data);
 extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_token **argv, boolean complain);
 
 

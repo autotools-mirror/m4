@@ -94,7 +94,7 @@ typedef unsigned long int unumber;
 
 static void	include		(int argc, m4_token **argv,
 				 boolean silent);
-static int	set_trace	(const char *name, m4_symbol *symbol,
+static int	set_trace	(const void *ignored, void *symbol,
 				 void *data);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(struct obstack *obs, const number value,
@@ -581,9 +581,9 @@ M4BUILTIN_HANDLER (m4wrap)
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
 static int
-set_trace (const char *name, m4_symbol *symbol, void *data)
+set_trace (const void *ignored, void *symbol, void *data)
 {
-  SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
+  SYMBOL_TRACED ((m4_symbol *) symbol) = (boolean) (data != NULL);
   return 0;
 }
 
@@ -592,7 +592,7 @@ M4BUILTIN_HANDLER (traceon)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (set_trace, (char *) obs);
+    m4_hash_apply (m4_symtab, set_trace, (void *) obs);
   else
     for (i = 1; i < argc; i++)
       {
@@ -612,7 +612,7 @@ M4BUILTIN_HANDLER (traceoff)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (set_trace, NULL);
+    m4_hash_apply (m4_symtab, set_trace, NULL);
   else
     for (i = 1; i < argc; i++)
       {

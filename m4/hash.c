@@ -83,21 +83,24 @@ static m4_hash_node *m4_hash_node_free_list = 0;
 
 
 
-/* Allocate and return a new, unpopulated but initialised m4_hash,
-   where HASH_FUNC will be used to generate bucket numbers and
-   CMP_FUNC will be called to compare keys.  */
+/* Allocate and return a new, unpopulated but initialised m4_hash with
+   SIZE buckets, where HASH_FUNC will be used to generate bucket numbers
+   and CMP_FUNC will be called to compare keys.  */
 m4_hash *
-m4_hash_new (m4_hash_hash_func *hash_func, m4_hash_cmp_func *cmp_func)
+m4_hash_new (size_t size, m4_hash_hash_func *hash_func, m4_hash_cmp_func *cmp_func)
 {
   m4_hash *hash;
 
   assert (hash_func);
   assert (cmp_func);
 
+  if (size == 0)
+    size = M4_HASH_DEFAULT_SIZE;
+
   hash			    = XMALLOC (m4_hash, 1);
-  M4_HASH_SIZE (hash)	    = M4_HASH_DEFAULT_SIZE;
+  M4_HASH_SIZE (hash)	    = size;
   M4_HASH_LENGTH (hash)	    = 0;
-  M4_HASH_BUCKETS (hash)    = XCALLOC (m4_hash_node *, M4_HASH_DEFAULT_SIZE);
+  M4_HASH_BUCKETS (hash)    = XCALLOC (m4_hash_node *, size);
   M4_HASH_HASH_FUNC (hash)  = hash_func;
   M4_HASH_CMP_FUNC (hash)   = cmp_func;
 
@@ -498,6 +501,31 @@ m4_hash_iterator_value (m4_hash_iterator *place)
   assert (place);
 
   return M4_HASH_NODE_VAL (M4_ITERATOR_PLACE (place));
+}
+
+/* The following function is used for the cases where we want to do
+   something to each and every entry in HASH.  This function
+   traverses the hash table, and calls a specified function FUNC for
+   each entry in the table.  FUNC is called with a pointer to the
+   entry key, value, and the passed DATA argument.  */
+int
+m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *data)
+{
+  int result = 0;
+  m4_hash_iterator *place = NULL;
+
+  assert (func);
+
+  while ((place = m4_hash_iterator_next (hash, place)))
+    {
+      result = (*func) (m4_hash_iterator_key (place),
+			m4_hash_iterator_value (place), data);
+
+      if (result != 0)
+	break;
+    }
+
+  return result;
 }
 
 

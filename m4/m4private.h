@@ -47,6 +47,10 @@ struct m4_token_arg {
   char *	default_val;
 };
 
+#define TOKEN_ARG_INDEX(A)	((A)->index)
+#define TOKEN_ARG_FLAGS(A)	((A)->flags)
+#define TOKEN_ARG_DEFAULT(A)	((A)->default_val)
+
 /* m4_token_arg.flags bit masks:  */
 
 #define TOKEN_ARG_REST_BIT	(1 << 0)

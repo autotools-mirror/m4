@@ -176,7 +176,7 @@ AC_CHECK_SIZEOF([long long int])
 ## Library functions required by M4. ##
 ## --------------------------------- ##
 AC_CHECK_FUNCS(bzero calloc mkstemp mktemp strerror tmpfile)
-AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
+AC_REPLACE_FUNCS(strtol xmalloc xstrdup xstrzdup)
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 

@@ -35,9 +35,10 @@
    M4_SYNTAX_CLOSE	Close list of macro arguments
    M4_SYNTAX_COMMA	Separates macro arguments
    M4_SYNTAX_DOLLAR	*Indicates macro argument in user macros
-   M4_SYNTAX_ACTIVE	This caracter is a macro name by itself
-
+   M4_SYNTAX_ACTIVE	This character is a macro name by itself
    M4_SYNTAX_ESCAPE	Use this character to prefix all macro names
+   M4_SYNTAX_ASSIGN	Used to assign defaults in parameter lists
+
    M4_SYNTAX_ALPHA	Alphabetic characters (can start macro names)
    M4_SYNTAX_NUM	Numeric characters
    M4_SYNTAX_ALNUM	Alphanumeric characters (can form macro names)
@@ -116,6 +117,8 @@ m4_syntax_init (void)
 	set_syntax_internal (M4_SYNTAX_CLOSE, ch);
       else if (ch == ',')
 	set_syntax_internal (M4_SYNTAX_COMMA, ch);
+      else if (ch == '=')
+	set_syntax_internal (M4_SYNTAX_ASSIGN, ch);
       else if (isspace (ch))
 	set_syntax_internal (M4_SYNTAX_SPACE, ch);
       else if (isalpha (ch) || ch == '_')
@@ -156,6 +159,7 @@ m4_syntax_code (char ch)
     case '(': code = M4_SYNTAX_OPEN;   break;
     case ')': code = M4_SYNTAX_CLOSE;  break;
     case ',': code = M4_SYNTAX_COMMA;  break;
+    case '=': code = M4_SYNTAX_ASSIGN; break;
     case '@': code = M4_SYNTAX_ESCAPE; break;
 #if 0				/* not yet used */
     case '$': code = M4_SYNTAX_DOLLAR; break;

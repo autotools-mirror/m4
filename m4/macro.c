@@ -18,7 +18,7 @@
    02111-1307  USA
 */
 
-/* This file contains the functions, that performs the basic argument
+/* This file contains the functions that perform the basic argument
    parsing and macro expansion.  */
 
 #include "m4.h"
@@ -33,15 +33,15 @@ int m4_expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
 
-/* This function read all input, and expands each token, one at a time.  */
+/* This function reads all input, and expands each token, one at a time.  */
 void
 m4_expand_input (void)
 {
-  m4_token_t t;
-  m4_token td;
+  m4_token_t type;
+  m4_token token;
 
-  while ((t = m4_next_token (&td)) != M4_TOKEN_EOF)
-    expand_token ((struct obstack *) NULL, t, &td);
+  while ((type = m4_next_token (&token)) != M4_TOKEN_EOF)
+    expand_token ((struct obstack *) NULL, type, &token);
 }
 
 
@@ -50,12 +50,12 @@ m4_expand_input (void)
    macro definition.  If they have, they are expanded as macros, otherwise
    the text are just copied to the output.  */
 static void
-expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
+expand_token (struct obstack *obs, m4_token_t type, m4_token *token)
 {
   m4_symbol *symbol;
-  char *text = xstrdup (TOKEN_TEXT (td));
+  char *text = xstrdup (TOKEN_TEXT (token));
 
-  switch (t)
+  switch (type)
     {				/* TOKSW */
     case M4_TOKEN_EOF:
     case M4_TOKEN_MACDEF:
@@ -69,12 +69,12 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
 
     case M4_TOKEN_WORD:
       {
-	char *p = text;
+	char *textp = text;
 
-	if (M4_IS_ESCAPE(*p))
-	  ++p;
+	if (M4_IS_ESCAPE(*textp))
+	  ++textp;
 
-	symbol = m4_symbol_lookup (p);
+	symbol = m4_symbol_lookup (textp);
 	if (symbol == NULL
 	    || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
 	    || (SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
@@ -84,7 +84,7 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
 	    m4_shipout_text (obs, text, strlen (text));
 	  }
 	else
-	  expand_macro (p, symbol);
+	  expand_macro (textp, symbol);
       }
       break;
 
@@ -101,15 +101,15 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
 /* This function parses one argument to a macro call.  It expects the first
    left parenthesis, or the separating comma to have been read by the
    caller.  It skips leading whitespace, and reads and expands tokens,
-   until it finds a comma or an right parenthesis at the same level of
-   parentheses.  It returns a flag indicating whether the argument read are
-   the last for the active macro call.  The argument are build on the
+   until it finds a comma or a right parenthesis at the same level of
+   parentheses.  It returns a flag indicating whether the argument read is
+   the last for the active macro call.  The arguments are build on the
    obstack OBS, indirectly through expand_token ().	 */
 static boolean
 expand_argument (struct obstack *obs, m4_token *argp)
 {
-  m4_token_t t;
-  m4_token td;
+  m4_token_t type;
+  m4_token token;
   char *text;
   int paren_level = 0;
   const char *current_file = m4_current_file;
@@ -120,16 +120,16 @@ expand_argument (struct obstack *obs, m4_token *argp)
   /* Skip leading white space.  */
   do
     {
-      t = m4_next_token (&td);
+      type = m4_next_token (&token);
     }
-  while (t == M4_TOKEN_SPACE);
+  while (type == M4_TOKEN_SPACE);
 
   while (1)
     {
-      switch (t)
+      switch (type)
 	{			/* TOKSW */
 	case M4_TOKEN_SIMPLE:
-	  text = TOKEN_TEXT (&td);
+	  text = TOKEN_TEXT (&token);
 	  if ((M4_IS_COMMA (*text) || M4_IS_CLOSE (*text)) && paren_level == 0)
 	    {
 
@@ -142,14 +142,14 @@ expand_argument (struct obstack *obs, m4_token *argp)
 		  TOKEN_TYPE (argp) = M4_TOKEN_TEXT;
 		  TOKEN_TEXT (argp) = text;
 		}
-	      return (boolean) (M4_IS_COMMA (*TOKEN_TEXT (&td)));
+	      return (boolean) (M4_IS_COMMA (*TOKEN_TEXT (&token)));
 	    }
 
 	  if (M4_IS_OPEN (*text))
 	    paren_level++;
 	  else if (M4_IS_CLOSE (*text))
 	    paren_level--;
-	  expand_token (obs, t, &td);
+	  expand_token (obs, type, &token);
 	  break;
 
 	case M4_TOKEN_EOF:
@@ -160,12 +160,12 @@ expand_argument (struct obstack *obs, m4_token *argp)
 	case M4_TOKEN_WORD:
 	case M4_TOKEN_SPACE:
 	case M4_TOKEN_STRING:
-	  expand_token (obs, t, &td);
+	  expand_token (obs, type, &token);
 	  break;
 
 	case M4_TOKEN_MACDEF:
 	  if (obstack_object_size (obs) == 0)
-	    m4_token_copy (argp, &td);
+	    m4_token_copy (argp, &token);
 	  break;
 
 	default:
@@ -174,46 +174,47 @@ expand_argument (struct obstack *obs, m4_token *argp)
 	  abort ();
 	}
 
-      t = m4_next_token (&td);
+      type = m4_next_token (&token);
     }
 }
 
-/* Collect all the arguments to a call of the macro SYM.  The arguments are
-   stored on the obstack ARGUMENTS and a table of pointers to the arguments
-   on the obstack ARGPTR.  */
+/* Collect all the arguments to a call of the macro SYMBOL (called NAME).
+   The arguments are stored on the obstack ARGUMENTS and a table of pointers
+   to the arguments on the obstack ARGPTR.  */
 static void
 collect_arguments (const char *name, m4_symbol *symbol,
 		   struct obstack *argptr, struct obstack *arguments)
 {
   int ch;			/* lookahead for ( */
-  m4_token td;
-  m4_token *tdp;
+  m4_token token;
+  m4_token *tokenp;
   boolean more_args;
   boolean groks_macro_args;
 
   groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), TOKEN_MACRO_ARGS_BIT);
 
-  TOKEN_TYPE (&td) = M4_TOKEN_TEXT;
-  TOKEN_TEXT (&td) = (char *) name;
-  tdp = (m4_token *) obstack_copy (arguments, (void *) &td, sizeof (td));
-  obstack_grow (argptr, (void *) &tdp, sizeof (tdp));
+  TOKEN_TYPE (&token) = M4_TOKEN_TEXT;
+  TOKEN_TEXT (&token) = (char *) name;
+  tokenp = (m4_token *) obstack_copy (arguments, (void *) &token,
+				      sizeof (token));
+  obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
   ch = m4_peek_input ();
   if (M4_IS_OPEN(ch))
     {
-      m4_next_token (&td);		/* gobble parenthesis */
+      m4_next_token (&token);		/* gobble parenthesis */
       do
 	{
-	  more_args = expand_argument (arguments, &td);
+	  more_args = expand_argument (arguments, &token);
 
-	  if (!groks_macro_args && TOKEN_TYPE (&td) == M4_TOKEN_FUNC)
+	  if (!groks_macro_args && TOKEN_TYPE (&token) == M4_TOKEN_FUNC)
 	    {
-	      TOKEN_TYPE (&td) = M4_TOKEN_TEXT;
-	      TOKEN_TEXT (&td) = "";
+	      TOKEN_TYPE (&token) = M4_TOKEN_TEXT;
+	      TOKEN_TEXT (&token) = "";
 	    }
-	  tdp = (m4_token *)
-	    obstack_copy (arguments, (void *) &td, sizeof (td));
-	  obstack_grow (argptr, (void *) &tdp, sizeof (tdp));
+	  tokenp = (m4_token *)
+	    obstack_copy (arguments, (void *) &token, sizeof (token));
+	  obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 	}
       while (more_args);
     }
@@ -222,11 +223,11 @@ collect_arguments (const char *name, m4_symbol *symbol,
 
 
 /* The actual call of a macro is handled by m4_call_macro ().
-   m4_call_macro () is passed a symbol SYM, whose type is used to
+   m4_call_macro () is passed a SYMBOL, whose type is used to
    call either a builtin function, or the user macro expansion
-   function expand_predefine () (lives in builtin.c).  There are ARGC
-   arguments to the call, stored in the ARGV table.  The expansion is
-   left on the obstack EXPANSION.  Macro tracing is also handled here.  */
+   function m4_process_macro ().  There are ARGC arguments to
+   the call, stored in the ARGV table.  The expansion is left on
+   the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_call_macro (m4_symbol *symbol, int argc, m4_token **argv,
 	       struct obstack *expansion)
@@ -358,7 +359,50 @@ m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc,
 	  break;
 
 	default:
-	  obstack_1grow (obs, '$');
+	  if (no_gnu_extensions || !SYMBOL_ARG_SIGNATURE (symbol))
+	    {
+	      obstack_1grow (obs, '$');
+	    }
+	  else
+	    {
+	      size_t       len  = 0;
+	      const char * endp;
+	      const char * key;
+
+	      for (endp = ++text; *endp && M4_IS_IDENT (*endp); ++endp)
+		++len;
+	      key = xstrzdup (text, len);
+
+	      if (*endp)
+		{
+		  struct m4_token_arg **arg
+		    = (struct m4_token_arg **)
+		      m4_hash_lookup (SYMBOL_ARG_SIGNATURE (symbol), key);
+
+		  if (arg)
+		    {
+		      i = TOKEN_ARG_INDEX (*arg);
+
+		      if (i < argc)
+			m4_shipout_string (obs, M4ARG (i), 0, FALSE);
+		      else
+			M4ERROR ((EXIT_FAILURE, 0, "\
+INTERNAL ERROR: %s: out of range reference `%d' from argument %s",
+			      M4ARG (0), i, key));
+		    }
+		}
+	      else
+		{
+		  M4ERROR ((warning_status, 0,
+			  _("Error: %s: unterminated parameter reference: %s"),
+			    M4ARG (0), key));
+		}
+
+	      text = *endp ? 1+ endp : endp;
+
+	      xfree ((char *) key);
+	      break;
+	    }
 	  break;
 	}
     }

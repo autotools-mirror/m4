@@ -132,7 +132,7 @@ m4_skip_space (const char *arg)
 }
 
 /* The function m4_numeric_arg () converts ARG to an int pointed to by
-   VALUEP. If the conversion fails, print error message for macro MACRO.
+   VALUEP. If the conversion fails, print error message for macro.
    Return TRUE iff conversion succeeds.  */
 boolean
 m4_numeric_arg (int argc, m4_token **argv, int arg, int *valuep)
@@ -222,16 +222,16 @@ dumpdef_cmp (const void *s1, const void *s2)
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
    table of all defined symbol names.  */
 int
-m4_dump_symbol (const char *name, m4_symbol *symbol, void *data)
+m4_dump_symbol (const void *name, void *symbol, void *data)
 {
-  if (SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
+  if (SYMBOL_TYPE ((m4_symbol *) symbol) != M4_TOKEN_VOID)
     {
       struct m4_dump_symbol_data *symbol_data
 	= (struct m4_dump_symbol_data *) data;
 
       obstack_blank (symbol_data->obs, sizeof (const char *));
       symbol_data->base = (const char **) obstack_base (symbol_data->obs);
-      symbol_data->base[symbol_data->size++] = name;
+      symbol_data->base[symbol_data->size++] = (const char *) name;
     }
 
   return 0;
@@ -248,7 +248,7 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
   if (argc == 1)
     {
-      m4_symtab_apply (m4_dump_symbol, data);
+      m4_hash_apply (m4_symtab, m4_dump_symbol, data);
     }
   else
     {

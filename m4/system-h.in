@@ -178,6 +178,7 @@ extern void *xrealloc (void *p, size_t n);
 extern void *xfree    (void *stale);
 
 extern char *xstrdup  (const char *string);
+extern char *xstrzdup (const char *string, size_t len);
 
 END_C_DECLS
 

@@ -1,3 +1,40 @@
+2003-06-06  Gary V. Vaughan  <gary@gnu.org>
+
+	First cut at formal parameters in macros.
+
+	* configure.ac (AC_REPLACE_FUNCS): Add xstrzdup.
+	* m4/xstrzdup.c: New file.
+	* m4/builtin.c (M4_ARG_SIGNATURE_DEFAULT_SIZE): Start size for
+	associative array of parameter names to details.
+	(m4_symbol_token): Capture macro names with parameter lists.
+	(m4_arg_signature_parse): And build an associative array to hang
+	from the symbol structure to map names to details.
+	* m4/hash.c (m4_hash_new): Break the m4_hash_new followed by
+	m4_hash_resize idiom.  Now that we potentially add a little hash
+	table to many of the entries in the symbol table, added an extra
+	arg to set the initial size.  Changed all callers.
+	(m4_hash_apply): New function that is basically a generalised
+	version of...
+	* m4/symtab.c (m4_symbol_apply): ...this.  Now deleted.  Adjusted
+	all callers to call m4_hash_apply instead.
+	(m4_arg_destroy): Recycle memory used by an m4_token_arg.
+	(m4_symbol_popdef): Use m4_arg_destroy to help recycle the
+	m4_arg_signature association that might be attached to the symbol,
+	* m4/hash.h (m4_hash_apply_func): Replacement type for...
+	* m4/m4module.h (m4_symtab_apply_func): ...this.  Now deleted.
+	(M4_SYNTAX_ASSIGN): Placeholder for assigning default values in
+	parameter lists.
+	(M4_IS_ASSIGN): Detect characters with M4_SYNTAX_ASSIGN syntax.
+	(M4_IS_IDENT): Detect characters that can be safely used in
+	parameter names.
+	* m4/syntax.c (m4_syntax_init): Add an M4_SYNTAX_ASSIGN character.
+	* m4/macro.c: Corrected grammar in some comments.  Use `token'
+	rather than `td' for m4_token variables.
+	(m4_process_macro): If we find a dollar followed by some
+	M4_IS_IDENT characters, replace that with the contents of the argv
+	entry with offset stored in the m4_token_arg associated with the
+	collected identifier.
+
 2003-06-05  Gary V. Vaughan  <gary@gnu.org>
 
 	Begin preparations for supporting formal parameters in m4 macros.
