@@ -1,3 +1,9 @@
+2004-09-09  Vincent Lonngren  <Vincent.lonngren.759@student.lu.se>
+
+	* configure.in (AC_CHECK_HEADERS):  Add signal.h, sys/signal.h.
+	* src/m4.c: And include them as appropriate.
+	* NEWS: Updated.
+
 2004-09-09  Andreas Schwab  <schwab@suse.de>
 
 	Refactoring of the string read case in next_char provides about a
@@ -16,7 +22,7 @@
 	* Release 1.4.2.
 
 	* configure.in (VERSION): Bump to 1.4.2.
-	* NEWS: Describe 1.4.2's changes.
+	* News: Describe 1.4.2's changes.
 
 	* src/m4.c (reference_error): Preserve errno, since M4ERROR
 	relies on this.
