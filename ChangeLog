@@ -1,5 +1,9 @@
 2003-10-10  Gary V. Vaughan  <gary@gnu.org>
 
+	* tests/modules.at (modules: importing): Apply some lateral
+	thinking, and use AT_CHECK to compare the output of a sed pass
+	over stderr against the canonical strerror string.
+
 	* tests/modules.at (modules: importing): Edit the generated stderr
 	output to canonicalize strerror output, before a comparison.
 

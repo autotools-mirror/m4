@@ -340,6 +340,11 @@ AT_CLEANUP
 
 # Importing a symbol from a not yet loaded module
 
+# This test is ugly, because we need to canonicalize strerror strings
+# to match our test.  So we save STDERR to a file, and run another check
+# which edits that file and compares it to the canonical STDERR output
+# from the first command:
+
 AT_SETUP([modules: importing])
 
 AT_DATA([[input.m4]],
@@ -373,11 +378,19 @@ m4: input.m4: 6: Warning: cannot load symbol `no_such' from module `modtest'
 m4: input.m4: 7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
 ]])
 
-AT_CHECK_M4([-m load input.m4 2>acterr], 1, expout, ignore)
+AT_CHECK_M4([-m load input.m4], 1, expout, stderr)
 
-sed '/^m4: input.m4: 7:/ {
-    s,\(7:[[^:]]*:\).*$,\1 no_such.so: cannot open shared object file: No such file or directory, }' < acterr > editerr
-$at_diff experr editerr || echo 1 > $at_status_file
+# The expected stderr from the m4 invocation above becomes the expected
+# stdout of the following sed invocation to canonicalize the strerror message.
+# Note that the choice of file name affects the behaviour of AT_CHECK, so
+# we retain experr above for consistency with the rest of the testsuite, but
+# rename it here to make it play nicely with AT_CHECK:
+rm -f expout
+mv experr expout
+
+AT_CHECK([sed '/^m4: input.m4: 7:/ {
+    s,\(7:[[^:]]*:\).*$,\1 no_such.so: cannot open shared object file: No such file or directory, }' stderr], 0, expout)
+
 
 AT_CLEANUP
 
