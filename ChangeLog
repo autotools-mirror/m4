@@ -1,5 +1,17 @@
 2001-09-03  Gary V. Vaughan  <gary@gnu.org>
 
+	Bootstrap will now work with Libtool 1.4.1 or higher:
+	* bootstrap: Remove stale autom4te.cache files when
+	rebootstrapping.
+	* config/Makefile.am (ACLOCAL_MACROS):  Add ltdl.m4 and
+	libtool.m4.
+	* bootstrap: Ignore acinclude.m4 now the we include ltdl.m4 and
+	libtool.m4 directly.
+	Run libtoolize to refresh ltmain.sh.
+	* config/ltmain.sh:  Deleted.
+	* acinclude.m4: Deleted.
+	* m4/ltdl.c, m4/ltdl.h: Updated from libtool-1.4.1.
+
 	* config/debug.m4 (AC_LIBTOOL_COMPILER_OPTION): Provide a fallback
 	implementation for the cvs impaired libtool user.
 

@@ -42,6 +42,8 @@ init.m4						\
 install-sh.m4					\
 isc-posix.m4					\
 lcmessage.m4					\
+libtool.m4					\
+ltdl.m4						\
 make.m4						\
 missing.m4					\
 progtest.m4					\

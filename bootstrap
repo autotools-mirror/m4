@@ -3,6 +3,8 @@
 # helps bootstrapping M4, when checked out from CVS
 # requires GNU autoconf, GNU automake and GNU libtool
 
+find . -name autom4te.cache | xargs rm -r
+
 auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.in | sed 's/^.*(\([^)]*\)).*$/\1/'`
 
 rm -f config.cache
@@ -23,9 +25,6 @@ done
   sed 's/^  //' <<EOF
   # This file was gererated by $0.
   # Do not edit by hand, *nor by aclocal*.
-
-  # Non Autoconf additional macros.
-  m4_include([acinclude.m4])
 
   # aclocal macros.
 EOF
@@ -64,8 +63,8 @@ EOF
 cat aclocal.m4t >>aclocal.m4
 
 # shtoolize -q -I ./$auxdir echo move install mkdir version || exit 1
-# libtoolize -f -c || exit 1
 # gettextize -f -c  || exit 1
+libtoolize --force --copy || exit 1
 touch config-h.in
 automake --add-missing --copy || exit 1
 autoconf || exit 1
