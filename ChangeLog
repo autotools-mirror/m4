@@ -1,5 +1,9 @@
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.in: Figure out whether to use the installed
+	getopt.h or the supplied one.
+	* src/Makefile.am: ditto.
+
 	* po/POTFILES.in: List files in their new positions.
 
 	* config/ltmain.sh:  This needs to be checked in to match the

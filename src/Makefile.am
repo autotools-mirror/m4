@@ -24,10 +24,10 @@ MAINTAINERCLEANFILES = Makefile.in
 AM_CPPFLAGS = $(LIBM4_DLL_IMPORT)
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
 
-noinst_HEADERS = getopt.h
+noinst_HEADERS = gnu-getopt.h
 
 bin_PROGRAMS = m4
-m4_SOURCES = main.c m4.h eval.c evalmp.c freeze.c stackovf.c
+m4_SOURCES = main.c m4.h eval.c evalmp.c freeze.c stackovf.c $(M4OBJS)
 EXTRA_m4_SOURCES = numb.c numb.h getopt.c getopt1.c
 
 

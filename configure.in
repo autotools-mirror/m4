@@ -76,7 +76,10 @@ AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
 M4OBJS=
-AC_CHECK_FUNC(getopt_long, , [M4OBJS="getopt1.o getopt.o"])
+AC_CHECK_FUNC(getopt_long, [], 
+[M4OBJS="getopt1.o getopt.o"
+rm -f src/getopt.h
+$LN_S src/gnu-getopt.h src/getopt.h])
 AC_SUBST(M4OBJS)
 jm_PREREQ_ERROR
 
