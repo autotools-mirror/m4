@@ -1,15 +1,12 @@
 config.m4
 config.sh
-testSubDir
 Makefile
 Makefile.in
-at-*
-atconfig
+at-* atconfig
 autom4te.cache
 debug-*.sh
 frozen.m4f
 generated.at
-in
-stderr
+in stderr stdout expout experr
 testsuite
 *.log log
