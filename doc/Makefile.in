@@ -57,13 +57,13 @@ stamp-vti: m4.texinfo ../configure.ac
 	date > $(srcdir)/stamp-vti
 
 install: all
-	$(srcdir)/../mkinstalldirs $(infodir)
+	$(srcdir)/../mkinstalldirs $(DESTDIR)$(infodir)
 	cd $(srcdir) && for file in m4.info*; do \
-	  $(INSTALL_DATA) $$file $(infodir)/$$file; \
+	  $(INSTALL_DATA) $$file $(DESTDIR)$(infodir)/$$file; \
 	done
 
 uninstall:
-	rm -f $(infodir)/m4.info*
+	rm -f $(DESTDIR)$(infodir)/m4.info*
 
 mostlyclean:
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.log *.pg *.toc *.tp *.vr

@@ -1,3 +1,8 @@
+2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+
+	* doc/Makefile.in (install, uninstall): Accomodate DESTDIR.
+	* src/Makefile.in (install, uninstall): Likewise.
+
 2005-02-07  Gary V. Vaughan  <gary@gnu.org>
 
 	* lib/regex.c, lib/regex.h:  Reverted gnulib update, which broke

@@ -1,5 +1,5 @@
 # Makefile for GNU m4 sources.
-# Copyright (C) 1994 Free Software Foundation, Inc.
+# Copyright (C) 1994, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -84,11 +84,12 @@ ansi2knr: ansi2knr.o
 	$(LINK) ansi2knr.o $(LIBS)
 
 install: all
-	$(srcdir)/../mkinstalldirs $(bindir)
-	$(INSTALL_PROGRAM) m4 $(bindir)/`echo m4 | sed '$(transform)'`
+	$(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) m4 \
+		$(DESTDIR)$(bindir)/`echo m4 | sed '$(transform)'`
 
 uninstall:
-	rm -f $(bindir)/`echo m4 | sed '$(transform)'`
+	rm -f $(DESTDIR)$(bindir)/`echo m4 | sed '$(transform)'`
 
 tags: TAGS
 
