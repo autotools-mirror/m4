@@ -57,7 +57,7 @@ m4_la_LDFLAGS		= -module
 mpeval_la_SOURCES	= mpeval.c
 EXTRA_mpeval_la_SOURCES	= evalparse.c
 mpeval_la_LDFLAGS	= -module
-mpeval_la_LIBADD	= -lgmp
+mpeval_la_LIBADD	= $(LIBADD_GMP)
 
 traditional_la_SOURCES = traditional.c
 traditional_la_LDFLAGS = -module

@@ -64,7 +64,7 @@ M4INIT_HANDLER (shadow)
 
   if (handle)
     info = lt_dlgetinfo (handle);
-  
+
   /* Only display the message on first load.  */
   if (obs && info && (info->ref_count == 1))
     obstack_grow (obs, s, strlen(s));

@@ -1,3 +1,14 @@
+2001-09-21  Gary V. Vaughan  <gary@gnu.org>
+
+	* config/gmp.m4 (AC_ARG_WITH): Removed.
+	(GMP_LIB): Renamed to LIBADD_GMP for consistency.
+	(AC_LIB_GMP): When performing a test compile against libgmp,
+	include the header gmp.h if possible, and link against -lgmp.  If
+	they both work define USE_GMP.
+	* modules/Makefile.am (mpeval_la_LIBADD): Add LIBADD_GMP.
+	(mpeval_LTX_init_func): Complain on load that there was no libgmp
+	at compile time.
+
 2001-09-20  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/evalparse.c: Moved to...

@@ -22,9 +22,37 @@
 #endif
 
 #include <m4module.h>
-#include "m4private.h"
 
-#include <gmp.h>
+#if !USE_GMP
+
+M4INIT_HANDLER (mpeval)
+{
+  const char s[] = "libgmp support was not compiled in";
+
+  if (obs)
+    obstack_grow (obs, s, strlen(s));
+}
+
+#else /* USE_GMP */
+
+#if HAVE_GMP_H
+#  include <gmp.h>
+#endif
+
+
+/* Rename exported symbols for dlpreload()ing.  */
+#define m4_builtin_table	mpeval_LTX_m4_builtin_table
+#define m4_macro_table		mpeval_LTX_m4_macro_table
+
+
+/* Maintain each of the builtins implemented in this modules along
+   with their details in a single table for easy maintenance.
+
+		function	macros	blind */
+#define builtin_functions			\
+	BUILTIN(mpeval,		FALSE,	TRUE )
+
+
 
 #define numb_set(ans,i) mpq_set(ans,i)
 #define numb_set_si(ans,i) mpq_set_si(*(ans),(long)i,(unsigned long)1)
@@ -61,19 +89,6 @@
 #define numb_invert(x)  reduce1(mpq_inv,x)
 
 #define numb_decr(n) numb_minus(n,numb_ONE)
-
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	mpeval_LTX_m4_builtin_table
-#define m4_macro_table		mpeval_LTX_m4_macro_table
-
-
-/* Maintain each of the builtins implemented in this modules along
-   with their details in a single table for easy maintenance.
-
-		function	macros	blind */
-#define builtin_functions			\
-	BUILTIN(mpeval,		FALSE,	TRUE )
-
 
 /* Generate prototypes for each builtin handler function. */
 #define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
@@ -423,3 +438,5 @@ numb_rshift (number * x, const number * y)
 
 #define m4_evaluate	builtin_mpeval
 #include "evalparse.c"
+
+#endif /* USE_GMP */
