@@ -1,0 +1,1275 @@
+# Hand crafted tests for GNU M4.                               -*- Autoconf -*-
+# Copyright 2001 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+
+# sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
+
+
+
+## ---------- ##
+## capitalize ##
+## ---------- ##
+
+AT_SETUP([capitalize])
+
+AT_CHECK_M4([../examples/capitalize.m4], 0,
+[[
+
+CONVERT TO UPPER CASE
+convert to lower case
+
+
+This Sentence Should Be Capitalized
+]])
+
+AT_CLEANUP
+
+
+
+## ---------- ##
+## changeword ##
+## ---------- ##
+
+AT_SETUP([changeword])
+
+# cannot perform test without --enable-changeword
+AT_CHECK([test -z "$ENABLE_CHANGEWORD" && exit 77])
+
+AT_DATA([[in]],
+[[define(1, 0)
+1
+changeword(`[_a-zA-Z0-9]+')
+1
+]])
+
+AT_CHECK([$M4 -M ../../modules -m changeword -d in], 0,
+[[
+1
+
+0
+]])
+
+AT_CLEANUP
+
+
+
+
+## -------- ##
+## comments ##
+## -------- ##
+
+AT_SETUP([comments])
+
+AT_CHECK_M4([../examples/comments.m4], 0,
+[[# An ordinary comment
+
+# A comment in a macro
+Macro foo expansion
+
+
+# A *** Macro comment expansion *** in a macro
+Macro foo expansion
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## ddivert ##
+## ------- ##
+
+AT_SETUP([ddivert])
+
+AT_CHECK_M4([../examples/ddivert.m4], 0,
+[[Text diverted a first time.
+Text diverted a second time.
+]])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## debug ##
+## ----- ##
+
+AT_SETUP([debug])
+
+AT_DATA([[expout]],
+[[
+
+
+2 1 0 Liftoff
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- countdown ...
+m4trace: -1- countdown(`2') -> ???
+m4trace: -1- countdown(...) -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`1') -> ???
+m4trace: -1- countdown(...) -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`0') -> ???
+m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
+]])
+
+AT_CHECK_M4([../examples/debug.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ---------------- ##
+## discard-comments ##
+## ---------------- ##
+
+AT_SETUP([discard-comments])
+
+AT_DATA([[in]],
+[[This is not a comment # but this is.
+# This line should dissappear completely.
+This should not disappear.
+changecom(`<!--', `-->')
+html <!--
+comment
+ --> ends.
+]])
+
+AT_CHECK([$M4 -c -M ../../modules -d in], 0,
+[[This is not a comment This should not disappear.
+
+html  ends.
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## esyscmd ##
+## ------- ##
+
+AT_SETUP([esyscmd])
+
+AT_CHECK_M4([../examples/esyscmd.m4], 0,
+[[# Cannot use real hostname program because test would fail
+hostname = >>www.gnu.org
+<<
+hostname = >>www<<
+]])
+
+AT_CLEANUP
+
+
+
+## --- ##
+## exp ##
+## --- ##
+
+AT_SETUP([exp])
+
+AT_CHECK_M4([../examples/exp.m4], 0,
+[[7
+6
+5
+4
+3
+2
+1
+0
+Done
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## foreach ##
+## ------- ##
+
+AT_SETUP([foreach])
+
+AT_CHECK_M4([../examples/foreach.m4], 0,
+[[
+Word was: foo
+Word was: bar
+Word was: foobar
+
+
+# Quote torture from Akim Demaille <akim@epita.fr>
+Word was: a
+Word was: (b
+Word was: c)
+
+
+# Something more complex, from Pierre Gaumond <gaumondp@ere.umontreal.ca>.
+case "$1" in
+  1)
+    vara=" -1";;
+  2)
+    varb=" -2";;
+  3)
+    varc=" -3";;
+esac
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## forloop ##
+## ------- ##
+
+AT_SETUP([forloop])
+
+AT_CHECK_M4([../examples/forloop.m4], 0,
+[[
+2**1 = 2
+2**2 = 4
+2**3 = 8
+2**4 = 16
+2**5 = 32
+2**6 = 64
+2**7 = 128
+2**8 = 256
+2**9 = 512
+2**10 = 1024
+
+]])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## fstab ##
+## ----- ##
+
+AT_SETUP([fstab])
+
+AT_CHECK_M4([../examples/fstab.m4], 0,
+[[
+
+
+freja:/home/gevn          /home/gevn       nfs    rw,soft,bg,grpid 0 0
+freja:/home/freja         /home/freja      nfs    rw,soft,grpid    0 0
+rimfaxe:/home/rimfaxe     /home/rimfaxe    nfs    rw,soft,bg       0 0
+
+]])
+
+AT_CLEANUP
+
+
+
+## --- ##
+## gmp ##
+## --- ##
+
+AT_SETUP([gmp])
+
+# cannot perform test without --with-gmp
+AT_CHECK([test -z "$WITH_GMP" && exit 77])
+
+AT_DATA([[in]],
+[[divert(-1)
+# forloop(i, from, to, stmt)
+
+define(`forloop', `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`_forloop',
+       `$4`'ifelse($1, `$3', ,
+			 `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+divert
+forloop(`x', 1, 100, `2**x = mpeval(2**x)
+')
+]])
+
+AT_DATA([[expout]],
+[[
+2**1 = 2
+2**2 = 4
+2**3 = 8
+2**4 = 16
+2**5 = 32
+2**6 = 64
+2**7 = 128
+2**8 = 256
+2**9 = 512
+2**10 = 1024
+2**11 = 2048
+2**12 = 4096
+2**13 = 8192
+2**14 = 16384
+2**15 = 32768
+2**16 = 65536
+2**17 = 131072
+2**18 = 262144
+2**19 = 524288
+2**20 = 1048576
+2**21 = 2097152
+2**22 = 4194304
+2**23 = 8388608
+2**24 = 16777216
+2**25 = 33554432
+2**26 = 67108864
+2**27 = 134217728
+2**28 = 268435456
+2**29 = 536870912
+2**30 = 1073741824
+2**31 = 2147483648
+2**32 = 4294967296
+2**33 = 8589934592
+2**34 = 17179869184
+2**35 = 34359738368
+2**36 = 68719476736
+2**37 = 137438953472
+2**38 = 274877906944
+2**39 = 549755813888
+2**40 = 1099511627776
+2**41 = 2199023255552
+2**42 = 4398046511104
+2**43 = 8796093022208
+2**44 = 17592186044416
+2**45 = 35184372088832
+2**46 = 70368744177664
+2**47 = 140737488355328
+2**48 = 281474976710656
+2**49 = 562949953421312
+2**50 = 1125899906842624
+2**51 = 2251799813685248
+2**52 = 4503599627370496
+2**53 = 9007199254740992
+2**54 = 18014398509481984
+2**55 = 36028797018963968
+2**56 = 72057594037927936
+2**57 = 144115188075855872
+2**58 = 288230376151711744
+2**59 = 576460752303423488
+2**60 = 1152921504606846976
+2**61 = 2305843009213693952
+2**62 = 4611686018427387904
+2**63 = 9223372036854775808
+2**64 = 18446744073709551616
+2**65 = 36893488147419103232
+2**66 = 73786976294838206464
+2**67 = 147573952589676412928
+2**68 = 295147905179352825856
+2**69 = 590295810358705651712
+2**70 = 1180591620717411303424
+2**71 = 2361183241434822606848
+2**72 = 4722366482869645213696
+2**73 = 9444732965739290427392
+2**74 = 18889465931478580854784
+2**75 = 37778931862957161709568
+2**76 = 75557863725914323419136
+2**77 = 151115727451828646838272
+2**78 = 302231454903657293676544
+2**79 = 604462909807314587353088
+2**80 = 1208925819614629174706176
+2**81 = 2417851639229258349412352
+2**82 = 4835703278458516698824704
+2**83 = 9671406556917033397649408
+2**84 = 19342813113834066795298816
+2**85 = 38685626227668133590597632
+2**86 = 77371252455336267181195264
+2**87 = 154742504910672534362390528
+2**88 = 309485009821345068724781056
+2**89 = 618970019642690137449562112
+2**90 = 1237940039285380274899124224
+2**91 = 2475880078570760549798248448
+2**92 = 4951760157141521099596496896
+2**93 = 9903520314283042199192993792
+2**94 = 19807040628566084398385987584
+2**95 = 39614081257132168796771975168
+2**96 = 79228162514264337593543950336
+2**97 = 158456325028528675187087900672
+2**98 = 316912650057057350374175801344
+2**99 = 633825300114114700748351602688
+2**100 = 1267650600228229401496703205376
+
+]])
+
+AT_CHECK([$M4 -M ../../modules -m mpeval -d in], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## hanoi ##
+## ----- ##
+
+AT_SETUP([hanoi])
+
+AT_CHECK_M4([../examples/hanoi.m4], 0,
+[[
+Move one disk from source to destination.
+Move one disk from source to auxilliary.
+Move one disk from destination to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to source.
+Move one disk from auxilliary to destination.
+Move one disk from source to destination.
+
+]])
+
+AT_CLEANUP
+
+
+
+## ------------------ ##
+## import-environment ##
+## ------------------ ##
+
+AT_SETUP([import-environment])
+
+AT_DATA([[in]],
+[[`TEST'=TEST
+`ZAPPED'=ZAPPED
+`OVERRIDE'=OVERRIDE
+]])
+
+TEST='This is an environment variable'
+export TEST
+
+ZAPPED='This is an environment variable which we will delete'
+export ZAPPED
+
+OVERRIDE='This is an environment variable which we will change'
+export OVERRIDE
+
+AT_CHECK([$M4 -M ../../modules --import-environment -UZAPPED -DOVERRIDE='It is changed.' -d in], 0,
+[[TEST=This is an environment variable
+ZAPPED=ZAPPED
+OVERRIDE=It is changed.
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## include ##
+## ------- ##
+
+AT_SETUP([include])
+
+AT_DATA([[expout]],
+[[Beginning.
+
+Intermidiate
+include test file.
+
+
+After
+
+very late
+]])
+
+AT_DATA([[experr]],
+[[m4: ../examples/include.m4: 2: Cannot open NOFILE: No such file or directory
+m4: ../examples/include.m4: 6: Cannot open NOFILE: No such file or directory
+]])
+
+AT_CHECK_M4([../examples/include.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## indir ##
+## ----- ##
+
+AT_SETUP([indir])
+
+AT_DATA([[expout]],
+[[
+
+# indir(`%%$$##', nonsens, nonsens)
+>>>%%$$##<<< cnt 2
+
+# indir(`indir', `%%$$##', nonsens)
+>>>%%$$##<<< cnt 1
+
+# indir(`indir', `indir', `indir', `indir', `%%$$##')
+>>>%%$$##<<< cnt 0
+]])
+
+AT_CHECK_M4([../examples/indir.m4], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## iso8859 ##
+## ------- ##
+
+AT_SETUP([iso8859])
+
+# Eh eh eh...
+# We can't embed iso8859.m4 in here since precisly this file demonstrates
+# an M4 ``bug'': it's inability to handle the NUL character.  So there
+# is no use in trying to handle it here...  Well, until autom4te provides
+# us with means to.
+
+AT_DATA([[expout]],
+[[# Testing quotes
+DEFINE			# eol
+CHANGEQUOTE(«,»)	# eol
+0 TEST			# TEST
+1 test			# test
+2 «test»		# «test»
+3 ««test»»		# ««test»»
+CHANGEQUOTE(«««,»»»)	# eol
+0 TEST			# TEST
+1 «TEST»		# «TEST»
+2 ««TEST»»		# ««TEST»»
+3 test			# test
+# Test use of all iso8859 characters except ^Z (win32 EOF) and NUL  ` '
+Length of string is: 254
+Comparing strings: MATCH
+# NUL does not pass through
+This will be seen.
+]])
+
+AT_CHECK([$M4 -M ../../modules -d iso8859.m4], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ---- ##
+## misc ##
+## ---- ##
+
+AT_SETUP([misc])
+
+[cat >expout <<EOF
+
+`sed -n '/^root:/{ s/^root:[^:]*://;s/:.*$//;p;q;}' /etc/passwd`
+
+EOF]
+
+AT_CHECK_M4([../examples/misc.m4], 0, expout)
+
+AT_CLEANUP
+
+
+
+## --------- ##
+## modfreeze ##
+## --------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modfreeze])
+
+AT_DATA([[frozen.m4]],
+[[divert(1)dnl
+define(`test', `local::`test'')dnl
+define(`test1', defn(`test'))dnl
+->test
+load(`modtest')
+define(`test2', defn(`test'))dnl
+->test
+load(`shadow')
+define(`test3', defn(`test'))dnl
+->test
+]])
+
+AT_DATA([[unfrozen.m4]],
+[[undivert(1)dnl
+test1
+test2
+test3
+]])
+
+# First generate the `expout' ouput by running over the sources before
+# freezeing.
+AT_CHECK([$M4 -M ../../modules -m load -d frozen.m4 unfrozen.m4], 0,
+         [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK([$M4 -M ../../modules -m load -d -F frozen.m4f frozen.m4], 0,
+         [ignore], [ignore])
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK([$M4 -M ../../modules -d -R frozen.m4f unfrozen.m4], 0,
+         [expout], [experr])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath1 ##
+## -------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([--module-directory: absolute path])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $top_builddir/modules; pwd` -m load -d ../modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath2 ##
+## -------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modpath2])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests LTDL_LIBRARY_PATH=../../modules $M4 -m load -d ../modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath3 ##
+## -------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modpath3])
+
+AT_DATA([[in]],
+[[test
+Dumpdef: dumpdef(`test').
+]])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -m load -m modtest -M ../../modules -d in], 0,
+[[Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath4 ##
+## -------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([M4MODPATH: absolute path])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests M4MODPATH=`cd $top_builddir/modules; pwd` $M4 -m load -d ../modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## modtest ##
+## ------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modtest])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M ../../modules -m load -d ../modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## ----------- ##
+## multiquotes ##
+## ----------- ##
+
+AT_SETUP([multiquotes])
+
+AT_DATA([[expout]],
+[[
+``traceon''
+foo
+``FOO''
+
+BAR
+foo bar
+``FOO'' BAR
+*>*>*<*<
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- changequote(`[', `]')
+m4trace: -1- dnl
+m4trace: -1- changequote([``], [''])
+m4trace: -1- dnl
+m4trace: -1- define(``foo'', ````FOO'''')
+m4trace: -1- dnl
+foo:	````FOO''''
+m4trace: -1- dumpdef(``foo'')
+m4trace: -1- dnl
+m4trace: -1- changequote(``!'', ``!'')
+m4trace: -1- dnl
+foo:	!``FOO''!
+m4trace: -1- dumpdef(!foo!)
+m4trace: -1- dnl
+m4trace: -1- define(!bar!, !BAR!)
+m4trace: -1- changequote(!>*>*>*>*>!, !<*<*<*<*<!)
+m4trace: -1- dnl
+bar:	>*>*>*>*>BAR<*<*<*<*<
+foo:	>*>*>*>*>``FOO''<*<*<*<*<
+m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)
+m4trace: -1- dnl
+]])
+
+AT_CHECK_M4([../examples/multiquotes.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## patsubst ##
+## -------- ##
+
+AT_SETUP([patsubst])
+
+AT_DATA([[expout]],
+[[# traceon(`patsubst')
+OBS: GNUs not Unix.
+OBS: GNUs OBS: not OBS: Unix.
+G=NUs n=ot U=nix.
+(GNUs)() (not)() (Unix)().
+(GNUs) (not) (Unix).
+  .
+GNUs not Unix.
+]])
+
+AT_DATA([[experr]],
+[[m4: ../examples/patsubst.m4: 4: WARNING: \0 will disappear, use \& instead in replacements
+]])
+
+AT_CHECK_M4([../examples/patsubst.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ---------------- ##
+## pushdef/popdef.  ##
+## ---------------- ##
+
+AT_SETUP([pushdef/popdef])
+
+AT_CHECK_M4([../examples/pushpop.m4], 0, [],
+[[hej:	`def 1.'
+hej:	`def 2.'
+hej:	`def 3.'
+hej:	`def 4.'
+hej:	`def 3.'
+hej:	`def 2.'
+hej:	`def 1.'
+m4: ../examples/pushpop.m4: 18: Undefined name hej
+m4: ../examples/pushpop.m4: 20: Undefined name hej
+m4: ../examples/pushpop.m4: 23: Undefined name mac2
+m4: ../examples/pushpop.m4: 25: Undefined name mac2
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## regexp ##
+## ------ ##
+
+AT_SETUP([regexp])
+
+AT_DATA([[expout]],
+[[>>hej med dig<<
+>>hej<<
+>>hej med dig<<
+>>med<<
+>>med dig<< >>ed dig<<
+
+0
+0
+0
+4
+4
+]])
+
+AT_DATA([[experr]],
+[[m4: ../examples/regexp.m4: 2: WARNING: \0 will disappear, use \& instead in replacements
+m4trace: -1- regexp(`hej med dig', `.*', `>>\0<<') -> `>>hej med dig<<'
+m4trace: -1- regexp(`hej med dig', `\w*', `>>\0<<') -> `>>hej<<'
+m4trace: -1- regexp(`hej med dig', `.+', `>>\0<<') -> `>>hej med dig<<'
+m4trace: -1- regexp(`hej med dig', `m\w+', `>>\0<<') -> `>>med<<'
+m4trace: -1- regexp(`hej med dig', `m\(.*\)', `>>\0<< >>\1<<') -> `>>med dig<< >>ed dig<<'
+m4trace: -1- regexp(`hej med dig', `.*') -> `0'
+m4trace: -1- regexp(`hej med dig', `\w*') -> `0'
+m4trace: -1- regexp(`hej med dig', `.+') -> `0'
+m4trace: -1- regexp(`hej med dig', `m\w+') -> `4'
+m4trace: -1- regexp(`hej med dig', `m\(.*\)') -> `4'
+]])
+
+AT_CHECK_M4([../examples/regexp.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## reverse ##
+## ------- ##
+
+AT_SETUP([reverse])
+
+AT_CHECK_M4([../examples/reverse.m4], 0,
+[[
+`' => .
+`hej' => hej.
+`hej, med, dig' => dig, med, hej.
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## shadow ##
+## ------ ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([shadow])
+
+AT_DATA([[expout]],
+[[# no modules loaded yet
+test
+shadow
+
+# define our own macros for `test' and `shadow'
+
+
+local::test
+local::shadow
+
+# module Shadow defines `shadow' and `test' macros
+Shadow module loaded.
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# save the definition of `test' from the Shadow module
+
+
+# module Test also defines a `test' macro
+Test module loaded.
+
+
+Test module called.
+Shadow::shadow called.
+
+# Reloading Shadow shouldn't affect anything
+
+
+
+Test module called.
+Shadow::shadow called.
+
+# Unloading Test will unshadow the test definition in Shadow
+
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# Unloading Shadow once has no effect (we loaded it twice)
+
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
+
+local::test
+local::shadow
+]])
+
+AT_DATA([[experr]],
+[[test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+]])
+
+AT_CHECK([$M4 -M ../../modules -m load -d ../modules/shadow.m4], 0,
+         expout, experr)
+
+AT_CLEANUP
+
+
+
+## ------------ ##
+## sync-lines.  ##
+## ------------ ##
+
+AT_SETUP([sync-lines])
+
+AT_DATA([[in]],
+[[syncoutput(on)dnl
+# Several input lines, expanding to one
+define(`foo', ``foo' line one.
+`foo' line two.
+`foo' line three.') xyz
+foo
+# Several input lines, expanding to none
+define(`foo', ``foo' line one.
+`foo' line two.
+`foo' line three.')dnl
+# one input line, expanding to several output lines
+foo foo
+]])
+
+AT_CHECK([[$M4 -M ../../modules -d in]], 0,
+[[#line 2 "in"
+# Several input lines, expanding to one
+#line 5
+ xyz
+foo line one.
+#line 6
+foo line two.
+#line 6
+foo line three.
+# Several input lines, expanding to none
+#line 11
+# one input line, expanding to several output lines
+foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three. foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three.
+]])
+
+AT_CLEANUP
+
+
+
+## --------- ##
+## sysv-args ##
+## --------- ##
+
+AT_SETUP([sysv-args])
+
+AT_DATA([[expout]],
+[[
+
+0
+1
+6
+
+
+hej med dig
+hej med dig en gang igen
+an awful lot of argument at least more that ten silly arguments
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- nargs -> `0'
+m4trace: -1- nargs(`') -> `1'
+m4trace: -1- nargs(`1', `2', `3', `4', `5', `6') -> `6'
+m4trace: -1- concat(`') -> `ifelse(1, 1, `', `` 'concat(shift(`'))')'
+m4trace: -1- concat(`hej', `med', `dig') -> `ifelse(1, 3, `hej', `hej` 'concat(shift(`hej',`med',`dig'))')'
+m4trace: -1- concat(`med', `dig') -> `ifelse(1, 2, `med', `med` 'concat(shift(`med',`dig'))')'
+m4trace: -1- concat(`dig') -> `ifelse(1, 1, `dig', `dig` 'concat(shift(`dig'))')'
+m4trace: -1- concat(`hej', `med', `dig', `en gang igen') -> `ifelse(1, 4, `hej', `hej` 'concat(shift(`hej',`med',`dig',`en gang igen'))')'
+m4trace: -1- concat(`med', `dig', `en gang igen') -> `ifelse(1, 3, `med', `med` 'concat(shift(`med',`dig',`en gang igen'))')'
+m4trace: -1- concat(`dig', `en gang igen') -> `ifelse(1, 2, `dig', `dig` 'concat(shift(`dig',`en gang igen'))')'
+m4trace: -1- concat(`en gang igen') -> `ifelse(1, 1, `en gang igen', `en gang igen` 'concat(shift(`en gang igen'))')'
+m4trace: -1- concat(`an', `awful', `lot', `of', `argument', `at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 12, `an', `an` 'concat(shift(`an',`awful',`lot',`of',`argument',`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`awful', `lot', `of', `argument', `at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 11, `awful', `awful` 'concat(shift(`awful',`lot',`of',`argument',`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`lot', `of', `argument', `at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 10, `lot', `lot` 'concat(shift(`lot',`of',`argument',`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`of', `argument', `at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 9, `of', `of` 'concat(shift(`of',`argument',`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`argument', `at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 8, `argument', `argument` 'concat(shift(`argument',`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`at', `least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 7, `at', `at` 'concat(shift(`at',`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`least', `more', `that', `ten', `silly', `arguments') -> `ifelse(1, 6, `least', `least` 'concat(shift(`least',`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`more', `that', `ten', `silly', `arguments') -> `ifelse(1, 5, `more', `more` 'concat(shift(`more',`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`that', `ten', `silly', `arguments') -> `ifelse(1, 4, `that', `that` 'concat(shift(`that',`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`ten', `silly', `arguments') -> `ifelse(1, 3, `ten', `ten` 'concat(shift(`ten',`silly',`arguments'))')'
+m4trace: -1- concat(`silly', `arguments') -> `ifelse(1, 2, `silly', `silly` 'concat(shift(`silly',`arguments'))')'
+m4trace: -1- concat(`arguments') -> `ifelse(1, 1, `arguments', `arguments` 'concat(shift(`arguments'))')'
+]])
+
+AT_CHECK_M4([../examples/sysv-args.m4], 0, [expout], [experr])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## trace ##
+## ----- ##
+
+AT_SETUP([trace])
+
+AT_DATA([[expout]],
+[[
+# Debugmode t
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode taeq
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode OFF
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+
+# Debugmode ae
+
+
+Move one disk from source to auxilliary.
+Move one disk from source to destination.
+Move one disk from auxilliary to destination.
+
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- hanoi
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -2- decr
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -1- move
+m4trace: -1- move
+m4trace: -2- decr
+m4trace: -1- _hanoi
+m4trace: -2- eval
+m4trace: -1- ifelse
+m4trace: -1- move
+
+m4trace: -1- hanoi(`2') -> `_hanoi(`2', source, destination, auxilliary)'
+m4trace: -1- _hanoi(`2', `source', `destination', `auxilliary') -> `ifelse(eval(`2'<=1), 1, `move(source, destination)',
+`_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)')'
+m4trace: -2- eval(`2<=1') -> `0'
+m4trace: -1- ifelse(`0', `1', `move(source, destination)', `_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)') -> `_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)'
+m4trace: -2- decr(`2') -> `1'
+m4trace: -1- _hanoi(`1', `source', `auxilliary', `destination') -> `ifelse(eval(`1'<=1), 1, `move(source, auxilliary)',
+`_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)')'
+m4trace: -2- eval(`1<=1') -> `1'
+m4trace: -1- ifelse(`1', `1', `move(source, auxilliary)', `_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)') -> `move(source, auxilliary)'
+m4trace: -1- move(`source', `auxilliary') -> `Move one disk from `source' to `auxilliary'.
+'
+m4trace: -1- move(`source', `destination') -> `Move one disk from `source' to `destination'.
+'
+m4trace: -2- decr(`2') -> `1'
+m4trace: -1- _hanoi(`1', `auxilliary', `destination', `source') -> `ifelse(eval(`1'<=1), 1, `move(auxilliary, destination)',
+`_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)')'
+m4trace: -2- eval(`1<=1') -> `1'
+m4trace: -1- ifelse(`1', `1', `move(auxilliary, destination)', `_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)') -> `move(auxilliary, destination)'
+m4trace: -1- move(`auxilliary', `destination') -> `Move one disk from `auxilliary' to `destination'.
+'
+m4trace: -1- debugmode
+m4trace: -1- _hanoi(2, source, destination, auxilliary) -> ifelse(eval(`2'<=1), 1, `move(source, destination)',
+`_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)')
+m4trace: -1- _hanoi(1, source, auxilliary, destination) -> ifelse(eval(`1'<=1), 1, `move(source, auxilliary)',
+`_hanoi(decr(1), source, destination, auxilliary)move(source, auxilliary)_hanoi(decr(1), destination, auxilliary, source)')
+m4trace: -1- move(source, auxilliary) -> Move one disk from `source' to `auxilliary'.
+
+m4trace: -1- move(source, destination) -> Move one disk from `source' to `destination'.
+
+m4trace: -1- _hanoi(1, auxilliary, destination, source) -> ifelse(eval(`1'<=1), 1, `move(auxilliary, destination)',
+`_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)')
+m4trace: -1- move(auxilliary, destination) -> Move one disk from `auxilliary' to `destination'.
+
+]])
+
+AT_CHECK_M4([../examples/trace.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## translit ##
+## -------- ##
+
+AT_SETUP([translit])
+
+AT_CHECK_M4([../examples/translit.m4], 0,
+[[# traceon(`translit')dnl
+GNU  U
+GNUS NOT UNIX
+gnus not unix
+s not nix
+z
+-ZY
+tmfs not fnix
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## undivert ##
+## -------- ##
+
+AT_SETUP([undivert])
+
+AT_CHECK_M4([../examples/undivert.m4], 0,
+[[
+# undiverted file.
+This is to be undiverted soon.
+
+# included file.
+This is to be UNDIVERTED soon.
+
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## unload ##
+## ------ ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([unload])
+
+AT_DATA([[in]],
+[[test
+__test__
+load(`modtest')
+test
+__test__
+load(`shadow')
+test
+__test__
+unload(`modtest')
+test
+__test__
+load(`modtest')
+test
+__test__
+unload(`modtest')
+test
+__test__
+unload(`shadow')
+test
+__test__
+]])
+
+AT_DATA([[expout]],
+[[test
+__test__
+Test module loaded.
+Test module called.
+modtest
+Shadow module loaded.
+Shadow::test called.
+shadow
+
+Shadow::test called.
+shadow
+Test module loaded.
+Test module called.
+modtest
+
+Shadow::test called.
+shadow
+
+test
+__test__
+]])
+
+AT_CHECK([M4PATH=$srcdir:$srcdir/../tests $M4 -M ../../modules -m load -d in], 0, expout)
+
+AT_CLEANUP
+
+
+
+## ---- ##
+## wrap ##
+## ---- ##
+
+AT_SETUP([wrap])
+
+AT_CHECK_M4([../examples/wrap.m4], 0,
+[[
+No. 33: The End.
+Wrapper no. 2
+Wrapper no. 1
+Wrapper no. 3
+Wrapper no. 4
+]])
+
+AT_CLEANUP

@@ -1,5 +1,18 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	others.at no longer depends on other-tests/.
+
+	* tests/others.at (stackovf): You're actually...
+	(sync-lines): this.
+	(modfreeze, modpath1, modpath2, modpath3, modpath4, modtest, shadow)
+	(unload.test): Keep their authorship.
+	(discard-comments, gmp, import-environment, modfreeze)
+	(sync-lines): Embed the input files.
+	* tests/stackovf.test: Copy from other-tests/stackovf.test.
+	* tests/iso8850.m4: Copy from other-tests/iso8859.m4.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* doc/m4.texinfo (Esyscmd): Fix the paths in the Vice example.
 	(M4exit): Tag the exit status of the example.
 	* tests/get-them: Adjust.

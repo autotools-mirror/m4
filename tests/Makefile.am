@@ -142,6 +142,8 @@ OTHER_TESTS = \
 	other-tests/wrap.test
 
 OTHER_FILES = \
+	iso8859.m4 \
+	stackovf.test \
 	other-tests/frozen.m4 \
 	other-tests/gmp.m4 \
 	other-tests/iso8859.m4 \
