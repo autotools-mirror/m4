@@ -719,7 +719,7 @@ call first.  If the input is
 
 @comment ignore
 @example
-format(`Result is %d', eval(2**15))
+format(`Result is %d', eval(`2**15'))
 @end example
 
 @noindent
@@ -728,7 +728,7 @@ then expand the resulting call
 
 @comment ignore
 @example
-format(`Result is %d', 32768)
+format(`Result is %d', `32768')
 @end example
 
 @noindent
@@ -879,7 +879,7 @@ empty string allows for the @code{dnl} macro to be recognized as such:
 @comment ignore
 @example
 define(`macro', `di$1')
-macro(v)`'dnl
+macro(`v')`'dnl
 @end example
 
 @noindent
@@ -892,7 +892,7 @@ macro expansion with the surrounding characters.  In this example:
 @example
 define(`macro', `di$1')
 @result{}
-macro(v)`ert'
+macro(`v')`ert'
 @result{}divert
 @end example
 
@@ -1058,7 +1058,7 @@ array_set(17, `array element no. 17')
 @result{}
 array(4)
 @result{}array element no. 4
-array(eval(10+7))
+array(eval(`10 + 7'))
 @result{}array element no. 17
 @end example
 
@@ -1077,7 +1077,7 @@ two arguments.  It simply exchanges the order of the two arguments.
 @example
 define(`exch', `$2, $1')
 @result{}
-exch(arg1, arg2)
+exch(`arg1', `arg2')
 @result{}arg2, arg1
 @end example
 
@@ -1522,7 +1522,7 @@ the procedure is repeated with the first three arguments discarded.  This
 calls for an example:
 
 @example
-ifelse(foo, bar, `third', gnu, gnats, `sixth', `seventh')
+ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth', `seventh')
 @result{}seventh
 @end example
 
@@ -1556,9 +1556,9 @@ argument, separated by commas, with each argument quoted.
 @example
 shift
 @result{}
-shift(bar)
+shift(`bar')
 @result{}
-shift(foo, bar, baz)
+shift(`foo', `bar', `baz')
 @result{}bar,baz
 @end example
 @end deffn
@@ -1572,9 +1572,9 @@ define(`reverse', `ifelse($#, 0, , $#, 1, ``$1'',
 @result{}
 reverse
 @result{}
-reverse(foo)
+reverse(`foo')
 @result{}foo
-reverse(foo, bar, gnats, and gnus)
+reverse(`foo', `bar', `gnats', `and gnus')
 @result{}and gnus, gnats, bar, foo
 @end example
 
@@ -1728,7 +1728,7 @@ traceon(`foo', `echo')
 foo
 @error{}m4trace: -1- foo -> `Hello World.'
 @result{}Hello World.
-echo(gnus, and gnats)
+echo(`gnus', `and gnats')
 @error{}m4trace: -1- echo(`gnus', `and gnats') -> ``gnus',`and gnats''
 @result{}gnus,and gnats
 @end example
@@ -2162,7 +2162,7 @@ by changing the syntax categories we can avoid it.
 @example
 define(`test', `$1$2$3')
 @result{}
-test(a, b, c)
+test(`a', `b', `c')
 @result{}abc
 changesyntax(`O         ')
 @result{}
@@ -2335,7 +2335,7 @@ wanted to apply translations to a file of numbers:
 @comment ignore
 @example
 changeword(`[_a-zA-Z0-9]+')
-define(1, 0)
+define(`1', `0')
 1
 @result{}
 0
@@ -2354,7 +2354,7 @@ accidental call of builtins, for example:
 @example
 define(`_indir', defn(`indir'))
 changeword(`_[_a-zA-Z0-9]*')
-esyscmd(foo)
+esyscmd(`foo')
 _indir(`esyscmd', `ls')
 @end example
 
@@ -2371,7 +2371,7 @@ the first of these is discarded before symbol lookup.  So:
 @example
 changecom(`/*', `*/')
 changeword(`#\([_a-zA-Z0-9]*\)')
-#esyscmd(ls)
+#esyscmd(`ls')
 @end example
 
 @code{m4} now requires a @samp{#} mark at the beginning of every
@@ -2398,7 +2398,7 @@ Then, the @code{m4} version:
 
 @comment ignore
 @example
-define(a, `errprint(`Hello')')
+define(`a', `errprint(`Hello')')
 changeword(`@@\([_a-zA-Z0-9]*\)')
 @@a
 @result{}errprint(Hello)
@@ -3309,20 +3309,20 @@ The builtin macro @code{eval} is recognized only when given arguments.
 Here are a few examples of use of @code{eval}.
 
 @example
-eval(-3 * 5)
+eval(`-3 * 5')
 @result{}-15
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
-define(`square', `eval(($1)**2)')
+define(`square', `eval(`($1)**2')')
 @result{}
-square(9)
+square(`9')
 @result{}81
 square(square(5)+1)
 @result{}676
 define(`foo', `666')
 @result{}
-eval(`foo'/6)
-@error{}m4: in: 7: Bad expression in eval: foo/6
+eval(`foo / 6')
+@error{}m4: in: 7: Bad expression in eval: foo / 6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3435,7 +3435,7 @@ Assume you are positioned into the @file{tests} directory of GNU M4
 distribution, then:
 
 @example
-define(`vice', `esyscmd(grep Vice Makefile)')
+define(`vice', `esyscmd(`grep Vice Makefile')')
 @result{}
 vice
 @result{}#  Ty Coon, President of Vice
@@ -3542,8 +3542,8 @@ utility builtins exist:
 
 @deffn {Builtin (gnu)} __file__
 @deffnx {Builtin (gnu)} __line__
-These expand to the quoted name of the current input file, and the
-current input line number in that file.
+These expand to the @emph{quoted} name of the current input file, and
+the current input line number in that file.
 
 @example
 errprint(`m4:'__file__:__line__: `Input error
