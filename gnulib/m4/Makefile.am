@@ -100,6 +100,10 @@ stdbool.h: $(gnulib_srcdir)/stdbool_.h
 MOSTLYCLEANFILES += stdbool.h stdbool.h-t
 
 
+## strndup:
+libgnu_la_SOURCES += strndup.h
+
+
 ## unlocked-io:
 libgnu_la_SOURCES += unlocked-io.h
 
@@ -107,3 +111,7 @@ libgnu_la_SOURCES += unlocked-io.h
 ## xalloc (not from gnulib):
 libgnu_la_SOURCES += xmalloc.c xstrdup.c
 pkginclude_HEADERS += xalloc.h
+
+## xstrndup (not from gnulib)::
+libgnu_la_SOURCES += xstrndup.c
+pkginclude_HEADERS += xstrndup.h

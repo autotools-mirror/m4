@@ -374,7 +374,7 @@ extern FILE *   m4_path_search           (m4 *, const char *, char **);
 
 
 #define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
+#define obstack_chunk_free	free
 
 END_C_DECLS
 

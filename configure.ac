@@ -178,13 +178,14 @@ AC_SUBST([INCLUDE_STDBOOL_H])
 ## Library functions required by M4. ##
 ## --------------------------------- ##
 AC_CHECK_FUNCS(bzero calloc mkstemp mktemp strerror tmpfile)
-AC_REPLACE_FUNCS(strtol xstrzdup)
+AC_REPLACE_FUNCS(strtol)
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 
 AM_WITH_DMALLOC
 
 gl_XALLOC
+gl_XSTRNDUP
 m4_ERROR
 m4_OBSTACK
 m4_SYS_STACKOVF

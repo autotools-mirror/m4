@@ -399,7 +399,7 @@ process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 
 	      for (endp = ++text; *endp && m4_has_syntax (M4SYNTAX, *endp, M4_SYNTAX_OTHER|M4_SYNTAX_ALPHA|M4_SYNTAX_NUM); ++endp)
 		++len;
-	      key = xstrzdup (text, len);
+	      key = xstrndup (text, len);
 
 	      if (*endp)
 		{

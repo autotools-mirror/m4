@@ -1,3 +1,24 @@
+2003-09-12  Gary V. Vaughan  <gary@gnu.org>
+
+	Replace the xstrzdup code by importing the xstrndup module from
+	CVS gnulib, along with its dependencies: strndup and strnlen:
+
+	* gnulib/m4/xstrndup.c, gnulib/m4/xstrndup.h,
+	gnulib/config/xstrndup.m4: Import xstrndup module from CVS
+	gnulib.
+	* gnulib/m4/strndup.c, gnulib/m4/strndup.h,
+	gnulib/config/strndup.m4: Ditto wrt strndup.
+	* gnulib/m4/strnlen.c, gnulib/config/strnlen.m4: Ditto wrt
+	strnlen.
+	* gnulib/m4/Makefile.am: Add rules from newly imported modules.
+	However, contrary to gnulib, we install xstrndup.h.
+	* configure.ac (AC_REPLACE_FUNCS): Remove xstrzdup.
+	* gnulib/lib/xstrzdup.c: Delete.  This was never a gnulib file, it
+	is an artifact of the old m4 portability layer.
+	* configure.ac (gl_XSTRNDUP): This is the gnulib equivalent.
+	* m4/system_.h: Include xstrndup.h.
+	* m4/macro.c (process_macro): Call xstrndup, not xstrzdup.
+
 2003-09-11  Gary V. Vaughan  <gary@gnu.org>
 
 	Reimport the latest xalloc module from CVS gnulib, and adjust the

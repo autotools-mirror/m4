@@ -293,7 +293,7 @@ m4__module_init (m4 *context)
 #if !WITH_DMALLOC
   /* initialise libltdl's memory management. */
   lt_dlmalloc = xmalloc;
-  lt_dlfree   = (void (*) (void *)) xfree;
+  lt_dlfree   = xfree;
 #endif
 
   errors      = lt_dlinit ();
