@@ -94,7 +94,7 @@ AC_SUBST(DLPREOPEN)
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE(AC_PACKAGE_TARNAME, AC_PACKAGE_VERSION)
+AM_INIT_AUTOMAKE
 
 
 
@@ -214,7 +214,7 @@ AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 ## Make sure LTLIBOBJS is up to date. ##
 ## ---------------------------------- ##
 Xsed="sed -e s/^X//"
-LTLIBOBJS=`echo X"$LIBOBJS" | \
+LTLIBOBJS=`echo X"$LIB@&t@OBJS" | \
     $Xsed -e 's,\.[[^.]]* ,.lo ,g;s,\.[[^.]]*$,.lo,'`
 AC_SUBST([LTLIBOBJS])
 

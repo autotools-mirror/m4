@@ -27,6 +27,7 @@ $(ACLOCAL_MACROS)				\
 $(STANDARD_TOOLS)
 
 ACLOCAL_MACROS =				\
+amversion.m4					\
 auxdir.m4					\
 ccstdc.m4					\
 codeset.m4					\
@@ -46,6 +47,7 @@ libtool.m4					\
 ltdl.m4						\
 make.m4						\
 missing.m4					\
+options.m4					\
 progtest.m4					\
 protos.m4					\
 sanity.m4					\

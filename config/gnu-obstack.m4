@@ -69,7 +69,7 @@ else
   fi
 
   # In the absence of a system implementation, we must compile our own:
-  LIBOBJS="$LIBOBJS obstack.$ac_objext"
+  AC_LIBOBJ(obstack)
 
 fi
 AC_SUBST(OBSTACK_H)

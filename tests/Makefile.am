@@ -22,11 +22,31 @@
 EXTRA_DIST = generate.awk atlocal.in \
 	$(OTHER_FILES) $(TESTSUITE_AT) $(TESTSUITE)
 
-DISTCLEANFILES       = atconfig atlocal package.m4 m4
+DISTCLEANFILES       = atconfig atlocal m4
 MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
 OTHER_FILES = \
 	iso8859.m4 stackovf.test
+
+## ------------ ##
+## package.m4.  ##
+## ------------ ##
+
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	{					\
+	  echo '# Signature of the current package.'; \
+	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
+	  echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \
+	  echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])'; \
+	  echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])'; \
+	  echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	} >$(srcdir)/package.m4
+
+EXTRA_DIST += package.m4
+
+## ------------ ##
+## Test suite.  ##
+## ------------ ##
 
 TESTSUITE_AT = \
 	testsuite.at \
@@ -49,7 +69,7 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(m4_texinfo)
 
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
+$(srcdir)/$(TESTSUITE): $(srcdir)/package.m4 $(TESTSUITE_AT)
 	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@
 
 # Run the test suite on the *installed* tree.

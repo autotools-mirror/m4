@@ -2,8 +2,8 @@
 # @configure_input@
 # Wrapper around a non installed m4 to make it work as an installed one.
 
-"@top_buildpath@/src/m4" \
-      --module-directory="@top_buildpath@/modules" \
+"@abs_top_builddir@/src/m4" \
+      --module-directory="@abs_top_builddir@/modules" \
       ${1+"$@"} 2>/tmp/m4-$$
 status=$?
 # Normalize stderr.

@@ -1,3 +1,15 @@
+2002-01-22  Akim Demaille  <akim@epita.fr>
+
+	* bootstrap (aclocal_apilibdir): New, to cope with Automake's new
+	APIVERSION scheme.
+	* tests/Makefile.am (package.m4): New.
+	* tests/atlocal.in: Adjust to CVS Autotest.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Use AC_LIBOBJ.
+	* configure.ac: LIBOBJ is a forbidden string.
+	Simplify AM_INIT_AUTOMAKE invocation.
+	* config/Makefile.am (ACLOCAL_MACROS): Add amversion.m4 and
+	options.m4.
+
 2001-10-19  Akim Demaille  <akim@epita.fr>
 
 	* m4/module.c, m4/output.c, src/main.c: Normalize error messages.
