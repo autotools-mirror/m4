@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-08-05 08:54+0200\n"
+"POT-Creation-Date: 2001-08-07 14:06+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -72,7 +72,7 @@ msgstr "%s: `%s' は不明瞭なオプション名です。\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
-#: m4/obstack.c:477
+#: m4/obstack.c:473
 #, fuzzy
 msgid "memory exhausted"
 msgstr "メモリが残っていません。"
@@ -224,11 +224,11 @@ msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "内部エラー：関数 expand_argument () のトークンの種類が不正です。"
 
-#: m4/macro.c:261
+#: m4/macro.c:262
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "内部エラー：関数 call_macro () 内のシンボルの種類が不正です。"
 
-#: m4/macro.c:290
+#: m4/macro.c:291
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""

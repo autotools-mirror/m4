@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-08-05 08:54+0200\n"
+"POT-Creation-Date: 2001-08-07 14:06+0200\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -72,7 +72,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: m4/obstack.c:477
+#: m4/obstack.c:473
 msgid "memory exhausted"
 msgstr ""
 
@@ -230,12 +230,12 @@ msgstr "CHYBA: EOF v seznamu argumentù"
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu v expand_argument ()"
 
-#: m4/macro.c:261
+#: m4/macro.c:262
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ symbolu v call_macro ()"
 
 # , c-format
-#: m4/macro.c:290
+#: m4/macro.c:291
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "CHYBA: pøekroèen limit pro rekurzi (%d), zmìòte jej pomocí -L<N>"

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-08-05 08:54+0200\n"
+"POT-Creation-Date: 2001-08-07 14:06+0200\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -74,7 +74,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: m4/obstack.c:477
+#: m4/obstack.c:473
 msgid "memory exhausted"
 msgstr ""
 
@@ -228,11 +228,11 @@ msgstr "FEHLER: Dateiende in Argumentliste"
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "INTERNER FEHLER: Falscher Typ des Tokens in expand_argument ()"
 
-#: m4/macro.c:261
+#: m4/macro.c:262
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "INTERNER FEHLER: Falsche Symboltyp in call_macro ()"
 
-#: m4/macro.c:290
+#: m4/macro.c:291
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""

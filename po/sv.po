@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-08-05 08:54+0200\n"
+"POT-Creation-Date: 2001-08-07 14:06+0200\n"
 "PO-Revision-Date: 1999-03-28 18:56 +02:00\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -73,7 +73,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: m4/obstack.c:477
+#: m4/obstack.c:473
 msgid "memory exhausted"
 msgstr ""
 
@@ -221,11 +221,11 @@ msgstr "FEL: Filslut i argumentlistan"
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i expand_argument ()"
 
-#: m4/macro.c:261
+#: m4/macro.c:262
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "INTERNT FEL: Otillåten symboltyp i call_macro ()"
 
-#: m4/macro.c:290
+#: m4/macro.c:291
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "FEL: Rekursionsgräns %d överskriden, använd -L<N> för att ändra"
