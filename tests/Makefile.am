@@ -30,7 +30,7 @@ OTHER_FILES = \
 
 TESTSUITE_AT = \
 	testsuite.at \
-	builtins.at options.at others.at modules.at generated.at
+	macros.at builtins.at options.at others.at modules.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)

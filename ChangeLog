@@ -1,5 +1,12 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* tests/builtins.at (pushdef/popdef, trace, trace2, trace3): Move
+	to...
+	* tests/macros.at (pushdef/popdef, Tracing Hanoi Towers)
+	(Propagation of traceon, Propagation of --trace): this new file.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* m4/utility.c (m4_numeric_arg): Use the usual (argc, argv, ...)
 	interface instead of (name, argc...).
 	Upon failure, specify which argument was guilty.

@@ -49,6 +49,9 @@ AT_TESTED([m4])
 
 AT_INIT
 
+# Macro definitions, uses, tracing etc.
+m4_include([macros.at])
+
 # Torturing builtins.
 m4_include([builtins.at])
 
