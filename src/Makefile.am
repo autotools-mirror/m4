@@ -1,0 +1,15 @@
+AUTOMAKE_OPTIONS = ansi2knr
+CATALOGS = fr.msg
+LIBS = @LIBS@
+STACKOVF = @STACKOVF@
+
+bin_PROGRAMS = m4
+
+INCLUDES = -I$(top_srcdir) -I$(srcdir) -I$(top_srcdir)/lib
+
+m4_SOURCES = m4.c m4.h builtin.c debug.c eval.c format.c freeze.c input.c \
+	macro.c output.c path.c symtab.c stackovf.c
+
+m4_LDADD = ../lib/libm4.a @INTLLIBS@
+
+

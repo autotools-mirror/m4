@@ -1,0 +1,41 @@
+This GNU package is `localizable'.
+
+It can be made to speak your native language (or mother tongue).
+If you are lucky, someone already did it for you.  Check in the
+distribution for `??.tt' files.  `??' is usually one of:
+
+	de  for German
+	fr  for French
+	nl  for Dutch
+	sv  for Swedish
+
+If your language is already supported, usage is quite simple.
+Let's suppose, here, that you speak German.  At the shell prompt,
+merely execute `setenv LANG de' (in csh) or `export LANG; LANG=de'
+(in sh).  You may want to put this in your .login or .profile file.
+
+If your language is not supported, you have to work a bit for it.
+Let's suppose again that you speak German.  Eventually, when the GNU
+locale package will have been published, you will follow these steps:
+
+1) Check with the maintainer if the work has been, or is being done.
+2) Ensure that GNU locale has been installed on your site.
+3) In the distribution, initialize `de.tt' by copying `fr.tt'.
+4) Carefully edit `de.tt', replacing French parts by German parts.
+5) Edit `Makefile.in', adding `de.msg' to the `CATALOGS =' line.
+6) You do not need to reconfigure again.  Execute `make install'.
+7) Use `setenv LANG de', and just use the programs as usual.
+8) Send `de.tt' to the maintainer, to be later distributed in GNU.
+
+But for the time being, GNU local package is still in alpha pretest,
+so you are not completely free of me yet!  Follow these steps:
+
+1) Check with the maintainer if the work has been, or is being done.
+2) In the distribution, initialize `de.tt' by copying `fr.tt'.
+3) Carefully edit `de.tt', replacing French parts by German parts.
+4) Send `de.tt' to the maintainer, then wait for `de.msg' in return.
+5) Install `de.msg' as `/usr/local/share/locale/de/PACKAGE.msg'.
+6) Use `setenv LANG de', and just use the programs as usual.
+
+In step 5), of course, replace PACKAGE by the GNU package name, which
+is usually the first word in the name of the distributed tar file.

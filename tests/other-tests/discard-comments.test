@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# discard-comments.test is part of the GNU m4 testsuite
+
+. ${srcdir}/defs
+
+cat ${srcdir}/other-tests/discard-comments.m4 >in
+
+cat <<\EOF >ok
+This is not a comment This should not disappear.
+
+html  ends.
+EOF
+
+M4PATH=$srcdir:$srcdir/other-tests $M4 -c -d in >out 2>err
+sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+$CMP -s out ok

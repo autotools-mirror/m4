@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# test.test is part of the GNU m4 testsuite
+
+. ${srcdir}/defs
+. ../../tests/config.sh
+
+cat <<'EOF' >in
+ifelse(regexp(currenttime, `^[1-9][0-9]*$'), 0, NUMERIC, NON NUMERIC)
+
+define(`sometime', 1890962700)dnl someones 65th birthday, hopefully
+`ctime'       = ctime(sometime) != ctime(eval(sometime+60*60*24))
+gmtime      = gmtime(sometime)
+localtime   = localtime(sometime)
+define(`q', `$1,$2,$3,$4,$5,$6,$9')dnl
+
+sometime
+eval(sometime+60*60*24)
+localtime(eval(sometime+60*60*24))
+q(localtime(eval(sometime+60*60*24)))
+mktime      = mktime(q(localtime(eval(sometime+60*60*24))))
+
+%A %B %d, %Y  = strftime(`%A %B %d, %Y', sometime)
+%X on %x      = strftime(`%X on %x', sometime)
+EOF
+
+cat <<'EOF' >ok
+NUMERIC
+
+ctime       = Mon Dec  3 04:25:00 2029 != Tue Dec  4 04:25:00 2029
+gmtime      = 0,25,3,3,11,129,1,336,0
+localtime   = 0,25,4,3,11,129,1,336,0
+
+1890962700
+1891049100
+0,25,4,4,11,129,2,337,0
+0,25,4,4,11,129,0
+mktime      = 1891049100
+
+%A %B %d, %Y  = Monday December 03, 2029
+%X on %x      = 04:25:00 on 12/03/29
+EOF
+
+cat <<'EOF' >okerr
+EOF
+
+
+M4PATH=$srcdir:$srcdir/../tests $M4 -m time -M `cd $srcdir; pwd` -d in >out 2>err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
+$CMP -s out ok && $CMP -s err okerr

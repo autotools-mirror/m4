@@ -1,0 +1,12 @@
+This is a alpha version of GNU m4.
+
+Please see the file TODO for a list of open problems and known bugs.
+
+Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
+is an adequate description of the problem: your input, what you
+expected, what you got, and why this is wrong.  Diffs are welcome, but
+they only describe a solution, from which the problem might be uneasy to
+infer.  Don't forget all relevant information about your operating
+system, compiler, libraries, ...
+
+GNU m4 has a web-site at http://www.seindal.dk/rene/gnu/

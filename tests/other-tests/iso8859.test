@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# iso8859.test is part of the GNU m4 testsuite
+
+. ${srcdir}/defs
+
+cat ${srcdir}/other-tests/iso8859.m4 > in
+
+cat <<\EOF >ok
+# Texting quotes
+DEFINE			
+CHANGEQUOTE(«,»)	
+0 TEST			# TEST
+1 test			# test
+2 «test»		# «test»
+3 ««test»»		# ««test»»
+CHANGEQUOTE(«««,»»»)	
+0 TEST			# TEST
+1 «TEST»		# «TEST»
+2 ««TEST»»		# ««TEST»»
+3 test			# test
+# Test use of all iso8859 characters except NUL ` '
+Length of string is: 253
+Comparing strings: MATCH
+# NUL does not pass through
+This will be seen.
+EOF
+
+M4PATH=$srcdir:$srcdir/other-tests $M4 -d in >out 2>err
+sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+$CMP -s out ok

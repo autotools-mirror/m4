@@ -1,0 +1,7 @@
+dnl ../doc/m4.texinfo:1432: Origin of test
+shift
+dnl @result{}
+shift(bar)
+dnl @result{}
+shift(foo, bar, baz)
+dnl @result{}bar,baz

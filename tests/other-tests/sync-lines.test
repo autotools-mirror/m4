@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# sync-lines.test is part of the GNU m4 testsuite
+
+. ${srcdir}/defs
+
+cat ${srcdir}/other-tests/sync-lines.m4 >in
+
+cat <<\EOF >ok
+#line 2 "in"
+# Several input lines, expanding to one
+#line 5
+ xyz
+foo line one.
+#line 6
+foo line two.
+#line 6
+foo line three.
+# Several input lines, expanding to none
+#line 11
+# one input line, expanding to several output lines
+foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three. foo line one.
+#line 12
+foo line two.
+#line 12
+foo line three.
+EOF
+
+M4PATH=$srcdir:$srcdir/other-tests $M4 -d in >out 2>err
+sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+$CMP -s out ok

@@ -1,0 +1,62 @@
+This directory contains demonstration modules for GNU m4.  
+
+Nothing in this directory is built by default.
+
+Dynamic modules is a experimental feature of GNU m4, and might change or
+disappear altogether in future versions.  Currently it has only been
+certified to work under Linux 2.0.
+
+Dynamic modules are only available if GNU m4 was configured with
+--with-modules and if the dlopen(3) interface is available in the
+operating system.
+
+Implementation details are in ../src/module.c
+
+A module is a compiled shared object, i.e., modules are written in C and
+then compiled.  The compiled file can then be loaded into a running m4
+process by calling the builtin "loadmodule".  This will give GNU m4
+access to any system feature with a C interface.
+
+A module extends GNU m4 by defining new builtins, It can define builtins
+with the same names as existing builtins, which will then be
+unavailable.  A module cannot redefine internal functions of GNU m4,
+such as the input parser or argument handling.
+
+The infrastructure for writing and compiling modules is still a bit
+wanting, quasi non-existent.
+
+Each module should include the two header files ../src/m4.h and
+../src/builtin.h.  These will include <ctype.h>, <stdio.h>,
+../lib/obstack.h and ../config.h.
+
+Each module *must* define the symbol "m4_macro_table" as a pointer to a
+table of "struct builtin" (defined in m4.h).  The table ends with an
+entry with name == NULL.  The builtins described in the table will be
+defined by GNU m4 as were they normal builtins.
+
+If a module defines the symbol "m4_init_module", it is supposed to be a
+function with a prototype of "void m4_init_module(struct obstack *obs)",
+and it will be called as soon as the module is loaded.  Any non-finished
+object left on the obstack will be the expansion of the call of the
+builtin "loadmodule". The obstack pointer might be NULL (in the future).
+
+If a module defines the symbol "m4_finish_module", it is supposed to be
+a function with a prototype of "void m4_finish_module(void)", and it
+will be called just before GNU m4 exits.  This will allow a module to
+clean up before exit.  There is no way of communicating information to
+the user, as GNU m4 exits immeidately afterwards.
+
+No other symbols will be used by GNU m4.  Other external symbols within
+the module are private and will not be accessible to GNU m4 or to other
+modules.
+
+Modules are allowed to call external functions already defined within
+the GNU m4 sources.  Some of these have prototypes in builtin.h.
+
+
+A complete, though silly, example is found in test.c.  A more
+interesting example is in time.c.
+
+To try the demos, compile with `make' and run them with the commands as:
+
+   M4MODPATH=`pwd` ../src/m4 time.m4

@@ -1,0 +1,20 @@
+Authors of GNU m4.
+
+The following contributions warranted legal paper exchanges with the
+Free Software Foundation.  Also see files ChangeLog and THANKS.
+
+M4      Rene Seindal                    (DENMARK, 1964)
+Assigns the program.
+
+M4      University of Copenhagen
+Disclaims the program.
+
+M4      James L. Avera  (USA)   10/4/93
+Assigns changes to M4.
+Changed (in m4-1.0.3): M4.c M4.h debug.c Makefile.in configure.in
+Changelog
+Added:  stackovf.c tests/stackovf_test.sh
+
+M4      Pete Chown      (UK, 1972)      6/28/94
+Assigns changes to M4 (builtin.c, input.c, m4.h, m4.texinfo, macro.c).
+

@@ -1,0 +1,468 @@
+# French messages for GNU m4.
+# Copyright (C) 1998 Free Software Foundation, Inc.
+# Erick Branderhorst <Erick.Branderhorst@asml.nl>, 1998,
+# created this file based on fr.msg, which was created by:
+# Franc,ois Pinard <pinard@iro.umontreal.ca> 199(4-7).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: m4 1.4d\n"
+"POT-Creation-Date: 1998-05-25 12:26+0200\n"
+"PO-Revision-Date: 1998-05-23 11:53+02:00\n"
+"Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
+"Language-Team: dutch <nl@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: src/builtin.c:272
+#, c-format
+msgid "Warning: Too few arguments to built-in `%s'"
+msgstr "Attention: Trop peu d'arguments pour «%s» prédéfini"
+
+#: src/builtin.c:278
+#, c-format
+msgid "Warning: Excess arguments to built-in `%s' ignored"
+msgstr "Attention: Les arguments superflus pour «%s» prédéfini sont ignorés"
+
+#: src/builtin.c:298
+#, c-format
+msgid "Non-numeric argument to built-in `%s'"
+msgstr "Argument non-numérique pour «%s» prédéfini"
+
+#: src/builtin.c:438
+msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
+msgstr "ERREUR INTERNE: Mauvais type de lexème dans define_macro ()"
+
+#: src/builtin.c:608 src/builtin.c:671 src/builtin.c:1188 src/builtin.c:1212
+#, c-format
+msgid "Undefined name %s"
+msgstr "Nom «%s» non-défini"
+
+#: src/builtin.c:636
+msgid "INTERNAL ERROR: Builtin not found in builtin table!"
+msgstr "ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis!"
+
+#: src/builtin.c:644
+msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
+msgstr "ERREUR INTERNE: Mauvais type de données pour lexème dans m4_dumpdef ()"
+
+#: src/builtin.c:695
+#, c-format
+msgid "Undefined macro `%s'"
+msgstr "Macro «%s» non-défini"
+
+#: src/builtin.c:735
+msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
+msgstr "ERREUR INTERNE: Mauvais type de symbole dans m4_defn ()"
+
+#: src/builtin.c:772
+#, c-format
+msgid "Cannot open pipe to command `%s'"
+msgstr "Incapable d'ouvrir un «pipe» pour la commande «%s»"
+
+#: src/builtin.c:811
+#, c-format
+msgid "Radix in eval out of range (radix = %d)"
+msgstr "Base hors intervalle dans «eval» (base = %d)"
+
+#: src/builtin.c:820
+msgid "Negative width to eval"
+msgstr "Largeur négative dans «eval»"
+
+#: src/builtin.c:925
+#, c-format
+msgid "Non-numeric argument to %s"
+msgstr "Argument non-numérique pour %s"
+
+#: src/builtin.c:937
+#, c-format
+msgid "Cannot undivert %s"
+msgstr "Incapble de ramener la diversion %s"
+
+#: src/builtin.c:1043 src/freeze.c:207
+#, c-format
+msgid "Cannot open %s"
+msgstr "Incapable d'ouvrir %s"
+
+#: src/builtin.c:1248
+#, c-format
+msgid "Debugmode: bad debug flags: `%s'"
+msgstr "Debugmode: mauvais indicateurs de mise-au-point: «%s»"
+
+#: src/builtin.c:1284
+#, c-format
+msgid "Cannot set error file: %s"
+msgstr "Incapable de préparer le fichier d'erreurs: %s"
+
+#: src/builtin.c:1501
+msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
+msgstr ""
+"ATTENTION: \\\\0 disparaîtra, utiliser \\\\& plutôt pour les remplacements"
+
+#: src/builtin.c:1562 src/builtin.c:1622 src/input.c:637
+#, c-format
+msgid "Bad regular expression `%s': %s"
+msgstr "Mauvaise expression régulière «%s»: %s"
+
+#: src/builtin.c:1573 src/builtin.c:1646
+#, c-format
+msgid "Error matching regular expression `%s'"
+msgstr "Erreur d'appariement pour l'expressio régulière «%s»"
+
+#: src/debug.c:379
+msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
+msgstr ""
+"ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis! "
+"(trace_pre ())"
+
+#: src/debug.c:387
+msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
+msgstr "ERREUR INTERNE: Mauvais type de donnée pour de lexème (trace_pre ())"
+
+#: src/eval.c:277
+#, c-format
+msgid "Bad expression in eval (missing right parenthesis): %s"
+msgstr "Mauvaise expression dans «eval» (parenthèse droite manquante): %s"
+
+#: src/eval.c:283
+#, c-format
+msgid "Bad expression in eval: %s"
+msgstr "Mauvaise expression dans «eval»: %s"
+
+#: src/eval.c:288
+#, c-format
+msgid "Bad expression in eval (bad input): %s"
+msgstr "Mauvaise expression dans «eval» (mauvaise entrée): %s"
+
+#: src/eval.c:293
+#, c-format
+msgid "Bad expression in eval (excess input): %s"
+msgstr "Mauvaise expression dans «eval» (entrée superflue): %s"
+
+#: src/eval.c:298
+#, c-format
+msgid "Divide by zero in eval: %s"
+msgstr "Division par zéro dans «eval»: %s"
+
+#: src/eval.c:303
+#, c-format
+msgid "Modulo by zero in eval: %s"
+msgstr "Module par zéro dans «eval»: %s"
+
+#: src/eval.c:308
+msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+msgstr "ERREUR INTERNE: Mauvais code d'erreur dans evaluate ()"
+
+#: src/eval.c:547
+msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+msgstr "ERREUR INTERNE: Mauvais opérateur de comparaison dans cmp_term ()"
+
+#: src/eval.c:590
+msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+msgstr "ERREUR INTERNE: Mauvais opérateur de décalage dans shift_term ()"
+
+#: src/eval.c:674
+msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+msgstr "ERREUR INTERNE: Mauvais opérateur dans mult_term ()"
+
+#: src/freeze.c:115
+msgid "INTERNAL ERROR: Built-in not found in builtin table!"
+msgstr "ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis!"
+
+#: src/freeze.c:128
+msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
+msgstr ""
+"ERREUR INTERNE: Mauvais type de donnée pour lexème dans freeze_one_symbol ()"
+
+#: src/freeze.c:159
+msgid "Expecting line feed in frozen file"
+msgstr "Fin-de-ligne attendue du fichier figé"
+
+#: src/freeze.c:161
+#, c-format
+msgid "Expecting character `%c' in frozen file"
+msgstr "Caractère «%c» attendu du fichier figé"
+
+#: src/freeze.c:218
+msgid "Ill-formated frozen file"
+msgstr "Fichier figé difforme"
+
+#: src/freeze.c:273 src/freeze.c:289
+msgid "Premature end of frozen file"
+msgstr "Fin prématurée de fichier figé"
+
+#: src/freeze.c:323
+#, c-format
+msgid "`%s' from frozen file not found in builtin table!"
+msgstr ""
+"«%s» dans le fichier figé est introuvable dans la table des prédéfinis!"
+
+#: src/input.c:174
+#, c-format
+msgid "Input read from %s"
+msgstr "Entrée lue de %s"
+
+#: src/input.c:231
+msgid "INTERNAL ERROR: Recursive push_string!"
+msgstr "ERREUR INTERNE: Utilisation récursive de push_string!"
+
+#: src/input.c:311
+#, c-format
+msgid "Input reverted to %s, line %d"
+msgstr "Entrée reprise de %s, ligne %d"
+
+#: src/input.c:325
+msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
+msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans pop_input ()"
+
+#: src/input.c:364
+msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
+msgstr "ERREUR INTERNE: Mauvais appel à init_macro_token ()"
+
+#: src/input.c:413
+msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
+msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans peek_input ()"
+
+#: src/input.c:470
+msgid "INTERNAL ERROR: Input stack botch in next_char ()"
+msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans next_char ()"
+
+#: src/input.c:550
+msgid "NONE"
+msgstr "AUCUN"
+
+#: src/input.c:777
+msgid "ERROR: EOF in string"
+msgstr "ERREUR: Fin-de-fichier dans la chaîne"
+
+#: src/m4.c:106
+msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
+msgstr "ERREUR INTERNE: Mauvais type de lexème dans expand_token ()"
+
+#: src/m4.c:133
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Pour plus d'information, essayez «%s --help».\\n\n"
+
+#: src/m4.c:137
+#, c-format
+msgid "Usage: %s [OPTION]... [FILE]...\n"
+msgstr "Usage: %s [OPTION]... [FICHIER]...\\n\n"
+
+#: src/m4.c:138
+msgid ""
+"Mandatory or optional arguments to long options are mandatory or optional\n"
+"for short options too.\n"
+"\n"
+"Operation modes:\n"
+"      --help                   display this help and exit\n"
+"      --version                output version information and exit\n"
+"  -e, --interactive            unbuffer output, ignore interrupts\n"
+"  -E, --fatal-warnings         stop execution after first warning\n"
+"  -Q, --quiet, --silent        suppress some warnings for builtins\n"
+"  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
+msgstr ""
+"Les arguments obligatoires ou optionnels pour la forme longue des\n"
+"options sont aussi obligatoires ou optionnels pour les formes courtes\n"
+"qui leur correspondent.\n"
+"\n"
+"Modes d'opération:\n"
+"      --help                   fournir ce message d'aide, puis terminer\n"
+"      --version                identifier le programme, puis terminer\n"
+"  -e, --interactive            ne pas tamponner, ignorer les interruptions\n"
+"  -E, --fatal-warnings         terminer l'exécution après le moindre "
+"message\n"
+"  -Q, --quiet, --silent        inhiber certains diagnostics prédéfinis\n"
+"  -P, --prefix-builtins        préfixer tous les prédéfinis par «m4_»\n"
+
+#: src/m4.c:151
+msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
+msgstr ""
+"  -W, --word-regexp=REGEXP     utiliser REGEXP pour les noms de macro\n"
+
+#: src/m4.c:155
+msgid ""
+"\n"
+"Preprocessor features:\n"
+"  -I, --include=DIRECTORY      search this directory second for includes\n"
+"  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
+"  -U, --undefine=NAME          delete builtin NAME\n"
+"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+msgstr ""
+"\n"
+"Capacités de préprocesseur:\n"
+"  -I, --include=REPERTOIRE     ensuite fouiller ce répertoire d'inclusions\n"
+"  -D, --define=NOM[=VALEUR]    définir NOM comme ayant VALEUR (ou vide)\n"
+"  -U, --undefine=NOM           éliminer le NOM prédéfini\n"
+"  -s, --synclines              engendrer des lignes «#line NNN "
+"\\\"FICHIER\\\"»\n"
+
+#: src/m4.c:163
+msgid ""
+"\n"
+"Limits control:\n"
+"  -G, --traditional            suppress all GNU extensions\n"
+"  -H, --hashsize=PRIME         set symbol lookup hash table size\n"
+"  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
+msgstr ""
+"\n"
+"Contrôle des limites:\n"
+"  -G, --traditional            inhiber toutes les extensions GNU\n"
+"  -H, --hashsize=PREMIER       choisir la grandeur de la table de symboles\n"
+"  -L, --nesting-limit=NOMBRE   modifier la limite artificielle "
+"d'imbrication\n"
+
+#: src/m4.c:170
+msgid ""
+"\n"
+"Frozen state files:\n"
+"  -F, --freeze-state=FILE      produce a frozen state on FILE at end\n"
+"  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
+msgstr ""
+"\n"
+"Fichiers d'état figé:\n"
+"  -F, --freeze-state=FICHIER   produire un FICHIER figé à la fin\n"
+"  -R, --reload-state=FICHIER   recharger un FICHIER figé au départ\n"
+
+#: src/m4.c:176
+msgid ""
+"\n"
+"Debugging:\n"
+"  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n"
+"  -t, --trace=NAME             trace NAME when it will be defined\n"
+"  -l, --arglength=NUM          restrict macro tracing size\n"
+"  -o, --error-output=FILE      redirect debug and trace output\n"
+msgstr ""
+"\n"
+"Mise-au-point:\n"
+"  -d, --debug=[INDICS]         niveau de mise-au-point (implicitement "
+"«aeq»)\n"
+"  -t, --trace=NOM              tracer NOM lorsqu'il sera défini\n"
+"  -l, --arglength=NOMBRE       restreindre la grandeur de trace des macros\n"
+"  -o, --error-output=FICHIER   rediriger la sortie de trace et "
+"mise-au-point\n"
+
+#: src/m4.c:184
+msgid ""
+"\n"
+"FLAGS is any of:\n"
+"  t   trace for all macro calls, not only traceon'ed\n"
+"  a   show actual arguments\n"
+"  e   show expansion\n"
+"  q   quote values as necessary, with a or e flag\n"
+"  c   show before collect, after collect and after call\n"
+"  x   add a unique macro call id, useful with c flag\n"
+"  f   say current input file name\n"
+"  l   say current input line number\n"
+"  p   show results of path searches\n"
+"  i   show changes in input files\n"
+"  V   shorthand for all of the above flags\n"
+msgstr ""
+"\n"
+"INDICS est une combinaison de:\n"
+"  t   tracer tous les appels de macro, pas uniquement les «traceon»\n"
+"  a   afficher les arguments véritables\n"
+"  e   afficher le résultat de l'expension\n"
+"  q   mettre entre guillemets lorsque necessaire, avec indics «a» ou «e»\n"
+"  c   afficher avant et après la collecte, puis après l'appel\n"
+"  x   ajouter une identification unique, utile avec l'indicateur «c»\n"
+"  f   donner le nom courant du fichier d'entrée\n"
+"  l   donner le numéro de la ligne d'entrée\n"
+"  p   afficher les résultats des fouilles de chemin\n"
+"  i   afficher les modifications dans les fichiers d'entrée\n"
+"  V   abbréviation commode pour toutes les options précédentes à la fois\n"
+
+#: src/m4.c:199
+msgid ""
+"\n"
+"If no FILE or if FILE is `-', standard input is read.\n"
+msgstr ""
+"\n"
+"Si aucun FICHIER ou si FICHIER vaut «-», lit l'entrée standard.\n"
+
+#: src/m4.c:355
+#, c-format
+msgid "Bad debug flags: `%s'"
+msgstr "Mauvais indicateurs de mise-au-point: «%s»"
+
+#: src/m4.c:434
+msgid "INTERNAL ERROR: Bad code in deferred arguments"
+msgstr "ERREUR INTERNE: Mauvais code dans les arguments différés"
+
+#: src/macro.c:92
+msgid "INTERNAL ERROR: Bad token type in expand_token ()"
+msgstr "ERREUR: Débordement de pile.  (Récursion hors contrôle sur «define»?)"
+
+#: src/macro.c:158
+msgid "ERROR: EOF in argument list"
+msgstr "ERREUR: Fin-de-fichier dans la liste d'arguments"
+
+#: src/macro.c:176
+msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
+msgstr ""
+"ERREUR INTERNE: Mauvais type de données pour lexème dans expand_argument ()"
+
+#: src/macro.c:253
+msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
+msgstr "ERREUR INTERNE: Mauvais type de symbole dans call_macro ()"
+
+#: src/macro.c:282
+#, c-format
+msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
+msgstr "ERREUR: Limite de récursion %d dépassée, la changer par -L<N>"
+
+#: src/output.c:198
+msgid "ERROR: Cannot create temporary file for diversion"
+msgstr "ERREUR: Incapable de créer un fichier temporaire pour la diversion"
+
+#: src/output.c:208
+msgid "ERROR: Cannot flush diversion to temporary file"
+msgstr "ERREUR: Incapable de vider la diversion sur un fichier temporaire"
+
+#: src/output.c:292
+msgid "ERROR: Copying inserted file"
+msgstr "ERREUR: Pendant la copie du fichier inséré"
+
+#: src/output.c:473
+msgid "ERROR: Reading inserted file"
+msgstr "ERREUR: Pendant la lecture d'un fichier inséré"
+
+#: src/output.c:572
+msgid "Cannot stat diversion"
+msgstr "Incapable d'opérer «stat» pour la diversion"
+
+#: src/path.c:131
+#, c-format
+msgid "Path search for `%s' found `%s'"
+msgstr "La fouille du chemin pour «%s» trouve «%s»"
+
+#. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
+#. if the stack limit has not been reached.
+#: src/stackovf.c:168
+msgid "VMEM limit exceeded?\n"
+msgstr "Limit VMEM outrepassée?\n"
+
+#: src/stackovf.c:190
+msgid ""
+"Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
+"occurred, or there is a bug in "
+msgstr ""
+"Les violations de mémoire sont détectées (SIGSEGV).  Ou bien la pile a\n"
+"débordé, ou bien il y a un problème dans "
+
+#: src/stackovf.c:195
+msgid ".  Check for possible infinite recursion.\n"
+msgstr ".  Vérifier une récursion hors contrôle.\n"
+
+#: src/symtab.c:190
+msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
+msgstr "ERREUR INTERNE: Mode illégal dans symbol_lookup ()"
+
+#: src/symtab.c:243
+#, c-format
+msgid "Name `%s' is unknown\n"
+msgstr "Le nom «%s» est inconnu\n"
+
+#~ msgid "Bad regular expression: `%s': %s"
+#~ msgstr "Mauvaise expression régulière: «%s»: %s"
