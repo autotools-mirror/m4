@@ -1,3 +1,20 @@
+2001-09-20  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/evalparse.c: Moved to...
+	* modules/evalparse.c:  ...here.  This code is shared between
+	modules/mpeval.c and modules/m4.c, so there is no need to pollute
+	the libm4 API with its details.  Moderately rewritten to interface
+	into its clients more simply.
+	* m4/eval.c: Deleted.  Migrated functionality to...
+	* modules/m4.c: ...here.
+	(builtin_eval):  Implemented in terms of the new interface style.
+	* modules/mpeval.c (builtin_mpeval): Ditto.
+	* m4/m4module.h: Removed references to the former m4/eval.c.
+	* m4/Makefile.am (libm4_la_SOURCES):  Removed eval.c.
+	(EXTRA_libm4_la_SOURCES): Deleted.
+	* modules/Makefile.am (EXTRA_m4_la_SOURCES): Reference evalparse.c.
+	(EXTRA_mpeval_la_SOURCES): Reference evalparse.c.
+
 2001-09-20  Akim Demaille  <akim@epita.fr>
 
 	* config/gmp.m4 (AM_WITH_GMP): Rename as...
@@ -17,7 +34,7 @@
 	* tests/atlocal.in, tests/builtins.at: Depend upon USE_GMP, not
 	WITH_GMP.
 
-2001-09-18  Akim Demaille  <akim@epita.fr>
+2001-09-20  Akim Demaille  <akim@epita.fr>
 
 	* tests/Makefile.am (package.m4): New.
 	* tests/testsuite.at: Adjust AT_INIT and AT_VICTIMS.

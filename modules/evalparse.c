@@ -19,31 +19,21 @@
 */
 
 /* This file contains the functions to evaluate integer expressions
-   for the "eval" macro.  It is a little, fairly self-contained
-   module, with its own scanner, and a recursive descent parser.  The
-   only entry point is evaluate ().
+   for the "eval" and "evalmp" builtins.  It is a little, fairly
+   self-contained module, with its own scanner, and a recursive descent
+   parser.
 
-   It has been carefully written to be also used for the GMP module,
+   It has been carefully factored for use from the GMP module builtin,
    mpeval: any actual operation performed on numbers is abstracted by
    a set of macro definitions.  For plain `eval', `number' is some
-   long int type, and `numb_*' manipulates those long ints, while when
+   long int type, and `numb_*' manipulate those long ints.  When
    using GMP, `number' is typedef'd to `mpq_t' (the arbritrary
    precision fractional numbers type of GMP), and `numb_*' are mapped
    to GMP functions.
 
-   There is only one entry point, `m4_do_eval', a single function for
-   both `eval' and `mpeval', but which is given a function pointer to
-   either `m4_evaluate' (for plain `eval'), and `m4_mp_evaluate' (for
-   GMP `mpeval').
-
-   This allows to factor the `user interface' of `eval' and `mpeval',
-   i.e., sanity checks on the input arguments.
-
-   FIXME: it makes no sense to me, since anyway both `modules' own
-   their copy of `m4_do_eval': why don't we just also use a macro for
-   that part instead of a function pointer? --akim.  */
-
-/* Evaluates token types.  */
+   There is only one entry point, `m4_evaluate', a single function for
+   both `eval' and `mpeval', but which is redefined appropriately when
+   this file is #included into its clients.  */
 
 #include <ctype.h>
 
@@ -286,73 +276,6 @@ eval_lex (number *val)
     default:
       return ERROR;
     }
-}
-
-/* Main entry point, called from "eval".  */
-boolean
-m4_evaluate (struct obstack *obs, const char *expr, const int radix, int min)
-{
-  number val;
-  eval_token et;
-  eval_error err;
-
-  numb_initialise();
-  eval_init_lex (expr);
-
-  numb_init(val);
-  et = eval_lex (&val);
-  err = logical_or_term (et, &val);
-
-  if (err == NO_ERROR && *eval_text != '\0')
-    err = EXCESS_INPUT;
-
-  switch (err)
-    {
-    case NO_ERROR:
-      break;
-
-    case MISSING_RIGHT:
-      M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (missing right parenthesis): %s"),
-		expr));
-      break;
-
-    case SYNTAX_ERROR:
-      M4ERROR ((warning_status, 0,
-		_("Bad expression in eval: %s"), expr));
-      break;
-
-    case UNKNOWN_INPUT:
-      M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (bad input): %s"), expr));
-      break;
-
-    case EXCESS_INPUT:
-      M4ERROR ((warning_status, 0,
-		_("Bad expression in eval (excess input): %s"), expr));
-      break;
-
-    case DIVIDE_ZERO:
-      M4ERROR ((warning_status, 0,
-		_("Divide by zero in eval: %s"), expr));
-      break;
-
-    case MODULO_ZERO:
-      M4ERROR ((warning_status, 0,
-		_("Modulo by zero in eval: %s"), expr));
-      break;
-
-    default:
-      M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad error code in evaluate ()")));
-      abort ();
-    }
-
-  if (err == NO_ERROR)
-    numb_obstack(obs, val, radix, min);
-
-  numb_fini(val);
-  return (boolean) (err != NO_ERROR);
 }
 
 /* Recursive descent parser.  */
@@ -841,12 +764,15 @@ simple_term (eval_token et, number *v1)
   return NO_ERROR;
 }
 
+/* Main entry point, called from "eval" and "mpeval" builtins.  */
 void
-m4_do_eval (struct obstack *obs,
-	    int argc, m4_symbol **argv, m4_eval_func func)
+m4_evaluate (struct obstack *obs, int argc, m4_symbol **argv)
 {
-  int radix = 10;
-  int min = 1;
+  int		radix	= 10;
+  int		min	= 1;
+  number	val;
+  eval_token	et;
+  eval_error	err;
 
   if (m4_bad_argc (argv[0], argc, 2, 4))
     return;
@@ -863,6 +789,7 @@ m4_do_eval (struct obstack *obs,
 
   if (argc >= 4 && !m4_numeric_arg (argv[0], M4ARG (3), &min))
     return;
+
   if (min <= 0)
     {
       M4ERROR ((warning_status, 0,
@@ -870,11 +797,62 @@ m4_do_eval (struct obstack *obs,
       return;
     }
 
-  /* FIXME: Huh?  What's these `if' and `return' doing here?  Makes no
-     sense to me. Furthermore, then what is the point of returning a
-     bool (m4_evaluate) if we just ignore it? --akim */
-  if ((*func) (obs, M4ARG (1), radix, min))
-    return;
+  numb_initialise ();
+  eval_init_lex (M4ARG (1));
+
+  numb_init(val);
+  et = eval_lex (&val);
+  err = logical_or_term (et, &val);
+
+  if (err == NO_ERROR && *eval_text != '\0')
+    err = EXCESS_INPUT;
+
+  switch (err)
+    {
+    case NO_ERROR:
+      break;
+
+    case MISSING_RIGHT:
+      M4ERROR ((warning_status, 0,
+		_("Bad expression in eval (missing right parenthesis): %s"),
+		M4ARG (1)));
+      break;
+
+    case SYNTAX_ERROR:
+      M4ERROR ((warning_status, 0,
+		_("Bad expression in eval: %s"), M4ARG (1)));
+      break;
+
+    case UNKNOWN_INPUT:
+      M4ERROR ((warning_status, 0,
+		_("Bad expression in eval (bad input): %s"), M4ARG (1)));
+      break;
+
+    case EXCESS_INPUT:
+      M4ERROR ((warning_status, 0,
+		_("Bad expression in eval (excess input): %s"), M4ARG (1)));
+      break;
+
+    case DIVIDE_ZERO:
+      M4ERROR ((warning_status, 0,
+		_("Divide by zero in eval: %s"), M4ARG (1)));
+      break;
+
+    case MODULO_ZERO:
+      M4ERROR ((warning_status, 0,
+		_("Modulo by zero in eval: %s"), M4ARG (1)));
+      break;
+
+    default:
+      M4ERROR ((warning_status, 0,
+		_("INTERNAL ERROR: Bad error code in evaluate ()")));
+      abort ();
+    }
+
+  if (err == NO_ERROR)
+    numb_obstack(obs, val, radix, min);
+
+  numb_fini(val);
 }
 
 static void

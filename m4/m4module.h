@@ -452,17 +452,7 @@ extern int m4_dump_symbol (const char *name, m4_symbol *symbol, void *data);
 extern void m4_dump_symbols (struct m4_dump_symbol_data *data, int argc, m4_symbol **argv, boolean complain);
 
 
-
 
-/* --- EXPRESSION EVALUATION --- */
-
-typedef boolean (*m4_eval_func) (struct obstack *obs,
-				const char *expr, const int radix, int min);
-
-extern boolean m4_evaluate (struct obstack *obs,
-				      const char *, const int radix, int min);
-extern void m4_do_eval (struct obstack *obs, int argc, m4_symbol **argv, m4_eval_func func);
-
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree
 

@@ -81,6 +81,25 @@ extern int errno;
 	BUILTIN(undefine,	FALSE,	TRUE  )	\
 	BUILTIN(undivert,	FALSE,	FALSE )
 
+
+#if defined(SIZEOF_LONG_LONG_INT) && SIZEOF_LONG_LONG_INT > 0
+/* Use GNU long long int if available.  */
+typedef long long int number;
+typedef unsigned long long int unumber;
+#else
+typedef long int number;
+typedef unsigned long int unumber;
+#endif
+
+
+static void	include		(int argc, m4_symbol **argv, boolean silent);
+static int	set_trace	(const char *name, m4_symbol *symbol,
+				 void *data);
+static const char *ntoa		(number value, int radix);
+static void	numb_obstack	(struct obstack *obs, const number value,
+				 const int radix, int min);
+
+
 /* Generate prototypes for each builtin handler function. */
 #define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
   builtin_functions
@@ -403,14 +422,6 @@ M4BUILTIN_HANDLER (sysval)
 }
 
 
-/* This section contains the top level code for the "eval" builtin.  The
-   actual work is done in the function m4_evaluate (), which lives in
-   eval.c.  */
-M4BUILTIN_HANDLER (eval)
-{
-  m4_do_eval(obs, argc, argv, m4_evaluate);
-}
-
 M4BUILTIN_HANDLER (incr)
 {
   int value;
@@ -647,9 +658,6 @@ M4BUILTIN_HANDLER (m4wrap)
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
 static int
-set_trace (const char *name, m4_symbol *symbol, void *data);
-
-static int
 set_trace (const char *name, m4_symbol *symbol, void *data)
 {
   M4_SYMBOL_TRACED (symbol) = (boolean) (data != NULL);
@@ -811,3 +819,125 @@ M4BUILTIN_HANDLER (translit)
 	}
     }
 }
+
+
+
+/* The rest of this  file contains the functions to evaluate integer
+ * expressions for the "eval" macro.  `number' should be at least 32 bits.
+ */
+#define int2numb(i) ((number)(i))
+#define numb2int(n) ((n))
+
+#define numb_set(ans,x) ((ans) = x)
+#define numb_set_si(ans,si) (*(ans) = int2numb(si))
+
+#define numb_init(x) x=((number)0)
+#define numb_fini(x)
+
+#define numb_decr(n) (n) -= 1
+
+#define numb_ZERO ((number)0)
+#define numb_ONE  ((number)1)
+
+#define numb_zerop(x)     ((x) == numb_ZERO)
+#define numb_positivep(x) ((x) >  numb_ZERO)
+#define numb_negativep(x) ((x) <  numb_ZERO)
+
+#define numb_eq(x,y) ((x) = ((x) == (y)))
+#define numb_ne(x,y) ((x) = ((x) != (y)))
+#define numb_lt(x,y) ((x) = ((x) <  (y)))
+#define numb_le(x,y) ((x) = ((x) <= (y)))
+#define numb_gt(x,y) ((x) = ((x) >  (y)))
+#define numb_ge(x,y) ((x) = ((x) >= (y)))
+
+#define numb_lnot(x)   ((x) = (! (x)))
+#define numb_lior(x,y) ((x) = ((x) || (y)))
+#define numb_land(x,y) ((x) = ((x) && (y)))
+
+#define numb_not(x)   (*(x) = int2numb(~numb2int(*(x))))
+#define numb_eor(x,y) (*(x) = int2numb(numb2int(*(x)) ^ numb2int(*(y))))
+#define numb_ior(x,y) (*(x) = int2numb(numb2int(*(x)) | numb2int(*(y))))
+#define numb_and(x,y) (*(x) = int2numb(numb2int(*(x)) & numb2int(*(y))))
+
+#define numb_plus(x,y)  ((x) = ((x) + (y)))
+#define numb_minus(x,y) ((x) = ((x) - (y)))
+#define numb_negate(x)  ((x) = (- (x)))
+
+#define numb_times(x,y)  ((x) = ((x) * (y)))
+#define numb_ratio(x,y)  ((x) = ((x) / ((y))))
+#define numb_divide(x,y) (*(x) = (*(x) / (*(y))))
+#define numb_modulo(x,y) (*(x) = (*(x) % *(y)))
+#define numb_invert(x)   ((x) = 1 / (x))
+
+#define numb_lshift(x,y) (*(x) = (*(x) << *(y)))
+#define numb_rshift(x,y) (*(x) = (*(x) >> *(y)))
+
+
+/* The function ntoa () converts VALUE to a signed ascii representation in
+   radix RADIX.  */
+static const char *
+ntoa (number value, int radix)
+{
+  /* Digits for number to ascii conversions.  */
+  static char const ntoa_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+  boolean negative;
+  unumber uvalue;
+  static char str[256];
+  char *s = &str[sizeof str];
+
+  *--s = '\0';
+
+  if (value < 0)
+    {
+      negative = TRUE;
+      uvalue = (unumber) -value;
+    }
+  else
+    {
+      negative = FALSE;
+      uvalue = (unumber) value;
+    }
+
+  do
+    {
+      *--s = ntoa_digits[uvalue % radix];
+      uvalue /= radix;
+    }
+  while (uvalue > 0);
+
+  if (negative)
+    *--s = '-';
+  return s;
+}
+
+static void
+numb_obstack(struct obstack *obs, const number value,
+	     const int radix, int min)
+{
+  const char *s = ntoa (value, radix);
+
+  if (*s == '-')
+    {
+      obstack_1grow (obs, '-');
+      min--;
+      s++;
+    }
+  for (min -= strlen (s); --min >= 0;)
+    obstack_1grow (obs, '0');
+
+  obstack_grow (obs, s, strlen (s));
+}
+
+
+static void
+numb_initialise (void)
+{
+  ;
+}
+
+/* This macro defines the top level code for the "eval" builtin.  The
+   actual work is done in the function m4_evaluate (), which lives in
+   evalparse.c.  */
+#define m4_evaluate	builtin_eval
+#include "evalparse.c"

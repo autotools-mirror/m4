@@ -105,8 +105,6 @@ m4_macro m4_macro_table[] =
 /* number should be at least 32 bits.  */
 typedef mpq_t number;
 
-extern boolean m4_mp_evaluate (struct obstack *obs, const char *,
-			       const int radix, int min);
 static void numb_initialise (void);
 static void numb_obstack (struct obstack *obs, const number value,
 			  const int radix, int min);
@@ -121,16 +119,6 @@ static void numb_not (number *x);
 static void numb_lshift (number *x, const number *y);
 static void numb_rshift (number *x, const number *y);
 
-
-
-/**
- * mpeval(EXPRESSION)
- **/
-M4BUILTIN_HANDLER (mpeval)
-{
-  m4_do_eval (obs, argc, argv, m4_mp_evaluate);
-}
-
 
 static number numb_ZERO;
 static number numb_ONE;
@@ -413,7 +401,8 @@ numb_rshift (number * x, const number * y)
   mpq2mpz (yy, *y, NOISY);
 
   mpz_init (res);
-  {				/* bug: need to determine if y is too big or negative */
+  {
+    /* FIXME: bug - need to determine if y is too big or negative */
     long int exp = mpz_get_si (yy);
     if (exp >= 0)
       {
@@ -432,5 +421,5 @@ numb_rshift (number * x, const number * y)
   mpz_clear (res);
 }
 
-#define m4_evaluate m4_mp_evaluate
+#define m4_evaluate	builtin_mpeval
 #include "evalparse.c"

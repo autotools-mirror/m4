@@ -50,12 +50,14 @@ gnu_la_LDFLAGS = -module
 load_la_SOURCES = load.c
 load_la_LDFLAGS = -module
 
-m4_la_SOURCES = m4.c
-m4_la_LDFLAGS = -module
+m4_la_SOURCES		= m4.c
+EXTRA_m4_la_SOURCES	= evalparse.c
+m4_la_LDFLAGS		= -module
 
-mpeval_la_SOURCES = mpeval.c
-mpeval_la_LDFLAGS = -module
-mpeval_la_LIBADD = -lgmp
+mpeval_la_SOURCES	= mpeval.c
+EXTRA_mpeval_la_SOURCES	= evalparse.c
+mpeval_la_LDFLAGS	= -module
+mpeval_la_LIBADD	= -lgmp
 
 traditional_la_SOURCES = traditional.c
 traditional_la_LDFLAGS = -module

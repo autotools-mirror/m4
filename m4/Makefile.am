@@ -36,10 +36,9 @@ EXTRA_HEADERS	= system-h.in gnu-obstack.h
 EXTRA_DIST = $(EXTRA_HEADERS) obstack.c
 
 lib_LTLIBRARIES		= libm4.la
-libm4_la_SOURCES 	= builtin.c debug.c error.c eval.c hash.c \
+libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c \
 			  input.c ltdl.c macro.c module.c output.c \
 			  path.c regex.c symtab.c utility.c
-EXTRA_libm4_la_SOURCES	= evalparse.c
 libm4_la_LIBADD		= @LTLIBOBJS@ @LIBADD_DL@
 
 module.o module.lo: $(srcdir)/module.c pathconf.h
