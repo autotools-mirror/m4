@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-10-04 10:25+0200\n"
+"POT-Creation-Date: 2001-10-13 08:32+0200\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -167,30 +167,31 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "INTERNER FEHLER: Falscher Datentyp des Tokens (trace_pre ())"
 
-#: m4/input.c:317
+#: m4/input.c:319
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Eingabe zurückgenommen zu %s, Zeile %d"
 
-#: m4/input.c:345
+#: m4/input.c:347
 #, c-format
 msgid "Input read from %s"
 msgstr "Eingabe gelesen von %s"
 
-#: m4/input.c:498
+#: m4/input.c:499
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "INTERNER FEHLER: Rekursives push_string!"
 
-#: m4/input.c:602
-msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
+#: m4/input.c:603
+#, fuzzy
+msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
 msgstr "INTERNER FEHLER: Falscher Aufruf von init_macro_token ()"
 
-#: m4/input.c:639
+#: m4/input.c:642
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr ""
 "INTERNER FEHLER: Kellerspeicher der Eingabe durcheinander in next_char ()"
 
-#: m4/input.c:673
+#: m4/input.c:676
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr ""
@@ -198,16 +199,16 @@ msgstr ""
 
 # This is the name of the input file when there is no current input file.
 # Is this ever printed in a message?
-#: m4/input.c:763
+#: m4/input.c:766
 msgid "NONE"
 msgstr "NONE"
 
-#: m4/input.c:983
+#: m4/input.c:986
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Syntaxzeichen %c nicht definiert."
 
-#: m4/input.c:1110 m4/input.c:1137
+#: m4/input.c:1113 m4/input.c:1140
 msgid "ERROR: EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
 
@@ -219,15 +220,15 @@ msgstr "INTERNER FEHLER: Falscher Datentyp des Tokens in expands_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "FEHLER: Dateiende in Argumentliste"
 
-#: m4/macro.c:177
+#: m4/macro.c:172
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "INTERNER FEHLER: Falscher Typ des Tokens in expand_argument ()"
 
-#: m4/macro.c:249
+#: m4/macro.c:246
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "INTERNER FEHLER: Falsche Symboltyp in call_macro ()"
 
-#: m4/macro.c:275
+#: m4/macro.c:272
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -306,15 +307,15 @@ msgstr "FEHLER: Kann Umleitung nicht in temporäre Datei ausgeben"
 msgid "ERROR: Copying inserted file"
 msgstr "FEHLER: Während Kopieren einer eingefügten Datei"
 
-#: m4/output.c:580
+#: m4/output.c:578
 msgid "ERROR: Reading inserted file"
 msgstr "FEHLER: Während Lesen einer eingefügten Datei"
 
-#: m4/output.c:672
+#: m4/output.c:668
 msgid "Cannot stat diversion"
 msgstr "Kann `stat' nicht auf Umleitung anwenden"
 
-#: m4/output.c:675
+#: m4/output.c:671
 msgid "Diversion too large"
 msgstr ""
 
@@ -323,7 +324,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
 
-#: m4/symtab.c:372
+#: m4/symtab.c:409
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Name »%s« ist unbekannt\n"
@@ -340,46 +341,46 @@ msgstr "INTERNER FEHLER: Falscher Shift-Operator in shift_term ()"
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "INTERNER FEHLER: Falscher Operator in mult_term ()"
 
-#: modules/evalparse.c:786
+#: modules/evalparse.c:783
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Basis in `eval' nicht in den Grenzen (Basis = %d)"
 
-#: modules/evalparse.c:796
+#: modules/evalparse.c:793
 msgid "Negative width to eval"
 msgstr "Negative Breite in `eval'"
 
-#: modules/evalparse.c:817
+#: modules/evalparse.c:814
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "Falscher Ausdruck in `eval' (fehlende rechte Klammer): %s"
 
-#: modules/evalparse.c:823
+#: modules/evalparse.c:820
 #, fuzzy, c-format
 msgid "Bad expression in eval: %s"
 msgstr "Falscher Ausdruck in `eval' (falsche Eingabe): %s"
 
-#: modules/evalparse.c:828
+#: modules/evalparse.c:825
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "Falscher Ausdruck in `eval' (falsche Eingabe): %s"
 
-#: modules/evalparse.c:833
+#: modules/evalparse.c:830
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "Falscher Ausdruck in `eval' (zu große Eingabe): %s"
 
-#: modules/evalparse.c:838
+#: modules/evalparse.c:835
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Division durch Null in `eval': %s"
 
-#: modules/evalparse.c:843
+#: modules/evalparse.c:840
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Modulo Null in `eval': %s"
 
-#: modules/evalparse.c:848
+#: modules/evalparse.c:845
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "INTERNER FEHLER: Falscher Fehlerkode in evaluate ()"
 
@@ -388,37 +389,37 @@ msgstr "INTERNER FEHLER: Falscher Fehlerkode in evaluate ()"
 msgid "Undefined name %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:169
+#: modules/gnu.c:166
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:229
+#: modules/gnu.c:220
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debugmodus: falsche Debug Flags: »%s«"
 
-#: modules/gnu.c:265
+#: modules/gnu.c:253
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kann Fehlerdatei nicht vorbereiten: %s"
 
-#: modules/gnu.c:295
-#, fuzzy
-msgid "%0: bad regular expression `%s': %s"
+#: modules/gnu.c:283
+#, fuzzy, c-format
+msgid "%s: bad regular expression `%s': %s"
 msgstr "Falscher regulärer Ausdruck »%s«: %s"
 
-#: modules/gnu.c:340 modules/gnu.c:418
+#: modules/gnu.c:325 modules/gnu.c:404
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: modules/gnu.c:531
+#: modules/gnu.c:511
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Kann keine `pipe' für Kommando »%s« öffnen"
 
-#: modules/gnu.c:604
+#: modules/gnu.c:579
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 
@@ -427,18 +428,18 @@ msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
-#: modules/m4.c:702
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:343 modules/m4.c:611
+#: modules/m4.c:631
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/m4.c:506
+#: modules/m4.c:451
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Kann Umleitung %s nicht aufheben"
 
-#: modules/m4.c:577 src/freeze.c:385
+#: modules/m4.c:510 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"
@@ -466,17 +467,17 @@ msgstr "Erwarte Zeilenumbruch in eingefrorener Datei"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Erwarte Zeichen »%c« in eingefrorener Datei"
 
-#: src/freeze.c:358 src/freeze.c:531
+#: src/freeze.c:358 src/freeze.c:541
 msgid "Premature end of frozen file"
 msgstr "Vorzeitiges Ende der eingefrorenen Datei"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:493 src/freeze.c:511
-#: src/freeze.c:629
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
+#: src/freeze.c:639
 msgid "Ill-formated frozen file"
 msgstr "Fehlerhafte eingefrorene Datei"
 
-#: src/freeze.c:478
+#: src/freeze.c:488
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""

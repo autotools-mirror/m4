@@ -1,5 +1,14 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* m4/utility.c (m4_bad_argc): Display user argument counts, i.e.,
+	exclude the builtin name from the count.
+	* modules/m4.c (ifelse): Do not use the regular argc mechanism, as
+	calling ifelse with a single argument is valid.
+	* doc/m4.texinfo (Ifelse): Add an example where ifelse is invoked
+	with 1 and 2 args, mostly to strengthen the test suite.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* m4/output.c (m4_make_diversion, m4_insert_file)
 	(m4_insert_diversion, +m4_freeze_diversions): Ansify.
 

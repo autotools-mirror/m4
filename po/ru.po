@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-10-04 10:25+0200\n"
+"POT-Creation-Date: 2001-10-13 08:32+0200\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -163,43 +163,44 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Встроенная лексема не найдена! (trace_pre ())"
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы (trace_pre ())"
 
-#: m4/input.c:317
+#: m4/input.c:319
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Ввод перенаправлен в %s , строка %d"
 
-#: m4/input.c:345
+#: m4/input.c:347
 #, c-format
 msgid "Input read from %s"
 msgstr "Ввод из %s"
 
-#: m4/input.c:498
+#: m4/input.c:499
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Рекурсивная push_string!"
 
-#: m4/input.c:602
-msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
+#: m4/input.c:603
+#, fuzzy
+msgid "INTERNAL ERROR: Bad call to init_builtin_token ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный вызов init_macro_token ()"
 
-#: m4/input.c:639
+#: m4/input.c:642
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в next_char ()"
 
-#: m4/input.c:673
+#: m4/input.c:676
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
 
-#: m4/input.c:763
+#: m4/input.c:766
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: m4/input.c:983
+#: m4/input.c:986
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Неопределенный синтаксический код %c"
 
-#: m4/input.c:1110 m4/input.c:1137
+#: m4/input.c:1113 m4/input.c:1140
 msgid "ERROR: EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
 
@@ -211,15 +212,15 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в expand_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "ОШИБКА: Конец файла в списке аргументов"
 
-#: m4/macro.c:177
+#: m4/macro.c:172
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип лексемы в expand_argument ()"
 
-#: m4/macro.c:249
+#: m4/macro.c:246
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный тип символа в call_macro ()"
 
-#: m4/macro.c:275
+#: m4/macro.c:272
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
@@ -299,15 +300,15 @@ msgstr "ОШИБКА: Ошибка записи разветвления во временный файл"
 msgid "ERROR: Copying inserted file"
 msgstr "ОШИБКА: Копирую вставленный файл"
 
-#: m4/output.c:580
+#: m4/output.c:578
 msgid "ERROR: Reading inserted file"
 msgstr "ОШИБКА: Читаю вставленный файл"
 
-#: m4/output.c:672
+#: m4/output.c:668
 msgid "Cannot stat diversion"
 msgstr "Невозможно подсчитать разветвления"
 
-#: m4/output.c:675
+#: m4/output.c:671
 msgid "Diversion too large"
 msgstr ""
 
@@ -316,7 +317,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
-#: m4/symtab.c:372
+#: m4/symtab.c:409
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
@@ -333,46 +334,46 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор сдвига в shift_term ()"
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный оператор в mult_term ()"
 
-#: modules/evalparse.c:786
+#: modules/evalparse.c:783
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Радикс в выражении выходит за пределы (radix = %d)"
 
-#: modules/evalparse.c:796
+#: modules/evalparse.c:793
 msgid "Negative width to eval"
 msgstr "Отрицательная ширина"
 
-#: modules/evalparse.c:817
+#: modules/evalparse.c:814
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "Неверное выражение (отсутствует правые скобки): %s"
 
-#: modules/evalparse.c:823
+#: modules/evalparse.c:820
 #, fuzzy, c-format
 msgid "Bad expression in eval: %s"
 msgstr "Неверное выражение (bad input): %s"
 
-#: modules/evalparse.c:828
+#: modules/evalparse.c:825
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "Неверное выражение (bad input): %s"
 
-#: modules/evalparse.c:833
+#: modules/evalparse.c:830
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "Неверное выражение (excess input): %s"
 
-#: modules/evalparse.c:838
+#: modules/evalparse.c:835
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Деление на ноль в выражении: %s"
 
-#: modules/evalparse.c:843
+#: modules/evalparse.c:840
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Модульное деление на ноль в выражении: %s"
 
-#: modules/evalparse.c:848
+#: modules/evalparse.c:845
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 
@@ -381,37 +382,37 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 msgid "Undefined name %s"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:169
+#: modules/gnu.c:166
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:229
+#: modules/gnu.c:220
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Режим отладки: неверный флаг отладки: '%s'"
 
-#: modules/gnu.c:265
+#: modules/gnu.c:253
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Невозможно назначить файл ошибок %s"
 
-#: modules/gnu.c:295
-#, fuzzy
-msgid "%0: bad regular expression `%s': %s"
+#: modules/gnu.c:283
+#, fuzzy, c-format
+msgid "%s: bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
 
-#: modules/gnu.c:340 modules/gnu.c:418
+#: modules/gnu.c:325 modules/gnu.c:404
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Ошибка сопоставления регулярного выражения '%s'"
 
-#: modules/gnu.c:531
+#: modules/gnu.c:511
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Невозможно открыть канал для комманды '%s'"
 
-#: modules/gnu.c:604
+#: modules/gnu.c:579
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
@@ -420,18 +421,18 @@ msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ОШИБКА: модуль `%s' не найден"
 
-#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
-#: modules/m4.c:702
+#: modules/m4.c:183 modules/m4.c:222 modules/m4.c:343 modules/m4.c:611
+#: modules/m4.c:631
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Имя %s неопределено"
 
-#: modules/m4.c:506
+#: modules/m4.c:451
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
 
-#: modules/m4.c:577 src/freeze.c:385
+#: modules/m4.c:510 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
@@ -459,17 +460,17 @@ msgstr "Ожидается перевод строки в файле-образе памяти"
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ожидается символ '%c' в файле-образе памяти"
 
-#: src/freeze.c:358 src/freeze.c:531
+#: src/freeze.c:358 src/freeze.c:541
 msgid "Premature end of frozen file"
 msgstr "Преждевременный конец файла-образа памяти"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:493 src/freeze.c:511
-#: src/freeze.c:629
+#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:503 src/freeze.c:521
+#: src/freeze.c:639
 msgid "Ill-formated frozen file"
 msgstr "Неверный формат файла-образа памяти"
 
-#: src/freeze.c:478
+#: src/freeze.c:488
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "'%s' из файла-образа памяти не найдена во встроенной таблице!"

@@ -98,11 +98,12 @@ m4_token_func (m4_token *name)
 
 
 
-/* Give friendly warnings if a builtin macro is passed an inappropriate
-   number of arguments.  NAME is macro name for messages, ARGC is actual
-   number of arguments, MIN is the minimum number of acceptable arguments,
-   negative if not applicable, MAX is the maximum number, negative if not
-   applicable.  */
+/* Give friendly warnings if a builtin macro is passed an
+   inappropriate number of arguments.  NAME is macro name for
+   messages, ARGC is actual number of arguments, MIN is the minimum
+   number of acceptable arguments, negative if not applicable, MAX is
+   the maximum number, negative if not applicable.  ARGC, MIN, and MAX
+   count ARGV[0], the name of the macro.  */
 boolean
 m4_bad_argc (m4_token *token, int argc, int min, int max)
 {
@@ -110,7 +111,7 @@ m4_bad_argc (m4_token *token, int argc, int min, int max)
     {
       M4WARN ((warning_status, 0,
 	       _("Warning: %s: too few arguments: %d < %d"),
-	       TOKEN_TEXT (token), argc, min));
+	       TOKEN_TEXT (token), argc - 1, min - 1));
       return TRUE;
     }
 
@@ -118,7 +119,7 @@ m4_bad_argc (m4_token *token, int argc, int min, int max)
     {
       M4WARN ((warning_status, 0,
 	       _("Warning: %s: too many arguments (ignored): %d > %d"),
-	       TOKEN_TEXT (token), argc, max));
+	       TOKEN_TEXT (token), argc - 1, max - 1));
       /* Return FALSE, otherwise it is not exactly `ignored'. */
       return FALSE;
     }

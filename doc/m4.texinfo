@@ -1491,6 +1491,14 @@ block comment, as an alternative to repeatedly using @code{dnl}.  This
 special usage is recognized by GNU @code{m4}, so that in this case, the
 warning about missing arguments is never triggered.
 
+@example
+ifelse(`some comments')
+@result{}
+ifelse(`foo', `bar')
+@error{}m4: input.m4: 2: Warning: ifelse: too few arguments: 2 < 3
+@result{}
+@end example
+
 If called with three or four arguments, @code{ifelse} expands into
 @var{equal}, if @var{string-1} and @var{string-2} are equal (character
 for character), otherwise it expands to @var{not-equal}.

@@ -60,7 +60,7 @@ extern int errno;
 	BUILTIN(errprint,	FALSE,	FALSE,	0,	-1 )	\
 	BUILTIN(eval,		FALSE,	TRUE,	2,	4  )	\
 	BUILTIN(ifdef,		FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(ifelse,		FALSE,	TRUE,	4,	-1 )	\
+	BUILTIN(ifelse,		FALSE,	TRUE,	-1,	-1 )	\
 	BUILTIN(include,	FALSE,	TRUE,	2,	2  )	\
 	BUILTIN(incr,		FALSE,	TRUE,	2,	2  )	\
 	BUILTIN(index,		FALSE,	TRUE,	3,	3  )	\
@@ -252,9 +252,13 @@ M4BUILTIN_HANDLER (ifelse)
 {
   const char *result;
 
+  /* The valid ranges of argc for ifelse is discontinuous, we cannot
+     rely on the regular mechanisms.  */
   if (argc == 2)
     return;
 
+  if (m4_bad_argc (argv[0], argc, 4, -1))
+    return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     m4_bad_argc (argv[0], (argc + 2) % 3, -1, 1);
