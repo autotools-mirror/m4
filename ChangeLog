@@ -1,3 +1,7 @@
+2001-08-29  Akim Demaille  <akim@epita.fr>
+
+	* tests/generate.awk (normalize): s/@__@/@&t@/.
+
 2001-08-28  Akim Demaille  <akim@epita.fr>
 
 	* examples/indir.m4, tests/others.at (indir): s/nonsens/nonsense/.
