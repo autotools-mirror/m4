@@ -21,13 +21,24 @@
 # We need a recent Autotest.
 m4_version_prereq([2.52c])
 
-# AT_CHECK_M4(FLAGS, [EXIT-STATUS], [STDOUT], [STDERR])
-# -----------------------------------------------------
+# AT_CHECK_M4(ARGS, [EXIT-STATUS], [STDOUT], [STDERR])
+# ----------------------------------------------------
 # Hide the impact of libtool on program_invocation_name, and hide
 # the differences of paths when src != build.
 m4_define([AT_CHECK_M4],
-[AT_CHECK([m4 -b -d $1],
-          [$2], [$3], [$4])
+[AT_CHECK([m4 -b -d $1], [$2], [$3], [$4])
+])
+
+
+# AT_CHECK_M4_FILTER(TITLE, INPUT, [STDOUT], [STDERR])
+# ----------------------------------------------------
+# Hide the impact of libtool on program_invocation_name, and hide
+# the differences of paths when src != build.
+m4_define([AT_CHECK_M4_FILTER],
+[AT_SETUP([$1])
+AT_DATA([[in.m4]], [$2])
+AT_CHECK_M4([[in.m4]], 0, [$4], [$5])
+AT_CLEANUP
 ])
 
 
@@ -44,6 +55,9 @@ AT_INIT([m4])
 
 # Hand crafted tests.
 m4_include([others.at])
+
+# Torturing the modules support.
+m4_include([modules.at])
 
 # From the documention.
 m4_include([generated.at])

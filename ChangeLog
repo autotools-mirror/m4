@@ -1,5 +1,15 @@
 2001-08-29  Akim Demaille  <akim@epita.fr>
 
+	* tests/others.at (Freezing modules)
+	(--module-directory: absolute path, modpath2, modpath3)
+	(M4MODPATH: absolute path, modtest, shadow, unload): Move to...
+	* tests/modules.at: here, new file.
+	* tests/others.at, tests/generate.awk: Add a banner.
+	* tests/testsuite.at: Adjust.
+	(AT_CHECK_M4_FILTER): New, but unused.
+
+2001-08-29  Akim Demaille  <akim@epita.fr>
+
 	* tests/testsuite.at (AT_CHECK_M4): Don't pass -I, let the tests
 	handle that.
 	* tests/others.at (wrap): Inline wrap.m4.

@@ -29,7 +29,7 @@ OTHER_FILES = \
 	iso8859.m4 incl.m4 foo \
 	stackovf.test
 
-TESTSUITE_AT = testsuite.at others.at generated.at
+TESTSUITE_AT = testsuite.at others.at modules.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)

@@ -29,6 +29,8 @@ BEGIN {
   print "#";
   print "# Copyright 1992, 2000, 2001 Free Software Foundation, Inc.";
   print ;
+  print "AT_BANNER([Documentation examples.])";
+  print ;
 }
 
 /^@node / {

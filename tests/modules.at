@@ -1,0 +1,368 @@
+# Hand crafted tests for GNU M4.                               -*- Autotest -*-
+# Copyright 2001 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+
+
+AT_BANNER([Module support.])
+
+
+## --------- ##
+## modfreeze ##
+## --------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([Freezing modules])
+
+AT_DATA([[frozen.m4]],
+[[divert(1)dnl
+define(`test', `local::`test'')dnl
+define(`test1', defn(`test'))dnl
+->test
+load(`modtest')
+define(`test2', defn(`test'))dnl
+->test
+load(`shadow')
+define(`test3', defn(`test'))dnl
+->test
+]])
+
+AT_DATA([[unfrozen.m4]],
+[[undivert(1)dnl
+test1
+test2
+test3
+]])
+
+# First generate the `expout' ouput by running over the sources before
+# freezeing.
+AT_CHECK_M4([-m load frozen.m4 unfrozen.m4], 0,
+            [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK_M4([-m load -F frozen.m4f frozen.m4], 0,
+            [ignore], [ignore])
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], 0,
+            [expout], [experr])
+
+AT_CLEANUP([frozen.m4f])
+
+
+
+## ----------------------------------- ##
+## --module-directory: absolute path.  ##
+## ----------------------------------- ##
+
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([--module-directory: absolute path])
+
+AT_CHECK(M4PATH=$top_srcdir [m4 -M `cd $top_builddir/modules; pwd` -m load -d modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath2 ##
+## -------- ##
+
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modpath2])
+
+AT_CHECK([M4PATH=$top_srcdir LTDL_LIBRARY_PATH=$top_builddir/modules m4 -m load -d modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath3 ##
+## -------- ##
+
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modpath3])
+
+AT_DATA([[in]],
+[[test
+Dumpdef: dumpdef(`test').
+]])
+
+AT_CHECK([M4PATH=$top_srcdir m4 -m load -m modtest -M $top_builddir/modules -d in], 0,
+[[Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## -------- ##
+## modpath4 ##
+## -------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([M4MODPATH: absolute path])
+
+AT_CHECK([M4MODPATH=`cd $top_builddir/modules; pwd` M4PATH=$top_srcdir m4 -m load -d modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## ------- ##
+## modtest ##
+## ------- ##
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([modtest])
+
+AT_CHECK([M4PATH=$top_srcdir m4 -M $top_builddir/modules -m load -d modules/modtest.m4], 0,
+[[Test module loaded.
+Test module called.
+Dumpdef: .
+]],
+[[test:	<test>
+]])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## shadow ##
+## ------ ##
+
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([shadow])
+
+AT_DATA([[shadow.m4]],
+[[# no modules loaded yet
+test
+shadow
+
+# define our own macros for `test' and `shadow'
+define(`test', `local::`test'')
+define(`shadow', `local::`shadow'')
+test
+shadow
+
+# module Shadow defines `shadow' and `test' macros
+load(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# save the definition of `test' from the Shadow module
+define(`Shadow::test', defn(`test'))
+
+# module Test also defines a `test' macro
+load(`modtest')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Reloading Shadow shouldn't affect anything
+load(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Test will unshadow the test definition in Shadow
+unload(`modtest')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Shadow once has no effect (we loaded it twice)
+unload(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
+unload(`shadow')
+test
+shadow
+]])
+
+AT_DATA([[expout]],
+[[# no modules loaded yet
+test
+shadow
+
+# define our own macros for `test' and `shadow'
+
+
+local::test
+local::shadow
+
+# module Shadow defines `shadow' and `test' macros
+Shadow module loaded.
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# save the definition of `test' from the Shadow module
+
+
+# module Test also defines a `test' macro
+Test module loaded.
+
+
+Test module called.
+Shadow::shadow called.
+
+# Reloading Shadow shouldn't affect anything
+
+
+
+Test module called.
+Shadow::shadow called.
+
+# Unloading Test will unshadow the test definition in Shadow
+
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# Unloading Shadow once has no effect (we loaded it twice)
+
+
+
+Shadow::test called.
+Shadow::shadow called.
+
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
+
+local::test
+local::shadow
+]])
+
+AT_DATA([[experr]],
+[[test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+test:	<test>
+shadow:	<shadow>
+]])
+
+AT_CHECK_M4([-m load shadow.m4], 0,
+            [expout], [experr])
+
+AT_CLEANUP
+
+
+
+## ------ ##
+## unload ##
+## ------ ##
+
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+AT_SETUP([unload])
+
+AT_DATA([[in]],
+[[test
+__test__
+load(`modtest')
+test
+__test__
+load(`shadow')
+test
+__test__
+unload(`modtest')
+test
+__test__
+load(`modtest')
+test
+__test__
+unload(`modtest')
+test
+__test__
+unload(`shadow')
+test
+__test__
+]])
+
+AT_DATA([[expout]],
+[[test
+__test__
+Test module loaded.
+Test module called.
+modtest
+Shadow module loaded.
+Shadow::test called.
+shadow
+
+Shadow::test called.
+shadow
+Test module loaded.
+Test module called.
+modtest
+
+Shadow::test called.
+shadow
+
+test
+__test__
+]])
+
+AT_CHECK_M4([-m load in], 0, expout)
+
+AT_CLEANUP
