@@ -1,3 +1,8 @@
+2001-09-01  Gary V. Vaughan  <gary@gnu.org>
+
+	* tests/m4: Don't call the m4 wrapper script with libtool, it
+	works fine all by itself.
+
 2001-08-30  Gary V. Vaughan  <gary@gnu.org>
 
 	The experimental `changeword' feature never took off, and has
