@@ -1,5 +1,10 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.ac (AC_CONFIG_FILES): Remove config/Makefile.
+	* config/Makefile.am: Removed.  Automake 1.8 distributes the files
+	in this directory automatically.
+	* Makefile.am (EXTRA_DIST): Except config/mkstamp.
+
 	* configure.ac (pkglibexecdir): Don't try and set it here, PACKAGE
 	isn't set yet.
 	* m4/Makefile.am (MODULE_PATH): Removed. Calculate pkglibexecdir
