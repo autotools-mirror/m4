@@ -62,8 +62,6 @@ m4_macro m4_macro_table[] =
 
 static PerlInterpreter *my_perl;
 
-extern void xs_init (void);
-
 M4INIT_HANDLER (perl)
 {
   const lt_dlinfo *info = 0;

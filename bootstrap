@@ -1,82 +1,9 @@
 #! /bin/sh -x
 
 # helps bootstrapping M4, when checked out from CVS
-# requires GNU autoconf, GNU automake and GNU libtool
+# requires GNU Autoconf, GNU Automake, GNU Gettext and GNU Libtool
 
-find . -name autom4te.cache | xargs rm -rf
-
-auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.ac | sed 's/^.*(\([^)]*\)).*$/\1/'`
-
-rm -f config.cache
-rm aclocal.m4
-
-trap 'rm -f aclocal.m4t' 0 1 9 15
-
-# Make a copy of each Automake/Gettext m4 file we need.
-aclocal_libdir=`aclocal --print-ac-dir`
-aclocal_version=`aclocal --version | sed 's/^.* //;q'`
-aclocal_apiversion=`echo $aclocal_version | sed 's/\([0-9]*\.[0-9]*\).*$/\1/'`
-aclocal_apilibdir=$aclocal_libdir-$aclocal_apiversion
-for i in `make -f config/Makefile.am spy SPIED=ACLOCAL_MACROS`
-do
-  cp $aclocal_apilibdir/$i config 2>/dev/null ||
-    cp $aclocal_libdir/$i config  2>/dev/null ||
-    echo "$0: cannot find $i" >&2
-done
-
-
-# aclocal is one of the worst things that ever happened to the GNU
-# build system...
-{
-  sed 's/^  //' <<EOF
-  # This file was gererated by $0.
-  # Do not edit by hand, *nor by aclocal*.
-
-  # aclocal macros.
-EOF
-  for i in `make -f config/Makefile.am spy SPIED=ACLOCAL_MACROS`
-  do
-    echo "m4_include([config/$i])"
-  done
-  echo
-  echo '# GNU M4 macros.'
-  for i in `make -f config/Makefile.am spy SPIED=SPECIFIC_MACROS`
-  do
-    echo "m4_include([config/$i])"
-  done
-  echo
-} >aclocal.m4
-
-
-# Automake understands nothing to our aclocal and misses all its
-# AC_SUBST...  We need aclocal to contain the includes though, otherwise
-# autoconf won't see them either :)
-# Output them, but in a way that makes m4 ignore then.
-#
-# Don't have aclocal grow while autoconf reads it: use aclocal.m4t.
-{
-  echo '# Help Automake understand includes.'
-  echo "ifelse("
-  echo "  ["
-  echo "    # It doesn't see its own version."
-  echo "    AM_AUTOMAKE_VERSION([$aclocal_version])"
-  echo "    # It doesn't see AC_SUBSTs."
-  autoconf -t AC_SUBST:'    AC_SUBST([$1])' | sort -u
-  echo "    # It doesn't see AM_CONDITIONALs."
-  autoconf -t AM_CONDITIONAL:'    AM_CONDITIONAL([$1])' | sort -u
-  echo "  ]"
-  echo ")"
-} >aclocal.m4t
-
-cat aclocal.m4t >>aclocal.m4
-
-# shtoolize -q -I ./$auxdir echo move install mkdir version || exit 1
-# gettextize -f -c  || exit 1
-libtoolize --force --copy || exit 1
-touch config-h.in
-automake --add-missing --copy || exit 1
-autoconf || exit 1
-autoheader || exit 1
+autoreconf -fvi
 
 (
   cd tests

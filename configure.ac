@@ -1,5 +1,5 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright 1991-1994, 2000, 2001  Free Software Foundation, Inc.
+# Copyright (C) 1991-1994, 2000, 2001, 2002  Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 ## -------------------------- ##
 ## We need a modern Autotest. ##
 ## -------------------------- ##
-AC_PREREQ([2.52e])
+AC_PREREQ([2.54])
 
 
 
@@ -30,7 +30,7 @@ AC_INIT([GNU m4], [1.4q], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR(config)
-AM_CONFIG_HEADER(config.h:config-h.in)
+AC_CONFIG_HEADERS(config.h:config-h.in)
 AC_CONFIG_TESTDIR(tests)
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
@@ -60,6 +60,7 @@ m4_pattern_allow([^m4_cv_])
 # We use some of Jim's macros.
 m4_pattern_forbid([^jm_])
 m4_pattern_allow([^jm_cv_])
+m4_pattern_allow([^jm_ac_cv_])
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST([pkglibexecdir])
@@ -94,7 +95,7 @@ AC_SUBST(DLPREOPEN)
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.7.1 dist-bzip2])
 
 
 
@@ -126,7 +127,7 @@ esac
 AM_ENABLE_SHARED
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 AC_LIB_LTDL
 
 AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
@@ -136,13 +137,10 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
-ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
-AM_GNU_GETTEXT
-AC_CONFIG_FILES(po/Makefile.in intl/Makefile)
+AM_GNU_GETTEXT(external, need-ngettext)
+AM_GNU_GETTEXT_VERSION(0.11.5)
+AC_CONFIG_FILES(po/Makefile.in)
 
-if test "$USE_INCLUDED_LIBINTL" = yes; then
-  AC_SUBST([INTLINCL], ['-I$(top_srcdir)/intl'])
-fi
 
 
 
@@ -207,16 +205,6 @@ AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 
 AC_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
-
-
-
-## ---------------------------------- ##
-## Make sure LTLIBOBJS is up to date. ##
-## ---------------------------------- ##
-Xsed="sed -e s/^X//"
-LTLIBOBJS=`echo X"$LIB@&t@OBJS" | \
-    $Xsed -e 's,\.[[^.]]* ,.lo ,g;s,\.[[^.]]*$,.lo,'`
-AC_SUBST([LTLIBOBJS])
 
 
 

@@ -19,16 +19,14 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-AUTOMAKE_OPTIONS = 1.5 dist-bzip2
-
-EXTRA_DIST	= bootstrap
+EXTRA_DIST	= config/config.rpath  bootstrap
 
 auxdir		= $(top_srcdir)/$(ac_aux_dir)
 
 ## There is currently no means with Automake not to run aclocal.
-ACLOCAL_AMFLAGS = --version >/dev/null && touch aclocal.m4
+ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS			= intl po config m4 modules src tests examples doc .
+SUBDIRS			= po config m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 			  config-h.in configure ltmain.sh stamp-h.in \
 			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id

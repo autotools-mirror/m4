@@ -1,3 +1,17 @@
+2002-11-04  Akim Demaille  <akim@epita.fr>
+
+	* configure.ac: Automake 1.7.1, Autoconf 2.54, Gettext 0.11.5,
+	used as `external', and Libtool 1.4.3.
+	(LINGUAS): Remove.
+	(LTLIBOBJS): Don't play with it.
+	* intl/: Remove.
+	* Makefile.am (SUBDIRS): Remove intl.
+	(ACLOCAL_AMFLAGS): Add -I config.
+	(EXTRA_DIST): Add config/config.rpath.
+	* po/LINGUAS: New.
+	* po/Makevars: New.
+	* modules/perl.c (M4INIT_HANDLER): Don't prototype xs_init.
+
 2002-05-29  Gary V. Vaughan  <gary@gnu.org>
 
 	Preparations for refactoring syntax tables to allow reverse
