@@ -1,0 +1,36 @@
+#!/bin/sh
+# This file is part of the GNU m4 testsuite
+# Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc.
+#  
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or 
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+# 02111-1307  USA
+
+. ${srcdir}/defs
+
+cat ${srcdir}/../examples/capitalize.m4 >in
+
+cat <<\EOF >ok
+
+
+CONVERT TO UPPER CASE
+convert to lower case
+
+
+This Sentence Should Be Capitalized
+EOF
+
+M4PATH=$srcdir:$srcdir/../examples $M4 -M ../../modules -d in >out 2>err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
+$CMP -s out ok

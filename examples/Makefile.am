@@ -16,7 +16,7 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 ## 02111-1307  USA
 
-EXTRA_DIST = $(pkgdata_DATA) $(TESTS) defs mktests.sh $(WEB_SITE)
+EXTRA_DIST = $(pkgdata_DATA) mktests.sh $(WEB_SITE)
 
 MAINTAINERCLEANFILES = Makefile.in
 
@@ -75,36 +75,4 @@ pkgdata_DATA = \
 	undivert.m4 \
 	wrap.m4
 
-TESTS =	capitalize.test \
-	comments.test \
-	ddivert.test \
-	debug.test \
-	esyscmd.test \
-	exp.test \
-	foreach.test \
-	forloop.test \
-	fstab.test \
-	hanoi.test \
-	include.test \
-	indir.test \
-	misc.test \
-	multiquotes.test \
-	patsubst.test \
-	pushpop.test \
-	regexp.test \
-	reverse.test \
-	sysv-args.test \
-	trace.test \
-	translit.test \
-	undivert.test \
-	wrap.test
-
-
 all:
-
-defs: $(top_srcdir)/tests/defs
-	cp $(top_srcdir)/tests/defs $@
-	chmod 444 $@
-
-clean-local:
-	rm -rf testSubDir

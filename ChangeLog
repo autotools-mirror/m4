@@ -1,5 +1,48 @@
 2000-11-29  Gary V. Vaughan  <gary@gnu.org>
 
+	Consolidate the myriad of dispersed test scripts into the
+	tests subdirectory.  I think I now have all the file where I
+	want them, so there shouldn't be anymore upheaval =)O|
+	Honest!
+	* tests/Makefile.am: Updated to run the new tests added below.
+	* tests/other-tests/capitalize.test, tests/other-tests/comments.test,
+	tests/other-tests/ddivert.test, tests/other-tests/debug.test,
+	tests/other-tests/esyscmd.test, tests/other-tests/exp.test,
+	tests/other-tests/foreach.test, tests/other-tests/forloop.test, 
+	tests/other-tests/frozen.m4, tests/other-tests/fstab.test,
+	tests/other-tests/hanoi.test, tests/other-tests/include.test,
+	tests/other-tests/indir.test, tests/other-tests/misc.test,
+	tests/other-tests/modfreeze.test, tests/other-tests/modpath1.test,
+	tests/other-tests/modpath2.test, tests/other-tests/modpath3.test,
+	tests/other-tests/modpath4.test, tests/other-tests/modtest.test, 
+	tests/other-tests/multiquotes.test, tests/other-tests/patsubst.test,
+	tests/other-tests/pushpop.test, tests/other-tests/regexp.test,
+	tests/other-tests/reverse.test, tests/other-tests/shadow.test,
+	tests/other-tests/sysv-args.test, tests/other-tests/trace.test, 
+	tests/other-tests/translit.test, tests/other-tests/undivert.test, 
+	tests/other-tests/unfrozen.m4, tests/other-tests/unload.test,
+	tests/other-tests/wrap.test:  New tests based on the contents
+	of the tests removed below.
+	* examples/Makefile.am, modules/Makefile.am:  Updated to
+	reflect removed tests.
+	* examples/defs,modules/defs: Removed.
+	* examples/capitalize.test, examples/comments.test,
+	examples/ddivert.test, examples/debug.test, 
+	examples/esyscmd.test, examples/exp.test,
+	examples/foreach.test, examples/forloop.test,
+	examples/fstab.test, examples/hanoi.test,
+	examples/include.test, examples/indir.test,
+	examples/misc.test, examples/multiquotes.test,
+	examples/patsubst.test, examples/pushpop.test,
+	examples/regexp.test, examples/reverse.test,
+	examples/sysv-args.test, examples/trace.test,
+	examples/translit.test, examples/undivert.test,
+	examples/wrap.test, modules/frozen.m4, modules/modfreeze.test,
+	modules/modpath1.test, modules/modpath2.test,
+	modules/modpath3.test, modules/modpath4.test,
+	modules/modtest.test, modules/shadow.test,
+	modules/unfrozen.m4, modules/unload.test: Removed.
+
 	Move the implementation of GMP support for the mpeval() builtin
 	into a loadable module that depends on libgmp.  mpeval() and
 	eval() share a common parser, now in m4/evalparser.c; the code

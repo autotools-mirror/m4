@@ -100,19 +100,52 @@ GENERATED_TESTS = \
 
 OTHER_TESTS = \
 	other-tests/changeword.test \
-	other-tests/gmp.test \
-	other-tests/iso8859.test \
-	other-tests/sync-lines.test \
-	other-tests/import-environment.test \
 	other-tests/discard-comments.test \
-	other-tests/stackovf.test
+	other-tests/stackovf.test \
+	other-tests/capitalize.test \
+	other-tests/comments.test \
+	other-tests/ddivert.test \
+	other-tests/debug.test \
+	other-tests/esyscmd.test \
+	other-tests/exp.test \
+	other-tests/foreach.test \
+	other-tests/forloop.test \
+	other-tests/fstab.test \
+	other-tests/gmp.test \
+	other-tests/hanoi.test \
+	other-tests/import-environment.test \
+	other-tests/include.test \
+	other-tests/indir.test \
+	other-tests/iso8859.test \
+	other-tests/misc.test \
+	other-tests/modfreeze.test \
+	other-tests/modpath1.test \
+	other-tests/modpath2.test \
+	other-tests/modpath3.test \
+	other-tests/modpath4.test \
+	other-tests/modtest.test \
+	other-tests/multiquotes.test \
+	other-tests/patsubst.test \
+	other-tests/pushpop.test \
+	other-tests/regexp.test \
+	other-tests/reverse.test \
+	other-tests/shadow.test \
+	other-tests/sync-lines.test \
+	other-tests/sysv-args.test \
+	other-tests/trace.test \
+	other-tests/translit.test \
+	other-tests/undivert.test \
+	other-tests/unload.test \
+	other-tests/wrap.test
 
 OTHER_FILES = \
+	other-tests/frozen.m4 \
 	other-tests/gmp.m4 \
 	other-tests/iso8859.m4 \
 	other-tests/import-environment.m4 \
 	other-tests/discard-comments.m4 \
-	other-tests/sync-lines.m4
+	other-tests/sync-lines.m4 \
+	other-tests/unfrozen.m4
 
 check: stamp-TESTS
 

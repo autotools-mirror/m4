@@ -22,12 +22,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 testsubdir = testSubDir
 
-EXTRA_DIST = frozen.m4 modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 \
-	 unfrozen.m4 $(TESTS) defs format.c
-
-TESTS = modtest.test shadow.test modfreeze.test \
-	modpath1.test modpath2.test modpath3.test modpath4.test \
-	unload.test
+EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 
 AM_CPPFLAGS = @LIBM4_DLL_IMPORT@
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
@@ -79,6 +74,3 @@ perlxsi.c:
 perl.lo: perl.c perlxsi.c
 	@echo '$(LTCOMPILE) $(perl_la_CFLAGS) -c $<'; \
 	$(LTCOMPILE) $(perl_la_CFLAGS) -c $<
-
-distclean-local:
-	rm -rf $(testsubdir)
