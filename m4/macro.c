@@ -46,7 +46,7 @@ m4_expand_input (void)
 
 
 /* Expand one token, according to its type.  Potential macro names
-   (TOKEN_WORD) are looked up in the symbol table, to see if they have a
+   (M4_TOKEN_WORD) are looked up in the symbol table, to see if they have a
    macro definition.  If they have, they are expanded as macros, otherwise
    the text are just copied to the output.  */
 static void
@@ -75,13 +75,13 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
 	  ++p;
 
 	symbol = m4_symbol_lookup (p);
-	if (symbol == NULL || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
+	if (symbol == NULL
+	    || SYMBOL_TYPE (symbol) == M4_TOKEN_VOID
 	    || (SYMBOL_TYPE (symbol) == M4_TOKEN_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), TOKEN_BLIND_ARGS_BIT)
-		&& !M4_IS_OPEN(m4_peek_input ())))
+		&& !M4_IS_OPEN (m4_peek_input ())))
 	  {
-	    m4_shipout_text (obs, TOKEN_TEXT (td),
-			     strlen (TOKEN_TEXT (td)));
+	    m4_shipout_text (obs, text, strlen (text));
 	  }
 	else
 	  expand_macro (p, symbol);

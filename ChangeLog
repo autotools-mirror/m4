@@ -1,3 +1,7 @@
+2003-06-05  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/macro.c: Format changes.
+
 2003-06-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/input.c: Updated various bitrotted comments.
