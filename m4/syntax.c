@@ -98,7 +98,7 @@ static int remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code);
 m4_syntax_table *
 m4_syntax_create (void)
 {
-  m4_syntax_table *syntax = xcalloc (1, sizeof *syntax);
+  m4_syntax_table *syntax = xzalloc (sizeof *syntax);
   int ch;
 
   for (ch = 256; --ch > 0;)

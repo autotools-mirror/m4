@@ -58,6 +58,8 @@ libgnu_la_SOURCES += exit.h
 ## ((( gnulib module exitfail
 libgnu_la_SOURCES += exitfail.h exitfail.c
 ## ))) gnulib module exitfail
+## ((( gnulib module extensions
+## ))) gnulib module extensions
 ## ((( gnulib module free
 ## ))) gnulib module free
 ## ((( gnulib module getopt
@@ -95,6 +97,8 @@ MOSTLYCLEANFILES += stdbool.h stdbool.h-t
 ## ((( gnulib module strndup
 libgnu_la_SOURCES += strndup.h
 ## ))) gnulib module strndup
+## ((( gnulib module strnlen
+## ))) gnulib module strnlen
 ## ((( gnulib module strtol
 ## ))) gnulib module strtol
 ## ((( gnulib module unlocked-io

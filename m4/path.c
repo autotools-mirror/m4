@@ -50,7 +50,7 @@ static void search_path_env_init (m4__search_path_info *, char *, bool);
 static void
 search_path_add (m4__search_path_info *info, const char *dir)
 {
-  NEW (m4__search_path, path);
+  m4__search_path *path = xmalloc (sizeof m4__search_path);
 
   if (*dir == '\0')
     dir = ".";

@@ -26,7 +26,7 @@
 m4 *
 m4_create (void)
 {
-  m4 *context = xcalloc (1, sizeof *context);
+  m4 *context = xzalloc (sizeof *context);
 
   context->symtab = m4_symtab_create (0, &context->no_gnu_extensions);
   context->syntax = m4_syntax_create ();
@@ -36,7 +36,7 @@ m4_create (void)
 
   context->nesting_limit = DEFAULT_NESTING_LIMIT;
 
-  context->search_path	 = xcalloc (1, sizeof context->search_path);
+  context->search_path	 = xzalloc (sizeof context->search_path);
 
   return context;
 }

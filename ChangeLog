@@ -1,5 +1,36 @@
 2003-11-13  Gary V. Vaughan  <gary@gnu.org>
 
+	The import script was not written properly, and the last gnulib
+	import was incomplete.  Fixed that problem, and reimport our
+	gnulib dependencies, which picks up the address calculation
+	overflow checks described by Paul below.  Also tweak the clients
+	of the gnulib xalloc module not to use deprecated macros:
+
+	* gnulib/import: Recurse through module dependencies rather than
+	naively descending only one level.
+	* configure.ac: Add calls to gnulib's strnlen and extension module
+	macros.
+	* gnulib/m4/Makefile.am: Add snippets from gnulib's strnlen and
+	extension modules.
+	* gnulib/acm4/extensions.m4, gnulib/acm4/xalloc.m4,
+	gnulib/m4/alloca.c, gnulib/m4/obstack.c, gnulib/m4/obstack.h,
+	gnulib/m4/stdbool_.h, gnulib/m4/unlocked-io.h, gnulib/m4/xalloc.h,
+	gnulib/m4/xmalloc.c, gnulib/m4/xstrdup.c: Updated from CVS
+	gnulib.
+	* gnulib/acm4/libtool.m4: Updated from CVS libtool.
+	* m4/hash.c (m4_get_hash_iterator_next): Use `xzalloc (S)' in
+	place of `xcalloc (1, S)'.
+	* m4/m4.c (m4_create): Likewise.
+	* m4/m4private.h (m4_symbol_value_create): Likewise.
+	* m4/symtab.c (symtab_fetch): Likewise.
+	* m4/syntax.c (m4_syntax_create): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* m4/path.c (search_path_add): Eliminate use of deprecated NEW
+	macro.
+	* m4/symtab.c (m4_symtab_create): Likewise.
+
+2003-11-13  Gary V. Vaughan  <gary@gnu.org>
+
 	* tests/module.at: Comment typo.
 
 2003-10-10  Gary V. Vaughan  <gary@gnu.org>

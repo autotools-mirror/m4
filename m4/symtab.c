@@ -67,7 +67,7 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 m4_symbol_table *
 m4_symtab_create (size_t size, bool *nuke_trace_bit)
 {
-  NEW (m4_symbol_table, symtab);
+  m4_symbol_table *symtab = xmalloc (sizeof m4_symbol_table);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);
@@ -127,7 +127,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
     }
   else
     {
-      symbol = xcalloc (1, sizeof *symbol);
+      symbol = xzalloc (sizeof *symbol);
       m4_hash_insert (symtab->table, xstrdup (name), symbol);
     }
 
@@ -414,7 +414,7 @@ m4_set_symbol_traced (m4_symbol *symbol, bool value)
 m4_symbol_value *
 m4_symbol_value_create (void)
 {
-  return xcalloc (1, sizeof (m4_symbol_value));
+  return xzalloc (sizeof (m4_symbol_value));
 }
 
 #undef m4_get_symbol_value

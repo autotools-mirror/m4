@@ -48,31 +48,40 @@ extern char const xalloc_msg_memory_exhausted[];
    memory allocation failure.  */
 extern void xalloc_die (void) ATTRIBUTE_NORETURN;
 
-void *xmalloc (size_t n);
+void *xmalloc (size_t s);
+void *xnmalloc (size_t n, size_t s);
+void *xzalloc (size_t s);
 void *xcalloc (size_t n, size_t s);
-void *xrealloc (void *p, size_t n);
+void *xrealloc (void *p, size_t s);
+void *xnrealloc (void *p, size_t n, size_t s);
+void *x2realloc (void *p, size_t *pn);
+void *x2nrealloc (void *p, size_t *pn, size_t s);
+void *xclone (void const *p, size_t s);
 char *xstrdup (const char *str);
 
-# define XMALLOC(Type, N_items) xmalloc (sizeof (Type) * (N_items))
-# define XCALLOC(Type, N_items) xcalloc (sizeof (Type), N_items)
-# define XREALLOC(Ptr, Type, N_items) xrealloc (Ptr, sizeof (Type) * (N_items))
+/* Return 1 if an array of N objects, each of size S, cannot exist due
+   to size arithmetic overflow.  S must be positive and N must be
+   nonnegative.  This is a macro, not an inline function, so that it
+   works correctly even when SIZE_MAX < N.
 
-/* Declare and alloc memory for VAR of type TYPE. */
-# define NEW(Type, Var)  Type *(Var) = XMALLOC (Type, 1)
+   By gnulib convention, SIZE_MAX represents overflow in size
+   calculations, so the conservative dividend to use here is
+   SIZE_MAX - 1, since SIZE_MAX might represent an overflowed value.
+   However, malloc (SIZE_MAX) fails on all known hosts where
+   sizeof (ptrdiff_t) <= sizeof (size_t), so do not bother to test for
+   exactly-SIZE_MAX allocations on such hosts; this avoids a test and
+   branch when S is known to be 1.  */
+# define xalloc_oversized(n, s) \
+    ((size_t) (sizeof (ptrdiff_t) <= sizeof (size_t) ? -1 : -2) / (s) < (n))
 
-/* Free VAR only if non NULL. */
-# define XFREE(Var)	\
-   do {                 \
-      if (Var)          \
-        free (Var);     \
-   } while (0)
-
-/* Return a pointer to a malloc'ed copy of the array SRC of NUM elements. */
-# define CCLONE(Src, Num) \
-  (memcpy (xmalloc (sizeof *(Src) * (Num)), Src, sizeof *(Src) * (Num)))
-
-/* Return a malloc'ed copy of SRC. */
-# define CLONE(Src) CCLONE (Src, 1)
-
+/* These macros are deprecated; they will go away soon, and are retained
+   temporarily only to ease conversion to the functions described above.  */
+# define CCLONE(p, n) xclone (p, (n) * sizeof *(p))
+# define CLONE(p) xclone (p, sizeof *(p))
+# define NEW(type, var) type *var = xmalloc (sizeof (type))
+# define XCALLOC(type, n) xcalloc (n, sizeof (type))
+# define XMALLOC(type, n) xnmalloc (n, sizeof (type))
+# define XREALLOC(p, type, n) xnrealloc (p, n, sizeof (type))
+# define XFREE(p) free (p)
 
 #endif /* !XALLOC_H_ */

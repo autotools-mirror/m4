@@ -158,7 +158,7 @@ struct m4_symbol_value {
 #  define m4_get_symbol_traced(S)	((S)->traced)
 #  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
 
-#  define m4_symbol_value_create()	xcalloc (1, sizeof (m4_symbol_value))
+#  define m4_symbol_value_create()	xzalloc (sizeof (m4_symbol_value))
 #  define m4_symbol_value_delete(V)	(DELETE (V))
 
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)

@@ -447,7 +447,7 @@ m4_get_hash_iterator_next (const m4_hash *hash, m4_hash_iterator *place)
   /* On the first iteration, allocate an iterator.  */
   if (!place)
     {
-      place = xcalloc (1, sizeof *place);
+      place = xzalloc (sizeof *place);
       ITERATOR_HASH (place) = hash;
     }
 

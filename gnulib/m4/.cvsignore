@@ -1,7 +1,9 @@
 *.o
 *.lo
 *.la
+alloca.h
 obstack.h
+stdbool.h
 .deps
 .libs
 Makefile

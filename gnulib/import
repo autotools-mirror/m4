@@ -63,15 +63,26 @@ func_update_file ()
   )
 }
 
-# Calculate list of all modules
-modules=
-for mod in $mymodules; do
-    modules="$modules
-$mod
-`( cd $GNULIB_DIR && ./gnulib-tool --extract-dependencies $mod )`"
+# func_get_dependencies mod [...]
+func_get_dependencies ()
+{
+  my_modules=
+  for my_mod in ${1+"$@"}; do
+    my_modules="$my_modules
+$my_mod
+`( cd $GNULIB_DIR && ./gnulib-tool --extract-dependencies $my_mod )`"
+  done
 
+  echo "$my_modules" | sort | uniq | sed '/^[ 	]*$/d'
+}
+	  
+# Calculate list of all modules
+modules=`func_get_dependencies $mymodules`
+while :; do
+    all_modules=`func_get_dependencies $modules`
+    test "X$modules" = "X$all_modules" && break
+    modules="$all_modules"
 done
-all_modules=`echo "$modules" | sort | uniq | sed '/^[ 	]*$/d'`
 
 for mod in $all_modules; do
     dest=m4/$mod.am

@@ -96,6 +96,9 @@ AM_INIT_AUTOMAKE([1.7a dist-bzip2])
 ## ------------------ ##
 AC_PROG_CC
 
+dnl ((( gnulib module extensions
+gl_USE_SYSTEM_EXTENSIONS
+dnl ))) gnulib module extensions
 dnl ((( gnulib module unlocked-io
 jm_FUNC_GLIBC_UNLOCKED_IO
 dnl ))) gnulib module unlocked-io
@@ -246,6 +249,9 @@ dnl ))) gnulib module restrict
 dnl ((( gnulib module strndup
 gl_FUNC_STRNDUP
 dnl ))) gnulib module strndup
+dnl ((( gnulib module strnlen
+gl_FUNC_STRNLEN
+dnl ))) gnulib module strnlen
 dnl ((( gnulib module strtol
 gl_FUNC_STRTOL
 dnl ))) gnulib module strtol
