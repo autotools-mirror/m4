@@ -37,7 +37,8 @@ libtool.m4					\
 ltdl.m4						\
 options.m4					\
 progtest.m4					\
-protos.m4
+protos.m4					\
+regex.m4
 
 STANDARD_TOOLS =				\
 compile						\
