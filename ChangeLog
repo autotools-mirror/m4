@@ -1,5 +1,9 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* m4/builtin.c (m4_macro_define): Do not reset SYMBOL_TRACED.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* m4/m4module.h (m4/list.h): Don't include it.
 
 2001-08-16  Gary V. Vaughan  <gary@gnu.org>

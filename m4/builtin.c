@@ -156,7 +156,9 @@ m4_macro_define (handle, name, text, mode)
       SYMBOL_MACRO_ARGS (symbol)	= FALSE;
       SYMBOL_BLIND_NO_ARGS (symbol)	= FALSE;
       SYMBOL_TEXT (symbol) 		= xstrdup (text);
-      SYMBOL_TRACED (symbol)		= FALSE;
+      /* Do not reset SYMBOL_TRACED as it means that --trace would be
+	 usable only for existing macros.  m4_lookup_symbol takes care
+	 of its proper initialization.  */
     }
 }
 
