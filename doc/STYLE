@@ -1,0 +1,65 @@
+GNU m4 STYLE - The way this code should look.		-*- outline -*-
+
+Before all else this code follows the GNU coding standards and
+indentation style described in standards.info.  Additionally the
+following restrictions on coding style apply:
+
+* C STANDARD
+
+  + All of this code is ANSI-C, GNU C extensions are conditional so that
+    the code will compile cleanly on non GLIBC/GCC systems.
+
+* SYMBOL NAMES
+
+  + All non-static symbols have a prefix either `M4' or `m4'.
+
+  + All exported symbols which are part of the library api have the
+    prefix `m4_'.
+
+  + Symbols which are exported from the library (for efficiency perhaps)
+    but are not part of the supported library api have the prefix
+    `m4__',
+
+  + Function names should be verb phrases; m4_get_module_field.
+
+  + Functions which exist to be used as callbacks from API functions, and
+    hence which likely have strange looking parameters are named with the
+    suffix `_CB', to make it obvious why they look a little odd.
+
+  + Macros which implement fast versions of functions share the
+    same name as the function they replace, and may not evaluate
+    parameters more than once.
+
+  + Otherwise macros are in uppercase, prefixed `M4' if they are visible
+    to the user after installation, to help the user know when to be
+    careful about multiple evaluations of parameters.
+
+  + Function names should contain the name of the module they belong to,
+    usually immediately after the namespace prefix: m4_module_load.
+
+  + Variables should not be exported (not true, but I'm working on it),
+    but accessor functions used instead.  Note the `get'/`set' part of
+    the symbol name comes before the module part: m4_get_module_macros.
+
+  + Structures come with accessor macros named <struct name>_<field
+    name> (in upper case), to make refactoring of nested structures much
+    easier: SYMBOL_FLAGS.
+
+  + Structures are typedeffed separately, and the structure itself
+    generally not exported unless in the `m4__' namespace to support
+    fast accessor macros.
+
+* ARCHITECTURE
+
+  + There are three groups of sources in subdirectories: `m4' contains
+    the functionality for libm4 and enables the user to write modules;
+    `modules' implements the builtin macros for the m4 binary; `src' is
+    a small wrapper program which links libm4 and loads initial modules
+    to implement the m4 engine.
+
+  + Low coupling.  Classes (and in C, by this I mean files of functions)
+    should not rely on a web of other classes to be useful, they should
+    communicate with as few other classes as possible.
+
+  + High cohesion.  The api and caller boundaries should be well defined
+    and adhered to; a class should do one thing only.

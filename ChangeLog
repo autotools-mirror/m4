@@ -1,5 +1,7 @@
 2003-06-26  Gary V. Vaughan  <gary@gnu.org>
 
+	* doc/STYLE: Added notes on callback naming schemes.
+
 	* m4/module.c (m4_set_module_macro_table)
 	(m4_set_module_builtin_table): Declarations weren't changed when
 	definitions were renamed on 2003-06-19.
