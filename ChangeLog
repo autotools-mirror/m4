@@ -1,5 +1,19 @@
 2003-07-24  Gary V. Vaughan  <gary@gnu.org>
 
+	Create an export table in modules/m4.c in readiness for beefing up
+	the module loader to track module exports and imports.
+
+	* m4/m4module.h (m4_debug_flush_files): Removed prototype.
+	* m4/debug.c (m4_debug_flush_files): Moved...
+	* modules/m4.c (m4_sysval_flush): ...to here and renamed.
+	* modules/gnu.c (builtin_esysval): Use it.
+	* m4/m4module.h (m4_export): New type for declaring module symbols
+	for export.
+	* modules/m4.c (m4_export_table): List symbols exported from this
+	module for use by other modules.
+
+2003-07-24  Gary V. Vaughan  <gary@gnu.org>
+
 	An experiment: There is loads of code in libm4 which should be in
 	the m4 module, but is also used by another module. Just because
 	some linkers won't cope with calls across dynamic runtime loaded

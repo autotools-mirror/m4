@@ -134,22 +134,6 @@ set_debug_file (m4 *context, FILE *fp)
     }
 }
 
-/* Serialize files.  Used before executing a system command.  */
-void
-m4_debug_flush_files (m4 *context)
-{
-  FILE *debug_file;
-
-  assert (context);
-
-  debug_file = m4_get_debug_file (context);
-
-  fflush (stdout);
-  fflush (stderr);
-  if (debug_file != NULL && debug_file != stdout && debug_file != stderr)
-    fflush (debug_file);
-}
-
 /* Change the debug output to file NAME.  If NAME is NULL, debug output is
    reverted to stderr, and if empty debug output is discarded.  Return TRUE
    iff the output stream was changed.  */

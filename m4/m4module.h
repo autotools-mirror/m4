@@ -55,6 +55,8 @@ typedef struct {
     size_t length;		/* length of the string */
 } m4_string;
 
+typedef lt_dlsymlist m4_export;
+
 
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
@@ -262,7 +264,6 @@ enum {
 #define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
 
 extern int	m4_debug_decode		(m4 *, const char *);
-extern void	m4_debug_flush_files	(m4 *);
 extern boolean	m4_debug_set_output	(m4 *, const char *);
 extern void	m4_debug_message_prefix (m4 *);
 

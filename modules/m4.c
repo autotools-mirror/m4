@@ -45,13 +45,25 @@ extern int errno;
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
+#define m4_export_table		m4_LTX_m4_export_table
 #define m4_builtin_table	m4_LTX_m4_builtin_table
+
+/* Exit code from last "syscmd" command.  */
+int m4_sysval = 0;
+void m4_sysval_flush (m4 *context);
+
+m4_export m4_export_table[] = {
+  { "m4_sysval",		&m4_sysval },
+  { "m4_sysval_flush",		&m4_sysval_flush },
+
+  { NULL,			NULL }
+};
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
 		function	macros	blind minargs maxargs */
-#define builtin_functions			\
+#define builtin_functions					\
 	BUILTIN(changecom,	FALSE,	FALSE,	1,	3  )	\
 	BUILTIN(changequote,	FALSE,	FALSE,	1,	3  )	\
 	BUILTIN(decr,		FALSE,	TRUE,	2,	2  )	\
@@ -338,12 +350,19 @@ M4BUILTIN_HANDLER (defn)
 /* This section contains macros to handle the builtins "syscmd"
    and "sysval".  */
 
-/* Exit code from last "syscmd" command (also used by gnu module).  */
-int m4_sysval = 0;
+void
+m4_sysval_flush (m4 *context)
+{
+  FILE *debug_file = m4_get_debug_file (context);
+
+  if (debug_file != stdout) fflush (stdout);
+  if (debug_file != stderr) fflush (stderr);
+  if (debug_file != NULL)   fflush (debug_file);
+}
 
 M4BUILTIN_HANDLER (syscmd)
 {
-  m4_debug_flush_files (context);
+  m4_sysval_flush (context);
   m4_sysval = system (M4ARG (1));
 }
 

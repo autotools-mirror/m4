@@ -504,14 +504,16 @@ M4BUILTIN_HANDLER (syncoutput)
  * esyscmd(SHELL-COMMAND)
  **/
 
-extern int m4_sysval;
+/* TODO:  Import these through the m4_export list of m4 module.  */
+extern int  m4_sysval;
+extern void m4_sysval_flush (m4 *);
 
 M4BUILTIN_HANDLER (esyscmd)
 {
   FILE *pin;
   int ch;
 
-  m4_debug_flush_files (context);
+  m4_sysval_flush (context);
   pin = popen (M4ARG (1), "r");
   if (pin == NULL)
     {
