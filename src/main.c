@@ -236,6 +236,7 @@ static const struct option long_options[] =
 #endif
 
 #define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULEPATH_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULE_SHORTOPT/**/"o:st:"
+#include <dlfcn.h>
 
 int
 main (int argc, char *const *argv, char *const *envp)

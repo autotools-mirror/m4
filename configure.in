@@ -30,11 +30,10 @@ AM_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_CC_C_O
 
+ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
 AM_GNU_GETTEXT
 
 AC_ARG_PROGRAM
-
-ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST(pkglibexecdir)
@@ -75,12 +74,23 @@ AC_CHECK_FUNCS(bzero calloc mkstemp mktemp sigaction sigaltstack sigstack sigvec
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
+
 M4OBJS=
+m4_getopt=src/getopt.h
+rm -f $m4_getopt
 AC_CHECK_FUNC(getopt_long, [], 
-[M4OBJS="getopt1.o getopt.o"
-rm -f src/getopt.h
-$LN_S src/gnu-getopt.h src/getopt.h])
+[M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
+echo linking src/gnu-getopt.h to $m4_getopt
+$LN_S ./gnu-getopt.h $m4_getopt])
 AC_SUBST(M4OBJS)
+
+m4_obstack=m4/obstack.h
+rm -f $m4_obstack
+AC_CHECK_FUNC(obstack_init, [],
+[LIBOBJS="$LIBOBJS obstack.$ac_objext"
+echo linking src/gnu-obstack.h to $m4_obstack
+$LN_S ./gnu-obstack.h $m4_obstack])
+
 jm_PREREQ_ERROR
 
 AC_MSG_CHECKING(ecvt declaration)

@@ -41,6 +41,7 @@ TESTS_ENVIRONMENT	= WITH_MODULES=1
 endif
 
 gnu_la_SOURCES = gnu.c
+EXTRA_gnu_la_SOURCES = format.c
 gnu_la_LDFLAGS = -module
 
 load_la_SOURCES = load.c
