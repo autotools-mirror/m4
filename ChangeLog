@@ -1,3 +1,9 @@
+2001-10-01  Akim Demaille  <akim@epita.fr>
+
+	* modules/gnu.c (RE_SYNTAX_BRE, RE_SYNTAX_ERE): New.
+	(m4_regexp_compile): New.
+	(regexp, patsubst): Use it.
+
 2001-09-30  Gary V. Vaughan  <gary@gnu.org>
 
 	Reinstate the memory handling improvements from the patch I just

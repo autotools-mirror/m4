@@ -40,6 +40,20 @@ int errno;
 #include "m4private.h"
 #include "regex.h"
 
+#define RE_SYNTAX_BRE RE_SYNTAX_EMACS
+
+#define RE_SYNTAX_ERE \
+  (/* Allow char classes. */					\
+    RE_CHAR_CLASSES						\
+  /* Be picky. */						\
+  | RE_CONTEXT_INVALID_OPS					\
+  /* Allow intervals with `{' and `}', forbid invalid ranges. */\
+  | RE_INTERVALS | RE_NO_BK_BRACES | RE_NO_EMPTY_RANGES		\
+  /* `(' and `)' are the grouping operators. */			\
+  | RE_NO_BK_PARENS						\
+  /* `|' is the alternation. */					\
+  | RE_NO_BK_VBAR)
+
 #include "format.c"
 
 
@@ -247,6 +261,41 @@ M4BUILTIN_HANDLER (debugfile)
 	      _("Cannot set error file: %s"), M4ARG (1)));
 }
 
+
+/* Compile a REGEXP using the Regex SYNTAX bits return the buffer.
+   Report errors on behalf of CALLER.  */
+
+static struct re_pattern_buffer *
+m4_regexp_compile (const char *caller,
+		   const char *regexp, int syntax)
+{
+  static struct re_pattern_buffer buf;	/* compiled regular expression */
+  static boolean buf_initialized = FALSE;
+  const char *msg;		/* error message from re_compile_pattern */
+
+  if (!buf_initialized)
+    {
+      buf_initialized = TRUE;
+      buf.buffer = NULL;
+      buf.allocated = 0;
+      buf.fastmap = NULL;
+      buf.translate = NULL;
+    }
+
+  re_set_syntax (syntax);
+  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+
+  if (msg != NULL)
+    {
+      M4ERROR ((warning_status, 0,
+		_("%0: bad regular expression `%s': %s"),
+		caller, regexp, msg));
+      return NULL;
+    }
+
+  return &buf;
+}
+
 /* Regular expression version of index.  Given two arguments, expand to the
    index of the first match of the second argument (a regexp) in the first.
    Expand to -1 if here is no match.  Given a third argument, is changes
@@ -261,34 +310,23 @@ M4BUILTIN_HANDLER (regexp)
   const char *regexp;		/* regular expression */
   const char *repl;		/* replacement string */
 
-  struct re_pattern_buffer buf;	/* compiled regular expression */
+  struct re_pattern_buffer *buf;/* compiled regular expression */
   struct re_registers regs;	/* for subexpression matches */
-  const char *msg;		/* error message from re_compile_pattern */
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
 
   if (m4_bad_argc (argv[0], argc, 3, 4))
     return;
 
-  victim = M4_TOKEN_DATA_TEXT (argv[1]);
-  regexp = M4_TOKEN_DATA_TEXT (argv[2]);
+  victim = M4ARG (1);
+  regexp = M4ARG (2);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
-
-  if (msg != NULL)
-    {
-      M4ERROR ((warning_status, 0,
-		_("Bad regular expression `%s': %s"), regexp, msg));
-      return;
-    }
+  buf = m4_regexp_compile (M4ARG(0), regexp, RE_SYNTAX_BRE);
+  if (!buf)
+    return;
 
   length = strlen (victim);
-  startpos = re_search (&buf, victim, length, 0, length, &regs);
-  xfree (buf.buffer);
+  startpos = re_search (buf, victim, length, 0, length, &regs);
 
   if (startpos  == -2)
     {
@@ -301,7 +339,7 @@ M4BUILTIN_HANDLER (regexp)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
     {
-      repl = M4_TOKEN_DATA_TEXT (argv[3]);
+      repl = M4ARG (3);
       substitute (obs, victim, repl, &regs);
     }
 
@@ -321,9 +359,8 @@ M4BUILTIN_HANDLER (patsubst)
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
 
-  struct re_pattern_buffer buf;	/* compiled regular expression */
+  struct re_pattern_buffer *buf;/* compiled regular expression */
   struct re_registers regs;	/* for subexpression matches */
-  const char *msg;		/* error message from re_compile_pattern */
   int matchpos;			/* start position of match */
   int offset;			/* current match offset */
   int length;			/* length of first argument */
@@ -331,31 +368,19 @@ M4BUILTIN_HANDLER (patsubst)
   if (m4_bad_argc (argv[0], argc, 3, 4))
     return;
 
-  regexp = M4_TOKEN_DATA_TEXT (argv[2]);
-
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
-
-  if (msg != NULL)
-    {
-      M4ERROR ((warning_status, 0,
-		_("Bad regular expression `%s': %s"), regexp, msg));
-      if (buf.buffer != NULL)
-	xfree (buf.buffer);
-      return;
-    }
-
-  victim = M4_TOKEN_DATA_TEXT (argv[1]);
+  regexp = M4ARG (2);
+  victim = M4ARG (1);
   length = strlen (victim);
+
+  buf = m4_regexp_compile (M4ARG(0), regexp, RE_SYNTAX_BRE);
+  if (!buf)
+    return;
 
   offset = 0;
   matchpos = 0;
   while (offset < length)
     {
-      matchpos = re_search (&buf, victim, length,
+      matchpos = re_search (buf, victim, length,
 			    offset, length - offset, &regs);
       if (matchpos < 0)
 	{
@@ -366,7 +391,8 @@ M4BUILTIN_HANDLER (patsubst)
 
 	  if (matchpos == -2)
 	    M4ERROR ((warning_status, 0,
-		      _("Error matching regular expression `%s'"), regexp));
+		      _("%s: error matching regular expression `%s'"),
+		      M4ARG (0), regexp));
 	  else if (offset < length)
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
@@ -391,7 +417,6 @@ M4BUILTIN_HANDLER (patsubst)
     }
   obstack_1grow (obs, '\0');
 
-  xfree (buf.buffer);
   return;
 }
 
