@@ -1,3 +1,11 @@
+2005-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (bindir, infodir): Substitute from configure rather
+	than hardcode.
+	* doc/Makefile.in (infodir): Ditto.
+	* src/Makefile.in (bindir): Ditto.
+	* NEWS: Updated.
+
 2005-03-31  Gary V. Vaughan  <gary@gnu.org>
 
 	Changes needed to automate the release process for 1.4.3:

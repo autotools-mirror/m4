@@ -28,7 +28,7 @@ MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 
 prefix = @prefix@
-infodir = $(prefix)/info
+infodir = @infodir@
 
 .SUFFIXES:
 

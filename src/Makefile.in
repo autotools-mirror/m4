@@ -35,7 +35,7 @@ STACKOVF = @STACKOVF@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 transform = @program_transform_name@
-bindir = $(exec_prefix)/bin
+bindir = @bindir@
 
 COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 LINK = $(CC) $(LDFLAGS) -o $@
