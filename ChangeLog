@@ -1,5 +1,13 @@
 2001-10-01  Akim Demaille  <akim@epita.fr>
 
+	* config/gmp.m4: Consult the user before using GMP: use
+	--without-gmp.
+	* configure.ac: Adjust.
+	* modules/gmp.c: No protection needed as the module is not built
+	if GMP is not used.
+
+2001-10-01  Akim Demaille  <akim@epita.fr>
+
 	* tests/generate.awk: Remove debugging code.
 	(fatal): Specify the current location.
 

@@ -16,52 +16,56 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 # 02111-1307  USA
 
-# serial 5
+# serial 6
 
 m4_define([_AC_LIB_GMP],
-[case $LIBADD_GMP:$ac_cv_header_gmp_h in
-  :yes)
+[AC_ARG_WITH(gmp,
+[  --without-gmp           don't use GNU multiple precision arithmetic library],
+[use_gmp=$withval], [use_gmp=yes])
+
+case $use_gmp:LIBADD_GMP:$ac_cv_header_gmp_h in
+  *::yes)
     AC_MSG_WARN([gmp library not found or does not appear to work
                  but `gmp.h' is present])
     ac_cv_using_lib_gmp=no
     ;;
-  -lgmp:no)
+  *:-lgmp:no)
     AC_MSG_WARN([gmp works but `gmp.h' is missing])
     ac_cv_using_lib_gmp=no
     ;;
-  *:yes)
+  yes:*:yes)
     ac_cv_using_lib_gmp=yes
     ;;
-  *)
+  no:*)
     ac_cv_using_lib_gmp=no
     ;;
 esac
 ])# _AC_LIB_GMP
 
+
 AC_DEFUN([AC_LIB_GMP],
 [AC_CHECK_HEADERS([gmp.h])
 # Some versions of gmp provide mpq_init as a macro, so we need to
 # include the header file, otherwise the detection will fail.
-gmp_save_LIBS="$LIBS"
+ac_gmp_save_LIBS="$LIBS"
 LIBS="$LIBS -lgmp"
 AC_TRY_LINK([#if HAVE_GMP_H
 #  include <gmp.h>
 #endif],
   [mpq_t n; mpq_init (n);],
   [LIBADD_GMP=-lgmp])
-LIBS="$gmp_save_LIBS"
+LIBS=$ac_gmp_save_LIBS
+AC_SUBST([LIBADD_GMP])
 
 AC_CACHE_CHECK([if using GNU multiple precision arithmetic library],
-                [ac_cv_using_lib_gmp],
-                [_AC_LIB_GMP])
+               [ac_cv_using_lib_gmp],
+               [_AC_LIB_GMP])
 
 # Don't try to link in libgmp if we are not using it after the last call
-if test "x$ac_cv_using_lib_gmp" = xyes; then
-  AC_DEFINE(USE_GMP, 1, [Define to 1 if using gmp library.])
-else
-  LIBADD_GMP=
+if test "$ac_cv_using_lib_gmp" = yes; then
+  AC_DEFINE(USE_GMP, 1,
+    [Define to 1 if using the GNU multiple precision library.])
 fi
 
 AC_SUBST([USE_GMP], [$ac_cv_using_lib_gmp])
-AC_SUBST([LIBADD_GMP])
 ])# AC_LIB_GMP

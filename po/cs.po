@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-30 15:13+0100\n"
+"POT-Creation-Date: 2001-10-01 09:52+0200\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -333,7 +333,7 @@ msgid "Path search for `%s' found `%s'"
 msgstr "Hledán soubor `%s', nalezen soubor `%s'"
 
 # , c-format
-#: m4/symtab.c:361
+#: m4/symtab.c:372
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Jméno `%s' není známo\n"
@@ -401,66 +401,72 @@ msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "VNITØNÍ CHYBA: ¹patný chybový kód v evaluate ()"
 
 # , c-format
-#: modules/gnu.c:126
+#: modules/gnu.c:140
 #, c-format
 msgid "Undefined name %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:151
+#: modules/gnu.c:165
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:211
+#: modules/gnu.c:225
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Ladící mód: ¹patné ladící volby: `%s'"
 
 # , c-format
-#: modules/gnu.c:247
+#: modules/gnu.c:261
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Chybový soubor %s nelze pou¾ít"
 
 # , c-format
-#: modules/gnu.c:285 modules/gnu.c:345
-#, c-format
-msgid "Bad regular expression `%s': %s"
+#: modules/gnu.c:291
+#, fuzzy
+msgid "%0: bad regular expression `%s': %s"
 msgstr "©patný regulární výraz `%s': %s"
 
 # , c-format
-#: modules/gnu.c:296 modules/gnu.c:369
+#: modules/gnu.c:334
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 # , c-format
-#: modules/gnu.c:468
+#: modules/gnu.c:394
+#, fuzzy, c-format
+msgid "%s: error matching regular expression `%s'"
+msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
+
+# , c-format
+#: modules/gnu.c:491
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Rouru do pøíkazu `%s' nelze otevøít"
 
-#: modules/gnu.c:541
+#: modules/gnu.c:564
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 
 # , c-format
-#: modules/load.c:78 modules/m4.c:131
+#: modules/load.c:78 modules/m4.c:132
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
 #: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/m4.c:505
+#: modules/m4.c:506
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Chyba pøi volání makra undivert pro %s"
@@ -472,7 +478,7 @@ msgid "Cannot open %s"
 msgstr "%s nelze otevøít"
 
 # , c-format
-#: modules/mpeval.c:201
+#: modules/mpeval.c:189
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "©patný výraz v makru eval: %s"

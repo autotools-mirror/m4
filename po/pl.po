@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-30 15:13+0100\n"
+"POT-Creation-Date: 2001-10-01 09:52+0200\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -317,7 +317,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
 
-#: m4/symtab.c:361
+#: m4/symtab.c:372
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Nazwa `%s' jest nieznana\n"
@@ -377,57 +377,62 @@ msgstr "Modulo zero w eval: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod b³êdu w evaluate ()"
 
-#: modules/gnu.c:126
+#: modules/gnu.c:140
 #, c-format
 msgid "Undefined name %s"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: modules/gnu.c:151
+#: modules/gnu.c:165
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: modules/gnu.c:211
+#: modules/gnu.c:225
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Tryb debugowania: z³e flagi debugowania: `%s'"
 
-#: modules/gnu.c:247
+#: modules/gnu.c:261
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Nie mogê ustawiæ pliku b³êdów: %s"
 
-#: modules/gnu.c:285 modules/gnu.c:345
-#, c-format
-msgid "Bad regular expression `%s': %s"
+#: modules/gnu.c:291
+#, fuzzy
+msgid "%0: bad regular expression `%s': %s"
 msgstr "B³êdne wyra¿enie regularne `%s': %s"
 
-#: modules/gnu.c:296 modules/gnu.c:369
+#: modules/gnu.c:334
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
 
-#: modules/gnu.c:468
+#: modules/gnu.c:394
+#, fuzzy, c-format
+msgid "%s: error matching regular expression `%s'"
+msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
+
+#: modules/gnu.c:491
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Nie mogê otworzyæ potoku do komendy `%s'"
 
-#: modules/gnu.c:541
+#: modules/gnu.c:564
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "UWAGA: \\0 zniknie, w podstawieniach u¿yj zamiast tego \\&"
 
-#: modules/load.c:78 modules/m4.c:131
+#: modules/load.c:78 modules/m4.c:132
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
 
-#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
 #: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: modules/m4.c:505
+#: modules/m4.c:506
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Nie mogê przetowrzyæ z powrotem %s"
@@ -437,7 +442,7 @@ msgstr "Nie mogê przetowrzyæ z powrotem %s"
 msgid "Cannot open %s"
 msgstr "Nie mogê otworzyæ %s"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:189
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "B³êdne wyra¿enie w eval: %s"

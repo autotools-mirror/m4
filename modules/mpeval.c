@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,18 +22,6 @@
 #endif
 
 #include <m4module.h>
-
-#if !USE_GMP
-
-M4INIT_HANDLER (mpeval)
-{
-  const char s[] = "libgmp support was not compiled in";
-
-  if (obs)
-    obstack_grow (obs, s, strlen(s));
-}
-
-#else /* USE_GMP */
 
 #if HAVE_GMP_H
 #  include <gmp.h>
@@ -438,5 +426,3 @@ numb_rshift (number * x, const number * y)
 
 #define m4_evaluate	builtin_mpeval
 #include "evalparse.c"
-
-#endif /* USE_GMP */

@@ -45,7 +45,7 @@ case AC_PACKAGE_VERSION in
     TIMESTAMP=`$CONFIG_SHELL $ac_aux_dir/mkstamp < $srcdir/ChangeLog`
     banner="Configuring AC_PACKAGE_TARNAME AC_PACKAGE_VERSION$TIMESTAMP"
     dashes=`echo "$banner" | sed 's/./-/g'`
-    
+
     # Display an obvious version banner
     echo
     echo $dashes
@@ -197,7 +197,7 @@ M4_AC_SYS_STACKOVF
 M4OBJS=
 m4_pattern_allow([^m4_getopt_h$])
 m4_getopt_h=src/getopt.h
-rm -f 
+rm -f
 AC_CHECK_FUNC([getopt_long], [],
     [M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
     AC_CONFIG_LINKS([$m4_getopt_h:src/gnu-getopt.h])])
@@ -211,7 +211,7 @@ AC_CHECK_FUNCS(getcwd gethostname mktime uname)
 AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 
 AC_LIB_GMP
-AM_CONDITIONAL([USE_GMP], [test "x$LIBADD_GMP" != xno])
+AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 
 
 

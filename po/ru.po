@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-30 15:13+0100\n"
+"POT-Creation-Date: 2001-10-01 09:52+0200\n"
 "PO-Revision-Date: 1999-04-17 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -316,7 +316,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Путь поиска для `%s' найден `%s'"
 
-#: m4/symtab.c:361
+#: m4/symtab.c:372
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Имя `%s' неизвестно\n"
@@ -376,57 +376,62 @@ msgstr "Модульное деление на ноль в выражении: %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код ошибки в evaluate ()"
 
-#: modules/gnu.c:126
+#: modules/gnu.c:140
 #, c-format
 msgid "Undefined name %s"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:151
+#: modules/gnu.c:165
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Имя %s неопределено"
 
-#: modules/gnu.c:211
+#: modules/gnu.c:225
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Режим отладки: неверный флаг отладки: '%s'"
 
-#: modules/gnu.c:247
+#: modules/gnu.c:261
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Невозможно назначить файл ошибок %s"
 
-#: modules/gnu.c:285 modules/gnu.c:345
-#, c-format
-msgid "Bad regular expression `%s': %s"
+#: modules/gnu.c:291
+#, fuzzy
+msgid "%0: bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
 
-#: modules/gnu.c:296 modules/gnu.c:369
+#: modules/gnu.c:334
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Ошибка сопоставления регулярного выражения '%s'"
 
-#: modules/gnu.c:468
+#: modules/gnu.c:394
+#, fuzzy, c-format
+msgid "%s: error matching regular expression `%s'"
+msgstr "Ошибка сопоставления регулярного выражения '%s'"
+
+#: modules/gnu.c:491
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Невозможно открыть канал для комманды '%s'"
 
-#: modules/gnu.c:541
+#: modules/gnu.c:564
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
-#: modules/load.c:78 modules/m4.c:131
+#: modules/load.c:78 modules/m4.c:132
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ОШИБКА: модуль `%s' не найден"
 
-#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
 #: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Имя %s неопределено"
 
-#: modules/m4.c:505
+#: modules/m4.c:506
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Невозможно вернуть вывод из %s"
@@ -436,7 +441,7 @@ msgstr "Невозможно вернуть вывод из %s"
 msgid "Cannot open %s"
 msgstr "Невозможно открыть %s"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:189
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Неверное выражение: %s"

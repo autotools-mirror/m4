@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-09-30 15:13+0100\n"
+"POT-Creation-Date: 2001-10-01 09:52+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -313,7 +313,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "La ricerca del percorso per `%s' ha trovato `%s'"
 
-#: m4/symtab.c:361
+#: m4/symtab.c:372
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Il nome `%s'  sconosciuto\n"
@@ -376,57 +376,62 @@ msgstr "Modulo zero in `eval': %s"
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "ERRORE INTERNO: Code di errore errato in evaluate ()"
 
-#: modules/gnu.c:126
+#: modules/gnu.c:140
 #, c-format
 msgid "Undefined name %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/gnu.c:151
+#: modules/gnu.c:165
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Nome `%s' non definito"
 
-#: modules/gnu.c:211
+#: modules/gnu.c:225
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Modalit di debug: indicatori di debug errati: `%s'"
 
-#: modules/gnu.c:247
+#: modules/gnu.c:261
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Impossibile aprire l' archivio di errore: %s"
 
-#: modules/gnu.c:285 modules/gnu.c:345
-#, c-format
-msgid "Bad regular expression `%s': %s"
+#: modules/gnu.c:291
+#, fuzzy
+msgid "%0: bad regular expression `%s': %s"
 msgstr "Espressione regolare errata `%s': %s"
 
-#: modules/gnu.c:296 modules/gnu.c:369
+#: modules/gnu.c:334
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Errore nel confronto dell' espressione regolare `%s'"
 
-#: modules/gnu.c:468
+#: modules/gnu.c:394
+#, fuzzy, c-format
+msgid "%s: error matching regular expression `%s'"
+msgstr "Errore nel confronto dell' espressione regolare `%s'"
+
+#: modules/gnu.c:491
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Impossibile aprire una `pipe' per il comando `%s'"
 
-#: modules/gnu.c:541
+#: modules/gnu.c:564
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
-#: modules/load.c:78 modules/m4.c:131
+#: modules/load.c:78 modules/m4.c:132
 #, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:203 modules/m4.c:255 modules/m4.c:383 modules/m4.c:682
+#: modules/m4.c:204 modules/m4.c:256 modules/m4.c:384 modules/m4.c:682
 #: modules/m4.c:702
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Nome `%s' non definito"
 
-#: modules/m4.c:505
+#: modules/m4.c:506
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Impossibile ripristinare la deviazione %s"
@@ -436,7 +441,7 @@ msgstr "Impossibile ripristinare la deviazione %s"
 msgid "Cannot open %s"
 msgstr "Impossibile aprire %s"
 
-#: modules/mpeval.c:201
+#: modules/mpeval.c:189
 #, fuzzy, c-format
 msgid "Loss of precision in eval: %s"
 msgstr "Espressione errata in `eval': %s"

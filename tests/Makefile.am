@@ -47,7 +47,7 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
-	$(AUTOM4TE) -I $(srcdir) testsuite.at -o $@
+	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@
 
 # Run the test suite on the *installed* tree.
 installcheck-local:
