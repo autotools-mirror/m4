@@ -2057,7 +2057,7 @@ macro.  Default is @kbd{$}.
 
 @item Other
 Characters that have no special syntactical meaning to @code{m4}.
-Default is all characters expect those in the categories above.
+Default is all characters except those in the categories above.
 
 @item Active
 Characters that themselves, alone, form macro names.  No default.
@@ -2096,7 +2096,7 @@ The builtin macro @code{changesyntax} is used to change the way
 @code{m4} parses the input stream into tokens.
 
 @deffn {Builtin (gnu)} changesyntax (@var{syntax-spec}, @dots{})
-The @var{syntax-spec} is a string, whose first characters determines the
+The @var{syntax-spec} is a string, whose first character determines the
 syntax category of the other characters.   Character ranges are expanded
 as for @ref{Translit}.  If there are no other
 characters, @emph{all} characters are given the syntax code.

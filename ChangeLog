@@ -1,3 +1,8 @@
+2005-02-08  Stepan Kasal  <kasal@ucw.cz>
+
+	* TODO: Add ``execution stack'', fix a typo.
+	* doc/m4.texinfo: Typos.
+
 2004-12-24  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (INCLUDE_STDBOOL_H): Account for gnulib's move

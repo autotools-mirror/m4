@@ -59,6 +59,9 @@ for any of these ideas or if you have others to add.
 
 * FEATURES OR PROBLEMS
 
+  + m4 should keep an ``execution stack'' of macros, which could applications
+    use in their error messages.
+
   + Implement discarding comment delimiters with the syntax table.
 
   + The $ used in user defined macros cannot be changed through
@@ -68,7 +71,7 @@ for any of these ideas or if you have others to add.
     some warnings, but it passes the tests.
 
   + Make m4 show include dependencies like gcc so Makefile targets are
-    updated When their (included) input files are updated (Erick B).
+    updated when their (included) input files are updated (Erick B).
 
   + Sort out all the weird forms of interaction between changesyntax,
     changecom and changequote.  What happens if you install a quote with
