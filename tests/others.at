@@ -705,7 +705,7 @@ Comparing strings: MATCH
 This will be seen.
 ]])
 
-AT_CHECK_M4([tests/iso8859.m4], 0, expout)
+AT_CHECK_M4([$srcdir/iso8859.m4], 0, expout)
 
 AT_CLEANUP
 
@@ -1130,6 +1130,62 @@ AT_CLEANUP
 
 AT_SETUP([shadow])
 
+AT_DATA([[shadow.m4]],
+[[# no modules loaded yet
+test
+shadow
+
+# define our own macros for `test' and `shadow'
+define(`test', `local::`test'')
+define(`shadow', `local::`shadow'')
+test
+shadow
+
+# module Shadow defines `shadow' and `test' macros
+load(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# save the definition of `test' from the Shadow module
+define(`Shadow::test', defn(`test'))
+
+# module Test also defines a `test' macro
+load(`modtest')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Reloading Shadow shouldn't affect anything
+load(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Test will unshadow the test definition in Shadow
+unload(`modtest')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Shadow once has no effect (we loaded it twice)
+unload(`shadow')
+dumpdef(`test')
+dumpdef(`shadow')
+test
+shadow
+
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
+unload(`shadow')
+test
+shadow
+]])
+
 AT_DATA([[expout]],
 [[# no modules loaded yet
 test
@@ -1199,7 +1255,7 @@ test:	<test>
 shadow:	<shadow>
 ]])
 
-AT_CHECK_M4([-m load modules/shadow.m4], 0,
+AT_CHECK_M4([-m load shadow.m4], 0,
             [expout], [experr])
 
 AT_CLEANUP
@@ -1582,7 +1638,20 @@ AT_CLEANUP
 
 AT_SETUP([wrap])
 
-AT_CHECK_M4([examples/wrap.m4], 0,
+AT_DATA([[wrap.m4]],
+[[divert(-1)
+m4wrap(`Wrapper no. 1
+')
+
+m4wrap(`Wrapper no. 2
+m4wrap(`Wrapper no. 3
+m4wrap(`Wrapper no. 4
+')')')
+divert
+No. 33: The End.
+]])
+
+AT_CHECK_M4([wrap.m4], 0,
 [[
 No. 33: The End.
 Wrapper no. 2

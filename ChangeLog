@@ -1,5 +1,14 @@
 2001-08-29  Akim Demaille  <akim@epita.fr>
 
+	* tests/testsuite.at (AT_CHECK_M4): Don't pass -I, let the tests
+	handle that.
+	* tests/others.at (wrap): Inline wrap.m4.
+	(shadow): Inline shadow.m4.
+	(iso8859): Don't specify the path from top_srcdir, but from srcdir.
+	* tests/m4: Simplify.
+
+2001-08-29  Akim Demaille  <akim@epita.fr>
+
 	* tests/Makefile.am ($(srcdir)/$(TESTSUITE)): Use autom4te's
 	--language.
 
