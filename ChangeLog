@@ -1,5 +1,13 @@
 2001-10-04  Akim Demaille  <akim@epita.fr>
 
+	* modules/modtest.c (init_handler): Consistently output to stderr.
+	(finish_handler): New.
+	(test): The `if' is an `assert'.
+	* tests/modules.at: Adjust.
+
+	
+2001-10-04  Akim Demaille  <akim@epita.fr>
+
 	* m4/utility.c (m4_bad_argc): Detail the mismatches.
 
 	

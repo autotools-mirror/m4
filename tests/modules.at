@@ -83,16 +83,25 @@ AT_DATA([input.m4],
 [[load(`modtest')
 test
 Dumpdef: dumpdef(`test').
+unload(`modtest')
+test
+Dumpdef: dumpdef(`test').
 ]])
 
 AT_CHECK([$2 m4 -m load -d input.m4 $3], 0,
          m4_default([$4],
-[[Test module loaded.
+[[
 Test module called.
+Dumpdef: .
+
+test
 Dumpdef: .
 ]]),
          m4_default([$5],
-[[test:	<test>
+[[Test module loaded.
+test:	<test>
+Test module unloaded.
+m4: input.m4: 6: Warning: dumpdef: undefined name: test
 ]]))
 
 AT_CLEANUP
@@ -124,7 +133,7 @@ AT_CHECK_M4_MODTEST([M4MODPATH: relative path],
 ## shadow ##
 ## ------ ##
 
-AT_SETUP([shadow])
+AT_SETUP([modules: shadow])
 
 AT_DATA([[input.m4]],
 [[# no modules loaded yet
@@ -147,7 +156,7 @@ shadow
 # save the definition of `test' from the Shadow module
 define(`Shadow::test', defn(`test'))
 
-# module Test also defines a `test' macro
+# module Modtest also defines a `test' macro
 load(`modtest')
 dumpdef(`test')
 dumpdef(`shadow')
@@ -161,7 +170,7 @@ dumpdef(`shadow')
 test
 shadow
 
-# Unloading Test will unshadow the test definition in Shadow
+# Unloading Modtest will unshadow the test definition in Shadow
 unload(`modtest')
 dumpdef(`test')
 dumpdef(`shadow')
@@ -203,8 +212,8 @@ Shadow::shadow called.
 # save the definition of `test' from the Shadow module
 
 
-# module Test also defines a `test' macro
-Test module loaded.
+# module Modtest also defines a `test' macro
+
 
 
 Test module called.
@@ -217,7 +226,7 @@ Shadow::shadow called.
 Test module called.
 Shadow::shadow called.
 
-# Unloading Test will unshadow the test definition in Shadow
+# Unloading Modtest will unshadow the test definition in Shadow
 
 
 
@@ -241,10 +250,12 @@ local::shadow
 AT_DATA([[experr]],
 [[test:	<test>
 shadow:	<shadow>
+Test module loaded.
 test:	<test>
 shadow:	<shadow>
 test:	<test>
 shadow:	<shadow>
+Test module unloaded.
 test:	<test>
 shadow:	<shadow>
 test:	<test>
@@ -262,7 +273,7 @@ AT_CLEANUP
 ## unload ##
 ## ------ ##
 
-AT_SETUP([unload])
+AT_SETUP([modules: unload])
 
 AT_DATA([[input.m4]],
 [[test
@@ -290,7 +301,7 @@ __test__
 AT_DATA([[expout]],
 [[test
 __test__
-Test module loaded.
+
 Test module called.
 modtest
 Shadow module loaded.
@@ -299,7 +310,7 @@ shadow
 
 Shadow::test called.
 shadow
-Test module loaded.
+
 Test module called.
 modtest
 
@@ -310,6 +321,14 @@ test
 __test__
 ]])
 
-AT_CHECK_M4([-m load input.m4], 0, expout)
+AT_DATA([[experr]],
+[[Test module loaded.
+Test module unloaded.
+Test module loaded.
+Test module unloaded.
+]])
+
+
+AT_CHECK_M4([-m load input.m4], 0, expout, experr)
 
 AT_CLEANUP
