@@ -26,10 +26,9 @@ libm4_la_SOURCES 	= builtin.c debug.c hash.c input.c \
 			  path.c symtab.c syntax.c utility.c
 libm4_la_LIBADD		= $(top_builddir)/gnulib/m4/libgnu.la $(LIBADD_DL)
 
-MODULE_PATH = $(pkglibexecdir)
 module.o module.lo: module.c pathconf.h
 pathconf.h: Makefile
-	@echo "#define MODULE_PATH \"${MODULE_PATH}\"" > pathconf.h
+	@echo "#define MODULE_PATH \"$(libexecdir)/$(PACKAGE)\"" > pathconf.h
 
 EXTRA_DIST	= system_.h
 # This file needs to be regenerated at configure time.

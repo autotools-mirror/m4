@@ -57,9 +57,6 @@ m4_pattern_forbid([^jm_])
 m4_pattern_allow([^jm_cv_])
 m4_pattern_allow([^jm_ac_cv_])
 
-pkglibexecdir='${libexecdir}'/$PACKAGE
-AC_SUBST([pkglibexecdir])
-
 AC_MSG_CHECKING(for modules to preload)
   m4_pattern_allow([^m4_default_preload$])
   m4_default_preload="m4 traditional gnu"

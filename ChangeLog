@@ -1,5 +1,12 @@
 2003-09-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.ac (pkglibexecdir): Don't try and set it here, PACKAGE
+	isn't set yet.
+	* m4/Makefile.am (MODULE_PATH): Removed. Calculate pkglibexecdir
+	inline.
+	* modules/Makefile.am (pkglibexecdir): Set it here.
+	(pkgmodincdir): Renamed to pkgmodincludedir).  Changed all clients.
+
 	* gnulib/m4/regex.c, gnulib/m4/regex_.h, gnulib/config/regex.m4:
 	Import regex module from CVS gnulib.
 	* gnulib/config/restrict.m4: Ditto for dependee module restrict.
