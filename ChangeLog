@@ -1,5 +1,9 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* modules/Makefile.am (ETAGS_ARGS): New.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	* m4/symtab.c (m4_hack_all_symbols, m4_lookup_symbol): Formatting
 	changes.
 
