@@ -1,3 +1,7 @@
+2004-08-21  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (VERSION): Bump to 1.4.2a.
+
 2004-08-19  Paul Eggert  <eggert@twinsun.com>
 
 	* Release 1.4.2.
