@@ -1,3 +1,20 @@
+2000-11-27  Gary V. Vaughan  <gary@gnu.org>
+
+	* po/POTFILES.in: Take account of these file movements.
+	* src/Makefile.am (m4_SOURCES): removed eval.c.
+	(EXTRA_m4_SOURCES): removed numb.c and numb.h.
+	* m4/Makefile.am (libm4_la_SOURCES): added eval.c.
+	(EXTRA_libm4_la_SOURCES): added numb.c and numb.h.
+	* modules/m4.c (builtin_eval): Use m4_evaluate().
+	* m4/eval.c: Moved here from src/eval.c to facilitate
+	implementation of eval() builtin as part of the `m4' loadable
+	module.
+	(m4_evaluate): renamed from evaluate for namespace cleanliness.
+	* m4/numb.c: Moved here from src/numb.c, since it is #included
+	into eval.c at compile time.
+	* m4/m4module.h (m4_evaluate): Added prototype.
+	* src/m4.h (evaluate): Removed prototype.
+	
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
 	* modules/perl.c (builtin_perleval):  Use PL_na for

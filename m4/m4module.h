@@ -453,6 +453,17 @@ struct m4_dump_symbol_data
 extern void m4_dump_symbol M4_PARAMS((m4_symbol *symbol, struct m4_dump_symbol_data *data));
 extern void m4_dump_symbols M4_PARAMS((struct m4_dump_symbol_data *data, int argc, m4_token_data **argv, boolean complain));
 
+
+/* File: eval.c  --- expression evaluation.  */
+
+extern boolean m4_evaluate M4_PARAMS((struct obstack *obs,
+				      const char *, const int radix, int min));
+
+#ifdef WITH_GMP
+extern boolean m4_mp_evaluate M4_PARAMS((struct obstack *obs, const char *,
+					 const int radix, int min));
+#endif /* WITH_GMP */
+
 END_C_DECLS
 
 #endif /* !M4MODULE_H */

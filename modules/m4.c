@@ -358,10 +358,11 @@ M4BUILTIN_HANDLER (sysval)
 }
 
 
-/*-------------------------------------------------------------------------.
-| This section contains the top level code for the "eval" builtin.  The	   |
-| actual work is done in the function evaluate (), which lives in eval.c.  |
-`-------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------.
+| This section contains the top level code for the "eval" builtin.  The |
+| actual work is done in the function m4_evaluate (), which lives in	|
+| eval.c.								|
+`----------------------------------------------------------------------*/
 
 typedef boolean (*eval_func) M4_PARAMS((struct obstack *obs, const char *expr, 
 					const int radix, int min));
@@ -400,8 +401,7 @@ do_eval (struct obstack *obs, int argc, m4_token_data **argv, eval_func func)
 
 M4BUILTIN_HANDLER (eval)
 {
-#define evaluate 0
-  do_eval(obs, argc, argv, evaluate);
+  do_eval(obs, argc, argv, m4_evaluate);
 }
 
 M4BUILTIN_HANDLER (incr)

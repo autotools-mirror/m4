@@ -104,17 +104,6 @@ void setup_stackovf_trap M4_PARAMS((char *const *, char *const *,
 #endif
 
 
-/* File: eval.c  --- expression evaluation.  */
-
-boolean evaluate M4_PARAMS((struct obstack *obs,
-			    const char *, const int radix, int min));
-
-#ifdef WITH_GMP
-boolean mp_evaluate M4_PARAMS((struct obstack *obs,
-			       const char *, const int radix, int min));
-#endif /* WITH_GMP */
-
-
 /* File: freeze.c --- frozen state files.  */
 
 void produce_frozen_state M4_PARAMS((const char *));

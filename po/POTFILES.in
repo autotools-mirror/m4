@@ -4,6 +4,7 @@ m4/regex.c
 m4/xmalloc.c
 m4/builtin.c
 m4/debug.c
+m4/eval.c
 m4/input.c
 m4/macro.c
 m4/module.c
@@ -18,7 +19,6 @@ modules/m4.c
 modules/mpeval.c
 modules/perl.c
 modules/traditional.c
-src/eval.c
 src/freeze.c
 src/main.c
 src/stackovf.c

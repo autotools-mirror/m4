@@ -33,7 +33,7 @@
 #include "m4private.h"
 
 #ifdef USE_GMP
-#define evaluate mp_evaluate
+#define m4_evaluate m4_mp_evaluate
 #endif
 
 #include "numb.c"
@@ -285,7 +285,7 @@ eval_lex (eval_t *val)
 `---------------------------------------*/
 
 boolean
-evaluate (struct obstack *obs, const char *expr, const int radix, int min)
+m4_evaluate (struct obstack *obs, const char *expr, const int radix, int min)
 {
   eval_t val;
   eval_token et;
