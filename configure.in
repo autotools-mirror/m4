@@ -125,7 +125,7 @@ AC_CHECK_FUNCS(getcwd gethostname mktime uname)
 AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
 
 AC_LIB_GMP
-AM_CONDITIONAL([USE_GMP], [test "x$LIB_GMP" != xno])
+AM_CONDITIONAL([USE_GMP], [test "x$LIBADD_GMP" != xno])
 
 AM_WITH_DMALLOC
 if test "$USE_INCLUDED_LIBINTL" = yes; then

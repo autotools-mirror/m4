@@ -1,3 +1,11 @@
+2001-09-22  Akim Demaille  <akim@epita.fr>
+
+	Autotest has changed again.
+
+	* tests/Makefile.am (DISTCLEANFILES): Add package.m4.
+	(package.m4): Remove.
+	* configure.in: Adjust to LIBADD_GMP.
+
 2001-09-21  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/gmp.m4 (AC_ARG_WITH): Removed.
