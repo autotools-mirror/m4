@@ -1,0 +1,12 @@
+config.m4
+config.sh
+Makefile
+Makefile.in
+at-* atconfig
+autom4te.cache
+debug-*.sh
+frozen.m4f
+generated.at
+in stderr stdout expout experr
+testsuite
+*.log log
