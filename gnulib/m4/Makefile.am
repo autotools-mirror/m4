@@ -63,10 +63,6 @@ gettext.h: gettext_.h
 MOSTLYCLEANFILES += gettext.h
 
 
-## malloc: (not yet in gnulib)
-EXTRA_DIST += malloc.c
-
-
 ## obstack: (not yet in gnulib)
 BUILT_SOURCES += $(OBSTACK_H)
 EXTRA_DIST += obstack_.h
@@ -80,10 +76,6 @@ MOSTLYCLEANFILES += obstack.h
 
 ## progname:
 libgnu_la_SOURCES += progname.c progname.h
-
-
-## realloc: (not yet in gnulib)
-EXTRA_DIST += realloc.c
 
 
 ## stdbool:
