@@ -4,9 +4,7 @@
 
 . ${srcdir}/defs
 
-cat <<\EOF >in
-include(comments.m4)dnl
-EOF
+cat ${srcdir}/comments.m4 >in
 
 cat <<\EOF >ok
 # An ordinary comment
@@ -19,6 +17,6 @@ Macro foo expansion
 Macro foo expansion
 EOF
 
-M4PATH=$srcdir:$srcdir/../examples $M4 -d in >out
-
+M4PATH=$srcdir:$srcdir/../tests $M4 -d in >out 2>err
+sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
 $CMP -s out ok

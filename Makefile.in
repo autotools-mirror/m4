@@ -90,7 +90,7 @@ l = @l@
 
 AUTOMAKE_OPTIONS = 1.3b gnits
 
-SUBDIRS = acm4 intl po lib src doc examples tests #  modules
+SUBDIRS = acm4 intl po lib src doc tests examples # modules
 
 # These are excluded otherwise
 EXTRA_DIST = modules/Makefile.am modules/Makefile.in \

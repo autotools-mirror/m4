@@ -125,7 +125,8 @@ module_load (const char *modname, struct obstack *obs)
   handle = module_search(modname, module_try_load);
   if (handle == NULL)
     {
-      M4ERROR ((1, 0, _("Error: cannot find module `%s'"), modname));
+      M4ERROR ((EXIT_FAILURE, 0, 
+		_("Error: cannot find module `%s'"), modname));
     }
 
   for (list = modules; list != NULL; list = list->next)

@@ -1,6 +1,6 @@
 EXTRA_DIST = $(ACINCLUDES_M4)
 
-ACINCLUDES_M4 = error.m4 gettext.m4 regex.m4
+ACINCLUDES_M4 = error.m4 gettext.m4 regex.m4 gmp.m4 modules.m4
 
 ACINCLUDE_M4 = $(top_srcdir)/acinclude.m4
 

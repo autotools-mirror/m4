@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-10-07 17:46+0200\n"
+"POT-Creation-Date: 1998-10-13 12:23+0200\n"
 "PO-Revision-Date: 1996-09-30 10:38 GMT+0100\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -34,7 +34,7 @@ msgstr "Nicht-numerisches Argument in eingebauter Funktion `%s'"
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "INTERNER FEHLER: Falscher Datentyp des Tokens in define_macro ()"
 
-#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1342 src/builtin.c:1366
+#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1344 src/builtin.c:1368
 #, c-format
 msgid "Undefined name %s"
 msgstr "Name %s nicht definiert"
@@ -85,31 +85,31 @@ msgstr "Kann Umleitung %s nicht aufheben"
 msgid "Undefined syntax code %c"
 msgstr "Name %s nicht definiert"
 
-#: src/builtin.c:1193 src/freeze.c:207
+#: src/builtin.c:1194 src/freeze.c:207
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"
 
-#: src/builtin.c:1402
+#: src/builtin.c:1404
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debug Modus: falsche Debug Flags: `%s'"
 
-#: src/builtin.c:1438
+#: src/builtin.c:1440
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kann Fehlerdatei nicht vorbereiten: %s"
 
-#: src/builtin.c:1655
+#: src/builtin.c:1657
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 
-#: src/builtin.c:1716 src/builtin.c:1776 src/input.c:982
+#: src/builtin.c:1718 src/builtin.c:1778 src/input.c:982
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Falscher regulärer Ausdruck `%s': %s"
 
-#: src/builtin.c:1727 src/builtin.c:1800
+#: src/builtin.c:1729 src/builtin.c:1802
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks `%s'"
@@ -387,12 +387,12 @@ msgstr ""
 "\n"
 "Ohne DATEI oder wenn DATEI `-' ist, wird die Standardeingabe gelesen\n"
 
-#: src/m4.c:365
+#: src/m4.c:366
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Falsche Debug Flags: `%s'"
 
-#: src/m4.c:444
+#: src/m4.c:445
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNER FEHLER: Falscher Kode in zurückgestellten Argumenten"
 
@@ -418,7 +418,7 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
 
-#: src/module.c:128
+#: src/module.c:129
 #, c-format
 msgid "Error: cannot find module `%s'"
 msgstr ""
@@ -443,12 +443,12 @@ msgstr "FEHLER: Während Lesen einer eingefügten Datei"
 msgid "Cannot stat diversion"
 msgstr "Kann `stat' nicht auf Umleitung anwenden"
 
-#: src/path.c:162
+#: src/path.c:166
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach `%s' hat `%s' gefunden"
 
-#: src/path.c:239
+#: src/path.c:248
 #, fuzzy, c-format
 msgid "Module search for `%s' found `%s'"
 msgstr "Pfad für Suche nach `%s' hat `%s' gefunden"

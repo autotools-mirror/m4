@@ -202,7 +202,7 @@ reload_frozen_state (const char *name)
     }								\
   while (0)
 
-  file = path_search (name);
+  file = path_search (name, (char **)NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, _("Cannot open %s"), name));
 

@@ -6,12 +6,6 @@
 @c %**end of header
 
 @include version.texi
-@ifinfo
-@set Francois Franc,ois
-@end ifinfo
-@tex
-@set Francois Fran\noexpand\ptexc cois
-@end tex
 
 @ifinfo
 @format
@@ -88,7 +82,7 @@ GNU @code{m4} for generating @file{configure} scripts, but not for
 running them.
 
 GNU @code{m4} was originally written by Ren@'e Seindal, with
-subsequent changes by @value{Francois} Pinard and other volunteers
+subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
 file @file{THANKS} from the GNU @code{m4} distribution.
 
@@ -291,13 +285,13 @@ properly write this section.
 
 @code{GPM} has been an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
-8,3 (1965), pp. 225 ff.  @code{GPM} is also succintly described into
+8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
-While @code{GPM} was @emph{pure}, @code{m4} was meant to deal more
-with the true intricacies of real life: macros could be recognized
-with being pre-announced, skipping whitespace or end-of-lines was
-made easier, more constructs were builtin instead of derived, etc.
+While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
+the true intricacies of real life: macros can be recognized without being
+pre-announced, skipping whitespace or end-of-lines is easier, more constructs
+are builtin instead of derived, etc.
 
 Originally, @code{m4} was the engine for Rational FORTRAN preprocessor,
 that is, the @code{ratfor} equivalent of @code{cpp}.
@@ -486,14 +480,14 @@ frozen @var{file} (@pxref{Frozen files}).
 
 @end table
 
-@cindex command line, filenames on the
-@cindex filenames, on the command line
+@cindex command line, file names on the
+@cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
 names.  If no names are present, the standard input is read.  A file
 name of @file{-} is taken to mean the standard input.
 
 The input files are read in the sequence given.  The standard input can
-only be read once, so the filename @file{-} should only appear once on
+only be read once, so the file name @file{-} should only appear once on
 the command line.
 
 @node Bugs, Manual, Invoking m4, Preliminaries
@@ -555,7 +549,7 @@ regexp(@var{string}, @var{regexp}, opt @var{replacement})
 @end example
 
 All macro arguments in @code{m4} are strings, but some are given special
-interpretation, e.g., as numbers, filenames, regular expressions, etc.
+interpretation, e.g., as numbers, file names, regular expressions, etc.
 
 The @samp{opt} before the third argument shows that this argument is
 optional---if it is left out, it is taken to be the empty string.  An
@@ -593,7 +587,7 @@ in macro names, depending on the active locale.
 
 @cindex names
 A name is a sequence of letters, digits, and the character @kbd{_}
-(underscore), where the first character is not a digit.  @code{M4} will
+(underscore), where the first character is not a digit.  @code{m4} will
 use the longest such sequences found in the input.  If a name has a
 macro definition, it will be subject to macro expansion
 (@pxref{Macros}).)
@@ -672,7 +666,7 @@ more input to get the arguments.  It then insert the expansion in front
 of the remaining input.  In other words, the resulting text from a macro
 call will be read and parsed into tokens again.
 
-@code{M4} expands a macro as soon as possible.  It it finds a macro call
+@code{m4} expands a macro as soon as possible.  It it finds a macro call
 when collecting the arguments to another, it will expand the second
 call first.  If the input is
 
@@ -1771,7 +1765,7 @@ Show the the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
-mecanism (@pxref{Search Path}), giving the actual filename used.
+mecanism (@pxref{Search Path}), giving the actual file name used.
 
 @item i
 Print a message each time the current input file is changed, giving file
@@ -2172,7 +2166,7 @@ arguments in user defined macros.
 
 Active characters are known from @TeX{}.  In @code{m4} a active
 character is always seen as a one-letter word, and so, if it has a macro
-definition, che macro will be called.
+definition, the macro will be called.
 
 @example
 define(`@@', `TEST')
@@ -3066,7 +3060,7 @@ modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
 
-@c FIXME: Why format does not require at least one argument?
+The builtin macros @code{format} is recognized only when given arguments.
 
 @node Arithmetic, UNIX commands, Text handling, Top
 @chapter Macros for doing arithmetic
@@ -3346,8 +3340,8 @@ which expands to the exit status of the last shell command run with
 @example
 syscmd(`false')
 @result{}
-ifelse(sysval, 0, zero, non-zero)
-@result{}non-zero
+ifelse(sysval, 0, zero, nonzero)
+@result{}nonzero
 syscmd(`true')
 @result{}
 sysval
@@ -3357,7 +3351,7 @@ sysval
 @node Maketemp,  , Sysval, UNIX commands
 @section Making names for temporary files
 
-@cindex temporary filenames
+@cindex temporary file names
 @cindex files, names of temporary
 @findex maketemp
 Commands specified to @code{syscmd} or @code{esyscmd} might need a
@@ -3374,7 +3368,7 @@ maketemp(@var{template})
 which expands to a name of a non-existent file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
 @code{X}'s are then replaced, usually with something that includes the
-process id of the @code{m4} process, in order to make the filename unique.
+process id of the @code{m4} process, in order to make the file name unique.
 
 @comment ignore
 @example
@@ -3758,7 +3752,7 @@ when text is being diverted.  GNU @code{m4} outputs the sync lines when
 the text is being diverted, and System V @code{m4} when the diverted
 text is being brought back.
 
-The problem is which lines and filenames should be attached to text that
+The problem is which lines and file names should be attached to text that
 is being, or has been, diverted.  System V @code{m4} regards all the
 diverted text as being generated by the source line containing the
 @code{undivert} call, whereas GNU @code{m4} regards the diverted text as
@@ -3791,7 +3785,7 @@ ifelse(defn(`@var{holder}'), `@var{value}', @dots{})
 
 @noindent
 In cases like this one, an interdiction for a macro to hold its own
-name would be a useless limitation.  Of course, this leave more rope
+name would be a useless limitation.  Of course, this leaves more rope
 for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.

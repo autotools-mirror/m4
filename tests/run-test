@@ -5,7 +5,10 @@
 srcdir=.
 export srcdir
 
-if sh "$@"; then
+shopts=
+test -z "$VERBOSE" || shopts=-x
+
+if sh $shopts "$@"; then
     echo "Test succeeded"
 else
     echo "TEST FAILED"
@@ -13,11 +16,10 @@ else
     if cmp testSubDir/ok testSubDir/out 2>/dev/null; then
 	:
     else
-	echo "stdout mosmatch"
+	echo "stdout mismatch"
 	diff -c  testSubDir/ok testSubDir/out
     fi
 
-    msgerr=""
     if test -e testSubDir/err; then
 	if cmp testSubDir/okerr testSubDir/err 2>/dev/null; then
 	    :

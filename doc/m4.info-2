@@ -113,7 +113,7 @@ when using the macros described in the preceding sections.
 
 `p'
      Print a message when a named file is found through the path search
-     mecanism (*note Search Path::.), giving the actual filename used.
+     mecanism (*note Search Path::.), giving the actual file name used.
 
 `i'
      Print a message each time the current input file is changed,
@@ -464,7 +464,7 @@ arguments in user defined macros.
 
    Active characters are known from TeX.  In `m4' a active character is
 always seen as a one-letter word, and so, if it has a macro definition,
-che macro will be called.
+the macro will be called.
 
      define(`@', `TEST')
      =>
@@ -1214,6 +1214,8 @@ and supports the normal `%' specifiers: `c', `s', `d', `o', `x', `X',
 modifiers `+', `-', ` ', `0', `#', `h' and `l'.  For more details on
 the functioning of `printf', see the C Library Manual.
 
+   The builtin macros `format' is recognized only when given arguments.
+
 
 File: m4.info,  Node: Arithmetic,  Next: UNIX commands,  Prev: Text handling,  Up: Top
 
@@ -1469,8 +1471,8 @@ which expands to the exit status of the last shell command run with
 
      syscmd(`false')
      =>
-     ifelse(sysval, 0, zero, non-zero)
-     =>non-zero
+     ifelse(sysval, 0, zero, nonzero)
+     =>nonzero
      syscmd(`true')
      =>
      sysval
@@ -1491,7 +1493,7 @@ file, for output or for some other purpose.  There is a builtin macro,
 which expands to a name of a non-existent file, made from the string
 TEMPLATE, which should end with the string `XXXXXX'.  The six `X''s are
 then replaced, usually with something that includes the process id of
-the `m4' process, in order to make the filename unique.
+the `m4' process, in order to make the file name unique.
 
      maketemp(`/tmp/fooXXXXXX')
      =>/tmp/fooa07346

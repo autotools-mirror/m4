@@ -7,14 +7,15 @@ running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 
 GNU `m4' has been originally written by René Seindal, from Denmark.
 
-This release is a development release.  Last stable release is 1.4.
+This release is a development release.  Lastest stable release is 1.4.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
 
-In the subdirectory `examples' you will find various m4 files, ranging
-from trivial test files to rather advanced macros.  If you intend to
-use m4 seriously, you might find useful material down there.
+In the subdirectories `tests' and `examples' you will find various m4
+files, ranging from trivial test files to rather advanced macros.  If
+you intend to use m4 seriously, you might find useful material down
+there.
 
 See file `COPYING' for copying conditions.
 See file `INSTALL' for compilation and installation instructions.
@@ -22,18 +23,24 @@ See file `ABOUT-NLS' for how to customize this program to your language.
 See file `NEWS' for a list of major changes in the current release.
 See file `THANKS' for a list of contributors.
 
-By using `./configure --with-gmp, you get an multiple precision integral
-and rational arithmetic in eval.  The implementation depends on GNU gmp
-v2.
+By using `./configure --with-gmp, you get multiple precision integral
+and rational arithmetic in eval.  The implementation depends on the GNU
+gmp v2 library.
 
 By using `./configure --with-modules, you get the possibility of using
 dynamic modules.  The implementation depends on dlopen(3) interface.
-This might change or go away, so don't count on it yet.
+This might change or go away, so don't count on it yet.  See file
+`modules/README' for a more detailed description.
 
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
 `m4'.  THIS WILL PROBABLY GO AWAY, so don't count on it.  Some of the
 same things can be achieved with `changesyntax' at a much better speed.
+
+By using `./configure --with-dmalloc', GNU m4 is linked with Gray
+Watson's dmalloc package.  It is a debugging option for finding memory
+management problems.  Gray Watson's dmalloc package is available at
+ftp://ftp.letters.com/src/dmalloc/dmalloc.tar.gz.
 
 Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
 is an adequate description of the problem: your input, what you

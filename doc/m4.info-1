@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4j.  It is now to be considered stable, future
+   This is release 1.4k.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -243,13 +243,13 @@ properly write this section.
 
    `GPM' has been an important ancestor of `m4'.  See C. Stratchey: "A
 General Purpose Macro generator", Computer Journal 8,3 (1965), pp. 225
-ff.  `GPM' is also succintly described into David Gries classic
+ff.  `GPM' is also succinctly described into David Gries classic
 "Compiler Construction for Digital Computers".
 
-   While `GPM' was *pure*, `m4' was meant to deal more with the true
-intricacies of real life: macros could be recognized with being
-pre-announced, skipping whitespace or end-of-lines was made easier,
-more constructs were builtin instead of derived, etc.
+   While `GPM' was more *pure*, `m4' is meant to deal with the true
+intricacies of real life: macros can be recognized without being
+pre-announced, skipping whitespace or end-of-lines is easier, more
+constructs are builtin instead of derived, etc.
 
    Originally, `m4' was the engine for Rational FORTRAN preprocessor,
 that is, the `ratfor' equivalent of `cpp'.
@@ -434,7 +434,7 @@ file names.  If no names are present, the standard input is read.  A
 file name of `-' is taken to mean the standard input.
 
    The input files are read in the sequence given.  The standard input
-can only be read once, so the filename `-' should only appear once on
+can only be read once, so the file name `-' should only appear once on
 the command line.
 
 
@@ -492,7 +492,7 @@ arguments, e.g.,
      regexp(STRING, REGEXP, opt REPLACEMENT)
 
    All macro arguments in `m4' are strings, but some are given special
-interpretation, e.g., as numbers, filenames, regular expressions, etc.
+interpretation, e.g., as numbers, file names, regular expressions, etc.
 
    The `opt' before the third argument shows that this argument is
 optional--if it is left out, it is taken to be the empty string.  An
@@ -533,7 +533,7 @@ Names
 =====
 
    A name is a sequence of letters, digits, and the character `_'
-(underscore), where the first character is not a digit.  `M4' will use
+(underscore), where the first character is not a digit.  `m4' will use
 the longest such sequences found in the input.  If a name has a macro
 definition, it will be subject to macro expansion (*note Macros::.).)
 
@@ -610,7 +610,7 @@ more input to get the arguments.  It then insert the expansion in front
 of the remaining input.  In other words, the resulting text from a macro
 call will be read and parsed into tokens again.
 
-   `M4' expands a macro as soon as possible.  It it finds a macro call
+   `m4' expands a macro as soon as possible.  It it finds a macro call
 when collecting the arguments to another, it will expand the second
 call first.  If the input is
 

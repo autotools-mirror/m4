@@ -13,3 +13,5 @@ define(`hanoi', `_hanoi(`$1', source, destination, auxilliary)')
 
 # traceon(`move', `_hanoi', `decr')
 divert`'dnl
+
+hanoi(3)

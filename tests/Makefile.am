@@ -2,88 +2,89 @@
 #  Ty Coon, President of Vice
 # The previous line is needed by `./esyscmd.1.test'
 
-EXTRA_DIST = get-them run-test foo incl.m4 stamp-TESTS \
-	defs $(GENERATED_TESTS)
+EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS \
+	defs $(TESTS) $(OTHER_FILES)
 
 TESTS = $(GENERATED_TESTS) $(OTHER_TESTS)
 
 GENERATED_TESTS = \
-	gentest/argument.1.test \
-	gentest/argument.2.test \
-	gentest/argument.3.test \
-	gentest/argument.4.test \
-	gentest/changeco.1.test \
-	gentest/changeco.2.test \
-	gentest/changequ.1.test \
-	gentest/changequ.2.test \
-	gentest/changequ.3.test \
-	gentest/changesy.1.test \
-	gentest/changesy.2.test \
-	gentest/changesy.3.test \
-	gentest/changesy.4.test \
-	gentest/changesy.5.test \
-	gentest/changesy.6.test \
-	gentest/changesy.7.test \
-	gentest/cleardiv.1.test \
-	gentest/cleardiv.2.test \
-	gentest/define.1.test \
-	gentest/define.2.test \
-	gentest/defn.1.test \
-	gentest/defn.2.test \
-	gentest/divert.1.test \
-	gentest/divert.2.test \
-	gentest/divnum.1.test \
-	gentest/dnl.1.test \
-	gentest/dumpdef.1.test \
-	gentest/errprint.1.test \
-	gentest/errprint.2.test \
-	gentest/esyscmd.1.test \
-	gentest/eval.1.test \
-	gentest/eval.2.test \
-	gentest/format.1.test \
-	gentest/ifdef.1.test \
-	gentest/ifelse.1.test \
-	gentest/ifelse.2.test \
-	gentest/include.1.test \
-	gentest/include.2.test \
-	gentest/include.3.test \
-	gentest/incr.1.test \
-	gentest/index.1.test \
-	gentest/indir.1.test \
-	gentest/len.1.test \
-	gentest/loops.1.test \
-	gentest/loops.2.test \
-	gentest/m4exit.1.test \
-	gentest/m4wrap.1.test \
-	gentest/patsubst.1.test \
-	gentest/patsubst.2.test \
-	gentest/pseudoar.1.test \
-	gentest/pseudoar.2.test \
-	gentest/pseudoar.3.test \
-	gentest/pseudoar.4.test \
-	gentest/pseudoar.5.test \
-	gentest/pushdef.1.test \
-	gentest/pushdef.2.test \
-	gentest/regexp.1.test \
-	gentest/regexp.2.test \
-	gentest/substr.1.test \
-	gentest/sysval.1.test \
-	gentest/trace.1.test \
-	gentest/translit.1.test \
-	gentest/undefine.1.test \
-	gentest/undivert.1.test \
-	gentest/undivert.2.test \
-	gentest/undivert.3.test
+	generated-tests/argument.1.test \
+	generated-tests/argument.2.test \
+	generated-tests/argument.3.test \
+	generated-tests/argument.4.test \
+	generated-tests/changeco.1.test \
+	generated-tests/changeco.2.test \
+	generated-tests/changequ.1.test \
+	generated-tests/changequ.2.test \
+	generated-tests/changequ.3.test \
+	generated-tests/changesy.1.test \
+	generated-tests/changesy.2.test \
+	generated-tests/changesy.3.test \
+	generated-tests/changesy.4.test \
+	generated-tests/changesy.5.test \
+	generated-tests/changesy.6.test \
+	generated-tests/changesy.7.test \
+	generated-tests/cleardiv.1.test \
+	generated-tests/cleardiv.2.test \
+	generated-tests/define.1.test \
+	generated-tests/define.2.test \
+	generated-tests/defn.1.test \
+	generated-tests/defn.2.test \
+	generated-tests/divert.1.test \
+	generated-tests/divert.2.test \
+	generated-tests/divnum.1.test \
+	generated-tests/dnl.1.test \
+	generated-tests/dumpdef.1.test \
+	generated-tests/errprint.1.test \
+	generated-tests/errprint.2.test \
+	generated-tests/esyscmd.1.test \
+	generated-tests/eval.1.test \
+	generated-tests/eval.2.test \
+	generated-tests/format.1.test \
+	generated-tests/ifdef.1.test \
+	generated-tests/ifelse.1.test \
+	generated-tests/ifelse.2.test \
+	generated-tests/include.1.test \
+	generated-tests/include.2.test \
+	generated-tests/include.3.test \
+	generated-tests/incr.1.test \
+	generated-tests/index.1.test \
+	generated-tests/indir.1.test \
+	generated-tests/len.1.test \
+	generated-tests/loops.1.test \
+	generated-tests/loops.2.test \
+	generated-tests/m4exit.1.test \
+	generated-tests/m4wrap.1.test \
+	generated-tests/patsubst.1.test \
+	generated-tests/patsubst.2.test \
+	generated-tests/pseudoar.1.test \
+	generated-tests/pseudoar.2.test \
+	generated-tests/pseudoar.3.test \
+	generated-tests/pseudoar.4.test \
+	generated-tests/pseudoar.5.test \
+	generated-tests/pushdef.1.test \
+	generated-tests/pushdef.2.test \
+	generated-tests/regexp.1.test \
+	generated-tests/regexp.2.test \
+	generated-tests/substr.1.test \
+	generated-tests/sysval.1.test \
+	generated-tests/trace.1.test \
+	generated-tests/translit.1.test \
+	generated-tests/undefine.1.test \
+	generated-tests/undivert.1.test \
+	generated-tests/undivert.2.test \
+	generated-tests/undivert.3.test
 
 OTHER_TESTS = \
-	../examples/comments.test \
-	../examples/ddivert.test \
-	../examples/debug.test \
-	../examples/iso8859.test \
-	../examples/reverse.test \
-	../examples/sysv-args.test \
-	../examples/wrap.test
+	other-tests/gmp.test \
+	other-tests/iso8859.test \
+	other-tests/sync-lines.test \
+	other-tests/stackovf.test
 
+OTHER_FILES = \
+	other-tests/gmp.m4 \
+	other-tests/iso8859.m4 \
+	other-tests/sync-lines.m4
 
 all: stamp-TESTS
 

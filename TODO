@@ -6,30 +6,31 @@ for any of these ideas or if you have others to add.
 
 * Features or problems
 
-  + Changes in the syntax_table are not saved to frozen files (René
-    Seindal).
+  + The module system is still rudimentary (see below)
 
-  + Information about loaded modules is not saved to frozen files (René
-    Seindal).
+  + Changes in the syntax_table are not saved to frozen files.
+
+  + Information about loaded modules is not saved to frozen files.
 
   + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
   + The $ used in user defined macros cannot be changed through
-    changesyntax.  It should be handled as a modifier (René Seindal).
+    changesyntax.  It should be handled as a modifier.
 
   + Make show include dependencies like gcc so targets are updated
     when their (included) input files are updated (Erick B).
 
-  + The filename found by path_search should be displayed by error
-    messages instead of the specified filename (René Seindal).
+  + The test case `other-tests/stackovf.test' does not work.
 
   + An escape character (like in TeX) should be definable through the
-    syntax table (René Seindal).
+    syntax table.
 
   + Sort out all the weird forms of interaction between changesyntax,
     changecom and changequote.  What happens if you install a quote with
-    changequote and removes it with changesyntax and vice versa (René
-    Seindal).
+    changequote and removes it with changesyntax and vice versa.
+
+  + Add support for wide character sets.
+
 
 * Optimization and clean up
 
@@ -39,11 +40,22 @@ for any of these ideas or if you have others to add.
 	etc.).
 
 
+* Module specific issues
 
+  + The module directory should be made to build automatically if
+    configured.
 
+  + Use libtool to build modules for portability.
 
+  + Support for other DL interfaces besides dlopen, such as dld and
+    hpux.
 
+  + Modules should be loadable from the command line with something like
+    `-M module.so' o `--load-module=module.so'.  M4 should abort if it
+    fails.
 
+  + Some way of linking a module statically is needed, for systems
+    without support for dynamic loading.
 
 
 

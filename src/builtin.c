@@ -110,7 +110,7 @@ builtin_tab[] =
   { "errprint",		FALSE,	FALSE,	FALSE,	m4_errprint },
   { "esyscmd",		TRUE,	FALSE,	TRUE,	m4_esyscmd },
   { "eval",		FALSE,	FALSE,	TRUE,	m4_eval },
-  { "format",		TRUE,	FALSE,	FALSE,	m4_format },
+  { "format",		TRUE,	FALSE,	TRUE,	m4_format },
   { "ifdef",		FALSE,	FALSE,	TRUE,	m4_ifdef },
   { "ifelse",		FALSE,	FALSE,	TRUE,	m4_ifelse },
   { "include",		FALSE,	FALSE,	TRUE,	m4_include },
@@ -988,7 +988,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 		    TOKEN_DATA_TEXT (argv[0])));
 	else
 	  {
-	    fp = path_search (ARG (i));
+	    fp = path_search (ARG (i), (char **)NULL);
 	    if (fp != NULL)
 	      {
 		insert_file (fp);
@@ -1181,11 +1181,12 @@ static void
 include (int argc, token_data **argv, boolean silent)
 {
   FILE *fp;
+  char *name = NULL;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = path_search (ARG (1));
+  fp = path_search (ARG (1), &name);
   if (fp == NULL)
     {
       if (!silent)
@@ -1194,7 +1195,8 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, ARG (1));
+  push_file (fp, name);
+  xfree (name);
 }
 
 /*------------------------------------------------.

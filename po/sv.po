@@ -1,13 +1,13 @@
 # Swedish messages for m4
 # Copyright (C) 1996 Free Software Foundation, Inc.
 # <Jan.Djarv@mbox200.swipnet.se>, 1996.
-# $Revision: 1.1.1.5 $
+# $Revision: 1.1.1.6 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-10-07 17:46+0200\n"
-"PO-Revision-Date: $Date: 2000/02/17 03:09:35 $\n"
+"POT-Creation-Date: 1998-10-13 12:23+0200\n"
+"PO-Revision-Date: $Date: 2000/02/17 03:09:46 $\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr "Ickenumeriskt argument till inbyggt makro \"%s\""
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i define_macro ()"
 
-#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1342 src/builtin.c:1366
+#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1344 src/builtin.c:1368
 #, fuzzy, c-format
 msgid "Undefined name %s"
 msgstr "Odefinierat namn \"%s\""
@@ -89,32 +89,32 @@ msgstr "Kan inte återleda %s"
 msgid "Undefined syntax code %c"
 msgstr "Odefinierat namn \"%s\""
 
-#: src/builtin.c:1193 src/freeze.c:207
+#: src/builtin.c:1194 src/freeze.c:207
 #, fuzzy, c-format
 msgid "Cannot open %s"
 msgstr "Kan inte öppna %s"
 
-#: src/builtin.c:1402
+#: src/builtin.c:1404
 #, fuzzy, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Felsökningsläge: okänd flagga: \"%s\""
 
-#: src/builtin.c:1438
+#: src/builtin.c:1440
 #, fuzzy, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kan inte sätta felutskriftsfil: %s"
 
-#: src/builtin.c:1655
+#: src/builtin.c:1657
 #, fuzzy
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VARNING: \\0 kommer att försvinna, använd \\& i ersättningar"
 
-#: src/builtin.c:1716 src/builtin.c:1776 src/input.c:982
+#: src/builtin.c:1718 src/builtin.c:1778 src/input.c:982
 #, fuzzy, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Otillåtet reguljäruttryck \"%s\": %s"
 
-#: src/builtin.c:1727 src/builtin.c:1800
+#: src/builtin.c:1729 src/builtin.c:1802
 #, fuzzy, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Reguljäruttrycket \"%s\" matchar inte"
@@ -404,12 +404,12 @@ msgstr ""
 "\n"
 "Om ingen FIL anges eller om FIL är `-', så läses standard in.\n"
 
-#: src/m4.c:365
+#: src/m4.c:366
 #, fuzzy, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Okänd felsökningsflagga \"%s\""
 
-#: src/m4.c:444
+#: src/m4.c:445
 #, fuzzy
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNT FEL: Otillåten kod i argument"
@@ -439,7 +439,7 @@ msgstr "INTERNT FEL: Otillåten symboltyp i call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "FEL: Rekursionsgräns %d överskriden, använd -L<N> för att ändra"
 
-#: src/module.c:128
+#: src/module.c:129
 #, c-format
 msgid "Error: cannot find module `%s'"
 msgstr ""
@@ -469,12 +469,12 @@ msgstr "FEL: Läsning av insatt fil"
 msgid "Cannot stat diversion"
 msgstr "Kan inte ta status på avledningen"
 
-#: src/path.c:162
+#: src/path.c:166
 #, fuzzy, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"
 
-#: src/path.c:239
+#: src/path.c:248
 #, fuzzy, c-format
 msgid "Module search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"

@@ -1,0 +1,58 @@
+# -*- ksh -*-
+# Defines for GNU m4 testing environment.
+# Erick Branderhorst <Erick.Branderhorst@asml.nl>
+
+# Ensure $srcdir set correctly.
+test -f ${srcdir}/defs || {
+   echo "defs: installation error" 1>&2
+   exit 1
+}
+
+# If srcdir is relative, we need to modify it.
+case "$srcdir" in
+ /*)
+    ;;
+
+ .)
+    srcdir=".."
+    ;;
+
+ *)
+    srcdir="../$srcdir"
+    ;;
+esac
+
+rm -rf testSubDir > /dev/null 2>&1
+mkdir testSubDir
+cd testSubDir
+
+# Build appropriate environment in test directory.  Eg create
+# configure.in, touch all necessary files, etc.
+
+# nothing yet
+
+# See how redirections should work.  User can set VERBOSE to see all
+# output.
+test -z "$VERBOSE" && {
+   exec > /dev/null 2>&1
+}
+
+# User can set MAKE to choose which make to use.  Must use GNU make.
+test -z "$MAKE" && MAKE=make
+
+echo "=== Running test $0"
+
+# See how GNU m4 should be run.  No options as default.
+test -z "$M4" && M4=../../src/m4
+
+# See how cmp should be run.
+test -z "$CMP" && CMP=cmp
+
+# Setting nls related vars. Override them in the test when needed.
+LANGUAGE=C
+export LANGUAGE
+LC_ALL=C
+export LC_ALL
+LANG=C
+export LANG
+

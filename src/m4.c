@@ -65,10 +65,10 @@ const char *frozen_file_to_write = NULL;
 /* The name this program was run with. */
 const char *program_name;
 
-/* If non-zero, display usage information and exit.  */
+/* If nonzero, display usage information and exit.  */
 static int show_help = 0;
 
-/* If non-zero, print the version on standard output and exit.  */
+/* If nonzero, print the version on standard output and exit.  */
 static int show_version = 0;
 
 struct macro_definition
@@ -258,6 +258,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   macro_definition *defines;
   FILE *fp;
+  char *filename;
 
   program_name = argv[0];
   setlocale (LC_ALL, "");
@@ -473,14 +474,17 @@ main (int argc, char *const *argv, char *const *envp)
 	  push_file (stdin, "stdin");
 	else
 	  {
-	    fp = path_search (argv[optind]);
+	    fp = path_search (argv[optind], &filename);
 	    if (fp == NULL)
 	      {
 		error (0, errno, argv[optind]);
 		continue;
 	      }
 	    else
-	      push_file (fp, argv[optind]);
+	      {
+		push_file (fp, filename);
+		xfree (filename);
+	      }
 	  }
 	expand_input ();
       }

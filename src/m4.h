@@ -518,7 +518,7 @@ const builtin *find_builtin_by_name __P ((const char *));
 void include_init __P ((void));
 void include_env_init __P ((void));
 void add_include_directory __P ((const char *));
-FILE *path_search __P ((const char *));
+FILE *path_search __P ((const char *, char **));
 
 
 /* File: eval.c  --- expression evaluation.  */

@@ -16,7 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Handling of path search of included files via the builtins "include"
-   and "sinclude".  */
+   and "sinclude" (and "loadmodule" if configured).  */
 
 #include "m4.h"
 
@@ -128,7 +128,7 @@ add_include_directory (const char *dir)
 }
 
 FILE *
-path_search (const char *dir)
+path_search (const char *dir, char **expanded_name)
 {
   FILE *fp;
   includes *incl;
@@ -137,7 +137,11 @@ path_search (const char *dir)
   /* Look in current working directory first.  */
   fp = fopen (dir, "r");
   if (fp != NULL)
-    return fp;
+    {
+      if (expanded_name != NULL)
+	*expanded_name = xstrdup (dir);
+      return fp;
+    }
 
   /* If file not found, and filename absolute, fail.  */
   if (*dir == '/' || no_gnu_extensions)
@@ -160,10 +164,15 @@ path_search (const char *dir)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
 	    DEBUG_MESSAGE2 (_("Path search for `%s' found `%s'"), dir, name);
+
+	  if (expanded_name != NULL)
+	    *expanded_name = xstrdup (name);
 	  break;
 	}
     }
+
   xfree (name);
+
   return fp;
 }
 

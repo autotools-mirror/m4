@@ -2,7 +2,7 @@ info_TEXINFOS = m4.texinfo
 
 man_MANS = m4.1
 
-EXTRA_DIST = helptoman.pl $(MANS)
+EXTRA_DIST = helptoman.pl # $(MANS)
 
 PERL = @PERL@
 
@@ -10,7 +10,7 @@ PERL = @PERL@
 	@if test -f ../src/$*; then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(PERL) $(srcdir)/helptoman.pl ../src/$* > $@-tmp; \
-	  cmp $@-tmp $(srcdir)/$@ || cp $@-tmp $(srcdir)/$@; \
+	  cmp -s $@-tmp $(srcdir)/$@ || cp $@-tmp $(srcdir)/$@; \
 	  rm -f $@-tmp; \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
