@@ -1,5 +1,13 @@
 2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
 
+	* doc/m4.texinfo (Patsubst): Re-add trailing space required by
+	checks/47.patsubst, with a redundant @comment to prevent emacs
+	from removing it accidentally again.
+	* checks/get-them: Allow for trailing spaces tucked behind
+	@comment marks.
+
+2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+
 	* doc/Makefile.in (install, uninstall): Accomodate DESTDIR.
 	* src/Makefile.in (install, uninstall): Likewise.
 

@@ -24,7 +24,7 @@
 @ifnottex
 This file documents GNU M4 @value{VERSION}.
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free Software
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free Software
 Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
@@ -2614,7 +2614,7 @@ patsubst(`GNUs not Unix', `\w*', `(\&)')
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not
+@result{}GN not @comment
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual

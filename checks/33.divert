@@ -1,4 +1,4 @@
-dnl ../doc/m4.texinfo:2202: Origin of test
+dnl ../doc/m4.texinfo:2204: Origin of test
 divert(1)
 This text is diverted.
 divert
