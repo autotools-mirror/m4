@@ -641,19 +641,6 @@ AT_CLEANUP
 
 AT_SETUP([indir])
 
-AT_DATA([[expout]],
-[[
-
-# indir(`%%$$##', nonsens, nonsens)
->>>%%$$##<<< cnt 2
-
-# indir(`indir', `%%$$##', nonsens)
->>>%%$$##<<< cnt 1
-
-# indir(`indir', `indir', `indir', `indir', `%%$$##')
->>>%%$$##<<< cnt 0
-]])
-
 AT_DATA([[indir.m4]],
 [[define(`%%$$##', `>>>$0<<< cnt $#')
 
@@ -665,6 +652,19 @@ indir(`indir', `%%$$##', nonsens)
 
 # indir(`indir', `indir', `indir', `indir', `%%$$##')
 indir(`indir', `indir', `indir', `indir', `%%$$##')
+]])
+
+AT_DATA([[expout]],
+[[
+
+# indir(`%%$$##', nonsens, nonsens)
+>>>%%$$##<<< cnt 2
+
+# indir(`indir', `%%$$##', nonsens)
+>>>%%$$##<<< cnt 1
+
+# indir(`indir', `indir', `indir', `indir', `%%$$##')
+>>>%%$$##<<< cnt 0
 ]])
 
 AT_CHECK_M4([indir.m4], 0, expout)
