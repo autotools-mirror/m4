@@ -34,6 +34,7 @@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_REGEX_H@
 @INCLUDE_STDBOOL_H@
+#include <m4/exit.h>
 #include <m4/xalloc.h>
 #include <m4/xstrndup.h>
 
@@ -148,16 +149,7 @@ BEGIN_C_DECLS
 
 
 
-/* Make sure these are defined.  */
-#ifndef EXIT_FAILURE
-#  define EXIT_SUCCESS	0
-#  define EXIT_FAILURE	1
-#endif
-
-
 #define DELETE(Expr)	((Expr) = (xfree (Expr), (void *) 0))
-
-extern char *xstrzdup (const char *string, size_t len);
 
 END_C_DECLS
 

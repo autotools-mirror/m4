@@ -37,6 +37,9 @@ MAINTAINERCLEANFILES	= Makefile.in
 # Gnulib Makefile.am snippets #
 # --------------------------- #
 
+## exit (not from gnulib):
+pkginclude_HEADERS += exit.h
+
 ## exitfail:
 libgnu_la_SOURCES += exitfail.c exitfail.h
 
