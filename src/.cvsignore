@@ -3,3 +3,7 @@
 *.la
 getopt.h
 m4
+.deps
+.libs
+Makefile
+Makefile.in

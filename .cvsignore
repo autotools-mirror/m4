@@ -1,3 +1,20 @@
-intl
-config-h.in
 ABOUT-NLS
+aclocal.m4
+autom4te.cache
+config.cache
+config.h
+config-h.in
+config.log
+config.status
+configure
+COPYING
+INSTALL
+intl
+libtool
+m4-*
+Makefile
+Makefile.in
+*.patch *.log
+stamp-h
+stamp-h1
+stamp-h.in

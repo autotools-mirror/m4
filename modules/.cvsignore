@@ -3,3 +3,8 @@
 *.la
 perlxsi.c
 testSubDir
+.deps
+.libs
+Makefile
+Makefile.in
+compile

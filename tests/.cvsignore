@@ -1,3 +1,5 @@
 config.m4
 config.sh
 testSubDir
+Makefile
+Makefile.in

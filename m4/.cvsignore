@@ -3,3 +3,7 @@
 *.la
 obstack.h
 pathconf.h
+.deps
+.libs
+Makefile
+Makefile.in
