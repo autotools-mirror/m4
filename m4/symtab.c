@@ -46,8 +46,8 @@
 
 static int	m4_symbol_destroy	(const void *name, void *symbol,
 					 void *symtab);
-static int	m4_arg_destroy		(const void *ignored, void *arg,
-					 void *also_ignored);
+static int	m4_arg_destroy		(const void *name, void *arg,
+					 void *arg_signature);
 
 /* Pointer to symbol table.  */
 m4_hash *m4_symtab = 0;
@@ -220,7 +220,7 @@ m4_symbol_popdef (const char *name)
       if (TOKEN_ARG_SIGNATURE (stale))
 	{
 	  m4_hash_apply (TOKEN_ARG_SIGNATURE (stale),
-			 m4_arg_destroy, NULL);
+			 m4_arg_destroy, TOKEN_ARG_SIGNATURE (stale));
 	  m4_hash_delete (TOKEN_ARG_SIGNATURE (stale));
 	}
       if (TOKEN_TYPE (stale) == M4_TOKEN_TEXT)
@@ -250,13 +250,17 @@ m4_symbol_delete (const char *name)
 /* Callback used by m4_symbol_popdef () to release the memory used
    by values in the arg_signature hash.  */
 static int
-m4_arg_destroy (const void *ignored, void *arg, void *also_ignored)
+m4_arg_destroy (const void *name, void *arg, void *arg_signature)
 {
   struct m4_token_arg *token_arg = (struct m4_token_arg *) arg;
 
+  assert (name);
+  assert (arg_signature);
+
   if (TOKEN_ARG_DEFAULT (token_arg))
     XFREE (TOKEN_ARG_DEFAULT (token_arg));
-  xfree (arg);
+  xfree (token_arg);
+  xfree (m4_hash_remove ((m4_hash *) arg_signature, (const char *) name));
 
   return 0;
 }
