@@ -210,7 +210,11 @@ m4_symbol_pushdef (const char *name)
 m4_symbol *
 m4_symbol_insert (const char *name)
 {
-  return (m4_symbol *) (m4_symbol_lookup (name) || m4_symbol_pushdef (name));
+  m4_symbol *res = m4_symbol_lookup (name);
+  if (res)
+    return res;
+  else
+    m4_symbol_pushdef (name);
 }
 
 
