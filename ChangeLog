@@ -1,5 +1,12 @@
 2001-09-03  Akim Demaille  <akim@epita.fr>
 
+	* m4/symtab.c (m4_lookup_symbol): Give more details when reporting
+	internal errors.
+	Avoid using `default' in switch, as it hides useful compiler
+	warnings when a case is forgotten.
+
+2001-09-03  Akim Demaille  <akim@epita.fr>
+
 	* src/main.c (MODULE_SHORTOPT, MODULEPATH_SHORTOPT): Remove, there
 	is no such thing as `WITH_MODULES'.
 

@@ -203,16 +203,16 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup mode)
 	  }
 	else
 	  M4ERROR ((warning_status, 0,
-		  _("INTERNAL ERROR: Attempt to delete non-existant symbol")));
+		  _("INTERNAL ERROR: Attempt to delete non-existant symbol: %s"),
+		    name));
 	return 0;
-
-      default:
-	M4ERROR ((warning_status, 0,
-		  _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()")));
-	abort ();
       }
   }
 
+  M4ERROR ((warning_status, 0,
+	    _("INTERNAL ERROR: Illegal mode to m4_symbol_lookup (%s, %d)"),
+	    name, mode));
+  abort ();
   /*NOTREACHED*/
   return 0;
 }
