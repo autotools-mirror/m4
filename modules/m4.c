@@ -52,6 +52,7 @@ extern int errno;
 #define m4_set_sysval		m4_LTX_m4_set_sysval
 #define m4_sysval_flush		m4_LTX_m4_sysval_flush
 #define m4_dump_symbols		m4_LTX_m4_dump_symbols
+#define m4_expand_ranges	m4_LTX_m4_expand_ranges
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -755,6 +756,47 @@ M4BUILTIN_HANDLER (substr)
   obstack_grow (obs, M4ARG (1) + start, length);
 }
 
+
+/* Ranges are expanded by the following function, and the expanded strings,
+   without any ranges left, are used to translate the characters of the
+   first argument.  A single - (dash) can be included in the strings by
+   being the first or the last character in the string.  If the first
+   character in a range is after the first in the character set, the range
+   is made backwards, thus 9-0 is the string 9876543210.  */
+const char *
+m4_expand_ranges (const char *s, m4_obstack *obs)
+{
+  char from;
+  char to;
+
+  for (from = '\0'; *s != '\0'; from = *s++)
+    {
+      if (*s == '-' && from != '\0')
+	{
+	  to = *++s;
+	  if (to == '\0')
+	    {
+              /* trailing dash */
+              obstack_1grow (obs, '-');
+              break;
+	    }
+	  else if (from <= to)
+	    {
+	      while (from++ < to)
+		obstack_1grow (obs, from);
+	    }
+	  else
+	    {
+	      while (--from >= to)
+		obstack_1grow (obs, from);
+	    }
+	}
+      else
+	obstack_1grow (obs, *s);
+    }
+  obstack_1grow (obs, '\0');
+  return obstack_finish (obs);
+}
 
 /* The macro "translit" translates all characters in the first argument,
    which are present in the second argument, into the corresponding

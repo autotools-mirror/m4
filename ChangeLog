@@ -1,3 +1,31 @@
+2003-08-15  Gary V. Vaughan  <gary@gnu.org>
+
+	Still cleaning up the users' module API, by taking out the stuff
+	that isn't used by any existing modules, and moving specialised
+	functions out of libm4 and into the module they are used by.
+
+	* m4/m4module.h (m4_skip_space): No need to export this.  Moved...
+	* m4/utility.c (m4_skip_space): ...to here the home of its only
+	use, made static and renamed to `skip_space'.  Changed all
+	callers.
+	* m4/m4module.h (m4_expand_ranges): Removed prototype.
+	* m4/utility.c (m4_expand_ranges): Moved definition from here...
+	* modules/m4.c (m4_expand_ranges): ...to here, and exported using
+	ltdl.
+	* modules/m4.h (m4_expand_ranges_func): For lt_dlsym import
+	casting .
+	* modules/gnu.c (builtin_syntax): Import and use in this
+	builtin implementation.
+	* m4/m4module.h (M4_DEBUG_PRINT1, M4_DEBUG_PRINT2, M4_DEBUG_PRINT3):
+	Not used.  Deleted.
+	* m4/macro.c (trace_flush): Except here where the macro is now
+	manually inlined.
+	* m4/m4module.h (M4_DEBUG_MESSAGE, M4_DEBUG_MESSAGE1)
+	(M4_DEBUG_MESSAGE2, M4_DEBUG_MESSAGE3): Only used internally, so
+	moved...
+	* m4/m4private.h (M4_DEBUG_MESSAGE, M4_DEBUG_MESSAGE1)
+	(M4_DEBUG_MESSAGE2, M4_DEBUG_MESSAGE3): ...to here.
+
 2003-08-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Use the interrim new

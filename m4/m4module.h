@@ -84,13 +84,11 @@ struct m4_macro
 
 extern boolean 	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
 				       int, int);
-extern const char * m4_skip_space     (m4 *, const char *);
 extern boolean	    m4_numeric_arg    (m4 *, int, m4_symbol_value **,
 				       int, int *);
 extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
 				       m4_symbol_value **, const char *,
 				       boolean);
-extern const char * m4_expand_ranges  (const char *, m4_obstack *);
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
@@ -269,42 +267,6 @@ extern int	m4_debug_decode		(m4 *, const char *);
 extern boolean	m4_debug_set_output	(m4 *, const char *);
 extern void	m4_debug_message_prefix (m4 *);
 
-#define M4_DEBUG_PRINT1(C, Fmt, Arg1) 			M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	fprintf (m4_get_debug_file (C), Fmt, Arg1);	} M4_STMT_END
-
-#define M4_DEBUG_PRINT2(Fmt, Arg1, Arg2)		M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);} M4_STMT_END
-
-#define M4_DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3)		M4_STMT_START {	\
-	if (m4_get_debug_file (C) != NULL)				\
-	fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2, Arg3);	} M4_STMT_END
-
-#define M4_DEBUG_MESSAGE(C, Fmt)			M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt);				\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
-#define M4_DEBUG_MESSAGE1(C, Fmt, Arg1)			M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt, Arg1);			\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
-#define M4_DEBUG_MESSAGE2(C, Fmt, Arg1, Arg2)		M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);		\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
 
 
 /* --- SYNTAX TABLE DEFINITIONS --- */
@@ -339,7 +301,7 @@ enum {
   M4_SYNTAX_ALPHA		= (1 << 10),
   M4_SYNTAX_NUM			= (1 << 11),
 
-  /* These values ARE bit masks to AND with categories above, a syntax entry
+  /* These values are bit masks to AND with categories above, a syntax entry
      may have any number of these in addition to a maximum of one of the
      values above.  */
   M4_SYNTAX_LQUOTE		= (1 << 12),

@@ -25,6 +25,9 @@
 #include "m4private.h"
 
 
+static const char * skip_space (m4 *, const char *);
+
+
 
 /* Give friendly warnings if a builtin macro is passed an
    inappropriate number of arguments.  ARGC/ARGV are the arguments,
@@ -54,8 +57,8 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
   return FALSE;
 }
 
-const char *
-m4_skip_space (m4 *context, const char *arg)
+static const char *
+skip_space (m4 *context, const char *arg)
 {
   while (m4_has_syntax (M4SYNTAX, *arg, M4_SYNTAX_SPACE))
     arg++;
@@ -72,8 +75,8 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
   char *endp;
 
   if (*M4ARG (arg) == 0
-      || (*valuep = strtol (m4_skip_space (context, M4ARG (arg)), &endp, 10),
-	  *m4_skip_space (context, endp) != 0))
+      || (*valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10),
+	  *skip_space (context, endp) != 0))
     {
       M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: argument %d non-numeric: %s"),
@@ -100,46 +103,4 @@ m4_dump_args (m4 *context, m4_obstack *obs, int argc,
 
       m4_shipout_string (context, obs, M4ARG (i), 0, quoted);
     }
-}
-
-/* For "translit", ranges are allowed in the second and third argument.
-   They are expanded in the following function, and the expanded strings,
-   without any ranges left, are used to translate the characters of the
-   first argument.  A single - (dash) can be included in the strings by
-   being the first or the last character in the string.  If the first
-   character in a range is after the first in the character set, the range
-   is made backwards, thus 9-0 is the string 9876543210.  */
-const char *
-m4_expand_ranges (const char *s, m4_obstack *obs)
-{
-  char from;
-  char to;
-
-  for (from = '\0'; *s != '\0'; from = *s++)
-    {
-      if (*s == '-' && from != '\0')
-	{
-	  to = *++s;
-	  if (to == '\0')
-	    {
-              /* trailing dash */
-              obstack_1grow (obs, '-');
-              break;
-	    }
-	  else if (from <= to)
-	    {
-	      while (from++ < to)
-		obstack_1grow (obs, from);
-	    }
-	  else
-	    {
-	      while (--from >= to)
-		obstack_1grow (obs, from);
-	    }
-	}
-      else
-	obstack_1grow (obs, *s);
-    }
-  obstack_1grow (obs, '\0');
-  return obstack_finish (obs);
 }

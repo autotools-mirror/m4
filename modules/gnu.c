@@ -181,17 +181,21 @@ M4BUILTIN_HANDLER (indir)
  **/
 M4BUILTIN_HANDLER (changesyntax)
 {
-  int i;
+  M4_MODULE_IMPORT (m4, m4_expand_ranges);
 
-  for (i = 1; i < argc; i++)
+  if (m4_expand_ranges)
     {
-      char key = *M4ARG (i);
-      if ((m4_set_syntax (M4SYNTAX, key,
-			  m4_expand_ranges (M4ARG (i)+1, obs)) < 0)
-	  && (key != '\0'))
+      int i;
+      for (i = 1; i < argc; i++)
 	{
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    _("Undefined syntax code %c"), key));
+	  char key = *M4ARG (i);
+	  if ((m4_set_syntax (M4SYNTAX, key,
+			      m4_expand_ranges (M4ARG (i)+1, obs)) < 0)
+	      && (key != '\0'))
+	    {
+	      M4ERROR ((m4_get_warning_status_opt (context), 0,
+			_("Undefined syntax code %c"), key));
+	    }
 	}
     }
 }

@@ -293,6 +293,30 @@ struct m4__search_path_info {
 
 /* Other debug stuff.  */
 
+#define M4_DEBUG_MESSAGE(C, Fmt)			M4_STMT_START {	\
+      if (m4_get_debug_file (C) != NULL)				\
+	{								\
+	  m4_debug_message_prefix (C);					\
+	  fprintf (m4_get_debug_file (C), Fmt);				\
+	  putc ('\n', m4_get_debug_file (C));				\
+	}						} M4_STMT_END
+
+#define M4_DEBUG_MESSAGE1(C, Fmt, Arg1)			M4_STMT_START {	\
+      if (m4_get_debug_file (C) != NULL)				\
+	{								\
+	  m4_debug_message_prefix (C);					\
+	  fprintf (m4_get_debug_file (C), Fmt, Arg1);			\
+	  putc ('\n', m4_get_debug_file (C));				\
+	}						} M4_STMT_END
+
+#define M4_DEBUG_MESSAGE2(C, Fmt, Arg1, Arg2)		M4_STMT_START {	\
+      if (m4_get_debug_file (C) != NULL)				\
+	{								\
+	  m4_debug_message_prefix (C);					\
+	  fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);		\
+	  putc ('\n', m4_get_debug_file (C));				\
+	}						} M4_STMT_END
+
 #if DEBUG
 # define DEBUG_INPUT
 # define DEBUG_MACRO

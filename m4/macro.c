@@ -539,7 +539,8 @@ trace_flush (m4 *context)
 
   obstack_1grow (&context->trace_messages, '\0');
   line = obstack_finish (&context->trace_messages);
-  M4_DEBUG_PRINT1 (context, "%s\n", line);
+  if (m4_get_debug_file (context))
+    fprintf (m4_get_debug_file (context), "%s\n", line);
   obstack_free (&context->trace_messages, line);
 }
 
