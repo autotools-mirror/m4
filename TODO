@@ -79,7 +79,7 @@ for any of these ideas or if you have others to add.
       qindir(`include', f)dnl
       a'b
       define(b,NONO)dnl
-      patsubst(qindir(`include', f), b, x)
+      patsubst(qindir(`include', f), `b', x)
       z'x
 
   + Use the TOS input quoting for qindir to fix this bug:
