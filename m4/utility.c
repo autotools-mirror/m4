@@ -71,30 +71,6 @@ m4_string bcomm;
 m4_string ecomm;
 
 
-/* Addressable function versions of the macros defined in m4private.h.
-   Since they are functions the caller does not need access to the
-   internal data structure, so they are safe to export for use in
-   external modules.  */
-m4_symbol_type
-m4_get_symbol_value_type (m4_symbol_value *name)
-{
-  return VALUE_TYPE (name);
-}
-
-char *
-m4_get_symbol_value_text (m4_symbol_value *name)
-{
-  return VALUE_TEXT (name);
-}
-
-m4_builtin_func *
-m4_get_symbol_value_func (m4_symbol_value *name)
-{
-  return VALUE_FUNC (name);
-}
-
-
-
 /* Give friendly warnings if a builtin macro is passed an
    inappropriate number of arguments.  ARGC/ARGV are the arguments,
    MIN is the minimum number of acceptable arguments, negative if not
@@ -224,7 +200,7 @@ dumpdef_cmp (const void *s1, const void *s2)
 int
 m4_dump_symbol (const void *name, void *symbol, void *data)
 {
-  if (SYMBOL_TYPE ((m4_symbol *) symbol) != M4_SYMBOL_VOID)
+  if (((m4_symbol *) symbol)->value->type != M4_SYMBOL_VOID)
     {
       struct m4_dump_symbol_data *symbol_data
 	= (struct m4_dump_symbol_data *) data;
@@ -258,7 +234,7 @@ m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc,
       for (i = 1; i < argc; i++)
 	{
 	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
-	  if (symbol != NULL && SYMBOL_TYPE (symbol) != M4_SYMBOL_VOID)
+	  if (symbol != NULL && symbol->value->type != M4_SYMBOL_VOID)
 	    m4_dump_symbol (M4ARG (i), symbol, data);
 	  else if (complain)
 	    M4WARN ((warning_status, 0,

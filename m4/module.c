@@ -52,13 +52,13 @@
  * NULL on failure or else a libtool module handle for the newly mapped
  * vm segment containing the module code.  If the module is not already
  * loaded, m4_module_load() retrieves its value for the symbol
- * `m4_builtin_table', which is installed using m4_set_module_builtin_table().
+ * `m4_builtin_table', which is installed using set_module_builtin_table().
  *
  * In addition to builtin functions, you can also define static macro
  * expansions in the `m4_macro_table' symbol.  If you define this symbol
  * in your modules, it should be an array of `m4_macro's, mapping macro
  * names to the expansion text.  Any macros defined in `m4_macro_table'
- * are installed into the M4 symbol table with m4_set_module_macro_table().
+ * are installed into the M4 symbol table with set_module_macro_table().
  *
  * Each time a module is loaded, the module function prototyped as
  * "M4INIT_HANDLER (<module name>)" is called, if defined.  Any value
@@ -90,6 +90,9 @@ static int	    module_remove  (m4 *context, lt_dlhandle handle,
 static void	    module_close   (m4 *context, lt_dlhandle handle,
 				    struct obstack *obs);
 
+static void m4_set_module_macro_table   (m4*, lt_dlhandle, const m4_macro*);
+static void m4_set_module_builtin_table (m4*, lt_dlhandle, const m4_builtin*);
+
 static lt_dlcaller_id caller_id = 0;
 
 const char *
@@ -116,30 +119,30 @@ m4_get_module_builtin_table (lt_dlhandle handle)
   return data ? data->builtin_table : 0;
 }
 
-void
-m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
+static void
+set_module_builtin_table (m4 *context, lt_dlhandle handle,
 			     const m4_builtin *table)
 {
   const m4_builtin *bp;
 
+  assert (context);
   assert (handle);
   assert (table);
 
   for (bp = table; bp->name != NULL; bp++)
     {
-      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+      m4_symbol_value *value = m4_symbol_value_create ();
       char *	name;
 
-      VALUE_TYPE (token)	= M4_SYMBOL_FUNC;
-      VALUE_FUNC (token)	= bp->func;
-      VALUE_HANDLE (token)	= handle;
-      VALUE_MIN_ARGS (token)	= bp->min_args;
-      VALUE_MAX_ARGS (token)	= bp->max_args;
+      m4_set_symbol_value_func (value, bp->func);
+      VALUE_HANDLE (value)	= handle;
+      VALUE_MIN_ARGS (value)	= bp->min_args;
+      VALUE_MAX_ARGS (value)	= bp->max_args;
 
       if (bp->groks_macro_args)
-	BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
+	BIT_SET (VALUE_FLAGS (value), VALUE_MACRO_ARGS_BIT);
       if (bp->blind_if_no_args)
-	BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
+	BIT_SET (VALUE_FLAGS (value), VALUE_BLIND_ARGS_BIT);
 
       if (prefix_all_builtins)
 	{
@@ -153,7 +156,7 @@ m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
 	name = (char *) bp->name;
 
 
-      m4_symbol_pushdef (M4SYMTAB, name, token);
+      m4_symbol_pushdef (M4SYMTAB, name, value);
 
       if (prefix_all_builtins)
 	xfree (name);
@@ -172,21 +175,24 @@ m4_get_module_macro_table (lt_dlhandle handle)
   return data ? data->macro_table : 0;
 }
 
-void
-m4_set_module_macro_table (m4 *context, lt_dlhandle handle,
+static void
+set_module_macro_table (m4 *context, lt_dlhandle handle,
 			   const m4_macro *table)
 {
   const m4_macro *mp;
 
+  assert (context);
+  assert (handle);
+  assert (table);
+
   for (mp = table; mp->name != NULL; mp++)
     {
-      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+      m4_symbol_value *value = m4_symbol_value_create ();
 
-      VALUE_TYPE (token)	= M4_SYMBOL_TEXT;
-      VALUE_TEXT (token)	= xstrdup (mp->value);
-      VALUE_HANDLE (token)	= handle;
+      m4_set_symbol_value_text (value, xstrdup (mp->value));
+      VALUE_HANDLE (value) = handle;
 
-      m4_symbol_pushdef (M4SYMTAB, mp->name, token);
+      m4_symbol_pushdef (M4SYMTAB, mp->name, value);
     }
 }
 
@@ -213,13 +219,15 @@ m4_module_load (m4 *context, const char *name, struct obstack *obs)
 	}
       else if (info->ref_count == 1)
 	{
-	  const m4_builtin *builtin_table	= m4_get_module_builtin_table (handle);
-	  const m4_macro   *macro_table	= m4_get_module_macro_table (handle);
+	  const m4_builtin *builtin_table
+	    = m4_get_module_builtin_table (handle);
+	  const m4_macro   *macro_table
+	    = m4_get_module_macro_table (handle);
 
 	  /* Install the macro functions.  */
 	  if (builtin_table)
 	    {
-	      m4_set_module_builtin_table (context, handle, builtin_table);
+	      set_module_builtin_table (context, handle, builtin_table);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: builtins loaded", name);
 #endif /* DEBUG_MODULES */
@@ -228,7 +236,7 @@ m4_module_load (m4 *context, const char *name, struct obstack *obs)
 	  /* Install the user macros. */
 	  if (macro_table)
 	    {
-	      m4_set_module_macro_table (context, handle, macro_table);
+	      set_module_macro_table (context, handle, macro_table);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: macros loaded", name);
 #endif /* DEBUG_MODULES */

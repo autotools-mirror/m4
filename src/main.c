@@ -432,17 +432,16 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	  {
 	  case 'D':
 	    {
-	      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+	      m4_symbol_value *value = m4_symbol_value_create ();
 
 	      macro_value = strchr (defines->macro, '=');
 	      if (macro_value == NULL)
 		macro_value = "";
 	      else
 		*macro_value++ = '\0';
-	      VALUE_TEXT (token) = xstrdup (macro_value);
-	      VALUE_TYPE (token) = M4_SYMBOL_TEXT;
+	      m4_set_symbol_value_text (value, xstrdup (macro_value));
 
-	      m4_symbol_pushdef (M4SYMTAB, defines->macro, token);
+	      m4_symbol_pushdef (M4SYMTAB, defines->macro, value);
 	    }
 	    break;
 
@@ -451,7 +450,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    break;
 
 	  case 't':
-	    m4_set_symbol_traced (M4SYMTAB, defines->macro);
+	    m4_set_symbol_name_traced (M4SYMTAB, defines->macro);
 	    break;
 
 	  case 'm':

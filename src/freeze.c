@@ -134,27 +134,26 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
       const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
       const m4_builtin *bp;
 
-      switch (SYMBOL_TYPE (symbol))
+      if (m4_is_symbol_text (symbol))
 	{
-	case M4_SYMBOL_TEXT:
 	  fprintf (file, "T%lu,%lu",
 		   (unsigned long) strlen (symbol_name),
-		   (unsigned long) strlen (SYMBOL_TEXT (symbol)));
+		   (unsigned long) strlen (m4_get_symbol_text (symbol)));
 	  if (handle)
 	    fprintf (file, ",%lu", (unsigned long) strlen (module_name));
 	  fputc ('\n', file);
 
 	  fputs (symbol_name, file);
-	  fputs (SYMBOL_TEXT (symbol), file);
+	  fputs (m4_get_symbol_text (symbol), file);
 	  if (handle)
 	    fputs (module_name, file);
 	  fputc ('\n', file);
-	  break;
-
-	case M4_SYMBOL_FUNC:
+	}
+      else if (m4_is_symbol_func (symbol))
+	{
 	  bp = m4_builtin_find_by_func
 	    	(m4_get_module_builtin_table (SYMBOL_HANDLE (symbol)),
-		 SYMBOL_FUNC (symbol));
+		 m4_get_symbol_func (symbol));
 
 	  if (bp == NULL)
 	    {
@@ -177,13 +176,12 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 	  if (handle)
 	    fputs (module_name, file);
 	  fputc ('\n', file);
-	  break;
-
-	default:
+	}
+      else
+	{
 	  M4ERROR ((warning_status, 0,
 		    "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"));
 	  abort ();
-	  break;
 	}
     }
 }
@@ -480,8 +478,7 @@ reload_frozen_state (m4 *context, const char *name)
 	      if (bp->blind_if_no_args)
 		BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
 
-	      VALUE_TYPE (token)	= M4_SYMBOL_FUNC;
-	      VALUE_FUNC (token)	= bp->func;
+	      m4_set_symbol_value_func (token, bp->func);
 	      VALUE_HANDLE (token)	= handle;
 	      VALUE_MIN_ARGS (token)	= bp->min_args;
 	      VALUE_MAX_ARGS (token)	= bp->max_args;
@@ -663,8 +660,7 @@ reload_frozen_state (m4 *context, const char *name)
 	      if (strcmp (m4_get_module_name (handle), string[2]) == 0)
 		break;
 
-	  VALUE_TYPE (token)		= M4_SYMBOL_TEXT;
-	  VALUE_TEXT (token)		= xstrdup (string[1]);
+	  m4_set_symbol_value_text (token, xstrdup (string[1]));
 	  VALUE_HANDLE (token)		= handle;
 	  VALUE_MAX_ARGS (token)	= -1;
 

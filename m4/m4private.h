@@ -25,8 +25,18 @@
 #endif
 
 #include <assert.h>
-#include <m4module.h>
 
+#include "m4module.h"
+
+typedef enum {
+  M4_SYMBOL_VOID,
+  M4_SYMBOL_TEXT,
+  M4_SYMBOL_FUNC
+} m4__symbol_type;
+
+#define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
+#define BIT_SET(flags, bit)	((flags) |= (bit))
+#define BIT_RESET(flags, bit)	((flags) &= ~(bit))
 
 
 /* --- CONTEXT MANAGEMENT --- */
@@ -35,10 +45,9 @@ struct m4 {
   m4_symtab *symtab;
 };
 
-#define M4_SYMTAB(context) ((context)->symtab)
-
-#define m4_get_symtab(context)	((context)->symtab)
-
+#ifdef NDEBUG
+#  define m4_get_symtab(context)	((context)->symtab)
+#endif
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -58,17 +67,66 @@ extern void	    m4__module_exit (m4 *context);
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
-extern void	m4__symtab_remove_module_references (m4_symtab*, lt_dlhandle);
+struct m4_symbol
+{
+  boolean		traced;
+  m4_symbol_value *	value;
+};
+
+struct m4_symbol_value {
+  m4_symbol_value *	next;
+  lt_dlhandle		handle;
+  int			flags;
+
+  m4_hash *		arg_signature;
+  int			min_args, max_args;
+
+  m4__symbol_type	type;
+  union {
+    char *		text;
+    m4_builtin_func *	func;
+  } u;
+};
+
+#define VALUE_NEXT(T)		((T)->next)
+#define VALUE_HANDLE(T) 	((T)->handle)
+#define VALUE_FLAGS(T)		((T)->flags)
+#define VALUE_ARG_SIGNATURE(T) 	((T)->arg_signature)
+#define VALUE_MIN_ARGS(T)	((T)->min_args)
+#define VALUE_MAX_ARGS(T)	((T)->max_args)
+
+#define SYMBOL_NEXT(S)		(VALUE_NEXT          ((S)->value))
+#define SYMBOL_HANDLE(S)	(VALUE_HANDLE        ((S)->value))
+#define SYMBOL_FLAGS(S)		(VALUE_FLAGS         ((S)->value))
+#define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE ((S)->value))
+#define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))
+#define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      ((S)->value))
+
+#ifdef NDEBUG
+#  define m4_get_symbol_traced(S)	((S)->traced)
+#  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
+
+#  define m4_symbol_value_create()	(XCALLOC (m4_symbol_value, 1))
+#  define m4_symbol_value_delete(V)	(XFREE (V))
+
+#  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
+#  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
+#  define m4_get_symbol_value_text(V)	((V)->u.text)
+#  define m4_get_symbol_value_func(V)	((V)->u.func)
+
+#  define m4_set_symbol_value_text(V, T)				\
+	((V)->type = M4_SYMBOL_TEXT, (V)->u.text = (T))
+#  define m4_set_symbol_value_func(V, F)				\
+	((V)->type = M4_SYMBOL_FUNC, (V)->u.func = (F))
+#endif
 
 
-/* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
-extern boolean m4__single_quotes;
 
-/* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
-extern boolean m4__single_comments;
+/* m4_symbol_value.flags bit masks:  */
 
-/* TRUE iff some character has M4_SYNTAX_ESCAPE */
-extern boolean m4__use_macro_escape;
+#define VALUE_MACRO_ARGS_BIT	(1 << 0)
+#define VALUE_BLIND_ARGS_BIT	(1 << 1)
+
 
 struct m4_symbol_arg {
   int		index;
@@ -85,66 +143,19 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_REST_BIT	(1 << 0)
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-struct m4_symbol_value {
-  m4_symbol_value *	next;
-  lt_dlhandle		handle;
-  int			flags;
-
-  m4_hash *		arg_signature;
-  int			min_args, max_args;
-
-  m4_symbol_type	type;
-  union {
-    char *		text;
-    m4_builtin_func *	func;
-  } u;
-};
-
-#define VALUE_NEXT(T)		((T)->next)
-#define VALUE_HANDLE(T) 	((T)->handle)
-#define VALUE_FLAGS(T)		((T)->flags)
-#define VALUE_ARG_SIGNATURE(T) 	((T)->arg_signature)
-#define VALUE_MIN_ARGS(T)	((T)->min_args)
-#define VALUE_MAX_ARGS(T)	((T)->max_args)
-#define VALUE_TYPE(T)		((T)->type)
-#define VALUE_TEXT(T)		((T)->u.text)
-#define VALUE_FUNC(T)		((T)->u.func)
-
-/* m4_symbol_value.flags bit masks:  */
-
-#define VALUE_MACRO_ARGS_BIT	(1 << 0)
-#define VALUE_BLIND_ARGS_BIT	(1 << 1)
-
-#define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
-#define BIT_SET(flags, bit)	((flags) |= (bit))
-#define BIT_RESET(flags, bit)	((flags) &= ~(bit))
+extern void	m4__symtab_remove_module_references (m4_symtab*, lt_dlhandle);
 
 
-/* Redefine the exported function to this faster
-   macro based version for internal use by the m4 code. */
-#undef M4ARG
-#define M4ARG(i)	(argc > (i) ? VALUE_TEXT (argv[i]) : "")
 
+
+/* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
+extern boolean m4__single_quotes;
 
-struct m4_symbol
-{
-  boolean		traced;
-  m4_symbol_value *	value;
-};
+/* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
+extern boolean m4__single_comments;
 
-#define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_VALUE(S)		((S)->value)
-
-#define SYMBOL_NEXT(S)		(VALUE_NEXT          (SYMBOL_VALUE (S)))
-#define SYMBOL_HANDLE(S)	(VALUE_HANDLE        (SYMBOL_VALUE (S)))
-#define SYMBOL_FLAGS(S)		(VALUE_FLAGS         (SYMBOL_VALUE (S)))
-#define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE (SYMBOL_VALUE (S)))
-#define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      (SYMBOL_VALUE (S)))
-#define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      (SYMBOL_VALUE (S)))
-#define SYMBOL_TYPE(S)		(VALUE_TYPE          (SYMBOL_VALUE (S)))
-#define SYMBOL_TEXT(S)		(VALUE_TEXT          (SYMBOL_VALUE (S)))
-#define SYMBOL_FUNC(S)		(VALUE_FUNC          (SYMBOL_VALUE (S)))
-
+/* TRUE iff some character has M4_SYNTAX_ESCAPE */
+extern boolean m4__use_macro_escape;
 
 /* Various different token types.  */
 typedef enum {

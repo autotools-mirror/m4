@@ -311,7 +311,7 @@ m4_push_builtin (m4_symbol_value *token)
   input_block *i;
 
   /* Make sure we were passed a builtin function type token.  */
-  assert (VALUE_TYPE (token) == M4_SYMBOL_FUNC);
+  assert (m4_is_symbol_value_func (token));
 
   if (next != NULL)
     {
@@ -323,7 +323,7 @@ m4_push_builtin (m4_symbol_value *token)
 				     sizeof (struct input_block));
   i->funcs = &builtin_funcs;
 
-  i->u.u_b.func		= VALUE_FUNC (token);
+  i->u.u_b.func		= m4_get_symbol_value_func (token);
   i->u.u_b.handle	= VALUE_HANDLE (token);
   i->u.u_b.arg_signature= VALUE_ARG_SIGNATURE (token);
   i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
@@ -527,8 +527,7 @@ init_builtin_token (m4_symbol_value *token)
       abort ();
     }
 
-  VALUE_TYPE (token)		= M4_SYMBOL_FUNC;
-  VALUE_FUNC (token)		= isp->u.u_b.func;
+  m4_set_symbol_value_func (token, isp->u.u_b.func);
   VALUE_HANDLE (token)		= isp->u.u_b.handle;
   VALUE_FLAGS (token)		= isp->u.u_b.flags;
   VALUE_ARG_SIGNATURE(token)	= isp->u.u_b.arg_signature;
@@ -941,9 +940,7 @@ m4__next_token (m4_symbol_value *token)
 
   bzero (token, sizeof (m4_symbol_value));
 
-  VALUE_TYPE (token)	= M4_SYMBOL_TEXT;
-  VALUE_TEXT (token)	= obstack_finish (&token_stack);
-  VALUE_MIN_ARGS (token)	= -1;
+  m4_set_symbol_value_text (token, obstack_finish (&token_stack));
   VALUE_MAX_ARGS (token)	= -1;
 
 #ifdef DEBUG_INPUT

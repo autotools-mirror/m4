@@ -61,7 +61,7 @@ expand_token (m4 *context, struct obstack *obs,
 	      m4__token_type type, m4_symbol_value *token)
 {
   m4_symbol *symbol;
-  char *text = xstrdup (VALUE_TEXT (token));
+  char *text = xstrdup (m4_get_symbol_value_text (token));
 
   switch (type)
     {				/* TOKSW */
@@ -84,8 +84,8 @@ expand_token (m4 *context, struct obstack *obs,
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
 	if (symbol == NULL
-	    || SYMBOL_TYPE (symbol) == M4_SYMBOL_VOID
-	    || (SYMBOL_TYPE (symbol) == M4_SYMBOL_FUNC
+	    || symbol->value->type == M4_SYMBOL_VOID
+	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& !M4_IS_OPEN (m4_peek_input ())))
 	  {
@@ -123,7 +123,7 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
   const char *current_file = m4_current_file;
   int current_line = m4_current_line;
 
-  VALUE_TYPE (argp) = M4_SYMBOL_VOID;
+  argp->type = M4_SYMBOL_VOID;
 
   /* Skip leading white space.  */
   do
@@ -137,7 +137,7 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
       switch (type)
 	{			/* TOKSW */
 	case M4_TOKEN_SIMPLE:
-	  text = VALUE_TEXT (&token);
+	  text = m4_get_symbol_value_text (&token);
 	  if ((M4_IS_COMMA (*text) || M4_IS_CLOSE (*text)) && paren_level == 0)
 	    {
 
@@ -145,12 +145,11 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
 	      obstack_1grow (obs, '\0');
 	      text = obstack_finish (obs);
 
-	      if (VALUE_TYPE (argp) == M4_SYMBOL_VOID)
+	      if (argp->type == M4_SYMBOL_VOID)
 		{
-		  VALUE_TYPE (argp) = M4_SYMBOL_TEXT;
-		  VALUE_TEXT (argp) = text;
+		  m4_set_symbol_value_text (argp, text);
 		}
-	      return (boolean) (M4_IS_COMMA (*VALUE_TEXT (&token)));
+	      return (boolean) (M4_IS_COMMA (*m4_get_symbol_value_text (&token)));
 	    }
 
 	  if (M4_IS_OPEN (*text))
@@ -215,7 +214,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (boolean) ((debug_level & M4_DEBUG_TRACE_ALL) || SYMBOL_TRACED (symbol));
+  traced = (boolean) ((debug_level & M4_DEBUG_TRACE_ALL)
+		      || m4_get_symbol_traced (symbol));
 
   obstack_init (&argptr);
   obstack_init (&arguments);
@@ -261,8 +261,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 
   groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
-  VALUE_TYPE (&token) = M4_SYMBOL_TEXT;
-  VALUE_TEXT (&token) = (char *) name;
+  m4_set_symbol_value_text (&token, (char *) name);
   tokenp = (m4_symbol_value *) obstack_copy (arguments, (void *) &token,
 				      sizeof (token));
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
@@ -275,10 +274,9 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 	{
 	  more_args = expand_argument (context, arguments, &token);
 
-	  if (!groks_macro_args && VALUE_TYPE (&token) == M4_SYMBOL_FUNC)
+	  if (!groks_macro_args && m4_is_symbol_value_func (&token))
 	    {
-	      VALUE_TYPE (&token) = M4_SYMBOL_TEXT;
-	      VALUE_TEXT (&token) = "";
+	      m4_set_symbol_value_text (&token, "");
 	    }
 	  tokenp = (m4_symbol_value *)
 	    obstack_copy (arguments, (void *) &token, sizeof (token));
@@ -299,17 +297,16 @@ void
 m4_call_macro (m4_symbol *symbol, m4 *context, struct obstack *expansion,
 	       int argc, m4_symbol_value **argv)
 {
-  switch (SYMBOL_TYPE (symbol))
+  if (m4_is_symbol_text (symbol))
     {
-    case M4_SYMBOL_FUNC:
-      (*SYMBOL_FUNC (symbol)) (context, expansion, argc, argv);
-      break;
-
-    case M4_SYMBOL_TEXT:
       m4_process_macro (symbol, context, expansion, argc, argv);
-      break;
-
-    case M4_SYMBOL_VOID:
+    }
+  else if (m4_is_symbol_func (symbol))
+    {
+      (*m4_get_symbol_func (symbol)) (context, expansion, argc, argv);
+    }
+  else
+    {
       M4ERROR ((warning_status, 0,
 		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
       abort ();
@@ -328,7 +325,7 @@ m4_process_macro (m4_symbol *symbol, m4 *context, struct obstack *obs,
   const unsigned char *text;
   int i;
 
-  for (text = SYMBOL_TEXT (symbol); *text != '\0';)
+  for (text = m4_get_symbol_text (symbol); *text != '\0';)
     {
       if (*text != '$')
 	{

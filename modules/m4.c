@@ -32,13 +32,17 @@
 extern int errno;
 #endif
 
+#include <assert.h>
+
 #include <m4module.h>
 
+#ifdef NDEBUG
 /* Include this header for speed, which gives us direct access to
    the fields of internal structures at the expense of maintaining
    interface/implementation separation.   The builtins in this file
    are the core of m4 and must be optimised for speed.  */
-#include "m4private.h"
+#  include "m4private.h"
+#endif
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	m4_LTX_m4_builtin_table
@@ -94,7 +98,7 @@ typedef unsigned long int unumber;
 
 static void	include		(int argc, m4_symbol_value **argv,
 				 boolean silent);
-static int	set_trace	(m4_hash *hash, const void *ignored,
+static void *	set_trace	(m4_hash *hash, const void *ignored,
 				 void *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(struct obstack *obs, const number value,
@@ -148,22 +152,16 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (VALUE_TYPE (argv[1]) == M4_SYMBOL_TEXT)
+  if (m4_is_symbol_value_text (argv[1]))
     {
-      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+      m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
-	{
-	  VALUE_TYPE (token) = M4_SYMBOL_TEXT;
-	  VALUE_TEXT (token) = xstrdup ("");
-	}
+	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	{
-	  m4_symbol_value_copy (token, argv[2]);
-	  VALUE_NEXT (token) = NULL;
-	}
+	m4_symbol_value_copy (value, argv[2]);
 
-      m4_symbol_define (M4SYMTAB, M4ARG (1), token);
+      m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
 }
 
@@ -178,22 +176,16 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (VALUE_TYPE (argv[1]) == M4_SYMBOL_TEXT)
+  if (m4_is_symbol_value_text (argv[1]))
     {
-      m4_symbol_value *token = XCALLOC (m4_symbol_value, 1);
+      m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
-	{
-	  VALUE_TYPE (token) = M4_SYMBOL_TEXT;
-	  VALUE_TEXT (token) = xstrdup ("");
-	}
+	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	{
-	  m4_symbol_value_copy (token, argv[2]);
-	  VALUE_NEXT (token) = NULL;
-	}
+	m4_symbol_value_copy (value, argv[2]);
 
-      m4_symbol_pushdef (M4SYMTAB, M4ARG (1), token);
+      m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
 }
 
@@ -289,28 +281,26 @@ M4BUILTIN_HANDLER (dumpdef)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base[0]);
 
       fprintf (stderr, "%s:\t", data.base[0]);
-      assert (SYMBOL_TYPE (symbol) == M4_SYMBOL_TEXT
-	      || SYMBOL_TYPE (symbol) == M4_SYMBOL_FUNC
-	      || SYMBOL_TYPE (symbol) == M4_SYMBOL_VOID);
-      switch (SYMBOL_TYPE (symbol))
+
+      if (m4_is_symbol_text (symbol))
 	{
-	case M4_SYMBOL_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
-		     lquote.string, SYMBOL_TEXT (symbol), rquote.string);
+		     lquote.string, m4_get_symbol_text (symbol),
+		     rquote.string);
 	  else
-	    fprintf (stderr, "%s\n", SYMBOL_TEXT (symbol));
-	  break;
-
-	case M4_SYMBOL_FUNC:
-	  bp = m4_builtin_find_by_func (NULL, SYMBOL_FUNC (symbol));
+	    fprintf (stderr, "%s\n", m4_get_symbol_text (symbol));
+	}
+      else if (m4_is_symbol_func (symbol))
+	{
+	  bp = m4_builtin_find_by_func (NULL,
+					m4_get_symbol_func (symbol));
 	  assert (bp);
 	  fprintf (stderr, "<%s>\n", bp->name);
-	  break;
-
-	case M4_SYMBOL_VOID:
-	  assert (!"VOID token in m4_dumpdef");
-	  break;
+	}
+      else
+	{
+	  assert (!"illegal token in m4_dumpdef");
 	}
     }
 }
@@ -330,22 +320,12 @@ M4BUILTIN_HANDLER (defn)
       return;
     }
 
-  switch (SYMBOL_TYPE (symbol))
-    {
-    case M4_SYMBOL_TEXT:
-      m4_shipout_string (obs, SYMBOL_TEXT (symbol), 0, TRUE);
-      return;
-
-    case M4_SYMBOL_FUNC:
-      m4_push_builtin (SYMBOL_VALUE (symbol));
-      return;
-
-    case M4_SYMBOL_VOID:
-      assert (!"VOID token in m4_dumpdef");
-      return;
-    }
-
-  assert (!"Bad token data type in m4_defn");
+  if (m4_is_symbol_text (symbol))
+    m4_shipout_string (obs, m4_get_symbol_text (symbol), 0, TRUE);
+  else if (m4_is_symbol_func (symbol))
+    m4_push_builtin (m4_get_symbol_value (symbol));
+  else
+    assert (!"Bad token data type in m4_defn");
 }
 
 
@@ -571,12 +551,12 @@ M4BUILTIN_HANDLER (m4wrap)
 /* Set_trace () is used by "traceon" and "traceoff" to enable and disable
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
-static int
+static void *
 set_trace (m4_hash *hash, const void *ignored, void *symbol,
 	   void *userdata)
 {
-  SYMBOL_TRACED ((m4_symbol *) symbol) = (boolean) (userdata != NULL);
-  return 0;
+  m4_set_symbol_traced ((m4_symbol *) symbol, (boolean) (userdata != NULL));
+  return NULL;
 }
 
 M4BUILTIN_HANDLER (traceon)

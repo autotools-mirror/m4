@@ -31,18 +31,12 @@ BEGIN_C_DECLS
 /* Various declarations.  */
 
 typedef struct m4		m4;
-typedef struct m4_symbol	m4_symbol;
-typedef struct m4_symbol_value		m4_symbol_value;
 typedef struct m4_hash		m4_symtab;
-
+typedef struct m4_symbol	m4_symbol;
+typedef struct m4_symbol_value	m4_symbol_value;
 
 typedef void m4_builtin_func (m4 *, struct obstack *, int, m4_symbol_value **);
 typedef void *m4_module_func (const char *);
-
-typedef struct {
-    unsigned char *string;	/* characters of the string */
-    size_t length;		/* length of the string */
-} m4_string;
 
 typedef struct {
   const char *name;
@@ -80,10 +74,6 @@ extern const char  *m4_get_module_name		(lt_dlhandle);
 extern m4_builtin  *m4_get_module_builtin_table	(lt_dlhandle);
 extern m4_macro	   *m4_get_module_macro_table	(lt_dlhandle);
 
-extern void	m4_set_module_macro_table   (m4 *context, lt_dlhandle handle,
-					     const m4_macro *table);
-extern void	m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
-					     const m4_builtin *table);
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
@@ -110,17 +100,31 @@ extern void       m4_symbol_delete  (m4_symtab*, const char *);
 	while (m4_symbol_lookup ((symtab), (name)))			\
  	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
 
-extern void	  m4_set_symbol_traced (m4_symtab*, const char *);
+extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol *symbol);
+extern boolean		m4_get_symbol_traced	  (m4_symbol*);
+extern boolean		m4_set_symbol_traced	  (m4_symbol*, boolean);
+extern boolean		m4_set_symbol_name_traced (m4_symtab*, const char *);
 
-
+#define m4_is_symbol_text(symbol)					\
+	(m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
+#define m4_is_symbol_func(symbol)					\
+	(m4_is_symbol_value_func (m4_get_symbol_value (symbol)))
+#define m4_get_symbol_text(symbol)					\
+	(m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
+#define m4_get_symbol_func(symbol)					\
+	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
 
-/* The data for a token, a macro argument, and a macro definition.  */
-typedef enum {
-  M4_SYMBOL_VOID,
-  M4_SYMBOL_TEXT,
-  M4_SYMBOL_FUNC
-} m4_symbol_type;
-
+extern m4_symbol_value *m4_symbol_value_create	  (void);
+extern void		m4_symbol_value_delete	  (m4_symbol_value *);
+extern void		m4_symbol_value_copy	  (m4_symbol_value *,
+						   m4_symbol_value *);
+extern boolean		m4_is_symbol_value_text   (m4_symbol_value *);
+extern boolean		m4_is_symbol_value_func   (m4_symbol_value *);
+extern char	       *m4_get_symbol_value_text  (m4_symbol_value *);
+extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
+extern void		m4_set_symbol_value_text  (m4_symbol_value *, char *);
+extern void		m4_set_symbol_value_func  (m4_symbol_value *,
+						   m4_builtin_func *);
 
 
 
@@ -130,10 +134,6 @@ extern const m4_builtin *m4_builtin_find_by_name (
 				const m4_builtin *, const char *);
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
-
-extern m4_symbol_type	m4_get_symbol_value_type (m4_symbol_value *);
-extern char	       *m4_get_symbol_value_text (m4_symbol_value *);
-extern m4_builtin_func *m4_get_symbol_value_func (m4_symbol_value *);
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
@@ -188,6 +188,11 @@ extern int nesting_limit;		/* -L */
 extern int discard_comments;		/* -c */
 
 /* left and right quote, begin and end comment */
+typedef struct {
+    unsigned char *string;	/* characters of the string */
+    size_t length;		/* length of the string */
+} m4_string;
+
 extern m4_string lquote;
 extern m4_string rquote;
 
@@ -401,7 +406,6 @@ extern int m4_current_line;
 extern	void	m4_input_init	(void);
 extern	void	m4_input_exit	(void);
 extern	int	m4_peek_input	(void);
-extern	void	m4_symbol_value_copy	(m4_symbol_value *dest, m4_symbol_value *src);
 extern	void	m4_skip_line	(void);
 
 /* push back input */

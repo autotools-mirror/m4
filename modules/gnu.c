@@ -27,7 +27,7 @@
 #  include <stdlib.h>
 #endif
 
-#include "m4module.h"
+#include <m4module.h>
 
 #if HAVE_ERRNO_H
 #  include <errno.h>
@@ -36,7 +36,10 @@
 int errno;
 #endif
 
-#include "m4private.h"
+#ifdef NDEBUG
+#  include "m4private.h"
+#endif
+
 #include "regex.h"
 
 #define RE_SYNTAX_BRE RE_SYNTAX_EMACS
@@ -477,17 +480,17 @@ M4BUILTIN_HANDLER (symbols)
  **/
 M4BUILTIN_HANDLER (syncoutput)
 {
-  if (VALUE_TYPE (argv[1]) != M4_SYMBOL_TEXT)
-    return;
-
-  if (   M4ARG (1)[0] == '0'
-      || M4ARG (1)[0] == 'n'
-      || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
-    sync_output = 0;
-  else if (   M4ARG (1)[0] == '1'
-	   || M4ARG (1)[0] == 'y'
-	   || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
-    sync_output = 1;
+  if (m4_is_symbol_value_text (argv[1]))
+    {
+      if (   M4ARG (1)[0] == '0'
+	  || M4ARG (1)[0] == 'n'
+	  || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
+	sync_output = 0;
+      else if (   M4ARG (1)[0] == '1'
+	       || M4ARG (1)[0] == 'y'
+	       || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
+	sync_output = 1;
+    }
 }
 
 

@@ -25,7 +25,7 @@ m4_create (void)
 {
   m4 *context = XMALLOC (m4, 1);
 
-  M4_SYMTAB (context) = m4_symtab_create (0);
+  context->symtab = m4_symtab_create (0);
 
   return context;
 }
@@ -35,11 +35,10 @@ m4_delete (m4 *context)
 {
   assert (context);
 
-  if (M4_SYMTAB (context))
-    m4_symtab_delete (M4_SYMTAB (context));
+  if (context->symtab)
+    m4_symtab_delete (context->symtab);
 
   xfree (context);
-
 }
 
 #undef m4_get_symtab
@@ -47,6 +46,5 @@ m4_symtab *
 m4_get_symtab (m4 *context)
 {
   assert (context);
-
-  return m4_get_symtab (context);
+  return context->symtab;
 }

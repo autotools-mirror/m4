@@ -343,14 +343,14 @@ m4_trace_pre (const char *name, int id, int argc, m4_symbol_value **argv)
 	  if (i != 1)
 	    m4_trace_format (", ");
 
-	  switch (VALUE_TYPE (argv[i]))
+	  if (m4_is_symbol_value_text (argv[i]))
 	    {
-	    case M4_SYMBOL_TEXT:
 	      m4_trace_format ("%l%S%r", M4ARG (i));
-	      break;
-
-	    case M4_SYMBOL_FUNC:
-	      bp = m4_builtin_find_by_func (NULL, VALUE_FUNC (argv[i]));
+	    }
+	  else if (m4_is_symbol_value_func (argv[i]))
+	    {
+	      bp = m4_builtin_find_by_func (NULL,
+					    m4_get_symbol_value_func(argv[i]));
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, "\
@@ -358,14 +358,13 @@ INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"));
 		  abort ();
 		}
 	      m4_trace_format ("<%s>", bp->name);
-	      break;
-
-	    case M4_SYMBOL_VOID:
+	    }
+	  else
+	    {
 	      M4ERROR ((warning_status, 0,
 			"INTERNAL ERROR: Bad token data type (m4_trace_pre ())"));
 	      abort ();
 	    }
-
 	}
       m4_trace_format (")");
     }
@@ -380,8 +379,8 @@ INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"));
 /* Format the final part of a trace line and print it all.  Used from
    expand_macro ().  */
 void
-m4_trace_post (const char *name, int id, int argc, m4_symbol_value **argv,
-	    const char *expanded)
+m4_trace_post (const char *name, int id,
+	       int argc, m4_symbol_value **argv, const char *expanded)
 {
   if (debug_level & M4_DEBUG_TRACE_CALL)
     {
