@@ -19,6 +19,17 @@
 ##
 ## Written by Akim Demaille <akim@freefriends.org>
 
+MAINTAINERCLEANFILES =				\
+Makefile.in					\
+config.guess					\
+config.sub					\
+install-sh					\
+ltmain.sh					\
+mdate-sh					\
+missing						\
+mkinstalldirs					\
+texinfo.tex
+
 EXTRA_DIST = 					\
 debug.m4					\
 gmp.m4						\

@@ -17,7 +17,8 @@
 @ifinfo
 This file documents GNU @code{m4} @value{VERSION}
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001
+Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -43,7 +44,8 @@ identical to this one except for the removal of this paragraph
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 90, 91, 92, 93, 94, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
+2000, 2001 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -459,9 +461,10 @@ Levels}, for more details.
 
 @item -o @var{FILE}
 @itemx --error-output=@var{FILE}
-Redirect debug and trace output to the named file.  Error messages are
-still printed on the standard error output.  @xref{Debug Output}, for
-more details.
+Redirect debug and trace output to the named file.  Error messages (from
+@code{errprint}) and macro definitions (from @code{dumpdef}) are still
+printed on the standard error output.  @xref{Debug Output}, for more
+details.
 
 @item -B
 @itemx -S
@@ -1668,7 +1671,8 @@ If you want to see what a name expands into, you can use the builtin
 @code{dumpdef} accepts any number of arguments.  If called without any
 arguments, it displays the definitions of all known names, otherwise it
 displays the definitions of the names given.  The output is printed
-directly on the standard error output.
+directly on the standard error output, independently of
+@option{--error-output}.
 
 The expansion of @code{dumpdef} is void.
 @end deffn
@@ -3517,7 +3521,7 @@ any of the previous chapters.
 @deffn {Builtin (m4)} errprint (@var{message}, @dots{})
 You can print error messages using @code{errprint}, which simply prints
 @var{message} and the rest of the arguments on the standard error
-output.
+output, independently of @option{--error-output}.
 
 The expansion of @code{errprint} is void.
 @end deffn

@@ -288,16 +288,16 @@ M4BUILTIN_HANDLER (dumpdef)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      M4_DEBUG_PRINT1 ("%s:\t", SYMBOL_NAME (data.base[0]));
+      fprintf (stderr, "%s:\t", SYMBOL_NAME (data.base[0]));
 
       switch (SYMBOL_TYPE (data.base[0]))
 	{
 	case M4_TOKEN_TEXT:
 	  if (debug_level & M4_DEBUG_TRACE_QUOTE)
-	    M4_DEBUG_PRINT3 ("%s%s%s\n",
-			  lquote.string, SYMBOL_TEXT (data.base[0]), rquote.string);
+	    fprintf (stderr, "%s%s%s\n",
+		     lquote.string, SYMBOL_TEXT (data.base[0]), rquote.string);
 	  else
-	    M4_DEBUG_PRINT1 ("%s\n", SYMBOL_TEXT (data.base[0]));
+	    fprintf (stderr, "%s\n", SYMBOL_TEXT (data.base[0]));
 	  break;
 
 	case M4_TOKEN_FUNC:
@@ -308,7 +308,7 @@ M4BUILTIN_HANDLER (dumpdef)
 			_("Undefined name `%s'"), SYMBOL_NAME (data.base[0])));
 	      abort ();
 	    }
-	  M4_DEBUG_PRINT1 ("<%s>\n", bp->name);
+	  fprintf (stderr, "<%s>\n", bp->name);
 	  break;
 
 	default:
@@ -622,7 +622,7 @@ M4BUILTIN_HANDLER (errprint)
 {
   m4_dump_args (obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
-  fprintf (stderr, "%s", (char *) obstack_finish (obs));
+  fputs ((char *) obstack_finish (obs), stderr);
   fflush (stderr);
 }
 
