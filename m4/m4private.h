@@ -79,9 +79,14 @@ struct m4_symbol
 /* Debugging the memory allocator.  */
 
 #if WITH_DMALLOC
-# define DMALLOC_FUNC_CHECK
-# include <dmalloc.h>
-#endif
+#  define DMALLOC_FUNC_CHECK
+#  include <dmalloc.h>
+
+/* Dmalloc expects us to use a void returning xfree.  */
+#  undef XFREE
+#  define XFREE(p)	if (p) xfree (p)
+
+#endif /* WITH_DMALLOC */
 
 /* Other debug stuff.  */
 

@@ -44,6 +44,12 @@ m4_debug_init (void)
   obstack_init (&trace);
 }
 
+void
+m4_debug_exit (void)
+{
+  obstack_free (&trace, NULL);
+}
+
 
 
 /* Function to decode the debugging flags OPTS.  Used by main while

@@ -83,6 +83,8 @@
 #define M4_FINISH_SYMBOL	"m4_finish_module"
 
 static const char*  m4_module_dlerror	(void);
+static int	    m4_module_remove	(lt_dlhandle handle,
+					 struct obstack *obs);
 
 static lt_dlcaller_id m4_caller_id = 0;
 
@@ -177,9 +179,11 @@ m4_module_init (void)
       return;
     }
 
+#if !WITH_DMALLOC
   /* initialise libltdl's memory management. */
   lt_dlmalloc = xmalloc;
   lt_dlfree   = (void (*)(void*)) xfree;
+#endif
 
   errors      = lt_dlinit ();
 
@@ -323,11 +327,11 @@ void
 m4_module_close (lt_dlhandle handle, struct obstack *obs)
 {
   m4_module_finish_func *finish_func	= 0;
-  const char		*name		= 0;
+  char			*name		= 0;
   int			 errors		= 0;
-  
+
   assert (handle);
-  name = m4_module_name (handle);
+  name = xstrdup (m4_module_name (handle));
 
   /* Run any finishing function for the opened module. */
   finish_func = (m4_module_finish_func *) lt_dlsym (handle, M4_FINISH_SYMBOL);
@@ -343,18 +347,16 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
       
   if (!lt_dlisresident (handle))
     {
-      {
-	const lt_dlinfo  *info	= lt_dlgetinfo (handle);
+      const lt_dlinfo  *info	= lt_dlgetinfo (handle);
 
-	/* When we are about to unload the module for the final
-	   time, be sure to release any client data memory.  */
-	if (info && (info->ref_count == 1))
-	  {
-	    m4_module_data *stale
-	      = lt_dlcaller_set_data (m4_caller_id, handle, 0);
-	    xfree (stale);
-	  }
-      }
+      /* When we are about to unload the module for the final
+	 time, be sure to release any client data memory.  */
+      if (info && (info->ref_count == 1))
+	{
+	  m4_module_data *stale
+	    = lt_dlcaller_set_data (m4_caller_id, handle, 0);
+	  XFREE (stale);
+	}
 
       errors = lt_dlclose (handle);
       if (!errors)
@@ -364,6 +366,10 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
 #endif /* DEBUG_MODULES */
 	}
     }
+#ifdef DEBUG_MODULES
+  else
+    M4_DEBUG_MESSAGE1("module %s: resident module not closed", name);
+#endif /* DEBUG_MODULES */
 
   if (errors)
     {
@@ -371,6 +377,8 @@ m4_module_close (lt_dlhandle handle, struct obstack *obs)
 		_("ERROR: cannot close module `%s': %s"),
 		name, m4_module_dlerror ()));
     }
+  
+  xfree (name);
 }
 
 void
@@ -384,6 +392,10 @@ m4_module_close_all (struct obstack *obs)
 	 closed, even to find the address of the next handle.  */
       lt_dlhandle pending = handle;
       handle = lt_dlhandle_next (handle);
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: attempting module close",
+			m4_module_name (pending));
+#endif /* DEBUG_MODULES */
       m4_module_close (pending, obs);
     }
 
@@ -438,6 +450,46 @@ m4_module_load (const char *name, struct obstack *obs)
   return handle;
 }
 
+int
+m4_module_remove (lt_dlhandle handle, struct obstack *obs)
+{
+  const lt_dlinfo *info		= 0;
+  int		   errors	= 0;
+
+  assert (handle);
+
+  info = lt_dlgetinfo (handle);
+
+  /* Only do the actual close when the number of calls to close this
+     module is equal to the number of times it was opened. */
+#ifdef DEBUG_MODULES
+  if (info->ref_count > 1)
+    {
+      M4_DEBUG_MESSAGE2("module %s: now has %d references.",
+			m4_module_name (handle), info->ref_count -1);
+    }
+#endif /* DEBUG_MODULES */
+
+  if (info->ref_count == 1)
+    {
+      /* Remove the table references only when ref_count is *exactly*
+	 equal to 1.  If m4_module_close is called again on a
+	 resident module after the references have already been
+	 removed, we needn't try to remove them again!  */
+      m4_symtab_remove_module_references (handle);
+
+#ifdef DEBUG_MODULES
+      M4_DEBUG_MESSAGE1("module %s: symbols unloaded",
+			m4_module_name (handle));
+#endif /* DEBUG_MODULES */
+    }
+
+  if (!errors)
+    m4_module_close (handle, obs);
+
+  return errors;
+}
+
 /* Unload a module.  */
 void
 m4_module_unload (const char *name, struct obstack *obs)
@@ -460,40 +512,51 @@ m4_module_unload (const char *name, struct obstack *obs)
       ++errors;
     }
   else
-    {
-      const lt_dlinfo *info = lt_dlgetinfo (handle);
-
-      /* Only do the actual close when the number of calls to close this
-	 module is equal to the number of times it was opened. */
-      if (info->ref_count > 1)
-	{
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE2("module %s: now has %d references.",
-			    name, info->ref_count -1);
-#endif /* DEBUG_MODULES */
-	}
-
-      if (info->ref_count == 1)
-	{
-	  /* Remove the table references only when ref_count is *exactly*
-	     equal to 1.  If m4_module_close is called again on a
-	     resident module after the references have already been
-	     removed, we needn't try to remove them again!  */
-	  m4_symtab_remove_module_references (handle);
-
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);
-#endif /* DEBUG_MODULES */
-	}
-    }
-
-  if (!errors)
-    m4_module_close (handle, obs);
+    errors = m4_module_remove (handle, obs);
 
   if (errors)
     {
       M4ERROR ((EXIT_FAILURE, 0,
 		_("ERROR: cannot unload module `%s': %s"),
 		name, m4_module_dlerror ()));
+    }
+}
+
+void
+m4_module_unload_all (void)
+{
+  lt_dlhandle	handle	= lt_dlhandle_next (0);
+  int		errors	= 0;
+
+  while (handle && !errors)
+    {
+      lt_dlhandle      pending	= handle;
+      const lt_dlinfo *info	= lt_dlgetinfo (pending);
+
+      /* We are *really* shutting down here, so freeing the module
+	 data is required.  */
+      if (info)
+	{
+	  m4_module_data *stale
+	    = lt_dlcaller_set_data (m4_caller_id, handle, 0);
+	  XFREE (stale);
+	}
+
+      /* If we are about to unload the final reference, move on to the
+	 next handle before we unload the current one.  */
+      if (info->ref_count <= 1)
+	handle = lt_dlhandle_next (pending);
+
+      errors = m4_module_remove (pending, 0);
+    }
+
+  if (!errors)
+    errors = lt_dlexit();
+
+  if (errors)
+    {
+      M4ERROR ((EXIT_FAILURE, 0,
+		_("ERROR: cannot unload all modules: %s"),
+		m4_module_dlerror ()));
     }
 }

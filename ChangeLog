@@ -1,5 +1,28 @@
 2001-09-30  Gary V. Vaughan  <gary@gnu.org>
 
+	Reinstate the memory handling improvements from the patch I just
+	reverted.  Relevant ChangeLog entries repeated here:
+
+	* m4/module.c (m4_module_remove): New function that holds the core
+	of the old m4_module_unload.
+	(m4_module_unload): Use it.
+	(m4_module_unload_all): When we know the modules will never be
+	used again (i.e. on exit), free up as much module memory as
+	possible.  There are still some artifacts from resident modules
+	living inside ltdl.c, but everything else is freed.
+	* m4/debug.c (m4_debug_exit): Free memory allocated in
+	m4_debug_init().
+	* m4/input.c (m4_input_exit): Ditto wrt m4_input_init().
+	* m4/output.c (m4_output_exit): Ditto wrt m4_output_init ().
+	* src/stackovf.c (stackovf_exit): Ditto wrt setup_stackovf_trap ().
+	* m4/m4module.h: Updated prototypes.
+	* m4/hash.c (m4_hash_exit): Free the nodes on the free list.
+	* m4/hash.h: Updated prototypes.
+	* src/main.c (main): Use all these new functions to clean up as
+	much memory as possible before exit.
+
+2001-09-30  Gary V. Vaughan  <gary@gnu.org>
+
 	Reverted my large patch for removing the old m4_symbol
 	structure on 2001-09-20.  We are still not happy about the way
 	trace works in conjunction with defn and undefine, and leaving

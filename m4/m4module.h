@@ -94,6 +94,7 @@ extern m4_hash *m4_symtab;
 extern void	m4_symtab_init		(void);
 extern int	m4_symtab_apply		(m4_symtab_apply_func *, void *);
 extern void	m4_symtab_remove_module_references (lt_dlhandle);
+extern void	m4_symtab_exit		(void);
 
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
@@ -291,6 +292,7 @@ FILE *m4_debug;
   while (0)
 
 void m4_debug_init (void);
+void m4_debug_exit (void);
 int m4_debug_decode (const char *);
 void m4_debug_flush_files (void);
 boolean m4_debug_set_output (const char *);
@@ -375,6 +377,7 @@ int m4_current_line;
 
 extern	int	m4_syntax_code	(char ch);
 extern	void	m4_input_init	(void);
+extern	void	m4_input_exit	(void);
 extern	void	m4_syntax_init	(void);
 extern	int	m4_peek_input	(void);
 extern	m4_token_t m4_next_token (m4_token_data *);
@@ -399,6 +402,7 @@ int m4_current_diversion;
 int m4_output_current_line;
 
 extern	void	m4_output_init	(void);
+extern	void	m4_output_exit	(void);
 extern	void	m4_shipout_text	(struct obstack *, const char *, int);
 extern	void	m4_make_diversion (int);
 extern	void	m4_insert_diversion (int);

@@ -793,6 +793,18 @@ m4_input_init (void)
   use_macro_escape = FALSE;
 }
 
+ void
+m4_input_exit (void)
+{
+  XFREE (lquote.string);
+  XFREE (rquote.string);
+  XFREE (bcomm.string);
+  XFREE (ecomm.string);
+  obstack_free (&wrapup_stack, NULL);
+  obstack_free (&input_stack, NULL);
+  obstack_free (&token_stack, NULL);
+}
+
 void
 m4_syntax_init (void)
 {

@@ -18,6 +18,11 @@
    02111-1307  USA
 */
 
+#include "m4private.h"
+
+#define DEBUG_SYM		/* Define this to see runtime debug info.  */
+#undef DEBUG_SYM
+
 /* This file handles all the low level work around the symbol table.  The
    symbol table is an abstract hash table type implemented in hash.c.  Each
    symbol is represented by `struct m4_symbol', which is stored in the hash
@@ -27,13 +32,13 @@
    simply ordered on the stack by age.  The most recently pushed definition
    will then always be the first found.  */
 
-#include "m4private.h"
-
 static size_t	m4_symtab_hash		(const void *key);
 static int	m4_symtab_cmp		(const void *key, const void *try);
 static void	m4_token_data_delete	(m4_token_data *data);
 static void	m4_symbol_pop		(m4_symbol *symbol);
 static void	m4_symbol_del		(m4_symbol *symbol);
+static int	m4_symbol_destroy	(const char *name, m4_symbol *symbol,
+					 void *data);
 
 
 /* Pointer to symbol table.  */
@@ -47,8 +52,23 @@ m4_symtab_init (void)
   m4_symtab = m4_hash_new (m4_symtab_hash, m4_symtab_cmp);
 }
 
+int
+m4_symbol_destroy (const char *name, m4_symbol *symbol, void *data)
+{
+  m4_symbol_delete (name);
+  return 0;
+}
+
+void
+m4_symtab_exit (void)
+{
+  m4_symtab_apply (m4_symbol_destroy, NULL);
+  m4_hash_delete (m4_symtab);
+  m4_hash_exit ();
+}
+
 /* Return a hashvalue for a string, from GNU-emacs.  */
-size_t
+static size_t
 m4_symtab_hash (const void *key)
 {
   int val = 0;
@@ -65,7 +85,7 @@ m4_symtab_hash (const void *key)
   return val;
 }
 
-int
+static int
 m4_symtab_cmp (const void *key, const void *try)
 {
   return (strcmp ((const char *) key, (const char *) try));
@@ -73,7 +93,7 @@ m4_symtab_cmp (const void *key, const void *try)
 
 
 
-void
+static void
 m4_token_data_delete (m4_token_data *data)
 {
   assert (data);
@@ -167,11 +187,11 @@ m4_symbol_pushdef (const char *name)
 m4_symbol *
 m4_symbol_define (const char *name)
 {
-  m4_symbol *res = m4_symbol_lookup (name);
-  if (res)
-    return res;
+  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
+  if (psymbol)
+    return *psymbol;
   else
-    m4_symbol_pushdef (name);
+    return m4_symbol_pushdef (name);
 }
 
 
@@ -200,6 +220,11 @@ m4_symbol_delete (const char *name)
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (m4_symtab, name);
 
   assert (psymbol);
+
+#ifdef DEBUG_SYM
+  M4_DEBUG_MESSAGE1("symbol %s recycled.", name);
+#endif
+
   xfree (m4_hash_remove (m4_symtab, name));
   m4_symbol_del (*psymbol);
 }
@@ -253,6 +278,7 @@ m4_symtab_remove_module_references (lt_dlhandle handle)
 
   assert (handle);
 
+   /* Traverse each symbol name in the hash table.  */
   while ((place = m4_hash_iterator_next (m4_symtab, place)))
     {
       m4_symbol *symbol = (m4_symbol *) m4_hash_iterator_value (place);
@@ -286,9 +312,9 @@ m4_symtab_remove_module_references (lt_dlhandle handle)
     }
 }
 
-/* The following function is used for the cases, where we want to do
+/* The following function is used for the cases where we want to do
    something to each and every symbol in the table.  The function
-   hack_all_symbols () traverses the symbol table, and calls a specified
+   m4_symtab_apply () traverses the symbol table, and calls a specified
    function FUNC for each symbol in the table.  FUNC is called with a
    pointer to the symbol, and the DATA argument.  */
 int
@@ -327,7 +353,7 @@ symtab_debug (void)
   m4_symbol *s;
   int delete;
 
-  while ((t = m4_next_token (&td)) != NULL)
+  while ((t = m4_next_token (&td)) != M4_TOKEN_EOF)
     {
       if (t != M4_TOKEN_WORD)
 	continue;
