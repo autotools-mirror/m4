@@ -3378,14 +3378,13 @@ The builtin macro @code{esyscmd} is recognized only when given
 arguments.
 @end deffn
 
-Assume you are positioned into the @file{tests} directory of GNU M4
-distribution, then:
+For instance:
 
 @example
-define(`vice', `esyscmd(`grep Vice Makefile')')
+define(`authors', `esyscmd(`m4 --version | grep Written')')
 @result{}
-vice
-@result{}#  Ty Coon, President of Vice
+authors
+@result{}Written by Rene' Seindal and Gary V. Vaughan.
 @result{}
 @end example
 

@@ -1,5 +1,11 @@
 2002-11-04  Akim Demaille  <akim@epita.fr>
 
+	* doc/m4.texinfo (Esyscmd): Don't grep, use something easier:
+	running m4 itself.
+	* tests/others.at (iso8859): Use abs_srcdir, not srcdir.
+
+2002-11-04  Akim Demaille  <akim@epita.fr>
+
 	* config/Makefile.am (ACLOCAL_MACROS): Ship the Gettext macros.
 
 2002-11-04  Akim Demaille  <akim@epita.fr>
