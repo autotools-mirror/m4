@@ -87,8 +87,7 @@ m4_getopt_h=src/getopt.h
 rm -f $m4_getopt_h
 AC_CHECK_FUNC(getopt_long, [],
 [M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
-echo linking src/gnu-getopt.h to $m4_getopt_h
-$LN_S ./gnu-getopt.h $m4_getopt_h])
+AC_CONFIG_LINKS($m4_getopt_h:src/gnu-getopt.h)])
 AC_SUBST(M4OBJS)
 
 M4_AC_FUNC_OBSTACK

@@ -1,5 +1,13 @@
 2001-09-01  Gary V. Vaughan  <gary@gnu.org>
 
+	* src/Makefile.am (m4_SOURCES): Don't list $(M4OBJS) here, since
+	Automake 1.5 chokes on dynamic source file lists,  Besides, it is
+	already listed in m4_LDADD... how did that ever used to work?
+	* configure.in (getopt.h): Use AC_CONFIG_LINKS instead of a manual
+	link.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Ditto.
+	Suggested by Tim Van Holder <tim.van.holder@pandora.be>
+
 	* tests/m4: Don't call the m4 wrapper script with libtool, it
 	works fine all by itself.
 

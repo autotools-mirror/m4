@@ -57,8 +57,7 @@ if test $m4_cv_func_obstack = yes; then
 EOF
 else
   LIBOBJS="$LIBOBJS obstack.$ac_objext"
-  echo linking src/gnu-obstack.h to $m4_obstack_h
-  $LN_S ./gnu-obstack.h $m4_obstack_h
+  AC_CONFIG_LINKS($m4_obstack_h:./gnu-obstack.h)
 
   if test x"$ac_cv_header_obstack_h" != xyes; then
     OBSTACK_H=obstack.h
