@@ -46,10 +46,8 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.
 AUTOM4TE = autom4te
-AUTOTEST = $(AUTOM4TE) -I /usr/local/share/autoconf autotest/autotest.m4
 $(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
-	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@.tmp
-	chmod +x $@.tmp
+	$(AUTOM4TE) --language=autotest -I $(srcdir) testsuite.at -o $@.tmp
 	mv $@.tmp $@
 
 # Run the test suite on the *installed* tree.

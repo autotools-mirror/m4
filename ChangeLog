@@ -1,5 +1,10 @@
 2001-08-29  Akim Demaille  <akim@epita.fr>
 
+	* tests/Makefile.am ($(srcdir)/$(TESTSUITE)): Use autom4te's
+	--language.
+
+2001-08-29  Akim Demaille  <akim@epita.fr>
+
 	* tests/generate.awk (normalize): s/@__@/@&t@/.
 
 2001-08-28  Akim Demaille  <akim@epita.fr>
