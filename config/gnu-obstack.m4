@@ -25,7 +25,7 @@
 # Use the libc supplied version of obstacks if available.
 AC_DEFUN([M4_AC_FUNC_OBSTACK],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
-AC_CHECK_HEADER(obstack.h, [], [], $ac_default_headers)
+AC_CHECK_HEADER(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
 m4_pattern_allow([^m4_cv_func_obstack$])dnl
 m4_pattern_allow([^m4_obstack_h$])dnl
 

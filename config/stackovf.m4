@@ -26,7 +26,7 @@ AC_DEFUN([M4_AC_SYS_STACKOVF],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
 AC_REQUIRE([AC_TYPE_SIGNAL])dnl
 
-AC_CHECK_HEADERS(siginfo.h, [], [], $ac_default_headers)
+AC_CHECK_HEADERS(siginfo.h, [], [], [AC_INCLUDES_DEFAULT])
 AC_CHECK_FUNCS(sigaction sigaltstack sigstack sigvec)
 AC_MSG_CHECKING(if stack overflow is detectable)
 # Code from Jim Avera <jima@netcom.com>.

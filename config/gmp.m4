@@ -45,7 +45,7 @@ esac
 
 AC_DEFUN([M4_AC_LIB_GMP],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
-AC_CHECK_HEADERS([gmp.h], [], [], $ac_default_headers)
+AC_CHECK_HEADERS([gmp.h], [], [], [AC_INCLUDES_DEFAULT])
 # Some versions of gmp provide mpq_init as a macro, so we need to
 # include the header file, otherwise the detection will fail.
 ac_gmp_save_LIBS="$LIBS"

@@ -1,5 +1,10 @@
 2003-08-27  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/gmp.m4 (M4_AC_LIB_GMP): Use AC_INCLUDES_DEFAULT:
+	ac_default_headers is an autoconf internal variable.
+	* config/gnu-obstack.m4 (M4_AC_FUNC_OBSTACK): Ditto.
+	* config/stackovf.m4 (M4_AC_SYS_STACKOVF): Ditto.
+
 	* configure.ac (AC_CONFIG_FILES): Add tests/atlocal.
 	* tests/Makefile.am (TESTS_ENVIRONMENT): Revert the 2003-08-14
 	delta.
