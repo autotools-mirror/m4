@@ -113,28 +113,31 @@ FLAGS is any of:\n\
   {"\
 \n\
 If no FILE or if FILE is `-', standard input is read.\n", 60},
-  {"Bad debug flags: `%s'", 61},
-  {"INTERNAL ERROR: Bad code in deferred arguments", 62},
-  {"INTERNAL ERROR: Bad token type in expand_token ()", 63},
-  {"ERROR: EOF in argument list", 64},
-  {"INTERNAL ERROR: Bad token type in expand_argument ()", 65},
-  {"INTERNAL ERROR: Bad symbol type in call_macro ()", 66},
-  {"ERROR: Recursion limit of %d exceeded, use -L<N> to change it", 67},
-  {"Error: cannot find module `%s'", 68},
-  {"ERROR: Cannot create temporary file for diversion", 69},
-  {"ERROR: Cannot flush diversion to temporary file", 70},
-  {"ERROR: Copying inserted file", 71},
-  {"ERROR: Reading inserted file", 72},
-  {"Cannot stat diversion", 73},
-  {"Path search for `%s' found `%s'", 74},
-  {"Module search for `%s' found `%s'", 75},
-  {"VMEM limit exceeded?\n", 76},
+  {"\
+\n\
+Report bugs to <bug-m4@gnu.org>.\n", 61},
+  {"Bad debug flags: `%s'", 62},
+  {"INTERNAL ERROR: Bad code in deferred arguments", 63},
+  {"INTERNAL ERROR: Bad token type in expand_token ()", 64},
+  {"ERROR: EOF in argument list", 65},
+  {"INTERNAL ERROR: Bad token type in expand_argument ()", 66},
+  {"INTERNAL ERROR: Bad symbol type in call_macro ()", 67},
+  {"ERROR: Recursion limit of %d exceeded, use -L<N> to change it", 68},
+  {"ERROR: cannot find module `%s'", 69},
+  {"ERROR: Cannot create temporary file for diversion", 70},
+  {"ERROR: Cannot flush diversion to temporary file", 71},
+  {"ERROR: Copying inserted file", 72},
+  {"ERROR: Reading inserted file", 73},
+  {"Cannot stat diversion", 74},
+  {"Path search for `%s' found `%s'", 75},
+  {"Module search for `%s' found `%s'", 76},
+  {"VMEM limit exceeded?\n", 77},
   {"\
 Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\
-occurred, or there is a bug in ", 77},
-  {".  Check for possible infinite recursion.\n", 78},
-  {"INTERNAL ERROR: Illegal mode to symbol_lookup ()", 79},
-  {"Name `%s' is unknown\n", 80},
+occurred, or there is a bug in ", 78},
+  {".  Check for possible infinite recursion.\n", 79},
+  {"INTERNAL ERROR: Illegal mode to symbol_lookup ()", 80},
+  {"Name `%s' is unknown\n", 81},
 };
 
-int _msg_tbl_length = 80;
+int _msg_tbl_length = 81;

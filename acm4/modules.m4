@@ -1,3 +1,12 @@
+# Written by René Seindal (rene@seindal.dk)
+#
+# This file can be copied and used freely without restrictions.  It can
+# be used in projects which are not available under the GNU Public License
+# but which still want to provide support for the GNU gettext functionality.
+# Please note that the actual code is *not* freely available.
+
+# serial 1
+
 
 AC_DEFUN(AM_WITH_MODULES,
   [AC_MSG_CHECKING(if support for dynamic modules is wanted)
@@ -7,72 +16,58 @@ AC_DEFUN(AM_WITH_MODULES,
   AC_MSG_RESULT($use_modules)
 
   if test "$use_modules" = yes; then
-    AC_CHECK_FUNCS(dlopen dlsym dlclose)
+    dnl We might no have it anyway, after all.
+    with_modules=no
+
+    dnl Test for dlopen in libc
+    AC_CHECK_FUNCS(dlopen)
     if test "$ac_cv_func_dlopen" = yes; then
-       MODULE_O=module.o
-       MODULES_DIR=modules
+       with_modules=yes
     fi
 
-    AC_CHECK_LIB(dl, dlopen, HAVE_LIBDL=true)
-    if test "$HAVE_LIBDL" = true; then
-      LIBS="$LIBS -ldl"
-      MODULE_O=module.o
-      MODULES_DIR=modules
-      AC_DEFINE(HAVE_DLOPEN,1)
+    dnl Test for dlopen in libdl
+    if test "$with_modules" = no; then
+      AC_CHECK_LIB(dl, dlopen)
+      if test "$ac_cv_lib_dl_dlopen" = yes; then
+	with_modules=yes
+
+#	LIBS="$LIBS -ldl"
+	AC_DEFINE(HAVE_DLOPEN,1)
+      fi
     fi
 
-    dnl Default extension for shared libraries.
-    SHARED_EXT=.so
+#    dnl Test for dld_link in libdld
+#    if test "$with_modules" = no; then
+#      AC_CHECK_LIB(dld, dld_link)
+#      if test "$ac_cv_lib_dld_dld_link" = "yes"; then
+#	 with_modules=yes
+#	 AC_DEFINE(HAVE_DLD,1)
+#      fi
+#    fi
 
-    dnl Maybe this is a system using shl_load and shl_findsym?
-    if test "${MODULES_DIR}" = ""; then
-       AC_CHECK_LIB(dld, shl_load, HAVE_LIBDLD=true)
-       if test "$HAVE_LIBDLD" = true; then
+    dnl Test for shl_load in libdld
+    if test "$with_modules" = no; then
+       AC_CHECK_LIB(dld, shl_load)
+       if test "$ac_cv_lib_dld_shl_load" = yes; then
+	  with_modules=yes
+
 	  LIBS="$LIBS -ldld"
-	  MODULE_O=module.o
-	  MODULES_DIR=modules
-	  SHARED_EXT=.O
-	  AC_DEFINE(USE_SHL_LOAD,1)
+	  AC_DEFINE(HAVE_SHL_LOAD,1)
        fi
     fi
 
-    if test "$MODULES_DIR"; then
-      SHARED_LD=ld
-      DASH_SHARED=""
-      case "$host_os" in
-	sunos4*)    DASH_SHARED=-Bdynamic ;;
-	 linux*)    DASH_SHARED=-shared; DLLDFLAGS=-rdynamic ;;
-	 winnt*)    SHARED_LD=./make-dll; SHARED_EXT=.dll; DLLDFLAGS=-rdynamic ;;
-	   osf*)    DASH_SHARED=-shared; SHARED_LD=$CC ;;
-	  irix*)    DASH_SHARED=-shared; SHARED_LD=$CC ;;
-	  bsdi*)    DASH_SHARED=-shared; DLLDFLAGS=-rdynamic ;;
-       freebsd*)    DASH_SHARED=-Bshareable; SHARED_LD='$(LD) 2>/dev/null';;
-       solaris*)
-	  # If both the GNU compiler and linker are installed, then we need
-	  # to add special options in order to compile the modules.
-	  if test "$GCC" = "yes"; then
-	     DASH_SHARED=-shared; GCC_FPIC=-fpic; 
-	     SHARED_LD='$(CC)'; DLLDFLAGS="-Xlinker -E";
-	  else
-	     DASH_SHARED=-G;
-	  fi
-	  ;;
-           aix*) DLLDFLAGS="-bexpall -brtl" ;;
+    if test "$with_modules" = yes; then
+      dnl This is for libtool
+      DLLDFLAGS=-export-dynamic
 
-	  hpux*)    DASH_SHARED="-b -E" GCC_FPIC=-fpic DLLDFLAGS="-Xlinker -E" ;;
-      esac
+      MODULES_DIR=modules
+      MODULE_PATH="${pkglibexecdir}"
     fi
 
-    AC_SUBST(SHARED_LD)
-    AC_SUBST(DASH_SHARED)
-    AC_SUBST(MODULE_O)
-    AC_SUBST(MODULES_DIR)
     AC_SUBST(DLLDFLAGS)
-    AC_SUBST(SHARED_EXT)
-    AC_SUBST(OS_NAME)
-    AC_SUBST(GCC_FPIC)
-
-    MODULE_PATH="${pkglibexecdir}"
+    AC_SUBST(MODULES_DIR)
     AC_SUBST(MODULE_PATH)
   fi
   ])
+
+

@@ -10,6 +10,10 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+# To get libtool and Automake to handle this correctly it is necessary
+# to pretend we are compiling shared libraries (which we are) and then
+# change the names when installing.
+
 
 SHELL = /bin/sh
 
@@ -64,10 +68,8 @@ CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
-DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
-GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -78,20 +80,20 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MODULES_DIR = @MODULES_DIR@
-MODULE_O = @MODULE_O@
 MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
-OS_NAME = @OS_NAME@
+NM = @NM@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-SHARED_EXT = @SHARED_EXT@
-SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
@@ -100,43 +102,39 @@ VERSION = @VERSION@
 l = @l@
 pkglibexecdir = @pkglibexecdir@
 
-pkglibexec_PROGRAMS = test time stdlib
+pkglibexec_LTLIBRARIES = libtest.la libtime.la libstdlib.la
 
-noinst_DATA = test.m4 time.m4 stdlib.m4
+EXTRA_DIST = test.m4 time.m4 stdlib.m4
 
 INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib
 
-CFLAGS = @GCC_FPIC@
-LD = @SHARED_LD@
-LDFLAGS = @DASH_SHARED@
+libtest_la_SOURCES = test.c
+libtime_la_SOURCES = time.c
+libstdlib_la_SOURCES = stdlib.c
+
+LIBS = 
+LDFLAGS = @DLLDFLAGS@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
-PROGRAMS =  $(pkglibexec_PROGRAMS)
+LTLIBRARIES =  $(pkglibexec_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
-LIBS = @LIBS@
-test_SOURCES = test.c
-test_OBJECTS =  test.o
-test_LDADD = $(LDADD)
-test_DEPENDENCIES = 
-test_LDFLAGS = 
-time_SOURCES = time.c
-time_OBJECTS =  time.o
-time_LDADD = $(LDADD)
-time_DEPENDENCIES = 
-time_LDFLAGS = 
-stdlib_SOURCES = stdlib.c
-stdlib_OBJECTS =  stdlib.o
-stdlib_LDADD = $(LDADD)
-stdlib_DEPENDENCIES = 
-stdlib_LDFLAGS = 
+libtest_la_LDFLAGS = 
+libtest_la_LIBADD = 
+libtest_la_OBJECTS =  test.lo
+libtime_la_LDFLAGS = 
+libtime_la_LIBADD = 
+libtime_la_OBJECTS =  time.lo
+libstdlib_la_LDFLAGS = 
+libstdlib_la_LIBADD = 
+libstdlib_la_OBJECTS =  stdlib.lo
+CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DATA =  $(noinst_DATA)
-
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README Makefile.am Makefile.in TODO
 
 
@@ -144,13 +142,13 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP = --best
-SOURCES = test.c time.c stdlib.c
-OBJECTS = test.o time.o stdlib.o
+SOURCES = $(libtest_la_SOURCES) $(libtime_la_SOURCES) $(libstdlib_la_SOURCES)
+OBJECTS = $(libtest_la_OBJECTS) $(libtime_la_OBJECTS) $(libstdlib_la_OBJECTS)
 
-all: Makefile $(PROGRAMS) $(DATA)
+all: Makefile $(LTLIBRARIES)
 
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .lo .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modules/Makefile
 
@@ -159,30 +157,14 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-pkglibexecPROGRAMS:
+mostlyclean-pkglibexecLTLIBRARIES:
 
-clean-pkglibexecPROGRAMS:
-	-test -z "$(pkglibexec_PROGRAMS)" || rm -f $(pkglibexec_PROGRAMS)
+clean-pkglibexecLTLIBRARIES:
+	-test -z "$(pkglibexec_LTLIBRARIES)" || rm -f $(pkglibexec_LTLIBRARIES)
 
-distclean-pkglibexecPROGRAMS:
+distclean-pkglibexecLTLIBRARIES:
 
-maintainer-clean-pkglibexecPROGRAMS:
-
-install-pkglibexecPROGRAMS: $(pkglibexec_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
-	@list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
-	  else :; fi; \
-	done
-
-uninstall-pkglibexecPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
-	done
+maintainer-clean-pkglibexecLTLIBRARIES:
 
 .c.o:
 	$(COMPILE) -c $<
@@ -203,17 +185,33 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-test: $(test_OBJECTS) $(test_DEPENDENCIES)
-	@rm -f test
-	$(LINK) $(test_LDFLAGS) $(test_OBJECTS) $(test_LDADD) $(LIBS)
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-time: $(time_OBJECTS) $(time_DEPENDENCIES)
-	@rm -f time
-	$(LINK) $(time_LDFLAGS) $(time_OBJECTS) $(time_LDADD) $(LIBS)
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-stdlib: $(stdlib_OBJECTS) $(stdlib_DEPENDENCIES)
-	@rm -f stdlib
-	$(LINK) $(stdlib_LDFLAGS) $(stdlib_OBJECTS) $(stdlib_LDADD) $(LIBS)
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libtest.la: $(libtest_la_OBJECTS) $(libtest_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(libtest_la_LDFLAGS) $(libtest_la_OBJECTS) $(libtest_la_LIBADD) $(LIBS)
+
+libtime.la: $(libtime_la_OBJECTS) $(libtime_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(libtime_la_LDFLAGS) $(libtime_la_OBJECTS) $(libtime_la_LIBADD) $(LIBS)
+
+libstdlib.la: $(libstdlib_la_OBJECTS) $(libstdlib_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkglibexecdir) $(libstdlib_la_LDFLAGS) $(libstdlib_la_OBJECTS) $(libstdlib_la_LIBADD) $(LIBS)
 
 tags: TAGS
 
@@ -251,11 +249,17 @@ distdir: $(DISTFILES)
 	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
 	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
+stdlib.lo stdlib.o: stdlib.c ../src/m4.h ../config.h ../lib/obstack.h \
+	../src/builtin.h
+test.o: test.c ../src/m4.h ../config.h ../lib/obstack.h ../src/builtin.h
+time.lo time.o: time.c ../src/m4.h ../config.h ../lib/obstack.h \
+	../src/builtin.h
+
 info:
 dvi:
 check: all
 installcheck:
-install-exec: install-pkglibexecPROGRAMS
+install-exec: install-pkglibexecLTLIBRARIES
 	@$(NORMAL_INSTALL)
 
 install-data: 
@@ -264,7 +268,7 @@ install-data:
 install: install-exec install-data all
 	@:
 
-uninstall: uninstall-pkglibexecPROGRAMS
+uninstall: uninstall-pkglibexecLTLIBRARIES
 
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
@@ -281,32 +285,60 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean:  mostlyclean-pkglibexecPROGRAMS mostlyclean-compile \
-		mostlyclean-tags mostlyclean-generic
+mostlyclean:  mostlyclean-pkglibexecLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags \
+		mostlyclean-generic
 
-clean:  clean-pkglibexecPROGRAMS clean-compile clean-tags clean-generic \
-		mostlyclean
+clean:  clean-pkglibexecLTLIBRARIES clean-compile clean-libtool \
+		clean-tags clean-generic mostlyclean
 
-distclean:  distclean-pkglibexecPROGRAMS distclean-compile \
-		distclean-tags distclean-generic clean
+distclean:  distclean-pkglibexecLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-generic \
+		clean
 	-rm -f config.status
+	-rm -f libtool
 
-maintainer-clean:  maintainer-clean-pkglibexecPROGRAMS \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-generic distclean
+maintainer-clean:  maintainer-clean-pkglibexecLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-.PHONY: mostlyclean-pkglibexecPROGRAMS distclean-pkglibexecPROGRAMS \
-clean-pkglibexecPROGRAMS maintainer-clean-pkglibexecPROGRAMS \
-uninstall-pkglibexecPROGRAMS install-pkglibexecPROGRAMS \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir info dvi installcheck \
-install-exec install-data install uninstall all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+.PHONY: mostlyclean-pkglibexecLTLIBRARIES \
+distclean-pkglibexecLTLIBRARIES clean-pkglibexecLTLIBRARIES \
+maintainer-clean-pkglibexecLTLIBRARIES uninstall-pkglibexecLTLIBRARIES \
+install-pkglibexecLTLIBRARIES mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile mostlyclean-libtool \
+distclean-libtool clean-libtool maintainer-clean-libtool tags \
+mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+distdir info dvi installcheck install-exec install-data install \
+uninstall all installdirs mostlyclean-generic distclean-generic \
+clean-generic maintainer-clean-generic clean mostlyclean distclean \
+maintainer-clean
 
+
+install-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
+	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
+          module=`echo "$$p" | sed -e 's/^lib\(.*\)\.la/\1/'`; \
+	  lib=.libs/lib$$module.so.0.0.0; \
+	  if test -f $$lib; then \
+	    echo "${INSTALL} $$lib $(DESTDIR)$(pkglibexecdir)/$$module"; \
+	    ${INSTALL} $$lib $(DESTDIR)$(pkglibexecdir)/$$module; \
+	  else :; fi; \
+	done
+
+uninstall-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
+          module=`echo "$$p" | sed -e 's/^lib\(.*\)\.la/\1/'`; \
+	  if test -f $$lib; then \
+	    echo "rm -f $(DESTDIR)$(pkglibexecdir)/$$module"; \
+	    rm -f $(DESTDIR)$(pkglibexecdir)/$$module; \
+	  else :; fi; \
+	done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

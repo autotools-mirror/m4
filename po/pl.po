@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "PO-Revision-Date: 1998-08-05 17:30+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -102,7 +102,7 @@ msgstr "Nie mogê ustawiæ pliku b³êdów: %s"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "UWAGA: \\0 zniknie, w podstawieniach u¿yj zamiast tego \\&"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "B³êdne wyra¿enie regularne `%s': %s"
@@ -228,7 +228,7 @@ msgstr "B£¡D WEWNÊTRZNY: B³±d stosu wej¶ciowego w peek_input ()"
 msgid "NONE"
 msgstr "¯ADEN"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "B£¡D: EOF w ³añcuchu"
 
@@ -373,12 +373,18 @@ msgstr ""
 "\n"
 "Je¿eli brak PLIKu lub PLIK to `-', czytane jest std. wej¶cie.\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "B³êdne flagi debugowania: `%s'"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod w od³o¿onych argumentach"
 
@@ -403,9 +409,9 @@ msgstr "B£¡D WEWNÊTRZNY: B³êdny symbol w call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "B£¡D: Osi±gniêty limit rekursji %d, u¿yj -L<N> ¿eby go zmieniæ"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

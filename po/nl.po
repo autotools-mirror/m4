@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -103,7 +103,7 @@ msgstr "Kan fout bestand niet instellen: %s"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "LET OP: \\0 zal verdwijnen, gebruik hiervoor \\& als vervanging"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Onjuiste reguliere expressie `%s': %s"
@@ -229,7 +229,7 @@ msgstr "INTERNE FOUT: Invoer stapel botch in peek_input ()"
 msgid "NONE"
 msgstr "GEEN"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
 
@@ -379,12 +379,21 @@ msgstr ""
 "\n"
 "Als geen BESTAND of als BESTAND `-' is, standaard invoer wordt gelezen.\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+#, fuzzy
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+"\n"
+"Meld fouten via <m4-bugs@gnu.org>.\n"
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Onjuiste debug vlaggen: `%s'"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNE FOUT: Onjuiste code in afgeleide argumenten"
 
@@ -410,9 +419,9 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FOUT: Recursie limiet of %d overschreden, gebruik -L<N> om dit te wijzigen"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198
@@ -471,10 +480,3 @@ msgstr "INTERNE FOUT: Ongeldige mode voor symbol_lookup ()"
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
-
-#~ msgid ""
-#~ "\n"
-#~ "Report bugs to <m4-bugs@gnu.org>.\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Meld fouten via <m4-bugs@gnu.org>.\n"

@@ -45,7 +45,7 @@
 #undef HAVE_DLOPEN
 
 /* Define to 1 if the -ldld library should be used .  */
-#undef USE_SHL_LOAD
+#undef HAVE_SHL_LOAD
 
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS

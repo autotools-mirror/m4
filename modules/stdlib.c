@@ -275,9 +275,9 @@ m4_uname (struct obstack *obs, int argc, token_data **argv)
       obstack_1grow (obs, ',');
       shipout_string (obs, ut.release, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.machine, 0, TRUE);
+      shipout_string (obs, ut.version, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.domainname, 0, TRUE);
+      shipout_string (obs, ut.machine, 0, TRUE);
     }
 }
 

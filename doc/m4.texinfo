@@ -2342,8 +2342,14 @@ apply translations to a file of numbers:
 @example
 changeword(`[_a-zA-Z0-9]+')
 define(1, 0)
-@result{}1
+@result{}
+1
+@result{}0
 @end example
+
+The syntax for regular expressions is the same as in GNU Emacs.
+@xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
+Manual}.
 
 Tightening the lexical rules is less useful, because it will generally
 make some of the builtins unavailable.  You could use it to prevent
@@ -2363,7 +2369,7 @@ is a restriction on the regular expressions that may be passed to
 @samp{foo}, it must also accept @samp{f} and @samp{fo}.
 
 @code{changeword} has another function.  If the regular expression
-supplied contains any bracketed subexpressions, then text outside
+supplied contains any subexpressions in parentheses, then text outside
 the first of these is discarded before symbol lookup.  So:
 
 @comment ignore
@@ -3915,9 +3921,9 @@ unproven and might go away.  Do not count on it yet.
 Some of the examples in this manuals are buggy.  Correctly working
 macros are presented here.
 
-The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be called without
-arguments to clear all pending diversions.  A macro that achieves that
-as well is:
+The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
+called without arguments to clear all pending diversions.  A macro that
+achieves that as well is:
 
 @comment ignore
 @example

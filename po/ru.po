@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "PO-Revision-Date: 1997-07-12 20:58\n"
 "Last-Translator: Denis Y. Pershin <dyp@siblug.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -103,7 +103,7 @@ msgstr "Невозможно назначить файл ошибок %s"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ПРЕДУПРЕЖДЕНИЕ: \\0 исчезнет, используйте \\& в заменах"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Неверное регулярное выражение: '%s': %s"
@@ -227,7 +227,7 @@ msgstr "ВНУТРЕННЯЯ ОШИБКА: Ошибка входного стека в peek_input ()"
 msgid "NONE"
 msgstr "НИЧЕГО"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "ОШИБКА: Конец файла в строке"
 
@@ -380,12 +380,18 @@ msgstr ""
 "\n"
 "Если FILE не существует или FILE это `-', используется стандартный вход.\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Неверный флаг отладки: '%s'"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ВНУТРЕННЯЯ ОШИБКА: Неверный код в косвенных аргументах"
 
@@ -411,9 +417,9 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "ОШИБКА: Лимит рекурсии %d исчерпан, используйте -L<N> чтобы изменить его"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

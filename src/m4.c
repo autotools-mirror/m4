@@ -200,6 +200,8 @@ FLAGS is any of:\n\
 \n\
 If no FILE or if FILE is `-', standard input is read.\n"),
 	     stdout);
+
+      fputs (_("\nReport bugs to <bug-m4@gnu.org>.\n"), stdout);
     }
   exit (status);
 }

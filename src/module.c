@@ -68,11 +68,77 @@
  * safe to load the same module several times, it has no effect.
  **/
 
-#if defined (USE_SHL_LOAD)
-# include <dl.h>
-#else
-# include <dlfcn.h>
-#endif
+#if defined (HAVE_SHL_LOAD)
+
+#include <dl.h>
+
+voidstar
+dynamic_load (const char *modname)
+{
+  return shl_load (modname, BIND_IMMEDIATE, 0L);
+}
+
+void
+dynamic_unload (voidstar handle)
+{
+  shl_unload ((shl_t)handle);
+}
+
+voidstar
+dynamic_find_data (voidstar handle, const char *symbol)
+{
+  voidstar addr;
+
+  /* XXX TYPE_PROCEDURE is probably wrong here, as it is a data pointer */
+  shl_findsym ((shl_t)handle, symbol, TYPE_PROCEDURE, (voidstar)&addr);
+  return addr;
+}
+
+voidstar
+dynamic_find_func (voidstar handle, const char *symbol)
+{
+  voidstar addr;
+
+  shl_findsym ((shl_t)handle, symbol, TYPE_PROCEDURE, (voidstar)&addr);
+  return addr;
+}
+
+#else  /* HAVE_DLOPEN */
+
+#include <dlfcn.h>
+
+voidstar
+dynamic_load (const char *modname)
+{
+  return dlopen (modname, RTLD_NOW);
+}
+
+void
+dynamic_unload(voidstar handle)
+{
+  dlclose (handle);
+}
+
+voidstar
+dynamic_find_data (voidstar handle, const char *symbol)
+{
+  return dlsym (handle, symbol);
+}
+
+voidstar
+dynamic_find_func (voidstar handle, const char *symbol)
+{
+  return dlsym (handle, symbol);
+}
+
+#endif /* HAVE_DLOPEN */
+
+
+
+
+/* 
+ * The rest of the code should be common for all interfaces. 
+ */
 
 
 /* This list is used to check for repeated loading of the same modules.  */
@@ -106,22 +172,14 @@ module_init (void)
 voidstar
 module_try_load (const char *modname)
 {
-#if defined (USE_SHL_LOAD)
-  return shl_load (modname, BIND_IMMEDIATE, 0L);
-#else
-  return dlopen (modname, RTLD_NOW);
-#endif
+  return dynamic_load (modname);
 }
 
 
 void
 module_unload(voidstar handle)
 {
-#if defined (USE_SHL_LOAD)
-  shl_unload (handle);
-#else
-  dlclose (handle);
-#endif
+  dynamic_unload (handle);
 }
 
 /* 
@@ -145,7 +203,7 @@ module_load (const char *modname, struct obstack *obs)
   if (handle == NULL)
     {
       M4ERROR ((EXIT_FAILURE, 0, 
-		_("Error: cannot find module `%s'"), modname));
+		_("ERROR: cannot find module `%s'"), modname));
     }
 
   for (list = modules; list != NULL; list = list->next)
@@ -158,13 +216,7 @@ module_load (const char *modname, struct obstack *obs)
 	return NULL;
       }
 
-
-#if defined (USE_SHL_LOAD)
-  /* XXX TYPE_PROCEDURE is probably wrong here, as it is a data pointer */
-  shl_findsym (&handle, "m4_macro_table", TYPE_PROCEDURE, (voidstar)&btab);
-#else
-  btab = (builtin *) dlsym (handle, "m4_macro_table");
-#endif
+  btab = (builtin *) dynamic_find_data (handle, "m4_macro_table");
 
   if (btab == NULL) {
 #ifdef DEBUG_MODULES
@@ -185,12 +237,8 @@ module_load (const char *modname, struct obstack *obs)
 #endif /* DEBUG_MODULES */
 
 
-#if defined (USE_SHL_LOAD)
-  shl_findsym (&handle, "m4_init_module", TYPE_PROCEDURE,
-	       (voidstar)&init_func);
-#else
-  init_func = (module_init_t *) dlsym (handle, "m4_init_module");
-#endif
+  init_func = (module_init_t *)
+    dynamic_find_func (handle, "m4_init_module");
 
   if (init_func != NULL)
     {
@@ -212,8 +260,9 @@ module_unload_all(void)
 
   while (modules != NULL)
     {
-      finish_func = (module_finish_t *) dlsym (modules->handle,
-					       "m4_finish_module");
+      finish_func = (module_finish_t *)
+	dynamic_find_func (modules->handle, "m4_finish_module");
+
       if (finish_func != NULL)
 	{
 	  (*finish_func)();
@@ -223,7 +272,7 @@ module_unload_all(void)
 #endif /* DEBUG_MODULES */
 	}
 
-      module_unload(modules->handle);
+      module_unload (modules->handle);
 
 #ifdef DEBUG_MODULES
       DEBUG_MESSAGE1("module %s unloaded", modules->modname);

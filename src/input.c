@@ -993,6 +993,7 @@ set_word_regexp (const char *regexp)
   int i;
   char test[2];
   const char *msg;
+  static struct re_pattern_buffer new_regexp;
 
   if (!strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
@@ -1000,9 +1001,7 @@ set_word_regexp (const char *regexp)
       return;
     }
 
-  default_word_regexp = FALSE;
-
-  msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  msg = re_compile_pattern (regexp, strlen (regexp), &new_regexp);
 
   if (msg != NULL)
     {
@@ -1010,6 +1009,10 @@ set_word_regexp (const char *regexp)
 		_("Bad regular expression `%s': %s"), regexp, msg));
       return;
     }
+
+  default_word_regexp = FALSE;
+
+  word_regexp = new_regexp;
 
   if (word_start == NULL)
     word_start = xmalloc (256);

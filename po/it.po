@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"
@@ -103,7 +103,7 @@ msgstr "Impossibile aprire l' archivio di errore: %s"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Espressione regolare errata `%s': %s"
@@ -227,7 +227,7 @@ msgstr "ERRORE INTERNO: Stack di ingresso corrotto in peek_input ()"
 msgid "NONE"
 msgstr "NESSUNO"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "ERRORE: Fine prematura di una stringa"
 
@@ -323,12 +323,18 @@ msgid ""
 "If no FILE or if FILE is `-', standard input is read.\n"
 msgstr ""
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Indicatori di debug errati: `%s'"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERRORE INTERNO: Codice errato in argomenti differiti"
 
@@ -353,9 +359,9 @@ msgstr "ERRORE INTERNO: Tipo simbolo errato in call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

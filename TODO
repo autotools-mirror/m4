@@ -6,6 +6,15 @@ for any of these ideas or if you have others to add.
 
 * Features or problems
 
+  + GMP eval() should be enables if the library is present, maybe by
+    providing two different versions of eval().  That way users can
+    choose whether to use gmp on an individual basis.
+
+  + There should be a way ot have m4 discard comments instead of
+    outputting them.
+
+  + Implement discarding comment delimiters with the syntax table.
+
   + The module system is still rudimentary (see below)
 
   + Changes in the syntax_table are not saved to frozen files.
@@ -21,9 +30,6 @@ for any of these ideas or if you have others to add.
     when their (included) input files are updated (Erick B).
 
   + The test case `other-tests/stackovf.test' does not work.
-
-  + An escape character (like in TeX) should be definable through the
-    syntax table.
 
   + Sort out all the weird forms of interaction between changesyntax,
     changecom and changequote.  What happens if you install a quote with
@@ -42,10 +48,8 @@ for any of these ideas or if you have others to add.
 
 * Module specific issues
 
-  + Use libtool to build modules for portability.
-
   + Support for other DL interfaces besides dlopen, such as dld and
-    hpux.
+    hpux is still missing.
 
   + Modules should be loadable from the command line with something like
     `-M module.so' o `--load-module=module.so'.  M4 should abort if it

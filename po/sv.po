@@ -1,13 +1,13 @@
 # Swedish messages for m4
 # Copyright (C) 1996 Free Software Foundation, Inc.
 # <Jan.Djarv@mbox200.swipnet.se>, 1996.
-# $Revision: 1.1.1.7 $
+# $Revision$
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
-"PO-Revision-Date: $Date: 2000/02/17 03:09:57 $\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
+"PO-Revision-Date: $Date$\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -109,7 +109,7 @@ msgstr "Kan inte sätta felutskriftsfil: %s"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VARNING: \\0 kommer att försvinna, använd \\& i ersättningar"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, fuzzy, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Otillåtet reguljäruttryck \"%s\": %s"
@@ -249,7 +249,7 @@ msgstr "INTERNT FEL: Instacken havererade i peek_input ()"
 msgid "NONE"
 msgstr "INGET"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 #, fuzzy
 msgid "ERROR: EOF in string"
 msgstr "FEL: Filslut i sträng"
@@ -404,12 +404,18 @@ msgstr ""
 "\n"
 "Om ingen FIL anges eller om FIL är `-', så läses standard in.\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, fuzzy, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Okänd felsökningsflagga \"%s\""
 
-#: src/m4.c:445
+#: src/m4.c:447
 #, fuzzy
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNT FEL: Otillåten kod i argument"
@@ -439,9 +445,9 @@ msgstr "INTERNT FEL: Otillåten symboltyp i call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "FEL: Rekursionsgräns %d överskriden, använd -L<N> för att ändra"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

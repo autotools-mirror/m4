@@ -546,7 +546,7 @@ void reload_frozen_state __P ((const char *));
 typedef void module_init_t (struct obstack *obs);
 typedef void module_finish_t (void);
 
-#if defined(HAVE_DLOPEN) || defined(USE_SHL_LOAD)
+#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 #define WITH_MODULES
 #endif
 

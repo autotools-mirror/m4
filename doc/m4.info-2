@@ -604,7 +604,12 @@ apply translations to a file of numbers:
 
      changeword(`[_a-zA-Z0-9]+')
      define(1, 0)
-     =>1
+     =>
+     1
+     =>0
+
+   The syntax for regular expressions is the same as in GNU Emacs.
+*Note Syntax of Regular Expressions: (emacs)Regexps.
 
    Tightening the lexical rules is less useful, because it will
 generally make some of the builtins unavailable.  You could use it to
@@ -621,8 +626,8 @@ restriction on the regular expressions that may be passed to
 it must also accept `f' and `fo'.
 
    `changeword' has another function.  If the regular expression
-supplied contains any bracketed subexpressions, then text outside the
-first of these is discarded before symbol lookup.  So:
+supplied contains any subexpressions in parentheses, then text outside
+the first of these is discarded before symbol lookup.  So:
 
      changecom(`/*', `*/')
      changeword(`#\([_a-zA-Z0-9]*\)')

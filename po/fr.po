@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -105,7 +105,7 @@ msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 "ATTENTION: \\\\0 disparaîtra, utiliser \\\\& plutôt pour les remplacements"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Mauvaise expression régulière «%s»: %s"
@@ -233,7 +233,7 @@ msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans peek_input ()"
 msgid "NONE"
 msgstr "AUCUN"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "ERREUR: Fin-de-fichier dans la chaîne"
 
@@ -383,12 +383,18 @@ msgstr ""
 "\n"
 "Si aucun FICHIER ou si FICHIER vaut «-», lit l'entrée standard.\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Mauvais indicateurs de mise-au-point: «%s»"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERREUR INTERNE: Mauvais code dans les arguments différés"
 
@@ -414,9 +420,9 @@ msgstr "ERREUR INTERNE: Mauvais type de symbole dans call_macro ()"
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "ERREUR: Limite de récursion %d dépassée, la changer par -L<N>"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

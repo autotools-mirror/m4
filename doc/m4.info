@@ -28,7 +28,7 @@ translation approved by the Foundation.
 Indirect:
 m4.info-1: 973
 m4.info-2: 50118
-m4.info-3: 99015
+m4.info-3: 99156
 
 Tag Table:
 (Indirect)
@@ -75,43 +75,43 @@ Node: Changequote56142
 Node: Changecom57506
 Node: Changesyntax58792
 Node: Changeword66041
-Node: M4wrap69276
-Node: File Inclusion70478
-Node: Include70794
-Node: Search Path72813
-Node: Diversions73600
-Node: Divert74837
-Node: Undivert75969
-Node: Divnum77940
-Node: Cleardiv78485
-Node: Text handling79540
-Node: Len80260
-Node: Index80658
-Node: Regexp81243
-Node: Substr82334
-Node: Translit82954
-Node: Patsubst84397
-Node: Format86488
-Node: Arithmetic88050
-Node: Incr88507
-Node: Eval89011
-Node: UNIX commands92617
-Node: Syscmd93088
-Node: Esyscmd93801
-Node: Sysval94749
-Node: Maketemp95154
-Node: Miscellaneous96212
-Node: Errprint96643
-Node: M4exit97625
-Node: Syncoutput98423
-Node: Frozen files99015
-Node: Compatibility103934
-Node: Extensions104550
-Node: Incompatibilities107020
-Node: Other Incompat107462
-Node: Experiments109627
-Node: Answers111134
-Node: Concept index111766
-Node: Macro index119187
+Node: M4wrap69417
+Node: File Inclusion70619
+Node: Include70935
+Node: Search Path72954
+Node: Diversions73741
+Node: Divert74978
+Node: Undivert76110
+Node: Divnum78081
+Node: Cleardiv78626
+Node: Text handling79681
+Node: Len80401
+Node: Index80799
+Node: Regexp81384
+Node: Substr82475
+Node: Translit83095
+Node: Patsubst84538
+Node: Format86629
+Node: Arithmetic88191
+Node: Incr88648
+Node: Eval89152
+Node: UNIX commands92758
+Node: Syscmd93229
+Node: Esyscmd93942
+Node: Sysval94890
+Node: Maketemp95295
+Node: Miscellaneous96353
+Node: Errprint96784
+Node: M4exit97766
+Node: Syncoutput98564
+Node: Frozen files99156
+Node: Compatibility104075
+Node: Extensions104691
+Node: Incompatibilities107161
+Node: Other Incompat107603
+Node: Experiments109768
+Node: Answers111275
+Node: Concept index111907
+Node: Macro index119328
 
 End Tag Table

@@ -1,9 +1,20 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
+Version beta 1.4m - November 1998, by Rene' Seindal
+
+* Using libtool for compiling modules and for linking main app.
+
+* Reorganised the dynamic module code to encapsulate system dependencies
+  better.  The code for HPUX shl_load() still needs testing and debugging.
+  A dld interface is also missing.  Any volunteers?
+
+* The files from the GNU m4 web-site is now in examples/WWW as a more
+  complete example of what GNU m4 can do.
+
 Version beta 1.4l - November 1998, by Rene' Seindal
 
-* GNU m4 now has and escape syntax category.  If a character is marked as
+* GNU m4 now has an escape syntax category.  If a character is marked as
   an escape, words are only recognised as macros if preceded by an escape
   character.  It is a bit like -P, but dynamic: it can be turned on and
   off.  The GNU m4 web-site on http://www.seindal.dk/rene/gnu/ is

@@ -1,3 +1,42 @@
+1998-11-18  Rene' Seindal  <rene@seindal.dk>
+
+	* src/input.c (set_word_regexp): Fixed a bug, where word_regexp
+	could be changed when compiling a illegal regexp, causing later
+	use of the regexp to dump core.
+
+	* src/module.c (module_load): Changed error message to conform to
+	standards. 
+
+	* src/m4.c (usage): Added message about reporting bugs.
+
+	* doc/m4.texinfo (Changeword): Corrected a wrong example.
+	(Changeword): Added note about the type of regexps used.
+
+	* ltconfig, ltmain.sh: New files from Libtool 1.2.
+
+	* configure.in: Added calls to AM_ENABLE_SHARED, AM_DISABLE_STATIC
+	and AM_PROG_LIBTOOL.
+
+	* acm4/modules.m4 (AM_WITH_MODULES): Redone completely to work
+	with libtool.
+
+	* modules/Makefile.am: Changed completely to compile modules using
+	libtool.  The modules are compiled as shared libraries, and are
+	renamed when installed.
+
+	* src/m4.h, src/module.c, acm4/modules.m4, acconfig.h: Renamed
+	USE_SHL_LOAD to HAVE_SHL_LOAD
+
+	* src/builtin.c (shipout_string): Now tests for a NULL string.
+
+	* src/module.c: New level of indirection around non-portable
+	functions to load shared objects.  Intended to encapsulate the non
+	portable parts better and to reduce the number of #ifdefs in the
+	code.
+
+	* Makefile.am (DIST_SUBDIRS): Instead of EXTRA_DIST for added
+	directory modules/ to the distribution.
+
 1998-11-15  Rene' Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4l.

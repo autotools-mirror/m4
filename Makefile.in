@@ -64,10 +64,8 @@ CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
-DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
-GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -78,20 +76,20 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MODULES_DIR = @MODULES_DIR@
-MODULE_O = @MODULE_O@
 MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
-OS_NAME = @OS_NAME@
+NM = @NM@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-SHARED_EXT = @SHARED_EXT@
-SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
@@ -103,13 +101,6 @@ pkglibexecdir = @pkglibexecdir@
 AUTOMAKE_OPTIONS = 1.3b gnits
 
 SUBDIRS = acm4 intl po lib src doc tests examples @MODULES_DIR@
-
-# These are excluded otherwise
-EXTRA_DIST = modules/Makefile.am modules/Makefile.in \
-	modules/test.c modules/test.m4 \
-	modules/time.c modules/time.m4 \
-	modules/stdlib.c modules/stdlib.m4 \
-	modules/README
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -117,7 +108,8 @@ CONFIG_CLEAN_FILES =
 DIST_COMMON =  README ABOUT-NLS AUTHORS BACKLOG COPYING ChangeLog \
 INSTALL Makefile.am Makefile.in NEWS README-alpha THANKS TODO \
 acconfig.h acinclude.m4 aclocal.m4 config.guess config.h.in config.sub \
-configure configure.in install-sh missing mkinstalldirs stamp-h.in
+configure configure.in install-sh ltconfig ltmain.sh missing \
+mkinstalldirs stamp-h.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -268,7 +260,6 @@ distdir: $(DISTFILES)
 	-rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
-	$(mkinstalldirs) $(distdir)/modules
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  test -f $(distdir)/$$file \
@@ -333,6 +324,7 @@ clean:  clean-recursive clean-am
 
 distclean:  distclean-recursive distclean-am
 	-rm -f config.status
+	-rm -f libtool
 
 maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
 	@echo "This command is intended for maintainers to use;"
@@ -351,6 +343,8 @@ uninstall all installdirs mostlyclean-generic distclean-generic \
 clean-generic maintainer-clean-generic clean mostlyclean distclean \
 maintainer-clean
 
+
+# DIST_SUBDIRS = acm4 intl po lib src doc tests examples modules
 
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.

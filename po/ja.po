@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"POT-Creation-Date: 1998-11-18 12:55+0100\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -102,7 +102,7 @@ msgstr "`%s' をエラーログファイルとしてセットできません。"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
-#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1009
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
@@ -233,7 +233,7 @@ msgstr "内部エラー：関数 peek_input () 内でスタックの入力に失敗しています。"
 msgid "NONE"
 msgstr "なし"
 
-#: src/input.c:1190 src/input.c:1217
+#: src/input.c:1193 src/input.c:1220
 msgid "ERROR: EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
@@ -393,12 +393,18 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/m4.c:366
+#: src/m4.c:204
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+
+#: src/m4.c:368
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/m4.c:445
+#: src/m4.c:447
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
 
@@ -425,9 +431,9 @@ msgstr ""
 "エラー：再帰的定義のネストが指定された値 %d を超えています。\n"
 "        -L<数字> オプションを用いてネスト数の上限を増やして下さい。"
 
-#: src/module.c:148
+#: src/module.c:206
 #, c-format
-msgid "Error: cannot find module `%s'"
+msgid "ERROR: cannot find module `%s'"
 msgstr ""
 
 #: src/output.c:198

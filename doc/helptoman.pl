@@ -23,7 +23,7 @@ use strict;
 use Getopt::Long;
 use POSIX 'strftime';
 
-my $RCS_Id = '$Id: helptoman.pl,v 1.1.1.1 2000/02/17 03:07:21 jbailey Exp $';
+my $RCS_Id = '$Id$';
 my $this_program = 'help2man';
 my $this_version = '0.0';
 
