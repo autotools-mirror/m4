@@ -1,3 +1,8 @@
+2001-08-07  Akim Demaille  <akim@epita.fr>
+
+	* config/Makefile.am, config/stackovf.m4: New.
+	* configure.in, Makefile.am: Adjust.
+
 2001-04-08  Roderick Koehle <Roderick.Koehle@infineon.com>
 
 	* modules/format.c (format):  Formatting for %f was not

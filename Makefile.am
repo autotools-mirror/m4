@@ -1,17 +1,17 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ##
 ## Copyright 2000 Free Software Foundation
-## 
+##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation; either version 2 of the License, or
 ## (at your option) any later version.
-## 
+##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with this program; see the file COPYING.  If not, write to
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -25,18 +25,12 @@ EXTRA_DIST	= bootstrap
 
 auxdir		= $(top_srcdir)/$(ac_aux_dir)
 
-AUX_DIST	= $(auxdir)/config.guess $(auxdir)/config.sub \
-		  $(auxdir)/install-sh $(auxdir)/ltmain.sh \
-		  $(auxdir)/missing $(auxdir)/mkinstalldirs
-AUX_DIST_EXTRA	= $(auxdir)/error.m4 $(auxdir)/gmp.m4 $(auxdir)/regex.m4
-
 ACLOCAL_AMFLAGS	= -I $(auxdir)
 
-SUBDIRS			= intl po m4 modules src tests examples doc .
+SUBDIRS			= intl po config m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 			  config-h.in configure ltmain.sh stamp-h.in \
-			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id \
-			  $(AUX_DIST)
+			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 
 
 ##                                                                      ##
@@ -57,7 +51,7 @@ dist-hook:
 # checks fail.  Also, make sure the NEWS file is up-to-date.
 cvs-dist: distcheck # maintainer-check
 	@if sed '1,2d;3q' $(srcdir)/NEWS | grep -e $(VERSION)" > dev/null; \
-	  echo "NEWS not updatedl not releasing" 1>&2; \
+	  echo "NEWS not updated not releasing" 1>&2; \
 	  exit 1;
 	fi
 	cd $(srcdir) && \
