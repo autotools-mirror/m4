@@ -644,11 +644,11 @@ AT_SETUP([indir])
 AT_DATA([[indir.m4]],
 [[define(`%%$$##', `>>>$0<<< cnt $#')
 
-# indir(`%%$$##', nonsens, nonsens)
-indir(`%%$$##', nonsens, nonsens)
+# indir(`%%$$##', nonsense, nonsense)
+indir(`%%$$##', nonsense, nonsense)
 
-# indir(`indir', `%%$$##', nonsens)
-indir(`indir', `%%$$##', nonsens)
+# indir(`indir', `%%$$##', nonsense)
+indir(`indir', `%%$$##', nonsense)
 
 # indir(`indir', `indir', `indir', `indir', `%%$$##')
 indir(`indir', `indir', `indir', `indir', `%%$$##')
@@ -657,10 +657,10 @@ indir(`indir', `indir', `indir', `indir', `%%$$##')
 AT_DATA([[expout]],
 [[
 
-# indir(`%%$$##', nonsens, nonsens)
+# indir(`%%$$##', nonsense, nonsense)
 >>>%%$$##<<< cnt 2
 
-# indir(`indir', `%%$$##', nonsens)
+# indir(`indir', `%%$$##', nonsense)
 >>>%%$$##<<< cnt 1
 
 # indir(`indir', `indir', `indir', `indir', `%%$$##')

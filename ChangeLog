@@ -1,3 +1,7 @@
+2001-08-28  Akim Demaille  <akim@epita.fr>
+
+	* examples/indir.m4, tests/others.at (indir): s/nonsens/nonsense/.
+
 2001-08-28  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap (generate.awk): Generate test cases with new script.
