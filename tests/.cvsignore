@@ -10,3 +10,5 @@ generated.at
 in stderr stdout expout experr
 testsuite
 *.log log
+m4
+package.m4
