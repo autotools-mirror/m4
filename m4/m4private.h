@@ -73,14 +73,23 @@ struct m4 {
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_symbol_table(C)		((C)->symtab)
+#  define m4_set_symbol_table(C, V)		((C)->symtab = (V))
 #  define m4_get_syntax_table(C)		((C)->syntax)
+#  define m4_set_syntax_table(C, V)		((C)->syntax = (V))
 #  define m4_get_debug_file(C)			((C)->debug_file)
+#  define m4_set_debug_file(C, V)		((C)->debug_file = (V))
 #  define m4_get_trace_messages(C)		((C)->trace_messages)
+#  define m4_set_trace_messages(C, V)		((C)->trace_messages = (V))
 #  define m4_get_warning_status_opt(C)		((C)->warning_status)
+#  define m4_set_warning_status_opt(C, V)	((C)->warning_status = (V))
 #  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
+#  define m4_set_no_gnu_extensions_opt(C, V)	((C)->no_gnu_extensions = (V))
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)
+#  define m4_set_nesting_limit_opt(C, V)	((C)->nesting_limit = (V))
 #  define m4_get_debug_level_opt(C)		((C)->debug_level)
+#  define m4_set_debug_level_opt(C, V)		((C)->debug_level = (V))
 #  define m4_get_max_debug_arg_length_opt(C)	((C)->max_debug_arg_length)
+#  define m4_set_max_debug_arg_length_opt(C, V)	((C)->max_debug_arg_length=(V))
 
 #  define m4_get_prefix_builtins_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_PREFIX_BUILTINS_BIT))
@@ -94,6 +103,9 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_SYNC_OUTPUT_BIT))
 #  define m4_get_posixly_correct_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
+
+/* No fast opt bit set macros, as they would need to evaluate their
+   arguments more than once, which would subtly change their semantics.  */
 #endif
 
 /* Accessors for private fields of m4, which have no function version
@@ -155,6 +167,8 @@ struct m4_symbol_value {
 #define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))
 #define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      ((S)->value))
 
+/* Fast macro versions of symbol table accessor functions,
+   that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_symbol_traced(S)	((S)->traced)
 #  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
@@ -235,6 +249,8 @@ struct m4_syntax_table {
   bool is_macro_escaped;
 };
 
+/* Fast macro versions of syntax table accessor functions,
+   that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_syntax_lquote(S)	((S)->lquote.string)
 #  define m4_get_syntax_rquote(S)	((S)->rquote.string)

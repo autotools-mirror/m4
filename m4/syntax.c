@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 2002, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -192,124 +192,6 @@ m4_syntax_code (char ch)
 
 
 
-/* Functions for setting quotes and comment delimiters.  Used by
-   m4_changecom () and m4_changequote ().  Both functions overrides the
-   syntax table to maintain compatibility.  */
-void
-m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
-{
-  int ch;
-
-  assert (syntax);
-
-  for (ch = 256; --ch >= 0;)	/* changequote overrides syntax_table */
-    if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE))
-      remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE);
-
-  free (syntax->lquote.string);
-  free (syntax->rquote.string);
-
-  syntax->lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
-  syntax->lquote.length = strlen (syntax->lquote.string);
-  syntax->rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
-  syntax->rquote.length = strlen (syntax->rquote.string);
-
-  syntax->is_single_quotes = (syntax->lquote.length == 1
-			      && syntax->rquote.length == 1);
-
-  if (syntax->is_single_quotes)
-    {
-      add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
-      add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
-    }
-
-  if (syntax->is_macro_escaped)
-    check_is_macro_escaped (syntax);
-}
-
-const char *
-m4_get_syntax_lquote (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->lquote.string;
-}
-
-const char *
-m4_get_syntax_rquote (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->rquote.string;
-}
-
-void
-m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
-{
-  int ch;
-
-  assert (syntax);
-
-  for (ch = 256; --ch >= 0;)	/* changecom overrides syntax_table */
-    if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM))
-      remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM);
-
-  free (syntax->bcomm.string);
-  free (syntax->ecomm.string);
-
-  syntax->bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
-  syntax->bcomm.length = strlen (syntax->bcomm.string);
-  syntax->ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
-  syntax->ecomm.length = strlen (syntax->ecomm.string);
-
-  syntax->is_single_comments = (syntax->bcomm.length == 1
-				&& syntax->ecomm.length == 1);
-
-  if (syntax->is_single_comments)
-    {
-      add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
-      add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
-    }
-
-  if (syntax->is_macro_escaped)
-    check_is_macro_escaped (syntax);
-}
-
-const char *
-m4_get_syntax_bcomm (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->bcomm.string;
-}
-
-const char *
-m4_get_syntax_ecomm (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->ecomm.string;
-}
-
-bool
-m4_is_syntax_single_quotes (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->is_single_quotes;
-}
-
-bool
-m4_is_syntax_single_comments (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->is_single_comments;
-}
-
-bool
-m4_is_syntax_macro_escaped (m4_syntax_table *syntax)
-{
-  assert (syntax);
-  return syntax->is_macro_escaped;
-}
-
-
-
 /* Functions to manipulate the syntax table.  */
 static int
 add_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
@@ -383,5 +265,134 @@ check_is_macro_escaped (m4_syntax_table *syntax)
 	break;
       }
 
+  return syntax->is_macro_escaped;
+}
+
+
+
+/* Functions for setting quotes and comment delimiters.  Used by
+   m4_changecom () and m4_changequote ().  Both functions overrides the
+   syntax table to maintain compatibility.  */
+void
+m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
+{
+  int ch;
+
+  assert (syntax);
+
+  for (ch = 256; --ch >= 0;)	/* changequote overrides syntax_table */
+    if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE);
+
+  free (syntax->lquote.string);
+  free (syntax->rquote.string);
+
+  syntax->lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
+  syntax->lquote.length = strlen (syntax->lquote.string);
+  syntax->rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
+  syntax->rquote.length = strlen (syntax->rquote.string);
+
+  syntax->is_single_quotes = (syntax->lquote.length == 1
+			      && syntax->rquote.length == 1);
+
+  if (syntax->is_single_quotes)
+    {
+      add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
+      add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
+    }
+
+  if (syntax->is_macro_escaped)
+    check_is_macro_escaped (syntax);
+}
+
+void
+m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
+{
+  int ch;
+
+  assert (syntax);
+
+  for (ch = 256; --ch >= 0;)	/* changecom overrides syntax_table */
+    if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM);
+
+  free (syntax->bcomm.string);
+  free (syntax->ecomm.string);
+
+  syntax->bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
+  syntax->bcomm.length = strlen (syntax->bcomm.string);
+  syntax->ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
+  syntax->ecomm.length = strlen (syntax->ecomm.string);
+
+  syntax->is_single_comments = (syntax->bcomm.length == 1
+				&& syntax->ecomm.length == 1);
+
+  if (syntax->is_single_comments)
+    {
+      add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
+      add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
+    }
+
+  if (syntax->is_macro_escaped)
+    check_is_macro_escaped (syntax);
+}
+
+
+
+/* Define these functions at the end, so that calls in the file use the
+   faster macro version from m4module.h.  */
+#undef m4_get_syntax_lquote
+const char *
+m4_get_syntax_lquote (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->lquote.string;
+}
+
+#undef m4_get_syntax_rquote
+const char *
+m4_get_syntax_rquote (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->rquote.string;
+}
+
+#undef m4_is_syntax_single_quotes
+bool
+m4_is_syntax_single_quotes (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_single_quotes;
+}
+
+#undef m4_get_syntax_bcomm
+const char *
+m4_get_syntax_bcomm (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->bcomm.string;
+}
+
+#undef m4_get_syntax_ecomm
+const char *
+m4_get_syntax_ecomm (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->ecomm.string;
+}
+
+#undef m4_is_syntax_single_comments
+bool
+m4_is_syntax_single_comments (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_single_comments;
+}
+
+#undef m4_is_syntax_macro_escaped
+bool
+m4_is_syntax_macro_escaped (m4_syntax_table *syntax)
+{
+  assert (syntax);
   return syntax->is_macro_escaped;
 }

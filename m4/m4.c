@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -78,23 +78,11 @@ m4_delete (m4 *context)
 
 
 /* Use the preprocessor to generate the repetitive bit twiddling functions
-   for us.  */
-#undef m4_get_symbol_table
-#undef m4_get_syntax_table
-#undef m4_get_warning_status_opt
-#undef m4_get_no_gnu_extensions_opt
-#undef m4_get_nesting_limit_opt
-#undef m4_get_debug_level_opt
-#undef m4_get_max_debug_arg_length_opt
-#undef m4_get_prefix_builtins_opt
-#undef m4_get_suppress_warnings_opt
-#undef m4_get_discard_comments_opt
-#undef m4_get_interactive_opt
-#undef m4_get_sync_output_opt
-#undef m4_get_posixly_correct_opt
-
+   for us.  Note the additional paretheses around the expanded function
+   name to protect against macro expansion from the fast macros used to
+   replace these functions when NDEBUG is defined.  */
 #define M4FIELD(type, base, field)					\
-	type CONC(m4_get_, base) (m4 *context)				\
+	type (CONC(m4_get_, base)) (m4 *context)			\
 	{								\
 	  assert (context);						\
 	  return context->field;					\
@@ -103,7 +91,7 @@ m4_context_field_table
 #undef M4FIELD
 
 #define M4FIELD(type, base, field)					\
-	type CONC(m4_set_, base) (m4 *context, type value)		\
+	type (CONC(m4_set_, base)) (m4 *context, type value)		\
 	{								\
 	  assert (context);						\
 	  return context->field = value;				\
@@ -112,7 +100,7 @@ m4_context_field_table
 #undef M4FIELD
 
 #define M4OPT_BIT(bit, base) 						\
-	bool CONC(m4_get_, base) (m4 *context)			\
+	bool (CONC(m4_get_, base)) (m4 *context)			\
 	{								\
 	  assert (context);						\
 	  return BIT_TEST (context->opt_flags, (bit));			\
@@ -121,7 +109,7 @@ m4_context_opt_bit_table
 #undef M4OPT_BIT
 
 #define M4OPT_BIT(bit, base) 						\
-	bool CONC(m4_set_, base) (m4 *context, bool value)	\
+	bool (CONC(m4_set_, base)) (m4 *context, bool value)		\
 	{								\
 	  assert (context);						\
 	  if (value)							\

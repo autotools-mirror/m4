@@ -1,3 +1,25 @@
+2004-10-14  Noah Misch  <noah@cs.caltech.edu>,
+	    Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/m4.c (m4_context_field_table, m4_context_opt_bit_table):
+	Protect definitions from macro expansion under -DNDEBUG by
+	parenthesising the expanded function names.
+	* m4/syntax.c (m4_get_syntax_lquote, m4_get_syntax_rquote)
+	(m4_get_syntax_bcomm, m4_get_syntax_ecomm)
+	(m4_is_syntax_single_quotes, m4_is_syntax_single_comments)
+	(m4_is_syntax_macro_escaped): Similarly protect function
+	definitions from macro expansion under -DNDEBUG by #undefing the
+	matching macro names before each definition.  Also, move all the
+	function definitions to the end of the file so that any
+	invocations in the rest of the file pick up the fast macro
+	versions.
+	* m4/m4private.h (m4_set_symbol_table, m4_set_syntax_table)
+	(m4_set_debug_file, m4_set_trace_messages)
+	(m4_set_warning_status_opt, m4_set_no_gnu_extensions_opt)
+	(m4_set_nesting_limit_opt, m4_set_debug_level_opt)
+	(m4_set_max_debug_arg_length_opt): New fast macro versions of the
+	option setter functions.
+
 2004-09-23  Gary V. Vaughan  <gary@gnu.org>
 
 	* src/main.c: Include gnulib files from the correct directory.
