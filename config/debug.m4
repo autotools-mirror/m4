@@ -27,7 +27,6 @@
 # Debugging Support
 AC_DEFUN([M4_AC_CHECK_DEBUGGING],
 [AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AC_LIBTOOL_COMPILER_OPTION])
 AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],
                            [build for debugging [default=no]])])
 AC_MSG_CHECKING(for compilation debug mode)

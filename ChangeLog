@@ -1,5 +1,9 @@
 2003-08-14  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/debug.m4 (M4_AC_CHECK_DEBUGGING): Don't AC_REQUIRE a
+	macro that requires arguments! This stops the shell's bad
+	substitution error at configure time.
+
 	* tests/Makefile.am (TESTS_ENVIRONMENT): Now we can pass make
 	variables to the testsuite shell.  Set the value of USE_GMP so
 	that the gmp test will run!
