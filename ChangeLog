@@ -1,5 +1,9 @@
 2005-02-03  Gary V. Vaughan  <gary@gnu.org>
 
+	* src/m4.c (main): Modernise the --version output.
+
+2005-02-03  Gary V. Vaughan  <gary@gnu.org>
+
 	Modernise the configury a little to prevent spurious errors from
 	Autoconf-2.59's autoreconf:
 

@@ -390,6 +390,13 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       printf ("%s\n", PACKAGE_STRING);
+      printf ("Written by Rene' Seindal.\n\
+\n\
+Copyright (C) 2005 Free Software Foundation, Inc.\n\
+This is free software; see the source for copying conditions.  There is NO\n\
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+");
+
       exit (EXIT_SUCCESS);
     }
 

@@ -41,7 +41,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release .  It is now to be considered stable, future
+   This is release 1.4.2a.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -3132,80 +3132,80 @@ characters removed in the index.
 
 Tag Table:
 Node: Top947
-Node: Preliminaries6942
-Node: Intro7664
-Node: History9270
-Node: Invoking m410188
-Node: Bugs16981
-Node: Manual18246
-Node: Syntax19609
-Node: Names20193
-Node: Quoted strings20563
-Node: Other tokens21145
-Node: Comments21359
-Node: Macros22019
-Node: Invocation22509
-Node: Inhibiting Invocation23317
-Node: Macro Arguments26460
-Node: Quoting Arguments27721
-Node: Macro expansion28523
-Node: Definitions29183
-Node: Define29956
-Node: Arguments30764
-Node: Pseudo Arguments32241
-Node: Undefine34089
-Node: Defn34748
-Node: Pushdef35902
-Node: Indir37735
-Node: Builtin38494
-Node: Conditionals38935
-Node: Ifdef39639
-Node: Ifelse40405
-Node: Loops42168
-Node: Debugging45437
-Node: Dumpdef46013
-Node: Trace46859
-Node: Debug Levels48236
-Node: Debug Output50617
-Node: Input Control51134
-Node: Dnl51668
-Node: Changequote52790
-Node: Changecom54151
-Node: Changeword55432
-Node: M4wrap58641
-Node: File Inclusion59840
-Node: Include60153
-Node: Search Path62078
-Node: Diversions62861
-Node: Divert64095
-Node: Undivert65224
-Node: Divnum67155
-Node: Cleardiv67697
-Node: Text handling68730
-Node: Len69447
-Node: Index69842
-Node: Regexp70424
-Node: Substr71512
-Node: Translit72129
-Node: Patsubst73569
-Node: Format75657
-Node: Arithmetic77143
-Node: Incr77585
-Node: Eval78086
-Node: UNIX commands81082
-Node: Syscmd81550
-Node: Esyscmd82261
-Node: Sysval83204
-Node: Maketemp83608
-Node: Miscellaneous84348
-Node: Errprint84714
-Node: M4exit85702
-Node: Frozen files86484
-Node: Compatibility91401
-Node: Extensions92016
-Node: Incompatibilities94369
-Node: Other Incompat94808
-Node: Concept index96968
-Node: Macro index103973
+Node: Preliminaries6948
+Node: Intro7670
+Node: History9276
+Node: Invoking m410194
+Node: Bugs16987
+Node: Manual18252
+Node: Syntax19615
+Node: Names20199
+Node: Quoted strings20569
+Node: Other tokens21151
+Node: Comments21365
+Node: Macros22025
+Node: Invocation22515
+Node: Inhibiting Invocation23323
+Node: Macro Arguments26466
+Node: Quoting Arguments27727
+Node: Macro expansion28529
+Node: Definitions29189
+Node: Define29962
+Node: Arguments30770
+Node: Pseudo Arguments32247
+Node: Undefine34095
+Node: Defn34754
+Node: Pushdef35908
+Node: Indir37741
+Node: Builtin38500
+Node: Conditionals38941
+Node: Ifdef39645
+Node: Ifelse40411
+Node: Loops42174
+Node: Debugging45443
+Node: Dumpdef46019
+Node: Trace46865
+Node: Debug Levels48242
+Node: Debug Output50623
+Node: Input Control51140
+Node: Dnl51674
+Node: Changequote52796
+Node: Changecom54157
+Node: Changeword55438
+Node: M4wrap58647
+Node: File Inclusion59846
+Node: Include60159
+Node: Search Path62084
+Node: Diversions62867
+Node: Divert64101
+Node: Undivert65230
+Node: Divnum67161
+Node: Cleardiv67703
+Node: Text handling68736
+Node: Len69453
+Node: Index69848
+Node: Regexp70430
+Node: Substr71518
+Node: Translit72135
+Node: Patsubst73575
+Node: Format75663
+Node: Arithmetic77149
+Node: Incr77591
+Node: Eval78092
+Node: UNIX commands81088
+Node: Syscmd81556
+Node: Esyscmd82267
+Node: Sysval83210
+Node: Maketemp83614
+Node: Miscellaneous84354
+Node: Errprint84720
+Node: M4exit85708
+Node: Frozen files86490
+Node: Compatibility91407
+Node: Extensions92022
+Node: Incompatibilities94375
+Node: Other Incompat94814
+Node: Concept index96974
+Node: Macro index103979
 
 End Tag Table
