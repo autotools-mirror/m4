@@ -8,11 +8,8 @@ define(`shadow', `local::`shadow'')
 test
 shadow
 
-# save our local `shadow' macro until the Shadow module is unloaded
-pushdef(`shadow')
-
 # module Shadow defines `shadow' and `test' macros
-loadmodule(`shadow')
+load(`shadow')
 dumpdef(`test')
 dumpdef(`shadow')
 test
@@ -22,38 +19,35 @@ shadow
 define(`Shadow::test', defn(`test'))
 
 # module Test also defines a `test' macro
-loadmodule(`test') 
+load(`modtest') 
 dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
 
 # Reloading Shadow shouldn't affect anything
-loadmodule(`shadow')
+load(`shadow')
 dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
 
-# Unloading Test will not unshadow the test definition in Shadow without
-# some macro magic
-unloadmodule(`test')
-define(`test', defn(`Shadow::test'))
-undefine(`Shadow::test')
+# Unloading Test will unshadow the test definition in Shadow
+unload(`modtest')
 dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
 
 # Unloading Shadow once has no effect (we loaded it twice)
-unloadmodule(`shadow')
+unload(`shadow')
 dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
 
-# Unloading Shadow again will revert to copying `test' and the locally
-# pushed `shadow' macro.
-unloadmodule(`shadow')
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
+unload(`shadow')
 test
 shadow

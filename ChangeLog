@@ -1,11 +1,1259 @@
-Sat Nov  5 15:52:47 1994  Francois Pinard  (pinard@icule)
+2000-08-12  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/builtin.c (dump_symbols): Use "Undefined name `%s'" for
+	error message, to make translators' jobs a little easier.
+	(builtin_builtin): ditto.
+	(builtin_traceon): ditto.
+	(builtin_traceoff): ditto.
+	Reported by Akim Demaille <akim@epita.fr>
+
+	* m4/Makefile.am (pkgincdir):  Deleted.  Use automake's built in
+	pkgincludedir instead.
+	
+	* m4/m4module.h (rquote): Renamed with a prefix of `m4_' since
+	it is exported globally.  Fixed all references.
+	(lquote): ditto.
+	(bcomm): ditto.
+	(ecomm): ditto.
+	(DEF_RQUOTE): Renamed with a prefix of `M4_' since it is exported
+	globally.  Fixed all references.
+	(DEF_LQUOTE): ditto.
+	(DEF_BCOMM): ditto.
+	(DEF_ECOMM): ditto.
+	
+2000-07-28  Gary V. Vaughan  <gary@gnu.org>
+
+	* NEWS: updated.
+	* TODO: updated.
+	
+	* configure.in (AC_CHECK_FUNCS): added bzero and calloc.
+	(AC_OUTPUT): touch stamp-h.in, not stamp-h.
+
+	* doc/m4.texinfo: Fixed to work with --html option of makeinfo.
+	Removed `Prev', `Next' and `Up' fields of all @nodes now that
+	makeinfo calculates them for us, and to make any future
+	reorganisation easier.
+	(Frozen files): Document format version 2.
+	`V' now takes argument `2'.
+	`F' can take a single argument if symbol and builtin names
+	are the same, or 3 arguments if the builtin is from a module.
+	New `S' specification for saving syntax table contents.
+	New `M' specification for saving loaded module names.
+	* src/freeze.c: Implement them.
+	* src/input.c (syntax_code): For interpreting frozen syntax
+	state.
+
+	* examples/Makefile.am:  Add the contents of the WWW directory to
+	the distribution.
+	* examples/WWW/Makefile:  ditto,
+	(%.htm): Compares file contents (not just sizes) to determine
+	whether a change has occured.
+	* examples/WWW/_header.htm: Bumped version number.
+	* examples/WWW: Regenerated content.
+
+	* m4/Makefile.am (AUTOMAKE_OPTIONS): Support for non-ANSI
+	compilers comes much easier without ansi2knr.
+	* src/Makefile.am (AUTOMAKE_OPTIONS): ditto.
+
+	* m4/list.c: New generic list container type.
+	* m4/list.h: Interface to new container type.
+	* m4/Makefile.am (pkginc_HEADERS): Install list.h.
+	(libm4_la_SOURCES): compile and link list.c.
+	* src/builtin.c (builtin_tables): Use list container.
+	* src/module.c (symtab): ditto.
+	* src/symtab.c (symtab): ditto.
+	
+	* m4/system.h: New file for common preprocessor definitions.
+	* m4/Makefile.am (pkginc_HEADERS): install system.h.
+	* m4/error.c: Use system.h in place of inline preprocessor.
+	* m4/error.h: ditto.
+	* m4/module.c: ditto.
+	* m4/module.h: ditto.
+	* m4/xmalloc.c: ditto.
+	
+	* m4/error.h (error_one_per_line): Make M4_GLOBAL_DATA for WIN32
+	compatibility.
+	* m4/xmalloc.c (xmalloc_exit_failure): ditto.
+
+	* m4module.h (syntax_table): Renamed with a prefix of `m4_' since
+	it is exported globally.  Fixed all references.
+	(builtin): ditto.
+	(module_init_t): ditto.
+	(module_finish_t): ditto.
+	(token_data): ditto.
+	(SYNTAX_OTHER): Renamed with a prefix of `M4_' since
+	it is exported globally.  Fixed all references.
+	(SYNTAX_IGNORE): ditto.
+	(SYNTAX_SPACE): ditto.
+	(SYNTAX_OPEN): ditto.
+	(SYNTAX_CLOSE): ditto.
+	(SYNTAX_COMMA): ditto.
+	(SYNTAX_DOLLAR): ditto.
+	(SYNTAX_ACTIVE): ditto.
+	(SYNTAX_ESCAPE): ditto.
+	(SYNTAX_ALPHA): ditto.
+	(SYNTAX_NUM): ditto.
+	(SYNTAX_ALNUM): ditto.
+	(SYNTAX_LQUOTE): ditto.
+	(SYNTAX_RQUOTE): ditto.
+	(SYNTAX_BCOMM): ditto.
+	(SYNTAX_ECOMM): ditto.
+	(SYNTAX_VALUE): ditto.
+	(SYNTAX_MASKS): ditto.
+	(IS_OTHER): ditto.
+	(IS_IGNORE): ditto.
+	(IS_SPACE): ditto.
+	(IS_OPEN): ditto.
+	(IS_CLOSE): ditto.
+	(IS_COMMA): ditto.
+	(IS_DOLLAR): ditto.
+	(IS_ACTIVE): ditto.
+	(IS_ESCAPE): ditto.
+	(IS_ALPHA): ditto.
+	(IS_NUM): ditto.
+	(IS_ALNUM): ditto.
+	(IS_LQUOTE): ditto.
+	(IS_RQUOTE): ditto.
+	(IS_BCOMM): ditto.
+	(IS_ECOMM): ditto.
+	(TOKEN_EOF): ditto.
+	(TOKEN_NONE): ditto.
+	(TOKEN_STRING): ditto.
+	(TOKEN_SPACE): ditto.
+	(TOKEN_WORD): ditto.
+	(TOKEN_SIMPLE): ditto.
+	(TOKEN_MACDEF): ditto.
+	
+	* m4/m4module.h (voidstar): Removed in favour of `VOID' for
+	consistency.  Fixed all references.
+	(STRING): Renamed to `m4_string' for consistency, and because if
+	is exported globally.  Fixed all references.
+	(token_type): Renamed to `m4_token_t' for the same reasons.
+	(token_data_type): Renamed to `m4_token_data_t' for the same
+	reasons.
+	
+	* m4/m4module.h (XCALLOC): Wrapper macro which handles type
+	sizes.
+	(XMALLOC): ditto.
+	(XREALLOC): ditto.
+	(XFREE): Wrapper macro which avoids freeing NULL pointers.
+	
+	* m4/m4module.h (m4_macro):  New type for module defined user
+	macros.
+	* modules/modtest.c (m4_macro_table):  Define module user macros.
+	* modules/shadow.c (m4_macro_table):  ditto.
+
+	* m4/m4module.h (M4BUILTIN_HANDLER):  For defining handlers
+	declared with M4BUILTIN.
+
+	* m4/xmalloc.c: Use memset if bzero is not available when
+	emulating calloc with malloc.
+	(xcalloc): Fallback to malloc/bzero if calloc is not available.
+	(xfree): Added for consistency.  Will not try to free NULL
+	pointers.
+	* src/m4.c (xfree):  Deleted in favour of the above.
+	* m4/xmalloc.c (WITH_DMALLOC): preprocess away the entire file if
+	linking with libdmalloc.
+	* m4/xstrdup.c (WITH_DMALLOC): ditto.
+
+	* modules/frozen.m4:  New test case.
+	* modules/unfrozen.m4:  ditto.
+	* modules/modfreeze.test:  New test.
+	* modules/unload.test:  ditto.
+	* modules/Makefile.am (EXTRA_DIST):  Distribute them.
+	(TESTS): Use them.
+	* modules/modpath1.test:  Don't try this test if module support is
+	not compiled in.
+	* modules/modpath2.test: ditto.
+	* modules/modpath3.test: ditto.
+	* modules/modpath4.test: ditto.
+	* modules/modtest.test: ditto.
+	* modules/shadow.test: ditto.
+
+	* modules/perl.c: New module.
+	* modules/perl.m4: Example of using it.
+	* modules/Makefile.am (perl_la_SOURCES):  Build new perl module.
+	
+	* src/m4.c (main): Assume interactive mode if STDIN is connected
+	to a tty.
+	Changed startup sequence slightly so that syntax is not
+	initialised from here when loading a frozen file.
+
+	* src/builtin.c:  Much improved macro definition style.
+	* src/m4private.h:  Internal structures for m4_builtin and
+	m4_macro instances.  These are not exposed to module writers.
+	* src/module.c (module_modname_find):  Find a module structure
+	from the its name.
+	(make_macro_table):  Build an internal macro table from a external
+	definition.
+	(make_builtin_table):  Build an internal builtin table from an
+	external definition.
+
+	* src/module.c (module_unload): Be extremely careful to remove
+	builtins and macros that match the module being unloaded -- no
+	longer assume that the top element can be removed incase another
+	odule defines an identical name.
+	* src/symtab.c (remove_table_reference_symbols): remove all symbol
+	table entries which refer to a given builtin table.
+	* src/builtin.c (remove_tables): Use it!
+	
+2000-07-13  Thomas Tanner  <tanner@ffii.org>
+
+	* Makefile.am (SUBDIRS): we need modules/ for "make dist"
+	* acm4/modules.m4: deleted
+	* bootstrap: don't libtoolize libltdl!
+	* configure.in: AC_SUBST INCLTDL and LIBLTDL, -with-modules flag:
+	if set, enable WITH_MODULES and add modules to DLPREOPEN
+	* examples/misc.test: redirect standard output
+	* lib/Makefile.am: don't use DLLDFLAGS
+	* lib/m4module.c: include necessary headers to silence GCC -Wall
+	* lib/m4regex.c: fixes to silence GCC -Wall
+	* modules/Makefile.am: don't use DLLDFLAGS, add INCLTDL to INCLUDES,
+	  build modules conditionally
+	* modules/shadow.c: define symbol aliases before using them
+	* modules/test.c: define symbol aliases before using them
+	* po/de.po: update translation
+	* src/Makefile.am: delete pathconf.h, set MODULE_PATH to
+	pkglibexecdir, don't use DLLDFLAGS, add INCLTDL to INCLUDES and
+	LIBLTDL to LIBS.
+	* src/m4.c: initialize libltdl's preloaded symbols via
+	LTDL_SET_PRELOADED_SYMBOLS
+	* src/module.c: libltdl's memory management must be initialized
+	before calling lt_dlinit!, fix warnings
+
+2000-01-18  Gary V. Vaughan  <gary@gnu.org>
+
+	* README:  Caveat about nls not supported by dll architecture on
+	Windows.
+
+	* TODO (MODULE SPECIFIC ISSUES): more ideas for the future.
+
+	* tests/Makefile.am (stamp-TESTS):  now works with VPATH.
+	* src/Makefile.am (m4_LDADD):  use $(builddir) for VPATH.
+	* modules/Makefile.am (LIBS): ditto.
+	(INCLUDES): search $(top_srcdir) (for eg. <m4/error.h>) and then
+	$(top_srcdir)/m4 (for only <m4module.h>).
+	* modules/shadow.test: fixed for VPATH.
+	* modules/modtest.test: ditto.
+	* modules/modpath4.test: ditto.
+	* modules/modpath3.test: ditto.
+	* modules/modpath2.test: ditto.
+	* modules/modpath1.test: ditto.
+
+	* modules/time.test: Removed due to timezone dependence,
+	* modules/Makefile.am (TESTS): Removed time.test.
+
+	* configure.in: Use $3 of AC_DEFINE so that we can,,,
+	* acconfig.h: Remove everything except the gettext parameters.
+	* acm4/gmp.m4: Add a serial number, and take advantage of $3 of
+	AC_DEFINE.
+	* acm4/ltdl.m4:  Updated to latest from libtool cvs.
+	* acm4/modules.m4:  Remove code which duplicates ltdl.m4 and
+	increment serial number.
+
+	* Makefile.am (SUBDIRS): Moved @MODULES_DIR@ to compile before
+	src dir and immediately after libm4 is built for confidence that
+	it doesn't rely on the src directory.
+	(SUBDIRS): Moved doc dir to the end since helptoman.pl and
+	makeinfo stop the build on cygwin (because they don't work).
+
+	* src/m4.h: use GNU standard #if HAVE_CONFIG_H ideom.
+
+	* m4/m4private.h: ...is not a public header, so moved to src.
+	Add `#include <config.h>', `#define _COMPILING_M4' and 
+	`#include "m4.h".
+	* m4/Makefile.am (noinst_HEADERS): remove m4private.h.
+	* src/Makefile.am (noinst_HEADERS): add m4private.h.
+	* src/builtin.c: `#include "m4private.h"' now takes care of the
+	above.  Duplicates removed.
+	* src/debug.c: ditto.
+	* src/eval.c: ditto.
+	* src/evalmp.c: ditto.
+	* src/format.c: ditto.
+	* src/freeze.c: ditto.
+	* src/input.c: ditto.
+	* src/m4.c: ditto.
+	* src/macro.c: ditto.
+	* src/module.c: ditto.
+	* src/numb.h: ditto.
+	* src/output.c: ditto.
+	* src/path.c: ditto.
+	* stackovf.c: ditto.
+	* symtab.c: ditto.
+
+	* po/POTFILES.in: compensate for renaming of lib/*.
+	* m4/Makefile.am (CLEANFILES): @EXEEXT@ left libtool wrapper behind.
+	(INCLUDES): Look first in $(top_srcdir) (for eg. <m4/error.h>),
+	and then in $(top_srcdir)/lib (for eg. "m4private.h").
+	* src/Makefile.am (m4_LDADD): replace libi/libm4.la with
+	m4/libm4.la.
+	* m4/m4error.h:  Renamed error.h, for installation to
+	$prefix/include/m4..
+	* m4/m4obstack.h:  Renamed obstack.h, for same reason.
+	* m4/m4regex.h: Renamed regex.h, for same reason.
+	* m4/m4error.c:  Renamed error.c, and use #include "error.h".
+	* m4/m4obstack.c: Renamed obstack.c, and fix #includes.
+	* m4/m4regex.c: Renamed regex.c, and fix #includes.
+
+	* lib: moved to m4 to easily support header installation to 
+	$prefix/include/m4.
+	* Makefile.am (SUBDIRS): renamed lib dir to m4.
+	* configure.in (AC_OUTPUT): reference m4/Makefile.in.
+	* acm4/regex.m4: Point to m4/regex.c.
+
+	* examples/foreach.m4:  Sanitise quoting.
+	* examples/foreach.test:  New torture test.
+	From Akim Demaille <akim@epita.fr>
+
+2000-01-17  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/ltdl.c: Use access() to abort doomed module load attempts
+	if module file does not exist.
+
+	* src/Makefile.am (m4_SOURCES, EXTRA_SOURCES): getopt.o and
+	getopt1.o will already be used if appropriate, so I moved getopt.c
+	and getopt1.c from m4_SOURCES to EXTRA_SOURCES.
+
+	* modules/modpath1.test: Use correct filename in header line.
+	* modules/modpath2.test: ditto.
+	* modules/modpath3.test: ditto.
+	* modules/modpath4.test: ditto.
+
+	Without these changes lt_dlopen("test") attempts to 
+	LoadLibrary("/bin/test") on Windows, which although harmless
+	generates a spurious error message which spoils most of the tests:
+	* modules/Makefile.am (EXTRA_DIST): s/test.m4 /modtest.m4 /
+	(TESTS): s/test.test /modtest.test /
+	(pkglibexec_LTLIBRARIES): s/test.la /modtest.la /
+	(test_la_SOURCES, test_la_LDFLAGS): renamed to use modtest.
+	* modules/modpath1.test: s/test.m4 /modtest.m4 /
+	* modules/modpath2.test: ditto.
+	* modules/modpath4.test: ditto.
+	* modules/modpath3.test: s/-m test /-m modtest /
+	* modules/shadow.m4: use {un,}loadmodule(`modtest').
+
+2000-01-16  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/ltdl.c (find_file): Updated to new version with fixed memory
+	allocation bug in `next'.
+	* src/ltdl.h: updated to match.
+
+	* modules/Makefile.am:  Cleaned up and reordered.
+
+2000-01-16  Rene' Seindal  <rene@seindal.dk>
+
+	* modules/Makefile.am (TESTS): New tests for the module system.
+
+	* modules/*.test: New files.
+
+	* src/m4.c (main): Added call to module_init().
+	Treats -M and -m as the arguments -D -U and -t, ie deferred.
+
+	* src/m4.h: Added declaration of module_init().
+
+	* src/module.c (module_init): No longer static
+
+	* modules/Makefile.am ({test,shadow,time,stdlib}_la_LDFLAGS):
+	Added to shut up automake about non standard libtool library
+	names.
+
+	* src/module.c: Disabled DEBUG by default.
+
+	* modules/README: Changed example from unload.m4 to shadow.m4
+
+	* modules/shadow.m4: Renamed from unload.m4
+
+	* modules/Makefile.am (EXTRA_DIST): Removed unload.m4.
+
+	* src/m4.c (main): Functionality for -m and -M were reversed.
+	Fixed.
+
+2000-01-12  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/help2man.pl: updated to version 1.020.
+
+	* lib/COPYING.LIB:  updated to version 2.1.
+
+	* lib/m4module.h: restructure the M4_SCOPE code to work when
+	creating a dll which links with libm4.la and both DLL_EXPORT
+	(for the new dll) and LIBM4_DLL_IMPORT (for m4module.h) are
+	both defined.
+
+2000-01-11  Gary V. Vaughan  <gary@gnu.org>
+
+	Merged the following changes from my tree:
+
+	1999-06-15  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (AC_LIBTOOL_WIN32_DLL): Declare that m4 has been
+	ported to compile shared libs.
+	
+	* configure.in (LIBM4_DLL_IMPORT): Discover whether we need to
+	use `__declspec(dllimport)' when linking libm4.la on win32.
+	* src/Makefile.am (m4_LDFLAGS): Use dllimport if necessary.
+
+	* configure.in (M4OBJS): Discover whether we need the shipped
+	implementation of getopt_long.
+	* src/Makefile.am (m4_LDADD): Link the getopt objects into the
+	main binary here, as opposed to the module library in lib/libm4.la.
+	
+	1999-06-14  Gary V. Vaughan  <gary@gnu.org>
+
+	* modules/README: Updated to describe the improved libltdl based
+	module scheme.
+	* README (cygwin): Added some compilation notes for building m4
+	correctly under cygwin.
+	* TODO: Cleaned out the entries for the module system since they
+	are now implemented.
+
+	* *.[ch]: __P is in the compiler's reserved namespace, so replaced
+	all instances of __P with M4_PARAMS.
+
+	* lib/getdate.h: removed unreferenced file.
+
+	* lib/m4private.h: New file to define the private interface to the
+	token_data struct, which must be shared between m4module.c, and
+	builtin.c but not exported to modules built from the installed
+	m4module.h since it's size changes depending on compile time
+	options.
+	
+	* src/m4.h: Lots of stuff moved to lib/m4module.h.
+
+	* lib/m4module.h: New file to define the interface available when
+	compiling m4 modules.
+	* lib/m4module.c: Moved parts of builtin.c, and m4.c which are
+	necessary for module compilation into this new file.
+	
+	* lib/Makefile.am (include_HEADERS): install headers (renamed to
+	avoid nameclash with other system headers) necessary for compiling
+	modules.
+	(libm4_la_SOURCES): always include error.c, obstack.c and regex.c
+	so that modules can include the (renamed) installed headers and
+	be guaranteed a matching implementation.
+	* lib/m4error.h: renamed from error.h.
+	* lib/m4obstack.h: renamed from obstack.h.
+	* lib/m4regex.h: renamed from regex.h.
+	* configure.in (AC_REPLACE_FUNCS):  Don't look for a system
+	implementation, simply include the shipped version
+	unconditionally, otherwise it is hard for a module to know
+	whether the m4obstack.h header it is using matches the
+	implementation it ends up linking against.
+	(jm_WITH_REGEX):  Include regex into libm4 unconditionally for
+	the same reason.
+	
+	1999-05-18  Gary V. Vaughan  <gary@gnu.org>
+
+	* examples/misc.test: Don't run this test on machines which don't
+	have a root user in /etc/passwd (e.g. cygwin).
+
+	* tests/get-them (/^@example$/): Error messages might have a
+	``.exe'' suffix to the program name, or else use the libtool
+	``.libs/lt-m4'' binary, or generally have an unexpected path.  All
+	of these cases are now catered for when comparing error messages
+	in generated tests.
+	* tests/other-tests/*.test: ditto.
+	* examples/*.test: ditto.
+	
+	* tests/defs (M4): use libtool execute mode.
+	* examples/defs (M4): ditto.
+
+	* tests/get-them (END): explicitly close any open file.
+	(printthem): In a regular expression, '{' is the start of a repeat
+	count!  Use `[{]' for a literal open brace.
+	(/^@node /): Don't use substr on a string shorter than the trim
+	length.
+
+	1999-05-17  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (LTLIBOBJS): calculated from LIBOBJS, and
+	substituted.
+	(AC_LIBTOOL_DLOPEN): declare that this package will use dlopen.
+
+2000-01-10  Andreas Schwab  <schwab@suse.de>
+
+	* tests/other-tests/gmp.test: Find config.sh in build directory.
+
+	* configure.in: Find tests/mkconfig.sh in $srcdir.
+
+	* configure.in: Define HAVE_SIGINFO_T if siginfo_t is defined in
+	<signal.h> (for SUS2 compliant systems).
+
+	* src/stackovf.c: Check for HAVE_SIGINFO_T in addition to
+	HAVE_SIGINFO_H.
+
+2000-01-10  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4o.
+
+	* TODO, NEWS: Cleaned up and updated.
+
+	* src/m4.c (main): New variable exit_status for exit status in
+	case of unreadable files.  Now m4 will exit with EXIT_FAILURE if a
+	file cannot be read instead of EXIT_SUCCESS.
+
+	* src/builtin.c (m4_indir): Changed error message to help
+	translators (from Akim Demaille <demaille@inf.enst.fr>). 
+
+	* lib/obstack.[hc], getopt*.[ch]: Updated to newest version from
+	Cygnus.
+
+	* lib/error.[hc], lib/regex.[hc], lib/strtol.c: Updated to version
+	from glic 2.1.2.
+
+	* src/input.c (match_input): Reordering of code, to avoid multiple
+	calls to push_string_init() from obstack_grow(), which can happen
+	with some compilers (found and fixed by James Bonfield
+	<jkb@mrc-lmb.cam.ac.uk>).
+
+	* src/stackovf.c: Added prototypes for ultrix.
+	(setup_stackovf_trap): Added __P to cast.
+	(Both reported by John David Anglin <dave@hiauly1.hia.nrc.ca>)
+
+2000-01-09  Rene' Seindal  <rene@seindal.dk>
+
+	* doc/m4.texinfo (Changequote): Added comment about changing
+	quotes when the old quote is a part of the new.
+
+	* src/builtin.c (expand_ranges): Added break after trailing dash.
+	This caused misbehavious on some systems (found and fixed by Akim
+	Demaille <demaille@inf.enst.fr>).
+
+	* AUTHORS: Thomas Tanner included
+
+	* acconfig.h: Added entry for ss_sp (see below).
+
+	* configure.in (use_stackovf): Added check for stack_t with member
+	ss_base instead of ss_sp (BSDI notably).  (Reported by Paul Eggert
+	<eggert@twinsun.com>).
+
+	* doc/m4.texinfo (Frozen files): Added a simpler example for
+	generating frozen files from several input files.
+
+1999-11-14  Paul Eggert  <eggert@twinsun.com>
+
+	* po/POTFILES.in: Add lib/getopt.c, lib/obstack.c,
+	lib/regex.c, lib/xmalloc.c.
+
+1999-11-10  Rene' Seindal  <rene@seindal.dk>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Passes -I acm4 to aclocal.
+
+	* src/module.c: reindented.
+	(module_load): return if this is a repeated load of same module.
+	(module_init): slight change of logic to avoid repeated
+	initialisation debug messages.
+
+	* Makefile.am (DIST_SUBDIRS): Added to ensure modules/ is included
+	in the distribution.
+
+	* modules/Makefile.am (test_la_LDFLAGS): set to -module to silence
+	automake warnings about missing lib prefix.
+	(time_la_LDFLAGS): ditto
+	(stdlib_la_LDFLAGS): ditto
+
+1999-11-10  Paul Eggert  <eggert@twinsun.com>
+
+	* src/m4.h: Include error.h, since our macros use error.
+	* src/m4.c: Don't need to include error.h.
+
+1999-11-09  Paul Eggert  <eggert@twinsun.com>
+
+	* src/m4.h (voidstar): Define to void * if __STDC__ is defined
+	and zero, as Solaris 7 cc does.
+	(bcopy): Remove macro; no longer needed with new obstack.h.
+
+	* src/output.c (freeze_diversions): Don't assume that a
+	diversion size can fit in `int'.  Check for diversion file
+	size too large to be printed with `unsigned long'.
+
+	* src/Makefile.am (CFLAGS): Omit -Wall.
+
+	* src/stackovf.c (setup_stackovf_trap): Remove cast to unsigned.
+
+	* src/debug.c (trace_format):
+	Use ANSI C if (defined __STDC__ && __STDC__) || defined PROTOTYPES.
+
+	* src/freeze.c (produce_frozen_state):
+	Don't assume string lengths fit in int.
+
+1999-10-13  Rene' Seindal  <rene@seindal.dk>
+
+	* configure.in (ALL_LINGUAS): Added Greek translation (el).
+	(ALL_LINGUAS): Added Czech translation (cs).
+
+1999-03-30  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/builtin.c: moved module loading functions into...
+	* src/module.c: entirely new implementation using libltdl.
+	* po/POTFILES.in: added src/module.c.
+	* modules/Makefile.am (LTLIBRARIES): Removed lib prefix as these
+	are modules, not linktime libraries.
+	(LDFLAGS): added -no-undefined -module and -avoid-version flags.
+	* modules/stdlib.c (m4_macro_table): use <name>_LTX collision
+	avoidance on exported symbols.
+	* modules/test.c (m4_macro_table, m4_init_module,
+	m4_finish_module): ditto.
+	* modules/time.c (m4_macro_table): ditto.
+
+	* modules/time2.m4: new file which requires command line loading
+	of modules.
+	* src/m4.c (--load-module): dynamically load named runtime module
+	into running executable before reading the source.
+	(--module-directory): prepend a directory to the module search
+	path.
+	(module_init()): Do this the first time we load a module instead;
+	if the module subsystem is broken normal m4 scripts can still run.
+	* src/m4.h (install_builtin_table): is now exported.
+	
+1999-03-26  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/module.c: removed.  No longer required.
+	* po/POTFILES.in: removed src/module.c.
+	
+	* Makefile.am (MAINTAINERCLEANFILES): Remove all the files that
+	the bootstrap script can recreate.
+	* acm4/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* doc/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* examples/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* lib/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	(AUTOMAKE_OPTIONS): reduced strictness to allow COPYING.LIB.
+	* modules/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* src/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	* tests/Makefile.am (MAINTAINERCLEANFILES): ditto.
+	
+	* acinclude.m4: removed.  `aclocal -I acm4' handles this much
+	better.
+	* acm4/Makefile.am (ACINCLUDE_M4): ditto.
+	* acm4/gettext.m4: removed.  It causes a multiple definition vs.
+	the installed gettext.m4 file when running aclocal.
+	
+1999-03-25  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (AM_INIT_AUTOMAKE): bumped version number to
+	distinguish this from the last prerelease.
+	(AC_LIBLTDL_CONVENIENCE):  build libltdl as a convenience library
+	in its own subdirectory.
+	
+	* modules/Makefile.am (*_SOURCES): renamed to use libtool's "no
+	lib prefix on a module" feature.
+	(LDFLAGS): Added `-module -avoid-version' flags to build
+	versionless module libraries.
+	* src/builtin.c (m4_load_module): use libltdl.
+	(module_unload_all): use libltdl.
+	* src/m4.c (module_init): initialise module loading on demand for
+	better diagnostics, and so that m4 will still work even if
+	the module code is broken.
+	* src/m4.h (module_init): removed.  No longer relevant.
+	* modules/stdlib.c (m4_macro_table): use stdlib_LTX_ prefix on
+	exported symbols for compatibility with dlpreopening.
+	* modules/test.c (m4_macro_table, m4_init_module,
+	m4_finish_module): ditto.
+	* modules/time.c (m4_macro_table): ditto.
+	
+	* bootstrap: New file.  Runs all the autoutils in the right order
+	after a fresh checkout, or a make maintainer-clean.
+
+1999-02-18  Akim Demaille  <demaille@inf.enst.fr>
+
+	* src/builtin.c (dump_symbols): New function, factorising common
+	content of m4_dumpdef and m4_symbols.
+	(m4_dumpdef): Use it.
+	(m4_symbols): New function, implementing `symbols'.  Use it.
+	* doc/m4.texinfo: Fixed missing commas after @xref, so that the
+ 	file compile with modern makeinfo.
+	(Symbols): New node, documenting symbols.
+	(direntry): Modernize.
+
+	
+1998-12-11  Rene' Seindal  <rene@seindal.dk>
+
+	* src/builtin.c (predefined_tab): New predefined macros
+	__m4_changeword__, __m4_gmp__ and __m4_modules__ for testing for
+	configure time options.
+
+1998-12-01  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* src/module.c (module_try_load): Don't try to be clever and
+	overwrite argument string.  Instead allocate all constructed
+	strings locally, since they can have arbitrary lengths.  Make
+	arguments pointers to const.
+	(module_search): Simplify due to above change.
+
+1998-11-29  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4n.
+
+	* tests/Makefile.am (OTHER_TESTS, OTHER_FILES): New tests.
+
+	* tests/other-tests/import-environment.{m4,test}: New test.
+
+	* tests/other-tests/discard-comments.{m4,test}: New test.
+
+	* doc/m4.texinfo (Invoking m4): Updated for --discard-comments.
+
+	* src/m4.c (main): New option -c --discard-comments.
+	New global variable discard_comments.
+
+	* src/m4.h (token_type): New TOKEN_NONE for tokens to be
+	discarded, ie never returned from next_token().
+	Added declaration of discard_comments.
+
+	* src/input.c (next_token): Now loops until token type is not
+	TOKEN_NONE.  Comments are now given this type when comments should
+	be discarded.
+
+	* doc/m4.texinfo (Invoking m4): Updated for --import-environment
+	and mpeval.
+
+1998-11-28  Rene' Seindal  <rene@seindal.dk>
+
+	* src/m4.c (main): New option --import-environment (no single
+	letter option).
+
+	* When configured with --with-gmp both the normal (fast) eval()
+	and the gmp aware mpeval() are defined.  To restore previous
+	bahaviour use "define(`eval', defn(`mpeval'))".
+
+	* tests/other-tests/gmp.m4: Changed to use mpeval().
+
+	* src/evalmp.c: New file for compiling eval.c as gmp aware.
+	Just defines USE_GMP if WITH_GMP is defined and includes eval.c.
+
+	* src/eval.c: Now includes "numb.c" directly.  Everything in this
+	file must by static, except evaluate(), which is changed to
+	mp_evaluate() if USE_GMP in force.
+
+	* src/numb.c: Changed to be included by eval.c instead of being
+	compiled separately.  Everything is declared static.
+
+	* src/numb.h: Removed declarations of functions, as numb.c is now
+	included by eval.c.
+
+	* src/builtin.c: Declaration of m4_mpeval() added.
+	Inserted `mpeval' in builtin table.
+	(do_eval): New function with common code for m4_eval and m4_mpeval.
+	(m4_mpeval): New function for gmp version of eval.
+
+	* src/m4.h: Declaration of mp_evaluate().
+
+	* src/Makefile.am (m4_SOUCES): Includes mpeval.c.
+	(EXTRA_m4_SOURCES): Now has numb.c and numb.h
+
+	* src/m4.c (main): m4 --version also shows which options were used
+	for compilation, such as: "GNU m4 1.4n (options: modules gmp)"
+
+1998-11-27  Rene' Seindal  <rene@seindal.dk>
+
+	* Error messages now always print program name before input file
+	name as specified by GNU coding standards.  Reported by Akim
+	Demaille <demaille@inf.enst.fr>.
+
+	* doc/m4.texinfo (Include): Change due to changed error message
+	format.
+	(Eval): Do.
+
+	* tests/get-them: Minor change to sed script due to changed error
+	message format.
+
+	* src/m4.c (print_program_name): New func used to print program
+	name, input file and line number in error ().  Used as an
+	error_print_progname handler.
+	(reference_error): Removed.
+	(main): Assigns error_print_progname.
+
+	* src/m4.h (M4ERROR): Removed reference_error ().
+
+1998-11-25  Rene' Seindal  <rene@seindal.dk>
+
+	* Updated to libtool 1.2b.
+
+	* src/builtin.c (install_builtin_table): Added braces to avoid
+	warning of ambiguous 'else'.
+
+	* src/module.c: Inserted search path code from path.c modified to
+	use new interface.
+	(module_init): Configured default path used only if M4MODPATH is
+	not set.
+	(module_try_load): Now reads libMODULE.la as generated by libtool
+	for actual module name.
+	(module_load): Gives better error messages on failure.
+
+	* src/m4.h: Added declarations of structures and functions for
+	generic search path handling.
+
+	* src/path.c: Removed all module specific code and introduced new
+	functions of more generic search path handling.
+
+1998-11-24  Rene' Seindal  <rene@seindal.dk>
+
+	* configure.in: Defines INTLINCL to -I$(top_srcdir)/intl if using
+	included gettext, as <libintl.h> might not be found
+	otherwise. Reported by Andrew Bettison <andrewb@zip.com.au>.
+
+1998-11-22  Rene' Seindal  <rene@seindal.dk>
+
+	* src/output.c (insert_diversion): Fixed bug that might cause m4
+	to read from standard output!  Triggered by input
+	'divert(1)undivert(0)'.  Test for divnum>0 changed to divnum>=0,
+	so now 'undivert(0)' does nothing.
+
+1998-11-18  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4m.
+
+	* src/input.c (set_word_regexp): Fixed a bug, where word_regexp
+	could be changed when compiling a illegal regexp, causing later
+	use of the regexp to dump core.
+
+	* src/module.c (module_load): Changed error message to conform to
+	standards. 
+
+	* src/m4.c (usage): Added message about reporting bugs.
+
+	* doc/m4.texinfo (Changeword): Corrected a wrong example.
+	(Changeword): Added note about the type of regexps used.
+
+	* ltconfig, ltmain.sh: New files from Libtool 1.2.
+
+	* configure.in: Added calls to AM_ENABLE_SHARED, AM_DISABLE_STATIC
+	and AM_PROG_LIBTOOL.
+
+	* acm4/modules.m4 (AM_WITH_MODULES): Redone completely to work
+	with libtool.
+
+	* modules/Makefile.am: Changed completely to compile modules using
+	libtool.  The modules are compiled as shared libraries, and are
+	renamed when installed.
+
+	* src/m4.h, src/module.c, acm4/modules.m4, acconfig.h: Renamed
+	USE_SHL_LOAD to HAVE_SHL_LOAD
+
+	* src/builtin.c (shipout_string): Now tests for a NULL string.
+
+	* src/module.c: New level of indirection around non-portable
+	functions to load shared objects.  Intended to encapsulate the non
+	portable parts better and to reduce the number of #ifdefs in the
+	code.
+
+	* Makefile.am (DIST_SUBDIRS): Instead of EXTRA_DIST for added
+	directory modules/ to the distribution.
+
+1998-11-15  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4l.
+
+	* modules/stdlib.c: New module `stdlib' defining some standard
+	functions: getcwd, getlogin, getpid, getppid, getuid, getpwnam,
+	getpwuid, hostname, rand, srand, getenv, setenv, unsetenv, uname.
+	
+	* src/builtin.c (shipout_string): New convenience function for
+	builtins and modules.
+
+	* src/module.c (module_load): Tentative support for
+	shl_load/shl_findsym, but I cannot test it.  Copied from MetaHTML.
+
+	* Makefile.am (SUBDIRS): Directory modules added if configured.
+
+	* modules/Makefile.am: Now correctly compiles and installs
+	modules in pkglibexecdir.
+
+	* src/m4.h: WITH_MODULES defined iff HAVE_DLOPEN or USE_SHL_LOAD.
+	These two are now initialised by autoconf macros.
+
+	* src/path.c (module_env_init): MODULE_PATH is always on the
+	search path.
+
+	* src/Makefile.am: Now generated pathconf.h which defined the
+	default MODULE_PATH.
+
+	* configure.in (pkglibexecdir): Added defintion of pkglibexecdir,
+	where modules are installed.
+
+	* acm4/modules.m4: Enhanced with code from MetaHTML, contributed
+	by Brian J. Fox <bfox@datawave.net>.  This change allow modules to
+	build and install automatically, and it is prepared for other
+	interfacec than dlopen().
+
+	* src/builtin.c (predefined_tab): Added __m4_version__ for the
+	current version of GNU m4.  It is a GNU extension.
+
+1998-11-14  Rene' Seindal  <rene@seindal.dk>
+
+	* tests/Makefile.am (GENERATED_TESTS): Added new
+	generated-tests/changesy.8.test
+	
+	* doc/m4.texinfo (Changesyntax): Documentation for escape
+	syntax class.
+
+	* src/macro.c (expand_token): Check for escaped macro call before
+	symbol table lookup.
+
+	* src/builtin.c (m4_changesyntax): Added `@' flag to define escape
+	characters
+
+	* src/input.c: New static variable use_macro_escape, which is TRUE
+	iff some character has code SYNTAX_ESCAPE
+	(input_init): Added initialisation of use_macro_escape.
+	(check_use_macro_escape): New function to synchronise
+	use_macro_escape with the syntax table.
+	(set_quotes): Added call to check_use_macro_escape()
+	(set_comment): Do.
+	(set_syntax): Do.
+	(next_token): Added new case for IS_ESCAPE.
+
+	* src/m4.h (SYNTAX_ESCAPE): Defined as simple syntax category.
+
+1998-10-13  René Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4k.
+
+	* tests/Makefile.am (GENERATED_TESTS): Renamed gentest to
+	generated-tests. 
+
+	* tests/Makefile.am (OTHER_TESTS, OTHER_FILES): Added manually
+	maintained tests in tests/other-tests.  These currently tests for
+	8-bit transparency, multiple precision arithmetic and sync-line
+	output.  Test for stackoverflow detection does not work.
+
+	* examples/Makefile.am (TESTS): Added tests for all example files.
+
+	* examples/mktests.sh: New file.  Help program for creating test
+	files. 
+
+	* tests/mkconfig.sh: New file to generate tests/config.m4 and
+	tests/config.sh.  This is for tests of configure selectable
+	features.  Picks up all set WITH_ and ENABLE_ veriables from
+	config.h
+
+	* src/path.c (path_search): Added argument 'char **expanded_name'
+	to return the expanded name.
+
+	* src/m4.h: Added 2nd argument to declaration of path_search().
+
+	* src/m4.c (main): Added 2nd argument to path_search().
+
+	* src/freeze.c (reload_frozen_state): Do.
+
+	* src/builtin.c (m4_undivert): Do.
+	(include): Do.
+
+1998-10-11  René Seindal  <rene@seindal.dk>
+
+	* acm4/Makefile.am (ACINCLUDES_M4): Added gmp.m4 and modules.m4
+
+	* acm4/modules.m4: New file.  Defines AM_WITH_MODULES.
+
+	* acm4/gmp.m4: New file.  Defines AM_WITH_GMP.
+
+	* configure.in: Introduced AM_WITH_MODULES and AM_WITH_GMP.
+
+	* AUTHORS, ChangeLog: Changed all dates to ISO 8601.
+
+	* intl/: Updated to GNU gettext 0.10.35.
+
+	* doc/m4.texinfo (Format): Documented that format is blind.
+
+	* src/builtin.c (builtin_tab): Builtin format marked as blind.
+
+1998-10-07  René Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4j.
+
+	* tests/Makefile.am (GENERATED_TESTS): Changed .m4 extension to
+	.test, as the files are no longer just m4 input.
+
+	* tests/get-them (FILE): Changed .m4 extension to .test.
+
+	* src/m4.h (token_type): New token type TOKEN_SPACE introduced.
+	Otherwise quoted strings with leading whitespace first in a macro
+	argument would be eliminated.
+
+	* src/macro.c (expand_token): Handles new token type TOKEN_SPACE.
+	(expand_argument): Do.
+
+	* src/input.c (next_token): SPACE and NUM/OTHER characters are only
+	grouped together iff both quote and comment strings are single
+	character.  Otherwise they might include a comment/quote leader.
+	(next_token): Returns new token type TOKEN_SPACE.
+
+	* src/builtin.c (push_builtin_table): New function to push a
+	builtin_table on the stack without installing its contents.
+	(find_builtin_by_name): Added call to push_builtin_table() if
+	reading frozen files.  Otherwise the builtins named in the frozen
+	files could not be found.
+	(install_builtin_table): Changed to use push_builtin_table()
+
+1998-10-04  René Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4i.
+
+	* configure.in (ALL_LINGUAS): Added Polish pl.po
+
+1998-10-03  René Seindal  <rene@seindal.dk>
+
+	* Many files: Incorporated changes to implement dynamic modules.
+	Detailed comments in src/modules.c and modules/README
+
+	* src/module.c: New file, implements the OS dependant parts of
+	dynamic module loading.
+
+	* src/Makefile.am (m4_SOURCES): Added module.c
+
+	* src/builtin.h: New file, declares some functions from builtin.c
+	that are of use for other modules (shipout_int, numeric_arg,
+	skip_space, bad_argc), and the macros ARG() and DECLARE().
+
+	* src/builtin.c (install_builtin_table): New function.  Each
+	module brings in a builtin_table, which is pushed on a stack.
+	(struct builtin_table): New struct for list of builtin_tables.
+	(m4_loadmodule): New function to implement builtin "loadmodule".
+	(shipout_int): No longer static, to be used by modules.
+	(numeric_arg): do.
+	(skip_space): do.
+	(bad_argc): do.
+	(builtin_init): changed to call install_builtin_table()
+	(find_builtin_by_name): Now searches all builtin_tables
+	(find_builtin_by_addr): do.
+
+	* src/path.c: Reorganised to allow for two search paths, one for
+	include files and one for modules.
+
+	* src/m4.h: Added declarations for new functions in module.c and
+	in path.c.
+
+	* src/m4.c (main): Added call to module_init().
+
+	* modules: New directory with a few demo modules.
+
+	* Makefile.am (EXTRA_DIST): Added modules/* since modules/ is not
+	in SUBDIRS.
+
+	* configure.in: Added modules/Makefile to AC_OUTPUT.
+
+	* configure.in: Added code to implement --with-modules.  Tests for
+	<dlfcn.h> and -ldl.
+
+	* acconfig.h: Added WITH_MODULES
+
+1998-10-02  René Seindal  <rene@seindal.dk>
+
+	* examples/Makefile.am (pkgdata_DATA): Removed special target for
+	check and variables TESTS.  These tests are now run from the
+	tests/ directory.
+
+	* tests/Makefile.am (OTHER_TESTS): Added tests from the example/
+	directory.  The files stay there but the tests are run from the
+	tests/ directory.
+
+	* tests/Makefile.am (EXTRA_DIST): Added run-test.
+
+	* tests/run-test: New file.  Run a test manually
+
+	* tests/Makefile.am, tests/get_them: Moved automatically generated
+	tests (from the manual) to sub directory tests/gentest/.  The
+	tests/ directory had gotten a bit messy.
+
+1998-09-06  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* examples/{comments,ddivert,debug,iso8859,reverse,sysv-args,\
+	wrap}.test: Added a few testcases.
+
+1998-08-21  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* Prerelease 1.4h.
+
+	* lib/Makefile.am (noinst_HEADERS): regex.h added
+
+	* configure.in (jm_WITH_REGEX, jm_PREREQ_ERROR):
+	acm4/{error,regex}.m4 (from fileutils-3.16u.tar.gz).
+
+	* acm4/Makefile.am: created providing rules to create
+	$(top_srcdir)/acinclude.m4 to be used by aclocal.
+
+	* tests/defs (LANGUAGE, LC_ALL, LANG): force them to be
+	`C'. Reported by Ulrich Drepper.
+
+	* Makefile.am (SUBDIRS): Removed checks directory
+	* configure.in (AC_OUTPUT): Removed checks/Makefile
+
+	* doc/m4.texinfo (Patsubst,example): @comment added to preserve
+	the space when m4.texinfo is edited and whitespace.el is active.
+	(Defn,example): idem.
+
+1998-08-20  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* doc/m4.texinfo (Esyscmd): grep ../Makefile instead of
+	../COPYING. ../Makefile is a file which is certainly present when
+	test is executed in testSubDir. One can't be sure that the COPYING
+	file is in .. or ../.. in all situations, the ../Makefile is
+	always there.
+
+	* doc/m4.texinfo (Include): adjusted expected test output
+	according to new tests, i.e. the input will always come from the
+	file `in' created by the test.
+
+	* tests/Makefile.am: Added three lines at the top to get
+	esyscmd.1.test working.
+
+	* tests/get-them: modified to generate clearer tests who will need
+	less maintenance when new test examples are created in
+	`doc/m4.texinfo'. All tests are small (nearly stand-alone, they
+	need the generic file `defs') shell scripts creating `in', `ok',
+	`out' and when apropriate `okerr' and `err' in the directory
+	`testSubDir' when executed. The compare of `ok' and `out'
+	(and of `okerr' and `err') will be the exit status of the test.
+	`out' must match `ok' (and `okerr' must match `err') for the test
+	to be succesful.
+
+	* tests/[a-b]\{1,8\}.[0-9]+.test: This namespace is reserved for
+	the tests generated by tests/get-them getting it input normally
+	from doc/m4.texinfo. The namespace tests/[a-b]+[0-9]+.test (no `.'
+	(dot) before the numeric part) is reserved for all other (hand
+	written) tests. The `+' means one or more times.
+
+1998-08-12  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* doc/Makefile.am (EXTRA_DIST): helptoman.pl and $(MANS) to
+	supported short man page to refer to info documentation
+	* helptoman.pl: added
+	* configure.in: AC_PATH_PROG(PERL,perl)
+	* Makefile.am (SUBDIRS): doc after src
+
+	* libitized with libit 0.5 from
+	ftp://ftp.iro.umontreal.ca/pub/contrib/pinard/maintenance/libit.
+
+	* configure.in (AC_REPLACE_FUNCS): added xmalloc xstrdup
+	* lib/Makefile.am (libm4_a_SOURCES): removed automakely supported
+	 replacement functions, (libm4_a_LIBADD): @LIBOBJS@
+	* configure.in (AM_WITH_REGEX), acconfig.h (WITH_REGEX): added
+	  lib/rx.{c,h}: added
+	* configure.in (AC_CHECK_FUNC): getopt_long
+
+	* src/m4.c (usage): Report bugs to m4-bugs@gnu.org.
+
+	* TODO: added entry about dependencies
+
+1998-08-10  René Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4f
+
+	* doc/m4.texinfo (Changesyntax): Added documentation for the macro
+	"changesyntax".
+
+	* src/builtin.c (m4_changesyntax): Added builtin macro
+	"changesyntax" to modify the syntax table.
+
+	* src/input.c, src/m4.h, src/macro.c: Implemented an input syntax
+	table.  All categories are assigned a syntax code and tokens are
+	read according to this table.
+
+1998-08-09  René Seindal  <rene@seindal.dk>
+
+	* src/numb.{c,h}: New files, implements multiple precision eval
+	using GNU gmp.  Originally submitted by John Gerard Makecki
+	(johnm@vlibs.com), later modified.  Tested with GNU gmp 2.0.2.
+
+	* doc/m4.texinfo (Eval): Added documentation for multiple
+	precision arithmetic library support.
+
+	* src/m4.{c,h}, src/eval.c, src/builtin.c, configure.in: Changes
+	to accommodate multiple precision eval.
+
+1998-08-07  René Seindal  <rene@seindal.dk>
+
+	* src/input.c (MATCH, match_input), src/m4.h: changed definition
+	of comment and quote strings to `unsigned int' to allow eight bit
+	chars (reported by andrewb@zip.com.au (Andrew Bettison)).
+
+	* src/builtin.c, doc/m4.texinfo: Builtin `syncoutput' added by
+	patch from Mike Howard <mike@clove.com>
+
+1998-08-06  René Seindal  <rene@seindal.dk>
+
+	* gettext.m4: corrected AM_WITH_NLS to handle use of installed
+	-lintl.
+
+1998-08-03  René Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4e
+
+	* src/m4.h: Added ifdef ENABLE_NLS around include of <libintl.h>
+	and _ macro.  M4 now builds with --disable-nls.
+
+	* src/m4.c (main): reintroduced textdomain(PACKAGE) to get gettext
+	to look for right message catalogs.  Call indef'ed by ENABLE_NLS.
+
+	* configure.in (ALL_LINGUAS): Added complete list of translations:
+	de fr it ja nl ru sv.
+
+1998-05-22  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* Prerelease 1.4d.
+
+	* src/m4.c: #include <signal.h> not <sys/signal.h>.
+
+	* src/Makefile.am: CFLAGS = -Wall @CFLAGS@.
+
+	* checks/Makefile.am: explicit list tests in CHECKS.
+
+	* configure.in, {,src,doc,lib,examples,checks}/Makefile.am,
+	src/{ansi2knr.{1,c}} doc/{m4.texinfo,mdate-sh}, missing,
+	mkinstalldirs, install-sh: Added automake (1.3) support.
+
+	* lib/{alloca.c,error.{c,h},get{date.h,opt.{c,h},opt1.c},
+	obstack.{c,h},regex.{c,h},strtol.c,xmalloc.c,xstrdup.c}:
+	Used libitize (0.4) to update.
+
+	* configure.in, ABOUT-NLS, intl/*, po/*: Added gettextize
+	(0.10.25) support. Removed LOCALE, fr.msg, m4.cod and adjusted
+	README accordingly.
+
+	* src/stackovf.c: #ifdef USE_STACKOVF ... #endif to (de-)activate
+	stack overflow functionality.
+
+1994-12-03  François Pinard  <pinard@iro.umontreal.ca>
+
+	* Prerelease 1.4.1.
+
+	* Makefile.in (realclean-local): Delete stamp-h.in.
+
+	* configure.in, {,src,lib}/Makefile.in, src/m4.h, src/m4.c:
+	Localize, adapting from how it is done in sharutils.
+
+	* fr.tt: New file, for French.
+
+	* configure.in, {,*/}Makefile.in, acconfig.h, src/m4.c,
+	src/freeze.c: Rename PRODUCT to PACKAGE.
+
+1994-11-26  François Pinard  <pinard@iro.umontreal.ca>
+
+	* configure.in: Check for <libintl.h> and <locale.h>.
+	* src/m4.h, src/builtin.c, src/debug.c, src/eval.c, src/macro.c,
+	src/stackovf.c: Rename _ to __P.
+	* src/m4.h: Declare _ as a macro returning its argument, or else,
+	include <libintl.h> and declare _ as gettext.
+	* src/m4.c: Possibly include <locale.h> and call setlocale.
+	* src/m4.c, src/builtin.c, src/debug.c, src/eval.c, src/freeze.c,
+	src/input.c, src/macro.c, src/output.c, src/path.c,
+	src/stackovf.c, src/symtab.c: Use _ macro over all localizable
+	strings.
+
+1994-11-07  François Pinard  <pinard@iro.umontreal.ca>
+
+	* doc/Makefile.in (stamp-vti): Use new -r option to date.
+
+	* configure.in: Put --with-gmp in place, in prevision for John
+	Gerard's work.
+	* acconfig.h: Document WITH_GMP.
+
+1994-11-05  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.4.
 
 	* doc/Makefile.in (realclean): Also remove stamp-vti.
 	Reported by Eric Backus.
 
-Wed Nov  2 00:47:53 1994  Francois Pinard  (pinard@icule)
+1994-11-02  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/freeze.c (produce_frozen_state): If the frozen file cannot
 	be opened, return immediately after producing the error message.
@@ -15,7 +1263,7 @@ Wed Nov  2 00:47:53 1994  Francois Pinard  (pinard@icule)
 	ANSIfying compiler flags, this is of no use to check it before.
 	Reported by Alexander Lehmann.
 
-Tue Nov  1 22:02:37 1994  Francois Pinard  (pinard@icule)
+1994-11-01  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/macro.c (collect_arguments): Cast obstack arguments to
 	(voidstar), so avoiding compiler warnings.
@@ -29,7 +1277,7 @@ Tue Nov  1 22:02:37 1994  Francois Pinard  (pinard@icule)
 	* src/symtab.c (free_symbol): Idem.
 	Reported by Karl Vogel.
 
-Mon Oct 31 02:11:19 1994  Francois Pinard  (pinard@icule)
+1994-10-31  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (DISTFILES): Distribute BACKLOG.
 
@@ -38,7 +1286,7 @@ Mon Oct 31 02:11:19 1994  Francois Pinard  (pinard@icule)
 	* src/m4.c, src/freeze.c: Use PRODUCT and VERSION instead of the
 	constant string m4 and variable or parameter named version.
 
-Sun Oct 30 08:13:03 1994  Francois Pinard  (pinard@icule)
+1994-10-30  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/m4.h, src/debug.c: Replace all #ifdef __STDC__ by #if
 	__STDC__.  Alliant FX/2800 Concentrix 2.2 (i860-BSD4.3) compiler
@@ -52,7 +1300,7 @@ Sun Oct 30 08:13:03 1994  Francois Pinard  (pinard@icule)
 	Reported by Eric Backus, Jim Meyering, John David Anglin and
 	Joseph E. Sacco.
 
-Sat Oct 29 05:10:03 1994  Francois Pinard  (pinard@icule)
+1994-10-29  François Pinard  <pinard@iro.umontreal.ca>
 
 	* aclocal.m4 (fp_C_PROTOTYPES): Force -D_HPUX_SOURCE with -Aa.
 	Reported by John David Anglin.
@@ -77,7 +1325,7 @@ Sat Oct 29 05:10:03 1994  Francois Pinard  (pinard@icule)
 	* doc/Makefile.in: Create version.texi, use it, clean it.
 	Reported by Jim Meyering.
 
-Fri Oct 28 20:33:55 1994  Francois Pinard  (pinard@icule)
+1994-10-28  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (all, install, uninstall): Depend on Makefile.
 
@@ -94,29 +1342,29 @@ Fri Oct 28 20:33:55 1994  Francois Pinard  (pinard@icule)
 
 	* {,*/}Makefile.in (dist): Always try a hard link before a copy.
 
-Thu Oct 27 22:32:58 1994  Francois Pinard  (pinard@icule)
+1994-10-27  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (mostlyclean-local): Do not remove *~.
 	* */Makefile.in (mostlyclean): Idem.
 	Reported by Robert E. Brown and Richard Stallman.
 
-Sun Oct  9 08:30:13 1994  Francois Pinard  (pinard@icule)
+1994-10-09  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/m4.h: Get rid of CONFIG_BROKETS.
 
-Sun Oct  2 16:48:10 1994  Francois Pinard  (pinard@icule)
+1994-10-02  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use AC_ARG_PROGRAM.
 	* aclocal.m4 (fp_C_PROTOTYPES): Substitute @kr@ by kr or empty.
 	Reported by David MacKenzie.
 
-Sat Oct  1 11:22:42 1994  Francois Pinard  (pinard@icule)
+1994-10-01  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Do not add -O to CFLAGS for GNU C, now that
 	configure does it automatically.
 	Reported by Jim Meyering.
 
-Fri Sep 23 08:16:58 1994  Francois Pinard  (pinard@icule)
+1994-09-23  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/stackovf.c: Declare the handler_t typedef earlier in the
 	code, use it for stackovf_handler.
@@ -128,12 +1376,12 @@ Fri Sep 23 08:16:58 1994  Francois Pinard  (pinard@icule)
 	basename'ing it.
 	Reported by Karl Berry.
 
-Sun Sep 18 11:42:50 1994  Francois Pinard  (pinard@icule)
+1994-09-18  François Pinard  <pinard@iro.umontreal.ca>
 
 	* src/Makefile.in (TAGS): Include a ../lib/TAGS reference.
 	Reported by Karl Berry.
 
-Wed Sep 14 10:00:22 1994  Francois Pinard  (pinard@icule)
+1994-09-14  François Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (mostlyclean): Added.
 	(TAGS): Make in $(srcdir).
@@ -156,7 +1404,7 @@ Wed Sep 14 10:00:22 1994  Francois Pinard  (pinard@icule)
 	-recursive and -local, only delay the removal of config.status,
 	which is repeated in both goals.
 
-Tue Sep 13 19:21:05 1994  Francois Pinard  (pinard@icule)
+1994-09-13  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.3.
 
@@ -184,12 +1432,12 @@ Tue Sep 13 19:21:05 1994  Francois Pinard  (pinard@icule)
 	(realclean): Remove it.
 	Reported by Karl Berry.
 
-Sat Sep 10 12:34:04 1994  Francois Pinard  (pinard@icule)
+1994-09-10  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use fp_ to match aclocal.m4.  Revert _OS_ macros
 	to old names, for following Autoconf.
 
-Thu Sep  8 15:07:27 1994  Francois Pinard  (pinard@icule)
+1994-09-08  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (MDEFINES): Remove INSTALL substitutions, for
 	./install.sh will not be correctly referred to in sub-Makefiles.
@@ -205,7 +1453,7 @@ Thu Sep  8 15:07:27 1994  Francois Pinard  (pinard@icule)
 	* configure.in (AC_OUTPUT): Touch stamp-h if CONFIG_HEADERS.
 	Reported by Jim Meyering.
 
-Tue Sep  6 12:07:33 1994  Francois Pinard  (pinard@icule)
+1994-09-06  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Correct stack overflow detection logic, taking
 	care of systems having only incomplete implementations (like for
@@ -214,11 +1462,11 @@ Tue Sep  6 12:07:33 1994  Francois Pinard  (pinard@icule)
 
 	* src/Makefile.in (TAGS): Remote -t from etags call.
 
-Fri Sep  2 10:37:10 1994  Francois Pinard  (pinard@icule)
+1994-09-02  François Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (install): Depend on all.
 
-Wed Aug 31 11:17:21 1994  Francois Pinard  (pinard@icule)
+1994-08-31  François Pinard  <pinard@iro.umontreal.ca>
 
 	* examples/Makefile.in (mostlyclean): Do not depend on texclean.
 	Reported by Jim Meyering and John David Anglin.
@@ -226,7 +1474,7 @@ Wed Aug 31 11:17:21 1994  Francois Pinard  (pinard@icule)
 	* Makefile.in (distclean-local): Delete config.log.
 	Reported by Jim Meyering.
 
-        Solidify frozen files with respect to -P:
+	Solidify frozen files with respect to -P:
 	* src/m4.c: Have -P set prefix_all_buitins variable instead of
 	calling a function by that name.  Declare the variable.
 	* src/m4.h: Adjust declaration for prefix_all_buitins.
@@ -255,7 +1503,7 @@ Wed Aug 31 11:17:21 1994  Francois Pinard  (pinard@icule)
 	* src/output.c (output_text): New function, for optimizing the
 	output of strings of characters.  Use it.
 
-Tue Aug 30 01:44:29 1994  Francois Pinard  (pinard@icule)
+1994-08-30  François Pinard  <pinard@iro.umontreal.ca>
 
 	* doc, src: New directories reorganizing the distribution.
 	* doc/Makefile.in, src/Makefile.in, examples/Makefile.in: New
@@ -269,7 +1517,7 @@ Tue Aug 30 01:44:29 1994  Francois Pinard  (pinard@icule)
 	* output.c (shipout_text): Accept a length parameter, and use it.
 	All callers adjusted.
 
-Mon Aug 29 12:27:19 1994  Francois Pinard  (pinard@icule)
+1994-08-29  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Include <unistd.h> if it exists.
 	* stackovf.c: Don't.
@@ -291,7 +1539,7 @@ Mon Aug 29 12:27:19 1994  Francois Pinard  (pinard@icule)
 	Reported by David MacKenzie.
 
 	Freeze diversions:
-	* output.c (freeze_diversions): New function.  
+	* output.c (freeze_diversions): New function.
 	* m4.h: Declare freeze_diversions.
 	* freeze.c: Document frozen file format, revise it, call
 	freeze_diversions to add diversions to frozen format, and code to
@@ -309,12 +1557,12 @@ Mon Aug 29 12:27:19 1994  Francois Pinard  (pinard@icule)
 	(insert_file): Use better buffering.
 	Reported by David MacKenzie.
 
-Sun Aug 28 05:20:02 1994  Francois Pinard  (pinard@icule)
+1994-08-28  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in, checks/Makefile.in: Arrange so
 	dist works from another build directory.
 
-Sat Aug 27 14:32:45 1994  Francois Pinard  (pinard@icule)
+1994-08-27  François Pinard  <pinard@iro.umontreal.ca>
 
 	* symtab.c (hack_all_symbols): Use hash_table_size instead of
 	constant HASHMAX, for -H option to work better.
@@ -331,7 +1579,7 @@ Sat Aug 27 14:32:45 1994  Francois Pinard  (pinard@icule)
 	(builtin_init): Accept and obey a flag argument.
 	* m4.h: Add declarations for freeze.c, changes for builtin.c.
 
-Wed Aug 24 16:14:19 1994  Francois Pinard  (pinard@icule)
+1994-08-24  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (dumpdef_cmp): Rewrite so the cast protect the const
 	specifier.
@@ -340,12 +1588,12 @@ Wed Aug 24 16:14:19 1994  Francois Pinard  (pinard@icule)
 	* acconfig.h: Document WITH_DMALLOC.
 	* m4.h: Add code for when WITH_DMALLOC.
 
-Mon Aug 15 12:38:05 1994  Francois Pinard  (pinard@icule)
+1994-08-15  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (long_options): Use "error-output", the dash was missing.
 	Reported by Akiko Matsushita.
 
-Fri Aug 12 16:38:01 1994  Francois Pinard  (pinard@icule)
+1994-08-12  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Include <sys/types.h>.
 	* builtin.c, debug.c, m4.c, output.c, stackovf.c: Don't.
@@ -374,7 +1622,7 @@ Fri Aug 12 16:38:01 1994  Francois Pinard  (pinard@icule)
 	* m4.c (usage): Reorganize the --help output by topic.  Include a
 	description for debugging flags.
 
-Fri Jul 29 10:15:52 1994  Francois Pinard  (pinard@icule)
+1994-07-29  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: If sigaction is available and SA_ONSTACK defined,
 	use sigaction.  Otherwise, if sigvec is available and SV_ONSTACK
@@ -383,15 +1631,15 @@ Fri Jul 29 10:15:52 1994  Francois Pinard  (pinard@icule)
 	Reported by Jim Avera, Karl Berry, Kaveh R. Ghazi, Matthias Rabe
 	and Simon Leinen.
 
-Thu Jul 21 22:43:17 1994  Francois Pinard  (pinard@icule)
+1994-07-21  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (usage): Replace printf par fputs.
 
-Mon Jul 18 23:48:23 1994  Francois Pinard  (pinard@icule)
+1994-07-18  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.2
 
-Sun Jul 17 08:08:25 1994  Francois Pinard  (pinard@icule)
+1994-07-17  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Check for sigaction and sigvec.  Add a new delayed
 	check for RLIMIT_STACK, combine in the checking for getrlimit.
@@ -401,21 +1649,21 @@ Sun Jul 17 08:08:25 1994  Francois Pinard  (pinard@icule)
 	* examples/stackovf.sh: Correct a typo.
 	Reported by Eric Backus, Jim Avera and Jim Meyering.
 
-Sat Jul 16 20:36:19 1994  Francois Pinard  (pinard@icule)
+1994-07-16  François Pinard  <pinard@iro.umontreal.ca>
 
 	* ansi2knr.c: New version sent by its author, Peter Deutsch.
 
-Fri Jul 15 14:36:21 1994  Francois Pinard  (pinard@icule)
+1994-07-15  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Modify so parallel make will not try making
 	lib/libm4.a twice simultaneously.
 	Reported by Jim Meyering.
 
-Thu Jul 14 17:23:17 1994  Francois Pinard  (pinard@icule)
+1994-07-14  François Pinard  <pinard@iro.umontreal.ca>
 
 	* stackovf.c (setup_stackovf_trap): Replace "Don't" by "Do not" in
 	error message, for when no code possibility exists.  Even if this
-	line is completely #ifdef'ed out, it brings a syntax error. 
+	line is completely #ifdef'ed out, it brings a syntax error.
 	Reported by Andreas Schwab, Jim Meyering and Joseph E. Sacco.
 
 	* Makefile.in (install): Have install depend on all too, for lib
@@ -425,7 +1673,7 @@ Thu Jul 14 17:23:17 1994  Francois Pinard  (pinard@icule)
 	providing ulimit, instead of using only ksh.
 	Reported by Jim Avera and Joseph E. Sacco.
 
-Tue Jul 12 06:54:31 1994  Francois Pinard  (pinard@icule)
+1994-07-12  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (check): Have it depend on all instead of m4.  In
 	this way, a change in lib will be detected and processed.
@@ -441,7 +1689,7 @@ Tue Jul 12 06:54:31 1994  Francois Pinard  (pinard@icule)
 	* lib/strtol.c: New file, from elsewhere.
 	Reported by Andreas Schwab.
 
-Thu Jul  7 22:38:10 1994  Francois Pinard  (pinard@icule)
+1994-07-07  François Pinard  <pinard@iro.umontreal.ca>
 
 	* macro.c (expand_macro): Cast value to (boolean) prior to
 	assigning it to traced.
@@ -450,11 +1698,11 @@ Thu Jul  7 22:38:10 1994  Francois Pinard  (pinard@icule)
 	* Makefile.in (m4): Always make all in lib first.
 	Reported by Jim Meyering.
 
-Wed Jul  6 13:16:31 1994  Jim Avera (jima@netcom.com)
+1994-07-06  Jim Avera <jima@netcom.com>
 
 	* stackovf.c: Isolated OS-dependent sections; Improved portability,
 	adding support for SunOS/BSD (sigvec, sigstack, and 4-parameter signal
-	handlers), and a default error message if the fault address is not 
+	handlers), and a default error message if the fault address is not
 	available (when neither siginfo.h nor BSD sigcontext are supported).
 	* configure.in: Changes for stackovf.h: Check for sigcontext,
 	sigaction, sigstack, and define rlim_t as int if necessary.
@@ -462,7 +1710,7 @@ Wed Jul  6 13:16:31 1994  Jim Avera (jima@netcom.com)
 	* examples/stackovf.sh: Run m4 -L99999999 to allow stack overflow.
 	* ansi2knr.c: Fix for func-ptr args; convert "..." to varargs syntax.
 
-Tue Jul  5 19:13:54 1994  Francois Pinard  (pinard@icule)
+1994-07-05  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use AC_SET_MAKE.
 	* Makefile.in: Use @SET_MAKE@.
@@ -471,7 +1719,7 @@ Tue Jul  5 19:13:54 1994  Francois Pinard  (pinard@icule)
 	* checks/check-them: Do not trap on SIGQUIT or SIGALRM.
 	Reported by Ian Taylor.
 
-Sat Jul  2 00:58:47 1994  Francois Pinard  (pinard@icule)
+1994-07-02  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Remove dependency of USE_STACKOVF on STDC_HEADERS,
 	because siginfo.h is unrelated to standard headers, and siginfo.h
@@ -483,14 +1731,14 @@ Sat Jul  2 00:58:47 1994  Francois Pinard  (pinard@icule)
 	* aclocal.m4, configure.in: Replace AC_HAVE_PROTOTYPES by
 	AC_PROTOTYPES.
 
-Wed Jun 29 22:41:53 1994  Francois Pinard  (pinard@icule)
+1994-06-29  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (substitute): Use \& to represent this part of the
 	string which was matched by the whole regexp, instead of
 	representing the whole string.  Any usage of \0 issues a warning
 	and acts like \&, it will disappear in some subsequent release.
 
-Mon Jun 27 14:24:23 1994  Francois Pinard  (pinard@icule)
+1994-06-27  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Complete prototype for forwarded declaration of usage.
 
@@ -510,11 +1758,11 @@ Mon Jun 27 14:24:23 1994  Francois Pinard  (pinard@icule)
 	(ntoa): Declare value as eval_t instead of int.  Declare uvalue as
 	unsigned_eval_t instead of unsigned int.  Change casts accordingly.
 	(shipout_int): Cast first argument of ntoa to eval_t.
-	Reported by Thorsten Ohl.	
+	Reported by Thorsten Ohl.
 
 	* macro.c: Complete the prototypes of forwarded expand_macro and
 	expand_token.
-	Reported by Thorsten Ohl.	
+	Reported by Thorsten Ohl.
 
 	* m4.h: Define voidstar as void * or char * depending on __STDC__.
 	The Ultrix 3.1 compiler cannot do much with void pointers.
@@ -536,7 +1784,7 @@ Mon Jun 27 14:24:23 1994  Francois Pinard  (pinard@icule)
 	(int) to most references, when used in expressions.
 	Reported by Tom McConnell.
 
-Sat Jun 25 00:10:05 1994  Francois Pinard  (pinard@icule)
+1994-06-25  François Pinard  <pinard@iro.umontreal.ca>
 
 	* aclocal.m4: Replace FP_PROTOTYPES by AC_HAVE_PROTOTYPES,
 	following an idea from Brook G. Milligan.  AC_HAVE_PROTOTYPES
@@ -551,7 +1799,7 @@ Sat Jun 25 00:10:05 1994  Francois Pinard  (pinard@icule)
 	* configure.in: Substitute CFLAGS and LDFLAGS, taking their value
 	from the environment.  Default CFLAGS to -g if not set.
 	* Makefile.in: Have CFLAGS and LDFLAGS substituted from configure.
-	* lib/Makefile.in: Have CFLAGS substituted from configure. 
+	* lib/Makefile.in: Have CFLAGS substituted from configure.
 	Reported by Eric Backus and Tom McConnell.
 
 	* configure.in: m4_undefine changeword before using AC_ENABLE.
@@ -575,13 +1823,13 @@ Sat Jun 25 00:10:05 1994  Francois Pinard  (pinard@icule)
 	* checks/Makefile.in (clean): Depends on mostlyclean.
 	(mostlyclean): New goal.
 
-Fri Jun 24 23:30:31 1994  Francois Pinard  (pinard@icule)
+1994-06-24  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (DISTFILES): Distribute install.sh.
 	* install.sh: New file, copied from elsewhere.
 	Reported by Assar Westerlund and Kaveh R. Ghazi.
 
-Thu Jun 23 00:00:30 1994  Francois Pinard  (pinard@icule)
+1994-06-23  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Define ENABLE_CHANGEWORD if --enable-changeword.
 	* acconfig.h: Explain ENABLE_CHANGEWORD.
@@ -589,7 +1837,7 @@ Thu Jun 23 00:00:30 1994  Francois Pinard  (pinard@icule)
 	[These modifs all depend upon ENABLE_CHANGEWORD and are adapted
 	from code provided by Pete Chown]
 	* m4.h: Add original_text field to u_t variant of union u.
-	Declare TOKEN_DATA_FUNC macro. 
+	Declare TOKEN_DATA_FUNC macro.
 	* builtin.c: Declare changeword.
 	(m4_changeword): New function.
 	* input.c: Include "regex.h", define variables with word regexps.
@@ -646,7 +1894,7 @@ Thu Jun 23 00:00:30 1994  Francois Pinard  (pinard@icule)
 	incl_test.m4.
 	* examples/multiquotes.m4: Renamed from multi-quotes.m.
 
-Wed Jun 22 21:58:54 1994  Francois Pinard  (pinard@icule)
+1994-06-22  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Avoid USE_STACKOVF if <siginfo.h> not found.  Note
 	that Jim developped stackovf.c on a 486 running SVR4.0 (ESIX), and
@@ -668,22 +1916,16 @@ Wed Jun 22 21:58:54 1994  Francois Pinard  (pinard@icule)
 	problem about an incorrect cpp seting on NeXT 3.1.
 	Reported by Alexander Lehmann.
 
-Sun Jun  5 16:25:19 1994  Francois Pinard  (pinard@icule)
+1994-06-05  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h (_): Change argument from `x' to `Args'.
 
-Wed May  4 23:59:39 1994  Francois Pinard  (pinard@icule)
-
-	* Makefile.in: Remove all occurrences of $(MFLAGS), which were
-	bringing more evil than good on a few systems.
-	Reported by Greg A. Woods.	
-
-Fri Apr 22 15:59:35 1994  Francois Pinard  (pinard@icule)
+1994-04-22  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Rename Args() to _().
 	* m4.h: Remove extern specifier from all function declarations.
 
-Fri Apr 22 15:51:21 1994  Jim Avera (jima@netcom.com)
+1994-04-22  Jim Avera <jima@netcom.com>
 
 	* stackovf.c: New file implementing stack-overflow detection.
 	* configure.in: Check for getrlimit, sigaction.  If all of
@@ -695,13 +1937,13 @@ Fri Apr 22 15:51:21 1994  Jim Avera (jima@netcom.com)
 	* m4.c: Call setup_stackovf_trap().
 	* tests/stackovf_test.sh: New file.
 
-Wed Apr 13 14:10:30 1994  Francois Pinard  (pinard@icule)
+1994-04-13  François Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in: Rename .all-stamp to stamp-checks.
 
 	* Makefile.in (Makefile, etc.): Adapt for Autoconf 1.8.
 
-Sun Jan 30 14:24:19 1994    (pinard at icule)
+1994-01-30    <pinard@iro.umontreal.ca>
 
 	* m4.h: Remove definition of volatile, not used anymore.
 	Reported by Jim Meyering and Joseph E. Sacco.
@@ -717,36 +1959,36 @@ Sun Jan 30 14:24:19 1994    (pinard at icule)
 	* m4.h: Avoid a pre-ANSI <memory.h> together with <string.h>.
 	Reported by Jim Meyering.
 
-Tue Jan 25 18:39:37 1994  Francois Pinard  (pinard at icule)
+1994-01-25  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Move the conditional definition of volatile after the
 	inclusion of system files, because they may define it first.
 
-Tue Jan  4 19:46:50 1994  Francois Pinard  (pinard@icule)
+1994-01-04  François Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in (CHECKS): Add a useless `*' before `[', to
 	get around a problem with Alpha make seeing a syntax error, there.
 	Reported by Vern Paxson.
 
-Mon Jan  3 00:21:45 1994  Francois Pinard  (pinard@icule)
+1994-01-03  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Do not define LDFLAGS, use CFLAGS on link calls.
 	Reported by Richard Stallman.
 
-Sat Dec 25 08:06:05 1993  Francois Pinard  (pinard@icule)
+1993-12-25  François Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Correct test for strerror, AC_FUNC_CHECK was used
 	instead of AC_HAVE_FUNCS.
 	Reported by Noah Friedman.
 
-Wed Dec  1 09:37:53 1993  Francois Pinard  (pinard@icule)
+1993-12-01  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Initialize show_help and show_version to zero.
 
 	* m4.c: Ensure EXIT_SUCCESS and EXIT_FAILURE are defined.
 	Use them in exit() and usage() calls.
 
-Sat Nov 27 10:43:24 1993  Francois Pinard  (pinard@icule)
+1993-11-27  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Delete extern sys_nerr, sys_errlist declarations, and
 	syserr() macro.  Delete errref, add reference_error and M4ERROR.
@@ -758,13 +2000,13 @@ Sat Nov 27 10:43:24 1993  Francois Pinard  (pinard@icule)
 	Doing so, the program name appears after the input reference
 	instead of before, which eases M-x next-error processing.
 
-Wed Nov 24 22:16:15 1993  Francois Pinard  (pinard@icule)
+1993-11-24  François Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/get-them: Escape braces with backslashes in patterns,
 	because HPUX-9.01 awk needs this.
 	Reported by Jim Meyering.
 
-Mon Nov 22 10:55:52 1993  Francois Pinard  (pinard@icule)
+1993-11-22  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c: Declare "FILE *popen ();".
 
@@ -779,7 +2021,7 @@ Mon Nov 22 10:55:52 1993  Francois Pinard  (pinard@icule)
 	conflicts on SGI and Alpha.
 	Reported by Kaveh R. Ghazi.
 
-Sat Nov 20 08:26:15 1993  Francois Pinard  (pinard@icule)
+1993-11-20  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Include <getopt.h> instead of "getopt.h".
 
@@ -793,7 +2035,7 @@ Sat Nov 20 08:26:15 1993  Francois Pinard  (pinard@icule)
 	* m4.h: Test for HAVE_MEMORY_H instead of NEED_MEMORY_H.
 	* configure.in: Use AC_HAVE_HEADERS(memory.h), delete AC_MEMORY_H.
 
-Wed Nov 17 09:34:55 1993  Francois Pinard  (pinard@icule)
+1993-11-17  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (m4_eval): Cast strlen to (int) before comparing.
 
@@ -851,7 +2093,7 @@ Wed Nov 17 09:34:55 1993  Francois Pinard  (pinard@icule)
 	* builtin.c (m4_syscmd, m4_esyscmd): Use it.
 	Reported by Nicolas Pioch.
 
-Fri Nov 12 10:02:26 1993  Francois Pinard  (pinard@icule)
+1993-11-12  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (m4.dvi): Use m4.texinfo instead of m4.texi.
 	Reported by Joel Sherrill.
@@ -866,17 +2108,17 @@ Fri Nov 12 10:02:26 1993  Francois Pinard  (pinard@icule)
 	* macro.c (call_macro): Add * in (*SYMBOL_FUNC (sym)) (...).
 	Reported by Karl Vogel.
 
-Tue Nov  9 09:31:47 1993  Francois Pinard  (pinard@icule)
+1993-11-09  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Do not define volatile if already defined.
-	Reported by Rene' Seindal.
+	Reported by René Seindal.
 
 	* lib/Makefile.in: Add a forgotten ALLOCA=@ALLOCA@.  Grrr!
 
 	Reported by Bernhard Daeubler, Eric Backus, Hal Peterson, Hoang
 	Uong, Ian Taylor, Kaveh R. Ghazi, Tom McConnell and Walter Wong.
 
-Mon Nov  8 21:11:44 1993  Francois Pinard  (pinard@icule)
+1993-11-08  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Define strchr and strrchr in terms of index and rindex,
 	instead of the other way around.
@@ -885,7 +2127,7 @@ Mon Nov  8 21:11:44 1993  Francois Pinard  (pinard@icule)
 	* input.c (next_char): Remove a "break;" after a "return ...;".
 	Reported by Tom McConnell.
 
-Mon Nov  8 12:45:34 1993  Francois Pinard  (pinard@icule)
+1993-11-08  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.1
 
@@ -904,7 +2146,7 @@ Mon Nov  8 12:45:34 1993  Francois Pinard  (pinard@icule)
 	instead of "configure --no-create", which is obsolete.
 	Reported by Tom McConnell.
 
-Fri Nov  5 09:49:30 1993  Francois Pinard  (pinard@compy.IRO.UMontreal.CA)
+1993-11-05  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (usage): Use "%s" instead of "m4" in format string.
 	Reported by Jim Meyering.
@@ -921,13 +2163,13 @@ Fri Nov  5 09:49:30 1993  Francois Pinard  (pinard@compy.IRO.UMontreal.CA)
 	* checks/Makefile.in: Changed accordingly.
 	Reported by Jim Meyering.
 
-Thu Nov  4 13:50:52 1993  Francois Pinard  (pinard@lagrande.IRO.UMontreal.CA)
+1993-11-04  François Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (dist): Correct permissions on files.
 
 	* output.c: Declare tmpfile, some systems don't.
 
-Wed Nov  3 09:09:16 1993  Francois Pinard  (pinard@icule)
+1993-11-03  François Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in (dist): Correct permissions on files.
 
@@ -947,7 +2189,7 @@ Wed Nov  3 09:09:16 1993  Francois Pinard  (pinard@icule)
 	diagnose missing arguments and return the empty string.
 	Reported by Nick S. Kanakakorn.
 
-Tue Nov  2 00:55:41 1993  Francois Pinard  (pinard@icule)
+1993-11-02  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (main): At end of all input, ensure all undiverted text
 	goes to the main output stream.
@@ -971,7 +2213,7 @@ Tue Nov  2 00:55:41 1993  Francois Pinard  (pinard@icule)
 	which case it is implied empty.  Affects define and pushdef.
 	Reported by Eric Allman.
 
-Mon Nov  1 07:45:24 1993  Francois Pinard  (pinard@icule)
+1993-11-01  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Add blind_if_no_args in struct builtin, blind_no_args in
 	struct symbol adn SYMBOL_BLIND_NO_ARGS macro.
@@ -1017,7 +2259,7 @@ Mon Nov  1 07:45:24 1993  Francois Pinard  (pinard@icule)
 
 	* m4.c: Remove all code conditionalized by IMPLEMENT_M4OPTS.
 	Merge parse_args into main.  Declare argv to be `char *const *',
-	then remove superfluous casts. 
+	then remove superfluous casts.
 
 	* m4.c: Rename --no-gnu-extensions to --traditional.
 	Reported by Ben A. Mesander.
@@ -1034,33 +2276,33 @@ Mon Nov  1 07:45:24 1993  Francois Pinard  (pinard@icule)
 	Reported by Kristine Lund.
 	Reported by Marion Hakanson.
 
-Sat Oct 30 12:51:47 1993  Francois Pinard  (pinard@icule)
+1993-10-30  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (m4.info): Use -I$(srcdir) on $(MAKEINFO).
 	Reported by Noah Friedman.
 
-Mon Oct 25 14:58:48 1993  Francois Pinard  (pinard@icule)
+1993-10-25  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Remove MDEFINES and cleanup.
 
-Wed Jun  9 14:59:46 1993  Francois Pinard  (pinard@icule)
+1993-06-09  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (dist): Replace "echo `pwd`" by a mere "pwd".
 	Create a gzip file.
 
-Sat Feb  6 14:59:22 1993  Francois Pinard  (pinard@icule)
+1993-02-06  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in, check/Makefile.in: In dist goals,
 	ensure 777 mode for directories, so older tar's will restore file
 	modes properly.
 
-Sun Jan 17 15:38:05 1993  Francois Pinard  (pinard@icule)
+1993-01-17  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in: Put $(CFLAGS) after $(CPPFLAGS),
 	so the installer can override automatically configured choices.
 	Reported by Karl Berry.
 
-Fri Jan 15 16:07:00 1993  Francois Pinard  (pinard@icule)
+1993-01-15  François Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/vfprintf.c: Stolen from Oleo distribution and adapted.  The
 	previous version was not working properly on m68k-hp-bsd4.3.
@@ -1071,19 +2313,19 @@ Fri Jan 15 16:07:00 1993  Francois Pinard  (pinard@icule)
 	* lib/Makefile.in: Distribute _doprnt.c.
 	Do not distribute regex.[ch].old anymore.
 
-Fri Jan  1 19:42:23 1993  Francois Pinard  (pinard at icule)
+1993-01-01  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in: Reinstate $(CPPFLAGS), use it.
 	Richard wants it there.
 
-Sun Dec 27 07:01:54 1992  Francois Pinard  (pinard at icule)
+1992-12-27  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Add DEFS to MDEFINES.
 	* lib/Makefile.in (.c.o): Remove $(CPPFLAGS).
 	(libm4.a): Remove the library before creating it.
 	(distclean): Remove tags and TAGS too.
 
-Wed Dec 23 12:46:55 1992  Francois Pinard  (pinard at icule)
+1992-12-23  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (dvi, m4.dvi): New goals.
 
@@ -1097,9 +2339,8 @@ Wed Dec 23 12:46:55 1992  Francois Pinard  (pinard at icule)
 
 	* Makefile.in (clean): Remove clutter from ansi2knr.
 	Reported by Pierre Gaumond.
-	Reported by Greg A. Woods.
 
-Sun Dec 20 10:40:20 1992  Francois Pinard  (pinard at icule)
+1992-12-20  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Remove $(CPPFLAGS) from the .c.o rule.  The user
 	might well use CFLAGS is s/he needs it.
@@ -1112,7 +2353,7 @@ Sun Dec 20 10:40:20 1992  Francois Pinard  (pinard at icule)
 	Reported by Erez Zadok.
 	Reported by Assar Westerlund.
 
-Sat Dec 19 08:21:34 1992  Francois Pinard  (pinard at icule)
+1992-12-19  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.0.3
 	This is still a	beta release for the future GNU m4 version 1.1.
@@ -1173,7 +2414,7 @@ Sat Dec 19 08:21:34 1992  Francois Pinard  (pinard at icule)
 	mysteriously stopped aborting with this one.  Insecure feeling...
 	* lib/Makefile.in: Distribute regex.[ch].old, just in case!
 
-Fri Dec 18 11:08:03 1992  Francois Pinard  (pinard at icule)
+1992-12-18  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Change `--no-warnings' to `--silent'.
 	Reported by David MacKenzie.
@@ -1193,14 +2434,14 @@ Fri Dec 18 11:08:03 1992  Francois Pinard  (pinard at icule)
 	* builtin.c (ntoa): Ensure the value is always interpreted as a
 	signed quantity, whatever the radix is.
 
-Wed Nov 18 07:57:19 1992  Jim Meyering  (meyering@idefix)
+1992-11-18  Jim Meyering  <meyering@idefix>
 
 	* builtin.c, format.c, input.c: Split long lines.
 	* m4.c: Use typedef macro_definition instead of struct
 	macro_definition.
 	* symtab.c: Use typedef symbol instead of struct symbol.
 
-Tue Nov 17 01:58:40 1992  Francois Pinard  (pinard at icule)
+1992-11-17  François Pinard  <pinard@iro.umontreal.ca>
 
 	* *.[ch]: Remove all trailing whitespace, in code and comments.
 
@@ -1211,7 +2452,7 @@ Tue Nov 17 01:58:40 1992  Francois Pinard  (pinard at icule)
 	awk script when switching files, because without this, mawk runs
 	out of file descriptors.
 
-Mon Nov 16 20:42:56 1992  Francois Pinard  (pinard at icule)
+1992-11-16  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (realclean): Delete m4.info*.
 	Reported by Jim Meyering.
@@ -1223,21 +2464,21 @@ Mon Nov 16 20:42:56 1992  Francois Pinard  (pinard at icule)
 	* checks/get_them: Have the dnl header of each test more
 	recognizable by next-error, also use a better message.
 
-Mon Nov 16 07:48:52 1992  Jim Meyering  (meyering@idefix)
+1992-11-16  Jim Meyering  <meyering@idefix>
 
-        * m4.h [__GNUC__]: Use __volatile__ instead of `volatile.'
-        And use that only if __GNUC__ since we're using it's GCC-specific
-        semantics that tell the compiler the associated function doesn't
-        return.
+	* m4.h [__GNUC__]: Use __volatile__ instead of `volatile.'
+	And use that only if __GNUC__ since we're using it's GCC-specific
+	semantics that tell the compiler the associated function doesn't
+	return.
 
-        * builtin.c (substitute): Don't use character as an array index.
-        (dumpdef_cmp): Make formal arguments `const void *' to avoid
-        warnings with gcc -W -Wall on systems with qsort prototype.
-        (m4_errprint): Cast obstack_finish to `char *' to avoid warnings
-        from gcc -W -Wall.
+	* builtin.c (substitute): Don't use character as an array index.
+	(dumpdef_cmp): Make formal arguments `const void *' to avoid
+	warnings with gcc -W -Wall on systems with qsort prototype.
+	(m4_errprint): Cast obstack_finish to `char *' to avoid warnings
+	from gcc -W -Wall.
 
-        * eval.c (most functions): Add parentheses to assignments used
-        as truth values go avoid warnings from gcc -Wall.
+	* eval.c (most functions): Add parentheses to assignments used
+	as truth values go avoid warnings from gcc -Wall.
 
 	* input.c, m4.c, output.c, path.c, symtab.c: Declare static
 	any functions that don't need external scope.
@@ -1245,7 +2486,7 @@ Mon Nov 16 07:48:52 1992  Jim Meyering  (meyering@idefix)
 	* builtin.c, debug.c, format.c, m4.c, m4.h, macro.c, symtab.c
 	(many functions and arrays): Declare `const'.
 
-Sun Nov 15 09:42:09 1992  Francois Pinard  (pinard at icule)
+1992-11-15  François Pinard  <pinard@iro.umontreal.ca>
 
 	* *.[ch]: Rename nil to NULL, using the declaration from <stdio.h>,
 	removing the declaration from m4.h.  Also rename false to FALSE
@@ -1261,13 +2502,13 @@ Sun Nov 15 09:42:09 1992  Francois Pinard  (pinard at icule)
 	instead of from version.h.  I need updating many files manually,
 	when the version changes, version.h is just one of them.
 
-Sat Nov 14 11:01:20 1992  Francois Pinard  (pinard at icule)
+1992-11-14  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Remove the tag `boolean' on the enum introducing typedef
 	`boolean'.  This tag conflicts with <sys/types.h> on SVR4.
 	Reported by Tom McConnell.
 
-Fri Nov 13 00:12:50 1992  Francois Pinard  (pinard at icule)
+1992-11-13  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.texinfo: Correct the examples for 33.divert, 38.divnum,
 	39.cleardiv, which were describing missing or spurious newlines.
@@ -1283,7 +2524,7 @@ Fri Nov 13 00:12:50 1992  Francois Pinard  (pinard at icule)
 
 	* Makefile.in (dist): chmod a+r before making the tar file.
 
-Thu Nov 12 14:42:57 1992  Francois Pinard  (pinard at icule)
+1992-11-12  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (m4_dnl): Diagnose any parameter to `dnl'.
 
@@ -1297,7 +2538,7 @@ Thu Nov 12 14:42:57 1992  Francois Pinard  (pinard at icule)
 	ensure that it does not define errno.
 	Reported by Richard Stallman.
 
-Wed Nov 11 17:40:35 1992  Francois Pinard  (pinard at icule)
+1992-11-11  François Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c: Define and use DECLARE macro for builtins.
 
@@ -1309,7 +2550,7 @@ Wed Nov 11 17:40:35 1992  Francois Pinard  (pinard at icule)
 
 	* m4.c (cmd_error): Add a missing semicolon before va_end().
 
-Tue Nov 10 08:57:05 1992  Francois Pinard  (pinard at icule)
+1992-11-10  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Now handle protoized sources.  Define and use U.
 	Compile and use ansi2knr with old compilers.  Update DISTFILES.
@@ -1338,7 +2579,7 @@ Tue Nov 10 08:57:05 1992  Francois Pinard  (pinard at icule)
 	* path.c: Protoized.  Then cast some (char *) over xmalloc's.
 	* symtab.c: Protoized.
 
-Fri Nov  6 02:05:21 1992  Francois Pinard  (pinard at icule)
+1992-11-06  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.texinfo: Remove directory from diagnostics in 30.include,
 	51.eval, 56.errprint and 57.m4exit tests.
@@ -1351,14 +2592,14 @@ Fri Nov  6 02:05:21 1992  Francois Pinard  (pinard at icule)
 	* Makefile.in, lib/Makefile.in: Implement Autoconf interface.
 	Then, rewritten for better compliance with GNU standards.
 
-Thu Nov  5 12:37:13 1992  Francois Pinard  (pinard at icule)
+1992-11-05  François Pinard  <pinard@iro.umontreal.ca>
 
 	* format.c (format): Avoid syntax error if not HAVE_EFGCVT,
 	because of a misplaced #endif.
 
 	* Many *.[hc] files: Correct intra-line spacing here and there,
 	according to GNU indent 1.6 advice.
-	
+
 	* configure.in: New, using Autoconf 1.2.
 	* m4.h: Reverse NO_MEMORY_H to NEED_MEMORY_H.
 	* Delete old configure.in, configure, etc/configure.in,
@@ -1383,7 +2624,7 @@ Thu Nov  5 12:37:13 1992  Francois Pinard  (pinard at icule)
 	* Delete empty etc/.
 	* examples/: New name for test/.
 
-Tue Mar 10 00:29:46 1992  Francois Pinard  (pinard at icule)
+1992-03-10  François Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (check): Add m4 as dependency.
 
@@ -1392,7 +2633,7 @@ Tue Mar 10 00:29:46 1992  Francois Pinard  (pinard at icule)
 	usage message more informative.
 	Reported by David MacKenzie.
 
-Mon Mar  9 14:53:40 1992  Francois Pinard  (pinard at icule)
+1992-03-09  François Pinard  <pinard@iro.umontreal.ca>
 
 	* etc/check_examples: New name for check_examples.sh.
 	* etc/get_examples: New name for get_examples.sh.
@@ -1403,7 +2644,7 @@ Mon Mar  9 14:53:40 1992  Francois Pinard  (pinard at icule)
 	* Many *.[hc] files: GNU indent'ed, with further fine tuning of
 	code disposition by hand.
 
-Sun Mar  8 11:01:55 1992  Francois Pinard  (pinard at icule)
+1992-03-08  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Delete definitions for abort() and exit().
 	Reported by Richard Stallman.
@@ -1417,9 +2658,9 @@ Sun Mar  8 11:01:55 1992  Francois Pinard  (pinard at icule)
 	* eval.c, input.c, m4.h: Remove last comma in enums.
 	Reported by Mike Lijewski.
 
-	* Transfer of maintenance duties from Rene' to Franc,ois.
+	* Transfer of maintenance duties from René to François.
 
-Thu Oct 24 15:18:46 1991  Rene' Seindal (seindal at diku.dk)
+1991-10-24  René Seindal <seindal@diku.dk>
 
 	* Release 1.0.  Many thanks to those, who provided me with bug
 	reports and feedback.
@@ -1441,7 +2682,7 @@ Thu Oct 24 15:18:46 1991  Rene' Seindal (seindal at diku.dk)
 
 	* Several minor bugs have been fixed.
 
-Fri Jul 26 15:28:42 1991  Rene' Seindal (seindal at diku.dk)
+1991-07-26  René Seindal <seindal@diku.dk>
 
 	* Fixed various bugs.  Release 0.99, manual 0.09.  Many thanks to
 	Francois Pinard and Roland H. Pesch for providing me with reports.
@@ -1480,7 +2721,7 @@ Fri Jul 26 15:28:42 1991  Rene' Seindal (seindal at diku.dk)
 
 	* The m4.info file is now installed along with the program.
 
-Thu Nov 15 21:51:06 1990  Rene' Seindal (seindal at diku.dk)
+1990-11-15  René Seindal <seindal@diku.dk>
 
 	* Updated and enhanced version.  Release 0.75, manual 0.07.
 
@@ -1521,6 +2762,6 @@ Thu Nov 15 21:51:06 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Fixed two missing null bytes bugs.
 
-Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
+1990-01-22  René Seindal <seindal@diku.dk>
 
 	* Initial beta release.  Release 0.50, manual 0.05.

@@ -16,11 +16,11 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "m4.h"
+#include "m4private.h"
 
 #include <sys/stat.h>
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -34,7 +34,7 @@ static struct obstack trace;
 
 extern int expansion_level;
 
-static void debug_set_file _((FILE *));
+static void debug_set_file M4_PARAMS((FILE *));
 
 /*----------------------------------.
 | Initialise the debugging module.  |
@@ -220,15 +220,16 @@ debug_message_prefix (void)
 | left quote) and %r (optional right quote).			       |
 `---------------------------------------------------------------------*/
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
 static void
 trace_format (const char *fmt, ...)
 #else
 static void
-trace_format (...)
+trace_format (va_alist)
+     va_dcl
 #endif
 {
-#if ! __STDC__
+#if ! ((defined __STDC__ && __STDC__) || defined PROTOTYPES)
   const char *fmt;
 #endif
   va_list args;
@@ -240,7 +241,7 @@ trace_format (...)
   int slen;
   int maxlen;
 
-#if __STDC__
+#if (defined __STDC__ && __STDC__) || defined PROTOTYPES
   va_start (args, fmt);
 #else
   va_start (args);
@@ -267,11 +268,11 @@ trace_format (...)
 	  break;
 
 	case 'l':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? lquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? (char *)m4_lquote.string : "";
 	  break;
 
 	case 'r':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? rquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? (char *)m4_rquote.string : "";
 	  break;
 
 	case 'd':
@@ -349,10 +350,10 @@ trace_prepre (const char *name, int id)
 `-----------------------------------------------------------------------*/
 
 void
-trace_pre (const char *name, int id, int argc, token_data **argv)
+trace_pre (const char *name, int id, int argc, m4_token_data **argv)
 {
   int i;
-  const builtin *bp;
+  const struct m4_builtin *bp;
 
   trace_header (id);
   trace_format ("%s", name);
@@ -366,26 +367,28 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 	  if (i != 1)
 	    trace_format (", ");
 
-	  switch (TOKEN_DATA_TYPE (argv[i]))
+	  switch (M4_TOKEN_DATA_TYPE (argv[i]))
 	    {
-	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv[i]));
+	    case M4_TOKEN_TEXT:
+	      trace_format ("%l%S%r", M4_TOKEN_DATA_TEXT (argv[i]));
 	      break;
 
-	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
+	    case M4_TOKEN_FUNC:
+	      bp = (struct m4_builtin *) list_find (builtin_tables,
+				(VOID *) M4_TOKEN_DATA_FUNC (argv[i]),
+				builtin_table_func_find);
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
+		  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())")));
 		  abort ();
 		}
 	      trace_format ("<%s>", bp->name);
 	      break;
 
 	    default:
-	      M4ERROR ((warning_status, 0,
-			"INTERNAL ERROR: Bad token data type (trace_pre ())"));
+	      M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad token data type (trace_pre ())")));
 	      abort ();
 	    }
 
@@ -406,7 +409,7 @@ INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
 `-------------------------------------------------------------------*/
 
 void
-trace_post (const char *name, int id, int argc, token_data **argv,
+trace_post (const char *name, int id, int argc, m4_token_data **argv,
 	    const char *expanded)
 {
   if (debug_level & DEBUG_TRACE_CALL)

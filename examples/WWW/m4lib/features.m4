@@ -23,13 +23,13 @@ have been made.))
 \dt(\b(Support for multiple precision arithmetic in eval.))
 
 \dd(\p(If appropriately configured, GNU m4 can now do multiple precision
-arithmetic in the build in macro 'eval'. If not configured, GNU m4
+arithmetic in the built in macro 'eval'. If not configured, GNU m4
 will use the largest integer available for its calculations.))
 
 \dt(\b(An input syntax table to change how input is parsed.))
 
 \dd(\p(A new build in macro 'changesyntax' allows finer control over how input
-characters are parsed into input tokens.&nbsp; It is no possible to have
+characters are parsed into input tokens.&nbsp; It is now possible to have
 several one character quote strings or comment delimiters, to change the
 format of macro calls, to use active characters like in TeX, and probably
 most useful, to change what input characters are treated as letters when
@@ -39,20 +39,16 @@ looking for macro calls.)
 
 \dt(\b(Support for loadable modules.))
 
-\dd(\p(GNU m4 now has rudimentary support for dynamic loading of
-compiled modules at runtime. A module can define any number of new build
-in macros, which will be indistinguishable from the standard set of
-build in macros. Modules can also override existing build in macros.)
-
-\p(Module support for GNU m4 still needs some work.)
-
-\p(See the \link(modules.htm, separate README file for modules))
+\dd(\p(GNU m4 now has support for dynamic loading of compiled modules at
+runtime. A module can define any number of new built in macros, which
+will be indistinguishable from the standard set of built in
+macros. Modules can also override existing built in macros.)
 )
 
 \dt(\b(Better control of sync-lines generation.))
 
-\dd(\p(The new build in macro 'syncoutput' allows better control of the
-generation of sync-lines.&nbsp; They can no be turned on or off at
+\dd(\p(The new built in macro 'syncoutput' allows better control of the
+generation of sync-lines. They can now be turned on or off at
 will.))
 
 )

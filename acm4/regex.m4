@@ -7,7 +7,7 @@ AC_DEFUN(jm_WITH_REGEX,
     dnl Even packages that don't use regex.c can use this macro.
     dnl Of course, for them it doesn't do anything.
 
-    syscmd([test -f lib/regex.c])
+    syscmd([test -f m4/regex.c])
     ifelse(sysval, 0,
       [
 	AC_ARG_WITH(included-regex,

@@ -1,252 +1,381 @@
 # Polish translations for the GNU m4 messages.
-# Copyright (C) 1998 Free Software Foundation, Inc.
-# Rafa³ Maszkowski <rzm@icm.edu.pl>, 1998.
+# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+# Rafa³ Maszkowski <rzm@icm.edu.pl>, 1998-1999.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-10-04 01:31+0200\n"
-"PO-Revision-Date: 1998-08-05 17:30+0200\n"
+"Project-Id-Version: m4 1.4n\n"
+"POT-Creation-Date: 2000-07-28 00:26+0100\n"
+"PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/builtin.c:317
+#: src/getopt.c:677
 #, c-format
-msgid "Warning: Too few arguments to built-in `%s'"
-msgstr "Uwaga: Za ma³o argumentów dla wbodowanego `%s'"
+msgid "%s: option `%s' is ambiguous\n"
+msgstr ""
 
-#: src/builtin.c:323
+#: src/getopt.c:702
 #, c-format
-msgid "Warning: Excess arguments to built-in `%s' ignored"
-msgstr "Uwaga: Nadmiarowe argumenty do built-in `%s' zosta³y zignorowane"
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr ""
 
-#: src/builtin.c:351
+#: src/getopt.c:707
 #, c-format
-msgid "Non-numeric argument to built-in `%s'"
-msgstr "Nienumeryczny argument do built-in `%s'"
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr ""
 
-#: src/builtin.c:450
-msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
+#: src/getopt.c:725 src/getopt.c:898
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr ""
+
+#. --option
+#: src/getopt.c:754
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr ""
+
+#. +option or -option
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr ""
+
+#. 1003.2 specifies the format of this message.
+#: src/getopt.c:784
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr ""
+
+#: src/getopt.c:787
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr ""
+
+#. 1003.2 specifies the format of this message.
+#: src/getopt.c:817 src/getopt.c:947
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr ""
+
+#: src/getopt.c:864
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr ""
+
+#: src/getopt.c:882
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr ""
+
+#: m4/obstack.c:473
+msgid "memory exhausted"
+msgstr ""
+
+#: m4/regex.c:1021
+msgid "Success"
+msgstr ""
+
+#: m4/regex.c:1024
+msgid "No match"
+msgstr ""
+
+#: m4/regex.c:1027
+#, fuzzy
+msgid "Invalid regular expression"
+msgstr "B³êdne wyra¿enie regularne `%s': %s"
+
+#: m4/regex.c:1030
+msgid "Invalid collation character"
+msgstr ""
+
+#: m4/regex.c:1033
+msgid "Invalid character class name"
+msgstr ""
+
+#: m4/regex.c:1036
+msgid "Trailing backslash"
+msgstr ""
+
+#: m4/regex.c:1039
+msgid "Invalid back reference"
+msgstr ""
+
+#: m4/regex.c:1042
+msgid "Unmatched [ or [^"
+msgstr ""
+
+#: m4/regex.c:1045
+msgid "Unmatched ( or \\("
+msgstr ""
+
+#: m4/regex.c:1048
+msgid "Unmatched \\{"
+msgstr ""
+
+#: m4/regex.c:1051
+msgid "Invalid content of \\{\\}"
+msgstr ""
+
+#: m4/regex.c:1054
+msgid "Invalid range end"
+msgstr ""
+
+#: m4/regex.c:1057 m4/xmalloc.c:82
+msgid "Memory exhausted"
+msgstr ""
+
+#: m4/regex.c:1060
+#, fuzzy
+msgid "Invalid preceding regular expression"
+msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
+
+#: m4/regex.c:1063
+#, fuzzy
+msgid "Premature end of regular expression"
+msgstr "Przedwczesny koniec pliku zamro¿onego"
+
+#: m4/regex.c:1066
+#, fuzzy
+msgid "Regular expression too big"
+msgstr "B³êdne wyra¿enie regularne `%s': %s"
+
+#: m4/regex.c:1069
+msgid "Unmatched ) or \\)"
+msgstr ""
+
+#: m4/regex.c:5566
+#, fuzzy
+msgid "No previous regular expression"
+msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
+
+#: src/builtin.c:487
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "B£¡D WEWNÊTRZNY: Z³y typ danych tokenu w define_macro ()"
 
-#: src/builtin.c:645 src/builtin.c:708 src/builtin.c:1331 src/builtin.c:1355
+#: src/builtin.c:696 src/builtin.c:797 src/builtin.c:1348 src/builtin.c:1371
 #, c-format
 msgid "Undefined name %s"
 msgstr "Niezdefiniowana nazwa %s"
 
-#: src/builtin.c:673
+#: src/builtin.c:738 src/freeze.c:212
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych!"
 
-#: src/builtin.c:681
+#: src/builtin.c:746
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "B£¡D WEWNÊTRZNY: Z³y typ danych tokenu w m4_dumpref ()"
 
-#: src/builtin.c:732
-#, c-format
-msgid "Undefined macro `%s'"
-msgstr "Niezdefiniowane makro `%s'"
+#: src/builtin.c:820
+#, fuzzy, c-format
+msgid "Undefined name `%s'"
+msgstr "Niezdefiniowana nazwa %s"
 
-#: src/builtin.c:772
+#: src/builtin.c:857
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "B£¡D WEWNETRZNY: Z³y typ symbolu w m4_defn ()"
 
-#: src/builtin.c:838
+#: src/builtin.c:920
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Nie mogê otworzyæ potoku do komendy `%s'"
 
-#: src/builtin.c:875
+#: src/builtin.c:959
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Baza w eval poza zakresem (radix = %d)"
 
-#: src/builtin.c:884
+#: src/builtin.c:968
 msgid "Negative width to eval"
 msgstr "Ujemna d³ugo¶æ w eval"
 
-#: src/builtin.c:976
+#: src/builtin.c:1067
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Nienumeryczny argument dla %s"
 
-#: src/builtin.c:988
+#: src/builtin.c:1079
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Nie mogê przetowrzyæ z powrotem %s"
 
-#: src/builtin.c:1132
-#, fuzzy, c-format
-msgid "Undefined syntax code %c"
-msgstr "Niezdefiniowana nazwa %s"
-
-#: src/builtin.c:1182 src/freeze.c:207
+#: src/builtin.c:1208 src/freeze.c:391
 #, c-format
 msgid "Cannot open %s"
 msgstr "Nie mogê otworzyæ %s"
 
-#: src/builtin.c:1391
+#: src/builtin.c:1406
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Tryb debugowania: z³e flagi debugowania: `%s'"
 
-#: src/builtin.c:1427
+#: src/builtin.c:1441
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Nie mogê ustawiæ pliku b³êdów: %s"
 
-#: src/builtin.c:1644
+#: src/builtin.c:1657
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "UWAGA: \\0 zniknie, w podstawieniach u¿yj zamiast tego \\&"
 
-#: src/builtin.c:1705 src/builtin.c:1765 src/input.c:979
+#: src/builtin.c:1717 src/builtin.c:1776 src/input.c:1051
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "B³êdne wyra¿enie regularne `%s': %s"
 
-#: src/builtin.c:1716 src/builtin.c:1789
+#: src/builtin.c:1728 src/builtin.c:1800
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "B³±d dopasowania do wyra¿enia regularnego `%s'"
 
-#: src/debug.c:379
+#: src/debug.c:382
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
 msgstr ""
 "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych! (trace_pre "
 "())"
 
-#: src/debug.c:387
+#: src/debug.c:390
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "B£¡D WEWNÊTRZNY: Z³y typ danych tokenu (trace_pre ())"
 
-#: src/eval.c:297
+#: src/eval.c:309
 #, c-format
 msgid "Bad expression in eval (missing right parenthesis): %s"
 msgstr "B³êdne wyra¿enie w eval (brakuj±cy prawy nawias): %s"
 
-#: src/eval.c:303
+#: src/eval.c:315
 #, c-format
 msgid "Bad expression in eval: %s"
 msgstr "B³êdne wyra¿enie w eval: %s"
 
-#: src/eval.c:308
+#: src/eval.c:320
 #, c-format
 msgid "Bad expression in eval (bad input): %s"
 msgstr "B³êdne wyra¿enie w eval (z³e dane wej¶ciowe): %s"
 
-#: src/eval.c:313
+#: src/eval.c:325
 #, c-format
 msgid "Bad expression in eval (excess input): %s"
 msgstr "B³êdne wyra¿enie w eval (nadmiarowe dane): %s"
 
-#: src/eval.c:318
+#: src/eval.c:330
 #, c-format
 msgid "Divide by zero in eval: %s"
 msgstr "Dzielenie przez zero w eval: %s"
 
-#: src/eval.c:323
+#: src/eval.c:335
 #, c-format
 msgid "Modulo by zero in eval: %s"
 msgstr "Modulo zero w eval: %s"
 
-#: src/eval.c:328
+#: src/eval.c:340
 msgid "INTERNAL ERROR: Bad error code in evaluate ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod b³êdu w evaluate ()"
 
-#: src/eval.c:582
+#: src/eval.c:594
 msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny operator porównania w cmp_term ()"
 
-#: src/eval.c:627
+#: src/eval.c:639
 msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny operator przesuniêcia w shift_term ()"
 
-#: src/eval.c:726
+#: src/eval.c:738
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny opertaotr w mult_term ()"
 
-#: src/freeze.c:115
-msgid "INTERNAL ERROR: Built-in not found in builtin table!"
-msgstr "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych!"
-
-#: src/freeze.c:128
+#: src/freeze.c:247
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny typ danych tokenu w freeze_one_symbol ()"
 
-#: src/freeze.c:159
+#: src/freeze.c:278
 msgid "Expecting line feed in frozen file"
 msgstr "Oczekiwany line fedd w pliku zamro¿onym"
 
-#: src/freeze.c:161
+#: src/freeze.c:280
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Oczekiwany znak `%c' w pliku zamro¿onym"
 
-#: src/freeze.c:218
+#. 1 argument 'F' operations are invalid for format version 1
+#: src/freeze.c:404 src/freeze.c:443 src/freeze.c:460 src/freeze.c:515
+#: src/freeze.c:541
 msgid "Ill-formated frozen file"
 msgstr "¬le sformatowy plik zamro¿ony"
 
-#: src/freeze.c:273 src/freeze.c:289
-msgid "Premature end of frozen file"
-msgstr "Przedwczesny koniec pliku zamro¿onego"
-
-#: src/freeze.c:323
+#: src/freeze.c:499
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' z pliku zamro¿onego nie znalezione w tablicy wbudowanych!"
 
-#: src/input.c:306
+#: src/freeze.c:532
+msgid "Module support not compiled in"
+msgstr ""
+
+#: src/freeze.c:561
+msgid "Premature end of frozen file"
+msgstr "Przedwczesny koniec pliku zamro¿onego"
+
+#: src/input.c:310
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Dane wej¶ciowe wycofane do %s, linia %d"
 
-#: src/input.c:334
+#: src/input.c:338
 #, c-format
 msgid "Input read from %s"
 msgstr "Dane wej¶ciowe przeczytane z %s"
 
-#: src/input.c:494
+#: src/input.c:498
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "B£¡D WEWNÊTRZNY: Rekursywny push_string!"
 
-#: src/input.c:611
+#: src/input.c:615
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdne wywo³anie init_macro_token ()"
 
-#: src/input.c:651
+#: src/input.c:655
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "B£¡D WEWNÊTRZNY: B³±d stosu wej¶ciowego w next_char ()"
 
-#: src/input.c:688
+#: src/input.c:692
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "B£¡D WEWNÊTRZNY: B³±d stosu wej¶ciowego w peek_input ()"
 
-#: src/input.c:791
+#: src/input.c:795
 msgid "NONE"
 msgstr "¯ADEN"
 
-#: src/input.c:1130 src/input.c:1157
+# hm - rzm
+#: src/input.c:1015
+#, c-format
+msgid "Undefined syntax code %c"
+msgstr "Niezdefiniowany kod sk³adniowy %c"
+
+#: src/input.c:1236 src/input.c:1263
 msgid "ERROR: EOF in string"
 msgstr "B£¡D: EOF w ³añcuchu"
 
-#: src/m4.c:106
+#: src/m4.c:79
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "B£¡D: Przepe³nienie stosu.  (Nieskoñczona rekursja definicji?)"
 
-#: src/m4.c:133
+#: src/m4.c:94
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Spróbuj `%s --help' ¿eby dowiedzieæ siê wiêcej.\n"
 
-#: src/m4.c:137
+#: src/m4.c:98
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
-msgstr "U¿ycie: %s [OPCJA]... [PLIK]...\n"
+msgstr "Sk³adnia: %s [OPCJA]... [PLIK]...\n"
 
-#: src/m4.c:138
+#: src/m4.c:99
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -272,11 +401,19 @@ msgstr ""
 "  -P, --prefix-builtins        dodaj zawsze `m4_' przez wszystkimi "
 "wbudowanymi\n"
 
-#: src/m4.c:151
+#: src/m4.c:112
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr "  -W, --word-regexp=WYR_REGUL  u¿yj WYR_REGUL w sk³adni nazw makr\n"
 
-#: src/m4.c:155
+#: src/m4.c:117
+msgid ""
+"\n"
+"Dynamic loading features:\n"
+"  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+msgstr ""
+
+#: src/m4.c:124
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -292,7 +429,7 @@ msgstr ""
 "  -U, --undefine=NAZWA         skasuj wbudowan± NAZWÊ\n"
 "  -s, --synclines              generuj linie `#line NR \"PLIK\"\n"
 
-#: src/m4.c:163
+#: src/m4.c:132
 msgid ""
 "\n"
 "Limits control:\n"
@@ -307,7 +444,7 @@ msgstr ""
 "symboli\n"
 "  -L, --nesting-limit=LICZBA   zmieñ sztuczny limit zag³ebieñ\n"
 
-#: src/m4.c:170
+#: src/m4.c:139
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -319,7 +456,7 @@ msgstr ""
 "  -F, --freeze-state=PLIK      zapisz zamro¿ony PLIK stanu na koñcu\n"
 "  -R, --reload-state=PLIK      za³aduj zamro¿ony PLIK stanu na pocz±tku\n"
 
-#: src/m4.c:176
+#: src/m4.c:145
 msgid ""
 "\n"
 "Debugging:\n"
@@ -335,7 +472,7 @@ msgstr ""
 "  -l, --arglength=ILE          ogranicz rozmiar ¶ledzenia makr\n"
 "  -o, --error-output=PLIK      przekieruj wyniki debugowania i ¶ledzenia\n"
 
-#: src/m4.c:184
+#: src/m4.c:153
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -365,7 +502,7 @@ msgstr ""
 "  i   poka¿ zmiany plików wej¶ciowych\n"
 "  V   skrót do wszystkich powy¿szych flag\n"
 
-#: src/m4.c:199
+#: src/m4.c:168
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -373,73 +510,139 @@ msgstr ""
 "\n"
 "Je¿eli brak PLIKu lub PLIK to `-', czytane jest std. wej¶cie.\n"
 
-#: src/m4.c:365
+#: src/m4.c:173
+msgid ""
+"\n"
+"Report bugs to <bug-m4@gnu.org>.\n"
+msgstr ""
+"\n"
+"Raporty o b³êdach wysy³aj do bug-m4@gnu.org.\n"
+
+#: src/m4.c:348
+#, c-format
+msgid "ERROR: failed to add search directory `%s'"
+msgstr ""
+
+#: src/m4.c:352
+#, c-format
+msgid "ERROR: failed to add search directory `%s': %s"
+msgstr ""
+
+#: src/m4.c:384
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "B³êdne flagi debugowania: `%s'"
 
-#: src/m4.c:444
+#: src/m4.c:413
+msgid " (options:"
+msgstr " (opcje:"
+
+#: src/m4.c:507
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny kod w od³o¿onych argumentach"
 
-#: src/macro.c:92
+#: src/macro.c:97
 msgid "INTERNAL ERROR: Bad token type in expand_token ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny typ tokena w expand_token ()"
 
-#: src/macro.c:158
+#: src/macro.c:163
 msgid "ERROR: EOF in argument list"
 msgstr "B£¡D: EOF w li¶cie argumentów"
 
-#: src/macro.c:176
+#: src/macro.c:182
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny typ tokena w expand_argument ()"
 
-#: src/macro.c:253
+#: src/macro.c:259
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "B£¡D WEWNÊTRZNY: B³êdny symbol w call_macro ()"
 
-#: src/macro.c:282
+#: src/macro.c:288
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "B£¡D: Osi±gniêty limit rekursji %d, u¿yj -L<N> ¿eby go zmieniæ"
 
-#: src/output.c:198
+#: src/module.c:230
+#, fuzzy, c-format
+msgid "ERROR: failed to initialise modules: %s"
+msgstr "B£¡D: nie mo¿na znale¿æ modu³u `%s': %s"
+
+#: src/module.c:358
+#, fuzzy, c-format
+msgid "ERROR: cannot find module: `%s'"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:361
+#, fuzzy, c-format
+msgid "ERROR: cannot find module: `%s': %s"
+msgstr "B£¡D: nie mo¿na znale¿æ modu³u `%s': %s"
+
+#: src/module.c:393
+#, fuzzy, c-format
+msgid "ERROR: cannot close module: %s is not loaded."
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:412
+#, fuzzy, c-format
+msgid "ERROR: cannot unload module builtins: `%s'"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:435 src/module.c:514
+#, fuzzy, c-format
+msgid "ERROR: cannot close module: `%s'"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:438 src/module.c:518
+#, fuzzy, c-format
+msgid "ERROR: cannot close module: `%s': %s"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:504
+#, fuzzy
+msgid "ERROR: cannot close modules"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/module.c:507
+#, fuzzy, c-format
+msgid "ERROR: cannot close modules: %s"
+msgstr "B£¡D: nie mo¿na znale¼æ modu³u `%s'"
+
+#: src/output.c:262
 msgid "ERROR: Cannot create temporary file for diversion"
 msgstr "B£¡D: Nie mogê utworzyæ plików tymczasowych dla przetwarzania"
 
-#: src/output.c:208
+#: src/output.c:272
 msgid "ERROR: Cannot flush diversion to temporary file"
 msgstr "B£¡D: Nie mogê zapisac zmian przetwarzania do pliku tymczasowego"
 
-#: src/output.c:292
+#: src/output.c:356
 msgid "ERROR: Copying inserted file"
 msgstr "B£¡D: Kopiowanie w³o¿onego pliku"
 
-#: src/output.c:473
+#: src/output.c:537
 msgid "ERROR: Reading inserted file"
 msgstr "B£¡D: Czytanie w³o¿onego pliku"
 
-#: src/output.c:572
+#: src/output.c:636
 msgid "Cannot stat diversion"
 msgstr "Nie mogê zrobiæ stat na danych przetwarzanych"
 
-#: src/path.c:162
+#: src/output.c:639
+msgid "Diversion too large"
+msgstr ""
+
+#: src/path.c:157
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
 
-#: src/path.c:239
-#, fuzzy, c-format
-msgid "Module search for `%s' found `%s'"
-msgstr "Przeszukanie ¶cie¿ki dla `%s' znalaz³o `%s'"
-
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:168
+#: src/stackovf.c:174
 msgid "VMEM limit exceeded?\n"
 msgstr "przekroczony limit VMEM\n"
 
-#: src/stackovf.c:190
+#: src/stackovf.c:196
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -447,7 +650,7 @@ msgstr ""
 "Wykryto pogwa³cenie ograniczeñ adresów pamiêci (SIGSEGV). Albo dosz³o do\n"
 "przepe³nienia stosu albo jest b³±d w "
 
-#: src/stackovf.c:195
+#: src/stackovf.c:201
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Sprawd¼ czy nie dosz³o do nieskoñczonej rekursji.\n"
 
@@ -455,46 +658,33 @@ msgstr ".  Sprawd¼ czy nie dosz³o do nieskoñczonej rekursji.\n"
 msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
 msgstr "B£¡D WEWNÊTRZNY: Nielegalny tryb w symbol_lookup ()"
 
-#: src/symtab.c:243
+#: src/symtab.c:322
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Nazwa `%s' jest nieznana\n"
 
-#~ msgid "Bad regular expression: `%s': %s"
-#~ msgstr "Z³e wyra¿enie regularne: `%s': %s"
+#~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
+#~ msgstr "B£¡D WEWNÊTRZNY: Wbudowane nie znalezione w tablicy wbudowanych!"
 
-#~ msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
-#~ msgstr "B£¡D WEWNÊTRZNY: B³±d stosu wej¶ciowego w pop_input ()"
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close module: `%s': %s"
+#~ msgstr "B£¡D: nie mo¿na znale¿æ modu³u `%s': %s"
 
-#~ msgid "%s: option `%s' is ambiguous\n"
-#~ msgstr "%s: opcja `%s' jest niejednoznaczna\n"
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close modules: %s"
+#~ msgstr "B£¡D: nie mo¿na znale¿æ modu³u `%s': %s"
 
-#~ msgid "%s: option `--%s' doesn't allow an argument\n"
-#~ msgstr "%s: opcja `--%s' nie mo¿e mieæ argumentu\n"
+#~ msgid "Warning: Too few arguments to built-in `%s'"
+#~ msgstr "Uwaga: Za ma³o argumentów dla wbudowanego `%s'"
 
-#~ msgid "%s: option `%c%s' doesn't allow an argument\n"
-#~ msgstr "%s: opcja `%c%s' nie mo¿e mieæ argumentu\n"
+#~ msgid "Warning: Excess arguments to built-in `%s' ignored"
+#~ msgstr "Uwaga: Nadmiarowe argumenty do built-in `%s' zosta³y zignorowane"
 
-#~ msgid "%s: option `%s' requires an argument\n"
-#~ msgstr "%s: opcja `%s' wymaga argumentu\n"
+#~ msgid "Non-numeric argument to built-in `%s'"
+#~ msgstr "Nienumeryczny argument do built-in `%s'"
 
-#~ msgid "%s: unrecognized option `--%s'\n"
-#~ msgstr "%s: nierozpoznana opcja --%s'\n"
+#~ msgid "Undefined macro `%s'"
+#~ msgstr "Niezdefiniowane makro `%s'"
 
-#~ msgid "%s: unrecognized option `%c%s'\n"
-#~ msgstr "%s: nierozpoznana opcja %c%s'\n"
-
-#~ msgid "%s: illegal option -- %c\n"
-#~ msgstr "%s: nielegalna opcja -- %c\n"
-
-#~ msgid "%s: invalid option -- %c\n"
-#~ msgstr "%s: b³êdna opcja -- %c\n"
-
-#~ msgid "%s: option requires an argument -- %c\n"
-#~ msgstr "%s: opcja wymaga argumentu -- %c\n"
-
-#~ msgid "No previous regular expression"
-#~ msgstr "Brak uprzedniego wyra¿enia regularnego"
-
-#~ msgid "Memory exhausted"
-#~ msgstr "Pamiêæ wyczerpana"
+#~ msgid "Module search for `%s' found `%s'"
+#~ msgstr "Wyszukiwanie modu³u `%s' - znaleziony `%s'"

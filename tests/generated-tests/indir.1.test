@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/indir.1.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 1363
+# generated from example in ../doc/m4.texinfo line 1387
 
 . ${srcdir}/defs
 

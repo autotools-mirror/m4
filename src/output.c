@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 98 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "m4.h"
+#include "m4private.h"
 
 #include <sys/stat.h>
 
@@ -100,8 +100,7 @@ output_init (void)
   output_unused = 0;
 }
 
-#ifndef HAVE_TMPFILE
-
+#ifdef HAVE_MKTEMP
 #ifndef HAVE_MKSTEMP
 
 /* This implementation of mkstemp(3) does not avoid any races, but its
@@ -117,6 +116,71 @@ mkstemp (const char *tmpl)
 }
 
 #endif /* not HAVE_MKSTEMP */
+
+#else /* not HAVE_MKTEMP */
+
+/* 
+ * Here's a quick implementation of mkstemp() for systems that don't have mktemp()
+ * such as QNX 4. Also included is a mktemp() impl. It's vulnerable to races, just
+ * like the real thing.
+ */
+#include <fcntl.h>
+
+int
+mkstemp (char *tmpl)
+{
+  char *xes;
+  pid_t pid;
+  char uniq;
+  int fd;
+
+  if ((xes = strstr (tmpl, "XXXXXX")) == NULL) {
+    errno = EINVAL;   /* no Xes found */
+    return -1;
+  }
+
+  pid = getpid(); if (pid > 99999) { pid = pid % 100000; }
+  uniq = 'a';
+
+  while (1) {
+    sprintf (xes, "%05d%d", pid, uniq);
+    fd = open (tmpl, O_RDWR | O_CREAT | O_EXCL, 0600);
+    if (fd >= 0) {
+      return fd;      /* got it */
+    }
+
+    /* this will ensure we cover a-zA-Z0-9 before giving up */
+    if (uniq == 'z') {
+      uniq = 'A';
+    } else if (uniq == 'Z') {
+      uniq = '0';
+    } else if (uniq == '9') {
+      errno = EEXIST; /* couldn't find one */
+      return -1;
+    } else {
+      uniq++;
+    }
+  }
+}
+
+char *
+mktemp (char *tmpl)
+{
+  int fd;
+
+  fd = mkstemp (tmpl);
+  if (fd > 0) {
+    close (fd);
+    unlink (tmpl);
+    return tmpl;
+  } else {
+    return NULL;
+  }
+}
+
+#endif /* not HAVE_MKTEMP */
+
+#ifndef HAVE_TMPFILE
 
 /* Implement tmpfile(3) for non-USG systems.  */
 
@@ -195,7 +259,7 @@ make_room_for (int length)
       selected_diversion->file = tmpfile ();
       if (selected_diversion->file == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
-		  "ERROR: Cannot create temporary file for diversion"));
+		  _("ERROR: Cannot create temporary file for diversion")));
 
       if (selected_diversion->used > 0)
 	{
@@ -205,7 +269,7 @@ make_room_for (int length)
 			  selected_diversion->file);
 	  if (count != 1)
 	    M4ERROR ((EXIT_FAILURE, errno,
-		      "ERROR: Cannot flush diversion to temporary file"));
+		      _("ERROR: Cannot flush diversion to temporary file")));
 	}
 
       /* Reclaim the buffer space for other diversions.  */
@@ -289,7 +353,7 @@ output_text (const char *text, int length)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-	M4ERROR ((EXIT_FAILURE, errno, "ERROR: Copying inserted file"));
+	M4ERROR ((EXIT_FAILURE, errno, _("ERROR: Copying inserted file")));
     }
   else
     {
@@ -470,7 +534,7 @@ insert_file (FILE *file)
   while (length = read (fileno (file), buffer, COPY_BUFFER_SIZE),
 	 length != 0)
     if (length == (size_t) -1)
-      M4ERROR ((EXIT_FAILURE, errno, "ERROR: Reading inserted file"));
+      M4ERROR ((EXIT_FAILURE, errno, _("ERROR: Reading inserted file")));
     else
       output_text (buffer, length);
 }
@@ -488,7 +552,7 @@ insert_diversion (int divnum)
 
   /* Do not care about unexisting diversions.  */
 
-  if (divnum < 0 || divnum >= diversions)
+  if (divnum <= 0 || divnum >= diversions)
     return;
 
   /* Also avoid undiverting into self.  */
@@ -569,8 +633,12 @@ freeze_diversions (FILE *file)
 	    {
 	      fflush (diversion->file);
 	      if (fstat (fileno (diversion->file), &file_stat) < 0)
-		M4ERROR ((EXIT_FAILURE, errno, "Cannot stat diversion"));
-	      fprintf (file, "D%d,%d", divnum, (int) file_stat.st_size);
+		M4ERROR ((EXIT_FAILURE, errno, _("Cannot stat diversion")));
+	      if (file_stat.st_size < 0
+		  || file_stat.st_size != (unsigned long) file_stat.st_size)
+		M4ERROR ((EXIT_FAILURE, errno, _("Diversion too large")));
+	      fprintf (file, "D%d,%lu", divnum,
+		       (unsigned long) file_stat.st_size);
 	    }
 	  else
 	    fprintf (file, "D%d,%d\n", divnum, diversion->used);

@@ -12,17 +12,24 @@ Word was: foo
 Word was: bar
 Word was: foobar
 
+
+# Quote torture from Akim Demaille <akim@epita.fr>
+Word was: a
+Word was: (b
+Word was: c)
+
+
 # Something more complex, from Pierre Gaumond <gaumondp@ere.umontreal.ca>.
 case "$1" in
-  a)
-    vara=" -a";;
-  b)
-    varb=" -b";;
-  c)
-    varc=" -c";;
+  1)
+    vara=" -1";;
+  2)
+    varb=" -2";;
+  3)
+    varc=" -3";;
 esac
 EOF
 
 M4PATH=$srcdir:$srcdir/../tests $M4 -d in >out 2>err
-sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 $CMP -s out ok

@@ -6,9 +6,10 @@ include(`setup.m4')
 \divert(1)
 
 \p([GNU \tt(m4) is an implementation of the traditional Unix macro
-processor. It is mostly SVR4 compatible, although it has some extensions
-(for example, handling more than 9 positional parameters to macros). GNU
-\tt(m4) also has built-in functions for including files, running shell
+processor.  GNU m4 is mostly compatible with the System V, Release 3
+version, and SVR4, although it has some extensions (for example,
+handling more than 9 positional parameters to macros). GNU \tt(m4)
+also has built-in functions for including files, running shell
 commands, doing arithmetic, etc.])
 
 \p([GNU \tt(m4) is a macro processor, in the sense that it copies its
@@ -24,8 +25,7 @@ only a small percentage of users are aware of its existence. However,
 those who do often become commited users. The growing popularity of GNU
 Autoconf, which prerequires GNU m4 for generating the `configure'
 scripts, is an incentive for many to install it, while these people will
-not themselves program in m4. GNU m4 is mostly compatible with the
-System V, Release 3 version, except for some minor differences.])
+not themselves program in m4.])
 
 \p([Some people found m4 to be fairly addictive. They first use m4 for
 simple problems, then take bigger and bigger challenges, learning how to
@@ -37,6 +37,11 @@ compulsive programmers.])
 
 \p([Autoconf needs GNU m4 for generating `configure' scripts, but not for
 running them.])
+
+\p([GNU m4 is a Unix program.  It is designed to work in a Unix-like
+environment.  GNU m4 1.4 has, however, been ported to DJGPP, the GNU C
+compiler for DOS/Windows.  These files are present in the
+\link(download.htm, download area).])
 
 \divert(0)\dnl
 \DO_LAYOUT([\undivert(1)])

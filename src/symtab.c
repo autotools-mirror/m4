@@ -28,7 +28,7 @@
    name are simply ordered on the list by age.  The current definition
    will then always be the first found.  */
 
-#include "m4.h"
+#include "m4private.h"
 
 /*----------------------------------------------------------------------.
 | Initialise the symbol table, by allocating the necessary storage, and |
@@ -81,9 +81,9 @@ free_symbol (symbol *sym)
 {
   if (SYMBOL_NAME (sym))
     xfree (SYMBOL_NAME (sym));
-  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+  if (SYMBOL_TYPE (sym) == M4_TOKEN_TEXT)
     xfree (SYMBOL_TEXT (sym));
-  xfree ((voidstar) sym);
+  xfree ((VOID *) sym);
 }
 
 /*------------------------------------------------------------------------.
@@ -102,93 +102,172 @@ free_symbol (symbol *sym)
 symbol *
 lookup_symbol (const char *name, symbol_lookup mode)
 {
-  int h, cmp = 1;
-  symbol *sym, *prev;
-  symbol **spp;
-
-  h = hash (name);
-  sym = symtab[h];
-
-  for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
+  if (mode != SYMBOL_IGNORE)
     {
-      cmp = strcmp (SYMBOL_NAME (sym), name);
-      if (cmp >= 0)
-	break;
-    }
+      int cmp = 1;
+      int h = hash (name);
+      symbol *sym = symtab[h];
+      symbol **spp, *prev;
 
-  /* If just searching, return status of search.  */
-
-  if (mode == SYMBOL_LOOKUP)
-    return cmp == 0 ? sym : NULL;
-
-  /* Symbol not found.  */
-
-  spp = (prev != NULL) ?  &prev->next : &symtab[h];
-
-  switch (mode)
-    {
-
-    case SYMBOL_INSERT:
-
-      /* Return the symbol, if the name was found in the table.
-	 Otherwise, just insert the name, and return the new symbol.  */
-
-      if (cmp == 0 && sym != NULL)
-	return sym;
-      /* Fall through.  */
-
-    case SYMBOL_PUSHDEF:
-
-      /* Insert a name in the symbol table.  If there is already a symbol
-	 with the name, insert this in front of it, and mark the old
-	 symbol as "shadowed".  */
-
-      sym = (symbol *) xmalloc (sizeof (symbol));
-      SYMBOL_TYPE (sym) = TOKEN_VOID;
-      SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
-      SYMBOL_NAME (sym) = xstrdup (name);
-
-      SYMBOL_NEXT (sym) = *spp;
-      (*spp) = sym;
-
-      if (mode == SYMBOL_PUSHDEF && cmp == 0)
+      for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
 	{
-	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = TRUE;
-	  SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
+	  cmp = strcmp (SYMBOL_NAME (sym), name);
+	  if (cmp >= 0)
+	  break;
 	}
-      return sym;
 
-    case SYMBOL_DELETE:
-
-      /* Delete all occurences of symbols with NAME.  */
-
-      if (cmp != 0 || sym == NULL)
-	return NULL;
-      do
+      /* If just searching, return status of search.  */
+      
+      if (mode == SYMBOL_LOOKUP)
+      return cmp == 0 ? sym : NULL;
+      
+      /* Symbol not found.  */
+      
+      spp = (prev != NULL) ?  &prev->next : &symtab[h];
+      
+      switch (mode)
 	{
+	  
+	case SYMBOL_INSERT:
+	  
+	  /* Return the symbol, if the name was found in the table.
+	   Otherwise, just insert the name, and return the new symbol.  */
+	  
+	  if (cmp == 0 && sym != NULL)
+	  return sym;
+	  /* Fall through.  */
+	  
+	case SYMBOL_PUSHDEF:
+	  
+	  /* Insert a name in the symbol table.  If there is already a symbol
+	   with the name, insert this in front of it, and mark the old
+	   symbol as "shadowed".  */
+	  
+	  sym = (symbol *) xmalloc (sizeof (symbol));
+	  SYMBOL_TYPE (sym) = M4_TOKEN_VOID;
+	  SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
+	  SYMBOL_NAME (sym) = xstrdup (name);
+	  
+	  SYMBOL_NEXT (sym) = *spp;
+	  (*spp) = sym;
+	  
+	  if (mode == SYMBOL_PUSHDEF && cmp == 0)
+	    {
+	      SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = TRUE;
+	      SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
+	    }
+	  return sym;
+	  
+	case SYMBOL_DELETE:
+	  
+	  /* Delete all occurences of symbols with NAME.  */
+	  
+	  if (cmp != 0 || sym == NULL)
+	  return NULL;
+	  do
+	    {
+	      *spp = SYMBOL_NEXT (sym);
+	      free_symbol (sym);
+	      sym = *spp;
+	    }
+	  while (sym != NULL && strcmp (name, SYMBOL_NAME (sym)) == 0);
+	  return NULL;
+	  
+	case SYMBOL_POPDEF:
+	  
+	  /* Delete the first occurence of a symbol with NAME.  */
+	  
+	  if (cmp != 0 || sym == NULL)
+	  return NULL;
+	  if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
+	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
 	  *spp = SYMBOL_NEXT (sym);
 	  free_symbol (sym);
-	  sym = *spp;
+	  return NULL;
+	  
+	default:
+	  M4ERROR ((warning_status, 0,
+		    _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
+	  abort ();
 	}
-      while (sym != NULL && strcmp (name, SYMBOL_NAME (sym)) == 0);
-      return NULL;
+    }
+}
+  
+/*--------------------------------------------------------------------.
+ | The following function removes from the symbol table, every symbol |
+ | that references a function in the given builtin table.             |
+ `-------------------------------------------------------------------*/
 
-    case SYMBOL_POPDEF:
+void
+remove_table_reference_symbols (struct m4_builtin *builtin_table,
+				struct m4_macro *macro_table)
+{
+  symbol *sym;
+  int h;
+      
+  /* Look in each bucket of the hashtable... */
+  for (h = 0; h < hash_table_size; h++)
+    {
+      symbol *prev = NULL;
+      symbol *next = NULL;
 
-       /* Delete the first occurence of a symbol with NAME.  */
+      /* And each symbol in each hash bucket... */
+      for (sym = symtab[h]; sym != NULL; prev = sym, sym = next)
+	{
+	  next = SYMBOL_NEXT (sym);
 
-      if (cmp != 0 || sym == NULL)
-	return NULL;
-      if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
-	SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
-      *spp = SYMBOL_NEXT (sym);
-      free_symbol (sym);
-      return NULL;
-
-    default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Illegal mode to symbol_lookup ()"));
-      abort ();
+	  switch (SYMBOL_TYPE (sym))
+	    {
+	    case M4_TOKEN_FUNC:
+	      /* For symbol functions referencing a function in
+		 BUILTIN_TABLE.  */
+	      {
+		const struct m4_builtin *bp;
+		for (bp = builtin_table; bp->name != NULL; bp++)
+		  if (SYMBOL_FUNC (sym) == bp->func)
+		    {
+		      if (prev)
+			SYMBOL_NEXT (prev) = SYMBOL_NEXT (sym);
+		      else
+			symtab[h] = SYMBOL_NEXT (sym);
+		      
+		      /* Unshadow any symbol that this one had shadowed. */
+		      if (SYMBOL_NEXT (sym) != NULL)
+			SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
+		      
+		      free_symbol (sym);
+		    }
+	      }
+	      break;
+	      
+	    case M4_TOKEN_TEXT:
+	      /* For symbol macros referencing a value in
+		 PREDEFINED_TABLE.  */
+	      {
+		const struct m4_macro *mp;
+		for (mp = macro_table; mp && mp->name; mp++)
+		  if ((strcmp(SYMBOL_NAME (sym), mp->name) == 0)
+		      && (strcmp (SYMBOL_TEXT (sym), mp->value) == 0))
+		    {
+		      if (prev)
+			SYMBOL_NEXT (prev) = SYMBOL_NEXT (sym);
+		      else
+			symtab[h] = SYMBOL_NEXT (sym);
+		      
+		      /* Unshadow any symbol that this one had shadowed. */
+		      if (SYMBOL_NEXT (sym) != NULL)
+			SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
+		      
+		      free_symbol (sym);
+		    }
+	      }
+	      break;
+		
+	    default:
+	      /*NOWORK*/
+	      break;
+	    }
+	}
     }
 }
 
@@ -226,9 +305,9 @@ symtab_debug (void)
 
   while ((t = next_token (&td)) != NULL)
     {
-      if (t != TOKEN_WORD)
+      if (t != M4_TOKEN_WORD)
 	continue;
-      text = TOKEN_DATA_TEXT (&td);
+      text = M4_TOKEN_DATA_TEXT (&td);
       if (*text == '_')
 	{
 	  delete = 1;
@@ -240,7 +319,7 @@ symtab_debug (void)
       s = lookup_symbol (text, SYMBOL_LOOKUP);
 
       if (s == NULL)
-	printf ("Name `%s' is unknown\n", text);
+	printf (_("Name `%s' is unknown\n"), text);
 
       if (delete)
 	(void) lookup_symbol (text, SYMBOL_DELETE);

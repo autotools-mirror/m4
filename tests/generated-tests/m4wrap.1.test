@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/m4wrap.1.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 2389
+# generated from example in ../doc/m4.texinfo line 2492
 
 . ${srcdir}/defs
 

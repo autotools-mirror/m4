@@ -1,3 +1,5 @@
+# serial 2
+
 AC_DEFUN(AM_WITH_GMP,
   [AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
   AC_ARG_WITH(gmp,
@@ -16,7 +18,8 @@ AC_DEFUN(AM_WITH_GMP,
 	  ac_cv_func_mpq_init_libgmp=no)
 
     if test "$ac_cv_func_mpq_init_libgmp$ac_cv_header_gmp_h" = yesyes; then
-      AC_DEFINE(WITH_GMP)
+      AC_DEFINE(WITH_GMP, 1,
+      [Define to 1 if the GNU multiple precision library should be used.])
     else
       LIBS=`echo $LIBS | sed -e 's/-lgmp//'`
       AC_MSG_WARN([gmp library not found or does not appear to work])

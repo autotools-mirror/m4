@@ -6,6 +6,8 @@
 
 FILE=${1-/dev/null}
 
+rm -f generated-tests/*.test 2>/dev/null
+
 ${AWK-gawk} '
 
 BEGIN {
@@ -25,11 +27,12 @@ BEGIN {
   Node = substr(tmp[1], 7);
   node = tolower(Node);
   gsub(" ", "", node);
-  if (length(node) > 8)
+  if (length(node) > 8) {
     printf("Node: %s - truncated", node);
-  else
+    node = substr(node, 1, 8);
+  } else {
     printf("Node: %s ", node);
-  node = substr(node, 1, 8);
+  }
   seq = 0;
 }
 
@@ -51,7 +54,7 @@ BEGIN {
     error_flag = 0;
     i = 0;
     include_flag = 0;
-    file = sprintf("%s.%d.test", node, seq);
+    file = sprintf("generated-tests/%s.%d.test", node, seq);
     printf ("#!/bin/sh\n\n") > file;
     printf ("# %s is part of the GNU m4 testsuite\n", file) >> file;
     printf ("# generated from example in %s line %d\n\n", FILENAME, NR) >>file;
@@ -66,7 +69,7 @@ BEGIN {
     if (include_flag == 1) printf ("M4PATH=$srcdir ") >> file;
     printf ("$M4 -d in >out") >> file;
     if (error_flag == 1) printf (" 2>err") >> file;
-    if (error_flag == 1) printf ("\nsed -e \"s, ../../src/m4:, m4:,\" err >sederr && mv sederr err") >> file;
+    if (error_flag == 1) printf ("\nsed -e \"s,^[^:]*[lt-]*m4[.ex]*:,m4:,\" err >sederr && mv sederr err") >> file;
     printf ("\n\n$CMP -s out ok") >> file;
     if (error_flag == 1) printf (" && $CMP -s err okerr") >> file;
     printf ("\n\n") >> file;
@@ -91,13 +94,15 @@ BEGIN {
 
 END {
   printf("\n");
+  if (count > 0)
+    close (file);
 }
 
 function printthem(thearray, thecounter, thefile) {
   if ((thecounter>0) || (thefile=="ok")) {
     printf ("\ncat <<\\EOF >%s\n", thefile) >> file;
     for (j=0; j<thecounter; j++) {
-      gsub("@{", "{", thearray[j]);
+      gsub("@[{]", "{", thearray[j]);
       gsub("@}", "}", thearray[j]);
       gsub("@@", "@", thearray[j]);
       gsub("@comment.*", "", thearray[j]);
@@ -109,4 +114,4 @@ function printthem(thearray, thecounter, thefile) {
 
 ' $FILE >/dev/null
 
-chmod +x *.[0-9].test
+chmod +x generated-tests/*.test

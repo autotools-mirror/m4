@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/dumpdef.1.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 1654
+# generated from example in ../doc/m4.texinfo line 1703
 
 . ${srcdir}/defs
 
@@ -23,7 +23,7 @@ define:	<define>
 EOF
 
 $M4 -d in >out 2>err
-sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 
 $CMP -s out ok && $CMP -s err okerr
 

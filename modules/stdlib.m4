@@ -1,4 +1,4 @@
-loadmodule(`stdlib')
+load(`stdlib')
 
 `getenv - 'getenv(PATH)
 

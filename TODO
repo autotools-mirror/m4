@@ -1,41 +1,103 @@
-TODO file for GNU m4
+* TODO file for GNU m4				-*- indented-text -*-
 
-Tell <pinard@iro.umontreal.ca> if you feel like volunteering for any
-of these ideas, listed more or less in decreasing order of priority.
+Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
+for any of these ideas or if you have others to add.
 
-* Features or problems
-  - Update documentation from accumulated mail about it
-  - Changeword without arguments should restore default behavior
-  - Study synclines at the very beginning of each diverted sequence
-  - Make eval work on bignums - the 32 bits limit is artificial
-	From Krste Asanovic <krste@icsi.berkeley.edu>, 1993-03-20
+* KNOWN BUGS
 
-* Optimization and clean up
-  - Check for memory leaks and uninitialized reads
-	From Vern Paxson <vern@horse.ee.lbl.gov> on 1993-12-06
-  - Simplify format/ecvt code, together with HAVE_EFGCVT
-  - Finalize the stdarg vs varargs thing
-  - Profile GNU m4 and speed it up
-	From David J. MacKenzie <djm@eng.umd.edu>, 1993-01-20
+  + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
 
-	GNU m4 should be sped up by a factor of three for competing
-	with other versions (I think that the lexer is not agressive
-	enough and too often return single characters; obstacks might
-	be a little abused, too).
-  - Have NULs go really undisturbed through GNU m4
-	See `dumpdef' and debugging section, which abuses %s
-	From Thorsten Ohl <ohl@chico.harvard.edu>, 1992-12-21
+  + The test case `other-tests/stackovf.test' does not work.
 
-	path.c (add_include_directory): Why the '\0' terminator?
+  + Some characters, such as dollar, are still hardcoded, and do not
+    follow changes in the syntax table.
 
+  + sigstack/sigaltstack and ENOSYS
+
+      When sigstack or sigaltstack fail with errno == ENOSYS, m4 should
+      fall back silently to not using an alternate signal stack.
+      Otherwise, problems arise in at least the following case: glibc
+      2.1 test releases, built with Linux 2.1 headers (as recommended
+      for glibc 2.1), so the library has sigstack and sigaltstack, but
+      run with a Linux 2.0 kernel, so the kernel support is not present
+      and ENOSYS is returned.
+
+      (GNU m4 1.4k, built with glibc 2.0.100 (itself built with Linux
+      2.1.126 headers), and running on Linux 2.0.36pre15.)
+
+      -- 
+      Joseph S. Myers
+      jsm28@cam.ac.uk
+
+  + ~/src/ace % m4 --trace undefine -dV                       nostromo Err 1$
+    m4 debug: NONE: 0: input read from stdin
+    undefine(`undefine')
+    m4trace:stdin:1: -1- id 1: undefine ...
+    m4trace:stdin:1: -1- id 1: undefine(`undefine') -> ???
+    m4trace:stdin:1: -1- id 1: p@8(...)
+
+    --
+    Akim Demaille
+    akim@epita.fr
+
+
+* FEATURES OR PROBLEMS
+
+  + Implement discarding comment delimiters with the syntax table.
+
+  + The $ used in user defined macros cannot be changed through
+    changesyntax.  It should be handled as a modifier.
+
+  + If configured --with-gmp for multiple precision arithmetic there are
+    some warnings, but it passes the tests.
+
+  + Make show include dependencies like gcc so targets are updated
+    when their (included) input files are updated (Erick B).
+
+  + Sort out all the weird forms of interaction between changesyntax,
+    changecom and changequote.  What happens if you install a quote with
+    changequote and removes it with changesyntax and vice versa.
+
+  + Add support for wide character sets.
+
+
+* OPTIMIZATION AND CLEAN UP
+
+  + Have NULs go really undisturbed through GNU m4
 	GNU m4 is lousy regarding NULs in streams (this would require
 	maintaining the string lengths, and avoiding strlen, strcpy,
-	etc.). 
-  - Clean up the obstack.[ch] code
-  - Use rx.[ch] instead of regex.[ch]
-	From Hal Peterson <hrp@ironwood.cray.com>, 1994-04-22
-
-Local Variables:
-mode: outline
-outline-regexp: " *[-+*.] \\|"
-End:
+	etc.).
+
+* MODULE SPECIFIC ISSUES
+
+  + There is a bug if two module are installed and the second overrides a
+    symbol from the first.  If the first module is unloaded before the second,
+    the top symbol is removed leaving the shadowed symbol which now points
+    to the unloaded module!
+
+  + Some way of linking a module statically is needed, for systems
+    without support for dynamic loading.
+
+  + Need a test to check whether a module is currently loaded, so
+    that optional command line loaded modules can be safely unloaded:
+
+	ifelse(__modules__, `foo', unloadmodule(`foo'))
+  ***DONE
+
+  + Setting of the module search path within m4 scripts:
+
+	append(__modulepath__, `/some/modules/live/here')
+
+  + It should be possible to add `user_macros' from a module.
+  ***DONE
+
+  + Gnu extensions should be pulled out into a module.  The -G option would
+    suppress automatic loading of this module.
+
+  + Module autoloader.  This would allow an m4 core with no builtins except
+    for loadmodule().  A default startup script would mark the recognised
+    set of builtins for autoload from the installed module directory on first
+    use.  A new cli parameter would inhibit initialisation from this script,
+    so that customised m4 interpreters could be built on the fly!
+
+  + All this stuff needs documenting in m4.texinfo.

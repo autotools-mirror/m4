@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/patsubst.2.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 2994
+# generated from example in ../doc/m4.texinfo line 3097
 
 . ${srcdir}/defs
 

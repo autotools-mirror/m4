@@ -1,14 +1,12 @@
 #!/bin/sh
 
-# test.test is part of the GNU m4 testsuite
+# modpath3.test is part of the GNU m4 testsuite
 
 . ${srcdir}/defs
-. ../../tests/config.sh
+. ${builddir}/../tests/config.sh
 
 # cannot perform test without --with-modules
-#test -z "$WITH_MODULES" && exit 77
-
-
+test -z "$WITH_MODULES" && exit 77
 
 cat <<'EOF' >in
 test
@@ -25,6 +23,6 @@ test:	<test>
 EOF
 
 
-M4PATH=$srcdir:$srcdir/../tests $M4 -m test -M `cd $srcdir; pwd` -d in >out 2>err
+M4PATH=$srcdir:$srcdir/../tests $M4 -m modtest -M `cd $builddir; pwd` -d in >out 2>err
 sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 $CMP -s out ok && $CMP -s err okerr

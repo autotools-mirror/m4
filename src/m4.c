@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,47 +16,15 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "m4.h"
+#include "m4private.h"
+#include "error.h"
 
 #include <getopt.h>
-#include <sys/signal.h>
+#include <signal.h>
 
-static void usage _((int));
-
-/* Operate interactively (-e).  */
-static int interactive = 0;
-
-/* Enable sync output for /lib/cpp (-s).  */
-int sync_output = 0;
-
-/* Debug (-d[flags]).  */
-int debug_level = 0;
-
-/* Hash table size (should be a prime) (-Hsize).  */
-int hash_table_size = HASHMAX;
-
-/* Disable GNU extensions (-G).  */
-int no_gnu_extensions = 0;
-
-/* Prefix all builtin functions by `m4_'.  */
-int prefix_all_builtins = 0;
-
-/* Max length of arguments in trace output (-lsize).  */
-int max_debug_argument_length = 0;
-
-/* Suppress warnings about missing arguments.  */
-int suppress_warnings = 0;
-
-/* If not zero, then value of exit status for warning diagnostics.  */
-int warning_status = 0;
-
-/* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 250;
-
-#ifdef ENABLE_CHANGEWORD
-/* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = NULL;
-#endif
+#ifdef WITH_MODULES
+#include "ltdl.h"
+#endif /* WITH_MODULES */
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -64,14 +32,14 @@ const char *frozen_file_to_read = NULL;
 /* Name of frozen file to produce near completion.  */
 const char *frozen_file_to_write = NULL;
 
-/* The name this program was run with. */
-const char *program_name;
-
-/* If non-zero, display usage information and exit.  */
+/* If nonzero, display usage information and exit.  */
 static int show_help = 0;
 
-/* If non-zero, print the version on standard output and exit.  */
+/* If nonzero, print the version on standard output and exit.  */
 static int show_version = 0;
+
+/* If nonzero, import the environment as macros.  */
+static int import_environment = 0;
 
 struct macro_definition
 {
@@ -83,17 +51,20 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/*-------------------------------------------------------------------------.
-| Print source and line reference on standard error, as a prefix for error |
-| messages.  Flush standard output first.				   |
-`-------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------.
+| Print program name, source file and line reference on standard        |
+| error, as a prefix for error messages.  Flush standard output first.  |
+`----------------------------------------------------------------------*/
 
 void
-reference_error (void)
+print_program_name (void)
 {
   fflush (stdout);
-  fprintf (stderr, "%s:%d: ", current_file, current_line);
+  fprintf (stderr, "%s: ", program_name);
+  if (current_line != 0)
+    fprintf (stderr, "%s: %d: ", current_file, current_line);
 }
+
 
 #ifdef USE_STACKOVF
 
@@ -105,25 +76,13 @@ static void
 stackovf_handler (void)
 {
   M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: Stack overflow.  (Infinite define recursion?)"));
+	    _("ERROR: Stack overflow.  (Infinite define recursion?)")));
 }
 
 #endif /* USE_STACKOV */
+
+
 
-/* Memory allocation.  */
-
-/*------------------------.
-| Failsafe free routine.  |
-`------------------------*/
-
-void
-xfree (voidstar p)
-{
-  if (p != NULL)
-    free (p);
-}
-
-
 /*---------------------------------------------.
 | Print a usage message and exit with STATUS.  |
 `---------------------------------------------*/
@@ -132,11 +91,12 @@ static void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    fprintf (stderr, "Try `%s --help' for more information.\n", program_name);
+    fprintf (stderr, _("Try `%s --help' for more information.\n"),
+	     program_name);
   else
     {
-      printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
-      fputs ("\
+      printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
+      fputs (_("\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -146,43 +106,51 @@ Operation modes:\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n",
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"),
 	     stdout);
 #ifdef ENABLE_CHANGEWORD
-      fputs ("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n",
+      fputs (_("\
+  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"),
 	     stdout);
 #endif
-      fputs ("\
+#ifdef WITH_MODULES
+      fputs (_("\
+\n\
+Dynamic loading features:\n\
+  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
+  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
+	     stdout);
+#endif
+      fputs (_("\
 \n\
 Preprocessor features:\n\
   -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n",
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n",
+  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n",
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 Debugging:\n\
   -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -t, --trace=NAME             trace NAME when it will be defined\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n",
+  -o, --error-output=FILE      redirect debug and trace output\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
 FLAGS is any of:\n\
   t   trace for all macro calls, not only traceon'ed\n\
@@ -195,12 +163,14 @@ FLAGS is any of:\n\
   l   say current input line number\n\
   p   show results of path searches\n\
   i   show changes in input files\n\
-  V   shorthand for all of the above flags\n",
+  V   shorthand for all of the above flags\n"),
 	     stdout);
-      fputs ("\
+      fputs (_("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n",
+If no FILE or if FILE is `-', standard input is read.\n"),
 	     stdout);
+
+      fputs (_("\nReport bugs to <bug-m4@gnu.org>.\n"), stdout);
     }
   exit (status);
 }
@@ -213,6 +183,7 @@ static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
+  {"discard-comments", no_argument, NULL, 'c'},
   {"diversions", required_argument, NULL, 'N'},
   {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -220,6 +191,10 @@ static const struct option long_options[] =
   {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'e'},
+#ifdef WITH_MODULES
+  {"load-module", required_argument, NULL, 'm'},
+  {"module-directory", required_argument, NULL, 'M'},
+#endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
@@ -228,6 +203,8 @@ static const struct option long_options[] =
   {"synclines", no_argument, NULL, 's'},
   {"traditional", no_argument, NULL, 'G'},
   {"word-regexp", required_argument, NULL, 'W'},
+
+  {"import-environment", no_argument, &import_environment, 1},
 
   {"help", no_argument, &show_help, 1},
   {"version", no_argument, &show_version, 1},
@@ -241,10 +218,19 @@ static const struct option long_options[] =
 };
 
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
+#  define CHANGEWORD_SHORTOPT	"W:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::el:o:st:"
+#  define CHANGEWORD_SHORTOPT	""
 #endif
+#ifdef WITH_MODULES
+#  define MODULE_SHORTOPT	"m:"
+#  define MODULEPATH_SHORTOPT	"M:"
+#else
+#  define MODULE_SHORTOPT	""
+#  define MODULEPATH_SHORTOPT	""
+#endif
+
+#define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULEPATH_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULE_SHORTOPT/**/"o:st:"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -256,14 +242,35 @@ main (int argc, char *const *argv, char *const *envp)
 
   macro_definition *defines;
   FILE *fp;
+  char *filename;
+
+  int exit_status;
 
   program_name = argv[0];
+  error_print_progname = print_program_name;
 
-  include_init ();
+  setlocale (LC_ALL, "");
+#ifdef ENABLE_NLS
+  textdomain(PACKAGE);
+#endif
+
+#ifdef WITH_MODULES
+  LTDL_SET_PRELOADED_SYMBOLS();
+#endif
+  
   debug_init ();
+  include_init ();
+  symtab_init ();
+#ifdef WITH_MODULES
+  module_init ();
+#endif
+
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
 #endif
+
+  if (isatty (STDIN_FILENO))
+    interactive = TRUE;
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 
@@ -288,7 +295,9 @@ main (int argc, char *const *argv, char *const *envp)
       case 'D':
       case 'U':
       case 't':
-
+#ifdef WITH_MODULES
+      case 'm':
+#endif /* WITH_MODULES */
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	new = (macro_definition *) xmalloc (sizeof (macro_definition));
@@ -329,6 +338,22 @@ main (int argc, char *const *argv, char *const *envp)
       case 'L':
 	nesting_limit = atoi (optarg);
 	break;
+#ifdef WITH_MODULES
+      case 'M':
+	if (lt_dladdsearchdir (optarg) != 0)
+	  {
+	    const char *dlerror = lt_dlerror();
+	    if (dlerror == NULL)
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: failed to add search directory `%s'"),
+			optarg));
+	    else
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: failed to add search directory `%s': %s"),
+			optarg, dlerror));
+	  }
+	break;
+#endif /* WITH_MODULES */
 
       case 'P':
 	prefix_all_builtins = 1;
@@ -348,11 +373,15 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 #endif
 
+      case 'c':
+	discard_comments = 1;
+	break;
+
       case 'd':
 	debug_level = debug_decode (optarg);
 	if (debug_level < 0)
 	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
+	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
 	    debug_level = 0;
 	  }
 	break;
@@ -379,29 +408,67 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s\n", PRODUCT, VERSION);
+      printf ("GNU %s %s", PACKAGE, VERSION);
+#if defined(WITH_MODULES) || defined(WITH_GMP) || defined(ENABLE_CHANGEWORD)
+      fputs(_(" (options:"), stdout);
+#ifdef WITH_MODULES
+      fputs(" modules", stdout);
+#endif /* WITH_MODULES */
+#ifdef WITH_GMP
+      fputs(" gmp", stdout);
+#endif /* WITH_GMP */
+#ifdef ENABLE_CHANGEWORD
+      fputs(" changeword", stdout);
+#endif /* ENABLE_CHANGEWORD */
+      fputs(")", stdout);
+#endif /* defined WITH_MODULES || WITH_GMP || ENABLE_CHANGEWORD */
+      fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }
 
   if (show_help)
     usage (EXIT_SUCCESS);
 
-  defines = head;
-
   /* Do the basic initialisations.  */
 
   input_init ();
   output_init ();
-  symtab_init ();
   include_env_init ();
 
   if (frozen_file_to_read)
-    reload_frozen_state (frozen_file_to_read);
+    {
+      builtin_init (SYMBOL_IGNORE);
+      reload_frozen_state (frozen_file_to_read);
+    }
   else
-    builtin_init ();
+    {
+
+      builtin_init (SYMBOL_PUSHDEF);
+      syntax_init  ();
+    }
+  
+  /* Import environment variables as macros.  The definition are
+     preprended to the macro definition list, so -U can override
+     environment variables. */
+
+  if (import_environment)
+    {
+      char *const *env;
+
+      for (env = envp; *env != NULL; env++)
+	{
+	  new = (macro_definition *) xmalloc (sizeof (macro_definition));
+	  new->code = 'D';
+	  new->macro = *env;
+	  new->next = head;
+	  head = new;
+	}
+    }
 
   /* Handle deferred command line macro definitions.  Must come after
      initialisation of the symbol table.  */
+
+  defines = head;
 
   while (defines != NULL)
     {
@@ -417,7 +484,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    macro_value = "";
 	  else
 	    *macro_value++ = '\0';
-	  define_user_macro (defines->macro, macro_value, SYMBOL_INSERT);
+	  define_macro (defines->macro, macro_value, SYMBOL_INSERT);
 	  break;
 
 	case 'U':
@@ -429,14 +496,20 @@ main (int argc, char *const *argv, char *const *envp)
 	  SYMBOL_TRACED (sym) = TRUE;
 	  break;
 
+#ifdef WITH_MODULES
+	case 'm':
+	  module_load (defines->macro, NULL, SYMBOL_PUSHDEF);
+	  break;
+#endif /* WITH_MODULES */
+	
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad code in deferred arguments"));
+		    _("INTERNAL ERROR: Bad code in deferred arguments")));
 	  abort ();
 	}
 
       next = defines->next;
-      xfree ((voidstar) defines);
+      xfree ((VOID *) defines);
       defines = next;
     }
 
@@ -451,6 +524,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Handle the various input files.  Each file is pushed on the input,
      and the input read.  Wrapup text is handled separately later.  */
 
+  exit_status = EXIT_SUCCESS;
   if (optind == argc)
     {
       push_file (stdin, "stdin");
@@ -463,14 +537,18 @@ main (int argc, char *const *argv, char *const *envp)
 	  push_file (stdin, "stdin");
 	else
 	  {
-	    fp = path_search (argv[optind]);
+	    fp = path_search (argv[optind], &filename);
 	    if (fp == NULL)
 	      {
 		error (0, errno, argv[optind]);
+		exit_status = EXIT_FAILURE;
 		continue;
 	      }
 	    else
-	      push_file (fp, argv[optind]);
+	      {
+		push_file (fp, filename);
+		xfree (filename);
+	      }
 	  }
 	expand_input ();
       }
@@ -489,5 +567,9 @@ main (int argc, char *const *argv, char *const *envp)
       undivert_all ();
     }
 
-  exit (EXIT_SUCCESS);
+#ifdef WITH_MODULES
+  module_unload_all();
+#endif /* WITH_MODULES */
+
+  exit (exit_status);
 }

@@ -7,25 +7,17 @@
 
 @include version.texi
 
-@ifinfo
-@set Francois Franc,ois
-@end ifinfo
-@tex
-@set Francois Fran\noexpand\ptexc cois
-@end tex
+@set beta
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
+@dircategory Text Processing Tools
+@direntry
 * m4: (m4).			A powerful macro processor.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
 
 @ifinfo
 This file documents the GNU @code{m4} utility.
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -57,7 +49,7 @@ by the Foundation.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 90, 91, 92, 93, 94, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -74,7 +66,7 @@ except that this permission notice may be stated in a translation approved
 by the Foundation.
 @end titlepage
 
-@ifinfo
+@ifnottex
 @node Top, Preliminaries, (dir), (dir)
 @top GNU @code{m4}
 
@@ -89,25 +81,23 @@ GNU @code{m4} for generating @file{configure} scripts, but not for
 running them.
 
 GNU @code{m4} was originally written by Ren@'e Seindal, with
-subsequent changes by @value{Francois} Pinard and other volunteers
+subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
 file @file{THANKS} from the GNU @code{m4} distribution.
 
+@ifclear beta
 This is release @value{VERSION}.  It is now to be considered stable,
 future releases are only meant to fix bugs, increase speed, or improve
 documentation.  However@dots{}
+@end ifclear
 
-An experimental feature, which would improve @code{m4} usefulness,
-allows for changing the syntax for what is a @dfn{word} in @code{m4}.
-You should use:
-@comment ignore
-@example
-./configure --enable-changeword
-@end example
-@noindent
-if you want this feature compiled in.  The current implementation
-slows down @code{m4} considerably and is hardly acceptable.  So, it
-might go away, do not count on it yet.
+@ifset beta
+This is BETA release @value{VERSION}.  This is a development release,
+and is as such prone to bugs, crashes, unforeseen features, incomplete
+documentation, @dots{} therefore, use at your own peril.  In case of
+problems, please do not hesitate to report them (see the README file in
+the distribution).
+@end ifset
 
 @menu
 * Preliminaries::               Introduction and preliminaries
@@ -130,16 +120,17 @@ might go away, do not count on it yet.
 * Frozen files::                Fast loading of frozen states
 
 * Compatibility::               Compatibility with other versions of m4
+* Experiments::                 Experimental features in GNU m4
+* Answers::                     Correct version of some examples
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
- --- The Detailed Node Listing ---
+@detailmenu --- The Detailed Node Listing ---
 
 Introduction and preliminaries
 
 * Intro::                       Introduction to @code{m4}
 * History::                     Historical references
-
 * Invoking m4::                 Invoking @code{m4}
 * Bugs::                        Problems and bugs
 * Manual::                      Using this manual
@@ -150,6 +141,7 @@ Lexical and syntactic conventions
 * Quoted strings::              Quoting input to m4
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
 
 How to invoke macros
 
@@ -171,6 +163,8 @@ How to define new macros
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
 
+* Symbols::                     Getting the defined macro names
+
 Conditionals, loops and recursion
 
 * Ifdef::                       Testing if a macro is defined
@@ -189,6 +183,7 @@ Input control
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
+* Changesyntax::                Changing the lexical structure of the input
 * Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving input until end of input
 
@@ -217,7 +212,8 @@ Macros for text handling
 Macros for doing arithmetic
 
 * Incr::                        Decrement and increment operators
-* Eval::                        Evaluating integer expressions
+* Eval::                        Evaluating integer or rational expressions
+* Mpeval::
 
 Running UNIX commands
 
@@ -230,17 +226,20 @@ Miscellaneous builtin macros
 
 * Errprint::                    Printing error messages
 * M4exit::                      Exiting from m4
+* Syncoutput::                  Turning on and off sync lines
 
 Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU m4
 * Incompatibilities::           Facilities in System V m4 not in GNU m4
 * Other Incompat::              Other incompatibilities
+
+@end detailmenu
 @end menu
 
-@end ifinfo
+@end ifnottex
 
-@node Preliminaries, Syntax, Top, Top
+@node Preliminaries
 @chapter Introduction and preliminaries
 
 This first chapter explains what is GNU @code{m4}, where @code{m4}
@@ -259,7 +258,7 @@ language.
 * Manual::                      Using this manual
 @end menu
 
-@node Intro, History, Preliminaries, Preliminaries
+@node Intro
 @section Introduction to @code{m4}
 
 @code{m4} is a macro processor, in the sense that it copies its
@@ -279,7 +278,7 @@ popularity of GNU Autoconf, which prerequires GNU @code{m4} for
 for many to install it, while these people will not themselves
 program in @code{m4}.  GNU @code{m4} is mostly compatible with the
 System V, Release 3 version, except for some minor differences.
-@xref{Compatibility} for more details.
+@xref{Compatibility}, for more details.
 
 Some people found @code{m4} to be fairly addictive.  They first use
 @code{m4} for simple problems, then take bigger and bigger challenges,
@@ -289,7 +288,7 @@ applications even to solve simple problems, devoting more time
 debugging their @code{m4} scripts than doing real work.  Beware that
 @code{m4} may be dangerous for the health of compulsive programmers.
 
-@node History, Invoking m4, Intro, Preliminaries
+@node History
 @section Historical references
 
 The historical notes included here are fairly incomplete, and not
@@ -298,18 +297,18 @@ properly write this section.
 
 @code{GPM} has been an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
-8,3 (1965), pp. 225 ff.  @code{GPM} is also succintly described into
+8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
-While @code{GPM} was @emph{pure}, @code{m4} was meant to deal more
-with the true intricacies of real life: macros could be recognized
-with being pre-announced, skipping whitespace or end-of-lines was
-made easier, more constructs were builtin instead of derived, etc.
+While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
+the true intricacies of real life: macros can be recognized without being
+pre-announced, skipping whitespace or end-of-lines is easier, more constructs
+are builtin instead of derived, etc.
 
 Originally, @code{m4} was the engine for Rational FORTRAN preprocessor,
 that is, the @code{ratfor} equivalent of @code{cpp}.
 
-@node Invoking m4, Bugs, History, Preliminaries
+@node Invoking m4
 @section Invoking @code{m4}
 
 The format of the @code{m4} command is:
@@ -349,29 +348,33 @@ issued, considering all of them to be fatal.
 @itemx --debug=@var{flags}
 Set the debug-level according to the flags @var{flags}.  The debug-level
 controls the format and amount of information presented by the debugging
-functions.  @xref{Debug Levels} for more details on the format and
+functions.  @xref{Debug Levels}, for more details on the format and
 meaning of @var{flags}.
 
 @item -l@var{num}
 @itemx --arglength=@var{num}
 Restrict the size of the output generated by macro tracing.  @xref{Debug
-Levels} for more details.
+Levels}, for more details.
 
 @item -o@var{file}
 @itemx --error-output=@var{file}
 Redirect debug and trace output to the named file.  Error messages are
-still printed on the standard error output.  @xref{Debug Output} for
+still printed on the standard error output.  @xref{Debug Output}, for
 more details.
 
 @item -I@var{dir}
 @itemx --include=@var{dir}
 Make @code{m4} search @var{dir} for included files that are not found in
-the current working directory.  @xref{Search Path} for more details.
+the current working directory.  @xref{Search Path}, for more details.
 
 @item -e
 @itemx --interactive
 Makes this invocation of @code{m4} interactive.  This means that all
 output will be unbuffered, and interrupts will be ignored.
+
+@item -c
+@itemx --discard-comments
+Discard all comments instead of copying them to the output.
 
 @item -s
 @itemx --synclines
@@ -388,7 +391,8 @@ the file name did not change from the previous directive.
 Synchronisation directives are always given on complete lines per
 themselves.  When a synchronisation discrepancy occurs in the middle of
 an output line, the associated synchronisation directive is delayed
-until the beginning of the next generated line.
+until the beginning of the next generated line.  @xref{Syncoutput}, for
+runtime control.
 
 @item -P
 @itemx --prefix-builtins
@@ -401,7 +405,7 @@ instead of @samp{__file__}.
 @itemx --word-regexp=@var{REGEXP}
 Use an alternative syntax for macro names.  This experimental
 option might not be present on all GNU @code{m4} implementations.
-(@pxref{Changeword}).
+(@pxref{Changeword} and @ref{Experiments}).
 
 @item -H@var{n}
 @itemx --hashsize=@var{n}
@@ -490,19 +494,23 @@ Once execution is finished, write out the frozen state on the specified
 Before execution starts, recover the internal state from the specified
 frozen @var{file} (@pxref{Frozen files}).
 
+@item --import-environment
+Imports every variable in the environment as a macro.  This is done
+before @code{-D} and @code{-U}, so these can change the macros.
+
 @end table
 
-@cindex command line, filenames on the
-@cindex filenames, on the command line
+@cindex command line, file names on the
+@cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
 names.  If no names are present, the standard input is read.  A file
 name of @file{-} is taken to mean the standard input.
 
 The input files are read in the sequence given.  The standard input can
-only be read once, so the filename @file{-} should only appear once on
+only be read once, so the file name @file{-} should only appear once on
 the command line.
 
-@node Bugs, Manual, Invoking m4, Preliminaries
+@node Bugs
 @section Problems and bugs
 
 If you have problems with GNU @code{m4} or think you've found a bug,
@@ -519,16 +527,15 @@ say what you expected to occur; this will help us decide whether the
 problem was really in the documentation.
 
 Once you've got a precise problem, send e-mail to (Internet)
-@file{bug-gnu-utils@@prep.ai.mit.edu} or (UUCP)
-@file{mit-eddie!prep.ai.mit.edu!bug-gnu-utils}.  Please include the
-version number of @code{m4} you are using.  You can get this information
-with the command @samp{m4 --version}.
+@file{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
+you are using.  You can get this information with the command @samp{m4
+--version}.
 
 Non-bug suggestions are always welcome as well.  If you have questions
 about things that are unclear in the documentation or are just obscure
 features, please report them too.
 
-@node Manual,  , Bugs, Preliminaries
+@node Manual
 @section Using this manual
 
 This manual contains a number of examples of @code{m4} input and output,
@@ -562,7 +569,7 @@ regexp(@var{string}, @var{regexp}, opt @var{replacement})
 @end example
 
 All macro arguments in @code{m4} are strings, but some are given special
-interpretation, e.g., as numbers, filenames, regular expressions, etc.
+interpretation, e.g., as numbers, file names, regular expressions, etc.
 
 The @samp{opt} before the third argument shows that this argument is
 optional---if it is left out, it is taken to be the empty string.  An
@@ -573,7 +580,7 @@ This document consistently writes and uses @dfn{builtin}, without an
 hyphen, as if it were an English word.  This is how the @code{builtin}
 primitive is spelled within @code{m4}.
 
-@node Syntax, Macros, Preliminaries, Top
+@node Syntax
 @chapter Lexical and syntactic conventions
 
 @cindex input tokens
@@ -583,25 +590,37 @@ token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
 contain comments.
 
+GNU @code{m4} passes all ISO-8859-1 characters, except @kbd{'\0'}.  Eight
+bit ISO-8859-1 characters can be used as quotes, comment delimiters and
+in macro names, depending on the active locale.
+
 @menu
 * Names::                       Macro names
 * Quoted strings::              Quoting input to m4
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
 @end menu
 
-@node Names, Quoted strings, Syntax, Syntax
+@node Names
 @section Names
 
 @cindex names
-A name is any sequence of letters, digits, and the character @kbd{_}
-(underscore), where the first character is not a digit.  If a
-name has a macro definition, it will be subject to macro expansion
-(@pxref{Macros}).
+A name is a sequence of letters, digits, and the character @kbd{_}
+(underscore), where the first character is not a digit.  @code{m4} will
+use the longest such sequences found in the input.  If a name has a
+macro definition, it will be subject to macro expansion
+(@pxref{Macros}).)
 
 Examples of legal names are: @samp{foo}, @samp{_tmp}, and @samp{name01}.
 
-@node Quoted strings, Other tokens, Names, Syntax
+Names are case-sensitive.
+
+The definitions of letters, digits and other input characters can be
+changed at any time, using the builtin macro @code{changesyntax}.
+@xref{Changesyntax}, for more information.
+
+@node Quoted strings
 @section Quoted strings
 
 @cindex quoted string
@@ -630,15 +649,15 @@ is the string
 @end example
 
 The quote characters can be changed at any time, using the builtin macro
-@code{changequote}.  @xref{Changequote} for more information.
+@code{changequote}.  @xref{Changequote}, for more information.
 
-@node Other tokens, Comments, Quoted strings, Syntax
+@node Other tokens
 @section Other tokens
 
 Any character, that is neither a part of a name, nor of a quoted string,
 is a token by itself.
 
-@node Comments,  , Other tokens, Syntax
+@node Comments
 @section Comments
 
 @cindex comments
@@ -652,12 +671,56 @@ the comment.  The commenting effect of the begin comment character
 can be inhibited by quoting it.
 
 The comment delimiters can be changed to any string at any time, using
-the builtin macro @code{changecom}.  @xref{Changecom} for more
+the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
 
 @c FIXME: more examples would be useful here --ADR
 
-@node Macros, Definitions, Syntax, Top
+@node Input processing
+@section Input Processing
+
+As @code{m4} reads the input token by token, it will copy each token
+directly to the output immediately.
+
+The exception is when it finds a word with a macro definition.  In that
+case @code{m4} will calculate the macro's expansion, possibly reading
+more input to get the arguments.  It then insert the expansion in front
+of the remaining input.  In other words, the resulting text from a macro
+call will be read and parsed into tokens again.
+
+@code{m4} expands a macro as soon as possible.  It it finds a macro call
+when collecting the arguments to another, it will expand the second
+call first.  If the input is
+
+@comment ignore
+@example
+format(`Result is %d', eval(2**15))
+@end example
+
+@noindent
+@code{m4} will first expand @samp{eval(2**15)} to @samp{32768}, and only
+then expand the resulting call
+
+@comment ignore
+@example
+format(`Result is %d', 32768)
+@end example
+
+@noindent
+which will give the output
+
+@comment ignore
+@example
+Result is 32768
+@end example
+
+The order in which @code{m4} expands the macros can be explored using
+the @ref{Trace} facilities of GNU @code{m4}.
+
+This process continues until there are no more macro calls to expand and
+all the input has been consumed.
+
+@node Macros
 @chapter How to invoke macros
 
 This chapter covers macro invocation, macro arguments and how macro
@@ -671,7 +734,7 @@ expansion is treated.
 * Macro expansion::             Expanding macros
 @end menu
 
-@node Invocation, Inhibiting Invocation, Macros, Macros
+@node Invocation
 @section Macro invocation
 
 @cindex macro invocation
@@ -711,7 +774,7 @@ name()
 is a macro call with one argument, which is the empty string, not a call
 with no arguments.
 
-@node Inhibiting Invocation, Macro Arguments, Invocation, Macros
+@node Inhibiting Invocation
 @section Preventing macro invocation
 
 An innovation of the @code{m4} language, compared to some of its
@@ -738,7 +801,7 @@ one has to write @code{m4_dnl} and even @code{m4_m4exit}.
 
 If your version of GNU @code{m4} has the @code{changeword} feature
 compiled in, there it offers far more flexibility in specifying the
-syntax of macro names, both builtin or user-defined.  @xref{Changeword}
+syntax of macro names, both builtin or user-defined.  @xref{Changeword},
 for more information on this experimental feature.
 
 Of course, the simplest way to prevent a name to be interpreted
@@ -809,7 +872,7 @@ macro(v)`ert'
 the input will produce the string @samp{divert}.  If the quote was
 removed, the @code{divert} builtin would be called instead.
 
-@node Macro Arguments, Quoting Arguments, Inhibiting Invocation, Macros
+@node Macro Arguments
 @section Macro arguments
 
 @cindex macros, arguments to
@@ -820,7 +883,8 @@ as a macro.
 If the name is followed by an opening parenthesis, the arguments will be
 collected before the macro is called.  If too few arguments are
 supplied, the missing arguments are taken to be the empty string.  If
-there are too many arguments, the excess arguments are ignored.
+there are too many arguments, the excess arguments are ignored.  Leading
+whitespace are stripped of all arguments.
 
 Normally @code{m4} will issue warnings if a builtin macro is called
 with an inappropriate number of arguments, but it can be suppressed with
@@ -842,7 +906,7 @@ is a macro call with four arguments, which are @samp{a }, @samp{b},
 whitespace, remember that leading unquoted whitespace is never part
 of an argument, but trailing whitespace always is.
 
-@node Quoting Arguments, Macro expansion, Macro Arguments, Macros
+@node Quoting Arguments
 @section Quoting macro arguments
 
 @cindex quoted macro arguments
@@ -872,7 +936,7 @@ It is, however, in certain cases necessary to leave out quotes for some
 arguments, and there is nothing wrong in doing it.  It just makes life a
 bit harder, if you are not careful.
 
-@node Macro expansion,  , Quoting Arguments, Macros
+@node Macro expansion
 @section Macro expansion
 
 @cindex macros, expansion of
@@ -895,7 +959,7 @@ foo
 will expand first to @samp{bar}, and when this is reread and
 expanded, into @samp{Hello world}.
 
-@node Definitions, Conditionals, Macros, Top
+@node Definitions
 @chapter How to define new macros
 
 @cindex macros, how to define new
@@ -914,9 +978,11 @@ value, which can be brought back at a later time.
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
+
+* Symbols::                     Getting the defined macro names
 @end menu
 
-@node Define, Arguments, Definitions, Definitions
+@node Define
 @section Defining a macro
 
 @findex define
@@ -948,9 +1014,34 @@ a part of the macro definition, and it is consequently copied to
 the output.  This can be avoided by use of the macro @code{dnl}.
 @xref{Dnl}, for details.
 
+The first argument to @code{define} does not have to be a simple word.
+It can be any text string.  A macro with a non standard name cannot be
+invoked in the normal way, as the name is not recognised.  It can only
+be referenced by the builtins @ref{Indir} and @ref{Defn}.
+
+@cindex arrays
+Arrays and associative arrays can be simulated by using this trick.
+
+@example
+define(`array', `defn(format(``array[%d]'', `$1'))')
+@result{}
+define(`array_set', `define(format(``array[%d]'', `$1'), `$2')')
+@result{}
+array_set(4, `array element no. 4')
+@result{}
+array_set(17, `array element no. 17')
+@result{}
+array(4)
+@result{}array element no. 4
+array(eval(10+7))
+@result{}array element no. 17
+@end example
+
+Change the @code{%d} to @code{%s} and it is an associative array.
+
 The macro @code{define} is recognized only with parameters.
 
-@node Arguments, Pseudo Arguments, Define, Definitions
+@node Arguments
 @section Arguments to macros
 
 @cindex macros, arguments to
@@ -1011,7 +1102,7 @@ foo
 The @samp{foo} in the expansion text is @emph{not} expanded, since it is
 a quoted string, and not a name.
 
-@node Pseudo Arguments, Undefine, Arguments, Definitions
+@node Pseudo Arguments
 @section Special arguments to macros
 
 @cindex special arguments to macros
@@ -1090,7 +1181,7 @@ If you want a macro to expand to something like @samp{$12}, put a pair
 of quotes after the @code{$}.  This will prevent @code{m4} from
 interpreting the @code{$} sign as a reference to an argument.
 
-@node Undefine, Defn, Pseudo Arguments, Definitions
+@node Undefine
 @section Deleting a macro
 
 @cindex macros, how to delete
@@ -1128,7 +1219,7 @@ case, @code{undefine} does nothing.
 
 The macro @code{undefine} is recognized only with parameters.
 
-@node Defn, Pushdef, Undefine, Definitions
+@node Defn
 @section Renaming macros
 
 @cindex macros, how to rename
@@ -1146,11 +1237,10 @@ defn(@var{name})
 which expands to the @emph{quoted definition} of @var{name}.  If the
 argument is not a defined macro, the expansion is void.
 
-If @var{name} is a user-defined macro, the quoted definition is simply
-the quoted expansion text.  If, instead, @var{name} is a builtin, the
-expansion is a special token, which points to the builtin's internal
-definition.  This token is only meaningful as the second argument to
-@code{define} (and @code{pushdef}), and is ignored in any other context.
+If @var{name} is a builtin, the expansion is a special token, which
+points to the builtin's internal definition.  This token is only
+meaningful as the second argument to @code{define} (and @code{pushdef}),
+and is ignored in any other context.
 
 Its normal use is best understood through an example, which shows how to
 rename @code{undefine} to @code{zap}:
@@ -1164,13 +1254,31 @@ undefine(`zap')
 @result{}undefine(zap)
 @end example
 
-In this way, @code{defn} can be used to copy macro definitions, and also
-definitions of builtin macros.  Even if the original macro is removed,
-the other name can still be used to access the definition.
+In this way, @code{defn} can be used to copy definitions of builtin
+macros.  Even if the original macro is removed, the other name can still
+be used to access the definition.
+
+If, instead, @var{name} is a user-defined macro, the expansion is simply
+the quoted text of the macro, and @code{defn} can therefore be used to
+copy user macro definitions as well.
+
+Macros used as string variables should be referred through @code{defn},
+to avoid unwanted expansion of the text:
+
+@example
+define(`string', `The macro dnl is very useful
+')
+@result{}
+string
+@result{}The macro @comment
+defn(`string')
+@result{}The macro dnl is very useful
+@result{}
+@end example
 
 The macro @code{defn} is recognized only with parameters.
 
-@node Pushdef, Indir, Defn, Definitions
+@node Pushdef
 @section Temporarily redefining macros
 
 @cindex macros, temporary redefinition of
@@ -1244,13 +1352,20 @@ foo
 @result{}foo
 @end example
 
+@cindex local variables
+@cindex variables, local
+Local variables within macros are made with @code{pushdef} and
+@code{popdef}.  At the start of the macro a new definition is pushed,
+within the macro it is manipulated and at the end it is popped,
+revealing the former definition.
+
 It is possible to temporarily redefine a builtin with @code{pushdef}
 and @code{defn}.
 
 The macros @code{pushdef} and @code{popdef} are recognized only with
 parameters.
 
-@node Indir, Builtin, Pushdef, Definitions
+@node Indir
 @section Indirect call of macros
 
 @cindex indirect call of macros
@@ -1266,8 +1381,8 @@ indir(@var{name}, ...)
 @end example
 @noindent
 which results in a call to the macro @var{name}, which is passed the
-rest of the arguments.  This can be used to call macros with ``illegal''
-names (@code{define} allows such names to be defined):
+rest of the arguments.  This can be used to call macros with computed or
+with``illegal'' names (@code{define} allows such names to be defined):
 
 @example
 define(`$$internal$macro', `Internal macro (name `$0')')
@@ -1284,7 +1399,7 @@ called through the builtin @code{indir}.
 
 @c FIXME: Why indir does not require at least one parameter?
 
-@node Builtin,  , Indir, Definitions
+@node Builtin
 @section Indirect call of builtins
 
 @cindex indirect call of builtins
@@ -1305,7 +1420,32 @@ another definition that has covered the original.
 
 The macro @code{builtin} is recognized only with parameters.
 
-@node Conditionals, Debugging, Definitions, Top
+@node Symbols
+@section Getting the defined macro names
+
+@cindex macro names
+@cindex GNU extensions
+@findex symbols
+
+The name of the currently defined macro can be accessed by
+@code{symbols}:
+@comment ignore
+@example
+symbols
+@end example
+@noindent
+which results in a sorted list of quoted strings.  This contrasts with
+@code{dumpdef} which output can not be accessed by @code{m4} programs.
+
+When given arguments, @code{symbols} returns the sorted subset of the
+symbols currently defined:
+@example
+symbols(`ifndef', `ifdef', `define', `undef')
+@result{}define,ifdef
+@end example
+
+
+@node Conditionals
 @chapter Conditionals, loops and recursion
 
 Macros, expanding to plain text, perhaps with arguments, are not quite
@@ -1320,7 +1460,7 @@ something a number of times, or while some condition is true.
 * Loops::                       Loops and recursion in m4
 @end menu
 
-@node Ifdef, Ifelse, Conditionals, Conditionals
+@node Ifdef
 @section Testing macro definitions
 
 @cindex conditionals
@@ -1351,7 +1491,7 @@ ifdef(`foo', ``foo' is defined', ``foo' is not defined')
 
 The macro @code{ifdef} is recognized only with parameters.
 
-@node Ifelse, Loops, Ifdef, Conditionals
+@node Ifelse
 @section Comparing strings
 
 @cindex comparing strings
@@ -1379,13 +1519,13 @@ If called with three or four arguments, @code{ifelse} expands into
 for character), otherwise it expands to @var{not-equal}.
 
 @example
-ifelse(foo, bar, `true')
+ifelse(`foo', `bar', `true')
 @result{}
-ifelse(foo, foo, `true')
+ifelse(`foo', `foo', `true')
 @result{}true
-ifelse(foo, bar, `true', `false')
+ifelse(`foo', `bar', `true', `false')
 @result{}false
-ifelse(foo, foo, `true', `false')
+ifelse(`foo', `foo', `true', `false')
 @result{}true
 @end example
 
@@ -1408,7 +1548,7 @@ of various kinds.
 
 The macro @code{ifelse} is recognized only with parameters.
 
-@node Loops,  , Ifelse, Conditionals
+@node Loops
 @section Loops and recursion
 
 @cindex recursive macros
@@ -1435,6 +1575,8 @@ It takes any number of arguments, and expands to all but the first
 argument, separated by commas, with each argument quoted.
 
 @example
+shift
+@result{}
 shift(bar)
 @result{}
 shift(foo, bar, baz)
@@ -1521,10 +1663,10 @@ enough for general use. They lack even basic error handling of cases
 like start value less than final value, and the first argument not being
 a name.  Correcting these errors are left as an exercise to the reader.
 
-@node Debugging, Input Control, Conditionals, Top
+@node Debugging
 @chapter How to debug macros and input
 
-When writing macros for @code{m4}, most of the time they woould not
+When writing macros for @code{m4}, most of the time they would not
 work as intended (as is the case with most programming languages).
 There is a little support for macro debugging in @code{m4}.
 
@@ -1535,7 +1677,7 @@ There is a little support for macro debugging in @code{m4}.
 * Debug Output::                Saving debugging output
 @end menu
 
-@node Dumpdef, Trace, Debugging, Debugging
+@node Dumpdef
 @section Displaying macro definitions
 
 @cindex displaying macro definitions
@@ -1571,10 +1713,10 @@ dumpdef(`define')
 
 The last example shows how builtin macros definitions are displayed.
 
-@xref{Debug Levels} for information on controlling the details of the
+@xref{Debug Levels}, for information on controlling the details of the
 display.
 
-@node Trace, Debug Levels, Dumpdef, Debugging
+@node Trace
 @section Tracing macro calls
 
 @cindex tracing macro expansion
@@ -1622,10 +1764,10 @@ The number between dashes is the depth of the expansion.  It is one most
 of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.
 
-@xref{Debug Levels} for information on controlling the details of the
+@xref{Debug Levels}, for information on controlling the details of the
 display.
 
-@node Debug Levels, Debug Output, Trace, Debugging
+@node Debug Levels
 @section Controlling debugging output
 
 @cindex controlling debugging output
@@ -1672,7 +1814,7 @@ Show the the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
-mecanism (@pxref{Search Path}), giving the actual filename used.
+mecanism (@pxref{Search Path}), giving the actual file name used.
 
 @item i
 Print a message each time the current input file is changed, giving file
@@ -1703,7 +1845,7 @@ are removed.  If no argument is present, the debugging flags are set to
 zero (as if no @samp{-d} was given), and with an empty argument the flags
 are reset to the default.
 
-@node Debug Output,  , Debug Levels, Debugging
+@node Debug Output
 @section Saving debugging output
 
 @cindex saving debugging output
@@ -1724,7 +1866,7 @@ will send all further debug and trace output to @var{filename}.  If
 @code{debugfile} is called without any arguments, debug and trace output
 are sent to the standard error output.
 
-@node Input Control, File Inclusion, Debugging, Top
+@node Input Control
 @chapter Input control
 
 This chapter describes various builtin macros for controlling the input
@@ -1734,11 +1876,12 @@ to @code{m4}.
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
+* Changesyntax::                Changing the lexical structure of the input
 * Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving input until end of input
 @end menu
 
-@node Dnl, Changequote, Input Control, Input Control
+@node Dnl
 @section Deleting whitespace in input
 
 @cindex deleting whitespace in input
@@ -1772,7 +1915,7 @@ collection will take place.  @code{dnl} will return no output.  The
 input following the matching close parenthesis up to and including the
 next newline, on whatever line containing it, will still be discarded.
 
-@node Changequote, Changecom, Dnl, Input Control
+@node Changequote
 @section Changing the quote characters
 
 @cindex changing the quote delimiters
@@ -1831,11 +1974,16 @@ There is no way in @code{m4} to quote a string containing an unmatched
 left quote, except using @code{changequote} to change the current
 quotes.
 
+If the quotes should be changed from, say, @samp{[} to @samp{[[},
+temporary quote characters have to be defined.  To achieve this, two
+calls of @code{changequote} must be made, one for the temporary quotes
+and one for the new quotes.
+
 Neither quote string should start with a letter or @samp{_} (underscore),
 as they will be confused with names in the input.  Doing so disables
 the quoting mechanism.
 
-@node Changecom, Changeword, Changequote, Input Control
+@node Changecom
 @section Changing comment delimiters
 
 @cindex changing comment delimiters
@@ -1886,19 +2034,337 @@ changecom
 @result{}# Not a COMMENT anymore
 @end example
 
-@node Changeword, M4wrap, Changecom, Input Control
+
+
+
+@node Changesyntax
+@section Changing the lexical structure of the input
+
+@cindex lexical structure of the input
+@cindex input, lexical structure of the
+@cindex syntax table
+@cindex GNU extensions
+@findex changesyntax
+@quotation
+The macro @code{changesyntax} and all associated functionality is
+experimental (@pxref{Experiments}).  The functionality might change in
+the future.  Please direct your comments about it the same way you would
+do for bugs.
+@end quotation
+
+The input to @code{m4} is read character per character, and these
+characters are grouped together to form input tokens (such as macro
+names, strings, comments, etc.).
+
+Each token is parsed according to certain rules.  For example, a macro
+name starts with a letter or @kbd{_} and consists of the longest
+possible string of letters, @kbd{_} and digits.  But who is to decide
+what characters are letters, digits, quotes, white space?  Earlier the
+operating system decided, now you do.
+
+Input characters belong to different categories:
+
+@table @dfn
+@item Letters
+Characters that start a macro name.  The default is the letters as
+defined by the operating system and the character @kbd{_}.
+
+@item Digits
+Characters that, together with the letters, form the remainder of a
+macro name.  The default is the ten digits @kbd{0}@dots{}@kbd{9}.
+
+@item White space
+Characters that should be trimmed from the beginning of each
+argument to a macro call.  The default is @kbd{SPC}, @kbd{TAB},
+@kbd{newline} and possibly others as defined by the operating system.
+
+@item Open parenthesis
+Characters that open the argument list of a macro call.  Default
+is @kbd{(}.
+
+@item Close parenthesis
+Characters that close the argument list of a macro call.  Default is
+@kbd{)}.
+
+@item Argument separator
+Characters that separate the arguments of a macro call.  Default
+is @kbd{,}.
+
+@item Other
+Characters that have no special syntactical meaning to @code{m4}.
+Default is all characters expect those in the categories above.
+
+@item Active
+Characters that themselves, alone, form macro names.  No default.
+
+@item Escape
+Characters that must precede macro names for them to be recognised.  No
+default.
+
+@end table
+
+@noindent
+Each character can, besides the basic syntax category, have some syntax
+attributes.  These are:
+
+@table @dfn
+@item Left quote
+The characters that start a quoted string.  Default is @kbd{`}.  Basic
+syntax category is `Other'.
+
+@item Right quote
+The characters that end a quoted string.  Default is @kbd{'}.  Basic
+syntax category is `Other'.
+
+@item Begin comment
+The characters that begin a comment.  Default is @kbd{#}.  Basic syntax
+category is `Other'.
+
+@item End comment
+The characters that end a comment.  Default is @kbd{newline}.  Basic
+syntax category is `White space'.
+@end table
+
+@noindent
+
+The builtin macro @code{changesyntax} is used to change the way
+@code{m4} parses the input stream into tokens.
+
+@comment ignore
+@example
+changesyntax(@var{syntax-spec}, ...)
+@end example
+
+@noindent
+The @var{syntax-spec} is a string, whose first characters determines the
+syntax category of the other characters.   Character ranges are expanded
+as for @ref{Translit}.  If there are no other
+characters, @emph{all} characters are given the syntax code.
+
+The characters for the syntax categories are:
+
+@table @kbd
+@item W
+Letters
+@item D
+Digits
+@item S
+White space
+@item (
+Open parenthesis
+@item )
+Close parenthesis
+@item ,
+Argument separator
+@item O
+Other
+@item @@
+Escape
+@item A
+Active
+@item L
+Left quote
+@item R
+Right quote
+@item B
+Begin comment
+@item E
+End comment
+@item
+@end table
+
+@noindent
+With @code{changesyntax} we can modify the meaning of a word.
+
+@example
+define(`test.1', `TEST ONE')
+@result{}
+__file__
+@result{}in
+changesyntax(`O_', `W.')
+@result{}
+__file__
+@result{}__file__
+test.1
+@result{}TEST ONE
+@end example
+
+@noindent
+Another possibility is to change the syntax of a macro call.
+
+@example
+define(`test', `$#')
+@result{}
+test(a, b, c)
+@result{}3
+changesyntax(`(<', `,|', `)>', `O(,)')
+@result{}
+test(a, b, c)
+@result{}0(a, b, c)
+test<a|b|c>
+@result{}3
+@end example
+
+@noindent
+Leading spaces are always removed from macro arguments in @code{m4}, but
+by changing the syntax categories we can avoid it.
+
+@example
+define(`test', `$1$2$3')
+@result{}
+test(a, b, c)
+@result{}abc
+changesyntax(`O         ')
+@result{}
+test(a, b, c)
+@result{}a b c
+@end example
+
+@noindent
+It is not yet possible to redefine the @samp{$} used to indicate macro
+arguments in user defined macros.
+
+Macro calls can be given a @TeX{} or Texinfo like syntax using an
+escape.  If one or more characters are defined as escapes macro names
+are only recognised if preceded by an escape character.
+
+If the escape is not followed by what is normally a word (a letter
+optionally followed by letters and/or numerals), that single character
+is returned as a macro name.
+
+As always, words without a macro definition cause no error message.
+They and the escape character are simply output.
+
+@example
+define(`foo', `bar')
+@result{}
+changesyntax(`@@@@')
+@result{}
+foo
+@result{}foo
+@@foo
+@result{}bar
+@@changesyntax(`@@\', `O@@')
+@result{}
+foo
+@result{}foo
+@@foo
+@result{}@@foo
+\foo
+@result{}bar
+define(`#', `No comment')
+@result{}define(#, No comment)
+\define(`#', `No comment')
+@result{}
+\# \foo # Comment \foo
+@result{}No comment bar # Comment \foo
+@end example
+
+Active characters are known from @TeX{}.  In @code{m4} an active
+character is always seen as a one-letter word, and so, if it has a macro
+definition, the macro will be called.
+
+@example
+define(`@@', `TEST')
+@result{}
+@@
+@result{}@@
+changesyntax(`A@@')
+@result{}
+@@
+@result{}TEST
+@end example
+
+
+
+There is obviously an overlap with @code{changecom} and
+@code{changequote}.  Comment delimiters and quotes can now be defined in
+two different ways.  To avoid incompatibilites, if the quotes are set
+with @code{changequote}, all characters marked in the syntax table as
+quotes will be unmarked, leaving only one set of defined quotes as
+before.  Since the quotes are syntax attributes rather than syntax
+categories, the old quotes simply revert to their old category.  If the
+quotes are set with @code{changesyntax}, other characters marked as
+quotes are left untouched, resulting in at least two sets of quotes.
+This applies to comment delimiters as well, @emph{mutatis mutandis}.
+
+@example
+define(`test', `TEST')
+@result{}
+changesyntax(`L<', `R>')
+@result{}
+<test>
+@result{}test
+`test>
+@result{}test
+changequote(<[>, `]')
+@result{}
+<test>
+@result{}<TEST>
+[test]
+@result{}test
+@end example
+
+@noindent
+If categories, that form single character tokens, contain several
+characters, all are treated as equal.  Any open parenthesis will match
+any close parenthesis, etc.
+
+@example
+changesyntax(`(@{<', `)@}>', `,;:', `O(,)')
+@result{}
+eval@{2**4-1; 2 : 8>
+@result{}00001111
+@end example
+
+@noindent
+This is not so for long quotes, which cannot be matched by single
+character quote and vice versa.  The same goes for comment delimiters.
+
+@example
+define(`test', `==$1==')
+@result{}
+changequote(`<<', `>>')
+@result{}
+changesyntax(<<L[>>, <<R]>>)
+@result{}
+test(<<testing]>>)
+@result{}==testing]==
+test([testing>>])
+@result{}==testing>>==
+test([<<testing>>])
+@result{}==testing==
+@end example
+
+@noindent
+Note how it is possible to have both long and short quotes, if
+@code{changequote} is used before @code{changesyntax}.
+
+The syntax table is initialiased to be backwards compatible, so if you
+never call @code{changesyntax}, nothing will have changed.
+
+Debugging output continue to use @kbd{(}, @kbd{,} and @kbd{)} to show
+macro calls.
+
+The builtin macros @code{changesyntax} is recognized only when given
+arguments.
+
+
+
+
+@node Changeword
 @section Changing the lexical structure of words
 
 @cindex lexical structure of words
 @cindex words, lexical structure of
 @findex changeword
 @quotation
-The macro @code{changeword} and all associated functionnality is
-experimental.  It is only available if the @code{--enable-changeword}
-option was given to @code{configure}, at GNU @code{m4} installation
-time.  The functionnality might change or even go away in the future.
-@emph{Do not rely on it}.  Please direct your comments about it the
-same way you would do for bugs.
+The macro @code{changeword} and all associated functionality is
+experimental (@pxref{Experiments}).  It is only available if the
+@code{--enable-changeword} option was given to @code{configure}, at GNU
+@code{m4} installation time.  The functionality might change or even go
+away in the future.  @emph{Do not rely on it}.  Please direct your
+comments about it the same way you would do for bugs.
 @end quotation
 
 A file being processed by @code{m4} is split into quoted strings, words
@@ -1918,8 +2384,15 @@ apply translations to a file of numbers:
 @example
 changeword(`[_a-zA-Z0-9]+')
 define(1, 0)
-@result{}1
+1
+@result{}
+0
+@result{}0
 @end example
+
+The syntax for regular expressions is the same as in GNU Emacs.
+@xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
+Manual}.
 
 Tightening the lexical rules is less useful, because it will generally
 make some of the builtins unavailable.  You could use it to prevent
@@ -1939,7 +2412,7 @@ is a restriction on the regular expressions that may be passed to
 @samp{foo}, it must also accept @samp{f} and @samp{fo}.
 
 @code{changeword} has another function.  If the regular expression
-supplied contains any bracketed subexpressions, then text outside
+supplied contains any subexpressions in parentheses, then text outside
 the first of these is discarded before symbol lookup.  So:
 
 @comment ignore
@@ -1994,7 +2467,7 @@ the macro is @emph{used}.
 You should note that using @code{changeword} will slow @code{m4} down
 by a factor of about seven.
 
-@node M4wrap,  , Changeword, Input Control
+@node M4wrap
 @section Saving input
 
 @cindex saving input
@@ -2036,7 +2509,7 @@ which the saved text is reread is undefined.  If @code{m4wrap} is not used
 recursively, the saved pieces of text are reread in the opposite order
 in which they were saved (LIFO---last in, first out).
 
-@node File Inclusion, Diversions, Input Control, Top
+@node File Inclusion
 @chapter File inclusion
 
 @cindex file inclusion
@@ -2049,7 +2522,7 @@ in which they were saved (LIFO---last in, first out).
 * Search Path::                 Searching for include files
 @end menu
 
-@node Include, Search Path, File Inclusion, File Inclusion
+@node Include
 @section Including named files
 
 @findex include
@@ -2078,7 +2551,7 @@ does not.
 @example
 include(`no-such-file')
 @result{}
-@error{}30.include:2: m4: Cannot open no-such-file: No such file or directory
+@error{}m4: in: 1: Cannot open no-such-file: No such file or directory
 sinclude(`no-such-file')
 @result{}
 @end example
@@ -2124,10 +2597,13 @@ This use of @code{include} is not trivial, though, as files can contain
 quotes, commas and parentheses, which can interfere with the way the
 @code{m4} parser works.
 
+In GNU @code{m4}, an alternative method of reading files is using
+@ref{Undivert} on a named file.
+
 The builtin macros @code{include} and @code{sinclude} are recognized
 only when given arguments.
 
-@node Search Path,  , Include, File Inclusion
+@node Search Path
 @section Searching for include files
 
 @cindex search path for included files
@@ -2146,7 +2622,7 @@ colon-separated list of directories, which will be searched in order.
 If the automatic search for include-files causes trouble, the @samp{p}
 debug flag (@pxref{Debug Levels}) can help isolate the problem.
 
-@node Diversions, Text handling, File Inclusion, Top
+@node Diversions
 @chapter Diverting and undiverting output
 
 Diversions are a way of temporarily saving output.  The output of
@@ -2175,7 +2651,7 @@ limited by the number of available file descriptors.
 * Cleardiv::                    Discarding diverted text
 @end menu
 
-@node Divert, Undivert, Diversions, Diversions
+@node Divert
 @section Diverting output
 
 @cindex diverting output to files
@@ -2228,7 +2704,7 @@ divert
 
 This is a common programming idiom in @code{m4}.
 
-@node Undivert, Divnum, Divert, Diversions
+@node Undivert
 @section Undiverting output
 
 @findex undivert
@@ -2241,9 +2717,9 @@ undivert(opt @var{number}, ...)
 @end example
 
 @noindent
-which undiverts the diversions given by the arguments, in the order
-given.  If no arguments are supplied, all diversions are undiverted, in
-numerical order.
+which reinserts the diverted output given by the arguments into the
+current output stream, in the order given.  If no arguments are
+supplied, all diversions are undiverted, in numerical order.
 
 @c FIXME: Explain what happens when undiverting all to else than 0.
 
@@ -2310,7 +2786,7 @@ include(`foo')
 @result{}
 @end example
 
-@node Divnum, Cleardiv, Undivert, Diversions
+@node Divnum
 @section Diversion numbers
 
 @cindex diversion numbers
@@ -2344,7 +2820,7 @@ divert
 The last call of @code{divert} without argument is necessary, since the
 undiverted text would otherwise be diverted itself.
 
-@node Cleardiv,  , Divnum, Diversions
+@node Cleardiv
 @section Discarding diverted text
 
 @cindex discarding diverted text
@@ -2379,9 +2855,9 @@ define(`cleardivert',
 
 It is called just like @code{undivert}, but the effect is to clear the
 diversions, given by the arguments.  (This macro has a nasty bug!  You
-should try to see if you can find it and correct it.)
+should try to see if you can find it and correct it.   @xref{Answers}.)
 
-@node Text handling, Arithmetic, Diversions, Top
+@node Text handling
 @chapter Macros for text handling
 
 There are a number of builtins in @code{m4} for manipulating text in
@@ -2397,7 +2873,7 @@ various ways, extracting substrings, searching, substituting, and so on.
 * Format::                      Formatting strings (printf-like)
 @end menu
 
-@node Len, Index, Text handling, Text handling
+@node Len
 @section Calculating length of strings
 
 @cindex length of strings
@@ -2422,7 +2898,7 @@ len(`abcdef')
 
 The builtin macro @code{len} is recognized only when given arguments.
 
-@node Index, Regexp, Len, Text handling
+@node Index
 @section Searching for substrings
 
 @findex index
@@ -2448,7 +2924,7 @@ index(`gnus, gnats, and armadillos', `dag')
 
 The builtin macro @code{index} is recognized only when given arguments.
 
-@node Regexp, Substr, Index, Text handling
+@node Regexp
 @section Searching for regular expressions
 
 @cindex regular expressions
@@ -2490,7 +2966,7 @@ regexp(`GNUs not Unix', `\w\(\w+\)$', `*** \& *** \1 ***')
 
 The builtin macro @code{regexp} is recognized only when given arguments.
 
-@node Substr, Translit, Regexp, Text handling
+@node Substr
 @section Extracting substrings
 
 @cindex extracting substrings
@@ -2518,7 +2994,7 @@ substr(`gnus, gnats, and armadillos', 6, 5)
 
 The builtin macro @code{substr} is recognized only when given arguments.
 
-@node Translit, Patsubst, Substr, Text handling
+@node Translit
 @section Translating characters
 
 @cindex translating characters
@@ -2567,7 +3043,7 @@ most common.
 The builtin macro @code{translit} is recognized only when given
 arguments.
 
-@node Patsubst, Format, Translit, Text handling
+@node Patsubst
 @section Substituting text by regular expression
 
 @cindex regular expressions
@@ -2611,7 +3087,7 @@ patsubst(`GNUs not Unix', `\w*', `(\&)')
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not 
+@result{}GN not @comment
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
@@ -2632,7 +3108,7 @@ capitalize(`GNUs not Unix')
 The builtin macro @code{patsubst} is recognized only when given
 arguments.
 
-@node Format,  , Patsubst, Text handling
+@node Format
 @section Formatted output
 
 @cindex formatted output
@@ -2687,9 +3163,9 @@ modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
 
-@c FIXME: Why format does not require at least one argument?
+The builtin macros @code{format} is recognized only when given arguments.
 
-@node Arithmetic, UNIX commands, Text handling, Top
+@node Arithmetic
 @chapter Macros for doing arithmetic
 
 @cindex arithmetic
@@ -2700,10 +3176,11 @@ decrement operations.
 
 @menu
 * Incr::                        Decrement and increment operators
-* Eval::                        Evaluating integer expressions
+* Eval::                        Evaluating integer or rational expressions
+* Mpeval::
 @end menu
 
-@node Incr, Eval, Arithmetic, Arithmetic
+@node Incr
 @section Decrement and increment operators
 
 @cindex decrement operator
@@ -2733,8 +3210,8 @@ decr(7)
 The builtin macros @code{incr} and @code{decr} are recognized only when
 given arguments.
 
-@node Eval,  , Incr, Arithmetic
-@section Evaluating integer expressions
+@node Eval
+@section Evaluating integer or rational expressions
 
 @cindex integer expression evaluation
 @cindex evaluation, of integer expressions
@@ -2758,8 +3235,8 @@ decreasing precedence.
 Unary minus
 @item **
 Exponentiation
-@item *  /  %
-Multiplication, division and modulo
+@item *  /  %  :
+Multiplication, division, modulo and ratio
 @item +  -
 Addition and subtraction
 @item <<  >>
@@ -2799,6 +3276,9 @@ then the digits making the number.  For any radix, the digits are
 @samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
 can be used interchangeably in numbers prefixes and as number digits.
 
+Calculations are done in at lease 32 bit, but @code{m4} will use wider
+integers if available.
+
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
 relation return @code{0}.
@@ -2819,7 +3299,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo'/6)
-@error{}51.eval:14: m4: Bad expression in eval: foo/6
+@error{}m4: in: 7: Bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -2853,7 +3333,26 @@ Take note that @var{radix} cannot be larger than 36.
 
 The builtin macro @code{eval} is recognized only when given arguments.
 
-@node UNIX commands, Miscellaneous, Arithmetic, Top
+@node Mpeval
+@comment  node-name,  next,  previous,  up
+@section Multiple precision arithmetic
+
+When @code{m4} is compiled with a multiple precision arithmetic library
+(@pxref{Experiments}), a builtin @code{mpeval} is defined.
+
+It is almost identical to @code{eval}, except the calculations are done
+with infinite precision.  Numbers may be of any length.
+
+The @code{:} operator rationally divides two numbers and canonicalizes
+the result.  The @code{/} operator always returns the quotient of the
+division.  To convert a rational value to integral, divide (@code{/}) by
+1.  Some operators such as @code{%}, @code{<<}, @code{>>}, @code{~},
+@code{&}, @code{|} and @code{^} operate only on integers and will
+truncate any rational remainder.  @code{**} assumes that the exponent is
+integral.
+
+
+@node UNIX commands
 @chapter Running UNIX commands
 
 @cindex executing UNIX commands
@@ -2870,7 +3369,7 @@ commands from within @code{m4}.
 * Maketemp::                    Making names for temporary files
 @end menu
 
-@node Syscmd, Esyscmd, UNIX commands, UNIX commands
+@node Syscmd
 @section Executing simple commands
 
 @findex syscmd
@@ -2886,7 +3385,7 @@ which executes @var{shell-command} as a shell command.
 
 The expansion of @code{syscmd} is void, @emph{not} the output from
 @var{shell-command}!  Output or error messages from @var{shell-command}
-are not read by @code{m4}.  @xref{Esyscmd} if you need to process the
+are not read by @code{m4}.  @xref{Esyscmd}, if you need to process the
 command output.
 
 Prior to executing the command, @code{m4} flushes its output buffers.
@@ -2895,7 +3394,7 @@ the same as those of @code{m4}.
 
 The builtin macro @code{syscmd} is recognized only when given arguments.
 
-@node Esyscmd, Sysval, Syscmd, UNIX commands
+@node Esyscmd
 @section Reading the output of commands
 
 @findex esyscmd
@@ -2922,10 +3421,10 @@ Assume you are positioned into the @file{checks} directory of GNU
 @code{m4} distribution, then:
 
 @example
-define(`vice', `esyscmd(grep Vice ../COPYING)')
+define(`vice', `esyscmd(grep Vice ../Makefile)')
 @result{}
 vice
-@result{}  Ty Coon, President of Vice
+@result{}#  Ty Coon, President of Vice
 @result{}
 @end example
 
@@ -2934,7 +3433,7 @@ Note how the expansion of @code{esyscmd} has a trailing newline.
 The builtin macro @code{esyscmd} is recognized only when given
 arguments.
 
-@node Sysval, Maketemp, Esyscmd, UNIX commands
+@node Sysval
 @section Exit codes
 
 @cindex exit code from UNIX commands
@@ -2955,18 +3454,18 @@ which expands to the exit status of the last shell command run with
 @example
 syscmd(`false')
 @result{}
-ifelse(sysval, 0, zero, non-zero)
-@result{}non-zero
+ifelse(sysval, 0, zero, nonzero)
+@result{}nonzero
 syscmd(`true')
 @result{}
 sysval
 @result{}0
 @end example
 
-@node Maketemp,  , Sysval, UNIX commands
+@node Maketemp
 @section Making names for temporary files
 
-@cindex temporary filenames
+@cindex temporary file names
 @cindex files, names of temporary
 @findex maketemp
 Commands specified to @code{syscmd} or @code{esyscmd} might need a
@@ -2983,7 +3482,7 @@ maketemp(@var{template})
 which expands to a name of a non-existent file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
 @code{X}'s are then replaced, usually with something that includes the
-process id of the @code{m4} process, in order to make the filename unique.
+process id of the @code{m4} process, in order to make the file name unique.
 
 @comment ignore
 @example
@@ -3001,7 +3500,7 @@ macro calls might expand to the same name.
 The builtin macro @code{maketemp} is recognized only when given
 arguments.
 
-@node Miscellaneous, Frozen files, UNIX commands, Top
+@node Miscellaneous
 @chapter Miscellaneous builtin macros
 
 This chapter describes various builtins, that do not really belong in
@@ -3010,9 +3509,10 @@ any of the previous chapters.
 @menu
 * Errprint::                    Printing error messages
 * M4exit::                      Exiting from m4
+* Syncoutput::                  Turning on and off sync lines
 @end menu
 
-@node Errprint, M4exit, Miscellaneous, Miscellaneous
+@node Errprint
 @section Printing error messages
 
 @cindex printing error messages
@@ -3059,11 +3559,11 @@ current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `Input error
 ')
-@error{}m4:56.errprint:2: Input error
+@error{}m4:in:1: Input error
 @result{}
 @end example
 
-@node M4exit,  , Errprint, Miscellaneous
+@node M4exit
 @section Exiting from @code{m4}
 
 @cindex exiting from @code{m4}
@@ -3084,7 +3584,7 @@ define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: 57.m4exit: 5: fatal error: This is a BAD one, buster
+@error{}m4: in: 3: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
@@ -3092,7 +3592,26 @@ is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
 (@pxref{M4wrap}) is not reread.
 
-@node Frozen files, Compatibility, Miscellaneous, Top
+@node Syncoutput
+@section Turning sync lines on and off within @code{m4}
+
+@cindex Toggling sync lines within @code{m4}
+@findex syncoutput
+If you need to toggle sync lines on and off while processing macros, or
+to insure that they are off or on, you may do so using
+@code{syncoutput}.
+
+@code{syncoutput(1)}, @code{syncoutput(on)}, and @code{syncoutput(yes)}
+causes @code{m4} to emit sync lines of the form: @code{#line <number>
+["<filename>"]}.
+
+@code{syncoutput(0)}, @code{syncoutput(off)}, and @code{syncoutput(no)}
+turn them off.
+
+All other arguments are ignored as is @code{syncoutput} without
+parenthesis.
+
+@node Frozen files
 @chapter Fast loading of frozen states
 
 @cindex fast loading of frozen files
@@ -3173,6 +3692,14 @@ m4 -R file2.m4f -F file3.m4f file3.m4
 m4 -R file3.m4f file4.m4
 @end example
 
+This could also be done in a simple way, if everything has been prepared
+before:
+
+@comment ignore
+@example
+m4 -F file1.m4f file1.m4 file2.m4 file3.m4 file4.m4
+@end example
+
 Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
 macros is not handled, nor the current setting of @code{changeword}.
@@ -3192,7 +3719,7 @@ It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
 Frozen files are sharable across architectures.  It is safe to write
-a frozen file one one machine and read it on another, given that the
+a frozen file on one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU @code{m4}.
 These are simple (editable) text files, made up of directives,
 each starting with a capital letter and ending with a newline
@@ -3204,7 +3731,9 @@ The directives are:
 
 @table @code
 @item V @var{number} @key{NL}
-Confirms the format of the file.  @var{number} should be 1.
+Confirms the format of the file.  For the version documented here,
+@var{number} should be 2.  It is backwards compatible with the previous
+version though, so version 1 frozen files can be loaded too if necessary.
 
 @item C @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Uses @var{string1} and @var{string2} as the beginning comment and
@@ -3214,9 +3743,32 @@ end comment strings.
 Uses @var{string1} and @var{string2} as the beginning quote and end quote
 strings.
 
+@item M @var{length} @key{NL} @var{string} @key{NL}
+Names a module which will be searched for according to the module search path
+and loaded.  Modules loaded from a frozen file don't add their builtin entries
+to the symbol table.
+
+@item F @var{length} @key{NL} @var{string} @key{ML}
+Defines, through @code{pushdef}, a definition for @var{string}
+expanding to the function whose builtin name is also @var{string}. The builtin
+name is searched for among the intrinsic builtin functions only.
+
 @item F @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Defines, through @code{pushdef}, a definition for @var{string1}
-expanding to the function whose builtin name is @var{string2}.
+expanding to the function whose builtin name is @var{string2}.  With two
+arguments, the builtin name is searched for among the intrinsic builtin
+functions only.
+
+@item F @var{length1} , @var{length2} , @var{length3} @key{NL} @var{string1} @var{string2} @var{string3} @key{NL}
+Defines, through @code{pushdef}, a definition for @var{string1}
+expanding to the function whose builtin name is @var{string2}.  With three
+arguments, the builtin name is searched for amongst the builtin functions
+defined by the module named by @var{string3}.
+
+@item S @var{syntax-code} @var{length} @key{NL} @var{string} @key{NL}
+Defines, through @code{changesyntax}, a syntax category for each of the
+characters in @var{string}.  The @var{syntax-code} must be one of the
+characters described in @ref{Changesyntax}.
 
 @item T @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Defines, though @code{pushdef}, a definition for @var{string1}
@@ -3232,13 +3784,13 @@ at reload time, however this may not be produced from within @code{m4}.
 
 @end table
 
-@node Compatibility, Concept index, Frozen files, Top
+@node Compatibility
 @chapter Compatibility with other versions of @code{m4}
 
 @cindex compatibility
 This chapter describes the differences between this implementation of
 @code{m4}, and the implementation found under UNIX, notably System V,
-Release 3.  
+Release 3.
 
 There are also differences in BSD flavors of @code{m4}.  No attempt
 is made to summarize these here.
@@ -3249,7 +3801,7 @@ is made to summarize these here.
 * Other Incompat::              Other incompatibilities
 @end menu
 
-@node Extensions, Incompatibilities, Compatibility, Compatibility
+@node Extensions
 @section Extensions in GNU @code{m4}
 
 @cindex GNU extensions
@@ -3301,6 +3853,10 @@ accessible through the builtins @code{__file__} and @code{__line__}
 (@pxref{Errprint}).
 
 @item
+The generation of sync lines can be controlled through @code{syncoutput}
+(@pxref{Syncoutput}).
+
+@item
 The format of the output from @code{dumpdef} and macro tracing can be
 controlled with @code{debugmode} (@pxref{Debug Levels}).
 
@@ -3318,7 +3874,7 @@ description of these options.
 Also, the debugging and tracing facilities in GNU @code{m4} are much
 more extensive than in most other versions of @code{m4}.
 
-@node Incompatibilities, Other Incompat, Extensions, Compatibility
+@node Incompatibilities
 @section Facilities in System V @code{m4} not in GNU @code{m4}
 
 The version of @code{m4} from System V contains a few facilities that
@@ -3330,7 +3886,7 @@ System V @code{m4} supports multiple arguments to @code{defn}.  This is
 not implemented in GNU @code{m4}.  Its usefulness is unclear to me.
 @end itemize
 
-@node Other Incompat,  , Incompatibilities, Compatibility
+@node Other Incompat
 @section Other incompatibilities
 
 There are a few other incompatibilities between this implementation of
@@ -3343,7 +3899,7 @@ when text is being diverted.  GNU @code{m4} outputs the sync lines when
 the text is being diverted, and System V @code{m4} when the diverted
 text is being brought back.
 
-The problem is which lines and filenames should be attached to text that
+The problem is which lines and file names should be attached to text that
 is being, or has been, diverted.  System V @code{m4} regards all the
 diverted text as being generated by the source line containing the
 @code{undivert} call, whereas GNU @code{m4} regards the diverted text as
@@ -3376,7 +3932,7 @@ ifelse(defn(`@var{holder}'), `@var{value}', @dots{})
 
 @noindent
 In cases like this one, an interdiction for a macro to hold its own
-name would be a useless limitation.  Of course, this leave more rope
+name would be a useless limitation.  Of course, this leaves more rope
 for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.
@@ -3392,12 +3948,90 @@ the macro @code{__unix__}, otherwise the macro @code{unix}.  Both will
 expand to the empty string.
 @end itemize
 
-@node Concept index, Macro index, Compatibility, Top
+
+@node  Experiments
+@chapter Experimental features in GNU m4
+
+Certain features of GNU @code{m4} are experimental.
+
+Some are only available if activated by an option given to
+@code{configure} at GNU @code{m4} installation time.  The functionality
+might change or even go away in the future.  @emph{Do not rely on it}.
+Please direct your comments about it the same way you would do for bugs.
+
+@section Changesyntax
+
+An experimental feature, which would improve @code{m4} usefulness,
+allows for changing the way the input is parsed (@pxref{Changesyntax}).
+
+No compile time option is needed for @code{changesyntax}.
+
+The implementation does not seem to slow down @code{m4}, more likely the
+contrary.
+
+
+@section Changeword
+
+An experimental feature, which would improve @code{m4} usefulness,
+allows for changing the syntax for what is a @dfn{word} in @code{m4}.
+You should use:
+
+@comment ignore
+@example
+./configure --enable-changeword
+@end example
+
+@noindent
+if you want this feature compiled in.  The current implementation
+slows down @code{m4} considerably and is hardly acceptable.  So, it
+might go away, do not count on it yet.
+
+@section Multiple precision arithmetic
+
+Another experimental feature, which would improve @code{m4} usefulness,
+allows for multiple precision rational arithmetic in @code{eval}.
+You should use:
+
+@comment ignore
+@example
+./configure --with-gmp
+@end example
+
+@noindent
+if you want this feature compiled in.  The current implementation is
+unproven and might go away.  Do not count on it yet.
+
+
+@node Answers
+@chapter Answers
+
+Some of the examples in this manuals are buggy.  Correctly working
+macros are presented here.
+
+The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
+called without arguments to clear all pending diversions.  A macro that
+achieves that as well is:
+
+@comment ignore
+@example
+define(`cleardivert',
+`pushdef(`_num', divnum)divert(-1)ifelse($#, 0,
+  `undivert`'', `undivert($@@)')divert(_num)popdef(`_num')')
+@end example
+
+@noindent
+If called without arguments, it will call undivert without argument,
+otherwise they will be passed to undivert().
+
+
+
+
+@node Concept index
 @unnumbered Concept index
 
 @printindex cp
 
-@node Macro index,  , Concept index, Top
+@node Macro index
 @unnumbered Macro index
 
 References are exclusively to the places where a builtin is introduced

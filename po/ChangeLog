@@ -1,0 +1,26 @@
+1999-10-13  Rene' Seindal  <rene@seindal.dk>
+
+	* cs.po: Czech translation added.
+
+	* sv.po: Updated Swedish translation.
+
+	* ru.po: Updated Russian translation.
+
+	* pl.po: Updated Polish translation.
+
+	* el.po: Greek translation added.
+
+1998-10-04  Rene' Seindal  <rene@seindal.dk>
+
+	* pl.po: Polish translation added.
+
+	* POTFILES.in: src/module.c added.
+
+1998-05-23  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* nl.po: Dutch translation by Erick Branderhorst.
+
+	* fr.po: French translation by Erick Branderhorst, based on the
+	translations by Franc,ois Pinard in fr.msg and m4.cod.
+
+

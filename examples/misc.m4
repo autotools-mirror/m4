@@ -1,9 +1,8 @@
 divert(-1)
-define(`HOST', `vale')
+define(`USER', `root')
 define(`TMP', maketemp(`/tmp/hejXXXXXX'))
-syscmd(`ypmatch' HOST `hosts | awk "{print \$1}"'  > TMP)
-define(`IP', include(TMP))
+syscmd(`grep "^'USER`:" /etc/passwd | awk -F: "{print \$3}"'  > TMP)
+define(`UID', include(TMP))
 syscmd(`rm -f' TMP)
 divert
-
-IP
+UID

@@ -1,14 +1,24 @@
 divert(-1)
 # foreach(x, (item_1, item_2, ..., item_n), stmt)
-define(`foreach', `pushdef(`$1', `')_foreach(`$1', `$2', `$3')popdef(`$1')')
-define(`_arg1', `$1')
+define(`foreach', `pushdef(`$1', `')_foreach($@)popdef(`$1')')
+define(`_arg1', ``$1'')
 define(`_foreach', 
-	`ifelse(`$2', `()', ,
-		`define(`$1', _arg1$2)$3`'_foreach(`$1', (shift$2), `$3')')')
+       `ifelse($2, `()', ,
+               `define(`$1', `_arg1$2')$3`'_foreach(`$1', `(shift$2)', `$3')')')
+
 # traceon(`define', `foreach', `_foreach', `ifelse')
+
+define(a, 1)
+define(b, 2)
+define(c, 3)
 divert
 foreach(`x', `(foo, bar, foobar)', `Word was: x
 ')
+
+# Quote torture from Akim Demaille <akim@epita.fr>
+foreach(`x', `(`a', `(b', `c)')', `Word was: x
+')
+
 # Something more complex, from Pierre Gaumond <gaumondp@ere.umontreal.ca>.
 define(`case', `  $1)
     $2=" -$1";;

@@ -1,9 +1,137 @@
-GNU m4 NEWS - User visible changes.
-Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+GNU m4 NEWS - History of user-visible changes.             -*-indented-text-*-
+Copyright (C) 1992, 1993, 1994, 1998, 2000 Free Software Foundation, Inc.
 
+Version beta 1.4p - August 2000
+
+* The names of all currently loaded modules are held in the macro
+  __m4_modules__.
+ 
+* The module code has been rewritten to use libltdl, the libtool dynamic
+  loader, which means GNU m4 can now load (and unload) modules just about
+  anywhere which it can be built.  This includes obscure hosts such as
+  cygwin and BeOS, and also on hosts which do not have shared libraries,
+  through preloading (see libtool manual) and GNU dld.
+
+* New builtin `load' to dynamically load modules which can define new
+  builtins and user macros.
+
+* New builtin `unload' to remove loaded modules (and the builtins and user
+  macros they define) from the running m4 interpreter.
+
+* Modules can now be built without the m4 source being available using the
+  installed m4module.h header file (and some other headers that it includes
+  for you), and the installed libm4.la libtool library.  All symbols
+  exported from libm4.la have a prefix of `m4_' or `M4_'.  See the modules
+  directory for examples of usage.
+
+* The macro `__modules__' contains a list of all loaded module names.
+
+* A new V2 format for frozen files that saves module and syntax information.
+ 
+Version beta 1.4o - January 2000, by Rene' Seindal
+
+* Modules can be loaded from the command line with --load-module
+
+* Modules now use libtool's wrapper libltdl.
+
+* Bug fixes.
+
+Version beta 1.4n - November 1998, by Rene' Seindal
+
+* The module code has been reorganised yet again, and now compiles
+  correctly on GNU/Linux, HPUX 9 and 10, SunOS 5 and Solaris 5.
+
+* When configured --with-gmp a new builtin `mpeval' is now defined.  The
+  builtin `eval' retains its normal behaviour.
+
+* m4 --version also shows which options were used for compilation, such as:
+  "GNU m4 1.4n (options: modules gmp changeword)"
+
+* New option --import-environment defines all environment variables as
+  macros.  This is done before -D and -U are handled, so the macros can be
+  changed through these options.
+
+* Error messages now always print program name before input file name as
+  specified by GNU coding standards.  Reported by Akim Demaille
+  <demaille@inf.enst.fr>.
+
+* Bug fixed: "undivert(0)" could cause m4 to read standard output.  A call
+  of "undivert(0)" is now silently ignored.
+
+* Bug fixed: when compiling --with-included-gettext, <libintl.h> wasn't
+  found in intl/ directory.  Reported by Andrew Bettison
+  <andrewb@zip.com.au>.
+
+Version beta 1.4m - November 1998, by Rene' Seindal
+
+* Using libtool for compiling modules and for linking main app.
+
+* Reorganised the dynamic module code to encapsulate system dependencies
+  better.  The code for HPUX shl_load() still needs testing and debugging.
+  A dld interface is also missing.  Any volunteers?
+
+* The files from the GNU m4 web-site is now in examples/WWW as a more
+  complete example of what GNU m4 can do.
+
+Version beta 1.4l - November 1998, by Rene' Seindal
+
+* GNU m4 now has an escape syntax category.  If a character is marked as
+  an escape, words are only recognised as macros if preceded by an escape
+  character.  It is a bit like -P, but dynamic: it can be turned on and
+  off.  The GNU m4 web-site on http://www.seindal.dk/rene/gnu/ is
+  maintained with this feature - the m4 source is available on the site.
+
+* The module interface is improved, thanks to "Brian J. Fox"
+  <bfox@datawave.net>, who have contributed some code from Meta-HTML.  The
+  modules now build automatically and installs properly, by default in
+  /usr/local/libexec/m4.  There is a preliminary, untested support for
+  shl_load().
+
+* There is now a __m4_version__ macro that expands to the current version
+  number.
+
+Version beta 1.4k - November 1998, by Erick Branderhorst and Rene' Seindal
+
+* GNU m4 now uses gettext to support internationalization.
+
+* GNU m4 now uses automake to control Makefile.in generation.  This
+  should make it more consistent with the GNU standards.
+
+* GNU m4 will use the gmp library for multiple precision integral and
+  rational arithmetic in `eval' if configured with `--with-gmp'.  If
+  configured without `--with-gmp' or if gmp is not available, and the type
+  `long long int' is, GNU m4 will use that for `eval' arithmetic.
+
+* GNU m4 now parses the input according to a syntax table, that can be
+  modified through the new builtin `changesyntax'.  It is a generalisation
+  of the existing builtins `changecom' and `changequote'.  The changes are
+  completely backwards compatible (except for the existence of
+  `changesyntax').
+
+* Sync lines can be turned on and off with the `syncoutput' builtin.  The
+  builtin `syncoutput' is a GNU extension.
+
+* New experimental feature: dynamically loadable modules.  New builtin
+  `loadmodules' loads shared libraries, that can define new builtin
+  macros, ie, new macros can be written in C.  Depends on the dlopen()
+  interface, and is currently only tested on Linux.  Enabled at configure
+  time with `--with-modules'.  Documentation is in src/module.c and
+  module/README. 
+
+* Implement a GNU message catalog for French (Franc,ois Pinard).
+
+* Filenames found through path searches are now correctly reflected in
+  error and debug messages and through the `__file__' macro.
+
+Bugs fixed
+
+* All 8-bit characters can now be used for quotes.
+
+
 Version 1.4 - October 1994, by Franc,ois Pinard
 
 (No user visible changes)
+
 
 Version 1.3 - September 1994, by Franc,ois Pinard
 
@@ -16,6 +144,7 @@ at all if all diversions taken altogether do not use more than 512K.
 
 * Frozen state files may be produced with the `--freeze-state' (-F)
 option and later brought back through the `--reload-state' (-R) option.
+
 
 Version 1.2 - July 1994, by Franc,ois Pinard
 
@@ -43,6 +172,7 @@ configure time to get these things.  Do *not* depend on them yet.
 
 * Various bugs have been corrected, m4 should be more portable.  See the
 ChangeLog for details.
+
 
 Version 1.1 - November 1993, by Franc,ois Pinard
 

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1998 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,278 +16,322 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <m4.h>
-#include <builtin.h>
-
 #include <pwd.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef TM_IN_SYS_TIME
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 #include <sys/utsname.h>
 #include <sys/types.h>
 
-DECLARE(m4_getcwd);
-DECLARE(m4_getlogin);
-DECLARE(m4_getpid);
-DECLARE(m4_getppid);
-DECLARE(m4_getuid);
-DECLARE(m4_getpwnam);
-DECLARE(m4_getpwuid);
-DECLARE(m4_hostname);
-DECLARE(m4_rand);
-DECLARE(m4_srand);
-DECLARE(m4_getenv);
-DECLARE(m4_setenv);
-DECLARE(m4_unsetenv);
-DECLARE(m4_uname);
+#include <m4module.h>
 
-#undef DECLARE
+#define m4_builtin_table	stdlib_LTX_m4_builtin_table
 
-builtin m4_macro_table[] =
+/*		function	macros	blind */
+#define builtin_functions			\
+	BUILTIN (getcwd,	FALSE,	FALSE)	\
+	BUILTIN (getenv,	FALSE,	TRUE)	\
+	BUILTIN (getlogin,	FALSE,	FALSE)	\
+	BUILTIN (getpid,	FALSE,	FALSE)	\
+	BUILTIN (getppid,	FALSE,	FALSE)	\
+	BUILTIN (getuid,	FALSE,	FALSE)	\
+	BUILTIN (getpwnam,	FALSE,	TRUE)	\
+	BUILTIN (getpwuid,	FALSE,	TRUE)	\
+	BUILTIN (hostname,	FALSE,	FALSE)	\
+	BUILTIN (rand,		FALSE,	FALSE)	\
+	BUILTIN (srand,		FALSE,	FALSE)	\
+	BUILTIN (setenv,	FALSE,	TRUE)	\
+	BUILTIN (unsetenv,	FALSE,	TRUE)	\
+	BUILTIN (uname,		FALSE,	FALSE)
+
+#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler);
+  builtin_functions
+#undef BUILTIN
+
+m4_builtin m4_builtin_table[] =
 {
-  /* name		GNUext	macros	blind	function */
-  { "getcwd",		TRUE,	FALSE,	FALSE,	m4_getcwd },
-  { "getenv",		TRUE,	FALSE,	TRUE,	m4_getenv },
-  { "setenv",		TRUE,	FALSE,	TRUE,	m4_setenv },
-  { "unsetenv",		TRUE,	FALSE,	TRUE,	m4_unsetenv },
-  { "getlogin",		TRUE,	FALSE,	FALSE,	m4_getlogin },
-  { "getpid",		TRUE,	FALSE,	FALSE,	m4_getpid },
-  { "getppid",		TRUE,	FALSE,	FALSE,	m4_getppid },
-  { "getpwnam",		TRUE,	FALSE,	TRUE,	m4_getpwnam },
-  { "getpwuid",		TRUE,	FALSE,	TRUE,	m4_getpwuid },
-  { "getuid",		TRUE,	FALSE,	FALSE,	m4_getuid },
-  { "hostname",		TRUE,	FALSE,	FALSE,	m4_hostname },
-  { "rand",		TRUE,	FALSE,	FALSE,	m4_rand },
-  { "srand",		TRUE,	FALSE,	FALSE,	m4_srand },
-  { "uname",		TRUE,	FALSE,	FALSE,	m4_uname },
-  { 0,			FALSE,	FALSE,	FALSE,	0 },
+#define BUILTIN(handler, macros, blind)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind },
+
+  builtin_functions
+#undef BUILTIN
+
+  { 0, 0, FALSE, FALSE },
 };
 
 
-
-static void
-m4_getcwd (struct obstack *obs, int argc, token_data **argv)
+/*---------.
+| getcwd() |
+`---------*/
+M4BUILTIN_HANDLER (getcwd)
 {
   char buf[1024];
   char *bp;
   int l;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
   bp = getcwd(buf, sizeof buf);
 
   if (bp != NULL)		/* in case of error return null string */
-    shipout_string (obs, buf, 0 , FALSE);
+    m4_shipout_string (obs, buf, 0 , FALSE);
 }
 
-static void
-m4_getenv (struct obstack *obs, int argc, token_data **argv)
+/*-------------.
+| getenv(NAME) |
+`-------------*/
+M4BUILTIN_HANDLER (getenv)
 {
   char *env;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  env = getenv(ARG(1));
+  env = getenv((char*)M4ARG(1));
 
   if (env != NULL)
-    shipout_string (obs, env, 0, FALSE);
+    m4_shipout_string (obs, env, 0, FALSE);
 }
 
-static void
-m4_setenv (struct obstack *obs, int argc, token_data **argv)
+/*---------------------------------.
+| setenv(NAME, VALUE, [OVERWRITE]) |
+`---------------------------------*/
+M4BUILTIN_HANDLER (setenv)
 {
   char *env;
   int overwrite = 1;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (m4_bad_argc (argv[0], argc, 3, 4))
     return;
 
   if (argc == 4)
-    if (!numeric_arg(argv[0], ARG(3), &overwrite))
+    if (!m4_numeric_arg(argv[0], (char*)M4ARG(3), &overwrite))
       return;
 
-  setenv(ARG(1), ARG(2), overwrite);
+#ifdef HAVE_SETENV
+  setenv((char*)M4ARG(1), (char*)M4ARG(2), overwrite);
+#else
+#ifdef HAVE_PUTENV
+  if (!overwrite && getenv ((char*)M4ARG(1)) != NULL)
+    return;
+
+  obstack_grow (obs, (char*)M4ARG(1), strlen ((char*)M4ARG(1)));
+  obstack_1grow (obs, '=');
+  obstack_grow (obs, (char*)M4ARG(2), strlen ((char*)M4ARG(2)));
+  obstack_1grow (obs, '\0');
+
+  env = obstack_finish (obs);
+  putenv (env);
+#endif /* HAVE_PUTENV */
+#endif /* HAVE_SETENV */
 }
 
-static void
-m4_unsetenv (struct obstack *obs, int argc, token_data **argv)
+/*---------------.
+| unsetenv(NAME) |
+`---------------*/
+M4BUILTIN_HANDLER (unsetenv)
 {
   char *env;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  unsetenv(ARG(1));
+#ifdef HAVE_UNSETENV
+  unsetenv ((char*)M4ARG(1));
+#endif /* HAVE_UNSETENV */
 }
 
-static void
-m4_getlogin (struct obstack *obs, int argc, token_data **argv)
+/*-----------.
+| getlogin() |
+`-----------*/
+M4BUILTIN_HANDLER (getlogin)
 {
   char *login;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  login =  getlogin();
+  login = getlogin ();
 
   if (login != NULL)
-    shipout_string (obs, login, 0, FALSE);
+    m4_shipout_string (obs, login, 0, FALSE);
 }
 
-static void
-m4_getpid (struct obstack *obs, int argc, token_data **argv)
+/*---------.
+| getpid() |
+`---------*/
+M4BUILTIN_HANDLER (getpid)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  shipout_int(obs, getpid());
+  m4_shipout_int(obs, getpid());
 }
 
-static void
-m4_getppid (struct obstack *obs, int argc, token_data **argv)
+/*----------.
+| getppid() |
+`----------*/
+M4BUILTIN_HANDLER (getppid)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  shipout_int(obs, getppid());
+  m4_shipout_int(obs, getppid());
 }
 
-static void
-m4_getpwnam (struct obstack *obs, int argc, token_data **argv)
+/*---------------.
+| getpwnam(NAME) |
+`---------------*/
+M4BUILTIN_HANDLER (getpwnam)
 {
   struct passwd *pw;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  pw = getpwnam(ARG(1));
+  pw = getpwnam((char*)M4ARG(1));
 
   if (pw != NULL)
     {
-      shipout_string (obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_name, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_int(obs, pw->pw_uid);
+      m4_shipout_int(obs, pw->pw_uid);
       obstack_1grow (obs, ',');
-      shipout_int(obs, pw->pw_gid);
+      m4_shipout_int(obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_dir, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_shell, 0, TRUE);
     }
 }
 
-static void
-m4_getpwuid (struct obstack *obs, int argc, token_data **argv)
+/*--------------.
+| getpwuid(UID) |
+`--------------*/
+M4BUILTIN_HANDLER (getpwuid)
 {
   struct passwd *pw;
   int uid;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg(argv[0], ARG(1), &uid))
+  if (!m4_numeric_arg(argv[0], (char*)M4ARG(1), &uid))
     return;
 
   pw = getpwuid(uid);
 
   if (pw != NULL)
     {
-      shipout_string (obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_name, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_int(obs, pw->pw_uid);
+      m4_shipout_int(obs, pw->pw_uid);
       obstack_1grow (obs, ',');
-      shipout_int(obs, pw->pw_gid);
+      m4_shipout_int(obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_dir, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (obs, pw->pw_shell, 0, TRUE);
     }
 }
 
-static void
-m4_hostname (struct obstack *obs, int argc, token_data **argv)
+/*-----------.
+| hostname() |
+`-----------*/
+M4BUILTIN_HANDLER (hostname)
 {
   char buf[1024];
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
   if (gethostname(buf, sizeof buf) < 0)
     return;
 
-  shipout_string (obs, buf, 0, FALSE);
+  m4_shipout_string (obs, buf, 0, FALSE);
 }
 
-static void
-m4_rand (struct obstack *obs, int argc, token_data **argv)
+/*-------.
+| rand() |
+`-------*/
+M4BUILTIN_HANDLER (rand)
 {
   int i;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  shipout_int(obs, rand());
+  m4_shipout_int(obs, rand());
 }
 
-static void
-m4_srand (struct obstack *obs, int argc, token_data **argv)
+/*--------.
+| srand() |
+`--------*/
+M4BUILTIN_HANDLER (srand)
 {
   char buf[64];
   int seed;
 
-  if (bad_argc (argv[0], argc, 1, 2))
+  if (m4_bad_argc (argv[0], argc, 1, 2))
     return;
 
   if (argc == 1)
     seed = time(0L) * getpid();
   else
     {
-      if (!numeric_arg(argv[0], ARG(1), &seed))
+      if (!m4_numeric_arg(argv[0], (char*)M4ARG(1), &seed))
 	return;
     }
 
   srand(seed);
 }
 
-static void
-m4_uname (struct obstack *obs, int argc, token_data **argv)
+/*--------.
+| uname() |
+`--------*/
+M4BUILTIN_HANDLER (uname)
 {
   struct utsname ut;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
   if (uname(&ut) == 0)
     {
-      shipout_string (obs, ut.sysname, 0, TRUE);
+      m4_shipout_string (obs, ut.sysname, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.nodename, 0, TRUE);
+      m4_shipout_string (obs, ut.nodename, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.release, 0, TRUE);
+      m4_shipout_string (obs, ut.release, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.machine, 0, TRUE);
+      m4_shipout_string (obs, ut.version, 0, TRUE);
       obstack_1grow (obs, ',');
-      shipout_string (obs, ut.domainname, 0, TRUE);
+      m4_shipout_string (obs, ut.machine, 0, TRUE);
     }
 }
 
-static void
-m4_getuid (struct obstack *obs, int argc, token_data **argv)
+/*---------.
+| getuid() |
+`---------*/
+M4BUILTIN_HANDLER (getuid)
 {
   int i;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
-  shipout_int(obs, getuid());
+  m4_shipout_int(obs, getuid());
 }

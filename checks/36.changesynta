@@ -1,5 +1,0 @@
-dnl ../doc/m4.texinfo:2121: Origin of test
-changesyntax(`({<', `)}>', `,;:', `O(,)')
-dnl @result{}
-eval{2**4-1; 2 : 8>
-dnl @result{}00001111

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2000-01-10 05:27+0100\n"
+"POT-Creation-Date: 2000-07-28 00:26+0100\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -13,255 +13,236 @@ msgstr ""
 "Content-Type: text/plain; charset=iso-8859-7\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: lib/getopt.c:677
+#: src/getopt.c:677
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
 msgstr ""
 
-#: lib/getopt.c:702
+#: src/getopt.c:702
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/getopt.c:707
+#: src/getopt.c:707
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/getopt.c:725 lib/getopt.c:898
+#: src/getopt.c:725 src/getopt.c:898
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
 msgstr ""
 
 #. --option
-#: lib/getopt.c:754
+#: src/getopt.c:754
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
 msgstr ""
 
 #. +option or -option
-#: lib/getopt.c:758
+#: src/getopt.c:758
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
 msgstr ""
 
 #. 1003.2 specifies the format of this message.
-#: lib/getopt.c:784
+#: src/getopt.c:784
 #, c-format
 msgid "%s: illegal option -- %c\n"
 msgstr ""
 
-#: lib/getopt.c:787
+#: src/getopt.c:787
 #, c-format
 msgid "%s: invalid option -- %c\n"
 msgstr ""
 
 #. 1003.2 specifies the format of this message.
-#: lib/getopt.c:817 lib/getopt.c:947
+#: src/getopt.c:817 src/getopt.c:947
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
 msgstr ""
 
-#: lib/getopt.c:864
+#: src/getopt.c:864
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
 msgstr ""
 
-#: lib/getopt.c:882
+#: src/getopt.c:882
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/obstack.c:471
+#: m4/obstack.c:473
 msgid "memory exhausted"
 msgstr ""
 
-#: lib/regex.c:1019
+#: m4/regex.c:1021
 msgid "Success"
 msgstr ""
 
-#: lib/regex.c:1022
+#: m4/regex.c:1024
 msgid "No match"
 msgstr ""
 
-#: lib/regex.c:1025
+#: m4/regex.c:1027
 #, fuzzy
 msgid "Invalid regular expression"
 msgstr "Λάθος κανονική έκφραση `%s': %s"
 
-#: lib/regex.c:1028
+#: m4/regex.c:1030
 msgid "Invalid collation character"
 msgstr ""
 
-#: lib/regex.c:1031
+#: m4/regex.c:1033
 msgid "Invalid character class name"
 msgstr ""
 
-#: lib/regex.c:1034
+#: m4/regex.c:1036
 msgid "Trailing backslash"
 msgstr ""
 
-#: lib/regex.c:1037
+#: m4/regex.c:1039
 msgid "Invalid back reference"
 msgstr ""
 
-#: lib/regex.c:1040
+#: m4/regex.c:1042
 msgid "Unmatched [ or [^"
 msgstr ""
 
-#: lib/regex.c:1043
+#: m4/regex.c:1045
 msgid "Unmatched ( or \\("
 msgstr ""
 
-#: lib/regex.c:1046
+#: m4/regex.c:1048
 msgid "Unmatched \\{"
 msgstr ""
 
-#: lib/regex.c:1049
+#: m4/regex.c:1051
 msgid "Invalid content of \\{\\}"
 msgstr ""
 
-#: lib/regex.c:1052
+#: m4/regex.c:1054
 msgid "Invalid range end"
 msgstr ""
 
-#: lib/regex.c:1055 lib/xmalloc.c:82
+#: m4/regex.c:1057 m4/xmalloc.c:82
 msgid "Memory exhausted"
 msgstr ""
 
-#: lib/regex.c:1058
+#: m4/regex.c:1060
 #, fuzzy
 msgid "Invalid preceding regular expression"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: lib/regex.c:1061
+#: m4/regex.c:1063
 #, fuzzy
 msgid "Premature end of regular expression"
 msgstr "Πρόωρο τέλος παγωμένου αρχείου"
 
-#: lib/regex.c:1064
+#: m4/regex.c:1066
 #, fuzzy
 msgid "Regular expression too big"
 msgstr "Λάθος κανονική έκφραση `%s': %s"
 
-#: lib/regex.c:1067
+#: m4/regex.c:1069
 msgid "Unmatched ) or \\)"
 msgstr ""
 
-#: lib/regex.c:5564
+#: m4/regex.c:5566
 #, fuzzy
 msgid "No previous regular expression"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: src/builtin.c:349
-#, c-format
-msgid "Warning: Too few arguments to built-in `%s'"
-msgstr "Προειδοποίηση: Πολύ λίγα ορίσματα στο εσωδομημένο `%s'"
-
-#: src/builtin.c:355
-#, c-format
-msgid "Warning: Excess arguments to built-in `%s' ignored"
-msgstr "Προειδοποίηση: Επιπλέον ορίσματα στο εσωδομημένο `%s' αγνοήθηκαν"
-
-#: src/builtin.c:383
-#, c-format
-msgid "Non-numeric argument to built-in `%s'"
-msgstr "Μη-αρθμητικό όρισμα στο εσωδομημένο `%s'"
-
-#: src/builtin.c:494
-msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
+#: src/builtin.c:487
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο define_macro ()"
 
-#: src/builtin.c:681 src/builtin.c:780 src/builtin.c:1423 src/builtin.c:1447
+#: src/builtin.c:696 src/builtin.c:797 src/builtin.c:1348 src/builtin.c:1371
 #, c-format
 msgid "Undefined name %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: src/builtin.c:721
+#: src/builtin.c:738 src/freeze.c:212
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Εσωδομημένο δε βρέθηκε στο πίνακα εσωδομημένων!"
 
-#: src/builtin.c:729
+#: src/builtin.c:746
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο m4_dumpdef ()"
 
-#: src/builtin.c:804
+#: src/builtin.c:820
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: src/builtin.c:842
+#: src/builtin.c:857
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος συμβόλου στο m4_defn ()"
 
-#: src/builtin.c:908
+#: src/builtin.c:920
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Αδυναμία ανοίγματος σωλήνωσης στην εντολή `%s'"
 
-#: src/builtin.c:948
+#: src/builtin.c:959
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Η βάση στην αποτίμηση είναι εκτός ορίου (βάση = %d)"
 
-#: src/builtin.c:957
+#: src/builtin.c:968
 msgid "Negative width to eval"
 msgstr "Αρνητικό πλάτος στην αποτίμηση"
 
-#: src/builtin.c:1063
+#: src/builtin.c:1067
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Μη αριθμητικό όρισμα στο %s"
 
-#: src/builtin.c:1075
+#: src/builtin.c:1079
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Αδυναμία επαναφοράς του %s"
 
-#: src/builtin.c:1223
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Μη ορισμένος κώδικας σύνταξης %c"
-
-#: src/builtin.c:1274 src/freeze.c:211
+#: src/builtin.c:1208 src/freeze.c:391
 #, c-format
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"
 
-#: src/builtin.c:1483
+#: src/builtin.c:1406
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Κατάσταση αποσφαλμάτωσης: λάθος σημαίες αποσφαλμάτωσης: `%s'"
 
-#: src/builtin.c:1519
+#: src/builtin.c:1441
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Αδυναμία ρύθμισης του αρχείου σφαλμάτων: %s"
 
-#: src/builtin.c:1740
+#: src/builtin.c:1657
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 "ΠΡΟΕΙΔΟΠΟΙΗΣΗ: Το \\0 θα εξαφανιστεί, κάνετε χρήση του \\& αντίθετα στις "
 "αντικαταστάσεις"
 
-#: src/builtin.c:1801 src/builtin.c:1861 src/input.c:1014
+#: src/builtin.c:1717 src/builtin.c:1776 src/input.c:1051
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Λάθος κανονική έκφραση `%s': %s"
 
-#: src/builtin.c:1812 src/builtin.c:1885
+#: src/builtin.c:1728 src/builtin.c:1800
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Σφάλμα στο ταίριασμα στην κανονική έκφραση `%s'"
 
-#: src/debug.c:380
+#: src/debug.c:382
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Εσωδομημένο δεν βρέθηκε στο πίνακα εσωδομημένων! "
 "(trace_pre ())"
 
-#: src/debug.c:388
+#: src/debug.c:390
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου (trace_pre ())"
 
@@ -311,86 +292,93 @@ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής ολίσθησης στο shift_term ()"
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τελεστής στο mult_term ()"
 
-#: src/freeze.c:119
-msgid "INTERNAL ERROR: Built-in not found in builtin table!"
-msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Εσωδομημένο δε βρέθηκε στο πίνακα εσωδομημένων!"
-
-#: src/freeze.c:132
+#: src/freeze.c:247
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο freeze_one_symbol ()"
 
-#: src/freeze.c:163
+#: src/freeze.c:278
 msgid "Expecting line feed in frozen file"
 msgstr "Αναμενόταν `line feed' στο παγωμένο αρχείο"
 
-#: src/freeze.c:165
+#: src/freeze.c:280
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Αναμενόταν χαρακτήρας `%c' στο παγωμένο αρχείο"
 
-#: src/freeze.c:222
+#. 1 argument 'F' operations are invalid for format version 1
+#: src/freeze.c:404 src/freeze.c:443 src/freeze.c:460 src/freeze.c:515
+#: src/freeze.c:541
 msgid "Ill-formated frozen file"
 msgstr "Κακό-μορφοποιημένο παγωμένο αρχείο"
 
-#: src/freeze.c:277 src/freeze.c:293
-msgid "Premature end of frozen file"
-msgstr "Πρόωρο τέλος παγωμένου αρχείου"
-
-#: src/freeze.c:327
+#: src/freeze.c:499
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "το `%s' από παγωμένο αρχείο δε βρέθηκε στον πίνακα εσωδομημένων"
 
-#: src/input.c:318
+#: src/freeze.c:532
+msgid "Module support not compiled in"
+msgstr ""
+
+#: src/freeze.c:561
+msgid "Premature end of frozen file"
+msgstr "Πρόωρο τέλος παγωμένου αρχείου"
+
+#: src/input.c:310
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Η είσοδος επαναφέρθηκε στο %s, γραμμή %d"
 
-#: src/input.c:346
+#: src/input.c:338
 #, c-format
 msgid "Input read from %s"
 msgstr "Η είσοδος αναγνώστηκε από το %s"
 
-#: src/input.c:506
+#: src/input.c:498
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αναδρομικό push_string!"
 
-#: src/input.c:623
+#: src/input.c:615
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Κακή κλήση στο init_macro_token ()"
 
-#: src/input.c:663
+#: src/input.c:655
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο next_char ()"
 
-#: src/input.c:700
+#: src/input.c:692
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αλλοίωση στοίβας εισόδου στο peek_input ()"
 
-#: src/input.c:805
+#: src/input.c:795
 msgid "NONE"
 msgstr "ΚΑΝΕΝΑ"
 
-#: src/input.c:1199 src/input.c:1226
+#: src/input.c:1015
+#, c-format
+msgid "Undefined syntax code %c"
+msgstr "Μη ορισμένος κώδικας σύνταξης %c"
+
+#: src/input.c:1236 src/input.c:1263
 msgid "ERROR: EOF in string"
 msgstr "ΣΦΑΛΜΑ: EOF στο αλφαριθμητικό"
 
-#: src/m4.c:119
+#: src/m4.c:79
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "ΣΦΑΛΜΑ: Υπερχείληση στοίβας. (Αναδρομή απείρου βάθους;)"
 
-#: src/m4.c:146
+#: src/m4.c:94
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Δοκιμάστε `%s --help' για περισσότερη βοήθεια.\n"
 
-#: src/m4.c:150
+#: src/m4.c:98
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Χρήση: %s [ΕΠΙΛΟΓΗ]... [ΑΡΧΕΙΟ]...\n"
 
-#: src/m4.c:151
+#: src/m4.c:99
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -418,21 +406,21 @@ msgstr ""
 "  -P, --prefix-builtins        επιβολή προθέματος `m4_' σε όλα τα "
 "εσωδομημένα\n"
 
-#: src/m4.c:164
+#: src/m4.c:112
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "   -W --word-regexp=ΚΑΝΕΚΦ     χρήση ΚΑΝονικής ΈΚΦρασης στο συντακτικό της "
 "μακροεντολής\n"
 
-#: src/m4.c:169
+#: src/m4.c:117
 msgid ""
 "\n"
 "Dynamic loading features:\n"
-"  -m, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
-"  -M, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+"  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/m4.c:176
+#: src/m4.c:124
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -450,7 +438,7 @@ msgstr ""
 "  -s, --synclines              δημιουργία γραμμών `#line ΑΡΙΘΜΟΣ "
 "\"ΑΡΧΕΙΟ\"'\n"
 
-#: src/m4.c:184
+#: src/m4.c:132
 msgid ""
 "\n"
 "Limits control:\n"
@@ -464,7 +452,7 @@ msgstr ""
 "  -H, --hashsize=ΠΡΩΤΟΣ        ορισμός μεγέθους πίνακα αναζήτησης συμβόλου\n"
 "  -L, --nesting-limit=ΑΡΙΘΜΟΣ  αλλαγή τεχνητού ορίου φωλιασμών\n"
 
-#: src/m4.c:191
+#: src/m4.c:139
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -478,7 +466,7 @@ msgstr ""
 "  -R, --reload-state=ARXEIO    φόρτωμα ξανά παγωμένης κατάστασης από ΑΡΧΕΙΟ "
 "στην εκκίνηση\n"
 
-#: src/m4.c:197
+#: src/m4.c:145
 msgid ""
 "\n"
 "Debugging:\n"
@@ -496,7 +484,7 @@ msgstr ""
 "  -o, --error-output=ΑΡΧΕΙΟ    επανακατεύθυνση εξόδου εκσφαλμάτωσης και "
 "ανίχνευσης\n"
 
-#: src/m4.c:205
+#: src/m4.c:153
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -528,7 +516,7 @@ msgstr ""
 "  i   εμφάνιση αλλαγών στα αρχεία εισόδου\n"
 "  V   συντομογραφία για όλες τις παραπάνω σημαίες\n"
 
-#: src/m4.c:220
+#: src/m4.c:168
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -537,7 +525,7 @@ msgstr ""
 "Χωρίς ΑΡΧΕΙΟ, ή όταν το αρχείο είναι το -, ανάγνωση από την κανονική "
 "είσοδο.\n"
 
-#: src/m4.c:225
+#: src/m4.c:173
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -545,26 +533,26 @@ msgstr ""
 "\n"
 "Αναφέρατε σφάλματα στο <bug-m4@gnu.org>.\n"
 
-#: src/m4.c:414
-#, c-format
-msgid "Bad debug flags: `%s'"
-msgstr "Λάθος σημαίες εκσφαλμάτωσης: `%s'"
-
-#: src/m4.c:436
+#: src/m4.c:348
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/m4.c:440
+#: src/m4.c:352
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/m4.c:460
+#: src/m4.c:384
+#, c-format
+msgid "Bad debug flags: `%s'"
+msgstr "Λάθος σημαίες εκσφαλμάτωσης: `%s'"
+
+#: src/m4.c:413
 msgid " (options:"
 msgstr " (επιλογές:"
 
-#: src/m4.c:542
+#: src/m4.c:507
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κωδικός στα αναφερόμενα ορίσματα"
 
@@ -591,40 +579,50 @@ msgstr ""
 "ΣΦΑΛΜΑ: Το όριο αναδρομής %d ξεπεράστηκε, κάντε χρήση του -L<N> για να το "
 "αλλάξετε"
 
-#: src/module.c:123
+#: src/module.c:230
 #, fuzzy, c-format
 msgid "ERROR: failed to initialise modules: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
 
-#: src/module.c:221
+#: src/module.c:358
 #, fuzzy, c-format
 msgid "ERROR: cannot find module: `%s'"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: src/module.c:224
+#: src/module.c:361
 #, fuzzy, c-format
 msgid "ERROR: cannot find module: `%s': %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
 
-#: src/module.c:274
-#, fuzzy
-msgid "ERROR: cannot close modules"
+#: src/module.c:393
+#, fuzzy, c-format
+msgid "ERROR: cannot close module: %s is not loaded."
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: src/module.c:277
+#: src/module.c:412
 #, fuzzy, c-format
-msgid "ERROR: cannot cannot close modules: %s"
-msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
+msgid "ERROR: cannot unload module builtins: `%s'"
+msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: src/module.c:284
+#: src/module.c:435 src/module.c:514
 #, fuzzy, c-format
 msgid "ERROR: cannot close module: `%s'"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: src/module.c:288
+#: src/module.c:438 src/module.c:518
 #, fuzzy, c-format
-msgid "ERROR: cannot cannot close module: `%s': %s"
-msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
+msgid "ERROR: cannot close module: `%s': %s"
+msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
+
+#: src/module.c:504
+#, fuzzy
+msgid "ERROR: cannot close modules"
+msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
+
+#: src/module.c:507
+#, fuzzy, c-format
+msgid "ERROR: cannot close modules: %s"
+msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
 #: src/output.c:262
 msgid "ERROR: Cannot create temporary file for diversion"
@@ -657,11 +655,11 @@ msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:175
+#: src/stackovf.c:174
 msgid "VMEM limit exceeded?\n"
 msgstr "Το όριο της εικονική μνήμης εξαντλήθηκε;\n"
 
-#: src/stackovf.c:197
+#: src/stackovf.c:196
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -670,7 +668,7 @@ msgstr ""
 "στοίβας\n"
 "είτε υπάρχει σφάλμα προγράμματος στο "
 
-#: src/stackovf.c:202
+#: src/stackovf.c:201
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
 
@@ -678,10 +676,30 @@ msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
 msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αντικανονική κατάσταση στο symbol_lookup ()"
 
-#: src/symtab.c:243
+#: src/symtab.c:322
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
+
+#~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
+#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Εσωδομημένο δε βρέθηκε στο πίνακα εσωδομημένων!"
+
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close module: `%s': %s"
+#~ msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
+
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close modules: %s"
+#~ msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s': %s"
+
+#~ msgid "Warning: Too few arguments to built-in `%s'"
+#~ msgstr "Προειδοποίηση: Πολύ λίγα ορίσματα στο εσωδομημένο `%s'"
+
+#~ msgid "Warning: Excess arguments to built-in `%s' ignored"
+#~ msgstr "Προειδοποίηση: Επιπλέον ορίσματα στο εσωδομημένο `%s' αγνοήθηκαν"
+
+#~ msgid "Non-numeric argument to built-in `%s'"
+#~ msgstr "Μη-αρθμητικό όρισμα στο εσωδομημένο `%s'"
 
 #~ msgid "Undefined macro `%s'"
 #~ msgstr "Μη ορισμένη μακροεντολή `%s'"

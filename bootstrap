@@ -1,0 +1,21 @@
+#! /bin/sh -x
+
+# helps bootstrapping m4, when checked out from CVS requires
+# GNU autoconf, GNU automake, GNU libtool and GNU gettext; 
+# this is not meant to go into the distributions
+
+aclocal -I acm4 || exit 1
+gettextize --force || exit 1
+
+# Requires a beta release of libtool, currently checked in to cvs
+# libtoolize --force --copy || exit 1
+
+autoheader || exit 1
+
+touch ltconfig
+automake --add-missing --copy || { rm ltconfig && exit 1; }
+rm ltconfig
+
+autoconf || exit 1
+
+exit 0

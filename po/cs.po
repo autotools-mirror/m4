@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2000-01-10 05:27+0100\n"
+"POT-Creation-Date: 2000-07-28 00:26+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -13,272 +13,248 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/getopt.c:677
+#: src/getopt.c:677
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
 msgstr ""
 
-#: lib/getopt.c:702
+#: src/getopt.c:702
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/getopt.c:707
+#: src/getopt.c:707
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/getopt.c:725 lib/getopt.c:898
+#: src/getopt.c:725 src/getopt.c:898
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
 msgstr ""
 
 #. --option
-#: lib/getopt.c:754
+#: src/getopt.c:754
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
 msgstr ""
 
 #. +option or -option
-#: lib/getopt.c:758
+#: src/getopt.c:758
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
 msgstr ""
 
 #. 1003.2 specifies the format of this message.
-#: lib/getopt.c:784
+#: src/getopt.c:784
 #, c-format
 msgid "%s: illegal option -- %c\n"
 msgstr ""
 
-#: lib/getopt.c:787
+#: src/getopt.c:787
 #, c-format
 msgid "%s: invalid option -- %c\n"
 msgstr ""
 
 #. 1003.2 specifies the format of this message.
-#: lib/getopt.c:817 lib/getopt.c:947
+#: src/getopt.c:817 src/getopt.c:947
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
 msgstr ""
 
-#: lib/getopt.c:864
+#: src/getopt.c:864
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
 msgstr ""
 
-#: lib/getopt.c:882
+#: src/getopt.c:882
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: lib/obstack.c:471
+#: m4/obstack.c:473
 msgid "memory exhausted"
 msgstr ""
 
-#: lib/regex.c:1019
+#: m4/regex.c:1021
 msgid "Success"
 msgstr ""
 
-#: lib/regex.c:1022
+#: m4/regex.c:1024
 msgid "No match"
 msgstr ""
 
 # , c-format
-#: lib/regex.c:1025
+#: m4/regex.c:1027
 #, fuzzy
 msgid "Invalid regular expression"
 msgstr "©patný regulární výraz `%s': %s"
 
-#: lib/regex.c:1028
+#: m4/regex.c:1030
 msgid "Invalid collation character"
 msgstr ""
 
-#: lib/regex.c:1031
+#: m4/regex.c:1033
 msgid "Invalid character class name"
 msgstr ""
 
-#: lib/regex.c:1034
+#: m4/regex.c:1036
 msgid "Trailing backslash"
 msgstr ""
 
-#: lib/regex.c:1037
+#: m4/regex.c:1039
 msgid "Invalid back reference"
 msgstr ""
 
-#: lib/regex.c:1040
+#: m4/regex.c:1042
 msgid "Unmatched [ or [^"
 msgstr ""
 
-#: lib/regex.c:1043
+#: m4/regex.c:1045
 msgid "Unmatched ( or \\("
 msgstr ""
 
-#: lib/regex.c:1046
+#: m4/regex.c:1048
 msgid "Unmatched \\{"
 msgstr ""
 
-#: lib/regex.c:1049
+#: m4/regex.c:1051
 msgid "Invalid content of \\{\\}"
 msgstr ""
 
-#: lib/regex.c:1052
+#: m4/regex.c:1054
 msgid "Invalid range end"
 msgstr ""
 
-#: lib/regex.c:1055 lib/xmalloc.c:82
+#: m4/regex.c:1057 m4/xmalloc.c:82
 msgid "Memory exhausted"
 msgstr ""
 
 # , c-format
-#: lib/regex.c:1058
+#: m4/regex.c:1060
 #, fuzzy
 msgid "Invalid preceding regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
-#: lib/regex.c:1061
+#: m4/regex.c:1063
 #, fuzzy
 msgid "Premature end of regular expression"
 msgstr "Pøedèasný konec zmrazeného souboru"
 
 # , c-format
-#: lib/regex.c:1064
+#: m4/regex.c:1066
 #, fuzzy
 msgid "Regular expression too big"
 msgstr "©patný regulární výraz `%s': %s"
 
-#: lib/regex.c:1067
+#: m4/regex.c:1069
 msgid "Unmatched ) or \\)"
 msgstr ""
 
 # , c-format
-#: lib/regex.c:5564
+#: m4/regex.c:5566
 #, fuzzy
 msgid "No previous regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
-# , c-format
-#: src/builtin.c:349
-#, c-format
-msgid "Warning: Too few arguments to built-in `%s'"
-msgstr "Varování: pøíli¹ málo argumentù pro vestavìné makro `%s'"
-
-# , c-format
-#: src/builtin.c:355
-#, c-format
-msgid "Warning: Excess arguments to built-in `%s' ignored"
-msgstr ""
-"Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou ignorovány"
-
-# , c-format
-#: src/builtin.c:383
-#, c-format
-msgid "Non-numeric argument to built-in `%s'"
-msgstr "Neèíselný argument pro vestavìné makro `%s'"
-
-#: src/builtin.c:494
-msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
+#: src/builtin.c:487
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu v define_macro ()"
 
 # , c-format
-#: src/builtin.c:681 src/builtin.c:780 src/builtin.c:1423 src/builtin.c:1447
+#: src/builtin.c:696 src/builtin.c:797 src/builtin.c:1348 src/builtin.c:1371
 #, c-format
 msgid "Undefined name %s"
 msgstr "Jméno %s není definováno"
 
-#: src/builtin.c:721
+#: src/builtin.c:738 src/freeze.c:212
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
 
-#: src/builtin.c:729
+#: src/builtin.c:746
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu v m4_dumpdef ()"
 
 # , c-format
-#: src/builtin.c:804
+#: src/builtin.c:820
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Jméno %s není definováno"
 
-#: src/builtin.c:842
+#: src/builtin.c:857
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ symbolu v m4_defn ()"
 
 # , c-format
-#: src/builtin.c:908
+#: src/builtin.c:920
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Rouru do pøíkazu `%s' nelze otevøít"
 
 # , c-format
-#: src/builtin.c:948
+#: src/builtin.c:959
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Základ v makru eval je mimo rozsah (základ = %d)"
 
-#: src/builtin.c:957
+#: src/builtin.c:968
 msgid "Negative width to eval"
 msgstr "Záporná ¹íøka v makru eval"
 
 # , c-format
-#: src/builtin.c:1063
+#: src/builtin.c:1067
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Neèíselný argument pro %s"
 
 # , c-format
-#: src/builtin.c:1075
+#: src/builtin.c:1079
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Chyba pøi volání makra undivert pro %s"
 
 # , c-format
-#: src/builtin.c:1223
-#, c-format
-msgid "Undefined syntax code %c"
-msgstr "Syntaktický kód %c není definován"
-
-# , c-format
-#: src/builtin.c:1274 src/freeze.c:211
+#: src/builtin.c:1208 src/freeze.c:391
 #, c-format
 msgid "Cannot open %s"
 msgstr "%s nelze otevøít"
 
 # , c-format
-#: src/builtin.c:1483
+#: src/builtin.c:1406
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Ladící mód: ¹patné ladící volby: `%s'"
 
 # , c-format
-#: src/builtin.c:1519
+#: src/builtin.c:1441
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Chybový soubor %s nelze pou¾ít"
 
-#: src/builtin.c:1740
+#: src/builtin.c:1657
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 
 # , c-format
-#: src/builtin.c:1801 src/builtin.c:1861 src/input.c:1014
+#: src/builtin.c:1717 src/builtin.c:1776 src/input.c:1051
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "©patný regulární výraz `%s': %s"
 
 # , c-format
-#: src/builtin.c:1812 src/builtin.c:1885
+#: src/builtin.c:1728 src/builtin.c:1800
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
-#: src/debug.c:380
+#: src/debug.c:382
 msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
 msgstr ""
 "VNITØNÍ CHYBA: vestavìné makro nenalezeno v tabulce vestavìných maker\n"
 "(trace_pre ())!"
 
-#: src/debug.c:388
+#: src/debug.c:390
 msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu (trace_pre ())"
 
@@ -334,91 +310,99 @@ msgstr "VNITØNÍ CHYBA: ¹patný operátor posunu v shift_term ()"
 msgid "INTERNAL ERROR: Bad operator in mult_term ()"
 msgstr "VNITØNÍ CHYBA: ¹patný operátor v mult_term ()"
 
-#: src/freeze.c:119
-msgid "INTERNAL ERROR: Built-in not found in builtin table!"
-msgstr "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
-
-#: src/freeze.c:132
+#: src/freeze.c:247
 msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu ve freeze_one_symbol ()"
 
-#: src/freeze.c:163
+#: src/freeze.c:278
 msgid "Expecting line feed in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván LF"
 
 # , c-format
-#: src/freeze.c:165
+#: src/freeze.c:280
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván znak `%c'"
 
-#: src/freeze.c:222
+#. 1 argument 'F' operations are invalid for format version 1
+#: src/freeze.c:404 src/freeze.c:443 src/freeze.c:460 src/freeze.c:515
+#: src/freeze.c:541
 msgid "Ill-formated frozen file"
 msgstr "©patný formát zmrazeného souboru"
 
-#: src/freeze.c:277 src/freeze.c:293
-msgid "Premature end of frozen file"
-msgstr "Pøedèasný konec zmrazeného souboru"
-
 # , c-format
-#: src/freeze.c:327
+#: src/freeze.c:499
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' ze zmrazeného souboru nenalezeno v tabulce vestavìných maker!"
 
+#: src/freeze.c:532
+msgid "Module support not compiled in"
+msgstr ""
+
+#: src/freeze.c:561
+msgid "Premature end of frozen file"
+msgstr "Pøedèasný konec zmrazeného souboru"
+
 # , c-format
-#: src/input.c:318
+#: src/input.c:310
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Vstup èten z %s, øádku %d"
 
 # , c-format
-#: src/input.c:346
+#: src/input.c:338
 #, c-format
 msgid "Input read from %s"
 msgstr "Vstup èten z %s"
 
-#: src/input.c:506
+#: src/input.c:498
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "VNITØNÍ CHYBA: rekurzivní push_string!"
 
-#: src/input.c:623
+#: src/input.c:615
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "VNITØNÍ CHYBA: ¹patné volání init_macro_token ()"
 
-#: src/input.c:663
+#: src/input.c:655
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "VNITØNÍ CHYBA: chyba vstupního zásobníku v next_char ()"
 
-#: src/input.c:700
+#: src/input.c:692
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "VNITØNÍ CHYBA: chyba vstupního zásobníku v peek_input ()"
 
-#: src/input.c:805
+#: src/input.c:795
 msgid "NONE"
 msgstr "®ÁDNÝ"
 
-#: src/input.c:1199 src/input.c:1226
+# , c-format
+#: src/input.c:1015
+#, c-format
+msgid "Undefined syntax code %c"
+msgstr "Syntaktický kód %c není definován"
+
+#: src/input.c:1236 src/input.c:1263
 msgid "ERROR: EOF in string"
 msgstr "CHYBA: EOF v øetìzci"
 
-#: src/m4.c:119
+#: src/m4.c:79
 msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
 msgstr "CHYBA: Pøeteèení zásobníku. (nekoneèná rekurze makra define?)"
 
 # , c-format
-#: src/m4.c:146
+#: src/m4.c:94
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Více informací získáte pøíkazem `%s --help'.\n"
 
 # , c-format
-#: src/m4.c:150
+#: src/m4.c:98
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Pou¾ití: %s [PØEPÍNAÈ]... [SOUBOR]...\n"
 
-#: src/m4.c:151
+#: src/m4.c:99
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
 "for short options too.\n"
@@ -444,20 +428,20 @@ msgstr ""
 "  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
 "`m4_'\n"
 
-#: src/m4.c:164
+#: src/m4.c:112
 msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 msgstr ""
 "  -W, --word-regexp=REGVÝR    syntaxe jmen maker bude urèena pomocí REGVÝR\n"
 
-#: src/m4.c:169
+#: src/m4.c:117
 msgid ""
 "\n"
 "Dynamic loading features:\n"
-"  -m, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
-"  -M, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+"  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
 msgstr ""
 
-#: src/m4.c:176
+#: src/m4.c:124
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -475,7 +459,7 @@ msgstr ""
 "  -U, --undefine=MAKRO          sma¾e vestavìné MAKRO\n"
 "  -s, --synclines               vlo¾í øádky tvaru `#line ÈÍSLO \"SOUBOR\"'\n"
 
-#: src/m4.c:184
+#: src/m4.c:132
 msgid ""
 "\n"
 "Limits control:\n"
@@ -490,7 +474,7 @@ msgstr ""
 "symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
-#: src/m4.c:191
+#: src/m4.c:139
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -502,7 +486,7 @@ msgstr ""
 "  -F, --freeze-state=SOUBOR     pøi ukonèení ulo¾í zmrazený stav do SOUBORU\n"
 "  -R, --reload-state=SOUBOR     pøi startu naète zmrazený stav ze SOUBORU\n"
 
-#: src/m4.c:197
+#: src/m4.c:145
 msgid ""
 "\n"
 "Debugging:\n"
@@ -521,7 +505,7 @@ msgstr ""
 "  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
 "SOUBORU\n"
 
-#: src/m4.c:205
+#: src/m4.c:153
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -551,7 +535,7 @@ msgstr ""
 "  i   vypí¹e informace o ka¾dé zmìnì vstupního souboru\n"
 "  V   zkratka pro v¹echny vý¹e uvedené volby\n"
 
-#: src/m4.c:220
+#: src/m4.c:168
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -560,7 +544,7 @@ msgstr ""
 "Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
 "vstup.\n"
 
-#: src/m4.c:225
+#: src/m4.c:173
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -569,27 +553,27 @@ msgstr ""
 "Chyby v programu oznamujte na adrese <bug-m4@gnu.org> (anglicky).\n"
 "Pøipomínky k pøekladu zasílejte na adresu <cs@li.org> (èesky).\n"
 
-# , c-format
-#: src/m4.c:414
-#, c-format
-msgid "Bad debug flags: `%s'"
-msgstr "©patné ladící volby: `%s'"
-
-#: src/m4.c:436
+#: src/m4.c:348
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/m4.c:440
+#: src/m4.c:352
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/m4.c:460
+# , c-format
+#: src/m4.c:384
+#, c-format
+msgid "Bad debug flags: `%s'"
+msgstr "©patné ladící volby: `%s'"
+
+#: src/m4.c:413
 msgid " (options:"
 msgstr " (pøelo¾eno s volbami:"
 
-#: src/m4.c:542
+#: src/m4.c:507
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "VNITØNÍ CHYBA: ¹patný kód v odlo¾ených argumentech"
 
@@ -616,46 +600,58 @@ msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "CHYBA: pøekroèen limit pro rekurzi (%d), zmìòte jej pomocí -L<N>"
 
 # , c-format
-#: src/module.c:123
+#: src/module.c:230
 #, fuzzy, c-format
 msgid "ERROR: failed to initialise modules: %s"
 msgstr "CHYBA: modul `%s' nelze nalézt: %s"
 
 # , c-format
-#: src/module.c:221
+#: src/module.c:358
 #, fuzzy, c-format
 msgid "ERROR: cannot find module: `%s'"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: src/module.c:224
+#: src/module.c:361
 #, fuzzy, c-format
 msgid "ERROR: cannot find module: `%s': %s"
 msgstr "CHYBA: modul `%s' nelze nalézt: %s"
 
 # , c-format
-#: src/module.c:274
-#, fuzzy
-msgid "ERROR: cannot close modules"
+#: src/module.c:393
+#, fuzzy, c-format
+msgid "ERROR: cannot close module: %s is not loaded."
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: src/module.c:277
+#: src/module.c:412
 #, fuzzy, c-format
-msgid "ERROR: cannot cannot close modules: %s"
-msgstr "CHYBA: modul `%s' nelze nalézt: %s"
+msgid "ERROR: cannot unload module builtins: `%s'"
+msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: src/module.c:284
+#: src/module.c:435 src/module.c:514
 #, fuzzy, c-format
 msgid "ERROR: cannot close module: `%s'"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: src/module.c:288
+#: src/module.c:438 src/module.c:518
 #, fuzzy, c-format
-msgid "ERROR: cannot cannot close module: `%s': %s"
-msgstr "CHYBA: modul `%s' nelze nalézt: %s"
+msgid "ERROR: cannot close module: `%s': %s"
+msgstr "CHYBA: modul `%s' nelze nalézt"
+
+# , c-format
+#: src/module.c:504
+#, fuzzy
+msgid "ERROR: cannot close modules"
+msgstr "CHYBA: modul `%s' nelze nalézt"
+
+# , c-format
+#: src/module.c:507
+#, fuzzy, c-format
+msgid "ERROR: cannot close modules: %s"
+msgstr "CHYBA: modul `%s' nelze nalézt"
 
 #: src/output.c:262
 msgid "ERROR: Cannot create temporary file for diversion"
@@ -689,11 +685,11 @@ msgstr "Hledán soubor `%s', nalezen soubor `%s'"
 
 #. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 #. if the stack limit has not been reached.
-#: src/stackovf.c:175
+#: src/stackovf.c:174
 msgid "VMEM limit exceeded?\n"
 msgstr "Pøekroèen VMEM limit?\n"
 
-#: src/stackovf.c:197
+#: src/stackovf.c:196
 msgid ""
 "Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
 "occurred, or there is a bug in "
@@ -702,7 +698,7 @@ msgstr ""
 "zásobníku,\n"
 "nebo o chybu "
 
-#: src/stackovf.c:202
+#: src/stackovf.c:201
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 
@@ -711,10 +707,37 @@ msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
 msgstr "VNITØNÍ CHYBA: ¹patný mód pro symbol_lookup ()"
 
 # , c-format
-#: src/symtab.c:243
+#: src/symtab.c:322
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Jméno `%s' není známo\n"
+
+#~ msgid "INTERNAL ERROR: Built-in not found in builtin table!"
+#~ msgstr ""
+#~ "VNITØNÍ CHYBA: Vestavìné makro nenalezeno v tabulce vestavìných maker!"
+
+# , c-format
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close module: `%s': %s"
+#~ msgstr "CHYBA: modul `%s' nelze nalézt: %s"
+
+# , c-format
+#, fuzzy
+#~ msgid "ERROR: cannot cannot close modules: %s"
+#~ msgstr "CHYBA: modul `%s' nelze nalézt: %s"
+
+# , c-format
+#~ msgid "Warning: Too few arguments to built-in `%s'"
+#~ msgstr "Varování: pøíli¹ málo argumentù pro vestavìné makro `%s'"
+
+# , c-format
+#~ msgid "Warning: Excess arguments to built-in `%s' ignored"
+#~ msgstr ""
+#~ "Varování: pøíli¹ mnoho argumentù pro vestavìné makro `%s' - budou ignorovány"
+
+# , c-format
+#~ msgid "Non-numeric argument to built-in `%s'"
+#~ msgstr "Neèíselný argument pro vestavìné makro `%s'"
 
 # , c-format
 #~ msgid "Undefined macro `%s'"

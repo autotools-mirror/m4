@@ -5,27 +5,57 @@ to macros).  `m4' also has built-in functions for including files,
 running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 `m4' for generating `configure' scripts, but not for running them.
 
-GNU `m4' has been originally written by Rene' Seindal, from Denmark.
-This release is to be considered as stable.
+GNU `m4' has been originally written by René Seindal, from Denmark.
+
+GNU `m4' has a web site at http://www.seindal.dk/rene/gnu/.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
 
-In the subdirectory `examples' you will find various m4 files, ranging
-from trivial test files to rather advanced macros.  If you intend to
-use m4 seriously, you might find useful material down there.
+In the subdirectories `tests' and `examples' you will find various m4
+files, ranging from trivial test files to rather advanced macros.  If
+you intend to use m4 seriously, you might find useful material down
+there.
 
-See file `BACKLOG' for a summary of pending mail and articles.
 See file `COPYING' for copying conditions.
 See file `INSTALL' for compilation and installation instructions.
+See file `ABOUT-NLS' for how to customize this program to your language.
 See file `NEWS' for a list of major changes in the current release.
 See file `THANKS' for a list of contributors.
 
+By using `./configure --with-gmp, you get multiple precision integral
+and rational arithmetic using mpeval.  The implementation depends on the
+GNU gmp v2 library.
+
+By using `./configure --with-modules, you get the possibility of using
+dynamic modules.  The implementation uses libltdl interface, details of
+which are in the libtool manual.  See file `modules/README' for a more
+detailed description.
+
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
-`m4'.  This might go away, so don't count on it yet.
+`m4'.  THIS WILL PROBABLY GO AWAY, so don't count on it.  Some of the
+same things can be achieved with `changesyntax' at a much better speed.
 
-Send bug reports to `bug-gnu-utils@prep.ai.mit.edu'.  A bug report is
-an adequate description of the problem: your input, what you expected,
-what you got, and why this is wrong.  Diffs are welcome, but they only
-describe a solution, from which the problem might be uneasy to infer.
+By using `./configure --with-dmalloc', GNU m4 is linked with Gray
+Watson's dmalloc package.  It is a debugging option for finding memory
+management problems.  Gray Watson's dmalloc package is available at
+ftp://ftp.letters.com/src/dmalloc/dmalloc.tar.gz.
+
+When compiling on cygwin (b20.1 at least), the cygwin getopt build
+doesn't handle optional arguments properly.  The best way to get around
+this is to force the build to use the included getopt files like this,
+`ac_cv_func_getopt_long=no ./configure`.
+
+The Windows dll mechanism conflicts with the requirements of NLS, so
+you should use `./configure --disable-nls' on these machines.  The problem
+is that an internationalised libm4.dll requires libintl.a to resolve its
+unbound symbols at compile time.  On real operating systems, linking
+libintl.a into the m4 binary and using -export-dynamic is good enough. 
+
+Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
+is an adequate description of the problem: your input, what you
+expected, what you got, and why this is wrong.  Diffs are welcome, but
+they only describe a solution, from which the problem might be uneasy to
+infer.  Don't forget all relevant information about your operating
+system, compiler, libraries, ...

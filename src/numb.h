@@ -16,21 +16,18 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "m4.h"
+#include "m4private.h"
 
-#ifdef WITH_GMP
+#ifdef USE_GMP
 #define NUMB_MP 1
 #endif
 
-#ifdef WITH_GMP
+#ifdef USE_GMP
 #include "gmp.h"
 
 /* eval_t should be at least 32 bits.  */
 typedef mpq_t eval_t;
 
-extern eval_t numb_ZERO;
-extern eval_t numb_ONE;
- 
 #define numb_set(ans,i) mpq_set(ans,i)
 #define numb_set_si(ans,i) mpq_set_si(*(ans),(long)i,(unsigned long)1)
 
@@ -67,22 +64,8 @@ extern eval_t numb_ONE;
 
 #define numb_decr(n) numb_minus(n,numb_ONE)
 
-
-
-void numb_divide(eval_t *x, const eval_t *y);
-void numb_modulo(eval_t *x, const eval_t *y);
-void numb_and(eval_t *x, const eval_t *y);
-void numb_ior(eval_t *x, const eval_t *y);
-void numb_eor(eval_t *x, const eval_t *y);
-void numb_not(eval_t *x);;
-void numb_lshift(eval_t *x, const eval_t *y);
-void numb_rshift(eval_t *x, const eval_t *y);
-void numb_pow (eval_t *x, const eval_t *y);
-
-
-
 
-#else  /* not WITH_GMP */
+#else  /* not USE_GMP */
 
 /* eval_t should be at least 32 bits.  */
 /* use GNU long long int if available */
@@ -93,9 +76,6 @@ typedef unsigned long long int ueval_t;
 typedef long int eval_t;
 typedef unsigned long int ueval_t;
 #endif
-
-extern eval_t numb_ZERO;
-extern eval_t numb_ONE;
  
 #define int2numb(i) ((eval_t)(i))
 #define numb2int(n) ((n))
@@ -145,12 +125,4 @@ extern eval_t numb_ONE;
 #define numb_lshift(x,y) (*(x) = (*(x) << *(y)))
 #define numb_rshift(x,y) (*(x) = (*(x) >> *(y)))
 
-void numb_pow (eval_t *x, const eval_t *y);
-
-#endif /* WITH_GMP */
-
-
-void numb_initialise __P((void));
-void numb_obstack __P((struct obstack *obs, 
-		       const eval_t value, 
-		       const int radix, int min));
+#endif /* USE_GMP */

@@ -21,7 +21,20 @@
    its own scanner, and a recursive descent parser.  The only entry point
    is evaluate ().  */
 
-#include "m4.h"
+/* If configured --with-gmp this file is compiled twice.  For the normal
+   eval() it is compiled without -DUSE_GMP, for the gmp enhanced eval()
+   it is compiled with -DUSE_GMP (and implicitly -DWITH_GMP). */
+
+/* Everything in this file and in numb.c should be declared static,
+   except evaluate, handled here. */
+
+#include "m4private.h"
+
+#ifdef USE_GMP
+#define evaluate mp_evaluate
+#endif
+
+#include "numb.c"
 
 /* Evaluates token types.  */
 
@@ -30,7 +43,7 @@ typedef enum eval_token
     ERROR,
     PLUS, MINUS,
     EXPONENT,
-    TIMES, DIVIDE, MODULO,
+    TIMES, DIVIDE, MODULO, RATIO,
     EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
     LSHIFT, RSHIFT,
     LNOT, LAND, LOR,
@@ -54,34 +67,34 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term _((eval_token, eval_t *));
-static eval_error logical_and_term _((eval_token, eval_t *));
-static eval_error or_term _((eval_token, eval_t *));
-static eval_error xor_term _((eval_token, eval_t *));
-static eval_error and_term _((eval_token, eval_t *));
-static eval_error not_term _((eval_token, eval_t *));
-static eval_error logical_not_term _((eval_token, eval_t *));
-static eval_error cmp_term _((eval_token, eval_t *));
-static eval_error shift_term _((eval_token, eval_t *));
-static eval_error add_term _((eval_token, eval_t *));
-static eval_error mult_term _((eval_token, eval_t *));
-static eval_error exp_term _((eval_token, eval_t *));
-static eval_error unary_term _((eval_token, eval_t *));
-static eval_error simple_term _((eval_token, eval_t *));
+static eval_error logical_or_term M4_PARAMS((eval_token, eval_t *));
+static eval_error logical_and_term M4_PARAMS((eval_token, eval_t *));
+static eval_error or_term M4_PARAMS((eval_token, eval_t *));
+static eval_error xor_term M4_PARAMS((eval_token, eval_t *));
+static eval_error and_term M4_PARAMS((eval_token, eval_t *));
+static eval_error not_term M4_PARAMS((eval_token, eval_t *));
+static eval_error logical_not_term M4_PARAMS((eval_token, eval_t *));
+static eval_error cmp_term M4_PARAMS((eval_token, eval_t *));
+static eval_error shift_term M4_PARAMS((eval_token, eval_t *));
+static eval_error add_term M4_PARAMS((eval_token, eval_t *));
+static eval_error mult_term M4_PARAMS((eval_token, eval_t *));
+static eval_error exp_term M4_PARAMS((eval_token, eval_t *));
+static eval_error unary_term M4_PARAMS((eval_token, eval_t *));
+static eval_error simple_term M4_PARAMS((eval_token, eval_t *));
 
 /*--------------------.
 | Lexical functions.  |
 `--------------------*/
 
 /* Pointer to next character of input text.  */
-static const char *eval_text;
+static const unsigned char *eval_text;
 
 /* Value of eval_text, from before last call of eval_lex ().  This is so we
    can back up, if we have read too much.  */
-static const char *last_text;
+static const unsigned char *last_text;
 
 static void
-eval_init_lex (const char *text)
+eval_init_lex (const unsigned char *text)
 {
   eval_text = text;
   last_text = NULL;
@@ -145,7 +158,7 @@ eval_lex (eval_t *val)
       else
 	base = 10;
 
-      (*val) = 0;
+      numb_set_si(val,0);
       for (; *eval_text; eval_text++)
 	{
 	  if (isdigit (*eval_text))
@@ -160,7 +173,20 @@ eval_lex (eval_t *val)
 	  if (digit >= base)
 	    break;
 
-	  (*val) = (*val) * base + digit;
+	  { /* (*val) = (*val) * base; */
+	    eval_t xbase;
+	    numb_init(xbase);
+	    numb_set_si(&xbase,base);
+	    numb_times(*val,xbase);
+	    numb_fini(xbase);
+	  }
+	  { /* (*val) = (*val) + digit; */
+	    eval_t xdigit;
+	    numb_init(xdigit);
+	    numb_set_si(&xdigit,digit);
+	    numb_plus(*val,xdigit);
+	    numb_fini(xdigit);
+	  }
 	}
       return NUMBER;
     }
@@ -183,6 +209,8 @@ eval_lex (eval_t *val)
       return DIVIDE;
     case '%':
       return MODULO;
+    case ':':
+      return RATIO;
     case '=':
       if (*eval_text == '=')
 	eval_text++;
@@ -255,14 +283,18 @@ eval_lex (eval_t *val)
 `---------------------------------------*/
 
 boolean
-evaluate (const char *expr, eval_t *val)
+evaluate (struct obstack *obs, const char *expr, const int radix, int min)
 {
+  eval_t val;
   eval_token et;
   eval_error err;
 
+  numb_initialise();
   eval_init_lex (expr);
-  et = eval_lex (val);
-  err = logical_or_term (et, val);
+
+  numb_init(val);
+  et = eval_lex (&val);
+  err = logical_or_term (et, &val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     err = EXCESS_INPUT;
@@ -274,41 +306,45 @@ evaluate (const char *expr, eval_t *val)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (missing right parenthesis): %s",
+		_("Bad expression in eval (missing right parenthesis): %s"),
 		expr));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval: %s", expr));
+		_("Bad expression in eval: %s"), expr));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (bad input): %s", expr));
+		_("Bad expression in eval (bad input): %s"), expr));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (excess input): %s", expr));
+		_("Bad expression in eval (excess input): %s"), expr));
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-		"Divide by zero in eval: %s", expr));
+		_("Divide by zero in eval: %s"), expr));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-		"Modulo by zero in eval: %s", expr));
+		_("Modulo by zero in eval: %s"), expr));
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad error code in evaluate ()"));
+		_("INTERNAL ERROR: Bad error code in evaluate ()")));
       abort ();
     }
 
+  if (err == NO_ERROR)
+    numb_obstack(obs, val, radix, min);
+
+  numb_fini(val);
   return (boolean) (err != NO_ERROR);
 }
 
@@ -325,6 +361,7 @@ logical_or_term (eval_token et, eval_t *v1)
   if ((er = logical_and_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == LOR)
     {
       et = eval_lex (&v2);
@@ -334,8 +371,9 @@ logical_or_term (eval_token et, eval_t *v1)
       if ((er = logical_and_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 || v2;
+      numb_lior(*v1,v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -352,6 +390,7 @@ logical_and_term (eval_token et, eval_t *v1)
   if ((er = or_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == LAND)
     {
       et = eval_lex (&v2);
@@ -361,8 +400,9 @@ logical_and_term (eval_token et, eval_t *v1)
       if ((er = or_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 && v2;
+      numb_land(*v1,v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -379,6 +419,7 @@ or_term (eval_token et, eval_t *v1)
   if ((er = xor_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == OR)
     {
       et = eval_lex (&v2);
@@ -388,8 +429,9 @@ or_term (eval_token et, eval_t *v1)
       if ((er = xor_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 | v2;
+      numb_ior(v1, (const eval_t *)&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -406,6 +448,7 @@ xor_term (eval_token et, eval_t *v1)
   if ((er = and_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == XOR)
     {
       et = eval_lex (&v2);
@@ -415,8 +458,9 @@ xor_term (eval_token et, eval_t *v1)
       if ((er = and_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 ^ v2;
+      numb_eor(v1, (const eval_t *)&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -433,6 +477,7 @@ and_term (eval_token et, eval_t *v1)
   if ((er = not_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == AND)
     {
       et = eval_lex (&v2);
@@ -442,8 +487,9 @@ and_term (eval_token et, eval_t *v1)
       if ((er = not_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      *v1 = *v1 & v2;
+      numb_and(v1, (const eval_t *)&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -464,7 +510,7 @@ not_term (eval_token et, eval_t *v1)
 
       if ((er = not_term (et, v1)) != NO_ERROR)
 	return er;
-      *v1 = ~*v1;
+      numb_not(v1);
     }
   else
     if ((er = logical_not_term (et, v1)) != NO_ERROR)
@@ -486,7 +532,7 @@ logical_not_term (eval_token et, eval_t *v1)
 
       if ((er = logical_not_term (et, v1)) != NO_ERROR)
 	return er;
-      *v1 = !*v1;
+      numb_lnot(*v1);
     }
   else
     if ((er = cmp_term (et, v1)) != NO_ERROR)
@@ -505,6 +551,7 @@ cmp_term (eval_token et, eval_t *v1)
   if ((er = shift_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == EQ || op == NOTEQ
 	 || op == GT || op == GTEQ
 	 || op == LS || op == LSEQ)
@@ -520,35 +567,36 @@ cmp_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case EQ:
-	  *v1 = *v1 == v2;
+	  numb_eq(*v1,v2);
 	  break;
 
 	case NOTEQ:
-	  *v1 = *v1 != v2;
+	  numb_ne(*v1,v2);
 	  break;
 
 	case GT:
-	  *v1 = *v1 > v2;
+	  numb_gt(*v1,v2);
 	  break;
 
 	case GTEQ:
-	  *v1 = *v1 >= v2;
+	  numb_ge(*v1,v2);
 	  break;
 
 	case LS:
-	  *v1 = *v1 < v2;
+	  numb_lt(*v1,v2);
 	  break;
 
 	case LSEQ:
-	  *v1 = *v1 <= v2;
+	  numb_le(*v1,v2);
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad comparison operator in cmp_term ()")));
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -566,6 +614,7 @@ shift_term (eval_token et, eval_t *v1)
   if ((er = add_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == LSHIFT || op == RSHIFT)
     {
 
@@ -579,19 +628,20 @@ shift_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case LSHIFT:
-	  *v1 = *v1 << v2;
+	  numb_lshift(v1, (const eval_t *)&v2);
 	  break;
 
 	case RSHIFT:
-	  *v1 = *v1 >> v2;
+	  numb_rshift(v1, (const eval_t *)&v2);
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad shift operator in shift_term ()")));
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -609,6 +659,7 @@ add_term (eval_token et, eval_t *v1)
   if ((er = mult_term (et, v1)) != NO_ERROR)
     return er;
 
+  numb_init(v2);
   while ((op = eval_lex (&v2)) == PLUS || op == MINUS)
     {
       et = eval_lex (&v2);
@@ -618,11 +669,13 @@ add_term (eval_token et, eval_t *v1)
       if ((er = mult_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      if (op == PLUS)
-	*v1 = *v1 + v2;
-      else
-	*v1 = *v1 - v2;
+      if (op == PLUS) {
+	numb_plus(*v1,v2);
+      } else {
+	numb_minus(*v1,v2);
+      }
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -640,7 +693,8 @@ mult_term (eval_token et, eval_t *v1)
   if ((er = exp_term (et, v1)) != NO_ERROR)
     return er;
 
-  while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO)
+  numb_init(v2);
+  while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO || op == RATIO)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
@@ -652,29 +706,40 @@ mult_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case TIMES:
-	  *v1 = *v1 * v2;
+	  numb_times(*v1,v2);
 	  break;
 
 	case DIVIDE:
-	  if (v2 == 0)
+	  if (numb_zerop(v2))
 	    return DIVIDE_ZERO;
-	  else
-	    *v1 = *v1 / v2;
+	  else {
+	    numb_divide(v1, (const eval_t *)&v2);
+	  }
+	  break;
+
+	case RATIO:
+	  if (numb_zerop(v2))
+	    return DIVIDE_ZERO;
+	  else {
+	    numb_ratio(*v1,v2);
+	  }
 	  break;
 
 	case MODULO:
-	  if (v2 == 0)
+	  if (numb_zerop(v2))
 	    return MODULO_ZERO;
-	  else
-	    *v1 = *v1 % v2;
+	  else {
+	    numb_modulo(v1, (const eval_t *)&v2);
+	  }
 	  break;
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad operator in mult_term ()"));
+		    _("INTERNAL ERROR: Bad operator in mult_term ()")));
 	  abort ();
 	}
     }
+  numb_fini(v2);
   if (op == ERROR)
     return UNKNOWN_INPUT;
 
@@ -685,14 +750,15 @@ mult_term (eval_token et, eval_t *v1)
 static eval_error
 exp_term (eval_token et, eval_t *v1)
 {
-  register eval_t result;
+  eval_t result;
   eval_t v2;
   eval_error er;
 
   if ((er = unary_term (et, v1)) != NO_ERROR)
     return er;
-  result = *v1;
+  memcpy(&result, v1, sizeof(eval_t));
 
+  numb_init(v2);
   while ((et = eval_lex (&v2)) == EXPONENT)
     {
       et = eval_lex (&v2);
@@ -702,11 +768,9 @@ exp_term (eval_token et, eval_t *v1)
       if ((er = exp_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      result = 1;
-      while (v2-- > 0)
-	result *= *v1;
-      *v1 = result;
+      numb_pow(v1, (const eval_t *)&v2);
     }
+  numb_fini(v2);
   if (et == ERROR)
     return UNKNOWN_INPUT;
 
@@ -730,7 +794,7 @@ unary_term (eval_token et, eval_t *v1)
 	return er;
 
       if (et == MINUS)
-	*v1 = -*v1;
+	numb_negate(*v1);
     }
   else
     if ((er = simple_term (et, v1)) != NO_ERROR)
@@ -772,3 +836,4 @@ simple_term (eval_token et, eval_t *v1)
     }
   return NO_ERROR;
 }
+

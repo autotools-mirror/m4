@@ -3,10 +3,10 @@
 # shadow.test is part of the GNU m4 testsuite
 
 . ${srcdir}/defs
-. ../../tests/config.sh
+. ${builddir}/../tests/config.sh
 
 # cannot perform test without --with-modules
-# test -z "$WITH_MODULES" && exit 77
+test -z "$WITH_MODULES" && exit 77
 
 cat ${srcdir}/shadow.m4 >in
 
@@ -20,9 +20,6 @@ shadow
 
 local::test
 local::shadow
-
-# save our local `shadow' macro until the Shadow module is unloaded
-
 
 # module Shadow defines `shadow' and `test' macros
 Shadow module loaded.
@@ -48,10 +45,7 @@ Shadow::shadow called.
 Test module called.
 Shadow::shadow called.
 
-# Unloading Test will not unshadow the test definition in Shadow without
-# some macro magic
-
-
+# Unloading Test will unshadow the test definition in Shadow
 
 
 
@@ -65,10 +59,10 @@ Shadow::shadow called.
 Shadow::test called.
 Shadow::shadow called.
 
-# Unloading Shadow again will revert to copying `test' and the locally
-# pushed `shadow' macro.
+# Unloading Shadow again will revert to copying `test' and the local
+# `shadow' macro.
 
-test
+local::test
 local::shadow
 EOF
 
@@ -86,6 +80,6 @@ shadow:	<shadow>
 EOF
 
 
-M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $srcdir; pwd` -d in >out 2>err
+M4PATH=$srcdir:$srcdir/../tests $M4 -M `cd $builddir; pwd` -d in >out 2>err
 sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 $CMP -s out ok && $CMP -s err okerr

@@ -19,10 +19,10 @@
 /* This file contains the functions, that performs the basic argument
    parsing and macro expansion.  */
 
-#include "m4.h"
+#include "m4private.h"
 
-static void expand_macro _((symbol *));
-static void expand_token _((struct obstack *, token_type, token_data *));
+static void expand_macro M4_PARAMS((symbol *));
+static void expand_token M4_PARAMS((struct obstack *, m4_token_t, m4_token_data *));
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -37,10 +37,10 @@ static int macro_call_id = 0;
 void
 expand_input (void)
 {
-  token_type t;
-  token_data td;
+  m4_token_t t;
+  m4_token_data td;
 
-  while ((t = next_token (&td)) != TOKEN_EOF)
+  while ((t = next_token (&td)) != M4_TOKEN_EOF)
     expand_token ((struct obstack *) NULL, t, &td);
 }
 
@@ -53,34 +53,39 @@ expand_input (void)
 `------------------------------------------------------------------------*/
 
 static void
-expand_token (struct obstack *obs, token_type t, token_data *td)
+expand_token (struct obstack *obs, m4_token_t t, m4_token_data *td)
 {
   symbol *sym;
+  char *text = M4_TOKEN_DATA_TEXT (td);
 
   switch (t)
     {				/* TOKSW */
-    case TOKEN_EOF:
-    case TOKEN_MACDEF:
+    case M4_TOKEN_EOF:
+    case M4_TOKEN_MACDEF:
       break;
 
-    case TOKEN_SIMPLE:
-    case TOKEN_STRING:
-      shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
+    case M4_TOKEN_SIMPLE:
+    case M4_TOKEN_STRING:
+    case M4_TOKEN_SPACE:
+      shipout_text (obs, text, strlen (text));
       break;
 
-    case TOKEN_WORD:
-      sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
-      if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
-	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
+    case M4_TOKEN_WORD:
+      if (M4_IS_ESCAPE(*text))
+	text++;
+
+      sym = lookup_symbol (text, SYMBOL_LOOKUP);
+      if (sym == NULL || SYMBOL_TYPE (sym) == M4_TOKEN_VOID
+	  || (SYMBOL_TYPE (sym) == M4_TOKEN_FUNC
 	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_input () != '('))
+	      && !M4_IS_OPEN(peek_input ())))
 	{
 #ifdef ENABLE_CHANGEWORD
-	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			strlen (TOKEN_DATA_ORIG_TEXT (td)));
+	  shipout_text (obs, M4_TOKEN_DATA_ORIG_TEXT (td),
+			strlen (M4_TOKEN_DATA_ORIG_TEXT (td)));
 #else
-	  shipout_text (obs, TOKEN_DATA_TEXT (td),
-			strlen (TOKEN_DATA_TEXT (td)));
+	  shipout_text (obs, M4_TOKEN_DATA_TEXT (td),
+			strlen (M4_TOKEN_DATA_TEXT (td)));
 #endif
 	}
       else
@@ -89,7 +94,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad token type in expand_token ()"));
+		_("INTERNAL ERROR: Bad token type in expand_token ()")));
       abort ();
     }
 }
@@ -106,21 +111,21 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 `-------------------------------------------------------------------------*/
 
 static boolean
-expand_argument (struct obstack *obs, token_data *argp)
+expand_argument (struct obstack *obs, m4_token_data *argp)
 {
-  token_type t;
-  token_data td;
+  m4_token_t t;
+  m4_token_data td;
   char *text;
   int paren_level;
 
-  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+  M4_TOKEN_DATA_TYPE (argp) = M4_TOKEN_VOID;
 
   /* Skip leading white space.  */
   do
     {
       t = next_token (&td);
     }
-  while (t == TOKEN_SIMPLE && isspace (*TOKEN_DATA_TEXT (&td)));
+  while (t == M4_TOKEN_SPACE);
 
   paren_level = 0;
 
@@ -129,52 +134,53 @@ expand_argument (struct obstack *obs, token_data *argp)
 
       switch (t)
 	{			/* TOKSW */
-	case TOKEN_SIMPLE:
-	  text = TOKEN_DATA_TEXT (&td);
-	  if ((*text == ',' || *text == ')') && paren_level == 0)
+	case M4_TOKEN_SIMPLE:
+	  text = M4_TOKEN_DATA_TEXT (&td);
+	  if ((M4_IS_COMMA(*text) || M4_IS_CLOSE(*text)) && paren_level == 0)
 	    {
 
 	      /* The argument MUST be finished, whether we want it or not.  */
 	      obstack_1grow (obs, '\0');
 	      text = obstack_finish (obs);
 
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
+	      if (M4_TOKEN_DATA_TYPE (argp) == M4_TOKEN_VOID)
 		{
-		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  TOKEN_DATA_TEXT (argp) = text;
+		  M4_TOKEN_DATA_TYPE (argp) = M4_TOKEN_TEXT;
+		  M4_TOKEN_DATA_TEXT (argp) = text;
 		}
-	      return (boolean) (*TOKEN_DATA_TEXT (&td) == ',');
+	      return (boolean) (M4_IS_COMMA(*M4_TOKEN_DATA_TEXT (&td)));
 	    }
 
-	  if (*text == '(')
+	  if (M4_IS_OPEN(*text))
 	    paren_level++;
-	  else if (*text == ')')
+	  else if (M4_IS_CLOSE(*text))
 	    paren_level--;
 	  expand_token (obs, t, &td);
 	  break;
 
-	case TOKEN_EOF:
+	case M4_TOKEN_EOF:
 	  M4ERROR ((EXIT_FAILURE, 0,
-		    "ERROR: EOF in argument list"));
+		    _("ERROR: EOF in argument list")));
 	  break;
 
-	case TOKEN_WORD:
-	case TOKEN_STRING:
+	case M4_TOKEN_WORD:
+	case M4_TOKEN_SPACE:
+	case M4_TOKEN_STRING:
 	  expand_token (obs, t, &td);
 	  break;
 
-	case TOKEN_MACDEF:
+	case M4_TOKEN_MACDEF:
 	  if (obstack_object_size (obs) == 0)
 	    {
-	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	      TOKEN_DATA_FUNC_TRACED (argp) = TOKEN_DATA_FUNC_TRACED (&td);
+	      M4_TOKEN_DATA_TYPE (argp) = M4_TOKEN_FUNC;
+	      M4_TOKEN_DATA_FUNC (argp) = M4_TOKEN_DATA_FUNC (&td);
+	      M4_TOKEN_DATA_FUNC_TRACED (argp) = M4_TOKEN_DATA_FUNC_TRACED (&td);
 	    }
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad token type in expand_argument ()"));
+	  M4ERROR ((warning_status, 0, _("\
+INTERNAL ERROR: Bad token type in expand_argument ()")));
 	  abort ();
 	}
 
@@ -193,32 +199,32 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 		   struct obstack *arguments)
 {
   int ch;			/* lookahead for ( */
-  token_data td;
-  token_data *tdp;
+  m4_token_data td;
+  m4_token_data *tdp;
   boolean more_args;
   boolean groks_macro_args = SYMBOL_MACRO_ARGS (sym);
 
-  TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
-  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+  M4_TOKEN_DATA_TYPE (&td) = M4_TOKEN_TEXT;
+  M4_TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
+  tdp = (m4_token_data *) obstack_copy (arguments, (VOID *) &td, sizeof (td));
+  obstack_grow (argptr, (VOID *) &tdp, sizeof (tdp));
 
   ch = peek_input ();
-  if (ch == '(')
+  if (M4_IS_OPEN(ch))
     {
       next_token (&td);		/* gobble parenthesis */
       do
 	{
 	  more_args = expand_argument (arguments, &td);
 
-	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
+	  if (!groks_macro_args && M4_TOKEN_DATA_TYPE (&td) == M4_TOKEN_FUNC)
 	    {
-	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = "";
+	      M4_TOKEN_DATA_TYPE (&td) = M4_TOKEN_TEXT;
+	      M4_TOKEN_DATA_TEXT (&td) = "";
 	    }
-	  tdp = (token_data *)
-	    obstack_copy (arguments, (voidstar) &td, sizeof (td));
-	  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+	  tdp = (m4_token_data *)
+	    obstack_copy (arguments, (VOID *) &td, sizeof (td));
+	  obstack_grow (argptr, (VOID *) &tdp, sizeof (tdp));
 	}
       while (more_args);
     }
@@ -228,29 +234,29 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 /*------------------------------------------------------------------------.
 | The actual call of a macro is handled by call_macro ().  call_macro ()  |
 | is passed a symbol SYM, whose type is used to call either a builtin	  |
-| function, or the user macro expansion function expand_user_macro ()	  |
+| function, or the user macro expansion function expand_predefine ()	  |
 | (lives in builtin.c).  There are ARGC arguments to the call, stored in  |
 | the ARGV table.  The expansion is left on the obstack EXPANSION.  Macro |
 | tracing is also handled here.						  |
 `------------------------------------------------------------------------*/
 
 void
-call_macro (symbol *sym, int argc, token_data **argv,
+call_macro (symbol *sym, int argc, m4_token_data **argv,
 		 struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
     {
-    case TOKEN_FUNC:
+    case M4_TOKEN_FUNC:
       (*SYMBOL_FUNC (sym)) (expansion, argc, argv);
       break;
 
-    case TOKEN_TEXT:
-      expand_user_macro (expansion, sym, argc, argv);
+    case M4_TOKEN_TEXT:
+      process_macro (expansion, sym, argc, argv);
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
+		_("INTERNAL ERROR: Bad symbol type in call_macro ()")));
       abort ();
     }
 }
@@ -270,7 +276,7 @@ expand_macro (symbol *sym)
 {
   struct obstack arguments;
   struct obstack argptr;
-  token_data **argv;
+  m4_token_data **argv;
   int argc;
   struct obstack *expansion;
   const char *expanded;
@@ -279,8 +285,8 @@ expand_macro (symbol *sym)
 
   expansion_level++;
   if (expansion_level > nesting_limit)
-    M4ERROR ((EXIT_FAILURE, 0,
-	      "ERROR: Recursion limit of %d exceeded, use -L<N> to change it",
+    M4ERROR ((EXIT_FAILURE, 0, _("\
+ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 	      nesting_limit));
 
   macro_call_id++;
@@ -296,8 +302,8 @@ expand_macro (symbol *sym)
 
   collect_arguments (sym, &argptr, &arguments);
 
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
+  argc = obstack_object_size (&argptr) / sizeof (m4_token_data *);
+  argv = (m4_token_data **) obstack_finish (&argptr);
 
   if (traced)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);

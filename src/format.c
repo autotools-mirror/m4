@@ -18,7 +18,7 @@
 
 /* printf like formatting for m4.  */
 
-#include "m4.h"
+#include "m4private.h"
 
 #ifdef HAVE_EFGCVT
 
@@ -39,7 +39,9 @@ extern long atol ();
 extern double atof ();
 #endif /* STDC_HEADERS */
 
+#ifndef min
 #define min(a, b)	((a) < (b) ? (a) : (b))
+#endif
 
 static char const digits[] = "0123456789abcdef";
 static char const Digits[] = "0123456789ABCDEF";
@@ -83,27 +85,27 @@ clr0 (char *s)
 
 #define ARG_INT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_UINT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned int) atoi (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned int) atoi (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_LONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_ULONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned long) atol (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, (unsigned long) atol (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_STR(argc, argv) \
 	((argc == 0) ? "" : \
-	 (--argc, argv++, TOKEN_DATA_TEXT (argv[-1])))
+	 (--argc, argv++, M4_TOKEN_DATA_TEXT (argv[-1])))
 
 #define ARG_DOUBLE(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atof (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, atof (M4_TOKEN_DATA_TEXT (argv[-1]))))
 
 
 /*------------------------------------------------------------------------.
@@ -113,11 +115,11 @@ clr0 (char *s)
 `------------------------------------------------------------------------*/
 
 void
-format (struct obstack *obs, int argc, token_data **argv)
+format (struct obstack *obs, int argc, m4_token_data **argv)
 {
 #ifdef HAVE_EFGCVT
 
-  const char *fmt;		/* format control string */
+  const unsigned char *fmt;	/* format control string */
   int c;			/* a simple character */
   char fc;			/* format code */
 

@@ -2,35 +2,57 @@ This directory contains demonstration modules for GNU m4.
 
 Nothing in this directory is built by default.
 
-Dynamic modules is a experimental feature of GNU m4, and might change or
-disappear altogether in future versions.  Currently it has only been
-certified to work under Linux 2.0.
+Note that as of this writing, an unreleased version of libtool from the
+CVS trunk is required to be able to compile the example modules, since they
+in turn depend on the uninstalled libm4.la library.  I think that third
+party modules will not have this requirement since they will be linking 
+against the installed library.  In any case, once libtool-1.4 (or 1.3a if
+you live on the bleeding edge) is released this will become a non-issue.
+The bottom line is that you shouldn't libtoolize this distribution unless
+you know what you are doing!
+
+Dynamic modules is a experimental feature of GNU m4.
 
 Dynamic modules are only available if GNU m4 was configured with
---with-modules and if the dlopen(3) interface is available in the
-operating system.
+--with-modules and if the operating system provides one (or more!) of
+libltdl's required APIs.
 
 Implementation details are in ../src/module.c
 
 A module is a compiled shared object, i.e., modules are written in C and
 then compiled.  The compiled file can then be loaded into a running m4
-process by calling the builtin "loadmodule".  This will give GNU m4
-access to any system feature with a C interface.
+process by calling the builtin "loadmodule", or by calling m4 with the
+`-m' or `--load-module' options on the command line.  This will give GNU
+m4 access to any system feature with a C interface.
+
+Modules are searched for in M4MODPATH, if set, else in a module directory
+defined at configure time, default /usr/local/libexec/m4.  Extra directories
+can also be added to the search patch by specifying them on the command
+line with the `-M' or `--module-directory' options.
 
 A module extends GNU m4 by defining new builtins, It can define builtins
 with the same names as existing builtins, which will then be
 unavailable.  A module cannot redefine internal functions of GNU m4,
 such as the input parser or argument handling.
 
-The infrastructure for writing and compiling modules is still a bit
-wanting, quasi non-existent.
+Each module should include the installed header file,
+`$prefix/include/m4module.h'.  This will define all the necessary macros,
+type declarations and function prototypes required.
 
-Each module should include the two header files ../src/m4.h and
-../src/builtin.h.  These will include <ctype.h>, <stdio.h>,
-../lib/obstack.h and ../config.h.
+The module system uses libtool's libltdl for dynamic module loading, and
+that in turn requires that any non-static symbols in the module to be
+be in their own namespace to avoid namespace clashes with symbols
+exported from other modules (which may be loaded too!).  This is usually
+done by `#define'ing these symbols to libltdl's naming scheme at the top
+of the file.  The scheme is to prefix each symbol with the module name,
+followed by `_LTX_' and then the original symbol name.  For example,
+to export "m4_macro_table" in a source file which will become part of
+a module, "mymod", we would add the following to the top of the source file:
+`#define m4_macro_table mymod_LTX_m4_macro_table'.  See the included modules
+for more examples.
 
 Each module *must* define the symbol "m4_macro_table" as a pointer to a
-table of "struct builtin" (defined in m4.h).  The table ends with an
+table of "struct builtin" (defined in m4module.h).  The table ends with an
 entry with name == NULL.  The builtins described in the table will be
 defined by GNU m4 as were they normal builtins.
 
@@ -47,16 +69,28 @@ clean up before exit.  There is no way of communicating information to
 the user, as GNU m4 exits immeidately afterwards.
 
 No other symbols will be used by GNU m4.  Other external symbols within
-the module are private and will not be accessible to GNU m4 or to other
-modules.
+the module are private and should be declared `static' so that they will
+not be accessible to GNU m4 or to other modules.
 
 Modules are allowed to call external functions already defined within
-the GNU m4 sources.  Some of these have prototypes in builtin.h.
+the GNU m4module library.  These have prototypes in m4module.h.
 
 
 A complete, though silly, example is found in test.c.  A more
-interesting example is in time.c.
+interesting example is in time.c or in stdlib.c.  Loading and unloading
+of modules, and symbol namespace resolution stratgies are illustrated by
+shadow.c and shadow.m4.
 
 To try the demos, compile with `make' and run them with the commands as:
 
    M4MODPATH=`pwd` ../src/m4 time.m4
+
+or
+
+  ../src/m4 -M `pwd` shadow.m4
+
+or in the case of time2.m4
+
+  ../src/m4 -M `pwd` -m time time2.m4
+
+

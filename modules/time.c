@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1998 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,42 +16,72 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <m4.h>
-#include <builtin.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 
+#ifdef TM_IN_SYS_TIME
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif /* TM_IN_SYS_TIME */
 
-DECLARE(m4_currenttime);
-DECLARE(m4_ctime);
-DECLARE(m4_gmtime);
-DECLARE(m4_localtime);
-DECLARE(m4_mktime);
-DECLARE(m4_strftime);
+#include <m4module.h>
 
-#undef DECLARE
+#define m4_builtin_table	time_LTX_m4_builtin_table
 
-builtin m4_macro_table[] =
+/*		function	macros	blind */
+#define builtin_functions			\
+	BUILTIN (currenttime,	FALSE,	FALSE)	\
+	BUILTIN (ctime,		FALSE,	FALSE)	\
+	BUILTIN (gmtime,	FALSE,	TRUE)	\
+	BUILTIN (localtime,	FALSE,	TRUE)
+
+#define mktime_functions			\
+	BUILTIN (mktime,	FALSE,	TRUE)
+
+#define strftime_functions			\
+	BUILTIN (strftime,	FALSE,	TRUE)
+
+#define BUILTIN(handler, macros,  blind)	M4BUILTIN(handler)
+  builtin_functions
+# ifdef HAVE_MKTIME
+  mktime_functions
+# endif
+# ifdef HAVE_STRFTIME
+  strftime_functions
+# endif
+#undef BUILTIN
+
+m4_builtin m4_builtin_table[] =
 {
-  /* name		GNUext	macros	blind	function */
-  { "currenttime",	TRUE,	FALSE,	FALSE,	m4_currenttime },
-  { "ctime",		TRUE,	FALSE,	FALSE,	m4_ctime },
-  { "gmtime",		TRUE,	FALSE,	TRUE,	m4_gmtime },
-  { "localtime",	TRUE,	FALSE,	TRUE,	m4_localtime },
-  { "mktime",		TRUE,	FALSE,	TRUE,	m4_mktime },
-  { "strftime",		TRUE,	FALSE,	TRUE,	m4_strftime },
-  { 0,			FALSE,	FALSE,	FALSE,	0 },
+#define BUILTIN(handler, macros, blind)		\
+	{ STR(handler), CONC(builtin_, handler), macros, blind },
+
+  builtin_functions
+# ifdef HAVE_MKTIME
+  mktime_functions
+# endif
+# ifdef HAVE_STRFTIME
+  strftime_functions
+# endif
+#undef BUILTIN
+
+  { 0, 0, FALSE, FALSE },
 };
 
 
 
-static void
-m4_currenttime (struct obstack *obs, int argc, token_data **argv)
+/*--------------.
+| currenttime() |
+`--------------*/
+M4BUILTIN_HANDLER(currenttime)
 {
   char buf[64];
   time_t now;
   int l;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
   now = time(0L);
@@ -60,18 +90,20 @@ m4_currenttime (struct obstack *obs, int argc, token_data **argv)
   obstack_grow (obs, buf, l);
 }
 
-static void
-m4_ctime (struct obstack *obs, int argc, token_data **argv)
+/*-----------------.
+| ctime([SECONDS]) |
+`-----------------*/
+M4BUILTIN_HANDLER(ctime)
 {
   char buf[64];
   time_t t;
   int l;
 
-  if (bad_argc (argv[0], argc, 1, 2))
+  if (m4_bad_argc (argv[0], argc, 1, 2))
     return;
 
   if (argc == 2)
-    numeric_arg(argv[0], ARG(1), (int *)&t);
+    m4_numeric_arg(argv[0], (char*)M4ARG(1), (int *)&t);
   else
     t = time(0L);
 
@@ -81,113 +113,121 @@ m4_ctime (struct obstack *obs, int argc, token_data **argv)
 static void
 format_tm(struct obstack *obs, struct tm *tm)
 {
-  shipout_int(obs, tm->tm_sec);
+  m4_shipout_int(obs, tm->tm_sec);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_min);
+  m4_shipout_int(obs, tm->tm_min);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_hour);
+  m4_shipout_int(obs, tm->tm_hour);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_mday);
+  m4_shipout_int(obs, tm->tm_mday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_mon);
+  m4_shipout_int(obs, tm->tm_mon);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_year);
+  m4_shipout_int(obs, tm->tm_year);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_wday);
+  m4_shipout_int(obs, tm->tm_wday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_yday);
+  m4_shipout_int(obs, tm->tm_yday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_isdst);
+  m4_shipout_int(obs, tm->tm_isdst);
 }
 
-static void
-m4_gmtime (struct obstack *obs, int argc, token_data **argv)
+/*----------------.
+| gmtime(SECONDS) |
+`----------------*/
+M4BUILTIN_HANDLER(gmtime)
 {
   time_t t;
   struct tm *tm;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
     return;
 
   format_tm(obs, gmtime(&t));
 }
 
-static void
-m4_localtime (struct obstack *obs, int argc, token_data **argv)
+/*-------------------.
+| localtime(SECONDS) |
+`-------------------*/
+M4BUILTIN_HANDLER(localtime)
 {
   time_t t;
   struct tm *tm;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
     return;
 
   format_tm(obs, localtime(&t));
 }
 
-/*-------------------------------------------.
-| mktime(sec,min,hour,mday,month,year,isdst) |
-`-------------------------------------------*/
-
-static void
-m4_mktime (struct obstack *obs, int argc, token_data **argv)
+#ifdef HAVE_MKTIME
+/*---------------------------------------------------.
+| mktime(SEC, MIN, HOUR, MDAY, MONTH, YEAR, [ISDST]) |
+`---------------------------------------------------*/
+M4BUILTIN_HANDLER(mktime)
 {
   struct tm tm;
   time_t t;
 
-  if (bad_argc (argv[0], argc, 7, 8))
+  if (m4_bad_argc (argv[0], argc, 7, 8))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &tm.tm_sec))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), &tm.tm_sec))
     return;
-  if (!numeric_arg (argv[0], ARG (2), &tm.tm_min))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), &tm.tm_min))
     return;
-  if (!numeric_arg (argv[0], ARG (3), &tm.tm_hour))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(3), &tm.tm_hour))
     return;
-  if (!numeric_arg (argv[0], ARG (4), &tm.tm_mday))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(4), &tm.tm_mday))
     return;
-  if (!numeric_arg (argv[0], ARG (5), &tm.tm_mon))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(5), &tm.tm_mon))
     return;
-  if (!numeric_arg (argv[0], ARG (6), &tm.tm_year))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(6), &tm.tm_year))
     return;
-  if (ARG(7) && !numeric_arg (argv[0], ARG (7), &tm.tm_isdst))
+  if (M4ARG(7) && !m4_numeric_arg (argv[0], (char*)M4ARG(7), &tm.tm_isdst))
     return;
 
   t = mktime(&tm);
 
-  shipout_int(obs, t);
+  m4_shipout_int(obs, t);
 }
+#endif /* HAVE_MKTIME */
 
-static void
-m4_strftime (struct obstack *obs, int argc, token_data **argv)
+#ifdef HAVE_STRFTIME
+/*--------------------------.
+| strftime(FORMAT, SECONDS) |
+`--------------------------*/
+M4BUILTIN_HANDLER(strftime)
 {
   struct tm *tm;
   time_t t;
   char *buf;
   int l;
 
-  if (bad_argc (argv[0], argc, 3, 3))
+  if (m4_bad_argc (argv[0], argc, 3, 3))
     return;
 
-  if (!numeric_arg (argv[0], ARG (2), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), (int *)&t))
     return;
 
   tm = localtime(&t);
 
   buf = (char *) obstack_alloc(obs, 1024);
-  l = strftime(buf, 1024, ARG(1), tm);
+  l = strftime(buf, 1024, (char*)M4ARG(1), tm);
   obstack_grow(obs, buf, l);
 }
+#endif /* HAVE_STRFTIME */

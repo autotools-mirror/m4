@@ -13,6 +13,10 @@ case "$srcdir" in
  /*)
     ;;
 
+ .)
+    srcdir=".."
+    ;;
+
  *)
     srcdir="../$srcdir"
     ;;
@@ -39,7 +43,7 @@ test -z "$MAKE" && MAKE=make
 echo "=== Running test $0"
 
 # See how GNU m4 should be run.  No options as default.
-test -z "$M4" && M4=../../src/m4
+test -z "$M4" && M4="${SHELL-/bin/sh} ../../libtool --mode=execute ../../src/m4"
 
 # See how cmp should be run.
 test -z "$CMP" && CMP=cmp

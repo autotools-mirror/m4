@@ -18,7 +18,7 @@
 
 /* This file is used to compile the gmp aware version of eval()  */
 
-#include "m4.h"
+#include "m4private.h"
 
 #ifdef WITH_GMP
 #define USE_GMP

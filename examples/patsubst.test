@@ -18,9 +18,9 @@ GNUs not Unix
 EOF
 
 cat <<\EOF >okerr
-in:4: m4: WARNING: \0 will disappear, use \& instead in replacements
+m4: in: 4: WARNING: \0 will disappear, use \& instead in replacements
 EOF
 
 M4PATH=$srcdir:$srcdir/../tests $M4 -d in >out 2>err
-sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 $CMP -s out ok && $CMP -s err okerr

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generated-tests/pseudoar.4.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 1129
+# generated from example in ../doc/m4.texinfo line 1153
 
 . ${srcdir}/defs
 
