@@ -391,7 +391,8 @@ static struct input_funcs macro_funcs = {
 };
 
 void
-m4_push_macro (m4_builtin_func *func, lt_dlhandle handle, int flags)
+m4_push_macro (m4_builtin_func *func, lt_dlhandle handle,
+	       int min, int max, int flags)
 {
   input_block *i;
 
@@ -407,6 +408,8 @@ m4_push_macro (m4_builtin_func *func, lt_dlhandle handle, int flags)
 
   i->u.u_m.func		= func;
   i->u.u_m.handle	= handle;
+  i->u.u_m.min_args	= min;
+  i->u.u_m.max_args	= max;
   i->u.u_m.flags	= flags;
   i->u.u_m.read		= FALSE;
 

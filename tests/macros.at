@@ -23,6 +23,82 @@ AT_BANNER([Macro definitions.])
 # arguments and so on).
 
 ## ---------------- ##
+## Arity and defn.  ##
+## ---------------- ##
+
+AT_SETUP([Arity and defn])
+
+# Check that the arity checking of define is correctly propagated.
+
+AT_DATA([[input.m4]],
+[[define(`defun', defn(`define'))
+define
+define(`foo')
+define(`foo', `bar')
+define(`foo', `bar', baz')
+
+defun
+defun(`foo')
+defun(`foo', `bar')
+defun(`foo', `bar', baz')
+]])
+
+AT_DATA([[expout]],
+[[
+define
+
+
+
+
+defun
+
+
+
+]])
+
+AT_CHECK_M4([input.m4], 0, [expout],
+[[m4: input.m4: 5: Warning: define: too many arguments (ignored): 3 > 2
+m4: input.m4: 10: Warning: defun: too many arguments (ignored): 3 > 2
+]])
+
+AT_CLEANUP
+
+
+## ------------------------- ##
+## Arity, defn, and freeze.  ##
+## ------------------------- ##
+
+AT_SETUP([Arity, defn, and freeze])
+
+AT_DATA([[freezeme.m4]],
+[[define(`defun', defn(`define'))dnl
+undefine(`define')dnl
+]])
+
+AT_CHECK_M4([--freeze-state=frozen.m4f freezeme.m4], 0)
+
+AT_DATA([[input.m4]],
+[[defun
+defun(`foo')
+defun(`foo', `bar')
+defun(`foo', `bar', baz')
+]])
+
+AT_DATA([[expout]],
+[[defun
+
+
+
+]])
+
+AT_CHECK_M4([--reload-state=frozen.m4f input.m4], 0, expout,
+[[m4: input.m4: 4: Warning: defun: too many arguments (ignored): 3 > 2
+]])
+
+AT_CLEANUP(freezeme.m4 frozen.m4f)
+
+
+## ---------------- ##
 ## pushdef/popdef.  ##
 ## ---------------- ##
 

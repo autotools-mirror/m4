@@ -351,11 +351,12 @@ M4BUILTIN_HANDLER (defn)
   switch (SYMBOL_TYPE (symbol))
     {
     case M4_TOKEN_TEXT:
-      m4_shipout_string(obs, SYMBOL_TEXT (symbol), 0, TRUE);
+      m4_shipout_string (obs, SYMBOL_TEXT (symbol), 0, TRUE);
       return;
 
     case M4_TOKEN_FUNC:
       m4_push_macro (SYMBOL_FUNC (symbol), SYMBOL_HANDLE (symbol),
+		     SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol),
 		     SYMBOL_FLAGS (symbol));
       return;
 

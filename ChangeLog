@@ -1,5 +1,15 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* tests/macros.at (Arity and defn): New failing test.
+	(Arity, defn, and freeze): New.
+
+	Fix `Arity and defn'.
+
+	* m4/input.c (m4_push_macro): Don't forget the arity.
+	* modules/m4.c (defn): Likewise.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* tests/builtins.at (pushdef/popdef, trace, trace2, trace3): Move
 	to...
 	* tests/macros.at (pushdef/popdef, Tracing Hanoi Towers)

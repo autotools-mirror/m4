@@ -293,11 +293,9 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
     m4_trace_pre (name, my_call_id, argc, argv);
 
   expansion = m4_push_string_init ();
-  {
-    if (!m4_bad_argc (argc, argv,
-		      SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
-      m4_call_macro (symbol, argc, argv, expansion);
-  }
+  if (!m4_bad_argc (argc, argv,
+		    SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
+    m4_call_macro (symbol, argc, argv, expansion);
   expanded = m4_push_string_finish ();
 
   if (traced)
