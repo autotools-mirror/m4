@@ -1,4 +1,5 @@
 #! /bin/sh
+# @configure_generated@
 # Wrapper around a non installed m4 to make it work as an installed one.
 
 "@top_buildpath@/src/m4" \
