@@ -1,3 +1,7 @@
+2001-10-05  Gary Vaughan  <gary@gnu.org>
+
+	* bootstrap: Remove aclocal.m4t when it is no longer required.
+
 2001-10-05  Akim Demaille  <akim@epita.fr>
 
 	* tests/Makefile.am: Adjust for gnuprog2.

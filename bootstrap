@@ -3,12 +3,14 @@
 # helps bootstrapping M4, when checked out from CVS
 # requires GNU autoconf, GNU automake and GNU libtool
 
-find . -name autom4te.cache | xargs rm -r
+find . -name autom4te.cache | xargs rm -rf
 
 auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.in | sed 's/^.*(\([^)]*\)).*$/\1/'`
 
 rm -f config.cache
 rm aclocal.m4
+
+trap 'rm -f aclocal.m4t' 0 1 9 15
 
 # Make a copy of each Automake/Gettext m4 file we need.
 aclocal_libdir=`aclocal --print-ac-dir`
