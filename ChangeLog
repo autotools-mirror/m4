@@ -1,3 +1,9 @@
+2005-02-03  Noah Misch  <noah@cs.caltech.edu>
+
+	* src/output.c (mkstemp): Make non-static, and build regardless of
+	HAVE_TMPFILE; src/builtin.c also needs this replacement.
+	* NEWS: Update.
+
 2004-09-09  Vincent Lonngren  <Vincent.lonngren.759@student.lu.se>
 
 	* configure.in (AC_CHECK_HEADERS): Commit works best when you save

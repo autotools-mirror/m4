@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
    Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
@@ -102,8 +102,6 @@ output_init (void)
   output_unused = 0;
 }
 
-#ifndef HAVE_TMPFILE
-
 #ifndef HAVE_MKSTEMP
 
 /* This implementation of mkstemp(3) does not avoid any races, but its
@@ -111,7 +109,7 @@ output_init (void)
 
 #include <fcntl.h>
 
-static int
+int
 mkstemp (const char *tmpl)
 {
   mktemp (tmpl);
@@ -119,6 +117,8 @@ mkstemp (const char *tmpl)
 }
 
 #endif /* not HAVE_MKSTEMP */
+
+#ifndef HAVE_TMPFILE
 
 /* Implement tmpfile(3) for non-USG systems.  */
 
