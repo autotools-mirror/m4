@@ -203,6 +203,7 @@ extern void		m4_symbol_value_copy	  (m4_symbol_value *,
 						   m4_symbol_value *);
 extern boolean		m4_is_symbol_value_text   (m4_symbol_value *);
 extern boolean		m4_is_symbol_value_func   (m4_symbol_value *);
+extern boolean		m4_is_symbol_value_void	  (m4_symbol_value *);
 extern char	       *m4_get_symbol_value_text  (m4_symbol_value *);
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
 extern void		m4_set_symbol_value_text  (m4_symbol_value *, char *);
@@ -426,21 +427,6 @@ struct m4_search_path_info
 extern struct m4_search_path_info *m4_search_path_info_new (void);
 extern	void	m4_search_path_env_init (struct m4_search_path_info *, char *, boolean);
 extern	void	m4_search_path_add (struct m4_search_path_info *, const char *);
-
-
-/* The structure dump_symbol_data is used to pass the information needed
-   from call to call to dump_symbol.  */
-
-struct m4_dump_symbol_data
-{
-  m4_obstack *obs;		/* obstack for table */
-  const char **base;		/* base of table */
-  int size;			/* size of table */
-};
-
-extern void *m4_dump_symbol_CB (m4_symbol_table*, const char*, m4_symbol *, void *);
-extern void m4_dump_symbols (m4 *context, struct m4_dump_symbol_data *data, int argc, m4_symbol_value **argv, boolean complain);
-
 
 
 #define obstack_chunk_alloc	xmalloc

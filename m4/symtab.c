@@ -441,6 +441,14 @@ m4_is_symbol_value_func (m4_symbol_value *value)
   return (value->type == M4_SYMBOL_FUNC);
 }
 
+#undef m4_is_symbol_value_void
+boolean
+m4_is_symbol_value_void (m4_symbol_value *value)
+{
+  assert (value);
+  return (value->type == M4_SYMBOL_VOID);
+}
+
 #undef m4_get_symbol_value_text
 char *
 m4_get_symbol_value_text (m4_symbol_value *value)

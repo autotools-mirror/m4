@@ -699,7 +699,7 @@ m4_input_init (void)
   start_of_input_line = FALSE;
 }
 
- void
+void
 m4_input_exit (void)
 {
   obstack_free (&wrapup_stack, NULL);

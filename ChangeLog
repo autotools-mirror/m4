@@ -1,5 +1,32 @@
 2003-07-24  Gary V. Vaughan  <gary@gnu.org>
 
+	Sometimes exporting the address of a symbol from a module isn't
+	enough for other modules to call that symbol correctly.  If
+	custom data types are used for function parameters, they need to
+	be known to the caller.  This change introduces the concept of
+	$(prefix)/include/modules/$(modulename).h to declare those
+	structures.  Also we move m4_dump_symbols from libm4 to the m4
+	module to show this concept in action.
+
+	* m4/m4module.h (m4_dump_symbol_data): Moved from here...
+	* modules/m4.h (m4_dump_symbol_data): ...to this new file for
+	exporting data structures from modules/m4.c.
+	* modules/m4.c, modules/gnu.c: Include it.
+	* modules/Makefile.am (pkgmodinc_HEADERS): Install it.
+	* m4/m4module.h (m4_dump_symbol_CB, m4_dump_symbols): Removed
+	prototypes.
+	* m4/utility.c (dumpdef_cmp, m4_dump_symbol_CB, m4_dump_symbols):
+	Moved from here...
+	* modules/m4.c (dumpdef_cmp_CB, dump_symbol_CB, m4_dump_symbols):
+	...to here, with slight renaming.
+	(m4_export_table): Prototype and add m4_dump_symbols.
+	* m4/symtab.c (m4_is_symbol_value_void): Needed for an external
+	definition of m4_dump_symbols.
+	* m4/m4module.h (m4_is_symbol_value_void): Prototype it.
+	* m4/m4private.h (m4_is_symbol_value_void): Fast macro version.
+
+2003-07-24  Gary V. Vaughan  <gary@gnu.org>
+
 	Create an export table in modules/m4.c in readiness for beefing up
 	the module loader to track module exports and imports.
 

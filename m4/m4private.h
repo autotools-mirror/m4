@@ -152,6 +152,7 @@ struct m4_symbol_value {
 
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
+#  define m4_is_symbol_value_void(V)	((V)->type == M4_SYMBOL_VOID)
 #  define m4_get_symbol_value_text(V)	((V)->u.text)
 #  define m4_get_symbol_value_func(V)	((V)->u.func)
 

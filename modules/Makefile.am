@@ -22,6 +22,7 @@ DISTCLEANFILES = perlxsi.c
 MAINTAINERCLEANFILES = Makefile.in
 
 testsubdir = testSubDir
+pkgmodincdir = $(includedir)/@PACKAGE@/modules
 
 ETAGS_ARGS = --regex='/M4BUILTIN_HANDLER[ \t]*(\([^)]*\)/\1/'
 
@@ -32,6 +33,7 @@ INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
 LIBS = $(top_builddir)/m4/libm4.la
 AM_LDFLAGS = -no-undefined
 
+pkgmodinc_HEADERS = m4.h
 pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la \
 			  traditional.la perl.la \
 			  modtest.la shadow.la stdlib.la time.la

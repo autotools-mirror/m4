@@ -28,6 +28,7 @@
 #endif
 
 #include <m4module.h>
+#include <modules/m4.h>
 
 #if HAVE_ERRNO_H
 #  include <errno.h>
@@ -367,9 +368,6 @@ M4BUILTIN_HANDLER (eregexp)
    third argument, with \& substituted by the matched text, and \N
    substituted by the text matched by the Nth parenthesized sub-expression.  */
 
-/**
- * patsubst(STRING, REGEXP, [REPLACEMENT])
- **/
 static void
 m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 		m4_symbol_value **argv, int syntax)
@@ -444,22 +442,26 @@ M4BUILTIN_HANDLER (patsubst)
 }
 
 /**
- * patsubst(STRING, REGEXP, [REPLACEMENT])
+ * epatsubst(STRING, REGEXP, [REPLACEMENT])
  **/
 M4BUILTIN_HANDLER (epatsubst)
 {
   m4_patsubst_do (context, obs, argc, argv, RE_SYNTAX_ERE);
 }
 
-/* Implementation of "symbols" itself.  It builds up a table of pointers to
-   symbols, sorts it and ships out the symbols name.  */
+/* Implementation of "symbols".  It builds up a table of pointers to
+   symbols, sorts it and ships out the symbol names.  */
+
+/* TODO:  Import this through the m4_export list of m4 module.  */
+extern void m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
+			     m4_symbol_value **argv, boolean complain);
 
 /**
  * symbols([...])
  **/
 M4BUILTIN_HANDLER (symbols)
 {
-  struct m4_dump_symbol_data data;
+  m4_dump_symbol_data data;
   m4_obstack data_obs;
 
   obstack_init (&data_obs);

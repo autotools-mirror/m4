@@ -35,6 +35,7 @@ extern int errno;
 #include <assert.h>
 
 #include <m4module.h>
+#include <modules/m4.h>
 
 #ifdef NDEBUG
 /* Include this header for speed, which gives us direct access to
@@ -49,12 +50,16 @@ extern int errno;
 #define m4_builtin_table	m4_LTX_m4_builtin_table
 
 /* Exit code from last "syscmd" command.  */
-int m4_sysval = 0;
+int  m4_sysval = 0;
+
 void m4_sysval_flush (m4 *context);
+void m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
+		      m4_symbol_value **argv, boolean complain);
 
 m4_export m4_export_table[] = {
   { "m4_sysval",		&m4_sysval },
   { "m4_sysval_flush",		&m4_sysval_flush },
+  { "m4_dump_symbols",		&m4_dump_symbols },
 
   { NULL,			NULL }
 };
@@ -107,10 +112,12 @@ typedef long int number;
 typedef unsigned long int unumber;
 #endif
 
-
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 boolean silent);
+static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	set_trace_CB	(m4_symbol_table *symtab, const char *ignored,
+				 m4_symbol *symbol, void *userdata);
+static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char*name,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(m4_obstack *obs, const number value,
@@ -281,11 +288,77 @@ M4BUILTIN_HANDLER (ifelse)
 }
 
 
+/* qsort comparison routine, for sorting the table made in m4_dumpdef ().  */
+static int
+dumpdef_cmp_CB (const void *s1, const void *s2)
+{
+  return strcmp (*(const char **) s1, *(const char **) s2);
+}
+
+/* The function m4_dump_symbols () is for use by "dumpdef".  It builds up a
+   table of all defined symbol names.  */
+static void *
+dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
+		void *userdata)
+{
+  assert (name);
+  assert (symbol);
+
+  if (!m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
+    {
+      m4_dump_symbol_data *symbol_data = (m4_dump_symbol_data *) userdata;
+
+      obstack_blank (symbol_data->obs, sizeof (const char *));
+      symbol_data->base = (const char **) obstack_base (symbol_data->obs);
+      symbol_data->base[symbol_data->size++] = (const char *) name;
+    }
+
+  return NULL;
+}
+
+/* If there are no arguments, build a sorted list of all defined
+   symbols, otherwise, only the specified symbols.  */
+void
+m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
+		 m4_symbol_value **argv, boolean complain)
+{
+  data->base = (const char **) obstack_base (data->obs);
+  data->size = 0;
+
+  if (argc == 1)
+    {
+      m4_symtab_apply (M4SYMTAB, dump_symbol_CB, data);
+    }
+  else
+    {
+      int i;
+      m4_symbol *symbol;
+
+      for (i = 1; i < argc; i++)
+	{
+	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
+	  if (symbol != NULL
+	      && !m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
+	    {
+	      dump_symbol_CB (NULL, M4ARG (i), symbol, data);
+	    }
+	  else if (complain)
+	    M4WARN ((m4_get_warning_status_opt (context), 0,
+		     _("Warning: %s: undefined name: %s"),
+		     M4ARG (0), M4ARG (i)));
+	}
+    }
+
+  obstack_finish (data->obs);
+  qsort ((void*) data->base, data->size, sizeof (const char*), dumpdef_cmp_CB);
+}
+
+
 /* Implementation of "dumpdef" itself.  It builds up a table of pointers to
    symbols, sorts it and prints the sorted table.  */
 M4BUILTIN_HANDLER (dumpdef)
 {
-  struct m4_dump_symbol_data data;
+  m4_dump_symbol_data data;
   const m4_builtin *bp;
 
   data.obs = obs;
@@ -316,7 +389,7 @@ M4BUILTIN_HANDLER (dumpdef)
 	}
       else
 	{
-	  assert (!"illegal token in m4_dumpdef");
+	  assert (!"illegal token in builtin_dumpdef");
 	}
     }
 }
