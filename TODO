@@ -1,5 +1,5 @@
 GNU m4 TODO - Tasks that need implementing.		-*- outline -*-
-Copyright 2000 Free Software Foundation, Inc.
+Copyright 2000, 2001 Free Software Foundation, Inc.
 
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
@@ -69,25 +69,10 @@ for any of these ideas or if you have others to add.
 	maintaining the string lengths, and avoiding strlen, strcpy,
 	etc.).
 
-  + The symbol table needs a complete reimplementation, so that it tracks
-    the module responsible for each of the symbols it contains.  This would
-    not only speed up module unloading immensely, but simplfy the code
-    considerably too.
-
-  + Much of the code could be improved by providing a resizing hash table
-    ADT, and  wrapping symtab and the various searchable internal
-    structures around it.
-
   + --with-gmp is surplus to requirements, mpeval should always be built --
     either with libgmp if it is available, or else without it.  Whether
     or not to use mpeval is then determined at runtime, if the user tries
     to `load(`mpeval')'.
-
-  + The `shadowed' flag in every symbol is only used by m4_dump_symbol(),
-    and could be determined instead by the presence of an identically
-    named symbol immediately proir to this one in the hash bucket.  So
-    doing would slow down dumpdef, but speed up the rest of the symbol
-    handling code, and reduce the memory overhead per symbol.
 
 
 * MODULE SPECIFIC ISSUES
@@ -103,9 +88,6 @@ for any of these ideas or if you have others to add.
   + Setting of the module search path within m4 scripts:
 
 	append(__modulepath__, `/some/modules/live/here')
-
-  + m4_finish_module should take an obstack argument to allow a module
-    to pass an expansion back to the caller.
 
   + Module autoloader.  This would allow an m4 core with no builtins except
     for loadmodule().  A default startup script would mark the recognised

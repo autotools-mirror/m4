@@ -1,3 +1,7 @@
+2001-09-05  Gary V. Vaughan  <gary@gnu.org>
+
+	* TODO: Remove the items that have been addressed already.
+
 2001-09-05  Akim Demaille  <akim@epita.fr>
 
 	* src/main.c (main): Standardize --version.
