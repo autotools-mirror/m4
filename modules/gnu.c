@@ -280,7 +280,7 @@ m4_regexp_compile (const char *caller,
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		_("%0: bad regular expression `%s': %s"),
+		_("%s: bad regular expression `%s': %s"),
 		caller, regexp, msg));
       return NULL;
     }

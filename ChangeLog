@@ -1,5 +1,9 @@
 2001-10-12  Gary V. Vaughan  <gary@gnu.org>
 
+	* modules/gnu.c (m4_regexp_compile): s/%0/%s/
+
+2001-10-12  Gary V. Vaughan  <gary@gnu.org>
+
 	Rather than forcing each builtin definition to manage its own
 	argument range checking, tabulate the maxima and minima for all
 	builtins in each module.  This forces us to consider what the
