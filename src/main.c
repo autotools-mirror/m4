@@ -435,7 +435,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	    macro_value = "";
 	  else
 	    *macro_value++ = '\0';
-	  m4_macro_insert (defines->macro, NULL, macro_value);
+	  m4_macro_define (defines->macro, NULL, macro_value);
 	  break;
 
 	case 'U':
@@ -443,7 +443,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	  break;
 
 	case 't':
-	  symbol = m4_symbol_insert (defines->macro);
+	  symbol = m4_symbol_define (defines->macro);
 	  M4_SYMBOL_TRACED (symbol) = TRUE;
 	  break;
 

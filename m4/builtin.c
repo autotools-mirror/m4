@@ -89,7 +89,7 @@ m4_builtin_pushdef (const char *name, lt_dlhandle handle,
 }
 
 m4_symbol *
-m4_builtin_insert (const char *name, lt_dlhandle handle,
+m4_builtin_define (const char *name, lt_dlhandle handle,
 		    const m4_builtin *bp)
 {
   m4_symbol *symbol;
@@ -98,7 +98,7 @@ m4_builtin_insert (const char *name, lt_dlhandle handle,
   assert (handle);
   assert (bp);
 
-  symbol = m4_symbol_insert (name);
+  symbol = m4_symbol_define (name);
 
   if (symbol)
     m4_symbol_builtin (symbol, handle, bp);
@@ -153,14 +153,14 @@ m4_macro_pushdef (const char *name, lt_dlhandle handle, const char *text)
 }
 
 m4_symbol *
-m4_macro_insert (const char *name, lt_dlhandle handle, const char *text)
+m4_macro_define (const char *name, lt_dlhandle handle, const char *text)
 {
   m4_symbol *symbol;
 
   assert (name);
   assert (text);
 
-  symbol = m4_symbol_insert (name);
+  symbol = m4_symbol_define (name);
 
   if (symbol)
     m4_symbol_macro (symbol, handle, text);

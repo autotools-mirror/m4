@@ -72,14 +72,14 @@ extern lt_dlhandle  m4_module_find_by_builtin (const m4_builtin*);
 
 extern m4_symbol *m4_macro_pushdef	(const char *name, lt_dlhandle handle,
 					 const char *text);
-extern m4_symbol *m4_macro_insert	(const char *name, lt_dlhandle handle,
+extern m4_symbol *m4_macro_define	(const char *name, lt_dlhandle handle,
 					 const char *text);
 extern void	  m4_macro_table_install (lt_dlhandle handle,
 					  const m4_macro *table);
 
 extern m4_symbol *m4_builtin_pushdef	(const char *name, lt_dlhandle handle,
 					 const m4_builtin *bp);
-extern m4_symbol *m4_builtin_insert	(const char *name, lt_dlhandle handle,
+extern m4_symbol *m4_builtin_define	(const char *name, lt_dlhandle handle,
 					 const m4_builtin *bp);
 extern void	  m4_builtin_table_install (lt_dlhandle handle,
 					    const m4_builtin *table);
@@ -97,7 +97,7 @@ extern void	m4_symtab_remove_module_references (lt_dlhandle);
 
 extern m4_symbol *m4_symbol_lookup	(const char *);
 extern m4_symbol *m4_symbol_pushdef	(const char *);
-extern m4_symbol *m4_symbol_insert	(const char *);
+extern m4_symbol *m4_symbol_define	(const char *);
 extern void       m4_symbol_popdef	(const char *);
 extern void       m4_symbol_delete	(const char *);
 extern void	  m4_symbol_builtin	(m4_symbol *symbol, lt_dlhandle handle,

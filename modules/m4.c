@@ -136,14 +136,14 @@ M4BUILTIN_HANDLER (define)
 
   if (argc == 2)
     {
-      m4_macro_insert (M4ARG (1), NULL, "");
+      m4_macro_define (M4ARG (1), NULL, "");
       return;
     }
 
   switch (M4_TOKEN_DATA_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
-      m4_macro_insert (M4ARG (1), NULL, M4ARG (2));
+      m4_macro_define (M4ARG (1), NULL, M4ARG (2));
       return;
 
     case M4_TOKEN_FUNC:
@@ -158,7 +158,7 @@ M4BUILTIN_HANDLER (define)
 	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
 					   M4_TOKEN_DATA_FUNC (argv[2]));
 
-	m4_builtin_insert (M4ARG (1), handle, builtin);
+	m4_builtin_define (M4ARG (1), handle, builtin);
       }
       return;
     }

@@ -1,5 +1,12 @@
 2001-09-08  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4module.h, m4/builtin.c, m4/symtab.c:
+	s/m4_symbol_insert/m4_symbol_define/g;
+	s/m4_builtin_insert/m4_builtin_define/g;
+	s/m4_macro_insert/m4_macro_define/g.  Updated all callers.
+
+2001-09-08  Gary V. Vaughan  <gary@gnu.org>
+
 	Get rid of m4_symbol_lookup_t entirely.  With Akim's earlier
 	commits, the m4_lookup_symbol dispatch function is split into
 	specialised functions that must be called directly.

@@ -165,7 +165,7 @@ m4_symbol_pushdef (const char *name)
 
 /* Return a slot associated to NAME, creating it if needed.  */
 m4_symbol *
-m4_symbol_insert (const char *name)
+m4_symbol_define (const char *name)
 {
   m4_symbol *res = m4_symbol_lookup (name);
   if (res)
@@ -348,7 +348,7 @@ symtab_debug (void)
       if (delete)
 	(void) m4_symbol_delete (text);
       else
-	(void) m4_symbol_insert (text);
+	(void) m4_symbol_define (text);
     }
   m4_symtab_apply (symtab_print_list, 0);
 }
