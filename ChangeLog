@@ -1,5 +1,9 @@
 2001-09-05  Akim Demaille  <akim@epita.fr>
 
+	* src/main.c (main): Standardize --version.
+
+2001-09-05  Akim Demaille  <akim@epita.fr>
+
 	* modules/format.c (format): Have a bigger `str'.
 
 2001-09-05  Akim Demaille  <akim@epita.fr>

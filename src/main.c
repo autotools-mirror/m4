@@ -364,13 +364,17 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s", PACKAGE, VERSION);
-#if defined(WITH_GMP)
-      fputs(_(" (options:"), stdout);
-      fputs(" gmp", stdout);
-      fputs(")", stdout);
-#endif /* WITH_GMP */
-      fputs("\n", stdout);
+      printf ("GNU %s %s\n", PACKAGE, VERSION);
+      fputs (_("Written by Rene' Seindal and Gary V. Vaughan.\n"), stdout);
+      putc ('\n', stdout);
+
+      fputs (_("Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."), stdout);
+      putc ('\n', stdout);
+
+      fputs (_("\
+This is free software; see the source for copying conditions.  There is NO\n\
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
+	 stdout);
       exit (EXIT_SUCCESS);
     }
 
