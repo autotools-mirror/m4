@@ -1,6 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ##
-## Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,8 +17,10 @@
 ## the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ## Boston, MA 02111-1307, USA.
 
+BUILT_SOURCES		= $(OBSTACK_H)
+
 CLEANFILES		= pathconf.h
-DISTCLEANFILES		= obstack.h
+MOSTLYCLEANFILES	= obstack.h
 MAINTAINERCLEANFILES	= Makefile.in
 
 MODULE_PATH		= $(pkglibexecdir)
@@ -48,3 +50,19 @@ pathconf.h: Makefile
 # This file needs to be regenerated at configure time.
 dist-hook:
 	rm -f $(distdir)/system.h
+
+
+# ------------------------------------------------------------ #
+# Taken from gnulib/modules/stdbool:Makefile.am.  Do not edit. #
+# ------------------------------------------------------------ #
+
+BUILT_SOURCES += $(STDBOOL_H)
+EXTRA_DIST += stdbool_.h
+
+# We need the following in order to create an <stdbool.h> when the system
+# doesn't have one that works.
+all-local $(lib_OBJECTS): $(STDBOOL_H)
+stdbool.h: stdbool_.h
+	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool_.h > $@-t
+	mv $@-t $@
+MOSTLYCLEANFILES += stdbool.h stdbool.h-t

@@ -16,12 +16,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 # 02111-1307  USA
 
-## -------------------------- ##
-## We need a modern Autotest. ##
-## -------------------------- ##
-AC_PREREQ([2.55])
-
-
 
 ## ------------------------ ##
 ## Autoconf initialisation. ##
@@ -158,13 +152,13 @@ AC_PROG_AWK
 ## C headers required by M4. ##
 ## ------------------------- ##
 AC_HEADER_STDC
-AC_HEADER_STDBOOL
+AM_STDBOOL_H
 AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
 else
-  INCLUDE_STDBOOL_H='typedef enum {false = 0, true = 1} bool'
+  INCLUDE_STDBOOL_H='#include <m4/stdbool.h>'
 fi
 AC_SUBST([INCLUDE_STDBOOL_H])
 

@@ -1,3 +1,11 @@
+2003-08-29  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/stdbool_.h: New file from gnulib for systems without their
+	own.
+	* m4/Makefile.am: Add snippets from gnulib for C99 bool support.
+	* config/stdbool.m4: New file.  Macros from gnulib for same.
+	* configure.ac: Use it.
+
 2003-08-27  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/debug.m4: `perl -pi.bak -e 's/(Copyright) (\d)/$1 (C) $2/g'`

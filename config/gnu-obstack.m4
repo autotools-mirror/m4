@@ -31,7 +31,7 @@ m4_pattern_allow([^m4_obstack_h$])dnl
 
 AC_ARG_WITH([included-obstack],
     [AC_HELP_STRING([--with-included-obstack],
-                    [use the obstack imlementation included here])])
+                    [use the obstack implementation included here])])
 
 if test "x${with_included_obstack-no}" = xno; then
   AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
