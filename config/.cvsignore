@@ -1,7 +1,7 @@
 mdate-sh
 Makefile
 Makefile.in
-config.guess
+config.guess config.sub
 depcomp
 install-sh
 missing
@@ -31,3 +31,7 @@ progtest.m4
 protos.m4
 sanity.m4
 strip.m4
+
+ltmain.sh
+ltdl.m4
+libtool.m4

@@ -1,5 +1,5 @@
 ABOUT-NLS
-aclocal.m4
+aclocal.m4 aclocal.m4t
 autom4te.cache
 config.cache
 config.h

@@ -1,8 +1,7 @@
 *.o
 *.lo
 *.la
-obstack.h
-pathconf.h
+obstack.h pathconf.h system.h
 .deps
 .libs
 Makefile
