@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-07 14:14+0100\n"
+"POT-Creation-Date: 2003-11-13 12:56+0000\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -71,7 +71,7 @@ msgstr "%s: `%s' は不明瞭なオプション名です。\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
-#: gnulib/m4/obstack.c:426 gnulib/m4/obstack.c:429 gnulib/m4/xmalloc.c:51
+#: gnulib/m4/obstack.c:403 gnulib/m4/obstack.c:406 gnulib/m4/xmalloc.c:53
 #, fuzzy
 msgid "memory exhausted"
 msgstr "メモリが残っていません。"

@@ -1,5 +1,11 @@
 2003-11-13  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.ac (AC_LIBTOOL_TAGS): Don't include shell code for
+	libtool tags we don't use in configure.  This reduces the size
+	of the script from over 1Mb to under 700Kb.
+
+2003-11-13  Gary V. Vaughan  <gary@gnu.org>
+
 	The import script was not written properly, and the last gnulib
 	import was incomplete.  Fixed that problem, and reimport our
 	gnulib dependencies, which picks up the address calculation

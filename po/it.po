@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU M4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-07 14:14+0100\n"
+"POT-Creation-Date: 2003-11-13 12:56+0000\n"
 "PO-Revision-Date: 2002-11-04 13:19+0100\n"
 "Last-Translator: full name <email@address>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -71,7 +71,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: gnulib/m4/obstack.c:426 gnulib/m4/obstack.c:429 gnulib/m4/xmalloc.c:51
+#: gnulib/m4/obstack.c:403 gnulib/m4/obstack.c:406 gnulib/m4/xmalloc.c:53
 msgid "memory exhausted"
 msgstr ""
 
