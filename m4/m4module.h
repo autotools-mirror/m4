@@ -27,7 +27,6 @@
 #endif
 
 #include <m4/error.h>
-#include <m4/list.h>
 #include <m4/ltdl.h>
 #include <m4/system.h>
 
@@ -387,7 +386,7 @@ extern	void	m4_skip_line	M4_PARAMS((void));
 /* push back input */
 extern	void	m4_push_file	M4_PARAMS((FILE *, const char *));
 extern	void	m4_push_single	M4_PARAMS((int ch));
-extern	void	m4_push_macro	M4_PARAMS((m4_builtin_func *, lt_dlhandle, 
+extern	void	m4_push_macro	M4_PARAMS((m4_builtin_func *, lt_dlhandle,
 					   boolean));
 extern	struct obstack *m4_push_string_init M4_PARAMS((void));
 extern	const char *m4_push_string_finish M4_PARAMS((void));
