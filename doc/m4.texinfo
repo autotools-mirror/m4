@@ -2039,6 +2039,10 @@ Characters that close the argument list of a macro call.  Default is
 Characters that separate the arguments of a macro call.  Default
 is @kbd{,}.
 
+@item Dollar
+Characters that can introduce an argument reference in the body of a
+macro.  Default is @kbd{$}.
+
 @item Other
 Characters that have no special syntactical meaning to @code{m4}.
 Default is all characters expect those in the categories above.
@@ -2100,6 +2104,8 @@ Open parenthesis
 Close parenthesis
 @item ,
 Argument separator
+@item $
+Dollar
 @item O
 Other
 @item @@
@@ -2171,8 +2177,32 @@ test(a, b, c)
 @end example
 
 @noindent
-It is not yet possible to redefine the @samp{$} used to indicate macro
-arguments in user defined macros.
+It is possible to redefine the @samp{$} used to indicate macro arguments
+in user defined macros.
+
+@example
+define(`argref', `Dollar: $#, Question: ?#')
+@result{}
+argref(1, 2, 3)
+@result{}Dollar: 3, Question: ?#
+changesyntax(`$?', `O$')
+@result{}
+argref(1,2,3)
+@result{}Dollar: $#, Question: 3
+@end example
+
+@noindent
+Dollar class syntax elements are copied to the output if there is no
+valid expansion.
+
+@example
+define(`escape', `$?`'1$?1?')
+@result{}
+changesyntax(`$?')
+@result{}
+escape(foo)
+@result{}$?1$foo?
+@end example
 
 Macro calls can be given a @TeX{} or Texinfo like syntax using an
 escape.  If one or more characters are defined as escapes macro names

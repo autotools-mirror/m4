@@ -515,7 +515,7 @@ m4_pop_wrapup (void)
   return TRUE;
 }
 
-/* When a BUILTIN token is seen, next_token () uses init_builtin_token
+/* When a BUILTIN token is seen, m4__next_token () uses init_builtin_token
    to retrieve the value of the function pointer.  */
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
@@ -718,11 +718,11 @@ m4_input_exit (void)
    is a potential macro name; and M4_TOKEN_SIMPLE for any single character
    that is not a part of any of the previous types.
 
-   M4_next_token () returns the token type, and passes back a pointer to the
-   token data through VALUE.  The token text is collected on the obstack
+   M4__next_token () returns the token type, and passes back a pointer to
+   the token data through VALUE.  The token text is collected on the obstack
    token_stack, which never contains more than one token text at a time.
    The storage pointed to by the fields in VALUE is therefore subject to
-   change the next time next_token () is called.	 */
+   change the next time m4__next_token () is called.  */
 m4__token_type
 m4__next_token (m4 *context, m4_symbol_value *token)
 {
@@ -890,11 +890,14 @@ m4__next_token (m4 *context, m4_symbol_value *token)
       {
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch))
+	if (M4_IS_OTHER (M4SYNTAX, ch) || M4__IS_STRING (M4SYNTAX, ch))
 	  {
 	    while ((ch = next_char(context)) != CHAR_EOF
-		   && (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch)))
-	      obstack_1grow (&token_stack, ch);
+		   && (M4_IS_OTHER (M4SYNTAX, ch)
+		       || M4__IS_STRING (M4SYNTAX, ch)))
+	      {
+		obstack_1grow (&token_stack, ch);
+	      }
 
 	    if (ch != CHAR_EOF)
 	      unget_input(ch);
@@ -918,11 +921,11 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	else
 	  type = M4_TOKEN_SIMPLE;
       }
-    else				/* EVERYTHING ELSE */
+    else				/* EVERYTHING ELSE AGAIN?! */
       {
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch))
+	if (M4_IS_OTHER (M4SYNTAX, ch) || M4__IS_STRING (M4SYNTAX, ch))
 	  type = M4_TOKEN_STRING;
 	else if (M4_IS_SPACE (M4SYNTAX, ch))
 	  type = M4_TOKEN_SPACE;

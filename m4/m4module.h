@@ -335,7 +335,7 @@ extern	boolean		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 #define M4_SYNTAX_OPEN		(0x0003)
 #define M4_SYNTAX_CLOSE		(0x0004)
 #define M4_SYNTAX_COMMA		(0x0005)
-#define M4_SYNTAX_DOLLAR	(0x0006) /* not used yet */
+#define M4_SYNTAX_DOLLAR	(0x0006)
 #define M4_SYNTAX_ACTIVE	(0x0007)
 #define M4_SYNTAX_ESCAPE	(0x0008)
 #define M4_SYNTAX_ASSIGN	(0x0009)
@@ -345,6 +345,11 @@ extern	boolean		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 #define M4_SYNTAX_ALPHA		(0x0010)
 #define M4_SYNTAX_NUM		(0x0020)
 #define M4_SYNTAX_ALNUM		(M4_SYNTAX_ALPHA|M4_SYNTAX_NUM)
+
+/* We can OR the valid M4_TOKEN_STRING chars together, since they are
+   carefully chosen not to overlap.  This reduces the number of comparisons
+   the compiled code needs in order to speed up m4__next_token () a bit.  */
+#define M4__SYNTAX_STRING	(M4_SYNTAX_NUM|M4_SYNTAX_DOLLAR)
 
 /* These are bit masks to AND with other categories.
    See input.c for details. */
@@ -381,6 +386,7 @@ extern	boolean		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 #define M4_IS_BCOMM(S, C)  ((S)->table[(int)(C)] & M4_SYNTAX_BCOMM)
 #define M4_IS_ECOMM(S, C)  ((S)->table[(int)(C)] & M4_SYNTAX_ECOMM)
 
+#define M4__IS_STRING(S, C) (m4__is_syntax((S), (C), M4__SYNTAX_STRING))
 #define M4_IS_IDENT(S, C)  (M4_IS_OTHER((S),(C))||M4_IS_ALNUM((S),(C)))
 
 

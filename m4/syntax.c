@@ -79,17 +79,17 @@
    M4_SYNTAX_ALPHA	Reads macro name
    M4_SYNTAX_LQUOTE	Reads all until balanced M4_SYNTAX_RQUOTE
 
-   M4_SYNTAX_OTHER	and M4_SYNTAX_NUM
-			Reads all M4_SYNTAX_OTHER and M4_SYNTAX_NUM
+   M4_SYNTAX_OTHER  }	Reads all M4_SYNTAX_OTHER, M4_SYNTAX_NUM
+   M4_SYNTAX_NUM    }	and M4_SYNTAX_DOLLAR
+   M4_SYNTAX_DOLLAR }
+
    M4_SYNTAX_SPACE	Reads all M4_SYNTAX_SPACE
    M4_SYNTAX_ACTIVE	Returns a single char as a word
    the rest		Returned as a single char
 
-   M4_SYNTAX_DOLLAR is not currently used.  The character $ is treated as a
-   M4_SYNTAX_OTHER.  It could be done, but it will slow next_token () down
-   a bit.  The $ is not really a part of m4's input syntax in the sense
-   that a string is parsed equally whether there is a $ or not.  The
-   character $ is used by convention in user macros.  */
+   The $ is not really a part of m4's input syntax in the sense that a
+   string is parsed equally whether there is a $ or not.  The character
+   $ is used by convention in user macros.  */
 
 static boolean check_is_macro_escaped (m4_syntax_table *syntax);
 static int add_syntax_attribute	   (m4_syntax_table *syntax, int ch, int code);
@@ -109,6 +109,8 @@ m4_syntax_create (void)
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_CLOSE);
       else if (ch == ',')
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_COMMA);
+      else if (ch == '$')
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_DOLLAR);
       else if (ch == '=')
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_ASSIGN);
       else if (isspace (ch))
@@ -174,9 +176,7 @@ m4_syntax_code (char ch)
     case ',': code = M4_SYNTAX_COMMA;  break;
     case '=': code = M4_SYNTAX_ASSIGN; break;
     case '@': code = M4_SYNTAX_ESCAPE; break;
-#if 0				/* not yet used */
     case '$': code = M4_SYNTAX_DOLLAR; break;
-#endif
 
     case 'L': case 'l': code = M4_SYNTAX_LQUOTE; break;
     case 'R': case 'r': code = M4_SYNTAX_RQUOTE; break;

@@ -1,5 +1,19 @@
 2003-06-27  Gary V. Vaughan  <gary@gnu.org>
 
+	* doc/m4.texinfo (Changesyntax): Document Dollar syntax class.
+	* m4/m4module.h (M4__SYNTAX_STRING): New syntax class. Be careful
+	not to slow the parser down.
+	(M4__IS_STRING): New macro to test string syntax class membership.
+	* m4/syntax.c: Adjust docucomment.
+	(m4_syntax_create): Add a default M4_SYNTAX_DOLLAR element.
+	(m4_syntax_code): Translate `$' -> M4_SYNTAX_DOLLAR.
+	* m4/input.c (init_builtin_token): Comment typo.
+	(m4__next_token): Comment typo.
+	Accept M4_SYNTAX_DOLLAR items into M4_TOKEN_STRING type tokens
+	by using the new M4__IS_STRING macro.
+	* m4/macro.c (m4_process_macro): Use M4_IS_DOLLAR to test for
+	variable references in macro expansions.
+
 	* doc/m4.texinfo (Eregexp and Regexp): Typo.
 	(Epatsubst and Patsubst): Typo.
 	(Eval): Typo.

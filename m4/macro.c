@@ -330,13 +330,15 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
 
   for (text = m4_get_symbol_text (symbol); *text != '\0';)
     {
-      if (*text != '$')
+      char ch;
+
+      if (!M4_IS_DOLLAR (M4SYNTAX, *text))
 	{
 	  obstack_1grow (obs, *text);
 	  text++;
 	  continue;
 	}
-      text++;
+      ch = *text++;
       switch (*text)
 	{
 	case '0': case '1': case '2': case '3': case '4':
@@ -370,7 +372,7 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
 	  if (m4_get_no_gnu_extensions_opt (context)
 	      || !SYMBOL_ARG_SIGNATURE (symbol))
 	    {
-	      obstack_1grow (obs, '$');
+	      obstack_1grow (obs, ch);
 	    }
 	  else
 	    {
