@@ -1,30 +1,35 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999 Free Software Foundation, Inc.
+   Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-  
+   the Free Software Foundation; either version 2 of the License, or 
+   (at your option) any later version.
+ 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+ 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307  USA
 */
-
-#include "m4private.h"
-#include "error.h"
 
 #include <getopt.h>
 #include <signal.h>
 
+#include "m4.h"
+#include "m4private.h"
+#include "error.h"
+
 #ifdef WITH_MODULES
-#include "ltdl.h"
+#  include "ltdl.h"
 #endif /* WITH_MODULES */
+
+void print_program_name M4_PARAMS((void));
+
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -41,13 +46,13 @@ static int show_version = 0;
 /* If nonzero, import the environment as macros.  */
 static int import_environment = 0;
 
-struct macro_definition
+typedef struct macro_definition
 {
   struct macro_definition *next;
   int code;			/* D, U or t */
   const char *macro;
-};
-typedef struct macro_definition macro_definition;
+} macro_definition;
+
 
 /* Error handling functions.  */
 
@@ -61,8 +66,8 @@ print_program_name (void)
 {
   fflush (stdout);
   fprintf (stderr, "%s: ", program_name);
-  if (current_line != 0)
-    fprintf (stderr, "%s: %d: ", current_file, current_line);
+  if (m4_current_line != 0)
+    fprintf (stderr, "%s: %d: ", m4_current_file, m4_current_line);
 }
 
 
@@ -258,11 +263,11 @@ main (int argc, char *const *argv, char *const *envp)
   LTDL_SET_PRELOADED_SYMBOLS();
 #endif
   
-  debug_init ();
-  include_init ();
-  symtab_init ();
+  m4_debug_init ();
+  m4_include_init ();
+  m4_symtab_init ();
 #ifdef WITH_MODULES
-  module_init ();
+  m4_module_init ();
 #endif
 
 #ifdef USE_STACKOVF
@@ -332,7 +337,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'I':
-	add_include_directory (optarg);
+	m4_add_include_directory (optarg);
 	break;
 
       case 'L':
@@ -378,7 +383,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'd':
-	debug_level = debug_decode (optarg);
+	debug_level = m4_debug_decode (optarg);
 	if (debug_level < 0)
 	  {
 	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
@@ -397,7 +402,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'o':
-	if (!debug_set_output (optarg))
+	if (!m4_debug_set_output (optarg))
 	  error (0, errno, optarg);
 	break;
 
@@ -431,20 +436,21 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initialisations.  */
 
-  input_init ();
-  output_init ();
-  include_env_init ();
+  m4_input_init ();
+  m4_output_init ();
+  m4_include_env_init ();
 
   if (frozen_file_to_read)
     {
-      builtin_init (SYMBOL_IGNORE);
       reload_frozen_state (frozen_file_to_read);
     }
   else
     {
-
-      builtin_init (SYMBOL_PUSHDEF);
-      syntax_init  ();
+      m4_syntax_init    ();
+      /* FIXME: Bah... a bug in ltdl means we must specify the full
+	 path to the m4 module for the moment. *.
+      m4_module_install ("/home/gary/src/m4-1.4p/modules/m4.la");
+      m4_module_install (no_gnu_extensions ? "traditional" : "gnu");
     }
   
   /* Import environment variables as macros.  The definition are
@@ -474,7 +480,7 @@ main (int argc, char *const *argv, char *const *envp)
     {
       macro_definition *next;
       char *macro_value;
-      symbol *sym;
+      m4_symbol *symbol;
 
       switch (defines->code)
 	{
@@ -484,21 +490,21 @@ main (int argc, char *const *argv, char *const *envp)
 	    macro_value = "";
 	  else
 	    *macro_value++ = '\0';
-	  define_macro (defines->macro, macro_value, SYMBOL_INSERT);
+	  m4_macro_define (defines->macro, macro_value, M4_SYMBOL_INSERT);
 	  break;
 
 	case 'U':
-	  lookup_symbol (defines->macro, SYMBOL_DELETE);
+	  m4_lookup_symbol (defines->macro, M4_SYMBOL_DELETE);
 	  break;
 
 	case 't':
-	  sym = lookup_symbol (defines->macro, SYMBOL_INSERT);
-	  SYMBOL_TRACED (sym) = TRUE;
+	  symbol = m4_lookup_symbol (defines->macro, M4_SYMBOL_INSERT);
+	  SYMBOL_TRACED (symbol) = TRUE;
 	  break;
 
 #ifdef WITH_MODULES
 	case 'm':
-	  module_load (defines->macro, NULL, SYMBOL_PUSHDEF);
+	  m4_module_install (defines->macro);
 	  break;
 #endif /* WITH_MODULES */
 	
@@ -527,17 +533,17 @@ main (int argc, char *const *argv, char *const *envp)
   exit_status = EXIT_SUCCESS;
   if (optind == argc)
     {
-      push_file (stdin, "stdin");
-      expand_input ();
+      m4_push_file (stdin, "stdin");
+      m4_expand_input ();
     }
   else
     for (; optind < argc; optind++)
       {
 	if (strcmp (argv[optind], "-") == 0)
-	  push_file (stdin, "stdin");
+	  m4_push_file (stdin, "stdin");
 	else
 	  {
-	    fp = path_search (argv[optind], &filename);
+	    fp = m4_path_search (argv[optind], &filename);
 	    if (fp == NULL)
 	      {
 		error (0, errno, argv[optind]);
@@ -546,29 +552,29 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    else
 	      {
-		push_file (fp, filename);
+		m4_push_file (fp, filename);
 		xfree (filename);
 	      }
 	  }
-	expand_input ();
+	m4_expand_input ();
       }
 #undef NEXTARG
 
   /* Now handle wrapup text.  */
 
-  while (pop_wrapup ())
-    expand_input ();
+  while (m4_pop_wrapup ())
+    m4_expand_input ();
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);
   else
     {
-      make_diversion (0);
-      undivert_all ();
+      m4_make_diversion (0);
+      m4_undivert_all ();
     }
 
 #ifdef WITH_MODULES
-  module_unload_all();
+  m4_module_unload_all();
 #endif /* WITH_MODULES */
 
   exit (exit_status);
