@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 1998-05-25 12:26+0200\n"
+"POT-Creation-Date: 1998-08-03 17:14+0200\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -381,12 +381,12 @@ msgstr ""
 "\n"
 "Si aucun FICHIER ou si FICHIER vaut «-», lit l'entrée standard.\n"
 
-#: src/m4.c:355
+#: src/m4.c:358
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Mauvais indicateurs de mise-au-point: «%s»"
 
-#: src/m4.c:434
+#: src/m4.c:437
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ERREUR INTERNE: Mauvais code dans les arguments différés"
 

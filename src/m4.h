@@ -114,8 +114,13 @@ char *mktemp ();
 # define setlocale(Category, Locale)
 #endif
 
+#ifdef ENABLE_NLS
 #include <libintl.h>
 #define _(Text) gettext ((Text))
+#else
+#define _(Text) (Text)
+#endif
+
 
 /* Various declarations.  */
 

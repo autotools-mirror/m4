@@ -258,6 +258,9 @@ main (int argc, char *const *argv, char *const *envp)
 
   program_name = argv[0];
   setlocale (LC_ALL, "");
+#ifdef ENABLE_NLS
+  textdomain(PACKAGE);
+#endif
 
   include_init ();
   debug_init ();

@@ -118,7 +118,7 @@ DIST_COMMON =  COPYING.LIB Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP = --best
 SOURCES = $(libm4_a_SOURCES)
 OBJECTS = $(libm4_a_OBJECTS)

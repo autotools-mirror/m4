@@ -1,3 +1,16 @@
+1998-08-03  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4e
+
+	* src/m4.h: Added ifdef ENABLE_NLS around include of <libintl.h>
+	and _ macro.  M4 now builds with --disable-nls.
+
+	* src/m4.c (main): reintroduced textdomain(PAKCAGE) to get gettext
+	to look for right message catalogs.  Call indef'ed by ENABLE_NLS.
+
+	* configure.in (ALL_LINGUAS): Added complete list of
+	translations: de fr it ja nl ru sv.
+
 1998-05-22  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
 
 	* Prerelease 1.4d.

@@ -8,8 +8,8 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4d)
-ALL_LINGUAS="fr nl"
+AM_INIT_AUTOMAKE(m4,1.4e)
+ALL_LINGUAS="de fr it ja nl ru sv"
 
 AC_PROG_AWK
 AC_PROG_CC
@@ -78,16 +78,16 @@ else
   AC_MSG_RESULT(no)
 fi], [AC_MSG_RESULT(no)])
 
-AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
-AC_ARG_WITH(gmp,
-[  --with-gmp              use gmp for extended and fractional arithmetic], 
-[if test "$withval" = yes; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(WITH_GMP)
-  LIBS="$LIBS -lgmp"
-else
-  AC_MSG_RESULT(no)
-fi], [AC_MSG_RESULT(no)])
+#AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
+#AC_ARG_WITH(gmp,
+#[  --with-gmp              use gmp for extended and fractional arithmetic], 
+#[if test "$withval" = yes; then
+#  AC_MSG_RESULT(yes)
+#  AC_DEFINE(WITH_GMP)
+#  LIBS="$LIBS -lgmp"
+#else
+#  AC_MSG_RESULT(no)
+#fi], [AC_MSG_RESULT(no)])
 
 AM_WITH_DMALLOC
 AM_GNU_GETTEXT

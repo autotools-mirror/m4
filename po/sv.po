@@ -1,0 +1,549 @@
+# Swedish messages for m4
+# Copyright (C) 1996 Free Software Foundation, Inc.
+# <Jan.Djarv@mbox200.swipnet.se>, 1996.
+# $Revision: 1.1.1.1 $
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: m4 1.4.3\n"
+"POT-Creation-Date: 1998-08-03 17:14+0200\n"
+"PO-Revision-Date: $Date: 2000/02/17 03:06:54 $\n"
+"Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
+"Language-Team: Swedish <sv@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: src/builtin.c:272
+#, fuzzy, c-format
+msgid "Warning: Too few arguments to built-in `%s'"
+msgstr "Varning: För få argument till inbyggt makro \"%s\""
+
+#: src/builtin.c:278
+#, fuzzy, c-format
+msgid "Warning: Excess arguments to built-in `%s' ignored"
+msgstr "Varning: Överskottsargument till inbyggt makro \"%s\" ignorerade"
+
+#: src/builtin.c:298
+#, fuzzy, c-format
+msgid "Non-numeric argument to built-in `%s'"
+msgstr "Ickenumeriskt argument till inbyggt makro \"%s\""
+
+#: src/builtin.c:438
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i define_macro ()"
+
+#: src/builtin.c:608 src/builtin.c:671 src/builtin.c:1188 src/builtin.c:1212
+#, fuzzy, c-format
+msgid "Undefined name %s"
+msgstr "Odefinierat namn \"%s\""
+
+#: src/builtin.c:636
+#, fuzzy
+msgid "INTERNAL ERROR: Builtin not found in builtin table!"
+msgstr "INTERNT FEL: Inbyggt makro finns inte i tabellen!"
+
+#: src/builtin.c:644
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i m4_dumpdef ()"
+
+#: src/builtin.c:695
+#, fuzzy, c-format
+msgid "Undefined macro `%s'"
+msgstr "Odefinierat makro \"%s\""
+
+#: src/builtin.c:735
+#, fuzzy
+msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
+msgstr "INTERNT FEL: Otillåten symboltyp i m4_defn ()"
+
+#: src/builtin.c:772
+#, fuzzy, c-format
+msgid "Cannot open pipe to command `%s'"
+msgstr "Kan inte skapa rör till kommandot \"%s\""
+
+#: src/builtin.c:811
+#, fuzzy, c-format
+msgid "Radix in eval out of range (radix = %d)"
+msgstr "Otillåten bas i \"eval\" (bas = %d)"
+
+#: src/builtin.c:820
+#, fuzzy
+msgid "Negative width to eval"
+msgstr "Negativ bredd till \"eval\""
+
+#: src/builtin.c:925
+#, fuzzy, c-format
+msgid "Non-numeric argument to %s"
+msgstr "Ickenumeriskt argument till %s"
+
+#: src/builtin.c:937
+#, fuzzy, c-format
+msgid "Cannot undivert %s"
+msgstr "Kan inte återleda %s"
+
+#: src/builtin.c:1043 src/freeze.c:207
+#, fuzzy, c-format
+msgid "Cannot open %s"
+msgstr "Kan inte öppna %s"
+
+#: src/builtin.c:1248
+#, fuzzy, c-format
+msgid "Debugmode: bad debug flags: `%s'"
+msgstr "Felsökningsläge: okänd flagga: \"%s\""
+
+#: src/builtin.c:1284
+#, fuzzy, c-format
+msgid "Cannot set error file: %s"
+msgstr "Kan inte sätta felutskriftsfil: %s"
+
+#: src/builtin.c:1501
+#, fuzzy
+msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
+msgstr "VARNING: \\0 kommer att försvinna, använd \\& i ersättningar"
+
+#: src/builtin.c:1562 src/builtin.c:1622 src/input.c:637
+#, fuzzy, c-format
+msgid "Bad regular expression `%s': %s"
+msgstr "Otillåtet reguljäruttryck \"%s\": %s"
+
+#: src/builtin.c:1573 src/builtin.c:1646
+#, fuzzy, c-format
+msgid "Error matching regular expression `%s'"
+msgstr "Reguljäruttrycket \"%s\" matchar inte"
+
+#: src/debug.c:379
+#, fuzzy
+msgid "INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"
+msgstr "INTERNT FEL: Inbyggt makro finns inte i tabellen (trace_pre ())"
+
+#: src/debug.c:387
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type (trace_pre ())"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp (trace_pre ())"
+
+#: src/eval.c:277
+#, fuzzy, c-format
+msgid "Bad expression in eval (missing right parenthesis): %s"
+msgstr "Otillåtet uttryck i \"eval\" (högerparentes saknas): %s"
+
+#: src/eval.c:283
+#, fuzzy, c-format
+msgid "Bad expression in eval: %s"
+msgstr "Otillåtet uttryck i \"eval\": %s"
+
+#: src/eval.c:288
+#, fuzzy, c-format
+msgid "Bad expression in eval (bad input): %s"
+msgstr "Otillåtet uttryck i \"eval\" (otillåtet indata): %s"
+
+#: src/eval.c:293
+#, fuzzy, c-format
+msgid "Bad expression in eval (excess input): %s"
+msgstr "Otillåtet uttryck i \"eval\" (för mycket indata): %s"
+
+#: src/eval.c:298
+#, fuzzy, c-format
+msgid "Divide by zero in eval: %s"
+msgstr "Division med noll i \"eval\": %s"
+
+#: src/eval.c:303
+#, fuzzy, c-format
+msgid "Modulo by zero in eval: %s"
+msgstr "Modulo med noll i \"eval\": %s"
+
+#: src/eval.c:308
+#, fuzzy
+msgid "INTERNAL ERROR: Bad error code in evaluate ()"
+msgstr "INTERNT FEL: Otillåten felkod i evaluate ()"
+
+#: src/eval.c:547
+#, fuzzy
+msgid "INTERNAL ERROR: Bad comparison operator in cmp_term ()"
+msgstr "INTERNT FEL: Otillåten jämförelseoperator i cmp_term ()"
+
+#: src/eval.c:590
+#, fuzzy
+msgid "INTERNAL ERROR: Bad shift operator in shift_term ()"
+msgstr "INTERNT FEL: Otillåten skiftoperator i shift_term ()"
+
+#: src/eval.c:674
+#, fuzzy
+msgid "INTERNAL ERROR: Bad operator in mult_term ()"
+msgstr "INTERNT FEL: Otillåten operator i mult_term ()"
+
+#: src/freeze.c:115
+#, fuzzy
+msgid "INTERNAL ERROR: Built-in not found in builtin table!"
+msgstr "INTERNT FEL: Inbyggt makro finns inte i tabellen!"
+
+#: src/freeze.c:128
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i freeze_one_symbol ()"
+
+#: src/freeze.c:159
+#, fuzzy
+msgid "Expecting line feed in frozen file"
+msgstr "Förväntar nyrad i fryst fil"
+
+#: src/freeze.c:161
+#, fuzzy, c-format
+msgid "Expecting character `%c' in frozen file"
+msgstr "Förväntar tecknet \"%c\" i fryst fil"
+
+#: src/freeze.c:218
+#, fuzzy
+msgid "Ill-formated frozen file"
+msgstr "Korrupt fryst fil"
+
+#: src/freeze.c:273 src/freeze.c:289
+#, fuzzy
+msgid "Premature end of frozen file"
+msgstr "För tidigt filslut i fryst fil"
+
+#: src/freeze.c:323
+#, fuzzy, c-format
+msgid "`%s' from frozen file not found in builtin table!"
+msgstr "\"%s\" från fryst fil hittades inte i tabellen för inbyggda makron!"
+
+#: src/input.c:174
+#, fuzzy, c-format
+msgid "Input read from %s"
+msgstr "Indata läses från %s"
+
+#: src/input.c:231
+#, fuzzy
+msgid "INTERNAL ERROR: Recursive push_string!"
+msgstr "INTERNT FEL: Rekursiv push_string!"
+
+#: src/input.c:311
+#, fuzzy, c-format
+msgid "Input reverted to %s, line %d"
+msgstr "Indata återgår till %s, rad %d"
+
+#: src/input.c:325
+#, fuzzy
+msgid "INTERNAL ERROR: Input stack botch in pop_input ()"
+msgstr "INTERNT FEL: Instacken havererade i pop_input ()"
+
+#: src/input.c:364
+#, fuzzy
+msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
+msgstr "INTERNT FEL: Otillåtet anrop till init_macro_token ()"
+
+#: src/input.c:413
+#, fuzzy
+msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
+msgstr "INTERNT FEL: Instacken havererade i peek_input ()"
+
+#: src/input.c:470
+#, fuzzy
+msgid "INTERNAL ERROR: Input stack botch in next_char ()"
+msgstr "INTERNT FEL: Instacken havererade i next_char ()"
+
+#: src/input.c:550
+#, fuzzy
+msgid "NONE"
+msgstr "INGET"
+
+#: src/input.c:777
+#, fuzzy
+msgid "ERROR: EOF in string"
+msgstr "FEL: Filslut i sträng"
+
+#: src/m4.c:106
+#, fuzzy
+msgid "ERROR: Stack overflow.  (Infinite define recursion?)"
+msgstr "FEL: Stacken flödar över. (Oändlig rekursion?)"
+
+#: src/m4.c:133
+#, fuzzy, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Försök med \"%s --help\" för mer information.\n"
+
+#: src/m4.c:137
+#, fuzzy, c-format
+msgid "Usage: %s [OPTION]... [FILE]...\n"
+msgstr "Användning: %s [FLAGGA]... [FIL]...\n"
+
+#: src/m4.c:138
+#, fuzzy
+msgid ""
+"Mandatory or optional arguments to long options are mandatory or optional\n"
+"for short options too.\n"
+"\n"
+"Operation modes:\n"
+"      --help                   display this help and exit\n"
+"      --version                output version information and exit\n"
+"  -e, --interactive            unbuffer output, ignore interrupts\n"
+"  -E, --fatal-warnings         stop execution after first warning\n"
+"  -Q, --quiet, --silent        suppress some warnings for builtins\n"
+"  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"
+msgstr ""
+"Obligatoriska respektive valfria argument för långa flaggor är\n"
+"obligatoriska respektive valfria även för korta flaggor.\n"
+"\n"
+"Körlägen:\n"
+"      --help                   visa denna hjälptext och avsluta\n"
+"      --version                visa versionsinformation och avsluta\n"
+"  -e, --interactive            obuffrad utskrift, ignorera avbrott\n"
+"  -E, --fatal-warnings         avsluta exekvering efter första varningen\n"
+"  -Q, --quiet, --silent        undertryck vissa varningar för inbyggda "
+"makron\n"
+"  -P, --prefix-builtins        alla inbyggda makron börjar med `m4_'\n"
+
+#: src/m4.c:151
+#, fuzzy
+msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
+msgstr "  -W, --word-regexp=REGEXP     använd REGEXP som makronamnsyntax\n"
+
+#: src/m4.c:155
+#, fuzzy
+msgid ""
+"\n"
+"Preprocessor features:\n"
+"  -I, --include=DIRECTORY      search this directory second for includes\n"
+"  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n"
+"  -U, --undefine=NAME          delete builtin NAME\n"
+"  -s, --synclines              generate `#line NO \"FILE\"' lines\n"
+msgstr ""
+"\n"
+"Förprocessorstyrning:\n"
+"  -I, --include=KATALOG        sök i katalog efter inkluderade filer\n"
+"  -D, --define=NAMN[=VÄRDE]    definiera NAMN som VÄRDE, eller tomt\n"
+"  -U, --undefine=NAMN          ta bort inbyggt makro\n"
+"  -s, --synclines              generera `#line NNN \"FIL\"' rader\n"
+
+#: src/m4.c:163
+#, fuzzy
+msgid ""
+"\n"
+"Limits control:\n"
+"  -G, --traditional            suppress all GNU extensions\n"
+"  -H, --hashsize=PRIME         set symbol lookup hash table size\n"
+"  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"
+msgstr ""
+"\n"
+"Begränsningskontroll:\n"
+"  -G, --traditional            undertryck alla extra GNU tillägg\n"
+"  -H, --hashsize=PRIMTAL       sätt storlek på symboltabellen\n"
+"  -L, --nesting-limit=NUMMER   ändra artificiell nästningsnivå\n"
+
+#: src/m4.c:170
+#, fuzzy
+msgid ""
+"\n"
+"Frozen state files:\n"
+"  -F, --freeze-state=FILE      produce a frozen state on FILE at end\n"
+"  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"
+msgstr ""
+"\n"
+"Frysta tillståndsfiler:\n"
+"  -F, --freeze-state=FIL       spara fryst tillstånd i FIL i slutet\n"
+"  -R, --reload-state=FIL       läs fryst tillstånd från FIL i början\n"
+
+#: src/m4.c:176
+#, fuzzy
+msgid ""
+"\n"
+"Debugging:\n"
+"  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n"
+"  -t, --trace=NAME             trace NAME when it will be defined\n"
+"  -l, --arglength=NUM          restrict macro tracing size\n"
+"  -o, --error-output=FILE      redirect debug and trace output\n"
+msgstr ""
+"\n"
+"Felsökning:\n"
+"  -d, --debug=[FLAGGOR]        sätt felsökningsnivå\n"
+"                               (inga FLAGGOR tolkas som \"aeq\")\n"
+"  -t, --trace=NAMN             spåra NAMN när den blir definierad\n"
+"  -l, --arglength=NUMMER       begränsa makrospårningsstorleken\n"
+"  -o, --error-output=FIL       avled felsöknings och spårutskrifter till "
+"FIL\n"
+
+#: src/m4.c:184
+#, fuzzy
+msgid ""
+"\n"
+"FLAGS is any of:\n"
+"  t   trace for all macro calls, not only traceon'ed\n"
+"  a   show actual arguments\n"
+"  e   show expansion\n"
+"  q   quote values as necessary, with a or e flag\n"
+"  c   show before collect, after collect and after call\n"
+"  x   add a unique macro call id, useful with c flag\n"
+"  f   say current input file name\n"
+"  l   say current input line number\n"
+"  p   show results of path searches\n"
+"  i   show changes in input files\n"
+"  V   shorthand for all of the above flags\n"
+msgstr ""
+"\n"
+"FLAGGOR kan vara en eller flera av:\n"
+"  t   spåra alla makroanrop, inte bara de som spåras med \"traceon\"\n"
+"  a   visa aktuella argument\n"
+"  e   visa expansioner\n"
+"  q   sätt citationstecken där det behövs, gäller \"a\" och \"e\"\n"
+"  c   visa före insamling, efter insamling och efter anrop\n"
+"  x   lägg till en unik identifierare för makroanrop, användbart med \"c\"\n"
+"  f   visa namnet på aktuell infil\n"
+"  l   visa raden i aktuell infil\n"
+"  p   visa resultatet av sökvägssökningar\n"
+"  i   visa byten av infil\n"
+"  V   förkortning för alla ovanstående flaggor\n"
+
+#: src/m4.c:199
+#, fuzzy
+msgid ""
+"\n"
+"If no FILE or if FILE is `-', standard input is read.\n"
+msgstr ""
+"\n"
+"Om ingen FIL anges eller om FIL är `-', så läses standard in.\n"
+
+#: src/m4.c:358
+#, fuzzy, c-format
+msgid "Bad debug flags: `%s'"
+msgstr "Okänd felsökningsflagga \"%s\""
+
+#: src/m4.c:437
+#, fuzzy
+msgid "INTERNAL ERROR: Bad code in deferred arguments"
+msgstr "INTERNT FEL: Otillåten kod i argument"
+
+#: src/macro.c:92
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token type in expand_token ()"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i expand_token ()"
+
+#: src/macro.c:158
+#, fuzzy
+msgid "ERROR: EOF in argument list"
+msgstr "FEL: Filslut i argumentlistan"
+
+#: src/macro.c:176
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
+msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i expand_argument ()"
+
+#: src/macro.c:253
+#, fuzzy
+msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
+msgstr "INTERNT FEL: Otillåten symboltyp i call_macro ()"
+
+#: src/macro.c:282
+#, fuzzy, c-format
+msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
+msgstr "FEL: Rekursionsgräns %d överskriden, använd -L<N> för att ändra"
+
+#: src/output.c:198
+#, fuzzy
+msgid "ERROR: Cannot create temporary file for diversion"
+msgstr "FEL: Kan inte skapa temporär fil för avledning"
+
+#: src/output.c:208
+#, fuzzy
+msgid "ERROR: Cannot flush diversion to temporary file"
+msgstr "FEL: Kan inte skriva avledningen till temporär fil"
+
+#: src/output.c:292
+#, fuzzy
+msgid "ERROR: Copying inserted file"
+msgstr "FEL: Kopiering av insatt fil"
+
+#: src/output.c:473
+#, fuzzy
+msgid "ERROR: Reading inserted file"
+msgstr "FEL: Läsning av insatt fil"
+
+#: src/output.c:572
+#, fuzzy
+msgid "Cannot stat diversion"
+msgstr "Kan inte ta status på avledningen"
+
+#: src/path.c:131
+#, fuzzy, c-format
+msgid "Path search for `%s' found `%s'"
+msgstr "\"%s\" hittades som \"%s\" i sökvägen"
+
+#. sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
+#. if the stack limit has not been reached.
+#: src/stackovf.c:168
+#, fuzzy
+msgid "VMEM limit exceeded?\n"
+msgstr "VMEM begränsning överskriden?\n"
+
+#: src/stackovf.c:190
+#, fuzzy
+msgid ""
+"Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n"
+"occurred, or there is a bug in "
+msgstr ""
+"Otillåten referens utanför minnesgränserna har upptäckts (SIGSEGV).\n"
+"Antingen flödade stacken över eller så är det ett fel i "
+
+#: src/stackovf.c:195
+#, fuzzy
+msgid ".  Check for possible infinite recursion.\n"
+msgstr ".  Kontrollera om oändlig rekursion förekommer.\n"
+
+#: src/symtab.c:190
+#, fuzzy
+msgid "INTERNAL ERROR: Illegal mode to symbol_lookup ()"
+msgstr "INTERNT FEL: Otillåtet läge till symbol_lookup ()"
+
+#: src/symtab.c:243
+#, fuzzy, c-format
+msgid "Name `%s' is unknown\n"
+msgstr "Namnet \"%s\" är okänt\n"
+
+#, fuzzy
+#~ msgid "Bad regular expression: `%s': %s"
+#~ msgstr "Otillåtet reguljäruttryck \"%s\": %s"
+
+#, fuzzy
+#~ msgid "%s: option `%s' is ambiguous\n"
+#~ msgstr "%s: flaggan \"%s\" är tvetydig\n"
+
+#, fuzzy
+#~ msgid "%s: option `--%s' doesn't allow an argument\n"
+#~ msgstr "%s: flaggan \"--%s\" tar inget argument\n"
+
+#, fuzzy
+#~ msgid "%s: option `%c%s' doesn't allow an argument\n"
+#~ msgstr "%s: flaggan \"%c%s\" tar inget argument\n"
+
+#, fuzzy
+#~ msgid "%s: option `%s' requires an argument\n"
+#~ msgstr "%s: flaggan \"%s\" behöver ett argument\n"
+
+#, fuzzy
+#~ msgid "%s: unrecognized option `--%s'\n"
+#~ msgstr "%s: okänd flagga \"--%s\"\n"
+
+#, fuzzy
+#~ msgid "%s: unrecognized option `%c%s'\n"
+#~ msgstr "%s: okänd flagga \"%c%s\"\n"
+
+#, fuzzy
+#~ msgid "%s: illegal option -- %c\n"
+#~ msgstr "%s: otillåten flagga -- %c\n"
+
+#, fuzzy
+#~ msgid "%s: invalid option -- %c\n"
+#~ msgstr "%s: ogiltig flagga -- %c\n"
+
+#, fuzzy
+#~ msgid "%s: option requires an argument -- %c\n"
+#~ msgstr "%s: flaggan behöver ett argument -- %c\n"
+
+#, fuzzy
+#~ msgid "No previous regular expression"
+#~ msgstr "Inget föregående reguljäruttryck"
+
+#, fuzzy
+#~ msgid "Memory exhausted"
+#~ msgstr "Minnet slut"

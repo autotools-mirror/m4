@@ -646,3 +646,4 @@ AC_DEFUN(AM_LC_MESSAGES,
     fi
   fi])
 
+

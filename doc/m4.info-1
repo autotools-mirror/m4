@@ -7,7 +7,7 @@ END-INFO-DIR-ENTRY
 
    This file documents the GNU `m4' utility.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994 Free Software
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998 Free Software
 Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4d.  It is now to be considered stable, future
+   This is release 1.4e.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 

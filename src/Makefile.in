@@ -122,7 +122,7 @@ DIST_COMMON =  Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP = --best
 SOURCES = $(m4_SOURCES)
 OBJECTS = $(m4_OBJECTS)
