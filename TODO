@@ -69,12 +69,6 @@ for any of these ideas or if you have others to add.
 	maintaining the string lengths, and avoiding strlen, strcpy,
 	etc.).
 
-  + --with-gmp is surplus to requirements, mpeval should always be built --
-    either with libgmp if it is available, or else without it.  Whether
-    or not to use mpeval is then determined at runtime, if the user tries
-    to `load(`mpeval')'.
-
-
 * MODULE SPECIFIC ISSUES
 
   + Some way of linking a module statically is needed, for systems
@@ -97,3 +91,8 @@ for any of these ideas or if you have others to add.
 
   + The perl module should only be built if a suitable perl interpreter
     is found on the build machine.
+
+* OTHER TOOLS
+
+  + Automake 1.5 doesn't seem to like pkglibexec_LTLIBRARIES +=
+    See modules/Makefile.am.

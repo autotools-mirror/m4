@@ -1,7 +1,7 @@
 # -*- shell-script -*-
-# @configure_generated@
+# @configure_input@
 # Configurable variable values for M4 test suite.
 # Copyright 2000, 2001 Free Software Foundation, Inc.
 
 # Some tests cannot be performed with all the configurations.
-WITH_GMP=@WITH_GMP@
+USE_GMP=@USE_GMP@

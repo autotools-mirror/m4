@@ -19,20 +19,20 @@
 AT_BANNER([Torturing builtins.])
 
 
-## ------- ##
-## ddivert ##
-## ------- ##
+## ------ ##
+## divert ##
+## ------ ##
 
-AT_SETUP([ddivert])
+AT_SETUP([[divert]])
 
-AT_DATA([[ddivert.m4]],
+AT_DATA([[divert.m4]],
 [[divert(1)Text diverted a first time.
 divert(0)undivert(1)dnl
 divert(1)Text diverted a second time.
 divert(0)undivert(1)dnl
 ]])
 
-AT_CHECK_M4([ddivert.m4], 0,
+AT_CHECK_M4([divert.m4], 0,
 [[Text diverted a first time.
 Text diverted a second time.
 ]])
@@ -140,7 +140,7 @@ AT_CLEANUP
 AT_SETUP([gmp])
 
 # cannot perform test without --with-gmp
-AT_CHECK([test "$WITH_GMP" = yes || exit 77])
+AT_CHECK([test "$USE_GMP" = yes || exit 77])
 
 AT_DATA([[in]],
 [[divert(-1)

@@ -16,36 +16,44 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 # 02111-1307  USA
 
-# serial 3
+# serial 4
 
-AC_DEFUN([AM_WITH_GMP],
-  [AC_MSG_CHECKING(if extended and fractional arithmetic is wanted)
-  AC_ARG_WITH(gmp,
-  [  --with-gmp              use gmp for extended and fractional arithmetic],
-  [use_gmp=$withval], [use_gmp=no])
-  AC_MSG_RESULT($use_gmp)
+m4_define([_AC_LIB_GMP],
+[AC_ARG_WITH(gmp,
+[  --without-gmp           don't use GNU multiple precision arithmetic library],
+[use_gmp=$withval], [use_gmp=yes])
 
-  if test "$use_gmp" = yes; then
-    LIBS="$LIBS -lgmp"
-    AC_CHECK_HEADER([gmp.h],
-      [AC_CACHE_CHECK([for mpq_init in libgmp], ac_cv_func_mpq_init_libgmp,
-	 [AC_TRY_LINK([#include <gmp.h>],
-	    [mpq_t x; (void)mpq_init(x)],
-	    ac_cv_func_mpq_init_libgmp=yes,
-	    ac_cv_func_mpq_init_libgmp=no)])],
-	  ac_cv_func_mpq_init_libgmp=no)
+case $use_gmp:$GMP_LIB:$ac_cv_header_gmp_h in
+  *::yes)
+    AC_MSG_WARN([gmp library not found or does not appear to work
+                 but `gmp.h' is present])
+    ac_cv_using_lib_gmp=no
+    ;;
+  *:-lgmp:no)
+    AC_MSG_WARN([gmp works but `gmp.h' is missing])
+    ac_cv_using_lib_gmp=no
+    ;;
+  yes:*:yes)
+    ac_cv_using_lib_gmp=yes
+    ;;
+  no:*)
+    ac_cv_using_lib_gmp=no
+    ;;
+esac
 
-    if test "$ac_cv_func_mpq_init_libgmp$ac_cv_header_gmp_h" = yesyes; then
-      AC_DEFINE(WITH_GMP, 1,
-      [Define to 1 if the GNU multiple precision library should be used.])
-    else
-      LIBS=`echo $LIBS | sed -e 's/-lgmp//'`
-      AC_MSG_WARN([gmp library not found or does not appear to work])
-      use_gmp=no
-    fi
-  fi
+if test "$ac_cv_using_lib_gmp" = yes; then
+  AC_DEFINE(WITH_GMP, 1,
+    [Define to 1 if the GNU multiple precision library should be used.])
+fi
+])# _AC_LIB_GMP
 
-  if test "$use_gmp" != yes; then
-    AC_CHECK_SIZEOF(long long int, 0)
-  fi
-  ])
+AC_DEFUN([AC_LIB_GMP],
+[AC_CHECK_HEADERS([gmp.h])
+AC_CHECK_LIB([gmp], [mpq_init], [GMP_LIB=-lgmp])
+AC_SUBST([GMP_LIB])dnl
+
+AC_CACHE_CHECK([if using GNU multiple precision arithmetic library],
+                [ac_cv_using_lib_gmp],
+                [_AC_LIB_GMP])
+AC_SUBST([USE_GMP], [$ac_cv_using_lib_gmp])dnl
+])# AC_LIB_GMP

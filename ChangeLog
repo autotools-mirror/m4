@@ -1,3 +1,22 @@
+2001-09-20  Akim Demaille  <akim@epita.fr>
+
+	* config/gmp.m4 (AM_WITH_GMP): Rename as...
+	(AC_LIB_GMP): this.
+	By default, use gmp.
+	Massive revamping.
+	* configure.in: Adjust.
+	Use Automake conditionals for USE_GMP.
+	Always compute sizeof (long long int).
+	This was a bug BTW, as `eval' (not `mpeval') depends on it:
+	before, it was used _only_ if mpeval was not activated.
+	* modules/Makefile.am (pkglibexec2dir, +pkglibexec2_LTLIBRARIES)
+	(mpeval_la_LIBADD): New macros.
+	* modules/mpeval.c: No longer be conditioned by WITH_GMP.
+	Indent.
+	* tests/Makefile.am ($(srcdir)/$(TESTSUITE)): Create package.m4.
+	* tests/atlocal.in, tests/builtins.at: Depend upon USE_GMP, not
+	WITH_GMP.
+
 2001-09-18  Akim Demaille  <akim@epita.fr>
 
 	* tests/Makefile.am (package.m4): New.

@@ -33,8 +33,15 @@ LIBS = $(top_builddir)/m4/libm4.la
 LDFLAGS = -no-undefined
 
 pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la \
-			  mpeval.la traditional.la perl.la \
+			  traditional.la perl.la \
 			  modtest.la shadow.la stdlib.la time.la
+
+## Aaaarg.  Automake 1.5 doesn't seem to like
+## pkglibexec_LTLIBRARIES += mpeval.la
+pkglibexec2dir = $(pkglibexecdir)
+if USE_GMP
+pkglibexec2_LTLIBRARIES = mpeval.la
+endif
 
 gnu_la_SOURCES = gnu.c
 EXTRA_gnu_la_SOURCES = format.c
@@ -48,6 +55,7 @@ m4_la_LDFLAGS = -module
 
 mpeval_la_SOURCES = mpeval.c
 mpeval_la_LDFLAGS = -module
+mpeval_la_LIBADD = -lgmp
 
 traditional_la_SOURCES = traditional.c
 traditional_la_LDFLAGS = -module
