@@ -1,5 +1,12 @@
 2003-09-09  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/m4-obstack.m4 (m4_FUNC_OBSTACK): D'oh! Now that we wrap
+	gl_OBSTACK, which in turn calls AC_FUNC_OBSTACK, don't rerun bits
+	of code originally snarfed from AC_FUNC_OBSTACK!!! While I'm here
+	rename to m4_OBSTACK in light of wrapping gl_OBSTACK.
+
+2003-09-09  Gary V. Vaughan  <gary@gnu.org>
+
 	The gnulib obstack module requires the gnulib gettext module for
 	systems that do not have GNU gettext installed.  Because we use
 	-Ignulib/m4 in our Makefiles it is not safe to drop gettext.h in

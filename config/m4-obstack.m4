@@ -22,39 +22,28 @@
 
 # serial 7
 
-# m4_FUNC_OBSTACK
-# ---------------
+# m4_OBSTACK
+# ----------
 # Use the libc supplied version of obstacks if available.
-AC_DEFUN([m4_FUNC_OBSTACK],
+AC_DEFUN([m4_OBSTACK],
 [AC_PREREQ(2.56)dnl We use the new compiler based header checking in 2.56
-AC_REQUIRE([gl_OBSTACK])
-m4_pattern_allow([^m4_cv_func_obstack$])dnl
-
-AC_CHECK_HEADERS(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
-
 AC_ARG_WITH([included-obstack],
     [AC_HELP_STRING([--with-included-obstack],
                     [use the obstack implementation included here])])
 
+AC_CHECK_HEADERS(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
+
 if test "x${with_included_obstack-no}" = xno; then
-  AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
-               [AC_TRY_LINK([#include "obstack.h"],
-	                    [struct obstack *mem;obstack_free(mem,(char *) 0)],
-	                    [m4_cv_func_obstack=yes],
-	                    [m4_cv_func_obstack=no])])
+  gl_OBSTACK
 else
-  m4_cv_func_obstack=no
+  ac_cv_func_obstack=no
 fi
 
 OBSTACK_H=
-if test $m4_cv_func_obstack = yes; then
-
+if test $ac_cv_func_obstack = yes; then
   # The system provides obstack.h, `#include <obstack.h>' will work
   INCLUDE_OBSTACK_H='#include <obstack.h>'
-  AC_DEFINE(HAVE_OBSTACK, 1, [Define if libc includes obstacks.])
-
 else
-
   # The system does not provide obstack.h, or the user has specified
   # to build without it.  Unfortunately we can't leave an obstack.h
   # file around anywhere in the include path if the system also
@@ -63,10 +52,6 @@ else
   # supplied version).  Hence, `#include <m4/obstack.h>' will work.
   INCLUDE_OBSTACK_H='#include <m4/obstack.h>'
   OBSTACK_H=obstack.h
-
-  # In the absence of a system implementation, we must compile our own:
-  AC_LIBOBJ(obstack)
-
 fi
 AC_SUBST(OBSTACK_H)
 AC_SUBST(INCLUDE_OBSTACK_H)
