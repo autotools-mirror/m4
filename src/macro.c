@@ -19,10 +19,12 @@
 /* This file contains the functions, that performs the basic argument
    parsing and macro expansion.  */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
 
-static void expand_macro __P ((symbol *));
-static void expand_token __P ((struct obstack *, token_type, token_data *));
+static void expand_macro M4_PARAMS((symbol *));
+static void expand_token M4_PARAMS((struct obstack *, token_type, token_data *));
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;

@@ -47,23 +47,30 @@
 void exit ();
 #endif
 
-#include "error.h"
-
 #ifndef _
 # define _(String) String
+#endif
+
+/* Get prototypes for the functions defined here.  */
+#include <m4error.h>
+
+#ifdef DLL_EXPORT
+#  define M4_GLOBAL_DATA	__declspec(dllexport)
+#else
+#  define M4_GLOBAL_DATA
 #endif
 
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this
    function without parameters instead.  */
-void (*error_print_progname) (
+M4_GLOBAL_DATA void (*error_print_progname) (
 #if __STDC__ - 0
 			      void
 #endif
 			      );
 
 /* This variable is incremented each time `error' is called.  */
-unsigned int error_message_count;
+M4_GLOBAL_DATA unsigned int error_message_count;
 
 #ifdef _LIBC
 /* In the GNU C library, there is a predefined variable for this.  */
@@ -85,7 +92,7 @@ unsigned int error_message_count;
 
 /* The calling program should define program_name and set it to the
    name of the executing program.  */
-extern char *program_name;
+M4_GLOBAL_DATA char *program_name;
 
 # ifdef HAVE_STRERROR_R
 #  define __strerror_r strerror_r

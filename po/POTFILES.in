@@ -1,6 +1,6 @@
-lib/getopt.c
-lib/obstack.c
-lib/regex.c
+src/getopt.c
+lib/m4obstack.c
+lib/m4regex.c
 lib/xmalloc.c
 src/builtin.c
 src/debug.c

@@ -28,8 +28,9 @@ and rational arithmetic using mpeval.  The implementation depends on the
 GNU gmp v2 library.
 
 By using `./configure --with-modules, you get the possibility of using
-dynamic modules.  The implementation depends on dlopen(3) interface.
-See file `modules/README' for a more detailed description.
+dynamic modules.  The implementation uses libltdl interface, details of
+which are in the libtool manual.  See file `modules/README' for a more
+detailed description.
 
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
@@ -40,6 +41,11 @@ By using `./configure --with-dmalloc', GNU m4 is linked with Gray
 Watson's dmalloc package.  It is a debugging option for finding memory
 management problems.  Gray Watson's dmalloc package is available at
 ftp://ftp.letters.com/src/dmalloc/dmalloc.tar.gz.
+
+When compiling on cygwin (b20.1 at least), the cygwin getopt build
+doesn't handle optional arguments properly.  The best way to get around
+this is to force the build to use the included getopt files like this,
+`ac_cv_func_getopt_long=no ./configure`.
 
 Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
 is an adequate description of the problem: your input, what you

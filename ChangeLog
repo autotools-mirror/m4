@@ -1,3 +1,144 @@
+2000-01-16  Rene' Seindal  <rene@seindal.dk>
+
+	* modules/Makefile.am (TESTS): New tests for the module system.
+
+	* modules/*.test: New files.
+
+	* src/m4.c (main): Added call to module_init().
+	Treats -M and -m as the arguments -D -U and -t, ie deferred.
+
+	* src/m4.h: Added declaration of module_init().
+
+	* src/module.c (module_init): No longer static
+
+	* modules/Makefile.am ({test,shadow,time,stdlib}_la_LDFLAGS):
+	Added to shut up automake about non standard libtool library
+	names.
+
+	* src/module.c: Disabled DEBUG by default.
+
+	* modules/README: Changed example from unload.m4 to shadow.m4
+
+	* modules/shadow.m4: Renamed from unload.m4
+
+	* modules/Makefile.am (EXTRA_DIST): Removed unload.m4.
+
+	* src/m4.c (main): Functionality for -m and -M were reversed.
+	Fixed.
+
+2000-01-12  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/help2man.pl: updated to version 1.020.
+
+	* lib/COPYING.LIB:  updated to version 2.1.
+
+	* lib/m4module.h: restructure the M4_SCOPE code to work when
+	creating a dll which links with libm4.la and both DLL_EXPORT
+	(for the new dll) and LIBM4_DLL_IMPORT (for m4module.h) are
+	both defined.
+
+2000-01-11  Gary V. Vaughan  <gary@gnu.org>
+
+	Merged the following changes from my tree:
+
+	1999-06-15  Gary V. Vaughan  <gary@oranda.demon.co.uk>
+
+	* configure.in (AC_LIBTOOL_WIN32_DLL): Declare that m4 has been
+	ported to compile shared libs.
+	
+	* configure.in (LIBM4_DLL_IMPORT): Discover whether we need to
+	use `__declspec(dllimport)' when linking libm4.la on win32.
+	* src/Makefile.am (m4_LDFLAGS): Use dllimport if necessary.
+
+	* configure.in (M4OBJS): Discover whether we need the shipped
+	implementation of getopt_long.
+	* src/Makefile.am (m4_LDADD): Link the getopt objects into the
+	main binary here, as opposed to the module library in lib/libm4.la.
+	
+	1999-06-14  Gary V. Vaughan  <gary@oranda.demon.co.uk>
+
+	* modules/README: Updated to describe the improved libltdl based
+	module scheme.
+	* README (cygwin): Added some compilation notes for building m4
+	correctly under cygwin.
+	* TODO: Cleaned out the entries for the module system since they
+	are now implemented.
+
+	* *.[ch]: __P is in the compiler's reserved namespace, so replaced
+	all instances of __P with M4_PARAMS.
+
+	* lib/getdate.h: removed unreferenced file.
+
+	* lib/m4private.h: New file to define the private interface to the
+	token_data struct, which must be shared between m4module.c, and
+	builtin.c but not exported to modules built from the installed
+	m4module.h since it's size changes depending on compile time
+	options.
+	
+	* src/m4.h: Lots of stuff moved to lib/m4module.h.
+
+	* lib/m4module.h: New file to define the interface available when
+	compiling m4 modules.
+	* lib/m4module.c: Moved parts of builtin.c, and m4.c which are
+	necessary for module compilation into this new file.
+	
+	* lib/Makefile.am (include_HEADERS): install headers (renamed to
+	avoid nameclash with other system headers) necessary for compiling
+	modules.
+	(libm4_la_SOURCES): always include error.c, obstack.c and regex.c
+	so that modules can include the (renamed) installed headers and
+	be guaranteed a matching implementation.
+	* lib/m4error.h: renamed from error.h.
+	* lib/m4obstack.h: renamed from obstack.h.
+	* lib/m4regex.h: renamed from regex.h.
+	* configure.in (AC_REPLACE_FUNCS):  Don't look for a system
+	implementation, simply include the shipped version
+	unconditionally, otherwise it is hard for a module to know
+	whether the m4obstack.h header it is using matches the
+	implementation it ends up linking against.
+	(jm_WITH_REGEX):  Include regex into libm4 unconditionally for
+	the same reason.
+	
+	1999-05-18  Gary V. Vaughan  <gary@oranda.demon.co.uk>
+
+	* examples/misc.test: Don't run this test on machines which don't
+	have a root user in /etc/passwd (e.g. cygwin).
+
+	* tests/get-them (/^@example$/): Error messages might have a
+	``.exe'' suffix to the program name, or else use the libtool
+	``.libs/lt-m4'' binary, or generally have an unexpected path.  All
+	of these cases are now catered for when comparing error messages
+	in generated tests.
+	* tests/other-tests/*.test: ditto.
+	* examples/*.test: ditto.
+	
+	* tests/defs (M4): use libtool execute mode.
+	* examples/defs (M4): ditto.
+
+	* tests/get-them (END): explicitly close any open file.
+	(printthem): In a regular expression, '{' is the start of a repeat
+	count!  Use `[{]' for a literal open brace.
+	(/^@node /): Don't use substr on a string shorter than the trim
+	length.
+
+	1999-05-17  Gary V. Vaughan  <gary@oranda.demon.co.uk>
+
+	* configure.in (LTLIBOBJS): calculated from LIBOBJS, and
+	substituted.
+	(AC_LIBTOOL_DLOPEN): declare that this package will use dlopen.
+
+2000-01-10  Andreas Schwab  <schwab@suse.de>
+
+	* tests/other-tests/gmp.test: Find config.sh in build directory.
+
+	* configure.in: Find tests/mkconfig.sh in $srcdir.
+
+	* configure.in: Define HAVE_SIGINFO_T if siginfo_t is defined in
+	<signal.h> (for SUS2 compliant systems).
+
+	* src/stackovf.c: Check for HAVE_SIGINFO_T in addition to
+	HAVE_SIGINFO_H.
+
 2000-01-10  Rene' Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4o.
@@ -122,7 +263,7 @@
 	if the module subsystem is broken normal m4 scripts can still run.
 	* src/m4.h (install_builtin_table): is now exported.
 	
-1999-03-26  Gary V. Vaughan  <gvaughan@oranda.demon.co.uk>
+1999-03-26  Gary V. Vaughan  <gary@oranda.demon.co.uk>
 
 	* src/module.c: removed.  No longer required.
 	* po/POTFILES.in: removed src/module.c.
@@ -144,7 +285,7 @@
 	* acm4/gettext.m4: removed.  It causes a multiple definition vs.
 	the installed gettext.m4 file when running aclocal.
 	
-1999-03-25  Gary V. Vaughan  <gvaughan@oranda.demon.co.uk>
+1999-03-25  Gary V. Vaughan  <gary@oranda.demon.co.uk>
 
 	* configure.in (AM_INIT_AUTOMAKE): bumped version number to
 	distinguish this from the last prerelease.

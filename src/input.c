@@ -18,7 +18,9 @@
 
 /* Handling of different input sources, and lexical analysis.  */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
 
 #define DEBUG_INPUT
 #undef DEBUG_INPUT
@@ -140,10 +142,10 @@
 
 struct input_funcs
 {
-  int (*peek_func) __P((void));		/* function to peek input */
-  int (*read_func) __P((void));		/* function to read input */
-  void (*unget_func) __P((int));	/* function to unread input */
-  void (*clean_func) __P((void));	/* function to clean up */
+  int (*peek_func) M4_PARAMS((void));		/* function to peek input */
+  int (*read_func) M4_PARAMS((void));		/* function to read input */
+  void (*unget_func) M4_PARAMS((int));	/* function to unread input */
+  void (*clean_func) M4_PARAMS((void));	/* function to clean up */
 };
 
 struct input_block
@@ -222,23 +224,15 @@ static input_block *next;
 static boolean start_of_input_line;
 
 /* Input syntax table */
-unsigned short syntax_table[256];
+/* unsigned short syntax_table[256];  moved to m4module.c. */
 
 #define CHAR_EOF	256	/* character return on EOF */
 #define CHAR_MACRO	257	/* character return for MACRO token */
 #define CHAR_RETRY	258	/* character return for end of input block */
 
-/* Quote chars.  */
-STRING rquote;
-STRING lquote;
-
 /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
 static boolean single_quotes;
 
-/* Comment chars.  */
-STRING bcomm;
-STRING ecomm;
- 
 /* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
 static boolean single_comments;
 
@@ -641,7 +635,7 @@ static int
 next_char (void)
 {
   int ch;
-  int (*f) __P ((void));
+  int (*f) M4_PARAMS((void));
 
   while (1)
     {
@@ -679,7 +673,7 @@ int
 peek_input (void)
 {
   int ch;
-  int (*f) __P((void));
+  int (*f) M4_PARAMS((void));
 
   while (1)
     {
@@ -794,8 +788,8 @@ match_input (const unsigned char *s)
 | Inititialise input stacks, and quote/comment characters.  |
 `----------------------------------------------------------*/
 
-static void set_syntax_internal __P ((int code, int ch));
-static void unset_syntax_attribute __P ((int code, int ch));
+static void set_syntax_internal M4_PARAMS((int code, int ch));
+static void unset_syntax_attribute M4_PARAMS((int code, int ch));
 
 void
 input_init (void)

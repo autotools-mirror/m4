@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = 1.4 gnits
+AUTOMAKE_OPTIONS = 1.4 # gnits
 
 ACLOCAL_AMFLAGS=-I acm4
 
@@ -8,8 +8,8 @@ MAINTAINERCLEANFILES = ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 	ltconfig ltmain.sh missing mkinstalldirs stamp-h.in \
 	po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 
-SUBDIRS =      acm4 intl po lib libltdl src doc tests examples @MODULES_DIR@
-DIST_SUBDIRS = acm4 intl po lib libltdl src doc tests examples modules
+SUBDIRS = acm4 intl po lib src doc tests examples @MODULES_DIR@
+# DIST_SUBDIRS = acm4 intl po lib libltdl src doc tests examples modules
 
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.

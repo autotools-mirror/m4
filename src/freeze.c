@@ -18,7 +18,10 @@
 
 /* This module handles frozen files.  */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
+
 
 /*-------------------------------------------------------------------.
 | Destructively reverse a symbol list and return the reversed list.  |

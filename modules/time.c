@@ -16,8 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <m4.h>
-#include <builtin.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 
 #ifdef TM_IN_SYS_TIME
 #include <sys/time.h>
@@ -25,22 +26,24 @@
 #include <time.h>
 #endif /* TM_IN_SYS_TIME */
 
-#define m4_macro_table time_LTX_m4_macro_table
+#include <m4module.h>
 
-DECLARE(m4_currenttime);
-DECLARE(m4_ctime);
-DECLARE(m4_gmtime);
-DECLARE(m4_localtime);
+M4BUILTIN(m4_currenttime);
+M4BUILTIN(m4_ctime);
+M4BUILTIN(m4_gmtime);
+M4BUILTIN(m4_localtime);
 
 #ifdef HAVE_MKTIME
-DECLARE(m4_mktime);
+M4BUILTIN(m4_mktime);
 #endif /* HAVE_MKTIME */
 
 #ifdef HAVE_STRFTIME
-DECLARE(m4_strftime);
+M4BUILTIN(m4_strftime);
 #endif /* HAVE_STRFTIME */
 
-#undef DECLARE
+#undef M4BUILTIN
+
+#define m4_macro_table	time_LTX_m4_macro_table
 
 builtin m4_macro_table[] =
 {
@@ -67,7 +70,7 @@ m4_currenttime (struct obstack *obs, int argc, token_data **argv)
   time_t now;
   int l;
 
-  if (bad_argc (argv[0], argc, 1, 1))
+  if (m4_bad_argc (argv[0], argc, 1, 1))
     return;
 
   now = time(0L);
@@ -83,11 +86,11 @@ m4_ctime (struct obstack *obs, int argc, token_data **argv)
   time_t t;
   int l;
 
-  if (bad_argc (argv[0], argc, 1, 2))
+  if (m4_bad_argc (argv[0], argc, 1, 2))
     return;
 
   if (argc == 2)
-    numeric_arg(argv[0], ARG(1), (int *)&t);
+    m4_numeric_arg(argv[0], (char*)M4ARG(1), (int *)&t);
   else
     t = time(0L);
 
@@ -97,31 +100,31 @@ m4_ctime (struct obstack *obs, int argc, token_data **argv)
 static void
 format_tm(struct obstack *obs, struct tm *tm)
 {
-  shipout_int(obs, tm->tm_sec);
+  m4_shipout_int(obs, tm->tm_sec);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_min);
+  m4_shipout_int(obs, tm->tm_min);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_hour);
+  m4_shipout_int(obs, tm->tm_hour);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_mday);
+  m4_shipout_int(obs, tm->tm_mday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_mon);
+  m4_shipout_int(obs, tm->tm_mon);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_year);
+  m4_shipout_int(obs, tm->tm_year);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_wday);
+  m4_shipout_int(obs, tm->tm_wday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_yday);
+  m4_shipout_int(obs, tm->tm_yday);
   obstack_1grow(obs, ',');
 
-  shipout_int(obs, tm->tm_isdst);
+  m4_shipout_int(obs, tm->tm_isdst);
 }
 
 static void
@@ -130,10 +133,10 @@ m4_gmtime (struct obstack *obs, int argc, token_data **argv)
   time_t t;
   struct tm *tm;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
     return;
 
   format_tm(obs, gmtime(&t));
@@ -145,10 +148,10 @@ m4_localtime (struct obstack *obs, int argc, token_data **argv)
   time_t t;
   struct tm *tm;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (m4_bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), (int *)&t))
     return;
 
   format_tm(obs, localtime(&t));
@@ -165,27 +168,27 @@ m4_mktime (struct obstack *obs, int argc, token_data **argv)
   struct tm tm;
   time_t t;
 
-  if (bad_argc (argv[0], argc, 7, 8))
+  if (m4_bad_argc (argv[0], argc, 7, 8))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &tm.tm_sec))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(1), &tm.tm_sec))
     return;
-  if (!numeric_arg (argv[0], ARG (2), &tm.tm_min))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), &tm.tm_min))
     return;
-  if (!numeric_arg (argv[0], ARG (3), &tm.tm_hour))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(3), &tm.tm_hour))
     return;
-  if (!numeric_arg (argv[0], ARG (4), &tm.tm_mday))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(4), &tm.tm_mday))
     return;
-  if (!numeric_arg (argv[0], ARG (5), &tm.tm_mon))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(5), &tm.tm_mon))
     return;
-  if (!numeric_arg (argv[0], ARG (6), &tm.tm_year))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(6), &tm.tm_year))
     return;
-  if (ARG(7) && !numeric_arg (argv[0], ARG (7), &tm.tm_isdst))
+  if (M4ARG(7) && !m4_numeric_arg (argv[0], (char*)M4ARG(7), &tm.tm_isdst))
     return;
 
   t = mktime(&tm);
 
-  shipout_int(obs, t);
+  m4_shipout_int(obs, t);
 }
 #endif /* HAVE_MKTIME */
 
@@ -198,16 +201,16 @@ m4_strftime (struct obstack *obs, int argc, token_data **argv)
   char *buf;
   int l;
 
-  if (bad_argc (argv[0], argc, 3, 3))
+  if (m4_bad_argc (argv[0], argc, 3, 3))
     return;
 
-  if (!numeric_arg (argv[0], ARG (2), (int *)&t))
+  if (!m4_numeric_arg (argv[0], (char*)M4ARG(2), (int *)&t))
     return;
 
   tm = localtime(&t);
 
   buf = (char *) obstack_alloc(obs, 1024);
-  l = strftime(buf, 1024, ARG(1), tm);
+  l = strftime(buf, 1024, (char*)M4ARG(1), tm);
   obstack_grow(obs, buf, l);
 }
 #endif /* HAVE_STRFTIME */

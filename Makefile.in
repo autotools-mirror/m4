@@ -68,6 +68,7 @@ CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
 DLLTOOL = @DLLTOOL@
+EXEEXT = @EXEEXT@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -80,8 +81,12 @@ INTLINCL = @INTLINCL@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 LD = @LD@
+LIBADD_DL = @LIBADD_DL@
+LIBM4_DLL_IMPORT = @LIBM4_DLL_IMPORT@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+LTLIBOBJS = @LTLIBOBJS@
+M4OBJS = @M4OBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MODULES_DIR = @MODULES_DIR@
@@ -102,7 +107,7 @@ VERSION = @VERSION@
 l = @l@
 pkglibexecdir = @pkglibexecdir@
 
-AUTOMAKE_OPTIONS = 1.4 gnits
+AUTOMAKE_OPTIONS = 1.4 # gnits
 
 ACLOCAL_AMFLAGS = -I acm4
 
@@ -110,16 +115,15 @@ ACLOCAL_AMFLAGS = -I acm4
 MAINTAINERCLEANFILES = ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 	config.guess config.h.in config.sub configure install-sh 	ltconfig ltmain.sh missing mkinstalldirs stamp-h.in 	po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 
 
-SUBDIRS = acm4 intl po lib libltdl src doc tests examples @MODULES_DIR@
-DIST_SUBDIRS = acm4 intl po lib libltdl src doc tests examples modules
+SUBDIRS = acm4 intl po lib src doc tests examples @MODULES_DIR@
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 
 DIST_COMMON =  README ./stamp-h.in ABOUT-NLS AUTHORS BACKLOG COPYING \
-ChangeLog INSTALL Makefile.am Makefile.in NEWS README-alpha THANKS TODO \
-acconfig.h aclocal.m4 config.guess config.h.in config.sub configure \
-configure.in install-sh ltconfig ltmain.sh missing mkinstalldirs
+ChangeLog INSTALL Makefile.am Makefile.in NEWS THANKS TODO acconfig.h \
+aclocal.m4 config.guess config.h.in config.sub configure configure.in \
+install-sh ltconfig ltmain.sh missing mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -129,14 +133,14 @@ GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnits --include-deps Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-$(ACLOCAL_M4):  configure.in  acm4/error.m4 acm4/gmp.m4 acm4/modules.m4 \
-		acm4/regex.m4
+$(ACLOCAL_M4):  configure.in  acm4/error.m4 acm4/gmp.m4 acm4/ltdl.m4 \
+		acm4/modules.m4 acm4/regex.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
@@ -296,10 +300,6 @@ dist-all: distdir
 	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
 	-rm -rf $(distdir)
 distdir: $(DISTFILES)
-	@if sed 15q $(srcdir)/NEWS | fgrep -e "$(VERSION)" > /dev/null; then :; else \
-	  echo "NEWS not updated; not releasing" 1>&2; \
-	  exit 1; \
-	fi
 	-rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
@@ -313,7 +313,7 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-	for subdir in $(DIST_SUBDIRS); do \
+	for subdir in $(SUBDIRS); do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d $(distdir)/$$subdir \
 	    || mkdir $(distdir)/$$subdir \
@@ -398,6 +398,7 @@ install uninstall-am uninstall all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+# DIST_SUBDIRS = acm4 intl po lib libltdl src doc tests examples modules
 
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.

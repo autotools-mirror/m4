@@ -139,6 +139,9 @@
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 
+/* Define if you have the dlerror function.  */
+#undef HAVE_DLERROR
+
 /* Define if you have the dlopen function.  */
 #undef HAVE_DLOPEN
 
@@ -157,6 +160,9 @@
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
+/* Define if you have the index function.  */
+#undef HAVE_INDEX
+
 /* Define if you have the mkstemp function.  */
 #undef HAVE_MKSTEMP
 
@@ -166,11 +172,11 @@
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP
 
-/* Define if you have the obstack function.  */
-#undef HAVE_OBSTACK
-
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
+
+/* Define if you have the rindex function.  */
+#undef HAVE_RINDEX
 
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
@@ -208,6 +214,9 @@
 /* Define if you have the strerror_r function.  */
 #undef HAVE_STRERROR_R
 
+/* Define if you have the strrchr function.  */
+#undef HAVE_STRRCHR
+
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
@@ -232,6 +241,18 @@
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 
+/* Define if you have the <ctype.h> header file.  */
+#undef HAVE_CTYPE_H
+
+/* Define if you have the <dl.h> header file.  */
+#undef HAVE_DL_H
+
+/* Define if you have the <dld.h> header file.  */
+#undef HAVE_DLD_H
+
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
+
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
@@ -250,8 +271,17 @@
 /* Define if you have the <siginfo.h> header file.  */
 #undef HAVE_SIGINFO_H
 
+/* Define if you have the <stdio.h> header file.  */
+#undef HAVE_STDIO_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
@@ -276,6 +306,39 @@
 
 /* Define if compiler has function prototypes */
 #undef PROTOTYPES
+
+/* Define to the extension used for shared libraries, say, .so.  */
+#undef LTDL_SHLIB_EXT
+
+/* Define to the name of the environment variable that determines the dynamic library search path.  */
+#undef LTDL_SHLIBPATH_VAR
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.  */
+#undef LTDL_OBJDIR
+
+/* Define if libtool can extract symbol lists from object files.  */
+#undef HAVE_PRELOADED_SYMBOLS
+
+/* Define if you have the libdl library or equivalent.  */
+#undef HAVE_LIBDL
+
+/* Define if you have the libdl library or equivalent. */
+#undef HAVE_LIBDL
+
+/* Define if you have the shl_load function. */
+#undef HAVE_SHL_LOAD
+
+/* Define if you have the shl_load function. */
+#undef HAVE_SHL_LOAD
+
+/* Define if you have the GNU dld library. */
+#undef HAVE_DLD
+
+/* Define if dlsym() requires a leading underscode in symbol names.  */
+#undef NEED_USCORE
+
+/* Define if <signal.h> declares siginfo_t.  */
+#undef HAVE_SIGINFO_T
 
 /* Define if using the dmalloc debugging malloc package */
 #undef WITH_DMALLOC

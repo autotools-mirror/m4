@@ -3,7 +3,7 @@
 <HEAD>
 <TITLE>GNU m4 - ChangeLog</TITLE> 
 <META NAME="AUTHOR" CONTENT="René Seindal"> 
-<META NAME="GENERATOR" CONTENT="GNU m4 1.4n">  
+<META NAME="GENERATOR" CONTENT="GNU m4 1.4o">  
 </HEAD>
  <BODY text="#000000" bgcolor="#FFCC99" link="#0000EF" alink="#FF0000" vlink="#51188E">
 <TABLE cellpadding=5 width="100%">
@@ -146,7 +146,7 @@
  <TR>
 <TD bgcolor="#CC6600">
 <P>
-<B>Development</B>
+<B>Feedback</B>
 </P>
 
 </TD>
@@ -158,7 +158,33 @@
 
 <FONT size=-1><B><A HREF="lists.htm">Mailing-lists</A><BR>
 <A HREF="feedback.htm">Feedback</A><BR>
-<A HREF="download.htm">Download</A><BR>
+<A HREF="/forum/list.php3?num=2">Discussion Forum</A></B></FONT>
+
+</P>
+
+</TD>
+
+</TR>
+ <TR>
+<TD height=5>
+
+</TD>
+
+</TR>
+ <TR>
+<TD bgcolor="#CC6600">
+<P>
+<B>Development</B>
+</P>
+
+</TD>
+
+</TR>
+ <TR>
+<TD>
+<P>
+
+<FONT size=-1><B><A HREF="download.htm">Download</A><BR>
 <A HREF="bugs.htm">Known bugs</A></B></FONT>
 
 </P>
@@ -206,24 +232,58 @@
  <TD align=left valign=top width="90%">
 
 
-<PRE>2000-01-09  Rene' Seindal  &lt;rene@seindal.dk&gt;
+<PRE>2000-01-10  Rene' Seindal  &lt;rene@seindal.dk&gt;
+
+	* Prerelease 1.4o.
+
+	* TODO, NEWS: Cleaned up and updated.
+
+	* src/m4.c (main): New variable exit_status for exit status in
+	case of unreadable files.  Now m4 will exit with EXIT_FAILURE if a
+	file cannot be read instead of EXIT_SUCCESS.
+
+	* src/builtin.c (m4_indir): Changed error message to help
+	translators (from Akim Demaille &lt;demaille@inf.enst.fr&gt;). 
+
+	* lib/obstack.[hc], getopt*.[ch]: Updated to newest version from
+	Cygnus.
+
+	* lib/error.[hc], lib/regex.[hc], lib/strtol.c: Updated to version
+	from glic 2.1.2.
+
+	* src/input.c (match_input): Reordering of code, to avoid multiple
+	calls to push_string_init() from obstack_grow(), which can happen
+	with some compilers (found and fixed by James Bonfield
+	&lt;jkb@mrc-lmb.cam.ac.uk&gt;).
+
+	* src/stackovf.c: Added prototypes for ultrix.
+	(setup_stackovf_trap): Added __P to cast.
+	(Both reported by John David Anglin &lt;dave@hiauly1.hia.nrc.ca&gt;)
+
+2000-01-09  Rene' Seindal  &lt;rene@seindal.dk&gt;
 
 	* doc/m4.texinfo (Changequote): Added comment about changing
 	quotes when the old quote is a part of the new.
 
 	* src/builtin.c (expand_ranges): Added break after trailing dash.
-	This caused misbehavious on some systems. (Bug found and fixed by
-	Akim Demaille &lt;demaille@inf.enst.fr&gt;)
+	This caused misbehavious on some systems (found and fixed by Akim
+	Demaille &lt;demaille@inf.enst.fr&gt;).
 
 	* AUTHORS: Thomas Tanner included
 
 	* acconfig.h: Added entry for ss_sp (see below).
 
 	* configure.in (use_stackovf): Added check for stack_t with member
-	ss_base instead of ss_sp (BSDI notably).  NEEDS TESTING.
+	ss_base instead of ss_sp (BSDI notably).  (Reported by Paul Eggert
+	&lt;eggert@twinsun.com&gt;).
 
 	* doc/m4.texinfo (Frozen files): Added a simpler example for
 	generating frozen files from several input files.
+
+1999-11-14  Paul Eggert  &lt;eggert@twinsun.com&gt;
+
+        * po/POTFILES.in: Add lib/getopt.c, lib/obstack.c,
+        lib/regex.c, lib/xmalloc.c.
 
 1999-11-10  Rene' Seindal  &lt;rene@seindal.dk&gt;
 
@@ -241,6 +301,31 @@
 	automake warnings about missing lib prefix.
 	(time_la_LDFLAGS): ditto
 	(stdlib_la_LDFLAGS): ditto
+
+1999-11-10  Paul Eggert  &lt;eggert@twinsun.com&gt;
+
+        * src/m4.h: Include error.h, since our macros use error.
+        * src/m4.c: Don't need to include error.h.
+
+1999-11-09  Paul Eggert  &lt;eggert@twinsun.com&gt;
+
+        * src/m4.h (voidstar): Define to void * if __STDC__ is defined
+        and zero, as Solaris 7 cc does.
+        (bcopy): Remove macro; no longer needed with new obstack.h.
+
+        * src/output.c (freeze_diversions): Don't assume that a
+        diversion size can fit in `int'.  Check for diversion file
+        size too large to be printed with `unsigned long'.
+
+        * src/Makefile.am (CFLAGS): Omit -Wall.
+
+        * src/stackovf.c (setup_stackovf_trap): Remove cast to unsigned.
+
+        * src/debug.c (trace_format):
+        Use ANSI C if (defined __STDC__ && __STDC__) || defined PROTOTYPES.
+
+        * src/freeze.c (produce_frozen_state):
+        Don't assume string lengths fit in int.
 
 1999-10-13  Rene' Seindal  &lt;rene@seindal.dk&gt;
 

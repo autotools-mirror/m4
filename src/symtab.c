@@ -28,7 +28,9 @@
    name are simply ordered on the list by age.  The current definition
    will then always be the first found.  */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
 
 /*----------------------------------------------------------------------.
 | Initialise the symbol table, by allocating the necessary storage, and |

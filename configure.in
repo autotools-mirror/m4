@@ -8,15 +8,12 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4o)
+AM_INIT_AUTOMAKE(m4,1.4ppre2)
 
 ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST(pkglibexecdir)
-
-AC_CONFIG_SUBDIRS(libltdl)
-AC_LIBLTDL_CONVENIENCE
 
 AC_PROG_AWK
 AC_PROG_CC
@@ -24,29 +21,44 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PATH_PROG(PERL,perl)
 
-AC_ENABLE_SHARED
-AC_DISABLE_STATIC
-AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
-
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+AC_EXEEXT
 AM_C_PROTOTYPES
 AC_C_CONST
+
+AM_ENABLE_SHARED
+AM_DISABLE_STATIC
+AC_LIBTOOL_DLOPEN
+AC_LIBTOOL_WIN32_DLL
+AM_PROG_LIBTOOL
+
+AC_LIB_LTDL
 
 AC_CHECK_HEADERS(limits.h locale.h memory.h siginfo.h string.h unistd.h)
 AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
+LIBM4_DLL_IMPORT=
+case "$host" in
+*-*-cygwin* | *-*-mingw* | *-*-os2)
+  if test "X$enable_shared" = Xyes; then
+    LIBM4_DLL_IMPORT=-DLIBM4_DLL_IMPORT
+  fi
+  ;;
+esac
+AC_SUBST(LIBM4_DLL_IMPORT)
+
 AC_CHECK_FUNCS(mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile)
 
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
-AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
-AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-jm_WITH_REGEX
+AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
+M4OBJS=
+AC_CHECK_FUNC(getopt_long, , [M4OBJS="getopt1.o getopt.o"])
+AC_SUBST(M4OBJS)
 jm_PREREQ_ERROR
 
 AC_MSG_CHECKING(ecvt declaration)
@@ -82,6 +94,9 @@ if test "$use_stackovf" = yes; then
   AC_EGREP_HEADER(rlim_t, sys/resource.h, , AC_DEFINE(rlim_t, int))
   AC_EGREP_HEADER(stack_t, signal.h, , AC_DEFINE(stack_t, struct sigaltstack))
   AC_EGREP_HEADER(sigcontext, signal.h, AC_DEFINE(HAVE_SIGCONTEXT))
+  AC_EGREP_HEADER(siginfo_t, signal.h,
+		  AC_DEFINE(HAVE_SIGINFO_T, 1,
+			    [Define if <signal.h> declares siginfo_t. ]))
 
   AC_TRY_COMPILE([#include <signal.h>],
 	    [struct sigaltstack x; x.ss_base = 0;],
@@ -121,6 +136,9 @@ fi
 
 dnl AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
+LTLIBOBJS=`echo "$LIBOBJS" | sed 's,.o ,.lo ,g;s,.o$,.lo,'`
+AC_SUBST(LTLIBOBJS)
+
 # This no-op line works around a bug in automake 1.4:
 # it doesn't recognize the assignment to LIBOBJS
 # in acm4/malloc.m4 and acm4/realloc.m4.
@@ -133,7 +151,7 @@ LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 AC_OUTPUT(Makefile acm4/Makefile intl/Makefile po/Makefile.in doc/Makefile \
 lib/Makefile src/Makefile modules/Makefile tests/Makefile examples/Makefile, \
 [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile; \
-sh tests/mkconfig.sh; \
+sh $srcdir/tests/mkconfig.sh; \
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
 
 

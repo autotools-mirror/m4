@@ -77,6 +77,7 @@
 #define DEBUG_STACKOVF
 
 
+#define COMPILING_M4
 #include "m4.h"			/* stdlib.h, xmalloc() */
 
 #ifdef USE_STACKOVF
@@ -108,13 +109,13 @@
 #endif
 
 /* Giving a hand to ansi2knr...  */
-typedef void (*handler_t) __P ((void));
+typedef void (*handler_t) M4_PARAMS((void));
 
 #if defined(__ultrix) && defined(__vax)
-extern char *sbrk __P ((int));
-extern int getrlimit __P ((int, struct rlimit *));
-extern int sigstack __P ((struct sigstack *, struct sigstack *));
-extern int sigvec __P ((int, struct sigvec *, struct sigvec *));
+extern char *sbrk M4_PARAMS((int));
+extern int getrlimit M4_PARAMS((int, struct rlimit *));
+extern int sigstack M4_PARAMS((struct sigstack *, struct sigstack *));
+extern int sigvec M4_PARAMS((int, struct sigvec *, struct sigvec *));
 #endif
 
 static const char *stackbot;
@@ -209,7 +210,7 @@ occurred, or there is a bug in ");
   signal (signo, SIG_DFL);
 }
 
-#if HAVE_SIGINFO_H
+#if HAVE_SIGINFO_H || HAVE_SIGINFO_T
 
 /* SVR4.  */
 
@@ -243,7 +244,7 @@ sigsegv_handler (int signo)
 }
 
 #endif /* not HAVE_SIGCONTEXT */
-#endif /* not HAVE_SIGINFO */
+#endif /* not HAVE_SIGINFO && not HAVE_SIGINFO_T */
 
 /* Arrange to trap a stack-overflow and call a specified handler.  The
    call is on a dedicated signal stack.
@@ -326,7 +327,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 
   /* Allocate a separate signal-handler stack.  */
 
-#if HAVE_SIGALTSTACK && (defined(HAVE_SIGINFO_H) || !HAVE_SIGSTACK)
+#if HAVE_SIGALTSTACK && (HAVE_SIGINFO_H || HAVE_SIGINFO_T || !HAVE_SIGSTACK)
 
   /* Use sigaltstack only if siginfo is available, unless there is no
      choice.  */
@@ -341,7 +342,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
       error (1, errno, "sigaltstack");
   }
 
-#else /* not HAVE_SIGALTSTACK || not HAVE_SIGINFO_H && HAVE_SIGSTACK */
+#else /* not HAVE_SIGALTSTACK || not HAVE_SIGINFO_H && not HAVE_SIGINFO_T && HAVE_SIGSTACK */
 #if HAVE_SIGSTACK
 
   {
@@ -366,7 +367,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #if HAVE_SIGACTION && defined(SA_ONSTACK)
 
   sigaction (SIGSEGV, NULL, &act);
-  act.sa_handler = (RETSIGTYPE (*) __P ((int))) sigsegv_handler;
+  act.sa_handler = (RETSIGTYPE (*) M4_PARAMS((int))) sigsegv_handler;
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK 
 #ifdef SA_RESETHAND
@@ -382,7 +383,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 #else /* not HAVE_SIGACTION */
 #if HAVE_SIGVEC && defined(SV_ONSTACK)
 
-  vec.sv_handler = (RETSIGTYPE (*) __P ((int))) sigsegv_handler;
+  vec.sv_handler = (RETSIGTYPE (*) M4_PARAMS((int))) sigsegv_handler;
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK
 #ifdef SV_RESETHAND

@@ -16,6 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define COMPILING_M4
 #include "m4.h"
 
 #include <sys/stat.h>

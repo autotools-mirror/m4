@@ -68,6 +68,7 @@ CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DLLDFLAGS = @DLLDFLAGS@
 DLLTOOL = @DLLTOOL@
+EXEEXT = @EXEEXT@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -80,8 +81,12 @@ INTLINCL = @INTLINCL@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 LD = @LD@
+LIBADD_DL = @LIBADD_DL@
+LIBM4_DLL_IMPORT = @LIBM4_DLL_IMPORT@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+LTLIBOBJS = @LTLIBOBJS@
+M4OBJS = @M4OBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MODULES_DIR = @MODULES_DIR@
@@ -103,49 +108,48 @@ l = @l@
 pkglibexecdir = @pkglibexecdir@
 
 AUTOMAKE_OPTIONS = gnu ../src/ansi2knr
-
 MAINTAINERCLEANFILES = Makefile.in
 
-noinst_LIBRARIES = libm4.a
+LDFLAGS = -no-undefined -export-dynamic @DLLDFLAGS@
 
 INCLUDES = @INTLINCL@
+include_HEADERS = m4module.h m4error.h m4obstack.h m4regex.h
+noinst_HEADERS = m4private.h
 
-libm4_a_SOURCES = error.c
-
-noinst_HEADERS = getopt.h error.h getdate.h obstack.h regex.h
-
-libm4_a_LIBADD = @LIBOBJS@
+lib_LTLIBRARIES = libm4.la
+libm4_la_SOURCES = m4module.c m4error.c m4obstack.c m4regex.c
+libm4_la_LIBADD = @LTLIBOBJS@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
+LTLIBRARIES =  $(lib_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
-LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 ANSI2KNR = ../src/ansi2knr
-libm4_a_DEPENDENCIES =  @LIBOBJS@
-libm4_a_OBJECTS =  error$U.o
-AR = ar
+libm4_la_LDFLAGS = 
+libm4_la_DEPENDENCIES =  @LTLIBOBJS@
+libm4_la_OBJECTS =  m4module$U.lo m4error$U.lo m4obstack$U.lo \
+m4regex$U.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-HEADERS =  $(noinst_HEADERS)
+HEADERS =  $(include_HEADERS) $(noinst_HEADERS)
 
-DIST_COMMON =  COPYING.LIB Makefile.am Makefile.in getopt.c getopt1.c \
-obstack.c regex.c strtol.c xmalloc.c xstrdup.c
+DIST_COMMON =  COPYING.LIB Makefile.am Makefile.in strtol.c xmalloc.c \
+xstrdup.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-SOURCES = $(libm4_a_SOURCES)
-OBJECTS = $(libm4_a_OBJECTS)
+SOURCES = $(libm4_la_SOURCES)
+OBJECTS = $(libm4_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -158,14 +162,30 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstLIBRARIES:
+mostlyclean-libLTLIBRARIES:
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 
-distclean-noinstLIBRARIES:
+distclean-libLTLIBRARIES:
 
-maintainer-clean-noinstLIBRARIES:
+maintainer-clean-libLTLIBRARIES:
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
 
 .c.o:
 	$(COMPILE) -c $<
@@ -220,29 +240,40 @@ distclean-kr:
 
 maintainer-clean-kr:
 
-libm4.a: $(libm4_a_OBJECTS) $(libm4_a_DEPENDENCIES)
-	-rm -f libm4.a
-	$(AR) cru libm4.a $(libm4_a_OBJECTS) $(libm4_a_LIBADD)
-	$(RANLIB) libm4.a
-error_.c: error.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/error.c; then echo $(srcdir)/error.c; else echo error.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > error_.c
-getopt_.c: getopt.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/getopt.c; then echo $(srcdir)/getopt.c; else echo getopt.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > getopt_.c
-getopt1_.c: getopt1.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/getopt1.c; then echo $(srcdir)/getopt1.c; else echo getopt1.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > getopt1_.c
-obstack_.c: obstack.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/obstack.c; then echo $(srcdir)/obstack.c; else echo obstack.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > obstack_.c
-regex_.c: regex.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/regex.c; then echo $(srcdir)/regex.c; else echo regex.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > regex_.c
+libm4.la: $(libm4_la_OBJECTS) $(libm4_la_DEPENDENCIES)
+	$(LINK) -rpath $(libdir) $(libm4_la_LDFLAGS) $(libm4_la_OBJECTS) $(libm4_la_LIBADD) $(LIBS)
+m4error_.c: m4error.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4error.c; then echo $(srcdir)/m4error.c; else echo m4error.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > m4error_.c
+m4module_.c: m4module.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4module.c; then echo $(srcdir)/m4module.c; else echo m4module.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > m4module_.c
+m4obstack_.c: m4obstack.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4obstack.c; then echo $(srcdir)/m4obstack.c; else echo m4obstack.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > m4obstack_.c
+m4regex_.c: m4regex.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/m4regex.c; then echo $(srcdir)/m4regex.c; else echo m4regex.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > m4regex_.c
 strtol_.c: strtol.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/strtol.c; then echo $(srcdir)/strtol.c; else echo strtol.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > strtol_.c
 xmalloc_.c: xmalloc.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/xmalloc.c; then echo $(srcdir)/xmalloc.c; else echo xmalloc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > xmalloc_.c
 xstrdup_.c: xstrdup.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/xstrdup.c; then echo $(srcdir)/xstrdup.c; else echo xstrdup.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > xstrdup_.c
-error_.o error_.lo getopt_.o getopt_.lo getopt1_.o getopt1_.lo \
-obstack_.o obstack_.lo regex_.o regex_.lo strtol_.o strtol_.lo \
-xmalloc_.o xmalloc_.lo xstrdup_.o xstrdup_.lo : $(ANSI2KNR)
+m4error_.o m4error_.lo m4module_.o m4module_.lo m4obstack_.o \
+m4obstack_.lo m4regex_.o m4regex_.lo strtol_.o strtol_.lo xmalloc_.o \
+xmalloc_.lo xstrdup_.o xstrdup_.lo : $(ANSI2KNR)
+
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(includedir)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d= ; else d="$(srcdir)/"; fi; \
+	  echo " $(INSTALL_DATA) $$d$$p $(DESTDIR)$(includedir)/$$p"; \
+	  $(INSTALL_DATA) $$d$$p $(DESTDIR)$(includedir)/$$p; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	list='$(include_HEADERS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(includedir)/$$p; \
+	done
 
 tags: TAGS
 
@@ -288,6 +319,16 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+error.o: error.c ../config.h error.h
+m4error.lo m4error.o : m4error.c ../config.h m4error.h
+m4module.lo m4module.o : m4module.c ../config.h m4module.h m4error.h \
+	m4obstack.h m4private.h
+m4obstack.lo m4obstack.o : m4obstack.c ../config.h m4obstack.h
+m4regex.lo m4regex.o : m4regex.c ../config.h m4regex.h
+obstack.o: obstack.c ../config.h obstack.h
+regex.o: regex.c ../config.h regex.h
+xmalloc.lo xmalloc.o : xmalloc.c ../config.h m4error.h
+xstrdup.lo xstrdup.o : xstrdup.c ../config.h
 
 info-am:
 info: info-am
@@ -297,22 +338,23 @@ check-am: all-am
 check: check-am
 installcheck-am:
 installcheck: installcheck-am
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 install-exec: install-exec-am
 
-install-data-am:
+install-data-am: install-includeHEADERS
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES uninstall-includeHEADERS
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 
 
 mostlyclean-generic:
@@ -325,25 +367,25 @@ distclean-generic:
 
 maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-kr mostlyclean-tags \
 		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-libtool clean-kr \
+clean-am:  clean-libLTLIBRARIES clean-compile clean-libtool clean-kr \
 		clean-tags clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+distclean-am:  distclean-libLTLIBRARIES distclean-compile \
 		distclean-libtool distclean-kr distclean-tags \
 		distclean-generic clean-am
 	-rm -f libtool
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+maintainer-clean-am:  maintainer-clean-libLTLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
 		maintainer-clean-kr maintainer-clean-tags \
 		maintainer-clean-generic distclean-am
@@ -352,18 +394,19 @@ maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool mostlyclean-kr distclean-kr \
-clean-kr maintainer-clean-kr tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir info-am info dvi-am dvi check \
-check-am installcheck-am installcheck install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+.PHONY: mostlyclean-libLTLIBRARIES distclean-libLTLIBRARIES \
+clean-libLTLIBRARIES maintainer-clean-libLTLIBRARIES \
+uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
+distclean-compile clean-compile maintainer-clean-compile \
+mostlyclean-libtool distclean-libtool clean-libtool \
+maintainer-clean-libtool mostlyclean-kr distclean-kr clean-kr \
+maintainer-clean-kr uninstall-includeHEADERS install-includeHEADERS \
+tags mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+distdir info-am info dvi-am dvi check check-am installcheck-am \
+installcheck install-exec-am install-exec install-data-am install-data \
+install-am install uninstall-am uninstall all-redirect all-am all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -19,13 +19,13 @@ CHANGEQUOTE(«««,»»»)
 1 «TEST»		# «TEST»
 2 ««TEST»»		# ««TEST»»
 3 test			# test
-# Test use of all iso8859 characters except NUL ` '
-Length of string is: 253
+# Test use of all iso8859 characters except ^Z (win32 EOF) and NUL  ` '
+Length of string is: 252
 Comparing strings: MATCH
 # NUL does not pass through
 This will be seen.
 EOF
 
 M4PATH=$srcdir:$srcdir/other-tests $M4 -d in >out 2>err
-sed -e "s, ../../src/m4:, m4:," err >sederr && mv sederr err
+sed -e "s,^[^:]*[lt-]*m4[.ex]*:,m4:," err >sederr && mv sederr err
 $CMP -s out ok

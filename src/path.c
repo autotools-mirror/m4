@@ -18,6 +18,7 @@
 /* Handling of path search of included files via the builtins "include"
    and "sinclude".  */
 
+#define COMPILING_M4
 #include "m4.h"
 
 static struct search_path_info dirpath; /* the list of path directories */

@@ -10,7 +10,7 @@ include(`setup.m4')
 
 \p([All files are generated using GNU m4 \__m4_version__.  You can view
 the \link(m4lib/, source files).  They are very simple.  They use some
-features from Gnu m4 1.4l])
+features from GNU m4 1.4l])
 
 \p([The basic M4 definitions of quotes, comments, escapes are in
 \showlink(m4lib/setup.m4).  This is first included by all files to

@@ -39,14 +39,10 @@ looking for macro calls.)
 
 \dt(\b(Support for loadable modules.))
 
-\dd(\p(GNU m4 now has rudimentary support for dynamic loading of
-compiled modules at runtime. A module can define any number of new build
-in macros, which will be indistinguishable from the standard set of
-build in macros. Modules can also override existing build in macros.)
-
-\p(Module support for GNU m4 still needs some work.)
-
-\p(See the \link(modules.htm, separate README file for modules))
+\dd(\p(GNU m4 now has support for dynamic loading of compiled modules at
+runtime. A module can define any number of new build in macros, which
+will be indistinguishable from the standard set of build in
+macros. Modules can also override existing build in macros.)
 )
 
 \dt(\b(Better control of sync-lines generation.))

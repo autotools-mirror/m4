@@ -16,20 +16,19 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <m4.h>				/* These are obligatory */
-#include <builtin.h>
+#include <m4module.h>			/* This is obligatory */
+
+#define LTDL_MODULE_NAME test
+
+module_init_t m4_init_module;		/* initialisation function */
+module_finish_t m4_finish_module;	/* cleanup function */
+M4BUILTIN(test);			/* declare test as implementing
+					   a builtin */
+#undef M4BUILTIN
 
 #define m4_macro_table		test_LTX_m4_macro_table
 #define m4_init_module		test_LTX_m4_init_module
 #define m4_finish_module	test_LTX_m4_finish_module
-
-module_init_t m4_init_module;		/* initialisation function */
-module_finish_t m4_finish_module;	/* cleanup function */
-
-DECLARE(test);				/* declare test as implementing
-					   a builtin */
-
-#undef DECLARE
 
 /* The table of builtins defined by this module - just one */
 
@@ -44,7 +43,9 @@ void
 m4_init_module(struct obstack *obs)
 {
   char *s = "Test module loaded.";
-  obstack_grow (obs, s, strlen(s));
+
+  if (obs != 0)
+    obstack_grow (obs, s, strlen(s));
 }
 
 void
@@ -57,6 +58,7 @@ m4_finish_module(void)
 static void
 test (struct obstack *obs, int argc, token_data **argv)
 {
-  char *s = "Test module called";
+  char *s = "Test module called.";
   obstack_grow (obs, s, strlen(s));
 }
+

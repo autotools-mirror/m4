@@ -19,8 +19,29 @@
    write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _ERROR_H
-#define _ERROR_H 1
+#ifndef M4ERROR_H
+#define M4ERROR_H 1
+
+/* DLL building support on win32 hosts;  mostly to workaround their
+   ridiculous implementation of data symbol exporting. */
+#ifndef M4_SCOPE
+#  ifdef _WIN32
+  /* Incase we are linking a dll with this library, the
+     LIBM4_DLL_IMPORT takes precedence over a generic DLL_EXPORT
+     when defining the SCOPE variable for M4.  */
+#    ifdef LIBM4_DLL_IMPORT	/* define if linking with this dll */
+#      define M4_SCOPE extern __declspec(dllimport)
+#    else
+#      ifdef DLL_EXPORT		/* defined by libtool (if required) */
+#        define M4_SCOPE	__declspec(dllexport)
+#      endif /* DLL_EXPORT */
+#    endif /* LIBM4_DLL_IMPORT */
+#  endif /* M4_SCOPE */
+#  ifndef M4_SCOPE		/* static linking or !_WIN32 */
+#    define M4_SCOPE	extern
+#  endif
+#endif
+
 
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
@@ -55,23 +76,23 @@ extern void error_at_line (int status, int errnum, const char *fname,
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this
    function without parameters instead.  */
-extern void (*error_print_progname) (void);
+M4_SCOPE void (*error_print_progname) (void);
 
 #else
 void error ();
 void error_at_line ();
-extern void (*error_print_progname) ();
+M4_SCOPE void (*error_print_progname) ();
 #endif
 
 /* This variable is incremented each time `error' is called.  */
-extern unsigned int error_message_count;
+M4_SCOPE unsigned int error_message_count;
 
 /* Sometimes we want to have at most one error per line.  This
    variable controls whether this mode is selected or not.  */
-extern int error_one_per_line;
+M4_SCOPE int error_one_per_line;
 
 #ifdef	__cplusplus
 }
 #endif
 
-#endif /* error.h */
+#endif /* m4error.h */

@@ -18,7 +18,9 @@
 
 /* printf like formatting for m4.  */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
 
 #ifdef HAVE_EFGCVT
 

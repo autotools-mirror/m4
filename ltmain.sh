@@ -54,8 +54,8 @@ modename="$progname"
 # Constants.
 PROGRAM=ltmain.sh
 PACKAGE=libtool
-VERSION=1.3
-TIMESTAMP=" (1.385.2.117 1999/04/29 13:07:13)"
+VERSION=1.3b
+TIMESTAMP=" (1.581 1999/07/02 15:16:39)"
 
 default_mode=
 help="Try \`$progname --help' for more information."
@@ -69,7 +69,7 @@ rm="rm -f"
 Xsed='sed -e 1s/^X//'
 sed_quote_subst='s/\([\\`\\"$\\\\]\)/\\\1/g'
 SP2NL='tr \040 \012'
-NL2SP='tr \012 \040'
+NL2SP='tr \015\012 \040\040'
 
 # NLS nuisances.
 # Only set LANG and LC_ALL to C if already set.
@@ -466,6 +466,7 @@ compiler."
 	command="$command -o $output_obj"
       fi
 
+      $run $rm "$output_obj"
       $show "$command"
       if $run eval "$command"; then :
       else
@@ -545,6 +546,7 @@ compiler."
 
       # Suppress compiler output if we already did a PIC compilation.
       command="$command$suppress_output"
+      $run $rm "$output_obj"
       $show "$command"
       if $run eval "$command"; then :
       else
@@ -609,10 +611,10 @@ compiler."
     ;;
 
   # libtool link mode
-  link)
+  link | relink)
     modename="$modename: link"
-    C_compiler="$CC" # save it, to compile generated C sources
-    CC="$nonopt"
+    relink=no
+    test "$mode" = "relink" && relink=yes
     case "$host" in
     *-*-cygwin* | *-*-mingw* | *-*-os2*)
       # It is impossible to link a dll without this setting, and
@@ -636,6 +638,12 @@ compiler."
 # #undef WIN32_LEAN_AND_MEAN
 # #include <stdio.h>
 #
+# #ifndef __CYGWIN__
+# #  ifdef __CYGWIN32__
+# #    define __CYGWIN__ __CYGWIN32__
+# #  endif
+# #endif
+#
 # #ifdef __cplusplus
 # extern "C" {
 # #endif
@@ -644,8 +652,10 @@ compiler."
 # }
 # #endif
 #
+# #ifdef __CYGWIN__
 # #include <cygwin/cygwin_dll.h>
 # DECLARE_CYGWIN_DLL( DllMain );
+# #endif
 # HINSTANCE __hDllInstance_base;
 #
 # BOOL APIENTRY
@@ -792,8 +802,9 @@ compiler."
       allow_undefined=yes
       ;;
     esac
-    compile_command="$CC"
-    finalize_command="$CC"
+    libtool_args="$nonopt"
+    compile_command="$nonopt"
+    finalize_command="$nonopt"
 
     compile_rpath=
     finalize_rpath=
@@ -802,18 +813,12 @@ compiler."
     convenience=
     old_convenience=
     deplibs=
-    linkopts=
+    old_deplibs=
+    compiler_flags=
+    linker_flags=
+    dllsearchpath=
+    lib_search_path=`pwd`
 
-    if test -n "$shlibpath_var"; then
-      # get the directories listed in $shlibpath_var
-      eval lib_search_path=\`\$echo \"X \${$shlibpath_var}\" \| \$Xsed -e \'s/:/ /g\'\`
-    else
-      lib_search_path=
-    fi
-    # now prepend the system-specific ones
-    eval lib_search_path=\"$sys_lib_search_path_spec\$lib_search_path\"
-    eval sys_lib_dlsearch_path=\"$sys_lib_dlsearch_path_spec\"
-    
     avoid_version=no
     dlfiles=
     dlprefiles=
@@ -823,7 +828,6 @@ compiler."
     export_symbols_regex=
     generated=
     libobjs=
-    link_against_libtool_libs=
     ltlibs=
     module=no
     objs=
@@ -871,6 +875,7 @@ compiler."
     while test $# -gt 0; do
       arg="$1"
       shift
+      libtool_args="$libtool_args $arg"
 
       # If the previous option needs an argument, assign it.
       if test -n "$prev"; then
@@ -891,6 +896,14 @@ compiler."
 	  fi
 	  case "$arg" in
 	  *.la | *.lo) ;;  # We handle these cases below.
+	  force)
+	    if test "$dlself" = no; then
+	      dlself=needless
+	      export_dynamic=yes
+	    fi
+	    prev=
+	    continue
+	    ;;
 	  self)
 	    if test "$prev" = dlprefiles; then
 	      dlself=yes
@@ -952,6 +965,29 @@ compiler."
 	    *) xrpath="$xrpath $arg" ;;
 	    esac
 	  fi
+	  prev=
+	  continue
+	  ;;
+	xcompiler)
+	  arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
+	  case "$arg" in
+	  *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*)
+	    arg="\"$arg\""
+	    ;;
+	  esac
+	  compiler_flags="$compiler_flags $arg"
+	  prev=
+	  continue
+	  ;;
+	xlinker)
+	  arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
+	  case "$arg" in
+	  *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*)
+	    arg="\"$arg\""
+	    ;;
+	  esac
+	  linker_flags="$linker_flags $arg"
+	  compiler_flags="$compiler_flags $wl$arg"
 	  prev=
 	  continue
 	  ;;
@@ -1027,24 +1063,22 @@ compiler."
 	  dir="$absdir"
 	  ;;
 	esac
-	case " $deplibs " in
-	*" $arg "*) ;;
-	*) deplibs="$deplibs $arg";;
-	esac
-	case " $lib_search_path " in
-	*" $dir "*) ;;
-	*) lib_search_path="$lib_search_path $dir";;
+	case "$deplibs " in
+	*" -L$dir "*) ;;
+	*)
+	  deplibs="$deplibs -L$dir"
+	  lib_search_path="$lib_search_path $dir"
+	  ;;
 	esac
 	case "$host" in
 	*-*-cygwin* | *-*-mingw* | *-*-os2*)
-	  dllsearchdir=`cd "$dir" && pwd || echo "$dir"`
 	  case ":$dllsearchpath:" in
-	  ::) dllsearchpath="$dllsearchdir";;
-	  *":$dllsearchdir:"*) ;;
-	  *) dllsearchpath="$dllsearchpath:$dllsearchdir";;
+	  *":$dir:"*) ;;
+	  *) dllsearchpath="$dllsearchpath:$dir";;
 	  esac
 	  ;;
 	esac
+	continue
 	;;
 
       -l*)
@@ -1064,10 +1098,16 @@ compiler."
 	  esac
 	fi
 	deplibs="$deplibs $arg"
+	continue
 	;;
 
       -module)
 	module=yes
+	continue
+	;;
+
+      -no-fast-install)
+	fast_install=no
 	continue
 	;;
 
@@ -1128,6 +1168,39 @@ compiler."
 	prev=vinfo
 	continue
 	;;
+	
+      -Wc,*)
+	arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
+	case "$arg" in
+	*[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*)
+	  arg="\"$arg\""
+	  ;;
+	esac
+	flag=`$echo "X$arg" | $Xsed -e 's/^-Wc,//'`
+	compiler_flags="$compiler_flags $flag"
+	;;
+
+      -Wl,*)
+	arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
+	case "$arg" in
+	*[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*)
+	  arg="\"$arg\""
+	  ;;
+	esac
+	flag=`$echo "X$arg" | $Xsed -e 's/^-Wl,//'`
+	linker_flags="$linker_flags $flag"
+	compiler_flags="$compiler_flags $wl$flag"
+	;;
+
+      -Xcompiler)
+	prev=xcompiler
+	continue
+	;;
+
+      -Xlinker)
+	prev=xlinker
+	continue
+	;;
 
       # Some other compiler flag.
       -* | +*)
@@ -1141,7 +1214,7 @@ compiler."
 	esac
 	;;
 
-      *.o | *.obj | *.a | *.lib)
+      *.o | *.obj)
 	# A standard object.
 	objs="$objs $arg"
 	;;
@@ -1165,6 +1238,13 @@ compiler."
 	  prev=
 	fi
 	libobjs="$libobjs $arg"
+	;;
+
+      *.a | *.lib)
+	# An archive.
+	deplibs="$deplibs $arg"
+	old_deplibs="$old_deplibs $arg"
+	continue
 	;;
 
       *.la)
@@ -1204,9 +1284,6 @@ compiler."
 	  exit 1
 	fi
 
-	# Find the relevant object directory and library name.
-	name=`$echo "X$arg" | $Xsed -e 's%^.*/%%' -e 's/\.la$//' -e 's/^lib//'`
-
 	if test "X$installed" = Xyes; then
 	  dir="$libdir"
 	else
@@ -1218,36 +1295,6 @@ compiler."
 	  fi
 	fi
 
-	if test -n "$dependency_libs"; then
-	  # Extract -R from dependency_libs
-	  temp_deplibs=
-	  for deplib in $dependency_libs; do
-	    case "$deplib" in
-	    -R*) temp_xrpath=`$echo "X$deplib" | $Xsed -e 's/^-R//'`
-		 case " $rpath $xrpath " in
-		 *" $temp_xrpath "*) ;;
-		 *) xrpath="$xrpath $temp_xrpath";;
-		 esac;;
-	    -L*) case "$compile_command $temp_deplibs " in
-		 *" $deplib "*) ;;
-		 *) temp_deplibs="$temp_deplibs $deplib";;
-		 esac;;
-	    *) temp_deplibs="$temp_deplibs $deplib";;
-	    esac
-	  done
-	  dependency_libs="$temp_deplibs"
-	fi
-
-	if test -z "$libdir"; then
-	  # It is a libtool convenience library, so add in its objects.
-	  convenience="$convenience $dir/$old_library"
-	  old_convenience="$old_convenience $dir/$old_library"
-	  deplibs="$deplibs$dependency_libs"
-	  compile_command="$compile_command $dir/$old_library$dependency_libs"
-	  finalize_command="$finalize_command $dir/$old_library$dependency_libs"
-	  continue
-	fi
-
 	# This library was specified with -dlopen.
 	if test "$prev" = dlfiles; then
 	  dlfiles="$dlfiles $arg"
@@ -1256,10 +1303,7 @@ compiler."
 	    # we need to preload.
 	    prev=dlprefiles
 	  else
-	    # We should not create a dependency on this library, but we
-	    # may need any libraries it requires.
-	    compile_command="$compile_command$dependency_libs"
-	    finalize_command="$finalize_command$dependency_libs"
+	    # We should not create a dependency on this library
 	    prev=
 	    continue
 	  fi
@@ -1277,179 +1321,7 @@ compiler."
 	  prev=
 	fi
 
-	if test -n "$library_names" &&
-	   { test "$prefer_static_libs" = no || test -z "$old_library"; }; then
-	  link_against_libtool_libs="$link_against_libtool_libs $arg"
-	  if test -n "$shlibpath_var"; then
-	    # Make sure the rpath contains only unique directories.
-	    case "$temp_rpath " in
-	    *" $dir "*) ;;
-	    *) temp_rpath="$temp_rpath $dir" ;;
-	    esac
-	  fi
-
-	  # We need an absolute path.
-	  case "$dir" in
-	  [\\/] | [A-Za-z]:[\\/]*) absdir="$dir" ;;
-	  *)
-	    absdir=`cd "$dir" && pwd`
-	    if test -z "$absdir"; then
-	      $echo "$modename: cannot determine absolute directory name of \`$dir'" 1>&2
-	      exit 1
-	    fi
-	    ;;
-	  esac
-	  
-	  # This is the magic to use -rpath.
-	  # Skip directories that are in the system default run-time
-	  # search path, unless they have been requested with -R.
-	  case " $sys_lib_dlsearch_path " in
-	  *" $absdir "*) ;;
-	  *)
-	    case "$compile_rpath " in
-	    *" $absdir "*) ;;
-	    *) compile_rpath="$compile_rpath $absdir" 
-	    esac
-	    ;;
-	  esac
-
-	  case " $sys_lib_dlsearch_path " in
-	  *" $libdir "*) ;;
-	  *)
-	    case "$finalize_rpath " in
-	    *" $libdir "*) ;;
-	    *) finalize_rpath="$finalize_rpath $libdir"
-	    esac
-	    ;;
-	  esac
-
-	  lib_linked=yes
-	  case "$hardcode_action" in
-	  immediate | unsupported)
-	    if test "$hardcode_direct" = no; then
-	      compile_command="$compile_command $dir/$linklib"
-	      deplibs="$deplibs $dir/$linklib"
-	      case "$host" in
-	      *-*-cygwin* | *-*-mingw* | *-*-os2*)
-		dllsearchdir=`cd "$dir" && pwd || echo "$dir"`
-		if test -n "$dllsearchpath"; then
-		  dllsearchpath="$dllsearchpath:$dllsearchdir"
-		else
-		  dllsearchpath="$dllsearchdir"
-		fi
-		;;
-	      esac
-	    elif test "$hardcode_minus_L" = no; then
-	      case "$host" in
-	      *-*-sunos*)
-		compile_shlibpath="$compile_shlibpath$dir:"
-		;;
-	      esac
-	      case "$compile_command " in
-	      *" -L$dir "*) ;;
-	      *) compile_command="$compile_command -L$dir";;
-	      esac
-	      compile_command="$compile_command -l$name"
-	      deplibs="$deplibs -L$dir -l$name"
-	    elif test "$hardcode_shlibpath_var" = no; then
-	      case ":$compile_shlibpath:" in
-	      *":$dir:"*) ;;
-	      *) compile_shlibpath="$compile_shlibpath$dir:";;
-	      esac
-	      compile_command="$compile_command -l$name"
-	      deplibs="$deplibs -l$name"
-	    else
-	      lib_linked=no
-	    fi
-	    ;;
-
-	  relink)
-	    if test "$hardcode_direct" = yes; then
-	      compile_command="$compile_command $absdir/$linklib"
-	      deplibs="$deplibs $absdir/$linklib"
-	    elif test "$hardcode_minus_L" = yes; then
-	      case "$compile_command " in
-	      *" -L$absdir "*) ;;
-	      *) compile_command="$compile_command -L$absdir";;
-	      esac
-	      compile_command="$compile_command -l$name"
-	      deplibs="$deplibs -L$absdir -l$name"
-	    elif test "$hardcode_shlibpath_var" = yes; then
-	      case ":$compile_shlibpath:" in
-	      *":$absdir:"*) ;;
-	      *) compile_shlibpath="$compile_shlibpath$absdir:";;
-	      esac
-	      compile_command="$compile_command -l$name"
-	      deplibs="$deplibs -l$name"
-	    else
-	      lib_linked=no
-	    fi
-	    ;;
-
-	  *)
-	    lib_linked=no
-	    ;;
-	  esac
-
-	  if test "$lib_linked" != yes; then
-	    $echo "$modename: configuration error: unsupported hardcode properties"
-	    exit 1
-	  fi
-
-	  # Finalize command for both is simple: just hardcode it.
-	  if test "$hardcode_direct" = yes; then
-	    finalize_command="$finalize_command $libdir/$linklib"
-	  elif test "$hardcode_minus_L" = yes; then
-	    case "$finalize_command " in
-	    *" -L$libdir "*) ;;
-	    *) finalize_command="$finalize_command -L$libdir";;
-	    esac
-	    finalize_command="$finalize_command -l$name"
-	  elif test "$hardcode_shlibpath_var" = yes; then
-	    case ":$finalize_shlibpath:" in
-	    *":$libdir:"*) ;;
-	    *) finalize_shlibpath="$finalize_shlibpath$libdir:";;
-	    esac
-	    finalize_command="$finalize_command -l$name"
-	  else
-	    # We cannot seem to hardcode it, guess we'll fake it.
-	    case "$finalize_command " in
-	    *" -L$dir "*) ;;
-	    *) finalize_command="$finalize_command -L$libdir";;
-	    esac
-	    finalize_command="$finalize_command -l$name"
-	  fi
-	else
-	  # Transform directly to old archives if we don't build new libraries.
-	  if test -n "$pic_flag" && test -z "$old_library"; then
-	    $echo "$modename: cannot find static library for \`$arg'" 1>&2
-	    exit 1
-	  fi
-
-	  # Here we assume that one of hardcode_direct or hardcode_minus_L
-	  # is not unsupported.  This is valid on all known static and
-	  # shared platforms.
-	  if test "$hardcode_direct" != unsupported; then
-	    test -n "$old_library" && linklib="$old_library"
-	    compile_command="$compile_command $dir/$linklib"
-	    finalize_command="$finalize_command $dir/$linklib"
-	  else
-	    case "$compile_command " in
-	    *" -L$dir "*) ;;
-	    *) compile_command="$compile_command -L$dir";;
-	    esac
-	    compile_command="$compile_command -l$name"
-	    case "$finalize_command " in
-	    *" -L$dir "*) ;;
-	    *) finalize_command="$finalize_command -L$dir";;
-	    esac
-	    finalize_command="$finalize_command -l$name"
-	  fi
-	fi
-
-	# Add in any libraries that this one depends upon.
-	compile_command="$compile_command$dependency_libs"
-	finalize_command="$finalize_command$dependency_libs"
+	deplibs="$deplibs $arg"
 	continue
 	;;
 
@@ -1490,6 +1362,16 @@ compiler."
     outputname=`$echo "X$output" | $Xsed -e 's%^.*/%%'`
     libobjs_save="$libobjs"
 
+    if test -n "$shlibpath_var"; then
+      # get the directories listed in $shlibpath_var
+      eval shlib_search_path=\`\$echo \"X \${$shlibpath_var}\" \| \$Xsed -e \'s/:/ /g\'\`
+    else
+      shlib_search_path=
+    fi
+    eval sys_lib_search_path=\"$sys_lib_search_path_spec\"
+    eval sys_lib_dlsearch_path=\"$sys_lib_dlsearch_path_spec\"
+    lib_search_path="$lib_search_path $sys_lib_search_path $shlib_search_path"
+
     case "$output" in
     "")
       $echo "$modename: you must specify an output file" 1>&2
@@ -1498,11 +1380,6 @@ compiler."
       ;;
 
     *.a | *.lib)
-      if test -n "$link_against_libtool_libs"; then
-	$echo "$modename: error: cannot link libtool libraries into archives" 1>&2
-	exit 1
-      fi
-
       if test -n "$deplibs"; then
 	$echo "$modename: warning: \`-l' and \`-L' are ignored for archives" 1>&2
       fi
@@ -1534,6 +1411,7 @@ compiler."
       # Now set the variables for building old libraries.
       build_libtool_libs=no
       oldlibs="$output"
+      objs="$objs$old_deplibs"
       ;;
 
     *.la)
@@ -1566,15 +1444,9 @@ compiler."
 	output_objdir="$output_objdir/$objdir"
       fi
 
-      if test -n "$objs"; then
+      if test -n "$objs$old_deplibs"; then
 	$echo "$modename: cannot build libtool library \`$output' from non-libtool objects:$objs" 2>&1
 	exit 1
-      fi
-
-      # How the heck are we supposed to write a wrapper for a shared library?
-      if test -n "$link_against_libtool_libs"; then
-	 $echo "$modename: error: cannot link shared libraries into libtool libraries" 1>&2
-	 exit 1
       fi
 
       if test -n "$dlfiles$dlprefiles" || test "$dlself" != no; then
@@ -1596,7 +1468,6 @@ compiler."
 	  build_libtool_libs=convenience
 	  build_old_libs=yes
 	fi
-	dependency_libs="$deplibs"
 
 	if test -n "$vinfo"; then
 	  $echo "$modename: warning: \`-version-info' is ignored for convenience libraries" 1>&2
@@ -1757,29 +1628,20 @@ compiler."
 	  # Don't allow undefined symbols.
 	  allow_undefined_flag="$no_undefined_flag"
 	fi
-
-	dependency_libs="$deplibs"
-	case "$host" in
-	*-*-cygwin* | *-*-mingw* | *-*-os2* | *-*-beos*)
-	  # these systems don't actually have a c library (as such)!
-	  ;;
-	*)
-	  # Add libc to deplibs on all other systems.
-	  deplibs="$deplibs -lc"
-	  ;;
-	esac
       fi
 
-      # Create the output directory, or remove our outputs if we need to.
-      if test -d $output_objdir; then
-	$show "${rm}r $output_objdir/$outputname $output_objdir/$libname.* $output_objdir/${libname}${release}.*"
-	$run ${rm}r $output_objdir/$outputname $output_objdir/$libname.* $output_objdir/${libname}${release}.*
-      else
-	$show "$mkdir $output_objdir"
-	$run $mkdir $output_objdir
-	status=$?
-	if test $status -ne 0 && test ! -d $output_objdir; then
-	  exit $status
+      if test "$relink" = no; then
+	# Create the output directory, or remove our outputs if we need to.
+	if test -d $output_objdir; then
+	  $show "${rm}r $output_objdir/$outputname $output_objdir/$libname.* $output_objdir/${libname}${release}.*"
+	  $run ${rm}r $output_objdir/$outputname $output_objdir/$libname.* $output_objdir/${libname}${release}.*
+	else
+	  $show "$mkdir $output_objdir"
+	  $run $mkdir $output_objdir
+	  status=$?
+	  if test $status -ne 0 && test ! -d $output_objdir; then
+	    exit $status
+	  fi
 	fi
       fi
 
@@ -1791,7 +1653,428 @@ compiler."
 	oldobjs="$objs "`$echo "X$libobjs" | $SP2NL | $Xsed -e '/\.'${libext}'$/d' -e "$lo2o" | $NL2SP`
       fi
 
+      # Save some variables
+      name_save=$name
+      libname_save=$libname
+	
+      # Find libtool libraries and add their dependencies and directories
+      save_deplibs="$deplibs"
+      deplibs=            # libraries to link (used in archive_cmds)
+      newdependency_libs= # all dependency libraries
+      uninst_path=        # paths that contain uninstalled libtool libraries
+      new_lib_search_path=
+      for deplib in $save_deplibs; do
+	lib=
+	case "$deplib" in
+	-L*)
+	  case "$deplibs " in
+	  *" $deplib "*) ;;
+	  *)
+	    deplibs="$deplibs $deplib"
+	    newdependency_libs="$newdependency_libs $deplib"
+	    new_lib_search_path="$new_lib_search_path "`$echo "X$deplib" | $Xsed -e 's/^-L//'`
+	    ;;
+	  esac
+	  continue
+	  ;;
+	-l*)
+	  name=`$echo "X$deplib" | $Xsed -e 's/^-l//'`
+	  found=no
+	  for searchdir in $lib_search_path; do
+	    # Search the libtool library
+	    lib="$searchdir/lib${name}.la"
+	    if test -f "$lib"; then
+	      found=yes
+	      break
+	    fi
+	  done
+	  if test "$found" != yes; then
+	    deplibs="$deplibs $deplib"
+	    newdependency_libs="$newdependency_libs $deplib"
+	    continue
+	  fi
+	  ;;
+	*)
+	  lib="$deplib"
+	  if test -f "$lib"; then :
+	  else
+	    $echo "$modename: cannot find the library \`$lib'" 1>&2
+	    exit 1
+	  fi
+	  ;;
+	esac
+	libdir=
+	library_names=
+	old_library=
+
+	# Check to see that this really is a libtool archive.
+	if (sed -e '2q' $lib | egrep "^# Generated by .*$PACKAGE") >/dev/null 2>&1; then :
+	else
+	  $echo "$modename: \`$lib' is not a valid libtool archive" 1>&2
+	  exit 1
+	fi
+
+	ladir=`$echo "X$lib" | $Xsed -e 's%/[^/]*$%%'`
+	test "X$ladir" = "X$lib" && ladir="."
+	# We need an absolute path.
+	case "$ladir" in
+	[\\/]* | [A-Za-z]:[\\/]*) abs_ladir="$ladir" ;;
+	*)
+	  abs_ladir=`cd "$ladir" && pwd`
+	  if test -z "$abs_ladir"; then
+	    $echo "$modename: warning: cannot determine absolute directory name of \`$ladir'" 1>&2
+	    $echo "$modename: passing it literally to the linker, although it might fail" 1>&2
+	    abs_ladir="$ladir"
+	  fi
+	  ;;
+	esac
+	laname=`$echo "X$lib" | $Xsed -e 's%^.*/%%'`
+
+	# If the library was installed with an old release of libtool,
+	# it will not redefine variable installed.
+	installed=yes
+
+	# Read the .la file
+	case "$lib" in
+	*/* | *\\*) . $lib ;;
+	*) . ./$lib ;;
+	esac
+
+	# Get the name of the library we link against.
+	linklib=
+	for l in $old_library $library_names; do
+	  linklib="$l"
+	done
+
+	if test -z "$linklib"; then
+	  $echo "$modename: cannot find name of link library for \`$lib'" 1>&2
+	  exit 1
+	fi
+
+	if test -z "$libdir"; then
+	  # It is a libtool convenience library, so add in its objects.
+	  convenience="$convenience $ladir/$objdir/$old_library"
+	  old_convenience="$old_convenience $ladir/$objdir/$old_library"
+	  deplibs="$deplibs $ladir/$objdir/$old_library"
+	  newdependency_libs="$newdependency_libs $dependency_libs"
+	  continue
+	fi
+
+	# Find the relevant object directory and library name.
+	if test "X$installed" = Xyes; then
+	  if test ! -f "$libdir/$linklib" && test -f "$abs_ladir/$linklib"; then
+	    $echo "$modename: warning: library \`$lib' was moved." 1>&2
+	    dir="$ladir"
+	    absdir="$abs_ladir"
+	    libdir="$abs_ladir"
+	  else
+	    dir="$libdir"
+	    absdir="$libdir"
+	  fi
+	else
+	  dir="$ladir/$objdir"
+	  absdir="$abs_ladir/$objdir"
+	  # Remove this search path later
+	  uninst_path="$uninst_path $abs_ladir"
+	fi
+	name=`$echo "X$laname" | $Xsed -e 's/\.la$//' -e 's/^lib//'`
+	link_static=no # Whether this library is linked statically
+
+	if test -n "$library_names" &&
+	   { test "$prefer_static_libs" = no || test -z "$old_library"; }; then
+	  # This is a shared library
+	  if test "$hardcode_into_libs" = yes; then
+	    # Hardcode the library path.
+	    # Skip directories that are in the system default run-time
+	    # search path.
+	    case " $sys_lib_dlsearch_path " in
+	    *" $absdir "*) ;;
+	    *)
+	      case "$compile_rpath " in
+	      *" $absdir "*) ;;
+	      *) compile_rpath="$compile_rpath $absdir" 
+	      esac
+	      ;;
+	    esac
+	    case " $sys_lib_dlsearch_path " in
+	    *" $libdir "*) ;;
+	    *)
+	      case "$finalize_rpath " in
+	      *" $libdir "*) ;;
+	      *) finalize_rpath="$finalize_rpath $libdir"
+	      esac
+	      ;;
+	    esac
+	  fi
+	    
+	  if test -n "$old_archive_from_expsyms_cmds"; then
+	    # figure out the soname
+	    set dummy $library_names
+	    realname="$2"
+	    shift; shift
+	    libname=`eval \\$echo \"$libname_spec\"`
+	    if test -n "$soname_spec"; then
+	      eval soname=\"$soname_spec\"
+	    else
+	      soname="$realname"
+	    fi
+
+	    # Make a new name for the extract_expsyms_cmds to use
+	    newlib="libimp-`echo $soname | sed 's/^lib//;s/\.dll$//'`.a"
+	  
+	    # If the library has no export list, then create one now
+	    if test -f "$output_objdir/$soname-def"; then :
+	    else
+	      $show "extracting exported symbol list from \`$soname'"
+	      IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
+	      eval cmds=\"$extract_expsyms_cmds\"
+	      for cmd in $cmds; do
+		IFS="$save_ifs"
+		$show "$cmd"
+		$run eval "$cmd" || exit $?
+	      done
+	      IFS="$save_ifs"
+	    fi
+ 
+	    # Create $newlib
+	    if test -f "$output_objdir/$newlib"; then :; else
+	      $show "generating import library for \`$soname'"
+	      IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
+	      eval cmds=\"$old_archive_from_expsyms_cmds\"
+	      for cmd in $cmds; do
+		IFS="$save_ifs"
+		$show "$cmd"
+		$run eval "$cmd" || exit $?
+	      done
+	      IFS="$save_ifs"
+	    fi
+	    # make sure the library variables are pointing to the new library
+	    dir=$output_objdir
+	    linklib=$newlib
+	  fi
+
+	  add_dir=
+	  add_shlibpath=
+	  add_name=no
+	  if test "$relink" = no; then
+	    lib_linked=yes
+	    case "$hardcode_action" in
+	    immediate | unsupported)
+	      if test "$hardcode_direct" = no; then
+		deplibs="$deplibs $dir/$linklib"
+	      elif test "$hardcode_minus_L" = no; then
+		case "$host" in
+		*-*-sunos*) add_shlibpath="$dir" ;;
+		esac
+		add_dir="-L$dir"
+		add_name=yes
+	      elif test "$hardcode_shlibpath_var" = no; then
+		add_shlibpath="$dir"
+		add_name=yes
+	      else
+		lib_linked=no
+	      fi
+	      ;;
+	    relink)
+	      if test "$hardcode_direct" = yes; then
+		deplibs="$deplibs $dir/$linklib"
+	      elif test "$hardcode_minus_L" = yes; then
+		add_dir="-L$dir"
+		add_name=yes
+	      elif test "$hardcode_shlibpath_var" = yes; then
+		add_shlibpath="$dir"
+		add_name=yes
+	      else
+		lib_linked=no
+	      fi
+	      ;;
+	    *) lib_linked=no ;;
+	    esac
+
+	    if test "$lib_linked" != yes; then
+	      $echo "$modename: configuration error: unsupported hardcode properties"
+	      exit 1
+	    fi
+	    if test -n "$add_shlibpath"; then
+	      case ":$compile_shlibpath:" in
+	      *":$add_shlibpath:"*) ;;
+	      *) compile_shlibpath="$compile_shlibpath$add_shlibpath:" ;;
+	      esac
+	    fi
+	  else
+	    # Install command for both is simple: just hardcode it.
+	    if test "$hardcode_direct" = yes; then
+	      deplibs="$deplibs $libdir/$linklib"
+	    elif test "$hardcode_minus_L" = yes; then
+	      add_dir="-L$libdir"
+	      add_name=yes
+	    elif test "$hardcode_shlibpath_var" = yes; then
+	      add_name=yes
+	    else
+	      # We cannot seem to hardcode it, guess we'll fake it.
+	      add_dir="-L$libdir"
+	      add_name=yes
+	    fi
+	  fi
+	  if test "$hardcode_direct" != yes && \
+	     test "$hardcode_minus_L" != yes && \
+	     test "$hardcode_shlibpath_var" = yes; then
+	      case ":$finalize_shlibpath:" in
+	      *":$libdir:"*) ;;
+	      *) finalize_shlibpath="$finalize_shlibpath$libdir:" ;;
+	      esac
+	  fi
+	  if test -n "$add_dir"; then
+	    case "$deplibs " in
+	    *" $add_dir "*) ;;
+	    *) deplibs="$deplibs $add_dir" ;;
+	    esac
+	  fi
+	  test "$add_name" = yes && deplibs="$deplibs -l$name"
+	elif test "$build_libtool_libs" = yes; then
+	  # Not a shared library
+	  if test "$deplibs_check_method" != pass_all; then
+	    # We're trying link a shared library against a static one
+	    # but the system doesn't support it.
+	    # Just print a warning and add the library to dependency_libs so
+	    # that the program can be linked against the static library.
+	    echo
+	    echo "*** Warning: This library needs some functionality provided by $libname."
+	    echo "*** I have the capability to make that library automatically link in when"
+	    echo "*** you link to this library.  But I can only do this if you have a"
+	    echo "*** shared version of the library, which you do not appear to have."
+	  else
+	    convenience="$convenience $dir/$old_library"
+	    old_convenience="$old_convenience $dir/$old_library"
+	    deplibs="$deplibs $dir/$old_library"
+	    link_static=yes
+	  fi
+	fi
+
+	if test -n "$dependency_libs"; then
+	  # Extract -R from dependency_libs
+	  temp_deplibs=
+	  for libdir in $dependency_libs; do
+	    case "$libdir" in
+	    -R*) temp_xrpath=`$echo "X$libdir" | $Xsed -e 's/^-R//'`
+		 case " $xrpath " in
+		 *" $temp_xrpath "*) ;;
+		 *) xrpath="$xrpath $temp_xrpath";;
+		 esac;;
+	    *) temp_deplibs="$temp_deplibs $libdir";;
+	    esac
+	  done
+	  dependency_libs="$temp_deplibs"
+	fi
+
+	new_lib_search_path="$new_lib_search_path $absdir"
+	# Link against this library
+	test "$link_static" = no && newdependency_libs="$newdependency_libs $abs_ladir/$laname"
+	# ... and its dependency_libs
+	newdependency_libs="$newdependency_libs $dependency_libs"
+
+	if test $link_all_deplibs != no; then
+	  # Add the search paths of all dependency libraries
+	  for deplib in $dependency_libs; do
+	    case "$deplib" in
+	    -L*) path="$deplib" ;;
+	    *.la) 
+	      if grep "^installed=no" $deplib > /dev/null; then
+		dir=`$echo "X$deplib" | $Xsed -e 's%/[^/]*$%%'`
+		test "X$dir" = "X$deplib" && dir="."
+		# We need an absolute path.
+		case "$dir" in
+		[\\/]* | [A-Za-z]:[\\/]*) absdir="$dir" ;;
+		*)
+		  absdir=`cd "$dir" && pwd`
+		  if test -z "$absdir"; then
+		    $echo "$modename: warning: cannot determine absolute directory name of \`$dir'" 1>&2
+		    absdir="$dir"
+		  fi
+		  ;;
+		esac
+		path="-L$absdir/$objdir"
+	      else
+		eval libdir=`sed -n -e 's/^libdir=\(.*\)$/\1/p' $deplib`
+		if test -z "$libdir"; then
+		  $echo "$modename: \`$deplib' is not a valid libtool archive" 1>&2
+		  exit 1
+		fi
+		path="-L$libdir"
+	      fi
+	      ;;
+	    *)
+	      continue
+	      ;;
+	    esac
+	    case "$deplibs " in
+	    *" $path "*) ;;
+	    *) deplibs="$path $deplibs" ;;
+	    esac
+	  done
+	fi
+      done
+
+      # Make sure lib_search_path contains only unique directories.
+      lib_search_path=
+      for dir in $new_lib_search_path; do
+	case "$lib_search_path " in
+	*" $dir "*) ;;
+	*) lib_search_path="$lib_search_path $dir" ;;
+	esac
+      done
+      lib_search_path="$lib_search_path $sys_lib_search_path"
+      
+      # Make sure newdependency_libs contains only unique libraries and directories.
+      dependency_libs=
+      for deplib in $newdependency_libs; do
+	case "$dependency_libs " in
+	*" $deplib "*) ;;
+	*) dependency_libs="$dependency_libs $deplib" ;;
+	esac
+      done
+      
+      # Eliminate all temporary directories.
+      for path in $uninst_path; do
+	lib_search_path=`echo "$lib_search_path " | sed -e 's% $path % %g'`
+	deplibs=`echo "$deplibs " | sed -e 's% -L$path % %g'`
+	dependency_libs=`echo "$dependency_libs " | sed -e 's% -L$path % %g'`
+      done
+      
+      if test -n "$xrpath"; then
+	# If the user specified any rpath flags, then add them.
+	temp_xrpath=
+	for libdir in $xrpath; do
+	  temp_xrpath="$temp_xrpath -R$libdir"
+	  case "$compile_rpath " in
+	  *" $libdir "*) ;;
+	  *) compile_rpath="$compile_rpath $libdir" ;;
+	  esac
+	  case "$finalize_rpath " in
+	  *" $libdir "*) ;;
+	  *) finalize_rpath="$finalize_rpath $libdir" ;;
+	  esac
+	done
+	dependency_libs="$temp_xrpath $dependency_libs"
+      fi
+
+      # Restore the variables
+      libname=$libname_save
+      name=$name_save
+
       if test "$build_libtool_libs" = yes; then
+	if test -n "$rpath"; then
+	  case "$host" in
+	  *-*-cygwin* | *-*-mingw* | *-*-os2* | *-*-beos*)
+	    # these systems don't actually have a c library (as such)!
+	    ;;
+	  *)
+	    # Add libc to deplibs on all other systems.
+	    deplibs="$deplibs -lc"
+	    ;;
+	  esac
+	fi
+
 	# Transform deplibs into only deplibs that can be linked in shared.
 	name_save=$name
 	libname_save=$libname
@@ -1825,7 +2108,7 @@ compiler."
 	  int main() { return 0; }
 EOF
 	  $rm conftest
-	  $C_compiler -o conftest conftest.c $deplibs
+	  $CC -o conftest conftest.c $deplibs
 	  if test $? -eq 0 ; then
 	    ldd_output=`ldd conftest`
 	    for i in $deplibs; do
@@ -1858,7 +2141,7 @@ EOF
 	     # If $name is empty we are operating on a -L argument.
 	      if test "$name" != "" ; then
 		$rm conftest
-		$C_compiler -o conftest conftest.c $i
+		$CC -o conftest conftest.c $i
 		# Did it work?
 		if test $? -eq 0 ; then
 		  ldd_output=`ldd conftest`
@@ -1902,7 +2185,7 @@ EOF
 		    potential_libs=`ls $i/$libname[.-]* 2>/dev/null`
 		    for potent_lib in $potential_libs; do
 		      # Follow soft links.
-		      if ls -lLd "$potlib" 2>/dev/null \
+		      if ls -lLd "$potent_lib" 2>/dev/null \
 			 | grep " -> " >/dev/null; then
 			continue 
 		      fi
@@ -2002,6 +2285,61 @@ EOF
       
       # Test again, we may have decided not to build it any more
       if test "$build_libtool_libs" = yes; then
+	if test "$hardcode_into_libs" = yes; then
+	  # Hardcode the library paths
+	  hardcode_libdirs=
+	  dep_rpath=
+	  rpath="$finalize_rpath"
+	  test "$relink" = no && rpath="$compile_rpath$rpath"
+	  for libdir in $rpath; do
+	    if test -n "$hardcode_libdir_flag_spec"; then
+	      if test -n "$hardcode_libdir_separator"; then
+		if test -z "$hardcode_libdirs"; then
+		  hardcode_libdirs="$libdir"
+		else
+		  # Just accumulate the unique libdirs.
+		  case "$hardcode_libdir_separator$hardcode_libdirs$hardcode_libdir_separator" in
+		  *"$hardcode_libdir_separator$libdir$hardcode_libdir_separator"*)
+		    ;;
+		  *)
+		    hardcode_libdirs="$hardcode_libdirs$hardcode_libdir_separator$libdir"
+		    ;;
+		  esac
+		fi
+	      else
+		eval flag=\"$hardcode_libdir_flag_spec\"
+		dep_rpath="$dep_rpath $flag"
+	      fi
+	    elif test -n "$runpath_var"; then
+	      case "$perm_rpath " in
+	      *" $libdir "*) ;;
+	      *) perm_rpath="$perm_rpath $libdir" ;;
+	      esac
+	    fi
+	  done
+	  # Substitute the hardcoded libdirs into the rpath.
+	  if test -n "$hardcode_libdir_separator" &&
+	     test -n "$hardcode_libdirs"; then
+	    libdir="$hardcode_libdirs"
+	    eval dep_rpath=\"$hardcode_libdir_flag_spec\"
+	  fi
+	  if test -n "$runpath_var" && test -n "$perm_rpath"; then
+	    # We should set the runpath_var.
+	    rpath=
+	    for dir in $perm_rpath; do
+	      rpath="$rpath$dir:"
+	    done
+	    eval "$runpath_var='$rpath\$$runpath_var'; export $runpath_var"
+	  fi
+	  test -n "$dep_rpath" && deplibs="$dep_rpath $deplibs"
+	fi
+
+	shlibpath="$finalize_shlibpath"	
+	test "$relink" = no && shlibpath="$compile_shlibpath$shlibpath"	
+	if test -n "$shlibpath"; then
+	  eval "$shlibpath_var='$shlibpath\$$shlibpath_var'; export $shlibpath_var"
+	fi
+  
 	# Get the real and link names of the library.
 	eval library_names=\"$library_names_spec\"
 	set dummy $library_names
@@ -2033,51 +2371,6 @@ EOF
 	# Use standard objects if they are pic
 	test -z "$pic_flag" && libobjs=`$echo "X$libobjs" | $SP2NL | $Xsed -e "$lo2o" | $NL2SP`
 
-	if test -n "$whole_archive_flag_spec"; then
-	  if test -n "$convenience"; then
-	    eval libobjs=\"\$libobjs $whole_archive_flag_spec\"
-	  fi
-	else
-	  gentop="$output_objdir/${outputname}x"
-	  $show "${rm}r $gentop"
-	  $run ${rm}r "$gentop"
-	  $show "mkdir $gentop"
-	  $run mkdir "$gentop"
-	  status=$?
-	  if test $status -ne 0 && test ! -d "$gentop"; then
-	    exit $status
-	  fi
-	  generated="$generated $gentop"
-	  
-	  for xlib in $convenience; do
-	    # Extract the objects.
-	    case "$xlib" in
-	    [\\/]* | [A-Za-z]:[\\/]*) xabs="$xlib" ;;
-	    *) xabs=`pwd`"/$xlib" ;;
-	    esac
-	    xlib=`$echo "X$xlib" | $Xsed -e 's%^.*/%%'`
-	    xdir="$gentop/$xlib"
-
-	    $show "${rm}r $xdir"
-	    $run ${rm}r "$xdir"
-	    $show "mkdir $xdir"
-	    $run mkdir "$xdir"
-	    status=$?
-	    if test $status -ne 0 && test ! -d "$xdir"; then
-	      exit $status
-	    fi
-	    $show "(cd $xdir && $AR x $xabs)"
-	    $run eval "(cd \$xdir && $AR x \$xabs)" || exit $?
-
-	    libobjs="$libobjs "`find $xdir -name \*.o -print -o -name \*.lo -print | $NL2SP`
-	  done
-	fi
-
-	if test "$thread_safe" = yes && test -n "$thread_safe_flag_spec"; then
-	  eval flag=\"$thread_safe_flag_spec\"
-	  linkopts="$linkopts $flag"
-	fi
-
 	# Prepare the list of exported symbols
 	if test -z "$export_symbols"; then
 	  if test "$always_export_symbols" = yes || test -n "$export_symbols_regex"; then
@@ -2105,6 +2398,56 @@ EOF
 	  $run eval '$echo "X$include_expsyms" | $SP2NL >> "$export_symbols"'
 	fi
 
+	if test -n "$convenience"; then
+	  if test -n "$whole_archive_flag_spec"; then
+	    eval libobjs=\"\$libobjs $whole_archive_flag_spec\"
+	  else
+	    gentop="$output_objdir/${outputname}x"
+	    $show "${rm}r $gentop"
+	    $run ${rm}r "$gentop"
+	    $show "mkdir $gentop"
+	    $run mkdir "$gentop"
+	    status=$?
+	    if test $status -ne 0 && test ! -d "$gentop"; then
+	      exit $status
+	    fi
+	    generated="$generated $gentop"
+
+	    for xlib in $convenience; do
+	      # Extract the objects.
+	      case "$xlib" in
+	      [\\/]* | [A-Za-z]:[\\/]*) xabs="$xlib" ;;
+	      *) xabs=`pwd`"/$xlib" ;;
+	      esac
+	      xlib=`$echo "X$xlib" | $Xsed -e 's%^.*/%%'`
+	      xdir="$gentop/$xlib"
+
+	      $show "${rm}r $xdir"
+	      $run ${rm}r "$xdir"
+	      $show "mkdir $xdir"
+	      $run mkdir "$xdir"
+	      status=$?
+	      if test $status -ne 0 && test ! -d "$xdir"; then
+		exit $status
+	      fi
+	      $show "(cd $xdir && $AR x $xabs)"
+	      $run eval "(cd \$xdir && $AR x \$xabs)" || exit $?
+
+	      libobjs="$libobjs "`find $xdir -name \*.o -print -o -name \*.lo -print | $NL2SP`
+	    done
+	  fi
+	fi
+
+	if test "$thread_safe" = yes && test -n "$thread_safe_flag_spec"; then
+	  eval flag=\"$thread_safe_flag_spec\"
+	  linker_flags="$linker_flags $flag"
+	fi
+
+	# Make a backup of the uninstalled library when relinking
+	if test "$relink" = yes && test "$hardcode_into_libs" = yes ; then
+	  $run eval '(cd $output_objdir && $rm ${realname}U && $mv $realname ${realname}U)' || exit $?
+	fi
+
 	# Do each of the archive commands.
 	if test -n "$export_symbols" && test -n "$archive_expsym_cmds"; then
 	  eval cmds=\"$archive_expsym_cmds\"
@@ -2118,6 +2461,12 @@ EOF
 	  $run eval "$cmd" || exit $?
 	done
 	IFS="$save_ifs"
+
+	# Restore the uninstalled library and exit
+	if test "$relink" = yes && test "$hardcode_into_libs" = yes; then
+	  $run eval '(cd $output_objdir && $rm ${realname}T && $mv $realname ${realname}T && $mv "$realname"U $realname)' || exit $?
+	  exit 0
+	fi
 
 	# Create links to the real library.
 	for linkname in $linknames; do
@@ -2136,11 +2485,6 @@ EOF
       ;;
 
     *.lo | *.o | *.obj)
-      if test -n "$link_against_libtool_libs"; then
-	$echo "$modename: error: cannot link libtool libraries into objects" 1>&2
-	exit 1
-      fi
-
       if test -n "$deplibs"; then
 	$echo "$modename: warning: \`-l' and \`-L' are ignored for objects" 1>&2
       fi
@@ -2167,7 +2511,7 @@ EOF
 
       case "$output" in
       *.lo)
-	if test -n "$objs"; then
+	if test -n "$objs$old_deplibs"; then
 	  $echo "$modename: cannot build library object \`$output' from non-libtool objects" 1>&2
 	  exit 1
 	fi
@@ -2183,8 +2527,58 @@ EOF
       # Delete the old objects.
       $run $rm $obj $libobj
 
+      # Objects from convenience libraries.  This assumes
+      # single-version convenience libraries.  Whenever we create
+      # different ones for PIC/non-PIC, this we'll have to duplicate
+      # the extraction.
+      reload_conv_objs=
+      gentop=
+      # reload_cmds runs $LD directly, so let us get rid of
+      # -Wl from whole_archive_flag_spec
+      wl= 
+
+      if test -n "$convenience"; then
+	if test -n "$whole_archive_flag_spec"; then
+	  eval reload_conv_objs=\"\$reload_objs $whole_archive_flag_spec\"
+	else
+	  gentop="$output_objdir/${obj}x"
+	  $show "${rm}r $gentop"
+	  $run ${rm}r "$gentop"
+	  $show "mkdir $gentop"
+	  $run mkdir "$gentop"
+	  status=$?
+	  if test $status -ne 0 && test ! -d "$gentop"; then
+	    exit $status
+	  fi
+	  generated="$generated $gentop"
+
+	  for xlib in $convenience; do
+	    # Extract the objects.
+	    case "$xlib" in
+	    [\\/]* | [A-Za-z]:[\\/]*) xabs="$xlib" ;;
+	    *) xabs=`pwd`"/$xlib" ;;
+	    esac
+	    xlib=`$echo "X$xlib" | $Xsed -e 's%^.*/%%'`
+	    xdir="$gentop/$xlib"
+
+	    $show "${rm}r $xdir"
+	    $run ${rm}r "$xdir"
+	    $show "mkdir $xdir"
+	    $run mkdir "$xdir"
+	    status=$?
+	    if test $status -ne 0 && test ! -d "$xdir"; then
+	      exit $status
+	    fi
+	    $show "(cd $xdir && $AR x $xabs)"
+	    $run eval "(cd \$xdir && $AR x \$xabs)" || exit $?
+
+	    reload_conv_objs="$reload_objs "`find $xdir -name \*.o -print -o -name \*.lo -print | $NL2SP`
+	  done
+	fi
+      fi
+
       # Create the old-style object.
-      reload_objs="$objs "`$echo "X$libobjs" | $SP2NL | $Xsed -e '/\.'${libext}$'/d' -e '/\.lib$/d' -e "$lo2o" | $NL2SP`
+      reload_objs="$objs$old_deplibs "`$echo "X$libobjs" | $SP2NL | $Xsed -e '/\.'${libext}$'/d' -e '/\.lib$/d' -e "$lo2o" | $NL2SP`" $reload_conv_objs"
 
       output="$obj"
       eval cmds=\"$reload_cmds\"
@@ -2197,9 +2591,21 @@ EOF
       IFS="$save_ifs"
 
       # Exit if we aren't doing a library object file.
-      test -z "$libobj" && exit 0
+      if test -z "$libobj"; then
+	if test -n "$gentop"; then
+	  $show "${rm}r $gentop"
+	  $run ${rm}r $gentop
+	fi
+
+	exit 0
+      fi
 
       if test "$build_libtool_libs" != yes; then
+	if test -n "$gentop"; then
+	  $show "${rm}r $gentop"
+	  $run ${rm}r $gentop
+	fi
+
 	# Create an invalid libtool object if no PIC, so that we don't
 	# accidentally link it into a program.
 	$show "echo timestamp > $libobj"
@@ -2209,7 +2615,7 @@ EOF
 
       if test -n "$pic_flag"; then
 	# Only do commands if we really have different PIC objects.
-	reload_objs="$libobjs"
+	reload_objs="$libobjs $reload_conv_objs"
 	output="$libobj"
 	eval cmds=\"$reload_cmds\"
 	IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
@@ -2225,6 +2631,11 @@ EOF
 	$run $rm $libobj
 	$show "$LN_S $obj $libobj"
 	$run $LN_S $obj $libobj || exit $?
+      fi
+
+      if test -n "$gentop"; then
+	$show "${rm}r $gentop"
+	$run ${rm}r $gentop
       fi
 
       exit 0
@@ -2247,6 +2658,467 @@ EOF
 	fi 
       fi
     
+      output_objdir=`$echo "X$output" | $Xsed -e 's%/[^/]*$%%'`
+      if test "X$output_objdir" = "X$output"; then
+	output_objdir="$objdir"
+      else
+	output_objdir="$output_objdir/$objdir"
+      fi
+
+      # Create the binary in the object directory, then wrap it.
+      if test ! -d $output_objdir; then
+	$show "$mkdir $output_objdir"
+	$run $mkdir $output_objdir
+	status=$?
+	if test $status -ne 0 && test ! -d $output_objdir; then
+	  exit $status
+	fi
+      fi
+
+      # Find libtool libraries and add their dependencies
+      save_deplibs="$deplibs"
+      deplibs=
+      newdependency_libs=
+      new_lib_search_path=
+      for deplib in $save_deplibs; do
+	lib=
+	case "$deplib" in
+	*.a | *.lib)
+	  deplibs="$deplibs $deplib"
+	  continue
+	  ;;
+	-L*)
+	  deplibs="$deplibs $deplib"
+	  new_lib_search_path="$new_lib_search_path "`$echo "X$deplib" | $Xsed -e 's/^-L//'`
+	  continue
+	  ;;
+	-l*)
+	  name=`$echo "X$deplib" | $Xsed -e 's/^-l//'`
+	  found=no
+	  for searchdir in $lib_search_path; do
+	    # Search the libtool library
+	    lib="$searchdir/lib${name}.la"
+	    if test -f "$lib"; then
+	      found=yes
+	      break
+	    fi
+	  done
+	  if test "$found" != yes; then
+	    deplibs="$deplibs $deplib"
+	    continue
+	  fi
+	  ;;
+	*)
+	  lib="$deplib"
+	  if test -f "$lib"; then :
+	  else
+	    $echo "$modename: cannot find the library \`$lib'" 1>&2
+	    exit 1
+	  fi
+	  ;;
+	esac
+	libdir=
+	library_names=
+	old_library=
+
+	# Check to see that this really is a libtool archive.
+	if (sed -e '2q' $lib | egrep "^# Generated by .*$PACKAGE") >/dev/null 2>&1; then :
+	else
+	  $echo "$modename: \`$lib' is not a valid libtool archive" 1>&2
+	  exit 1
+	fi
+
+	# If the library was installed with an old release of libtool,
+	# it will not redefine variable installed.
+	installed=yes
+
+	# Read the .la file
+	case "$lib" in
+	*/* | *\\*) . $lib ;;
+	*) . ./$lib ;;
+	esac
+
+	# Get the name of the library we link against.
+	linklib=
+	for l in $old_library $library_names; do
+	  linklib="$l"
+	done
+
+	if test -z "$linklib"; then
+	  $echo "$modename: cannot find name of link library for \`$lib'" 1>&2
+	  exit 1
+	fi
+
+	new_lib_search_path="$new_lib_search_path `$echo "X$lib" | $Xsed -e 's%/[^/]*$%%'`"
+	deplibs="$deplibs $lib"
+
+	for deplib in $dependency_libs; do
+	  case "$deplib" in
+	  -L*)
+	    new_lib_search_path="$new_lib_search_path `$echo "X$deplib" | $Xsed -e 's/^-L//'`"
+	    ;;
+	  esac
+	  
+	  if test "$link_all_deplibs" != no || \
+	     test "$fast_install" != no || \
+	     test "$build_libtool_libs" = no || \
+	     test -z "$library_names"; then
+	    # Need to link against all dependency_libs
+	    deplibs="$deplibs $deplib"
+	  else
+	    # Need to hardcode shared library paths
+	    # or/and link against static libraries
+	    newdependency_libs="$newdependency_libs $deplib"
+	  fi
+	done
+      done
+      
+      # Eliminate all dependency_libs that are already contained in deplibs
+      dependency_libs=
+      for deplib in $newdependency_libs; do
+	case "$deplibs " in
+	*" $deplib "*) ;;
+	*) dependency_libs="$dependency_libs $deplib" ;;
+	esac
+      done
+
+      # Make sure lib_search_path contains only unique directories.
+      lib_search_path=
+      for dir in $new_lib_search_path; do
+	case "$lib_search_path " in
+	*" $dir "*) ;;
+	*) lib_search_path="$lib_search_path $dir" ;;
+	esac
+      done
+      lib_search_path="$lib_search_path $sys_lib_search_path"
+      
+      # Find libtool libraries and add their directories
+      alldeplibs=no
+      link_against_libtool_libs=
+      
+      for deplib in $deplibs @DEPLIBS@ $dependency_libs; do
+	lib=
+	case "$deplib" in
+	-L* | *.a | *.lib)
+	  compile_command="$compile_command $deplib"
+	  finalize_command="$finalize_command $deplib"
+	  continue
+	  ;;
+	-R*)
+	  dir=`$echo "X$deplib" | $Xsed -e 's/^-R//'`
+	  # Make sure the xrpath contains only unique directories.
+	  case "$xrpath " in
+	  *" $dir "*) ;;
+	  *) xrpath="$xrpath $dir" ;;
+	  esac
+	  continue
+	  ;;
+	@DEPLIBS@)
+	  alldeplibs=yes
+	  continue
+	  ;;
+	-l*)
+	  name=`$echo "X$deplib" | $Xsed -e 's/^-l//'`
+	  found=no
+	  for searchdir in $lib_search_path; do
+	    # Search the libtool library
+	    lib="$searchdir/lib${name}.la"
+	    if test -f "$lib"; then
+	      found=yes
+	      break
+	    fi
+	  done
+	  if test "$found" != yes; then
+	    compile_command="$compile_command $deplib"
+	    finalize_command="$finalize_command $deplib"
+	    continue
+	  fi
+	  ;;
+	*)
+	  lib="$deplib"
+	  if test -f "$lib"; then :
+	  else
+	    $echo "$modename: cannot find the library \`$lib'" 1>&2
+	    exit 1
+	  fi
+	  ;;
+	esac
+	libdir=
+	library_names=
+	old_library=
+
+	# Check to see that this really is a libtool archive.
+	if (sed -e '2q' $lib | egrep "^# Generated by .*$PACKAGE") >/dev/null 2>&1; then :
+	else
+	  $echo "$modename: \`$lib' is not a valid libtool archive" 1>&2
+	  exit 1
+	fi
+
+	ladir=`$echo "X$lib" | $Xsed -e 's%/[^/]*$%%'`
+	test "X$ladir" = "X$lib" && ladir="."
+	# We need an absolute path.
+	case "$ladir" in
+	[\\/]* | [A-Za-z]:[\\/]*) abs_ladir="$ladir" ;;
+	*)
+	  abs_ladir=`cd "$ladir" && pwd`
+	  if test -z "$abs_ladir"; then
+	    $echo "$modename: warning: cannot determine absolute directory name of \`$abs_ladir'" 1>&2
+	    $echo "$modename: passing it literally to the linker, although it might fail" 1>&2
+	    abs_ladir="$ladir"
+	  fi
+	  ;;
+	esac
+	laname=`$echo "X$lib" | $Xsed -e 's%^.*/%%'`
+
+	# If the library was installed with an old release of libtool,
+	# it will not redefine variable installed.
+	installed=yes
+
+	# Read the .la file
+	case "$lib" in
+	*/* | *\\*) . $lib ;;
+	*) . ./$lib ;;
+	esac
+
+	# Get the name of the library we link against.
+	linklib=
+	for l in $old_library $library_names; do
+	  linklib="$l"
+	done
+
+	if test -z "$linklib"; then
+	  $echo "$modename: cannot find name of link library for \`$lib'" 1>&2
+	  exit 1
+	fi
+
+	# Find the relevant object directory and library name.
+	if test "X$installed" = Xyes; then
+	  if test ! -f "$libdir/$linklib" && test -f "$abs_ladir/$linklib"; then
+	    $echo "$modename: warning: library \`$lib' was moved." 1>&2
+	    dir="$ladir"
+	    absdir="$abs_ladir"
+	    libdir="$abs_ladir"
+	  else
+	    dir="$libdir"
+	    absdir="$libdir"
+	  fi
+	else
+	  dir="$ladir/$objdir"
+	  absdir="$abs_ladir/$objdir"
+	fi
+	name=`$echo "X$laname" | $Xsed -e 's/\.la$//' -e 's/^lib//'`
+
+	hardcode=yes
+	test "$hardcode_into_libs" = yes && test "$alldeplibs" = yes && hardcode=no
+	if test "$hardcode" = yes && test -n "$library_names" &&
+	   { test "$prefer_static_libs" = no || test -z "$old_library"; }; then
+	  # We need to hardcode the library path
+	  if test -n "$shlibpath_var"; then
+	    # Make sure the rpath contains only unique directories.
+	    case "$temp_rpath " in
+	    *" $dir "*) ;;
+	    *" $absdir "*) ;;
+	    *) temp_rpath="$temp_rpath $dir" ;;
+	    esac
+	  fi
+
+	  # Hardcode the library path.
+	  # Skip directories that are in the system default run-time
+	  # search path.
+	  case " $sys_lib_dlsearch_path " in
+	  *" $absdir "*) ;;
+	  *)
+	    case "$compile_rpath " in
+	    *" $absdir "*) ;;
+	    *) compile_rpath="$compile_rpath $absdir" 
+	    esac
+	    ;;
+	  esac
+
+	  case " $sys_lib_dlsearch_path " in
+	  *" $libdir "*) ;;
+	  *)
+	    case "$finalize_rpath " in
+	    *" $libdir "*) ;;
+	    *) finalize_rpath="$finalize_rpath $libdir"
+	    esac
+	    ;;
+	  esac
+	fi
+
+	if test "$alldeplibs" = yes &&
+	   { test "$deplibs_check_method" = pass_all ||
+	     { test "$build_libtool_libs" = yes &&
+	       test -n "$library_names"; }; }; then
+	  # Do we only need to link against static libraries?
+	  continue
+	fi
+	
+	if test -z "$libdir"; then
+	  # It is a libtool convenience library, so add in its objects.
+	  convenience="$convenience $dir/$old_library"
+	  old_convenience="$old_convenience $dir/$old_library"
+	  compile_command="$compile_command $dir/$old_library"
+	  finalize_command="$finalize_command $dir/$old_library"
+	  continue
+	fi
+
+	if test -n "$library_names" &&
+	   { test "$prefer_static_libs" = no || test -z "$old_library"; }; then
+	  link_against_libtool_libs="$link_against_libtool_libs $lib"
+
+	  if test -n "$old_archive_from_expsyms_cmds"; then
+	    # figure out the soname
+	    set dummy $library_names
+	    realname="$2"
+	    shift; shift
+	    libname=`eval \\$echo \"$libname_spec\"`
+	    if test -n "$soname_spec"; then
+	      eval soname=\"$soname_spec\"
+	    else
+	      soname="$realname"
+	    fi
+
+	    # Make a new name for the extract_expsyms_cmds to use
+	    newlib="libimp-`echo $soname | sed 's/^lib//;s/\.dll$//'`.a"
+	  
+	    # If the library has no export list, then create one now
+	    if test -f "$output_objdir/$soname-def"; then :
+	    else
+	      $show "extracting exported symbol list from \`$soname'"
+	      IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
+	      eval cmds=\"$extract_expsyms_cmds\"
+	      for cmd in $cmds; do
+		IFS="$save_ifs"
+		$show "$cmd"
+		$run eval "$cmd" || exit $?
+	      done
+	      IFS="$save_ifs"
+	    fi
+ 
+	    # Create $newlib
+	    if test -f "$output_objdir/$newlib"; then :; else
+	      $show "generating import library for \`$soname'"
+	      IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
+	      eval cmds=\"$old_archive_from_expsyms_cmds\"
+	      for cmd in $cmds; do
+		IFS="$save_ifs"
+		$show "$cmd"
+		$run eval "$cmd" || exit $?
+	      done
+	      IFS="$save_ifs"
+	    fi
+	    # make sure the library variables are pointing to the new library
+	    dir=$output_objdir
+	    linklib=$newlib
+	  fi
+
+	  lib_linked=yes
+	  add_dir=
+	  add_shlibpath=
+	  add_name=no
+	  case "$hardcode_action" in
+	  immediate | unsupported)
+	    if test "$hardcode_direct" = no; then
+	      compile_command="$compile_command $dir/$linklib"
+	    elif test "$hardcode_minus_L" = no; then
+	      case "$host" in
+	      *-*-sunos*) add_shlibpath="$dir" ;;
+	      esac
+	      add_dir="-L$dir"
+	      add_name=yes
+	    elif test "$hardcode_shlibpath_var" = no; then
+	      add_shlibpath="$dir"
+	      add_name=yes
+	    else
+	      lib_linked=no
+	    fi
+	    ;;
+
+	  relink)
+	    if test "$hardcode_direct" = yes; then
+	      compile_command="$compile_command $absdir/$linklib"
+	    elif test "$hardcode_minus_L" = yes; then
+	      add_dir="-L$absdir"
+	      add_name=yes
+	    elif test "$hardcode_shlibpath_var" = yes; then
+	      add_shlibpath="$absdir"
+	      add_name=yes
+	    else
+	      lib_linked=no
+	    fi
+	    ;;
+
+	  *) lib_linked=no ;;
+	  esac
+
+	  if test "$lib_linked" != yes; then
+	    $echo "$modename: configuration error: unsupported hardcode properties"
+	    exit 1
+	  fi
+	  if test -n "$add_dir"; then
+	    case "$compile_command " in
+	    *" $add_dir "*) ;;
+	    *) compile_command="$compile_command $add_dir" ;;
+	    esac
+	  fi
+	  if test -n "$add_shlibpath"; then
+	    case ":$compile_shlibpath:" in
+	    *":$add_shlibpath:"*) ;;
+	    *) compile_shlibpath="$compile_shlibpath$add_shlibpath:" ;;
+	    esac
+	  fi
+	  test "$add_name" = yes && compile_command="$compile_command -l$name"
+
+	  add_dir=
+	  add_name=no
+	  # Finalize command for both is simple: just hardcode it.
+	  if test "$hardcode_direct" = yes; then
+	    finalize_command="$finalize_command $libdir/$linklib"
+	  elif test "$hardcode_minus_L" = yes; then
+	    add_dir="-L$libdir"
+	    add_name=yes
+	  elif test "$hardcode_shlibpath_var" = yes; then
+	    case ":$finalize_shlibpath:" in
+	    *":$libdir:"*) ;;
+	    *) finalize_shlibpath="$finalize_shlibpath$libdir:" ;;
+	    esac
+	    add_name=yes
+	  else
+	    # We cannot seem to hardcode it, guess we'll fake it.
+	    add_dir="-L$libdir"
+	    add_name=yes
+	  fi
+	  if test -n "$add_dir"; then
+	    case "$finalize_command " in
+	    *" $add_dir "*) ;;
+	    *) finalize_command="$finalize_command $add_dir" ;;
+	    esac
+	  fi
+	  test "$add_name" = yes && finalize_command="$finalize_command -l$name"
+	else
+	  # Here we assume that one of hardcode_direct or hardcode_minus_L
+	  # is not unsupported.  This is valid on all known static and
+	  # shared platforms.
+	  if test "$hardcode_direct" != unsupported; then
+	    test -n "$old_library" && linklib="$old_library"
+	    compile_command="$compile_command $dir/$linklib"
+	    finalize_command="$finalize_command $dir/$linklib"
+	  else
+	    case "$compile_command " in
+	    *" -L$dir "*) ;;
+	    *) compile_command="$compile_command -L$dir";;
+	    esac
+	    compile_command="$compile_command -l$name"
+	    case "$finalize_command " in
+	    *" -L$dir "*) ;;
+	    *) finalize_command="$finalize_command -L$dir";;
+	    esac
+	    finalize_command="$finalize_command -l$name"
+	  fi
+	fi
+      done
+      
       if test -n "$rpath$xrpath"; then
 	# If the user specified any rpath flags, then add them.
 	for libdir in $rpath $xrpath; do
@@ -2290,6 +3162,14 @@ EOF
 	  *) perm_rpath="$perm_rpath $libdir" ;;
 	  esac
 	fi
+	case "$host" in
+	*-*-cygwin* | *-*-mingw* | *-*-os2*)
+	  case ":$dllsearchpath:" in
+	  *":$libdir:"*) ;;
+	  *) dllsearchpath="$dllsearchpath:$libdir";;
+	  esac
+	  ;;
+	esac
       done
       # Substitute the hardcoded libdirs into the rpath.
       if test -n "$hardcode_libdir_separator" &&
@@ -2335,23 +3215,6 @@ EOF
       fi
       finalize_rpath="$rpath"
 
-      output_objdir=`$echo "X$output" | $Xsed -e 's%/[^/]*$%%'`
-      if test "X$output_objdir" = "X$output"; then
-	output_objdir="$objdir"
-      else
-	output_objdir="$output_objdir/$objdir"
-      fi
-
-      # Create the binary in the object directory, then wrap it.
-      if test ! -d $output_objdir; then
-	$show "$mkdir $output_objdir"
-	$run $mkdir $output_objdir
-	status=$?
-	if test $status -ne 0 && test ! -d $output_objdir; then
-	  exit $status
-	fi
-      fi
-
       if test -n "$libobjs" && test "$build_old_libs" = yes; then
 	# Transform all the library objects into standard objects.
 	compile_command=`$echo "X$compile_command" | $SP2NL | $Xsed -e "$lo2o" | $NL2SP`
@@ -2359,7 +3222,7 @@ EOF
       fi
 
       dlsyms=
-      if test -n "$dlfiles$dlprefiles" || test "$dlself" = yes; then
+      if test -n "$dlfiles$dlprefiles" || test "$dlself" != no; then
 	if test -n "$NM" && test -n "$global_symbol_pipe"; then
 	  dlsyms="${outputname}S.c"
 	else
@@ -2400,7 +3263,7 @@ extern \"C\" {
 	    test -z "$run" && $echo ': @PROGRAM@ ' > "$nlist"
 
 	    # Add our own program objects to the symbol list.
-	    progfiles=`$echo "X$objs" | $SP2NL | $Xsed -e "$lo2o" | $NL2SP`
+	    progfiles=`$echo "X$objs$old_deplibs" | $SP2NL | $Xsed -e "$lo2o" | $NL2SP`
 	    for arg in $progfiles; do
 	      $show "extracting global C symbols from \`$arg'"
 	      $run eval "$NM $arg | $global_symbol_pipe >> '$nlist'"
@@ -2513,8 +3376,8 @@ static const void *lt_preloaded_setup() {
 	  esac
 
 	  # Now compile the dynamic symbol file.
-	  $show "(cd $output_objdir && $C_compiler -c$no_builtin_flag$pic_flag_for_symtable \"$dlsyms\")"
-	  $run eval '(cd $output_objdir && $C_compiler -c$no_builtin_flag$pic_flag_for_symtable "$dlsyms")' || exit $?
+	  $show "(cd $output_objdir && $CC -c$no_builtin_flag$pic_flag_for_symtable \"$dlsyms\")"
+	  $run eval '(cd $output_objdir && $CC -c$no_builtin_flag$pic_flag_for_symtable "$dlsyms")' || exit $?
 
 	  # Clean up the generated files.
 	  $show "$rm $output_objdir/$dlsyms $nlist ${nlist}S ${nlist}T"
@@ -2604,7 +3467,7 @@ static const void *lt_preloaded_setup() {
 	fi
       fi
 
-      if test "$hardcode_action" = relink; then
+      if test "$hardcode_action" = relink || test "$hardcode_into_libs" = yes; then
 	# Fast installation is not supported
 	link_command="$compile_var$compile_command$compile_rpath"
 	relink_command="$finalize_var$finalize_command$finalize_rpath"
@@ -2772,7 +3635,7 @@ else
   fi"
 	else
 	  echo >> $output "\
-  program='$outputname'
+  program='$outputname$exeext'
   progdir=\"\$thisdir/$objdir\"
 "
 	fi
@@ -2856,7 +3719,7 @@ fi\
 	  oldobjs="$libobjs_save"
 	  build_libtool_libs=no
 	else
-	  oldobjs="$objs "`$echo "X$libobjs_save" | $SP2NL | $Xsed -e '/\.'${libext}'$/d' -e '/\.lib$/d' -e "$lo2o" | $NL2SP`
+	  oldobjs="$objs$old_deplibs "`$echo "X$libobjs_save" | $SP2NL | $Xsed -e '/\.'${libext}'$/d' -e '/\.lib$/d' -e "$lo2o" | $NL2SP`
 	fi
 	addlibs="$old_convenience"
       fi
@@ -2936,14 +3799,10 @@ fi\
       test "$build_old_libs" = yes && old_library="$libname.$libext"
       $show "creating $output"
 
-      if test -n "$xrpath"; then
-	temp_xrpath=
-	for libdir in $xrpath; do
-	  temp_xrpath="$temp_xrpath -R$libdir"
-	done
-	dependency_libs="$temp_xrpath $dependency_libs"
-      fi
-
+      # Quote the link command for shipping.
+      relink_command="cd `pwd`; $SHELL $0 --mode=relink $libtool_args"
+      relink_command=`$echo "X$relink_command" | $Xsed -e "$sed_quote_subst"`
+      
       # Only create the output if not a dry run.
       if test -z "$run"; then
 	for installed in no yes; do
@@ -2952,6 +3811,23 @@ fi\
 	      break
 	    fi
 	    output="$output_objdir/$outputname"i
+	    # Replace all uninstalled libtool libraries with the installed ones
+	    newdependency_libs=
+	    for deplib in $dependency_libs; do
+	      case "$deplib" in
+	      *.la) 
+		name=`$echo "X$deplib" | $Xsed -e 's%^.*/%%'`
+		eval libdir=`sed -n -e 's/^libdir=\(.*\)$/\1/p' $deplib`
+		if test -z "$libdir"; then
+		  $echo "$modename: \`$deplib' is not a valid libtool archive" 1>&2
+		  exit 1
+		fi
+		newdependency_libs="$newdependency_libs $libdir/$name"
+		;;
+	      *) newdependency_libs="$newdependency_libs $deplib" ;;
+	      esac
+	    done
+	    dependency_libs="$newdependency_libs"
 	  fi
 	  $rm $output
 	  $echo > $output "\
@@ -2982,8 +3858,11 @@ revision=$revision
 installed=$installed
 
 # Directory that this library needs to be installed in:
-libdir='$install_libdir'\
-"
+libdir='$install_libdir'"
+	  if test "$installed" = no; then
+	    $echo >> $output "\
+relink_command=\"$relink_command\""
+	  fi
 	done
       fi
 
@@ -3163,6 +4042,7 @@ libdir='$install_libdir'\
 
 	library_names=
 	old_library=
+	relink_command=
 	# If there is no directory component, then add one.
 	case "$file" in
 	*/* | *\\*) . $file ;;
@@ -3187,6 +4067,20 @@ libdir='$install_libdir'\
 	test "X$dir" = "X$file/" && dir=
 	dir="$dir$objdir"
 
+	if test "$hardcode_into_libs" = yes; then
+	  if test -z "$relink_command"; then
+	    $echo "$modename: invalid libtool pseudo library \`$file'" 1>&2
+	    exit 1
+	  fi
+	  $echo "$modename: warning: relinking \`$file'" 1>&2
+	  $show "$relink_command"
+	  if $run eval "$relink_command"; then :
+	  else
+	    $echo "$modename: error: relink \`$file' with the above command before installing it" 1>&2
+	    continue
+	  fi
+	fi
+	
 	# See the names of the shared library.
 	set dummy $library_names
 	if test -n "$2"; then
@@ -3194,27 +4088,26 @@ libdir='$install_libdir'\
 	  shift
 	  shift
 
+	  srcname="$realname"
+	  test "$hardcode_into_libs" = yes && srcname="$realname"T
+
 	  # Install the shared library and build the symlinks.
-	  $show "$install_prog $dir/$realname $destdir/$realname"
-	  $run eval "$install_prog $dir/$realname $destdir/$realname" || exit $?
-	  test "X$dlname" = "X$realname" && dlname=
+	  $show "$install_prog $dir/$srcname $destdir/$realname"
+	  $run eval "$install_prog $dir/$srcname $destdir/$realname" || exit $?
+	  if test -n "$stripme" && test -n "$striplib"; then
+	    $show "$striplib $destdir/$realname"
+	    $run eval "$striplib $destdir/$realname" || exit $?
+	  fi
 
 	  if test $# -gt 0; then
 	    # Delete the old symlinks, and create new ones.
 	    for linkname
 	    do
-	      test "X$dlname" = "X$linkname" && dlname=
 	      if test "$linkname" != "$realname"; then
 		$show "(cd $destdir && $rm $linkname && $LN_S $realname $linkname)"
 		$run eval "(cd $destdir && $rm $linkname && $LN_S $realname $linkname)"
 	      fi
 	    done
-	  fi
-
-	  if test -n "$dlname"; then
-	    # Install the dynamically-loadable library.
-	    $show "$install_prog $dir/$dlname $destdir/$dlname"
-	    $run eval "$install_prog $dir/$dlname $destdir/$dlname" || exit $?
 	  fi
 
 	  # Do each command in the postinstall commands.
@@ -3327,6 +4220,13 @@ libdir='$install_libdir'\
 	    fi
 	  done
 
+	  relink_command=
+	  # If there is no directory component, then add one.
+	  case "$file" in
+	  */* | *\\*) . $file ;;
+	  *) . ./$file ;;
+	  esac
+
 	  outputname=
 	  if test "$fast_install" = no && test -n "$relink_command"; then
 	    if test "$finalize" = yes && test -z "$run"; then
@@ -3375,6 +4275,11 @@ libdir='$install_libdir'\
       $show "$install_prog $file $oldlib"
       $run eval "$install_prog \$file \$oldlib" || exit $?
 
+      if test -n "$stripme" && test -n "$striplib"; then
+	$show "$old_striplib $oldlib"
+	$run eval "$old_striplib $oldlib" || exit $?
+      fi
+      
       # Do each command in the postinstall commands.
       eval cmds=\"$old_postinstall_cmds\"
       IFS="${IFS= 	}"; save_ifs="$IFS"; IFS='~'
@@ -3471,6 +4376,83 @@ libdir='$install_libdir'\
     echo "See any operating system documentation about shared libraries for"
     echo "more information, such as the ld(1) and ld.so(8) manual pages."
     echo "----------------------------------------------------------------------"
+    exit 0
+    ;;
+
+  # libtool clean mode
+  clean)
+    modename="$modename: clean"
+    rm="$nonopt"
+    files=
+
+    # This variable tells wrapper scripts just to set variables rather
+    # than running their programs.
+    libtool_install_magic="$magic"
+
+    for arg
+    do
+      case "$arg" in
+      -*) rm="$rm $arg" ;;
+      *) files="$files $arg" ;;
+      esac
+    done
+
+    if test -z "$rm"; then
+      $echo "$modename: you must specify an RM program" 1>&2
+      $echo "$help" 1>&2
+      exit 1
+    fi
+
+    for file in $files; do
+      dir=`$echo "X$file" | $Xsed -e 's%/[^/]*$%%'`
+      if test "X$dir" = "X$file"; then
+	dir=.
+	objdir="$objdir"
+      else
+	objdir="$dir/$objdir"
+      fi
+      name=`$echo "X$file" | $Xsed -e 's%^.*/%%'`
+
+      rmfiles="$file"
+
+      case "$file" in
+      *.la)
+	# Possibly a libtool archive, so verify it.
+	if (sed -e '2q' $file | egrep "^# Generated by .*$PACKAGE") >/dev/null 2>&1; then
+	  . ./$file
+
+	  # Delete the libtool libraries and symlinks.
+	  for n in $library_names; do
+	    rmfiles="$rmfiles $objdir/$n"
+	  done
+	  test -n "$old_library" && rmfiles="$rmfiles $objdir/$old_library"
+	  rmfiles="$rmfiles $objdir/$name $objdir/${name}i"
+	fi
+	;;
+
+      *.lo)
+	if test "$build_old_libs" = yes; then
+	  oldobj=`$echo "X$name" | $Xsed -e "$lo2o"`
+	  rmfiles="$rmfiles $dir/$oldobj"
+	fi
+	;;
+
+      *)
+	# Do a test to see if this is a libtool program.
+	if (sed -e '4q' $file | egrep "^# Generated by .*$PACKAGE") >/dev/null 2>&1; then
+	  relink_command=
+	  . $dir/$file
+
+	  rmfiles="$rmfiles $objdir/$name $objdir/${name}S.${objext}"
+	  if test "$fast_install" = yes && test -n "$relink_command"; then
+	    rmfiles="$rmfiles $objdir/lt-$name"
+	  fi
+	fi
+	;;
+      esac
+      $show "$rm $rmfiles"
+      $run $rm $rmfiles
+    done
     exit 0
     ;;
 
@@ -3648,9 +4630,7 @@ libdir='$install_libdir'\
 	  # Delete the libtool libraries and symlinks.
 	  for n in $library_names; do
 	    rmfiles="$rmfiles $dir/$n"
-	    test "X$n" = "X$dlname" && dlname=
 	  done
-	  test -n "$dlname" && rmfiles="$rmfiles $dir/$dlname"
 	  test -n "$old_library" && rmfiles="$rmfiles $dir/$old_library"
 
 	  $show "$rm $rmfiles"
@@ -3734,6 +4714,7 @@ Provide generalized library-building support services.
 
 MODE must be one of the following:
 
+      clean           remove files from the build directory
       compile         compile a source file into a libtool object
       execute         automatically set library path, then run a program
       finish          complete the installation of libtool libraries
@@ -3744,6 +4725,20 @@ MODE must be one of the following:
 MODE-ARGS vary depending on the MODE.  Try \`$modename --help --mode=MODE' for
 a more detailed description of MODE."
   exit 0
+  ;;
+
+clean)
+  $echo \
+"Usage: $modename [OPTION]... --mode=clean RM [RM-OPTION]... FILE...
+
+Remove files from the build directory.
+
+RM is the name of the program to use to delete files associated with each FILE
+(typically \`/bin/rm').  RM-OPTIONS are options (such as \`-f') to be passed
+to RM.
+
+If FILE is a libtool library, object or program, all the files associated
+with it are deleted. Otherwise, only FILE itself is deleted using RM."
   ;;
 
 compile)

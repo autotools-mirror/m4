@@ -47,10 +47,16 @@
 	   )],
        [\separator],
 
-       [\header([Development])],
+       [\header([Feedback])],
        [\rows(
 	   [lists.htm], [Mailing-lists],
 	   [feedback.htm], [Feedback],
+	   [/forum/list.php3?num=2], [Discussion Forum],
+	   )],
+       [\separator],
+
+       [\header([Development])],
+       [\rows(
 	   [download.htm], [Download],
 	   [bugs.htm], [Known bugs],
 	   )],

@@ -32,6 +32,7 @@
 #define evaluate mp_evaluate
 #endif
 
+#define COMPILING_M4
 #include "m4.h"
 
 #include "numb.c"
@@ -67,20 +68,20 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term __P ((eval_token, eval_t *));
-static eval_error logical_and_term __P ((eval_token, eval_t *));
-static eval_error or_term __P ((eval_token, eval_t *));
-static eval_error xor_term __P ((eval_token, eval_t *));
-static eval_error and_term __P ((eval_token, eval_t *));
-static eval_error not_term __P ((eval_token, eval_t *));
-static eval_error logical_not_term __P ((eval_token, eval_t *));
-static eval_error cmp_term __P ((eval_token, eval_t *));
-static eval_error shift_term __P ((eval_token, eval_t *));
-static eval_error add_term __P ((eval_token, eval_t *));
-static eval_error mult_term __P ((eval_token, eval_t *));
-static eval_error exp_term __P ((eval_token, eval_t *));
-static eval_error unary_term __P ((eval_token, eval_t *));
-static eval_error simple_term __P ((eval_token, eval_t *));
+static eval_error logical_or_term M4_PARAMS((eval_token, eval_t *));
+static eval_error logical_and_term M4_PARAMS((eval_token, eval_t *));
+static eval_error or_term M4_PARAMS((eval_token, eval_t *));
+static eval_error xor_term M4_PARAMS((eval_token, eval_t *));
+static eval_error and_term M4_PARAMS((eval_token, eval_t *));
+static eval_error not_term M4_PARAMS((eval_token, eval_t *));
+static eval_error logical_not_term M4_PARAMS((eval_token, eval_t *));
+static eval_error cmp_term M4_PARAMS((eval_token, eval_t *));
+static eval_error shift_term M4_PARAMS((eval_token, eval_t *));
+static eval_error add_term M4_PARAMS((eval_token, eval_t *));
+static eval_error mult_term M4_PARAMS((eval_token, eval_t *));
+static eval_error exp_term M4_PARAMS((eval_token, eval_t *));
+static eval_error unary_term M4_PARAMS((eval_token, eval_t *));
+static eval_error simple_term M4_PARAMS((eval_token, eval_t *));
 
 /*--------------------.
 | Lexical functions.  |
@@ -429,7 +430,7 @@ or_term (eval_token et, eval_t *v1)
       if ((er = xor_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_ior(v1,&v2);
+      numb_ior(v1, (const eval_t *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -458,7 +459,7 @@ xor_term (eval_token et, eval_t *v1)
       if ((er = and_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_eor(v1,&v2);
+      numb_eor(v1, (const eval_t *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -487,7 +488,7 @@ and_term (eval_token et, eval_t *v1)
       if ((er = not_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_and(v1,&v2);
+      numb_and(v1, (const eval_t *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -628,11 +629,11 @@ shift_term (eval_token et, eval_t *v1)
       switch (op)
 	{
 	case LSHIFT:
-	  numb_lshift(v1,&v2);
+	  numb_lshift(v1, (const eval_t *)&v2);
 	  break;
 
 	case RSHIFT:
-	  numb_rshift(v1,&v2);
+	  numb_rshift(v1, (const eval_t *)&v2);
 	  break;
 
 	default:
@@ -713,7 +714,7 @@ mult_term (eval_token et, eval_t *v1)
 	  if (numb_zerop(v2))
 	    return DIVIDE_ZERO;
 	  else {
-	    numb_divide(v1,&v2);
+	    numb_divide(v1, (const eval_t *)&v2);
 	  }
 	  break;
 
@@ -729,7 +730,7 @@ mult_term (eval_token et, eval_t *v1)
 	  if (numb_zerop(v2))
 	    return MODULO_ZERO;
 	  else {
-	    numb_modulo(v1,&v2);
+	    numb_modulo(v1, (const eval_t *)&v2);
 	  }
 	  break;
 
@@ -768,7 +769,7 @@ exp_term (eval_token et, eval_t *v1)
       if ((er = exp_term (et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_pow(v1,&v2);
+      numb_pow(v1, (const eval_t *)&v2);
     }
   numb_fini(v2);
   if (et == ERROR)

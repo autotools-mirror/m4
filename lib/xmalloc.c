@@ -44,7 +44,7 @@ void free ();
 # define _(Text) Text
 #endif
 
-#include "error.h"
+#include "m4error.h"
 
 #ifndef EXIT_FAILURE
 # define EXIT_FAILURE 1

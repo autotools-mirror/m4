@@ -1,14 +1,14 @@
 ## Process this file with automake to produce Makefile.in
 AUTOMAKE_OPTIONS = gnu ../src/ansi2knr
-
 MAINTAINERCLEANFILES = Makefile.in
 
-noinst_LIBRARIES = libm4.a
+LDFLAGS = -no-undefined -export-dynamic @DLLDFLAGS@
 
 INCLUDES = @INTLINCL@
+include_HEADERS = m4module.h m4error.h m4obstack.h m4regex.h
+noinst_HEADERS = m4private.h
 
-libm4_a_SOURCES = error.c
+lib_LTLIBRARIES = libm4.la
+libm4_la_SOURCES = m4module.c m4error.c m4obstack.c m4regex.c
+libm4_la_LIBADD = @LTLIBOBJS@
 
-noinst_HEADERS = getopt.h error.h getdate.h obstack.h regex.h
-
-libm4_a_LIBADD = @LIBOBJS@

@@ -16,7 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
 
 #include <sys/stat.h>
 
@@ -34,7 +36,7 @@ static struct obstack trace;
 
 extern int expansion_level;
 
-static void debug_set_file __P ((FILE *));
+static void debug_set_file M4_PARAMS((FILE *));
 
 /*----------------------------------.
 | Initialise the debugging module.  |

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999 Free Software Foundation, Inc.
   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,7 +16,10 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define COMPILING_M4
 #include "m4.h"
+#include "m4private.h"
+#include "m4error.h"
 
 #include <getopt.h>
 #include <signal.h>
@@ -25,49 +28,11 @@
 #include "ltdl.h"
 #endif /* WITH_MODULES */
 
-/* Operate interactively (-e).  */
-int interactive = 0;
-
-/* Enable sync output for /lib/cpp (-s).  */
-int sync_output = 0;
-
-/* Debug (-d[flags]).  */
-int debug_level = 0;
-
-/* Hash table size (should be a prime) (-Hsize).  */
-int hash_table_size = HASHMAX;
-
-/* Disable GNU extensions (-G).  */
-int no_gnu_extensions = 0;
-
-/* Prefix all builtin functions by `m4_'.  */
-int prefix_all_builtins = 0;
-
-/* Max length of arguments in trace output (-lsize).  */
-int max_debug_argument_length = 0;
-
-/* Suppress warnings about missing arguments.  */
-int suppress_warnings = 0;
-
-/* If not zero, then value of exit status for warning diagnostics.  */
-int warning_status = 0;
-
-/* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 250;
-
-#ifdef ENABLE_CHANGEWORD
-/* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = NULL;
-#endif
-
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
 
 /* Name of frozen file to produce near completion.  */
 const char *frozen_file_to_write = NULL;
-
-/* The name this program was run with. */
-const char *program_name;
 
 /* If nonzero, display usage information and exit.  */
 static int show_help = 0;
@@ -77,9 +42,6 @@ static int show_version = 0;
 
 /* If nonzero, import the environment as macros.  */
 static int import_environment = 0;
-
-/* If nonzero, comments are discarded in the token parser.  */
-int discard_comments = 0;
 
 struct macro_definition
 {
@@ -169,8 +131,8 @@ Operation modes:\n\
       fputs (_("\
 \n\
 Dynamic loading features:\n\
-  -m, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
-  -M, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
+  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
+  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"),
 	     stdout);
 #endif
       fputs (_("\
@@ -244,8 +206,8 @@ static const struct option long_options[] =
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'e'},
 #ifdef WITH_MODULES
-  {"load-module", required_argument, NULL, 'M'},
-  {"module-directory", required_argument, NULL, 'm'},
+  {"load-module", required_argument, NULL, 'm'},
+  {"module-directory", required_argument, NULL, 'M'},
 #endif /* WITH_MODULES */
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
@@ -275,14 +237,14 @@ static const struct option long_options[] =
 #  define CHANGEWORD_SHORTOPT	""
 #endif
 #ifdef WITH_MODULES
-#  define MODULE_SHORTOPT	"M:"
-#  define MODULEPATH_SHORTOPT	"m:"
+#  define MODULE_SHORTOPT	"m:"
+#  define MODULEPATH_SHORTOPT	"M:"
 #else
 #  define MODULE_SHORTOPT	""
 #  define MODULEPATH_SHORTOPT	""
 #endif
 
-#define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULE_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULEPATH_SHORTOPT/**/"o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:"/**/MODULEPATH_SHORTOPT/**/"N:PQR:S:T:U:"/**/CHANGEWORD_SHORTOPT/**/":cd::el:"/**/MODULE_SHORTOPT/**/"o:st:"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -309,6 +271,9 @@ main (int argc, char *const *argv, char *const *envp)
   debug_init ();
   include_init ();
   symtab_init ();
+#ifdef WITH_MODULES
+  module_init ();
+#endif
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -337,7 +302,9 @@ main (int argc, char *const *argv, char *const *envp)
       case 'D':
       case 'U':
       case 't':
-
+#ifdef WITH_MODULES
+      case 'm':
+#endif /* WITH_MODULES */
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	new = (macro_definition *) xmalloc (sizeof (macro_definition));
@@ -378,13 +345,23 @@ main (int argc, char *const *argv, char *const *envp)
       case 'L':
 	nesting_limit = atoi (optarg);
 	break;
-
 #ifdef WITH_MODULES
       case 'M':
-	module_load (optarg, NULL);
+	if (lt_dladdsearchdir (optarg) != 0)
+	  {
+	    const char *dlerror = lt_dlerror();
+	    if (dlerror == NULL)
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: failed to add search directory `%s'"),
+			optarg));
+	    else
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("ERROR: failed to add search directory `%s': %s"),
+			optarg, dlerror));
+	  }
 	break;
 #endif /* WITH_MODULES */
-	
+
       case 'P':
 	prefix_all_builtins = 1;
 	break;
@@ -425,23 +402,6 @@ main (int argc, char *const *argv, char *const *envp)
 	if (max_debug_argument_length <= 0)
 	  max_debug_argument_length = 0;
 	break;
-
-#ifdef WITH_MODULES
-      case 'm':
-	  if (lt_dladdsearchdir (optarg) != 0)
-	    {
-	      const char *dlerror = lt_dlerror();
-	      if (dlerror == NULL)
-		  M4ERROR ((EXIT_FAILURE, 0,
-			    _("ERROR: failed to add search directory `%s'"),
-			    optarg));
-	      else
-		  M4ERROR ((EXIT_FAILURE, 0,
-			   _("ERROR: failed to add search directory `%s': %s"),
-			    optarg, dlerror));
-	    }
-	  break;
-#endif /* WITH_MODULES */
 
       case 'o':
 	if (!debug_set_output (optarg))
@@ -537,6 +497,12 @@ main (int argc, char *const *argv, char *const *envp)
 	  SYMBOL_TRACED (sym) = TRUE;
 	  break;
 
+#ifdef WITH_MODULES
+	case 'm':
+	  module_load (defines->macro, NULL);
+	  break;
+#endif /* WITH_MODULES */
+	
 	default:
 	  M4ERROR ((warning_status, 0,
 		    _("INTERNAL ERROR: Bad code in deferred arguments")));

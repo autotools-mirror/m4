@@ -3,7 +3,6 @@
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
 
-
 * KNOWN BUGS
 
   + Changes in the syntax_table are not saved to frozen files.
@@ -69,3 +68,9 @@ for any of these ideas or if you have others to add.
 
   + Some way of linking a module statically is needed, for systems
     without support for dynamic loading.
+
+  + Need a test to check whether a module is currently loaded, so
+    that optional command line loaded modules can be safely unloaded:
+
+	ifelse(__modules__, `foo', unloadmodule(`foo'))
+
