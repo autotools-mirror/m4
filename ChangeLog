@@ -1,5 +1,28 @@
 2003-06-16  Gary V. Vaughan  <gary@gnu.org>
 
+	Further refactoring to stabilise the module API.  Renaming some
+	functions for orthogonality, and judicious definition migration to
+	move things out of the set of exported symbols.
+
+	* doc/STYLE: New file.  Notes on coding style.
+	* m4/m4module.c: Updated bitrotted docucomment at the top of the
+	file.
+	(m4_module_name, m4_module_builtins, m4_module_macros): Renamed to
+	m4_get_module_name, m4_get_module_builtin_table,
+	m4_get_module_macro_table which are verb phrases.  Changed all
+	callers.
+	* m4/builtin.c (m4_builtin_table_install, m4_macro_table_install):
+	Moved to...
+	* m4/module.c (m4_set_module_builtin_table)
+	(m4_set_module_macro_table): ...here, and renamed. Changed all
+	callers.
+	* m4/m4module.c (m4_module_data): This...
+	* m4/m4private.c (struct m4_module_data): ...and this...
+	* m4/module.c (module_data) ...consolidated here and no longer
+	exported.  Changed all callers.
+
+2003-06-16  Gary V. Vaughan  <gary@gnu.org>
+
 	Begin work on lifting the curse of the global variables.  To start
 	with create a `struct m4' context container, and replace
 	`m4__symtab' with `context->symtab' throughout.  This means
@@ -8,7 +31,7 @@
 	container gets passed through.  It would have been nice to
 	defer this until after 1.5, but it has a major effect on the
 	user's module writing ABI, so it needs to be addressed now - at
-	least in the areas that impact the ABI.  An interrelatated change
+	least in the areas that impact the ABI.  An interrelated change
 	in the symtab API removes the dependency on a global symbol table,
 	and instead focuses on a passed table (from the context
 	container).

@@ -76,7 +76,7 @@ M4INIT_HANDLER (load)
       {
 	M4ERROR ((warning_status, 0,
 		  _("Warning: cannot make module `%s' resident: %s"),
-		  m4_module_name (handle), lt_dlerror ()));
+		  m4_get_module_name (handle), lt_dlerror ()));
       }
 }
 
@@ -98,7 +98,7 @@ M4BUILTIN_HANDLER (modules)
   if (handle)
     do
       {
-	m4_shipout_string (obs, m4_module_name (handle), 0, TRUE);
+	m4_shipout_string (obs, m4_get_module_name (handle), 0, TRUE);
 
 	if ((handle = lt_dlhandle_next (handle)))
 	  obstack_1grow (obs, ',');

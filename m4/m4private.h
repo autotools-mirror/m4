@@ -72,11 +72,6 @@ extern boolean m4__single_comments;
 /* TRUE iff some character has M4_SYNTAX_ESCAPE */
 extern boolean m4__use_macro_escape;
 
-struct m4_module_data {
-  m4_builtin	    *bp;	/* `m4_builtin_table' address */
-  m4_macro	    *mp;	/* `m4_macro_table' address */
-};
-
 struct m4_token_arg {
   int		index;
   int		flags;

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989-1994, 1998, 99 Free Software Foundation, Inc.
+   Copyright 1989-1994, 1998, 1999, 2002, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,17 +30,18 @@
  * compiled shared object, that can be loaded into GNU M4 at run
  * time. Information about creating modules is in ../modules/README.
  *
- * This implementation uses libltdl, which is in turn can open modules
+  * This implementation uses libltdl, which is in turn can open modules
  * using either dlopen(3) (exists on GNU/Linux, OSF, Solaris, SunOS and
  * others), shl_load(3) (exists on HPUX), LoadLibrary(3) (exists on
- * Windows, cygwin, OS/2), load_add_on(3) (exists on BeOS), and can
- * also fall back to dld_link(3) from GNU libdld or lt_dlpreload from
- * libtool if shared libraries are not available on the host machine.
+ * Windows, cygwin, OS/2), load_add_on(3) (exists on BeOS), NSAddImage
+ * (exists on MacOS) and can also fall back to dld_link(3) from GNU
+ * libdld or lt_dlpreload from libtool if shared libraries are not
+ * available on the host machine.
  *
  * An M4 module will usually define an external symbol called
  * `m4_builtin_table'.  This symbol points to a table of `m4_builtin'.
- * The table is pushed on an internal stack of builtin tables, each
- * definition therein is added to the symbol table.
+ * The table is saved as libltdl caller data and each definition therein
+ * is added to the symbol table.
  *
  * To load a module, call m4_module_load(), which uses the libltdl
  * API to find the module in the module search path.  The search
@@ -50,24 +51,23 @@
  * get the real library name (which can be system dependent), returning
  * NULL on failure or else a libtool module handle for the newly mapped
  * vm segment containing the module code.  If the module is not already
- * loaded, m4_module_load() retrieves the value of the symbol
- * `m4_builtin_table', which is installed using m4_builtin_table_install().
+ * loaded, m4_module_load() retrieves its value for the symbol
+ * `m4_builtin_table', which is installed using m4_set_module_builtin_table().
  *
  * In addition to builtin functions, you can also define static macro
  * expansions in the `m4_macro_table' symbol.  If you define this symbol
  * in your modules, it should be an array of `m4_macro's, mapping macro
  * names to the expansion text.  Any macros defined in `m4_macro_table'
- * are installed into the M4 symbol table with m4_macro_table_install().
+ * are installed into the M4 symbol table with m4_set_module_macro_table().
  *
- * Each time a module is loaded, the module function
- * "void m4_init_module (lt_dlhandle handle, struct obstack *obs)" is
- * called, if defined.  Any value stored in OBS by this function becomes
- * the expansion of the macro which called it.  Before M4 exits, all
- * modules are unloaded and the function
- * "void m4_finish_module (lt_dlhandle handle, struct obstack *obs)" is
- * called, if defined.  It is safe to load the same module several times:
- * the init and finish functions will also be called multiple times in
- * this case.
+ * Each time a module is loaded, the module function prototyped as
+ * "M4INIT_HANDLER (<module name>)" is called, if defined.  Any value
+ * stored in OBS by this function becomes the expansion of the macro
+ * which called it.  Before M4 exits, all modules are unloaded and the
+ * function prototyped as "M4FINISH_HANDLER (<module name>)" is called,
+ * if defined.  It is safe to load the same module several times: the
+ * init and finish functions will also be called multiple times in this
+ * case.
  *
  * To unload a module, use m4_module_unload(). which uses
  * m4__symtab_remove_module_references() to remove the builtins defined by
@@ -79,6 +79,11 @@
 
 #define MODULE_SELF_NAME	"!myself!"
 
+typedef struct {
+  m4_builtin    *builtin_table;
+  m4_macro	*macro_table;
+} module_data;
+
 static const char*  module_dlerror (void);
 static int	    module_remove  (m4 *context, lt_dlhandle handle,
 				    struct obstack *obs);
@@ -88,7 +93,7 @@ static void	    module_close   (m4 *context, lt_dlhandle handle,
 static lt_dlcaller_id caller_id = 0;
 
 const char *
-m4_module_name (lt_dlhandle handle)
+m4_get_module_name (lt_dlhandle handle)
 {
   const lt_dlinfo *info;
 
@@ -100,27 +105,89 @@ m4_module_name (lt_dlhandle handle)
 }
 
 m4_builtin *
-m4_module_builtins (lt_dlhandle handle)
+m4_get_module_builtin_table (lt_dlhandle handle)
 {
-  m4_module_data *data;
+  module_data *data;
 
   assert (handle);
 
-  data = (m4_module_data *) lt_dlcaller_get_data (caller_id, handle);
+  data = lt_dlcaller_get_data (caller_id, handle);
 
-  return data ? data->bp : 0;
+  return data ? data->builtin_table : 0;
+}
+
+void
+m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
+			     const m4_builtin *table)
+{
+  const m4_builtin *bp;
+  m4_token token;
+
+  assert (handle);
+  assert (table);
+
+  bzero (&token, sizeof (m4_token));
+  TOKEN_TYPE (&token)		= M4_TOKEN_FUNC;
+  TOKEN_HANDLE (&token)		= handle;
+
+  for (bp = table; bp->name != NULL; bp++)
+    {
+      int flags = 0;
+      char *name;
+
+      if (prefix_all_builtins)
+	{
+	  static const char prefix[] = "m4_";
+	  size_t len = strlen (prefix) + strlen (bp->name);
+
+	  name = (char *) xmalloc (1+ len);
+	  snprintf (name, 1+ len, "%s%s", prefix, bp->name);
+	}
+      else
+	name = (char *) bp->name;
+
+      if (bp->groks_macro_args) BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
+      if (bp->blind_if_no_args) BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
+
+      TOKEN_FUNC (&token)	= bp->func;
+      TOKEN_FLAGS (&token)	= flags;
+      TOKEN_MIN_ARGS (&token)	= bp->min_args;
+      TOKEN_MAX_ARGS (&token)	= bp->max_args;
+
+      m4_builtin_pushdef (context, name, &token);
+
+      if (prefix_all_builtins)
+	xfree (name);
+    }
 }
 
 m4_macro *
-m4_module_macros (lt_dlhandle handle)
+m4_get_module_macro_table (lt_dlhandle handle)
 {
-  m4_module_data *data;
+  module_data *data;
 
   assert (handle);
 
-  data = (m4_module_data *) lt_dlcaller_get_data (caller_id, handle);
+  data = lt_dlcaller_get_data (caller_id, handle);
 
-  return data ? data->mp : 0;
+  return data ? data->macro_table : 0;
+}
+
+void
+m4_set_module_macro_table (m4 *context, lt_dlhandle handle, const m4_macro *table)
+{
+  const m4_macro *mp;
+  m4_token token;
+
+  bzero (&token, sizeof (m4_token));
+  TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
+  TOKEN_HANDLE (&token)		= handle;
+
+  for (mp = table; mp->name != NULL; mp++)
+    {
+      TOKEN_TEXT (&token)	= (char *) mp->value;
+      m4_macro_pushdef (context, mp->name, &token);
+    }
 }
 
 lt_dlhandle
@@ -146,22 +213,22 @@ m4_module_load (m4 *context, const char *name, struct obstack *obs)
 	}
       else if (info->ref_count == 1)
 	{
-	  const m4_builtin *bp	= m4_module_builtins (handle);
-	  const m4_macro   *mp	= m4_module_macros (handle);
+	  const m4_builtin *builtin_table	= m4_get_module_builtin_table (handle);
+	  const m4_macro   *macro_table	= m4_get_module_macro_table (handle);
 
 	  /* Install the macro functions.  */
-	  if (bp)
+	  if (builtin_table)
 	    {
-	      m4_builtin_table_install (context, handle, bp);
+	      m4_set_module_builtin_table (context, handle, builtin_table);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: builtins loaded", name);
 #endif /* DEBUG_MODULES */
 	    }
 
 	  /* Install the user macros. */
-	  if (mp)
+	  if (macro_table)
 	    {
-	      m4_macro_table_install (context, handle, mp);
+	      m4_set_module_macro_table (context, handle, macro_table);
 #ifdef DEBUG_MODULES
 	      M4_DEBUG_MESSAGE1("module %s: macros loaded", name);
 #endif /* DEBUG_MODULES */
@@ -182,7 +249,7 @@ m4_module_unload (m4 *context, const char *name, struct obstack *obs)
   /* Scan the list for the first module with a matching name.  */
   while ((handle = lt_dlhandle_next (handle)))
     {
-      if (name && (strcmp (name, m4_module_name (handle)) == 0))
+      if (name && (strcmp (name, m4_get_module_name (handle)) == 0))
 	break;
     }
 
@@ -284,8 +351,8 @@ m4__module_open (m4 *context, const char *name, struct obstack *obs)
 {
   lt_dlhandle		handle		= lt_dlopenext (name);
   m4_module_init_func  *init_func	= 0;
-  m4_builtin	       *bp		= 0;
-  m4_macro	       *mp		= 0;
+  m4_builtin	       *builtin_table		= 0;
+  m4_macro	       *macro_table		= 0;
 
   if (handle)
     {
@@ -295,10 +362,10 @@ m4__module_open (m4 *context, const char *name, struct obstack *obs)
 #endif
 
       /* Find the builtin table in the opened module. */
-      bp = (m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
+      builtin_table = (m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
 
       /* Find the macro table in the opened module. */
-      mp = (m4_macro *) lt_dlsym (handle, MACRO_SYMBOL);
+      macro_table = (m4_macro *) lt_dlsym (handle, MACRO_SYMBOL);
 
       /* Find and run any initialising function in the opened module,
 	 each time the module is opened.  */
@@ -320,7 +387,7 @@ m4__module_open (m4 *context, const char *name, struct obstack *obs)
 		name, module_dlerror ()));
     }
 
-  if (!bp && !mp && !init_func)
+  if (!builtin_table && !macro_table && !init_func)
     {
       /* Since we don't use it here, only check for the finish hook
 	 if we were about to diagnose a module with no entry points.  */
@@ -339,11 +406,11 @@ m4__module_open (m4 *context, const char *name, struct obstack *obs)
 
       if (info && (info->ref_count == 1))
 	{
-	  m4_module_data *data  = XMALLOC (m4_module_data, 1);
-	  m4_module_data *stale = 0;
+	  module_data *data	= XMALLOC (module_data, 1);
+	  module_data *stale	= 0;
 
-	  data->bp	= bp;
-	  data->mp	= mp;
+	  data->builtin_table	= builtin_table;
+	  data->macro_table	= macro_table;
 
 	  stale = lt_dlcaller_set_data (caller_id, handle, data);
 
@@ -380,7 +447,7 @@ m4__module_exit (m4 *context)
 	 data is required.  */
       if (info)
 	{
-	  m4_module_data *stale
+	  module_data *stale
 	    = lt_dlcaller_set_data (caller_id, handle, 0);
 	  XFREE (stale);
 	}
@@ -427,7 +494,7 @@ module_close (m4 *context, lt_dlhandle handle, struct obstack *obs)
   assert (handle);
 
   /* Be careful when closing myself.  */
-  name = m4_module_name (handle);
+  name = m4_get_module_name (handle);
   name = xstrdup (name ? name : MODULE_SELF_NAME);
 
   /* Run any finishing function for the opened module. */
@@ -450,7 +517,7 @@ module_close (m4 *context, lt_dlhandle handle, struct obstack *obs)
 	 time, be sure to release any client data memory.  */
       if (info && (info->ref_count == 1))
 	{
-	  m4_module_data *stale
+	  module_data *stale
 	    = lt_dlcaller_set_data (caller_id, handle, 0);
 	  XFREE (stale);
 	}
@@ -490,7 +557,7 @@ module_remove (m4 *context, lt_dlhandle handle, struct obstack *obs)
   /* Be careful when closing myself.  */
   if (handle)
     {
-      name = m4_module_name (handle);
+      name = m4_get_module_name (handle);
       name = xstrdup (name ? name : MODULE_SELF_NAME);
     }
 #endif /* DEBUG_MODULES */

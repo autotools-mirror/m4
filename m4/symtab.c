@@ -327,7 +327,7 @@ symtab_dump (void)
       m4_token	   *token	= SYMBOL_TOKEN (symbol);
       int	    flags	= token ? SYMBOL_FLAGS (symbol) : 0;
       lt_dlhandle   handle	= token ? SYMBOL_HANDLE (symbol) : 0;
-      const char   *module_name	= handle ? m4_module_name (handle) : "NONE";
+      const char   *module_name	= handle ? m4_get_module_name (handle) : "NONE";
       const m4_builtin *bp;
 
       fprintf (stderr, "%10s: (%d%s) %s=",
@@ -344,7 +344,7 @@ symtab_dump (void)
 	    break;
 
 	  case M4_TOKEN_FUNC:
-	    bp = m4_builtin_find_by_func (m4_module_builtins (handle),
+	    bp = m4_builtin_find_by_func (m4_get_module_builtin_table (handle),
 					SYMBOL_FUNC (symbol));
 	    fprintf (stderr, "<%s>",
 		     bp ? bp->name : "!ERROR!");

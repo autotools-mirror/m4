@@ -107,7 +107,7 @@ void
 produce_module_dump (FILE *file, lt_dlhandle handle)
 {
   lt_dlhandle pending = handle;
-  const char *name = m4_module_name (pending);
+  const char *name = m4_get_module_name (pending);
 
   handle = lt_dlhandle_next (handle);
   if (handle)
@@ -131,7 +131,7 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
       const char   *symbol_name	= (const char *) m4_hash_iterator_key (place);
       m4_symbol	   *symbol	= m4_hash_iterator_value (place);
       lt_dlhandle   handle	= SYMBOL_HANDLE (symbol);
-      const char   *module_name	= handle ? m4_module_name (handle) : NULL;
+      const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
       const m4_builtin *bp;
 
       switch (SYMBOL_TYPE (symbol))
@@ -153,7 +153,7 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 
 	case M4_TOKEN_FUNC:
 	  bp = m4_builtin_find_by_func
-	    	(m4_module_builtins (SYMBOL_HANDLE (symbol)),
+	    	(m4_get_module_builtin_table (SYMBOL_HANDLE (symbol)),
 		 SYMBOL_FUNC (symbol));
 
 	  if (bp == NULL)
@@ -459,12 +459,12 @@ reload_frozen_state (m4 *context, const char *name)
 	  if (number[2] > 0)
 	    {
 	      while ((handle = lt_dlhandle_next (handle)))
-		if (strcmp (m4_module_name (handle), string[2]) == 0)
+		if (strcmp (m4_get_module_name (handle), string[2]) == 0)
 		  break;
 
 	      if (handle)
 		{
-		  bt = m4_module_builtins (handle);
+		  bt = m4_get_module_builtin_table (handle);
 		}
 	    }
 
@@ -663,7 +663,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	  if (number[2] > 0)
 	    while ((handle = lt_dlhandle_next (handle)))
-	      if (strcmp (m4_module_name (handle), string[2]) == 0)
+	      if (strcmp (m4_get_module_name (handle), string[2]) == 0)
 		break;
 
 	  bzero (&token, sizeof (m4_token));

@@ -38,7 +38,7 @@ m4_builtin_find_by_name (const m4_builtin *bp, const char *name)
 
   while ((handle = lt_dlhandle_next (handle)))
     {
-      m4_builtin *builtin = m4_module_builtins (handle);
+      m4_builtin *builtin = m4_get_module_builtin_table (handle);
 
       if (builtin && (bp == NULL || bp == builtin))
 	{
@@ -58,7 +58,7 @@ m4_builtin_find_by_func (const m4_builtin *bp, m4_builtin_func *func)
 
   while ((handle = lt_dlhandle_next (handle)))
     {
-      m4_builtin *builtin = m4_module_builtins (handle);
+      m4_builtin *builtin = m4_get_module_builtin_table (handle);
 
       if (builtin && (bp == NULL || bp == builtin))
 	{
@@ -197,66 +197,4 @@ m4_arg_signature_parse (const char *name, const char *params)
 	     _("Warning: %s: unterminated parameter list"), name));
 
   return arg_signature;
-}
-
-void
-m4_builtin_table_install (m4 *context, lt_dlhandle handle,
-			  const m4_builtin *table)
-{
-  const m4_builtin *bp;
-  m4_token token;
-
-  assert (handle);
-  assert (table);
-
-  bzero (&token, sizeof (m4_token));
-  TOKEN_TYPE (&token)		= M4_TOKEN_FUNC;
-  TOKEN_HANDLE (&token)		= handle;
-
-  for (bp = table; bp->name != NULL; bp++)
-    {
-      int flags = 0;
-      char *name;
-
-      if (prefix_all_builtins)
-	{
-	  static const char prefix[] = "m4_";
-	  size_t len = strlen (prefix) + strlen (bp->name);
-
-	  name = (char *) xmalloc (1+ len);
-	  snprintf (name, 1+ len, "%s%s", prefix, bp->name);
-	}
-      else
-	name = (char *) bp->name;
-
-      if (bp->groks_macro_args) BIT_SET (flags, TOKEN_MACRO_ARGS_BIT);
-      if (bp->blind_if_no_args) BIT_SET (flags, TOKEN_BLIND_ARGS_BIT);
-
-      TOKEN_FUNC (&token)	= bp->func;
-      TOKEN_FLAGS (&token)	= flags;
-      TOKEN_MIN_ARGS (&token)	= bp->min_args;
-      TOKEN_MAX_ARGS (&token)	= bp->max_args;
-
-      m4_builtin_pushdef (context, name, &token);
-
-      if (prefix_all_builtins)
-	xfree (name);
-    }
-}
-
-void
-m4_macro_table_install (m4 *context, lt_dlhandle handle, const m4_macro *table)
-{
-  const m4_macro *mp;
-  m4_token token;
-
-  bzero (&token, sizeof (m4_token));
-  TOKEN_TYPE (&token)		= M4_TOKEN_TEXT;
-  TOKEN_HANDLE (&token)		= handle;
-
-  for (mp = table; mp->name != NULL; mp++)
-    {
-      TOKEN_TEXT (&token)	= (char *) mp->value;
-      m4_macro_pushdef (context, mp->name, &token);
-    }
 }

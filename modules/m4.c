@@ -130,7 +130,7 @@ M4INIT_HANDLER (m4)
       {
 	M4ERROR ((warning_status, 0,
 		  _("Warning: cannot make module `%s' resident: %s"),
-		  m4_module_name (handle), lt_dlerror ()));
+		  m4_get_module_name (handle), lt_dlerror ()));
       }
 }
 

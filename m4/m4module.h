@@ -31,7 +31,6 @@ BEGIN_C_DECLS
 /* Various declarations.  */
 
 typedef struct m4		m4;
-typedef struct m4_module_data	m4_module_data;
 typedef struct m4_symbol	m4_symbol;
 typedef struct m4_token		m4_token;
 typedef struct m4_hash		m4_symtab;
@@ -76,9 +75,9 @@ typedef void m4_module_finish_func (m4 *, lt_dlhandle, struct obstack*);
 extern lt_dlhandle  m4_module_load   (m4 *, const char*, struct obstack*);
 extern void	    m4_module_unload (m4 *, const char*, struct obstack*);
 
-extern const char  *m4_module_name     (lt_dlhandle);
-extern m4_builtin  *m4_module_builtins (lt_dlhandle);
-extern m4_macro	   *m4_module_macros   (lt_dlhandle);
+extern const char  *m4_get_module_name     (lt_dlhandle);
+extern m4_builtin  *m4_get_module_builtin_table (lt_dlhandle);
+extern m4_macro	   *m4_get_module_macro_table   (lt_dlhandle);
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
@@ -132,9 +131,9 @@ extern m4_symbol *m4_symbol_set_token (m4 *context, const char *name,
 			m4_symbol *(*getter) (m4_symtab *, const char *),
 			m4_symbol *(*setter) (m4_symbol *, m4_token *));
 
-extern void	  m4_macro_table_install   (m4 *context, lt_dlhandle handle,
+extern void	  m4_set_module_macro_table   (m4 *context, lt_dlhandle handle,
 					    const m4_macro *table);
-extern void	  m4_builtin_table_install (m4 *context, lt_dlhandle handle,
+extern void	  m4_set_module_builtin_table (m4 *context, lt_dlhandle handle,
 					    const m4_builtin *table);
 
 extern const m4_builtin *m4_builtin_find_by_name (
