@@ -1,3 +1,23 @@
+2004-09-23  Gary V. Vaughan  <gary@gnu.org>
+
+	* gnulib/*: Don't store any of the gnulib files in arch, as they
+	generate spurious changes.
+	* Makefile.am (ACLOCAL_AMFLAGS): Remove gnulib/acm4 since the
+	gnulib macros now share our macro directory.
+	(SUBDIRS): Descend into `gnu' rather than `gnulib'.
+	* bootstrap: Call gnulib-tool to import from the gnulib tree.
+	(gl_AC_HEADER_INT_TYPES_H, gl_AC_HEADER_STDINT_H,
+	gl_AC_TYPE_UINTMAX_T): Patch gnulib.m4 to define these in terms of
+	the gettext macros from autopoint that overwrite the gnulib-tool
+	imported versions.  Import sources and Makefile.am into the `gnu'
+	directory.  Changed all callers.
+	* configure.ac (gl_EARLY, gl_SOURCE_BASE, gl_M4_BASE, gl_MODULES,
+	gl_INIT): Call these gnulib-tool macros instead of the hardcoded
+	for imported modules.
+	* acm4/m4-error.m4, acm4/m4-gettext.m4, acm4/m4-obstack.m4,
+	acm4/m4-regex.m4: Use AC_BEFORE to enforce ordering rather than
+	hardcoding the gnulib macros they wrap.
+
 2004-07-15  Gary V. Vaughan  <gary@gnu.org>
 
 	Latest CVS libtool can preload modules in libraries, including

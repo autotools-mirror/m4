@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright (C) 2000, 2001, 2003 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ ETAGS_ARGS = --regex='/M4BUILTIN_HANDLER[ \t]*(\([^)]*\)/\1/'
 EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 
 AM_CPPFLAGS	= -I$(top_builddir) -I$(top_srcdir) \
-		  -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib \
+		  -I$(top_builddir)/gnu -I$(top_srcdir)/gnu \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
 AM_LDFLAGS 	= -no-undefined -module
 LIBS		= $(top_builddir)/m4/libm4.la

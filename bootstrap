@@ -6,6 +6,7 @@
 : ${AWK="awk"}
 : ${SED="sed"}
 : ${RM="rm -f"}
+: ${GNULIB_TOOL="gnulib-tool"}
 
 ltdldir=libltdl
 
@@ -29,6 +30,16 @@ func_echo ()
     echo $progname: ${1+"$@"}
 }
 
+func_echo "running: ${GNULIB_TOOL} --import"
+${GNULIB_TOOL} --import
+mv acm4/regex.m4 acm4/regex-m4.old
+sed 's,lib/regex.c,gnu/regex.c,g' acm4/regex-m4.old > acm4/regex.m4 && \
+  $RM acm4/regex-m4.old
+cat >> acm4/gnulib.m4 <<EOF
+AC_DEFUN([gl_AC_HEADER_INTTYPES_H], [jm_AC_HEADER_INTTYPES_H])
+AC_DEFUN([gl_AC_HEADER_STDINT_H], [jm_AC_HEADER_STDINT_H])
+AC_DEFUN([gl_AC_TYPE_UINTMAX_T], [jm_AC_TYPE_UINTMAX_T])
+EOF
 
 $RM -r "$ltdldir"
 func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --quiet --copy"

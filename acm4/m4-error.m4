@@ -1,7 +1,8 @@
 #                                                            -*- Autoconf -*-
 # m4-error.m4 -- Use the installed version of error.h if available.
+# Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2003 Free Software Foundation, Inc
+# Copyright (C) 2003, 2004 Free Software Foundation, Inc
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +19,13 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-# Written by Gary V. Vaughan <gary@gnu.org>
-
-# serial 1
+# serial 2
 
 # m4_ERROR
 # --------
 # Use the installed version of error.h if available.
 AC_DEFUN([m4_ERROR],
-[AC_REQUIRE([gl_ERROR])
+[AC_BEFORE([gl_ERROR], [m4_ERROR])
 
 AC_CHECK_HEADERS([error.h],
     [ERROR_H=""], [ERROR_H="error.h"], [AC_INCLUDES_DEFAULT])

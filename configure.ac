@@ -97,14 +97,7 @@ AM_INIT_AUTOMAKE([1.7g dist-bzip2])
 ## ------------------ ##
 AC_PROG_CC
 
-gl_USE_SYSTEM_EXTENSIONS
-dnl ((( gnulib module extensions
-dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
-dnl ))) gnulib module extensions
-dnl ((( gnulib module unlocked-io
-gl_FUNC_GLIBC_UNLOCKED_IO
-dnl ))) gnulib module unlocked-io
-
+gl_EARLY
 AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
@@ -114,7 +107,7 @@ m4_CHECK_DEBUGGING
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
   *-pipe* ) ;;
-        * ) AC_LIBTOOL_COMPILER_OPTION([if $compiler supports -pipe],
+        * ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
                 [m4_cv_prog_compiler_pipe],
                 [-pipe -c conftest.$ac_ext], [],
                 [CFLAGS="$CFLAGS -pipe"])
@@ -136,32 +129,24 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
-dnl <-- override gnulib module gettext
 AM_GNU_GETTEXT(external, need-ngettext)
 AM_GNU_GETTEXT_VERSION(0.14.1)
 m4_GNU_GETTEXT
-dnl --> override gnulib module gettext
 
 
 
 ## --------------- ##
 ## Gnulib support, ##
 ## --------------- ##
-m4_GNULIB_MODULES(
-[error
-exit
-free
-getopt
-gettext
-obstack
-progname
-regex
-stdbool
-strtol
-version-etc
-xalloc
-xstrndup
-])
+gl_SOURCE_BASE(gnu)
+gl_M4_BASE(acm4)
+gl_MODULES(error exit free getopt gettext obstack progname regex stdbool strtol version-etc xalloc xalloc-die xstrndup)
+gl_INIT
+
+# Gnulib doesn't always do things quite the way M4 would like...
+m4_ERROR
+m4_OBSTACK
+m4_REGEX
 
 
 ## ------------------------ ##
@@ -188,9 +173,6 @@ AC_CHECK_SIZEOF([long long int])
 ## C headers required by M4. ##
 ## ------------------------- ##
 AC_HEADER_STDC
-dnl ((( gnulib module stdbool
-AM_STDBOOL_H
-dnl ))) gnulib module stdbool
 AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 
 if test $ac_cv_header_stdbool_h = yes; then
@@ -211,58 +193,6 @@ AC_FUNC_VPRINTF
 
 AM_WITH_DMALLOC
 
-dnl ((( gnulib module alloca
-gl_FUNC_ALLOCA
-dnl ))) gnulib module alloca
-dnl <-- override gnulib module error
-m4_ERROR
-dnl --> override gnulib module error
-dnl ((( gnulib module exit
-dnl ))) gnulib module exit
-dnl ((( gnulib module exitfail
-gl_EXITFAIL
-dnl ))) gnulib module exitfail
-dnl ((( gnulib module free
-gl_FUNC_FREE
-dnl ))) gnulib module free
-dnl ((( gnulib module getopt
-gl_GETOPT
-dnl ))) gnulib module getopt
-dnl ((( gnulib module malloc
-jm_FUNC_MALLOC
-dnl ))) gnulib module malloc
-dnl <-- override gnulib module obstack
-m4_OBSTACK
-dnl --> override gnulib module obstack
-dnl ((( gnulib module progname
-dnl ))) gnulib module progname
-dnl ((( gnulib module realloc
-jm_FUNC_REALLOC
-dnl ))) gnulib module realloc
-dnl <-- override gnulib module regex
-m4_REGEX([gnulib/m4/regex.c])
-dnl <-- override gnulib module regex
-dnl ((( gnulib module restrict
-gl_C_RESTRICT
-dnl ))) gnulib module restrict
-dnl ((( gnulib module strndup
-gl_FUNC_STRNDUP
-dnl ))) gnulib module strndup
-dnl ((( gnulib module strnlen
-gl_FUNC_STRNLEN
-dnl ))) gnulib module strnlen
-dnl ((( gnulib module strtol
-gl_FUNC_STRTOL
-dnl ))) gnulib module strtol
-dnl ((( gnulib module version-etc
-dnl ))) gnulib module version-etc
-dnl ((( gnulib module xalloc
-gl_XALLOC
-dnl ))) gnulib module xalloc
-dnl ((( gnulib module xstrndup
-gl_XSTRNDUP
-dnl ))) gnulib module xstrndup
-
 m4_SYS_STACKOVF
 
 # This is for the modules
@@ -282,8 +212,7 @@ AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 AC_CONFIG_FILES([Makefile
 		doc/Makefile
 		examples/Makefile
-		gnulib/Makefile
-		gnulib/m4/Makefile
+		gnu/Makefile
 		m4/Makefile
 		m4/system.h:m4/system_.h
 		modules/Makefile
