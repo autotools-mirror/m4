@@ -18,9 +18,9 @@
 
 info_TEXINFOS = m4.texinfo
 
-man_MANS = m4.1
+dist_man_MANS = m4.1
 
-EXTRA_DIST = helptoman.pl # $(MANS)
+EXTRA_DIST = helptoman.pl
 
 # Automake 1.4 does not support TAGS_FILES directly.
 TAGS_FILES = $(info_TEXINFOS)

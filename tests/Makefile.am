@@ -20,7 +20,7 @@
 #  Ty Coon, President of Vice
 
 EXTRA_DIST = generate.awk atlocal.in \
-	$(OTHER_FILES) $(TESTSUITE_SOURCES) $(TESTSUITE)
+	$(OTHER_FILES) $(TESTSUITE_AT) $(TESTSUITE)
 
 MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 
@@ -28,7 +28,7 @@ OTHER_FILES = \
 	iso8859.m4 incl.m4 foo \
 	stackovf.test
 
-TESTSUITE_SOURCES = testsuite.at others.at generated.at
+TESTSUITE_AT = testsuite.at others.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
@@ -42,8 +42,11 @@ $(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.
 AUTOM4TE = autom4te
-AUTOTEST = $(AUTOM4TE) -I /usr/local/share/autoconf autotest/general.m4
-$(srcdir)/$(TESTSUITE): $(TESTSUITE_SOURCES)
+AUTOTEST = $(AUTOM4TE) -I /usr/local/share/autoconf autotest/autotest.m4
+$(srcdir)/$(TESTSUITE): $(TESTSUITE_AT)
 	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@.tmp
 	chmod +x $@.tmp
 	mv $@.tmp $@
+
+# Junk created by the testsuite.
+CLEANFILES = at-* atconfig atlocal frozen.m4f testsuite.log

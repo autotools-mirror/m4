@@ -21,18 +21,52 @@
 
 MAINTAINERCLEANFILES =				\
 Makefile.in					\
+ltmain.sh					\
+texinfo.tex					\
+$(STANDARD_MACROS)				\
+$(STANDARD_TOOLS)
+
+STANDARD_MACROS =				\
+auxdir.m4					\
+ccstdc.m4					\
+codeset.m4					\
+cond.m4						\
+depend.m4					\
+depout.m4					\
+dmalloc.m4					\
+gettext.m4					\
+glibc21.m4					\
+header.m4					\
+iconv.m4					\
+init.m4						\
+install-sh.m4					\
+isc-posix.m4					\
+lcmessage.m4					\
+make.m4						\
+missing.m4					\
+progtest.m4					\
+protos.m4					\
+sanity.m4					\
+strip.m4
+
+STANDARD_TOOLS =				\
+compile						\
 config.guess					\
 config.sub					\
+depcomp						\
 install-sh					\
-ltmain.sh					\
 mdate-sh					\
 missing						\
-mkinstalldirs					\
-texinfo.tex
+mkinstalldirs
 
-EXTRA_DIST = 					\
-atconfig.m4					\
+SPECIFIC_MACROS =				\
 debug.m4					\
+error.m4					\
 gmp.m4						\
 gnu-obstack.m4					\
 stackovf.m4
+
+list-standard-macros:
+	@echo $(STANDARD_MACROS)
+
+EXTRA_DIST = $(SPECIFIC_MACROS) $(STANDARD_MACROS)

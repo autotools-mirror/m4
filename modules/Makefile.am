@@ -18,6 +18,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
+DISTCLEANFILES = perlxsi.c
 MAINTAINERCLEANFILES = Makefile.in
 
 testsubdir = testSubDir
@@ -69,9 +70,6 @@ stdlib_la_LDFLAGS = -module
 time_la_SOURCES = time.c
 time_la_LDFLAGS = -module
 
+BUILT_SOURCES = perlxsi.c
 perlxsi.c:
 	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c
-
-perl.lo: perl.c perlxsi.c
-	@echo '$(LTCOMPILE) $(perl_la_CFLAGS) -c $<'; \
-	$(LTCOMPILE) $(perl_la_CFLAGS) -c $<

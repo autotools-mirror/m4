@@ -615,7 +615,7 @@ AT_CHECK_M4([-m load -F frozen.m4f frozen.m4], 0,
 AT_CHECK_M4([-R frozen.m4f unfrozen.m4], 0,
             [expout], [experr])
 
-AT_CLEANUP
+AT_CLEANUP([frozen.m4f])
 
 
 

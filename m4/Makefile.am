@@ -18,6 +18,7 @@
 ## Boston, MA 02111-1307, USA.
 
 CLEANFILES		= pathconf.h
+DISTCLEANFILES		= obstack.h
 MAINTAINERCLEANFILES	= Makefile.in
 
 MODULE_PATH		= $(pkglibexecdir)

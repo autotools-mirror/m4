@@ -18,6 +18,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
+# We need a recent Autotest.
+m4_version_prereq([2.52c])
+
 # AT_CHECK_M4(FLAGS, [EXIT-STATUS = 0], STDOUT, STDERR)
 # -----------------------------------------------------
 # Hide the impact of libtool on program_invocation_name, and hide

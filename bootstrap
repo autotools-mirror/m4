@@ -7,7 +7,26 @@ auxdir=`grep '^AC_CONFIG_AUX_DIR' configure.in | sed 's/^.*(\([^)]*\)).*$/\1/'`
 
 rm -f config.cache
 
-aclocal -I ./$auxdir  || exit 1
+# Make a copy of each Automake/Gettext m4 file we need.
+aclocal_libdir=`aclocal --print-ac-dir`
+for i in `make -f config/Makefile.am list-standard-macros`
+do
+  cp $aclocal_libdir/$i config ||
+    echo "$0: cannot find $i" >&2
+done
+
+# Automake understands nothing to our aclocal and misses all its
+# AC_SUBST...
+(
+  set -e
+  sed -n '1,/# Help Automake understand includes./p' aclocal.m4
+  echo "# It doesn't see AC_SUBSTs."
+  autoconf -t AC_SUBST:'AC_SUBST([$1])' | sort -u
+  echo "# It doesn't see AM_CONDITIONALs."
+  autoconf -t AM_CONDITIONAL:'AM_CONDITIONAL([$1])' | sort -u
+) >aclocal.m4t
+mv aclocal.m4t aclocal.m4
+
 # shtoolize -q -I ./$auxdir echo move install mkdir version || exit 1
 # libtoolize -f -c || exit 1
 # gettextize -f -c  || exit 1

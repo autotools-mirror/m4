@@ -16,14 +16,19 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 # 02111-1307  USA
 
-AC_PREREQ(2.52)
+# We need a modern Autotest.
+AC_PREREQ([2.52c])
 m4_pattern_allow([^m4_cv_])
+
+# We use some of Jim's macros.
+m4_pattern_forbid([^jm_])
+m4_pattern_allow([^jm_cv_])
 
 AC_INIT([GNU M4], [1.4q], [bug-m4@gnu.org])
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h:config-h.in)
-AT_CONFIG(tests)
+AC_CONFIG_TESTDIR(tests)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_TARNAME, AC_PACKAGE_VERSION)
 

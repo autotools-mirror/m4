@@ -74,5 +74,3 @@ pkgdata_DATA = \
 	undivert.incl \
 	undivert.m4 \
 	wrap.m4
-
-all:

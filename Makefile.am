@@ -19,13 +19,14 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-AUTOMAKE_OPTIONS = 1.4
+AUTOMAKE_OPTIONS = 1.5
 
 EXTRA_DIST	= bootstrap
 
 auxdir		= $(top_srcdir)/$(ac_aux_dir)
 
-ACLOCAL_AMFLAGS	= -I $(auxdir)
+## There is currently no means with Automake not to run aclocal.
+ACLOCAL_AMFLAGS = --version >/dev/null && touch aclocal.m4
 
 SUBDIRS			= intl po config m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
