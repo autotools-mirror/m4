@@ -1,3 +1,10 @@
+2002-05-29  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap (aclocal_apiversion): The aclocal apiversion is
+	distinct from the automake release number (in that the apiversion
+	apparently has no micro-version-component).
+	(aclocal_apilibdir): Use it.
+
 2002-05-28  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/hash.c (m4_hash_resize): New function.

@@ -15,7 +15,8 @@ trap 'rm -f aclocal.m4t' 0 1 9 15
 # Make a copy of each Automake/Gettext m4 file we need.
 aclocal_libdir=`aclocal --print-ac-dir`
 aclocal_version=`aclocal --version | sed 's/^.* //;q'`
-aclocal_apilibdir=$aclocal_libdir-$aclocal_version
+aclocal_apiversion=`echo $aclocal_version | sed 's/\([0-9]*\.[0-9]*\).*$/\1/'`
+aclocal_apilibdir=$aclocal_libdir-$aclocal_apiversion
 for i in `make -f config/Makefile.am spy SPIED=ACLOCAL_MACROS`
 do
   cp $aclocal_apilibdir/$i config 2>/dev/null ||
