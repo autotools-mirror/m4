@@ -72,21 +72,21 @@ int errno;
 
 		function	macros	blind argmin  argmax */
 #define builtin_functions			\
-	BUILTIN(__file__,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN(__line__,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN(builtin,	FALSE,	TRUE,	2,	-1 )	\
-	BUILTIN(changesyntax,	FALSE,	TRUE,	1,	-1 )	\
-	BUILTIN(debugmode,	FALSE,	FALSE,	1,	2  )	\
-	BUILTIN(debugfile,	FALSE,	FALSE,	1,	2  )	\
-	BUILTIN(eregexp,	FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(epatsubst,	FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(esyscmd,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(format,		FALSE,	TRUE,	2,	-1 )	\
-	BUILTIN(indir,		FALSE,	TRUE,	2,	-1 )	\
-	BUILTIN(patsubst,	FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(regexp,		FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(symbols,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(syncoutput,	FALSE,  TRUE,	2,	2  )	\
+	BUILTIN(__file__,	false,	false,	1,	1  )	\
+	BUILTIN(__line__,	false,	false,	1,	1  )	\
+	BUILTIN(builtin,	false,	true,	2,	-1 )	\
+	BUILTIN(changesyntax,	false,	true,	1,	-1 )	\
+	BUILTIN(debugmode,	false,	false,	1,	2  )	\
+	BUILTIN(debugfile,	false,	false,	1,	2  )	\
+	BUILTIN(eregexp,	false,	true,	3,	4  )	\
+	BUILTIN(epatsubst,	false,	true,	3,	4  )	\
+	BUILTIN(esyscmd,	false,	true,	2,	2  )	\
+	BUILTIN(format,		false,	true,	2,	-1 )	\
+	BUILTIN(indir,		false,	true,	2,	-1 )	\
+	BUILTIN(patsubst,	false,	true,	3,	4  )	\
+	BUILTIN(regexp,		false,	true,	3,	4  )	\
+	BUILTIN(symbols,	false,	false,	0,	-1 )	\
+	BUILTIN(syncoutput,	false,  true,	2,	2  )	\
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -103,7 +103,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 
@@ -275,12 +275,12 @@ m4_regexp_compile (m4 *context, const char *caller,
 		   const char *regexp, int syntax)
 {
   static struct re_pattern_buffer buf;	/* compiled regular expression */
-  static boolean buf_initialized = FALSE;
+  static bool buf_initialized = false;
   const char *msg;		/* error message from re_compile_pattern */
 
   if (!buf_initialized)
     {
-      buf_initialized = TRUE;
+      buf_initialized = true;
       buf.buffer = NULL;
       buf.allocated = 0;
       buf.fastmap = NULL;
@@ -470,11 +470,11 @@ M4BUILTIN_HANDLER (symbols)
 
       obstack_init (&data_obs);
       data.obs = &data_obs;
-      m4_dump_symbols (context, &data, argc, argv, FALSE);
+      m4_dump_symbols (context, &data, argc, argv, false);
 
       for (; data.size > 0; --data.size, data.base++)
 	{
-	  m4_shipout_string (context, obs, data.base[0], 0, TRUE);
+	  m4_shipout_string (context, obs, data.base[0], 0, true);
 	  if (data.size > 1)
 	    obstack_1grow (obs, ',');
 	}
@@ -498,11 +498,11 @@ M4BUILTIN_HANDLER (syncoutput)
       if (   M4ARG (1)[0] == '0'
 	  || M4ARG (1)[0] == 'n'
 	  || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
-	m4_set_sync_output_opt (context, FALSE);
+	m4_set_sync_output_opt (context, false);
       else if (   M4ARG (1)[0] == '1'
 	       || M4ARG (1)[0] == 'y'
 	       || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
-	m4_set_sync_output_opt (context, TRUE);
+	m4_set_sync_output_opt (context, true);
     }
 }
 
@@ -555,7 +555,7 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (__file__)
 {
-  m4_shipout_string (context, obs, m4_current_file, 0, TRUE);
+  m4_shipout_string (context, obs, m4_current_file, 0, true);
 }
 
 

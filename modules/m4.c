@@ -59,38 +59,38 @@ extern int errno;
 
 		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN(changecom,	FALSE,	FALSE,	1,	3  )	\
-	BUILTIN(changequote,	FALSE,	FALSE,	1,	3  )	\
-	BUILTIN(decr,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(define,		TRUE,	TRUE,	2,	3  )	\
-	BUILTIN(defn,		FALSE,	TRUE,	0,	-1 )	\
-	BUILTIN(divert,		FALSE,	FALSE,	1,	2  )	\
-	BUILTIN(divnum,		FALSE,	FALSE,	1,	1  )	\
-	BUILTIN(dnl,		FALSE,	FALSE,	1,	1  )	\
-	BUILTIN(dumpdef,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(errprint,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(eval,		FALSE,	TRUE,	2,	4  )	\
-	BUILTIN(ifdef,		FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(ifelse,		FALSE,	TRUE,	-1,	-1 )	\
-	BUILTIN(include,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(incr,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(index,		FALSE,	TRUE,	3,	3  )	\
-	BUILTIN(len,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(m4exit,		FALSE,	FALSE,	1,	2  )	\
-	BUILTIN(m4wrap,		FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(maketemp,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(popdef,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(pushdef,	TRUE,	TRUE,	2,	3  )	\
-	BUILTIN(shift,		FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(sinclude,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(substr,		FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(syscmd,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(sysval,		FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(traceoff,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(traceon,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN(translit,	FALSE,	TRUE,	3,	4  )	\
-	BUILTIN(undefine,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(undivert,	FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN(changecom,	false,	false,	1,	3  )	\
+	BUILTIN(changequote,	false,	false,	1,	3  )	\
+	BUILTIN(decr,		false,	true,	2,	2  )	\
+	BUILTIN(define,		true,	true,	2,	3  )	\
+	BUILTIN(defn,		false,	true,	0,	-1 )	\
+	BUILTIN(divert,		false,	false,	1,	2  )	\
+	BUILTIN(divnum,		false,	false,	1,	1  )	\
+	BUILTIN(dnl,		false,	false,	1,	1  )	\
+	BUILTIN(dumpdef,	false,	false,	0,	-1 )	\
+	BUILTIN(errprint,	false,	false,	0,	-1 )	\
+	BUILTIN(eval,		false,	true,	2,	4  )	\
+	BUILTIN(ifdef,		false,	true,	3,	4  )	\
+	BUILTIN(ifelse,		false,	true,	-1,	-1 )	\
+	BUILTIN(include,	false,	true,	2,	2  )	\
+	BUILTIN(incr,		false,	true,	2,	2  )	\
+	BUILTIN(index,		false,	true,	3,	3  )	\
+	BUILTIN(len,		false,	true,	2,	2  )	\
+	BUILTIN(m4exit,		false,	false,	1,	2  )	\
+	BUILTIN(m4wrap,		false,	false,	0,	-1 )	\
+	BUILTIN(maketemp,	false,	true,	2,	2  )	\
+	BUILTIN(popdef,		false,	true,	2,	2  )	\
+	BUILTIN(pushdef,	true,	true,	2,	3  )	\
+	BUILTIN(shift,		false,	false,	0,	-1 )	\
+	BUILTIN(sinclude,	false,	true,	2,	2  )	\
+	BUILTIN(substr,		false,	true,	3,	4  )	\
+	BUILTIN(syscmd,		false,	true,	2,	2  )	\
+	BUILTIN(sysval,		false,	false,	0,	-1 )	\
+	BUILTIN(traceoff,	false,	false,	0,	-1 )	\
+	BUILTIN(traceon,	false,	false,	0,	-1 )	\
+	BUILTIN(translit,	false,	true,	3,	4  )	\
+	BUILTIN(undefine,	false,	true,	2,	2  )	\
+	BUILTIN(undivert,	false,	false,	0,	-1 )	\
 
 
 #if defined(SIZEOF_LONG_LONG_INT) && SIZEOF_LONG_LONG_INT > 0
@@ -103,7 +103,7 @@ typedef unsigned long int unumber;
 #endif
 
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
-				 boolean silent);
+				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	set_trace_CB	(m4_symbol_table *symtab, const char *ignored,
 				 m4_symbol *symbol, void *userdata);
@@ -128,7 +128,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 
@@ -310,7 +310,7 @@ dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
    symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
-		 m4_symbol_value **argv, boolean complain)
+		 m4_symbol_value **argv, bool complain)
 {
   data->base = (const char **) obstack_base (data->obs);
   data->size = 0;
@@ -352,7 +352,7 @@ M4BUILTIN_HANDLER (dumpdef)
   const m4_builtin *bp;
 
   data.obs = obs;
-  m4_dump_symbols (context, &data, argc, argv, TRUE);
+  m4_dump_symbols (context, &data, argc, argv, true);
 
   for (; data.size > 0; --data.size, data.base++)
     {
@@ -401,7 +401,7 @@ M4BUILTIN_HANDLER (defn)
 		 _("Warning: %s: undefined name: %s"),
 		 m4_get_symbol_value_text (argv[0]), name));
       else if (m4_is_symbol_text (symbol))
-	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, TRUE);
+	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (m4_get_symbol_value (symbol));
       else
@@ -535,7 +535,7 @@ M4BUILTIN_HANDLER (dnl)
    output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
-  m4_dump_args (context, obs, argc - 1, argv + 1, ",", TRUE);
+  m4_dump_args (context, obs, argc - 1, argv + 1, ",", true);
 }
 
 /* Change the current quotes.  The function set_quotes () lives in input.c.  */
@@ -562,9 +562,9 @@ M4BUILTIN_HANDLER (changecom)
    the input is scanned before being copied to the output.  */
 
 /* Generic include function.  Include the file given by the first argument,
-   if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
+   if it exists.  Complain about inaccesible files iff SILENT is false.  */
 static void
-include (m4 *context, int argc, m4_symbol_value **argv, boolean silent)
+include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
 {
   FILE *fp;
   char *name = NULL;
@@ -585,13 +585,13 @@ include (m4 *context, int argc, m4_symbol_value **argv, boolean silent)
 /* Include a file, complaining in case of errors.  */
 M4BUILTIN_HANDLER (include)
 {
-  include (context, argc, argv, FALSE);
+  include (context, argc, argv, false);
 }
 
 /* Include a file, ignoring errors.  */
 M4BUILTIN_HANDLER (sinclude)
 {
-  include (context, argc, argv, TRUE);
+  include (context, argc, argv, true);
 }
 
 
@@ -601,13 +601,13 @@ M4BUILTIN_HANDLER (sinclude)
 M4BUILTIN_HANDLER (maketemp)
 {
   mktemp (M4ARG (1));
-  m4_shipout_string (context, obs, M4ARG (1), 0, FALSE);
+  m4_shipout_string (context, obs, M4ARG (1), 0, false);
 }
 
 /* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
-  m4_dump_args (context, obs, argc, argv, " ", FALSE);
+  m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   fputs ((char *) obstack_finish (obs), stderr);
   fflush (stderr);
@@ -639,9 +639,9 @@ M4BUILTIN_HANDLER (m4exit)
 M4BUILTIN_HANDLER (m4wrap)
 {
   if (m4_get_no_gnu_extensions_opt (context))
-    m4_shipout_string (context, obs, M4ARG (1), 0, FALSE);
+    m4_shipout_string (context, obs, M4ARG (1), 0, false);
   else
-    m4_dump_args (context, obs, argc, argv, " ", FALSE);
+    m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   m4_push_wrapup (obstack_finish (obs));
 }
@@ -657,7 +657,7 @@ static void *
 set_trace_CB (m4_symbol_table *hash, const char *ignored, m4_symbol *symbol,
 	   void *userdata)
 {
-  m4_set_symbol_traced (symbol, (boolean) (userdata != NULL));
+  m4_set_symbol_traced (symbol, (bool) (userdata != NULL));
   return NULL;
 }
 
@@ -908,7 +908,7 @@ ntoa (number value, int radix)
   /* Digits for number to ascii conversions.  */
   static char const ntoa_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-  boolean negative;
+  bool negative;
   unumber uvalue;
   static char str[256];
   char *s = &str[sizeof str];
@@ -917,12 +917,12 @@ ntoa (number value, int radix)
 
   if (value < 0)
     {
-      negative = TRUE;
+      negative = true;
       uvalue = (unumber) -value;
     }
   else
     {
-      negative = FALSE;
+      negative = false;
       uvalue = (unumber) value;
     }
 

@@ -19,7 +19,7 @@
 ## -------------------------- ##
 ## We need a modern Autotest. ##
 ## -------------------------- ##
-AC_PREREQ([2.54])
+AC_PREREQ([2.55])
 
 
 
@@ -157,9 +157,16 @@ AC_PROG_AWK
 ## ------------------------- ##
 ## C headers required by M4. ##
 ## ------------------------- ##
-AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 AC_HEADER_STDC
+AC_HEADER_STDBOOL
+AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 
+if test $ac_cv_header_stdbool_h = yes; then
+  INCLUDE_STDBOOL_H='#include <stdbool.h>'
+else
+  INCLUDE_STDBOOL_H='typedef enum {false = 0, true = 1} bool'
+fi
+AC_SUBST([INCLUDE_STDBOOL_H])
 
 
 ## --------------------------- ##

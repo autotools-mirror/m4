@@ -33,7 +33,7 @@ static void    expand_macro      (m4 *context, const char *name,
 				  m4_symbol *symbol);
 static void    expand_token      (m4 *context, m4_obstack *obs,
 				  m4__token_type type, m4_symbol_value *token);
-static boolean expand_argument   (m4 *context, m4_obstack *obs,
+static bool expand_argument   (m4 *context, m4_obstack *obs,
 				  m4_symbol_value *argp);
 
 static void    process_macro	 (m4 *context, m4_symbol *symbol,
@@ -132,7 +132,7 @@ expand_token (m4 *context, m4_obstack *obs,
    parentheses.  It returns a flag indicating whether the argument read is
    the last for the active macro call.  The arguments are built on the
    obstack OBS, indirectly through expand_token ().	 */
-static boolean
+static bool
 expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
@@ -170,7 +170,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 		{
 		  m4_set_symbol_value_text (argp, text);
 		}
-	      return (boolean) (m4_has_syntax (M4SYNTAX, *m4_get_symbol_value_text (&token), M4_SYNTAX_COMMA));
+	      return (bool) (m4_has_syntax (M4SYNTAX, *m4_get_symbol_value_text (&token), M4_SYNTAX_COMMA));
 	    }
 
 	  if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_OPEN))
@@ -223,7 +223,7 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   int argc;
   m4_obstack *expansion;
   const char *expanded;
-  boolean traced;
+  bool traced;
   int my_call_id;
 
   expansion_level++;
@@ -235,7 +235,7 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (boolean) (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
+  traced = (bool) (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
 		      || m4_get_symbol_traced (symbol));
 
   obstack_init (&argptr);
@@ -277,8 +277,8 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
   int ch;			/* lookahead for ( */
   m4_symbol_value token;
   m4_symbol_value *tokenp;
-  boolean more_args;
-  boolean groks_macro_args;
+  bool more_args;
+  bool groks_macro_args;
 
   groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
@@ -372,7 +372,7 @@ process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 	      text = endp;
 	    }
 	  if (i < argc)
-	    m4_shipout_string (context, obs, M4ARG (i), 0, FALSE);
+	    m4_shipout_string (context, obs, M4ARG (i), 0, false);
 	  break;
 
 	case '#':		/* number of arguments */
@@ -413,7 +413,7 @@ process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 		      i = SYMBOL_ARG_INDEX (*arg);
 
 		      if (i < argc)
-			m4_shipout_string (context, obs, M4ARG (i), 0, FALSE);
+			m4_shipout_string (context, obs, M4ARG (i), 0, false);
 		      else
 			M4ERROR ((EXIT_FAILURE, 0, "\
 INTERNAL ERROR: %s: out of range reference `%d' from argument %s",
@@ -462,7 +462,7 @@ trace_format (m4 *context, const char *fmt, ...)
 
   va_start (args, fmt);
 
-  while (TRUE)
+  while (true)
     {
       while ((ch = *fmt++) != '\0' && ch != '%')
 	obstack_1grow (&context->trace_messages, ch);

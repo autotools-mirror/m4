@@ -116,7 +116,7 @@ struct input_block
 	  int lineno;		/* current line number for do */
 	  /* Yet another attack of "The curse of global variables" (sigh) */
 	  int out_lineno;	/* current output line number do */
-	  boolean advance_line;	/* start_of_input_line from next_char () */
+	  bool advance_line;	/* start_of_input_line from next_char () */
 	}
       u_f;
       struct
@@ -126,8 +126,8 @@ struct input_block
 	  int flags;		  /* flags associated with the builtin. */
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  int min_args, max_args; /* argv maxima and minima for the builtin. */
-	  boolean traced;	  /* TRUE iff builtin is traced. */
-	  boolean read;		  /* TRUE iff block has been read. */
+	  bool traced;	  /* true iff builtin is traced. */
+	  bool read;		  /* true iff block has been read. */
 	}
       u_b;
     }
@@ -168,7 +168,7 @@ static input_block *wsp;
 static input_block *next;
 
 /* Flag for next_char () to increment m4_current_line.  */
-static boolean start_of_input_line;
+static bool start_of_input_line;
 
 
 
@@ -202,7 +202,7 @@ file_read (void)
 
   if (start_of_input_line)
     {
-      start_of_input_line = FALSE;
+      start_of_input_line = false;
       m4_current_line++;
     }
 
@@ -211,7 +211,7 @@ file_read (void)
     return CHAR_RETRY;
 
   if (ch == '\n')
-    start_of_input_line = TRUE;
+    start_of_input_line = true;
   return ch;
 }
 
@@ -221,7 +221,7 @@ file_unget (ch)
 {
   ungetc (ch, isp->u.u_f.file);
   if (ch == '\n')
-    start_of_input_line = FALSE;
+    start_of_input_line = false;
 }
 
 static void
@@ -282,7 +282,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title)
 static int
 builtin_peek (void)
 {
-  if (isp->u.u_b.read == TRUE)
+  if (isp->u.u_b.read == true)
     return CHAR_RETRY;
 
   return CHAR_BUILTIN;
@@ -291,10 +291,10 @@ builtin_peek (void)
 static int
 builtin_read (void)
 {
-  if (isp->u.u_b.read == TRUE)
+  if (isp->u.u_b.read == true)
     return CHAR_RETRY;
 
-  isp->u.u_b.read = TRUE;
+  isp->u.u_b.read = true;
   return CHAR_BUILTIN;
 }
 
@@ -326,7 +326,7 @@ m4_push_builtin (m4_symbol_value *token)
   i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
   i->u.u_b.max_args	= VALUE_MAX_ARGS (token);
   i->u.u_b.flags	= VALUE_FLAGS (token);
-  i->u.u_b.read		= FALSE;
+  i->u.u_b.read		= false;
 
   i->prev = isp;
   isp = i;
@@ -498,18 +498,18 @@ pop_input (m4 *context)
 
 /* To switch input over to the wrapup stack, main () calls pop_wrapup
    Since wrapup text can install new wrapup text, pop_wrapup () returns
-   FALSE when there is no wrapup text on the stack, and TRUE otherwise.  */
-boolean
+   false when there is no wrapup text on the stack, and true otherwise.  */
+bool
 m4_pop_wrapup (void)
 {
   if (wsp == NULL)
-    return FALSE;
+    return false;
 
   current_input = &wrapup_stack;
   isp = wsp;
   wsp = NULL;
 
-  return TRUE;
+  return true;
 }
 
 /* When a BUILTIN token is seen, m4__next_token () uses init_builtin_token
@@ -696,7 +696,7 @@ m4_input_init (void)
   wsp = NULL;
   next = NULL;
 
-  start_of_input_line = FALSE;
+  start_of_input_line = false;
 }
 
 void

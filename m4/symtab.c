@@ -46,7 +46,7 @@
 
 struct m4_symbol_table {
   m4_hash *table;
-  boolean *nuke_trace_bit;	/* default: &(context->no_gnu_ext_opt) */
+  bool *nuke_trace_bit;	/* default: &(context->no_gnu_ext_opt) */
 };
 
 static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *);
@@ -65,7 +65,7 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
    These functions are used to manage a symbol table as a whole.  */
 
 m4_symbol_table *
-m4_symtab_create (size_t size, boolean *nuke_trace_bit)
+m4_symtab_create (size_t size, bool *nuke_trace_bit)
 {
   m4_symbol_table *symtab = XMALLOC (m4_symbol_table, 1);
 
@@ -187,7 +187,7 @@ symbol_destroy_CB (m4_symbol_table *symtab, const char *name, m4_symbol *symbol,
 {
   char *key = xstrdup ((char *) name);
 
-  m4_set_symbol_traced (symbol, FALSE);
+  m4_set_symbol_traced (symbol, false);
 
   while (key && m4_hash_lookup (symtab->table, key))
     m4_symbol_popdef (symtab, key);
@@ -368,7 +368,7 @@ arg_copy_CB (m4_hash *src, const void *name, void *arg, m4_hash *dest)
   return NULL;
 }
 
-boolean
+bool
 m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name)
 {
   m4_symbol *symbol;
@@ -378,7 +378,7 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name)
 
   symbol = symtab_fetch (symtab, name);
 
-  return m4_set_symbol_traced (symbol, TRUE);
+  return m4_set_symbol_traced (symbol, true);
 }
 
 
@@ -395,7 +395,7 @@ m4_symbol_delete (m4_symbol_table *symtab, const char *name)
 }
 
 #undef m4_get_symbol_traced
-boolean
+bool
 m4_get_symbol_traced (m4_symbol *symbol)
 {
   assert (symbol);
@@ -403,8 +403,8 @@ m4_get_symbol_traced (m4_symbol *symbol)
 }
 
 #undef m4_set_symbol_traced
-boolean
-m4_set_symbol_traced (m4_symbol *symbol, boolean value)
+bool
+m4_set_symbol_traced (m4_symbol *symbol, bool value)
 {
   assert (symbol);
   return symbol->traced = value;
@@ -426,7 +426,7 @@ m4_get_symbol_value (m4_symbol *symbol)
 }
 
 #undef m4_is_symbol_value_text
-boolean
+bool
 m4_is_symbol_value_text (m4_symbol_value *value)
 {
   assert (value);
@@ -434,7 +434,7 @@ m4_is_symbol_value_text (m4_symbol_value *value)
 }
 
 #undef m4_is_symbol_value_func
-boolean
+bool
 m4_is_symbol_value_func (m4_symbol_value *value)
 {
   assert (value);
@@ -442,7 +442,7 @@ m4_is_symbol_value_func (m4_symbol_value *value)
 }
 
 #undef m4_is_symbol_value_void
-boolean
+bool
 m4_is_symbol_value_void (m4_symbol_value *value)
 {
   assert (value);

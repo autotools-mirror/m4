@@ -34,7 +34,7 @@ static const char * skip_space (m4 *, const char *);
    MIN is the minimum number of acceptable arguments, negative if not
    applicable, MAX is the maximum number, negative if not applicable.
    ARGC, MIN, and MAX count ARGV[0], the name of the macro.  */
-boolean
+bool
 m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
 {
   if (min > 0 && argc < min)
@@ -42,7 +42,7 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
       M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: too few arguments: %d < %d"),
 	       M4ARG (0), argc - 1, min - 1));
-      return TRUE;
+      return true;
     }
 
   if (max > 0 && argc > max)
@@ -50,11 +50,11 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
       M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: too many arguments (ignored): %d > %d"),
 	       M4ARG (0), argc - 1, max - 1));
-      /* Return FALSE, otherwise it is not exactly `ignored'. */
-      return FALSE;
+      /* Return false, otherwise it is not exactly `ignored'. */
+      return false;
     }
 
-  return FALSE;
+  return false;
 }
 
 static const char *
@@ -67,8 +67,8 @@ skip_space (m4 *context, const char *arg)
 
 /* The function m4_numeric_arg () converts ARG to an int pointed to by
    VALUEP. If the conversion fails, print error message for macro.
-   Return TRUE iff conversion succeeds.  */
-boolean
+   Return true iff conversion succeeds.  */
+bool
 m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
 		int arg, int *valuep)
 {
@@ -81,17 +81,17 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
       M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: argument %d non-numeric: %s"),
 	       M4ARG (0), arg - 1, M4ARG (arg)));
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
-   SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
+   SEP, and quoted by the current quotes, if QUOTED is true.  */
 void
 m4_dump_args (m4 *context, m4_obstack *obs, int argc,
-	      m4_symbol_value **argv, const char *sep, boolean quoted)
+	      m4_symbol_value **argv, const char *sep, bool quoted)
 {
   int i;
   size_t len = strlen (sep);

@@ -34,9 +34,9 @@
 
 		function	macros	blind minargs maxargs */
 #define builtin_functions			\
-	BUILTIN(modules,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN(load,		FALSE,	TRUE,	2,	2  )	\
-	BUILTIN(unload,		FALSE,	TRUE,	2,	2  )	\
+	BUILTIN(modules,	false,	false,	1,	1  )	\
+	BUILTIN(load,		false,	true,	2,	2  )	\
+	BUILTIN(unload,		false,	true,	2,	2  )	\
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -53,7 +53,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 
@@ -98,7 +98,7 @@ M4BUILTIN_HANDLER (modules)
   if (handle)
     do
       {
-	m4_shipout_string (context, obs, m4_get_module_name (handle), 0, TRUE);
+	m4_shipout_string (context, obs, m4_get_module_name (handle), 0, true);
 
 	if ((handle = lt_dlhandle_next (handle)))
 	  obstack_1grow (obs, ',');

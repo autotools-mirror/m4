@@ -91,7 +91,7 @@
    string is parsed equally whether there is a $ or not.  The character
    $ is used by convention in user macros.  */
 
-static boolean check_is_macro_escaped (m4_syntax_table *syntax);
+static bool check_is_macro_escaped (m4_syntax_table *syntax);
 static int add_syntax_attribute	   (m4_syntax_table *syntax, int ch, int code);
 static int remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code);
 
@@ -134,9 +134,9 @@ m4_syntax_create (void)
   syntax->ecomm.string		= xstrdup (DEF_ECOMM);
   syntax->ecomm.length		= strlen (syntax->ecomm.string);
 
-  syntax->is_single_quotes	= TRUE;
-  syntax->is_single_comments	= TRUE;
-  syntax->is_macro_escaped	= FALSE;
+  syntax->is_single_quotes	= true;
+  syntax->is_single_comments	= true;
+  syntax->is_macro_escaped	= false;
 
   add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
   add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
@@ -287,21 +287,21 @@ m4_get_syntax_ecomm (m4_syntax_table *syntax)
   return syntax->ecomm.string;
 }
 
-boolean
+bool
 m4_is_syntax_single_quotes (m4_syntax_table *syntax)
 {
   assert (syntax);
   return syntax->is_single_quotes;
 }
 
-boolean
+bool
 m4_is_syntax_single_comments (m4_syntax_table *syntax)
 {
   assert (syntax);
   return syntax->is_single_comments;
 }
 
-boolean
+bool
 m4_is_syntax_macro_escaped (m4_syntax_table *syntax)
 {
   assert (syntax);
@@ -370,16 +370,16 @@ m4_set_syntax (m4_syntax_table *syntax, char key, const unsigned char *chars)
   return code;
 }
 
-static boolean
+static bool
 check_is_macro_escaped (m4_syntax_table *syntax)
 {
   int ch;
 
-  syntax->is_macro_escaped = FALSE;
+  syntax->is_macro_escaped = false;
   for (ch = 256; --ch >= 0; )
     if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
       {
-	syntax->is_macro_escaped = TRUE;
+	syntax->is_macro_escaped = true;
 	break;
       }
 

@@ -30,7 +30,8 @@
 /* I have yet to see a system that doesn't have these... */
 #include <stdio.h>
 #include <sys/types.h>
-#include @INCLUDE_OBSTACK_H@
+@INCLUDE_OBSTACK_H@
+@INCLUDE_STDBOOL_H@
 
 /* This is okay in an installed file, because it will not change the
    behaviour of the including program whether ENABLE_NLS is defined
@@ -147,21 +148,6 @@ BEGIN_C_DECLS
 #ifndef EXIT_FAILURE
 #  define EXIT_SUCCESS	0
 #  define EXIT_FAILURE	1
-#endif
-
-
-
-/* If FALSE is defined, we presume TRUE is defined too.  In this case,
-   merely typedef boolean as being int.  Or else, define these all.  */
-#ifndef FALSE
-/* Do not use `enum boolean': this tag is used in SVR4 <sys/types.h>.  */
-typedef enum { FALSE = 0, TRUE = 1 } m4_boolean;
-#else
-typedef int m4_boolean;
-#endif
-/* `boolean' is already a macro on some systems.  */
-#ifndef boolean
-#  define boolean m4_boolean
 #endif
 
 

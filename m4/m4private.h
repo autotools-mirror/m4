@@ -52,7 +52,7 @@ struct m4 {
 
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
-  boolean	no_gnu_extensions;		/* -G */
+  bool	no_gnu_extensions;		/* -G */
   int		nesting_limit;			/* -L */
   int		debug_level;			/* -d */
   int		max_debug_arg_length;		/* -l */
@@ -121,7 +121,7 @@ extern void	    m4__module_exit (m4 *context);
 
 struct m4_symbol
 {
-  boolean		traced;
+  bool		traced;
   m4_symbol_value *	value;
 };
 
@@ -224,14 +224,14 @@ struct m4_syntax_table {
   m4_string lquote, rquote;
   m4_string bcomm, ecomm;
 
-  /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
-  boolean is_single_quotes;
+  /* true iff strlen(rquote) == strlen(lquote) == 1 */
+  bool is_single_quotes;
 
-  /* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
-  boolean is_single_comments;
+  /* true iff strlen(bcomm) == strlen(ecomm) == 1 */
+  bool is_single_comments;
 
-  /* TRUE iff some character has M4_SYNTAX_ESCAPE */
-  boolean is_macro_escaped;
+  /* true iff some character has M4_SYNTAX_ESCAPE */
+  bool is_macro_escaped;
 };
 
 #ifdef NDEBUG

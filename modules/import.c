@@ -29,9 +29,9 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (import,	FALSE,	FALSE,	1,	2)	\
-	BUILTIN (symbol_fail,	FALSE,	FALSE,	1,	2)	\
-	BUILTIN (module_fail,	FALSE,	FALSE,	1,	2)
+	BUILTIN (import,	false,	false,	1,	2)	\
+	BUILTIN (symbol_fail,	false,	false,	1,	2)	\
+	BUILTIN (module_fail,	false,	false,	1,	2)
 
 #define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
@@ -45,13 +45,13 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 
 
-typedef boolean export_test_func (const char *);
-typedef boolean no_such_func (const char *);
+typedef bool export_test_func (const char *);
+typedef bool no_such_func (const char *);
 
 /**
  * import()

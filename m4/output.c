@@ -395,7 +395,7 @@ void
 m4_shipout_text (m4 *context, m4_obstack *obs,
 		 const char *text, int length)
 {
-  static boolean start_of_output_line = TRUE;
+  static bool start_of_output_line = true;
   char line[20];
   const char *cursor;
 
@@ -441,7 +441,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
       {
 	if (start_of_output_line)
 	  {
-	    start_of_output_line = FALSE;
+	    start_of_output_line = false;
 	    m4_output_current_line++;
 
 #ifdef DEBUG_OUTPUT
@@ -472,7 +472,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	  }
 	OUTPUT_CHARACTER (*text);
 	if (*text == '\n')
-	  start_of_output_line = TRUE;
+	  start_of_output_line = true;
       }
 }
 
@@ -489,7 +489,7 @@ m4_shipout_int (m4_obstack *obs, int val)
 
 void
 m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, int len,
-		   boolean quoted)
+		   bool quoted)
 {
   if (s == NULL)
     s = "";

@@ -35,16 +35,16 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (currenttime,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (ctime,		FALSE,	FALSE,	1,	2  )	\
-	BUILTIN (gmtime,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN (localtime,	FALSE,	TRUE,	2,	2  )	\
+	BUILTIN (currenttime,	false,	false,	1,	1  )	\
+	BUILTIN (ctime,		false,	false,	1,	2  )	\
+	BUILTIN (gmtime,	false,	true,	2,	2  )	\
+	BUILTIN (localtime,	false,	true,	2,	2  )	\
 
 #define mktime_functions					\
-	BUILTIN (mktime,	FALSE,	TRUE,	7,	8  )	\
+	BUILTIN (mktime,	false,	true,	7,	8  )	\
 
 #define strftime_functions					\
-	BUILTIN (strftime,	FALSE,	TRUE,	3,	3  )	\
+	BUILTIN (strftime,	false,	true,	3,	3  )	\
 
 
 #define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
@@ -71,7 +71,7 @@ m4_builtin m4_builtin_table[] =
 # endif
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE },
+  { 0, 0, false, false },
 };
 
 /**

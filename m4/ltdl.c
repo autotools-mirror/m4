@@ -454,7 +454,7 @@ opendir (path)
   entry = LT_DLMALLOC (DIR,sizeof(DIR));
   if (entry != (DIR *) 0)
     {
-      entry->firsttime = TRUE;
+      entry->firsttime = true;
       entry->hSearch = FindFirstFile(file_specification,&entry->Win32FindData);
     }
   if (entry->hSearch == INVALID_HANDLE_VALUE)
@@ -487,7 +487,7 @@ static struct dirent *readdir(entry)
       if (status == 0)
         return((struct dirent *) 0);
     }
-  entry->firsttime = FALSE;
+  entry->firsttime = false;
   (void) strncpy(entry->file_info.d_name,entry->Win32FindData.cFileName,
     LT_FILENAME_MAX-1);
   entry->file_info.d_namlen = strlen(entry->file_info.d_name);
@@ -1587,11 +1587,11 @@ static struct lt_user_dlloader sys_dld = {
 /* We have to put some stuff here that isn't in older dyld.h files */
 #ifndef ENUM_DYLD_BOOL
 # define ENUM_DYLD_BOOL
-# undef FALSE
-# undef TRUE
+# undef false
+# undef true
  enum DYLD_BOOL {
-    FALSE,
-    TRUE
+    false,
+    true
  };
 #endif
 #ifndef LC_REQ_DYLD

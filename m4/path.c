@@ -40,7 +40,7 @@
 #include "m4private.h"
 
 static void search_path_add (m4__search_path_info *, const char *);
-static void search_path_env_init (m4__search_path_info *, char *, boolean);
+static void search_path_env_init (m4__search_path_info *, char *, bool);
 
 
 /*
@@ -71,7 +71,7 @@ search_path_add (m4__search_path_info *info, const char *dir)
 }
 
 static void
-search_path_env_init (m4__search_path_info *info, char *path, boolean isabs)
+search_path_env_init (m4__search_path_info *info, char *path, bool isabs)
 {
   char *path_end;
 
@@ -100,7 +100,7 @@ m4_include_env_init (m4 *context)
     return;
 
   search_path_env_init (m4__get_search_path (context),
-			getenv ("M4PATH"), FALSE);
+			getenv ("M4PATH"), false);
 }
 
 void

@@ -135,9 +135,9 @@ set_debug_file (m4 *context, FILE *fp)
 }
 
 /* Change the debug output to file NAME.  If NAME is NULL, debug output is
-   reverted to stderr, and if empty debug output is discarded.  Return TRUE
+   reverted to stderr, and if empty debug output is discarded.  Return true
    iff the output stream was changed.  */
-boolean
+bool
 m4_debug_set_output (m4 *context, const char *name)
 {
   FILE *fp;
@@ -152,11 +152,11 @@ m4_debug_set_output (m4 *context, const char *name)
     {
       fp = fopen (name, "a");
       if (fp == NULL)
-	return FALSE;
+	return false;
 
       set_debug_file (context, fp);
     }
-  return TRUE;
+  return true;
 }
 
 /* Print the header of a one-line debug message, starting by "m4 debug".  */

@@ -38,7 +38,7 @@
 
 		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN(mpeval,		FALSE,	TRUE,	2, 	4  )	\
+	BUILTIN(mpeval,		false,	true,	2, 	4  )	\
 
 
 
@@ -92,7 +92,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 

@@ -39,7 +39,7 @@ typedef struct
 typedef void m4_sysval_flush_func (m4 *context);
 typedef void m4_set_sysval_func (int value);
 typedef void m4_dump_symbols_func (m4 *context, m4_dump_symbol_data *data,
-		int argc, m4_symbol_value **argv, boolean complain);
+		int argc, m4_symbol_value **argv, bool complain);
 typedef const char *m4_expand_ranges_func  (const char *s, m4_obstack *obs);
 
 END_C_DECLS

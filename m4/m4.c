@@ -112,7 +112,7 @@ m4_context_field_table
 #undef M4FIELD
 
 #define M4OPT_BIT(bit, base) 						\
-	boolean CONC(m4_get_, base) (m4 *context)			\
+	bool CONC(m4_get_, base) (m4 *context)			\
 	{								\
 	  assert (context);						\
 	  return BIT_TEST (context->opt_flags, (bit));			\
@@ -121,7 +121,7 @@ m4_context_opt_bit_table
 #undef M4OPT_BIT
 
 #define M4OPT_BIT(bit, base) 						\
-	boolean CONC(m4_set_, base) (m4 *context, boolean value)	\
+	bool CONC(m4_set_, base) (m4 *context, bool value)	\
 	{								\
 	  assert (context);						\
 	  if (value)							\

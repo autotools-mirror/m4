@@ -245,10 +245,10 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
   if (isatty (STDIN_FILENO))
-    m4_set_interactive_opt (context, TRUE);
+    m4_set_interactive_opt (context, true);
 
   if (getenv ("POSIXLY_CORRECT"))
-    m4_set_posixly_correct_opt (context, TRUE);
+    m4_set_posixly_correct_opt (context, true);
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 
@@ -299,8 +299,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'G':
-	m4_set_no_gnu_extensions_opt (context, TRUE);
-	m4_set_posixly_correct_opt (context, TRUE);
+	m4_set_no_gnu_extensions_opt (context, true);
+	m4_set_posixly_correct_opt (context, true);
 	break;
 
       case 'I':
@@ -326,11 +326,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'P':
-	m4_set_prefix_builtins_opt (context, TRUE);
+	m4_set_prefix_builtins_opt (context, true);
 	break;
 
       case 'Q':
-	m4_set_suppress_warnings_opt (context, TRUE);
+	m4_set_suppress_warnings_opt (context, true);
 	break;
 
       case 'R':
@@ -338,11 +338,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'b':
-	m4_set_interactive_opt (context, FALSE);
+	m4_set_interactive_opt (context, false);
 	break;
 
       case 'c':
-	m4_set_discard_comments_opt (context, TRUE);
+	m4_set_discard_comments_opt (context, true);
 	break;
 
       case 'd':
@@ -355,7 +355,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	m4_set_interactive_opt (context, TRUE);
+	m4_set_interactive_opt (context, true);
 	break;
 
       case 'l':
@@ -370,7 +370,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 's':
-	m4_set_sync_output_opt (context, TRUE);
+	m4_set_sync_output_opt (context, true);
 	break;
       }
 

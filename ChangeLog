@@ -1,5 +1,12 @@
 2003-08-15  Gary V. Vaughan  <gary@gnu.org>
 
+	* configure.ac (AC_HEADER_STDBOOL, INCLUDE_STDBOOL_H): Check for
+	C99 bool.
+	* system-h.in (m4_boolean): Removed in favour of using C99 bool if
+	possible or faking one with a typedef.  Changed all callers.
+
+2003-08-15  Gary V. Vaughan  <gary@gnu.org>
+
 	Still cleaning up the users' module API, by taking out the stuff
 	that isn't used by any existing modules, and moving specialised
 	functions out of libm4 and into the module they are used by.

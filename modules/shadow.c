@@ -30,8 +30,8 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions			\
-	BUILTIN (shadow,	FALSE,	FALSE,	0,	-1 )	\
-	BUILTIN (test,		FALSE,	FALSE,	0,	-1 )	\
+	BUILTIN (shadow,	false,	false,	0,	-1 )	\
+	BUILTIN (test,		false,	false,	0,	-1 )	\
 
 
 #define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
@@ -46,7 +46,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 m4_macro m4_macro_table[] =

@@ -49,7 +49,7 @@ rm -f $m4_obstack_h
 if test $m4_cv_func_obstack = yes; then
 
   # The system provides obstack.h, `#include <obstack.h>' will work
-  INCLUDE_OBSTACK_H='<obstack.h>'
+  INCLUDE_OBSTACK_H='#include <obstack.h>'
   AC_DEFINE(HAVE_OBSTACK, 1, [Define if libc includes obstacks.])
 
 else
@@ -60,7 +60,7 @@ else
   # provides an implementation: So we ship m4/gnu-obstack.h, and link
   # it to m4/obstack.h here (to substitute the missing system supplied
   # version).  Hence, `#include <m4/obstack.h>' will work.
-  INCLUDE_OBSTACK_H='<m4/obstack.h>'
+  INCLUDE_OBSTACK_H='#include <m4/obstack.h>'
   AC_CONFIG_LINKS($m4_obstack_h:${top_srcdir}/m4/gnu-obstack.h)
 
   if test x"$ac_cv_header_obstack_h" != xyes; then

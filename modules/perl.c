@@ -32,7 +32,7 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (perleval,	FALSE,	FALSE,	0,	-1  )	\
+	BUILTIN (perleval,	false,	false,	0,	-1  )	\
 
 
 #define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
@@ -47,7 +47,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 /* A table for mapping m4 symbol names to simple expansion text. */
@@ -111,8 +111,8 @@ M4BUILTIN_HANDLER (perleval)
       if (i > 1)
 	obstack_1grow (obs, ',');
 
-      val = perl_eval_pv(M4ARG(i), TRUE);
+      val = perl_eval_pv(M4ARG(i), true);
 
-      m4_shipout_string(context, obs, SvPV(val,PL_na), 0, FALSE);
+      m4_shipout_string(context, obs, SvPV(val,PL_na), 0, false);
     }
 }

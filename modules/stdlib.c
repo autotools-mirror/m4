@@ -38,20 +38,20 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (getcwd,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (getenv,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN (getlogin,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (getpid,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (getppid,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (getuid,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (getpwnam,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN (getpwuid,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN (hostname,	FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (rand,		FALSE,	FALSE,	1,	1  )	\
-	BUILTIN (srand,		FALSE,	FALSE,	1,	2  )	\
-	BUILTIN (setenv,	FALSE,	TRUE,	3,	4  )	\
-	BUILTIN (unsetenv,	FALSE,	TRUE,	2,	2  )	\
-	BUILTIN (uname,		FALSE,	FALSE,	1,	1  )	\
+	BUILTIN (getcwd,	false,	false,	1,	1  )	\
+	BUILTIN (getenv,	false,	true,	2,	2  )	\
+	BUILTIN (getlogin,	false,	false,	1,	1  )	\
+	BUILTIN (getpid,	false,	false,	1,	1  )	\
+	BUILTIN (getppid,	false,	false,	1,	1  )	\
+	BUILTIN (getuid,	false,	false,	1,	1  )	\
+	BUILTIN (getpwnam,	false,	true,	2,	2  )	\
+	BUILTIN (getpwuid,	false,	true,	2,	2  )	\
+	BUILTIN (hostname,	false,	false,	1,	1  )	\
+	BUILTIN (rand,		false,	false,	1,	1  )	\
+	BUILTIN (srand,		false,	false,	1,	2  )	\
+	BUILTIN (setenv,	false,	true,	3,	4  )	\
+	BUILTIN (unsetenv,	false,	true,	2,	2  )	\
+	BUILTIN (uname,		false,	false,	1,	1  )	\
 
 
 #define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler);
@@ -66,7 +66,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 /**
@@ -80,7 +80,7 @@ M4BUILTIN_HANDLER (getcwd)
   bp = getcwd (buf, sizeof buf);
 
   if (bp != NULL)		/* in case of error return null string */
-    m4_shipout_string (context, obs, buf, 0, FALSE);
+    m4_shipout_string (context, obs, buf, 0, false);
 }
 
 /**
@@ -93,7 +93,7 @@ M4BUILTIN_HANDLER (getenv)
   env = getenv (M4ARG (1));
 
   if (env != NULL)
-    m4_shipout_string (context, obs, env, 0, FALSE);
+    m4_shipout_string (context, obs, env, 0, false);
 }
 
 /**
@@ -148,7 +148,7 @@ M4BUILTIN_HANDLER (getlogin)
   login = getlogin ();
 
   if (login != NULL)
-    m4_shipout_string (context, obs, login, 0, FALSE);
+    m4_shipout_string (context, obs, login, 0, false);
 }
 
 /**
@@ -178,19 +178,19 @@ M4BUILTIN_HANDLER (getpwnam)
 
   if (pw != NULL)
     {
-      m4_shipout_string (context, obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_name, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_passwd, 0, true);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_gecos, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_dir, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_shell, 0, true);
     }
 }
 
@@ -209,19 +209,19 @@ M4BUILTIN_HANDLER (getpwuid)
 
   if (pw != NULL)
     {
-      m4_shipout_string (context, obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_name, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_passwd, 0, true);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_gecos, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_dir, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_shell, 0, true);
     }
 }
 
@@ -235,7 +235,7 @@ M4BUILTIN_HANDLER (hostname)
   if (gethostname (buf, sizeof buf) < 0)
     return;
 
-  m4_shipout_string (context, obs, buf, 0, FALSE);
+  m4_shipout_string (context, obs, buf, 0, false);
 }
 
 /**
@@ -273,15 +273,15 @@ M4BUILTIN_HANDLER (uname)
 
   if (uname (&ut) == 0)
     {
-      m4_shipout_string (context, obs, ut.sysname, 0, TRUE);
+      m4_shipout_string (context, obs, ut.sysname, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.nodename, 0, TRUE);
+      m4_shipout_string (context, obs, ut.nodename, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.release, 0, TRUE);
+      m4_shipout_string (context, obs, ut.release, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.version, 0, TRUE);
+      m4_shipout_string (context, obs, ut.version, 0, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.machine, 0, TRUE);
+      m4_shipout_string (context, obs, ut.machine, 0, true);
     }
 }
 

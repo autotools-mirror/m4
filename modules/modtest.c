@@ -33,7 +33,7 @@
 
 /*		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN (test,		FALSE,	FALSE,	1,	1)
+	BUILTIN (test,		false,	false,	1,	1)
 
 #define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
   builtin_functions
@@ -47,7 +47,7 @@ m4_builtin m4_builtin_table[] =
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, FALSE, FALSE, 0, 0 },
+  { 0, 0, false, false, 0, 0 },
 };
 
 m4_macro m4_macro_table[] =
@@ -100,10 +100,10 @@ M4BUILTIN_HANDLER (test)
 /**
  * export_test()
  **/
-boolean
+bool
 export_test (const char *foo)
 {
   if (foo)
     fprintf (stderr, "%s\n", foo);
-  return (boolean) (foo != 0);
+  return (bool) (foo != 0);
 }
