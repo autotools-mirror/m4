@@ -54,14 +54,14 @@ void exit ();
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this
    function without parameters instead.  */
-M4_GLOBAL_DATA void (*error_print_progname) (
+void (*error_print_progname) (
 #if __STDC__ - 0
 			      void
 #endif
 			      );
 
 /* This variable is incremented each time `error' is called.  */
-M4_GLOBAL_DATA unsigned int error_message_count;
+unsigned int error_message_count;
 
 #ifdef _LIBC
 /* In the GNU C library, there is a predefined variable for this.  */
@@ -83,7 +83,7 @@ M4_GLOBAL_DATA unsigned int error_message_count;
 
 /* The calling program should define program_name and set it to the
    name of the executing program.  */
-M4_GLOBAL_DATA char *program_name;
+char *program_name;
 
 # ifdef HAVE_STRERROR_R
 #  define __strerror_r strerror_r
@@ -168,7 +168,7 @@ error (status, errnum, message, va_alist)
 
 /* Sometimes we want to have at most one error per line.  This
    variable controls whether this mode is selected or not.  */
-M4_GLOBAL_DATA int error_one_per_line;
+int error_one_per_line;
 
 void
 #if defined VA_START && __STDC__

@@ -213,10 +213,10 @@ typedef struct input_block input_block;
 
 
 /* Current input file name.  */
-M4_GLOBAL_DATA const char *m4_current_file;
+const char *m4_current_file;
 
 /* Current input line number.  */
-M4_GLOBAL_DATA int m4_current_line;
+int m4_current_line;
 
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;

@@ -1,4 +1,23 @@
 2001-08-20  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/system.h [cygwin*]:  Thanks to Paul Sokolovsky and
+	Robert Collins, building on Cygwin no longer requires Windows
+	import and export symbol decorations.
+	* m4/m4module.h (M4_SCOPE) [cygwin*]:  Deleted all occurences.
+	* m4/error.h (M4_SCOPE) [cygwin*]: Ditto.
+	* m4/debug.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/error.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/input.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/macro.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/output.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/utilty.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* m4/xmalloc.c (M4_GLOBAL_DATA) [cygwin*]:  Ditto.
+	* configure.in (LIBM4_DLL_IMPORT) [cygwin*]:  Don't set this
+	anymore.
+	* src/Makefile.am (AM_CPPFLAGS) [cygwin*]: Don't use it either!
+	* modules/Makefile.am (AM_CPPFLAGS) [cygwin*]: Ditto.
+
+2001-08-20  Gary V. Vaughan  <gary@gnu.org>
  
 	Ansify the source.  Previously we had a mix, where my code was
 	in a K&R compatible style, and the preexisting code was in ANSI

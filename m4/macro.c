@@ -27,7 +27,7 @@ static void expand_macro (m4_symbol *);
 static void expand_token (struct obstack *, m4_token_t, m4_token_data *);
 
 /* Current recursion level in expand_macro ().  */
-M4_GLOBAL_DATA int m4_expansion_level = 0;
+int m4_expansion_level = 0;
 
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;

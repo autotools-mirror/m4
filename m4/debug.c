@@ -29,7 +29,7 @@
 #include "m4private.h"
 
 /* File for debugging output.  */
-M4_GLOBAL_DATA FILE *m4_debug = NULL;
+FILE *m4_debug = NULL;
 
 /* Obstack for trace messages.  */
 static struct obstack trace;

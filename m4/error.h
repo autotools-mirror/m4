@@ -57,20 +57,20 @@ extern void error_at_line (int status, int errnum, const char *fname,
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this
    function without parameters instead.  */
-M4_SCOPE void (*error_print_progname) (void);
+void (*error_print_progname) (void);
 
 #else
 void error ();
 void error_at_line ();
-M4_SCOPE void (*error_print_progname) ();
+void (*error_print_progname) ();
 #endif
 
 /* This variable is incremented each time `error' is called.  */
-M4_SCOPE unsigned int error_message_count;
+unsigned int error_message_count;
 
 /* Sometimes we want to have at most one error per line.  This
    variable controls whether this mode is selected or not.  */
-M4_SCOPE int error_one_per_line;
+int error_one_per_line;
 
 END_C_DECLS
 

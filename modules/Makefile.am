@@ -26,7 +26,6 @@ ETAGS_ARGS = --regex='/M4BUILTIN_HANDLER[ \t]*(\([^)]*\)/\1/'
 
 EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 
-AM_CPPFLAGS = @LIBM4_DLL_IMPORT@
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
 LIBS = $(top_builddir)/m4/libm4.la
 LDFLAGS = -no-undefined

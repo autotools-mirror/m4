@@ -21,7 +21,6 @@
 CLEANFILES = m4$(EXEEXT)
 MAINTAINERCLEANFILES = Makefile.in
 
-AM_CPPFLAGS = $(LIBM4_DLL_IMPORT)
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/m4 $(INCLTDL) $(INTLINCL)
 
 noinst_HEADERS = gnu-getopt.h

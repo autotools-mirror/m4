@@ -61,12 +61,6 @@ BEGIN_C_DECLS
 
 
 
-/* DLL building support on win32 hosts;  mostly to workaround their
-   ridiculous implementation of data symbol exporting.  As it stands,
-   this code assumes that the project will build a single library,
-   defining DLL_EXPORT when compiling objects destined for the library,
-   and LIBM4_DLL_IMPORT when linking against the library.  */
-
 /* Canonicalise Windows and Cygwin recognition macros.  */
 #if defined __CYGWIN32__ && !defined __CYGWIN__
 #  define __CYGWIN__ __CYGWIN32__
@@ -84,31 +78,6 @@ BEGIN_C_DECLS
 #ifndef M4_PATHSEP_CHAR
 #  define M4_PATHSEP_CHAR	':'
 #endif
-
-#ifndef M4_SCOPE
-#  ifdef WIN32
-  /* Incase we are linking a dll with this library, the
-     LIBM4_DLL_IMPORT takes precedence over a generic DLL_EXPORT
-     when defining the SCOPE variable for M4.  */
-#    ifdef LIBM4_DLL_IMPORT	/* define if linking with this dll */
-#      define M4_SCOPE extern __declspec(dllimport)
-#    else
-#      ifdef DLL_EXPORT		/* defined by libtool (if required) */
-#        define M4_SCOPE	__declspec(dllexport)
-#      endif /* DLL_EXPORT */
-#    endif /* LIBM4_DLL_IMPORT */
-#  endif /* M4_SCOPE */
-#  ifndef M4_SCOPE		/* static linking or !_WIN32 */
-#    define M4_SCOPE	extern
-#  endif
-#endif
-
-/* Always define global variables with this macro.  */
-#ifdef DLL_EXPORT		/* defined by libtool (if required) */
-#  define M4_GLOBAL_DATA	__declspec(dllexport)
-#else
-#  define M4_GLOBAL_DATA	/* empty */
-#endif /* DLL_EXPORT */
 
 
 

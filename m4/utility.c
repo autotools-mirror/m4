@@ -27,57 +27,57 @@
 static int dumpdef_cmp (const void *s1, const void *s2);
 
 /* The name this program was run with. */
-M4_GLOBAL_DATA const char *program_name;
+const char *program_name;
 
 /* Exit code from last "syscmd" command.  */
-M4_GLOBAL_DATA int m4_sysval = 0;
+int m4_sysval = 0;
 
 /* Operate interactively (-e).  */
-M4_GLOBAL_DATA int interactive = 0;
+int interactive = 0;
 
 /* Enable sync output for /lib/cpp (-s).  */
-M4_GLOBAL_DATA int sync_output = 0;
+int sync_output = 0;
 
 /* Debug (-d[flags]).  */
-M4_GLOBAL_DATA int debug_level = 0;
+int debug_level = 0;
 
 /* Hash table size (should be a prime) (-Hsize).  */
-M4_GLOBAL_DATA int hash_table_size = HASHMAX;
+int hash_table_size = HASHMAX;
 
 /* Disable GNU extensions (-G).  */
-M4_GLOBAL_DATA int no_gnu_extensions = 0;
+int no_gnu_extensions = 0;
 
 /* Prefix all builtin functions by `m4_'.  */
-M4_GLOBAL_DATA int prefix_all_builtins = 0;
+int prefix_all_builtins = 0;
 
 /* Max length of arguments in trace output (-lsize).  */
-M4_GLOBAL_DATA int max_debug_argument_length = 0;
+int max_debug_argument_length = 0;
 
 /* Suppress warnings about missing arguments.  */
-M4_GLOBAL_DATA int suppress_warnings = 0;
+int suppress_warnings = 0;
 
 /* If not zero, then value of exit status for warning diagnostics.  */
-M4_GLOBAL_DATA int warning_status = 0;
+int warning_status = 0;
 
 /* Artificial limit for expansion_level in macro.c.  */
-M4_GLOBAL_DATA int nesting_limit = 250;
+int nesting_limit = 250;
 
 /* User provided regexp for describing m4 words.  */
-M4_GLOBAL_DATA const char *user_word_regexp = NULL;
+const char *user_word_regexp = NULL;
 
 /* If nonzero, comments are discarded in the token parser.  */
-M4_GLOBAL_DATA int discard_comments = 0;
+int discard_comments = 0;
 
 /* input syntax table. */
-M4_GLOBAL_DATA unsigned short m4_syntax_table[256];
+unsigned short m4_syntax_table[256];
 
 /* Quote chars.  */
-M4_GLOBAL_DATA m4_string rquote;
-M4_GLOBAL_DATA m4_string lquote;
+m4_string rquote;
+m4_string lquote;
 
 /* Comment chars.  */
-M4_GLOBAL_DATA m4_string bcomm;
-M4_GLOBAL_DATA m4_string ecomm;
+m4_string bcomm;
+m4_string ecomm;
 
 
 /* Addressable function versions of the macros defined in m4private.h.

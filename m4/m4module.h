@@ -166,28 +166,28 @@ extern boolean		m4_token_data_func_traced (m4_token_data*);
 #define HASHMAX 509		/* default, overridden by -Hsize */
 
 /* The name this program was run with. */
-M4_SCOPE const char *program_name;
+const char *program_name;
 
 /* Option flags  (defined in utility.c; set in m4.c).  */
-M4_SCOPE int interactive;		/* -e */
-M4_SCOPE int sync_output;		/* -s */
-M4_SCOPE int debug_level;		/* -d */
-M4_SCOPE int hash_table_size;		/* -H */
-M4_SCOPE int no_gnu_extensions;		/* -G */
-M4_SCOPE int prefix_all_builtins;	/* -P */
-M4_SCOPE int max_debug_argument_length;	/* -l */
-M4_SCOPE int suppress_warnings;		/* -Q */
-M4_SCOPE int warning_status;		/* -E */
-M4_SCOPE int nesting_limit;		/* -L */
-M4_SCOPE int discard_comments;		/* -c */
-M4_SCOPE const char *user_word_regexp;	/* -W */
+int interactive;		/* -e */
+int sync_output;		/* -s */
+int debug_level;		/* -d */
+int hash_table_size;		/* -H */
+int no_gnu_extensions;		/* -G */
+int prefix_all_builtins;	/* -P */
+int max_debug_argument_length;	/* -l */
+int suppress_warnings;		/* -Q */
+int warning_status;		/* -E */
+int nesting_limit;		/* -L */
+int discard_comments;		/* -c */
+const char *user_word_regexp;	/* -W */
 
 /* left and right quote, begin and end comment */
-M4_SCOPE m4_string lquote;
-M4_SCOPE m4_string rquote;
+m4_string lquote;
+m4_string rquote;
 
-M4_SCOPE m4_string bcomm;
-M4_SCOPE m4_string ecomm;
+m4_string bcomm;
+m4_string ecomm;
 
 #define DEF_LQUOTE "`"
 #define DEF_RQUOTE "\'"
@@ -202,7 +202,7 @@ void m4_shipout_string (struct obstack*, const char*, int, boolean);
 void m4_dump_args (struct obstack *obs, int argc, m4_token_data **argv, const char *sep, boolean quoted);
 
 
-M4_SCOPE FILE *m4_debug;
+FILE *m4_debug;
 
 /* The value of debug_level is a bitmask of the following.  */
 
@@ -304,8 +304,8 @@ void m4_trace_post (const char *, int, int, m4_token_data **,
 			   const char *);
 
 /* Exit code from last "syscmd" command.  */
-M4_SCOPE int m4_sysval;
-M4_SCOPE int m4_expansion_level;
+int m4_sysval;
+int m4_expansion_level;
 
 const char *m4_expand_ranges (const char *s, struct obstack *obs);
 void m4_expand_input (void);
@@ -369,11 +369,11 @@ void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_toke
 #define M4_IS_ECOMM(ch)  (m4_syntax(ch) & M4_SYNTAX_ECOMM)
 
 /* Please read the comment at the top of input.c for details */
-M4_SCOPE unsigned short m4_syntax_table[256];
+unsigned short m4_syntax_table[256];
 
 /* current input file, and line */
-M4_SCOPE const char *m4_current_file;
-M4_SCOPE int m4_current_line;
+const char *m4_current_file;
+int m4_current_line;
 
 extern	int	m4_syntax_code	(char ch);
 extern	void	m4_input_init	(void);
@@ -399,8 +399,8 @@ extern	void	m4_set_syntax	(char, const unsigned char *);
 extern	void	m4_set_word_regexp (const char *);
 #endif
 
-M4_SCOPE int m4_current_diversion;
-M4_SCOPE int m4_output_current_line;
+int m4_current_diversion;
+int m4_output_current_line;
 
 extern	void	m4_output_init	(void);
 extern	void	m4_shipout_text	(struct obstack *, const char *, int);

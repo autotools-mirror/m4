@@ -56,7 +56,7 @@ static void *fixup_null_alloc (size_t n);
 
 /* Exit value when the requested amount of memory is not available.
    The caller may set it to some other value.  */
-M4_GLOBAL_DATA int xmalloc_exit_failure = EXIT_FAILURE;
+int xmalloc_exit_failure = EXIT_FAILURE;
 
 
 /* Your program must provide these functions in order for

@@ -84,7 +84,7 @@ static int total_buffer_size;
 
 /* The number of the currently active diversion.  This variable is
    maintained for the `divnum' builtin function.  */
-M4_GLOBAL_DATA int m4_current_diversion;
+int m4_current_diversion;
 
 /* Current output diversion, NULL if output is being currently discarded.  */
 static struct diversion *output_diversion;
@@ -95,7 +95,7 @@ static char *output_cursor;	/* current value of (buffer + used) */
 static int output_unused;	/* current value of (size - used) */
 
 /* Number of input line we are generating output for.  */
-M4_GLOBAL_DATA int m4_output_current_line;
+int m4_output_current_line;
 
 
 
