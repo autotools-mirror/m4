@@ -153,18 +153,22 @@ OTHER_FILES = \
 check: stamp-TESTS
 
 stamp-TESTS: $(srcdir)/get-them $(top_srcdir)/doc/m4.texinfo
-	cd $(srcdir) \
-	&& AWK=$(AWK) ./get-them ../doc/m4.texinfo \
-	&& > $@
+	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texinfo
+	> $(srcdir)/$@
 
 clean-local:
 	rm -rf testSubDir
 
-TESTSUITE_SOURCES = testsuite.at others.at
+TESTSUITE_SOURCES = testsuite.at others.at generated.at
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
 	$(SHELL) $(TESTSUITE)
+
+$(srcdir)/generated.at: $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo
+	rm -f $@
+	$(AWK) -f $(srcdir)/generate.awk $(top_srcdir)/doc/m4.texinfo >$@t
+	mv $@t $@
 
 # FIXME: Autom4te is not complete yet, and lacks a means to find
 # the lib files.

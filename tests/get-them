@@ -106,6 +106,10 @@ function printthem(thearray, thecounter, thefile) {
       gsub("@}", "}", thearray[j]);
       gsub("@@", "@", thearray[j]);
       gsub("@comment.*", "", thearray[j]);
+      gsub("@comment.*", "", thearray[j]);
+      # other-tests are run one level deeper than announced.
+      # See the Esyscmd node in the documentation.
+      gsub (" Makefile", "../Makefile", thearray[j]);
       printf ("%s\n", thearray[j]) >> file;
     }
     printf ("EOF\n") >> file;

@@ -3431,11 +3431,11 @@ The builtin macro @code{esyscmd} is recognized only when given
 arguments.
 @end deffn
 
-Assume you are positioned into the @file{checks} directory of GNU
-@code{m4} distribution, then:
+Assume you are positioned into the @file{tests} directory of GNU M4
+distribution, then:
 
 @example
-define(`vice', `esyscmd(grep Vice ../Makefile)')
+define(`vice', `esyscmd(grep Vice Makefile)')
 @result{}
 vice
 @result{}#  Ty Coon, President of Vice
@@ -3565,6 +3565,7 @@ exit code @var{code}.  If @var{code} is left out, the exit code is
 zero.
 @end deffn
 
+@comment status: 1
 @example
 define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')

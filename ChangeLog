@@ -1,5 +1,15 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	* doc/m4.texinfo (Esyscmd): Fix the paths in the Vice example.
+	(M4exit): Tag the exit status of the example.
+	* tests/get-them: Adjust.
+	* tests/generate.awk: New, based on get-them.
+	* tests/Makefile.am: Adjust to generate `generated.at'.
+	* tests/testsuite.at: Adjust.
+	(AT_CHECK_M4): Don't overquote.  Blush...
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	Start using Autotest.  atconfig creation is still lacking.
 
 	* examples/patsubst.m4, modules/modtest.m4, modules/shadow.m4,
