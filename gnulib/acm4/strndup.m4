@@ -19,7 +19,6 @@ AC_DEFUN([gl_FUNC_STRNDUP],
 
 # Prerequisites of lib/strndup.c.
 AC_DEFUN([gl_PREREQ_STRNDUP], [
-  AC_REQUIRE([gl_FUNC_STRNLEN])
   AC_CHECK_DECLS(strnlen)
 ])
 

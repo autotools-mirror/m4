@@ -160,7 +160,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
 	}
     }
 
-  xfree (name);
+  free (name);
 
   return fp;
 }

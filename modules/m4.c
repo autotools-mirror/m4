@@ -579,7 +579,7 @@ include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
     }
 
   m4_push_file (context, fp, name);
-  xfree (name);
+  free (name);
 }
 
 /* Include a file, complaining in case of errors.  */

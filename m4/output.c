@@ -299,7 +299,7 @@ make_room_for (int length)
 
       /* Reclaim the buffer space for other diversions.  */
 
-      xfree (selected_diversion->buffer);
+      free (selected_diversion->buffer);
       total_buffer_size -= selected_diversion->size;
 
       selected_diversion->buffer = NULL;
@@ -626,7 +626,7 @@ m4_insert_diversion (int divnum)
     }
   else if (diversion->buffer)
     {
-      xfree (diversion->buffer);
+      free (diversion->buffer);
       diversion->buffer = NULL;
       diversion->size = 0;
       diversion->used = 0;

@@ -120,7 +120,7 @@ expand_token (m4 *context, m4_obstack *obs,
       abort ();
     }
 
-  xfree (text);
+  free (text);
 }
 
 
@@ -428,7 +428,7 @@ INTERNAL ERROR: %s: out of range reference `%d' from argument %s",
 
 	      text = *endp ? 1+ endp : endp;
 
-	      xfree ((char *) key);
+	      free ((char *) key);
 	      break;
 	    }
 	  break;

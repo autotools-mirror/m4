@@ -343,7 +343,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_flags = 0;
     if (sigaltstack (&ss, (stack_t *) 0) < 0)
       {
-	xfree ((void *) stackbuf);
+	free ((void *) stackbuf);
 	error (1, errno, "sigaltstack");
       }
   }
@@ -359,7 +359,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
       {
-	xfree (stackbuf);
+	free (stackbuf);
 	error (1, errno, "sigstack");
       }
   }

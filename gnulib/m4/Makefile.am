@@ -25,8 +25,9 @@ noinst_LTLIBRARIES	= libgnu.la
 libgnu_la_SOURCES	=
 libgnu_la_LIBADD	= $(LTLIBOBJS) $(LTLIBINTL)
 
-pkginclude_HEADERS	= $(GETTEXT_H) $(OBSTACK_H) $(REGEX_H) $(STDBOOL_H)
-EXTRA_HEADERS		= gettext.h obstack.h regex.h stdbool.h
+pkginclude_HEADERS	= $(STDBOOL_H) exit.h gettext.h obstack.h regex.h \
+			  xalloc.h xstrndup.h
+EXTRA_HEADERS		= stdbool.h
 EXTRA_DIST		=
 
 MOSTLYCLEANFILES	=
@@ -37,43 +38,74 @@ MAINTAINERCLEANFILES	= Makefile.in
 # Gnulib Makefile.am snippets #
 # --------------------------- #
 
-## exit (not from gnulib):
-pkginclude_HEADERS += exit.h
+## ((( gnulib module alloca
+BUILT_SOURCES += $(ALLOCA_H)
+EXTRA_DIST += alloca_.h
 
-## exitfail:
-libgnu_la_SOURCES += exitfail.c exitfail.h
-
-
-## progname:
-libgnu_la_SOURCES += progname.c progname.h
-
-
-## stdbool:
+# We need the following in order to create an <alloca.h> when the system
+# doesn't have one that works with the given compiler.
+all-local $(lib_OBJECTS): $(ALLOCA_H)
+alloca.h: alloca_.h
+	cp $(srcdir)/alloca_.h $@-t
+	mv $@-t $@
+MOSTLYCLEANFILES += alloca.h alloca.h-t
+## ))) gnulib module alloca
+## ((( gnulib module error
+## ))) gnulib module error
+## ((( gnulib module exit
+libgnu_la_SOURCES += exit.h
+## ))) gnulib module exit
+## ((( gnulib module exitfail
+libgnu_la_SOURCES += exitfail.h exitfail.c
+## ))) gnulib module exitfail
+## ((( gnulib module free
+## ))) gnulib module free
+## ((( gnulib module getopt
+libgnu_la_SOURCES += getopt.h getopt.c getopt1.c
+## ))) gnulib module getopt
+## ((( gnulib module gettext
+libgnu_la_SOURCES += gettext.h
+## ))) gnulib module gettext
+## ((( gnulib module malloc
+## ))) gnulib module malloc
+## ((( gnulib module obstack
+## ))) gnulib module obstack
+## ((( gnulib module progname
+libgnu_la_SOURCES += progname.h progname.c
+## ))) gnulib module progname
+## ((( gnulib module realloc
+## ))) gnulib module realloc
+## ((( gnulib module regex
+libgnu_la_SOURCES += regex.h
+## ))) gnulib module regex
+## ((( gnulib module restrict
+## ))) gnulib module restrict
+## ((( gnulib module stdbool
 BUILT_SOURCES += $(STDBOOL_H)
 EXTRA_DIST += stdbool_.h
 
 # We need the following in order to create an <stdbool.h> when the system
 # doesn't have one that works.
 all-local $(lib_OBJECTS): $(STDBOOL_H)
-stdbool.h: $(srcdir)/stdbool_.h
+stdbool.h: stdbool_.h
 	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool_.h > $@-t
 	mv $@-t $@
-
 MOSTLYCLEANFILES += stdbool.h stdbool.h-t
-
-
-## strndup:
+## ))) gnulib module stdbool
+## ((( gnulib module strndup
 libgnu_la_SOURCES += strndup.h
-
-
-## unlocked-io:
+## ))) gnulib module strndup
+## ((( gnulib module strtol
+## ))) gnulib module strtol
+## ((( gnulib module unlocked-io
 libgnu_la_SOURCES += unlocked-io.h
-
-
-## xalloc (not from gnulib):
-libgnu_la_SOURCES += xmalloc.c xstrdup.c
-pkginclude_HEADERS += xalloc.h
-
-## xstrndup (not from gnulib)::
-libgnu_la_SOURCES += xstrndup.c
-pkginclude_HEADERS += xstrndup.h
+## ))) gnulib module unlocked-io
+## ((( gnulib module version-etc
+libgnu_la_SOURCES += version-etc.h version-etc.c
+## ))) gnulib module version-etc
+## ((( gnulib module xalloc
+libgnu_la_SOURCES += xalloc.h xmalloc.c xstrdup.c
+## ))) gnulib module xalloc
+## ((( gnulib module xstrndup
+libgnu_la_SOURCES += xstrndup.h xstrndup.c
+## ))) gnulib module xstrndup

@@ -95,7 +95,11 @@ AM_INIT_AUTOMAKE([1.7a dist-bzip2])
 ## C compiler checks. ##
 ## ------------------ ##
 AC_PROG_CC
+
+dnl ((( gnulib module unlocked-io
 jm_FUNC_GLIBC_UNLOCKED_IO
+dnl ))) gnulib module unlocked-io
+
 AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
@@ -130,10 +134,32 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
+dnl <-- override gnulib module gettext
 AM_GNU_GETTEXT(external, need-ngettext)
 AM_GNU_GETTEXT_VERSION(0.12.1)
 m4_GNU_GETTEXT
+dnl --> override gnulib module gettext
 
+
+
+## --------------- ##
+## Gnulib support, ##
+## --------------- ##
+m4_GNULIB_MODULES(
+[error
+exit
+free
+getopt
+gettext
+obstack
+progname
+regex
+stdbool
+strtol
+version-etc
+xalloc
+xstrndup
+])
 
 
 ## ------------------------ ##
@@ -160,7 +186,9 @@ AC_CHECK_SIZEOF([long long int])
 ## C headers required by M4. ##
 ## ------------------------- ##
 AC_HEADER_STDC
+dnl ((( gnulib module stdbool
 AM_STDBOOL_H
+dnl ))) gnulib module stdbool
 AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
 
 if test $ac_cv_header_stdbool_h = yes; then
@@ -181,13 +209,55 @@ AC_FUNC_VPRINTF
 
 AM_WITH_DMALLOC
 
-gl_FUNC_STRTOL
-gl_GETOPT
-gl_XALLOC
-gl_XSTRNDUP
+dnl ((( gnulib module alloca
+gl_FUNC_ALLOCA
+dnl ))) gnulib module alloca
+dnl <-- override gnulib module error
 m4_ERROR
+dnl --> override gnulib module error
+dnl ((( gnulib module exit
+dnl ))) gnulib module exit
+dnl ((( gnulib module exitfail
+gl_EXITFAIL
+dnl ))) gnulib module exitfail
+dnl ((( gnulib module free
+gl_FUNC_FREE
+dnl ))) gnulib module free
+dnl ((( gnulib module getopt
+gl_GETOPT
+dnl ))) gnulib module getopt
+dnl ((( gnulib module malloc
+jm_FUNC_MALLOC
+dnl ))) gnulib module malloc
+dnl <-- override gnulib module obstack
 m4_OBSTACK
+dnl --> override gnulib module obstack
+dnl ((( gnulib module progname
+dnl ))) gnulib module progname
+dnl ((( gnulib module realloc
+jm_FUNC_REALLOC
+dnl ))) gnulib module realloc
+dnl <-- override gnulib module regex
 m4_REGEX([gnulib/m4/regex.c])
+dnl <-- override gnulib module regex
+dnl ((( gnulib module restrict
+gl_C_RESTRICT
+dnl ))) gnulib module restrict
+dnl ((( gnulib module strndup
+gl_FUNC_STRNDUP
+dnl ))) gnulib module strndup
+dnl ((( gnulib module strtol
+gl_FUNC_STRTOL
+dnl ))) gnulib module strtol
+dnl ((( gnulib module version-etc
+dnl ))) gnulib module version-etc
+dnl ((( gnulib module xalloc
+gl_XALLOC
+dnl ))) gnulib module xalloc
+dnl ((( gnulib module xstrndup
+gl_XSTRNDUP
+dnl ))) gnulib module xstrndup
+
 m4_SYS_STACKOVF
 
 # This is for the modules

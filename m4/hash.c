@@ -134,8 +134,8 @@ m4_hash_delete (m4_hash *hash)
   for (i = 0; i < HASH_SIZE (hash); ++i)
     if (BUCKET_NTH (hash, i))
       bucket_delete (hash, i);
-  xfree (HASH_BUCKETS (hash));
-  xfree (hash);
+  free (HASH_BUCKETS (hash));
+  free (hash);
 }
 
 /* Check that the nodes in bucket I have been cleared, and recycle
@@ -354,7 +354,7 @@ m4_hash_resize (m4_hash *hash, size_t size)
 	bucket_insert (hash, original_buckets[i]);
   }
 
-  xfree (original_buckets);
+  free (original_buckets);
 }
 #endif
 
@@ -385,7 +385,7 @@ maybe_grow (m4_hash *hash)
 	    bucket_insert (hash, original_buckets[i]);
       }
 
-      xfree (original_buckets);
+      free (original_buckets);
     }
 }
 
@@ -417,7 +417,7 @@ m4_hash_exit (void)
     {
       hash_node *stale = free_list;
       free_list = NODE_NEXT (stale);
-      xfree (stale);
+      free (stale);
     }
 }
 
@@ -484,7 +484,7 @@ m4_get_hash_iterator_next (const m4_hash *hash, m4_hash_iterator *place)
   /* If there are no more nodes to return, recycle the iterator memory.  */
   if (! (ITERATOR_PLACE (place) || ITERATOR_NEXT (place)))
     {
-      xfree (place);
+      free (place);
       return 0;
     }
 

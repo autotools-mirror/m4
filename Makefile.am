@@ -22,7 +22,7 @@
 EXTRA_DIST	= bootstrap config/mkstamp
 
 ## There is currently no means with Automake not to run aclocal.
-ACLOCAL_AMFLAGS = -I gnulib/config -I config
+ACLOCAL_AMFLAGS = -I gnulib/acm4 -I acm4
 
 SUBDIRS			= po gnulib m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \

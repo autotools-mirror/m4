@@ -1,3 +1,79 @@
+2003-10-07  Gary V. Vaughan  <gary@gnu.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Search in the new acm4 and
+	gnulib/acm4 directories for aclocal m4 macros.
+	* gnulib/Makefile.am (EXTRA_DIST): Removed.
+	(MAINTAINERCLEANFILES): Add Makefile.in.
+	* configure.ac (m4_GNULIB_MODULES): Use it to declare which gnulib
+	modules we use.
+	* acm4/m4-gnulib.m4 (m4_GNULIB_MODULES): New macro.
+	* gnulib/import: New file.  Temporary script for updating gnulib
+	imported files, until gnulib-tool is working.
+	* gnulib/config/codeset.m4, gnulib/config/error.m4,
+	gnulib/config/exitfail.m4, gnulib/config/extensions.m4,
+	gnulib/config/getopt.m4, gnulib/config/gettext.m4,
+	gnulib/config/glibc21.m4, gnulib/config/iconv.m4,
+	gnulib/config/intdiv0.m4, gnulib/config/inttypes-pri.m4,
+	gnulib/config/inttypes.m4, gnulib/config/inttypes_h.m4,
+	gnulib/config/isc-posix.m4, gnulib/config/lcmessage.m4,
+	gnulib/config/lib-ld.m4, gnulib/config/lib-link.m4,
+	gnulib/config/lib-prefix.m4, gnulib/config/malloc.m4,
+	gnulib/config/nls.m4, gnulib/config/obstack.m4,
+	gnulib/config/onceonly_2_57.m4, gnulib/config/po.m4,
+	gnulib/config/progtest.m4, gnulib/config/realloc.m4,
+	gnulib/config/regex.m4, gnulib/config/restrict.m4.
+	gnulib/config/stdbool.m4, gnulib/config/stdint_h.m4,
+	gnulib/config/strerror_r.m4, gnulib/config/strndup.m4,
+	gnulib/config/strnlen.m4, gnulib/config/strtol.m4,
+	gnulib/config/uintmax_t.m4, gnulib/config/ulonglong.m4,
+	gnulib/config/unlocked-io.m4, gnulib/config/xalloc.m4,
+	gnulib/config/xstrndup.m4: Removed.
+	* gnulib/acm4/alloca.m4, gnulib/acm4/codeset.m4,
+	gnulib/acm4/error.m4, gnulib/acm4/exitfail.m4,
+	gnulib/acm4/extensions.m4, gnulib/acm4/free.m4,
+	gnulib/acm4/getopt.m4, gnulib/acm4/gettext.m4,
+	gnulib/acm4/glibc21.m4, gnulib/acm4/iconv.m4,
+	gnulib/acm4/intdiv0.m4, gnulib/acm4/inttypes-pri.m4,
+	gnulib/acm4/inttypes.m4, gnulib/acm4/inttypes_h.m4,
+	gnulib/acm4/isc-posix.m4, gnulib/acm4/lcmessage.m4,
+	gnulib/acm4/lib-ld.m4, gnulib/acm4/lib-link.m4,
+	gnulib/acm4/lib-prefix.m4, gnulib/acm4/malloc.m4,
+	gnulib/acm4/nls.m4, gnulib/acm4/obstack.m4,
+	gnulib/acm4/onceonly_2_57.m4, gnulib/acm4/po.m4,
+	gnulib/acm4/progtest.m4, gnulib/acm4/realloc.m4,
+	gnulib/acm4/regex.m4, gnulib/acm4/restrict.m4.
+	gnulib/acm4/stdbool.m4, gnulib/acm4/stdint_h.m4,
+	gnulib/acm4/strerror_r.m4, gnulib/acm4/strndup.m4,
+	gnulib/acm4/strnlen.m4, gnulib/acm4/strtol.m4,
+	gnulib/acm4/uintmax_t.m4, gnulib/acm4/ulonglong.m4,
+	gnulib/acm4/unlocked-io.m4, gnulib/acm4/xalloc.m4,
+	gnulib/acm4/xstrndup.m4: Reimported from CVS gnulib with
+	gnulib/import script.
+	* gnulib/m4/alloca.c, gnulib/m4/alloca_.h, gnulib/m4/error.c,
+	gnulib/m4/error.h, gnulib/m4/exitfail.c, gnulib/m4/free.c,
+	gnulib/m4/malloc.c, gnulib/m4/obstack.c, gnulib/m4/obstack.h,
+	gnulib/m4/realloc.c, gnulib/m4/regex.c, gnulib/m4/strtol.c,
+	gnulib/m4/version-etc.c, gnulib/m4/version-etc.h,
+	gnulib/m4/xalloc.h, gnulib/m4/xmalloc.c: Updated from CVS
+	gnulib with gnulib/import script.
+	* configure.ac, gnulib/m4/Makefile.am: Manually insert anticipated
+	guards ready for gnulib-tool to autoupdate on import.
+	* config/debug.m4, config/gmp.m4, config/m4-error.m4,
+	config/m4-gettext.m4, config/m4-obstack.m4, config/m4-regex.m4,
+	config/stackovf.m4: Moved from here...
+	* acm4/debug.m4, acm4/gmp.m4, acm4/m4-error.m4,
+	acm4/m4-gettext.m4, acm4/m4-obstack.m4, acm4/m4-regex.m4,
+	acm4/stackovf.m4: ...to here, to separate aclocal macros from
+	configure time helper scripts.
+	* config/error.m4: Removed; superceded by gnulib/acm4/error.m4.
+	* m4/hash.c, m4/m4.c, m4/macro.c, m4/module.c, m4/output.c,
+	m4/path.c, m4/symtab.c, m4/syntax, m4/system_.h, modules/m4.c,
+	src/main.c, src/stackovf.c: s/xfree/free/g to comply with new
+	gnulib xalloc.h.
+	* src/main.c (version_etc_copyright): Only output the current
+	year.
+	(version_etc): Call with new variadic API.
+
 2003-09-16  Gary V. Vaughan  <gary@gnu.org>
 
 	* gnulib/m4/version-etc.c, gnulib/m4/version-etc.h: Import

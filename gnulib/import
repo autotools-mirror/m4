@@ -1,0 +1,97 @@
+#! /bin/sh
+
+# Copyright (C) 2003 Free Software Foundation, Inc.
+#
+# This file is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# Written by Gary V. Vaughan <gary@gnu.org>
+
+: ${AUTOCONF="autoconf"}
+: ${GNULIB_DIR="$HOME/devel/savannah/gnulib"}
+: ${CONFIGDIR=".."}
+: ${destdir="."}
+: ${DEST_TRANSFORM='s:^m4/:acm4/:;s:^lib/:m4/:'}
+: ${LIB_TRANSFORM='s:^lib_:libgnu_la_:'}
+
+me=import
+mymodules=${*-`cd $CONFIGDIR; $AUTOCONF --trace=m4_GNULIB_MODULES |sed 's,^.*:,,g'`}
+
+dryrun=false
+
+gnulibtool_magic="## This file generated automatically by $me "
+
+# func_update_file dest
+func_update_file ()
+{
+  dest="$1"
+
+  src="${dest}T"
+  (
+    cd "${destdir-.}"
+
+    if test -f $dest; then
+      if cmp -s $src $dest; then
+	# Files are the same: remove SRC
+	rm -f $src
+      elif cat $dest | grep "^$gnulibtool_magic" >/dev/null 2>&1; then
+        # Files differ, and contain correct magic: update
+	$dryrun || mv -f $src $dest
+	echo "$me: updating... $dest"
+      else
+	# DEST does not contain correct magic: ignore
+	echo "$me: ignoring... $dest (user edits)"
+      fi
+    else
+      # DEST does not yet exist: create it
+      $dryrun || { echo "$gnulibtool_magic" > $dest; cat $src >> $dest; }
+      echo "$me: creating... $dest"
+    fi
+
+    $dryrun || rm -f $src
+  )
+}
+
+# Calculate list of all modules
+modules=
+for mod in $mymodules; do
+    modules="$modules
+$mod
+`( cd $GNULIB_DIR && ./gnulib-tool --extract-dependencies $mod )`"
+
+done
+all_modules=`echo "$modules" | sort | uniq | sed '/^[ 	]*$/d'`
+
+for mod in $all_modules; do
+    dest=m4/$mod.am
+    # import Makefile snippets
+#    (
+#	cd $GNULIB_DIR
+#	./gnulib-tool --extract-automake-snippet $mod
+#    ) | sed $LIB_TRANSFORM > $destdir/${dest}T
+#    func_update_file $dest
+
+    # collect filelist
+    filelist="$filelist
+`( cd $GNULIB_DIR && ./gnulib-tool --extract-filelist $mod )`"
+done
+all_files=`echo "$filelist" | sort | uniq`
+
+for file in $all_files; do
+    # import files
+    cp -f $GNULIB_DIR/$file $destdir/`echo $file | sed $DEST_TRANSFORM`
+    echo "$me: importing... $file"
+done
+
+exit 0

@@ -166,7 +166,7 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 	  m4_symbol_pushdef (M4SYMTAB, name, value);
 
 	  if (m4_get_prefix_builtins_opt (context))
-	    xfree (name);
+	    free (name);
 	}
 
 #ifdef DEBUG_MODULES
@@ -293,7 +293,7 @@ m4__module_init (m4 *context)
 #if !WITH_DMALLOC
   /* initialise libltdl's memory management. */
   lt_dlmalloc = xmalloc;
-  lt_dlfree   = xfree;
+  lt_dlfree   = free;
 #endif
 
   errors      = lt_dlinit ();
@@ -493,7 +493,7 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 		name, module_dlerror ()));
     }
 
-  xfree ((void *) name);
+  free ((void *) name);
 }
 
 static int

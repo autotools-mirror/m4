@@ -149,7 +149,7 @@ BEGIN_C_DECLS
 
 
 
-#define DELETE(Expr)	((Expr) = (xfree (Expr), (void *) 0))
+#define DELETE(Expr)	((Expr) = (free (Expr), (void *) 0))
 
 END_C_DECLS
 

@@ -151,11 +151,11 @@ m4_syntax_delete (m4_syntax_table *syntax)
 {
   assert (syntax);
 
-  xfree (syntax->lquote.string);
-  xfree (syntax->rquote.string);
-  xfree (syntax->bcomm.string);
-  xfree (syntax->ecomm.string);
-  xfree (syntax);
+  free (syntax->lquote.string);
+  free (syntax->rquote.string);
+  free (syntax->bcomm.string);
+  free (syntax->ecomm.string);
+  free (syntax);
 }
 
 int
@@ -206,8 +206,8 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
     if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE))
       remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE);
 
-  xfree (syntax->lquote.string);
-  xfree (syntax->rquote.string);
+  free (syntax->lquote.string);
+  free (syntax->rquote.string);
 
   syntax->lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
   syntax->lquote.length = strlen (syntax->lquote.string);
@@ -252,8 +252,8 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
     if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM))
       remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM);
 
-  xfree (syntax->bcomm.string);
-  xfree (syntax->ecomm.string);
+  free (syntax->bcomm.string);
+  free (syntax->ecomm.string);
 
   syntax->bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
   syntax->bcomm.length = strlen (syntax->bcomm.string);

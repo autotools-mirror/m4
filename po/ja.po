@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-12 15:21+0100\n"
+"POT-Creation-Date: 2003-10-07 14:14+0100\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -71,7 +71,7 @@ msgstr "%s: `%s' は不明瞭なオプション名です。\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
+#: gnulib/m4/obstack.c:426 gnulib/m4/obstack.c:429 gnulib/m4/xmalloc.c:51
 #, fuzzy
 msgid "memory exhausted"
 msgstr "メモリが残っていません。"
@@ -151,6 +151,103 @@ msgstr ""
 #: gnulib/m4/regex.c:7915
 msgid "No previous regular expression"
 msgstr "正規表現が定義されていません。"
+
+#. TRANSLATORS: %s denotes an author name.
+#: gnulib/m4/version-etc.c:78
+#, c-format
+msgid "Written by %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnulib/m4/version-etc.c:82
+#, c-format
+msgid "Written by %s and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnulib/m4/version-etc.c:86
+#, c-format
+msgid "Written by %s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:92
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:98
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:104
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:111
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:118
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:126
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:136
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, %s, and others.\n"
+msgstr ""
+
+#: gnulib/m4/version-etc.c:147
+msgid ""
+"This is free software; see the source for copying conditions.  There is NO\n"
+"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+msgstr ""
 
 #: m4/input.c:231
 #, c-format
@@ -320,47 +417,47 @@ msgstr "`%s' は定義されていません。"
 msgid "Warning: %s: modulo by zero: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:147
+#: modules/gnu.c:145
 #, c-format
 msgid "Undefined name %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:168
+#: modules/gnu.c:166
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:197 src/freeze.c:548
+#: modules/gnu.c:195 src/freeze.c:548
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:233
+#: modules/gnu.c:231
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "debugmode マクロにおいて %s は不正なデバッグオプションです。"
 
-#: modules/gnu.c:266
+#: modules/gnu.c:264
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "`%s' をエラーログファイルとしてセットできません。"
 
-#: modules/gnu.c:296
+#: modules/gnu.c:294
 #, fuzzy, c-format
 msgid "%s: bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
 
-#: modules/gnu.c:338 modules/gnu.c:411
+#: modules/gnu.c:336 modules/gnu.c:409
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "正規表現 %s のマッチングに失敗しました。"
 
-#: modules/gnu.c:529
+#: modules/gnu.c:527
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "コマンド `%s' へのパイプがオープンできません。"
 
-#: modules/gnu.c:598
+#: modules/gnu.c:596
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
@@ -413,24 +510,24 @@ msgstr "内部エラー：凍結ファイルのフォーマットが不正です。"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
 
-#: src/main.c:74
+#: src/main.c:75
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 "エラー: スタックがオーバーフローを起こしています。\n"
 "        (無限に再帰的定義をしていませんか？)"
 
-#: src/main.c:86
+#: src/main.c:87
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "詳しくは `%s --help' の出力を御覧下さい。\n"
 
-#: src/main.c:90
+#: src/main.c:91
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "使用方法: %s [オプション]...[ファイル名]\n"
 
-#: src/main.c:91
+#: src/main.c:92
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -456,7 +553,7 @@ msgstr ""
 "  -Q, --quiet, --silent        いくつかのビルトインコマンドの警告を抑制します。\n"
 "  -P, --prefix-builtins        全てのビルトインマクロに `m4_' という接頭辞を                               強制的に追加します。\n"
 
-#: src/main.c:105
+#: src/main.c:106
 #, c-format
 msgid ""
 "\n"
@@ -465,7 +562,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:111
+#: src/main.c:112
 #, fuzzy
 msgid ""
 "\n"
@@ -484,7 +581,7 @@ msgstr ""
 "  -U, --undefine=NAME           NAME の定義を取り消します。\n"
 "  -s, --synclines               行番号とファイル名の行を生成します。\n"
 
-#: src/main.c:119
+#: src/main.c:120
 #, fuzzy
 msgid ""
 "\n"
@@ -499,7 +596,7 @@ msgstr ""
 "                                セットします。\n"
 "   -L, --nesting-limit=NUNBER   マクロのネスト回数の上限値を人為的に変更します。\n"
 
-#: src/main.c:125
+#: src/main.c:126
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -511,7 +608,7 @@ msgstr ""
 "   -R, --reload-state=FILE      最初に指定された FILE から\n"
 "                                凍結された定義をロードします\n"
 
-#: src/main.c:131
+#: src/main.c:132
 msgid ""
 "\n"
 "Debugging:\n"
@@ -529,7 +626,7 @@ msgstr ""
 "   -o, --error-output=FILE      デバッグとトレースの出力を FILE に\n"
 "                                リダイレクトします。\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -561,7 +658,7 @@ msgstr ""
 "   i   入力ファイルに生じた変化を表示します。\n"
 "   V   上記の全ての FLAG を指定することを意味します。\n"
 
-#: src/main.c:154
+#: src/main.c:155
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -570,40 +667,26 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/main.c:159
+#: src/main.c:160
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:310
+#: src/main.c:317
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:314
+#: src/main.c:321
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:343
+#: src/main.c:350
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
-
-#: src/main.c:371
-msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
-msgstr ""
-
-#: src/main.c:374
-msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
-msgstr ""
-
-#: src/main.c:377
-msgid ""
-"This is free software; see the source for copying conditions.  There is NO\n"
-"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
-msgstr ""
 
 #: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"

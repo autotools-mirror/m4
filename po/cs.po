@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-12 15:21+0100\n"
+"POT-Creation-Date: 2003-10-07 14:14+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -71,7 +71,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: gnulib/m4/obstack.c:487 gnulib/m4/obstack.c:490 gnulib/m4/xmalloc.c:62
+#: gnulib/m4/obstack.c:426 gnulib/m4/obstack.c:429 gnulib/m4/xmalloc.c:51
 msgid "memory exhausted"
 msgstr ""
 
@@ -155,6 +155,103 @@ msgstr ""
 #, fuzzy
 msgid "No previous regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
+
+#. TRANSLATORS: %s denotes an author name.
+#: gnulib/m4/version-etc.c:78
+#, c-format
+msgid "Written by %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnulib/m4/version-etc.c:82
+#, c-format
+msgid "Written by %s and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnulib/m4/version-etc.c:86
+#, c-format
+msgid "Written by %s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:92
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:98
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:104
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:111
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:118
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:126
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnulib/m4/version-etc.c:136
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, %s, and others.\n"
+msgstr ""
+
+#: gnulib/m4/version-etc.c:147
+msgid ""
+"This is free software; see the source for copying conditions.  There is NO\n"
+"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+msgstr ""
 
 # , c-format
 #: m4/input.c:231
@@ -340,54 +437,54 @@ msgid "Warning: %s: modulo by zero: %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:147
+#: modules/gnu.c:145
 #, c-format
 msgid "Undefined name %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:168
+#: modules/gnu.c:166
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:197 src/freeze.c:548
+#: modules/gnu.c:195 src/freeze.c:548
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Syntaktický kód %c není definován"
 
 # , c-format
-#: modules/gnu.c:233
+#: modules/gnu.c:231
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Ladící mód: ¹patné ladící volby: `%s'"
 
 # , c-format
-#: modules/gnu.c:266
+#: modules/gnu.c:264
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Chybový soubor %s nelze pou¾ít"
 
 # , c-format
-#: modules/gnu.c:296
+#: modules/gnu.c:294
 #, fuzzy, c-format
 msgid "%s: bad regular expression `%s': %s"
 msgstr "©patný regulární výraz `%s': %s"
 
 # , c-format
-#: modules/gnu.c:338 modules/gnu.c:411
+#: modules/gnu.c:336 modules/gnu.c:409
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 # , c-format
-#: modules/gnu.c:529
+#: modules/gnu.c:527
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Rouru do pøíkazu `%s' nelze otevøít"
 
-#: modules/gnu.c:598
+#: modules/gnu.c:596
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 
@@ -447,24 +544,24 @@ msgstr "©patný formát zmrazeného souboru"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' ze zmrazeného souboru nenalezeno v tabulce vestavìných maker!"
 
-#: src/main.c:74
+#: src/main.c:75
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "CHYBA: Pøeteèení zásobníku. (nekoneèná rekurze makra define?)"
 
 # , c-format
-#: src/main.c:86
+#: src/main.c:87
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Více informací získáte pøíkazem `%s --help'.\n"
 
 # , c-format
-#: src/main.c:90
+#: src/main.c:91
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Pou¾ití: %s [PØEPÍNAÈ]... [SOUBOR]...\n"
 
-#: src/main.c:91
+#: src/main.c:92
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -493,7 +590,7 @@ msgstr ""
 "  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
 "`m4_'\n"
 
-#: src/main.c:105
+#: src/main.c:106
 #, c-format
 msgid ""
 "\n"
@@ -502,7 +599,7 @@ msgid ""
 "  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:111
+#: src/main.c:112
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -520,7 +617,7 @@ msgstr ""
 "  -U, --undefine=MAKRO          sma¾e vestavìné MAKRO\n"
 "  -s, --synclines               vlo¾í øádky tvaru `#line ÈÍSLO \"SOUBOR\"'\n"
 
-#: src/main.c:119
+#: src/main.c:120
 #, fuzzy
 msgid ""
 "\n"
@@ -535,7 +632,7 @@ msgstr ""
 "symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
-#: src/main.c:125
+#: src/main.c:126
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -547,7 +644,7 @@ msgstr ""
 "  -F, --freeze-state=SOUBOR     pøi ukonèení ulo¾í zmrazený stav do SOUBORU\n"
 "  -R, --reload-state=SOUBOR     pøi startu naète zmrazený stav ze SOUBORU\n"
 
-#: src/main.c:131
+#: src/main.c:132
 msgid ""
 "\n"
 "Debugging:\n"
@@ -566,7 +663,7 @@ msgstr ""
 "  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
 "SOUBORU\n"
 
-#: src/main.c:139
+#: src/main.c:140
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -596,7 +693,7 @@ msgstr ""
 "  i   vypí¹e informace o ka¾dé zmìnì vstupního souboru\n"
 "  V   zkratka pro v¹echny vý¹e uvedené volby\n"
 
-#: src/main.c:154
+#: src/main.c:155
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -605,7 +702,7 @@ msgstr ""
 "Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
 "vstup.\n"
 
-#: src/main.c:159
+#: src/main.c:160
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -614,35 +711,21 @@ msgstr ""
 "Chyby v programu oznamujte na adrese <bug-m4@gnu.org> (anglicky).\n"
 "Pøipomínky k pøekladu zasílejte na adresu <cs@li.org> (èesky).\n"
 
-#: src/main.c:310
+#: src/main.c:317
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:314
+#: src/main.c:321
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 # , c-format
-#: src/main.c:343
+#: src/main.c:350
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "©patné ladící volby: `%s'"
-
-#: src/main.c:371
-msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
-msgstr ""
-
-#: src/main.c:374
-msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
-msgstr ""
-
-#: src/main.c:377
-msgid ""
-"This is free software; see the source for copying conditions.  There is NO\n"
-"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
-msgstr ""
 
 #: src/stackovf.c:177
 msgid "VMEM limit exceeded?\n"

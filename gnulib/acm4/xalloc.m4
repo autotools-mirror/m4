@@ -8,14 +8,12 @@ dnl the same distribution terms as the rest of that program.
 
 AC_DEFUN([gl_XALLOC],
 [
-  AC_REQUIRE([AC_C_INLINE])
   gl_PREREQ_XMALLOC
   gl_PREREQ_XSTRDUP
 ])
 
 # Prerequisites of lib/xmalloc.c.
 AC_DEFUN([gl_PREREQ_XMALLOC], [
-  AC_REQUIRE([AC_HEADER_STDC])
   AC_REQUIRE([jm_FUNC_MALLOC])
   AC_REQUIRE([jm_FUNC_REALLOC])
 ])

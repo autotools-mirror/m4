@@ -83,7 +83,7 @@ m4_symtab_delete (m4_symbol_table *symtab)
 
   m4_symtab_apply  (symtab, symbol_destroy_CB, NULL);
   m4_hash_delete (symtab->table);
-  xfree (symtab);
+  free (symtab);
 }
 
 void *
@@ -162,8 +162,8 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle
 		  VALUE_NEXT (data) = VALUE_NEXT (next);
 
 		  if (next->type == M4_SYMBOL_TEXT)
-		    xfree (m4_get_symbol_value_text (next));
-		  xfree (next);
+		    free (m4_get_symbol_value_text (next));
+		  free (next);
 		}
 	      else
 		data = next;
@@ -192,7 +192,7 @@ symbol_destroy_CB (m4_symbol_table *symtab, const char *name, m4_symbol *symbol,
   while (key && m4_hash_lookup (symtab->table, key))
     m4_symbol_popdef (symtab, key);
 
-  xfree (key);
+  free (key);
 
   return NULL;
 }
@@ -281,7 +281,7 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
     if (*symtab->nuke_trace_bit || !m4_get_symbol_traced (*psymbol))
       {
 	DELETE (*psymbol);
-	xfree (m4_hash_remove (symtab->table, name));
+	free (m4_hash_remove (symtab->table, name));
       }
 }
 
@@ -305,8 +305,8 @@ symbol_popval (m4_symbol *symbol)
 	  m4_hash_delete (VALUE_ARG_SIGNATURE (stale));
 	}
       if (m4_is_symbol_value_text (stale))
-	xfree (m4_get_symbol_value_text (stale));
-      xfree (stale);
+	free (m4_get_symbol_value_text (stale));
+      free (stale);
     }
 }
 
@@ -322,8 +322,8 @@ arg_destroy_CB (m4_hash *hash, const void *name, void *arg, void *ignored)
 
   if (SYMBOL_ARG_DEFAULT (token_arg))
     DELETE (SYMBOL_ARG_DEFAULT (token_arg));
-  xfree (token_arg);
-  xfree (m4_hash_remove (hash, (const char *) name));
+  free (token_arg);
+  free (m4_hash_remove (hash, (const char *) name));
 
   return NULL;
 }
@@ -337,7 +337,7 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
   assert (src);
 
   if (m4_is_symbol_value_text (dest))
-    xfree (m4_get_symbol_value_text (dest));
+    free (m4_get_symbol_value_text (dest));
 
   if (VALUE_ARG_SIGNATURE (dest))
     {

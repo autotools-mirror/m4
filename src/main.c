@@ -222,10 +222,10 @@ main (int argc, char *const *argv, char *const *envp)
   set_program_name (argv[0]);
   error_print_progname = print_program_name_CB;
 
-  /* Initialise gnulib version-etc module.  
+  /* Initialise gnulib version-etc module.
      Do *not* mark this string for translation.  */
   version_etc_copyright	=
-    "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc.";
+    "Copyright (C) 2003 Free Software Foundation, Inc.";
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
@@ -375,7 +375,7 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       version_etc (stdout, NULL, "GNU " PACKAGE, VERSION TIMESTAMP,
-		   _("Written by Rene' Seindal and Gary V. Vaughan."));
+		   "Rene' Seindal", "Gary V. Vaughan", NULL);
       exit (EXIT_SUCCESS);
     }
 
@@ -471,7 +471,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  }
 
 	next = defines->next;
-	xfree ((void *) defines);
+	free (defines);
 	defines = next;
       }
   }
@@ -510,7 +510,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    else
 	      {
 		m4_push_file (context, fp, filename);
-		xfree (filename);
+		free (filename);
 	      }
 	  }
 	m4_macro_expand_input (context);

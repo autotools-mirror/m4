@@ -66,13 +66,13 @@ m4_delete (m4 *context)
 	  m4__search_path *stale = path;
 	  path = path->next;
 
-	  xfree ((void*) stale->dir);
-	  xfree (stale);
+	  free ((void*) stale->dir);
+	  free (stale);
 	}
-      xfree (context->search_path);
+      free (context->search_path);
     }
 
-  xfree (context);
+  free (context);
 }
 
 

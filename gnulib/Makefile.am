@@ -18,11 +18,5 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS		= m4
-
-EXTRA_DIST	=				\
-config/extensions.m4				\
-config/obstack.m4				\
-config/onceonly_2_57.m4				\
-config/stdbool.m4				\
-config/unlocked-io.m4
+SUBDIRS			= m4
+MAINTAINERCLEANFILES	= Makefile.in
