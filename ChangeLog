@@ -1,5 +1,9 @@
 2001-10-13  Akim Demaille  <akim@epita.fr>
 
+	* m4/ltdl.c: Update.
+
+2001-10-13  Akim Demaille  <akim@epita.fr>
+
 	* src/main.c, src/freeze.c, m4/debug.c, m4/input.c, m4/macro.c:
 	Don't gettextize internal error messages.
 
