@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-09-03 09:37+0200\n"
+"POT-Creation-Date: 2001-09-05 10:19+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -313,26 +313,17 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
-#: m4/symtab.c:206
-msgid "INTERNAL ERROR: Attempt to delete non-existant symbol"
-msgstr ""
-
-#: m4/symtab.c:211
-#, fuzzy
-msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
-msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αντικανονική κατάσταση στο symbol_lookup ()"
-
-#: m4/symtab.c:319
+#: m4/symtab.c:347
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
 
-#: modules/gnu.c:126 modules/m4.c:636 modules/m4.c:655
+#: modules/gnu.c:126
 #, c-format
 msgid "Undefined name %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/gnu.c:151 modules/m4.c:300
+#: modules/gnu.c:151
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Μη ορισμένο όνομα %s"
@@ -379,20 +370,18 @@ msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο define_macro ()"
 
-#: modules/m4.c:307
-msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
-msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο m4_dumpdef ()"
+#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
+#: modules/m4.c:664
+#, fuzzy, c-format
+msgid "Warning: %s: undefined name: %s"
+msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/m4.c:345
-msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
-msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος συμβόλου στο m4_defn ()"
-
-#: modules/m4.c:457
+#: modules/m4.c:464
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Αδυναμία επαναφοράς του %s"
 
-#: modules/m4.c:529 src/freeze.c:390
+#: modules/m4.c:536 src/freeze.c:390
 #, c-format
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"
@@ -607,26 +596,26 @@ msgstr ""
 "\n"
 "Αναφέρατε σφάλματα στο <bug-m4@gnu.org>.\n"
 
-#: src/main.c:315
+#: src/main.c:307
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:319
+#: src/main.c:311
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:348
+#: src/main.c:340
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Λάθος σημαίες εκσφαλμάτωσης: `%s'"
 
-#: src/main.c:377
+#: src/main.c:369
 msgid " (options:"
 msgstr " (επιλογές:"
 
-#: src/main.c:460
+#: src/main.c:452
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος κωδικός στα αναφερόμενα ορίσματα"
 
@@ -648,6 +637,17 @@ msgstr ""
 #: src/stackovf.c:203
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Ελέγξατε για πιθανή επ'άπειρο αναδρομή.\n"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
+#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Αντικανονική κατάσταση στο symbol_lookup ()"
+
+#~ msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
+#~ msgstr ""
+#~ "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο m4_dumpdef ()"
+
+#~ msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
+#~ msgstr "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος συμβόλου στο m4_defn ()"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 #~ msgstr ""

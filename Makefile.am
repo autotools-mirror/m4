@@ -19,7 +19,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-AUTOMAKE_OPTIONS = 1.5
+AUTOMAKE_OPTIONS = 1.5 dist-bzip2
 
 EXTRA_DIST	= bootstrap
 

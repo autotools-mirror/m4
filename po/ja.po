@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-09-03 09:37+0200\n"
+"POT-Creation-Date: 2001-09-05 10:19+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -317,26 +317,17 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
 
-#: m4/symtab.c:206
-msgid "INTERNAL ERROR: Attempt to delete non-existant symbol"
-msgstr ""
-
-#: m4/symtab.c:211
-#, fuzzy
-msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
-msgstr "内部エラー：関数 symbol_lookup () への引数 mode が不正です。"
-
-#: m4/symtab.c:319
+#: m4/symtab.c:347
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "`%s' は定義されていません。\n"
 
-#: modules/gnu.c:126 modules/m4.c:636 modules/m4.c:655
+#: modules/gnu.c:126
 #, c-format
 msgid "Undefined name %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:151 modules/m4.c:300
+#: modules/gnu.c:151
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "`%s' は定義されていません。"
@@ -380,20 +371,18 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "内部エラー：関数 define_macro () 内のトークンデータの種類が不正です。"
 
-#: modules/m4.c:307
-msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
-msgstr "内部エラー：関数 m4_dumpdef () のトークンデータの種類が不正です。"
+#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
+#: modules/m4.c:664
+#, fuzzy, c-format
+msgid "Warning: %s: undefined name: %s"
+msgstr "`%s' は定義されていません。"
 
-#: modules/m4.c:345
-msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
-msgstr "内部エラー：関数 m4_defn () 内のシンボルの種類が不正です。"
-
-#: modules/m4.c:457
+#: modules/m4.c:464
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:529 src/freeze.c:390
+#: modules/m4.c:536 src/freeze.c:390
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
@@ -602,26 +591,26 @@ msgid ""
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:315
+#: src/main.c:307
 #, c-format
 msgid "ERROR: failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:319
+#: src/main.c:311
 #, c-format
 msgid "ERROR: failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:348
+#: src/main.c:340
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/main.c:377
+#: src/main.c:369
 msgid " (options:"
 msgstr ""
 
-#: src/main.c:460
+#: src/main.c:452
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "内部エラー：オプションの後処理で、不正コードが検出されました。"
 
@@ -643,6 +632,16 @@ msgstr ""
 #: src/stackovf.c:203
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  無限の再帰呼び出しが行われていないかどうかチェックして下さい。\n"
+
+#, fuzzy
+#~ msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
+#~ msgstr "内部エラー：関数 symbol_lookup () への引数 mode が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
+#~ msgstr "内部エラー：関数 m4_dumpdef () のトークンデータの種類が不正です。"
+
+#~ msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
+#~ msgstr "内部エラー：関数 m4_defn () 内のシンボルの種類が不正です。"
 
 #~ msgid "  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n"
 #~ msgstr "-W, --word-regexp=REGEXP   マクロ名のシンタックスに REGEXP を                                       正規表現として用います。\n"
