@@ -1,3 +1,9 @@
+2003-08-27  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.ac (AC_CONFIG_FILES): Add tests/atlocal.
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Revert the 2003-08-14
+	delta.
+
 2003-08-15  Gary V. Vaughan  <gary@gnu.org>
 
 	* configure.ac (AC_HEADER_STDBOOL, INCLUDE_STDBOOL_H): Check for

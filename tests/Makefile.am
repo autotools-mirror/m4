@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
+## Copyright 2000, 2001 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@ MAINTAINERCLEANFILES = Makefile.in generated.at $(TESTSUITE)
 OTHER_FILES = \
 	iso8859.m4 stackovf.test
 
-TESTS_ENVIRONMENT = USE_GMP="$(USE_GMP)"
-
 ## ------------ ##
 ## package.m4.  ##
 ## ------------ ##
@@ -56,10 +54,10 @@ TESTSUITE_AT = \
 TESTSUITE = testsuite
 
 check-local: atconfig $(TESTSUITE)
-	$(TESTS_ENVIRONMENT) $(SHELL) $(srcdir)/$(TESTSUITE)
+	$(SHELL) $(srcdir)/$(TESTSUITE)
 
 clean-local:
-	$(TESTS_ENVIRONMENT) $(SHELL) $(srcdir)/$(TESTSUITE) --clean
+	$(srcdir)/testsuite --clean
 
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
