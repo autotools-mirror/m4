@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -110,7 +111,9 @@ expand_argument (struct obstack *obs, m4_token *argp)
   m4_token_t t;
   m4_token td;
   char *text;
-  int paren_level;
+  int paren_level = 0;
+  const char *current_file = m4_current_file;
+  int current_line = m4_current_line;
 
   TOKEN_TYPE (argp) = M4_TOKEN_VOID;
 
@@ -121,16 +124,13 @@ expand_argument (struct obstack *obs, m4_token *argp)
     }
   while (t == M4_TOKEN_SPACE);
 
-  paren_level = 0;
-
   while (1)
     {
-
       switch (t)
 	{			/* TOKSW */
 	case M4_TOKEN_SIMPLE:
 	  text = TOKEN_TEXT (&td);
-	  if ((M4_IS_COMMA(*text) || M4_IS_CLOSE(*text)) && paren_level == 0)
+	  if ((M4_IS_COMMA (*text) || M4_IS_CLOSE (*text)) && paren_level == 0)
 	    {
 
 	      /* The argument MUST be finished, whether we want it or not.  */
@@ -142,19 +142,19 @@ expand_argument (struct obstack *obs, m4_token *argp)
 		  TOKEN_TYPE (argp) = M4_TOKEN_TEXT;
 		  TOKEN_TEXT (argp) = text;
 		}
-	      return (boolean) (M4_IS_COMMA(*TOKEN_TEXT (&td)));
+	      return (boolean) (M4_IS_COMMA (*TOKEN_TEXT (&td)));
 	    }
 
-	  if (M4_IS_OPEN(*text))
+	  if (M4_IS_OPEN (*text))
 	    paren_level++;
-	  else if (M4_IS_CLOSE(*text))
+	  else if (M4_IS_CLOSE (*text))
 	    paren_level--;
 	  expand_token (obs, t, &td);
 	  break;
 
 	case M4_TOKEN_EOF:
-	  M4ERROR ((EXIT_FAILURE, 0,
-		    _("ERROR: EOF in argument list")));
+	  error_at_line (EXIT_FAILURE, 0, current_file, current_line,
+			 _("EOF in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:

@@ -1,3 +1,8 @@
+2001-10-19  Akim Demaille  <akim@epita.fr>
+
+	* m4/macro.c (expand_argument): Display where was opened what is
+	not closed.
+
 2001-10-18  Akim Demaille  <akim@epita.fr>
 
 	* m4/input.c, modules/m4.c: Formatting changes.
