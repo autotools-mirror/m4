@@ -43,17 +43,12 @@ TIMESTAMP=
 case AC_PACKAGE_VERSION in
   *[[acegikmoqsuwy]])
     TIMESTAMP=`$CONFIG_SHELL $ac_aux_dir/mkstamp < $srcdir/ChangeLog`
-    banner="Configuring AC_PACKAGE_TARNAME AC_PACKAGE_VERSION$TIMESTAMP"
-    dashes=`echo "$banner" | sed 's/./-/g'`
-
-    # Display an obvious version banner
-    echo
-    echo $dashes
-    echo "$banner"
-    echo $dashes
+    AS_BOX([Configuring AC_PACKAGE_TARNAME AC_PACKAGE_VERSION$TIMESTAMP])
     echo
     ;;
 esac
+AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
+    [Defined to a CVS timestamp for alpha releases of M4])
 
 
 

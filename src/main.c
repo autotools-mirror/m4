@@ -364,7 +364,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      printf ("GNU %s %s\n", PACKAGE, VERSION);
+      printf ("GNU %s %s%s\n", PACKAGE, VERSION, TIMESTAMP);
       fputs (_("Written by Rene' Seindal and Gary V. Vaughan.\n"), stdout);
       putc ('\n', stdout);
 
