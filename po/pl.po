@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-08-07 14:06+0200\n"
+"POT-Creation-Date: 2001-08-10 12:35+0200\n"
 "PO-Revision-Date: 1999-05-03 19:47+0200\n"
 "Last-Translator: Rafa³ Maszkowski <rzm@icm.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"

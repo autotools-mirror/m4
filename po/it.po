@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2001-08-07 14:06+0200\n"
+"POT-Creation-Date: 2001-08-10 12:35+0200\n"
 "Version: \n"
 "Date: 1995-06-30 21:00:12+0200\n"
 "From: Ulrich Drepper <drepper@myware>\n"

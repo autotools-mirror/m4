@@ -15,8 +15,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 # 02111-1307  USA
-
-undefine([changeword])
+AC_PREREQ(2.52)
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_cv_])])dnl
+ifdef([changeword], [undefine([changeword])])dnl
 
 AC_INIT(src/m4.h)
 AC_CONFIG_AUX_DIR(config)
@@ -32,8 +33,6 @@ AC_PROG_CC_C_O
 
 ALL_LINGUAS="cs de el fr it ja nl pl ru sv"
 AM_GNU_GETTEXT
-
-AC_ARG_PROGRAM
 
 pkglibexecdir='${libexecdir}'/$PACKAGE
 AC_SUBST(pkglibexecdir)
@@ -75,12 +74,13 @@ AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol xmalloc xstrdup)
 
 M4OBJS=
-m4_getopt=src/getopt.h
-rm -f $m4_getopt
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_getopt_h$])])dnl
+m4_getopt_h=src/getopt.h
+rm -f $m4_getopt_h
 AC_CHECK_FUNC(getopt_long, [],
 [M4OBJS="getopt1.$ac_objext getopt.$ac_objext"
-echo linking src/gnu-getopt.h to $m4_getopt
-$LN_S ./gnu-getopt.h $m4_getopt])
+echo linking src/gnu-getopt.h to $m4_getopt_h
+$LN_S ./gnu-getopt.h $m4_getopt_h])
 AC_SUBST(M4OBJS)
 
 M4_AC_FUNC_OBSTACK
@@ -108,6 +108,7 @@ else
 fi], [AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING(for modules to preload)
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_default_preload$])])dnl
 m4_default_preload="m4 traditional gnu"
 AC_ARG_WITH(modules,
 [  --with-modules=MODULES preload MODULES [default: $m4_default_preload]],
@@ -157,6 +158,7 @@ AC_SUBST(ac_aux_dir)
 # Big hack below: 2.13 does not garantee the value of $srcdir, so
 # do not use `sh $srcdir/tests/mkconfig.sh' since in case we build
 # in a separate dir, it points to srcdir for... `examples/'!
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_top_srcdir$])])dnl
 AC_OUTPUT(
 Makefile
 config/Makefile

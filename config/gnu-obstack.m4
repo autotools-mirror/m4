@@ -18,11 +18,13 @@
 # the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-#serial 2
+#serial 3
 
 # FIXME: This is not portable I guess.  There is no reason for all
 # the CPP in the world to support #include_next.  So?  Copy the
 # actual content of obstack.h if CPP does not support 'include_next'?
+
+AC_PREREQ(2.52)
 
 # M4_AC_FUNC_OBSTACK
 # ------------------
@@ -35,18 +37,19 @@ AC_CACHE_CHECK([for obstack in libc], m4_cv_func_obstack,
 	                    m4_cv_func_obstack=yes,
 	                    m4_cv_func_obstack=no)])
 OBSTACK_H=
-m4_obstack=m4/obstack.h
-rm -f $m4_obstack
+ifdef([m4_pattern_allow], [m4_pattern_allow([^m4_obstack_h])])dnl
+m4_obstack_h=m4/obstack.h
+rm -f $m4_obstack_h
 if test $m4_cv_func_obstack = yes; then
   AC_DEFINE(HAVE_OBSTACK, 1, [Define if libc includes obstacks.])
-  cat >$m4_obstack <<EOF
+  cat >$m4_obstack_h <<EOF
 /* The native header works properly. */
 #include_next <obstack.h>
 EOF
 else
   LIBOBJS="$LIBOBJS obstack.$ac_objext"
-  echo linking src/gnu-obstack.h to $m4_obstack
-  $LN_S ./gnu-obstack.h $m4_obstack
+  echo linking src/gnu-obstack.h to $m4_obstack_h
+  $LN_S ./gnu-obstack.h $m4_obstack_h
 
   if test x"$ac_cv_header_obstack_h" != xyes; then
     OBSTACK_H=obstack.h

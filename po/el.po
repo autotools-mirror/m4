@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-08-07 14:06+0200\n"
+"POT-Creation-Date: 2001-08-10 12:35+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"

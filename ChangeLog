@@ -1,3 +1,15 @@
+2001-08-10  Akim Demaille  <akim@epita.fr>
+
+	* configure.in: Require Autoconf 2.52.
+	(AC_ARG_PROGRAM): Remove, handled by Automake.
+	(m4_getopt): Rename as...
+	(m4_getopt_h): this.
+	Allow the tokens `m4_cv_*', `m4_top_srcdir', and `m4_getopt_h'.
+	Undefine `changeword' only if defined.
+	* config/gnu-obstack.m4: Require Autoconf 2.52.
+	(M4_AC_FUNC_OBSTACK): Rename `m4_obstack' and `m4_obstack_h'.
+	Allow this token.
+
 2001-08-09  Yuji Minejima  <ggb01164@nifty.ne.jp>
 
 	* doc/m4.texinfo: Fix some typos, and apply some small
