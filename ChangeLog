@@ -1,5 +1,13 @@
 2001-09-30  Gary V. Vaughan  <gary@gnu.org>
 
+	Reverted my large patch for removing the old m4_symbol
+	structure on 2001-09-20.  We are still not happy about the way
+	trace works in conjunction with defn and undefine, and leaving
+	the reverted patch active prevents us from moving the traced
+	bit from the definition back to the symbol.
+
+2001-09-30  Gary V. Vaughan  <gary@gnu.org>
+
 	* configure.in: Moved to...
 	* configure.ac: ...here.  Added a libtool like timestamped
 	banner, and tidied up the libltdl cruft.

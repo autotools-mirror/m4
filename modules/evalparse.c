@@ -766,7 +766,7 @@ simple_term (eval_token et, number *v1)
 
 /* Main entry point, called from "eval" and "mpeval" builtins.  */
 void
-m4_evaluate (struct obstack *obs, int argc, m4_symbol **argv)
+m4_evaluate (struct obstack *obs, int argc, m4_token_data **argv)
 {
   int		radix	= 10;
   int		min	= 1;

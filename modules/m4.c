@@ -92,7 +92,8 @@ typedef unsigned long int unumber;
 #endif
 
 
-static void	include		(int argc, m4_symbol **argv, boolean silent);
+static void	include		(int argc, m4_token_data **argv,
+				 boolean silent);
 static int	set_trace	(const char *name, m4_symbol *symbol,
 				 void *data);
 static const char *ntoa		(number value, int radix);
@@ -150,7 +151,7 @@ M4BUILTIN_HANDLER (define)
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
 
-  if (M4_SYMBOL_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
@@ -159,7 +160,7 @@ M4BUILTIN_HANDLER (define)
       return;
     }
 
-  switch (M4_SYMBOL_TYPE (argv[2]))
+  switch (M4_TOKEN_DATA_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
       m4_macro_define (M4ARG (1), NULL, M4ARG (2));
@@ -167,9 +168,9 @@ M4BUILTIN_HANDLER (define)
 
     case M4_TOKEN_FUNC:
       {
-	lt_dlhandle	   handle  = M4_SYMBOL_HANDLE (argv[2]);
-	const m4_builtin * builtin = 0;
-	m4_symbol *	   symbol  = 0;
+	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
+	const m4_builtin  *builtin = 0;
+	m4_symbol *symbol = 0;
 
 	/* If we find a TOKEN_FUNC with no defining module, then
 	   somewhere along the way we have lost the module handle.  */
@@ -179,12 +180,12 @@ M4BUILTIN_HANDLER (define)
 	   and blind_no_args flags?  May as well carry these around with
 	   the traced flag, and save a _lot_ of lookup time.  */
 	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
-					   M4_SYMBOL_FUNC (argv[2]));
+					   M4_TOKEN_DATA_FUNC (argv[2]));
 
-	symbol  = m4_builtin_define (M4ARG (1), handle, builtin);
+	symbol = m4_builtin_define (M4ARG (1), handle, builtin);
 
 	/* Be sure to propogate the flags from the TOKEN_FUNC.  */
-	M4_SYMBOL_TRACED (symbol) = M4_SYMBOL_TRACED (argv[2]);
+	M4_SYMBOL_TRACED (symbol) = M4_TOKEN_TRACED (argv[2]);
       }
       return;
     }
@@ -210,7 +211,7 @@ M4BUILTIN_HANDLER (pushdef)
   if (m4_bad_argc (argv[0], argc, 2, 3))
     return;
 
-  if (M4_SYMBOL_TYPE (argv[1]) != M4_TOKEN_TEXT)
+  if (M4_TOKEN_DATA_TYPE (argv[1]) != M4_TOKEN_TEXT)
     return;
 
   if (argc == 2)
@@ -219,7 +220,7 @@ M4BUILTIN_HANDLER (pushdef)
       return;
     }
 
-  switch (M4_SYMBOL_TYPE (argv[2]))
+  switch (M4_TOKEN_DATA_TYPE (argv[2]))
     {
     case M4_TOKEN_TEXT:
       m4_macro_pushdef (M4ARG (1), NULL, M4ARG (2));
@@ -227,15 +228,15 @@ M4BUILTIN_HANDLER (pushdef)
 
     case M4_TOKEN_FUNC:
       {
-	lt_dlhandle	   handle  = M4_SYMBOL_HANDLE (argv[2]);
-	const m4_builtin * builtin = 0;
+	lt_dlhandle  handle  = M4_TOKEN_DATA_HANDLE (argv[2]);
+	const m4_builtin  *builtin = 0;
 
 	/* If we find a TOKEN_FUNC with no defining module, then
 	   somewhere along the way we have lost the module handle.  */
 	assert (handle);
 
 	builtin = m4_builtin_find_by_func (m4_module_builtins (handle),
-					   M4_SYMBOL_FUNC (argv[2]));
+					   M4_TOKEN_DATA_FUNC (argv[2]));
 
 	m4_builtin_pushdef (M4ARG (1), handle, builtin);
       }
@@ -535,8 +536,8 @@ M4BUILTIN_HANDLER (changequote)
   if (m4_bad_argc (argv[0], argc, 1, 3))
     return;
 
-  m4_set_quotes ((argc >= 2) ? M4_SYMBOL_TEXT (argv[1]) : NULL,
-	     (argc >= 3) ? M4_SYMBOL_TEXT (argv[2]) : NULL);
+  m4_set_quotes ((argc >= 2) ? M4_TOKEN_DATA_TEXT (argv[1]) : NULL,
+	     (argc >= 3) ? M4_TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
 
 /* Change the current comment delimiters.  The function set_comment ()
@@ -549,8 +550,8 @@ M4BUILTIN_HANDLER (changecom)
   if (argc == 1)
     m4_set_comment ("", "");	/* disable comments */
   else
-    m4_set_comment (M4_SYMBOL_TEXT (argv[1]),
-		    (argc >= 3) ? M4_SYMBOL_TEXT (argv[2]) : NULL);
+    m4_set_comment (M4_TOKEN_DATA_TEXT (argv[1]),
+		    (argc >= 3) ? M4_TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
 
 
@@ -561,7 +562,7 @@ M4BUILTIN_HANDLER (changecom)
 /* Generic include function.  Include the file given by the first argument,
    if it exists.  Complain about inaccesible files iff SILENT is FALSE.  */
 static void
-include (int argc, m4_symbol **argv, boolean silent)
+include (int argc, m4_token_data **argv, boolean silent)
 {
   FILE *fp;
   char *name = NULL;

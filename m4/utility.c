@@ -79,21 +79,21 @@ m4_string ecomm;
    internal data structure, so they are safe to export for use in
    external modules.  */
 m4_token_data_t
-m4_symbol_type (m4_symbol *name)
+m4_token_data_type (m4_token_data *name)
 {
-  return M4_SYMBOL_TYPE(name);
+  return M4_TOKEN_DATA_TYPE(name);
 }
 
 char *
-m4_symbol_text (m4_symbol *name)
+m4_token_data_text (m4_token_data *name)
 {
-  return M4_SYMBOL_TEXT(name);
+  return M4_TOKEN_DATA_TEXT(name);
 }
 
 m4_builtin_func *
-m4_symbol_func (m4_symbol *name)
+m4_token_data_func (m4_token_data *name)
 {
-  return M4_SYMBOL_FUNC(name);
+  return M4_TOKEN_DATA_FUNC(name);
 }
 
 
@@ -104,13 +104,13 @@ m4_symbol_func (m4_symbol *name)
    negative if not applicable, MAX is the maximum number, negative if not
    applicable.  */
 boolean
-m4_bad_argc (m4_symbol *name, int argc, int min, int max)
+m4_bad_argc (m4_token_data *name, int argc, int min, int max)
 {
   if (min > 0 && argc < min)
     {
       M4WARN ((warning_status, 0,
 	       _("Warning: %s: too few arguments"),
-	       M4_SYMBOL_TEXT (name)));
+	       M4_TOKEN_DATA_TEXT (name)));
       return TRUE;
     }
 
@@ -118,7 +118,7 @@ m4_bad_argc (m4_symbol *name, int argc, int min, int max)
     {
       M4WARN ((warning_status, 0,
 	       _("Warning: %s: too many arguments (ignored)"),
-	       M4_SYMBOL_TEXT (name)));
+	       M4_TOKEN_DATA_TEXT (name)));
       /* Return FALSE, otherwise it is not exactly `ignored'. */
       return FALSE;
     }
@@ -138,7 +138,7 @@ m4_skip_space (const char *arg)
    VALUEP. If the conversion fails, print error message for macro MACRO.
    Return TRUE iff conversion succeeds.  */
 boolean
-m4_numeric_arg (m4_symbol *macro, const char *arg, int *valuep)
+m4_numeric_arg (m4_token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
 
@@ -147,7 +147,7 @@ m4_numeric_arg (m4_symbol *macro, const char *arg, int *valuep)
     {
       M4WARN ((warning_status, 0,
 	       _("Warning: %s: non-numeric argument: %s"),
-	       M4_SYMBOL_TEXT (macro), arg));
+	       M4_TOKEN_DATA_TEXT (macro), arg));
       return FALSE;
     }
   return TRUE;
@@ -157,7 +157,7 @@ m4_numeric_arg (m4_symbol *macro, const char *arg, int *valuep)
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
    SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
-m4_dump_args (struct obstack *obs, int argc, m4_symbol **argv,
+m4_dump_args (struct obstack *obs, int argc, m4_token_data **argv,
 	      const char *sep, boolean quoted)
 {
   int i;
@@ -168,7 +168,7 @@ m4_dump_args (struct obstack *obs, int argc, m4_symbol **argv,
       if (i > 1)
 	obstack_grow (obs, sep, len);
 
-      m4_shipout_string (obs, M4_SYMBOL_TEXT (argv[i]), 0, quoted);
+      m4_shipout_string (obs, M4_TOKEN_DATA_TEXT (argv[i]), 0, quoted);
     }
 }
 
@@ -243,7 +243,7 @@ m4_dump_symbol (const char *name, m4_symbol *symbol, void *data)
    symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
-		 m4_symbol **argv, boolean complain)
+		 m4_token_data **argv, boolean complain)
 {
   data->base = (const char **) obstack_base (data->obs);
   data->size = 0;
@@ -259,9 +259,9 @@ m4_dump_symbols (struct m4_dump_symbol_data *data, int argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_symbol_lookup (M4_SYMBOL_TEXT (argv[i]));
+	  symbol = m4_symbol_lookup (M4_TOKEN_DATA_TEXT (argv[i]));
 	  if (symbol != NULL && M4_SYMBOL_TYPE (symbol) != M4_TOKEN_VOID)
-	    m4_dump_symbol (M4_SYMBOL_TEXT (argv[i]), symbol, data);
+	    m4_dump_symbol (M4_TOKEN_DATA_TEXT (argv[i]), symbol, data);
 	  else if (complain)
 	    M4WARN ((warning_status, 0,
 		     _("Warning: %s: undefined name: %s"),

@@ -44,7 +44,7 @@ void		m4_hash_insert	(m4_hash *hash, const void *key, void *value);
 void *		m4_hash_remove	(m4_hash *hash, const void *key);
 void **		m4_hash_lookup	(m4_hash *hash, const void *key);
 size_t		m4_hash_length	(m4_hash *hash);
-void		m4_hash_exit	(void);
+
 
 
 typedef struct m4_hash_iterator m4_hash_iterator;
@@ -52,7 +52,7 @@ typedef struct m4_hash_iterator m4_hash_iterator;
 m4_hash_iterator *	m4_hash_iterator_next	(const m4_hash *hash,
 						 m4_hash_iterator *place);
 const void *		m4_hash_iterator_key	(m4_hash_iterator *place);
-void **			m4_hash_iterator_value	(m4_hash_iterator *place);
+void *			m4_hash_iterator_value	(m4_hash_iterator *place);
 
 END_C_DECLS
 

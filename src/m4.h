@@ -99,7 +99,6 @@ char *mktemp ();
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,
 			  void (*handler) (void));
-void stackovf_exit (void);
 #endif
 
 

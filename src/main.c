@@ -516,21 +516,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
       m4_undivert_all ();
     }
 
-  m4_module_unload_all ();
-
-  /* The remaining cleanup functions systematically free all of the
-     memory we still have pointers to.  By definition, if there is
-     anything left when we're done: it was caused by a memory leak.
-     Strictly, we don't need to do this, but it makes leak detection
-     a whole lot easier!  */
-  m4_symtab_exit ();
-  m4_output_exit ();
-  m4_input_exit ();
-  m4_debug_exit ();
-
-#ifdef USE_STACKOVF
-  stackovf_exit ();
-#endif
+  {
+    struct obstack *obs = 0;
+    m4_module_close_all (obs);
+  }
 
   exit (exit_status);
 }

@@ -118,7 +118,6 @@ extern int	sigstack	(struct sigstack *, struct sigstack *);
 extern int	sigvec		(int, struct sigvec *, struct sigvec *);
 #endif
 
-static const char *stackbuf;
 static const char *stackbot;
 static const char *stackend;
 static const char *arg0;
@@ -336,14 +335,12 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
   {
     stack_t ss;
 
-    stackbuf = (char *) xmalloc (SIGSTKSZ);
-
     ss.ss_size = SIGSTKSZ;
-    ss.ss_sp = (void *) stackbuf;
+    ss.ss_sp = xmalloc (ss.ss_size);
     ss.ss_flags = 0;
     if (sigaltstack (&ss, (stack_t *) 0) < 0)
       {
-	xfree (stackbuf);
+	xfree (ss.ss_sp);
 	error (1, errno, "sigaltstack");
       }
   }
@@ -353,7 +350,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 
   {
     struct sigstack ss;
-    stackbuf = (char *) xmalloc (2 * SIGSTKSZ);
+    char *stackbuf = xmalloc (2 * SIGSTKSZ);
 
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
@@ -409,12 +406,6 @@ Error - Do not know how to catch signals on an alternate stack...
 #endif /* HAVE_SIGVEC && defined(SV_ONSTACK) */
 #endif /* HAVE_SIGALTSTACK && defined(SA_ONSTACK) */
 
-}
-
-void
-stackovf_exit (void)
-{
-  XFREE (stackbuf);
 }
 
 #endif /* USE_STACKOVF */

@@ -91,9 +91,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 
 #include "ltdl.h"
 
-#if WITH_DMALLOC
-#  include <dmalloc.h>
-#endif
 
 
 
@@ -166,18 +163,6 @@ LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
 
 /* The following macros reduce the amount of typing needed to cast
    assigned memory.  */
-#if WITH_DMALLOC
-
-#define LT_DLMALLOC(tp, n)	((tp *) xmalloc ((n) * sizeof(tp)))
-#define LT_DLREALLOC(tp, p, n)	((tp *) xrealloc ((p), (n) * sizeof(tp)))
-#define LT_DLFREE(p)						\
-	LT_STMT_START { if (p) (p) = (xfree (p), (lt_ptr) 0); } LT_STMT_END
-
-#define LT_EMALLOC(tp, n)	((tp *) xmalloc ((n) * sizeof(tp)))
-#define LT_EREALLOC(tp, p, n)	((tp *) xrealloc ((p), (n) * sizeof(tp)))
-
-#else
-
 #define LT_DLMALLOC(tp, n)	((tp *) lt_dlmalloc ((n) * sizeof(tp)))
 #define LT_DLREALLOC(tp, p, n)	((tp *) rpl_realloc ((p), (n) * sizeof(tp)))
 #define LT_DLFREE(p)						\
@@ -186,10 +171,8 @@ LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
 #define LT_EMALLOC(tp, n)	((tp *) lt_emalloc ((n) * sizeof(tp)))
 #define LT_EREALLOC(tp, p, n)	((tp *) lt_erealloc ((p), (n) * sizeof(tp)))
 
-#endif
-
 #define LT_DLMEM_REASSIGN(p, q)			LT_STMT_START {	\
-	if ((p) != (q)) { if (p) lt_dlfree (p); (p) = (q); (q) = 0; }	\
+	if ((p) != (q)) { lt_dlfree (p); (p) = (q); (q) = 0; }	\
 						} LT_STMT_END
 
 
@@ -895,10 +878,10 @@ char *
 lt_estrdup (str)
      const char *str;
 {
-  char *copy = strdup (str);
-  if (LT_STRLEN (str) && !copy)
+  char *dup = strdup (str);
+  if (LT_STRLEN (str) && !dup)
     LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-  return copy;
+  return dup;
 }
 
 
@@ -1699,17 +1682,9 @@ static	int	lt_argz_insert	      LT_PARAMS((char **pargz,
 static	int	lt_argz_insertinorder LT_PARAMS((char **pargz,
 						 size_t *pargz_len,
 						 const char *entry));
-static	int	lt_argz_insertdir     LT_PARAMS((char **pargz,
-						 size_t *pargz_len,
-						 const char *dirnam,
-						 struct dirent *dp));
 static	int	lt_dlpath_insertdir   LT_PARAMS((char **ppath,
 						 char *before,
 						 const char *dir));
-static	int	list_files_by_dir     LT_PARAMS((const char *dirnam,
-						 char **pargz,
-						 size_t *pargz_len));
-static	int	file_not_found	      LT_PARAMS((void));
 
 static	char	       *user_search_path= 0;
 static	lt_dlloader    *loaders		= 0;
@@ -2917,7 +2892,7 @@ lt_dlopen (filename)
 
 /* If the last error messge store was `FILE_NOT_FOUND', then return
    non-zero.  */
-static int
+int
 file_not_found ()
 {
   const char *error = 0;
@@ -2942,6 +2917,7 @@ lt_dlopenext (filename)
   char *	ext		= 0;
   int		len;
   int		errors		= 0;
+  int		file_found	= 1; /* until proven otherwise */
 
   if (!filename)
     {
@@ -3302,9 +3278,6 @@ lt_dlclose (handle)
 
       errors += handle->loader->module_close (data, handle->module);
       errors += unload_deplibs(handle);
-
-      /* It is up to the callers to free the data itself.  */
-      LT_DLFREE (handle->caller_data);
 
       LT_DLFREE (handle->info.filename);
       LT_DLFREE (handle->info.name);

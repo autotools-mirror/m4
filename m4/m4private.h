@@ -33,8 +33,8 @@ struct m4_module_data {
 };
 
 
-struct m4_symbol {
-  m4_symbol	*	next;
+struct m4_token_data {
+  m4_token_data	*	next;
   m4_token_data_t	type;
   boolean		traced;
   boolean		macro_args;
@@ -46,33 +46,42 @@ struct m4_symbol {
   } u;
 };
 
-#define M4_SYMBOL_NEXT(Symbol)		((Symbol)->next)
-#define M4_SYMBOL_TYPE(Symbol)		((Symbol)->type)
-#define M4_SYMBOL_TRACED(Symbol)	((Symbol)->traced)
-#define M4_SYMBOL_MACRO_ARGS(Symbol)	((Symbol)->macro_args)
-#define M4_SYMBOL_BLIND_NO_ARGS(Symbol)	((Symbol)->blind_no_args)
-#define M4_SYMBOL_HANDLE(Symbol)	((Symbol)->handle)
-#define M4_SYMBOL_TEXT(Symbol)		((Symbol)->u.text)
-#define M4_SYMBOL_FUNC(Symbol)		((Symbol)->u.func)
+#define M4_TOKEN_DATA_NEXT(Td)		((Td)->next)
+#define M4_TOKEN_DATA_TYPE(Td)		((Td)->type)
+#define M4_TOKEN_TRACED(Td)		((Td)->traced)
+#define M4_TOKEN_MACRO_ARGS(Td)		((Td)->macro_args)
+#define M4_TOKEN_BLIND_NO_ARGS(Td)	((Td)->blind_no_args)
+#define M4_TOKEN_DATA_HANDLE(Td)	((Td)->handle)
+#define M4_TOKEN_DATA_TEXT(Td)		((Td)->u.text)
+#define M4_TOKEN_DATA_FUNC(Td)		((Td)->u.func)
 
 /* Redefine the exported function to this faster
    macro based version for internal use by the m4 code. */
 #undef M4ARG
-#define M4ARG(i)	(argc > (i) ? M4_SYMBOL_TEXT (argv[i]) : "")
+#define M4ARG(i)	(argc > (i) ? M4_TOKEN_DATA_TEXT (argv[i]) : "")
 
+struct m4_symbol
+{
+  m4_token_data *data;
+};
+
+#define M4_SYMBOL_DATA(S)	   ((S)->data)
+#define M4_SYMBOL_DATA_NEXT(S)	   (M4_TOKEN_DATA_NEXT (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TYPE(S)	   (M4_TOKEN_DATA_TYPE (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TRACED(S)	   (M4_TOKEN_TRACED (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_MACRO_ARGS(S)	   (M4_TOKEN_MACRO_ARGS (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_BLIND_NO_ARGS(S) (M4_TOKEN_BLIND_NO_ARGS (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_TEXT(S)	   (M4_TOKEN_DATA_TEXT (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_FUNC(S)	   (M4_TOKEN_DATA_FUNC (M4_SYMBOL_DATA(S)))
+#define M4_SYMBOL_HANDLE(S)	   (M4_TOKEN_DATA_HANDLE (M4_SYMBOL_DATA(S)))
 
 
 /* Debugging the memory allocator.  */
 
 #if WITH_DMALLOC
-#  define DMALLOC_FUNC_CHECK
-#  include <dmalloc.h>
-
-/* Dmalloc expects us to use a void returning xfree.  */
-#  undef XFREE
-#  define XFREE(p)	if (p) xfree (p)
-
-#endif /* WITH_DMALLOC */
+# define DMALLOC_FUNC_CHECK
+# include <dmalloc.h>
+#endif
 
 /* Other debug stuff.  */
 
