@@ -203,8 +203,8 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
   assert (syntax);
 
   for (ch = 256; --ch >= 0;)	/* changequote overrides syntax_table */
-    if (M4_IS_LQUOTE (syntax, ch) || M4_IS_RQUOTE (syntax, ch))
-      remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE | M4_SYNTAX_RQUOTE);
+    if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE);
 
   xfree (syntax->lquote.string);
   xfree (syntax->rquote.string);
@@ -249,8 +249,8 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
   assert (syntax);
 
   for (ch = 256; --ch >= 0;)	/* changecom overrides syntax_table */
-    if (M4_IS_BCOMM (syntax, ch) || M4_IS_ECOMM (syntax, ch))
-      remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM | M4_SYNTAX_ECOMM);
+    if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM);
 
   xfree (syntax->bcomm.string);
   xfree (syntax->ecomm.string);
@@ -377,7 +377,7 @@ check_is_macro_escaped (m4_syntax_table *syntax)
 
   syntax->is_macro_escaped = FALSE;
   for (ch = 256; --ch >= 0; )
-    if (M4_IS_ESCAPE (syntax, ch))
+    if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
       {
 	syntax->is_macro_escaped = TRUE;
 	break;

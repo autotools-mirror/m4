@@ -1,3 +1,26 @@
+2003-07-17  Gary V. Vaughan  <gary@gnu.org>
+
+	Change the macros for checking syntax so that matching against
+	multiple possible syntax classes can be done with a single
+	comparison some of the time.  The various classes are now bits of
+	an int that can be checked with bitwise logic operators.
+
+	* m4/m4module.h (M4_SYNTAX_IGNORE, M4_SYNTAX_OTHER)
+	(M4_SYNTAX_SPACE, M4_SYNTAX_OPEN, M4_SYNTAX_CLOSE, M4_SYNTAX_COMMA)
+	(M4_SYNTAX_DOLLAR, M4_SYNTAX_ACTIVE, M4_SYNTAX_ESCAPE)
+	(M4_SYNTAX_ASSIGN, M4_SYNTAX_ALPHA, M4_SYNTAX_NUM)
+	(M4_SYNTAX_LQUOTE, M4_SYNTAX_RQUOTE, M4_SYNTAX_BCOMM)
+	(M4_SYNTAX_ECOMM): Replaced #defines with an enum.
+	(M4_SYNTAX_ALNUM): Removed.  Changed all callers.
+	(M4_IS_IGNORE, M4_IS_OTHER, M4_IS_SPACE, M4_IS_OPEN, M4_IS_CLOSE)
+	(M4_IS_COMMA, M4_IS_DOLLAR, M4_IS_ACTIVE, M4_IS_ESCAPE)
+	(M4_IS_ASSIGN, M4_IS_ALPHA, M4_IS_NUM, M4_IS_LQUOTE, M4_IS_RQUOTE)
+	(M4_IS_BCOMM, M4_IS_ECOMM, M4__IS_STRING, M4_IS_IDENT): Removed.
+	Replace all calls with invocations of these...
+	(m4_is_syntax, m4_has_syntax): ...New macros.
+	* src/freeze.c (produce_syntax_dump): Remove mask argument, which
+	is no longer required with new macros.  Changed all callers.
+
 2003-07-15  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/input.c (CHAR_EOF, CHAR_BUILTIN, CHAR_RETRY): These token

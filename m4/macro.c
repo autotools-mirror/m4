@@ -80,7 +80,7 @@ expand_token (m4 *context, struct obstack *obs,
 	char *textp = text;
 	int ch;
 
-	if (M4_IS_ESCAPE (M4SYNTAX, *textp))
+	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
 	  ++textp;
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
@@ -89,7 +89,7 @@ expand_token (m4 *context, struct obstack *obs,
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& (ch = m4_peek_input (context)) < CHAR_EOF
-		&& !M4_IS_OPEN (M4SYNTAX, ch)))
+		&& !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN)))
 	  {
 	    m4_shipout_text (context, obs, text, strlen (text));
 	  }
@@ -140,7 +140,8 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
 	{			/* TOKSW */
 	case M4_TOKEN_SIMPLE:
 	  text = m4_get_symbol_value_text (&token);
-	  if ((M4_IS_COMMA (M4SYNTAX, *text) || M4_IS_CLOSE (M4SYNTAX, *text))
+	  if ((m4_has_syntax (M4SYNTAX, *text,
+			      M4_SYNTAX_COMMA|M4_SYNTAX_CLOSE))
 	      && paren_level == 0)
 	    {
 
@@ -152,12 +153,12 @@ expand_argument (m4 *context, struct obstack *obs, m4_symbol_value *argp)
 		{
 		  m4_set_symbol_value_text (argp, text);
 		}
-	      return (boolean) (M4_IS_COMMA (M4SYNTAX, *m4_get_symbol_value_text (&token)));
+	      return (boolean) (m4_has_syntax (M4SYNTAX, *m4_get_symbol_value_text (&token), M4_SYNTAX_COMMA));
 	    }
 
-	  if (M4_IS_OPEN (M4SYNTAX, *text))
+	  if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_OPEN))
 	    paren_level++;
-	  else if (M4_IS_CLOSE (M4SYNTAX, *text))
+	  else if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_CLOSE))
 	    paren_level--;
 	  expand_token (context, obs, type, &token);
 	  break;
@@ -272,7 +273,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
   ch = m4_peek_input (context);
-  if ((ch < CHAR_EOF) && M4_IS_OPEN (M4SYNTAX, ch))
+  if ((ch < CHAR_EOF) && m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN))
     {
       m4__next_token (context, &token);		/* gobble parenthesis */
       do
@@ -334,7 +335,7 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
     {
       char ch;
 
-      if (!M4_IS_DOLLAR (M4SYNTAX, *text))
+      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR))
 	{
 	  obstack_1grow (obs, *text);
 	  text++;
@@ -382,7 +383,7 @@ m4_process_macro (m4 *context, m4_symbol *symbol, struct obstack *obs,
 	      const char * endp;
 	      const char * key;
 
-	      for (endp = ++text; *endp && M4_IS_IDENT (M4SYNTAX, *endp); ++endp)
+	      for (endp = ++text; *endp && m4_has_syntax (M4SYNTAX, *endp, M4_SYNTAX_OTHER|M4_SYNTAX_ALPHA|M4_SYNTAX_NUM); ++endp)
 		++len;
 	      key = xstrzdup (text, len);
 

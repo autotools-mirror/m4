@@ -27,7 +27,7 @@ static	int   decode_char	   (FILE *in);
 static	void  issue_expect_message (int expected);
 static	int   produce_char_dump    (char *buf, int ch);
 static	void  produce_syntax_dump  (FILE *file, m4_syntax_table *syntax,
-				    char ch, int mask);
+				    char ch);
 static	void  produce_module_dump  (FILE *file, lt_dlhandle handle);
 static	void  produce_symbol_dump  (m4 *context, FILE *file,
 				    m4_symbol_table *symtab);
@@ -79,7 +79,7 @@ produce_char_dump (char *buf, int ch)
 #define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
 
 static void
-produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch, int mask)
+produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
 {
   char buf[1+ MAX_CHAR_LENGTH * sizeof (m4_syntax_table)];
   int code = m4_syntax_code (ch);
@@ -93,8 +93,7 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch, int mask)
 
   for (i = 1; i < 256; ++i)
     {
-      if ((mask && ((syntax->table[i] & mask) == code))
-	  || (!mask && ((syntax->table[i] & code) == code)))
+      if (m4_has_syntax (syntax, i, code))
 	{
 	  offset += produce_char_dump (buf + offset, i);
 	  ++count;
@@ -236,23 +235,23 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Dump syntax table. */
 
-  produce_syntax_dump (file, M4SYNTAX, 'I', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, 'S', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, '(', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, ')', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, ',', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, '$', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, 'A', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, '@', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, 'O', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'I');
+  produce_syntax_dump (file, M4SYNTAX, 'S');
+  produce_syntax_dump (file, M4SYNTAX, '(');
+  produce_syntax_dump (file, M4SYNTAX, ')');
+  produce_syntax_dump (file, M4SYNTAX, ',');
+  produce_syntax_dump (file, M4SYNTAX, '$');
+  produce_syntax_dump (file, M4SYNTAX, 'A');
+  produce_syntax_dump (file, M4SYNTAX, '@');
+  produce_syntax_dump (file, M4SYNTAX, 'O');
 
-  produce_syntax_dump (file, M4SYNTAX, 'W', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, M4SYNTAX, 'D', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'W');
+  produce_syntax_dump (file, M4SYNTAX, 'D');
 
-  produce_syntax_dump (file, M4SYNTAX, 'L', 0);
-  produce_syntax_dump (file, M4SYNTAX, 'R', 0);
-  produce_syntax_dump (file, M4SYNTAX, 'B', 0);
-  produce_syntax_dump (file, M4SYNTAX, 'E', 0);
+  produce_syntax_dump (file, M4SYNTAX, 'L');
+  produce_syntax_dump (file, M4SYNTAX, 'R');
+  produce_syntax_dump (file, M4SYNTAX, 'B');
+  produce_syntax_dump (file, M4SYNTAX, 'E');
 
   /* Dump all loaded modules.  */
   produce_module_dump (file, lt_dlhandle_next (0));

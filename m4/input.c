@@ -752,21 +752,20 @@ m4__next_token (m4 *context, m4_symbol_value *token)
       }
 
     (void) next_char (context);
-    if (M4_IS_BCOMM (M4SYNTAX, ch))	/* COMMENT, SHORT DELIM */
-      {
+    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
+      {					/* COMMENT, SHORT DELIM */
 	obstack_1grow (&token_stack, ch);
 	while ((ch = next_char (context)) != CHAR_EOF
-	       && !M4_IS_ECOMM (M4SYNTAX, ch))
+	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
 	  obstack_1grow (&token_stack, ch);
 	if (ch != CHAR_EOF)
 	  obstack_1grow (&token_stack, ch);
 	type = m4_get_discard_comments_opt (context)
 	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
-					/* COMMENT, LONGER DELIM */
     else if (!m4_is_syntax_single_comments (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->bcomm.string))
-      {
+      {					/* COMMENT, LONGER DELIM */
 	obstack_grow (&token_stack, context->syntax->bcomm.string,
 		      context->syntax->bcomm.length);
 	while ((ch = next_char (context)) != CHAR_EOF
@@ -778,16 +777,17 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	type = m4_get_discard_comments_opt (context)
 	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
-    else if (M4_IS_ESCAPE (M4SYNTAX, ch))	/* ESCAPED WORD */
-      {
+    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
+      {					/* ESCAPED WORD */
 	obstack_1grow (&token_stack, ch);
 	if ((ch = next_char (context)) != CHAR_EOF)
 	  {
-	    if (M4_IS_ALPHA (M4SYNTAX, ch))
+	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
 	      {
 		obstack_1grow (&token_stack, ch);
 		while ((ch = next_char (context)) != CHAR_EOF
-		       && (M4_IS_ALNUM (M4SYNTAX, ch)))
+		       && (m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA)
+			   || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_NUM)))
 		  {
 		    obstack_1grow (&token_stack, ch);
 		  }
@@ -807,11 +807,12 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	    type = M4_TOKEN_SIMPLE;	/* escape before eof */
 	  }
       }
-    else if (M4_IS_ALPHA (M4SYNTAX, ch))
+    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
       {
 	obstack_1grow (&token_stack, ch);
 	while ((ch = next_char (context)) != CHAR_EOF
-	       && (M4_IS_ALNUM (M4SYNTAX, ch)))
+	       && (m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA)
+		   || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_NUM)))
 	  {
 	    obstack_1grow (&token_stack, ch);
 	  }
@@ -821,8 +822,8 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	type = m4_is_syntax_macro_escaped (M4SYNTAX)
 	  	? M4_TOKEN_STRING : M4_TOKEN_WORD;
       }
-    else if (M4_IS_LQUOTE (M4SYNTAX, ch)) /* QUOTED STRING, SINGLE QUOTES */
-      {
+    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
+      {					/* QUOTED STRING, SINGLE QUOTES */
 	const char *current_file = m4_current_file;
 	int current_line = m4_current_line;
 	quote_level = 1;
@@ -834,13 +835,13 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 			      current_file, current_line,
 			      _("EOF in string"));
 
-	    if (M4_IS_RQUOTE (M4SYNTAX, ch))
+	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 	      {
 		if (--quote_level == 0)
 		  break;
 		obstack_1grow (&token_stack, ch);
 	      }
-	    else if (M4_IS_LQUOTE (M4SYNTAX, ch))
+	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
 	      {
 		quote_level++;
 		obstack_1grow (&token_stack, ch);
@@ -850,10 +851,9 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	  }
 	type = M4_TOKEN_STRING;
       }
-					/* QUOTED STRING, LONGER QUOTES */
     else if (!m4_is_syntax_single_quotes (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->lquote.string))
-      {
+      {					/* QUOTED STRING, LONGER QUOTES */
 	const char *current_file = m4_current_file;
 	int current_line = m4_current_line;
 	quote_level = 1;
@@ -883,15 +883,18 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	type = M4_TOKEN_STRING;
       }
     else if (m4_is_syntax_single_quotes (M4SYNTAX)
-	     && m4_is_syntax_single_comments (M4SYNTAX)) /* EVERYTHING ELSE */
-      {
+	     && m4_is_syntax_single_comments (M4SYNTAX))
+      {			/* EVERYTHING ELSE (SHORT QUOTES AND COMMENTS) */
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER (M4SYNTAX, ch) || M4__IS_STRING (M4SYNTAX, ch))
+	if (m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_OTHER)
+	    || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_NUM)
+	    || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_DOLLAR))
 	  {
-	    while ((ch = next_char(context)) != CHAR_EOF
-		   && (M4_IS_OTHER (M4SYNTAX, ch)
-		       || M4__IS_STRING (M4SYNTAX, ch)))
+	    while (((ch = next_char(context)) != CHAR_EOF)
+		   && (m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_OTHER)
+		       || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_NUM)
+		       || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_DOLLAR)))
 	      {
 		obstack_1grow (&token_stack, ch);
 	      }
@@ -900,12 +903,12 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	      unget_input(ch);
 	    type = M4_TOKEN_STRING;
 	  }
-	else if (M4_IS_SPACE (M4SYNTAX, ch))
+	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  {
 	    if (!m4_get_interactive_opt (context))
 	      {
 		while ((ch = next_char (context)) != CHAR_EOF
-		       && M4_IS_SPACE (M4SYNTAX, ch))
+		       && m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 		  obstack_1grow (&token_stack, ch);
 
 		if (ch != CHAR_EOF)
@@ -913,20 +916,22 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	      }
 	    type = M4_TOKEN_SPACE;
 	  }
-	else if (M4_IS_ACTIVE (M4SYNTAX, ch))
+	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ACTIVE))
 	  type = M4_TOKEN_WORD;
 	else
 	  type = M4_TOKEN_SIMPLE;
       }
-    else				/* EVERYTHING ELSE AGAIN?! */
+    else		/* EVERYTHING ELSE (LONG QUOTES OR COMMENTS) */
       {
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER (M4SYNTAX, ch) || M4__IS_STRING (M4SYNTAX, ch))
+	if (m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_OTHER)
+	    || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_NUM)
+	    || m4_is_syntax (M4SYNTAX, ch, M4_SYNTAX_DOLLAR))
 	  type = M4_TOKEN_STRING;
-	else if (M4_IS_SPACE (M4SYNTAX, ch))
+	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  type = M4_TOKEN_SPACE;
-	else if (M4_IS_ACTIVE (M4SYNTAX, ch))
+	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ACTIVE))
 	  type = M4_TOKEN_WORD;
 	else
 	  type = M4_TOKEN_SIMPLE;

@@ -328,67 +328,39 @@ extern	boolean		 m4_is_syntax_single_quotes	(m4_syntax_table *);
 extern	boolean		 m4_is_syntax_single_comments	(m4_syntax_table *);
 extern	boolean		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 
-/* These are simple values, not bit masks.  There is no overlap. */
-#define M4_SYNTAX_OTHER		(0x0000)
+/* These are values to be assigned to syntax table entries, although they
+   are bit masks for fast categorisation in m4__next_token(), only one
+   value per syntax table entry is allowed.  */
+enum {
+  M4_SYNTAX_OTHER		= (1 << 0),
+  M4_SYNTAX_IGNORE		= (1 << 1),
+  M4_SYNTAX_SPACE		= (1 << 2),
+  M4_SYNTAX_OPEN		= (1 << 3),
+  M4_SYNTAX_CLOSE		= (1 << 4),
+  M4_SYNTAX_COMMA		= (1 << 5),
+  M4_SYNTAX_DOLLAR		= (1 << 6),
+  M4_SYNTAX_ACTIVE		= (1 << 7),
+  M4_SYNTAX_ESCAPE		= (1 << 8),
+  M4_SYNTAX_ASSIGN		= (1 << 9),
+  M4_SYNTAX_ALPHA		= (1 << 10),
+  M4_SYNTAX_NUM			= (1 << 11),
 
-#define M4_SYNTAX_IGNORE	(0x0001)
-#define M4_SYNTAX_SPACE		(0x0002)
-#define M4_SYNTAX_OPEN		(0x0003)
-#define M4_SYNTAX_CLOSE		(0x0004)
-#define M4_SYNTAX_COMMA		(0x0005)
-#define M4_SYNTAX_DOLLAR	(0x0006)
-#define M4_SYNTAX_ACTIVE	(0x0007)
-#define M4_SYNTAX_ESCAPE	(0x0008)
-#define M4_SYNTAX_ASSIGN	(0x0009)
+  /* These values ARE bit masks to AND with categories above, a syntax entry
+     may have any number of these in addition to a maximum of one of the
+     values above.  */
+  M4_SYNTAX_LQUOTE		= (1 << 12),
+  M4_SYNTAX_RQUOTE		= (1 << 13),
+  M4_SYNTAX_BCOMM		= (1 << 14),
+  M4_SYNTAX_ECOMM		= (1 << 15),
+};
 
-/* These are values to be assigned to syntax table entries, but they are
-   used as bit masks with M4_IS_ALNUM.*/
-#define M4_SYNTAX_ALPHA		(0x0010)
-#define M4_SYNTAX_NUM		(0x0020)
-#define M4_SYNTAX_ALNUM		(M4_SYNTAX_ALPHA|M4_SYNTAX_NUM)
+#define M4_SYNTAX_MASKS		(M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE|M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM)
+#define M4_SYNTAX_VALUE		(~(M4_SYNTAX_RQUOTE|M4_SYNTAX_ECOMM))
 
-/* We can OR the valid M4_TOKEN_STRING chars together, since they are
-   carefully chosen not to overlap.  This reduces the number of comparisons
-   the compiled code needs in order to speed up m4__next_token () a bit.  */
-#define M4__SYNTAX_STRING	(M4_SYNTAX_NUM|M4_SYNTAX_DOLLAR)
+#define m4_syntab(S,C)		((S)->table[(int)(C)])
+#define m4_has_syntax(S,C,T)	((m4_syntab((S),(C)) & (T)) > 0)
+#define m4_is_syntax(S,C,T)	((m4_syntab((S),(C)) & M4_SYNTAX_VALUE) == (T))
 
-/* These are bit masks to AND with other categories.
-   See input.c for details. */
-#define M4_SYNTAX_LQUOTE	(0x0100)
-#define M4_SYNTAX_RQUOTE	(0x0200)
-#define M4_SYNTAX_BCOMM		(0x0400)
-#define M4_SYNTAX_ECOMM		(0x0800)
-
-/* These bits define the syntax code of a character */
-#define M4_SYNTAX_VALUE		(0x00FF|M4_SYNTAX_LQUOTE|M4_SYNTAX_BCOMM)
-#define M4_SYNTAX_MASKS		(0xFF00)
-
-#define m4__is_syntax(S,C,T)						\
-	(((S)->table[(int)(C)] & M4_SYNTAX_VALUE) == (T))
-
-#define M4_IS_IGNORE(S, C) (((S)->table[(int)(C)]) == M4_SYNTAX_IGNORE)
-#define M4_IS_OTHER(S, C)  (m4__is_syntax((S), (C), M4_SYNTAX_OTHER))
-#define M4_IS_SPACE(S, C)  (m4__is_syntax((S), (C), M4_SYNTAX_SPACE))
-
-#define M4_IS_OPEN(S, C)   (m4__is_syntax((S), (C), M4_SYNTAX_OPEN))
-#define M4_IS_CLOSE(S, C)  (m4__is_syntax((S), (C), M4_SYNTAX_CLOSE))
-#define M4_IS_COMMA(S, C)  (m4__is_syntax((S), (C), M4_SYNTAX_COMMA))
-#define M4_IS_DOLLAR(S, C) (m4__is_syntax((S), (C), M4_SYNTAX_DOLLAR))
-#define M4_IS_ACTIVE(S, C) (m4__is_syntax((S), (C), M4_SYNTAX_ACTIVE))
-#define M4_IS_ESCAPE(S, C) (m4__is_syntax((S), (C), M4_SYNTAX_ESCAPE))
-#define M4_IS_ASSIGN(S, C) (m4__is_syntax((S), (C), M4_SYNTAX_ASSIGN))
-
-#define M4_IS_ALPHA(S, C)  (m4__is_syntax((S), (C), M4_SYNTAX_ALPHA))
-#define M4_IS_NUM(S, C)    (m4__is_syntax((S), (C), M4_SYNTAX_NUM))
-#define M4_IS_ALNUM(S, C)  ((S)->table[(int)(C)] & M4_SYNTAX_ALNUM)
-
-#define M4_IS_LQUOTE(S, C) ((S)->table[(int)(C)] & M4_SYNTAX_LQUOTE)
-#define M4_IS_RQUOTE(S, C) ((S)->table[(int)(C)] & M4_SYNTAX_RQUOTE)
-#define M4_IS_BCOMM(S, C)  ((S)->table[(int)(C)] & M4_SYNTAX_BCOMM)
-#define M4_IS_ECOMM(S, C)  ((S)->table[(int)(C)] & M4_SYNTAX_ECOMM)
-
-#define M4__IS_STRING(S, C) (m4__is_syntax((S), (C), M4__SYNTAX_STRING))
-#define M4_IS_IDENT(S, C)  (M4_IS_OTHER((S),(C))||M4_IS_ALNUM((S),(C)))
 
 
 /* --- TOKENISATION AND INPUT --- */
