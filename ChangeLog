@@ -1,5 +1,8 @@
 2001-08-29  Gary V. Vaughan  <gary@gnu.org>
 
+	In an attempt to moderate my egomania...
+	* tests/modules.at: Remove attributions.
+
 	* tests/generate.awk: When making substitutions to "@&t@", either
 	"&" or "\&" in the substitution string argument to gsub refer back
 	to the matched text.  "@\\t@" seems to work though, Tests 43 and

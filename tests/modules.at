@@ -23,7 +23,6 @@ AT_BANNER([Module support.])
 ## --------- ##
 ## modfreeze ##
 ## --------- ##
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([Freezing modules])
 
@@ -71,8 +70,6 @@ AT_CLEANUP([frozen.m4f])
 ## --module-directory: absolute path.  ##
 ## ----------------------------------- ##
 
-# Written by Gary V. Vaughan <gary@gnu.org>
-
 AT_SETUP([--module-directory: absolute path])
 
 AT_CHECK(M4PATH=$top_srcdir [m4 -M `cd $top_builddir/modules; pwd` -m load -d modules/modtest.m4], 0,
@@ -91,8 +88,6 @@ AT_CLEANUP
 ## modpath2 ##
 ## -------- ##
 
-# Written by Gary V. Vaughan <gary@gnu.org>
-
 AT_SETUP([modpath2])
 
 AT_CHECK([M4PATH=$top_srcdir LTDL_LIBRARY_PATH=$top_builddir/modules m4 -m load -d modules/modtest.m4], 0,
@@ -110,8 +105,6 @@ AT_CLEANUP
 ## -------- ##
 ## modpath3 ##
 ## -------- ##
-
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([modpath3])
 
@@ -134,7 +127,6 @@ AT_CLEANUP
 ## -------- ##
 ## modpath4 ##
 ## -------- ##
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([M4MODPATH: absolute path])
 
@@ -153,7 +145,6 @@ AT_CLEANUP
 ## ------- ##
 ## modtest ##
 ## ------- ##
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([modtest])
 
@@ -172,8 +163,6 @@ AT_CLEANUP
 ## ------ ##
 ## shadow ##
 ## ------ ##
-
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([shadow])
 
@@ -312,8 +301,6 @@ AT_CLEANUP
 ## ------ ##
 ## unload ##
 ## ------ ##
-
-# Written by Gary V. Vaughan <gary@gnu.org>
 
 AT_SETUP([unload])
 
