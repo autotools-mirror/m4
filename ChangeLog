@@ -1,3 +1,30 @@
+2004-06-14  Gary V. Vaughan  <gary@gnu.org>
+
+	* gnulib/import: Now updates makefile fragments, and configure.ac.
+	* gnulib/m4/gnulib.am: New file.  Generated makefile fragments.
+	* gnulib/m4/Makefile.am: include it.
+	* gnulib/acm4/intmax.m4, gnulib/acm4/longdouble.m4,
+	gnulib/acm4/longlong.m4, gnulib/acm4/printf-posix.m4,
+	gnulib/acm4/signed.m4, gnulib/acm4/size_max.m4,
+	gnulib/acm4/wchar_t.m4, gnulib/acm4/wint_t.m4,
+	gnulib/acm4/xsize.m4: New macro files from latest gnulib import.
+	* gnulib/acm4/alloca.m4, gnulib/acm4/inttypes_h.m4,
+	gnulib/acm4/lib-ld.m4, gnulib/acm4/lib-prefix.m4,
+	gnulib/acm4/error.m4, gnulib/acm4/po.m4, gnulib/acm4/regex.m4,
+	gnulib/acm4/stdbool.m4, gnulib/acm4/stdint_h.m4,
+	gnulib/acm4/uintmax_t.m4, gnulib/acm4/ulonglong.m4,
+	gnulib/acm4/unlocked-io.m4, gnulib/acm4/xalloc.m4,
+	gnulib/acm4/free.m4, gnulib/acm4/gettext.m4,
+	gnulib/acm4/glibc21.m4: Updated macro files from latest gnulib
+	import.
+	* gnulib/m4/getopt_int.h: New source file from latest gnulib
+	import.
+	* gnulib/m4/alloca.c, gnulib/m4/alloca_.h, gnulib/m4/getopt1.c,
+	gnulib/m4/obstack.c, gnulib/m4/obstack.h, gnulib/m4/regex.c,
+	gnulib/m4/unlocked-io.h, gnulib/m4/version-etc.c,
+	gnulib/m4/xmalloc.c, gnulib/m4/getopt.c, gnulib/m4/getopt.h:
+	Updated source files from latest gnulib.
+
 2004-02-29  Gary V. Vaughan  <gary@gnu.org>
 
 	* config/mailnotify: New file for mailing commit notifications,

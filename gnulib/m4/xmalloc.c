@@ -1,7 +1,7 @@
 /* xmalloc.c -- malloc with out of memory checking
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2003,
-   1999, 2000, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -37,14 +37,6 @@
 # define SIZE_MAX ((size_t) -1)
 #endif
 
-#ifndef HAVE_MALLOC
-"you must run the autoconf test for a GNU libc compatible malloc"
-#endif
-
-#ifndef HAVE_REALLOC
-"you must run the autoconf test for a GNU libc compatible realloc"
-#endif
-
 /* If non NULL, call this function when memory is exhausted. */
 void (*xalloc_fail_func) (void) = 0;
 
@@ -71,7 +63,7 @@ static inline void *
 xnmalloc_inline (size_t n, size_t s)
 {
   void *p;
-  if (xalloc_oversized (n, s) || ! (p = malloc (n * s)))
+  if (xalloc_oversized (n, s) || (! (p = malloc (n * s)) && n != 0))
     xalloc_die ();
   return p;
 }
@@ -96,7 +88,7 @@ xmalloc (size_t n)
 static inline void *
 xnrealloc_inline (void *p, size_t n, size_t s)
 {
-  if (xalloc_oversized (n, s) || ! (p = realloc (p, n * s)))
+  if (xalloc_oversized (n, s) || (! (p = realloc (p, n * s)) && n != 0))
     xalloc_die ();
   return p;
 }
@@ -136,8 +128,8 @@ xrealloc (void *p, size_t n)
    Here is an example of use:
 
      int *p = NULL;
-     size used = 0;
-     size allocated = 0;
+     size_t used = 0;
+     size_t allocated = 0;
 
      void
      append_int (int value)
@@ -155,9 +147,9 @@ xrealloc (void *p, size_t n)
    example:
 
      int *p = NULL;
-     size used = 0;
-     size allocated = 0;
-     size allocated1 = 1000;
+     size_t used = 0;
+     size_t allocated = 0;
+     size_t allocated1 = 1000;
 
      void
      append_int (int value)
@@ -239,7 +231,7 @@ xcalloc (size_t n, size_t s)
   void *p;
   /* Test for overflow, since some calloc implementations don't have
      proper overflow checks.  */
-  if (xalloc_oversized (n, s) || ! (p = calloc (n, s)))
+  if (xalloc_oversized (n, s) || (! (p = calloc (n, s)) && n != 0))
     xalloc_die ();
   return p;
 }

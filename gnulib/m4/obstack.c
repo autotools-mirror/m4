@@ -1,7 +1,8 @@
 /* obstack.c - subroutines used implicitly by object stack macros
 
    Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
+   Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,9 +23,9 @@
 #endif
 
 #ifdef _LIBC
-#include <obstack.h>
+# include <obstack.h>
 #else
-#include "obstack.h"
+# include "obstack.h"
 #endif
 
 /* NOTE BEFORE MODIFYING THIS FILE: This version number must be
@@ -53,18 +54,26 @@
 # include <wchar.h>
 #endif
 
+#include <stddef.h>
+
 #ifndef ELIDE_CODE
 
 
 /* Determine default alignment.  */
-struct fooalign {char x; double d;};
-# define DEFAULT_ALIGNMENT  \
-  ((PTR_INT_TYPE) ((char *) &((struct fooalign *) 0)->d - (char *) 0))
+union fooround
+{
+  long int i;
+  long double d;
+  void *p;
+};
 /* If malloc were really smart, it would round addresses to DEFAULT_ALIGNMENT.
    But in fact it might be less smart and round addresses to as much as
    DEFAULT_ROUNDING.  So we prepare for it to do that.  */
-union fooround {long x; double d;};
-# define DEFAULT_ROUNDING (sizeof (union fooround))
+enum
+  {
+    DEFAULT_ALIGNMENT = offsetof (struct { char c; union fooround u; }, u),
+    DEFAULT_ROUNDING = sizeof (union fooround)
+  };
 
 /* When we copy a long block of data, this is the unit to do it with.
    On some machines, copying successive ints does not work;
@@ -86,15 +95,19 @@ void (*obstack_alloc_failed_handler) (void) = print_and_abort;
 
 /* Exit value used when `print_and_abort' is used.  */
 # include <stdlib.h>
-# ifndef _LIBC
-#  include "exit.h"
-# endif
+# ifdef _LIBC
 int obstack_exit_failure = EXIT_FAILURE;
+# else
+#  include "exitfail.h"
+#  define obstack_exit_failure exit_failure
+# endif
 
-/* The non-GNU-C macros copy the obstack into this global variable
-   to avoid multiple evaluation.  */
-
+# ifdef _LIBC
+/* A looong time ago (before 1994, anyway; we're not sure) this global variable
+   was used by non-GNU-C macros to avoid multiple evaluation.  The GNU C
+   library still exports it because somebody might use it.  */
 struct obstack *_obstack;
+# endif
 
 /* Define a macro that either calls functions with the traditional malloc/free
    calling interface, or calls functions with the mmalloc/mfree interface
@@ -133,7 +146,7 @@ _obstack_begin (struct obstack *h,
   register struct _obstack_chunk *chunk; /* points to new chunk */
 
   if (alignment == 0)
-    alignment = (int) DEFAULT_ALIGNMENT;
+    alignment = DEFAULT_ALIGNMENT;
   if (size == 0)
     /* Default size is what GNU malloc can fit in a 4096-byte block.  */
     {
@@ -179,7 +192,7 @@ _obstack_begin_1 (struct obstack *h, int size, int alignment,
   register struct _obstack_chunk *chunk; /* points to new chunk */
 
   if (alignment == 0)
-    alignment = (int) DEFAULT_ALIGNMENT;
+    alignment = DEFAULT_ALIGNMENT;
   if (size == 0)
     /* Default size is what GNU malloc can fit in a 4096-byte block.  */
     {
@@ -249,8 +262,7 @@ _obstack_newchunk (struct obstack *h, int length)
 
   /* Compute an aligned object_base in the new chunk */
   object_base =
-    __INT_TO_PTR ((__PTR_TO_INT (new_chunk->contents) + h->alignment_mask)
-		  & ~ (h->alignment_mask));
+    __PTR_ALIGN ((char *) new_chunk, new_chunk->contents, h->alignment_mask);
 
   /* Move the existing object to the new chunk.
      Word at a time is fast and is safe if the object
@@ -286,9 +298,9 @@ _obstack_newchunk (struct obstack *h, int length)
   /* The new chunk certainly contains no empty object yet.  */
   h->maybe_empty_object = 0;
 }
-#ifdef _LIBC
+# ifdef _LIBC
 libc_hidden_def (_obstack_newchunk)
-#endif
+# endif
 
 /* Return nonzero if object OBJ has been allocated from obstack H.
    This is here for debugging.
@@ -351,11 +363,11 @@ obstack_free (struct obstack *h, void *obj)
     abort ();
 }
 
-#ifdef _LIBC
+# ifdef _LIBC
 /* Older versions of libc used a function _obstack_free intended to be
    called by non-GCC compilers.  */
 strong_alias (obstack_free, _obstack_free)
-#endif
+# endif
 
 int
 _obstack_memory_used (struct obstack *h)
@@ -376,7 +388,9 @@ _obstack_memory_used (struct obstack *h)
 # else
 #  include "gettext.h"
 # endif
-# define _(msgid) gettext (msgid)
+# ifndef _
+#  define _(msgid) gettext (msgid)
+# endif
 
 # ifdef _LIBC
 #  include <libio/iolibio.h>

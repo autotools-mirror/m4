@@ -1,5 +1,5 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright (C) 1991-1994, 2000, 2001, 2002  Free Software Foundation, Inc.
+# Copyright (C) 1991-1994, 2000, 2001, 2002, 2004  Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -97,11 +97,12 @@ AM_INIT_AUTOMAKE([1.7g dist-bzip2])
 ## ------------------ ##
 AC_PROG_CC
 
-dnl ((( gnulib module extensions
 gl_USE_SYSTEM_EXTENSIONS
+dnl ((( gnulib module extensions
+dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
 dnl ))) gnulib module extensions
 dnl ((( gnulib module unlocked-io
-jm_FUNC_GLIBC_UNLOCKED_IO
+gl_FUNC_GLIBC_UNLOCKED_IO
 dnl ))) gnulib module unlocked-io
 
 AC_ISC_POSIX
@@ -125,11 +126,7 @@ esac
 ## ----------------------- ##
 ## Libtool initialisation. ##
 ## ----------------------- ##
-AM_ENABLE_SHARED
-AC_LIBTOOL_DLOPEN
-AC_LIBTOOL_WIN32_DLL
-AC_LIBTOOL_TAGS([])
-AC_PROG_LIBTOOL
+LT_INIT([shared dlopen win32-dll])
 AC_LIB_LTDL
 
 AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
@@ -141,7 +138,7 @@ AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
 ## ---------------- ##
 dnl <-- override gnulib module gettext
 AM_GNU_GETTEXT(external, need-ngettext)
-AM_GNU_GETTEXT_VERSION(0.12.1)
+AM_GNU_GETTEXT_VERSION(0.14.1)
 m4_GNU_GETTEXT
 dnl --> override gnulib module gettext
 
