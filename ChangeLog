@@ -1,3 +1,34 @@
+2003-07-28  Gary V. Vaughan  <gary@gnu.org>
+
+	Aside from auditing path.c for m4module.h api obfuscation, this
+	delta introduces the concept of private struct members in opaque
+	data types to GNU m4: See the STYLE file for details.
+
+	* TODO: Remind ourselves that a rewrite of path.c is needed.
+	* m4/m4module.h (m4_search_path, struct m4_search_path_info):
+	Moved from here...
+	* m4/m4private.h (m4__search_path, m4__search_path_info): ...to
+	here and renamed.  These type definitions are for internal api use
+	only.  Changed all callers.
+	* m4/m4module.h (m4_search_path_env_init, m4_search_path_add):
+	Moved from here...
+	* m4/path.c (search_path_env_init, search_path_add): ...to here
+	and renamed.  These calls were never used outside this file.
+	Changed all callers.
+	(dirpath): Moved functionality of this static declaration...
+	* m4/m4private.h (struct m4): ...to this new internal only
+	search_path field.  Changed all callers.
+	(m4__get_search_path): Added new internal api accessor.
+	* m4/path.c (m4_search_path_info_new):  Removed.  Not used.
+	(m4_include_init): Removed...
+	* m4/m4.c (m4_create): ...because the new m4 field is now
+	initialised here.
+	(m4_delete): Recycle search_path memory.
+	* src/main.c (main): Don't call m4_include_init now that it's
+	gone!
+	* doc/STYLE: Document convention for private fields in opaque
+	ADTs.
+
 2003-07-24  Gary V. Vaughan  <gary@gnu.org>
 
 	Sometimes exporting the address of a symbol from a module isn't

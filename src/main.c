@@ -239,7 +239,6 @@ main (int argc, char *const *argv, char *const *envp)
   context = m4_create ();
 
   m4__module_init (context);
-  m4_include_init ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -527,7 +526,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	  }
 	m4_macro_expand_input (context);
       }
-#undef NEXTARG
 
   /* Now handle wrapup text.  */
 

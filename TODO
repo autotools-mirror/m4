@@ -92,6 +92,12 @@ for any of these ideas or if you have others to add.
     We should be making the library reentrant so that multiple instances
     of m4 can be run in the same process at the same time.
 
+  + The path management stuff (in path.c/m4private.h) is reinventing the
+    wheel.  There are a bunch of fast path management and search functions
+    in ltdl.c:  These need to be sanitized, exported through ltdl.h, and
+    then wrapped by the m4module.h path api.  path.c can probably be removed
+    entirely at that point.
+
 * MODULE SPECIFIC ISSUES
 
   + Some way of linking a module statically is needed, for systems

@@ -20,7 +20,7 @@ following restrictions on coding style apply:
     but are not part of the supported library api have the prefix
     `m4__',
 
-  + Function names should be verb phrases; m4_get_module_field.
+  + Function names should be verb phrases; m4_module_get_field.
 
   + Functions which exist to be used as callbacks from API functions, and
     hence which likely have strange looking parameters are named with the
@@ -48,6 +48,13 @@ following restrictions on coding style apply:
   + Structures are typedeffed separately, and the structure itself
     generally not exported unless in the `m4__' namespace to support
     fast accessor macros.
+
+  + An opaque abstract data type (ADT) can have public and private fields:
+    By convention public fields will have exported accessor functions (and
+    maybe also fast macro versions of the same), and private fields will
+    not export accessors at all.  However, there should be non-exported
+    (or at least in the `m4__' namespace) accessor functions for even the
+    private fields of an ADI to aid possible later refactoring.
 
 * ARCHITECTURE
 

@@ -401,32 +401,14 @@ extern void	m4_insert_file	     (FILE *);
 extern void	m4_freeze_diversions (FILE *);
 extern void	m4_undivert_all	     (void);
 
-extern void	m4_include_init          (void);
+
+
+/* --- PATH MANAGEMENT --- */
+
 extern void	m4_include_env_init      (m4 *);
 extern void	m4_add_include_directory (m4 *, const char *);
 extern FILE *   m4_path_search           (m4 *, const char *, char **);
 
-/* These are for other search paths */
-
-struct m4_search_path
-{
-  struct m4_search_path *next;	/* next directory to search */
-  const char *dir;		/* directory */
-  int len;
-};
-
-typedef struct m4_search_path m4_search_path;
-
-struct m4_search_path_info
-{
-  m4_search_path *list;		/* the list of path directories */
-  m4_search_path *list_end;	/* the end of same */
-  int max_length;		/* length of longest directory name */
-};
-
-extern struct m4_search_path_info *m4_search_path_info_new (void);
-extern	void	m4_search_path_env_init (struct m4_search_path_info *, char *, boolean);
-extern	void	m4_search_path_add (struct m4_search_path_info *, const char *);
 
 
 #define obstack_chunk_alloc	xmalloc

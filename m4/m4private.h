@@ -28,6 +28,8 @@
 
 #include "m4module.h"
 
+typedef struct m4__search_path_info m4__search_path_info;
+
 typedef enum {
   M4_SYMBOL_VOID,
   M4_SYMBOL_TEXT,
@@ -42,11 +44,11 @@ typedef enum {
 /* --- CONTEXT MANAGEMENT --- */
 
 struct m4 {
-  m4_symbol_table *symtab;
-  m4_syntax_table *syntax;
+  m4_symbol_table *	symtab;
+  m4_syntax_table *	syntax;
 
-  FILE *	 debug_file;		/* File for debugging output.  */
-  m4_obstack trace_messages;
+  FILE *	 	debug_file;	/* File for debugging output.  */
+  m4_obstack		trace_messages;
 
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
@@ -55,6 +57,9 @@ struct m4 {
   int		debug_level;			/* -d */
   int		max_debug_arg_length;		/* -l */
   int		opt_flags;
+
+  /* __PRIVATE__: */
+  m4__search_path_info	*search_path;	/* The list of path directories. */
 };
 
 #define M4_OPT_PREFIX_BUILTINS_BIT	(1 << 0) /* -P */
@@ -64,6 +69,8 @@ struct m4 {
 #define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
 #define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
 
+/* Fast macro versions of accessor functions for public fields of m4,
+   that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_symbol_table(C)		((C)->symtab)
 #  define m4_get_syntax_table(C)		((C)->syntax)
@@ -88,6 +95,10 @@ struct m4 {
 #  define m4_get_posixly_correct_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #endif
+
+/* Accessors for private fields of m4, which have no function version
+   exported in m4module.h.  */
+#define m4__get_search_path(C)			((C)->search_path)
 
 
 
@@ -185,7 +196,7 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_REST_BIT	(1 << 0)
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-extern void	m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
+extern void m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 
 
 
@@ -242,6 +253,24 @@ typedef enum {
 } m4__token_type;
 
 extern	m4__token_type m4__next_token (m4 *context, m4_symbol_value *);
+
+
+
+/* --- PATH MANAGEMENT --- */
+
+typedef struct m4__search_path m4__search_path;
+
+struct m4__search_path {
+  m4__search_path *next;	/* next directory to search */
+  const char *dir;		/* directory */
+  int len;
+};
+
+struct m4__search_path_info {
+  m4__search_path *list;	/* the list of path directories */
+  m4__search_path *list_end;	/* the end of same */
+  int max_length;		/* length of longest directory name */
+};
 
 
 

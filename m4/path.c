@@ -39,36 +39,23 @@
 #include "m4module.h"
 #include "m4private.h"
 
-static struct m4_search_path_info dirpath; /* the list of path directories */
+static void search_path_add (m4__search_path_info *, const char *);
+static void search_path_env_init (m4__search_path_info *, char *, boolean);
 
 
 /*
  * General functions for search paths
  */
 
-struct m4_search_path_info *
-m4_search_path_info_new (void)
+static void
+search_path_add (m4__search_path_info *info, const char *dir)
 {
-  struct m4_search_path_info *info;
-
-  info = (struct m4_search_path_info *)
-    xmalloc (sizeof (struct m4_search_path_info));
-  info->list = NULL;
-  info->list_end = NULL;
-  info->max_length = 0;
-
-  return info;
-}
-
-void
-m4_search_path_add (struct m4_search_path_info *info, const char *dir)
-{
-  m4_search_path *path;
+  m4__search_path *path;
 
   if (*dir == '\0')
     dir = ".";
 
-  path = (struct m4_search_path *) xmalloc (sizeof (struct m4_search_path));
+  path = XMALLOC (m4__search_path, 1);
   path->next = NULL;
   path->len = strlen (dir);
   path->dir = xstrdup (dir);
@@ -83,9 +70,8 @@ m4_search_path_add (struct m4_search_path_info *info, const char *dir)
   info->list_end = path;
 }
 
-void
-m4_search_path_env_init (struct m4_search_path_info *info, char *path,
-			 boolean isabs)
+static void
+search_path_env_init (m4__search_path_info *info, char *path, boolean isabs)
 {
   char *path_end;
 
@@ -98,19 +84,10 @@ m4_search_path_env_init (struct m4_search_path_info *info, char *path,
       if (path_end)
 	*path_end = '\0';
       if (!isabs || *path == '/')
-	m4_search_path_add (info, path);
+	search_path_add (info, path);
       path = path_end + 1;
     }
   while (path_end);
-}
-
-
-void
-m4_include_init (void)
-{
-  dirpath.list = NULL;
-  dirpath.list_end = NULL;
-  dirpath.max_length = 0;
 }
 
 
@@ -122,7 +99,8 @@ m4_include_env_init (m4 *context)
   if (m4_get_no_gnu_extensions_opt (context))
     return;
 
-  m4_search_path_env_init (&dirpath, getenv ("M4PATH"), FALSE);
+  search_path_env_init (m4__get_search_path (context),
+			getenv ("M4PATH"), FALSE);
 }
 
 void
@@ -131,7 +109,7 @@ m4_add_include_directory (m4 *context, const char *dir)
   if (m4_get_no_gnu_extensions_opt (context))
     return;
 
-  m4_search_path_add (&dirpath, dir);
+  search_path_add (m4__get_search_path (context), dir);
 
 #ifdef DEBUG_INCL
   fprintf (stderr, "add_include_directory (%s);\n", dir);
@@ -142,7 +120,7 @@ FILE *
 m4_path_search (m4 *context, const char *dir, char **expanded_name)
 {
   FILE *fp;
-  struct m4_search_path *incl;
+  m4__search_path *incl;
   char *name;			/* buffer for constructed name */
 
   /* Look in current working directory first.  */
@@ -158,9 +136,9 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
   if (*dir == '/' || m4_get_no_gnu_extensions_opt (context))
     return NULL;
 
-  name = (char *) xmalloc (dirpath.max_length + 1 + strlen (dir) + 1);
+  name = (char *) xmalloc (m4__get_search_path (context)->max_length + 1 + strlen (dir) + 1);
 
-  for (incl = dirpath.list; incl != NULL; incl = incl->next)
+  for (incl = m4__get_search_path (context)->list; incl != NULL; incl = incl->next)
     {
       strncpy (name, incl->dir, incl->len);
       name[incl->len] = '/';
@@ -193,10 +171,10 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
 static void
 include_dump (void)
 {
-  struct m4_search_path *incl;
+  m4__search_path *incl;
 
   fprintf (stderr, "include_dump:\n");
-  for (incl = dirpath.list; incl != NULL; incl = incl->next)
+  for (incl = m4__get_search_path (context)->list; incl != NULL; incl = incl->next)
     fprintf (stderr, "\t%s\n", incl->dir);
 }
 

@@ -33,6 +33,8 @@ m4_create (void)
 
   context->nesting_limit = M4_DEFAULT_NESTING_LIMIT;
 
+  context->search_path		  = XCALLOC (m4__search_path_info, 1);
+
   return context;
 }
 
@@ -51,6 +53,21 @@ m4_delete (m4 *context)
     fclose (context->debug_file);
 
   obstack_free (&context->trace_messages, NULL);
+
+  if (context->search_path)
+    {
+      m4__search_path *path = context->search_path->list;
+
+      while (path)
+	{
+	  m4__search_path *stale = path;
+	  path = path->next;
+
+	  xfree ((void*) stale->dir);
+	  xfree (stale);
+	}
+      xfree (context->search_path);
+    }
 
   xfree (context);
 }
@@ -72,7 +89,6 @@ m4_delete (m4 *context)
 #undef m4_get_interactive_opt
 #undef m4_get_sync_output_opt
 #undef m4_get_posixly_correct_opt
-
 
 #define M4FIELD(type, base, field)					\
 	type CONC(m4_get_, base) (m4 *context)				\
