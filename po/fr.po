@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-08-15 11:56+0200\n"
+"POT-Creation-Date: 2001-08-17 15:08+0200\n"
 "PO-Revision-Date: 1998-05-23 11:53+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -165,48 +165,48 @@ msgstr "ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis! (tra
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "ERREUR INTERNE: Mauvais type de donnée pour de lexème (trace_pre ())"
 
-#: m4/input.c:334
+#: m4/input.c:335
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Entrée reprise de %s, ligne %d"
 
-#: m4/input.c:364
+#: m4/input.c:365
 #, c-format
 msgid "Input read from %s"
 msgstr "Entrée lue de %s"
 
-#: m4/input.c:528
+#: m4/input.c:531
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "ERREUR INTERNE: Utilisation récursive de push_string!"
 
-#: m4/input.c:648
+#: m4/input.c:651
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "ERREUR INTERNE: Mauvais appel à init_macro_token ()"
 
-#: m4/input.c:688
+#: m4/input.c:691
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans next_char ()"
 
-#: m4/input.c:725
+#: m4/input.c:728
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "ERREUR INTERNE: Pile d'entrée douteuse dans peek_input ()"
 
-#: m4/input.c:830
+#: m4/input.c:833
 msgid "NONE"
 msgstr "AUCUN"
 
-#: m4/input.c:1061
+#: m4/input.c:1064
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Nom «%s» non-défini"
 
-#: m4/input.c:1098 modules/gnu.c:279 modules/gnu.c:338
+#: m4/input.c:1101 modules/gnu.c:279 modules/gnu.c:338
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Mauvaise expression régulière «%s»: %s"
 
-#: m4/input.c:1284 m4/input.c:1311
+#: m4/input.c:1287 m4/input.c:1314
 msgid "ERROR: EOF in string"
 msgstr "ERREUR: Fin-de-fichier dans la chaîne"
 
@@ -218,61 +218,73 @@ msgstr "ERREUR: Débordement de pile.  (Récursion hors contrôle sur «define»?)"
 msgid "ERROR: EOF in argument list"
 msgstr "ERREUR: Fin-de-fichier dans la liste d'arguments"
 
-#: m4/macro.c:184
+#: m4/macro.c:185
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "ERREUR INTERNE: Mauvais type de données pour lexème dans expand_argument ()"
 
-#: m4/macro.c:262
+#: m4/macro.c:263
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "ERREUR INTERNE: Mauvais type de symbole dans call_macro ()"
 
-#: m4/macro.c:291
+#: m4/macro.c:292
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "ERREUR: Limite de récursion %d dépassée, la changer par -L<N>"
 
-#: m4/module.c:196
-#, c-format
-msgid "ERROR: failed to initialise modules: %s"
+#: m4/module.c:161
+msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:273
-#, c-format
-msgid "ERROR: cannot load module: `%s'"
+#: m4/module.c:180
+msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:276
-#, c-format
-msgid "ERROR: cannot load module: `%s': %s"
+#: m4/module.c:198
+msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:283
+#: m4/module.c:225
+#, c-format
+msgid "ERROR: failed to initialise module loader: %s"
+msgstr ""
+
+#: m4/module.c:279
+#, c-format
+msgid "ERROR: cannot open module `%s': %s"
+msgstr ""
+
+#: m4/module.c:289
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:373
+#: m4/module.c:315
 #, c-format
-msgid "ERROR: cannot close module: %s is not loaded."
+msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:424 m4/module.c:504
+#: m4/module.c:379
 #, c-format
-msgid "ERROR: cannot close module: `%s'"
+msgid "ERROR: cannot close module `%s': %s"
 msgstr ""
 
-#: m4/module.c:427 m4/module.c:508
-#, c-format
-msgid "ERROR: cannot close module: `%s': %s"
-msgstr ""
-
-#: m4/module.c:494
-msgid "ERROR: cannot close modules"
-msgstr ""
-
-#: m4/module.c:497
+#: m4/module.c:402
 #, c-format
 msgid "ERROR: cannot close modules: %s"
+msgstr ""
+
+#: m4/module.c:421
+#, c-format
+msgid "Warning: cannot load module `%s': %s"
+msgstr ""
+
+#: m4/module.c:470
+msgid "module not loaded"
+msgstr ""
+
+#: m4/module.c:510
+#, c-format
+msgid "ERROR: cannot unload module `%s': %s"
 msgstr ""
 
 #: m4/output.c:292
@@ -304,12 +316,12 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "La fouille du chemin pour «%s» trouve «%s»"
 
-#: m4/symtab.c:191
+#: m4/symtab.c:192
 #, fuzzy
 msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
 msgstr "ERREUR INTERNE: Mode illégal dans symbol_lookup ()"
 
-#: m4/symtab.c:339
+#: m4/symtab.c:338
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Le nom «%s» est inconnu\n"
@@ -319,12 +331,12 @@ msgstr "Le nom «%s» est inconnu\n"
 msgid "%s support was not compiled in"
 msgstr ""
 
-#: modules/gnu.c:125 modules/m4.c:681 modules/m4.c:704
+#: modules/gnu.c:125 modules/m4.c:700 modules/m4.c:723
 #, c-format
 msgid "Undefined name %s"
 msgstr "Nom «%s» non-défini"
 
-#: modules/gnu.c:149 modules/m4.c:290
+#: modules/gnu.c:149 modules/m4.c:308
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Nom «%s» non-défini"
@@ -353,30 +365,35 @@ msgstr "Incapable d'ouvrir un «pipe» pour la commande «%s»"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "ATTENTION: \\\\0 disparaîtra, utiliser \\\\& plutôt pour les remplacements"
 
-#: modules/m4.c:161
+#: modules/load.c:78 modules/m4.c:112
+#, c-format
+msgid "Warning: cannot make module `%s' resident: %s"
+msgstr ""
+
+#: modules/m4.c:179
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "ERREUR INTERNE: Mauvais type de lexème dans define_macro ()"
 
-#: modules/m4.c:297
+#: modules/m4.c:315
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "ERREUR INTERNE: Mauvais type de données pour lexème dans m4_dumpdef ()"
 
-#: modules/m4.c:337
+#: modules/m4.c:356
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "ERREUR INTERNE: Mauvais type de symbole dans m4_defn ()"
 
-#: modules/m4.c:455
+#: modules/m4.c:474
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Argument non-numérique pour %s"
 
-#: modules/m4.c:467
+#: modules/m4.c:486
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Incapble de ramener la diversion %s"
 
-#: modules/m4.c:556 src/freeze.c:409
+#: modules/m4.c:575 src/freeze.c:413
 #, c-format
 msgid "Cannot open %s"
 msgstr "Incapable d'ouvrir %s"
@@ -386,34 +403,35 @@ msgstr "Incapable d'ouvrir %s"
 msgid "Loss of precision in eval: %s"
 msgstr "Mauvaise expression dans «eval»: %s"
 
-#: src/freeze.c:231
+#: src/freeze.c:178
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "ERREUR INTERNE: Prédéfini introuvable dans la table des prédéfinis!"
 
-#: src/freeze.c:262
-msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
+#: src/freeze.c:199
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
 msgstr "ERREUR INTERNE: Mauvais type de donnée pour lexème dans freeze_one_symbol ()"
 
-#: src/freeze.c:294
+#: src/freeze.c:298
 msgid "Expecting line feed in frozen file"
 msgstr "Fin-de-ligne attendue du fichier figé"
 
-#: src/freeze.c:296
+#: src/freeze.c:300
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Caractère «%c» attendu du fichier figé"
 
-#: src/freeze.c:382 src/freeze.c:551
+#: src/freeze.c:386 src/freeze.c:559
 msgid "Premature end of frozen file"
 msgstr "Fin prématurée de fichier figé"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
-#: src/freeze.c:649
+#: src/freeze.c:426 src/freeze.c:468 src/freeze.c:521 src/freeze.c:539
+#: src/freeze.c:657
 msgid "Ill-formated frozen file"
 msgstr "Fichier figé difforme"
 
-#: src/freeze.c:497
+#: src/freeze.c:506
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "«%s» dans le fichier figé est introuvable dans la table des prédéfinis!"

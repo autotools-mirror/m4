@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-08-15 11:56+0200\n"
+"POT-Creation-Date: 2001-08-17 15:08+0200\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -165,48 +165,48 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad token data type (m4_trace_pre ())"
 msgstr "INTERNE FOUT: Onjuiste teken data type (trace_pre ())"
 
-#: m4/input.c:334
+#: m4/input.c:335
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Invoer reverted naar %s, lijn %d"
 
-#: m4/input.c:364
+#: m4/input.c:365
 #, c-format
 msgid "Input read from %s"
 msgstr "Invoer gelezen vanuit %s"
 
-#: m4/input.c:528
+#: m4/input.c:531
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "INTERNE FOUT: Recursieve push_string!"
 
-#: m4/input.c:648
+#: m4/input.c:651
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "INTERNE FOUT: Onjuiste aanroep naar init_macro_token ()"
 
-#: m4/input.c:688
+#: m4/input.c:691
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "INTERNE FOUT: Invoer stapel botch in next_char ()"
 
-#: m4/input.c:725
+#: m4/input.c:728
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "INTERNE FOUT: Invoer stapel botch in peek_input ()"
 
-#: m4/input.c:830
+#: m4/input.c:833
 msgid "NONE"
 msgstr "GEEN"
 
-#: m4/input.c:1061
+#: m4/input.c:1064
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr "Ongedefinieerde syntax code %c"
 
-#: m4/input.c:1098 modules/gnu.c:279 modules/gnu.c:338
+#: m4/input.c:1101 modules/gnu.c:279 modules/gnu.c:338
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Onjuiste reguliere expressie `%s': %s"
 
-#: m4/input.c:1284 m4/input.c:1311
+#: m4/input.c:1287 m4/input.c:1314
 msgid "ERROR: EOF in string"
 msgstr "FOUT: Einde van bestand teken in string"
 
@@ -218,62 +218,74 @@ msgstr "INTERNE FOUT: Onjuist teken type in expand_token ()"
 msgid "ERROR: EOF in argument list"
 msgstr "FOUT: Einde van bestand teken in argumentenlijst"
 
-#: m4/macro.c:184
+#: m4/macro.c:185
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "INTERNE FOUT: Onjuist teken type in expand_argument ()"
 
-#: m4/macro.c:262
+#: m4/macro.c:263
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "INTERNE FOUT: Onjuist symbool type in call_macro ()"
 
-#: m4/macro.c:291
+#: m4/macro.c:292
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FOUT: Recursie limiet of %d overschreden, gebruik -L<N> om dit te wijzigen"
 
-#: m4/module.c:196
-#, c-format
-msgid "ERROR: failed to initialise modules: %s"
+#: m4/module.c:161
+msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:273
-#, c-format
-msgid "ERROR: cannot load module: `%s'"
+#: m4/module.c:180
+msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:276
-#, c-format
-msgid "ERROR: cannot load module: `%s': %s"
+#: m4/module.c:198
+msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:283
+#: m4/module.c:225
+#, c-format
+msgid "ERROR: failed to initialise module loader: %s"
+msgstr ""
+
+#: m4/module.c:279
+#, c-format
+msgid "ERROR: cannot open module `%s': %s"
+msgstr ""
+
+#: m4/module.c:289
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:373
+#: m4/module.c:315
 #, c-format
-msgid "ERROR: cannot close module: %s is not loaded."
+msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:424 m4/module.c:504
+#: m4/module.c:379
 #, c-format
-msgid "ERROR: cannot close module: `%s'"
+msgid "ERROR: cannot close module `%s': %s"
 msgstr ""
 
-#: m4/module.c:427 m4/module.c:508
-#, c-format
-msgid "ERROR: cannot close module: `%s': %s"
-msgstr ""
-
-#: m4/module.c:494
-msgid "ERROR: cannot close modules"
-msgstr ""
-
-#: m4/module.c:497
+#: m4/module.c:402
 #, c-format
 msgid "ERROR: cannot close modules: %s"
+msgstr ""
+
+#: m4/module.c:421
+#, c-format
+msgid "Warning: cannot load module `%s': %s"
+msgstr ""
+
+#: m4/module.c:470
+msgid "module not loaded"
+msgstr ""
+
+#: m4/module.c:510
+#, c-format
+msgid "ERROR: cannot unload module `%s': %s"
 msgstr ""
 
 #: m4/output.c:292
@@ -305,12 +317,12 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"
 
-#: m4/symtab.c:191
+#: m4/symtab.c:192
 #, fuzzy
 msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
 msgstr "INTERNE FOUT: Ongeldige mode voor symbol_lookup ()"
 
-#: m4/symtab.c:339
+#: m4/symtab.c:338
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
@@ -320,12 +332,12 @@ msgstr "Naam `%s' is niet bekend\n"
 msgid "%s support was not compiled in"
 msgstr ""
 
-#: modules/gnu.c:125 modules/m4.c:681 modules/m4.c:704
+#: modules/gnu.c:125 modules/m4.c:700 modules/m4.c:723
 #, c-format
 msgid "Undefined name %s"
 msgstr "Ongedefinieerde naam %s"
 
-#: modules/gnu.c:149 modules/m4.c:290
+#: modules/gnu.c:149 modules/m4.c:308
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Ongedefinieerde naam %s"
@@ -354,30 +366,35 @@ msgstr "Kan geen pijp openen voor commando `%s'"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "LET OP: \\0 zal verdwijnen, gebruik hiervoor \\& als vervanging"
 
-#: modules/m4.c:161
+#: modules/load.c:78 modules/m4.c:112
+#, c-format
+msgid "Warning: cannot make module `%s' resident: %s"
+msgstr ""
+
+#: modules/m4.c:179
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in define_macro ()"
 
-#: modules/m4.c:297
+#: modules/m4.c:315
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in m4_dumpdef ()"
 
-#: modules/m4.c:337
+#: modules/m4.c:356
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "INTERNE FOUT: Onjuist symbool type in m4_defn ()"
 
-#: modules/m4.c:455
+#: modules/m4.c:474
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Niet numeriek argument voor %s"
 
-#: modules/m4.c:467
+#: modules/m4.c:486
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
-#: modules/m4.c:556 src/freeze.c:409
+#: modules/m4.c:575 src/freeze.c:413
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"
@@ -387,34 +404,35 @@ msgstr "Kan %s niet openen"
 msgid "Loss of precision in eval: %s"
 msgstr "Onjuist expressie in evaluatie: %s"
 
-#: src/freeze.c:231
+#: src/freeze.c:178
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "INTERNE FOUT: Ingebouwde functie niet gevonden in functie tabel!"
 
-#: src/freeze.c:262
-msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
+#: src/freeze.c:199
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in freeze_one_symbol ()"
 
-#: src/freeze.c:294
+#: src/freeze.c:298
 msgid "Expecting line feed in frozen file"
 msgstr "Verwacht nieuwe regel in gefixeerd bestand"
 
-#: src/freeze.c:296
+#: src/freeze.c:300
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Verwacht karakter `%c' in gefixeerd bestand"
 
-#: src/freeze.c:382 src/freeze.c:551
+#: src/freeze.c:386 src/freeze.c:559
 msgid "Premature end of frozen file"
 msgstr "Voorbarig einde van gefixeerd bestand"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
-#: src/freeze.c:649
+#: src/freeze.c:426 src/freeze.c:468 src/freeze.c:521 src/freeze.c:539
+#: src/freeze.c:657
 msgid "Ill-formated frozen file"
 msgstr "Slecht geformateerd gefixeerd bestand"
 
-#: src/freeze.c:497
+#: src/freeze.c:506
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' van gefixeerd bestand niet gevonden in functie tabel!"

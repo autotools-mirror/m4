@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
-"POT-Creation-Date: 2001-08-15 11:56+0200\n"
+"POT-Creation-Date: 2001-08-17 15:08+0200\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -167,48 +167,48 @@ msgstr ""
 "内部エラー：トークンデータの種類が不正です。\n"
 "            (関数 trace_pre () がこのエラーメッセージを出しています。)"
 
-#: m4/input.c:334
+#: m4/input.c:335
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "ファイル %s, %d 行目から入力し直します。"
 
-#: m4/input.c:364
+#: m4/input.c:365
 #, c-format
 msgid "Input read from %s"
 msgstr "%s からの入力を読み込みます。"
 
-#: m4/input.c:528
+#: m4/input.c:531
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "内部エラー：再帰的に文字列を push しています。"
 
-#: m4/input.c:648
+#: m4/input.c:651
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "内部エラー：関数 init_macro_token () が不正に呼ばれています。"
 
-#: m4/input.c:688
+#: m4/input.c:691
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "内部エラー：関数 next_char () 内でスタックの入力に失敗しています。"
 
-#: m4/input.c:725
+#: m4/input.c:728
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in m4_peek_input ()"
 msgstr "内部エラー：関数 peek_input () 内でスタックの入力に失敗しています。"
 
-#: m4/input.c:830
+#: m4/input.c:833
 msgid "NONE"
 msgstr "なし"
 
-#: m4/input.c:1061
+#: m4/input.c:1064
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "`%s' は定義されていません。"
 
-#: m4/input.c:1098 modules/gnu.c:279 modules/gnu.c:338
+#: m4/input.c:1101 modules/gnu.c:279 modules/gnu.c:338
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
 
-#: m4/input.c:1284 m4/input.c:1311
+#: m4/input.c:1287 m4/input.c:1314
 msgid "ERROR: EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
@@ -220,63 +220,75 @@ msgstr "内部エラー：関数 expand_token () 内のトークンの種類が不正です。"
 msgid "ERROR: EOF in argument list"
 msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
 
-#: m4/macro.c:184
+#: m4/macro.c:185
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "内部エラー：関数 expand_argument () のトークンの種類が不正です。"
 
-#: m4/macro.c:262
+#: m4/macro.c:263
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "内部エラー：関数 call_macro () 内のシンボルの種類が不正です。"
 
-#: m4/macro.c:291
+#: m4/macro.c:292
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "エラー：再帰的定義のネストが指定された値 %d を超えています。\n"
 "        -L<数字> オプションを用いてネスト数の上限を増やして下さい。"
 
-#: m4/module.c:196
-#, c-format
-msgid "ERROR: failed to initialise modules: %s"
+#: m4/module.c:161
+msgid "unknown error"
 msgstr ""
 
-#: m4/module.c:273
-#, c-format
-msgid "ERROR: cannot load module: `%s'"
+#: m4/module.c:180
+msgid "Warning: multiple module loader initialisations"
 msgstr ""
 
-#: m4/module.c:276
-#, c-format
-msgid "ERROR: cannot load module: `%s': %s"
+#: m4/module.c:198
+msgid "libltdl client registration failed"
 msgstr ""
 
-#: m4/module.c:283
+#: m4/module.c:225
+#, c-format
+msgid "ERROR: failed to initialise module loader: %s"
+msgstr ""
+
+#: m4/module.c:279
+#, c-format
+msgid "ERROR: cannot open module `%s': %s"
+msgstr ""
+
+#: m4/module.c:289
 #, c-format
 msgid "ERROR: module `%s' has no entry points"
 msgstr ""
 
-#: m4/module.c:373
+#: m4/module.c:315
 #, c-format
-msgid "ERROR: cannot close module: %s is not loaded."
+msgid "Warning: overiding stale caller data in module `%s'"
 msgstr ""
 
-#: m4/module.c:424 m4/module.c:504
+#: m4/module.c:379
 #, c-format
-msgid "ERROR: cannot close module: `%s'"
+msgid "ERROR: cannot close module `%s': %s"
 msgstr ""
 
-#: m4/module.c:427 m4/module.c:508
-#, c-format
-msgid "ERROR: cannot close module: `%s': %s"
-msgstr ""
-
-#: m4/module.c:494
-msgid "ERROR: cannot close modules"
-msgstr ""
-
-#: m4/module.c:497
+#: m4/module.c:402
 #, c-format
 msgid "ERROR: cannot close modules: %s"
+msgstr ""
+
+#: m4/module.c:421
+#, c-format
+msgid "Warning: cannot load module `%s': %s"
+msgstr ""
+
+#: m4/module.c:470
+msgid "module not loaded"
+msgstr ""
+
+#: m4/module.c:510
+#, c-format
+msgid "ERROR: cannot unload module `%s': %s"
 msgstr ""
 
 #: m4/output.c:292
@@ -310,12 +322,12 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
 
-#: m4/symtab.c:191
+#: m4/symtab.c:192
 #, fuzzy
 msgid "INTERNAL ERROR: Illegal mode to m4_symbol_lookup ()"
 msgstr "内部エラー：関数 symbol_lookup () への引数 mode が不正です。"
 
-#: m4/symtab.c:339
+#: m4/symtab.c:338
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "`%s' は定義されていません。\n"
@@ -325,12 +337,12 @@ msgstr "`%s' は定義されていません。\n"
 msgid "%s support was not compiled in"
 msgstr ""
 
-#: modules/gnu.c:125 modules/m4.c:681 modules/m4.c:704
+#: modules/gnu.c:125 modules/m4.c:700 modules/m4.c:723
 #, c-format
 msgid "Undefined name %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:149 modules/m4.c:290
+#: modules/gnu.c:149 modules/m4.c:308
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "`%s' は定義されていません。"
@@ -359,30 +371,35 @@ msgstr "コマンド `%s' へのパイプがオープンできません。"
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
-#: modules/m4.c:161
+#: modules/load.c:78 modules/m4.c:112
+#, c-format
+msgid "Warning: cannot make module `%s' resident: %s"
+msgstr ""
+
+#: modules/m4.c:179
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "内部エラー：関数 define_macro () 内のトークンデータの種類が不正です。"
 
-#: modules/m4.c:297
+#: modules/m4.c:315
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "内部エラー：関数 m4_dumpdef () のトークンデータの種類が不正です。"
 
-#: modules/m4.c:337
+#: modules/m4.c:356
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "内部エラー：関数 m4_defn () 内のシンボルの種類が不正です。"
 
-#: modules/m4.c:455
+#: modules/m4.c:474
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr "`%s' に数字でない引数が渡されています。"
 
-#: modules/m4.c:467
+#: modules/m4.c:486
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:556 src/freeze.c:409
+#: modules/m4.c:575 src/freeze.c:413
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
@@ -392,34 +409,35 @@ msgstr "`%s' をオープンできません。"
 msgid "Loss of precision in eval: %s"
 msgstr "eval で %s という不正な式が用いられています。"
 
-#: src/freeze.c:231
+#: src/freeze.c:178
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "内部エラー：`Built-in' というビルトインマクロはありません。"
 
-#: src/freeze.c:262
-msgid "INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"
+#: src/freeze.c:199
+#, fuzzy
+msgid "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"
 msgstr "内部エラー：関数 freeze_one_symbol () のトークンデータの種類が不正です。"
 
-#: src/freeze.c:294
+#: src/freeze.c:298
 msgid "Expecting line feed in frozen file"
 msgstr "凍結ファイル内で改行コードを期待しています。"
 
-#: src/freeze.c:296
+#: src/freeze.c:300
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "凍結ファイル内で文字 `%c' を期待しています。"
 
-#: src/freeze.c:382 src/freeze.c:551
+#: src/freeze.c:386 src/freeze.c:559
 msgid "Premature end of frozen file"
 msgstr "凍結ファイルの EOF が早く来過ぎています。"
 
 #. 3 argument 'F' operations are invalid for format version 1.
-#: src/freeze.c:422 src/freeze.c:464 src/freeze.c:513 src/freeze.c:531
-#: src/freeze.c:649
+#: src/freeze.c:426 src/freeze.c:468 src/freeze.c:521 src/freeze.c:539
+#: src/freeze.c:657
 msgid "Ill-formated frozen file"
 msgstr "内部エラー：凍結ファイルのフォーマットが不正です。"
 
-#: src/freeze.c:497
+#: src/freeze.c:506
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
