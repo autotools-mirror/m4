@@ -353,6 +353,10 @@ operating system decided, now you do.
 "Active"
      Characters that themselves, alone, form macro names.  No default.
 
+"Escape"
+     Characters that must precede macro names for them to be
+     recognised.  No default.
+
 Each character can, besides the basic syntax category, have some syntax
 attributes.  These are:
 
@@ -404,6 +408,9 @@ characters are given the syntax code.
 
 `O'
      Other
+
+`@'
+     Escape
 
 `A'
      Active
@@ -461,6 +468,40 @@ changing the syntax categories we can avoid it.
 
 It is not yet possible to redefine the `$' used to indicate macro
 arguments in user defined macros.
+
+   Macro calls can be given a TeX- or texinfo like syntax using an
+escape.  If one or more characters are defined as escapes macro names
+are only recognised if preceded by an escape character.
+
+   If the escape is not followed by what is normally a word (a letter
+optionally followed by letters and/or numerals), that single character
+is returned as a macro name.
+
+   As always, words without a macro definition cause no error message.
+They and the escape character are simply output.
+
+     define(`foo', `bar')
+     =>
+     changesyntax(`@@')
+     =>
+     foo
+     =>foo
+     @foo
+     =>bar
+     @changesyntax(`@\', `O@')
+     =>
+     foo
+     =>foo
+     @foo
+     =>@foo
+     \foo
+     =>bar
+     define(`#', `No comment')
+     =>define(#, No comment)
+     \define(`#', `No comment')
+     =>
+     \# \foo # Comment \foo
+     =>No comment bar # Comment \foo
 
    Active characters are known from TeX.  In `m4' a active character is
 always seen as a one-letter word, and so, if it has a macro definition,

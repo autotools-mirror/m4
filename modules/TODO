@@ -1,0 +1,3 @@
+The file src/m4.h will have to be split to have an installable m4defs.h
+suitable for modules.  Modules should be compilable without have the m4
+source available.

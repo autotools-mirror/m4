@@ -7,8 +7,6 @@ running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 
 GNU `m4' has been originally written by René Seindal, from Denmark.
 
-This release is a development release.  Lastest stable release is 1.4.
-
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
 
@@ -29,8 +27,7 @@ gmp v2 library.
 
 By using `./configure --with-modules, you get the possibility of using
 dynamic modules.  The implementation depends on dlopen(3) interface.
-This might change or go away, so don't count on it yet.  See file
-`modules/README' for a more detailed description.
+See file `modules/README' for a more detailed description.
 
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in

@@ -1,120 +1,120 @@
 # Swedish messages for m4
 # Copyright (C) 1996 Free Software Foundation, Inc.
 # <Jan.Djarv@mbox200.swipnet.se>, 1996.
-# $Revision: 1.1.1.6 $
+# $Revision: 1.1.1.7 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4.3\n"
-"POT-Creation-Date: 1998-10-13 12:23+0200\n"
-"PO-Revision-Date: $Date: 2000/02/17 03:09:46 $\n"
+"POT-Creation-Date: 1998-11-15 15:55+0100\n"
+"PO-Revision-Date: $Date: 2000/02/17 03:09:57 $\n"
 "Last-Translator: Jan Djärv <Jan.Djarv@mbox200.swipnet.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: src/builtin.c:328
+#: src/builtin.c:329
 #, fuzzy, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr "Varning: För få argument till inbyggt makro \"%s\""
 
-#: src/builtin.c:334
+#: src/builtin.c:335
 #, fuzzy, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr "Varning: Överskottsargument till inbyggt makro \"%s\" ignorerade"
 
-#: src/builtin.c:362
+#: src/builtin.c:363
 #, fuzzy, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr "Ickenumeriskt argument till inbyggt makro \"%s\""
 
-#: src/builtin.c:461
+#: src/builtin.c:474
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i define_macro ()"
 
-#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1344 src/builtin.c:1368
+#: src/builtin.c:669 src/builtin.c:732 src/builtin.c:1358 src/builtin.c:1382
 #, fuzzy, c-format
 msgid "Undefined name %s"
 msgstr "Odefinierat namn \"%s\""
 
-#: src/builtin.c:684
+#: src/builtin.c:697
 #, fuzzy
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr "INTERNT FEL: Inbyggt makro finns inte i tabellen!"
 
-#: src/builtin.c:692
+#: src/builtin.c:705
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i m4_dumpdef ()"
 
-#: src/builtin.c:743
+#: src/builtin.c:756
 #, fuzzy, c-format
 msgid "Undefined macro `%s'"
 msgstr "Odefinierat makro \"%s\""
 
-#: src/builtin.c:783
+#: src/builtin.c:794
 #, fuzzy
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr "INTERNT FEL: Otillåten symboltyp i m4_defn ()"
 
-#: src/builtin.c:849
+#: src/builtin.c:860
 #, fuzzy, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Kan inte skapa rör till kommandot \"%s\""
 
-#: src/builtin.c:886
+#: src/builtin.c:897
 #, fuzzy, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr "Otillåten bas i \"eval\" (bas = %d)"
 
-#: src/builtin.c:895
+#: src/builtin.c:906
 #, fuzzy
 msgid "Negative width to eval"
 msgstr "Negativ bredd till \"eval\""
 
-#: src/builtin.c:987
+#: src/builtin.c:998
 #, fuzzy, c-format
 msgid "Non-numeric argument to %s"
 msgstr "Ickenumeriskt argument till %s"
 
-#: src/builtin.c:999
+#: src/builtin.c:1010
 #, fuzzy, c-format
 msgid "Cannot undivert %s"
 msgstr "Kan inte återleda %s"
 
-#: src/builtin.c:1143
+#: src/builtin.c:1158
 #, fuzzy, c-format
 msgid "Undefined syntax code %c"
 msgstr "Odefinierat namn \"%s\""
 
-#: src/builtin.c:1194 src/freeze.c:207
+#: src/builtin.c:1209 src/freeze.c:207
 #, fuzzy, c-format
 msgid "Cannot open %s"
 msgstr "Kan inte öppna %s"
 
-#: src/builtin.c:1404
+#: src/builtin.c:1418
 #, fuzzy, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Felsökningsläge: okänd flagga: \"%s\""
 
-#: src/builtin.c:1440
+#: src/builtin.c:1454
 #, fuzzy, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kan inte sätta felutskriftsfil: %s"
 
-#: src/builtin.c:1657
+#: src/builtin.c:1671
 #, fuzzy
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VARNING: \\0 kommer att försvinna, använd \\& i ersättningar"
 
-#: src/builtin.c:1718 src/builtin.c:1778 src/input.c:982
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
 #, fuzzy, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr "Otillåtet reguljäruttryck \"%s\": %s"
 
-#: src/builtin.c:1729 src/builtin.c:1802
+#: src/builtin.c:1743 src/builtin.c:1816
 #, fuzzy, c-format
 msgid "Error matching regular expression `%s'"
 msgstr "Reguljäruttrycket \"%s\" matchar inte"
@@ -214,42 +214,42 @@ msgstr "För tidigt filslut i fryst fil"
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "\"%s\" från fryst fil hittades inte i tabellen för inbyggda makron!"
 
-#: src/input.c:309
+#: src/input.c:315
 #, fuzzy, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Indata återgår till %s, rad %d"
 
-#: src/input.c:337
+#: src/input.c:343
 #, fuzzy, c-format
 msgid "Input read from %s"
 msgstr "Indata läses från %s"
 
-#: src/input.c:497
+#: src/input.c:503
 #, fuzzy
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr "INTERNT FEL: Rekursiv push_string!"
 
-#: src/input.c:614
+#: src/input.c:620
 #, fuzzy
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr "INTERNT FEL: Otillåtet anrop till init_macro_token ()"
 
-#: src/input.c:654
+#: src/input.c:660
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr "INTERNT FEL: Instacken havererade i next_char ()"
 
-#: src/input.c:691
+#: src/input.c:697
 #, fuzzy
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr "INTERNT FEL: Instacken havererade i peek_input ()"
 
-#: src/input.c:794
+#: src/input.c:800
 #, fuzzy
 msgid "NONE"
 msgstr "INGET"
 
-#: src/input.c:1133 src/input.c:1160
+#: src/input.c:1190 src/input.c:1217
 #, fuzzy
 msgid "ERROR: EOF in string"
 msgstr "FEL: Filslut i sträng"
@@ -414,32 +414,32 @@ msgstr "Okänd felsökningsflagga \"%s\""
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr "INTERNT FEL: Otillåten kod i argument"
 
-#: src/macro.c:93
+#: src/macro.c:97
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token type in expand_token ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i expand_token ()"
 
-#: src/macro.c:159
+#: src/macro.c:163
 #, fuzzy
 msgid "ERROR: EOF in argument list"
 msgstr "FEL: Filslut i argumentlistan"
 
-#: src/macro.c:178
+#: src/macro.c:182
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr "INTERNT FEL: Otillåten lexikalisk datatyp i expand_argument ()"
 
-#: src/macro.c:255
+#: src/macro.c:259
 #, fuzzy
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr "INTERNT FEL: Otillåten symboltyp i call_macro ()"
 
-#: src/macro.c:284
+#: src/macro.c:288
 #, fuzzy, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "FEL: Rekursionsgräns %d överskriden, använd -L<N> för att ändra"
 
-#: src/module.c:129
+#: src/module.c:148
 #, c-format
 msgid "Error: cannot find module `%s'"
 msgstr ""
@@ -469,12 +469,12 @@ msgstr "FEL: Läsning av insatt fil"
 msgid "Cannot stat diversion"
 msgstr "Kan inte ta status på avledningen"
 
-#: src/path.c:166
+#: src/path.c:170
 #, fuzzy, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"
 
-#: src/path.c:248
+#: src/path.c:253
 #, fuzzy, c-format
 msgid "Module search for `%s' found `%s'"
 msgstr "\"%s\" hittades som \"%s\" i sökvägen"

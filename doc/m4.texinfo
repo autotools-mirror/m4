@@ -7,6 +7,8 @@
 
 @include version.texi
 
+@set beta
+
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
@@ -86,9 +88,19 @@ subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
 file @file{THANKS} from the GNU @code{m4} distribution.
 
+@ifclear beta
 This is release @value{VERSION}.  It is now to be considered stable,
 future releases are only meant to fix bugs, increase speed, or improve
 documentation.  However@dots{}
+@end ifclear
+
+@ifset beta
+This is BETA release @value{VERSION}.  This is a development release,
+and is as such prone to bugs, crashes, unforeseen features, incomplete
+documentation, @dots{} therefore, use at your own peril.  In case of
+problems, please do not hesitate to report them (see the README file in
+the distribution).
+@end ifset
 
 @menu
 * Preliminaries::               Introduction and preliminaries
@@ -2043,6 +2055,10 @@ Default is all characters expect those in the categories above.
 @item Active
 Characters that themselves, alone, form macro names.  No default.
 
+@item Escape
+Characters that must precede macro names for them to be recognised.  No
+default.
+
 @end table
 
 @noindent
@@ -2100,6 +2116,8 @@ Close parenthesis
 Argument separator
 @item O
 Other
+@item @@
+Escape
 @item A
 Active
 @item L
@@ -2163,6 +2181,42 @@ test(a, b, c)
 @noindent
 It is not yet possible to redefine the @samp{$} used to indicate macro
 arguments in user defined macros.
+
+Macro calls can be given a @TeX{}- or texinfo like syntax using an
+escape.  If one or more characters are defined as escapes macro names
+are only recognised if preceded by an escape character.
+
+If the escape is not followed by what is normally a word (a letter
+optionally followed by letters and/or numerals), that single character
+is returned as a macro name.
+
+As always, words without a macro definition cause no error message.
+They and the escape character are simply output.
+
+@example
+define(`foo', `bar')
+@result{}
+changesyntax(`@@@@')
+@result{}
+foo
+@result{}foo
+@@foo
+@result{}bar
+@@changesyntax(`@@\', `O@@')
+@result{}
+foo
+@result{}foo
+@@foo
+@result{}@@foo
+\foo
+@result{}bar
+define(`#', `No comment')
+@result{}define(#, No comment)
+\define(`#', `No comment')
+@result{}
+\# \foo # Comment \foo
+@result{}No comment bar # Comment \foo
+@end example
 
 Active characters are known from @TeX{}.  In @code{m4} a active
 character is always seen as a one-letter word, and so, if it has a macro

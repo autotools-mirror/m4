@@ -57,12 +57,17 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
+DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
+DLLDFLAGS = @DLLDFLAGS@
+GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -75,24 +80,32 @@ INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
+MODULES_DIR = @MODULES_DIR@
+MODULE_O = @MODULE_O@
 MSGFMT = @MSGFMT@
+OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SHARED_EXT = @SHARED_EXT@
+SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 l = @l@
+pkglibexecdir = @pkglibexecdir@
 
 AUTOMAKE_OPTIONS = ansi2knr
 
 LIBS = @LIBS@
 
 CFLAGS = -Wall @CFLAGS@
+
+MODULE_PATH=@MODULE_PATH@
 
 bin_PROGRAMS = m4
 
@@ -103,6 +116,9 @@ m4_SOURCES = m4.c m4.h builtin.c builtin.h debug.c eval.c numb.c numb.h \
 	stackovf.c module.c
 
 m4_LDADD = ../lib/libm4.a @INTLLIBS@
+m4_LDFLAGS = @DLLDFLAGS@
+
+EXTRA_DIST = 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -117,7 +133,6 @@ m4_OBJECTS =  m4$U.o builtin$U.o debug$U.o eval$U.o numb$U.o format$U.o \
 freeze$U.o input$U.o macro$U.o output$U.o path$U.o symtab$U.o \
 stackovf$U.o module$U.o
 m4_DEPENDENCIES =  ../lib/libm4.a
-m4_LDFLAGS = 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
@@ -290,7 +305,7 @@ macro.o: macro.c m4.h ../config.h ../lib/obstack.h
 module.o: module.c m4.h ../config.h ../lib/obstack.h
 numb.o: numb.c m4.h ../config.h ../lib/obstack.h numb.h
 output.o: output.c m4.h ../config.h ../lib/obstack.h
-path.o: path.c m4.h ../config.h ../lib/obstack.h
+path.o: path.c m4.h ../config.h ../lib/obstack.h pathconf.h
 stackovf.o: stackovf.c m4.h ../config.h ../lib/obstack.h
 symtab.o: symtab.c m4.h ../config.h ../lib/obstack.h
 
@@ -353,6 +368,11 @@ install-exec install-data install uninstall all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+path.o: path.c pathconf.h
+
+pathconf.h: Makefile
+	@echo "#define MODULE_PATH \"${MODULE_PATH}\"" >pathconf.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

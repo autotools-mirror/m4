@@ -35,5 +35,6 @@ const char *skip_space (const char *arg);
 
 boolean numeric_arg (token_data *macro, const char *arg, int *valuep);
 void shipout_int (struct obstack *obs, int val);
+void shipout_string (struct obstack *obs, const char *s, int len, boolean quoted);
 
 #endif /* BUILTIN_H */

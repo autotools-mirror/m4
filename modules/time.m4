@@ -1,4 +1,4 @@
-loadmodule(`time.so')
+loadmodule(`time')
 
 `currenttime' = currenttime
 `ctime'       = ctime != ctime(eval(currenttime+60*60*24))

@@ -57,12 +57,17 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
+DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
+DLLDFLAGS = @DLLDFLAGS@
+GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -75,36 +80,44 @@ INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
+MODULES_DIR = @MODULES_DIR@
+MODULE_O = @MODULE_O@
+MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
+OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SHARED_EXT = @SHARED_EXT@
+SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 l = @l@
+pkglibexecdir = @pkglibexecdir@
 
 AUTOMAKE_OPTIONS = 1.3b gnits
 
-SUBDIRS = acm4 intl po lib src doc tests examples # modules
+SUBDIRS = acm4 intl po lib src doc tests examples @MODULES_DIR@
 
 # These are excluded otherwise
 EXTRA_DIST = modules/Makefile.am modules/Makefile.in \
 	modules/test.c modules/test.m4 \
 	modules/time.c modules/time.m4 \
+	modules/stdlib.c modules/stdlib.m4 \
 	modules/README
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 
 DIST_COMMON =  README ABOUT-NLS AUTHORS BACKLOG COPYING ChangeLog \
-INSTALL Makefile.am Makefile.in NEWS THANKS TODO acconfig.h \
-acinclude.m4 aclocal.m4 config.guess config.h.in config.sub configure \
-configure.in install-sh missing mkinstalldirs stamp-h.in
+INSTALL Makefile.am Makefile.in NEWS README-alpha THANKS TODO \
+acconfig.h acinclude.m4 aclocal.m4 config.guess config.h.in config.sub \
+configure configure.in install-sh missing mkinstalldirs stamp-h.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)

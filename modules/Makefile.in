@@ -57,12 +57,17 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
+DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
+DLLDFLAGS = @DLLDFLAGS@
+GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -75,48 +80,63 @@ INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
+MODULES_DIR = @MODULES_DIR@
+MODULE_O = @MODULE_O@
+MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
+OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SHARED_EXT = @SHARED_EXT@
+SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 l = @l@
+pkglibexecdir = @pkglibexecdir@
 
-noinst_PROGRAMS = test.so time.so
+pkglibexec_PROGRAMS = test time stdlib
 
-test_so_SOURCES = test.c
-time_so_SOURCES = time.c
-
-EXTRA_DIST = test.m4 time.m4
+noinst_DATA = test.m4 time.m4 stdlib.m4
 
 INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib
-LDFLAGS = -shared
+
+CFLAGS = @GCC_FPIC@
+LD = @SHARED_LD@
+LDFLAGS = @DASH_SHARED@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
-PROGRAMS =  $(noinst_PROGRAMS)
+PROGRAMS =  $(pkglibexec_PROGRAMS)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
-test_so_OBJECTS =  test.o
-test_so_LDADD = $(LDADD)
-test_so_DEPENDENCIES = 
-test_so_LDFLAGS = 
-time_so_OBJECTS =  time.o
-time_so_LDADD = $(LDADD)
-time_so_DEPENDENCIES = 
-time_so_LDFLAGS = 
-CFLAGS = @CFLAGS@
+test_SOURCES = test.c
+test_OBJECTS =  test.o
+test_LDADD = $(LDADD)
+test_DEPENDENCIES = 
+test_LDFLAGS = 
+time_SOURCES = time.c
+time_OBJECTS =  time.o
+time_LDADD = $(LDADD)
+time_DEPENDENCIES = 
+time_LDFLAGS = 
+stdlib_SOURCES = stdlib.c
+stdlib_OBJECTS =  stdlib.o
+stdlib_LDADD = $(LDADD)
+stdlib_DEPENDENCIES = 
+stdlib_LDFLAGS = 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DATA =  $(noinst_DATA)
+
 DIST_COMMON =  README Makefile.am Makefile.in TODO
 
 
@@ -124,30 +144,48 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP = --best
-DEP_FILES =  .deps/test.P .deps/time.P
-SOURCES = $(test_so_SOURCES) $(time_so_SOURCES)
-OBJECTS = $(test_so_OBJECTS) $(time_so_OBJECTS)
+SOURCES = test.c time.c stdlib.c
+OBJECTS = test.o time.o stdlib.o
 
-all: Makefile $(PROGRAMS)
+all: Makefile $(PROGRAMS) $(DATA)
 
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu modules/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modules/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstPROGRAMS:
+mostlyclean-pkglibexecPROGRAMS:
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-pkglibexecPROGRAMS:
+	-test -z "$(pkglibexec_PROGRAMS)" || rm -f $(pkglibexec_PROGRAMS)
 
-distclean-noinstPROGRAMS:
+distclean-pkglibexecPROGRAMS:
 
-maintainer-clean-noinstPROGRAMS:
+maintainer-clean-pkglibexecPROGRAMS:
+
+install-pkglibexecPROGRAMS: $(pkglibexec_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibexecdir)
+	@list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-pkglibexecPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(pkglibexecdir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+.c.o:
+	$(COMPILE) -c $<
 
 .s.o:
 	$(COMPILE) -c $<
@@ -165,13 +203,17 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-test.so: $(test_so_OBJECTS) $(test_so_DEPENDENCIES)
-	@rm -f test.so
-	$(LINK) $(test_so_LDFLAGS) $(test_so_OBJECTS) $(test_so_LDADD) $(LIBS)
+test: $(test_OBJECTS) $(test_DEPENDENCIES)
+	@rm -f test
+	$(LINK) $(test_LDFLAGS) $(test_OBJECTS) $(test_LDADD) $(LIBS)
 
-time.so: $(time_so_OBJECTS) $(time_so_DEPENDENCIES)
-	@rm -f time.so
-	$(LINK) $(time_so_LDFLAGS) $(time_so_OBJECTS) $(time_so_LDADD) $(LIBS)
+time: $(time_OBJECTS) $(time_DEPENDENCIES)
+	@rm -f time
+	$(LINK) $(time_LDFLAGS) $(time_OBJECTS) $(time_LDADD) $(LIBS)
+
+stdlib: $(stdlib_OBJECTS) $(stdlib_DEPENDENCIES)
+	@rm -f stdlib
+	$(LINK) $(stdlib_LDFLAGS) $(stdlib_OBJECTS) $(stdlib_LDADD) $(LIBS)
 
 tags: TAGS
 
@@ -203,46 +245,17 @@ distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 subdir = modules
 
 distdir: $(DISTFILES)
-	here=`cd $(top_builddir) && pwd`; \
-	top_distdir=`cd $(top_distdir) && pwd`; \
-	distdir=`cd $(distdir) && pwd`; \
-	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu modules/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  test -f $(distdir)/$$file \
 	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
 	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
-
-DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
-
--include $(DEP_FILES)
-
-mostlyclean-depend:
-
-clean-depend:
-
-distclean-depend:
-
-maintainer-clean-depend:
-	-rm -rf .deps
-
-%.o: %.c
-	@echo '$(COMPILE) -c $<'; \
-	$(COMPILE) -Wp,-MD,.deps/$(*F).P -c $<
-
-%.lo: %.c
-	@echo '$(LTCOMPILE) -c $<'; \
-	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).p -c $<
-	@-sed -e 's/^\([^:]*\)\.o:/\1.lo \1.o:/' \
-	  < .deps/$(*F).p > .deps/$(*F).P
-	@-rm -f .deps/$(*F).p
 info:
 dvi:
 check: all
 installcheck:
-install-exec: 
+install-exec: install-pkglibexecPROGRAMS
 	@$(NORMAL_INSTALL)
 
 install-data: 
@@ -251,11 +264,12 @@ install-data:
 install: install-exec install-data all
 	@:
 
-uninstall: 
+uninstall: uninstall-pkglibexecPROGRAMS
 
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(pkglibexecdir)
 
 
 mostlyclean-generic:
@@ -267,31 +281,30 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean:  mostlyclean-noinstPROGRAMS mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+mostlyclean:  mostlyclean-pkglibexecPROGRAMS mostlyclean-compile \
+		mostlyclean-tags mostlyclean-generic
 
-clean:  clean-noinstPROGRAMS clean-compile clean-tags clean-depend \
-		clean-generic mostlyclean
+clean:  clean-pkglibexecPROGRAMS clean-compile clean-tags clean-generic \
+		mostlyclean
 
-distclean:  distclean-noinstPROGRAMS distclean-compile distclean-tags \
-		distclean-depend distclean-generic clean
+distclean:  distclean-pkglibexecPROGRAMS distclean-compile \
+		distclean-tags distclean-generic clean
 	-rm -f config.status
 
-maintainer-clean:  maintainer-clean-noinstPROGRAMS \
+maintainer-clean:  maintainer-clean-pkglibexecPROGRAMS \
 		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean
+		maintainer-clean-generic distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-.PHONY: mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
-clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
+.PHONY: mostlyclean-pkglibexecPROGRAMS distclean-pkglibexecPROGRAMS \
+clean-pkglibexecPROGRAMS maintainer-clean-pkglibexecPROGRAMS \
+uninstall-pkglibexecPROGRAMS install-pkglibexecPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend info dvi \
-installcheck install-exec install-data install uninstall all \
-installdirs mostlyclean-generic distclean-generic clean-generic \
+clean-tags maintainer-clean-tags distdir info dvi installcheck \
+install-exec install-data install uninstall all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 

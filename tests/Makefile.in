@@ -61,12 +61,17 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 AWK = @AWK@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CPP = @CPP@
+DASH_SHARED = @DASH_SHARED@
 DATADIRNAME = @DATADIRNAME@
+DLLDFLAGS = @DLLDFLAGS@
+GCC_FPIC = @GCC_FPIC@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -79,18 +84,25 @@ INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
+MODULES_DIR = @MODULES_DIR@
+MODULE_O = @MODULE_O@
+MODULE_PATH = @MODULE_PATH@
 MSGFMT = @MSGFMT@
+OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SHARED_EXT = @SHARED_EXT@
+SHARED_LD = @SHARED_LD@
 STACKOVF = @STACKOVF@
 U = @U@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 l = @l@
+pkglibexecdir = @pkglibexecdir@
 
 EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS \
 	defs $(TESTS) $(OTHER_FILES)
@@ -114,6 +126,7 @@ GENERATED_TESTS = \
 	generated-tests/changesy.5.test \
 	generated-tests/changesy.6.test \
 	generated-tests/changesy.7.test \
+	generated-tests/changesy.8.test \
 	generated-tests/cleardiv.1.test \
 	generated-tests/cleardiv.2.test \
 	generated-tests/define.1.test \

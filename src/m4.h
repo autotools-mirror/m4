@@ -369,6 +369,7 @@ extern unsigned short syntax_table[256];
 #define SYNTAX_COMMA	(0x0005)
 #define SYNTAX_DOLLAR	(0x0006) /* not used yet */
 #define SYNTAX_ACTIVE	(0x0007)
+#define SYNTAX_ESCAPE	(0x0008)
 
 /* These are values to be assigned to syntax table entries, but they are
    used as bit masks with IS_ALNUM.*/
@@ -397,6 +398,7 @@ extern unsigned short syntax_table[256];
 #define IS_DOLLAR(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_DOLLAR)
 #define IS_ACTIVE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ACTIVE)
 
+#define IS_ESCAPE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ESCAPE)
 #define IS_ALPHA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ALPHA)
 #define IS_NUM(ch)    ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_NUM)
 #define IS_ALNUM(ch)  (((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0)
@@ -543,6 +545,10 @@ void reload_frozen_state __P ((const char *));
 
 typedef void module_init_t (struct obstack *obs);
 typedef void module_finish_t (void);
+
+#if defined(HAVE_DLOPEN) || defined(USE_SHL_LOAD)
+#define WITH_MODULES
+#endif
 
 #ifdef WITH_MODULES
 

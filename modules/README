@@ -2,9 +2,8 @@ This directory contains demonstration modules for GNU m4.
 
 Nothing in this directory is built by default.
 
-Dynamic modules is a experimental feature of GNU m4, and might change or
-disappear altogether in future versions.  Currently it has only been
-certified to work under Linux 2.0.
+Dynamic modules is a experimental feature of GNU m4.  Currently it has
+only been certified to work under Linux 2.0.
 
 Dynamic modules are only available if GNU m4 was configured with
 --with-modules and if the dlopen(3) interface is available in the
@@ -17,13 +16,16 @@ then compiled.  The compiled file can then be loaded into a running m4
 process by calling the builtin "loadmodule".  This will give GNU m4
 access to any system feature with a C interface.
 
+Modules are searched for in M4MODPATH, if set, and in a module directory
+defined at configure time, default /usr/local/libexec/m4.
+
 A module extends GNU m4 by defining new builtins, It can define builtins
 with the same names as existing builtins, which will then be
 unavailable.  A module cannot redefine internal functions of GNU m4,
 such as the input parser or argument handling.
 
 The infrastructure for writing and compiling modules is still a bit
-wanting, quasi non-existent.
+wanting.
 
 Each module should include the two header files ../src/m4.h and
 ../src/builtin.h.  These will include <ctype.h>, <stdio.h>,
@@ -60,3 +62,4 @@ interesting example is in time.c.
 To try the demos, compile with `make' and run them with the commands as:
 
    M4MODPATH=`pwd` ../src/m4 time.m4
+

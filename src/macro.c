@@ -56,6 +56,7 @@ static void
 expand_token (struct obstack *obs, token_type t, token_data *td)
 {
   symbol *sym;
+  char *text = TOKEN_DATA_TEXT (td);
 
   switch (t)
     {				/* TOKSW */
@@ -66,11 +67,14 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
     case TOKEN_SPACE:
-      shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
+      shipout_text (obs, text, strlen (text));
       break;
 
     case TOKEN_WORD:
-      sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
+      if (IS_ESCAPE(*text))
+	text++;
+
+      sym = lookup_symbol (text, SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
 	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
 	      && SYMBOL_BLIND_NO_ARGS (sym)

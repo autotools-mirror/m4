@@ -68,7 +68,12 @@
  * safe to load the same module several times, it has no effect.
  **/
 
-#include <dlfcn.h>
+#if defined (USE_SHL_LOAD)
+# include <dl.h>
+#else
+# include <dlfcn.h>
+#endif
+
 
 /* This list is used to check for repeated loading of the same modules.  */
 
@@ -101,9 +106,23 @@ module_init (void)
 voidstar
 module_try_load (const char *modname)
 {
+#if defined (USE_SHL_LOAD)
+  return shl_load (modname, BIND_IMMEDIATE, 0L);
+#else
   return dlopen (modname, RTLD_NOW);
+#endif
 }
 
+
+void
+module_unload(voidstar handle)
+{
+#if defined (USE_SHL_LOAD)
+  shl_unload (handle);
+#else
+  dlclose (handle);
+#endif
+}
 
 /* 
  * Load a module.  Modname can be a absolute file name or, if relative,
@@ -135,16 +154,23 @@ module_load (const char *modname, struct obstack *obs)
 #ifdef DEBUG_MODULES
 	DEBUG_MESSAGE1("module %s handle already seen", modname);
 #endif /* DEBUG_MODULES */
-	dlclose(handle);
+	module_unload(handle);
 	return NULL;
       }
 
+
+#if defined (USE_SHL_LOAD)
+  /* XXX TYPE_PROCEDURE is probably wrong here, as it is a data pointer */
+  shl_findsym (&handle, "m4_macro_table", TYPE_PROCEDURE, (voidstar)&btab);
+#else
   btab = (builtin *) dlsym (handle, "m4_macro_table");
+#endif
+
   if (btab == NULL) {
 #ifdef DEBUG_MODULES
     DEBUG_MESSAGE1("module %s no symbol m4_macro_table", modname);
 #endif /* DEBUG_MODULES */
-    dlclose(handle);
+    module_unload(handle);
     return NULL;
   }
 
@@ -158,7 +184,14 @@ module_load (const char *modname, struct obstack *obs)
   DEBUG_MESSAGE1("module %s loaded ok", modname);
 #endif /* DEBUG_MODULES */
 
+
+#if defined (USE_SHL_LOAD)
+  shl_findsym (&handle, "m4_init_module", TYPE_PROCEDURE,
+	       (voidstar)&init_func);
+#else
   init_func = (module_init_t *) dlsym (handle, "m4_init_module");
+#endif
+
   if (init_func != NULL)
     {
       (*init_func)(obs);
@@ -190,7 +223,7 @@ module_unload_all(void)
 #endif /* DEBUG_MODULES */
 	}
 
-      dlclose(modules->handle);
+      module_unload(modules->handle);
 
 #ifdef DEBUG_MODULES
       DEBUG_MESSAGE1("module %s unloaded", modules->modname);
@@ -205,3 +238,4 @@ module_unload_all(void)
 
 
 #endif /* WITH_MODULES */
+

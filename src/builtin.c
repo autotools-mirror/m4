@@ -148,6 +148,7 @@ predefined_tab[] =
 {
   { "unix",	"__unix__",	"" },
   { NULL,	"__gnu__",	"" },
+  { NULL,	"__m4_version__", VERSION },
 
   { NULL,	NULL,		NULL },
 };
@@ -380,6 +381,22 @@ shipout_int (struct obstack *obs, int val)
   obstack_grow (obs, buf, strlen (buf));
 }
 
+void
+shipout_string (struct obstack *obs, const char *s, int len, boolean quoted)
+{
+  if (s == NULL)
+    s = "";
+
+  if (len == 0)
+    len = strlen(s);
+
+  if (quoted)
+    obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, s, len);
+  if (quoted)
+    obstack_grow (obs, rquote.string, rquote.length);
+}
+
 /*----------------------------------------------------------------------.
 | Print ARGC arguments from the table ARGV to obstack OBS, separated by |
 | SEP, and quoted by the current quotes, if QUOTED is TRUE.	        |
@@ -396,12 +413,8 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
     {
       if (i > 1)
 	obstack_grow (obs, sep, len);
-      if (quoted)
-	obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-		    strlen (TOKEN_DATA_TEXT (argv[i])));
-      if (quoted)
-	obstack_grow (obs, rquote.string, rquote.length);
+
+      shipout_string(obs, TOKEN_DATA_TEXT (argv[i]), 0, quoted);
     }
 }
 
@@ -766,9 +779,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
-      obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      obstack_grow (obs, rquote.string, rquote.length);
+      shipout_string(obs, SYMBOL_TEXT (s), 0, TRUE);
       break;
 
     case TOKEN_FUNC:
@@ -1135,6 +1146,10 @@ m4_changesyntax (struct obstack *obs, int argc, token_data **argv)
 	code = SYNTAX_ACTIVE;
 	break;
 
+      case '@':
+	code = SYNTAX_ESCAPE;
+	break;
+
       case '\0':
 	code = -1;
 	break;
@@ -1232,7 +1247,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
   mktemp (ARG (1));
-  obstack_grow (obs, ARG (1), strlen (ARG (1)));
+  shipout_string (obs, ARG (1), 0, FALSE);
 }
 
 /*----------------------------------------.
@@ -1253,9 +1268,8 @@ m4___file__ (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
-  obstack_grow (obs, lquote.string, lquote.length);
-  obstack_grow (obs, current_file, strlen (current_file));
-  obstack_grow (obs, rquote.string, rquote.length);
+
+  shipout_string (obs, current_file, 0, TRUE);
 }
 
 static void
@@ -1302,7 +1316,7 @@ static void
 m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
 {
   if (no_gnu_extensions)
-    obstack_grow (obs, ARG (1), strlen (ARG (1)));
+    shipout_string (obs, ARG (1), 0, FALSE);
   else
     dump_args (obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
@@ -1867,8 +1881,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	      text = endp;
 	    }
 	  if (i < argc)
-	    obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-			  strlen (TOKEN_DATA_TEXT (argv[i])));
+	    shipout_string (obs, TOKEN_DATA_TEXT (argv[i]), 0, FALSE);
 	  break;
 
 	case '#':		/* number of arguments */

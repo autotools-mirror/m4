@@ -1,6 +1,23 @@
 GNU m4 NEWS - History of user-visible changes.              -*-indented-text-*-
 Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
+Version beta 1.4l - November 1998, by Rene' Seindal
+
+* GNU m4 now has and escape syntax category.  If a character is marked as
+  an escape, words are only recognised as macros if preceded by an escape
+  character.  It is a bit like -P, but dynamic: it can be turned on and
+  off.  The GNU m4 web-site on http://www.seindal.dk/rene/gnu/ is
+  maintained with this feature - the m4 source is available on the site.
+
+* The module interface is improved, thanks to "Brian J. Fox"
+  <bfox@datawave.net>, who have contributed some code from Meta-HTML.  The
+  modules now build automatically and installs properly, by default in
+  /usr/local/libexec/m4.  There is a preliminary, untested support for
+  shl_load().
+
+* There is now a __m4_version__ macro that expands to the current version
+  number.
+
 Version beta 1.4k - November 1998, by Erick Branderhorst and Rene' Seindal
 
 * GNU m4 now uses gettext to support internationalization.

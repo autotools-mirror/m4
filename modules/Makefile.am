@@ -1,9 +1,9 @@
-noinst_PROGRAMS = test.so time.so
+pkglibexec_PROGRAMS = test time stdlib
 
-test_so_SOURCES = test.c
-time_so_SOURCES = time.c
-
-EXTRA_DIST = test.m4 time.m4
+noinst_DATA = test.m4 time.m4 stdlib.m4
 
 INCLUDES = -I$(srcdir)/../src -I$(srcdir)/../lib
-LDFLAGS = -shared
+
+CFLAGS = @GCC_FPIC@
+LD = @SHARED_LD@
+LDFLAGS = @DASH_SHARED@

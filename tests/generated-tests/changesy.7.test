@@ -1,26 +1,18 @@
 #!/bin/sh
 
 # generated-tests/changesy.7.test is part of the GNU m4 testsuite
-# generated from example in ../doc/m4.texinfo line 2228
+# generated from example in ../doc/m4.texinfo line 2271
 
 . ${srcdir}/defs
 
 cat <<\EOF >in
-define(`test', `==$1==')
-changequote(`<<', `>>')
-changesyntax(<<L[>>, <<R]>>)
-test(<<testing]>>)
-test([testing>>])
-test([<<testing>>])
+changesyntax(`({<', `)}>', `,;:', `O(,)')
+eval{2**4-1; 2 : 8>
 EOF
 
 cat <<\EOF >ok
 
-
-
-==testing]==
-==testing>>==
-==testing==
+00001111
 EOF
 
 $M4 -d in >out

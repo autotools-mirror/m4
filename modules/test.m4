@@ -1,3 +1,3 @@
-loadmodule(`test.so') 
+loadmodule(`test') 
 test
 Dumpdef: dumpdef(`test')

@@ -24,6 +24,7 @@ GENERATED_TESTS = \
 	generated-tests/changesy.5.test \
 	generated-tests/changesy.6.test \
 	generated-tests/changesy.7.test \
+	generated-tests/changesy.8.test \
 	generated-tests/cleardiv.1.test \
 	generated-tests/cleardiv.2.test \
 	generated-tests/define.1.test \

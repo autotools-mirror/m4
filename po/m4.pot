@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-10-13 12:23+0200\n"
+"POT-Creation-Date: 1998-11-15 15:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,101 +14,101 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: src/builtin.c:328
+#: src/builtin.c:329
 #, c-format
 msgid "Warning: Too few arguments to built-in `%s'"
 msgstr ""
 
-#: src/builtin.c:334
+#: src/builtin.c:335
 #, c-format
 msgid "Warning: Excess arguments to built-in `%s' ignored"
 msgstr ""
 
-#: src/builtin.c:362
+#: src/builtin.c:363
 #, c-format
 msgid "Non-numeric argument to built-in `%s'"
 msgstr ""
 
-#: src/builtin.c:461
+#: src/builtin.c:474
 msgid "INTERNAL ERROR: Bad token data type in define_macro ()"
 msgstr ""
 
-#: src/builtin.c:656 src/builtin.c:719 src/builtin.c:1344 src/builtin.c:1368
+#: src/builtin.c:669 src/builtin.c:732 src/builtin.c:1358 src/builtin.c:1382
 #, c-format
 msgid "Undefined name %s"
 msgstr ""
 
-#: src/builtin.c:684
+#: src/builtin.c:697
 msgid "INTERNAL ERROR: Builtin not found in builtin table!"
 msgstr ""
 
-#: src/builtin.c:692
+#: src/builtin.c:705
 msgid "INTERNAL ERROR: Bad token data type in m4_dumpdef ()"
 msgstr ""
 
-#: src/builtin.c:743
+#: src/builtin.c:756
 #, c-format
 msgid "Undefined macro `%s'"
 msgstr ""
 
-#: src/builtin.c:783
+#: src/builtin.c:794
 msgid "INTERNAL ERROR: Bad symbol type in m4_defn ()"
 msgstr ""
 
-#: src/builtin.c:849
+#: src/builtin.c:860
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr ""
 
-#: src/builtin.c:886
+#: src/builtin.c:897
 #, c-format
 msgid "Radix in eval out of range (radix = %d)"
 msgstr ""
 
-#: src/builtin.c:895
+#: src/builtin.c:906
 msgid "Negative width to eval"
 msgstr ""
 
-#: src/builtin.c:987
+#: src/builtin.c:998
 #, c-format
 msgid "Non-numeric argument to %s"
 msgstr ""
 
-#: src/builtin.c:999
+#: src/builtin.c:1010
 #, c-format
 msgid "Cannot undivert %s"
 msgstr ""
 
-#: src/builtin.c:1143
+#: src/builtin.c:1158
 #, c-format
 msgid "Undefined syntax code %c"
 msgstr ""
 
-#: src/builtin.c:1194 src/freeze.c:207
+#: src/builtin.c:1209 src/freeze.c:207
 #, c-format
 msgid "Cannot open %s"
 msgstr ""
 
-#: src/builtin.c:1404
+#: src/builtin.c:1418
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr ""
 
-#: src/builtin.c:1440
+#: src/builtin.c:1454
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr ""
 
-#: src/builtin.c:1657
+#: src/builtin.c:1671
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr ""
 
-#: src/builtin.c:1718 src/builtin.c:1778 src/input.c:982
+#: src/builtin.c:1732 src/builtin.c:1792 src/input.c:1010
 #, c-format
 msgid "Bad regular expression `%s': %s"
 msgstr ""
 
-#: src/builtin.c:1729 src/builtin.c:1802
+#: src/builtin.c:1743 src/builtin.c:1816
 #, c-format
 msgid "Error matching regular expression `%s'"
 msgstr ""
@@ -197,37 +197,37 @@ msgstr ""
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
 
-#: src/input.c:309
+#: src/input.c:315
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr ""
 
-#: src/input.c:337
+#: src/input.c:343
 #, c-format
 msgid "Input read from %s"
 msgstr ""
 
-#: src/input.c:497
+#: src/input.c:503
 msgid "INTERNAL ERROR: Recursive push_string!"
 msgstr ""
 
-#: src/input.c:614
+#: src/input.c:620
 msgid "INTERNAL ERROR: Bad call to init_macro_token ()"
 msgstr ""
 
-#: src/input.c:654
+#: src/input.c:660
 msgid "INTERNAL ERROR: Input stack botch in next_char ()"
 msgstr ""
 
-#: src/input.c:691
+#: src/input.c:697
 msgid "INTERNAL ERROR: Input stack botch in peek_input ()"
 msgstr ""
 
-#: src/input.c:794
+#: src/input.c:800
 msgid "NONE"
 msgstr ""
 
-#: src/input.c:1133 src/input.c:1160
+#: src/input.c:1190 src/input.c:1217
 msgid "ERROR: EOF in string"
 msgstr ""
 
@@ -332,28 +332,28 @@ msgstr ""
 msgid "INTERNAL ERROR: Bad code in deferred arguments"
 msgstr ""
 
-#: src/macro.c:93
+#: src/macro.c:97
 msgid "INTERNAL ERROR: Bad token type in expand_token ()"
 msgstr ""
 
-#: src/macro.c:159
+#: src/macro.c:163
 msgid "ERROR: EOF in argument list"
 msgstr ""
 
-#: src/macro.c:178
+#: src/macro.c:182
 msgid "INTERNAL ERROR: Bad token type in expand_argument ()"
 msgstr ""
 
-#: src/macro.c:255
+#: src/macro.c:259
 msgid "INTERNAL ERROR: Bad symbol type in call_macro ()"
 msgstr ""
 
-#: src/macro.c:284
+#: src/macro.c:288
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 
-#: src/module.c:129
+#: src/module.c:148
 #, c-format
 msgid "Error: cannot find module `%s'"
 msgstr ""
@@ -378,12 +378,12 @@ msgstr ""
 msgid "Cannot stat diversion"
 msgstr ""
 
-#: src/path.c:166
+#: src/path.c:170
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr ""
 
-#: src/path.c:248
+#: src/path.c:253
 #, c-format
 msgid "Module search for `%s' found `%s'"
 msgstr ""

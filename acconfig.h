@@ -3,6 +3,9 @@
    Francois Pinard <pinard@iro.umontreal.ca>, 1993.
 */
 
+/* Define to the installdir for modules.  */
+#undef MODULE_PATH
+
 /* Define to 1 if the changeword(REGEXP) functionnality is wanted.  */
 #undef ENABLE_CHANGEWORD
 
@@ -39,7 +42,10 @@
 #undef WITH_GMP
 
 /* Define to 1 if the -ldl library should be used .  */
-#undef WITH_MODULES
+#undef HAVE_DLOPEN
+
+/* Define to 1 if the -ldld library should be used .  */
+#undef USE_SHL_LOAD
 
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS

@@ -1,11 +1,12 @@
 AUTOMAKE_OPTIONS = 1.3b gnits
 
-SUBDIRS = acm4 intl po lib src doc tests examples # modules
+SUBDIRS = acm4 intl po lib src doc tests examples @MODULES_DIR@
 
 # These are excluded otherwise
 EXTRA_DIST = modules/Makefile.am modules/Makefile.in \
 	modules/test.c modules/test.m4 \
 	modules/time.c modules/time.m4 \
+	modules/stdlib.c modules/stdlib.m4 \
 	modules/README
 
 # Tag before making distribution.  Also, don't make a distribution if

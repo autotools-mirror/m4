@@ -42,9 +42,6 @@ for any of these ideas or if you have others to add.
 
 * Module specific issues
 
-  + The module directory should be made to build automatically if
-    configured.
-
   + Use libtool to build modules for portability.
 
   + Support for other DL interfaces besides dlopen, such as dld and

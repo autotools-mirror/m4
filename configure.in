@@ -8,8 +8,13 @@ AC_INIT(src/m4.c)
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 
-AM_INIT_AUTOMAKE(m4,1.4k)
+AM_INIT_AUTOMAKE(m4,1.4l)
 ALL_LINGUAS="de fr it ja nl pl ru sv"
+
+pkglibexecdir='${libexecdir}'/$PACKAGE
+AC_SUBST(pkglibexecdir)
+
+AC_CANONICAL_HOST
 
 AC_PROG_AWK
 AC_PROG_CC

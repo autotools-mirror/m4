@@ -20,6 +20,10 @@
 
 #include "m4.h"
 
+#ifdef WITH_MODULES
+#include "pathconf.h"
+#endif /* WITH_MODULES */
+
 struct includes
 {
   struct includes *next;	/* next directory to search */
@@ -201,6 +205,7 @@ module_env_init (void)
   if (no_gnu_extensions)
     return;
 
+  include_directory (&modpath, MODULE_PATH);
   env_init (&modpath, getenv ("M4MODPATH"), TRUE);
 }
 

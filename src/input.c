@@ -76,7 +76,9 @@
    SYNTAX_CLOSE		Close list of macro arguments
    SYNTAX_COMMA		Separates macro arguments
    SYNTAX_DOLLAR	*Indicates macro argument in user macros
+   SYNTAX_ACTIVE	This caracter is a macro name by itself
 
+   SYNTAX_ESCAPE	Use this character to prefix all macro names
    SYNTAX_ALPHA		Alphabetic characters (can start macro names)
    SYNTAX_NUM		Numeric characters
    SYNTAX_ALNUM		Alphanumeric characters (can form macro names)
@@ -113,6 +115,7 @@
 
    SYNTAX_IGNORE	*Filtered out below next_token ()
    SYNTAX_BCOMM		Reads all until SYNTAX_ECOMM
+   SYNTAX_ESCAPE	Reads macro name iff set, else next
    SYNTAX_ALPHA		Reads macro name
    SYNTAX_LQUOTE	Reads all until balanced SYNTAX_RQUOTE
 
@@ -235,6 +238,9 @@ STRING ecomm;
  
 /* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
 static boolean single_comments;
+
+/* TRUE iff some character has SYNTAX_ESCAPE */
+static boolean use_macro_escape;
 
 #ifdef ENABLE_CHANGEWORD
 
@@ -821,6 +827,8 @@ input_init (void)
   ecomm.length = strlen (ecomm.string);
   single_comments = TRUE;
 
+  use_macro_escape = FALSE;
+
 #ifdef ENABLE_CHANGEWORD
   if (user_word_regexp)
     set_word_regexp (user_word_regexp);
@@ -854,8 +862,19 @@ input_init (void)
   set_syntax_internal(SYNTAX_ECOMM, ecomm.string[0]);
 
 }
-
 
+static void
+check_use_macro_escape (void)
+{
+  int ch;
+
+  use_macro_escape = FALSE;
+  for (ch = 256; --ch >= 0; )
+    if (IS_ESCAPE(ch))
+      use_macro_escape = TRUE;
+}
+
+
 /*---------------------------------------------------------------------.
 | Functions for setting quotes and comment delimiters.  Used by	       |
 | m4_changecom () and m4_changequote ().  Both functions overrides the |
@@ -885,6 +904,9 @@ set_quotes (const char *lq, const char *rq)
       set_syntax_internal(SYNTAX_LQUOTE, lquote.string[0]);
       set_syntax_internal(SYNTAX_RQUOTE, rquote.string[0]);
     }
+
+  if (use_macro_escape)
+    check_use_macro_escape();
 }
 
 void
@@ -910,6 +932,9 @@ set_comment (const char *bc, const char *ec)
       set_syntax_internal(SYNTAX_BCOMM, bcomm.string[0]);
       set_syntax_internal(SYNTAX_ECOMM, ecomm.string[0]);
     }
+
+  if (use_macro_escape)
+    check_use_macro_escape();
 }
 
 /*-------------------------------------------.
@@ -955,6 +980,9 @@ set_syntax (int code, const char *chars)
   else
     for (ch = 256; --ch > 0; )
       set_syntax_internal (code, ch);
+
+  if (use_macro_escape || code == SYNTAX_ESCAPE)
+    check_use_macro_escape();
 }
 
 #ifdef ENABLE_CHANGEWORD
@@ -1048,7 +1076,7 @@ next_token (token_data *td)
     }
 
   (void) next_char ();
-  if (IS_BCOMM(ch)) /* COMMENT, SHORT DELIM */
+  if (IS_BCOMM(ch))		/* COMMENT, SHORT DELIM */
     {
       obstack_1grow (&token_stack, ch);
       while ((ch = next_char ()) != CHAR_EOF && !IS_ECOMM(ch))
@@ -1067,6 +1095,34 @@ next_token (token_data *td)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
       type = TOKEN_STRING;
     }
+  else if (IS_ESCAPE(ch))	/* ESCAPED WORD */
+    {
+      obstack_1grow (&token_stack, ch);
+      if ((ch = next_char ()) != CHAR_EOF)
+	{
+	  if (IS_ALPHA(ch))
+	    {
+	      obstack_1grow (&token_stack, ch);
+	      while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
+		{
+		  obstack_1grow (&token_stack, ch);
+		}
+
+	      if (ch != CHAR_EOF)
+		unget_input(ch);
+	    }
+	  else
+	    {
+	      obstack_1grow (&token_stack, ch);
+	    }
+
+	  type = TOKEN_WORD;
+	}
+      else
+	{
+	  type = TOKEN_SIMPLE;	/* escape before eof */
+	}
+    }
   else if (
 #ifdef ENABLE_CHANGEWORD
 	   default_word_regexp &&
@@ -1080,7 +1136,8 @@ next_token (token_data *td)
 	}
       if (ch != CHAR_EOF)
 	unget_input(ch);
-      type = TOKEN_WORD;
+
+      type = use_macro_escape ? TOKEN_STRING : TOKEN_WORD;
     }
 
 #ifdef ENABLE_CHANGEWORD

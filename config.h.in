@@ -102,7 +102,10 @@
 #undef WITH_GMP
 
 /* Define to 1 if the -ldl library should be used .  */
-#undef WITH_MODULES
+#undef HAVE_DLOPEN
+
+/* Define to 1 if the -ldld library should be used .  */
+#undef USE_SHL_LOAD
 
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS
@@ -136,6 +139,15 @@
 
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
+
+/* Define if you have the dlclose function.  */
+#undef HAVE_DLCLOSE
+
+/* Define if you have the dlopen function.  */
+#undef HAVE_DLOPEN
+
+/* Define if you have the dlsym function.  */
+#undef HAVE_DLSYM
 
 /* Define if you have the doprnt function.  */
 #undef HAVE_DOPRNT

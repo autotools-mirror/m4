@@ -1,3 +1,68 @@
+1998-11-15  Rene' Seindal  <rene@seindal.dk>
+
+	* Prerelease 1.4l.
+
+	* modules/stdlib.c: New module `stdlib' defining some standard
+	functions: getcwd, getlogin, getpid, getppid, getuid, getpwnam,
+	getpwuid, hostname, rand, srand, getenv, setenv, unsetenv, uname.
+	
+	* src/builtin.c (shipout_string): New convenience function for
+	builtins and modules.
+
+	* src/module.c (module_load): Tentative support for
+	shl_load/shl_findsym, but I cannot test it.  Copied from MetaHTML.
+
+	* Makefile.am (SUBDIRS): Directory modules added if configured.
+
+	* modules/Makefile.am: Now correctly compiles and installs
+	modules in pkglibexecdir.
+
+	* src/m4.h: WITH_MODULES defined iff HAVE_DLOPEN or USE_SHL_LOAD.
+	These two are now initialised by autoconf macros.
+
+	* src/path.c (module_env_init): MODULE_PATH is always on the
+	search path.
+
+	* src/Makefile.am: Now generated pathconf.h which defined the
+	default MODULE_PATH.
+
+	* configure.in (pkglibexecdir): Added defintion of pkglibexecdir,
+	where modules are installed.
+
+	* acm4/modules.m4: Enhanced with code from MetaHTML, contributed
+	by Brian J. Fox <bfox@datawave.net>.  This change allow modules to
+	build and install automatically, and it is prepared for other
+	interfacec than dlopen().
+
+	* src/builtin.c (predefined_tab): Added __m4_version__ for the
+	current version of GNU m4.  It is a GNU extension.
+
+1998-11-14  Rene' Seindal  <rene@seindal.dk>
+
+	* tests/Makefile.am (GENERATED_TESTS): Added new
+	generated-tests/changesy.8.test
+	
+	* doc/m4.texinfo (Changesyntax): Documentation for escape
+	syntax class.
+
+	* src/macro.c (expand_token): Check for escaped macro call before
+	symbol table lookup.
+
+	* src/builtin.c (m4_changesyntax): Added `@' flag to define escape
+	characters
+
+	* src/input.c: New static variable use_macro_escape, which is TRUE
+	iff some character has code SYNTAX_ESCAPE
+	(input_init): Added initialisation of use_macro_escape.
+	(check_use_macro_escape): New function to synchronise
+	use_macro_escape with the syntax table.
+	(set_quotes): Added call to check_use_macro_escape()
+	(set_comment): Do.
+	(set_syntax): Do.
+	(next_token): Added new case for IS_ESCAPE.
+
+	* src/m4.h (SYNTAX_ESCAPE): Defined as simple syntax category.
+
 1998-10-13  René Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4k.
