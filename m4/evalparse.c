@@ -1,26 +1,47 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Free Software Foundation, Inc.
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307  USA
 */
 
-/* This file contains the functions to evaluate integer expressions for
-   the "eval" macro.  It is a little, fairly self-contained module, with
-   its own scanner, and a recursive descent parser.  The only entry point
-   is evaluate ().  */
+/* This file contains the functions to evaluate integer expressions
+   for the "eval" macro.  It is a little, fairly self-contained
+   module, with its own scanner, and a recursive descent parser.  The
+   only entry point is evaluate ().
+
+   It has been carefully written to be also used for the GMP module,
+   mpeval: any actual operation performed on numbers is abstracted by
+   a set of macro definitions.  For plain `eval', `number' is some
+   long int type, and `numb_*' manipulates those long ints, while when
+   using GMP, `number' is typedef'd to `mpq_t' (the arbritrary
+   precision fractional numbers type of GMP), and `numb_*' are mapped
+   to GMP functions.
+
+   There is only one entry point, `m4_do_eval', a single function for
+   both `eval' and `mpeval', but which is given a function pointer to
+   either `m4_evaluate' (for plain `eval'), and `m4_mp_evaluate' (for
+   GMP `mpeval').
+
+   This allows to factor the `user interface' of `eval' and `mpeval',
+   i.e., sanity checks on the input arguments.
+
+   FIXME: it makes no sense to me, since anyway both `modules' own
+   their copy of `m4_do_eval': why don't we just also use a macro for
+   that part instead of a function pointer? --akim.  */
 
 /* Evaluates token types.  */
 
@@ -287,7 +308,7 @@ m4_evaluate (struct obstack *obs, const char *expr, const int radix, int min)
 
   if (err == NO_ERROR && *eval_text != '\0')
     err = EXCESS_INPUT;
-    
+
   switch (err)
     {
     case NO_ERROR:
@@ -827,11 +848,9 @@ simple_term (eval_token et, number *v1)
 }
 
 void
-m4_do_eval (obs, argc, argv, func)
-     struct obstack *obs;
-     int argc;
-     m4_token_data **argv;
-     m4_eval_func func;
+m4_do_eval (struct obstack *obs,
+	    int argc, m4_token_data **argv,
+	    m4_eval_func func)
 {
   int radix = 10;
   int min = 1;
@@ -851,13 +870,16 @@ m4_do_eval (obs, argc, argv, func)
 
   if (argc >= 4 && !m4_numeric_arg (argv[0], M4ARG (3), &min))
     return;
-  if  (min <= 0)
+  if (min <= 0)
     {
       M4ERROR ((warning_status, 0,
 		_("Negative width to eval")));
       return;
     }
 
+  /* FIXME: Huh?  What's these `if' and `return' doing here?  Makes no
+     sense to me. Furthermore, then what is the point of returning a
+     bool (m4_evaluate) if we just ignore it? --akim */
   if ((*func) (obs, M4ARG (1), radix, min))
     return;
 }

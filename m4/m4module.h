@@ -3,14 +3,14 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -152,7 +152,7 @@ boolean m4_token_data_func_traced M4_PARAMS((m4_token_data *));
 #define M4BUILTIN(name) 					\
   static void CONC(builtin_, name) 				\
   M4_PARAMS((struct obstack *, int , m4_token_data **));
-					     
+
 #define M4BUILTIN_HANDLER(name) 				\
   static void CONC(builtin_, name) (obs, argc, argv)		\
 	struct obstack *obs; int argc; m4_token_data **argv;
@@ -240,7 +240,7 @@ M4_SCOPE FILE *m4_debug;
 #define M4_DEBUG_PRINT2(Fmt, Arg1, Arg2) \
   do								\
     {								\
-      if (M4_debug != NULL)					\
+      if (m4_debug != NULL)					\
 	fprintf (m4_debug, Fmt, Arg1, Arg2);			\
     }								\
   while (0)
@@ -249,7 +249,7 @@ M4_SCOPE FILE *m4_debug;
   do								\
     {								\
       if (m4_debug != NULL)					\
-	fprintf (m4_debug, Fmt, Arg1, Arg2, Arg3);			\
+	fprintf (m4_debug, Fmt, Arg1, Arg2, Arg3);		\
     }								\
   while (0)
 
@@ -259,8 +259,8 @@ M4_SCOPE FILE *m4_debug;
       if (m4_debug != NULL)					\
 	{							\
 	  m4_debug_message_prefix ();				\
-	  fprintf (m4_debug, Fmt);					\
-	  putc ('\n', m4_debug);					\
+	  fprintf (m4_debug, Fmt);				\
+	  putc ('\n', m4_debug);				\
 	}							\
     }								\
   while (0)
@@ -271,8 +271,8 @@ M4_SCOPE FILE *m4_debug;
       if (m4_debug != NULL)					\
 	{							\
 	  m4_debug_message_prefix ();				\
-	  fprintf (m4_debug, Fmt, Arg1);				\
-	  putc ('\n', m4_debug);					\
+	  fprintf (m4_debug, Fmt, Arg1);			\
+	  putc ('\n', m4_debug);				\
 	}							\
     }								\
   while (0)
@@ -284,7 +284,7 @@ M4_SCOPE FILE *m4_debug;
 	{							\
 	  m4_debug_message_prefix ();				\
 	  fprintf (m4_debug, Fmt, Arg1, Arg2);			\
-	  putc ('\n', m4_debug);					\
+	  putc ('\n', m4_debug);				\
 	}							\
     }								\
   while (0)
@@ -331,7 +331,7 @@ void m4_process_macro M4_PARAMS((struct obstack *obs, m4_symbol *symbol, int arg
 #define M4_SYNTAX_NUM		(0x0020)
 #define M4_SYNTAX_ALNUM		(M4_SYNTAX_ALPHA|M4_SYNTAX_NUM)
 
-/* These are bit masks to AND with other categories.  
+/* These are bit masks to AND with other categories.
    See input.c for details. */
 #define M4_SYNTAX_LQUOTE	(0x0100)
 #define M4_SYNTAX_RQUOTE	(0x0200)

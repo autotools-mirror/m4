@@ -1,16 +1,16 @@
 /* GNU m4 -- A simple macro processor
    Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or 
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
- 
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
@@ -233,18 +233,19 @@ collect_arguments (m4_symbol *symbol, struct obstack *argptr,
 }
 
 
-/*------------------------------------------------------------------------.
-| The actual call of a macro is handled by call_macro ().  call_macro ()  |
-| is passed a symbol SYM, whose type is used to call either a builtin	  |
-| function, or the user macro expansion function expand_predefine ()	  |
-| (lives in builtin.c).  There are ARGC arguments to the call, stored in  |
-| the ARGV table.  The expansion is left on the obstack EXPANSION.  Macro |
-| tracing is also handled here.						  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The actual call of a macro is handled by m4_call_macro ().         |
+| m4_call_macro () is passed a symbol SYM, whose type is used to     |
+| call either a builtin function, or the user macro expansion        |
+| function expand_predefine () (lives in builtin.c).  There are ARGC |
+| arguments to the call, stored in the ARGV table.  The expansion is |
+| left on the obstack EXPANSION.  Macro tracing is also handled      |
+| here.                                                              |
+`-------------------------------------------------------------------*/
 
 void
 m4_call_macro (m4_symbol *symbol, int argc, m4_token_data **argv,
-		 struct obstack *expansion)
+	       struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (symbol))
     {

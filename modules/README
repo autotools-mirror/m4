@@ -1,9 +1,9 @@
-This directory contains all bundled modules for GNU m4.  
+This directory contains all bundled modules for GNU m4.
 
 Note that as of this writing, an unreleased version of libtool from the
 CVS trunk is required to be able to compile the example modules, since they
 in turn depend on the uninstalled libm4.la library.  I think that third
-party modules will not have this requirement since they will be linking 
+party modules will not have this requirement since they will be linking
 against the installed library.  In any case, once libtool-1.4 (or 1.3a if
 you live on the bleeding edge) is released this will become a non-issue.
 The bottom line is that you shouldn't libtoolize this distribution unless
@@ -19,7 +19,7 @@ then compiled.  The compiled file can then be loaded into a running m4
 process by calling m4 with the `-m' or `--load-module' options on the
 command line, or by calling the builtin "load" (itself implemented by the
 module `load').  This will give GNU m4 potential access to any system
-feature with a C interface. 
+feature with a C interface.
 
 Modules are searched for in M4MODPATH, if set, else in a module directory
 defined at configure time, default $prefix/libexec/m4.  Extra directories
@@ -52,7 +52,7 @@ Each module *must* define one or more entry points from the following:
 "m4_builtin_table", "m4_macro_table" and "m4_init_module".  The symbol
 "m4_builtin_table" is a pointer to a table of "m4_builtin" (defined in
 m4module.h), listing each new builtin that it implements.  The symbol
-"m4_macro_table", is a pointer to a table of "m4)macro", listing each
+"m4_macro_table", is a pointer to a table of "m4_macro", listing each
 text macro initialised by the module.  These tables end with an
 entry where name == NULL.
 

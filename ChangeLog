@@ -1,5 +1,12 @@
 2001-08-07  Akim Demaille  <akim@epita.fr>
 
+	* m4/evalparse.c: A better introductory comment.
+	* m4/m4module.h (M4_DEBUG_PRINT2): s/M4_debug/m4_debug/.
+	* m4/macro.c: Adjust old comments.
+	* modules/README: Typo.
+
+2001-08-07  Akim Demaille  <akim@epita.fr>
+
 	* config/gnu-obstacks.m4: New.
 
 2001-08-07  Akim Demaille  <akim@epita.fr>
