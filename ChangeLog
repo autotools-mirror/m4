@@ -1,5 +1,9 @@
 2001-08-14  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4module.h (obstack.h): Choose between installed version
+	and shipped version based on configure tests.
+	* src/freeze.c (obstack.h): Ditto.
+
 	* acconfig.h: Removed.  No longer required.
 
 	* bootstrap: Rewritten to play nicely with Autoconf 2.5x.

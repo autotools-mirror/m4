@@ -19,9 +19,14 @@
 
 /* This module handles frozen files.  */
 
+#if HAVE_OBSTACK
+#  include <obstack.h>
+#else
+#  include <m4/obstack.h>
+#endif
+
 #include "m4.h"
 #include "m4private.h"
-#include "m4/obstack.h"
 
 static	int   decode_char	    M4_PARAMS((FILE *in));
 static	void  issue_expect_message  M4_PARAMS((int expected));
