@@ -1,5 +1,5 @@
 /* Declaration for error-reporting function
-   Copyright 1995-1997, 2000 Free Software Foundation, Inc.
+   Copyright 1995-1997, 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.  Its master source is NOT part of
    the C library, however.  The master source lives in /gd/gnu/lib.
@@ -57,22 +57,21 @@ extern void error_at_line (int status, int errnum, const char *fname,
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this
    function without parameters instead.  */
-void (*error_print_progname) (void);
+extern void (*error_print_progname) (void);
 
 #else
-void error ();
-void error_at_line ();
-void (*error_print_progname) ();
+extern void error ();
+extern void error_at_line ();
+extern void (*error_print_progname) ();
 #endif
 
 /* This variable is incremented each time `error' is called.  */
-unsigned int error_message_count;
+extern unsigned int error_message_count;
 
 /* Sometimes we want to have at most one error per line.  This
    variable controls whether this mode is selected or not.  */
-int error_one_per_line;
+extern int error_one_per_line;
 
 END_C_DECLS
 
 #endif /* !M4_ERROR_H */
-

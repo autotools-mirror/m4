@@ -1,6 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ##
-## Copyright 2000, 2001 Free Software Foundation
+## Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ MAINTAINERCLEANFILES	= Makefile.in
 MODULE_PATH		= $(pkglibexecdir)
 pkgincdir		= $(includedir)/@PACKAGE@
 
-LDFLAGS 	= -no-undefined -export-dynamic
+AM_LDFLAGS 	= -no-undefined -export-dynamic
 INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
 		  -I$(top_builddir)/src -I$(top_srcdir)/src $(INTLINCL)
 
@@ -39,7 +39,7 @@ lib_LTLIBRARIES		= libm4.la
 libm4_la_SOURCES 	= builtin.c debug.c error.c hash.c \
 			  input.c ltdl.c macro.c module.c output.c \
 			  path.c regex.c symtab.c syntax.c utility.c
-libm4_la_LIBADD		= $(LTLIBOBJS) $(LIBADD_DL)
+libm4_la_LIBADD		= $(LTLIBOBJS) $(LTLIBINTL) $(LIBADD_DL)
 
 module.o module.lo: $(srcdir)/module.c pathconf.h
 pathconf.h: Makefile

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989-1994, 1998-1999 Free Software Foundation, Inc.
+   Copyright 1989-1994, 1998-1999, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,6 @@
 #include "m4private.h"
 
 static int dumpdef_cmp (const void *s1, const void *s2);
-
-/* The name this program was run with. */
-const char *program_name;
 
 /* Exit code from last "syscmd" command.  */
 int m4_sysval = 0;

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -200,8 +200,6 @@ static const struct option long_options[] =
 };
 
 #define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:st:"
-
-#include <dlfcn.h>
 
 int
 main (int argc, char *const *argv, char *const *envp)

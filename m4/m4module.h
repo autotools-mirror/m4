@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1989-1994, 1999, 2000, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -183,45 +183,49 @@ extern m4_builtin_func *m4_token_func	  (m4_token *);
   while (0)
 
 /* The name this program was run with. */
-const char *program_name;
+#ifdef _LIBC
+/* In the GNU C library, there is a predefined variable for this.  */
+# define program_name program_invocation_name
+#endif
+extern const char *program_name;
 
 /* Option flags  (defined in utility.c; set in m4.c).  */
-int interactive;		/* -e */
-int sync_output;		/* -s */
-int debug_level;		/* -d */
-int hash_table_size;		/* -H */
-int no_gnu_extensions;		/* -G */
-int prefix_all_builtins;	/* -P */
-int max_debug_argument_length;	/* -l */
-int suppress_warnings;		/* -Q */
-int warning_status;		/* -E */
-int nesting_limit;		/* -L */
-int discard_comments;		/* -c */
+extern int interactive;			/* -e */
+extern int sync_output;			/* -s */
+extern int debug_level;			/* -d */
+extern int hash_table_size;		/* -H */
+extern int no_gnu_extensions;		/* -G */
+extern int prefix_all_builtins;		/* -P */
+extern int max_debug_argument_length;	/* -l */
+extern int suppress_warnings;		/* -Q */
+extern int warning_status;		/* -E */
+extern int nesting_limit;		/* -L */
+extern int discard_comments;		/* -c */
 
 /* left and right quote, begin and end comment */
-m4_string lquote;
-m4_string rquote;
+extern m4_string lquote;
+extern m4_string rquote;
 
-m4_string bcomm;
-m4_string ecomm;
+extern m4_string bcomm;
+extern m4_string ecomm;
 
 #define DEF_LQUOTE "`"
 #define DEF_RQUOTE "\'"
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-boolean m4_bad_argc (int, m4_token **, int, int);
-const char *m4_skip_space (const char *);
-boolean m4_numeric_arg (int, m4_token **, int, int *);
-void m4_shipout_int (struct obstack *, int);
-void m4_shipout_string (struct obstack*, const char*, int, boolean);
-void m4_dump_args (struct obstack *obs, int argc, m4_token **argv, const char *sep, boolean quoted);
+extern boolean m4_bad_argc (int, m4_token **, int, int);
+extern const char *m4_skip_space (const char *);
+extern boolean m4_numeric_arg (int, m4_token **, int, int *);
+extern void m4_shipout_int (struct obstack *, int);
+extern void m4_shipout_string (struct obstack*, const char*, int, boolean);
+extern void m4_dump_args (struct obstack *obs, int argc, m4_token **argv, const char *sep, boolean quoted);
 
 
 
 /* --- RUNTIME DEBUGGING --- */
 
-FILE *m4_debug;
+extern FILE *m4_debug;
 
 /* The value of debug_level is a bitmask of the following.  */
 
@@ -311,33 +315,33 @@ FILE *m4_debug;
     }								\
   while (0)
 
-void m4_debug_init (void);
-void m4_debug_exit (void);
-int m4_debug_decode (const char *);
-void m4_debug_flush_files (void);
-boolean m4_debug_set_output (const char *);
-void m4_debug_message_prefix (void);
+extern void m4_debug_init (void);
+extern void m4_debug_exit (void);
+extern int m4_debug_decode (const char *);
+extern void m4_debug_flush_files (void);
+extern boolean m4_debug_set_output (const char *);
+extern void m4_debug_message_prefix (void);
 
-void m4_trace_prepre (const char *, int);
-void m4_trace_pre (const char *, int, int, m4_token **);
-void m4_trace_post (const char *, int, int, m4_token **,
+extern void m4_trace_prepre (const char *, int);
+extern void m4_trace_pre (const char *, int, int, m4_token **);
+extern void m4_trace_post (const char *, int, int, m4_token **,
 			   const char *);
 
 /* Exit code from last "syscmd" command.  */
-int m4_sysval;
-int m4_expansion_level;
+extern int m4_sysval;
+extern int m4_expansion_level;
 
-const char *m4_expand_ranges (const char *s, struct obstack *obs);
-void m4_expand_input (void);
-void m4_call_macro (m4_symbol *, int, m4_token **, struct obstack *);
-void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_token **argv);
+extern const char *m4_expand_ranges (const char *s, struct obstack *obs);
+extern void m4_expand_input (void);
+extern void m4_call_macro (m4_symbol *, int, m4_token **, struct obstack *);
+extern void m4_process_macro (struct obstack *obs, m4_symbol *symbol, int argc, m4_token **argv);
 
 
 
 /* --- SYNTAX TABLE DEFINITIONS --- */
 
 /* Please read the comment at the top of input.c for details */
-unsigned short m4_syntax_table[256];
+extern unsigned short m4_syntax_table[256];
 
 extern	void	m4_syntax_init	(void);
 extern	void	m4_syntax_exit	(void);
@@ -399,8 +403,8 @@ extern	int	m4_syntax_code	(char ch);
 /* --- TOKENISATION AND INPUT --- */
 
 /* current input file, and line */
-const char *m4_current_file;
-int m4_current_line;
+extern const char *m4_current_file;
+extern int m4_current_line;
 
 extern	void	m4_input_init	(void);
 extern	void	m4_input_exit	(void);
@@ -423,8 +427,8 @@ extern	void	m4_set_quotes	(const char *, const char *);
 extern	void	m4_set_comment	(const char *, const char *);
 extern	void	m4_set_syntax	(char, const unsigned char *);
 
-int m4_current_diversion;
-int m4_output_current_line;
+extern int m4_current_diversion;
+extern int m4_output_current_line;
 
 extern	void	m4_output_init	(void);
 extern	void	m4_output_exit	(void);

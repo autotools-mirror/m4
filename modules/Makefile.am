@@ -1,5 +1,5 @@
 ## This file is part of GNU m4
-## Copyright 2000, 2001 Free Software Foundation, Inc.
+## Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -30,17 +30,14 @@ EXTRA_DIST = modtest.m4 shadow.m4 time.m4 time2.m4 stdlib.m4 format.c
 INCLUDES	= -I$(top_builddir) -I$(top_srcdir) \
 		  -I$(top_builddir)/m4 -I$(top_srcdir)/m4 $(INTLINCL)
 LIBS = $(top_builddir)/m4/libm4.la
-LDFLAGS = -no-undefined
+AM_LDFLAGS = -no-undefined
 
 pkglibexec_LTLIBRARIES	= gnu.la load.la m4.la \
 			  traditional.la perl.la \
 			  modtest.la shadow.la stdlib.la time.la
 
-## Aaaarg.  Automake 1.5 doesn't seem to like
-## pkglibexec_LTLIBRARIES += mpeval.la
-pkglibexec2dir = $(pkglibexecdir)
 if USE_GMP
-pkglibexec2_LTLIBRARIES = mpeval.la
+pkglibexec_LTLIBRARIES += mpeval.la
 endif
 
 gnu_la_SOURCES = gnu.c
@@ -81,3 +78,4 @@ time_la_LDFLAGS = -module
 BUILT_SOURCES = perlxsi.c
 perlxsi.c:
 	perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c
+

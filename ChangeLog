@@ -1,3 +1,36 @@
+2003-05-29  Gary V. Vaughan  <gary@gnu.org>
+
+	These changes were necessary to get m4 to build on my iBook
+	running "powerpc-apple-darwin6.6" using Apples build of gcc "gcc
+	(GCC) 3.1 20020420 (prerelease)":
+
+	* src/main.c: Don't include dlfcn.h, ltdl.h handles correct
+	inclusion of module loader headers.
+	* modules/Makefile.am: Use AM_LDFLAGS, not LDFLAGS.
+	* m4/Makefile.am: Ditto.
+	(libm4_la_LIBADD): Added $(LTLIBINTL).
+	* m4/utility.c (program_name): Removed declaration in favour of
+	the one already in error.c!
+	* m4/m4module.h (program_name): Define to program_invocation_name
+	when using GNU C library. Use an explicit extern declaration.
+	(interactive, sync_output, debug_level, hash_table_size)
+	(no_gnu_extensions, prefix_all_builtins, max_debug_argument_length)
+	(suppress_warnings, warning_status, nesting_limit, discard_comments)
+	(lquote, rquote, bcomm, ecomm, m4_bad_argc, m4_skip_space)
+	(m4_numeric_arg, m4_shipout_int, m4_shipout_string, m4_dump_args)
+	(m4_debug, m4_debug_init, m4_debug_exit, m4_debug_decode)
+	(m4_debug_flush_files, m4_debug_set_output, m4_debug_message_prefix)
+	(m4_trace_prepre, m4_trace_pre, m4_trace_post, m4_sysval)
+	(m4_expansion_level, m4_expand_ranges, m4_expand_input)
+	(m4_call_macro, m4_process_macro, m4_syntax_table, m4_current_file)
+	(m4_current_line, m4_current_diversion, m4_output_current_line):
+	Don't rely on default, use an explicit extern.
+	* m4/error.h (error, error_at_line, error_print_progname)
+	(error_message_count, error_one_per_line): Ditto.
+	* m4/ltdl.c: Update from CVS libtool.
+	* m4/ltdl.h: Ditto.
+	* commit: Update from CVS cvs-utils.
+
 2002-11-04  Akim Demaille  <akim@epita.fr>
 
 	* doc/m4.texinfo (Esyscmd): Don't grep, use something easier:
