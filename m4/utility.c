@@ -109,16 +109,16 @@ m4_bad_argc (m4_token_data *name, int argc, int min, int max)
   if (min > 0 && argc < min)
     {
       M4WARN ((warning_status, 0,
-	       _("Warning: %s: too few arguments"),
-	       M4_TOKEN_DATA_TEXT (name)));
+	       _("Warning: %s: too few arguments: %d < %d"),
+	       M4_TOKEN_DATA_TEXT (name), argc, min));
       return TRUE;
     }
 
   if (max > 0 && argc > max)
     {
       M4WARN ((warning_status, 0,
-	       _("Warning: %s: too many arguments (ignored)"),
-	       M4_TOKEN_DATA_TEXT (name)));
+	       _("Warning: %s: too many arguments (ignored): %d > %d"),
+	       M4_TOKEN_DATA_TEXT (name), argc, max));
       /* Return FALSE, otherwise it is not exactly `ignored'. */
       return FALSE;
     }
