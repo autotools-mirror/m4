@@ -1,5 +1,8 @@
 2001-08-14  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/ltmain.sh: Doh!  Import again for a quoting fix that
+	prevented any regression test from passing.
+
 	* m4/m4module.h (obstack.h): Choose between installed version
 	and shipped version based on configure tests.
 	* src/freeze.c (obstack.h): Ditto.
