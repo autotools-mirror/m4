@@ -1,3 +1,3 @@
-load(`modtest') 
+load(`modtest')
 test
-Dumpdef: dumpdef(`test')
+Dumpdef: dumpdef(`test').

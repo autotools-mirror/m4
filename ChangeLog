@@ -1,5 +1,22 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	Start using Autotest.  atconfig creation is still lacking.
+
+	* examples/patsubst.m4, modules/modtest.m4, modules/shadow.m4,
+	* examples/reverse.m4, tests/other-tests/import-environment.m4,
+	* tests/other-tests/iso8859.m4: Don't produce trailing blanks.
+	* tests/other-tests/import-environment.test: Don't check LANGUAGE
+	as it might be `unset', or set to `C'.
+	* tests/other-tests/iso8859.test, tests/other-tests/modpath1.test,
+	* tests/other-tests/modpath2.test, tests/other-tests/modpath3.test,
+	* tests/other-tests/modpath4.test, tests/other-tests/modtest.test,
+	* tests/other-tests/patsubst.test, tests/other-tests/reverse.test,
+	* tests/other-tests/shadow.test: Adjust.
+	* tests/testsuite.at, tests/others.at: New.
+	* tests/Makefile.am: Adjust.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	Drop Autoconf 2.13 compatibility.
 
 	* configure.in (changeword): No need to undefine it, as anyway if

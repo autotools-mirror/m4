@@ -19,7 +19,7 @@ shadow
 define(`Shadow::test', defn(`test'))
 
 # module Test also defines a `test' macro
-load(`modtest') 
+load(`modtest')
 dumpdef(`test')
 dumpdef(`shadow')
 test

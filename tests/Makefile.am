@@ -21,7 +21,7 @@
 # The previous line is needed by `./esyscmd.1.test'
 
 EXTRA_DIST = get-them run-test mkconfig.sh foo incl.m4 stamp-TESTS \
-	defs $(TESTS) $(OTHER_FILES)
+	defs $(TESTS) $(OTHER_FILES) $(TESTSUITE_SOURCES) testsuite
 
 MAINTAINERCLEANFILES = Makefile.in $(GENERATED_TESTS) config.m4 config.sh \
 	stamp-TESTS
@@ -159,3 +159,18 @@ stamp-TESTS: $(srcdir)/get-them $(top_srcdir)/doc/m4.texinfo
 
 clean-local:
 	rm -rf testSubDir
+
+TESTSUITE_SOURCES = testsuite.at others.at
+TESTSUITE = testsuite
+
+check-local: atconfig $(TESTSUITE)
+	$(SHELL) $(TESTSUITE)
+
+# FIXME: Autom4te is not complete yet, and lacks a means to find
+# the lib files.
+AUTOM4TE = autom4te
+AUTOTEST = $(AUTOM4TE) -I /usr/local/share/autoconf autotest/general.m4
+$(srcdir)/$(TESTSUITE): $(TESTSUITE_SOURCES)
+	$(AUTOTEST) -I $(srcdir) testsuite.at -o $@.tmp
+	chmod +x $@.tmp
+	mv $@.tmp $@
