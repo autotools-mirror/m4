@@ -159,7 +159,7 @@ struct m4_symbol_value {
 #  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
 
 #  define m4_symbol_value_create()	(XCALLOC (m4_symbol_value, 1))
-#  define m4_symbol_value_delete(V)	(XFREE (V))
+#  define m4_symbol_value_delete(V)	(DELETE (V))
 
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
@@ -284,11 +284,6 @@ struct m4__search_path_info {
 #if WITH_DMALLOC
 #  define DMALLOC_FUNC_CHECK
 #  include <dmalloc.h>
-
-/* Dmalloc expects us to use a void returning xfree.  */
-#  undef XFREE
-#  define XFREE(p)	(xfree (p))
-
 #endif /* WITH_DMALLOC */
 
 /* Other debug stuff.  */

@@ -50,12 +50,11 @@ static void search_path_env_init (m4__search_path_info *, char *, bool);
 static void
 search_path_add (m4__search_path_info *info, const char *dir)
 {
-  m4__search_path *path;
+  NEW (m4__search_path, path);
 
   if (*dir == '\0')
     dir = ".";
 
-  path = XMALLOC (m4__search_path, 1);
   path->next = NULL;
   path->len = strlen (dir);
   path->dir = xstrdup (dir);

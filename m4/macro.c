@@ -120,7 +120,7 @@ expand_token (m4 *context, m4_obstack *obs,
       abort ();
     }
 
-  XFREE (text);
+  xfree (text);
 }
 
 

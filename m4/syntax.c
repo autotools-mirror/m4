@@ -151,10 +151,10 @@ m4_syntax_delete (m4_syntax_table *syntax)
 {
   assert (syntax);
 
-  XFREE (syntax->lquote.string);
-  XFREE (syntax->rquote.string);
-  XFREE (syntax->bcomm.string);
-  XFREE (syntax->ecomm.string);
+  xfree (syntax->lquote.string);
+  xfree (syntax->rquote.string);
+  xfree (syntax->bcomm.string);
+  xfree (syntax->ecomm.string);
   xfree (syntax);
 }
 

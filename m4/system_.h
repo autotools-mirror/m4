@@ -153,11 +153,8 @@ BEGIN_C_DECLS
 #endif
 
 
-/* FIXME: macros to ease transition to gnulib xalloc.h API */
-#undef XFREE
-#define XFREE(Var)	((Var) = xfree (Var))
+#define DELETE(Expr)	((Expr) = (xfree (Expr), (void *) 0))
 
-extern void *xfree (void *stale);
 extern char *xstrzdup (const char *string, size_t len);
 
 END_C_DECLS

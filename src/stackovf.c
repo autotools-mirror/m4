@@ -414,7 +414,7 @@ Error - Do not know how to catch signals on an alternate stack...
 void
 stackovf_exit (void)
 {
-  XFREE ((void *) stackbuf);
+  DELETE ((void *) stackbuf);
 }
 
 #endif /* USE_STACKOVF */

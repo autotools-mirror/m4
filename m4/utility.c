@@ -104,12 +104,3 @@ m4_dump_args (m4 *context, m4_obstack *obs, int argc,
     }
 }
 
-/* FIXME: merge xfree into gnulib. */
-/* Don't free NULL pointers. */
-void *
-xfree (void *stale)
-{
-  if (stale)
-    free (stale);
-  return 0;
-}

@@ -21,6 +21,7 @@
 # define XALLOC_H_
 
 # include <stddef.h>
+# include <stdlib.h>
 
 # ifndef __attribute__
 #  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8) || __STRICT_ANSI__
@@ -61,11 +62,13 @@ char *xstrdup (const char *str);
 # define NEW(Type, Var)  Type *(Var) = XMALLOC (Type, 1)
 
 /* Free VAR only if non NULL. */
-# define XFREE(Var)	\
-   do {                 \
-      if (Var)          \
-        free (Var);     \
-   } while (0)
+# define XFREE(Var)	xfree (Var)
+static inline void
+xfree (void *p)
+{
+  if (p)
+    free (p);
+}
 
 /* Return a pointer to a malloc'ed copy of the array SRC of NUM elements. */
 # define CCLONE(Src, Num) \

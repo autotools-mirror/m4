@@ -124,7 +124,7 @@ void
 m4_output_exit (void)
 {
   assert (diversions = 1);
-  XFREE (diversion_table);
+  DELETE (diversion_table);
 }
 
 

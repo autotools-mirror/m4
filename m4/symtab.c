@@ -67,7 +67,7 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 m4_symbol_table *
 m4_symtab_create (size_t size, bool *nuke_trace_bit)
 {
-  m4_symbol_table *symtab = XMALLOC (m4_symbol_table, 1);
+  NEW (m4_symbol_table, symtab);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);
@@ -163,7 +163,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle
 
 		  if (next->type == M4_SYMBOL_TEXT)
 		    xfree (m4_get_symbol_value_text (next));
-		  XFREE (next);
+		  xfree (next);
 		}
 	      else
 		data = next;
@@ -280,7 +280,7 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
   if (!m4_get_symbol_value (*psymbol))
     if (*symtab->nuke_trace_bit || !m4_get_symbol_traced (*psymbol))
       {
-	XFREE (*psymbol);
+	DELETE (*psymbol);
 	xfree (m4_hash_remove (symtab->table, name));
       }
 }
@@ -306,7 +306,7 @@ symbol_popval (m4_symbol *symbol)
 	}
       if (m4_is_symbol_value_text (stale))
 	xfree (m4_get_symbol_value_text (stale));
-      XFREE (stale);
+      xfree (stale);
     }
 }
 
@@ -321,7 +321,7 @@ arg_destroy_CB (m4_hash *hash, const void *name, void *arg, void *ignored)
   assert (hash);
 
   if (SYMBOL_ARG_DEFAULT (token_arg))
-    XFREE (SYMBOL_ARG_DEFAULT (token_arg));
+    DELETE (SYMBOL_ARG_DEFAULT (token_arg));
   xfree (token_arg);
   xfree (m4_hash_remove (hash, (const char *) name));
 

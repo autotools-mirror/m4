@@ -1,3 +1,25 @@
+2003-09-11  Gary V. Vaughan  <gary@gnu.org>
+
+	Reimport the latest xalloc module from CVS gnulib, and adjust the
+	m4 sources to take advantage of xalloc xfree.  Also create a new
+	macro DELETE with the same semantics as the old m4 XFREE macro,
+	and carefully tweak callers:
+
+	* gnulib/config/xalloc.m4, gnulib/m4/xalloc.h: Updated from CVS
+	gnulib.
+	* m4/utility.c (xfree): Removed.  This function is now supplied by
+	gnulib xalloc.
+	* m4/m4private.h (WITH_DMALLOC): Removed XFREE redefine.
+	* m4/path.c (search_path_add): Use NEW macro from xalloc.h.
+	* m4/symtab.c (m4_symtab_create): Ditto.
+	* m4/system_.h: Removed XFREE redefine.
+	(DELETE): New macro with same functionality as the original m4
+	XFREE macro, but based on xalloc.h now.  Changed all callers.
+	* src/main.c (main): Use XMALLOC macro.
+	* m4/hash.c, m4/macro.c, m4/symtab.c, m4/syntax.c: Use xfree
+	instead of XFREE.
+	* m4/output.c (m4_output_exit): Use DELETE instead of XFREE.
+
 2003-09-10  Gary V. Vaughan  <gary@gnu.org>
 
 	Import the xalloc module from CVS gnulib, along with its
