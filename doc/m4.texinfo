@@ -2883,7 +2883,7 @@ the first match of @var{regexp} in @var{string}.  If @var{replacement}
 is specified and matches, then it expands into @var{replacement}. If
 @var{regexp} does not match anywhere in @var{string}, it expands to -1.
 
-The builtin macro @code{regexp} is recognized only when given arguments.
+The builtin macro @code{eregexp} is recognized only when given arguments.
 @end deffn
 
 @example
@@ -2990,7 +2990,7 @@ most common.
 @cindex pattern substitution
 @cindex substitution by regular expression
 @cindex GNU extensions
-@deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @w{opt @var{replacement})}
+@deffn {Builtin (gnu)} epatsubst (@var{string}, @var{regexp}, @w{opt @var{replacement})}
 Global substitution in a string is done by @code{patsubst}, which
 searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.  It uses Extended Regular Expressions
@@ -3243,7 +3243,7 @@ then the digits making the number.  For any radix, the digits are
 @samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
 can be used interchangeably in numbers prefixes and as number digits.
 
-Calculations are done in at lease 32 bit, but @code{m4} will use wider
+Calculations are done in at least 32 bit, but @code{m4} will use wider
 integers if available.
 
 Parentheses may be used to group subexpressions whenever needed.  For the

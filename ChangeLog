@@ -1,3 +1,9 @@
+2003-06-27  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/m4.texinfo (Eregexp and Regexp): Typo.
+	(Epatsubst and Patsubst): Typo.
+	(Eval): Typo.
+
 2003-06-26  Gary V. Vaughan  <gary@gnu.org>
 
 	Move the global variables that pertain to syntax to a new `struct
