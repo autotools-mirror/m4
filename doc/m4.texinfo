@@ -1,7 +1,9 @@
-\input texinfo
+\input texinfo @c -*-texinfo-*-
 @c %**start of header
 @setfilename m4.info
 @settitle GNU macro processor
+@c For double-sided printing, uncomment:
+@c @setchapterpage odd
 @finalout
 @c %**end of header
 
@@ -14,16 +16,13 @@
 @set Francois Fran\noexpand\ptexc cois
 @end tex
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
+@dircategory GNU programming tools
+@direntry
 * m4: (m4).			A powerful macro processor.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
 
-@ifinfo
-This file documents the GNU @code{m4} utility.
+@ifnottex
+This file documents GNU M4 @value{VERSION}.
 
 Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free Software
 Foundation, Inc.
@@ -48,17 +47,17 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that this permission notice may be stated in a translation approved
 by the Foundation.
-@end ifinfo
+@end ifnottex
 
 @titlepage
-@title GNU m4, version @value{VERSION}
+@title GNU M4, version @value{VERSION}
 @subtitle A powerful macro processor
 @subtitle Edition @value{EDITION}, @value{UPDATED}
 @author by Ren@'e Seindal
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -75,9 +74,9 @@ except that this permission notice may be stated in a translation approved
 by the Foundation.
 @end titlepage
 
-@ifinfo
+@ifnottex
 @node Top, Preliminaries, (dir), (dir)
-@top GNU @code{m4}
+@top GNU M4
 
 @c @item @b{@code{m4}} @value{hfillkludge} (UtilD, UtilT, SrcCD)
 @c
@@ -134,6 +133,7 @@ might go away, do not count on it yet.
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
+@detailmenu
  --- The Detailed Node Listing ---
 
 Introduction and preliminaries
@@ -237,9 +237,11 @@ Compatibility with other versions of @code{m4}
 * Extensions::                  Extensions in GNU m4
 * Incompatibilities::           Facilities in System V m4 not in GNU m4
 * Other Incompat::              Other incompatibilities
+
+@end detailmenu
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 @node Preliminaries, Syntax, Top, Top
 @chapter Introduction and preliminaries
@@ -2612,7 +2614,7 @@ patsubst(`GNUs not Unix', `\w*', `(\&)')
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not 
+@result{}GN not
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
@@ -3232,7 +3234,7 @@ at reload time, however this may not be produced from within @code{m4}.
 @cindex compatibility
 This chapter describes the differences between this implementation of
 @code{m4}, and the implementation found under UNIX, notably System V,
-Release 3.  
+Release 3.
 
 There are also differences in BSD flavors of @code{m4}.  No attempt
 is made to summarize these here.
