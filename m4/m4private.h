@@ -45,6 +45,9 @@ struct m4 {
   m4_symbol_table *symtab;
   m4_syntax_table *syntax;
 
+  FILE *	 debug_file;		/* File for debugging output.  */
+  struct obstack trace_messages;
+
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
   boolean	no_gnu_extensions;		/* -G */
@@ -64,6 +67,8 @@ struct m4 {
 #ifdef NDEBUG
 #  define m4_get_symbol_table(C)		((C)->symtab)
 #  define m4_get_syntax_table(C)		((C)->syntax)
+#  define m4_get_debug_file(C)			((C)->debug_file)
+#  define m4_get_trace_messages(C)		((C)->trace_messages)
 #  define m4_get_warning_status_opt(C)		((C)->warning_status)
 #  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)

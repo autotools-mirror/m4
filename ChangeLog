@@ -1,3 +1,37 @@
+2003-07-23  Gary V. Vaughan  <gary@gnu.org>
+
+	More refactoring of the m4module.h API.  Replace #defines with an
+	enum, and move non-public functions out of the public API.
+
+	* m4/debug.c (stdarg.h, varargs.h): Remove variadic header
+	inclusion.
+	* m4/macro.c (stdarg.h): Add ANSI C variadic header.
+	* m4/debug.c (m4_debug, trace): Moved...
+	* m4/m4private.h (struct m4): ...to fields of this struct.
+	(m4_get_debug_file, m4_get_trace_messages): New fast access macros
+	for the new fields.
+	* m4/debug.c (m4_debug_init, m4_debug_exit): Removed functions...
+	* src/main.c (m4_debug_init, m4_debug_exit): ...invocations...
+	* m4/m4.c (m4_create, m4_delete): ...and handled here instead.
+	* m4/m4module.h (m4_context_field_table): Add entries for new
+	debug_file and trace_messages fields.
+	(M4_DEBUG_TRACE_ARGS, M4_DEBUG_TRACE_EXPANSION)
+	(M4_DEBUG_TRACE_QUOTE, M4_DEBUG_TRACE_ALL, M4_DEBUG_TRACE_LINE)
+	(M4_DEBUG_TRACE_FILE, M4_DEBUG_TRACE_PATH, M4_DEBUG_TRACE_CALL)
+	(M4_DEBUG_TRACE_INPUT, M4_DEBUG_TRACE_CALLID)
+	(M4_DEBUG_TRACE_VERBOSE): Replaced #defines with an enum.
+	(m4_is_debug_bit): New macro to simplfy checks against the debug
+	bits above.
+	(m4_trace_format, m4_trace_header, m4_trace_flush)
+	(m4_trace_prepre, m4_trace_pre, m4_trace_post): Removed
+	prototypes.
+	* m4/debug.c (m4_trace_format, m4_trace_header, m4_trace_flush)
+	(m4_trace_prepre, m4_trace_pre, m4_trace_post): Moved...
+	* m4/macro.c (trace_format, trace_header, trace_flush)
+	(trace_prepre, trace_pre, trace_post): ...to these newly static
+	functions, since they are only ever used from this file.  Changed
+	all callers.
+
 2003-07-17  Gary V. Vaughan  <gary@gnu.org>
 
 	Change the macros for checking syntax so that matching against
@@ -147,7 +181,7 @@
 
 	Two related changes, and a huge knockon effect throughout the
 	source: Moved the option variables out of global space and into
-	`struct m4'; made `m4_symtab' a real datatype, so that it's api
+	`struct m4'; made `m4_symtab' a real datatype, so that its api
 	is not marred passing `struct m4' around just so it can decide
 	whether to keep traced symbol names or not.  Added setters and
 	getters for the formerly global option variables, and obviously

@@ -216,12 +216,12 @@ M4BUILTIN_HANDLER (debugmode)
       if (M4ARG (1)[0] == '+' || M4ARG (1)[0] == '-')
 	{
 	  change_flag = M4ARG (1)[0];
-	  new_debug_level = m4_debug_decode (M4ARG (1) + 1);
+	  new_debug_level = m4_debug_decode (context, M4ARG (1) + 1);
 	}
       else
 	{
 	  change_flag = 0;
-	  new_debug_level = m4_debug_decode (M4ARG (1));
+	  new_debug_level = m4_debug_decode (context, M4ARG (1));
 	}
 
       if (new_debug_level < 0)
@@ -256,8 +256,8 @@ M4BUILTIN_HANDLER (debugmode)
 M4BUILTIN_HANDLER (debugfile)
 {
   if (argc == 1)
-    m4_debug_set_output (NULL);
-  else if (!m4_debug_set_output (M4ARG (1)))
+    m4_debug_set_output (context, NULL);
+  else if (!m4_debug_set_output (context, M4ARG (1)))
     M4ERROR ((m4_get_warning_status_opt (context), errno,
 	      _("Cannot set error file: %s"), M4ARG (1)));
 }
@@ -509,7 +509,7 @@ M4BUILTIN_HANDLER (esyscmd)
   FILE *pin;
   int ch;
 
-  m4_debug_flush_files ();
+  m4_debug_flush_files (context);
   pin = popen (M4ARG (1), "r");
   if (pin == NULL)
     {

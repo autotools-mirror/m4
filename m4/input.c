@@ -227,7 +227,7 @@ file_unget (ch)
 static void
 file_clean (m4 *context)
 {
-  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_INPUT))
+  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_INPUT))
     M4_DEBUG_MESSAGE2 (context, _("Input reverted to %s, line %d"),
 		       isp->u.u_f.name, isp->u.u_f.lineno);
 

@@ -230,7 +230,6 @@ main (int argc, char *const *argv, char *const *envp)
   context = m4_create ();
 
   m4__module_init (context);
-  m4_debug_init ();
   m4_include_init ();
 
 #ifdef USE_STACKOVF
@@ -339,7 +338,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'd':
-	m4_set_debug_level_opt (context, m4_debug_decode (optarg));
+	m4_set_debug_level_opt (context, m4_debug_decode (context, optarg));
 	if (m4_get_debug_level_opt (context) < 0)
 	  {
 	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
@@ -358,7 +357,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'o':
-	if (!m4_debug_set_output (optarg))
+	if (!m4_debug_set_output (context, optarg))
 	  error (0, errno, "%s", optarg);
 	break;
 
@@ -543,7 +542,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
   m4__module_exit (context);
   m4_output_exit ();
   m4_input_exit ();
-  m4_debug_exit ();
 
   m4_delete (context);
 

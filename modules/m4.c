@@ -339,7 +339,7 @@ M4BUILTIN_HANDLER (defn)
    and "sysval".  */
 M4BUILTIN_HANDLER (syscmd)
 {
-  m4_debug_flush_files ();
+  m4_debug_flush_files (context);
   m4_sysval = system (M4ARG (1));
 }
 

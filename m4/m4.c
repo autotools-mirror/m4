@@ -27,6 +27,10 @@ m4_create (void)
 
   context->symtab = m4_symtab_create (0, &context->no_gnu_extensions);
   context->syntax = m4_syntax_create ();
+
+  context->debug_file	 = stderr;
+  obstack_init (&context->trace_messages);
+
   context->nesting_limit = M4_DEFAULT_NESTING_LIMIT;
 
   return context;
@@ -42,6 +46,11 @@ m4_delete (m4 *context)
 
   if (context->syntax)
     m4_syntax_delete (context->syntax);
+
+  if (context->debug_file)
+    fclose (context->debug_file);
+
+  obstack_free (&context->trace_messages, NULL);
 
   xfree (context);
 }

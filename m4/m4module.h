@@ -92,6 +92,8 @@ extern void		m4_delete	(m4 *);
 #define m4_context_field_table 						\
 	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
+	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
+	M4FIELD(struct obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,	 warning_status_opt,	   warning_status)	\
 	M4FIELD(boolean, no_gnu_extensions_opt,    no_gnu_extensions)	\
 	M4FIELD(int,	 nesting_limit_opt,	   nesting_limit)	\
@@ -218,85 +220,80 @@ extern void m4_dump_args (m4 *, struct obstack *obs, int argc, m4_symbol_value *
 
 /* --- RUNTIME DEBUGGING --- */
 
-extern FILE *m4_debug;
+/* The value of debug_level is a bitmask of the following:  */
+enum {
+  /* a: show arglist in trace output */
+  M4_DEBUG_TRACE_ARGS 		= (1 << 0),
+  /* e: show expansion in trace output */
+  M4_DEBUG_TRACE_EXPANSION	= (1 << 1),
+  /* q: quote args and expansion in trace output */
+  M4_DEBUG_TRACE_QUOTE		= (1 << 2),
+  /* t: trace all macros -- overrides trace{on,off} */
+  M4_DEBUG_TRACE_ALL		= (1 << 3),
+  /* l: add line numbers to trace output */
+  M4_DEBUG_TRACE_LINE		= (1 << 4),
+  /* f: add file name to trace output */
+  M4_DEBUG_TRACE_FILE		= (1 << 5),
+  /* p: trace path search of include files */
+  M4_DEBUG_TRACE_PATH		= (1 << 6),
+  /* c: show macro call before args collection */
+  M4_DEBUG_TRACE_CALL		= (1 << 7),
+  /* i: trace changes of input files */
+  M4_DEBUG_TRACE_INPUT		= (1 << 8),
+  /* x: add call id to trace output */
+  M4_DEBUG_TRACE_CALLID		= (1 << 9),
 
-/* The value of debug_level is a bitmask of the following.  */
+  /* V: very verbose --  print everything */
+  M4_DEBUG_TRACE_VERBOSE	= (~0)
+};
 
-/* a: show arglist in trace output */
-#define M4_DEBUG_TRACE_ARGS 		(1 << 0)
-/* e: show expansion in trace output */
-#define M4_DEBUG_TRACE_EXPANSION	(1 << 1)
-/* q: quote args and expansion in trace output */
-#define M4_DEBUG_TRACE_QUOTE		(1 << 2)
-/* t: trace all macros -- overrides trace{on,off} */
-#define M4_DEBUG_TRACE_ALL		(1 << 3)
-/* l: add line numbers to trace output */
-#define M4_DEBUG_TRACE_LINE		(1 << 4)
-/* f: add file name to trace output */
-#define M4_DEBUG_TRACE_FILE		(1 << 5)
-/* p: trace path search of include files */
-#define M4_DEBUG_TRACE_PATH		(1 << 6)
-/* c: show macro call before args collection */
-#define M4_DEBUG_TRACE_CALL		(1 << 7)
-/* i: trace changes of input files */
-#define M4_DEBUG_TRACE_INPUT		(1 << 8)
-/* x: add call id to trace output */
-#define M4_DEBUG_TRACE_CALLID		(1 << 9)
-
-/* V: very verbose --  print everything */
-#define M4_DEBUG_TRACE_VERBOSE		1023
 /* default flags -- equiv: aeq */
 #define M4_DEBUG_TRACE_DEFAULT		\
 	(M4_DEBUG_TRACE_ARGS|M4_DEBUG_TRACE_EXPANSION|M4_DEBUG_TRACE_QUOTE)
 
-#define M4_DEBUG_PRINT1(Fmt, Arg1) 			M4_STMT_START {	\
-      if (m4_debug != NULL)						\
-	fprintf (m4_debug, Fmt, Arg1);			} M4_STMT_END
+#define M4_DEBUG_PRINT1(C, Fmt, Arg1) 			M4_STMT_START {	\
+      if (m4_get_debug_file (C) != NULL)				\
+	fprintf (m4_get_debug_file (C), Fmt, Arg1);	} M4_STMT_END
 
 #define M4_DEBUG_PRINT2(Fmt, Arg1, Arg2)		M4_STMT_START {	\
-      if (m4_debug != NULL)					\
-	fprintf (m4_debug, Fmt, Arg1, Arg2);		} M4_STMT_END
+      if (m4_get_debug_file (C) != NULL)				\
+	fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);} M4_STMT_END
 
 #define M4_DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3)		M4_STMT_START {	\
-	if (m4_debug != NULL)						\
-	fprintf (m4_debug, Fmt, Arg1, Arg2, Arg3);	} M4_STMT_END
+	if (m4_get_debug_file (C) != NULL)				\
+	fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2, Arg3);	} M4_STMT_END
 
 #define M4_DEBUG_MESSAGE(C, Fmt)			M4_STMT_START {	\
-      if (m4_debug != NULL)						\
+      if (m4_get_debug_file (C) != NULL)				\
 	{								\
 	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_debug, Fmt);					\
-	  putc ('\n', m4_debug);					\
+	  fprintf (m4_get_debug_file (C), Fmt);				\
+	  putc ('\n', m4_get_debug_file (C));				\
 	}						} M4_STMT_END
 
 #define M4_DEBUG_MESSAGE1(C, Fmt, Arg1)			M4_STMT_START {	\
-      if (m4_debug != NULL)						\
+      if (m4_get_debug_file (C) != NULL)				\
 	{								\
 	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_debug, Fmt, Arg1);				\
-	  putc ('\n', m4_debug);					\
+	  fprintf (m4_get_debug_file (C), Fmt, Arg1);			\
+	  putc ('\n', m4_get_debug_file (C));				\
 	}						} M4_STMT_END
 
 #define M4_DEBUG_MESSAGE2(C, Fmt, Arg1, Arg2)		M4_STMT_START {	\
-      if (m4_debug != NULL)						\
+      if (m4_get_debug_file (C) != NULL)				\
 	{								\
 	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_debug, Fmt, Arg1, Arg2);				\
-	  putc ('\n', m4_debug);					\
+	  fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);		\
+	  putc ('\n', m4_get_debug_file (C));				\
 	}						} M4_STMT_END
 
-extern void m4_debug_init (void);
-extern void m4_debug_exit (void);
-extern int m4_debug_decode (const char *);
-extern void m4_debug_flush_files (void);
-extern boolean m4_debug_set_output (const char *);
+#define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
+
+extern int m4_debug_decode (m4 *context, const char *);
+extern void m4_debug_flush_files (m4 *context);
+extern boolean m4_debug_set_output (m4 *context, const char *);
 extern void m4_debug_message_prefix (m4 *context);
 
-extern void m4_trace_prepre (m4 *context, const char *, int);
-extern void m4_trace_pre (m4 *context, const char *, int, int,
-			  m4_symbol_value **);
-extern void m4_trace_post (m4 *context, const char *, int, int,
-			   m4_symbol_value **, const char *);
 
 /* Exit code from last "syscmd" command.  */
 extern int m4_sysval;
