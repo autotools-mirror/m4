@@ -1,5 +1,9 @@
 2001-09-05  Akim Demaille  <akim@epita.fr>
 
+	* modules/format.c (format): Have a bigger `str'.
+
+2001-09-05  Akim Demaille  <akim@epita.fr>
+
 	Rationalize warnings, reporting the macro name as if it were a
 	program name, and assertions.
 

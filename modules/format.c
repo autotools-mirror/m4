@@ -69,7 +69,7 @@ format (struct obstack *obs, int argc, m4_token_data **argv)
   char hflag;			/* short flag */
 
   /* Buffer and stuff.  */
-  char str[256];		/* buffer for formatted text */
+  char str[4096];		/* buffer for formatted text */
   enum {INT, UINT, LONG, ULONG, DOUBLE, STR} datatype;
 
   fmt = ARG_STR (argc, argv);
