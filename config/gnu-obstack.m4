@@ -1,5 +1,5 @@
 #                                                            -*- Autoconf -*-
-# gnu-obstacks.m4 -- the libc supplied version of obstacks if available
+# gnu-obstack.m4 -- the libc supplied version of obstacks if available.
 #
 # Copyright 2000, 2001 Gary V. Vaughan <gary@gnu.org>
 #

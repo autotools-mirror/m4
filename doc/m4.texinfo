@@ -1242,7 +1242,7 @@ case, @code{undefine} does nothing.
 It is possible to rename an already defined macro.  To do this, you need
 the builtin @code{defn}, which expands to the @emph{quoted definition}
 of @var{name}.  If the argument is not a defined macro, the expansion is
-void. 
+void.
 
 If @var{name} is a builtin, the expansion is a special token, which
 points to the builtin's internal definition.  This token is only
@@ -1385,7 +1385,7 @@ The macro @code{defn} is recognized only with parameters.
 @end deffn
 
 This can be used to call macros with computed or with ``illegal'' names
-(@code{define} allows such names to be defined): 
+(@code{define} allows such names to be defined):
 
 @example
 define(`$$internal$macro', `Internal macro (name `$0')')
@@ -2469,7 +2469,7 @@ in which they were saved (LIFO---last in, first out).
 @section Including named files
 
 @deffn {Builtin (m4)} include (@var{filename})
-@deffnx {Builtin (m4)} sinclude(@var{filename})
+@deffnx {Builtin (m4)} sinclude (@var{filename})
 These two builtin macros are for including files.  Both cause the file
 named @var{filename} to be read by @code{m4}.  When the end of the file
 is reached, input is resumed from the previous input file.
@@ -3476,7 +3476,7 @@ names, which expands to a name of a non-existent file, made from the
 string @var{template}, which should end with the string @samp{XXXXXX}.
 The six @code{X}'s are then replaced, usually with something that
 includes the process id of the @code{m4} process, in order to make the
-file name unique. 
+file name unique.
 
 The builtin macro @code{maketemp} is recognized only when given
 arguments.

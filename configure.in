@@ -154,6 +154,9 @@ AC_SUBST(LTLIBOBJS)
 
 AC_SUBST(ac_aux_dir)
 
+# Big hack below: 2.13 does not garantee the value of $srcdir, so
+# do not use `sh $srcdir/tests/mkconfig.sh' since in case we build
+# in a separate dir, it points to srcdir for... `examples/'!
 AC_OUTPUT(
 Makefile
 config/Makefile
@@ -166,5 +169,6 @@ modules/Makefile
 tests/Makefile
 examples/Makefile,
 [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile; \
-sh $srcdir/tests/mkconfig.sh; \
-test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h.in])
+sh $m4_top_srcdir/tests/mkconfig.sh; \
+test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h.in],
+[m4_top_srcdir=$srcdir])

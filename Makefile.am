@@ -41,12 +41,6 @@ MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 
 CVS	= cvs # set it to `:' to avoid CVS operations at dist time
 
-dist-hook:
-	(cd $(distdir) && mkdir $(auxdir))
-	for file in $(AUX_DIST) $(AUX_DIST_EXTRA); do \
-	  cp $$file $(distdir)/$$file; \
-	done
-
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.
 cvs-dist: distcheck # maintainer-check

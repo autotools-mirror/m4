@@ -1,5 +1,16 @@
 2001-08-07  Akim Demaille  <akim@epita.fr>
 
+	Improve `make distcheck'.
+
+	* configure.in: Be sure to be able to run `mkconfig.sh' when src
+	!= build.
+	* Makefile.am (dist-hook): Remove, as it is no longer needed.
+	* doc/m4.texinfo (Include): Add missing blank.
+	* m4/Makefile.am (EXTRA_DIST): Distribute gnu-obstack.h and
+	obstack.c.
+
+2001-08-07  Akim Demaille  <akim@epita.fr>
+
 	* m4/evalparse.c: A better introductory comment.
 	* m4/m4module.h (M4_DEBUG_PRINT2): s/M4_debug/m4_debug/.
 	* m4/macro.c: Adjust old comments.
