@@ -38,6 +38,17 @@ MAINTAINERCLEANFILES	= Makefile.in
 # Gnulib Makefile.am snippets #
 # --------------------------- #
 
+## error: (not yet in gnulib)
+BUILT_SOURCES += $(ERROR_H)
+EXTRA_DIST += error_.h
+
+all-local $(lib_OBJECTS): $(ERROR_H)
+error.h: error_.h
+	rm -f $@ && $(LN_S) error_.h $@
+
+MOSTLYCLEANFILES += error.h
+
+
 ## gettext: (not yet in gnulib)
 BUILT_SOURCES += $(GETTEXT_H)
 EXTRA_DIST += gettext_.h
@@ -58,6 +69,10 @@ obstack.h: obstack_.h
 	rm -f $@ && $(LN_S) obstack_.h $@
 
 MOSTLYCLEANFILES += obstack.h
+
+
+## progname:
+libgnu_la_SOURCES += progname.c progname.h
 
 
 ## stdbool:

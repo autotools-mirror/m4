@@ -30,6 +30,7 @@
 /* I have yet to see a system that doesn't have these... */
 #include <stdio.h>
 #include <sys/types.h>
+@INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_STDBOOL_H@
 

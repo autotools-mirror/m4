@@ -1,36 +1,31 @@
 /* Declaration for error-reporting function
-   Copyright (C) 1995-1997, 2000, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997 Free Software Foundation, Inc.
 
-   This file is part of the GNU C Library.  Its master source is NOT part of
-   the C library, however.  The master source lives in /gd/gnu/lib.
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
+   NOTE: The canonical source of this file is maintained with the GNU C Library.
+   Bugs can be reported to bug-glibc@prep.ai.mit.edu.
 
-   The GNU C Library is distributed in the hope that it will be useful,
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by the
+   Free Software Foundation; either version 2, or (at your option) any
+   later version.
+
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
-/* Modified for GNU m4 by Gary V. Vaughan <gary@gnu.org> */
-
-#ifndef M4_ERROR_H
-#define M4_ERROR_H 1
-
-#include <m4/system.h>
-
-BEGIN_C_DECLS
+#ifndef _ERROR_H
+#define _ERROR_H 1
 
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
 #  define __attribute__(Spec) /* empty */
 # endif
 /* The __-protected variants of `format' and `printf' attributes
@@ -39,6 +34,10 @@ BEGIN_C_DECLS
 #  define __format__ format
 #  define __printf__ printf
 # endif
+#endif
+
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 #if defined (__STDC__) && __STDC__
@@ -60,8 +59,8 @@ extern void error_at_line (int status, int errnum, const char *fname,
 extern void (*error_print_progname) (void);
 
 #else
-extern void error ();
-extern void error_at_line ();
+void error ();
+void error_at_line ();
 extern void (*error_print_progname) ();
 #endif
 
@@ -72,6 +71,8 @@ extern unsigned int error_message_count;
    variable controls whether this mode is selected or not.  */
 extern int error_one_per_line;
 
-END_C_DECLS
+#ifdef	__cplusplus
+}
+#endif
 
-#endif /* !M4_ERROR_H */
+#endif /* error.h */

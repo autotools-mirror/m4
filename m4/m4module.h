@@ -21,7 +21,6 @@
 #define M4MODULE_H 1
 
 #include <m4/system.h>
-#include <m4/error.h>
 #include <m4/ltdl.h>
 #include <m4/hash.h>
 

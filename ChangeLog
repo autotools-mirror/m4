@@ -1,5 +1,36 @@
 2003-09-09  Gary V. Vaughan  <gary@gnu.org>
 
+	Import the error and progname modules from CVS gnulib.  Our old
+	error.c subsumed the functionality of both, so a little adjustment
+	was required to accomodate the split in sources.  Also added more
+	wrapper macros to choose between a system installed error.h or our
+	shipped gnulib error module:
+
+	* m4/error.c, m4/error.h: Removed.
+	* m4/Makefile.am: Adjust.
+	(pkgincdir): Removed.  Use pkgincludedir instead.
+	* m4/module.h, src/main.c: Don't include `m4/error.h'.
+	* m4/system_.h (INCLUDE_ERROR_H): Add a substitution for suitable
+	error.h.
+	* gnulib/m4/progname.c: Imported from CVS gnulib.
+	* gnulib/m4/progname.h: Ditto.
+	* src/main.c: Adjust to use progname module.
+	* gnulib/m4/error.c: Imported from CVS gnulib.
+	* gnulib/m4/error_.h: Ditto.
+	* gnulib/m4/Makefile.am: Build the error module into our libgnu.la
+	if appropriate, and link a local error.h if the system version is
+	missing.
+	(libgnu_la_SOURCES) Add progname module sources.
+	* gnulib/config/error.m4: Imported from CVS gnulib.
+	* gnulib/config/strerror_r.m4: Ditto.
+	* config/m4-error.c: New file.  Wrap gnulib error.m4 but arrange
+	to have ERROR_H for Makefile substitutions and tell system.h
+	whether the system error.h should be used, or a locally installed
+	version.
+	* configure.ac (jm_PREREQ_ERROR): Replaced by a call to m4_ERROR.
+
+2003-09-09  Gary V. Vaughan  <gary@gnu.org>
+
 	* gnulib/m4/Makefile.am (MOSTLYCLEANFILES): Typo
 	s/gettext_.h/gettext.h/.
 

@@ -22,16 +22,7 @@
 
 #include "m4.h"
 #include "m4private.h"
-#include "error.h"
-
-/* The name this program was run with. */
-#ifdef _LIBC
-  /* In the GNU C library, there is a predefined variable for this.  */
-#  define program_name program_invocation_name
-#endif
-
-/* This will be provided either by GNU libc, or error.c. */
-extern const char *program_name;
+#include "m4/progname.h"
 
 static void print_program_name_CB (void);
 
@@ -226,7 +217,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   int exit_status;
 
-  program_name = argv[0];
+  set_program_name (argv[0]);
   error_print_progname = print_program_name_CB;
 
   setlocale (LC_ALL, "");
