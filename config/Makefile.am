@@ -20,44 +20,54 @@
 ## Written by Akim Demaille <akim@freefriends.org>
 
 MAINTAINERCLEANFILES =				\
-Makefile.in					\
-ltmain.sh					\
-texinfo.tex					\
+$(srcdir)/Makefile.in				\
+$(srcdir)/ltmain.sh				\
+$(srcdir)/texinfo.tex				\
 $(ACLOCAL_MACROS)				\
 $(STANDARD_TOOLS)
 
 ACLOCAL_MACROS =				\
-dmalloc.m4					\
-gettext.m4					\
-iconv.m4					\
-lib-ld.m4  					\
-lib-link.m4					\
-lib-prefix.m4					\
-libtool.m4					\
-ltdl.m4						\
-options.m4					\
-progtest.m4					\
-protos.m4					\
-regex.m4
+$(srcdir)/codeset.m4				\
+$(srcdir)/gettext.m4				\
+$(srcdir)/glibc21.m4				\
+$(srcdir)/iconv.m4				\
+$(srcdir)/intdiv0.m4				\
+$(srcdir)/inttypes-pri.m4			\
+$(srcdir)/inttypes.m4				\
+$(srcdir)/inttypes_h.m4				\
+$(srcdir)/iscposix.m4				\
+$(srcdir)/lcmessage.m4				\
+$(srcdir)/lib-ld.m4  				\
+$(srcdir)/lib-link.m4				\
+$(srcdir)/lib-prefix.m4				\
+$(srcdir)/progtest.m4				\
+$(srcdir)/stdint_h.m4				\
+$(srcdir)/uintmax_t.m4				\
+$(srcdir)/ulonglong.m4
 
 STANDARD_TOOLS =				\
-compile						\
-config.guess					\
-config.sub					\
-depcomp						\
-install-sh					\
-mdate-sh					\
-missing						\
-mkinstalldirs
+$(srcdir)/compile				\
+$(srcdir)/config.guess				\
+$(srcdir)/config.rpath				\
+$(srcdir)/config.sub				\
+$(srcdir)/depcomp				\
+$(srcdir)/install-sh				\
+$(srcdir)/mdate-sh				\
+$(srcdir)/missing				\
+$(srcdir)/mkinstalldirs
 
 SPECIFIC_MACROS =				\
-debug.m4					\
-error.m4					\
-gmp.m4						\
-gnu-obstack.m4					\
-stackovf.m4
+$(srcdir)/debug.m4				\
+$(srcdir)/error.m4				\
+$(srcdir)/gmp.m4				\
+$(srcdir)/gnu-obstack.m4			\
+$(srcdir)/regex.m4				\
+$(srcdir)/stackovf.m4
+
+SPECIFIC_TOOLS =				\
+$(srcdir)/mkstamp
 
 spy:
 	@echo $($(SPIED))
 
-EXTRA_DIST = mkstamp $(SPECIFIC_MACROS) $(ACLOCAL_MACROS)
+EXTRA_DIST = $(ACLOCAL_MACROS) $(SPECIFIC_MACROS) $(SPECIFIC_TOOLS)

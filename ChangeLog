@@ -1,5 +1,11 @@
 2003-09-04  Gary V. Vaughan  <gary@gnu.org>
 
+	* config/Makefile.am (MAINTAINERCLEANFILES, ACLOCAL_MACROS)
+	(STANDARD_TOOLS, SPECIFIC_MACROS): Needed `$(srcdir)/' for VPATH
+	builds to work.
+	(SPECIFIC_TOOLS): New variable.  Moved mkstamp to here.
+	(EXTRA_DIST): Use it.
+
 	* bootstrap: CVS autoreconf leaves file droppings.  Remove
 	aclocal.m4t incase autoreconf doesn't.
 
