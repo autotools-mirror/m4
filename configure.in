@@ -17,7 +17,7 @@
 # 02111-1307  USA
 
 # We need a modern Autotest.
-AC_PREREQ([2.52c])
+AC_PREREQ([2.52e])
 m4_pattern_allow([^m4_cv_])
 
 # We use some of Jim's macros.

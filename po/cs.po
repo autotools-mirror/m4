@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
-"POT-Creation-Date: 2001-09-06 18:16+0100\n"
+"POT-Creation-Date: 2001-09-07 10:50+0200\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -327,7 +327,7 @@ msgid "Path search for `%s' found `%s'"
 msgstr "Hledán soubor `%s', nalezen soubor `%s'"
 
 # , c-format
-#: m4/symtab.c:347
+#: m4/symtab.c:339
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Jméno `%s' není známo\n"
@@ -384,26 +384,26 @@ msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
-#: modules/m4.c:174
+#: modules/m4.c:173
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "VNITØNÍ CHYBA: ¹patný typ tokenu v define_macro ()"
 
 # , c-format
-#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
-#: modules/m4.c:664
+#: modules/m4.c:191 modules/m4.c:207 modules/m4.c:333 modules/m4.c:643
+#: modules/m4.c:663
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/m4.c:464
+#: modules/m4.c:463
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Chyba pøi volání makra undivert pro %s"
 
 # , c-format
-#: modules/m4.c:536 src/freeze.c:385
+#: modules/m4.c:535 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "%s nelze otevøít"

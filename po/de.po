@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
-"POT-Creation-Date: 2001-09-06 18:16+0100\n"
+"POT-Creation-Date: 2001-09-07 10:50+0200\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -318,7 +318,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
 
-#: m4/symtab.c:347
+#: m4/symtab.c:339
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Name »%s« ist unbekannt\n"
@@ -367,23 +367,23 @@ msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: modules/m4.c:174
+#: modules/m4.c:173
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "INTERNER FEHLER: Falscher Datentyp des Tokens in define_macro ()"
 
-#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
-#: modules/m4.c:664
+#: modules/m4.c:191 modules/m4.c:207 modules/m4.c:333 modules/m4.c:643
+#: modules/m4.c:663
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/m4.c:464
+#: modules/m4.c:463
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Kann Umleitung %s nicht aufheben"
 
-#: modules/m4.c:536 src/freeze.c:385
+#: modules/m4.c:535 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"

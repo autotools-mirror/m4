@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4n\n"
-"POT-Creation-Date: 2001-09-06 18:16+0100\n"
+"POT-Creation-Date: 2001-09-07 10:50+0200\n"
 "PO-Revision-Date: 1999-06-24 00:25+0000\n"
 "Last-Translator: Simos Xenitellis <S.Xenitellis@rhbnc.ac.uk>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -313,7 +313,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Ο έλεγχος μονοπατιού για το `%s' βρήκε `%s'"
 
-#: m4/symtab.c:347
+#: m4/symtab.c:339
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Το όνομα `%s' είναι άγνωστο\n"
@@ -364,24 +364,24 @@ msgstr ""
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "ΣΦΑΛΜΑ: αδυναμία εύρεσης άρθρωσης `%s'"
 
-#: modules/m4.c:174
+#: modules/m4.c:173
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr ""
 "ΕΣΩΤΕΡΙΚΟ ΣΦΑΛΜΑ: Λάθος τύπος δεδομένου αντικειμένου στο define_macro ()"
 
-#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
-#: modules/m4.c:664
+#: modules/m4.c:191 modules/m4.c:207 modules/m4.c:333 modules/m4.c:643
+#: modules/m4.c:663
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Μη ορισμένο όνομα %s"
 
-#: modules/m4.c:464
+#: modules/m4.c:463
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Αδυναμία επαναφοράς του %s"
 
-#: modules/m4.c:536 src/freeze.c:385
+#: modules/m4.c:535 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Αδυναμία ανοίγματος του %s"

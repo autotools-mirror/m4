@@ -126,10 +126,9 @@ M4INIT_HANDLER (m4)
    individual arguments to the macro.  Please note that in general
    argv[argc] != NULL.  */
 
-/* The function macro_install is common for the builtins "define",
-   "undefine", "pushdef" and "popdef".  ARGC and ARGV is as for the caller,
-   and MODE argument determines how the macro name is entered into the
-   symbol table.  */
+/* The function macro_install is common for the builtins "define" and
+   "pushdef".  ARGC and ARGV is as for the caller, and MODE argument
+   determines how the macro name is entered into the symbol table.  */
 
 static void
 macro_install (int argc, m4_token_data **argv, m4_symbol_lookup_t mode)

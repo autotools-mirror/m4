@@ -146,14 +146,6 @@ m4_lookup_symbol (const char *name, m4_symbol_lookup_t mode)
 
     case M4_SYMBOL_PUSHDEF:
       return m4_symbol_pushdef (name);
-
-    case M4_SYMBOL_POPDEF:
-      m4_symbol_popdef (name);
-      return 0;
-
-    case M4_SYMBOL_DELETE:
-      m4_symbol_delete (name);
-      return 0;
     }
 
   assert (0);
@@ -347,9 +339,9 @@ symtab_debug (void)
 	printf (_("Name `%s' is unknown\n"), text);
 
       if (delete)
-	(void) m4_lookup_symbol (text, M4_SYMBOL_DELETE);
+	(void) m4_symbol_delete (text);
       else
-	(void) m4_lookup_symbol (text, M4_SYMBOL_INSERT);
+	(void) m4_symbol_insert (text);
     }
   m4_symtab_apply (symtab_print_list, 0);
 }

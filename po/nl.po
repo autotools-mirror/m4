@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4d\n"
-"POT-Creation-Date: 2001-09-06 18:16+0100\n"
+"POT-Creation-Date: 2001-09-07 10:50+0200\n"
 "PO-Revision-Date: 1998-05-23 09:27+02:00\n"
 "Last-Translator: Erick Branderhorst <Erick.Branderhorst@asml.nl>\n"
 "Language-Team: dutch <nl@li.org>\n"
@@ -312,7 +312,7 @@ msgstr ""
 msgid "Path search for `%s' found `%s'"
 msgstr "Zoeken naar `%s' via PATH levert `%s'"
 
-#: m4/symtab.c:347
+#: m4/symtab.c:339
 #, c-format
 msgid "Name `%s' is unknown\n"
 msgstr "Naam `%s' is niet bekend\n"
@@ -361,23 +361,23 @@ msgstr "LET OP: \\0 zal verdwijnen, gebruik hiervoor \\& als vervanging"
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:174
+#: modules/m4.c:173
 #, fuzzy
 msgid "INTERNAL ERROR: Bad token data type in install_macro ()"
 msgstr "INTERNE FOUT: Onjuist teken data type in define_macro ()"
 
-#: modules/m4.c:192 modules/m4.c:208 modules/m4.c:334 modules/m4.c:644
-#: modules/m4.c:664
+#: modules/m4.c:191 modules/m4.c:207 modules/m4.c:333 modules/m4.c:643
+#: modules/m4.c:663
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Ongedefinieerde naam %s"
 
-#: modules/m4.c:464
+#: modules/m4.c:463
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Cannot undivert %s"
 
-#: modules/m4.c:536 src/freeze.c:385
+#: modules/m4.c:535 src/freeze.c:385
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kan %s niet openen"

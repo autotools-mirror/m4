@@ -47,9 +47,7 @@ typedef struct {
 typedef enum
 {
   M4_SYMBOL_INSERT,
-  M4_SYMBOL_DELETE,
-  M4_SYMBOL_PUSHDEF,
-  M4_SYMBOL_POPDEF,
+  M4_SYMBOL_PUSHDEF
 } m4_symbol_lookup_t;
 
 typedef struct {

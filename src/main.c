@@ -439,7 +439,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 	  break;
 
 	case 'U':
-	  m4_lookup_symbol (defines->macro, M4_SYMBOL_DELETE);
+	  m4_symbol_delete (defines->macro);
 	  break;
 
 	case 't':
