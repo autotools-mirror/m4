@@ -447,9 +447,7 @@ main (int argc, char *const *argv, char *const *envp)
   else
     {
       m4_syntax_init    ();
-      /* FIXME: Bah... a bug in ltdl means we must specify the full
-	 path to the m4 module for the moment. */
-      m4_module_install ("/home/gary/src/m4-1.4p/modules/m4.la");
+      m4_module_install ("m4");
       m4_module_install (no_gnu_extensions ? "traditional" : "gnu");
     }
   

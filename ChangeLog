@@ -1,5 +1,11 @@
 2000-11-25  Gary V. Vaughan  <gary@gnu.org>
 
+	* src/main.c (main):  It is now safe to
+	``m4_module_install("m4")'', without tripping over the m4
+	binary itself!
+	* m4/ltdl.h, m4/ltdl.c: Upgraded to latest bleeding edge
+	versions having fixed the insidious module search order bug.
+
 	* m4/Makefile.am (libm4_la_LIBADD): New magic -- we are
 	supposed to be using @LIBADD_DL@; @DLLDFLAGS@ is dead.
 
