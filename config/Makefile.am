@@ -20,52 +20,52 @@
 ## Written by Akim Demaille <akim@freefriends.org>
 
 MAINTAINERCLEANFILES =				\
-$(srcdir)/Makefile.in				\
-$(srcdir)/ltmain.sh				\
-$(srcdir)/texinfo.tex				\
+Makefile.in					\
+ltmain.sh					\
+texinfo.tex					\
 $(ACLOCAL_MACROS)				\
 $(STANDARD_TOOLS)
 
 ACLOCAL_MACROS =				\
-$(srcdir)/codeset.m4				\
-$(srcdir)/gettext.m4				\
-$(srcdir)/glibc21.m4				\
-$(srcdir)/iconv.m4				\
-$(srcdir)/intdiv0.m4				\
-$(srcdir)/inttypes-pri.m4			\
-$(srcdir)/inttypes.m4				\
-$(srcdir)/inttypes_h.m4				\
-$(srcdir)/isc-posix.m4				\
-$(srcdir)/lcmessage.m4				\
-$(srcdir)/lib-ld.m4  				\
-$(srcdir)/lib-link.m4				\
-$(srcdir)/lib-prefix.m4				\
-$(srcdir)/progtest.m4				\
-$(srcdir)/stdint_h.m4				\
-$(srcdir)/uintmax_t.m4				\
-$(srcdir)/ulonglong.m4
+codeset.m4					\
+gettext.m4					\
+glibc21.m4					\
+iconv.m4					\
+intdiv0.m4					\
+inttypes-pri.m4					\
+inttypes.m4					\
+inttypes_h.m4					\
+isc-posix.m4					\
+lcmessage.m4					\
+lib-ld.m4  					\
+lib-link.m4					\
+lib-prefix.m4					\
+progtest.m4					\
+stdint_h.m4					\
+uintmax_t.m4					\
+ulonglong.m4
 
 STANDARD_TOOLS =				\
-$(srcdir)/compile				\
-$(srcdir)/config.guess				\
-$(srcdir)/config.rpath				\
-$(srcdir)/config.sub				\
-$(srcdir)/depcomp				\
-$(srcdir)/install-sh				\
-$(srcdir)/mdate-sh				\
-$(srcdir)/missing				\
-$(srcdir)/mkinstalldirs
+compile						\
+config.guess					\
+config.rpath					\
+config.sub					\
+depcomp						\
+install-sh					\
+mdate-sh					\
+missing						\
+mkinstalldirs
 
 SPECIFIC_MACROS =				\
-$(srcdir)/debug.m4				\
-$(srcdir)/error.m4				\
-$(srcdir)/gmp.m4				\
-$(srcdir)/m4-obstack.m4				\
-$(srcdir)/regex.m4				\
-$(srcdir)/stackovf.m4
+debug.m4					\
+error.m4					\
+gmp.m4						\
+m4-obstack.m4					\
+regex.m4					\
+stackovf.m4
 
 SPECIFIC_TOOLS =				\
-$(srcdir)/mkstamp
+mkstamp
 
 spy:
 	@echo $($(SPIED))

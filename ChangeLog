@@ -1,3 +1,7 @@
+2003-09-05  Gary V. Vaughan  <gary@gnu.org>
+
+	* config/Makefile.am: Reverting yesterdays patch for VPATH builds.
+
 2003-09-04  Gary V. Vaughan  <gary@gnu.org>
 
 	Migrate the obstack support into the gnulib directories for easy
