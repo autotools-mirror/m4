@@ -1,5 +1,42 @@
 2001-08-17  Akim Demaille  <akim@epita.fr>
 
+	Remove the non Autotest tests.
+
+	* tests/other-tests/capitalize.test,
+	* tests/other-tests/changeword.test,
+	* tests/other-tests/comments.test, tests/other-tests/ddivert.test,
+	* tests/other-tests/debug.test,
+	* tests/other-tests/discard-comments.m4,
+	* tests/other-tests/discard-comments.test,
+	* tests/other-tests/esyscmd.test, tests/other-tests/exp.test,
+	* tests/other-tests/foreach.test, tests/other-tests/forloop.test,
+	* tests/other-tests/frozen.m4, tests/other-tests/fstab.test,
+	* tests/other-tests/gmp.m4, tests/other-tests/gmp.test,
+	* tests/other-tests/hanoi.test,
+	* tests/other-tests/import-environment.m4,
+	* tests/other-tests/import-environment.test,
+	* tests/other-tests/include.test, tests/other-tests/indir.test,
+	* tests/other-tests/iso8859.m4, tests/other-tests/iso8859.test,
+	* tests/other-tests/misc.test, tests/other-tests/modfreeze.test,
+	* tests/other-tests/modpath1.test, tests/other-tests/modpath2.test,
+	* tests/other-tests/modpath3.test, tests/other-tests/modpath4.test,
+	* tests/other-tests/modtest.test,
+	* tests/other-tests/multiquotes.test,
+	* tests/other-tests/patsubst.test, tests/other-tests/pushpop.test,
+	* tests/other-tests/regexp.test, tests/other-tests/reverse.test,
+	* tests/other-tests/shadow.test, tests/other-tests/stackovf.test,
+	* tests/other-tests/sync-lines.m4,
+	* tests/other-tests/sync-lines.test,
+	* tests/other-tests/sysv-args.test, tests/other-tests/trace.test,
+	* tests/other-tests/translit.test, tests/other-tests/undivert.test,
+	* tests/other-tests/unfrozen.m4, tests/other-tests/unload.test,
+	* tests/other-tests/wrap.test: Remove.
+
+	* tests/run-test, tests/get-them: Remove.
+	* tests/Makefile.am: Adjust.
+
+2001-08-17  Akim Demaille  <akim@epita.fr>
+
 	others.at no longer depends on other-tests/.
 
 	* tests/others.at (stackovf): You're actually...
