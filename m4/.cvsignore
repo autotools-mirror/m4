@@ -1,0 +1,5 @@
+*.o
+*.lo
+*.la
+obstack.h
+pathconf.h
