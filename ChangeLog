@@ -1,5 +1,28 @@
 2003-09-04  Gary V. Vaughan  <gary@gnu.org>
 
+	GNU M4 currently builds with a number of files adapted from
+	upstream sources.  Recently the gnulib project on savannah.gnu.org
+	has pulled together a great many of these externally maintained
+	files.  This delta is the beginnings of isolating those files
+	maintained in gnulib to make it easy to synchronise M4 with the
+	upstream files prior to releases.
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Mention gnulib/m4 macro
+	directory.
+	(SUBDIRS): Added new gnulib subdirectory.
+	* configure.ac (AC_CONFIG_FILES): Add new gnulib tree Makefiles.
+	* config/stdbool.m4: Moved from here...
+	* gnulib/m4/stdbool.m4: ...to here.
+	* m4/stdbool_.h: Moved from here...
+	* gnulib/lib/stdbool_.h: ...to here.
+	* gnulib/Makefile.am: New file.  Make sure the gnulib tree is
+	distributed.
+	* m4/Makefile.am: Adjust gnulib/modules/stdbool:Makefile.am based
+	code to work with new stdbool_.h location.
+	(gnulib_srcdir): New.
+
+2003-09-04  Gary V. Vaughan  <gary@gnu.org>
+
 	* config/Makefile.am (MAINTAINERCLEANFILES, ACLOCAL_MACROS)
 	(STANDARD_TOOLS, SPECIFIC_MACROS): Needed `$(srcdir)/' for VPATH
 	builds to work.

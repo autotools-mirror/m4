@@ -52,17 +52,21 @@ dist-hook:
 	rm -f $(distdir)/system.h
 
 
-# ------------------------------------------------------------ #
-# Taken from gnulib/modules/stdbool:Makefile.am.  Do not edit. #
-# ------------------------------------------------------------ #
+gnulib_srcdir		= $(top_srcdir)/gnulib/lib
+
+
+# ------------------------------------------------ #
+# Adapted from gnulib/modules/stdbool:Makefile.am. #
+# ------------------------------------------------ #
 
 BUILT_SOURCES += $(STDBOOL_H)
-EXTRA_DIST += stdbool_.h
+MOSTLYCLEANFILES += stdbool.h stdbool.h-t
+
+pkginc_HEADERS += $(STDBOOL_H)
 
 # We need the following in order to create an <stdbool.h> when the system
 # doesn't have one that works.
 all-local $(lib_OBJECTS): $(STDBOOL_H)
-stdbool.h: stdbool_.h
-	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool_.h > $@-t
+stdbool.h: $(gnulib_srcdir)/stdbool_.h
+	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(gnulib_srcdir)/stdbool_.h > $@-t
 	mv $@-t $@
-MOSTLYCLEANFILES += stdbool.h stdbool.h-t

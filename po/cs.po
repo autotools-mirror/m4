@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-06-11 17:47+0100\n"
+"POT-Creation-Date: 2003-09-02 17:24+0100\n"
 "PO-Revision-Date: 1998-12-07 22:02+01:00\n"
 "Last-Translator: Jiøí Pavlovský <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -69,7 +69,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: m4/obstack.c:473
+#: m4/obstack.c:487 m4/obstack.c:490
 msgid "memory exhausted"
 msgstr ""
 
@@ -154,120 +154,104 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
-#: m4/builtin.c:175
-#, c-format
-msgid "Error: %s: syntax error in parameter list at char `%c'"
-msgstr ""
-
 # , c-format
-#: m4/builtin.c:196
-#, fuzzy, c-format
-msgid "Warning: %s: unterminated parameter list"
-msgstr "Jméno %s není definováno"
-
-# , c-format
-#: m4/input.c:234
+#: m4/input.c:231
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Vstup èten z %s, øádku %d"
 
 # , c-format
-#: m4/input.c:262
+#: m4/input.c:259
 #, c-format
 msgid "Input read from %s"
 msgstr "Vstup èten z %s"
 
-#: m4/input.c:687
+#: m4/input.c:683
 msgid "NONE"
 msgstr "®ÁDNÝ"
 
-#: m4/input.c:847 m4/input.c:877
+#: m4/input.c:836 m4/input.c:866
 #, fuzzy
 msgid "EOF in string"
 msgstr "CHYBA: EOF v øetìzci"
 
-#: m4/macro.c:157
+#: m4/macro.c:185
 #, fuzzy
 msgid "EOF in argument list"
 msgstr "CHYBA: EOF v seznamu argumentù"
 
 # , c-format
-#: m4/macro.c:273
+#: m4/macro.c:231
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr "CHYBA: pøekroèen limit pro rekurzi (%d), zmìòte jej pomocí -L<N>"
 
-#: m4/macro.c:397
+#: m4/macro.c:426
 #, c-format
 msgid "Error: %s: unterminated parameter reference: %s"
 msgstr ""
 
-#: m4/module.c:159
-msgid "unknown error"
-msgstr ""
-
-#: m4/module.c:178
-msgid "Warning: multiple module loader initialisations"
-msgstr ""
-
-#: m4/module.c:198
-msgid "libltdl client registration failed"
-msgstr ""
-
 # , c-format
-#: m4/module.c:225
+#: m4/module.c:123
 #, fuzzy, c-format
-msgid "failed to initialise module loader: %s"
-msgstr "CHYBA: modul `%s' nelze nalézt: %s"
-
-# , c-format
-#: m4/module.c:277
-#, fuzzy, c-format
-msgid "cannot open module `%s': %s"
-msgstr "CHYBA: modul `%s' nelze nalézt"
-
-#: m4/module.c:287
-#, c-format
-msgid "module `%s' has no entry points"
-msgstr ""
-
-#: m4/module.c:313
-#, c-format
-msgid "Warning: overiding stale caller data in module `%s'"
-msgstr ""
-
-# , c-format
-#: m4/module.c:377
-#, fuzzy, c-format
-msgid "cannot close module `%s': %s"
+msgid "Warning: cannot load symbol `%s' from module `%s'"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: m4/module.c:405
-#, fuzzy, c-format
-msgid "cannot close modules: %s"
-msgstr "CHYBA: modul `%s' nelze nalézt"
-
-# , c-format
-#: m4/module.c:422
+#: m4/module.c:231
 #, fuzzy, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
-#: m4/module.c:509
+#: m4/module.c:258
 msgid "module not loaded"
 msgstr ""
 
 # , c-format
-#: m4/module.c:520
+#: m4/module.c:269
 #, fuzzy, c-format
 msgid "cannot unload module `%s': %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
+#: m4/module.c:290
+msgid "Warning: multiple module loader initialisations"
+msgstr ""
+
+#: m4/module.c:310
+msgid "libltdl client registration failed"
+msgstr ""
+
 # , c-format
-#: m4/module.c:559
+#: m4/module.c:337
+#, fuzzy, c-format
+msgid "failed to initialise module loader: %s"
+msgstr "CHYBA: modul `%s' nelze nalézt: %s"
+
+#: m4/module.c:388
+#, c-format
+msgid "module `%s' has no entry points"
+msgstr ""
+
+# , c-format
+#: m4/module.c:400
+#, fuzzy, c-format
+msgid "cannot open module `%s': %s"
+msgstr "CHYBA: modul `%s' nelze nalézt"
+
+# , c-format
+#: m4/module.c:432
 #, fuzzy, c-format
 msgid "cannot unload all modules: %s"
+msgstr "CHYBA: modul `%s' nelze nalézt"
+
+#: m4/module.c:445
+msgid "unknown error"
+msgstr ""
+
+# , c-format
+#: m4/module.c:493
+#, fuzzy, c-format
+msgid "cannot close module `%s': %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 #: m4/output.c:287
@@ -285,31 +269,25 @@ msgstr "CHYBA: odlo¾ený výstup nelze zapsat do doèasného souboru"
 msgid "copying inserted file"
 msgstr "CHYBA: pøi zapisování vlo¾eného souboru"
 
-#: m4/output.c:578
+#: m4/output.c:581
 #, fuzzy
 msgid "reading inserted file"
 msgstr "CHYBA: pøi ètení vlo¾eného souboru"
 
-#: m4/output.c:668
+#: m4/output.c:671
 #, fuzzy
 msgid "cannot stat diversion"
 msgstr "Chyba pøi volání funkce stat pro soubor obsahující odlo¾ený výstup"
 
-#: m4/output.c:671
+#: m4/output.c:674
 msgid "diversion too large"
 msgstr ""
 
 # , c-format
-#: m4/path.c:177
+#: m4/path.c:155
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Hledán soubor `%s', nalezen soubor `%s'"
-
-# , c-format
-#: m4/symtab.c:393
-#, c-format
-msgid "Name `%s' is unknown\n"
-msgstr "Jméno `%s' není známo\n"
 
 # , c-format
 #: modules/evalparse.c:787
@@ -360,72 +338,78 @@ msgid "Warning: %s: modulo by zero: %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:144
+#: modules/gnu.c:147
 #, c-format
 msgid "Undefined name %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:166
+#: modules/gnu.c:168
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/gnu.c:220
+#: modules/gnu.c:197 src/freeze.c:548
+#, c-format
+msgid "Undefined syntax code %c"
+msgstr "Syntaktický kód %c není definován"
+
+# , c-format
+#: modules/gnu.c:233
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Ladící mód: ¹patné ladící volby: `%s'"
 
 # , c-format
-#: modules/gnu.c:253
+#: modules/gnu.c:266
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Chybový soubor %s nelze pou¾ít"
 
 # , c-format
-#: modules/gnu.c:283
+#: modules/gnu.c:296
 #, fuzzy, c-format
 msgid "%s: bad regular expression `%s': %s"
 msgstr "©patný regulární výraz `%s': %s"
 
 # , c-format
-#: modules/gnu.c:325 modules/gnu.c:401
+#: modules/gnu.c:338 modules/gnu.c:411
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Chyba pøi porovnávání regulárního výrazu `%s'"
 
 # , c-format
-#: modules/gnu.c:508
+#: modules/gnu.c:529
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Rouru do pøíkazu `%s' nelze otevøít"
 
-#: modules/gnu.c:576
+#: modules/gnu.c:598
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "VAROVÁNÍ: \\0 zmizí, pøi nahrazování pou¾ijte \\&"
 
 # , c-format
-#: modules/load.c:78 modules/m4.c:132
+#: modules/load.c:78 modules/m4.c:145
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "CHYBA: modul `%s' nelze nalézt"
 
 # , c-format
-#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
-#: modules/m4.c:625
+#: modules/m4.c:184 modules/m4.c:208 modules/m4.c:337 modules/m4.c:401
+#: modules/m4.c:679 modules/m4.c:699
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Jméno %s není definováno"
 
 # , c-format
-#: modules/m4.c:446
+#: modules/m4.c:517
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Chyba pøi volání makra undivert pro %s"
 
 # , c-format
-#: modules/m4.c:505 src/freeze.c:385
+#: modules/m4.c:577 src/freeze.c:387
 #, c-format
 msgid "Cannot open %s"
 msgstr "%s nelze otevøít"
@@ -436,49 +420,49 @@ msgstr "%s nelze otevøít"
 msgid "Loss of precision in eval: %s"
 msgstr "©patný výraz v makru eval: %s"
 
-#: src/freeze.c:274
+#: src/freeze.c:276
 msgid "Expecting line feed in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván LF"
 
 # , c-format
-#: src/freeze.c:276
+#: src/freeze.c:278
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Ve zmrazeném souboru oèekáván znak `%c'"
 
-#: src/freeze.c:358 src/freeze.c:549
+#: src/freeze.c:360 src/freeze.c:537
 msgid "Premature end of frozen file"
 msgstr "Pøedèasný konec zmrazeného souboru"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
-#: src/freeze.c:647
+#: src/freeze.c:400 src/freeze.c:442 src/freeze.c:499 src/freeze.c:517
+#: src/freeze.c:640
 msgid "Ill-formated frozen file"
 msgstr "©patný formát zmrazeného souboru"
 
 # , c-format
-#: src/freeze.c:496
+#: src/freeze.c:484
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "`%s' ze zmrazeného souboru nenalezeno v tabulce vestavìných maker!"
 
-#: src/main.c:74
+#: src/main.c:83
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "CHYBA: Pøeteèení zásobníku. (nekoneèná rekurze makra define?)"
 
 # , c-format
-#: src/main.c:86
+#: src/main.c:95
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Více informací získáte pøíkazem `%s --help'.\n"
 
 # , c-format
-#: src/main.c:90
+#: src/main.c:99
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Pou¾ití: %s [PØEPÍNAÈ]... [SOUBOR]...\n"
 
-#: src/main.c:91
+#: src/main.c:100
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -507,15 +491,16 @@ msgstr ""
 "  -P, --prefix-builtins         v¹echna vestavìná makra budou mít prefix "
 "`m4_'\n"
 
-#: src/main.c:105
+#: src/main.c:114
+#, c-format
 msgid ""
 "\n"
 "Dynamic loading features:\n"
 "  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
-"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:111
+#: src/main.c:120
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -533,7 +518,7 @@ msgstr ""
 "  -U, --undefine=MAKRO          sma¾e vestavìné MAKRO\n"
 "  -s, --synclines               vlo¾í øádky tvaru `#line ÈÍSLO \"SOUBOR\"'\n"
 
-#: src/main.c:119
+#: src/main.c:128
 #, fuzzy
 msgid ""
 "\n"
@@ -548,7 +533,7 @@ msgstr ""
 "symbolù\n"
 "  -L, --nesting-limit=ÈÍSLO     nastaví limit pro vnoøená volání maker\n"
 
-#: src/main.c:125
+#: src/main.c:134
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -560,7 +545,7 @@ msgstr ""
 "  -F, --freeze-state=SOUBOR     pøi ukonèení ulo¾í zmrazený stav do SOUBORU\n"
 "  -R, --reload-state=SOUBOR     pøi startu naète zmrazený stav ze SOUBORU\n"
 
-#: src/main.c:131
+#: src/main.c:140
 msgid ""
 "\n"
 "Debugging:\n"
@@ -579,7 +564,7 @@ msgstr ""
 "  -o, --error-output=SOUBOR     pøesmìruje výstup ladìní a sledování do "
 "SOUBORU\n"
 
-#: src/main.c:139
+#: src/main.c:148
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -609,7 +594,7 @@ msgstr ""
 "  i   vypí¹e informace o ka¾dé zmìnì vstupního souboru\n"
 "  V   zkratka pro v¹echny vý¹e uvedené volby\n"
 
-#: src/main.c:154
+#: src/main.c:163
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -618,7 +603,7 @@ msgstr ""
 "Jestli¾e SOUBOR není zadán, nebo je SOUBOR `-', pak je èten standardní "
 "vstup.\n"
 
-#: src/main.c:159
+#: src/main.c:168
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -627,31 +612,31 @@ msgstr ""
 "Chyby v programu oznamujte na adrese <bug-m4@gnu.org> (anglicky).\n"
 "Pøipomínky k pøekladu zasílejte na adresu <cs@li.org> (èesky).\n"
 
-#: src/main.c:305
+#: src/main.c:319
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:309
+#: src/main.c:323
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
 # , c-format
-#: src/main.c:338
+#: src/main.c:352
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "©patné ladící volby: `%s'"
 
-#: src/main.c:366
+#: src/main.c:380
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:369
-msgid "Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."
+#: src/main.c:383
+msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:372
+#: src/main.c:386
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -675,8 +660,18 @@ msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Provìøte, zda se nejedná o nekoneènou rekurzi.\n"
 
 # , c-format
-#~ msgid "Undefined syntax code %c"
-#~ msgstr "Syntaktický kód %c není definován"
+#, fuzzy
+#~ msgid "Warning: %s: unterminated parameter list"
+#~ msgstr "Jméno %s není definováno"
+
+# , c-format
+#, fuzzy
+#~ msgid "cannot close modules: %s"
+#~ msgstr "CHYBA: modul `%s' nelze nalézt"
+
+# , c-format
+#~ msgid "Name `%s' is unknown\n"
+#~ msgstr "Jméno `%s' není známo\n"
 
 #, fuzzy
 #~ msgid ""

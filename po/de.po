@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: m4 1.4ppre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-06-11 17:47+0100\n"
+"POT-Creation-Date: 2003-09-02 17:24+0100\n"
 "PO-Revision-Date: 1999-03-20 00:46+01:00\n"
 "Last-Translator: Martin von Löwis <martin@mira.isdn.cs.tu-berlin.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -71,7 +71,7 @@ msgstr ""
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr ""
 
-#: m4/obstack.c:473
+#: m4/obstack.c:487 m4/obstack.c:490
 msgid "memory exhausted"
 msgstr ""
 
@@ -152,112 +152,97 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: m4/builtin.c:175
-#, c-format
-msgid "Error: %s: syntax error in parameter list at char `%c'"
-msgstr ""
-
-#: m4/builtin.c:196
-#, fuzzy, c-format
-msgid "Warning: %s: unterminated parameter list"
-msgstr "Name %s nicht definiert"
-
-#: m4/input.c:234
+#: m4/input.c:231
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "Eingabe zurückgenommen zu %s, Zeile %d"
 
-#: m4/input.c:262
+#: m4/input.c:259
 #, c-format
 msgid "Input read from %s"
 msgstr "Eingabe gelesen von %s"
 
 # This is the name of the input file when there is no current input file.
 # Is this ever printed in a message?
-#: m4/input.c:687
+#: m4/input.c:683
 msgid "NONE"
 msgstr "NONE"
 
-#: m4/input.c:847 m4/input.c:877
+#: m4/input.c:836 m4/input.c:866
 #, fuzzy
 msgid "EOF in string"
 msgstr "FEHLER: Dateiende in Zeichenkette"
 
-#: m4/macro.c:157
+#: m4/macro.c:185
 #, fuzzy
 msgid "EOF in argument list"
 msgstr "FEHLER: Dateiende in Argumentliste"
 
-#: m4/macro.c:273
+#: m4/macro.c:231
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "FEHLER: Grenze der Rekursion von %d überschritten, benutze -L<N> zur Änderung"
 
-#: m4/macro.c:397
+#: m4/macro.c:426
 #, c-format
 msgid "Error: %s: unterminated parameter reference: %s"
 msgstr ""
 
-#: m4/module.c:159
-msgid "unknown error"
-msgstr ""
-
-#: m4/module.c:178
-msgid "Warning: multiple module loader initialisations"
-msgstr ""
-
-#: m4/module.c:198
-msgid "libltdl client registration failed"
-msgstr ""
-
-#: m4/module.c:225
+#: m4/module.c:123
 #, fuzzy, c-format
-msgid "failed to initialise module loader: %s"
-msgstr "FEHLER: Kann Modul »%s« nicht finden: %s"
-
-#: m4/module.c:277
-#, fuzzy, c-format
-msgid "cannot open module `%s': %s"
+msgid "Warning: cannot load symbol `%s' from module `%s'"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:287
-#, c-format
-msgid "module `%s' has no entry points"
-msgstr ""
-
-#: m4/module.c:313
-#, c-format
-msgid "Warning: overiding stale caller data in module `%s'"
-msgstr ""
-
-#: m4/module.c:377
-#, fuzzy, c-format
-msgid "cannot close module `%s': %s"
-msgstr "FEHLER: Kann Module »%s« nicht finden."
-
-#: m4/module.c:405
-#, fuzzy, c-format
-msgid "cannot close modules: %s"
-msgstr "FEHLER: Kann Module »%s« nicht finden."
-
-#: m4/module.c:422
+#: m4/module.c:231
 #, fuzzy, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:509
+#: m4/module.c:258
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:520
+#: m4/module.c:269
 #, fuzzy, c-format
 msgid "cannot unload module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: m4/module.c:559
+#: m4/module.c:290
+msgid "Warning: multiple module loader initialisations"
+msgstr ""
+
+#: m4/module.c:310
+msgid "libltdl client registration failed"
+msgstr ""
+
+#: m4/module.c:337
+#, fuzzy, c-format
+msgid "failed to initialise module loader: %s"
+msgstr "FEHLER: Kann Modul »%s« nicht finden: %s"
+
+#: m4/module.c:388
+#, c-format
+msgid "module `%s' has no entry points"
+msgstr ""
+
+#: m4/module.c:400
+#, fuzzy, c-format
+msgid "cannot open module `%s': %s"
+msgstr "FEHLER: Kann Module »%s« nicht finden."
+
+#: m4/module.c:432
 #, fuzzy, c-format
 msgid "cannot unload all modules: %s"
+msgstr "FEHLER: Kann Module »%s« nicht finden."
+
+#: m4/module.c:445
+msgid "unknown error"
+msgstr ""
+
+#: m4/module.c:493
+#, fuzzy, c-format
+msgid "cannot close module `%s': %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
 #: m4/output.c:287
@@ -275,29 +260,24 @@ msgstr "FEHLER: Kann Umleitung nicht in temporäre Datei ausgeben"
 msgid "copying inserted file"
 msgstr "FEHLER: Während Kopieren einer eingefügten Datei"
 
-#: m4/output.c:578
+#: m4/output.c:581
 #, fuzzy
 msgid "reading inserted file"
 msgstr "FEHLER: Während Lesen einer eingefügten Datei"
 
-#: m4/output.c:668
+#: m4/output.c:671
 #, fuzzy
 msgid "cannot stat diversion"
 msgstr "Kann `stat' nicht auf Umleitung anwenden"
 
-#: m4/output.c:671
+#: m4/output.c:674
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:177
+#: m4/path.c:155
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "Pfad für Suche nach »%s« hat »%s« gefunden"
-
-#: m4/symtab.c:393
-#, c-format
-msgid "Name `%s' is unknown\n"
-msgstr "Name »%s« ist unbekannt\n"
 
 #: modules/evalparse.c:787
 #, fuzzy, c-format
@@ -339,62 +319,67 @@ msgstr "Name %s nicht definiert"
 msgid "Warning: %s: modulo by zero: %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:144
+#: modules/gnu.c:147
 #, c-format
 msgid "Undefined name %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:166
+#: modules/gnu.c:168
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "Name %s nicht definiert"
 
-#: modules/gnu.c:220
+#: modules/gnu.c:197 src/freeze.c:548
+#, c-format
+msgid "Undefined syntax code %c"
+msgstr "Syntaxzeichen %c nicht definiert."
+
+#: modules/gnu.c:233
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "Debugmodus: falsche Debug Flags: »%s«"
 
-#: modules/gnu.c:253
+#: modules/gnu.c:266
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "Kann Fehlerdatei nicht vorbereiten: %s"
 
-#: modules/gnu.c:283
+#: modules/gnu.c:296
 #, fuzzy, c-format
 msgid "%s: bad regular expression `%s': %s"
 msgstr "Falscher regulärer Ausdruck »%s«: %s"
 
-#: modules/gnu.c:325 modules/gnu.c:401
+#: modules/gnu.c:338 modules/gnu.c:411
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "Fehler beim Erkennen des regulären Ausdrucks »%s«"
 
-#: modules/gnu.c:508
+#: modules/gnu.c:529
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "Kann keine `pipe' für Kommando »%s« öffnen"
 
-#: modules/gnu.c:576
+#: modules/gnu.c:598
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "WARNUNG: \\0 wird wegfallen, benutze \\& stattdessen"
 
-#: modules/load.c:78 modules/m4.c:132
+#: modules/load.c:78 modules/m4.c:145
 #, fuzzy, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr "FEHLER: Kann Module »%s« nicht finden."
 
-#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
-#: modules/m4.c:625
+#: modules/m4.c:184 modules/m4.c:208 modules/m4.c:337 modules/m4.c:401
+#: modules/m4.c:679 modules/m4.c:699
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "Name %s nicht definiert"
 
-#: modules/m4.c:446
+#: modules/m4.c:517
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "Kann Umleitung %s nicht aufheben"
 
-#: modules/m4.c:505 src/freeze.c:385
+#: modules/m4.c:577 src/freeze.c:387
 #, c-format
 msgid "Cannot open %s"
 msgstr "Kann %s nicht öffnen"
@@ -404,47 +389,47 @@ msgstr "Kann %s nicht öffnen"
 msgid "Loss of precision in eval: %s"
 msgstr "Falscher Ausdruck in `eval': %s"
 
-#: src/freeze.c:274
+#: src/freeze.c:276
 msgid "Expecting line feed in frozen file"
 msgstr "Erwarte Zeilenumbruch in eingefrorener Datei"
 
-#: src/freeze.c:276
+#: src/freeze.c:278
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "Erwarte Zeichen »%c« in eingefrorener Datei"
 
-#: src/freeze.c:358 src/freeze.c:549
+#: src/freeze.c:360 src/freeze.c:537
 msgid "Premature end of frozen file"
 msgstr "Vorzeitiges Ende der eingefrorenen Datei"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
-#: src/freeze.c:647
+#: src/freeze.c:400 src/freeze.c:442 src/freeze.c:499 src/freeze.c:517
+#: src/freeze.c:640
 msgid "Ill-formated frozen file"
 msgstr "Fehlerhafte eingefrorene Datei"
 
-#: src/freeze.c:496
+#: src/freeze.c:484
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr ""
 "»%s« aus eingefrorener Datei nicht in Tabelle der eingebauten Funktionen "
 "gefunden!"
 
-#: src/main.c:74
+#: src/main.c:83
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr "FEHLER: Keller voll.  (Unendliche `define' Rekursion?)"
 
-#: src/main.c:86
+#: src/main.c:95
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "»%s --help« zeigt weitere Informationen.\n"
 
-#: src/main.c:90
+#: src/main.c:99
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "Aufruf: %s [OPTION]... [DATEI]...\n"
 
-#: src/main.c:91
+#: src/main.c:100
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -473,12 +458,13 @@ msgstr ""
 "  -P, --prefix-builtins        erzwinge `m4_' Präfix für eingebaute "
 "Funktionen\n"
 
-#: src/main.c:105
+#: src/main.c:114
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Dynamic loading features:\n"
 "  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
-"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 "\n"
 "Dynamisches Laden:\n"
@@ -486,7 +472,7 @@ msgstr ""
 "hinzu\n"
 "  -M, --load-module=MODULE            lade dynamisches MODULE aus M4MODPATH\n"
 
-#: src/main.c:111
+#: src/main.c:120
 msgid ""
 "\n"
 "Preprocessor features:\n"
@@ -503,7 +489,7 @@ msgstr ""
 "  -U, --undefine=NAME          lösche eingebaute Funktion NAME\n"
 "  -s, --synclines              erzeuge `#line NR \"DATEI\"' Zeilen\n"
 
-#: src/main.c:119
+#: src/main.c:128
 #, fuzzy
 msgid ""
 "\n"
@@ -518,7 +504,7 @@ msgstr ""
 "  -L, --nesting-limit=NUMMER   setze künstliche Grenze für "
 "Schachtelungstiefe\n"
 
-#: src/main.c:125
+#: src/main.c:134
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -532,7 +518,7 @@ msgstr ""
 "  -R, --reload-state=DATEI     lade zu Beginn Zustand von eingefrorener "
 "DATEI\n"
 
-#: src/main.c:131
+#: src/main.c:140
 msgid ""
 "\n"
 "Debugging:\n"
@@ -550,7 +536,7 @@ msgstr ""
 "  -o, --error-output=DATEI     leite Debug- und Verfolgungsausgaben nach "
 "DATEI\n"
 
-#: src/main.c:139
+#: src/main.c:148
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -580,7 +566,7 @@ msgstr ""
 "  i   gebe Veränderungen der Eingabedatei aus\n"
 "  V   Kurzform für alle Flags oben zusammen\n"
 
-#: src/main.c:154
+#: src/main.c:163
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -588,7 +574,7 @@ msgstr ""
 "\n"
 "Ohne DATEI oder wenn DATEI `-' ist, wird die Standardeingabe gelesen\n"
 
-#: src/main.c:159
+#: src/main.c:168
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
@@ -596,30 +582,30 @@ msgstr ""
 "\n"
 "Probleme und Fehler an <bug-m4@gnu.org>.\n"
 
-#: src/main.c:305
+#: src/main.c:319
 #, fuzzy, c-format
 msgid "failed to add search directory `%s'"
 msgstr "FEHLER: konnte Suchpfad `%s' nicht hinzufügen"
 
-#: src/main.c:309
+#: src/main.c:323
 #, fuzzy, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr "FEHLER: konnte Suchpfad `%s' nicht hinzufügen: %s"
 
-#: src/main.c:338
+#: src/main.c:352
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "Falsche Debug Flags: »%s«"
 
-#: src/main.c:366
+#: src/main.c:380
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:369
-msgid "Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."
+#: src/main.c:383
+msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:372
+#: src/main.c:386
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -641,8 +627,16 @@ msgstr ""
 msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  Untersuche auf mögliche unendliche Rekursion.\n"
 
-#~ msgid "Undefined syntax code %c"
-#~ msgstr "Syntaxzeichen %c nicht definiert."
+#, fuzzy
+#~ msgid "Warning: %s: unterminated parameter list"
+#~ msgstr "Name %s nicht definiert"
+
+#, fuzzy
+#~ msgid "cannot close modules: %s"
+#~ msgstr "FEHLER: Kann Module »%s« nicht finden."
+
+#~ msgid "Name `%s' is unknown\n"
+#~ msgstr "Name »%s« ist unbekannt\n"
 
 #, fuzzy
 #~ msgid ""

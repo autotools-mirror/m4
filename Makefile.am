@@ -1,6 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ##
-## Copyright (C) 2000 Free Software Foundation
+## Copyright (C) 2000, 2003 Free Software Foundation
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-EXTRA_DIST	= config/config.rpath  bootstrap
+EXTRA_DIST	= bootstrap
 
 auxdir		= $(top_srcdir)/$(ac_aux_dir)
 
 ## There is currently no means with Automake not to run aclocal.
-ACLOCAL_AMFLAGS = -I config
+ACLOCAL_AMFLAGS = -I config -I gnulib/m4
 
-SUBDIRS			= po config m4 modules src tests examples doc .
+SUBDIRS			= po gnulib config m4 modules src tests examples doc .
 MAINTAINERCLEANFILES	= ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 			  config-h.in configure ltmain.sh stamp-h.in \
 			  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id

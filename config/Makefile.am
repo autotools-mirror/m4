@@ -35,7 +35,7 @@ $(srcdir)/intdiv0.m4				\
 $(srcdir)/inttypes-pri.m4			\
 $(srcdir)/inttypes.m4				\
 $(srcdir)/inttypes_h.m4				\
-$(srcdir)/iscposix.m4				\
+$(srcdir)/isc-posix.m4				\
 $(srcdir)/lcmessage.m4				\
 $(srcdir)/lib-ld.m4  				\
 $(srcdir)/lib-link.m4				\

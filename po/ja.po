@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU m4 1.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-06-11 17:47+0100\n"
+"POT-Creation-Date: 2003-09-02 17:24+0100\n"
 "PO-Revision-Date: 1996-03-28 11:52 EST\n"
 "Last-Translator: Akiko Matsushita <matusita@sra.co.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -69,7 +69,7 @@ msgstr "%s: `%s' は不明瞭なオプション名です。\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: オプション `--%s' は引数を取ることができません。\n"
 
-#: m4/obstack.c:473
+#: m4/obstack.c:487 m4/obstack.c:490
 #, fuzzy
 msgid "memory exhausted"
 msgstr "メモリが残っていません。"
@@ -150,112 +150,97 @@ msgstr ""
 msgid "No previous regular expression"
 msgstr "正規表現が定義されていません。"
 
-#: m4/builtin.c:175
-#, c-format
-msgid "Error: %s: syntax error in parameter list at char `%c'"
-msgstr ""
-
-#: m4/builtin.c:196
-#, fuzzy, c-format
-msgid "Warning: %s: unterminated parameter list"
-msgstr "`%s' は定義されていません。"
-
-#: m4/input.c:234
+#: m4/input.c:231
 #, c-format
 msgid "Input reverted to %s, line %d"
 msgstr "ファイル %s, %d 行目から入力し直します。"
 
-#: m4/input.c:262
+#: m4/input.c:259
 #, c-format
 msgid "Input read from %s"
 msgstr "%s からの入力を読み込みます。"
 
-#: m4/input.c:687
+#: m4/input.c:683
 msgid "NONE"
 msgstr "なし"
 
-#: m4/input.c:847 m4/input.c:877
+#: m4/input.c:836 m4/input.c:866
 #, fuzzy
 msgid "EOF in string"
 msgstr "エラー: 文字列内にファイルの終端記号があります。"
 
-#: m4/macro.c:157
+#: m4/macro.c:185
 #, fuzzy
 msgid "EOF in argument list"
 msgstr "エラー: 引数リスト内にファイルの終端記号があります。"
 
-#: m4/macro.c:273
+#: m4/macro.c:231
 #, c-format
 msgid "ERROR: Recursion limit of %d exceeded, use -L<N> to change it"
 msgstr ""
 "エラー：再帰的定義のネストが指定された値 %d を超えています。\n"
 "        -L<数字> オプションを用いてネスト数の上限を増やして下さい。"
 
-#: m4/macro.c:397
+#: m4/macro.c:426
 #, c-format
 msgid "Error: %s: unterminated parameter reference: %s"
 msgstr ""
 
-#: m4/module.c:159
-msgid "unknown error"
-msgstr ""
-
-#: m4/module.c:178
-msgid "Warning: multiple module loader initialisations"
-msgstr ""
-
-#: m4/module.c:198
-msgid "libltdl client registration failed"
-msgstr ""
-
-#: m4/module.c:225
+#: m4/module.c:123
 #, c-format
-msgid "failed to initialise module loader: %s"
+msgid "Warning: cannot load symbol `%s' from module `%s'"
 msgstr ""
 
-#: m4/module.c:277
-#, fuzzy, c-format
-msgid "cannot open module `%s': %s"
-msgstr "`%s' をオープンできません。"
-
-#: m4/module.c:287
-#, c-format
-msgid "module `%s' has no entry points"
-msgstr ""
-
-#: m4/module.c:313
-#, c-format
-msgid "Warning: overiding stale caller data in module `%s'"
-msgstr ""
-
-#: m4/module.c:377
-#, fuzzy, c-format
-msgid "cannot close module `%s': %s"
-msgstr "`%s' をエラーログファイルとしてセットできません。"
-
-#: m4/module.c:405
-#, fuzzy, c-format
-msgid "cannot close modules: %s"
-msgstr "`%s' をエラーログファイルとしてセットできません。"
-
-#: m4/module.c:422
+#: m4/module.c:231
 #, c-format
 msgid "Warning: cannot load module `%s': %s"
 msgstr ""
 
-#: m4/module.c:509
+#: m4/module.c:258
 msgid "module not loaded"
 msgstr ""
 
-#: m4/module.c:520
+#: m4/module.c:269
 #, c-format
 msgid "cannot unload module `%s': %s"
 msgstr ""
 
-#: m4/module.c:559
+#: m4/module.c:290
+msgid "Warning: multiple module loader initialisations"
+msgstr ""
+
+#: m4/module.c:310
+msgid "libltdl client registration failed"
+msgstr ""
+
+#: m4/module.c:337
+#, c-format
+msgid "failed to initialise module loader: %s"
+msgstr ""
+
+#: m4/module.c:388
+#, c-format
+msgid "module `%s' has no entry points"
+msgstr ""
+
+#: m4/module.c:400
+#, fuzzy, c-format
+msgid "cannot open module `%s': %s"
+msgstr "`%s' をオープンできません。"
+
+#: m4/module.c:432
 #, c-format
 msgid "cannot unload all modules: %s"
 msgstr ""
+
+#: m4/module.c:445
+msgid "unknown error"
+msgstr ""
+
+#: m4/module.c:493
+#, fuzzy, c-format
+msgid "cannot close module `%s': %s"
+msgstr "`%s' をエラーログファイルとしてセットできません。"
 
 #: m4/output.c:287
 #, fuzzy
@@ -272,31 +257,26 @@ msgstr "エラー: テンポラリファイルに divert すべき内容を write できません。"
 msgid "copying inserted file"
 msgstr "エラー: 挿入されるべきファイルをコピー中です。"
 
-#: m4/output.c:578
+#: m4/output.c:581
 #, fuzzy
 msgid "reading inserted file"
 msgstr "エラー: 挿入されるべきファイルをリード中です。"
 
-#: m4/output.c:668
+#: m4/output.c:671
 #, fuzzy
 msgid "cannot stat diversion"
 msgstr ""
 "divert のためのファイルのステータスを得ることができません。\n"
 "        (stat できません。)"
 
-#: m4/output.c:671
+#: m4/output.c:674
 msgid "diversion too large"
 msgstr ""
 
-#: m4/path.c:177
+#: m4/path.c:155
 #, c-format
 msgid "Path search for `%s' found `%s'"
 msgstr "`%s' というディレクトリから `%s' というファイルを見つけました。"
-
-#: m4/symtab.c:393
-#, c-format
-msgid "Name `%s' is unknown\n"
-msgstr "`%s' は定義されていません。\n"
 
 #: modules/evalparse.c:787
 #, fuzzy, c-format
@@ -338,62 +318,67 @@ msgstr "`%s' は定義されていません。"
 msgid "Warning: %s: modulo by zero: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:144
+#: modules/gnu.c:147
 #, c-format
 msgid "Undefined name %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:166
+#: modules/gnu.c:168
 #, fuzzy, c-format
 msgid "Undefined name `%s'"
 msgstr "`%s' は定義されていません。"
 
-#: modules/gnu.c:220
+#: modules/gnu.c:197 src/freeze.c:548
+#, fuzzy, c-format
+msgid "Undefined syntax code %c"
+msgstr "`%s' は定義されていません。"
+
+#: modules/gnu.c:233
 #, c-format
 msgid "Debugmode: bad debug flags: `%s'"
 msgstr "debugmode マクロにおいて %s は不正なデバッグオプションです。"
 
-#: modules/gnu.c:253
+#: modules/gnu.c:266
 #, c-format
 msgid "Cannot set error file: %s"
 msgstr "`%s' をエラーログファイルとしてセットできません。"
 
-#: modules/gnu.c:283
+#: modules/gnu.c:296
 #, fuzzy, c-format
 msgid "%s: bad regular expression `%s': %s"
 msgstr "`%s' : %s は、不正な正規表現です。"
 
-#: modules/gnu.c:325 modules/gnu.c:401
+#: modules/gnu.c:338 modules/gnu.c:411
 #, fuzzy, c-format
 msgid "%s: error matching regular expression `%s'"
 msgstr "正規表現 %s のマッチングに失敗しました。"
 
-#: modules/gnu.c:508
+#: modules/gnu.c:529
 #, c-format
 msgid "Cannot open pipe to command `%s'"
 msgstr "コマンド `%s' へのパイプがオープンできません。"
 
-#: modules/gnu.c:576
+#: modules/gnu.c:598
 msgid "WARNING: \\0 will disappear, use \\& instead in replacements"
 msgstr "警告：\\0 は旧式の用法です。\\& を代わりに使って下さい。"
 
-#: modules/load.c:78 modules/m4.c:132
+#: modules/load.c:78 modules/m4.c:145
 #, c-format
 msgid "Warning: cannot make module `%s' resident: %s"
 msgstr ""
 
-#: modules/m4.c:179 modules/m4.c:214 modules/m4.c:339 modules/m4.c:605
-#: modules/m4.c:625
+#: modules/m4.c:184 modules/m4.c:208 modules/m4.c:337 modules/m4.c:401
+#: modules/m4.c:679 modules/m4.c:699
 #, fuzzy, c-format
 msgid "Warning: %s: undefined name: %s"
 msgstr "`%s' は定義されていません。"
 
-#: modules/m4.c:446
+#: modules/m4.c:517
 #, c-format
 msgid "Cannot undivert %s"
 msgstr "`%s' を undivert できません。"
 
-#: modules/m4.c:505 src/freeze.c:385
+#: modules/m4.c:577 src/freeze.c:387
 #, c-format
 msgid "Cannot open %s"
 msgstr "`%s' をオープンできません。"
@@ -403,47 +388,47 @@ msgstr "`%s' をオープンできません。"
 msgid "Loss of precision in eval: %s"
 msgstr "eval で %s という不正な式が用いられています。"
 
-#: src/freeze.c:274
+#: src/freeze.c:276
 msgid "Expecting line feed in frozen file"
 msgstr "凍結ファイル内で改行コードを期待しています。"
 
-#: src/freeze.c:276
+#: src/freeze.c:278
 #, c-format
 msgid "Expecting character `%c' in frozen file"
 msgstr "凍結ファイル内で文字 `%c' を期待しています。"
 
-#: src/freeze.c:358 src/freeze.c:549
+#: src/freeze.c:360 src/freeze.c:537
 msgid "Premature end of frozen file"
 msgstr "凍結ファイルの EOF が早く来過ぎています。"
 
-#: src/freeze.c:398 src/freeze.c:440 src/freeze.c:511 src/freeze.c:529
-#: src/freeze.c:647
+#: src/freeze.c:400 src/freeze.c:442 src/freeze.c:499 src/freeze.c:517
+#: src/freeze.c:640
 msgid "Ill-formated frozen file"
 msgstr "内部エラー：凍結ファイルのフォーマットが不正です。"
 
-#: src/freeze.c:496
+#: src/freeze.c:484
 #, c-format
 msgid "`%s' from frozen file not found in builtin table!"
 msgstr "凍結ファイルの %s はビルトインコマンドのテーブルにはありません。"
 
-#: src/main.c:74
+#: src/main.c:83
 #, fuzzy
 msgid "Stack overflow.  (Infinite define recursion?)"
 msgstr ""
 "エラー: スタックがオーバーフローを起こしています。\n"
 "        (無限に再帰的定義をしていませんか？)"
 
-#: src/main.c:86
+#: src/main.c:95
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "詳しくは `%s --help' の出力を御覧下さい。\n"
 
-#: src/main.c:90
+#: src/main.c:99
 #, c-format
 msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr "使用方法: %s [オプション]...[ファイル名]\n"
 
-#: src/main.c:91
+#: src/main.c:100
 #, fuzzy
 msgid ""
 "Mandatory or optional arguments to long options are mandatory or optional\n"
@@ -469,15 +454,16 @@ msgstr ""
 "  -Q, --quiet, --silent        いくつかのビルトインコマンドの警告を抑制します。\n"
 "  -P, --prefix-builtins        全てのビルトインマクロに `m4_' という接頭辞を                               強制的に追加します。\n"
 
-#: src/main.c:105
+#: src/main.c:114
+#, c-format
 msgid ""
 "\n"
 "Dynamic loading features:\n"
 "  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n"
-"  -m, --load-module=MODULE          load dynamic MODULE from M4MODPATH\n"
+"  -m, --load-module=MODULE          load dynamic MODULE from %s\n"
 msgstr ""
 
-#: src/main.c:111
+#: src/main.c:120
 #, fuzzy
 msgid ""
 "\n"
@@ -496,7 +482,7 @@ msgstr ""
 "  -U, --undefine=NAME           NAME の定義を取り消します。\n"
 "  -s, --synclines               行番号とファイル名の行を生成します。\n"
 
-#: src/main.c:119
+#: src/main.c:128
 #, fuzzy
 msgid ""
 "\n"
@@ -511,7 +497,7 @@ msgstr ""
 "                                セットします。\n"
 "   -L, --nesting-limit=NUNBER   マクロのネスト回数の上限値を人為的に変更します。\n"
 
-#: src/main.c:125
+#: src/main.c:134
 msgid ""
 "\n"
 "Frozen state files:\n"
@@ -523,7 +509,7 @@ msgstr ""
 "   -R, --reload-state=FILE      最初に指定された FILE から\n"
 "                                凍結された定義をロードします\n"
 
-#: src/main.c:131
+#: src/main.c:140
 msgid ""
 "\n"
 "Debugging:\n"
@@ -541,7 +527,7 @@ msgstr ""
 "   -o, --error-output=FILE      デバッグとトレースの出力を FILE に\n"
 "                                リダイレクトします。\n"
 
-#: src/main.c:139
+#: src/main.c:148
 msgid ""
 "\n"
 "FLAGS is any of:\n"
@@ -573,7 +559,7 @@ msgstr ""
 "   i   入力ファイルに生じた変化を表示します。\n"
 "   V   上記の全ての FLAG を指定することを意味します。\n"
 
-#: src/main.c:154
+#: src/main.c:163
 msgid ""
 "\n"
 "If no FILE or if FILE is `-', standard input is read.\n"
@@ -582,36 +568,36 @@ msgstr ""
 "FILE が指定されていない場合および指定されたファイルが `-' の場合は\n"
 "        標準入力が読み込まれます。\n"
 
-#: src/main.c:159
+#: src/main.c:168
 msgid ""
 "\n"
 "Report bugs to <bug-m4@gnu.org>.\n"
 msgstr ""
 
-#: src/main.c:305
+#: src/main.c:319
 #, c-format
 msgid "failed to add search directory `%s'"
 msgstr ""
 
-#: src/main.c:309
+#: src/main.c:323
 #, c-format
 msgid "failed to add search directory `%s': %s"
 msgstr ""
 
-#: src/main.c:338
+#: src/main.c:352
 #, c-format
 msgid "Bad debug flags: `%s'"
 msgstr "`%s' は不正なデバッグオプション引数です。"
 
-#: src/main.c:366
+#: src/main.c:380
 msgid "Written by Rene' Seindal and Gary V. Vaughan.\n"
 msgstr ""
 
-#: src/main.c:369
-msgid "Copyright 1989-1994, 1999, 2000 Free Software Foundation, Inc."
+#: src/main.c:383
+msgid "Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc."
 msgstr ""
 
-#: src/main.c:372
+#: src/main.c:386
 msgid ""
 "This is free software; see the source for copying conditions.  There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -635,8 +621,15 @@ msgid ".  Check for possible infinite recursion.\n"
 msgstr ".  無限の再帰呼び出しが行われていないかどうかチェックして下さい。\n"
 
 #, fuzzy
-#~ msgid "Undefined syntax code %c"
+#~ msgid "Warning: %s: unterminated parameter list"
 #~ msgstr "`%s' は定義されていません。"
+
+#, fuzzy
+#~ msgid "cannot close modules: %s"
+#~ msgstr "`%s' をエラーログファイルとしてセットできません。"
+
+#~ msgid "Name `%s' is unknown\n"
+#~ msgstr "`%s' は定義されていません。\n"
 
 #, fuzzy
 #~ msgid ""
