@@ -158,8 +158,8 @@ produce_symbol_dump (FILE *file, m4_hash *hash)
 
 	  if (bp == NULL)
 	    {
-	      M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Builtin not found in builtin table!")));
+	      M4ERROR ((warning_status, 0,
+			"INTERNAL ERROR: Builtin not found in builtin table!"));
 	      abort ();
 	    }
 
@@ -180,8 +180,8 @@ INTERNAL ERROR: Builtin not found in builtin table!")));
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type in produce_symbol_dump ()")));
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()"));
 	  abort ();
 	  break;
 	}

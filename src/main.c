@@ -453,7 +453,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    _("INTERNAL ERROR: Bad code in deferred arguments")));
+		    "INTERNAL ERROR: Bad code in deferred arguments"));
 	  abort ();
 	}
 

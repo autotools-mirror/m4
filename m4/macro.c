@@ -89,7 +89,7 @@ expand_token (struct obstack *obs, m4_token_t t, m4_token *td)
 
     default:
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad token type in expand_token ()")));
+		"INTERNAL ERROR: Bad token type in expand_token ()"));
       abort ();
     }
 
@@ -169,8 +169,8 @@ expand_argument (struct obstack *obs, m4_token *argp)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token type in expand_argument ()")));
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: Bad token type in expand_argument ()"));
 	  abort ();
 	}
 
@@ -243,7 +243,7 @@ m4_call_macro (m4_symbol *symbol, int argc, m4_token **argv,
 
     case M4_TOKEN_VOID:
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad symbol type in call_macro ()")));
+		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
       abort ();
     }
 }

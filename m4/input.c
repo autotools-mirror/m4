@@ -499,7 +499,7 @@ m4_push_string_init (void)
   if (next != NULL)
     {
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Recursive push_string!")));
+		"INTERNAL ERROR: Recursive push_string!"));
       abort ();
     }
 
@@ -603,7 +603,7 @@ init_builtin_token (m4_token *td)
   if (isp->funcs->read_func != macro_read)
     {
       M4ERROR ((warning_status, 0,
-		_("INTERNAL ERROR: Bad call to init_builtin_token ()")));
+		"INTERNAL ERROR: Bad call to init_builtin_token ()"));
       abort ();
     }
 
@@ -642,7 +642,7 @@ next_char (void)
       else
 	{
 	  M4ERROR ((warning_status, 0,
-		    _("INTERNAL ERROR: Input stack botch in next_char ()")));
+		    "INTERNAL ERROR: Input stack botch in next_char ()"));
 	  abort ();
 	}
 
@@ -676,7 +676,7 @@ m4_peek_input (void)
       else
 	{
 	  M4ERROR ((warning_status, 0,
-		    _("INTERNAL ERROR: Input stack botch in m4_peek_input ()")));
+		    "INTERNAL ERROR: Input stack botch in m4_peek_input ()"));
 	  abort ();
 	}
 

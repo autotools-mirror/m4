@@ -353,16 +353,16 @@ m4_trace_pre (const char *name, int id, int argc, m4_token **argv)
 	      bp = m4_builtin_find_by_func (NULL, TOKEN_FUNC (argv[i]));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())")));
+		  M4ERROR ((warning_status, 0, "\
+INTERNAL ERROR: Builtin not found in builtin table! (m4_trace_pre ())"));
 		  abort ();
 		}
 	      m4_trace_format ("<%s>", bp->name);
 	      break;
 
 	    case M4_TOKEN_VOID:
-	      M4ERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type (m4_trace_pre ())")));
+	      M4ERROR ((warning_status, 0,
+			"INTERNAL ERROR: Bad token data type (m4_trace_pre ())"));
 	      abort ();
 	    }
 
