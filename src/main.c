@@ -24,7 +24,16 @@
 #include "m4private.h"
 #include "error.h"
 
-void print_program_name (void);
+/* The name this program was run with. */
+#ifdef _LIBC
+  /* In the GNU C library, there is a predefined variable for this.  */
+#  define program_name program_invocation_name
+#endif
+
+/* This will be provided either by GNU libc, or error.c. */
+extern const char *program_name;
+
+static void print_program_name_CB (void);
 
 
 /* Name of frozen file to digest after initialization.  */
@@ -54,8 +63,8 @@ typedef struct macro_definition
 
 /* Print program name, source file and line reference on standard
    error, as a prefix for error messages.  Flush standard output first.  */
-void
-print_program_name (void)
+static void
+print_program_name_CB (void)
 {
   fflush (stdout);
   fprintf (stderr, "%s: ", program_name);
@@ -218,7 +227,7 @@ main (int argc, char *const *argv, char *const *envp)
   int exit_status;
 
   program_name = argv[0];
-  error_print_progname = print_program_name;
+  error_print_progname = print_program_name_CB;
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS

@@ -196,13 +196,6 @@ extern const m4_builtin *m4_builtin_find_by_name (
 extern const m4_builtin *m4_builtin_find_by_func (
 				const m4_builtin *, m4_builtin_func *);
 
-/* The name this program was run with. */
-#ifdef _LIBC
-/* In the GNU C library, there is a predefined variable for this.  */
-# define program_name program_invocation_name
-#endif
-extern const char *program_name;
-
 /* left and right quote, begin and end comment */
 typedef struct {
     unsigned char *string;	/* characters of the string */

@@ -1,5 +1,13 @@
 2003-07-23  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/m4module.h (program_name): Not used by modules at all, so
+	moved...
+	* src/main.c (program_name): ...to here.
+	(print_program_name): Renamed...
+	(print_program_name_CB): ...to conform to the STYLE guide.
+
+2003-07-23  Gary V. Vaughan  <gary@gnu.org>
+
 	More refactoring of the m4module.h API.  Replace #defines with an
 	enum, and move non-public functions out of the public API.
 
