@@ -29,17 +29,6 @@ static int dumpdef_cmp (const void *s1, const void *s2);
 /* Exit code from last "syscmd" command.  */
 int m4_sysval = 0;
 
-/* input syntax table. */
-unsigned short m4_syntax_table[256];
-
-/* Quote chars.  */
-m4_string rquote;
-m4_string lquote;
-
-/* Comment chars.  */
-m4_string bcomm;
-m4_string ecomm;
-
 
 /* Give friendly warnings if a builtin macro is passed an
    inappropriate number of arguments.  ARGC/ARGV are the arguments,
@@ -70,9 +59,9 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
 }
 
 const char *
-m4_skip_space (const char *arg)
+m4_skip_space (m4 *context, const char *arg)
 {
-  while (M4_IS_SPACE(*arg))
+  while (M4_IS_SPACE (M4SYNTAX, *arg))
     arg++;
   return arg;
 }
@@ -87,8 +76,8 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
   char *endp;
 
   if (*M4ARG (arg) == 0
-      || (*valuep = strtol (m4_skip_space (M4ARG (arg)), &endp, 10),
-	  *m4_skip_space (endp) != 0))
+      || (*valuep = strtol (m4_skip_space (context, M4ARG (arg)), &endp, 10),
+	  *m4_skip_space (context, endp) != 0))
     {
       M4WARN ((m4_get_warning_status_opt (context), 0,
 	       _("Warning: %s: argument %d non-numeric: %s"),
@@ -102,8 +91,8 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
 /* Print ARGC arguments from the table ARGV to obstack OBS, separated by
    SEP, and quoted by the current quotes, if QUOTED is TRUE.  */
 void
-m4_dump_args (struct obstack *obs, int argc, m4_symbol_value **argv,
-	      const char *sep, boolean quoted)
+m4_dump_args (m4 *context, struct obstack *obs, int argc,
+	      m4_symbol_value **argv, const char *sep, boolean quoted)
 {
   int i;
   size_t len = strlen (sep);
@@ -113,7 +102,7 @@ m4_dump_args (struct obstack *obs, int argc, m4_symbol_value **argv,
       if (i > 1)
 	obstack_grow (obs, sep, len);
 
-      m4_shipout_string (obs, M4ARG (i), 0, quoted);
+      m4_shipout_string (context, obs, M4ARG (i), 0, quoted);
     }
 }
 
@@ -169,7 +158,7 @@ dumpdef_cmp (const void *s1, const void *s2)
 /* The function dump_symbol () is for use by "dumpdef".  It builds up a
    table of all defined symbol names.  */
 void *
-m4_dump_symbol_CB (m4_symtab *ignored, const char *name, m4_symbol *symbol,
+m4_dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
 		   void *userdata)
 {
   assert (name);

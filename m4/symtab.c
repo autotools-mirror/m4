@@ -44,14 +44,14 @@
 
 #define M4_SYMTAB_DEFAULT_SIZE		2047
 
-struct m4_symtab {
+struct m4_symbol_table {
   m4_hash *table;
   boolean *nuke_trace_bit;	/* default: &(context->no_gnu_ext_opt) */
 };
 
-static m4_symbol *symtab_fetch		(m4_symtab*, const char *);
+static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *);
 static void	  symbol_popval		(m4_symbol *symbol);
-static void *	  symbol_destroy_CB	(m4_symtab *symtab, const char *name,
+static void *	  symbol_destroy_CB	(m4_symbol_table *symtab, const char *name,
 					 m4_symbol *symbol, void *ignored);
 static void *	  arg_destroy_CB	(m4_hash *hash, const void *name,
 					 void *arg, void *ignored);
@@ -64,10 +64,10 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 
    These functions are used to manage a symbol table as a whole.  */
 
-m4_symtab *
+m4_symbol_table *
 m4_symtab_create (size_t size, boolean *nuke_trace_bit)
 {
-  m4_symtab *symtab = XMALLOC (m4_symtab, 1);
+  m4_symbol_table *symtab = XMALLOC (m4_symbol_table, 1);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);
@@ -76,7 +76,7 @@ m4_symtab_create (size_t size, boolean *nuke_trace_bit)
 }
 
 void
-m4_symtab_delete (m4_symtab *symtab)
+m4_symtab_delete (m4_symbol_table *symtab)
 {
   assert (symtab);
   assert (symtab->table);
@@ -87,7 +87,8 @@ m4_symtab_delete (m4_symtab *symtab)
 }
 
 void *
-m4_symtab_apply (m4_symtab *symtab, m4_symtab_apply_func *func, void *userdata)
+m4_symtab_apply (m4_symbol_table *symtab,
+		 m4_symtab_apply_func *func, void *userdata)
 {
   m4_hash_iterator *place  = NULL;
   void *	    result = NULL;
@@ -111,7 +112,7 @@ m4_symtab_apply (m4_symtab *symtab, m4_symtab_apply_func *func, void *userdata)
 }
 
 static m4_symbol *
-symtab_fetch (m4_symtab *symtab, const char *name)
+symtab_fetch (m4_symbol_table *symtab, const char *name)
 {
   m4_symbol **psymbol;
   m4_symbol *symbol;
@@ -136,7 +137,7 @@ symtab_fetch (m4_symtab *symtab, const char *name)
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
 void
-m4__symtab_remove_module_references (m4_symtab *symtab, lt_dlhandle handle)
+m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle)
 {
   m4_hash_iterator *place = 0;
 
@@ -181,7 +182,7 @@ m4__symtab_remove_module_references (m4_symtab *symtab, lt_dlhandle handle)
    on every symbol so that m4_symbol_popdef() doesn't try to preserve
    the table entry.  */
 static void *
-symbol_destroy_CB (m4_symtab *symtab, const char *name, m4_symbol *symbol,
+symbol_destroy_CB (m4_symbol_table *symtab, const char *name, m4_symbol *symbol,
 		   void *ignored)
 {
   char *key = xstrdup ((char *) name);
@@ -205,7 +206,7 @@ symbol_destroy_CB (m4_symtab *symtab, const char *name, m4_symbol *symbol,
 
 /* Return the symbol associated to NAME, or else NULL.  */
 m4_symbol *
-m4_symbol_lookup (m4_symtab *symtab, const char *name)
+m4_symbol_lookup (m4_symbol_table *symtab, const char *name)
 {
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
 
@@ -219,7 +220,7 @@ m4_symbol_lookup (m4_symtab *symtab, const char *name)
    associated with NAME, push the new VALUE on top of the value stack
    for this symbol.  Otherwise create a new association.  */
 m4_symbol *
-m4_symbol_pushdef (m4_symtab *symtab, const char *name, m4_symbol_value *value)
+m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -239,7 +240,8 @@ m4_symbol_pushdef (m4_symtab *symtab, const char *name, m4_symbol_value *value)
 /* Return the symbol associated with NAME in the symbol table, creating
    a new symbol if necessary.  In either case set the symbol's VALUE.  */
 m4_symbol *
-m4_symbol_define (m4_symtab *symtab, const char *name, m4_symbol_value *value)
+m4_symbol_define (m4_symbol_table *symtab,
+		  const char *name, m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -263,7 +265,7 @@ m4_symbol_define (m4_symtab *symtab, const char *name, m4_symbol_value *value)
    NAME, deleting it from the table entirely if that was the last
    remaining value in the stack.  */
 void
-m4_symbol_popdef (m4_symtab *symtab, const char *name)
+m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
 {
   m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
 
@@ -367,7 +369,7 @@ arg_copy_CB (m4_hash *src, const void *name, void *arg, m4_hash *dest)
 }
 
 boolean
-m4_set_symbol_name_traced (m4_symtab *symtab, const char *name)
+m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name)
 {
   m4_symbol *symbol;
 
@@ -386,7 +388,7 @@ m4_set_symbol_name_traced (m4_symtab *symtab, const char *name)
 /* Pop all values from the symbol associated with NAME.  */
 #undef m4_symbol_delete
 void
-m4_symbol_delete (m4_symtab *symtab, const char *name)
+m4_symbol_delete (m4_symbol_table *symtab, const char *name)
 {
   while (m4_symbol_lookup (symtab, name))
     m4_symbol_popdef (symtab, name);
@@ -481,16 +483,16 @@ m4_set_symbol_value_func (m4_symbol_value *value, m4_builtin_func *func)
 
 #ifdef DEBUG_SYM
 
-static void *symtab_dump	(m4_symtab *symtab);
-static void  dump_symbol_CB	(m4_symtab *symtab, const char *name,
+static void *symtab_dump	(m4_symbol_table *symtab);
+static void  dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
 				 m4_symbol *symbol, void *userdata);
 static void *
-symtab_dump (m4_symtab *symtab)
+symtab_dump (m4_symbol_table *symtab)
 {
   return symtab_apply (symtab, dump_symbol_CB, NULL);
 }
 
-static void *dump_symbol_CB (m4_symtab *symtab, const char *name,
+static void *dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 			     m4_symbol *symbol, void *ignored)
 {
   m4_symbol_value *value	= m4_get_symbol_value (symbol);

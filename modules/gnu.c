@@ -172,7 +172,7 @@ M4BUILTIN_HANDLER (indir)
 
 /* Change the current input syntax.  The function set_syntax () lives
    in input.c.  For compability reasons, this function is not called,
-   if not followed by an SYNTAX_OPEN.  Also, any changes to comment
+   if not followed by a` SYNTAX_OPEN.  Also, any changes to comment
    delimiters and quotes made here will be overridden by a call to
    `changecom' or `changequote'.  */
 
@@ -185,8 +185,14 @@ M4BUILTIN_HANDLER (changesyntax)
 
   for (i = 1; i < argc; i++)
     {
-      m4_set_syntax (context, *M4ARG (i),
-		     m4_expand_ranges (M4ARG (i)+1, obs));
+      char key = *M4ARG (i);
+      if ((m4_set_syntax (M4SYNTAX, key,
+			  m4_expand_ranges (M4ARG (i)+1, obs)) < 0)
+	  && (key != '\0'))
+	{
+	  M4ERROR ((m4_get_warning_status_opt (context), 0,
+		    _("Undefined syntax code %c"), key));
+	}
     }
 }
 
@@ -463,7 +469,7 @@ M4BUILTIN_HANDLER (symbols)
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      m4_shipout_string (obs, data.base[0], 0, TRUE);
+      m4_shipout_string (context, obs, data.base[0], 0, TRUE);
       if (data.size > 1)
 	obstack_1grow (obs, ',');
     }
@@ -536,7 +542,7 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (__file__)
 {
-  m4_shipout_string (obs, m4_current_file, 0, TRUE);
+  m4_shipout_string (context, obs, m4_current_file, 0, TRUE);
 }
 
 

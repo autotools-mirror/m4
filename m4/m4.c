@@ -26,6 +26,7 @@ m4_create (void)
   m4 *context = XCALLOC (m4, 1);
 
   context->symtab = m4_symtab_create (0, &context->no_gnu_extensions);
+  context->syntax = m4_syntax_create ();
   context->nesting_limit = M4_DEFAULT_NESTING_LIMIT;
 
   return context;
@@ -39,21 +40,18 @@ m4_delete (m4 *context)
   if (context->symtab)
     m4_symtab_delete (context->symtab);
 
-  xfree (context);
-}
+  if (context->syntax)
+    m4_syntax_delete (context->syntax);
 
-#undef m4_get_symtab
-m4_symtab *
-m4_get_symtab (m4 *context)
-{
-  assert (context);
-  return context->symtab;
+  xfree (context);
 }
 
 
 
 /* Use the preprocessor to generate the repetitive bit twiddling functions
    for us.  */
+#undef m4_get_symbol_table
+#undef m4_get_syntax_table
 #undef m4_get_warning_status_opt
 #undef m4_get_no_gnu_extensions_opt
 #undef m4_get_nesting_limit_opt
@@ -66,20 +64,20 @@ m4_get_symtab (m4 *context)
 #undef m4_get_sync_output_opt
 
 
-#define M4FIELD(type, name)						\
-	type CONC(m4_get_, CONC(name, _opt)) (m4 *context)		\
+#define M4FIELD(type, base, field)					\
+	type CONC(m4_get_, base) (m4 *context)				\
 	{								\
 	  assert (context);						\
-	  return context->name;						\
+	  return context->field;					\
 	}
 m4_context_field_table
 #undef M4FIELD
 
-#define M4FIELD(type, name)						\
-	type CONC(m4_set_, CONC(name, _opt)) (m4 *context, type value)	\
+#define M4FIELD(type, base, field)					\
+	type CONC(m4_set_, base) (m4 *context, type value)		\
 	{								\
 	  assert (context);						\
-	  return context->name = value;					\
+	  return context->field = value;				\
 	}
 m4_context_field_table
 #undef M4FIELD

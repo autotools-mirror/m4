@@ -488,7 +488,7 @@ m4_shipout_int (struct obstack *obs, int val)
 }
 
 void
-m4_shipout_string (struct obstack *obs, const char *s, int len,
+m4_shipout_string (m4 *context, struct obstack *obs, const char *s, int len,
 		   boolean quoted)
 {
   if (s == NULL)
@@ -498,10 +498,12 @@ m4_shipout_string (struct obstack *obs, const char *s, int len,
     len = strlen(s);
 
   if (quoted)
-    obstack_grow (obs, lquote.string, lquote.length);
+    obstack_grow (obs, context->syntax->lquote.string,
+		  context->syntax->lquote.length);
   obstack_grow (obs, s, len);
   if (quoted)
-    obstack_grow (obs, rquote.string, rquote.length);
+    obstack_grow (obs, context->syntax->rquote.string,
+		  context->syntax->rquote.length);
 }
 
 

@@ -1,5 +1,53 @@
 2003-06-26  Gary V. Vaughan  <gary@gnu.org>
 
+	Move the global variables that pertain to syntax to a new `struct
+	m4_syntax_table', and then add one of these to `struct m4'.  The
+	ripple effect through the code to both change formerly global
+	references, and make sure a suitable context is available in
+	lexical scope is disproportionately large compared to the size of
+	the change proper.  This change is a large part of decoupling
+	syntax.c from the rest of the code that uses it.
+
+	* m4/m4private.h (struct m4): Add a syntax field.
+	* m4/m4.c (m4_create): Initialise it,
+	(m4_delete): Recycle it.
+	(m4_get_symtab): Remove hand coded version...
+	(m4_get_symbol_table): ...and generate this with cpp.  Changed all
+	callers.
+	* m4/m4module.h (m4_context_field_table): Add an extra field so we
+	can generate m4_get_symbol_table.  Add a new row for
+	m4_get_syntax_table.
+	(M4SYNTAX): Syntactic sugar for module writers.
+	(m4_symtab): Renamed to m4_symbol_table.  Changed all callers.
+	(m4_syntax_table): New home for syntax related formerly global
+	variables.
+	* m4/m4private.h (struct m4_syntax_table): Define it.
+	* m4/input.c (m4_input_init): Initialisation of these formerly
+	global variables moved...
+	* m4/syntax.c (m4_syntax_create): ...to here.
+	* m4/input.c (m4_input_exit): And similarly, recycling of the
+	memory used by those values moved...
+	* m4/syntax.c (m4_syntax_delete): ...to here.
+	* m4/m4module.h (DEF_LQUOTE, DEF_RQUOTE, DEF_BCOMM, DEF_ECOMM):
+	Moved to m4/m4private.h.
+	* m4/syntax.c (m4_get_syntax_lquote, m4_get_syntax_rquote)
+	(m4_get_syntax_bcomm, m4_get_syntax_ecomm)
+	(m4_is_syntax_single_quotes, m4_is_syntax_single_comments)
+	(m4_is_syntax_macro_escaped): New accessors for m4_syntax_table
+	objects.  Changed all callers that used to directly access the
+	global equivalents.
+	(m4__single_quotes, m4__single_comments, m4__use_macro_escape):
+	Removed and incorporated into m4_syntax_table structure.
+	* m4/utility.c (lquote, rquote, bcomm, ecomm): Ditto.
+	* m4/syntax.c (m4_set_syntax): Now returns an error status,
+	instead of requiring a `struct m4' to generate its own errors.
+	Changed all callers.
+	* src/main.c (main): Now that the syntax table is initialised as
+	part of m4_create, we have to manually wipe the syntax entries if
+	we are about to read a frozen file.
+
+2003-06-26  Gary V. Vaughan  <gary@gnu.org>
+
 	* doc/STYLE: Added notes on callback naming schemes.
 
 	* m4/module.c (m4_set_module_macro_table)

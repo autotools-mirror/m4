@@ -91,56 +91,69 @@
    that a string is parsed equally whether there is a $ or not.  The
    character $ is used by convention in user macros.  */
 
-static	void  check_use_macro_escape	(void);
-static	void  set_syntax_internal	(int code, int ch);
-static	void  unset_syntax_attribute	(int code, int ch);
+static boolean check_is_macro_escaped (m4_syntax_table *syntax);
+static int add_syntax_attribute	   (m4_syntax_table *syntax, int ch, int code);
+static int remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code);
 
-/* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
-boolean m4__single_quotes;
-
-/* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
-boolean m4__single_comments;
-
-/* TRUE iff some character has M4_SYNTAX_ESCAPE */
-boolean m4__use_macro_escape;
-
-void
-m4_syntax_init (void)
+m4_syntax_table *
+m4_syntax_create (void)
 {
+  m4_syntax_table *syntax = XCALLOC (m4_syntax_table, 1);
   int ch;
 
   for (ch = 256; --ch > 0;)
     {
       if (ch == '(')
-	set_syntax_internal (M4_SYNTAX_OPEN, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_OPEN);
       else if (ch == ')')
-	set_syntax_internal (M4_SYNTAX_CLOSE, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_CLOSE);
       else if (ch == ',')
-	set_syntax_internal (M4_SYNTAX_COMMA, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_COMMA);
       else if (ch == '=')
-	set_syntax_internal (M4_SYNTAX_ASSIGN, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_ASSIGN);
       else if (isspace (ch))
-	set_syntax_internal (M4_SYNTAX_SPACE, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_SPACE);
       else if (isalpha (ch) || ch == '_')
-	set_syntax_internal (M4_SYNTAX_ALPHA, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_ALPHA);
       else if (isdigit (ch))
-	set_syntax_internal (M4_SYNTAX_NUM, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_NUM);
       else
-	set_syntax_internal (M4_SYNTAX_OTHER, ch);
+	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
     }
-  /* set_syntax_internal(M4_SYNTAX_IGNORE, 0); */
+  /* add_syntax_attribute(syntax, 0, M4_SYNTAX_IGNORE); */
 
   /* Default quotes and comment delimiters are always one char */
-  set_syntax_internal (M4_SYNTAX_LQUOTE, lquote.string[0]);
-  set_syntax_internal (M4_SYNTAX_RQUOTE, rquote.string[0]);
-  set_syntax_internal (M4_SYNTAX_BCOMM, bcomm.string[0]);
-  set_syntax_internal (M4_SYNTAX_ECOMM, ecomm.string[0]);
+  syntax->lquote.string		= xstrdup (DEF_LQUOTE);
+  syntax->lquote.length		= strlen (syntax->lquote.string);
+  syntax->rquote.string		= xstrdup (DEF_RQUOTE);
+  syntax->rquote.length		= strlen (syntax->rquote.string);
+  syntax->bcomm.string		= xstrdup (DEF_BCOMM);
+  syntax->bcomm.length		= strlen (syntax->bcomm.string);
+  syntax->ecomm.string		= xstrdup (DEF_ECOMM);
+  syntax->ecomm.length		= strlen (syntax->ecomm.string);
+
+  syntax->is_single_quotes	= TRUE;
+  syntax->is_single_comments	= TRUE;
+  syntax->is_macro_escaped	= FALSE;
+
+  add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
+  add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
+  add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
+  add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
+
+  return syntax;
 }
 
 void
-m4_syntax_exit (void)
+m4_syntax_delete (m4_syntax_table *syntax)
 {
-  return;
+  assert (syntax);
+
+  XFREE (syntax->lquote.string);
+  XFREE (syntax->rquote.string);
+  XFREE (syntax->bcomm.string);
+  XFREE (syntax->ecomm.string);
+  xfree (syntax);
 }
 
 int
@@ -181,124 +194,194 @@ m4_syntax_code (char ch)
 
 /* Functions for setting quotes and comment delimiters.  Used by
    m4_changecom () and m4_changequote ().  Both functions overrides the
-   syntax_table to maintain compatibility.  */
+   syntax table to maintain compatibility.  */
 void
-m4_set_quotes (const char *lq, const char *rq)
+m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 {
   int ch;
+
+  assert (syntax);
+
   for (ch = 256; --ch >= 0;)	/* changequote overrides syntax_table */
-    if (M4_IS_LQUOTE (ch) || M4_IS_RQUOTE (ch))
-      unset_syntax_attribute (M4_SYNTAX_LQUOTE | M4_SYNTAX_RQUOTE, ch);
+    if (M4_IS_LQUOTE (syntax, ch) || M4_IS_RQUOTE (syntax, ch))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_LQUOTE | M4_SYNTAX_RQUOTE);
 
-  xfree (lquote.string);
-  xfree (rquote.string);
+  xfree (syntax->lquote.string);
+  xfree (syntax->rquote.string);
 
-  lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
-  lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
-  rquote.length = strlen (rquote.string);
+  syntax->lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
+  syntax->lquote.length = strlen (syntax->lquote.string);
+  syntax->rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
+  syntax->rquote.length = strlen (syntax->rquote.string);
 
-  m4__single_quotes = (lquote.length == 1 && rquote.length == 1);
+  syntax->is_single_quotes = (syntax->lquote.length == 1
+			      && syntax->rquote.length == 1);
 
-  if (m4__single_quotes)
+  if (syntax->is_single_quotes)
     {
-      set_syntax_internal (M4_SYNTAX_LQUOTE, lquote.string[0]);
-      set_syntax_internal (M4_SYNTAX_RQUOTE, rquote.string[0]);
+      add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
+      add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
     }
 
-  if (m4__use_macro_escape)
-    check_use_macro_escape ();
+  if (syntax->is_macro_escaped)
+    check_is_macro_escaped (syntax);
+}
+
+const char *
+m4_get_syntax_lquote (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->lquote.string;
+}
+
+const char *
+m4_get_syntax_rquote (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->rquote.string;
 }
 
 void
-m4_set_comment (const char *bc, const char *ec)
+m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
 {
   int ch;
+
+  assert (syntax);
+
   for (ch = 256; --ch >= 0;)	/* changecom overrides syntax_table */
-    if (M4_IS_BCOMM (ch) || M4_IS_ECOMM (ch))
-      unset_syntax_attribute (M4_SYNTAX_BCOMM | M4_SYNTAX_ECOMM, ch);
+    if (M4_IS_BCOMM (syntax, ch) || M4_IS_ECOMM (syntax, ch))
+      remove_syntax_attribute (syntax, ch, M4_SYNTAX_BCOMM | M4_SYNTAX_ECOMM);
 
-  xfree (bcomm.string);
-  xfree (ecomm.string);
+  xfree (syntax->bcomm.string);
+  xfree (syntax->ecomm.string);
 
-  bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
-  ecomm.length = strlen (ecomm.string);
+  syntax->bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
+  syntax->bcomm.length = strlen (syntax->bcomm.string);
+  syntax->ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
+  syntax->ecomm.length = strlen (syntax->ecomm.string);
 
-  m4__single_comments = (bcomm.length == 1 && ecomm.length == 1);
+  syntax->is_single_comments = (syntax->bcomm.length == 1
+				&& syntax->ecomm.length == 1);
 
-  if (m4__single_comments)
+  if (syntax->is_single_comments)
     {
-      set_syntax_internal (M4_SYNTAX_BCOMM, bcomm.string[0]);
-      set_syntax_internal (M4_SYNTAX_ECOMM, ecomm.string[0]);
+      add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
+      add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
     }
 
-  if (m4__use_macro_escape)
-    check_use_macro_escape ();
+  if (syntax->is_macro_escaped)
+    check_is_macro_escaped (syntax);
 }
 
+const char *
+m4_get_syntax_bcomm (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->bcomm.string;
+}
+
+const char *
+m4_get_syntax_ecomm (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->ecomm.string;
+}
+
+boolean
+m4_is_syntax_single_quotes (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_single_quotes;
+}
+
+boolean
+m4_is_syntax_single_comments (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_single_comments;
+}
+
+boolean
+m4_is_syntax_macro_escaped (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_macro_escaped;
+}
+
+
+
 /* Functions to manipulate the syntax table.  */
-static void
-set_syntax_internal (int code, int ch)
+static int
+add_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
 {
   if (code & M4_SYNTAX_MASKS)
-    m4_syntax_table[ch] |= code;
+    syntax->table[ch] |= code;
   else
-    m4_syntax_table[ch] = code;
+    syntax->table[ch] = code;
 
 #ifdef DEBUG_SYNTAX
   fprintf(stderr, "Set syntax %o %c = %04X\n",
 	  ch, isprint(ch) ? ch : '-',
-	  m4_syntax_table[ch]);
+	  syntax->table[ch]);
 #endif
+
+  return syntax->table[ch];
 }
 
-static void
-unset_syntax_attribute (int code, int ch)
+static int
+remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
 {
   if (code & M4_SYNTAX_MASKS)
-    m4_syntax_table[ch] &= ~code;
+    syntax->table[ch] &= ~code;
 
 #ifdef DEBUG_SYNTAX
   fprintf(stderr, "Unset syntax %o %c = %04X\n",
 	  ch, isprint(ch) ? ch : '-',
-	  m4_syntax_table[ch]);
+	  syntax->table[ch]);
 #endif
+
+  return syntax->table[ch];
 }
 
-void
-m4_set_syntax (m4 *context, char key, const unsigned char *chars)
+int
+m4_set_syntax (m4_syntax_table *syntax, char key, const unsigned char *chars)
 {
   int ch, code;
+
+  assert (syntax);
 
   code = m4_syntax_code (key);
 
   if ((code < 0) && (key != '\0'))
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Undefined syntax code %c"), key));
-      return;
+      return -1;
     }
 
   if (*chars != '\0')
     while ((ch = *chars++))
-      set_syntax_internal (code, ch);
+      add_syntax_attribute (syntax, ch, code);
   else
     for (ch = 256; --ch > 0; )
-      set_syntax_internal (code, ch);
+      add_syntax_attribute (syntax, ch, code);
 
-  if (m4__use_macro_escape || code == M4_SYNTAX_ESCAPE)
-    check_use_macro_escape();
+  if (syntax->is_macro_escaped || code == M4_SYNTAX_ESCAPE)
+    check_is_macro_escaped (syntax);
+
+  return code;
 }
 
-static void
-check_use_macro_escape (void)
+static boolean
+check_is_macro_escaped (m4_syntax_table *syntax)
 {
   int ch;
 
-  m4__use_macro_escape = FALSE;
+  syntax->is_macro_escaped = FALSE;
   for (ch = 256; --ch >= 0; )
-    if (M4_IS_ESCAPE (ch))
-      m4__use_macro_escape = TRUE;
+    if (M4_IS_ESCAPE (syntax, ch))
+      {
+	syntax->is_macro_escaped = TRUE;
+	break;
+      }
+
+  return syntax->is_macro_escaped;
 }

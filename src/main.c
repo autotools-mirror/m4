@@ -390,11 +390,16 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
 
   if (frozen_file_to_read)
     {
+      int ch;
+
+      /* Take care not to mix frozen state with startup state.  */
+      for (ch = 256; --ch > 0;)
+	context->syntax->table[ch] = 0;
+
       reload_frozen_state (context, frozen_file_to_read);
     }
   else
     {
-      m4_syntax_init ();
       m4_module_load (context, "m4", 0);
       if (m4_get_no_gnu_extensions_opt (context))
 	m4_module_load (context, "traditional", 0);
@@ -429,7 +434,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
       {
 	macro_definition *next;
 	char *macro_value;
-	m4_symbol *symbol;
 
 	switch (defines->code)
 	  {
@@ -533,7 +537,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"),
      a whole lot easier!  */
 
   m4__module_exit (context);
-  m4_syntax_exit ();
   m4_output_exit ();
   m4_input_exit ();
   m4_debug_exit ();

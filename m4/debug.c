@@ -257,13 +257,13 @@ m4_trace_format (m4 *context, va_alist)
 
 	case 'l':
 	  s = BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_QUOTE)
-	    	? (char *) lquote.string
+	    	? m4_get_syntax_lquote (M4SYNTAX)
 	    	: "";
 	  break;
 
 	case 'r':
 	  s = BIT_TEST(m4_get_debug_level_opt(context), M4_DEBUG_TRACE_QUOTE)
-	    	? (char *) rquote.string
+	    	? m4_get_syntax_rquote (M4SYNTAX)
 	    	: "";
 	  break;
 

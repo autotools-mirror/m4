@@ -98,7 +98,7 @@ typedef unsigned long int unumber;
 
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 boolean silent);
-static void *	set_trace_CB	(m4_symtab *symtab, const char *ignored,
+static void *	set_trace_CB	(m4_symbol_table *symtab, const char *ignored,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(struct obstack *obs, const number value,
@@ -286,8 +286,9 @@ M4BUILTIN_HANDLER (dumpdef)
 	{
 	  if (m4_get_debug_level_opt (context) & M4_DEBUG_TRACE_QUOTE)
 	    fprintf (stderr, "%s%s%s\n",
-		     lquote.string, m4_get_symbol_text (symbol),
-		     rquote.string);
+		     m4_get_syntax_lquote (M4SYNTAX),
+		     m4_get_symbol_text (symbol),
+		     m4_get_syntax_rquote (M4SYNTAX));
 	  else
 	    fprintf (stderr, "%s\n", m4_get_symbol_text (symbol));
 	}
@@ -321,7 +322,7 @@ M4BUILTIN_HANDLER (defn)
     }
 
   if (m4_is_symbol_text (symbol))
-    m4_shipout_string (obs, m4_get_symbol_text (symbol), 0, TRUE);
+    m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, TRUE);
   else if (m4_is_symbol_func (symbol))
     m4_push_builtin (m4_get_symbol_value (symbol));
   else
@@ -434,13 +435,14 @@ M4BUILTIN_HANDLER (dnl)
    output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
-  m4_dump_args (obs, argc - 1, argv + 1, ",", TRUE);
+  m4_dump_args (context, obs, argc - 1, argv + 1, ",", TRUE);
 }
 
 /* Change the current quotes.  The function set_quotes () lives in input.c.  */
 M4BUILTIN_HANDLER (changequote)
 {
-  m4_set_quotes ((argc >= 2) ? M4ARG (1) : NULL,
+  m4_set_quotes (M4SYNTAX,
+		 (argc >= 2) ? M4ARG (1) : NULL,
 		 (argc >= 3) ? M4ARG (2) : NULL);
 }
 
@@ -449,9 +451,9 @@ M4BUILTIN_HANDLER (changequote)
 M4BUILTIN_HANDLER (changecom)
 {
   if (argc == 1)
-    m4_set_comment ("", "");	/* disable comments */
+    m4_set_comment (M4SYNTAX, "", "");	/* disable comments */
   else
-    m4_set_comment (M4ARG (1), (argc >= 3) ? M4ARG (2) : NULL);
+    m4_set_comment (M4SYNTAX, M4ARG (1), (argc >= 3) ? M4ARG (2) : NULL);
 }
 
 
@@ -499,13 +501,13 @@ M4BUILTIN_HANDLER (sinclude)
 M4BUILTIN_HANDLER (maketemp)
 {
   mktemp (M4ARG (1));
-  m4_shipout_string (obs, M4ARG (1), 0, FALSE);
+  m4_shipout_string (context, obs, M4ARG (1), 0, FALSE);
 }
 
 /* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
-  m4_dump_args (obs, argc, argv, " ", FALSE);
+  m4_dump_args (context, obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
   fputs ((char *) obstack_finish (obs), stderr);
   fflush (stderr);
@@ -537,9 +539,9 @@ M4BUILTIN_HANDLER (m4exit)
 M4BUILTIN_HANDLER (m4wrap)
 {
   if (m4_get_no_gnu_extensions_opt (context))
-    m4_shipout_string (obs, M4ARG (1), 0, FALSE);
+    m4_shipout_string (context, obs, M4ARG (1), 0, FALSE);
   else
-    m4_dump_args (obs, argc, argv, " ", FALSE);
+    m4_dump_args (context, obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
   m4_push_wrapup (obstack_finish (obs));
 }
@@ -552,7 +554,7 @@ M4BUILTIN_HANDLER (m4wrap)
    tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
    enable tracing.  */
 static void *
-set_trace_CB (m4_symtab *hash, const char *ignored, m4_symbol *symbol,
+set_trace_CB (m4_symbol_table *hash, const char *ignored, m4_symbol *symbol,
 	   void *userdata)
 {
   m4_set_symbol_traced (symbol, (boolean) (userdata != NULL));

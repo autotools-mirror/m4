@@ -42,7 +42,8 @@ typedef enum {
 /* --- CONTEXT MANAGEMENT --- */
 
 struct m4 {
-  m4_symtab *	symtab;
+  m4_symbol_table *symtab;
+  m4_syntax_table *syntax;
 
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
@@ -60,7 +61,8 @@ struct m4 {
 #define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
 
 #ifdef NDEBUG
-#  define m4_get_symtab(C)			((C)->symtab)
+#  define m4_get_symbol_table(C)		((C)->symtab)
+#  define m4_get_syntax_table(C)		((C)->syntax)
 #  define m4_get_warning_status_opt(C)		((C)->warning_status)
 #  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)
@@ -174,20 +176,47 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_REST_BIT	(1 << 0)
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-extern void	m4__symtab_remove_module_references (m4_symtab*, lt_dlhandle);
+extern void	m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 
 
 
 
-/* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
-extern boolean m4__single_quotes;
+/* --- SYNTAX TABLE MANAGEMENT --- */
 
-/* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
-extern boolean m4__single_comments;
+#define DEF_LQUOTE "`"
+#define DEF_RQUOTE "\'"
+#define DEF_BCOMM "#"
+#define DEF_ECOMM "\n"
 
-/* TRUE iff some character has M4_SYNTAX_ESCAPE */
-extern boolean m4__use_macro_escape;
+struct m4_syntax_table {
+  /* Please read the comment at the top of input.c for details */
+  unsigned short table[256];
 
+  m4_string lquote, rquote;
+  m4_string bcomm, ecomm;
+
+  /* TRUE iff strlen(rquote) == strlen(lquote) == 1 */
+  boolean is_single_quotes;
+
+  /* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
+  boolean is_single_comments;
+
+  /* TRUE iff some character has M4_SYNTAX_ESCAPE */
+  boolean is_macro_escaped;
+};
+
+#ifdef NDEBUG
+#  define m4_get_syntax_lquote(S)	((S)->lquote.string)
+#  define m4_get_syntax_rquote(S)	((S)->rquote.string)
+#  define m4_get_syntax_bcomm(S)	((S)->bcomm.string)
+#  define m4_get_syntax_ecomm(S)	((S)->ecomm.string)
+
+#  define m4_is_syntax_single_quotes(S)		((S)->is_single_quotes)
+#  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)
+#  define m4_is_syntax_macro_escaped(S)		((S)->is_macro_escaped)
+#endif
+
+
 /* Various different token types.  */
 typedef enum {
   M4_TOKEN_EOF,			/* end of file */

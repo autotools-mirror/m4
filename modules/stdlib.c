@@ -80,7 +80,7 @@ M4BUILTIN_HANDLER (getcwd)
   bp = getcwd (buf, sizeof buf);
 
   if (bp != NULL)		/* in case of error return null string */
-    m4_shipout_string (obs, buf, 0, FALSE);
+    m4_shipout_string (context, obs, buf, 0, FALSE);
 }
 
 /**
@@ -93,7 +93,7 @@ M4BUILTIN_HANDLER (getenv)
   env = getenv (M4ARG (1));
 
   if (env != NULL)
-    m4_shipout_string (obs, env, 0, FALSE);
+    m4_shipout_string (context, obs, env, 0, FALSE);
 }
 
 /**
@@ -148,7 +148,7 @@ M4BUILTIN_HANDLER (getlogin)
   login = getlogin ();
 
   if (login != NULL)
-    m4_shipout_string (obs, login, 0, FALSE);
+    m4_shipout_string (context, obs, login, 0, FALSE);
 }
 
 /**
@@ -178,19 +178,19 @@ M4BUILTIN_HANDLER (getpwnam)
 
   if (pw != NULL)
     {
-      m4_shipout_string (obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_name, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_dir, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_shell, 0, TRUE);
     }
 }
 
@@ -209,19 +209,19 @@ M4BUILTIN_HANDLER (getpwuid)
 
   if (pw != NULL)
     {
-      m4_shipout_string (obs, pw->pw_name, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_name, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_passwd, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_passwd, 0, TRUE);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_gecos, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_gecos, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_dir, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_dir, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, pw->pw_shell, 0, TRUE);
+      m4_shipout_string (context, obs, pw->pw_shell, 0, TRUE);
     }
 }
 
@@ -235,7 +235,7 @@ M4BUILTIN_HANDLER (hostname)
   if (gethostname (buf, sizeof buf) < 0)
     return;
 
-  m4_shipout_string (obs, buf, 0, FALSE);
+  m4_shipout_string (context, obs, buf, 0, FALSE);
 }
 
 /**
@@ -273,15 +273,15 @@ M4BUILTIN_HANDLER (uname)
 
   if (uname (&ut) == 0)
     {
-      m4_shipout_string (obs, ut.sysname, 0, TRUE);
+      m4_shipout_string (context, obs, ut.sysname, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, ut.nodename, 0, TRUE);
+      m4_shipout_string (context, obs, ut.nodename, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, ut.release, 0, TRUE);
+      m4_shipout_string (context, obs, ut.release, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, ut.version, 0, TRUE);
+      m4_shipout_string (context, obs, ut.version, 0, TRUE);
       obstack_1grow (obs, ',');
-      m4_shipout_string (obs, ut.machine, 0, TRUE);
+      m4_shipout_string (context, obs, ut.machine, 0, TRUE);
     }
 }
 

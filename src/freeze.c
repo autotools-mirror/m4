@@ -26,12 +26,14 @@
 static	int   decode_char	   (FILE *in);
 static	void  issue_expect_message (int expected);
 static	int   produce_char_dump    (char *buf, int ch);
-static	void  produce_syntax_dump  (FILE *file, char ch, int mask);
+static	void  produce_syntax_dump  (FILE *file, m4_syntax_table *syntax,
+				    char ch, int mask);
 static	void  produce_module_dump  (FILE *file, lt_dlhandle handle);
 static	void  produce_symbol_dump  (m4 *context, FILE *file,
-				    m4_symtab *symtab);
-static	void *dump_symbol_CB	   (m4_symtab *symtab, const char *symbol_name,
-				    m4_symbol *symbol, void *userdata);
+				    m4_symbol_table *symtab);
+static	void *dump_symbol_CB	   (m4_symbol_table *symtab,
+				    const char *symbol_name, m4_symbol *symbol,
+				    void *userdata);
 
 
 /* Produce a frozen state to the given file NAME. */
@@ -77,7 +79,7 @@ produce_char_dump (char *buf, int ch)
 #define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
 
 static void
-produce_syntax_dump (FILE *file, char ch, int mask)
+produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch, int mask)
 {
   char buf[1+ MAX_CHAR_LENGTH * sizeof (m4_syntax_table)];
   int code = m4_syntax_code (ch);
@@ -86,13 +88,13 @@ produce_syntax_dump (FILE *file, char ch, int mask)
   int i;
 
   /* FIXME:  Can't set the syntax of '\000' since that character marks
-             the end of a string, and when passed to `set_syntax', tells
+             the end of a string, and when passed to `m4_set_syntax', tells
 	     it to set the syntax of every table entry. */
 
   for (i = 1; i < 256; ++i)
     {
-      if ((mask && ((m4_syntax_table[i] & mask) == code))
-	  || (!mask && ((m4_syntax_table[i] & code) == code)))
+      if ((mask && ((syntax->table[i] & mask) == code))
+	  || (!mask && ((syntax->table[i] & code) == code)))
 	{
 	  offset += produce_char_dump (buf + offset, i);
 	  ++count;
@@ -125,7 +127,7 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
    This order ensures that, at reload time, pushdef's will be
    executed with the oldest definitions first.  */
 void
-produce_symbol_dump (m4 *context, FILE *file, m4_symtab *symtab)
+produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
   const char *errormsg = m4_symtab_apply (symtab, dump_symbol_CB, file);
 
@@ -137,7 +139,7 @@ produce_symbol_dump (m4 *context, FILE *file, m4_symtab *symtab)
 }
 
 static void *
-dump_symbol_CB (m4_symtab *symtab, const char *symbol_name, m4_symbol *symbol,
+dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, m4_symbol *symbol,
 		void *userdata)
 {
   lt_dlhandle   handle		= SYMBOL_HANDLE (symbol);
@@ -208,48 +210,49 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Dump quote delimiters.  */
 
-  if (strcmp (lquote.string, DEF_LQUOTE)
-      || strcmp (rquote.string, DEF_RQUOTE))
+  if (strcmp (m4_get_syntax_lquote (M4SYNTAX), DEF_LQUOTE)
+      || strcmp (m4_get_syntax_rquote (M4SYNTAX), DEF_RQUOTE))
     {
       fprintf (file, "Q%lu,%lu\n",
-	       (unsigned long) lquote.length,
-	       (unsigned long) rquote.length);
-      fputs (lquote.string, file);
-      fputs (rquote.string, file);
+	       (unsigned long) context->syntax->lquote.length,
+	       (unsigned long) context->syntax->rquote.length);
+      fputs (context->syntax->lquote.string, file);
+      fputs (context->syntax->rquote.string, file);
       fputc ('\n', file);
     }
 
   /* Dump comment delimiters.  */
 
-  if (strcmp (bcomm.string, DEF_BCOMM) || strcmp (ecomm.string, DEF_ECOMM))
+  if (strcmp (m4_get_syntax_bcomm (M4SYNTAX), DEF_BCOMM)
+      || strcmp (m4_get_syntax_ecomm (M4SYNTAX), DEF_ECOMM))
     {
       fprintf (file, "C%lu,%lu\n",
-	       (unsigned long) bcomm.length,
-	       (unsigned long) ecomm.length);
-      fputs (bcomm.string, file);
-      fputs (ecomm.string, file);
+	       (unsigned long) context->syntax->bcomm.length,
+	       (unsigned long) context->syntax->ecomm.length);
+      fputs (context->syntax->bcomm.string, file);
+      fputs (context->syntax->ecomm.string, file);
       fputc ('\n', file);
     }
 
   /* Dump syntax table. */
 
-  produce_syntax_dump (file, 'I', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, 'S', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, '(', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, ')', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, ',', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, '$', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, 'A', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, '@', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, 'O', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'I', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'S', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, '(', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, ')', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, ',', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, '$', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'A', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, '@', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'O', M4_SYNTAX_VALUE);
 
-  produce_syntax_dump (file, 'W', M4_SYNTAX_VALUE);
-  produce_syntax_dump (file, 'D', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'W', M4_SYNTAX_VALUE);
+  produce_syntax_dump (file, M4SYNTAX, 'D', M4_SYNTAX_VALUE);
 
-  produce_syntax_dump (file, 'L', 0);
-  produce_syntax_dump (file, 'R', 0);
-  produce_syntax_dump (file, 'B', 0);
-  produce_syntax_dump (file, 'E', 0);
+  produce_syntax_dump (file, M4SYNTAX, 'L', 0);
+  produce_syntax_dump (file, M4SYNTAX, 'R', 0);
+  produce_syntax_dump (file, M4SYNTAX, 'B', 0);
+  produce_syntax_dump (file, M4SYNTAX, 'E', 0);
 
   /* Dump all loaded modules.  */
   produce_module_dump (file, lt_dlhandle_next (0));
@@ -550,7 +553,12 @@ reload_frozen_state (m4 *context, const char *name)
 	  }
 	string[0][number[0]] = '\0';
 
-	m4_set_syntax (context, syntax, string[0]);
+	if ((m4_set_syntax (context->syntax, syntax, string[0]) < 0)
+	    && (syntax != '\0'))
+	  {
+	    M4ERROR ((m4_get_warning_status_opt (context), 0,
+		      _("Undefined syntax code %c"), syntax));
+	  }
 	break;
 
       case 'C':
@@ -590,7 +598,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	    /* Change comment strings.  */
 
-	    m4_set_comment (string[0], string[1]);
+	    m4_set_comment (M4SYNTAX, string[0], string[1]);
 	    break;
 
 	  case 'D':
@@ -606,7 +614,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	    /* Change quote strings.  */
 
-	    m4_set_quotes (string[0], string[1]);
+	    m4_set_quotes (M4SYNTAX, string[0], string[1]);
 	    break;
 
 	  default:

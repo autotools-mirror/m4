@@ -700,29 +700,11 @@ m4_input_init (void)
   next = NULL;
 
   start_of_input_line = FALSE;
-
-  lquote.string = xstrdup (DEF_LQUOTE);
-  lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (DEF_RQUOTE);
-  rquote.length = strlen (rquote.string);
-  m4__single_quotes = TRUE;
-
-  bcomm.string = xstrdup (DEF_BCOMM);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (DEF_ECOMM);
-  ecomm.length = strlen (ecomm.string);
-  m4__single_comments = TRUE;
-
-  m4__use_macro_escape = FALSE;
 }
 
  void
 m4_input_exit (void)
 {
-  XFREE (lquote.string);
-  XFREE (rquote.string);
-  XFREE (bcomm.string);
-  XFREE (ecomm.string);
   obstack_free (&wrapup_stack, NULL);
   obstack_free (&input_stack, NULL);
   obstack_free (&token_stack, NULL);
@@ -773,10 +755,11 @@ m4__next_token (m4 *context, m4_symbol_value *token)
       }
 
     (void) next_char (context);
-    if (M4_IS_BCOMM(ch))			/* COMMENT, SHORT DELIM */
+    if (M4_IS_BCOMM (M4SYNTAX, ch))	/* COMMENT, SHORT DELIM */
       {
 	obstack_1grow (&token_stack, ch);
-	while ((ch = next_char (context)) != CHAR_EOF && !M4_IS_ECOMM(ch))
+	while ((ch = next_char (context)) != CHAR_EOF
+	       && !M4_IS_ECOMM (M4SYNTAX, ch))
 	  obstack_1grow (&token_stack, ch);
 	if (ch != CHAR_EOF)
 	  obstack_1grow (&token_stack, ch);
@@ -784,25 +767,30 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
 					/* COMMENT, LONGER DELIM */
-    else if (!m4__single_comments && MATCH (context, ch, bcomm.string))
+    else if (!m4_is_syntax_single_comments (M4SYNTAX)
+	     && MATCH (context, ch, context->syntax->bcomm.string))
       {
-	obstack_grow (&token_stack, bcomm.string, bcomm.length);
-	while ((ch = next_char (context)) != CHAR_EOF && !MATCH (context, ch, ecomm.string))
+	obstack_grow (&token_stack, context->syntax->bcomm.string,
+		      context->syntax->bcomm.length);
+	while ((ch = next_char (context)) != CHAR_EOF
+	       && !MATCH (context, ch, context->syntax->ecomm.string))
 	  obstack_1grow (&token_stack, ch);
 	if (ch != CHAR_EOF)
-	  obstack_grow (&token_stack, ecomm.string, ecomm.length);
+	  obstack_grow (&token_stack, context->syntax->ecomm.string,
+			context->syntax->ecomm.length);
 	type = m4_get_discard_comments_opt (context)
 	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
-    else if (M4_IS_ESCAPE(ch))		/* ESCAPED WORD */
+    else if (M4_IS_ESCAPE (M4SYNTAX, ch))	/* ESCAPED WORD */
       {
 	obstack_1grow (&token_stack, ch);
 	if ((ch = next_char (context)) != CHAR_EOF)
 	  {
-	    if (M4_IS_ALPHA(ch))
+	    if (M4_IS_ALPHA (M4SYNTAX, ch))
 	      {
 		obstack_1grow (&token_stack, ch);
-		while ((ch = next_char (context)) != CHAR_EOF && (M4_IS_ALNUM(ch)))
+		while ((ch = next_char (context)) != CHAR_EOF
+		       && (M4_IS_ALNUM (M4SYNTAX, ch)))
 		  {
 		    obstack_1grow (&token_stack, ch);
 		  }
@@ -822,19 +810,21 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	    type = M4_TOKEN_SIMPLE;	/* escape before eof */
 	  }
       }
-    else if (M4_IS_ALPHA (ch))
+    else if (M4_IS_ALPHA (M4SYNTAX, ch))
       {
 	obstack_1grow (&token_stack, ch);
-	while ((ch = next_char (context)) != CHAR_EOF && (M4_IS_ALNUM(ch)))
+	while ((ch = next_char (context)) != CHAR_EOF
+	       && (M4_IS_ALNUM (M4SYNTAX, ch)))
 	  {
 	    obstack_1grow (&token_stack, ch);
 	  }
 	if (ch != CHAR_EOF)
 	  unget_input(ch);
 
-	type = m4__use_macro_escape ? M4_TOKEN_STRING : M4_TOKEN_WORD;
+	type = m4_is_syntax_macro_escaped (M4SYNTAX)
+	  	? M4_TOKEN_STRING : M4_TOKEN_WORD;
       }
-    else if (M4_IS_LQUOTE(ch))		/* QUOTED STRING, SINGLE QUOTES */
+    else if (M4_IS_LQUOTE (M4SYNTAX, ch)) /* QUOTED STRING, SINGLE QUOTES */
       {
 	const char *current_file = m4_current_file;
 	int current_line = m4_current_line;
@@ -847,13 +837,13 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 			      current_file, current_line,
 			      _("EOF in string"));
 
-	    if (M4_IS_RQUOTE(ch))
+	    if (M4_IS_RQUOTE (M4SYNTAX, ch))
 	      {
 		if (--quote_level == 0)
 		  break;
 		obstack_1grow (&token_stack, ch);
 	      }
-	    else if (M4_IS_LQUOTE(ch))
+	    else if (M4_IS_LQUOTE (M4SYNTAX, ch))
 	      {
 		quote_level++;
 		obstack_1grow (&token_stack, ch);
@@ -864,7 +854,8 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	type = M4_TOKEN_STRING;
       }
 					/* QUOTED STRING, LONGER QUOTES */
-    else if (!m4__single_quotes && MATCH (context, ch, lquote.string))
+    else if (!m4_is_syntax_single_quotes (M4SYNTAX)
+	     && MATCH (context, ch, context->syntax->lquote.string))
       {
 	const char *current_file = m4_current_file;
 	int current_line = m4_current_line;
@@ -876,41 +867,45 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	      error_at_line (EXIT_FAILURE, 0,
 			      current_file, current_line,
 			      _("EOF in string"));
-	    if (MATCH (context, ch, rquote.string))
+	    if (MATCH (context, ch, context->syntax->rquote.string))
 	      {
 		if (--quote_level == 0)
 		  break;
-		obstack_grow (&token_stack, rquote.string, rquote.length);
+		obstack_grow (&token_stack, context->syntax->rquote.string,
+			      context->syntax->rquote.length);
 	      }
-	    else if (MATCH (context, ch, lquote.string))
+	    else if (MATCH (context, ch, context->syntax->lquote.string))
 	      {
 		quote_level++;
-		obstack_grow (&token_stack, lquote.string, lquote.length);
+		obstack_grow (&token_stack, context->syntax->lquote.string,
+			      context->syntax->lquote.length);
 	      }
 	    else
 	      obstack_1grow (&token_stack, ch);
 	  }
 	type = M4_TOKEN_STRING;
       }
-    else if (m4__single_quotes && m4__single_comments) /* EVERYTHING ELSE */
+    else if (m4_is_syntax_single_quotes (M4SYNTAX)
+	     && m4_is_syntax_single_comments (M4SYNTAX)) /* EVERYTHING ELSE */
       {
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER(ch) || M4_IS_NUM(ch))
+	if (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch))
 	  {
 	    while ((ch = next_char(context)) != CHAR_EOF
-		   && (M4_IS_OTHER(ch) || M4_IS_NUM(ch)))
+		   && (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch)))
 	      obstack_1grow (&token_stack, ch);
 
 	    if (ch != CHAR_EOF)
 	      unget_input(ch);
 	    type = M4_TOKEN_STRING;
 	  }
-	else if (M4_IS_SPACE(ch))
+	else if (M4_IS_SPACE (M4SYNTAX, ch))
 	  {
 	    if (!m4_get_interactive_opt (context))
 	      {
-		while ((ch = next_char(context)) != CHAR_EOF && M4_IS_SPACE(ch))
+		while ((ch = next_char (context)) != CHAR_EOF
+		       && M4_IS_SPACE (M4SYNTAX, ch))
 		  obstack_1grow (&token_stack, ch);
 
 		if (ch != CHAR_EOF)
@@ -918,7 +913,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	      }
 	    type = M4_TOKEN_SPACE;
 	  }
-	else if (M4_IS_ACTIVE(ch))
+	else if (M4_IS_ACTIVE (M4SYNTAX, ch))
 	  type = M4_TOKEN_WORD;
 	else
 	  type = M4_TOKEN_SIMPLE;
@@ -927,11 +922,11 @@ m4__next_token (m4 *context, m4_symbol_value *token)
       {
 	obstack_1grow (&token_stack, ch);
 
-	if (M4_IS_OTHER(ch) || M4_IS_NUM(ch))
+	if (M4_IS_OTHER (M4SYNTAX, ch) || M4_IS_NUM (M4SYNTAX, ch))
 	  type = M4_TOKEN_STRING;
-	else if (M4_IS_SPACE(ch))
+	else if (M4_IS_SPACE (M4SYNTAX, ch))
 	  type = M4_TOKEN_SPACE;
-	else if (M4_IS_ACTIVE(ch))
+	else if (M4_IS_ACTIVE (M4SYNTAX, ch))
 	  type = M4_TOKEN_WORD;
 	else
 	  type = M4_TOKEN_SIMPLE;

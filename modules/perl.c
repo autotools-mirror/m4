@@ -113,6 +113,6 @@ M4BUILTIN_HANDLER (perleval)
 
       val = perl_eval_pv(M4ARG(i), TRUE);
 
-      m4_shipout_string(obs, SvPV(val,PL_na), 0, FALSE);
+      m4_shipout_string(context, obs, SvPV(val,PL_na), 0, FALSE);
     }
 }
