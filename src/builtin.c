@@ -1,21 +1,22 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004 Free
-   Software Foundation, Inc.
-  
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004
+   Free Software Foundation, Inc.
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-  
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+   02110-1301  USA
 */
 
 /* Code for all builtin macros, initialisation of symbol table, and
@@ -386,9 +387,9 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
-   
+
 	void m4_MACRONAME (struct obstack *obs, int argc, char *argv[]);
-   
+
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
    individual arguments to the macro.  Please note that in general
@@ -1523,7 +1524,7 @@ WARNING: \\0 will disappear, use \\& instead in replacements"));
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
-	case '7': case '8': case '9': 
+	case '7': case '8': case '9':
 	  ch -= '0';
 	  if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],

@@ -4,8 +4,8 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,57 +14,58 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+   02110-1301  USA
  */
 
 /* Compiled only when USE_STACKOVF is defined, which itself requires
    getrlimit with the RLIMIT_STACK option, and support for alternate
    signal stacks using either SVR4 or BSD interfaces.
-   
+
    This should compile on ANY system which supports either sigaltstack()
    or sigstack(), with or without <siginfo.h> or another way to determine
    the fault address.
-   
+
    There is no completely portable way to determine if a SIGSEGV signal
    indicates a stack overflow.  The fault address can be used to infer
    this.  However, the fault address is passed to the signal handler in
    different ways on various systems.  One of three methods are used to
    determine the fault address:
-   
+
       1. The siginfo parameter (with siginfo.h, i.e., SVR4).
-   
+
       2. 4th "addr" parameter (assumed if struct sigcontext is defined,
 	 i.e., SunOS 4.x/BSD).
-   
+
       3. None (if no method is available).  This case just prints a
       message before aborting with a core dump.  That way the user at
       least knows that it *might* be a recursion problem.
-   
+
    Jim Avera <jima@netcom.com> writes, on Tue, 5 Oct 93 19:27 PDT:
-   
+
       "I got interested finding out how a program could catch and
       diagnose its own stack overflow, and ended up modifying m4 to do
       this.  Now it prints a nice error message and exits.
-   
+
       How it works: SIGSEGV is caught using a separate signal stack.  The
       signal handler declares a stack overflow if the fault address is
       near the end of the stack region, or if the maximum VM address
       space limit has been reached.  Otherwise, it returns to re-execute
       the instruction with SIG_DFL set, so that any real bugs cause a
       core dump as usual."
-   
+
    Jim Avera <jima@netcom.com> writes, on Fri, 24 Jun 94 12:14 PDT:
-   
+
       "The stack-overflow detection code would still be needed to avoid a
       SIGSEGV abort if swap space was exhausted at the moment the stack
       tried to grow.  This is probably unlikely to occur with the
       explicit nesting limit option of GNU m4."
-   
+
    Jim Avera <jima@netcom.com> writes, on Wed, 6 Jul 1994 14:41 PDT:
-   
+
       "When a stack overflow occurs, a SIGSEGV signal is sent, which by
       default aborts the process with a core dump.
-   
+
       The code in stackovf.c catches SIGSEGV using a separate signal
       stack.  The signal handler determines whether or not the SIGSEGV
       arose from a stack overflow.  If it is a stack overflow, an
@@ -97,7 +98,7 @@
    account for the maximum size of local variables (the amount the
    trapping reference might exceed the stack limit).  Also, some machines
    may report an arbitrary address within the same page frame.
-   If the value is too large, we might call some other SIGSEGV a stack 
+   If the value is too large, we might call some other SIGSEGV a stack
    overflow, masking a bug.  */
 
 #ifndef STACKOVF_DETECT
@@ -116,17 +117,17 @@ static handler_t stackovf_handler;
    signal handler.  The signal handler obtains information about the trap
    in an OS-dependent manner, and passes a parameter with the meanings as
    explained below.
-   
+
    If the OS explicitly identifies a stack overflow trap, either pass
    PARAM_STACKOVF if a stack overflow, or pass PARAM_NOSTACKOVF if not
    (id est, it is a random bounds violation).  Otherwise, if the fault
    address is available, pass the fault address.  Otherwise (if no
    information is available), pass NULL.
-   
+
    Not given an explicit indication, we compare the fault address with
    the estimated stack limit, and test to see if overall VM space is
    exhausted.
-   
+
    If a stack overflow is identified, then the external *stackovf_handler
    function is called, which should print an error message and exit.  If
    it is NOT a stack overflow, then we silently abort with a core dump by
@@ -358,12 +359,12 @@ Error - Do not know how to set up stack-ovf trap handler...
   sigaction (SIGSEGV, NULL, &act);
   act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
   sigemptyset (&act.sa_mask);
-  act.sa_flags = (SA_ONSTACK 
+  act.sa_flags = (SA_ONSTACK
 #ifdef SA_RESETHAND
 		  | SA_RESETHAND
 #endif
 #ifdef SA_SIGINFO
-		  | SA_SIGINFO 
+		  | SA_SIGINFO
 #endif
 		  );
   if (sigaction (SIGSEGV, &act, NULL) < 0)
