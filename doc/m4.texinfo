@@ -22,7 +22,8 @@
 @ifinfo
 This file documents GNU @code{m4} @value{VERSION}
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
+2001, 2004
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -3465,28 +3466,21 @@ temporary file, for output or for some other purpose.
 
 @deffn {Builtin (m4)} maketemp (@var{template})
 There is a builtin macro, @code{maketemp}, for making temporary file
-names, which expands to a name of a non-existent file, made from the
+names, which expands to a name of a new, empty file, made from the
 string @var{template}, which should end with the string @samp{XXXXXX}.
 The six @code{X}'s are then replaced, usually with something that
 includes the process id of the @code{m4} process, in order to make the
 file name unique.
 
-The builtin macro @code{maketemp} is recognized only when given
-arguments.
-@end deffn
-
 @comment ignore
 @example
 maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
-maketemp(`/tmp/fooXXXXXX')
-@result{}/tmp/fooa07346
 @end example
 
-As seen in the example, several calls of @code{maketemp} might expand to
-the same string, since the selection criteria is whether the file exists
-or not.  If a file has not been created before the next call, the two
-macro calls might expand to the same name.
+The builtin macro @code{maketemp} is recognized only when given
+arguments.
+@end deffn
 
 @node Miscellaneous
 @chapter Miscellaneous builtin macros

@@ -1,3 +1,12 @@
+2005-05-02  Matt Kraai  <kraai@debian.org>  (tiny change)
+
+	http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=84416
+	* doc/m4.texinfo (Maketemp): Change maketemp to refer to a new,
+	empty file rather than to a nonexistent file.  This closes a
+	common security hole.
+	* modules/m4.c (m4_maketemp): Implement the above, by using
+	mkstemp rather than mktemp.
+
 2005-05-01  Gary V. Vaughan  <gary@gnu.org>
 
 	The FSF are moving offices today.  Changed their contact address

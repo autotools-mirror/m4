@@ -610,7 +610,14 @@ M4BUILTIN_HANDLER (sinclude)
 /* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)
 {
-  mktemp (M4ARG (1));
+  int fd;
+  if ((fd = mkstemp (M4ARG(1))) < 0)
+    {
+      M4ERROR ((m4_get_warning_status_opt (context), errno,
+		"Cannot create tempfile %s", M4ARG (1)));
+      return;
+    }
+  close(fd);
   m4_shipout_string (context, obs, M4ARG (1), 0, false);
 }
 
