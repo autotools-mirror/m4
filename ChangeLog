@@ -1,3 +1,8 @@
+2005-05-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/m4private.h: Make errno visible for the sources patched
+	below.
+
 2005-05-04  Paul Eggert  <eggert@twinsun.com>
 
 	* src/main.c (print_program_name_CB): Preserve errno, since
