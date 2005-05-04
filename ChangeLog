@@ -1,3 +1,37 @@
+2005-05-04  Gary V. Vaughan  <gary@gnu.org>
+
+	Gnulib has changed again.  Reimport.  Adjust.  Rinse.  Repeat.
+	Automake and Libtool now agree on subdir-objects and LTLIBOBJS,
+	and libtoolize does a better job of ltdl importing now too, so
+	take advantage of that while updating the tree:
+
+	* acm4, config: Moved from here...
+	* ltdl/m4, ltdl/config: ...to here.
+	* doc/Makefile.am, m4/Makefile.am, modules/Makefile.am,
+	src/Makefile.am, tests/Makefile.am: Removed...
+	* Makefile.am: ...and migrated to here, with adjustments to
+	compensate for relative path differences.
+	* commit: Adjust relative paths.
+	* configure.ac: Adjust relative paths.
+	(AC_PREREQ): 2.59 isn't strictly new enough, we also need a
+	patch.
+	(LT_PREREQ): 2.0 isn't released yet, but will work when it is!  In
+	the meanwhile, CVS HEAD libtool is needed.
+	(AM_INIT_AUTOMAKE): Added subdir-objects declaration. 1.9.5 isn't
+	stricly new enough, we also need a patch.
+	(AM_PROG_CC_C_O): Required for subdir-objects in Automake.
+	(AC_WITH_LTDL): Replaced with LT_WITH_LTDL.
+	(gl_MODULES): Don't list getopt and version-etc, as they don't
+	belong in libm4.
+	* bootstrap: After running gnulib-tool to import the listed
+	modules, fetch getopt and version-etc into src manually.
+	(ltdldir): Change to ltdl.
+	* src/main.c: Adjust for changes in version-etc API.
+	* ltdl/m4/m4-getopt.m4: New macro to mirror gnulib's getopt.m4,
+	but works when the getopt module isn't to be included in the lib.
+	* README: Add note about patching autoconf and automake to
+	bootstrap CVS m4.
+
 2005-05-02  Matt Kraai  <kraai@debian.org>  (tiny change)
 
 	http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=84416

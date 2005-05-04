@@ -8,7 +8,11 @@
 : ${RM="rm -f"}
 : ${GNULIB_TOOL="gnulib-tool"}
 
-ltdldir=libltdl
+ltdldir=ltdl
+config_aux_dir=$ltdldir/config
+config_macro_dir=$ltdldir/m4
+
+src_modules='getopt version-etc'
 
 dirname="s,/[^/]*$,,"
 basename="s,^.*/,,g"
@@ -32,18 +36,38 @@ func_echo ()
 
 func_echo "running: ${GNULIB_TOOL} --import"
 ${GNULIB_TOOL} --import
-mv acm4/regex.m4 acm4/regex-m4.old
-sed 's,lib/regex.c,gnu/regex.c,g' acm4/regex-m4.old > acm4/regex.m4 && \
-  $RM acm4/regex-m4.old
-cat >> acm4/gnulib.m4 <<EOF
+
+func_echo "patching include directories in gnulib regex module"
+mv $config_macro_dir/regex.m4 $config_macro_dir/regex-m4.old
+sed 's,lib/regex.c,gnu/regex.c,g' $config_macro_dir/regex-m4.old > $config_macro_dir/regex.m4 && \
+  $RM $config_macro_dir/regex-m4.old
+
+func_echo "hiding gnulib jm_\* macros"
+cat >> $config_macro_dir/gnulib.m4 <<\EOF
 AC_DEFUN([gl_AC_HEADER_INTTYPES_H], [jm_AC_HEADER_INTTYPES_H])
 AC_DEFUN([gl_AC_HEADER_STDINT_H], [jm_AC_HEADER_STDINT_H])
 AC_DEFUN([gl_AC_TYPE_UINTMAX_T], [jm_AC_TYPE_UINTMAX_T])
 EOF
 
-$RM -r "$ltdldir"
-func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --quiet --copy"
-libtoolize --ltdl="$ltdldir" --force --quiet --copy
+func_echo "fetching version_etc and getopt modules for src directory"
+gnulibdir=`which gnulib-tool | $SED "$dirname"`
+for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
+
+    dest=`echo $file | $SED "$basename"`
+    case $file in
+        lib/*) dest=src/$dest ;;
+	m4/*)  dest=$config_macro_dir/$dest ;;
+	*)     func_echo "Unknown file: $file"
+	       exit 1
+	       ;;
+    esac
+
+    func_echo "copying file \`$dest'"
+    cp $gnulibdir/$file $dest
+done
+
+func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --copy"
+libtoolize --ltdl="$ltdldir" --force --copy
 
 func_echo "running: autoreconf --force --verbose --install"
 autoreconf --force --verbose --install

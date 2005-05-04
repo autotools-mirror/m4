@@ -67,8 +67,8 @@
 # Report bugs to <gary@gnu.org>
 
 : ${CVS="cvs"}
-: ${MAILNOTIFY="./config/mailnotify"}
-: ${MKSTAMP="./config/mkstamp"}
+: ${MAILNOTIFY="./ltdl/config/mailnotify"}
+: ${MKSTAMP="./ltdl/config/mkstamp"}
 : ${MV="mv -f"}
 : ${RM="rm -f"}
 : ${SED="sed"}

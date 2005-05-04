@@ -58,3 +58,147 @@ expected, what you got, and why this is wrong.  Diffs are welcome, but
 they only describe a solution, from which the problem might be uneasy to
 infer.  Don't forget all relevant information about your operating
 system, compiler, libraries, ...
+
+
+
+## ------- ##
+## Patches ##
+## ------- ##
+
+If you wish to run bootstrap, the released versions of autoconf and automake
+are missing some functionality we need.  You will need to patch automake-1.9.5
+and autoconf-2.59 according to the patches below:
+
+--- automake-1.9.5/automake.in.orig	2005-02-12 10:06:56.000000000 +0000
++++ automake-1.9.5/automake.in	2005-04-20 14:08:05.000000000 +0100
+@@ -142,6 +142,7 @@
+ use Automake::RuleDef;
+ use Automake::Wrap 'makefile_wrap';
+ use File::Basename;
++use File::Spec;
+ use Carp;
+ 
+ ## ----------- ##
+@@ -333,6 +334,10 @@
+ # in Makefiles.
+ my $am_config_aux_dir = '';
+ 
++# Directory to search for AC_LIBSOURCE file, as set by AC_CONFIG_LIBOBJ_DIR
++# in configure.ac.
++my $config_libobj_dir = '';
++
+ # Whether AM_GNU_GETTEXT has been seen in configure.ac.
+ my $seen_gettext = 0;
+ # Whether AM_GNU_GETTEXT([external]) is used.
+@@ -2067,7 +2072,7 @@
+ 
+       if ($iter =~ /\.h$/)
+ 	{
+-	  require_file_with_macro ($cond, $var, FOREIGN, $iter);
++	  require_libobj_with_macro ($cond, $var, FOREIGN, $iter);
+ 	}
+       elsif ($iter ne 'alloca.c')
+ 	{
+@@ -2079,7 +2084,7 @@
+ 	  my $bs = var ('BUILT_SOURCES');
+ 	  if (! $bs || ! grep (/$rewrite/, $bs->value_as_list_recursive))
+ 	    {
+-	      require_file_with_macro ($cond, $var, FOREIGN, $iter);
++	      require_libobj_with_macro ($cond, $var, FOREIGN, $iter);
+ 	    }
+ 	}
+     }
+@@ -2092,7 +2097,7 @@
+   $lt ||= '';
+   $var->requires_variables ("\@${lt}ALLOCA\@ used", $lt . 'ALLOCA');
+   $dep_files{'$(DEPDIR)/alloca.P' . $myobjext} = 1;
+-  require_file_with_macro ($cond, $var, FOREIGN, 'alloca.c');
++  require_libobj_with_macro ($cond, $var, FOREIGN, 'alloca.c');
+   &saw_extension ('c');
+ }
+ 
+@@ -4636,6 +4641,7 @@
+ 		AC_CONFIG_AUX_DIR => 1,
+ 		AC_CONFIG_FILES => 1,
+ 		AC_CONFIG_HEADERS => 1,
++		AC_CONFIG_LIBOBJ_DIR => 1,
+ 		AC_CONFIG_LINKS => 1,
+ 		AC_INIT => 0,
+ 		AC_LIBSOURCE => 1,
+@@ -4731,6 +4737,12 @@
+ 	      push @config_headers, $spec;
+ 	    }
+ 	}
++      elsif ($macro eq 'AC_CONFIG_LIBOBJ_DIR')
++	{
++	  $config_libobj_dir = $args[1];
++	  $relative_dir = '.';
++	  check_directory ($config_libobj_dir, $where);
++	}
+       elsif ($macro eq 'AC_CONFIG_LINKS')
+ 	{
+ 	  foreach my $spec (split (' ', $args[1]))
+@@ -5761,6 +5773,15 @@
+     use constant IN_COMMENT => 2;
+     my $prev_state = IN_RULE_DEF;
+ 
++    # Calculate the relative path from this Makefile to LIBOBJDIR.
++    my $am_libobj_dir = '';
++    unless ($config_libobj_dir eq '')
++      {
++	my $dir = File::Spec->abs2rel ($config_libobj_dir, $relative_dir);
++	$am_libobj_dir = "$dir/" unless $dir eq '';
++      }
++    &define_variable ('LIBOBJDIR', "$am_libobj_dir", INTERNAL);
++
+     while ($_ = $am_file->getline)
+     {
+         $where->set ("$amfile:$.");
+@@ -6975,6 +6996,22 @@
+     require_file ($macro->rdef ($cond)->location, $mystrict, @files);
+ }
+ 
++# &require_libobj_with_macro ($COND, $MACRO, $MYSTRICT, @FILES)
++# -------------------------------------------------------------
++sub require_libobj_with_macro ($$$@)
++{
++    my ($cond, $macro, $mystrict, @files) = @_;
++    $macro = rvar ($macro) unless ref $macro;
++    if ($config_libobj_dir eq '')
++      {
++	require_file ($macro->rdef ($cond)->location, $mystrict, @files);
++      }
++    else
++      {
++	require_file_internal ($macro->rdef ($cond)->location, $mystrict,
++			       $config_libobj_dir, @files);
++      }
++}
+ 
+ # &require_conf_file ($WHERE, $MYSTRICT, @FILES)
+ # ----------------------------------------------
+--- autoconf-2.59/lib/autoconf/general.m4.orig	2003-10-27 11:10:56.000000000 +0000
++++ autoconf-2.59/lib/autoconf/general.m4	2005-04-25 17:56:48.000000000 +0100
+@@ -2435,7 +2435,7 @@
+ 
+ # _AC_LIBOBJS_NORMALIZE
+ # ---------------------
+-# Clean up LIBOBJS abd LTLIBOBJS so that they work with 1. ac_objext,
++# Clean up LIBOBJS and LTLIBOBJS so that they work with 1. ac_objext,
+ # 2. Automake's ANSI2KNR, 3. Libtool, 4. combination of the three.
+ # Used with AC_CONFIG_COMMANDS_PRE.
+ AC_DEFUN([_AC_LIBOBJS_NORMALIZE],
+@@ -2445,9 +2445,10 @@
+   # 1. Remove the extension, and $U if already installed.
+   ac_i=`echo "$ac_i" |
+ 	 sed 's/\$U\././;s/\.o$//;s/\.obj$//'`
+-  # 2. Add them.
+-  ac_libobjs="$ac_libobjs $ac_i\$U.$ac_objext"
+-  ac_ltlibobjs="$ac_ltlibobjs $ac_i"'$U.lo'
++  # 2. Prepend LIBOBJDIR.  When used with automake>=1.10 LIBOBJDIR
++  #    will be set to the directory where LIBOBJS objects are built.
++  ac_libobjs="$ac_libobjs \${LIBOBJDIR}$ac_i\$U.$ac_objext"
++  ac_ltlibobjs="$ac_ltlibobjs \${LIBOBJDIR}$ac_i"'$U.lo'
+ done
+ AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
+ AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])

@@ -1,5 +1,7 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,12 +23,17 @@
 
 #include "m4.h"
 #include "m4private.h"
-#include "gnu/getopt.h"
+#include "getopt.h"
+#include "version-etc.h"
 #include "gnu/progname.h"
-#include "gnu/version-etc.h"
 
 static void print_program_name_CB (void);
 
+
+/* Initialise gnulib version-etc module.
+   Do *not* mark this string for translation.  */
+const char version_etc_copyright[] =
+    "Copyright (C) 2005 Free Software Foundation, Inc.";
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -221,11 +228,6 @@ main (int argc, char *const *argv, char *const *envp)
   /* Initialise gnulib error module.  */
   set_program_name (argv[0]);
   error_print_progname = print_program_name_CB;
-
-  /* Initialise gnulib version-etc module.
-     Do *not* mark this string for translation.  */
-  version_etc_copyright	=
-    "Copyright (C) 2004 Free Software Foundation, Inc.";
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS

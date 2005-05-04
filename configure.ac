@@ -1,5 +1,6 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright (C) 1991-1994, 2000, 2001, 2002, 2004  Free Software Foundation, Inc.
+# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005
+# Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,17 +17,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
+AC_PREREQ([2.59])
 
 ## ------------------------ ##
 ## Autoconf initialisation. ##
 ## ------------------------ ##
-AC_INIT([GNU m4], [1.4q], [bug-m4@gnu.org])
+AC_INIT([GNU m4], [1.9a], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_LIBOBJ_DIR([gnulib/m4])
-AC_CONFIG_HEADERS([config.h:config-h.in])
+AC_CONFIG_AUX_DIR([ltdl/config])
+AC_CONFIG_MACRO_DIR([ltdl/m4])
+AC_CONFIG_LIBOBJ_DIR([gnu])
 AC_CONFIG_TESTDIR([tests])
+AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
@@ -76,7 +79,7 @@ AC_MSG_CHECKING(for modules to preload)
   else
     if test "$use_modules" != yes; then
       for module in $use_modules; do
-        DLPREOPEN="$DLPREOPEN -dlpreopen ../modules/$module.la"
+        DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
       done
     fi
   fi
@@ -88,7 +91,7 @@ AC_SUBST(DLPREOPEN)
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.7g dist-bzip2])
+AM_INIT_AUTOMAKE([1.9.5 subdir-objects dist-bzip2])
 
 
 
@@ -101,7 +104,7 @@ gl_EARLY
 AC_ISC_POSIX
 AM_PROG_CC_STDC
 AC_PROG_CPP
-AC_PROG_CC_C_O
+AM_PROG_CC_C_O
 m4_CHECK_DEBUGGING
 
 # Use gcc's -pipe option if available: for faster compilation.
@@ -119,10 +122,9 @@ esac
 ## ----------------------- ##
 ## Libtool initialisation. ##
 ## ----------------------- ##
+LT_PREREQ([2.0])
 LT_INIT([shared dlopen win32-dll])
-AC_WITH_LTDL
-
-AC_SUBST([LTDLINCL], ["${LTDLINCL-INCLTDL}"])
+LT_WITH_LTDL([ltdl])
 
 
 
@@ -139,12 +141,15 @@ m4_GNU_GETTEXT
 ## Gnulib support, ##
 ## --------------- ##
 gl_SOURCE_BASE(gnu)
-gl_M4_BASE(acm4)
-gl_MODULES(error exit free getopt gettext obstack progname regex stdbool strtol version-etc xalloc xalloc-die xstrndup)
+gl_M4_BASE(ltdl/m4)
+# We also use getopt and version-etc, but they are copied into
+# the project tree by bootstrap since they are used only by m4 itself.
+gl_MODULES(error exit free gettext obstack progname regex stdbool strtol xalloc xalloc-die xstrndup)
 gl_INIT
 
 # Gnulib doesn't always do things quite the way M4 would like...
 m4_ERROR
+m4_GETOPT
 m4_OBSTACK
 m4_REGEX
 
@@ -154,7 +159,7 @@ m4_REGEX
 ## ------------------------ ##
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PATH_PROG(PERL,perl)
+AC_PATH_PROG(PERL, perl)
 AC_PROG_AWK
 
 
@@ -209,16 +214,11 @@ AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 ## -------- ##
 ## Outputs. ##
 ## -------- ##
-AC_CONFIG_FILES([Makefile
-		doc/Makefile
-		examples/Makefile
-		gnu/Makefile
-		m4/Makefile
-		m4/system.h:m4/system_.h
-		modules/Makefile
-		src/Makefile
-		tests/Makefile
-		tests/atlocal
+AC_CONFIG_FILES([
+Makefile
+gnu/Makefile
+m4/system.h:m4/system_.h
+tests/atlocal
 ])
 
 AC_OUTPUT
