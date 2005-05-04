@@ -19,8 +19,6 @@
    02110-1301  USA
 */
 
-#include <signal.h>
-
 #include "m4.h"
 #include "m4private.h"
 #include "getopt.h"

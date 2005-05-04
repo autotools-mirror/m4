@@ -1,3 +1,14 @@
+2005-05-04  Vincent Lonngren  <Vincent.lonngren.759@student.lu.se>
+
+	Forward port of a patch that allowed m4-1.4.2 to compile on
+	QNX 6.3:
+
+	* configure.ac (AC_CHECK_HEADERS):  Add signal.h,
+	sys/signal.h.
+	* src/m4.h: And include them as appropriate.
+	* src/main.c, src/stackovf.h: Don't include signal.h literally;
+	m4.h will include the correct file.
+
 2005-05-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4private.h: Make errno visible for the sources patched

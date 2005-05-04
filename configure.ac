@@ -178,7 +178,8 @@ AC_CHECK_SIZEOF([long long int])
 ## C headers required by M4. ##
 ## ------------------------- ##
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h locale.h memory.h string.h unistd.h errno.h)
+AC_CHECK_HEADERS([limits.h locale.h memory.h string.h unistd.h errno.h])
+AC_CHECK_HEADERS([signal.h sys/signal.h], break)
 
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
@@ -192,7 +193,7 @@ AC_SUBST([INCLUDE_STDBOOL_H])
 ## --------------------------------- ##
 ## Library functions required by M4. ##
 ## --------------------------------- ##
-AC_CHECK_FUNCS(bzero calloc mkstemp mktemp strerror tmpfile)
+AC_CHECK_FUNCS([bzero calloc mkstemp mktemp strerror tmpfile])
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 

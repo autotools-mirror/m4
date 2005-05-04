@@ -93,6 +93,12 @@ char *mktemp ();
 # define setlocale(Category, Locale)
 #endif
 
+#if HAVE_SIGNAL_H
+# include <signal.h>
+#elif HAVE_SYS_SIGNAL_H
+# include <sys/signal.h>
+#endif
+
 #include "ltdl.h"
 
 /* Error handling.  */
