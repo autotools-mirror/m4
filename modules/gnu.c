@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000,2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -520,6 +520,7 @@ M4BUILTIN_HANDLER (esyscmd)
       int ch;
 
       m4_sysval_flush (context);
+      errno = 0;
       pin = popen (M4ARG (1), "r");
       if (pin == NULL)
 	{

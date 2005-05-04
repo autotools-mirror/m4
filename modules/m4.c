@@ -611,6 +611,8 @@ M4BUILTIN_HANDLER (sinclude)
 M4BUILTIN_HANDLER (maketemp)
 {
   int fd;
+
+  errno = 0;
   if ((fd = mkstemp (M4ARG(1))) < 0)
     {
       M4ERROR ((m4_get_warning_status_opt (context), errno,

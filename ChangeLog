@@ -1,5 +1,12 @@
 2005-05-04  Paul Eggert  <eggert@twinsun.com>
 
+	* src/main.c (print_program_name_CB): Preserve errno, since
+	M4ERROR relies on this.
+	* modules/gnu.c (m4_esyscmd): Clear errno before calling popen.
+	* modules/m4.c (m4_maketemp): Clear errno before calling mkstemp.
+	* m4/path.c (m4_path_search): Don't let "free" trash errno when
+	returning NULL.
+
 	* m4/output.c (m4_insert_file): Don't assume errno has a valid
 	value simply because fread returns zero.  This fixes a
 	portability bug reported by Marion Hakanson in

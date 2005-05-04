@@ -1,5 +1,7 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 98 Free Software Foundation, Inc.
+
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -121,6 +123,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
   FILE *fp;
   m4__search_path *incl;
   char *name;			/* buffer for constructed name */
+  int e;
 
   /* Look in current working directory first.  */
   fp = fopen (dir, "r");
@@ -134,6 +137,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
   /* If file not found, and filename absolute, fail.  */
   if (*dir == '/' || m4_get_no_gnu_extensions_opt (context))
     return NULL;
+  e= errno;
 
   name = (char *) xmalloc (m4__get_search_path (context)->max_length + 1 + strlen (dir) + 1);
 
@@ -162,6 +166,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
 
   free (name);
 
+  errno = e;
   return fp;
 }
 

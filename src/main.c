@@ -65,10 +65,12 @@ typedef struct macro_definition
 static void
 print_program_name_CB (void)
 {
+  int e = errno;
   fflush (stdout);
   fprintf (stderr, "%s: ", program_name);
   if (m4_current_line != 0)
     fprintf (stderr, "%s: %d: ", m4_current_file, m4_current_line);
+  errno = e;
 }
 
 
