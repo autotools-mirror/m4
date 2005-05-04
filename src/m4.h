@@ -24,6 +24,14 @@
 # include <config.h>
 #endif
 
+/* Canonicalise Windows and Cygwin recognition macros.  */
+#if defined(__CYGWIN32__) && !defined(__CYGWIN__)
+# define __CYGWIN__ __CYGWIN32__
+#endif
+#if defined(_WIN32) && !defined(WIN32)
+# define WIN32 _WIN32
+#endif
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <ctype.h>

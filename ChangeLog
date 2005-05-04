@@ -1,3 +1,11 @@
+2005-05-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* src/m4.h (__CYGWIN__, WIN32): Canonicalise Windows and Cygwin
+	recognition macros.
+	* src/freeze.c (produce_frozen_state): Use \n line-endings even
+	on Windows, so that the frozen file reader will work.
+	Reported by Josef T. Burger <bolo@bolo.com>
+
 2005-05-04  Vincent Lonngren  <Vincent.lonngren.759@student.lu.se>
 
 	Forward port of a patch that allowed m4-1.4.2 to compile on

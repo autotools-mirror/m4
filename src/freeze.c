@@ -193,7 +193,13 @@ produce_frozen_state (m4 *context, const char *name)
 {
   FILE *file;
 
-  if (file = fopen (name, "w"), !file)
+#ifdef WIN32
+# define FROZEN_WRITE "wb"
+#else
+# define FROZEN_WRITE "w"
+#endif
+
+  if (file = fopen (name, FROZEN_WRITE), !file)
     {
       M4ERROR ((m4_get_warning_status_opt (context), errno, name));
       return;
