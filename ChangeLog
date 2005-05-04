@@ -1,3 +1,7 @@
+2005-05-04  Santiago Vila  <sanvila@debian.org>
+
+	* tests/stackovf.test: Use tempfile if available.
+
 2005-05-04  Robert Bihlmeyer  <robbe@orcus.priv.at>  (tiny change)
 
 	http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=92629

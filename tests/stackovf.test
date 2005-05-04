@@ -1,17 +1,17 @@
 #!/bin/sh
 # This file is part of the GNU m4 testsuite
-# Copyright 2000 Free Software Foundation, Inc.
-#  
+# Copyright (C) 2000, 2003 Free Software Foundation, Inc.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or 
+# the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -26,8 +26,8 @@ exit 77
 # On some systems the ulimit command is available in ksh or bash but not sh
 (exec 2>/dev/null; ulimit -HSs 300) || {
     for altshell in bash bsh ksh ; do
-	if (exec >/dev/null 2>&1; $altshell -c 'ulimit -HSs 300') && 
-								test -z "$1" 
+	if (exec >/dev/null 2>&1; $altshell -c 'ulimit -HSs 300') &&
+								test -z "$1"
 	then
 		echo "Using $altshell because it supports ulimit"
 		exec $altshell $0 running-with-$altshell
@@ -40,7 +40,7 @@ PATH=.:..:$PATH; export PATH;
 : ${M4=../../src/m4}
 type $M4
 
-tmpfile=/tmp/t.$$
+tmpfile=`tempfile 2> /dev/null` || tmpfile=/tmp/t.$$
 trap 'rm -f $tmpfile; exit 1' 1 2 3 15
 
 rm -f core
@@ -64,12 +64,13 @@ then
 	#test -n "$ulimitdashv" && ulimit -HSv 8000
 	echo "Stack limit is `ulimit -s`K";
 	echo "Heap limit  is `ulimit -d`K";
-	test -n "$ulimitdashv" && 
+	test -n "$ulimitdashv" &&
 		echo "VMem limit  is `ulimit -v`K";
 else
 	echo "Can't reset stack limit - this may take a while..."
 fi
-strace -o /tmp/aaa $M4 -L999999999 > $tmpfile 2>&1
+#strace -o /tmp/aaa $M4 -L999999999 > $tmpfile 2>&1
+$M4 -L999999999 > $tmpfile 2>&1
 )
 result=$?
 { echo "Output from $M4:"; cat $tmpfile; }
@@ -81,7 +82,7 @@ else
     # See if stack overflow was diagnosed
     case "`cat $tmpfile`" in
     *overflow*)
-	echo "Test succeeded."; 
+	echo "Test succeeded.";
 	exitcode=0
 	;;
     *ut*of*emory*|*emory*xhausted)
