@@ -1,3 +1,9 @@
+2005-05-04  Robert Bihlmeyer  <robbe@orcus.priv.at>  (tiny change)
+
+	http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=92629
+	* m4/output.c (m4_insert_file): Do not mix buffered and
+	unbuffered I/O, as this breaks on the Hurd.
+
 2005-05-04  Gary V. Vaughan  <gary@gnu.org>
 
 	Gnulib has changed again.  Reimport.  Adjust.  Rinse.  Repeat.

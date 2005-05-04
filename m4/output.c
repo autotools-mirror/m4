@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 98 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 2002
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -574,13 +575,13 @@ m4_insert_file (FILE *file)
     return;
 
   /* Insert output by big chunks.  */
-
-  while (length = read (fileno (file), buffer, COPY_BUFFER_SIZE),
+  errno = 0;
+  while (length = fread (buffer, 1, COPY_BUFFER_SIZE, file),
 	 length != 0)
-    if (length == (size_t) -1)
+    output_text (buffer, length);
+
+  if (errno)
       M4ERROR ((EXIT_FAILURE, errno, _("reading inserted file")));
-    else
-      output_text (buffer, length);
 }
 
 /* Insert diversion number DIVNUM into the current output file.  The
