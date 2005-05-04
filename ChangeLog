@@ -1,3 +1,10 @@
+2005-05-04  Paul Eggert  <eggert@twinsun.com>
+
+	* m4/output.c (m4_insert_file): Don't assume errno has a valid
+	value simply because fread returns zero.  This fixes a
+	portability bug reported by Marion Hakanson in
+	<http://lists.gnu.org/archive/html/bug-m4/2004-07/msg00029.html>.
+
 2005-05-04  Santiago Vila  <sanvila@debian.org>
 
 	* tests/stackovf.test: Use tempfile if available.
