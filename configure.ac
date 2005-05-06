@@ -144,7 +144,7 @@ gl_SOURCE_BASE(gnu)
 gl_M4_BASE(ltdl/m4)
 # We also use getopt and version-etc, but they are copied into
 # the project tree by bootstrap since they are used only by m4 itself.
-gl_MODULES(error exit free gettext obstack progname regex stdbool strtol xalloc xalloc-die xstrndup)
+gl_MODULES(assert error exit free gettext obstack progname regex stdbool strtol xalloc xalloc-die xstrndup)
 gl_INIT
 
 # Gnulib doesn't always do things quite the way M4 would like...
