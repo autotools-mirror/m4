@@ -29,13 +29,25 @@ AC_DEFUN([m4_GETOPT],
 AC_SUBST([GETOPT_H])
 
 AC_CHECK_HEADERS([getopt.h], [], [GETOPT_H=getopt.h], [AC_INCLUDES_DEFAULT])
-AC_CHECK_FUNCS([getopt_long_only], [], [GETOPT_H=getopt.h])
+
+if test -z "$GETOPT_H"; then
+  AC_CHECK_FUNCS([getopt_long_only], [], [GETOPT_H=getopt.h])
+fi
 
 dnl BSD getopt_log uses an incompatible method to reset option processing,
 dnl and (as of 2004-10-15) mishandles optional option-arguments.
-AC_CHECK_DECL([optreset], [GETOPT_H=getopt.h], [], [#include <getopt.h>])
+if test -z "$GETOPT_H"; then
+  AC_CHECK_DECL([optreset], [GETOPT_H=getopt.h], [], [#include <getopt.h>])
+fi
 
-AC_DEFINE([__GETOPT_PREFIX], [[rpl_]],
-  [Define to rpl_ if the getopt replacement function should be used.])
+dnl Solaris 10 getopt doesn't handle `+' as a leading character in an
+dnl option string (as of 2005-05-05).
+if test -z "$GETOPT_H"; then
+  AC_CHECK_DECL([getopt_clip], [GETOPT_H=getopt.h], [], [#include <getopt.h>])
+fi
 
-])# m4_ERROR
+if test -n "$GETOPT_H"; then
+  AC_DEFINE([__GETOPT_PREFIX], [[rpl_]],
+    [Define to rpl_ if the getopt replacement function should be used.])
+fi
+])# m4_GETOPT

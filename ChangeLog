@@ -1,3 +1,7 @@
+2005-05-06  Gary V. Vaughan  <gary@gnu.org>
+
+	* ltdl/m4/m4-getopt.m4 (m4_GETOPT): Synch with gnulib/getopt.m4.
+
 2005-05-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* src/m4.h (__CYGWIN__, WIN32): Canonicalise Windows and Cygwin
