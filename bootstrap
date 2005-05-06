@@ -12,7 +12,9 @@ ltdldir=ltdl
 config_aux_dir=$ltdldir/config
 config_macro_dir=$ltdldir/m4
 
-src_modules='getopt version-etc'
+# List dependencies here too; we don't extract them, otherwise dependent
+# modules could end up being imported to src/ *and* gnu/!
+src_modules='getopt version-etc-fsf version-etc'
 
 dirname="s,/[^/]*$,,"
 basename="s,^.*/,,g"
@@ -49,8 +51,9 @@ AC_DEFUN([gl_AC_HEADER_STDINT_H], [jm_AC_HEADER_STDINT_H])
 AC_DEFUN([gl_AC_TYPE_UINTMAX_T], [jm_AC_TYPE_UINTMAX_T])
 EOF
 
-func_echo "fetching version_etc and getopt modules for src directory"
+func_echo "fetching modules for src directory"
 gnulibdir=`which gnulib-tool | $SED "$dirname"`
+
 for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
 
     dest=`echo $file | $SED "$basename"`

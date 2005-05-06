@@ -71,6 +71,7 @@ src_m4_SOURCES	= \
 		  src/getopt.c \
 		  src/getopt1.c \
 		  src/getopt.h \
+		  src/version-etc-fsf.c \
 		  src/version-etc.c \
 		  src/version-etc.h \
 		  src/main.c \

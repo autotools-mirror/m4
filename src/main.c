@@ -28,11 +28,6 @@
 static void print_program_name_CB (void);
 
 
-/* Initialise gnulib version-etc module.
-   Do *not* mark this string for translation.  */
-const char version_etc_copyright[] =
-    "Copyright (C) 2005 Free Software Foundation, Inc.";
-
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
 

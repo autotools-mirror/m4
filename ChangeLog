@@ -1,5 +1,9 @@
 2005-05-06  Gary V. Vaughan  <gary@gnu.org>
 
+	* Makefile.am (src_m4_SOURCES): Add version-etc-fsf.c.
+	* bootstrap (src_modules): Add version-etc-fsf.
+	* src/main.c (version_etc_copyright): Removed.
+
 	* ltdl/m4/m4-getopt.m4 (m4_GETOPT): Synch with gnulib/getopt.m4.
 
 2005-05-04  Gary V. Vaughan  <gary@gnu.org>
