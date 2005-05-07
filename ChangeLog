@@ -1,5 +1,16 @@
 2005-05-07  Gary V. Vaughan  <gary@gnu.org>
 
+	Since most of the build is handled from a single Makefile.am now,
+	we can teach make about the dependencies between the m4 binary and
+	the preopened modules it is built against:
+
+	* configure.ac (PREOPEN_DEPENDENCIES): Substitute for a list of
+	preopened modules.
+	* Makefile.am (src_m4_DEPENDENCIES): Rebuild the m4 program if any
+	of the preopened modules have changed.
+
+2005-05-07  Gary V. Vaughan  <gary@gnu.org>
+
 	* configure.ac (gl_MODULES): Add mkstemp for machines that don't
 	have a native implementation.
 

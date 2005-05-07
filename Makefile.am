@@ -81,6 +81,7 @@ src_m4_SOURCES	= \
 src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src $(LTDLINCL)
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
 src_m4_LDADD	= m4/libm4.la
+src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES)
 
 ##                                                                      ##
 ##                 --- PASTED MANUALLY FROM GNULIB ---                  ##

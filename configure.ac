@@ -73,6 +73,7 @@ AC_MSG_CHECKING(for modules to preload)
     [use_modules="$withval"],
     [use_modules="$m4_default_preload"])
 
+  PREOPEN_DEPENDENCIES=
   DLPREOPEN="-dlpreopen force"
   if test -z "$use_modules"; then
     use_modules=none
@@ -80,11 +81,13 @@ AC_MSG_CHECKING(for modules to preload)
     if test "$use_modules" != yes; then
       for module in $use_modules; do
         DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
+	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES modules/$module.la"
       done
     fi
   fi
 AC_MSG_RESULT($use_modules)
 AC_SUBST(DLPREOPEN)
+AC_SUBST(PREOPEN_DEPENDENCIES)
 
 
 
