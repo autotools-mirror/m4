@@ -1,5 +1,7 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
+   2004, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -176,6 +178,9 @@ extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*,
 extern m4_symbol *m4_symbol_define  (m4_symbol_table*,
 				     const char *, m4_symbol_value *);
 extern void       m4_symbol_popdef  (m4_symbol_table*, const char *);
+extern m4_symbol *m4_symbol_rename  (m4_symbol_table*, const char *,
+				     const char *);
+
 extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
 
 #define m4_symbol_delete(symtab, name)			M4_STMT_START {	\

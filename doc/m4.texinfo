@@ -22,8 +22,7 @@
 @ifinfo
 This file documents GNU @code{m4} @value{VERSION}
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-2001, 2004
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001, 2004, 2005
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -50,8 +49,7 @@ identical to this one except for the removal of this paragraph
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
-2000, 2001 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001, 2004, 2005 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -158,6 +156,7 @@ How to define new macros
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
+* Erenamesyms and Renamesyms::  Renaming macros with regular expressions
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
@@ -996,6 +995,7 @@ value, which can be brought back at a later time.
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
+* Erenamesyms and Renamesyms::  Renaming macros with regular expressions
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
@@ -1378,6 +1378,65 @@ revealing the former definition.
 
 It is possible to temporarily redefine a builtin with @code{pushdef}
 and @code{defn}.
+
+@node Erenamesyms and Renamesyms
+@section Renaming macros with regular expressions
+
+@cindex regular expressions
+@cindex macros, how to rename
+@cindex renaming macros
+@cindex GNU extensions
+@deffn {Builtin (gnu)} erenamesyms (@var{regexp}, @var{replacement})
+Global renaming of macros is done by @code{erenamesyms}, which selects
+all macros with names that match @var{regexp}, and renames each match
+according to @var{replacement}.
+
+A macro that does not have a name that matches @var{regexp} is left
+with its original name.  If only part of the name matches, any part of
+the name that is not covered by @var{regexp} is copied to the
+replacement name.  Whenever a match is found in the name, the search
+proceeds from the end of the match, so no character in the original
+name can be substituted twice.  If @var{regexp} matches a string of
+zero length, the start position for the continued search is
+incremented to avoid infinite loops.
+
+Where a replacement is to be made, @var{replacement} replaces the
+matched text in the original name, with @samp{\@var{n}} substituted by
+the text matched by the @var{n}th parenthesized sub-expression of
+@var{regexp}, and @samp{\&} being the text matched by the entire
+regular expression.
+
+The builtin macro @code{erenamesyms} is recognized only when given
+arguments.
+@end deffn
+
+Here is an example that performs the same renaming as the
+@option{--prefix-builtins} option.  Where @option{--prefix-builtins}
+only renames M4 builtin macros, @code{erenamesyms} will rename any
+macros that match when it runs, including text macros.
+
+@example
+erenamesyms(`^.*$', `m4_\&')
+@result{}
+@end example
+
+Here is a more realistic example that performs a similar renaming on
+macros with lowercase names, except that it ignores macros with names
+that begin with @samp{_}, and avoids creating macros with names that
+begin with @samp{m4_m4}.
+
+@example
+erenamesyms(`^[^_]\w*$', `m4_\&')
+@result{}
+m4_erenamesyms(`^m4_m4(\w*)$', `m4_\1')
+@result{}
+@end example
+
+@deffn {Builtin (gnu)} renamesyms (@var{regexp}, @var{replacement})
+Same as @code{erenamesyms}, but using Basic Regular Expression syntax,
+see @xref{Eregexp and Regexp}, for more details.
+@end deffn
+
 
 @node Indir
 @section Indirect call of macros
@@ -3034,7 +3093,7 @@ most common.
 @cindex substitution by regular expression
 @cindex GNU extensions
 @deffn {Builtin (gnu)} epatsubst (@var{string}, @var{regexp}, @w{opt @var{replacement})}
-Global substitution in a string is done by @code{patsubst}, which
+Global substitution in a string is done by @code{epatsubst}, which
 searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.  It uses Extended Regular Expressions
 syntax.
@@ -3054,7 +3113,7 @@ being the text the entire regular expression matched.
 The @var{replacement} argument can be omitted, in which case the text
 matched by @var{regexp} is deleted.
 
-The builtin macro @code{patsubst} is recognized only when given
+The builtin macro @code{epatsubst} is recognized only when given
 arguments.
 @end deffn
 

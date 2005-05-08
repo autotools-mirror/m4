@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000,2004 Free Software Foundation, Inc.
+
+  Copyright (C) 2000, 2004, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,6 +37,8 @@
 #ifndef errno
 int errno;
 #endif
+
+#include <assert.h>
 
 #ifdef NDEBUG
 #  include "m4private.h"
@@ -78,11 +81,13 @@ int errno;
 	BUILTIN(debugfile,	false,	false,	1,	2  )	\
 	BUILTIN(eregexp,	false,	true,	3,	4  )	\
 	BUILTIN(epatsubst,	false,	true,	3,	4  )	\
+	BUILTIN(erenamesyms,	false,	true,	3,	3  )	\
 	BUILTIN(esyscmd,	false,	true,	2,	2  )	\
 	BUILTIN(format,		false,	true,	2,	-1 )	\
 	BUILTIN(indir,		false,	true,	2,	-1 )	\
 	BUILTIN(patsubst,	false,	true,	3,	4  )	\
 	BUILTIN(regexp,		false,	true,	3,	4  )	\
+	BUILTIN(renamesyms,	false,	true,	3,	3  )	\
 	BUILTIN(symbols,	false,	false,	0,	-1 )	\
 	BUILTIN(syncoutput,	false,  true,	2,	2  )	\
 
@@ -120,10 +125,19 @@ m4_macro m4_macro_table[] =
   { 0, 0 },
 };
 
-static void substitute (m4 *context, m4_obstack *obs, const char *victim,
-			const char *repl, struct re_registers *regs);
-static void m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
-			    m4_symbol_value **argv, int syntax);
+static bool regsub	(m4 *context, m4_obstack *obs, const char *caller,
+			 const char *victim, int length, const char *regexp,
+			 struct re_pattern_buffer *buf, const char *replace,
+			 bool ignore_duplicates);
+static void substitute	(m4 *context, m4_obstack *obs, const char *victim,
+			 const char *repl, struct re_registers *regs);
+
+static void m4_regexp_do	(m4 *context, m4_obstack *obs, int argc,
+				 m4_symbol_value **argv, int syntax);
+static void m4_patsubst_do	(m4 *context, m4_obstack *obs, int argc,
+				 m4_symbol_value **argv, int syntax);
+static void m4_renamesyms_do	(m4 *context, m4_obstack *obs, int argc,
+				 m4_symbol_value **argv, int syntax);
 
 
 /* The builtin "builtin" allows calls to builtin macros, even if their
@@ -376,27 +390,39 @@ m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
-
-  struct re_pattern_buffer *buf;/* compiled regular expression */
-  struct re_registers regs;	/* for subexpression matches */
-  int matchpos;			/* start position of match */
-  int offset;			/* current match offset */
   int length;			/* length of first argument */
 
-  regexp = M4ARG (2);
+  struct re_pattern_buffer *buf;/* compiled regular expression */
+
   victim = M4ARG (1);
   length = strlen (victim);
+  regexp = M4ARG (2);
 
   buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
   if (!buf)
     return;
 
-  offset = 0;
-  matchpos = 0;
+  regsub (context, obs, M4ARG(0), victim, length,
+	  regexp, buf, M4ARG(3), false);
+}
+
+
+static bool
+regsub (m4 *context, m4_obstack *obs, const char *caller,
+	const char *victim, int length, const char *regexp,
+	struct re_pattern_buffer *buf, const char *replace,
+	bool ignore_duplicates)
+{
+  struct re_registers regs;	/* for subexpression matches */
+
+  int matchpos	= 0;		/* start position of match */
+  int offset	= 0;		/* current match offset */
+
   while (offset < length)
     {
       matchpos = re_search (buf, victim, length,
 			    offset, length - offset, &regs);
+
       if (matchpos < 0)
 	{
 
@@ -407,8 +433,8 @@ m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 	  if (matchpos == -2)
 	    M4ERROR ((m4_get_warning_status_opt (context), 0,
 		      _("%s: error matching regular expression `%s'"),
-		      M4ARG (0), regexp));
-	  else if (offset < length)
+		      caller, regexp));
+	  else if (!ignore_duplicates && (offset < length))
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
 	}
@@ -420,7 +446,7 @@ m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (context, obs, victim, M4ARG (3), &regs);
+      substitute (context, obs, victim, replace, &regs);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
@@ -430,10 +456,13 @@ m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
       if (regs.start[0] == regs.end[0])
 	obstack_1grow (obs, victim[offset++]);
     }
-  obstack_1grow (obs, '\0');
 
-  return;
+  if (!ignore_duplicates || (matchpos >= 0))
+    obstack_1grow (obs, '\0');
+
+  return (matchpos >= 0);
 }
+
 
 /**
  * patsubst(STRING, REGEXP, [REPLACEMENT])
@@ -478,6 +507,8 @@ M4BUILTIN_HANDLER (symbols)
 	}
       obstack_free (&data_obs, NULL);
     }
+  else
+    assert (!"Unable to import from m4 module");
 }
 
 
@@ -535,6 +566,74 @@ M4BUILTIN_HANDLER (esyscmd)
 	  m4_set_sysval (pclose (pin));
 	}
     }
+}
+
+
+
+/**
+ * renamesyms(REGEXP, REPLACEMENT)
+ **/
+M4BUILTIN_HANDLER (renamesyms)
+{
+  m4_renamesyms_do (context, obs, argc, argv, RE_SYNTAX_BRE);
+}
+
+/**
+ * erenamesyms(REGEXP, REPLACEMENT)
+ **/
+M4BUILTIN_HANDLER (erenamesyms)
+{
+  m4_renamesyms_do (context, obs, argc, argv, RE_SYNTAX_ERE);
+}
+
+
+
+static void
+m4_renamesyms_do (m4 *context, m4_obstack *obs, int argc,
+		  m4_symbol_value **argv, int syntax)
+{
+  const char *regexp;		/* regular expression string */
+  const char *replace;		/* replacement expression string */
+
+  struct re_pattern_buffer *buf;/* compiled regular expression */
+
+  m4_dump_symbol_data	data;
+  m4_obstack		data_obs;
+  m4_obstack		rename_obs;
+
+  M4_MODULE_IMPORT (m4, m4_dump_symbols);
+
+  assert (m4_dump_symbols);
+
+  regexp = M4ARG(1);
+  replace = M4ARG(2);
+
+  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
+  if (!buf)
+    return;
+
+  obstack_init (&rename_obs);
+  obstack_init (&data_obs);
+  data.obs = &data_obs;
+
+  m4_dump_symbols (context, &data, 1, argv, false);
+
+  for (; data.size > 0; --data.size, data.base++)
+    {
+      const char *	name	= data.base[0];
+      int		length	= strlen (name);
+
+      if (regsub (context, &rename_obs, M4ARG(0), name, length,
+		  regexp, buf, replace, true))
+	{
+	  const char *renamed = obstack_finish (&rename_obs);
+
+	  m4_symbol_rename (M4SYMTAB, name, renamed);
+	}
+    }
+
+  obstack_free (&data_obs, NULL);
+  obstack_free (&rename_obs, NULL);
 }
 
 /* Frontend for printf like formatting.  The function format () lives in

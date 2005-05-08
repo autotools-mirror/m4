@@ -31,6 +31,9 @@ BEGIN {
   print ;
   print "AT_BANNER([Documentation examples.])";
   print ;
+  # stop spurious warnings in the erenamesyms checks
+  print "m4_pattern_allow([^m4_(m4|erenamesyms|)$])"
+  print ;
 }
 
 /^@node / {

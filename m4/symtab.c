@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -285,7 +285,6 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
       }
 }
 
-
 static void
 symbol_popval (m4_symbol *symbol)
 {
@@ -309,6 +308,37 @@ symbol_popval (m4_symbol *symbol)
       free (stale);
     }
 }
+
+m4_symbol *
+m4_symbol_rename (m4_symbol_table *symtab, const char *name, const char *rename)
+{
+  m4_symbol *symbol	= NULL;
+  m4_symbol **psymbol;
+
+  assert (symtab);
+  assert (name);
+  assert (rename);
+
+  /* Use a low level hash fetch, so we can save the symbol value when
+     removing the symbol name from the symbol table.  */
+  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
+
+  if (psymbol)
+    {
+      symbol = *psymbol;
+
+      /* Remove the old name from the symbol table.  */
+      free (m4_hash_remove (symtab->table, name));
+      assert (!m4_hash_lookup (symtab->table, name));
+
+      m4_hash_insert (symtab->table, xstrdup (rename), *psymbol);
+    }
+  /* else
+       NAME does not name a symbol in symtab->table!  */
+
+  return symbol;
+}
+
 
 /* Callback used by m4_symbol_popdef () to release the memory used
    by values in the arg_signature hash.  */
