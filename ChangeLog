@@ -1,5 +1,9 @@
 2005-07-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* ltdl/m4/debug.m4 (m4_CHECK_DEBUGGING): Make sure that both $rm
+	and $RM are defined for various versions of
+	AC_LIBTOOL_COMPILER_OPTION.
+
 	* bootstrap (AUTORECONF): New variable to allow user overriding of
 	autoreconf path.
 

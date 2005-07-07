@@ -20,7 +20,7 @@
 ## the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ## Boston, MA 02110-1301, USA.
 
-# serial 7
+# serial 8
 
 # m4_CHECK_DEBUGGING
 # ------------------
@@ -31,6 +31,9 @@ AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],
                            [build for debugging [default=no]])])
 AC_MSG_CHECKING(for compilation debug mode)
 AC_MSG_RESULT([${enable_debug-no}])
+
+: ${rm=rm -f}
+: ${RM=rm -f}
 
 set dummy $CC
 compiler="${compiler-[$]2}"
