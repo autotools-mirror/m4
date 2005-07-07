@@ -3,10 +3,11 @@
 # helps bootstrapping M4, when checked out from CVS
 # requires GNU Autoconf, GNU Automake, GNU Gettext and GNU Libtool
 
-: ${AWK="awk"}
-: ${SED="sed"}
-: ${RM="rm -f"}
-: ${GNULIB_TOOL="gnulib-tool"}
+: ${AWK=awk}
+: ${SED=sed}
+: ${RM=rm -f}
+: ${GNULIB_TOOL=gnulib-tool}
+: ${AUTORECONF=autoreconf}
 
 ltdldir=ltdl
 config_aux_dir=$ltdldir/config
@@ -72,8 +73,8 @@ done
 func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --copy"
 libtoolize --ltdl="$ltdldir" --force --copy
 
-func_echo "running: autoreconf --force --verbose --install"
-autoreconf --force --verbose --install
+func_echo "running: $AUTORECONF --force --verbose --install"
+$AUTORECONF --force --verbose --install
 
 (
   func_echo "generating testsuite"
