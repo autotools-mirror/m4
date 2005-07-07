@@ -291,25 +291,53 @@ applications even to solve simple problems, devoting more time
 debugging their @code{m4} scripts than doing real work.  Beware that
 @code{m4} may be dangerous for the health of compulsive programmers.
 
+
 @node History
 @section Historical references
-
-The historical notes included here are fairly incomplete, and not
-authoritative at all.  Please knowledgeable users help us to more
-properly write this section.
 
 @code{GPM} has been an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
 8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
-While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
-the true intricacies of real life: macros can be recognized without being
-pre-announced, skipping whitespace or end-of-lines is easier, more constructs
-are builtin instead of derived, etc.
+The classic B. Kernighan and P.J. Plauger: ``Software Tools'',
+Addison-Wesley, Inc. (1976) describes and implements a Unix
+macro-processor language, which inspired Dennis Ritchie to write
+@code{m3}, a macro processor for the AP-3 minicomputer.
 
-Originally, @code{m4} was the engine for Rational FORTRAN preprocessor,
-that is, the @code{ratfor} equivalent of @code{cpp}.
+Kernighan and Ritchie then joined forces to develop the original
+@code{m4}, as described in ``The M4 Macro Processor'', Bell
+Laboratories (1977) which had only 21 builtin macros.
+
+While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
+the true intricacies of real life: macros can be recognized without
+being pre-announced, skipping whitespace or end-of-lines is easier,
+more constructs are builtin instead of derived, etc.
+
+Originally, the Kernighan and Plauger macro-processor, and then
+@code{m3} formed the engine for the Rational FORTRAN preprocessor,
+that is, the @code{Ratfor} equivalent of @code{cpp}.  Later, @code{m4}
+was used as a frontend for @code{Ratfor}, @code{C} and @code{Cobol}.
+
+Rene' Seindal released his implementation of @code{m4}, GNU @code{m4},
+in 1990, with the aim of removing the artificial limitations in many
+of the traditional @code{m4}'s: like maximum line length, macro size,
+number of macros and so on.
+
+The late Professor A. Dain Samples described and implemented a further
+evolution in the form of @code{M5}: ``User's Guide to the M5 Macro
+Language: 2nd edition'', Electronic Announcement on comp.compilers
+newsgroup (1992).
+
+Francois Pinard took over maintainance of GNU @code{m4} in 1992, until
+1994 when he released GNU @code{m4} 1.4, which was the stable release
+for 10 years.  In 2004, Paul Eggert released 1.4.1 and 1.4.2 which
+addressed some long standing bugs in the venerable 1.4 release.
+
+Most recently, in 2005 Gary V. Vaughan collected together the many
+patches to GNU @code{m4} 1.4 that were floating around the net and
+released 1.4.3.
+
 
 @node Invoking m4
 @section Invoking @code{m4}
