@@ -1,3 +1,8 @@
+2005-07-07  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* ltdl/m4/m4-gnulib.m4: Update FSF contact address.  Somehow this
+	file escaped the address updates on 2005-05-01.
+
 2005-07-07  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap: Allow user overriding of gnulib-tool location, and
@@ -5,7 +10,7 @@
 	is given as a relative or absolute path, or is found by searching
 	PATH.
 	Reported by Eric Blake <ebb9@byu.net>
-	
+
 2005-07-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* ltdl/m4/debug.m4 (m4_CHECK_DEBUGGING): Make sure that both $rm
