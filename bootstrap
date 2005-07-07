@@ -1,17 +1,19 @@
 #! /bin/sh
 
 # helps bootstrapping M4, when checked out from CVS
-# requires GNU Autoconf, GNU Automake, GNU Gettext and GNU Libtool
+# requires GNU Gettext and bleeding edge GNU Autoconf, Automake & Libtool
 
-: ${AWK=awk}
-: ${SED=sed}
-: ${RM=rm -f}
-: ${GNULIB_TOOL=gnulib-tool}
 : ${AUTORECONF=autoreconf}
+: ${AWK=awk}
+: ${GNULIB_TOOL=gnulib-tool}
+: ${LIBTOOLIZE=libtoolize}
+: ${RM=rm -f}
+: ${SED=sed}
 
 ltdldir=ltdl
 config_aux_dir=$ltdldir/config
 config_macro_dir=$ltdldir/m4
+bailout_cb=:
 
 # List dependencies here too; we don't extract them, otherwise dependent
 # modules could end up being imported to src/ *and* gnu/!
@@ -37,6 +39,47 @@ func_echo ()
     echo $progname: ${1+"$@"}
 }
 
+# func_error arg...
+# Echo program name prefixed message to standard error.
+func_error ()
+{
+    echo $progname: ${1+"$@"} >&2
+}
+
+
+## ---------------------------- ##
+## Find the gnulib module tree. ##
+## ---------------------------- ##
+
+case $GNULIB_TOOL in
+    /*  )  gnulibdir=$GNULIB_TOOL ;; 		# absolute
+    */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
+    *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
+esac
+
+# Follow symlinks
+while test -h "$gnulibdir"; do
+  
+    # Resolve symbolic link.
+    sedexpr1='s, -> ,#%%#,'
+    sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
+    linkval=`LC_ALL=C ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
+    test -n "$linkval" || break
+
+    case "$linkval" in
+        /* ) gnulibdir="$linkval" ;;
+        * )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
+    esac
+
+done
+
+gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+
+
+## ---------------------- ##
+## Import Gnulib modules. ##
+## ---------------------- ##
+
 func_echo "running: ${GNULIB_TOOL} --import"
 ${GNULIB_TOOL} --import
 
@@ -52,8 +95,12 @@ AC_DEFUN([gl_AC_HEADER_STDINT_H], [jm_AC_HEADER_STDINT_H])
 AC_DEFUN([gl_AC_TYPE_UINTMAX_T], [jm_AC_TYPE_UINTMAX_T])
 EOF
 
+
+## --------------------------------- ##
+## Copy additional src only modules. ##
+## --------------------------------- ##
+
 func_echo "fetching modules for src directory"
-gnulibdir=`which gnulib-tool | $SED "$dirname"`
 
 for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
 
@@ -66,15 +113,37 @@ for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
 	       ;;
     esac
 
-    func_echo "copying file \`$dest'"
-    cp $gnulibdir/$file $dest
+    # Be sure to show all copying errors before bailing out
+    if test -f $gnulibdir/$file; then
+        func_echo "copying file \`$dest'"
+        cp $gnulibdir/$file $dest
+    else
+	func_error "$gnulibdir/$file does not exist"
+	bailout_cb="exit 1"
+    fi
 done
+$bailout_cb
 
-func_echo "running: libtoolize --ltdl=\"$ltdldir\" --force --copy"
-libtoolize --ltdl="$ltdldir" --force --copy
+
+## ----------- ##
+## Libtoolize. ##
+## ----------- ##
+
+func_echo "running: $LIBTOOLIZE --ltdl=\"$ltdldir\" --force --copy"
+$LIBTOOLIZE --ltdl="$ltdldir" --force --copy
+
+
+## ----------- ##
+## Autoreconf. ##
+## ----------- ##
 
 func_echo "running: $AUTORECONF --force --verbose --install"
 $AUTORECONF --force --verbose --install
+
+
+## ---------- ##
+## testsuite. ##
+## ---------- ##
 
 (
   func_echo "generating testsuite"
