@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -260,6 +260,7 @@ static const struct option long_options[] =
 int
 main (int argc, char *const *argv, char *const *envp)
 {
+  int retcode = EXIT_SUCCESS;
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
   macro_definition *new;
@@ -485,6 +486,9 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
+		/* Set the status to EXIT_FAILURE, even though we
+		   continue to process files after a missing file.  */
+		retcode = EXIT_FAILURE;
 		continue;
 	      }
 	    else
@@ -507,5 +511,5 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
       undivert_all ();
     }
 
-  exit (EXIT_SUCCESS);
+  exit (retcode);
 }

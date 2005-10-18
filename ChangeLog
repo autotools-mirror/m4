@@ -1,5 +1,9 @@
 2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
 
+	* src/m4.c: fix return code when non-existent files are processed
+
+2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
+
 	* README: update email address for bug reports.
 
 2005-10-17  Gary V. Vaughan  <gary@gnu.org>
