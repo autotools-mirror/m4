@@ -25,7 +25,7 @@ By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
 `m4'.  This might go away, so don't count on it yet.
 
-Send bug reports to `bug-gnu-utils@prep.ai.mit.edu'.  A bug report is
-an adequate description of the problem: your input, what you expected,
-what you got, and why this is wrong.  Diffs are welcome, but they only
-describe a solution, from which the problem might be uneasy to infer.
+Send bug reports to `bug-m4@gnu.org'.  A bug report is an adequate
+description of the problem: your input, what you expected, what you got,
+and why this is wrong.  Diffs are welcome, but they only describe a
+solution, from which the problem might be uneasy to infer.

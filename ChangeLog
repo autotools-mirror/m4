@@ -1,3 +1,11 @@
+2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
+
+	* README: update email address for bug reports.
+
+2005-10-17  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/m4.info: Generated files are not kept in the repository.
+
 2005-05-01  Gary V. Vaughan  <gary@gnu.org>
 
 	The FSF are moving offices today.  Changed their contact address
@@ -1750,4 +1758,4 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
-	$Revision$ $Date$
+	$Revision: 1.1.1.1.2.27 $ $Date: 2005/10/18 11:29:12 $
