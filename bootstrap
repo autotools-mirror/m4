@@ -9,6 +9,7 @@
 : ${LIBTOOLIZE=libtoolize}
 : ${RM=rm -f}
 : ${SED=sed}
+: ${DOWNLOAD_PO=yes}
 
 ltdldir=ltdl
 config_aux_dir=$ltdldir/config
@@ -47,6 +48,40 @@ func_error ()
 }
 
 
+## ------------------------------ ##
+## Fetch translations.            ##
+## (taken from GNU tar bootstrap) ##
+## ------------------------------ ##
+
+TP_URL="http://www.iro.umontreal.ca/translation/maint/m4/"
+
+func_update_po ()
+{
+    if test $# = 1; then
+      case $1 in
+        *.po)  POFILE=$1    ;;
+	*)     POFILE=$1.po ;;
+      esac
+      func_echo "getting translation for $1..."
+      wget -r -C off $TP_URL/$POFILE
+    else
+      func_echo "getting translations into po..."
+      (cd po &&
+       rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'` &&
+         wget -nv -nd -r -l 1 -A .po -C off $TP_URL &&
+	 rm -f index.html index.html.[0-9]*
+       ls *.po | sed 's/\.po$//' > LINGUAS
+      ) || exit
+    fi
+}
+
+case $DOWNLOAD_PO in
+  no)   ;;
+  only) func_update_po; exit 0 ;;
+  yes)  func_update_po ;;
+  *)    func_update_po $DOWNLOAD_PO ;;
+esac
+
 ## ---------------------------- ##
 ## Find the gnulib module tree. ##
 ## ---------------------------- ##
@@ -59,7 +94,7 @@ esac
 
 # Follow symlinks
 while test -h "$gnulibdir"; do
-  
+
     # Resolve symbolic link.
     sedexpr1='s, -> ,#%%#,'
     sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
@@ -150,5 +185,10 @@ $AUTORECONF --force --verbose --install
   cd tests
   $AWK -f ./generate.awk ../doc/m4.texinfo > generated.at
 )
+
+if test x"$DOWNLOAD_PO" != xno; then
+  func_echo "If your pofiles are uptodate, you can rerun bootstrap"
+  func_echo "as \`DOWNLOAD_PO=no $progname' to avoid redownloading."
+fi
 
 exit 0

@@ -1,3 +1,12 @@
+2005-10-20  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap (func_update_po): Update pofiles directly from the
+	translation project.
+	* po/LINGUAS, po/cs.po, po/de.po, po/el.po, po/fr.po, po/it.po,
+	po/ja.po, po/nl.po, po/pl.po, po/ru.po, po/sv.po: No need to store
+	these files under source control anymore.
+	Suggested by Eric Blake <ebb9@byu.net>
+
 2005-07-07  Paul Eggert  <eggert@cs.ucla.edu>
 
 	* ltdl/m4/m4-gnulib.m4: Update FSF contact address.  Somehow this
