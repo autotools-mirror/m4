@@ -1,9 +1,10 @@
 GNU m4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005 Free Software Foundation, Inc.
 
-Version 1.4.4 - ??? 2005, by ???
+Version 1.4.4 - October 2005, by Gary V. Vaughan
 
 * ./configure --infodir=/usr/share/info now works correctly.
+* When any file named on the command line is missing exit with status 1.
 
 Version 1.4.3 - March 2005, by Gary V. Vaughan
 

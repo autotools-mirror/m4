@@ -1,3 +1,11 @@
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
+	Release 1.4.4:
+
+	* configure.ac (AC_INIT): Bump to 1.4.4.
+	* NEWS: Describe 1.4.4's changes.
+	* INSTALL, install-sh, doc/texinfo.tex: Updated from upstream.
+
 2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
 
 	* src/m4.c: fix return code when non-existent files are processed
