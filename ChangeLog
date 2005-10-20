@@ -1,4 +1,8 @@
-2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+2005-10-19  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	* configure.ac (AC_INIT): Bump to 1.4.4a.
+
+2005-10-19  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	Release 1.4.4:
 
