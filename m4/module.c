@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1998, 1999, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1998, 1999, 2002, 2003, 2004, 2005
+                 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -90,7 +91,7 @@ static const m4_macro *   install_macro_table   (m4*, lt_dlhandle);
 static int	    m4__module_interface	(lt_dlhandle handle,
 						 const char *id_string);
 
-static lt_dlcaller_id caller_id = 0;
+static lt_dlinterface_id iface_id = 0;
 
 const char *
 m4_get_module_name (lt_dlhandle handle)
@@ -108,7 +109,7 @@ void *
 m4_module_import (m4 *context, const char *module_name,
 		  const char *symbol_name, m4_obstack *obs)
 {
-  lt_dlhandle	handle		= lt_dlhandle_find (module_name);
+  lt_dlhandle	handle		= m4__module_find (module_name);
   lt_ptr	symbol_address	= 0;
 
   /* Try to load the module if it is not yet available (errors are
@@ -253,7 +254,7 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
   assert (context);
 
   if (name)
-    handle = lt_dlhandle_find (name);
+    handle = m4__module_find (name);
 
   if (!handle)
     {
@@ -287,11 +288,23 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
 
 
 /* Return successive loaded modules that pass the interface test registered
-   with the caller id.  */
+   with the interface id.  */
 lt_dlhandle
 m4__module_next (lt_dlhandle handle)
 {
-  return handle ? lt_dlhandle_next (handle) : lt_dlhandle_first (caller_id);
+  assert (iface_id);
+
+  return lt_dlhandle_iterate (iface_id, handle);
+}
+
+/* Return the first loaded module that passes the registered interface test
+   and is called NAME.  */
+lt_dlhandle
+m4__module_find (const char *name)
+{
+  assert (iface_id);
+
+  return lt_dlhandle_fetch (iface_id, name);
 }
 
 
@@ -304,9 +317,9 @@ m4__module_init (m4 *context)
 {
   int errors = 0;
 
-  /* Do this only once!  If we already have a caller_id, then the
+  /* Do this only once!  If we already have an iface_id, then the
      module system has already been initialised.  */
-  if (caller_id)
+  if (iface_id)
     {
       M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("Warning: multiple module loader initialisations")));
@@ -319,9 +332,9 @@ m4__module_init (m4 *context)
      ltdl module handles.  */
   if (!errors)
     {
-      caller_id = lt_dlcaller_register ("m4 libm4", m4__module_interface);
+      iface_id = lt_dlinterface_register ("m4 libm4", m4__module_interface);
 
-      if (!caller_id)
+      if (!iface_id)
 	{
 	  const char *error_msg = _("libltdl client registration failed");
 
@@ -369,7 +382,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
   m4_module_init_func *	init_func	= 0;
 
   assert (context);
-  assert (caller_id);
+  assert (iface_id);		/* need to have called m4__module_init */
 
   if (handle)
     {
@@ -423,18 +436,18 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 void
 m4__module_exit (m4 *context)
 {
-  lt_dlhandle	handle	= lt_dlhandle_first (caller_id);
+  lt_dlhandle	handle	= m4__module_next (0);
   int		errors	= 0;
 
   while (handle && !errors)
     {
+      const lt_dlinfo *info	= lt_dlgetinfo (handle);
       lt_dlhandle      pending	= handle;
-      const lt_dlinfo *info	= lt_dlgetinfo (pending);
 
       /* If we are about to unload the final reference, move on to the
 	 next handle before we unload the current one.  */
       if (info->ref_count <= 1)
-	handle = lt_dlhandle_next (pending);
+	handle = m4__module_next (handle);
 
       errors = module_remove (context, pending, 0);
     }

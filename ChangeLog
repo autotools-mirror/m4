@@ -1,5 +1,18 @@
 2005-10-20  Gary V. Vaughan  <gary@gnu.org>
 
+	* m4/module.c (caller_id): To match libtool-2.0 interface, changed
+	to ...
+	(iface_id): ...an lt_dlinterface_id type.
+	(m4__module_find): New abstraction for lt_dlhandle_fetch.  Use
+	throughout, instead of calling obsolete lt_dlhandle_find directly.
+	(m4__module_next): Use multiloader-safe lt_dlhandle_iterate.  Use
+	throughout, instead of calling obsolete lt_dlhandle_next.
+	* m4/m4private.h (m4__module_find): Declare it.
+	* m4/builtin.c (m4_builtin_find_by_name, m4_builtin_find_by_func):
+	Use m4__module_next instead of obsolete lt_dlhandle_next.
+
+2005-10-20  Gary V. Vaughan  <gary@gnu.org>
+
 	* bootstrap (func_update_po): Update pofiles directly from the
 	translation project.
 	* po/LINGUAS, po/cs.po, po/de.po, po/el.po, po/fr.po, po/it.po,

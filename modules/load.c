@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -93,14 +93,14 @@ M4BUILTIN_HANDLER (modules)
 {
   /* The expansion of this builtin is a comma separated list of
      loaded modules.  */
-  lt_dlhandle handle = lt_dlhandle_next (NULL);
+  lt_dlhandle handle = m4__module_next (NULL);
 
   if (handle)
     do
       {
 	m4_shipout_string (context, obs, m4_get_module_name (handle), 0, true);
 
-	if ((handle = lt_dlhandle_next (handle)))
+	if ((handle = m4__module_next (handle)))
 	  obstack_1grow (obs, ',');
       }
     while (handle);

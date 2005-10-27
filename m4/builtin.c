@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1999, 2000, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 const m4_builtin *
 m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 {
-  lt_dlhandle cur = handle ? handle : lt_dlhandle_next (0);
+  lt_dlhandle cur = handle ? handle : m4__module_next (0);
 
   do
     {
@@ -41,7 +41,7 @@ m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 	      return builtin;
 	}
     }
-  while (!handle && (cur = lt_dlhandle_next (cur)));
+  while (!handle && (cur = m4__module_next (cur)));
 
   return 0;
 }
@@ -51,7 +51,7 @@ m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 const m4_builtin *
 m4_builtin_find_by_func (lt_dlhandle handle, m4_builtin_func *func)
 {
-  lt_dlhandle cur = handle ? handle : lt_dlhandle_next (0);
+  lt_dlhandle cur = handle ? handle : m4__module_next (0);
 
   do
     {
@@ -65,7 +65,7 @@ m4_builtin_find_by_func (lt_dlhandle handle, m4_builtin_func *func)
 	      return builtin;
 	}
     }
-  while (!handle && (cur = lt_dlhandle_next (cur)));
+  while (!handle && (cur = m4__module_next (cur)));
 
   return 0;
 }

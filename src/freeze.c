@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 04 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 2004, 2005
+                 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -463,7 +464,7 @@ reload_frozen_state (m4 *context, const char *name)
 	  lt_dlhandle handle   = 0;
 
 	  if (number[2] > 0)
-	    handle = lt_dlhandle_find (string[2]);
+	    handle = m4__module_find (string[2]);
 
 	  if (handle)
 	    bp = m4_builtin_find_by_name (handle, string[1]);
@@ -660,7 +661,7 @@ reload_frozen_state (m4 *context, const char *name)
 	  lt_dlhandle handle = 0;
 
 	  if (number[2] > 0)
-	    handle = lt_dlhandle_find (string[2]);
+	    handle = m4__module_find (string[2]);
 
 	  m4_set_symbol_value_text (token, xstrdup (string[1]));
 	  VALUE_HANDLE (token)		= handle;
