@@ -1,4 +1,10 @@
-2005-12-04  Gary V. Vaughan  <gary@gnu.org> (tiny change)
+2005-12-04  Ilya N. Golubev  <gin@mo.msk.ru>  (tiny change)
+
+	* input.c (match_input): Do not pass expression with side effect
+	to `obstack_grow'.  Fix <INTERNAL ERROR: Recursive push_string!>.
+	* NEWS: Updated.
+
+2005-12-04  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* doc/m4.texinfo (How to debug macros and input): s/woould/would/
 	Reported by Damian Menscher <menscher@uiuc.edu>

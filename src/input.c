@@ -531,7 +531,12 @@ match_input (const char *s)
     }
 
   /* Failed, push back input.  */
-  obstack_grow (push_string_init (), t, n);
+  {
+    struct obstack *h = push_string_init ();
+
+    /* `obstack_grow' may be macro evaluating its arg 1 several times. */
+    obstack_grow (h, t, n);
+  }
   push_string_finish ();
   return 0;
 }
