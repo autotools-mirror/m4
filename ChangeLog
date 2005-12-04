@@ -1,3 +1,9 @@
+2005-12-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap (func_update_po): Test and set $WGETFLAGS to disable
+	http caching as -C is no longer supported by wget 1.10.x.
+	Reported by Eric Blake <ebb9@byu.net>
+
 2005-10-20  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/module.c (caller_id): To match libtool-2.0 interface, changed
