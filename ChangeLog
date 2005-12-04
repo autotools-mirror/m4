@@ -1,3 +1,8 @@
+2005-12-04  Gary V. Vaughan  <gary@gnu.org> (tiny change)
+
+	* doc/m4.texinfo (How to debug macros and input): s/woould/would/
+	Reported by Damian Menscher <menscher@uiuc.edu>
+
 2005-10-19  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* configure.ac (AC_INIT): Bump to 1.4.4a.

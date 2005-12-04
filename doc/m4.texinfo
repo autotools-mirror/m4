@@ -1527,7 +1527,7 @@ a name.  Correcting these errors are left as an exercise to the reader.
 @node Debugging, Input Control, Conditionals, Top
 @chapter How to debug macros and input
 
-When writing macros for @code{m4}, most of the time they woould not
+When writing macros for @code{m4}, most of the time they would not
 work as intended (as is the case with most programming languages).
 There is a little support for macro debugging in @code{m4}.
 
