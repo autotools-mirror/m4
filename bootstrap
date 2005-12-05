@@ -57,11 +57,6 @@ func_error ()
 
 TP_URL="http://www.iro.umontreal.ca/translation/maint/m4/"
 
-WGETFLAGS="--no-cache"
-case `wget $WGETFLAGS 2>&1` in
-  *"unrecognized option \`--no-cache'"*) WGETFLAGS="--cache=off" ;;
-esac
-
 func_update_po ()
 {
     if test $# = 1; then
@@ -70,12 +65,12 @@ func_update_po ()
 	*)     POFILE=$1.po ;;
       esac
       func_echo "getting translation for $1..."
-      $WGET -r $WGETFLAGS $TP_URL/$POFILE
+      $WGET -r --cache=off $TP_URL/$POFILE
     else
       func_echo "getting translations into po..."
       (cd po &&
        rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'` &&
-         $WGET -nv -nd -r -l 1 -A .po $WGETFLAGS $TP_URL &&
+         $WGET -nv -nd -r -l 1 -A .po --cache=off $TP_URL &&
 	 rm -f index.html index.html.[0-9]*
        ls *.po | sed 's/\.po$//' > LINGUAS
       ) || exit

@@ -1,3 +1,9 @@
+2005-12-05  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap (func_update_po): Synch with CVS GNU tar.  wget 1.9.x
+	and 1.10.x support --cache=off, so $WGETFLAGS are not necessary.
+	Reported by Eric Blake <ebb9@byu.net>
+
 2005-12-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap (func_update_po): Test and set $WGETFLAGS to disable
