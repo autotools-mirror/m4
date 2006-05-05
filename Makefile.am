@@ -1,6 +1,7 @@
 ## This file is part of GNU M4.
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006 Free Software
+## Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -150,13 +151,13 @@ endif
 ## pkglibexec_LTLIBRARIES         += modules/perl.la
 ## modules_perl_la_CPPFLAGS	= `$(PERL) -MExtUtils::Embed -e ccopts`
 ## modules_perl_la_LDFLAGS		= \
-## 		  $(module_ldflags) `$(PERL) -MExtUtils::Embed -e ldopts`
+##		  $(module_ldflags) `$(PERL) -MExtUtils::Embed -e ldopts`
 ## modules_perl_la_LIBADD		= $(module_libadd)
 ## BUILT_SOURCES			= perlxsi.c
 ## DISTCLEANFILES		       += $(BUILT_SOURCES)
 ##
 ## perlxsi.c:
-## 	$(PERL) -MExtUtils::Embed -e xsinit -- -o perlxsi.c
+##	$(PERL) -MExtUtils::Embed -e xsinit -- -o perlxsi.c
 
 module_check	= -rpath /dev/null
 check_LTLIBRARIES = \
@@ -244,10 +245,10 @@ ltdl/libltdlc.la:
 info_TEXINFOS	= doc/m4.texinfo
 dist_man_MANS	= $(srcdir)/doc/m4.1
 
-$(srcdir)/doc/m4.1: doc/helptoman.pl src/m4
-	@if test -f src/m4; then \
+$(srcdir)/doc/m4.1: doc/helptoman.pl src/m4$(EXEEXT)
+	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
-	  $(PERL) $(srcdir)/doc/helptoman.pl src/m4 > $@-tmp; \
+	  $(PERL) $(srcdir)/doc/helptoman.pl src/m4$(EXEEXT) > $@-tmp; \
 	  cmp -s $@-tmp $(srcdir)/doc/$@ || cp $@-tmp $(srcdir)/doc/$@; \
 	  rm -f $@-tmp; \
 	else \
