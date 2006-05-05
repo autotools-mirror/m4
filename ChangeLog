@@ -1,3 +1,22 @@
+2006-05-05  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (doc/m4.1): Use $@, not $(srcdir)/doc/$@.
+
+	* THANKS: Update.
+
+2006-05-05  Bruno Haible  <bruno@clisp.org>
+	    Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (gl_SOURCE_BASE, gl_M4_BASE, gl_MODULES): Move to...
+	* ltdl/m4/gnulib-cache.m4: ...this new file, per new gnulib-tool
+	usage pattern.
+	* bootstrap: Update usage of gnulib-tool.
+
+2006-05-04  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (doc/m4.1): Use EXEEXT on built binary.
+	Cleanup whitespace.
+
 2005-12-05  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap (func_update_po): Synch with CVS GNU tar.  wget 1.9.x
