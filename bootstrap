@@ -89,7 +89,7 @@ esac
 ## ---------------------------- ##
 
 case $GNULIB_TOOL in
-    /*  )  gnulibdir=$GNULIB_TOOL ;; 		# absolute
+    /*  )  gnulibdir=$GNULIB_TOOL ;;		# absolute
     */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
     *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
 esac
@@ -117,8 +117,8 @@ gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
 ## Import Gnulib modules. ##
 ## ---------------------- ##
 
-func_echo "running: ${GNULIB_TOOL} --import"
-${GNULIB_TOOL} --import
+func_echo "running: ${GNULIB_TOOL} --update"
+${GNULIB_TOOL} --update
 
 func_echo "patching include directories in gnulib regex module"
 mv $config_macro_dir/regex.m4 $config_macro_dir/regex-m4.old

@@ -1,5 +1,5 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005
+# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005, 2006
 # Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -143,11 +143,6 @@ m4_GNU_GETTEXT
 ## --------------- ##
 ## Gnulib support, ##
 ## --------------- ##
-gl_SOURCE_BASE(gnu)
-gl_M4_BASE(ltdl/m4)
-# We also use getopt and version-etc, but they are copied into
-# the project tree by bootstrap since they are used only by m4 itself.
-gl_MODULES(assert error exit free gettext mkstemp obstack progname regex stdbool strtol xalloc xalloc-die xstrndup)
 gl_INIT
 
 # Gnulib doesn't always do things quite the way M4 would like...
