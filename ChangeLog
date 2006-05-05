@@ -1310,7 +1310,7 @@
 	    Gary V. Vaughan  <gary@gnu.org>
 
 	Conform to POSIX if the POSIXLY_CORRECT environment is set.
-        --traditional `define' now smashes all the definitions.
+	--traditional `define' now smashes all the definitions.
 
 	* NEWS: Explain this.
 	* doc/m4.texinfo (Defn): `defn' takes any number of arguments.
@@ -4269,7 +4269,7 @@
 	(m4_dumpdef): Use it.
 	(m4_symbols): New function, implementing `symbols'.  Use it.
 	* doc/m4.texinfo: Fixed missing commas after @xref, so that the
- 	file compile with modern makeinfo.
+	file compile with modern makeinfo.
 	(Symbols): New node, documenting symbols.
 	(direntry): Modernize.
 
