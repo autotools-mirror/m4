@@ -249,7 +249,7 @@ $(srcdir)/doc/m4.1: doc/helptoman.pl src/m4$(EXEEXT)
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(PERL) $(srcdir)/doc/helptoman.pl src/m4$(EXEEXT) > $@-tmp; \
-	  cmp -s $@-tmp $(srcdir)/doc/$@ || cp $@-tmp $(srcdir)/doc/$@; \
+	  cmp -s $@-tmp $@ || cp $@-tmp $@; \
 	  rm -f $@-tmp; \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
