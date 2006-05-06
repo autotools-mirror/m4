@@ -1,10 +1,11 @@
 *.o
 *.lo
 *.la
-perlxsi.c
-testSubDir
 .deps
+.dirstamp
 .libs
+compile
 Makefile
 Makefile.in
-compile
+perlxsi.c
+testSubDir

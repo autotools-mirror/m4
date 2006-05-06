@@ -1,8 +1,19 @@
+*.aux
+*.cp
+*.cps
+*.dvi
+*.fn
+*.fns
+*.ky
+*.log
+*.pg
+*.toc
+*.tp
+*.vr
+.dirstamp
 Makefile.in
 Makefile
-m4.info
-version.texi
-stamp-vti
 m4.info*
 m4.1
-*.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.log *.pg *.toc *.tp *.vr
+stamp-vti
+version.texi

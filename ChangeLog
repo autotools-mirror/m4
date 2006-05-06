@@ -1,5 +1,15 @@
 2006-05-05  Eric Blake  <ebb9@byu.net>
 
+	* .cvsignore: Update.
+	* doc/.cvsignore: Likewise.
+	* m4/.cvsignore: Likewise.
+	* modules/.cvsignore: Likewise.
+	* po/.cvsignore: Likewise.
+	* src/.cvsignore: Likewise.
+	* ltdl/.cvsignore: New file.
+	* ltdl/config/.cvsignore: Likewise.
+	* ltdl/m4/.cvsignore: Likewise.
+
 	* Makefile.am (doc/m4.1): Use $@, not $(srcdir)/doc/$@.
 
 	* THANKS: Update.

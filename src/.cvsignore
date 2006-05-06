@@ -1,9 +1,11 @@
 *.o
 *.lo
 *.la
-getopt.h
-m4
 .deps
+.dirstamp
 .libs
+getopt*
+m4
 Makefile
 Makefile.in
+version-etc*
