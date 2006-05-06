@@ -1,3 +1,10 @@
+2006-05-06  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (LT_CONFIG_LTDL_DIR): Inform libtool which
+	subdirectory to use.
+	(support for -pipe): Move after LT_INIT, since it relies on
+	libtool internals.
+
 2006-05-05  Eric Blake  <ebb9@byu.net>
 
 	* .cvsignore: Update.

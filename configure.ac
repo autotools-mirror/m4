@@ -110,6 +110,16 @@ AC_PROG_CPP
 AM_PROG_CC_C_O
 m4_CHECK_DEBUGGING
 
+
+
+## ----------------------- ##
+## Libtool initialisation. ##
+## ----------------------- ##
+LT_PREREQ([2.0])
+LT_CONFIG_LTDL_DIR([ltdl])
+LT_INIT([shared dlopen win32-dll])
+LT_WITH_LTDL([ltdl])
+
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
   *-pipe* ) ;;
@@ -119,15 +129,6 @@ case "$CFLAGS" in
                 [CFLAGS="$CFLAGS -pipe"])
               ;;
 esac
-
-
-
-## ----------------------- ##
-## Libtool initialisation. ##
-## ----------------------- ##
-LT_PREREQ([2.0])
-LT_INIT([shared dlopen win32-dll])
-LT_WITH_LTDL([ltdl])
 
 
 
