@@ -1,3 +1,9 @@
+2006-05-06  Eric Blake  <ebb9@byu.net>
+
+	* Makevars (MSGID_BUGS_ADDRESS): Add.
+	* POTFILES.in (src/getopt.c, src/version-etc.c): These files live
+	in src, not gnu.
+
 2004-09-23  Gary V. Vaughan  <gary@gnu.org>
 
 	* POTFILES.in: Reflect move of gnulib files from gnulib/m4
