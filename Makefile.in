@@ -1,6 +1,6 @@
 ## Makefile.in -- Main Makefile for GNU m4.
 ##
-## Copyright (C) 1992, 1993, 1994, 2005 Free Software Foundation, Inc.
+## Copyright (C) 1992, 1993, 1994, 2005, 2006 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
 infodir = @infodir@
+datarootdir = @datarootdir@
 
 MDEFINES = CC='$(CC)' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' \
 prefix='$(prefix)' exec_prefix='$(exec_prefix)' \

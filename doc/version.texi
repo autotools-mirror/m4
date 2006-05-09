@@ -1,3 +1,0 @@
-@set EDITION 1.4.4a
-@set UPDATED October 2005
-@set VERSION 1.4.4a

@@ -1,3 +1,9 @@
+2006-05-09  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (main): Bump copyright year.
+	* Makefile.in (datarootdir): Define, for autoconf 2.59c.
+	* doc/Makefile.in (datarootdir): Likewise.
+
 2006-05-08  Eric Blake  <ebb9@byu.net>
 
 	* THANKS: Update.
