@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -426,6 +426,10 @@ M4BUILTIN_HANDLER (defn)
 /* Exit code from last "syscmd" command.  */
 int  m4_sysval = 0;
 
+#ifndef WEXITSTATUS
+# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#endif
+
 void
 m4_set_sysval (int value)
 {
@@ -451,7 +455,7 @@ M4BUILTIN_HANDLER (syscmd)
 
 M4BUILTIN_HANDLER (sysval)
 {
-  m4_shipout_int (obs, (m4_sysval >> 8) & 0xff);
+  m4_shipout_int (obs, WEXITSTATUS (m4_sysval));
 }
 
 

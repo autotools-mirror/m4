@@ -1,6 +1,5 @@
 /* GNU m4 -- A simple macro processor
-
-  Copyright (C) 2000, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -557,7 +556,7 @@ M4BUILTIN_HANDLER (esyscmd)
 	{
 	  M4ERROR ((m4_get_warning_status_opt (context), errno,
 		    _("Cannot open pipe to command `%s'"), M4ARG (1)));
-	  m4_set_sysval (0xff << 8);
+	  m4_set_sysval (0xffff);
 	}
       else
 	{
