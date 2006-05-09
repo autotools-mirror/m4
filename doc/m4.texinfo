@@ -24,8 +24,8 @@
 @ifnottex
 This file documents GNU M4 @value{VERSION}.
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free Software
-Foundation, Inc.
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
+Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -522,10 +522,9 @@ say what you expected to occur; this will help us decide whether the
 problem was really in the documentation.
 
 Once you've got a precise problem, send e-mail to (Internet)
-@file{bug-gnu-utils@@prep.ai.mit.edu} or (UUCP)
-@file{mit-eddie!prep.ai.mit.edu!bug-gnu-utils}.  Please include the
-version number of @code{m4} you are using.  You can get this information
-with the command @samp{m4 --version}.
+@email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
+you are using.  You can get this information with the command @samp{m4
+--version}.
 
 Non-bug suggestions are always welcome as well.  If you have questions
 about things that are unclear in the documentation or are just obscure

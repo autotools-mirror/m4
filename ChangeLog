@@ -1,3 +1,9 @@
+2006-05-08  Eric Blake  <ebb9@byu.net>
+
+	* THANKS: Update.
+	* doc/m4.texinfo (Bugs): Backport bug email address from head.
+	Reported by Stepan Kasal <kasal@ucw.cz>
+
 2005-12-04  Ilya N. Golubev  <gin@mo.msk.ru>  (tiny change)
 
 	* input.c (match_input): Do not pass expression with side effect
