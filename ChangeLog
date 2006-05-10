@@ -1,5 +1,9 @@
 2006-05-09  Eric Blake  <ebb9@byu.net>
 
+	* install-sh: Update to newer upstream version.
+	* mkinstalldirs: Likewise.
+	Reported by Andreas Buening <andreas.buening@nexgo.de>
+
 	* src/m4.c (main): Bump copyright year.
 	* Makefile.in (datarootdir): Define, for autoconf 2.59c.
 	* doc/Makefile.in (datarootdir): Likewise.

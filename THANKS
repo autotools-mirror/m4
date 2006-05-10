@@ -1,6 +1,6 @@
 GNU m4 THANKS file
 
-GNU m4 has originally been written by Rene' Seindal.  Many people
+GNU m4 has originally been written by René Seindal.  Many people
 further contributed to GNU m4 by reporting problems, suggesting
 various improvements or submitting actual code.  Here is a list of
 these people.  Help me keep it complete and exempt of errors.
@@ -9,6 +9,7 @@ Akiko Matsushita	matusita@sra.co.jp
 Alan Magnuson		awm@osc.edu
 Alexander Lehmann	alex@hal.rhein-main.de
 Amos Shapira		amoss@cs.huji.ac.il
+Andreas Büning		andreas.buening@nexgo.de
 Andreas Gustafsson	gson@niksula.hut.fi
 Andreas Schwab		schwab@ls5.informatik.uni-dortmund.de
 Assar Westerlund	assar@nada.kth.se
