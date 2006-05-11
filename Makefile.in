@@ -54,7 +54,7 @@ SUBDIRS = doc lib src checks examples
 
 DISTFILES = README NEWS TODO THANKS COPYING INSTALL ChangeLog c-boxes.el \
 configure.ac aclocal.m4 mkinstalldirs install-sh Makefile.in Makefile.maint \
-stamp-h.in config-h.in configure BACKLOG
+stamp-h.in config-h.in configure BACKLOG bootstrap
 
 .SUFFIXES:
 

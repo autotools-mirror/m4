@@ -1,5 +1,9 @@
 2006-05-11  Eric Blake  <ebb9@byu.net>
 
+	* bootstrap: New file, so that generated files need not be stored
+	in CVS.
+	* Makefile.in (DISTFILES): Add bootstrap.
+
 	Make testsuite less sensitive to doc changes.
 	* doc/m4.texinfo: Use m4.input instead of filename.
 	* checks/check-them (xerr): Turn m4.input into filename.

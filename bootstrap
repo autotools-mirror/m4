@@ -1,0 +1,7 @@
+#! /bin/sh
+
+# helps bootstrapping M4, when checked out from CVS
+# requires GNU Autoconf 2.5x.
+
+: ${AUTORECONF=autoreconf}
+$AUTORECONF --force --verbose --install
