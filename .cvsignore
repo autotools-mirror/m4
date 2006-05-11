@@ -1,6 +1,9 @@
 autom4te.cache
+config.cache
 config.h
 config.log
 config.status
+configure.lineno
 Makefile
 stamp-h
+stamp-h.in
