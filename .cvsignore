@@ -1,8 +1,12 @@
+*.tar.bz2
+*.tar.gz
 autom4te.cache
 config.cache
 config.h
 config.log
 config.status
+config-h.in
+configure
 configure.lineno
 Makefile
 stamp-h
