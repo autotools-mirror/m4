@@ -38,6 +38,8 @@ datarootdir = @datarootdir@
 DISTFILES = Makefile.in m4.texinfo texinfo.tex \
 stamp-vti version.texi m4.info
 
+INFO_DEPS = $(srcdir)/m4.info
+
 all: m4.info
 
 info: m4.info
@@ -64,8 +66,27 @@ install: all
 	cd $(srcdir) && for file in m4.info*; do \
 	  $(INSTALL_DATA) $$file $(DESTDIR)$(infodir)/$$file; \
 	done
+	@if (install-info --version && \
+	     install-info --version 2>&1 | sed 1q | grep -i -v debian) >/dev/null 2>&1; then \
+	  list='$(INFO_DEPS)'; \
+	  for file in $$list; do \
+	    relfile=`echo "$$file" | sed 's|^.*/||'`; \
+	    echo " install-info --info-dir='$(DESTDIR)$(infodir)' '$(DESTDIR)$(infodir)/$$relfile'";\
+	    install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$$relfile" || :;\
+	  done; \
+	else : ; fi
 
 uninstall:
+	@if test -d '$(DESTDIR)$(infodir)' && \
+	    (install-info --version && \
+	     install-info --version 2>&1 | sed 1q | grep -i -v debian) >/dev/null 2>&1; then \
+	  list='$(INFO_DEPS)'; \
+	  for file in $$list; do \
+	    relfile=`echo "$$file" | sed 's|^.*/||'`; \
+	    echo " install-info --info-dir='$(DESTDIR)$(infodir)' --remove '$(DESTDIR)$(infodir)/$$relfile'"; \
+	    install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$$relfile"; \
+	  done; \
+	else :; fi
 	rm -f $(DESTDIR)$(infodir)/m4.info*
 
 mostlyclean:

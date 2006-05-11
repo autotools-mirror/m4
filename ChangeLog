@@ -1,3 +1,16 @@
+2006-05-11  Eric Blake  <ebb9@byu.net>
+
+	Portability updates for OS/2.
+	* THANKS: Update.
+	* src/Makefile.in (EXEEXT, OBJEXT): Define.
+	(LINK): Use CFLAGS.
+	(.c.obj): Define.
+	* lib/Makefile.in (OBJEXT): Define.
+	(.c.obj): Define.
+	* doc/Makefile.in (install, uninstall): Install info files into
+	the dir listing.
+	Reported by Andreas Buening  <andreas.buening@nexgo.de>
+
 2006-05-09  Eric Blake  <ebb9@byu.net>
 
 	* install-sh: Update to newer upstream version.

@@ -1,6 +1,6 @@
 ## Makefile.in -- Makefile for GNU m4 library.
 ##
-## Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+## Copyright (C) 1992, 1993, 1994, 2006 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -29,13 +29,16 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
+OBJEXT = @OBJEXT@
 RANLIB = @RANLIB@
 
 COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 
 .SUFFIXES:
-.SUFFIXES: .c .o
+.SUFFIXES: .c .o .obj
 .c.o:
+	$(COMPILE) $<
+.c.obj:
 	$(COMPILE) $<
 
 INCLUDES = -I.. -I$(srcdir)
@@ -43,8 +46,8 @@ INCLUDES = -I.. -I$(srcdir)
 HEADERS = getopt.h obstack.h regex.h
 SOURCES = regex.c getopt.c getopt1.c error.c obstack.c xmalloc.c \
 xstrdup.c alloca.c strtol.c
-OBJECTS = regex.o getopt.o getopt1.o error.o obstack.o xmalloc.o \
-xstrdup.o @ALLOCA@ @LIBOBJS@
+OBJECTS = regex.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) error.$(OBJEXT) \
+obstack.$(OBJEXT) xmalloc.$(OBJEXT) xstrdup.$(OBJEXT) @ALLOCA@ @LIBOBJS@
 
 DISTFILES = COPYING.LIB Makefile.in $(HEADERS) $(SOURCES) \
 TAGS
@@ -68,7 +71,7 @@ TAGS: $(HEADERS) $(SOURCES)
 	cd $(srcdir) && etags $(HEADERS) $(SOURCES)
 
 mostlyclean:
-	rm -f *.o
+	rm -f *.o *.obj
 
 clean: mostlyclean
 	rm -f libm4.a
