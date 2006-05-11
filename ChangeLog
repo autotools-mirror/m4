@@ -1,5 +1,9 @@
 2006-05-11  Eric Blake  <ebb9@byu.net>
 
+	* THANKS: Update.
+	* doc/m4.texinfo (Changequote): Give testsuite exposure to bug
+	patched on 2005-12-04.  Reported by Ilya N. Golubev <gin@mo.msk.ru>
+
 	* bootstrap: New file, so that generated files need not be stored
 	in CVS.
 	* Makefile.in (DISTFILES): Add bootstrap.

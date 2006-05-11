@@ -1807,12 +1807,12 @@ If no single character is appropriate, @var{start} and @var{end} can be
 of any length.
 
 @example
-changequote([[, ]])
+changequote([[[, ]]])
 @result{}
-define([[foo]], [[Macro [[[foo]]].]])
+define([[[foo]]], [[[Macro [[[[[foo]]]]].]]])
 @result{}
 foo
-@result{}Macro [foo].
+@result{}Macro [[foo]].
 @end example
 
 Changing the quotes to the empty strings will effectively disable the
