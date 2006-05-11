@@ -1,5 +1,5 @@
 ##
-## Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+## Copyright (C) 1992, 1993, 1994, 2006 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ distclean: clean
 realclean: distclean
 	rm -f $(CHECKS) stamp-checks
 
-dist: $(DISTFILES)
+dist: $(DISTFILES) stamp-checks
 	@echo "Copying distribution files"
 	@for file in $(DISTFILES); do \
 	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/checks 2> /dev/null \

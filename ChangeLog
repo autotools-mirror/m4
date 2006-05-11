@@ -1,7 +1,11 @@
 2006-05-11  Eric Blake  <ebb9@byu.net>
 
+	Make testsuite less sensitive to doc changes.
+	* doc/m4.texinfo: Use m4.input instead of filename.
+	* checks/check-them (xerr): Turn m4.input into filename.
+	* checks/Makefile.in (dist): Depend on stamp-checks.
+
 	Portability updates for OS/2.
-	* THANKS: Update.
 	* src/Makefile.in (EXEEXT, OBJEXT): Define.
 	(LINK): Use CFLAGS.
 	(.c.obj): Define.

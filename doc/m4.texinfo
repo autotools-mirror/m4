@@ -2080,7 +2080,7 @@ does not.
 @example
 include(`no-such-file')
 @result{}
-@error{}30.include:2: m4: Cannot open no-such-file: No such file or directory
+@error{}m4.input:2: m4: Cannot open no-such-file: No such file or directory
 sinclude(`no-such-file')
 @result{}
 @end example
@@ -2821,7 +2821,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo'/6)
-@error{}51.eval:14: m4: Bad expression in eval: foo/6
+@error{}m4.input:14: m4: Bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3054,7 +3054,7 @@ current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `Input error
 ')
-@error{}m4:56.errprint:2: Input error
+@error{}m4:m4.input:2: Input error
 @result{}
 @end example
 
@@ -3079,7 +3079,7 @@ define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: 57.m4exit: 5: fatal error: This is a BAD one, buster
+@error{}m4: m4.input: 5: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
