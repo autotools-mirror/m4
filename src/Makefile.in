@@ -1,6 +1,6 @@
 ## Makefile.in -- Makefile for GNU m4 sources.
 ##
-## Copyright (C) 1994, 2005 Free Software Foundation, Inc.
+## Copyright (C) 1994, 2005, 2006 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,10 +28,12 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
+EXEEXT = @EXEEXT@
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
+OBJEXT = @OBJEXT@
 STACKOVF = @STACKOVF@
 
 prefix = @prefix@
@@ -40,15 +42,17 @@ transform = @program_transform_name@
 bindir = @bindir@
 
 COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(CC) $(LDFLAGS) -o $@
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
 .SUFFIXES:
-.SUFFIXES: .c .o
+.SUFFIXES: .c .o .obj
 .c.o:
+	$(COMPILE) $<
+.c.obj:
 	$(COMPILE) $<
 
 ANSI2KNR = @ANSI2KNR@
-O = .@U@o
+O = .@U@$(OBJEXT)
 
 .SUFFIXES: ._c ._o
 .c._c:
@@ -56,12 +60,12 @@ O = .@U@o
 ._c._o:
 	@echo $(COMPILE) $<
 	@rm -f _$*.c
-	@ln $< _$*.c && $(COMPILE) _$*.c && mv _$*.o $@ && rm _$*.c
+	@ln $< _$*.c && $(COMPILE) _$*.c && mv _$*.$(OBJEXT) $@ && rm _$*.c
 .c._o:
 	./ansi2knr --varargs $< > $*._c
 	@echo $(COMPILE) $*._c
 	@rm -f _$*.c
-	@ln $*._c _$*.c && $(COMPILE) _$*.c && mv _$*.o $@ && rm _$*.c
+	@ln $*._c _$*.c && $(COMPILE) _$*.c && mv _$*.$(OBJEXT) $@ && rm _$*.c
 
 INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/../lib
 
@@ -74,24 +78,24 @@ macro$O output$O path$O $(STACKOVF) symtab$O
 DISTFILES = Makefile.in ansi2knr.c ansi2knr.1 $(HEADERS) $(SOURCES) \
 TAGS
 
-all: m4
+all: m4$(EXEEXT)
 
-m4: $(OBJECTS) ../lib/libm4.a
+m4$(EXEEXT): $(OBJECTS) ../lib/libm4.a
 	$(LINK) $(OBJECTS) ../lib/libm4.a $(LIBS)
 
 $(OBJECTS): $(ANSI2KNR) ../config.h m4.h ../lib/obstack.h
 builtin$O: ../lib/regex.h
 
-ansi2knr: ansi2knr.o
-	$(LINK) ansi2knr.o $(LIBS)
+ansi2knr: ansi2knr.$(OBJEXT)
+	$(LINK) ansi2knr.$(OBJEXT) $(LIBS)
 
 install: all
 	$(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir)
-	$(INSTALL_PROGRAM) m4 \
-		$(DESTDIR)$(bindir)/`echo m4 | sed '$(transform)'`
+	$(INSTALL_PROGRAM) m4$(EXEEXT) \
+		$(DESTDIR)$(bindir)/"`echo m4 | sed '$(transform)'`"$(EXEEXT)
 
 uninstall:
-	rm -f $(DESTDIR)$(bindir)/`echo m4 | sed '$(transform)'`
+	rm -f $(DESTDIR)$(bindir)/"`echo m4 | sed '$(transform)'`"$(EXEEXT)
 
 tags: TAGS
 
@@ -99,10 +103,10 @@ TAGS: $(HEADERS) $(SOURCES)
 	cd $(srcdir) && etags -i ../lib/TAGS $(HEADERS) $(SOURCES)
 
 mostlyclean:
-	rm -f *.o *._c *._o core core.*
+	rm -f *.o *.obj *._c *._o core core.*
 
 clean: mostlyclean
-	rm -f m4
+	rm -f m4$(EXEEXT)
 
 distclean: clean
 	rm -f Makefile ansi2knr
