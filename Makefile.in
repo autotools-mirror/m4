@@ -64,7 +64,7 @@ all install uninstall: config.h
 	  (cd $$subdir && $(MAKE) $(MDEFINES) $@) || exit 1; \
 	done
 
-info dvi:
+info dvi html:
 	cd doc && $(MAKE) $@
 
 check: all

@@ -9,9 +9,9 @@
 
 @include version.texi
 
-@ifinfo
-@set Francois Franc,ois
-@end ifinfo
+@ifnottex
+@set Francois Fran@,{c}ois
+@end ifnottex
 @tex
 @set Francois Fran\noexpand\ptexc cois
 @end tex
@@ -2466,8 +2466,16 @@ regexp(@var{string}, @var{regexp}, opt @var{replacement})
 
 @noindent
 which searches for @var{regexp} in @var{string}.  The syntax for regular
-expressions is the same as in GNU Emacs.  @xref{Regexps, , Syntax of
-Regular Expressions, emacs, The GNU Emacs Manual}.
+expressions is the same as in GNU Emacs.
+@ifnothtml
+@xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
+Manual}.
+@end ifnothtml
+@ifhtml
+See
+@uref{http://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
+Syntax of Regular Expressions} in the GNU Emacs Manual.
+@end ifhtml
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
 the first match of @var{regexp} in @var{string}.  If @var{regexp} does

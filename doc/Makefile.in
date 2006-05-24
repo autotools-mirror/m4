@@ -27,6 +27,7 @@ VPATH = @srcdir@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 MAKEINFO = makeinfo
+MAKEINFOHTML = $(MAKEINFO) --html
 TEXI2DVI = texi2dvi
 
 prefix = @prefix@
@@ -51,6 +52,22 @@ dvi: m4.dvi
 
 m4.dvi: m4.texinfo version.texi
 	$(TEXI2DVI) $(srcdir)/m4.texinfo
+
+html: m4.html
+
+m4.html: m4.texinfo version.texi
+	rm -rf $(@:.html=.htp)
+	if $(MAKEINFOHTML) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
+	 -o $(@:.html=.htp) `test -f 'm4.texinfo' || echo '$(srcdir)/'`m4.texinfo; \
+	then \
+	  rm -rf $@; \
+	  if test ! -d $(@:.html=.htp) && test -d $(@:.html=); then \
+	    mv $(@:.html=) $@; else mv $(@:.html=.htp) $@; fi; \
+	else \
+	  if test ! -d $(@:.html=.htp) && test -d $(@:.html=); then \
+	    rm -rf $(@:.html=); else rm -Rf $(@:.html=.htp) $@; fi; \
+	  exit 1; \
+	fi
 
 version.texi: stamp-vti
 stamp-vti: m4.texinfo ../configure.ac

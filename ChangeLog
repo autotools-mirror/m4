@@ -1,8 +1,23 @@
+2006-05-24  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.in (html): New target.
+	* doc/Makefile.in (html, m4.html): Likewise.
+	(MAKEINFOHTML): New macro.
+	* doc/m4.texinfo (Francois) [ifnottex]: Use newer texinfo
+	rendering.
+	(Regexp) [ifhtml]: Make cross-reference to emacs manual an
+	absolute URL.
+	Reported by Bob Badour.
+
+	* THANKS: Update.  Move reporter's email addresses here, instead
+	of in ChangeLog.
+
 2006-05-11  Eric Blake  <ebb9@byu.net>
 
 	* THANKS: Update.
 	* doc/m4.texinfo (Changequote): Give testsuite exposure to bug
-	patched on 2005-12-04.  Reported by Ilya N. Golubev <gin@mo.msk.ru>
+	patched on 2005-12-04.
+	Reported by Ilya N. Golubev.
 
 	* bootstrap: New file, so that generated files need not be stored
 	in CVS.
@@ -21,13 +36,13 @@
 	(.c.obj): Define.
 	* doc/Makefile.in (install, uninstall): Install info files into
 	the dir listing.
-	Reported by Andreas Buening  <andreas.buening@nexgo.de>
+	Reported by Andreas Buening.
 
 2006-05-09  Eric Blake  <ebb9@byu.net>
 
 	* install-sh: Update to newer upstream version.
 	* mkinstalldirs: Likewise.
-	Reported by Andreas Buening <andreas.buening@nexgo.de>
+	Reported by Andreas Buening.
 
 	* src/m4.c (main): Bump copyright year.
 	* Makefile.in (datarootdir): Define, for autoconf 2.59c.
@@ -37,7 +52,7 @@
 
 	* THANKS: Update.
 	* doc/m4.texinfo (Bugs): Backport bug email address from head.
-	Reported by Stepan Kasal <kasal@ucw.cz>
+	Reported by Stepan Kasal.
 
 2005-12-04  Ilya N. Golubev  <gin@mo.msk.ru>  (tiny change)
 
@@ -48,7 +63,7 @@
 2005-12-04  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* doc/m4.texinfo (How to debug macros and input): s/woould/would/
-	Reported by Damian Menscher <menscher@uiuc.edu>
+	Reported by Damian Menscher.
 
 2005-10-19  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
@@ -146,7 +161,7 @@
 
 	* lib/regex.c, lib/regex.h:  Reverted gnulib update, which broke
 	on Cygwin.
-	Reported by Eric Blake <ebb9@byu.net>
+	Reported by Eric Blake.
 
 2005-02-04  Gary V. Vaughan  <gary@gnu.org>
 
@@ -154,7 +169,7 @@
 	* src/input.c (set_word_regexp):  Don't change the word_regexp
 	unless it compiles correctly.
 	* NEWS: Updated.
-	Reported by Frank Schwidom <schwidom@impernet.de>
+	Reported by Frank Schwidom.
 
 	* Makefile.in (stamp-h): Regenerate config.h properly.
 
@@ -167,7 +182,7 @@
 	recognition macros.
 	* src/freeze.c (produce_frozen_state): Use \n line-endings even
 	on Windows, so that the frozen file reader will work.
-	Reported by Josef T. Burger <bolo@bolo.com>
+	Reported by Josef T. Burger.
 
 	* src/m4.c (main): Modernise the --version output.
 
