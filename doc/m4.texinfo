@@ -9,13 +9,6 @@
 
 @include version.texi
 
-@ifnottex
-@set Francois Fran@,{c}ois
-@end ifnottex
-@tex
-@set Francois Fran\noexpand\ptexc cois
-@end tex
-
 @dircategory GNU programming tools
 @direntry
 * m4: (m4).			A powerful macro processor.
@@ -57,7 +50,8 @@ by the Foundation.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
+2006 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -89,7 +83,7 @@ GNU @code{m4} for generating @file{configure} scripts, but not for
 running them.
 
 GNU @code{m4} was originally written by Ren@'e Seindal, with
-subsequent changes by @value{Francois} Pinard and other volunteers
+subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
 file @file{THANKS} from the GNU @code{m4} distribution.
 
