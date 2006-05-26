@@ -1,5 +1,8 @@
 2006-05-25  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Fix spelling errors.  Use `invalid' instead of
+	`illegal'.
+
 	* doc/m4.texinfo (Francois): No longer needed as a tex variable.
 	Reported by Karl Berry.
 

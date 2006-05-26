@@ -230,7 +230,7 @@ Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU m4
 * Incompatibilities::           Facilities in System V m4 not in GNU m4
-* Other Incompat::              Other incompatibilities
+* Other Incompatibilities::     Other incompatibilities
 
 @end detailmenu
 @end menu
@@ -270,8 +270,8 @@ macro processor in its own right.
 
 The @code{m4} macro processor is widely available on all UNIXes.
 Usually, only a small percentage of users are aware of its existence.
-However, those who do often become commited users.  The growing
-popularity of GNU Autoconf, which prerequires GNU @code{m4} for
+However, those who do often become committed users.  The growing
+popularity of GNU Autoconf, which requires GNU @code{m4} for
 @emph{generating} the @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
 program in @code{m4}.  GNU @code{m4} is mostly compatible with the
@@ -295,7 +295,7 @@ properly write this section.
 
 @code{GPM} has been an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
-8,3 (1965), pp. 225 ff.  @code{GPM} is also succintly described into
+8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
 While @code{GPM} was @emph{pure}, @code{m4} was meant to deal more
@@ -320,7 +320,7 @@ The format of the @code{m4} command is:
 @cindex options, command line
 All options begin with @samp{-}, or if long option names are used, with
 a @samp{--}.  A long option name need not be written completely, and
-unambigous prefix is sufficient.  @code{m4} understands the following
+unambiguous prefix is sufficient.  @code{m4} understands the following
 options:
 
 @table @code
@@ -372,7 +372,7 @@ output will be unbuffered, and interrupts will be ignored.
 
 @item -s
 @itemx --synclines
-Generate synchronisation lines, for use by the C preprocessor or other
+Generate synchronization lines, for use by the C preprocessor or other
 similar tools.  This is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
 is conveyed by directives of the form @samp{#line @var{linenum}
@@ -382,9 +382,9 @@ expanded from the contents of input file @var{filename} at line
 @var{linenum}.  The @samp{"@var{filename}"} part is often omitted when
 the file name did not change from the previous directive.
 
-Synchronisation directives are always given on complete lines per
-themselves.  When a synchronisation discrepancy occurs in the middle of
-an output line, the associated synchronisation directive is delayed
+Synchronization directives are always given on complete lines per
+themselves.  When a synchronization discrepancy occurs in the middle of
+an output line, the associated synchronization directive is delayed
 until the beginning of the next generated line.
 
 @item -P
@@ -433,7 +433,7 @@ problem in general, if not undecidable!
 @item -Q
 @itemx --quiet
 @itemx --silent
-Suppress warnings about missing or superflous arguments in macro calls.
+Suppress warnings about missing or superfluous arguments in macro calls.
 
 @item -B
 @itemx -S
@@ -983,7 +983,7 @@ or more digits, allowing macros to have any number of arguments.  This
 is not so in UNIX implementations of @code{m4}, which only recognize
 one digit.
 
-As a special case, the zero'th argument, @code{$0}, is always the name
+As a special case, the zeroth argument, @code{$0}, is always the name
 of the macro being expanded.
 
 @example
@@ -1262,7 +1262,7 @@ indir(@var{name}, ...)
 @end example
 @noindent
 which results in a call to the macro @var{name}, which is passed the
-rest of the arguments.  This can be used to call macros with ``illegal''
+rest of the arguments.  This can be used to call macros with ``invalid''
 names (@code{define} allows such names to be defined):
 
 @example
@@ -1455,10 +1455,10 @@ reverse(foo, bar, gnats, and gnus)
 While not a very interesting macro, it does show how simple loops can be
 made with @code{shift}, @code{ifelse} and recursion.
 
-@cindex forloops
+@cindex for loops
 @cindex loops, counting
 @cindex counting loops
-Here is an example of a loop macro that implements a simple forloop.  It
+Here is an example of a loop macro that implements a simple for loop.  It
 can, for example, be used for simple counting:
 
 @comment ignore
@@ -1668,7 +1668,7 @@ Show the the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
-mecanism (@pxref{Search Path}), giving the actual filename used.
+mechanism (@pxref{Search Path}), giving the actual filename used.
 
 @item i
 Print a message each time the current input file is changed, giving file
@@ -1889,10 +1889,10 @@ changecom
 @cindex words, lexical structure of
 @findex changeword
 @quotation
-The macro @code{changeword} and all associated functionnality is
+The macro @code{changeword} and all associated functionality is
 experimental.  It is only available if the @code{--enable-changeword}
 option was given to @code{configure}, at GNU @code{m4} installation
-time.  The functionnality might change or even go away in the future.
+time.  The functionality might change or even go away in the future.
 @emph{Do not rely on it}.  Please direct your comments about it the
 same way you would do for bugs.
 @end quotation
@@ -3029,9 +3029,9 @@ standard error output.
 The expansion of @code{errprint} is void.
 
 @example
-errprint(`Illegal arguments to forloop
+errprint(`Invalid arguments to forloop
 ')
-@error{}Illegal arguments to forloop
+@error{}Invalid arguments to forloop
 @result{}
 @end example
 
@@ -3243,7 +3243,7 @@ is made to summarize these here.
 @menu
 * Extensions::                  Extensions in GNU m4
 * Incompatibilities::           Facilities in System V m4 not in GNU m4
-* Other Incompat::              Other incompatibilities
+* Other Incompatibilities::     Other incompatibilities
 @end menu
 
 @node Extensions, Incompatibilities, Compatibility, Compatibility
@@ -3315,7 +3315,7 @@ description of these options.
 Also, the debugging and tracing facilities in GNU @code{m4} are much
 more extensive than in most other versions of @code{m4}.
 
-@node Incompatibilities, Other Incompat, Extensions, Compatibility
+@node Incompatibilities, Other Incompatibilities, Extensions, Compatibility
 @section Facilities in System V @code{m4} not in GNU @code{m4}
 
 The version of @code{m4} from System V contains a few facilities that
@@ -3327,7 +3327,7 @@ System V @code{m4} supports multiple arguments to @code{defn}.  This is
 not implemented in GNU @code{m4}.  Its usefulness is unclear to me.
 @end itemize
 
-@node Other Incompat,  , Incompatibilities, Compatibility
+@node Other Incompatibilities,  , Incompatibilities, Compatibility
 @section Other incompatibilities
 
 There are a few other incompatibilities between this implementation of
@@ -3352,7 +3352,7 @@ the error messages should most probably refer to the place where the
 diversion were made, and not where it was inserted again.
 
 @item
-GNU @code{m4} makes no attempt at prohiting autoreferential definitions
+GNU @code{m4} makes no attempt at prohibiting self-referential definitions
 like:
 
 @comment ignore
@@ -3410,3 +3410,8 @@ characters removed in the index.
 @summarycontents
 @contents
 @bye
+
+@c Local Variables:
+@c fill-column: 72
+@c ispell-local-dictionary: "american"
+@c End:
