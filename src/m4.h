@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -43,11 +43,8 @@
 # define voidstar char *
 #endif
 
-#ifdef PROTOTYPES
-# define _(Args) Args
-#else
-# define _(Args) ()
-#endif
+/* FIXME - we no longer need this ansi2knr hack.  */
+#define _(Args) Args
 
 #include <stdio.h>
 #include <ctype.h>
@@ -315,7 +312,7 @@ struct token_data
 # define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
 #endif
 #define TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
-#define TOKEN_DATA_FUNC_TRACED(Td) 	((Td)->u.u_f.traced)
+#define TOKEN_DATA_FUNC_TRACED(Td)	((Td)->u.u_f.traced)
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;

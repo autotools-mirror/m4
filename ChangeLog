@@ -1,3 +1,16 @@
+2006-05-27  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac: Update to autoconf 2.59.  Forbid ^M4_.  Fix
+	quoting.
+	* aclocal.m4 (fp_PROG_CC_STDC): Delete; now covered by autoconf.
+	(fp_C_PROTOTYPES): Delete, GNU Coding Standards state we can now
+	assume C89.
+	(M4_WITH_DMALLOC): Rename from fp_WITH_DMALLOC. Fix quoting.
+	* src/m4.h (_): PROTOTYPES is no longer provided, assume C89.
+	* src/Makefile.in: Delete remains of ansi2knr.
+	* src/ansi2knr.1: Delete.
+	* src/ansi2knr.c: Delete.
+
 2006-05-25  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Fix spelling errors.  Use `invalid' instead of
