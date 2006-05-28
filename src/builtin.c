@@ -231,16 +231,18 @@ builtin_init (void)
 
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
-      if (prefix_all_builtins)
-	{
-	  string = (char *) xmalloc (strlen (bp->name) + 4);
-	  strcpy (string, "m4_");
-	  strcat (string, bp->name);
-	  define_builtin (string, bp, SYMBOL_INSERT, FALSE);
-	  free (string);
-	}
-      else
-	define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+      {
+        if (prefix_all_builtins)
+          {
+            string = (char *) xmalloc (strlen (bp->name) + 4);
+            strcpy (string, "m4_");
+            strcat (string, bp->name);
+            define_builtin (string, bp, SYMBOL_INSERT, FALSE);
+            free (string);
+          }
+        else
+          define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+      }
 
   for (pp = &predefined_tab[0]; pp->func != NULL; pp++)
     if (no_gnu_extensions)

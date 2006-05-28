@@ -3,7 +3,7 @@
    (Implements POSIX draft P10003.2/D11.2, except for
    internationalization features.)
 
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -2057,10 +2057,12 @@ regex_compile (pattern, size, syntax, bufp)
               if (syntax & RE_NO_BK_PARENS) goto normal_backslash;
 
               if (COMPILE_STACK_EMPTY)
-                if (syntax & RE_UNMATCHED_RIGHT_PAREN_ORD)
-                  goto normal_backslash;
-                else
-                  FREE_STACK_RETURN (REG_ERPAREN);
+                {
+                  if (syntax & RE_UNMATCHED_RIGHT_PAREN_ORD)
+                    goto normal_backslash;
+                  else
+                    FREE_STACK_RETURN (REG_ERPAREN);
+                }
 
             handle_close:
               if (fixup_alt_jump)
@@ -2077,10 +2079,12 @@ regex_compile (pattern, size, syntax, bufp)
 
               /* See similar code for backslashed left paren above.  */
               if (COMPILE_STACK_EMPTY)
-                if (syntax & RE_UNMATCHED_RIGHT_PAREN_ORD)
-                  goto normal_char;
-                else
-                  FREE_STACK_RETURN (REG_ERPAREN);
+                {
+                  if (syntax & RE_UNMATCHED_RIGHT_PAREN_ORD)
+                    goto normal_char;
+                  else
+                    FREE_STACK_RETURN (REG_ERPAREN);
+                }
 
               /* Since we just checked for an empty stack above, this
                  ``can't happen''.  */

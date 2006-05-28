@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 2004 Free Software
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 2004, 2006 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -134,7 +134,7 @@ path_search (const char *dir)
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
-	    DEBUG_MESSAGE (("path search for `%s' found `%s'", dir, name));
+	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", dir, name);
 	  break;
 	}
     }

@@ -1,5 +1,11 @@
 2006-05-27  Eric Blake  <ebb9@byu.net>
 
+	* lib/regex.c (regex_compile): Kill compiler warnings.
+	* lib/getopt.c: Likewise.
+	* lib/obstack.c: Likewise.
+	* src/builtin.c (builtin_init): Likewise.
+	* src/path.c (path_search): Likewise.
+
 	* doc/m4.texinfo: Fix usage of a vs. an.
 	(Loops, Include, Cleardiv, Patsubst, Format, M4exit): Kill
 	overfull hbox warnings.
