@@ -329,7 +329,7 @@ Print the version number of the program on standard output, then
 immediately exit @code{m4} without reading any @var{input-files}.
 
 @item --help
-Print an help summary on standard output, then immediately exit
+Print a help summary on standard output, then immediately exit
 @code{m4} without reading any @var{input-files}.
 
 @item -G
@@ -771,11 +771,13 @@ The output of macro evaluations is always rescanned.  The following
 example would yield the string @samp{de}, exactly as if @code{m4}
 has been given @w{@samp{substr(abcde, 3, 2)}} as input:
 
-@comment ignore
 @example
 define(`x', `substr(ab')
+@result{}
 define(`y', `cde, 3, 2)')
+@result{}
 x`'y
+@result{}de
 @end example
 
 Unquoted strings on either side of a quoted string are subject to
@@ -953,7 +955,7 @@ The macro @code{define} is recognized only with parameters.
 @cindex Arguments to macros
 Macros can have arguments.  The @var{n}th argument is denoted by
 @code{$n} in the expansion text, and is replaced by the @var{n}th actual
-argument, when the macro is expanded.  Here is a example of a macro with
+argument, when the macro is expanded.  Here is an example of a macro with
 two arguments.  It simply exchanges the order of the two arguments.
 
 @example
@@ -1501,10 +1503,10 @@ Here is the actual implementation of @code{forloop}:
 @comment ignore
 @example
 define(`forloop',
-       `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+       `pushdef(`$1', `$2')_forloop(`$1',`$2',`$3',`$4')popdef(`$1')')
 define(`_forloop',
        `$4`'ifelse($1, `$3', ,
-		   `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+		   `define(`$1', incr($1))_forloop(`$1',`$2',`$3',`$4')')')
 @end example
 
 Notice the careful use of quotes.  Only three macro arguments are
@@ -1913,8 +1915,9 @@ apply translations to a file of numbers:
 @comment ignore
 @example
 changeword(`[_a-zA-Z0-9]+')
-define(1, 0)
-@result{}1
+@result{}
+define(1, 0)1
+@result{}0
 @end example
 
 Tightening the lexical rules is less useful, because it will generally
@@ -1924,9 +1927,14 @@ accidental call of builtins, for example:
 @comment ignore
 @example
 define(`_indir', defn(`indir'))
+@result{}
 changeword(`_[_a-zA-Z0-9]*')
+@result{}
 esyscmd(foo)
-_indir(`esyscmd', `ls')
+@result{}esyscmd(foo)
+_indir(`esyscmd', `echo hi')
+@result{}hi
+@result{}
 @end example
 
 Because @code{m4} constructs its words a character at a time, there
@@ -1935,14 +1943,17 @@ is a restriction on the regular expressions that may be passed to
 @samp{foo}, it must also accept @samp{f} and @samp{fo}.
 
 @code{changeword} has another function.  If the regular expression
-supplied contains any bracketed subexpressions, then text outside
+supplied contains any grouped subexpressions, then text outside
 the first of these is discarded before symbol lookup.  So:
 
 @comment ignore
 @example
-changecom(`/*', `*/')
+changecom(`/*', `*/')dnl
+define(`foo', `bar')dnl
 changeword(`#\([_a-zA-Z0-9]*\)')
-#esyscmd(ls)
+@result{}
+#esyscmd(`echo foo')
+@result{}bar
 @end example
 
 @code{m4} now requires a @samp{#} mark at the beginning of every
@@ -1960,8 +1971,9 @@ First, the @TeX{} version:
 \def\a@{\message@{Hello@}@}
 \catcode`\@@=0
 \catcode`\\=12
-@result{}@@a
-@result{}@@bye
+@@a
+@@bye
+@result{}Hello
 @end example
 
 @noindent
@@ -1969,9 +1981,10 @@ Then, the @code{m4} version:
 
 @comment ignore
 @example
-define(a, `errprint(`Hello')')
+define(a, `errprint(`Hello')')dnl
 changeword(`@@\([_a-zA-Z0-9]*\)')
-@result{}@@a
+@@a
+@result{}errprint(Hello)
 @end example
 
 In the @TeX{} example, the first line defines a macro @code{a} to
@@ -2072,10 +2085,10 @@ be used to include a file, if it exists, expanding to nothing if it
 does not.
 
 @example
-include(`no-such-file')
+include(`none')
 @result{}
-@error{}m4.input:2: m4: Cannot open no-such-file: No such file or directory
-sinclude(`no-such-file')
+@error{}m4.input:2: m4: Cannot open none: No such file or directory
+sinclude(`none')
 @result{}
 @end example
 
@@ -2207,7 +2220,20 @@ This text is not diverted.
 @end example
 
 Several calls of @code{divert} with the same argument do not overwrite
-the previous diverted text, but append to it.
+the previous diverted text, but append to it.  Diversions are printed
+after any wrapped text is expanded.
+
+@example
+define(`text', `TEXT')
+@result{}
+divert(`1')`diverted text.'
+divert
+@result{}
+m4wrap(`Wrapped text preceeds ')
+@result{}
+^D
+@result{}Wrapped TEXT preceeds diverted text.
+@end example
 
 If output is diverted to a non-existent diversion, it is simply
 discarded.  This can be used to suppress unwanted output.  A common
@@ -2369,7 +2395,7 @@ Clearing selected diversions can be done with the following macro:
 
 @example
 define(`cleardivert',
-`pushdef(`_num', divnum)divert(-1)undivert($@@)divert(_num)popdef(`_num')')
+`pushdef(`_n', divnum)divert(-1)undivert($@@)divert(_n)popdef(`_n')')
 @result{}
 @end example
 
@@ -2626,9 +2652,10 @@ word or whole sentences, by substituting calls of the macros
 define(`upcase', `translit(`$*', `a-z', `A-Z')')dnl
 define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
 define(`capitalize1',
-     `regexp(`$1', `^\(\w\)\(\w*\)', `upcase(`\1')`'downcase(`\2')')')dnl
+       `regexp(`$1', `^\(\w\)\(\w*\)',
+               `upcase(`\1')`'downcase(`\2')')')dnl
 define(`capitalize',
-     `patsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
+       `patsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
 capitalize(`GNUs not Unix')
 @result{}Gnus Not Unix
 @end example
@@ -2660,8 +2687,8 @@ Its use is best described by a few examples:
 @example
 define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
-format(`The string "%s" is %d characters long', foo, len(foo))
-@result{}The string "The brown fox jumped over the lazy dog" is 38 characters long
+format(`The string "%s" uses %d characters', foo, len(foo))
+@result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
 @end example
 
 Using the @code{forloop} macro defined in @xref{Loops}, this
@@ -2794,7 +2821,7 @@ bitwise exclusive-or.  GNU @code{m4} changed its behavior: it used to
 exponentiate for @samp{^}, it now computes the bitwise exclusive-or.
 
 Numbers without special prefix are given decimal.  A simple @samp{0}
-prefix introduces an octal number.  @samp{0x} introduces an hexadecimal
+prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
 number.  @samp{0b} introduces a binary number.  @samp{0r} introduces a
 number expressed in any radix between 1 and 36: the prefix should be
 immediately followed by the decimal expression of the radix, a colon,
@@ -2995,6 +3022,26 @@ maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
 @end example
 
+@ignore
+@c FIXME: POSIX requires maketemp to replace the trailing XXX with the
+@c process id, without creating the file; meaning you only get one
+@c string no matter how many times you use maketemp.  Instead, we treat
+@c it like mkstemp(), and create a unique file every invocation.
+
+@c This test makes sure maketemp gets testsuite coverage, but is
+@c somewhat complex for use in the manual.
+@example
+define(`file1', maketemp(`./fooXXXXXX'))dnl
+define(`file2', maketemp(`./fooXXXXXX'))dnl
+ifelse(file1, file2, `same', `different')
+@result{}different
+syscmd(`rm 'file1 file2)
+@result{}
+sysval
+@result{}0
+@end example
+@end ignore
+
 The builtin macro @code{maketemp} is recognized only when given
 arguments.
 
@@ -3077,17 +3124,27 @@ which causes @code{m4} to exit, with exit code @var{code}.  If
 @var{code} is left out, the exit code is zero.
 
 @example
-define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
+define(`fatal_error',
+       `errprint(`m4: '__file__: __line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: m4.input: 5: fatal error: This is a BAD one, buster
+@error{}m4: m4.input: 6: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
 (@pxref{M4wrap}) is not reread.
+
+@example
+m4wrap(`This text is lost to `m4exit'.')
+@result{}
+divert(`1') And so is this.
+divert
+@result{}
+m4exit
+@end example
 
 @node Frozen files, Compatibility, Miscellaneous, Top
 @chapter Fast loading of frozen states

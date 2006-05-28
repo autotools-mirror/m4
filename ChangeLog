@@ -1,5 +1,10 @@
 2006-05-27  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Fix usage of a vs. an.
+	(Loops, Include, Cleardiv, Patsubst, Format, M4exit): Kill
+	overfull hbox warnings.
+	(Inhibiting Invocation, Divert, Maketemp, M4exit): Add new tests.
+
 	* configure.ac: Update to autoconf 2.59.  Forbid ^M4_.  Fix
 	quoting.
 	* aclocal.m4 (fp_PROG_CC_STDC): Delete; now covered by autoconf.
