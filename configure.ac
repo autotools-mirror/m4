@@ -19,6 +19,7 @@
 
 AC_PREREQ([2.59])
 AC_INIT([GNU M4], [1.4.4a], [bug-m4@gnu.org])
+AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 
@@ -26,7 +27,6 @@ m4_pattern_forbid([^M4_])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])
-AC_ARG_PROGRAM
 
 AC_PROG_AWK
 AC_PROG_CC
@@ -81,11 +81,10 @@ choke me		/* SA_ONSTACK and/or SV_ONSTACK are not defined */
   fi
 fi
 AC_MSG_RESULT([$use_stackovf])
+AM_CONDITIONAL([STACKOVF], [test "$use_stackovf" = yes])
 if test "$use_stackovf" = yes; then
   AC_DEFINE([USE_STACKOVF], [1],
     [Define to 1 if using stack overflow detection])
-  STACKOVF=stackovf.$(OBJEXT)
-  AC_SUBST([STACKOVF])
   AC_EGREP_HEADER([rlim_t], [sys/resource.h], [],
     [AC_DEFINE([rlim_t], [int],
       [Define to int if rlim_t is not defined in sys/resource.h])
@@ -114,7 +113,7 @@ AC_ARG_ENABLE([changeword],
 
 M4_WITH_DMALLOC
 
-AC_CONFIG_FILES([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
+AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 
 AC_CONFIG_FILES([Makefile
 		 doc/Makefile

@@ -1,6 +1,6 @@
-## Makefile.in -- Makefile for GNU m4 examples.
+## This file is part of GNU M4.
 ##
-## Copyright (C) 1994, 2005 Free Software Foundation, Inc.
+## Copyright (C) 2006 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -13,50 +13,14 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; See the file COPYING.  if not, write to
+## along with this program; see the file COPYING.  If not, write to
 ## the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ## Boston, MA 02110-1301, USA.
+##
+## This file written by Eric Blake <ebb9@byu.net>
 
-PACKAGE = @PACKAGE@
-VERSION = @VERSION@
-
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-.SUFFIXES:
-
-DISTFILES = Makefile.in capitalize.m4 comments.m4 ddivert.m4 \
+EXTRA_DIST = capitalize.m4 comments.m4 ddivert.m4 \
 debug.m4 esyscmd.m4 exp.m4 file.m4 foreach.m4 forloop.m4 fstab.m4 \
 hanoi.m4 incl-test.m4 include.m4 indir.m4 misc.m4 multiquotes.m4 \
 patsubst.m4 pushpop.m4 regexp.m4 reverse.m4 stackovf.sh sync-lines.m4 \
 sysv-args.m4 trace.m4 translit.m4 undivert.incl undivert.m4 wrap.m4
-
-all:
-
-install:
-
-uninstall:
-
-mostlyclean:
-
-clean: mostlyclean
-
-distclean: clean
-	rm -f Makefile
-
-realclean: distclean
-
-dist: $(DISTFILES)
-	@echo "Copying distribution files"
-	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/examples 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/examples; \
-	done
-
-Makefile: Makefile.in ../config.status
-	cd .. && CONFIG_FILES=examples/$@ CONFIG_HEADERS= ./config.status
-
-# Tell versions [3.59,3.63) of GNU make not to export all variables.
-# Otherwise a system limit (for SysV at least) may be exceeded.
-.NOEXPORT:

@@ -21,6 +21,7 @@ VERSION = @VERSION@
 
 SHELL = /bin/sh
 
+bindir = @bindir@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -40,10 +41,17 @@ stamp-checks: get-them ../doc/m4.texinfo
 
 install:
 
+dvi pdf ps html info:
+install-dvi install-pdf install-ps install-html install-info:
+
 uninstall:
 
 check: stamp-checks
 	PATH=`pwd`/../src:$$PATH; export PATH; \
+	cd $(srcdir) && ./check-them $(CHECKS)
+
+installcheck: stamp-checks
+	PATH=$(bindir):$$PATH; export PATH; \
 	cd $(srcdir) && ./check-them $(CHECKS)
 
 tags:
@@ -57,6 +65,8 @@ distclean: clean
 
 realclean: distclean
 	rm -f $(CHECKS) stamp-checks
+
+distdir: dist
 
 dist: $(DISTFILES) stamp-checks
 	@echo "Copying distribution files"

@@ -3033,8 +3033,8 @@ maketemp(`/tmp/fooXXXXXX')
 @c This test makes sure maketemp gets testsuite coverage, but is
 @c somewhat complex for use in the manual.
 @example
-define(`file1', maketemp(`./fooXXXXXX'))dnl
-define(`file2', maketemp(`./fooXXXXXX'))dnl
+define(`file1', maketemp(`/tmp/fooXXXXXX'))dnl
+define(`file2', maketemp(`/tmp/fooXXXXXX'))dnl
 ifelse(file1, file2, `same', `different')
 @result{}different
 syscmd(`rm 'file1 file2)

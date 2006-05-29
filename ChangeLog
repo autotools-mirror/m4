@@ -1,5 +1,32 @@
 2006-05-29  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Maketemp): Work even when running 'make check'
+	in read-only dir.
+
+	Use automake.
+	* Makefile.am: New file.
+	* doc/Makefile.am: Ditto.
+	* examples/Makefile.am: Ditto.
+	* lib/Makefile.am: Ditto.
+	* src/Makefile.am: Ditto.
+	* acinclude.m4: New file, renamed from aclocal.m4.
+	* configure.ac (AM_INIT_AUTOMAKE): Invoke new macro.
+	(AC_ARG_PROGRAM): Now redundant.
+	(STACKOVF): Turn into automake conditional.
+	(AC_CONFIG_COMMANDS): stamp-h is a command, not a file.
+	* checks/Makefile.in: Converting this dir to automake was not
+	trivial; for now, just add missing targets demanded by top-level.
+	* INSTALL: Remove files that are now generated from CVS.
+	* Makefile.in: Ditto.
+	* aclocal.m4: Ditto.
+	* install-sh: Ditto.
+	* mkinstalldirs: Ditto.
+	* doc/Makefile.in: Ditto.
+	* doc/texinfo.tex: Ditto.
+	* examples/Makefile.in: Ditto.
+	* lib/Makefile.in: Ditto.
+	* src/Makefile.in: Ditto.
+
 	* AUTHORS: Backport from CVS head, and update.
 	* doc/m4.texinfo (Changeword): Fix examples to match behavior.
 
