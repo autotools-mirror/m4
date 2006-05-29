@@ -1,3 +1,8 @@
+2006-05-29  Eric Blake  <ebb9@byu.net>
+
+	* AUTHORS: Backport from CVS head, and update.
+	* doc/m4.texinfo (Changeword): Fix examples to match behavior.
+
 2006-05-27  Eric Blake  <ebb9@byu.net>
 
 	* lib/regex.c (regex_compile): Kill compiler warnings.

@@ -1952,8 +1952,9 @@ changecom(`/*', `*/')dnl
 define(`foo', `bar')dnl
 changeword(`#\([_a-zA-Z0-9]*\)')
 @result{}
-#esyscmd(`echo foo')
-@result{}bar
+#esyscmd(`echo foo \#foo')
+@result{}foo bar
+@result{}
 @end example
 
 @code{m4} now requires a @samp{#} mark at the beginning of every
@@ -1983,6 +1984,7 @@ Then, the @code{m4} version:
 @example
 define(a, `errprint(`Hello')')dnl
 changeword(`@@\([_a-zA-Z0-9]*\)')
+@result{}
 @@a
 @result{}errprint(Hello)
 @end example
