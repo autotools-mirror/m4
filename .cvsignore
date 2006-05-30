@@ -1,5 +1,6 @@
 *.tar.bz2
 *.tar.gz
+aclocal.m4
 autom4te.cache
 config.cache
 config.h
@@ -8,6 +9,12 @@ config.status
 config-h.in
 configure
 configure.lineno
+depcomp
+INSTALL
+install-sh
+Makefile.in
 Makefile
+missing
 stamp-h
+stamp-h1
 stamp-h.in
