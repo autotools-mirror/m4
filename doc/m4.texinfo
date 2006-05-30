@@ -2042,10 +2042,28 @@ This is the first and last normal input line.
 The saved input is only reread when the end of normal input is seen, and
 not if @code{m4exit} is used to exit @code{m4}.
 
+@comment FIXME: this contradicts POSIX, which requires that "If the
+@comment m4wrap macro is used multiple times, the arguments specified
+@comment shall be processed in the order in which the m4wrap macros were
+@comment processed."
 It is safe to call @code{m4wrap} from saved text, but then the order in
 which the saved text is reread is undefined.  If @code{m4wrap} is not used
 recursively, the saved pieces of text are reread in the opposite order
 in which they were saved (LIFO---last in, first out).
+
+Here is an example of implementing a factorial function using
+@code{m4wrap}:
+
+@example
+define(`f', `ifelse(`$1', `0', `Answer: 0!=1
+', eval(`$1>1'), `0', `Answer: $2$1=eval(`$2$1')
+', `m4wrap(`f(decr(`$1'), `$2$1*')')')')
+@result{}
+f(10)
+@result{}
+^D
+@result{}Answer: 10*9*8*7*6*5*4*3*2*1=3628800
+@end example
 
 @node File Inclusion, Diversions, Input Control, Top
 @chapter File inclusion
@@ -3322,6 +3340,11 @@ This allows macros in GNU @code{m4} to take any number of arguments, and
 not only nine (@pxref{Arguments}).
 
 @item
+The @code{divert} (@pxref{Divert}) macro can manage more than 9
+diversions.  GNU @code{m4} treats all positive numbers as valid
+diversions, rather than discarding diversions greater than 9.
+
+@item
 Files included with @code{include} and @code{sinclude} are sought in a
 user specified search path, if they are not found in the working
 directory.  The search path is specified by the @samp{-I} option and the
@@ -3378,12 +3401,67 @@ more extensive than in most other versions of @code{m4}.
 @section Facilities in System V @code{m4} not in GNU @code{m4}
 
 The version of @code{m4} from System V contains a few facilities that
-have not been implemented in GNU @code{m4} yet.
+have not been implemented in GNU @code{m4} yet.  Additionally,
+@acronym{POSIX} requires some behaviors that GNU @code{m4} has not
+implemented yet.  Relying on these behaviors is non-portable, as a
+future release of GNU @code{m4} may change.
 
 @itemize @bullet
 @item
-System V @code{m4} supports multiple arguments to @code{defn}.  This is
-not implemented in GNU @code{m4}.  Its usefulness is unclear to me.
+System V @code{m4} supports multiple arguments to @code{defn}, and
+@acronym{POSIX} requires it.  This is not implemented in GNU @code{m4}.
+
+@item
+@acronym{POSIX} requires an application to exit with non-zero status if
+it wrote an error message to stderr.  This has not yet been consistently
+implemented for the various builtins that are required to issue an error
+(such as @code{include} (@pxref{Include}) when a file is unreadable,
+@code{eval} (@pxref{Eval}) when an argument cannot be parsed, or using
+@code{m4exit} (@pxref{M4exit}) with a non-numeric argument).
+
+@item
+@acronym{POSIX} requires an application to exit with non-zero status if
+it encounters a read error on stdin or write error on stdout, but GNU
+@code{m4} still exits with status 0 even if the disk is full.
+
+@item
+@acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
+(first-in, first-out) order, but GNU @code{m4} uses LIFO order.
+Furthermore, @acronym{POSIX} states that only the first argument to
+@code{m4wrap} is saved for later evaluation, bug GNU @code{m4} saves and
+processes all arguments, with output separated by spaces.
+
+@item
+@acronym{POSIX} requires that all builtins that require arguments, but
+are called without arguments, behave as though empty strings had been
+passed.  For example, @code{a`'define`'b} would expand to @code{ab}.
+But GNU @code{m4} ignores certain builtins if they have missing
+arguments, giving @code{adefineb} for the above example.
+
+@item
+Traditional implementations treat @code{define(`f',1} (@pxref{Define})
+as though it were @code{undefine(`f')pushdef(`f',1)}, effectively
+replacing the entire stack of previously pushdef'd definitions with a
+single definition.  GNU @code{m4} behaves as
+@code{popdef(`f')pushdef(`f',1)}, keeping all previous definitions on
+the stack intact.
+
+@item
+@acronym{POSIX} requires @code{syscmd} (@pxref{Syscmd}) to evaluate
+command output for macro expansion, but this appears to be a mistake
+in @acronym{POSIX} since traditional implementations did not do this.
+GNU @code{m4} follows traditional behavior in @code{syscmd}, and
+provides the extension @code{esyscmd} that provides the @acronym{POSIX}
+semantics.
+
+@item
+@acronym{POSIX} requires @code{maketemp} (@pxref{Maketemp}) to replace
+the trailing @samp{X} characters with the @code{m4} process id, giving
+the same result on identical input, without creating any files, which
+leaves the door open for a data race in which other processes can create
+a file by the same name.  GNU @code{m4} actually creates a temporary
+file for each invocation of @code{maketemp}, which means that the output
+of the macro is different even if the input is identical.
 @end itemize
 
 @node Other Incompatibilities,  , Incompatibilities, Compatibility
