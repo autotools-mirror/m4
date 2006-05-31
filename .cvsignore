@@ -12,6 +12,7 @@ configure.lineno
 depcomp
 INSTALL
 install-sh
+m4-*
 Makefile.in
 Makefile
 missing

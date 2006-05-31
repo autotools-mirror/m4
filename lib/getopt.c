@@ -3,7 +3,7 @@
    "Keep this file name-space clean" means, talk to roland@gnu.ai.mit.edu
    before changing it!
 
-   Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
