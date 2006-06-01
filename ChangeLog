@@ -1,4 +1,17 @@
 2006-05-31  Eric Blake  <ebb9@byu.net>
+	    John Brzustowski  <jbrzusto@fastmail.fm>
+
+	* src/input.c (input_stack): Delete; use current_input instead.
+	(wrapup_stack): Dynamically allocate, so that recursion is handled
+	properly.
+	(push_wrapup): Use current wrapup stack.
+	(pop_wrapup): Rotate wrapup stack to current, and create new
+	wrapup stack.
+	(input_init): Dynamically allocate stacks.
+	* NEWS: Update, now that recursive m4wrap can no longer cause
+	core dump.
+
+2006-05-31  Eric Blake  <ebb9@byu.net>
 
 	* lib/getopt.c: Fix copyright year.
 	* lib/obstack.c: Ditto.

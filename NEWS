@@ -1,9 +1,12 @@
 GNU m4 NEWS - User visible changes.
-Copyright (C) 1992, 1993, 1994, 2004, 2005 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
+Foundation, Inc.
 
-Version 1.4.5 - ??? 200?, by ???
+Version 1.4.5 - ??? 2006, by ???
 
 * Fix a recursive push_string crashing bug.
+* Use automake to fix build portability issues.
+* Fix a recursive m4wrap crashing bug.
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 
