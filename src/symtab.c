@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2003 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2003, 2006 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,59 @@
 
 #include "m4.h"
 
+#ifdef DEBUG_SYM
+/* When evaluating hash table performance, this profiling code shows
+   how many collisions were encountered.  */
+
+struct profile
+{
+  int entry; /* Number of times lookup_symbol called with this mode.  */
+  int comparisons; /* Number of times strcmp was called.  */
+  int misses; /* Number of times strcmp did not return 0.  */
+  long long bytes; /* Number of bytes compared.  */
+};
+
+static struct profile profiles[5];
+static symbol_lookup current_mode;
+
+/* On exit, show a profile of symbol table performance.  */
+static void
+show_profile (void)
+{
+  int i;
+  for (i = 0; i < 5; i++)
+    {
+      fprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
+              "%d misses, %lld bytes\n",
+              i, profiles[i].entry, profiles[i].comparisons,
+              profiles[i].misses, profiles[i].bytes);
+    }
+}
+
+/* Like strcmp (S1, S2), but also track profiling statistics.  */
+static int
+profile_strcmp (const char *s1, const char *s2)
+{
+  int i = 1;
+  int result;
+  while (*s1 && *s1 == *s2)
+    {
+      s1++;
+      s2++;
+      i++;
+    }
+  result = (unsigned char) *s1 - (unsigned char) *s2;
+  profiles[current_mode].comparisons++;
+  if (result != 0)
+    profiles[current_mode].misses++;
+  profiles[current_mode].bytes += i;
+  return result;
+}
+
+# define strcmp profile_strcmp
+#endif /* DEBUG_SYM */
+
+
 /*----------------------------------------------------------------------.
 | Initialise the symbol table, by allocating the necessary storage, and |
 | zeroing all the entries.					        |
@@ -51,6 +104,13 @@ symtab_init (void)
 
   for (i = hash_table_size; --i >= 0;)
     *s++ = NULL;
+
+#ifdef DEBUG_SYM
+  i = atexit(show_profile);
+  if (i != 0)
+    M4ERROR ((warning_status, 0,
+              "INTERNAL ERROR: Unable to show symtab profile"));
+#endif /* DEBUG_SYM */
 }
 
 /*--------------------------------------------------.
@@ -94,7 +154,7 @@ free_symbol (symbol *sym)
 | lookup_symbol ().  It basically hashes NAME to a list in the symbol	  |
 | table, and searched this list for the first occurence of a symbol with  |
 | the name.								  |
-| 									  |
+|									  |
 | The MODE parameter determines what lookup_symbol () will do.  It can	  |
 | either just do a lookup, do a lookup and insert if not present, do an	  |
 | insertion even if the name is already in the list, delete the first	  |
@@ -108,6 +168,11 @@ lookup_symbol (const char *name, symbol_lookup mode)
   int h, cmp = 1;
   symbol *sym, *prev;
   symbol **spp;
+
+#if DEBUG_SYM
+  current_mode = mode;
+  profiles[mode].entry++;
+#endif /* DEBUG_SYM */
 
   h = hash (name);
   sym = symtab[h];
@@ -221,19 +286,19 @@ hack_all_symbols (hack_symbol *func, const char *data)
 
 #ifdef DEBUG_SYM
 
+static void symtab_print_list (int i);
+
 static void
 symtab_debug (void)
 {
-  token_type t;
   token_data td;
   const char *text;
   symbol *s;
   int delete;
+  static int i;
 
-  while ((t = next_token (&td)) != NULL)
+  while (next_token (&td) == TOKEN_WORD)
     {
-      if (t != TOKEN_WORD)
-	continue;
       text = TOKEN_DATA_TEXT (&td);
       if (*text == '_')
 	{
@@ -253,20 +318,24 @@ symtab_debug (void)
       else
 	(void) lookup_symbol (text, SYMBOL_INSERT);
     }
-  hack_all_symbols (dump_symbol);
+  symtab_print_list (i++);
 }
 
 static void
 symtab_print_list (int i)
 {
   symbol *sym;
+  int h;
 
-  printf ("Symbol dump #d:\n", i);
-  for (sym = symtab[i]; sym != NULL; sym = sym->next)
-    printf ("\tname %s, addr 0x%x, next 0x%x, flags%s%s\n",
-	   SYMBOL_NAME (sym), sym, sym->next,
-	   SYMBOL_TRACED (sym) ? " traced" : "",
-	   SYMBOL_SHADOWED (sym) ? " shadowed" : "");
+  printf ("Symbol dump #%d:\n", i);
+  for (h = 0; h < hash_table_size; h++)
+    for (sym = symtab[h]; sym != NULL; sym = sym->next)
+      printf ("\tname %s, bucket %d, addr %p, next %p, "
+              "flags%s%s\n",
+              SYMBOL_NAME (sym),
+              h, sym, SYMBOL_NEXT (sym),
+              SYMBOL_TRACED (sym) ? " traced" : "",
+              SYMBOL_SHADOWED (sym) ? " shadowed" : "");
 }
 
 #endif /* DEBUG_SYM */

@@ -1,3 +1,11 @@
+2006-06-04  Eric Blake  <ebb9@byu.net>
+
+	* src/symtab.c (symtab_debug, symtab_print_list) [DEBUG_SYM]: Fix
+	to allow compilation, for use in debugger.
+	(profiles, current_mode) [DEBUG_SYM]: New variables.
+	(show_profile, profile_strcmp) [DEBUG_SYM]: New methods for
+	determining hash table performance.
+
 2006-05-31  Eric Blake  <ebb9@byu.net>
 	    John Brzustowski  <jbrzusto@fastmail.fm>
 
