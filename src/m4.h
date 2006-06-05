@@ -147,7 +147,7 @@ typedef struct token_data token_data;
 /* Option flags.  */
 extern int sync_output;			/* -s */
 extern int debug_level;			/* -d */
-extern int hash_table_size;		/* -H */
+extern size_t hash_table_size;		/* -H */
 extern int no_gnu_extensions;		/* -G */
 extern int prefix_all_builtins;		/* -P */
 extern int max_debug_argument_length;	/* -l */

@@ -7,6 +7,7 @@ Version 1.4.5 - ??? 2006, by ???
 * Fix a recursive push_string crashing bug.
 * Use automake to fix build portability issues.
 * Fix a recursive m4wrap crashing bug.
+* Fix a 1 in 2**32 hash crashing bug.
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 

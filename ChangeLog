@@ -1,3 +1,18 @@
+2006-06-04  Paul Eggert  <eggert@cs.ucla.edu>  (tiny change)
+	    Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (hash_table_size): Now size_t instead of int.
+	* src/m4.c (hash_table_size): Likewise.
+	(main): Adjust to this; use atol rather than atoi.
+	* src/symtab.c: Include <limits.h>, for CHAR_BIT.
+	(symtab_init, lookup_symbol, hack_all_symbols):
+	Use size_t for sizes and indexes, not int.
+	(symtab_print_list) [DEBUG_SYM]: Likewise.
+	(hash): Likewise.  Don't case-fold in the hash function.
+	Shift by 7, not 3, for consistency with gnulib/lib/hash.c.
+	Don't assume hash word is 32 bits.
+	NEWS: Document this change.
+
 2006-06-04  Eric Blake  <ebb9@byu.net>
 
 	* src/symtab.c (symtab_debug, symtab_print_list) [DEBUG_SYM]: Fix

@@ -42,7 +42,7 @@ int sync_output = 0;
 int debug_level = 0;
 
 /* Hash table size (should be a prime) (-Hsize).  */
-int hash_table_size = HASHMAX;
+size_t hash_table_size = HASHMAX;
 
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
@@ -329,8 +329,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'H':
-	hash_table_size = atoi (optarg);
-	if (hash_table_size <= 0)
+	hash_table_size = atol (optarg);
+	if (hash_table_size == 0)
 	  hash_table_size = HASHMAX;
 	break;
 

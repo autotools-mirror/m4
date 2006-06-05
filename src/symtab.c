@@ -32,6 +32,7 @@
    will then always be the first found.  */
 
 #include "m4.h"
+#include <limits.h>
 
 #ifdef DEBUG_SYM
 /* When evaluating hash table performance, this profiling code shows
@@ -97,19 +98,21 @@ symbol **symtab;
 void
 symtab_init (void)
 {
-  int i;
+  size_t i;
   symbol **s;
 
   s = symtab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
 
-  for (i = hash_table_size; --i >= 0;)
-    *s++ = NULL;
+  for (i = 0; i < hash_table_size; i++)
+    s[i] = NULL;
 
 #ifdef DEBUG_SYM
-  i = atexit(show_profile);
-  if (i != 0)
-    M4ERROR ((warning_status, 0,
-              "INTERNAL ERROR: Unable to show symtab profile"));
+  {
+    int e = atexit(show_profile);
+    if (e != 0)
+      M4ERROR ((warning_status, 0,
+		"INTERNAL ERROR: Unable to show symtab profile"));
+  }
 #endif /* DEBUG_SYM */
 }
 
@@ -117,22 +120,17 @@ symtab_init (void)
 | Return a hashvalue for a string, from GNU-emacs.  |
 `--------------------------------------------------*/
 
-static int
+static size_t
 hash (const char *s)
 {
-  register int val = 0;
+  register size_t val = 0;
 
   register const char *ptr = s;
   register char ch;
 
   while ((ch = *ptr++) != '\0')
-    {
-      if (ch >= 0140)
-	ch -= 40;
-      val = ((val << 3) + (val >> 28) + ch);
-    };
-  val = (val < 0) ? -val : val;
-  return val % hash_table_size;
+    val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
+  return val;
 }
 
 /*--------------------------------------------.
@@ -165,7 +163,8 @@ free_symbol (symbol *sym)
 symbol *
 lookup_symbol (const char *name, symbol_lookup mode)
 {
-  int h, cmp = 1;
+  size_t h;
+  int cmp = 1;
   symbol *sym, *prev;
   symbol **spp;
 
@@ -175,7 +174,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 #endif /* DEBUG_SYM */
 
   h = hash (name);
-  sym = symtab[h];
+  sym = symtab[h % hash_table_size];
 
   for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
     {
@@ -191,7 +190,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
   /* Symbol not found.  */
 
-  spp = (prev != NULL) ?  &prev->next : &symtab[h];
+  spp = (prev != NULL) ?  &prev->next : &symtab[h % hash_table_size];
 
   switch (mode)
     {
@@ -274,7 +273,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 void
 hack_all_symbols (hack_symbol *func, const char *data)
 {
-  int h;
+  size_t h;
   symbol *sym;
 
   for (h = 0; h < hash_table_size; h++)
@@ -325,15 +324,15 @@ static void
 symtab_print_list (int i)
 {
   symbol *sym;
-  int h;
+  size_t h;
 
   printf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      printf ("\tname %s, bucket %d, addr %p, next %p, "
+      printf ("\tname %s, bucket %lu, addr %p, next %p, "
               "flags%s%s\n",
               SYMBOL_NAME (sym),
-              h, sym, SYMBOL_NEXT (sym),
+              (long) h, sym, SYMBOL_NEXT (sym),
               SYMBOL_TRACED (sym) ? " traced" : "",
               SYMBOL_SHADOWED (sym) ? " shadowed" : "");
 }
