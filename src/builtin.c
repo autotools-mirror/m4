@@ -196,7 +196,6 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
   SYMBOL_MACRO_ARGS (sym) = bp->groks_macro_args;
   SYMBOL_BLIND_NO_ARGS (sym) = bp->blind_if_no_args;
   SYMBOL_FUNC (sym) = bp->func;
-  SYMBOL_TRACED (sym) = traced;
 }
 
 /*-------------------------------------------------------------------------.

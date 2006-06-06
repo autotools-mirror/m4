@@ -1,5 +1,12 @@
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
+	Trace status of builtins is no longer inherited across
+	define(...,defn(...)).  Fixes bug that autom4te had been working
+	around.
+	* src/builtin.c (define_builtin): Don't override trace status.
+	* doc/m4.texinfo (Trace): Add test for this.
+	* NEWS: Document this.
+
 	When changing macro definitions inside the arguments to the macro,
 	consistently preserve the old definition that was in effect before
 	argument collection, similar to the C pre-processor.

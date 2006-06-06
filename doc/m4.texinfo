@@ -1690,6 +1690,24 @@ foo
 @result{}blah
 @end example
 
+Tracing even works on builtins, but does not transfer via @command{defn}
+(@pxref{Defn}).
+
+@example
+define(`m4_eval')traceon(`eval', `m4_divnum')
+@result{}
+define(`m4_eval', defn(`eval'))
+@result{}
+define(`m4_divnum', defn(`divnum'))
+@result{}
+eval(divnum)
+@error{}m4trace: -1- eval(0)
+@result{}0
+m4_eval(m4_divnum)
+@error{}m4trace: -2- m4_divnum
+@result{}0
+@end example
+
 @xref{Debug Levels}, for information on controlling the details of the
 display.
 
