@@ -488,7 +488,7 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
     return;
   s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
 
-  if (s != NULL)
+  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
     result = ARG (2);
   else if (argc == 4)
     result = ARG (3);
@@ -695,7 +695,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
     return;
 
   s = lookup_symbol (name, SYMBOL_LOOKUP);
-  if (s == NULL)
+  if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
     M4ERROR ((warning_status, 0,
 	      "Undefined macro `%s'", name));
   else
@@ -1179,6 +1179,9 @@ static void
 set_trace (symbol *sym, const char *data)
 {
   SYMBOL_TRACED (sym) = (boolean) (data != NULL);
+  /* Remove placeholder from table if macro is undefined and untraced.  */
+  if (SYMBOL_TYPE (sym) == TOKEN_VOID && data == NULL)
+    lookup_symbol (SYMBOL_NAME (sym), SYMBOL_DELETE);
 }
 
 static void
@@ -1192,12 +1195,8 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
-	if (s != NULL)
-	  set_trace (s, (char *) obs);
-	else
-	  M4ERROR ((warning_status, 0,
-		    "Undefined name %s", TOKEN_DATA_TEXT (argv[i])));
+	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_INSERT);
+	set_trace (s, (char *) obs);
       }
 }
 
@@ -1219,9 +1218,6 @@ m4_traceoff (struct obstack *obs, int argc, token_data **argv)
 	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
 	if (s != NULL)
 	  set_trace (s, NULL);
-	else
-	  M4ERROR ((warning_status, 0,
-		    "Undefined name %s", TOKEN_DATA_TEXT (argv[i])));
       }
 }
 

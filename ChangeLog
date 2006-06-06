@@ -1,3 +1,20 @@
+2006-06-06  Eric Blake  <ebb9@byu.net>
+
+	Solve crash when passing "indir(`foo')" to "m4 -tfoo".
+	* src/symtab.c (lookup_symbol) <SYMBOL_DELETE, SYMBOL_POPDEF>:
+	Preserve placeholder when macro is being traced.
+	* src/builtin.c (m4_ifdef, m4_indir): A traced but undefined
+	symbol is not defined.
+	(set_trace): Remove placeholder when no longer traced.
+	(m4_traceon): On named traces, always reserve a slot in the
+	symbol table.
+	(m4_traceoff): Don't warn about untracing a nonexistent symbol.
+	* NEWS: Document new trace behavior.
+	* doc/m4.texinfo (Trace): Tracing by name now consistently works
+	no matter whether that macro is currently defined.
+	(Incompatibilities): Document differences between traditional and
+	GNU trace.
+
 2006-06-04  Paul Eggert  <eggert@cs.ucla.edu>  (tiny change)
 	    Eric Blake  <ebb9@byu.net>
 

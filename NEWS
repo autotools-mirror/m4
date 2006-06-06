@@ -4,10 +4,16 @@ Foundation, Inc.
 
 Version 1.4.5 - ??? 2006, by ???
 
-* Fix a recursive push_string crashing bug.
+* Fix a recursive push_string crashing bug, which affected changequote of
+  three or more characters on some compilers.
 * Use automake to fix build portability issues.
 * Fix a recursive m4wrap crashing bug.
 * Fix a 1 in 2**32 hash crashing bug.
+* Tracing a macro by name is now persistent, even if the macro is
+  subsequently undefined or redefined.  The traceon and traceoff macros no
+  longer warn about undefined symbols.  This solves a crash when using
+  indir on an undefined macro traced with the -t option, as well as an
+  incorrect result of ifdef.
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 

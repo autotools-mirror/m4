@@ -1620,6 +1620,36 @@ The number between dashes is the depth of the expansion.  It is one most
 of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.
 
+Tracing by name is an attribute that is preserved whether the macro is
+defined or not.  This allows the @samp{-t} option to select macros to
+trace before those macros are defined.
+
+@example
+traceoff(`foo')
+@result{}
+traceon(`foo')
+@result{}
+foo
+@result{}foo
+define(`foo', `bar')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+undefine(`foo')
+@result{}
+ifdef(`foo', `yes', `no')
+@result{}no
+indir(`foo')
+@error{}m4.input:17: m4: Undefined macro `foo'
+@result{}
+define(`foo', `blah')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `blah'
+@result{}blah
+@end example
+
 @xref{Debug Levels}, for information on controlling the details of the
 display.
 
@@ -3462,6 +3492,18 @@ leaves the door open for a data race in which other processes can create
 a file by the same name.  GNU @code{m4} actually creates a temporary
 file for each invocation of @code{maketemp}, which means that the output
 of the macro is different even if the input is identical.
+
+@item
+Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
+arguments as a global variable, independent of named macro tracing.
+Also, once a macro is undefined, named tracing of that macro is lost.
+On the other hand, when GNU @code{m4} encounters @code{traceon} without
+arguments, it turns tracing on for all existing definitions at the time,
+but does not trace future definitions; @code{traceoff} without arguments
+turns tracing off for all definitions regardless of whether they were
+also traced by name; and tracing by name, such as with @samp{-tfoo} at
+the command line or @code{traceon(`foo')} in the input, is an attribute
+that is preserved even if the macro is currently undefined.
 @end itemize
 
 @node Other Incompatibilities,  , Incompatibilities, Compatibility

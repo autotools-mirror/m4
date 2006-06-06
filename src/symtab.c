@@ -147,18 +147,18 @@ free_symbol (symbol *sym)
   xfree ((voidstar) sym);
 }
 
-/*------------------------------------------------------------------------.
-| Search in, and manipulation of the symbol table, are all done by	  |
-| lookup_symbol ().  It basically hashes NAME to a list in the symbol	  |
-| table, and searched this list for the first occurence of a symbol with  |
-| the name.								  |
-|									  |
-| The MODE parameter determines what lookup_symbol () will do.  It can	  |
-| either just do a lookup, do a lookup and insert if not present, do an	  |
-| insertion even if the name is already in the list, delete the first	  |
-| occurrence of the name on the list or delete all occurences of the name |
-| on the list.								  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Search in, and manipulation of the symbol table, are all done by   |
+| lookup_symbol ().  It basically hashes NAME to a list in the	     |
+| symbol table, and searches this list for the first occurrence of a |
+| symbol with the name.						     |
+|								     |
+| The MODE parameter determines what lookup_symbol () will do.  It   |
+| can either just do a lookup, do a lookup and insert if not	     |
+| present, do an insertion even if the name is already in the list,  |
+| delete the first occurrence of the name on the list, or delete all |
+| occurrences of the name on the list.				     |
+`-------------------------------------------------------------------*/
 
 symbol *
 lookup_symbol (const char *name, symbol_lookup mode)
@@ -230,29 +230,64 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     case SYMBOL_DELETE:
 
-      /* Delete all occurences of symbols with NAME.  */
+      /* Delete all occurrences of symbols with NAME.  However, if symbol
+	 is marked for tracing, leave a placeholder in the table.  */
 
       if (cmp != 0 || sym == NULL)
 	return NULL;
-      do
-	{
-	  *spp = SYMBOL_NEXT (sym);
-	  free_symbol (sym);
-	  sym = *spp;
-	}
-      while (sym != NULL && strcmp (name, SYMBOL_NAME (sym)) == 0);
+      {
+	boolean traced = SYMBOL_TRACED (sym);
+	while (SYMBOL_NEXT (sym) != NULL
+	       && SYMBOL_SHADOWED (SYMBOL_NEXT (sym)))
+	  {
+	    *spp = SYMBOL_NEXT (sym);
+	    free_symbol (sym);
+	    sym = *spp;
+	  }
+	if (traced)
+	  {
+	    if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+	      xfree (SYMBOL_TEXT (sym));
+	    SYMBOL_TYPE (sym) = TOKEN_VOID;
+	    SYMBOL_TRACED (sym) = TRUE;
+	    SYMBOL_SHADOWED (sym) = FALSE;
+	  }
+	else
+	  {
+	    *spp = SYMBOL_NEXT (sym);
+	    free_symbol (sym);
+	    sym = *spp;
+	  }
+      }
       return NULL;
 
     case SYMBOL_POPDEF:
 
-       /* Delete the first occurence of a symbol with NAME.  */
+      /* Delete the first occurrence of a symbol with NAME.  However, if
+	 symbol is marked for tracing, and this is the last copy, leave a
+	 placeholder in the table.  */
 
       if (cmp != 0 || sym == NULL)
 	return NULL;
-      if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
-	SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
-      *spp = SYMBOL_NEXT (sym);
-      free_symbol (sym);
+      if (SYMBOL_NEXT (sym) != NULL
+	  && SYMBOL_SHADOWED (SYMBOL_NEXT (sym)))
+	{
+	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
+	  SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
+	  *spp = SYMBOL_NEXT (sym);
+	  free_symbol (sym);
+	}
+      else if (SYMBOL_TRACED (sym))
+	{
+	  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+	    xfree (SYMBOL_TEXT (sym));
+	  SYMBOL_TYPE (sym) = TOKEN_VOID;
+	}
+      else
+	{
+	  *spp = SYMBOL_NEXT (sym);
+	  free_symbol (sym);
+	}
       return NULL;
 
     default:
