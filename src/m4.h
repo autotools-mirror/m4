@@ -296,12 +296,7 @@ struct token_data
 #endif
 	}
       u_t;
-      struct
-	{
-	  builtin_func *func;
-	  boolean traced;
-	}
-      u_f;
+      builtin_func *func;
     }
   u;
 };
@@ -311,8 +306,7 @@ struct token_data
 #ifdef ENABLE_CHANGEWORD
 # define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
 #endif
-#define TOKEN_DATA_FUNC(Td)		((Td)->u.u_f.func)
-#define TOKEN_DATA_FUNC_TRACED(Td)	((Td)->u.u_f.traced)
+#define TOKEN_DATA_FUNC(Td)		((Td)->u.func)
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -324,7 +318,7 @@ void skip_line _((void));
 
 /* push back input */
 void push_file _((FILE *, const char *));
-void push_macro _((builtin_func *, boolean));
+void push_macro _((builtin_func *));
 struct obstack *push_string_init _((void));
 const char *push_string_finish _((void));
 void push_wrapup _((const char *));
@@ -376,11 +370,11 @@ enum symbol_lookup
 struct symbol
 {
   struct symbol *next;
-  boolean traced;
-  boolean shadowed;
-  boolean macro_args;
-  boolean blind_no_args;
-  boolean deleted;
+  boolean traced : 1;
+  boolean shadowed : 1;
+  boolean macro_args : 1;
+  boolean blind_no_args : 1;
+  boolean deleted : 1;
   int pending_expansions;
 
   char *name;
@@ -422,9 +416,9 @@ void call_macro _((symbol *, int, token_data **, struct obstack *));
 struct builtin
 {
   const char *name;
-  boolean gnu_extension;
-  boolean groks_macro_args;
-  boolean blind_if_no_args;
+  boolean gnu_extension : 1;
+  boolean groks_macro_args : 1;
+  boolean blind_if_no_args : 1;
   builtin_func *func;
 };
 
@@ -439,7 +433,7 @@ typedef struct builtin builtin;
 typedef struct predefined predefined;
 
 void builtin_init _((void));
-void define_builtin _((const char *, const builtin *, symbol_lookup, boolean));
+void define_builtin _((const char *, const builtin *, symbol_lookup));
 void define_user_macro _((const char *, const char *, symbol_lookup));
 void undivert_all _((void));
 void expand_user_macro _((struct obstack *, symbol *, int, token_data **));

@@ -89,12 +89,7 @@ struct input_block
 	  boolean advance_line;	/* start_of_input_line from next_char () */
 	}
       u_f;
-      struct
-	{
-	  builtin_func *func;	/* pointer to macros function */
-	  boolean traced;	/* TRUE iff builtin is traced */
-	}
-      u_m;
+      builtin_func *func;	/* pointer to macro's function */
     }
   u;
 };
@@ -192,14 +187,14 @@ push_file (FILE *fp, const char *title)
   isp = i;
 }
 
-/*-------------------------------------------------------------------------.
-| push_macro () pushes a builtin macros definition on the input stack.  If |
-| next is non-NULL, this push invalidates a call to push_string_init (),   |
-| whose storage are consequentely released.				   |
-`-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------.
+| push_macro () pushes a builtin macro's definition on the input |
+| stack.  If next is non-NULL, this push invalidates a call to   |
+| push_string_init (), whose storage is consequently released.   |
+`---------------------------------------------------------------*/
 
 void
-push_macro (builtin_func *func, boolean traced)
+push_macro (builtin_func *func)
 {
   input_block *i;
 
@@ -213,8 +208,7 @@ push_macro (builtin_func *func, boolean traced)
 				     sizeof (struct input_block));
   i->type = INPUT_MACRO;
 
-  i->u.u_m.func = func;
-  i->u.u_m.traced = traced;
+  i->u.func = func;
   i->prev = isp;
   isp = i;
 }
@@ -362,10 +356,10 @@ pop_wrapup (void)
   return TRUE;
 }
 
-/*--------------------------------------------------------------------.
-| When a MACRO token is seen, next_token () uses init_macro_token () to |
-| retrieve the value of the function pointer.			      |
-`--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| When a MACRO token is seen, next_token () uses init_macro_token () |
+| to retrieve the value of the function pointer.                     |
+`-------------------------------------------------------------------*/
 
 static void
 init_macro_token (token_data *td)
@@ -378,8 +372,7 @@ init_macro_token (token_data *td)
     }
 
   TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-  TOKEN_DATA_FUNC (td) = isp->u.u_m.func;
-  TOKEN_DATA_FUNC_TRACED (td) = isp->u.u_m.traced;
+  TOKEN_DATA_FUNC (td) = isp->u.func;
 }
 
 

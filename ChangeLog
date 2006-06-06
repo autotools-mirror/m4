@@ -1,5 +1,22 @@
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
+	Cleanup of previous patches.
+	* src/input.c (struct input_block): Remove traced member.
+	(push_macro, init_macro_token): Don't pass trace status around.
+	* src/m4.h (struct token_data): Remove traced member.
+	(struct symbol, struct builtin): Reduce unused space.
+	(TOKEN_DATA_FUNC): Simplify.
+	(TOKEN_DATA_FUNC_TRACED): Remove unused macro.
+	(push_macro, define_builtin): Remove unused parameter.
+	* src/builtin.c (define_builtin, builtin_init, define_macro),
+	(m4_defn): Don't pass trace status around.
+	* src/macro.c (expand_argument): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/symtab.c: Whitespace cleanup.
+	* NEWS: Clean up wording.
+	* doc/m4.texinfo (Undefine, Dumpdef, Trace): Cleanup wording;
+	ensure tests actually expose bugs prior to today's patches.
+
 	Trace status of builtins is no longer inherited across
 	define(...,defn(...)).  Fixes bug that autom4te had been working
 	around.

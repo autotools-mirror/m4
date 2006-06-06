@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -327,7 +327,7 @@ reload_frozen_state (const char *name)
 
 	    bp = find_builtin_by_name (string[1]);
 	    if (bp)
-	      define_builtin (string[0], bp, SYMBOL_PUSHDEF, 0);
+	      define_builtin (string[0], bp, SYMBOL_PUSHDEF);
 	    else
 	      M4ERROR ((warning_status, 0, "\
 `%s' from frozen file not found in builtin table!",

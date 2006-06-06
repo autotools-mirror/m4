@@ -13,12 +13,14 @@ Version 1.4.5 - ??? 2006, by ???
   subsequently undefined or redefined.  The traceon and traceoff macros no
   longer warn about undefined symbols.  This solves a crash when using
   indir on an undefined macro traced with the -t option, as well as an
-  incorrect result of ifdef.
+  incorrect result of ifdef.  Furthermore, tracing is no longer transferred
+  with builtins, solving the bug of "m4 -tm4_eval" failing to give trace
+  output on the input "define(`m4_eval',defn(`eval'))m4_eval(1)".
 * Fix a crash when a macro is undefined while collecting its arguments, by
   always using the definition that was in effect before argument
   collection.  This behavior matches the C pre-processor, and means that
-  the sequence "define(`f',`1')f(define(`f',`2'))f" now results in "12"
-  rather than the previously undocumented "22".
+  the sequence "define(`f',`1')f(define(`f',`2'))f" is now documented to
+  result in "12", rather than the previously undocumented "22".
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 

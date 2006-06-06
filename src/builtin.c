@@ -186,8 +186,7 @@ find_builtin_by_name (const char *name)
 `-------------------------------------------------------------------------*/
 
 void
-define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
-		boolean traced)
+define_builtin (const char *name, const builtin *bp, symbol_lookup mode)
 {
   symbol *sym;
 
@@ -236,11 +235,11 @@ builtin_init (void)
             string = (char *) xmalloc (strlen (bp->name) + 4);
             strcpy (string, "m4_");
             strcat (string, bp->name);
-            define_builtin (string, bp, SYMBOL_INSERT, FALSE);
+            define_builtin (string, bp, SYMBOL_INSERT);
             free (string);
           }
         else
-          define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+          define_builtin (bp->name, bp, SYMBOL_INSERT);
       }
 
   for (pp = &predefined_tab[0]; pp->func != NULL; pp++)
@@ -434,7 +433,7 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
       if (bp == NULL)
 	return;
       else
-	define_builtin (ARG (1), bp, mode, TOKEN_DATA_FUNC_TRACED (argv[2]));
+	define_builtin (ARG (1), bp, mode);
       break;
 
     default:
@@ -728,7 +727,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
       break;
 
     case TOKEN_FUNC:
-      push_macro (SYMBOL_FUNC (s), SYMBOL_TRACED (s));
+      push_macro (SYMBOL_FUNC (s));
       break;
 
     case TOKEN_VOID:

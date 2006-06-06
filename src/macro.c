@@ -171,7 +171,6 @@ expand_argument (struct obstack *obs, token_data *argp)
 	    {
 	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
 	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	      TOKEN_DATA_FUNC_TRACED (argp) = TOKEN_DATA_FUNC_TRACED (&td);
 	    }
 	  break;
 
@@ -263,7 +262,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
 | arguments, using collect_arguments (), and builds a table of pointers to |
 | the arguments.  The arguments themselves are stored on a local obstack.  |
 | Expand_macro () uses call_macro () to do the call of the macro.	   |
-| 									   |
+|									   |
 | Expand_macro () is potentially recursive, since it calls expand_argument |
 | (), which might call expand_token (), which might call expand_macro ().  |
 `-------------------------------------------------------------------------*/

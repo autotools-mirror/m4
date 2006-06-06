@@ -1138,10 +1138,10 @@ Undefining a macro inside that macro's expansion is safe; the macro
 still expands to the definition that was in effect at the @samp{(}.
 
 @example
-define(`f', `.$1')
+define(`f', ``$0':$1')
 @result{}
 f(f(f(undefine(`f')`hello world')))
-@result{}...hello world
+@result{}f:f:f:hello world
 f(`bye')
 @result{}f(bye)
 @end example
@@ -1599,14 +1599,14 @@ macro were to be called at that point, even if other definitions are
 still live due to redefining a macro during argument collection.
 
 @example
-pushdef(`f',`1')pushdef(`f',`2')
+pushdef(`f', ``$0'1')pushdef(`f', ``$0'2')
 @result{}
 f(popdef(`f')dumpdef(`f'))
-@error{}f:	`1'
-@result{}2
+@error{}f:	``$0'1'
+@result{}f2
 f(popdef(`f')dumpdef(`f'))
 @error{}m4.input:7: m4: Undefined name f
-@result{}1
+@result{}f1
 @end example
 
 @xref{Debug Levels}, for information on controlling the details of the
@@ -1688,23 +1688,27 @@ define(`foo', `blah')
 foo
 @error{}m4trace: -1- foo -> `blah'
 @result{}blah
+traceoff
+@result{}
+foo
+@result{}blah
 @end example
 
-Tracing even works on builtins, but does not transfer via @command{defn}
-(@pxref{Defn}).
+Tracing even works on builtins.  However, @command{defn} (@pxref{Defn})
+does not transfer tracing status.
 
 @example
-define(`m4_eval')traceon(`eval', `m4_divnum')
+traceon(`eval', `m4_divnum')
 @result{}
 define(`m4_eval', defn(`eval'))
 @result{}
 define(`m4_divnum', defn(`divnum'))
 @result{}
 eval(divnum)
-@error{}m4trace: -1- eval(0)
+@error{}m4trace: -1- eval(`0') -> `0'
 @result{}0
 m4_eval(m4_divnum)
-@error{}m4trace: -2- m4_divnum
+@error{}m4trace: -2- m4_divnum -> `0'
 @result{}0
 @end example
 
