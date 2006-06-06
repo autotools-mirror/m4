@@ -1181,7 +1181,7 @@ set_trace (symbol *sym, const char *data)
   SYMBOL_TRACED (sym) = (boolean) (data != NULL);
   /* Remove placeholder from table if macro is undefined and untraced.  */
   if (SYMBOL_TYPE (sym) == TOKEN_VOID && data == NULL)
-    lookup_symbol (SYMBOL_NAME (sym), SYMBOL_DELETE);
+    lookup_symbol (SYMBOL_NAME (sym), SYMBOL_POPDEF);
 }
 
 static void

@@ -1,5 +1,11 @@
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
+	* src/symtab.c (hack_all_symbols): Allow certain modifications of
+	the symbol table during traversal.
+	* src/builtin.c (set_trace): Replace SYMBOL_DELETE with
+	SYMBOL_POPDEF, since only the latter is safe with
+	hack_all_symbols.
+
 	Solve crash when passing "indir(`foo')" to "m4 -tfoo".
 	* src/symtab.c (lookup_symbol) <SYMBOL_DELETE, SYMBOL_POPDEF>:
 	Preserve placeholder when macro is being traced.

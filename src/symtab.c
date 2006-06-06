@@ -297,24 +297,34 @@ lookup_symbol (const char *name, symbol_lookup mode)
     }
 }
 
-/*----------------------------------------------------------------------.
-| The following function is used for the cases, where we want to do     |
-| something to each and every symbol in the table.  The function        |
-| hack_all_symbols () traverses the symbol table, and calls a specified |
-| function FUNC for each symbol in the table.  FUNC is called with a    |
-| pointer to the symbol, and the DATA argument.			        |
-`----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| The following function is used for the cases where we want to do |
+| something to each and every symbol in the table.  The function   |
+| hack_all_symbols () traverses the symbol table, and calls a	   |
+| specified function FUNC for each symbol in the table.  FUNC is   |
+| called with a pointer to the symbol, and the DATA argument.	   |
+|								   |
+| FUNC may safely call lookup_symbol with mode SYMBOL_POPDEF or	   |
+| SYMBOL_LOOKUP, but any other mode can break the iteration.	   |
+`-----------------------------------------------------------------*/
 
 void
 hack_all_symbols (hack_symbol *func, const char *data)
 {
   size_t h;
   symbol *sym;
+  symbol *next;
 
   for (h = 0; h < hash_table_size; h++)
     {
-      for (sym = symtab[h]; sym != NULL; sym = SYMBOL_NEXT (sym))
-	(*func) (sym, data);
+      /* We allow func to call SYMBOL_POPDEF, which can invalidate
+         sym, so we must grab the next element to traverse before
+         calling func.  */
+      for (sym = symtab[h]; sym != NULL; sym = next)
+        {
+          next = SYMBOL_NEXT (sym);
+          (*func) (sym, data);
+        }
     }
 }
 
