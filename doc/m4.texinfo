@@ -840,6 +840,19 @@ is a macro call with four arguments, which are @samp{a }, @samp{b},
 whitespace, remember that leading unquoted whitespace is never part
 of an argument, but trailing whitespace always is.
 
+It is possible for a macro's definition to change during argument
+collection, in which case the expansion uses the definition that was in
+effect at the time the opening @samp{(} was seen.
+
+@example
+define(`f', `1')
+@result{}
+f(define(`f', `2'))
+@result{}1
+f
+@result{}2
+@end example
+
 @node Quoting Arguments, Macro expansion, Macro Arguments, Macros
 @section Quoting macro arguments
 
@@ -1119,6 +1132,18 @@ undefine(`foo')
 @result{}
 foo
 @result{}foo
+@end example
+
+Undefining a macro inside that macro's expansion is safe; the macro
+still expands to the definition that was in effect at the @samp{(}.
+
+@example
+define(`f', `.$1')
+@result{}
+f(f(f(undefine(`f')`hello world')))
+@result{}...hello world
+f(`bye')
+@result{}f(bye)
 @end example
 
 It is not an error for @var{name} to have no macro definition.  In that
@@ -1568,6 +1593,21 @@ dumpdef(`define')
 @end example
 
 The last example shows how builtin macros definitions are displayed.
+
+The definition that is dumped corresponds to what would occur if the
+macro were to be called at that point, even if other definitions are
+still live due to redefining a macro during argument collection.
+
+@example
+pushdef(`f',`1')pushdef(`f',`2')
+@result{}
+f(popdef(`f')dumpdef(`f'))
+@error{}f:	`1'
+@result{}2
+f(popdef(`f')dumpdef(`f'))
+@error{}m4.input:7: m4: Undefined name f
+@result{}1
+@end example
 
 @xref{Debug Levels}, for information on controlling the details of the
 display.

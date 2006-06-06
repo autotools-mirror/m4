@@ -380,6 +380,8 @@ struct symbol
   boolean shadowed;
   boolean macro_args;
   boolean blind_no_args;
+  boolean deleted;
+  int pending_expansions;
 
   char *name;
   token_data data;
@@ -390,6 +392,8 @@ struct symbol
 #define SYMBOL_SHADOWED(S)	((S)->shadowed)
 #define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
+#define SYMBOL_DELETED(S)	((S)->deleted)
+#define SYMBOL_PENDING_EXPANSIONS(S) ((S)->pending_expansions)
 #define SYMBOL_NAME(S)		((S)->name)
 #define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
@@ -403,6 +407,7 @@ typedef void hack_symbol ();
 
 extern symbol **symtab;
 
+void free_symbol _((symbol *sym));
 void symtab_init _((void));
 symbol *lookup_symbol _((const char *, symbol_lookup));
 void hack_all_symbols _((hack_symbol *, const char *));

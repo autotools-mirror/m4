@@ -1,5 +1,28 @@
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
+	When changing macro definitions inside the arguments to the macro,
+	consistently preserve the old definition that was in effect before
+	argument collection, similar to the C pre-processor.
+	* NEWS: Document this change.
+	* doc/m4.texinfo (Macro Arguments, Undefine, Dumpdef): Document
+	this policy, and add tests that expose core dumps prior to this
+	patch.
+	* src/m4.h (struct symbol): New members to track when a symbol is
+	still in use after removal from the symbol table.
+	(SYMBOL_PENDING_EXPANSIONS, SYMBOL_DELETED): Define.
+	(free_symbol): Prototype.
+	* src/macro.c (expand_macro): Track pending expansions of a
+	symbol.  On completion, if a symbol is deleted and no longer
+	pending, free its memory.
+	* src/symtab.c (free_symbol): Export.  Don't free memory if symbol
+	is still in use.
+	(lookup_symbol) <SYMBOL_INSERT>: Create new entry when old entry
+	is still in use.
+	(lookup_symbol) <SYMBOL_DELETE, SYMBOL_POPDEF>: Mark entries still
+	in use as deleted and remove from the table without freeing
+	memory.
+	(symtab_print_list) [DEBUG_SYM]: More debug output.
+
 	* src/symtab.c (hack_all_symbols): Allow certain modifications of
 	the symbol table during traversal.
 	* src/builtin.c (set_trace): Replace SYMBOL_DELETE with

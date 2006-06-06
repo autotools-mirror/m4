@@ -1,6 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -279,6 +280,7 @@ expand_macro (symbol *sym)
   boolean traced;
   int my_call_id;
 
+  SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
@@ -312,6 +314,10 @@ expand_macro (symbol *sym)
     trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
 
   --expansion_level;
+  --SYMBOL_PENDING_EXPANSIONS (sym);
+
+  if (SYMBOL_DELETED (sym))
+    free_symbol (sym);
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);

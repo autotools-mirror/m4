@@ -137,14 +137,19 @@ hash (const char *s)
 | Free all storage associated with a symbol.  |
 `--------------------------------------------*/
 
-static void
+void
 free_symbol (symbol *sym)
 {
-  if (SYMBOL_NAME (sym))
-    xfree (SYMBOL_NAME (sym));
-  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (sym));
-  xfree ((voidstar) sym);
+  if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
+    SYMBOL_DELETED (sym) = TRUE;
+  else
+    {
+      if (SYMBOL_NAME (sym))
+        xfree (SYMBOL_NAME (sym));
+      if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+        xfree (SYMBOL_TEXT (sym));
+      xfree ((voidstar) sym);
+    }
 }
 
 /*-------------------------------------------------------------------.
@@ -197,11 +202,34 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     case SYMBOL_INSERT:
 
-      /* Return the symbol, if the name was found in the table.
-	 Otherwise, just insert the name, and return the new symbol.  */
+      /* If the name was found in the table, check whether it is still in
+         use by a pending expansion.  If so, replace the table element with
+         a new one; if not, just return the symbol.  If not found, just
+	 insert the name, and return the new symbol.  */
 
       if (cmp == 0 && sym != NULL)
-	return sym;
+        {
+          if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
+            {
+              symbol *old = sym;
+              SYMBOL_DELETED (old) = TRUE;
+
+              sym = (symbol *) xmalloc (sizeof (symbol));
+              SYMBOL_TYPE (sym) = TOKEN_VOID;
+              SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
+              SYMBOL_NAME (sym) = xstrdup (name);
+              SYMBOL_SHADOWED (sym) = FALSE;
+              SYMBOL_MACRO_ARGS (sym) = FALSE;
+              SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
+              SYMBOL_DELETED (sym) = FALSE;
+              SYMBOL_PENDING_EXPANSIONS (sym) = 0;
+
+              SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
+              SYMBOL_NEXT (old) = NULL;
+              (*spp) = sym;
+            }
+          return sym;
+        }
       /* Fall through.  */
 
     case SYMBOL_PUSHDEF:
@@ -212,11 +240,13 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
-      SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
+      SYMBOL_TRACED (sym) = FALSE;
       SYMBOL_NAME (sym) = xstrdup (name);
       SYMBOL_SHADOWED (sym) = FALSE;
       SYMBOL_MACRO_ARGS (sym) = FALSE;
       SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
+      SYMBOL_DELETED (sym) = FALSE;
+      SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;
@@ -229,65 +259,52 @@ lookup_symbol (const char *name, symbol_lookup mode)
       return sym;
 
     case SYMBOL_DELETE:
+    case SYMBOL_POPDEF:
 
-      /* Delete all occurrences of symbols with NAME.  However, if symbol
-	 is marked for tracing, leave a placeholder in the table.  */
+      /* Delete occurrences of symbols with NAME.  SYMBOL_DELETE kills
+         all definitions, SYMBOL_POPDEF kills only the first.
+         However, if the last instance of a symbol is marked for
+         tracing, reinsert a placeholder in the table.  And if the
+         definition is still in use, let the caller free the memory
+         after it is done with the symbol.  */
 
       if (cmp != 0 || sym == NULL)
 	return NULL;
       {
-	boolean traced = SYMBOL_TRACED (sym);
-	while (SYMBOL_NEXT (sym) != NULL
-	       && SYMBOL_SHADOWED (SYMBOL_NEXT (sym)))
+	boolean traced = FALSE;
+        if (SYMBOL_NEXT (sym) != NULL
+            && SYMBOL_SHADOWED (SYMBOL_NEXT (sym))
+            && mode == SYMBOL_POPDEF)
+          {
+            SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
+            SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
+          }
+        else
+          traced = SYMBOL_TRACED (sym);
+        do
 	  {
 	    *spp = SYMBOL_NEXT (sym);
 	    free_symbol (sym);
 	    sym = *spp;
 	  }
+	while (*spp != NULL && SYMBOL_SHADOWED (*spp)
+               && mode == SYMBOL_DELETE);
 	if (traced)
 	  {
-	    if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-	      xfree (SYMBOL_TEXT (sym));
-	    SYMBOL_TYPE (sym) = TOKEN_VOID;
-	    SYMBOL_TRACED (sym) = TRUE;
-	    SYMBOL_SHADOWED (sym) = FALSE;
-	  }
-	else
-	  {
-	    *spp = SYMBOL_NEXT (sym);
-	    free_symbol (sym);
-	    sym = *spp;
+            sym = (symbol *) xmalloc (sizeof (symbol));
+            SYMBOL_TYPE (sym) = TOKEN_VOID;
+            SYMBOL_TRACED (sym) = TRUE;
+            SYMBOL_NAME (sym) = xstrdup (name);
+            SYMBOL_SHADOWED (sym) = FALSE;
+            SYMBOL_MACRO_ARGS (sym) = FALSE;
+            SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
+            SYMBOL_DELETED (sym) = FALSE;
+            SYMBOL_PENDING_EXPANSIONS (sym) = 0;
+
+            SYMBOL_NEXT (sym) = *spp;
+            (*spp) = sym;
 	  }
       }
-      return NULL;
-
-    case SYMBOL_POPDEF:
-
-      /* Delete the first occurrence of a symbol with NAME.  However, if
-	 symbol is marked for tracing, and this is the last copy, leave a
-	 placeholder in the table.  */
-
-      if (cmp != 0 || sym == NULL)
-	return NULL;
-      if (SYMBOL_NEXT (sym) != NULL
-	  && SYMBOL_SHADOWED (SYMBOL_NEXT (sym)))
-	{
-	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
-	  SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
-	  *spp = SYMBOL_NEXT (sym);
-	  free_symbol (sym);
-	}
-      else if (SYMBOL_TRACED (sym))
-	{
-	  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-	    xfree (SYMBOL_TEXT (sym));
-	  SYMBOL_TYPE (sym) = TOKEN_VOID;
-	}
-      else
-	{
-	  *spp = SYMBOL_NEXT (sym);
-	  free_symbol (sym);
-	}
       return NULL;
 
     default:
@@ -375,11 +392,13 @@ symtab_print_list (int i)
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
       printf ("\tname %s, bucket %lu, addr %p, next %p, "
-              "flags%s%s\n",
+              "flags%s%s%s, pending %d\n",
               SYMBOL_NAME (sym),
-              (long) h, sym, SYMBOL_NEXT (sym),
+              (unsigned long int) h, sym, SYMBOL_NEXT (sym),
               SYMBOL_TRACED (sym) ? " traced" : "",
-              SYMBOL_SHADOWED (sym) ? " shadowed" : "");
+              SYMBOL_SHADOWED (sym) ? " shadowed" : "",
+	      SYMBOL_DELETED (sym) ? " deleted" : "",
+	      SYMBOL_PENDING_EXPANSIONS (sym));
 }
 
 #endif /* DEBUG_SYM */

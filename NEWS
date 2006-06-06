@@ -14,6 +14,11 @@ Version 1.4.5 - ??? 2006, by ???
   longer warn about undefined symbols.  This solves a crash when using
   indir on an undefined macro traced with the -t option, as well as an
   incorrect result of ifdef.
+* Fix a crash when a macro is undefined while collecting its arguments, by
+  always using the definition that was in effect before argument
+  collection.  This behavior matches the C pre-processor, and means that
+  the sequence "define(`f',`1')f(define(`f',`2'))f" now results in "12"
+  rather than the previously undocumented "22".
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 
