@@ -1,5 +1,9 @@
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
+	* lib/regex.c (re_match_2_internal, bcmp_translate): Avoid
+	compiler warnings at -O2.
+	* lib/getopt.c (_getopt_internal): Likewise.
+
 	Cleanup of previous patches.
 	* src/input.c (struct input_block): Remove traced member.
 	(push_macro, init_macro_token): Don't pass trace status around.

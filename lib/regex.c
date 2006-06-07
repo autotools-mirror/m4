@@ -3421,7 +3421,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
      stopped matching the regnum-th subexpression.  (The zeroth register
      keeps track of what the whole pattern matches.)  */
 #ifdef MATCH_MAY_ALLOCATE /* otherwise, these are global.  */
-  const char **regstart, **regend;
+  const char **regstart = NULL, **regend = NULL;
 #endif
 
   /* If a group that's operated upon by a repetition operator fails to
@@ -3430,7 +3430,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
      are when we last see its open-group operator.  Similarly for a
      register's end.  */
 #ifdef MATCH_MAY_ALLOCATE /* otherwise, these are global.  */
-  const char **old_regstart, **old_regend;
+  const char **old_regstart = NULL, **old_regend = NULL;
 #endif
 
   /* The is_active field of reg_info helps us keep track of which (possibly
@@ -3440,7 +3440,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
      subexpression.  These two fields get reset each time through any
      loop their register is in.  */
 #ifdef MATCH_MAY_ALLOCATE /* otherwise, this is global.  */
-  register_info_type *reg_info;
+  register_info_type *reg_info = NULL;
 #endif
 
   /* The following record the register info as found in the above
@@ -3449,7 +3449,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
      turn happens only if we have not yet matched the entire string. */
   unsigned best_regs_set = false;
 #ifdef MATCH_MAY_ALLOCATE /* otherwise, these are global.  */
-  const char **best_regstart, **best_regend;
+  const char **best_regstart = NULL, **best_regend = NULL;
 #endif
 
   /* Logically, this is `best_regend[0]'.  But we don't want to have to
@@ -3464,8 +3464,8 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
 
   /* Used when we pop values we don't care about.  */
 #ifdef MATCH_MAY_ALLOCATE /* otherwise, these are global.  */
-  const char **reg_dummy;
-  register_info_type *reg_info_dummy;
+  const char **reg_dummy = NULL;
+  register_info_type *reg_info_dummy = NULL;
 #endif
 
 #ifdef DEBUG
@@ -4890,11 +4890,11 @@ common_op_match_null_string_p (p, end, reg_info)
 
 static int
 bcmp_translate (s1, s2, len, translate)
-     unsigned char *s1, *s2;
+     unsigned const char *s1, *s2;
      register int len;
      char *translate;
 {
-  register unsigned char *p1 = s1, *p2 = s2;
+  register const unsigned char *p1 = s1, *p2 = s2;
   while (len)
     {
       if (translate[*p1++] != translate[*p2++]) return 1;
