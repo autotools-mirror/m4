@@ -20,3 +20,16 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 info_TEXINFOS = m4.texinfo
+man_MANS = m4.1
+EXTRA_DIST = $(man_MANS)
+MAINTAINERDISTCLEAN = $(man_MANS)
+SUFFIXES = .1
+
+# Depend on configure.ac for version, m4.c for usage text.  Do not depend on
+# built m4 executable, since not everyone has help2man or perl.
+m4.1: $(top_srcdir)/configure.ac $(top_srcdir)/src/m4.c
+	@if test -x ../src/m4$(EXEEXT) ; then \
+	  echo "Updating man page m4.1" ; \
+	  $(SHELL) $(top_srcdir)/missing --run \
+	    help2man -o m4.1 ../src/m4$(EXEEXT) ; \
+	fi

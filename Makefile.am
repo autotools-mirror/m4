@@ -20,6 +20,6 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS = doc examples lib src checks
+SUBDIRS = examples lib src doc checks
 EXTRA_DIST = bootstrap c-boxes.el Makefile.maint
 DISTCLEANFILES = stamp-h

@@ -1,3 +1,11 @@
+2006-06-07  Eric Blake  <ebb9@byu.net>
+
+	Distribute a rudimentary man page.
+	* Makefile.am (SUBDIRS): Move doc after src so that 'm4 --help'
+	can feed help2man.
+	* doc/Makefile.am (man_MANS, EXTRA_DIST, MAINTAINERDISTCLEAN),
+	(SUFFIXES, m4.1): New macros and rules to build m4.1.
+
 2006-06-06  Eric Blake  <ebb9@byu.net>
 
 	* lib/regex.c (re_match_2_internal, bcmp_translate): Avoid
