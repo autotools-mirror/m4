@@ -22,7 +22,7 @@
 info_TEXINFOS = m4.texinfo
 man_MANS = m4.1
 EXTRA_DIST = $(man_MANS)
-MAINTAINERDISTCLEAN = $(man_MANS)
+MAINTAINERCLEANFILES = $(man_MANS)
 SUFFIXES = .1
 
 # Depend on configure.ac for version, m4.c for usage text.  Do not depend on

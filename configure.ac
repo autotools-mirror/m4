@@ -99,6 +99,10 @@ if test "$use_stackovf" = yes; then
   ])
 fi
 
+dnl Don't let changeword get in our way, if bootstrapping with a version of
+dnl m4 that already turned the feature on.
+m4_undefine([changeword])dnl
+
 AC_MSG_CHECKING([[if changeword is wanted]])
 AC_ARG_ENABLE([changeword],
   [AS_HELP_STRING([--enable-changeword],

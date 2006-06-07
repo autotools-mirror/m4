@@ -4890,7 +4890,7 @@ common_op_match_null_string_p (p, end, reg_info)
 
 static int
 bcmp_translate (s1, s2, len, translate)
-     unsigned const char *s1, *s2;
+     const unsigned char *s1, *s2;
      register int len;
      char *translate;
 {
