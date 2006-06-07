@@ -31,6 +31,7 @@
 	When changing macro definitions inside the arguments to the macro,
 	consistently preserve the old definition that was in effect before
 	argument collection, similar to the C pre-processor.
+	Reported by John Brzustowski.
 	* NEWS: Document this change.
 	* doc/m4.texinfo (Macro Arguments, Undefine, Dumpdef): Document
 	this policy, and add tests that expose core dumps prior to this
