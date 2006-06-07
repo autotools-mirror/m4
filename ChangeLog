@@ -738,7 +738,7 @@ Wed Aug 31 11:17:21 1994  Francois Pinard  (pinard@icule)
 	* Makefile.in (distclean-local): Delete config.log.
 	Reported by Jim Meyering.
 
-        Solidify frozen files with respect to -P:
+	Solidify frozen files with respect to -P:
 	* src/m4.c: Have -P set prefix_all_buitins variable instead of
 	calling a function by that name.  Declare the variable.
 	* src/m4.h: Adjust declaration for prefix_all_buitins.
@@ -1737,19 +1737,19 @@ Mon Nov 16 20:42:56 1992  Francois Pinard  (pinard at icule)
 
 Mon Nov 16 07:48:52 1992  Jim Meyering  (meyering@idefix)
 
-        * m4.h [__GNUC__]: Use __volatile__ instead of `volatile.'
-        And use that only if __GNUC__ since we're using it's GCC-specific
-        semantics that tell the compiler the associated function doesn't
-        return.
+	* m4.h [__GNUC__]: Use __volatile__ instead of `volatile.'
+	And use that only if __GNUC__ since we're using it's GCC-specific
+	semantics that tell the compiler the associated function doesn't
+	return.
 
-        * builtin.c (substitute): Don't use character as an array index.
-        (dumpdef_cmp): Make formal arguments `const void *' to avoid
-        warnings with gcc -W -Wall on systems with qsort prototype.
-        (m4_errprint): Cast obstack_finish to `char *' to avoid warnings
-        from gcc -W -Wall.
+	* builtin.c (substitute): Don't use character as an array index.
+	(dumpdef_cmp): Make formal arguments `const void *' to avoid
+	warnings with gcc -W -Wall on systems with qsort prototype.
+	(m4_errprint): Cast obstack_finish to `char *' to avoid warnings
+	from gcc -W -Wall.
 
-        * eval.c (most functions): Add parentheses to assignments used
-        as truth values go avoid warnings from gcc -Wall.
+	* eval.c (most functions): Add parentheses to assignments used
+	as truth values go avoid warnings from gcc -Wall.
 
 	* input.c, m4.c, output.c, path.c, symtab.c: Declare static
 	any functions that don't need external scope.
