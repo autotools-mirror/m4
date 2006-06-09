@@ -28,20 +28,14 @@ m4_pattern_forbid([^M4_])
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])
 
-AC_PROG_AWK
 AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
 AC_AIX
-AC_ISC_POSIX
 AC_MINIX
-AC_C_CONST
 
 AC_CHECK_HEADERS([limits.h memory.h siginfo.h string.h unistd.h])
 AC_CHECK_HEADERS([signal.h sys/signal.h], [break])
-AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
@@ -101,7 +95,7 @@ fi
 
 dnl Don't let changeword get in our way, if bootstrapping with a version of
 dnl m4 that already turned the feature on.
-m4_undefine([changeword])dnl
+m4_ifdef([changeword], [m4_undefine([changeword])])dnl
 
 AC_MSG_CHECKING([[if changeword is wanted]])
 AC_ARG_ENABLE([changeword],
