@@ -1,3 +1,11 @@
+2006-06-10  Eric Blake  <ebb9@byu.net>
+
+	Avoid compiler warnings.
+	* m4/macro.c (trace_format): Don't mark this as a printf format,
+	since we don't accept the same set of modifiers as printf.  It
+	would be nice if gcc let us specify a custom format archetype.
+	* src/main.c (main): Cast away const.
+
 2006-06-10  Andreas Schwab  <schwab@suse.de>  (tiny change)
 	    Eric Blake  <ebb9@byu.net>
 

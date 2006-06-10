@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -44,8 +44,12 @@ static void    trace_pre	 (m4 *context, const char *, int, int,
 				  m4_symbol_value **);
 static void    trace_post	 (m4 *context, const char *, int, int,
 				  m4_symbol_value **, const char *);
-static void    trace_format	 (m4 *context, const char *fmt, ...)
-     							M4_GNUC_PRINTF(2, 3);
+
+/* It would be nice if we could use M4_GNUC_PRINTF(2, 3) on
+   trace_format, but since we don't accept the same set of modifiers,
+   it would lead to compiler warnings.  */
+static void    trace_format	 (m4 *context, const char *fmt, ...);
+
 static void    trace_header	 (m4 *, int);
 static void    trace_flush	 (m4 *);
 
@@ -482,14 +486,14 @@ trace_format (m4 *context, const char *fmt, ...)
 
 	case 'l':
 	  s = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE)
-	    	? m4_get_syntax_lquote (M4SYNTAX)
-	    	: "";
+		? m4_get_syntax_lquote (M4SYNTAX)
+		: "";
 	  break;
 
 	case 'r':
 	  s = m4_is_debug_bit(context, M4_DEBUG_TRACE_QUOTE)
-	    	? m4_get_syntax_rquote (M4SYNTAX)
-	    	: "";
+		? m4_get_syntax_rquote (M4SYNTAX)
+		: "";
 	  break;
 
 	case 'd':

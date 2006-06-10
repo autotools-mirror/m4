@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004, 2005
+   Copyright (C) 1989-1994, 1999, 2000, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -249,7 +249,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   head = tail = NULL;
 
-  while (optchar = getopt_long (argc, argv, OPTSTRING, long_options, NULL),
+  while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+				long_options, NULL),
 	 optchar != EOF)
     switch (optchar)
       {
