@@ -4,7 +4,7 @@
 # Written by Gary V. Vaughan <gary@gnu.org>
 # and Alexandre Oliva <aoliva@redhat.com>
 
-# Copyright (C) 1999, 2000, 2004 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2004, 2006 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -99,7 +99,7 @@ opt_commit=:
 opt_update=:
 opt_first=false
 
-sendmail_to="M4 Commit <m4-commit@gnu.org>"
+sendmail_to=
 sendmail_from=
 exit_cmd=:
 
@@ -248,7 +248,7 @@ func_version ()
 			;;
 
       -1|--first)       if test -f "$log_File"; then
-	    		  func_error "you can have at most one of -m, -F and -1"
+			  func_error "you can have at most one of -m, -F and -1"
 			  break
 			fi
 			opt_first=:
@@ -269,12 +269,12 @@ func_version ()
       -q|--quiet)	cvs_flags="$cvs_flags -q"		;;
 
       -s|--sendmail)	test $# = 0 && func_missing_arg $opt && break
-      			sendmail_to="$1"
+			sendmail_to="$1"
 			shift
 			;;
 
     --signature)	test $# = 0 && func_missing_arg $opt && break
-    			signature_file="$HOME/.signature"
+			signature_file="$HOME/.signature"
 			case $1 in
 			  -*) ;;
 			  *)  signature_file="$1"; shift ;;
@@ -407,7 +407,7 @@ if test -f "$log_file"; then :; else
   # deletes the first and/or the last line, when they happen to be empty
 fi
 
-grep '[^ 	]' < "$log_file" > /dev/null ||
+grep '[^	 ]' < "$log_file" > /dev/null ||
   func_fatal_error "empty commit message, aborting"
 
 if grep '^$' < "$log_file" > /dev/null; then
