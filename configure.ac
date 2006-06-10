@@ -17,12 +17,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
-AC_PREREQ([2.59])
+AC_PREREQ([2.59d])
 
 ## ------------------------ ##
 ## Autoconf initialisation. ##
 ## ------------------------ ##
-AC_INIT([GNU m4], [1.9a], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.9a], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR([ltdl/config])
@@ -54,22 +54,22 @@ AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
 ## -------------------------- ##
 ## M4 specific configuration. ##
 ## -------------------------- ##
+dnl Autoconf recommends that packages use lowercase for their package-specific
+dnl prefix for cache variables.  But in the case of m4, that collides with
+dnl the m4_ namespace provided by m4sugar, so we prefer M4_ as our
+dnl package-specific prefix.  FIXME - consistently use M4_ in the m4 macros
+dnl that feed the creation of configure.
+m4_pattern_forbid([^M4_])
 m4_pattern_allow([^m4_cv_])
 
-# We use some of Jim's macros.
-dnl m4_pattern_forbid([^jm_])
-dnl m4_pattern_allow([^jm_cv_])
-dnl m4_pattern_allow([^jm_ac_cv_])
-dnl m4_pattern_allow([^jm_with_])
-
-AC_MSG_CHECKING(for modules to preload)
+AC_MSG_CHECKING([for modules to preload])
   m4_pattern_allow([^m4_default_preload$])
   m4_default_preload="m4 traditional gnu"
   DLPREOPEN=
 
   AC_ARG_WITH([modules],
-    [AC_HELP_STRING([--with-modules=MODULES],
-                    [preload MODULES @<:@default: $m4_default_preload@:>@])],
+    [AS_HELP_STRING([--with-modules=MODULES],
+		    [preload MODULES @<:@default: $m4_default_preload@:>@])],
     [use_modules="$withval"],
     [use_modules="$m4_default_preload"])
 
@@ -85,16 +85,16 @@ AC_MSG_CHECKING(for modules to preload)
       done
     fi
   fi
-AC_MSG_RESULT($use_modules)
-AC_SUBST(DLPREOPEN)
-AC_SUBST(PREOPEN_DEPENDENCIES)
+AC_MSG_RESULT([$use_modules])
+AC_SUBST([DLPREOPEN])
+AC_SUBST([PREOPEN_DEPENDENCIES])
 
 
 
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.9.5 subdir-objects dist-bzip2])
+AM_INIT_AUTOMAKE([1.9.6 subdir-objects dist-bzip2 gnits])
 
 
 
@@ -102,10 +102,8 @@ AM_INIT_AUTOMAKE([1.9.5 subdir-objects dist-bzip2])
 ## C compiler checks. ##
 ## ------------------ ##
 AC_PROG_CC
+M4_EARLY
 
-gl_EARLY
-AC_ISC_POSIX
-AM_PROG_CC_STDC
 AC_PROG_CPP
 AM_PROG_CC_C_O
 m4_CHECK_DEBUGGING
@@ -135,8 +133,8 @@ esac
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
-AM_GNU_GETTEXT(external, need-ngettext)
-AM_GNU_GETTEXT_VERSION(0.14.1)
+AM_GNU_GETTEXT([external], [need-ngettext])
+AM_GNU_GETTEXT_VERSION([0.14.1])
 m4_GNU_GETTEXT
 
 
@@ -144,7 +142,7 @@ m4_GNU_GETTEXT
 ## --------------- ##
 ## Gnulib support, ##
 ## --------------- ##
-gl_INIT
+M4_INIT
 
 # Gnulib doesn't always do things quite the way M4 would like...
 m4_ERROR
@@ -156,18 +154,13 @@ m4_REGEX
 ## ------------------------ ##
 ## Other external programs. ##
 ## ------------------------ ##
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
 AC_PATH_PROG(PERL, perl)
-AC_PROG_AWK
 
 
 
 ## --------------------------- ##
 ## C compiler characteristics. ##
 ## --------------------------- ##
-AM_C_PROTOTYPES
-AC_C_CONST
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([long long int])
 
@@ -176,8 +169,7 @@ AC_CHECK_SIZEOF([long long int])
 ## ------------------------- ##
 ## C headers required by M4. ##
 ## ------------------------- ##
-AC_HEADER_STDC
-AC_CHECK_HEADERS([limits.h locale.h memory.h string.h unistd.h errno.h])
+AC_CHECK_HEADERS([limits.h])
 AC_CHECK_HEADERS([signal.h sys/signal.h], break)
 
 if test $ac_cv_header_stdbool_h = yes; then
@@ -192,9 +184,7 @@ AC_SUBST([INCLUDE_STDBOOL_H])
 ## --------------------------------- ##
 ## Library functions required by M4. ##
 ## --------------------------------- ##
-AC_CHECK_FUNCS([bzero calloc mkstemp mktemp strerror tmpfile])
-AC_FUNC_ALLOCA
-AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([bzero calloc mktemp strerror tmpfile])
 
 AM_WITH_DMALLOC
 
@@ -203,8 +193,8 @@ m4_SYS_STACKOVF
 # This is for the modules
 AC_STRUCT_TM
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(getcwd gethostname mktime uname)
-AC_CHECK_FUNCS(setenv unsetenv putenv clearenv)
+AC_CHECK_FUNCS([getcwd gethostname mktime uname \
+		setenv unsetenv putenv clearenv])
 
 m4_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])

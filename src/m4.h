@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 06 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -73,9 +73,7 @@ long strtol ();
 
 #endif /* STDC_HEADERS */
 
-#if HAVE_ERRNO_H
 #include <errno.h>
-#endif
 
 #ifndef errno
 extern int errno;

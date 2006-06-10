@@ -30,9 +30,7 @@
 #include <m4module.h>
 #include <modules/m4.h>
 
-#if HAVE_ERRNO_H
-#  include <errno.h>
-#endif
+#include <errno.h>
 #ifndef errno
 int errno;
 #endif

@@ -1,4 +1,5 @@
-# Copyright (C) 2004 Free Software Foundation, Inc.
+# Copyright (C) 2004-2006 Free Software Foundation, Inc.
+#
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
 # Public License, this file may be distributed as part of a program
@@ -14,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --aux-dir=ltdl/config --libtool --macro-prefix=gl assert error exit free gettext mkstemp obstack progname regex stdbool strtol xalloc xalloc-die xstrndup
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert error exit free gettext mkstemp obstack progname regex stdbool strtol xalloc xalloc-die xstrndup
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_MODULES([assert error exit free gettext mkstemp obstack progname regex stdbool strtol xalloc xalloc-die xstrndup])
@@ -24,4 +25,4 @@ gl_M4_BASE([ltdl/m4])
 gl_TESTS_BASE([tests])
 gl_LIB([libgnu])
 gl_LIBTOOL
-gl_MACRO_PREFIX([gl])
+gl_MACRO_PREFIX([M4])

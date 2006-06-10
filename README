@@ -62,9 +62,12 @@ system, compiler, libraries, ...
 ## Patches ##
 ## ------- ##
 
-If you wish to run bootstrap, the released versions of autoconf and automake
-are missing some functionality we need.  You will need to patch automake-1.9.5
-and autoconf-2.59 according to the patches below:
+If you wish to run bootstrap, the released versions of autoconf,
+automake, and libtool are missing some functionality we need.  You
+will need a CVS build of libtool head (1.5.x does not have enough
+functionality), and use the 2.59d snapshot of autoconf or a CVS
+build.  If you do not use a CVS build of automake, you can instead
+patch automake-1.9.5 or 1.9.6 according to the patch below:
 
 --- automake-1.9.5/automake.in.orig	2005-02-12 10:06:56.000000000 +0000
 +++ automake-1.9.5/automake.in	2005-04-20 14:08:05.000000000 +0100
@@ -174,28 +177,3 @@ and autoconf-2.59 according to the patches below:
  
  # &require_conf_file ($WHERE, $MYSTRICT, @FILES)
  # ----------------------------------------------
---- autoconf-2.59/lib/autoconf/general.m4.orig	2003-10-27 11:10:56.000000000 +0000
-+++ autoconf-2.59/lib/autoconf/general.m4	2005-04-25 17:56:48.000000000 +0100
-@@ -2435,7 +2435,7 @@
- 
- # _AC_LIBOBJS_NORMALIZE
- # ---------------------
--# Clean up LIBOBJS abd LTLIBOBJS so that they work with 1. ac_objext,
-+# Clean up LIBOBJS and LTLIBOBJS so that they work with 1. ac_objext,
- # 2. Automake's ANSI2KNR, 3. Libtool, 4. combination of the three.
- # Used with AC_CONFIG_COMMANDS_PRE.
- AC_DEFUN([_AC_LIBOBJS_NORMALIZE],
-@@ -2445,9 +2445,10 @@
-   # 1. Remove the extension, and $U if already installed.
-   ac_i=`echo "$ac_i" |
- 	 sed 's/\$U\././;s/\.o$//;s/\.obj$//'`
--  # 2. Add them.
--  ac_libobjs="$ac_libobjs $ac_i\$U.$ac_objext"
--  ac_ltlibobjs="$ac_ltlibobjs $ac_i"'$U.lo'
-+  # 2. Prepend LIBOBJDIR.  When used with automake>=1.10 LIBOBJDIR
-+  #    will be set to the directory where LIBOBJS objects are built.
-+  ac_libobjs="$ac_libobjs \${LIBOBJDIR}$ac_i\$U.$ac_objext"
-+  ac_ltlibobjs="$ac_ltlibobjs \${LIBOBJDIR}$ac_i"'$U.lo'
- done
- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])

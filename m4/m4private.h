@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005, 2006
                  Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -26,9 +26,7 @@
 #  include <config.h>
 #endif
 
-#if HAVE_ERRNO_H
 #include <errno.h>
-#endif
 
 #ifndef errno
 extern int errno;
@@ -57,7 +55,7 @@ struct m4 {
   m4_symbol_table *	symtab;
   m4_syntax_table *	syntax;
 
-  FILE *	 	debug_file;	/* File for debugging output.  */
+  FILE *		debug_file;	/* File for debugging output.  */
   m4_obstack		trace_messages;
 
   /* Option flags  (set in src/main.c).  */
@@ -165,9 +163,9 @@ struct m4_symbol_value {
 };
 
 #define VALUE_NEXT(T)		((T)->next)
-#define VALUE_HANDLE(T) 	((T)->handle)
+#define VALUE_HANDLE(T)	((T)->handle)
 #define VALUE_FLAGS(T)		((T)->flags)
-#define VALUE_ARG_SIGNATURE(T) 	((T)->arg_signature)
+#define VALUE_ARG_SIGNATURE(T)	((T)->arg_signature)
 #define VALUE_MIN_ARGS(T)	((T)->min_args)
 #define VALUE_MAX_ARGS(T)	((T)->max_args)
 

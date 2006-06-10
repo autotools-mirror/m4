@@ -1,5 +1,25 @@
 2006-06-10  Eric Blake  <ebb9@byu.net>
 
+	* README (Patches): Document the current dependence on CVS
+	builds of autotools.
+	* ltdl/m4/gnulib-cache.m4: Update, and use --macro-prefix=M4.
+	* configure.ac: Use consistent quoting throughout.
+	(AC_PREREQ): Bump to 2.59d.
+	(AC_INIT): Package name begins with uppercase.
+	(AC_ARG_WITH): Use AS_HELP_STRING.
+	(AM_INIT_AUTOMAKE): Enable gnits mode.
+	(AC_ISC_POSIX, AM_PROG_CC_STDC, AC_PROG_INSTALL, AC_PROG_MAKE_SET),
+	(AC_PROG_AWK, AM_C_PROTOTYPES, AC_C_CONST, AC_HEADER_STDC),
+	(AC_CHECK_HEADERS, AC_FUNC_ALLOCA, AC_FUNC_VPRINTF): Remove checks
+	done by gnulib or automake, or which autoconf has declared
+	obsolete.
+	* m4/m4private.h (Includes): Assume C89 or better, and use errno
+	unconditionally.
+	* m4/output.c (Includes): Likewise.
+	* modules/gnu.c (Includes): Likewise.
+	* modules/m4.c (Includes): Likewise.
+	* src/m4.h (Includes): Likewise.
+
 	* README-alpha: Update web address.
 	* README: Likewise. Change encoding to ASCII.  Remove old advice
 	about cygwin.  Document bootstrapping dependency.
