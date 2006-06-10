@@ -1,17 +1,16 @@
 GNU m4 THANKS file
 
-GNU m4 has originally been written by Rene' Seindal.  Many people
+GNU m4 has originally been written by René Seindal.  Many people
 further contributed to GNU m4 by reporting problems, suggesting
 various improvements or submitting actual code.  Here is a list of
 these people.  Help me keep it complete and exempt of errors.
-
-
 
 Akiko Matsushita	matusita@sra.co.jp
 Akim Demaille		demaille@inf.enst.fr
 Alan Magnuson		awm@osc.edu
 Alexander Lehmann	alex@hal.rhein-main.de
 Amos Shapira		amoss@cs.huji.ac.il
+Andreas Büning		andreas.buening@nexgo.de
 Andreas Gustafsson	gson@niksula.hut.fi
 Andreas Schwab		schwab@ls5.informatik.uni-dortmund.de
 Andrew Athan            athan@morgan.com
@@ -23,10 +22,12 @@ Bengt Mertensson	bengt@mathematik.uni-bremen.de
 Bernhard Daeubler	daeb@physik.uni-ulm.de
 Bill Bumgarner          bbum@thoughtport.com
 Bjorn R. Bjornsson	brb@falcon.is
+Bob Badour		bob@badour.net
 Brendan Kehoe		brendan@cygnus.com
 Brian J. Fox 		bfox@datawave.net
 Brian D. Carlstrom      bdc@clark.lcs.mit.edu
 Bruno Haible		bruno@clisp.org
+Damian Menscher		menscher@uiuc.edu
 David J. MacKenzie	djm@uunet.uu.net
 Erez Zadok		ezk@cs.columbia.edu
 Eric Allman		eric@cs.berkeley.edu
@@ -34,25 +35,32 @@ Eric Backus		ericb@lsid.hp.com
 Eric Blake		ebb9@byu.net
 Eric Fischer            enf1@ellis.uchicago.edu
 Erick Branderhorst	Erick.Branderhorst@asml.nl
-Fran�ois Pinard		pinard@iro.umontreal.ca
+François Pinard		pinard@iro.umontreal.ca
+Frank Schwidom		schwidom@impernet.de
 Gary Affonso            Gary_Affonso@iqinc.com
+Gary V. Vaughan		gary@gnu.org
 Geoff Russell		grussell@guest.adelaide.edu.au
+Greg A. Woods		woods@web.apc.org
 Greg McGary             gkm@cstone.net
 Hal Peterson		hrp@pecan.cray.com
 Hoang Uong		hoang@ornews.intel.com
 Hongjiu Lu              hjl@nynexst.com
 Ian Taylor		ian@cygnus.com
+Ilya N. Golubev		gin@mo.msk.ru
 Jan Djarv               Jan.Djarv@sa.erisoft.se
 Jason Merrill		jason@jarthur.claremont.edu
 Jim Avera		jima@netcom.com
 Jim Kingdom		kingdon@cygnus.com
-Jim Meyering            meyering@na-net.ornl.gov
+Jim Meyering		meyering@acm.org
 Joel Sherrill		jsherril@uahcs2.cs.uah.edu
+John Brzustowski	jbrzusto@fastmail.fm
 John David Anglin	dave@hiauly1.hia.nrc.ca
+John Gatewood Ham	zappaman@buraphalinux.org
 John Gerard Malecki	johnm@artisan.com
+Josef T. Burger		bolo@bolo.com
 Joseph E. Sacco		jsacco@ssl.com
 Joshua R. Poulson       jrp@plaza.ds.adp.com
-Karl Berry		karl@cs.umb.edu
+Karl Berry		karl@freefriends.org
 Karl Vogel		vogelke@c-17igp.wpafb.af.mil
 Kaveh R. Ghazi		ghazi@noc.rutgers.edu
 Keith Bostic 		bostic@abyssinian.sleepycat.com
@@ -62,28 +70,35 @@ Marcus Daniels          marcus@ee.pdx.edu
 Marion Hakanson		hakanson@cse.ogi.edu
 Mark Seiden		mis@seiden.com
 Massimo Dal Zotto       dz@cs.unitn.it
+Matt Kraai		kraai@debian.org
 Matthias Rabe		rabe@mathematik.uni-bielefeld.de
 Michael Fetterman	mafetter@ichips.intel.com
 Michael L. Welcome	welcome@bigbird.llnl.gov
 Mike Andrews            kramer@fragile.termfrost.org
+Mike Frysinger		vapier@gentoo.org
 Mike Howard		mike@clove.com
 Mike Lijewski		lijewski@theory.tc.cornell.edu
 Nick S. Kanakakorn	skanan@otl.scu.edu
 Nicolas Pioch		pioch@inf.enst.fr
 Noah Friedman	        friedman@gnu.org
+Noah Misch		noah@cs.caltech.edu
+Paul Eggert		eggert@twinsun.com
 Pete Chown		pete.chown@dale.dircon.co.uk
 Pierre Gaumond		gaumondp@ere.umontreal.ca
 Pierre Mathieu		mathieu@geod.emr.ca
-Rafael Corvalan		rafael@club-internet.fr 
-Ren� Seindal		rene@seindal.dk
+Rafael Corvalan		rafael@club-internet.fr
+René Seindal		seindal@diku.dk
 Richard Ling            richard@research.canon.oz.au
 Richard Stallman        rms@gnu.org
 Robert Bernstein	rocky@panix.com
+Robert Bihlmeyer	robbe@orcus.priv.at
 Roland H. Pesch		roland@wrs.com
 Roland McGrath          roland@gnu.org
+Santiago Vila		sanvila@debian.org
 Scott Bartram		deneb!scottb
 Simon Leinen		simon@lia.di.epfl.ch
 Skip Montanaro		skip@automatrix.com
+Stepan Kasal		kasal@ucw.cz
 Stephen Perkins		perkins@cps.msu.edu
 Steve Williamson	willy@uinpla.npl.uiuc.edu
 Terry Jones		terry@cliffs.ucsd.edu
@@ -94,5 +109,6 @@ Tom Tromey		tromey@cns.caltech.edu
 Ulrich Drepper          drepper@gnu.org
 Vern Paxson		vern@ee.lbl.gov
 Vic Abell               abe@cc.purdue.edu
+Vincent Lonngren	Vincent.lonngren.759@student.lu.se
 Vivek P. Singhal	singhal@cs.utexas.edu
 Walter Wong		wcw+@cmu.edu

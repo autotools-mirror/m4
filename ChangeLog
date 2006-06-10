@@ -1,5 +1,14 @@
 2006-06-10  Eric Blake  <ebb9@byu.net>
 
+	* README-alpha: Update web address.
+	* README: Likewise. Change encoding to ASCII.  Remove old advice
+	about cygwin.  Document bootstrapping dependency.
+	* AUTHORS: Update from branch-1_4.
+	* THANKS: Likewise.  Change encoding to UTF-8.
+	* BACKLOG: Delete.  This file is too old and unmaintained to be
+	worthwhile.
+	* ChangeLog: Change encoding to UTF-8.
+
 	Avoid compiler warnings.
 	* m4/macro.c (trace_format): Don't mark this as a printf format,
 	since we don't accept the same set of modifiers as printf.  It
@@ -4001,7 +4010,7 @@
 
 	* modules/Makefile.am:  Cleaned up and reordered.
 
-2000-01-16  Rene' Seindal  <rene@seindal.dk>
+2000-01-16  Ren√© Seindal  <rene@seindal.dk>
 
 	* modules/Makefile.am (TESTS): New tests for the module system.
 
@@ -4142,7 +4151,7 @@
 	* src/stackovf.c: Check for HAVE_SIGINFO_T in addition to
 	HAVE_SIGINFO_H.
 
-2000-01-10  Rene' Seindal  <rene@seindal.dk>
+2000-01-10  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4o.
 
@@ -4170,7 +4179,7 @@
 	(setup_stackovf_trap): Added __P to cast.
 	(Both reported by John David Anglin <dave@hiauly1.hia.nrc.ca>)
 
-2000-01-09  Rene' Seindal  <rene@seindal.dk>
+2000-01-09  Ren√© Seindal  <rene@seindal.dk>
 
 	* doc/m4.texinfo (Changequote): Added comment about changing
 	quotes when the old quote is a part of the new.
@@ -4195,7 +4204,7 @@
 	* po/POTFILES.in: Add lib/getopt.c, lib/obstack.c,
 	lib/regex.c, lib/xmalloc.c.
 
-1999-11-10  Rene' Seindal  <rene@seindal.dk>
+1999-11-10  Ren√© Seindal  <rene@seindal.dk>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Passes -I acm4 to aclocal.
 
@@ -4237,7 +4246,7 @@
 	* src/freeze.c (produce_frozen_state):
 	Don't assume string lengths fit in int.
 
-1999-10-13  Rene' Seindal  <rene@seindal.dk>
+1999-10-13  Ren√© Seindal  <rene@seindal.dk>
 
 	* configure.in (ALL_LINGUAS): Added Greek translation (el).
 	(ALL_LINGUAS): Added Czech translation (cs).
@@ -4325,7 +4334,7 @@
 	(Symbols): New node, documenting symbols.
 	(direntry): Modernize.
 
-1998-12-11  Rene' Seindal  <rene@seindal.dk>
+1998-12-11  Ren√© Seindal  <rene@seindal.dk>
 
 	* src/builtin.c (predefined_tab): New predefined macros
 	__m4_changeword__, __m4_gmp__ and __m4_modules__ for testing for
@@ -4339,7 +4348,7 @@
 	arguments pointers to const.
 	(module_search): Simplify due to above change.
 
-1998-11-29  Rene' Seindal  <rene@seindal.dk>
+1998-11-29  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4n.
 
@@ -4365,7 +4374,7 @@
 	* doc/m4.texinfo (Invoking m4): Updated for --import-environment
 	and mpeval.
 
-1998-11-28  Rene' Seindal  <rene@seindal.dk>
+1998-11-28  Ren√© Seindal  <rene@seindal.dk>
 
 	* src/m4.c (main): New option --import-environment (no single
 	letter option).
@@ -4402,7 +4411,7 @@
 	* src/m4.c (main): m4 --version also shows which options were used
 	for compilation, such as: "GNU m4 1.4n (options: modules gmp)"
 
-1998-11-27  Rene' Seindal  <rene@seindal.dk>
+1998-11-27  Ren√© Seindal  <rene@seindal.dk>
 
 	* Error messages now always print program name before input file
 	name as specified by GNU coding standards.  Reported by Akim
@@ -4423,7 +4432,7 @@
 
 	* src/m4.h (M4ERROR): Removed reference_error ().
 
-1998-11-25  Rene' Seindal  <rene@seindal.dk>
+1998-11-25  Ren√© Seindal  <rene@seindal.dk>
 
 	* Updated to libtool 1.2b.
 
@@ -4444,20 +4453,20 @@
 	* src/path.c: Removed all module specific code and introduced new
 	functions of more generic search path handling.
 
-1998-11-24  Rene' Seindal  <rene@seindal.dk>
+1998-11-24  Ren√© Seindal  <rene@seindal.dk>
 
 	* configure.in: Defines INTLINCL to -I$(top_srcdir)/intl if using
 	included gettext, as <libintl.h> might not be found
 	otherwise. Reported by Andrew Bettison <andrewb@zip.com.au>.
 
-1998-11-22  Rene' Seindal  <rene@seindal.dk>
+1998-11-22  Ren√© Seindal  <rene@seindal.dk>
 
 	* src/output.c (insert_diversion): Fixed bug that might cause m4
 	to read from standard output!  Triggered by input
 	'divert(1)undivert(0)'.  Test for divnum>0 changed to divnum>=0,
 	so now 'undivert(0)' does nothing.
 
-1998-11-18  Rene' Seindal  <rene@seindal.dk>
+1998-11-18  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4m.
 
@@ -4498,7 +4507,7 @@
 	* Makefile.am (DIST_SUBDIRS): Instead of EXTRA_DIST for added
 	directory modules/ to the distribution.
 
-1998-11-15  Rene' Seindal  <rene@seindal.dk>
+1998-11-15  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4l.
 
@@ -4537,7 +4546,7 @@
 	* src/builtin.c (predefined_tab): Added __m4_version__ for the
 	current version of GNU m4.  It is a GNU extension.
 
-1998-11-14  Rene' Seindal  <rene@seindal.dk>
+1998-11-14  Ren√© Seindal  <rene@seindal.dk>
 
 	* tests/Makefile.am (GENERATED_TESTS): Added new
 	generated-tests/changesy.8.test
@@ -4563,7 +4572,7 @@
 
 	* src/m4.h (SYNTAX_ESCAPE): Defined as simple syntax category.
 
-1998-10-13  RenÈ Seindal  <rene@seindal.dk>
+1998-10-13  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4k.
 
@@ -4597,7 +4606,7 @@
 	* src/builtin.c (m4_undivert): Do.
 	(include): Do.
 
-1998-10-11  RenÈ Seindal  <rene@seindal.dk>
+1998-10-11  Ren√© Seindal  <rene@seindal.dk>
 
 	* acm4/Makefile.am (ACINCLUDES_M4): Added gmp.m4 and modules.m4
 
@@ -4615,7 +4624,7 @@
 
 	* src/builtin.c (builtin_tab): Builtin format marked as blind.
 
-1998-10-07  RenÈ Seindal  <rene@seindal.dk>
+1998-10-07  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4j.
 
@@ -4643,13 +4652,13 @@
 	files could not be found.
 	(install_builtin_table): Changed to use push_builtin_table()
 
-1998-10-04  RenÈ Seindal  <rene@seindal.dk>
+1998-10-04  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4i.
 
 	* configure.in (ALL_LINGUAS): Added Polish pl.po
 
-1998-10-03  RenÈ Seindal  <rene@seindal.dk>
+1998-10-03  Ren√© Seindal  <rene@seindal.dk>
 
 	* Many files: Incorporated changes to implement dynamic modules.
 	Detailed comments in src/modules.c and modules/README
@@ -4695,7 +4704,7 @@
 
 	* acconfig.h: Added WITH_MODULES
 
-1998-10-02  RenÈ Seindal  <rene@seindal.dk>
+1998-10-02  Ren√© Seindal  <rene@seindal.dk>
 
 	* examples/Makefile.am (pkgdata_DATA): Removed special target for
 	check and variables TESTS.  These tests are now run from the
@@ -4793,7 +4802,7 @@
 
 	* TODO: added entry about dependencies
 
-1998-08-10  RenÈ Seindal  <rene@seindal.dk>
+1998-08-10  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4f
 
@@ -4807,7 +4816,7 @@
 	table.  All categories are assigned a syntax code and tokens are
 	read according to this table.
 
-1998-08-09  RenÈ Seindal  <rene@seindal.dk>
+1998-08-09  Ren√© Seindal  <rene@seindal.dk>
 
 	* src/numb.{c,h}: New files, implements multiple precision eval
 	using GNU gmp.  Originally submitted by John Gerard Makecki
@@ -4819,7 +4828,7 @@
 	* src/m4.{c,h}, src/eval.c, src/builtin.c, configure.in: Changes
 	to accommodate multiple precision eval.
 
-1998-08-07  RenÈ Seindal  <rene@seindal.dk>
+1998-08-07  Ren√© Seindal  <rene@seindal.dk>
 
 	* src/input.c (MATCH, match_input), src/m4.h: changed definition
 	of comment and quote strings to `unsigned int' to allow eight bit
@@ -4828,12 +4837,12 @@
 	* src/builtin.c, doc/m4.texinfo: Builtin `syncoutput' added by
 	patch from Mike Howard <mike@clove.com>
 
-1998-08-06  RenÈ Seindal  <rene@seindal.dk>
+1998-08-06  Ren√© Seindal  <rene@seindal.dk>
 
 	* gettext.m4: corrected AM_WITH_NLS to handle use of installed
 	-lintl.
 
-1998-08-03  RenÈ Seindal  <rene@seindal.dk>
+1998-08-03  Ren√© Seindal  <rene@seindal.dk>
 
 	* Prerelease 1.4e
 
@@ -4871,7 +4880,7 @@
 	* src/stackovf.c: #ifdef USE_STACKOVF ... #endif to (de-)activate
 	stack overflow functionality.
 
-1994-12-03  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-12-03  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Prerelease 1.4.1.
 
@@ -4885,7 +4894,7 @@
 	* configure.in, {,*/}Makefile.in, acconfig.h, src/m4.c,
 	src/freeze.c: Rename PRODUCT to PACKAGE.
 
-1994-11-26  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-11-26  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Check for <libintl.h> and <locale.h>.
 	* src/m4.h, src/builtin.c, src/debug.c, src/eval.c, src/macro.c,
@@ -4898,7 +4907,7 @@
 	src/stackovf.c, src/symtab.c: Use _ macro over all localizable
 	strings.
 
-1994-11-07  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-11-07  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* doc/Makefile.in (stamp-vti): Use new -r option to date.
 
@@ -4906,14 +4915,14 @@
 	Gerard's work.
 	* acconfig.h: Document WITH_GMP.
 
-1994-11-05  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-11-05  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.4.
 
 	* doc/Makefile.in (realclean): Also remove stamp-vti.
 	Reported by Eric Backus.
 
-1994-11-02  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-11-02  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/freeze.c (produce_frozen_state): If the frozen file cannot
 	be opened, return immediately after producing the error message.
@@ -4923,7 +4932,7 @@
 	ANSIfying compiler flags, this is of no use to check it before.
 	Reported by Alexander Lehmann.
 
-1994-11-01  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-11-01  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/macro.c (collect_arguments): Cast obstack arguments to
 	(voidstar), so avoiding compiler warnings.
@@ -4937,7 +4946,7 @@
 	* src/symtab.c (free_symbol): Idem.
 	Reported by Karl Vogel.
 
-1994-10-31  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-31  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (DISTFILES): Distribute BACKLOG.
 
@@ -4946,7 +4955,7 @@
 	* src/m4.c, src/freeze.c: Use PRODUCT and VERSION instead of the
 	constant string m4 and variable or parameter named version.
 
-1994-10-30  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-30  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/m4.h, src/debug.c: Replace all #ifdef __STDC__ by #if
 	__STDC__.  Alliant FX/2800 Concentrix 2.2 (i860-BSD4.3) compiler
@@ -4960,7 +4969,7 @@
 	Reported by Eric Backus, Jim Meyering, John David Anglin and
 	Joseph E. Sacco.
 
-1994-10-29  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-29  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* aclocal.m4 (fp_C_PROTOTYPES): Force -D_HPUX_SOURCE with -Aa.
 	Reported by John David Anglin.
@@ -4985,7 +4994,7 @@
 	* doc/Makefile.in: Create version.texi, use it, clean it.
 	Reported by Jim Meyering.
 
-1994-10-28  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-28  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (all, install, uninstall): Depend on Makefile.
 
@@ -5002,29 +5011,29 @@
 
 	* {,*/}Makefile.in (dist): Always try a hard link before a copy.
 
-1994-10-27  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-27  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (mostlyclean-local): Do not remove *~.
 	* */Makefile.in (mostlyclean): Idem.
 	Reported by Robert E. Brown and Richard Stallman.
 
-1994-10-09  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-09  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/m4.h: Get rid of CONFIG_BROKETS.
 
-1994-10-02  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-02  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use AC_ARG_PROGRAM.
 	* aclocal.m4 (fp_C_PROTOTYPES): Substitute @kr@ by kr or empty.
 	Reported by David MacKenzie.
 
-1994-10-01  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-10-01  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Do not add -O to CFLAGS for GNU C, now that
 	configure does it automatically.
 	Reported by Jim Meyering.
 
-1994-09-23  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-23  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/stackovf.c: Declare the handler_t typedef earlier in the
 	code, use it for stackovf_handler.
@@ -5036,12 +5045,12 @@
 	basename'ing it.
 	Reported by Karl Berry.
 
-1994-09-18  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-18  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* src/Makefile.in (TAGS): Include a ../lib/TAGS reference.
 	Reported by Karl Berry.
 
-1994-09-14  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-14  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (mostlyclean): Added.
 	(TAGS): Make in $(srcdir).
@@ -5064,7 +5073,7 @@
 	-recursive and -local, only delay the removal of config.status,
 	which is repeated in both goals.
 
-1994-09-13  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-13  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.3.
 
@@ -5092,12 +5101,12 @@
 	(realclean): Remove it.
 	Reported by Karl Berry.
 
-1994-09-10  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-10  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use fp_ to match aclocal.m4.  Revert _OS_ macros
 	to old names, for following Autoconf.
 
-1994-09-08  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-08  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (MDEFINES): Remove INSTALL substitutions, for
 	./install.sh will not be correctly referred to in sub-Makefiles.
@@ -5113,7 +5122,7 @@
 	* configure.in (AC_OUTPUT): Touch stamp-h if CONFIG_HEADERS.
 	Reported by Jim Meyering.
 
-1994-09-06  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-06  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Correct stack overflow detection logic, taking
 	care of systems having only incomplete implementations (like for
@@ -5122,11 +5131,11 @@
 
 	* src/Makefile.in (TAGS): Remote -t from etags call.
 
-1994-09-02  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-09-02  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (install): Depend on all.
 
-1994-08-31  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-31  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* examples/Makefile.in (mostlyclean): Do not depend on texclean.
 	Reported by Jim Meyering and John David Anglin.
@@ -5163,7 +5172,7 @@
 	* src/output.c (output_text): New function, for optimizing the
 	output of strings of characters.  Use it.
 
-1994-08-30  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-30  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* doc, src: New directories reorganizing the distribution.
 	* doc/Makefile.in, src/Makefile.in, examples/Makefile.in: New
@@ -5177,7 +5186,7 @@
 	* output.c (shipout_text): Accept a length parameter, and use it.
 	All callers adjusted.
 
-1994-08-29  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-29  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Include <unistd.h> if it exists.
 	* stackovf.c: Don't.
@@ -5217,12 +5226,12 @@
 	(insert_file): Use better buffering.
 	Reported by David MacKenzie.
 
-1994-08-28  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-28  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in, checks/Makefile.in: Arrange so
 	dist works from another build directory.
 
-1994-08-27  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-27  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* symtab.c (hack_all_symbols): Use hash_table_size instead of
 	constant HASHMAX, for -H option to work better.
@@ -5239,7 +5248,7 @@
 	(builtin_init): Accept and obey a flag argument.
 	* m4.h: Add declarations for freeze.c, changes for builtin.c.
 
-1994-08-24  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-24  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (dumpdef_cmp): Rewrite so the cast protect the const
 	specifier.
@@ -5248,12 +5257,12 @@
 	* acconfig.h: Document WITH_DMALLOC.
 	* m4.h: Add code for when WITH_DMALLOC.
 
-1994-08-15  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-15  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (long_options): Use "error-output", the dash was missing.
 	Reported by Akiko Matsushita.
 
-1994-08-12  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-08-12  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Include <sys/types.h>.
 	* builtin.c, debug.c, m4.c, output.c, stackovf.c: Don't.
@@ -5282,7 +5291,7 @@
 	* m4.c (usage): Reorganize the --help output by topic.  Include a
 	description for debugging flags.
 
-1994-07-29  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-29  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: If sigaction is available and SA_ONSTACK defined,
 	use sigaction.  Otherwise, if sigvec is available and SV_ONSTACK
@@ -5291,15 +5300,15 @@
 	Reported by Jim Avera, Karl Berry, Kaveh R. Ghazi, Matthias Rabe
 	and Simon Leinen.
 
-1994-07-21  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-21  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (usage): Replace printf par fputs.
 
-1994-07-18  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-18  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.2
 
-1994-07-17  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-17  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Check for sigaction and sigvec.  Add a new delayed
 	check for RLIMIT_STACK, combine in the checking for getrlimit.
@@ -5309,17 +5318,17 @@
 	* examples/stackovf.sh: Correct a typo.
 	Reported by Eric Backus, Jim Avera and Jim Meyering.
 
-1994-07-16  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-16  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* ansi2knr.c: New version sent by its author, Peter Deutsch.
 
-1994-07-15  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-15  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Modify so parallel make will not try making
 	lib/libm4.a twice simultaneously.
 	Reported by Jim Meyering.
 
-1994-07-14  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-14  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* stackovf.c (setup_stackovf_trap): Replace "Don't" by "Do not" in
 	error message, for when no code possibility exists.  Even if this
@@ -5333,7 +5342,7 @@
 	providing ulimit, instead of using only ksh.
 	Reported by Jim Avera and Joseph E. Sacco.
 
-1994-07-12  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-12  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (check): Have it depend on all instead of m4.  In
 	this way, a change in lib will be detected and processed.
@@ -5349,7 +5358,7 @@
 	* lib/strtol.c: New file, from elsewhere.
 	Reported by Andreas Schwab.
 
-1994-07-07  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-07  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* macro.c (expand_macro): Cast value to (boolean) prior to
 	assigning it to traced.
@@ -5370,7 +5379,7 @@
 	* examples/stackovf.sh: Run m4 -L99999999 to allow stack overflow.
 	* ansi2knr.c: Fix for func-ptr args; convert "..." to varargs syntax.
 
-1994-07-05  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-05  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Use AC_SET_MAKE.
 	* Makefile.in: Use @SET_MAKE@.
@@ -5379,7 +5388,7 @@
 	* checks/check-them: Do not trap on SIGQUIT or SIGALRM.
 	Reported by Ian Taylor.
 
-1994-07-02  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-07-02  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Remove dependency of USE_STACKOVF on STDC_HEADERS,
 	because siginfo.h is unrelated to standard headers, and siginfo.h
@@ -5391,14 +5400,14 @@
 	* aclocal.m4, configure.in: Replace AC_HAVE_PROTOTYPES by
 	AC_PROTOTYPES.
 
-1994-06-29  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-29  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (substitute): Use \& to represent this part of the
 	string which was matched by the whole regexp, instead of
 	representing the whole string.  Any usage of \0 issues a warning
 	and acts like \&, it will disappear in some subsequent release.
 
-1994-06-27  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-27  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Complete prototype for forwarded declaration of usage.
 
@@ -5444,7 +5453,7 @@
 	(int) to most references, when used in expressions.
 	Reported by Tom McConnell.
 
-1994-06-25  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-25  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* aclocal.m4: Replace FP_PROTOTYPES by AC_HAVE_PROTOTYPES,
 	following an idea from Brook G. Milligan.  AC_HAVE_PROTOTYPES
@@ -5483,13 +5492,13 @@
 	* checks/Makefile.in (clean): Depends on mostlyclean.
 	(mostlyclean): New goal.
 
-1994-06-24  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-24  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (DISTFILES): Distribute install.sh.
 	* install.sh: New file, copied from elsewhere.
 	Reported by Assar Westerlund and Kaveh R. Ghazi.
 
-1994-06-23  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-23  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Define ENABLE_CHANGEWORD if --enable-changeword.
 	* acconfig.h: Explain ENABLE_CHANGEWORD.
@@ -5554,7 +5563,7 @@
 	incl_test.m4.
 	* examples/multiquotes.m4: Renamed from multi-quotes.m.
 
-1994-06-22  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-22  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Avoid USE_STACKOVF if <siginfo.h> not found.  Note
 	that Jim developped stackovf.c on a 486 running SVR4.0 (ESIX), and
@@ -5576,11 +5585,11 @@
 	problem about an incorrect cpp seting on NeXT 3.1.
 	Reported by Alexander Lehmann.
 
-1994-06-05  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-06-05  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h (_): Change argument from `x' to `Args'.
 
-1994-04-22  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-04-22  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Rename Args() to _().
 	* m4.h: Remove extern specifier from all function declarations.
@@ -5597,7 +5606,7 @@
 	* m4.c: Call setup_stackovf_trap().
 	* tests/stackovf_test.sh: New file.
 
-1994-04-13  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-04-13  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in: Rename .all-stamp to stamp-checks.
 
@@ -5619,36 +5628,36 @@
 	* m4.h: Avoid a pre-ANSI <memory.h> together with <string.h>.
 	Reported by Jim Meyering.
 
-1994-01-25  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-01-25  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Move the conditional definition of volatile after the
 	inclusion of system files, because they may define it first.
 
-1994-01-04  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-01-04  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in (CHECKS): Add a useless `*' before `[', to
 	get around a problem with Alpha make seeing a syntax error, there.
 	Reported by Vern Paxson.
 
-1994-01-03  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1994-01-03  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Do not define LDFLAGS, use CFLAGS on link calls.
 	Reported by Richard Stallman.
 
-1993-12-25  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-12-25  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* configure.in: Correct test for strerror, AC_FUNC_CHECK was used
 	instead of AC_HAVE_FUNCS.
 	Reported by Noah Friedman.
 
-1993-12-01  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-12-01  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Initialize show_help and show_version to zero.
 
 	* m4.c: Ensure EXIT_SUCCESS and EXIT_FAILURE are defined.
 	Use them in exit() and usage() calls.
 
-1993-11-27  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-27  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Delete extern sys_nerr, sys_errlist declarations, and
 	syserr() macro.  Delete errref, add reference_error and M4ERROR.
@@ -5660,13 +5669,13 @@
 	Doing so, the program name appears after the input reference
 	instead of before, which eases M-x next-error processing.
 
-1993-11-24  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-24  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/get-them: Escape braces with backslashes in patterns,
 	because HPUX-9.01 awk needs this.
 	Reported by Jim Meyering.
 
-1993-11-22  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-22  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c: Declare "FILE *popen ();".
 
@@ -5681,7 +5690,7 @@
 	conflicts on SGI and Alpha.
 	Reported by Kaveh R. Ghazi.
 
-1993-11-20  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-20  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Include <getopt.h> instead of "getopt.h".
 
@@ -5695,7 +5704,7 @@
 	* m4.h: Test for HAVE_MEMORY_H instead of NEED_MEMORY_H.
 	* configure.in: Use AC_HAVE_HEADERS(memory.h), delete AC_MEMORY_H.
 
-1993-11-17  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-17  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (m4_eval): Cast strlen to (int) before comparing.
 
@@ -5753,7 +5762,7 @@
 	* builtin.c (m4_syscmd, m4_esyscmd): Use it.
 	Reported by Nicolas Pioch.
 
-1993-11-12  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-12  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (m4.dvi): Use m4.texinfo instead of m4.texi.
 	Reported by Joel Sherrill.
@@ -5768,17 +5777,17 @@
 	* macro.c (call_macro): Add * in (*SYMBOL_FUNC (sym)) (...).
 	Reported by Karl Vogel.
 
-1993-11-09  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-09  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Do not define volatile if already defined.
-	Reported by RenÈ Seindal.
+	Reported by Ren√© Seindal.
 
 	* lib/Makefile.in: Add a forgotten ALLOCA=@ALLOCA@.  Grrr!
 
 	Reported by Bernhard Daeubler, Eric Backus, Hal Peterson, Hoang
 	Uong, Ian Taylor, Kaveh R. Ghazi, Tom McConnell and Walter Wong.
 
-1993-11-08  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-08  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Define strchr and strrchr in terms of index and rindex,
 	instead of the other way around.
@@ -5787,7 +5796,7 @@
 	* input.c (next_char): Remove a "break;" after a "return ...;".
 	Reported by Tom McConnell.
 
-1993-11-08  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-08  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.1
 
@@ -5806,7 +5815,7 @@
 	instead of "configure --no-create", which is obsolete.
 	Reported by Tom McConnell.
 
-1993-11-05  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-05  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (usage): Use "%s" instead of "m4" in format string.
 	Reported by Jim Meyering.
@@ -5823,13 +5832,13 @@
 	* checks/Makefile.in: Changed accordingly.
 	Reported by Jim Meyering.
 
-1993-11-04  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-04  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/Makefile.in (dist): Correct permissions on files.
 
 	* output.c: Declare tmpfile, some systems don't.
 
-1993-11-03  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-03  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* checks/Makefile.in (dist): Correct permissions on files.
 
@@ -5849,7 +5858,7 @@
 	diagnose missing arguments and return the empty string.
 	Reported by Nick S. Kanakakorn.
 
-1993-11-02  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-02  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c (main): At end of all input, ensure all undiverted text
 	goes to the main output stream.
@@ -5873,7 +5882,7 @@
 	which case it is implied empty.  Affects define and pushdef.
 	Reported by Eric Allman.
 
-1993-11-01  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-11-01  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Add blind_if_no_args in struct builtin, blind_no_args in
 	struct symbol adn SYMBOL_BLIND_NO_ARGS macro.
@@ -5936,33 +5945,33 @@
 	Reported by Kristine Lund.
 	Reported by Marion Hakanson.
 
-1993-10-30  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-10-30  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (m4.info): Use -I$(srcdir) on $(MAKEINFO).
 	Reported by Noah Friedman.
 
-1993-10-25  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-10-25  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Remove MDEFINES and cleanup.
 
-1993-06-09  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-06-09  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (dist): Replace "echo `pwd`" by a mere "pwd".
 	Create a gzip file.
 
-1993-02-06  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-02-06  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in, check/Makefile.in: In dist goals,
 	ensure 777 mode for directories, so older tar's will restore file
 	modes properly.
 
-1993-01-17  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-01-17  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in: Put $(CFLAGS) after $(CPPFLAGS),
 	so the installer can override automatically configured choices.
 	Reported by Karl Berry.
 
-1993-01-15  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-01-15  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* lib/vfprintf.c: Stolen from Oleo distribution and adapted.  The
 	previous version was not working properly on m68k-hp-bsd4.3.
@@ -5973,19 +5982,19 @@
 	* lib/Makefile.in: Distribute _doprnt.c.
 	Do not distribute regex.[ch].old anymore.
 
-1993-01-01  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1993-01-01  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in, lib/Makefile.in: Reinstate $(CPPFLAGS), use it.
 	Richard wants it there.
 
-1992-12-27  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-12-27  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Add DEFS to MDEFINES.
 	* lib/Makefile.in (.c.o): Remove $(CPPFLAGS).
 	(libm4.a): Remove the library before creating it.
 	(distclean): Remove tags and TAGS too.
 
-1992-12-23  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-12-23  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (dvi, m4.dvi): New goals.
 
@@ -6000,7 +6009,7 @@
 	* Makefile.in (clean): Remove clutter from ansi2knr.
 	Reported by Pierre Gaumond.
 
-1992-12-20  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-12-20  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Remove $(CPPFLAGS) from the .c.o rule.  The user
 	might well use CFLAGS is s/he needs it.
@@ -6013,7 +6022,7 @@
 	Reported by Erez Zadok.
 	Reported by Assar Westerlund.
 
-1992-12-19  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-12-19  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Release 1.0.3
 	This is still a	beta release for the future GNU m4 version 1.1.
@@ -6074,7 +6083,7 @@
 	mysteriously stopped aborting with this one.  Insecure feeling...
 	* lib/Makefile.in: Distribute regex.[ch].old, just in case!
 
-1992-12-18  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-12-18  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.c: Change `--no-warnings' to `--silent'.
 	Reported by David MacKenzie.
@@ -6101,7 +6110,7 @@
 	macro_definition.
 	* symtab.c: Use typedef symbol instead of struct symbol.
 
-1992-11-17  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-17  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* *.[ch]: Remove all trailing whitespace, in code and comments.
 
@@ -6112,7 +6121,7 @@
 	awk script when switching files, because without this, mawk runs
 	out of file descriptors.
 
-1992-11-16  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-16  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (realclean): Delete m4.info*.
 	Reported by Jim Meyering.
@@ -6146,7 +6155,7 @@
 	* builtin.c, debug.c, format.c, m4.c, m4.h, macro.c, symtab.c
 	(many functions and arrays): Declare `const'.
 
-1992-11-15  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-15  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* *.[ch]: Rename nil to NULL, using the declaration from <stdio.h>,
 	removing the declaration from m4.h.  Also rename false to FALSE
@@ -6162,13 +6171,13 @@
 	instead of from version.h.  I need updating many files manually,
 	when the version changes, version.h is just one of them.
 
-1992-11-14  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-14  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Remove the tag `boolean' on the enum introducing typedef
 	`boolean'.  This tag conflicts with <sys/types.h> on SVR4.
 	Reported by Tom McConnell.
 
-1992-11-13  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-13  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.texinfo: Correct the examples for 33.divert, 38.divnum,
 	39.cleardiv, which were describing missing or spurious newlines.
@@ -6184,7 +6193,7 @@
 
 	* Makefile.in (dist): chmod a+r before making the tar file.
 
-1992-11-12  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-12  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c (m4_dnl): Diagnose any parameter to `dnl'.
 
@@ -6198,7 +6207,7 @@
 	ensure that it does not define errno.
 	Reported by Richard Stallman.
 
-1992-11-11  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-11  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* builtin.c: Define and use DECLARE macro for builtins.
 
@@ -6210,7 +6219,7 @@
 
 	* m4.c (cmd_error): Add a missing semicolon before va_end().
 
-1992-11-10  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-10  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in: Now handle protoized sources.  Define and use U.
 	Compile and use ansi2knr with old compilers.  Update DISTFILES.
@@ -6239,7 +6248,7 @@
 	* path.c: Protoized.  Then cast some (char *) over xmalloc's.
 	* symtab.c: Protoized.
 
-1992-11-06  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-06  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.texinfo: Remove directory from diagnostics in 30.include,
 	51.eval, 56.errprint and 57.m4exit tests.
@@ -6252,7 +6261,7 @@
 	* Makefile.in, lib/Makefile.in: Implement Autoconf interface.
 	Then, rewritten for better compliance with GNU standards.
 
-1992-11-05  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-11-05  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* format.c (format): Avoid syntax error if not HAVE_EFGCVT,
 	because of a misplaced #endif.
@@ -6284,7 +6293,7 @@
 	* Delete empty etc/.
 	* examples/: New name for test/.
 
-1992-03-10  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-03-10  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* Makefile.in (check): Add m4 as dependency.
 
@@ -6293,7 +6302,7 @@
 	usage message more informative.
 	Reported by David MacKenzie.
 
-1992-03-09  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-03-09  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* etc/check_examples: New name for check_examples.sh.
 	* etc/get_examples: New name for get_examples.sh.
@@ -6304,7 +6313,7 @@
 	* Many *.[hc] files: GNU indent'ed, with further fine tuning of
 	code disposition by hand.
 
-1992-03-08  FranÁois Pinard  <pinard@iro.umontreal.ca>
+1992-03-08  Fran√ßois Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Delete definitions for abort() and exit().
 	Reported by Richard Stallman.
@@ -6318,9 +6327,9 @@
 	* eval.c, input.c, m4.h: Remove last comma in enums.
 	Reported by Mike Lijewski.
 
-	* Transfer of maintenance duties from RenÈ to FranÁois.
+	* Transfer of maintenance duties from Ren√© to Fran√ßois.
 
-1991-10-24  RenÈ Seindal <seindal@diku.dk>
+1991-10-24  Ren√© Seindal <seindal@diku.dk>
 
 	* Release 1.0.  Many thanks to those, who provided me with bug
 	reports and feedback.
@@ -6342,7 +6351,7 @@
 
 	* Several minor bugs have been fixed.
 
-1991-07-26  RenÈ Seindal <seindal@diku.dk>
+1991-07-26  Ren√© Seindal <seindal@diku.dk>
 
 	* Fixed various bugs.  Release 0.99, manual 0.09.  Many thanks to
 	Francois Pinard and Roland H. Pesch for providing me with reports.
@@ -6381,7 +6390,7 @@
 
 	* The m4.info file is now installed along with the program.
 
-1990-11-15  RenÈ Seindal <seindal@diku.dk>
+1990-11-15  Ren√© Seindal <seindal@diku.dk>
 
 	* Updated and enhanced version.  Release 0.75, manual 0.07.
 
@@ -6422,7 +6431,7 @@
 
 	* Fixed two missing null bytes bugs.
 
-1990-01-22  RenÈ Seindal <seindal@diku.dk>
+1990-01-22  Ren√© Seindal <seindal@diku.dk>
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
