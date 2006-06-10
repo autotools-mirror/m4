@@ -1,3 +1,14 @@
+2006-06-10  Andreas Schwab  <schwab@suse.de>  (tiny change)
+	    Eric Blake  <ebb9@byu.net>
+
+	* modules/time.c (ctime): Pass correctly typed variable to
+	m4_numeric_arg.
+	(gmtime): Likewise.
+	(localtime): Likewise.
+	(strftime): Likewise.
+	* m4/utility.c (m4_numeric_arg): For now, document arbitrary
+	limit inherent in this interface.
+
 2006-05-08  Bruno Haible  <bruno@clisp.org>  (tiny change)
 
 	* modules/m4.c (WEXITSTATUS): Provide fallback definition.

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1998-1999, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 1998-1999, 2003, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -67,6 +67,8 @@ skip_space (m4 *context, const char *arg)
 /* The function m4_numeric_arg () converts ARG to an int pointed to by
    VALUEP. If the conversion fails, print error message for macro.
    Return true iff conversion succeeds.  */
+/* FIXME: Convert this to use gnulib's xstrtoimax, xstrtoumax.
+   Otherwise, we are arbitrarily limiting integer values.  */
 bool
 m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
 		int arg, int *valuep)
@@ -103,4 +105,3 @@ m4_dump_args (m4 *context, m4_obstack *obs, int argc,
       m4_shipout_string (context, obs, M4ARG (i), 0, quoted);
     }
 }
-

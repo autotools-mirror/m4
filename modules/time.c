@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -95,9 +95,13 @@ M4BUILTIN_HANDLER (currenttime)
 M4BUILTIN_HANDLER (ctime)
 {
   time_t t;
+  int i;
 
   if (argc == 2)
-    m4_numeric_arg (context, argc, argv, 1, (int *) &t);
+    {
+      m4_numeric_arg (context, argc, argv, 1, &i);
+      t = i;
+    }
   else
     t = time (0L);
 
@@ -140,10 +144,12 @@ format_tm (m4_obstack *obs, struct tm *tm)
 M4BUILTIN_HANDLER (gmtime)
 {
   time_t t;
+  int i;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
+  t = i;
   format_tm (obs, gmtime (&t));
 }
 
@@ -153,10 +159,12 @@ M4BUILTIN_HANDLER (gmtime)
 M4BUILTIN_HANDLER (localtime)
 {
   time_t t;
+  int i;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
+  t = i;
   format_tm (obs, localtime (&t));
 }
 
@@ -201,9 +209,10 @@ M4BUILTIN_HANDLER (strftime)
   char *buf;
   int l;
 
-  if (!m4_numeric_arg (context, argc, argv, 2, (int *) &t))
+  if (!m4_numeric_arg (context, argc, argv, 2, &l))
     return;
 
+  t = l;
   tm = localtime (&t);
 
   buf = (char *) obstack_alloc (obs, 1024);
