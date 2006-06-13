@@ -243,17 +243,19 @@ ltdl/libltdlc.la:
 ## -------------- ##
 
 info_TEXINFOS	= doc/m4.texinfo
-dist_man_MANS	= $(srcdir)/doc/m4.1
+dist_man_MANS	= doc/m4.1
+MAINTAINERCLEANFILES += $(dist_man_MANS)
 
-$(srcdir)/doc/m4.1: doc/helptoman.pl src/m4$(EXEEXT)
+doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
-	  $(PERL) $(srcdir)/doc/helptoman.pl src/m4$(EXEEXT) > $@-tmp; \
+	  $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run \
+	    help2man -o $@-tmp src/m4$(EXEEXT); \
 	  cmp -s $@-tmp $@ || cp $@-tmp $@; \
 	  rm -f $@-tmp; \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
-	  echo "         Retry once the program executable will be ready."; \
+	  echo "         Retry once the program executable is ready."; \
 	fi
 
 ## Disabled for now.  Clashes with earlier definition.

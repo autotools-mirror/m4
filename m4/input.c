@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -940,7 +941,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 
   obstack_1grow (&token_stack, '\0');
 
-  bzero (token, sizeof (m4_symbol_value));
+  memset (token, '\0', sizeof (m4_symbol_value));
 
   m4_set_symbol_value_text (token, obstack_finish (&token_stack));
   VALUE_MAX_ARGS (token)	= -1;

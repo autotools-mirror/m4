@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 06 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -82,8 +83,6 @@ extern int errno;
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-
-char *mktemp ();
 
 #if HAVE_LOCALE_H
 # include <locale.h>

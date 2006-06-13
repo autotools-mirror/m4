@@ -1,3 +1,14 @@
+2006-06-12  Eric Blake  <ebb9@byu.net>
+
+	* m4/output.c [HAVE_MKTEMP]: Gnulib provides mkstemp, so don't
+	bother with mktemp.
+	* src/m4.h: Don't declare mktemp.
+	* m4/input.c (m4__next_token): Avoid bzero.
+	* configure.ac (AC_CHECK_FUNCS): Remove obsolete checks.
+	* Makefile.am (doc/m4.1): Depend on installed help2man, rather
+	than distributing outdated helptoman.pl.
+	* doc/helptoman.pl: Delete.
+
 2006-06-10  Eric Blake  <ebb9@byu.net>
 
 	* README (Patches): Document the current dependence on CVS
