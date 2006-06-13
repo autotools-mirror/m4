@@ -29,7 +29,7 @@ ACLOCAL_AMFLAGS = -I ltdl/m4
 AM_CPPFLAGS	= -I. -I$(srcdir) \
 		  -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4\
-		  $(INTLINCL)
+		  $(INTLINCL) $(LTDLINCL)
 AM_LDFLAGS	= -no-undefined -export-dynamic
 
 EXTRA_DIST	= bootstrap $(config_aux_dir)/mkstamp

@@ -1,3 +1,16 @@
+2006-06-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (AM_CPPFLAGS):  Add $(LTDLINCL), so the right
+	ltdl.h is used.
+
+	* bootstrap: Do not run libtoolize manually, this is done
+	correctly by autoreconf.  Invoke autoreconf with --no-recursive
+	to avoid unnecessary rerunning of autotools for libltdl.
+
+2006-06-13  Eric Blake  <ebb9@byu.net>
+
+	* THANKS: Update.
+
 2006-06-12  Eric Blake  <ebb9@byu.net>
 
 	* m4/output.c [HAVE_MKTEMP]: Gnulib provides mkstemp, so don't

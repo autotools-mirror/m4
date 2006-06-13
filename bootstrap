@@ -6,7 +6,6 @@
 : ${AUTORECONF=autoreconf}
 : ${AWK=awk}
 : ${GNULIB_TOOL=gnulib-tool}
-: ${LIBTOOLIZE=libtoolize}
 : ${RM=rm -f}
 : ${SED=sed}
 : ${WGET=wget}
@@ -61,7 +60,7 @@ func_update_po ()
 {
     if test $# = 1; then
       case $1 in
-        *.po)  POFILE=$1    ;;
+	*.po)  POFILE=$1    ;;
 	*)     POFILE=$1.po ;;
       esac
       func_echo "getting translation for $1..."
@@ -70,7 +69,7 @@ func_update_po ()
       func_echo "getting translations into po..."
       (cd po &&
        rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'` &&
-         $WGET -nv -nd -r -l 1 -A .po --cache=off $TP_URL &&
+	 $WGET -nv -nd -r -l 1 -A .po --cache=off $TP_URL &&
 	 rm -f index.html index.html.[0-9]*
        ls *.po | sed 's/\.po$//' > LINGUAS
       ) || exit
@@ -104,8 +103,8 @@ while test -h "$gnulibdir"; do
     test -n "$linkval" || break
 
     case "$linkval" in
-        /* ) gnulibdir="$linkval" ;;
-        * )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
+	/* ) gnulibdir="$linkval" ;;
+	* )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
     esac
 
 done
@@ -143,7 +142,7 @@ for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
 
     dest=`echo $file | $SED "$basename"`
     case $file in
-        lib/*) dest=src/$dest ;;
+	lib/*) dest=src/$dest ;;
 	m4/*)  dest=$config_macro_dir/$dest ;;
 	*)     func_echo "Unknown file: $file"
 	       exit 1
@@ -152,8 +151,8 @@ for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
 
     # Be sure to show all copying errors before bailing out
     if test -f $gnulibdir/$file; then
-        func_echo "copying file \`$dest'"
-        cp $gnulibdir/$file $dest
+	func_echo "copying file \`$dest'"
+	cp $gnulibdir/$file $dest
     else
 	func_error "$gnulibdir/$file does not exist"
 	bailout_cb="exit 1"
@@ -163,19 +162,11 @@ $bailout_cb
 
 
 ## ----------- ##
-## Libtoolize. ##
-## ----------- ##
-
-func_echo "running: $LIBTOOLIZE --ltdl=\"$ltdldir\" --force --copy"
-$LIBTOOLIZE --ltdl="$ltdldir" --force --copy
-
-
-## ----------- ##
 ## Autoreconf. ##
 ## ----------- ##
 
-func_echo "running: $AUTORECONF --force --verbose --install"
-$AUTORECONF --force --verbose --install
+func_echo "running: $AUTORECONF --force --verbose --install --no-recursive"
+$AUTORECONF --force --verbose --install --no-recursive
 
 
 ## ---------- ##
