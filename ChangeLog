@@ -1,4 +1,13 @@
 2006-06-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+	    Eric Blake  <ebb9@byu.net>
+
+	Allow `make dist' to work again.
+	* Makefile.am (EXTRA_DIST): doc/helptoman.pl is gone.
+	(MAINTAINERCLEANFILES): Avoid redundant mention of dist_man_MANS.
+	(cvs-dist): Fix typo.
+	* NEWS: Match current version number.
+
+2006-06-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (AM_CPPFLAGS):  Add $(LTDLINCL), so the right
 	ltdl.h is used.

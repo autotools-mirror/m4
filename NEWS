@@ -1,7 +1,8 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
-Copyright 1992, 1993, 1994, 1998, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1992, 1993, 1994, 1998, 2000, 2001, 2006 Free Software
+Foundation, Inc.
 
-Version beta 1.4r - ???, by ???
+Version beta 1.9a - ???, by ???
 
 * If the POSIXLY_CORRECT environment variable is set, m4 now disables
   GNU extensions that are incompatible with POSIX.

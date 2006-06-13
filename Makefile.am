@@ -244,7 +244,6 @@ ltdl/libltdlc.la:
 
 info_TEXINFOS	= doc/m4.texinfo
 dist_man_MANS	= doc/m4.1
-MAINTAINERCLEANFILES += $(dist_man_MANS)
 
 doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
 	@if test -f src/m4$(EXEEXT); then \
@@ -262,8 +261,6 @@ doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
 ## TAGS_FILES	= $(infos_TEXINFOS)
 ## TAGS_DEPENDENCIES = $(TAGS_FILES)
 ## ETAGS_ARGS	= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
-
-EXTRA_DIST     += doc/helptoman.pl
 
 MAINTAINERCLEANFILES += $(dist_man_MANS)
 
@@ -421,8 +418,8 @@ CVS	= cvs # set it to `:' to avoid CVS operations at dist time
 # Tag before making distribution.  Also, don't make a distribution if
 # checks fail.  Also, make sure the NEWS file is up-to-date.
 cvs-dist: distcheck # maintainer-check
-	@if sed '1,2d;3q' $(srcdir)/NEWS | grep -e $(VERSION)" > dev/null; \
-	  echo "NEWS not updated not releasing" 1>&2; \
+	@if sed '1,2d;3q' $(srcdir)/NEWS | grep -e "$(VERSION)" > dev/null; \
+	  echo "NEWS not updated; not releasing" 1>&2; \
 	  exit 1;
 	fi
 	cd $(srcdir) && \
