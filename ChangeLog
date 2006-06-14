@@ -1,3 +1,7 @@
+2006-06-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (modules_mpeval_la_LIBADD): Readd $(LIBADD_GMP).
+
 2006-06-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 	    Eric Blake  <ebb9@byu.net>
 
