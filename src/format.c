@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -225,14 +225,14 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  width = ARG_INT (argc, argv);
 	  fmt++;
 	}
-      else if (isdigit (*fmt))
+      else if (isdigit (to_uchar (*fmt)))
 	{
 	  width = 0;
 	  do
 	    {
 	      width = width * 10 + *fmt++ - '0';
 	    }
-	  while (isdigit (*fmt));
+	  while (isdigit (to_uchar (*fmt)));
 	}
 
       /* Maximum precision.  */
@@ -244,14 +244,14 @@ format (struct obstack *obs, int argc, token_data **argv)
 	      prec = ARG_INT (argc, argv);
 	      ++fmt;
 	    }
-	  else if (isdigit (*fmt))
+	  else if (isdigit (to_uchar (*fmt)))
 	    {
 	      prec = 0;
 	      do
 		{
 		  prec = prec * 10 + *fmt++ - '0';
 		}
-	      while (isdigit (*fmt))
+	      while (isdigit (to_uchar (*fmt)))
 		;
 	    }
 	}
@@ -582,13 +582,13 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  width = ARG_INT (argc, argv);
 	  fmt++;
 	}
-      else if (isdigit (*fmt))
+      else if (isdigit (to_uchar (*fmt)))
 	{
 	  do
 	    {
 	      fmt++;
 	    }
-	  while (isdigit (*fmt));
+	  while (isdigit (to_uchar (*fmt)));
 	}
 
       /* Maximum precision.  */
@@ -600,13 +600,13 @@ format (struct obstack *obs, int argc, token_data **argv)
 	      prec = ARG_INT (argc, argv);
 	      ++fmt;
 	    }
-	  else if (isdigit (*fmt))
+	  else if (isdigit (to_uchar (*fmt)))
 	    {
 	      do
 		{
 		  fmt++;
 		}
-	      while (isdigit (*fmt));
+	      while (isdigit (to_uchar (*fmt)));
 	    }
 	}
 

@@ -22,6 +22,7 @@ Version 1.4.5 - ??? 2006, by ???
   the sequence "define(`f',`1')f(define(`f',`2'))f" is now documented to
   result in "12", rather than the previously undocumented "22".
 * Update the regex engine to fix several bugs.
+* Fix a potential crash on machines where char is signed.
 
 Version 1.4.4 - October 2005, by Gary V. Vaughan
 

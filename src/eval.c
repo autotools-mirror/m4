@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -101,7 +101,7 @@ eval_undo (void)
 static eval_token
 eval_lex (eval_t *val)
 {
-  while (isspace (*eval_text))
+  while (isspace (to_uchar (*eval_text)))
     eval_text++;
 
   last_text = eval_text;
@@ -109,7 +109,7 @@ eval_lex (eval_t *val)
   if (*eval_text == '\0')
     return EOTEXT;
 
-  if (isdigit (*eval_text))
+  if (isdigit (to_uchar (*eval_text)))
     {
       int base, digit;
 
@@ -134,7 +134,7 @@ eval_lex (eval_t *val)
 	    case 'R':
 	      base = 0;
 	      eval_text++;
-	      while (isdigit (*eval_text) && base <= 36)
+	      while (isdigit (to_uchar (*eval_text)) && base <= 36)
 		base = 10 * base + *eval_text++ - '0';
 	      if (base == 0 || base > 36 || *eval_text != ':')
 		return ERROR;
@@ -151,11 +151,11 @@ eval_lex (eval_t *val)
       (*val) = 0;
       for (; *eval_text; eval_text++)
 	{
-	  if (isdigit (*eval_text))
+          if (isdigit (to_uchar (*eval_text)))
 	    digit = *eval_text - '0';
-	  else if (islower (*eval_text))
+	  else if (islower (to_uchar (*eval_text)))
 	    digit = *eval_text - 'a' + 10;
-	  else if (isupper (*eval_text))
+	  else if (isupper (to_uchar (*eval_text)))
 	    digit = *eval_text - 'A' + 10;
 	  else
 	    break;

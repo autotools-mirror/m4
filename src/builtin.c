@@ -1716,7 +1716,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	    }
 	  else
 	    {
-	      for (i = 0; isdigit (*text); text++)
+	      for (i = 0; isdigit (to_uchar (*text)); text++)
 		i = i*10 + (*text - '0');
 	    }
 	  if (i < argc)
