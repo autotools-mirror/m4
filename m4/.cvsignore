@@ -1,0 +1,4 @@
+[a-fh-z]*
+g[a-mo-z]*
+gnulib-comp.m4
+gnulib-tool.m4
