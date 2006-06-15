@@ -29,21 +29,16 @@ AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])
 
 AC_PROG_CC
-AC_PROG_RANLIB
+M4_EARLY
 
-AC_AIX
-AC_MINIX
-
-AC_CHECK_HEADERS([limits.h memory.h siginfo.h string.h unistd.h])
+AC_CHECK_HEADERS([limits.h siginfo.h])
 AC_CHECK_HEADERS([signal.h sys/signal.h], [break])
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS([mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile])
-AC_FUNC_ALLOCA
-AC_FUNC_VPRINTF
-AC_REPLACE_FUNCS([strtol])
 
+M4_INIT
 
 AC_MSG_CHECKING([ecvt declaration])
 AC_EGREP_HEADER([ecvt], [stdlib.h],

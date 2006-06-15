@@ -1,7 +1,54 @@
 #! /bin/sh
 
-# helps bootstrapping M4, when checked out from CVS
-# requires GNU Autoconf 2.5x.
+# Helps bootstrapping M4, when checked out from CVS.
+# Requires GNU Autoconf 2.59 or later, GNU Automake 1.9.6 or later,
+# and a recent CVS checkout of gnulib.
 
 : ${AUTORECONF=autoreconf}
-$AUTORECONF --force --verbose --install
+: ${GNULIB_TOOL=gnulib-tool}
+: ${SED=sed}
+
+dirname="s,/[^/]*$,,"
+basename="s,^.*/,,g"
+
+# Work around backward compatibility issue on IRIX 6.5. On IRIX 6.4+, sh
+# is ksh but when the shell is invoked as "sh" and the current value of
+# the _XPG environment variable is not equal to 1 (one), the special
+# positional parameter $0, within a function call, is the name of the
+# function.
+progpath="$0"
+
+# The name of this program:
+progname=`echo "$progpath" | $SED "$basename"`
+
+# func_echo arg...
+# Echo program name prefixed message.
+func_echo ()
+{
+    echo $progname: ${1+"$@"}
+}
+
+
+# func_error arg...
+# Echo program name prefixed message to standard error.
+func_error ()
+{
+    echo $progname: ${1+"$@"} >&2
+    exit 1
+}
+
+## ---------------------- ##
+## Import Gnulib modules. ##
+## ---------------------- ##
+
+func_echo "running: ${GNULIB_TOOL} --update"
+${GNULIB_TOOL} --update || func_error "gnulib-tool failed"
+
+## ----------- ##
+## Autoreconf. ##
+## ----------- ##
+
+func_echo "running: $AUTORECONF --force --verbose --install"
+$AUTORECONF --force --verbose --install || func_error "autoreconf failed"
+
+exit 0

@@ -281,7 +281,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   head = tail = NULL;
 
-  while (optchar = getopt_long (argc, argv, OPTSTRING, long_options, NULL),
+  while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+                                long_options, NULL),
 	 optchar != EOF)
     switch (optchar)
       {

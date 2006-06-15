@@ -23,3 +23,4 @@
 SUBDIRS = examples lib src doc checks
 EXTRA_DIST = bootstrap c-boxes.el Makefile.maint
 DISTCLEANFILES = stamp-h
+ACLOCAL_AMFLAGS = -I m4
