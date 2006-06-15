@@ -12,6 +12,7 @@ configure.lineno
 depcomp
 INSTALL
 install-sh
+lib
 m4-*
 Makefile.in
 Makefile
