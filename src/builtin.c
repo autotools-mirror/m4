@@ -272,13 +272,13 @@ bad_argc (token_data *name, int argc, int min, int max)
     {
       if (!suppress_warnings)
 	M4ERROR ((warning_status, 0,
-		  "Warning: Too few arguments to built-in `%s'",
+		  "Warning: Too few arguments to builtin `%s'",
 		  TOKEN_DATA_TEXT (name)));
       isbad = TRUE;
     }
   else if (max > 0 && argc > max && !suppress_warnings)
     M4ERROR ((warning_status, 0,
-	      "Warning: Excess arguments to built-in `%s' ignored",
+	      "Warning: Excess arguments to builtin `%s' ignored",
 	      TOKEN_DATA_TEXT (name)));
 
   return isbad;
@@ -298,7 +298,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
   if (*arg == 0 || (*valuep = strtol (arg, &endp, 10), *endp != 0))
     {
       M4ERROR ((warning_status, 0,
-		"Non-numeric argument to built-in `%s'",
+		"Non-numeric argument to builtin `%s'",
 		TOKEN_DATA_TEXT (macro)));
       return FALSE;
     }

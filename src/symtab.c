@@ -309,7 +309,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Illegal mode to symbol_lookup ()"));
+		"INTERNAL ERROR: Invalid mode to symbol_lookup ()"));
       abort ();
     }
 }

@@ -1,5 +1,11 @@
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
+	Message cleanup.
+	* src/symtab.c (lookup_symbol): Use invalid, not illegal.
+	* src/freeze.c (reload_frozen_state): Fix typo in message.
+	(produce_frozen_state): Standardize on builtin, not built-in.
+	* src/builtin.c (numeric_arg, bad_argc): Likewise.
+
 	* configure.ac (M4_EARLY, M4_INIT): Use gnulib.
 	(AC_PROG_RANLIB, AC_AIX, AC_MINIX, AC_CHECK_HEADERS),
 	(AC_FUNC_ALLOCA, AC_REPLACE_FUNCS): Avoid checks now done by

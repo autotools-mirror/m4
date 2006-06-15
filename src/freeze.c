@@ -122,7 +122,7 @@ produce_frozen_state (const char *name)
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Built-in not found in builtin table!"));
+INTERNAL ERROR: Builtin not found in builtin table!"));
 		  abort ();
 		}
 	      fprintf (file, "F%d,%d\n",
@@ -224,7 +224,7 @@ reload_frozen_state (const char *name)
     switch (character)
       {
       default:
-	M4ERROR ((EXIT_FAILURE, 0, "Ill-formated frozen file"));
+	M4ERROR ((EXIT_FAILURE, 0, "Ill-formed frozen file"));
 
       case '\n':
 
