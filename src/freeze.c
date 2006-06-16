@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 2004, 2005
-                 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -332,14 +332,13 @@ void
 reload_frozen_state (m4 *context, const char *name)
 {
   FILE *file;
-  int version;
+  int version = 0;
   int character;
   int operation;
   char syntax;
   unsigned char *string[3];
   int allocated[3];
   int number[3];
-  const m4_builtin *bp;
 
 #define GET_CHARACTER \
   (character = getc (file))
@@ -362,8 +361,8 @@ reload_frozen_state (m4 *context, const char *name)
       CHECK_ALLOCATION((Buf), (BufSize), (StrLen));		\
       if ((StrLen) > 0)						\
 	if (!fread ((Buf), (size_t) (StrLen), 1, (File)))	\
-	    M4ERROR ((EXIT_FAILURE, 0, 				\
-                      _("Premature end of frozen file")));	\
+	    M4ERROR ((EXIT_FAILURE, 0,				\
+		      _("Premature end of frozen file")));	\
       (Buf)[(StrLen)] = '\0';					\
     }								\
   while (0)
@@ -380,7 +379,7 @@ reload_frozen_state (m4 *context, const char *name)
   do								\
     {								\
       if ((Needed) + 1 > (Allocated))				\
-        {							\
+	{							\
 	  free (Where);						\
 	  (Allocated) = (Needed) + 1;				\
 	  (Where) = xmalloc ((size_t) (Allocated));		\
@@ -403,7 +402,7 @@ reload_frozen_state (m4 *context, const char *name)
     switch (character)
       {
       default:
-	M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
 
       case '\n':
 
@@ -445,7 +444,7 @@ reload_frozen_state (m4 *context, const char *name)
 	else
 	  {
 	    /* 3 argument 'F' operations are invalid for format version 1.  */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
 	  }
 
 	VALIDATE ('\n');
@@ -461,6 +460,7 @@ reload_frozen_state (m4 *context, const char *name)
 
 	/* Enter a macro having a builtin function as a definition.  */
 	{
+	  const m4_builtin *bp = NULL;
 	  lt_dlhandle handle   = 0;
 
 	  if (number[2] > 0)
@@ -502,7 +502,7 @@ reload_frozen_state (m4 *context, const char *name)
 	if (version < 2)
 	  {
 	    /* 'M' operator is not supported in format version 1. */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
 	  }
 
 	GET_CHARACTER;
@@ -520,7 +520,7 @@ reload_frozen_state (m4 *context, const char *name)
 	if (version < 2)
 	  {
 	    /* 'S' operator is not supported in format version 1. */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
 	  }
 
 	GET_CHARACTER;
@@ -643,7 +643,7 @@ reload_frozen_state (m4 *context, const char *name)
 	else
 	  {
 	    /* 3 argument 'T' operations are invalid for format version 1.  */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formated frozen file")));
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
 	  }
 
 	VALIDATE ('\n');

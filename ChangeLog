@@ -1,3 +1,18 @@
+2006-06-15  Eric Blake  <eric.b.blake@l-3com.com>
+
+	Reduce compiler warnings.  Inside GMP, mpq_t is an array type, so
+	const mpq_t is not assignable from plain mpq_t.  Avoid
+	type-punning warnings caused trying to mix these types.
+	* modules/mpeval.c (numb_ior, numb_eor, numb_and, numb_lshift),
+	(numb_rshift, numb_divide, numb_modulo): Remove const qualifier.
+	* modules/evalparse.c (or_term, xor_term, and_term, shift_term),
+	(mult_term, exp_term): Remove type-punning casts.
+	(numb_pow): Remove const qualifier.
+	* src/freeze.c (reload_frozen_state): Fix typo in messages.
+	Fix variables that can be used uninitialized, which fixes
+	security hole where malicious frozen file can execute arbitrary
+	code.
+
 2006-06-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (modules_mpeval_la_LIBADD): Readd $(LIBADD_GMP).

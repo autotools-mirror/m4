@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 
 		function	macros	blind minargs maxargs */
 #define builtin_functions					\
-	BUILTIN(mpeval,		false,	true,	2, 	4  )	\
+	BUILTIN(mpeval,		false,	true,	2,	4  )	\
 
 
 
@@ -105,7 +105,8 @@ m4_macro m4_macro_table[] =
 };
 
 
-/* number should be at least 32 bits.  */
+/* GMP defines mpq_t as a 1-element array of struct.  Therefore, `mpq_t'
+   is not compatible with `const mpq_t'.  */
 typedef mpq_t number;
 
 static void numb_initialise (void);
@@ -113,14 +114,14 @@ static void numb_obstack (m4_obstack *obs, const number value,
 			  const int radix, int min);
 static void mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily);
 static void mpz2mpq (number q, const mpz_t z);
-static void numb_divide (number *x, const number *y);
-static void numb_modulo (m4 *context, number *x, const number *y);
-static void numb_and (m4 *context, number *x, const number *y);
-static void numb_ior (m4 *context, number *x, const number *y);
-static void numb_eor (m4 *context, number *x, const number *y);
+static void numb_divide (number *x, number *y);
+static void numb_modulo (m4 *context, number *x, number *y);
+static void numb_and (m4 *context, number *x, number *y);
+static void numb_ior (m4 *context, number *x, number *y);
+static void numb_eor (m4 *context, number *x, number *y);
 static void numb_not (m4 *context, number *x);
-static void numb_lshift (m4 *context, number *x, const number *y);
-static void numb_rshift (m4 *context, number *x, const number *y);
+static void numb_lshift (m4 *context, number *x, number *y);
+static void numb_rshift (m4 *context, number *x, number *y);
 
 
 static number numb_ZERO;
@@ -200,7 +201,7 @@ mpz2mpq (number q, const mpz_t z)
 }
 
 static void
-numb_divide (number * x, const number * y)
+numb_divide (number * x, number * y)
 {
   mpq_t qres;
   mpz_t zres;
@@ -217,7 +218,7 @@ numb_divide (number * x, const number * y)
 }
 
 static void
-numb_modulo (m4 *context, number * x, const number * y)
+numb_modulo (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 
@@ -241,7 +242,7 @@ numb_modulo (m4 *context, number * x, const number * y)
 }
 
 static void
-numb_and (m4 *context, number * x, const number * y)
+numb_and (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 
@@ -265,7 +266,7 @@ numb_and (m4 *context, number * x, const number * y)
 }
 
 static void
-numb_ior (m4 *context, number * x, const number * y)
+numb_ior (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 
@@ -289,7 +290,7 @@ numb_ior (m4 *context, number * x, const number * y)
 }
 
 static void
-numb_eor (m4 *context, number * x, const number * y)
+numb_eor (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 
@@ -355,7 +356,7 @@ numb_not (m4 *context, number * x)
 }
 
 static void
-numb_lshift (m4 *context, number * x, const number * y)
+numb_lshift (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 
@@ -390,7 +391,7 @@ numb_lshift (m4 *context, number * x, const number * y)
 }
 
 static void
-numb_rshift (m4 *context, number * x, const number * y)
+numb_rshift (m4 *context, number * x, number * y)
 {
   mpz_t xx, yy, res;
 

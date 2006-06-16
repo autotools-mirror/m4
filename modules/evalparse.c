@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -80,7 +80,7 @@ static eval_error mult_term	    (m4 *, eval_token, number *);
 static eval_error exp_term	    (m4 *, eval_token, number *);
 static eval_error unary_term	    (m4 *, eval_token, number *);
 static eval_error simple_term	    (m4 *, eval_token, number *);
-static void	  numb_pow	    (number *x, const number *y);
+static void	  numb_pow	    (number *x, number *y);
 
 
 
@@ -356,7 +356,7 @@ or_term (m4 *context, eval_token et, number *v1)
       if ((er = xor_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_ior(context, v1, (const number *)&v2);
+      numb_ior(context, v1, &v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -385,7 +385,7 @@ xor_term (m4 *context, eval_token et, number *v1)
       if ((er = and_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_eor(context, v1, (const number *)&v2);
+      numb_eor(context, v1, &v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -414,7 +414,7 @@ and_term (m4 *context, eval_token et, number *v1)
       if ((er = not_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_and(context, v1, (const number *)&v2);
+      numb_and(context, v1, &v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -555,11 +555,11 @@ shift_term (m4 *context, eval_token et, number *v1)
       switch (op)
 	{
 	case LSHIFT:
-	  numb_lshift(context, v1, (const number *)&v2);
+	  numb_lshift(context, v1, &v2);
 	  break;
 
 	case RSHIFT:
-	  numb_rshift(context, v1, (const number *)&v2);
+	  numb_rshift(context, v1, &v2);
 	  break;
 
 	default:
@@ -644,7 +644,7 @@ mult_term (m4 *context, eval_token et, number *v1)
 	  if (numb_zerop(v2))
 	    return DIVIDE_ZERO;
 	  else {
-	    numb_divide(v1, (const number *)&v2);
+	    numb_divide(v1, &v2);
 	  }
 	  break;
 
@@ -660,7 +660,7 @@ mult_term (m4 *context, eval_token et, number *v1)
 	  if (numb_zerop(v2))
 	    return MODULO_ZERO;
 	  else {
-	    numb_modulo(context, v1, (const number *)&v2);
+	    numb_modulo(context, v1, &v2);
 	  }
 	  break;
 
@@ -699,7 +699,7 @@ exp_term (m4 *context, eval_token et, number *v1)
       if ((er = exp_term (context, et, &v2)) != NO_ERROR)
 	return er;
 
-      numb_pow(v1, (const number *)&v2);
+      numb_pow(v1, &v2);
     }
   numb_fini(v2);
   if (et == ERROR)
@@ -864,7 +864,7 @@ m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 }
 
 static void
-numb_pow (number *x, const number *y)
+numb_pow (number *x, number *y)
 {
   /* y should be integral */
 
