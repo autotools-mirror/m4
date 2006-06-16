@@ -1,5 +1,3 @@
-2006-06-15  Eric Blake  <eric.b.blake@l-3com.com>
-
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.h (to_uchar): New function.
