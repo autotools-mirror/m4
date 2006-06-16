@@ -1,5 +1,7 @@
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
+	* configure.ac (M4_DEFAULT_PRELOAD): Fix typo in last commit.
+
 	* ltdl/m4/m4-error.m4 (M4_ERROR): Use M4_ instead of m4_ to avoid
 	clashes with m4sugar.
 	* ltdl/m4/m4-getopt.m4 (M4_GETOPT): Likewise.

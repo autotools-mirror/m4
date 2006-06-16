@@ -70,7 +70,7 @@ AC_MSG_CHECKING([for modules to preload])
     [AS_HELP_STRING([--with-modules=MODULES],
 		    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
     [use_modules="$withval"],
-    [use_modules="$M4_DEFAULT_PRELOAD"])
+    [use_modules="M4_DEFAULT_PRELOAD"])
 
   PREOPEN_DEPENDENCIES=
   DLPREOPEN="-dlpreopen force"
