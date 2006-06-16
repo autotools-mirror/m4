@@ -3501,7 +3501,9 @@ future release of GNU @code{m4} may change.
 @itemize @bullet
 @item
 System V @code{m4} supports multiple arguments to @code{defn}, and
-@acronym{POSIX} requires it.  This is not implemented in GNU @code{m4}.
+@acronym{POSIX} requires it.  This is not yet implemented in GNU
+@code{m4}.  Unfortunately, this means it is not possible to mix builtins
+and other text into a single macro; a helper macro is required.
 
 @item
 @acronym{POSIX} requires an application to exit with non-zero status if
@@ -3518,10 +3520,33 @@ it encounters a read error on stdin or write error on stdout, but GNU
 
 @item
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
-(first-in, first-out) order, but GNU @code{m4} uses LIFO order.
+(first-in, first-out) order, but GNU @code{m4} currently uses LIFO order.
 Furthermore, @acronym{POSIX} states that only the first argument to
 @code{m4wrap} is saved for later evaluation, bug GNU @code{m4} saves and
 processes all arguments, with output separated by spaces.
+
+However, it is possible to emulate @acronym{POSIX} behavior by
+including the sample file @file{wrapfifo.m4}:
+
+@example
+undivert(`wrapfifo.m4')dnl
+@result{}define(`_m4wrap_level', `0')dnl
+@result{}define(`m4wrap',
+@result{}`ifdef(`m4wrap'_m4wrap_level,
+@result{}       `define(`m4wrap'_m4wrap_level,
+@result{}               defn(`m4wrap'_m4wrap_level)`$1')',
+@result{}       `builtin(`m4wrap', `define(`_m4wrap_level',
+@result{}                                  incr(_m4wrap_level))dnl
+@result{}m4wrap'_m4wrap_level)dnl
+@result{}define(`m4wrap'_m4wrap_level, `$1')')')dnl
+include(`wrapfifo.m4')
+@result{}
+m4wrap(`a`'m4wrap(`c
+', `d')')m4wrap(`b')
+@result{}
+^D
+@result{}abc
+@end example
 
 @item
 @acronym{POSIX} requires that all builtins that require arguments, but
@@ -3531,11 +3556,11 @@ But GNU @code{m4} ignores certain builtins if they have missing
 arguments, giving @code{adefineb} for the above example.
 
 @item
-Traditional implementations treat @code{define(`f',1} (@pxref{Define})
-as though it were @code{undefine(`f')pushdef(`f',1)}, effectively
+Traditional implementations treat @code{define(`f',`1')} (@pxref{Define})
+as though it were @code{undefine(`f')pushdef(`f',`1')}, effectively
 replacing the entire stack of previously pushdef'd definitions with a
 single definition.  GNU @code{m4} behaves as
-@code{popdef(`f')pushdef(`f',1)}, keeping all previous definitions on
+@code{popdef(`f')pushdef(`f',`1')}, keeping all previous definitions on
 the stack intact.
 
 @item

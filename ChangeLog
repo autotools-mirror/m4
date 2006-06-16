@@ -1,5 +1,9 @@
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
+	* checks/wrapfifo.m4: New file.  Use it...
+	* doc/m4.texinfo (Incompatibilities): here, in a new test case to
+	demonstrate how to get POSIX behavior of m4wrap prior to m4 2.0.
+
 	* src/m4.h (to_uchar): New function.
 	* src/eval.c (eval_lex): Use it to avoid passing signed char to
 	isdigit, isalpha, isupper, islower, isspace, isalnum.
