@@ -30,7 +30,8 @@ AWK = @AWK@
 
 # Vern says that the first star is required around an Alpha make bug.
 CHECKS = *[0-9][0-9].*
-DISTFILES = Makefile.in get-them check-them stamp-checks incl.m4 foo
+DISTFILES = Makefile.in get-them check-them stamp-checks \
+	incl.m4 foo wrapfifo.m4
 
 all: stamp-checks
 

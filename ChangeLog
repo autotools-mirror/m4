@@ -1,3 +1,7 @@
+2006-06-16  Eric Blake  <ebb9@byu.net>
+
+	* checks/Makefile.in (DISTFILES): Distribute wrapfifo.m4.
+
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
 	* checks/wrapfifo.m4: New file.  Use it...
