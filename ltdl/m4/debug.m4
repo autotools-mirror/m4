@@ -1,7 +1,7 @@
 ##                                                           -*- Autoconf -*-
 ## debug.m4 -- massage compiler flags for debugging/optimisation
 ##
-## Copyright (C) 1999-2000 Ralf S. Engelschall
+## Copyright (C) 1999-2000, 2006 Ralf S. Engelschall
 ## Written by <rse@engelschall.com>
 ## Modified for M4 by Gary V. Vaughan <gary@gnu.org>
 ##
@@ -20,16 +20,16 @@
 ## the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ## Boston, MA 02110-1301, USA.
 
-# serial 8
+# serial 9
 
-# m4_CHECK_DEBUGGING
+# M4_CHECK_DEBUGGING
 # ------------------
 # Debugging Support
-AC_DEFUN([m4_CHECK_DEBUGGING],
+AC_DEFUN([M4_CHECK_DEBUGGING],
 [AC_REQUIRE([AC_PROG_CC])
-AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],
+AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug],
                            [build for debugging [default=no]])])
-AC_MSG_CHECKING(for compilation debug mode)
+AC_MSG_CHECKING([for compilation debug mode])
 AC_MSG_RESULT([${enable_debug-no}])
 
 : ${rm=rm -f}
@@ -41,7 +41,7 @@ test -n "$rm" || rm="rm -f"
 
 if test "X$enable_debug" = Xyes; then
   AC_DISABLE_SHARED
-  AC_DEFINE([DEBUG], 1,
+  AC_DEFINE([DEBUG], [1],
       [Define this to enable additional runtime debugging])
   if test "$GCC" = yes; then
     case "$CFLAGS" in
@@ -50,7 +50,7 @@ if test "X$enable_debug" = Xyes; then
     case "$CFLAGS" in
         *-g* ) ;;
          * ) AC_LIBTOOL_COMPILER_OPTION([if $compiler accepts -ggdb3],
-                 [m4_cv_prog_compiler_ggdb3],
+                 [M4_cv_prog_compiler_ggdb3],
                  [-ggdb3 -c conftest.$ac_ext], [],
                  [CFLAGS="$CFLAGS -ggdb3"],
                [CFLAGS="$CFLAGS -g"])
@@ -60,12 +60,12 @@ if test "X$enable_debug" = Xyes; then
     WMORE="-Wshadow -Wpointer-arith -Wcast-align -Wnested-externs"
     WMORE="$WMORE -Wmissing-prototypes -Wmissing-declarations -Winline"
     AC_LIBTOOL_COMPILER_OPTION([if $compiler accepts $WMORE],
-        [m4_cv_prog_compiler_warning_flags],
+        [M4_cv_prog_compiler_warning_flags],
         [$WMORE -c conftest.$ac_ext], [],
         [CFLAGS="$CFLAGS $WMORE"])
 
     AC_LIBTOOL_COMPILER_OPTION([if $compiler accepts -Wno-long-long],
-        [m4_cv_prog_compiler_wnolonglong],
+        [M4_cv_prog_compiler_wnolonglong],
         [-Wno-long-long -c conftest.$ac_ext], [],
         [CFLAGS="$CFLAGS -Wno-long-long"])
   else
@@ -87,4 +87,4 @@ else
            ;;
   esac
 fi
-])# m4_CHECK_DEBUGGING
+])# M4_CHECK_DEBUGGING

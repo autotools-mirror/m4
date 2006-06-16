@@ -2,7 +2,7 @@
 # m4-regex.m4 -- Use the installed regex if it is good enough.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2003, 2004 Free Software Foundation, Inc
+# Copyright (C) 2003, 2004, 2006 Free Software Foundation, Inc
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,13 +19,13 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-# serial 3
+# serial 4
 
-# m4_REGEX([path/to/regex.c])
+# M4_REGEX([path/to/regex.c])
 # ---------------------------
 # Use the installed regex if it is good enough.
-AC_DEFUN([m4_REGEX],
-[AC_BEFORE([gl_REGEX], [m4_REGEX])
+AC_DEFUN([M4_REGEX],
+[AC_BEFORE([gl_REGEX], [M4_REGEX])
 if test $ac_use_included_regex = no; then
   INCLUDE_REGEX_H='#include <regex.h>'
   REGEX_H=
@@ -33,6 +33,6 @@ else
   INCLUDE_REGEX_H='#include <gnu/regex.h>'
   REGEX_H=regex.h
 fi
-AC_SUBST(REGEX_H)
-AC_SUBST(INCLUDE_REGEX_H)
-])# m4_REGEX
+AC_SUBST([REGEX_H])
+AC_SUBST([INCLUDE_REGEX_H])
+])# M4_REGEX

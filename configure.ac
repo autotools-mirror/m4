@@ -60,18 +60,17 @@ dnl the m4_ namespace provided by m4sugar, so we prefer M4_ as our
 dnl package-specific prefix.  FIXME - consistently use M4_ in the m4 macros
 dnl that feed the creation of configure.
 m4_pattern_forbid([^M4_])
-m4_pattern_allow([^m4_cv_])
+m4_pattern_allow([^M4_cv_])
 
+AC_DEFUN([M4_DEFAULT_PRELOAD], [m4 traditional gnu])
 AC_MSG_CHECKING([for modules to preload])
-  m4_pattern_allow([^m4_default_preload$])
-  m4_default_preload="m4 traditional gnu"
   DLPREOPEN=
 
   AC_ARG_WITH([modules],
     [AS_HELP_STRING([--with-modules=MODULES],
-		    [preload MODULES @<:@default: $m4_default_preload@:>@])],
+		    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
     [use_modules="$withval"],
-    [use_modules="$m4_default_preload"])
+    [use_modules="$M4_DEFAULT_PRELOAD"])
 
   PREOPEN_DEPENDENCIES=
   DLPREOPEN="-dlpreopen force"
@@ -106,7 +105,7 @@ M4_EARLY
 
 AC_PROG_CPP
 AM_PROG_CC_C_O
-m4_CHECK_DEBUGGING
+M4_CHECK_DEBUGGING
 
 
 
@@ -122,7 +121,7 @@ LT_WITH_LTDL([ltdl])
 case "$CFLAGS" in
   *-pipe* ) ;;
         * ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
-                [m4_cv_prog_compiler_pipe],
+                [M4_cv_prog_compiler_pipe],
                 [-pipe -c conftest.$ac_ext], [],
                 [CFLAGS="$CFLAGS -pipe"])
               ;;
@@ -135,7 +134,7 @@ esac
 ## ---------------- ##
 AM_GNU_GETTEXT([external], [need-ngettext])
 AM_GNU_GETTEXT_VERSION([0.14.1])
-m4_GNU_GETTEXT
+M4_GNU_GETTEXT
 
 
 
@@ -145,10 +144,10 @@ m4_GNU_GETTEXT
 M4_INIT
 
 # Gnulib doesn't always do things quite the way M4 would like...
-m4_ERROR
-m4_GETOPT
-m4_OBSTACK
-m4_REGEX
+M4_ERROR
+M4_GETOPT
+M4_OBSTACK
+M4_REGEX
 
 
 ## ------------------------ ##
@@ -188,7 +187,7 @@ AC_CHECK_FUNCS([calloc strerror tmpfile])
 
 AM_WITH_DMALLOC
 
-m4_SYS_STACKOVF
+M4_SYS_STACKOVF
 
 # This is for the modules
 AC_STRUCT_TM
@@ -196,7 +195,7 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([getcwd gethostname mktime uname \
 		setenv unsetenv putenv clearenv])
 
-m4_LIB_GMP
+M4_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
 
 

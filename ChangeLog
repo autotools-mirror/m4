@@ -1,4 +1,19 @@
-2006-06-15  Eric Blake  <eric.b.blake@l-3com.com>
+2006-06-15  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/m4-error.m4 (M4_ERROR): Use M4_ instead of m4_ to avoid
+	clashes with m4sugar.
+	* ltdl/m4/m4-getopt.m4 (M4_GETOPT): Likewise.
+	* ltdl/m4/m4-gettext.m4 (M4_GNU_GETTEXT): Likewise.
+	* ltdl/m4/m4-obstack.m4 (M4_OBSTACK): Likewise.
+	* ltdl/m4/m4-regex.m4 (M4_REGEX): Likewise.
+	* ltdl/m4/gmp.m4 (_M4_LIB_GMP): Likewise.
+	* ltdl/m4/stackovf.m4 (M4_SYS_STACKOVF): Likewise.
+	* ltdl/m4/debug.m4 (M4_CHECK_DEBUGGING): Likewise.
+	* configure.ac: Likewise.
+	(M4_DEFAULT_PRELOAD): Use as a macro, not shell variable.
+	* Makefile.am (src_m4_CPPFLAGS): Use STACKOVF as a makefile
+	conditional.
+	* ltdl/m4/m4-gnulib.m4: Delete, no longer needed.
 
 	Reduce compiler warnings.  Inside GMP, mpq_t is an array type, so
 	const mpq_t is not assignable from plain mpq_t.  Avoid

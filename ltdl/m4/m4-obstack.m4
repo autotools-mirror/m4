@@ -1,7 +1,7 @@
 #                                                            -*- Autoconf -*-
 # m4-obstack.m4 -- the libc supplied version of obstacks if available.
 #
-# Copyright (C) 2000, 2001, 2003, 2004 Free Software Foundation, Inc
+# Copyright (C) 2000, 2001, 2003, 2004, 2006 Free Software Foundation, Inc
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,19 +19,19 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-# serial 9
+# serial 10
 
-# m4_OBSTACK
+# M4_OBSTACK
 # ----------
 # Use the libc supplied version of obstacks if available.
-AC_DEFUN([m4_OBSTACK],
-[AC_PREREQ(2.56)dnl We use the compiler based header checking in 2.56
-AC_BEFORE([gl_OBSTACK], [m4_OBSTACK])
+AC_DEFUN([M4_OBSTACK],
+[AC_PREREQ([2.56])dnl We use the compiler based header checking in 2.56
+AC_BEFORE([gl_OBSTACK], [M4_OBSTACK])
 AC_ARG_WITH([included-obstack],
-    [AC_HELP_STRING([--with-included-obstack],
+    [AS_HELP_STRING([--with-included-obstack],
                     [use the obstack implementation included here])])
 
-AC_CHECK_HEADERS(obstack.h, [], [], [AC_INCLUDES_DEFAULT])
+AC_CHECK_HEADERS([obstack.h], [], [], [AC_INCLUDES_DEFAULT])
 
 if test "x${with_included_obstack-no}" != xno; then
   ac_cv_func_obstack=no
@@ -44,6 +44,6 @@ else
   INCLUDE_OBSTACK_H='#include <gnu/obstack.h>'
   OBSTACK_H=obstack.h
 fi
-AC_SUBST(OBSTACK_H)
-AC_SUBST(INCLUDE_OBSTACK_H)
-])# m4_FUNC_OBSTACK
+AC_SUBST([OBSTACK_H])
+AC_SUBST([INCLUDE_OBSTACK_H])
+])# M4_FUNC_OBSTACK

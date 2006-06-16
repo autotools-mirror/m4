@@ -2,7 +2,7 @@
 # m4-getopt.m4 -- Use the installed version of getopt.h if available.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2005 Free Software Foundation, Inc
+# Copyright (C) 2005, 2006 Free Software Foundation, Inc
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-# serial 1
+# serial 2
 
-# m4_GETOPT
+# M4_GETOPT
 # ---------
 # Use the installed version of getopt.h if available.
-AC_DEFUN([m4_GETOPT],
+AC_DEFUN([M4_GETOPT],
 [GETOPT_H=
 AC_SUBST([GETOPT_H])
 
@@ -50,4 +50,4 @@ if test -n "$GETOPT_H"; then
   AC_DEFINE([__GETOPT_PREFIX], [[rpl_]],
     [Define to rpl_ if the getopt replacement function should be used.])
 fi
-])# m4_GETOPT
+])# M4_GETOPT

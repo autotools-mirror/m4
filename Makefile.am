@@ -77,8 +77,10 @@ src_m4_SOURCES	= \
 		  src/version-etc.h \
 		  src/main.c \
 		  src/m4.h \
-		  src/freeze.c \
-		  src/stackovf.c
+		  src/freeze.c
+if STACKOVF
+src_m4_SOURCES += src/stackovf.c
+endif
 src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src $(LTDLINCL)
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
 src_m4_LDADD	= m4/libm4.la
