@@ -1,3 +1,10 @@
+2006-06-17  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (MAINTAINERCLEANFILES): Clean files added by
+	bootstrap.
+	* checks/Makefile.in (maintainer-clean): Add missing target.
+	* COPYING: Remove generated file from CVS.
+
 2006-06-16  Eric Blake  <ebb9@byu.net>
 
 	* checks/Makefile.in (DISTFILES): Distribute wrapfifo.m4.

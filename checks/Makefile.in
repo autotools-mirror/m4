@@ -64,7 +64,7 @@ clean: mostlyclean
 distclean: clean
 	rm -f Makefile
 
-realclean: distclean
+maintainer-clean realclean: distclean
 	rm -f $(CHECKS) stamp-checks
 
 distdir: dist
