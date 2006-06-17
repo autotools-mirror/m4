@@ -9,6 +9,7 @@ config.status
 config-h.in
 configure
 configure.lineno
+COPYING
 depcomp
 INSTALL
 install-sh
