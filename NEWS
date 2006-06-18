@@ -2,7 +2,11 @@ GNU m4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
-Version 1.4.4b - 17 June 2006, by Eric Blake
+Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
+
+* No user-visible changes, yet.
+
+Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 
 * Fix a recursive push_string crashing bug, which affected changequote of
   three or more characters on some compilers.
