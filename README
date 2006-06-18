@@ -5,8 +5,8 @@ to macros).  `m4' also has built-in functions for including files,
 running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 `m4' for generating `configure' scripts, but not for running them.
 
-GNU `m4' has been originally written by Rene' Seindal, from Denmark.
-This release is to be considered as stable.
+GNU `m4' was originally written by Rene' Seindal, from Denmark.
+This release is considered stable.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
@@ -23,7 +23,9 @@ See file `THANKS' for a list of contributors.
 
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
-`m4'.  This might go away, so don't count on it yet.
+`m4'.  This feature will not be present in m4 2.0, but will be
+replaced by other new features which provide the same capability, so
+do not count on it.
 
 Send bug reports to `bug-m4@gnu.org'.  A bug report is an adequate
 description of the problem: your input, what you expected, what you got,

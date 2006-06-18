@@ -1,7 +1,7 @@
-Authors of GNU m4.
+Authors of GNU M4.
 
 The following contributors have warranted legal paper exchanges with
-the Free Software Foundation for their contributions to GNU m4.  Also
+the Free Software Foundation for their contributions to GNU M4.  Also
 see the files ChangeLog and THANKS.
 
 This list comes from "sed -ne '/^M4/,/^$/p' /gd/gnuorg/copyright.list"

@@ -1,3 +1,15 @@
+2006-06-18  Eric Blake  <ebb9@byu.net>
+
+	Consistently use "GNU M4" as package name, "m4" as executable
+	name.
+	* NEWS: Document previous fix.
+	* THANKS: Update.
+	* README: Fix grammar.  Document that --enable-changeword is on
+	its last leg.
+	* doc/m4.texinfo (Top, Changeword): Likewise.
+	(Sysval): Enhance this test.
+	(History): Backport this section from CVS head, and update.
+
 2006-06-18  Bruno Haible  <bruno@clisp.org>  (tiny change)
 	    Eric Blake  <ebb9@byu.net>
 

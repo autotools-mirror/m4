@@ -1,10 +1,11 @@
-GNU m4 NEWS - User visible changes.
+GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
 Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 
-* No user-visible changes, yet.
+* Fix sysval on BeOS, OS/2, and other systems that store exit status
+  in the low-order byte.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 
