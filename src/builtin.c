@@ -745,6 +745,10 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
 
+#ifndef WEXITSTATUS
+# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#endif
+
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
@@ -774,7 +778,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     {
       M4ERROR ((warning_status, errno,
 		"Cannot open pipe to command \"%s\"", ARG (1)));
-      sysval = 0xff << 8;
+      sysval = 0xffff;
     }
   else
     {
@@ -787,7 +791,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_sysval (struct obstack *obs, int argc, token_data **argv)
 {
-  shipout_int (obs, (sysval >> 8) & 0xff);
+  shipout_int (obs, WEXITSTATUS (sysval));
 }
 
 /*-------------------------------------------------------------------------.
