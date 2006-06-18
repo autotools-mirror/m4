@@ -24,6 +24,7 @@ SHELL = /bin/sh
 bindir = @bindir@
 srcdir = @srcdir@
 VPATH = @srcdir@
+PATH_SEPARATOR = @PATH_SEPARATOR@
 
 # Should be GNU awk, for the get-them script.
 AWK = @AWK@
@@ -48,11 +49,11 @@ install-dvi install-pdf install-ps install-html install-info:
 uninstall:
 
 check: stamp-checks
-	PATH=`pwd`/../src:$$PATH; export PATH; \
+	PATH=`pwd`/../src"$(PATH_SEPARATOR)"$$PATH; export PATH; \
 	cd $(srcdir) && ./check-them $(CHECKS)
 
 installcheck: stamp-checks
-	PATH=$(bindir):$$PATH; export PATH; \
+	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
 	cd $(srcdir) && ./check-them $(CHECKS)
 
 tags:

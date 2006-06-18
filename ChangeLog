@@ -1,3 +1,8 @@
+2006-06-18  Andreas Buening  <andreas.buening@nexgo.de>  (tiny change)
+
+	* checks/Makefile.in (PATH_SEPARATOR): New macro.
+	(check, installcheck): Use it, for OS/2.
+
 2006-06-18  Eric Blake  <ebb9@byu.net>
 
 	Consistently use "GNU M4" as package name, "m4" as executable
