@@ -338,7 +338,7 @@ reload_frozen_state (m4 *context, const char *name)
   char syntax;
   unsigned char *string[3];
   int allocated[3];
-  int number[3];
+  int number[3] = {0};
 
 #define GET_CHARACTER \
   (character = getc (file))

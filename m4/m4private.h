@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005, 2006
-                 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005,
+   2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -342,7 +342,7 @@ struct m4__search_path_info {
 
 
 /* Convenience macro to zero a variable after freeing it.  */
-#define DELETE(Expr)	((Expr) = (free (Expr), (void *) 0))
+#define DELETE(Expr)	((Expr) = (free ((void *) Expr), (void *) 0))
 
 
 #if DEBUG

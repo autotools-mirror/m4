@@ -1,3 +1,10 @@
+2006-06-19  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* m4/m4private.h (DELETE): Cast away const here...
+	* src/stackovf.c (stackovf_exit): ...to avoid cast-as-lvalue here.
+	* src/freeze.c (reload_frozen_state): Avoid uninitialized
+	variable warning.
+
 2006-06-19  Eric Blake  <ebb9@byu.net>
 
 	* Makefile.am (doc/m4.1): Build in $(srcdir), to match where

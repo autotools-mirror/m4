@@ -1,5 +1,5 @@
 /* Detect stack overflow (when getrlimit and sigaction or sigvec are available)
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006 Free Software Foundation, Inc.
    Jim Avera <jima@netcom.com>, October 1993.
 
    This program is free software; you can redistribute it and/or modify
@@ -413,7 +413,7 @@ Error - Do not know how to catch signals on an alternate stack...
 void
 stackovf_exit (void)
 {
-  DELETE ((void *) stackbuf);
+  DELETE (stackbuf);
 }
 
 #endif /* USE_STACKOVF */
