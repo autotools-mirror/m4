@@ -244,7 +244,10 @@ ltdl/libltdlc.la:
 info_TEXINFOS	= doc/m4.texinfo
 dist_man_MANS	= doc/m4.1
 
-doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
+# Build the man page once in the srcdir, rather than in every VPATH build
+# dir, to match how automake builds info pages.  This is safe for 'make
+# distcheck' since it is distributed pre-built.
+$(srcdir)/doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run \
@@ -342,7 +345,9 @@ TESTSUITE_AT	= \
 		  tests/others.at \
 		  tests/testsuite.at
 
-EXTRA_DIST     += '$(TESTSUITE)' $(TESTSUITE_AT) $(OTHER_FILES) \
+# FIXME - Based on our earlier definition of TESTSUITE as absolute, we
+# must use 'tests/testsuite' instead of '$(TESTSUITE)' here.
+EXTRA_DIST     += tests/testsuite $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/atlocal.in \
 		  tests/generate.awk \
 		  tests/package.m4

@@ -1,3 +1,11 @@
+2006-06-19  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (doc/m4.1): Build in $(srcdir), to match where
+	.info pages are built.
+	Reported by Ralf Wildenhues.
+	(EXTRA_DIST): Inline definition of testsuite, so that make dist
+	works again.
+
 2006-06-16  Eric Blake  <ebb9@byu.net>
 
 	Follow recommendations from autoconf manual for autotest.
