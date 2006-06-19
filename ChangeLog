@@ -1,3 +1,22 @@
+2006-06-16  Eric Blake  <ebb9@byu.net>
+
+	Follow recommendations from autoconf manual for autotest.
+	* Makefile.am (TESTSUITE): Factor the $(srcdir) out of uses, and
+	turn it into an absolute path until autotest provides an option
+	that allows us to avoid changing directories.  Properly quote
+	throughout.
+	(TESTS_ENVIRONMENT) [USE_GMP]: Inform testsuite about GMP.
+	(check-recursive): Delete unused target.
+	($(TESTSUITE)): Atomically update testsuite.
+	(CD_TESTDIR): Simplify.
+	(m4__cd): Delete unused macro.
+	(check-local): Let TESTSUITEFLAGS influence the run.
+	(installcheck-local): Let TESTSUITEFLAGS override
+	AUTOTEST_PATH.  Add dependencies.
+	(clean-local): Clean up.
+	(DISTCLEANFILES, MAINTAINERCLEANFILES): Add directory location.
+	* README: Document how to use the testsuite.
+
 2006-06-15  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (M4_DEFAULT_PRELOAD): Fix typo in last commit.

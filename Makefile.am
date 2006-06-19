@@ -43,9 +43,6 @@ MAINTAINERCLEANFILES = \
 
 BUILT_SOURCES	=
 
-# Using `cd' in backquotes may print the directory name, use this instead:
-m4__cd		= CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
-
 # Make sure config.status is regenerated when the version timestamp changes
 MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
 CONFIG_STATUS_DEPENDENCIES = stamp-vcl
@@ -330,7 +327,12 @@ dist_pkgdata_DATA = \
 ## Test suite. ##
 ## ----------- ##
 
-TESTSUITE = tests/testsuite
+# NOTE - After 2.60, autoconf might add an option to testsuite to specify
+# which directory it should output testsuite.log.  Until then, we want it
+# to drop in tests, so we have to do a cd inside make targets that invoke
+# testsuite.  As a result, we need an absolute path since a relative
+# $(srcdir) does not work after cd.
+TESTSUITE = $(abs_srcdir)/tests/testsuite
 TESTSUITE_AT	= \
 		  tests/builtins.at \
 		  tests/generated.at \
@@ -340,7 +342,7 @@ TESTSUITE_AT	= \
 		  tests/others.at \
 		  tests/testsuite.at
 
-EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
+EXTRA_DIST     += '$(TESTSUITE)' $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/atlocal.in \
 		  tests/generate.awk \
 		  tests/package.m4
@@ -353,6 +355,9 @@ TESTS_ENVIRONMENT = MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
 	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" CXXCPP="$(CXXCPP)" \
 	F77="$(F77)" FFLAGS="$(FFLAGS)" \
 	GCJ="$(GCJ)" GCJFLAGS="$(GCJFLAGS)"
+if USE_GMP
+TESTS_ENVIRONMENT += USE_GMP=yes
+endif
 
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
@@ -362,15 +367,13 @@ $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
 	$(generate) $(m4_texinfo) >$@t
 	mv $@t $@
 
-check-recursive: $(srcdir)/$(TESTSUITE)
-
 # Use `$(srcdir)' for the benefit of non-GNU makes: this is
 # how `testsuite' appears in our dependencies.
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(srcdir)/$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
-	cd $(srcdir)/tests; \
-	$(AUTOTEST) -I $(srcdir)/tests testsuite.at -o testsuite
+$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
+	$(AUTOTEST) -I '$(srcdir)/tests' -o $@.tmp $@.at
+	mv $@.tmp $@
 
 $(srcdir)/tests/package.m4: configure.ac
 	{					\
@@ -386,28 +389,28 @@ tests/atconfig: config.status
 	$(SHELL) ./config.status tests/atconfig
 DISTCLEANFILES += tests/atconfig
 
-CD_TESTDIR	= abs_srcdir=`$(m4__cd) $(srcdir) && pwd`; cd tests
+CD_TESTDIR	= cd ./tests
 
 # Hook the test suite into the check rule
-check-local: tests/atconfig $(srcdir)/$(TESTSUITE)
+check-local: tests/atconfig $(TESTSUITE)
 	$(CD_TESTDIR); \
-	$(TESTS_ENVIRONMENT) $(SHELL) $$abs_srcdir/$(TESTSUITE) $(TESTSUITE_FLAGS)
+	$(SHELL) '$(TESTSUITE)' $(TESTS_ENVIRONMENT) $(TESTSUITEFLAGS)
 
 # Run the test suite on the *installed* tree.
-installcheck-local:
+installcheck-local: tests/atconfig $(TESTSUITE)
 	$(CD_TESTDIR); \
-	$(TESTS_ENVIRONMENT) $(SHELL) $$abs_srcdir/$(TESTSUITE) $(TESTSUITE_FLAGS) AUTOTEST_PATH=$(exec_prefix)/bin
+	$(SHELL) '$(TESTSUITE)' $(TESTS_ENVIRONMENT) \
+	  AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
 
 # We need to remove any file droppings left behind by testsuite.
 clean-local:
-	-$(CD_TESTDIR); \
-	test -f $$abs_srcdir/$(TESTSUITE) && \
-	    $(SHELL) $$abs_srcdir/$(TESTSUITE) --clean
+	$(CD_TESTDIR); \
+	test ! -f '$(TESTSUITE)' || $(SHELL) '$(TESTSUITE)' --clean
 
 OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test
 
-DISTCLEANFILES += atconfig atlocal m4
-MAINTAINERCLEANFILES += generated.at $(TESTSUITE)
+DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
+MAINTAINERCLEANFILES += tests/generated.at '$(TESTSUITE)'
 
 ##                                                                      ##
 ##                   --- RULES FOR THE MAINTAINER ---                   ##

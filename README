@@ -56,6 +56,18 @@ they only describe a solution, from which the problem might be uneasy to
 infer.  Don't forget all relevant information about your operating
 system, compiler, libraries, ...
 
+The easiest way to remember this information is by using the
+testsuite.  Any test failures are automatically logged, along with
+lots of useful information about your setup; simply mailing
+tests/testsuite.log to `bug-m4@gnu.org' is a good start.  If you want
+to dive in and debug a failure, you may find it useful to fine-tune
+the execution of the testsuite.  For example, running test 12 in
+verbose mode can be done with:
+
+make check TESTSUITEFLAGS='-v -d -x 12'
+
+The testsuite understands --help to tell you more about the current
+set of tests.
 
 
 ## ------- ##
