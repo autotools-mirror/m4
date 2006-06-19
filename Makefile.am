@@ -83,7 +83,14 @@ endif
 src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src $(LTDLINCL)
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
 src_m4_LDADD	= m4/libm4.la
-src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES)
+src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
+
+## Since we do not build a libtool library in src, Automake fails to infer
+## that there may be a libs directory there.  FIXME - revisit this if
+## automake 1.10 fixes the bug.
+clean-local-src:
+	-rm -rf src/.libs src/_libs
+
 
 ##                                                                      ##
 ##                 --- PASTED MANUALLY FROM GNULIB ---                  ##
@@ -159,6 +166,9 @@ endif
 ##
 ## perlxsi.c:
 ##	$(PERL) -MExtUtils::Embed -e xsinit -- -o perlxsi.c
+
+## but we should still distribute it, because it is listed in POTFILES.in:
+EXTRA_DIST += modules/perl.c
 
 module_check	= -rpath /dev/null
 check_LTLIBRARIES = \
@@ -406,7 +416,7 @@ installcheck-local: tests/atconfig $(TESTSUITE)
 	  AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
 
 # We need to remove any file droppings left behind by testsuite.
-clean-local:
+clean-local-tests:
 	$(CD_TESTDIR); \
 	test ! -f '$(abs_srcdir)/tests/testsuite' || \
 	  $(SHELL) '$(abs_srcdir)/tests/testsuite' --clean
@@ -415,6 +425,8 @@ OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test
 
 DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
 MAINTAINERCLEANFILES += tests/generated.at '$(TESTSUITE)'
+
+clean-local: clean-local-src clean-local-tests
 
 ##                                                                      ##
 ##                   --- RULES FOR THE MAINTAINER ---                   ##

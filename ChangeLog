@@ -1,3 +1,12 @@
+2006-06-19  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (src_m4_DEPENDENCIES): Make dependency explicit.
+	(clean-local): Split into and depend upon...
+	(clean-local-tests, clean-local-src): ...these two.  The latter
+	removes the libtool object directory below `src', to work around
+	a buglet in Automake, failing to list it.
+	(EXTRA_DIST): Distribute modules/perl.c.
+
 2006-06-19  Eric Blake  <ebb9@byu.net>
 
 	* Makefile.am ($(srcdir)/doc/m4.1): No need to list $(srcdir) in
