@@ -1,3 +1,19 @@
+2006-06-19  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am ($(srcdir)/doc/m4.1): No need to list $(srcdir) in
+	right side of dependency; VPATH does that.
+	(stamp-vcl): Update to use libtool's algorithm.
+	(EXTRA_DIST): Distribute stamp-vcl.
+	Reported by Ralf Wildenhues.
+	(TESTSUITE): Revert earlier change that used absolute path, as
+	that broke 'make dist' in VPATH.  Stick with $(srcdir) instead.
+	(EXTRA_DIST): Revert earlier change of $(TESTSUITE).
+	(TESTS_ENVIRONMENT) [USE_GMP]: Revert earlier addition, since
+	atlocal takes care of it instead.
+	(check-local, installcheck-local, clean-local): Inline absolute
+	path to testsuite here, rather than relative path to testsuite
+	elsewhere.
+
 2006-06-19  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* m4/m4private.h (DELETE): Cast away const here...

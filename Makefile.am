@@ -43,21 +43,23 @@ MAINTAINERCLEANFILES = \
 
 BUILT_SOURCES	=
 
-# Make sure config.status is regenerated when the version timestamp changes
+## We know that $(srcdir)/ChangeLog has been edited if stamp-vcl
+## needs updating, so we assume we have write access to $(srcdir).
+## If we try to maintain ./stamp-vcl to avoid writing to a possibly
+## read-only $(srcdir), then when the two stamp-vcls differ, distcheck
+## will try to update the one in the read-only source tree it makes.
 MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
-CONFIG_STATUS_DEPENDENCIES = stamp-vcl
-stamp-vcl: vcl.tmp $(srcdir)/ChangeLog
-vcl.tmp:
-	@dir=.; test -f $$dir/stamp-vcl || dir=$(srcdir); \
-	set `$(MKSTAMP) < $(srcdir)/ChangeLog`; \
+$(srcdir)/stamp-vcl: vcl-tmp ChangeLog
+vcl-tmp:
+	@set dummy `$(MKSTAMP) < $(srcdir)/ChangeLog`; shift; \
 	echo "$$1" > vcl.tmp; \
-	cmp -s vcl.tmp $$dir/stamp-vcl \
-## If mkstamp does not match $(srcdir)/stamp-vcl, we still put the new one
-## in the current dir, incase $(srcdir) is not writable.  The dir selection
-## at the top of this rule takes care of prefering the right one on
-## subsequent runs.
-	  || (echo "Updating stamp-vcl"; cp vcl.tmp ./stamp-vcl)
+	diff vcl.tmp $(srcdir)/stamp-vcl >/dev/null 2>&1 \
+	  || (echo "Updating stamp-vcl"; cp vcl.tmp $(srcdir)/stamp-vcl)
 	-@rm -f vcl.tmp
+
+# Make sure config.status is regenerated when the version timestamp changes
+CONFIG_STATUS_DEPENDENCIES = stamp-vcl
+EXTRA_DIST += stamp-vcl
 
 
 ## ------- ##
@@ -247,7 +249,7 @@ dist_man_MANS	= doc/m4.1
 # Build the man page once in the srcdir, rather than in every VPATH build
 # dir, to match how automake builds info pages.  This is safe for 'make
 # distcheck' since it is distributed pre-built.
-$(srcdir)/doc/m4.1: $(srcdir)/configure.ac $(srcdir)/src/main.c
+$(srcdir)/doc/m4.1: configure.ac src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run \
@@ -330,12 +332,9 @@ dist_pkgdata_DATA = \
 ## Test suite. ##
 ## ----------- ##
 
-# NOTE - After 2.60, autoconf might add an option to testsuite to specify
-# which directory it should output testsuite.log.  Until then, we want it
-# to drop in tests, so we have to do a cd inside make targets that invoke
-# testsuite.  As a result, we need an absolute path since a relative
-# $(srcdir) does not work after cd.
-TESTSUITE = $(abs_srcdir)/tests/testsuite
+# Use `$(srcdir)' for the benefit of non-GNU makes: this is
+# how `testsuite' appears in our dependencies.
+TESTSUITE = $(srcdir)/tests/testsuite
 TESTSUITE_AT	= \
 		  tests/builtins.at \
 		  tests/generated.at \
@@ -345,9 +344,7 @@ TESTSUITE_AT	= \
 		  tests/others.at \
 		  tests/testsuite.at
 
-# FIXME - Based on our earlier definition of TESTSUITE as absolute, we
-# must use 'tests/testsuite' instead of '$(TESTSUITE)' here.
-EXTRA_DIST     += tests/testsuite $(TESTSUITE_AT) $(OTHER_FILES) \
+EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/atlocal.in \
 		  tests/generate.awk \
 		  tests/package.m4
@@ -360,9 +357,6 @@ TESTS_ENVIRONMENT = MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
 	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" CXXCPP="$(CXXCPP)" \
 	F77="$(F77)" FFLAGS="$(FFLAGS)" \
 	GCJ="$(GCJ)" GCJFLAGS="$(GCJFLAGS)"
-if USE_GMP
-TESTS_ENVIRONMENT += USE_GMP=yes
-endif
 
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
@@ -372,8 +366,6 @@ $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
 	$(generate) $(m4_texinfo) >$@t
 	mv $@t $@
 
-# Use `$(srcdir)' for the benefit of non-GNU makes: this is
-# how `testsuite' appears in our dependencies.
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
@@ -394,23 +386,30 @@ tests/atconfig: config.status
 	$(SHELL) ./config.status tests/atconfig
 DISTCLEANFILES += tests/atconfig
 
+# FIXME - After 2.60, autoconf might add an option to testsuite to specify
+# which directory it should output testsuite.log.  Until then, we want it
+# to drop in tests, so we have to do a cd inside the targets that invoke
+# testsuite.  As a result, we need an absolute path since the relative
+# $(srcdir) inside $(TESTSUITE) does not work after cd.
 CD_TESTDIR	= cd ./tests
 
 # Hook the test suite into the check rule
 check-local: tests/atconfig $(TESTSUITE)
 	$(CD_TESTDIR); \
-	$(SHELL) '$(TESTSUITE)' $(TESTS_ENVIRONMENT) $(TESTSUITEFLAGS)
+	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
+	  $(TESTSUITEFLAGS)
 
 # Run the test suite on the *installed* tree.
 installcheck-local: tests/atconfig $(TESTSUITE)
 	$(CD_TESTDIR); \
-	$(SHELL) '$(TESTSUITE)' $(TESTS_ENVIRONMENT) \
+	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
 	  AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
 
 # We need to remove any file droppings left behind by testsuite.
 clean-local:
 	$(CD_TESTDIR); \
-	test ! -f '$(TESTSUITE)' || $(SHELL) '$(TESTSUITE)' --clean
+	test ! -f '$(abs_srcdir)/tests/testsuite' || \
+	  $(SHELL) '$(abs_srcdir)/tests/testsuite' --clean
 
 OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test
 
