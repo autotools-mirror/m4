@@ -1,3 +1,7 @@
+2006-06-19  Eric Blake  <ebb9@byu.net>
+
+	* THANKS: Update.
+
 2006-06-18  Andreas Buening  <andreas.buening@nexgo.de>  (tiny change)
 
 	* checks/Makefile.in (PATH_SEPARATOR): New macro.
