@@ -1,5 +1,21 @@
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
+	Robustify frozen file format.
+	* src/freeze.c (reload_frozen_state): Add GET_DIRECTIVE helper
+	macro.  Require V first, and only accept it once.  For F, use
+	placeholder if builtin is not found, rather than warning.
+	* src/m4.h (m4_placeholder): New prototype.
+	* src/builtin.c: Unify error message style.
+	(m4_placeholder): New function, warn if invoked.
+	(builtin_tab): Add m4_placeholder.
+	(m4_defn): Warn if placeholder is encountered.
+	(find_builtin_by_addr): Handle placeholder.
+	(find_builtin_by_name): Return placeholder on failure.
+	(m4_builtin): Treat placeholder as undefined.
+	* doc/m4.texinfo (Frozen files): Document changes in V and F.
+	* NEWS: Document this change.
+	Reported by Bruno Haible.
+
 	* doc/m4.texinfo: Whitespace cleanup.  TABs are evil in texinfo.
 	(tabchar): New macro, so that 'make check' still works.
 	(Invoking m4): Document that ignored compatibility options -B, -S,

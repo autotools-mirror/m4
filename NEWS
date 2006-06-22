@@ -8,6 +8,13 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   in the low-order byte.
 * The maketemp macro is no longer subject to platform limitations (such as
   26 or 32 max files from a given template).
+* Frozen files now require that the first directive be V (version), to
+  better diagnose version mismatch.  Additionally, if the F directive
+  (builtin function) names an unknown builtin that existed in the m4 that
+  froze the file but not in the current m4 (for example, changeword), the
+  warning is deferred until an attempt is made to actually use the builtin.
+  This allows downgrading from beta m4-1.4o to m4-1.4.5 without breaking
+  autoconf.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

@@ -3418,7 +3418,10 @@ The directives are:
 
 @table @code
 @item V @var{number} @key{NL}
-Confirms the format of the file.  @var{number} should be 1.
+Confirms the format of the file.  @code{m4} @value{VERSION} only creates
+and understands frozen files where @var{number} is 1.  This directive
+must be the first non-comment in the file, and may not appear more than
+once.
 
 @item C @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Uses @var{string1} and @var{string2} as the beginning comment and
@@ -3430,7 +3433,12 @@ strings.
 
 @item F @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Defines, through @code{pushdef}, a definition for @var{string1}
-expanding to the function whose builtin name is @var{string2}.
+expanding to the function whose builtin name is @var{string2}.  If the
+builtin does not exist (for example, if the frozen file was produced by
+a copy of @code{m4} compiled with changeword support, but the version
+of @code{m4} reloading was compiled without it), the reload is silent,
+but any subsequent use of the definition of @var{string1} will result in
+a warning.
 
 @item T @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
 Defines, though @code{pushdef}, a definition for @var{string1}

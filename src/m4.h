@@ -439,6 +439,7 @@ void define_builtin _((const char *, const builtin *, symbol_lookup));
 void define_user_macro _((const char *, const char *, symbol_lookup));
 void undivert_all _((void));
 void expand_user_macro _((struct obstack *, symbol *, int, token_data **));
+void m4_placeholder _((struct obstack *, int, token_data **));
 
 const builtin *find_builtin_by_addr _((builtin_func *));
 const builtin *find_builtin_by_name _((const char *));

@@ -211,6 +211,22 @@ reload_frozen_state (const char *name)
     }								\
   while (0)
 
+  /* Skip comments (`#' at beginning of line) and blank lines, setting
+     character to the next directive or to EOF.  */
+
+#define GET_DIRECTIVE \
+  do                                                            \
+    {                                                           \
+      GET_CHARACTER;                                            \
+      if (character == '#')                                     \
+        {                                                       \
+          while (character != EOF && character != '\n')         \
+            GET_CHARACTER;                                      \
+          VALIDATE ('\n');                                      \
+        }                                                       \
+    }                                                           \
+  while (character == '\n')
+
   file = path_search (name);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, "Cannot open %s", name));
@@ -220,159 +236,141 @@ reload_frozen_state (const char *name)
   allocated[1] = 100;
   string[1] = xmalloc ((size_t) allocated[1]);
 
-  while (GET_CHARACTER, character != EOF)
-    switch (character)
-      {
-      default:
-	M4ERROR ((EXIT_FAILURE, 0, "Ill-formed frozen file"));
+  /* Validate format version.  Only `1' is acceptable for now.  */
+  GET_DIRECTIVE;
+  VALIDATE ('V');
+  GET_CHARACTER;
+  VALIDATE ('1');
+  GET_CHARACTER;
+  VALIDATE ('\n');
 
-      case '\n':
+  GET_DIRECTIVE;
+  while (character != EOF)
+    {
+      switch (character)
+        {
+        default:
+          M4ERROR ((EXIT_FAILURE, 0, "Ill-formed frozen file"));
 
-	/* Skip empty lines.  */
+        case 'C':
+        case 'D':
+        case 'F':
+        case 'T':
+        case 'Q':
+          operation = character;
+          GET_CHARACTER;
 
-	break;
+          /* Get string lengths.  Accept a negative diversion number.  */
 
-      case '#':
+          if (operation == 'D' && character == '-')
+            {
+              GET_CHARACTER;
+              GET_NUMBER (number[0]);
+              number[0] = -number[0];
+            }
+          else
+            GET_NUMBER (number[0]);
+          VALIDATE (',');
+          GET_CHARACTER;
+          GET_NUMBER (number[1]);
+          VALIDATE ('\n');
 
-	/* Comments are introduced by `#' at beginning of line, and are
-	   ignored.  */
+          if (operation != 'D')
+            {
 
-	while (character != EOF && character != '\n')
-	  GET_CHARACTER;
-	VALIDATE ('\n');
-	break;
+              /* Get first string contents.  */
 
-      case 'C':
-      case 'D':
-      case 'F':
-      case 'T':
-      case 'Q':
-	operation = character;
-	GET_CHARACTER;
+              if (number[0] + 1 > allocated[0])
+                {
+                  free (string[0]);
+                  allocated[0] = number[0] + 1;
+                  string[0] = xmalloc ((size_t) allocated[0]);
+                }
 
-	/* Get string lengths.  Accept a negative diversion number.  */
+              if (number[0] > 0)
+                if (!fread (string[0], (size_t) number[0], 1, file))
+                  M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
 
-	if (operation == 'D' && character == '-')
-	  {
-	    GET_CHARACTER;
-	    GET_NUMBER (number[0]);
-	    number[0] = -number[0];
-	  }
-	else
-	  GET_NUMBER (number[0]);
-	VALIDATE (',');
-	GET_CHARACTER;
-	GET_NUMBER (number[1]);
-	VALIDATE ('\n');
+              string[0][number[0]] = '\0';
+            }
 
-	if (operation != 'D')
-	  {
+          /* Get second string contents.  */
 
-	    /* Get first string contents.  */
+          if (number[1] + 1 > allocated[1])
+            {
+              free (string[1]);
+              allocated[1] = number[1] + 1;
+              string[1] = xmalloc ((size_t) allocated[1]);
+            }
 
-	    if (number[0] + 1 > allocated[0])
-	      {
-		free (string[0]);
-		allocated[0] = number[0] + 1;
-		string[0] = xmalloc ((size_t) allocated[0]);
-	      }
+          if (number[1] > 0)
+            if (!fread (string[1], (size_t) number[1], 1, file))
+              M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
 
-	    if (number[0] > 0)
-	      if (!fread (string[0], (size_t) number[0], 1, file))
-		M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
+          string[1][number[1]] = '\0';
+          GET_CHARACTER;
+          VALIDATE ('\n');
 
-	    string[0][number[0]] = '\0';
-	  }
+          /* Act according to operation letter.  */
 
-	/* Get second string contents.  */
+          switch (operation)
+            {
+            case 'C':
 
-	if (number[1] + 1 > allocated[1])
-	  {
-	    free (string[1]);
-	    allocated[1] = number[1] + 1;
-	    string[1] = xmalloc ((size_t) allocated[1]);
-	  }
+              /* Change comment strings.  */
 
-	if (number[1] > 0)
-	  if (!fread (string[1], (size_t) number[1], 1, file))
-	    M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
+              set_comment (string[0], string[1]);
+              break;
 
-	string[1][number[1]] = '\0';
-	GET_CHARACTER;
-	VALIDATE ('\n');
+            case 'D':
 
-	/* Act according to operation letter.  */
+              /* Select a diversion and add a string to it.  */
 
-	switch (operation)
-	  {
-	  case 'C':
+              make_diversion (number[0]);
+              if (number[1] > 0)
+                shipout_text (NULL, string[1], number[1]);
+              break;
 
-	    /* Change comment strings.  */
+            case 'F':
 
-	    set_comment (string[0], string[1]);
-	    break;
+              /* Enter a macro having a builtin function as a definition.  */
 
-	  case 'D':
+              bp = find_builtin_by_name (string[1]);
+              define_builtin (string[0], bp, SYMBOL_PUSHDEF);
+              break;
 
-	    /* Select a diversion and add a string to it.  */
+            case 'T':
 
-	    make_diversion (number[0]);
-	    if (number[1] > 0)
-	      shipout_text (NULL, string[1], number[1]);
-	    break;
+              /* Enter a macro having an expansion text as a definition.  */
 
-	  case 'F':
+              define_user_macro (string[0], string[1], SYMBOL_PUSHDEF);
+              break;
 
-	    /* Enter a macro having a builtin function as a definition.  */
+            case 'Q':
 
-	    bp = find_builtin_by_name (string[1]);
-	    if (bp)
-	      define_builtin (string[0], bp, SYMBOL_PUSHDEF);
-	    else
-	      M4ERROR ((warning_status, 0, "\
-`%s' from frozen file not found in builtin table!",
-			string[0]));
-	    break;
+              /* Change quote strings.  */
 
-	  case 'T':
+              set_quotes (string[0], string[1]);
+              break;
 
-	    /* Enter a macro having an expansion text as a definition.  */
+            default:
 
-	    define_user_macro (string[0], string[1], SYMBOL_PUSHDEF);
-	    break;
+              /* Cannot happen.  */
 
-	  case 'Q':
+              break;
+            }
+          break;
 
-	    /* Change quote strings.  */
-
-	    set_quotes (string[0], string[1]);
-	    break;
-
-	  default:
-
-	    /* Cannot happen.  */
-
-	    break;
-	  }
-	break;
-
-      case 'V':
-
-	/* Validate format version.  Only `1' is acceptable for now.  */
-
-	GET_CHARACTER;
-	VALIDATE ('1');
-	GET_CHARACTER;
-	VALIDATE ('\n');
-	break;
-
-      }
+        }
+      GET_DIRECTIVE;
+    }
 
   free (string[0]);
   free (string[1]);
   fclose (file);
 
 #undef GET_CHARACTER
+#undef GET_DIRECTIVE
 #undef GET_NUMBER
 #undef VALIDATE
 }
