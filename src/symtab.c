@@ -349,7 +349,7 @@ hack_all_symbols (hack_symbol *func, const char *data)
 
 static void symtab_print_list (int i);
 
-static void
+static void M4_GNUC_UNUSED
 symtab_debug (void)
 {
   token_data td;

@@ -728,10 +728,10 @@ next_token (token_data *td)
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
-      return TOKEN_EOF;
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> EOF\n");
 #endif
+      return TOKEN_EOF;
     }
   if (ch == CHAR_MACRO)
     {
@@ -872,7 +872,7 @@ print_token (const char *s, token_type t, token_data *td)
       break;
 
     case TOKEN_MACDEF:
-      fprintf (stderr, "macro: 0x%x\n", TOKEN_DATA_FUNC (td));
+      fprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
       break;
 
     case TOKEN_EOF:
@@ -882,13 +882,13 @@ print_token (const char *s, token_type t, token_data *td)
   fprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
 }
 
-static void
+static void M4_GNUC_UNUSED
 lex_debug (void)
 {
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td)) != NULL)
+  while ((t = next_token (&td)) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif

@@ -477,13 +477,25 @@ void reload_frozen_state _((const char *));
 /* Other debug stuff.  */
 
 #ifdef DEBUG
-# define DEBUG_INPUT
-# define DEBUG_MACRO
-# define DEBUG_SYM
-# define DEBUG_INCL
+# define DEBUG_INCL   1
+# define DEBUG_INPUT  1
+# define DEBUG_MACRO  1
+# define DEBUG_OUTPUT 1
+# define DEBUG_STKOVF 1
+# define DEBUG_SYM    1
 #endif
 
 /* Convert a possibly-signed character to an unsigned character.  This is
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
 static inline unsigned char to_uchar (char ch) { return ch; }
+
+/* Take advantage of GNU C compiler source level optimization hints,
+   using portable macros.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#else
+#  define M4_GNUC_ATTRIBUTE(args)
+#endif  /* __GNUC__ */
+
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((unused))

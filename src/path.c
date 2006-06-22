@@ -145,7 +145,7 @@ path_search (const char *dir)
 
 #ifdef DEBUG_INCL
 
-static int
+static void M4_GNUC_UNUSED
 include_dump (void)
 {
   includes *incl;

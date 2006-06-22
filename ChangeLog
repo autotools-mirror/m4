@@ -1,5 +1,14 @@
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
+	Avoid compiler warnings during -DDEBUG.
+	* src/m4.h (M4_GNUC_ATTRIBUTE, M4_GNUC_UNUSED): New macros.
+	[DEBUG]: Also imply DEBUG_OUTPUT and DEBUG_STKOVF.
+	* src/input.c (print_token) [DEBUG_INPUT]: Use correct format.
+	(lex_debug) [DEBUG_INPUT]: Fix to compile.  Mark unused.
+	(next_token) [DEBUG_INPUT]: Print before returning.
+	* src/path.c (include_dump) [DEBUG_INCL]: Mark unused.
+	* src/symtab.c (symtab_debug) [DEBUG_SYM]: Mark unused.
+
 	Avoid mkstemp bugs on various platforms.
 	* m4/gnulib-cache.c: Augment with gnulib-tool --import mkstemp.
 	* src/output.c [! HAVE_MKSTEMP]: Delete.
