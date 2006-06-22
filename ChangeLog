@@ -1,5 +1,11 @@
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Whitespace cleanup.  TABs are evil in texinfo.
+	(tabchar): New macro, so that 'make check' still works.
+	(Invoking m4): Document that ignored compatibility options -B, -S,
+	and -T each consume an argument.
+	* checks/get-them: Honor @tabchar{}.
+
 	Avoid compiler warnings during -DDEBUG.
 	* src/m4.h (M4_GNUC_ATTRIBUTE, M4_GNUC_UNUSED): New macros.
 	[DEBUG]: Also imply DEBUG_OUTPUT and DEBUG_STKOVF.

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Extract all examples from the manual source.
-# Copyright (C) 1992, 2005 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2005, 2006 Free Software Foundation, Inc.
 
 # This script is for use with GNU awk.
 
@@ -60,6 +60,7 @@ BEGIN {
     prefix = "";
   gsub("@@", "@", $0);
   gsub("@comment.*", "", $0);
+  gsub("@tabchar{}", "\t", $0);
   printf("%s%s\n", prefix, $0) >> file;
 }
 
