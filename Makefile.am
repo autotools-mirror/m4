@@ -32,7 +32,9 @@ AM_CPPFLAGS	= -I. -I$(srcdir) \
 		  $(INTLINCL) $(LTDLINCL)
 AM_LDFLAGS	= -no-undefined -export-dynamic
 
-EXTRA_DIST	= bootstrap $(config_aux_dir)/mkstamp
+EXTRA_DIST	= bootstrap \
+		  $(config_aux_dir)/mkstamp \
+		  $(config_macro_dir)/gnulib-cache.m4
 CLEANFILES	=
 DISTCLEANFILES	=
 MOSTLYCLEANFILES=
