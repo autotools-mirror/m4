@@ -1,6 +1,11 @@
-2006-06-20  Eric Blake  <ebb9@byu.net>
+2006-06-22  Eric Blake  <ebb9@byu.net>
 
-	Avoid obsolete sigstack when POSIX sigaltstack is available:
+	* Makefile.am (EXTRA_DIST): Distribute gnulib-cache.m4.
+	Reported by Bruno Haible.
+
+2006-06-21  Eric Blake  <ebb9@byu.net>
+
+	Avoid obsolete sigstack when POSIX sigaltstack is available.
 	* src/m4.c: Blindly assume signal.h, since stackovf.c and gnulib
 	do likewise.
 	* configure.ac (AC_CHECK_HEADERS): Likewise.
