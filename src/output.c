@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -102,22 +102,6 @@ output_init (void)
   output_cursor = NULL;
   output_unused = 0;
 }
-
-#ifndef HAVE_MKSTEMP
-
-/* This implementation of mkstemp(3) does not avoid any races, but its
-   there.  */
-
-#include <fcntl.h>
-
-int
-mkstemp (const char *tmpl)
-{
-  mktemp (tmpl);
-  return open (tmpl, O_RDWR | O_TRUNC | O_CREAT, 0600);
-}
-
-#endif /* not HAVE_MKSTEMP */
 
 #ifndef HAVE_TMPFILE
 
@@ -307,7 +291,7 @@ output_text (const char *text, int length)
 | characters.  If OBS is NULL, rather output the text to an external file  |
 | or an in-memory diversion buffer.  If OBS is NULL, and there is no	   |
 | output file, the text is discarded.					   |
-| 									   |
+|									   |
 | If we are generating sync lines, the output have to be examined, because |
 | we need to know how much output each input line generates.  In general,  |
 | sync lines are output whenever a single input lines generates several	   |

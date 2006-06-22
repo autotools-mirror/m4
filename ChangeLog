@@ -1,5 +1,12 @@
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
+	Avoid mkstemp bugs on various platforms.
+	* m4/gnulib-cache.c: Augment with gnulib-tool --import mkstemp.
+	* src/output.c [! HAVE_MKSTEMP]: Delete.
+	* configure.ac (AC_CHECK_FUNCS): Don't check for mkstemp.
+	* src/m4.h (mkstemp) [! HAVE_MKSTEMP]: Prototype, if needed.
+	* NEWS: Document this.
+
 	* Makefile.am (EXTRA_DIST): Distribute gnulib-cache.m4.
 	Reported by Bruno Haible.
 

@@ -6,6 +6,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 
 * Fix sysval on BeOS, OS/2, and other systems that store exit status
   in the low-order byte.
+* The maketemp macro is no longer subject to platform limitations (such as
+  26 or 32 max files from a given template).
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

@@ -46,7 +46,7 @@ AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
-AC_CHECK_FUNCS([mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile])
+AC_CHECK_FUNCS([sigaction sigaltstack sigstack sigvec strerror tmpfile])
 
 M4_INIT
 

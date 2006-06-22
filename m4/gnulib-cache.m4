@@ -15,10 +15,10 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --aux-dir=. --macro-prefix=M4 alloca error getopt obstack regex strtol xalloc
+#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --aux-dir=. --macro-prefix=M4 alloca error getopt mkstemp obstack regex strtol xalloc
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([alloca error getopt obstack regex strtol xalloc])
+gl_MODULES([alloca error getopt mkstemp obstack regex strtol xalloc])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])

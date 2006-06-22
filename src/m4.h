@@ -116,7 +116,9 @@ typedef enum { FALSE = 0, TRUE = 1 } boolean;
 typedef int boolean;
 #endif
 
-char *mktemp ();
+#if ! HAVE_MKSTEMP
+int mkstemp (char *);
+#endif
 
 /* Various declarations.  */
 
