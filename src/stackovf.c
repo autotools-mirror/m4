@@ -1,5 +1,5 @@
 /* Detect stack overflow (when getrlimit and sigaction or sigvec are available)
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006 Free Software Foundation, Inc.
    Jim Avera <jima@netcom.com>, October 1993.
 
    This program is free software; you can redistribute it and/or modify
@@ -75,8 +75,6 @@
       dump in the usual way.  It seems important (to me) that internal m4
       bugs not be reported as user recursion errors, or vice-versa."  */
 
-#define DEBUG_STACKOVF
-
 #include "m4.h"			/* stdlib.h, xmalloc() */
 
 #include <assert.h>
@@ -86,6 +84,13 @@
 
 #if HAVE_SIGINFO_H
 # include <siginfo.h>
+#endif
+
+#ifndef SA_RESETHAND
+# define SA_RESETHAND 0
+#endif
+#ifndef SA_SIGINFO
+# define SA_SIGINFO 0
 #endif
 
 #ifndef SIGSTKSZ
@@ -136,8 +141,8 @@ static handler_t stackovf_handler;
    message and abort with a core dump.  This only occurs on systems which
    provide no information, but is better than nothing.  */
 
-#define PARAM_STACKOVF ((const char *) 1)
-#define PARAM_NOSTACKOVF ((const char *) 2)
+#define PARAM_STACKOVF ((const char *) (1 + STACKOVF_DETECT))
+#define PARAM_NOSTACKOVF ((const char *) (2 + STACKOVF_DETECT))
 
 static void
 process_sigsegv (int signo, const char *p)
@@ -200,20 +205,31 @@ occurred, or there is a bug in ";
   signal (signo, SIG_DFL);
 }
 
-#if HAVE_SIGINFO_H
+#if HAVE_STRUCT_SIGACTION_SA_SIGACTION
+
+/* POSIX.  */
+
+static void
+sigsegv_handler (int signo, siginfo_t *ip, void *context)
+{
+  process_sigsegv
+    (signo, (ip != NULL
+	     && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
+}
+
+#elif HAVE_SIGINFO_T
 
 /* SVR4.  */
 
 static void
-sigsegv_handler (int signo, siginfo_t * ip)
+sigsegv_handler (int signo, siginfo_t *ip)
 {
   process_sigsegv
-    (signo, (ip != (siginfo_t *) 0
+    (signo, (ip != NULL
 	     && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
 }
 
-#else /* not HAVE_SIGINFO_H */
-#if HAVE_SIGCONTEXT
+#elif HAVE_SIGCONTEXT
 
 /* SunOS 4.x (and BSD?).  (not tested) */
 
@@ -234,7 +250,6 @@ sigsegv_handler (int signo)
 }
 
 #endif /* not HAVE_SIGCONTEXT */
-#endif /* not HAVE_SIGINFO */
 
 /* Arrange to trap a stack-overflow and call a specified handler.  The
    call is on a dedicated signal stack.
@@ -259,20 +274,23 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
   int grows_upward;
   register char *const *v;
   register char *p;
-#if HAVE_SIGACTION && defined(SA_ONSTACK)
+#if HAVE_SIGACTION && defined SA_ONSTACK
   struct sigaction act;
-#else
+#elif HAVE_SIGVEC && defined SV_ONSTACK
   struct sigvec vec;
+#else
+
+Error - Do not know how to set up stack-ovf trap handler...
+
 #endif
 
-  grows_upward = ((char *) argv < (char *) &stack_len);
   arg0 = argv[0];
   stackovf_handler = handler;
 
   /* Calculate the approximate expected addr for a stack-ovf trap.  */
 
   if (getrlimit (RLIMIT_STACK, &rl) < 0)
-    error (1, errno, "getrlimit");
+    error (EXIT_FAILURE, errno, "getrlimit");
   stack_len = (rl.rlim_cur < rl.rlim_max ? rl.rlim_cur : rl.rlim_max);
   stackbot = (char *) argv;
   grows_upward = ((char *) &stack_len > stackbot);
@@ -281,14 +299,14 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 
       /* Grows toward increasing addresses.  */
 
-      for (v = argv; (p = (char *) *v) != (char *) 0; v++)
+      for (v = argv; (p = (char *) *v) != NULL; v++)
 	{
 	  if (p < stackbot)
 	    stackbot = p;
 	}
       if ((char *) envp < stackbot)
 	stackbot = (char *) envp;
-      for (v = envp; (p = (char *) *v) != (char *) 0; v++)
+      for (v = envp; (p = (char *) *v) != NULL; v++)
 	{
 	  if (p < stackbot)
 	    stackbot = p;
@@ -300,14 +318,14 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 
       /* The stack grows "downward" (toward decreasing addresses).  */
 
-      for (v = argv; (p = (char *) *v) != (char *) 0; v++)
+      for (v = argv; (p = (char *) *v) != NULL; v++)
 	{
 	  if (p > stackbot)
 	    stackbot = p;
 	}
       if ((char *) envp > stackbot)
 	stackbot = (char *) envp;
-      for (v = envp; (p = (char *) *v) != (char *) 0; v++)
+      for (v = envp; (p = (char *) *v) != NULL; v++)
 	{
 	  if (p > stackbot)
 	    stackbot = p;
@@ -317,9 +335,9 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 
   /* Allocate a separate signal-handler stack.  */
 
-#if HAVE_SIGALTSTACK && (defined(HAVE_SIGINFO_H) || !HAVE_SIGSTACK)
+#if HAVE_SIGALTSTACK && (HAVE_SIGINFO_T || ! HAVE_SIGSTACK)
 
-  /* Use sigaltstack only if siginfo is available, unless there is no
+  /* Use sigaltstack only if siginfo_t is available, unless there is no
      choice.  */
 
   {
@@ -328,12 +346,11 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_size = SIGSTKSZ;
     ss.ss_sp = xmalloc ((unsigned) ss.ss_size);
     ss.ss_flags = 0;
-    if (sigaltstack (&ss, (stack_t *) 0) < 0)
-      error (1, errno, "sigaltstack");
+    if (sigaltstack (&ss, NULL) < 0)
+      error (EXIT_FAILURE, errno, "sigaltstack");
   }
 
-#else /* not HAVE_SIGALTSTACK || not HAVE_SIGINFO_H && HAVE_SIGSTACK */
-#if HAVE_SIGSTACK
+#elif HAVE_SIGSTACK
 
   {
     struct sigstack ss;
@@ -342,7 +359,7 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
-      error (1, errno, "sigstack");
+      error (EXIT_FAILURE, errno, "sigstack");
   }
 
 #else /* not HAVE_SIGSTACK */
@@ -350,44 +367,30 @@ setup_stackovf_trap (char *const *argv, char *const *envp, handler_t handler)
 Error - Do not know how to set up stack-ovf trap handler...
 
 #endif /* not HAVE_SIGSTACK */
-#endif /* not HAVE_SIGALTSTACK || not HAVE_SIGINFO_H && HAVE_SIGSTACK */
 
   /* Arm the SIGSEGV signal handler.  */
 
-#if HAVE_SIGACTION && defined(SA_ONSTACK)
+#if HAVE_SIGACTION && defined SA_ONSTACK
 
   sigaction (SIGSEGV, NULL, &act);
+# if HAVE_STRUCT_SIGACTION_SA_SIGACTION
+  act.sa_sigaction = sigsegv_handler;
+# else /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
   act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
+# endif /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
   sigemptyset (&act.sa_mask);
-  act.sa_flags = (SA_ONSTACK
-#ifdef SA_RESETHAND
-		  | SA_RESETHAND
-#endif
-#ifdef SA_SIGINFO
-		  | SA_SIGINFO
-#endif
-		  );
+  act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
   if (sigaction (SIGSEGV, &act, NULL) < 0)
-    error (1, errno, "sigaction");
+    error (EXIT_FAILURE, errno, "sigaction");
 
-#else /* not HAVE_SIGACTION */
-#if HAVE_SIGVEC && defined(SV_ONSTACK)
+#else /* ! HAVE_SIGACTION */
 
   vec.sv_handler = (RETSIGTYPE (*)_ ((int))) sigsegv_handler;
   vec.sv_mask = 0;
-  vec.sv_flags = (SV_ONSTACK
-#ifdef SV_RESETHAND
-		  | SV_RESETHAND
-#endif
-	         );
+  vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
   if (sigvec (SIGSEGV, &vec, NULL) < 0)
-    error (1, errno, "sigvec");
+    error (EXIT_FAILURE, errno, "sigvec");
 
-#else /* not HAVE_SIGVEC && defined(SV_ONSTACK) */
-
-Error - Do not know how to catch signals on an alternate stack...
-
-#endif /* HAVE_SIGVEC && defined(SV_ONSTACK) */
-#endif /* HAVE_SIGALTSTACK && defined(SA_ONSTACK) */
+#endif /* ! HAVE_SIGACTION */
 
 }

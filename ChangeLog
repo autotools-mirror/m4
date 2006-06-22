@@ -1,3 +1,28 @@
+2006-06-20  Eric Blake  <ebb9@byu.net>
+
+	Avoid obsolete sigstack when POSIX sigaltstack is available:
+	* src/m4.c: Blindly assume signal.h, since stackovf.c and gnulib
+	do likewise.
+	* configure.ac (AC_CHECK_HEADERS): Likewise.
+	(AC_CHECK_TYPES): New check for siginfo_t, since siginfo.h is
+	obsolete and most hosts now have it in signal.h.
+	(AC_CHECK_MEMBERS): New check for sigaction.sa_sigaction.
+	(AC_CACHE_CHECK): Cache decision to use stackovf.
+	(AC_EGREP_HEADER): Switch to AC_CHECK_TYPES.
+	* src/stackovf.c (DEBUG_STACKOVF): Remove unused define.
+	(SA_RESETHAND, SA_SIGINFO): Provide fallback definitions, to
+	simplify later code.
+	(PARAM_STACKOVF, PARAM_NOSTACKOVF): Move further away from NULL,
+	in case of dereferencing a member of a NULL pointer.
+	(sigsegv_handler) [HAVE_STRUCT_SIGACTION_SA_SIGACTION]: Define a
+	POSIX handler.
+	(setup_stackovf_trap): Use NULL instead of 0 for pointers, use
+	EXIT_FAILURE in error, indent preprocessor directives.
+	[HAVE_SIGALTSTACK && HAVE_SIGINFO_T]: Depend on siginfo_t, not
+	siginfo.h.
+	[HAVE_SIGACTION && defined SA_ONSTACK]: Prefer POSIX handler.
+	Reported by Santiago Vila.
+
 2006-06-19  Eric Blake  <ebb9@byu.net>
 
 	* THANKS: Update.

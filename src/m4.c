@@ -22,13 +22,7 @@
 #include "m4.h"
 
 #include <getopt.h>
-
-#if defined(HAVE_SYS_SIGNAL_H)
-#  include <sys/signal.h>
-#endif
-#if defined(HAVE_SIGNAL_H)
-#  include <signal.h>
-#endif
+#include <signal.h>
 
 static void usage _((int));
 
