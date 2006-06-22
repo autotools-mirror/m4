@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1998, 1999, 2002, 2003, 2004, 2005
-                 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2002, 2003,
+   2004, 2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ static const m4_macro *   install_macro_table   (m4*, lt_dlhandle);
 static int	    m4__module_interface	(lt_dlhandle handle,
 						 const char *id_string);
 
-static lt_dlinterface_id iface_id = 0;
+static lt_dlinterface_id iface_id = NULL;
 
 const char *
 m4_get_module_name (lt_dlhandle handle)
@@ -110,7 +110,7 @@ m4_module_import (m4 *context, const char *module_name,
 		  const char *symbol_name, m4_obstack *obs)
 {
   lt_dlhandle	handle		= m4__module_find (module_name);
-  lt_ptr	symbol_address	= 0;
+  lt_ptr	symbol_address	= NULL;
 
   /* Try to load the module if it is not yet available (errors are
      diagnosed by m4_module_load).  */
@@ -248,7 +248,7 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 void
 m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 {
-  lt_dlhandle	handle  = 0;
+  lt_dlhandle	handle  = NULL;
   int		errors	= 0;
 
   assert (context);
@@ -379,7 +379,7 @@ lt_dlhandle
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
   lt_dlhandle		handle		= lt_dlopenext (name);
-  m4_module_init_func *	init_func	= 0;
+  m4_module_init_func *	init_func	= NULL;
 
   assert (context);
   assert (iface_id);		/* need to have called m4__module_init */
@@ -451,6 +451,10 @@ m4__module_exit (m4 *context)
 
       errors = module_remove (context, pending, 0);
     }
+
+  assert (iface_id);		/* need to have called m4__module_init */
+  lt_dlinterface_free (iface_id);
+  iface_id = NULL;
 
   if (!errors)
     errors = lt_dlexit();

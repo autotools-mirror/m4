@@ -1,3 +1,7 @@
+2006-06-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* m4/module.c (m4__module_exit): Avoid ltdl memory leak.
+
 2006-06-19  Eric Blake  <ebb9@byu.net>
 
 	* THANKS: Update.
