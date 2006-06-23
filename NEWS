@@ -15,6 +15,7 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   warning is deferred until an attempt is made to actually use the builtin.
   This allows downgrading from beta m4-1.4o to m4-1.4.5 without breaking
   autoconf.
+* The format and indir macros are now recognized only with arguments.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

@@ -1,3 +1,9 @@
+2006-06-23  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (builtin_tab): Make format and indir blind.
+	(substitute): Prefer "Warning:" vs. "ERROR:" in messages.
+	* NEWS: Mention the change to builtins.
+
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
 	Robustify frozen file format.

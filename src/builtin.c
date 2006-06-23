@@ -111,13 +111,13 @@ builtin_tab[] =
   { "errprint",		FALSE,	FALSE,	FALSE,	m4_errprint },
   { "esyscmd",		TRUE,	FALSE,	TRUE,	m4_esyscmd },
   { "eval",		FALSE,	FALSE,	TRUE,	m4_eval },
-  { "format",		TRUE,	FALSE,	FALSE,	m4_format },
+  { "format",		TRUE,	FALSE,	TRUE,	m4_format },
   { "ifdef",		FALSE,	FALSE,	TRUE,	m4_ifdef },
   { "ifelse",		FALSE,	FALSE,	TRUE,	m4_ifelse },
   { "include",		FALSE,	FALSE,	TRUE,	m4_include },
   { "incr",		FALSE,	FALSE,	TRUE,	m4_incr },
   { "index",		FALSE,	FALSE,	TRUE,	m4_index },
-  { "indir",		TRUE,	FALSE,	FALSE,	m4_indir },
+  { "indir",		TRUE,	FALSE,	TRUE,	m4_indir },
   { "len",		FALSE,	FALSE,	TRUE,	m4_len },
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
   { "m4wrap",		FALSE,	FALSE,	FALSE,	m4_m4wrap },
@@ -1529,7 +1529,7 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	  if (!substitute_warned)
 	    {
 	      M4ERROR ((warning_status, 0, "\
-WARNING: \\0 will disappear, use \\& instead in replacements"));
+Warning: \\0 will disappear, use \\& instead in replacements"));
 	      substitute_warned = 1;
 	    }
 	  /* Fall through.  */
