@@ -651,20 +651,16 @@ level of quotes stripped off.  Thus
 @comment ignore
 @example
 `'
+@result{}
 @end example
 
-is the empty string, and
+@noindent
+is the empty string, and double-quoting turns into single-quoting.
 
 @comment ignore
 @example
-`@w{}`quoted'@w{}'
-@end example
-
-is the string
-
-@comment ignore
-@example
-`quoted'
+``quoted''
+@result{}`quoted'
 @end example
 
 The quote characters can be changed at any time, using the builtin macro
@@ -689,11 +685,16 @@ Comments cannot be nested, so the first newline after a @samp{#} ends
 the comment.  The commenting effect of the begin comment character
 can be inhibited by quoting it.
 
+@example
+`quoted text' # `commented text'
+@result{}quoted text # `commented text'
+`quoting inhibits' `#' `comments'
+@result{}quoting inhibits # comments
+@end example
+
 The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
-
-@c FIXME: more examples would be useful here --ADR
 
 @node Macros, Definitions, Syntax, Top
 @chapter How to invoke macros
@@ -792,9 +793,13 @@ For example:
 @comment ignore
 @example
 `divert'
+@result{}divert
 `d'ivert
+@result{}divert
 di`ver't
+@result{}divert
 div`'ert
+@result{}divert
 @end example
 
 @noindent
@@ -803,7 +808,9 @@ all yield the string @samp{divert}.  While in both:
 @comment ignore
 @example
 `'divert
+@result{}
 divert`'
+@result{}
 @end example
 
 @noindent
@@ -811,12 +818,12 @@ the @code{divert} builtin macro will be called.
 
 The output of macro evaluations is always rescanned.  The following
 example would yield the string @samp{de}, exactly as if @code{m4}
-has been given @w{@samp{substr(abcde, 3, 2)}} as input:
+has been given @w{@samp{substr(`abcde', `3', `2')}} as input:
 
 @example
 define(`x', `substr(ab')
 @result{}
-define(`y', `cde, 3, 2)')
+define(`y', `cde, `3', `2')')
 @result{}
 x`'y
 @result{}de
@@ -824,30 +831,32 @@ x`'y
 
 Unquoted strings on either side of a quoted string are subject to
 being recognized as macro names.  In the following example, quoting the
-empty string allows for the @code{dnl} macro to be recognized as such:
+empty string allows for the second @code{macro} to be recognized as such:
 
-@comment ignore
 @example
-define(`macro', `di$1')
-macro(v)`'dnl
+define(`macro', `m')
+@result{}
+macro(`m')macro
+@result{}mmacro
+macro(`m')`'macro
+@result{}mm
 @end example
-
-@noindent
-Without the quotes, this would rather yield the string @samp{divdnl}
-followed by an end of line.
 
 Quoting may prevent recognizing as a macro name the concatenation of a
 macro expansion with the surrounding characters.  In this example:
 
-@comment ignore
 @example
 define(`macro', `di$1')
-macro(v)`ert'
+@result{}
+macro(`v')`ert'
+@result{}divert
+macro(`v')ert
+@result{}
 @end example
 
 @noindent
-the input will produce the string @samp{divert}.  If the quote was
-removed, the @code{divert} builtin would be called instead.
+the input will produce the string @samp{divert}.  When the quotes were
+removed, the @code{divert} builtin was called instead.
 
 @node Macro Arguments, Quoting Arguments, Inhibiting Invocation, Macros
 @section Macro arguments
@@ -921,9 +930,13 @@ example with the parentheses, the `right' way to do it is like this:
 foo(`() (() (')
 @end example
 
-It is, however, in certain cases necessary to leave out quotes for some
-arguments, and there is nothing wrong in doing it.  It just makes life a
-bit harder, if you are not careful.
+It is, however, in certain cases necessary or convenient to leave out
+quotes for some arguments, and there is nothing wrong in doing it.  It
+just makes life a bit harder, if you are not careful.  For consistency,
+this manual follows the rule of thumb that each layer of parenthesis
+introduces another layer of single quoting, except when showing the
+consequences of quoting rules.  This is done even when the quoted string
+cannot be a macro, such as with integers.
 
 @node Macro expansion,  , Quoting Arguments, Macros
 @section Macro expansion
@@ -1001,6 +1014,20 @@ a part of the macro definition, and it is consequently copied to
 the output.  This can be avoided by use of the macro @code{dnl}.
 @xref{Dnl}, for details.
 
+The first argument to @code{define} should be quoted; otherwise, if the
+macro is already defined, you will be defining a different macro.  This
+example shows the problems with underquoting, since we did not want to
+define @code{one}:
+
+@example
+define(foo, one)
+@result{}
+define(foo, two)
+@result{}
+one
+@result{}two
+@end example
+
 The macro @code{define} is recognized only with parameters.
 
 @node Arguments, Pseudo Arguments, Define, Definitions
@@ -1010,13 +1037,15 @@ The macro @code{define} is recognized only with parameters.
 @cindex Arguments to macros
 Macros can have arguments.  The @var{n}th argument is denoted by
 @code{$n} in the expansion text, and is replaced by the @var{n}th actual
-argument, when the macro is expanded.  Here is an example of a macro with
+argument, when the macro is expanded.  Replacement of arguments happens
+before rescanning, regardless of how many nesting levels of quoting
+appear in the expansion.  Here is an example of a macro with
 two arguments.  It simply exchanges the order of the two arguments.
 
 @example
 define(`exch', `$2, $1')
 @result{}
-exch(arg1, arg2)
+exch(`arg1', `arg2')
 @result{}arg2, arg1
 @end example
 
@@ -1084,7 +1113,7 @@ nargs
 @result{}0
 nargs()
 @result{}1
-nargs(arg1, arg2, arg3)
+nargs(`arg1', `arg2', `arg3')
 @result{}3
 @end example
 
@@ -1121,8 +1150,12 @@ define(`foo', `This is macro `foo'.')
 @result{}
 echo1(foo)
 @result{}This is macro This is macro foo..
+echo1(`foo')
+@result{}This is macro foo.
 echo2(foo)
 @result{}This is macro foo.
+echo2(`foo')
+@result{}foo
 @end example
 
 @noindent
@@ -1232,6 +1265,19 @@ undefine(`zap')
 In this way, @code{defn} can be used to copy macro definitions, and also
 definitions of builtin macros.  Even if the original macro is removed,
 the other name can still be used to access the definition.
+
+The fact that macro definitions can be transferred also explains why you
+should use @code{$0}, rather than retyping a macro's name in its
+definition:
+
+@example
+define(`foo', `This is `$0'')
+@result{}
+define(`bar', defn(`foo'))
+@result{}
+bar
+@result{}This is bar
+@end example
 
 The macro @code{defn} is recognized only with parameters.
 
@@ -1347,7 +1393,7 @@ The point is, here, that larger macro packages can have private macros
 defined, that will not be called by accident.  They can @emph{only} be
 called through the builtin @code{indir}.
 
-@c FIXME: Why indir does not require at least one parameter?
+The macro @code{indir} is recognized only with parameters.
 
 @node Builtin,  , Indir, Definitions
 @section Indirect call of builtins
@@ -1444,15 +1490,34 @@ If called with three or four arguments, @code{ifelse} expands into
 for character), otherwise it expands to @var{not-equal}.
 
 @example
-ifelse(foo, bar, `true')
+ifelse(`foo', `bar', `true')
 @result{}
-ifelse(foo, foo, `true')
+ifelse(`foo', `foo', `true')
 @result{}true
-ifelse(foo, bar, `true', `false')
+define(`foo', `bar')
+@result{}
+ifelse(foo, `bar', `true', `false')
+@result{}true
+ifelse(foo, `foo', `true', `false')
 @result{}false
-ifelse(foo, foo, `true', `false')
-@result{}true
 @end example
+
+Notice how the first argument was used unquoted; it is common to compare
+the expansion of a macro with a string.  With this macro, you can now
+reproduce the behavior of many of the builtins, where the macro is
+recognized only with arguments.
+
+@example
+define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')
+@result{}
+foo
+@result{}foo
+foo()
+@result{}arguments:1
+foo(`a', `b', `c')
+@result{}arguments:3
+@end example
+
 
 @cindex multibranches
 However, @code{ifelse} can take more than four arguments.  If given more
@@ -1463,7 +1528,7 @@ the procedure is repeated with the first three arguments discarded.  This
 calls for an example:
 
 @example
-ifelse(foo, bar, `third', gnu, gnats, `sixth', `seventh')
+ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth', `seventh')
 @result{}seventh
 @end example
 
@@ -1500,9 +1565,9 @@ It takes any number of arguments, and expands to all but the first
 argument, separated by commas, with each argument quoted.
 
 @example
-shift(bar)
+shift(`bar')
 @result{}
-shift(foo, bar, baz)
+shift(`foo', `bar', `baz')
 @result{}bar,baz
 @end example
 
@@ -1510,14 +1575,14 @@ An example of the use of @code{shift} is this macro, which reverses the
 order of its arguments:
 
 @example
-define(`reverse', `ifelse($#, 0, , $#, 1, ``$1'',
+define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
 			  `reverse(shift($@@)), `$1'')')
 @result{}
 reverse
 @result{}
-reverse(foo)
+reverse(`foo')
 @result{}foo
-reverse(foo, bar, gnats, and gnus)
+reverse(`foo', `bar', `gnats', `and gnus')
 @result{}and gnus, gnats, bar, foo
 @end example
 
@@ -1532,7 +1597,7 @@ can, for example, be used for simple counting:
 
 @comment ignore
 @example
-forloop(`i', 1, 8, `i ')
+forloop(`i', `1', `8', `i ')
 @result{}1 2 3 4 5 6 7 8
 @end example
 
@@ -1545,7 +1610,7 @@ For-loops can be nested, like
 
 @comment ignore
 @example
-forloop(`i', 1, 4, `forloop(`j', 1, 8, `(i, j) ')
+forloop(`i', `1', `4', `forloop(`j', `1', `8', `(i, j) ')
 ')
 @result{}(1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8)
 @result{}(2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8)
@@ -1589,9 +1654,9 @@ a name.  Correcting these errors are left as an exercise to the reader.
 @node Debugging, Input Control, Conditionals, Top
 @chapter How to debug macros and input
 
-When writing macros for @code{m4}, most of the time they would not
-work as intended (as is the case with most programming languages).
-There is a little support for macro debugging in @code{m4}.
+When writing macros for @code{m4}, they often do not work as intended on
+the first try (as is the case with most programming languages).
+Fortunately, there is support for macro debugging in @code{m4}.
 
 @menu
 * Dumpdef::                     Displaying macro definitions
@@ -1635,7 +1700,6 @@ dumpdef(`define')
 @end example
 
 The last example shows how builtin macros definitions are displayed.
-
 The definition that is dumped corresponds to what would occur if the
 macro were to be called at that point, even if other definitions are
 still live due to redefining a macro during argument collection.
@@ -1647,7 +1711,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}m4.input:7: m4: Undefined name f
+@error{}m4.input:7: m4: undefined macro `f'
 @result{}f1
 @end example
 
@@ -1673,7 +1737,7 @@ traceoff(...)
 
 @noindent
 When called without any arguments, @code{traceon} and @code{traceoff}
-will turn tracing on and off, respectively,  for all defined macros.
+will turn tracing on and off, respectively, for all defined macros.
 When called with arguments, only the named macros are affected.
 
 The expansion of @code{traceon} and @code{traceoff} is void.
@@ -1723,7 +1787,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4.input:17: m4: Undefined macro `foo'
+@error{}m4.input:17: m4: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -1904,6 +1968,14 @@ collection will take place.  @code{dnl} will return no output.  The
 input following the matching close parenthesis up to and including the
 next newline, on whatever line containing it, will still be discarded.
 
+@example
+dnl(`this is ignored',
+`so is this') and this too
+@error{}m4.input:3: m4: Warning: excess arguments to builtin `dnl' ignored
+but not this
+@result{}but not this
+@end example
+
 @node Changequote, Changecom, Dnl, Input Control
 @section Changing the quote characters
 
@@ -1921,11 +1993,13 @@ changequote(opt @var{start}, opt @var{end})
 where @var{start} is the new start-quote delimiter and @var{end} is the
 new end-quote delimiter.  If any of the arguments are missing, the default
 quotes (@code{`} and @code{'}) are used instead of the void arguments.
+@comment FIXME POSIX requires that with one argument, the closing quote
+@comment be set to newline, not '.
 
 The expansion of @code{changequote} is void.
 
 @example
-changequote([, ])
+changequote(`[', `]')
 @result{}
 define([foo], [Macro [foo].])
 @result{}
@@ -1937,7 +2011,7 @@ If no single character is appropriate, @var{start} and @var{end} can be
 of any length.
 
 @example
-changequote([[[, ]]])
+changequote(`[[[', `]]]')
 @result{}
 define([[[foo]]], [[[Macro [[[[[foo]]]]].]]])
 @result{}
@@ -1982,9 +2056,9 @@ changecom(opt @var{start}, opt @var{end})
 @end example
 @noindent
 where @var{start} is the new start-comment delimiter and @var{end} is
-the new end-comment delimiter.  If any of the arguments are void, the
-default comment delimiters (@code{#} and newline) are used instead of
-the void arguments.  The comment delimiters can be of any length.
+the new end-comment delimiter.  If only one argument is provided,
+newline becomes the new end-comment delimiter.  The comment delimiters
+can be of any length.
 
 The expansion of @code{changecom} is void.
 
@@ -2006,8 +2080,8 @@ Note how comments are copied to the output, much as if they were quoted
 strings.  If you want the text inside a comment expanded, quote the
 start comment delimiter.
 
-Calling @code{changecom} without any arguments disables the commenting
-mechanism completely.
+Calling @code{changecom} without any arguments, or with an empty string
+for the first argument, disables the commenting mechanism completely.
 
 @example
 define(`comment', `COMMENT')
@@ -2051,7 +2125,7 @@ apply translations to a file of numbers:
 @example
 changeword(`[_a-zA-Z0-9]+')
 @result{}
-define(1, 0)1
+define(`1', `0')1
 @result{}0
 @end example
 
@@ -2065,7 +2139,7 @@ define(`_indir', defn(`indir'))
 @result{}
 changeword(`_[_a-zA-Z0-9]*')
 @result{}
-esyscmd(foo)
+esyscmd(`foo')
 @result{}esyscmd(foo)
 _indir(`esyscmd', `echo hi')
 @result{}hi
@@ -2164,7 +2238,7 @@ which stores @var{string} and the rest of the arguments in a safe place,
 to be reread when end of input is reached.
 
 @example
-define(`cleanup', `This is the `cleanup' actions.
+define(`cleanup', `This is the `cleanup' action.
 ')
 @result{}
 m4wrap(`cleanup')
@@ -2172,7 +2246,7 @@ m4wrap(`cleanup')
 This is the first and last normal input line.
 @result{}This is the first and last normal input line.
 ^D
-@result{}This is the cleanup actions.
+@result{}This is the cleanup action.
 @end example
 
 The saved input is only reread when the end of normal input is seen, and
@@ -2185,7 +2259,9 @@ not if @code{m4exit} is used to exit @code{m4}.
 It is safe to call @code{m4wrap} from saved text, but then the order in
 which the saved text is reread is undefined.  If @code{m4wrap} is not used
 recursively, the saved pieces of text are reread in the opposite order
-in which they were saved (LIFO---last in, first out).
+in which they were saved (LIFO---last in, first out).  However, this
+behavior is likely to change in a future release, to match
+@acronym{POSIX}, so you should not depend on this order.
 
 Here is an example of implementing a factorial function using
 @code{m4wrap}:
@@ -2195,7 +2271,7 @@ define(`f', `ifelse(`$1', `0', `Answer: 0!=1
 ', eval(`$1>1'), `0', `Answer: $2$1=eval(`$2$1')
 ', `m4wrap(`f(decr(`$1'), `$2$1*')')')')
 @result{}
-f(10)
+f(`10')
 @result{}
 ^D
 @result{}Answer: 10*9*8*7*6*5*4*3*2*1=3628800
@@ -2243,7 +2319,7 @@ does not.
 @example
 include(`none')
 @result{}
-@error{}m4.input:2: m4: Cannot open none: No such file or directory
+@error{}m4.input:2: m4: cannot open `none': No such file or directory
 sinclude(`none')
 @result{}
 @end example
@@ -2364,7 +2440,7 @@ When all the @code{m4} input will have been processed, all existing
 diversions are automatically undiverted, in numerical order.
 
 @example
-divert(1)
+divert(`1')
 This text is diverted.
 divert
 @result{}
@@ -2397,7 +2473,7 @@ example of unwanted output is the trailing newlines after macro
 definitions.  Here is how to avoid them.
 
 @example
-divert(-1)
+divert(`-1')
 define(`foo', `Macro `foo'.')
 define(`bar', `Macro `bar'.')
 divert
@@ -2423,18 +2499,16 @@ which undiverts the diversions given by the arguments, in the order
 given.  If no arguments are supplied, all diversions are undiverted, in
 numerical order.
 
-@c FIXME: Explain what happens when undiverting all to else than 0.
-
 The expansion of @code{undivert} is void.
 
 @example
-divert(1)
+divert(`1')
 This text is diverted.
 divert
 @result{}
 This text is not diverted.
 @result{}This text is not diverted.
-undivert(1)
+undivert(`1')
 @result{}
 @result{}This text is diverted.
 @result{}
@@ -2452,21 +2526,34 @@ When a diversion has been undiverted, the diverted text is discarded,
 and it is not possible to bring back diverted text more than once.
 
 @example
-divert(1)
+divert(`1')
 This text is diverted first.
-divert(0)undivert(1)dnl
+divert(`0')undivert(`1')dnl
 @result{}
 @result{}This text is diverted first.
-undivert(1)
+undivert(`1')
 @result{}
-divert(1)
+divert(`1')
 This text is also diverted but not appended.
-divert(0)undivert(1)dnl
+divert(`0')undivert(`1')dnl
 @result{}
 @result{}This text is also diverted but not appended.
 @end example
 
-Attempts to undivert the current diversion are silently ignored.
+Attempts to undivert the current diversion are silently ignored.  Thus,
+when the current diversion is not 0, the current diversion does not get
+rearranged among the other diversions.
+
+@example
+divert(`1')one
+divert(`2')two
+divert(`3')three
+divert(`2')undivert`'dnl
+divert`'undivert`'dnl
+@result{}two
+@result{}one
+@result{}three
+@end example
 
 @cindex GNU extensions
 @cindex file inclusion
@@ -2506,21 +2593,16 @@ expands to the number of the current diversion.
 @example
 Initial divnum
 @result{}Initial 0
-divert(1)
+divert(`1')
 Diversion one: divnum
-divert(2)
+divert(`2')
 Diversion two: divnum
-divert
-@result{}
 ^D
 @result{}
 @result{}Diversion one: 1
 @result{}
 @result{}Diversion two: 2
 @end example
-
-The last call of @code{divert} without argument is necessary, since the
-undiverted text would otherwise be diverted itself.
 
 @node Cleardiv,  , Divnum, Diversions
 @section Discarding diverted text
@@ -2532,14 +2614,14 @@ text is actually needed.  Since all non-empty diversion are brought back
 on the main output stream when the end of input is seen, a method of
 discarding a diversion is needed.  If all diversions should be
 discarded, the easiest is to end the input to @code{m4} with
-@samp{divert(-1)} followed by an explicit @samp{undivert}:
+@samp{divert(`-1')} followed by an explicit @samp{undivert}:
 
 @example
-divert(1)
+divert(`1')
 Diversion one: divnum
-divert(2)
+divert(`2')
 Diversion two: divnum
-divert(-1)
+divert(`-1')
 undivert
 ^D
 @end example
@@ -2551,7 +2633,7 @@ Clearing selected diversions can be done with the following macro:
 
 @example
 define(`cleardivert',
-`pushdef(`_n', divnum)divert(-1)undivert($@@)divert(_n)popdef(`_n')')
+`pushdef(`_n', divnum)divert(`-1')undivert($@@)divert(_n)popdef(`_n')')
 @result{}
 @end example
 
@@ -2696,9 +2778,9 @@ which expands to the substring of @var{string}, which starts at index
 is always 0.
 
 @example
-substr(`gnus, gnats, and armadillos', 6)
+substr(`gnus, gnats, and armadillos', `6')
 @result{}gnats, and armadillos
-substr(`gnus, gnats, and armadillos', 6, 5)
+substr(`gnus, gnats, and armadillos', `6', `5')
 @result{}gnats
 @end example
 
@@ -2852,7 +2934,7 @@ example shows how @code{format} can be used to produce tabular output.
 
 @comment ignore
 @example
-forloop(`i', 1, 10, `format(`%6d squared is %10d
+forloop(`i', `1', `10', `format(`%6d squared is %10d
 ', i, eval(i**2))')
 @result{}     1 squared is          1
 @result{}     2 squared is          4
@@ -2874,7 +2956,7 @@ modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
 
-@c FIXME: Why format does not require at least one argument?
+The macro @code{format} is recognized only with parameters.
 
 @node Arithmetic, UNIX commands, Text handling, Top
 @chapter Macros for doing arithmetic
@@ -2911,9 +2993,9 @@ which expand to the numerical value of @var{number}, incremented,
 or decremented, respectively, by one.
 
 @example
-incr(4)
+incr(`4')
 @result{}5
-decr(7)
+decr(`7')
 @result{}6
 @end example
 
@@ -2993,20 +3075,20 @@ relation return @code{0}.
 Here are a few examples of use of @code{eval}.
 
 @example
-eval(-3 * 5)
+eval(`-3 * 5')
 @result{}-15
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
-define(`square', `eval(($1)**2)')
+define(`square', `eval(`('$1`)**2')')
 @result{}
-square(9)
+square(`9')
 @result{}81
-square(square(5)+1)
+square(square(`5')`+1')
 @result{}676
 define(`foo', `666')
 @result{}
-eval(`foo'/6)
-@error{}m4.input:14: m4: Bad expression in eval: foo/6
+eval(`foo/6')
+@error{}m4.input:14: m4: bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3024,15 +3106,15 @@ output width.  The result is zero-padded to extend the expansion to the
 requested width.
 
 @example
-eval(666, 10)
+eval(`666', `10')
 @result{}666
-eval(666, 11)
+eval(`666', `11')
 @result{}556
-eval(666, 6)
+eval(`666', `6')
 @result{}3030
-eval(666, 6, 10)
+eval(`666', `6', `10')
 @result{}0000003030
-eval(-666, 6, 10)
+eval(`-666', `6', `10')
 @result{}-000003030
 @end example
 
@@ -3109,7 +3191,7 @@ Assume you are positioned into the @file{checks} directory of GNU
 @code{m4} distribution, then:
 
 @example
-define(`vice', `esyscmd(grep Vice ../COPYING)')
+define(`vice', `esyscmd(`grep Vice ../COPYING')')
 @result{}
 vice
 @result{}  Ty Coon, President of Vice
@@ -3142,7 +3224,7 @@ which expands to the exit status of the last shell command run with
 @example
 syscmd(`false')
 @result{}
-ifelse(sysval, 0, zero, non-zero)
+ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
 syscmd(`exit 2')
 @result{}
@@ -3261,9 +3343,9 @@ which expands to the quoted name of the current input file, and the
 current input line number in that file.
 
 @example
-errprint(`m4:'__file__:__line__: `Input error
+errprint(`m4:'__file__:__line__: `input error
 ')
-@error{}m4:m4.input:2: Input error
+@error{}m4:m4.input:2: input error
 @result{}
 @end example
 
@@ -3286,10 +3368,10 @@ which causes @code{m4} to exit, with exit code @var{code}.  If
 @example
 define(`fatal_error',
        `errprint(`m4: '__file__: __line__`: fatal error: $*
-')m4exit(1)')
+')m4exit(`1')')
 @result{}
-fatal_error(`This is a BAD one, buster')
-@error{}m4: m4.input: 6: fatal error: This is a BAD one, buster
+fatal_error(`this is a BAD one, buster')
+@error{}m4: m4.input: 6: fatal error: this is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
@@ -3390,11 +3472,13 @@ m4 -R file3.m4f file4.m4
 Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
 macros is not handled, nor the current setting of @code{changeword}.
+Currently, @code{m4wrap} and @code{sysval} also have problems.
 Also, interactions for some options of @code{m4} being used in one call
 and not for the next, have not been fully analyzed yet.  On the other
 end, you may be confident that stacks of @code{pushdef}'ed definitions
 are handled correctly, so are @code{undefine}'d or renamed builtins,
-changed strings for quotes or comments.
+changed strings for quotes or comments.  And future releases of GNU M4
+will improve on the utility of frozen files.
 
 When an @code{m4} run is to be frozen, the automatic undiversion
 which takes place at end of execution is inhibited.  Instead, all
@@ -3637,6 +3721,11 @@ file for each invocation of @code{maketemp}, which means that the output
 of the macro is different even if the input is identical.
 
 @item
+@acronym{POSIX} requires @code{changequote(@var{arg})}
+(@pxref{Changequote}) to use newline as the close quote, but GNU
+@code{m4} uses @samp{'} as the close quote.
+
+@item
 Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
 arguments as a global variable, independent of named macro tracing.
 Also, once a macro is undefined, named tracing of that macro is lost.
@@ -3647,6 +3736,13 @@ turns tracing off for all definitions regardless of whether they were
 also traced by name; and tracing by name, such as with @samp{-tfoo} at
 the command line or @code{traceon(`foo')} in the input, is an attribute
 that is preserved even if the macro is currently undefined.
+
+@item
+Traditional implementations allow argument collection, but not string
+processing, to span file boundaries.  Thus, if @file{a.m4} contains
+@samp{len(}, and @file{b.m4} contains @samp{abc)}, @kbd{m4 a.m4 b.m4}
+outputs @samp{3} with traditional @code{m4}, but gives an error message
+that the end of file was encountered inside a macro with GNU @code{m4}.
 @end itemize
 
 @node Other Incompatibilities,  , Incompatibilities, Compatibility

@@ -1,5 +1,27 @@
 2006-06-23  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Quoting cleanup throughout - follow
+	autoconf-recommended style of one level of quote per parenthesis
+	in the normal case.  Adjust error messages to match GNU coding
+	standards (and to allow 'make check' to pass again).
+	(Quoted strings, Inhibiting Invocation): Turn more examples into
+	tests.
+	(Comments): Resolve FIXME by adding example.
+	(Define): Add example about underquoting.
+	(Defn): Add example about use of $0.
+	(Indir, Format): Resolve FIXME done in last commit.
+	(Ifelse): Add example about creating blind macro.
+	(Debugging): Fix grammar.
+	(Dnl): Add example about dnl with arguments.
+	(M4wrap): Be explicit that LIFO order is non compliant, and will
+	change in m4 2.0.
+	(Undivert): Resolve FIXME by adding example.
+	(Frozen files): Document that m4wrap and sysval will not work
+	consistently until m4 2.0.
+	(Incompatibilities): Document another POSIX compliance bug, this
+	time with changequote.  Document a traditional incompatibility
+	with partial input spanning file boundaries.
+
 	Make error messages more consistent with GNU coding standards -
 	start with lower case, and don't end sentence with punctuation.
 	* src/debug.c (trace_pre): Update message wording.
