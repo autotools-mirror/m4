@@ -1,6 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -379,7 +380,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
+INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
 		  abort ();
 		}
 	      trace_format ("<%s>", bp->name);
@@ -387,7 +388,7 @@ INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
 
 	    default:
 	      M4ERROR ((warning_status, 0,
-			"INTERNAL ERROR: Bad token data type (trace_pre ())"));
+			"INTERNAL ERROR: bad token data type (trace_pre ())"));
 	      abort ();
 	    }
 

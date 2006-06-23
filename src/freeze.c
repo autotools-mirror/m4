@@ -122,7 +122,7 @@ produce_frozen_state (const char *name)
 	      if (bp == NULL)
 		{
 		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Builtin not found in builtin table!"));
+INTERNAL ERROR: builtin not found in builtin table!"));
 		  abort ();
 		}
 	      fprintf (file, "F%d,%d\n",
@@ -135,7 +135,7 @@ INTERNAL ERROR: Builtin not found in builtin table!"));
 
 	    default:
 	      M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"));
+INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
 	      abort ();
 	      break;
 	    }
@@ -165,9 +165,9 @@ static void
 issue_expect_message (int expected)
 {
   if (expected == '\n')
-    M4ERROR ((EXIT_FAILURE, 0, "Expecting line feed in frozen file"));
+    M4ERROR ((EXIT_FAILURE, 0, "expecting line feed in frozen file"));
   else
-    M4ERROR ((EXIT_FAILURE, 0, "Expecting character `%c' in frozen file",
+    M4ERROR ((EXIT_FAILURE, 0, "expecting character `%c' in frozen file",
 	      expected));
 }
 
@@ -229,7 +229,7 @@ reload_frozen_state (const char *name)
 
   file = path_search (name);
   if (file == NULL)
-    M4ERROR ((EXIT_FAILURE, errno, "Cannot open %s", name));
+    M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
 
   allocated[0] = 100;
   string[0] = xmalloc ((size_t) allocated[0]);
@@ -250,7 +250,7 @@ reload_frozen_state (const char *name)
       switch (character)
         {
         default:
-          M4ERROR ((EXIT_FAILURE, 0, "Ill-formed frozen file"));
+          M4ERROR ((EXIT_FAILURE, 0, "ill-formed frozen file"));
 
         case 'C':
         case 'D':
@@ -289,7 +289,7 @@ reload_frozen_state (const char *name)
 
               if (number[0] > 0)
                 if (!fread (string[0], (size_t) number[0], 1, file))
-                  M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
+                  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
               string[0][number[0]] = '\0';
             }
@@ -305,7 +305,7 @@ reload_frozen_state (const char *name)
 
           if (number[1] > 0)
             if (!fread (string[1], (size_t) number[1], 1, file))
-              M4ERROR ((EXIT_FAILURE, 0, "Premature end of frozen file"));
+              M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
           string[1][number[1]] = '\0';
           GET_CHARACTER;

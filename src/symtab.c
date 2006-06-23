@@ -111,7 +111,7 @@ symtab_init (void)
     int e = atexit(show_profile);
     if (e != 0)
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Unable to show symtab profile"));
+		"INTERNAL ERROR: unable to show symtab profile"));
   }
 #endif /* DEBUG_SYM */
 }
@@ -309,7 +309,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Invalid mode to symbol_lookup ()"));
+		"INTERNAL ERROR: invalid mode to symbol_lookup ()"));
       abort ();
     }
 }

@@ -92,7 +92,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad token type in expand_token ()"));
+		"INTERNAL ERROR: bad token type in expand_token ()"));
       abort ();
     }
 }
@@ -158,7 +158,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 
 	case TOKEN_EOF:
 	  M4ERROR ((EXIT_FAILURE, 0,
-		    "ERROR: EOF in argument list"));
+		    "ERROR: end of file in argument list"));
 	  break;
 
 	case TOKEN_WORD:
@@ -176,7 +176,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad token type in expand_argument ()"));
+		    "INTERNAL ERROR: bad token type in expand_argument ()"));
 	  abort ();
 	}
 
@@ -252,7 +252,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
+		"INTERNAL ERROR: bad symbol type in call_macro ()"));
       abort ();
     }
 }
@@ -283,7 +283,7 @@ expand_macro (symbol *sym)
   expansion_level++;
   if (expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
-	      "ERROR: Recursion limit of %d exceeded, use -L<N> to change it",
+	      "ERROR: recursion limit of %d exceeded, use -L<N> to change it",
 	      nesting_limit));
 
   macro_call_id++;

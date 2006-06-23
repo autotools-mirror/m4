@@ -277,38 +277,38 @@ evaluate (const char *expr, eval_t *val)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (missing right parenthesis): %s",
+		"bad expression in eval (missing right parenthesis): %s",
 		expr));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval: %s", expr));
+		"bad expression in eval: %s", expr));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (bad input): %s", expr));
+		"bad expression in eval (bad input): %s", expr));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-		"Bad expression in eval (excess input): %s", expr));
+		"bad expression in eval (excess input): %s", expr));
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-		"Divide by zero in eval: %s", expr));
+		"divide by zero in eval: %s", expr));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-		"Modulo by zero in eval: %s", expr));
+		"modulo by zero in eval: %s", expr));
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad error code in evaluate ()"));
+		"INTERNAL ERROR: bad error code in evaluate ()"));
       abort ();
     }
 
@@ -548,7 +548,7 @@ cmp_term (eval_token et, eval_t *v1)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
+		    "INTERNAL ERROR: bad comparison operator in cmp_term ()"));
 	  abort ();
 	}
     }
@@ -591,7 +591,7 @@ shift_term (eval_token et, eval_t *v1)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
+		    "INTERNAL ERROR: bad shift operator in shift_term ()"));
 	  abort ();
 	}
     }
@@ -674,7 +674,7 @@ mult_term (eval_token et, eval_t *v1)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad operator in mult_term ()"));
+		    "INTERNAL ERROR: bad operator in mult_term ()"));
 	  abort ();
 	}
     }

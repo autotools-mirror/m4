@@ -1,5 +1,21 @@
 2006-06-23  Eric Blake  <ebb9@byu.net>
 
+	Make error messages more consistent with GNU coding standards -
+	start with lower case, and don't end sentence with punctuation.
+	* src/debug.c (trace_pre): Update message wording.
+	* src/eval.c (evaluate, cmp_term, shift_term, mult_term):
+	Likewise.
+	* src/freeze.c (produce_frozen_state, issue_expect_message),
+	(reload_frozen_state): Likewise.
+	* src/input.c (push_string_init, pop_init, init_macro_token),
+	(peek_input, next_char_1, set_word_regexp, next_token): Likewise.
+	* src/m4.c (stackovf_handler, main): Likewise.
+	* src/macro.c (expand_token, expand_argument, call_macro),
+	(expand_macro): Likewise.
+	* src/output.c (make_room_for, output_text, insert_file),
+	(freeze_diversions): Likewise.
+	* src/symtab.c (symtab_init, lookup_symbol): Likewise.
+
 	* src/builtin.c (builtin_tab): Make format and indir blind.
 	(substitute): Prefer "Warning:" vs. "ERROR:" in messages.
 	* NEWS: Mention the change to builtins.

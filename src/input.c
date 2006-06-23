@@ -224,7 +224,7 @@ push_string_init (void)
   if (next != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Recursive push_string!"));
+		"INTERNAL ERROR: recursive push_string!"));
       abort ();
     }
 
@@ -318,7 +318,7 @@ pop_input (void)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Input stack botch in pop_input ()"));
+		"INTERNAL ERROR: input stack botch in pop_input ()"));
       abort ();
     }
   obstack_free (current_input, isp);
@@ -367,7 +367,7 @@ init_macro_token (token_data *td)
   if (isp->type != INPUT_MACRO)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad call to init_macro_token ()"));
+		"INTERNAL ERROR: bad call to init_macro_token ()"));
       abort ();
     }
 
@@ -415,7 +415,7 @@ peek_input (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in peek_input ()"));
+		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
       /* End of input source --- pop one level.  */
@@ -479,7 +479,7 @@ next_char_1 (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in next_char ()"));
+		    "INTERNAL ERROR: input stack botch in next_char ()"));
 	  abort ();
 	}
 
@@ -663,7 +663,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"Bad regular expression `%s': %s", regexp, msg));
+		"bad regular expression `%s': %s", regexp, msg));
       return;
     }
 
@@ -674,7 +674,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		"Internal error: Expression recompilation `%s': %s",
+		"INTERNAL ERROR: expression recompilation `%s': %s",
 		regexp, msg));
     }
 
@@ -816,7 +816,7 @@ next_token (token_data *td)
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
 	    M4ERROR ((EXIT_FAILURE, 0,
-		      "ERROR: EOF in string"));
+		      "ERROR: end of file in string"));
 
 	  if (MATCH (ch, rquote.string))
 	    {

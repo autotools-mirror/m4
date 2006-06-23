@@ -110,7 +110,7 @@ static void
 stackovf_handler (void)
 {
   M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: Stack overflow.  (Infinite define recursion?)"));
+	    "ERROR: stack overflow.  (Infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOV */
@@ -445,7 +445,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad code in deferred arguments"));
+		    "INTERNAL ERROR: bad code in deferred arguments"));
 	  abort ();
 	}
 
