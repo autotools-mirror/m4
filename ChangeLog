@@ -1,3 +1,9 @@
+2006-06-24  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_PREREQ): Autoconf 2.60 is now released.
+	(AC_CHECK_HEADERS_ONCE): Use this new feature.
+	(AC_CHECK_FUNCS_ONCE): Likewise.
+
 2006-06-23  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Quoting cleanup throughout - follow

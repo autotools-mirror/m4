@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
-AC_PREREQ([2.59])
+AC_PREREQ([2.60])
 AC_INIT([GNU M4], [1.4.4c], [bug-m4@gnu.org])
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
@@ -32,7 +32,7 @@ AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_PROG_CC
 M4_EARLY
 
-AC_CHECK_HEADERS([limits.h siginfo.h])
+AC_CHECK_HEADERS_ONCE([limits.h siginfo.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
 #if HAVE_SIGINFO_H
@@ -46,7 +46,7 @@ AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
-AC_CHECK_FUNCS([sigaction sigaltstack sigstack sigvec strerror tmpfile])
+AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror tmpfile])
 
 M4_INIT
 
