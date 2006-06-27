@@ -22,7 +22,8 @@
 /* This file contains the functions to evaluate integer expressions for
    the "eval" macro.  It is a little, fairly self-contained module, with
    its own scanner, and a recursive descent parser.  The only entry point
-   is evaluate ().  */
+   is evaluate ().  For POSIX semantics of the "eval" macro, the type
+   eval_t must be a 32-bit signed integer.  */
 
 #include "m4.h"
 
@@ -151,7 +152,7 @@ eval_lex (eval_t *val)
       (*val) = 0;
       for (; *eval_text; eval_text++)
 	{
-          if (isdigit (to_uchar (*eval_text)))
+	  if (isdigit (to_uchar (*eval_text)))
 	    digit = *eval_text - '0';
 	  else if (islower (to_uchar (*eval_text)))
 	    digit = *eval_text - 'a' + 10;
@@ -579,14 +580,20 @@ shift_term (eval_token et, eval_t *v1)
       if ((er = add_term (et, &v2)) != NO_ERROR)
 	return er;
 
+      /* Shifting by a negative number, or by greater than the width, is
+	 undefined in C, but POSIX requires eval to operate on 32-bit signed
+	 numbers.  Explicitly mask the right argument to ensure defined
+	 behavior.  */
       switch (op)
 	{
 	case LSHIFT:
-	  *v1 = *v1 << v2;
+	  *v1 = *v1 << (v2 & 0x1f);
 	  break;
 
 	case RSHIFT:
-	  *v1 = *v1 >> v2;
+	  /* This assumes 2's-complement with sign-extension, since shifting
+	     a negative number right is implementation-defined in C.  */
+	  *v1 = *v1 >> (v2 & 0x1f);
 	  break;
 
 	default:
@@ -661,6 +668,9 @@ mult_term (eval_token et, eval_t *v1)
 	case DIVIDE:
 	  if (v2 == 0)
 	    return DIVIDE_ZERO;
+	  else if (v2 == -1)
+	    /* Avoid the x86 SIGFPE on INT_MIN / -1.  */
+	    *v1 = -*v1;
 	  else
 	    *v1 = *v1 / v2;
 	  break;
@@ -668,6 +678,9 @@ mult_term (eval_token et, eval_t *v1)
 	case MODULO:
 	  if (v2 == 0)
 	    return MODULO_ZERO;
+	  else if (v2 == -1)
+	    /* Avoid the x86 SIGFPE on INT_MIN % -1.  */
+	    *v1 = 0;
 	  else
 	    *v1 = *v1 % v2;
 	  break;

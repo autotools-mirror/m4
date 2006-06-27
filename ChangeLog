@@ -1,5 +1,14 @@
 2006-06-27  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Eval): Document 32-bit signed limitations
+	required by POSIX, and add example that exposed core dump on x86
+	architectures.
+	(Incompatibilities): Document incompatibility in eval precedence.
+	* src/eval.c (shift_term): Explicitly mask, to avoid undefined
+	behavior.
+	(mult_term): Explicitly check for -1, to avoid SIGFPE on x86.
+	* NEWS: Document this change.
+
 	* doc/m4.texinfo: Use @noindent consistently.
 	(Quoting Arguments): Document that unquoted parentheses group
 	arguments.

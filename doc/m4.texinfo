@@ -3064,8 +3064,8 @@ Expressions can contain the following operators, listed in order of
 decreasing precedence.
 
 @table @code
-@item -
-Unary minus
+@item + -
+Unary plus and minus
 @item **
 Exponentiation
 @item *  /  %
@@ -3094,10 +3094,14 @@ Logical or
 
 All operators, except exponentiation, are left associative.
 
-Note that many @code{m4} implementations use @samp{^} as an alternate
-operator for the exponentiation, while many others use @samp{^} for the
-bitwise exclusive-or.  GNU @code{m4} changed its behavior: it used to
-exponentiate for @samp{^}, it now computes the bitwise exclusive-or.
+Note that some older @code{m4} implementations use @samp{^} as an
+alternate operator for exponentiation, although @acronym{POSIX} requires
+the C behavior of bitwise exclusive-or.  On the other hand, the
+precedence of @samp{~} and @samp{!} are different in GNU @code{m4} than
+they are in C, matching the precedence in traditional @code{m4}
+implementations.  This behavior is likely to change in a future
+version to match @acronym{POSIX}, so use parentheses to force the
+desired precedence.
 
 Numbers without special prefix are given decimal.  A simple @samp{0}
 prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
@@ -3139,6 +3143,24 @@ As the second to last example shows, @code{eval} does not handle macro
 names, even if they expand to a valid expression (or part of a valid
 expression).  Therefore all macros must be expanded before they are
 passed to @code{eval}.
+
+All evaluation is done with 32-bit signed integers, assuming
+2's-complement with wrap-around.  The shift operators are defined in GNU
+@code{m4} by doing an implicit bit-wise and of the right-hand operand
+with 0x1f, and sign-extension with right shift.
+
+@example
+eval(0x80000000 / -1)
+@result{}-2147483648
+eval(0x80000000 % -1)
+@result{}0
+eval(0x7fffffff)
+@result{}2147483647
+incr(eval(0x7fffffff))
+@result{}-2147483648
+eval(-4 >> 33)
+@result{}-2
+@end example
 
 If @var{radix} is specified, it specifies the radix to be used in the
 expansion.  The default radix is 10.  The result of @code{eval} is
@@ -3790,6 +3812,18 @@ processing, to span file boundaries.  Thus, if @file{a.m4} contains
 @samp{len(}, and @file{b.m4} contains @samp{abc)}, @kbd{m4 a.m4 b.m4}
 outputs @samp{3} with traditional @code{m4}, but gives an error message
 that the end of file was encountered inside a macro with GNU @code{m4}.
+
+@item
+@acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all
+operators with the same precedence as C.  However, GNU @code{m4}
+currently follows the traditional precedence of other @code{m4}
+implementations, where bitwise and logical negation (@samp{~} and
+@samp{!}) have lower precedence than equality operators, rather than
+equal precedence with other unary operators.  Use explicit parentheses
+to ensure proper precedence.  As extensions to @acronym{POSIX}, GNU
+@code{m4} treats the shift operators @samp{<<} and @samp{>>} as
+well-defined on signed integers (even though they are not in C), and
+adds the exponentiation operator @samp{**}.
 @end itemize
 
 @node Other Incompatibilities,  , Incompatibilities, Compatibility
