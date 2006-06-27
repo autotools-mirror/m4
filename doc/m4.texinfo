@@ -886,6 +886,7 @@ expanded text will serve to define the arguments as well.  Thus, if
 bar(a foo, d)
 @end example
 
+@noindent
 is a macro call with four arguments, which are @samp{a }, @samp{b},
 @samp{c} and @samp{d}.  To understand why the first argument contains
 whitespace, remember that leading unquoted whitespace is never part
@@ -919,7 +920,11 @@ argument, all unquoted parentheses must match.  For example, if
 foo(() (`(') `(')
 @end example
 
-is a macro call, with one argument, whose value is @samp{()@w{ }(()@w{ }(}.
+@noindent
+is a macro call, with one argument, whose value is @samp{() (() (}.
+Commas separate arguments, except when they occur inside quotes,
+comments, or unquoted parentheses, @pxref{Pseudo Arguments} for
+examples.
 
 It is common practice to quote all arguments to macros, unless you are
 sure you want the arguments expanded.  Thus, in the above
@@ -933,7 +938,7 @@ foo(`() (() (')
 It is, however, in certain cases necessary or convenient to leave out
 quotes for some arguments, and there is nothing wrong in doing it.  It
 just makes life a bit harder, if you are not careful.  For consistency,
-this manual follows the rule of thumb that each layer of parenthesis
+this manual follows the rule of thumb that each layer of parentheses
 introduces another layer of single quoting, except when showing the
 consequences of quoting rules.  This is done even when the quoted string
 cannot be a macro, such as with integers.
@@ -994,7 +999,8 @@ The normal way to define or redefine macros is to use the builtin
 define(@var{name} [, @var{expansion}])
 @end example
 
-@noindent which defines @var{name} to expand to @var{expansion}.  If
+@noindent
+which defines @var{name} to expand to @var{expansion}.  If
 @var{expansion} is not given, it is taken to be empty.
 
 The expansion of @code{define} is void.
@@ -1115,6 +1121,13 @@ nargs()
 @result{}1
 nargs(`arg1', `arg2', `arg3')
 @result{}3
+nargs(`commas can be quoted, like this')
+@result{}1
+nargs(arg1#inside comments, commas do not separate arguments
+still arg1)
+@result{}1
+nargs((unquoted parentheses, like this, group arguments))
+@result{}1
 @end example
 
 The notation @code{$*} can be used in the expansion text to denote all
@@ -1159,7 +1172,26 @@ echo2(`foo')
 @end example
 
 @noindent
-@xref{Trace}, if you do not understand this.
+@xref{Trace}, if you do not understand this.  As another example of the
+difference, remember that comments encountered in arguments are passed
+untouched to the macro, and that quoting disables comments.
+
+@example
+define(`echo1', `$*')
+@result{}
+define(`echo2', `$@')
+@result{}
+define(`foo', `bar')
+@result{}
+echo1(#foo'foo
+foo)
+@result{}#foo'foo
+@result{}bar
+echo2(#foo'foo
+foo)
+@result{}#foobar
+@result{}bar'
+@end example
 
 A @samp{$} sign in the expansion text, that is not followed by anything
 @code{m4} understands, is simply copied to the macro expansion, as any
@@ -1375,6 +1407,7 @@ Any macro can be called indirectly with @code{indir}:
 @example
 indir(@var{name}, ...)
 @end example
+
 @noindent
 which results in a call to the macro @var{name}, which is passed the
 rest of the arguments.  This can be used to call macros with ``invalid''
@@ -1409,6 +1442,7 @@ Builtin macros can be called indirectly with @code{builtin}:
 @example
 builtin(@var{name}, ...)
 @end example
+
 @noindent
 which results in a call to the builtin @var{name}, which is passed the
 rest of the arguments.  This can be used, if @var{name} has been given
@@ -1478,7 +1512,6 @@ ifelse(@var{string-1}, @var{string-2}, @var{equal}, opt @var{not-equal})
 ifelse(@var{string-1}, @var{string-2}, @var{equal}, ...)
 @end example
 
-@noindent
 Used with only one argument, the @code{ifelse} simply discards it and
 produces no output.  This is a common @code{m4} idiom for introducing a
 block comment, as an alternative to repeatedly using @code{dnl}.  This
@@ -1636,9 +1669,11 @@ Here is the actual implementation of @code{forloop}:
 @example
 define(`forloop',
   `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+@result{}
 define(`_forloop',
   `$4`'ifelse($1, `$3', ,
     `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+@result{}
 @end example
 
 Notice the careful use of quotes.  Only three macro arguments are
@@ -1891,7 +1926,7 @@ the debugging output format:
 @example
 debugmode(opt @var{flags})
 @end example
-@noindent
+
 The argument @var{flags} should be a subset of the letters listed above.
 As special cases, if the argument starts with a @samp{+}, the flags are
 added to the current debug flags, and if it starts with a @samp{-}, they
@@ -1914,6 +1949,7 @@ Debug and tracing output can be redirected to files using either the
 @example
 debugfile(opt @var{filename})
 @end example
+
 @noindent
 will send all further debug and trace output to @var{filename}.  If
 @var{filename} is empty, debug and trace output are discarded and if
@@ -1946,6 +1982,7 @@ including the first newline:
 @example
 dnl
 @end example
+
 @noindent
 and it is often used in connection with @code{define}, to remove the
 newline that follow the call to @code{define}.  Thus
@@ -1989,6 +2026,7 @@ The default quote delimiters can be changed with the builtin
 @example
 changequote(opt @var{start}, opt @var{end})
 @end example
+
 @noindent
 where @var{start} is the new start-quote delimiter and @var{end} is the
 new end-quote delimiter.  If any of the arguments are missing, the default
@@ -2054,6 +2092,7 @@ macro @code{changecom}:
 @example
 changecom(opt @var{start}, opt @var{end})
 @end example
+
 @noindent
 where @var{start} is the new start-comment delimiter and @var{end} is
 the new end-comment delimiter.  If only one argument is provided,
@@ -2233,6 +2272,7 @@ To save input text, use the builtin @code{m4wrap}:
 @example
 m4wrap(@var{string}, ...)
 @end example
+
 @noindent
 which stores @var{string} and the rest of the arguments in a safe place,
 to be reread when end of input is reached.
@@ -2849,6 +2889,7 @@ Global substitution in a string is done by @code{patsubst}:
 @example
 patsubst(@var{string}, @var{regexp}, opt @var{replacement})
 @end example
+
 @noindent
 which searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.  The syntax for regular expressions
@@ -3311,6 +3352,7 @@ You can print error messages using @code{errprint}:
 @example
 errprint(@var{message}, ...)
 @end example
+
 @noindent
 which simply prints @var{message} and the rest of the arguments on the
 standard error output.
@@ -3338,6 +3380,7 @@ utility builtins exist:
 __file__
 __line__
 @end example
+
 @noindent
 which expands to the quoted name of the current input file, and the
 current input line number in that file.
@@ -3361,6 +3404,7 @@ read, you can use @code{m4exit}:
 @example
 m4exit(opt @var{code})
 @end example
+
 @noindent
 which causes @code{m4} to exit, with exit code @var{code}.  If
 @var{code} is left out, the exit code is zero.
@@ -3723,7 +3767,10 @@ of the macro is different even if the input is identical.
 @item
 @acronym{POSIX} requires @code{changequote(@var{arg})}
 (@pxref{Changequote}) to use newline as the close quote, but GNU
-@code{m4} uses @samp{'} as the close quote.
+@code{m4} uses @samp{'} as the close quote.  Meanwhile,  some
+traditional implementations use @var{arg} as the close quote, making it
+impossible to nest quotes.  For predictable results, never call
+changequote with just one argument.
 
 @item
 Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
