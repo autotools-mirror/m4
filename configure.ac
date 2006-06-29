@@ -29,6 +29,8 @@ m4_pattern_allow([^M4_cv_])
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])
 
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
@@ -50,14 +52,16 @@ AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror tmpfile])
 
 M4_INIT
 
-AC_MSG_CHECKING([ecvt declaration])
-AC_EGREP_HEADER([ecvt], [stdlib.h],
-  [AC_MSG_RESULT([yes])
-   AC_DEFINE([HAVE_EFGCVT], [2],
+AC_CACHE_CHECK([ecvt declaration], [M4_cv_have_efgcvt],
+[AC_EGREP_HEADER([ecvt], [stdlib.h],
+  [M4_cv_have_efgcvt=yes], [M4_cv_have_efgcvt=no])])
+if test $M4_cv_have_efgcvt = yes ; then
+  AC_DEFINE([HAVE_EFGCVT], [2],
      [Define to 1 if you have ecvt(3), fcvt(3) and gcvt(3).  Define to 2 if
 they are declared in stdlib.h])
-  ],
-  [AC_MSG_RESULT([no]); AC_CHECK_FUNCS([ecvt])])
+else
+  AC_CHECK_FUNCS([ecvt])
+fi
 
 
 # Code from Jim Avera <jima@netcom.com>.

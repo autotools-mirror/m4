@@ -1,3 +1,9 @@
+2006-06-29  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_CANONICAL_HOST, AC_CANONICAL_BUILD): Allow
+	cross-compilation.
+	(AC_CACHE_CHECK): Cache search for ecvt.
+
 2006-06-27  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Eval): Document 32-bit signed limitations
