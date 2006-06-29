@@ -3,9 +3,11 @@
 aclocal.m4
 autom4te.cache
 config.cache
+config.guess
 config.h
 config.log
 config.status
+config.sub
 config-h.in
 configure
 configure.lineno
