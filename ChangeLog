@@ -1,3 +1,27 @@
+2006-06-30  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (UNIX, W32_NATIVE): Improve platform detection macros.
+	* src/freeze.c (produce_frozen_state): Use new spelling of
+	platform macro.
+	* src/builtin.c (predefined_tab): Add __windows__ on non-unix
+	platforms.
+	(m4_syscmd, m4_esyscmd): The empty command is successful.
+	* doc/m4.texinfo (Shell commands): Rename from UNIX commands.
+	Document platform-dependence of system().
+	(Syscmd): Add example.
+	(Esyscmd): Make example more robust, and actually demonstrate
+	rescanning.
+	(Sysval): Expand test to cover esyscmd code path, and to check
+	that empty command is successful.  Add conditional check for
+	signal behavior.
+	(Other Incompatibilities): Move platform macros from here...
+	(Platform macros): ...to this new node.  Add windows macro.
+	Check that exactly one platform macro is provided.
+	* checks/check-them: Improve trap cleanup.  Tolerate dirname and
+	.exe in error messages.  Allow for skipping checks.
+	* configure.ac (HAVE_EFGCVT): Kill dead configure check.
+	* NEWS: Document platform macros.
+
 2006-06-29  Eric Blake  <ebb9@byu.net>
 
 	Fix buffer overrun bug.

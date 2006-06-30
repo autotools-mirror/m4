@@ -22,6 +22,9 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   zeroes on integers printed with %.0f.  On systems without these
   functions, format is no longer subject to a buffer overflow that
   permitted arbitrary code execution.
+* On Windows builds, the macro __windows__ is provided instead of
+  __unix__.  This allows input files to determine when syscmd might behave
+  differently.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

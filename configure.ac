@@ -52,18 +52,6 @@ AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror tmpfile])
 
 M4_INIT
 
-AC_CACHE_CHECK([ecvt declaration], [M4_cv_have_efgcvt],
-[AC_EGREP_HEADER([ecvt], [stdlib.h],
-  [M4_cv_have_efgcvt=yes], [M4_cv_have_efgcvt=no])])
-if test $M4_cv_have_efgcvt = yes ; then
-  AC_DEFINE([HAVE_EFGCVT], [2],
-     [Define to 1 if you have ecvt(3), fcvt(3) and gcvt(3).  Define to 2 if
-they are declared in stdlib.h])
-else
-  AC_CHECK_FUNCS([ecvt])
-fi
-
-
 # Code from Jim Avera <jima@netcom.com>.
 # stackovf.c requires:
 #  1. Either sigaction with SA_ONSTACK, or sigvec with SV_ONSTACK

@@ -56,7 +56,7 @@ produce_frozen_state (const char *name)
   symbol *sym;
   const builtin *bp;
 
-#ifdef WIN32
+#ifdef W32_NATIVE
 # define FROZEN_WRITE "wb"
 #else
 # define FROZEN_WRITE "w"

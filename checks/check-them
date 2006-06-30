@@ -2,19 +2,45 @@
 # Check GNU m4 against examples from the manual source.
 # Copyright (C) 1992, 2006 Free Software Foundation, Inc.
 
-out=/tmp/m4-out.$$
-err=/tmp/m4-err.$$
-xout=/tmp/m4-xout.$$
-xerr=/tmp/m4-xerr.$$
-
-trap "rm -f $out $err $xout $xerr; exit 1" 1 2 15
-
+# Sanity check what we are testing
 m4 --version
 
+# Clean up temp files on exit
+pwd=`pwd`
+tmp=m4-tmp.$$
+trap 'stat=$?; cd $pwd; rm -rf $tmp && exit $stat' 0
+trap '(exit $?); exit $?' 1 2 13 15
+
+# Create scratch dir
+framework_failure=0
+mkdir $tmp || framework_failure=1
+
+if test $framework_failure = 1; then
+  echo "$0: failure in testing framework" 1>&2
+  (exit 1); exit 1
+fi
+
+out=$tmp/m4-out
+err=$tmp/m4-err
+xout=$tmp/m4-xout
+xerr=$tmp/m4-xerr
+failed=
+skipped=
+
+# Find out how the executable prints argv[0]
+m4=`m4 --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
+    -e 's/\\\\/\\\\\\\\/g' -e 1q`
+
+# Run the tests.  This assumes pwd is the checks directory.
 for file
 do
   echo "Checking $file"
-  LC_MESSAGES=C m4 -d $file >$out 2>$err
+  LC_MESSAGES=C m4 -d -I ../examples $file >$out 2>$err
+
+  if test $? == 77 ; then
+    skipped="$skipped $file"
+    continue
+  fi
 
   sed -e '/^dnl @result{}/!d' -e 's///' -e "s/m4.input/$file/" $file > $xout
 
@@ -27,7 +53,8 @@ do
     diff $xout $out
   fi
 
-  sed -e '/^dnl @error{}/!d' -e 's///' -e "s/m4.input/$file/" $file > $xerr
+  sed -e '/^dnl @error{}/!d' -e 's///' -e "s/m4.input/$file/" \
+      -e "s| $m4:| m4:|" $file > $xerr
 
   if cmp -s $err $xerr; then
     :
@@ -43,9 +70,16 @@ done
 rm -f $out $err $xout $xerr
 
 echo
+if test -n "$skipped"; then
+  echo "Skipped checks were:"
+  echo " $skipped"
+fi
 if test -z "$failed"; then
   echo "All checks successful"
+  stat=0
 else
   echo "Failed checks were:"
   echo " $failed"
+  stat=1
 fi
+(exit $stat); exit $stat

@@ -148,7 +148,13 @@ builtin_tab[] =
 static predefined const
 predefined_tab[] =
 {
+#if UNIX
   { "unix",	"__unix__",	"" },
+#elif W32_NATIVE
+  { "windows",	"__windows__",	"" },
+#else
+# warning Platform macro not provided
+#endif
   { NULL,	"__gnu__",	"" },
 
   { NULL,	NULL,		NULL },
@@ -770,7 +776,11 @@ static void
 m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
-    return;
+    {
+      /* The empty command is successful.  */
+      sysval = 0;
+      return;
+    }
 
   debug_flush_files ();
   sysval = system (ARG (1));
@@ -783,7 +793,11 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   int ch;
 
   if (bad_argc (argv[0], argc, 2, 2))
-    return;
+    {
+      /* The empty command is successful.  */
+      sysval = 0;
+      return;
+    }
 
   debug_flush_files ();
   errno = 0;

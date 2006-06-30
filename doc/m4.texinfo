@@ -127,7 +127,7 @@ changeword will go away and you should not count on it.
 
 * Text handling::               Macros for text handling
 * Arithmetic::                  Macros for doing arithmetic
-* UNIX commands::               Macros for running UNIX commands
+* Shell commands::              Macros for running shell commands
 * Miscellaneous::               Miscellaneous builtin macros
 * Frozen files::                Fast loading of frozen states
 
@@ -222,8 +222,9 @@ Macros for doing arithmetic
 * Incr::                        Decrement and increment operators
 * Eval::                        Evaluating integer expressions
 
-Running UNIX commands
+Running shell commands
 
+* Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit codes
@@ -271,7 +272,7 @@ language.
 input to the output, expanding macros as it goes.  Macros are either
 builtin or user-defined, and can take any number of arguments.
 Besides just doing macro expansion, @code{m4} has builtin functions
-for including named files, running UNIX commands, doing integer
+for including named files, running shell commands, doing integer
 arithmetic, manipulating text in various ways, recursion, etc@dots{}
 @code{m4} can be used either as a front-end to a compiler, or as a
 macro processor in its own right.
@@ -2230,7 +2231,7 @@ Then, the @code{m4} version:
 
 @comment ignore
 @example
-define(a, `errprint(`Hello')')dnl
+define(`a', `errprint(`Hello')')dnl
 changeword(`@@\([_a-zA-Z0-9]*\)')
 @result{}
 @@a
@@ -3007,7 +3008,7 @@ specifiers, and give warnings when problems are encountered.
 
 The macro @code{format} is recognized only with parameters.
 
-@node Arithmetic, UNIX commands, Text handling, Top
+@node Arithmetic, Shell commands, Text handling, Top
 @chapter Macros for doing arithmetic
 
 @cindex arithmetic
@@ -3193,24 +3194,91 @@ Take note that @var{radix} cannot be larger than 36.
 
 The builtin macro @code{eval} is recognized only when given arguments.
 
-@node UNIX commands, Miscellaneous, Arithmetic, Top
-@chapter Running UNIX commands
+@node Shell commands, Miscellaneous, Arithmetic, Top
+@chapter Running shell commands
 
 @cindex executing UNIX commands
 @cindex running UNIX commands
 @cindex UNIX commands, running
 @cindex commands, running UNIX
-There are a few builtin macros in @code{m4} that allow you to run UNIX
+@cindex executing shell commands
+@cindex running shell commands
+@cindex shell commands, running
+@cindex commands, running shell
+There are a few builtin macros in @code{m4} that allow you to run shell
 commands from within @code{m4}.
 
+Note that the definition of a valid shell command is system dependent.
+On UNIX systems, this is the typical @code{/bin/sh}.  But on other
+systems, such as native Windows, the shell has a different syntax of
+commands that it understands.  Some examples in this chapter assume
+@code{/bin/sh}, and also demonstrate how to quit early with a known
+exit value if this is not the case.
+
 @menu
+* Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit codes
 * Maketemp::                    Making names for temporary files
 @end menu
 
-@node Syscmd, Esyscmd, UNIX commands, UNIX commands
+@node Platform macros, Syscmd, Shell commands, Shell commands
+@section Determining the platform
+
+@cindex platform macros
+Sometimes it is desirable for an input file to know which
+platform @code{m4} is running on.  GNU @code{m4} provides several
+macros that are predefined to expand to the empty string; checking for
+their existence will confirm platform details.
+
+@comment ignore
+@example
+__gnu__
+__unix__
+unix
+__windows__
+windows
+@end example
+
+@findex gnu
+When GNU extensions are in effect (that is, when you did not use the
+@samp{-G} option), GNU @code{m4} will define the macro @code{__gnu__} to
+expand to the empty string.
+
+@example
+__gnu__
+@result{}
+ifdef(`__gnu__', `Extensions are active')
+@result{}Extensions are active
+@end example
+
+@findex unix
+@cindex platform macro
+On UNIX systems, GNU @code{m4} without the @samp{-G} option will define
+the macro @code{__unix__}, otherwise the macro @code{unix}.  Both will
+expand to the empty string.
+
+@findex windows
+On native Windows systems, GNU @code{m4} without the @samp{-G} option
+will define the macro @code{__windows__}, otherwise the macro
+@code{windows}.  Both will expand to the empty string.
+
+If GNU @code{m4} does not provide a platform macro for your system,
+please report that as a bug.
+
+@example
+define(`provided', `0')
+@result{}
+ifdef(`__gnu__', `define(`provided', incr(provided))')
+@result{}
+ifdef(`__windows__', `define(`provided', incr(provided))')
+@result{}
+provided
+@result{}1
+@end example
+
+@node Syscmd, Esyscmd, Platform macros, Shell commands
 @section Executing simple commands
 
 @findex syscmd
@@ -3233,14 +3301,25 @@ Prior to executing the command, @code{m4} flushes its output buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
+@example
+define(`foo', `FOO')
+@result{}
+syscmd(`echo foo')
+@result{}foo
+@result{}
+@end example
+
+Note how the expansion of @code{syscmd} keeps the trailing newline of
+the command, as well as using the newline that appeared after the macro.
+
 The builtin macro @code{syscmd} is recognized only when given arguments.
 
-@node Esyscmd, Sysval, Syscmd, UNIX commands
+@node Esyscmd, Sysval, Syscmd, Shell commands
 @section Reading the output of commands
 
 @findex esyscmd
 @cindex GNU extensions
-If you want @code{m4} to read the output of a UNIX command, use
+If you want @code{m4} to read the output of a shell command, use
 @code{esyscmd}:
 
 @comment ignore
@@ -3258,28 +3337,29 @@ the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
 
-Assume you are positioned into the @file{checks} directory of GNU
-@code{m4} distribution, then:
-
 @example
-define(`vice', `esyscmd(`grep Vice ../COPYING')')
+define(`foo, `FOO')
 @result{}
-vice
-@result{}  Ty Coon, President of Vice
+esyscmd(`echo foo')
+@result{}FOO
 @result{}
 @end example
 
-Note how the expansion of @code{esyscmd} has a trailing newline.
+Note how the expansion of @code{esyscmd} keeps the trailing newline of
+the command, as well as using the newline that appeared after the macro.
 
 The builtin macro @code{esyscmd} is recognized only when given
 arguments.
 
-@node Sysval, Maketemp, Esyscmd, UNIX commands
+@node Sysval, Maketemp, Esyscmd, Shell commands
 @section Exit codes
 
 @cindex exit code from UNIX commands
 @cindex UNIX commands, exit code from
 @cindex commands, exit code from UNIX
+@cindex exit code from shell commands
+@cindex shell commands, exit code from
+@cindex commands, exit code from shell
 @findex sysval
 To see whether a shell command succeeded, use @code{sysval}:
 
@@ -3297,6 +3377,10 @@ syscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
+syscmd
+@result{}
+sysval
+@result{}0
 syscmd(`exit 2')
 @result{}
 sysval
@@ -3305,9 +3389,49 @@ syscmd(`true')
 @result{}
 sysval
 @result{}0
+esyscmd(`false')
+@result{}
+ifelse(sysval, `0', `zero', `non-zero')
+@result{}non-zero
+esyscmd
+@result{}
+sysval
+@result{}0
+esyscmd(`exit 2')
+@result{}
+sysval
+@result{}2
+esyscmd(`true')
+@result{}
+sysval
+@result{}0
 @end example
 
-@node Maketemp,  , Sysval, UNIX commands
+@command{sysval} results in 127 if there was a problem executing the
+command, for example, if the system-imposed argument length is exceeded,
+or if there were not enough resources to fork.  It is not possible to
+distinguish between failed execution and successful execution that had
+an exit status of 127.
+
+On UNIX platforms, where it is possible to detect when command execution
+is terminated by a signal, rather than a normal exit, the result is the
+signal number shifted left by eight bits.
+
+@example
+dnl This test assumes kill is a shell builtin, and that signals are
+dnl recognizable.
+ifdef(`__unix__', , `m4exit(`77')')dnl
+syscmd(`kill -1 $$')
+@result{}
+sysval
+@result{}256
+esyscmd(`kill -9 $$')
+@result{}
+sysval
+@result{}2304
+@end example
+
+@node Maketemp,  , Sysval, Shell commands
 @section Making names for temporary files
 
 @cindex temporary filenames
@@ -3344,6 +3468,9 @@ maketemp(`/tmp/fooXXXXXX')
 @c This test makes sure maketemp gets testsuite coverage, but is
 @c somewhat complex for use in the manual.
 @example
+dnl This test assumes /tmp is a valid directory name, which is not true
+dnl for native Windows.
+ifdef(`__unix__', , `m4exit(`77')')dnl
 define(`file1', maketemp(`/tmp/fooXXXXXX'))dnl
 define(`file2', maketemp(`/tmp/fooXXXXXX'))dnl
 ifelse(file1, file2, `same', `different')
@@ -3358,7 +3485,7 @@ sysval
 The builtin macro @code{maketemp} is recognized only when given
 arguments.
 
-@node Miscellaneous, Frozen files, UNIX commands, Top
+@node Miscellaneous, Frozen files, Shell commands, Top
 @chapter Miscellaneous builtin macros
 
 This chapter describes various builtins, that do not really belong in
@@ -3797,7 +3924,7 @@ of the macro is different even if the input is identical.
 @item
 @acronym{POSIX} requires @code{changequote(@var{arg})}
 (@pxref{Changequote}) to use newline as the close quote, but GNU
-@code{m4} uses @samp{'} as the close quote.  Meanwhile,  some
+@code{m4} uses @samp{'} as the close quote.  Meanwhile, some
 traditional implementations use @var{arg} as the close quote, making it
 impossible to nest quotes.  For predictable results, never call
 changequote with just one argument.
@@ -3884,16 +4011,6 @@ name would be a useless limitation.  Of course, this leave more rope
 for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.
-
-@item
-@findex gnu
-GNU @code{m4} without @samp{-G} option will define the macro
-@code{__gnu__} to expand to the empty string.
-
-@findex unix
-On UNIX systems, GNU @code{m4} without the @samp{-G} option will define
-the macro @code{__unix__}, otherwise the macro @code{unix}.  Both will
-expand to the empty string.
 @end itemize
 
 @node Concept index, Macro index, Compatibility, Top
