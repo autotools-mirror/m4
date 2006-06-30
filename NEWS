@@ -12,12 +12,16 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   better diagnose version mismatch.  Additionally, if the F directive
   (builtin function) names an unknown builtin that existed in the m4 that
   froze the file but not in the current m4 (for example, changeword), the
-  warning is deferred until an attempt is made to actually use the builtin.
-  This allows downgrading from beta m4-1.4o to m4-1.4.5 without breaking
-  autoconf.
+  warning is deferred until an attempt is made to actually use the
+  builtin.  This allows downgrading from beta m4-1.4o to stable m4-1.4.5
+  without breaking autoconf.
 * The format and indir macros are now recognized only with arguments.
 * The eval macro no longer crashes on x86 architectures when dividing the
   minimum integer by -1.
+* On systems with ecvt and fcvt, format no longer truncates trailing
+  zeroes on integers printed with %.0f.  On systems without these
+  functions, format is no longer subject to a buffer overflow that
+  permitted arbitrary code execution.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

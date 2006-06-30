@@ -1609,7 +1609,7 @@ order of its arguments:
 
 @example
 define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
-			  `reverse(shift($@@)), `$1'')')
+                          `reverse(shift($@@)), `$1'')')
 @result{}
 reverse
 @result{}
@@ -2932,7 +2932,7 @@ define(`upcase', `translit(`$*', `a-z', `A-Z')')dnl
 define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
 define(`capitalize1',
        `regexp(`$1', `^\(\w\)\(\w*\)',
-	       `upcase(`\1')`'downcase(`\2')')')dnl
+               `upcase(`\1')`'downcase(`\2')')')dnl
 define(`capitalize',
        `patsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
 capitalize(`GNUs not Unix')
@@ -2968,6 +2968,10 @@ define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
 format(`The string "%s" uses %d characters', foo, len(foo))
 @result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
+format(`%.0f', `56789.9876')
+@result{}56790
+len(format(`%-*X', `300', `1'))
+@result{}300
 @end example
 
 Using the @code{forloop} macro defined in @xref{Loops}, this
@@ -2996,6 +3000,10 @@ function, and supports the normal @samp{%} specifiers: @samp{c},
 modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
+
+For now, unrecognized specifiers are silently ignored, but it is
+anticipated that a future release of GNU @code{m4} will support more
+specifiers, and give warnings when problems are encountered.
 
 The macro @code{format} is recognized only with parameters.
 

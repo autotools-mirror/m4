@@ -1,5 +1,15 @@
 2006-06-29  Eric Blake  <ebb9@byu.net>
 
+	Fix buffer overrun bug.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	xvasprintf.
+	* src/format.c [HAVE_EFGCVT]: Delete this code, and use *printf
+	variant instead, since [efg]cvt are obsolete and our use of them
+	was buggy (savannah sr #104303).
+	(format): Fix buffer overflow by using xasprintf.
+	* doc/m4.texinfo (Format): Expand format test to catch both bugs.
+	* NEWS: Document this fix.
+
 	* configure.ac (AC_CANONICAL_HOST, AC_CANONICAL_BUILD): Allow
 	cross-compilation.
 	(AC_CACHE_CHECK): Cache search for ecvt.
