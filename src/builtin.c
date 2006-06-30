@@ -28,6 +28,10 @@ extern FILE *popen ();
 
 #include "regex.h"
 
+#if HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
+
 #define ARG(i)	(argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
 
 /* Initialisation of builtin and predefined macros.  The table
@@ -765,8 +769,33 @@ builtin `%s' requested by frozen file is not supported", ARG (1)));
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
 
+/* Helper macros for readability.  */
+#if UNIX || defined WEXITSTATUS
+# define M4SYSVAL_EXITBITS(status)                       \
+   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
+# define M4SYSVAL_TERMSIGBITS(status)                    \
+   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
+
+#else /* ! UNIX && ! defined WEXITSTATUS */
+/* Platforms such as mingw do not support the notion of reporting
+   which signal terminated a process.  Furthermore if WEXITSTATUS was
+   not provided, then the exit value is in the low eight bits.  */
+# define M4SYSVAL_EXITBITS(status) status
+# define M4SYSVAL_TERMSIGBITS(status) 0
+#endif /* ! UNIX && ! defined WEXITSTATUS */
+
+/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
 #ifndef WEXITSTATUS
 # define WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#endif
+#ifndef WTERMSIG
+# define WTERMSIG(status) ((status) & 0x7f)
+#endif
+#ifndef WIFSIGNALED
+# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
+#endif
+#ifndef WIFEXITED
+# define WIFEXITED(status) (WTERMSIG (status) == 0)
 #endif
 
 /* Exit code from last "syscmd" command.  */
@@ -806,7 +835,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     {
       M4ERROR ((warning_status, errno,
 		"cannot open pipe to command \"%s\"", ARG (1)));
-      sysval = 0xffff;
+      sysval = -1;
     }
   else
     {
@@ -819,7 +848,9 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_sysval (struct obstack *obs, int argc, token_data **argv)
 {
-  shipout_int (obs, WEXITSTATUS (sysval));
+  shipout_int (obs, (sysval == -1 ? 127
+		     : (M4SYSVAL_EXITBITS (sysval)
+			| M4SYSVAL_TERMSIGBITS (sysval))));
 }
 
 /*-------------------------------------------------------------------------.

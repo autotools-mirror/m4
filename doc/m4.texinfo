@@ -3270,7 +3270,7 @@ please report that as a bug.
 @example
 define(`provided', `0')
 @result{}
-ifdef(`__gnu__', `define(`provided', incr(provided))')
+ifdef(`__unix__', `define(`provided', incr(provided))')
 @result{}
 ifdef(`__windows__', `define(`provided', incr(provided))')
 @result{}
@@ -3338,7 +3338,7 @@ is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
 
 @example
-define(`foo, `FOO')
+define(`foo', `FOO')
 @result{}
 esyscmd(`echo foo')
 @result{}FOO
@@ -3377,7 +3377,7 @@ syscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-syscmd
+syscmd()
 @result{}
 sysval
 @result{}0
@@ -3393,7 +3393,7 @@ esyscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-esyscmd
+esyscmd()
 @result{}
 sysval
 @result{}0

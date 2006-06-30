@@ -5,7 +5,9 @@ Foundation, Inc.
 Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 
 * Fix sysval on BeOS, OS/2, and other systems that store exit status
-  in the low-order byte.
+  in the low-order byte.  Additionally, on Unix platforms, if syscmd was
+  terminated by a signal, sysval now displays the signal number shifted
+  left by eight bits, to match traditional m4 implementations.
 * The maketemp macro is no longer subject to platform limitations (such as
   26 or 32 max files from a given template).
 * Frozen files now require that the first directive be V (version), to

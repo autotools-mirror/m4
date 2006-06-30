@@ -34,7 +34,7 @@ AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
-AC_CHECK_HEADERS_ONCE([limits.h siginfo.h])
+AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
 #if HAVE_SIGINFO_H

@@ -54,7 +54,7 @@ do
   fi
 
   sed -e '/^dnl @error{}/!d' -e 's///' -e "s/m4.input/$file/" \
-      -e "s| $m4:| m4:|" $file > $xerr
+      -e "s| m4:| $m4:|" $file > $xerr
 
   if cmp -s $err $xerr; then
     :

@@ -1,5 +1,21 @@
 2006-06-30  Eric Blake  <ebb9@byu.net>
 
+	For compatibility with other m4 implementations, sysval returns
+	signal<<8 rather than 0 if syscmd is terminated by a signal.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Check for sys/wait.h.
+	* src/builtin.c (include): Include sys/wait.h when stdlib.h does
+	not provide wait macros.
+	(WTERMSIG, WIFSIGNALED, WIFEXITED): More fallback macros.
+	(M4SYSVAL_EXITBITS, M4SYSVAL_TERMSIGBITS): New helper macros.
+	(m4_esyscmd): Set sysval to -1 on failure.
+	(m4_sysval): Print 127 on failure, and accomodate signals if they
+	are detectable.
+	* NEWS: Document this change.
+	* doc/m4.texinfo (Platform macros, Esyscmd, Sysval): Fix typos in
+	last commit.
+	* checks/check-them: Likewise.
+	* src/debug.c (debug_set_file): Work around mingw fstat bug.
+
 	* src/m4.h (UNIX, W32_NATIVE): Improve platform detection macros.
 	* src/freeze.c (produce_frozen_state): Use new spelling of
 	platform macro.

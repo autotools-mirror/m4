@@ -148,8 +148,11 @@ debug_set_file (FILE *fp)
       if (fstat (fileno (debug), &debug_stat) < 0)
 	return;
 
+      /* mingw has a bug where fstat on a regular file reports st_ino
+	 of 0.  On normal system, st_ino should never be 0.  */
       if (stdout_stat.st_ino == debug_stat.st_ino
-	  && stdout_stat.st_dev == debug_stat.st_dev)
+	  && stdout_stat.st_dev == debug_stat.st_dev
+	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug != stderr)
 	    fclose (debug);
