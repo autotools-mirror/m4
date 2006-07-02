@@ -1,0 +1,420 @@
+GNU M4
+******
+
+1. Introduction
+===============
+
+This file attempts to describe the processes we use to maintain M4,
+and is not part of a release distribution.
+
+
+2. Maintenance Notes
+====================
+
+* If you incorporate a change from somebody on the net:
+  If it is a large change, you must make sure they have signed the
+  appropriate paperwork, and be sure to add their name and email
+  address to THANKS.  AUTHORS is built from the FSF list of copyright
+  assignments, on fencepost.gnu.org.
+
+* If somebody reports a new bug, write a test case, then mention his
+  name in the ChangeLog entry.
+
+* The correct response to most actual bugs is to write a new test case
+  which demonstrates the bug.  Then fix the bug, re-run the test suite,
+  and check everything in.
+
+* Changes with user-visible effects must be mentioned in NEWS.
+
+* GNU Coding Standards should be followed:
+    http://www.gnu.org/prep/standards/
+  Additionally, while GNU M4 is not yet POSIX compliant, we are trying
+  to get closer to it (although some design decisions state that POSIX
+  compliance should only happen when POSIXLY_CORRECT is in the
+  environment or the -G option was passed on the command line):
+    http://www.opengroup.org/onlinepubs/009695399/utilities/m4.html
+
+
+3. Bootstrapping
+================
+
+* Before you can build from CVS, you need to bootstrap.  This requires a
+  pre-installed version of GNU M4 built from a package, Autoconf 2.60 or
+  later, Automake 1.9.6 or later, and a CVS checkout of gnulib.  Gnulib
+  can be obtained by:
+    cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/gnulib co gnulib
+
+* Either add the gnulib directory to your PATH, or run
+    GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap
+
+* When it is time for a release, it is a good idea to bootstrap with
+  official releases of the autotools, rather than CVS builds, to reduce
+  the pain of a user re-running bootstrap on the packaged M4.  However,
+  files installed by Automake should be updated to the latest version
+  from their respective upstream source, rather than the version that
+  shipped with the automake release.
+
+
+4. Test Suite
+=============
+
+* Use
+    make check
+  liberally, on as many platforms as you can.  Use as many compilers and
+  linkers you can.
+
+* For branch-1_4, the testsuite is generated from the documentation.
+  All instances of @example in doc/m4.texinfo that are not preceeded by
+  "@comment ignore" are turned into tests in the checks directory.
+
+
+5. Editing 'ChangeLog'
+======================
+
+* When in doubt, check that emacs can syntax-color properly in
+  change-log-mode.  And preferably use emacs 'C-x 4 a'
+  (add-change-log-entry-other-window) to open ChangeLog with an
+  appropriate new template.
+
+* If this change is by a different author, or on a different date to the
+  last entry start a new entry at the top of the file with the format
+  (note two spaces between each field):
+
+yyyy-mm-dd  Name of Author  <email@address>
+
+*  If more than one person collaborated on the change, additional
+   authors can be listed on subsequent lines, thus:
+
+yyyy-mm-dd  Name of Main Author  <email@address>,
+            Name of Contributor  <another@email.address>
+
+* Where a change author did not supply a copyright assignment, but the
+  changes they submitted were sufficiently trivial to commit in any case
+  (see the GCS for guidelines on this), then flag this against their
+  name in the header, thus:
+
+yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
+
+* Preferably the next part should be a description of the overall
+  purpose of the change, separated from the header by a blank line,
+  indented by 1 tab, and filled at column 72.  The last character of the
+  description should be a colon, :.
+
+* Changes to each file come next.  Each new file starts on a new line,
+  indented by 1 tab and starting with an asterisk and a space.  Multiple
+  files can be listed here relative to $top_srcdir, and comma separated.
+  Names of functions (or sections as appropriate) to which the change
+  applies should be named inside parentheses and comma separated.  If
+  this goes beyond column 72, then parens should be closed and re-opened
+  on the next line:
+
+	* file, another/file, test/testcases/foo.test (func_foo)
+	(func_bar, func_baz): Description of changes.
+
+* If the change does not apply to particular functions (or sections),
+  the section list can be omitted:
+
+	* file, another/file, test/testcases/foo.test: General changes.
+
+* If the changes are particular to certain architectures, they should be
+  listed after the functions in square brackets:
+
+	* file, another/file (func_foo) [linux, solaris]: Description of
+	changes.
+
+* Subsequent changes in other files that are related to the same overall
+  enhancement or bugfix should be listed concurrently, without blank
+  lines.  Always start a fresh line for a new file:
+
+	* file, another/file (func_foo) [linux, solaris]: Description of
+	changes.
+	* doc/foo.texi (Invoking Foo): Document.
+	* NEWS: Updated.
+
+* If the change is in response to a problem reported by someone other
+  than the author, then credit them at the end of the description with:
+
+	Reported by Reporter Name <email@address>.
+
+* See the GNU Coding Standards document for more details on ChangeLog
+  formatting.
+
+
+6. Release Procedure
+====================
+
+* If you are an m4 maintainer, but have not yet registered your
+  gpg public key and (preferred) email address with the FSF, send an
+  email, preferably GPG-signed, to <ftp-upload@gnu.org> that includes
+  the following:
+
+    (a) name of package(s) that you are the maintainer for, and your
+        preferred email address.
+
+    (b) an ASCII armored copy of your GnuPG key, as an attachment.
+	("gpg --export -a YOUR_KEY_ID > mykey.asc" should give you
+	this.)
+
+  When you have received acknowledgement of your message, the proper GPG
+  keys will be registered on ftp-upload.gnu.org and only then will you be
+  authorized to upload files to the FSF ftp machines.
+
+* If you do not have access to the mailing list administrative interface,
+  approach the list owners for the password.  Be sure to check the lists
+  (esp. bug-m4) for outstanding bug reports also in the list of
+  pending moderation requests.  This step is not strictly necessary.
+
+* Make sure you have wget installed.
+
+* Make sure you have a copy of xdelta installed, and a copy of the previous
+  release tarball in the build directory.
+
+* Make sure your locale is sane, e.g. by exporting LC_ALL=C.
+
+* Update the version number in configure.ac.
+  See http://www.gnu.org/software/libtool/contribute.html for details of
+  the numbering scheme (m4 uses the same scheme as libtool).
+
+* Update NEWS, ChangeLog.
+
+* Run ./bootstrap.
+
+* Run ./configure (or create a build directory first and run configure
+  from there, if you want to keep the build tree separate).
+
+* Run `make -fMakefile.maint fetch' (or `make -f../Makefile.maint fetch'
+  if you are running from a VPATH build directory, where `../' is the
+  relative path to the directory with `configure' in it), which will
+  fetch new versions of the files that are maintained outside of m4.  If
+  you are using GNU make, the included GNUmakefile allows you to leave
+  off the '-fMakefile.maint'.
+
+* Run `make distcheck'.  If there are any problems, fix them and start
+  again.
+
+* Run ./commit from the source tree.
+
+* Run `make -fMakefile.maint cvs-dist' (or `make -f../Makefile.maint
+  cvs-dist' if you are running from a VPATH build directory, where `../'
+  is the relative path to the directory with `configure' in it), which
+  will build a release tarball (with `make distcheck'), tag the tree
+  with release-$(VERSION) and generate the gpg signature files.
+
+* Run 'make -f[../]Makefile.maint deltas' (pass
+  LASTRELEASE=maj.min[.mic[alpha]] if needed) to create both diff and
+  xdelta files between the previous release tarball and the new with
+  detached gpg signature files and clear signed directive files.
+
+* Upload release tarball, diff file and xdelta file, plus their associated
+  detached gpg signature files and clear signed directive files to
+  ftp-upload.gnu.org.  If the upload is destined for ftp.gnu.org, then the
+  files should be placed in the /incoming/ftp directory.  If the upload is
+  an alpha release destined for alpha.gnu.org, then the files should be
+  placed in the /incoming/alpha directory.
+
+* Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
+  autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
+  as well.
+
+* Update version number in configure.ac to next alpha number.
+  See http://www.gnu.org/software/libtool/contribute.html for details of
+  the numbering scheme.
+
+* Update NEWS, ChangeLog.
+
+* Run ./commit.
+
+* For non-alpha releases, update the webpages.  Replace manual.html with
+  the new one (generate with `make -f[../]Makefile.maint web-manual').
+
+
+7. Alpha release note template
+==============================
+
+To: m4-announce@gnu.org, m4-discuss@gnu.org, autotools-announce@gnu.org
+Subject: GNU M4 @VERSION@ released (alpha release).
+
+The GNU M4 Team is pleased to announce alpha release @VERSION@ of GNU
+M4.
+
+GNU `m4' is an implementation of the traditional Unix macro processor.
+It is mostly SVR4 compatible, although it has some extensions (for
+example, handling more than 9 positional parameters to macros).  `m4'
+also has built-in functions for including files, running shell commands,
+doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
+`configure' scripts, but not for running them. 
+
+Here are the compressed sources:
+
+  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.gz    [@SIZE@]
+  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2   [@SIZE@]
+
+Here are the xdeltas and diffs against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@:
+
+  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz   [@SIZE@]
+  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta    [@SIZE@]
+
+Here are the gpg detached signatures:
+
+  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.gz.sig
+  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2.sig
+  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz.sig
+  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta.sig
+
+You should download the signature named after any tarball you download,
+and then verify its integrity with, for example:
+
+  gpg --verify m4-@VERSION.tar.gz.sig
+
+If that command fails because you don't have the required public key,
+then run this command to import it:
+
+  gpg --keyserver wwwkeys.pgp.net --recv-keys @KEY@
+
+Here are the MD5 and SHA1 checksums:
+
+  @MD5SUM@ m4-@VERSION@.tar.gz
+  @MD5SUM@ m4-@VERSION@.tar.bz2
+  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
+  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
+  @SHA1SUM@ m4-@VERSION@.tar.gz
+  @SHA1SUM@ m4-@VERSION@.tar.bz2
+  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
+  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
+
+This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
+
+This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
+
+Alternatively, you can fetch the unbootstrapped sourcecode from
+anonymous cvs by using the following commands:
+
+  $ export CVS_RSH=ssh
+  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/m4 \
+  co -r @CVS_RELEASE_TAG@ m4
+
+You will then need to have recent versions of Automake and Autoconf
+installed, and a recent checkout of gnulib, in order to bootstrap the
+checked out sources yourself.
+
+New in @VERSION@: @RELEASE_DATE@
+
+  @EXCERPT_FROM_NEWS_FILE@
+
+Please report bugs to <bug-m4@gnu.org>, along with the output of 'make
+check' and any other information that might be useful in resolving the
+issue.
+
+
+8. Full release note template
+=============================
+
+To: info-gnu@gnu.org
+To: m4-announce@gnu.org, m4-discuss@gnu.org, autotools-announce@gnu.org
+Subject: GNU M4 @VERSION@ released.
+
+The GNU M4 Team is pleased to announce the release of GNU M4 @VERSION@.
+
+GNU `m4' is an implementation of the traditional Unix macro processor.
+It is mostly SVR4 compatible, although it has some extensions (for
+example, handling more than 9 positional parameters to macros).  `m4'
+also has built-in functions for including files, running shell commands,
+doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
+`configure' scripts, but not for running them. 
+
+This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
+
+New in @VERSION@: @RELEASE_DATE@
+
+  @EXCERPT_FROM_NEWS_FILE@
+
+m4-@VERSION@ is available now from ftp.gnu.org, along with diffs and
+xdeltas against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@ that are also
+available from ftp.gnu.org.  Please use a mirror to reduce stress on the
+main gnu machine:
+
+  http://www.gnu.org/order/ftp.html
+
+Here are the compressed sources:
+
+  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.gz    [@SIZE@]
+  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2   [@SIZE@]
+
+Here are the xdeltas and diffs against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@:
+
+  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz   [@SIZE@]
+  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta    [@SIZE@]
+
+Here are the gpg detached signatures:
+
+  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.gz.sig
+  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2.sig
+  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz.sig
+  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta.sig
+
+You should download the signature named after any tarball you download,
+and then verify its integrity with, for example:
+
+  gpg --verify m4-@VERSION.tar.gz.sig
+
+If that command fails because you don't have the required public key,
+then run this command to import it:
+
+  gpg --keyserver wwwkeys.pgp.net --recv-keys @KEY@
+
+Here are the MD5 and SHA1 checksums:
+
+  @MD5SUM@ m4-@VERSION@.tar.gz
+  @MD5SUM@ m4-@VERSION@.tar.bz2
+  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
+  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
+  @SHA1SUM@ m4-@VERSION@.tar.gz
+  @SHA1SUM@ m4-@VERSION@.tar.bz2
+  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
+  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
+
+This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
+
+Alternatively, you can fetch the unbootstrapped sourcecode from
+anonymous cvs by using the following commands:
+
+  $ export CVS_RSH=ssh
+  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/libtool \
+  co -r @CVS_RELEASE_TAG@ libtool
+
+You will then need to have the latest release versions of Automake
+(@AUTOMAKE_VERSION@) and Autoconf (@AUTOCONF_VERSION@) installed to
+bootstrap the checked out sources yourself.
+
+Please report bugs to <bug-m4@gnu.org>, along with the output of 'make
+check' and any other information that might be useful in resolving the
+issue.
+
+
+-- 
+Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
+
+The canonical source of this file is maintained with the
+GNU M4 package.  Report bugs to bug-m4@gnu.org.
+
+GNU M4 is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+GNU M4 is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Libtool; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+02110-1301  USA
+
+
+Local Variables:
+mode: text
+fill-column: 72
+End:
+vim:tw=72
