@@ -1,3 +1,10 @@
+2006-07-01  Eric Blake  <ebb9@byu.net>
+
+	* GNUmakefile: New file, borrowed from coreutils.
+	* Makefile.am (EXTRA_DIST): Distribute GNUmakefile.
+	* Makefile.maint (Makefile): Delete this rule, now that
+	GNUmakefile includes Makefile.
+
 2006-06-30  Eric Blake  <ebb9@byu.net>
 
 	For compatibility with other m4 implementations, sysval returns

@@ -21,7 +21,8 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = examples lib src doc checks
-EXTRA_DIST = bootstrap c-boxes.el Makefile.maint m4/gnulib-cache.m4
+EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.maint \
+	m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
