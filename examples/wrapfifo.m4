@@ -1,3 +1,4 @@
+dnl Redefine m4wrap to have FIFO semantics.
 define(`_m4wrap_level', `0')dnl
 define(`m4wrap',
 `ifdef(`m4wrap'_m4wrap_level,

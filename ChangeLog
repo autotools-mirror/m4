@@ -1,3 +1,19 @@
+2006-07-03  Eric Blake  <ebb9@byu.net>
+
+	Fix 'make check' in VPATH build.  All files included by testsuite
+	now live in a single directory.  Use forloop.m4 in testsuite.
+	* checks/incl.m4, checks/foo, checks/wrapfifo.m4: Move from
+	here...
+	* examples/incl.m4, examples/foo, examples/wrapfifo.m4: ...to
+	here.
+	* checks/Makefile.in (DISTFILES): Don't distribute moved files.
+	* examples/Makefile.am (EXTRA_DIST): Distribute new files.
+	* checks/check-them: Avoid s/// when filename is in pattern.
+	* examples/forloop.m4: Fix to match documentation.
+	* doc/m4.texinfo (Include, Undivert, Incompatibilities): Reflect
+	new locations.
+	(Loops, Format): Actually use forloop.m4 in tests.
+
 2006-07-02  Eric Blake  <ebb9@byu.net>
 
 	* checks/Makefile.in (exec_prefix, prefix): New macros, so that
@@ -2341,4 +2357,4 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
-	$Revision: 1.1.1.1.2.27 $ $Date: 2005/10/18 11:29:12 $
+	$Revision$ $Date$

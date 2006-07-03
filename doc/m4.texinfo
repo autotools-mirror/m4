@@ -1629,10 +1629,11 @@ made with @code{shift}, @code{ifelse} and recursion.
 Here is an example of a loop macro that implements a simple for loop.  It
 can, for example, be used for simple counting:
 
-@comment ignore
 @example
+include(`forloop.m4')
+@result{}
 forloop(`i', `1', `8', `i ')
-@result{}1 2 3 4 5 6 7 8
+@result{}1 2 3 4 5 6 7 8 @comment
 @end example
 
 The arguments are a name for the iteration variable, the starting value,
@@ -1642,14 +1643,15 @@ the loop, it retains whatever value it might have had before.
 
 For-loops can be nested, like
 
-@comment ignore
 @example
+include(`forloop.m4')
+@result{}
 forloop(`i', `1', `4', `forloop(`j', `1', `8', `(i, j) ')
 ')
-@result{}(1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8)
-@result{}(2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8)
-@result{}(3, 1) (3, 2) (3, 3) (3, 4) (3, 5) (3, 6) (3, 7) (3, 8)
-@result{}(4, 1) (4, 2) (4, 3) (4, 4) (4, 5) (4, 6) (4, 7) (4, 8)
+@result{}(1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8) @comment
+@result{}(2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8) @comment
+@result{}(3, 1) (3, 2) (3, 3) (3, 4) (3, 5) (3, 6) (3, 7) (3, 8) @comment
+@result{}(4, 1) (4, 2) (4, 3) (4, 4) (4, 5) (4, 6) (4, 7) (4, 8) @comment
 @result{}
 @end example
 
@@ -1664,16 +1666,19 @@ to see if it is finished.  If it has not finished, it increments
 the iteration variable (using the predefined macro @code{incr},
 @pxref{Incr}), and recurses.
 
-Here is the actual implementation of @code{forloop}:
+Here is the actual implementation of @code{forloop}, distributed as
+@file{examples/forloop.m4} in this package:
 
-@comment ignore
 @example
-define(`forloop',
-  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
-@result{}
-define(`_forloop',
-  `$4`'ifelse($1, `$3', ,
-    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+undivert(`forloop.m4')
+@result{}divert(`-1')
+@result{}# forloop(var, from, to, stmt)
+@result{}define(`forloop',
+@result{}  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+@result{}define(`_forloop',
+@result{}  `$4`'ifelse($1, `$3', ,
+@result{}    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+@result{}divert`'dnl
 @result{}
 @end example
 
@@ -2365,7 +2370,10 @@ sinclude(`none')
 @result{}
 @end example
 
-Assume in the following that the file @file{incl.m4} contains the lines:
+The rest of this section assumes that @code{m4} is invoked with the
+@samp{-I} option pointing to the @file{examples} directory shipped as
+part of the GNU @code{m4} package.  The file @file{examples/incl.m4} in
+the distribution contains the lines:
 @comment ignore
 @example
 Include file start
@@ -2602,8 +2610,8 @@ divert`'undivert`'dnl
 GNU @code{m4} allows named files to be undiverted.  Given a non-numeric
 argument, the contents of the file named will be copied, uninterpreted, to
 the current output.  This complements the builtin @code{include}
-(@pxref{Include}).  To illustrate the difference, assume the file
-@file{foo} contains the word @samp{bar}:
+(@pxref{Include}).  To illustrate the difference, the file
+@file{examples/foo} contains the word @samp{bar}:
 
 @example
 define(`bar', `BAR')
@@ -2978,8 +2986,9 @@ len(format(`%-*X', `300', `1'))
 Using the @code{forloop} macro defined in @xref{Loops}, this
 example shows how @code{format} can be used to produce tabular output.
 
-@comment ignore
 @example
+include(`forloop.m4')
+@result{}
 forloop(`i', `1', `10', `format(`%6d squared is %10d
 ', i, eval(i**2))')
 @result{}     1 squared is          1
@@ -2992,6 +3001,7 @@ forloop(`i', `1', `10', `format(`%6d squared is %10d
 @result{}     8 squared is         64
 @result{}     9 squared is         81
 @result{}    10 squared is        100
+@result{}
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
@@ -3867,10 +3877,11 @@ Furthermore, @acronym{POSIX} states that only the first argument to
 processes all arguments, with output separated by spaces.
 
 However, it is possible to emulate @acronym{POSIX} behavior by
-including the sample file @file{wrapfifo.m4}:
+including the file @file{examples/wrapfifo.m4} from the distribution:
 
 @example
 undivert(`wrapfifo.m4')dnl
+@result{}dnl Redefine m4wrap to have FIFO semantics.
 @result{}define(`_m4wrap_level', `0')dnl
 @result{}define(`m4wrap',
 @result{}`ifdef(`m4wrap'_m4wrap_level,
