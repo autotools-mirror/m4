@@ -44,7 +44,7 @@ do
   echo "Checking $file"
   LC_MESSAGES=C m4 -d -I "$examples" $file >$out 2>$err
 
-  if test $? == 77 ; then
+  if test $? = 77 ; then
     skipped="$skipped $file"
     continue
   fi

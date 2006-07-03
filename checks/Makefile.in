@@ -32,13 +32,14 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 AWK = @AWK@
 
 # Vern says that the first star is required around an Alpha make bug.
-CHECKS = *[0-9][0-9].*
-DISTFILES = Makefile.in get-them check-them stamp-checks
+CHECKS = $(srcdir)/*[0-9][0-9].*
+# Makefile.in is automatically distributed by automake.
+DISTFILES = $(srcdir)/get-them $(srcdir)/check-them $(srcdir)/stamp-checks
 
-all: stamp-checks
+all: $(srcdir)/stamp-checks
 
-stamp-checks: get-them ../doc/m4.texinfo
-	rm -f $(srcdir)/$(CHECKS)
+$(srcdir)/stamp-checks: $(srcdir)/get-them $(srcdir)/../doc/m4.texinfo
+	rm -f $(CHECKS)
 	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texinfo
 	touch $(srcdir)/stamp-checks
 
@@ -49,13 +50,13 @@ install-dvi install-pdf install-ps install-html install-info:
 
 uninstall:
 
-check: stamp-checks
+check: $(srcdir)/stamp-checks
 	PATH=`pwd`/../src"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	$(srcdir)/check-them -I $(srcdir)/../examples $(srcdir)/$(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples $(CHECKS)
 
-installcheck: stamp-checks
+installcheck: $(srcdir)/stamp-checks
 	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	$(srcdir)/check-them -I $(srcdir)/../examples $(srcdir)/$(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples $(CHECKS)
 
 tags:
 
@@ -67,23 +68,19 @@ distclean: clean
 	rm -f Makefile
 
 maintainer-clean realclean: distclean
-	rm -f $(srcdir)/$(CHECKS) stamp-checks
+	rm -f $(CHECKS) $(srcdir)/stamp-checks
 
 distdir: dist
 
-dist: $(DISTFILES) stamp-checks
+dist: $(DISTFILES)
 	@echo "Copying distribution files"
-	@for file in $(DISTFILES); do \
-	  ln $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/checks 2> /dev/null \
-	    || cp -p $(srcdir)/$$file ../$(PACKAGE)-$(VERSION)/checks; \
-	done
-	@for file in $(srcdir)/$(CHECKS); do \
-	  ln $$file ../$(PACKAGE)-$(VERSION)/checks \
+	@for file in $(DISTFILES) $(CHECKS); do \
+	  ln $$file ../$(PACKAGE)-$(VERSION)/checks 2> /dev/null \
 	    || cp -p $$file ../$(PACKAGE)-$(VERSION)/checks; \
 	done
 
-Makefile: Makefile.in ../config.status
-	cd .. && CONFIG_FILES=checks/$@ CONFIG_HEADERS= ./config.status
+Makefile: $(srcdir)/Makefile.in ../config.status
+	cd .. && ./config.status checks/$@
 
 # Tell versions [3.59,3.63) of GNU make not to export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

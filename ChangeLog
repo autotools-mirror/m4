@@ -1,5 +1,18 @@
 2006-07-03  Eric Blake  <ebb9@byu.net>
 
+	* checks/check-them: Use portable = in test.
+	* src/Makefile.am (AM_CPPFLAGS): Omit space between -I and
+	directory, as required by Solaris cc.  Include built headers, as
+	required by Solaris make in VPATH build.
+	* checks/Makefile.in: Use $(srcdir) where needed.
+	(CHECKS): Factor $(srcdir) into macro.
+	(DISTFILES): Likewise.  Automake takes care of distributing
+	Makefile.in.
+	(dist): Simplify.
+	(Makefile): Use modern syntax of config.status.
+	* doc/m4.texinfo (Loops, Include, Undivert, Incompatibilities):
+	Avoid overfull and underfull hboxes in dvi.
+
 	Fix 'make check' in VPATH build.  All files included by testsuite
 	now live in a single directory.  Use forloop.m4 in testsuite.
 	* checks/incl.m4, checks/foo, checks/wrapfifo.m4: Move from

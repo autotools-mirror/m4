@@ -1646,12 +1646,12 @@ For-loops can be nested, like
 @example
 include(`forloop.m4')
 @result{}
-forloop(`i', `1', `4', `forloop(`j', `1', `8', `(i, j) ')
+forloop(`i', `1', `4', `forloop(`j', `1', `8', ` (i, j)')
 ')
-@result{}(1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8) @comment
-@result{}(2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8) @comment
-@result{}(3, 1) (3, 2) (3, 3) (3, 4) (3, 5) (3, 6) (3, 7) (3, 8) @comment
-@result{}(4, 1) (4, 2) (4, 3) (4, 4) (4, 5) (4, 6) (4, 7) (4, 8) @comment
+@result{} (1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8)
+@result{} (2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8)
+@result{} (3, 1) (3, 2) (3, 3) (3, 4) (3, 5) (3, 6) (3, 7) (3, 8)
+@result{} (4, 1) (4, 2) (4, 3) (4, 4) (4, 5) (4, 6) (4, 7) (4, 8)
 @result{}
 @end example
 
@@ -1667,7 +1667,7 @@ the iteration variable (using the predefined macro @code{incr},
 @pxref{Incr}), and recurses.
 
 Here is the actual implementation of @code{forloop}, distributed as
-@file{examples/forloop.m4} in this package:
+@file{examples/@/forloop.m4} in this package:
 
 @example
 undivert(`forloop.m4')
@@ -2372,7 +2372,7 @@ sinclude(`none')
 
 The rest of this section assumes that @code{m4} is invoked with the
 @samp{-I} option pointing to the @file{examples} directory shipped as
-part of the GNU @code{m4} package.  The file @file{examples/incl.m4} in
+part of the GNU @code{m4} package.  The file @file{examples/@/incl.m4} in
 the distribution contains the lines:
 @comment ignore
 @example
@@ -2611,7 +2611,7 @@ GNU @code{m4} allows named files to be undiverted.  Given a non-numeric
 argument, the contents of the file named will be copied, uninterpreted, to
 the current output.  This complements the builtin @code{include}
 (@pxref{Include}).  To illustrate the difference, the file
-@file{examples/foo} contains the word @samp{bar}:
+@file{examples/@/foo} contains the word @samp{bar}:
 
 @example
 define(`bar', `BAR')
@@ -3877,7 +3877,7 @@ Furthermore, @acronym{POSIX} states that only the first argument to
 processes all arguments, with output separated by spaces.
 
 However, it is possible to emulate @acronym{POSIX} behavior by
-including the file @file{examples/wrapfifo.m4} from the distribution:
+including the file @file{examples/@/wrapfifo.m4} from the distribution:
 
 @example
 undivert(`wrapfifo.m4')dnl

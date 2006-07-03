@@ -19,7 +19,7 @@
 ##
 ## This file written by Eric Blake <ebb9@byu.net>
 
-AM_CPPFLAGS = -I $(top_srcdir)/lib
+AM_CPPFLAGS = -I$(top_srcdir)/lib -I../lib
 bin_PROGRAMS = m4
 m4_SOURCES = m4.h m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
 macro.c output.c path.c symtab.c
