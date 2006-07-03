@@ -1,3 +1,11 @@
+2006-07-02  Eric Blake  <ebb9@byu.net>
+
+	* checks/Makefile.in (exec_prefix, prefix): New macros, so that
+	$(bindir) works in installcheck.
+	(check, installcheck): No longer change directory, so that
+	distcheck works with a read-only builddir.
+	* checks/check-them: Work when pwd is no longer builddir.
+
 2006-07-01  Eric Blake  <ebb9@byu.net>
 
 	* GNUmakefile: New file, borrowed from coreutils.

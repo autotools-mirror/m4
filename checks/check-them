@@ -31,11 +31,18 @@ skipped=
 m4=`m4 --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
     -e 's/\\\\/\\\\\\\\/g' -e 1q`
 
-# Run the tests.  This assumes pwd is the checks directory.
+# Find out where the examples live.
+examples=.
+if test "x$1" = x-I ; then
+  examples="$2"
+  shift; shift
+fi
+
+# Run the tests.
 for file
 do
   echo "Checking $file"
-  LC_MESSAGES=C m4 -d -I ../examples $file >$out 2>$err
+  LC_MESSAGES=C m4 -d -I "$examples" $file >$out 2>$err
 
   if test $? == 77 ; then
     skipped="$skipped $file"

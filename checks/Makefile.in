@@ -22,6 +22,8 @@ VERSION = @VERSION@
 SHELL = /bin/sh
 
 bindir = @bindir@
+exec_prefix = @exec_prefix@
+prefix = @prefix@
 srcdir = @srcdir@
 VPATH = @srcdir@
 PATH_SEPARATOR = @PATH_SEPARATOR@
@@ -50,11 +52,11 @@ uninstall:
 
 check: stamp-checks
 	PATH=`pwd`/../src"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	cd $(srcdir) && ./check-them $(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples $(srcdir)/$(CHECKS)
 
 installcheck: stamp-checks
 	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	cd $(srcdir) && ./check-them $(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples $(srcdir)/$(CHECKS)
 
 tags:
 
@@ -66,7 +68,7 @@ distclean: clean
 	rm -f Makefile
 
 maintainer-clean realclean: distclean
-	rm -f $(CHECKS) stamp-checks
+	rm -f $(srcdir)/$(CHECKS) stamp-checks
 
 distdir: dist
 
