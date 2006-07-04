@@ -40,14 +40,32 @@ if test -z "$GETOPT_H"; then
   AC_CHECK_DECL([optreset], [GETOPT_H=getopt.h], [], [#include <getopt.h>])
 fi
 
-dnl Solaris 10 getopt doesn't handle `+' as a leading character in an
-dnl option string (as of 2005-05-05).
 if test -z "$GETOPT_H"; then
-  AC_CHECK_DECL([getopt_clip], [GETOPT_H=getopt.h], [], [#include <getopt.h>])
+  AC_CACHE_CHECK([for working gnu getopt function], [gl_cv_func_gnu_getopt],
+    [AC_RUN_IFELSE(
+      [AC_LANG_PROGRAM([#include <getopt.h>],
+        [[
+	  char *myargv[3];
+	  myargv[0] = "conftest";
+	  myargv[1] = "-+";
+	  myargv[2] = 0;
+	  return getopt (2, myargv, "+a") != '?';
+	]])],
+      [gl_cv_func_gnu_getopt=yes],
+      [gl_cv_func_gnu_getopt=no],
+      [dnl cross compiling - pessimistically gues based on decls
+       dnl Solaris 10 getopt doesn't handle `+' as a leading character in an
+       dnl option string (as of 2005-05-05).
+       AC_CHECK_DECL([getopt_clip],
+         [gl_cv_func_gnu_getopt=no], [gl_cv_func_gnu_getopt=yes],
+	 [#include <getopt.h>])])])
+  test X"$gl_cv_func_gnu_getopt" = Xno && GETOPT_H=getopt.h
 fi
 
 if test -n "$GETOPT_H"; then
   AC_DEFINE([__GETOPT_PREFIX], [[rpl_]],
     [Define to rpl_ if the getopt replacement function should be used.])
 fi
+
+AM_CONDITIONAL([GETOPT], [test -n "$GETOPT_H"])
 ])# M4_GETOPT

@@ -1,3 +1,10 @@
+2006-07-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* ltdl/m4/m4-getopt.m4 (M4_GETOPT): Update to take into account
+	changes to gnulib getopt.m4 since last build.
+	* Makefile.am (src_m4_SOURCES): Only compile shipped getopt module
+	if the system getopt fails M4_GETOPT tests.
+
 2006-06-22  Eric Blake  <ebb9@byu.net>
 
 	* Makefile.am (EXTRA_DIST): Distribute gnulib-cache.m4.

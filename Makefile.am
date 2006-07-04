@@ -70,15 +70,18 @@ EXTRA_DIST += stamp-vcl
 
 bin_PROGRAMS	= src/m4
 src_m4_SOURCES	= \
-		  src/getopt.c \
-		  src/getopt1.c \
-		  src/getopt.h \
 		  src/version-etc-fsf.c \
 		  src/version-etc.c \
 		  src/version-etc.h \
 		  src/main.c \
 		  src/m4.h \
 		  src/freeze.c
+if GETOPT
+src_m4_SOURCES += \
+		  src/getopt.c \
+		  src/getopt1.c \
+		  src/getopt.h
+endif
 if STACKOVF
 src_m4_SOURCES += src/stackovf.c
 endif
