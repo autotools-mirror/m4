@@ -1,3 +1,18 @@
+2006-07-05  Gary V. Vaughan  <gary@gnu.org>
+
+	The regs_allocated field in a struct re_pattern_buffer refers
+	to the state of a particular re_registers struct when used in
+	successive matches using the same compiled pattern.  Avoid a
+	SEGV in `renamesyms' resulting from using a new re_registers
+	with an existing re_pattern_buffer:
+
+	* modules/gnu.c (m4_pattern_buffer): Wrapper struct for associated
+	pattern buffer and registers.
+	(m4_regexp_search): New function to call re_regexp_search with
+	correctly matched pattern buffer and register instantiations.
+	(m4_regexp_compile): Return an m4_pattern_buffer.  Adust all
+	callers.
+
 2006-07-04  Gary V. Vaughan  <gary@gnu.org>
 
 	* ltdl/m4/m4-getopt.m4 (M4_GETOPT): Update to take into account

@@ -60,6 +60,15 @@ int errno;
 #include "format.c"
 
 
+/* The regs_allocated field in an re_pattern_buffer refers to the
+   state of the re_registers struct used in successive matches with
+   the same compiled pattern:  */
+typedef struct {
+  struct re_pattern_buffer pat;	/* compiled regular expression */
+  struct re_registers regs;	/* match registers */
+} m4_pattern_buffer;
+
+
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table
 #define m4_macro_table		gnu_LTX_m4_macro_table
@@ -123,11 +132,11 @@ m4_macro m4_macro_table[] =
 };
 
 static bool regsub	(m4 *context, m4_obstack *obs, const char *caller,
-			 const char *victim, int length, const char *regexp,
-			 struct re_pattern_buffer *buf, const char *replace,
+			 const char *victim, const char *regexp,
+			 m4_pattern_buffer *buf, const char *replace,
 			 bool ignore_duplicates);
 static void substitute	(m4 *context, m4_obstack *obs, const char *victim,
-			 const char *repl, struct re_registers *regs);
+			 const char *repl, m4_pattern_buffer *buf);
 
 static void m4_regexp_do	(m4 *context, m4_obstack *obs, int argc,
 				 m4_symbol_value **argv, int syntax);
@@ -279,25 +288,25 @@ M4BUILTIN_HANDLER (debugfile)
 /* Compile a REGEXP using the Regex SYNTAX bits return the buffer.
    Report errors on behalf of CALLER.  */
 
-static struct re_pattern_buffer *
+static m4_pattern_buffer *
 m4_regexp_compile (m4 *context, const char *caller,
 		   const char *regexp, int syntax)
 {
-  static struct re_pattern_buffer buf;	/* compiled regular expression */
+  static m4_pattern_buffer buf;	/* compiled regular expression */
   static bool buf_initialized = false;
   const char *msg;		/* error message from re_compile_pattern */
 
   if (!buf_initialized)
     {
-      buf_initialized = true;
-      buf.buffer = NULL;
-      buf.allocated = 0;
-      buf.fastmap = NULL;
-      buf.translate = NULL;
+      buf_initialized	= true;
+      buf.pat.buffer	= NULL;
+      buf.pat.allocated	= 0;
+      buf.pat.fastmap	= NULL;
+      buf.pat.translate	= NULL;
     }
 
   re_set_syntax (syntax);
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+  msg = re_compile_pattern (regexp, strlen (regexp), &buf.pat);
 
   if (msg != NULL)
     {
@@ -310,56 +319,66 @@ m4_regexp_compile (m4 *context, const char *caller,
   return &buf;
 }
 
+static int
+m4_regexp_search (m4_pattern_buffer *buf, const char *string,
+		  const int size, const int start, const int range)
+{
+  return re_search (&(buf->pat), string, size, start, range, &(buf->regs));
+}
+
+
 /* Regular expression version of index.  Given two arguments, expand to the
    index of the first match of the second argument (a regexp) in the first.
-   Expand to -1 if here is no match.  Given a third argument, is changes
+   Expand to -1 if here is no match.  Given a third argument, it changes
    the expansion to this argument.  */
 
 /**
- * regexp(STRING, REGEXP, [REPLACEMENT])
+ * regexp(VICTIM, REGEXP, [REPLACEMENT])
+ * eregexp(VICTIM, REGEXP, [REPLACEMENT])
  **/
 
 static void
 m4_regexp_do (m4 *context, m4_obstack *obs, int argc,
 	      m4_symbol_value **argv, int syntax)
 {
+  const char *caller;		/* calling macro name */
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
 
-  struct re_pattern_buffer *buf;/* compiled regular expression */
-  struct re_registers regs;	/* for subexpression matches */
+  m4_pattern_buffer *buf;	/* compiled regular expression */
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
 
+  caller = M4ARG (0);
   victim = M4ARG (1);
   regexp = M4ARG (2);
 
-  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
+  buf = m4_regexp_compile (context, caller, regexp, syntax);
   if (!buf)
     return;
 
   length = strlen (victim);
-  startpos = re_search (buf, victim, length, 0, length, &regs);
+  startpos = m4_regexp_search (buf, victim, length, 0, length);
 
   if (startpos  == -2)
     {
       M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("%s: error matching regular expression `%s'"),
-		M4ARG (0), regexp));
+		caller, regexp));
       return;
     }
 
   if (argc == 3)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (context, obs, victim, M4ARG (3), &regs);
+    substitute (context, obs, victim, M4ARG (3), buf);
 
   return;
 }
 
 
 /**
- * regexp(STRING, REGEXP, [REPLACEMENT])
+ * regexp(VICTIM, REGEXP, [REPLACEMENT])
  **/
 M4BUILTIN_HANDLER (regexp)
 {
@@ -367,7 +386,7 @@ M4BUILTIN_HANDLER (regexp)
 }
 
 /**
- * regexp(STRING, REGEXP, [REPLACEMENT])
+ * eregexp(VICTIM, REGEXP, [REPLACEMENT])
  **/
 M4BUILTIN_HANDLER (eregexp)
 {
@@ -381,44 +400,43 @@ M4BUILTIN_HANDLER (eregexp)
    third argument, with \& substituted by the matched text, and \N
    substituted by the text matched by the Nth parenthesized sub-expression.  */
 
+/**
+ * patsubst(VICTIM, REGEXP, [REPLACEMENT])
+ * epatsubst(VICTIM, REGEXP, [REPLACEMENT])
+ **/
 static void
 m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
 		m4_symbol_value **argv, int syntax)
 {
+  const char *caller;		/* calling macro name */
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
-  int length;			/* length of first argument */
+  m4_pattern_buffer *buf;	/* compiled regular expression */
 
-  struct re_pattern_buffer *buf;/* compiled regular expression */
-
+  caller = M4ARG (0);
   victim = M4ARG (1);
-  length = strlen (victim);
   regexp = M4ARG (2);
 
-  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
+  buf = m4_regexp_compile (context, caller, regexp, syntax);
   if (!buf)
     return;
 
-  regsub (context, obs, M4ARG(0), victim, length,
-	  regexp, buf, M4ARG(3), false);
+  regsub (context, obs, caller, victim, regexp, buf, M4ARG (3), false);
 }
-
 
 static bool
 regsub (m4 *context, m4_obstack *obs, const char *caller,
-	const char *victim, int length, const char *regexp,
-	struct re_pattern_buffer *buf, const char *replace,
-	bool ignore_duplicates)
+	const char *victim, const char *regexp, m4_pattern_buffer *buf,
+	const char *replace, bool ignore_duplicates)
 {
-  struct re_registers regs;	/* for subexpression matches */
-
   int matchpos	= 0;		/* start position of match */
   int offset	= 0;		/* current match offset */
+  int length	= strlen (victim);
 
   while (offset < length)
     {
-      matchpos = re_search (buf, victim, length,
-			    offset, length - offset, &regs);
+      matchpos = m4_regexp_search (buf, victim, length,
+				   offset, length - offset);
 
       if (matchpos < 0)
 	{
@@ -443,14 +461,14 @@ regsub (m4 *context, m4_obstack *obs, const char *caller,
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (context, obs, victim, replace, &regs);
+      substitute (context, obs, victim, replace, buf);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
 	 infinite loops.  */
 
-      offset = regs.end[0];
-      if (regs.start[0] == regs.end[0])
+      offset = buf->regs.end[0];
+      if (buf->regs.start[0] == buf->regs.end[0])
 	obstack_1grow (obs, victim[offset++]);
     }
 
@@ -567,6 +585,63 @@ M4BUILTIN_HANDLER (esyscmd)
 
 
 
+/* Rename all current symbols that match REGEXP according to the
+   REPLACEMENT specification.  */
+
+/**
+ * renamesyms(REGEXP, REPLACEMENT)
+ * erenamesyms(REGEXP, REPLACEMENT)
+ **/
+static void
+m4_renamesyms_do (m4 *context, m4_obstack *obs, int argc,
+		  m4_symbol_value **argv, int syntax)
+{
+  const char *caller;		/* calling macro name */
+  const char *regexp;		/* regular expression string */
+  const char *replace;		/* replacement expression string */
+
+  m4_pattern_buffer *buf;	/* compiled regular expression */
+
+  m4_dump_symbol_data	data;
+  m4_obstack		data_obs;
+  m4_obstack		rename_obs;
+
+  M4_MODULE_IMPORT (m4, m4_dump_symbols);
+
+  assert (m4_dump_symbols);
+
+  caller  = M4ARG (0);
+  regexp  = M4ARG (1);
+  replace = M4ARG (2);
+
+  buf = m4_regexp_compile (context, caller, regexp, syntax);
+  if (!buf)
+    return;
+
+  obstack_init (&rename_obs);
+  obstack_init (&data_obs);
+  data.obs = &data_obs;
+
+  m4_dump_symbols (context, &data, 1, argv, false);
+
+  for (; data.size > 0; --data.size, data.base++)
+    {
+      const char *	name	= data.base[0];
+      int		length	= strlen (name);
+
+      if (regsub (context, &rename_obs, caller, name, regexp, buf,
+		  replace, true))
+	{
+	  const char *renamed = obstack_finish (&rename_obs);
+
+	  m4_symbol_rename (M4SYMTAB, name, renamed);
+	}
+    }
+
+  obstack_free (&data_obs, NULL);
+  obstack_free (&rename_obs, NULL);
+}
+
 /**
  * renamesyms(REGEXP, REPLACEMENT)
  **/
@@ -584,54 +659,6 @@ M4BUILTIN_HANDLER (erenamesyms)
 }
 
 
-
-static void
-m4_renamesyms_do (m4 *context, m4_obstack *obs, int argc,
-		  m4_symbol_value **argv, int syntax)
-{
-  const char *regexp;		/* regular expression string */
-  const char *replace;		/* replacement expression string */
-
-  struct re_pattern_buffer *buf;/* compiled regular expression */
-
-  m4_dump_symbol_data	data;
-  m4_obstack		data_obs;
-  m4_obstack		rename_obs;
-
-  M4_MODULE_IMPORT (m4, m4_dump_symbols);
-
-  assert (m4_dump_symbols);
-
-  regexp = M4ARG(1);
-  replace = M4ARG(2);
-
-  buf = m4_regexp_compile (context, M4ARG(0), regexp, syntax);
-  if (!buf)
-    return;
-
-  obstack_init (&rename_obs);
-  obstack_init (&data_obs);
-  data.obs = &data_obs;
-
-  m4_dump_symbols (context, &data, 1, argv, false);
-
-  for (; data.size > 0; --data.size, data.base++)
-    {
-      const char *	name	= data.base[0];
-      int		length	= strlen (name);
-
-      if (regsub (context, &rename_obs, M4ARG(0), name, length,
-		  regexp, buf, replace, true))
-	{
-	  const char *renamed = obstack_finish (&rename_obs);
-
-	  m4_symbol_rename (M4SYMTAB, name, renamed);
-	}
-    }
-
-  obstack_free (&data_obs, NULL);
-  obstack_free (&rename_obs, NULL);
-}
 
 /* Frontend for printf like formatting.  The function format () lives in
    the file format.c.  */
@@ -663,16 +690,16 @@ M4BUILTIN_HANDLER (__line__)
 }
 
 /* Function to perform substitution by regular expressions.  Used by the
-   builtins regexp and patsubst.  The changed text is placed on the
-   obstack.  The substitution is REPL, with \& substituted by this part of
-   VICTIM matched by the last whole regular expression, taken from REGS[0],
-   and \N substituted by the text matched by the Nth parenthesized
+   builtins regexp, patsubst and renamesyms.  The changed text is placed on
+   the obstack.  The substitution is REPL, with \& substituted by this part
+   of VICTIM matched by the last whole regular expression, taken from
+   REGS[0], and \N substituted by the text matched by the Nth parenthesized
    sub-expression, taken from REGS[N].  */
 static int substitute_warned = 0;
 
 static void
 substitute (m4 *context, m4_obstack *obs, const char *victim,
-	    const char *repl, struct re_registers *regs)
+	    const char *repl, m4_pattern_buffer *buf)
 {
   register unsigned int ch;
 
@@ -697,16 +724,16 @@ WARNING: \\0 will disappear, use \\& instead in replacements")));
 	  /* Fall through.  */
 
 	case '&':
-	  obstack_grow (obs, victim + regs->start[0],
-			regs->end[0] - regs->start[0]);
+	  obstack_grow (obs, victim + buf->regs.start[0],
+			buf->regs.end[0] - buf->regs.start[0]);
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (regs->end[ch] > 0)
-	    obstack_grow (obs, victim + regs->start[ch],
-			  regs->end[ch] - regs->start[ch]);
+	  if (buf->regs.end[ch] > 0)
+	    obstack_grow (obs, victim + buf->regs.start[ch],
+			  buf->regs.end[ch] - buf->regs.start[ch]);
 	  break;
 
 	default:
