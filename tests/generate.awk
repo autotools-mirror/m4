@@ -1,7 +1,7 @@
 # Extract all examples from the manual source.            -*- AWK -*-
 
 # This file is part of GNU M4
-# Copyright 1992, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1992, 2000, 2001, 2006 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,9 +65,9 @@ BEGIN {
   if ($0 ~ /^@example$/)
     {
       if (seq == 0)
-        new_group(node);
+	new_group(node);
       if (!file)
-        seq++;
+	seq++;
       printf ("# %s:%d\n", FILENAME, NR)
       next;
     }
@@ -75,21 +75,21 @@ BEGIN {
   if ($0 ~ /^@end example$/)
     {
       if (file != "")
-        {
-           if (output || error)
-             {
-               fatal("while getting file " file      \
+	{
+	   if (output || error)
+	     {
+	       fatal("while getting file " file      \
 		     " found output = " output ","  \
 		     " found error = " error);
-             }
-           input = normalize(input);
-           printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
-        }
+	     }
+	   input = normalize(input);
+	   printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
+	}
       else
-        {
-           new_test(input, status, output, error);
-           status = 0;
-        }
+	{
+	   new_test(input, status, output, error);
+	   status = 0;
+	}
       file = input = output = error = "";
       next;
     }
@@ -143,7 +143,7 @@ function new_group(node) {
   printf ("## %s.  ##\n", node);
   printf ("## %s ##\n", banner);
   printf ("\n");
-  printf ("AT_SETUP([[%s]])\n", node);
+  printf ("AT_SETUP([%s])\n", node);
   printf ("AT_KEYWORDS([[documentation]])\n\n");
 }
 

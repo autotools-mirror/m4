@@ -1,3 +1,19 @@
+2006-07-05  Eric Blake  <ebb9@byu.net>
+
+	Fix all testsuite failures on cygwin.
+	* doc/m4.texinfo (Syscmd, Esyscmd): Forward-port updates from
+	branch-1_4.  Solves testsuite failure when uninstalled m4 is
+	shadowed by redefinition of PATH in libtool wrapper.
+	* Makefile.am (module_ldflags): Don't forget AM_LDFLAGS, which
+	contains the -no-undefined required by cygwin.
+	(TESTS_ENVIRONMENT): Export abs_top_builddir.
+	* tests/others.at (misc): Port to platforms where /etc/passwd
+	does not exist or does not contain user named root.
+	* tests/modules.at (AT_CHECK_M4_MODTEST): Look in correct
+	directory.
+	* tests/builtins.at (define, divert): Avoid overquoting.
+	* tests/generate.awk (new_group): Likewise.
+
 2006-07-05  Gary V. Vaughan  <gary@gnu.org>
 
 	The regs_allocated field in a struct re_pattern_buffer refers

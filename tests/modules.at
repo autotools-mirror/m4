@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright 2001 Free Software Foundation, Inc.
+# Copyright 2001, 2006 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ m4_define([AT_CHECK_M4_MODTEST],
 [AT_SETUP([$1])
 AT_KEYWORDS([module])
 
-AT_CHECK([test -f $top_builddir/modules/modtest.la || exit 77])
+AT_CHECK([test -f "$abs_top_builddir/modules/modtest.la" || exit 77])
 
 AT_DATA([input.m4],
 [[load(`modtest')

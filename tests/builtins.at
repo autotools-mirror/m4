@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright 2001 Free Software Foundation, Inc.
+# Copyright 2001, 2006 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ AT_BANNER([Torturing builtins.])
 ## define ##
 ## ------ ##
 
-AT_SETUP([[define]])
+AT_SETUP([define])
 
 AT_DATA([[define.m4]],
 [[undefine(`macro')dnl
@@ -61,7 +61,7 @@ AT_CLEANUP
 ## divert ##
 ## ------ ##
 
-AT_SETUP([[divert]])
+AT_SETUP([divert])
 
 AT_DATA([[divert.m4]],
 [[divert(1)Text diverted a first time.

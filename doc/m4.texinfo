@@ -22,8 +22,8 @@
 @ifinfo
 This file documents GNU @code{m4} @value{VERSION}
 
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001, 2004, 2005
-Free Software Foundation, Inc.
+Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
+2001, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -49,7 +49,8 @@ identical to this one except for the removal of this paragraph
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001, 2004, 2005 Free Software Foundation, Inc.
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
+2000, 2001, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -3489,6 +3490,19 @@ the same as those of @code{m4}.
 The builtin macro @code{syscmd} is recognized only when given arguments.
 @end deffn
 
+@example
+define(`foo', `FOO')
+@result{}
+syscmd(`echo foo')
+@result{}foo
+@result{}
+@end example
+
+Note how the expansion of @code{syscmd} keeps the trailing newline of
+the command, as well as using the newline that appeared after the macro.
+
+The builtin macro @code{syscmd} is recognized only when given arguments.
+
 @node Esyscmd
 @section Reading the output of commands
 
@@ -3504,21 +3518,21 @@ the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
 
-The builtin macro @code{esyscmd} is recognized only when given
-arguments.
-@end deffn
-
-For instance:
 
 @example
-define(`authors', `esyscmd(`m4 --version | grep Written')')
+define(`foo', `FOO')
 @result{}
-authors
-@result{}Written by Rene' Seindal and Gary V. Vaughan.
+esyscmd(`echo foo')
+@result{}FOO
 @result{}
 @end example
 
-Note how the expansion of @code{esyscmd} has a trailing newline.
+Note how the expansion of @code{esyscmd} keeps the trailing newline of
+the command, as well as using the newline that appeared after the macro.
+
+The builtin macro @code{esyscmd} is recognized only when given
+arguments.
+@end deffn
 
 @node Sysval
 @section Exit codes
