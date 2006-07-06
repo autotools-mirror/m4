@@ -27,9 +27,17 @@ SUFFIXES = .1
 
 # Depend on configure.ac for version, m4.c for usage text.  Do not depend on
 # built m4 executable, since not everyone has help2man or perl.
-m4.1: $(top_srcdir)/configure.ac $(top_srcdir)/src/m4.c
+# Build the man page once in the srcdir, rather than in every VPATH build
+# dir, to match how automake builds info pages.  This is safe for 'make
+# distcheck' since it is distributed pre-built.
+$(srcdir)/m4.1: $(top_srcdir)/configure.ac $(top_srcdir)/src/m4.c
 	@if test -x ../src/m4$(EXEEXT) ; then \
 	  echo "Updating man page m4.1" ; \
 	  $(SHELL) $(top_srcdir)/missing --run \
-	    help2man -o m4.1 ../src/m4$(EXEEXT) ; \
+	    help2man -o $@-tmp ../src/m4$(EXEEXT) ; \
+	  cmp -s $@-tmp $@ || cp $@-tmp $@; \
+	  rm -f $@-tmp; \
+	else \
+	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
+	  echo "         Retry once the program executable is ready."; \
 	fi

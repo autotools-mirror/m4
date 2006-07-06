@@ -1,3 +1,10 @@
+2006-07-06  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (SUBDIRS): Build . before src, so that autoheader
+	runs first when needed.
+	* doc/Makefile.am (m4.1): Backport rule from CVS head: build m4.1
+	once in srcdir rather than multiple times in VPATH builds.
+
 2006-07-03  Eric Blake  <ebb9@byu.net>
 
 	* checks/check-them: Use portable = in test.
