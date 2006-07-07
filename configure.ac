@@ -91,6 +91,38 @@ if test "$M4_cv_use_stackovf" = yes; then
   ]])
 fi
 
+AC_CACHE_CHECK([if system() agrees with pclose()],
+  [M4_cv_func_system_consistent],
+  [AC_RUN_IFELSE([AC_LANG_PROGRAM([
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+], [int i1, i2;
+  FILE *f;
+  i1 = system ("exit 2");
+  if (i1 == -1)
+    return 1;
+  f = popen ("exit 2", "r");
+  if (!f)
+    return 1;
+  i2 = pclose (f);
+  return i1 != i2;])],
+  [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no],
+  [AC_COMPILE_IFELSE([
+/* EMX on OS/2 defines WEXITSTATUS to be (x>>8)&0xff, and uses that for
+   pclose(), but for system() it uses x&0xff instead.  Otherwise, we assume
+   your system is sane and that pclose() and system() are consistent in their
+   values.  If this heuristic is wrong for your platform, report it as a bug
+   to bug-m4@gnu.org.  */
+#ifdef __EMX__
+choke me
+#endif
+], [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no])])])
+if test "$M4_cv_func_system_consistent" = no ; then
+  AC_DEFINE([FUNC_SYSTEM_BROKEN], [1],
+    [Define to 1 if the return value of system() disagrees with pclose().])
+fi
+
 dnl Don't let changeword get in our way, if bootstrapping with a version of
 dnl m4 that already turned the feature on.
 m4_ifdef([changeword], [m4_undefine([changeword])])dnl

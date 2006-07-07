@@ -813,6 +813,16 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 
   debug_flush_files ();
   sysval = system (ARG (1));
+#if FUNC_SYSTEM_BROKEN
+  /* OS/2 has a buggy system() that returns exit status in the lowest eight
+     bits, although pclose() and WEXITSTATUS are defined to return exit
+     status in the next eight bits.  This approach can't detect signals, but
+     at least syscmd(`ls') still works when stdout is a terminal.  An
+     alternate approach is popen/insert_file/pclose, but that makes stdout
+     a pipe, which can change how some child processes behave.  */
+  if (sysval != -1)
+    sysval <<= 8;
+#endif /* FUNC_SYSTEM_BROKEN */
 }
 
 static void

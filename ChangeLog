@@ -1,5 +1,8 @@
 2006-07-06  Eric Blake  <ebb9@byu.net>
 
+	* configure.ac (FUNC_SYSTEM_BROKEN): New check for OS/2 bug.
+	* src/builtin.c (m4_syscmd): Work around OS/2 bug.
+
 	* Makefile.am (SUBDIRS): Build . before src, so that autoheader
 	runs first when needed.
 	* doc/Makefile.am (m4.1): Backport rule from CVS head: build m4.1
