@@ -1,3 +1,11 @@
+2006-07-07  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_PREREQ): Autoconf 2.60 is now out.
+	(AC_CHECK_HEADERS): Assume signal.h.
+	(AC_CHECK_HEADERS_ONCE): Use new feature to shrink configure.
+	(AC_CHECK_FUNCS_ONCE): Likewise.
+	* src/m4.h (includes): Assume signal.h.
+
 2006-07-05  Eric Blake  <ebb9@byu.net>
 
 	Fix all testsuite failures on cygwin.

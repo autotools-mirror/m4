@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
-AC_PREREQ([2.59d])
+AC_PREREQ([2.60])
 
 ## ------------------------ ##
 ## Autoconf initialisation. ##
@@ -168,8 +168,7 @@ AC_CHECK_SIZEOF([long long int])
 ## ------------------------- ##
 ## C headers required by M4. ##
 ## ------------------------- ##
-AC_CHECK_HEADERS([limits.h])
-AC_CHECK_HEADERS([signal.h sys/signal.h], [break])
+AC_CHECK_HEADERS_ONCE([limits.h])
 
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
@@ -183,7 +182,7 @@ AC_SUBST([INCLUDE_STDBOOL_H])
 ## --------------------------------- ##
 ## Library functions required by M4. ##
 ## --------------------------------- ##
-AC_CHECK_FUNCS([calloc strerror tmpfile])
+AC_CHECK_FUNCS_ONCE([calloc strerror tmpfile])
 
 AM_WITH_DMALLOC
 
@@ -192,8 +191,8 @@ M4_SYS_STACKOVF
 # This is for the modules
 AC_STRUCT_TM
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS([getcwd gethostname mktime uname \
-		setenv unsetenv putenv clearenv])
+AC_CHECK_FUNCS_ONCE([getcwd gethostname mktime uname])
+AC_CHECK_FUNCS_ONCE([setenv unsetenv putenv clearenv])
 
 M4_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])

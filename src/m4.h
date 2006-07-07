@@ -75,6 +75,7 @@ long strtol ();
 #endif /* STDC_HEADERS */
 
 #include <errno.h>
+#include <signal.h>
 
 #ifndef errno
 extern int errno;
@@ -88,12 +89,6 @@ extern int errno;
 # include <locale.h>
 #else
 # define setlocale(Category, Locale)
-#endif
-
-#if HAVE_SIGNAL_H
-# include <signal.h>
-#elif HAVE_SYS_SIGNAL_H
-# include <sys/signal.h>
 #endif
 
 #include "ltdl.h"
