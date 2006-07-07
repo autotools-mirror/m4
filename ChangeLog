@@ -1,5 +1,10 @@
 2006-07-07  Eric Blake  <ebb9@byu.net>
 
+	* tests/freeze.at (loading format 1): New file, with new test.
+	* tests/testsuite.at: Include it.
+	* tests/macros.at (Arity, defn, and freeze): Add frozen keyword.
+	* tests/modules.at (Freezing modules): Likewise.
+
 	* configure.ac (AC_PREREQ): Autoconf 2.60 is now out.
 	(AC_CHECK_HEADERS): Assume signal.h.
 	(AC_CHECK_HEADERS_ONCE): Use new feature to shrink configure.

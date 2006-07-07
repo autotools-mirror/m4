@@ -25,6 +25,7 @@ AT_BANNER([Module support.])
 ## --------- ##
 
 AT_SETUP([Freezing modules])
+AT_KEYWORDS([frozen])
 
 AT_DATA([[frozen.m4]],
 [[divert(1)dnl
