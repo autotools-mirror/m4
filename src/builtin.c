@@ -590,7 +590,7 @@ dump_symbol (symbol *sym, struct dump_symbol_data *data)
 `------------------------------------------------------------------------*/
 
 static int
-dumpdef_cmp (const voidstar s1, const voidstar s2)
+dumpdef_cmp (const void *s1, const void *s2)
 {
   return strcmp (SYMBOL_NAME (* (symbol *const *) s1),
 		 SYMBOL_NAME (* (symbol *const *) s2));

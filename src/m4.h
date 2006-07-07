@@ -23,9 +23,7 @@
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because it found this file in $srcdir).  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 /* Canonicalize UNIX recognition macros.  */
 #if defined unix || defined __unix || defined __unix__ \
@@ -38,74 +36,21 @@
 # define W32_NATIVE 1
 #endif
 
-#include <sys/types.h>
-
-#ifdef __STDC__
-# define voidstar void *
-#else
-# define voidstar char *
-#endif
-
 /* FIXME - we no longer need this ansi2knr hack.  */
 #define _(Args) Args
 
-#include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 #include "binary-io.h"
+#include "error.h"
+#include "exit.h"
 #include "obstack.h"
-
-/* An ANSI string.h and pre-ANSI memory.h might conflict.  */
-
-#if defined (HAVE_STRING_H) || defined (STDC_HEADERS)
-# include <string.h>
-# if !defined (STDC_HEADERS) && defined (HAVE_MEMORY_H)
-#  include <memory.h>
-# endif
-/* This is for obstack code -- should live in obstack.h.  */
-# ifndef bcopy
-#  define bcopy(S, D, N) memcpy ((D), (S), (N))
-# endif
-#else
-# include <strings.h>
-# ifndef memcpy
-#  define memcpy(D, S, N) bcopy((S), (D), (N))
-# endif
-# ifndef strchr
-#  define strchr(S, C) index ((S), (C))
-# endif
-# ifndef strrchr
-#  define strrchr(S, C) rindex ((S), (C))
-# endif
-# ifndef bcopy
-void bcopy ();
-# endif
-#endif
-
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-#else /* not STDC_HEADERS */
-
-voidstar malloc ();
-voidstar realloc ();
-char *getenv ();
-double atof ();
-long strtol ();
-
-#endif /* STDC_HEADERS */
-
-/* Some systems do not define EXIT_*, even with STDC_HEADERS.  */
-#ifndef EXIT_SUCCESS
-# define EXIT_SUCCESS 0
-#endif
-#ifndef EXIT_FAILURE
-# define EXIT_FAILURE 1
-#endif
-
-#include <errno.h>
-#ifndef errno
-extern int errno;
-#endif
+#include "xalloc.h"
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -134,19 +79,13 @@ struct string
 typedef struct string STRING;
 
 /* Memory allocation.  */
-voidstar xmalloc _((unsigned int));
-voidstar xrealloc _((voidstar , unsigned int));
-void xfree _((voidstar));
-char *xstrdup _((const char *));
+void xfree (void *);
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree
 
-/* Other library routines.  */
-void error _((int, int, const char *, ...));
-
 /* Those must come first.  */
-typedef void builtin_func ();
 typedef struct token_data token_data;
+typedef void builtin_func (struct obstack *, int, token_data **);
 
 /* File: m4.c  --- global definitions.  */
 

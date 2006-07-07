@@ -148,7 +148,7 @@ free_symbol (symbol *sym)
 	xfree (SYMBOL_NAME (sym));
       if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
 	xfree (SYMBOL_TEXT (sym));
-      xfree ((voidstar) sym);
+      xfree (sym);
     }
 }
 

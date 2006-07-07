@@ -121,8 +121,12 @@ stackovf_handler (void)
 | Failsafe free routine.  |
 `------------------------*/
 
+#ifdef WITH_DMALLOC
+# undef xfree
+#endif
+
 void
-xfree (voidstar p)
+xfree (void *p)
 {
   if (p != NULL)
     free (p);
@@ -450,7 +454,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 	}
 
       next = defines->next;
-      xfree ((voidstar) defines);
+      xfree (defines);
       defines = next;
     }
 

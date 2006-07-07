@@ -202,8 +202,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
-  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+  tdp = (token_data *) obstack_copy (arguments, &td, sizeof (td));
+  obstack_grow (argptr, &tdp, sizeof (tdp));
 
   ch = peek_input ();
   if (ch == '(')
@@ -219,8 +219,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	      TOKEN_DATA_TEXT (&td) = "";
 	    }
 	  tdp = (token_data *)
-	    obstack_copy (arguments, (voidstar) &td, sizeof (td));
-	  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+	    obstack_copy (arguments, &td, sizeof (td));
+	  obstack_grow (argptr, &tdp, sizeof (tdp));
 	}
       while (more_args);
     }
