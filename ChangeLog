@@ -1,4 +1,10 @@
+2006-07-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* doc/m4.texinfo: Fix spelling errors.
+
 2006-07-07  Eric Blake  <ebb9@byu.net>
+
+	* THANKS: Update.
 
 	* doc/Makefile.am (m4.1): No need to go through a temporary file;
 	this also ensures timestamps are updated.

@@ -332,7 +332,7 @@ evolution in the form of @code{M5}: ``User's Guide to the M5 Macro
 Language: 2nd edition'', Electronic Announcement on comp.compilers
 newsgroup (1992).
 
-Fran@,{c}ois Pinard took over maintainance of GNU @code{m4} in 1992, until
+Fran@,{c}ois Pinard took over maintenance of GNU @code{m4} in 1992, until
 1994 when he released GNU @code{m4} 1.4, which was the stable release
 for 10 years.  It was at this time that GNU Autoconf decided to require
 GNU @code{m4} as its underlying engine, since all other implementations
@@ -1905,7 +1905,7 @@ useful in connection with the @samp{c} flag above.
 Show the name of the current input file in each trace output line.
 
 @item l
-Show the the current input line number in each trace output line.
+Show the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
