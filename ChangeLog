@@ -1,5 +1,12 @@
 2006-07-06  Eric Blake  <ebb9@byu.net>
 
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	binary-io.
+	* src/m4.h (includes): Add binary-io.h for O_BINARY.
+	* src/freeze.c (produce_frozen_state): Use O_BINARY to remove
+	#ifdef.  Fixes patch from 2005-02-03 for cygwin.
+	* NEWS: Mention this fix.
+
 	* configure.ac (FUNC_SYSTEM_BROKEN): New check for OS/2 bug.
 	* src/builtin.c (m4_syscmd): Work around OS/2 bug.
 

@@ -56,13 +56,7 @@ produce_frozen_state (const char *name)
   symbol *sym;
   const builtin *bp;
 
-#ifdef W32_NATIVE
-# define FROZEN_WRITE "wb"
-#else
-# define FROZEN_WRITE "w"
-#endif
-
-  if (file = fopen (name, FROZEN_WRITE), !file)
+  if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
     {
       M4ERROR ((warning_status, errno, name));
       return;

@@ -27,6 +27,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 * On Windows builds, the macro __windows__ is provided instead of
   __unix__.  This allows input files to determine when syscmd might behave
   differently.
+* Fix bug in 1.4.3 patch to use \n line-endings that did not work for
+  cygwin.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 
@@ -59,7 +61,7 @@ Version 1.4.3 - March 2005, by Gary V. Vaughan
 
 * DESTDIR installs now work correctly.
 * Don't segfault with uncompilable regexps to changeword().
-* Always use \n line-endings for frozen files (fixes a cygwin bug).
+* Always use \n line-endings for frozen files (fixes a Windows bug).
 * Portability fix for systems lacking mkstemp(3).
 * Approximately 20% speed up in the common case of usage with autoconf.
 * Supported on QNX 6.3.

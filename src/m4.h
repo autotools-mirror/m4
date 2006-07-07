@@ -52,6 +52,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "binary-io.h"
 #include "obstack.h"
 
 /* An ANSI string.h and pre-ANSI memory.h might conflict.  */
