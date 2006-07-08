@@ -1,52 +1,71 @@
 \input texinfo @c -*-texinfo-*-
-@c %**start of header
+@comment ========================================================
+@comment %**start of header
 @setfilename m4.info
-@settitle GNU macro processor
-@c For double-sided printing, uncomment:
-@c @setchapterpage odd
+@settitle GNU M4 macro processor
+@setchapternewpage odd
+@ifnothtml
+@setcontentsaftertitlepage
+@end ifnothtml
 @finalout
-@c %**end of header
 
 @include version.texi
 
+@c @tabchar{}
+@c ----------
 @c The testsuite expects literal tab output in some examples, but
 @c literal tabs in texinfo lead to formatting issues.
 @macro tabchar
 @	@c
 @end macro
 
+@c @ovar(ARG)
+@c -------------------
+@c The ARG is an optional argument.  To be used for macro arguments in
+@c their documentation.
+@macro ovar{varname}
+@r{[}@var{\varname\}@r{]}
+@end macro
+
+@c @dvar(ARG, DEFAULT)
+@c -------------------
+@c The ARG is an optional argument, defaulting to DEFAULT.  To be used
+@c for macro arguments in their documentation.
+@macro dvar{varname, default}
+@r{[}@var{\varname\} = @samp{\default\}@r{]}
+@end macro
+
+@comment %**end of header
+@comment ========================================================
+
+@copying
+
+This manual is for GNU M4 (version @value{VERSION}, @value{UPDATED}),
+a package containing an implementation the m4 macro language.
+
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
+2006 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the @acronym{GNU} Free Documentation License,
+Version 1.2 or any later version published by the Free Software
+Foundation; with no Invariant Sections, with the Front-Cover texts
+being ``A @acronym{GNU} Manual,'' and with the Back-Cover Texts as in
+(a) below.  A copy of the license is included in the section entitled
+``@acronym{GNU} Free Documentation License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and
+modify this @acronym{GNU} Manual, like @acronym{GNU} software.  Copies
+published by the Free Software Foundation raise funds for
+@acronym{GNU} development.''
+@end quotation
+@end copying
+
 @dircategory GNU programming tools
 @direntry
-* m4: (m4).                     A powerful macro processor.
+* M4: (m4).                     A powerful macro processor.
 @end direntry
-
-@ifnottex
-This file documents GNU M4 @value{VERSION}.
-
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
-Free Software Foundation, Inc.
-
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the entire
-resulting derived work is distributed under the terms of a permission
-notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation approved
-by the Foundation.
-@end ifnottex
 
 @titlepage
 @title GNU M4, version @value{VERSION}
@@ -56,30 +75,17 @@ by the Foundation.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006 Free Software Foundation, Inc.
-
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the entire
-resulting derived work is distributed under the terms of a permission
-notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation approved
-by the Foundation.
+@insertcopying
 @end titlepage
+
+@contents
 
 @ifnottex
 @node Top, Preliminaries, (dir), (dir)
 @top GNU M4
+@insertcopying
+@end ifnottex
 
-@c @item @b{@code{m4}} @value{hfillkludge} (UtilD, UtilT, SrcCD)
-@c
 GNU @code{m4} is an implementation of the traditional UNIX macro
 processor.  It is mostly SVR4 compatible, although it has some
 extensions (for example, handling more than 9 positional parameters
@@ -132,6 +138,7 @@ changeword will go away and you should not count on it.
 * Frozen files::                Fast loading of frozen states
 
 * Compatibility::               Compatibility with other versions of m4
+* Answers::                     Answers
 * Concept index::               Index for many concepts
 * Macro index::                 Index for all m4 macros
 
@@ -153,6 +160,7 @@ Lexical and syntactic conventions
 * Quoted strings::              Quoting input to m4
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
 
 How to invoke macros
 
@@ -243,8 +251,6 @@ Compatibility with other versions of @code{m4}
 
 @end detailmenu
 @end menu
-
-@end ifnottex
 
 @node Preliminaries, Syntax, Top, Top
 @chapter Introduction and preliminaries
@@ -627,6 +633,7 @@ contain comments.
 * Quoted strings::              Quoting input to m4
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Input processing::            How m4 copies input to output
 @end menu
 
 @node Names, Quoted strings, Syntax, Syntax
@@ -673,7 +680,7 @@ The quote characters can be changed at any time, using the builtin macro
 Any character, that is neither a part of a name, nor of a quoted string,
 is a token by itself.
 
-@node Comments,  , Other tokens, Syntax
+@node Comments
 @section Comments
 
 @cindex comments
@@ -696,6 +703,50 @@ can be inhibited by quoting it.
 The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
+
+@node Input processing
+@section Input Processing
+
+As @code{m4} reads the input token by token, it will copy each token
+directly to the output immediately.
+
+The exception is when it finds a word with a macro definition.  In that
+case @code{m4} will calculate the macro's expansion, possibly reading
+more input to get the arguments.  It then inserts the expansion in front
+of the remaining input.  In other words, the resulting text from a macro
+call will be read and parsed into tokens again.
+
+@code{m4} expands a macro as soon as possible.  It it finds a macro call
+when collecting the arguments to another, it will expand the second
+call first.  If the input is
+
+@comment ignore
+@example
+format(`Result is %d', eval(`2**15'))
+@end example
+
+@noindent
+@code{m4} will first expand @samp{eval(2**15)} to @samp{32768}, and only
+then expand the resulting call
+
+@comment ignore
+@example
+format(`Result is %d', `32768')
+@end example
+
+@noindent
+which will give the output
+
+@comment ignore
+@example
+Result is 32768
+@end example
+
+The order in which @code{m4} expands the macros can be explored using
+the @ref{Trace} facilities of GNU @code{m4}.
+
+This process continues until there are no more macro calls to expand and
+all the input has been consumed.
 
 @node Macros, Definitions, Syntax, Top
 @chapter How to invoke macros
@@ -815,7 +866,8 @@ divert`'
 @end example
 
 @noindent
-the @code{divert} builtin macro will be called.
+the @code{divert} builtin macro will be called, which expands to the
+empty string.
 
 The output of macro evaluations is always rescanned.  The following
 example would yield the string @samp{de}, exactly as if @code{m4}
@@ -1024,7 +1076,7 @@ the output.  This can be avoided by use of the macro @code{dnl}.
 The first argument to @code{define} should be quoted; otherwise, if the
 macro is already defined, you will be defining a different macro.  This
 example shows the problems with underquoting, since we did not want to
-define @code{one}:
+redefine @code{one}:
 
 @example
 define(foo, one)
@@ -1034,6 +1086,32 @@ define(foo, two)
 one
 @result{}two
 @end example
+
+The first argument to @code{define} does not have to be a simple word.
+It can be any text string, even the empty string.  A macro with a
+non-standard name cannot be invoked in the normal way, as the name is
+not recognised.  It can only be referenced by the builtins @ref{Indir}
+and @ref{Defn}.
+
+@cindex arrays
+Arrays and associative arrays can be simulated by using this trick.
+
+@example
+define(`array', `defn(format(``array[%d]'', `$1'))')
+@result{}
+define(`array_set', `define(format(``array[%d]'', `$1'), `$2')')
+@result{}
+array_set(`4', `array element no. 4')
+@result{}
+array_set(`17', `array element no. 17')
+@result{}
+array(`4')
+@result{}array element no. 4
+array(eval(`10 + 7'))
+@result{}array element no. 17
+@end example
+
+Change the @code{%d} to @code{%s} and it is an associative array.
 
 The macro @code{define} is recognized only with parameters.
 
@@ -1312,7 +1390,21 @@ bar
 @result{}This is bar
 @end example
 
-The macro @code{defn} is recognized only with parameters.
+Macros used as string variables should be referred through @code{defn},
+to avoid unwanted expansion of the text:
+
+@example
+define(`string', `The macro dnl is very useful
+')
+@result{}
+string
+@result{}The macro @comment
+defn(`string')
+@result{}The macro dnl is very useful
+@result{}
+@end example
+
+he macro @code{defn} is recognized only with parameters.
 
 @node Pushdef, Indir, Defn, Definitions
 @section Temporarily redefining macros
@@ -1519,7 +1611,15 @@ block comment, as an alternative to repeatedly using @code{dnl}.  This
 special usage is recognized by GNU @code{m4}, so that in this case, the
 warning about missing arguments is never triggered.
 
-If called with three or four arguments, @code{ifelse} expands into
+@example
+ifelse(`some comments')
+@result{}
+ifelse(`foo', `bar')
+@error{}stdin:2: m4: Warning: too few arguments to builtin `ifelse'
+@result{}
+@end example
+
+f called with three or four arguments, @code{ifelse} expands into
 @var{equal}, if @var{string-1} and @var{string-2} are equal (character
 for character), otherwise it expands to @var{not-equal}.
 
@@ -1551,7 +1651,6 @@ foo()
 foo(`a', `b', `c')
 @result{}arguments:3
 @end example
-
 
 @cindex multibranches
 However, @code{ifelse} can take more than four arguments.  If given more
@@ -1599,6 +1698,8 @@ It takes any number of arguments, and expands to all but the first
 argument, separated by commas, with each argument quoted.
 
 @example
+shift
+@result{}
 shift(`bar')
 @result{}
 shift(`foo', `bar', `baz')
@@ -1752,7 +1853,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}m4.input:7: m4: undefined macro `f'
+@error{}stdin:3: m4: undefined macro `f'
 @result{}f1
 @end example
 
@@ -1828,7 +1929,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4.input:17: m4: undefined macro `foo'
+@error{}stdin:8: m4: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -2014,7 +2115,7 @@ next newline, on whatever line containing it, will still be discarded.
 @example
 dnl(`this is ignored',
 `so is this') and this too
-@error{}m4.input:3: m4: Warning: excess arguments to builtin `dnl' ignored
+@error{}stdin:2: m4: Warning: excess arguments to builtin `dnl' ignored
 but not this
 @result{}but not this
 @end example
@@ -2080,6 +2181,11 @@ foo
 There is no way in @code{m4} to quote a string containing an unmatched
 left quote, except using @code{changequote} to change the current
 quotes.
+
+If the quotes should be changed from, say, @samp{[} to @samp{[[},
+temporary quote characters have to be defined.  To achieve this, two
+calls of @code{changequote} must be made, one for the temporary quotes
+and one for the new quotes.
 
 Neither quote string should start with a letter or @samp{_} (underscore),
 as they will be confused with names in the input.  Doing so disables
@@ -2166,8 +2272,9 @@ Using @code{changeword}, you can change this regular expression.  Relaxing
 @code{m4}'s lexical rules might be useful (for example) if you wanted to
 apply translations to a file of numbers:
 
-@comment ignore
 @example
+ifdef(`changeword', `', `m4exit(`77')')
+@result{}
 changeword(`[_a-zA-Z0-9]+')
 @result{}
 define(`1', `0')1
@@ -2178,8 +2285,9 @@ Tightening the lexical rules is less useful, because it will generally
 make some of the builtins unavailable.  You could use it to prevent
 accidental call of builtins, for example:
 
-@comment ignore
 @example
+ifdef(`changeword', `', `m4exit(`77')')
+@result{}
 define(`_indir', defn(`indir'))
 @result{}
 changeword(`_[_a-zA-Z0-9]*')
@@ -2200,8 +2308,9 @@ is a restriction on the regular expressions that may be passed to
 supplied contains any grouped subexpressions, then text outside
 the first of these is discarded before symbol lookup.  So:
 
-@comment ignore
 @example
+ifdef(`changeword', `', `m4exit(`77')')
+@result{}
 changecom(`/*', `*/')dnl
 define(`foo', `bar')dnl
 changeword(`#\([_a-zA-Z0-9]*\)')
@@ -2234,8 +2343,9 @@ First, the @TeX{} version:
 @noindent
 Then, the @code{m4} version:
 
-@comment ignore
 @example
+ifdef(`changeword', `', `m4exit(`77')')
+@result{}
 define(`a', `errprint(`Hello')')dnl
 changeword(`@@\([_a-zA-Z0-9]*\)')
 @result{}
@@ -2360,13 +2470,18 @@ contents of @var{filename}.
 It is an error for an @code{include}d file not to exist.  If you do
 not want error messages about non-existent files, @code{sinclude} can
 be used to include a file, if it exists, expanding to nothing if it
-does not.
+does not.  The empty string counts as a file that does not exist.
 
 @example
 include(`none')
 @result{}
-@error{}m4.input:2: m4: cannot open `none': No such file or directory
+@error{}stdin:1: m4: cannot open `none': No such file or directory
+include()
+@result{}
+@error{}stdin:2: m4: cannot open `': No such file or directory
 sinclude(`none')
+@result{}
+sinclude()
 @result{}
 @end example
 
@@ -2569,7 +2684,21 @@ following @code{undivert}, the other from the newline that followed the
 
 When diverted text is undiverted, it is @emph{not} reread by @code{m4},
 but rather copied directly to the current output, and it is therefore
-not an error to undivert into a diversion.
+not an error to undivert into a diversion.  Undiverting the empty string
+is the same as specifying diversion 0; in either case nothing happens
+since the output has already been flushed.
+
+@example
+divert(`1')diverted text
+divert
+@result{}
+undivert()
+@result{}
+undivert(`0')
+@result{}
+undivert
+@result{}diverted text
+@end example
 
 When a diversion has been undiverted, the diverted text is discarded,
 and it is not possible to bring back diverted text more than once.
@@ -2688,7 +2817,7 @@ define(`cleardivert',
 
 It is called just like @code{undivert}, but the effect is to clear the
 diversions, given by the arguments.  (This macro has a nasty bug!  You
-should try to see if you can find it and correct it.)
+should try to see if you can find it and correct it.  @xref{Answers}.)
 
 @node Text handling, Arithmetic, Diversions, Top
 @chapter Macros for text handling
@@ -3152,7 +3281,7 @@ square(square(`5')`+1')
 define(`foo', `666')
 @result{}
 eval(`foo/6')
-@error{}m4.input:14: m4: bad expression in eval: foo/6
+@error{}stdin:7: m4: bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3555,7 +3684,7 @@ current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `input error
 ')
-@error{}m4:m4.input:2: input error
+@error{}m4:stdin:1: input error
 @result{}
 @end example
 
@@ -3578,11 +3707,11 @@ which causes @code{m4} to exit, with exit code @var{code}.  If
 
 @example
 define(`fatal_error',
-       `errprint(`m4: '__file__: __line__`: fatal error: $*
+       `errprint(`m4:'__file__:__line__`: fatal error: $*
 ')m4exit(`1')')
 @result{}
 fatal_error(`this is a BAD one, buster')
-@error{}m4: m4.input: 6: fatal error: this is a BAD one, buster
+@error{}m4:stdin:4: fatal error: this is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
@@ -3701,7 +3830,7 @@ It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
 Frozen files are sharable across architectures.  It is safe to write
-a frozen file one one machine and read it on another, given that the
+a frozen file one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU @code{m4}.
 These are simple (editable) text files, made up of directives,
 each starting with a capital letter and ending with a newline
@@ -3749,7 +3878,7 @@ at reload time, however this may not be produced from within @code{m4}.
 
 @end table
 
-@node Compatibility, Concept index, Frozen files, Top
+@node Compatibility
 @chapter Compatibility with other versions of @code{m4}
 
 @cindex compatibility
@@ -4018,13 +4147,50 @@ ifelse(defn(`@var{holder}'), `@var{value}', @dots{})
 
 @noindent
 In cases like this one, an interdiction for a macro to hold its own
-name would be a useless limitation.  Of course, this leave more rope
+name would be a useless limitation.  Of course, this leaves more rope
 for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.
 @end itemize
 
-@node Concept index, Macro index, Compatibility, Top
+@node Answers
+@chapter Answers
+
+Some of the examples in this manuals are buggy, for demonstration
+purposes.  Correctly working macros are presented here.
+
+The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
+called without arguments to clear all pending diversions.  That is
+because using undivert with an empty string for an argument is different
+than using it with no arguments at all.  Compare the earlier definition
+with one that takes the number of arguments into account:
+
+@example
+define(`cleardivert',
+  `pushdef(`_n', divnum)divert(`-1')undivert($@@)divert(_n)popdef(`_n')')
+@result{}
+divert(`1')one
+divert
+@result{}
+cleardivert
+@result{}
+undivert
+@result{}one
+@result{}
+define(`cleardivert',
+  `pushdef(`_num', divnum)divert(`-1')ifelse(`$#', `0',
+    `undivert`'', `undivert($@@)')divert(_num)popdef(`_num')')
+@result{}
+divert(`2')two
+divert
+@result{}
+cleardivert
+@result{}
+undivert
+@result{}
+@end example
+
+@node Concept index
 @unnumbered Concept index
 
 @printindex cp
@@ -4042,8 +4208,6 @@ characters removed in the index.
 
 @printindex fn
 
-@summarycontents
-@contents
 @bye
 
 @c Local Variables:

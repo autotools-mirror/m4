@@ -1,3 +1,17 @@
+2006-07-08  Eric Blake  <ebb9@byu.net>
+
+	* checks/get-them: Make filtering easier.
+	* checks/check-them: Filter non-input lines, so line counts are
+	more realistic in the documentation, and so changeword tests work
+	even when dnl is disabled.
+	* doc/m4.texinfo: Adjust example line numbers.  Clean up
+	front-matter, following autoconf's example.
+	(Changeword): Enable tests, skipping if changeword not supported.
+	(Define, Defn, Ifelse): Backport more examples from head.
+	(Input processing, Answers): New nodes, backported from head.
+	(Include): Expand test to cover empty filename.
+	(Undivert): Add test of undivert(0).
+
 2006-07-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* doc/m4.texinfo: Fix spelling errors.

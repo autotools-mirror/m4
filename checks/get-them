@@ -46,7 +46,7 @@ BEGIN {
     seq++;
     count++;
     file = sprintf("%02d.%s", count, node);
-    printf("dnl %s:%d: Origin of test\n", FILENAME, NR) > file;
+    printf("dnl @ %s:%d: Origin of test\n", FILENAME, NR) > file;
     next;
   }
   if ($0 ~ /^@end example$/) {

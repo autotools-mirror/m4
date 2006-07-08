@@ -41,15 +41,20 @@ fi
 # Run the tests.
 for file
 do
+  test -f "$file" || {
+    echo "No such file: $file"
+    continue
+  }
   echo "Checking $file"
-  LC_MESSAGES=C m4 -d -I "$examples" $file >$out 2>$err
+  sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
+    | LC_MESSAGES=C m4 -d -I "$examples" - >$out 2>$err
 
   if test $? = 77 ; then
     skipped="$skipped $file"
     continue
   fi
 
-  sed -e '/^dnl @result{}/!d' -e 's///' -e "s|m4.input|$file|" $file > $xout
+  sed -e '/^dnl @result{}/!d' -e 's///' "$file" > $xout
 
   if cmp -s $out $xout; then
     :
@@ -60,8 +65,7 @@ do
     diff $xout $out
   fi
 
-  sed -e '/^dnl @error{}/!d' -e 's///' -e "s|m4.input|$file|" \
-      -e "s| m4:| $m4:|" $file > $xerr
+  sed -e '/^dnl @error{}/!d' -e 's///' -e "s| m4:| $m4:|" "$file" > $xerr
 
   if cmp -s $err $xerr; then
     :
