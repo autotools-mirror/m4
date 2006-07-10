@@ -1,5 +1,8 @@
 2006-07-10  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
+	* modules/gnu.c (m4_regexp_search, regsub, substitute)
+	(esyscmd):  Improve comments.
+
 	* modules/gnu.c (substitute): Remove old warning for \0.
 	(substitute_warned): No longer required.  Removed.
 

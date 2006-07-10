@@ -172,6 +172,9 @@ m4_regexp_compile (m4 *context, const char *caller,
   return &buf;
 }
 
+
+/* Wrap up GNU Regex re_search call to work with an m4_pattern_buffer.  */
+
 static int
 m4_regexp_search (m4_pattern_buffer *buf, const char *string,
 		  const int size, const int start, const int range)
@@ -183,9 +186,9 @@ m4_regexp_search (m4_pattern_buffer *buf, const char *string,
 /* Function to perform substitution by regular expressions.  Used by the
    builtins regexp, patsubst and renamesyms.  The changed text is placed on
    the obstack.  The substitution is REPL, with \& substituted by this part
-   of VICTIM matched by the last whole regular expression, taken from
-   REGS[0], and \N substituted by the text matched by the Nth parenthesized
-   sub-expression, taken from REGS[N].  */
+   of VICTIM matched by the last whole regular expression, and \N
+   substituted by the text matched by the Nth parenthesized sub-expression.  */
+
 static void
 substitute (m4 *context, m4_obstack *obs, const char *victim,
 	    const char *repl, m4_pattern_buffer *buf)
@@ -223,6 +226,10 @@ substitute (m4 *context, m4_obstack *obs, const char *victim,
     }
 }
 
+
+/* For each match against compiled REGEXP (held in BUF -- as returned by
+   m4_regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
+   characters are copied verbatim, and the result copied to the obstack.  */
 
 static bool
 regsub (m4 *context, m4_obstack *obs, const char *caller,
@@ -419,6 +426,9 @@ M4BUILTIN_HANDLER (debugmode)
     }
 }
 
+
+/* Same as the sysymd builtin from m4.c module, but expand to the
+   output of SHELL-COMMAND. */
 
 /**
  * esyscmd(SHELL-COMMAND)
