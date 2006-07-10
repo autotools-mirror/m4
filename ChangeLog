@@ -1,5 +1,8 @@
 2006-07-10  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
+	* tests/builtin.at (patsubst, regexp):  Adjust these tests, now
+	that `\0' is no longer accepted.
+
 	* src/main.c (usage): Alphabetize options within their sections.
 
 	* modules/gnu.c (m4_regexp_search, regsub, substitute)
