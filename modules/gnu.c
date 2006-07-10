@@ -186,8 +186,6 @@ m4_regexp_search (m4_pattern_buffer *buf, const char *string,
    of VICTIM matched by the last whole regular expression, taken from
    REGS[0], and \N substituted by the text matched by the Nth parenthesized
    sub-expression, taken from REGS[N].  */
-static int substitute_warned = 0;
-
 static void
 substitute (m4 *context, m4_obstack *obs, const char *victim,
 	    const char *repl, m4_pattern_buffer *buf)
@@ -205,15 +203,6 @@ substitute (m4 *context, m4_obstack *obs, const char *victim,
 
       switch ((ch = *repl++))
 	{
-	case '0':
-	  if (!substitute_warned)
-	    {
-	      M4ERROR ((m4_get_warning_status_opt (context), 0, _("\
-WARNING: \\0 will disappear, use \\& instead in replacements")));
-	      substitute_warned = 1;
-	    }
-	  /* Fall through.  */
-
 	case '&':
 	  obstack_grow (obs, victim + buf->regs.start[0],
 			buf->regs.end[0] - buf->regs.start[0]);

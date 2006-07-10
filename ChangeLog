@@ -1,5 +1,8 @@
 2006-07-10  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
+	* modules/gnu.c (substitute): Remove old warning for \0.
+	(substitute_warned): No longer required.  Removed.
+
 	* modules/gnu.c: Put macro definitions into alphabetical order.
 
 2006-07-07  Eric Blake  <ebb9@byu.net>
