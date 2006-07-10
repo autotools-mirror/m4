@@ -2698,6 +2698,7 @@ undivert(`0')
 @result{}
 undivert
 @result{}diverted text
+@result{}
 @end example
 
 When a diversion has been undiverted, the diverted text is discarded,

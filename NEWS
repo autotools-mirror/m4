@@ -29,6 +29,9 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   differently.
 * Fix bug in 1.4.3 patch to use \n line-endings that did not work for
   cygwin.
+* When given the empty string or 0, undivert is now documented as a no-op
+  rather than closing stdout, warning about a non-existent file, or trying
+  to read a directory as a file.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

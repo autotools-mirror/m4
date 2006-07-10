@@ -208,6 +208,11 @@ FLAGS is any of:\n\
 	     stdout);
       fputs ("\
 \n\
+If defined, the environment variable `M4PATH' is a colon-separated list\n\
+of directories included after any specified by `-I'.\n",
+	     stdout);
+      fputs ("\
+\n\
 If no FILE or if FILE is `-', standard input is read.\n",
 	     stdout);
     }

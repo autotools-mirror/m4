@@ -101,40 +101,47 @@ add_include_directory (const char *dir)
 }
 
 FILE *
-path_search (const char *dir)
+path_search (const char *file)
 {
   FILE *fp;
   includes *incl;
   char *name;			/* buffer for constructed name */
   int e;
 
+  /* Reject empty file.  */
+  if (!*file)
+    {
+      errno = ENOENT;
+      return NULL;
+    }
+
   /* Look in current working directory first.  */
-  fp = fopen (dir, "r");
+  fp = fopen (file, "r");
   if (fp != NULL)
     return fp;
 
   /* If file not found, and filename absolute, fail.  */
-  if (*dir == '/' || no_gnu_extensions)
+  if (*file == '/' || no_gnu_extensions)
     return NULL;
   e = errno;
 
-  name = (char *) xmalloc (dir_max_length + 1 + strlen (dir) + 1);
+  name = (char *) xmalloc (dir_max_length + 1 + strlen (file) + 1);
 
   for (incl = dir_list; incl != NULL; incl = incl->next)
     {
       strncpy (name, incl->dir, incl->len);
       name[incl->len] = '/';
-      strcpy (name + incl->len + 1, dir);
+      strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", dir, name);
+      fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
-	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", dir, name);
+	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
 	  break;
 	}
     }

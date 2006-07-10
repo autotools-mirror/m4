@@ -998,6 +998,8 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
       {
 	if (sscanf (ARG (i), "%d", &file) == 1)
 	  insert_diversion (file);
+	else if (!*ARG (i))
+	  /* Ignore empty string.  */;
 	else if (no_gnu_extensions)
 	  M4ERROR ((warning_status, 0,
 		    "non-numeric argument to builtin `%s'", ARG (0)));

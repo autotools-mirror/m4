@@ -476,9 +476,10 @@ insert_diversion (int divnum)
 {
   struct diversion *diversion;
 
-  /* Do not care about unexisting diversions.  */
+  /* Do not care about unexisting diversions.  Also, diversion 0 is stdout,
+     which is effectively always empty.  */
 
-  if (divnum < 0 || divnum >= diversions)
+  if (divnum <= 0 || divnum >= diversions)
     return;
 
   /* Also avoid undiverting into self.  */

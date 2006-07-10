@@ -1,3 +1,12 @@
+2006-07-09  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Undivert): Fix typo in last commit.
+	* src/m4.c (usage): Document M4PATH.
+	* src/path.c (path_search): Reject empty string.
+	* src/output.c (insert_diversion): Ignore diversion 0.
+	* src/builtin.c (m4_undivert): Ignore empty string.
+	* NEWS: Document this fix.
+
 2006-07-08  Eric Blake  <ebb9@byu.net>
 
 	* checks/get-them: Make filtering easier.
