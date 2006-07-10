@@ -98,12 +98,12 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
-  -c, --discard-comments       do not copy comments to the output\n\
   -b, --batch                  buffer output, process interrupts\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -c, --discard-comments       do not copy comments to the output\n\
   -E, --fatal-warnings         stop execution after first warning\n\
-  -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n"),
+  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
+  -Q, --quiet, --silent        suppress some warnings for builtins\n"),
 	     stdout);
       printf (_("\
 \n\
@@ -114,10 +114,10 @@ Dynamic loading features:\n\
       fputs (_("\
 \n\
 Preprocessor features:\n\
-  -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
-  -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n"),
+  -I, --include=DIRECTORY      search this directory second for includes\n\
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
+  -U, --undefine=NAME          delete builtin NAME\n"),
 	     stdout);
       fputs (_("\
 \n\
@@ -135,24 +135,24 @@ Frozen state files:\n\
 \n\
 Debugging:\n\
   -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n"),
+  -o, --error-output=FILE      redirect debug and trace output\n\
+  -t, --trace=NAME             trace NAME when it will be defined\n"),
 	     stdout);
       fputs (_("\
 \n\
 FLAGS is any of:\n\
-  t   trace for all macro calls, not only traceon'ed\n\
   a   show actual arguments\n\
-  e   show expansion\n\
-  q   quote values as necessary, with a or e flag\n\
   c   show before collect, after collect and after call\n\
-  x   add a unique macro call id, useful with c flag\n\
+  e   show expansion\n\
   f   say current input file name\n\
+  i   show changes in input files\n\
   l   say current input line number\n\
   p   show results of path searches\n\
-  i   show changes in input files\n\
-  V   shorthand for all of the above flags\n"),
+  q   quote values as necessary, with a or e flag\n\
+  t   trace for all macro calls, not only traceon'ed\n\
+  V   shorthand for all of the above flags\n\
+  x   add a unique macro call id, useful with c flag\n"),
 	     stdout);
       fputs (_("\
 \n\
