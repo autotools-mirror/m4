@@ -156,6 +156,8 @@ predefined_tab[] =
   { "unix",	"__unix__",	"" },
 #elif W32_NATIVE
   { "windows",	"__windows__",	"" },
+#elif OS2
+  { "os2",	"__os2__",	"" },
 #else
 # warning Platform macro not provided
 #endif

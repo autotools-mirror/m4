@@ -36,6 +36,11 @@
 # define W32_NATIVE 1
 #endif
 
+/* Canonicalize OS/2 recognition macro.  */
+#ifdef __EMX__
+# define OS2 1
+#endif
+
 /* FIXME - we no longer need this ansi2knr hack.  */
 #define _(Args) Args
 

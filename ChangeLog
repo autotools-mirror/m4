@@ -1,3 +1,13 @@
+2006-07-11  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (OS2): New platform macro.
+	* src/builtin.c (predefined_tab) [OS2]: Use it to give OS/2 a
+	platform macro.
+	* doc/m4.texinfo (Platform macros): Document it.
+	(Sysval): Remove non-portable test of system("").
+	* NEWS: Document this change.
+	Reported by Andreas Buening.
+
 2006-07-09  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Undivert): Fix typo in last commit.

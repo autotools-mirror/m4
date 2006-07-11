@@ -3375,6 +3375,8 @@ their existence will confirm platform details.
 @comment ignore
 @example
 __gnu__
+__os2__
+os2
 __unix__
 unix
 __windows__
@@ -3404,6 +3406,11 @@ On native Windows systems, GNU @code{m4} without the @samp{-G} option
 will define the macro @code{__windows__}, otherwise the macro
 @code{windows}.  Both will expand to the empty string.
 
+@findex os2
+On OS/2 systems, GNU @code{m4} without the @samp{-G} option will define
+the macro @code{__os2__}, otherwise the macro @code{os2}.  Both will
+expand to the empty string.
+
 If GNU @code{m4} does not provide a platform macro for your system,
 please report that as a bug.
 
@@ -3413,6 +3420,8 @@ define(`provided', `0')
 ifdef(`__unix__', `define(`provided', incr(provided))')
 @result{}
 ifdef(`__windows__', `define(`provided', incr(provided))')
+@result{}
+ifdef(`__os2__', `define(`provided', incr(provided))')
 @result{}
 provided
 @result{}1
@@ -3517,10 +3526,6 @@ syscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-syscmd()
-@result{}
-sysval
-@result{}0
 syscmd(`exit 2')
 @result{}
 sysval
@@ -3533,10 +3538,6 @@ esyscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-esyscmd()
-@result{}
-sysval
-@result{}0
 esyscmd(`exit 2')
 @result{}
 sysval

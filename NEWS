@@ -25,8 +25,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   functions, format is no longer subject to a buffer overflow that
   permitted arbitrary code execution.
 * On Windows builds, the macro __windows__ is provided instead of
-  __unix__.  This allows input files to determine when syscmd might behave
-  differently.
+  __unix__.  Likewise, on OS/2 builds, the macro __os2__ is provided.  This
+  allows input files to determine when syscmd might behave differently.
 * Fix bug in 1.4.3 patch to use \n line-endings that did not work for
   cygwin.
 * When given the empty string or 0, undivert is now documented as a no-op
