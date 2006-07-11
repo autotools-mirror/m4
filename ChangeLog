@@ -1,5 +1,14 @@
 2006-07-11  Eric Blake  <ebb9@byu.net>
 
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): New macro, to
+	stress-test changeword before a release.
+	* doc/m4.texinfo: More doc cleanups.
+	(Copying This Manual): New node; actually include the FDL in the
+	documentation.
+	* doc/Makefile.am (m4_TEXINFOS): Mention dependence on fdl.texi.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import fdl.
+	* NEWS: Mention documentation improvements.
+
 	* src/m4.h (OS2): New platform macro.
 	* src/builtin.c (predefined_tab) [OS2]: Use it to give OS/2 a
 	platform macro.

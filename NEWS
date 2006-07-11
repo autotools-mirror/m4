@@ -32,6 +32,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 * When given the empty string or 0, undivert is now documented as a no-op
   rather than closing stdout, warning about a non-existent file, or trying
   to read a directory as a file.
+* Many documentation improvements.  Also, the manual is now distributed
+  under FDL 1.2, rather than a stricter verbatim-only license.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

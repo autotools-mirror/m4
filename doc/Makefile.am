@@ -20,6 +20,7 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 info_TEXINFOS = m4.texinfo
+m4_TEXINFOS = fdl.texi
 man_MANS = m4.1
 EXTRA_DIST = $(man_MANS)
 MAINTAINERCLEANFILES = $(man_MANS)

@@ -27,8 +27,9 @@ DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
 MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
-	config-h.in configure depcomp install-sh lib/* \
+	config-h.in configure depcomp doc/fdl.texi install-sh lib/* \
 	m4/[a-fh-z]* m4/g[a-mo-z]* m4/gnulib-comp.m4 m4/gnulib-tool.m4 \
 	missing stamp-h.in
 
 ACLOCAL_AMFLAGS = -I m4
+DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
