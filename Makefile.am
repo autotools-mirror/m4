@@ -268,9 +268,7 @@ $(srcdir)/doc/m4.1: configure.ac src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run \
-	    help2man -o $@-tmp src/m4$(EXEEXT); \
-	  cmp -s $@-tmp $@ || cp $@-tmp $@; \
-	  rm -f $@-tmp; \
+	    help2man -o $@ src/m4$(EXEEXT); \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
 	  echo "         Retry once the program executable is ready."; \
