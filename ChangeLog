@@ -1,5 +1,8 @@
 2006-07-12  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Extensions): Document how to overcome
+	implementation difference in > 9 positional parameters.
+
 	* src/m4.c (usage): Sort within sections.
 	(nesting_limit): Raise default from 250 to 1024.
 	* doc/m4.texinfo: Use file name, not filename, per GNU coding

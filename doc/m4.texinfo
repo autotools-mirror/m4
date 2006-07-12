@@ -3996,6 +3996,31 @@ several digits, while the System V @code{m4} only accepts one digit.
 This allows macros in GNU @code{m4} to take any number of arguments, and
 not only nine (@pxref{Arguments}).
 
+This means that @code{define(`foo', `$11')} is ambiguous between
+implementations.  To portably choose between grabbing the first
+parameter and appending 1 to the expansion, or grabbing the eleventh
+parameter, you can do the following:
+
+@example
+define(`a1', `A1')
+@result{}
+dnl First argument, concatenated with 1
+define(`_1', `$1')define(`first1', `_1($@@)1')
+@result{}
+dnl Eleventh argument, portable
+define(`_9', `$9')define(`eleventh', `_9(shift(shift($@@)))')
+@result{}
+dnl Eleventh argument, GNU style
+define(`Eleventh', `$11')
+@result{}
+first1(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
+@result{}A1
+eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
+@result{}k
+Eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
+@result{}k
+@end example
+
 @item
 The @code{divert} (@pxref{Divert}) macro can manage more than 9
 diversions.  GNU @code{m4} treats all positive numbers as valid
