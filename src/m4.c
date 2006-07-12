@@ -54,7 +54,7 @@ int suppress_warnings = 0;
 int warning_status = 0;
 
 /* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 250;
+int nesting_limit = 1024;
 
 #ifdef ENABLE_CHANGEWORD
 /* User provided regexp for describing m4 words.  */

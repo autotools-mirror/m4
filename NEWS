@@ -24,7 +24,7 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   zeroes on integers printed with %.0f.  On systems without these
   functions, format is no longer subject to a buffer overflow that
   permitted arbitrary code execution.
-* On Windows builds, the macro __windows__ is provided instead of
+* On native Windows builds, the macro __windows__ is provided instead of
   __unix__.  Likewise, on OS/2 builds, the macro __os2__ is provided.  This
   allows input files to determine when syscmd might behave differently.
 * Fix bug in 1.4.3 patch to use \n line-endings that did not work for
@@ -34,6 +34,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   to read a directory as a file.
 * Many documentation improvements.  Also, the manual is now distributed
   under FDL 1.2, rather than a stricter verbatim-only license.
+* Raise the -L (--nesting-limit) command line option limit from 250 to
+  1024.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 
