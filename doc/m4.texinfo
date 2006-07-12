@@ -1,4 +1,4 @@
-\input texinfo @c -*-texinfo-*-
+\input texinfo @c -*- texinfo -*-
 @comment ========================================================
 @comment %**start of header
 @setfilename m4.info
@@ -19,7 +19,7 @@
 @	@c
 @end macro
 
-@c @ovar(ARG)
+@c @ovar{ARG}
 @c -------------------
 @c The ARG is an optional argument.  To be used for macro arguments in
 @c their documentation.
@@ -27,7 +27,7 @@
 @r{[}@var{\varname\}@r{]}
 @end macro
 
-@c @dvar(ARG, DEFAULT)
+@c @dvar{ARG, DEFAULT}
 @c -------------------
 @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
 @c for macro arguments in their documentation.
@@ -115,7 +115,7 @@ if you want this feature compiled in.  The current implementation
 slows down @code{m4} considerably and is hardly acceptable.  In the
 future, @code{m4} 2.0 will come with a different set of new features
 that provide similar capabilities, but without the inefficiencies, so
-changeword will go away and you should not count on it.
+changeword will go away and @emph{you should not count on it}.
 
 @menu
 * Preliminaries::               Introduction and preliminaries
@@ -123,7 +123,7 @@ changeword will go away and you should not count on it.
 
 * Macros::                      How to invoke macros
 * Definitions::                 How to define new macros
-* Conditionals::                Conditionals and loops
+* Conditionals::                Conditionals, loops, and recursion
 
 * Debugging::                   How to debug macros and input
 
@@ -135,10 +135,10 @@ changeword will go away and you should not count on it.
 * Arithmetic::                  Macros for doing arithmetic
 * Shell commands::              Macros for running shell commands
 * Miscellaneous::               Miscellaneous builtin macros
-* Frozen files::                Fast loading of frozen states
+* Frozen files::                Fast loading of frozen state
 
 * Compatibility::               Compatibility with other versions of m4
-* Answers::                     Answers
+* Answers::                     Correct version of some examples
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
 
@@ -149,7 +149,6 @@ Introduction and preliminaries
 
 * Intro::                       Introduction to @code{m4}
 * History::                     Historical references
-
 * Invoking m4::                 Invoking @code{m4}
 * Bugs::                        Problems and bugs
 * Manual::                      Using this manual
@@ -182,7 +181,7 @@ How to define new macros
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
 
-Conditionals, loops and recursion
+Conditionals, loops, and recursion
 
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
@@ -243,6 +242,11 @@ Miscellaneous builtin macros
 * Errprint::                    Printing error messages
 * M4exit::                      Exiting from m4
 
+Fast loading of frozen state
+
+* Using frozen files::          Using frozen files
+* Frozen file format::          Frozen file format
+
 Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU M4
@@ -264,9 +268,9 @@ Indices
 @node Preliminaries
 @chapter Introduction and preliminaries
 
-This first chapter explains what is GNU @code{m4}, where @code{m4}
+This first chapter explains what GNU @code{m4} is, where @code{m4}
 comes from, how to read and use this documentation, how to call the
-@code{m4} program and how to report bugs about it.  It concludes by
+@code{m4} program, and how to report bugs about it.  It concludes by
 giving tips for reading the remainder of the manual.
 
 The following chapters then detail all the features of the @code{m4}
@@ -294,7 +298,7 @@ macro processor in its own right.
 
 The @code{m4} macro processor is widely available on all UNIXes.
 Usually, only a small percentage of users are aware of its existence.
-However, those who do often become committed users.  The growing
+However, those who find it often become committed users.  The
 popularity of GNU Autoconf, which requires GNU @code{m4} for
 @emph{generating} the @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
@@ -302,7 +306,7 @@ program in @code{m4}.  GNU @code{m4} is mostly compatible with the
 System V, Release 3 version, except for some minor differences.
 @xref{Compatibility}, for more details.
 
-Some people found @code{m4} to be fairly addictive.  They first use
+Some people find @code{m4} to be fairly addictive.  They first use
 @code{m4} for simple problems, then take bigger and bigger challenges,
 learning how to write complex @code{m4} sets of macros along the way.
 Once really addicted, users pursue writing of sophisticated @code{m4}
@@ -371,62 +375,80 @@ The format of the @code{m4} command is:
 
 @comment ignore
 @example
-@code{m4} [@var{option}@dots{}] [@var{macro-definitions}@dots{}] [@var{input-file}@dots{}]
+@code{m4} [@var{option}@dots{}] [@var{file}@dots{}]
 @end example
 
 @cindex command line, options
 @cindex options, command line
 All options begin with @samp{-}, or if long option names are used, with
-a @samp{--}.  A long option name need not be written completely, and
-unambiguous prefix is sufficient.  @code{m4} understands the following
-options:
+a @samp{--}.  A long option name need not be written completely, any
+unambiguous prefix is sufficient.  Options may be intermixed with files,
+use @option{--} as a marker to denote the end of options.  @code{m4}
+understands the following options, grouped by functionality.
+
+Several options control the overall operation of @code{m4}:
 
 @table @code
-@item --version
-Print the version number of the program on standard output, then
-immediately exit @code{m4} without reading any @var{input-files}.
-
 @item --help
 Print a help summary on standard output, then immediately exit
-@code{m4} without reading any @var{input-files}.
+@code{m4} without reading any input files.
 
-@item -G
-@itemx --traditional
-Suppress all the extensions made in this implementation, compared to the
-System V version.  @xref{Compatibility}, for a list of these.
+@item --version
+Print the version number of the program on standard output, then
+immediately exit @code{m4} without reading any input files.
 
 @item -E
 @itemx --fatal-warnings
 Stop execution and exit @code{m4} once the first warning has been
 issued, considering all of them to be fatal.
 
-@item -d@var{flags}
-@itemx --debug=@var{flags}
-Set the debug-level according to the flags @var{flags}.  The debug-level
-controls the format and amount of information presented by the debugging
-functions.  @xref{Debug Levels}, for more details on the format and
-meaning of @var{flags}.
-
-@item -l@var{num}
-@itemx --arglength=@var{num}
-Restrict the size of the output generated by macro tracing.  @xref{Debug
-Levels}, for more details.
-
-@item -o@var{file}
-@itemx --error-output=@var{file}
-Redirect debug and trace output to the named file.  Error messages are
-still printed on the standard error output.  @xref{Debug Output}, for
-more details.
-
-@item -I@var{dir}
-@itemx --include=@var{dir}
-Make @code{m4} search @var{dir} for included files that are not found in
-the current working directory.  @xref{Search Path}, for more details.
-
 @item -e
 @itemx --interactive
 Makes this invocation of @code{m4} interactive.  This means that all
 output will be unbuffered, and interrupts will be ignored.
+
+@item -P
+@itemx --prefix-builtins
+Internally modify @emph{all} builtin macro names so they all start with
+the prefix @samp{m4_}.  For example, using this option, one should write
+@samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
+instead of @samp{__file__}.  This option has no effect if @option{-R} is
+also specified.
+
+@item -Q
+@itemx --quiet
+@itemx --silent
+Suppress warnings about missing or superfluous arguments in macro calls.
+
+@item -W @var{REGEXP}
+@itemx --word-regexp=@var{REGEXP}
+Use @var{REGEXP} as an alternative syntax for macro names.  This
+experimental option will not be present on all GNU @code{m4}
+implementations. (@pxref{Changeword}).
+@end table
+
+@cindex macro definitions, on the command line
+@cindex command line, macro definitions on the
+Several options allow @code{m4} to behave more like a preprocessor.
+Macro definitions and deletions can be made on the command line, the
+search path can be altered, and the output file can track where the
+input came from.  These features occur with the following options:
+
+@table @code
+@item -D @var{NAME}[=@var{VALUE}]
+@itemx --define=@var{NAME}[=@var{VALUE}]
+This enters @var{NAME} into the symbol table, before any input files are
+read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
+empty string.  The @var{VALUE} can be any string, and the macro can be
+defined to take arguments, just as if it was defined from within the
+input.  This option may be given more than once; order is significant,
+and redefining the same @var{NAME} loses the previous value.
+
+@item -I @var{DIR}
+@itemx --include=@var{DIR}
+Make @code{m4} search @var{DIR} for included files that are not found in
+the current working directory.  @xref{Search Path}, for more details.
+This option may be given more than once.
 
 @item -s
 @itemx --synclines
@@ -434,42 +456,48 @@ Generate synchronization lines, for use by the C preprocessor or other
 similar tools.  This is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
 is conveyed by directives of the form @samp{#line @var{linenum}
-"@var{filename}"}, which are inserted as needed into the middle of the
+"@var{file}"}, which are inserted as needed into the middle of the
 input.  Such directives mean that the following line originated or was
-expanded from the contents of input file @var{filename} at line
-@var{linenum}.  The @samp{"@var{filename}"} part is often omitted when
+expanded from the contents of input file @var{file} at line
+@var{linenum}.  The @samp{"@var{file}"} part is often omitted when
 the file name did not change from the previous directive.
 
-Synchronization directives are always given on complete lines per
+Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
 until the beginning of the next generated line.
 
-@item -P
-@itemx --prefix-builtins
-Internally modify @emph{all} builtin macro names so they all start with
-the prefix @samp{m4_}.  For example, using this option, one should write
-@samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
-instead of @samp{__file__}.
+@item -U @var{NAME}
+@itemx --undefine=@var{NAME}
+This deletes any predefined meaning @var{NAME} might have.  Obviously,
+only predefined macros can be deleted in this way.  This option may be
+given more than once; undefining a @var{NAME} that does not have a
+definition is silently ignored.
+@end table
 
-@item -W@var{REGEXP}
-@itemx --word-regexp=@var{REGEXP}
-Use an alternative syntax for macro names.  This experimental
-option might not be present on all GNU @code{m4} implementations.
-(@pxref{Changeword}).
+There are some limits within @code{m4} that can be tuned.  For
+compatibility, @code{m4} also accepts some options that control limits
+in other implementations, but which are automatically unbounded (limited
+only by your hardware constraints) in GNU @code{m4}.
 
-@item -H@var{n}
-@itemx --hashsize=@var{n}
-Make the internal hash table for symbol lookup be @var{n} entries big.
-The number should be prime.  The default is 509 entries.  It should not
-be necessary to increase this value, unless you define an excessive
-number of macros.
+@table @code
+@item -G
+@itemx --traditional
+Suppress all the extensions made in this implementation, compared to the
+System V version.  @xref{Compatibility}, for a list of these.
 
-@item -L@var{n}
-@itemx --nesting-limit=@var{n}
-Artificially limit the nesting of macro calls to @var{n} levels,
+@item -H @var{NUM}
+@itemx --hashsize=@var{NUM}
+Make the internal hash table for symbol lookup be @var{NUM} entries big.
+For better performance, the number should be prime, but this is not
+checked.  The default is 509 entries.  It should not be necessary to
+increase this value, unless you define an excessive number of macros.
+
+@item -L @var{NUM}
+@itemx --nesting-limit=@var{NUM}
+Artificially limit the nesting of macro calls to @var{NUM} levels,
 stopping program execution if this limit is ever exceeded.  When not
-specified, nesting is limited to 250 levels.
+specified, nesting is limited to 1024 levels.
 
 The precise effect of this option might be more correctly associated
 with textual nesting than dynamic recursion.  It has been useful
@@ -488,74 +516,83 @@ only the simplest example (but @pxref{Compatibility}).  Expecting GNU
 system to detect and diagnose endless loops: it is a quite @emph{hard}
 problem in general, if not undecidable!
 
-@item -Q
-@itemx --quiet
-@itemx --silent
-Suppress warnings about missing or superfluous arguments in macro calls.
-
-@item -B@var{n}
-@itemx -S@var{n}
-@itemx -T@var{n}
+@item -B @var{NUM}
+@itemx -S @var{NUM}
+@itemx -T @var{NUM}
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.
 
-@item -N@var{n}
-@itemx --diversions=@var{n}
+@item -N @var{NUM}
+@itemx --diversions=@var{NUM}
 These options are present only for compatibility with previous
 versions of GNU @code{m4}, and were controlling the number of possible
 diversions which could be used at the same time.  They do nothing,
 because there is no fixed limit anymore.
-
 @end table
 
-@cindex macro definitions, on the command line
-@cindex command line, macro definitions on the
-Macro definitions and deletions can be made on the command line, by
-using the @samp{-D} and @samp{-U} options.  They have the following
-format:
+GNU @code{m4} comes with a feature of freezing internal state
+(@pxref{Frozen files}).  This can be used to speed up @code{m4}
+execution when reusing a common initialization script.
 
 @table @code
-@item -D@var{name}
-@itemx -D@var{name}=@var{value}
-@itemx --define=@var{name}
-@itemx --define=@var{name}=@var{value}
-This enters @var{name} into the symbol table, before any input files are
-read.  If @samp{=@var{value}} is missing, the value is taken to be the
-empty string.  The @var{value} can be any string, and the macro can be
-defined to take arguments, just as if it was defined from within the
-input.
-
-@item -U@var{name}
-@itemx --undefine=@var{name}
-This deletes any predefined meaning @var{name} might have.  Obviously,
-only predefined macros can be deleted in this way.
-
-@item -t@var{name}
-@itemx --trace=@var{name}
-This enters @var{name} into the symbol table, as undefined but traced.
-The macro will consequently be traced from the point it is defined.
-
-@item -F@var{file}
-@itemx --freeze-state @var{file}
+@item -F @var{FILE}
+@itemx --freeze-state @var{FILE}
 Once execution is finished, write out the frozen state on the specified
-@var{file} (@pxref{Frozen files}).
+@var{FILE}.  It is conventional, but not required, for @var{FILE} to end
+in @samp{.m4f}.
 
-@item -R@var{file}
-@itemx --reload-state @var{file}
+@item -R @var{FILE}
+@itemx --reload-state @var{FILE}
 Before execution starts, recover the internal state from the specified
-frozen @var{file} (@pxref{Frozen files}).
-
+frozen @var{FILE}.  The options @option{-D}, @option{-U}, and
+@option{-t} take effect after state is reloaded, but before the input
+files are read.
 @end table
 
-@cindex command line, filenames on the
-@cindex filenames, on the command line
+Finally, there are several options for aiding in debugging @code{m4}
+scripts.
+
+@table @code
+@item -d@var{FLAGS}
+@itemx --debug[=@var{FLAGS}]
+Set the debug-level according to the flags @var{FLAGS}.  The debug-level
+controls the format and amount of information presented by the debugging
+functions.  @xref{Debug Levels}, for more details on the format and
+meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to @samp{aeq}.
+
+@item -l @var{NUM}
+@itemx --arglength=@var{NUM}
+Restrict the size of the output generated by macro tracing to @var{NUM}
+characters per trace line.  @xref{Debug Levels}, for more details.
+
+@item -o @var{FILE}
+@itemx --error-output=@var{FILE}
+Redirect debug and trace output to the named @var{FILE}.  Error messages
+are still printed on the standard error output.  @xref{Debug Output},
+for more details.
+
+@item -t @var{NAME}
+@itemx --trace=@var{NAME}
+This enables tracing for the macro @var{NAME}, at any point where it is
+defined.  @var{NAME} need not be defined when this option is given.
+This option may be given more than once.
+@end table
+
+@cindex command line, file names on the
+@cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
 names.  If no names are present, the standard input is read.  A file
-name of @file{-} is taken to mean the standard input.
+name of @file{-} is taken to mean the standard input.  It is
+conventional, but not required, for input files to end in @samp{.m4}.
 
 The input files are read in the sequence given.  The standard input can
-only be read once, so the filename @file{-} should only appear once on
-the command line.
+only be read once, so the file name @file{-} should only appear once on
+the command line.  It is an error if a file ends in the middle of
+argument collection or a quoted string.
+
+If you need to read a file whose name starts with a @file{-}, you can
+specify it as @samp{./-file}, or use @option{--} to mark the end of
+options.
 
 @node Bugs
 @section Problems and bugs
@@ -576,7 +613,8 @@ problem was really in the documentation.
 Once you've got a precise problem, send e-mail to (Internet)
 @email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
 you are using.  You can get this information with the command @samp{m4
---version}.
+--version}.  Also provide details about the platform you are executing
+on.
 
 Non-bug suggestions are always welcome as well.  If you have questions
 about things that are unclear in the documentation or are just obscure
@@ -606,6 +644,11 @@ Example of input line
 @error{}and an error message
 @end example
 
+The majority of these examples are self-contained, and you can run them
+with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
+that is bundled in the GNU M4 package consists of the examples in this
+document!
+
 As each of the predefined macros in @code{m4} is described, a prototype
 call of the macro will be shown, giving descriptive names to the
 arguments, e.g.,
@@ -616,7 +659,7 @@ regexp(@var{string}, @var{regexp}, opt @var{replacement})
 @end example
 
 All macro arguments in @code{m4} are strings, but some are given special
-interpretation, e.g., as numbers, filenames, regular expressions, etc.
+interpretation, e.g., as numbers, file names, regular expressions, etc.
 
 The @samp{opt} before the third argument shows that this argument is
 optional---if it is left out, it is taken to be the empty string.  An
@@ -635,7 +678,8 @@ primitive is spelled within @code{m4}.
 As @code{m4} reads its input, it separates it into @dfn{tokens}.  A
 token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
-contain comments.
+contain comments.  GNU @code{m4} does not yet understand locales; all
+operations are byte-oriented rather than character-oriented.
 
 @menu
 * Names::                       Macro names
@@ -830,8 +874,8 @@ call is not triggered.  This solves the most usual cases, like for
 ``This macro is recognized only when given arguments'' refers to this
 specific provision.
 
-There is also a command call option (@code{--prefix-builtins}, or
-@code{-P}) which requires all builtin macro names to be prefixed
+There is also a command call option (@option{--prefix-builtins}, or
+@option{-P}) which requires all builtin macro names to be prefixed
 by @samp{m4_} for them to be recognized.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.
@@ -935,7 +979,7 @@ there are too many arguments, the excess arguments are ignored.
 
 Normally @code{m4} will issue warnings if a builtin macro is called
 with an inappropriate number of arguments, but it can be suppressed with
-the @samp{-Q} command line option.  For user defined macros, there is no
+the @option{-Q} command line option.  For user defined macros, there is no
 check of the number of arguments given.
 
 Macros are expanded normally during argument collection, and whatever
@@ -1553,7 +1597,7 @@ another definition that has covered the original.
 The macro @code{builtin} is recognized only with parameters.
 
 @node Conditionals
-@chapter Conditionals, loops and recursion
+@chapter Conditionals, loops, and recursion
 
 Macros, expanding to plain text, perhaps with arguments, are not quite
 enough.  We would like to have macros expand to different things, based
@@ -1918,7 +1962,7 @@ of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.
 
 Tracing by name is an attribute that is preserved whether the macro is
-defined or not.  This allows the @samp{-t} option to select macros to
+defined or not.  This allows the @option{-t} option to select macros to
 trace before those macros are defined.
 
 @example
@@ -1977,29 +2021,17 @@ display.
 
 @cindex controlling debugging output
 @cindex debugging output, controlling
-The @samp{-d} option to @code{m4} controls the amount of details
+The @option{-d} option to @code{m4} controls the amount of details
 presented, when using the macros described in the preceding sections.
 
 The @var{flags} following the option can be one or more of the
 following:
 
 @table @code
-@item t
-Trace all macro calls made in this invocation of @code{m4}.
-
 @item a
 Show the actual arguments in each macro call.  This applies to all macro
 calls if the @samp{t} flag is used, otherwise only the macros covered by
 calls of @code{traceon}.
-
-@item e
-Show the expansion of each macro call, if it is not void.  This applies
-to all macro calls if the @samp{t} flag is used, otherwise only the
-macros covered by calls of @code{traceon}.
-
-@item q
-Quote actual arguments and macro expansions in the display with the
-current quotes.
 
 @item c
 Show several trace lines for each macro call.  A line is shown when the
@@ -2007,31 +2039,43 @@ macro is seen, but before the arguments are collected; a second line
 when the arguments have been collected and a third line after the call
 has completed.
 
-@item x
-Add a unique `macro call id' to each line of the trace output.  This is
-useful in connection with the @samp{c} flag above.
+@item e
+Show the expansion of each macro call, if it is not void.  This applies
+to all macro calls if the @samp{t} flag is used, otherwise only the
+macros covered by calls of @code{traceon}.
 
 @item f
 Show the name of the current input file in each trace output line.
+
+@item i
+Print a message each time the current input file is changed, giving file
+name and input line number.
 
 @item l
 Show the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
-mechanism (@pxref{Search Path}), giving the actual filename used.
+mechanism (@pxref{Search Path}), giving the actual file name used.
 
-@item i
-Print a message each time the current input file is changed, giving file
-name and input line number.
+@item q
+Quote actual arguments and macro expansions in the display with the
+current quotes.
+
+@item t
+Trace all macro calls made in this invocation of @code{m4}.
+
+@item x
+Add a unique `macro call id' to each line of the trace output.  This is
+useful in connection with the @samp{c} flag above.
 
 @item V
 A shorthand for all of the above flags.
 @end table
 
-If no flags are specified with the @samp{-d} option, the default is
-@samp{aeq}. The examples in the previous two sections assumed the
-default flags.
+If no flags are specified with the @option{-d} option, the default is
+@samp{aeq}.  The examples throughout this manual assume the default
+flags.
 
 @cindex GNU extensions
 @findex debugmode
@@ -2047,7 +2091,7 @@ The argument @var{flags} should be a subset of the letters listed above.
 As special cases, if the argument starts with a @samp{+}, the flags are
 added to the current debug flags, and if it starts with a @samp{-}, they
 are removed.  If no argument is present, the debugging flags are set to
-zero (as if no @samp{-d} was given), and with an empty argument the flags
+zero (as if no @option{-d} was given), and with an empty argument the flags
 are reset to the default.
 
 @node Debug Output
@@ -2059,16 +2103,16 @@ are reset to the default.
 @cindex GNU extensions
 @findex debugfile
 Debug and tracing output can be redirected to files using either the
-@samp{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
+@option{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
 
 @comment ignore
 @example
-debugfile(opt @var{filename})
+debugfile(opt @var{file})
 @end example
 
 @noindent
-will send all further debug and trace output to @var{filename}.  If
-@var{filename} is empty, debug and trace output are discarded and if
+will send all further debug and trace output to @var{file}.  If
+@var{file} is empty, debug and trace output are discarded and if
 @code{debugfile} is called without any arguments, debug and trace output
 are sent to the standard error output.
 
@@ -2260,7 +2304,7 @@ changecom
 @findex changeword
 @quotation
 The macro @code{changeword} and all associated functionality is
-experimental.  It is only available if the @code{--enable-changeword}
+experimental.  It is only available if the @option{--enable-changeword}
 option was given to @code{configure}, at GNU @code{m4} installation
 time.  The functionality will go away in the future, to be replaced by
 other new features that are more efficient at providing the same
@@ -2464,17 +2508,17 @@ There are two builtin macros in @code{m4} for including files:
 
 @comment ignore
 @example
-include(@var{filename})
-sinclude(@var{filename})
+include(@var{file})
+sinclude(@var{file})
 @end example
 
 @noindent
-both of which cause the file named @var{filename} to be read by
+both of which cause the file named @var{file} to be read by
 @code{m4}.  When the end of the file is reached, input is resumed from
 the previous input file.
 
 The expansion of @code{include} and @code{sinclude} is therefore the
-contents of @var{filename}.
+contents of @var{file}.
 
 It is an error for an @code{include}d file not to exist.  If you do
 not want error messages about non-existent files, @code{sinclude} can
@@ -2495,7 +2539,7 @@ sinclude()
 @end example
 
 The rest of this section assumes that @code{m4} is invoked with the
-@samp{-I} option pointing to the @file{examples} directory shipped as
+@option{-I} option pointing to the @file{examples} directory shipped as
 part of the GNU @code{m4} package.  The file @file{examples/@/incl.m4} in
 the distribution contains the lines:
 @comment ignore
@@ -2552,9 +2596,9 @@ than the current working directory.
 
 If a file is not found in the current working directory, and the file
 name is not absolute, the file will be looked for in a specified search
-path.  First, the directories specified with the @samp{-I} option will
+path.  First, the directories specified with the @option{-I} option will
 be searched, in the order found on the command line.  Second, if the
-@samp{M4PATH} environment variable is set, it is expected to contain a
+@env{M4PATH} environment variable is set, it is expected to contain a
 colon-separated list of directories, which will be searched in order.
 
 If the automatic search for include-files causes trouble, the @samp{p}
@@ -3394,7 +3438,7 @@ windows
 
 @findex gnu
 When GNU extensions are in effect (that is, when you did not use the
-@samp{-G} option), GNU @code{m4} will define the macro @code{__gnu__} to
+@option{-G} option), GNU @code{m4} will define the macro @code{__gnu__} to
 expand to the empty string.
 
 @example
@@ -3406,17 +3450,17 @@ ifdef(`__gnu__', `Extensions are active')
 
 @findex unix
 @cindex platform macro
-On UNIX systems, GNU @code{m4} without the @samp{-G} option will define
+On UNIX systems, GNU @code{m4} without the @option{-G} option will define
 the macro @code{__unix__}, otherwise the macro @code{unix}.  Both will
 expand to the empty string.
 
 @findex windows
-On native Windows systems, GNU @code{m4} without the @samp{-G} option
+On native Windows systems, GNU @code{m4} without the @option{-G} option
 will define the macro @code{__windows__}, otherwise the macro
 @code{windows}.  Both will expand to the empty string.
 
 @findex os2
-On OS/2 systems, GNU @code{m4} without the @samp{-G} option will define
+On OS/2 systems, GNU @code{m4} without the @option{-G} option will define
 the macro @code{__os2__}, otherwise the macro @code{os2}.  Both will
 expand to the empty string.
 
@@ -3584,7 +3628,7 @@ sysval
 @node Maketemp
 @section Making names for temporary files
 
-@cindex temporary filenames
+@cindex temporary file names
 @cindex files, names of temporary
 @findex maketemp
 Commands specified to @code{syscmd} or @code{esyscmd} might need a
@@ -3601,7 +3645,8 @@ maketemp(@var{template})
 which expands to a name of a new, empty file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
 @code{X}'s are then replaced, usually with something that includes the
-process id of the @code{m4} process, in order to make the filename unique.
+process id of the @code{m4} process, in order to make the file name
+unique.
 
 @comment ignore
 @example
@@ -3740,14 +3785,8 @@ m4exit
 @end example
 
 @node Frozen files
-@chapter Fast loading of frozen states
+@chapter Fast loading of frozen state
 
-@cindex fast loading of frozen files
-@cindex frozen files for fast loading
-@cindex initialization, frozen states
-@cindex dumping into frozen file
-@cindex reloading a frozen file
-@cindex GNU extensions
 Some bigger @code{m4} applications may be built over a common base
 containing hundreds of definitions and other costly initializations.
 Usually, the common base is kept in one or more declarative files,
@@ -3756,17 +3795,33 @@ user's input file, or else, @code{include}'d from this input file.
 
 Reading the common base of a big application, over and over again, may
 be time consuming.  GNU @code{m4} offers some machinery to speed up
-the start of an application using lengthy common bases.  Presume the
-user repeatedly uses:
+the start of an application using lengthy common bases.
+
+@menu
+* Using frozen files::          Using frozen files
+* Frozen file format::          Frozen file format
+@end menu
+
+@node Using frozen files
+@section Using frozen files
+@cindex fast loading of frozen files
+@cindex frozen files for fast loading
+@cindex initialization, frozen states
+@cindex dumping into frozen file
+@cindex reloading a frozen file
+@cindex GNU extensions
+Suppose a user has a library of @code{m4} initializations in
+@file{base.m4}, which is then used with multiple input files:
 
 @comment ignore
 @example
-m4 base.m4 input.m4
+m4 base.m4 input1.m4
+m4 base.m4 input2.m4
+m4 base.m4 input3.m4
 @end example
 
-@noindent
-with a varying contents of @file{input.m4}, but a rather fixed contents
-for @file{base.m4}.  Then, the user might rather execute:
+Rather than spending time parsing the fixed contents of @file{base.m4}
+every time, the user might rather execute:
 
 @comment ignore
 @example
@@ -3778,18 +3833,20 @@ once, and further execute, as often as needed:
 
 @comment ignore
 @example
-m4 -R base.m4f input.m4
+m4 -R base.m4f input1.m4
+m4 -R base.m4f input2.m4
+m4 -R base.m4f input3.m4
 @end example
 
 @noindent
-with the varying input.  The first call, containing the @code{-F}
+with the varying input.  The first call, containing the @option{-F}
 option, only reads and executes file @file{base.m4}, so defining
 various application macros and computing other initializations.  Only
 once the input file @file{base.m4} has been completely processed, GNU
 @code{m4} produces on @file{base.m4f} a @dfn{frozen} file, that is, a
 file which contains a kind of snapshot of the @code{m4} internal state.
 
-Later calls, containing the @code{-R} option, are able to reload
+Later calls, containing the @option{-R} option, are able to reload
 the internal state of @code{m4}'s memory, from @file{base.m4f},
 @emph{prior} to reading any other input files.  By this mean,
 instead of starting with a virgin copy of @code{m4}, input will be
@@ -3800,7 +3857,7 @@ been read anew.  However, this effect is achieved a lot faster.
 Only one frozen file may be created or read in any one @code{m4}
 invocation.  It is not possible to recover two frozen files at once.
 However, frozen files may be updated incrementally, through using
-@code{-R} and @code{-F} options simultaneously.  For example, if
+@option{-R} and @option{-F} options simultaneously.  For example, if
 some care is taken, the command:
 
 @comment ignore
@@ -3840,53 +3897,70 @@ A frozen file to be reloaded need not reside in the current directory.
 It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
+@node Frozen file format
+@section Frozen file format
+@cindex frozen file format
+@cindex file format, frozen file
 Frozen files are sharable across architectures.  It is safe to write
 a frozen file on one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU @code{m4}.
+It is convention, but not required, to give a frozen file the suffix of
+@code{.m4f}.
+
 These are simple (editable) text files, made up of directives,
 each starting with a capital letter and ending with a newline
 (@key{NL}).  Wherever a directive is expected, the character
 @kbd{#} introduces a comment line, empty lines are also ignored.
-In the following descriptions, @var{length}s always refer to
-corresponding @var{string}s.  Numbers are always expressed in decimal.
-The directives are:
+In the following descriptions, each @var{len} refers to the length of
+the corresponding strings @var{str} in the next line of input.  Numbers
+are always expressed in decimal.  There are no escape characters.  The
+directives are:
 
 @table @code
+@item C @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the beginning comment and
+end comment strings.  If omitted, then @samp{#} and @key{NL} are the
+comment delimiters.
+
+@item D @var{number}, @var{len} @key{NL} @var{str} @key{NL}
+Selects diversion @var{number}, making it current, then copy
+@var{str} in the current diversion.  @var{number} may be a negative
+number for a non-existing diversion.  To merely specify an active
+selection, use this command with an empty @var{str}.  With 0 as the
+diversion @var{number}, @var{str} will be issued on standard output
+at reload time, however @code{m4} will not produce the @samp{D}
+directive with non-zero length for diversion 0.  This directive may
+appear more than once for the same diversion, in which case the
+diversion is the concatenation of the various uses.  If omitted, then
+diversion 0 is current.
+
+@item F @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Defines, through @code{pushdef}, a definition for @var{str1}
+expanding to the function whose builtin name is @var{str2}.  If the
+builtin does not exist (for example, if the frozen file was produced by
+a copy of @code{m4} compiled with changeword support, but the version
+of @code{m4} reloading was compiled without it), the reload is silent,
+but any subsequent use of the definition of @var{str1} will result in
+a warning.  This directive may appear more than once for the same name,
+and its order, along with @samp{T}, is important.  If omitted, you will
+have no access to any builtins.
+
+@item Q @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the beginning quote and end quote
+strings.  If omitted, then @samp{`} and @samp{'} are the quote
+delimiters.
+
+@item T @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Defines, though @code{pushdef}, a definition for @var{str1}
+expanding to the text given by @var{str2}.  This directive may appear
+more than once for the same name, and its order, along with @samp{F}, is
+important.
+
 @item V @var{number} @key{NL}
 Confirms the format of the file.  @code{m4} @value{VERSION} only creates
 and understands frozen files where @var{number} is 1.  This directive
 must be the first non-comment in the file, and may not appear more than
 once.
-
-@item C @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Uses @var{string1} and @var{string2} as the beginning comment and
-end comment strings.
-
-@item Q @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Uses @var{string1} and @var{string2} as the beginning quote and end quote
-strings.
-
-@item F @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Defines, through @code{pushdef}, a definition for @var{string1}
-expanding to the function whose builtin name is @var{string2}.  If the
-builtin does not exist (for example, if the frozen file was produced by
-a copy of @code{m4} compiled with changeword support, but the version
-of @code{m4} reloading was compiled without it), the reload is silent,
-but any subsequent use of the definition of @var{string1} will result in
-a warning.
-
-@item T @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Defines, though @code{pushdef}, a definition for @var{string1}
-expanding to the text given by @var{string2}.
-
-@item D @var{number}, @var{length} @key{NL} @var{string} @key{NL}
-Selects diversion @var{number}, making it current, then copy
-@var{string} in the current diversion.  @var{number} may be a negative
-number for a non-existing diversion.  To merely specify an active
-selection, use this command with an empty @var{string}.  With 0 as the
-diversion @var{number}, @var{string} will be issued on standard output
-at reload time, however this may not be produced from within @code{m4}.
-
 @end table
 
 @node Compatibility
@@ -3912,7 +3986,7 @@ is made to summarize these here.
 @cindex GNU extensions
 This version of @code{m4} contains a few facilities, that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
-using the @samp{-G} command line option, unless overridden by other
+using the @option{-G} command line option, unless overridden by other
 command line options.
 
 @itemize @bullet
@@ -3930,8 +4004,8 @@ diversions, rather than discarding diversions greater than 9.
 @item
 Files included with @code{include} and @code{sinclude} are sought in a
 user specified search path, if they are not found in the working
-directory.  The search path is specified by the @samp{-I} option and the
-@samp{M4PATH} environment variable (@pxref{Search Path}).
+directory.  The search path is specified by the @option{-I} option and the
+@env{M4PATH} environment variable (@pxref{Search Path}).
 
 @item
 Arguments to @code{undivert} can be non-numeric, in which case the named
@@ -3972,9 +4046,9 @@ The destination of trace and debug output can be controlled with
 @end itemize
 
 In addition to the above extensions, GNU @code{m4} implements the
-following command line options: @samp{-F}, @samp{-G}, @samp{-I},
-@samp{-L}, @samp{-R}, @samp{-V}, @samp{-W}, @samp{-d},
-@samp{-l}, @samp{-o} and @samp{-t}.  @xref{Invoking m4}, for a
+following command line options: @option{-F}, @option{-G}, @option{-I},
+@option{-L}, @option{-R}, @option{-V}, @option{-W}, @option{-d},
+@option{-l}, @option{-o} and @option{-t}.  @xref{Invoking m4}, for a
 description of these options.
 
 Also, the debugging and tracing facilities in GNU @code{m4} are much
@@ -4088,7 +4162,7 @@ On the other hand, when GNU @code{m4} encounters @code{traceon} without
 arguments, it turns tracing on for all existing definitions at the time,
 but does not trace future definitions; @code{traceoff} without arguments
 turns tracing off for all definitions regardless of whether they were
-also traced by name; and tracing by name, such as with @samp{-tfoo} at
+also traced by name; and tracing by name, such as with @option{-tfoo} at
 the command line or @code{traceon(`foo')} in the input, is an attribute
 that is preserved even if the macro is currently undefined.
 
@@ -4125,7 +4199,7 @@ when text is being diverted.  GNU @code{m4} outputs the sync lines when
 the text is being diverted, and System V @code{m4} when the diverted
 text is being brought back.
 
-The problem is which lines and filenames should be attached to text that
+The problem is which lines and file names should be attached to text that
 is being, or has been, diverted.  System V @code{m4} regards all the
 diverted text as being generated by the source line containing the
 @code{undivert} call, whereas GNU @code{m4} regards the diverted text as
@@ -4143,7 +4217,9 @@ like:
 @comment ignore
 @example
 define(`x', `x')
+@result{}
 define(`x', `x ')
+@result{}
 @end example
 
 There is nothing inherently wrong with defining @samp{x} to
@@ -4165,7 +4241,7 @@ in traditional programming languages.
 @end itemize
 
 @node Answers
-@chapter Answers
+@chapter Correct version of some examples
 
 Some of the examples in this manuals are buggy, for demonstration
 purposes.  Correctly working macros are presented here.

@@ -152,69 +152,69 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
+  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n",
-	     stdout);
+", stdout);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n",
-	     stdout);
+  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\
+", stdout);
 #endif
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
+  -I, --include=DIRECTORY      append this directory to include path\n\
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n",
-	     stdout);
+", stdout);
       fputs ("\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
-  -H, --hashsize=PRIME         set symbol lookup hash table size\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n",
-	     stdout);
+  -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
+  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
+", stdout);
       fputs ("\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n",
-	     stdout);
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
+", stdout);
       fputs ("\
 \n\
 Debugging:\n\
-  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
+  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n",
-	     stdout);
+  -o, --error-output=FILE      redirect debug and trace output\n\
+  -t, --trace=NAME             trace NAME when it will be defined\n\
+", stdout);
       fputs ("\
 \n\
 FLAGS is any of:\n\
-  t   trace for all macro calls, not only traceon'ed\n\
   a   show actual arguments\n\
-  e   show expansion\n\
-  q   quote values as necessary, with a or e flag\n\
   c   show before collect, after collect and after call\n\
-  x   add a unique macro call id, useful with c flag\n\
+  e   show expansion\n\
   f   say current input file name\n\
+  i   show changes in input files\n\
   l   say current input line number\n\
   p   show results of path searches\n\
-  i   show changes in input files\n\
-  V   shorthand for all of the above flags\n",
-	     stdout);
+  q   quote values as necessary, with a or e flag\n\
+  t   trace for all macro calls, not only traceon'ed\n\
+  V   shorthand for all of the other flags\n\
+  x   add a unique macro call id, useful with c flag\n\
+", stdout);
       fputs ("\
 \n\
 If defined, the environment variable `M4PATH' is a colon-separated list\n\
-of directories included after any specified by `-I'.\n",
-	     stdout);
+of directories included after any specified by `-I'.\n\
+", stdout);
       fputs ("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n",
-	     stdout);
+If no FILE or if FILE is `-', standard input is read.\n\
+", stdout);
     }
   exit (status);
 }

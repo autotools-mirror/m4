@@ -1,6 +1,15 @@
 2006-07-12  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.c (usage): Sort within sections.
+	(nesting_limit): Raise default from 250 to 1024.
+	* doc/m4.texinfo: Use file name, not filename, per GNU coding
+	standard.  Use @option where appropriate.
+	(Invoking m4): Sort to match --help output.
+	(Debug Levels): Sort.
+	(Frozen files): Sort and break into two nodes.
+
 	* src/m4.c (nesting_limit): Raise default from 250 to 1024.
+	* NEWS: Document raised -L limit.
 
 2006-07-11  Eric Blake  <ebb9@byu.net>
 
