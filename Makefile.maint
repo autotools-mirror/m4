@@ -93,9 +93,7 @@ fetch:
 	(cd Fetchdir && \
 	$(WGETSGO)/autoconf/autoconf/INSTALL; \
 	$(WGETSGO)/automake/automake/lib/install-sh; \
-	$(WGETSGO)/texinfo/texinfo/doc/texinfo.tex; \
-	$(WGETSGO)/texinfo/texinfo/util/gendocs.sh; \
-	$(WGETSGO)/texinfo/texinfo/util/gendocs_template; )
+	$(WGETSGO)/texinfo/texinfo/doc/texinfo.tex; )
 ## Don't exit after test because we want to give as many errors as
 ## possible.
 	@stat=0; for file in $(FETCHFILES); do \
@@ -198,12 +196,7 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 
 .PHONY: web-manual
 web-manual:
-	@ln -s `cd $(srcdir) && pwd`/doc/$(PACKAGE).texinfo doc/$(PACKAGE).texi
-	@ln -s `cd $(srcdir) && pwd`/doc/version.texi doc/version.texi
-	@ln -s `pwd`/Fetchdir/gendocs.sh doc/gendocs.sh
-	@ln -s `pwd`/Fetchdir/gendocs_template doc/gendocs_template
-	@cd doc; \
-	  $(SHELL) ./gendocs.sh $(PACKAGE) "GNU $(PACKAGE) - GNU macro processor"
-	@rm -rf doc/$(PACKAGE).texi doc/version.texi doc/gendocs* manual
-	@mv -f doc/manual .
-	@echo " *** Upload the manual directory to web-cvs."
+	@cd ./doc; \
+	  $(SHELL) "$(abs_srcdir)/gendocs.sh" $(PACKAGE) \
+	    "GNU $(PACKAGE)- GNU macro processor"
+	@echo " *** Upload the doc/manual directory to web-cvs."

@@ -15,14 +15,14 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --macro-prefix=M4 alloca binary-io error fdl getopt mkstemp obstack regex strtol xalloc xvasprintf
+#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --macro-prefix=M4 alloca binary-io error fdl gendocs getopt mkstemp obstack regex strtol xalloc xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([alloca binary-io error fdl getopt mkstemp obstack regex strtol xalloc xvasprintf])
+gl_MODULES([alloca binary-io error fdl gendocs getopt mkstemp obstack regex strtol xalloc xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
-gl_TESTS_BASE([tests])
 gl_DOC_BASE([doc])
+gl_TESTS_BASE([tests])
 gl_LIB([libm4])
 gl_MACRO_PREFIX([M4])

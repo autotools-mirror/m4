@@ -21,14 +21,14 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc checks
-EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.maint \
+EXTRA_DIST = bootstrap c-boxes.el gendocs.sh GNUmakefile Makefile.maint \
 	m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
 MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
-	config-h.in configure depcomp doc/fdl.texi install-sh lib/* \
-	m4/[a-fh-z]* m4/g[a-mo-z]* m4/gnulib-comp.m4 m4/gnulib-tool.m4 \
+	config-h.in configure depcomp doc/fdl.texi gendocs.sh install-sh
+	lib/* m4/[a-fh-z]* m4/g[a-mo-z]* m4/gnulib-comp.m4 m4/gnulib-tool.m4 \
 	missing stamp-h.in
 
 ACLOCAL_AMFLAGS = -I m4

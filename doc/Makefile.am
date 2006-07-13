@@ -22,8 +22,8 @@
 info_TEXINFOS = m4.texinfo
 m4_TEXINFOS = fdl.texi
 man_MANS = m4.1
-EXTRA_DIST = $(man_MANS)
-MAINTAINERCLEANFILES = $(man_MANS)
+EXTRA_DIST = $(man_MANS) gendocs_template
+MAINTAINERCLEANFILES = $(man_MANS) gendocs_template
 SUFFIXES = .1
 
 # Depend on configure.ac for version, m4.c for usage text.  Do not depend on
