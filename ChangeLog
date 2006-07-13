@@ -1,3 +1,10 @@
+2006-07-13  Gary V. Vaughan  <gary@gnu.org>
+
+	* bootstrap: Enhanced to work more like our other scripts:
+	Add a copyright statement; support --version and --help; accept a
+	--download-po option with argument as a substitute for DOWNLOAD_PO
+	in the environment.
+
 2006-07-11  Eric Blake  <ebb9@byu.net>
 
 	* Makefile.am (doc/m4.1): Port patch from branch that avoids
