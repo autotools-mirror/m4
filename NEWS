@@ -45,6 +45,8 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
 * The ifdef, divert, m4exit, substr, and translit macros now correctly
   ignore extra arguments.
 * The popdef and undefine macros now correctly accept multiple arguments.
+* Although changeword is on its last leg, if enabled, it now reverts to the
+  default (faster) regexp when passed the empty string.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

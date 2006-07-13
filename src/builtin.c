@@ -101,7 +101,7 @@ builtin_tab[] =
   { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
   { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
 #ifdef ENABLE_CHANGEWORD
-  { "changeword",	TRUE,	FALSE,	FALSE,	m4_changeword },
+  { "changeword",	TRUE,	FALSE,	TRUE,	m4_changeword },
 #endif
   { "debugmode",	TRUE,	FALSE,	FALSE,	m4_debugmode },
   { "debugfile",	TRUE,	FALSE,	FALSE,	m4_debugfile },

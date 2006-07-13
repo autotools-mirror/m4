@@ -2445,7 +2445,12 @@ the macro is @emph{used}.
 
 You should note that using @code{changeword} will slow @code{m4} down
 by a factor of about seven, once it is changed to something other
-than the default regular expression.
+than the default regular expression.  You can invoke @code{changeword}
+with the empty string to restore the default word definition, and regain
+the parsing speed.
+
+The builtin macro @code{changeword} is recognized only when given
+arguments.
 
 @node M4wrap
 @section Saving input

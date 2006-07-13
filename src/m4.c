@@ -58,7 +58,7 @@ int nesting_limit = 1024;
 
 #ifdef ENABLE_CHANGEWORD
 /* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = NULL;
+const char *user_word_regexp = "";
 #endif
 
 /* Name of frozen file to digest after initialization.  */
