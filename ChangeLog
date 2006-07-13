@@ -1,5 +1,22 @@
 2006-07-13  Eric Blake  <ebb9@byu.net>
 
+	* src/builtin.c (numeric_arg): Treat empty string as 0, with a
+	warning.  Detect quoted leading space and overflow as warnings.
+	(m4_eval): Treat empty radix as 10, and allow output in radix 1.
+	Treat width as minimum number of digits, as required by POSIX.
+	(m4_ifdef, m4_divert, m4_m4exit, m4_translit): Ignore extra
+	arguments.
+	(m4_substr): Likewise.  Silently treat empty start as 0.
+	(m4_undivert): Treat ` 1a' as file, not diversion 1.
+	* src/eval.c (eval_lex): Parse radix 1 numbers.
+	* doc/m4.texinfo (Invoking m4): Fix wording; there is more than
+	one type of warning.
+	(Manual): Document behavior of numeric parsing of empty string.
+	(Divert, Incr): Document error handling.
+	(Eval): Document radices better.
+	(Incompatibilities): Document translit incompatibility.
+	* NEWS: Document these changes.
+
 	* Makefile.maint (fetch): Get gendocs from gnulib, not texinfo.
 	(web-manual): Simplify.
 	* m4/gnulib-cache.m4: Augment with gnulib-tool --import gendocs.

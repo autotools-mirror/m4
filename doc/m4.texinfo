@@ -418,7 +418,8 @@ also specified.
 @item -Q
 @itemx --quiet
 @itemx --silent
-Suppress warnings about missing or superfluous arguments in macro calls.
+Suppress warnings, such as missing or superfluous arguments in macro
+calls, or treating the empty string as zero.
 
 @item -W @var{REGEXP}
 @itemx --word-regexp=@var{REGEXP}
@@ -553,7 +554,7 @@ Finally, there are several options for aiding in debugging @code{m4}
 scripts.
 
 @table @code
-@item -d@var{FLAGS}
+@item -d[@var{FLAGS}]
 @itemx --debug[=@var{FLAGS}]
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
@@ -644,6 +645,7 @@ Example of input line
 @error{}and an error message
 @end example
 
+The sequence @samp{^D} in an example indicates the end of the input file.
 The majority of these examples are self-contained, and you can run them
 with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
 that is bundled in the GNU M4 package consists of the examples in this
@@ -658,8 +660,15 @@ arguments, e.g.,
 regexp(@var{string}, @var{regexp}, opt @var{replacement})
 @end example
 
-All macro arguments in @code{m4} are strings, but some are given special
-interpretation, e.g., as numbers, file names, regular expressions, etc.
+All macro arguments in @code{m4} are strings, but some are given
+special interpretation, e.g., as numbers, file names, regular
+expressions, etc.  The documentation for each macro will state how the
+parameters are interpreted, and what happens if the argument cannot be
+parsed according to the desired interpretation.  Unless specified
+otherwise, a parameter specified to be a number is parsed as a decimal,
+even if the argument has leading zeros; and parsing the empty string as
+a number results in 0 rather than an error, although a warning will be
+issued.
 
 The @samp{opt} before the third argument shows that this argument is
 optional---if it is left out, it is taken to be the empty string.  An
@@ -1638,6 +1647,9 @@ define(`foo', `')
 @result{}
 ifdef(`foo', ``foo' is defined', ``foo' is not defined')
 @result{}foo is defined
+ifdef(`no_such_macro', `yes', `no', `extra argument')
+@error{}stdin:4: m4: Warning: excess arguments to builtin `ifdef' ignored
+@result{}no
 @end example
 
 The macro @code{ifdef} is recognized only with parameters.
@@ -2649,7 +2661,8 @@ divert(opt @var{number})
 
 @noindent
 where @var{number} is the diversion to be used.  If @var{number} is left
-out, it is assumed to be zero.
+out or empty, it is assumed to be zero.  If @var{number} cannot be
+parsed, the diversion is unchanged.
 
 The expansion of @code{divert} is void.
 
@@ -3007,7 +3020,8 @@ substr(@var{string}, @var{from}, opt @var{length})
 which expands to the substring of @var{string}, which starts at index
 @var{from}, and extends for @var{length} characters, or to the end of
 @var{string}, if @var{length} is omitted.  The starting index of a string
-is always 0.
+is always 0.  The expansion is empty if there is an error parsing
+@var{from} or @var{length}.
 
 @example
 substr(`gnus, gnats, and armadillos', `6')
@@ -3233,13 +3247,20 @@ decr(@var{number})
 
 @noindent
 which expand to the numerical value of @var{number}, incremented,
-or decremented, respectively, by one.
+or decremented, respectively, by one.  Except for the empty string, the
+expansion is empty if @var{number} could not be parsed.
 
 @example
 incr(`4')
 @result{}5
 decr(`7')
 @result{}6
+incr()
+@error{}stdin:3: m4: empty string treated as 0 in builtin `incr'
+@result{}1
+decr()
+@error{}stdin:4: m4: empty string treated as 0 in builtin `decr'
+@result{}-1
 @end example
 
 The builtin macros @code{incr} and @code{decr} are recognized only when
@@ -3260,7 +3281,8 @@ eval(@var{expression}, opt @var{radix}, opt @var{width})
 @end example
 
 @noindent
-which expands to the value of @var{expression}.
+which expands to the value of @var{expression}.  The expansion is empty
+if an error is encountered while parsing the arguments.
 
 Expressions can contain the following operators, listed in order of
 decreasing precedence.
@@ -3305,12 +3327,15 @@ implementations.  This behavior is likely to change in a future
 version to match @acronym{POSIX}, so use parentheses to force the
 desired precedence.
 
-Numbers without special prefix are given decimal.  A simple @samp{0}
+Within @var{expression}, (but not @var{radix} or @var{width}),
+numbers without a special prefix are decimal.  A simple @samp{0}
 prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
 number.  @samp{0b} introduces a binary number.  @samp{0r} introduces a
 number expressed in any radix between 1 and 36: the prefix should be
 immediately followed by the decimal expression of the radix, a colon,
-then the digits making the number.  For any radix, the digits are
+then the digits making the number.  For radix 1, leading zeros are
+ignored and all remaining digits must be @samp{1}; for all other
+radices, the digits are
 @samp{0}, @samp{1}, @samp{2}, @dots{}.  Beyond @samp{9}, the digits are
 @samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
 can be used interchangeably in numbers prefixes and as number digits.
@@ -3326,6 +3351,8 @@ eval(`-3 * 5')
 @result{}-15
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
+eval(`0r1:0111 + 0b100 + 0r3:12')
+@result{}12
 define(`square', `eval(`('$1`)**2')')
 @result{}
 square(`9')
@@ -3335,7 +3362,7 @@ square(square(`5')`+1')
 define(`foo', `666')
 @result{}
 eval(`foo/6')
-@error{}stdin:7: m4: bad expression in eval: foo/6
+@error{}stdin:8: m4: bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -3365,10 +3392,15 @@ eval(-4 >> 33)
 @end example
 
 If @var{radix} is specified, it specifies the radix to be used in the
-expansion.  The default radix is 10.  The result of @code{eval} is
-always taken to be signed.  The @var{width} argument specifies a minimum
-output width.  The result is zero-padded to extend the expansion to the
-requested width.
+expansion.  The default radix is 10; this is also the case if
+@var{radix} is the empty string.  It is an error if the radix is outside
+the range of 1 through 36, inclusive.  The result of @code{eval} is
+always taken to be signed.  No radix prefix is output, and for radices
+greater than 10, the digits are lower case.  The @var{width} argument
+specifies the minimum output width, excluding any negative sign.  The
+result is zero-padded to extend the expansion to the requested width.
+It is an error if the width is negative.  On error, the expansion of
+@code{eval} is empty.
 
 @example
 eval(`666', `10')
@@ -3380,10 +3412,14 @@ eval(`666', `6')
 eval(`666', `6', `10')
 @result{}0000003030
 eval(`-666', `6', `10')
-@result{}-000003030
+@result{}-0000003030
+eval(`10', `', `0')
+@result{}10
+`0r1:'eval(`10', `1', `11')
+@result{}0r1:01111111111
+eval(`10', `16')
+@result{}a
 @end example
-
-Take note that @var{radix} cannot be larger than 36.
 
 The builtin macro @code{eval} is recognized only when given arguments.
 
@@ -4209,6 +4245,11 @@ to ensure proper precedence.  As extensions to @acronym{POSIX}, GNU
 @code{m4} treats the shift operators @samp{<<} and @samp{>>} as
 well-defined on signed integers (even though they are not in C), and
 adds the exponentiation operator @samp{**}.
+
+@item
+@acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat
+each character of the second and third arguments literally, but GNU
+@code{m4} treats @samp{-} as a range operator.
 @end itemize
 
 @node Other Incompatibilities

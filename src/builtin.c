@@ -250,16 +250,16 @@ builtin_init (void)
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
       {
-        if (prefix_all_builtins)
-          {
-            string = (char *) xmalloc (strlen (bp->name) + 4);
-            strcpy (string, "m4_");
-            strcat (string, bp->name);
-            define_builtin (string, bp, SYMBOL_INSERT);
-            free (string);
-          }
-        else
-          define_builtin (bp->name, bp, SYMBOL_INSERT);
+	if (prefix_all_builtins)
+	  {
+	    string = (char *) xmalloc (strlen (bp->name) + 4);
+	    strcpy (string, "m4_");
+	    strcat (string, bp->name);
+	    define_builtin (string, bp, SYMBOL_INSERT);
+	    free (string);
+	  }
+	else
+	  define_builtin (bp->name, bp, SYMBOL_INSERT);
       }
 
   for (pp = &predefined_tab[0]; pp->func != NULL; pp++)
@@ -315,12 +315,32 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
 
-  if (*arg == 0 || (*valuep = strtol (arg, &endp, 10), *endp != 0))
+  if (*arg == '\0')
     {
+      *valuep = 0;
       M4ERROR ((warning_status, 0,
-		"non-numeric argument to builtin `%s'",
+		"empty string treated as 0 in builtin `%s'",
 		TOKEN_DATA_TEXT (macro)));
-      return FALSE;
+    }
+  else
+    {
+      errno = 0;
+      *valuep = strtol (arg, &endp, 10);
+      if (*endp != '\0')
+	{
+	  M4ERROR ((warning_status, 0,
+		    "non-numeric argument to builtin `%s'",
+		    TOKEN_DATA_TEXT (macro)));
+	  return FALSE;
+	}
+      if (isspace (to_uchar (*arg)))
+	M4ERROR ((warning_status, 0,
+		  "leading whitespace ignored in builtin `%s'",
+		  TOKEN_DATA_TEXT (macro)));
+      else if (errno == ERANGE)
+	M4ERROR ((warning_status, 0,
+		  "numeric overflow detected in builtin `%s'",
+		  TOKEN_DATA_TEXT (macro)));
     }
   return TRUE;
 }
@@ -508,7 +528,7 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
 
   if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
     result = ARG (2);
-  else if (argc == 4)
+  else if (argc >= 4)
     result = ARG (3);
   else
     result = NULL;
@@ -750,10 +770,10 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
     case TOKEN_FUNC:
       b = SYMBOL_FUNC (s);
       if (b == m4_placeholder)
-        M4ERROR ((warning_status, 0, "\
+	M4ERROR ((warning_status, 0, "\
 builtin `%s' requested by frozen file is not supported", ARG (1)));
       else
-        push_macro (b);
+	push_macro (b);
       break;
 
     case TOKEN_VOID:
@@ -873,7 +893,7 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  eval_t value;
+  eval_t value = 0;
   int radix = 10;
   int min = 1;
   const char *s;
@@ -881,35 +901,53 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, 4))
     return;
 
-  if (argc >= 3 && !numeric_arg (argv[0], ARG (2), &radix))
+  if (*ARG (2) && !numeric_arg (argv[0], ARG (2), &radix))
     return;
 
-  if (radix <= 1 || radix > (int) strlen (digits))
+  if (radix < 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
 		"radix in builtin `%s' out of range (radix = %d)",
-                ARG (0), radix));
+		ARG (0), radix));
       return;
     }
 
   if (argc >= 4 && !numeric_arg (argv[0], ARG (3), &min))
     return;
-  if  (min <= 0)
+  if (min < 0)
     {
       M4ERROR ((warning_status, 0,
 		"negative width to builtin `%s'", ARG (0)));
       return;
     }
 
-  if (evaluate (ARG (1), &value))
+  if (!*ARG (1))
+    M4ERROR ((warning_status, 0,
+	      "empty string treated as 0 in builtin `%s'", ARG (0)));
+  else if (evaluate (ARG (1), &value))
     return;
+
+  if (radix == 1)
+    {
+      if (value < 0)
+	{
+	  obstack_1grow (obs, '-');
+	  value = -value;
+	}
+      /* This assumes 2's-complement for correctly handling INT_MIN.  */
+      while (min-- - value > 0)
+	obstack_1grow (obs, '0');
+      while (value-- != 0)
+	obstack_1grow (obs, '1');
+      obstack_1grow (obs, '\0');
+      return;
+    }
 
   s = ntoa (value, radix);
 
   if (*s == '-')
     {
       obstack_1grow (obs, '-');
-      min--;
       s++;
     }
   for (min -= strlen (s); --min >= 0;)
@@ -962,7 +1000,7 @@ m4_divert (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 2))
     return;
 
-  if (argc == 2 && !numeric_arg (argv[0], ARG (1), &i))
+  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &i))
     return;
 
   make_diversion (i);
@@ -992,16 +1030,16 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 {
   int i, file;
   FILE *fp;
+  char *endp;
 
   if (argc == 1)
     undivert_all ();
   else
     for (i = 1; i < argc; i++)
       {
-	if (sscanf (ARG (i), "%d", &file) == 1)
+	file = strtol (ARG (i), &endp, 10);
+	if (*endp == '\0' && !isspace (to_uchar (*ARG (i))))
 	  insert_diversion (file);
-	else if (!*ARG (i))
-	  /* Ignore empty string.  */;
 	else if (no_gnu_extensions)
 	  M4ERROR ((warning_status, 0,
 		    "non-numeric argument to builtin `%s'", ARG (0)));
@@ -1165,7 +1203,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
   if ((fd = mkstemp (ARG (1))) < 0)
     {
       M4ERROR ((warning_status, errno, "cannot create tempfile `%s'",
-                ARG (1)));
+		ARG (1)));
       return;
     }
   close(fd);
@@ -1219,7 +1257,7 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 
   if (bad_argc (argv[0], argc, 1, 2))
     return;
-  if (argc == 2  && !numeric_arg (argv[0], ARG (1), &exit_code))
+  if (argc >= 2  && !numeric_arg (argv[0], ARG (1), &exit_code))
     exit_code = 0;
 
   exit (exit_code);
@@ -1424,7 +1462,8 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_substr (struct obstack *obs, int argc, token_data **argv)
 {
-  int start, length, avail;
+  int start = 0;
+  int length, avail;
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
@@ -1433,7 +1472,7 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
   if (!numeric_arg (argv[0], ARG (2), &start))
     return;
 
-  if (argc == 4 && !numeric_arg (argv[0], ARG (3), &length))
+  if (argc >= 4 && !numeric_arg (argv[0], ARG (3), &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)
@@ -1467,9 +1506,9 @@ expand_ranges (const char *s, struct obstack *obs)
 	  to = *++s;
 	  if (to == '\0')
 	    {
-              /* trailing dash */
-              obstack_1grow (obs, '-');
-              break;
+	      /* trailing dash */
+	      obstack_1grow (obs, '-');
+	      break;
 	    }
 	  else if (from <= to)
 	    {
@@ -1515,7 +1554,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 	return;
     }
 
-  if (argc == 4)
+  if (argc >= 4)
     {
       to = ARG (3);
       if (strchr (to, '-') != NULL)

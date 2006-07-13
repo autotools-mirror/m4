@@ -36,6 +36,14 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   under FDL 1.2, rather than a stricter verbatim-only license.
 * Raise the -L (--nesting-limit) command line option limit from 250 to
   1024.
+* The decr, incr, divert, m4exit, and substr macros treat an empty number
+  as 0, issue a warning, and expand as normal; rather than issuing an error
+  and expanding to the empty string.
+* The eval macro now treats an empty radix argument as 10, handles radix 1,
+  and treats the width argument as number of digits excluding the sign,
+  for compatibility with other m4 implementations.
+* The ifdef, divert, m4exit, substr, and translit macros now correctly
+  ignore extra arguments.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

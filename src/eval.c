@@ -161,10 +161,19 @@ eval_lex (eval_t *val)
 	  else
 	    break;
 
-	  if (digit >= base)
+	  if (base == 1)
+	    {
+	      if (digit == 1)
+		(*val)++;
+	      else if (digit == 0 && !*val)
+		continue;
+	      else
+		break;
+	    }
+	  else if (digit >= base)
 	    break;
-
-	  (*val) = (*val) * base + digit;
+	  else
+	    (*val) = (*val) * base + digit;
 	}
       return NUMBER;
     }
