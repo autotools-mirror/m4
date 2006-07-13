@@ -1,4 +1,5 @@
 fdl.texi
+gendocs_template
 m4.1
 m4.??
 m4.???
@@ -6,6 +7,7 @@ m4.html
 m4.info
 Makefile.in
 Makefile
+manual
 mdate-sh
 stamp-vti
 texinfo.tex
