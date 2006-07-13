@@ -44,6 +44,7 @@ Version 1.4.5 - ?? 2006, by ???  (CVS version 1.4.4c)
   for compatibility with other m4 implementations.
 * The ifdef, divert, m4exit, substr, and translit macros now correctly
   ignore extra arguments.
+* The popdef and undefine macros now correctly accept multiple arguments.
 
 Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
 

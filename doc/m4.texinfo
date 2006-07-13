@@ -1370,16 +1370,20 @@ quoted, since it will be expanded otherwise.
 The expansion of @code{undefine} is void.
 
 @example
-foo
-@result{}foo
-define(`foo', `expansion text')
+foo bar blah
+@result{}foo bar blah
+define(`foo', `some')define(`bar', `other')define(`blah', `text')
 @result{}
-foo
-@result{}expansion text
+foo bar blah
+@result{}some other text
 undefine(`foo')
 @result{}
-foo
-@result{}foo
+foo bar blah
+@result{}foo other text
+undefine(`bar', `blah')
+@result{}
+foo bar blah
+@result{}foo bar blah
 @end example
 
 Undefining a macro inside that macro's expansion is safe; the macro
@@ -1508,7 +1512,15 @@ pushdef(`foo', `Expansion two.')
 @result{}
 foo
 @result{}Expansion two.
+pushdef(`foo', `Expansion three.')
+@result{}
+pushdef(`foo', `Expansion four.')
+@result{}
 popdef(`foo')
+@result{}
+foo
+@result{}Expansion three.
+popdef(`foo', `foo')
 @result{}
 foo
 @result{}Expansion one.

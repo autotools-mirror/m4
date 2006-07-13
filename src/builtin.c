@@ -493,9 +493,11 @@ m4_define (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_undefine (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  int i;
+  if (bad_argc (argv[0], argc, 2, -1))
     return;
-  lookup_symbol (ARG (1), SYMBOL_DELETE);
+  for (i = 1; i < argc; i++)
+    lookup_symbol (ARG (i), SYMBOL_DELETE);
 }
 
 static void
@@ -507,9 +509,11 @@ m4_pushdef (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_popdef (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  int i;
+  if (bad_argc (argv[0], argc, 2, -1))
     return;
-  lookup_symbol (ARG (1), SYMBOL_POPDEF);
+  for (i = 1; i < argc; i++)
+    lookup_symbol (ARG (i), SYMBOL_POPDEF);
 }
 
 /*---------------------.

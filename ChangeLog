@@ -1,5 +1,10 @@
 2006-07-13  Eric Blake  <ebb9@byu.net>
 
+	* src/builtin.c (m4_undefine, m4_popdef): Visit all arguments, not
+	just the first.
+	* doc/m4.texinfo (Undefine, Pushdef): Test this.
+	* NEWS: Document this change.
+
 	* src/builtin.c (numeric_arg): Treat empty string as 0, with a
 	warning.  Detect quoted leading space and overflow as warnings.
 	(m4_eval): Treat empty radix as 10, and allow output in radix 1.
