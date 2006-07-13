@@ -14,6 +14,20 @@ Version beta 1.9a - ???, by ???
 
 * The '$' syntax class is now enabled.  See the info docs for examples.
 
+* New builtin `renamesyms' allows programmatic renaming of all symbols
+  according to a regular expression.
+
+* New `-r' command-line option changes the default regular expression
+  syntax used by M4.  Without this option, M4 continues to use
+  RE_SYNTAX_EMACS style expressions.  A new section in the info docs
+  explains the differences between them, and what builtins are affected.
+
+* The experimental `epatsubst' and `eregexp' have been removed in favor
+  of a new `changeresyntax' builtin.
+
+* `patsubst' and `regexp' have a new optional 4th argument to use a
+  different regular expression syntax for the duration of that invocation.
+
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
 * Support for the experimental `changeword' has been dropped.

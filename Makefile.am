@@ -228,6 +228,7 @@ m4_libm4_la_SOURCES	= \
 		  m4/output.c \
 		  m4/path.c \
 		  m4/pathconf.h \
+		  m4/resyntax.c \
 		  m4/symtab.c \
 		  m4/syntax.c \
 		  m4/utility.c
@@ -259,6 +260,7 @@ ltdl/libltdlc.la:
 ## -------------- ##
 
 info_TEXINFOS	= doc/m4.texinfo
+doc_m4_TEXINFOS	= doc/regexprops-generic.texi
 dist_man_MANS	= doc/m4.1
 
 # Build the man page once in the srcdir, rather than in every VPATH build

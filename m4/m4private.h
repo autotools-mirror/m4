@@ -60,10 +60,11 @@ struct m4 {
 
   /* Option flags  (set in src/main.c).  */
   int		warning_status;			/* -E */
-  bool	no_gnu_extensions;		/* -G */
+  bool		no_gnu_extensions;		/* -G */
   int		nesting_limit;			/* -L */
   int		debug_level;			/* -d */
   int		max_debug_arg_length;		/* -l */
+  int		regexp_syntax;			/* -r */
   int		opt_flags;
 
   /* __PRIVATE__: */
@@ -98,6 +99,8 @@ struct m4 {
 #  define m4_set_debug_level_opt(C, V)		((C)->debug_level = (V))
 #  define m4_get_max_debug_arg_length_opt(C)	((C)->max_debug_arg_length)
 #  define m4_set_max_debug_arg_length_opt(C, V)	((C)->max_debug_arg_length=(V))
+#  define m4_get_regexp_syntax_opt(C)		((C)->regexp_syntax)
+#  define m4_set_regexp_syntax_opt(C, V)	((C)->regexp_syntax = (V))
 
 #  define m4_get_prefix_builtins_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_PREFIX_BUILTINS_BIT))

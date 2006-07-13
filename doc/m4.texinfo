@@ -140,6 +140,7 @@ Lexical and syntactic conventions
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
 * Input processing::            How m4 copies input to output
+* Regular expression syntax::	How m4 interprets regular expressions
 
 How to invoke macros
 
@@ -157,7 +158,7 @@ How to define new macros
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
-* Erenamesyms and Renamesyms::  Renaming macros with regular expressions
+* Renamesyms::                  Renaming macros with regular expressions
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
@@ -182,6 +183,7 @@ Input control
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
+* Changeresyntax::              Changing the regular expression syntax
 * Changesyntax::                Changing the lexical structure of the input
 * M4wrap::                      Saving input until end of input
 
@@ -208,10 +210,10 @@ Macros for text handling
 
 * Len::                         Calculating length of strings
 * Index::                       Searching for substrings
-* Eregexp and Regexp::          Searching for regular expressions
+* Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
-* Epatsubst and Patsubst::      Substituting text by regular expression
+* Patsubst::                    Substituting text by regular expression
 * Format::                      Formatting strings (printf-like)
 
 Macros for doing arithmetic
@@ -391,6 +393,13 @@ Internally modify @emph{all} builtin macro names so they all start with
 the prefix @samp{m4_}.  For example, using this option, one should write
 @samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
 instead of @samp{__file__}.
+
+@item -r @var{RESYNTAX-SPEC}
+@itemx --regexp-syntax=@var{RESYNTAX-SPEC}
+Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
+When this option is not given, @sc{gnu} M4 uses emacs compatible
+regular expressions.  @xref{Changeresyntax}, for more details on the
+format and meaning of @var{RESYNTAX-SPEC}.
 
 @item -M @var{DIRECTORY}
 @itemx --module-directory=@var{DIRECTORY}
@@ -603,7 +612,7 @@ As each of the predefined macros in @code{m4} is described, a prototype
 call of the macro will be shown, giving descriptive names to the
 arguments, e.g.,
 
-@deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement})}
+@deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
 Description of @samp{regexp}.
 @end deffn
 
@@ -649,6 +658,7 @@ in macro names, depending on the active locale.
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
 * Input processing::            How m4 copies input to output
+* Regular expression syntax::	How m4 interprets regular expressions
 @end menu
 
 @node Names
@@ -770,6 +780,11 @@ the @ref{Trace} facilities of GNU @code{m4}.
 
 This process continues until there are no more macro calls to expand and
 all the input has been consumed.
+
+@node Regular expression syntax
+@section Regular Expression Syntax
+
+@include regexprops-generic.texi
 
 @node Macros
 @chapter How to invoke macros
@@ -1024,7 +1039,7 @@ value, which can be brought back at a later time.
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
-* Erenamesyms and Renamesyms::  Renaming macros with regular expressions
+* Renamesyms::                  Renaming macros with regular expressions
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
@@ -1408,17 +1423,22 @@ revealing the former definition.
 It is possible to temporarily redefine a builtin with @code{pushdef}
 and @code{defn}.
 
-@node Erenamesyms and Renamesyms
+@node Renamesyms
 @section Renaming macros with regular expressions
 
 @cindex regular expressions
 @cindex macros, how to rename
 @cindex renaming macros
 @cindex GNU extensions
-@deffn {Builtin (gnu)} erenamesyms (@var{regexp}, @var{replacement})
-Global renaming of macros is done by @code{erenamesyms}, which selects
+@deffn {Builtin (gnu)} renamesyms (@var{regexp}, @var{replacement}, @w{opt @var{resyntax})}
+Global renaming of macros is done by @code{renamesyms}, which selects
 all macros with names that match @var{regexp}, and renames each match
 according to @var{replacement}.
+
+If @var{resyntax} is given, the particular flavor of regular
+expression understood with respect to @var{regexp} can be changed from
+the current default.  @xref{Changeresyntax}, for details of the values
+that can be given for this argument.
 
 A macro that does not have a name that matches @var{regexp} is left
 with its original name.  If only part of the name matches, any part of
@@ -1435,36 +1455,34 @@ the text matched by the @var{n}th parenthesized sub-expression of
 @var{regexp}, and @samp{\&} being the text matched by the entire
 regular expression.
 
-The builtin macro @code{erenamesyms} is recognized only when given
+The builtin macro @code{renamesyms} is recognized only when given
 arguments.
 @end deffn
 
 Here is an example that performs the same renaming as the
 @option{--prefix-builtins} option.  Where @option{--prefix-builtins}
-only renames M4 builtin macros, @code{erenamesyms} will rename any
+only renames M4 builtin macros, @code{renamesyms} will rename any
 macros that match when it runs, including text macros.
 
 @example
-erenamesyms(`^.*$', `m4_\&')
+renamesyms(`^.*$', `m4_\&')
 @result{}
 @end example
 
-Here is a more realistic example that performs a similar renaming on
-macros with lowercase names, except that it ignores macros with names
-that begin with @samp{_}, and avoids creating macros with names that
-begin with @samp{m4_m4}.
+If @var{resyntax} is given, @var{regexp} must be given according to
+the syntax chosen, though the default regular expression syntax
+remains unchanged for other invocations.  Here is a more realistic
+example that performs a similar renaming on macros with lowercase
+names, except that it ignores macros with names that begin with
+@samp{_}, and avoids creating macros with names that begin with
+@samp{m4_m4}.
 
 @example
-erenamesyms(`^[^_]\w*$', `m4_\&')
+renamesyms(`^[^_]\w*$', `m4_\&')
 @result{}
-m4_erenamesyms(`^m4_m4(\w*)$', `m4_\1')
+m4_renamesyms(`^m4_m4(\w*)$', `m4_\1', `POSIX_EXTENDED')
 @result{}
 @end example
-
-@deffn {Builtin (gnu)} renamesyms (@var{regexp}, @var{replacement})
-Same as @code{erenamesyms}, but using Basic Regular Expression syntax,
-see @xref{Eregexp and Regexp}, for more details.
-@end deffn
 
 
 @node Indir
@@ -1945,6 +1963,7 @@ to @code{m4}.
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
+* Changeresyntax::              Changing the regular expression syntax
 * Changesyntax::                Changing the lexical structure of the input
 * M4wrap::                      Saving input until end of input
 @end menu
@@ -2086,6 +2105,87 @@ changecom
 # Not a comment anymore
 @result{}# Not a COMMENT anymore
 @end example
+
+
+@node Changeresyntax
+@section Changing the regular expression syntax
+
+@cindex regular expression syntax, changing
+@cindex GNU extensions
+@deffn {Builtin (gnu)} changeresyntax (@w{opt @var{resyntax}})
+By default, the @sc{gnu} extensions @code{patsubst}, @code{regexp} and
+more recently @code{renamesyms} continue to use emacs style regular
+expression syntax (@pxref{Regular expression syntax}).
+
+The @code{changeresyntax} macro expands to nothing, but changes the
+default regular expression syntax used by M4 according to the value of
+@var{resyntax}, equivalent to passing @var{resyntax} as the argument to
+@option{--regexp-syntax} when invoking @code{m4}.  @xref{Invoking m4},
+for more details.  If @var{resyntax} is empty or omitted the default
+settings are reverted to emacs style.
+@end deffn
+
+Any one of the values below, case is not important, and optionally
+with @kbd{-} or @kbd{ } substituted for @kbd{_} in the given names,
+will set the default regular expression syntax as described in the
+table below.  For example the following are all equivalent to
+@samp{GNU_M4}:
+
+@example
+changeresyntax(`gnu m4')
+@result{}
+changeresyntax(`GNU-m4')
+@result{}
+changeresyntax(`Gnu_M4')
+@result{}
+@end example
+
+@table @dfn
+@item AWK
+@xref{awk regular expression syntax}, for details.
+
+@item BASIC
+@itemx ED
+@itemx POSIX_BASIC
+@itemx SED
+@xref{posix-basic regular expression syntax}, for details.
+
+@item BSD_M4
+@xref{posix-extended regular expression syntax}, for details.
+
+@item EMACS
+@itemx GNU_EMACS
+@xref{emacs regular expression syntax}, for details.
+
+@item EXTENDED
+@itemx POSIX_EXTENDED
+@xref{posix-extended regular expression syntax}, for details.
+
+@item GNU_AWK
+@itemx GAWK
+@xref{gnu-awk regular expression syntax}, for details.
+
+@item GNU_EGREP
+@itemx EGREP
+@xref{egrep regular expression syntax}, for details.
+
+@item GNU_M4
+@xref{emacs regular expression syntax}, for details.
+
+@item GREP
+@xref{grep regular expression syntax}, for details.
+
+@item MINIMAL
+@itemx POSIX_MINIMAL
+@itemx POSIX_MINIMAL_BASIC
+@xref{posix-minimal-basic regular expression syntax}, for details.
+
+@item POSIX_AWK
+@xref{posix-awk regular expression syntax}, for details.
+
+@item POSIX_EGREP
+@xref{posix-egrep regular expression syntax}, for details.
+@end table
 
 
 @node Changesyntax
@@ -2952,10 +3052,10 @@ various ways, extracting substrings, searching, substituting, and so on.
 @menu
 * Len::                         Calculating length of strings
 * Index::                       Searching for substrings
-* Eregexp and Regexp::          Searching for regular expressions
+* Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
-* Epatsubst and Patsubst::      Substituting text by regular expression
+* Patsubst::                    Substituting text by regular expression
 * Format::                      Formatting strings (printf-like)
 @end menu
 
@@ -2998,12 +3098,13 @@ index(`gnus, gnats, and armadillos', `dag')
 @result{}-1
 @end example
 
-@node Eregexp and Regexp
+@node Regexp
 @section Searching for regular expressions
 
 @cindex regular expressions
 @cindex GNU extensions
-@deffn {Builtin (gnu)} eregexp (@var{string}, @var{regexp}, @w{opt @var{replacement})}
+@deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @var{resyntax})
+@deffnx {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
 Searching for regular expressions is done with the builtin
 @code{regexp}, which searches for @var{regexp} in @var{string}.  The
 syntax of regular expressions is similar to that of Perl, @sc{gnu} Awk
@@ -3014,13 +3115,18 @@ the first match of @var{regexp} in @var{string}.  If @var{replacement}
 is specified and matches, then it expands into @var{replacement}. If
 @var{regexp} does not match anywhere in @var{string}, it expands to -1.
 
-The builtin macro @code{eregexp} is recognized only when given arguments.
+If @var{resyntax} is given, the particular flavor of regular
+expression understood with respect to @var{regexp} can be changed from
+the current default.  @xref{Changeresyntax}, for details of the values
+that can be given for this argument.
+
+The builtin macro @code{regexp} is recognized only when given arguments.
 @end deffn
 
 @example
-eregexp(`GNUs not Unix', `\<[a-z]\w+')
+regexp(`GNUs not Unix', `\<[a-z]\w+')
 @result{}5
-eregexp(`GNUs not Unix', `\<Q\w*')
+regexp(`GNUs not Unix', `\<Q\w*')
 @result{}-1
 @end example
 
@@ -3030,25 +3136,27 @@ matched by the @var{n}th parenthesized sub-expression of @var{regexp},
 @samp{\&} being the text the entire regular expression matched.
 
 @example
-eregexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***')
+regexp(`GNUs not Unix', `\w\(\w+\)$', `*** \& *** \1 ***')
 @result{}*** Unix *** nix ***
 @end example
 
-Originally, regular expressions were much less powerful (basically only
-@samp{*} was available), but to keep backward compatibility, new
-operators were implemented with previously invalid sequences, such as
-@samp{\(}.  The following macro is exactly equivalent to @code{eregexp},
-but using the old, clumsy syntax.
-
-@deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement})}
-Same as @code{eregexp}, but using the old and clumsy ``Basic Regular
-Expression'' syntax, the same as in @sc{gnu} Emacs.  @xref{Regexps, ,
-Syntax of Regular Expressions, emacs, The @sc{gnu} Emacs Manual}.
-@end deffn
+If @var{resyntax} is given, @var{regexp} must be given according to
+the syntax chosen, though the default regular expression syntax
+remains unchanged for other invocations:
 
 @example
-regexp(`GNUs not Unix', `\w\(\w+\)$', `*** \& *** \1 ***')
+regexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***', `POSIX_EXTENDED')
 @result{}*** Unix *** nix ***
+@end example
+
+Occasionally, you might want to pass an @var{resyntax} argument
+without wishing to give @var{replacement}.  If the @strong{last}
+argument is a valid @var{resyntax} it is used as such whether
+or not a @var{replacement} argument is also given:
+
+@example
+regexp(`GNUs not Unix', `\w(\w+)$', `POSIX_EXTENDED')
+@result{}9
 @end example
 
 @node Substr
@@ -3114,18 +3222,22 @@ lowercase to uppercase, and the third `mirrors' all uppercase letters,
 while converting them to lowercase.  The two first cases are by far the
 most common.
 
-@node Epatsubst and Patsubst
+@node Patsubst
 @section Substituting text by regular expression
 
 @cindex regular expressions
 @cindex pattern substitution
 @cindex substitution by regular expression
 @cindex GNU extensions
-@deffn {Builtin (gnu)} epatsubst (@var{string}, @var{regexp}, @w{opt @var{replacement})}
-Global substitution in a string is done by @code{epatsubst}, which
+@deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
+Global substitution in a string is done by @code{patsubst}, which
 searches @var{string} for matches of @var{regexp}, and substitutes
-@var{replacement} for each match.  It uses Extended Regular Expressions
-syntax.
+@var{replacement} for each match.
+
+If @var{resyntax} is given, the particular flavor of regular
+expression understood with respect to @var{regexp} can be changed from
+the current default.  @xref{Changeresyntax}, for details of the values
+that can be given for this parameter.
 
 The parts of @var{string} that are not covered by any match of
 @var{regexp} are copied to the expansion.  Whenever a match is found, the
@@ -3142,66 +3254,13 @@ being the text the entire regular expression matched.
 The @var{replacement} argument can be omitted, in which case the text
 matched by @var{regexp} is deleted.
 
-The builtin macro @code{epatsubst} is recognized only when given
+The builtin macro @code{patsubst} is recognized only when given
 arguments.
 @end deffn
 
-When used with two arguments, while @code{eregexp} returns the position
-of the match, @code{epatsusbt} deletes it:
+When used with two arguments, while @code{regexp} returns the position
+of the match, @code{patsubst} deletes it:
 
-@example
-epatsubst(`GNUs not Unix', `^', `OBS: ')
-@result{}OBS: GNUs not Unix
-epatsubst(`GNUs not Unix', `\<', `OBS: ')
-@result{}OBS: GNUs OBS: not OBS: Unix
-epatsubst(`GNUs not Unix', `\w*', `(\&)')
-@result{}(GNUs)() (not)() (Unix)
-epatsubst(`GNUs not Unix', `\w+', `(\&)')
-@result{}(GNUs) (not) (Unix)
-epatsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not @comment
-@end example
-
-Here is a slightly more realistic example, which capitalizes individual
-words or whole sentences, by substituting calls of the macros
-@code{upcase} and @code{downcase} into the strings.
-
-@example
-define(`upcase',   `translit(`$*', `a-z', `A-Z')')dnl
-define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
-define(`capitalize1',
-       `eregexp(`$1', `^(\w)(\w*)', `upcase(`\1')`'downcase(`\2')')')dnl
-define(`capitalize',
-       `epatsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
-capitalize(`GNUs not Unix')
-@result{}Gnus Not Unix
-@end example
-
-While @code{eregexp} replaces the whole input with the replacement as
-soon as there is a match, @code{epatsubst} replaces each
-@emph{occurrence} of a match and preserves non matching pieces:
-
-@example
-define(`patreg',
-`epatsubst($@@)
-eregexp($@@)')dnl
-patreg(`bar foo baz Foo', `foo|Foo', `FOO')
-@result{}bar FOO baz FOO
-@result{}FOO
-patreg(`aba abb 121', `(.)(.)\1', `\2\1\2')
-@result{}bab abb 212
-@result{}bab
-@end example
-
-
-@deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @w{opt @var{replacement})}
-Same as @code{epatsubst}, but using Basic Regular Expression syntax, see
-@xref{Eregexp and Regexp}, for more details.
-@end deffn
-
-@c No longer interesting for the documentation per se, but good
-@c for testing.
-@ignore
 @example
 patsubst(`GNUs not Unix', `^', `OBS: ')
 @result{}OBS: GNUs not Unix
@@ -3215,6 +3274,10 @@ patsubst(`GNUs not Unix', `[A-Z][a-z]+')
 @result{}GN not @comment
 @end example
 
+Here is a slightly more realistic example, which capitalizes individual
+words or whole sentences, by substituting calls of the macros
+@code{upcase} and @code{downcase} into the strings.
+
 @example
 define(`upcase',   `translit(`$*', `a-z', `A-Z')')dnl
 define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
@@ -3225,7 +3288,36 @@ define(`capitalize',
 capitalize(`GNUs not Unix')
 @result{}Gnus Not Unix
 @end example
-@end ignore
+
+If @var{resyntax} is given, @var{regexp} must be given according to
+the syntax chosen, though the default regular expression syntax
+remains unchanged for other invocations:
+
+@example
+define(`epatsubst',
+       `builtin(`patsubst', `$1', `$2', `$3', `POSIX_EXTENDED')')dnl
+epatsubst(`bar foo baz Foo', `(\w*) (foo|Foo)', `_\1_')
+@result{}_bar_ _baz_
+patsubst(`bar foo baz Foo', `\(\w*\) \(foo\|Foo\)', `_\1_')
+@result{}_bar_ _baz_
+@end example
+
+While @code{regexp} replaces the whole input with the replacement as
+soon as there is a match, @code{patsubst} replaces each
+@emph{occurrence} of a match and preserves non matching pieces:
+
+@example
+define(`patreg',
+`patsubst($@@)
+regexp($@@)')dnl
+patreg(`bar foo baz Foo', `foo\|Foo', `FOO')
+@result{}bar FOO baz FOO
+@result{}FOO
+patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
+@result{}bab abb 212
+@result{}bab
+@end example
+
 
 @node Format
 @section Formatted output
@@ -3814,6 +3906,11 @@ end comment strings.
 Uses @var{string1} and @var{string2} as the beginning quote and end quote
 strings.
 
+@item R @var{length} @key{NL} @var{string} @key{NL}
+Sets the default regexp syntax, where @var{string} encodes one of the
+regular expression syntaxes supported by @sc{gnu} M4.
+@xref{Changeresyntax}, for more details.
+
 @item M @var{length} @key{NL} @var{string} @key{NL}
 Names a module which will be searched for according to the module search path
 and loaded.  Modules loaded from a frozen file don't add their builtin entries
@@ -3913,16 +4010,15 @@ is modeled after the C library function @code{printf} (@pxref{Format}).
 
 @item
 Searches and text substitution through regular expressions are supported
-by the @code{eregexp}, @code{regexp} (@pxref{Eregexp and Regexp}) and
-@code{epatsubst}, @code{patsubst} (@pxref{Epatsubst and Patsubst})
-builtins.
+by the @code{regexp} (@pxref{Regexp}) and @code{patsubst}
+(@pxref{Patsubst}) builtins.
 
 @item
 The syntax of regular expressions in M4 has never clearly formalized.
 While Open BSD M4 uses extended regular expressions for @code{regexp}
 and @code{patsubst}, @sc{gnu} M4 uses basic regular expression.  Use
-@code{eregexp} (@pxref{Eregexp and Regexp}) and @code{epatsubst}
-(@pxref{Epatsubst and Patsubst}) for extended regular expressions.
+@code{changeresyntax} (@pxref{Changeresyntax}) to change the regular
+expression syntax used by @sc{gnu} M4.
 
 @item
 The output of shell commands can be read into @code{m4} with
@@ -3956,8 +4052,8 @@ The destination of trace and debug output can be controlled with
 In addition to the above extensions, GNU @code{m4} implements the
 following command line options: @samp{-F}, @samp{-G}, @samp{-I},
 @samp{-L}, @samp{-R}, @samp{-V}, @samp{-W}, @samp{-d},
-@samp{-l}, @samp{-o} and @samp{-t}.  @xref{Invoking m4}, for a
-description of these options.
+@samp{-l}, @samp{-o}, @samp{-r} and @samp{-t}.  @xref{Invoking m4},
+for a description of these options.
 
 Also, the debugging and tracing facilities in GNU @code{m4} are much
 more extensive than in most other versions of @code{m4}.

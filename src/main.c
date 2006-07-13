@@ -103,7 +103,14 @@ Operation modes:\n\
   -E, --fatal-warnings         stop execution after first warning\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
-  -Q, --quiet, --silent        suppress some warnings for builtins\n"),
+  -Q, --quiet, --silent        suppress some warnings for builtins\n\
+  -r, --regexp-syntax=[SPEC]   change the default regexp syntax\n"),
+	     stdout);
+      fputs (_("\
+\n\
+SPEC is any one of:\n\
+  AWK, BASIC, BSD_M4, ED, EMACS, EXTENDED, GNU_AWK, GNU_EGREP, GNU_M4,\n\
+  GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n"),
 	     stdout);
       printf (_("\
 \n\
@@ -183,6 +190,7 @@ static const struct option long_options[] =
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
+  {"regexp-syntax", required_argument, NULL, 'r'},
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
@@ -202,7 +210,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:r:st:"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -271,6 +279,7 @@ main (int argc, char *const *argv, char *const *envp)
       case 'U':
       case 't':
       case 'm':
+      case 'r':
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	new = xmalloc (sizeof *new);
@@ -432,6 +441,7 @@ main (int argc, char *const *argv, char *const *envp)
       {
 	macro_definition *next;
 	char *macro_value;
+	char *optarg = defines->macro;
 
 	switch (defines->code)
 	  {
@@ -439,27 +449,37 @@ main (int argc, char *const *argv, char *const *envp)
 	    {
 	      m4_symbol_value *value = m4_symbol_value_create ();
 
-	      macro_value = strchr (defines->macro, '=');
+	      macro_value = strchr (optarg, '=');
 	      if (macro_value == NULL)
 		macro_value = "";
 	      else
 		*macro_value++ = '\0';
 	      m4_set_symbol_value_text (value, xstrdup (macro_value));
 
-	      m4_symbol_pushdef (M4SYMTAB, defines->macro, value);
+	      m4_symbol_pushdef (M4SYMTAB, optarg, value);
 	    }
 	    break;
 
 	  case 'U':
-	    m4_symbol_delete (M4SYMTAB, defines->macro);
+	    m4_symbol_delete (M4SYMTAB, optarg);
 	    break;
 
 	  case 't':
-	    m4_set_symbol_name_traced (M4SYMTAB, defines->macro);
+	    m4_set_symbol_name_traced (M4SYMTAB, optarg);
 	    break;
 
 	  case 'm':
-	    m4_module_load (context, defines->macro, 0);
+	    m4_module_load (context, optarg, 0);
+	    break;
+
+	  case 'r':
+	    m4_set_regexp_syntax_opt (context,
+				      m4_regexp_syntax_encode (optarg));
+	    if (m4_get_regexp_syntax_opt (context) < 0)
+	      {
+		M4ERROR ((EXIT_FAILURE, 0,
+			  _("Bad regexp syntax option: `%s'"), optarg));
+	      }
 	    break;
 
 	  default:

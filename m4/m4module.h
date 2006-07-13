@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -113,11 +113,12 @@ extern void		m4_delete	(m4 *);
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
-	M4FIELD(int,	 warning_status_opt,	   warning_status)	\
-	M4FIELD(bool, no_gnu_extensions_opt,    no_gnu_extensions)	\
-	M4FIELD(int,	 nesting_limit_opt,	   nesting_limit)	\
-	M4FIELD(int,	 debug_level_opt,	   debug_level)		\
-	M4FIELD(int,	 max_debug_arg_length_opt, max_debug_arg_length)\
+	M4FIELD(int,	warning_status_opt,	   warning_status)	\
+	M4FIELD(bool,	no_gnu_extensions_opt,	   no_gnu_extensions)	\
+	M4FIELD(int,	nesting_limit_opt,	   nesting_limit)	\
+	M4FIELD(int,	debug_level_opt,	   debug_level)		\
+	M4FIELD(int,	max_debug_arg_length_opt,  max_debug_arg_length)\
+	M4FIELD(int,	regexp_syntax_opt,	   regexp_syntax)	\
 
 
 #define m4_context_opt_bit_table					\
@@ -271,6 +272,13 @@ enum {
 extern int	m4_debug_decode		(m4 *, const char *);
 extern bool	m4_debug_set_output	(m4 *, const char *);
 extern void	m4_debug_message_prefix (m4 *);
+
+
+
+/* --- REGEXP SYNTAX --- */
+
+extern const char *	m4_regexp_syntax_decode	(int);
+extern int		m4_regexp_syntax_encode	(const char *);
 
 
 

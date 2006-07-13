@@ -24,20 +24,19 @@
 #include "m4.h"
 #include "m4private.h"
 
-static	int   decode_char	   (FILE *in);
-static	void  issue_expect_message (int expected);
-static	int   produce_char_dump    (char *buf, int ch);
-static	void  produce_syntax_dump  (FILE *file, m4_syntax_table *syntax,
-				    char ch);
-static	void  produce_module_dump  (FILE *file, lt_dlhandle handle);
-static	void  produce_symbol_dump  (m4 *context, FILE *file,
-				    m4_symbol_table *symtab);
-static	void *dump_symbol_CB	   (m4_symbol_table *symtab,
-				    const char *symbol_name, m4_symbol *symbol,
-				    void *userdata);
+static	int   decode_char	    (FILE *);
+static	void  issue_expect_message  (int);
+static	int   produce_char_dump     (char *, int);
+static	void  produce_resyntax_dump (m4 *, FILE *);
+static	void  produce_syntax_dump   (FILE *, m4_syntax_table *, char);
+static	void  produce_module_dump   (FILE *, lt_dlhandle);
+static	void  produce_symbol_dump   (m4 *, FILE *, m4_symbol_table *);
+static	void *dump_symbol_CB	    (m4_symbol_table *, const char *,
+				     m4_symbol *, void *);
 
 
 /* Produce a frozen state to the given file NAME. */
+
 static int
 produce_char_dump (char *buf, int ch)
 {
@@ -75,6 +74,32 @@ produce_char_dump (char *buf, int ch)
   *p = '\0';
 
   return strlen (buf);
+}
+
+
+/* Produce the 'R14\nPOSIX_EXTENDED\n' frozen file dump of the current
+   default regular expression syntax.  Note that it would be a little
+   faster to use the encoded syntax in this format as used by re_compile(),
+   but the representation of RE_SYNTAX_POSIX_EXTENDED may change in
+   future (or alternative) implementations of re_compile, so we use an
+   unencoded representation here.  */
+
+static void
+produce_resyntax_dump (m4 *context, FILE *file)
+{
+  int code  = m4_get_regexp_syntax_opt (context);
+
+  /* Don't dump default syntax code (`0' for GNU_EMACS).  */
+  if (code)
+    {
+      const char *resyntax = m4_regexp_syntax_decode (code);
+
+      if (!resyntax)
+	M4ERROR ((EXIT_FAILURE, 0,
+		  _("Invalid regexp syntax code `%d'"), code));
+
+      fprintf (file, "R%d\n%s\n", strlen(resyntax), resyntax);
+    }
 }
 
 #define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
@@ -237,6 +262,10 @@ produce_frozen_state (m4 *context, const char *name)
       fputs (context->syntax->ecomm.string, file);
       fputc ('\n', file);
     }
+
+  /* Dump regular expression syntax.  */
+
+  produce_resyntax_dump (context, file);
 
   /* Dump syntax table. */
 
@@ -512,6 +541,30 @@ reload_frozen_state (m4 *context, const char *name)
 	VALIDATE ('\n');
 
 	m4__module_open (context, string[0], NULL);
+
+	break;
+
+      case 'R':
+
+	if (version < 2)
+	  {
+	    /* 'R' operator is not supported in format version 1. */
+	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
+	  }
+
+	GET_CHARACTER;
+	GET_NUMBER (number[0]);
+	VALIDATE ('\n');
+	GET_STRING (file, string[0], allocated[0], number[0]);
+	VALIDATE ('\n');
+
+	m4_set_regexp_syntax_opt (context,
+				  m4_regexp_syntax_encode (string[0]));
+	if (m4_get_regexp_syntax_opt (context) < 0)
+	  {
+	    M4ERROR ((EXIT_FAILURE, 0,
+		      _("Unknown regexp syntax code %s"), string[0]));
+	  }
 
 	break;
 

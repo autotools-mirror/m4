@@ -102,3 +102,40 @@ bar
 ]])
 
 AT_CLEANUP
+
+
+## ---------------------- ##
+## Freezing regexp syntax ##
+## ---------------------- ##
+
+AT_SETUP([regexp syntax])
+AT_KEYWORDS([frozen])
+
+# Check that regular expression syntax is maintained across freeze baundaries.
+
+AT_DATA([[frozen.m4]],
+[[changeresyntax(`POSIX_EXTENDED')dnl
+]])
+
+AT_DATA([[unfrozen.m4]],
+[[regexp(`GNUs not Unix', `\w(\w*)$')
+regexp(`GNUs not Unix', `\w\(\w*\)$', `GNU_M4')
+]])
+
+# First generate the `expout' output by running over the sources before
+# freezing.
+AT_CHECK_M4([frozen.m4 unfrozen.m4], 0,
+	    [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK_M4([-F frozen.m4f frozen.m4], 0,
+	    [ignore], [ignore])
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], 0,
+	    [expout], [experr])
+
+AT_CLEANUP([frozen.m4f])

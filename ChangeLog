@@ -1,3 +1,37 @@
+2006-07-14  Gary V. Vaughan  <gary@gnu.org>
+
+	* m4/m4module.h (m4_regexp_syntax_decode, m4_regexp_syntax_encode)
+	(m4_get_regexp_syntax_opt, m4_set_regexp_syntax_opt): Declare
+	new functions for managing regexp syntax options.
+	* m4/m4private.h (m4): Add regexp_syntax field.
+	* m4/resyntax.c: New file implements the above.
+	* Makefile.am (m4_libm4_la_SOURCES): Add m4/resyntax.c.
+	* modules/gnu.c (RE_SYNTAX_BRE, RE_SYNTAX_ERE, builtin_eregexp)
+	(builtin_epatsubst, builtin_erenamsyms, m4_regexp_do)
+	(m4_patsubst_do, m4_renamesyms_do): Removed.
+	(builtin_changeresyntax): New builtin to change regular expression
+	syntax.
+	(m4_resyntax_encode_safe): Factor out diagnostics code.
+	* src/freeze.c (produce_resyntax_dump): New function to dump
+	default regexp syntax specifier to frozen file.
+	(reload_frozen_state): Updated to action 'R' directive.
+	* src/main.c (usage): Describe new -r option.
+	(long_options, OPTSTRING): Declare it.
+	(main): Encode and store cli regexp syntax option argument.
+	* tests/freeze.at (regexp syntax): New test that regexp syntax
+	survives freezing.
+	* tests/generate.awk (m4_pattern_allow): Updated for renamesyms.
+	* doc/m4.texinfo (Erenamesyms and Renamesyms, Eregexp and Regexp)
+	(Epatsubst and Patsubst): Renamed to...
+	(Renamesyms, Regexp, Patsubst): ...these respectively. Updated
+	documentation and added new examples.
+	(Changeresyntax): New section describing changeresyntax builtin,
+	and regexp syntax names.
+	(Regular expression syntax): New section describing differences
+	between various regular expression syntaxes.
+	(Frozen files): Document 'R' directive.
+	* NEWS: Updated.
+
 2006-07-13  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap: Enhanced to work more like our other scripts:

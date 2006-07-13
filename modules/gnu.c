@@ -50,22 +50,20 @@ int errno;
    with their details in a single table for easy maintenance.
 
 		function	macros	blind argmin  argmax */
-#define builtin_functions			\
+#define builtin_functions					\
 	BUILTIN(__file__,	false,	false,	1,	1  )	\
 	BUILTIN(__line__,	false,	false,	1,	1  )	\
 	BUILTIN(builtin,	false,	true,	2,	-1 )	\
+	BUILTIN(changeresyntax,	false,	true,	1,	2  )	\
 	BUILTIN(changesyntax,	false,	true,	1,	-1 )	\
 	BUILTIN(debugmode,	false,	false,	1,	2  )	\
 	BUILTIN(debugfile,	false,	false,	1,	2  )	\
-	BUILTIN(eregexp,	false,	true,	3,	4  )	\
-	BUILTIN(epatsubst,	false,	true,	3,	4  )	\
-	BUILTIN(erenamesyms,	false,	true,	3,	3  )	\
 	BUILTIN(esyscmd,	false,	true,	2,	2  )	\
 	BUILTIN(format,		false,	true,	2,	-1 )	\
 	BUILTIN(indir,		false,	true,	2,	-1 )	\
-	BUILTIN(patsubst,	false,	true,	3,	4  )	\
-	BUILTIN(regexp,		false,	true,	3,	4  )	\
-	BUILTIN(renamesyms,	false,	true,	3,	3  )	\
+	BUILTIN(patsubst,	false,	true,	3,	5  )	\
+	BUILTIN(regexp,		false,	true,	3,	5  )	\
+	BUILTIN(renamesyms,	false,	true,	3,	4  )	\
 	BUILTIN(symbols,	false,	false,	0,	-1 )	\
 	BUILTIN(syncoutput,	false,  true,	2,	2  )	\
 
@@ -104,46 +102,23 @@ m4_macro m4_macro_table[] =
 };
 
 
-static void m4_regexp_do	(m4 *context, m4_obstack *obs, int argc,
-				 m4_symbol_value **argv, int syntax);
-static void m4_patsubst_do	(m4 *context, m4_obstack *obs, int argc,
-				 m4_symbol_value **argv, int syntax);
-static void m4_renamesyms_do	(m4 *context, m4_obstack *obs, int argc,
-				 m4_symbol_value **argv, int syntax);
-
-
 
-#define RE_SYNTAX_BRE RE_SYNTAX_EMACS
-
-#define RE_SYNTAX_ERE \
-  (/* Allow char classes. */					\
-    RE_CHAR_CLASSES						\
-  /* Anchors are OK in groups. */				\
-  | RE_CONTEXT_INDEP_ANCHORS					\
-  /* Be picky, `/^?/', for instance, makes no sense. */		\
-  | RE_CONTEXT_INVALID_OPS					\
-  /* Allow intervals with `{' and `}', forbid invalid ranges. */\
-  | RE_INTERVALS | RE_NO_BK_BRACES | RE_NO_EMPTY_RANGES		\
-  /* `(' and `)' are the grouping operators. */			\
-  | RE_NO_BK_PARENS						\
-  /* `|' is the alternation. */					\
-  | RE_NO_BK_VBAR)
-
 /* The regs_allocated field in an re_pattern_buffer refers to the
    state of the re_registers struct used in successive matches with
    the same compiled pattern:  */
+
 typedef struct {
   struct re_pattern_buffer pat;	/* compiled regular expression */
   struct re_registers regs;	/* match registers */
 } m4_pattern_buffer;
 
 
-/* Compile a REGEXP using the Regex SYNTAX bits return the buffer.
+/* Compile a REGEXP using the RESYNTAX bits, and return the buffer.
    Report errors on behalf of CALLER.  */
 
 static m4_pattern_buffer *
 m4_regexp_compile (m4 *context, const char *caller,
-		   const char *regexp, int syntax)
+		   const char *regexp, int resyntax)
 {
   static m4_pattern_buffer buf;	/* compiled regular expression */
   static bool buf_initialized = false;
@@ -158,7 +133,7 @@ m4_regexp_compile (m4 *context, const char *caller,
       buf.pat.translate	= NULL;
     }
 
-  re_set_syntax (syntax);
+  re_set_syntax (resyntax);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf.pat);
 
   if (msg != NULL)
@@ -232,9 +207,10 @@ substitute (m4 *context, m4_obstack *obs, const char *victim,
    characters are copied verbatim, and the result copied to the obstack.  */
 
 static bool
-regsub (m4 *context, m4_obstack *obs, const char *caller,
-	const char *victim, const char *regexp, m4_pattern_buffer *buf,
-	const char *replace, bool ignore_duplicates)
+m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
+		      const char *victim, const char *regexp,
+		      m4_pattern_buffer *buf, const char *replace,
+		      bool ignore_duplicates)
 {
   int matchpos	= 0;		/* start position of match */
   int offset	= 0;		/* current match offset */
@@ -328,9 +304,40 @@ M4BUILTIN_HANDLER (builtin)
 }
 
 
-/* Change the current input syntax.  The function set_syntax () lives
-   in input.c.  For compability reasons, this function is not called,
-   if not followed by a` SYNTAX_OPEN.  Also, any changes to comment
+/* Change the current regexp syntax.  Currently this affects the
+   builtins: `patsubst', `regexp' and `renamesyms'.  */
+
+static int
+m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
+{
+  int resyntax = m4_regexp_syntax_encode (spec);
+
+  if (resyntax < 0)
+    {
+      M4ERROR ((m4_get_warning_status_opt (context), 0,
+		_("%s: bad syntax-spec: `%s'"),
+		caller, spec));
+    }
+
+  return resyntax;
+}
+
+
+/**
+ * changeresyntax([RESYNTAX-SPEC])
+ **/
+M4BUILTIN_HANDLER (changeresyntax)
+{
+  int resyntax = m4_resyntax_encode_safe (context, M4ARG (0), M4ARG (1));
+
+  if (resyntax >= 0)
+    m4_set_regexp_syntax_opt (context, resyntax);
+}
+
+
+/* Change the current input syntax.  The function m4_set_syntax () lives
+   in syntax.c.  For compability reasons, this function is not called,
+   if not followed by a SYNTAX_OPEN.  Also, any changes to comment
    delimiters and quotes made here will be overridden by a call to
    `changecom' or `changequote'.  */
 
@@ -352,10 +359,13 @@ M4BUILTIN_HANDLER (changesyntax)
 	      && (key != '\0'))
 	    {
 	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			_("Undefined syntax code %c"), key));
+			_("%s: undefined syntax code: `%c'"),
+			M4ARG (0), key));
 	    }
 	}
     }
+  else
+    assert (!"Unable to import from m4 module");
 }
 
 
@@ -460,6 +470,8 @@ M4BUILTIN_HANDLER (esyscmd)
 	  m4_set_sysval (pclose (pin));
 	}
     }
+  else
+    assert (!"Unable to import from m4 module");
 }
 
 
@@ -479,8 +491,7 @@ M4BUILTIN_HANDLER (format)
 
 /* The builtin "indir" allows indirect calls to macros, even if their name
    is not a proper macro name.  It is thus possible to define macros with
-   ill-formed names for internal use in larger macro packages.  This macro
-   is not available in compatibility mode.  */
+   ill-formed names for internal use in larger macro packages.  */
 
 /**
  * indir(MACRO, [...])
@@ -504,45 +515,30 @@ M4BUILTIN_HANDLER (indir)
    substituted by the text matched by the Nth parenthesized sub-expression.  */
 
 /**
- * patsubst(VICTIM, REGEXP, [REPLACEMENT])
- * epatsubst(VICTIM, REGEXP, [REPLACEMENT])
- **/
-static void
-m4_patsubst_do (m4 *context, m4_obstack *obs, int argc,
-		m4_symbol_value **argv, int syntax)
-{
-  const char *caller;		/* calling macro name */
-  const char *victim;		/* first argument */
-  const char *regexp;		/* regular expression */
-  m4_pattern_buffer *buf;	/* compiled regular expression */
-
-  caller = M4ARG (0);
-  victim = M4ARG (1);
-  regexp = M4ARG (2);
-
-  buf = m4_regexp_compile (context, caller, regexp, syntax);
-  if (!buf)
-    return;
-
-  regsub (context, obs, caller, victim, regexp, buf, M4ARG (3), false);
-}
-
-
-/**
- * patsubst(STRING, REGEXP, [REPLACEMENT])
+ * patsubst(VICTIM, REGEXP, [REPLACEMENT], [RESYNTAX])
  **/
 M4BUILTIN_HANDLER (patsubst)
 {
-  m4_patsubst_do (context, obs, argc, argv, RE_SYNTAX_BRE);
-}
+  const char *me;		/* name of this macro */
+  m4_pattern_buffer *buf;	/* compiled regular expression */
+  int resyntax;
 
+  me = M4ARG (0);
 
-/**
- * epatsubst(STRING, REGEXP, [REPLACEMENT])
- **/
-M4BUILTIN_HANDLER (epatsubst)
-{
-  m4_patsubst_do (context, obs, argc, argv, RE_SYNTAX_ERE);
+  resyntax = m4_get_regexp_syntax_opt (context);
+  if (argc >= 5)		/* additional args ignored */
+    {
+      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4));
+      if (resyntax < 0)
+	return;
+    }
+
+  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax);
+  if (!buf)
+    return;
+
+  m4_regexp_substitute (context, obs, me, M4ARG (1), M4ARG (2), buf,
+			M4ARG (3), false);
 }
 
 
@@ -552,64 +548,69 @@ M4BUILTIN_HANDLER (epatsubst)
    the expansion to this argument.  */
 
 /**
- * regexp(VICTIM, REGEXP, [REPLACEMENT])
- * eregexp(VICTIM, REGEXP, [REPLACEMENT])
+ * regexp(VICTIM, REGEXP, RESYNTAX)
+ * regexp(VICTIM, REGEXP, [REPLACEMENT], [RESYNTAX])
  **/
-
-static void
-m4_regexp_do (m4 *context, m4_obstack *obs, int argc,
-	      m4_symbol_value **argv, int syntax)
+M4BUILTIN_HANDLER (regexp)
 {
-  const char *caller;		/* calling macro name */
-  const char *victim;		/* first argument */
-  const char *regexp;		/* regular expression */
-
+  const char *me;		/* name of this macro */
+  const char *replace;		/* optional replacement string */
   m4_pattern_buffer *buf;	/* compiled regular expression */
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
+  int resyntax;
 
-  caller = M4ARG (0);
-  victim = M4ARG (1);
-  regexp = M4ARG (2);
+  me = M4ARG (0);
+  replace = M4ARG (3);
+  resyntax = m4_get_regexp_syntax_opt (context);
 
-  buf = m4_regexp_compile (context, caller, regexp, syntax);
+  if (argc == 4)
+    {
+      resyntax = m4_regexp_syntax_encode (replace);
+
+      /* The first case is the most difficult, because the empty string
+	 is a valid RESYNTAX, yet we want `regexp(aab, a*, )' to return
+	 an empty string as per M4 1.4.x!  */
+
+      if ((*replace == '\0') || (resyntax < 0))
+	/* regexp(VICTIM, REGEXP, REPLACEMENT) */
+	resyntax = m4_get_regexp_syntax_opt (context);
+      else
+	/* regexp(VICTIM, REGEXP, RESYNTAX) */
+	replace = NULL;
+    }
+  else if (argc >= 5)
+    {
+      /* regexp(VICTIM, REGEXP, REPLACEMENT, RESYNTAX) */
+      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4));
+      if (resyntax < 0)
+	return;
+    }
+  /*
+    else
+      regexp(VICTIM, REGEXP)  */
+
+  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax);
   if (!buf)
     return;
 
-  length = strlen (victim);
-  startpos = m4_regexp_search (buf, victim, length, 0, length);
+  length = strlen (M4ARG (1));
+  startpos = m4_regexp_search (buf, M4ARG (1), length, 0, length);
 
   if (startpos  == -2)
     {
       M4ERROR ((m4_get_warning_status_opt (context), 0,
 		_("%s: error matching regular expression `%s'"),
-		caller, regexp));
+		me, M4ARG (2)));
       return;
     }
 
-  if (argc == 3)
+  if ((argc == 3) || (replace == NULL))
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (context, obs, victim, M4ARG (3), buf);
+    substitute (context, obs, M4ARG (1), replace, buf);
 
   return;
-}
-
-
-/**
- * regexp(VICTIM, REGEXP, [REPLACEMENT])
- **/
-M4BUILTIN_HANDLER (regexp)
-{
-  m4_regexp_do (context, obs, argc, argv, RE_SYNTAX_BRE);
-}
-
-/**
- * eregexp(VICTIM, REGEXP, [REPLACEMENT])
- **/
-M4BUILTIN_HANDLER (eregexp)
-{
-  m4_regexp_do (context, obs, argc, argv, RE_SYNTAX_ERE);
 }
 
 
@@ -617,73 +618,67 @@ M4BUILTIN_HANDLER (eregexp)
    REPLACEMENT specification.  */
 
 /**
- * renamesyms(REGEXP, REPLACEMENT)
- * erenamesyms(REGEXP, REPLACEMENT)
- **/
-static void
-m4_renamesyms_do (m4 *context, m4_obstack *obs, int argc,
-		  m4_symbol_value **argv, int syntax)
-{
-  const char *caller;		/* calling macro name */
-  const char *regexp;		/* regular expression string */
-  const char *replace;		/* replacement expression string */
-
-  m4_pattern_buffer *buf;	/* compiled regular expression */
-
-  m4_dump_symbol_data	data;
-  m4_obstack		data_obs;
-  m4_obstack		rename_obs;
-
-  M4_MODULE_IMPORT (m4, m4_dump_symbols);
-
-  assert (m4_dump_symbols);
-
-  caller  = M4ARG (0);
-  regexp  = M4ARG (1);
-  replace = M4ARG (2);
-
-  buf = m4_regexp_compile (context, caller, regexp, syntax);
-  if (!buf)
-    return;
-
-  obstack_init (&rename_obs);
-  obstack_init (&data_obs);
-  data.obs = &data_obs;
-
-  m4_dump_symbols (context, &data, 1, argv, false);
-
-  for (; data.size > 0; --data.size, data.base++)
-    {
-      const char *	name	= data.base[0];
-      int		length	= strlen (name);
-
-      if (regsub (context, &rename_obs, caller, name, regexp, buf,
-		  replace, true))
-	{
-	  const char *renamed = obstack_finish (&rename_obs);
-
-	  m4_symbol_rename (M4SYMTAB, name, renamed);
-	}
-    }
-
-  obstack_free (&data_obs, NULL);
-  obstack_free (&rename_obs, NULL);
-}
-
-/**
- * renamesyms(REGEXP, REPLACEMENT)
+ * renamesyms(REGEXP, REPLACEMENT, [RESYNTAX])
  **/
 M4BUILTIN_HANDLER (renamesyms)
 {
-  m4_renamesyms_do (context, obs, argc, argv, RE_SYNTAX_BRE);
-}
+  M4_MODULE_IMPORT (m4, m4_dump_symbols);
 
-/**
- * erenamesyms(REGEXP, REPLACEMENT)
- **/
-M4BUILTIN_HANDLER (erenamesyms)
-{
-  m4_renamesyms_do (context, obs, argc, argv, RE_SYNTAX_ERE);
+  if (m4_dump_symbols)
+    {
+      const char *me;		/* name of this macro */
+      const char *regexp;	/* regular expression string */
+      const char *replace;	/* replacement expression string */
+
+      m4_pattern_buffer *buf;	/* compiled regular expression */
+
+      m4_dump_symbol_data	data;
+      m4_obstack		data_obs;
+      m4_obstack		rename_obs;
+
+      int resyntax;
+
+      me      = M4ARG (0);
+      regexp  = M4ARG (1);
+      replace = M4ARG (2);
+
+      resyntax = m4_get_regexp_syntax_opt (context);
+      if (argc == 4)
+	{
+	  resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3));
+	  if (resyntax < 0)
+	    return;
+	}
+
+      buf = m4_regexp_compile (context, me, regexp, resyntax);
+      if (!buf)
+	return;
+
+      obstack_init (&rename_obs);
+      obstack_init (&data_obs);
+      data.obs = &data_obs;
+
+      m4_dump_symbols (context, &data, 1, argv, false);
+
+      for (; data.size > 0; --data.size, data.base++)
+	{
+	  const char *	name	= data.base[0];
+	  int		length	= strlen (name);
+
+	  if (m4_regexp_substitute (context, &rename_obs, me, name, regexp,
+				    buf, replace, true))
+	    {
+	      const char *renamed = obstack_finish (&rename_obs);
+
+	      m4_symbol_rename (M4SYMTAB, name, renamed);
+	    }
+	}
+
+      obstack_free (&data_obs, NULL);
+      obstack_free (&rename_obs, NULL);
+    }
+  else
+    assert (!"Unable to import from m4 module");
 }
 
 
@@ -719,7 +714,6 @@ M4BUILTIN_HANDLER (symbols)
 }
 
 
-
 /* This contains macro which implements syncoutput() which takes one arg
      1, on, yes - turn on sync lines
      0, off, no - turn off sync lines
