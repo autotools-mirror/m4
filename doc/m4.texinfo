@@ -2206,7 +2206,7 @@ foo
 @error{}m4trace:8: -1- foo
 @result{}FOO
 @end example
- 
+
 @node Debug Output
 @section Saving debugging output
 
@@ -3115,24 +3115,39 @@ If @var{replacement} is omitted, @code{regexp} expands to the index of
 the first match of @var{regexp} in @var{string}.  If @var{regexp} does
 not match anywhere in @var{string}, it expands to -1.
 
+If @var{replacement} is supplied, and there was a match, @code{regexp}
+changes the expansion to this argument, with @samp{\@var{n}} substituted
+by the text matched by the @var{n}th parenthesized sub-expression of
+@var{regexp}, up to nine sub-expressions.  The escape @samp{\&} is
+replaced by the text of the entire regular expression matched.  For
+all other characters, @samp{\} treats the next character literally.  A
+warning is issued if there were fewer sub-expressions than the
+@samp{\@var{n}} requested, or if there is a trailing @samp{\}.  If there
+was no match, @code{regexp} expands to the empty string.
+
+The builtin macro @code{regexp} is recognized only when given arguments.
+
 @example
 regexp(`GNUs not Unix', `\<[a-z]\w+')
 @result{}5
 regexp(`GNUs not Unix', `\<Q\w*')
 @result{}-1
-@end example
-
-If @var{replacement} is supplied, @code{regexp} changes the expansion
-to this argument, with @samp{\@var{n}} substituted by the text
-matched by the @var{n}th parenthesized sub-expression of @var{regexp},
-@samp{\&} being the text the entire regular expression matched.
-
-@example
 regexp(`GNUs not Unix', `\w\(\w+\)$', `*** \& *** \1 ***')
 @result{}*** Unix *** nix ***
+regexp(`GNUs not Unix', `\<Q\w*', `*** \& *** \1 ***')
+@result{}
 @end example
 
-The builtin macro @code{regexp} is recognized only when given arguments.
+Here are some more examples on the handling of backslash:
+
+@example
+regexp(`abc', `\(b\)', `\\\10\a')
+@result{}\b0a
+regexp(`abc', `b', `\1\')
+@error{}stdin:2: m4: Warning: sub-expression 1 not present
+@error{}stdin:2: m4: Warning: trailing \ ignored in replacement
+@result{}
+@end example
 
 @node Substr
 @section Extracting substrings
@@ -3241,11 +3256,18 @@ to avoid infinite loops.
 
 When a replacement is to be made, @var{replacement} is inserted into
 the expansion, with @samp{\@var{n}} substituted by the text matched by
-the @var{n}th parenthesized sub-expression of @var{regexp}, @samp{\&}
-being the text the entire regular expression matched.
+the @var{n}th parenthesized sub-expression of @var{patsubst}, for up to
+nine sub-expressions.  The escape @samp{\&} is replaced by the text of
+the entire regular expression matched.  For all other characters,
+@samp{\} treats the next character literally.  A warning is issued if
+there were fewer sub-expressions than the @samp{\@var{n}} requested, or
+if there is a trailing @samp{\}.
 
 The @var{replacement} argument can be omitted, in which case the text
 matched by @var{regexp} is deleted.
+
+The builtin macro @code{patsubst} is recognized only when given
+arguments.
 
 @example
 patsubst(`GNUs not Unix', `^', `OBS: ')
@@ -3258,6 +3280,9 @@ patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
 @result{}GN not @comment
+patsubst(`GNUs not Unix', `not', `NOT\')
+@error{}stdin:6: m4: Warning: trailing \ ignored in replacement
+@result{}GNUs NOT Unix
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
@@ -3276,8 +3301,21 @@ capitalize(`GNUs not Unix')
 @result{}Gnus Not Unix
 @end example
 
-The builtin macro @code{patsubst} is recognized only when given
-arguments.
+While @code{regexp} replaces the whole input with the replacement as
+soon as there is a match, @code{patsubst} replaces each
+@emph{occurrence} of a match and preserves non matching pieces:
+
+@example
+define(`patreg',
+`patsubst($@@)
+regexp($@@)')dnl
+patreg(`bar foo baz Foo', `foo\|Foo', `FOO')
+@result{}bar FOO baz FOO
+@result{}FOO
+patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
+@result{}bab abb 212
+@result{}bab
+@end example
 
 @node Format
 @section Formatted output

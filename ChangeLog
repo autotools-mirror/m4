@@ -1,5 +1,10 @@
 2006-07-14  Eric Blake  <ebb9@byu.net>
 
+	* src/builtin.c (substitute): Warn on bad escape sequences.
+	Ignore trailing backslash.
+	* doc/m4.texinfo (Regexp): Add documentation for this.
+	* NEWS: Document this change.
+
 	* src/builtin.c (m4_format, m4_indir): Warn on too few arguments.
 	* doc/m4.texinfo (Defn, Builtin, Debug Levels, Debug Output): Add
 	more examples.

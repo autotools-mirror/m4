@@ -1649,6 +1649,14 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	  if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
+	  else
+	    M4ERROR ((warning_status, 0, "\
+Warning: sub-expression %d not present", ch));
+	  break;
+
+	case '\0':
+	  M4ERROR ((warning_status, 0, "\
+Warning: trailing \\ ignored in replacement"));
 	  break;
 
 	default:
