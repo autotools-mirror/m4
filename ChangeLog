@@ -1,3 +1,8 @@
+2006-07-14  Eric Blake  <ebb9@byu.net>
+
+	* src/main.c (main): Avoid compiler warning.
+	* modules/gnu.c (renamesyms): Remove unused variable.
+
 2006-07-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* m4/m4module.h (m4_regexp_syntax_decode, m4_regexp_syntax_encode)

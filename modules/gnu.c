@@ -663,7 +663,6 @@ M4BUILTIN_HANDLER (renamesyms)
       for (; data.size > 0; --data.size, data.base++)
 	{
 	  const char *	name	= data.base[0];
-	  int		length	= strlen (name);
 
 	  if (m4_regexp_substitute (context, &rename_obs, me, name, regexp,
 				    buf, replace, true))

@@ -441,7 +441,7 @@ main (int argc, char *const *argv, char *const *envp)
       {
 	macro_definition *next;
 	char *macro_value;
-	char *optarg = defines->macro;
+	const char *optarg = defines->macro;
 
 	switch (defines->code)
 	  {
