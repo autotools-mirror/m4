@@ -23,7 +23,7 @@ BEGIN {
 
   split($0, tmp, ",");
   node = substr(tmp[1], 7);
-  if (length(node) > 11)
+  if (length(node) > 10)
     printf("Node: %s - truncated", node);
   else
     printf("Node: %s ", node);
@@ -45,7 +45,7 @@ BEGIN {
       close (file);
     seq++;
     count++;
-    file = sprintf("%02d.%s", count, node);
+    file = sprintf("%03d.%s", count, node);
     printf("dnl @ %s:%d: Origin of test\n", FILENAME, NR) > file;
     next;
   }

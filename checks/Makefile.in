@@ -32,7 +32,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 AWK = @AWK@
 
 # Vern says that the first star is required around an Alpha make bug.
-CHECKS = $(srcdir)/*[0-9][0-9].*
+CHECKS = $(srcdir)/*[0-9][0-9][0-9].*
 # Makefile.in is automatically distributed by automake.
 DISTFILES = $(srcdir)/get-them $(srcdir)/check-them $(srcdir)/stamp-checks
 

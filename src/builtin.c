@@ -733,7 +733,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   symbol *s;
   const char *name = ARG (1);
 
-  if (bad_argc (argv[0], argc, 1, -1))
+  if (bad_argc (argv[0], argc, 2, -1))
     return;
 
   s = lookup_symbol (name, SYMBOL_LOOKUP);
@@ -1596,6 +1596,8 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_format (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   format (obs, argc - 1, argv + 1);
 }
 

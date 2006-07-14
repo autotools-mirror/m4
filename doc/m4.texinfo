@@ -1427,6 +1427,8 @@ expansion is a special token, which points to the builtin's internal
 definition.  This token is only meaningful as the second argument to
 @code{define} (and @code{pushdef}), and is ignored in any other context.
 
+The macro @code{defn} is recognized only with parameters.
+
 Its normal use is best understood through an example, which shows how to
 rename @code{undefine} to @code{zap}:
 
@@ -1470,7 +1472,27 @@ defn(`string')
 @result{}
 @end example
 
-The macro @code{defn} is recognized only with parameters.
+However, it is important to remember that @code{m4} rescanning is purely
+textual.  If an unbalanced right quote string occurs in a macro
+definition, the rescan will see that embedded quote as the termination
+of the quoted string, and the remainder of the macro's definition will
+be rescanned unquoted.  Thus it is a good idea to avoid unbalanced right
+quotes in macro definitions or arguments to macros.
+
+@example
+define(`foo', a'a)
+@result{}
+define(`a', `A')
+@result{}
+define(`echo', `$@')
+@result{}
+foo
+@result{}A'A
+defn(`foo')
+@result{}aA'
+echo(foo)
+@result{}AA'
+@end example
 
 @node Pushdef
 @section Temporarily redefining macros
@@ -1616,6 +1638,51 @@ rest of the arguments.  This can be used, if @var{name} has been given
 another definition that has covered the original.
 
 The macro @code{builtin} is recognized only with parameters.
+
+This can be used even if @var{name} has been given another definition
+that has covered the original, or been undefined so that no @var{name}
+maps to the builtin.
+
+@example
+pushdef(`define', `hidden')
+@result{}
+undefine(`undefine')
+@result{}
+define(`foo', `bar')
+@result{}hidden
+foo
+@result{}foo
+builtin(`define', `foo', `BAR')
+@result{}
+foo
+@result{}BAR
+undefine(`foo')
+@result{}undefine(foo)
+foo
+@result{}BAR
+builtin(`undefine', `foo')
+@result{}
+foo
+@result{}foo
+@end example
+
+Note that this can be used to invoke builtins that normally require
+parameters without actually providing them; but it will provoke a
+warning, and usually result in a void expansion.
+
+@example
+builtin
+@result{}builtin
+builtin()
+@error{}stdin:2: m4: undefined builtin `'
+@result{}
+builtin(`builtin')
+@error{}stdin:3: m4: Warning: too few arguments to builtin `builtin'
+@result{}
+builtin(`builtin',)
+@error{}stdin:4: m4: undefined builtin `'
+@result{}
+@end example
 
 @node Conditionals
 @chapter Conditionals, loops, and recursion
@@ -2114,10 +2181,32 @@ debugmode(opt @var{flags})
 The argument @var{flags} should be a subset of the letters listed above.
 As special cases, if the argument starts with a @samp{+}, the flags are
 added to the current debug flags, and if it starts with a @samp{-}, they
-are removed.  If no argument is present, the debugging flags are set to
-zero (as if no @option{-d} was given), and with an empty argument the flags
-are reset to the default.
+are removed.  If no argument is present, the debugging flags are cleared
+(as if no @option{-d} was given), and with an empty argument the flags
+are reset to the default of @samp{aeq}.
 
+@example
+define(`foo', `FOO')
+@result{}
+traceon(`foo')
+@result{}
+debugmode()
+@result{}
+foo
+@error{}m4trace: -1- foo -> `FOO'
+@result{}FOO
+debugmode
+@result{}
+foo
+@error{}m4trace: -1- foo
+@result{}FOO
+debugmode(`+l')
+@result{}
+foo
+@error{}m4trace:8: -1- foo
+@result{}FOO
+@end example
+ 
 @node Debug Output
 @section Saving debugging output
 
@@ -2139,6 +2228,25 @@ will send all further debug and trace output to @var{file}.  If
 @var{file} is empty, debug and trace output are discarded and if
 @code{debugfile} is called without any arguments, debug and trace output
 are sent to the standard error output.
+
+@example
+traceon(`divnum')
+@result{}
+divnum(`extra')
+@error{}stdin:2: m4: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4trace: -1- divnum(`extra') -> `0'
+@result{}0
+debugfile()
+@result{}
+divnum(`extra')
+@error{}stdin:4: m4: Warning: excess arguments to builtin `divnum' ignored
+@result{}0
+debugfile
+@result{}
+divnum
+@error{}m4trace: -1- divnum -> `0'
+@result{}0
+@end example
 
 @node Input Control
 @chapter Input control
@@ -2190,11 +2298,11 @@ input following the matching close parenthesis up to and including the
 next newline, on whatever line containing it, will still be discarded.
 
 @example
-dnl(`this is ignored',
-`so is this') and this too
+dnl(`args are ignored, but side effects occur',
+define(`foo', `like this')) while this text is ignored: undefine(`foo')
 @error{}stdin:2: m4: Warning: excess arguments to builtin `dnl' ignored
-but not this
-@result{}but not this
+See how `foo' was defined, foo?
+@result{}See how foo was defined, like this?
 @end example
 
 @node Changequote
@@ -2310,6 +2418,8 @@ start comment delimiter.
 
 Calling @code{changecom} without any arguments, or with an empty string
 for the first argument, disables the commenting mechanism completely.
+To restore the original comment start of @samp{#}, you must explicitly
+ask for it.
 
 @example
 define(`comment', `COMMENT')
@@ -2318,6 +2428,10 @@ changecom
 @result{}
 # Not a comment anymore
 @result{}# Not a COMMENT anymore
+changecom(`#')
+@result{}
+# comment again
+@result{}# comment again
 @end example
 
 @node Changeword

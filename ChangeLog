@@ -1,3 +1,12 @@
+2006-07-14  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_format, m4_indir): Warn on too few arguments.
+	* doc/m4.texinfo (Defn, Builtin, Debug Levels, Debug Output): Add
+	more examples.
+	(Dnl): Update example to show side effects.
+	* checks/get-them: Generate three digit test names.
+	* checks/Makefile.in (CHECKS): Accomodate 100+ tests.
+
 2006-07-13  Eric Blake  <ebb9@byu.net>
 
 	* src/input.c (input_init): Simplify.
