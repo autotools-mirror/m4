@@ -352,6 +352,7 @@ dist_pkgdata_DATA = \
 TESTSUITE = $(srcdir)/tests/testsuite
 TESTSUITE_AT	= \
 		  tests/builtins.at \
+		  tests/freeze.at \
 		  tests/generated.at \
 		  tests/macros.at \
 		  tests/modules.at \
