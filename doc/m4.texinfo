@@ -2213,7 +2213,7 @@ the debugging output format:
 The argument @var{flags} should be a subset of the letters listed above.
 As special cases, if the argument starts with a @samp{+}, the flags are
 added to the current debug flags, and if it starts with a @samp{-}, they
-are removed.  If no argument is present, the debugging flags are cleared
+are removed.  If no argument is present, all debugging flags are cleared
 (as if no @option{-d} was given), and with an empty argument the flags
 are reset to the default of @samp{aeq}.
 
@@ -3304,7 +3304,7 @@ capitalize(`GNUs not Unix')
 
 While @code{regexp} replaces the whole input with the replacement as
 soon as there is a match, @code{patsubst} replaces each
-@emph{occurrence} of a match and preserves non matching pieces:
+@emph{occurrence} of a match and preserves non-matching pieces:
 
 @example
 define(`patreg',
