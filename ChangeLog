@@ -1,5 +1,9 @@
 2006-07-14  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Global cleanup.  Avoid @code{...}'d, as it
+	looks bad in info.  Use @deffn rather than @example for
+	describing prototypes.  Fix awkward wording and grammar.
+
 	* src/builtin.c (substitute): Warn on bad escape sequences.
 	Ignore trailing backslash.
 	* doc/m4.texinfo (Regexp): Add documentation for this.
