@@ -1,47 +1,76 @@
-\input texinfo
-@c %**start of header
+\input texinfo @c -*- texinfo -*-
+@comment ========================================================
+@comment %**start of header
 @setfilename m4.info
-@settitle GNU macro processor
+@settitle GNU M4 macro processor
+@setchapternewpage odd
+@ifnothtml
+@setcontentsaftertitlepage
+@end ifnothtml
 @finalout
-@c %**end of header
 
 @include version.texi
 
 @set beta
 
-@c A simple macro for optional variables.
+@c @tabchar{}
+@c ----------
+@c The testsuite expects literal tab output in some examples, but
+@c literal tabs in texinfo lead to formatting issues.
+@macro tabchar
+@	@c
+@end macro
+
+@c @ovar{ARG}
+@c -------------------
+@c The ARG is an optional argument.  To be used for macro arguments in
+@c their documentation.
 @macro ovar{varname}
 @r{[}@var{\varname\}@r{]}
 @end macro
 
-@dircategory Text Processing Tools
+@c @dvar{ARG, DEFAULT}
+@c -------------------
+@c The ARG is an optional argument, defaulting to DEFAULT.  To be used
+@c for macro arguments in their documentation.
+@macro dvar{varname, default}
+@r{[}@var{\varname\} = @samp{\default\}@r{]}
+@end macro
+
+@comment %**end of header
+@comment ========================================================
+
+@copying
+
+This manual is for GNU M4 (version @value{VERSION}, @value{UPDATED}),
+a package containing an implementation of the m4 macro language.
+
+Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
+2000, 2001, 2004, 2005, 2006 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the @acronym{GNU} Free Documentation License,
+Version 1.2 or any later version published by the Free Software
+Foundation; with no Invariant Sections, with the Front-Cover texts
+being ``A @acronym{GNU} Manual,'' and with the Back-Cover Texts as in
+(a) below.  A copy of the license is included in the section entitled
+``@acronym{GNU} Free Documentation License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and
+modify this @acronym{GNU} Manual, like @acronym{GNU} software.  Copies
+published by the Free Software Foundation raise funds for
+@acronym{GNU} development.''
+@end quotation
+@end copying
+
+@dircategory GNU programming tools
 @direntry
-* m4: (m4).			A powerful macro processor.
+* M4: (m4).                     A powerful macro processor.
 @end direntry
 
-@ifinfo
-This file documents GNU @code{m4} @value{VERSION}
-
-Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-2001, 2004, 2005, 2006 Free Software Foundation, Inc.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1
-or any later version published by the Free Software Foundation;
-with the no Invariant Sections, with no Front-Cover Texts,
-and with no Back-Cover Texts.  A copy of the license is included in
-the section entitled "GNU Free Documentation License".
-
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries copying permission notice
-identical to this one except for the removal of this paragraph
-
-@end ignore
-@end ifinfo
-
 @titlepage
-@title GNU m4, version @value{VERSION}
+@title GNU M4, version @value{VERSION}
 @subtitle A powerful macro processor
 @subtitle Edition @value{EDITION}, @value{UPDATED}
 @author by Ren@'e Seindal
@@ -49,24 +78,17 @@ identical to this one except for the removal of this paragraph
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
-2000, 2001, 2004, 2005, 2006 Free Software Foundation, Inc.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1
-or any later version published by the Free Software Foundation;
-with the no Invariant Sections, with no Front-Cover Texts,
-and with no Back-Cover Texts.  A copy of the license is included in
-the section entitled "GNU Free Documentation License".
-
+@insertcopying
 @end titlepage
 
-@ifnottex
-@node Top, Preliminaries, (dir), (dir)
-@top GNU @code{m4}
+@contents
 
-@c @item @b{@code{m4}} @value{hfillkludge} (UtilD, UtilT, SrcCD)
-@c
+@ifnottex
+@node Top
+@top GNU M4
+@insertcopying
+@end ifnottex
+
 GNU @code{m4} is an implementation of the traditional UNIX macro
 processor.  It is mostly SVR4 compatible, although it has some
 extensions (for example, handling more than 9 positional parameters
@@ -78,21 +100,20 @@ running them.
 GNU @code{m4} was originally written by Ren@'e Seindal, with
 subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
-files @file{AUTHORS} and @file{THANKS} from the GNU @code{m4}
-distribution.
+files @file{AUTHORS} and @file{THANKS} from the GNU M4 distribution.
 
 @ifclear beta
 This is release @value{VERSION}.  It is now to be considered stable,
-future releases are only meant to fix bugs, increase speed, or improve
-documentation.  However@dots{}
+future releases on this branch are only meant to fix bugs, increase
+speed, or improve documentation.
 @end ifclear
 
 @ifset beta
 This is BETA release @value{VERSION}.  This is a development release,
-and is as such prone to bugs, crashes, unforeseen features, incomplete
-documentation@dots{} therefore, use at your own peril.  In case of
-problems, please do not hesitate to report them (see the README file in
-the distribution).
+and as such, is prone to bugs, crashes, unforeseen features, incomplete
+documentation@dots{}, therefore, use at your own peril.  In case of
+problems, please do not hesitate to report them (see the @file{README}
+file in the distribution).  @xref{Experiments}.
 @end ifset
 
 @menu
@@ -101,7 +122,7 @@ the distribution).
 
 * Macros::                      How to invoke macros
 * Definitions::                 How to define new macros
-* Conditionals::                Conditionals, loops an recursions
+* Conditionals::                Conditionals, loops, and recursions
 
 * Debugging::                   How to debug macros and input
 
@@ -113,17 +134,18 @@ the distribution).
 
 * Text handling::               Macros for text handling
 * Arithmetic::                  Macros for doing arithmetic
-* UNIX commands::               Macros for running UNIX commands
+* Shell commands::              Macros for running shell commands
 * Miscellaneous::               Miscellaneous builtin macros
-* Frozen files::                Fast loading of frozen states
+* Frozen files::                Fast loading of frozen state
 
 * Compatibility::               Compatibility with other versions of m4
 * Experiments::                 Experimental features in GNU m4
 * Answers::                     Correct version of some examples
-* Concept index::               Index for many concepts
-* Macro index::                 Index for all m4 macros
+* Copying This Manual::         How to make copies of this manual
+* Indices::                     Indices of concepts and macros
 
-@detailmenu --- The Detailed Node Listing ---
+@detailmenu
+ --- The Detailed Node Listing ---
 
 Introduction and preliminaries
 
@@ -140,7 +162,7 @@ Lexical and syntactic conventions
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
 * Input processing::            How m4 copies input to output
-* Regular expression syntax::	How m4 interprets regular expressions
+* Regular expression syntax::   How m4 interprets regular expressions
 
 How to invoke macros
 
@@ -165,7 +187,7 @@ How to define new macros
 
 * Symbols::                     Getting the defined macro names
 
-Conditionals, loops and recursion
+Conditionals, loops, and recursion
 
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
@@ -209,7 +231,7 @@ Extending m4 with dynamic runtime modules
 Macros for text handling
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -219,11 +241,12 @@ Macros for text handling
 Macros for doing arithmetic
 
 * Incr::                        Decrement and increment operators
-* Eval::                        Evaluating integer or rational expressions
-* Mpeval::
+* Eval::                        Evaluating integer expressions
+* Mpeval::                      Multiple precision arithmetic
 
-Running UNIX commands
+Running shell commands
 
+* Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit codes
@@ -235,26 +258,39 @@ Miscellaneous builtin macros
 * M4exit::                      Exiting from m4
 * Syncoutput::                  Turning on and off sync lines
 
+Fast loading of frozen state
+
+* Using frozen files::          Using frozen files
+* Frozen file format 1::        Frozen file format 1
+* Frozen file format 2::        Frozen file format 2
+
 Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU m4
-* Other Incompat::              Other incompatibilities
+* Incompatibilities::           Other incompatibilities
+
+Copying This Manual
+
+* GNU Free Documentation License::  License for copying this manual
+
+Indices
+
+* Concept index::               Index for many concepts
+* Macro index::                 Index for all m4 macros
 
 @end detailmenu
 @end menu
 
-@end ifnottex
-
 @node Preliminaries
 @chapter Introduction and preliminaries
 
-This first chapter explains what is GNU @code{m4}, where @code{m4}
+This first chapter explains what GNU @code{m4} is, where @code{m4}
 comes from, how to read and use this documentation, how to call the
-@code{m4} program and how to report bugs about it.  It concludes by
+@code{m4} program, and how to report bugs about it.  It concludes by
 giving tips for reading the remainder of the manual.
 
 The following chapters then detail all the features of the @code{m4}
-language.
+language, as shipped in the GNU M4 package.
 
 @menu
 * Intro::                       Introduction to @code{m4}
@@ -271,7 +307,7 @@ language.
 input to the output, expanding macros as it goes.  Macros are either
 builtin or user-defined, and can take any number of arguments.
 Besides just doing macro expansion, @code{m4} has builtin functions
-for including named files, running UNIX commands, doing integer
+for including named files, running shell commands, doing integer
 arithmetic, manipulating text in various ways, recursion, etc@dots{}
 @code{m4} can be used either as a front-end to a compiler, or as a
 macro processor in its own right.
@@ -658,7 +694,7 @@ in macro names, depending on the active locale.
 * Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
 * Input processing::            How m4 copies input to output
-* Regular expression syntax::	How m4 interprets regular expressions
+* Regular expression syntax::   How m4 interprets regular expressions
 @end menu
 
 @node Names
@@ -1082,7 +1118,7 @@ macro if it has several definitions from @code{pushdef}.
 @xref{Pushdef, , Temporarily redefining macros}, for an explanation of
 @code{pushdef}.  Some other UNIX implementations replace all definitions
 of a macro with @code{define}.
-@xref{Other Incompat, , Other incompatibilities}, for more details.
+@xref{Incompatibilities, , Other incompatibilities}, for more details.
 
 The first argument to @code{define} does not have to be a simple word.
 It can be any text string.  A macro with a non standard name cannot be
@@ -1555,7 +1591,7 @@ symbols(`ifndef', `ifdef', `define', `undef')
 @end deffn
 
 @node Conditionals
-@chapter Conditionals, loops and recursion
+@chapter Conditionals, loops, and recursion
 
 Macros, expanding to plain text, perhaps with arguments, are not quite
 enough.  We would like to have macros expand to different things, based
@@ -1687,8 +1723,8 @@ An example of the use of @code{shift} is this macro, which reverses the
 order of its arguments:
 
 @example
-define(`reverse', `ifelse($#, 0, , $#, 1, ``$1'',
-			  `reverse(shift($@@)), `$1'')')
+define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
+                          `reverse(shift($@@)), `$1'')')
 @result{}
 reverse
 @result{}
@@ -1747,10 +1783,10 @@ Here is the actual implementation of @code{forloop}:
 @comment ignore
 @example
 define(`forloop',
-       `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
 define(`_forloop',
-       `$4`'ifelse($1, `$3', ,
-		   `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+  `$4`'ifelse($1, `$3', ,
+    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
 @end example
 
 Notice the careful use of quotes.  Only three macro arguments are
@@ -1801,10 +1837,10 @@ The expansion of @code{dumpdef} is void.
 define(`foo', `Hello world.')
 @result{}
 dumpdef(`foo')
-@error{}foo:	`Hello world.'
+@error{}foo:@tabchar{}`Hello world.'
 @result{}
 dumpdef(`define')
-@error{}define:	<define>
+@error{}define:@tabchar{}<define>
 @result{}
 @end example
 
@@ -2603,10 +2639,10 @@ only when given arguments.
 @end deffn
 
 @example
-include(`no-such-file')
+include(`none')
 @result{}
-@error{}m4: input.m4: 1: Cannot open no-such-file: No such file or directory
-sinclude(`no-such-file')
+@error{}m4: input.m4: 1: Cannot open none: No such file or directory
+sinclude(`none')
 @result{}
 @end example
 
@@ -2892,7 +2928,7 @@ Clearing selected diversions can be done with the following macro:
 
 @example
 define(`cleardivert',
-`pushdef(`_num', divnum)divert(-1)undivert($@@)divert(_num)popdef(`_num')')
+`pushdef(`_n', divnum)divert(`-1')undivert($@@)divert(_n)popdef(`_n')')
 @result{}
 @end example
 
@@ -3136,7 +3172,7 @@ various ways, extracting substrings, searching, substituting, and so on.
 
 @menu
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -3163,7 +3199,7 @@ len(`abcdef')
 @result{}6
 @end example
 
-@node Index
+@node Index macro
 @section Searching for substrings
 
 @deffn {Builtin (m4)} index (@var{string}, @var{substring})
@@ -3230,7 +3266,8 @@ the syntax chosen, though the default regular expression syntax
 remains unchanged for other invocations:
 
 @example
-regexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***', `POSIX_EXTENDED')
+regexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***',
+       `POSIX_EXTENDED')
 @result{}*** Unix *** nix ***
 @end example
 
@@ -3367,7 +3404,8 @@ words or whole sentences, by substituting calls of the macros
 define(`upcase',   `translit(`$*', `a-z', `A-Z')')dnl
 define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
 define(`capitalize1',
-       `regexp(`$1', `^\(\w\)\(\w*\)', `upcase(`\1')`'downcase(`\2')')')dnl
+       `regexp(`$1', `^\(\w\)\(\w*\)',
+               `upcase(`\1')`'downcase(`\2')')')dnl
 define(`capitalize',
        `patsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
 capitalize(`GNUs not Unix')
@@ -3424,8 +3462,8 @@ Its use is best described by a few examples:
 @example
 define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
-format(`The string "%s" is %d characters long', foo, len(foo))
-@result{}The string "The brown fox jumped over the lazy dog" is 38 characters long
+format(`The string "%s" uses %d characters', foo, len(foo))
+@result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
 @end example
 
 Using the @code{forloop} macro defined in @xref{Loops}, this
@@ -3435,16 +3473,16 @@ example shows how @code{format} can be used to produce tabular output.
 @example
 forloop(`i', 1, 10, `format(`%6d squared is %10d
 ', i, eval(i**2))')
-@result{}     1 squared is	    1
-@result{}     2 squared is	    4
-@result{}     3 squared is	    9
-@result{}     4 squared is	   16
-@result{}     5 squared is	   25
-@result{}     6 squared is	   36
-@result{}     7 squared is	   49
-@result{}     8 squared is	   64
-@result{}     9 squared is	   81
-@result{}    10 squared is	  100
+@result{}     1 squared is          1
+@result{}     2 squared is          4
+@result{}     3 squared is          9
+@result{}     4 squared is         16
+@result{}     5 squared is         25
+@result{}     6 squared is         36
+@result{}     7 squared is         49
+@result{}     8 squared is         64
+@result{}     9 squared is         81
+@result{}    10 squared is        100
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
@@ -3466,8 +3504,8 @@ decrement operations.
 
 @menu
 * Incr::                        Decrement and increment operators
-* Eval::                        Evaluating integer or rational expressions
-* Mpeval::
+* Eval::                        Evaluating integer expressions
+* Mpeval::                      Multiple precision arithmetic
 @end menu
 
 @node Incr
@@ -3610,7 +3648,6 @@ eval(-666, 6, 10)
 Take note that @var{radix} cannot be larger than 36.
 
 @node Mpeval
-@comment  node-name,  next,  previous,  up
 @section Multiple precision arithmetic
 
 When @code{m4} is compiled with a multiple precision arithmetic library
@@ -3631,22 +3668,28 @@ integral.
 The builtin macro @code{mpeval} is recognized only when given arguments.
 @end deffn
 
-@node UNIX commands
-@chapter Running UNIX commands
+@node Shell commands
+@chapter Running shell commands
 
-@cindex executing UNIX commands
-@cindex running UNIX commands
+@cindex executing shell commands
+@cindex running shell commands
+@cindex shell commands, running
 @cindex UNIX commands, running
-@cindex commands, running UNIX
-There are a few builtin macros in @code{m4} that allow you to run UNIX
+@cindex commands, running shell
+There are a few builtin macros in @code{m4} that allow you to run shell
 commands from within @code{m4}.
 
 @menu
+* Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit codes
 * Maketemp::                    Making names for temporary files
 @end menu
+
+@node Platform macros
+@section Determining the platform
+@comment FIXME - port from branch
 
 @node Syscmd
 @section Executing simple commands
@@ -3685,7 +3728,7 @@ The builtin macro @code{syscmd} is recognized only when given arguments.
 
 @cindex GNU extensions
 @deffn {Builtin (gnu)} esyscmd (@var{shell-command})
-If you want @code{m4} to read the output of a UNIX command, use
+If you want @code{m4} to read the output of a shell command, use
 @code{esyscmd}, which expands to the standard output of the shell
 command @var{shell-command}.
 
@@ -3714,9 +3757,10 @@ arguments.
 @node Sysval
 @section Exit codes
 
-@cindex exit code from UNIX commands
+@cindex exit code from shell commands
+@cindex shell commands, exit code from
 @cindex UNIX commands, exit code from
-@cindex commands, exit code from UNIX
+@cindex commands, exit code from shell
 @deffn {Builtin (m4)} sysval
 To see whether a shell command succeeded, use @code{sysval}, which
 expands to the exit status of the last shell command run with
@@ -3827,11 +3871,12 @@ zero.
 
 @comment status: 1
 @example
-define(`fatal_error', `errprint(`m4: '__file__: __line__`: fatal error: $*
+define(`fatal_error',
+       `errprint(`m4:'__file__:__line__`: fatal error: $*
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4: input.m4: 3: fatal error: This is a BAD one, buster
+@error{}m4:input.m4:4: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro
@@ -3860,20 +3905,29 @@ parenthesis.
 @end deffn
 
 @node Frozen files
-@chapter Fast loading of frozen states
+@chapter Fast loading of frozen state
 
-@cindex fast loading of frozen files
-@cindex frozen files for fast loading
-@cindex initialization, frozen states
-@cindex dumping into frozen file
-@cindex reloading a frozen file
-@cindex GNU extensions
 Some bigger @code{m4} applications may be built over a common base
 containing hundreds of definitions and other costly initializations.
 Usually, the common base is kept in one or more declarative files,
 which files are listed on each @code{m4} invocation prior to the
 user's input file, or else, @code{include}'d from this input file.
 
+@menu
+* Using frozen files::          Using frozen files
+* Frozen file format 1::        Frozen file format 1
+* Frozen file format 2::        Frozen file format 2
+@end menu
+
+@node Using frozen files
+@section Using frozen files
+
+@cindex fast loading of frozen files
+@cindex frozen files for fast loading
+@cindex initialization, frozen state
+@cindex dumping into frozen file
+@cindex reloading a frozen file
+@cindex GNU extensions
 Reading the common base of a big application, over and over again, may
 be time consuming.  GNU @code{m4} offers some machinery to speed up
 the start of an application using lengthy common bases.  Presume the
@@ -3966,6 +4020,16 @@ A frozen file to be reloaded need not reside in the current directory.
 It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
+@node Frozen file format 1
+@section Frozen file format 1
+
+Wow - thanks for really reading the manual.  Report this as a bug if
+this text is not removed before a release.
+FIXME - split out the two formats into separate nodes.
+
+@node Frozen file format 2
+@section Frozen file format 2
+
 Frozen files are sharable across architectures.  It is safe to write
 a frozen file on one machine and read it on another, given that the
 second machine uses the same, or a newer version of GNU @code{m4}.
@@ -4050,7 +4114,7 @@ is made to summarize these here.
 
 @menu
 * Extensions::                  Extensions in GNU m4
-* Other Incompat::              Other incompatibilities
+* Incompatibilities::           Other incompatibilities
 @end menu
 
 @node Extensions
@@ -4143,7 +4207,7 @@ for a description of these options.
 Also, the debugging and tracing facilities in GNU @code{m4} are much
 more extensive than in most other versions of @code{m4}.
 
-@node Other Incompat
+@node Incompatibilities
 @section Other incompatibilities
 
 There are a few other incompatibilities between this implementation of
@@ -4260,7 +4324,7 @@ unproven and might go away.  Do not count on it yet.
 
 
 @node Answers
-@chapter Answers
+@chapter Correct version of some examples
 
 Some of the examples in this manuals are buggy.  Correctly working
 macros are presented here.
@@ -4280,20 +4344,36 @@ define(`cleardivert',
 If called without arguments, it will call undivert without argument,
 otherwise they will be passed to undivert().
 
+@c ========================================================== Appendices
 
+@node Copying This Manual
+@appendix Copying This Manual
+@cindex License
 
+@menu
+* GNU Free Documentation License::  License for copying this manual
+@end menu
+
+@include fdl.texi
+
+@node Indices
+@appendix Indices
+
+@menu
+* Concept index::               Index for many concepts
+* Macro index::                 Index for all m4 macros
+@end menu
 
 @node Concept index
-@unnumbered Concept index
+@appendixsec Concept index
 
 @printindex cp
 
 @node Macro index
-@unnumbered Macro index
+@appendixsec Macro index
 
 References are exclusively to the places where a builtin is introduced
-the first time.  Names starting and ending with @samp{__} have these
-characters removed in the index.
+the first time.
 
 @iftex
 @sp 1
@@ -4301,6 +4381,11 @@ characters removed in the index.
 
 @printindex fn
 
-@summarycontents
-@contents
 @bye
+
+@c Local Variables:
+@c fill-column: 72
+@c ispell-local-dictionary: "american"
+@c indent-tabs-mode: nil
+@c whitespace-check-buffer-indent: nil
+@c End:

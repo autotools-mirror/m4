@@ -260,8 +260,11 @@ ltdl/libltdlc.la:
 ## -------------- ##
 
 info_TEXINFOS	= doc/m4.texinfo
-doc_m4_TEXINFOS	= doc/regexprops-generic.texi
+doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl.texi
 dist_man_MANS	= doc/m4.1
+EXTRA_DIST     += $(config_aux_dir)/gendocs.sh doc/gendocs_template
+MAINTAINERCLEANFILES += $(config_aux_dir)/gendocs.sh doc/gendocs_template \
+		  doc/fdl.texi
 
 # Build the man page once in the srcdir, rather than in every VPATH build
 # dir, to match how automake builds info pages.  This is safe for 'make
@@ -462,3 +465,10 @@ cvs-diff:
 	prevver=Release-`echo $$prevno | sed 's/\./-/g'`; \
 	cvs -f rdiff -c -r $$prevver -r $$thisver $(PACKAGE) \
 	    > $(PACKAGE)-$$prevno-$(VERSION).diff
+
+.PHONY: web-manual
+web-manual:
+	@cd $(srcdir)/doc; \
+	  $(SHELL) "$(abs_srcdir)/$(config_aux_dir)/gendocs.sh" $(PACKAGE) \
+	    "GNU $(PACKAGE)- GNU macro processor"
+	@echo " *** Upload the doc/manual directory to web-cvs."

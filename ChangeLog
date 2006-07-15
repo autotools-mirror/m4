@@ -1,3 +1,20 @@
+2006-07-15  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: Augment with `gnulib-tool --import
+	gendocs fdl'.
+	* tests/generate.awk (normalize): Recognize @tabchar.
+	* doc/m4.texinfo (Top): Start merging from branch.  Remove tabs.
+	Fix menus.  Upgrade FDL license from 1.1 to 1.2.  Fix overfull
+	hboxes.
+	(Index macro, Shell commands, Incompatiblities): Rename nodes
+	from Index, UNIX commands, Other incompat.
+	(Platform macros, Using frozen files, Frozen file format 1)
+	(Frozen file format 2, Copying This Manual, Indices): New nodes.
+	* Makefile.am (EXTRA_DIST): Distribute gendocs.
+	(MAINTAINERCLEANFILES): Clean up files from gnulib.
+	(doc_m4_TEXINFOS): Depend on fdl.texi.
+	(web-manual): New maintainer target.
+
 2006-07-14  Gary V. Vaughan  <gary@gnu.org>
 
 	* doc/m4.texinfo (Modules):  RMS asked me for an explanation of
