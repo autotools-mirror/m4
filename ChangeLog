@@ -1,5 +1,10 @@
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
+	Release 1.4.5:
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.4.
+
 	* src/m4.c (usage): Document exit status.
 	* doc/m4.texinfo: Use `exit status', not `exit code'.
 	(Invoking m4): Document exit status.
