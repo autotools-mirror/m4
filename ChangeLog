@@ -1,3 +1,10 @@
+2006-07-15  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap: Backport --help, --version from head.
+	(func_update): New function, for easily grabbing up-to-date files
+	from gnulib.
+	* Makefile.maint (web-manual): Fix for VPATH builds.
+
 2006-07-14  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Global cleanup.  Avoid @code{...}'d, as it

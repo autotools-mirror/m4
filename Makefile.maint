@@ -181,7 +181,7 @@ XDELTA_OPTIONS = -9
 
 .PHONY: delta-xdelta
 delta-xdelta: prev-tarball new-tarball got-xdelta
-## Generate the delta file (xdelta has wierd exit statuses, so we need to
+## Generate the delta file (xdelta has weird exit statuses, so we need to
 ## add some shell code to keep make happy), and then generate the signatures
 ## for FSF ftp-upload:
 	ofile="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).xdelta"; \
@@ -196,7 +196,7 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 
 .PHONY: web-manual
 web-manual:
-	@cd ./doc; \
+	@cd "$(abs_srcdir)/doc"; \
 	  $(SHELL) "$(abs_srcdir)/gendocs.sh" $(PACKAGE) \
 	    "GNU $(PACKAGE)- GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."
