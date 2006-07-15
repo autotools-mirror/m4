@@ -2904,13 +2904,98 @@ should try to see if you can find it and correct it.   @xref{Answers}.)
 @chapter Runtime Dynamic Modules
 
 @cindex modules
-GNU @code{m4} has a facility for defining additional builtins without
+@sc{gnu} m4-1.4.x had a monolithic architecture.  All of its
+functionality was contained in a single binary, and additional macros
+could be added only by writing more code in the M4 language, or at the
+extreme by hacking the sources and recompiling the whole thing to make
+a custom M4 installation.
+
+Starting with release 2.0, M4 uses Libtool's @code{libltdl} facilities
+(@pxref{Using libltdl, ,libltdl ,libtool , The GNU Libtool Manual})
+to move all of M4's builtins out to pluggable modules.  Unless compile
+time options are set to change the default build, the installed M4 2.0
+binary is virtually identical to 1.4.x, supporting the same builtins.
+However, an optional module can be loaded into the running M4 interpreter
+to provide a new @code{load} builtin.  This facilitates runtime
+extension of the M4 builtin macro list using compiled C code linked
+against a new @file{libm4.so}.
+
+For example, you might want to add a @code{setenv} builtin to M4, to
+use before invoking @code{esyscmd}.  We might write a @file{setenv.c}
+something like this:
+
+@comment ignore
+@example
+#include "m4module.h"
+
+M4BUILTIN(setenv);
+
+m4_builtin m4_builtin_table[] =
+  @{
+    /* name     handler         macros blind minargs maxargs */
+    @{ "setenv", builtin_setenv, false, false,   3,     4 @},
+
+    @{ NULL,     NULL,           false, false,    0,     0 @}
+@};
+
+/**
+ * setenv(NAME, VALUE, [OVERWRITE])
+ **/
+M4BUILTIN_HANDLER (setenv)
+@{
+  int overwrite = 1;
+
+  if (argc >= 4)
+    if (!m4_numeric_arg (context, argc, argv, 3, &overwrite))
+      return;
+
+  setenv (M4ARG (1), M4ARG (2), overwrite);
+@}
+@end example
+
+Then, having compiled and linked the module, in (somewhat contrived)
+M4 code:
+
+@comment ignore
+@example
+$ M4MODPATH=`pwd` m4 --load-module=setenv
+setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
+esyscmd(`ifconfig -a')
+@end example
+
+Or instead of loading the module from the M4 invocation, you can use
+the new @code{load} builtin:
+
+@comment ignore
+@example
+$ M4MODPATH=`pwd` m4 --load-module=load
+load(`setenv')
+setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
+@end example
+
+Also, at build time, you can choose which modules to build into
+the core (so that they will be available without dynamic loading).
+SUSv3 M4 functionality is contained in the module @samp{m4}, @sc{gnu}
+extensions in the module @samp{gnu}, the @code{load} builtin in the
+module @samp{load} and so on.
+
+We hinted earlier that the @code{m4} and @code{gnu} modules are
+preloaded into the installed M4 binary, but it is possible to install
+a @emph{thinner} binary minus GNU extensions, for example, by
+configuring the distribution with @samp{./configure
+--with-modules=m4}.  For a binary built with that option to understand
+code that uses @sc{gnu} extensions, you must then run @samp{m4
+--load-module=gnu}.  It is also possible to build a @emph{fatter}
+binary with additional modules preloaded: adding, say, the @code{load}
+builtin using @samp{./configure --with-modules="m4 gnu load"}.
+
+GNU M4 now has a facility for defining additional builtins without
 recompiling the sources.  In actual fact, all of the builtins provided
-by GNU @code{m4} are loaded from such modules.  All of the builtin
+by GNU M4 are loaded from such modules.  All of the builtin
 descriptions in this manual are annotated with the module from which
 they are loaded -- mostly from the module @samp{m4}.
 
-When you start GNU @code{m4}, the modules @samp{m4} and @samp{gnu} are
+When you start GNU M4, the modules @samp{m4} and @samp{gnu} are
 loaded by default.  If you supply the @option{-G} option at startup, the
 module @samp{traditional} is loaded instead of @samp{gnu}.
 @xref{Compatibility}, for more details on the differences between these

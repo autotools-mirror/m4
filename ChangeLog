@@ -1,3 +1,9 @@
+2006-07-14  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/m4.texinfo (Modules):  RMS asked me for an explanation of
+	the modular architecture of M4.  The result is paraphrased here
+	for the benefit of future readers of the manual.
+
 2006-07-14  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* Makefile.am (TESTSUITE_AT): Add missing tests/freeze.at.
