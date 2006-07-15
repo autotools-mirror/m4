@@ -234,7 +234,7 @@ Running shell commands
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
-* Sysval::                      Exit codes
+* Sysval::                      Exit status
 * Maketemp::                    Making names for temporary files
 
 Miscellaneous builtin macros
@@ -591,6 +591,9 @@ The input files are read in the sequence given.  The standard input can
 only be read once, so the file name @file{-} should only appear once on
 the command line.  It is an error if an input file ends in the middle of
 argument collection or a quoted string.
+
+If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
+exit status of @code{m4} will be 0 for success, and 1 for failure.
 
 If you need to read a file whose name starts with a @file{-}, you can
 specify it as @samp{./-file}, or use @option{--} to mark the end of
@@ -3605,7 +3608,7 @@ exit value if this is not the case.
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
-* Sysval::                      Exit codes
+* Sysval::                      Exit status
 * Maketemp::                    Making names for temporary files
 @end menu
 
@@ -3730,14 +3733,13 @@ Note how the expansion of @code{esyscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
 @node Sysval
-@section Exit codes
+@section Exit status
 
-@cindex exit code from UNIX commands
-@cindex UNIX commands, exit code from
-@cindex commands, exit code from UNIX
-@cindex exit code from shell commands
-@cindex shell commands, exit code from
-@cindex commands, exit code from shell
+@cindex UNIX commands, exit status from
+@cindex exit status from shell commands
+@cindex shell commands, exit status from
+@cindex commands, exit status from shell
+@cindex status of shell commands
 To see whether a shell command succeeded, use @code{sysval}:
 
 @deffn Builtin sysval
@@ -3904,12 +3906,13 @@ errprint(`m4:'__file__:__line__: `input error
 @section Exiting from @code{m4}
 
 @cindex exiting from @code{m4}
+@cindex status, setting @code{m4} exit
 If you need to exit from @code{m4} before the entire input has been
 read, you can use @code{m4exit}:
 
 @deffn Builtin m4exit (@dvar{code, 0})
-Causes @code{m4} to exit, with exit code @var{code}.  If @var{code} is
-left out, the exit code is zero.  No further input is read, and all
+Causes @code{m4} to exit, with exit status @var{code}.  If @var{code} is
+left out, the exit status is zero.  No further input is read, and all
 wrapped and diverted text is discarded.
 @end deffn
 
@@ -3930,7 +3933,7 @@ fatal_error(`this is a BAD one, buster')
 @error{}m4:stdin:4: fatal error: this is a BAD one, buster
 @end example
 
-After this macro call, @code{m4} will exit with exit code 1.  This macro
+After this macro call, @code{m4} will exit with exit status 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
 (@pxref{M4wrap}) is not reread.

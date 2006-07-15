@@ -1,5 +1,9 @@
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.c (usage): Document exit status.
+	* doc/m4.texinfo: Use `exit status', not `exit code'.
+	(Invoking m4): Document exit status.
+
 	* bootstrap: Backport --help, --version from head.
 	(func_update): New function, for easily grabbing up-to-date files
 	from gnulib.

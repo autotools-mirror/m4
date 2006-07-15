@@ -215,6 +215,11 @@ of directories included after any specified by `-I'.\n\
 \n\
 If no FILE or if FILE is `-', standard input is read.\n\
 ", stdout);
+      fputs ("\
+\n\
+Exit status is 0 for success, 1 for failure, or whatever value was passed\n\
+to the m4exit macro.\n\
+", stdout);
     }
   exit (status);
 }
