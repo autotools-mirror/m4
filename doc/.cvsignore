@@ -11,8 +11,11 @@
 *.tp
 *.vr
 .dirstamp
+fdl.texi
+gendocs_template
 Makefile.in
 Makefile
+manual
 m4.info*
 m4.1
 stamp-vti

@@ -1,6 +1,7 @@
 compile
 config.*
 depcomp
+gendocs.sh
 install-sh
 ltmain.sh
 mdate-sh
