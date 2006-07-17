@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-07-13
+# bootstrap (GNU M4) version 2006-07-17
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -182,7 +182,7 @@ func_version ()
     case $opt in
       -p|--download-po)
       			test $# = 0 && func_missing_arg $opt && break
-			case $opt in
+			case $1 in
 			  0|[Nn]*|[Ff]*) DOWNLOAD_PO=no ;;
 			  [Oo]*)	 DOWNLOAD_PO=only ;;
 			esac

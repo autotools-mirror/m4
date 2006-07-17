@@ -1,3 +1,7 @@
+2006-07-17  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	* bootstrap: Correct typo in --download-po argument parsing.
+
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: Augment with `gnulib-tool --import
