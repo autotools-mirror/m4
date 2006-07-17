@@ -4,8 +4,9 @@ Foundation, Inc.
 
 Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 
-* Fix buffer overrun in regex and patsubst macros when handed a trailing
+* Fix buffer overrun in regexp and patsubst macros when handed a trailing
   backslash in the replacement text.
+* The format macro now understands %F, %g, and %G.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 

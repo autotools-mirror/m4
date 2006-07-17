@@ -3328,9 +3328,10 @@ forloop(`i', `1', `10', `format(`%6d squared is %10d
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
-function, and supports the normal @samp{%} specifiers: @samp{c},
+function, and supports these @samp{%} specifiers: @samp{c},
 @samp{s}, @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{e},
-@samp{E} and @samp{f}; it supports field widths and precisions, and the
+@samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and @samp{%}; it
+supports field widths and precisions, and the
 modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.

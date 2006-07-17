@@ -200,6 +200,9 @@ format (struct obstack *obs, int argc, token_data **argv)
 	case 'e':
 	case 'E':
 	case 'f':
+	case 'F':
+	case 'g':
+	case 'G':
 	  datatype = DOUBLE;
 	  break;
 
