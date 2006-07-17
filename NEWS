@@ -2,6 +2,11 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
+
+* Fix buffer overrun in regex and patsubst macros when handed a trailing
+  backslash in the replacement text.
+
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 
 * Fix sysval on BeOS, OS/2, and other systems that store exit status

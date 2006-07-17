@@ -1657,7 +1657,7 @@ Warning: sub-expression %d not present", ch));
 	case '\0':
 	  M4ERROR ((warning_status, 0, "\
 Warning: trailing \\ ignored in replacement"));
-	  break;
+	  return;
 
 	default:
 	  obstack_1grow (obs, ch);

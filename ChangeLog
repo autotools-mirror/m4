@@ -1,3 +1,9 @@
+2006-07-17  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_INIT): Bump version number.
+	* src/builtin.c (substitute): Bah.  Fix buffer overrun.
+	* NEWS: Document this fix.
+
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.5:
