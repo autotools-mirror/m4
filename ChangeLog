@@ -1,3 +1,14 @@
+2006-07-17  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: Augment with `gnulib-tool --import
+	xvasprintf'.
+	* modules/format.c (includes): Use xvasprintf.h.
+	(format): Make static.  Avoid buffer overflow, that can lead to
+	arbitrary code execution exploit.  Only pass unsigned char to
+	is*().  Support F, g, and G specifiers.
+	* doc/m4.texinfo (Format): Expose buffer overrun bug.  Document
+	new specifiers.
+
 2006-07-17  Gary V. Vaughan  <gary@gnu.org>
 
 	Ensure M4 compiles correctly with -DDEBUG, and use a single

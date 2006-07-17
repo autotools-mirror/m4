@@ -3464,6 +3464,10 @@ define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
 format(`The string "%s" uses %d characters', foo, len(foo))
 @result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
+format(`%.0f', `56789.9876')
+@result{}56790
+len(format(`%-*X', `5000', `1'))
+@result{}5000
 @end example
 
 Using the @code{forloop} macro defined in @xref{Loops}, this
@@ -3488,10 +3492,13 @@ forloop(`i', 1, 10, `format(`%6d squared is %10d
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
 function, and supports the normal @samp{%} specifiers: @samp{c},
 @samp{s}, @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{e},
-@samp{E} and @samp{f}; it supports field widths and precisions, and the
+@samp{E}, @samp{f}, @samp{F}, @samp{g}, and @samp{G}; it supports
+field widths and precisions, and the
 modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
+
+@c FIXME - format still needs some improvements.
 
 @node Arithmetic
 @chapter Macros for doing arithmetic

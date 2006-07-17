@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,13 @@
 
 /* printf like formatting for m4.  */
 
-/* Simple varargs substitute.  */
+#include "xvasprintf.h"
+
+/* Simple varargs substitute.
+   TODO - warn if we use these because too many % specifiers were used in
+   relation to number of arguments passed.
+   TODO - use xstrtoimax, not atoi, to catch overflow, non-numeric
+   arguments, etc.  */
 
 #define ARG_INT(argc, argv) \
 	((argc == 0) ? 0 : \
@@ -50,9 +56,8 @@
 /* The main formatting function.  Output is placed on the obstack OBS, the
    first argument in ARGV is the formatting string, and the rest is
    arguments for the string.  */
-void format (m4_obstack *obs, int argc, m4_symbol_value **argv);
 
-void
+static void
 format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 {
   char *fmt;			/* format control string */
@@ -69,7 +74,7 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
   char hflag;			/* short flag */
 
   /* Buffer and stuff.  */
-  char str[4096];		/* buffer for formatted text */
+  char *str;			/* malloc'd buffer for formatted text */
   enum {INT, UINT, LONG, ULONG, DOUBLE, STR} datatype;
 
   fmt = ARG_STR (argc, argv);
@@ -77,7 +82,7 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
     {
       while ((c = *fmt++) != '%')
 	{
-	  if (c == 0)
+	  if (c == '\0')
 	    return;
 	  obstack_1grow (obs, c);
 	}
@@ -92,6 +97,8 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	}
 
       /* Parse flags.  */
+      /* TODO - borrow ideas from coreutils printf(1) for argument validation,
+	 and for supporting specifiers for larger types.  */
       flags = 1;
       do
 	{
@@ -118,13 +125,13 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	  width = ARG_INT (argc, argv);
 	  fmt++;
 	}
-      else if (isdigit ((int) *fmt))
+      else if (isdigit ((unsigned char) *fmt))
 	{
 	  do
 	    {
 	      fmt++;
 	    }
-	  while (isdigit ((int) *fmt));
+	  while (isdigit ((unsigned char) *fmt));
 	}
 
       /* Maximum precision.  */
@@ -136,13 +143,13 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	      prec = ARG_INT (argc, argv);
 	      ++fmt;
 	    }
-	  else if (isdigit ((int) *fmt))
+	  else if (isdigit ((unsigned char) *fmt))
 	    {
 	      do
 		{
 		  fmt++;
 		}
-	      while (isdigit ((int) *fmt));
+	      while (isdigit ((unsigned char) *fmt));
 	    }
 	}
 
@@ -156,6 +163,7 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	{
 
 	case '\0':
+	  /* TODO - warn about incomplete % specifier.  */
 	  return;
 
 	case 'c':
@@ -195,6 +203,9 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	case 'e':
 	case 'E':
 	case 'f':
+	case 'F':
+	case 'g':
+	case 'G':
 	  datatype = DOUBLE;
 	  break;
 
@@ -209,73 +220,79 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	{
 	case INT:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_INT(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, width, ARG_INT(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_INT(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, ARG_INT(argc, argv));
 	  break;
 
 	case UINT:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_UINT(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, width, ARG_UINT(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_UINT(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, ARG_UINT(argc, argv));
 	  break;
 
 	case LONG:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_LONG(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, width, ARG_LONG(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_LONG(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, ARG_LONG(argc, argv));
 	  break;
 
 	case ULONG:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_ULONG(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, width, ARG_ULONG(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_ULONG(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, ARG_ULONG(argc, argv));
 	  break;
 
 	case DOUBLE:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_DOUBLE(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, width, ARG_DOUBLE(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_DOUBLE(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, ARG_DOUBLE(argc, argv));
 	  break;
 
 	case STR:
 	  if (width != -1 && prec != -1)
-	    sprintf (str, fstart, width, prec, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_STR(argc, argv));
 	  else if (width != -1)
-	    sprintf (str, fstart, width, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, width, ARG_STR(argc, argv));
 	  else if (prec != -1)
-	    sprintf (str, fstart, prec, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_STR(argc, argv));
 	  else
-	    sprintf (str, fstart, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, ARG_STR(argc, argv));
 	  break;
 	}
 
       *fmt = c;
 
+      /* NULL was returned on failure, such as invalid format string.  For
+	 now, just silently ignore that bad specifier.  */
+      if (str == NULL)
+	continue;
+
       obstack_grow (obs, str, strlen (str));
+      free (str);
     }
 }
