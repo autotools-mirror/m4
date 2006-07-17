@@ -1,5 +1,8 @@
 2006-07-17  Eric Blake  <ebb9@byu.net>
 
+	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump requirement to
+	0.14.5.
+
 	* ltdl/m4/gnulib-cache.m4: Augment with `gnulib-tool --import
 	xvasprintf'.
 	* modules/format.c (includes): Use xvasprintf.h.

@@ -79,7 +79,7 @@ AC_MSG_CHECKING([for modules to preload])
   else
     if test "$use_modules" != yes; then
       for module in $use_modules; do
-        DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
+	DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
 	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES modules/$module.la"
       done
     fi
@@ -120,11 +120,11 @@ LT_WITH_LTDL([ltdl])
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
   *-pipe* ) ;;
-        * ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
-                [M4_cv_prog_compiler_pipe],
-                [-pipe -c conftest.$ac_ext], [],
-                [CFLAGS="$CFLAGS -pipe"])
-              ;;
+	* ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
+		[M4_cv_prog_compiler_pipe],
+		[-pipe -c conftest.$ac_ext], [],
+		[CFLAGS="$CFLAGS -pipe"])
+	      ;;
 esac
 
 
@@ -133,7 +133,7 @@ esac
 ## Gettext support. ##
 ## ---------------- ##
 AM_GNU_GETTEXT([external], [need-ngettext])
-AM_GNU_GETTEXT_VERSION([0.14.1])
+AM_GNU_GETTEXT_VERSION([0.14.5])
 M4_GNU_GETTEXT
 
 
