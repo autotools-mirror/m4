@@ -1,5 +1,7 @@
 2006-07-17  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Builtin): Delete redundant text.
+
 	* configure.ac (AC_INIT): Bump version number.
 	* src/builtin.c (substitute): Bah.  Fix buffer overrun.
 	* NEWS: Document this fix.

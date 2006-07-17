@@ -1636,7 +1636,7 @@ The macro @code{builtin} is recognized only with parameters.
 @end deffn
 
 This can be used even if @var{name} has been given another definition
-that has covered the original, or been undefined so that no @var{name}
+that has covered the original, or been undefined so that no macro
 maps to the builtin.
 
 @example
@@ -1662,54 +1662,9 @@ foo
 @result{}foo
 @end example
 
-Note that this can be used to invoke builtins that normally require
-parameters without actually providing them; but it will provoke a
-warning, and usually result in a void expansion.
-
-@example
-builtin
-@result{}builtin
-builtin()
-@error{}stdin:2: m4: undefined builtin `'
-@result{}
-builtin(`builtin')
-@error{}stdin:3: m4: Warning: too few arguments to builtin `builtin'
-@result{}
-builtin(`builtin',)
-@error{}stdin:4: m4: undefined builtin `'
-@result{}
-@end example
-
-This can be used even if @var{name} has been given another definition
-that has covered the original, or been undefined so that no @var{name}
-maps to the builtin.
-
-@example
-pushdef(`define', `hidden')
-@result{}
-undefine(`undefine')
-@result{}
-define(`foo', `bar')
-@result{}hidden
-foo
-@result{}foo
-builtin(`define', `foo', `BAR')
-@result{}
-foo
-@result{}BAR
-undefine(`foo')
-@result{}undefine(foo)
-foo
-@result{}BAR
-builtin(`undefine', `foo')
-@result{}
-foo
-@result{}foo
-@end example
-
-Note that this can be used to invoke builtins that normally require
-parameters without actually providing them; but it will provoke a
-warning, and usually result in a void expansion.
+Note that this can be used to invoke builtins without arguments, even
+when they normally require parameters to be recognized; but it will
+provoke a warning, and result in a void expansion.
 
 @example
 builtin
