@@ -22,8 +22,7 @@
 #include "ltdl.h"
 #include "m4private.h"
 
-#define DEBUG_MODULES  /* Define this to see runtime debug info. */
-#undef DEBUG_MODULES
+/*#define DEBUG_MODULES  /* Define this to see runtime debug info. */
 
 /*
  * This file implements dynamic modules in GNU M4.  A module is a

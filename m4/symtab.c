@@ -20,8 +20,7 @@
 
 #include "m4private.h"
 
-#define DEBUG_SYM		/* Define this to see runtime debug info.  */
-#undef DEBUG_SYM
+/*#define DEBUG_SYM	/* Define this to see runtime debug info.  */
 
 /* This file handles all the low level work around the symbol table.  The
    symbol table is an abstract hash table type implemented in hash.c.  Each

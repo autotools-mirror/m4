@@ -75,7 +75,7 @@
       dump in the usual way.  It seems important (to me) that internal m4
       bugs not be reported as user recursion errors, or vice-versa."  */
 
-#define DEBUG_STACKOVF
+/*#define DEBUG_STACKOVF	/* Define this to see runtime debug info.  */
 
 #include "m4.h"
 #include "m4private.h"			/* stdlib.h, xmalloc() */

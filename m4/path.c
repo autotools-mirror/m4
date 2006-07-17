@@ -41,6 +41,8 @@
 #include "m4module.h"
 #include "m4private.h"
 
+/*#define DEBUG_INCL	/* Define this to see runtime debug info.  */
+
 static void search_path_add (m4__search_path_info *, const char *);
 static void search_path_env_init (m4__search_path_info *, char *, bool);
 

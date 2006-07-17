@@ -349,11 +349,13 @@ struct m4__search_path_info {
 
 
 #if DEBUG
+# define DEBUG_INCL
 # define DEBUG_INPUT
 # define DEBUG_MACRO
-# define DEBUG_SYM
-# define DEBUG_INCL
 # define DEBUG_MODULE
+# define DEBUG_OUTPUT
+# define DEBUG_STACKOVF
+# define DEBUG_SYM
 #endif
 
 #endif /* m4private.h */

@@ -19,8 +19,7 @@
 
 #include "m4private.h"
 
-#define DEBUG_SYNTAX
-#undef DEBUG_SYNTAX
+/*#define DEBUG_SYNTAX	/* Define this to see runtime debug info.  */
 
 /* THE SYNTAX TABLE
 

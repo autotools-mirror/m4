@@ -1,3 +1,23 @@
+2006-07-17  Gary V. Vaughan  <gary@gnu.org>
+
+	Ensure M4 compiles correctly with -DDEBUG, and use a single
+	consistent definition of various /DEBUG_[A-Z]+/ symbols:
+
+	* m4/input.c: Have commented out out DEBUG_INPUT only by default.
+	(m4_print_token): Use m4_get_symbol_value_text and
+	m4_get_symbol_value_func calls instead of obsolescent VALUE_TEXT
+	and VALUE_FUNC respectively.
+	(m4__next_token): Use m4_print_token call instead of obsolescent
+	print_token symbol.
+	* m4/module.c: Have commented out out DEBUG_MODULE only by default.
+	* m4/output.c: Similarly for DEBUG_OUTPUT.
+	* m4/path.c: Similarly for DEBUG_INCL.
+	* m4/symtax.c: Similarly for DEBUG_SYM.
+	* m4/syntax.c: Similarly for DEBUG_SYNTAX.
+	* src/stackovf.c: Similarly for DEBUG_STACKOVF.
+	* m4/m4private.h (DEBUG): Add DEBUG_OUTPUT and DEBUG_STACKOVF to
+	preprocessor macros defined with -DDEBUG compiles.
+
 2006-07-17  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	* bootstrap: Correct typo in --download-po argument parsing.

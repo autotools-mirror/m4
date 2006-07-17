@@ -24,8 +24,7 @@
 
 #include "m4private.h"
 
-#define DEBUG_INPUT
-#undef DEBUG_INPUT
+/*#define DEBUG_INPUT	/* Define this to see runtime debug info.  */
 
 /*
    Unread input can be either files, that should be read (eg. included
@@ -747,7 +746,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	init_builtin_token (context, token);
 	(void) next_char (context);
 #ifdef DEBUG_INPUT
-	print_token ("next_token", M4_TOKEN_MACDEF, token);
+	m4_print_token ("next_token", M4_TOKEN_MACDEF, token);
 #endif
 	return M4_TOKEN_MACDEF;
       }
@@ -947,7 +946,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
   VALUE_MAX_ARGS (token)	= -1;
 
 #ifdef DEBUG_INPUT
-  print_token("next_token", type, token);
+  m4_print_token("next_token", type, token);
 #endif
 
   return type;
@@ -966,23 +965,23 @@ m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
   switch (type)
     {				/* TOKSW */
     case M4_TOKEN_SIMPLE:
-      fprintf (stderr,	"char\t\"%s\"\n",	VALUE_TEXT (token));
+      fprintf (stderr,	"char\t\"%s\"\n",	m4_get_symbol_value_text (token));
       break;
 
     case M4_TOKEN_WORD:
-      fprintf (stderr,	"word\t\"%s\"\n",	VALUE_TEXT (token));
+      fprintf (stderr,	"word\t\"%s\"\n",	m4_get_symbol_value_text (token));
       break;
 
     case M4_TOKEN_STRING:
-      fprintf (stderr,	"string\t\"%s\"\n",	VALUE_TEXT (token));
+      fprintf (stderr,	"string\t\"%s\"\n",	m4_get_symbol_value_text (token));
       break;
 
     case M4_TOKEN_SPACE:
-      fprintf (stderr,	"space\t\"%s\"\n",	VALUE_TEXT (token));
+      fprintf (stderr,	"space\t\"%s\"\n",	m4_get_symbol_value_text (token));
       break;
 
     case M4_TOKEN_MACDEF:
-      fprintf (stderr,	"builtin 0x%x\n", 	(int) VALUE_FUNC (token));
+      fprintf (stderr,	"builtin 0x%x\n", (int) m4_get_symbol_value_func (token));
       break;
 
     case M4_TOKEN_EOF:
@@ -1003,6 +1002,6 @@ lex_debug (void)
   m4_symbol_value token;
 
   while ((type = next_token (&token)) != NULL)
-    print_token ("lex", type, &token);
+    m4_print_token ("lex", type, &token);
 }
 #endif
