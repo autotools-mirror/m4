@@ -1,5 +1,10 @@
 2006-07-19  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Sysval): Avoid kill -1, since ksh traps SIGHUP
+	and exits normally with 129.
+	Reported by Nelson H. F. Beebe.
+	* THANKS: Update.
+
 	* src/m4.h (EXIT_MISMATCH): Define.
 	* src/freeze.c (reload_frozen_state): Detect version mismatch, by
 	exiting with status 63.
