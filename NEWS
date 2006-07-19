@@ -7,6 +7,8 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * Fix buffer overrun in regexp and patsubst macros when handed a trailing
   backslash in the replacement text.
 * The format macro now understands %F, %g, and %G.
+* When loading frozen files, m4 now exits with status 63 if version
+  mismatch is detected.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 

@@ -1,5 +1,12 @@
 2006-07-19  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.h (EXIT_MISMATCH): Define.
+	* src/freeze.c (reload_frozen_state): Detect version mismatch, by
+	exiting with status 63.
+	* src/m4.c (usage): Document this.
+	* doc/m4.texinfo (Invoking m4, Using frozen files): Likewise.
+	* NEWS: Likewise.
+
 	* doc/m4.texinfo (copying): Relax restriction on front-cover and
 	back-cover texts.
 

@@ -73,6 +73,9 @@ typedef int boolean;
 #if ! HAVE_MKSTEMP
 int mkstemp (char *);
 #endif
+
+/* Used for version mismatch, when -R detects a frozen file it can't parse.  */
+#define EXIT_MISMATCH 63
 
 /* Various declarations.  */
 

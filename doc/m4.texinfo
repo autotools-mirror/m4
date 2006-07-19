@@ -587,7 +587,9 @@ the command line.  It is an error if an input file ends in the middle of
 argument collection or a quoted string.
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
-exit status of @code{m4} will be 0 for success, and 1 for failure.
+exit status of @code{m4} will be 0 for success, 1 for general failure
+(such as problems with reading an input file), and 63 for version
+mismatch (@pxref{Using frozen files}).
 
 If you need to read a file whose name starts with a @file{-}, you can
 specify it as @samp{./-file}, or use @option{--} to mark the end of
@@ -4010,13 +4012,18 @@ A frozen file to be reloaded need not reside in the current directory.
 It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
+If the frozen file was generated with a newer version of @code{m4}, and
+contains directives that an older @code{m4} cannot parse, attempting to
+load the frozen file with option @option{-R} will cause @code{m4} to
+exit with status 63 to indicate version mismatch.
+
 @node Frozen file format
 @section Frozen file format
 @cindex frozen file format
 @cindex file format, frozen file
 Frozen files are sharable across architectures.  It is safe to write
 a frozen file on one machine and read it on another, given that the
-second machine uses the same, or a newer version of GNU @code{m4}.
+second machine uses the same or newer version of GNU @code{m4}.
 It is conventional, but not required, to give a frozen file the suffix
 of @code{.m4f}.
 

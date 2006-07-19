@@ -217,8 +217,8 @@ If no FILE or if FILE is `-', standard input is read.\n\
 ", stdout);
       fputs ("\
 \n\
-Exit status is 0 for success, 1 for failure, or whatever value was passed\n\
-to the m4exit macro.\n\
+Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
+mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
     }
   exit (status);

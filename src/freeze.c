@@ -234,8 +234,14 @@ reload_frozen_state (const char *name)
   GET_DIRECTIVE;
   VALIDATE ('V');
   GET_CHARACTER;
-  VALIDATE ('1');
-  GET_CHARACTER;
+  GET_NUMBER (number[0]);
+  if (number[0] > 1)
+    M4ERROR ((EXIT_MISMATCH, 0,
+              "frozen file version %d greater than max supported of 1",
+	      number[0]));
+  else if (number[0] < 1)
+    M4ERROR ((EXIT_FAILURE, 0,
+              "ill-formed frozen file, version directive expected"));
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
