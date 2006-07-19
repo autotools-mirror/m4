@@ -27,6 +27,7 @@ Brendan Kehoe		brendan@cygnus.com
 Brian J. Fox 		bfox@datawave.net
 Brian D. Carlstrom      bdc@clark.lcs.mit.edu
 Bruno Haible		bruno@clisp.org
+Charles Wilson		cygwin@cwilson.fastmail.fm
 Damian Menscher		menscher@uiuc.edu
 David J. MacKenzie	djm@uunet.uu.net
 Erez Zadok		ezk@cs.columbia.edu
@@ -78,11 +79,13 @@ Mike Andrews            kramer@fragile.termfrost.org
 Mike Frysinger		vapier@gentoo.org
 Mike Howard		mike@clove.com
 Mike Lijewski		lijewski@theory.tc.cornell.edu
+Nelson H. F. Beebe	beebe@math.utah.edu
 Nick S. Kanakakorn	skanan@otl.scu.edu
 Nicolas Pioch		pioch@inf.enst.fr
 Noah Friedman	        friedman@gnu.org
 Noah Misch		noah@cs.caltech.edu
 Paul Eggert		eggert@cs.ucla.edu
+Per Bothner		per@bothner.com
 Pete Chown		pete.chown@dale.dircon.co.uk
 Pierre Gaumond		gaumondp@ere.umontreal.ca
 Pierre Mathieu		mathieu@geod.emr.ca
@@ -93,6 +96,7 @@ Richard Ling            richard@research.canon.oz.au
 Richard Stallman        rms@gnu.org
 Robert Bernstein	rocky@panix.com
 Robert Bihlmeyer	robbe@orcus.priv.at
+Roderick Koehle		Roderick.Koehle@infineon.com
 Roland H. Pesch		roland@wrs.com
 Roland McGrath          roland@gnu.org
 Santiago Vila		sanvila@debian.org
@@ -103,6 +107,7 @@ Stepan Kasal		kasal@ucw.cz
 Stephen Perkins		perkins@cps.msu.edu
 Steve Williamson	willy@uinpla.npl.uiuc.edu
 Terry Jones		terry@cliffs.ucsd.edu
+Thomas Tanner		tanner@ffii.org
 Thorsten Ohl		ohl@physics.harvard.edu
 Tom McConnell		tmcconne@sedona.intel.com
 Tom Quinn		trq@dionysos.thphys.ox.ac.uk
@@ -113,3 +118,4 @@ Vic Abell               abe@cc.purdue.edu
 Vincent Lonngren	Vincent.lonngren.759@student.lu.se
 Vivek P. Singhal	singhal@cs.utexas.edu
 Walter Wong		wcw+@cmu.edu
+Yuji Minejima		ggb01164@nifty.ne.jp

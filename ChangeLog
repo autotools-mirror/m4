@@ -1,5 +1,8 @@
 2006-07-19  Eric Blake  <ebb9@byu.net>
 
+	* po/ChangeLog: Merge into main ChangeLog, then delete file.
+	* THANKS: Update.
+
 	* doc/m4.texinfo (copying): Relax restriction on front-cover and
 	back-cover texts.
 
@@ -385,6 +388,12 @@
 
 2006-05-06  Eric Blake  <ebb9@byu.net>
 
+	* po/Makevars (MSGID_BUGS_ADDRESS): Add.
+	* po/POTFILES.in (src/getopt.c, src/version-etc.c): These files live
+	in src, not gnu.
+
+2006-05-06  Eric Blake  <ebb9@byu.net>
+
 	* configure.ac (LT_CONFIG_LTDL_DIR): Inform libtool which
 	subdirectory to use.
 	(support for -pipe): Move after LT_INIT, since it relies on
@@ -665,6 +674,11 @@
 	(m4_set_nesting_limit_opt, m4_set_debug_level_opt)
 	(m4_set_max_debug_arg_length_opt): New fast macro versions of the
 	option setter functions.
+
+2004-09-23  Gary V. Vaughan  <gary@gnu.org>
+
+	* po/POTFILES.in: Reflect move of gnulib files from gnulib/m4
+	to gnu.
 
 2004-09-23  Gary V. Vaughan  <gary@gnu.org>
 
@@ -2315,6 +2329,17 @@
 	* m4/ltdl.h: Ditto.
 	* commit: Update from CVS cvs-utils.
 
+2002-11-04  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* po/Makefile.in.in: Upgrade to gettext-0.11.5.
+	* po/boldquot.sed: New file, from gettext-0.11.5.
+	* po/en@boldquot.header: New file, from gettext-0.11.5.
+	* po/en@quot.header: New file, from gettext-0.11.5.
+	* po/insert-header.sin: New file, from gettext-0.11.5.
+	* po/quot.sed: New file, from gettext-0.11.5.
+	* po/remove-potcdate.sin: New file, from gettext-0.11.5.
+	* po/Rules-quot: New file, from gettext-0.11.5.
+
 2002-11-04  Akim Demaille  <akim@epita.fr>
 
 	* doc/m4.texinfo (Esyscmd): Don't grep, use something easier:
@@ -2392,6 +2417,10 @@
 	Simplify AM_INIT_AUTOMAKE invocation.
 	* config/Makefile.am (ACLOCAL_MACROS): Add amversion.m4 and
 	options.m4.
+
+2002-01-21  gettextize  <bug-gnu-utils@gnu.org>
+
+	* po/Makefile.in.in: Upgrade to gettext-0.10.40.
 
 2001-10-19  Akim Demaille  <akim@epita.fr>
 
@@ -3706,6 +3735,12 @@
 	* config/Makefile.am, config/stackovf.m4: New.
 	* configure.in, Makefile.am: Adjust.
 
+2001-08-05  gettextize  <bug-gnu-utils@gnu.org>
+
+	* po/Makefile.in.in: Upgrade to gettext-0.10.39.
+	* po/cat-id-tbl.c: Remove file.
+	* po/stamp-cat-id: Remove file.
+
 2001-04-08  Roderick Koehle <Roderick.Koehle@infineon.com>
 
 	* modules/format.c (format):  Formatting for %f was not
@@ -4598,6 +4633,18 @@
 
 1999-10-13  René Seindal  <rene@seindal.dk>
 
+	* po/cs.po: Czech translation added.
+
+	* po/sv.po: Updated Swedish translation.
+
+	* po/ru.po: Updated Russian translation.
+
+	* po/pl.po: Updated Polish translation.
+
+	* po/el.po: Greek translation added.
+
+1999-10-13  René Seindal  <rene@seindal.dk>
+
 	* configure.in (ALL_LINGUAS): Added Greek translation (el).
 	(ALL_LINGUAS): Added Czech translation (cs).
 
@@ -5004,6 +5051,12 @@
 
 1998-10-04  René Seindal  <rene@seindal.dk>
 
+	* po/pl.po: Polish translation added.
+
+	* po/POTFILES.in: src/module.c added.
+
+1998-10-04  René Seindal  <rene@seindal.dk>
+
 	* Prerelease 1.4i.
 
 	* configure.in (ALL_LINGUAS): Added Polish pl.po
@@ -5204,6 +5257,13 @@
 
 	* configure.in (ALL_LINGUAS): Added complete list of translations:
 	de fr it ja nl ru sv.
+
+1998-05-23  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
+
+	* po/nl.po: Dutch translation by Erick Branderhorst.
+
+	* po/fr.po: French translation by Erick Branderhorst, based on the
+	translations by François Pinard in fr.msg and m4.cod.
 
 1998-05-22  Erick Branderhorst  <Erick.Branderhorst@asml.nl>
 
@@ -5962,7 +6022,7 @@
 
 	* Makefile.in (Makefile, etc.): Adapt for Autoconf 1.8.
 
-1994-01-30    <pinard@iro.umontreal.ca>
+1994-01-30  François Pinard  <pinard@iro.umontreal.ca>
 
 	* m4.h: Remove definition of volatile, not used anymore.
 	Reported by Jim Meyering and Joseph E. Sacco.
@@ -6704,7 +6764,7 @@
 1991-07-26  René Seindal <seindal@diku.dk>
 
 	* Fixed various bugs.  Release 0.99, manual 0.09.  Many thanks to
-	Francois Pinard and Roland H. Pesch for providing me with reports.
+	François Pinard and Roland H. Pesch for providing me with reports.
 
 	* The builtins incr and decr are now implemented without use of
 	eval.
