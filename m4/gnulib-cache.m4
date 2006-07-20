@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --macro-prefix=M4 alloca binary-io error fdl gendocs getopt mkstemp obstack regex strtol xalloc xvasprintf
+#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --macro-prefix=M4 --assume-autoconf=2.60 alloca binary-io error fdl gendocs getopt mkstemp obstack regex strtol xalloc xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_MODULES([alloca binary-io error fdl gendocs getopt mkstemp obstack regex strtol xalloc xvasprintf])
@@ -26,3 +26,4 @@ gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_LIB([libm4])
 gl_MACRO_PREFIX([M4])
+gl_AUTOCONF_MINVERSION([2.60])
