@@ -1,3 +1,8 @@
+2006-07-20  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: gnulib-tool has changed again.
+	Regenerate to explicitly ask for --assume-autoconf=2.60.
+
 2006-07-19  Eric Blake  <ebb9@byu.net>
 
 	* po/ChangeLog: Merge into main ChangeLog, then delete file.
