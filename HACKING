@@ -242,7 +242,7 @@ It is mostly SVR4 compatible, although it has some extensions (for
 example, handling more than 9 positional parameters to macros).  `m4'
 also has built-in functions for including files, running shell commands,
 doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
-`configure' scripts, but not for running them. 
+`configure' scripts, but not for running them.
 
 Here are the compressed sources:
 
@@ -264,7 +264,7 @@ Here are the gpg detached signatures:
 You should download the signature named after any tarball you download,
 and then verify its integrity with, for example:
 
-  gpg --verify m4-@VERSION.tar.gz.sig
+  gpg --verify m4-@VERSION@.tar.gz.sig
 
 If that command fails because you don't have the required public key,
 then run this command to import it:
@@ -320,7 +320,7 @@ It is mostly SVR4 compatible, although it has some extensions (for
 example, handling more than 9 positional parameters to macros).  `m4'
 also has built-in functions for including files, running shell commands,
 doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
-`configure' scripts, but not for running them. 
+`configure' scripts, but not for running them.
 
 This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
 
@@ -379,8 +379,8 @@ Alternatively, you can fetch the unbootstrapped sourcecode from
 anonymous cvs by using the following commands:
 
   $ export CVS_RSH=ssh
-  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/libtool \
-  co -r @CVS_RELEASE_TAG@ libtool
+  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/m4 \
+  co -r @CVS_RELEASE_TAG@ m4
 
 You will then need to have the latest release versions of Automake
 (@AUTOMAKE_VERSION@) and Autoconf (@AUTOCONF_VERSION@) installed to
@@ -408,7 +408,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GNU Libtool; if not, write to the Free Software
+along with GNU M4; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 02110-1301  USA
 
