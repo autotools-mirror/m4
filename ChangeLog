@@ -1,3 +1,9 @@
+2006-07-21  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h [UNIX]: Add more platforms that are close enough to
+	categorize as UNIX, but which don't predefine __unix__.
+	Reported by Nelson H. F. Beebe.
+
 2006-07-20  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: gnulib-tool has changed again.  Regenerate

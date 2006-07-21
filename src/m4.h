@@ -27,7 +27,9 @@
 
 /* Canonicalize UNIX recognition macros.  */
 #if defined unix || defined __unix || defined __unix__ \
-  || defined _POSIX_VERSION || defined _POSIX2_VERSION
+  || defined _POSIX_VERSION || defined _POSIX2_VERSION \
+  || defined __NetBSD__ || defined __OpenBSD__ \
+  || defined __APPLE__ || defined __APPLE_CC__
 # define UNIX 1
 #endif
 
