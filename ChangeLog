@@ -1,5 +1,15 @@
 2006-07-22  Eric Blake  <ebb9@byu.net>
 
+	* src/main.c (stackovf_handler): Document the problems in our
+	overflow handler.
+	* src/stackovf.c: Forward port changes in branch to use POSIX
+	sa_sigaction when available.
+	(process_sigsegv): Avoid buffer overrun when error string is
+	translated, although the fact that we translate in a signal
+	handler is still a bug.
+	* ltdl/m4/stackovf.m4 (M4_SYS_STACKOVF): Forward port changes
+	from branch to modernize checks.
+
 	* modules/format.c (format): Avoid compiler warning that str may
 	be used uninitialized.
 

@@ -73,6 +73,10 @@ print_program_name_CB (void)
 static void
 stackovf_handler (void)
 {
+  /* FIXME - calling gettext and error inside a signal handler is dangerous,
+     since these functions invoke functions that are not signal-safe.  We
+     are sort of justified by the fact that we will exit and never return,
+     but this should really be fixed.  */
   M4ERROR ((EXIT_FAILURE, 0,
 	    _("Stack overflow.  (Infinite define recursion?)")));
 }
