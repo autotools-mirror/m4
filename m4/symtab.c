@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 
 #include "m4private.h"
 
-/*#define DEBUG_SYM	/* Define this to see runtime debug info.  */
+/* Define this to see runtime debug info.  Implied by DEBUG.  */
+/*#define DEBUG_SYM */
 
 /* This file handles all the low level work around the symbol table.  The
    symbol table is an abstract hash table type implemented in hash.c.  Each
@@ -227,7 +228,7 @@ m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, m4_symbol_value *v
   assert (name);
   assert (value);
 
-  symbol 		= symtab_fetch (symtab, name);
+  symbol		= symtab_fetch (symtab, name);
   VALUE_NEXT (value)	= m4_get_symbol_value (symbol);
   symbol->value		= value;
 

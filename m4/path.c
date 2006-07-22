@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,8 @@
 #include "m4module.h"
 #include "m4private.h"
 
-/*#define DEBUG_INCL	/* Define this to see runtime debug info.  */
+/* Define this to see runtime debug info.  Implied by DEBUG.  */
+/*#define DEBUG_INCL */
 
 static void search_path_add (m4__search_path_info *, const char *);
 static void search_path_env_init (m4__search_path_info *, char *, bool);

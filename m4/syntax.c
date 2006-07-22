@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 2002, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006 Free
+   Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,7 +20,8 @@
 
 #include "m4private.h"
 
-/*#define DEBUG_SYNTAX	/* Define this to see runtime debug info.  */
+/* Define this to see runtime debug info.  Implied by DEBUG.  */
+/*#define DEBUG_SYNTAX */
 
 /* THE SYNTAX TABLE
 

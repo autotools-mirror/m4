@@ -24,7 +24,8 @@
 
 #include "m4private.h"
 
-/*#define DEBUG_INPUT	/* Define this to see runtime debug info.  */
+/* Define this to see runtime debug info.  Implied by DEBUG.  */
+/*#define DEBUG_INPUT */
 
 /*
    Unread input can be either files, that should be read (eg. included
@@ -761,7 +762,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	if (ch != CHAR_EOF)
 	  obstack_1grow (&token_stack, ch);
 	type = m4_get_discard_comments_opt (context)
-	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
+		? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
     else if (!m4_is_syntax_single_comments (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->bcomm.string))
@@ -775,7 +776,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	  obstack_grow (&token_stack, context->syntax->ecomm.string,
 			context->syntax->ecomm.length);
 	type = m4_get_discard_comments_opt (context)
-	  	? M4_TOKEN_NONE : M4_TOKEN_STRING;
+		? M4_TOKEN_NONE : M4_TOKEN_STRING;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
       {					/* ESCAPED WORD */
@@ -820,7 +821,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	  unget_input(ch);
 
 	type = m4_is_syntax_macro_escaped (M4SYNTAX)
-	  	? M4_TOKEN_STRING : M4_TOKEN_WORD;
+		? M4_TOKEN_STRING : M4_TOKEN_WORD;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
       {					/* QUOTED STRING, SINGLE QUOTES */

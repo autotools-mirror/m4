@@ -1,3 +1,17 @@
+2006-07-22  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4private.h (DEBUG_MODULES, DEBUG_STKOVF) [DEBUG]: Fix
+	spelling.
+	(DEBUG_SYNTAX) [DEBUG]: Turn on more debug.
+	(DEBUG_MACRO): Remove unused macro.
+	* src/stackovf.c: Avoid compiler warnings.
+	* m4/input.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/path.c: Likewise.
+	* m4/symtab.c: Likewise.
+	* m4/syntax.c: Likewise.
+
 2006-07-20  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: gnulib-tool has changed again.

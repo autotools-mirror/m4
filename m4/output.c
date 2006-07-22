@@ -38,7 +38,8 @@ extern int errno;
 
 #include "m4private.h"
 
-/*#define DEBUG_OUTPUT	/* Define this to see runtime debug output.  */
+/* Define this to see runtime debug output.  Implied by DEBUG.  */
+/*#define DEBUG_OUTPUT */
 
 /* Size of initial in-memory buffer size for diversions.  Small diversions
    would usually fit in.  */
