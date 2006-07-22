@@ -1,3 +1,8 @@
+2006-07-22  Eric Blake  <ebb9@byu.net>
+
+	* src/format.c (format): Avoid compiler warning that str may be
+	used uninitialized.
+
 2006-07-21  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.h [UNIX]: Add more platforms that are close enough to

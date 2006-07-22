@@ -280,6 +280,9 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  else
 	    str = xasprintf (fstart, ARG_STR(argc, argv));
 	  break;
+
+	default:
+	  abort();
 	}
 
       *fmt = c;
