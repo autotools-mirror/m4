@@ -1,5 +1,8 @@
 2006-07-22  Eric Blake  <ebb9@byu.net>
 
+	* modules/format.c (format): Avoid compiler warning that str may
+	be used uninitialized.
+
 	* m4/m4private.h (DEBUG_MODULES, DEBUG_STKOVF) [DEBUG]: Fix
 	spelling.
 	(DEBUG_SYNTAX) [DEBUG]: Turn on more debug.

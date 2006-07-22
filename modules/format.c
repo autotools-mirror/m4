@@ -283,6 +283,9 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	  else
 	    str = xasprintf (fstart, ARG_STR(argc, argv));
 	  break;
+
+	default:
+	  abort ();
 	}
 
       *fmt = c;
