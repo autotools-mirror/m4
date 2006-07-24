@@ -307,7 +307,17 @@ pop_input (void)
 	DEBUG_MESSAGE2 ("input reverted to %s, line %d",
 			isp->u.u_f.name, isp->u.u_f.lineno);
 
-      fclose (isp->u.u_f.file);
+      if (ferror (isp->u.u_f.file))
+        {
+          M4ERROR ((warning_status, 0, "read error"));
+          fclose (isp->u.u_f.file);
+          retcode = EXIT_FAILURE;
+        }
+      else if (fclose (isp->u.u_f.file) == EOF)
+        {
+          M4ERROR ((warning_status, errno, "error reading file"));
+          retcode = EXIT_FAILURE;
+        }
       current_file = isp->u.u_f.name;
       current_line = isp->u.u_f.lineno;
       output_current_line = isp->u.u_f.out_lineno;

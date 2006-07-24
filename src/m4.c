@@ -24,7 +24,9 @@
 #include <getopt.h>
 #include <signal.h>
 
-static void usage _((int));
+#include "close-stream.h"
+
+static void usage (int);
 
 /* Operate interactively (-e).  */
 static int interactive = 0;
@@ -221,6 +223,9 @@ Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
     }
+
+  if (close_stream (stdout) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "write error"));
   exit (status);
 }
 
@@ -259,6 +264,10 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
+/* Global catchall for any errors that should affect final error status, but
+   where we try to continue execution in the meantime.  */
+int retcode;
+
 #ifdef ENABLE_CHANGEWORD
 #define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
 #else
@@ -268,7 +277,6 @@ static const struct option long_options[] =
 int
 main (int argc, char *const *argv, char *const *envp)
 {
-  int retcode = EXIT_SUCCESS;
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
   macro_definition *new;
@@ -278,6 +286,7 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
 
   program_name = argv[0];
+  retcode = EXIT_SUCCESS;
 
   include_init ();
   debug_init ();
@@ -408,6 +417,8 @@ This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 ");
 
+      if (close_stream (stdout) != 0)
+	M4ERROR ((EXIT_FAILURE, errno, "write error"));
       exit (EXIT_SUCCESS);
     }
 
@@ -512,6 +523,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
   while (pop_wrapup ())
     expand_input ();
 
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);
   else
@@ -520,5 +535,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
       undivert_all ();
     }
 
+  if (close_stream (stdout) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "write error"));
   exit (retcode);
 }

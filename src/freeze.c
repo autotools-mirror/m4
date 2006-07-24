@@ -148,7 +148,8 @@ INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
   /* All done.  */
 
   fputs ("# End of frozen state file\n", file);
-  fclose (file);
+  if (close_stream (file) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "unable to create frozen state"));
 }
 
 /*----------------------------------------------------------------------.
@@ -367,7 +368,9 @@ reload_frozen_state (const char *name)
 
   free (string[0]);
   free (string[1]);
-  fclose (file);
+  errno = 0;
+  if (ferror (file) || fclose (file) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
 
 #undef GET_CHARACTER
 #undef GET_DIRECTIVE

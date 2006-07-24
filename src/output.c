@@ -34,10 +34,6 @@
 /* Size of buffer size to use while copying files.  */
 #define COPY_BUFFER_SIZE (32 * 512)
 
-#ifdef HAVE_TMPFILE
-extern FILE *tmpfile ();
-#endif
-
 /* Output functions.  Most of the complexity is for handling cpp like
    sync lines.
 
@@ -102,27 +98,6 @@ output_init (void)
   output_cursor = NULL;
   output_unused = 0;
 }
-
-#ifndef HAVE_TMPFILE
-
-/* Implement tmpfile(3) for non-USG systems.  */
-
-static FILE *
-tmpfile (void)
-{
-  char buf[32];
-  int fd;
-
-  strcpy (buf, "/tmp/m4XXXXXX");
-  fd = mkstemp (buf);
-  if (fd < 0)
-    return NULL;
-
-  unlink (buf);
-  return fdopen (fd, "w+");
-}
-
-#endif /* not HAVE_TMPFILE */
 
 /*-----------------------------------------------------------------------.
 | Reorganize in-memory diversion buffers so the current diversion can	 |

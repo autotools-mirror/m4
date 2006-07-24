@@ -137,8 +137,12 @@ debug_set_file (FILE *fp)
 {
   struct stat stdout_stat, debug_stat;
 
-  if (debug != NULL && debug != stderr && debug != stdout)
-    fclose (debug);
+  if (debug != NULL && debug != stderr && debug != stdout
+      && close_stream (debug) != 0)
+    {
+      M4ERROR ((warning_status, errno, "error writing to debug stream"));
+      retcode = EXIT_FAILURE;
+    }
   debug = fp;
 
   if (debug != NULL && debug != stdout)
@@ -154,8 +158,12 @@ debug_set_file (FILE *fp)
 	  && stdout_stat.st_dev == debug_stat.st_dev
 	  && stdout_stat.st_ino != 0)
 	{
-	  if (debug != stderr)
-	    fclose (debug);
+	  if (debug != stderr && close_stream (debug) != 0)
+            {
+              M4ERROR ((warning_status, errno,
+                        "error writing to debug stream"));
+              retcode = EXIT_FAILURE;
+            }
 	  debug = stdout;
 	}
     }

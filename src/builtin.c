@@ -1257,13 +1257,29 @@ m4___line__ (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 {
-  int exit_code = 0;
+  int exit_code = EXIT_SUCCESS;
 
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
-  if (argc >= 2  && !numeric_arg (argv[0], ARG (1), &exit_code))
-    exit_code = 0;
-
+  /* Warn on bad arguments, but still exit.  */
+  bad_argc (argv[0], argc, 1, 2);
+  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &exit_code))
+    exit_code = EXIT_FAILURE;
+  if (exit_code < 0 || exit_code > 255)
+    {
+      M4ERROR ((warning_status, 0,
+                "exit status out of range: `%d'", exit_code));
+      exit_code = EXIT_FAILURE;
+    }
+  if (close_stream (stdout) != 0)
+    {
+      M4ERROR ((warning_status, errno, "write error"));
+      if (exit_code == 0)
+        exit_code = EXIT_FAILURE;
+    }
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+  if (exit_code == 0 && retcode != 0)
+    exit_code = retcode;
   exit (exit_code);
 }
 

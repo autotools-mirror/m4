@@ -48,20 +48,18 @@
 
 #include <ctype.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include "binary-io.h"
+#include "close-stream.h"
 #include "error.h"
 #include "exit.h"
 #include "obstack.h"
+#include "stdio--.h"
+#include "stdlib--.h"
+#include "unistd--.h"
 #include "xalloc.h"
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
    merely typedef boolean as being int.  Or else, define these all.  */
@@ -114,6 +112,7 @@ extern const char *user_word_regexp;	/* -W */
 #endif
 
 /* Error handling.  */
+extern int retcode;
 #define M4ERROR(Arglist) \
   (reference_error (), error Arglist)
 

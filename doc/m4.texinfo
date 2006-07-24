@@ -3873,8 +3873,9 @@ read, you can use @code{m4exit}:
 
 @deffn Builtin m4exit (@dvar{code, 0})
 Causes @code{m4} to exit, with exit status @var{code}.  If @var{code} is
-left out, the exit status is zero.  No further input is read, and all
-wrapped and diverted text is discarded.
+left out, the exit status is zero.  If @var{code} cannot be parsed, or
+is outside the range of 0 to 255, the exit status is one.  No further
+input is read, and all wrapped and diverted text is discarded.
 @end deffn
 
 A common use of this is to abort processing:
@@ -3907,6 +3908,11 @@ divert
 @result{}
 m4exit
 @end example
+
+Note that it is still possible for the exit status to be different than
+what was requested by @code{m4exit}.  If @code{m4} detects some other
+error, such as a write error on standard out, the exit status will be
+non-zero even if @code{m4exit} requested zero.
 
 @node Frozen files
 @chapter Fast loading of frozen state
@@ -4233,11 +4239,6 @@ implemented for the various builtins that are required to issue an error
 (such as @code{include} (@pxref{Include}) when a file is unreadable,
 @code{eval} (@pxref{Eval}) when an argument cannot be parsed, or using
 @code{m4exit} (@pxref{M4exit}) with a non-numeric argument).
-
-@item
-@acronym{POSIX} requires an application to exit with non-zero status if
-it encounters a read error on stdin or write error on stdout, but GNU
-@code{m4} still exits with status 0 even if the disk is full.
 
 @item
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO

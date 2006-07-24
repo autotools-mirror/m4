@@ -1,3 +1,26 @@
+2006-07-24  Eric Blake  <ebb9@byu.net>
+
+	Fix bugs related to stream handling.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	unlocked-io stdio-safer stdlib-safer close-stream.
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Assume tmpfile; it can be
+	provided by gnulib if needed.
+	* src/output.c [! HAVE_TMPFILE]: Likewise.
+	* src/m4.h (includes): Replace unistd, stdio, and stdlib with
+	their safer counterparts.
+	(retcode): New global variable.
+	* src/input.c (pop_input): Check for read failure.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	(produce_frozen_state): Check for write failure.
+	* src/debug.c (debug_set_file): Likewise.
+	* src/m4.c (usage, main): Likewise.
+	(retcode): Make global.
+	* src/builtin.c (m4_m4exit): Likewise.  Ensure that the exit
+	status is non-zero except when everything succeeds.
+	* doc/m4.texinfo (M4exit): Document these changes.
+	(Incompatibilities): Remove documentation of bug now fixed.
+	* NEWS: Document these fixes.
+
 2006-07-22  Eric Blake  <ebb9@byu.net>
 
 	* src/format.c (format): Avoid compiler warning that str may be
