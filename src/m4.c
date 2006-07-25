@@ -24,8 +24,6 @@
 #include <getopt.h>
 #include <signal.h>
 
-#include "close-stream.h"
-
 static void usage (int);
 
 /* Operate interactively (-e).  */
@@ -299,7 +297,7 @@ main (int argc, char *const *argv, char *const *envp)
   head = tail = NULL;
 
   while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-                                long_options, NULL),
+				long_options, NULL),
 	 optchar != EOF)
     switch (optchar)
       {
