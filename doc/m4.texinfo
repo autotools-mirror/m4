@@ -1033,6 +1033,15 @@ f
 @result{}2
 @end example
 
+It is an error if the end of file occurs while collecting arguments.
+
+@example
+define(
+^D
+@error{}NONE:0: m4: ERROR: end of file in argument list
+@end example
+
+
 @node Quoting Arguments
 @section Quoting macro arguments
 
@@ -2292,6 +2301,20 @@ See how `foo' was defined, foo?
 @result{}See how foo was defined, like this?
 @end example
 
+If the end of file is encountered without a newline character, a
+warning is issued and dnl stops consuming input.
+
+@example
+define(`hi', `HI')
+@result{}
+m4wrap(`m4wrap(`2 hi
+')0 hi dnl 1 hi')
+@result{}
+^D
+@error{}NONE:0: m4: Warning: end of file treated as newline
+@result{}0 HI 2 HI
+@end example
+
 @node Changequote
 @section Changing the quote characters
 
@@ -2346,7 +2369,7 @@ foo
 @end example
 
 There is no way in @code{m4} to quote a string containing an unmatched
-left quote, except using @code{changequote} to change the current
+start-quote, except using @code{changequote} to change the current
 quotes.
 
 If the quotes should be changed from, say, @samp{[} to @samp{[[},
@@ -2354,13 +2377,62 @@ temporary quote characters have to be defined.  To achieve this, two
 calls of @code{changequote} must be made, one for the temporary quotes
 and one for the new quotes.
 
-Neither quote string should start with a letter or @samp{_} (underscore),
-as they will be confused with names in the input.  Doing so disables
-the quoting mechanism.
+Macros are recognized in preference to the start-quote string, so if a
+prefix of @var{start} can be recognized as a macro name, the quoting
+mechanism is effectively disabled.  Unless you use @code{changeword}
+(@pxref{Changeword}), this means that @var{start} should not begin with
+a letter or @samp{_} (underscore).
 
-Changing the quotes to have the same start and end string disables
-nesting of quotes.  This makes it impossible to double-quote strings
-across macro expansions, so it is not done very often.
+@example
+define(`hi', `HI')
+@result{}
+changequote(`q', `Q')
+@result{}
+q hi Q hi
+@result{}q HI Q HI
+changequote
+@result{}
+changequote(`-', `EOF')
+@result{}
+- hi EOF hi
+@result{} hi  HI
+@end example
+
+If @var{end} is a prefix of @var{start}, the end-quote will be
+recognized in preference to a nested start-quote.  In particular,
+changing the quotes to have the same string for @var{start} and
+@var{end} disables nesting of quotes.  When quote nesting is disabled,
+it is impossible to double-quote strings across macro expansions, so
+using the same string is not done very often.
+
+@example
+define(`hi', `HI')
+@result{}
+changequote(`""', `"')
+@result{}
+""hi"""hi"
+@result{}hihi
+""hi" ""hi"
+@result{}hi hi
+""hi"" "hi"
+@result{}hi" "HI"
+changequote
+@result{}
+`hi`hi'hi'
+@result{}hi`hi'hi
+changequote(`"', `"')
+@result{}
+"hi"hi"hi"
+@result{}hiHIhi
+@end example
+
+It is an error if the end of file occurs within a quoted string.
+
+@example
+`dangling quote
+^D
+@error{}NONE:0: m4: ERROR: end of file in string
+@end example
 
 @node Changecom
 @section Changing comment delimiters
@@ -2414,6 +2486,31 @@ changecom(`#')
 @result{}
 # comment again
 @result{}# comment again
+@end example
+
+Comments are recognized in preference to macros.  However, this is not
+compatible with other implementations, where macros take precedence over
+comments, so it may change in a future release.  For portability, this
+means that @var{start} should not have a prefix that begins with a
+letter or @samp{_} (underscore).
+
+@example
+define(`hi', `HI')
+@result{}
+changecom(`q', `Q')
+@result{}
+q hi Q hi
+@result{}q hi Q HI
+@end example
+
+It is an error if the end of file occurs within a comment.
+
+@example
+changecom(`/*', `*/')
+@result{}
+/*dangling comment
+^D
+@error{}NONE:0: m4: ERROR: end of file in comment
 @end example
 
 @node Changeword
@@ -2619,6 +2716,30 @@ f(`10')
 @result{}Answer: 10*9*8*7*6*5*4*3*2*1=3628800
 @end example
 
+Invocations of @code{m4wrap} at the same recursion level are
+concatenated and rescanned as usual:
+
+@example
+define(`aa', `AA
+')
+@result{}
+m4wrap(`a')m4wrap(`a')
+@result{}
+^D
+@result{}AA
+@end example
+
+@noindent
+however, the transition between recursion levels behaves like an end of
+file condition between two input files.
+
+@example
+m4wrap(`m4wrap(`)')len(abc')
+@result{}
+^D
+@error{}NONE:0: m4: ERROR: end of file in argument list
+@end example
+
 @node File Inclusion
 @chapter File inclusion
 
@@ -2709,7 +2830,11 @@ This is `bar':  >>bar<<
 
 This use of @code{include} is not trivial, though, as files can contain
 quotes, commas, and parentheses, which can interfere with the way the
-@code{m4} parser works.
+@code{m4} parser works.  GNU @code{m4} seamlessly concatenates the file
+contents with the next character, even if the included file ended in
+the middle of a comment, string, or macro call.  These conditions are
+only treated as end of file errors if specified as input files on the
+command line.
 
 @node Search Path
 @section Searching for include files
@@ -4311,6 +4436,27 @@ impossible to nest quotes.  For predictable results, never call
 changequote with just one argument.
 
 @item
+Some implementations of @code{m4} give macros a higher precedence than
+comments when parsing, meaning that if the start delimiter given to
+@code{changecom} (@pxref{Changecom}) starts with a macro name, comments
+are effectively disabled.  @acronym{POSIX} does not specify what the
+precedence is, so the GNU @code{m4} parser recognizes comments, then
+macros, then quoted strings.
+
+@item
+Traditional implementations allow argument collection, but not string
+and comment processing, to span file boundaries.  Thus, if @file{a.m4}
+contains @samp{len(}, and @file{b.m4} contains @samp{abc)},
+@kbd{m4 a.m4 b.m4} outputs @samp{3} with traditional @code{m4}, but
+gives an error message that the end of file was encountered inside a
+macro with GNU @code{m4}.  On the other hand, traditional
+implementations do end of file processing for files included with
+@code{include} or @code{sinclude} (@pxref{Include}), while GNU @code{m4}
+seamlessly integrates the content of those files.  Thus
+@code{include(`a.m4')include(`b.m4')} will output @samp{3} instead of
+giving an error.
+
+@item
 Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
 arguments as a global variable, independent of named macro tracing.
 Also, once a macro is undefined, named tracing of that macro is lost.
@@ -4321,13 +4467,6 @@ turns tracing off for all definitions regardless of whether they were
 also traced by name; and tracing by name, such as with @option{-tfoo} at
 the command line or @code{traceon(`foo')} in the input, is an attribute
 that is preserved even if the macro is currently undefined.
-
-@item
-Traditional implementations allow argument collection, but not string
-processing, to span file boundaries.  Thus, if @file{a.m4} contains
-@samp{len(}, and @file{b.m4} contains @samp{abc)}, @kbd{m4 a.m4 b.m4}
-outputs @samp{3} with traditional @code{m4}, but gives an error message
-that the end of file was encountered inside a macro with GNU @code{m4}.
 
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all

@@ -510,6 +510,8 @@ skip_line (void)
 
   while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
     ;
+  if (ch == CHAR_EOF)
+    M4ERROR ((warning_status, 0, "Warning: end of file treated as newline"));
 }
 
 
@@ -755,6 +757,10 @@ next_token (token_data *td)
 	obstack_1grow (&token_stack, ch);
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
+      else
+        M4ERROR ((EXIT_FAILURE, 0,
+                  "ERROR: end of file in comment"));
+
       type = TOKEN_STRING;
     }
 #ifdef ENABLE_CHANGEWORD

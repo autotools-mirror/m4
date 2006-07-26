@@ -12,6 +12,11 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * Fix bugs that occurred when invoked with stdout or stderr closed.  Detect
   write failures to stdout.
 * The m4exit macro now converts values outside the range 0-255 to 1.
+* It is now an error if a command-line input file ends in the middle of a
+  comment, matching the behavior of mid-string and mid-argument
+  collection.
+* The dnl macro now warns if end of file is encountered instead of a
+  newline.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 

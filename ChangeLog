@@ -1,3 +1,13 @@
+2006-07-26  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom)
+	(Dnl, M4wrap, Include): Document EOF issues, and add examples.
+	(Incompatibilities): Document incompatibility of changecom
+	vs. macro names, and of EOF in include.
+	* src/input.c (next_token): Reject unterminated comments at EOF.
+	(skip_line): Warn on unterminated dnl at EOF.
+	* NEWS: Document these changes.
+
 2006-07-25  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Update to reflect gnulib's split of
