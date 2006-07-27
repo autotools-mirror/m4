@@ -37,7 +37,7 @@ static struct obstack trace;
 
 extern int expansion_level;
 
-static void debug_set_file _((FILE *));
+static void debug_set_file (FILE *);
 
 /*----------------------------------.
 | Initialise the debugging module.  |

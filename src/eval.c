@@ -58,20 +58,20 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term _((eval_token, eval_t *));
-static eval_error logical_and_term _((eval_token, eval_t *));
-static eval_error or_term _((eval_token, eval_t *));
-static eval_error xor_term _((eval_token, eval_t *));
-static eval_error and_term _((eval_token, eval_t *));
-static eval_error not_term _((eval_token, eval_t *));
-static eval_error logical_not_term _((eval_token, eval_t *));
-static eval_error cmp_term _((eval_token, eval_t *));
-static eval_error shift_term _((eval_token, eval_t *));
-static eval_error add_term _((eval_token, eval_t *));
-static eval_error mult_term _((eval_token, eval_t *));
-static eval_error exp_term _((eval_token, eval_t *));
-static eval_error unary_term _((eval_token, eval_t *));
-static eval_error simple_term _((eval_token, eval_t *));
+static eval_error logical_or_term (eval_token, eval_t *);
+static eval_error logical_and_term (eval_token, eval_t *);
+static eval_error or_term (eval_token, eval_t *);
+static eval_error xor_term (eval_token, eval_t *);
+static eval_error and_term (eval_token, eval_t *);
+static eval_error not_term (eval_token, eval_t *);
+static eval_error logical_not_term (eval_token, eval_t *);
+static eval_error cmp_term (eval_token, eval_t *);
+static eval_error shift_term (eval_token, eval_t *);
+static eval_error add_term (eval_token, eval_t *);
+static eval_error mult_term (eval_token, eval_t *);
+static eval_error exp_term (eval_token, eval_t *);
+static eval_error unary_term (eval_token, eval_t *);
+static eval_error simple_term (eval_token, eval_t *);
 
 /*--------------------.
 | Lexical functions.  |

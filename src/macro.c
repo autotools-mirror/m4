@@ -24,8 +24,8 @@
 
 #include "m4.h"
 
-static void expand_macro _((symbol *));
-static void expand_token _((struct obstack *, token_type, token_data *));
+static void expand_macro (symbol *);
+static void expand_token (struct obstack *, token_type, token_data *);
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;

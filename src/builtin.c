@@ -39,7 +39,7 @@ extern FILE *popen ();
    builtin.  */
 
 #define DECLARE(name) \
-  static void name _((struct obstack *, int, token_data **))
+  static void name (struct obstack *, int, token_data **)
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);

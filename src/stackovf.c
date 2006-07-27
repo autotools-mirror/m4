@@ -110,8 +110,7 @@
 # define STACKOVF_DETECT 16384
 #endif
 
-/* Giving a hand to ansi2knr...  */
-typedef void (*handler_t) _((void));
+typedef void (*handler_t) (void);
 
 static const char *stackbot;
 static const char *stackend;

@@ -1,5 +1,12 @@
 2006-07-27  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.h (_): Remove K&R cruft.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/macro.c: Likewise.
+	* src/stackovf.c: Likewise.
+
 	* doc/Makefile.am (m4.1): Improve man page.
 	* src/m4.c (usage): Improve --help output, including adding the
 	bug reporting address.
