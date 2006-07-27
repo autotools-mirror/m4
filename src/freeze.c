@@ -114,7 +114,7 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
   int i;
 
   /* FIXME:  Can't set the syntax of '\000' since that character marks
-             the end of a string, and when passed to `m4_set_syntax', tells
+	     the end of a string, and when passed to `m4_set_syntax', tells
 	     it to set the syntax of every table entry. */
 
   for (i = 1; i < 256; ++i)
@@ -163,8 +163,8 @@ produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 }
 
 static void *
-dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, m4_symbol *symbol,
-		void *userdata)
+dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
+		m4_symbol *symbol, void *userdata)
 {
   lt_dlhandle   handle		= SYMBOL_HANDLE (symbol);
   const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
@@ -361,7 +361,7 @@ void
 reload_frozen_state (m4 *context, const char *name)
 {
   FILE *file;
-  int version = 0;
+  int version;
   int character;
   int operation;
   char syntax;
@@ -416,6 +416,22 @@ reload_frozen_state (m4 *context, const char *name)
     }								\
   while (0)
 
+  /* Skip comments (`#' at beginning of line) and blank lines, setting
+     character to the next directive or to EOF.  */
+
+#define GET_DIRECTIVE \
+  do                                                            \
+    {                                                           \
+      GET_CHARACTER;                                            \
+      if (character == '#')                                     \
+	{                                                       \
+	  while (character != EOF && character != '\n')         \
+	    GET_CHARACTER;                                      \
+	  VALIDATE ('\n');                                      \
+	}                                                       \
+    }                                                           \
+  while (character == '\n')
+
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, _("Cannot open %s"), name));
@@ -427,317 +443,338 @@ reload_frozen_state (m4 *context, const char *name)
   allocated[2] = 100;
   string[2] = xmalloc ((size_t) allocated[2]);
 
-  while (GET_CHARACTER, character != EOF)
-    switch (character)
+  /* Validate format version.  Accept both `1' (m4 1.3 and 1.4.x) and
+     `2' (m4 2.0).  */
+  GET_DIRECTIVE;
+  VALIDATE ('V');
+  GET_CHARACTER;
+  GET_NUMBER (version);
+  switch (version)
+    {
+    case 2:
       {
-      default:
-	M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
+	int ch;
 
-      case '\n':
-
-	/* Skip empty lines.  */
-
-	break;
-
-      case '#':
-
-	/* Comments are introduced by `#' at beginning of line, and are
-	   ignored.  */
-
-	while (character != EOF && character != '\n')
-	  GET_CHARACTER;
-	VALIDATE ('\n');
-	break;
-
-      case 'F':
-	GET_CHARACTER;
-
-	/* Get string lengths. */
-
-	GET_NUMBER (number[0]);
-	VALIDATE (',');
-	GET_CHARACTER;
-	GET_NUMBER (number[1]);
-
-	if ((character == ',') && (version > 1))
-	  {
-	    /* 'F' operator accepts an optional third argument for
-	       format versions 2 or later.  */
-	    GET_CHARACTER;
-	    GET_NUMBER (number[2]);
-	  }
-	else if (version > 1)
-	  {
-	    number[2] = 0;
-	  }
+	/* Take care not to mix frozen state with startup state.  */
+	for (ch = 256; --ch > 0;)
+	  context->syntax->table[ch] = 0;
+      }
+      break;
+    case 1:
+      {
+	//      sleep(100);
+	m4__module_open (context, "m4", NULL);
+	if (m4_get_no_gnu_extensions_opt (context))
+	  m4__module_open (context, "traditional", NULL);
 	else
-	  {
-	    /* 3 argument 'F' operations are invalid for format version 1.  */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
-	  }
+	  m4__module_open (context, "gnu", NULL);
+      }
+      break;
+    default:
+      if (version > 2)
+	M4ERROR ((EXIT_MISMATCH, 0,
+		  "frozen file version %d greater than max supported of 2",
+		  version));
+      else
+	M4ERROR ((EXIT_FAILURE, 0,
+		  "ill-formed frozen file, version directive expected"));
+    }
+  VALIDATE ('\n');
 
-	VALIDATE ('\n');
-
-
-	/* Get string contents.  */
-
-	GET_STRING (file, string[0], allocated[0], number[0]);
-	GET_STRING (file, string[1], allocated[1], number[1]);
-	if ((number[2] > 0)  && (version > 1))
-	  GET_STRING (file, string[2], allocated[2], number[2]);
-	VALIDATE ('\n');
-
-	/* Enter a macro having a builtin function as a definition.  */
+  GET_DIRECTIVE;
+  while (character != EOF)
+    {
+      switch (character)
 	{
-	  const m4_builtin *bp = NULL;
-	  lt_dlhandle handle   = 0;
+	default:
+	  M4ERROR ((EXIT_FAILURE, 0,
+		    _("ill-formed frozen file, unknown directive %c"),
+		    character));
 
-	  if (number[2] > 0)
-	    handle = m4__module_find (string[2]);
+	case 'F':
+	  GET_CHARACTER;
 
-	  if (handle)
-	    bp = m4_builtin_find_by_name (handle, string[1]);
+	  /* Get string lengths. */
 
-	  if (bp)
+	  GET_NUMBER (number[0]);
+	  VALIDATE (',');
+	  GET_CHARACTER;
+	  GET_NUMBER (number[1]);
+
+	  if (character == ',')
 	    {
-	      m4_symbol_value *token = xzalloc (sizeof *token);
-
-	      if (bp->groks_macro_args)
-		BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
-	      if (bp->blind_if_no_args)
-		BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
-
-	      m4_set_symbol_value_func (token, bp->func);
-	      VALUE_HANDLE (token)	= handle;
-	      VALUE_MIN_ARGS (token)	= bp->min_args;
-	      VALUE_MAX_ARGS (token)	= bp->max_args;
-
-	      m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	      if (version > 1)
+		{
+		  /* 'F' operator accepts an optional third argument for
+		     format versions 2 or later.  */
+		  GET_CHARACTER;
+		  GET_NUMBER (number[2]);
+		}
+	      else
+		/* 3 argument 'F' operations are invalid for format
+		   version 1.  */
+		M4ERROR ((EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive encountered")));
 	    }
 	  else
-	    M4ERROR ((m4_get_warning_status_opt (context), 0,
-		      _("`%s' from frozen file not found in builtin table!"),
-		      string[0]));
-	}
-	break;
+	    {
+	      number[2] = 0;
+	    }
 
-      case 'M':
+	  VALIDATE ('\n');
 
-	/* Load a module, but *without* perturbing the symbol table.
-	   Note that any expansion from loading the module which would
-	   have been seen when loading it originally is discarded
-	   when loading it from a frozen file. */
 
-	if (version < 2)
-	  {
-	    /* 'M' operator is not supported in format version 1. */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
-	  }
+	  /* Get string contents.  */
 
-	GET_CHARACTER;
-	GET_NUMBER (number[0]);
-	VALIDATE ('\n');
-	GET_STRING (file, string[0], allocated[0], number[0]);
-	VALIDATE ('\n');
-
-	m4__module_open (context, string[0], NULL);
-
-	break;
-
-      case 'R':
-
-	if (version < 2)
-	  {
-	    /* 'R' operator is not supported in format version 1. */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
-	  }
-
-	GET_CHARACTER;
-	GET_NUMBER (number[0]);
-	VALIDATE ('\n');
-	GET_STRING (file, string[0], allocated[0], number[0]);
-	VALIDATE ('\n');
-
-	m4_set_regexp_syntax_opt (context,
-				  m4_regexp_syntax_encode (string[0]));
-	if (m4_get_regexp_syntax_opt (context) < 0)
-	  {
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("Unknown regexp syntax code %s"), string[0]));
-	  }
-
-	break;
-
-      case 'S':
-
-	if (version < 2)
-	  {
-	    /* 'S' operator is not supported in format version 1. */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
-	  }
-
-	GET_CHARACTER;
-	syntax = character;
-	GET_CHARACTER;
-	GET_NUMBER (number[0]);
-	VALIDATE ('\n');
-
-	CHECK_ALLOCATION(string[0], allocated[0], number[0]);
-	if (number[0] > 0)
-	  {
-	    int i;
-
-	    for (i = 0; i < number[0]; ++i)
-	      {
-		int ch = decode_char (file);
-
-		if (ch < 0)
-		  M4ERROR ((EXIT_FAILURE, 0,
-			    _("Premature end of frozen file")));
-
-		string[0][i] = (unsigned char) ch;
-	      }
-	  }
-	string[0][number[0]] = '\0';
-
-	if ((m4_set_syntax (context->syntax, syntax, string[0]) < 0)
-	    && (syntax != '\0'))
-	  {
-	    M4ERROR ((m4_get_warning_status_opt (context), 0,
-		      _("Undefined syntax code %c"), syntax));
-	  }
-	break;
-
-      case 'C':
-      case 'D':
-      case 'Q':
-	operation = character;
-	GET_CHARACTER;
-
-	/* Get string lengths. */
-
-	if (operation == 'D' && character == '-')
-	  {
-	    /* Accept a negative diversion number.  */
-	    GET_CHARACTER;
-	    GET_NUMBER (number[0]);
-	    number[0] = -number[0];
-	  }
-	else
-	  GET_NUMBER (number[0]);
-	VALIDATE (',');
-	GET_CHARACTER;
-	GET_NUMBER (number[1]);
-	VALIDATE ('\n');
-
-	/* Get string contents.  */
-	if (operation != 'D')
 	  GET_STRING (file, string[0], allocated[0], number[0]);
-	GET_STRING (file, string[1], allocated[1], number[1]);
-	GET_CHARACTER;
-	VALIDATE ('\n');
-
-	/* Act according to operation letter.  */
-
-	switch (operation)
-	  {
-	  case 'C':
-
-	    /* Change comment strings.  */
-
-	    m4_set_comment (M4SYNTAX, string[0], string[1]);
-	    break;
-
-	  case 'D':
-
-	    /* Select a diversion and add a string to it.  */
-
-	    m4_make_diversion (number[0]);
-	    if (number[1] > 0)
-	      m4_shipout_text (context, NULL, string[1], number[1]);
-	    break;
-
-	  case 'Q':
-
-	    /* Change quote strings.  */
-
-	    m4_set_quotes (M4SYNTAX, string[0], string[1]);
-	    break;
-
-	  default:
-
-	    /* Cannot happen.  */
-
-	    break;
-	  }
-	break;
-
-      case 'T':
-	GET_CHARACTER;
-
-	/* Get string lengths. */
-
-	GET_NUMBER (number[0]);
-	VALIDATE (',');
-	GET_CHARACTER;
-	GET_NUMBER (number[1]);
-
-	if ((character == ',') && (version > 1))
-	  {
-	    /* 'T' operator accepts an optional third argument for
-	       format versions 2 or later.  */
-	    GET_CHARACTER;
-	    GET_NUMBER (number[2]);
-	  }
-	else if (version > 1)
-	  {
-	    number[2] = 0;
-	  }
-	else
-	  {
-	    /* 3 argument 'T' operations are invalid for format version 1.  */
-	    M4ERROR ((EXIT_FAILURE, 0, _("Ill-formed frozen file")));
-	  }
-
-	VALIDATE ('\n');
-
-	/* Get string contents.  */
-	GET_STRING (file, string[0], allocated[0], number[0]);
-	GET_STRING (file, string[1], allocated[1], number[1]);
-	if ((number[2] > 0)  && (version > 1))
+	  GET_STRING (file, string[1], allocated[1], number[1]);
 	  GET_STRING (file, string[2], allocated[2], number[2]);
-	VALIDATE ('\n');
+	  VALIDATE ('\n');
 
-	/* Enter a macro having an expansion text as a definition.  */
-	{
-	  m4_symbol_value *token = xzalloc (sizeof *token);
-	  lt_dlhandle handle = 0;
+	  /* Enter a macro having a builtin function as a definition.  */
+	  {
+	    const m4_builtin *bp;
+	    lt_dlhandle handle   = 0;
 
-	  if (number[2] > 0)
-	    handle = m4__module_find (string[2]);
+	    if (number[2] > 0)
+	      handle = m4__module_find (string[2]);
 
-	  m4_set_symbol_value_text (token, xstrdup (string[1]));
-	  VALUE_HANDLE (token)		= handle;
-	  VALUE_MAX_ARGS (token)	= -1;
+	    bp = m4_builtin_find_by_name (handle, string[1]);
 
-	  m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	    if (bp)
+	      {
+		m4_symbol_value *token = xzalloc (sizeof *token);
+
+		if (bp->groks_macro_args)
+		  BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
+		if (bp->blind_if_no_args)
+		  BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
+
+		m4_set_symbol_value_func (token, bp->func);
+		VALUE_HANDLE (token)	= handle;
+		VALUE_MIN_ARGS (token)	= bp->min_args;
+		VALUE_MAX_ARGS (token)	= bp->max_args;
+
+		m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	      }
+	    else
+	      M4ERROR ((m4_get_warning_status_opt (context), 0,
+			_("`%s' from frozen file not found in builtin table!"),
+			string[0]));
+	  }
+	  break;
+
+	case 'M':
+
+	  /* Load a module, but *without* perturbing the symbol table.
+	     Note that any expansion from loading the module which would
+	     have been seen when loading it originally is discarded
+	     when loading it from a frozen file. */
+
+	  if (version < 2)
+	    {
+	      /* 'M' operator is not supported in format version 1. */
+	      M4ERROR ((EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive encountered")));
+	    }
+
+	  GET_CHARACTER;
+	  GET_NUMBER (number[0]);
+	  VALIDATE ('\n');
+	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  VALIDATE ('\n');
+
+	  m4__module_open (context, string[0], NULL);
+
+	  break;
+
+	case 'R':
+
+	  if (version < 2)
+	    {
+	      /* 'R' operator is not supported in format version 1. */
+	      M4ERROR ((EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive encountered")));
+	    }
+
+	  GET_CHARACTER;
+	  GET_NUMBER (number[0]);
+	  VALIDATE ('\n');
+	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  VALIDATE ('\n');
+
+	  m4_set_regexp_syntax_opt (context,
+				    m4_regexp_syntax_encode (string[0]));
+	  if (m4_get_regexp_syntax_opt (context) < 0)
+	    {
+	      M4ERROR ((EXIT_FAILURE, 0,
+			_("Unknown regexp syntax code %s"), string[0]));
+	    }
+
+	  break;
+
+	case 'S':
+
+	  if (version < 2)
+	    {
+	      /* 'S' operator is not supported in format version 1. */
+	      M4ERROR ((EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive encountered")));
+	    }
+
+	  GET_CHARACTER;
+	  syntax = character;
+	  GET_CHARACTER;
+	  GET_NUMBER (number[0]);
+	  VALIDATE ('\n');
+
+	  CHECK_ALLOCATION(string[0], allocated[0], number[0]);
+	  if (number[0] > 0)
+	    {
+	      int i;
+
+	      for (i = 0; i < number[0]; ++i)
+		{
+		  int ch = decode_char (file);
+
+		  if (ch < 0)
+		    M4ERROR ((EXIT_FAILURE, 0,
+			      _("Premature end of frozen file")));
+
+		  string[0][i] = (unsigned char) ch;
+		}
+	    }
+	  string[0][number[0]] = '\0';
+
+	  if ((m4_set_syntax (context->syntax, syntax, string[0]) < 0)
+	      && (syntax != '\0'))
+	    {
+	      M4ERROR ((m4_get_warning_status_opt (context), 0,
+			_("Undefined syntax code %c"), syntax));
+	    }
+	  break;
+
+	case 'C':
+	case 'D':
+	case 'Q':
+	  operation = character;
+	  GET_CHARACTER;
+
+	  /* Get string lengths. */
+
+	  if (operation == 'D' && character == '-')
+	    {
+	      /* Accept a negative diversion number.  */
+	      GET_CHARACTER;
+	      GET_NUMBER (number[0]);
+	      number[0] = -number[0];
+	    }
+	  else
+	    GET_NUMBER (number[0]);
+	  VALIDATE (',');
+	  GET_CHARACTER;
+	  GET_NUMBER (number[1]);
+	  VALIDATE ('\n');
+
+	  /* Get string contents.  */
+	  if (operation != 'D')
+	    GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[1], allocated[1], number[1]);
+	  GET_CHARACTER;
+	  VALIDATE ('\n');
+
+	  /* Act according to operation letter.  */
+
+	  switch (operation)
+	    {
+	    case 'C':
+
+	      /* Change comment strings.  */
+
+	      m4_set_comment (M4SYNTAX, string[0], string[1]);
+	      break;
+
+	    case 'D':
+
+	      /* Select a diversion and add a string to it.  */
+
+	      m4_make_diversion (number[0]);
+	      if (number[1] > 0)
+		m4_shipout_text (context, NULL, string[1], number[1]);
+	      break;
+
+	    case 'Q':
+
+	      /* Change quote strings.  */
+
+	      m4_set_quotes (M4SYNTAX, string[0], string[1]);
+	      break;
+
+	    default:
+
+	      /* Cannot happen.  */
+
+	      break;
+	    }
+	  break;
+
+	case 'T':
+	  GET_CHARACTER;
+
+	  /* Get string lengths. */
+
+	  GET_NUMBER (number[0]);
+	  VALIDATE (',');
+	  GET_CHARACTER;
+	  GET_NUMBER (number[1]);
+
+	  if (character == ',')
+	    {
+	      if (version > 1)
+		{
+		  /* 'T' operator accepts an optional third argument for
+		     format versions 2 or later.  */
+		  GET_CHARACTER;
+		  GET_NUMBER (number[2]);
+		}
+	      else
+		{
+		  /* 3 argument 'T' operations are invalid for format
+		     version 1.  */
+		  M4ERROR ((EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive encountered")));
+		}
+	    }
+	  else
+	    number[2] = 0;
+
+	  VALIDATE ('\n');
+
+	  /* Get string contents.  */
+	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[1], allocated[1], number[1]);
+	  GET_STRING (file, string[2], allocated[2], number[2]);
+	  VALIDATE ('\n');
+
+	  /* Enter a macro having an expansion text as a definition.  */
+	  {
+	    m4_symbol_value *token = xzalloc (sizeof *token);
+	    lt_dlhandle handle = 0;
+
+	    if (number[2] > 0)
+	      handle = m4__module_find (string[2]);
+
+	    m4_set_symbol_value_text (token, xstrdup (string[1]));
+	    VALUE_HANDLE (token)		= handle;
+	    VALUE_MAX_ARGS (token)	= -1;
+
+	    m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	  }
+	  break;
+
 	}
-	break;
-
-      case 'V':
-
-	/* Validate and save format version.  Only `1' and `2'
-	   are acceptable for now.  */
-
-	GET_CHARACTER;
-	version = character - '0';
-	if ((version < 1) || (version > 2))
-	    issue_expect_message ('2');
-	GET_CHARACTER;
-	VALIDATE ('\n');
-	break;
-
-      }
+      GET_DIRECTIVE;
+    }
 
   free (string[0]);
   free (string[1]);
@@ -749,4 +786,5 @@ reload_frozen_state (m4 *context, const char *name)
 #undef GET_NUMBER
 #undef VALIDATE
 #undef CHECK_ALLOCATION
+#undef GET_DIRECTIVE
 }

@@ -108,7 +108,7 @@ Operation modes:\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -r, --regexp-syntax=[SPEC]   change the default regexp syntax\n"),
+  -r, --regexp-syntax=SPEC     change the default regexp syntax\n"),
 	     stdout);
       fputs (_("\
 \n\
@@ -145,7 +145,7 @@ Frozen state files:\n\
       fputs (_("\
 \n\
 Debugging:\n\
-  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -o, --error-output=FILE      redirect debug and trace output\n\
   -t, --trace=NAME             trace NAME when it will be defined\n"),
@@ -169,6 +169,11 @@ FLAGS is any of:\n\
 \n\
 If no FILE or if FILE is `-', standard input is read.\n"),
 	     stdout);
+      fputs (_("\
+\n\
+Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
+mismatch, or whatever value was passed to the m4exit macro.\n\
+"), stdout);
 
       fputs (_("\nReport bugs to <bug-m4@gnu.org>.\n"), stdout);
     }
@@ -400,15 +405,7 @@ main (int argc, char *const *argv, char *const *envp)
   m4_include_env_init (context);
 
   if (frozen_file_to_read)
-    {
-      int ch;
-
-      /* Take care not to mix frozen state with startup state.  */
-      for (ch = 256; --ch > 0;)
-	context->syntax->table[ch] = 0;
-
-      reload_frozen_state (context, frozen_file_to_read);
-    }
+    reload_frozen_state (context, frozen_file_to_read);
   else
     {
       m4_module_load (context, "m4", 0);

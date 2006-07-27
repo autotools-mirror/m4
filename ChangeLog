@@ -1,3 +1,12 @@
+2006-07-27  Eric Blake  <ebb9@byu.net>
+
+	* m4/system_.h (EXIT_MISMATCH): Define.
+	* src/main.c (main): Don't clear syntax table for version 1.
+	(usage): Document exit status.
+	* src/freeze.c (reload_frozen_state): Port GET_DIRECTIVE from the
+	branch, and require V directive to appear first in file.  Fix
+	broken logic for detecting F and T in version 1 files.
+
 2006-07-22  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (stackovf_handler): Document the problems in our

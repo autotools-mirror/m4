@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2003, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,6 +45,11 @@
 #include <gnu/exit.h>
 #include <gnu/xalloc.h>
 #include <gnu/xstrndup.h>
+
+/* In addition to EXIT_SUCCESS and EXIT_FAILURE, m4 can fail with version
+   mismatch when trying to load a frozen file produced by a newer m4 than
+   the version doing the reload.  */
+#define EXIT_MISMATCH 63
 
 /* This is okay in an installed file, because it will not change the
    behaviour of the including program whether ENABLE_NLS is defined
