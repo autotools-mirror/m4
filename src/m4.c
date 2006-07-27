@@ -146,6 +146,11 @@ usage (int status)
     {
       printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
       fputs ("\
+Process macros in FILEs.  If no FILE or if FILE is `-', standard input\n\
+is read.\n\
+", stdout);
+      fputs ("\
+\n\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -165,10 +170,10 @@ Operation modes:\n\
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
-  -I, --include=DIRECTORY      append this directory to include path\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
-  -U, --undefine=NAME          delete builtin NAME\n\
+  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -I, --include=DIRECTORY      append DIRECTORY to include path\n\
+  -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
+  -U, --undefine=NAME          undefine NAME\n\
 ", stdout);
       fputs ("\
 \n\
@@ -203,8 +208,8 @@ FLAGS is any of:\n\
   p   show results of path searches\n\
   q   quote values as necessary, with a or e flag\n\
   t   trace for all macro calls, not only traceon'ed\n\
-  V   shorthand for all of the other flags\n\
   x   add a unique macro call id, useful with c flag\n\
+  V   shorthand for all of the above flags\n\
 ", stdout);
       fputs ("\
 \n\
@@ -213,13 +218,10 @@ of directories included after any specified by `-I'.\n\
 ", stdout);
       fputs ("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n\
-", stdout);
-      fputs ("\
-\n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
+      printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
 
   if (close_stream (stdout) != 0)
@@ -408,12 +410,13 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       printf ("%s\n", PACKAGE_STRING);
-      printf ("Written by Rene' Seindal.\n\
-\n\
+      fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-");
+\n\
+Written by Rene' Seindal.\n\
+", stdout);
 
       if (close_stream (stdout) != 0)
 	M4ERROR ((EXIT_FAILURE, errno, "write error"));

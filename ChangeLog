@@ -1,8 +1,15 @@
+2006-07-27  Eric Blake  <ebb9@byu.net>
+
+	* doc/Makefile.am (m4.1): Improve man page.
+	* src/m4.c (usage): Improve --help output, including adding the
+	bug reporting address.
+	(main): Follow GNU Coding Standards for --version output.
+
 2006-07-26  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Use begin-quote, end-quote, begin-comment, and
 	end-comment consistently, to match POSIX.
-	
+
 	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom)
 	(Dnl, M4wrap, Include): Document EOF issues, and add examples.
 	(Incompatibilities): Document incompatibility of changecom
