@@ -724,7 +724,7 @@ Examples of legal names are: @samp{foo}, @samp{_tmp}, and @samp{name01}.
 
 @cindex quoted string
 A quoted string is a sequence of characters surrounded by the quotes
-@kbd{`} and @kbd{'}, where the nested start and end quotes within the
+@kbd{`} and @kbd{'}, where the nested begin and end quotes within the
 string are balanced.  The value of a string token is the text, with one
 level of quotes stripped off.  Thus
 
@@ -762,7 +762,7 @@ but the entire comment (including the delimiters) is passed through to
 the output---comments are @emph{not} discarded by @code{m4}.
 
 Comments cannot be nested, so the first newline after a @samp{#} ends
-the comment.  The commenting effect of the begin comment character
+the comment.  The commenting effect of the begin-comment string
 can be inhibited by quoting it.
 
 @example
@@ -1479,11 +1479,11 @@ defn(`string')
 @end example
 
 However, it is important to remember that @code{m4} rescanning is purely
-textual.  If an unbalanced right quote string occurs in a macro
+textual.  If an unbalanced end-quote string occurs in a macro
 definition, the rescan will see that embedded quote as the termination
 of the quoted string, and the remainder of the macro's definition will
-be rescanned unquoted.  Thus it is a good idea to avoid unbalanced right
-quotes in macro definitions or arguments to macros.
+be rescanned unquoted.  Thus it is a good idea to avoid unbalanced
+end-quotes in macro definitions or arguments to macros.
 
 @example
 define(`foo', a'a)
@@ -2324,7 +2324,7 @@ The default quote delimiters can be changed with the builtin
 @code{changequote}:
 
 @deffn Builtin changequote (@dvar{start, `}, @dvar{end, '})
-This sets @var{start} as the new start-quote delimiter and @var{end} as the
+This sets @var{start} as the new begin-quote delimiter and @var{end} as the
 new end-quote delimiter.  If any of the arguments are missing, the default
 quotes (@code{`} and @code{'}) are used instead of the void arguments.
 @comment FIXME POSIX requires that with one argument, the closing quote
@@ -2369,7 +2369,7 @@ foo
 @end example
 
 There is no way in @code{m4} to quote a string containing an unmatched
-start-quote, except using @code{changequote} to change the current
+begin-quote, except using @code{changequote} to change the current
 quotes.
 
 If the quotes should be changed from, say, @samp{[} to @samp{[[},
@@ -2377,7 +2377,7 @@ temporary quote characters have to be defined.  To achieve this, two
 calls of @code{changequote} must be made, one for the temporary quotes
 and one for the new quotes.
 
-Macros are recognized in preference to the start-quote string, so if a
+Macros are recognized in preference to the begin-quote string, so if a
 prefix of @var{start} can be recognized as a macro name, the quoting
 mechanism is effectively disabled.  Unless you use @code{changeword}
 (@pxref{Changeword}), this means that @var{start} should not begin with
@@ -2399,7 +2399,7 @@ changequote(`-', `EOF')
 @end example
 
 If @var{end} is a prefix of @var{start}, the end-quote will be
-recognized in preference to a nested start-quote.  In particular,
+recognized in preference to a nested begin-quote.  In particular,
 changing the quotes to have the same string for @var{start} and
 @var{end} disables nesting of quotes.  When quote nesting is disabled,
 it is impossible to double-quote strings across macro expansions, so
@@ -2443,7 +2443,7 @@ The default comment delimiters can be changed with the builtin
 macro @code{changecom}:
 
 @deffn Builtin changecom (@ovar{start}, @ovar{end})
-This sets @var{start} as the new start-comment delimiter and @var{end} as
+This sets @var{start} as the new begin-comment delimiter and @var{end} as
 the new end-comment delimiter.  If only one argument is provided,
 newline becomes the new end-comment delimiter.  The comment delimiters
 can be of any length.  Omitting the first argument, or using the empty
@@ -2468,7 +2468,7 @@ But: /* this is a comment now */ while this is not a comment
 @cindex comments, copied to output
 Note how comments are copied to the output, much as if they were quoted
 strings.  If you want the text inside a comment expanded, quote the
-start comment delimiter.
+begin-comment delimiter.
 
 Calling @code{changecom} without any arguments, or with an empty string
 for the first argument, disables the commenting mechanism completely.
@@ -4179,8 +4179,8 @@ directives are:
 
 @table @code
 @item C @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
-Uses @var{str1} and @var{str2} as the beginning comment and
-end comment strings.  If omitted, then @samp{#} and @key{NL} are the
+Uses @var{str1} and @var{str2} as the begin-comment and
+end-comment strings.  If omitted, then @samp{#} and @key{NL} are the
 comment delimiters.
 
 @item D @var{number}, @var{len} @key{NL} @var{str} @key{NL}
@@ -4208,7 +4208,7 @@ and its order, along with @samp{T}, is important.  If omitted, you will
 have no access to any builtins.
 
 @item Q @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
-Uses @var{str1} and @var{str2} as the beginning quote and end quote
+Uses @var{str1} and @var{str2} as the begin-quote and end-quote
 strings.  If omitted, then @samp{`} and @samp{'} are the quote
 delimiters.
 
