@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2004
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2004, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 
 #include "m4private.h"
 
-#define DEFAULT_NESTING_LIMIT	250
+#define DEFAULT_NESTING_LIMIT	1024
 
 
 m4 *
@@ -99,7 +99,7 @@ m4_context_field_table
 m4_context_field_table
 #undef M4FIELD
 
-#define M4OPT_BIT(bit, base) 						\
+#define M4OPT_BIT(bit, base)						\
 	bool (CONC(m4_get_, base)) (m4 *context)			\
 	{								\
 	  assert (context);						\
@@ -108,7 +108,7 @@ m4_context_field_table
 m4_context_opt_bit_table
 #undef M4OPT_BIT
 
-#define M4OPT_BIT(bit, base) 						\
+#define M4OPT_BIT(bit, base)						\
 	bool (CONC(m4_set_, base)) (m4 *context, bool value)		\
 	{								\
 	  assert (context);						\

@@ -25,6 +25,8 @@
 #include "version-etc.h"
 #include "gnu/progname.h"
 
+#define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan"
+
 static void print_program_name_CB (void);
 
 
@@ -96,6 +98,11 @@ usage (int status)
     {
       printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
       fputs (_("\
+Process macros in FILEs.\n\
+If no FILE or if FILE is `-', standard input is read.\n\
+"), stdout);
+      fputs (_("\
+\n\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -108,48 +115,48 @@ Operation modes:\n\
   -e, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -r, --regexp-syntax=SPEC     change the default regexp syntax\n"),
-	     stdout);
+  -r, --regexp-syntax=SPEC     change the default regexp syntax\n\
+"), stdout);
       fputs (_("\
 \n\
 SPEC is any one of:\n\
   AWK, BASIC, BSD_M4, ED, EMACS, EXTENDED, GNU_AWK, GNU_EGREP, GNU_M4,\n\
-  GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n"),
-	     stdout);
+  GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n\
+"), stdout);
       printf (_("\
 \n\
 Dynamic loading features:\n\
   -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
-  -m, --load-module=MODULE          load dynamic MODULE from %s\n"),
-	     USER_MODULE_PATH_ENV);
+  -m, --load-module=MODULE          load dynamic MODULE from %s\n\
+"), USER_MODULE_PATH_ENV);
       fputs (_("\
 \n\
 Preprocessor features:\n\
-  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
-  -I, --include=DIRECTORY      search this directory second for includes\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
-  -U, --undefine=NAME          delete builtin NAME\n"),
-	     stdout);
+  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -I, --include=DIRECTORY      append DIRECTORY to include path\n\
+  -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
+  -U, --undefine=NAME          undefine NAME\n\
+"), stdout);
       fputs (_("\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n"),
-	     stdout);
+  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
+"), stdout);
       fputs (_("\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n"),
-	     stdout);
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
+"), stdout);
       fputs (_("\
 \n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -o, --error-output=FILE      redirect debug and trace output\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n"),
-	     stdout);
+  -t, --trace=NAME             trace NAME when it will be defined\n\
+"), stdout);
       fputs (_("\
 \n\
 FLAGS is any of:\n\
@@ -162,20 +169,15 @@ FLAGS is any of:\n\
   p   show results of path searches\n\
   q   quote values as necessary, with a or e flag\n\
   t   trace for all macro calls, not only traceon'ed\n\
+  x   add a unique macro call id, useful with c flag\n\
   V   shorthand for all of the above flags\n\
-  x   add a unique macro call id, useful with c flag\n"),
-	     stdout);
-      fputs (_("\
-\n\
-If no FILE or if FILE is `-', standard input is read.\n"),
-	     stdout);
+"), stdout);
       fputs (_("\
 \n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 "), stdout);
-
-      fputs (_("\nReport bugs to <bug-m4@gnu.org>.\n"), stdout);
+      printf (_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
     }
   exit (status);
 }
@@ -390,8 +392,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (show_version)
     {
-      version_etc (stdout, NULL, "GNU " PACKAGE TIMESTAMP,
-		   VERSION, "Rene' Seindal", "Gary V. Vaughan", NULL);
+      version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
+		   VERSION, AUTHORS, NULL);
       exit (EXIT_SUCCESS);
     }
 
