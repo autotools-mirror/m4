@@ -375,7 +375,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 # if HAVE_STRUCT_SIGACTION_SA_SIGACTION
   act.sa_sigaction = sigsegv_handler;
 # else /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
-  act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
+  act.sa_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
 # endif /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
@@ -384,7 +384,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 
 #else /* ! HAVE_SIGACTION */
 
-  vec.sv_handler = (RETSIGTYPE (*)_ ((int))) sigsegv_handler;
+  vec.sv_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
   if (sigvec (SIGSEGV, &vec, NULL) < 0)

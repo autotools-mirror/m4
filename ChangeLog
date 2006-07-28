@@ -1,3 +1,12 @@
+2006-07-28  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (MAINTAINERCLEANFILES): Fix typo that tripped up
+	several non-GNU makes.
+	* src/stackovf.c (setup_stackovf_trap): Missed _ from yesterday.
+	* src/m4.h: Likewise.
+	* src/input.c (push_wrapup): Avoid compiler warning with Solaris
+	/usr/ccs/bin/ucbcc.
+
 2006-07-27  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Use @acronym{GNU} throughout.

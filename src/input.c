@@ -276,8 +276,9 @@ push_string_finish (void)
 void
 push_wrapup (const char *s)
 {
-  input_block *i = (input_block *) obstack_alloc (wrapup_stack,
-						  sizeof (struct input_block));
+  input_block *i;
+  i = (input_block *) obstack_alloc (wrapup_stack,
+                                     sizeof (struct input_block));
   i->prev = wsp;
   i->type = INPUT_STRING;
   i->u.u_s.string = obstack_copy0 (wrapup_stack, s, strlen (s));

@@ -116,8 +116,8 @@ extern int retcode;
 void reference_error (void);
 
 #ifdef USE_STACKOVF
-void setup_stackovf_trap _((char *const *, char *const *,
-			    void (*handler) (void)));
+void setup_stackovf_trap (char *const *, char *const *,
+                          void (*handler) (void));
 #endif
 
 /* File: debug.c  --- debugging and tracing function.  */
