@@ -68,7 +68,7 @@ BEGIN {
 	new_group(node);
       if (!file)
 	seq++;
-      printf ("# %s:%d\n", FILENAME, NR)
+      printf ("echo \"$at_srcdir/%s:%d:\"\n", FILENAME, NR)
       next;
     }
 

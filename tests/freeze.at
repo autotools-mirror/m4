@@ -106,6 +106,59 @@ bar
 AT_CLEANUP
 
 
+## -------------------------- ##
+## Reloading unknown builtins ##
+## -------------------------- ##
+
+AT_SETUP([reloading unknown builtin])
+AT_KEYWORDS([frozen])
+
+AT_DATA([[empty.m4]])
+
+# Freeze default state.
+AT_CHECK_M4([-F frozen.m4f empty.m4])
+
+# Add an unknown builtin.
+echo 'F1,1' >> frozen.m4f
+echo 'ab' >> frozen.m4f
+
+AT_DATA([[input.m4]],
+[[dnl The macro is defined; checking this is safe
+ifdef(`a', `yes', `no')
+dnl Grabbing the definition must warn; and the copy is the empty string
+define(`c', defn(`a'))
+dnl Invoking the macro directly must warn
+a
+dnl Invoking it indirectly must warn
+indir(`a')
+dnl The copy is a text string, not a placeholder
+c
+dnl Since it is defined, it must have a definition
+dumpdef(`a', `c')
+dnl Deleting it is safe
+popdef(`a')
+a
+]])
+
+AT_CHECK_M4([-R frozen.m4f input.m4], 0,
+[[yes
+
+
+
+
+
+
+a
+]],
+[[m4: input.m4: 4: Warning: a: builtin `b' requested by frozen file not found
+m4: input.m4: 6: Warning: a: builtin `b' requested by frozen file not found
+m4: input.m4: 8: Warning: a: builtin `b' requested by frozen file not found
+a:	<placeholder for b>
+c:	`'
+]])
+
+AT_CLEANUP
+
 ## ---------------------- ##
 ## Freezing regexp syntax ##
 ## ---------------------- ##

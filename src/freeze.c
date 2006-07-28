@@ -558,7 +558,7 @@ ill-formed frozen file, version 2 directive encountered")));
 	      }
 	    else
 	      {
-		m4_set_symbol_value_placeholder (token, string[1]);
+		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
 		VALUE_MIN_ARGS (token) = -1;
 		VALUE_MAX_ARGS (token) = -1;
 	      }

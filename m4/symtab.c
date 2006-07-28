@@ -305,19 +305,22 @@ symbol_popval (m4_symbol *symbol)
 	}
       if (m4_is_symbol_value_text (stale))
 	free (m4_get_symbol_value_text (stale));
+      else if (m4_is_symbol_value_placeholder (stale))
+	free (m4_get_symbol_value_placeholder (stale));
       free (stale);
     }
 }
 
 m4_symbol *
-m4_symbol_rename (m4_symbol_table *symtab, const char *name, const char *rename)
+m4_symbol_rename (m4_symbol_table *symtab, const char *name,
+		  const char *newname)
 {
   m4_symbol *symbol	= NULL;
   m4_symbol **psymbol;
 
   assert (symtab);
   assert (name);
-  assert (rename);
+  assert (newname);
 
   /* Use a low level hash fetch, so we can save the symbol value when
      removing the symbol name from the symbol table.  */
@@ -331,7 +334,7 @@ m4_symbol_rename (m4_symbol_table *symtab, const char *name, const char *rename)
       free (m4_hash_remove (symtab->table, name));
       assert (!m4_hash_lookup (symtab->table, name));
 
-      m4_hash_insert (symtab->table, xstrdup (rename), *psymbol);
+      m4_hash_insert (symtab->table, xstrdup (newname), *psymbol);
     }
   /* else
        NAME does not name a symbol in symtab->table!  */
@@ -548,13 +551,12 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, char *text)
 
 #ifdef DEBUG_SYM
 
-static void *symtab_dump	(m4_symbol_table *symtab);
-static void  dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
+static void *dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
 				 m4_symbol *symbol, void *userdata);
-static void *
+static M4_GNUC_UNUSED void *
 symtab_dump (m4_symbol_table *symtab)
 {
-  return symtab_apply (symtab, dump_symbol_CB, NULL);
+  return m4_symtab_apply (symtab, dump_symbol_CB, NULL);
 }
 
 static void *
@@ -567,9 +569,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
   const char *     module_name	= handle ? m4_get_module_name (handle) : "NONE";
   const m4_builtin *bp;
 
-  fprintf (stderr, "%10s: (%d%s) %s=",
-	   handle ? m4_get_module_name (handle) : "NONE",
-	   value  ? VALUE_FLAGS (value) : 0,
+  fprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
 	   m4_get_symbol_traced (symbol) ? "!" : "", name);
 
   if (!value)
@@ -595,5 +595,6 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 	break;
       }
   fputc ('\n', stderr);
+  return NULL;
 }
 #endif /* DEBUG_SYM */

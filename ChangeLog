@@ -1,5 +1,14 @@
 2006-07-28  Eric Blake  <ebb9@byu.net>
 
+	* src/freeze.c (reload_frozen_state): Copy string when creating
+	placeholder, to avoid memory corruption.
+	* m4/symtab.c (symbol_popval): Avoid memory leak.
+	(m4_symbol_rename): Avoid shadowing rename function.
+	(dump_symbol_CB, symtab_dump) [DEBUG_SYM]: Fix compilation.
+	* tests/freeze.at (reloading unknown builtin): Add test.
+	* tests/generate.awk: Capture m4.texinfo line number in
+	testsuite.log, not just generated.at.
+
 	Port idea from branch that a frozen file can request an unknown
 	builtin without producing a warning unless the builtin is
 	actually used.
