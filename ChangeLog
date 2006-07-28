@@ -33,6 +33,15 @@
 
 2006-07-27  Eric Blake  <ebb9@byu.net>
 
+	* src/main.c (usage): Update to match branch.
+	(main): Update --version info to distinguish between program name
+	`m4' and package name `GNU M4'.
+	(AUTHORS): Translate René Seindal's name.
+	* configure.ac (TIMESTAMP): Remove now-redundant parentheses.
+	* Makefile.am (doc/m4.1): Update to match branch.
+	* m4/m4.c (DEFAULT_NESTING_LIMIT): Raise to 1024, to match
+	branch.
+
 	* m4/system_.h (EXIT_MISMATCH): Define.
 	* src/main.c (main): Don't clear syntax table for version 1.
 	(usage): Document exit status.
