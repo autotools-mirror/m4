@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006 Free Software Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -160,7 +160,7 @@ bucket_delete (m4_hash *hash, size_t i)
   --HASH_LENGTH (hash);
 
   NODE_NEXT (node)	= free_list;
-  free_list 		= BUCKET_NTH (hash, i);
+  free_list		= BUCKET_NTH (hash, i);
   BUCKET_NTH (hash, i)	= 0;
 }
 
@@ -544,21 +544,17 @@ m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *userdata)
 /* Using a string as the hash key is common enough that we provide
    implementations here for use in client hash table routines.  */
 
-/* Return a hash value for a string, from GNU Emacs.  */
+/* Return a hash value for a string, consistent with gnulib's hash
+   module.  */
 size_t
 m4_hash_string_hash (const void *key)
 {
-  int val = 0;
+  size_t val = 0;
   const char *ptr = (const char *) key;
   char ch;
 
   while ((ch = *ptr++) != '\0')
-    {
-      if (ch >= 0140)
-	ch -= 40;
-      val = ((val << 3) + (val >> 28) + ch);
-    };
-  val = (val < 0) ? -val : val;
+    val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
   return val;
 }
 

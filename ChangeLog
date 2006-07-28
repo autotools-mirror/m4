@@ -1,3 +1,9 @@
+2006-07-27  Paul Eggert  <eggert@cs.ucla.edu>  (tiny change)
+
+	* m4/hash.c (m4_hash_string_hash): Don't case-fold in the hash
+	function. Shift by 7, not 3, for consistency with
+	gnulib/lib/hash.c. Don't assume hash word is 32 bits.
+
 2006-07-27  Eric Blake  <ebb9@byu.net>
 
 	* m4/system_.h (EXIT_MISMATCH): Define.
