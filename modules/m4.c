@@ -385,9 +385,14 @@ M4BUILTIN_HANDLER (dumpdef)
 	  assert (bp);
 	  fprintf (stderr, "<%s>\n", bp->name);
 	}
+      else if (m4_is_symbol_placeholder (symbol))
+	{
+	  fprintf (stderr, "<placeholder for %s>\n",
+		   m4_get_symbol_placeholder (symbol));
+	}
       else
 	{
-	  assert (!"illegal token in builtin_dumpdef");
+	  assert (!"invalid token in builtin_dumpdef");
 	}
     }
 }
@@ -412,6 +417,10 @@ M4BUILTIN_HANDLER (defn)
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (m4_get_symbol_value (symbol));
+      else if (m4_is_symbol_placeholder (symbol))
+	M4WARN ((m4_get_warning_status_opt (context), 0, _("\
+Warning: %s: builtin `%s' requested by frozen file not found"),
+		 name, m4_get_symbol_placeholder (symbol)));
       else
 	assert (!"Bad token data type in m4_defn");
     }

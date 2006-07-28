@@ -208,6 +208,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	fputs (module_name, file);
       fputc ('\n', file);
     }
+  else if (m4_is_symbol_placeholder (symbol))
+    ; /* Nothing to do for a builtin we couldn't reload earlier.  */
   else
     return "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()";
 
@@ -535,32 +537,32 @@ ill-formed frozen file, version 2 directive encountered")));
 	  {
 	    const m4_builtin *bp;
 	    lt_dlhandle handle   = 0;
+	    m4_symbol_value *token = xzalloc (sizeof *token);
 
 	    if (number[2] > 0)
 	      handle = m4__module_find (string[2]);
 
 	    bp = m4_builtin_find_by_name (handle, string[1]);
+	    VALUE_HANDLE (token) = handle;
 
 	    if (bp)
 	      {
-		m4_symbol_value *token = xzalloc (sizeof *token);
-
 		if (bp->groks_macro_args)
 		  BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
 		if (bp->blind_if_no_args)
 		  BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
 
 		m4_set_symbol_value_func (token, bp->func);
-		VALUE_HANDLE (token)	= handle;
 		VALUE_MIN_ARGS (token)	= bp->min_args;
 		VALUE_MAX_ARGS (token)	= bp->max_args;
-
-		m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	      }
 	    else
-	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			_("`%s' from frozen file not found in builtin table!"),
-			string[0]));
+	      {
+		m4_set_symbol_value_placeholder (token, string[1]);
+		VALUE_MIN_ARGS (token) = -1;
+		VALUE_MAX_ARGS (token) = -1;
+	      }
+	    m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	  }
 	  break;
 

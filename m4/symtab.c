@@ -471,6 +471,14 @@ m4_is_symbol_value_func (m4_symbol_value *value)
   return (value->type == M4_SYMBOL_FUNC);
 }
 
+#undef m4_is_symbol_value_placeholder
+bool
+m4_is_symbol_value_placeholder (m4_symbol_value *value)
+{
+  assert (value);
+  return (value->type == M4_SYMBOL_PLACEHOLDER);
+}
+
 #undef m4_is_symbol_value_void
 bool
 m4_is_symbol_value_void (m4_symbol_value *value)
@@ -483,7 +491,7 @@ m4_is_symbol_value_void (m4_symbol_value *value)
 char *
 m4_get_symbol_value_text (m4_symbol_value *value)
 {
-  assert (value);
+  assert (value && value->type == M4_SYMBOL_TEXT);
   return value->u.text;
 }
 
@@ -491,8 +499,16 @@ m4_get_symbol_value_text (m4_symbol_value *value)
 m4_builtin_func *
 m4_get_symbol_value_func (m4_symbol_value *value)
 {
-  assert (value);
+  assert (value && value->type == M4_SYMBOL_FUNC);
   return value->u.func;
+}
+
+#undef m4_get_symbol_value_placeholder
+char *
+m4_get_symbol_value_placeholder (m4_symbol_value *value)
+{
+  assert (value && value->type == M4_SYMBOL_PLACEHOLDER);
+  return value->u.text;
 }
 
 #undef m4_set_symbol_value_text
@@ -517,6 +533,17 @@ m4_set_symbol_value_func (m4_symbol_value *value, m4_builtin_func *func)
   value->u.func = func;
 }
 
+#undef m4_set_symbol_value_placeholder
+void
+m4_set_symbol_value_placeholder (m4_symbol_value *value, char *text)
+{
+  assert (value);
+  assert (text);
+
+  value->type   = M4_SYMBOL_PLACEHOLDER;
+  value->u.text = text;
+}
+
 
 
 #ifdef DEBUG_SYM
@@ -530,8 +557,9 @@ symtab_dump (m4_symbol_table *symtab)
   return symtab_apply (symtab, dump_symbol_CB, NULL);
 }
 
-static void *dump_symbol_CB (m4_symbol_table *symtab, const char *name,
-			     m4_symbol *symbol, void *ignored)
+static void *
+dump_symbol_CB (m4_symbol_table *symtab, const char *name,
+		m4_symbol *symbol, void *ignored)
 {
   m4_symbol_value *value	= m4_get_symbol_value (symbol);
   int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
@@ -557,6 +585,10 @@ static void *dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 	bp = m4_builtin_find_by_func (handle, m4_get_symbol_func (symbol));
 	fprintf (stderr, "<%s>",
 		 bp ? bp->name : "!ERROR!");
+	break;
+      case M4_SYMBOL_PLACEHOLDER:
+	fprintf (stderr, "<placeholder for %s>",
+		 m4_get_symbol_placeholder (symbol));
 	break;
       case M4_SYMBOL_VOID:
 	fputs ("<!VOID!>", stderr);

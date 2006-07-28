@@ -39,9 +39,10 @@ extern int errno;
 typedef struct m4__search_path_info m4__search_path_info;
 
 typedef enum {
-  M4_SYMBOL_VOID,
-  M4_SYMBOL_TEXT,
-  M4_SYMBOL_FUNC
+  M4_SYMBOL_VOID, /* Traced but undefined.  */
+  M4_SYMBOL_TEXT, /* Plain text.  */
+  M4_SYMBOL_FUNC, /* Builtin function.  */
+  M4_SYMBOL_PLACEHOLDER, /* Placeholder for unknown builtin during -R.  */
 } m4__symbol_type;
 
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
@@ -160,13 +161,13 @@ struct m4_symbol_value {
 
   m4__symbol_type	type;
   union {
-    char *		text;
-    m4_builtin_func *	func;
+    char *		text; /* Valid when type is TEXT, PLACEHOLDER.  */
+    m4_builtin_func *	func; /* Valid when type is FUNC.  */
   } u;
 };
 
 #define VALUE_NEXT(T)		((T)->next)
-#define VALUE_HANDLE(T)	((T)->handle)
+#define VALUE_HANDLE(T)		((T)->handle)
 #define VALUE_FLAGS(T)		((T)->flags)
 #define VALUE_ARG_SIGNATURE(T)	((T)->arg_signature)
 #define VALUE_MIN_ARGS(T)	((T)->min_args)
@@ -191,13 +192,19 @@ struct m4_symbol_value {
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
 #  define m4_is_symbol_value_void(V)	((V)->type == M4_SYMBOL_VOID)
+#  define m4_is_symbol_value_placeholder(V)				\
+					((V)->type == M4_SYMBOL_PLACEHOLDER)
 #  define m4_get_symbol_value_text(V)	((V)->u.text)
 #  define m4_get_symbol_value_func(V)	((V)->u.func)
+#  define m4_get_symbol_value_placeholder(V)				\
+					((V)->u.text)
 
 #  define m4_set_symbol_value_text(V, T)				\
 	((V)->type = M4_SYMBOL_TEXT, (V)->u.text = (T))
 #  define m4_set_symbol_value_func(V, F)				\
 	((V)->type = M4_SYMBOL_FUNC, (V)->u.func = (F))
+#  define m4_set_symbol_value_placeholder(V, T)				\
+	((V)->type = M4_SYMBOL_PLACEHOLDER, (V)->u.text = (T))
 #endif
 
 

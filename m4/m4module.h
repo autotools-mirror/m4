@@ -57,33 +57,33 @@ struct m4_macro
 };
 
 
-#define M4BUILTIN(name) 					\
-  static void CONC(builtin_, name) 				\
+#define M4BUILTIN(name)					\
+  static void CONC(builtin_, name)				\
    (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv);
 
-#define M4BUILTIN_HANDLER(name) 				\
+#define M4BUILTIN_HANDLER(name)				\
   static void CONC(builtin_, name)				\
    (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 
 #define M4INIT_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_init_module)) 			\
+  void CONC(name, CONC(_LTX_, m4_init_module))			\
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
-  void CONC(name, CONC(_LTX_, m4_init_module)) 			\
+  void CONC(name, CONC(_LTX_, m4_init_module))			\
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
+  void CONC(name, CONC(_LTX_, m4_finish_module))		\
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
-  void CONC(name, CONC(_LTX_, m4_finish_module)) 		\
+  void CONC(name, CONC(_LTX_, m4_finish_module))		\
 	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
 #define M4_MODULE_IMPORT(M, S)					\
-  CONC(S, _func) *S = (CONC(S, _func) *)	 		\
+  CONC(S, _func) *S = (CONC(S, _func) *)			\
 	m4_module_import (context, STR(M), STR(S), obs)
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
-extern bool 	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
+extern bool	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
 				       int, int);
 extern bool	    m4_numeric_arg    (m4 *, int, m4_symbol_value **,
 				       int, int *);
@@ -93,7 +93,7 @@ extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
 
 /* Error handling.  */
 #define M4ERROR(Arglist) (error Arglist)
-#define M4WARN(Arglist) 				M4_STMT_START {	\
+#define M4WARN(Arglist)				M4_STMT_START {	\
 	if (!m4_get_suppress_warnings_opt (context)) M4ERROR (Arglist);	\
 							} M4_STMT_END
 
@@ -108,7 +108,7 @@ typedef struct m4_symbol	m4_symbol;
 extern m4 *		m4_create	(void);
 extern void		m4_delete	(m4 *);
 
-#define m4_context_field_table 						\
+#define m4_context_field_table						\
 	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
@@ -136,7 +136,7 @@ extern void		m4_delete	(m4 *);
 m4_context_field_table
 #undef M4FIELD
 
-#define M4OPT_BIT(bit, base) 						\
+#define M4OPT_BIT(bit, base)						\
 	extern bool CONC(m4_get_, base) (m4 *context);		\
 	extern bool CONC(m4_set_, base) (m4 *context, bool value);
 m4_context_opt_bit_table
@@ -186,7 +186,7 @@ extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
 
 #define m4_symbol_delete(symtab, name)			M4_STMT_START {	\
 	while (m4_symbol_lookup ((symtab), (name)))			\
- 	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
+	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
 
 extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
@@ -198,10 +198,14 @@ extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 	(m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_func(symbol)					\
 	(m4_is_symbol_value_func (m4_get_symbol_value (symbol)))
+#define m4_is_symbol_placeholder(symbol)				\
+	(m4_is_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_text(symbol)					\
 	(m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_func(symbol)					\
 	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
+#define m4_get_symbol_placeholder(symbol)				\
+	(m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);
@@ -209,12 +213,16 @@ extern void		m4_symbol_value_copy	  (m4_symbol_value *,
 						   m4_symbol_value *);
 extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
+extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
 extern bool		m4_is_symbol_value_void	  (m4_symbol_value *);
 extern char	       *m4_get_symbol_value_text  (m4_symbol_value *);
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
+extern char	       *m4_get_symbol_value_placeholder  (m4_symbol_value *);
 extern void		m4_set_symbol_value_text  (m4_symbol_value *, char *);
 extern void		m4_set_symbol_value_func  (m4_symbol_value *,
 						   m4_builtin_func *);
+extern void		m4_set_symbol_value_placeholder  (m4_symbol_value *,
+							  char *);
 
 
 
@@ -228,7 +236,7 @@ extern const m4_builtin *m4_builtin_find_by_func (lt_dlhandle,
 
 /* --- MACRO MANAGEMENT --- */
 
-extern void 	   m4_macro_expand_input (m4 *);
+extern void	   m4_macro_expand_input (m4 *);
 extern void	   m4_macro_call	 (m4 *, m4_symbol *, m4_obstack *,
 					  int, m4_symbol_value **);
 
@@ -239,7 +247,7 @@ extern void	   m4_macro_call	 (m4 *, m4_symbol *, m4_obstack *,
 /* The value of debug_level is a bitmask of the following:  */
 enum {
   /* a: show arglist in trace output */
-  M4_DEBUG_TRACE_ARGS 		= (1 << 0),
+  M4_DEBUG_TRACE_ARGS		= (1 << 0),
   /* e: show expansion in trace output */
   M4_DEBUG_TRACE_EXPANSION	= (1 << 1),
   /* q: quote args and expansion in trace output */

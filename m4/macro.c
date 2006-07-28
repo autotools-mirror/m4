@@ -329,6 +329,12 @@ m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
     {
       (*m4_get_symbol_func (symbol)) (context, expansion, argc, argv);
     }
+  else if (m4_is_symbol_placeholder (symbol))
+    {
+      M4WARN ((m4_get_warning_status_opt (context), 0, _("\
+Warning: %s: builtin `%s' requested by frozen file not found"),
+	       M4ARG (0), m4_get_symbol_placeholder (symbol)));
+    }
   else
     {
       M4ERROR ((m4_get_warning_status_opt (context), 0,
@@ -593,6 +599,11 @@ INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
 		  abort ();
 		}
 	      trace_format (context, "<%s>", bp->name);
+	    }
+	  else if (m4_is_symbol_value_placeholder (argv[i]))
+	    {
+	      trace_format (context, "<placeholder for %s>",
+			    m4_get_symbol_value_placeholder (argv[i]));
 	    }
 	  else
 	    {
