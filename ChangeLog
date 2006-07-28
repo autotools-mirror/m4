@@ -1,5 +1,8 @@
 2006-07-27  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Use @acronym{GNU} throughout.
+	(History): Update for 1.4.6.
+
 	* src/m4.h (_): Remove K&R cruft.
 	* src/builtin.c: Likewise.
 	* src/debug.c: Likewise.
@@ -698,7 +701,7 @@
 	(hash): Likewise.  Don't case-fold in the hash function.
 	Shift by 7, not 3, for consistency with gnulib/lib/hash.c.
 	Don't assume hash word is 32 bits.
-	NEWS: Document this change.
+	* NEWS: Document this change.
 
 2006-06-04  Eric Blake  <ebb9@byu.net>
 

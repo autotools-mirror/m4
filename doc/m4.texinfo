@@ -40,7 +40,7 @@
 
 @copying
 
-This manual is for GNU M4 (version @value{VERSION}, @value{UPDATED}),
+This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
@@ -80,18 +80,18 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @insertcopying
 @end ifnottex
 
-GNU @code{m4} is an implementation of the traditional UNIX macro
+@acronym{GNU} @code{m4} is an implementation of the traditional UNIX macro
 processor.  It is mostly SVR4 compatible, although it has some
 extensions (for example, handling more than 9 positional parameters
 to macros).  @code{m4} also has builtin functions for including
 files, running shell commands, doing arithmetic, etc.  Autoconf needs
-GNU @code{m4} for generating @file{configure} scripts, but not for
+@acronym{GNU} @code{m4} for generating @file{configure} scripts, but not for
 running them.
 
-GNU @code{m4} was originally written by Ren@'e Seindal, with
+@acronym{GNU} @code{m4} was originally written by Ren@'e Seindal, with
 subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
-files @file{AUTHORS} and @file{THANKS} from the GNU M4 distribution.
+files @file{AUTHORS} and @file{THANKS} from the @acronym{GNU} M4 distribution.
 
 This is release @value{VERSION}.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
@@ -243,7 +243,7 @@ Fast loading of frozen state
 
 Compatibility with other versions of @code{m4}
 
-* Extensions::                  Extensions in GNU M4
+* Extensions::                  Extensions in @acronym{GNU} M4
 * Incompatibilities::           Facilities in System V m4 not in GNU M4
 * Other Incompatibilities::     Other incompatibilities
 
@@ -262,7 +262,7 @@ Indices
 @node Preliminaries
 @chapter Introduction and preliminaries
 
-This first chapter explains what GNU @code{m4} is, where @code{m4}
+This first chapter explains what @acronym{GNU} @code{m4} is, where @code{m4}
 comes from, how to read and use this documentation, how to call the
 @code{m4} program, and how to report bugs about it.  It concludes by
 giving tips for reading the remainder of the manual.
@@ -294,10 +294,10 @@ The @code{m4} macro processor is widely available on all UNIXes, and has
 been standardized by @acronym{POSIX}.
 Usually, only a small percentage of users are aware of its existence.
 However, those who find it often become committed users.  The
-popularity of GNU Autoconf, which requires GNU @code{m4} for
-@emph{generating} @file{configure} scripts, is an incentive
+popularity of @acronym{GNU} Autoconf, which requires @acronym{GNU}
+@code{m4} for @emph{generating} @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
-program in @code{m4}.  GNU @code{m4} is mostly compatible with the
+program in @code{m4}.  @acronym{GNU} @code{m4} is mostly compatible with the
 System V, Release 3 version, except for some minor differences.
 @xref{Compatibility}, for more details.
 
@@ -336,7 +336,8 @@ Originally, the Kernighan and Plauger macro-processor, and then
 that is, the @code{Ratfor} equivalent of @code{cpp}.  Later, @code{m4}
 was used as a frontend for @code{Ratfor}, @code{C} and @code{Cobol}.
 
-Ren@'e Seindal released his implementation of @code{m4}, GNU @code{m4},
+Ren@'e Seindal released his implementation of @code{m4}, @acronym{GNU}
+@code{m4}, 
 in 1990, with the aim of removing the artificial limitations in many
 of the traditional @code{m4} implementations, such as maximum line
 length, macro size, or number of macros.
@@ -346,22 +347,22 @@ evolution in the form of @code{M5}: ``User's Guide to the M5 Macro
 Language: 2nd edition'', Electronic Announcement on comp.compilers
 newsgroup (1992).
 
-Fran@,{c}ois Pinard took over maintenance of GNU @code{m4} in 1992, until
-1994 when he released GNU @code{m4} 1.4, which was the stable release
-for 10 years.  It was at this time that GNU Autoconf decided to require
-GNU @code{m4} as its underlying engine, since all other implementations
-of @code{m4} had too many limitations.
+Fran@,{c}ois Pinard took over maintenance of @acronym{GNU} @code{m4} in
+1992, until 1994 when he released @acronym{GNU} @code{m4} 1.4, which was
+the stable release for 10 years.  It was at this time that @acronym{GNU}
+Autoconf decided to require @acronym{GNU} @code{m4} as its underlying
+engine, since all other implementations of @code{m4} had too many limitations.
 
 More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
 addressed some long standing bugs in the venerable 1.4 release.
 Then in 2005 Gary V. Vaughan collected together the many
-patches to GNU @code{m4} 1.4 that were floating around the net and
+patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5.
+prepared patches for the release of 1.4.5 and 1.4.6.
 
 Meanwhile, development has continued on new features for @code{m4}, such
-as dynamic module loading and additional builtins.  When complete, GNU
-@code{m4} 2.0 will start a new series of releases.
+as dynamic module loading and additional builtins.  When complete,
+@acronym{GNU} @code{m4} 2.0 will start a new series of releases.
 
 @node Invoking m4
 @section Invoking @code{m4}
@@ -419,7 +420,7 @@ calls, or treating the empty string as zero.
 @item -W @var{REGEXP}
 @itemx --word-regexp=@var{REGEXP}
 Use @var{REGEXP} as an alternative syntax for macro names.  This
-experimental option will not be present on all GNU @code{m4}
+experimental option will not be present on all @acronym{GNU} @code{m4}
 implementations (@pxref{Changeword}).
 @end table
 
@@ -474,7 +475,7 @@ definition is silently ignored.
 There are some limits within @code{m4} that can be tuned.  For
 compatibility, @code{m4} also accepts some options that control limits
 in other implementations, but which are automatically unbounded (limited
-only by your hardware constraints) in GNU @code{m4}.
+only by your hardware constraints) in @acronym{GNU} @code{m4}.
 
 @table @code
 @item -G
@@ -507,7 +508,7 @@ or stack space.  Through clever usage of rescanning loops, one can
 request complex, time-consuming computations to @code{m4} with useful
 results.  Putting limitations in this area would break @code{m4} power.
 There are many pathological cases: @w{@samp{define(`a', `a')a}} is
-only the simplest example (but @pxref{Compatibility}).  Expecting GNU
+only the simplest example (but @pxref{Compatibility}).  Expecting @acronym{GNU}
 @code{m4} to detect these would be a little like expecting a compiler
 system to detect and diagnose endless loops: it is a quite @emph{hard}
 problem in general, if not undecidable!
@@ -521,12 +522,12 @@ do nothing in this implementation.
 @item -N @var{NUM}
 @itemx --diversions=@var{NUM}
 These options are present only for compatibility with previous
-versions of GNU @code{m4}, and were controlling the number of possible
-diversions which could be used at the same time.  They do nothing,
+versions of @acronym{GNU} @code{m4}, and were controlling the number of
+possible diversions which could be used at the same time.  They do nothing,
 because there is no fixed limit anymore.
 @end table
 
-GNU @code{m4} comes with a feature of freezing internal state
+@acronym{GNU} @code{m4} comes with a feature of freezing internal state
 (@pxref{Frozen files}).  This can be used to speed up @code{m4}
 execution when reusing a common initialization script.
 
@@ -598,7 +599,7 @@ options.
 @node Bugs
 @section Problems and bugs
 
-If you have problems with GNU @code{m4} or think you've found a bug,
+If you have problems with @acronym{GNU} @code{m4} or think you've found a bug,
 please report it.  Before reporting a bug, make sure you've actually
 found a real bug.  Carefully reread the documentation and see if it
 really says you can do what you're trying to do.  If it's not clear
@@ -648,8 +649,8 @@ Example of input line
 The sequence @samp{^D} in an example indicates the end of the input file.
 The majority of these examples are self-contained, and you can run them
 with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
-that is bundled in the GNU M4 package consists of the examples in this
-document!
+that is bundled in the @acronym{GNU} M4 package consists of the examples
+in this document!
 
 As each of the predefined macros in @code{m4} is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -697,7 +698,7 @@ primitive is spelled within @code{m4}.
 As @code{m4} reads its input, it separates it into @dfn{tokens}.  A
 token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
-contain comments.  GNU @code{m4} does not yet understand locales; all
+contain comments.  @acronym{GNU} @code{m4} does not yet understand locales; all
 operations are byte-oriented rather than character-oriented.
 
 @menu
@@ -815,7 +816,7 @@ Result is 32768
 @end example
 
 The order in which @code{m4} expands the macros can be explored using
-the @ref{Trace} facilities of GNU @code{m4}.
+the @ref{Trace} facilities of @acronym{GNU} @code{m4}.
 
 This process continues until there are no more macro calls to expand and
 all the input has been consumed.
@@ -881,7 +882,7 @@ An innovation of the @code{m4} language, compared to some of its
 predecessors (like Stratchey's @code{GPM}, for example), is the ability
 to recognize macro calls without resorting to any special, prefixed
 invocation character.  While generally useful, this feature might
-sometimes be the source of spurious, unwanted macro calls.  So, GNU
+sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
 @code{m4} offers several mechanisms or techniques for inhibiting the
 recognition of names as macro calls.
 
@@ -899,7 +900,7 @@ by @samp{m4_} for them to be recognized.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.
 
-If your version of GNU @code{m4} has the @code{changeword} feature
+If your version of @acronym{GNU} @code{m4} has the @code{changeword} feature
 compiled in, it offers far more flexibility in specifying the
 syntax of macro names, both builtin or user-defined.  @xref{Changeword},
 for more information on this experimental feature.
@@ -1167,8 +1168,8 @@ one
 @result{}two
 @end example
 
-As a GNU extension, the first argument to @code{define} does not have to
-be a simple word.
+As a @acronym{GNU} extension, the first argument to @code{define} does
+not have to be a simple word.
 It can be any text string, even the empty string.  A macro with a
 non-standard name cannot be invoked in the normal way, as the name is
 not recognised.  It can only be referenced by the builtins @ref{Indir}
@@ -1227,8 +1228,9 @@ macro
 
 @xref{Quoting Arguments}, for an explanation of the double quotes.
 
-@cindex GNU extensions
-GNU @code{m4} allows the number following the @samp{$} to consist of one
+@cindex @acronym{GNU} extensions
+@acronym{GNU} @code{m4} allows the number following the @samp{$} to
+consist of one
 or more digits, allowing macros to have any number of arguments.  This
 is not so in UNIX implementations of @code{m4}, which only recognize
 one digit.
@@ -1596,7 +1598,7 @@ and @code{defn}.
 @cindex indirect call of macros
 @cindex call of macros, indirect
 @cindex macros, indirect call of
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Any macro can be called indirectly with @code{indir}:
 
 @deffn Builtin indir (@var{name}, @dots{})
@@ -1629,7 +1631,7 @@ called through the builtin @code{indir}.
 @cindex indirect call of builtins
 @cindex call of builtins, indirect
 @cindex builtins, indirect call of
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Builtin macros can be called indirectly with @code{builtin}:
 
 @deffn Builtin builtin (@var{name}, @dots{})
@@ -1758,8 +1760,8 @@ The macro @code{ifelse} is recognized only with parameters.
 
 Using only one argument is a common @code{m4} idiom for introducing a
 block comment, as an alternative to repeatedly using @code{dnl}.  This
-special usage is recognized by GNU @code{m4}, so that in this case, the
-warning about missing arguments is never triggered.
+special usage is recognized by @acronym{GNU} @code{m4}, so that in this
+case, the warning about missing arguments is never triggered.
 
 @example
 ifelse(`some comments')
@@ -2168,7 +2170,7 @@ If no flags are specified with the @option{-d} option, the default is
 @samp{aeq}.  The examples throughout this manual assume the default
 flags.
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 There is a builtin macro @code{debugmode}, which allows on-the-fly control of
 the debugging output format:
 
@@ -2211,7 +2213,7 @@ foo
 @cindex saving debugging output
 @cindex debugging output, saving
 @cindex output, saving debugging
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Debug and tracing output can be redirected to files using either the
 @option{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
 
@@ -2285,7 +2287,7 @@ The input up to and including the next newline is discarded, as opposed
 to the way comments are treated (@pxref{Comments}).
 
 Usually, @code{dnl} is immediately followed by an end of line or some
-other whitespace.  GNU @code{m4} will produce a warning diagnostic if
+other whitespace.  @acronym{GNU} @code{m4} will produce a warning diagnostic if
 @code{dnl} is followed by an open parenthesis.  In this case, @code{dnl}
 will collect and process all arguments, looking for a matching close
 parenthesis.  All predictable side effects resulting from this
@@ -2521,7 +2523,7 @@ changecom(`/*', `*/')
 @quotation
 The macro @code{changeword} and all associated functionality is
 experimental.  It is only available if the @option{--enable-changeword}
-option was given to @code{configure}, at GNU @code{m4} installation
+option was given to @code{configure}, at @acronym{GNU} @code{m4} installation
 time.  The functionality will go away in the future, to be replaced by
 other new features that are more efficient at providing the same
 capabilities.  @emph{Do not rely on it}.  Please direct your comments
@@ -2670,8 +2672,8 @@ To save input text, use the builtin @code{m4wrap}:
 
 @deffn Builtin m4wrap (@ovar{string}, @dots{})
 Stores @var{string} in a safe place, to be reread when end of input is
-reached.  As a GNU extension, additional arguments are concatenated with
-a space to the @var{string}.
+reached.  As a @acronym{GNU} extension, additional arguments are
+concatenated with a space to the @var{string}.
 
 The expansion of @code{m4wrap} is void.
 @end deffn
@@ -2790,8 +2792,8 @@ sinclude()
 
 The rest of this section assumes that @code{m4} is invoked with the
 @option{-I} option pointing to the @file{examples} directory shipped as
-part of the GNU @code{m4} package.  The file @file{examples/@/incl.m4} in
-the distribution contains the lines:
+part of the @acronym{GNU} @code{m4} package.  The file
+@file{examples/@/incl.m4} in the distribution contains the lines:
 @comment ignore
 @example
 Include file start
@@ -2830,7 +2832,8 @@ This is `bar':  >>bar<<
 
 This use of @code{include} is not trivial, though, as files can contain
 quotes, commas, and parentheses, which can interfere with the way the
-@code{m4} parser works.  GNU @code{m4} seamlessly concatenates the file
+@code{m4} parser works.  @acronym{GNU} @code{m4} seamlessly concatenates
+the file
 contents with the next character, even if the included file ended in
 the middle of a comment, string, or macro call.  These conditions are
 only treated as end of file errors if specified as input files on the
@@ -2841,8 +2844,8 @@ command line.
 
 @cindex search path for included files
 @cindex included files, search path for
-@cindex GNU extensions
-GNU @code{m4} allows included files to be found in other directories
+@cindex @acronym{GNU} extensions
+@acronym{GNU} @code{m4} allows included files to be found in other directories
 than the current working directory.
 
 If a file is not found in the current working directory, and the file
@@ -2865,7 +2868,7 @@ time.
 
 Numbered diversions are counted from 0 upwards, diversion number 0
 being the normal output stream.  The number of simultaneous diversions
-is limited mainly by the memory used to describe them, because GNU
+is limited mainly by the memory used to describe them, because @acronym{GNU}
 @code{m4} tries to keep diversions in memory.  However, there is a
 limit to the overall memory usable by all diversions taken altogether
 (512K, currently).  When this maximum is about to be exceeded,
@@ -2955,7 +2958,7 @@ Diverted text can be undiverted explicitly using the builtin
 @deffn Builtin undivert (@ovar{number}@dots{})
 Undiverts the diversions given by the arguments, in the order
 given.  If no arguments are supplied, all diversions are undiverted, in
-numerical order.  As a GNU extension, if @var{number} is not numeric,
+numerical order.  As a @acronym{GNU} extension, if @var{number} is not numeric,
 treat it as a file name instead.
 
 The expansion of @code{undivert} is void.
@@ -3030,10 +3033,11 @@ divert`'undivert`'dnl
 @result{}three
 @end example
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 @cindex file inclusion
 @cindex inclusion, of files
-GNU @code{m4} allows named files to be undiverted.  Given a non-numeric
+@acronym{GNU} @code{m4} allows named files to be undiverted.  Given a
+non-numeric
 argument, the contents of the file named will be copied, uninterpreted, to
 the current output.  This complements the builtin @code{include}
 (@pxref{Include}).  To illustrate the difference, the file
@@ -3179,13 +3183,13 @@ index(`gnus, gnats, and armadillos', `dag')
 @section Searching for regular expressions
 
 @cindex regular expressions
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Searching for regular expressions is done with the builtin
 @code{regexp}:
 
 @deffn Builtin regexp (@var{string}, @var{regexp}, @ovar{replacement})
 Searches for @var{regexp} in @var{string}.  The syntax for regular
-expressions is the same as in GNU Emacs.
+expressions is the same as in @acronym{GNU} Emacs.
 @ifnothtml
 @xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
 Manual}.
@@ -3193,7 +3197,7 @@ Manual}.
 @ifhtml
 See
 @uref{http://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
-Syntax of Regular Expressions} in the GNU Emacs Manual.
+Syntax of Regular Expressions} in the @acronym{GNU} Emacs Manual.
 @end ifhtml
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
@@ -3277,8 +3281,8 @@ are deleted from the expansion.  If @var{replacement} is omitted, all
 characters in @var{string} that are present in @var{chars} are deleted
 from the expansion.
 
-As a GNU extension, both @var{chars} and @var{replacement} can contain
-character-ranges,
+As a @acronym{GNU} extension, both @var{chars} and @var{replacement} can
+contain character-ranges,
 e.g., @samp{a-z} (meaning all lowercase letters) or @samp{0-9} (meaning
 all digits).  To include a dash @samp{-} in @var{chars} or
 @var{replacement}, place it first or last.
@@ -3310,13 +3314,13 @@ most common.
 @cindex regular expressions
 @cindex pattern substitution
 @cindex substitution by regular expression
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Global substitution in a string is done by @code{patsubst}:
 
 @deffn Builtin patsubst (@var{string}, @var{regexp}, @ovar{replacement})
 Searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.  The syntax for regular expressions
-is the same as in GNU Emacs (@pxref{Regexp}).
+is the same as in @acronym{GNU} Emacs (@pxref{Regexp}).
 
 The parts of @var{string} that are not covered by any match of
 @var{regexp} are copied to the expansion.  Whenever a match is found, the
@@ -3402,7 +3406,7 @@ patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 
 @cindex formatted output
 @cindex output, formatted
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Formatted output can be made with @code{format}:
 
 @deffn Builtin format (@var{format-string}, @dots{})
@@ -3458,7 +3462,7 @@ modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 C Library Manual.
 
 For now, unrecognized specifiers are silently ignored, but it is
-anticipated that a future release of GNU @code{m4} will support more
+anticipated that a future release of @acronym{GNU} @code{m4} will support more
 specifiers, and give warnings when problems are encountered.  Likewise,
 escape sequences are not yet recognized.
 
@@ -3560,7 +3564,8 @@ All operators, except exponentiation, are left associative.
 Note that some older @code{m4} implementations use @samp{^} as an
 alternate operator for exponentiation, although @acronym{POSIX} requires
 the C behavior of bitwise exclusive-or.  On the other hand, the
-precedence of @samp{~} and @samp{!} are different in GNU @code{m4} than
+precedence of @samp{~} and @samp{!} are different in @acronym{GNU}
+@code{m4} than 
 they are in C, matching the precedence in traditional @code{m4}
 implementations.  This behavior is likely to change in a future
 version to match @acronym{POSIX}, so use parentheses to force the
@@ -3613,7 +3618,8 @@ expression).  Therefore all macros must be expanded before they are
 passed to @code{eval}.
 
 All evaluation is done with 32-bit signed integers, assuming
-2's-complement with wrap-around.  The shift operators are defined in GNU
+2's-complement with wrap-around.  The shift operators are defined in
+@acronym{GNU} 
 @code{m4} by doing an implicit bit-wise and of the right-hand operand
 with 0x1f, and sign-extension with right shift.
 
@@ -3694,7 +3700,7 @@ exit value if this is not the case.
 
 @cindex platform macros
 Sometimes it is desirable for an input file to know which
-platform @code{m4} is running on.  GNU @code{m4} provides several
+platform @code{m4} is running on.  @acronym{GNU} @code{m4} provides several
 macros that are predefined to expand to the empty string; checking for
 their existence will confirm platform details.
 
@@ -3710,9 +3716,9 @@ environment of @code{m4}.  If defined, each macro expands to the empty
 string.
 @end deffn
 
-When GNU extensions are in effect (that is, when you did not use the
-@option{-G} option), GNU @code{m4} will define the macro @code{__gnu__} to
-expand to the empty string.
+When @acronym{GNU} extensions are in effect (that is, when you did not use the
+@option{-G} option), @acronym{GNU} @code{m4} will define the macro
+@code{__gnu__} to expand to the empty string.
 
 @example
 __gnu__
@@ -3722,16 +3728,17 @@ ifdef(`__gnu__', `Extensions are active')
 @end example
 
 @cindex platform macro
-On UNIX systems, GNU @code{m4} will define @code{__unix__} by default,
-or @code{unix} when the @option{-G} option is specified.
+On UNIX systems, @acronym{GNU} @code{m4} will define @code{__unix__} by
+default, or @code{unix} when the @option{-G} option is specified.
 
-On native Windows systems, GNU @code{m4} will define @code{__windows__}
-by default, or @code{windows} when the @option{-G} option is specified.
+On native Windows systems, @acronym{GNU} @code{m4} will define
+@code{__windows__} by default, or @code{windows} when the @option{-G}
+option is specified. 
 
-On OS/2 systems, GNU @code{m4} will define @code{__os2__} by default, or
-@code{os2} when the @option{-G} option is specified.
+On OS/2 systems, @acronym{GNU} @code{m4} will define @code{__os2__} by
+default, or @code{os2} when the @option{-G} option is specified.
 
-If GNU @code{m4} does not provide a platform macro for your system,
+If @acronym{GNU} @code{m4} does not provide a platform macro for your system,
 please report that as a bug.
 
 @example
@@ -3781,7 +3788,7 @@ the command, as well as using the newline that appeared after the macro.
 @node Esyscmd
 @section Reading the output of commands
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 If you want @code{m4} to read the output of a shell command, use
 @code{esyscmd}:
 
@@ -4049,7 +4056,7 @@ which files are listed on each @code{m4} invocation prior to the
 user's input file, or else each input file uses @code{include}.
 
 Reading the common base of a big application, over and over again, may
-be time consuming.  GNU @code{m4} offers some machinery to speed up
+be time consuming.  @acronym{GNU} @code{m4} offers some machinery to speed up
 the start of an application using lengthy common bases.
 
 @menu
@@ -4064,7 +4071,7 @@ the start of an application using lengthy common bases.
 @cindex initialization, frozen states
 @cindex dumping into frozen file
 @cindex reloading a frozen file
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Suppose a user has a library of @code{m4} initializations in
 @file{base.m4}, which is then used with multiple input files:
 
@@ -4097,7 +4104,7 @@ m4 -R base.m4f input3.m4
 with the varying input.  The first call, containing the @option{-F}
 option, only reads and executes file @file{base.m4}, defining
 various application macros and computing other initializations.
-Once the input file @file{base.m4} has been completely processed, GNU
+Once the input file @file{base.m4} has been completely processed, @acronym{GNU}
 @code{m4} produces on @file{base.m4f} a @dfn{frozen} file, that is, a
 file which contains a kind of snapshot of the @code{m4} internal state.
 
@@ -4140,8 +4147,8 @@ Also, interactions for some options of @code{m4}, being used in one call
 and not in the next, have not been fully analyzed yet.  On the other
 end, you may be confident that stacks of @code{pushdef} definitions
 are handled correctly, as well as undefined or renamed builtins, and
-changed strings for quotes or comments.  And future releases of GNU M4
-will improve on the utility of frozen files.
+changed strings for quotes or comments.  And future releases of
+@acronym{GNU} M4 will improve on the utility of frozen files.
 
 When an @code{m4} run is to be frozen, the automatic undiversion
 which takes place at end of execution is inhibited.  Instead, all
@@ -4163,7 +4170,7 @@ exit with status 63 to indicate version mismatch.
 @cindex file format, frozen file
 Frozen files are sharable across architectures.  It is safe to write
 a frozen file on one machine and read it on another, given that the
-second machine uses the same or newer version of GNU @code{m4}.
+second machine uses the same or newer version of @acronym{GNU} @code{m4}.
 It is conventional, but not required, to give a frozen file the suffix
 of @code{.m4f}.
 
@@ -4189,7 +4196,7 @@ Selects diversion @var{number}, making it current, then copy
 number for a non-existing diversion.  To merely specify an active
 selection, use this command with an empty @var{str}.  With 0 as the
 diversion @var{number}, @var{str} will be issued on standard output
-at reload time.  GNU @code{m4} will not produce the @samp{D}
+at reload time.  @acronym{GNU} @code{m4} will not produce the @samp{D}
 directive with non-zero length for diversion 0, but this can be done
 with manual edits.  This directive may
 appear more than once for the same diversion, in which case the
@@ -4237,15 +4244,15 @@ There are also differences in BSD flavors of @code{m4}.  No attempt
 is made to summarize these here.
 
 @menu
-* Extensions::                  Extensions in GNU M4
+* Extensions::                  Extensions in @acronym{GNU} M4
 * Incompatibilities::           Facilities in System V m4 not in GNU M4
 * Other Incompatibilities::     Other incompatibilities
 @end menu
 
 @node Extensions
-@section Extensions in GNU @code{m4}
+@section Extensions in @acronym{GNU} @code{m4}
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 This version of @code{m4} contains a few facilities that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
 using the @option{-G} command line option, unless overridden by other
@@ -4255,8 +4262,8 @@ command line options.
 @item
 In the @code{$}@var{n} notation for macro arguments, @var{n} can contain
 several digits, while the System V @code{m4} only accepts one digit.
-This allows macros in GNU @code{m4} to take any number of arguments, and
-not only nine (@pxref{Arguments}).
+This allows macros in @acronym{GNU} @code{m4} to take any number of
+arguments, and not only nine (@pxref{Arguments}).
 
 This means that @code{define(`foo', `$11')} is ambiguous between
 implementations.  To portably choose between grabbing the first
@@ -4285,7 +4292,7 @@ Eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 
 @item
 The @code{divert} (@pxref{Divert}) macro can manage more than 9
-diversions.  GNU @code{m4} treats all positive numbers as valid
+diversions.  @acronym{GNU} @code{m4} treats all positive numbers as valid
 diversions, rather than discarding diversions greater than 9.
 
 @item
@@ -4332,28 +4339,28 @@ The destination of trace and debug output can be controlled with
 @code{debugfile} (@pxref{Debug Output}).
 @end itemize
 
-In addition to the above extensions, GNU @code{m4} implements the
+In addition to the above extensions, @acronym{GNU} @code{m4} implements the
 following command line options: @option{-F}, @option{-G}, @option{-I},
 @option{-L}, @option{-R}, @option{-V}, @option{-W}, @option{-d},
 @option{-l}, @option{-o} and @option{-t}.  @xref{Invoking m4}, for a
 description of these options.
 
-Also, the debugging and tracing facilities in GNU @code{m4} are much
+Also, the debugging and tracing facilities in @acronym{GNU} @code{m4} are much
 more extensive than in most other versions of @code{m4}.
 
 @node Incompatibilities
-@section Facilities in System V @code{m4} not in GNU @code{m4}
+@section Facilities in System V @code{m4} not in @acronym{GNU} @code{m4}
 
 The version of @code{m4} from System V contains a few facilities that
-have not been implemented in GNU @code{m4} yet.  Additionally,
-@acronym{POSIX} requires some behaviors that GNU @code{m4} has not
+have not been implemented in @acronym{GNU} @code{m4} yet.  Additionally,
+@acronym{POSIX} requires some behaviors that @acronym{GNU} @code{m4} has not
 implemented yet.  Relying on these behaviors is non-portable, as a
-future release of GNU @code{m4} may change.
+future release of @acronym{GNU} @code{m4} may change.
 
 @itemize @bullet
 @item
 System V @code{m4} supports multiple arguments to @code{defn}, and
-@acronym{POSIX} requires it.  This is not yet implemented in GNU
+@acronym{POSIX} requires it.  This is not yet implemented in @acronym{GNU}
 @code{m4}.  Unfortunately, this means it is not possible to mix builtins
 and other text into a single macro; a helper macro is required.
 
@@ -4367,10 +4374,11 @@ implemented for the various builtins that are required to issue an error
 
 @item
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
-(first-in, first-out) order, but GNU @code{m4} currently uses LIFO order.
-Furthermore, @acronym{POSIX} states that only the first argument to
-@code{m4wrap} is saved for later evaluation, bug GNU @code{m4} saves and
-processes all arguments, with output separated by spaces.
+(first-in, first-out) order, but @acronym{GNU} @code{m4} currently uses
+LIFO order.  Furthermore, @acronym{POSIX} states that only the first
+argument to @code{m4wrap} is saved for later evaluation, bug
+@acronym{GNU} @code{m4} saves and processes all arguments, with output
+separated by spaces. 
 
 However, it is possible to emulate @acronym{POSIX} behavior by
 including the file @file{examples/@/wrapfifo.m4} from the distribution:
@@ -4400,13 +4408,13 @@ m4wrap(`a`'m4wrap(`c
 @acronym{POSIX} requires that all builtins that require arguments, but
 are called without arguments, behave as though empty strings had been
 passed.  For example, @code{a`'define`'b} would expand to @code{ab}.
-But GNU @code{m4} ignores certain builtins if they have missing
+But @acronym{GNU} @code{m4} ignores certain builtins if they have missing
 arguments, giving @code{adefineb} for the above example.
 
 @item
 Traditional implementations handle @code{define(`f',`1')} (@pxref{Define})
 by undefining the entire stack of previous definitions, and if doing
-@code{undefine(`f')} first.  GNU @code{m4} replaces just the top
+@code{undefine(`f')} first.  @acronym{GNU} @code{m4} replaces just the top
 definition on the stack, as if doing @code{popdef(`f')} followed by
 @code{pushdef(`f',`1')}.
 
@@ -4414,7 +4422,7 @@ definition on the stack, as if doing @code{popdef(`f')} followed by
 @acronym{POSIX} requires @code{syscmd} (@pxref{Syscmd}) to evaluate
 command output for macro expansion, but this appears to be a mistake
 in @acronym{POSIX} since traditional implementations did not do this.
-GNU @code{m4} follows traditional behavior in @code{syscmd}, and
+@acronym{GNU} @code{m4} follows traditional behavior in @code{syscmd}, and
 provides the extension @code{esyscmd} that provides the @acronym{POSIX}
 semantics.
 
@@ -4423,13 +4431,13 @@ semantics.
 the trailing @samp{X} characters with the @code{m4} process id, giving
 the same result on identical input, without creating any files, which
 leaves the door open for a data race in which other processes can create
-a file by the same name.  GNU @code{m4} actually creates a temporary
+a file by the same name.  @acronym{GNU} @code{m4} actually creates a temporary
 file for each invocation of @code{maketemp}, which means that the output
 of the macro is different even if the input is identical.
 
 @item
 @acronym{POSIX} requires @code{changequote(@var{arg})}
-(@pxref{Changequote}) to use newline as the close quote, but GNU
+(@pxref{Changequote}) to use newline as the close quote, but @acronym{GNU}
 @code{m4} uses @samp{'} as the close quote.  Meanwhile, some
 traditional implementations use @var{arg} as the close quote, making it
 impossible to nest quotes.  For predictable results, never call
@@ -4440,7 +4448,7 @@ Some implementations of @code{m4} give macros a higher precedence than
 comments when parsing, meaning that if the start delimiter given to
 @code{changecom} (@pxref{Changecom}) starts with a macro name, comments
 are effectively disabled.  @acronym{POSIX} does not specify what the
-precedence is, so the GNU @code{m4} parser recognizes comments, then
+precedence is, so the @acronym{GNU} @code{m4} parser recognizes comments, then
 macros, then quoted strings.
 
 @item
@@ -4449,10 +4457,10 @@ and comment processing, to span file boundaries.  Thus, if @file{a.m4}
 contains @samp{len(}, and @file{b.m4} contains @samp{abc)},
 @kbd{m4 a.m4 b.m4} outputs @samp{3} with traditional @code{m4}, but
 gives an error message that the end of file was encountered inside a
-macro with GNU @code{m4}.  On the other hand, traditional
+macro with @acronym{GNU} @code{m4}.  On the other hand, traditional
 implementations do end of file processing for files included with
-@code{include} or @code{sinclude} (@pxref{Include}), while GNU @code{m4}
-seamlessly integrates the content of those files.  Thus
+@code{include} or @code{sinclude} (@pxref{Include}), while @acronym{GNU}
+@code{m4} seamlessly integrates the content of those files.  Thus
 @code{include(`a.m4')include(`b.m4')} will output @samp{3} instead of
 giving an error.
 
@@ -4460,7 +4468,8 @@ giving an error.
 Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
 arguments as a global variable, independent of named macro tracing.
 Also, once a macro is undefined, named tracing of that macro is lost.
-On the other hand, when GNU @code{m4} encounters @code{traceon} without
+On the other hand, when @acronym{GNU} @code{m4} encounters
+@code{traceon} without 
 arguments, it turns tracing on for all existing definitions at the time,
 but does not trace future definitions; @code{traceoff} without arguments
 turns tracing off for all definitions regardless of whether they were
@@ -4470,19 +4479,19 @@ that is preserved even if the macro is currently undefined.
 
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all
-operators with the same precedence as C.  However, GNU @code{m4}
+operators with the same precedence as C.  However, @acronym{GNU} @code{m4}
 currently follows the traditional precedence of other @code{m4}
 implementations, where bitwise and logical negation (@samp{~} and
 @samp{!}) have lower precedence than equality operators, rather than
 equal precedence with other unary operators.  Use explicit parentheses
-to ensure proper precedence.  As extensions to @acronym{POSIX}, GNU
+to ensure proper precedence.  As extensions to @acronym{POSIX}, @acronym{GNU}
 @code{m4} treats the shift operators @samp{<<} and @samp{>>} as
 well-defined on signed integers (even though they are not in C), and
 adds the exponentiation operator @samp{**}.
 
 @item
 @acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat
-each character of the second and third arguments literally, but GNU
+each character of the second and third arguments literally, but @acronym{GNU}
 @code{m4} treats @samp{-} as a range operator.
 @end itemize
 
@@ -4494,16 +4503,16 @@ There are a few other incompatibilities between this implementation of
 
 @itemize @bullet
 @item
-GNU @code{m4} implements sync lines differently from System V @code{m4},
-when text is being diverted.  GNU @code{m4} outputs the sync lines when
-the text is being diverted, and System V @code{m4} when the diverted
-text is being brought back.
+@acronym{GNU} @code{m4} implements sync lines differently from System V
+@code{m4}, when text is being diverted.  @acronym{GNU} @code{m4} outputs
+the sync lines when the text is being diverted, and System V @code{m4}
+when the diverted text is being brought back.
 
 The problem is which lines and file names should be attached to text that
 is being, or has been, diverted.  System V @code{m4} regards all the
 diverted text as being generated by the source line containing the
-@code{undivert} call, whereas GNU @code{m4} regards the diverted text as
-being generated at the time it is diverted.
+@code{undivert} call, whereas @acronym{GNU} @code{m4} regards the
+diverted text as being generated at the time it is diverted.
 
 The sync line option is used mostly when using @code{m4} as
 a front end to a compiler.  If a diverted line causes a compiler error,
@@ -4511,8 +4520,8 @@ the error messages should most probably refer to the place where the
 diversion were made, and not where it was inserted again.
 
 @item
-GNU @code{m4} makes no attempt at prohibiting self-referential definitions
-like:
+@acronym{GNU} @code{m4} makes no attempt at prohibiting self-referential
+definitions like:
 
 @comment ignore
 @example
@@ -4535,7 +4544,7 @@ ifelse(defn(`@var{holder}'), `@var{value}', @dots{})
 @noindent
 In cases like this one, an interdiction for a macro to hold its own
 name would be a useless limitation.  Of course, this leaves more rope
-for the GNU @code{m4} user to hang himself!  Rescanning hangs may be
+for the @acronym{GNU} @code{m4} user to hang himself!  Rescanning hangs may be
 avoided through careful programming, a little like for endless loops
 in traditional programming languages.
 @end itemize
