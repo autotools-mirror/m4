@@ -26,6 +26,8 @@
 #include "hash.h"
 #include "m4private.h"
 
+#include <limits.h>
+
 typedef struct hash_node hash_node;
 
 struct m4_hash
