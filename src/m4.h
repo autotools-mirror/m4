@@ -398,7 +398,7 @@ const builtin *find_builtin_by_name (const char *);
 void include_init (void);
 void include_env_init (void);
 void add_include_directory (const char *);
-FILE *path_search (const char *);
+FILE *path_search (const char *, const char **);
 
 /* File: eval.c  --- expression evaluation.  */
 

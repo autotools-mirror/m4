@@ -503,7 +503,8 @@ Written by Rene' Seindal.\n\
 	  push_file (stdin, "stdin");
 	else
 	  {
-	    fp = path_search (argv[optind]);
+	    const char *name;
+	    fp = path_search (argv[optind], &name);
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
@@ -512,8 +513,8 @@ Written by Rene' Seindal.\n\
 		retcode = EXIT_FAILURE;
 		continue;
 	      }
-	    else
-	      push_file (fp, argv[optind]);
+	    push_file (fp, name);
+	    free ((char *) name);
 	  }
 	expand_input ();
       }

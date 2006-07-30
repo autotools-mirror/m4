@@ -1,3 +1,13 @@
+2006-07-29  Eric Blake  <ebb9@byu.net>
+
+	* src/path.c (path_search): Add result parameter, so that
+	-I can be accounted for.  Debian bug 53685.
+	* src/m4.h (path_search): Update prototype.
+	* src/m4.c (main): Adjust callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/builtin.c (include, m4_undivert): Likewise.
+	* NEWS: Document this change.
+
 2006-07-28  Eric Blake  <ebb9@byu.net>
 
 	* Makefile.am (MAINTAINERCLEANFILES): Fix typo that tripped up

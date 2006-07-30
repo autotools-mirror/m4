@@ -1049,7 +1049,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 		    "non-numeric argument to builtin `%s'", ARG (0)));
 	else
 	  {
-	    fp = path_search (ARG (i));
+	    fp = path_search (ARG (i), NULL);
 	    if (fp != NULL)
 	      {
 		insert_file (fp);
@@ -1154,11 +1154,12 @@ static void
 include (int argc, token_data **argv, boolean silent)
 {
   FILE *fp;
+  const char *name;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = path_search (ARG (1));
+  fp = path_search (ARG (1), &name);
   if (fp == NULL)
     {
       if (!silent)
@@ -1167,7 +1168,8 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, ARG (1));
+  push_file (fp, name);
+  free ((char *) name);
 }
 
 /*------------------------------------------------.
