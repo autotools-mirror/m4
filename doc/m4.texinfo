@@ -3995,6 +3995,26 @@ errprint(`m4:'__file__:__line__: `input error
 @result{}
 @end example
 
+Line numbers start at 1 for each file.  If the file was found due to the
+@option{-I} option or @env{M4PATH} environment variable, that is
+reflected in the file name.  The syncline option (@option{-s}) uses the
+same notion of current file and line.  Assume this example is run in the
+@file{checks} directory of the @acronym{GNU} M4 package, using
+@samp{--include=../examples} in the command line to find the file
+@file{incl.m4} mentioned earlier:
+
+@example
+define(`foo', ``$0' called at __file__:__line__')
+@result{}
+foo
+@result{}foo called at stdin:2
+include(`incl.m4')
+@result{}Include file start
+@result{}foo called at ../examples/incl.m4:2
+@result{}Include file end
+@result{}
+@end example
+
 @node M4exit
 @section Exiting from @code{m4}
 

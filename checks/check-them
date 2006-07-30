@@ -54,7 +54,8 @@ do
     continue
   fi
 
-  sed -e '/^dnl @result{}/!d' -e 's///' "$file" > $xout
+  sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
+    "$file" > $xout
 
   if cmp -s $out $xout; then
     :

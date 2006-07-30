@@ -1,3 +1,8 @@
+2006-07-30  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Errprint): Add example for last patch.
+	* checks/check-them): Account for VPATH in latest example.
+
 2006-07-29  Eric Blake  <ebb9@byu.net>
 
 	* src/path.c (path_search): Add result parameter, so that
