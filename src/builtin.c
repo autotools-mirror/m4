@@ -230,7 +230,7 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (s));
+    free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = xstrdup (text);
@@ -1725,7 +1725,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
 
   length = strlen (victim);
   startpos = re_search (&buf, victim, length, 0, length, &regs);
-  xfree (buf.buffer);
+  free (buf.buffer);
 
   if (startpos  == -2)
     {
@@ -1780,8 +1780,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression `%s': %s", regexp, msg));
-      if (buf.buffer != NULL)
-	xfree (buf.buffer);
+      free (buf.buffer);
       return;
     }
 
@@ -1828,7 +1827,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     }
   obstack_1grow (obs, '\0');
 
-  xfree (buf.buffer);
+  free (buf.buffer);
   return;
 }
 

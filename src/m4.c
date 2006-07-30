@@ -115,23 +115,6 @@ stackovf_handler (void)
 
 #endif /* USE_STACKOV */
 
-/* Memory allocation.  */
-
-/*------------------------.
-| Failsafe free routine.  |
-`------------------------*/
-
-#ifdef WITH_DMALLOC
-# undef xfree
-#endif
-
-void
-xfree (void *p)
-{
-  if (p != NULL)
-    free (p);
-}
-
 
 /*---------------------------------------------.
 | Print a usage message and exit with STATUS.  |
@@ -476,7 +459,7 @@ Written by Rene' Seindal.\n\
 	}
 
       next = defines->next;
-      xfree (defines);
+      free (defines);
       defines = next;
     }
 

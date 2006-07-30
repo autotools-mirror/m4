@@ -144,11 +144,10 @@ free_symbol (symbol *sym)
     SYMBOL_DELETED (sym) = TRUE;
   else
     {
-      if (SYMBOL_NAME (sym))
-	xfree (SYMBOL_NAME (sym));
+      free (SYMBOL_NAME (sym));
       if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-	xfree (SYMBOL_TEXT (sym));
-      xfree (sym);
+	free (SYMBOL_TEXT (sym));
+      free (sym);
     }
 }
 

@@ -1,7 +1,17 @@
 2006-07-30  Eric Blake  <ebb9@byu.net>
 
+	Use native free when it is good enough.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import free.
+	* src/builtin.c (define_user_macro, m4_regexp, m4_patsubst):
+	Adjust calls.
+	* src/symtab.c (free_symbol): Likewise.
+	* src/m4.c (xfree, main): Likewise.
+	* src/m4.h (obstack_chunk_free): Likewise.
+	* src/path.c (path_search): Likewise.
+	* src/input.c (pop_wrapup, set_quotes, set_comment): Likewise.
+
 	* doc/m4.texinfo (Errprint): Add example for last patch.
-	* checks/check-them): Account for VPATH in latest example.
+	* checks/check-them: Account for VPATH in latest example.
 
 2006-07-29  Eric Blake  <ebb9@byu.net>
 

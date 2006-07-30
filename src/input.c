@@ -348,12 +348,12 @@ boolean
 pop_wrapup (void)
 {
   obstack_free (current_input, NULL);
-  xfree (current_input);
+  free (current_input);
 
   if (wsp == NULL)
     {
       obstack_free (wrapup_stack, NULL);
-      xfree (wrapup_stack);
+      free (wrapup_stack);
       return FALSE;
     }
 
@@ -619,8 +619,8 @@ input_init (void)
 void
 set_quotes (const char *lq, const char *rq)
 {
-  xfree (lquote.string);
-  xfree (rquote.string);
+  free (lquote.string);
+  free (rquote.string);
 
   lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
   lquote.length = strlen (lquote.string);
@@ -631,8 +631,8 @@ set_quotes (const char *lq, const char *rq)
 void
 set_comment (const char *bc, const char *ec)
 {
-  xfree (bcomm.string);
-  xfree (ecomm.string);
+  free (bcomm.string);
+  free (ecomm.string);
 
   bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
   bcomm.length = strlen (bcomm.string);

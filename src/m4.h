@@ -84,9 +84,8 @@ struct string
 typedef struct string STRING;
 
 /* Memory allocation.  */
-void xfree (void *);
 #define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
+#define obstack_chunk_free	free
 
 /* Those must come first.  */
 typedef struct token_data token_data;

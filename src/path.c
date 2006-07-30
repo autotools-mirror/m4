@@ -162,7 +162,7 @@ path_search (const char *file, const char **result)
 	  return fp;
 	}
     }
-  xfree (name);
+  free (name);
   errno = e;
   return fp;
 }
