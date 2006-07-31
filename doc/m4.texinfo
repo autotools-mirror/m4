@@ -337,7 +337,7 @@ that is, the @code{Ratfor} equivalent of @code{cpp}.  Later, @code{m4}
 was used as a frontend for @code{Ratfor}, @code{C} and @code{Cobol}.
 
 Ren@'e Seindal released his implementation of @code{m4}, @acronym{GNU}
-@code{m4}, 
+@code{m4},
 in 1990, with the aim of removing the artificial limitations in many
 of the traditional @code{m4} implementations, such as maximum line
 length, macro size, or number of macros.
@@ -3565,7 +3565,7 @@ Note that some older @code{m4} implementations use @samp{^} as an
 alternate operator for exponentiation, although @acronym{POSIX} requires
 the C behavior of bitwise exclusive-or.  On the other hand, the
 precedence of @samp{~} and @samp{!} are different in @acronym{GNU}
-@code{m4} than 
+@code{m4} than
 they are in C, matching the precedence in traditional @code{m4}
 implementations.  This behavior is likely to change in a future
 version to match @acronym{POSIX}, so use parentheses to force the
@@ -3619,7 +3619,7 @@ passed to @code{eval}.
 
 All evaluation is done with 32-bit signed integers, assuming
 2's-complement with wrap-around.  The shift operators are defined in
-@acronym{GNU} 
+@acronym{GNU}
 @code{m4} by doing an implicit bit-wise and of the right-hand operand
 with 0x1f, and sign-extension with right shift.
 
@@ -3733,7 +3733,7 @@ default, or @code{unix} when the @option{-G} option is specified.
 
 On native Windows systems, @acronym{GNU} @code{m4} will define
 @code{__windows__} by default, or @code{windows} when the @option{-G}
-option is specified. 
+option is specified.
 
 On OS/2 systems, @acronym{GNU} @code{m4} will define @code{__os2__} by
 default, or @code{os2} when the @option{-G} option is specified.
@@ -4398,7 +4398,7 @@ implemented for the various builtins that are required to issue an error
 LIFO order.  Furthermore, @acronym{POSIX} states that only the first
 argument to @code{m4wrap} is saved for later evaluation, bug
 @acronym{GNU} @code{m4} saves and processes all arguments, with output
-separated by spaces. 
+separated by spaces.
 
 However, it is possible to emulate @acronym{POSIX} behavior by
 including the file @file{examples/@/wrapfifo.m4} from the distribution:
@@ -4489,7 +4489,7 @@ Traditional @code{m4} treats @code{traceon} (@pxref{Trace}) without
 arguments as a global variable, independent of named macro tracing.
 Also, once a macro is undefined, named tracing of that macro is lost.
 On the other hand, when @acronym{GNU} @code{m4} encounters
-@code{traceon} without 
+@code{traceon} without
 arguments, it turns tracing on for all existing definitions at the time,
 but does not trace future definitions; @code{traceoff} without arguments
 turns tracing off for all definitions regardless of whether they were

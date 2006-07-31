@@ -28,7 +28,7 @@ BEGIN {
   else
     printf("Node: %s ", node);
   gsub(" ", "_", node);
-  node = tolower(substr(node, 1, 11));
+  node = tolower(substr(node, 1, 10));
   seq = 0;
 }
 

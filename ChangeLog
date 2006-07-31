@@ -1,3 +1,9 @@
+2006-07-31  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Whitespace fix.
+	* checks/get-them: Avoid exceeding 14-char file name limit.
+	* THANKS: Update.
+
 2006-07-30  Eric Blake  <ebb9@byu.net>
 
 	* src/path.c (path_search): Detect allocation failure.
@@ -24,6 +30,7 @@
 	* src/freeze.c (reload_frozen_state): Likewise.
 	* src/builtin.c (include, m4_undivert): Likewise.
 	* NEWS: Document this change.
+	Reported by Nicolas Lichtmaier.
 
 2006-07-28  Eric Blake  <ebb9@byu.net>
 
