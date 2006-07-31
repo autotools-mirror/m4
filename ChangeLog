@@ -1,5 +1,7 @@
 2006-07-30  Eric Blake  <ebb9@byu.net>
 
+	* src/path.c (path_search): Detect allocation failure.
+
 	Use native free when it is good enough.
 	* m4/gnulib-cache.m4: Augment with gnulib-tool --import free.
 	* src/builtin.c (define_user_macro, m4_regexp, m4_patsubst):

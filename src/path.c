@@ -128,7 +128,7 @@ path_search (const char *file, const char **result)
   if (fp != NULL)
     {
       if (result)
-	*result = strdup (file);
+	*result = xstrdup (file);
       return fp;
     }
 
