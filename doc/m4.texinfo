@@ -1043,9 +1043,8 @@ It is an error if the end of file occurs while collecting arguments.
 @example
 define(
 ^D
-@error{}NONE:0: m4: ERROR: end of file in argument list
+@error{}m4:stdin:1: ERROR: end of file in argument list
 @end example
-
 
 @node Quoting Arguments
 @section Quoting macro arguments
@@ -2317,7 +2316,7 @@ m4wrap(`m4wrap(`2 hi
 ')0 hi dnl 1 hi')
 @result{}
 ^D
-@error{}NONE:0: m4: Warning: end of file treated as newline
+@error{}m4:NONE:0: Warning: end of file treated as newline
 @result{}0 HI 2 HI
 @end example
 
@@ -2454,7 +2453,7 @@ It is an error if the end of file occurs within a quoted string.
 @example
 `dangling quote
 ^D
-@error{}NONE:0: m4: ERROR: end of file in string
+@error{}m4:stdin:1: ERROR: end of file in string
 @end example
 
 @node Changecom
@@ -2551,7 +2550,7 @@ changecom(`/*', `*/')
 @result{}
 /*dangling comment
 ^D
-@error{}NONE:0: m4: ERROR: end of file in comment
+@error{}m4:stdin:1: ERROR: end of file in comment
 @end example
 
 @node Changeword
@@ -2778,7 +2777,7 @@ file condition between two input files.
 m4wrap(`m4wrap(`)')len(abc')
 @result{}
 ^D
-@error{}NONE:0: m4: ERROR: end of file in argument list
+@error{}m4:NONE:0: ERROR: end of file in argument list
 @end example
 
 @node File Inclusion
@@ -4053,6 +4052,11 @@ include(`incl.m4')
 @result{}Include file end
 @result{}
 @end example
+
+Currently, all text wrapped with @code{m4wrap} (@pxref{M4wrap}) behaves
+as though it came from line 0 of the file ``NONE''.  It is hoped that a
+future release of @code{m4} can overcome this limitation and remember
+which file invoked the call to @code{m4wrap}.
 
 @node M4exit
 @section Exiting from @code{m4}

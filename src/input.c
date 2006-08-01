@@ -323,8 +323,22 @@ pop_input (void)
       current_line = isp->u.u_f.lineno;
       output_current_line = isp->u.u_f.out_lineno;
       start_of_input_line = isp->u.u_f.advance_line;
-      if (tmp != NULL)
-	output_current_line = -1;
+      if (tmp == NULL)
+	{
+	  /* We have exhausted the current input stack.  However,
+	     freeing the obstack now is a bad idea, since if we are in
+	     the middle of a quote, comment, dnl, or argument
+	     collection, there is still a pointer to the former
+	     current_file that we must not invalidate until after the
+	     warning message has been issued.  Setting next to a
+	     non-string is safe in this case, because the only place
+	     more input could come from is another push_file or
+	     pop_wrapup, both of which then free the input_block.  */
+	  next = isp;
+	  isp = NULL;
+	  return;
+	}
+      output_current_line = -1;
       break;
 
     default:
@@ -347,6 +361,7 @@ pop_input (void)
 boolean
 pop_wrapup (void)
 {
+  next = NULL;
   obstack_free (current_input, NULL);
   free (current_input);
 
@@ -508,11 +523,16 @@ void
 skip_line (void)
 {
   int ch;
+  const char *file = current_file;
+  int line = current_line;
 
   while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
     ;
   if (ch == CHAR_EOF)
-    M4ERROR ((warning_status, 0, "Warning: end of file treated as newline"));
+    /* current_file changed to "NONE" if we see CHAR_EOF, use the
+       previous value we stored earlier.  */
+    error_at_line (warning_status, 0, file, line,
+		   "Warning: end of file treated as newline");
 }
 
 
@@ -730,6 +750,8 @@ next_token (token_data *td)
   int startpos;
   char *orig_text = 0;
 #endif
+  const char *file = current_file;
+  int line = current_line;
 
   obstack_free (&token_stack, token_bottom);
   obstack_1grow (&token_stack, '\0');
@@ -759,8 +781,10 @@ next_token (token_data *td)
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
       else
-        M4ERROR ((EXIT_FAILURE, 0,
-                  "ERROR: end of file in comment"));
+	/* current_file changed to "NONE" if we see CHAR_EOF, use the
+	   previous value we stored earlier.  */
+	error_at_line (EXIT_FAILURE, 0, file, line,
+		       "ERROR: end of file in comment");
 
       type = TOKEN_STRING;
     }
@@ -829,8 +853,10 @@ next_token (token_data *td)
 	{
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      "ERROR: end of file in string"));
+	    /* current_file changed to "NONE" if we see CHAR_EOF, use
+	       the previous value we stored earlier.  */
+	    error_at_line (EXIT_FAILURE, 0, file, line,
+			   "ERROR: end of file in string");
 
 	  if (MATCH (ch, rquote.string))
 	    {

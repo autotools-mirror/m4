@@ -115,6 +115,8 @@ expand_argument (struct obstack *obs, token_data *argp)
   token_data td;
   char *text;
   int paren_level;
+  const char *file = current_file;
+  int line = current_line;
 
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
@@ -157,8 +159,10 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  break;
 
 	case TOKEN_EOF:
-	  M4ERROR ((EXIT_FAILURE, 0,
-		    "ERROR: end of file in argument list"));
+	  /* current_file changed to "NONE" if we see TOKEN_EOF, use the
+	     previous value we stored earlier.  */
+	  error_at_line (EXIT_FAILURE, 0, file, line,
+			 "ERROR: end of file in argument list");
 	  break;
 
 	case TOKEN_WORD:

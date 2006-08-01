@@ -1,3 +1,18 @@
+2006-08-01  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (skip_line, next_token): Remember current file in
+	case input file ends abruptly.  Addresses debian bug 175365.
+	(pop_input): Defer freeing storage that holds previous file
+	name...
+	(pop_wrapup): to here, after error message is issued.
+	* src/macro.c (expand_argument): Remember current file in case
+	input file ends abruptly.
+	* doc/m4.texinfo (Macro Arguments, Dnl, Changequote, Changecom)
+	(M4wrap): Adjust testsuite accordingly.
+	(Errprint): Document line number limitation of m4wrap.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+
 2006-07-31  Eric Blake  <ebb9@byu.net>
 
 	* src/input.c (peek_input, next_char, match_input): Be eight-bit
