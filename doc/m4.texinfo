@@ -698,8 +698,12 @@ primitive is spelled within @code{m4}.
 As @code{m4} reads its input, it separates it into @dfn{tokens}.  A
 token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
-contain comments.  @acronym{GNU} @code{m4} does not yet understand locales; all
-operations are byte-oriented rather than character-oriented.
+contain comments.  @acronym{GNU} @code{m4} does not yet understand
+locales; all operations are byte-oriented rather than
+character-oriented.  However, @code{m4} is eight-bit clean, so you can
+use non-ASCII characters in quoted strings (@pxref{Changequote}),
+comments (@pxref{Changecom}), and macro names (@pxref{Indir}), with the
+exception of the NUL character (the zero byte).
 
 @menu
 * Names::                       Macro names
@@ -2344,6 +2348,23 @@ foo
 @result{}Macro foo.
 @end example
 
+The quotation strings can safely contain eight-bit characters.
+@ignore
+Yuck.  I know of no clean way to render an 8-bit character in both info
+and dvi.  This example uses the `open-guillemot' and `close-guillemot'
+characters of the Latin-1 character set.
+
+@example
+define(`a', `b')
+@result{}
+«a»
+@result{}«b»
+changequote(`«', `»')
+@result{}
+«a»
+@result{}a
+@end example
+@end ignore
 If no single character is appropriate, @var{start} and @var{end} can be
 of any length.
 
@@ -2380,10 +2401,10 @@ calls of @code{changequote} must be made, one for the temporary quotes
 and one for the new quotes.
 
 Macros are recognized in preference to the begin-quote string, so if a
-prefix of @var{start} can be recognized as a macro name, the quoting
-mechanism is effectively disabled.  Unless you use @code{changeword}
-(@pxref{Changeword}), this means that @var{start} should not begin with
-a letter or @samp{_} (underscore).
+prefix of @var{start} can be recognized as a potential macro name, the
+quoting mechanism is effectively disabled.  Unless you use
+@code{changeword} (@pxref{Changeword}), this means that @var{start}
+should not begin with a letter or @samp{_} (underscore).
 
 @example
 define(`hi', `HI')
@@ -2490,11 +2511,29 @@ changecom(`#')
 @result{}# comment again
 @end example
 
+The comment strings can safely contain eight-bit characters.
+@ignore
+Yuck.  I know of no clean way to render an 8-bit character in both info
+and dvi.  This example uses the `open-guillemot' and `close-guillemot'
+characters of the Latin-1 character set.
+
+@example
+define(`a', `b')
+@result{}
+«a»
+@result{}«b»
+changecom(`«', `»')
+@result{}
+«a»
+@result{}«a»
+@end example
+@end ignore
+
 Comments are recognized in preference to macros.  However, this is not
 compatible with other implementations, where macros take precedence over
 comments, so it may change in a future release.  For portability, this
-means that @var{start} should not have a prefix that begins with a
-letter or @samp{_} (underscore).
+means that @var{start} should not begin with a letter or @samp{_}
+(underscore).
 
 @example
 define(`hi', `HI')
@@ -4646,6 +4685,7 @@ the first time.
 @bye
 
 @c Local Variables:
+@c coding: ISO-8859-1
 @c fill-column: 72
 @c ispell-local-dictionary: "american"
 @c indent-tabs-mode: nil

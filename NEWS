@@ -20,6 +20,7 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The __file__ macro, and the -s/--synclines option, now show what
   directory a file was found in when the -I/--include option or M4PATH
   variable had an effect.
+* The changequote and changecom macros now work with 8-bit characters.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 

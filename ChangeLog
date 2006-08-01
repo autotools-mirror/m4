@@ -1,5 +1,13 @@
 2006-07-31  Eric Blake  <ebb9@byu.net>
 
+	* src/input.c (peek_input, next_char, match_input): Be eight-bit
+	clean; fixes debian bug 311378.
+	* doc/m4.texinfo (Syntax): Describe eight-bit handling.
+	(Changequote, Changecom): Add examples to test this.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+	Reported by Steven Augart.
+
 	* doc/m4.texinfo: Whitespace fix.
 	* checks/get-them: Avoid exceeding 14-char file name limit.
 	* THANKS: Update.

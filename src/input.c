@@ -397,7 +397,7 @@ init_macro_token (token_data *td)
 int
 peek_input (void)
 {
-  register int ch;
+  int ch;
 
   while (1)
     {
@@ -407,7 +407,7 @@ peek_input (void)
       switch (isp->type)
 	{
 	case INPUT_STRING:
-	  ch = isp->u.u_s.string[0];
+	  ch = to_uchar (isp->u.u_s.string[0]);
 	  if (ch != '\0')
 	    return ch;
 	  break;
@@ -446,13 +446,13 @@ peek_input (void)
 
 #define next_char() \
   (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]		\
-   ? *isp->u.u_s.string++						\
+   ? to_uchar (*isp->u.u_s.string++)					\
    : next_char_1 ())
 
 static int
 next_char_1 (void)
 {
-  register int ch;
+  int ch;
 
   if (start_of_input_line)
     {
@@ -468,7 +468,7 @@ next_char_1 (void)
       switch (isp->type)
 	{
 	case INPUT_STRING:
-	  ch = *isp->u.u_s.string++;
+	  ch = to_uchar (*isp->u.u_s.string++);
 	  if (ch != '\0')
 	    return ch;
 	  break;
@@ -531,14 +531,14 @@ match_input (const char *s)
   const char *t;
 
   ch = peek_input ();
-  if (ch != *s)
+  if (ch != to_uchar (*s))
     return 0;			/* fail */
   (void) next_char ();
 
   if (s[1] == '\0')
     return 1;			/* short match */
 
-  for (n = 1, t = s++; (ch = peek_input ()) == *s++; n++)
+  for (n = 1, t = s++; (ch = peek_input ()) == to_uchar (*s++); n++)
     {
       (void) next_char ();
       if (*s == '\0')		/* long match */
@@ -564,9 +564,9 @@ match_input (const char *s)
 `------------------------------------------------------------------------*/
 
 #define MATCH(ch, s) \
-  ((s)[0] == (ch) \
-   && (ch) != '\0' \
-   && ((s)[1] == '\0' \
+  (to_uchar ((s)[0]) == (ch)                                            \
+   && (ch) != '\0'                                                      \
+   && ((s)[1] == '\0'                                                   \
        || (match_input ((s) + 1) ? (ch) = peek_input (), 1 : 0)))
 
 
