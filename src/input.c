@@ -586,8 +586,7 @@ match_input (const char *s)
 #define MATCH(ch, s) \
   (to_uchar ((s)[0]) == (ch)                                            \
    && (ch) != '\0'                                                      \
-   && ((s)[1] == '\0'                                                   \
-       || (match_input ((s) + 1) ? (ch) = peek_input (), 1 : 0)))
+   && ((s)[1] == '\0' || (match_input ((s) + 1))))
 
 
 /*----------------------------------------------------------.
@@ -769,6 +768,10 @@ next_token (token_data *td)
     {
       init_macro_token (td);
       (void) next_char ();
+#ifdef DEBUG_INPUT
+      fprintf (stderr, "next_token -> MACDEF (%s)\n",
+               find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
+#endif
       return TOKEN_MACDEF;
     }
 
