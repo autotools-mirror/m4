@@ -219,10 +219,13 @@ void trace_post (const char *, int, int, token_data **, const char *);
 enum token_type
 {
   TOKEN_EOF,			/* end of file */
-  TOKEN_STRING,			/* a quoted string */
+  TOKEN_STRING,			/* a quoted string or comment */
   TOKEN_WORD,			/* an identifier */
-  TOKEN_SIMPLE,			/* a single character */
-  TOKEN_MACDEF			/* a macros definition (see "defn") */
+  TOKEN_OPEN,			/* ( */
+  TOKEN_COMMA,			/* , */
+  TOKEN_CLOSE,			/* ) */
+  TOKEN_SIMPLE,			/* any other single character */
+  TOKEN_MACDEF			/* a macro's definition (see "defn") */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
@@ -262,7 +265,7 @@ typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
 
 void input_init (void);
-int peek_input (void);
+token_type peek_token (void);
 token_type next_token (token_data *);
 void skip_line (void);
 

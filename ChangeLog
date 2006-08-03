@@ -1,5 +1,23 @@
 2006-08-03  Eric Blake  <ebb9@byu.net>
 
+	Don't confuse leading `(' in comment or quote with start of
+	argument collection.
+	* src/m4.h (enum token_type): Add TOKEN_OPEN, TOKEN_COMMA,
+	TOKEN_CLOSE.
+	(peek_input): Make private to input.c.
+	(peek_token): New prototype.
+	* src/input.c (default_word_regexp): Reduce ifdefs.
+	(peek_input): Make static.
+	(next_token): Return new token types.
+	(match_input, MATCH): Add argument consume, which controls
+	whether match should be pushed back.
+	(peek_token): New function.
+	(token_type_string) [DEBUG_INPUT]: New function.
+	* src/macro.c (expand_token, expand_argument, collect_arguments):
+	Handle new token types.
+	* doc/m4.texinfo (Changequote, Changecom): Document this.
+	* NEWS: Document this.
+
 	* src/stackovf.c (setup_stackovf_trap): Free memory on failure.
 
 	* src/stackovf.c (setup_stackovf_trap): Gracefully avoid stack

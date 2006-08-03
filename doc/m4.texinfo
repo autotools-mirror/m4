@@ -2420,6 +2420,37 @@ changequote(`-', `EOF')
 @result{} hi  HI
 @end example
 
+Quotes are recognized in preference to argument collection.  In
+particular, if @var{start} is a single @samp{(}, then argument
+collection is effectively disabled.  For portability with other
+implementations, it is a good idea to avoid @samp{(}, @samp{,}, and
+@samp{)} as the first character in @var{start}.
+
+@example
+define(`echo', `$#:$@:')
+@result{}
+define(`hi', `HI')
+@result{}
+changequote(`(',`)')
+@result{}
+echo(hi)
+@result{}0::hi
+changequote
+@result{}
+changequote(`((', `))')
+@result{}
+echo(hi)
+@result{}1:HI:
+echo((hi))
+@result{}0::hi
+changequote
+@result{}
+changequote(`,', `)')
+@result{}
+echo(hi,hi)bye)
+@result{}1:HIhibye:
+@end example
+
 If @var{end} is a prefix of @var{start}, the end-quote will be
 recognized in preference to a nested begin-quote.  In particular,
 changing the quotes to have the same string for @var{start} and
@@ -2529,10 +2560,11 @@ changecom(`«', `»')
 @end ignore
 
 Comments are recognized in preference to macros.  However, this is not
-compatible with other implementations, where macros take precedence over
-comments, so it may change in a future release.  For portability, this
-means that @var{start} should not begin with a letter or @samp{_}
-(underscore).
+compatible with other implementations, where macros and even quoting
+takes precedence over comments, so it may change in a future release.
+For portability, this means that @var{start} should not begin with a
+letter or @samp{_} (underscore), and that neither the start-quote nor
+the start-comment string should be a prefix of the other.
 
 @example
 define(`hi', `HI')
@@ -2541,6 +2573,35 @@ changecom(`q', `Q')
 @result{}
 q hi Q hi
 @result{}q hi Q HI
+@end example
+
+Comments are recognized in preference to argument collection.  In
+particular, if @var{start} is a single @samp{(}, then argument
+collection is effectively disabled.  For portability with other
+implementations, it is a good idea to avoid @samp{(}, @samp{,}, and
+@samp{)} as the first character in @var{start}.
+
+@example
+define(`echo', `$#:$@:')
+@result{}
+define(`hi', `HI')
+@result{}
+changecom(`(',`)')
+@result{}
+echo(hi)
+@result{}0::(hi)
+changecom
+@result{}
+changecom(`((', `))')
+@result{}
+echo(hi)
+@result{}1:HI:
+echo((hi))
+@result{}0::((hi))
+changecom(`,', `)')
+@result{}
+echo(hi,hi)bye)
+@result{}1:HI,hi)bye:
 @end example
 
 It is an error if the end of file occurs within a comment.

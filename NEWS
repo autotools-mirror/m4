@@ -17,12 +17,14 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
   collection.
 * The dnl macro now warns if end of file is encountered instead of a
   newline.
-* The error message when end of file is encountered now uses the file where
-  the dangling construct started, rather than "NONE:0".
+* The error message when end of file is encountered now uses the file and
+  line where the dangling construct started, rather than `NONE:0'.
 * The __file__ macro, and the -s/--synclines option, now show what
   directory a file was found in when the -I/--include option or M4PATH
   variable had an effect.
-* The changequote and changecom macros now work with 8-bit characters.
+* The changequote and changecom macros now work with 8-bit characters, and
+  quotes and strings that begin with `(' are properly recognized following
+  a word.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 
