@@ -352,6 +352,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 	   it as though sigaltstack doesn't exist.  For example, this
 	   happens when compiled with Linux 2.1 headers but run
 	   against Linux 2.0 kernel.  */
+	free (ss.ss_sp);
 	if (errno == ENOSYS)
 	  return;
 	error (EXIT_FAILURE, errno, "sigaltstack");
@@ -373,6 +374,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 	   though sigstack doesn't exist.  For example, this happens
 	   when compiled with Linux 2.1 headers but run against Linux
 	   2.0 kernel.  */
+	free (stackbuf);
 	if (errno == ENOSYS)
 	  return;
 	error (EXIT_FAILURE, errno, "sigstack");
