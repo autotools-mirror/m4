@@ -1,3 +1,10 @@
+2006-08-03  Eric Blake  <ebb9@byu.net>
+
+	* src/stackovf.c (setup_stackovf_trap): Gracefully avoid stack
+	overflow detection when sigstack exists but is not implemented.
+	Fixes debian bug 154053.
+	Reported by David Perlin.
+
 2006-08-02  Eric Blake  <ebb9@byu.net>
 
 	* src/input.c (MATCH): Fix EOF detection on multi-byte comment

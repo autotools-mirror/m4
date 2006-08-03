@@ -346,7 +346,16 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_sp = xmalloc ((unsigned) ss.ss_size);
     ss.ss_flags = 0;
     if (sigaltstack (&ss, NULL) < 0)
-      error (EXIT_FAILURE, errno, "sigaltstack");
+      {
+	/* Oops - sigaltstack exists but doesn't work.  We can't
+	   install the overflow detector, but should gracefully treat
+	   it as though sigaltstack doesn't exist.  For example, this
+	   happens when compiled with Linux 2.1 headers but run
+	   against Linux 2.0 kernel.  */
+	if (errno == ENOSYS)
+	  return;
+	error (EXIT_FAILURE, errno, "sigaltstack");
+      }
   }
 
 #elif HAVE_SIGSTACK
@@ -358,7 +367,16 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
-      error (EXIT_FAILURE, errno, "sigstack");
+      {
+	/* Oops - sigstack exists but doesn't work.  We can't install
+	   the overflow detector, but should gracefully treat it as
+	   though sigstack doesn't exist.  For example, this happens
+	   when compiled with Linux 2.1 headers but run against Linux
+	   2.0 kernel.  */
+	if (errno == ENOSYS)
+	  return;
+	error (EXIT_FAILURE, errno, "sigstack");
+      }
   }
 
 #else /* not HAVE_SIGSTACK */
