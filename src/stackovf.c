@@ -124,7 +124,7 @@ extern int	sigstack	(struct sigstack *, struct sigstack *);
 extern int	sigvec		(int, struct sigvec *, struct sigvec *);
 #endif
 
-static const char *stackbuf;
+static void *stackbuf;
 static const char *stackbot;
 static const char *stackend;
 static const char *arg0;
@@ -365,14 +365,21 @@ Error - Do not know how to set up stack-ovf trap handler...
   {
     stack_t ss;
 
-    stackbuf = (char *) xmalloc (SIGSTKSZ);
+    stackbuf = xmalloc (SIGSTKSZ);
 
     ss.ss_size = SIGSTKSZ;
-    ss.ss_sp = (void *) stackbuf;
+    ss.ss_sp = stackbuf;
     ss.ss_flags = 0;
     if (sigaltstack (&ss, NULL) < 0)
       {
-	free ((void *) stackbuf);
+	/* Oops - sigstack exists but doesn't work.  We can't install
+	   the overflow detector, but should gracefully treat it as
+	   though sigstack doesn't exist.  For example, this happens
+	   when compiled with Linux 2.1 headers but run against Linux
+	   2.0 kernel.  */
+	free (stackbuf);
+	if (errno == ENOSYS)
+	  return;
 	error (EXIT_FAILURE, errno, "sigaltstack");
       }
   }
@@ -381,13 +388,20 @@ Error - Do not know how to set up stack-ovf trap handler...
 
   {
     struct sigstack ss;
-    stackbuf = (char *) xmalloc (2 * SIGSTKSZ);
+    stackbuf = xmalloc (2 * SIGSTKSZ);
 
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
       {
-	free ((void *) stackbuf);
+	/* Oops - sigstack exists but doesn't work.  We can't install
+	   the overflow detector, but should gracefully treat it as
+	   though sigstack doesn't exist.  For example, this happens
+	   when compiled with Linux 2.1 headers but run against Linux
+	   2.0 kernel.  */
+	free (stackbuf);
+	if (errno == ENOSYS)
+	  return;
 	error (EXIT_FAILURE, errno, "sigstack");
       }
   }

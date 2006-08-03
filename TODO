@@ -1,5 +1,5 @@
 GNU m4 TODO - Tasks that need implementing.		-*- outline -*-
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2006 Free Software Foundation, Inc.
 
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
@@ -12,23 +12,6 @@ for any of these ideas or if you have others to add.
 
   + Some characters, such as comma, are still hardcoded, and do not
     follow changes in the syntax table.
-
-  + sigstack/sigaltstack and ENOSYS
-
-      When sigstack or sigaltstack fail with errno == ENOSYS, m4 should
-      fall back silently to not using an alternate signal stack.
-      Otherwise, problems arise in at least the following case: glibc
-      2.1 test releases, built with Linux 2.1 headers (as recommended
-      for glibc 2.1), so the library has sigstack and sigaltstack, but
-      run with a Linux 2.0 kernel, so the kernel support is not present
-      and ENOSYS is returned.
-
-      (GNU m4 1.4k, built with glibc 2.0.100 (itself built with Linux
-      2.1.126 headers), and running on Linux 2.0.36pre15.)
-
-      -- 
-      Joseph S. Myers
-      jsm28@cam.ac.uk
 
   + stack overflow is basically broken
 
