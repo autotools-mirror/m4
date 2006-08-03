@@ -3,6 +3,7 @@
 	* src/stackovf.c (setup_stackovf_trap): Gracefully avoid stack
 	overflow detection when sigstack exists but is not implemented.
 	Fixes debian bug 154053.
+	* THANKS: Updated.
 	Reported by David Perlin.
 
 2006-08-02  Eric Blake  <ebb9@byu.net>
