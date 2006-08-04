@@ -1,3 +1,22 @@
+2006-08-04  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (program_name): Declare.
+	(suppress_line): New variable.
+	(M4ERROR_AT_LINE): New macro.
+	* src/m4.c (reference_error, main): Follow GNU Coding Standards
+	for error message format.
+	* src/input.c (skip_line, next_token): Use M4ERROR_AT_LINE.
+	* src/macro.c (expand_argument): Likewise.
+	* checks/check-them (examples): Adjust to new message format.
+	* src/builtin.c (m4___program__): New builtin.
+	* doc/m4.texinfo (Location): Split from Errprint into new node,
+	and document __program__.
+	(Builtin, Ifdef, Ifelse, Dumpdef, Trace, Debug Output, Dnl)
+	(Include, Regexp, Patsubst, Incr, Eval): Adjust error message
+	format.
+	(Extensions): Document __program__.
+	* NEWS: Document this change.
+
 2006-08-03  Eric Blake  <ebb9@byu.net>
 
 	Don't confuse leading `(' in comment or quote with start of

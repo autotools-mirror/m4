@@ -66,7 +66,7 @@ do
     diff $xout $out
   fi
 
-  sed -e '/^dnl @error{}/!d' -e 's///' -e "s| m4:| $m4:|" "$file" > $xerr
+  sed -e '/^dnl @error{}/!d' -e 's///' -e "s|^m4:|$m4:|" "$file" > $xerr
 
   if cmp -s $err $xerr; then
     :

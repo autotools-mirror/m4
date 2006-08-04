@@ -234,6 +234,7 @@ Running shell commands
 Miscellaneous builtin macros
 
 * Errprint::                    Printing error messages
+* Location::                    Printing current location
 * M4exit::                      Exiting from m4
 
 Fast loading of frozen state
@@ -1680,13 +1681,13 @@ provoke a warning, and result in a void expansion.
 builtin
 @result{}builtin
 builtin()
-@error{}stdin:2: m4: undefined builtin `'
+@error{}m4:stdin:2: undefined builtin `'
 @result{}
 builtin(`builtin')
-@error{}stdin:3: m4: Warning: too few arguments to builtin `builtin'
+@error{}m4:stdin:3: Warning: too few arguments to builtin `builtin'
 @result{}
 builtin(`builtin',)
-@error{}stdin:4: m4: undefined builtin `'
+@error{}m4:stdin:4: undefined builtin `'
 @result{}
 @end example
 
@@ -1729,7 +1730,7 @@ define(`foo', `')
 ifdef(`foo', ``foo' is defined', ``foo' is not defined')
 @result{}foo is defined
 ifdef(`no_such_macro', `yes', `no', `extra argument')
-@error{}stdin:4: m4: Warning: excess arguments to builtin `ifdef' ignored
+@error{}m4:stdin:4: Warning: excess arguments to builtin `ifdef' ignored
 @result{}no
 @end example
 
@@ -1770,7 +1771,7 @@ case, the warning about missing arguments is never triggered.
 ifelse(`some comments')
 @result{}
 ifelse(`foo', `bar')
-@error{}stdin:2: m4: Warning: too few arguments to builtin `ifelse'
+@error{}m4:stdin:2: Warning: too few arguments to builtin `ifelse'
 @result{}
 @end example
 
@@ -2005,7 +2006,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}stdin:3: m4: undefined macro `f'
+@error{}m4:stdin:3: undefined macro `f'
 @result{}f1
 @end example
 
@@ -2078,7 +2079,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}stdin:8: m4: undefined macro `foo'
+@error{}m4:stdin:8: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -2235,13 +2236,13 @@ The expansion of @code{debugfile} is void.
 traceon(`divnum')
 @result{}
 divnum(`extra')
-@error{}stdin:2: m4: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:2: Warning: excess arguments to builtin `divnum' ignored
 @error{}m4trace: -1- divnum(`extra') -> `0'
 @result{}0
 debugfile()
 @result{}
 divnum(`extra')
-@error{}stdin:4: m4: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:4: Warning: excess arguments to builtin `divnum' ignored
 @result{}0
 debugfile
 @result{}
@@ -2301,7 +2302,7 @@ next newline, on whatever line containing it, will still be discarded.
 @example
 dnl(`args are ignored, but side effects occur',
 define(`foo', `like this')) while this text is ignored: undefine(`foo')
-@error{}stdin:2: m4: Warning: excess arguments to builtin `dnl' ignored
+@error{}m4:stdin:2: Warning: excess arguments to builtin `dnl' ignored
 See how `foo' was defined, foo?
 @result{}See how foo was defined, like this?
 @end example
@@ -2879,10 +2880,10 @@ parameters.
 @example
 include(`none')
 @result{}
-@error{}stdin:1: m4: cannot open `none': No such file or directory
+@error{}m4:stdin:1: cannot open `none': No such file or directory
 include()
 @result{}
-@error{}stdin:2: m4: cannot open `': No such file or directory
+@error{}m4:stdin:2: cannot open `': No such file or directory
 sinclude(`none')
 @result{}
 sinclude()
@@ -3333,8 +3334,8 @@ Here are some more examples on the handling of backslash:
 regexp(`abc', `\(b\)', `\\\10\a')
 @result{}\b0a
 regexp(`abc', `b', `\1\')
-@error{}stdin:2: m4: Warning: sub-expression 1 not present
-@error{}stdin:2: m4: Warning: trailing \ ignored in replacement
+@error{}m4:stdin:2: Warning: sub-expression 1 not present
+@error{}m4:stdin:2: Warning: trailing \ ignored in replacement
 @result{}
 @end example
 
@@ -3455,7 +3456,7 @@ patsubst(`GNUs not Unix', `\w+', `(\&)')
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
 @result{}GN not @comment
 patsubst(`GNUs not Unix', `not', `NOT\')
-@error{}stdin:6: m4: Warning: trailing \ ignored in replacement
+@error{}m4:stdin:6: Warning: trailing \ ignored in replacement
 @result{}GNUs NOT Unix
 @end example
 
@@ -3603,10 +3604,10 @@ incr(`4')
 decr(`7')
 @result{}6
 incr()
-@error{}stdin:3: m4: empty string treated as 0 in builtin `incr'
+@error{}m4:stdin:3: empty string treated as 0 in builtin `incr'
 @result{}1
 decr()
-@error{}stdin:4: m4: empty string treated as 0 in builtin `decr'
+@error{}m4:stdin:4: empty string treated as 0 in builtin `decr'
 @result{}-1
 @end example
 
@@ -3705,7 +3706,7 @@ square(square(`5')`+1')
 define(`foo', `666')
 @result{}
 eval(`foo/6')
-@error{}stdin:8: m4: bad expression in eval: foo/6
+@error{}m4:stdin:8: bad expression in eval: foo/6
 @result{}
 eval(foo/6)
 @result{}111
@@ -4047,6 +4048,7 @@ any of the previous chapters.
 
 @menu
 * Errprint::                    Printing error messages
+* Location::                    Printing current location
 * M4exit::                      Exiting from m4
 @end menu
 
@@ -4078,17 +4080,22 @@ implementations of @code{m4} do append a trailing newline on each
 @code{errprint} call, while some other implementations only print the
 first argument.
 
-To make it possible to specify the location of the error, two
+@node Location
+@section Printing current location
+
+To make it possible to specify the location of an error, three
 utility builtins exist:
 
 @deffn Builtin __file__
 @deffnx Builtin __line__
-Expand to the quoted name of the current input file, and the
-current input line number in that file.
+@deffnx Builtin __program__
+Expand to the quoted name of the current input file, the
+current input line number in that file, and the quoted name of the
+current invocation of @code{m4}.
 @end deffn
 
 @example
-errprint(`m4:'__file__:__line__: `input error
+errprint(__program__:__file__:__line__: `input error
 ')
 @error{}m4:stdin:1: input error
 @result{}
@@ -4119,6 +4126,16 @@ as though it came from line 0 of the file ``NONE''.  It is hoped that a
 future release of @code{m4} can overcome this limitation and remember
 which file invoked the call to @code{m4wrap}.
 
+The @code{__program__} macro behaves like @samp{$0} in shell
+terminology.  If you invoke @code{m4} through an absolute path or a link
+with a different spelling, rather than by relying on a @env{PATH} search
+for plain @samp{m4}, it will affect how @code{__program__} expands.  The
+intent is that you can use it to produce error messages with the same
+formatting that @code{m4} produces internally.  It can also be used
+within @code{syscmd} (@pxref{Syscmd}) to pick the same version of
+@code{m4} that is currently running, rather than whatever version of
+@code{m4} happens to be first in @env{PATH}.
+
 @node M4exit
 @section Exiting from @code{m4}
 
@@ -4144,7 +4161,7 @@ resulting string to standard error.
 
 @example
 define(`fatal_error',
-       `errprint(`m4:'__file__:__line__`: fatal error: $*
+       `errprint(__program__:__file__:__line__`: fatal error: $*
 ')m4exit(`1')')
 @result{}
 fatal_error(`this is a BAD one, buster')
@@ -4450,9 +4467,9 @@ There is indirect access to any builtin macro with @code{builtin}
 Macros can be called indirectly through @code{indir} (@pxref{Indir}).
 
 @item
-The name of the current input file and the current input line number are
-accessible through the builtins @code{__file__} and @code{__line__}
-(@pxref{Errprint}).
+The name of the program, the current input file, and the current input
+line number are accessible through the builtins @code{__program__},
+@code{__file__}, and @code{__line__} (@pxref{Location}).
 
 @item
 The format of the output from @code{dumpdef} and macro tracing can be

@@ -537,8 +537,8 @@ skip_line (void)
   if (ch == CHAR_EOF)
     /* current_file changed to "NONE" if we see CHAR_EOF, use the
        previous value we stored earlier.  */
-    error_at_line (warning_status, 0, file, line,
-		   "Warning: end of file treated as newline");
+    M4ERROR_AT_LINE ((warning_status, 0, file, line,
+		      "Warning: end of file treated as newline"));
 }
 
 
@@ -808,8 +808,8 @@ next_token (token_data *td)
       else
 	/* current_file changed to "NONE" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
-	error_at_line (EXIT_FAILURE, 0, file, line,
-		       "ERROR: end of file in comment");
+	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+			  "ERROR: end of file in comment"));
 
       type = TOKEN_STRING;
     }
@@ -890,8 +890,8 @@ next_token (token_data *td)
 	  if (ch == CHAR_EOF)
 	    /* current_file changed to "NONE" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
-	    error_at_line (EXIT_FAILURE, 0, file, line,
-			   "ERROR: end of file in string");
+	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+			      "ERROR: end of file in string"));
 
 	  if (MATCH (ch, rquote.string, TRUE))
 	    {

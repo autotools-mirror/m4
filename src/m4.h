@@ -90,6 +90,18 @@ typedef struct string STRING;
 /* Those must come first.  */
 typedef struct token_data token_data;
 typedef void builtin_func (struct obstack *, int, token_data **);
+
+/* Take advantage of GNU C compiler source level optimization hints,
+   using portable macros.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
+#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#else
+#  define M4_GNUC_ATTRIBUTE(args)
+#endif  /* __GNUC__ */
+
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
+#define M4_GNUC_PRINTF(fmt, arg)			\
+  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
 
 /* File: m4.c  --- global definitions.  */
 
@@ -109,9 +121,34 @@ extern const char *user_word_regexp;	/* -W */
 
 /* Error handling.  */
 extern int retcode;
-#define M4ERROR(Arglist) \
-  (reference_error (), error Arglist)
+extern const char *program_name;
 
+/* It would be so much nicer if the gnulib error module provided a
+   va_list version of error, so that we wouldn't need to use macros
+   and a global hook variable.  Oh well.  */
+#if 0
+void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
+/* Would be implemented as:
+void
+m4_error (int status, int errnum, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  verror_at_line (status, errnum, current_file, current_line, format, args);
+}
+*/
+#endif
+
+#define M4ERROR(Arglist) (error Arglist)
+#define M4ERROR_AT_LINE(Arglist)		\
+  do						\
+    {						\
+      suppress_line = TRUE;			\
+      (error_at_line Arglist);			\
+    }						\
+  while (0)
+
+extern boolean suppress_line;
 void reference_error (void);
 
 #ifdef USE_STACKOVF
@@ -441,13 +478,3 @@ void reload_frozen_state (const char *);
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
 static inline unsigned char to_uchar (char ch) { return ch; }
-
-/* Take advantage of GNU C compiler source level optimization hints,
-   using portable macros.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
-#else
-#  define M4_GNUC_ATTRIBUTE(args)
-#endif  /* __GNUC__ */
-
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((unused))

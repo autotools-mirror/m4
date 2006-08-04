@@ -43,6 +43,7 @@ extern FILE *popen ();
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
+DECLARE (m4___program__);
 DECLARE (m4_builtin);
 DECLARE (m4_changecom);
 DECLARE (m4_changequote);
@@ -97,6 +98,7 @@ builtin_tab[] =
 
   { "__file__",		TRUE,	FALSE,	FALSE,	m4___file__ },
   { "__line__",		TRUE,	FALSE,	FALSE,	m4___line__ },
+  { "__program__",	TRUE,	FALSE,	FALSE,	m4___program__ },
   { "builtin",		TRUE,	FALSE,	TRUE,	m4_builtin },
   { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
   { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
@@ -1192,8 +1194,8 @@ m4_sinclude (struct obstack *obs, int argc, token_data **argv)
   include (argc, argv, TRUE);
 }
 
-/* More miscellaneous builtins -- "maketemp", "errprint", "__file__" and
-   "__line__".  The last two are GNU specific.  */
+/* More miscellaneous builtins -- "maketemp", "errprint", "__file__",
+   "__line__", and "__program__".  The last three are GNU specific.  */
 
 /*------------------------------------------------------------------.
 | Use the first argument as at template for a temporary file name.  |
@@ -1245,6 +1247,16 @@ m4___line__ (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 1))
     return;
   shipout_int (obs, current_line);
+}
+
+static void
+m4___program__ (struct obstack *obs, int argc, token_data **argv)
+{
+  if (bad_argc (argv[0], argc, 1, 1))
+    return;
+  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, program_name, strlen (program_name));
+  obstack_grow (obs, rquote.string, rquote.length);
 }
 
 /* This section contains various macros for exiting, saving input until

@@ -25,6 +25,9 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The changequote and changecom macros now work with 8-bit characters, and
   quotes and strings that begin with `(' are properly recognized following
   a word.
+* The new macro __program__ is added, which allows the input file to issue
+  an error message that resembles messages from m4.  Warning and error
+  messages have been reformatted to comply with GNU Coding Standards.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 
