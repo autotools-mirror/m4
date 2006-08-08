@@ -1,5 +1,19 @@
 2006-08-08  Eric Blake  <ebb9@byu.net>
 
+	Avoid printing `NONE:0:' in error messages.
+	* src/m4.h (m4_error_at_line): New function.
+	* src/m4.c (m4_error_at_line): Implement.
+	* src/input.c (skip_line, input_init, next_token): Use "", not
+	"NONE", for no file, since NONE can be a real file name.
+	* src/macro.c (expand_argument): Likewise.
+	* src/debug.c (debug_message_prefix, trace_header): Check for
+	current file.
+	* doc/m4.texinfo (Dnl, M4wrap): Adjust accordingly.
+	(Location): Document that synclines and internal message format
+	are not impacted by redefining these macros.
+	(M4exit): Hint at bug in fatal_error.
+	(Answers): Provide workaround to match m4 output.
+
 	* m4/gnulib-cache.m4: Augment with gnulib-tool --import verror.
 	* src/m4.h (m4_error): New function.
 	(M4ERROR, M4ERROR_AT_LINE): Reimplement without hacking around

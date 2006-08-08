@@ -165,7 +165,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  break;
 
 	case TOKEN_EOF:
-	  /* current_file changed to "NONE" if we see TOKEN_EOF, use the
+	  /* current_file changed to "" if we see TOKEN_EOF, use the
 	     previous value we stored earlier.  */
 	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
 			    "ERROR: end of file in argument list"));

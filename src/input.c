@@ -535,7 +535,7 @@ skip_line (void)
   while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
     ;
   if (ch == CHAR_EOF)
-    /* current_file changed to "NONE" if we see CHAR_EOF, use the
+    /* current_file changed to "" if we see CHAR_EOF, use the
        previous value we stored earlier.  */
     M4ERROR_AT_LINE ((warning_status, 0, file, line,
 		      "Warning: end of file treated as newline"));
@@ -617,7 +617,7 @@ match_input (const char *s, boolean consume)
 void
 input_init (void)
 {
-  current_file = "NONE";
+  current_file = "";
   current_line = 0;
 
   obstack_init (&token_stack);
@@ -806,7 +806,7 @@ next_token (token_data *td)
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
       else
-	/* current_file changed to "NONE" if we see CHAR_EOF, use the
+	/* current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
 	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
 			  "ERROR: end of file in comment"));
@@ -888,7 +888,7 @@ next_token (token_data *td)
 	{
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
-	    /* current_file changed to "NONE" if we see CHAR_EOF, use
+	    /* current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
 	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
 			      "ERROR: end of file in string"));

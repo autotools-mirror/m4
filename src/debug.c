@@ -215,11 +215,14 @@ debug_set_output (const char *name)
 void
 debug_message_prefix (void)
 {
-  fprintf (debug, "m4 debug: ");
-  if (debug_level & DEBUG_TRACE_FILE)
-    fprintf (debug, "%s: ", current_file);
-  if (debug_level & DEBUG_TRACE_LINE)
-    fprintf (debug, "%d: ", current_line);
+  fprintf (debug, "m4debug:");
+  if (current_line)
+  {
+    if (debug_level & DEBUG_TRACE_FILE)
+      fprintf (debug, "%s:", current_file);
+    if (debug_level & DEBUG_TRACE_LINE)
+      fprintf (debug, "%d:", current_line);
+  }
 }
 
 /* The rest of this file contains the functions for macro tracing output.
@@ -320,10 +323,13 @@ static void
 trace_header (int id)
 {
   trace_format ("m4trace:");
-  if (debug_level & DEBUG_TRACE_FILE)
-    trace_format ("%s:", current_file);
-  if (debug_level & DEBUG_TRACE_LINE)
-    trace_format ("%d:", current_line);
+  if (current_line)
+    {
+      if (debug_level & DEBUG_TRACE_FILE)
+        trace_format ("%s:", current_file);
+      if (debug_level & DEBUG_TRACE_LINE)
+        trace_format ("%d:", current_line);
+    }
   trace_format (" -%d- ", expansion_level);
   if (debug_level & DEBUG_TRACE_CALLID)
     trace_format ("id %d: ", id);

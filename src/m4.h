@@ -125,9 +125,11 @@ extern int retcode;
 extern const char *program_name;
 
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
+void m4_error_at_line (int, int, const char *, int,
+                       const char *, ...) M4_GNUC_PRINTF(5, 6);
 
 #define M4ERROR(Arglist) (m4_error Arglist)
-#define M4ERROR_AT_LINE(Arglist) (error_at_line Arglist)
+#define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,

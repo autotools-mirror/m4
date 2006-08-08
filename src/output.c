@@ -339,7 +339,7 @@ shipout_text (struct obstack *obs, const char *text, int length)
 		sprintf (line, "#line %d", current_line);
 		for (cursor = line; *cursor; cursor++)
 		  OUTPUT_CHARACTER (*cursor);
-		if (output_current_line < 1)
+		if (output_current_line < 1 && current_file[0] != '\0')
 		  {
 		    OUTPUT_CHARACTER (' ');
 		    OUTPUT_CHARACTER ('"');

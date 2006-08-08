@@ -95,7 +95,21 @@ m4_error (int status, int errnum, const char *format, ...)
 {
   va_list args;
   va_start (args, format);
-  verror_at_line (status, errnum, current_file, current_line, format, args);
+  verror_at_line (status, errnum, current_line ? current_file : NULL,
+                  current_line, format, args);
+}
+
+/*-------------------------------.
+| Wrapper around error_at_line.  |
+`-------------------------------*/
+
+void
+m4_error_at_line (int status, int errnum, const char *file, int line,
+                  const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  verror_at_line (status, errnum, line ? file : NULL, line, format, args);
 }
 
 #ifdef USE_STACKOVF

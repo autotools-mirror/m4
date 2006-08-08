@@ -2317,7 +2317,7 @@ m4wrap(`m4wrap(`2 hi
 ')0 hi dnl 1 hi')
 @result{}
 ^D
-@error{}m4:NONE:0: Warning: end of file treated as newline
+@error{}m4: Warning: end of file treated as newline
 @result{}0 HI 2 HI
 @end example
 
@@ -2839,7 +2839,7 @@ file condition between two input files.
 m4wrap(`m4wrap(`)')len(abc')
 @result{}
 ^D
-@error{}m4:NONE:0: ERROR: end of file in argument list
+@error{}m4: ERROR: end of file in argument list
 @end example
 
 @node File Inclusion
@@ -4103,8 +4103,11 @@ errprint(__program__:__file__:__line__: `input error
 
 Line numbers start at 1 for each file.  If the file was found due to the
 @option{-I} option or @env{M4PATH} environment variable, that is
-reflected in the file name.  The syncline option (@option{-s}) uses the
-same notion of current file and line.  Assume this example is run in the
+reflected in the file name.  The syncline option (@option{-s}), and the
+@samp{f} and @samp{l} flags of @code{debugmode} (@pxref{Debug Levels}),
+also use this notion of current file and line.  Redefining the three
+location macros has no effect on syncline, debug, or warning message
+output.  Assume this example is run in the
 @file{checks} directory of the @acronym{GNU} M4 package, using
 @samp{--include=../examples} in the command line to find the file
 @file{incl.m4} mentioned earlier:
@@ -4122,7 +4125,7 @@ include(`incl.m4')
 @end example
 
 Currently, all text wrapped with @code{m4wrap} (@pxref{M4wrap}) behaves
-as though it came from line 0 of the file ``NONE''.  It is hoped that a
+as though it came from line 0 of the file ``''.  It is hoped that a
 future release of @code{m4} can overcome this limitation and remember
 which file invoked the call to @code{m4wrap}.
 
@@ -4171,7 +4174,9 @@ fatal_error(`this is a BAD one, buster')
 After this macro call, @code{m4} will exit with exit status 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
-(@pxref{M4wrap}) is not reread.
+(@pxref{M4wrap}) is not reread.  (This macro has a subtle bug, when
+invoked from wrapped text.  You should try to see if you can find it and
+correct it.  @pxref{Answers})
 
 @example
 m4wrap(`This text is lost to `m4exit'.')
@@ -4725,6 +4730,29 @@ cleardivert
 @result{}
 undivert
 @result{}
+@end example
+
+The @code{fatal_error} macro (@pxref{M4exit}) does not quite match the
+format of internal error messages when invoked inside wrapped text, due
+to the current limitations of @code{__file__} (@pxref{Location}) when
+invoked inside @code{m4wrap}.  Since @code{m4} omits the file and line
+number from its warning messages when there is no current file (or
+equivalently, when the current line is 0, since all files start at line
+1), a better implementation would be:
+
+@example
+define(`fatal_error',
+  `errprint(__program__:ifelse(__line__, `0', `',
+    `__file__:__line__:')` fatal error: $*
+')m4exit(`1')')
+@result{}
+m4wrap(`divnum(`demo of internal message')
+fatal_error(`inside wrapped text')')
+@result{}
+^D
+@error{}m4: Warning: excess arguments to builtin `divnum' ignored
+@result{}0
+@error{}m4: fatal error: inside wrapped text
 @end example
 
 @c ========================================================== Appendices

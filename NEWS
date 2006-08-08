@@ -9,8 +9,8 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The format macro now understands %F, %g, and %G.
 * When loading frozen files, m4 now exits with status 63 if version
   mismatch is detected.
-* Fix bugs that occurred when invoked with stdout or stderr closed.  Detect
-  write failures to stdout.
+* Fix bugs that occurred when invoked with stdout or stderr closed.
+  Detect write failures to stdout or to the target of the debugfile macro.
 * The m4exit macro now converts values outside the range 0-255 to 1.
 * It is now an error if a command-line input file ends in the middle of a
   comment, matching the behavior of mid-string and mid-argument
@@ -18,10 +18,10 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The dnl macro now warns if end of file is encountered instead of a
   newline.
 * The error message when end of file is encountered now uses the file and
-  line where the dangling construct started, rather than `NONE:0'.
-* The __file__ macro, and the -s/--synclines option, now show what
-  directory a file was found in when the -I/--include option or M4PATH
-  variable had an effect.
+  line where the dangling construct started, rather than `NONE:0:'.
+* The debugmode and __file__ macros, and the -s/--synclines option, now
+  show what directory a file was found in when the -I/--include option or
+  M4PATH variable had an effect.
 * The changequote and changecom macros now work with 8-bit characters, and
   quotes and strings that begin with `(' are properly recognized following
   a word.
