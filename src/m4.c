@@ -86,27 +86,16 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/* TRUE if error_at_line was called.  Too bad the error module doesn't
-   let us pass a parameter to the callback, or take a va_list
-   argument.  */
-boolean suppress_line;
-
-/*---------------------------------------------------------------.
-| Callback used by error to print program name, source, and line |
-| reference.							 |
-`---------------------------------------------------------------*/
+/*-----------------------.
+| Wrapper around error.  |
+`-----------------------*/
 
 void
-reference_error (void)
+m4_error (int status, int errnum, const char *format, ...)
 {
-  /* error already flushed stdout before calling us.  */
-  if (suppress_line)
-    {
-      fprintf (stderr, "%s:", program_name);
-      suppress_line = FALSE;
-    }
-  else
-    fprintf (stderr, "%s:%s:%d: ", program_name, current_file, current_line);
+  va_list args;
+  va_start (args, format);
+  verror_at_line (status, errnum, current_file, current_line, format, args);
 }
 
 #ifdef USE_STACKOVF
@@ -278,7 +267,6 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
 
   program_name = argv[0];
-  error_print_progname = reference_error;
   retcode = EXIT_SUCCESS;
 
   include_init ();

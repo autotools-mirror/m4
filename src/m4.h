@@ -56,6 +56,7 @@
 #include "stdio--.h"
 #include "stdlib--.h"
 #include "unistd--.h"
+#include "verror.h"
 #include "xalloc.h"
 
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
@@ -123,33 +124,10 @@ extern const char *user_word_regexp;	/* -W */
 extern int retcode;
 extern const char *program_name;
 
-/* It would be so much nicer if the gnulib error module provided a
-   va_list version of error, so that we wouldn't need to use macros
-   and a global hook variable.  Oh well.  */
-#if 0
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
-/* Would be implemented as:
-void
-m4_error (int status, int errnum, const char *format, ...)
-{
-  va_list args;
-  va_start (args, format);
-  verror_at_line (status, errnum, current_file, current_line, format, args);
-}
-*/
-#endif
 
-#define M4ERROR(Arglist) (error Arglist)
-#define M4ERROR_AT_LINE(Arglist)		\
-  do						\
-    {						\
-      suppress_line = TRUE;			\
-      (error_at_line Arglist);			\
-    }						\
-  while (0)
-
-extern boolean suppress_line;
-void reference_error (void);
+#define M4ERROR(Arglist) (m4_error Arglist)
+#define M4ERROR_AT_LINE(Arglist) (error_at_line Arglist)
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,

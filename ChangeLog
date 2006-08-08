@@ -1,3 +1,13 @@
+2006-08-08  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import verror.
+	* src/m4.h (m4_error): New function.
+	(M4ERROR, M4ERROR_AT_LINE): Reimplement without hacking around
+	error module deficiencies.
+	(reference_error, suppress_line): No longer needed.
+	* src/m4.c (m4_error): Implement.
+	(main): No longer need to install error callback.
+
 2006-08-04  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.h (program_name): Declare.
