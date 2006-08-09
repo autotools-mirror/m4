@@ -1644,7 +1644,7 @@ warning about missing arguments is never triggered.
 ifelse(`some comments')
 @result{}
 ifelse(`foo', `bar')
-@error{}m4: input.m4: 2: Warning: ifelse: too few arguments: 2 < 3
+@error{}m4:input.m4:2: Warning: ifelse: too few arguments: 2 < 3
 @result{}
 @end example
 
@@ -2632,10 +2632,11 @@ The builtin macros @code{include} and @code{sinclude} are recognized
 only when given arguments.
 @end deffn
 
+@comment status: 1
 @example
 include(`none')
 @result{}
-@error{}m4: input.m4: 1: Cannot open none: No such file or directory
+@error{}m4:input.m4:1: include: cannot open `none': No such file or directory
 sinclude(`none')
 @result{}
 @end example
@@ -3602,6 +3603,7 @@ The builtin macro @code{eval} is recognized only when given arguments.
 
 Here are a few examples of use of @code{eval}.
 
+@comment status: 1
 @example
 eval(`-3 * 5')
 @result{}-15
@@ -3616,7 +3618,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4: input.m4: 7: Warning: eval: bad expression: foo / 6
+@error{}m4:input.m4:7: eval: bad expression: foo / 6
 @result{}
 eval(foo/6)
 @result{}111

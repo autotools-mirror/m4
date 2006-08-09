@@ -35,6 +35,7 @@
    both `eval' and `mpeval', but which is redefined appropriately when
    this file is #included into its clients.  */
 
+#include <assert.h>
 #include <ctype.h>
 
 typedef enum eval_token
@@ -518,8 +519,7 @@ cmp_term (m4 *context, eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Bad comparison operator in cmp_term ()"));
+	  assert (!"INTERNAL ERROR: bad comparison operator in cmp_term ()");
 	  abort ();
 	}
     }
@@ -563,8 +563,7 @@ shift_term (m4 *context, eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Bad shift operator in shift_term ()"));
+	  assert (!"INTERNAL ERROR: bad shift operator in shift_term ()");
 	  abort ();
 	}
     }
@@ -665,8 +664,7 @@ mult_term (m4 *context, eval_token et, number *v1)
 	  break;
 
 	default:
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Bad operator in mult_term ()"));
+	  assert (!"INTERNAL ERROR: bad operator in mult_term ()");
 	  abort ();
 	}
     }
@@ -783,9 +781,8 @@ m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 
   if (radix <= 1 || radix > 36)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: radix out of range: %d"),
-		M4ARG(0), radix));
+      m4_error (context, 0, 0, _("%s: radix out of range: %d"),
+		M4ARG(0), radix);
       return;
     }
 
@@ -794,9 +791,7 @@ m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 
   if (min <= 0)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: negative width: %d"),
-		M4ARG(0), min));
+      m4_error (context, 0, 0, _("%s: negative width: %d"), M4ARG(0), min);
       return;
     }
 
@@ -816,44 +811,36 @@ m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
       break;
 
     case MISSING_RIGHT:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: missing right parenthesis: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: missing right parenthesis: %s"),
+		M4ARG (0), M4ARG (1));
       break;
 
     case SYNTAX_ERROR:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: bad expression: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: bad expression: %s"),
+		M4ARG (0), M4ARG (1));
       break;
 
     case UNKNOWN_INPUT:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: bad input: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: bad input: %s"), M4ARG (0), M4ARG (1));
       break;
 
     case EXCESS_INPUT:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: excess input: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: excess input: %s"), M4ARG (0),
+		M4ARG (1));
       break;
 
     case DIVIDE_ZERO:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: divide by zero: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: divide by zero: %s"), M4ARG (0),
+		M4ARG (1));
       break;
 
     case MODULO_ZERO:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: %s: modulo by zero: %s"),
-		M4ARG (0), M4ARG (1)));
+      m4_error (context, 0, 0, _("%s: modulo by zero: %s"), M4ARG (0),
+		M4ARG (1));
       break;
 
     default:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		"INTERNAL ERROR: Bad error code in evaluate ()"));
+      assert (!"INTERNAL ERROR: bad error code in evaluate ()");
       abort ();
     }
 

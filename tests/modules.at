@@ -100,7 +100,7 @@ Dumpdef: .
 [[Test module loaded.
 test:	<test>
 Test module unloaded.
-m4: input.m4: 6: Warning: dumpdef: undefined name: test
+m4:input.m4:6: Warning: dumpdef: undefined name: test
 ]])
 
 AT_CLEANUP
@@ -375,8 +375,8 @@ Test module unloaded.
 Test module loaded.
 
 TRUE
-m4: input.m4: 6: Warning: cannot load symbol `no_such' from module `modtest'
-m4: input.m4: 7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
+m4:input.m4:6: cannot load symbol `no_such' from module `modtest'
+m4:input.m4:7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
 ]])
 
 AT_CHECK_M4([-m load input.m4], 1, expout, stderr)
@@ -389,7 +389,7 @@ AT_CHECK_M4([-m load input.m4], 1, expout, stderr)
 rm -f expout
 mv experr expout
 
-AT_CHECK([sed '/^m4: input.m4: 7:/ {
+AT_CHECK([sed '/^m4:input.m4:7:/ {
     s,\(7:[[^:]]*:\).*$,\1 no_such.so: cannot open shared object file: No such file or directory,;q; }' stderr], 0, expout)
 
 

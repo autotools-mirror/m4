@@ -138,9 +138,8 @@ m4_regexp_compile (m4 *context, const char *caller,
 
   if (msg != NULL)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("%s: bad regular expression `%s': %s"),
-		caller, regexp, msg));
+      m4_error (context, 0, 0, _("%s: bad regular expression `%s': %s"),
+		caller, regexp, msg);
       return NULL;
     }
 
@@ -229,9 +228,9 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 	     copied verbatim.  */
 
 	  if (matchpos == -2)
-	    M4ERROR ((m4_get_warning_status_opt (context), 0,
+	    m4_error (context, 0, 0,
 		      _("%s: error matching regular expression `%s'"),
-		      caller, regexp));
+		      caller, regexp);
 	  else if (!ignore_duplicates && (offset < length))
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
@@ -269,7 +268,7 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
  **/
 M4BUILTIN_HANDLER (__file__)
 {
-  m4_shipout_string (context, obs, m4_current_file, 0, true);
+  m4_shipout_string (context, obs, m4_get_current_file (context), 0, true);
 }
 
 
@@ -278,7 +277,7 @@ M4BUILTIN_HANDLER (__file__)
  **/
 M4BUILTIN_HANDLER (__line__)
 {
-  m4_shipout_int (obs, m4_current_line);
+  m4_shipout_int (obs, m4_get_current_line (context));
 }
 
 
@@ -297,8 +296,7 @@ M4BUILTIN_HANDLER (builtin)
   bp = m4_builtin_find_by_name (NULL, name);
 
   if (bp == NULL)
-    M4ERROR ((m4_get_warning_status_opt (context), 0,
-	      _("Undefined name %s"), name));
+    m4_error (context, 0, 0, _("%s: undefined name `%s'"), M4ARG (0), name);
   else
     (*bp->func) (context, obs, argc - 1, argv + 1);
 }
@@ -313,11 +311,7 @@ m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
   int resyntax = m4_regexp_syntax_encode (spec);
 
   if (resyntax < 0)
-    {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("%s: bad syntax-spec: `%s'"),
-		caller, spec));
-    }
+    m4_error (context, 0, 0, _("%s: bad syntax-spec: `%s'"), caller, spec);
 
   return resyntax;
 }
@@ -358,9 +352,8 @@ M4BUILTIN_HANDLER (changesyntax)
 			      m4_expand_ranges (M4ARG (i)+1, obs)) < 0)
 	      && (key != '\0'))
 	    {
-	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			_("%s: undefined syntax code: `%c'"),
-			M4ARG (0), key));
+	      m4_error (context, 0, 0, _("%s: undefined syntax code: `%c'"),
+			M4ARG (0), key);
 	    }
 	}
     }
@@ -380,8 +373,8 @@ M4BUILTIN_HANDLER (debugfile)
   if (argc == 1)
     m4_debug_set_output (context, NULL);
   else if (!m4_debug_set_output (context, M4ARG (1)))
-    M4ERROR ((m4_get_warning_status_opt (context), errno,
-	      _("Cannot set error file: %s"), M4ARG (1)));
+    m4_error (context, 0, errno, _("%s: cannot set error file: %s"),
+	      M4ARG (0), M4ARG (1));
 }
 
 
@@ -414,8 +407,8 @@ M4BUILTIN_HANDLER (debugmode)
 	}
 
       if (new_debug_level < 0)
-	M4ERROR ((m4_get_warning_status_opt (context), 0,
-		  _("Debugmode: bad debug flags: `%s'"), M4ARG (1)));
+	m4_error (context, 0, 0, _("%s: bad debug flags: `%s'"),
+		  M4ARG (0), M4ARG (1));
       else
 	{
 	  switch (change_flag)
@@ -459,8 +452,9 @@ M4BUILTIN_HANDLER (esyscmd)
       pin = popen (M4ARG (1), "r");
       if (pin == NULL)
 	{
-	  M4ERROR ((m4_get_warning_status_opt (context), errno,
-		    _("Cannot open pipe to command `%s'"), M4ARG (1)));
+	  m4_error (context, 0, errno,
+		    _("%s: cannot open pipe to command `%s'"),
+		    M4ARG (0), M4ARG (1));
 	  m4_set_sysval (0xffff);
 	}
       else
@@ -502,8 +496,7 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *  symbol = m4_symbol_lookup (M4SYMTAB, name);
 
   if (symbol == NULL)
-    M4ERROR ((m4_get_warning_status_opt (context), 0,
-	      _("Undefined name `%s'"), name));
+    m4_error (context, 0, 0, _("%s: undefined name `%s'"), M4ARG (0), name);
   else
     m4_macro_call (context, symbol, obs, argc - 1, argv + 1);
 }
@@ -599,9 +592,8 @@ M4BUILTIN_HANDLER (regexp)
 
   if (startpos  == -2)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("%s: error matching regular expression `%s'"),
-		me, M4ARG (2)));
+      m4_error (context, 0, 0, _("%s: error matching regular expression `%s'"),
+		me, M4ARG (2));
       return;
     }
 

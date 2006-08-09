@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -71,13 +71,9 @@ m4_macro m4_macro_table[] =
    unload is in progress.  */
 M4INIT_HANDLER (load)
 {
-  if (handle)
-    if (lt_dlmakeresident (handle) != 0)
-      {
-	M4ERROR ((m4_get_warning_status_opt (context), 0,
-		  _("Warning: cannot make module `%s' resident: %s"),
-		  m4_get_module_name (handle), lt_dlerror ()));
-      }
+  if (handle && lt_dlmakeresident (handle) != 0)
+    m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
+	      m4_get_module_name (handle), lt_dlerror ());
 }
 
 

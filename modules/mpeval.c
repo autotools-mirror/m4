@@ -185,10 +185,7 @@ static void
 mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily)
 {
   if (noisily && mpz_cmp_si (mpq_denref (q), (long) 1) != 0)
-    {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Loss of precision in eval: %s"), noisily));
-    }
+    m4_error (context, 0, 0, _("loss of precision in eval: %s"), noisily);
 
   mpz_div (z, mpq_numref (q), mpq_denref (q));
 }

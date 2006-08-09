@@ -68,26 +68,26 @@
    input file.  */
 
 static	int   file_peek			(void);
-static	int   file_read			(void);
+static	int   file_read			(m4 *);
 static	void  file_unget		(int ch);
 static	void  file_clean		(m4 *context);
 static	void  init_builtin_token	(m4 *context, m4_symbol_value *token);
 static	int   builtin_peek		(void);
-static	int   builtin_read		(void);
+static	int   builtin_read		(m4 *);
 static	int   match_input		(m4 *context, const unsigned char *s);
 static	int   next_char			(m4 *context);
 static	void  pop_input			(m4 *context);
 static	int   single_peek		(void);
-static	int   single_read		(void);
+static	int   single_read		(m4 *);
 static	int   string_peek		(void);
-static	int   string_read		(void);
+static	int   string_read		(m4 *);
 static	void  string_unget		(int ch);
 static	void  unget_input		(int ch);
 
 struct input_funcs
 {
   int (*peek_func) (void);	/* function to peek input */
-  int (*read_func) (void);	/* function to read input */
+  int (*read_func) (m4 *);	/* function to read input */
   void (*unget_func) (int);	/* function to unread input */
   void (*clean_func) (m4 *);	/* function to clean up */
 };
@@ -138,12 +138,6 @@ struct input_block
 typedef struct input_block input_block;
 
 
-/* Current input file name.  */
-const char *m4_current_file;
-
-/* Current input line number.  */
-int m4_current_line;
-
 /* Obstack for storing individual tokens.  */
 static m4_obstack token_stack;
 
@@ -168,7 +162,7 @@ static input_block *wsp;
 /* Aux. for handling split m4_push_string ().  */
 static input_block *next;
 
-/* Flag for next_char () to increment m4_current_line.  */
+/* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
 
 
@@ -197,14 +191,14 @@ file_peek (void)
 }
 
 static int
-file_read (void)
+file_read (m4 *context)
 {
   int ch;
 
   if (start_of_input_line)
     {
       start_of_input_line = false;
-      m4_current_line++;
+      m4_set_current_line (context, m4_get_current_line (context) + 1);
     }
 
   ch = getc (isp->u.u_f.file);
@@ -233,8 +227,8 @@ file_clean (m4 *context)
 		       isp->u.u_f.name, isp->u.u_f.lineno);
 
   fclose (isp->u.u_f.file);
-  m4_current_file = isp->u.u_f.name;
-  m4_current_line = isp->u.u_f.lineno;
+  m4_set_current_file (context, isp->u.u_f.name);
+  m4_set_current_line (context, isp->u.u_f.lineno);
   m4_output_current_line = isp->u.u_f.out_lineno;
   start_of_input_line = isp->u.u_f.advance_line;
   if (isp->prev != NULL)
@@ -264,13 +258,14 @@ m4_push_file (m4 *context, FILE *fp, const char *title)
   i->funcs = &file_funcs;
 
   i->u.u_f.file = fp;
-  i->u.u_f.name = m4_current_file;
-  i->u.u_f.lineno = m4_current_line;
+  i->u.u_f.name = m4_get_current_file (context);
+  i->u.u_f.lineno = m4_get_current_line (context);
   i->u.u_f.out_lineno = m4_output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
 
-  m4_current_file = obstack_copy0 (current_input, title, strlen (title));
-  m4_current_line = 1;
+  m4_set_current_file (context, obstack_copy0 (current_input, title,
+					       strlen (title)));
+  m4_set_current_line (context, 1);
   m4_output_current_line = -1;
 
   i->prev = isp;
@@ -290,7 +285,7 @@ builtin_peek (void)
 }
 
 static int
-builtin_read (void)
+builtin_read (m4 *context M4_GNUC_UNUSED)
 {
   if (isp->u.u_b.read == true)
     return CHAR_RETRY;
@@ -341,7 +336,7 @@ single_peek (void)
 }
 
 static int
-single_read (void)
+single_read (m4 *context M4_GNUC_UNUSED)
 {
   int ch = isp->u.u_c.ch;
 
@@ -388,7 +383,7 @@ string_peek (void)
 }
 
 static int
-string_read (void)
+string_read (m4 *context M4_GNUC_UNUSED)
 {
   int ch = *isp->u.u_s.current++;
 
@@ -414,13 +409,12 @@ m4_push_string_init (m4 *context)
 {
   if (next != NULL)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		"INTERNAL ERROR: Recursive m4_push_string!"));
+      assert (!"INTERNAL ERROR: recursive m4_push_string!");
       abort ();
     }
 
   next = (input_block *) obstack_alloc (current_input,
-				        sizeof (struct input_block));
+					sizeof (struct input_block));
   next->funcs = &string_funcs;
 
   return current_input;
@@ -480,7 +474,7 @@ m4_push_wrapup (const char *s)
 
 
 /* The function pop_input () pops one level of input sources.  If the
-   popped input_block is a file, m4_current_file and m4_current_line are
+   popped input_block is a file, current_file and current_line are
    reset to the saved values before the memory for the input_block are
    released.  */
 static void
@@ -520,8 +514,7 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
 {
   if (isp->funcs->read_func != builtin_read)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		"INTERNAL ERROR: Bad call to init_builtin_token ()"));
+      assert (!"INTERNAL ERROR: bad call to init_builtin_token ()");
       abort ();
     }
 
@@ -541,7 +534,7 @@ static int
 next_char (m4 *context)
 {
   int ch;
-  int (*f) (void);
+  int (*f) (m4 *);
 
   while (1)
     {
@@ -551,7 +544,7 @@ next_char (m4 *context)
       f = isp->funcs->read_func;
       if (f != NULL)
 	{
-	  while ((ch = (*f)()) != CHAR_RETRY)
+	  while ((ch = f (context)) != CHAR_RETRY)
 	    {
 	      /* if (!IS_IGNORE(ch)) */
 		return ch;
@@ -559,8 +552,7 @@ next_char (m4 *context)
 	}
       else
 	{
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Input stack botch in next_char ()"));
+	  assert (!"INTERNAL ERROR: input stack botch in next_char ()");
 	  abort ();
 	}
 
@@ -593,8 +585,7 @@ m4_peek_input (m4 *context)
 	}
       else
 	{
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Input stack botch in m4_peek_input ()"));
+	  assert (!"INTERNAL ERROR: input stack botch in m4_peek_input ()");
 	  abort ();
 	}
 
@@ -679,10 +670,12 @@ match_input (m4 *context, const unsigned char *s)
 
 /* Inititialise input stacks, and quote/comment characters.  */
 void
-m4_input_init (void)
+m4_input_init (m4 *context)
 {
-  m4_current_file = _("NONE");
-  m4_current_line = 0;
+  /* FIXME: The user should never be able to see the empty string as a
+     file name, even during m4wrap expansion.  */
+  m4_set_current_file (context, "");
+  m4_set_current_line (context, 0);
 
   obstack_init (&token_stack);
   obstack_init (&input_stack);
@@ -825,8 +818,8 @@ m4__next_token (m4 *context, m4_symbol_value *token)
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
       {					/* QUOTED STRING, SINGLE QUOTES */
-	const char *current_file = m4_current_file;
-	int current_line = m4_current_line;
+	const char *current_file = m4_get_current_file (context);
+	int current_line = m4_get_current_line (context);
 	quote_level = 1;
 	while (1)
 	  {
@@ -855,8 +848,8 @@ m4__next_token (m4 *context, m4_symbol_value *token)
     else if (!m4_is_syntax_single_quotes (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->lquote.string))
       {					/* QUOTED STRING, LONGER QUOTES */
-	const char *current_file = m4_current_file;
-	int current_line = m4_current_line;
+	const char *current_file = m4_get_current_file (context);
+	int current_line = m4_get_current_line (context);
 	quote_level = 1;
 	while (1)
 	  {

@@ -146,13 +146,11 @@ m4_builtin m4_builtin_table[] =
    progress.  */
 M4INIT_HANDLER (m4)
 {
-  if (handle)
-    if (lt_dlmakeresident (handle) != 0)
-      {
-	M4ERROR ((m4_get_warning_status_opt (context), 0,
-		  _("Warning: cannot make module `%s' resident: %s"),
-		  m4_get_module_name (handle), lt_dlerror ()));
-      }
+  if (handle && lt_dlmakeresident (handle) != 0)
+    {
+      m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
+		m4_get_module_name (handle), lt_dlerror ());
+    }
 }
 
 
@@ -188,8 +186,8 @@ M4BUILTIN_HANDLER (define)
 M4BUILTIN_HANDLER (undefine)
 {
   if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    M4WARN ((m4_get_warning_status_opt (context), 0,
-	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
+    m4_warn (context, 0,_("Warning: %s: undefined name: %s"), M4ARG (0),
+	     M4ARG (1));
   else
     m4_symbol_delete (M4SYMTAB, M4ARG (1));
 }
@@ -212,8 +210,8 @@ M4BUILTIN_HANDLER (pushdef)
 M4BUILTIN_HANDLER (popdef)
 {
   if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    M4WARN ((m4_get_warning_status_opt (context), 0,
-	     _("Warning: %s: undefined name: %s"), M4ARG (0), M4ARG (1)));
+    m4_warn (context, 0, _("Warning: %s: undefined name: %s"), M4ARG (0),
+	     M4ARG (1));
   else
     m4_symbol_popdef (M4SYMTAB, M4ARG (1));
 }
@@ -341,9 +339,8 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 	      dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	    }
 	  else if (complain)
-	    M4WARN ((m4_get_warning_status_opt (context), 0,
-		     _("Warning: %s: undefined name: %s"),
-		     M4ARG (0), M4ARG (i)));
+	    m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+		     M4ARG (0), M4ARG (i));
 	}
     }
 
@@ -410,17 +407,16 @@ M4BUILTIN_HANDLER (defn)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (!symbol)
-	M4WARN ((m4_get_warning_status_opt (context), 0,
-		 _("Warning: %s: undefined name: %s"),
-		 m4_get_symbol_value_text (argv[0]), name));
+	m4_warn (context, 0, _("Warning: %s: undefined name: %s"), M4ARG (0),
+		 name);
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	M4WARN ((m4_get_warning_status_opt (context), 0, _("\
+	m4_warn (context, 0, _("\
 Warning: %s: builtin `%s' requested by frozen file not found"),
-		 name, m4_get_symbol_placeholder (symbol)));
+		 name, m4_get_symbol_placeholder (symbol));
       else
 	assert (!"Bad token data type in m4_defn");
     }
@@ -518,11 +514,11 @@ M4BUILTIN_HANDLER (undivert)
   int i = 0;
 
   if (argc == 1)
-    m4_undivert_all ();
+    m4_undivert_all (context);
   else
     {
       if (sscanf (M4ARG (1), "%d", &i) == 1)
-	m4_insert_diversion (i);
+	m4_insert_diversion (context, i);
       else if (m4_get_posixly_correct_opt (context))
 	m4_numeric_arg (context, argc, argv, 1, &i);
       else
@@ -530,12 +526,12 @@ M4BUILTIN_HANDLER (undivert)
 	  FILE *fp = m4_path_search (context, M4ARG (1), (char **) NULL);
 	  if (fp != NULL)
 	    {
-	      m4_insert_file (fp);
+	      m4_insert_file (context, fp);
 	      fclose (fp);
 	    }
 	  else
-	    M4ERROR ((m4_get_warning_status_opt (context), errno,
-		      _("Cannot undivert %s"), M4ARG (1)));
+	    m4_error (context, 0, errno, _("%s: cannot undivert `%s'"),
+		      M4ARG (0), M4ARG (1));
 	}
     }
 }
@@ -594,8 +590,8 @@ include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	M4ERROR ((m4_get_warning_status_opt (context), errno,
-		  _("Cannot open %s"), M4ARG (1)));
+	m4_error (context, 0, errno, _("%s: cannot open `%s'"), M4ARG (0),
+		  M4ARG (1));
       return;
     }
 
@@ -626,11 +622,11 @@ M4BUILTIN_HANDLER (maketemp)
   errno = 0;
   if ((fd = mkstemp (M4ARG(1))) < 0)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), errno,
-		"Cannot create tempfile %s", M4ARG (1)));
+      m4_error (context, 0, errno, _("%s: cannot create tempfile `%s'"),
+		M4ARG (0), M4ARG (1));
       return;
     }
-  close(fd);
+  close (fd);
   m4_shipout_string (context, obs, M4ARG (1), 0, false);
 }
 
@@ -705,8 +701,8 @@ M4BUILTIN_HANDLER (traceon)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, (char *) obs);
 	else
-	  M4WARN ((m4_get_warning_status_opt (context), 0,
-		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
+	  m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+		   M4ARG (0), name);
       }
 }
 
@@ -725,8 +721,8 @@ M4BUILTIN_HANDLER (traceoff)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, NULL);
 	else
-	  M4WARN ((m4_get_warning_status_opt (context), 0,
-		   _("Warning: %s: undefined name: %s"), M4ARG (0), name));
+	  m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+		   M4ARG (0), name);
       }
 }
 
@@ -806,9 +802,9 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
 	  to = *++s;
 	  if (to == '\0')
 	    {
-              /* trailing dash */
-              obstack_1grow (obs, '-');
-              break;
+	      /* trailing dash */
+	      obstack_1grow (obs, '-');
+	      break;
 	    }
 	  else if (from <= to)
 	    {

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-07-17
+# bootstrap (GNU M4) version 2006-08-08
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -133,7 +133,7 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
     }; d' < "$progpath"
@@ -147,7 +147,7 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
      }; d' < "$progpath"
@@ -159,9 +159,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-        s/^# //; s/^# *$//;
-        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-        p;
+	s/^# //; s/^# *$//;
+	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+	p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -181,7 +181,7 @@ func_version ()
     shift
     case $opt in
       -p|--download-po)
-      			test $# = 0 && func_missing_arg $opt && break
+			test $# = 0 && func_missing_arg $opt && break
 			case $1 in
 			  0|[Nn]*|[Ff]*) DOWNLOAD_PO=no ;;
 			  [Oo]*)	 DOWNLOAD_PO=only ;;
@@ -300,13 +300,6 @@ func_echo "patching include directories in gnulib regex module"
 mv $config_macro_dir/regex.m4 $config_macro_dir/regex-m4.old
 sed 's,lib/regex.c,gnu/regex.c,g' $config_macro_dir/regex-m4.old > $config_macro_dir/regex.m4 && \
   $RM $config_macro_dir/regex-m4.old
-
-func_echo "hiding gnulib jm_\* macros"
-cat >> $config_macro_dir/gnulib.m4 <<\EOF
-AC_DEFUN([gl_AC_HEADER_INTTYPES_H], [jm_AC_HEADER_INTTYPES_H])
-AC_DEFUN([gl_AC_HEADER_STDINT_H], [jm_AC_HEADER_STDINT_H])
-AC_DEFUN([gl_AC_TYPE_UINTMAX_T], [jm_AC_TYPE_UINTMAX_T])
-EOF
 
 
 ## --------------------------------- ##

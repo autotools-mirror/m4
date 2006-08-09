@@ -22,6 +22,7 @@
 #endif
 
 #include "m4private.h"
+#include "verror.h"
 
 
 static const char * skip_space (m4 *, const char *);
@@ -32,23 +33,22 @@ static const char * skip_space (m4 *, const char *);
    inappropriate number of arguments.  ARGC/ARGV are the arguments,
    MIN is the minimum number of acceptable arguments, negative if not
    applicable, MAX is the maximum number, negative if not applicable.
-   ARGC, MIN, and MAX count ARGV[0], the name of the macro.  */
+   ARGC, MIN, and MAX count ARGV[0], the name of the macro.  Return
+   true if there are too few arguments, false otherwise.  */
 bool
 m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
 {
   if (min > 0 && argc < min)
     {
-      M4WARN ((m4_get_warning_status_opt (context), 0,
-	       _("Warning: %s: too few arguments: %d < %d"),
-	       M4ARG (0), argc - 1, min - 1));
+      m4_warn (context, 0, _("Warning: %s: too few arguments: %d < %d"),
+	       M4ARG (0), argc - 1, min - 1);
       return true;
     }
 
   if (max > 0 && argc > max)
     {
-      M4WARN ((m4_get_warning_status_opt (context), 0,
-	       _("Warning: %s: too many arguments (ignored): %d > %d"),
-	       M4ARG (0), argc - 1, max - 1));
+      m4_warn (context, 0, _("Warning: %s: extra arguments ignored: %d > %d"),
+	       M4ARG (0), argc - 1, max - 1);
       /* Return false, otherwise it is not exactly `ignored'. */
       return false;
     }
@@ -79,9 +79,8 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
       || (*valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10),
 	  *skip_space (context, endp) != 0))
     {
-      M4WARN ((m4_get_warning_status_opt (context), 0,
-	       _("Warning: %s: argument %d non-numeric: %s"),
-	       M4ARG (0), arg - 1, M4ARG (arg)));
+      m4_warn (context, 0, _("Warning: %s: argument %d non-numeric: %s"),
+	       M4ARG (0), arg - 1, M4ARG (arg));
       return false;
     }
   return true;
@@ -103,5 +102,48 @@ m4_dump_args (m4 *context, m4_obstack *obs, int argc,
 	obstack_grow (obs, sep, len);
 
       m4_shipout_string (context, obs, M4ARG (i), 0, quoted);
+    }
+}
+
+/* Issue an error.  The message is printf-style, based on FORMAT and
+   any other arguments, and the program name and location (if we are
+   currently parsing an input file) are automatically prepended.  If
+   ERRNUM is non-zero, include strerror output in the message.  If
+   STATUS is non-zero, or if errors are fatal, call exit immediately;
+   otherwise, remember that an error occurred so that m4 cannot exit
+   with success later on.*/
+void
+m4_error (m4 *context, int status, int errnum, const char *format, ...)
+{
+  va_list args;
+  int line = m4_get_current_line (context);
+  va_start (args, format);
+  if (status == EXIT_SUCCESS && m4_get_fatal_warnings_opt (context))
+    status = EXIT_FAILURE;
+  verror_at_line (status, errnum, line ? m4_get_current_file (context) : NULL,
+		  line, format, args);
+  m4_set_exit_status (context, EXIT_FAILURE);
+}
+
+/* Issue a warning, if they are not being suppressed.  The message is
+   printf-style, based on FORMAT and any other arguments, and the
+   program name and location (if we are currently parsing an input
+   file) are automatically prepended.  If ERRNUM is non-zero, include
+   strerror output in the message.  If warnings are fatal, call exit
+   immediately, otherwise exit status is unchanged.  */
+void
+m4_warn (m4 *context, int errnum, const char *format, ...)
+{
+  if (!m4_get_suppress_warnings_opt (context))
+    {
+      va_list args;
+      int status = EXIT_SUCCESS;
+      int line = m4_get_current_line (context);
+      va_start (args, format);
+      if (m4_get_fatal_warnings_opt (context))
+	status = EXIT_FAILURE;
+      verror_at_line (status, errnum,
+		      line ? m4_get_current_file (context) : NULL, line,
+		      format, args);
     }
 }

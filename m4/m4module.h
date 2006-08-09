@@ -92,11 +92,8 @@ extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
 				       bool);
 
 /* Error handling.  */
-#define M4ERROR(Arglist) (error Arglist)
-#define M4WARN(Arglist)				M4_STMT_START {	\
-	if (!m4_get_suppress_warnings_opt (context)) M4ERROR (Arglist);	\
-							} M4_STMT_END
-
+extern void m4_error (m4 *, int, int, const char *, ...) M4_GNUC_PRINTF (4, 5);
+extern void m4_warn  (m4 *, int, const char *, ...)      M4_GNUC_PRINTF (3, 4);
 
 
 /* --- CONTEXT MANAGEMENT --- */
@@ -111,9 +108,11 @@ extern void		m4_delete	(m4 *);
 #define m4_context_field_table						\
 	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
+	M4FIELD(const char *,	   current_file,   current_file)        \
+	M4FIELD(int,		   current_line,   current_line)        \
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
-	M4FIELD(int,	warning_status_opt,	   warning_status)	\
+	M4FIELD(int,		   exit_status,	   exit_status)		\
 	M4FIELD(bool,	no_gnu_extensions_opt,	   no_gnu_extensions)	\
 	M4FIELD(int,	nesting_limit_opt,	   nesting_limit)	\
 	M4FIELD(int,	debug_level_opt,	   debug_level)		\
@@ -128,6 +127,7 @@ extern void		m4_delete	(m4 *);
 	M4OPT_BIT(M4_OPT_INTERACTIVE_BIT,	interactive_opt)	\
 	M4OPT_BIT(M4_OPT_SYNC_OUTPUT_BIT,	sync_output_opt)	\
 	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
+	M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
 
 
 #define M4FIELD(type, base, field)					\
@@ -344,13 +344,9 @@ extern int	m4_set_syntax	(m4_syntax_table*, char, const unsigned char*);
 
 
 
-/* --- INPUT TOKENISATION --- */
+/* --- INPUT TOKENIZATION --- */
 
-/* current input file, and line */
-extern const char *m4_current_file;
-extern int m4_current_line;
-
-extern	void	m4_input_init	(void);
+extern	void	m4_input_init	(m4 *context);
 extern	void	m4_input_exit	(void);
 extern	int	m4_peek_input	(m4 *context);
 extern	void	m4_skip_line	(m4 *context);
@@ -380,10 +376,10 @@ extern void	m4_shipout_string (m4 *, m4_obstack *, const char *,
 				   int, bool);
 
 extern void	m4_make_diversion    (int);
-extern void	m4_insert_diversion  (int);
-extern void	m4_insert_file	     (FILE *);
-extern void	m4_freeze_diversions (FILE *);
-extern void	m4_undivert_all	     (void);
+extern void	m4_insert_diversion  (m4 *, int);
+extern void	m4_insert_file	     (m4 *, FILE *);
+extern void	m4_freeze_diversions (m4 *, FILE *);
+extern void	m4_undivert_all	     (m4 *);
 
 
 

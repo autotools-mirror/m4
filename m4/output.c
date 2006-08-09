@@ -157,7 +157,7 @@ tmpfile (void)
    to be flushed to a newly created temporary file.  This flushed buffer
    might well be the current one.  */
 static void
-make_room_for (int length)
+make_room_for (m4 *context, int length)
 {
   int wanted_size;
 
@@ -204,8 +204,8 @@ make_room_for (int length)
 
       selected_diversion->file = tmpfile ();
       if (selected_diversion->file == NULL)
-	M4ERROR ((EXIT_FAILURE, errno,
-		  _("cannot create temporary file for diversion")));
+	m4_error (context, EXIT_FAILURE, errno,
+		  _("cannot create temporary file for diversion"));
 
       if (selected_diversion->used > 0)
 	{
@@ -214,8 +214,8 @@ make_room_for (int length)
 			  1,
 			  selected_diversion->file);
 	  if (count != 1)
-	    M4ERROR ((EXIT_FAILURE, errno,
-		      _("cannot flush diversion to temporary file")));
+	    m4_error (context, EXIT_FAILURE, errno,
+		      _("cannot flush diversion to temporary file"));
 	}
 
       /* Reclaim the buffer space for other diversions.  */
@@ -255,20 +255,21 @@ make_room_for (int length)
     }
 }
 
-/* Output one character CHAR, when it is known that it goes to a diversion
-   file or an in-memory diversion buffer.  */
-#define OUTPUT_CHARACTER(Char) \
-  if (output_file)							\
-    putc ((Char), output_file);						\
-  else if (output_unused == 0)						\
-    output_character_helper ((Char));					\
-  else									\
+/* Output one character CHAR, when it is known that it goes to a
+   diversion file or an in-memory diversion buffer.  A variable m4
+   *context must be in scope.  */
+#define OUTPUT_CHARACTER(Char)			 \
+  if (output_file)				 \
+    putc ((Char), output_file);			 \
+  else if (output_unused == 0)			 \
+    output_character_helper (context, (Char));	 \
+  else						 \
     (output_unused--, *output_cursor++ = (Char))
 
 static void
-output_character_helper (int character)
+output_character_helper (m4 *context, int character)
 {
-  make_room_for (1);
+  make_room_for (context, 1);
 
   if (output_file)
     putc (character, output_file);
@@ -282,18 +283,18 @@ output_character_helper (int character)
 /* Output one TEXT having LENGTH characters, when it is known that it goes
    to a diversion file or an in-memory diversion buffer.  */
 static void
-output_text (const char *text, int length)
+output_text (m4 *context, const char *text, int length)
 {
   int count;
 
   if (!output_file && length > output_unused)
-    make_room_for (length);
+    make_room_for (context, length);
 
   if (output_file)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-	M4ERROR ((EXIT_FAILURE, errno, _("copying inserted file")));
+	m4_error (context, EXIT_FAILURE, errno, _("copying inserted file"));
     }
   else
     {
@@ -355,7 +356,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	/* Optimize longer texts.  */
 
       default:
-	output_text (text, length);
+	output_text (context, text, length);
       }
   else
     for (; length-- > 0; text++)
@@ -374,21 +375,25 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	       If output_current_line was previously given a negative
 	       value (invalidated), rather output `#line NUM "FILE"'.  */
 
-	    if (m4_output_current_line != m4_current_line)
+	    if (m4_output_current_line != m4_get_current_line (context))
 	      {
-		sprintf (line, "#line %d", m4_current_line);
+		sprintf (line, "#line %d", m4_get_current_line (context));
 		for (cursor = line; *cursor; cursor++)
 		  OUTPUT_CHARACTER (*cursor);
-		if (m4_output_current_line < 1)
+		if (m4_output_current_line < 1
+		    && m4_get_current_file (context)[0] != '\0')
 		  {
 		    OUTPUT_CHARACTER (' ');
 		    OUTPUT_CHARACTER ('"');
-		    for (cursor = m4_current_file; *cursor; cursor++)
-		      OUTPUT_CHARACTER (*cursor);
+		    for (cursor = m4_get_current_file (context);
+			 *cursor; cursor++)
+		      {
+			OUTPUT_CHARACTER (*cursor);
+		      }
 		    OUTPUT_CHARACTER ('"');
 		  }
 		OUTPUT_CHARACTER ('\n');
-		m4_output_current_line = m4_current_line;
+		m4_output_current_line = m4_get_current_line (context);
 	      }
 	  }
 	OUTPUT_CHARACTER (*text);
@@ -484,7 +489,7 @@ m4_make_diversion (int divnum)
    diversions are handled.  This allows files to be included, without
    having them rescanned by m4.  */
 void
-m4_insert_file (FILE *file)
+m4_insert_file (m4 *context, FILE *file)
 {
   char buffer[COPY_BUFFER_SIZE];
   size_t length;
@@ -499,10 +504,10 @@ m4_insert_file (FILE *file)
     {
       length = fread (buffer, 1, COPY_BUFFER_SIZE, file);
       if (ferror (file))
-	M4ERROR ((EXIT_FAILURE, errno, _("reading inserted file")));
+	m4_error (context, EXIT_FAILURE, errno, _("reading inserted file"));
       if (length == 0)
 	break;
-      output_text (buffer, length);
+      output_text (context, buffer, length);
     }
 }
 
@@ -510,7 +515,7 @@ m4_insert_file (FILE *file)
    diversion is NOT placed on the expansion obstack, because it must not
    be rescanned.  When the file is closed, it is deleted by the system.  */
 void
-m4_insert_diversion (int divnum)
+m4_insert_diversion (m4 *context, int divnum)
 {
   struct diversion *diversion;
 
@@ -532,10 +537,10 @@ m4_insert_diversion (int divnum)
       if (diversion->file)
 	{
 	  rewind (diversion->file);
-	  m4_insert_file (diversion->file);
+	  m4_insert_file (context, diversion->file);
 	}
       else if (diversion->buffer)
-	output_text (diversion->buffer, diversion->used);
+	output_text (context, diversion->buffer, diversion->used);
 
       m4_output_current_line = -1;
     }
@@ -559,17 +564,17 @@ m4_insert_diversion (int divnum)
 /* Get back all diversions.  This is done just before exiting from main (),
    and from m4_undivert (), if called without arguments.  */
 void
-m4_undivert_all ()
+m4_undivert_all (m4 *context)
 {
   int divnum;
 
   for (divnum = 1; divnum < diversions; divnum++)
-    m4_insert_diversion (divnum);
+    m4_insert_diversion (context, divnum);
 }
 
 /* Produce all diversion information in frozen format on FILE.  */
 void
-m4_freeze_diversions (FILE *file)
+m4_freeze_diversions (m4 *context, FILE *file)
 {
   int saved_number;
   int last_inserted;
@@ -591,17 +596,19 @@ m4_freeze_diversions (FILE *file)
 	    {
 	      fflush (diversion->file);
 	      if (fstat (fileno (diversion->file), &file_stat) < 0)
-		M4ERROR ((EXIT_FAILURE, errno, _("cannot stat diversion")));
+		m4_error (context, EXIT_FAILURE, errno,
+			  _("cannot stat diversion"));
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long) file_stat.st_size)
-		M4ERROR ((EXIT_FAILURE, errno, _("diversion too large")));
+		m4_error (context, EXIT_FAILURE, errno,
+			  _("diversion too large"));
 	      fprintf (file, "D%d,%lu", divnum,
 		       (unsigned long) file_stat.st_size);
 	    }
 	  else
 	    fprintf (file, "D%d,%d\n", divnum, diversion->used);
 
-	  m4_insert_diversion (divnum);
+	  m4_insert_diversion (context, divnum);
 	  putc ('\n', file);
 
 	  last_inserted = divnum;

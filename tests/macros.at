@@ -57,8 +57,8 @@ defun
 ]])
 
 AT_CHECK_M4([input.m4], 0, [expout],
-[[m4: input.m4: 5: Warning: define: too many arguments (ignored): 3 > 2
-m4: input.m4: 10: Warning: defun: too many arguments (ignored): 3 > 2
+[[m4:input.m4:5: Warning: define: extra arguments ignored: 3 > 2
+m4:input.m4:10: Warning: defun: extra arguments ignored: 3 > 2
 ]])
 
 AT_CLEANUP
@@ -93,7 +93,7 @@ AT_DATA([[expout]],
 ]])
 
 AT_CHECK_M4([--reload-state=frozen.m4f input.m4], 0, expout,
-[[m4: input.m4: 4: Warning: defun: too many arguments (ignored): 3 > 2
+[[m4:input.m4:4: Warning: defun: extra arguments ignored: 3 > 2
 ]])
 
 AT_CLEANUP(freezeme.m4 frozen.m4f)
@@ -137,9 +137,9 @@ hej:	`def 4.'
 hej:	`def 3.'
 hej:	`def 2.'
 hej:	`def 1.'
-m4: pushpop.m4: 18: Warning: dumpdef: undefined name: hej
-m4: pushpop.m4: 20: Warning: dumpdef: undefined name: mac2
-m4: pushpop.m4: 21: Warning: popdef: undefined name: mac2
+m4:pushpop.m4:18: Warning: dumpdef: undefined name: hej
+m4:pushpop.m4:20: Warning: dumpdef: undefined name: mac2
+m4:pushpop.m4:21: Warning: popdef: undefined name: mac2
 ]])
 
 AT_CLEANUP

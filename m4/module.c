@@ -122,9 +122,8 @@ m4_module_import (m4 *context, const char *module_name,
       symbol_address = lt_dlsym (handle, symbol_name);
 
       if (!symbol_address)
-	M4ERROR ((m4_get_warning_status_opt (context), 0,
-		  _("Warning: cannot load symbol `%s' from module `%s'"),
-		    symbol_name, module_name));
+	m4_error (context, 0, 0, _("cannot load symbol `%s' from module `%s'"),
+		  symbol_name, module_name);
     }
 
   return (void *) symbol_address;
@@ -230,9 +229,8 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 	  if (!name)
 	    name = MODULE_SELF_NAME;
 
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    _("Warning: cannot load module `%s': %s"),
-		    name, module_dlerror ()));
+	  m4_error (context, 0, 0, _("cannot load module `%s': %s"),
+		    name, module_dlerror ());
 	}
       else if (info->ref_count == 1)
 	{
@@ -268,9 +266,9 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 
   if (errors)
     {
-      M4ERROR ((EXIT_FAILURE, 0,
+      m4_error (context, EXIT_FAILURE, 0,
 		_("cannot unload module `%s': %s"),
-		name ? name : MODULE_SELF_NAME, module_dlerror ()));
+		name ? name : MODULE_SELF_NAME, module_dlerror ());
     }
 }
 
@@ -321,8 +319,7 @@ m4__module_init (m4 *context)
      module system has already been initialised.  */
   if (iface_id)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		_("Warning: multiple module loader initialisations")));
+      m4_error (context, 0, 0, _("multiple module loader initializations"));
       return;
     }
 
@@ -362,9 +359,9 @@ m4__module_init (m4 *context)
 
   /* Couldn't initialise the module system; diagnose and exit.  */
   if (errors)
-    M4ERROR ((EXIT_FAILURE, 0,
-	      _("failed to initialise module loader: %s"),
-	      module_dlerror ()));
+    m4_error (context, EXIT_FAILURE, 0,
+	      _("failed to initialize module loader: %s"),
+	      module_dlerror ());
 
 #ifdef DEBUG_MODULES
   M4_DEBUG_MESSAGE ("Module loader initialised.");
@@ -413,9 +410,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  && !lt_dlsym (handle, BUILTIN_SYMBOL)
 	  && !lt_dlsym (handle, MACRO_SYMBOL))
 	{
-	    M4ERROR ((EXIT_FAILURE, 0,
-		      _("module `%s' has no entry points"),
-		      name));
+	  m4_error (context, EXIT_FAILURE, 0,
+		    _("module `%s' has no entry points"), name);
 	}
 
 #ifdef DEBUG_MODULES
@@ -425,9 +421,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
   else
     {
       /* Couldn't open the module; diagnose and exit. */
-      M4ERROR ((EXIT_FAILURE, 0,
-		_("cannot open module `%s': %s"),
-		name, module_dlerror ()));
+      m4_error (context, EXIT_FAILURE, 0, _("cannot open module `%s': %s"),
+		name, module_dlerror ());
     }
 
   return handle;
@@ -461,9 +456,8 @@ m4__module_exit (m4 *context)
 
   if (errors)
     {
-      M4ERROR ((EXIT_FAILURE, 0,
-		_("cannot unload all modules: %s"),
-		module_dlerror ()));
+      m4_error (context, EXIT_FAILURE, 0, _("cannot unload all modules: %s"),
+		module_dlerror ());
     }
 }
 
@@ -522,9 +516,8 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 
   if (errors)
     {
-      M4ERROR ((EXIT_FAILURE, 0,
-		_("cannot close module `%s': %s"),
-		name, module_dlerror ()));
+      m4_error (context, EXIT_FAILURE, 0, _("cannot close module `%s': %s"),
+		name, module_dlerror ());
     }
 
   free ((void *) name);

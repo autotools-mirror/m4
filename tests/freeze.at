@@ -100,7 +100,7 @@ define 1
 my_define(bar, 4) 3
 bar
 ]],
-[[m4: input.m4: 5: Warning: popdef: undefined name: my_define
+[[m4:input.m4:5: Warning: popdef: undefined name: my_define
 ]])
 
 AT_CLEANUP
@@ -150,9 +150,9 @@ AT_CHECK_M4([-R frozen.m4f input.m4], 0,
 
 a
 ]],
-[[m4: input.m4: 4: Warning: a: builtin `b' requested by frozen file not found
-m4: input.m4: 6: Warning: a: builtin `b' requested by frozen file not found
-m4: input.m4: 8: Warning: a: builtin `b' requested by frozen file not found
+[[m4:input.m4:4: Warning: a: builtin `b' requested by frozen file not found
+m4:input.m4:6: Warning: a: builtin `b' requested by frozen file not found
+m4:input.m4:8: Warning: a: builtin `b' requested by frozen file not found
 a:	<placeholder for b>
 c:	`'
 ]])

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ m4_debug_set_output (m4 *context, const char *name)
   return true;
 }
 
-/* Print the header of a one-line debug message, starting by "m4 debug".  */
+/* Print the header of a one-line debug message, starting with "m4debug:".  */
 void
 m4_debug_message_prefix (m4 *context)
 {
@@ -168,9 +168,12 @@ m4_debug_message_prefix (m4 *context)
   assert (context);
 
   debug_file = m4_get_debug_file (context);
-  fprintf (debug_file, "m4 debug: ");
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
-    fprintf (debug_file, "%s: ", m4_current_file);
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
-    fprintf (debug_file, "%d: ", m4_current_line);
+  fprintf (debug_file, "m4debug:");
+  if (m4_get_current_line (context))
+    {
+      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
+	fprintf (debug_file, "%s:", m4_get_current_file (context));
+      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
+	fprintf (debug_file, "%d:", m4_get_current_line (context));
+    }
 }

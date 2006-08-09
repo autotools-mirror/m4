@@ -27,8 +27,6 @@
 
 #define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan"
 
-static void print_program_name_CB (void);
-
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -55,20 +53,6 @@ typedef struct macro_definition
 
 /* Error handling functions.  */
 
-/* Print program name, source file and line reference on standard
-   error, as a prefix for error messages.  Flush standard output first.  */
-static void
-print_program_name_CB (void)
-{
-  int e = errno;
-  fflush (stdout);
-  fprintf (stderr, "%s: ", program_name);
-  if (m4_current_line != 0)
-    fprintf (stderr, "%s: %d: ", m4_current_file, m4_current_line);
-  errno = e;
-}
-
-
 #ifdef USE_STACKOVF
 
 /* Tell user stack overflowed and abort.  */
@@ -79,8 +63,7 @@ stackovf_handler (void)
      since these functions invoke functions that are not signal-safe.  We
      are sort of justified by the fact that we will exit and never return,
      but this should really be fixed.  */
-  M4ERROR ((EXIT_FAILURE, 0,
-	    _("Stack overflow.  (Infinite define recursion?)")));
+  error (EXIT_FAILURE, 0, _("stack overflow (infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOV */
@@ -241,7 +224,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Initialise gnulib error module.  */
   set_program_name (argv[0]);
-  error_print_progname = print_program_name_CB;
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
@@ -307,7 +289,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	m4_set_warning_status_opt (context, EXIT_FAILURE);
+	m4_set_fatal_warnings_opt (context, true);
 	break;
 
       case 'F':
@@ -331,13 +313,13 @@ main (int argc, char *const *argv, char *const *envp)
 	  {
 	    const char *dlerr = lt_dlerror();
 	    if (dlerr == NULL)
-	      M4ERROR ((EXIT_FAILURE, 0,
+	      m4_error (context, EXIT_FAILURE, 0,
 			_("failed to add search directory `%s'"),
-			optarg));
+			optarg);
 	    else
-	      M4ERROR ((EXIT_FAILURE, 0,
+	      m4_error (context, EXIT_FAILURE, 0,
 			_("failed to add search directory `%s': %s"),
-			optarg, dlerr));
+			optarg, dlerr);
 	  }
 	break;
 
@@ -402,7 +384,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initialisations.  */
 
-  m4_input_init ();
+  m4_input_init (context);
   m4_output_init ();
   m4_include_env_init (context);
 
@@ -480,14 +462,13 @@ main (int argc, char *const *argv, char *const *envp)
 				      m4_regexp_syntax_encode (optarg));
 	    if (m4_get_regexp_syntax_opt (context) < 0)
 	      {
-		M4ERROR ((EXIT_FAILURE, 0,
-			  _("Bad regexp syntax option: `%s'"), optarg));
+		m4_error (context, EXIT_FAILURE, 0,
+			  _("bad regexp syntax option: `%s'"), optarg);
 	      }
 	    break;
 
 	  default:
-	    M4ERROR ((m4_get_warning_status_opt (context), 0,
-		      "INTERNAL ERROR: Bad code in deferred arguments"));
+	    assert (!"INTERNAL ERROR: bad code in deferred arguments");
 	    abort ();
 	  }
 
@@ -547,7 +528,7 @@ main (int argc, char *const *argv, char *const *envp)
   else
     {
       m4_make_diversion (0);
-      m4_undivert_all ();
+      m4_undivert_all (context);
     }
 
   /* The remaining cleanup functions systematically free all of the
@@ -560,6 +541,8 @@ main (int argc, char *const *argv, char *const *envp)
   m4_output_exit ();
   m4_input_exit ();
 
+  if (exit_status == EXIT_SUCCESS)
+    exit_status = m4_get_exit_status (context);
   m4_delete (context);
 
   m4_hash_exit ();

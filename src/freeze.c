@@ -25,7 +25,7 @@
 #include "m4private.h"
 
 static	int   decode_char	    (FILE *);
-static	void  issue_expect_message  (int);
+static	void  issue_expect_message  (m4 *, int);
 static	int   produce_char_dump     (char *, int);
 static	void  produce_resyntax_dump (m4 *, FILE *);
 static	void  produce_syntax_dump   (FILE *, m4_syntax_table *, char);
@@ -95,8 +95,8 @@ produce_resyntax_dump (m4 *context, FILE *file)
       const char *resyntax = m4_regexp_syntax_decode (code);
 
       if (!resyntax)
-	M4ERROR ((EXIT_FAILURE, 0,
-		  _("Invalid regexp syntax code `%d'"), code));
+	m4_error (context, EXIT_FAILURE, 0,
+		  _("invalid regexp syntax code `%d'"), code);
 
       fprintf (file, "R%d\n%s\n", strlen(resyntax), resyntax);
     }
@@ -155,11 +155,7 @@ produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
   const char *errormsg = m4_symtab_apply (symtab, dump_symbol_CB, file);
 
-  if (errormsg)
-    {
-      M4ERROR ((m4_get_warning_status_opt (context), 0, errormsg));
-      abort ();
-    }
+  assert (!errormsg);
 }
 
 static void *
@@ -191,7 +187,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 						m4_get_symbol_func (symbol));
 
       if (bp == NULL)
-	return "INTERNAL ERROR: Builtin not found in builtin table!";
+	return "INTERNAL ERROR: builtin not found in builtin table!";
 
       fprintf (file, "F%lu,%lu",
 	       (unsigned long) strlen (symbol_name),
@@ -211,7 +207,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   else if (m4_is_symbol_placeholder (symbol))
     ; /* Nothing to do for a builtin we couldn't reload earlier.  */
   else
-    return "INTERNAL ERROR: Bad token data type in produce_symbol_dump ()";
+    return "INTERNAL ERROR: bad token data type in produce_symbol_dump ()";
 
   return NULL;
 }
@@ -227,9 +223,10 @@ produce_frozen_state (m4 *context, const char *name)
 # define FROZEN_WRITE "w"
 #endif
 
-  if (file = fopen (name, FROZEN_WRITE), !file)
+  file = fopen (name, FROZEN_WRITE);
+  if (!file)
     {
-      M4ERROR ((m4_get_warning_status_opt (context), errno, name));
+      m4_error (context, 0, errno, _("cannot open `%s'"), name);
       return;
     }
 
@@ -297,7 +294,7 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
-  m4_freeze_diversions (file);
+  m4_freeze_diversions (context, file);
 
   /* All done.  */
 
@@ -307,13 +304,14 @@ produce_frozen_state (m4 *context, const char *name)
 
 /* Issue a message saying that some character is an EXPECTED character. */
 static void
-issue_expect_message (int expected)
+issue_expect_message (m4 *context, int expected)
 {
   if (expected == '\n')
-    M4ERROR ((EXIT_FAILURE, 0, _("Expecting line feed in frozen file")));
+    m4_error (context, EXIT_FAILURE, 0,
+	      _("expecting line feed in frozen file"));
   else
-    M4ERROR ((EXIT_FAILURE, 0, _("Expecting character `%c' in frozen file"),
-	      expected));
+    m4_error (context, EXIT_FAILURE, 0,
+	      _("expecting character `%c' in frozen file"), expected);
 }
 
 /* Reload a frozen state from the given file NAME. */
@@ -371,10 +369,10 @@ reload_frozen_state (m4 *context, const char *name)
   int allocated[3];
   int number[3] = {0};
 
-#define GET_CHARACTER \
+#define GET_CHARACTER						\
   (character = getc (file))
 
-#define GET_NUMBER(Number) \
+#define GET_NUMBER(Number)					\
   do								\
     {								\
       (Number) = 0;						\
@@ -386,27 +384,27 @@ reload_frozen_state (m4 *context, const char *name)
     }								\
   while (0)
 
-#define GET_STRING(File, Buf, BufSize, StrLen) \
+#define GET_STRING(File, Buf, BufSize, StrLen)			\
   do								\
     {								\
       CHECK_ALLOCATION((Buf), (BufSize), (StrLen));		\
       if ((StrLen) > 0)						\
 	if (!fread ((Buf), (size_t) (StrLen), 1, (File)))	\
-	    M4ERROR ((EXIT_FAILURE, 0,				\
-		      _("Premature end of frozen file")));	\
+	  m4_error (context, EXIT_FAILURE, 0,			\
+		    _("premature end of frozen file"));		\
       (Buf)[(StrLen)] = '\0';					\
     }								\
   while (0)
 
-#define VALIDATE(Expected) \
+#define VALIDATE(Expected)					\
   do								\
     {								\
       if (character != (Expected))				\
-	issue_expect_message ((Expected));			\
+	issue_expect_message (context, (Expected));		\
     }								\
   while (0)
 
-#define CHECK_ALLOCATION(Where, Allocated, Needed) \
+#define CHECK_ALLOCATION(Where, Allocated, Needed)		\
   do								\
     {								\
       if ((Needed) + 1 > (Allocated))				\
@@ -421,22 +419,22 @@ reload_frozen_state (m4 *context, const char *name)
   /* Skip comments (`#' at beginning of line) and blank lines, setting
      character to the next directive or to EOF.  */
 
-#define GET_DIRECTIVE \
-  do                                                            \
-    {                                                           \
-      GET_CHARACTER;                                            \
-      if (character == '#')                                     \
-	{                                                       \
-	  while (character != EOF && character != '\n')         \
-	    GET_CHARACTER;                                      \
-	  VALIDATE ('\n');                                      \
-	}                                                       \
-    }                                                           \
+#define GET_DIRECTIVE						\
+  do								\
+    {								\
+      GET_CHARACTER;						\
+      if (character == '#')					\
+	{							\
+	  while (character != EOF && character != '\n')		\
+	    GET_CHARACTER;					\
+	  VALIDATE ('\n');					\
+	}							\
+    }								\
   while (character == '\n')
 
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
-    M4ERROR ((EXIT_FAILURE, errno, _("Cannot open %s"), name));
+    m4_error (context, EXIT_FAILURE, errno, _("cannot open `%s'"), name);
 
   allocated[0] = 100;
   string[0] = xmalloc ((size_t) allocated[0]);
@@ -474,12 +472,12 @@ reload_frozen_state (m4 *context, const char *name)
       break;
     default:
       if (version > 2)
-	M4ERROR ((EXIT_MISMATCH, 0,
-		  "frozen file version %d greater than max supported of 2",
-		  version));
+	m4_error (context, EXIT_MISMATCH, 0,
+		  _("frozen file version %d greater than max supported of 2"),
+		  version);
       else
-	M4ERROR ((EXIT_FAILURE, 0,
-		  "ill-formed frozen file, version directive expected"));
+	m4_error (context, EXIT_FAILURE, 0,
+		  _("ill-formed frozen file, version directive expected"));
     }
   VALIDATE ('\n');
 
@@ -489,9 +487,9 @@ reload_frozen_state (m4 *context, const char *name)
       switch (character)
 	{
 	default:
-	  M4ERROR ((EXIT_FAILURE, 0,
+	  m4_error (context, EXIT_FAILURE, 0,
 		    _("ill-formed frozen file, unknown directive %c"),
-		    character));
+		    character);
 
 	case 'F':
 	  GET_CHARACTER;
@@ -515,8 +513,8 @@ reload_frozen_state (m4 *context, const char *name)
 	      else
 		/* 3 argument 'F' operations are invalid for format
 		   version 1.  */
-		M4ERROR ((EXIT_FAILURE, 0, _("\
-ill-formed frozen file, version 2 directive encountered")));
+		m4_error (context, EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 	    }
 	  else
 	    {
@@ -576,8 +574,8 @@ ill-formed frozen file, version 2 directive encountered")));
 	  if (version < 2)
 	    {
 	      /* 'M' operator is not supported in format version 1. */
-	      M4ERROR ((EXIT_FAILURE, 0, _("\
-ill-formed frozen file, version 2 directive encountered")));
+	      m4_error (context, EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	    }
 
 	  GET_CHARACTER;
@@ -595,8 +593,8 @@ ill-formed frozen file, version 2 directive encountered")));
 	  if (version < 2)
 	    {
 	      /* 'R' operator is not supported in format version 1. */
-	      M4ERROR ((EXIT_FAILURE, 0, _("\
-ill-formed frozen file, version 2 directive encountered")));
+	      m4_error (context, EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	    }
 
 	  GET_CHARACTER;
@@ -609,8 +607,8 @@ ill-formed frozen file, version 2 directive encountered")));
 				    m4_regexp_syntax_encode (string[0]));
 	  if (m4_get_regexp_syntax_opt (context) < 0)
 	    {
-	      M4ERROR ((EXIT_FAILURE, 0,
-			_("Unknown regexp syntax code %s"), string[0]));
+	      m4_error (context, EXIT_FAILURE, 0,
+			_("unknown regexp syntax code `%s'"), string[0]);
 	    }
 
 	  break;
@@ -620,8 +618,8 @@ ill-formed frozen file, version 2 directive encountered")));
 	  if (version < 2)
 	    {
 	      /* 'S' operator is not supported in format version 1. */
-	      M4ERROR ((EXIT_FAILURE, 0, _("\
-ill-formed frozen file, version 2 directive encountered")));
+	      m4_error (context, EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	    }
 
 	  GET_CHARACTER;
@@ -640,8 +638,8 @@ ill-formed frozen file, version 2 directive encountered")));
 		  int ch = decode_char (file);
 
 		  if (ch < 0)
-		    M4ERROR ((EXIT_FAILURE, 0,
-			      _("Premature end of frozen file")));
+		    m4_error (context, EXIT_FAILURE, 0,
+			      _("premature end of frozen file"));
 
 		  string[0][i] = (unsigned char) ch;
 		}
@@ -651,8 +649,8 @@ ill-formed frozen file, version 2 directive encountered")));
 	  if ((m4_set_syntax (context->syntax, syntax, string[0]) < 0)
 	      && (syntax != '\0'))
 	    {
-	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			_("Undefined syntax code %c"), syntax));
+	      m4_error (context, 0, 0,
+			_("undefined syntax code %c"), syntax);
 	    }
 	  break;
 
@@ -743,8 +741,8 @@ ill-formed frozen file, version 2 directive encountered")));
 		{
 		  /* 3 argument 'T' operations are invalid for format
 		     version 1.  */
-		  M4ERROR ((EXIT_FAILURE, 0, _("\
-ill-formed frozen file, version 2 directive encountered")));
+		  m4_error (context, EXIT_FAILURE, 0, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 		}
 	    }
 	  else

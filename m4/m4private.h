@@ -26,13 +26,8 @@
 #  include <config.h>
 #endif
 
-#include <errno.h>
-
-#ifndef errno
-extern int errno;
-#endif
-
 #include <assert.h>
+#include <errno.h>
 
 #include "m4module.h"
 
@@ -56,11 +51,14 @@ struct m4 {
   m4_symbol_table *	symtab;
   m4_syntax_table *	syntax;
 
+  const char *		current_file;	/* Current input file.  */
+  int			current_line;	/* Current input line.  */
+
   FILE *		debug_file;	/* File for debugging output.  */
   m4_obstack		trace_messages;
+  int			exit_status;	/* Cumulative exit status.  */
 
   /* Option flags  (set in src/main.c).  */
-  int		warning_status;			/* -E */
   bool		no_gnu_extensions;		/* -G */
   int		nesting_limit;			/* -L */
   int		debug_level;			/* -d */
@@ -78,6 +76,7 @@ struct m4 {
 #define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
 #define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
 #define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
+#define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E */
 
 /* Fast macro versions of accessor functions for public fields of m4,
    that also have an identically named function exported in m4module.h.  */
@@ -86,12 +85,16 @@ struct m4 {
 #  define m4_set_symbol_table(C, V)		((C)->symtab = (V))
 #  define m4_get_syntax_table(C)		((C)->syntax)
 #  define m4_set_syntax_table(C, V)		((C)->syntax = (V))
+#  define m4_get_current_file(C)		((C)->current_file)
+#  define m4_set_current_file(C, V)		((C)->current_file = (V))
+#  define m4_get_current_line(C)		((C)->current_line)
+#  define m4_set_current_line(C, V)		((C)->current_line = (V))
 #  define m4_get_debug_file(C)			((C)->debug_file)
 #  define m4_set_debug_file(C, V)		((C)->debug_file = (V))
 #  define m4_get_trace_messages(C)		((C)->trace_messages)
 #  define m4_set_trace_messages(C, V)		((C)->trace_messages = (V))
-#  define m4_get_warning_status_opt(C)		((C)->warning_status)
-#  define m4_set_warning_status_opt(C, V)	((C)->warning_status = (V))
+#  define m4_get_exit_status(C)			((C)->exit_status)
+#  define m4_set_exit_status(C, V)		((C)->exit_status = (V))
 #  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
 #  define m4_set_no_gnu_extensions_opt(C, V)	((C)->no_gnu_extensions = (V))
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)
@@ -115,6 +118,8 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_SYNC_OUTPUT_BIT))
 #  define m4_get_posixly_correct_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
+#  define m4_get_fatal_warnings_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_FATAL_WARN_BIT))
 
 /* No fast opt bit set macros, as they would need to evaluate their
    arguments more than once, which would subtly change their semantics.  */

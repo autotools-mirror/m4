@@ -32,7 +32,7 @@ static void    expand_macro      (m4 *context, const char *name,
 				  m4_symbol *symbol);
 static void    expand_token      (m4 *context, m4_obstack *obs,
 				  m4__token_type type, m4_symbol_value *token);
-static bool expand_argument   (m4 *context, m4_obstack *obs,
+static bool    expand_argument   (m4 *context, m4_obstack *obs,
 				  m4_symbol_value *argp);
 
 static void    process_macro	 (m4 *context, m4_symbol *symbol,
@@ -119,8 +119,7 @@ expand_token (m4 *context, m4_obstack *obs,
       break;
 
     default:
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		"INTERNAL ERROR: Bad token type in expand_token ()"));
+      assert (!"INTERNAL ERROR: bad token type in expand_token ()");
       abort ();
     }
 
@@ -142,8 +141,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
   m4_symbol_value token;
   char *text;
   int paren_level = 0;
-  const char *current_file = m4_current_file;
-  int current_line = m4_current_line;
+  const char *current_file = m4_get_current_file (context);
+  int current_line = m4_get_current_line (context);
 
   argp->type = M4_SYMBOL_VOID;
 
@@ -200,8 +199,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  break;
 
 	default:
-	  M4ERROR ((m4_get_warning_status_opt (context), 0,
-		    "INTERNAL ERROR: Bad token type in expand_argument ()"));
+	  assert (!"INTERNAL ERROR: bad token type in expand_argument ()");
 	  abort ();
 	}
 
@@ -231,9 +229,9 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
 
   expansion_level++;
   if (expansion_level > m4_get_nesting_limit_opt (context))
-    M4ERROR ((EXIT_FAILURE, 0, _("\
-ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
-	      m4_get_nesting_limit_opt (context)));
+    m4_error (context, EXIT_FAILURE, 0, _("\
+recursion limit of %d exceeded, use -L<N> to change it"),
+	      m4_get_nesting_limit_opt (context));
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -331,14 +329,13 @@ m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
     }
   else if (m4_is_symbol_placeholder (symbol))
     {
-      M4WARN ((m4_get_warning_status_opt (context), 0, _("\
+      m4_warn (context, 0, _("\
 Warning: %s: builtin `%s' requested by frozen file not found"),
-	       M4ARG (0), m4_get_symbol_placeholder (symbol)));
+	       M4ARG (0), m4_get_symbol_placeholder (symbol));
     }
   else
     {
-      M4ERROR ((m4_get_warning_status_opt (context), 0,
-		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
+      assert (!"INTERNAL ERROR: bad symbol type in call_macro ()");
       abort ();
     }
 }
@@ -407,8 +404,14 @@ process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 	      const char * endp;
 	      const char * key;
 
-	      for (endp = ++text; *endp && m4_has_syntax (M4SYNTAX, *endp, M4_SYNTAX_OTHER|M4_SYNTAX_ALPHA|M4_SYNTAX_NUM); ++endp)
-		++len;
+	      for (endp = ++text;
+		   *endp && m4_has_syntax (M4SYNTAX, *endp,
+					   (M4_SYNTAX_OTHER | M4_SYNTAX_ALPHA
+					    | M4_SYNTAX_NUM));
+		   ++endp)
+		{
+		  ++len;
+		}
 	      key = xstrndup (text, len);
 
 	      if (*endp)
@@ -424,19 +427,20 @@ process_macro (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 		      if (i < argc)
 			m4_shipout_string (context, obs, M4ARG (i), 0, false);
 		      else
-			M4ERROR ((EXIT_FAILURE, 0, "\
-INTERNAL ERROR: %s: out of range reference `%d' from argument %s",
-			      M4ARG (0), i, key));
+			{
+			  assert (!"INTERNAL ERROR: out of range reference");
+			  abort ();
+			}
 		    }
 		}
 	      else
 		{
-		  M4ERROR ((m4_get_warning_status_opt (context), 0,
-			  _("Error: %s: unterminated parameter reference: %s"),
-			    M4ARG (0), key));
+		  m4_error (context, 0, 0,
+			    _("%s: unterminated parameter reference: %s"),
+			    M4ARG (0), key);
 		}
 
-	      text = *endp ? 1+ endp : endp;
+	      text = *endp ? 1 + endp : endp;
 
 	      free ((char *) key);
 	      break;
@@ -531,10 +535,13 @@ static void
 trace_header (m4 *context, int id)
 {
   trace_format (context, "m4trace:");
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
-    trace_format (context, "%s:", m4_current_file);
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
-    trace_format (context, "%d:", m4_current_line);
+  if (m4_get_current_line (context))
+    {
+      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
+	trace_format (context, "%s:", m4_get_current_file (context));
+      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
+	trace_format (context, "%d:", m4_get_current_line (context));
+    }
   trace_format (context, " -%d- ", expansion_level);
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALLID))
     trace_format (context, "id %d: ", id);
@@ -594,8 +601,7 @@ trace_pre (m4 *context, const char *name, int id,
 					    m4_get_symbol_value_func(argv[i]));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((m4_get_warning_status_opt (context), 0, "\
-INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
+		  assert (!"INTERNAL ERROR: builtin not found in table!");
 		  abort ();
 		}
 	      trace_format (context, "<%s>", bp->name);
@@ -607,8 +613,7 @@ INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
 	    }
 	  else
 	    {
-	      M4ERROR ((m4_get_warning_status_opt (context), 0,
-			"INTERNAL ERROR: Bad token data type (trace_pre ())"));
+	      assert (!"INTERNAL ERROR: bad token data type (trace_pre ())");
 	      abort ();
 	    }
 	}

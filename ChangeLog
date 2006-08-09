@@ -1,5 +1,41 @@
 2006-08-09  Eric Blake  <ebb9@byu.net>
 
+	* bootstrap: Recent gnulib no longer has jm_* macros to worry
+	about.
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	verror.
+	* m4/m4module.h (M4ERROR, M4WARN): Delete, replaced by...
+	(m4_error, m4_warn): ... these new prototypes.
+	(m4_current_file, m4_current_line): Move into context, rather
+	than leaving as globals.
+	(m4_insert_file, m4_insert_diversion, m4_freeze_diversions)
+	(m4_undivert_all, m4_input_init): Now takes context.
+	* m4/utility.c (m4_error, m4_warn): New functions.
+	* m4/m4private.h: Assume errno exists.
+	(struct m4): Move warning_status to a bit flag,
+	and add exit_status.  Adjust accessors accordingly.
+	* src/main.c (print_program_name_CB): No longer needed.
+	(main): Use new m4_get_fatal_warnings_opt.
+	* m4/debug.c: Adjust all callers of M4WARN and M4ERROR, and abort
+	instead of issuing "INTERNAL ERROR".  Pass context when needed,
+	and use new accessors.
+	* m4/input.c: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/utility.c: Likewise.
+	* modules/evalparse.c: Likewise.
+	* modules/gnu.c: Likewise.
+	* modules/load.c: Likewise.
+	* modules/m4.c: Likewise.
+	* modules/mpeval.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/main.c: Likewise.
+	* tests/macros.at: Adjust to new message format.
+	* tests/builtins.at: Likewise.
+	* tests/freeze.at: Likewise.
+	* tests/modules.at: Likewise.
+	* doc/m4.texinfo: Likewise.
+
 	* configure.ac (AM_GNU_GETTEXT, AM_GNU_GETTEXT_VERSION): Require
 	newer gettext 0.15.
 
