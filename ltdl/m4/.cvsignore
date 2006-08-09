@@ -19,6 +19,7 @@ iconv.m4
 intdiv0.m4
 intmax.m4
 intmax_t.m4
+inttypes-h.m4
 inttypes-pri.m4
 inttypes.m4
 inttypes_h.m4
@@ -28,6 +29,7 @@ lib-ld.m4
 lib-link.m4
 lib-prefix.m4
 libtool.m4
+lock.m4
 longdouble.m4
 longlong.m4
 ltdl.m4
@@ -65,6 +67,7 @@ uintmax_t.m4
 ulonglong.m4
 vasnprintf.m4
 vasprintf.m4
+visibility.m4
 wchar_t.m4
 wcwidth.m4
 wint_t.m4
