@@ -1,3 +1,8 @@
+2006-08-09  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AM_GNU_GETTEXT, AM_GNU_GETTEXT_VERSION): Require
+	newer gettext 0.15.
+
 2006-08-03  Eric Blake  <ebb9@byu.net>
 
 	* src/stackovf.c (setup_stackovf_trap): Port patch from branch to

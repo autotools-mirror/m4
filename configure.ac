@@ -132,8 +132,8 @@ esac
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
-AM_GNU_GETTEXT([external], [need-ngettext])
-AM_GNU_GETTEXT_VERSION([0.14.5])
+AM_GNU_GETTEXT([external], [need-formatstring-macros])
+AM_GNU_GETTEXT_VERSION([0.15])
 M4_GNU_GETTEXT
 
 
