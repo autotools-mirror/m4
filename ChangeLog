@@ -1,3 +1,9 @@
+2006-08-09  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Incompatibilities): Document that m4 does not
+	yet understand locales.
+	* NEWS: Fix wording of a few items.
+
 2006-08-08  Eric Blake  <ebb9@byu.net>
 
 	Avoid printing `NONE:0:' in error messages.

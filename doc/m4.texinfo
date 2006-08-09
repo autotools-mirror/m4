@@ -4639,6 +4639,12 @@ adds the exponentiation operator @samp{**}.
 @acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat
 each character of the second and third arguments literally, but @acronym{GNU}
 @code{m4} treats @samp{-} as a range operator.
+
+@item
+@acronym{POSIX} requires @code{m4} to honor the locale environment
+variables of @env{LANG}, @env{LC_ALL}, @env{LC_CTYPE},
+@env{LC_MESSAGES}, and @env{NLSPATH}, but this has not yet been
+implemented in @acronym{GNU} @code{m4}.
 @end itemize
 
 @node Other Incompatibilities
