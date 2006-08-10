@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-08-08
+# bootstrap (GNU M4) version 2006-08-10
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -29,13 +29,16 @@
 # -v      --version          print version information
 # -h,-?   --help             print short or long help message
 
+# For --download-po, ARG can also be `no' to skip pofile downloads,
+# `only' to just update pofiles, or a set of locales to add or update.
+
 # You can also set the following variables to help $progname
 # locate the right tools:
 #   AUTORECONF, AWK, GNULIB_TOOL, RM, SED, WGET
 
 # This script bootstraps a CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
-# requires the latest releases of GNU Gettext and Autoconf, and
+# requires GNU Gettext 0.15 or better, and Autoconf 2.60 or better, and
 # bleeding edge CVS snapshots of GNU Automake, Libtool & Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
@@ -46,9 +49,19 @@
 : ${RM=rm -f}
 : ${SED=sed}
 : ${WGET=wget}
+export WGET
 
 : ${DOWNLOAD_PO=yes}
 
+# Translation Project URL, for the registry of all projects.
+TP_URL="http://www.iro.umontreal.ca/translation/registry.cgi?domain="
+
+# Ensure file names are sorted consistently across platforms.
+# Also, ensure diagnostics are in English, e.g., "wget --help" below.
+LC_ALL=C
+export LC_ALL
+
+package=m4
 ltdldir=ltdl
 config_aux_dir=$ltdldir/config
 config_macro_dir=$ltdldir/m4
@@ -231,7 +244,44 @@ func_version ()
 ## (taken from GNU tar bootstrap) ##
 ## ------------------------------ ##
 
-TP_URL="http://www.iro.umontreal.ca/translation/maint/m4/"
+func_get_translations()
+{
+  subdir=$1
+  domain=$2
+  po_file=$3
+
+  func_echo "getting translations into $subdir for $domain..."
+  (cd $subdir && rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'`) &&
+
+  $WGET -nv --cache=off -O "$subdir/$domain.html" "$TP_URL$domain" &&
+
+  $SED -n 's|.*"http://[^"]*/translation/teams/PO/\([^/"]*\)/'"$domain"'-\([^/"]*\)\.[^."]*\.po".*|\1.\2|p' <"$subdir/$domain.html" |
+  sort -k 1,1 -k 2,2n -k2,2 -k3,3n -k3,3 -k4,4n -k4,4 -k5,5n -k5.5 |
+  $AWK -F. '
+    { if (lang && $1 != lang) print lang, ver }
+    { lang = $1; ver = substr($0, index($0, ".") + 1) }
+    END { if (lang) print lang, ver }
+  ' |
+  $AWK -v domain="$domain" -v po_file="$po_file" -v subdir="$subdir" '
+    {
+      lang = $1
+      if (po_file == (lang ".po")) next
+
+      ver = $2
+      urlfmt = ""
+      printf "$WGET -nv --cache=off -O %s/%s.po 'http://www.iro.umontreal.ca/translation/teams/PO/%s/%s-%s.%s.po' &&\n", subdir, lang, lang, domain, ver, lang
+    }
+    END { print ":" }
+  ' |
+  sh &&
+  ls "$subdir"/*.po | sed 's|.*/||; s|\.po$||' >"$subdir/LINGUAS" &&
+  rm "$subdir/$domain.html"
+}
+
+## ------------------------------ ##
+## Update translations.           ##
+## (taken from GNU tar bootstrap) ##
+## ------------------------------ ##
 
 func_update_po ()
 {
@@ -240,16 +290,12 @@ func_update_po ()
 	*.po)  POFILE=$1    ;;
 	*)     POFILE=$1.po ;;
       esac
-      func_echo "getting translation for $1..."
-      $WGET -r --cache=off $TP_URL/$POFILE
+      func_get_translations po $package "$POFILE" &&
+      LANG=`expr $POFILE : '\(.*\)\.po'` &&
+      { grep -q $LANG po/LINGUAS ||
+	(echo $LANG; cat po/LINGUAS) | sort -o po/LINGUAS; }
     else
-      func_echo "getting translations into po..."
-      (cd po &&
-       rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'` &&
-	 $WGET -nv -nd -r -l 1 -A .po --cache=off $TP_URL &&
-	 rm -f index.html index.html.[0-9]*
-       ls *.po | sed 's/\.po$//' > LINGUAS
-      ) || exit
+      func_get_translations po $package
     fi
 }
 
@@ -276,7 +322,7 @@ while test -h "$gnulibdir"; do
     # Resolve symbolic link.
     sedexpr1='s, -> ,#%%#,'
     sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
-    linkval=`LC_ALL=C ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
+    linkval=`ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
     test -n "$linkval" || break
 
     case "$linkval" in

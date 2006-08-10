@@ -1,3 +1,9 @@
+2006-08-10  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap (func_get_translations): New function.
+	(func_update_po): Borrow ideas from tar to correctly pull in
+	translations from newer location.
+
 2006-08-09  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap: Recent gnulib no longer has jm_* macros to worry
