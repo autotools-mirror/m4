@@ -251,7 +251,10 @@ func_get_translations()
   po_file=$3
 
   func_echo "getting translations into $subdir for $domain..."
-  (cd $subdir && rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'`) &&
+
+  case $po_file in
+    '') (cd $subdir && rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'`);;
+  esac &&
 
   $WGET -nv --cache=off -O "$subdir/$domain.html" "$TP_URL$domain" &&
 
@@ -290,12 +293,12 @@ func_update_po ()
 	*.po)  POFILE=$1    ;;
 	*)     POFILE=$1.po ;;
       esac
-      func_get_translations po $package "$POFILE" &&
+      func_get_translations ./po $package "$POFILE" &&
       LANG=`expr $POFILE : '\(.*\)\.po'` &&
       { grep -q $LANG po/LINGUAS ||
 	(echo $LANG; cat po/LINGUAS) | sort -o po/LINGUAS; }
     else
-      func_get_translations po $package
+      func_get_translations ./po $package
     fi
 }
 

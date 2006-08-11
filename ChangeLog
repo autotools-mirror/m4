@@ -1,3 +1,9 @@
+2006-08-11  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap (func_get_translations): Only remove files when doing
+	full update.
+	(func_update_po): Avoid CDPATH problems.
+
 2006-08-10  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap (func_get_translations): New function.
