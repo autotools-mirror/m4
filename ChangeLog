@@ -1,7 +1,7 @@
 2006-08-12  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Arguments): Hint at better exch macro.
-	(Answers): Provide a better definiton.
+	(Answers): Provide a better definition.
 
 2006-08-09  Eric Blake  <ebb9@byu.net>
 
