@@ -1231,6 +1231,8 @@ macro
 @end example
 
 @xref{Quoting Arguments}, for an explanation of the double quotes.
+(You should try and improve this example so that clients of exch do not
+have to double quote.  @pxref{Answers})
 
 @cindex @acronym{GNU} extensions
 @acronym{GNU} @code{m4} allows the number following the @samp{$} to
@@ -4706,6 +4708,21 @@ in traditional programming languages.
 
 Some of the examples in this manuals are buggy, for demonstration
 purposes.  Correctly working macros are presented here.
+
+The @code{exch} macro (@pxref{Arguments}) as presented requires clients
+to double quote their arguments.  A nicer definition, which lets
+clients follow the rule of thumb of one level of quoting per level of
+parentheses, involves adding quotes in the definition of @code{exch}, as
+follows:
+
+@example
+define(`exch', ``$2', `$1'')
+@result{}
+define(exch(`expansion text', `macro'))
+@result{}
+macro
+@result{}expansion text
+@end example
 
 The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
 called without arguments to clear all pending diversions.  That is
