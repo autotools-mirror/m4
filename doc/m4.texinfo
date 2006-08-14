@@ -288,8 +288,8 @@ builtin or user-defined, and can take any number of arguments.
 Besides just doing macro expansion, @code{m4} has builtin functions
 for including named files, running shell commands, doing integer
 arithmetic, manipulating text in various ways, performing recursion,
-etc@dots{} @code{m4} can be used either as a front-end to a compiler, or
-as a macro processor in its own right.
+etc.@dots{}  @code{m4} can be used either as a front-end to a compiler,
+or as a macro processor in its own right.
 
 The @code{m4} macro processor is widely available on all UNIXes, and has
 been standardized by @acronym{POSIX}.
@@ -352,7 +352,8 @@ Fran@,{c}ois Pinard took over maintenance of @acronym{GNU} @code{m4} in
 1992, until 1994 when he released @acronym{GNU} @code{m4} 1.4, which was
 the stable release for 10 years.  It was at this time that @acronym{GNU}
 Autoconf decided to require @acronym{GNU} @code{m4} as its underlying
-engine, since all other implementations of @code{m4} had too many limitations.
+engine, since all other implementations of @code{m4} had too many
+limitations.
 
 More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
 addressed some long standing bugs in the venerable 1.4 release.
@@ -372,7 +373,7 @@ The format of the @code{m4} command is:
 
 @comment ignore
 @example
-@code{m4} [@var{option}@dots{}] [@var{file}@dots{}]
+@code{m4} @r{[}@var{option}@dots{}@r{]} @r{[}@var{file}@dots{}@r{]}
 @end example
 
 @cindex command line, options
@@ -409,8 +410,8 @@ output will be unbuffered, and interrupts will be ignored.
 Internally modify @emph{all} builtin macro names so they all start with
 the prefix @samp{m4_}.  For example, using this option, one should write
 @samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
-instead of @samp{__file__}.  This option has no effect if @option{-R} is
-also specified.
+instead of @samp{__file__}.  This option has no effect if @option{-R}
+is also specified.
 
 @item -Q
 @itemx --quiet
@@ -433,8 +434,8 @@ search path can be altered, and the output file can track where the
 input came from.  These features occur with the following options:
 
 @table @code
-@item -D @var{NAME}[=@var{VALUE}]
-@itemx --define=@var{NAME}[=@var{VALUE}]
+@item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
+@itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
 This enters @var{NAME} into the symbol table, before any input files are
 read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
 empty string.  The @var{VALUE} can be any string, and the macro can be
@@ -442,11 +443,11 @@ defined to take arguments, just as if it was defined from within the
 input.  This option may be given more than once; order is significant,
 and redefining the same @var{NAME} loses the previous value.
 
-@item -I @var{DIR}
-@itemx --include=@var{DIR}
-Make @code{m4} search @var{DIR} for included files that are not found in
-the current working directory.  @xref{Search Path}, for more details.
-This option may be given more than once.
+@item -I @var{DIRECTORY}
+@itemx --include=@var{DIRECTORY}
+Make @code{m4} search @var{DIRECTORY} for included files that are not
+found in the current working directory.  @xref{Search Path}, for more
+details.  This option may be given more than once.
 
 @item -s
 @itemx --synclines
@@ -504,9 +505,9 @@ Most users would never need this option.  If shown to be obtrusive,
 this option (which is still experimental) might well disappear.
 
 This option does @emph{not} have the ability to break endless
-rescanning loops, while these do not necessarily consume much memory
+rescanning loops, since these do not necessarily consume much memory
 or stack space.  Through clever usage of rescanning loops, one can
-request complex, time-consuming computations to @code{m4} with useful
+request complex, time-consuming computations from @code{m4} with useful
 results.  Putting limitations in this area would break @code{m4} power.
 There are many pathological cases: @w{@samp{define(`a', `a')a}} is
 only the simplest example (but @pxref{Compatibility}).  Expecting @acronym{GNU}
@@ -534,13 +535,13 @@ execution when reusing a common initialization script.
 
 @table @code
 @item -F @var{FILE}
-@itemx --freeze-state @var{FILE}
+@itemx --freeze-state=@var{FILE}
 Once execution is finished, write out the frozen state on the specified
 @var{FILE}.  It is conventional, but not required, for @var{FILE} to end
 in @samp{.m4f}.
 
 @item -R @var{FILE}
-@itemx --reload-state @var{FILE}
+@itemx --reload-state=@var{FILE}
 Before execution starts, recover the internal state from the specified
 frozen @var{FILE}.  The options @option{-D}, @option{-U}, and
 @option{-t} take effect after state is reloaded, but before the input
@@ -551,8 +552,8 @@ Finally, there are several options for aiding in debugging @code{m4}
 scripts.
 
 @table @code
-@item -d[@var{FLAGS}]
-@itemx --debug[=@var{FLAGS}]
+@item -d@r{[}@var{FLAGS}@r{]}
+@itemx --debug@r{[}=@var{FLAGS}@r{]}
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debug Levels}, for more details on the format and
@@ -561,13 +562,15 @@ meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to @samp{aeq}.
 @item -l @var{NUM}
 @itemx --arglength=@var{NUM}
 Restrict the size of the output generated by macro tracing to @var{NUM}
-characters per trace line.  @xref{Debug Levels}, for more details.
+characters per trace line.  If unspecified or zero, output is
+unlimited.  @xref{Debug Levels}, for more details.
 
 @item -o @var{FILE}
 @itemx --error-output=@var{FILE}
-Redirect debug and trace output to the named @var{FILE}.  Error messages
-are still printed on the standard error output.  @xref{Debug Output},
-for more details.
+Redirect debug and trace output to the named @var{FILE}.  Warnings,
+error messages, and the output of @code{errprint} and @code{dumpdef},
+are still printed to standard error.  @xref{Debug Output}, for more
+details.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
@@ -586,7 +589,7 @@ conventional, but not required, for input files to end in @samp{.m4}.
 The input files are read in the sequence given.  The standard input can
 only be read once, so the file name @file{-} should only appear once on
 the command line.  It is an error if an input file ends in the middle of
-argument collection or a quoted string.
+argument collection, a comment, or a quoted string.
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
