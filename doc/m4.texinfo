@@ -42,7 +42,7 @@
 
 @copying
 
-This manual is for GNU M4 (version @value{VERSION}, @value{UPDATED}),
+This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
@@ -83,18 +83,18 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @insertcopying
 @end ifnottex
 
-GNU @code{m4} is an implementation of the traditional UNIX macro
+@acronym{GNU} @code{m4} is an implementation of the traditional UNIX macro
 processor.  It is mostly SVR4 compatible, although it has some
 extensions (for example, handling more than 9 positional parameters
 to macros).  @code{m4} also has builtin functions for including
 files, running shell commands, doing arithmetic, etc.  Autoconf needs
-GNU @code{m4} for generating @file{configure} scripts, but not for
+@acronym{GNU} @code{m4} for generating @file{configure} scripts, but not for
 running them.
 
-GNU @code{m4} was originally written by Ren@'e Seindal, with
+@acronym{GNU} @code{m4} was originally written by Ren@'e Seindal, with
 subsequent changes by Fran@,{c}ois Pinard and other volunteers
 on the Internet.  All names and email addresses can be found in the
-files @file{AUTHORS} and @file{THANKS} from the GNU M4 distribution.
+files @file{AUTHORS} and @file{THANKS} from the @acronym{GNU} M4 distribution.
 
 @ifclear beta
 This is release @value{VERSION}.  It is now to be considered stable,
@@ -116,7 +116,7 @@ file in the distribution).  @xref{Experiments}.
 
 * Macros::                      How to invoke macros
 * Definitions::                 How to define new macros
-* Conditionals::                Conditionals, loops, and recursions
+* Conditionals::                Conditionals, loops, and recursion
 
 * Debugging::                   How to debug macros and input
 
@@ -243,12 +243,13 @@ Running shell commands
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
-* Sysval::                      Exit codes
+* Sysval::                      Exit status
 * Maketemp::                    Making names for temporary files
 
 Miscellaneous builtin macros
 
 * Errprint::                    Printing error messages
+* Location::                    Printing current location
 * M4exit::                      Exiting from m4
 * Syncoutput::                  Turning on and off sync lines
 
@@ -260,7 +261,7 @@ Fast loading of frozen state
 
 Compatibility with other versions of @code{m4}
 
-* Extensions::                  Extensions in GNU m4
+* Extensions::                  Extensions in @acronym{GNU} m4
 * Incompatibilities::           Other incompatibilities
 
 Copying This Manual
@@ -278,13 +279,13 @@ Indices
 @node Preliminaries
 @chapter Introduction and preliminaries
 
-This first chapter explains what GNU @code{m4} is, where @code{m4}
+This first chapter explains what @acronym{GNU} @code{m4} is, where @code{m4}
 comes from, how to read and use this documentation, how to call the
 @code{m4} program, and how to report bugs about it.  It concludes by
 giving tips for reading the remainder of the manual.
 
 The following chapters then detail all the features of the @code{m4}
-language, as shipped in the GNU M4 package.
+language, as shipped in the @acronym{GNU} M4 package.
 
 @menu
 * Intro::                       Introduction to @code{m4}
@@ -302,17 +303,18 @@ input to the output, expanding macros as it goes.  Macros are either
 builtin or user-defined, and can take any number of arguments.
 Besides just doing macro expansion, @code{m4} has builtin functions
 for including named files, running shell commands, doing integer
-arithmetic, manipulating text in various ways, recursion, etc@dots{}
-@code{m4} can be used either as a front-end to a compiler, or as a
-macro processor in its own right.
+arithmetic, manipulating text in various ways, performing recursion,
+etc.@dots{}  @code{m4} can be used either as a front-end to a compiler,
+or as a macro processor in its own right.
 
-The @code{m4} macro processor is widely available on all UNIXes.
+The @code{m4} macro processor is widely available on all UNIXes, and has
+been standardized by @acronym{POSIX}.
 Usually, only a small percentage of users are aware of its existence.
-However, those who find it often become commited users.  The
-popularity of GNU Autoconf, which prerequires GNU @code{m4} for
-@emph{generating} the @file{configure} scripts, is an incentive
+However, those who find it often become committed users.  The
+popularity of @acronym{GNU} Autoconf, which requires @acronym{GNU}
+@code{m4} for @emph{generating} @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
-program in @code{m4}.  GNU @code{m4} is mostly compatible with the
+program in @code{m4}.  @acronym{GNU} @code{m4} is mostly compatible with the
 System V, Release 3 version, except for some minor differences.
 @xref{Compatibility}, for more details.
 
@@ -324,11 +326,10 @@ applications even to solve simple problems, devoting more time
 debugging their @code{m4} scripts than doing real work.  Beware that
 @code{m4} may be dangerous for the health of compulsive programmers.
 
-
 @node History
 @section Historical references
 
-@code{GPM} has been an important ancestor of @code{m4}.  See
+@code{GPM} was an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
 8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
@@ -340,7 +341,7 @@ macro-processor language, which inspired Dennis Ritchie to write
 
 Kernighan and Ritchie then joined forces to develop the original
 @code{m4}, as described in ``The M4 Macro Processor'', Bell
-Laboratories (1977) which had only 21 builtin macros.
+Laboratories (1977).  It had only 21 builtin macros.
 
 While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
 the true intricacies of real life: macros can be recognized without
@@ -348,29 +349,40 @@ being pre-announced, skipping whitespace or end-of-lines is easier,
 more constructs are builtin instead of derived, etc.
 
 Originally, the Kernighan and Plauger macro-processor, and then
-@code{m3} formed the engine for the Rational FORTRAN preprocessor,
+@code{m3}, formed the engine for the Rational FORTRAN preprocessor,
 that is, the @code{Ratfor} equivalent of @code{cpp}.  Later, @code{m4}
 was used as a frontend for @code{Ratfor}, @code{C} and @code{Cobol}.
 
-Rene' Seindal released his implementation of @code{m4}, GNU @code{m4},
+Ren@'e Seindal released his implementation of @code{m4}, @acronym{GNU}
+@code{m4},
 in 1990, with the aim of removing the artificial limitations in many
-of the traditional @code{m4}'s: like maximum line length, macro size,
-number of macros and so on.
+of the traditional @code{m4} implementations, such as maximum line
+length, macro size, or number of macros.
 
 The late Professor A. Dain Samples described and implemented a further
 evolution in the form of @code{M5}: ``User's Guide to the M5 Macro
 Language: 2nd edition'', Electronic Announcement on comp.compilers
 newsgroup (1992).
 
-Francois Pinard took over maintainance of GNU @code{m4} in 1992, until
-1994 when he released GNU @code{m4} 1.4, which was the stable release
-for 10 years.  In 2004, Paul Eggert released 1.4.1 and 1.4.2 which
+Fran@,{c}ois Pinard took over maintenance of @acronym{GNU} @code{m4} in
+1992, until 1994 when he released @acronym{GNU} @code{m4} 1.4, which was
+the stable release for 10 years.  It was at this time that @acronym{GNU}
+Autoconf decided to require @acronym{GNU} @code{m4} as its underlying
+engine, since all other implementations of @code{m4} had too many
+limitations.
+
+More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
 addressed some long standing bugs in the venerable 1.4 release.
+Then in 2005 Gary V. Vaughan collected together the many
+patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
+released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
+prepared patches for the release of 1.4.5 and 1.4.6.
 
-Most recently, in 2005 Gary V. Vaughan collected together the many
-patches to GNU @code{m4} 1.4 that were floating around the net and
-released 1.4.3.
-
+Meanwhile, development was underway for new features for @code{m4},
+such as dynamic module loading and additional builtins, practically
+rewriting the entire code base.  This development has spurred
+improvements to other @acronym{GNU} software, such as @acronym{GNU}
+Libtool.  @acronym{GNU} M4 2.0 is the result of this effort.
 
 @node Invoking m4
 @section Invoking @code{m4}
@@ -379,58 +391,83 @@ The format of the @code{m4} command is:
 
 @comment ignore
 @example
-@code{m4} [@var{option}@dots{}] [@var{macro-definition}@dots{}] [@var{input-file}@dots{}]
+@code{m4} @r{[}@var{option}@dots{}@r{]} @r{[}@var{file}@dots{}@r{]}
 @end example
 
 @cindex command line, options
 @cindex options, command line
 All options begin with @samp{-}, or if long option names are used, with
 a @samp{--}.  A long option name need not be written completely, any
-unambigous prefix is sufficient.  @code{m4} understands the following
-options:
+unambiguous prefix is sufficient.  Unless @env{POSIXLY_CORRECT} is set
+in the environment, options may be intermixed with files, with
+@option{--} as a marker to denote the end of options.  @code{m4}
+understands the following options, grouped by functionality.
+
+Several options control the overall operation of @code{m4}:
 
 @table @code
+@item --help
+Print a help summary on standard output, then immediately exit
+@code{m4} without reading any input files.
+
 @item --version
 Print the version number of the program on standard output, then
-immediately exit @code{m4} without reading any @var{input-files}.
+immediately exit @code{m4} without reading any input files.
 
-@item --help
-Print an help summary on standard output, then immediately exit
-@code{m4} without reading any @var{input-files}.
+@item -b
+@itemx --batch
+Makes this invocation of @code{m4} non-interactive.  This means that
+output will be buffered, and interrupts will halt execution.  If neither
+@option{-b} nor @option{-e} are specified, this is activated by default
+if standard input is not a terminal.  If both @option{-b} and
+@option{-e} are specified, only the last one takes effect.
 
 @item -c
 @itemx --discard-comments
 Discard all comments instead of copying them to the output.
-
-@item -e
-@itemx --interactive
-Makes this invocation of @code{m4} interactive.  This means that all
-output will be unbuffered, and interrupts will be ignored.
 
 @item -E
 @itemx --fatal-warnings
 Stop execution and exit @code{m4} once the first warning has been
 issued, considering all of them to be fatal.
 
-@item -Q
-@itemx --quiet
-@itemx --silent
-Suppress warnings about missing or superflous arguments in macro calls.
+@item -e
+@itemx --interactive
+Makes this invocation of @code{m4} interactive.  This means that all
+output will be unbuffered, and interrupts will be ignored.  If neither
+@option{-b} nor @option{-e} are specified, this is activated by default
+if standard input is a terminal.  If both @option{-b} and @option{-e}
+are specified, only the last one takes effect.
 
 @item -P
 @itemx --prefix-builtins
 Internally modify @emph{all} builtin macro names so they all start with
 the prefix @samp{m4_}.  For example, using this option, one should write
 @samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
-instead of @samp{__file__}.
+instead of @samp{__file__}.  This option has no effect if @option{-R}
+is also specified.
+
+@item -Q
+@itemx --quiet
+@itemx --silent
+Suppress warnings, such as missing or superfluous arguments in macro
+calls, or treating the empty string as zero.  Error messages are still
+printed.  The distinction between error and warning is fuzzy, and if
+you encounter a situation where the message output did not match your
+expectations, please report that as a bug.
 
 @item -r @var{RESYNTAX-SPEC}
 @itemx --regexp-syntax=@var{RESYNTAX-SPEC}
 Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
-When this option is not given, @sc{gnu} M4 uses emacs compatible
+When this option is not given, @acronym{GNU} M4 uses emacs compatible
 regular expressions.  @xref{Changeresyntax}, for more details on the
 format and meaning of @var{RESYNTAX-SPEC}.
+@end table
 
+On platforms that support dynamic libraries, there are some options
+that affect dynamic loading.
+
+@table @code
 @item -M @var{DIRECTORY}
 @itemx --module-directory=@var{DIRECTORY}
 Specify an alternate @var{DIRECTORY} to search for modules.  This option
@@ -442,48 +479,89 @@ module search path.  @xref{Modules}, for more details.
 Load @var{MODULE} before parsing input files.  @var{MODULE} is searched
 for in each directory of the module search path, until the first match
 is found or the list is exhausted.  @xref{Modules}, for more details.
+By default, the modules @samp{m4}, @samp{traditional}, and @samp{gnu}
+are preloaded, although this can be controlled during configuration
+with the @option{--with-modules} option to @file{configure}.
+@end table
+
+@cindex macro definitions, on the command line
+@cindex command line, macro definitions on the
+Several options allow @code{m4} to behave more like a preprocessor.
+Macro definitions and deletions can be made on the command line, the
+search path can be altered, and the output file can track where the
+input came from.  These features occur with the following options:
+
+@table @code
+@item --import-environment
+Imports every variable in the environment as a macro.  This is done
+before @option{-D} and @option{-U}, so they can override the
+enviroment.
+
+@comment FIXME - need to implement -B/--prepend=DIR, to prepend to the
+@comment search path prior to `.'.
+@item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
+@itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
+This enters @var{NAME} into the symbol table, before any input files are
+read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
+empty string.  The @var{VALUE} can be any string, and the macro can be
+defined to take arguments, just as if it was defined from within the
+input.  This option may be given more than once; order is significant,
+and redefining the same @var{NAME} loses the previous value.
 
 @item -I @var{DIRECTORY}
 @itemx --include=@var{DIRECTORY}
 Make @code{m4} search @var{DIRECTORY} for included files that are not
 found in the current working directory.  @xref{Search Path}, for more
-details.
+details.  This option may be given more than once.
 
 @item -s
 @itemx --synclines
-Generate synchronisation lines, for use by the C preprocessor or other
+Generate synchronization lines, for use by the C preprocessor or other
 similar tools.  This is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
 is conveyed by directives of the form @samp{#line @var{linenum}
-"@var{filename}"}, which are inserted as needed into the middle of the
-input.  Such directives mean that the following line originated or was
-expanded from the contents of input file @var{filename} at line
-@var{linenum}.  The @samp{"@var{filename}"} part is often omitted when
+"@var{file}"}, which are inserted as needed into the middle of the
+output.  Such directives mean that the following line originated or was
+expanded from the contents of input file @var{file} at line
+@var{linenum}.  The @samp{"@var{file}"} part is often omitted when
 the file name did not change from the previous directive.
 
-Synchronisation directives are always given on complete lines per
-themselves.  When a synchronisation discrepancy occurs in the middle of
-an output line, the associated synchronisation directive is delayed
+Synchronization directives are always given on complete lines by
+themselves.  When a synchronization discrepancy occurs in the middle of
+an output line, the associated synchronization directive is delayed
 until the beginning of the next generated line.  @xref{Syncoutput}, for
 runtime control.
 
+@item -U @var{NAME}
+@itemx --undefine=@var{NAME}
+This deletes any predefined meaning @var{NAME} might have.  Obviously,
+only predefined macros can be deleted in this way.  This option may be
+given more than once; undefining a @var{NAME} that does not have a
+definition is silently ignored.
+@end table
+
+There are some limits within @code{m4} that can be tuned.  For
+compatibility, @code{m4} also accepts some options that control limits
+in other implementations, but which are automatically unbounded (limited
+only by your hardware constraints) in @acronym{GNU} @code{m4}.
+
+@table @code
+@comment FIXME - clean this up.  POSIXLY_CORRECT should imply -G (as
+@comment well as -Q), such that POSIX and traditional are identical.
+@comment We should also provide -g, to match BSD implementations, which
+@comment enables GNU mode and overrides POSIXLY_CORRECT in the
+@comment environment.
 @item -G
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
-System V version.  @xref{Compatibility}, for a list of these.
+System V version.  @xref{Compatibility}, for a list of these.  This
+loads the @samp{traditional} module in place of the @samp{gnu} module.
 
-@item -H @var{N}
-@itemx --hashsize=@var{N}
-These options are present only for compatibility with previous
-versions of GNU @code{m4}, and were controlling the number of slots
-in the symbol table.  They do nothing, because the size is not fixed
-anymore.
-
-@item -L @var{N}
-@itemx --nesting-limit=@var{N}
-Artificially limit the nesting of macro calls to @var{N} levels,
+@item -L @var{NUM}
+@itemx --nesting-limit=@var{NUM}
+Artificially limit the nesting of macro calls to @var{NUM} levels,
 stopping program execution if this limit is ever exceeded.  When not
-specified, nesting is limited to 250 levels.
+specified, nesting is limited to 1024 levels.
 
 The precise effect of this option might be more correctly associated
 with textual nesting than dynamic recursion.  It has been useful
@@ -492,102 +570,105 @@ Most users would never need this option.  If shown to be obtrusive,
 this option (which is still experimental) might well disappear.
 
 This option does @emph{not} have the ability to break endless
-rescanning loops, while these do not necessarily consume much memory
+rescanning loops, since these do not necessarily consume much memory
 or stack space.  Through clever usage of rescanning loops, one can
-request complex, time-consuming computations to @code{m4} with useful
+request complex, time-consuming computations from @code{m4} with useful
 results.  Putting limitations in this area would break @code{m4} power.
 There are many pathological cases: @w{@samp{define(`a', `a')a}} is
-only the simplest example (but @pxref{Compatibility}).  Expecting GNU
+only the simplest example (but @pxref{Compatibility}).  Expecting @acronym{GNU}
 @code{m4} to detect these would be a little like expecting a compiler
 system to detect and diagnose endless loops: it is a quite @emph{hard}
-problem in general, if not insoluble!
+problem in general, if not undecidable!
 
+@item -H @var{NUM}
+@itemx --hashsize=@var{NUM}
+@item -N @var{NUM}
+@itemx --diversions=@var{NUM}
+These options are present only for compatibility with previous
+versions of GNU @code{m4}.  They do nothing, because the symbol table
+size and number of diversions are not fixed anymore.
+
+@item -B @var{NUM}
+@itemx -S @var{NUM}
+@itemx -T @var{NUM}
+These options are present for compatibility with System V @code{m4}, but
+do nothing in this implementation.
+@end table
+
+@acronym{GNU} @code{m4} comes with a feature of freezing internal state
+(@pxref{Frozen files}).  This can be used to speed up @code{m4}
+execution when reusing a common initialization script.
+
+@table @code
 @item -F @var{FILE}
 @itemx --freeze-state=@var{FILE}
 Once execution is finished, write out the frozen state on the specified
-@var{FILE}. @xref{Frozen files}, for more details.
+@var{FILE}.  It is conventional, but not required, for @var{FILE} to end
+in @samp{.m4f}.
 
 @item -R @var{FILE}
 @itemx --reload-state=@var{FILE}
 Before execution starts, recover the internal state from the specified
-frozen @var{FILE}. @xref{Frozen files}, for more details.
+frozen @var{FILE}.  The options @option{-D}, @option{-U}, and
+@option{-t} take effect after state is reloaded, but before the input
+files are read.
+@end table
 
-@item -d @var{FLAGS}
-@itemx --debug=@var{FLAGS}
+Finally, there are several options for aiding in debugging @code{m4}
+scripts.
+
+@table @code
+@item -d@r{[}@var{FLAGS}@r{]}
+@itemx --debug@r{[}=@var{FLAGS}@r{]}
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debug Levels}, for more details on the format and
-meaning of @var{FLAGS}.
+meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to @samp{aeq}.
 
 @item -l @var{NUM}
 @itemx --arglength=@var{NUM}
-Restrict the size of the output generated by macro tracing.  @xref{Debug
-Levels}, for more details.
+Restrict the size of the output generated by macro tracing to @var{NUM}
+characters per trace line.  If unspecified or zero, output is
+unlimited.  @xref{Debug Levels}, for more details.
 
 @item -o @var{FILE}
 @itemx --error-output=@var{FILE}
-Redirect debug and trace output to the named file.  Error messages (from
-@code{errprint}) and macro definitions (from @code{dumpdef}) are still
-printed on the standard error output.  @xref{Debug Output}, for more
+Redirect debug and trace output to the named @var{FILE}.  Warnings,
+error messages, and the output of @code{errprint} and @code{dumpdef},
+are still printed to standard error.  @xref{Debug Output}, for more
 details.
-
-@item -B
-@itemx -S
-@itemx -T
-These options are present for compatibility with System V @code{m4}, but
-do nothing in this implementation.
-
-@item -N @var{N}
-@itemx --diversions=@var{N}
-These options are present only for compatibility with previous
-versions of GNU @code{m4}, and were controlling the number of possible
-diversions which could be used at the same time.  They do nothing,
-because there is no fixed limit anymore.
-
-@end table
-
-@cindex macro definitions, on the command line
-@cindex command line, macro definitions on the
-Macro definitions and deletions can be made on the command line, by
-using the @samp{-D} and @samp{-U} options.  They have the following
-format:
-
-@table @code
-@item -D @var{NAME}
-@itemx -D @var{NAME}=@var{VALUE}
-@itemx --define=@var{NAME}
-@itemx --define=@var{NAME}=@var{VALUE}
-This enters @var{NAME} into the symbol table, before any input files are
-read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
-empty string.  The @var{VALUE} can be any string, and the macro can be
-defined to take arguments, just as if it was defined from within the
-input.
-
-@item -U @var{NAME}
-@itemx --undefine=@var{NAME}
-This deletes any predefined meaning @var{NAME} might have.  Obviously,
-only predefined macros can be deleted in this way.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
-This enters @var{NAME} into the symbol table, as undefined but traced.
-The macro will consequently be traced from the point it is defined.
-
-@item --import-environment
-Imports every variable in the environment as a macro.  This is done
-before @code{-D} and @code{-U}, so these can change the macros.
-
+This enables tracing for the macro @var{NAME}, at any point where it is
+defined.  @var{NAME} need not be defined when this option is given.
+This option may be given more than once.  @xref{Trace}, for more details.
 @end table
 
 @cindex command line, file names on the
 @cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
 names.  If no names are present, the standard input is read.  A file
-name of @file{-} is taken to mean the standard input.
+name of @file{-} is taken to mean the standard input.  It is
+conventional, but not required, for input files to end in @samp{.m4}.
 
 The input files are read in the sequence given.  The standard input can
 only be read once, so the file name @file{-} should only appear once on
-the command line.
+the command line.  It is an error if an input file ends in the middle of
+argument collection, a comment, or a quoted string.
+@comment FIXME - it would be nicer if we let these three things
+@comment continue across file boundaries, provided that we warn in
+@comment interactive use when switching to stdin in a non-default parse
+@comment state.
+
+If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
+exit status of @code{m4} will be 0 for success, 1 for general failure
+(such as problems with reading an input file), and 63 for version
+mismatch (@pxref{Using frozen files}).
+
+If you need to read a file whose name starts with a @file{-}, you can
+specify it as @samp{./-file}, or use @option{--} to mark the end of
+options.
 
 @node Bugs
 @section Problems and bugs
@@ -2634,10 +2715,10 @@ only when given arguments.
 
 @comment status: 1
 @example
-include(`none')
+include(`n')
 @result{}
-@error{}m4:input.m4:1: include: cannot open `none': No such file or directory
-sinclude(`none')
+@error{}m4:input.m4:1: include: cannot open `n': No such file or directory
+sinclude(`n')
 @result{}
 @end example
 
@@ -3066,7 +3147,7 @@ modules
 @deffn {Builtin (load)} load (@var{module-name})
 @var{module-name} will be searched for along the module search path
 (@pxref{Standard Modules}) and loaded if found.  Loading a module
-consists of running its initialisation function (if any) and then adding
+consists of running its initialization function (if any) and then adding
 any macros it provides to the internal table.
 
 The macro @code{load} is recognized only with parameters.
@@ -3095,7 +3176,7 @@ Any loaded modules that can be listed by the @code{modules} macro can be
 removed by naming them as the @var{module-name} parameter of the
 @code{unload} macro.  Unloading a module consists of removing all of the
 macros it provides from the internal table of visible macros, and
-running the module's finalisation method (if any).
+running the module's finalization method (if any).
 
 The macro @code{unload} is recognized only with parameters.
 @end deffn
@@ -3815,6 +3896,7 @@ any of the previous chapters.
 
 @menu
 * Errprint::                    Printing error messages
+* Location::                    Printing current location
 * M4exit::                      Exiting from m4
 * Syncoutput::                  Turning on and off sync lines
 @end menu
@@ -3843,6 +3925,9 @@ errprint(`Illegal arguments to forloop
 A trailing newline is @emph{not} printed automatically, so it must be
 supplied as part of the argument, as in the example.  (BSD flavored
 @code{m4}'s do append a trailing newline on each @code{errprint} call).
+
+@node Location
+@section Printing current location
 
 To make it possible to specify the location of the error, two
 utility builtins exist:

@@ -1,3 +1,8 @@
+2006-08-14  Eric Blake  <ebb9@byu.net>
+
+	* src/main.c (usage): Document --import-environment.
+	* doc/m4.texinfo (History, Invoking m4): Synchronize from branch.
+
 2006-08-11  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap (func_get_translations): Only remove files when doing

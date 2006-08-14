@@ -115,6 +115,7 @@ Dynamic loading features:\n\
       fputs (_("\
 \n\
 Preprocessor features:\n\
+      --import-environment     import all environment variables as macros\n\
   -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
   -I, --include=DIRECTORY      append DIRECTORY to include path\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
