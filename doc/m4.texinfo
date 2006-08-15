@@ -903,7 +903,8 @@ call is not triggered.  This solves the most usual cases, like for
 specific provision.
 
 There is also a command line option (@option{--prefix-builtins}, or
-@option{-P}) which requires all builtin macro names to be prefixed
+@option{-P}, @pxref{Invoking m4}) which requires all builtin macro names
+to be prefixed
 by @samp{m4_} for them to be recognized.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.
@@ -1010,8 +1011,8 @@ there are too many arguments, the excess arguments are ignored.
 
 Normally @code{m4} will issue warnings if a builtin macro is called
 with an inappropriate number of arguments, but it can be suppressed with
-the @option{-Q} command line option.  For user defined macros, there is no
-check of the number of arguments given.
+the @option{-Q} command line option (@pxref{Invoking m4}).  For user
+defined macros, there is no check of the number of arguments given.
 
 Macros are expanded normally during argument collection, and whatever
 commas, quotes and parentheses that might show up in the resulting
@@ -1847,11 +1848,13 @@ be used for iterating through the actual arguments to a macro:
 @deffn Builtin shift (@dots{})
 Takes any number of arguments, and expands to all but the first
 argument, separated by commas, with each argument quoted.
+
+The macro @code{shift} is recognized only with parameters.
 @end deffn
 
 @example
 shift
-@result{}
+@result{}shift
 shift(`bar')
 @result{}
 shift(`foo', `bar', `baz')
@@ -2061,7 +2064,7 @@ The number between dashes is the depth of the expansion.  It is one most
 of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.  The
 maximum number that will appear between dashes is controlled by the
-option @option{--nesting-limit}.
+option @option{--nesting-limit} (@pxref{Invoking m4}).
 
 Tracing by name is an attribute that is preserved whether the macro is
 defined or not.  This allows the @option{-t} option to select macros to
@@ -2123,8 +2126,9 @@ display.
 
 @cindex controlling debugging output
 @cindex debugging output, controlling
-The @option{-d} option to @code{m4} controls the amount of details
-presented, when using the macros described in the preceding sections.
+The @option{-d} option to @code{m4} (@pxref{Invoking m4}) controls the
+amount of details presented, when using the macros described in the
+preceding sections.
 
 The @var{flags} following the option can be one or more of the
 following:
@@ -2224,7 +2228,8 @@ foo
 @cindex output, saving debugging
 @cindex @acronym{GNU} extensions
 Debug and tracing output can be redirected to files using either the
-@option{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
+@option{-o} option to @code{m4} (@pxref{Invoking m4}), or with the
+builtin macro @code{debugfile}:
 
 @deffn Builtin debugfile (@ovar{file})
 Sends all further debug and trace output to @var{file}.  If
@@ -2711,9 +2716,8 @@ changeword(`#\([_a-zA-Z0-9]*\)')
 @end example
 
 @code{m4} now requires a @samp{#} mark at the beginning of every
-macro invocation, so one can use @code{m4} to preprocess shell
-scripts without getting @code{shift} commands swallowed, and plain
-text without losing various common words.
+macro invocation, so one can use @code{m4} to preprocess plain
+text without losing various words like @samp{divert}.
 
 In @code{m4}, macro substitution is based on text, while in @TeX{}, it
 is based on tokens.  @code{changeword} can throw this difference into
@@ -2781,6 +2785,7 @@ reached.  As a @acronym{GNU} extension, additional arguments are
 concatenated with a space to the @var{string}.
 
 The expansion of @code{m4wrap} is void.
+The macro @code{m4wrap} is recognized only with parameters.
 @end deffn
 
 @example
@@ -2896,9 +2901,9 @@ sinclude()
 @end example
 
 The rest of this section assumes that @code{m4} is invoked with the
-@option{-I} option pointing to the @file{examples} directory shipped as
-part of the @acronym{GNU} @code{m4} package.  The file
-@file{examples/@/incl.m4} in the distribution contains the lines:
+@option{-I} option (@pxref{Invoking m4}) pointing to the @file{examples}
+directory shipped as part of the @acronym{GNU} @code{m4} package.  The
+file @file{examples/@/incl.m4} in the distribution contains the lines:
 @comment ignore
 @example
 Include file start
@@ -2956,7 +2961,8 @@ than the current working directory.
 If a file is not found in the current working directory, and the file
 name is not absolute, the file will be looked for in a specified search
 path.  First, the directories specified with the @option{-I} option will
-be searched, in the order found on the command line.  Second, if the
+be searched, in the order found on the command line (@pxref{Invoking
+m4}).  Second, if the
 @env{M4PATH} environment variable is set, it is expected to contain a
 colon-separated list of directories, which will be searched in order.
 
@@ -3053,6 +3059,26 @@ divert
 @end example
 
 This is a common programming idiom in @code{m4}.
+
+Note that @code{divert} is an English word, but also an active macro
+without arguments.  When processing plain text, the word might appear in
+normal text and be unintentionally swallowed as a macro invocation.  One
+way to avoid this is to use the @option{-P} option to rename all
+builtins (@pxref{Invoking m4}).  Another is to write a wrapper that
+requires a parameter to be recognized.
+
+@example
+We decided to divert the stream for irrigation.
+@result{}We decided to  the stream for irrigation.
+define(`divert', `ifelse(`$#', `0', ``$0'', `builtin(`$0', $@@)')')
+@result{}
+divert(-1)
+Ignored text.
+divert(0)
+@result{}
+We decided to divert the stream for irrigation.
+@result{}We decided to divert the stream for irrigation.
+@end example
 
 @node Undivert
 @section Undiverting output
@@ -3822,8 +3848,8 @@ string.
 @end deffn
 
 When @acronym{GNU} extensions are in effect (that is, when you did not use the
-@option{-G} option), @acronym{GNU} @code{m4} will define the macro
-@code{__gnu__} to expand to the empty string.
+@option{-G} option, @pxref{Invoking m4}), @acronym{GNU} @code{m4} will
+define the macro @code{__gnu__} to expand to the empty string.
 
 @example
 __gnu__
@@ -4070,6 +4096,7 @@ Prints @var{message} and the rest of the arguments on the
 standard error output, separated by spaces.
 
 The expansion of @code{errprint} is void.
+The macro @code{errprint} is recognized only with parameters.
 @end deffn
 
 @example
@@ -4108,7 +4135,8 @@ errprint(__program__:__file__:__line__: `input error
 
 Line numbers start at 1 for each file.  If the file was found due to the
 @option{-I} option or @env{M4PATH} environment variable, that is
-reflected in the file name.  The syncline option (@option{-s}), and the
+reflected in the file name.  The syncline option (@option{-s},
+@pxref{Invoking m4}), and the
 @samp{f} and @samp{l} flags of @code{debugmode} (@pxref{Debug Levels}),
 also use this notion of current file and line.  Redefining the three
 location macros has no effect on syncline, debug, or warning message
@@ -4406,8 +4434,8 @@ is made to summarize these here.
 @cindex @acronym{GNU} extensions
 This version of @code{m4} contains a few facilities that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
-using the @option{-G} command line option, unless overridden by other
-command line options.
+using the @option{-G} command line option (@pxref{Invoking m4}), unless
+overridden by other command line options.
 
 @itemize @bullet
 @item

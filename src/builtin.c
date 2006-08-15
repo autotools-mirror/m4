@@ -114,7 +114,7 @@ builtin_tab[] =
   { "divnum",		FALSE,	FALSE,	FALSE,	m4_divnum },
   { "dnl",		FALSE,	FALSE,	FALSE,	m4_dnl },
   { "dumpdef",		FALSE,	FALSE,	FALSE,	m4_dumpdef },
-  { "errprint",		FALSE,	FALSE,	FALSE,	m4_errprint },
+  { "errprint",		FALSE,	FALSE,	TRUE,	m4_errprint },
   { "esyscmd",		TRUE,	FALSE,	TRUE,	m4_esyscmd },
   { "eval",		FALSE,	FALSE,	TRUE,	m4_eval },
   { "format",		TRUE,	FALSE,	TRUE,	m4_format },
@@ -126,13 +126,13 @@ builtin_tab[] =
   { "indir",		TRUE,	FALSE,	TRUE,	m4_indir },
   { "len",		FALSE,	FALSE,	TRUE,	m4_len },
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
-  { "m4wrap",		FALSE,	FALSE,	FALSE,	m4_m4wrap },
+  { "m4wrap",		FALSE,	FALSE,	TRUE,	m4_m4wrap },
   { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
   { "patsubst",		TRUE,	FALSE,	TRUE,	m4_patsubst },
   { "popdef",		FALSE,	FALSE,	TRUE,	m4_popdef },
   { "pushdef",		FALSE,	TRUE,	TRUE,	m4_pushdef },
   { "regexp",		TRUE,	FALSE,	TRUE,	m4_regexp },
-  { "shift",		FALSE,	FALSE,	FALSE,	m4_shift },
+  { "shift",		FALSE,	FALSE,	TRUE,	m4_shift },
   { "sinclude",		FALSE,	FALSE,	TRUE,	m4_sinclude },
   { "substr",		FALSE,	FALSE,	TRUE,	m4_substr },
   { "syscmd",		FALSE,	FALSE,	TRUE,	m4_syscmd },
@@ -1090,6 +1090,8 @@ m4_dnl (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_shift (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   dump_args (obs, argc - 1, argv + 1, ",", TRUE);
 }
 
@@ -1225,6 +1227,8 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_errprint (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   dump_args (obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
   fprintf (stderr, "%s", (char *) obstack_finish (obs));
@@ -1306,6 +1310,8 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
   else

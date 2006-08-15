@@ -1,3 +1,11 @@
+2006-08-15  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_m4wrap, m4_errprint, m4_shift): Make blind,
+	per debian bug 96075.
+	* doc/m4.texinfo (Loops, M4wrap, Errprint): Document this change.
+	(Changeword): Don't use shift as an example of a swallowed word.
+	(Divert): Discuss fact that divert is an English word.
+
 2006-08-14  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Invoking m4): Minor fixes.

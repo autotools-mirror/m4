@@ -28,6 +28,8 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The new macro __program__ is added, which allows the input file to issue
   an error message that resembles messages from m4.  Warning and error
   messages have been reformatted to comply with GNU Coding Standards.
+* The errprint, m4wrap, and shift macros are now recognized only with
+  arguments.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 
@@ -318,5 +320,6 @@ Version 0.50 - January 1990, by Rene' Seindal
 * Initial beta release.
 
 Local Variables:
+mode: outline
 fill-column: 75
 End:
