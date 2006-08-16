@@ -348,7 +348,7 @@ main (int argc, char *const *argv, char *const *envp)
 	m4_set_debug_level_opt (context, m4_debug_decode (context, optarg));
 	if (m4_get_debug_level_opt (context) < 0)
 	  {
-	    error (0, 0, _("Bad debug flags: `%s'"), optarg);
+	    error (0, 0, _("bad debug flags: `%s'"), optarg);
 	    m4_set_debug_level_opt (context, 0);
 	  }
 	break;

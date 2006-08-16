@@ -1,3 +1,16 @@
+2006-08-16  Eric Blake  <ebb9@byu.net>
+
+	* po/POTFILES.in: Add more files that contain translatable
+	strings.
+	* po/Makevars (XGETTEXT_OPTIONS): Add options to pass more
+	information to translators.
+	(USE_MSGCTXT): New var for gettext 0.15.
+	* m4/input.c (file_clean, m4_push_file, m4__next_token): Start
+	debug/trace messages in lower case.
+	* m4/macro.c (expand_argument): Likewise.
+	* m4/path.c (m4_path_search): Likewise.
+	* src/main.c (main): Likewise.
+
 2006-08-14  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (usage): Document --import-environment.

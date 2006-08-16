@@ -184,7 +184,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 
 	case M4_TOKEN_EOF:
 	  error_at_line (EXIT_FAILURE, 0, current_file, current_line,
-			 _("EOF in argument list"));
+			 _("end of file in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:

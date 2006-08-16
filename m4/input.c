@@ -223,7 +223,7 @@ static void
 file_clean (m4 *context)
 {
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_INPUT))
-    M4_DEBUG_MESSAGE2 (context, _("Input reverted to %s, line %d"),
+    M4_DEBUG_MESSAGE2 (context, _("input reverted to %s, line %d"),
 		       isp->u.u_f.name, isp->u.u_f.lineno);
 
   fclose (isp->u.u_f.file);
@@ -251,7 +251,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title)
     }
 
   if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_INPUT))
-    M4_DEBUG_MESSAGE1 (context, _("Input read from %s"), title);
+    M4_DEBUG_MESSAGE1 (context, _("input read from %s"), title);
 
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
@@ -827,7 +827,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	    if (ch == CHAR_EOF)
 	      error_at_line (EXIT_FAILURE, 0,
 			      current_file, current_line,
-			      _("EOF in string"));
+			      _("end of file in string"));
 
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 	      {
@@ -857,7 +857,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	    if (ch == CHAR_EOF)
 	      error_at_line (EXIT_FAILURE, 0,
 			      current_file, current_line,
-			      _("EOF in string"));
+			      _("end of file in string"));
 	    if (MATCH (context, ch, context->syntax->rquote.string))
 	      {
 		if (--quote_level == 0)

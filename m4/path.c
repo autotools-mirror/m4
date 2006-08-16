@@ -158,7 +158,7 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
       if (fp != NULL)
 	{
 	  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_PATH))
-	    M4_DEBUG_MESSAGE2 (context, _("Path search for `%s' found `%s'"),
+	    M4_DEBUG_MESSAGE2 (context, _("path search for `%s' found `%s'"),
 			       dir, name);
 
 	  if (expanded_name != NULL)

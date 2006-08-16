@@ -1,6 +1,8 @@
+gnu/error.c
 gnu/obstack.c
-gnu/regex.c
-gnu/xmalloc.c
+gnu/strtol.c
+gnu/verror.c
+gnu/xalloc-die.c
 m4/builtin.c
 m4/debug.c
 m4/input.c
@@ -9,6 +11,7 @@ m4/module.c
 m4/output.c
 m4/path.c
 m4/symtab.c
+m4/utility.c
 modules/evalparse.c
 modules/format.c
 modules/gnu.c
