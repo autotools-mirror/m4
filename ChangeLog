@@ -1,5 +1,8 @@
 2006-08-16  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Invoking m4, Debug Output): Fix wording to be
+	clear that dumpdef does not always go to stderr.
+
 	* src/builtin.c (m4_errprint): Flush buffers before printing to
 	stderr.
 	* THANKS: Updated.

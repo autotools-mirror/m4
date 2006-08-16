@@ -567,10 +567,11 @@ unlimited.  @xref{Debug Levels}, for more details.
 
 @item -o @var{FILE}
 @itemx --error-output=@var{FILE}
-Redirect debug and trace output to the named @var{FILE}.  Warnings,
-error messages, and the output of @code{errprint} and @code{dumpdef},
-are still printed to standard error.  @xref{Debug Output}, for more
-details.
+Redirect @code{dumpdef} output, debug messages, and trace output to the
+named @var{FILE}.  Warnings, error messages, and @code{errprint} output
+are still printed to standard error.  If unspecified, debug output goes
+to standard error; if empty, debug output is discarded.  @xref{Debug
+Output}, for more details.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
@@ -2235,7 +2236,8 @@ builtin macro @code{debugfile}:
 Sends all further debug and trace output to @var{file}.  If
 @var{file} is empty, debug and trace output are discarded.  If
 @code{debugfile} is called without any arguments, debug and trace output
-are sent to standard error.  This does not affect warnings, which are
+are sent to standard error.  This does not affect warnings, error
+messages, or @code{errprint} output, which are
 always sent to standard error.  If @var{file} cannot be opened, the
 current debug file is unchanged.
 
