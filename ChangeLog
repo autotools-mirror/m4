@@ -1,3 +1,9 @@
+2006-08-16  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_errprint): Flush buffers before printing to
+	stderr.
+	* THANKS: Updated.
+
 2006-08-15  Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (m4_m4wrap, m4_errprint, m4_shift): Make blind,
@@ -5,6 +11,7 @@
 	* doc/m4.texinfo (Loops, M4wrap, Errprint): Document this change.
 	(Changeword): Don't use shift as an example of a swallowed word.
 	(Divert): Discuss fact that divert is an English word.
+	Reported by Richard A Nelson.
 
 2006-08-14  Eric Blake  <ebb9@byu.net>
 

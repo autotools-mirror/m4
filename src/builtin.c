@@ -1231,6 +1231,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
     return;
   dump_args (obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
+  debug_flush_files ();
   fprintf (stderr, "%s", (char *) obstack_finish (obs));
   fflush (stderr);
 }
