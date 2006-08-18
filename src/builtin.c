@@ -1285,14 +1285,14 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
   if (exit_code < 0 || exit_code > 255)
     {
       M4ERROR ((warning_status, 0,
-                "exit status out of range: `%d'", exit_code));
+		"exit status out of range: `%d'", exit_code));
       exit_code = EXIT_FAILURE;
     }
   if (close_stream (stdout) != 0)
     {
       M4ERROR ((warning_status, errno, "write error"));
       if (exit_code == 0)
-        exit_code = EXIT_FAILURE;
+	exit_code = EXIT_FAILURE;
     }
   /* Change debug stream back to stderr, to force flushing debug stream and
      detect any errors it might have encountered.  */
@@ -1683,12 +1683,12 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (regs->end[ch] > 0)
-	    obstack_grow (obs, victim + regs->start[ch],
-			  regs->end[ch] - regs->start[ch]);
-	  else
+	  if (regs->num_regs - 1 <= ch)
 	    M4ERROR ((warning_status, 0, "\
 Warning: sub-expression %d not present", ch));
+	  else if (regs->end[ch] > 0)
+	    obstack_grow (obs, victim + regs->start[ch],
+			  regs->end[ch] - regs->start[ch]);
 	  break;
 
 	case '\0':

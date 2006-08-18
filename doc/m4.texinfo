@@ -3370,6 +3370,11 @@ regexp(`abc', `b', `\1\')
 @error{}m4:stdin:2: Warning: sub-expression 1 not present
 @error{}m4:stdin:2: Warning: trailing \ ignored in replacement
 @result{}
+regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
+@error{}m4:stdin:3: Warning: sub-expression 4 not present
+@error{}m4:stdin:3: Warning: sub-expression 5 not present
+@error{}m4:stdin:3: Warning: sub-expression 6 not present
+@result{}c
 @end example
 
 @node Substr

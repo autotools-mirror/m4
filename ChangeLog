@@ -1,3 +1,12 @@
+2006-08-17  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (substitute): Avoid core dump when accessing
+	beyond bound of regular expression.
+	Reported by Karl Nelson.
+	* doc/m4.texinfo (Regexp): Add example that causes core dump on
+	some architectures prior to this patch.
+	* THANKS: Updated.
+
 2006-08-16  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Invoking m4, Debug Output): Fix wording to be
