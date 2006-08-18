@@ -11,8 +11,10 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
 * The format macro now understands %F, %g, and %G.
 * When loading frozen files, m4 now exits with status 63 if version
   mismatch is detected.
-* Fix bugs that occurred when invoked with stdout or stderr closed.
-  Detect write failures to stdout or to the target of the debugfile macro.
+* Fix bugs that occurred when invoked with stdout or stderr closed,
+  and detect write failures to stdout or to the target of the
+  debugfile macro.  In particular, the syscmd and esyscmd macros can
+  no longer interfere with the debug stream or diversions.
 * The m4exit macro now converts values outside the range 0-255 to 1.
 * It is now an error if a command-line input file ends in the middle of a
   comment, matching the behavior of mid-string and mid-argument

@@ -1,5 +1,16 @@
 2006-08-18  Eric Blake  <ebb9@byu.net>
 
+	Don't let unrelated child processes see too many files.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import cloexec.
+	* src/builtin.c (m4_esyscmd, m4_regexp, m4_patsubst): Fix
+	spelling in error message.
+	* src/debug.c [!__STDC__]: Assume C89, and nuke old varargs.h.
+	(debug_set_output): Close debug file on exec.
+	* src/m4.h (includes): Add cloexec.h.
+	* src/output.c (make_room_for): Close diversions on exec.
+	* src/path.c (path_search): Close include files on exec.
+	* NEWS: Document this.
+
 	Regular expressions were leaking memory.
 	* src/builtin.c (init_pattern_buffer, free_pattern_buffer): New
 	helper methods.

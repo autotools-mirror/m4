@@ -21,13 +21,8 @@
 
 #include "m4.h"
 
-#include <sys/stat.h>
-
-#ifdef __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+#include <sys/stat.h>
 
 /* File for debugging output.  */
 FILE *debug = NULL;
@@ -159,11 +154,11 @@ debug_set_file (FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug != stderr && close_stream (debug) != 0)
-            {
-              M4ERROR ((warning_status, errno,
-                        "error writing to debug stream"));
-              retcode = EXIT_FAILURE;
-            }
+	    {
+	      M4ERROR ((warning_status, errno,
+			"error writing to debug stream"));
+	      retcode = EXIT_FAILURE;
+	    }
 	  debug = stdout;
 	}
     }
@@ -203,6 +198,9 @@ debug_set_output (const char *name)
       if (fp == NULL)
 	return FALSE;
 
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect debug file across forks"));
       debug_set_file (fp);
     }
   return TRUE;
@@ -237,17 +235,9 @@ debug_message_prefix (void)
 | left quote) and %r (optional right quote).			       |
 `---------------------------------------------------------------------*/
 
-#ifdef __STDC__
 static void
 trace_format (const char *fmt, ...)
-#else
-static void
-trace_format (...)
-#endif
 {
-#ifndef __STDC__
-  const char *fmt;
-#endif
   va_list args;
   char ch;
 
@@ -257,12 +247,7 @@ trace_format (...)
   int slen;
   int maxlen;
 
-#ifdef __STDC__
   va_start (args, fmt);
-#else
-  va_start (args);
-  fmt = va_arg (args, const char *);
-#endif
 
   while (TRUE)
     {
@@ -326,9 +311,9 @@ trace_header (int id)
   if (current_line)
     {
       if (debug_level & DEBUG_TRACE_FILE)
-        trace_format ("%s:", current_file);
+	trace_format ("%s:", current_file);
       if (debug_level & DEBUG_TRACE_LINE)
-        trace_format ("%d:", current_line);
+	trace_format ("%d:", current_line);
     }
   trace_format (" -%d- ", expansion_level);
   if (debug_level & DEBUG_TRACE_CALLID)

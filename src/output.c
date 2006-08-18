@@ -158,6 +158,9 @@ make_room_for (int length)
       if (selected_diversion->file == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
 		  "ERROR: cannot create temporary file for diversion"));
+      if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect diversion across forks"));
 
       if (selected_diversion->used > 0)
 	{

@@ -127,6 +127,9 @@ path_search (const char *file, const char **result)
   fp = fopen (file, "r");
   if (fp != NULL)
     {
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect input file across forks"));
       if (result)
 	*result = xstrdup (file);
       return fp;
@@ -154,6 +157,9 @@ path_search (const char *file, const char **result)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
 	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
+	  if (set_cloexec_flag (fileno (fp), true) != 0)
+	    M4ERROR ((warning_status, errno,
+		      "Warning: cannot protect input file across forks"));
 	  if (result)
 	    *result = name;
 	  else

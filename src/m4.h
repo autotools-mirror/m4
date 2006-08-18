@@ -49,6 +49,7 @@
 #include <sys/types.h>
 
 #include "binary-io.h"
+#include "cloexec.h"
 #include "close-stream.h"
 #include "error.h"
 #include "exit.h"

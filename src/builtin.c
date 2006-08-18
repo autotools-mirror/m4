@@ -871,7 +871,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   if (pin == NULL)
     {
       M4ERROR ((warning_status, errno,
-		"cannot open pipe to command \"%s\"", ARG (1)));
+		"cannot open pipe to command `%s'", ARG (1)));
       sysval = -1;
     }
   else
@@ -1773,7 +1773,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
 
   if (startpos == -2)
     M4ERROR ((warning_status, 0,
-	       "error matching regular expression \"%s\"", regexp));
+	       "error matching regular expression `%s'", regexp));
   else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
@@ -1839,7 +1839,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
 	  if (matchpos == -2)
 	    M4ERROR ((warning_status, 0,
-		      "error matching regular expression \"%s\"", regexp));
+		      "error matching regular expression `%s'", regexp));
 	  else if (offset < length)
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
