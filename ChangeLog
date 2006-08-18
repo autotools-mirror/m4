@@ -1,3 +1,17 @@
+2006-08-18  Eric Blake  <ebb9@byu.net>
+
+	Regular expressions were leaking memory.
+	* src/builtin.c (init_pattern_buffer, free_pattern_buffer): New
+	helper methods.
+	(m4_regexp, m4_patsubst): Avoid memory leak.
+	* src/input.c (init_pattern_buffer) [ENABLE_CHANGEWORD]: Make
+	static.
+	(set_word_regexp) [ENABLE_CHANGEWORD]: Avoid memory leak.  Change
+	from O(n^2) to O(n) for calculating word_start.
+	(next_token, peek_token) [ENABLE_CHANGEWORD]: Treat word_start as
+	O(1) bitmap, not O(n) search string.
+	* NEWS: Document this fix.
+
 2006-08-17  Eric Blake  <ebb9@byu.net>
 
 	* NEWS: Document previous checkin.

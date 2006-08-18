@@ -682,12 +682,12 @@ set_comment (const char *bc, const char *ec)
 
 #ifdef ENABLE_CHANGEWORD
 
-void
+static void
 init_pattern_buffer (struct re_pattern_buffer *buf)
 {
-  buf->translate = 0;
-  buf->fastmap = 0;
-  buf->buffer = 0;
+  buf->translate = NULL;
+  buf->fastmap = NULL;
+  buf->buffer = NULL;
   buf->allocated = 0;
 }
 
@@ -719,7 +719,9 @@ set_word_regexp (const char *regexp)
 
   /* If compilation worked, retry using the word_regexp struct.
      Can't rely on struct assigns working, so redo the compilation.  */
+  regfree (&word_regexp);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
 
   if (msg != NULL)
     {
@@ -738,8 +740,7 @@ set_word_regexp (const char *regexp)
   for (i = 1; i < 256; i++)
     {
       test[0] = i;
-      if (re_search (&word_regexp, test, 1, 0, 0, &regs) >= 0)
-	strcat (word_start, test);
+      word_start[i] = re_search (&word_regexp, test, 1, 0, 0, NULL) >= 0;
     }
 }
 
@@ -826,7 +827,7 @@ next_token (token_data *td)
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && strchr (word_start, ch))
+  else if (!default_word_regexp && word_start[ch])
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -960,7 +961,7 @@ peek_token (void)
 
   if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (! default_word_regexp && strchr (word_start, ch))
+      || (! default_word_regexp && word_start[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {

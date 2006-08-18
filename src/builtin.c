@@ -483,7 +483,6 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 		"INTERNAL ERROR: bad token data type in define_macro ()"));
       abort ();
     }
-  return;
 }
 
 static void
@@ -1703,6 +1702,33 @@ Warning: trailing \\ ignored in replacement"));
     }
 }
 
+/*------------------------------------------.
+| Initialize regular expression variables.  |
+`------------------------------------------*/
+
+static void
+init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  buf->translate = NULL;
+  buf->fastmap = NULL;
+  buf->buffer = NULL;
+  buf->allocated = 0;
+  regs->start = NULL;
+  regs->end = NULL;
+}
+
+/*----------------------------------------.
+| Clean up regular expression variables.  |
+`----------------------------------------*/
+
+static void
+free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  regfree (buf);
+  free (regs->start);
+  free (regs->end);
+}
+
 /*--------------------------------------------------------------------------.
 | Regular expression version of index.  Given two arguments, expand to the  |
 | index of the first match of the second argument (a regexp) in the first.  |
@@ -1729,31 +1755,26 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   victim = TOKEN_DATA_TEXT (argv[1]);
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
+  init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
 
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression: `%s': %s", regexp, msg));
+      free_pattern_buffer (&buf, &regs);
       return;
     }
 
   length = strlen (victim);
-  startpos = re_search (&buf, victim, length, 0, length, &regs);
-  free (buf.buffer);
+  /* Avoid overhead of allocating regs if we won't use it.  */
+  startpos = re_search (&buf, victim, length, 0, length,
+			argc == 3 ? NULL : &regs);
 
-  if (startpos  == -2)
-    {
-      M4ERROR ((warning_status, 0,
-		"error matching regular expression \"%s\"", regexp));
-      return;
-    }
-
-  if (argc == 3)
+  if (startpos == -2)
+    M4ERROR ((warning_status, 0,
+	       "error matching regular expression \"%s\"", regexp));
+  else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
     {
@@ -1761,7 +1782,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       substitute (obs, victim, repl, &regs);
     }
 
-  return;
+  free_pattern_buffer (&buf, &regs);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1789,10 +1810,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
+  init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
 
   if (msg != NULL)
@@ -1846,8 +1864,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     }
   obstack_1grow (obs, '\0');
 
-  free (buf.buffer);
-  return;
+  free_pattern_buffer (&buf, &regs);
 }
 
 /* Finally, a placeholder builtin.  This builtin is not installed by
