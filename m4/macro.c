@@ -254,9 +254,7 @@ recursion limit of %d exceeded, use -L<N> to change it"),
     trace_pre (context, name, my_call_id, argc, argv);
 
   expansion = m4_push_string_init (context);
-  if (!m4_bad_argc (context, argc, argv,
-		    SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
-    m4_macro_call (context, symbol, expansion, argc, argv);
+  m4_macro_call (context, symbol, expansion, argc, argv);
   expanded = m4_push_string_finish ();
 
   if (traced)
@@ -319,6 +317,9 @@ void
 m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
 	       int argc, m4_symbol_value **argv)
 {
+  if (m4_bad_argc (context, argc, argv,
+		   SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
+    return;
   if (m4_is_symbol_text (symbol))
     {
       process_macro (context, symbol, expansion, argc, argv);

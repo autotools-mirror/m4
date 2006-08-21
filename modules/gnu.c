@@ -33,6 +33,8 @@
 #  include "m4private.h"
 #endif
 
+#include "progname.h"
+
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table
 #define m4_macro_table		gnu_LTX_m4_macro_table
@@ -45,6 +47,7 @@
 #define builtin_functions					\
 	BUILTIN(__file__,	false,	false,	1,	1  )	\
 	BUILTIN(__line__,	false,	false,	1,	1  )	\
+	BUILTIN(__program__,	false,	false,	1,	1  )	\
 	BUILTIN(builtin,	false,	true,	2,	-1 )	\
 	BUILTIN(changeresyntax,	false,	true,	1,	2  )	\
 	BUILTIN(changesyntax,	false,	true,	1,	-1 )	\
@@ -289,6 +292,15 @@ M4BUILTIN_HANDLER (__line__)
 }
 
 
+/**
+ * __program__
+ **/
+M4BUILTIN_HANDLER (__program__)
+{
+  m4_shipout_string (context, obs, program_name, 0, true);
+}
+
+
 /* The builtin "builtin" allows calls to builtin macros, even if their
    definition has been overridden or shadowed.  It is thus possible to
    redefine builtins, and still access their original definition.  */
@@ -304,9 +316,10 @@ M4BUILTIN_HANDLER (builtin)
   bp = m4_builtin_find_by_name (NULL, name);
 
   if (bp == NULL)
-    m4_error (context, 0, 0, _("%s: undefined name `%s'"), M4ARG (0), name);
-  else
-    (*bp->func) (context, obs, argc - 1, argv + 1);
+    m4_error (context, 0, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
+  else if (!m4_bad_argc (context, argc - 1, argv + 1,
+			 bp->min_args, bp->max_args))
+    bp->func (context, obs, argc - 1, argv + 1);
 }
 
 
@@ -356,9 +369,9 @@ M4BUILTIN_HANDLER (changesyntax)
       for (i = 1; i < argc; i++)
 	{
 	  char key = *M4ARG (i);
-	  if ((m4_set_syntax (M4SYNTAX, key,
-			      m4_expand_ranges (M4ARG (i)+1, obs)) < 0)
-	      && (key != '\0'))
+	  if (key != '\0'
+	      && (m4_set_syntax (M4SYNTAX, key,
+				 m4_expand_ranges (M4ARG (i) + 1, obs)) < 0))
 	    {
 	      m4_error (context, 0, 0, _("%s: undefined syntax code: `%c'"),
 			M4ARG (0), key);
@@ -504,7 +517,7 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *  symbol = m4_symbol_lookup (M4SYMTAB, name);
 
   if (symbol == NULL)
-    m4_error (context, 0, 0, _("%s: undefined name `%s'"), M4ARG (0), name);
+    m4_error (context, 0, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
   else
     m4_macro_call (context, symbol, obs, argc - 1, argv + 1);
 }

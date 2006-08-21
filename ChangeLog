@@ -1,5 +1,11 @@
 2006-08-20  Eric Blake  <ebb9@byu.net>
 
+	* m4/macro.c (expand_macro): Move argument check...
+	(m4_macro_call): ...to here, so indir will warn.
+	* modules/gnu.c (__program__): New macro, ported from branch.
+	(builtin): Perform argument check.
+	(changesyntax): Avoid out-of-bounds read.
+
 	* modules/gnu.c (includes): Assume stdlib.h, errno.
 	(m4_regexp_compile): Add no_sub parameter, avoid memory leaks.
 	(substitute): Add caller parameter, avoid out-of-bounds memory
