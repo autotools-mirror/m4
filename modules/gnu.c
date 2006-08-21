@@ -21,21 +21,13 @@
 #  include <config.h>
 #endif
 
-#include <ctype.h>
-
-#if HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-
 #include <m4module.h>
 #include <modules/m4.h>
 
-#include <errno.h>
-#ifndef errno
-int errno;
-#endif
-
 #include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
 
 #ifdef NDEBUG
 #  include "m4private.h"
@@ -64,7 +56,7 @@ int errno;
 	BUILTIN(patsubst,	false,	true,	3,	5  )	\
 	BUILTIN(regexp,		false,	true,	3,	5  )	\
 	BUILTIN(renamesyms,	false,	true,	3,	4  )	\
-	BUILTIN(symbols,	false,	false,	0,	-1 )	\
+	BUILTIN(symbols,	false,	false,	1,	-1 )	\
 	BUILTIN(syncoutput,	false,  true,	2,	2  )	\
 
 
@@ -114,26 +106,30 @@ typedef struct {
 
 
 /* Compile a REGEXP using the RESYNTAX bits, and return the buffer.
-   Report errors on behalf of CALLER.  */
+   Report errors on behalf of CALLER.  If NO_SUB, optimize the
+   compilation to skip filling out the regs member of the buffer.  */
 
 static m4_pattern_buffer *
 m4_regexp_compile (m4 *context, const char *caller,
-		   const char *regexp, int resyntax)
+		   const char *regexp, int resyntax, bool no_sub)
 {
+  /* buf is guaranteed to start life 0-initialized, which works in the
+     below algorithm.
+
+     FIXME - this method is not reentrant, since re_compile_pattern
+     mallocs memory, depends on the global variable re_syntax_options
+     for its syntax (but at least the compiled regex remembers its
+     syntax even if the global variable changes later), and since we
+     use a static variable.  To be reentrant, we would need a mutex in
+     this method, and we should have a way to free the memory used by
+     buf when this module is unloaded.  */
+  
   static m4_pattern_buffer buf;	/* compiled regular expression */
-  static bool buf_initialized = false;
   const char *msg;		/* error message from re_compile_pattern */
 
-  if (!buf_initialized)
-    {
-      buf_initialized	= true;
-      buf.pat.buffer	= NULL;
-      buf.pat.allocated	= 0;
-      buf.pat.fastmap	= NULL;
-      buf.pat.translate	= NULL;
-    }
-
   re_set_syntax (resyntax);
+  regfree (&buf.pat);
+  buf.pat.no_sub = no_sub;
   msg = re_compile_pattern (regexp, strlen (regexp), &buf.pat);
 
   if (msg != NULL)
@@ -143,6 +139,8 @@ m4_regexp_compile (m4 *context, const char *caller,
       return NULL;
     }
 
+  re_set_registers (&buf.pat, &buf.regs, buf.regs.num_regs, buf.regs.start,
+		    buf.regs.end);
   return &buf;
 }
 
@@ -164,10 +162,10 @@ m4_regexp_search (m4_pattern_buffer *buf, const char *string,
    substituted by the text matched by the Nth parenthesized sub-expression.  */
 
 static void
-substitute (m4 *context, m4_obstack *obs, const char *victim,
-	    const char *repl, m4_pattern_buffer *buf)
+substitute (m4 *context, m4_obstack *obs, const char *caller,
+	    const char *victim, const char *repl, m4_pattern_buffer *buf)
 {
-  register unsigned int ch;
+  unsigned int ch;
 
   for (;;)
     {
@@ -188,10 +186,20 @@ substitute (m4 *context, m4_obstack *obs, const char *victim,
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (buf->regs.end[ch] > 0)
+	  if (buf->pat.re_nsub < ch)
+	    m4_warn (context, 0,
+		     _("Warning: %s: sub-expression %d not present"),
+		     caller, ch);
+	  else if (buf->regs.end[ch] > 0)
 	    obstack_grow (obs, victim + buf->regs.start[ch],
 			  buf->regs.end[ch] - buf->regs.start[ch]);
 	  break;
+
+	case '\0':
+	  m4_warn (context, 0,
+		   _("Warning: %s: trailing \\ ignored in replacement"),
+		   caller);
+	  return;
 
 	default:
 	  obstack_1grow (obs, ch);
@@ -243,7 +251,7 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (context, obs, victim, replace, buf);
+      substitute (context, obs, caller, victim, replace, buf);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
@@ -526,7 +534,7 @@ M4BUILTIN_HANDLER (patsubst)
 	return;
     }
 
-  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax);
+  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, false);
   if (!buf)
     return;
 
@@ -583,14 +591,14 @@ M4BUILTIN_HANDLER (regexp)
     else
       regexp(VICTIM, REGEXP)  */
 
-  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax);
+  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, argc == 3);
   if (!buf)
     return;
 
   length = strlen (M4ARG (1));
   startpos = m4_regexp_search (buf, M4ARG (1), length, 0, length);
 
-  if (startpos  == -2)
+  if (startpos == -2)
     {
       m4_error (context, 0, 0, _("%s: error matching regular expression `%s'"),
 		me, M4ARG (2));
@@ -600,7 +608,7 @@ M4BUILTIN_HANDLER (regexp)
   if ((argc == 3) || (replace == NULL))
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (context, obs, M4ARG (1), replace, buf);
+    substitute (context, obs, me, M4ARG (1), replace, buf);
 
   return;
 }
@@ -642,7 +650,7 @@ M4BUILTIN_HANDLER (renamesyms)
 	    return;
 	}
 
-      buf = m4_regexp_compile (context, me, regexp, resyntax);
+      buf = m4_regexp_compile (context, me, regexp, resyntax, false);
       if (!buf)
 	return;
 
@@ -654,7 +662,7 @@ M4BUILTIN_HANDLER (renamesyms)
 
       for (; data.size > 0; --data.size, data.base++)
 	{
-	  const char *	name	= data.base[0];
+	  const char *name = data.base[0];
 
 	  if (m4_regexp_substitute (context, &rename_obs, me, name, regexp,
 				    buf, replace, true))

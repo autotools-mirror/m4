@@ -1,3 +1,12 @@
+2006-08-20  Eric Blake  <ebb9@byu.net>
+
+	* modules/gnu.c (includes): Assume stdlib.h, errno.
+	(m4_regexp_compile): Add no_sub parameter, avoid memory leaks.
+	(substitute): Add caller parameter, avoid out-of-bounds memory
+	references.
+	(m4_regexp_substitute, patsubst, regexp, renamesyms): Adjust
+	callers.
+
 2006-08-16  Eric Blake  <ebb9@byu.net>
 
 	* po/POTFILES.in: Add more files that contain translatable
