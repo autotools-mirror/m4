@@ -53,7 +53,7 @@
 	BUILTIN(changesyntax,	false,	true,	1,	-1 )	\
 	BUILTIN(debugmode,	false,	false,	1,	2  )	\
 	BUILTIN(debugfile,	false,	false,	1,	2  )	\
-	BUILTIN(esyscmd,	false,	true,	2,	2  )	\
+	BUILTIN(esyscmd,	false,	true,	-1,	2  )	\
 	BUILTIN(format,		false,	true,	2,	-1 )	\
 	BUILTIN(indir,		false,	true,	2,	-1 )	\
 	BUILTIN(patsubst,	false,	true,	3,	5  )	\
@@ -126,7 +126,7 @@ m4_regexp_compile (m4 *context, const char *caller,
      use a static variable.  To be reentrant, we would need a mutex in
      this method, and we should have a way to free the memory used by
      buf when this module is unloaded.  */
-  
+
   static m4_pattern_buffer buf;	/* compiled regular expression */
   const char *msg;		/* error message from re_compile_pattern */
 
@@ -468,6 +468,16 @@ M4BUILTIN_HANDLER (esyscmd)
       FILE *pin;
       int ch;
 
+      /* Calling with no arguments triggers a warning, but must also
+         set sysval to 0 as if the empty command had been executed.
+         Therefore, we must manually check min args ourselves rather
+         than relying on the macro calling engine.  */
+      if (m4_bad_argc (context, argc, argv, 2, -1))
+        {
+          m4_set_sysval (0);
+          return;
+        }
+
       m4_sysval_flush (context);
       errno = 0;
       pin = popen (M4ARG (1), "r");
@@ -476,7 +486,7 @@ M4BUILTIN_HANDLER (esyscmd)
 	  m4_error (context, 0, errno,
 		    _("%s: cannot open pipe to command `%s'"),
 		    M4ARG (0), M4ARG (1));
-	  m4_set_sysval (0xffff);
+	  m4_set_sysval (-1);
 	}
       else
 	{

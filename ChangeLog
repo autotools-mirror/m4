@@ -1,3 +1,15 @@
+2006-08-21  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Check for <sys/wait.h>.
+	* modules/gnu.c (esyscmd): Use -1 for failure.  Set sysval to 0
+	when no arguments are given, but without losing warning about 0
+	arguments.
+	* modules/m4.c (syscmd): Likewise.
+	(includes): Assume C89.
+	(m4_sysval): Make static.
+	(M4_SYSVAL_EXITBITS, M4_SYSVAL_TERMSIGBITS): New macros.
+	(sysval): Port calculation from branch.
+
 2006-08-20  Eric Blake  <ebb9@byu.net>
 
 	* m4/macro.c (expand_macro): Move argument check...

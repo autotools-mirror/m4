@@ -21,20 +21,14 @@
 #  include <config.h>
 #endif
 
-#if HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-
-#if HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
-#include <errno.h>
-#ifndef errno
-extern int errno;
-#endif
-
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#if HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
 
 #include <m4module.h>
 #include <modules/m4.h>
@@ -92,7 +86,7 @@ extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 	BUILTIN(shift,		false,	false,	0,	-1 )	\
 	BUILTIN(sinclude,	false,	true,	2,	2  )	\
 	BUILTIN(substr,		false,	true,	3,	4  )	\
-	BUILTIN(syscmd,		false,	true,	2,	2  )	\
+	BUILTIN(syscmd,		false,	true,	-1,	2  )	\
 	BUILTIN(sysval,		false,	false,	0,	-1 )	\
 	BUILTIN(traceoff,	false,	false,	0,	-1 )	\
 	BUILTIN(traceon,	false,	false,	0,	-1 )	\
@@ -427,10 +421,39 @@ Warning: %s: builtin `%s' requested by frozen file not found"),
    and "sysval".  */
 
 /* Exit code from last "syscmd" command.  */
-int  m4_sysval = 0;
+/* FIXME - we should preserve this value across freezing.  See
+   http://lists.gnu.org/archive/html/bug-m4/2006-06/msg00059.html
+   for ideas on how do to that.  */
+static int  m4_sysval = 0;
 
+/* Helper macros for readability.  */
+#if UNIX || defined WEXITSTATUS
+# define M4_SYSVAL_EXITBITS(status)                       \
+   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
+# define M4_SYSVAL_TERMSIGBITS(status)                    \
+   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
+
+#else /* ! UNIX && ! defined WEXITSTATUS */
+/* Platforms such as mingw do not support the notion of reporting
+   which signal terminated a process.  Furthermore if WEXITSTATUS was
+   not provided, then the exit value is in the low eight bits.  */
+# define M4_SYSVAL_EXITBITS(status) status
+# define M4_SYSVAL_TERMSIGBITS(status) 0
+#endif /* ! UNIX && ! defined WEXITSTATUS */
+
+/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
+/* FIXME - this may fit better as a gnulib module.  */
 #ifndef WEXITSTATUS
 # define WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#endif
+#ifndef WTERMSIG
+# define WTERMSIG(status) ((status) & 0x7f)
+#endif
+#ifndef WIFSIGNALED
+# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
+#endif
+#ifndef WIFEXITED
+# define WIFEXITED(status) (WTERMSIG (status) == 0)
 #endif
 
 void
@@ -451,14 +474,28 @@ m4_sysval_flush (m4 *context)
 
 M4BUILTIN_HANDLER (syscmd)
 {
+  /* Calling with no arguments triggers a warning, but must also set
+     sysval to 0 as if the empty command had been executed.
+     Therefore, we must manually check min args ourselves rather than
+     relying on the macro calling engine.  */
+  if (m4_bad_argc (context, argc, argv, 2, -1))
+    {
+      m4_set_sysval (0);
+      return;
+    }
   m4_sysval_flush (context);
   m4_sysval = system (M4ARG (1));
+  /* FIXME - determine if libtool works for OS/2, in which case the
+     FUNC_SYSTEM_BROKEN section on the branch must be ported to work
+     around the bug in their EMX libc system().  */
 }
 
 
 M4BUILTIN_HANDLER (sysval)
 {
-  m4_shipout_int (obs, WEXITSTATUS (m4_sysval));
+  m4_shipout_int (obs, (m4_sysval == -1 ? 127
+                        : (M4_SYSVAL_EXITBITS (m4_sysval)
+                           | M4_SYSVAL_TERMSIGBITS (m4_sysval))));
 }
 
 

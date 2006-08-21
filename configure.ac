@@ -168,7 +168,7 @@ AC_CHECK_SIZEOF([long long int])
 ## ------------------------- ##
 ## C headers required by M4. ##
 ## ------------------------- ##
-AC_CHECK_HEADERS_ONCE([limits.h])
+AC_CHECK_HEADERS_ONCE([limits.h sys/wait.h])
 
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
