@@ -2,6 +2,7 @@ compile
 config.*
 depcomp
 gendocs.sh
+gnupload
 install-sh
 ltmain.sh
 mdate-sh
