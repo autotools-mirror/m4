@@ -15,10 +15,10 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --no-libtool --macro-prefix=M4 alloca binary-io cloexec close-stream error fdl fopen-safer free gendocs getopt gnupload mkstemp obstack regex stdlib-safer strtol tmpfile-safer unlocked-io verror xalloc xvasprintf
+#   gnulib-tool --import --dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --no-libtool --macro-prefix=M4 binary-io cloexec close-stream error fdl fopen-safer free gendocs getopt gnupload mkstemp obstack regex stdlib-safer strtol tmpfile-safer unlocked-io verror xalloc xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([alloca binary-io cloexec close-stream error fdl fopen-safer free gendocs getopt gnupload mkstemp obstack regex stdlib-safer strtol tmpfile-safer unlocked-io verror xalloc xvasprintf])
+gl_MODULES([binary-io cloexec close-stream error fdl fopen-safer free gendocs getopt gnupload mkstemp obstack regex stdlib-safer strtol tmpfile-safer unlocked-io verror xalloc xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
