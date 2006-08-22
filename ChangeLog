@@ -1,3 +1,14 @@
+2006-08-22  Eric Blake  <ebb9@byu.net>
+
+	* ChangeLog: Add copyright.
+	* AUTHORS: Likewise.
+	* BACKLOG: Likewise.
+	* README: Likewise.
+	* THANKS: Likewise.
+	* TODO: Likewise.
+	* examples/COPYING: New file, add copyright for all the examples.
+	* checks/get-them: Put copyright on testsuite files.
+
 2006-08-18  Eric Blake  <ebb9@byu.net>
 
 	Don't let unrelated child processes see too many files.
@@ -2855,4 +2866,17 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
+	-----
+
 	$Revision$ $Date$
+
+	Local Variables:
+	coding: utf-8
+	End:
+
+	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
+	2005, 2006 Free Software Foundation, Inc.
+
+	Copying and distribution of this file, with or without
+	modification, are permitted provided the copyright notice
+	and this notice are preserved.

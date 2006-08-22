@@ -46,7 +46,12 @@ BEGIN {
     seq++;
     count++;
     file = sprintf("%03d.%s", count, node);
-    printf("dnl @ %s:%d: Origin of test\n", FILENAME, NR) > file;
+    printf("dnl @ %s:%d: Origin of test\n"\
+	   "dnl @ Copyright (C) 2006 Free Software Foundation\n"\
+	   "dnl @ This file is free software; the Free Software Foundation\n"\
+	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
+	   "dnl @ with or without modifications, as long as this notice\n"\
+	   "dnl @ is preserved.\n", FILENAME, NR) > file;
     next;
   }
   if ($0 ~ /^@end example$/) {
