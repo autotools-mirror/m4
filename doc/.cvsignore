@@ -18,5 +18,6 @@ Makefile
 manual
 m4.info*
 m4.1
+regexprops-generic.texi
 stamp-vti
 version.texi
