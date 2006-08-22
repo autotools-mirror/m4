@@ -1,5 +1,19 @@
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
+	Start porting various fixes from the branch that use gnulib.
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	binary-io cloexec close-stream fopen-safer getopt gnupload mkstemp
+	regexprops-generic stdlib-safer unlocked-io.
+	* m4/debug.c (m4_debug_set_output): Close debug file on exec.
+	* m4/path.c (m4_path_search): Close input file on exec, reject
+	empty file name, fix parameter naming.
+	* m4/output.c (make_room_for): Close diversion file on exec.
+	(includes): Assume C89 headers.
+	(tmpfile): For now, we don't want tmpfile-safer, because we want
+	clean-temp later.
+	* m4/m4private.h (includes): Use various gnulib headers.
+	* doc/regexprops-generic.texi: Use gnulib's copy.
+
 	* configure.ac (AM_INIT_AUTOMAKE): Bump automake requirement.
 	* AUTHORS: Add copyright.
 	* ChangeLog: Likewise.

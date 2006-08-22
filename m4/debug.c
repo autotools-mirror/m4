@@ -154,6 +154,9 @@ m4_debug_set_output (m4 *context, const char *name)
       if (fp == NULL)
 	return false;
 
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	m4_error (context, 0, errno,
+		  _("cannot protect debug file across forks"));
       set_debug_file (context, fp);
     }
   return true;

@@ -15,10 +15,10 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert error exit fdl free gendocs gettext mkstemp obstack progname regex stdbool strtol verror xalloc xalloc-die xstrndup xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert binary-io cloexec close-stream error exit fdl fopen-safer free gendocs getopt gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([assert error exit fdl free gendocs gettext mkstemp obstack progname regex stdbool strtol verror xalloc xalloc-die xstrndup xvasprintf])
+gl_MODULES([assert binary-io cloexec close-stream error exit fdl fopen-safer free gendocs getopt gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([gnu])
 gl_M4_BASE([ltdl/m4])

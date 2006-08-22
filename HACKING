@@ -183,35 +183,24 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run ./configure (or create a build directory first and run configure
   from there, if you want to keep the build tree separate).
 
-* Run `make -fMakefile.maint fetch' (or `make -f../Makefile.maint fetch'
-  if you are running from a VPATH build directory, where `../' is the
-  relative path to the directory with `configure' in it), which will
-  fetch new versions of the files that are maintained outside of m4.  If
-  you are using GNU make, the included GNUmakefile allows you to leave
-  off the '-fMakefile.maint'.
-
 * Run `make distcheck'.  If there are any problems, fix them and start
   again.
 
 * Run ./commit from the source tree.
 
-* Run `make -fMakefile.maint cvs-dist' (or `make -f../Makefile.maint
-  cvs-dist' if you are running from a VPATH build directory, where `../'
-  is the relative path to the directory with `configure' in it), which
-  will build a release tarball (with `make distcheck'), tag the tree
-  with release-$(VERSION) and generate the gpg signature files.
+* Run `make cvs-dist', which will build a release tarball (with `make
+  distcheck'), and tag the tree with release-$(VERSION).
 
-* Run 'make -f[../]Makefile.maint deltas' (pass
-  LASTRELEASE=maj.min[.mic[alpha]] if needed) to create both diff and
-  xdelta files between the previous release tarball and the new with
-  detached gpg signature files and clear signed directive files.
+* Run 'make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
+  create both diff and xdelta files between the previous release tarball
+  and the new.
 
-* Upload release tarball, diff file and xdelta file, plus their associated
-  detached gpg signature files and clear signed directive files to
-  ftp-upload.gnu.org.  If the upload is destined for ftp.gnu.org, then the
-  files should be placed in the /incoming/ftp directory.  If the upload is
-  an alpha release destined for alpha.gnu.org, then the files should be
-  placed in the /incoming/alpha directory.
+* Run '[../]./gnupload --to [dest].gnu.org:m4 [files]' to create
+  detached gpg signature and clear signed directive files, and upload
+  the combination to the correct location.  For an alpha release,
+  gnupload will place files in alpha.gnu.org, in /incoming/alpha, and
+  the xdelta file is not strictly necessary.  For a full release,
+  gnupload will place files in ftp.gnu.org, in /incoming/ftp.
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
@@ -226,7 +215,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run ./commit.
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
-  the new one (generate with `make -f[../]Makefile.maint web-manual').
+  the new one (generate with `make web-manual').
 
 
 7. Alpha release note template

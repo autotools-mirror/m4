@@ -121,37 +121,52 @@ m4_add_include_directory (m4 *context, const char *dir)
 }
 
 FILE *
-m4_path_search (m4 *context, const char *dir, char **expanded_name)
+m4_path_search (m4 *context, const char *file, char **expanded_name)
 {
   FILE *fp;
   m4__search_path *incl;
   char *name;			/* buffer for constructed name */
   int e;
 
+  if (expanded_name != NULL)
+    *expanded_name = NULL;
+
+  /* Reject empty file.  */
+  if (*file == '\0')
+    {
+      errno = ENOENT;
+      return NULL;
+    }
+
   /* Look in current working directory first.  */
-  fp = fopen (dir, "r");
+  fp = fopen (file, "r");
   if (fp != NULL)
     {
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	m4_error (context, 0, errno,
+		  _("cannot protect input file across forks"));
       if (expanded_name != NULL)
-	*expanded_name = xstrdup (dir);
+	*expanded_name = xstrdup (file);
       return fp;
     }
 
   /* If file not found, and filename absolute, fail.  */
-  if (*dir == '/' || m4_get_no_gnu_extensions_opt (context))
+  if (*file == '/' || m4_get_no_gnu_extensions_opt (context))
     return NULL;
-  e= errno;
+  e = errno;
 
-  name = (char *) xmalloc (m4__get_search_path (context)->max_length + 1 + strlen (dir) + 1);
+  name = (char *) xmalloc (m4__get_search_path (context)->max_length
+			   + 1 + strlen (file) + 1);
 
-  for (incl = m4__get_search_path (context)->list; incl != NULL; incl = incl->next)
+  for (incl = m4__get_search_path (context)->list;
+       incl != NULL; incl = incl->next)
     {
       strncpy (name, incl->dir, incl->len);
       name[incl->len] = '/';
-      strcpy (name + incl->len + 1, dir);
+      strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", dir, name);
+      fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");
@@ -159,11 +174,17 @@ m4_path_search (m4 *context, const char *dir, char **expanded_name)
 	{
 	  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_PATH))
 	    M4_DEBUG_MESSAGE2 (context, _("path search for `%s' found `%s'"),
-			       dir, name);
+			       file, name);
+	  if (set_cloexec_flag (fileno (fp), true) != 0)
+	    m4_error (context, 0, errno,
+		      _("cannot protect input file across forks"));
 
 	  if (expanded_name != NULL)
-	    *expanded_name = xstrdup (name);
-	  break;
+	    *expanded_name = name;
+	  else
+	    free (name);
+	  errno = e;
+	  return fp;
 	}
     }
 

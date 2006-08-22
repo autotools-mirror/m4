@@ -22,19 +22,11 @@
 #  include <config.h>
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#if HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
-#include <errno.h>
-
-#ifndef errno
-extern int errno;
-#endif
+#include <unistd.h>
 
 #include "m4private.h"
 
@@ -55,6 +47,9 @@ extern int errno;
 #ifdef HAVE_TMPFILE
 extern FILE *tmpfile ();
 #endif
+
+/* FIXME - hack until we get clean-temp gnulib module going.  */
+#undef tmpfile
 
 /* Output functions.  Most of the complexity is for handling cpp like
    sync lines.
@@ -206,6 +201,9 @@ make_room_for (m4 *context, int length)
       if (selected_diversion->file == NULL)
 	m4_error (context, EXIT_FAILURE, errno,
 		  _("cannot create temporary file for diversion"));
+      if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
+	m4_error (context, 0, errno,
+		  _("cannot protect diversion across forks"));
 
       if (selected_diversion->used > 0)
 	{
