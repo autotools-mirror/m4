@@ -1,5 +1,8 @@
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import gnupload.
+	* Makefile.maint (fetch): Simplify, now that we can use gnupload.
+
 	* checks/check-them: State why a test is skipped.
 	* doc/m4.texinfo (Changeword, Sysval, Maketemp): Likewise.
 

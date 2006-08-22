@@ -20,7 +20,7 @@
 TEXI2HTML = texi2html
 
 .PHONY: cvs-release
-cvs-release: version-check prev-tarball cvs-news fetch cvs-commit cvs-dist deltas web-manual
+cvs-release: version-check prev-tarball cvs-news cvs-commit cvs-dist deltas web-manual
 	@tarname="$(PACKAGE)-$(VERSION).tar.gz"; \
 	diffname="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).diff.gz"; \
 	xdeltaname="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).xdelta"; \
@@ -73,46 +73,6 @@ cvs-news:
 	  exit 1; \
 	fi
 
-## Program to use to fetch files.
-WGET = wget
-WGETSGO = $(WGET) http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~
-
-## Files that we fetch and which we compare against.
-## FIXME should be a lot more here
-FETCHFILES = \
-./INSTALL \
-./install-sh \
-doc/texinfo.tex
-
-## Fetch the latest versions of files we care about.
-.PHONY: fetch
-fetch:
-	rm -rf Fetchdir > /dev/null 2>&1
-	mkdir Fetchdir
-## If a get fails then that is a problem.
-	(cd Fetchdir && \
-	$(WGETSGO)/autoconf/autoconf/INSTALL; \
-	$(WGETSGO)/automake/automake/lib/install-sh; \
-	$(WGETSGO)/texinfo/texinfo/doc/texinfo.tex; )
-## Don't exit after test because we want to give as many errors as
-## possible.
-	@stat=0; for file in $(FETCHFILES); do \
-	  fetchedfile=Fetchdir/`echo $$file | sed 's,.*/,,g'`; \
-	  if diff -u $(srcdir)/$$file $$fetchedfile \
-	    >>Fetchdir/update.patch 2>/dev/null; then :; \
-	  else \
-	    stat=1; \
-	    echo "Updating $(srcdir)/$$file..."; \
-	    cp $$fetchedfile $(srcdir)/$$file; \
-	  fi; \
-	done; \
-	test $$stat = 1 && \
-	  echo "See Fetchdir/update.patch for a log of the changes."; \
-	exit $$stat
-
-
-GPG = gpg # set it to `:' to avoid gpg operations
-
 .PHONY: cvs-commit
 cvs-commit: cvs-news
 	cd $(srcdir) && $(SHELL) ./commit
@@ -124,14 +84,6 @@ cvs-dist: cvs-news timestamps
 ## Finally, if everything was successful, tag the release
 	cd $(srcdir) \
 	  && $(CVS) -q tag `echo "release-$(VERSION)" | sed 's/\./_/g'`
-## Generate signatures and directives for FSF ftp-upload:
-	for suffix in .gz .bz2; do \
-	  ofile="$(PACKAGE)-$(VERSION).tar$$suffix"; \
-	  $(GPG) --detach-sign $$ofile \
-	  && echo "directory: $(PACKAGE)" > $$ofile.directive \
-	  && $(GPG) --clearsign $$ofile.directive \
-	  && rm -f $$ofile.directive; \
-	done
 
 .PHONY: new-tarball
 new-tarball:
@@ -168,11 +120,7 @@ delta-diff: prev-tarball new-tarball
 	&& tar xzf "../$(PACKAGE)-$(VERSION).tar.gz" \
 	&& $(DIFF) $(DIFF_OPTIONS) \
 		$(PACKAGE)-$(LASTRELEASE) $(PACKAGE)-$(VERSION) \
-		| GZIP=$(GZIP_ENV) gzip -c > $$ofile \
-	&& $(GPG) --detach-sign $$ofile \
-	&& echo "directory: $(PACKAGE)" > $$ofile.directive \
-	&& $(GPG) --clearsign $$ofile.directive \
-	&& rm -f $$ofile.directive
+		| GZIP=$(GZIP_ENV) gzip -c > $$ofile
 
 	rm -rf delta-diff
 
@@ -188,11 +136,7 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 	( test -z `$(XDELTA) delta $(XDELTA_OPTIONS) \
 	    $(PACKAGE)-$(LASTRELEASE).tar.gz $(PACKAGE)-$(VERSION).tar.gz \
 	    $$ofile 2>&1` \
-	  && : ) \
-	&& $(GPG) --detach-sign $$ofile \
-	&& echo "directory: $(PACKAGE)" > $$ofile.directive \
-	&& $(GPG) --clearsign $$ofile.directive \
-	&& rm -f $$ofile.directive
+	  && : )
 
 .PHONY: web-manual
 web-manual:
