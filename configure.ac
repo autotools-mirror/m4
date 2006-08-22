@@ -93,7 +93,7 @@ AC_SUBST([PREOPEN_DEPENDENCIES])
 ## ------------------------ ##
 ## Automake Initialisation. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.9.6 subdir-objects dist-bzip2 gnits])
+AM_INIT_AUTOMAKE([1.9b subdir-objects dist-bzip2 gnits])
 
 
 

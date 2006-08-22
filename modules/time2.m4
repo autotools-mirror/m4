@@ -1,3 +1,7 @@
+dnl Copyright (C) 2006 Free Software Foundation
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it
+dnl with or without modifications, as long as this notice is preserved.
 `currenttime' = currenttime
 `ctime'       = ctime != ctime(eval(currenttime+60*60*24))
 gmtime      = gmtime(currenttime)

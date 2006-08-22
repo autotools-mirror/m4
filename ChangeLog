@@ -1,5 +1,41 @@
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
+	* configure.ac (AM_INIT_AUTOMAKE): Bump automake requirement.
+	* AUTHORS: Add copyright.
+	* ChangeLog: Likewise.
+	* README: Likewise.  Require automake 1.9b or later.
+	* HACKING: New file.
+	* README-alpha: Add copyright.
+	* THANKS: Likewise.  Update.
+	* doc/STYLE: Add copyright, and tweak for changed directories.
+	* modules/README: Add copyright, and tweak for libtool version.
+	* examples/COPYING: New file.
+	* examples/WWW/COPYING: Likewise.
+	* examples/WWW/m4lib/COPYING: Likewise.
+	* modules/shadow.m4: Add copyright.
+	* modules/perl.m4: Likewise.
+	* modules/modtest.m4: Likewise.
+	* modules/stdlib.m4: Likewise.
+	* modules/time.m4: Likewise.
+	* modules/time2.m4: Likewise.
+	* po/Makevars: Likewise.
+	* tests/iso8859.m4: Likewise.
+	* tests/m4.in: Likewise.
+	* NEWS: Add (C) to copyright.
+	* TODO: Likewise.
+	* m4/system_.h: Likewise.
+	* tests/atlocal.in: Likewise.
+	* tests/builtins.at: Likewise.
+	* tests/freeze.at: Likewise.
+	* tests/generate.awk: Likewise.
+	* tests/macros.at: Likewise.
+	* tests/modules.at: Likewise.
+	* tests/options.at: Likewise.
+	* tests/others.at: Likewise.
+	* tests/testsuite.at: Likewise.
+	* m4/utility.c: Spell out copyright years.
+	* src/main.c: Likewise.
+
 	* doc/m4.texinfo (Bugs, Manual, Syntax): Sync from branch.
 
 2006-08-21  Eric Blake  <ebb9@byu.net>
@@ -7047,4 +7083,17 @@
 	* Initial beta release.  Release 0.50, manual 0.05.
 
 
+	-----
+
 	$Revision$ $Date$
+
+	Local Variables:
+	coding: utf-8
+	End:
+
+	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
+	2005, 2006 Free Software Foundation, Inc.
+
+	Copying and distribution of this file, with or without
+	modification, are permitted provided the copyright notice
+	and this notice are preserved.

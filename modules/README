@@ -4,10 +4,9 @@ Note that as of this writing, an unreleased version of libtool from the
 CVS trunk is required to be able to compile the example modules, since they
 in turn depend on the uninstalled libm4.la library.  I think that third
 party modules will not have this requirement since they will be linking
-against the installed library.  In any case, once libtool-1.4 (or 1.3a if
-you live on the bleeding edge) is released this will become a non-issue.
-The bottom line is that you shouldn't libtoolize this distribution unless
-you know what you are doing!
+against the installed library.  In any case, once libtool-2.0 is
+released this will become a non-issue.  The bottom line is that you
+shouldn't libtoolize this distribution unless you know what you are doing!
 
 Dynamic modules are only available if the host operating system provides
 one (or more!) of libltdl's required APIs.
@@ -90,3 +89,14 @@ or
 or in the case of time2.m4
 
   ../src/m4 -M `pwd` -m time time2.m4
+
+========================================================================
+
+Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the ``GNU Free
+Documentation License'' file as part of this distribution.

@@ -58,14 +58,14 @@ following restrictions on coding style apply:
 
 * ARCHITECTURE
 
-  + There are four groups of sources in subdirectories: `gnulib' contains
+  + There are four groups of sources in subdirectories: `gnu' contains
     the files maintained outside of m4, as a portability layer when building
     the souce for non-glibc2 machines; `m4' contains the functionality for
     libm4 and enables the user to write modules; `modules' implements the
     builtin macros for the m4 binary; `src' is a small wrapper program
     which links libm4 and loads initial modules to implement the m4 engine.
 
-  + The headers in gnulib/m4 need to be managed carefully: gnulib/m4 headers
+  + The headers in gnu need to be managed carefully: gnulib headers
     can be included by other files in the same directory using `#include
     "file.h"', and from files in other directories with `#include
     <m4/file.h>'.  The include path to invocations of the compiler from
@@ -82,3 +82,14 @@ following restrictions on coding style apply:
 
   + High cohesion.  The api and caller boundaries should be well defined
     and adhered to; a class should do one thing only.
+
+========================================================================
+
+Copyright (C) 2003, 2006 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the ``GNU Free
+Documentation License'' file as part of this distribution.
