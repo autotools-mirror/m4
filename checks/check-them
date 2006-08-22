@@ -51,6 +51,7 @@ do
 
   if test $? = 77 ; then
     skipped="$skipped $file"
+    cat $err
     continue
   fi
 
