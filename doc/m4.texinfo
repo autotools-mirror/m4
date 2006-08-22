@@ -609,9 +609,9 @@ in @samp{.m4f}.
 @item -R @var{FILE}
 @itemx --reload-state=@var{FILE}
 Before execution starts, recover the internal state from the specified
-frozen @var{FILE}.  The options @option{-D}, @option{-U}, and
-@option{-t} take effect after state is reloaded, but before the input
-files are read.
+frozen @var{FILE}.  The options @option{-D}, @option{-U}, @option{-t},
+@option{-m}, and @option{-r} take effect after state is reloaded, but
+before the input files are read.
 @end table
 
 Finally, there are several options for aiding in debugging @code{m4}
@@ -673,7 +673,7 @@ options.
 @node Bugs
 @section Problems and bugs
 
-If you have problems with GNU @code{m4} or think you've found a bug,
+If you have problems with @acronym{GNU} M4 or think you've found a bug,
 please report it.  Before reporting a bug, make sure you've actually
 found a real bug.  Carefully reread the documentation and see if it
 really says you can do what you're trying to do.  If it's not clear
@@ -689,7 +689,8 @@ problem was really in the documentation.
 Once you've got a precise problem, send e-mail to (Internet)
 @email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
 you are using.  You can get this information with the command @samp{m4
---version}.
+--version}.  You can also run @kbd{make check} to generate the file
+@file{tests/@/testsuite.log}, useful for including in your report.
 
 Non-bug suggestions are always welcome as well.  If you have questions
 about things that are unclear in the documentation or are just obscure
@@ -719,33 +720,56 @@ Example of input line
 @error{}and an error message
 @end example
 
+The sequence @samp{^D} in an example indicates the end of the input file.
+The majority of these examples are self-contained, and you can run them
+with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
+that is bundled in the @acronym{GNU} M4 package consists of the examples
+in this document!
+
 As each of the predefined macros in @code{m4} is described, a prototype
 call of the macro will be shown, giving descriptive names to the
 arguments, e.g.,
 
-@deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
-Description of @samp{regexp}.
+@deffn {Composite (none)} example (@var{string}, @dvar{count, 1}, @
+  @ovar{argument}@dots{})
+This is a sample prototype.  There is not really a macro named
+@code{example}, but this documents that if there were, it would be a
+Composite macro, rather than a Builtin, and would be provided by the
+module @code{none}.
+
+It requires at least one argument, @var{string}.  Remember that in
+@code{m4}, there must not be a space between the macro name and the
+opening parenthesis, unless it was intended to call the macro without
+any arguments.  The brackets around @var{count} and @var{argument} show
+that these arguments are optional.  If @var{count} is omitted, the macro
+behaves as if count were @samp{1}, whereas if @var{argument} is omitted,
+the macro behaves as if it were the empty string.  A blank argument is
+not the same as an omitted argument.  For example, @samp{example(`a')},
+@samp{example(`a',`1')}, and @samp{example(`a',`1',)} would behave
+identically with @var{count} set to @samp{1}; while @samp{example(`a',)}
+and @samp{example(`a',`')} would explicitly pass the empty string for
+@var{count}.  The ellipses (@samp{@dots{}}) show that the macro
+processes additional arguments after @var{argument}, rather than
+ignoring them.
 @end deffn
 
-@noindent
-The @samp{Builtin} declaration declares that this macro is implemented
-as an m4 builtin; any parenthesised word immediately following is the
-name of the module that must be loaded.  The standards modules include
-@samp{m4} (which is always available), @samp{gnu} (for @sc{gnu} specific
-m4 extensions) and @samp{traditional} (for compatibility with System V
-m4).
+Each builtin definition will list, in parentheses, the module that must
+be loaded to use that macro.  The standard modules include
+@samp{m4} (which is always available), @samp{gnu} (for @acronym{GNU} specific
+m4 extensions), and @samp{traditional} (for compatibility with System V
+m4).  @xref{Modules}.
 
-@noindent
-All macro arguments in @code{m4} are strings, but some are given special
-interpretation, e.g., as numbers, file names, regular expressions, etc.
+All macro arguments in @code{m4} are strings, but some are given
+special interpretation, e.g., as numbers, file names, regular
+expressions, etc.  The documentation for each macro will state how the
+parameters are interpreted, and what happens if the argument cannot be
+parsed according to the desired interpretation.  Unless specified
+otherwise, a parameter specified to be a number is parsed as a decimal,
+even if the argument has leading zeros; and parsing the empty string as
+a number results in 0 rather than an error, although a warning will be
+issued.
 
-@noindent
-The @samp{opt} before the third argument shows that this argument is
-optional---if it is left out, it is taken to be the empty string.  An
-ellipsis (@samp{...}) last in the argument list indicates that any
-number of arguments may follow.
-
-This document consistently writes and uses @dfn{builtin}, without an
+This document consistently writes and uses @dfn{builtin}, without a
 hyphen, as if it were an English word.  This is how the @code{builtin}
 primitive is spelled within @code{m4}.
 
@@ -757,11 +781,14 @@ primitive is spelled within @code{m4}.
 As @code{m4} reads its input, it separates it into @dfn{tokens}.  A
 token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
-contain comments.
-
-GNU @code{m4} passes all ISO-8859-1 characters, except @kbd{'\0'}.  Eight
-bit ISO-8859-1 characters can be used as quotes, comment delimiters and
-in macro names, depending on the active locale.
+contain comments.  @acronym{GNU} @code{m4} does not yet understand
+multibyte locales; all operations are byte-oriented rather than
+character-oriented (although if your locale uses a single byte
+encoding, such as @sc{ISO-8859-1}, you will not notice a difference).
+However, @code{m4} is eight-bit clean, so you can
+use non-@sc{ascii} characters in quoted strings (@pxref{Changequote}),
+comments (@pxref{Changecom}), and macro names (@pxref{Indir}), with the
+exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 
 @menu
 * Names::                       Macro names
@@ -776,15 +803,13 @@ in macro names, depending on the active locale.
 @section Names
 
 @cindex names
-A name is a sequence of letters, digits, and the character @kbd{_}
+A name is any sequence of letters, digits, and the character @kbd{_}
 (underscore), where the first character is not a digit.  @code{m4} will
-use the longest such sequences found in the input.  If a name has a
+use the longest such sequence found in the input.  If a name has a
 macro definition, it will be subject to macro expansion
-(@pxref{Macros}).)
+(@pxref{Macros}).  Names are case-sensitive.
 
 Examples of legal names are: @samp{foo}, @samp{_tmp}, and @samp{name01}.
-
-Names are case-sensitive.
 
 The definitions of letters, digits and other input characters can be
 changed at any time, using the builtin macro @code{changesyntax}.

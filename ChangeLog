@@ -1,3 +1,7 @@
+2006-08-22  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Bugs, Manual, Syntax): Sync from branch.
+
 2006-08-21  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (AC_CHECK_HEADERS_ONCE): Check for <sys/wait.h>.
