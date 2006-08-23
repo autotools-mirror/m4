@@ -223,8 +223,13 @@ static void
 file_clean (m4 *context)
 {
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_INPUT))
-    M4_DEBUG_MESSAGE2 (context, _("input reverted to %s, line %d"),
-		       isp->u.u_f.name, isp->u.u_f.lineno);
+    {
+      if (isp->u.u_f.lineno)
+	M4_DEBUG_MESSAGE2 (context, _("input reverted to %s, line %d"),
+			   isp->u.u_f.name, isp->u.u_f.lineno);
+      else
+	M4_DEBUG_MESSAGE (context, _("input exhausted"));
+    }
 
   fclose (isp->u.u_f.file);
   m4_set_current_file (context, isp->u.u_f.name);

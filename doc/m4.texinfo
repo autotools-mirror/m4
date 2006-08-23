@@ -623,7 +623,10 @@ scripts.
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debug Levels}, for more details on the format and
-meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to @samp{aeq}.
+meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
+@samp{aeq}.  When the option is presented multiple times, if later
+@var{FLAGS} starts with @samp{-} or @samp{+}, they are cumulative,
+otherwise the later flags override all earlier occurrences.
 
 @item -l @var{NUM}
 @itemx --arglength=@var{NUM}
@@ -4006,15 +4009,15 @@ If you need to toggle sync lines on and off while processing macros, or
 to insure that they are off or on, you may do so using
 @code{syncoutput}.
 
-@code{syncoutput(1)}, @code{syncoutput(on)}, and @code{syncoutput(yes)}
-causes @code{m4} to emit sync lines of the form: @code{#line <number>
-["<filename>"]}.
+If @var{truth} matches the extended regular expression
+@samp{^[1yY]|^([oO][nN])}, it causes @code{m4} to emit sync lines of the
+form: @code{#line <number> ["<file>"]}.
 
-@code{syncoutput(0)}, @code{syncoutput(off)}, and @code{syncoutput(no)}
-turn them off.
+If @var{truth} is empty, or matches the extended regular expression
+@samp{^[0nN]|^([oO][fF])}, it causes @code{m4} to turn sync lines off.
 
-All other arguments are ignored as is @code{syncoutput} without
-parenthesis.
+All other arguments are ignored and issue a warning.  The macro
+@code{syncoutput} is only recognized with arguments.
 @end deffn
 
 @node Frozen files

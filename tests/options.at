@@ -73,3 +73,43 @@ OVERRIDE=It is changed.
 ]])
 
 AT_CLEANUP
+
+
+## ----------- ##
+## debug-flags ##
+## ----------- ##
+
+AT_SETUP([debug-flags])
+
+AT_DATA([[in]],
+[[divnum
+len(`abc')
+]])
+
+dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
+AT_CHECK_M4([-tlen in], 0, [[0
+3
+]], [[m4trace: -1- len(`abc') -> `3'
+]])
+
+dnl Test all flags.
+AT_CHECK_M4([-dV in], 0, [[0
+3
+]], [[m4debug: input read from in
+m4trace:in:1: -1- id 1: divnum ...
+m4trace:in:1: -1- id 1: divnum -> ???
+m4trace:in:1: -1- id 1: divnum -> `0'
+m4trace:in:2: -1- id 2: len ...
+m4trace:in:2: -1- id 2: len(`abc') -> ???
+m4trace:in:2: -1- id 2: len(...) -> `3'
+m4debug:in:3: input exhausted
+]])
+
+dnl Test addition and subtraction of flags.
+AT_CHECK_M4([-d-e -d+xt in], 0, [[0
+3
+]], [[m4trace: -1- id 1: divnum
+m4trace: -1- id 2: len(`abc')
+]])
+
+AT_CLEANUP

@@ -29,14 +29,17 @@ static void set_debug_file (m4 *, FILE *);
 /* Function to decode the debugging flags OPTS.  Used by main while
    processing option -d, and by the builtin debugmode ().  */
 int
-m4_debug_decode (m4 *context, const char *opts)
+m4_debug_decode (m4 *context, int previous, const char *opts)
 {
   int level;
+  char mode = '\0';
 
   if (opts == NULL || *opts == '\0')
     level = M4_DEBUG_TRACE_DEFAULT;
   else
     {
+      if (*opts == '-' || *opts == '+')
+	mode = *opts++;
       for (level = 0; *opts; opts++)
 	{
 	  switch (*opts)
@@ -96,6 +99,26 @@ m4_debug_decode (m4 *context, const char *opts)
 
   obstack_free (&context->trace_messages,
 		obstack_finish (&context->trace_messages));
+
+  switch (mode)
+    {
+    case '\0':
+      /* Replace old level.  */
+      break;
+
+    case '-':
+      /* Subtract flags.  */
+      level = previous & ~level;
+      break;
+
+    case '+':
+      /* Add flags.  */
+      level |= previous;
+      break;
+
+    default:
+      assert (!"INTERNAL ERROR: impossible mode from flags");
+    }
 
   return level;
 }
@@ -179,4 +202,5 @@ m4_debug_message_prefix (m4 *context)
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
 	fprintf (debug_file, "%d:", m4_get_current_line (context));
     }
+  putc (' ', debug_file);
 }

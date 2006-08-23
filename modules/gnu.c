@@ -410,43 +410,17 @@ M4BUILTIN_HANDLER (debugmode)
 {
   int debug_level = m4_get_debug_level_opt (context);
   int new_debug_level;
-  int change_flag;
 
   if (argc == 1)
     m4_set_debug_level_opt (context, 0);
   else
     {
-      if (M4ARG (1)[0] == '+' || M4ARG (1)[0] == '-')
-	{
-	  change_flag = M4ARG (1)[0];
-	  new_debug_level = m4_debug_decode (context, M4ARG (1) + 1);
-	}
-      else
-	{
-	  change_flag = 0;
-	  new_debug_level = m4_debug_decode (context, M4ARG (1));
-	}
-
+      new_debug_level = m4_debug_decode (context, debug_level, M4ARG (1));
       if (new_debug_level < 0)
 	m4_error (context, 0, 0, _("%s: bad debug flags: `%s'"),
 		  M4ARG (0), M4ARG (1));
       else
-	{
-	  switch (change_flag)
-	    {
-	    case 0:
-	      m4_set_debug_level_opt (context, new_debug_level);
-	      break;
-
-	    case '+':
-	      m4_set_debug_level_opt (context, debug_level | new_debug_level);
-	      break;
-
-	    case '-':
-	      m4_set_debug_level_opt (context, debug_level & ~new_debug_level);
-	      break;
-	    }
-	}
+	m4_set_debug_level_opt (context, new_debug_level);
     }
 }
 
@@ -610,11 +584,11 @@ M4BUILTIN_HANDLER (regexp)
       if (resyntax < 0)
 	return;
     }
-  /*
-    else
-      regexp(VICTIM, REGEXP)  */
+  else
+    /* regexp(VICTIM, REGEXP)  */
+    replace = NULL;
 
-  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, argc == 3);
+  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, replace == NULL);
   if (!buf)
     return;
 
@@ -628,7 +602,7 @@ M4BUILTIN_HANDLER (regexp)
       return;
     }
 
-  if ((argc == 3) || (replace == NULL))
+  if (replace == NULL)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
     substitute (context, obs, me, M4ARG (1), replace, buf);
@@ -666,7 +640,7 @@ M4BUILTIN_HANDLER (renamesyms)
       replace = M4ARG (2);
 
       resyntax = m4_get_regexp_syntax_opt (context);
-      if (argc == 4)
+      if (argc >= 4)
 	{
 	  resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3));
 	  if (resyntax < 0)
@@ -746,15 +720,22 @@ M4BUILTIN_HANDLER (symbols)
  **/
 M4BUILTIN_HANDLER (syncoutput)
 {
-  if (m4_is_symbol_value_text (argv[1]))
-    {
-      if (   M4ARG (1)[0] == '0'
-	  || M4ARG (1)[0] == 'n'
-	  || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'f'))
-	m4_set_sync_output_opt (context, false);
-      else if (   M4ARG (1)[0] == '1'
-	       || M4ARG (1)[0] == 'y'
-	       || (M4ARG (1)[0] == 'o' && M4ARG (1)[1] == 'n'))
-	m4_set_sync_output_opt (context, true);
-    }
+  const char *arg = M4ARG (1);
+
+  if (arg[0] == '\0'
+      || arg[0] == '0'
+      || arg[0] == 'n'
+      || arg[0] == 'N'
+      || ((arg[0] == 'o' || arg[0] == 'O')
+	  && (arg[1] == 'f' || arg[1] == 'F')))
+    m4_set_sync_output_opt (context, false);
+  else if (arg[0] == '1'
+	   || arg[0] == 'y'
+	   || arg[0] == 'Y'
+	   || ((arg[0] == 'o' || arg[0] == 'O')
+	       && (arg[1] == 'n' || arg[1] == 'N')))
+    m4_set_sync_output_opt (context, true);
+  else
+    m4_warn (context, 0, _("Warning: %s: unknown directive `%s'"),
+	     M4ARG (0), arg);
 }

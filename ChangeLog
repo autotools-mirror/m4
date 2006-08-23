@@ -1,5 +1,20 @@
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
+	* tests/options.at (debug-flags): New test.
+	* m4/m4module.h (M4_DEBUG_TRACE_VERBOSE): Make sure this value is
+	not negative, to distinguish failure in m4_debug_decode.
+	(m4_debug_decode): Add new parameter.
+	* modules/gnu.c (regexp): Slight cleanup.
+	(renamesyms): Ignore excess arguments.
+	(syncoutput): Make case-insensitive, warn on bad argument.
+	(debugmode): Factor -+ handling out to...
+	* m4/debug.c (m4_debug_decode): ...here.
+	(m4_debug_message_prefix): Fix spacing.
+	* src/main.c (main): Let -d option adjust flags.
+	* m4/input.c (file_clean): Avoid printing empty file name.
+	* doc/m4.texinfo (Syncoutput): Document new range of input.
+	(Invoking m4): Document use of multiple -d flags.
+
 	Start porting various fixes from the branch that use gnulib.
 	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
 	binary-io cloexec close-stream fopen-safer getopt gnupload mkstemp

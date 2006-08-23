@@ -268,7 +268,7 @@ enum {
   M4_DEBUG_TRACE_CALLID		= (1 << 9),
 
   /* V: very verbose --  print everything */
-  M4_DEBUG_TRACE_VERBOSE	= (~0)
+  M4_DEBUG_TRACE_VERBOSE	= ((1 << 10) - 1)
 };
 
 /* default flags -- equiv: aeq */
@@ -277,7 +277,7 @@ enum {
 
 #define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
 
-extern int	m4_debug_decode		(m4 *, const char *);
+extern int	m4_debug_decode		(m4 *, int, const char *);
 extern bool	m4_debug_set_output	(m4 *, const char *);
 extern void	m4_debug_message_prefix (m4 *);
 

@@ -345,7 +345,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'd':
-	m4_set_debug_level_opt (context, m4_debug_decode (context, optarg));
+	{
+	  int old = m4_get_debug_level_opt (context);
+	  m4_set_debug_level_opt (context, m4_debug_decode (context, old,
+							    optarg));
+	}
 	if (m4_get_debug_level_opt (context) < 0)
 	  {
 	    error (0, 0, _("bad debug flags: `%s'"), optarg);
