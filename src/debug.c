@@ -221,6 +221,7 @@ debug_message_prefix (void)
     if (debug_level & DEBUG_TRACE_LINE)
       fprintf (debug, "%d:", current_line);
   }
+  putc (' ', debug);
 }
 
 /* The rest of this file contains the functions for macro tracing output.

@@ -1,5 +1,8 @@
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
+	* src/input.c (pop_input): Avoid empty filename with -di option.
+	* src/debug.c (debug_message_prefix): Put space before message.
+
 	* m4/gnulib-cache.m4: We don't explicitly use alloca module.
 
 	* m4/gnulib-cache.m4: Augment with gnulib-tool --import gnupload.

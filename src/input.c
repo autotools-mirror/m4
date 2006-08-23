@@ -311,8 +311,13 @@ pop_input (void)
 
     case INPUT_FILE:
       if (debug_level & DEBUG_TRACE_INPUT)
-	DEBUG_MESSAGE2 ("input reverted to %s, line %d",
-			isp->u.u_f.name, isp->u.u_f.lineno);
+	{
+	  if (isp->u.u_f.lineno)
+	    DEBUG_MESSAGE2 ("input reverted to %s, line %d",
+			    isp->u.u_f.name, isp->u.u_f.lineno);
+	  else
+	    DEBUG_MESSAGE ("input exhausted");
+	}
 
       if (ferror (isp->u.u_f.file))
 	{
