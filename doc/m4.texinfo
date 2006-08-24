@@ -153,8 +153,8 @@ Lexical and syntactic conventions
 
 * Names::                       Macro names
 * Quoted strings::              Quoting input to m4
-* Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Other tokens::                Other kinds of input tokens
 * Input processing::            How m4 copies input to output
 * Regular expression syntax::   How m4 interprets regular expressions
 
@@ -261,7 +261,7 @@ Fast loading of frozen state
 
 Compatibility with other versions of @code{m4}
 
-* Extensions::                  Extensions in @acronym{GNU} m4
+* Extensions::                  Extensions in @acronym{GNU} M4
 * Incompatibilities::           Other incompatibilities
 
 Copying This Manual
@@ -714,10 +714,14 @@ This is an example of an example!
 
 To distinguish input from output, all output from @code{m4} is prefixed
 by the string @samp{@result{}}, and all error messages by the string
-@samp{@error{}}.  Thus
+@samp{@error{}}.  When showing how command line options affect matters,
+the command line is shown with a prompt @samp{$ @kbd{like this}},
+otherwise, you can assume that a simple @kbd{m4} invocation will work.
+Thus:
 
 @comment ignore
 @example
+$ @kbd{command line to invoke m4}
 Example of input line
 @result{}Output line from m4
 @error{}and an error message
@@ -725,8 +729,8 @@ Example of input line
 
 The sequence @samp{^D} in an example indicates the end of the input file.
 The majority of these examples are self-contained, and you can run them
-with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
-that is bundled in the @acronym{GNU} M4 package consists of the examples
+with similar results.  In fact, the testsuite that is bundled in the
+@acronym{GNU} M4 package consists in part of the examples
 in this document!
 
 As each of the predefined macros in @code{m4} is described, a prototype
@@ -796,8 +800,8 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 @menu
 * Names::                       Macro names
 * Quoted strings::              Quoting input to m4
-* Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Other tokens::                Other kinds of input tokens
 * Input processing::            How m4 copies input to output
 * Regular expression syntax::   How m4 interprets regular expressions
 @end menu
@@ -822,38 +826,29 @@ changed at any time, using the builtin macro @code{changesyntax}.
 @section Quoted strings
 
 @cindex quoted string
-A quoted string is a sequence of characters surrounded by the quotes
-@kbd{`} and @kbd{'}, where the number of start and end quotes within the
-string balances.  The value of a string token is the text, with one
+A quoted string is a sequence of characters surrounded by quote
+strings, defaulting to
+@kbd{`} and @kbd{'}, where the nested begin and end quotes within the
+string are balanced.  The value of a string token is the text, with one
 level of quotes stripped off.  Thus
 
 @comment ignore
 @example
 `'
+@result{}
 @end example
 
-is the empty string, and
+is the empty string, and double-quoting turns into single-quoting.
 
 @comment ignore
 @example
-`@w{}`quoted'@w{}'
+``quoted''
+@result{}`quoted'
 @end example
 
-is the string
-
-@comment ignore
-@example
-`quoted'
-@end example
-
-The quote characters can be changed at any time, using the builtin macro
-@code{changequote}.  @xref{Changequote}, for more information.
-
-@node Other tokens
-@section Other tokens
-
-Any character, that is neither a part of a name, nor of a quoted string,
-is a token by itself.
+The quote characters can be changed at any time, using the builtin macros
+@code{changequote} (@pxref{Changequote}) or @code{changesyntax}
+(@pxref{Changesyntax}).
 
 @node Comments
 @section Comments
@@ -862,19 +857,46 @@ is a token by itself.
 Comments in @code{m4} are normally delimited by the characters @samp{#}
 and newline.  All characters between the comment delimiters are ignored,
 but the entire comment (including the delimiters) is passed through to
-the output -- by default, comments are not discarded by @code{m4},
-unless you supply the @option{-c} option.  @xref{Invoking m4}, for more
-details.
+the output, unless you supply the @option{--discard-comments} or
+@option{-c} option at the command line (@pxref{Invoking m4}).  When
+discarding comments, the comment delimiters are discarded, even if the
+close-comment string is a newline.
 
 Comments cannot be nested, so the first newline after a @samp{#} ends
-the comment.  The commenting effect of the begin comment character
+the comment.  The commenting effect of the begin-comment string
 can be inhibited by quoting it.
 
-The comment delimiters can be changed to any string at any time, using
-the builtin macro @code{changecom}.  @xref{Changecom}, for more
-information.
+@example
+$ @kbd{m4}
+`quoted text' # `commented text'
+@result{}quoted text # `commented text'
+`quoting inhibits' `#' `comments'
+@result{}quoting inhibits # comments
+@end example
 
-@c FIXME: more examples would be useful here --ADR
+@comment options: -c
+@example
+$ @kbd{m4 -c}
+`quoted text' # `commented text'
+`quoting inhibits' `#' `comments'
+@result{}quoted text quoting inhibits # comments
+@end example
+
+The comment delimiters can be changed to any string at any time, using
+the builtin macros @code{changecom} (@pxref{Changecom}) or
+@code{changesyntax} (@pxref{Changesyntax}).
+
+@node Other tokens
+@section Other tokens
+
+Any character, that is neither a part of a name, nor of a quoted string,
+nor a comment, is a token by itself.  When not in the context of macro
+expansion, all of these tokens are just copied to output.  However,
+during macro expansion, whitespace characters (space, tab, newline,
+formfeed, carriage return, vertical tab), parentheses (@samp{(} and
+@samp{)}), comma (@samp{,}), and dollar (@samp{$}) have additional
+roles, explained later.  Which characters actually perform these roles
+can be adjusted with @code{changesyntax} (@pxref{Changesyntax}).
 
 @node Input processing
 @section Input Processing
@@ -888,9 +910,10 @@ more input to get the arguments.  It then inserts the expansion in front
 of the remaining input.  In other words, the resulting text from a macro
 call will be read and parsed into tokens again.
 
-@code{m4} expands a macro as soon as possible.  It it finds a macro call
+@code{m4} expands a macro as soon as possible.  If it finds a macro call
 when collecting the arguments to another, it will expand the second
-call first.  If the input is
+call first.  For a running example, examine how @code{m4} handles this
+input:
 
 @comment ignore
 @example
@@ -898,30 +921,45 @@ format(`Result is %d', eval(`2**15'))
 @end example
 
 @noindent
-@code{m4} will first expand @samp{eval(2**15)} to @samp{32768}, and only
-then expand the resulting call
+First, @code{m4} sees that the token @samp{format} is a macro name, so
+it collects the tokens @samp{(}, @samp{`Result is %d'}, @samp{,},
+and @samp{@w{ }}, before encountering another potential macro.  Sure
+enough, @samp{eval} is a macro name, so the nested argument collection
+picks up @samp{(}, @samp{`2**15'}, and @samp{)}, invoking the eval macro
+with the lone argument of @samp{2**15}.  The expansion of
+@samp{eval(2**15)} is @samp{32768}, which is then rescanned as the five
+tokens @samp{3}, @samp{2}, @samp{7}, @samp{6}, and @samp{8}; and
+combined with the next @samp{)}, the format macro now has all its
+arguments, as if the user had typed:
 
 @comment ignore
 @example
-format(`Result is %d', `32768')
+format(`Result is %d', 32768)
 @end example
 
 @noindent
-which will give the output
+The format macro expands to @samp{Result is 32768}, and we have another
+round of scanning for the tokens @samp{Result}, @samp{@w{ }},
+@samp{is}, @samp{@w{ }}, @samp{3}, @samp{2}, @samp{7}, @samp{6}, and
+@samp{8}.  None of these are macros, so the final output is
 
 @comment ignore
 @example
-Result is 32768
+@result{}Result is 32768
 @end example
 
 The order in which @code{m4} expands the macros can be explored using
-the @ref{Trace} facilities of GNU @code{m4}.
+the @ref{Trace} facilities of @acronym{GNU} @code{m4}.
 
 This process continues until there are no more macro calls to expand and
 all the input has been consumed.
 
 @node Regular expression syntax
 @section Regular Expression Syntax
+
+There are several contexts where @code{m4} parses an argument as a
+regular expression.  This section describes the various flavors of
+regular expressions.  @xref{Changeresyntax}.
 
 @include regexprops-generic.texi
 
@@ -955,7 +993,7 @@ which is a macro invocation without any arguments, or
 
 @comment ignore
 @example
-name(arg1, arg2, ..., arg@var{n})
+name(arg1, arg2, @dots{}, arg@var{n})
 @end example
 
 @noindent
@@ -986,7 +1024,7 @@ An innovation of the @code{m4} language, compared to some of its
 predecessors (like Stratchey's @code{GPM}, for example), is the ability
 to recognize macro calls without resorting to any special, prefixed
 invocation character.  While generally useful, this feature might
-sometimes be the source of spurious, unwanted macro calls.  So, GNU
+sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
 @code{m4} offers several mechanisms or techniques for inhibiting the
 recognition of names as macro calls.
 
@@ -995,14 +1033,58 @@ without arguments.  For any of these macros, whenever an opening
 parenthesis does not immediately follow their name, the builtin macro
 call is not triggered.  This solves the most usual cases, like for
 @samp{include} or @samp{eval}.  Later in this document, the sentence
-``This macro is recognized only when given arguments'' refers to this
+``This macro is recognized only with parameters'' refers to this
 specific provision.
 
-There is also a command line option (@code{--prefix-builtins}, or
-@code{-P}) that requires all builtin macro names to be prefixed
-by @samp{m4_} for them to be recognized.  The option has no effect
+@comment FIXME - The feature of blind macros is incompatible with
+@comment @acronym{POSIX} and @comment traditional implementations.
+@comment Should we  suppress it with the @comment @option{--traditional}
+@comment or @option{-G} command line option?
+
+@example
+$ @kbd{m4}
+eval
+@result{}eval
+eval(`1')
+@result{}1
+@end example
+
+@ignore
+@comment options: -G
+@comment ignore
+@example
+$ @kbd{m4 -G}
+eval
+@result{}0
+eval(`1')
+@result{}1
+@end example
+@end ignore
+
+There is also a command line option (@option{--prefix-builtins}, or
+@option{-P}) that renames all builtin macro names to be prefixed
+by @samp{m4_} at startup.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
-one has to write @code{m4_dnl} and even @code{m4_m4exit}.
+one has to write @code{m4_dnl} and even @code{m4_m4exit}.  It also has
+no effect on whether a macro requires parameters.
+
+@comment options: -P
+@example
+$ @kbd{m4 -P}
+eval
+@result{}eval
+eval(`1')
+@result{}eval(1)
+m4_eval
+@result{}m4_eval
+m4_eval(`1')
+@result{}1
+@end example
+
+Another alternative is to redefine problematic macros to a name less
+likely to cause conflicts, @xref{Definitions}.  Or the parsing engine
+can be changed to redefine what constitutes a valid macro name,
+@xref{Changesyntax}.
 
 Of course, the simplest way to prevent a name from being interpreted
 as a call to an existing macro is to quote it.  The remainder of
@@ -1010,38 +1092,44 @@ this section studies a little more deeply how quoting affects macro
 invocation, and how quoting can be used to inhibit macro invocation.
 
 Even if quoting is usually done over the whole macro name, it can also
-be done over only a few characters of this name.  It is also possible
+be done over only a few characters of this name (provided, of course,
+that the unquoted portions are not also a macro).  It is also possible
 to quote the empty string, but this works only @emph{inside} the name.
 For example:
 
-@comment ignore
 @example
 `divert'
+@result{}divert
 `d'ivert
+@result{}divert
 di`ver't
+@result{}divert
 div`'ert
+@result{}divert
 @end example
 
 @noindent
-all yield the string @samp{divert}.  While:
+all yield the string @samp{divert}.  While in both:
 
-@comment ignore
 @example
 `'divert
+@result{}
 divert`'
+@result{}
 @end example
 
 @noindent
-will allow the @code{divert} builtin macro will be called.
+the @code{divert} builtin macro will be called, which expands to the
+empty string.
 
 The output of macro evaluations is always rescanned.  The following
 example would yield the string @samp{de}, exactly as if @code{m4}
-has been given @w{@samp{substr(abcde, 3, 2)}} as input:
+has been given @w{@samp{substr(`abcde', `3', `2')}} as input:
 
 @example
 define(`x', `substr(ab')
 @result{}
-define(`y', `cde, 3, 2)')
+define(`y', `cde, `3', `2')')
 @result{}
 x`'y
 @result{}de
@@ -1049,17 +1137,16 @@ x`'y
 
 Unquoted strings on either side of a quoted string are subject to
 being recognized as macro names.  In the following example, quoting the
-empty string allows for the @code{dnl} macro to be recognized as such:
+empty string allows for the @code{macro} to be recognized as such:
 
-@comment ignore
 @example
-define(`macro', `di$1')
-macro(`v')`'dnl
+define(`macro', `m')
+@result{}
+macro(`m')macro
+@result{}mmacro
+macro(`m')`'macro
+@result{}mm
 @end example
-
-@noindent
-Without the quotes, this would rather yield the string @samp{divdnl}
-followed by an end of line.
 
 Quoting may prevent recognizing as a macro name the concatenation of a
 macro expansion with the surrounding characters.  In this example:
@@ -1069,11 +1156,13 @@ define(`macro', `di$1')
 @result{}
 macro(`v')`ert'
 @result{}divert
+macro(`v')ert
+@result{}
 @end example
 
 @noindent
-the input will produce the string @samp{divert}.  If the quote was
-removed, the @code{divert} builtin would be called instead.
+the input will produce the string @samp{divert}.  When the quotes were
+removed, the @code{divert} builtin was called instead.
 
 @node Macro Arguments
 @section Macro arguments
