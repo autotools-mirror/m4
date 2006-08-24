@@ -151,8 +151,8 @@ Lexical and syntactic conventions
 
 * Names::                       Macro names
 * Quoted strings::              Quoting input to m4
-* Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Other tokens::                Other kinds of input tokens
 * Input processing::            How m4 copies input to output
 
 How to invoke macros
@@ -604,7 +604,7 @@ options.
 @node Bugs
 @section Problems and bugs
 
-If you have problems with @acronym{GNU} @code{m4} or think you've found a bug,
+If you have problems with @acronym{GNU} M4 or think you've found a bug,
 please report it.  Before reporting a bug, make sure you've actually
 found a real bug.  Carefully reread the documentation and see if it
 really says you can do what you're trying to do.  If it's not clear
@@ -713,8 +713,8 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 @menu
 * Names::                       Macro names
 * Quoted strings::              Quoting input to m4
-* Other tokens::                Other kinds of input tokens
 * Comments::                    Comments in m4 input
+* Other tokens::                Other kinds of input tokens
 * Input processing::            How m4 copies input to output
 @end menu
 
@@ -734,7 +734,8 @@ Examples of legal names are: @samp{foo}, @samp{_tmp}, and @samp{name01}.
 @section Quoted strings
 
 @cindex quoted string
-A quoted string is a sequence of characters surrounded by the quotes
+A quoted string is a sequence of characters surrounded by quote
+strings, defaulting to
 @kbd{`} and @kbd{'}, where the nested begin and end quotes within the
 string are balanced.  The value of a string token is the text, with one
 level of quotes stripped off.  Thus
@@ -756,12 +757,6 @@ is the empty string, and double-quoting turns into single-quoting.
 
 The quote characters can be changed at any time, using the builtin macro
 @code{changequote}.  @xref{Changequote}, for more information.
-
-@node Other tokens
-@section Other tokens
-
-Any character, that is neither a part of a name, nor of a quoted string,
-is a token by itself.
 
 @node Comments
 @section Comments
@@ -787,6 +782,17 @@ The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
 
+@node Other tokens
+@section Other tokens
+
+Any character, that is neither a part of a name, nor of a quoted string,
+nor a comment, is a token by itself.  When not in the context of macro
+expansion, all of these tokens are just copied to output.  However,
+during macro expansion, whitespace characters (space, tab, newline,
+formfeed, carriage return, vertical tab), parentheses (@samp{(} and
+@samp{)}), comma (@samp{,}), and dollar (@samp{$}) have additional
+roles, explained later.
+
 @node Input processing
 @section Input Processing
 
@@ -801,7 +807,8 @@ call will be read and parsed into tokens again.
 
 @code{m4} expands a macro as soon as possible.  If it finds a macro call
 when collecting the arguments to another, it will expand the second
-call first.  If the input is
+call first.  For a running example, examine how @code{m4} handles this
+input:
 
 @comment ignore
 @example
@@ -809,8 +816,16 @@ format(`Result is %d', eval(`2**15'))
 @end example
 
 @noindent
-@code{m4} will first expand @samp{eval(2**15)} to @samp{32768}, and only
-then expand the resulting call
+First, @code{m4} sees that the token @samp{format} is a macro name, so
+it collects the tokens @samp{(}, @samp{`Result is %d'}, @samp{,},
+and @samp{@w{ }}, before encountering another potential macro.  Sure
+enough, @samp{eval} is a macro name, so the nested argument collection
+picks up @samp{(}, @samp{`2**15'}, and @samp{)}, invoking the eval macro
+with the lone argument of @samp{2**15}.  The expansion of
+@samp{eval(2**15)} is @samp{32768}, which is then rescanned as the five
+tokens @samp{3}, @samp{2}, @samp{7}, @samp{6}, and @samp{8}; and
+combined with the next @samp{)}, the format macro now has all its
+arguments, as if the user had typed:
 
 @comment ignore
 @example
@@ -818,11 +833,14 @@ format(`Result is %d', 32768)
 @end example
 
 @noindent
-which will give the output
+The format macro expands to @samp{Result is 32768}, and we have another
+round of scanning for the tokens @samp{Result}, @samp{@w{ }},
+@samp{is}, @samp{@w{ }}, @samp{3}, @samp{2}, @samp{7}, @samp{6}, and
+@samp{8}.  None of these are macros, so the final output is
 
 @comment ignore
 @example
-Result is 32768
+@result{}Result is 32768
 @end example
 
 The order in which @code{m4} expands the macros can be explored using
@@ -910,6 +928,9 @@ to be prefixed
 by @samp{m4_} for them to be recognized.  The option has no effect
 whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.
+
+Another alternative is to redefine problematic macros to a name less
+likely to cause conflicts, @xref{Definitions}.
 
 If your version of @acronym{GNU} @code{m4} has the @code{changeword} feature
 compiled in, it offers far more flexibility in specifying the
@@ -1010,6 +1031,7 @@ supplied, the missing arguments are taken to be the empty string.
 However, some builtins are documented to behave differently for a
 missing optional argument than for an explicit empty string.  If
 there are too many arguments, the excess arguments are ignored.
+Unquoted leading whitespace is stripped off all arguments.
 
 Normally @code{m4} will issue warnings if a builtin macro is called
 with an inappropriate number of arguments, but it can be suppressed with
@@ -3313,6 +3335,14 @@ index(`gnus, gnats, and armadillos', `dag')
 @result{}-1
 @end example
 
+Omitting @var{substring} evokes a warning, but still produces output.
+
+@example
+index(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `index'
+@result{}0
+@end example
+
 @node Regexp
 @section Searching for regular expressions
 
@@ -3378,6 +3408,14 @@ regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
 @result{}c
 @end example
 
+Omitting @var{regexp} evokes a warning, but still produces output.
+
+@example
+regexp(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `regexp'
+@result{}0
+@end example
+
 @node Substr
 @section Extracting substrings
 
@@ -3401,6 +3439,17 @@ substr(`gnus, gnats, and armadillos', `6')
 @result{}gnats, and armadillos
 substr(`gnus, gnats, and armadillos', `6', `5')
 @result{}gnats
+@end example
+
+Omitting @var{from} evokes a warning, but still produces output.
+
+@example
+substr(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `substr'
+@result{}abc
+substr(`abc',)
+@error{}m4:stdin:2: empty string treated as 0 in builtin `substr'
+@result{}abc
 @end example
 
 @node Translit
@@ -3447,6 +3496,14 @@ lowercase to uppercase, and the third `mirrors' all uppercase letters,
 while converting them to lowercase.  The two first cases are by far the
 most common.
 
+Omitting @var{chars} evokes a warning, but still produces output.
+
+@example
+translit(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `translit'
+@result{}abc
+@end example
+
 @node Patsubst
 @section Substituting text by regular expression
 
@@ -3489,7 +3546,7 @@ patsubst(`GNUs not Unix', `^', `OBS: ')
 patsubst(`GNUs not Unix', `\<', `OBS: ')
 @result{}OBS: GNUs OBS: not OBS: Unix
 patsubst(`GNUs not Unix', `\w*', `(\&)')
-@result{}(GNUs)() (not)() (Unix)
+@result{}(GNUs)() (not)() (Unix)()
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
@@ -3538,6 +3595,14 @@ patreg(`bar foo baz Foo', `foo\|Foo', `FOO')
 patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 @result{}bab abb 212
 @result{}bab
+@end example
+
+Omitting @var{regexp} evokes a warning, but still produces output.
+
+@example
+patsubst(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `patsubst'
+@result{}abc
 @end example
 
 @node Format
@@ -4020,7 +4085,8 @@ signal number shifted left by eight bits.
 @example
 dnl This test assumes kill is a shell builtin, and that signals are
 dnl recognizable.
-ifdef(`__unix__', , `errprint(` skipping: syscmd does not have unix semantics
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
 syscmd(`kill -13 $$')
 @result{}

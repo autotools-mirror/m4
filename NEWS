@@ -34,6 +34,11 @@ Version 1.4.6 - ?? 2006, by ??  (CVS version 1.4.5a)
   messages have been reformatted to comply with GNU Coding Standards.
 * The errprint, m4wrap, and shift macros are now recognized only with
   arguments.
+* The index, substr, translit, regexp, and patsubst macros now produce
+  output when given only one argument, but still warn about a missing
+  second argument.
+* The patsubst macro now reliably finds zero-length matches at the end
+  of a string.
 
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 

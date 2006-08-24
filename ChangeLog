@@ -1,3 +1,15 @@
+2006-08-24  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_index, m4_substr, m4_translit): Similar to
+	Solaris, produce output on just one argument.
+	(m4_regexp, m4_patsubst): For consistency, do likewise.
+	(m4_patsubst): Allow zero-length match at end of string.
+	* doc/m4.texinfo (Sysval): Fix overfull hbox.
+	(Bugs, Macro Arguments): Minor fixes.
+	(Other tokens): Rearrange node order.
+	(Index macro, Substr, Translit, Regexp, Patsubst): Add tests.
+	* NEWS: Document these fixes.
+
 2006-08-22  Eric Blake  <ebb9@byu.net>
 
 	* src/input.c (pop_input): Avoid empty filename with -di option.

@@ -1475,7 +1475,12 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
   int l1, l2, retval;
 
   if (bad_argc (argv[0], argc, 3, 3))
-    return;
+    {
+      /* builtin(`index') is blank, but index(`abc') is 0.  */
+      if (argc == 2)
+	shipout_int (obs, 0);
+      return;
+    }
 
   l1 = strlen (ARG (1));
   l2 = strlen (ARG (2));
@@ -1506,7 +1511,12 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
   int length, avail;
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`substr') is blank, but substr(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   length = avail = strlen (ARG (1));
   if (!numeric_arg (argv[0], ARG (2), &start))
@@ -1584,7 +1594,12 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   int tolen;
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`translit') is blank, but translit(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   from = ARG (2);
   if (strchr (from, '-') != NULL)
@@ -1750,7 +1765,12 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   int length;			/* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`regexp') is blank, but regexp(`abc') is 0.  */
+      if (argc == 2)
+	shipout_int (obs, 0);
+      return;
+    }
 
   victim = TOKEN_DATA_TEXT (argv[1]);
   regexp = TOKEN_DATA_TEXT (argv[2]);
@@ -1806,7 +1826,12 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   int length;			/* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
@@ -1826,7 +1851,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
   offset = 0;
   matchpos = 0;
-  while (offset < length)
+  while (offset <= length)
     {
       matchpos = re_search (&buf, victim, length,
 			    offset, length - offset, &regs);
