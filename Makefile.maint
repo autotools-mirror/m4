@@ -140,7 +140,7 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 
 .PHONY: web-manual
 web-manual:
-	@cd "$(abs_srcdir)/doc"; \
-	  $(SHELL) "$(abs_srcdir)/gendocs.sh" $(PACKAGE) \
+	@cd ./doc ; \
+	  $(SHELL) ../gendocs.sh $(PACKAGE) \
 	    "GNU $(PACKAGE)- GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."
