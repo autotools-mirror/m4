@@ -162,12 +162,18 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * If you do not have access to the mailing list administrative interface,
   approach the list owners for the password.  Be sure to check the lists
   (esp. bug-m4) for outstanding bug reports also in the list of
-  pending moderation requests.  This step is not strictly necessary.
+  pending moderation requests.  This step is not strictly necessary, but
+  helps, since by default, m4-announce rejects all posts, so you have to
+  get an administrator to allow your announcement through.
 
 * Make sure you have wget installed.
 
 * Make sure you have a copy of xdelta installed, and a copy of the previous
   release tarball in the build directory.
+
+* Make sure you have GNU make installed.
+
+* Make sure you have an up-to-date version of help2man installed.
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
@@ -179,25 +185,28 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Run ./bootstrap.
 
-* Run ./configure (or create a build directory first and run configure
-  from there, if you want to keep the build tree separate).
+* Run ./configure (a VPATH build is not recommended, since several
+  targets in GNUMakefile and Makefile.maint assume an in-tree build for
+  distribution purposes.  Normal builds do not suffer from this
+  restriction, and make distcheck ensures VPATH still works).
+
+* Run `make'.  The file doc/m4.1 needs to exist for a distribution, and
+  be up-to-date with m4 --help output, but `make dist' intentionally
+  does not depend on running a built binary.
 
 * Run `make distcheck'.  If there are any problems, fix them and start
   again.
 
 * Run ./commit from the source tree.
 
-* Run `make -fMakefile.maint cvs-dist' (or `make -f../Makefile.maint
-  cvs-dist' if you are running from a VPATH build directory, where `../'
-  is the relative path to the directory with `configure' in it), which
-  will build a release tarball (with `make distcheck') and tag the tree
-  with release-$(VERSION).
+* Run `make cvs-dist', which will build a release tarball (with `make
+  distcheck') and tag the tree with release-$(VERSION).
 
-* Run 'make -f[../]Makefile.maint deltas' (pass
-  LASTRELEASE=maj.min[.mic[alpha]] if needed) to create both diff and
-  xdelta files between the previous release tarball and the new.
+* Run `make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
+  create both diff and xdelta files between the previous release tarball
+  and the new.
 
-* Run '[../]./gnupload --to [dest].gnu.org:m4 [files]' to create
+* Run './gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
   the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha, and
@@ -206,7 +215,10 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
-  as well.
+  as well.  Use the templates below as a starting point.  Contact a list
+  administrator for m4-announce in advance to ensure your post will
+  make it through (the list is normally set to silently discard all
+  posts, even from subscribers).
 
 * Update version number in configure.ac to next alpha number.
   See http://www.gnu.org/software/libtool/contribute.html for details of
@@ -217,7 +229,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run ./commit.
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
-  the new one (generate with `make -f[../]Makefile.maint web-manual').
+  the new one (generate with `make web-manual').
 
 
 7. Alpha release note template
