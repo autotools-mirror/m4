@@ -5,10 +5,13 @@ assert.m4
 cloexec.m4
 close-stream.m4
 codeset.m4
+dirname.m4
+dos.m4
 eoverflow.m4
 error.m4
 exitfail.m4
 extensions.m4
+filenamecat.m4
 fpending.m4
 free.m4
 getopt.m4
