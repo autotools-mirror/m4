@@ -1,5 +1,10 @@
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
+	Release 1.4.6:
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.5.
+
 	* Makefile.maint (web-manual): Give up on VPATH build during
 	distribution.  But distributions are made so infrequently that
 	this is not too much of a hardship.
