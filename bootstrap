@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-08-10
+# bootstrap (GNU M4) version 2006-08-25
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -34,15 +34,17 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTORECONF, AWK, GNULIB_TOOL, RM, SED, WGET
+#   AUTOPOINT, AUTORECONF, AWK, GNULIB_TOOL, RM, SED, WGET
 
 # This script bootstraps a CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
-# requires GNU Gettext 0.15 or better, and Autoconf 2.60 or better, and
-# bleeding edge CVS snapshots of GNU Automake, Libtool & Gnulib.
+# requires GNU Gettext 0.15 or better, and Autoconf 2.60 or better
+# Automake 1.9b or better, and bleeding edge CVS snapshots of
+# Libtool and Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
 
+: ${AUTOPOINT=autopoint}
 : ${AUTORECONF=autoreconf}
 : ${AWK=awk}
 : ${GNULIB_TOOL=gnulib-tool}
@@ -309,6 +311,15 @@ case $DOWNLOAD_PO in
   *)    func_update_po $DOWNLOAD_PO ;;
 esac
 
+## ---------- ##
+## Autopoint. ##
+## ---------- ##
+
+# Released autopoint has the tendency to install macros that have been
+# obsoleted in current gnulib, so run this before gnulib-tool.
+func_echo "running: $AUTOPOINT --force"
+$AUTOPOINT --force
+
 ## ---------------------------- ##
 ## Find the gnulib module tree. ##
 ## ---------------------------- ##
@@ -384,8 +395,10 @@ $bailout_cb
 ## Autoreconf. ##
 ## ----------- ##
 
-func_echo "running: $AUTORECONF --force --verbose --install --no-recursive"
-$AUTORECONF --force --verbose --install --no-recursive
+# Disable autopoint, since it was already done above.
+func_echo "running: AUTOPOINT=true" \
+    "$AUTORECONF --force --verbose --install --no-recursive"
+AUTOPOINT=true $AUTORECONF --force --verbose --install --no-recursive
 
 
 ## ---------- ##
@@ -399,7 +412,7 @@ $AUTORECONF --force --verbose --install --no-recursive
 )
 
 if test x"$DOWNLOAD_PO" != xno; then
-  func_echo "If your pofiles are uptodate, you can rerun bootstrap"
+  func_echo "If your pofiles are up-to-date, you can rerun bootstrap"
   func_echo "as \`DOWNLOAD_PO=no $progname' to avoid redownloading."
 fi
 
