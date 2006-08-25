@@ -386,7 +386,7 @@ extern void	m4_undivert_all	     (m4 *);
 /* --- PATH MANAGEMENT --- */
 
 extern void	m4_include_env_init      (m4 *);
-extern void	m4_add_include_directory (m4 *, const char *);
+extern void	m4_add_include_directory (m4 *, const char *, bool);
 extern FILE *   m4_path_search           (m4 *, const char *, char **);
 
 

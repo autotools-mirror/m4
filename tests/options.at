@@ -35,7 +35,7 @@ comment
  --> ends.
 ]])
 
-AT_CHECK_M4([-c in], 0,
+AT_CHECK_M4([-c in], [0],
 [[This is not a comment This should not disappear.
 
 html  ends.
@@ -66,8 +66,8 @@ export ZAPPED
 OVERRIDE='This is an environment variable which we will change'
 export OVERRIDE
 
-AT_CHECK_M4([--import-environment -UZAPPED -DOVERRIDE='It is changed.' in], 0,
-[[TEST=This is an environment variable
+AT_CHECK_M4([--import-environment -UZAPPED -DOVERRIDE='It is changed.' in],
+[0], [[TEST=This is an environment variable
 ZAPPED=ZAPPED
 OVERRIDE=It is changed.
 ]])
@@ -87,15 +87,16 @@ len(`abc')
 ]])
 
 dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
-AT_CHECK_M4([-tlen in], 0, [[0
+AT_CHECK_M4([-tlen in], [0], [[0
 3
 ]], [[m4trace: -1- len(`abc') -> `3'
 ]])
 
 dnl Test all flags.
-AT_CHECK_M4([-dV in], 0, [[0
+AT_CHECK_M4([-dV in], [0], [[0
 3
-]], [[m4debug: input read from in
+]], [[m4debug: path search for `in' found `in'
+m4debug: input read from in
 m4trace:in:1: -1- id 1: divnum ...
 m4trace:in:1: -1- id 1: divnum -> ???
 m4trace:in:1: -1- id 1: divnum -> `0'
@@ -106,10 +107,114 @@ m4debug:in:3: input exhausted
 ]])
 
 dnl Test addition and subtraction of flags.
-AT_CHECK_M4([-d-e -d+xt in], 0, [[0
+AT_CHECK_M4([-d-e -d+xt in], [0], [[0
 3
 ]], [[m4trace: -1- id 1: divnum
 m4trace: -1- id 2: len(`abc')
 ]])
+
+AT_CLEANUP
+
+
+## ---------------- ##
+## obsolete options ##
+## ---------------- ##
+
+AT_SETUP([deprecated options])
+
+dnl -N/--diversions are no-ops since 1.4.x
+AT_CHECK_M4([-N1 --diversions=1], [0], [],
+[[m4: Warning: `m4 -N' is deprecated
+m4: Warning: `m4 --diversions' is deprecated
+]])
+
+dnl -H/--hashsize are no-ops since 2.0, and still silent for now...
+AT_CHECK_M4([-H1 --hashsize=1])
+
+dnl -S/-T are no-ops for compatibility
+AT_CHECK_M4([-S1 -T1], [0], [],
+[[m4: Warning: `m4 -S' may be removed in a future release
+m4: Warning: `m4 -T' may be removed in a future release
+]])
+
+dnl -Bint can be confused with its no-op meaning in 1.4.x, but all other
+dnl uses of -B or its long option are okay
+AT_CHECK_M4([-B1 -B./1 --prepend-include=1], [0], [],
+[[m4: Warning: recommend using `m4 -B ./1' instead
+]])
+
+AT_CLEANUP
+
+
+## --------------- ##
+## prepend-include ##
+## --------------- ##
+
+AT_SETUP([prepend-include])
+
+dnl Lots of data to set up.
+AT_DATA([[in]],
+[[include(`foo')dnl
+include(`bar')dnl
+include(`bad')dnl
+include(`blah')dnl
+]])
+
+AT_CHECK([mkdir pre post])
+
+AT_DATA([[pre/foo]], [[in pre/foo
+]])
+AT_DATA([[foo]], [[in ./foo
+]])
+AT_DATA([[bar]], [[in ./bar
+]])
+AT_DATA([[post/bar]], [[in post/bar
+]])
+AT_DATA([[post/blah]], [[in post/blah
+]])
+
+dnl Make circular links in the subdirectories, to ensure that the error
+dnl message when bad cannot be opened comes from the search in ., regardless
+dnl of what else was searched.
+AT_CHECK([ln -s bad pre/bad])
+AT_CHECK([ln -s bad post/bad])
+
+dnl Finally, see that it all works.
+AT_CHECK_M4([-I post -B pre in], [1],
+[[in pre/foo
+in ./bar
+in post/blah
+]], [[m4:in:3: include: cannot open `bad': No such file or directory
+]])
+
+AT_CLEANUP
+
+
+## ---------------- ##
+## help and version ##
+## ---------------- ##
+
+AT_SETUP([help and version])
+
+AT_CHECK_M4([--help], [0], [stdout])
+AT_CHECK([[sed -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
+[0], [success
+])
+
+AT_CHECK_M4([--version], [0], [stdout])
+AT_CHECK([[sed -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
+[0], [success
+])
+
+dnl make sure option specified first takes precedence
+AT_CHECK_M4([--help --version], [0], [stdout])
+AT_CHECK([[sed -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
+[0], [success
+])
+
+AT_CHECK_M4([--version --help], [0], [stdout])
+AT_CHECK([[sed -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
+[0], [success
+])
 
 AT_CLEANUP

@@ -323,6 +323,7 @@ struct m4__search_path_info {
   int max_length;		/* length of longest directory name */
 };
 
+extern void m4__include_init (m4 *);
 
 
 /* Debugging the memory allocator.  */

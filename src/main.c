@@ -25,6 +25,8 @@
 #include "version-etc.h"
 #include "gnu/progname.h"
 
+#include <limits.h>
+
 #define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan"
 
 
@@ -34,14 +36,8 @@ const char *frozen_file_to_read = NULL;
 /* Name of frozen file to produce near completion.  */
 const char *frozen_file_to_write = NULL;
 
-/* If nonzero, display usage information and exit.  */
-static int show_help = 0;
-
-/* If nonzero, print the version on standard output and exit.  */
-static int show_version = 0;
-
 /* If nonzero, import the environment as macros.  */
-static int import_environment = 0;
+static bool import_environment = false;
 
 typedef struct macro_definition
 {
@@ -109,15 +105,16 @@ SPEC is any one of:\n\
       printf (_("\
 \n\
 Dynamic loading features:\n\
-  -M, --module-directory=DIRECTORY  add DIRECTORY to the module search path\n\
-  -m, --load-module=MODULE          load dynamic MODULE from %s\n\
+  -M, --module-directory=DIR   add DIR to the module search path\n\
+  -m, --load-module=MODULE     load dynamic MODULE from %s\n\
 "), USER_MODULE_PATH_ENV);
       fputs (_("\
 \n\
 Preprocessor features:\n\
       --import-environment     import all environment variables as macros\n\
+  -B, --prepend-include=DIR    add DIR to include path before `.'\n\
   -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
-  -I, --include=DIRECTORY      append DIRECTORY to include path\n\
+  -I, --include=DIR            add DIR to include path after `.'\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
 "), stdout);
@@ -158,6 +155,13 @@ FLAGS is any of:\n\
 "), stdout);
       fputs (_("\
 \n\
+If defined, the environment variable `M4PATH' is a colon-separated list\n\
+of directories included after any specified by `-I', and the variable\n\
+`M4MODPATH' is a colon-separated list of directories searched after any\n\
+specified by `-M'.\n\
+"), stdout);
+      fputs (_("\
+\n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 "), stdout);
@@ -166,14 +170,26 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
   exit (status);
 }
 
+/* For long options that have no equivalent short option, use a
+   non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
+enum
+{
+  DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
+  IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
+  PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
+
+  HELP_OPTION,				/* no short opt */
+  VERSION_OPTION			/* no short opt */
+};
+
 /* Decode options and launch execution.  */
 static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
+  {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
-  {"diversions", required_argument, NULL, 'N'},
   {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
@@ -189,20 +205,19 @@ static const struct option long_options[] =
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
+  {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
+  {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
-  {"import-environment", no_argument, &import_environment, 1},
+  {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
+  {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
+  {"prepend-include", required_argument, NULL, PREPEND_INCLUDE_OPTION},
 
-  {"help", no_argument, &show_help, 1},
-  {"version", no_argument, &show_version, 1},
+  {"help", no_argument, NULL, HELP_OPTION},
+  {"version", no_argument, NULL, VERSION_OPTION},
 
-  /* These are somewhat troublesome.  */
-  { "define", required_argument, NULL, 'D' },
-  { "undefine", required_argument, NULL, 'U' },
-  { "trace", required_argument, NULL, 't' },
-
-  { 0, 0, 0, 0 },
+  { NULL, 0, NULL, 0 },
 };
 
 #define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:r:st:"
@@ -212,7 +227,7 @@ main (int argc, char *const *argv, char *const *envp)
 {
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
-  macro_definition *new;
+  macro_definition *defn;
   int optchar;			/* option character */
 
   macro_definition *defines;
@@ -251,22 +266,33 @@ main (int argc, char *const *argv, char *const *envp)
 
   head = tail = NULL;
 
-  while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				long_options, NULL),
-	 optchar != EOF)
+  while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+				 long_options, NULL)) != -1)
     switch (optchar)
       {
       default:
 	usage (EXIT_FAILURE);
 
-      case 0:
+      case 'H':
+	/* -H was supported in 1.4.x.  FIXME - make obsolete after
+            2.0, and remove after 2.1.  For now, keep it silent.  */
 	break;
 
-      case 'B':			/* compatibility junk */
-      case 'H':
       case 'N':
+      case DIVERSIONS_OPTION:
+	/* -N became an obsolete no-op in 1.4.x.  FIXME - remove
+            support for -N after 2.0.  */
+	error (0, 0, _("Warning: `m4 %s' is deprecated"),
+	       optchar == 'N' ? "-N" : "--diversions");
+	break;
+
       case 'S':
       case 'T':
+	/* Compatibility junk: options that other implementations
+	   support, but which we ignore as no-ops and don't list in
+	   --help.  */
+	error (0, 0, _("Warning: `m4 -%c' may be removed in a future release"),
+	       optchar);
 	break;
 
       case 'D':
@@ -276,17 +302,35 @@ main (int argc, char *const *argv, char *const *envp)
       case 'r':
 	/* Arguments that cannot be handled until later are accumulated.  */
 
-	new = xmalloc (sizeof *new);
-	new->code = optchar;
-	new->macro = optarg;
-	new->next = NULL;
+	defn = xmalloc (sizeof *defn);
+	defn->code = optchar;
+	defn->macro = optarg;
+	defn->next = NULL;
 
 	if (head == NULL)
-	  head = new;
+	  head = defn;
 	else
-	  tail->next = new;
-	tail = new;
+	  tail->next = defn;
+	tail = defn;
 
+	break;
+
+      case 'B':
+	/* In 1.4.x, -B<num> was a no-op option for compatibility with
+	   Solaris m4.  Warn if optarg is all numeric.  FIXME -
+	   silence this warning after 2.0.  */
+	if (isdigit ((unsigned char) *optarg))
+	  {
+	    char *end;
+	    errno = 0;
+	    strtol (optarg, &end, 10);
+	    if (*end == '\0' && errno == 0)
+	      error (0, 0, _("Warning: recommend using `m4 -B ./%s' instead"),
+		     optarg);
+	  }
+	/* fall through */
+      case PREPEND_INCLUDE_OPTION:
+	m4_add_include_directory (context, optarg, true);
 	break;
 
       case 'E':
@@ -303,12 +347,13 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'I':
-	m4_add_include_directory (context, optarg);
+	m4_add_include_directory (context, optarg, false);
 	break;
 
       case 'L':
 	m4_set_nesting_limit_opt (context, atoi (optarg));
 	break;
+
       case 'M':
 	if (lt_dlinsertsearchdir (lt_dlgetsearchpath(), optarg) != 0)
 	  {
@@ -375,19 +420,23 @@ main (int argc, char *const *argv, char *const *envp)
       case 's':
 	m4_set_sync_output_opt (context, true);
 	break;
+
+      case IMPORT_ENVIRONMENT_OPTION:
+	import_environment = true;
+	break;
+
+      case VERSION_OPTION:
+	version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
+		     VERSION, AUTHORS, NULL);
+	exit (EXIT_SUCCESS);
+	break;
+
+      case HELP_OPTION:
+	usage (EXIT_SUCCESS);
+	break;
       }
 
-  if (show_version)
-    {
-      version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
-		   VERSION, AUTHORS, NULL);
-      exit (EXIT_SUCCESS);
-    }
-
-  if (show_help)
-    usage (EXIT_SUCCESS);
-
-  /* Do the basic initialisations.  */
+  /* Do the basic initializations.  */
 
   m4_input_init (context);
   m4_output_init ();
@@ -405,7 +454,7 @@ main (int argc, char *const *argv, char *const *envp)
     }
 
   /* Import environment variables as macros.  The definition are
-     preprended to the macro definition list, so -U can override
+     prepended to the macro definition list, so -U can override
      environment variables. */
 
   if (import_environment)
@@ -414,16 +463,16 @@ main (int argc, char *const *argv, char *const *envp)
 
       for (env = envp; *env != NULL; env++)
 	{
-	  new = xmalloc (sizeof *new);
-	  new->code = 'D';
-	  new->macro = *env;
-	  new->next = head;
-	  head = new;
+	  defn = xmalloc (sizeof *defn);
+	  defn->code = 'D';
+	  defn->macro = *env;
+	  defn->next = head;
+	  head = defn;
 	}
     }
 
   /* Handle deferred command line macro definitions.  Must come after
-     initialisation of the symbol table.  */
+     initialization of the symbol table.  */
   {
     defines = head;
 

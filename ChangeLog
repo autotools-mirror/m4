@@ -1,3 +1,28 @@
+2006-08-25  Eric Blake  <ebb9@byu.net>
+
+	* tests/options.at (debug-flags): Update to reflect new message.
+	(deprecated options, prepend-include, help and version): New
+	tests.
+	* tests/testsuite.at (AT_CHECK_M4): Avoid hanging testsuite if
+	test omits an input file name.
+	* src/main.c (long_options, main): Add -B/--prepend-include.
+	(usage): Document it.
+	(main): `m4 --help --version' now displays help, not version.
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	dirname filenamecat.
+	* m4/m4module.h (m4_add_include_directory): Add parameter.
+	* m4/m4private.h (m4__include_init): New prototype.
+	* m4/m4.c (m4_create): Put `.' on path before options are
+	collected.
+	* m4/path.c (includes): Assume C89.  Use gnulib for file name
+	management.
+	(m4__include_init): New function.
+	(search_path_add): Allow prepending.
+	(m4_add_include_directory, search_path_env_init): Adjust callers.
+	(m4_path_search): Relative names now invoke path search, since
+	`.' might not be first.
+	* doc/m4.texinfo (Invoking m4, Search Path): Document new option.
+
 2006-08-25  Bruno Haible  <bruno@clisp.org>  (tiny change)
 	and Eric Blake  <ebb9@byu.net>
 

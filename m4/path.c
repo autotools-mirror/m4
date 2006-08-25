@@ -26,25 +26,19 @@
 #  include <config.h>
 #endif
 
-#if HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-
-#if HAVE_STRING_H
-#  include <string.h>
-#else
-#  if HAVE_STRINGS_H
-#    include <strings.h>
-#  endif
-#endif
+#include <stdlib.h>
+#include <string.h>
 
 #include "m4module.h"
 #include "m4private.h"
 
+#include "dirname.h"
+#include "filenamecat.h"
+
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INCL */
 
-static void search_path_add (m4__search_path_info *, const char *);
+static void search_path_add (m4__search_path_info *, const char *, bool);
 static void search_path_env_init (m4__search_path_info *, char *, bool);
 
 
@@ -53,25 +47,33 @@ static void search_path_env_init (m4__search_path_info *, char *, bool);
  */
 
 static void
-search_path_add (m4__search_path_info *info, const char *dir)
+search_path_add (m4__search_path_info *info, const char *dir, bool prepend)
 {
   m4__search_path *path = xmalloc (sizeof *path);
 
-  if (*dir == '\0')
-    dir = ".";
-
-  path->next = NULL;
   path->len = strlen (dir);
   path->dir = xstrdup (dir);
 
   if (path->len > info->max_length) /* remember len of longest directory */
     info->max_length = path->len;
 
-  if (info->list_end == NULL)
-    info->list = path;
+  if (prepend)
+    {
+      path->next = info->list;
+      info->list = path;
+      if (info->list_end == NULL)
+	info->list_end = path;
+    }
   else
-    info->list_end->next = path;
-  info->list_end = path;
+    {
+      path->next = NULL;
+
+      if (info->list_end == NULL)
+	info->list = path;
+      else
+	info->list_end->next = path;
+      info->list_end = path;
+    }
 }
 
 static void
@@ -88,7 +90,7 @@ search_path_env_init (m4__search_path_info *info, char *path, bool isabs)
       if (path_end)
 	*path_end = '\0';
       if (!isabs || *path == '/')
-	search_path_add (info, path);
+	search_path_add (info, path, false);
       path = path_end + 1;
     }
   while (path_end);
@@ -108,17 +110,25 @@ m4_include_env_init (m4 *context)
 }
 
 void
-m4_add_include_directory (m4 *context, const char *dir)
+m4_add_include_directory (m4 *context, const char *dir, bool prepend)
 {
   if (m4_get_no_gnu_extensions_opt (context))
     return;
 
-  search_path_add (m4__get_search_path (context), dir);
+  search_path_add (m4__get_search_path (context), dir, prepend);
 
 #ifdef DEBUG_INCL
-  fprintf (stderr, "add_include_directory (%s);\n", dir);
+  fprintf (stderr, "add_include_directory (%s) %s;\n", dir,
+	   prepend ? "prepend" : "append");
 #endif
 }
+
+/* Search for FILE according to -B options, `.', -I options, then
+   M4PATH environment.  If successful, return the open file, and if
+   RESULT is not NULL, set *RESULT to a malloc'd string that
+   represents the file found with respect to the current working
+   directory.  Otherwise, return NULL, and errno reflects the failure
+   from searching `.' (regardless of what else was searched).  */
 
 FILE *
 m4_path_search (m4 *context, const char *file, char **expanded_name)
@@ -126,7 +136,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
   FILE *fp;
   m4__search_path *incl;
   char *name;			/* buffer for constructed name */
-  int e;
+  int e = 0;
 
   if (expanded_name != NULL)
     *expanded_name = NULL;
@@ -138,32 +148,27 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       return NULL;
     }
 
-  /* Look in current working directory first.  */
-  fp = fopen (file, "r");
-  if (fp != NULL)
+  /* If file is absolute, or if we are not searching a path, a single
+     lookup will do the trick.  */
+  if (IS_ABSOLUTE_FILE_NAME (file) || m4_get_no_gnu_extensions_opt (context))
     {
-      if (set_cloexec_flag (fileno (fp), true) != 0)
-	m4_error (context, 0, errno,
-		  _("cannot protect input file across forks"));
-      if (expanded_name != NULL)
-	*expanded_name = xstrdup (file);
-      return fp;
+      fp = fopen (file, "r");
+      if (fp != NULL)
+	{
+	  if (set_cloexec_flag (fileno (fp), true) != 0)
+	    m4_error (context, 0, errno,
+		      _("cannot protect input file across forks"));
+	  if (expanded_name != NULL)
+	    *expanded_name = xstrdup (file);
+	  return fp;
+	}
+      return NULL;
     }
-
-  /* If file not found, and filename absolute, fail.  */
-  if (*file == '/' || m4_get_no_gnu_extensions_opt (context))
-    return NULL;
-  e = errno;
-
-  name = (char *) xmalloc (m4__get_search_path (context)->max_length
-			   + 1 + strlen (file) + 1);
 
   for (incl = m4__get_search_path (context)->list;
        incl != NULL; incl = incl->next)
     {
-      strncpy (name, incl->dir, incl->len);
-      name[incl->len] = '/';
-      strcpy (name + incl->len + 1, file);
+      name = file_name_concat (incl->dir, file, NULL);
 
 #ifdef DEBUG_INCL
       fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
@@ -183,26 +188,38 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
 	    *expanded_name = name;
 	  else
 	    free (name);
-	  errno = e;
 	  return fp;
 	}
+      else if (!incl->len)
+	/* Capture errno only when searching `.'.  */
+	e = errno;
+      free (name);
     }
 
-  free (name);
-
   errno = e;
-  return fp;
+  return NULL;
 }
 
+void
+m4__include_init (m4 *context)
+{
+  m4__search_path_info *info = m4__get_search_path (context);
+
+  assert (info);
+  search_path_add (info, "", false);
+}
+
+
 #ifdef DEBUG_INCL
 
-static void
+static void M4_GNUC_UNUSED
 include_dump (m4 *context)
 {
   m4__search_path *incl;
 
   fprintf (stderr, "include_dump:\n");
-  for (incl = m4__get_search_path (context)->list; incl != NULL; incl = incl->next)
+  for (incl = m4__get_search_path (context)->list;
+       incl != NULL; incl = incl->next)
     fprintf (stderr, "\t%s\n", incl->dir);
 }
 

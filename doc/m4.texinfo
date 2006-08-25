@@ -497,8 +497,19 @@ Imports every variable in the environment as a macro.  This is done
 before @option{-D} and @option{-U}, so they can override the
 enviroment.
 
-@comment FIXME - need to implement -B/--prepend=DIR, to prepend to the
-@comment search path prior to `.'.
+@item -B @var{DIRECTORY}
+@itemx --prepend-include=@var{DIRECTORY}
+Make @code{m4} search @var{DIRECTORY} for included files, prior to
+searching the current working directory.  @xref{Search Path}, for more
+details.  This option may be given more than once.  Some other
+implementations of @code{m4} use @code{-B @var{number}} to change their
+hard-coded limits, but that is unnecessary in @acronym{GNU} where the
+only limit is your hardware capability.  So although it is unlikely that
+you will want to include a relative directory whose name is purely
+numeric, @acronym{GNU} @code{m4} will warn you about this potential
+compatibility issue; you can avoid the warning by using the long
+spelling, or by using @samp{./@var{number}} if you really meant it.
+
 @item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
 @itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
 This enters @var{NAME} into the symbol table, before any input files are
@@ -586,13 +597,14 @@ problem in general, if not undecidable!
 @itemx --diversions=@var{NUM}
 These options are present only for compatibility with previous
 versions of GNU @code{m4}.  They do nothing, because the symbol table
-size and number of diversions are not fixed anymore.
+size and number of diversions are not fixed anymore.  They will
+eventually disappear in future releases.
 
-@item -B @var{NUM}
 @itemx -S @var{NUM}
 @itemx -T @var{NUM}
 These options are present for compatibility with System V @code{m4}, but
-do nothing in this implementation.
+do nothing in this implementation.  They may disappear in future
+releases.
 @end table
 
 @acronym{GNU} @code{m4} comes with a feature of freezing internal state
@@ -2184,7 +2196,7 @@ Show the the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
-mecanism (@pxref{Search Path}), giving the actual file name used.
+mechanism (@pxref{Search Path}), giving the actual file name used.
 
 @item i
 Print a message each time the current input file is changed, giving file
@@ -2941,12 +2953,14 @@ In GNU @code{m4}, an alternative method of reading files is using
 GNU @code{m4} allows included files to be found in other directories
 than the current working directory.
 
-If a file is not found in the current working directory, and the file
-name is not absolute, the file will be looked for in a specified search
-path.  First, the directories specified with the @samp{-I} option will
-be searched, in the order found on the command line.  Second, if the
-@samp{M4PATH} environment variable is set, it is expected to contain a
-colon-separated list of directories, which will be searched in order.
+If the @option{--prepend-include} or @option{-B} option was provided
+(@pxref{Invoking m4}), those directories are searched first, in reverse
+order that those options were listed on the command line.  Then
+@code{m4} looks in the current working directory.  Next comes the
+directories specified with the @option{--include} or @option{-I} option
+will be searched, in the order found on the command line.  Finally, if
+the @env{M4PATH} environment variable is set, it is expected to contain
+a colon-separated list of directories, which will be searched in order.
 
 If the automatic search for include-files causes trouble, the @samp{p}
 debug flag (@pxref{Debug Levels}) can help isolate the problem.

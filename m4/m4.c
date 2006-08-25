@@ -37,6 +37,7 @@ m4_create (void)
   context->nesting_limit = DEFAULT_NESTING_LIMIT;
 
   context->search_path	 = xzalloc (sizeof context->search_path);
+  m4__include_init (context);
 
   return context;
 }
