@@ -43,28 +43,28 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind argmin  argmax */
+	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-	BUILTIN(__file__,	false,	false,	1,	1  )	\
-	BUILTIN(__line__,	false,	false,	1,	1  )	\
-	BUILTIN(__program__,	false,	false,	1,	1  )	\
-	BUILTIN(builtin,	false,	true,	2,	-1 )	\
-	BUILTIN(changeresyntax,	false,	true,	1,	2  )	\
-	BUILTIN(changesyntax,	false,	true,	1,	-1 )	\
-	BUILTIN(debugmode,	false,	false,	1,	2  )	\
-	BUILTIN(debugfile,	false,	false,	1,	2  )	\
-	BUILTIN(esyscmd,	false,	true,	-1,	2  )	\
-	BUILTIN(format,		false,	true,	2,	-1 )	\
-	BUILTIN(indir,		false,	true,	2,	-1 )	\
-	BUILTIN(patsubst,	false,	true,	3,	5  )	\
-	BUILTIN(regexp,		false,	true,	3,	5  )	\
-	BUILTIN(renamesyms,	false,	true,	3,	4  )	\
-	BUILTIN(symbols,	false,	false,	1,	-1 )	\
-	BUILTIN(syncoutput,	false,  true,	2,	2  )	\
+  BUILTIN (__file__,	false,	false,	false,	0,	0 )	\
+  BUILTIN (__line__,	false,	false,	false,	0,	0  )	\
+  BUILTIN (__program__,	false,	false,	false,	0,	0  )	\
+  BUILTIN (builtin,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (changeresyntax,false,true,	false,	0,	1  )	\
+  BUILTIN (changesyntax,false,	true,	false,	0,	-1 )	\
+  BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
+  BUILTIN (debugfile,	false,	false,	false,	0,	1  )	\
+  BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
+  BUILTIN (format,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (indir,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
+  BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
+  BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
+  BUILTIN (symbols,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (syncoutput,	false,  true,	false,	1,	1  )	\
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros, blind, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -72,12 +72,16 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)	\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, false, false, 0, 0 },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 
@@ -93,7 +97,7 @@ m4_macro m4_macro_table[] =
   { "__gnu__",			"" },
   { "__m4_version__",		VERSION/**/TIMESTAMP },
 
-  { 0, 0 },
+  { NULL, NULL },
 };
 
 
@@ -212,9 +216,12 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 }
 
 
-/* For each match against compiled REGEXP (held in BUF -- as returned by
-   m4_regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
-   characters are copied verbatim, and the result copied to the obstack.  */
+/* For each match against compiled REGEXP (held in BUF -- as returned
+   by m4_regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
+   characters are copied verbatim, and the result copied to the
+   obstack.  Errors are reported on behalf of CALLER.  Return true if
+   a substitution was made.  If IGNORE_DUPLICATES is set, don't worry
+   about completing the obstack when returning false.  */
 
 static bool
 m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
@@ -225,8 +232,9 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
   int matchpos	= 0;		/* start position of match */
   int offset	= 0;		/* current match offset */
   int length	= strlen (victim);
+  bool subst	= false;	/* if a substitution has been made */
 
-  while (offset < length)
+  while (offset <= length)
     {
       matchpos = m4_regexp_search (buf, victim, length,
 				   offset, length - offset);
@@ -255,6 +263,7 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
       /* Handle the part of the string that was covered by the match.  */
 
       substitute (context, obs, caller, victim, replace, buf);
+      subst = true;
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
@@ -265,10 +274,10 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 	obstack_1grow (obs, victim[offset++]);
     }
 
-  if (!ignore_duplicates || (matchpos >= 0))
+  if (!ignore_duplicates || subst)
     obstack_1grow (obs, '\0');
 
-  return (matchpos >= 0);
+  return subst;
 }
 
 
@@ -318,7 +327,8 @@ M4BUILTIN_HANDLER (builtin)
   if (bp == NULL)
     m4_error (context, 0, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
   else if (!m4_bad_argc (context, argc - 1, argv + 1,
-			 bp->min_args, bp->max_args))
+			 bp->min_args, bp->max_args,
+			 (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
     bp->func (context, obs, argc - 1, argv + 1);
 }
 
@@ -442,11 +452,8 @@ M4BUILTIN_HANDLER (esyscmd)
       FILE *pin;
       int ch;
 
-      /* Calling with no arguments triggers a warning, but must also
-         set sysval to 0 as if the empty command had been executed.
-         Therefore, we must manually check min args ourselves rather
-         than relying on the macro calling engine.  */
-      if (m4_bad_argc (context, argc, argv, 2, -1))
+      /* Optimize the empty command.  */
+      if (*M4ARG (1) == '\0')
         {
           m4_set_sysval (0);
           return;

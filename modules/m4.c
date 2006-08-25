@@ -59,40 +59,40 @@ extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind minargs maxargs */
+	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-	BUILTIN(changecom,	false,	false,	1,	3  )	\
-	BUILTIN(changequote,	false,	false,	1,	3  )	\
-	BUILTIN(decr,		false,	true,	2,	2  )	\
-	BUILTIN(define,		true,	true,	2,	3  )	\
-	BUILTIN(defn,		false,	true,	0,	-1 )	\
-	BUILTIN(divert,		false,	false,	1,	2  )	\
-	BUILTIN(divnum,		false,	false,	1,	1  )	\
-	BUILTIN(dnl,		false,	false,	1,	1  )	\
-	BUILTIN(dumpdef,	false,	false,	0,	-1 )	\
-	BUILTIN(errprint,	false,	false,	0,	-1 )	\
-	BUILTIN(eval,		false,	true,	2,	4  )	\
-	BUILTIN(ifdef,		false,	true,	3,	4  )	\
-	BUILTIN(ifelse,		false,	true,	-1,	-1 )	\
-	BUILTIN(include,	false,	true,	2,	2  )	\
-	BUILTIN(incr,		false,	true,	2,	2  )	\
-	BUILTIN(index,		false,	true,	3,	3  )	\
-	BUILTIN(len,		false,	true,	2,	2  )	\
-	BUILTIN(m4exit,		false,	false,	1,	2  )	\
-	BUILTIN(m4wrap,		false,	false,	0,	-1 )	\
-	BUILTIN(maketemp,	false,	true,	2,	2  )	\
-	BUILTIN(popdef,		false,	true,	2,	2  )	\
-	BUILTIN(pushdef,	true,	true,	2,	3  )	\
-	BUILTIN(shift,		false,	false,	0,	-1 )	\
-	BUILTIN(sinclude,	false,	true,	2,	2  )	\
-	BUILTIN(substr,		false,	true,	3,	4  )	\
-	BUILTIN(syscmd,		false,	true,	-1,	2  )	\
-	BUILTIN(sysval,		false,	false,	0,	-1 )	\
-	BUILTIN(traceoff,	false,	false,	0,	-1 )	\
-	BUILTIN(traceon,	false,	false,	0,	-1 )	\
-	BUILTIN(translit,	false,	true,	3,	4  )	\
-	BUILTIN(undefine,	false,	true,	2,	2  )	\
-	BUILTIN(undivert,	false,	false,	0,	-1 )	\
+  BUILTIN (changecom,	false,	false,	false,	0,	2  )	\
+  BUILTIN (changequote,	false,	false,	false,	0,	2  )	\
+  BUILTIN (decr,	false,	true,	true,	1,	1  )	\
+  BUILTIN (define,	true,	true,	false,	1,	2  )	\
+  BUILTIN (defn,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (divert,	false,	false,	false,	0,	1  )	\
+  BUILTIN (divnum,	false,	false,	false,	0,	0  )	\
+  BUILTIN (dnl,		false,	false,	false,	0,	0  )	\
+  BUILTIN (dumpdef,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (errprint,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (eval,	false,	true,	true,	1,	3  )	\
+  BUILTIN (ifdef,	false,	true,	false,	2,	3  )	\
+  BUILTIN (ifelse,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (include,	false,	true,	false,	1,	1  )	\
+  BUILTIN (incr,	false,	true,	true,	1,	1  )	\
+  BUILTIN (index,	false,	true,	true,	2,	2  )	\
+  BUILTIN (len,		false,	true,	true,	1,	1  )	\
+  BUILTIN (m4exit,	false,	false,	false,	0,	1  )	\
+  BUILTIN (m4wrap,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (maketemp,	false,	true,	false,	1,	1  )	\
+  BUILTIN (popdef,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (pushdef,	true,	true,	false,	1,	2  )	\
+  BUILTIN (shift,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (sinclude,	false,	true,	false,	1,	1  )	\
+  BUILTIN (substr,	false,	true,	true,	2,	3  )	\
+  BUILTIN (syscmd,	false,	true,	true,	1,	1  )	\
+  BUILTIN (sysval,	false,	false,	false,	0,	0  )	\
+  BUILTIN (traceoff,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (traceon,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (translit,	false,	true,	true,	2,	3  )	\
+  BUILTIN (undefine,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (undivert,	false,	false,	false,	0,	-1 )	\
 
 
 #if defined(SIZEOF_LONG_LONG_INT) && SIZEOF_LONG_LONG_INT > 0
@@ -117,7 +117,7 @@ static void	numb_obstack	(m4_obstack *obs, const number value,
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, side, min, max) M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -125,12 +125,16 @@ static void	numb_obstack	(m4_obstack *obs, const number value,
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)	\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, false, false, 0, 0 },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 
@@ -243,11 +247,11 @@ M4BUILTIN_HANDLER (ifelse)
   if (argc == 2)
     return;
 
-  if (m4_bad_argc (context, argc, argv, 4, -1))
+  if (m4_bad_argc (context, argc, argv, 3, -1, false))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    m4_bad_argc (context, (argc + 2) % 3, argv, -1, 1);
+    m4_bad_argc (context, (argc % 3) + 1, argv, 0, 2, false);
 
   argv++;
   argc--;
@@ -474,11 +478,8 @@ m4_sysval_flush (m4 *context)
 
 M4BUILTIN_HANDLER (syscmd)
 {
-  /* Calling with no arguments triggers a warning, but must also set
-     sysval to 0 as if the empty command had been executed.
-     Therefore, we must manually check min args ourselves rather than
-     relying on the macro calling engine.  */
-  if (m4_bad_argc (context, argc, argv, 2, -1))
+  /* Optimize the empty command.  */
+  if (*M4ARG (1) == '\0')
     {
       m4_set_sysval (0);
       return;

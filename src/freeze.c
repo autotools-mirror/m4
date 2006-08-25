@@ -545,19 +545,15 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	    if (bp)
 	      {
-		if (bp->groks_macro_args)
-		  BIT_SET (VALUE_FLAGS (token), VALUE_MACRO_ARGS_BIT);
-		if (bp->blind_if_no_args)
-		  BIT_SET (VALUE_FLAGS (token), VALUE_BLIND_ARGS_BIT);
-
 		m4_set_symbol_value_func (token, bp->func);
+		VALUE_FLAGS    (token)	= bp->flags;
 		VALUE_MIN_ARGS (token)	= bp->min_args;
 		VALUE_MAX_ARGS (token)	= bp->max_args;
 	      }
 	    else
 	      {
 		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
-		VALUE_MIN_ARGS (token) = -1;
+		VALUE_MIN_ARGS (token) = 0;
 		VALUE_MAX_ARGS (token) = -1;
 	      }
 	    m4_symbol_pushdef (M4SYMTAB, string[0], token);

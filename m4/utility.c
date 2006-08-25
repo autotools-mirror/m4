@@ -31,27 +31,31 @@ static const char * skip_space (m4 *, const char *);
 
 
 /* Give friendly warnings if a builtin macro is passed an
-   inappropriate number of arguments.  ARGC/ARGV are the arguments,
-   MIN is the minimum number of acceptable arguments, negative if not
-   applicable, MAX is the maximum number, negative if not applicable.
-   ARGC, MIN, and MAX count ARGV[0], the name of the macro.  Return
-   true if there are too few arguments, false otherwise.  */
+   inappropriate number of arguments.  MIN is the 0-based minimum
+   number of acceptable arguments, MAX is the 0-based maximum number
+   or UINT_MAX if not applicable, and SIDE_EFFECT is true if the macro
+   has side effects even if min is not satisfied.  ARGC is the 1-based
+   count of ARGV, where ARGV[0] is the name of the macro.  Return true
+   if the macro is guaranteed to expand to the empty string, false
+   otherwise.  */
 bool
-m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv, int min, int max)
+m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv,
+	     unsigned int min, unsigned int max, bool side_effect)
 {
-  if (min > 0 && argc < min)
+  assert (min <= max);
+  assert (min > 0 || ! side_effect);
+
+  if (argc - 1 < min)
     {
       m4_warn (context, 0, _("Warning: %s: too few arguments: %d < %d"),
-	       M4ARG (0), argc - 1, min - 1);
-      return true;
+	       M4ARG (0), argc - 1, min);
+      return ! side_effect;
     }
 
-  if (max > 0 && argc > max)
+  if (argc - 1 > max)
     {
       m4_warn (context, 0, _("Warning: %s: extra arguments ignored: %d > %d"),
-	       M4ARG (0), argc - 1, max - 1);
-      /* Return false, otherwise it is not exactly `ignored'. */
-      return false;
+	       M4ARG (0), argc - 1, max);
     }
 
   return false;

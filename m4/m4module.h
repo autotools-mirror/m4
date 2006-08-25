@@ -42,12 +42,23 @@ typedef lt_dlsymlist		m4_export;
 
 typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
 
+/* The value of m4_builtin flags is built from these:  */
+enum {
+  /* set if macro can handle non-text tokens, such as builtin macro tokens */
+  M4_BUILTIN_GROKS_MACRO	= (1 << 0),
+  /* set if macro should only be recognized with arguments */
+  M4_BUILTIN_BLIND		= (1 << 1),
+  /* set if macro has side effects even when there are too few arguments */
+  M4_BUILTIN_SIDE_EFFECT	= (1 << 2)
+};
+
 struct m4_builtin
 {
-  const char *	    name;
-  m4_builtin_func * func;
-  bool	    groks_macro_args, blind_if_no_args;
-  int		    min_args, max_args;
+  m4_builtin_func * func;	/* implementation of the builtin */
+  const char *	    name;	/* name found by builtin, printed by dumpdef */
+  int		    flags;	/* bitwise OR of M4_BUILTIN_* bits */
+  unsigned int	    min_args;	/* 0-based minimum number of arguments */
+  unsigned int	    max_args;	/* max arguments, UINT_MAX if unlimited */
 };
 
 struct m4_macro
@@ -84,7 +95,7 @@ struct m4_macro
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
 extern bool	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
-				       int, int);
+				       unsigned int, unsigned int, bool);
 extern bool	    m4_numeric_arg    (m4 *, int, m4_symbol_value **,
 				       int, int *);
 extern void	    m4_dump_args      (m4 *, m4_obstack *, int,

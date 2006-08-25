@@ -318,7 +318,9 @@ m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
 	       int argc, m4_symbol_value **argv)
 {
   if (m4_bad_argc (context, argc, argv,
-		   SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol)))
+		   SYMBOL_MIN_ARGS (symbol), SYMBOL_MAX_ARGS (symbol),
+		   BIT_TEST (SYMBOL_FLAGS (symbol),
+			     VALUE_SIDE_EFFECT_ARGS_BIT)))
     return;
   if (m4_is_symbol_text (symbol))
     {

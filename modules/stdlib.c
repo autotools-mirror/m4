@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,37 +36,41 @@
 
 #define m4_builtin_table	stdlib_LTX_m4_builtin_table
 
-/*		function	macros	blind minargs maxargs */
+/*	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-	BUILTIN (getcwd,	false,	false,	1,	1  )	\
-	BUILTIN (getenv,	false,	true,	2,	2  )	\
-	BUILTIN (getlogin,	false,	false,	1,	1  )	\
-	BUILTIN (getpid,	false,	false,	1,	1  )	\
-	BUILTIN (getppid,	false,	false,	1,	1  )	\
-	BUILTIN (getuid,	false,	false,	1,	1  )	\
-	BUILTIN (getpwnam,	false,	true,	2,	2  )	\
-	BUILTIN (getpwuid,	false,	true,	2,	2  )	\
-	BUILTIN (hostname,	false,	false,	1,	1  )	\
-	BUILTIN (rand,		false,	false,	1,	1  )	\
-	BUILTIN (srand,		false,	false,	1,	2  )	\
-	BUILTIN (setenv,	false,	true,	3,	4  )	\
-	BUILTIN (unsetenv,	false,	true,	2,	2  )	\
-	BUILTIN (uname,		false,	false,	1,	1  )	\
+  BUILTIN (getcwd,	false,	false,	false,	0,	0  )	\
+    BUILTIN (getenv,	false,	true,	false,	1,	1  )	\
+    BUILTIN (getlogin,	false,	false,	false,	0,	0  )	\
+    BUILTIN (getpid,	false,	false,	false,	0,	0  )	\
+    BUILTIN (getppid,	false,	false,	false,	0,	0  )	\
+    BUILTIN (getuid,	false,	false,	false,	0,	0  )	\
+    BUILTIN (getpwnam,	false,	true,	false,	1,	1  )	\
+    BUILTIN (getpwuid,	false,	true,	false,	1,	1  )	\
+    BUILTIN (hostname,	false,	false,	false,	0,	0  )	\
+    BUILTIN (rand,	false,	false,	false,	0,	0  )	\
+    BUILTIN (srand,	false,	false,	false,	0,	1  )	\
+    BUILTIN (setenv,	false,	true,	false,	2,	3  )	\
+    BUILTIN (unsetenv,	false,	true,	false,	1,	1  )	\
+    BUILTIN (uname,	false,	false,	false,	0,	0  )	\
 
 
-#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler);
+#define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN(handler);
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)	\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
 
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, false, false, 0, 0 },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 /**

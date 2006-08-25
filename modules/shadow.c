@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,32 +28,36 @@
 #define m4_builtin_table	shadow_LTX_m4_builtin_table
 #define m4_macro_table		shadow_LTX_m4_macro_table
 
-/*		function	macros	blind minargs maxargs */
+/*	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions			\
-	BUILTIN (shadow,	false,	false,	0,	-1 )	\
-	BUILTIN (test,		false,	false,	0,	-1 )	\
+  BUILTIN (shadow,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (test,	false,	false,	false,	0,	-1 )	\
 
 
-#define BUILTIN(handler, macros,  blind, min, max) M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)	\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
 
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, false, false, 0, 0 },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 m4_macro m4_macro_table[] =
 {
   /* name		text */
   { "__test__",		"`shadow'" },
-  { 0,			0 },
+  { NULL, NULL },
 };
 
 

@@ -477,7 +477,7 @@ AT_DATA([[expout]],
 OBS: GNUs not Unix.
 OBS: GNUs OBS: not OBS: Unix.
 G=NUs n=ot U=nix.
-(GNUs)() (not)() (Unix)().
+(GNUs)() (not)() (Unix)().()
 (GNUs) (not) (Unix).
   .
 GNUs not Unix.

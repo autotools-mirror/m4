@@ -1,5 +1,37 @@
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
+	* m4/m4module.h (M4_BUILTIN_GROKS_MACRO, M4_BUILTIN_BLIND)
+	(M4_BUILTIN_SIDE_EFFECT): New enumerators.
+	(struct m4_builtin): New member flags replaces groks_macro_args,
+	blind_if_no_args.  min_args and max_args are now 0-based.
+	Rearrange members to reduce size on platforms where function
+	pointers are 64 bits but regular pointers are 32.
+	(m4_bad_argc): Add argument.
+	* m4/m4private.h (VALUE_SIDE_EFFECT_ARGS_BIT): New define.
+	* m4/utility.c (m4_bad_argc): Simplify calculation, and take side
+	effect into account.
+	* m4/module.c (install_builtin_table): Adjust all users affected
+	by this API change.
+	* m4/macro.c (m4_macro_call): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* modules/m4.c (builtin_functions, ifelse, syscmd): Likewise.
+	* modules/gnu.c (builtin_functions, builtin, esyscmd): Likewise.
+	* modules/import.c (builtin_functions): Likewise.
+	* modules/load.c (builtin_functions): Likewise.
+	* modules/modtest.c (builtin_functions): Likewise.
+	* modules/mpeval.c (builtin_functions): Likewise.
+	* modules/perl.c (builtin_functions): Likewise.
+	* modules/shadow.c (builtin_functions): Likewise.
+	* modules/stdlib.c (builtin_functions): Likewise.
+	* modules/time.c (builtin_functions, mktime_functions)
+	(strftime_functions): Likewise.
+	* doc/m4.texinfo (Loops): Update test now that shift is blind.
+	(Macro Arguments): Fix typo in test.
+	(Patsubst): Fix typo in test.
+	* modules/gnu.c (m4_regexp_substitute): Don't skip empty match at
+	end of string.  Fix return value when ignore_duplicates.
+	* tests/builtins.at (patsubst): Fix typo in test.
+
 	* tests/options.at (debug-flags): Update to reflect new message.
 	(deprecated options, prepend-include, help and version): New
 	tests.

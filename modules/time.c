@@ -33,21 +33,21 @@
 
 #define m4_builtin_table	time_LTX_m4_builtin_table
 
-/*		function	macros	blind minargs maxargs */
+/*	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-	BUILTIN (currenttime,	false,	false,	1,	1  )	\
-	BUILTIN (ctime,		false,	false,	1,	2  )	\
-	BUILTIN (gmtime,	false,	true,	2,	2  )	\
-	BUILTIN (localtime,	false,	true,	2,	2  )	\
+  BUILTIN (currenttime,	false,	false,	false,	0,	0  )	\
+  BUILTIN (ctime,	false,	false,	false,	0,	1  )	\
+  BUILTIN (gmtime,	false,	true,	false,	1,	1  )	\
+  BUILTIN (localtime,	false,	true,	false,	1,	1  )	\
 
 #define mktime_functions					\
-	BUILTIN (mktime,	false,	true,	7,	8  )	\
+  BUILTIN (mktime,	false,	true,	false,	6,	7  )	\
 
 #define strftime_functions					\
-	BUILTIN (strftime,	false,	true,	3,	3  )	\
+  BUILTIN (strftime,	false,	true,	false,	2,	2  )	\
 
 
-#define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
   builtin_functions
 # if HAVE_MKTIME
   mktime_functions
@@ -59,8 +59,12 @@
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)	\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
 
   builtin_functions
 # if HAVE_MKTIME
@@ -71,7 +75,7 @@ m4_builtin m4_builtin_table[] =
 # endif
 #undef BUILTIN
 
-  { 0, 0, false, false },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 /**

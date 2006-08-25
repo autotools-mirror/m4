@@ -36,9 +36,9 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-		function	macros	blind minargs maxargs */
+	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-	BUILTIN(mpeval,		false,	true,	2,	4  )	\
+  BUILTIN (mpeval,	false,	true,	true,	1,	3  )	\
 
 
 
@@ -79,7 +79,7 @@
 #define numb_decr(n) numb_minus(n,numb_ONE)
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
   builtin_functions
 #undef BUILTIN
 
@@ -87,12 +87,16 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, min, max)		\
-	{ STR(handler), CONC(builtin_, handler), macros, blind, min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)			\
+  { CONC(builtin_, handler), STR(handler),		\
+    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
+     | (blind ? M4_BUILTIN_BLIND : 0)			\
+     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
+    min, max },
   builtin_functions
 #undef BUILTIN
 
-  { 0, 0, false, false, 0, 0 },
+  { NULL, NULL, 0, 0, 0 },
 };
 
 

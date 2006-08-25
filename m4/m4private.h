@@ -219,10 +219,15 @@ struct m4_symbol_value {
 
 
 
-/* m4_symbol_value.flags bit masks:  */
+/* m4_symbol_value.flags bit masks.  Be sure these are consistent with
+   M4_BUILTIN_* bit masks, so we can copy m4_builtin.flags to
+   m4_symbol_arg.flags.  However, if we ever add blind support to user
+   macros, then these names are better for use in the symbol
+   table:  */
 
-#define VALUE_MACRO_ARGS_BIT	(1 << 0)
-#define VALUE_BLIND_ARGS_BIT	(1 << 1)
+#define VALUE_MACRO_ARGS_BIT		(1 << 0)
+#define VALUE_BLIND_ARGS_BIT		(1 << 1)
+#define VALUE_SIDE_EFFECT_ARGS_BIT	(1 << 2)
 
 
 struct m4_symbol_arg {

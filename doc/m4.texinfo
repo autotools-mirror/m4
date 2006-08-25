@@ -1219,7 +1219,7 @@ index(`abc')
 index(`abc',)
 @result{}0
 index(`abc', `b', `ignored')
-@result{}0
+@result{}1
 @end example
 
 Macros are expanded normally during argument collection, and whatever
@@ -1964,7 +1964,7 @@ argument, separated by commas, with each argument quoted.
 
 @example
 shift
-@result{}
+@result{}shift
 shift(`bar')
 @result{}
 shift(`foo', `bar', `baz')
@@ -3645,7 +3645,7 @@ patsubst(`GNUs not Unix', `^', `OBS: ')
 patsubst(`GNUs not Unix', `\<', `OBS: ')
 @result{}OBS: GNUs OBS: not OBS: Unix
 patsubst(`GNUs not Unix', `\w*', `(\&)')
-@result{}(GNUs)() (not)() (Unix)
+@result{}(GNUs)() (not)() (Unix)()
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')

@@ -147,13 +147,9 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 
 	  m4_set_symbol_value_func (value, bp->func);
 	  VALUE_HANDLE   (value)	= handle;
+	  VALUE_FLAGS    (value)	= bp->flags;
 	  VALUE_MIN_ARGS (value)	= bp->min_args;
 	  VALUE_MAX_ARGS (value)	= bp->max_args;
-
-	  if (bp->groks_macro_args)
-	    BIT_SET (VALUE_FLAGS (value), VALUE_MACRO_ARGS_BIT);
-	  if (bp->blind_if_no_args)
-	    BIT_SET (VALUE_FLAGS (value), VALUE_BLIND_ARGS_BIT);
 
 	  if (m4_get_prefix_builtins_opt (context))
 	    {
