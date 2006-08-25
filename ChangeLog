@@ -1,3 +1,8 @@
+2006-08-25  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Macro Arguments): Another section merged;
+	testsuite failures now exposed.
+
 2006-08-23  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Quoted strings, Other tokens, Comments)

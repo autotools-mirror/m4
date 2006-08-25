@@ -838,6 +838,7 @@ level of quotes stripped off.  Thus
 @result{}
 @end example
 
+@noindent
 is the empty string, and double-quoting turns into single-quoting.
 
 @comment ignore
@@ -1137,7 +1138,7 @@ x`'y
 
 Unquoted strings on either side of a quoted string are subject to
 being recognized as macro names.  In the following example, quoting the
-empty string allows for the @code{macro} to be recognized as such:
+empty string allows for the second @code{macro} to be recognized as such:
 
 @example
 define(`macro', `m')
@@ -1174,14 +1175,40 @@ as a macro.
 
 If the name is followed by an opening parenthesis, the arguments will be
 collected before the macro is called.  If too few arguments are
-supplied, the missing arguments are taken to be the empty string.  If
-there are too many arguments, the excess arguments are ignored.  Leading
-whitespace are stripped of all arguments.
+supplied, the missing arguments are taken to be the empty string.
+However, some builtins are documented to behave differently for a
+missing optional argument than for an explicit empty string.  If
+there are too many arguments, the excess arguments are ignored.
+Unquoted leading whitespace is stripped off all arguments.
 
 Normally @code{m4} will issue warnings if a builtin macro is called
 with an inappropriate number of arguments, but it can be suppressed with
-the @samp{-Q} command line option.  For user defined macros, there is no
-check of the number of arguments given.
+the @option{--quiet} command line option (or @option{--silent}, or
+@option{-Q}, @pxref{Invoking m4}).  For user
+defined macros, there is no check of the number of arguments given.
+
+@example
+$ @kbd{m4}
+index(`abc')
+@error{}m4:input.m4:1: Warning: index: too few arguments: 1 < 2
+@result{}0
+index(`abc',)
+@result{}0
+index(`abc', `b', `ignored')
+@error{}m4:input.m4:3: Warning: index: extra arguments ignored: 3 > 2
+@result{}1
+@end example
+
+@comment options: -Q
+@example
+$ @kbd{m4 -Q}
+index(`abc')
+@result{}0
+index(`abc',)
+@result{}0
+index(`abc', `b', `ignored')
+@result{}0
+@end example
 
 Macros are expanded normally during argument collection, and whatever
 commas, quotes and parentheses that might show up in the resulting
@@ -1193,10 +1220,32 @@ expanded text will serve to define the arguments as well.  Thus, if
 bar(a foo, d)
 @end example
 
+@noindent
 is a macro call with four arguments, which are @samp{a }, @samp{b},
 @samp{c} and @samp{d}.  To understand why the first argument contains
 whitespace, remember that leading unquoted whitespace is never part
 of an argument, but trailing whitespace always is.
+
+It is possible for a macro's definition to change during argument
+collection, in which case the expansion uses the definition that was in
+effect at the time the opening @samp{(} was seen.
+
+@example
+define(`f', `1')
+@result{}
+f(define(`f', `2'))
+@result{}1
+f
+@result{}2
+@end example
+
+It is an error if the end of file occurs while collecting arguments.
+
+@example
+define(
+^D
+@error{}m4:input.m4:1: ERROR: end of file in argument list
+@end example
 
 @node Quoting Arguments
 @section Quoting macro arguments
