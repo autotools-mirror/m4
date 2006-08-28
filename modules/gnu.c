@@ -49,8 +49,8 @@
   BUILTIN (__line__,	false,	false,	false,	0,	0  )	\
   BUILTIN (__program__,	false,	false,	false,	0,	0  )	\
   BUILTIN (builtin,	false,	true,	false,	1,	-1 )	\
-  BUILTIN (changeresyntax,false,true,	false,	0,	1  )	\
-  BUILTIN (changesyntax,false,	true,	false,	0,	-1 )	\
+  BUILTIN (changeresyntax,false,true,	false,	1,	1  )	\
+  BUILTIN (changesyntax,false,	true,	false,	1,	-1 )	\
   BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
   BUILTIN (debugfile,	false,	false,	false,	0,	1  )	\
   BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
@@ -349,7 +349,7 @@ m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
 
 
 /**
- * changeresyntax([RESYNTAX-SPEC])
+ * changeresyntax(RESYNTAX-SPEC)
  **/
 M4BUILTIN_HANDLER (changeresyntax)
 {
@@ -360,11 +360,10 @@ M4BUILTIN_HANDLER (changeresyntax)
 }
 
 
-/* Change the current input syntax.  The function m4_set_syntax () lives
-   in syntax.c.  For compability reasons, this function is not called,
-   if not followed by a SYNTAX_OPEN.  Also, any changes to comment
-   delimiters and quotes made here will be overridden by a call to
-   `changecom' or `changequote'.  */
+/* Change the current input syntax.  The function m4_set_syntax ()
+   lives in syntax.c.  Any changes to comment delimiters and quotes
+   made here will be overridden by a call to `changecom' or
+   `changequote'.  */
 
 /**
  * changesyntax(SYNTAX-SPEC, ...)
@@ -404,7 +403,7 @@ M4BUILTIN_HANDLER (debugfile)
   if (argc == 1)
     m4_debug_set_output (context, NULL);
   else if (!m4_debug_set_output (context, M4ARG (1)))
-    m4_error (context, 0, errno, _("%s: cannot set error file: %s"),
+    m4_error (context, 0, errno, _("%s: cannot set debug file: %s"),
 	      M4ARG (0), M4ARG (1));
 }
 

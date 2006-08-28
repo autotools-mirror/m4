@@ -1,3 +1,14 @@
+2006-08-28  Eric Blake  <ebb9@byu.net>
+
+	* m4/utility.c (m4_bad_argc): Move assertion out of hot path...
+	* m4/module.c (install_builtin_table): ...to here, and add
+	assertion that blind macros require arguments.
+	* m4/m4module.h (struct m4_builtin): Document restrictions that
+	must be met during module loading.
+	* modules/gnu.c (changeresyntax, changesyntax): These are blind,
+	so require an argument to avoid	triggering assertion.
+	(debugfile): Tweak error message.
+
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (M4_BUILTIN_GROKS_MACRO, M4_BUILTIN_BLIND)

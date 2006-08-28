@@ -145,6 +145,12 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 	  m4_symbol_value *value = m4_symbol_value_create ();
 	  char *	   name;
 
+	  /* Sanity check that builtins meet the required interface.  */
+	  assert (bp->min_args <= bp->max_args);
+	  assert (bp->min_args > 0
+		  || (bp->flags & (M4_BUILTIN_BLIND
+				   | M4_BUILTIN_SIDE_EFFECT)) == 0);
+
 	  m4_set_symbol_value_func (value, bp->func);
 	  VALUE_HANDLE   (value)	= handle;
 	  VALUE_FLAGS    (value)	= bp->flags;

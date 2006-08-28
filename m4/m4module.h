@@ -44,11 +44,15 @@ typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
 
 /* The value of m4_builtin flags is built from these:  */
 enum {
-  /* set if macro can handle non-text tokens, such as builtin macro tokens */
+  /* Set if macro can handle non-text tokens, such as builtin macro
+     tokens; if clear, non-text tokens are flattened to the empty
+     string before invoking the builtin.  */
   M4_BUILTIN_GROKS_MACRO	= (1 << 0),
-  /* set if macro should only be recognized with arguments */
+  /* Set if macro should only be recognized with arguments; may only
+     be set if min_args is nonzero.  */
   M4_BUILTIN_BLIND		= (1 << 1),
-  /* set if macro has side effects even when there are too few arguments */
+  /* set if macro has side effects even when there are too few
+     arguments; may only be set if min_args is nonzero.  */
   M4_BUILTIN_SIDE_EFFECT	= (1 << 2)
 };
 
@@ -58,7 +62,8 @@ struct m4_builtin
   const char *	    name;	/* name found by builtin, printed by dumpdef */
   int		    flags;	/* bitwise OR of M4_BUILTIN_* bits */
   unsigned int	    min_args;	/* 0-based minimum number of arguments */
-  unsigned int	    max_args;	/* max arguments, UINT_MAX if unlimited */
+  /* max arguments, UINT_MAX if unlimited; must be >= min_args */
+  unsigned int	    max_args;
 };
 
 struct m4_macro

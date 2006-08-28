@@ -42,9 +42,6 @@ bool
 m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv,
 	     unsigned int min, unsigned int max, bool side_effect)
 {
-  assert (min <= max);
-  assert (min > 0 || ! side_effect);
-
   if (argc - 1 < min)
     {
       m4_warn (context, 0, _("Warning: %s: too few arguments: %d < %d"),
