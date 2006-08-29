@@ -23,7 +23,7 @@ AT_BANNER([Options.])
 ## Discard comments.  ##
 ## ------------------ ##
 
-AT_SETUP([Discard comments])
+AT_SETUP([--discard-comments])
 
 AT_DATA([[in]],
 [[This is not a comment # but this is.
@@ -49,7 +49,7 @@ AT_CLEANUP
 ## import-environment ##
 ## ------------------ ##
 
-AT_SETUP([import-environment])
+AT_SETUP([--import-environment])
 
 AT_DATA([[in]],
 [[`TEST'=TEST
@@ -79,7 +79,7 @@ AT_CLEANUP
 ## debug-flags ##
 ## ----------- ##
 
-AT_SETUP([debug-flags])
+AT_SETUP([--debug])
 
 AT_DATA([[in]],
 [[divnum
@@ -150,7 +150,7 @@ AT_CLEANUP
 ## prepend-include ##
 ## --------------- ##
 
-AT_SETUP([prepend-include])
+AT_SETUP([--prepend-include])
 
 dnl Lots of data to set up.
 AT_DATA([[in]],
@@ -194,7 +194,7 @@ AT_CLEANUP
 ## help and version ##
 ## ---------------- ##
 
-AT_SETUP([help and version])
+AT_SETUP([--help and --version])
 
 AT_CHECK_M4([--help], [0], [stdout])
 AT_CHECK([[sed -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],

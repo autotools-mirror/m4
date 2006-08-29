@@ -243,10 +243,10 @@ main (int argc, char *const *argv, char *const *envp)
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
-  textdomain(PACKAGE);
+  textdomain (PACKAGE);
 #endif
 
-  LTDL_SET_PRELOADED_SYMBOLS();
+  LTDL_SET_PRELOADED_SYMBOLS ();
 
   context = m4_create ();
 
@@ -355,9 +355,9 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'M':
-	if (lt_dlinsertsearchdir (lt_dlgetsearchpath(), optarg) != 0)
+	if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
 	  {
-	    const char *dlerr = lt_dlerror();
+	    const char *dlerr = lt_dlerror ();
 	    if (dlerr == NULL)
 	      m4_error (context, EXIT_FAILURE, 0,
 			_("failed to add search directory `%s'"),
@@ -480,7 +480,7 @@ main (int argc, char *const *argv, char *const *envp)
       {
 	macro_definition *next;
 	char *macro_value;
-	const char *optarg = defines->macro;
+	const char *arg = defines->macro;
 
 	switch (defines->code)
 	  {
@@ -488,36 +488,36 @@ main (int argc, char *const *argv, char *const *envp)
 	    {
 	      m4_symbol_value *value = m4_symbol_value_create ();
 
-	      macro_value = strchr (optarg, '=');
+	      macro_value = strchr (arg, '=');
 	      if (macro_value == NULL)
 		macro_value = "";
 	      else
 		*macro_value++ = '\0';
 	      m4_set_symbol_value_text (value, xstrdup (macro_value));
 
-	      m4_symbol_pushdef (M4SYMTAB, optarg, value);
+	      m4_symbol_pushdef (M4SYMTAB, arg, value);
 	    }
 	    break;
 
 	  case 'U':
-	    m4_symbol_delete (M4SYMTAB, optarg);
+	    m4_symbol_delete (M4SYMTAB, arg);
 	    break;
 
 	  case 't':
-	    m4_set_symbol_name_traced (M4SYMTAB, optarg);
+	    m4_set_symbol_name_traced (M4SYMTAB, arg);
 	    break;
 
 	  case 'm':
-	    m4_module_load (context, optarg, 0);
+	    m4_module_load (context, arg, 0);
 	    break;
 
 	  case 'r':
 	    m4_set_regexp_syntax_opt (context,
-				      m4_regexp_syntax_encode (optarg));
+				      m4_regexp_syntax_encode (arg));
 	    if (m4_get_regexp_syntax_opt (context) < 0)
 	      {
 		m4_error (context, EXIT_FAILURE, 0,
-			  _("bad regexp syntax option: `%s'"), optarg);
+			  _("bad regexp syntax option: `%s'"), arg);
 	      }
 	    break;
 

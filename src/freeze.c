@@ -155,7 +155,8 @@ produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
   const char *errormsg = m4_symtab_apply (symtab, dump_symbol_CB, file);
 
-  assert (!errormsg);
+  if (errormsg != NULL)
+    assert (false);
 }
 
 static void *

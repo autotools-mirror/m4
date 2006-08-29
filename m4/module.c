@@ -385,12 +385,12 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 
   if (handle)
     {
+#ifdef DEBUG_MODULES
       const lt_dlinfo *info = lt_dlgetinfo (handle);
 
       /* If we have a handle, there must be handle info.  */
       assert (info);
 
-#ifdef DEBUG_MODULES
       M4_DEBUG_MESSAGE2("module %s: opening at %s",
 			name ? name : MODULE_SELF_NAME, info->filename);
 #endif

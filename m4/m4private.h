@@ -286,10 +286,10 @@ struct m4_syntax_table {
 /* Fast macro versions of syntax table accessor functions,
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
-#  define m4_get_syntax_lquote(S)	((S)->lquote.string)
-#  define m4_get_syntax_rquote(S)	((S)->rquote.string)
-#  define m4_get_syntax_bcomm(S)	((S)->bcomm.string)
-#  define m4_get_syntax_ecomm(S)	((S)->ecomm.string)
+#  define m4_get_syntax_lquote(S)	((const char *) (S)->lquote.string)
+#  define m4_get_syntax_rquote(S)	((const char *) (S)->rquote.string)
+#  define m4_get_syntax_bcomm(S)	((const char *) (S)->bcomm.string)
+#  define m4_get_syntax_ecomm(S)	((const char *) (S)->ecomm.string)
 
 #  define m4_is_syntax_single_quotes(S)		((S)->is_single_quotes)
 #  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)

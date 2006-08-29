@@ -1,3 +1,17 @@
+2006-08-29  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4private.h (m4_get_syntax_lquote, m4_get_syntax_rquote)
+	(m4_get_syntax_bcomm, m4_get_syntax_ecomm) [NDEBUG]: Use same type
+	as accessor function, to avoid compiler warning.
+	* m4/module.c (m4__module_open): Move declaration of variable to
+	avoid compiler warning.
+	* src/main.c (main): Avoid shadowing a global variable.
+	* src/freeze.c (produce_symbol_dump): Avoid unused variable
+	warning when NDEBUG.
+	* tests/options.at (--discard-comments, --import-environment)
+	(--debug, --prepend-include, --help and --version): Rename tests
+	to name option tested.
+
 2006-08-28  Eric Blake  <ebb9@byu.net>
 
 	* m4/utility.c (m4_bad_argc): Move assertion out of hot path...
