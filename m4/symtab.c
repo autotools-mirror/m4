@@ -161,6 +161,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle
 		{
 		  VALUE_NEXT (data) = VALUE_NEXT (next);
 
+		  assert (next->type != M4_SYMBOL_PLACEHOLDER);
 		  if (next->type == M4_SYMBOL_TEXT)
 		    free (m4_get_symbol_value_text (next));
 		  free (next);
@@ -371,6 +372,8 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
 
   if (m4_is_symbol_value_text (dest))
     free (m4_get_symbol_value_text (dest));
+  else if (m4_is_symbol_value_placeholder (dest))
+    free (m4_get_symbol_value_placeholder (dest));
 
   if (VALUE_ARG_SIGNATURE (dest))
     {

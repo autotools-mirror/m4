@@ -100,7 +100,7 @@ define 1
 my_define(bar, 4) 3
 bar
 ]],
-[[m4:input.m4:5: Warning: popdef: undefined name: my_define
+[[m4:input.m4:5: Warning: popdef: undefined macro: my_define
 ]])
 
 AT_CLEANUP

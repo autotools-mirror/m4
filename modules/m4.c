@@ -179,15 +179,24 @@ M4BUILTIN_HANDLER (define)
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
+  else
+    m4_warn (context, 0, _("Warning: %s: invalid macro name ignored"),
+	     M4ARG (0));
 }
 
 M4BUILTIN_HANDLER (undefine)
 {
-  if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    m4_warn (context, 0,_("Warning: %s: undefined name: %s"), M4ARG (0),
-	     M4ARG (1));
-  else
-    m4_symbol_delete (M4SYMTAB, M4ARG (1));
+  int i;
+  for (i = 1; i < argc; i++)
+    {
+      const char *name = M4ARG (i);
+
+      if (!m4_symbol_lookup (M4SYMTAB, name))
+	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
+		 name);
+      else
+	m4_symbol_delete (M4SYMTAB, name);
+    }
 }
 
 M4BUILTIN_HANDLER (pushdef)
@@ -203,15 +212,24 @@ M4BUILTIN_HANDLER (pushdef)
 
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
+  else
+    m4_warn (context, 0, _("Warning: %s: invalid macro name ignored"),
+	     M4ARG (0));
 }
 
 M4BUILTIN_HANDLER (popdef)
 {
-  if (!m4_symbol_lookup (M4SYMTAB, M4ARG (1)))
-    m4_warn (context, 0, _("Warning: %s: undefined name: %s"), M4ARG (0),
-	     M4ARG (1));
-  else
-    m4_symbol_popdef (M4SYMTAB, M4ARG (1));
+  int i;
+  for (i = 1; i < argc; i++)
+    {
+      const char *name = M4ARG (i);
+
+      if (!m4_symbol_lookup (M4SYMTAB, name))
+	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
+		 name);
+      else
+	m4_symbol_popdef (M4SYMTAB, name);
+    }
 }
 
 
@@ -229,7 +247,7 @@ M4BUILTIN_HANDLER (ifdef)
 
   if (symbol)
     result = M4ARG (2);
-  else if (argc == 4)
+  else if (argc >= 4)
     result = M4ARG (3);
   else
     result = NULL;
@@ -249,9 +267,9 @@ M4BUILTIN_HANDLER (ifelse)
 
   if (m4_bad_argc (context, argc, argv, 3, -1, false))
     return;
-  else
+  else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    m4_bad_argc (context, (argc % 3) + 1, argv, 0, 2, false);
+    m4_bad_argc (context, argc, argv, 0, argc - 2, false);
 
   argv++;
   argc--;
@@ -337,7 +355,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 	      dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	    }
 	  else if (complain)
-	    m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+	    m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
 		     M4ARG (0), M4ARG (i));
 	}
     }
@@ -405,7 +423,7 @@ M4BUILTIN_HANDLER (defn)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (!symbol)
-	m4_warn (context, 0, _("Warning: %s: undefined name: %s"), M4ARG (0),
+	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
 		 name);
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
@@ -739,7 +757,7 @@ M4BUILTIN_HANDLER (traceon)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, (char *) obs);
 	else
-	  m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+	  m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
 		   M4ARG (0), name);
       }
 }
@@ -759,7 +777,7 @@ M4BUILTIN_HANDLER (traceoff)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, NULL);
 	else
-	  m4_warn (context, 0, _("Warning: %s: undefined name: %s"),
+	  m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
 		   M4ARG (0), name);
       }
 }

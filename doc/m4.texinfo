@@ -133,7 +133,7 @@ file in the distribution).  @xref{Experiments}.
 * Frozen files::                Fast loading of frozen state
 
 * Compatibility::               Compatibility with other versions of m4
-* Experiments::                 Experimental features in GNU m4
+* Experiments::                 Experimental features in GNU M4
 * Answers::                     Correct version of some examples
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
@@ -1274,7 +1274,11 @@ argument, all unquoted parentheses must match.  For example, if
 foo(() (`(') `(')
 @end example
 
-is a macro call, with one argument, whose value is @samp{()@w{ }(()@w{ }(}.
+@noindent
+is a macro call, with one argument, whose value is @samp{() (() (}.
+Commas separate arguments, except when they occur inside quotes,
+comments, or unquoted parentheses, @xref{Pseudo Arguments}, for
+examples.
 
 It is common practice to quote all arguments to macros, unless you are
 sure you want the arguments expanded.  Thus, in the above
@@ -1285,9 +1289,14 @@ example with the parentheses, the `right' way to do it is like this:
 foo(`() (() (')
 @end example
 
-It is, however, in certain cases necessary to leave out quotes for some
-arguments, and there is nothing wrong in doing it.  It just makes life a
-bit harder, if you are not careful.
+It is, however, in certain cases necessary or convenient to leave out
+quotes for some arguments, and there is nothing wrong in doing it.  It
+just makes life a bit harder, if you are not careful.  For consistency,
+this manual follows the rule of thumb that each layer of parentheses
+introduces another layer of single quoting, except when showing the
+consequences of quoting rules.  This is done even when the quoted string
+cannot be a macro, such as with integers when you have not changed the
+syntax via @code{changesyntax} (@pxref{Changesyntax}).
 
 @node Macro expansion
 @section Macro expansion
@@ -1303,9 +1312,11 @@ completely or partially, in the first macro calls' expansion.
 Taking a very simple example, if @var{foo} expands to @samp{bar}, and
 @var{bar} expands to @samp{Hello world}, the input
 
-@comment ignore
+@comment options: -Dbar='Hello world' -Dfoo=bar
 @example
+$ @kbd{m4 -Dbar="Hello world" -Dfoo=bar}
 foo
+@result{}Hello world
 @end example
 
 @noindent
@@ -1318,8 +1329,8 @@ expanded, into @samp{Hello world}.
 @cindex macros, how to define new
 @cindex defining new macros
 Macros can be defined, redefined and deleted in several different ways.
-Also, it is possible to redefine a macro, without losing a previous
-value, which can be brought back at a later time.
+Also, it is possible to redefine a macro without losing a previous
+value, and bring back the original value at a later time.
 
 @menu
 * Define::                      Defining a new macro
@@ -1339,14 +1350,14 @@ value, which can be brought back at a later time.
 @node Define
 @section Defining a macro
 
-@deffn {Builtin (m4)} define (@var{name}, @w{opt @var{expansion})}
 The normal way to define or redefine macros is to use the builtin
-@code{define}, which defines a new macro, @var{name}, to expand to
-@var{expansion}.  If @var{expansion} is not given, it is taken to be
-empty.
+@code{define}:
+
+@deffn {Builtin (m4)} define (@var{name}, @ovar{expansion})
+Defines @var{name} to expand to @var{expansion}.  If
+@var{expansion} is not given, it is taken to be empty.
 
 The expansion of @code{define} is void.
-
 The macro @code{define} is recognized only with parameters.
 @end deffn
 
@@ -1365,18 +1376,40 @@ a part of the macro definition, and it is consequently copied to
 the output.  This can be avoided by use of the macro @code{dnl}.
 @xref{Dnl}, for details.
 
-@cindex GNU extensions
-GNU @code{m4} normally replaces only the @emph{topmost} definition of a
-macro if it has several definitions from @code{pushdef}.
-@xref{Pushdef, , Temporarily redefining macros}, for an explanation of
-@code{pushdef}.  Some other UNIX implementations replace all definitions
-of a macro with @code{define}.
-@xref{Incompatibilities, , Other incompatibilities}, for more details.
+The first argument to @code{define} should be quoted; otherwise, if the
+macro is already defined, you will be defining a different macro.  This
+example shows the problems with underquoting, since we did not want to
+redefine @code{one}:
 
-The first argument to @code{define} does not have to be a simple word.
-It can be any text string.  A macro with a non standard name cannot be
-invoked in the normal way, as the name is not recognised.  It can only
-be referenced by the builtins @ref{Indir} and @ref{Defn}.
+@example
+define(foo, one)
+@result{}
+define(foo, two)
+@result{}
+one
+@result{}two
+@end example
+
+@cindex @acronym{GNU} extensions
+@acronym{GNU} @code{m4} normally replaces only the @emph{topmost}
+definition of a macro if it has several definitions from @code{pushdef}
+(@pxref{Pushdef}).  Some other implementations of @code{m4} replace all
+definitions of a macro with @code{define}.  @xref{Incompatibilities},
+for more details.
+@comment FIXME - See Austin group XCU ERN 118; this is considered
+@comment ambiguous in the current version of POSIX.  The best thing to
+@comment do here would probably be keep GNU semantics of popdef/pushdef
+@comment in the m4 module unconditionally, then have a shadow builtin in
+@comment the traditional module that does the undefine/pushdef
+@comment semantics, rather than our current keying off of
+@comment POSIXLY_CORRECT within the m4 module.
+
+As a @acronym{GNU} extension, the first argument to @code{define} does
+not have to be a simple word.
+It can be any text string, even the empty string.  A macro with a
+non-standard name cannot be invoked in the normal way, as the name is
+not recognized.  It can only be referenced by the builtins @ref{Indir}
+and @ref{Defn}.
 
 @cindex arrays
 Arrays and associative arrays can be simulated by using this trick.
@@ -1386,11 +1419,11 @@ define(`array', `defn(format(``array[%d]'', `$1'))')
 @result{}
 define(`array_set', `define(format(``array[%d]'', `$1'), `$2')')
 @result{}
-array_set(4, `array element no. 4')
+array_set(`4', `array element no. 4')
 @result{}
-array_set(17, `array element no. 17')
+array_set(`17', `array element no. 17')
 @result{}
-array(4)
+array(`4')
 @result{}array element no. 4
 array(eval(`10 + 7'))
 @result{}array element no. 17
@@ -1405,7 +1438,9 @@ Change the @code{%d} to @code{%s} and it is an associative array.
 @cindex Arguments to macros
 Macros can have arguments.  The @var{n}th argument is denoted by
 @code{$n} in the expansion text, and is replaced by the @var{n}th actual
-argument, when the macro is expanded.  Here is a example of a macro with
+argument, when the macro is expanded.  Replacement of arguments happens
+before rescanning, regardless of how many nesting levels of quoting
+appear in the expansion.  Here is a example of a macro with
 two arguments.  It simply exchanges the order of the two arguments.
 
 @example
@@ -1428,14 +1463,22 @@ macro
 @end example
 
 @xref{Quoting Arguments}, for an explanation of the double quotes.
+(You should try and improve this example so that clients of @code{exch}
+do not have to double quote.  @pxref{Answers})
 
-@cindex GNU extensions
-GNU @code{m4} allows the number following the @samp{$} to consist of one
+@cindex @acronym{GNU} extensions
+@acronym{GNU} @code{m4} allows the number following the @samp{$} to
+consist of one
 or more digits, allowing macros to have any number of arguments.  This
 is not so in UNIX implementations of @code{m4}, which only recognize
 one digit.
+@comment FIXME - See Austin group XCU ERN 111.  This is controversial,
+@comment and perhaps we should consider an alternate syntax ${10}
+@comment and phase out $10, for better POSIX compliance.  There are
+@comment existing m4 scripts that depend on $10 being the first
+@comment parameter concatenated with 0, not the tenth argument.
 
-As a special case, the zero'th argument, @code{$0}, is always the name
+As a special case, the zeroth argument, @code{$0}, is always the name
 of the macro being expanded.
 
 @example
@@ -1479,8 +1522,15 @@ nargs
 @result{}0
 nargs()
 @result{}1
-nargs(arg1, arg2, arg3)
+nargs(`arg1', `arg2', `arg3')
 @result{}3
+nargs(`commas can be quoted, like this')
+@result{}1
+nargs(arg1#inside comments, commas do not separate arguments
+still arg1)
+@result{}1
+nargs((unquoted parentheses, like this, group arguments))
+@result{}1
 @end example
 
 The notation @code{$*} can be used in the expansion text to denote all
@@ -1516,12 +1566,35 @@ define(`foo', `This is macro `foo'.')
 @result{}
 echo1(foo)
 @result{}This is macro This is macro foo..
+echo1(`foo')
+@result{}This is macro foo.
 echo2(foo)
 @result{}This is macro foo.
+echo2(`foo')
+@result{}foo
 @end example
 
 @noindent
-@xref{Trace}, if you do not understand this.
+@xref{Trace}, if you do not understand this.  As another example of the
+difference, remember that comments encountered in arguments are passed
+untouched to the macro, and that quoting disables comments.
+
+@example
+define(`echo1', `$*')
+@result{}
+define(`echo2', `$@')
+@result{}
+define(`foo', `bar')
+@result{}
+echo1(#foo'foo
+foo)
+@result{}#foo'foo
+@result{}bar
+echo2(#foo'foo
+foo)
+@result{}#foobar
+@result{}bar'
+@end example
 
 A @samp{$} sign in the expansion text, that is not followed by anything
 @code{m4} understands, is simply copied to the macro expansion, as any
@@ -1534,9 +1607,34 @@ foo
 @result{}$$$ hello $$$
 @end example
 
-If you want a macro to expand to something like @samp{$12}, put a pair
-of quotes after the @code{$}.  This will prevent @code{m4} from
-interpreting the @code{$} sign as a reference to an argument.
+If you want a macro to expand to something like @samp{$12}, the
+judicious use of nested quoting can put a safe character between the
+@code{$} and the next character, relying on the rescanning to remove the
+nested quote.  This will prevent @code{m4} from interpreting the
+@code{$} sign as a reference to an argument.
+
+@example
+define(`foo', `no nested quote: $1')
+@result{}
+foo(`arg')
+@result{}no nested quote: arg
+define(`foo', `nested quote around $: `$'1')
+@result{}
+foo(`arg')
+@result{}nested quote around $: $1
+define(`foo', `nested empty quote after $: $`'1')
+@result{}
+foo(`arg')
+@result{}nested empty quote after $: $1
+define(`foo', `nested quote around next character: $`1'')
+@result{}
+foo(`arg')
+@result{}nested quote around next character: $1
+define(`foo', `nested quote around both: `$1'')
+@result{}
+foo(`arg')
+@result{}nested quote around both: arg
+@end example
 
 @node Undefine
 @section Deleting a macro
@@ -4555,7 +4653,7 @@ define the macro @code{__windows__}, which expands to the empty string.
 
 
 @node  Experiments
-@chapter Experimental features in GNU m4
+@chapter Experimental features in GNU M4
 
 Certain features of GNU @code{m4} are experimental.
 
