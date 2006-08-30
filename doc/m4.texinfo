@@ -1440,7 +1440,7 @@ Macros can have arguments.  The @var{n}th argument is denoted by
 @code{$n} in the expansion text, and is replaced by the @var{n}th actual
 argument, when the macro is expanded.  Replacement of arguments happens
 before rescanning, regardless of how many nesting levels of quoting
-appear in the expansion.  Here is a example of a macro with
+appear in the expansion.  Here is an example of a macro with
 two arguments.  It simply exchanges the order of the two arguments.
 
 @example
@@ -1642,27 +1642,43 @@ foo(`arg')
 @cindex macros, how to delete
 @cindex deleting macros
 @cindex undefining macros
-@deffn {Builtin (m4)} undefine (@var{name})
-A macro definition can be removed with @code{undefine}, which removes
-the macro @var{name}.  The macro name must necessarily be quoted, since
-it will be expanded otherwise.
+A macro definition can be removed with @code{undefine}:
+
+@deffn {Builtin (m4)} undefine (@var{name}@dots{})
+For each argument, remove the macro @var{name}.  The macro names must
+necessarily be quoted, since they will be expanded otherwise.
 
 The expansion of @code{undefine} is void.
-
 The macro @code{undefine} is recognized only with parameters.
 @end deffn
 
 @example
-foo
-@result{}foo
-define(`foo', `expansion text')
+foo bar blah
+@result{}foo bar blah
+define(`foo', `some')define(`bar', `other')define(`blah', `text')
 @result{}
-foo
-@result{}expansion text
+foo bar blah
+@result{}some other text
 undefine(`foo')
 @result{}
-foo
-@result{}foo
+foo bar blah
+@result{}foo other text
+undefine(`bar', `blah')
+@result{}
+foo bar blah
+@result{}foo bar blah
+@end example
+
+Undefining a macro inside that macro's expansion is safe; the macro
+still expands to the definition that was in effect at the @samp{(}.
+
+@example
+define(`f', ``$0':$1')
+@result{}
+f(f(f(undefine(`f')`hello world')))
+@result{}f:f:f:hello world
+f(`bye')
+@result{}f(bye)
 @end example
 
 It is not an error for @var{name} to have no macro definition.  In that
@@ -1673,21 +1689,27 @@ case, @code{undefine} does nothing.
 
 @cindex macros, how to rename
 @cindex renaming macros
-@deffn {Builtin (m4)} defn (@var{name})
 It is possible to rename an already defined macro.  To do this, you need
-the builtin @code{defn}, which expands to the @emph{quoted definition}
-of @var{name}.  If the argument is not a defined macro, the expansion is
-void.
+the builtin @code{defn}:
 
-If @var{name} is a builtin, the expansion is a special token, which
-points to the builtin's internal definition.  This token is only
-meaningful as the second argument to @code{define} (and @code{pushdef}),
-and is ignored in any other context.
+@deffn {Builtin (m4)} defn (@var{name}@dots{})
+Expands to the @emph{quoted definition} of each @var{name}.  If an
+argument is not a defined macro, the expansion for that argument is
+empty and triggers a warning.
 
-@code{defn} can be given any number of arguments; it expands to the
-concatenation of the quoted definitions of each argument.  The
-usefulness of this behavior is unclear, but @acronym{POSIX} requires
-it.
+If @var{name} is a user-defined macro, the quoted definition is simply
+the quoted expansion text.  If, instead, @var{name} is a builtin, the
+expansion is a special token, which points to the builtin's internal
+definition.  This token is only meaningful as the second argument to
+@code{define} (and @code{pushdef}), and is silently converted to an
+empty string in most other contexts.
+@comment FIXME - Other implementations, such as Solaris, can pass a
+@comment builtin token around to other macros, flattening it only on output:
+@comment  define(foo, a`'defn(`divnum')b)
+@comment  len(foo) => 3
+@comment  index(foo, defn(`divnum') => 1
+@comment  foo => ab
+@comment It may be worth making some changes to support this behavior.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -1704,13 +1726,22 @@ undefine(`zap')
 @result{}undefine(zap)
 @end example
 
-In this way, @code{defn} can be used to copy definitions of builtin
-macros.  Even if the original macro is removed, the other name can still
-be used to access the definition.
+In this way, @code{defn} can be used to copy macro definitions, and also
+definitions of builtin macros.  Even if the original macro is removed,
+the other name can still be used to access the definition.
 
-If, instead, @var{name} is a user-defined macro, the expansion is simply
-the quoted text of the macro, and @code{defn} can therefore be used to
-copy user macro definitions as well.
+The fact that macro definitions can be transferred also explains why you
+should use @code{$0}, rather than retyping a macro's name in its
+definition:
+
+@example
+define(`foo', `This is `$0'')
+@result{}
+define(`bar', defn(`foo'))
+@result{}
+bar
+@result{}This is bar
+@end example
 
 Macros used as string variables should be referred through @code{defn},
 to avoid unwanted expansion of the text:
@@ -1726,6 +1757,60 @@ defn(`string')
 @result{}
 @end example
 
+However, it is important to remember that @code{m4} rescanning is purely
+textual.  If an unbalanced end-quote string occurs in a macro
+definition, the rescan will see that embedded quote as the termination
+of the quoted string, and the remainder of the macro's definition will
+be rescanned unquoted.  Thus it is a good idea to avoid unbalanced
+end-quotes in macro definitions or arguments to macros.
+
+@example
+define(`foo', a'a)
+@result{}
+define(`a', `A')
+@result{}
+define(`echo', `$@')
+@result{}
+foo
+@result{}A'A
+defn(`foo')
+@result{}aA'
+echo(foo)
+@result{}AA'
+@end example
+
+Using @code{defn} to generate special tokens for builtin macros outside
+of expected contexts can sometimes trigger warnings.
+
+@example
+define(defn(`divnum'), `cannot redefine a builtin token')
+@error{}m4:input.m4:1: Warning: define: invalid macro name ignored
+@result{}
+divnum
+@result{}0
+@end example
+
+Since @code{defn} can take more than one argument, it can be used to
+concatenate multiple macros into one.
+@comment FIXME - we don't yet handle mixing text and builtins.  This
+@comment example passes under Solaris (minus the warning).
+
+@example
+defn(`foo')
+@error{}m4:input.m4:1: Warning: defn: undefined macro: foo
+@result{}
+define(`foo', `a')
+@result{}
+define(`bar', defn(`foo', `divnum'))
+@result
+define(`blah', defn(`divnum', `foo'))
+@result
+bar
+@result{}a0
+blah
+@result{}0a
+@end example
+
 @node Pushdef
 @section Temporarily redefining macros
 
@@ -1733,12 +1818,11 @@ defn(`string')
 @cindex temporary redefinition of macros
 @cindex redefinition of macros, temporary
 It is possible to redefine a macro temporarily, reverting to the
-previous definition at a later time.
+previous definition at a later time.  This is done with the builtins
+@code{pushdef} and @code{popdef}:
 
-This is done with the builtins @code{pushdef} and @code{popdef}:
-
-@deffn {Builtin (m4)} pushdef (@var{name}, @w{opt @var{expansion})}
-@deffnx {Builtin (m4)} popdef @w{(@var{name})}
+@deffn {Builtin (m4)} pushdef (@var{name}, @ovar{expansion})
+@deffnx {Builtin (m4)} popdef (@var{name}@dots{})
 Analogous to @code{define} and @code{undefine}.
 
 These macros work in a stack-like fashion.  A macro is temporarily
@@ -1747,15 +1831,14 @@ redefined with @code{pushdef}, which replaces an existing definition of
 installed.  If there is no previous definition, @code{pushdef} behaves
 exactly like @code{define}.
 
-The expansion of both @code{pushdef} and @code{popdef} is void.
-
-The macros @code{pushdef} and @code{popdef} are recognized only with
-parameters.
-@end deffn
-
 If a macro has several definitions (of which only one is accessible),
 the topmost definition can be removed with @code{popdef}.  If there is
 no previous definition, @code{popdef} behaves like @code{undefine}.
+
+The expansion of both @code{pushdef} and @code{popdef} is void.
+The macros @code{pushdef} and @code{popdef} are recognized only with
+parameters.
+@end deffn
 
 @example
 define(`foo', `Expansion one.')
@@ -1766,7 +1849,16 @@ pushdef(`foo', `Expansion two.')
 @result{}
 foo
 @result{}Expansion two.
+pushdef(`foo', `Expansion three.')
+@result{}
+pushdef(`foo', `Expansion four.')
+@result{}
 popdef(`foo')
+@result{}
+foo
+@result{}Expansion one.
+@result{}Expansion three.
+popdef(`foo', `foo')
 @result{}
 foo
 @result{}Expansion one.
@@ -1816,11 +1908,19 @@ and @code{defn}.
 @cindex regular expressions
 @cindex macros, how to rename
 @cindex renaming macros
-@cindex GNU extensions
-@deffn {Builtin (gnu)} renamesyms (@var{regexp}, @var{replacement}, @w{opt @var{resyntax})}
+@cindex @acronym{GNU} extensions
+Sometimes it is desirable to rename multiple symbols without having to
+use a long sequence of calls to @code{define}.  The @code{renamesyms}
+builtin allows this:
+
+@deffn {Builtin (gnu)} renamesyms (@var{regexp}, @var{replacement}, @
+  @ovar{resyntax})
 Global renaming of macros is done by @code{renamesyms}, which selects
 all macros with names that match @var{regexp}, and renames each match
-according to @var{replacement}.
+according to @var{replacement}.  It is unspecified what happens if the
+rename causes multiple macros to map to the same name.
+@comment FIXME - right now, collisions cause a core dump on some platforms:
+@comment define(bar,1)define(baz,2)renamesyms(^ba., baa)dumpdef(`baa')
 
 If @var{resyntax} is given, the particular flavor of regular
 expression understood with respect to @var{regexp} can be changed from
@@ -1842,14 +1942,15 @@ the text matched by the @var{n}th parenthesized sub-expression of
 @var{regexp}, and @samp{\&} being the text matched by the entire
 regular expression.
 
-The builtin macro @code{renamesyms} is recognized only when given
-arguments.
+The expansion of @code{renamesyms} is void.
+The macro @code{renamesyms} is recognized only with parameters.
 @end deffn
 
 Here is an example that performs the same renaming as the
-@option{--prefix-builtins} option.  Where @option{--prefix-builtins}
-only renames M4 builtin macros, @code{renamesyms} will rename any
-macros that match when it runs, including text macros.
+@option{--prefix-builtins} option (or @option{-P}).  Where
+@option{--prefix-builtins} only renames M4 builtin macros,
+@code{renamesyms} will rename any macros that match when it runs,
+including text macros.
 
 @example
 renamesyms(`^.*$', `m4_\&')
@@ -1859,10 +1960,9 @@ renamesyms(`^.*$', `m4_\&')
 If @var{resyntax} is given, @var{regexp} must be given according to
 the syntax chosen, though the default regular expression syntax
 remains unchanged for other invocations.  Here is a more realistic
-example that performs a similar renaming on macros with lowercase
-names, except that it ignores macros with names that begin with
-@samp{_}, and avoids creating macros with names that begin with
-@samp{m4_m4}.
+example that performs a similar renaming on macros, except that it
+ignores macros with names that begin with @samp{_}, and avoids creating
+macros with names that begin with @samp{m4_m4}.
 
 @example
 renamesyms(`^[^_]\w*$', `m4_\&')
@@ -1870,7 +1970,6 @@ renamesyms(`^[^_]\w*$', `m4_\&')
 m4_renamesyms(`^m4_m4(\w*)$', `m4_\1', `POSIX_EXTENDED')
 @result{}
 @end example
-
 
 @node Indir
 @section Indirect call of macros

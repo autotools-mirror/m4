@@ -1,3 +1,11 @@
+2006-08-30  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Undefine, Defn, Pushdef): More doc merges from
+	the branch.
+	(Defn): Add failing test case for mixing text and builtin.
+	(Renamesyms): Improve wording, and identify core dump that needs
+	fixing.
+
 2006-08-29  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Quoting Arguments, Definitions, Define)
