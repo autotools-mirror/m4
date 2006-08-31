@@ -1,5 +1,26 @@
 2006-08-30  Eric Blake  <ebb9@byu.net>
 
+	* m4/utility.c (m4_warn): Factor "Warning" out of messages into
+	here.
+	(m4_bad_argc, m4_numeric_arg): Update all callers.
+	* m4/macro.c (m4_macro_call): Likewise.
+	* doc/m4.texinfo (Defn, Pushdef): Fix typos in last commit.
+	(Indir, Builtin, Ifdef): More doc merges.
+	(Loops): Mention that documenting foreach would be nice.
+	(Macro Arguments, Defn, Builtin, Ifdef, Ifelse, Changesyntax)
+	(Include, Eval, Location, M4exit): s/input.m4/stdin/.
+	* modules/gnu.c (indir, builtin): Warn, not error, on undefined.
+	(substitute, syncoutput): Update all m4_warn callers.
+	* modules/m4.c (undefine, popdef, m4_dump_symbols, defn)
+	(traceon, traceoff): Make warning message consistent.
+	(define, pushdef): Update all m4_warn callers.
+	* tests/generate.awk: Choose file name so that documentation can
+	show command-line behavior.
+	* tests/builtins.at (define): Update to new wording.
+	* tests/macros.at (pushdef/popdef): Likewise.
+	* tests/freeze.at (loading format 1): Likewise.
+	* tests/modules.at (AT_CHECK_M4_MODTEST): Likewise.
+
 	* doc/m4.texinfo (Undefine, Defn, Pushdef): More doc merges from
 	the branch.
 	(Defn): Add failing test case for mixing text and builtin.

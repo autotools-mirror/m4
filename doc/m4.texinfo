@@ -1202,12 +1202,12 @@ defined macros, there is no check of the number of arguments given.
 @example
 $ @kbd{m4}
 index(`abc')
-@error{}m4:input.m4:1: Warning: index: too few arguments: 1 < 2
+@error{}m4:stdin:1: Warning: index: too few arguments: 1 < 2
 @result{}0
 index(`abc',)
 @result{}0
 index(`abc', `b', `ignored')
-@error{}m4:input.m4:3: Warning: index: extra arguments ignored: 3 > 2
+@error{}m4:stdin:3: Warning: index: extra arguments ignored: 3 > 2
 @result{}1
 @end example
 
@@ -1256,7 +1256,7 @@ It is an error if the end of file occurs while collecting arguments.
 @example
 define(
 ^D
-@error{}m4:input.m4:1: ERROR: end of file in argument list
+@error{}m4:stdin:1: ERROR: end of file in argument list
 @end example
 
 @node Quoting Arguments
@@ -1784,7 +1784,7 @@ of expected contexts can sometimes trigger warnings.
 
 @example
 define(defn(`divnum'), `cannot redefine a builtin token')
-@error{}m4:input.m4:1: Warning: define: invalid macro name ignored
+@error{}m4:stdin:1: Warning: define: invalid macro name ignored
 @result{}
 divnum
 @result{}0
@@ -1797,14 +1797,14 @@ concatenate multiple macros into one.
 
 @example
 defn(`foo')
-@error{}m4:input.m4:1: Warning: defn: undefined macro: foo
+@error{}m4:stdin:1: Warning: defn: undefined macro `foo'
 @result{}
 define(`foo', `a')
 @result{}
 define(`bar', defn(`foo', `divnum'))
-@result
+@result{}
 define(`blah', defn(`divnum', `foo'))
-@result
+@result{}
 bar
 @result{}a0
 blah
@@ -1856,7 +1856,6 @@ pushdef(`foo', `Expansion four.')
 popdef(`foo')
 @result{}
 foo
-@result{}Expansion one.
 @result{}Expansion three.
 popdef(`foo', `foo')
 @result{}
@@ -1977,16 +1976,19 @@ m4_renamesyms(`^m4_m4(\w*)$', `m4_\1', `POSIX_EXTENDED')
 @cindex indirect call of macros
 @cindex call of macros, indirect
 @cindex macros, indirect call of
-@cindex GNU extensions
-@deffn {Builtin (gnu)} indir (@var{name}, @dots{})
-Any macro can be called indirectly with @code{indir}, which results in a
-call to the macro @var{name}, which is passed the rest of the arguments.
+@cindex @acronym{GNU} extensions
+Any macro can be called indirectly with @code{indir}:
 
-The macro @code{defn} is recognized only with parameters.
+@deffn {Builtin (gnu)} indir (@var{name}, @dots{})
+Results in a call to the macro @var{name}, which is passed the
+rest of the arguments.  If @var{name} is not defined, an error message
+is printed, and the expansion is void.
+
+The macro @code{indir} is recognized only with parameters.
 @end deffn
 
-This can be used to call macros with computed or with ``illegal'' names
-(@code{define} allows such names to be defined):
+This can be used to call macros with computed or ``invalid''
+names (@code{define} allows such names to be defined):
 
 @example
 define(`$$internal$macro', `Internal macro (name `$0')')
@@ -1997,7 +1999,7 @@ indir(`$$internal$macro')
 @result{}Internal macro (name $$internal$macro)
 @end example
 
-The point here is that larger macro packages can have private macros
+The point is, here, that larger macro packages can have private macros
 defined, that will not be called by accident.  They can @emph{only} be
 called through the builtin @code{indir}.
 
@@ -2007,45 +2009,115 @@ called through the builtin @code{indir}.
 @cindex indirect call of builtins
 @cindex call of builtins, indirect
 @cindex builtins, indirect call of
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
+Builtin macros can be called indirectly with @code{builtin}:
+
 @deffn {Builtin (gnu)} builtin (@var{name}, @dots{})
-Builtin macros can be called indirectly with @code{builtin}, which
-results in a call to the builtin @var{name}, which is passed the rest of
-the arguments.  This can be used, if @var{name} has been given another
-definition that has covered the original.
+Results in a call to the builtin @var{name}, which is passed the
+rest of the arguments.  If @var{name} does not name a builtin, a warning
+message is printed, and the expansion is void.
 
 The macro @code{builtin} is recognized only with parameters.
 @end deffn
+
+This can be used even if @var{name} has been given another definition
+that has covered the original, or been undefined so that no macro
+maps to the builtin.
+
+@example
+pushdef(`define', `hidden')
+@result{}
+undefine(`undefine')
+@result{}
+define(`foo', `bar')
+@result{}hidden
+foo
+@result{}foo
+builtin(`define', `foo', `BAR')
+@result{}
+foo
+@result{}BAR
+undefine(`foo')
+@result{}undefine(foo)
+foo
+@result{}BAR
+builtin(`undefine', `foo')
+@result{}
+foo
+@result{}foo
+@end example
+
+The @var{name} argument only matches the original name of the builtin,
+even when the @option{--prefix-builtins} option (or @option{-P},
+@pxref{Invoking m4}) is in effect.  This is different from @code{indir},
+which only tracks current macro names.
+
+@comment options: -P
+@example
+$ @kbd{m4 -P}
+m4_builtin(`divnum')
+@result{}0
+m4_builtin(`m4_divnum')
+@error{}m4:stdin:2: Warning: m4_builtin: undefined builtin `m4_divnum'
+@result{}
+m4_indir(`divnum')
+@error{}m4:stdin:3: Warning: m4_indir: undefined macro `divnum'
+@result{}
+m4_indir(`m4_divnum')
+@result{}0
+@end example
+
+Note that @code{indir} and @code{builtin} can be used to invoke builtins
+without arguments, even when they normally require parameters to be
+recognized; but it will provoke a warning, and the expansion will behave
+as though empty strings had been passed as the required arguments.
+
+@example
+builtin
+@result{}builtin
+builtin()
+@error{}m4:stdin:2: Warning: builtin: undefined builtin `'
+@result{}
+builtin(`builtin')
+@error{}m4:stdin:3: Warning: builtin: too few arguments: 0 < 1
+@result{}
+builtin(`builtin',)
+@error{}m4:stdin:4: Warning: builtin: undefined builtin `'
+@result{}
+indir(`index')
+@error{}m4:stdin:5: Warning: index: too few arguments: 0 < 2
+@result{}0
+@end example
 
 @node Symbols
 @section Getting the defined macro names
 
 @cindex macro names
-@cindex GNU extensions
-The name of the currently defined macro can be accessed by
+@cindex @acronym{GNU} extensions
+The name of the currently defined macros can be accessed by
 @code{symbols}:
 
-@deffn {Builtin (gnu)} symbols
-@deffnx {Builtin (gnu)} symbols (@dots{})
+@deffn {Builtin (gnu)} symbols (@dots{})
 Without arguments, @samp{symbols} expands to a sorted list of quoted
-strings.  This contrasts with @code{dumpdef} which output can not be
-accessed by @code{m4} programs.
+strings, separated by commas.  This contrasts with @code{dumpdef}
+(@pxref{Dumpdef}), whose output cannot be accessed by @code{m4}
+programs.
 
 When given arguments, @code{symbols} returns the sorted subset of the
-symbols currently defined:
+symbols currently defined.
+@end deffn
 
 @example
 symbols(`ifndef', `ifdef', `define', `undef')
 @result{}define,ifdef
 @end example
-@end deffn
 
 @node Conditionals
 @chapter Conditionals, loops, and recursion
 
 Macros, expanding to plain text, perhaps with arguments, are not quite
 enough.  We would like to have macros expand to different things, based
-on decisions taken at run-time.  E.g., we need some kind of conditionals.
+on decisions taken at run-time.  For that, we need some kind of conditionals.
 Also, we would like to have some kind of loop construct, so we could do
 something a number of times, or while some condition is true.
 
@@ -2059,10 +2131,11 @@ something a number of times, or while some condition is true.
 @section Testing macro definitions
 
 @cindex conditionals
-@deffn {Builtin (m4)} ifdef (@var{name}, @var{string-1}, @w{opt @var{string-2})}
 There are two different builtin conditionals in @code{m4}.  The first is
-@code{ifdef}, which test whether a macro is defined or not.  If
-@var{name} is defined as a macro, @code{ifdef} expands to
+@code{ifdef}:
+
+@deffn {Builtin (m4)} ifdef (@var{name}, @var{string-1}, @ovar{string-2})
+If @var{name} is defined as a macro, @code{ifdef} expands to
 @var{string-1}, otherwise to @var{string-2}.  If @var{string-2} is
 omitted, it is taken to be the empty string (according to the normal
 rules).
@@ -2077,6 +2150,9 @@ define(`foo', `')
 @result{}
 ifdef(`foo', ``foo' is defined', ``foo' is not defined')
 @result{}foo is defined
+ifdef(`no_such_macro', `yes', `no', `extra argument')
+@error{}m4:stdin:4: Warning: ifdef: extra arguments ignored: 4 > 3
+@result{}no
 @end example
 
 @node Ifelse
@@ -2100,7 +2176,7 @@ warning about missing arguments is never triggered.
 ifelse(`some comments')
 @result{}
 ifelse(`foo', `bar')
-@error{}m4:input.m4:2: Warning: ifelse: too few arguments: 2 < 3
+@error{}m4:stdin:2: Warning: ifelse: too few arguments: 2 < 3
 @result{}
 @end example
 
@@ -2248,6 +2324,13 @@ Now, even though these two macros are useful, they are still not robust
 enough for general use. They lack even basic error handling of cases
 like start value less than final value, and the first argument not being
 a name.  Correcting these errors are left as an exercise to the reader.
+
+@comment FIXME - it would be nice to introduce foreach here, and even
+@comment give an example like this for finding defined macros that meet
+@comment a certain pattern (see examples/foreach.m4):
+@comment define(`quote', ``$@'')
+@comment foreach(`macro', (quote(symbols)),
+@comment         `regexp(macro, `.*_.*', ``\&',')')
 
 @node Debugging
 @chapter How to debug macros and input
@@ -2823,7 +2906,7 @@ With @code{changesyntax} we can modify the meaning of a word.
 define(`test.1', `TEST ONE')
 @result{}
 __file__
-@result{}input.m4
+@result{}stdin
 changesyntax(`O_', `W.')
 @result{}
 __file__
@@ -3092,7 +3175,7 @@ only when given arguments.
 @example
 include(`n')
 @result{}
-@error{}m4:input.m4:1: include: cannot open `n': No such file or directory
+@error{}m4:stdin:1: include: cannot open `n': No such file or directory
 sinclude(`n')
 @result{}
 @end example
@@ -4076,7 +4159,7 @@ square(square(5)+1)
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:input.m4:7: eval: bad expression: foo / 6
+@error{}m4:stdin:7: eval: bad expression: foo / 6
 @result{}
 eval(foo/6)
 @result{}111
@@ -4317,7 +4400,7 @@ the current input line number in that file.
 @example
 errprint(`m4:'__file__:__line__: `Input error
 ')
-@error{}m4:input.m4:1: Input error
+@error{}m4:stdin:1: Input error
 @result{}
 @end example
 @end deffn
@@ -4341,7 +4424,7 @@ define(`fatal_error',
 ')m4exit(1)')
 @result{}
 fatal_error(`This is a BAD one, buster')
-@error{}m4:input.m4:4: fatal error: This is a BAD one, buster
+@error{}m4:stdin:4: fatal error: This is a BAD one, buster
 @end example
 
 After this macro call, @code{m4} will exit with exit code 1.  This macro

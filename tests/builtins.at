@@ -42,15 +42,15 @@ AT_CHECK_M4([define.m4], 0,
 [[new value.
 hello, world.
 base value.
-]], [[m4:define.m4:1: Warning: undefine: undefined macro: macro
+]], [[m4:define.m4:1: Warning: undefine: undefined macro `macro'
 ]])
 
 AT_CHECK_M4([--traditional define.m4], 0,
 [[new value.
 macro.
 macro.
-]], [[m4:define.m4:1: Warning: undefine: undefined macro: macro
-m4:define.m4:9: Warning: popdef: undefined macro: macro
+]], [[m4:define.m4:1: Warning: undefine: undefined macro `macro'
+m4:define.m4:9: Warning: popdef: undefined macro `macro'
 ]])
 
 AT_CLEANUP

@@ -180,8 +180,7 @@ M4BUILTIN_HANDLER (define)
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, _("Warning: %s: invalid macro name ignored"),
-	     M4ARG (0));
+    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
 }
 
 M4BUILTIN_HANDLER (undefine)
@@ -192,8 +191,7 @@ M4BUILTIN_HANDLER (undefine)
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
-		 name);
+	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
       else
 	m4_symbol_delete (M4SYMTAB, name);
     }
@@ -213,8 +211,7 @@ M4BUILTIN_HANDLER (pushdef)
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, _("Warning: %s: invalid macro name ignored"),
-	     M4ARG (0));
+    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
 }
 
 M4BUILTIN_HANDLER (popdef)
@@ -225,8 +222,7 @@ M4BUILTIN_HANDLER (popdef)
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
-		 name);
+	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
       else
 	m4_symbol_popdef (M4SYMTAB, name);
     }
@@ -355,7 +351,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 	      dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	    }
 	  else if (complain)
-	    m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
+	    m4_warn (context, 0, _("%s: undefined macro `%s'"),
 		     M4ARG (0), M4ARG (i));
 	}
     }
@@ -406,6 +402,7 @@ M4BUILTIN_HANDLER (dumpdef)
       else
 	{
 	  assert (!"invalid token in builtin_dumpdef");
+	  abort ();
 	}
     }
 }
@@ -423,18 +420,20 @@ M4BUILTIN_HANDLER (defn)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (!symbol)
-	m4_warn (context, 0, _("Warning: %s: undefined macro: %s"), M4ARG (0),
-		 name);
+	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	m4_warn (context, 0, _("\
-Warning: %s: builtin `%s' requested by frozen file not found"),
+	m4_warn (context, 0,
+		 _("%s: builtin `%s' requested by frozen file not found"),
 		 name, m4_get_symbol_placeholder (symbol));
       else
-	assert (!"Bad token data type in m4_defn");
+	{
+	  assert (!"Bad token data type in m4_defn");
+	  abort ();
+	}
     }
 }
 
@@ -757,8 +756,7 @@ M4BUILTIN_HANDLER (traceon)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, (char *) obs);
 	else
-	  m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
-		   M4ARG (0), name);
+	  m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
       }
 }
 
@@ -777,8 +775,7 @@ M4BUILTIN_HANDLER (traceoff)
 	if (symbol != NULL)
 	  set_trace_CB (NULL, NULL, symbol, NULL);
 	else
-	  m4_warn (context, 0, _("Warning: %s: undefined macro: %s"),
-		   M4ARG (0), name);
+	  m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
       }
 }
 

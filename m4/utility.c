@@ -24,6 +24,7 @@
 
 #include "m4private.h"
 #include "verror.h"
+#include "xvasprintf.h"
 
 
 static const char * skip_space (m4 *, const char *);
@@ -44,14 +45,14 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv,
 {
   if (argc - 1 < min)
     {
-      m4_warn (context, 0, _("Warning: %s: too few arguments: %d < %d"),
+      m4_warn (context, 0, _("%s: too few arguments: %d < %d"),
 	       M4ARG (0), argc - 1, min);
       return ! side_effect;
     }
 
   if (argc - 1 > max)
     {
-      m4_warn (context, 0, _("Warning: %s: extra arguments ignored: %d > %d"),
+      m4_warn (context, 0, _("%s: extra arguments ignored: %d > %d"),
 	       M4ARG (0), argc - 1, max);
     }
 
@@ -81,7 +82,7 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
       || (*valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10),
 	  *skip_space (context, endp) != 0))
     {
-      m4_warn (context, 0, _("Warning: %s: argument %d non-numeric: %s"),
+      m4_warn (context, 0, _("%s: argument %d non-numeric: %s"),
 	       M4ARG (0), arg - 1, M4ARG (arg));
       return false;
     }
@@ -129,10 +130,10 @@ m4_error (m4 *context, int status, int errnum, const char *format, ...)
 
 /* Issue a warning, if they are not being suppressed.  The message is
    printf-style, based on FORMAT and any other arguments, and the
-   program name and location (if we are currently parsing an input
-   file) are automatically prepended.  If ERRNUM is non-zero, include
-   strerror output in the message.  If warnings are fatal, call exit
-   immediately, otherwise exit status is unchanged.  */
+   program name, location (if we are currently parsing an input file),
+   and "Warning:" are automatically prepended.  If ERRNUM is non-zero,
+   include strerror output in the message.  If warnings are fatal,
+   call exit immediately, otherwise exit status is unchanged.  */
 void
 m4_warn (m4 *context, int errnum, const char *format, ...)
 {
@@ -141,11 +142,15 @@ m4_warn (m4 *context, int errnum, const char *format, ...)
       va_list args;
       int status = EXIT_SUCCESS;
       int line = m4_get_current_line (context);
+      char *full_format = xasprintf(_("Warning: %s"), format);
       va_start (args, format);
       if (m4_get_fatal_warnings_opt (context))
 	status = EXIT_FAILURE;
+      /* If the full_format failed (unlikely though that may be), at
+	 least fall back on the original format.  */
       verror_at_line (status, errnum,
 		      line ? m4_get_current_file (context) : NULL, line,
-		      format, args);
+		      full_format ? full_format : format, args);
+      free (full_format);
     }
 }

@@ -332,8 +332,8 @@ m4_macro_call (m4 *context, m4_symbol *symbol, m4_obstack *expansion,
     }
   else if (m4_is_symbol_placeholder (symbol))
     {
-      m4_warn (context, 0, _("\
-Warning: %s: builtin `%s' requested by frozen file not found"),
+      m4_warn (context, 0,
+	       _("%s: builtin `%s' requested by frozen file not found"),
 	       M4ARG (0), m4_get_symbol_placeholder (symbol));
     }
   else

@@ -194,8 +194,7 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 	case '7': case '8': case '9':
 	  ch -= '0';
 	  if (buf->pat.re_nsub < ch)
-	    m4_warn (context, 0,
-		     _("Warning: %s: sub-expression %d not present"),
+	    m4_warn (context, 0, _("%s: sub-expression %d not present"),
 		     caller, ch);
 	  else if (buf->regs.end[ch] > 0)
 	    obstack_grow (obs, victim + buf->regs.start[ch],
@@ -203,8 +202,7 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 	  break;
 
 	case '\0':
-	  m4_warn (context, 0,
-		   _("Warning: %s: trailing \\ ignored in replacement"),
+	  m4_warn (context, 0, _("%s: trailing \\ ignored in replacement"),
 		   caller);
 	  return;
 
@@ -325,7 +323,7 @@ M4BUILTIN_HANDLER (builtin)
   bp = m4_builtin_find_by_name (NULL, name);
 
   if (bp == NULL)
-    m4_error (context, 0, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
+    m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
   else if (!m4_bad_argc (context, argc - 1, argv + 1,
 			 bp->min_args, bp->max_args,
 			 (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
@@ -507,7 +505,7 @@ M4BUILTIN_HANDLER (indir)
   m4_symbol *  symbol = m4_symbol_lookup (M4SYMTAB, name);
 
   if (symbol == NULL)
-    m4_error (context, 0, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+    m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
   else
     m4_macro_call (context, symbol, obs, argc - 1, argv + 1);
 }
@@ -742,6 +740,5 @@ M4BUILTIN_HANDLER (syncoutput)
 	       && (arg[1] == 'n' || arg[1] == 'N')))
     m4_set_sync_output_opt (context, true);
   else
-    m4_warn (context, 0, _("Warning: %s: unknown directive `%s'"),
-	     M4ARG (0), arg);
+    m4_warn (context, 0, _("%s: unknown directive `%s'"), M4ARG (0), arg);
 }
