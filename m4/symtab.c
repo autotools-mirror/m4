@@ -105,7 +105,10 @@ m4_symtab_apply (m4_symbol_table *symtab,
 			userdata);
 
       if (result != NULL)
-	break;
+	{
+	  m4_free_hash_iterator (symtab->table, place);
+	  break;
+	}
     }
 
   return result;

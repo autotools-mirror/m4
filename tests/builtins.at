@@ -176,6 +176,7 @@ AT_CLEANUP
 ## --- ##
 
 AT_SETUP([gmp])
+AT_KEYWORDS([module])
 
 # cannot perform test without --with-gmp
 AT_CHECK([test "$USE_GMP" = yes || exit 77])

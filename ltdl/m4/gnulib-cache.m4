@@ -15,15 +15,17 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert binary-io cloexec close-stream dirname error exit fdl filenamecat fopen-safer free gendocs getopt gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert binary-io cloexec close-stream dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([assert binary-io cloexec close-stream dirname error exit fdl filenamecat fopen-safer free gendocs getopt gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf])
+gl_LOCAL_DIR([])
+gl_MODULES([assert binary-io cloexec close-stream dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strtol unlocked-io verror xalloc xalloc-die xstrndup xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([gnu])
 gl_M4_BASE([ltdl/m4])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_LIB([libgnu])
+gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([M4])

@@ -26,6 +26,7 @@ AT_BANNER([Module support.])
 
 AT_SETUP([Freezing modules])
 AT_KEYWORDS([frozen])
+AT_KEYWORDS([module])
 
 AT_DATA([[frozen.m4]],
 [[divert(1)dnl
@@ -134,6 +135,7 @@ AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: relative path],
 ## ------ ##
 
 AT_SETUP([modules: shadow])
+AT_KEYWORDS([module])
 
 AT_DATA([[input.m4]],
 [[# no modules loaded yet
@@ -274,6 +276,7 @@ AT_CLEANUP
 ## ------ ##
 
 AT_SETUP([modules: unload])
+AT_KEYWORDS([module])
 
 AT_DATA([[input.m4]],
 [[test
@@ -347,6 +350,7 @@ AT_CLEANUP
 # from the first command:
 
 AT_SETUP([modules: importing])
+AT_KEYWORDS([module])
 
 AT_DATA([[input.m4]],
 [[import
@@ -405,6 +409,7 @@ AT_CLEANUP
 # memory and then redefined by a subsequent load.
 
 AT_SETUP([modules: trace])
+AT_KEYWORDS([module])
 
 AT_DATA([[input.m4]],
 [[test

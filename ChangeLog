@@ -1,4 +1,26 @@
-2006-08-30  Eric Blake  <ebb9@byu.net>
+2006-09-01  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4.c (m4_create): Fix latent bug since 2003-10-08.
+	* m4/hash.h (m4_free_hash_iterator): New prototype.
+	* m4/hash.c (struct m4_hash) [!NDEBUG]: Add iter member, to
+	ensure we don't do unsafe things while iterating.
+	(HASH_ITER, ITER_CHAIN): New accessor macros.
+	(m4_hash_new, m4_hash_resize, maybe_grow): Fix malloc typing bug.
+	(m4_hash_delete, m4_hash_insert): Unsafe while iterating.
+	(m4_hash_remove) [!NDEBUG]: Enforce safety while iterating.
+	(m4_get_hash_iterator_next) [!NDEBUG]: Track current iterators,
+	to catch unsafe actions.
+	(m4_free_hash_iterator): New function, to avoid memory leaks, and
+	when debugging, to track safe actions.
+	(m4_hash_apply): Avoid memory leak.
+	* m4/symtab.c (m4_symtab_apply): Likewise.
+	* ltdl/m4/gnulib-cache.m4: Remove getopt from here; it is pulled
+	in manually to src/ for now.
+	* tests/builtins.at (gmp): Add keyword module.
+	* tests/modules.at (Freezing modules, modules: shadow)
+	(modules: unload, modules: importing, modules: trace): Likewise.
+
+2006-08-31  Eric Blake  <ebb9@byu.net>
 
 	* m4/utility.c (m4_warn): Factor "Warning" out of messages into
 	here.

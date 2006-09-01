@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006 Free Software Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -70,6 +70,8 @@ extern void *	m4_hash_apply	    (m4_hash *hash, m4_hash_apply_func *func,
 extern const void *	 m4_get_hash_iterator_key   (m4_hash_iterator *place);
 extern void *		 m4_get_hash_iterator_value (m4_hash_iterator *place);
 extern m4_hash_iterator *m4_get_hash_iterator_next  (const m4_hash *hash,
+						     m4_hash_iterator *place);
+extern void		 m4_free_hash_iterator      (const m4_hash *hash,
 						     m4_hash_iterator *place);
 
 
