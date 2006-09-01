@@ -20,7 +20,7 @@
 	* tests/modules.at (Freezing modules, modules: shadow)
 	(modules: unload, modules: importing, modules: trace): Likewise.
 
-2006-08-31  Eric Blake  <ebb9@byu.net>
+2006-08-30  Eric Blake  <ebb9@byu.net>
 
 	* m4/utility.c (m4_warn): Factor "Warning" out of messages into
 	here.
