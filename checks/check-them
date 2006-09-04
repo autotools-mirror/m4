@@ -26,10 +26,21 @@ xout=$tmp/m4-xout
 xerr=$tmp/m4-xerr
 failed=
 skipped=
+strip_needed=false
 
 # Find out how the executable prints argv[0]
 m4=`m4 --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
     -e 's/\\\\/\\\\\\\\/g' -e 1q`
+
+# Find out if we should strip \r in the output
+m4 --version > $out
+m4 --version | tr -d '\015' > $xout
+if cmp -s $out $xout; then
+  :
+else
+  echo "Ignoring carriage returns"
+  strip_needed=:
+fi
 
 # Find out where the examples live.
 examples=.
@@ -57,6 +68,19 @@ do
 
   sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
     "$file" > $xout
+  sed -e '/^dnl @error{}/!d' -e 's///' -e "s|^m4:|$m4:|" "$file" > $xerr
+
+  # For the benefit of mingw, normalize \r\n line endings
+  if $strip_needed ; then
+    tr -d '\015' < $out > $out.t
+    mv $out.t $out
+    tr -d '\015' < $xout > $xout.t
+    mv $xout.t $xout
+    tr -d '\015' < $err > $err.t
+    mv $err.t $err
+    tr -d '\015' < $xerr > $xerr.t
+    mv $xerr.t $xerr
+  fi
 
   if cmp -s $out $xout; then
     :
@@ -66,8 +90,6 @@ do
     echo "$file: stdout mismatch"
     diff $xout $out
   fi
-
-  sed -e '/^dnl @error{}/!d' -e 's///' -e "s|^m4:|$m4:|" "$file" > $xerr
 
   if cmp -s $err $xerr; then
     :

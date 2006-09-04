@@ -1,5 +1,10 @@
 2006-09-04  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Changeword): Skip test on mingw, where the
+	native echo is braindead.
+	* checks/check-them (strip_needed): Ignore \r in output.  Now the
+	testsuite will pass when cross-compiling from cygwin to mingw.
+
 	* src/input.c (peek_input): Fix regression in handling macro
 	without arguments as last token in file; debian bug 385720.
 	(next_token): Always consume an input character.
