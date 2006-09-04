@@ -360,7 +360,7 @@ addressed some long standing bugs in the venerable 1.4 release.
 Then in 2005 Gary V. Vaughan collected together the many
 patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5 and 1.4.6.
+prepared patches for the release of 1.4.5, 1.4.6, and 1.4.7.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -2723,6 +2723,41 @@ Because @code{m4} constructs its words a character at a time, there
 is a restriction on the regular expressions that may be passed to
 @code{changeword}.  This is that if your regular expression accepts
 @samp{foo}, it must also accept @samp{f} and @samp{fo}.
+
+@example
+ifdef(`changeword', `', `errprint(` skipping: no changeword support
+')m4exit(`77')')dnl
+define(`foo
+', `bar
+')
+@result{}
+dnl This example wants to recognize changeword, dnl, and `foo\n'.
+dnl First, we check that our regexp will match.
+regexp(`changeword', `[cd][a-z]*\|foo[
+]')
+@result{}0
+regexp(`foo
+', `[cd][a-z]*\|foo[
+]')
+@result{}0
+regexp(`f', `[cd][a-z]*\|foo[
+]')
+@result{}-1
+foo
+@result{}foo
+changeword(`[cd][a-z]*\|foo[
+]')
+@result{}
+dnl Even though `foo\n' matches, we forgot to allow `f'.
+foo
+@result{}foo
+changeword(`[cd][a-z]*\|fo*[
+]?')
+@result{}
+dnl Now we can call `foo\n'.
+foo
+@result{}bar
+@end example
 
 @code{changeword} has another function.  If the regular expression
 supplied contains any grouped subexpressions, then text outside

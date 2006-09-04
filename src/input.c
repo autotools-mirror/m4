@@ -455,8 +455,12 @@ peek_input (void)
 		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
-      /* End of input source --- pop one level.  */
-      pop_input ();
+      /* End of current input source --- pop one level if another
+	 level still exists.  */
+      if (isp->prev != NULL)
+	pop_input ();
+      else
+	return CHAR_EOF;
     }
 }
 
@@ -783,18 +787,20 @@ next_token (token_data *td)
   obstack_1grow (&token_stack, '\0');
   token_bottom = obstack_finish (&token_stack);
 
+ /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> EOF\n");
 #endif
+      next_char ();
       return TOKEN_EOF;
     }
   if (ch == CHAR_MACRO)
     {
       init_macro_token (td);
-      (void) next_char ();
+      next_char ();
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> MACDEF (%s)\n",
 	       find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
@@ -802,7 +808,7 @@ next_token (token_data *td)
       return TOKEN_MACDEF;
     }
 
-  (void) next_char ();
+  next_char (); /* Consume character we already peeked at.  */
   if (MATCH (ch, bcomm.string, TRUE))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);

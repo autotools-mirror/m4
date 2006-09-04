@@ -1,3 +1,15 @@
+2006-09-04  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (peek_input): Fix regression in handling macro
+	without arguments as last token in file; debian bug 385720.
+	(next_token): Always consume an input character.
+	Reported by Andreas Schultz.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Document this fix.
+	* doc/m4.texinfo (History): Mention next version.
+	(Changeword): Add example that exposes this bug.
+	* THANKS: Update.
+
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.6:

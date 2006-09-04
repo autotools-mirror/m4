@@ -2,6 +2,11 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.7 - ?? ??? 2006, by ??  (CVS version 1.4.6a)
+
+* Fix regression from 1.4.5 in handling a file that ends in a macro
+  expansion without arguments instead of a newline.
+
 Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
 
 * Fix buffer overruns in regexp and patsubst macros when handed a trailing
