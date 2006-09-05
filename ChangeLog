@@ -1,3 +1,8 @@
+2006-09-05  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* doc/m4.texinfo: Fix some typos.
+	* tests/others.at: Likewise.
+
 2006-09-05  Eric Blake  <ebb9@byu.net>
 
 	* m4/input.c (lex_debug): Remove dead code that broke compilation

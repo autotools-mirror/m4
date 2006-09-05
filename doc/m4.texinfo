@@ -377,7 +377,7 @@ addressed some long standing bugs in the venerable 1.4 release.
 Then in 2005 Gary V. Vaughan collected together the many
 patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5 and 1.4.6.
+prepared patches for the release of 1.4.5, 1.4.6, and 1.4.7.
 
 Meanwhile, development was underway for new features for @code{m4},
 such as dynamic module loading and additional builtins, practically
@@ -496,7 +496,7 @@ input came from.  These features occur with the following options:
 @item --import-environment
 Imports every variable in the environment as a macro.  This is done
 before @option{-D} and @option{-U}, so they can override the
-enviroment.
+environment.
 
 @item -B @var{DIRECTORY}
 @itemx --prepend-include=@var{DIRECTORY}
@@ -2651,7 +2651,7 @@ useful in connection with the @samp{c} flag above.
 Show the name of the current input file in each trace output line.
 
 @item l
-Show the the current input line number in each trace output line.
+Show the current input line number in each trace output line.
 
 @item p
 Print a message when a named file is found through the path search
@@ -3000,7 +3000,7 @@ Default is all characters except those in the categories above.
 Characters that themselves, alone, form macro names.  No default.
 
 @item Escape
-Characters that must precede macro names for them to be recognised.  No
+Characters that must precede macro names for them to be recognized.  No
 default.
 
 @end table
@@ -3155,7 +3155,7 @@ escape(foo)
 
 Macro calls can be given a @TeX{} or Texinfo like syntax using an
 escape.  If one or more characters are defined as escapes macro names
-are only recognised if preceded by an escape character.
+are only recognized if preceded by an escape character.
 
 If the escape is not followed by what is normally a word (a letter
 optionally followed by letters and/or numerals), that single character
@@ -3208,7 +3208,7 @@ changesyntax(`A@@')
 
 There is obviously an overlap with @code{changecom} and
 @code{changequote}.  Comment delimiters and quotes can now be defined in
-two different ways.  To avoid incompatibilites, if the quotes are set
+two different ways.  To avoid incompatibilities, if the quotes are set
 with @code{changequote}, all characters marked in the syntax table as
 quotes will be unmarked, leaving only one set of defined quotes as
 before.  Since the quotes are syntax attributes rather than syntax
@@ -3269,7 +3269,7 @@ test([<<testing>>])
 Note how it is possible to have both long and short quotes, if
 @code{changequote} is used before @code{changesyntax}.
 
-The syntax table is initialiased to be backwards compatible, so if you
+The syntax table is initialized to be backwards compatible, so if you
 never call @code{changesyntax}, nothing will have changed.
 
 Debugging output continue to use @kbd{(}, @kbd{,} and @kbd{)} to show
@@ -4960,13 +4960,15 @@ the error messages should most probably refer to the place where the
 diversion were made, and not where it was inserted again.
 
 @item
-GNU @code{m4} makes no attempt at prohiting autoreferential definitions
+GNU @code{m4} makes no attempt at prohibiting self-referential definitions
 like:
 
 @comment ignore
 @example
 define(`x', `x')
+@result{}
 define(`x', `x ')
+@result{}
 @end example
 
 There is nothing inherently wrong with defining @samp{x} to

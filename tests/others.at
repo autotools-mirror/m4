@@ -256,7 +256,7 @@ AT_SETUP([iso8859])
 
 # Eh eh eh...
 # We can't embed iso8859.m4 in here since precisly this file demonstrates
-# an M4 ``bug'': it's inability to handle the NUL character.  So there
+# an M4 ``bug'': its inability to handle the NUL character.  So there
 # is no use in trying to handle it here...  Well, until autom4te provides
 # us with means to.
 
