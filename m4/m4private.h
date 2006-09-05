@@ -186,9 +186,9 @@ struct m4_symbol_value {
 #define VALUE_MAX_ARGS(T)	((T)->max_args)
 #define VALUE_PENDING(T)	((T)->pending_expansions)
 
-#define SYMBOL_NEXT(S)		(VALUE_NEXT          ((S)->value))
-#define SYMBOL_HANDLE(S)	(VALUE_HANDLE        ((S)->value))
-#define SYMBOL_FLAGS(S)		(VALUE_FLAGS         ((S)->value))
+#define SYMBOL_NEXT(S)		(VALUE_NEXT	     ((S)->value))
+#define SYMBOL_HANDLE(S)	(VALUE_HANDLE	     ((S)->value))
+#define SYMBOL_FLAGS(S)		(VALUE_FLAGS	     ((S)->value))
 #define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE ((S)->value))
 #define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))
 #define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      ((S)->value))
@@ -343,33 +343,6 @@ extern void m4__include_init (m4 *);
 #  define DMALLOC_FUNC_CHECK
 #  include <dmalloc.h>
 #endif /* WITH_DMALLOC */
-
-/* Other debug stuff.  */
-
-#define M4_DEBUG_MESSAGE(C, Fmt)			M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt);				\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
-#define M4_DEBUG_MESSAGE1(C, Fmt, Arg1)			M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt, Arg1);			\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
-#define M4_DEBUG_MESSAGE2(C, Fmt, Arg1, Arg2)		M4_STMT_START {	\
-      if (m4_get_debug_file (C) != NULL)				\
-	{								\
-	  m4_debug_message_prefix (C);					\
-	  fprintf (m4_get_debug_file (C), Fmt, Arg1, Arg2);		\
-	  putc ('\n', m4_get_debug_file (C));				\
-	}						} M4_STMT_END
-
 
 
 

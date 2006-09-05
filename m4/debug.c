@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 
 #include "m4private.h"
 
@@ -82,6 +83,10 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
 
 	    case 'x':
 	      level |= M4_DEBUG_TRACE_CALLID;
+	      break;
+
+	    case 'm':
+	      level |= M4_DEBUG_TRACE_MODULE;
 	      break;
 
 	    case 'V':
@@ -203,4 +208,27 @@ m4_debug_message_prefix (m4 *context)
 	fprintf (debug_file, "%d:", m4_get_current_line (context));
     }
   putc (' ', debug_file);
+}
+
+/* If the current debug mode includes MODE, and there is a current
+   debug file, then output a debug message described by FORMAT.  A
+   message header is supplied, as well as a trailing newline.  */
+void
+m4_debug_message (m4 *context, int mode, const char *format, ...)
+{
+  /* Check that mode has exactly one bit set.  */
+  assert ((mode & (mode - 1)) == 0);
+  assert (format);
+
+  if (m4_get_debug_file (context) != NULL
+      && m4_is_debug_bit (context, mode))
+    {
+      va_list args;
+
+      m4_debug_message_prefix (context);
+      va_start (args, format);
+      vfprintf (m4_get_debug_file (context), format, args);
+      va_end (args);
+      putc ('\n', m4_get_debug_file (context));
+    }
 }

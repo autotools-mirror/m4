@@ -177,9 +177,9 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       fp = fopen (name, "r");
       if (fp != NULL)
 	{
-	  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_PATH))
-	    M4_DEBUG_MESSAGE2 (context, _("path search for `%s' found `%s'"),
-			       file, name);
+	  m4_debug_message (context, M4_DEBUG_TRACE_PATH,
+			    _("path search for `%s' found `%s'"),
+			    file, name);
 	  if (set_cloexec_flag (fileno (fp), true) != 0)
 	    m4_error (context, 0, errno,
 		      _("cannot protect input file across forks"));

@@ -127,8 +127,8 @@ extern void		m4_delete	(m4 *);
 #define m4_context_field_table						\
 	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
-	M4FIELD(const char *,	   current_file,   current_file)        \
-	M4FIELD(int,		   current_line,   current_line)        \
+	M4FIELD(const char *,	   current_file,   current_file)	\
+	M4FIELD(int,		   current_line,   current_line)	\
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,		   exit_status,	   exit_status)		\
@@ -286,9 +286,11 @@ enum {
   M4_DEBUG_TRACE_INPUT		= (1 << 8),
   /* x: add call id to trace output */
   M4_DEBUG_TRACE_CALLID		= (1 << 9),
+  /* m: trace module actions */
+  M4_DEBUG_TRACE_MODULE		= (1 << 10),
 
   /* V: very verbose --  print everything */
-  M4_DEBUG_TRACE_VERBOSE	= ((1 << 10) - 1)
+  M4_DEBUG_TRACE_VERBOSE	= ((1 << 11) - 1)
 };
 
 /* default flags -- equiv: aeq */
@@ -300,6 +302,8 @@ enum {
 extern int	m4_debug_decode		(m4 *, int, const char *);
 extern bool	m4_debug_set_output	(m4 *, const char *);
 extern void	m4_debug_message_prefix (m4 *);
+extern void	m4_debug_message	(m4 *, int, const char *, ...)
+  M4_GNUC_PRINTF (3, 4);
 
 
 
@@ -405,9 +409,9 @@ extern void	m4_undivert_all	     (m4 *);
 
 /* --- PATH MANAGEMENT --- */
 
-extern void	m4_include_env_init      (m4 *);
+extern void	m4_include_env_init	 (m4 *);
 extern void	m4_add_include_directory (m4 *, const char *, bool);
-extern FILE *   m4_path_search           (m4 *, const char *, char **);
+extern FILE *   m4_path_search		 (m4 *, const char *, char **);
 
 
 

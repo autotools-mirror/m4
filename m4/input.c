@@ -222,14 +222,12 @@ file_unget (ch)
 static void
 file_clean (m4 *context)
 {
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_INPUT))
-    {
-      if (isp->u.u_f.lineno)
-	M4_DEBUG_MESSAGE2 (context, _("input reverted to %s, line %d"),
-			   isp->u.u_f.name, isp->u.u_f.lineno);
-      else
-	M4_DEBUG_MESSAGE (context, _("input exhausted"));
-    }
+  if (isp->u.u_f.lineno)
+    m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
+		      _("input reverted to %s, line %d"),
+		      isp->u.u_f.name, isp->u.u_f.lineno);
+  else
+    m4_debug_message (context, M4_DEBUG_TRACE_INPUT, _("input exhausted"));
 
   fclose (isp->u.u_f.file);
   m4_set_current_file (context, isp->u.u_f.name);
@@ -255,8 +253,8 @@ m4_push_file (m4 *context, FILE *fp, const char *title)
       next = NULL;
     }
 
-  if (BIT_TEST (m4_get_debug_level_opt (context), M4_DEBUG_TRACE_INPUT))
-    M4_DEBUG_MESSAGE1 (context, _("input read from %s"), title);
+  m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
+		    _("input read from %s"), title);
 
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));

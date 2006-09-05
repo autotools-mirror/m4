@@ -2653,6 +2653,9 @@ Show the name of the current input file in each trace output line.
 @item l
 Show the current input line number in each trace output line.
 
+@item m
+Print a message each time a module is manipulated (@pxref{Modules}).
+
 @item p
 Print a message when a named file is found through the path search
 mechanism (@pxref{Search Path}), giving the actual file name used.

@@ -1,3 +1,25 @@
+2006-09-05  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4module.h (m4_debug_message): New prototype.
+	(M4_DEBUG_TRACE_MODULE): New debug bit.
+	* m4/m4private.h (M4_DEBUG_MESSAGE, M4_DEBUG_MESSAGE1)
+	(M4_DEBUG_MESSAGE2): Delete these macros.
+	* m4/debug.c (m4_debug_message): New method.
+	(m4_debug_decode): Add module tracing as flag `m'.
+	* m4/input.c (m4_push_file, file_clean): Use new method.
+	* m4/path.c (m4_path_search): Likewise.
+	* po/Makevars (XGETTEXT_OPTIONS): Likewise.
+	* m4/module.c (install_builtin_table, install_macro_table)
+	(m4__module_open, module_close, module_remove): Promote several
+	module debug messages outside of DEBUG_MODULES.
+	(m4__module_init, module_remove) [DEBUG_MODULES]: Don't mix
+	DEBUG_MODULES with normal trace output.
+	* src/main.c (usage): Document new flag.
+	* doc/m4.texinfo (Debug Levels): Likewise.
+	* Makefile.am ($(TESTSUITE)): Add missing dependency.
+	* tests/m4.in: Neutralize platform-dependent module filenames.
+	* tests/options.at (--debug): Update expected output.
+
 2006-09-05  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* doc/m4.texinfo: Fix some typos.

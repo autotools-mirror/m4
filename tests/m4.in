@@ -34,7 +34,11 @@ status=$?
 #   actual program, either lt-m4, or m4.
 #
 # - In both cases, beware of .exe.
-sed 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' /tmp/m4-$$ >&2
+# - Also, when tracing modules, lines of the form
+#      m4debug: module m4: opening file `m4.a'
+#   must be reduced, since module names are platform dependent.
+sed -e 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' \
+    -e '/^m4debug: module/s/opening file.*/opening file/' /tmp/m4-$$ >&2
 rm /tmp/m4-$$
 
 exit $status

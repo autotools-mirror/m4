@@ -175,10 +175,9 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 	    free (name);
 	}
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1(context, "module %s: builtins loaded",
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: builtins loaded"),
 			m4_get_module_name (handle));
-#endif /* DEBUG_MODULES */
     }
 
   return bp;
@@ -206,10 +205,9 @@ install_macro_table (m4 *context, lt_dlhandle handle)
 	  m4_symbol_pushdef (M4SYMTAB, mp->name, value);
 	}
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1(context, "module %s: macros loaded",
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: macros loaded"),
 			m4_get_module_name (handle));
-#endif /* DEBUG_MODULES */
     }
 
   return mp;
@@ -367,7 +365,7 @@ m4__module_init (m4 *context)
 	      module_dlerror ());
 
 #ifdef DEBUG_MODULES
-  M4_DEBUG_MESSAGE (context, "Module loader initialized.");
+  fprintf (stderr, "Module loader initialized.\n");
 #endif /* DEBUG_MODULES */
 }
 
@@ -386,15 +384,14 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 
   if (handle)
     {
-#ifdef DEBUG_MODULES
       const lt_dlinfo *info = lt_dlgetinfo (handle);
 
       /* If we have a handle, there must be handle info.  */
       assert (info);
 
-      M4_DEBUG_MESSAGE2(context, "module %s: opening at %s",
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: opening file `%s'"),
 			name ? name : MODULE_SELF_NAME, info->filename);
-#endif
 
       /* Find and run any initializing function in the opened module,
 	 each time the module is opened.  */
@@ -403,9 +400,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	{
 	  (*init_func) (context, handle, obs);
 
-#ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1(context, "module %s: init hook called", name);
-#endif /* DEBUG_MODULES */
+	  m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			    _("module %s: init hook called"), name);
 	}
 
       if (!init_func
@@ -417,9 +413,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 		    _("module `%s' has no entry points"), name);
 	}
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1(context, "module %s: opened", name);
-#endif /* DEBUG_MODULES */
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: opened"), name);
     }
   else
     {
@@ -455,7 +450,7 @@ m4__module_exit (m4 *context)
   iface_id = NULL;
 
   if (!errors)
-    errors = lt_dlexit();
+    errors = lt_dlexit ();
 
   if (errors)
     {
@@ -497,9 +492,8 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
     {
       (*finish_func) (context, handle, obs);
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1(context, "module %s: finish hook called", name);
-#endif /* DEBUG_MODULES */
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: finish hook called"), name);
     }
 
   if (!lt_dlisresident (handle))
@@ -507,15 +501,13 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
       errors = lt_dlclose (handle);
       if (!errors)
 	{
-#ifdef DEBUG_MODULES
-          M4_DEBUG_MESSAGE1(context, "module %s: closed", name);
-#endif /* DEBUG_MODULES */
+	  m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			    _("module %s: closed"), name);
 	}
     }
-#ifdef DEBUG_MODULES
   else
-    M4_DEBUG_MESSAGE1(context, "module %s: resident module not closed", name);
-#endif /* DEBUG_MODULES */
+    m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+		      _("module %s: resident module not closed"), name);
 
   if (errors)
     {
@@ -523,7 +515,7 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 		name, module_dlerror ());
     }
 
-  free ((void *) name);
+  DELETE (name);
 }
 
 static int
@@ -531,19 +523,13 @@ module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 {
   const lt_dlinfo *info;
   int		   errors	= 0;
-
-#ifdef DEBUG_MODULES
-  char *	   name;
-
-  /* Be careful when closing myself.  */
-  if (handle)
-    {
-      name = m4_get_module_name (handle);
-      name = xstrdup (name ? name : MODULE_SELF_NAME);
-    }
-#endif /* DEBUG_MODULES */
+  const char *	   name;
 
   assert (handle);
+
+  /* Be careful when closing myself.  */
+  name = m4_get_module_name (handle);
+  name = xstrdup (name ? name : MODULE_SELF_NAME);
 
   info = lt_dlgetinfo (handle);
 
@@ -552,8 +538,8 @@ module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 #ifdef DEBUG_MODULES
   if (info->ref_count > 1)
     {
-      M4_DEBUG_MESSAGE2(context, "module %s: now has %d references.",
-			name, info->ref_count -1);
+      fprintf (stderr, "module %s: now has %d references.",
+	       name, info->ref_count -1);
     }
 #endif /* DEBUG_MODULES */
 
@@ -565,13 +551,14 @@ module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 	 removed, we needn't try to remove them again!  */
       m4__symtab_remove_module_references (M4SYMTAB, handle);
 
-#ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1(context, "module %s: symbols unloaded", name);
-#endif /* DEBUG_MODULES */
+      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+			_("module %s: symbols unloaded"), name);
     }
 
   if (!errors)
     module_close (context, handle, obs);
+
+  DELETE (name);
 
   return errors;
 }

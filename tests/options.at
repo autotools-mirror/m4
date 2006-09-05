@@ -95,7 +95,15 @@ AT_CHECK_M4([-tlen in], [0], [[0
 dnl Test all flags.
 AT_CHECK_M4([-dV in], [0], [[0
 3
-]], [[m4debug: path search for `in' found `in'
+]], [[m4debug: module m4: opening file
+m4debug: module m4: init hook called
+m4debug: module m4: opened
+m4debug: module m4: builtins loaded
+m4debug: module gnu: opening file
+m4debug: module gnu: opened
+m4debug: module gnu: builtins loaded
+m4debug: module gnu: macros loaded
+m4debug: path search for `in' found `in'
 m4debug: input read from in
 m4trace:in:1: -1- id 1: divnum ...
 m4trace:in:1: -1- id 1: divnum -> ???
@@ -104,6 +112,10 @@ m4trace:in:2: -1- id 2: len ...
 m4trace:in:2: -1- id 2: len(`abc') -> ???
 m4trace:in:2: -1- id 2: len(...) -> `3'
 m4debug:in:3: input exhausted
+m4debug: module gnu: symbols unloaded
+m4debug: module gnu: closed
+m4debug: module m4: symbols unloaded
+m4debug: module m4: resident module not closed
 ]])
 
 dnl Test addition and subtraction of flags.

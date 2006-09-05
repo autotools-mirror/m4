@@ -147,6 +147,9 @@ FLAGS is any of:\n\
   f   say current input file name\n\
   i   show changes in input files\n\
   l   say current input line number\n\
+"), stdout);
+      fputs (_("\
+  m   show actions related to modules\n\
   p   show results of path searches\n\
   q   quote values as necessary, with a or e flag\n\
   t   trace for all macro calls, not only traceon'ed\n\
@@ -275,13 +278,13 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'H':
 	/* -H was supported in 1.4.x.  FIXME - make obsolete after
-            2.0, and remove after 2.1.  For now, keep it silent.  */
+	   2.0, and remove after 2.1.  For now, keep it silent.  */
 	break;
 
       case 'N':
       case DIVERSIONS_OPTION:
 	/* -N became an obsolete no-op in 1.4.x.  FIXME - remove
-            support for -N after 2.0.  */
+	   support for -N after 2.0.  */
 	error (0, 0, _("Warning: `m4 %s' is deprecated"),
 	       optchar == 'N' ? "-N" : "--diversions");
 	break;

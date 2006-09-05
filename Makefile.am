@@ -389,7 +389,7 @@ $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
 
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
+$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT) tests/m4
 	$(AUTOTEST) -I '$(srcdir)/tests' -o $@.tmp $@.at
 	mv $@.tmp $@
 
