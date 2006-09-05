@@ -10,9 +10,6 @@ for any of these ideas or if you have others to add.
 
   + The test case `other-tests/stackovf.test' does not work.
 
-  + Some characters, such as comma, are still hardcoded, and do not
-    follow changes in the syntax table.
-
   + stack overflow is basically broken
 
     The routines to detect stack overflow throuh segv  are basically
@@ -27,17 +24,6 @@ for any of these ideas or if you have others to add.
     --
     Marc Espie
     espie@schutzenberger.liafa.jussieu.fr
-
-  + ~/src/ace % m4 --trace undefine -dV                       nostromo Err 1$
-    m4 debug: NONE: 0: input read from stdin
-    undefine(`undefine')
-    m4trace:stdin:1: -1- id 1: undefine ...
-    m4trace:stdin:1: -1- id 1: undefine(`undefine') -> ???
-    m4trace:stdin:1: -1- id 1: p@8(...)
-
-    --
-    Akim Demaille
-    akim@epita.fr
 
 
 * FEATURES OR PROBLEMS
@@ -73,9 +59,6 @@ for any of these ideas or if you have others to add.
       --'
     --
     Stepan Kasal <kasal@ucw.cz>
-
-  + The $ used in user defined macros cannot be changed through
-    changesyntax.  It should be handled as a modifier.
 
   + If configured --with-gmp for multiple precision arithmetic there are
     some warnings, but it passes the tests.

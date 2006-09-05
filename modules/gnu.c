@@ -507,7 +507,8 @@ M4BUILTIN_HANDLER (indir)
   if (symbol == NULL)
     m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
   else
-    m4_macro_call (context, symbol, obs, argc - 1, argv + 1);
+    m4_macro_call (context, m4_get_symbol_value (symbol), obs,
+		   argc - 1, argv + 1);
 }
 
 

@@ -51,7 +51,8 @@ struct m4_symbol_table {
 
 static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *);
 static void	  symbol_popval		(m4_symbol *symbol);
-static void *	  symbol_destroy_CB	(m4_symbol_table *symtab, const char *name,
+static void *	  symbol_destroy_CB	(m4_symbol_table *symtab,
+					 const char *name,
 					 m4_symbol *symbol, void *ignored);
 static void *	  arg_destroy_CB	(m4_hash *hash, const void *name,
 					 void *arg, void *ignored);
@@ -140,7 +141,8 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
 /* Remove every symbol that references the given module handle from
    the symbol table.  */
 void
-m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle)
+m4__symtab_remove_module_references (m4_symbol_table *symtab,
+				     lt_dlhandle handle)
 {
   m4_hash_iterator *place = 0;
 
@@ -165,9 +167,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle
 		  VALUE_NEXT (data) = VALUE_NEXT (next);
 
 		  assert (next->type != M4_SYMBOL_PLACEHOLDER);
-		  if (next->type == M4_SYMBOL_TEXT)
-		    free (m4_get_symbol_value_text (next));
-		  free (next);
+		  m4_symbol_value_delete (next);
 		}
 	      else
 		data = next;
@@ -186,8 +186,8 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab, lt_dlhandle handle
    on every symbol so that m4_symbol_popdef() doesn't try to preserve
    the table entry.  */
 static void *
-symbol_destroy_CB (m4_symbol_table *symtab, const char *name, m4_symbol *symbol,
-		   void *ignored)
+symbol_destroy_CB (m4_symbol_table *symtab, const char *name,
+		   m4_symbol *symbol, void *ignored)
 {
   char *key = xstrdup ((char *) name);
 
@@ -224,7 +224,8 @@ m4_symbol_lookup (m4_symbol_table *symtab, const char *name)
    associated with NAME, push the new VALUE on top of the value stack
    for this symbol.  Otherwise create a new association.  */
 m4_symbol *
-m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, m4_symbol_value *value)
+m4_symbol_pushdef (m4_symbol_table *symtab, const char *name,
+		   m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -289,6 +290,7 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
       }
 }
 
+/* Remove the top-most value from SYMBOL's stack.  */
 static void
 symbol_popval (m4_symbol *symbol)
 {
@@ -301,17 +303,29 @@ symbol_popval (m4_symbol *symbol)
   if (stale)
     {
       symbol->value = VALUE_NEXT (stale);
+      m4_symbol_value_delete (stale);
+    }
+}
 
-      if (VALUE_ARG_SIGNATURE (stale))
+/* Remove VALUE from the symbol table, and mark it as deleted.  If no
+   expansions are pending, reclaim its resources.  */
+void
+m4_symbol_value_delete (m4_symbol_value *value)
+{
+  if (VALUE_PENDING (value) > 0)
+    BIT_SET (VALUE_FLAGS (value), VALUE_DELETED_BIT);
+  else
+    {
+      if (VALUE_ARG_SIGNATURE (value))
 	{
-	  m4_hash_apply (VALUE_ARG_SIGNATURE (stale), arg_destroy_CB, NULL);
-	  m4_hash_delete (VALUE_ARG_SIGNATURE (stale));
+	  m4_hash_apply (VALUE_ARG_SIGNATURE (value), arg_destroy_CB, NULL);
+	  m4_hash_delete (VALUE_ARG_SIGNATURE (value));
 	}
-      if (m4_is_symbol_value_text (stale))
-	free (m4_get_symbol_value_text (stale));
-      else if (m4_is_symbol_value_placeholder (stale))
-	free (m4_get_symbol_value_placeholder (stale));
-      free (stale);
+      if (m4_is_symbol_value_text (value))
+	free (m4_get_symbol_value_text (value));
+      else if (m4_is_symbol_value_placeholder (value))
+	free (m4_get_symbol_value_placeholder (value));
+      free (value);
     }
 }
 
@@ -384,16 +398,20 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
       m4_hash_delete (VALUE_ARG_SIGNATURE (dest));
     }
 
-  /* Copy the valuecontents over, being careful to preserve
+  /* Copy the value contents over, being careful to preserve
      the next pointer.  */
   next = VALUE_NEXT (dest);
-  bcopy (src, dest, sizeof (m4_symbol_value));
+  memcpy (dest, src, sizeof (m4_symbol_value));
   VALUE_NEXT (dest) = next;
 
   /* Caller is supposed to free text token strings, so we have to
      copy the string not just its address in that case.  */
   if (m4_is_symbol_value_text (src))
     m4_set_symbol_value_text (dest, xstrdup (m4_get_symbol_value_text (src)));
+  else if (m4_is_symbol_value_placeholder (src))
+    m4_set_symbol_value_placeholder (dest,
+				     xstrdup (m4_get_symbol_value_placeholder
+					      (src)));
 
   if (VALUE_ARG_SIGNATURE (src))
     VALUE_ARG_SIGNATURE (dest) = m4_hash_dup (VALUE_ARG_SIGNATURE (src),

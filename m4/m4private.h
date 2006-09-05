@@ -167,7 +167,9 @@ struct m4_symbol_value {
   int			flags;
 
   m4_hash *		arg_signature;
-  int			min_args, max_args;
+  unsigned int		min_args;
+  unsigned int		max_args;
+  size_t		pending_expansions;
 
   m4__symbol_type	type;
   union {
@@ -182,6 +184,7 @@ struct m4_symbol_value {
 #define VALUE_ARG_SIGNATURE(T)	((T)->arg_signature)
 #define VALUE_MIN_ARGS(T)	((T)->min_args)
 #define VALUE_MAX_ARGS(T)	((T)->max_args)
+#define VALUE_PENDING(T)	((T)->pending_expansions)
 
 #define SYMBOL_NEXT(S)		(VALUE_NEXT          ((S)->value))
 #define SYMBOL_HANDLE(S)	(VALUE_HANDLE        ((S)->value))
@@ -189,15 +192,18 @@ struct m4_symbol_value {
 #define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE ((S)->value))
 #define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))
 #define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      ((S)->value))
+#define SYMBOL_PENDING(S)	(VALUE_PENDING       ((S)->value))
 
 /* Fast macro versions of symbol table accessor functions,
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_symbol_traced(S)	((S)->traced)
 #  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
+#  define m4_get_symbol_value(S)	((S)->value)
+#  define m4_set_symbol_value(S, V)	((S)->value = (V))
 
 #  define m4_symbol_value_create()	xzalloc (sizeof (m4_symbol_value))
-#  define m4_symbol_value_delete(V)	(DELETE (V))
+/* m4_symbol_value_delete is too complex for a simple macro.  */
 
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
@@ -219,15 +225,15 @@ struct m4_symbol_value {
 
 
 
-/* m4_symbol_value.flags bit masks.  Be sure these are consistent with
-   M4_BUILTIN_* bit masks, so we can copy m4_builtin.flags to
-   m4_symbol_arg.flags.  However, if we ever add blind support to user
-   macros, then these names are better for use in the symbol
-   table:  */
+/* m4_symbol_value.flags bit masks.  Be sure these are a consistent
+   superset of the M4_BUILTIN_* bit masks, so we can copy
+   m4_builtin.flags to m4_symbol_arg.flags.  We can use additional
+   bits for private use.  */
 
 #define VALUE_MACRO_ARGS_BIT		(1 << 0)
 #define VALUE_BLIND_ARGS_BIT		(1 << 1)
 #define VALUE_SIDE_EFFECT_ARGS_BIT	(1 << 2)
+#define VALUE_DELETED_BIT		(1 << 3)
 
 
 struct m4_symbol_arg {

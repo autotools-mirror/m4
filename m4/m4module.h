@@ -51,9 +51,12 @@ enum {
   /* Set if macro should only be recognized with arguments; may only
      be set if min_args is nonzero.  */
   M4_BUILTIN_BLIND		= (1 << 1),
-  /* set if macro has side effects even when there are too few
+  /* Set if macro has side effects even when there are too few
      arguments; may only be set if min_args is nonzero.  */
-  M4_BUILTIN_SIDE_EFFECT	= (1 << 2)
+  M4_BUILTIN_SIDE_EFFECT	= (1 << 2),
+
+  /* Mask of valid flag bits.  Any other bits must be set to 0.  */
+  M4_BUILTIN_FLAGS_MASK		= (1 << 3) - 1
 };
 
 struct m4_builtin
@@ -253,8 +256,9 @@ extern const m4_builtin *m4_builtin_find_by_func (lt_dlhandle,
 /* --- MACRO MANAGEMENT --- */
 
 extern void	   m4_macro_expand_input (m4 *);
-extern void	   m4_macro_call	 (m4 *, m4_symbol *, m4_obstack *,
-					  int, m4_symbol_value **);
+extern void	   m4_macro_call	 (m4 *, m4_symbol_value *,
+					  m4_obstack *, int,
+					  m4_symbol_value **);
 
 
 

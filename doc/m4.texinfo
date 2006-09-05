@@ -124,7 +124,7 @@ file in the distribution).  @xref{Experiments}.
 * File Inclusion::              File inclusion
 * Diversions::                  Diverting and undiverting output
 
-* Modules::                     Extending m4 with dynamic runtime modules
+* Modules::                     Extending M4 with dynamic runtime modules
 
 * Text handling::               Macros for text handling
 * Arithmetic::                  Macros for doing arithmetic
@@ -132,8 +132,7 @@ file in the distribution).  @xref{Experiments}.
 * Miscellaneous::               Miscellaneous builtin macros
 * Frozen files::                Fast loading of frozen state
 
-* Compatibility::               Compatibility with other versions of m4
-* Experiments::                 Experimental features in GNU M4
+* Compatibility::               Compatibility with other versions of @code{m4}
 * Answers::                     Correct version of some examples
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
@@ -152,11 +151,11 @@ Introduction and preliminaries
 Lexical and syntactic conventions
 
 * Names::                       Macro names
-* Quoted strings::              Quoting input to m4
-* Comments::                    Comments in m4 input
+* Quoted strings::              Quoting input to @code{m4}
+* Comments::                    Comments in @code{m4} input
 * Other tokens::                Other kinds of input tokens
-* Input processing::            How m4 copies input to output
-* Regular expression syntax::   How m4 interprets regular expressions
+* Input processing::            How @code{m4} copies input to output
+* Regular expression syntax::   How @code{m4} interprets regular expressions
 
 How to invoke macros
 
@@ -170,7 +169,7 @@ How to define new macros
 
 * Define::                      Defining a new macro
 * Arguments::                   Arguments to macros
-* Pseudo Arguments::            Pseudo arguments to macros
+* Pseudo Arguments::            Special arguments to macros
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
@@ -178,14 +177,15 @@ How to define new macros
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
-
 * Symbols::                     Getting the defined macro names
 
 Conditionals, loops, and recursion
 
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
-* Loops::                       Loops and recursion in m4
+* Shift::                       Recursion in @code{m4}
+* Forloop::                     Iteration by counting
+* Foreach::                     Iteration by list contents
 
 How to debug macros and input
 
@@ -201,7 +201,7 @@ Input control
 * Changecom::                   Changing the comment delimiters
 * Changeresyntax::              Changing the regular expression syntax
 * Changesyntax::                Changing the lexical structure of the input
-* M4wrap::                      Saving input until end of input
+* M4wrap::                      Saving text until end of input
 
 File inclusion
 
@@ -215,7 +215,7 @@ Diverting and undiverting output
 * Divnum::                      Diversion numbers
 * Cleardiv::                    Discarding diverted text
 
-Extending m4 with dynamic runtime modules
+Extending M4 with dynamic runtime modules
 
 * Listing Modules::             Listing loaded modules
 * Load::                        Loading additional modules
@@ -238,19 +238,19 @@ Macros for doing arithmetic
 * Eval::                        Evaluating integer expressions
 * Mpeval::                      Multiple precision arithmetic
 
-Running shell commands
+Macros for running shell commands
 
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
-* Maketemp::                    Making names for temporary files
+* Maketemp::                    Making temporary files
 
 Miscellaneous builtin macros
 
 * Errprint::                    Printing error messages
 * Location::                    Printing current location
-* M4exit::                      Exiting from m4
+* M4exit::                      Exiting from @code{m4}
 * Syncoutput::                  Turning on and off sync lines
 
 Fast loading of frozen state
@@ -263,15 +263,16 @@ Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in @acronym{GNU} M4
 * Incompatibilities::           Other incompatibilities
+* Experiments::                 Experimental features in @acronym{GNU} M4
 
-Copying This Manual
+How to make copies of this manual
 
 * GNU Free Documentation License::  License for copying this manual
 
-Indices
+Indices of concepts and macros
 
 * Concept index::               Index for many concepts
-* Macro index::                 Index for all m4 macros
+* Macro index::                 Index for all @code{m4} macros
 
 @end detailmenu
 @end menu
@@ -811,15 +812,15 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 
 @menu
 * Names::                       Macro names
-* Quoted strings::              Quoting input to m4
-* Comments::                    Comments in m4 input
+* Quoted strings::              Quoting input to @code{m4}
+* Comments::                    Comments in @code{m4} input
 * Other tokens::                Other kinds of input tokens
-* Input processing::            How m4 copies input to output
-* Regular expression syntax::   How m4 interprets regular expressions
+* Input processing::            How @code{m4} copies input to output
+* Regular expression syntax::   How @code{m4} interprets regular expressions
 @end menu
 
 @node Names
-@section Names
+@section Macro names
 
 @cindex names
 A name is any sequence of letters, digits, and the character @kbd{_}
@@ -835,7 +836,7 @@ changed at any time, using the builtin macro @code{changesyntax}.
 @xref{Changesyntax}, for more information.
 
 @node Quoted strings
-@section Quoted strings
+@section Quoting input to @code{m4}
 
 @cindex quoted string
 A quoted string is a sequence of characters surrounded by quote
@@ -864,7 +865,7 @@ The quote characters can be changed at any time, using the builtin macros
 (@pxref{Changesyntax}).
 
 @node Comments
-@section Comments
+@section Comments in @code{m4} input
 
 @cindex comments
 Comments in @code{m4} are normally delimited by the characters @samp{#}
@@ -900,7 +901,7 @@ the builtin macros @code{changecom} (@pxref{Changecom}) or
 @code{changesyntax} (@pxref{Changesyntax}).
 
 @node Other tokens
-@section Other tokens
+@section Other kinds of input tokens
 
 Any character, that is neither a part of a name, nor of a quoted string,
 nor a comment, is a token by itself.  When not in the context of macro
@@ -912,7 +913,7 @@ roles, explained later.  Which characters actually perform these roles
 can be adjusted with @code{changesyntax} (@pxref{Changesyntax}).
 
 @node Input processing
-@section Input Processing
+@section How @code{m4} copies input to output
 
 As @code{m4} reads the input token by token, it will copy each token
 directly to the output immediately.
@@ -968,7 +969,7 @@ This process continues until there are no more macro calls to expand and
 all the input has been consumed.
 
 @node Regular expression syntax
-@section Regular Expression Syntax
+@section How @code{m4} interprets regular expressions
 
 There are several contexts where @code{m4} parses an argument as a
 regular expression.  This section describes the various flavors of
@@ -1253,14 +1254,15 @@ f
 
 It is an error if the end of file occurs while collecting arguments.
 
+@comment status: 1
 @example
 define(
 ^D
-@error{}m4:stdin:1: ERROR: end of file in argument list
+@error{}m4:stdin:1: end of file in argument list
 @end example
 
 @node Quoting Arguments
-@section Quoting macro arguments
+@section On Quoting Arguments to macros
 
 @cindex quoted macro arguments
 @cindex macros, quoted arguments to
@@ -1335,7 +1337,7 @@ value, and bring back the original value at a later time.
 @menu
 * Define::                      Defining a new macro
 * Arguments::                   Arguments to macros
-* Pseudo Arguments::            Pseudo arguments to macros
+* Pseudo Arguments::            Special arguments to macros
 * Undefine::                    Deleting a macro
 * Defn::                        Renaming macros
 * Pushdef::                     Temporarily redefining macros
@@ -1343,7 +1345,6 @@ value, and bring back the original value at a later time.
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
-
 * Symbols::                     Getting the defined macro names
 @end menu
 
@@ -1780,11 +1781,14 @@ echo(foo)
 @end example
 
 Using @code{defn} to generate special tokens for builtin macros outside
-of expected contexts can sometimes trigger warnings.
+of expected contexts can sometimes trigger warnings.  But most of the
+time, such tokens are silently converted to the empty string.
 
 @example
+defn(`defn')
+@result{}
 define(defn(`divnum'), `cannot redefine a builtin token')
-@error{}m4:stdin:1: Warning: define: invalid macro name ignored
+@error{}m4:stdin:2: Warning: define: invalid macro name ignored
 @result{}
 divnum
 @result{}0
@@ -2003,6 +2007,25 @@ The point is, here, that larger macro packages can have private macros
 defined, that will not be called by accident.  They can @emph{only} be
 called through the builtin @code{indir}.
 
+One other point to observe is that argument collection occurs before
+@code{indir} invokes @var{name}, so if argument collection changes the
+value of @var{name}, that will be reflected in the final expansion.
+This is different than the behavior when invoking macros directly,
+where the definition that was in effect before argument collection is
+used.
+
+@example
+define(`f', `1')
+@result{}
+f(define(`f', `2'))
+@result{}1
+indir(`f', define(`f', `3'))
+@result{}3
+indir(`f', undefine(`f'))
+@error{}m4:stdin:4: Warning: indir: undefined macro `f'
+@result{}
+@end example
+
 @node Builtin
 @section Indirect call of builtins
 
@@ -2124,11 +2147,13 @@ something a number of times, or while some condition is true.
 @menu
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
-* Loops::                       Loops and recursion in m4
+* Shift::                       Recursion in @code{m4}
+* Forloop::                     Iteration by counting
+* Foreach::                     Iteration by list contents
 @end menu
 
 @node Ifdef
-@section Testing macro definitions
+@section Testing if a macro is defined
 
 @cindex conditionals
 There are two different builtin conditionals in @code{m4}.  The first is
@@ -2156,7 +2181,7 @@ ifdef(`no_such_macro', `yes', `no', `extra argument')
 @end example
 
 @node Ifelse
-@section Comparing strings
+@section If-else construct, or multibranch
 
 @cindex comparing strings
 The other conditional, @code{ifelse}, is much more powerful.  It can be
@@ -2164,13 +2189,30 @@ used as a way to introduce a long comment, as an if-else construct, or
 as a multibranch, depending on the number of arguments supplied:
 
 @deffn {Builtin (m4)} ifelse (@var{comment})
-@deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal}, @w{opt @var{not-equal})}
-@deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal}, @dots{})
+@deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal}, @
+  @ovar{not-equal})
+@deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal-1}, @
+  @var{string-3}, @var{string-4}, @var{equal-2}, @dots{})
 Used with only one argument, the @code{ifelse} simply discards it and
-produces no output.  This is a common @code{m4} idiom for introducing a
+produces no output.
+
+If called with three or four arguments, @code{ifelse} expands into
+@var{equal}, if @var{string-1} and @var{string-2} are equal (character
+for character), otherwise it expands to @var{not-equal}.  A final fifth
+argument is ignored, after triggering a warning.
+
+If called with six or more arguments, and @var{string-1} and
+@var{string-2} are equal, @code{ifelse} expands into @var{equal-1},
+otherwise the first three arguments are discarded and the processing
+starts again.
+
+The macro @code{ifelse} is recognized only with parameters.
+@end deffn
+
+Using only one argument is a common @code{m4} idiom for introducing a
 block comment, as an alternative to repeatedly using @code{dnl}.  This
-special usage is recognized by GNU @code{m4}, so that in this case, the
-warning about missing arguments is never triggered.
+special usage is recognized by @acronym{GNU} @code{m4}, so that in this
+case, the warning about missing arguments is never triggered.
 
 @example
 ifelse(`some comments')
@@ -2180,43 +2222,64 @@ ifelse(`foo', `bar')
 @result{}
 @end example
 
-If called with three or four arguments, @code{ifelse} expands into
-@var{equal}, if @var{string-1} and @var{string-2} are equal (character
-for character), otherwise it expands to @var{not-equal}.
+Using three or four arguments provides decision points.
 
 @example
 ifelse(`foo', `bar', `true')
 @result{}
 ifelse(`foo', `foo', `true')
 @result{}true
-ifelse(`foo', `bar', `true', `false')
-@result{}false
-ifelse(`foo', `foo', `true', `false')
+define(`foo', `bar')
+@result{}
+ifelse(foo, `bar', `true', `false')
 @result{}true
+ifelse(foo, `foo', `true', `false')
+@result{}false
+@end example
+
+Notice how the first argument was used unquoted; it is common to compare
+the expansion of a macro with a string.  With this macro, you can now
+reproduce the behavior of many of the builtins, where the macro is
+recognized only with arguments.
+
+@example
+define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')
+@result{}
+foo
+@result{}foo
+foo()
+@result{}arguments:1
+foo(`a', `b', `c')
+@result{}arguments:3
 @end example
 
 @cindex multibranches
 However, @code{ifelse} can take more than four arguments.  If given more
 than four arguments, @code{ifelse} works like a @code{case} or @code{switch}
 statement in traditional programming languages.  If @var{string-1} and
-@var{string-2} are equal, @code{ifelse} expands into @var{equal}, otherwise
+@var{string-2} are equal, @code{ifelse} expands into @var{equal-1}, otherwise
 the procedure is repeated with the first three arguments discarded.  This
 calls for an example:
 
 @example
+ifelse(`foo', `bar', `third', `gnu', `gnats')
+@error{}m4:stdin:1: Warning: ifelse: extra arguments ignored: 5 > 4
+@result{}gnu
+ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth')
+@result{}
 ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth', `seventh')
 @result{}seventh
+ifelse(`foo', `bar', `3', `gnu', `gnats', `6', `7', `8')
+@error{}m4:stdin:4: Warning: ifelse: extra arguments ignored: 8 > 7
+@result{}7
 @end example
-
-The macro @code{ifelse} is recognized only with parameters.
-@end deffn
 
 Naturally, the normal case will be slightly more advanced than these
 examples.  A common use of @code{ifelse} is in macros implementing loops
 of various kinds.
 
-@node Loops
-@section Loops and recursion
+@node Shift
+@section Recursion in @code{m4}
 
 @cindex recursive macros
 @cindex macros, recursive
@@ -2231,9 +2294,12 @@ previously.
 There is a builtin macro, @code{shift}, which can, among other things,
 be used for iterating through the actual arguments to a macro:
 
-@deffn {Builtin (m4)} shift (@dots{})
-@code{shift} takes any number of arguments, and expands to all but the first
-argument, separated by commas, with each argument quoted.
+@deffn {Builtin (m4)} shift (@var{arg1}, @dots{})
+Takes any number of arguments, and expands to all its arguments except
+@var{arg1}, separated by commas, with each argument quoted.
+
+The macro @code{shift} is recognized only with parameters.
+@end deffn
 
 @example
 shift
@@ -2243,10 +2309,14 @@ shift(`bar')
 shift(`foo', `bar', `baz')
 @result{}bar,baz
 @end example
+
+An example of the use of @code{shift} is this macro:
+
+@deffn Composite reverse (@dots{})
+Takes any number of arguments, and reverse their order.
 @end deffn
 
-An example of the use of @code{shift} is this macro, which reverses the
-order of its arguments:
+It is implemented as:
 
 @example
 define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
@@ -2261,14 +2331,66 @@ reverse(`foo', `bar', `gnats', `and gnus')
 @end example
 
 While not a very interesting macro, it does show how simple loops can be
-made with @code{shift}, @code{ifelse} and recursion.
+made with @code{shift}, @code{ifelse} and recursion.  It also shows
+that @code{shift} is usually used with @samp{$@@}.  Sometimes, a
+recursive algorithm requires adding quotes to each element:
 
-@cindex forloops
+@deffn Composite quote (@dots{})
+@deffnx Composite dquote (@dots{})
+@deffnx Composite dquote_elt (@dots{})
+Takes any number of arguments, and quoting.  With @code{quote}, only one
+level of quoting is added, effectively removing whitespace after commas
+and turning the arguments into a string.  With @code{dquote}, two
+levels of quoting are added, one around each element, and one around
+the list.  And with @code{dquote_elt}, two levels of quoting are added
+around each element.
+@end deffn
+
+Here is an implementation, along with an example usage.
+
+@comment FIXME - these macros are worth reusing in other examples;
+@comment factor them into examples/quote.m4.
+@example
+define(`quote', `ifelse(`$#', `0', `', ``$*'')')dnl
+define(`dquote', ``$@@'')dnl
+define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
+                             ```$1'',dquote_elt(shift($@@))')')dnl
+-quote-dquote-dquote_elt-
+@result{}----
+-quote(`1')-dquote(`1')-dquote_elt(`1')-
+@result{}-1-`1'-`1'-
+-quote(`1',`2')-dquote(`1',`2')-dquote_elt(`1',`2')-
+@result{}-1,2-`1',`2'-`1',`2'-
+dquote(dquote_elt(`1',`2'))
+@result{}``1'',``2''
+dquote_elt(dquote(`1',`2'))
+@result{}``1',`2''
+@end example
+
+The last two lines show that when given two arguments, @code{dquote}
+results in one string, while @code{dquote_elt} results in two.
+
+@node Forloop
+@section Iteration by counting
+
+@cindex for loops
 @cindex loops, counting
 @cindex counting loops
-Here is an example of a loop macro that implements a simple forloop.  It
-can, for example, be used for simple counting:
+Here is an example of a loop macro that implements a simple for loop.
+@comment FIXME - this section still needs some work done
 
+@deffn Composite forloop (@var{iterator}, @var{start}, @var{end}, @var{text})
+Takes the name in @var{iterator}, which must be a valid macro name, and
+successively assign it each integer value from @var{start} to @var{end},
+inclusive.  For each assignment to @var{iterator}, append @var{text} to
+the expansion of the @code{forloop}.  @var{text} may refer to
+@var{iterator}.  Any definition of @var{iterator} prior to this
+invocation is restored.
+@end deffn
+
+It can, for example, be used for simple counting:
+
+@comment FIXME - include(`forloop.m4')
 @comment ignore
 @example
 forloop(`i', 1, 8, `i ')
@@ -2325,12 +2447,69 @@ enough for general use. They lack even basic error handling of cases
 like start value less than final value, and the first argument not being
 a name.  Correcting these errors are left as an exercise to the reader.
 
-@comment FIXME - it would be nice to introduce foreach here, and even
-@comment give an example like this for finding defined macros that meet
-@comment a certain pattern (see examples/foreach.m4):
-@comment define(`quote', ``$@'')
-@comment foreach(`macro', (quote(symbols)),
-@comment         `regexp(macro, `.*_.*', ``\&',')')
+@node Foreach
+@section Iteration by list contents
+
+@cindex for each loops
+@cindex loops, list iteration
+@cindex iterating over lists
+Here is an example of a loop macro that implements list iteration.
+@comment FIXME - this section still needs some work done
+
+@deffn Composite foreach (@var{iterator}, @var{paren-list}, @var{text})
+Takes the name in @var{iterator}, which must be a valid macro name, and
+successively assign it each value from @var{paren-list}.
+@var{paren-list} is a comma-separated list of elements surrounded by
+parentheses.  For each assignment to @var{iterator}, append @var{text}
+to the expansion of @code{foreach}.  @var{text} may refer to
+@var{iterator}.  Any definition of @var{iterator} prior to this
+invocation is restored.
+@end deffn
+
+As an example, this displays each word in a list inside of a sentence.
+
+@comment FIXME - include(`foreach.m4')
+@comment ignore
+@example
+foreach(`x', `(foo, bar, foobar)', `Word was: x
+')
+@result{}Word was: foo
+@result{}Word was: bar
+@result{}Word was: foobar
+@end example
+
+The implementation of the @code{foreach} macro is a bit more involved;
+it is a wrapper around two helper macros.  First, @code{_arg1} is needed
+to grab the first element of a list.  Second, @code{_foreach} implements
+the recursion, successively walking through the original list.
+
+Here is an actual implementation of @code{forloop}, followed by a
+demonstration of using it to filter out a list of symbols that contain
+@samp{if}.
+
+@comment FIXME - include(foreach.m4),include(quote.m4)
+@example
+define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
+define(`_arg1', ``$1'')dnl
+define(`_foreach',
+       `ifelse($2, `()', ,
+               `define(`$1',
+                       `_arg1$2')$3`'_foreach(`$1', `(shift$2)',
+                                              `$3')')')dnl
+define(`dquote', ``$@@'')
+@result{}
+foreach(`macro', (dquote(symbols)), `regexp(macro, `.*if.*', ``\&',')')
+@result{}ifdef,ifelse,shift,
+@end example
+
+The example had to use a helper @code{quote} to ensure that the output
+from @code{symbols} was double quoted; without it, the macro would have
+gone into an infinite loop thanks to macros being reinvoked during the
+rescanning.  Choosing @samp{()} as the list delimiters made this
+example rather awkward in terms of proper quoting.  (A different
+implementation can be acheived by changing @var{list} from a
+parenthesized list to a quoted list; try reimplementing @code{foreach}
+with these semantics yourself, then check @pxref{Answers}).
 
 @node Debugging
 @chapter How to debug macros and input
@@ -2534,7 +2713,7 @@ to @code{m4}.
 * Changecom::                   Changing the comment delimiters
 * Changeresyntax::              Changing the regular expression syntax
 * Changesyntax::                Changing the lexical structure of the input
-* M4wrap::                      Saving input until end of input
+* M4wrap::                      Saving text until end of input
 @end menu
 
 @node Dnl
@@ -2630,7 +2809,7 @@ as they will be confused with names in the input.  Doing so disables
 the quoting mechanism.
 
 @node Changecom
-@section Changing comment delimiters
+@section Changing the comment delimiters
 
 @cindex changing comment delimiters
 @cindex comment delimiters, changing
@@ -3101,7 +3280,7 @@ macro calls.
 
 
 @node M4wrap
-@section Saving input
+@section Saving text until end of input
 
 @cindex saving input
 @cindex input, saving
@@ -3473,7 +3652,7 @@ diversions, given by the arguments.  (This macro has a nasty bug!  You
 should try to see if you can find it and correct it.   @xref{Answers}.)
 
 @node Modules
-@chapter Runtime Dynamic Modules
+@chapter Extending M4 with dynamic runtime modules
 
 @cindex modules
 @sc{gnu} m4-1.4.x had a monolithic architecture.  All of its
@@ -3979,7 +4158,7 @@ patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 
 
 @node Format
-@section Formatted output
+@section Formatting strings (printf-like)
 
 @cindex formatted output
 @cindex output, formatted
@@ -4006,7 +4185,7 @@ len(format(`%-*X', `5000', `1'))
 @result{}5000
 @end example
 
-Using the @code{forloop} macro defined in @xref{Loops}, this
+Using the @code{forloop} macro defined in @xref{Forloop}, this
 example shows how @code{format} can be used to produce tabular output.
 
 @comment ignore
@@ -4074,7 +4253,7 @@ given arguments.
 @end deffn
 
 @node Eval
-@section Evaluating integer or rational expressions
+@section Evaluating integer expressions
 
 @cindex integer expression evaluation
 @cindex evaluation, of integer expressions
@@ -4213,7 +4392,7 @@ The builtin macro @code{mpeval} is recognized only when given arguments.
 @end deffn
 
 @node Shell commands
-@chapter Running shell commands
+@chapter Macros for running shell commands
 
 @cindex executing shell commands
 @cindex running shell commands
@@ -4227,8 +4406,8 @@ commands from within @code{m4}.
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
-* Sysval::                      Exit codes
-* Maketemp::                    Making names for temporary files
+* Sysval::                      Exit status
+* Maketemp::                    Making temporary files
 @end menu
 
 @node Platform macros
@@ -4299,7 +4478,7 @@ arguments.
 @end deffn
 
 @node Sysval
-@section Exit codes
+@section Exit status
 
 @cindex exit code from shell commands
 @cindex shell commands, exit code from
@@ -4323,7 +4502,7 @@ sysval
 @end example
 
 @node Maketemp
-@section Making names for temporary files
+@section Making temporary files
 
 @cindex temporary file names
 @cindex files, names of temporary
@@ -4357,7 +4536,7 @@ any of the previous chapters.
 @menu
 * Errprint::                    Printing error messages
 * Location::                    Printing current location
-* M4exit::                      Exiting from m4
+* M4exit::                      Exiting from @code{m4}
 * Syncoutput::                  Turning on and off sync lines
 @end menu
 
@@ -4433,7 +4612,7 @@ not followed, e.g., diverted text is not undiverted, and saved text
 (@pxref{M4wrap}) is not reread.
 
 @node Syncoutput
-@section Turning sync lines on and off within @code{m4}
+@section Turning on and off sync lines
 
 @cindex Toggling sync lines within @code{m4}
 @deffn {Builtin (gnu)} syncoutput (@var{truth})
@@ -4661,12 +4840,13 @@ There are also differences in BSD flavors of @code{m4}.  No attempt
 is made to summarize these here.
 
 @menu
-* Extensions::                  Extensions in GNU m4
+* Extensions::                  Extensions in @acronym{GNU} M4
 * Incompatibilities::           Other incompatibilities
+* Experiments::                 Experimental features in @acronym{GNU} M4
 @end menu
 
 @node Extensions
-@section Extensions in GNU @code{m4}
+@section Extensions in @acronym{GNU} M4
 
 @cindex GNU extensions
 @cindex @acronym{POSIX}
@@ -4835,7 +5015,7 @@ define the macro @code{__windows__}, which expands to the empty string.
 
 
 @node  Experiments
-@chapter Experimental features in GNU M4
+@section Experimental features in @acronym{GNU} M4
 
 Certain features of GNU @code{m4} are experimental.
 
@@ -4877,6 +5057,82 @@ unproven and might go away.  Do not count on it yet.
 Some of the examples in this manuals are buggy.  Correctly working
 macros are presented here.
 
+The @code{foreach} macro (@pxref{Foreach}) as presented required the
+user to use parentheses to delineate the list.  This approach is
+quadratic, because the entire list is propagated through each recursion,
+with additional invocations of the shift macro added on each iteration:
+
+@comment FIXME - include(foreach.m4),include(quote.m4)
+@comment options: -d-V
+@example
+define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
+define(`_arg1', ``$1'')dnl
+define(`_foreach',
+       `ifelse($2, `()', ,
+               `define(`$1',
+                       `_arg1$2')$3`'_foreach(`$1', `(shift$2)',
+                                              `$3')')')dnl
+define(`dquote', ``$@'')
+@result{}
+foreach(`macro', (dquote(symbols)), `regexp(macro, `shift', `\&')')
+@result{}shift
+traceon(`shift')
+@result{}
+foreach(`a', `(1,2,3)', `a
+')
+@result{}1
+@error{}m4trace: -2- shift
+@error{}m4trace: -2- shift
+@result{}2
+@error{}m4trace: -3- shift
+@error{}m4trace: -2- shift
+@error{}m4trace: -3- shift
+@error{}m4trace: -2- shift
+@result{}3
+@error{}m4trace: -4- shift
+@error{}m4trace: -3- shift
+@error{}m4trace: -2- shift
+@result{}
+@end example
+
+An alternative implementation takes a quoted list, with semantics that
+the list is expanded once before iteration, and has the benefit that
+each iteration operates on a shorter list, giving linear performance on
+long lists.  Another way of viewing these semantics is that the
+outermost quotes delineates the list, then each element of the list must
+be quoted as though the list delimiters were not present.  Notice the
+difference when iterating over @code{symbols}; we must use
+@code{dquote_elt} instead of @code{dquote} to get the necessary quoting.
+
+@comment FIXME - include(foreach.m4),include(quote.m4)
+@comment options: -d-V
+@example
+define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
+define(`_arg1', ``$1'')dnl
+define(`quote', `ifelse(`$#', `0', `', ``$*'')')dnl
+define(`dquote', ``$@@'')dnl
+define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
+                             ```$1'',dquote_elt(shift($@@))')')dnl
+define(`_rest', `ifelse(`$#', `1', , `dquote(shift($@@))')')dnl
+define(`_foreach',
+       `ifelse(quote($2), , ,
+               `define(`$1',
+                       `_arg1($2)')$3`'_foreach(`$1', _rest($2),
+                                                `$3')')')dnl
+foreach(`macro', `dquote_elt(symbols)', `regexp(macro, `shift', `\&')')
+@result{}shift
+traceon(`shift')
+@result{}
+foreach(`a', ``1',`2',`3'', `a
+')
+@result{}1
+@error{}m4trace: -3- shift
+@result{}2
+@error{}m4trace: -3- shift
+@result{}3
+@result{}
+@end example
+
 The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
 called without arguments to clear all pending diversions.  A macro that
 achieves that as well is:
@@ -4895,7 +5151,7 @@ otherwise they will be passed to undivert().
 @c ========================================================== Appendices
 
 @node Copying This Manual
-@appendix Copying This Manual
+@appendix How to make copies of this manual
 @cindex License
 
 @menu
@@ -4905,20 +5161,20 @@ otherwise they will be passed to undivert().
 @include fdl.texi
 
 @node Indices
-@appendix Indices
+@appendix Indices of concepts and macros
 
 @menu
 * Concept index::               Index for many concepts
-* Macro index::                 Index for all m4 macros
+* Macro index::                 Index for all @code{m4} macros
 @end menu
 
 @node Concept index
-@appendixsec Concept index
+@appendixsec Index for many concepts
 
 @printindex cp
 
 @node Macro index
-@appendixsec Macro index
+@appendixsec Index for all @code{m4} macros
 
 References are exclusively to the places where a builtin is introduced
 the first time.
