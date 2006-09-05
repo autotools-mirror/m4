@@ -45,7 +45,7 @@
  *
  * To load a module, call m4_module_load(), which uses the libltdl
  * API to find the module in the module search path.  The search
- * path is initialised from the environment variable M4MODPATH, followed
+ * path is initialized from the environment variable M4MODPATH, followed
  * by the configuration time default where the modules shipped with M4
  * itself are installed.  Libltdl reads the libtool .la file to
  * get the real library name (which can be system dependent), returning
@@ -176,7 +176,7 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 	}
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: builtins loaded",
+      M4_DEBUG_MESSAGE1(context, "module %s: builtins loaded",
 			m4_get_module_name (handle));
 #endif /* DEBUG_MODULES */
     }
@@ -207,7 +207,7 @@ install_macro_table (m4 *context, lt_dlhandle handle)
 	}
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: macros loaded",
+      M4_DEBUG_MESSAGE1(context, "module %s: macros loaded",
 			m4_get_module_name (handle));
 #endif /* DEBUG_MODULES */
     }
@@ -309,8 +309,8 @@ m4__module_find (const char *name)
 }
 
 
-/* Initialisation.  Currently the module search path in path.c is
-   initialised from M4MODPATH.  Only absolute path names are accepted to
+/* Initialization.  Currently the module search path in path.c is
+   initialized from M4MODPATH.  Only absolute path names are accepted to
    prevent the path search of the dlopen library from finding wrong
    files. */
 void
@@ -319,7 +319,7 @@ m4__module_init (m4 *context)
   int errors = 0;
 
   /* Do this only once!  If we already have an iface_id, then the
-     module system has already been initialised.  */
+     module system has already been initialized.  */
   if (iface_id)
     {
       m4_error (context, 0, 0, _("multiple module loader initializations"));
@@ -360,14 +360,14 @@ m4__module_init (m4 *context)
 	errors = lt_dlinsertsearchdir (lt_dlgetsearchpath (), path);
     }
 
-  /* Couldn't initialise the module system; diagnose and exit.  */
+  /* Couldn't initialize the module system; diagnose and exit.  */
   if (errors)
     m4_error (context, EXIT_FAILURE, 0,
 	      _("failed to initialize module loader: %s"),
 	      module_dlerror ());
 
 #ifdef DEBUG_MODULES
-  M4_DEBUG_MESSAGE ("Module loader initialised.");
+  M4_DEBUG_MESSAGE (context, "Module loader initialized.");
 #endif /* DEBUG_MODULES */
 }
 
@@ -392,11 +392,11 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
       /* If we have a handle, there must be handle info.  */
       assert (info);
 
-      M4_DEBUG_MESSAGE2("module %s: opening at %s",
+      M4_DEBUG_MESSAGE2(context, "module %s: opening at %s",
 			name ? name : MODULE_SELF_NAME, info->filename);
 #endif
 
-      /* Find and run any initialising function in the opened module,
+      /* Find and run any initializing function in the opened module,
 	 each time the module is opened.  */
       init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
       if (init_func)
@@ -404,7 +404,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  (*init_func) (context, handle, obs);
 
 #ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s: init hook called", name);
+	  M4_DEBUG_MESSAGE1(context, "module %s: init hook called", name);
 #endif /* DEBUG_MODULES */
 	}
 
@@ -418,7 +418,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	}
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: opened", name);
+      M4_DEBUG_MESSAGE1(context, "module %s: opened", name);
 #endif /* DEBUG_MODULES */
     }
   else
@@ -498,7 +498,7 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
       (*finish_func) (context, handle, obs);
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: finish hook called", name);
+      M4_DEBUG_MESSAGE1(context, "module %s: finish hook called", name);
 #endif /* DEBUG_MODULES */
     }
 
@@ -508,13 +508,13 @@ module_close (m4 *context, lt_dlhandle handle, m4_obstack *obs)
       if (!errors)
 	{
 #ifdef DEBUG_MODULES
-	  M4_DEBUG_MESSAGE1("module %s: closed", name);
+          M4_DEBUG_MESSAGE1(context, "module %s: closed", name);
 #endif /* DEBUG_MODULES */
 	}
     }
 #ifdef DEBUG_MODULES
   else
-    M4_DEBUG_MESSAGE1("module %s: resident module not closed", name);
+    M4_DEBUG_MESSAGE1(context, "module %s: resident module not closed", name);
 #endif /* DEBUG_MODULES */
 
   if (errors)
@@ -552,7 +552,7 @@ module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
 #ifdef DEBUG_MODULES
   if (info->ref_count > 1)
     {
-      M4_DEBUG_MESSAGE2("module %s: now has %d references.",
+      M4_DEBUG_MESSAGE2(context, "module %s: now has %d references.",
 			name, info->ref_count -1);
     }
 #endif /* DEBUG_MODULES */
@@ -566,7 +566,7 @@ module_remove (m4 *context, lt_dlhandle handle, m4_obstack *obs)
       m4__symtab_remove_module_references (M4SYMTAB, handle);
 
 #ifdef DEBUG_MODULES
-      M4_DEBUG_MESSAGE1("module %s: symbols unloaded", name);
+      M4_DEBUG_MESSAGE1(context, "module %s: symbols unloaded", name);
 #endif /* DEBUG_MODULES */
     }
 

@@ -20,7 +20,7 @@
 AC_PREREQ([2.60])
 
 ## ------------------------ ##
-## Autoconf initialisation. ##
+## Autoconf initialization. ##
 ## ------------------------ ##
 AC_INIT([GNU M4], [1.9a], [bug-m4@gnu.org])
 
@@ -59,39 +59,14 @@ dnl prefix for cache variables.  But in the case of m4, that collides with
 dnl the m4_ namespace provided by m4sugar, so we prefer M4_ as our
 dnl package-specific prefix.  FIXME - consistently use M4_ in the m4 macros
 dnl that feed the creation of configure.
-m4_pattern_forbid([^M4_])
-m4_pattern_allow([^M4_cv_])
+m4_pattern_forbid([^M4_[A-Z]])
 
 AC_DEFUN([M4_DEFAULT_PRELOAD], [m4 traditional gnu])
-AC_MSG_CHECKING([for modules to preload])
-  DLPREOPEN=
-
-  AC_ARG_WITH([modules],
-    [AS_HELP_STRING([--with-modules=MODULES],
-		    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
-    [use_modules="$withval"],
-    [use_modules="M4_DEFAULT_PRELOAD"])
-
-  PREOPEN_DEPENDENCIES=
-  DLPREOPEN="-dlpreopen force"
-  if test -z "$use_modules"; then
-    use_modules=none
-  else
-    if test "$use_modules" != yes; then
-      for module in $use_modules; do
-	DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
-	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES modules/$module.la"
-      done
-    fi
-  fi
-AC_MSG_RESULT([$use_modules])
-AC_SUBST([DLPREOPEN])
-AC_SUBST([PREOPEN_DEPENDENCIES])
-
+M4_default_preload="M4_DEFAULT_PRELOAD"
 
 
 ## ------------------------ ##
-## Automake Initialisation. ##
+## Automake Initialization. ##
 ## ------------------------ ##
 AM_INIT_AUTOMAKE([1.9b subdir-objects dist-bzip2 gnits])
 
@@ -110,7 +85,7 @@ M4_CHECK_DEBUGGING
 
 
 ## ----------------------- ##
-## Libtool initialisation. ##
+## Libtool initialization. ##
 ## ----------------------- ##
 LT_PREREQ([2.0])
 LT_CONFIG_LTDL_DIR([ltdl])
@@ -127,6 +102,37 @@ case "$CFLAGS" in
 	      ;;
 esac
 
+## ------------------------------- ##
+## Preloaded module configuration. ##
+## ------------------------------- ##
+AS_IF([test "x$enable_shared" != xno],
+      [DYNAMIC_MODULES=yes], [DYNAMIC_MODULES=no])
+AC_SUBST([DYNAMIC_MODULES], [$DYNAMIC_MODULES])
+
+AC_MSG_CHECKING([for modules to preload])
+  DLPREOPEN=
+
+  AC_ARG_WITH([modules],
+    [AS_HELP_STRING([--with-modules=MODULES],
+		    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
+    [use_modules="$withval"],
+    [use_modules="$M4_default_preload"])
+
+  PREOPEN_DEPENDENCIES=
+  DLPREOPEN="-dlpreopen force"
+  if test -z "$use_modules"; then
+    use_modules=none
+  else
+    if test "$use_modules" != yes; then
+      for module in $use_modules; do
+	DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
+	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES modules/$module.la"
+      done
+    fi
+  fi
+AC_MSG_RESULT([$use_modules])
+AC_SUBST([DLPREOPEN])
+AC_SUBST([PREOPEN_DEPENDENCIES])
 
 
 ## ---------------- ##

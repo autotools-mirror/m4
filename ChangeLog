@@ -1,5 +1,25 @@
 2006-09-05  Eric Blake  <ebb9@byu.net>
 
+	* m4/input.c (lex_debug): Remove dead code that broke compilation
+	with --enable-debug.
+	* m4/module.c (install_builtin_table, install_macro_table)
+	(m4__module_init, m4__module_open, module_close)
+	(module_remove): Fix compilation when --enable-debug.
+	* m4/output.c (m4_shipout_text): Likewise.
+	* ltdl/m4/debug.m4 (M4_CHECK_DEBUGGING): Preload all static
+	libraries when --enable-debug.
+	* configure.ac (DYNAMIC_MODULES): New variable, to pass
+	information to testsuite.
+	(modules to preload): Determine modules after we know whether
+	shared libraries are supported.
+	* tests/atlocal.in (DYNAMIC_MODULES): Substitute this into
+	testsuite.
+	* tests/testsuite.at (AT_CHECK_DYNAMIC_MODULE): New macro.
+	* tests/modules.at (Freezing modules, AT_CHECK_M4_MODTEST)
+	(modules: shadow, modules: unload, modules: importing)
+	(modules: trace): Use new macro.
+	* tests/builtins.at (gmp): Likewise.
+
 	* m4/macro.c (expansion_level, macro_call_id): Change to size_t.
 	All users updated.
 	(expand_token): Avoid assertion just added to docs.

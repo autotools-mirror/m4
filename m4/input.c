@@ -955,8 +955,6 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 
 #ifdef DEBUG_INPUT
 
-static	void  lex_debug	(void);
-
 int
 m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
 {
@@ -992,15 +990,5 @@ m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
       break;
     }
   return 0;
-}
-
-static void
-lex_debug (void)
-{
-  m4__token_type type;
-  m4_symbol_value token;
-
-  while ((type = next_token (&token)) != NULL)
-    m4_print_token ("lex", type, &token);
 }
 #endif

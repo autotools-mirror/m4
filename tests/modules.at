@@ -26,7 +26,7 @@ AT_BANNER([Module support.])
 
 AT_SETUP([Freezing modules])
 AT_KEYWORDS([frozen])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[frozen.m4]],
 [[divert(1)dnl
@@ -77,7 +77,7 @@ AT_CLEANUP([frozen.m4f])
 # Skip if modtest is not present (we are not in the package).
 m4_define([AT_CHECK_M4_MODTEST],
 [AT_SETUP([$1])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_CHECK([test -f "$abs_top_builddir/modules/modtest.la" || exit 77])
 
@@ -135,7 +135,7 @@ AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: relative path],
 ## ------ ##
 
 AT_SETUP([modules: shadow])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[# no modules loaded yet
@@ -276,7 +276,7 @@ AT_CLEANUP
 ## ------ ##
 
 AT_SETUP([modules: unload])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[test
@@ -350,7 +350,7 @@ AT_CLEANUP
 # from the first command:
 
 AT_SETUP([modules: importing])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[import
@@ -409,7 +409,7 @@ AT_CLEANUP
 # memory and then redefined by a subsequent load.
 
 AT_SETUP([modules: trace])
-AT_KEYWORDS([module])
+AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[test

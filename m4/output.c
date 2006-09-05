@@ -366,7 +366,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 
 #ifdef DEBUG_OUTPUT
 	    printf ("DEBUG: cur %d, cur out %d\n",
-		    current_line, output_current_line);
+		    m4_get_current_line (context), m4_output_current_line);
 #endif
 
 	    /* Output a `#line NUM' synchronisation directive if needed.

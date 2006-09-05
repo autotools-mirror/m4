@@ -45,6 +45,17 @@ m4_pattern_allow([^dnl$])
 # We exercise m4.
 AT_TESTED([m4])
 
+# AT_CHECK_DYNAMIC_MODULE
+# -----------------------
+# Add keyword `module' to the test, and skip the test if dynamic
+# modules were disabled at configure time.
+m4_define([AT_CHECK_DYNAMIC_MODULE],
+[AT_KEYWORDS([module])
+AT_CHECK([if test "x$DYNAMIC_MODULES" = xno ; then
+  echo Dynamic module support not detected, skipping this test.
+  exit 77
+fi])])
+
 ## ----------- ##
 ## The suite.  ##
 ## ----------- ##
