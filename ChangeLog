@@ -1,3 +1,11 @@
+2006-09-05  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (define_macro): Warn on invalid macro name.
+	* NEWS: Document this change.
+	* doc/m4.texinfo: Fix typos.
+	(Invoking m4, Macro Arguments, Pseudo Arguments, Defn, Indir)
+	(Ifelse): Backport some improvements from head.
+
 2006-09-04  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Changeword): Skip test on mingw, where the

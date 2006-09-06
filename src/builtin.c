@@ -456,7 +456,11 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
     return;
 
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
-    return;
+    {
+      M4ERROR ((warning_status, 0,
+		"Warning: %s: invalid macro name ignored", ARG (0)));
+      return;
+    }
 
   if (argc == 2)
     {
