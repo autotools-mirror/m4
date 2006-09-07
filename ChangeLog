@@ -1,3 +1,9 @@
+2006-09-07  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am ($(TESTSUITE)): Revert patch from 2006-09-05...
+	(check-local): and put dependency here.
+	Reported by Ralf Wildenhues.
+
 2006-09-05  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (m4_debug_message): New prototype.

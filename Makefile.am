@@ -389,7 +389,7 @@ $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
 
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT) tests/m4
+$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
 	$(AUTOTEST) -I '$(srcdir)/tests' -o $@.tmp $@.at
 	mv $@.tmp $@
 
@@ -415,7 +415,7 @@ DISTCLEANFILES += tests/atconfig
 CD_TESTDIR	= cd ./tests
 
 # Hook the test suite into the check rule
-check-local: tests/atconfig $(TESTSUITE)
+check-local: tests/atconfig tests/m4 $(TESTSUITE)
 	$(CD_TESTDIR); \
 	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
 	  $(TESTSUITEFLAGS)
