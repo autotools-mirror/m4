@@ -1,3 +1,7 @@
+2006-09-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* checks/check-them: Quote $pwd.
+
 2006-09-05  Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (define_macro): Warn on invalid macro name.
