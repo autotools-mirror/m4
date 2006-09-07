@@ -1175,7 +1175,7 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, name);
+  push_file (fp, name, TRUE);
   free ((char *) name);
 }
 

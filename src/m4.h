@@ -288,7 +288,7 @@ token_type next_token (token_data *);
 void skip_line (void);
 
 /* push back input */
-void push_file (FILE *, const char *);
+void push_file (FILE *, const char *, boolean);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
 const char *push_string_finish (void);

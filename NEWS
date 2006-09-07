@@ -7,7 +7,11 @@ Version 1.4.7 - ?? ??? 2006, by ??  (CVS version 1.4.6a)
 * Fix regression from 1.4.5 in handling a file that ends in a macro
   expansion without arguments instead of a newline.
 * The define and pushdef macros now warn when the first argument is not
-  a string.
+  a string, rather than silently doing nothing.
+* Standard input can now be read more than once, as in 'm4 - file -', and
+  is not closed until all wrapped text is handled.  This makes a
+  difference when stdin is not a regular file, and also fixes bugs when
+  using the syscmd or esyscmd macros from wrapped text.
 
 Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
 

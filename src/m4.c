@@ -96,7 +96,7 @@ m4_error (int status, int errnum, const char *format, ...)
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
-                  current_line, format, args);
+		  current_line, format, args);
 }
 
 /*-------------------------------.
@@ -105,7 +105,7 @@ m4_error (int status, int errnum, const char *format, ...)
 
 void
 m4_error_at_line (int status, int errnum, const char *file, int line,
-                  const char *format, ...)
+		  const char *format, ...)
 {
   va_list args;
   va_start (args, format);
@@ -279,6 +279,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   macro_definition *defines;
   FILE *fp;
+  boolean read_stdin = FALSE;
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
@@ -488,14 +489,24 @@ Written by Rene' Seindal.\n\
 
   if (optind == argc)
     {
-      push_file (stdin, "stdin");
+      /* No point closing stdin until after wrapped text is
+	 processed.  */
+      push_file (stdin, "stdin", FALSE);
+      read_stdin = TRUE;
       expand_input ();
     }
   else
     for (; optind < argc; optind++)
       {
 	if (strcmp (argv[optind], "-") == 0)
-	  push_file (stdin, "stdin");
+	  {
+	    /* If stdin is a terminal, we want to allow 'm4 - file -'
+	       to read input from stdin twice, like GNU cat.  Besides,
+	       there is no point closing stdin before wrapped text, to
+	       minimize bugs in syscmd called from wrapped text.  */
+	    push_file (stdin, "stdin", FALSE);
+	    read_stdin = TRUE;
+	  }
 	else
 	  {
 	    const char *name;
@@ -508,7 +519,7 @@ Written by Rene' Seindal.\n\
 		retcode = EXIT_FAILURE;
 		continue;
 	      }
-	    push_file (fp, name);
+	    push_file (fp, name, TRUE);
 	    free ((char *) name);
 	  }
 	expand_input ();
@@ -520,9 +531,15 @@ Written by Rene' Seindal.\n\
   while (pop_wrapup ())
     expand_input ();
 
-  /* Change debug stream back to stderr, to force flushing debug stream and
-     detect any errors it might have encountered.  */
+  /* Change debug stream back to stderr, to force flushing the debug
+     stream and detect any errors it might have encountered.  Close
+     stdin if we read from it, to detect any errors.  */
   debug_set_output (NULL);
+  if (read_stdin && fclose (stdin) == EOF)
+    {
+      M4ERROR ((warning_status, errno, "error reading file"));
+      retcode = EXIT_FAILURE;
+    }
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);

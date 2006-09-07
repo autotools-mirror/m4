@@ -588,10 +588,12 @@ names.  If no names are present, the standard input is read.  A file
 name of @file{-} is taken to mean the standard input.  It is
 conventional, but not required, for input files to end in @samp{.m4}.
 
-The input files are read in the sequence given.  The standard input can
-only be read once, so the file name @file{-} should only appear once on
-the command line.  It is an error if an input file ends in the middle of
-argument collection, a comment, or a quoted string.
+The input files are read in the sequence given.  Standard input can be
+read more than once, so the file name @file{-} may appear multiple times
+on the command line; this makes a difference when input is from a
+terminal or other special file type.  It is an error if an input file
+ends in the middle of argument collection, a comment, or a quoted
+string.
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
@@ -4109,6 +4111,32 @@ syscmd(`echo foo')
 Note how the expansion of @code{syscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
+As an example of @var{shell-command} using the same standard input as
+@code{m4}, the command line @kbd{echo "m4wrap(\`syscmd(\`cat')')" | m4}
+will tell @code{m4} to read all of its input before executing the
+wrapped text, then hand a valid (albeit emptied) pipe as standard input
+for the @code{cat} subcommand.  Therefore, you should be careful when
+using standard input (either by specifying no files, or by passing
+@samp{-} as a file name on the command line, @pxref{Invoking m4}), and
+also invoking subcommands via @code{syscmd} or @code{esyscmd} that
+consume data from standard input.
+
+@ignore
+@comment If the user types the example below with stdin being an
+@comment interactive terminal, then cat will hang waiting for additional
+@comment input after m4 has exited.  But the testsuite is using a pipe
+@comment for stdin.  Hence, we have two versions - the one we feed the
+@comment testsuite below, and the one we display to the user above that
+@comment more accurately shows what the testsuite is really doing but
+@comment which the testsuite cannot parse.
+
+@example
+m4wrap(`syscmd(`cat')')
+@result{}
+^D
+@end example
+@end ignore
+
 @node Esyscmd
 @section Reading the output of commands
 
@@ -4749,6 +4777,11 @@ implemented for the various builtins that are required to issue an error
 (such as @code{include} (@pxref{Include}) when a file is unreadable,
 @code{eval} (@pxref{Eval}) when an argument cannot be parsed, or using
 @code{m4exit} (@pxref{M4exit}) with a non-numeric argument).
+
+@item
+Some traditional implementations only allow reading standard input
+once, but @acronym{GNU} @code{m4} correctly handles multiple instances
+of @samp{-} on the command line.
 
 @item
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
