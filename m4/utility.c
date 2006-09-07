@@ -128,6 +128,26 @@ m4_error (m4 *context, int status, int errnum, const char *format, ...)
   m4_set_exit_status (context, EXIT_FAILURE);
 }
 
+/* Issue an error.  The message is printf-style, based on FORMAT and
+   any other arguments, and the program name and location (from FILE
+   and LINE) are automatically prepended.  If ERRNUM is non-zero,
+   include strerror output in the message.  If STATUS is non-zero, or
+   if errors are fatal, call exit immediately; otherwise, remember
+   that an error occurred so that m4 cannot exit with success later
+   on.*/
+void
+m4_error_at_line (m4 *context, int status, int errnum, const char *file,
+		  int line, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  if (status == EXIT_SUCCESS && m4_get_fatal_warnings_opt (context))
+    status = EXIT_FAILURE;
+  verror_at_line (status, errnum, line ? file : NULL,
+		  line, format, args);
+  m4_set_exit_status (context, EXIT_FAILURE);
+}
+
 /* Issue a warning, if they are not being suppressed.  The message is
    printf-style, based on FORMAT and any other arguments, and the
    program name, location (if we are currently parsing an input file),
@@ -150,6 +170,32 @@ m4_warn (m4 *context, int errnum, const char *format, ...)
 	 least fall back on the original format.  */
       verror_at_line (status, errnum,
 		      line ? m4_get_current_file (context) : NULL, line,
+		      full_format ? full_format : format, args);
+      free (full_format);
+    }
+}
+
+/* Issue a warning, if they are not being suppressed.  The message is
+   printf-style, based on FORMAT and any other arguments, and the
+   program name, location (from FILE and LINE), and "Warning:" are
+   automatically prepended.  If ERRNUM is non-zero, include strerror
+   output in the message.  If warnings are fatal, call exit
+   immediately, otherwise exit status is unchanged.  */
+void
+m4_warn_at_line (m4 *context, int errnum, const char *file, int line,
+		 const char *format, ...)
+{
+  if (!m4_get_suppress_warnings_opt (context))
+    {
+      va_list args;
+      int status = EXIT_SUCCESS;
+      char *full_format = xasprintf(_("Warning: %s"), format);
+      va_start (args, format);
+      if (m4_get_fatal_warnings_opt (context))
+	status = EXIT_FAILURE;
+      /* If the full_format failed (unlikely though that may be), at
+	 least fall back on the original format.  */
+      verror_at_line (status, errnum, line ? file : NULL, line,
 		      full_format ? full_format : format, args);
       free (full_format);
     }

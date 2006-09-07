@@ -236,6 +236,7 @@ main (int argc, char *const *argv, char *const *envp)
   macro_definition *defines;
   FILE *fp;
   char *filename;
+  bool read_stdin = false;	/* true iff we have read from stdin */
 
   m4 *context;
 
@@ -549,14 +550,18 @@ main (int argc, char *const *argv, char *const *envp)
   exit_status = EXIT_SUCCESS;
   if (optind == argc)
     {
-      m4_push_file (context, stdin, "stdin");
+      m4_push_file (context, stdin, "stdin", false);
+      read_stdin = true;
       m4_macro_expand_input (context);
     }
   else
     for (; optind < argc; optind++)
       {
 	if (strcmp (argv[optind], "-") == 0)
-	  m4_push_file (context, stdin, "stdin");
+	  {
+	    m4_push_file (context, stdin, "stdin", false);
+	    read_stdin = true;
+	  }
 	else
 	  {
 	    fp = m4_path_search (context, argv[optind], &filename);
@@ -568,7 +573,7 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    else
 	      {
-		m4_push_file (context, fp, filename);
+		m4_push_file (context, fp, filename, true);
 		free (filename);
 	      }
 	  }
@@ -576,9 +581,15 @@ main (int argc, char *const *argv, char *const *envp)
       }
 
   /* Now handle wrapup text.  */
-
   while (m4_pop_wrapup ())
     m4_macro_expand_input (context);
+
+  /* Change debug stream back to stderr, to force flushing the debug
+     stream and detect any errors it might have encountered.  Close
+     stdin if we read from it, to detect any errors.  */
+  m4_debug_set_output (context, NULL);
+  if (read_stdin && fclose (stdin) == EOF)
+    m4_error (context, 0, errno, _("error closing stdin"));
 
   if (frozen_file_to_write)
     produce_frozen_state (context, frozen_file_to_write);

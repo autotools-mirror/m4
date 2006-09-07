@@ -650,7 +650,7 @@ include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
       return;
     }
 
-  m4_push_file (context, fp, name);
+  m4_push_file (context, fp, name, true);
   free (name);
 }
 

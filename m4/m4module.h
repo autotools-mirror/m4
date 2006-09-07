@@ -112,7 +112,11 @@ extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
 
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const char *, ...) M4_GNUC_PRINTF (4, 5);
+extern void m4_error_at_line (m4 *, int, int, const char *, int,
+			      const char *, ...)         M4_GNUC_PRINTF (6, 7);
 extern void m4_warn  (m4 *, int, const char *, ...)      M4_GNUC_PRINTF (3, 4);
+extern void m4_warn_at_line  (m4 *, int, const char *, int,
+			      const char *, ...)         M4_GNUC_PRINTF (5, 6);
 
 
 /* --- CONTEXT MANAGEMENT --- */
@@ -213,6 +217,8 @@ extern bool		m4_set_symbol_traced	  (m4_symbol*, bool);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *);
 
+#define m4_is_symbol_void(symbol)					\
+	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_text(symbol)					\
 	(m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_func(symbol)					\
@@ -372,12 +378,11 @@ extern int	m4_set_syntax	(m4_syntax_table*, char, const unsigned char*);
 
 extern	void	m4_input_init	(m4 *context);
 extern	void	m4_input_exit	(void);
-extern	int	m4_peek_input	(m4 *context);
 extern	void	m4_skip_line	(m4 *context);
 
 /* push back input */
 
-extern	void	m4_push_file	(m4 *context, FILE *, const char *);
+extern	void	m4_push_file	(m4 *context, FILE *, const char *, bool);
 extern	void	m4_push_single	(int ch);
 extern	void	m4_push_builtin	(m4_symbol_value *);
 extern	m4_obstack *m4_push_string_init (m4 *context);

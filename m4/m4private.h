@@ -310,11 +310,15 @@ typedef enum {
   M4_TOKEN_STRING,		/* a quoted string */
   M4_TOKEN_SPACE,		/* whitespace */
   M4_TOKEN_WORD,		/* an identifier */
+  M4_TOKEN_OPEN,		/* argument list start */
+  M4_TOKEN_COMMA,		/* argument separator */
+  M4_TOKEN_CLOSE,		/* argument list end */
   M4_TOKEN_SIMPLE,		/* a single character */
-  M4_TOKEN_MACDEF		/* a macros definition (see "defn") */
+  M4_TOKEN_MACDEF		/* a macro's definition (see "defn") */
 } m4__token_type;
 
-extern	m4__token_type m4__next_token (m4 *context, m4_symbol_value *);
+extern	m4__token_type m4__next_token (m4 *, m4_symbol_value *);
+extern	m4__token_type m4__peek_token (m4 *);
 
 
 

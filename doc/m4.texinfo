@@ -668,10 +668,12 @@ names.  If no names are present, the standard input is read.  A file
 name of @file{-} is taken to mean the standard input.  It is
 conventional, but not required, for input files to end in @samp{.m4}.
 
-The input files are read in the sequence given.  The standard input can
-only be read once, so the file name @file{-} should only appear once on
-the command line.  It is an error if an input file ends in the middle of
-argument collection, a comment, or a quoted string.
+The input files are read in the sequence given.  Standard input can be
+read more than once, so the file name @file{-} may appear multiple times
+on the command line; this makes a difference when input is from a
+terminal or other special file type.  It is an error if an input file
+ends in the middle of argument collection, a comment, or a quoted
+string.
 @comment FIXME - it would be nicer if we let these three things
 @comment continue across file boundaries, provided that we warn in
 @comment interactive use when switching to stdin in a non-default parse
@@ -1583,7 +1585,7 @@ untouched to the macro, and that quoting disables comments.
 @example
 define(`echo1', `$*')
 @result{}
-define(`echo2', `$@')
+define(`echo2', `$@@')
 @result{}
 define(`foo', `bar')
 @result{}
@@ -1770,7 +1772,7 @@ define(`foo', a'a)
 @result{}
 define(`a', `A')
 @result{}
-define(`echo', `$@')
+define(`echo', `$@@')
 @result{}
 foo
 @result{}A'A
@@ -5077,7 +5079,7 @@ define(`_foreach',
                `define(`$1',
                        `_arg1$2')$3`'_foreach(`$1', `(shift$2)',
                                               `$3')')')dnl
-define(`dquote', ``$@'')
+define(`dquote', ``$@@'')
 @result{}
 foreach(`macro', (dquote(symbols)), `regexp(macro, `shift', `\&')')
 @result{}shift

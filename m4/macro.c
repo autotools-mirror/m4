@@ -92,6 +92,9 @@ expand_token (m4 *context, m4_obstack *obs,
     case M4_TOKEN_MACDEF:
       break;
 
+    case M4_TOKEN_OPEN:
+    case M4_TOKEN_COMMA:
+    case M4_TOKEN_CLOSE:
     case M4_TOKEN_SIMPLE:
     case M4_TOKEN_STRING:
     case M4_TOKEN_SPACE:
@@ -101,18 +104,16 @@ expand_token (m4 *context, m4_obstack *obs,
     case M4_TOKEN_WORD:
       {
 	char *textp = text;
-	int ch;
 
 	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
 	  ++textp;
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
+	assert (! symbol || ! m4_is_symbol_void (symbol));
 	if (symbol == NULL
-	    || symbol->value->type == M4_SYMBOL_VOID
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
-		&& (ch = m4_peek_input (context)) < CHAR_EOF
-		&& !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN)))
+		&& m4__peek_token (context) != M4_TOKEN_OPEN))
 	  {
 	    m4_shipout_text (context, obs, text, strlen (text));
 	  }
@@ -144,8 +145,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
   m4_symbol_value token;
   char *text;
   int paren_level = 0;
-  const char *current_file = m4_get_current_file (context);
-  int current_line = m4_get_current_line (context);
+  const char *file = m4_get_current_file (context);
+  int line = m4_get_current_line (context);
 
   argp->type = M4_SYMBOL_VOID;
 
@@ -160,11 +161,9 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
     {
       switch (type)
 	{			/* TOKSW */
-	case M4_TOKEN_SIMPLE:
-	  text = m4_get_symbol_value_text (&token);
-	  if ((m4_has_syntax (M4SYNTAX, *text,
-			      M4_SYNTAX_COMMA|M4_SYNTAX_CLOSE))
-	      && paren_level == 0)
+	case M4_TOKEN_COMMA:
+	case M4_TOKEN_CLOSE:
+	  if (paren_level == 0)
 	    {
 
 	      /* The argument MUST be finished, whether we want it or not.  */
@@ -175,11 +174,12 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 		{
 		  m4_set_symbol_value_text (argp, text);
 		}
-	      return m4_has_syntax (M4SYNTAX,
-				    *m4_get_symbol_value_text (&token),
-				    M4_SYNTAX_COMMA);
+	      return type == M4_TOKEN_COMMA;
 	    }
-
+	  /* fallthru */
+	case M4_TOKEN_OPEN:
+	case M4_TOKEN_SIMPLE:
+	  text = m4_get_symbol_value_text (&token);
 	  if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_OPEN))
 	    paren_level++;
 	  else if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_CLOSE))
@@ -188,8 +188,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  break;
 
 	case M4_TOKEN_EOF:
-	  error_at_line (EXIT_FAILURE, 0, current_file, current_line,
-			 _("end of file in argument list"));
+           m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
+                             _("end of file in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:
@@ -286,7 +286,6 @@ static void
 collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 		   m4_obstack *argptr, m4_obstack *arguments)
 {
-  int ch;			/* lookahead for ( */
   m4_symbol_value token;
   m4_symbol_value *tokenp;
   bool more_args;
@@ -299,8 +298,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 				      sizeof (token));
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
-  ch = m4_peek_input (context);
-  if ((ch < CHAR_EOF) && m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN))
+  if (m4__peek_token (context) == M4_TOKEN_OPEN)
     {
       m4__next_token (context, &token);		/* gobble parenthesis */
       do
