@@ -1,3 +1,9 @@
+2006-09-08  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap: Kill unrelated copy-n-paste code from argument
+	parsing.  Let Makefile generate testsuite.
+	* Makefile.am (EXTRA_DIST): Remove examples/WWW/man/Makefile.
+
 2006-09-07  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (m4_peek_input): No longer export.

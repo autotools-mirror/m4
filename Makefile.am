@@ -296,7 +296,6 @@ EXTRA_DIST     += \
 		  examples/WWW/Makefile \
 		  examples/WWW/_footer.htm \
 		  examples/WWW/_header.htm \
-		  examples/WWW/man/Makefile \
 		  examples/WWW/m4lib/bugs.m4 \
 		  examples/WWW/m4lib/changelog.m4 \
 		  examples/WWW/m4lib/download.m4 \

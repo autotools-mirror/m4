@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-08-25
+# bootstrap (GNU M4) version 2006-09-08
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -226,17 +226,6 @@ func_version ()
     esac
   done
 
-  if test -z "$sendmail_to"; then
-
-    # can't have a from address without a destination address
-    test -n "$sendmail_from" &&
-      func_error "can't use --from without --sendmail." && exit_cmd=exit
-
-    # can't use a signature file without a destination address
-    test -n "$signature_file" &&
-      func_error "can't use --signature without --sendmail." && exit_cmd=exit
-  fi
-
   # Bail if the options were screwed
   $exit_cmd $EXIT_FAILURE
 }
@@ -401,15 +390,9 @@ func_echo "running: AUTOPOINT=true" \
 AUTOPOINT=true $AUTORECONF --force --verbose --install --no-recursive
 
 
-## ---------- ##
-## testsuite. ##
-## ---------- ##
-
-(
-  func_echo "generating testsuite"
-  cd tests
-  $AWK -f ./generate.awk ../doc/m4.texinfo > generated.at
-)
+## ------- ##
+## Wrapup. ##
+## ------- ##
 
 if test x"$DOWNLOAD_PO" != xno; then
   func_echo "If your pofiles are up-to-date, you can rerun bootstrap"
