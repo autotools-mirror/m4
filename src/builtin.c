@@ -1291,15 +1291,16 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 		"exit status out of range: `%d'", exit_code));
       exit_code = EXIT_FAILURE;
     }
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+  debug_flush_files ();
   if (close_stream (stdout) != 0)
     {
       M4ERROR ((warning_status, errno, "write error"));
       if (exit_code == 0)
 	exit_code = EXIT_FAILURE;
     }
-  /* Change debug stream back to stderr, to force flushing debug stream and
-     detect any errors it might have encountered.  */
-  debug_set_output (NULL);
   if (exit_code == 0 && retcode != 0)
     exit_code = retcode;
   exit (exit_code);

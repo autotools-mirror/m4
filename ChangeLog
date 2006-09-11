@@ -1,3 +1,14 @@
+2006-09-11  Eric Blake  <ebb9@byu.net>
+
+	* src/Makefile.am (m4_LDADD): Add any gnulib dependent libraries.
+	* src/debug.c (debug_flush_files) [UNIX]: Flush stdin if it is
+	seekable.
+	(debug_set_file): Use STDOUT_FILENO.
+	* src/builtin.c (m4_m4exit): Flush stdin before exiting, to comply
+	with POSIX in regards to unread input.
+	* NEWS: Document this fix.
+	* doc/m4.texinfo (Syscmd, Esyscmd, M4exit): Likewise.
+
 2006-09-07  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Update to newer gnulib-tool.

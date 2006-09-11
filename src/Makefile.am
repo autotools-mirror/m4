@@ -26,4 +26,4 @@ macro.c output.c path.c symtab.c
 if STACKOVF
 m4_SOURCES += stackovf.c
 endif
-m4_LDADD = ../lib/libm4.a
+m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS)

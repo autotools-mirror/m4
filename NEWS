@@ -12,6 +12,9 @@ Version 1.4.7 - ?? ??? 2006, by ??  (CVS version 1.4.6a)
   is not closed until all wrapped text is handled.  This makes a
   difference when stdin is not a regular file, and also fixes bugs when
   using the syscmd or esyscmd macros from wrapped text.
+* When standard input is a seekable file, the m4exit, syscmd, and esyscmd
+  macros now restore the current position to the next unread byte rather
+  than discarding an arbitrary amount of buffered data.
 
 Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
 

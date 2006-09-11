@@ -4093,7 +4093,7 @@ The expansion of @code{syscmd} is void, @emph{not} the output from
 are not read by @code{m4}.  @xref{Esyscmd}, if you need to process the
 command output.
 
-Prior to executing the command, @code{m4} flushes its output buffers.
+Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
@@ -4119,7 +4119,11 @@ for the @code{cat} subcommand.  Therefore, you should be careful when
 using standard input (either by specifying no files, or by passing
 @samp{-} as a file name on the command line, @pxref{Invoking m4}), and
 also invoking subcommands via @code{syscmd} or @code{esyscmd} that
-consume data from standard input.
+consume data from standard input.  When standard input is a seekable
+file, the subprocess will pick up with the next character not yet
+processed by @code{m4}; when it is a pipe or other non-seekable file,
+there is no guarantee how much data will already be buffered by
+@code{m4} and thus unavailable to the child.
 
 @ignore
 @comment If the user types the example below with stdin being an
@@ -4148,7 +4152,7 @@ If you want @code{m4} to read the output of a shell command, use
 Expands to the standard output of the shell command
 @var{shell-command}.
 
-Prior to executing the command, @code{m4} flushes its output buffers.
+Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input and error output of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
@@ -4167,6 +4171,9 @@ esyscmd(`echo foo')
 
 Note how the expansion of @code{esyscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
+
+Just as with @code{syscmd}, care must be exercised when sharing standard
+input between @code{m4} and the child process of @code{esyscmd}.
 
 @node Sysval
 @section Exit status
@@ -4451,6 +4458,11 @@ Note that it is still possible for the exit status to be different than
 what was requested by @code{m4exit}.  If @code{m4} detects some other
 error, such as a write error on standard out, the exit status will be
 non-zero even if @code{m4exit} requested zero.
+
+If standard input is seekable, then the file will be positioned at the
+next unread character.  If it is a pipe or other non-seekable file,
+then there are no guarantees how much data @code{m4} might have read
+into buffers, and thus discarded.
 
 @node Frozen files
 @chapter Fast loading of frozen state
