@@ -89,7 +89,13 @@ test
 Dumpdef: dumpdef(`test').
 ]])
 
-AT_CHECK([$2 m4 -m load -d $3 input.m4], [0],
+dnl Fortunately, all tests within AT_SETUP are in the same subshell, so
+dnl setting the environment now will impact the AT_CHECK_M4, but not
+dnl carry over to the next AT_SETUP.
+m4_ifval([$2], [$2
+export m4_substr([$2], [0], m4_index([$2], [=]))])
+
+AT_CHECK_M4([-m load $3 input.m4], [0],
 [[
 Test module called.
 Dumpdef: .

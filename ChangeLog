@@ -1,5 +1,9 @@
 2006-09-13  Eric Blake  <ebb9@byu.net>
 
+	* tests/modules.at (AT_CHECK_M4_MODTEST): Use AT_CHECK_M4, for
+	stderr filtering.
+	Reported by Ralf Wildenhues.
+
 	Fix installcheck.
 	* Makefile.am (check_LTLIBRARIES): Build test libraries in the
 	tests directory, so we can be sure an installed build is not
