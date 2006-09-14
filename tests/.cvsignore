@@ -1,16 +1,14 @@
-config.m4
-config.sh
+*.la
+.dirstamp
+.libs
+at-*
+atconfig
+atlocal
+m4
 Makefile
 Makefile.in
-at-* atconfig atlocal
-autom4te.cache
-debug-*.sh
-frozen.m4f
 generated.at
-in stderr stdout expout experr
-testsuite
-*.log log
-m4
 package.m4
+testsuite
 testsuite.dir
-
+testsuite.log
