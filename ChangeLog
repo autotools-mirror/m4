@@ -1,3 +1,16 @@
+2006-09-14  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (main): Warn on deprecated options -B, -S, -T, -N,
+	--diversions. `m4 --help --version' now displays help, not
+	version.
+	(interactive, frozen_file_to_read, frozen_file_to_write): Move to
+	smaller scope.
+	(show_help, show_version): No longer needed.
+	(long_options, DIVERSIONS_OPTION): Backport patch from head to
+	distinguish between -N and --diversions in warning.
+	* doc/m4.texinfo (Invoking m4): Document this.
+	* NEWS: Likewise.
+
 2006-09-11  Eric Blake  <ebb9@byu.net>
 
 	* src/Makefile.am (m4_LDADD): Add any gnulib dependent libraries.

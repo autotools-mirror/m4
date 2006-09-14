@@ -22,12 +22,10 @@
 #include "m4.h"
 
 #include <getopt.h>
+#include <limits.h>
 #include <signal.h>
 
 static void usage (int);
-
-/* Operate interactively (-e).  */
-static int interactive = 0;
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -61,20 +59,8 @@ int nesting_limit = 1024;
 const char *user_word_regexp = "";
 #endif
 
-/* Name of frozen file to digest after initialization.  */
-const char *frozen_file_to_read = NULL;
-
-/* Name of frozen file to produce near completion.  */
-const char *frozen_file_to_write = NULL;
-
 /* The name this program was run with. */
 const char *program_name;
-
-/* If non-zero, display usage information and exit.  */
-static int show_help = 0;
-
-/* If non-zero, print the version on standard output and exit.  */
-static int show_version = 0;
 
 struct macro_definition
 {
@@ -228,11 +214,21 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 | Decode options and launch execution.  |
 `--------------------------------------*/
 
+/* For long options that have no equivalent short option, use a
+   non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
+enum
+{
+  DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
+
+  HELP_OPTION,				/* no short opt */
+  VERSION_OPTION			/* no short opt */
+};
+
 static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
-  {"diversions", required_argument, NULL, 'N'},
+  {"define", required_argument, NULL, 'D'},
   {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
@@ -245,18 +241,17 @@ static const struct option long_options[] =
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
+  {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
+  {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
-  {"help", no_argument, &show_help, 1},
-  {"version", no_argument, &show_version, 1},
+  {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
 
-  /* These are somewhat troublesome.  */
-  { "define", required_argument, NULL, 'D' },
-  { "undefine", required_argument, NULL, 'U' },
-  { "trace", required_argument, NULL, 't' },
+  {"help", no_argument, NULL, HELP_OPTION},
+  {"version", no_argument, NULL, VERSION_OPTION},
 
-  { 0, 0, 0, 0 },
+  { NULL, 0, NULL, 0 },
 };
 
 /* Global catchall for any errors that should affect final error status, but
@@ -280,6 +275,9 @@ main (int argc, char *const *argv, char *const *envp)
   macro_definition *defines;
   FILE *fp;
   boolean read_stdin = FALSE;
+  boolean interactive = FALSE;
+  const char *frozen_file_to_read = NULL;
+  const char *frozen_file_to_write = NULL;
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
@@ -302,14 +300,21 @@ main (int argc, char *const *argv, char *const *envp)
       default:
 	usage (EXIT_FAILURE);
 
-      case 0:
-	break;
-
-      case 'B':			/* compatibility junk */
-      case 'N':
+      case 'B':
       case 'S':
       case 'T':
+	/* Compatibility junk: options that other implementations
+	   support, but which we ignore as no-ops and don't list in
+	   --help.  */
+	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
+	       optchar);
 	break;
+
+      case 'N':
+      case DIVERSIONS_OPTION:
+         /* -N became an obsolete no-op in 1.4.x.  */
+	error (0, 0, "Warning: `m4 %s' is deprecated",
+	       optchar == 'N' ? "-N" : "--diversions");
 
       case 'D':
       case 'U':
@@ -384,7 +389,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	interactive = 1;
+	interactive = TRUE;
 	break;
 
       case 'l':
@@ -401,12 +406,10 @@ main (int argc, char *const *argv, char *const *envp)
       case 's':
 	sync_output = 1;
 	break;
-      }
 
-  if (show_version)
-    {
-      printf ("%s\n", PACKAGE_STRING);
-      fputs ("\
+      case VERSION_OPTION:
+         printf ("%s\n", PACKAGE_STRING);
+         fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
@@ -414,13 +417,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 Written by Rene' Seindal.\n\
 ", stdout);
 
-      if (close_stream (stdout) != 0)
-	M4ERROR ((EXIT_FAILURE, errno, "write error"));
-      exit (EXIT_SUCCESS);
-    }
+         if (close_stream (stdout) != 0)
+            M4ERROR ((EXIT_FAILURE, errno, "write error"));
+         exit (EXIT_SUCCESS);
+	break;
 
-  if (show_help)
-    usage (EXIT_SUCCESS);
+      case HELP_OPTION:
+	usage (EXIT_SUCCESS);
+	break;
+      }
 
   defines = head;
 
