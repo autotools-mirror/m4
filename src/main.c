@@ -24,20 +24,11 @@
 #include "getopt.h"
 #include "version-etc.h"
 #include "gnu/progname.h"
+#include "pathconf.h"
 
 #include <limits.h>
 
 #define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan"
-
-
-/* Name of frozen file to digest after initialization.  */
-const char *frozen_file_to_read = NULL;
-
-/* Name of frozen file to produce near completion.  */
-const char *frozen_file_to_write = NULL;
-
-/* If nonzero, import the environment as macros.  */
-static bool import_environment = false;
 
 typedef struct macro_definition
 {
@@ -105,9 +96,10 @@ SPEC is any one of:\n\
       printf (_("\
 \n\
 Dynamic loading features:\n\
-  -M, --module-directory=DIR   add DIR to the module search path\n\
-  -m, --load-module=MODULE     load dynamic MODULE from %s\n\
-"), USER_MODULE_PATH_ENV);
+  -M, --module-directory=DIR   add DIR to module search path before\n\
+                               `%s'\n\
+  -m, --load-module=MODULE     load dynamic MODULE\n\
+"), MODULE_PATH);
       fputs (_("\
 \n\
 Preprocessor features:\n\
@@ -237,12 +229,15 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
   char *filename;
   bool read_stdin = false;	/* true iff we have read from stdin */
+  bool import_environment = false; /* true to import environment */
+  const char *frozen_file_to_read = NULL;
+  const char *frozen_file_to_write = NULL;
 
   m4 *context;
 
   int exit_status;
 
-  /* Initialise gnulib error module.  */
+  /* Initialize gnulib error module.  */
   set_program_name (argv[0]);
 
   setlocale (LC_ALL, "");

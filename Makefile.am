@@ -177,26 +177,31 @@ EXTRA_DIST += modules/perl.c
 
 module_check	= -rpath /dev/null
 check_LTLIBRARIES = \
-		  modules/import.la \
-		  modules/modtest.la \
-		  modules/shadow.la \
-		  modules/stdlib.la \
-		  modules/time.la
+		  tests/import.la \
+		  tests/modtest.la \
+		  tests/shadow.la \
+		  tests/stdlib.la \
+		  tests/time.la
 
-modules_import_la_LDFLAGS	= $(module_ldflags) $(module_check)
-modules_import_la_LIBADD	= $(module_libadd)
+tests_import_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_import_la_LIBADD		= $(module_libadd)
+tests_import_la_SOURCES		= modules/import.c
 
-modules_modtest_la_LDFLAGS	= $(module_ldflags) $(module_check)
-modules_modtest_la_LIBADD	= $(module_libadd)
+tests_modtest_la_LDFLAGS	= $(module_ldflags) $(module_check)
+tests_modtest_la_LIBADD		= $(module_libadd)
+tests_modtest_la_SOURCES	= modules/modtest.c
 
-modules_shadow_la_LDFLAGS	= $(module_ldflags) $(module_check)
-modules_shadow_la_LIBADD	= $(module_libadd)
+tests_shadow_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_shadow_la_LIBADD		= $(module_libadd)
+tests_shadow_la_SOURCES		= modules/shadow.c
 
-modules_stdlib_la_LDFLAGS	= $(module_ldflags) $(module_check)
-modules_stdlib_la_LIBADD	= $(module_libadd)
+tests_stdlib_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_stdlib_la_LIBADD		= $(module_libadd)
+tests_stdlib_la_SOURCES		= modules/stdlib.c
 
-modules_time_la_LDFLAGS		= $(module_ldflags) $(module_check)
-modules_time_la_LIBADD		= $(module_libadd)
+tests_time_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_time_la_LIBADD		= $(module_libadd)
+tests_time_la_SOURCES		= modules/time.c
 
 EXTRA_DIST     += \
 		  modules/modtest.m4 \
@@ -414,13 +419,13 @@ DISTCLEANFILES += tests/atconfig
 CD_TESTDIR	= cd ./tests
 
 # Hook the test suite into the check rule
-check-local: tests/atconfig tests/m4 $(TESTSUITE)
+check-local: tests/atconfig tests/m4 $(TESTSUITE) $(check_LTLIBRARIES)
 	$(CD_TESTDIR); \
 	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
 	  $(TESTSUITEFLAGS)
 
 # Run the test suite on the *installed* tree.
-installcheck-local: tests/atconfig $(TESTSUITE)
+installcheck-local: tests/atconfig $(TESTSUITE) $(check_LTLIBRARIES)
 	$(CD_TESTDIR); \
 	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
 	  AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)

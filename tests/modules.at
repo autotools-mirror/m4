@@ -50,19 +50,19 @@ test3
 
 # First generate the `expout' ouput by running over the sources before
 # freezing.
-AT_CHECK_M4([-m load frozen.m4 unfrozen.m4], 0,
-            [stdout], [stderr])
+AT_CHECK_M4([-M "$abs_builddir" -m load frozen.m4 unfrozen.m4],
+	    [0], [stdout], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
-AT_CHECK_M4([-m load -F frozen.m4f frozen.m4], 0,
-            [ignore], [ignore])
+AT_CHECK_M4([-M "$abs_builddir" -m load -F frozen.m4f frozen.m4],
+	    [0], [], [ignore])
 
 # Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], 0,
-            [expout], [experr])
+AT_CHECK_M4([-M "$abs_builddir" -R frozen.m4f unfrozen.m4],
+	    [0], [expout], [experr])
 
 AT_CLEANUP([frozen.m4f])
 
@@ -74,12 +74,11 @@ AT_CLEANUP([frozen.m4f])
 
 # AT_CHECK_M4_MODTEST(TITLE, ENV-VARS, M4-OPTIONS)
 # ------------------------------------------------
-# Skip if modtest is not present (we are not in the package).
+# Add a test named TITLE, running m4 with either ENV-VARS in the environment
+# or M4-OPTIONS set to pick up test modules.
 m4_define([AT_CHECK_M4_MODTEST],
 [AT_SETUP([$1])
 AT_CHECK_DYNAMIC_MODULE
-
-AT_CHECK([test -f "$abs_top_builddir/modules/modtest.la" || exit 77])
 
 AT_DATA([input.m4],
 [[load(`modtest')
@@ -90,7 +89,7 @@ test
 Dumpdef: dumpdef(`test').
 ]])
 
-AT_CHECK([$2 m4 -m load -d input.m4 $3], 0,
+AT_CHECK([$2 m4 -m load -d $3 input.m4], [0],
 [[
 Test module called.
 Dumpdef: .
@@ -110,22 +109,22 @@ AT_CLEANUP
 
 
 AT_CHECK_M4_MODTEST([--module-directory: absolute path],
-                    [], [-M $top_buildpath/modules])
+		    [], [-M "$abs_builddir"])
 
 AT_CHECK_M4_MODTEST([--module-directory: relative path],
-                    [], [-M $top_builddir/modules])
+		    [], [-M "$top_build_prefix/tests"])
 
 AT_CHECK_M4_MODTEST([M4MODPATH: absolute path],
-                    [M4MODPATH=$top_buildpath/modules], [])
+		    [M4MODPATH="$abs_builddir"], [])
 
 AT_CHECK_M4_MODTEST([M4MODPATH: relative path],
-                    [M4MODPATH=$top_builddir/modules], [])
+		    [M4MODPATH="$top_build_prefix/tests"], [])
 
 AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: absolute path],
-                    [LTDL_LIBRARY_PATH=$top_buildpath/modules], [])
+		    [LTDL_LIBRARY_PATH="$abs_builddir"], [])
 
 AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: relative path],
-                    [LTDL_LIBRARY_PATH=$top_builddir/modules], [])
+		    [LTDL_LIBRARY_PATH="$top_build_prefix/tests"], [])
 
 
 
@@ -264,8 +263,8 @@ test:	<test>
 shadow:	<shadow>
 ]])
 
-AT_CHECK_M4([-m load input.m4], 0,
-            [expout], [experr])
+AT_CHECK_M4([-M "$abs_builddir" -m load input.m4], [0],
+	    [expout], [experr])
 
 AT_CLEANUP
 
@@ -332,7 +331,8 @@ Test module unloaded.
 ]])
 
 
-AT_CHECK_M4([-m load input.m4], 0, expout, experr)
+AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
+	    [0], [expout], [experr])
 
 AT_CLEANUP
 
@@ -380,22 +380,11 @@ Test module loaded.
 
 TRUE
 m4:input.m4:6: cannot load symbol `no_such' from module `modtest'
-m4:input.m4:7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
+m4:input.m4:7: cannot open module `no_such'
 ]])
 
-AT_CHECK_M4([-m load input.m4], 1, expout, stderr)
-
-# The expected stderr from the m4 invocation above becomes the expected
-# stdout of the following sed invocation to canonicalize the strerror message.
-# Note that the choice of file name affects the behaviour of AT_CHECK, so
-# we retain experr above for consistency with the rest of the testsuite, but
-# rename it here to make it play nicely with AT_CHECK:
-rm -f expout
-mv experr expout
-
-AT_CHECK([sed '/^m4:input.m4:7:/ {
-    s,\(7:[[^:]]*:\).*$,\1 no_such.so: cannot open shared object file: No such file or directory,;q; }' stderr], 0, expout)
-
+AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
+	    [1], [expout], [experr])
 
 AT_CLEANUP
 
@@ -437,6 +426,7 @@ m4trace: -1- test -> `Shadow::`test' called.'
 ]])
 
 
-AT_CHECK_M4([-m load -t test input.m4], 0, expout, experr)
+AT_CHECK_M4([-M "$abs_builddir" -m load -t test input.m4],
+	    [0], [expout], [experr])
 
 AT_CLEANUP

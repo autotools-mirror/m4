@@ -23,22 +23,19 @@
 #
 # Written by Gary V. Vaughan <gary@gnu.org>
 
-"@abs_top_builddir@/src/m4" \
-      --module-directory="@abs_top_builddir@/modules" \
-      ${1+"$@"} 2>/tmp/m4-$$
-status=$?
-# Normalize stderr.
-# - If configure --disable-shared, then src/m4 is a real program,
-#   neutralize the full path display
-# - otherwise, it is a  libtool wrapper, relying on PATH to execute the
-#   actual program, either lt-m4, or m4.
-#
-# - In both cases, beware of .exe.
-# - Also, when tracing modules, lines of the form
-#      m4debug: module m4: opening file `m4.a'
-#   must be reduced, since module names are platform dependent.
-sed -e 's,^[^:]*[lt-]*m4[.ex]*:,m4:,' \
-    -e '/^m4debug: module/s/opening file.*/opening file/' /tmp/m4-$$ >&2
-rm /tmp/m4-$$
+# Be Bourne compatible
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
+  emulate sh
+  NULLCMD=:
+  # Zsh 3.x and 4.x performs word splitting on ${1+"$@"}, which
+  # is contrary to our usage.  Disable this feature.
+  alias -g '${1+"$@"}'='"$@"'
+  setopt NO_GLOB_SUBST
+else
+  case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
+fi
 
-exit $status
+exec "@abs_top_builddir@/src/m4" \
+      --module-directory="@abs_top_builddir@/modules" \
+      ${1+"$@"}
+exit 1

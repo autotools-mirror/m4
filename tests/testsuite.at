@@ -24,9 +24,32 @@ m4_version_prereq([2.52e])
 # AT_CHECK_M4(ARGS, [EXIT-STATUS = 0], [STDOUT = `'], [STDERR = `'])
 # ------------------------------------------------------------------
 # Run m4 with ARGS, and stdin redirected from /dev/null.  Expect EXIT-STATUS,
-# with output matching STDOUT and STDERR as in AT_CHECK.
+# with output matching STDOUT and STDERR as in AT_CHECK.  If stderr is
+# specified, normalize the observed error output.
+#
+# When testing an uninstalled wrapper, tests/m4 is on the path, but invokes
+# src/m4, which may itself be a libtool wrapper.  Also, some platforms
+# choose to display argv[0] differently:
+#    path/to/lt-m4:file:line: message
+# or m4.exe:file:line: message
+# to m4:file:line
+#
+# When tracing modules, the module name is platform-dependent:
+#    m4debug: module gnu: opening file `gnu.so'
+# or m4debug: module gnu: opening file `gnu.a'
+# to m4debug: module gnu: opening file
+#
+# When testing modules, a failed module name is platform-dependent:
+#    m4:input.m4:7: cannot open module `no_such': no_such.so: cannot open shared object file: No such file or directory
+# or m4:input.m4:7: cannot open module `no_such': can't open the module
+# to m4:input.m4:7: cannot open module `no_such'
 m4_define([AT_CHECK_M4],
-[AT_CHECK([m4 -b -d $1 < /dev/null], [$2], [$3], [$4])
+[AT_CHECK([m4 -b -d $1 < /dev/null], [$2], [$3], m4_ifval([$4], [stderr]))
+m4_ifval([$4],
+[AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/
+	/^m4debug: module/s/opening file.*/opening file/
+	s/\(cannot open module [^:]*\):.*/\1/
+    ' stderr >&2]], [0], [], [$4])])
 ])
 
 # AT_TEST_M4(TITLE, INPUT, [STDOUT = `'], [STDERR = `'])

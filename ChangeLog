@@ -1,3 +1,25 @@
+2006-09-13  Eric Blake  <ebb9@byu.net>
+
+	Fix installcheck.
+	* Makefile.am (check_LTLIBRARIES): Build test libraries in the
+	tests directory, so we can be sure an installed build is not
+	picking up uninstalled non-test libraries.
+	(check-local, installcheck-local): Depend on test libraries.
+	* tests/modules.at (AT_CHECK_M4_MODTEST): Don't use options
+	after file name.  Fix quoting.  Remove skipping the test, now
+	that makefile guarantees test modules will exist.
+	(Freezing modules, modules: shadow, modules: unload)
+	(modules: trace): Always put test modules in module path.
+	(modules: importing): Likewise, and rely on AT_CHECK_M4 for
+	stderr munging.
+	* src/main.c (usage): Document default module search path.
+	(import_environment, frozen_file_to_read, frozen_file_to_write):
+	Move...
+	(main): ...here.
+	* tests/testsuite.at (AT_CHECK_M4): Filter stderr here...
+	* tests/m4.in: ...not here.
+	Reported by Ralf Wildenhues.
+
 2006-09-08  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap: Kill unrelated copy-n-paste code from argument
