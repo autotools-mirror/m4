@@ -1,3 +1,19 @@
+2006-09-14  Eric Blake  <ebb9@byu.net>
+
+	Add --safer option, per debian bug 5898.
+	* src/main.c (usage): Document new option.
+	(SAFER_OPTION): New enumerator.
+	(main): Set the option bit.
+	* m4/m4module.h (m4_context_opt_bit_table): Declare new bit
+	accessors.
+	* m4/m4private.h (M4_OPT_SAFER_BIT): New macro.
+	(m4_get_safer_opt): New accessor.
+	* modules/gnu.c (esyscmd, debugfile): Disable when --safer.
+	* modules/m4.c (syscmd, maketemp): Likewise.
+	* doc/m4.texinfo (Invoking m4, Debug Output, Syscmd, Esyscmd)
+	(Sysval, Maketemp): Add tests of this.
+	* tests/options.at (--safer): Likewise.
+
 2006-09-13  Eric Blake  <ebb9@byu.net>
 
 	* tests/modules.at (AT_CHECK_M4_MODTEST): Use AT_CHECK_M4, for

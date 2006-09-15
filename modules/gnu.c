@@ -400,6 +400,8 @@ M4BUILTIN_HANDLER (debugfile)
 {
   if (argc == 1)
     m4_debug_set_output (context, NULL);
+  else if (m4_get_safer_opt (context) && *M4ARG (1))
+    m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
   else if (!m4_debug_set_output (context, M4ARG (1)))
     m4_error (context, 0, errno, _("%s: cannot set debug file: %s"),
 	      M4ARG (0), M4ARG (1));
@@ -449,12 +451,18 @@ M4BUILTIN_HANDLER (esyscmd)
       FILE *pin;
       int ch;
 
+      if (m4_get_safer_opt (context))
+	{
+	  m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+	  return;
+	}
+
       /* Optimize the empty command.  */
       if (*M4ARG (1) == '\0')
-        {
-          m4_set_sysval (0);
-          return;
-        }
+	{
+	  m4_set_sysval (0);
+	  return;
+	}
 
       m4_sysval_flush (context);
       errno = 0;

@@ -151,6 +151,7 @@ extern void		m4_delete	(m4 *);
 	M4OPT_BIT(M4_OPT_SYNC_OUTPUT_BIT,	sync_output_opt)	\
 	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
 	M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
+	M4OPT_BIT(M4_OPT_SAFER_BIT,		safer_opt)		\
 
 
 #define M4FIELD(type, base, field)					\

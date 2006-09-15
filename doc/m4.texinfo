@@ -463,6 +463,14 @@ Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
 When this option is not given, @acronym{GNU} M4 uses emacs compatible
 regular expressions.  @xref{Changeresyntax}, for more details on the
 format and meaning of @var{RESYNTAX-SPEC}.
+
+@item --safer
+Cripple the builtins @code{maketemp} (@pxref{Maketemp}),
+@code{debugfile} (@pxref{Debug Output}), @code{syscmd} (@pxref{Syscmd}),
+and @code{esyscmd} (@pxref{Esyscmd}), since they can perform potentially
+unsafe actions.  An attempt to use these macros will result in an error.
+This option is intended to make it safer to preprocess an input file of
+unknown origin.
 @end table
 
 On platforms that support dynamic libraries, there are some options
@@ -2699,12 +2707,29 @@ Debug and tracing output can be redirected to files using either the
 @samp{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
 
 @deffn {Builtin (gnu)} debugfile
-@deffnx {Builtin (gnu)} debugfile @w{(opt @var{filename})}
-Send all further debug and trace output to @var{filename}.  If
-@var{filename} is empty, debug and trace output are discarded and if
-@code{debugfile} is called without any arguments, debug and trace output
-are sent to the standard error output.
+@deffnx {Builtin (gnu)} debugfile @w{(opt @var{file})}
+Send all further debug and trace output to @var{file}, opened in append
+mode.  If @var{file} is the empty string, debug and trace output are
+discarded and if @code{debugfile} is called without any arguments, debug
+and trace output are sent to the standard error output.
+
+When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
+@var{file} must be empty or omitted, since otherwise an input file
+could cause the modification of arbitrary files.
 @end deffn
+
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+debugfile(`foo')
+@error{}m4:stdin:1: debugfile: disabled by --safer
+@result{}
+debugfile()
+@result{}
+debugfile
+@result{}
+@end example
 
 @node Input Control
 @chapter Input control
@@ -2859,7 +2884,6 @@ changecom
 @result{}# Not a COMMENT anymore
 @end example
 
-
 @node Changeresyntax
 @section Changing the regular expression syntax
 
@@ -2939,7 +2963,6 @@ changeresyntax(`Gnu_M4')
 @item POSIX_EGREP
 @xref{posix-egrep regular expression syntax}, for details.
 @end table
-
 
 @node Changesyntax
 @section Changing the lexical structure of the input
@@ -3209,8 +3232,6 @@ changesyntax(`A@@')
 @result{}TEST
 @end example
 
-
-
 There is obviously an overlap with @code{changecom} and
 @code{changequote}.  Comment delimiters and quotes can now be defined in
 two different ways.  To avoid incompatibilities, if the quotes are set
@@ -3279,10 +3300,6 @@ never call @code{changesyntax}, nothing will have changed.
 
 Debugging output continue to use @kbd{(}, @kbd{,} and @kbd{)} to show
 macro calls.
-
-
-
-
 
 @node M4wrap
 @section Saving text until end of input
@@ -3784,7 +3801,6 @@ modules
 @result{}load,gnu,m4
 @end example
 
-
 @node Load
 @section Loading additional modules
 
@@ -3811,7 +3827,6 @@ modules
 @result{}mymodule,load,gnu,m4
 @end example
 
-
 @node Unload
 @section Removing loaded modules
 
@@ -3824,7 +3839,6 @@ running the module's finalization method (if any).
 
 The macro @code{unload} is recognized only with parameters.
 @end deffn
-
 
 @node Standard Modules
 @section Standard bundled modules
@@ -3882,7 +3896,6 @@ Expands to the empty string.
 @end deffn
 
 @end table
-
 
 @node Text handling
 @chapter Macros for text handling
@@ -4161,7 +4174,6 @@ patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 @result{}bab
 @end example
 
-
 @node Format
 @section Formatting strings (printf-like)
 
@@ -4435,6 +4447,10 @@ Prior to executing the command, @code{m4} flushes its output buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
+When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
+@code{syscmd} results in an error, since otherwise an input file could
+execute arbitrary code.
+
 The builtin macro @code{syscmd} is recognized only when given arguments.
 @end deffn
 
@@ -4449,7 +4465,14 @@ syscmd(`echo foo')
 Note how the expansion of @code{syscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
-The builtin macro @code{syscmd} is recognized only when given arguments.
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+syscmd(`echo hi')
+@error{}m4:stdin:1: syscmd: disabled by --safer
+@result{}
+@end example
 
 @node Esyscmd
 @section Reading the output of commands
@@ -4466,7 +4489,6 @@ the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
 
-
 @example
 define(`foo', `FOO')
 @result{}
@@ -4478,9 +4500,22 @@ esyscmd(`echo foo')
 Note how the expansion of @code{esyscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
+When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
+@code{esyscmd} results in an error, since otherwise an input file could
+execute arbitrary code.
+
 The builtin macro @code{esyscmd} is recognized only when given
 arguments.
 @end deffn
+
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+esyscmd(`echo hi')
+@error{}m4:stdin:1: esyscmd: disabled by --safer
+@result{}
+@end example
 
 @node Sysval
 @section Exit status
@@ -4501,6 +4536,22 @@ syscmd(`false')
 ifelse(sysval, 0, zero, nonzero)
 @result{}nonzero
 syscmd(`true')
+@result{}
+sysval
+@result{}0
+@end example
+
+When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
+@code{sysval} will always remain at its default value of zero.
+
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+sysval
+@result{}0
+syscmd(`false')
+@error{}m4:stdin:2: syscmd: disabled by --safer
 @result{}
 sysval
 @result{}0
@@ -4528,9 +4579,23 @@ maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
 @end example
 
+When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
+@code{maketemp} results in an error, since otherwise an input file could
+perform a mild denial-of-service attack by filling up a disk with
+multiple empty files.
+
 The builtin macro @code{maketemp} is recognized only when given
 arguments.
 @end deffn
+
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+maketemp(`/tmp/fooXXXXXX')
+@error{}m4:stdin:1: maketemp: disabled by --safer
+@result{}
+@end example
 
 @node Miscellaneous
 @chapter Miscellaneous builtin macros
@@ -5020,7 +5085,6 @@ On Windows systems, GNU @code{m4} without the @option{-G} option will
 define the macro @code{__windows__}, which expands to the empty string.
 @end itemize
 
-
 @node  Experiments
 @section Experimental features in @acronym{GNU} M4
 
@@ -5041,7 +5105,6 @@ No compile time option is needed for @code{changesyntax}.
 The implementation does not seem to slow down @code{m4}, more likely the
 contrary.
 
-
 @section Multiple precision arithmetic
 
 Another experimental feature, which would improve @code{m4} usefulness,
@@ -5056,7 +5119,6 @@ You should use:
 @noindent
 if you want this feature compiled in.  The current implementation is
 unproven and might go away.  Do not count on it yet.
-
 
 @node Answers
 @chapter Correct version of some examples

@@ -79,6 +79,8 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
+"), stdout);
+      fputs (_("\
   -b, --batch                  buffer output, process interrupts\n\
   -c, --discard-comments       do not copy comments to the output\n\
   -E, --fatal-warnings         stop execution after first warning\n\
@@ -86,6 +88,7 @@ Operation modes:\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
   -r, --regexp-syntax=SPEC     change the default regexp syntax\n\
+  -s, --safer                  disable potentially unsafe builtins\n\
 "), stdout);
       fputs (_("\
 \n\
@@ -172,6 +175,7 @@ enum
   DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
   PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
+  SAFER_OPTION,				/* -S still has old no-op semantics */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -208,6 +212,7 @@ static const struct option long_options[] =
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
   {"prepend-include", required_argument, NULL, PREPEND_INCLUDE_OPTION},
+  {"safer", no_argument, NULL, SAFER_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
@@ -423,6 +428,10 @@ main (int argc, char *const *argv, char *const *envp)
       case IMPORT_ENVIRONMENT_OPTION:
 	import_environment = true;
 	break;
+
+      case SAFER_OPTION:
+	m4_set_safer_opt (context, true);
+        break;
 
       case VERSION_OPTION:
 	version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,

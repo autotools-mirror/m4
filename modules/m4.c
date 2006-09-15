@@ -495,7 +495,13 @@ m4_sysval_flush (m4 *context)
 
 M4BUILTIN_HANDLER (syscmd)
 {
-  /* Optimize the empty command.  */
+   if (m4_get_safer_opt (context))
+   {
+     m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+     return;
+   }
+
+   /* Optimize the empty command.  */
   if (*M4ARG (1) == '\0')
     {
       m4_set_sysval (0);
@@ -512,8 +518,8 @@ M4BUILTIN_HANDLER (syscmd)
 M4BUILTIN_HANDLER (sysval)
 {
   m4_shipout_int (obs, (m4_sysval == -1 ? 127
-                        : (M4_SYSVAL_EXITBITS (m4_sysval)
-                           | M4_SYSVAL_TERMSIGBITS (m4_sysval))));
+			: (M4_SYSVAL_EXITBITS (m4_sysval)
+			   | M4_SYSVAL_TERMSIGBITS (m4_sysval))));
 }
 
 
@@ -673,6 +679,12 @@ M4BUILTIN_HANDLER (sinclude)
 M4BUILTIN_HANDLER (maketemp)
 {
   int fd;
+
+  if (m4_get_safer_opt (context))
+    {
+      m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+      return;
+    }
 
   errno = 0;
   if ((fd = mkstemp (M4ARG(1))) < 0)

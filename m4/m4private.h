@@ -82,6 +82,7 @@ struct m4 {
 #define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
 #define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
 #define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E */
+#define M4_OPT_SAFER_BIT		(1 << 7) /* --safer */
 
 /* Fast macro versions of accessor functions for public fields of m4,
    that also have an identically named function exported in m4module.h.  */
@@ -125,6 +126,8 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #  define m4_get_fatal_warnings_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_FATAL_WARN_BIT))
+#  define m4_get_safer_opt(C)						\
+		(BIT_TEST((C)->opt_flags, M4_OPT_SAFER_BIT))
 
 /* No fast opt bit set macros, as they would need to evaluate their
    arguments more than once, which would subtly change their semantics.  */

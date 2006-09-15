@@ -230,3 +230,47 @@ AT_CHECK([[sed -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
 ])
 
 AT_CLEANUP
+
+
+## ----- ##
+## safer ##
+## ----- ##
+
+AT_SETUP([--safer])
+
+dnl with --safer, debugfile is crippled, but -o is not
+AT_DATA([[in]],
+[[define(`foo', `1')foo
+debugfile(`trace2')
+define(`foo', `2')foo
+]])
+
+AT_CHECK_M4([--safer -o trace1 -t foo in], [1],
+[[1
+
+2
+]], [[m4:in:2: debugfile: disabled by --safer
+]])
+
+AT_CHECK([test -f trace2], [1])
+AT_CHECK([cat trace1], [0],
+[[m4trace: -1- foo -> `1'
+m4trace: -1- foo -> `2'
+]])
+
+dnl make sure builtin cannot bypass --safer, and that maketemp does not
+dnl create file
+AT_DATA([[in]], [[builtin(`maketemp', `./fooXXXXXX')
+]])
+
+AT_CHECK([echo foo*], [0], [foo*
+])
+
+AT_CHECK_M4([--safer in], [1], [[
+]], [[m4:in:1: maketemp: disabled by --safer
+]])
+
+AT_CHECK([echo foo*], [0], [foo*
+])
+
+AT_CLEANUP
