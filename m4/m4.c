@@ -28,7 +28,7 @@ m4_create (void)
 {
   m4 *context = xzalloc (sizeof *context);
 
-  context->symtab = m4_symtab_create (0, &context->no_gnu_extensions);
+  context->symtab = m4_symtab_create (0);
   context->syntax = m4_syntax_create ();
 
   context->debug_file	 = stderr;

@@ -192,7 +192,7 @@ extern void	    m4__module_exit    (m4 *context);
 typedef void *m4_symtab_apply_func (m4_symbol_table *symtab, const char *key,
 				    m4_symbol *symbol, void *userdata);
 
-extern m4_symbol_table *m4_symtab_create  (size_t, bool *);
+extern m4_symbol_table *m4_symtab_create  (size_t);
 extern void	  m4_symtab_delete  (m4_symbol_table*);
 extern void *	  m4_symtab_apply   (m4_symbol_table*, m4_symtab_apply_func*,
 				     void*);
@@ -214,9 +214,8 @@ extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
 
 extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
-extern bool		m4_set_symbol_traced	  (m4_symbol*, bool);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
-						   const char *);
+						   const char *, bool);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))

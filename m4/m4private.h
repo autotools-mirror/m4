@@ -201,7 +201,6 @@ struct m4_symbol_value {
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 #  define m4_get_symbol_traced(S)	((S)->traced)
-#  define m4_set_symbol_traced(S, V)	((S)->traced = (V))
 #  define m4_get_symbol_value(S)	((S)->value)
 #  define m4_set_symbol_value(S, V)	((S)->value = (V))
 

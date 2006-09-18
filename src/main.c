@@ -88,7 +88,7 @@ Operation modes:\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
   -r, --regexp-syntax=SPEC     change the default regexp syntax\n\
-  -s, --safer                  disable potentially unsafe builtins\n\
+      --safer                  disable potentially unsafe builtins\n\
 "), stdout);
       fputs (_("\
 \n\
@@ -431,7 +431,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case SAFER_OPTION:
 	m4_set_safer_opt (context, true);
-        break;
+	break;
 
       case VERSION_OPTION:
 	version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
@@ -512,7 +512,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    break;
 
 	  case 't':
-	    m4_set_symbol_name_traced (M4SYMTAB, arg);
+	    m4_set_symbol_name_traced (M4SYMTAB, arg, true);
 	    break;
 
 	  case 'm':

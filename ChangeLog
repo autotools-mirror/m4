@@ -1,3 +1,27 @@
+2006-09-18  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (traceon, traceoff): Change to Solaris semantics,
+	such that without arguments, the global trace flag is changed
+	rather than walking the table of all currently-defined macros.
+	(set_trace_CB): No longer needed.
+	* m4/m4module.h (m4_set_symbol_name_traced): Add a parameter.
+	(m4_set_symbol_traced): Delete.
+	(m4_symtab_create): Nuke the nuke parameter.
+	* m4/m4private.h (m4_get_symbol_value): Delete.
+	* m4/symtab.c (m4_symbol_popdef): No more need for nuke_trace.
+	(m4_set_symbol_name_traced): Free undefined entries that are no
+	longer traced.
+	(symbol_destroy_CB): Update caller.
+	* m4/m4.c (m4_create): Update caller.
+	* src/main.c (main): Likewise.
+	(usage): Fix typo in last commit.
+	* doc/m4.texinfo: Minor cleanups throughout.
+	(Debugging, Dumpdef, Trace, Debug Levels, Debug Output): Merge
+	more nodes from branch.
+	(Trace): Document new semantics, and how to simulate the old.
+	* tests/builtins.at (multiquotes): Adjust to new semantics.
+	* NEWS: Update somewhat.
+
 2006-09-14  Eric Blake  <ebb9@byu.net>
 
 	Add --safer option, per debian bug 5898.

@@ -438,12 +438,16 @@ m4trace: -1- dumpdef(``foo'')
 m4trace: -1- dnl
 m4trace: -1- changequote(``!'', ``!'')
 m4trace: -1- dnl
+m4trace: -1- foo -> !``FOO''!
 foo:	!``FOO''!
 m4trace: -1- dumpdef(!foo!)
 m4trace: -1- dnl
 m4trace: -1- define(!bar!, !BAR!)
+m4trace: -1- bar -> !BAR!
 m4trace: -1- changequote(!>*>*>*>*>!, !<*<*<*<*<!)
 m4trace: -1- dnl
+m4trace: -1- foo -> >*>*>*>*>``FOO''<*<*<*<*<
+m4trace: -1- bar -> >*>*>*>*>BAR<*<*<*<*<
 bar:	>*>*>*>*>BAR<*<*<*<*<
 foo:	>*>*>*>*>``FOO''<*<*<*<*<
 m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)

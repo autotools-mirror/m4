@@ -613,7 +613,7 @@ eventually disappear in future releases.
 @itemx -T @var{NUM}
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.  They may disappear in future
-releases.
+releases, and issue a warning to that effect.
 @end table
 
 @acronym{GNU} @code{m4} comes with a feature of freezing internal state
@@ -631,8 +631,8 @@ in @samp{.m4f}.
 @itemx --reload-state=@var{FILE}
 Before execution starts, recover the internal state from the specified
 frozen @var{FILE}.  The options @option{-D}, @option{-U}, @option{-t},
-@option{-m}, and @option{-r} take effect after state is reloaded, but
-before the input files are read.
+@option{-m}, @option{-r}, and @option{--import-environment} take effect
+after state is reloaded, but before the input files are read.
 @end table
 
 Finally, there are several options for aiding in debugging @code{m4}
@@ -661,6 +661,11 @@ Redirect debug and trace output to the named @var{FILE}.  Warnings,
 error messages, and the output of @code{errprint} and @code{dumpdef},
 are still printed to standard error.  @xref{Debug Output}, for more
 details.
+@comment FIXME the name --error-output is misleading, since errprint
+@comment and errors still prints to stderr in spite of this option.  We
+@comment should rename the option; perhaps --trace-output or
+@comment --debug-output, or perhaps --debugfile to match the macro
+@comment name.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
@@ -672,8 +677,8 @@ This option may be given more than once.  @xref{Trace}, for more details.
 @cindex command line, file names on the
 @cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
-names.  If no names are present, the standard input is read.  A file
-name of @file{-} is taken to mean the standard input.  It is
+names.  If no names are present, standard input is read.  A file
+name of @file{-} is taken to mean standard input.  It is
 conventional, but not required, for input files to end in @samp{.m4}.
 
 The input files are read in the sequence given.  Standard input can be
@@ -1484,10 +1489,11 @@ or more digits, allowing macros to have any number of arguments.  This
 is not so in UNIX implementations of @code{m4}, which only recognize
 one digit.
 @comment FIXME - See Austin group XCU ERN 111.  This is controversial,
-@comment and perhaps we should consider an alternate syntax ${10}
-@comment and phase out $10, for better POSIX compliance.  There are
-@comment existing m4 scripts that depend on $10 being the first
-@comment parameter concatenated with 0, not the tenth argument.
+@comment and POSIX is moving to reserve ${ for implementation use.  We
+@comment should phase out $10 and replace it with ${10}, and consider
+@comment other extensions like ${1-default}.  There are existing m4
+@comment scripts that depend on $10 being the first parameter
+@comment concatenated with 0, not the tenth argument.
 
 As a special case, the zeroth argument, @code{$0}, is always the name
 of the macro being expanded.
@@ -1993,10 +1999,10 @@ m4_renamesyms(`^m4_m4(\w*)$', `m4_\1', `POSIX_EXTENDED')
 @cindex @acronym{GNU} extensions
 Any macro can be called indirectly with @code{indir}:
 
-@deffn {Builtin (gnu)} indir (@var{name}, @dots{})
+@deffn {Builtin (gnu)} indir (@var{name}, @ovar{args@dots{}})
 Results in a call to the macro @var{name}, which is passed the
-rest of the arguments.  If @var{name} is not defined, an error message
-is printed, and the expansion is void.
+rest of the arguments @var{args}.  If @var{name} is not defined, an
+error message is printed, and the expansion is void.
 
 The macro @code{indir} is recognized only with parameters.
 @end deffn
@@ -2045,10 +2051,10 @@ indir(`f', undefine(`f'))
 @cindex @acronym{GNU} extensions
 Builtin macros can be called indirectly with @code{builtin}:
 
-@deffn {Builtin (gnu)} builtin (@var{name}, @dots{})
+@deffn {Builtin (gnu)} builtin (@var{name}, @ovar{args@dots{}})
 Results in a call to the builtin @var{name}, which is passed the
-rest of the arguments.  If @var{name} does not name a builtin, a warning
-message is printed, and the expansion is void.
+rest of the arguments @var{args}.  If @var{name} does not name a
+builtin, a warning message is printed, and the expansion is void.
 
 The macro @code{builtin} is recognized only with parameters.
 @end deffn
@@ -2130,14 +2136,14 @@ indir(`index')
 The name of the currently defined macros can be accessed by
 @code{symbols}:
 
-@deffn {Builtin (gnu)} symbols (@dots{})
+@deffn {Builtin (gnu)} symbols (@ovar{names@dots{}})
 Without arguments, @samp{symbols} expands to a sorted list of quoted
 strings, separated by commas.  This contrasts with @code{dumpdef}
 (@pxref{Dumpdef}), whose output cannot be accessed by @code{m4}
 programs.
 
 When given arguments, @code{symbols} returns the sorted subset of the
-symbols currently defined.
+@var{names} currently defined, and silently ignores the rest.
 @end deffn
 
 @example
@@ -2524,9 +2530,9 @@ with these semantics yourself, then check @pxref{Answers}).
 @node Debugging
 @chapter How to debug macros and input
 
-When writing macros for @code{m4}, most of the time they would not
-work as intended (as is the case with most programming languages).
-There is a little support for macro debugging in @code{m4}.
+When writing macros for @code{m4}, they often do not work as intended on
+the first try (as is the case with most programming languages).
+Fortunately, there is support for macro debugging in @code{m4}.
 
 @menu
 * Dumpdef::                     Displaying macro definitions
@@ -2544,18 +2550,20 @@ There is a little support for macro debugging in @code{m4}.
 If you want to see what a name expands into, you can use the builtin
 @code{dumpdef}:
 
-@deffn {Builtin (m4)} dumpdef
-@deffnx {Builtin (m4)} dumpdef (@dots{})
-@code{dumpdef} accepts any number of arguments.  If called without any
-arguments, it displays the definitions of all known names, otherwise it
-displays the definitions of the names given.  The output is printed
-directly on the standard error output, independently of
-@option{--error-output}.
+@deffn {Builtin (m4)} dumpdef (@ovar{names@dots{}})
+Accepts any number of arguments.  If called without any arguments,
+it displays the definitions of all known names, otherwise it displays
+the definitions of the @var{names} given.  The output is printed
+directly to standard error, independently of the @option{--error-output}
+option (or @option{-o}, @pxref{Invoking m4}), or @code{debugfile} macro.
+The output is sorted by name.  If an unknown name is encountered, a
+warning is printed.
 
 The expansion of @code{dumpdef} is void.
 @end deffn
 
 @example
+$ @kbd{m4 -d}
 define(`foo', `Hello world.')
 @result{}
 dumpdef(`foo')
@@ -2567,9 +2575,25 @@ dumpdef(`define')
 @end example
 
 The last example shows how builtin macros definitions are displayed.
+The definition that is dumped corresponds to what would occur if the
+macro were to be called at that point, even if other definitions are
+still live due to redefining a macro during argument collection.
+
+@example
+$ @kbd{m4 -d}
+pushdef(`f', ``$0'1')pushdef(`f', ``$0'2')
+@result{}
+f(popdef(`f')dumpdef(`f'))
+@error{}f:@tabchar{}``$0'1'
+@result{}f2
+f(popdef(`f')dumpdef(`f'))
+@error{}m4:stdin:3: Warning: dumpdef: undefined macro `f'
+@result{}f1
+@end example
 
 @xref{Debug Levels}, for information on controlling the details of the
-display.
+display; in particular, the @samp{q} flag, implied by @option{-d} in the
+example command line, has an impact.
 
 @node Trace
 @section Tracing macro calls
@@ -2580,13 +2604,16 @@ display.
 It is possible to trace macro calls and expansions through the builtins
 @code{traceon} and @code{traceoff}:
 
-@deffn {Builtin (m4)} traceon
-@deffnx {Builtin (m4)} traceon (@dots{})
-@deffnx {Builtin (m4)} traceoff
-@deffnx {Builtin (m4)} traceoff (@dots{})
+@deffn {Builtin (m4)} traceon (@ovar{names@dots{}})
+@deffnx {Builtin (m4)} traceoff (@ovar{names@dots{}})
 When called without any arguments, @code{traceon} and @code{traceoff}
-will turn tracing on and off, respectively,  for all defined macros.
-When called with arguments, only the named macros are affected.
+will turn tracing on and off, respectively, for all macros, identical to
+using the @samp{t} flag of @code{debugmode} (@pxref{Debug Levels}).
+When called with arguments, only the named macros are affected, whether
+or not they are currently defined.  A macro's expansion will be traced
+if global tracing is on, or if the individual macro tracing flag is
+set; to avoid tracing a macro, both the global flag and the macro must
+have tracing off.
 
 The expansion of @code{traceon} and @code{traceoff} is void.
 @end deffn
@@ -2594,9 +2621,11 @@ The expansion of @code{traceon} and @code{traceoff} is void.
 Whenever a traced macro is called and the arguments have been collected,
 the call is displayed.  If the expansion of the macro call is not void,
 the expansion can be displayed after the call.  The output is printed
-directly on the standard error output.
+to the current debug file (defaulting to standard error, @pxref{Debug
+Output}).
 
 @example
+$ @kbd{m4 -d}
 define(`foo', `Hello World.')
 @result{}
 define(`echo', `$@@')
@@ -2613,7 +2642,162 @@ echo(`gnus', `and gnats')
 
 The number between dashes is the depth of the expansion.  It is one most
 of the time, signifying an expansion at the outermost level, but it
-increases when macro arguments contain unquoted macro calls.
+increases when macro arguments contain unquoted macro calls.  The
+maximum number that will appear between dashes is controlled by the
+option @option{--nesting-limit} (or @option{-L}, @pxref{Invoking m4}).
+Additionally, the option @option{--trace} (or @option{-t}) can be used
+to invoke @code{traceon(@var{name})} before parsing input.
+
+@comment options: -d-V -L3 -tifelse
+@comment status: 1
+@example
+$ @kbd{m4 -L 3 -t ifelse}
+ifelse(`one level')
+@error{}m4trace: -1- ifelse
+@result{}
+ifelse(ifelse(ifelse(`three levels')))
+@error{}m4trace: -3- ifelse
+@error{}m4trace: -2- ifelse
+@error{}m4trace: -1- ifelse
+@result{}
+ifelse(ifelse(ifelse(ifelse(`four levels'))))
+@error{}m4:stdin:3: recursion limit of 3 exceeded, use -L<N> to change it
+@end example
+
+Tracing by name is an attribute that is preserved whether the macro is
+defined or not.  This allows the selection of macros to trace before
+those macros are defined.
+
+@example
+$ @kbd{m4 -d}
+traceoff(`foo')
+@result{}
+traceon(`foo')
+@result{}
+foo
+@result{}foo
+define(`foo', `bar')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+undefine(`foo')
+@result{}
+ifdef(`foo', `yes', `no')
+@result{}no
+indir(`foo')
+@error{}m4:stdin:8: Warning: indir: undefined macro `foo'
+@result{}
+define(`foo', `blah')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `blah'
+@result{}blah
+@end example
+
+Tracing even works on builtins.  However, @command{defn} (@pxref{Defn})
+does not transfer tracing status.
+
+@example
+$ @kbd{m4 -d}
+traceon(`eval', `m4_divnum')
+@result{}
+define(`m4_eval', defn(`eval'))
+@result{}
+define(`m4_divnum', defn(`divnum'))
+@result{}
+eval(divnum)
+@error{}m4trace: -1- eval(`0') -> `0'
+@result{}0
+m4_eval(m4_divnum)
+@error{}m4trace: -2- m4_divnum -> `0'
+@result{}0
+@end example
+
+As of @acronym{GNU} M4 2.0, named macro tracing is independent of global
+tracing status; calling @code{traceoff} without arguments turns off the
+global trace flag, but does not turn off tracing for macros where
+tracing was requested by name.  Likewise, calling @code{traceon} without
+arguments will affect tracing of macros that are not defined yet.  This
+behavior matches traditional implementations of @code{m4}.
+
+@example
+$ @kbd{m4 -d}
+traceon
+@result{}
+define(`foo', `bar')
+@error{}m4trace: -1- define(`foo', `bar')
+@result{}
+foo # traced, even though foo was not defined at traceon
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar # traced, even though foo was not defined at traceon
+traceoff(`foo')
+@error{}m4trace: -1- traceoff(`foo')
+@result{}
+foo # traced, since global tracing is still on
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar # traced, since global tracing is still on
+traceon(`foo')
+@error{}m4trace: -1- traceon(`foo')
+@result{}
+traceoff
+@error{}m4trace: -1- traceoff
+@result{}
+foo # traced, since foo is now traced by name
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar # traced, since foo is now traced by name
+traceoff(`foo')
+@result{}
+foo # untraced
+@result{}bar # untraced
+@end example
+
+However, @acronym{GNU} M4 1.4.7 and earlier had slightly different
+semantics, where @code{traceon} without arguments only affected symbols
+that were defined at that moment, and @code{traceoff} without arguments
+stopped all tracing, even when tracing was requested by macro name.  The
+addition of the macro @code{symbols} (@pxref{Symbols}) in 2.0 makes it
+possible to write a file that approximates the older semantics
+regardless of which version of @acronym{GNU} M4 is in use.
+
+@comment options: -d-V
+@example
+$ @kbd{m4}
+ifdef(`symbols',
+  `define(`traceon', `ifelse(`$#', `0', `builtin(`traceon', symbols)',
+    `builtin(`traceon', $@@)')')dnl
+define(`traceoff', `ifelse(`$#', `0',
+    `builtin(`traceoff')builtin(`traceoff', symbols)',
+    `builtin(`traceoff', $@@)')')')dnl
+define(`a', `1')
+@result{}
+traceon # called before b is defined, so b is not traced
+@result{} # called before b is defined, so b is not traced
+define(`b', `2')
+@error{}m4trace: -1- define
+@result{}
+a b
+@error{}m4trace: -1- a
+@result{}1 2
+traceon(`b')
+@error{}m4trace: -1- traceon
+@error{}m4trace: -1- ifelse
+@error{}m4trace: -1- builtin
+@result{}
+a b
+@error{}m4trace: -1- a
+@error{}m4trace: -1- b
+@result{}1 2
+traceoff # stops tracing b, even though it was traced by name
+@error{}m4trace: -1- traceoff
+@error{}m4trace: -1- ifelse
+@error{}m4trace: -1- builtin
+@error{}m4trace: -2- symbols
+@error{}m4trace: -1- builtin
+@result{} # stops tracing b, even though it was traced by name
+a b
+@result{}1 2
+@end example
 
 @xref{Debug Levels}, for information on controlling the details of the
 display.
@@ -2623,29 +2807,18 @@ display.
 
 @cindex controlling debugging output
 @cindex debugging output, controlling
-The @samp{-d} option to @code{m4} controls the amount of details
-presented, when using the macros described in the preceding sections.
+The @option{--debug} option to @code{m4} (or @option{-d},
+@pxref{Invoking m4}) controls the amount of details presented, when
+using the macros described in the preceding sections.
 
 The @var{flags} following the option can be one or more of the
 following:
 
 @table @code
-@item t
-Trace all macro calls made in this invocation of @code{m4}.
-
 @item a
 Show the actual arguments in each macro call.  This applies to all macro
 calls if the @samp{t} flag is used, otherwise only the macros covered by
 calls of @code{traceon}.
-
-@item e
-Show the expansion of each macro call, if it is not void.  This applies
-to all macro calls if the @samp{t} flag is used, otherwise only the
-macros covered by calls of @code{traceon}.
-
-@item q
-Quote actual arguments and macro expansions in the display with the
-current quotes.
 
 @item c
 Show several trace lines for each macro call.  A line is shown when the
@@ -2653,12 +2826,17 @@ macro is seen, but before the arguments are collected; a second line
 when the arguments have been collected and a third line after the call
 has completed.
 
-@item x
-Add a unique `macro call id' to each line of the trace output.  This is
-useful in connection with the @samp{c} flag above.
+@item e
+Show the expansion of each macro call, if it is not void.  This applies
+to all macro calls if the @samp{t} flag is used, otherwise only the
+macros covered by calls of @code{traceon}.
 
 @item f
 Show the name of the current input file in each trace output line.
+
+@item i
+Print a message each time the current input file is changed, giving file
+name and input line number.
 
 @item l
 Show the current input line number in each trace output line.
@@ -2670,31 +2848,67 @@ Print a message each time a module is manipulated (@pxref{Modules}).
 Print a message when a named file is found through the path search
 mechanism (@pxref{Search Path}), giving the actual file name used.
 
-@item i
-Print a message each time the current input file is changed, giving file
-name and input line number.
+@item q
+Quote actual arguments and macro expansions in the display with the
+current quotes.  This affects traced macros, as well as @code{dumpdef}
+output.
+
+@item t
+Trace all macro calls made in this invocation of @code{m4}.  This is
+equivalent to using @code{traceon} without arguments.
+
+@item x
+Add a unique `macro call id' to each line of the trace output.  This is
+useful in connection with the @samp{c} flag above.
 
 @item V
 A shorthand for all of the above flags.
 @end table
 
-If no flags are specified with the @samp{-d} option, the default is
-@samp{aeq}. The examples in the previous two sections assumed the
+As special cases, if @var{flags} starts with a @samp{+}, the remaining
+flags are added to the current debug flags, and if it starts with a
+@samp{-}, remaining flags are removed.  Without either of these
+starting characters, @var{flags} simply replaces the previous setting.
+
+If no flags are specified with the @option{-d} option, the default is
+@samp{aeq}. Many examples in this manual show their output using
 default flags.
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 There is a builtin macro @code{debugmode}, which allows on-the-fly control of
 the debugging output format:
 
-@deffn {Builtin (gnu)} debugmode
-@deffnx {Builtin (gnu)} debugmode @w{(opt @var{flags})}
+@deffn {Builtin (gnu)} debugmode (@ovar{flags})
 The argument @var{flags} should be a subset of the letters listed above.
-As special cases, if the argument starts with a @samp{+}, the flags are
-added to the current debug flags, and if it starts with a @samp{-}, they
-are removed.  If no argument is present, the debugging flags are set to
-zero (as if no @samp{-d} was given), and with an empty argument the flags
-are reset to the default.
+If no argument is present, all debugging flags are cleared
+(as if no @option{-d} was given), and with an empty argument the flags
+are reset to the default of @samp{aeq}.  If an unknown flag is
+encountered, an error is issued.
+
+The expansion of @code{debugmode} is void.
 @end deffn
+
+@example
+define(`foo', `FOO')
+@result{}
+traceon(`foo')
+@result{}
+debugmode()
+@result{}
+foo
+@error{}m4trace: -1- foo -> `FOO'
+@result{}FOO
+debugmode
+@result{}
+foo
+@error{}m4trace: -1- foo
+@result{}FOO
+debugmode(`+l')
+@result{}
+foo
+@error{}m4trace:8: -1- foo
+@result{}FOO
+@end example
 
 @node Debug Output
 @section Saving debugging output
@@ -2702,21 +2916,50 @@ are reset to the default.
 @cindex saving debugging output
 @cindex debugging output, saving
 @cindex output, saving debugging
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Debug and tracing output can be redirected to files using either the
-@samp{-o} option to @code{m4}, or with the builtin macro @code{debugfile}:
+@option{-o} option to @code{m4} (@pxref{Invoking m4}), or with the
+builtin macro @code{debugfile}:
 
-@deffn {Builtin (gnu)} debugfile
-@deffnx {Builtin (gnu)} debugfile @w{(opt @var{file})}
+@deffn {Builtin (gnu)} debugfile (@ovar{file})
 Send all further debug and trace output to @var{file}, opened in append
 mode.  If @var{file} is the empty string, debug and trace output are
-discarded and if @code{debugfile} is called without any arguments, debug
-and trace output are sent to the standard error output.
+discarded.  If @code{debugfile} is called without any arguments,
+debug and trace output are sent to standard error.  This does not
+affect warnings, error messages, or @code{errprint} and @code{dumpdef}
+output, which are always sent to standard error.  If @var{file} cannot
+be opened, the current debug file is unchanged, and an error is issued.
 
 When the @option{--safer} option (@pxref{Invoking m4}) is in effect,
 @var{file} must be empty or omitted, since otherwise an input file
 could cause the modification of arbitrary files.
+
+The expansion of @code{debugfile} is void.
 @end deffn
+
+@example
+$ @kbd{m4 -d}
+traceon(`divnum')
+@result{}
+divnum(`extra')
+@error{}m4:stdin:2: Warning: divnum: extra arguments ignored: 1 > 0
+@error{}m4trace: -1- divnum(`extra') -> `0'
+@result{}0
+debugfile()
+@result{}
+divnum(`extra')
+@error{}m4:stdin:4: Warning: divnum: extra arguments ignored: 1 > 0
+@result{}0
+debugfile
+@result{}
+divnum
+@error{}m4trace: -1- divnum -> `0'
+@result{}0
+@end example
+
+Although the @option{--safer} option cripples @code{debugfile} to a
+limited subset of capabilities, you may still use the @option{-o}
+option from the command line with no restrictions.
 
 @comment options: --safer
 @comment status: 1
@@ -2780,7 +3023,7 @@ next newline, on whatever line containing it, will still be discarded.
 
 @cindex changing the quote delimiters
 @cindex quote delimiters, changing the
-@deffn {Builtin (m4)} changequote (@w{opt @var{start}}, @w{opt @var{end})}
+@deffn {Builtin (m4)} changequote (@ovar{start}, @ovar{end})
 The default quote delimiters can be changed with the builtin
 @code{changequote}, where @var{start} is the new start-quote delimiter
 and @var{end} is the new end-quote delimiter.  If any of the arguments
@@ -2843,7 +3086,7 @@ the quoting mechanism.
 
 @cindex changing comment delimiters
 @cindex comment delimiters, changing
-@deffn {Builtin (m4)} changecom (@w{opt @var{start}}, @w{opt @var{end})}
+@deffn {Builtin (m4)} changecom (@ovar{start}, @ovar{end})
 The default comment delimiters can be changed with the builtin
 macro @code{changecom}, where @var{start} is the new start-comment
 delimiter and @var{end} is the new end-comment delimiter.  If any of the
@@ -2889,7 +3132,7 @@ changecom
 
 @cindex regular expression syntax, changing
 @cindex GNU extensions
-@deffn {Builtin (gnu)} changeresyntax (@w{opt @var{resyntax}})
+@deffn {Builtin (gnu)} changeresyntax (@var{resyntax})
 By default, the @sc{gnu} extensions @code{patsubst}, @code{regexp} and
 more recently @code{renamesyms} continue to use emacs style regular
 expression syntax (@pxref{Regular expression syntax}).
@@ -3411,11 +3654,11 @@ of @file{incl.m4}:
 @example
 define(`bar', include(`incl.m4'))
 @result{}
-This is `bar':  >>>bar<<<
-@result{}This is bar:  >>>Include file start
+This is `bar':  >>bar<<
+@result{}This is bar:  >>Include file start
 @result{}foo
 @result{}Include file end
-@result{}<<<
+@result{}<<
 @end example
 
 This use of @code{include} is not trivial, though, as files can contain
@@ -3482,7 +3725,7 @@ limited by the number of available file descriptors.
 @cindex output, diverting to files
 @cindex files, diverting output to
 @deffn {Builtin (m4)} divert
-@deffnx {Builtin (m4)} divert (@w{opt @var{number}})
+@deffnx {Builtin (m4)} divert (@ovar{number})
 Output is diverted using @code{divert} where @var{number} is the
 diversion to be used.  If @var{number} is left out, it is assumed to be
 zero.
@@ -3527,7 +3770,7 @@ This is a common programming idiom in @code{m4}.
 @section Undiverting output
 
 @deffn {Builtin (m4)} undivert
-@deffnx {Builtin (m4)} undivert (@w{opt @var{number}}, @dots{})
+@deffnx {Builtin (m4)} undivert (@ovar{number@dots{}})
 Diverted text can be undiverted explicitly using the builtin
 @code{undivert},  which reinserts the diverted output given by the
 arguments into the current output stream, in the order given.  If no
@@ -3958,7 +4201,8 @@ index(`gnus, gnats, and armadillos', `dag')
 @cindex regular expressions
 @cindex GNU extensions
 @deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @var{resyntax})
-@deffnx {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
+@deffnx {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @
+  @ovar{replacement}, @ovar{resyntax})
 Searching for regular expressions is done with the builtin
 @code{regexp}, which searches for @var{regexp} in @var{string}.  The
 syntax of regular expressions is similar to that of Perl, @sc{gnu} Awk
@@ -4019,7 +4263,7 @@ regexp(`GNUs not Unix', `\w(\w+)$', `POSIX_EXTENDED')
 
 @cindex extracting substrings
 @cindex substrings, extracting
-@deffn {Builtin (m4)} substr (@var{string}, @var{from}, @w{opt @var{length})}
+@deffn {Builtin (m4)} substr (@var{string}, @var{from}, @ovar{length})
 Substrings are extracted with @code{substr}, which expands to the
 substring of @var{string}, which starts at index @var{from}, and extends
 for @var{length} characters, or to the end of @var{string}, if
@@ -4084,7 +4328,8 @@ most common.
 @cindex pattern substitution
 @cindex substitution by regular expression
 @cindex GNU extensions
-@deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @w{opt @var{replacement},} @w{opt @var{resyntax})}
+@deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @
+  @ovar{replacement}, @ovar{resyntax})
 Global substitution in a string is done by @code{patsubst}, which
 searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.
@@ -4275,7 +4520,7 @@ given arguments.
 @cindex integer expression evaluation
 @cindex evaluation, of integer expressions
 @cindex expressions, evaluation of integer
-@deffn {Builtin (m4)} eval (@var{expression}, @w{opt @var{radix},} @w{opt @var{width})}
+@deffn {Builtin (m4)} eval (@var{expression}, @ovar{radix}, @ovar{width})
 Integer expressions are evaluated with @code{eval}, which expands to the
 value of @var{expression}.
 
@@ -4393,7 +4638,7 @@ Take note that @var{radix} cannot be larger than 36.
 When @code{m4} is compiled with a multiple precision arithmetic library
 (@pxref{Experiments}), a builtin @code{mpeval} is defined.
 
-@deffn {Builtin (mpeval)} mpeval (@var{expression}, @w{opt @var{radix},} @w{opt @var{width})}
+@deffn {Builtin (mpeval)} mpeval (@var{expression}, @ovar{radix}, @ovar{width})
 It is almost identical to @code{eval}, except the calculations are done
 with infinite precision.  Numbers may be of any length.
 
@@ -4484,7 +4729,7 @@ If you want @code{m4} to read the output of a shell command, use
 command @var{shell-command}.
 
 Prior to executing the command, @code{m4} flushes its output buffers.
-The default standard input and error output of @var{shell-command} are
+The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
@@ -4618,8 +4863,8 @@ any of the previous chapters.
 @cindex messages, printing error
 @deffn {Builtin (m4)} errprint (@var{message}, @dots{})
 You can print error messages using @code{errprint}, which simply prints
-@var{message} and the rest of the arguments on the standard error
-output, independently of @option{--error-output}.
+@var{message} and the rest of the arguments on standard error,
+independently of @option{--error-output}.
 
 The expansion of @code{errprint} is void.
 @end deffn
@@ -4658,8 +4903,7 @@ errprint(`m4:'__file__:__line__: `Input error
 @section Exiting from @code{m4}
 
 @cindex exiting from @code{m4}
-@deffn {Builtin (m4)} m4exit
-@deffnx {Builtin (m4)} m4exit (@w{opt @var{code}})
+@deffn {Builtin (m4)} m4exit (@ovar{code})
 If you need to exit from @code{m4} before the entire input has been
 read, you can use @code{m4exit}, which causes @code{m4} to exit, with
 exit code @var{code}.  If @var{code} is left out, the exit code is

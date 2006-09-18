@@ -107,8 +107,6 @@ typedef unsigned long int unumber;
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
-static void *	set_trace_CB	(m4_symbol_table *symtab, const char *ignored,
-				 m4_symbol *symbol, void *userdata);
 static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char*name,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
@@ -743,33 +741,16 @@ M4BUILTIN_HANDLER (m4wrap)
    Tracing is disabled by default, when a macro is defined.  This can be
    overridden by the "t" debug flag.  */
 
-/* Set_trace () is used by "traceon" and "traceoff" to enable and disable
-   tracing of a macro.  It disables tracing if DATA is NULL, otherwise it
-   enable tracing.  */
-static void *
-set_trace_CB (m4_symbol_table *hash, const char *ignored, m4_symbol *symbol,
-	   void *userdata)
-{
-  m4_set_symbol_traced (symbol, (bool) (userdata != NULL));
-  return NULL;
-}
-
 M4BUILTIN_HANDLER (traceon)
 {
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (M4SYMTAB, set_trace_CB, (void *) obs);
+    m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
+				      | M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
-      {
-	const char *name = M4ARG (i);
-	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
-	if (symbol != NULL)
-	  set_trace_CB (NULL, NULL, symbol, (char *) obs);
-	else
-	  m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
-      }
+      m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), true);
 }
 
 /* Disable tracing of all specified macros, or all, if none is specified.  */
@@ -778,17 +759,11 @@ M4BUILTIN_HANDLER (traceoff)
   int i;
 
   if (argc == 1)
-    m4_symtab_apply (M4SYMTAB, set_trace_CB, NULL);
+    m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
+				      & ~M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
-      {
-	const char *name = M4ARG (i);
-	m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
-	if (symbol != NULL)
-	  set_trace_CB (NULL, NULL, symbol, NULL);
-	else
-	  m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
-      }
+      m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), false);
 }
 
 

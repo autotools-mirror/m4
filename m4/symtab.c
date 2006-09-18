@@ -46,7 +46,6 @@
 
 struct m4_symbol_table {
   m4_hash *table;
-  bool *nuke_trace_bit;	/* default: &(context->no_gnu_ext_opt) */
 };
 
 static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *);
@@ -66,13 +65,12 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
    These functions are used to manage a symbol table as a whole.  */
 
 m4_symbol_table *
-m4_symtab_create (size_t size, bool *nuke_trace_bit)
+m4_symtab_create (size_t size)
 {
   m4_symbol_table *symtab = xmalloc (sizeof *symtab);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);
-  symtab->nuke_trace_bit = nuke_trace_bit;
   return symtab;
 }
 
@@ -115,6 +113,7 @@ m4_symtab_apply (m4_symbol_table *symtab,
   return result;
 }
 
+/* Ensure that NAME exists in the table, creating an entry if needed.  */
 static m4_symbol *
 symtab_fetch (m4_symbol_table *symtab, const char *name)
 {
@@ -191,7 +190,7 @@ symbol_destroy_CB (m4_symbol_table *symtab, const char *name,
 {
   char *key = xstrdup ((char *) name);
 
-  m4_set_symbol_traced (symbol, false);
+  symbol->traced = false;
 
   while (key && m4_hash_lookup (symtab->table, key))
     m4_symbol_popdef (symtab, key);
@@ -216,7 +215,7 @@ m4_symbol_lookup (m4_symbol_table *symtab, const char *name)
 
   /* If just searching, return status of search -- if only an empty
      struct is returned, that is treated as a failed lookup.  */
-  return (psymbol && m4_get_symbol_value (*psymbol)) ? *psymbol : 0;
+  return (psymbol && m4_get_symbol_value (*psymbol)) ? *psymbol : NULL;
 }
 
 
@@ -276,18 +275,16 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
 
   assert (psymbol);
   assert (*psymbol);
-  assert (symtab->nuke_trace_bit);
 
   symbol_popval (*psymbol);
 
   /* Only remove the hash table entry if the last value in the
      symbol value stack was successfully removed.  */
-  if (!m4_get_symbol_value (*psymbol))
-    if (*symtab->nuke_trace_bit || !m4_get_symbol_traced (*psymbol))
-      {
-	DELETE (*psymbol);
-	free (m4_hash_remove (symtab->table, name));
-      }
+  if (!m4_get_symbol_value (*psymbol) && !m4_get_symbol_traced (*psymbol))
+    {
+      DELETE (*psymbol);
+      free (m4_hash_remove (symtab->table, name));
+    }
 }
 
 /* Remove the top-most value from SYMBOL's stack.  */
@@ -425,17 +422,43 @@ arg_copy_CB (m4_hash *src, const void *name, void *arg, m4_hash *dest)
   return NULL;
 }
 
+/* Set the tracing status of the symbol NAME to TRACED.  This takes a
+   name, rather than a symbol, since we hide macros that are traced
+   but otherwise undefined from normal lookups, but still can affect
+   their tracing status.  Return true iff the macro was previously
+   traced.  */
 bool
-m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name)
+m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
+			   bool traced)
 {
   m4_symbol *symbol;
+  bool result;
 
   assert (symtab);
   assert (name);
 
-  symbol = symtab_fetch (symtab, name);
+  if (traced)
+    symbol = symtab_fetch (symtab, name);
+  else
+    {
+      m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table,
+							   name);
+      if (!psymbol)
+	return false;
+      symbol = *psymbol;
+    }
 
-  return m4_set_symbol_traced (symbol, true);
+  result = symbol->traced;
+  symbol->traced = traced;
+  if (!traced && !m4_get_symbol_value (symbol))
+    {
+      /* Free an undefined entry once it is no longer traced.  */
+      assert (result);
+      free (symbol);
+      free (m4_hash_remove (symtab->table, name));
+    }
+
+  return result;
 }
 
 
@@ -457,14 +480,6 @@ m4_get_symbol_traced (m4_symbol *symbol)
 {
   assert (symbol);
   return symbol->traced;
-}
-
-#undef m4_set_symbol_traced
-bool
-m4_set_symbol_traced (m4_symbol *symbol, bool value)
-{
-  assert (symbol);
-  return symbol->traced = value;
 }
 
 #undef m4_symbol_value_create

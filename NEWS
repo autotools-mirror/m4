@@ -2,24 +2,42 @@ GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
 Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006 Free Software
 Foundation, Inc.
 
-Version beta 1.9a - ???, by ???
+Version beta 1.9b - ???, by ??? (CVS version 1.9a)
+
+NOTE - there are still a number of FIXMEs to resolve before this can be
+promoted to 2.0.
+
+* The build environment has been updated to modern GNU practices,
+  depending on newer features of Autoconf, Automake, Libtool, Gettext,
+  and Gnulib to be more portable to a wide variety of platforms.
 
 * If the POSIXLY_CORRECT environment variable is set, m4 now disables
   GNU extensions that are incompatible with POSIX.
+  - FIXME: POSIXLY_CORRECT should imply -G, rather than being a separate
+  conditional in the code.  And we should have -g to override the
+  environment.  Also, the list of features incompatible with POSIX is
+  still larger than what either flag currently affects.
 
 * POSIXLY_CORRECT and `m4 --traditional' now makes the `define' builtin
-  replace all `pushdef'ed values of a macro, as POSIX requires.
+  replace all `pushdef'ed values of a macro.
+  - FIXME: The Austin group clarified that this was never a POSIX
+  requirement; consider reverting this change.
 
 * The `defn' builtin now allows any number of arguments, as POSIX requires.
+  - FIXME: This still doesn't work with concatenating builtins with text.
 
-* The '$' syntax class is now enabled.  See the info docs for examples.
+* The '$' syntax class is now enabled.  See the manual for examples.
+  - FIXME: POSIX recommends using ${10} instead of $10 for the tenth
+  positional argument.  We should deprecate $10.
 
 * New builtin `renamesyms' allows programmatic renaming of all symbols
   according to a regular expression.
+  - FIXME: This feature can cause core dumps when renaming multiple
+  symbols to the same name.
 
-* New `-r' command-line option changes the default regular expression
-  syntax used by M4.  Without this option, M4 continues to use
-  RE_SYNTAX_EMACS style expressions.  A new section in the info docs
+* New `-r'/`--regexp-syntax' command-line option changes the default
+  regular expression syntax used by M4.  Without this option, M4 continues
+  to use EMACS style expressions.  A new section in the info docs
   explains the differences between them, and what builtins are affected.
 
 * The experimental `epatsubst' and `eregexp' have been removed in favor
@@ -27,6 +45,40 @@ Version beta 1.9a - ???, by ???
 
 * `patsubst' and `regexp' have a new optional 4th argument to use a
   different regular expression syntax for the duration of that invocation.
+
+* New `-B'/`--prepend-include' command-line option allows prepending to
+  the include path, rather than always searching `.' first.
+
+* New `--safer' command-line option cripples the potentially unsafe
+  macros `debugfile', `syscmd', `esyscmd', and `maketemp'.
+
+* New `m' flag to `-d'/`--debug' option or `debugmode' macro traces
+  actions related to module loading and unloading.  Also, the `--debug'
+  option now understands `-' and `+' modifiers, the way `debugmode' has
+  always done.
+
+* The semantics of `traceon' and `traceoff' now match traditional
+  implementations: when called without arguments, they affect global state
+  rather than affecting only the macros defined at that moment.  The
+  manual includes an example of how to recover 1.4.x semantics.
+
+* The syntax of frozen files format V2 has been improved to save
+  additional state.
+  - FIXME: format 2 still needs to be tweaked to allow complete ASCII
+  representation and to catch any more missing state; once 2.0 is released,
+  any further changes would introduce format 3.
+
+* The `dumpdef' macro now always outputs to standard error, rather than
+  the debug file specified by `-o'/`--error-output' or option or
+  `debugfile' macro.
+  - FIXME: the name --error-output is a bit misleading, since it really
+  affects only debugmode and traceon output; we should probably deprecate
+  the --error-output, and rename it something like --trace-output.
+
+* FIXME: `m4wrap' semantics need an update to FIFO.
+
+* FIXME: include the (long) list of changes in 1.4.x that were not already
+  in earlier betas.
 
 Version beta 1.4q - August 2001, by Gary V. Vaughan
 
@@ -88,6 +140,9 @@ Version beta 1.4o - January 2000, by Rene' Seindal
 * Modules can be loaded from the command line with --load-module
 
 * Modules now use libtool's wrapper libltdl.
+
+* New builtin `symbols' allows dynamic queries of all currently defined
+  macros.
 
 * Bug fixes.
 
