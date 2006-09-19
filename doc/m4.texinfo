@@ -656,16 +656,14 @@ characters per trace line.  If unspecified or zero, output is
 unlimited.  @xref{Debug Levels}, for more details.
 
 @item -o @var{FILE}
+@itemx --debugfile=@var{FILE}
 @itemx --error-output=@var{FILE}
 Redirect debug and trace output to the named @var{FILE}.  Warnings,
 error messages, and the output of @code{errprint} and @code{dumpdef},
 are still printed to standard error.  @xref{Debug Output}, for more
-details.
-@comment FIXME the name --error-output is misleading, since errprint
-@comment and errors still prints to stderr in spite of this option.  We
-@comment should rename the option; perhaps --trace-output or
-@comment --debug-output, or perhaps --debugfile to match the macro
-@comment name.
+details.  The name @option{--error-output} is misleading; using it
+instead of the other spellings will evoke a warning, and it may be
+withdrawn in a future release.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
@@ -2555,7 +2553,7 @@ If you want to see what a name expands into, you can use the builtin
 Accepts any number of arguments.  If called without any arguments,
 it displays the definitions of all known names, otherwise it displays
 the definitions of the @var{names} given.  The output is printed
-directly to standard error, independently of the @option{--error-output}
+directly to standard error, independently of the @option{--debugfile}
 option (or @option{-o}, @pxref{Invoking m4}), or @code{debugfile} macro.
 The output is sorted by name.  If an unknown name is encountered, a
 warning is printed.
@@ -2919,8 +2917,8 @@ foo
 @cindex output, saving debugging
 @cindex @acronym{GNU} extensions
 Debug and tracing output can be redirected to files using either the
-@option{-o} option to @code{m4} (@pxref{Invoking m4}), or with the
-builtin macro @code{debugfile}:
+@option{--debugfile} option to @code{m4} (or @option{-o},
+@pxref{Invoking m4}), or with the builtin macro @code{debugfile}:
 
 @deffn {Builtin (gnu)} debugfile (@ovar{file})
 Send all further debug and trace output to @var{file}, opened in append
@@ -2962,17 +2960,29 @@ Although the @option{--safer} option cripples @code{debugfile} to a
 limited subset of capabilities, you may still use the @option{-o}
 option from the command line with no restrictions.
 
-@comment options: --safer
+@comment options: --safer -otrace -tfoo -Dfoo=bar -d+l
 @comment status: 1
 @example
-$ @kbd{m4 --safer}
-debugfile(`foo')
-@error{}m4:stdin:1: debugfile: disabled by --safer
+$ @kbd{m4 --safer -o trace -t foo -D foo=bar -daelq}
+foo # traced to `trace'
+@result{}bar # traced to `trace'
+debugfile(`file')
+@error{}m4:stdin:2: debugfile: disabled by --safer
 @result{}
+foo # traced to `trace'
+@result{}bar # traced to `trace'
 debugfile()
 @result{}
+foo # trace discarded
+@result{}bar # trace discarded
 debugfile
 @result{}
+foo # traced to stderr
+@error{}m4trace:7: -1- foo -> `bar'
+@result{}bar # traced to stderr
+undivert(`trace')dnl
+@result{}m4trace:1: -1- foo -> `bar'
+@result{}m4trace:3: -1- foo -> `bar'
 @end example
 
 @node Input Control
@@ -4866,7 +4876,8 @@ any of the previous chapters.
 @deffn {Builtin (m4)} errprint (@var{message}, @dots{})
 You can print error messages using @code{errprint}, which simply prints
 @var{message} and the rest of the arguments on standard error,
-independently of @option{--error-output}.
+independently of the @option{--debugfile} option (or @option{-o},
+@pxref{Invoking m4}).
 
 The expansion of @code{errprint} is void.
 @end deffn

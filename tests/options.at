@@ -155,6 +155,12 @@ AT_CHECK_M4([-B1 -B./1 --prepend-include=1], [0], [],
 [[m4: Warning: recommend using `m4 -B ./1' instead
 ]])
 
+dnl --error-output is a misleading name
+AT_CHECK_M4([--error-output=trace], [0], [],
+[[m4: Warning: --error-output is deprecated, use --debugfile instead
+]])
+AT_CHECK([rm trace])
+
 AT_CLEANUP
 
 
@@ -272,5 +278,28 @@ AT_CHECK_M4([--safer in], [1], [[
 
 AT_CHECK([echo foo*], [0], [foo*
 ])
+
+AT_CLEANUP
+
+
+## --------- ##
+## debugfile ##
+## --------- ##
+
+AT_SETUP([--debugfile])
+
+dnl For a while, CVS m4 mistakenly replaced debug output with stdout
+dnl when stdout and stderr were the same file.
+
+AT_DATA([[in]], [[foo
+]])
+
+AT_CHECK_M4([-otrace1 -tfoo -Dfoo=bar in 2>&1], [0], [[bar
+]])
+
+AT_CHECK_M4([--debugfile=trace2 -tfoo -Dfoo=bar in], [0], [[bar
+]])
+
+AT_CHECK([cmp trace1 trace2])
 
 AT_CLEANUP

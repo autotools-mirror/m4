@@ -68,12 +68,13 @@ promoted to 2.0.
   representation and to catch any more missing state; once 2.0 is released,
   any further changes would introduce format 3.
 
+* New `--debugfile' option is a synonym for the misnamed `--error-output',
+  using the old spelling will print a warning and may break in future
+  versions.
+
 * The `dumpdef' macro now always outputs to standard error, rather than
-  the debug file specified by `-o'/`--error-output' or option or
+  the debug file specified by the `-o'/`--debugfile' option or
   `debugfile' macro.
-  - FIXME: the name --error-output is a bit misleading, since it really
-  affects only debugmode and traceon output; we should probably deprecate
-  the --error-output, and rename it something like --trace-output.
 
 * The builtins `modules' and `symbols', introduced in previous betas,
   have been renamed `m4modules' and `m4symbols', in order to minimize

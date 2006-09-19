@@ -140,9 +140,10 @@ set_debug_file (m4 *context, FILE *fp)
   assert (context);
 
   debug_file = m4_get_debug_file (context);
-
   if (debug_file != NULL && debug_file != stderr && debug_file != stdout)
     fclose (debug_file);
+
+  debug_file = fp;
   m4_set_debug_file (context, fp);
 
   if (debug_file != NULL && debug_file != stdout)

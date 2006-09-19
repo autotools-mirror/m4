@@ -130,7 +130,7 @@ Frozen state files:\n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n\
+  -o, --debugfile=FILE         redirect debug and trace output\n\
   -t, --trace=NAME             trace NAME when it will be defined\n\
 "), stdout);
       fputs (_("\
@@ -173,6 +173,7 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 enum
 {
   DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
+  ERROR_OUTPUT_OPTION,			/* deprecated form of -o */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
   PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
   SAFER_OPTION,				/* -S still has old no-op semantics */
@@ -187,9 +188,9 @@ static const struct option long_options[] =
   {"arglength", required_argument, NULL, 'l'},
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
+  {"debugfile", required_argument, NULL, 'o'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
-  {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"hashsize", required_argument, NULL, 'H'},
@@ -210,6 +211,7 @@ static const struct option long_options[] =
   {"word-regexp", required_argument, NULL, 'W'},
 
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
+  {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
   {"prepend-include", required_argument, NULL, PREPEND_INCLUDE_OPTION},
   {"safer", no_argument, NULL, SAFER_OPTION},
@@ -416,6 +418,10 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_set_max_debug_arg_length_opt (context, 0);
 	break;
 
+      case ERROR_OUTPUT_OPTION:
+	error (0, 0, _("\
+Warning: --error-output is deprecated, use --debugfile instead"));
+	/* fall through */
       case 'o':
 	if (!m4_debug_set_output (context, optarg))
 	  error (0, errno, "%s", optarg);
