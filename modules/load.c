@@ -34,7 +34,7 @@
 
 	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-  BUILTIN (modules,	false,	false,	false,	0,	0  )	\
+  BUILTIN (m4modules,	false,	false,	false,	0,	0  )	\
   BUILTIN (load,	false,	true,	false,	1,	1  )	\
   BUILTIN (unload,	false,	true,	false,	1,	1  )	\
 
@@ -87,9 +87,9 @@ M4INIT_HANDLER (load)
    of the m4 builtins declared in `m4_builtin_table[]' above.  */
 
 /**
- * modules()
+ * m4modules()
  **/
-M4BUILTIN_HANDLER (modules)
+M4BUILTIN_HANDLER (m4modules)
 {
   /* The expansion of this builtin is a comma separated list of
      loaded modules.  */

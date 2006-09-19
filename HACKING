@@ -26,6 +26,10 @@ and is not part of a release distribution.
 
 * Changes with user-visible effects must be mentioned in NEWS.
 
+* New macros must be blind, or else prefixed with `m4' or `__', in
+  order to minimize backward compatibility issues with previous
+  releases of M4 when processing English text.
+
 * GNU Coding Standards should be followed:
     http://www.gnu.org/prep/standards/
   Additionally, while GNU M4 is not yet POSIX compliant, we are trying

@@ -59,7 +59,7 @@
   BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
   BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
   BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
-  BUILTIN (symbols,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (m4symbols,	false,	false,	false,	0,	-1 )	\
   BUILTIN (syncoutput,	false,  true,	false,	1,	1  )	\
 
 
@@ -691,13 +691,13 @@ M4BUILTIN_HANDLER (renamesyms)
 }
 
 
-/* Implementation of "symbols".  It builds up a table of pointers to
+/* Implementation of "m4symbols".  It builds up a table of pointers to
    symbols, sorts it and ships out the symbol names.  */
 
 /**
- * symbols([...])
+ * m4symbols([...])
  **/
-M4BUILTIN_HANDLER (symbols)
+M4BUILTIN_HANDLER (m4symbols)
 {
   M4_MODULE_IMPORT (m4, m4_dump_symbols);
 

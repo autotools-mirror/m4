@@ -1,5 +1,16 @@
 2006-09-18  Eric Blake  <ebb9@byu.net>
 
+	* modules/load.c (modules): Rename to...
+	(m4modules): ...this, since it is an English word with 0
+	arguments.
+	* modules/gnu.c (symbols, m4symbols): Likewise.
+	* doc/m4.texinfo (Listing Modules): Rename to...
+	(M4modules): ...this.
+	(Symbols): Rename to...
+	(M4symbols): ...this.
+	(Load, Foreach, Trace, Answers): Update to new spellings.
+	* NEWS: Document this.
+
 	* modules/m4.c (traceon, traceoff): Change to Solaris semantics,
 	such that without arguments, the global trace flag is changed
 	rather than walking the table of all currently-defined macros.

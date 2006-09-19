@@ -177,7 +177,7 @@ How to define new macros
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
-* Symbols::                     Getting the defined macro names
+* M4symbols::                   Getting the defined macro names
 
 Conditionals, loops, and recursion
 
@@ -217,7 +217,7 @@ Diverting and undiverting output
 
 Extending M4 with dynamic runtime modules
 
-* Listing Modules::             Listing loaded modules
+* M4modules::                   Listing loaded modules
 * Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
 * Standard Modules::            Standard bundled modules
@@ -1360,7 +1360,7 @@ value, and bring back the original value at a later time.
 
 * Indir::                       Indirect call of macros
 * Builtin::                     Indirect call of builtins
-* Symbols::                     Getting the defined macro names
+* M4symbols::                   Getting the defined macro names
 @end menu
 
 @node Define
@@ -2128,26 +2128,26 @@ indir(`index')
 @result{}0
 @end example
 
-@node Symbols
+@node M4symbols
 @section Getting the defined macro names
 
 @cindex macro names
 @cindex @acronym{GNU} extensions
 The name of the currently defined macros can be accessed by
-@code{symbols}:
+@code{m4symbols}:
 
-@deffn {Builtin (gnu)} symbols (@ovar{names@dots{}})
-Without arguments, @samp{symbols} expands to a sorted list of quoted
+@deffn {Builtin (gnu)} m4symbols (@ovar{names@dots{}})
+Without arguments, @code{m4symbols} expands to a sorted list of quoted
 strings, separated by commas.  This contrasts with @code{dumpdef}
 (@pxref{Dumpdef}), whose output cannot be accessed by @code{m4}
 programs.
 
-When given arguments, @code{symbols} returns the sorted subset of the
+When given arguments, @code{m4symbols} returns the sorted subset of the
 @var{names} currently defined, and silently ignores the rest.
 @end deffn
 
 @example
-symbols(`ifndef', `ifdef', `define', `undef')
+m4symbols(`ifndef', `ifdef', `define', `undef')
 @result{}define,ifdef
 @end example
 
@@ -2514,12 +2514,13 @@ define(`_foreach',
                                               `$3')')')dnl
 define(`dquote', ``$@@'')
 @result{}
-foreach(`macro', (dquote(symbols)), `regexp(macro, `.*if.*', ``\&',')')
+foreach(`macro', (dquote(m4symbols)),
+        `regexp(macro, `.*if.*', ``\&',')')
 @result{}ifdef,ifelse,shift,
 @end example
 
 The example had to use a helper @code{quote} to ensure that the output
-from @code{symbols} was double quoted; without it, the macro would have
+from @code{m4symbols} was double quoted; without it, the macro would have
 gone into an infinite loop thanks to macros being reinvoked during the
 rescanning.  Choosing @samp{()} as the list delimiters made this
 example rather awkward in terms of proper quoting.  (A different
@@ -2756,18 +2757,18 @@ However, @acronym{GNU} M4 1.4.7 and earlier had slightly different
 semantics, where @code{traceon} without arguments only affected symbols
 that were defined at that moment, and @code{traceoff} without arguments
 stopped all tracing, even when tracing was requested by macro name.  The
-addition of the macro @code{symbols} (@pxref{Symbols}) in 2.0 makes it
+addition of the macro @code{m4symbols} (@pxref{M4symbols}) in 2.0 makes it
 possible to write a file that approximates the older semantics
 regardless of which version of @acronym{GNU} M4 is in use.
 
 @comment options: -d-V
 @example
 $ @kbd{m4}
-ifdef(`symbols',
-  `define(`traceon', `ifelse(`$#', `0', `builtin(`traceon', symbols)',
+ifdef(`m4symbols',
+  `define(`traceon', `ifelse(`$#', `0', `builtin(`traceon', m4symbols)',
     `builtin(`traceon', $@@)')')dnl
 define(`traceoff', `ifelse(`$#', `0',
-    `builtin(`traceoff')builtin(`traceoff', symbols)',
+    `builtin(`traceoff')builtin(`traceoff', m4symbols)',
     `builtin(`traceoff', $@@)')')')dnl
 define(`a', `1')
 @result{}
@@ -2792,7 +2793,7 @@ traceoff # stops tracing b, even though it was traced by name
 @error{}m4trace: -1- traceoff
 @error{}m4trace: -1- ifelse
 @error{}m4trace: -1- builtin
-@error{}m4trace: -2- symbols
+@error{}m4trace: -2- m4symbols
 @error{}m4trace: -1- builtin
 @result{} # stops tracing b, even though it was traced by name
 a b
@@ -3133,7 +3134,7 @@ changecom
 @cindex regular expression syntax, changing
 @cindex GNU extensions
 @deffn {Builtin (gnu)} changeresyntax (@var{resyntax})
-By default, the @sc{gnu} extensions @code{patsubst}, @code{regexp} and
+By default, the @acronym{GNU} extensions @code{patsubst}, @code{regexp} and
 more recently @code{renamesyms} continue to use emacs style regular
 expression syntax (@pxref{Regular expression syntax}).
 
@@ -3920,7 +3921,7 @@ should try to see if you can find it and correct it.   @xref{Answers}.)
 @chapter Extending M4 with dynamic runtime modules
 
 @cindex modules
-@sc{gnu} m4-1.4.x had a monolithic architecture.  All of its
+@acronym{GNU} M4 1.4.x had a monolithic architecture.  All of its
 functionality was contained in a single binary, and additional macros
 could be added only by writing more code in the M4 language, or at the
 extreme by hacking the sources and recompiling the whole thing to make
@@ -3991,7 +3992,7 @@ setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
 
 Also, at build time, you can choose which modules to build into
 the core (so that they will be available without dynamic loading).
-SUSv3 M4 functionality is contained in the module @samp{m4}, @sc{gnu}
+SUSv3 M4 functionality is contained in the module @samp{m4}, @acronym{GNU}
 extensions in the module @samp{gnu}, the @code{load} builtin in the
 module @samp{load} and so on.
 
@@ -4000,47 +4001,48 @@ preloaded into the installed M4 binary, but it is possible to install
 a @emph{thinner} binary minus GNU extensions, for example, by
 configuring the distribution with @samp{./configure
 --with-modules=m4}.  For a binary built with that option to understand
-code that uses @sc{gnu} extensions, you must then run @samp{m4
+code that uses @acronym{GNU} extensions, you must then run @samp{m4
 --load-module=gnu}.  It is also possible to build a @emph{fatter}
 binary with additional modules preloaded: adding, say, the @code{load}
 builtin using @samp{./configure --with-modules="m4 gnu load"}.
 
-GNU M4 now has a facility for defining additional builtins without
+@acronym{GNU} M4 now has a facility for defining additional builtins without
 recompiling the sources.  In actual fact, all of the builtins provided
-by GNU M4 are loaded from such modules.  All of the builtin
+by @acronym{GNU} M4 are loaded from such modules.  All of the builtin
 descriptions in this manual are annotated with the module from which
 they are loaded -- mostly from the module @samp{m4}.
 
-When you start GNU M4, the modules @samp{m4} and @samp{gnu} are
+When you start @acronym{GNU} M4, the modules @samp{m4} and @samp{gnu} are
 loaded by default.  If you supply the @option{-G} option at startup, the
 module @samp{traditional} is loaded instead of @samp{gnu}.
 @xref{Compatibility}, for more details on the differences between these
 two modes of startup.
 
 @menu
-* Listing Modules::             Listing loaded modules
+* M4modules::                   Listing loaded modules
 * Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
 * Standard Modules::            Standard bundled modules
 @end menu
 
-@node Listing Modules
+@node M4modules
 @section Listing loaded modules
 
-@deffn {Builtin (load)} modules
-@samp{modules} expands to an ordered list of currently loaded modules,
+@deffn {Builtin (load)} m4modules
+Expands to a quoted ordered list of currently loaded modules,
 with the most recently loaded module at the front of the list.  Loading
 a module multiple times will not affect the order of this list, the
 position depends on when the module was @emph{first} loaded.
 @end deffn
 
-For example, if GNU @code{m4} is started with the @option{-mload}
-option to load the module @samp{load} and make this builtin available,
-@samp{modules} will yield the following:
+For example, if @acronym{GNU} @code{m4} is started with the
+@option{-mload} option to load the module @samp{load} and make this
+builtin available, @code{m4modules} will yield the following:
 
-@comment ignore
+@comment options: -m load
 @example
-modules
+$ @kbd{m4 -m load}
+m4modules
 @result{}load,gnu,m4
 @end example
 
@@ -4062,11 +4064,11 @@ option.
 
 @comment ignore
 @example
-modules
+m4modules
 @result{}load,gnu,m4
 load(`mymodule')
 @result{}
-modules
+m4modules
 @result{}mymodule,load,gnu,m4
 @end example
 
@@ -4205,7 +4207,7 @@ index(`gnus, gnats, and armadillos', `dag')
   @ovar{replacement}, @ovar{resyntax})
 Searching for regular expressions is done with the builtin
 @code{regexp}, which searches for @var{regexp} in @var{string}.  The
-syntax of regular expressions is similar to that of Perl, @sc{gnu} Awk
+syntax of regular expressions is similar to that of Perl, @acronym{GNU} Awk
 and Egrep: so called ``Extended Regular Expression''.
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
@@ -5098,7 +5100,7 @@ strings.
 
 @item R @var{length} @key{NL} @var{string} @key{NL}
 Sets the default regexp syntax, where @var{string} encodes one of the
-regular expression syntaxes supported by @sc{gnu} M4.
+regular expression syntaxes supported by @acronym{GNU} M4.
 @xref{Changeresyntax}, for more details.
 
 @item M @var{length} @key{NL} @var{string} @key{NL}
@@ -5207,9 +5209,9 @@ by the @code{regexp} (@pxref{Regexp}) and @code{patsubst}
 @item
 The syntax of regular expressions in M4 has never clearly formalized.
 While Open BSD M4 uses extended regular expressions for @code{regexp}
-and @code{patsubst}, @sc{gnu} M4 uses basic regular expression.  Use
+and @code{patsubst}, @acronym{GNU} M4 uses basic regular expression.  Use
 @code{changeresyntax} (@pxref{Changeresyntax}) to change the regular
-expression syntax used by @sc{gnu} M4.
+expression syntax used by @acronym{GNU} M4.
 
 @item
 The output of shell commands can be read into @code{m4} with
@@ -5387,7 +5389,7 @@ define(`_foreach',
                                               `$3')')')dnl
 define(`dquote', ``$@@'')
 @result{}
-foreach(`macro', (dquote(symbols)), `regexp(macro, `shift', `\&')')
+foreach(`macro', (dquote(m4symbols)), `regexp(macro, `shift', `\&')')
 @result{}shift
 traceon(`shift')
 @result{}
@@ -5414,7 +5416,7 @@ each iteration operates on a shorter list, giving linear performance on
 long lists.  Another way of viewing these semantics is that the
 outermost quotes delineates the list, then each element of the list must
 be quoted as though the list delimiters were not present.  Notice the
-difference when iterating over @code{symbols}; we must use
+difference when iterating over @code{m4symbols}; we must use
 @code{dquote_elt} instead of @code{dquote} to get the necessary quoting.
 
 @comment FIXME - include(foreach.m4),include(quote.m4)
@@ -5432,7 +5434,8 @@ define(`_foreach',
                `define(`$1',
                        `_arg1($2)')$3`'_foreach(`$1', _rest($2),
                                                 `$3')')')dnl
-foreach(`macro', `dquote_elt(symbols)', `regexp(macro, `shift', `\&')')
+foreach(`macro', `dquote_elt(m4symbols)',
+        `regexp(macro, `shift', `\&')')
 @result{}shift
 traceon(`shift')
 @result{}
