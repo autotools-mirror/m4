@@ -1,3 +1,14 @@
+2006-09-20  Eric Blake  <ebb9@byu.net>
+
+	Change the default of interactive sessions to match sh.
+	* src/main.c (usage): Document this.
+	(enum interactive_choice): New enum.
+	(main): Use it to defer decision of interactive until after
+	argument processing.
+	* doc/m4.texinfo (Invoking m4): Document this.
+	* NEWS: Likewise, plus add missing mention of -b.
+	Reported by Stepan Kasal.
+
 2006-09-19  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (usage, main, DEBUGFILE_OPTION): Deprecate -o as

@@ -52,6 +52,12 @@ promoted to 2.0.
 * New `--safer' command-line option cripples the potentially unsafe
   macros `debugfile', `syscmd', `esyscmd', and `maketemp'.
 
+* New `-b'/`--batch' command line option to force non-interactive mode.
+  Also, in addition to `-e'/`--interactive' requesting interactive mode, m4
+  now follows the lead of sh, and automatically enters interactive mode
+  when there are no files specified, and when both standard input and
+  standard error are terminals.
+
 * New `m' flag to `-d'/`--debug' option or `debugmode' macro traces
   actions related to module loading and unloading.  Also, the `--debug'
   option now understands `-' and `+' modifiers, the way `debugmode' has

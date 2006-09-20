@@ -420,8 +420,9 @@ immediately exit @code{m4} without reading any input files.
 Makes this invocation of @code{m4} non-interactive.  This means that
 output will be buffered, and interrupts will halt execution.  If neither
 @option{-b} nor @option{-e} are specified, this is activated by default
-if standard input is not a terminal.  If both @option{-b} and
-@option{-e} are specified, only the last one takes effect.
+when any input files are specified, or when either standard input or
+standard error is not a terminal.  If both @option{-b} and @option{-e}
+are specified, only the last one takes effect.
 
 @item -c
 @itemx --discard-comments
@@ -437,8 +438,10 @@ issued, considering all of them to be fatal.
 Makes this invocation of @code{m4} interactive.  This means that all
 output will be unbuffered, and interrupts will be ignored.  If neither
 @option{-b} nor @option{-e} are specified, this is activated by default
-if standard input is a terminal.  If both @option{-b} and @option{-e}
-are specified, only the last one takes effect.
+when no input files are specified, and when both standard input and
+standard error are terminals (similar to the way that /bin/sh determines
+when to be interactive).  If both @option{-b} and @option{-e} are
+specified, only the last one takes effect.
 
 @item -P
 @itemx --prefix-builtins

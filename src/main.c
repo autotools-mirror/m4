@@ -69,7 +69,8 @@ usage (int status)
       printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
       fputs (_("\
 Process macros in FILEs.\n\
-If no FILE or if FILE is `-', standard input is read.\n\
+If no FILE or if FILE is `-', standard input is read.  With no FILE and both\n\
+standard input and standard output are terminals, -e is implied.\n\
 "), stdout);
       fputs (_("\
 \n\
@@ -225,6 +226,14 @@ static const struct option long_options[] =
 
 #define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:r:st:"
 
+/* For determining whether to be interactive.  */
+enum interactive_choice
+{
+  INTERACTIVE_UNKNOWN,	/* Still processing arguments, no -b or -e yet */
+  INTERACTIVE_YES,	/* -e specified last */
+  INTERACTIVE_NO	/* -b specified last */
+};
+
 int
 main (int argc, char *const *argv, char *const *envp)
 {
@@ -240,6 +249,7 @@ main (int argc, char *const *argv, char *const *envp)
   bool import_environment = false; /* true to import environment */
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
+  enum interactive_choice interactive = INTERACTIVE_UNKNOWN;
 
   m4 *context;
 
@@ -262,9 +272,6 @@ main (int argc, char *const *argv, char *const *envp)
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
 #endif
-
-  if (isatty (STDIN_FILENO))
-    m4_set_interactive_opt (context, true);
 
   if (getenv ("POSIXLY_CORRECT"))
     m4_set_posixly_correct_opt (context, true);
@@ -389,7 +396,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'b':
-	m4_set_interactive_opt (context, false);
+	interactive = INTERACTIVE_NO;
 	break;
 
       case 'c':
@@ -410,7 +417,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	m4_set_interactive_opt (context, true);
+	interactive = INTERACTIVE_YES;
 	break;
 
       case 'l':
@@ -427,7 +434,7 @@ main (int argc, char *const *argv, char *const *envp)
 	   affect error messages to stderr.  Change the meaning of -o
 	   after 2.1.  */
 	error (0, 0, _("Warning: %s is deprecated, use --debugfile instead"),
-               optchar == 'o' ? "-o" : "--error-output");
+	       optchar == 'o' ? "-o" : "--error-output");
 	/* fall through */
       case DEBUGFILE_OPTION:
 	if (!m4_debug_set_output (context, optarg))
@@ -456,6 +463,15 @@ main (int argc, char *const *argv, char *const *envp)
 	usage (EXIT_SUCCESS);
 	break;
       }
+
+  /* Interactive if specified, or if no input files and stdin and
+     stderr are terminals, to match sh behavior.  */
+
+  m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
+				    || (interactive == INTERACTIVE_UNKNOWN
+					&& optind == argc
+					&& isatty (STDIN_FILENO)
+					&& isatty (STDERR_FILENO))));
 
   /* Do the basic initializations.  */
 
