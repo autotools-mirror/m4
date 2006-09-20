@@ -1,3 +1,12 @@
+2006-09-19  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (usage, long_options, main, DEBUGFILE_OPTION): Rename
+	-o/--error-output to --debugfile, and deprecate the former.  This
+	will allow a future release to be more consistent with other GNU
+	tools, with -o/--output affecting stdout, not debug.
+	* doc/m4.texinfo (Invoking m4, Debug Output): Document this.
+	* NEWS: Document this.
+
 2006-09-14  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.c (main): Warn on deprecated options -B, -S, -T, -N,

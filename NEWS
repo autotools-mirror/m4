@@ -16,8 +16,13 @@ Version 1.4.7 - ?? ??? 2006, by ??  (CVS version 1.4.6a)
   macros now restore the current position to the next unread byte rather
   than discarding an arbitrary amount of buffered data.
 * The no-op compatibility command line options -B, -N, -S, -T, and
-  --diversions may be withdrawn or assigned new meanings in M4 2.0, so
-  they now issue a warning.
+  --diversions may be withdrawn or assigned new meanings in future
+  releases, so they now issue a warning if used.
+* A new command line option --debugfile replaces the options -o and
+  --error-output as the preferred spelling.  The old options were
+  misleading in their names and inconsistent with other GNU tools; they are
+  still silently accepted, but no longer documented in --help, and may
+  assigned new meanings in future releases.
 
 Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
 

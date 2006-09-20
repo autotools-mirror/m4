@@ -151,7 +151,7 @@ Operation modes:\n\
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
   -I, --include=DIRECTORY      append DIRECTORY to include path\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
@@ -173,9 +173,9 @@ Frozen state files:\n\
 \n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+      --debugfile=FILE         redirect debug and trace output\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
+  -t, --trace=NAME             trace NAME when it is defined\n\
 ", stdout);
       fputs ("\
 \n\
@@ -218,7 +218,8 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
+  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
+  DIVERSIONS_OPTION,			/* not quite -N, because of message */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -229,7 +230,7 @@ static const struct option long_options[] =
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
-  {"error-output", required_argument, NULL, 'o'},
+  {"error-output", required_argument, NULL, 'o'}, /* FIXME: deprecate in 2.0 */
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"hashsize", required_argument, NULL, 'H'},
@@ -246,6 +247,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
+  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
@@ -312,7 +314,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'N':
       case DIVERSIONS_OPTION:
-         /* -N became an obsolete no-op in 1.4.x.  */
+	/* -N became an obsolete no-op in 1.4.x.  */
 	error (0, 0, "Warning: `m4 %s' is deprecated",
 	       optchar == 'N' ? "-N" : "--diversions");
 
@@ -399,6 +401,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'o':
+	/* -o/--error-output are deprecated synonyms of --debugfile,
+	   but don't issue a deprecation warning until autoconf 2.61
+	   or later is more widely established, as such a warning
+	   would interfere with all earlier versions of autoconf.  */
+      case DEBUGFILE_OPTION:
 	if (!debug_set_output (optarg))
 	  error (0, errno, "%s", optarg);
 	break;
@@ -408,8 +415,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case VERSION_OPTION:
-         printf ("%s\n", PACKAGE_STRING);
-         fputs ("\
+	 printf ("%s\n", PACKAGE_STRING);
+	 fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
@@ -417,9 +424,9 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 Written by Rene' Seindal.\n\
 ", stdout);
 
-         if (close_stream (stdout) != 0)
-            M4ERROR ((EXIT_FAILURE, errno, "write error"));
-         exit (EXIT_SUCCESS);
+	 if (close_stream (stdout) != 0)
+	    M4ERROR ((EXIT_FAILURE, errno, "write error"));
+	 exit (EXIT_SUCCESS);
 	break;
 
       case HELP_OPTION:
