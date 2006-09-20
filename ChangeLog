@@ -1,5 +1,20 @@
 2006-09-19  Eric Blake  <ebb9@byu.net>
 
+	* src/main.c (usage, main, DEBUGFILE_OPTION): Deprecate -o as
+	well as --error-output; the goal is to add -o/--output in some
+	future version with semantics like gcc or autom4te.
+	* doc/m4.texinfo (Invoking m4, Dumpdef, Debug Output, Errprint):
+	(Extensions): Reflect this update.
+	(Renamesyms): Add another test.
+	(Defn): Xfail for now, so that `make check' is happy.
+	* NEWS: Document this change.
+	* tests/generate.awk: Mark dynamic loading tests as such.  Allow
+	xfailing tests.
+	* tests/macros.at (Renamesyms collisions): New test, exposing
+	renamesyms' coredump.
+	* tests/options.at (--debugfile, --safer): Update to match
+	change.
+
 	* m4/debug.c (set_debug_file): Fix regression in -o when stdout
 	and stderr are same file, introduced 2003-07-23.
 	* tests/options.at (--debugfile): New test, to catch the bug.

@@ -22,7 +22,7 @@
 
 BEGIN {
   seq = -1;
-  status = 0;
+  status = xfail = 0;
   file = options = "";
   print "# This file is part of the GNU m4 test suite.  -*- Autotest -*-";
   # I don't know how to get this file's name, so it's hard coded :(
@@ -53,9 +53,13 @@ BEGIN {
   gsub ("@comment options:", "", options);
 }
 
+/^@comment xfail$/ {
+  xfail = 1;
+}
+
 /^@comment ignore$/ {
   getline;
-  status = 0;
+  status = xfail = 0;
   options = file = "";
   next;
 }
@@ -93,9 +97,9 @@ BEGIN {
 	}
       else
 	{
-	  new_test(input, status, output, error, options);
+	  new_test(input, status, output, error, options, xfail);
 	}
-      status = 0;
+      status = xfail = 0;
       file = input = output = error = options = "";
       next;
     }
@@ -158,10 +162,15 @@ function new_group(node) {
   printf ("AT_KEYWORDS([[documentation]])\n\n");
 }
 
-function new_test(input, status, output, error, options) {
+function new_test(input, status, output, error, options, xfail) {
   input = normalize(input);
   output = normalize(output);
   error = normalize(error);
+
+  if (options ~ /-m/)
+    printf ("AT_CHECK_DYNAMIC_MODULE\n");
+  if (xfail == 1)
+    printf ("AT_XFAIL_IF([:])\n");
 
   printf ("AT_DATA([[input.m4]],\n[[%s]])\n\n", input);
   # Some of these tests `include' files from tests/.

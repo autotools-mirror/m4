@@ -108,7 +108,7 @@ Dynamic loading features:\n\
 Preprocessor features:\n\
       --import-environment     import all environment variables as macros\n\
   -B, --prepend-include=DIR    add DIR to include path before `.'\n\
-  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
   -I, --include=DIR            add DIR to include path after `.'\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
@@ -129,9 +129,9 @@ Frozen state files:\n\
 \n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+      --debugfile=FILE         redirect debug and trace output\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --debugfile=FILE         redirect debug and trace output\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
+  -t, --trace=NAME             trace NAME when it is defined\n\
 "), stdout);
       fputs (_("\
 \n\
@@ -172,8 +172,9 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DIVERSIONS_OPTION = CHAR_MAX + 1,	/* not quite -N, because of message */
-  ERROR_OUTPUT_OPTION,			/* deprecated form of -o */
+  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
+  DIVERSIONS_OPTION,			/* not quite -N, because of message */
+  ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
   PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
   SAFER_OPTION,				/* -S still has old no-op semantics */
@@ -188,7 +189,6 @@ static const struct option long_options[] =
   {"arglength", required_argument, NULL, 'l'},
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
-  {"debugfile", required_argument, NULL, 'o'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -210,6 +210,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
+  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
@@ -418,11 +419,17 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_set_max_debug_arg_length_opt (context, 0);
 	break;
 
-      case ERROR_OUTPUT_OPTION:
-	error (0, 0, _("\
-Warning: --error-output is deprecated, use --debugfile instead"));
-	/* fall through */
       case 'o':
+      case ERROR_OUTPUT_OPTION:
+	/* FIXME: -o is inconsistent with other tools' use of
+	   -o/--output for creating an output file instead of using
+	   stdout, and --error-output is misnamed since it does not
+	   affect error messages to stderr.  Change the meaning of -o
+	   after 2.1.  */
+	error (0, 0, _("Warning: %s is deprecated, use --debugfile instead"),
+               optchar == 'o' ? "-o" : "--error-output");
+	/* fall through */
+      case DEBUGFILE_OPTION:
 	if (!m4_debug_set_output (context, optarg))
 	  error (0, errno, "%s", optarg);
 	break;

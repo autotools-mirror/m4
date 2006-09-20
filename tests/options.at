@@ -161,6 +161,12 @@ AT_CHECK_M4([--error-output=trace], [0], [],
 ]])
 AT_CHECK([rm trace])
 
+dnl -o will change meaning in the future
+AT_CHECK_M4([-otrace], [0], [],
+[[m4: Warning: -o is deprecated, use --debugfile instead
+]])
+AT_CHECK([rm trace])
+
 AT_CLEANUP
 
 
@@ -244,14 +250,14 @@ AT_CLEANUP
 
 AT_SETUP([--safer])
 
-dnl with --safer, debugfile is crippled, but -o is not
+dnl with --safer, the debugfile macro is crippled, but --debugfile is not
 AT_DATA([[in]],
 [[define(`foo', `1')foo
 debugfile(`trace2')
 define(`foo', `2')foo
 ]])
 
-AT_CHECK_M4([--safer -o trace1 -t foo in], [1],
+AT_CHECK_M4([--safer --debugfile trace1 -t foo in], [1],
 [[1
 
 2
@@ -294,7 +300,7 @@ dnl when stdout and stderr were the same file.
 AT_DATA([[in]], [[foo
 ]])
 
-AT_CHECK_M4([-otrace1 -tfoo -Dfoo=bar in 2>&1], [0], [[bar
+AT_CHECK_M4([--debugfile=trace1 -tfoo -Dfoo=bar in 2>&1], [0], [[bar
 ]])
 
 AT_CHECK_M4([--debugfile=trace2 -tfoo -Dfoo=bar in], [0], [[bar

@@ -68,13 +68,14 @@ promoted to 2.0.
   representation and to catch any more missing state; once 2.0 is released,
   any further changes would introduce format 3.
 
-* New `--debugfile' option is a synonym for the misnamed `--error-output',
-  using the old spelling will print a warning and may break in future
-  versions.
+* The `-o' and `--error-output' options, which were replaced by
+  `--debugfile' in M4 1.4.7, now issue a deprecation warning.  This warning
+  interferes with all versions of Autoconf prior to 2.61, so plan on
+  installing an updated Autoconf when installing M4 2.0.
 
 * The `dumpdef' macro now always outputs to standard error, rather than
-  the debug file specified by the `-o'/`--debugfile' option or
-  `debugfile' macro.
+  the debug file specified by the `--debugfile' option or `debugfile'
+  macro.
 
 * The builtins `modules' and `symbols', introduced in previous betas,
   have been renamed `m4modules' and `m4symbols', in order to minimize

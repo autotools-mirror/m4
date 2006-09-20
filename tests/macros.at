@@ -403,3 +403,23 @@ m4trace: -1- define(`foo', `bar')
 AT_CHECK_M4([-t define -daeq trace3.m4], 0, expout, experr)
 
 AT_CLEANUP
+
+
+## --------------------- ##
+## Renamesyms collisions ##
+## --------------------- ##
+
+AT_SETUP([Renamesyms collisions])
+
+dnl FIXME - We should gracefully detect rename collisions, rather than
+dnl violating the invariants of the symbol table.
+AT_XFAIL_IF([:])
+
+AT_DATA([in], [[define(`bar', `1')define(`baz', `2')dnl
+renamesyms(`^ba.$', `baa')
+]])
+
+AT_CHECK_M4([in], [0], [[
+]], [ignore])
+
+AT_CLEANUP
