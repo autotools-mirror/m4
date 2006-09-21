@@ -1,3 +1,9 @@
+2006-09-21  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap: Add --force option, based on idea from coreutils.
+	* README: Document that ./bootstrap and autoreconf are for
+	developers, and not lightly done in tarballs.
+
 2006-09-20  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (usage, OPTSTRING, main): Rename -e to -i.  Make

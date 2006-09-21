@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-09-08
+# bootstrap (GNU M4) version 2006-09-21
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -25,6 +25,7 @@
 
 # Usage: $progname [options]
 
+# -f      --force            bootstrap even when sources are not from CVS
 # -p ARG  --download-po=ARG  whether to download pofiles [yes]
 # -v      --version          print version information
 # -h,-?   --help             print short or long help message
@@ -86,6 +87,9 @@ progpath="$0"
 # The name of this program:
 progname=`echo "$progpath" | $SED "$basename"`
 PROGRAM=bootstrap
+
+# Detect whether this is a CVS checkout or a tarball
+CVS_only_file=HACKING
 
 # func_echo arg...
 # Echo program name prefixed message.
@@ -195,6 +199,10 @@ func_version ()
     opt="$1"
     shift
     case $opt in
+      -f|--force)
+			CVS_only_file=
+			;;
+
       -p|--download-po)
 			test $# = 0 && func_missing_arg $opt && break
 			case $1 in
@@ -228,6 +236,10 @@ func_version ()
 
   # Bail if the options were screwed
   $exit_cmd $EXIT_FAILURE
+
+  if test -n "$CVS_only_file" && test ! -r "$CVS_only_file"; then
+    func_fatal_error "Bootstrapping from a non-CVS distribution is risky."
+  fi
 }
 
 ## ------------------------------ ##

@@ -14,6 +14,11 @@ should be fully installed *prior to* configuring `autoconf' itself.
 Likewise, if you intend on hacking GNU `m4' from CVS, the bootstrap
 process requires that you first install a released copy of GNU `m4'.
 
+If you are just trying to build `m4' from a released tarball, you
+should not normally need to run `./bootstrap' or `autoreconf'; just go
+ahead and start with `./configure'.  If you are trying to build `m4'
+from CVS, more information can be found in the CVS-only file HACKING.
+
 In the subdirectories `tests' and `examples' you will find various m4
 files, ranging from trivial test files to rather advanced macros.  If
 you intend to use m4 seriously, you might find useful material down
@@ -47,7 +52,9 @@ GNU M4 uses GNU Libtool in order to build shared libraries on a
 variety of systems.  While this is very nice for making usable
 binaries, it can be a pain when trying to debug a program. For that
 reason, compilation of shared libraries can be turned off by
-specifying the `--disable-shared' option to `configure'.
+specifying the `--disable-shared' option to `configure'.  However,
+without shared libraries, modules that are not preloaded will not be
+available for use.
 
 Send bug reports, comments or ideas to `bug-m4@gnu.org'.  A bug report
 is an adequate description of the problem: your input, what you
@@ -68,12 +75,6 @@ make check TESTSUITEFLAGS='-v -d -x 12'
 
 The testsuite understands --help to tell you more about the current
 set of tests.
-
-If you wish to run bootstrap, the released versions of
-automake and libtool are missing some functionality we need.  You
-will need a CVS build of libtool head (1.5.x does not have enough
-functionality), autoconf 2.60 or later, automake 1.9b or later,
-gettext 0.15 or later, and a CVS checkout of gnulib.
 
 ========================================================================
 
