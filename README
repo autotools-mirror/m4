@@ -10,6 +10,13 @@ This release is considered stable.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.
+Likewise, if you intend on hacking GNU `m4' from CVS, the bootstrap
+process requires that you first install a released copy of GNU `m4'.
+
+If you are just trying to build `m4' from a released tarball, you
+should not normally need to run `./bootstrap' or `autoreconf'; just go
+ahead and start with `./configure'.  If you are trying to build `m4'
+from CVS, more information can be found in the CVS-only file HACKING.
 
 In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to
@@ -24,7 +31,7 @@ See file `THANKS' for a list of contributors.
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
 `m4'.  This feature will not be present in m4 2.0, but will be
-replaced by other new features which provide the same capability, so
+replaced by other new features which provide similar capability, so
 do not count on it.
 
 Send bug reports to `bug-m4@gnu.org'.  A bug report is an adequate
