@@ -1,5 +1,11 @@
 2006-09-21  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Invoking m4): Add clarification on option
+	processing behavior.
+	* tests/options.at (option grouping): Test this.
+	* THANKS: Update.
+	Reported by Mikhail Teterin.
+
 	* bootstrap: Add --force option, based on idea from coreutils.
 	* README: Document that ./bootstrap and autoreconf are for
 	developers, and not lightly done in tarballs.

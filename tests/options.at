@@ -19,6 +19,67 @@
 AT_BANNER([Options.])
 
 
+## ---------------- ##
+## Option grouping. ##
+## ---------------- ##
+
+AT_SETUP([option grouping])
+
+dnl this test group depends on correct settings of POSIXLY_CORRECT
+if test -n "${POSIXLY_CORRECT+set}" ; then
+  (unset POSIXLY_CORRECT) >/dev/null 2>&1 || {
+    echo "Problem unsetting POSIXLY_CORRECT"
+    AT_CHECK([exit 77])
+  }
+  unset POSIXLY_CORRECT
+fi
+
+dnl This comes from the "Invoking m4" node; it was easier to write the
+dnl test separately than to let generate.awk fiddle with it.
+AT_DATA([a], [[foo 1
+m@&t@4_dnl()
+]])
+
+AT_DATA([-d+f], [[hi
+]])
+
+dnl First, run with GNU semantics
+AT_CHECK_M4([-QPDfoo -d a -d+f], [0], [[ 1
+]])
+
+AT_CHECK_M4([-Q -P -D foo -d -d+f -- a], [0], [[ 1
+]])
+
+AT_CHECK_M4([--def foo --debug a], [0], [[ 1
+m@&t@4_dnl()
+]])
+
+AT_CHECK_M4([--define=foo --debug= -- a], [0], [[ 1
+m@&t@4_dnl()
+]])
+
+dnl Next, run with POSIX semantics
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+
+AT_CHECK_M4([-QPDfoo -d a -d+f], [0], [[ 1
+hi
+]])
+
+AT_CHECK_M4([-Q -P -D foo -d -- a ./-d+f], [0], [[ 1
+hi
+]])
+
+AT_CHECK_M4([--def foo --debug a], [0], [[ 1
+m@&t@4_dnl()
+]])
+
+AT_CHECK_M4([--define=foo --debug= -- a], [0], [[ 1
+m@&t@4_dnl()
+]])
+
+AT_CLEANUP
+
 ## ------------------ ##
 ## Discard comments.  ##
 ## ------------------ ##

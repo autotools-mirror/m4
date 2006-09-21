@@ -397,13 +397,32 @@ The format of the @code{m4} command is:
 
 @cindex command line, options
 @cindex options, command line
+@cindex @env{POSIXLY_CORRECT}
 All options begin with @samp{-}, or if long option names are used, with
-a @samp{--}.  A long option name need not be written completely, any
+@samp{--}.  A long option name need not be written completely, any
 unambiguous prefix is sufficient.  Unless @env{POSIXLY_CORRECT} is set
-in the environment, options may be intermixed with files, with
-@option{--} as a marker to denote the end of options.  @code{m4}
-understands the following options, grouped by functionality.
+in the environment, options may be intermixed with files.  The argument
+@option{--} is a marker to denote the end of options.
 
+With short options, options that do not take arguments may be combined
+into a single command line argument with subsequent options, options
+with mandatory arguments may be provided either as a single command line
+argument or as two arguments, and options with optional arguments must
+be provided as a single argument.  In other words, without
+@env{POSIXLY_CORRECT}, @kbd{m4 -QPDfoo -d a -d+f} is equivalent to
+@kbd{m4 -Q -P -D foo -d -d+f -- a}, although the latter form is
+considered canonical.  (With @env{POSIXLY_CORRECT}, it is equivalent to
+@kbd{m4 -Q -P -D foo -d -- a ./-d+f}).
+
+With long options, options with mandatory arguments may be provided with
+an equal sign (@samp{=}) in a single argument, or as two arguments, and
+options with optional arguments must be provided as a single argument.
+In other words, @kbd{m4 --def foo --debug a} is equivalent to
+@kbd{m4 --define=foo --debug= -- a}, although the latter form is
+considered canonical (not to mention more robust, in case a future
+version of @code{m4} introduces an option named @option{--default}).
+
+@code{m4} understands the following options, grouped by functionality.
 Several options control the overall operation of @code{m4}:
 
 @table @code
