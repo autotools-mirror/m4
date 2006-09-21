@@ -139,7 +139,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
   -E, --fatal-warnings         stop execution after first warning\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
 ", stdout);
@@ -235,7 +235,7 @@ static const struct option long_options[] =
   {"freeze-state", required_argument, NULL, 'F'},
   {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
-  {"interactive", no_argument, NULL, 'e'},
+  {"interactive", no_argument, NULL, 'i'},
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
@@ -261,9 +261,9 @@ static const struct option long_options[] =
 int retcode;
 
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::eil:o:st:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::eil:o:st:"
 #endif
 
 int
@@ -391,6 +391,9 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
+	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
+	/* fall through */
+      case 'i':
 	interactive = TRUE;
 	break;
 

@@ -400,10 +400,14 @@ immediately exit @code{m4} without reading any input files.
 Stop execution and exit @code{m4} once the first warning has been
 issued, considering all of them to be fatal.
 
-@item -e
+@item -i
 @itemx --interactive
+@itemx -e
 Makes this invocation of @code{m4} interactive.  This means that all
-output will be unbuffered, and interrupts will be ignored.
+output will be unbuffered, and interrupts will be ignored.  The
+spelling @option{-e} exists for compatibility with other @code{m4}
+implementations, and issues a warning because it may be withdrawn in a
+future version of @acronym{GNU} M4.
 
 @item -P
 @itemx --prefix-builtins
@@ -4765,7 +4769,7 @@ The destination of trace and debug output can be controlled with
 
 In addition to the above extensions, @acronym{GNU} @code{m4} implements the
 following command line options: @option{-F}, @option{-G}, @option{-I},
-@option{-L}, @option{-R}, @option{-V}, @option{-W}, @option{-d},
+@option{-L}, @option{-R}, @option{-V}, @option{-W}, @option{-d}, @option{-i},
 @option{-l}, @option{--debugfile} and @option{-t}.  @xref{Invoking m4}, for a
 description of these options.
 
