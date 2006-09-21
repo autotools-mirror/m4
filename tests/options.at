@@ -136,36 +136,46 @@ AT_SETUP([deprecated options])
 
 dnl -N/--diversions are no-ops since 1.4.x
 AT_CHECK_M4([-N1 --diversions=1], [0], [],
-[[m4: Warning: `m4 -N' is deprecated
-m4: Warning: `m4 --diversions' is deprecated
+[[m4: Warning: `-N' is deprecated
+m4: Warning: `--diversions' is deprecated
 ]])
 
-dnl -H/--hashsize are no-ops since 2.0, and still silent for now...
-AT_CHECK_M4([-H1 --hashsize=1])
+dnl -H/--hashsize are no-ops since 2.0
+AT_CHECK_M4([-H1 --hashsize=1], [0], [],
+[[m4: Warning: `-H' is deprecated
+m4: Warning: `--hashsize' is deprecated
+]])
 
 dnl -S/-T are no-ops for compatibility
 AT_CHECK_M4([-S1 -T1], [0], [],
-[[m4: Warning: `m4 -S' may be removed in a future release
-m4: Warning: `m4 -T' may be removed in a future release
+[[m4: Warning: `-S' is deprecated
+m4: Warning: `-T' is deprecated
 ]])
 
 dnl -Bint can be confused with its no-op meaning in 1.4.x, but all other
 dnl uses of -B or its long option are okay
-AT_CHECK_M4([-B1 -B./1 --prepend-include=1], [0], [],
-[[m4: Warning: recommend using `m4 -B ./1' instead
+AT_CHECK_M4([-B1], [0], [],
+[[m4: Warning: recommend using `-B ./1' instead
 ]])
+AT_CHECK_M4([-B./1 --prepend-include=1], [0], [],
+[[]])
 
 dnl --error-output is a misleading name
 AT_CHECK_M4([--error-output=trace], [0], [],
-[[m4: Warning: --error-output is deprecated, use --debugfile instead
+[[m4: Warning: `--error-output' is deprecated, use `--debugfile' instead
 ]])
 AT_CHECK([rm trace])
 
 dnl -o will change meaning in the future
 AT_CHECK_M4([-otrace], [0], [],
-[[m4: Warning: -o is deprecated, use --debugfile instead
+[[m4: Warning: `-o' is deprecated, use `--debugfile' instead
 ]])
 AT_CHECK([rm trace])
+
+dnl -e is an odd spelling for --interactive
+AT_CHECK_M4([-e], [0], [],
+[[m4: Warning: `-e' is deprecated, use `-i' instead
+]])
 
 AT_CLEANUP
 

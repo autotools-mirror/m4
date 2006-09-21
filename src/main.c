@@ -85,7 +85,7 @@ Operation modes:\n\
   -b, --batch                  buffer output, process interrupts\n\
   -c, --discard-comments       do not copy comments to the output\n\
   -E, --fatal-warnings         stop execution after first warning\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
   -r, --regexp-syntax=SPEC     change the default regexp syntax\n\
@@ -176,6 +176,7 @@ enum
   DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
   DIVERSIONS_OPTION,			/* not quite -N, because of message */
   ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
+  HASHSIZE_OPTION,			/* not quite -H, because of message */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
   PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
   SAFER_OPTION,				/* -S still has old no-op semantics */
@@ -194,9 +195,8 @@ static const struct option long_options[] =
   {"discard-comments", no_argument, NULL, 'c'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
-  {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
-  {"interactive", no_argument, NULL, 'e'},
+  {"interactive", no_argument, NULL, 'i'},
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
   {"nesting-limit", required_argument, NULL, 'L'},
@@ -213,6 +213,7 @@ static const struct option long_options[] =
 
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
+  {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
   {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
   {"prepend-include", required_argument, NULL, PREPEND_INCLUDE_OPTION},
@@ -224,13 +225,13 @@ static const struct option long_options[] =
   { NULL, 0, NULL, 0 },
 };
 
-#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::el:m:o:r:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::eil:m:o:r:st:"
 
 /* For determining whether to be interactive.  */
 enum interactive_choice
 {
-  INTERACTIVE_UNKNOWN,	/* Still processing arguments, no -b or -e yet */
-  INTERACTIVE_YES,	/* -e specified last */
+  INTERACTIVE_UNKNOWN,	/* Still processing arguments, no -b or -i yet */
+  INTERACTIVE_YES,	/* -i specified last */
   INTERACTIVE_NO	/* -b specified last */
 };
 
@@ -288,15 +289,18 @@ main (int argc, char *const *argv, char *const *envp)
 	usage (EXIT_FAILURE);
 
       case 'H':
-	/* -H was supported in 1.4.x.  FIXME - make obsolete after
-	   2.0, and remove after 2.1.  For now, keep it silent.  */
+      case HASHSIZE_OPTION:
+        /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
+            remove support for -H after 2.0.  */
+	error (0, 0, _("Warning: `%s' is deprecated"),
+	       optchar == 'H' ? "-H" : "--hashsize");
 	break;
 
       case 'N':
       case DIVERSIONS_OPTION:
 	/* -N became an obsolete no-op in 1.4.x.  FIXME - remove
 	   support for -N after 2.0.  */
-	error (0, 0, _("Warning: `m4 %s' is deprecated"),
+	error (0, 0, _("Warning: `%s' is deprecated"),
 	       optchar == 'N' ? "-N" : "--diversions");
 	break;
 
@@ -305,7 +309,7 @@ main (int argc, char *const *argv, char *const *envp)
 	/* Compatibility junk: options that other implementations
 	   support, but which we ignore as no-ops and don't list in
 	   --help.  */
-	error (0, 0, _("Warning: `m4 -%c' may be removed in a future release"),
+	error (0, 0, _("Warning: `-%c' is deprecated"),
 	       optchar);
 	break;
 
@@ -339,7 +343,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    errno = 0;
 	    strtol (optarg, &end, 10);
 	    if (*end == '\0' && errno == 0)
-	      error (0, 0, _("Warning: recommend using `m4 -B ./%s' instead"),
+	      error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
 		     optarg);
 	  }
 	/* fall through */
@@ -417,6 +421,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
+	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	       "-e", "-i");
+        /* fall through */
+      case 'i':
 	interactive = INTERACTIVE_YES;
 	break;
 
@@ -433,8 +441,8 @@ main (int argc, char *const *argv, char *const *envp)
 	   stdout, and --error-output is misnamed since it does not
 	   affect error messages to stderr.  Change the meaning of -o
 	   after 2.1.  */
-	error (0, 0, _("Warning: %s is deprecated, use --debugfile instead"),
-	       optchar == 'o' ? "-o" : "--error-output");
+	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
 	/* fall through */
       case DEBUGFILE_OPTION:
 	if (!m4_debug_set_output (context, optarg))

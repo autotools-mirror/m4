@@ -419,10 +419,12 @@ immediately exit @code{m4} without reading any input files.
 @itemx --batch
 Makes this invocation of @code{m4} non-interactive.  This means that
 output will be buffered, and interrupts will halt execution.  If neither
-@option{-b} nor @option{-e} are specified, this is activated by default
+@option{-b} nor @option{-i} are specified, this is activated by default
 when any input files are specified, or when either standard input or
-standard error is not a terminal.  If both @option{-b} and @option{-e}
-are specified, only the last one takes effect.
+standard error is not a terminal.  Note that this means that @kbd{m4}
+alone might be interactive, but @kbd{m4 -} is not, even though both
+commands process only standard input.  If both @option{-b} and
+@option{-i} are specified, only the last one takes effect.
 
 @item -c
 @itemx --discard-comments
@@ -433,15 +435,19 @@ Discard all comments instead of copying them to the output.
 Stop execution and exit @code{m4} once the first warning has been
 issued, considering all of them to be fatal.
 
-@item -e
+@item -i
 @itemx --interactive
+@itemx -e
 Makes this invocation of @code{m4} interactive.  This means that all
 output will be unbuffered, and interrupts will be ignored.  If neither
-@option{-b} nor @option{-e} are specified, this is activated by default
+@option{-b} nor @option{-i} are specified, this is activated by default
 when no input files are specified, and when both standard input and
 standard error are terminals (similar to the way that /bin/sh determines
-when to be interactive).  If both @option{-b} and @option{-e} are
-specified, only the last one takes effect.
+when to be interactive).  If both @option{-b} and @option{-i} are
+specified, only the last one takes effect.  The spelling @option{-e}
+exists for compatibility with other @code{m4} implementations, and
+issues a warning because it may be withdrawn in a future version of
+@acronym{GNU} M4.
 
 @item -P
 @itemx --prefix-builtins
@@ -608,9 +614,9 @@ problem in general, if not undecidable!
 @item -N @var{NUM}
 @itemx --diversions=@var{NUM}
 These options are present only for compatibility with previous
-versions of GNU @code{m4}.  They do nothing, because the symbol table
-size and number of diversions are not fixed anymore.  They will
-eventually disappear in future releases.
+versions of GNU @code{m4}.  They do nothing except issue a warning,
+because the symbol table size and number of diversions are not fixed
+anymore.  They will eventually disappear in future releases.
 
 @itemx -S @var{NUM}
 @itemx -T @var{NUM}

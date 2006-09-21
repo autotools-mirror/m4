@@ -1,5 +1,11 @@
 2006-09-20  Eric Blake  <ebb9@byu.net>
 
+	* src/main.c (usage, OPTSTRING, main): Rename -e to -i.  Make
+	warnings consistent.
+	(long_options, HASHSIZE_OPTION): Warn on -H.
+	* doc/m4.texinfo (Invoking m4): Document this.
+	* tests/options.at (deprecated options): Update.
+
 	Change the default of interactive sessions to match sh.
 	* src/main.c (usage): Document this.
 	(enum interactive_choice): New enum.
