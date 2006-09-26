@@ -2638,9 +2638,23 @@ f(popdef(`f')dumpdef(`f'))
 @result{}f1
 @end example
 
-@xref{Debug Levels}, for information on controlling the details of the
-display; in particular, the @samp{q} flag, implied by @option{-d} in the
-example command line, has an impact.
+@xref{Debug Levels}, for information on how the @samp{q} and @samp{s}
+flags affect the details of the display.  Remember, the @samp{q} flag is
+implied when @option{-d} is used in the command line without arguments.
+
+@comment options: -ds
+@example
+$ @kbd{m4 -ds}
+pushdef(`foo', `1')
+@result{}
+pushdef(`foo', defn(`divnum'))
+@result{}
+pushdef(`foo', `3')
+@result{}
+dumpdef(`foo')
+@error{}foo:@tabchar{}3, <divnum>, 1
+@result{}
+@end example
 
 @node Trace
 @section Tracing macro calls
@@ -2855,67 +2869,80 @@ display.
 @cindex controlling debugging output
 @cindex debugging output, controlling
 The @option{--debug} option to @code{m4} (or @option{-d},
-@pxref{Invoking m4}) controls the amount of details presented, when
-using the macros described in the preceding sections.
+@pxref{Invoking m4}) controls the amount of details presented in three
+categories of output.  Trace output is requested by @code{traceon}
+(@pxref{Trace}), and each line is prefixed by @samp{m4trace:} in
+relation to a macro invocation.  Debug output tracks useful events not
+associated with a macro invocation, and each line is prefixed by
+@samp{m4debug:}.  Finally, @code{dumpdef} (@pxref{Dumpdef}) output is
+affected, with no prefix added to the output lines.
 
 The @var{flags} following the option can be one or more of the
 following:
 
 @table @code
 @item a
-Show the actual arguments in each macro call.  This applies to all macro
-calls if the @samp{t} flag is used, otherwise only the macros covered by
-calls of @code{traceon}.
+In trace output, show the actual arguments that were collected before
+invoking the macro.
 
 @item c
-Show several trace lines for each macro call.  A line is shown when the
-macro is seen, but before the arguments are collected; a second line
-when the arguments have been collected and a third line after the call
-has completed.
+In trace output, show several trace lines for each macro call.  A line
+is shown when the macro is seen, but before the arguments are collected;
+a second line when the arguments have been collected and a third line
+after the call has completed.
 
 @item e
-Show the expansion of each macro call, if it is not void.  This applies
-to all macro calls if the @samp{t} flag is used, otherwise only the
-macros covered by calls of @code{traceon}.
+In trace output, show the expansion of each macro call, if it is not
+void.
 
 @item f
-Show the name of the current input file in each trace output line.
+In debug and trace output, include the name of the current input file in
+the output line.
 
 @item i
-Print a message each time the current input file is changed, giving file
-name and input line number.
+In debug output, print a message each time the current input file is
+changed.
 
 @item l
-Show the current input line number in each trace output line.
+In debug and trace output, include the current input line number in the
+output line.
 
 @item m
-Print a message each time a module is manipulated (@pxref{Modules}).
+In debug output, print a message each time a module is manipulated
+(@pxref{Modules}).
 
 @item p
-Print a message when a named file is found through the path search
-mechanism (@pxref{Search Path}), giving the actual file name used.
+In debug output, print a message when a named file is found through the
+path search mechanism (@pxref{Search Path}), giving the actual file name
+used.
 
 @item q
-Quote actual arguments and macro expansions in the display with the
-current quotes.  This affects traced macros, as well as @code{dumpdef}
-output.
+In trace and dumpdef output, quote actual arguments and macro expansions
+in the display with the current quotes.  This is useful in connection
+with the @samp{a} and @samp{e} flags above.
+
+@item s
+In dumpdef output, show the entire stack of definitions associated with
+a symbol via @code{pushdef}.
 
 @item t
-Trace all macro calls made in this invocation of @code{m4}.  This is
-equivalent to using @code{traceon} without arguments.
+In trace output, trace all macro calls made in this invocation of
+@code{m4}.  This is equivalent to using @code{traceon} without
+arguments.
 
 @item x
-Add a unique `macro call id' to each line of the trace output.  This is
-useful in connection with the @samp{c} flag above.
+In trace output, add a unique `macro call id' to each line of the trace
+output.  This is useful in connection with the @samp{c} flag above.
 
 @item V
 A shorthand for all of the above flags.
 @end table
 
-As special cases, if @var{flags} starts with a @samp{+}, the remaining
-flags are added to the current debug flags, and if it starts with a
-@samp{-}, remaining flags are removed.  Without either of these
-starting characters, @var{flags} simply replaces the previous setting.
+As special cases, if @var{flags} starts with a @samp{+}, the named flags
+are enabled without impacting other flags, and if it starts with a
+@samp{-}, the named flags are disabled without impacting other flags.
+Without either of these starting characters, @var{flags} simply replaces
+the previous setting.
 
 If no flags are specified with the @option{-d} option, the default is
 @samp{aeq}. Many examples in this manual show their output using

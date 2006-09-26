@@ -1,5 +1,18 @@
 2006-09-26  Eric Blake  <ebb9@byu.net>
 
+	* m4/m4module.h (m4_symbol_print): New prototype.
+	(M4_DEBUG_TRACE_STACK): New enumerator.
+	(m4_is_debug_bit): Allow use without requiring m4private.h.
+	* m4/symtab.c (symbol_value_print, m4_symbol_print): New
+	functions.
+	* modules/m4.c (dump_symbol_CB, m4_dump_symbols): Speed up
+	callback.
+	(dumpdef): Allow printing pushdef'd stacks.
+	* m4/debug.c (m4_debug_decode): Add new 's' debug mode.
+	* src/main.c (usage): Document it.
+	* doc/m4.texinfo (Dumpdef, Debug Levels): Likewise.
+	* NEWS: Likewise.
+
 	* configure.ac (AC_CONFIG_HEADERS): Place <config.h> with other
 	gnulib headers.
 	* Makefile.am (AUTOMAKE_OPTIONS): Add nostdinc, to reduce length

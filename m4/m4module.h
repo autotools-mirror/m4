@@ -113,10 +113,10 @@ extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const char *, ...) M4_GNUC_PRINTF (4, 5);
 extern void m4_error_at_line (m4 *, int, int, const char *, int,
-			      const char *, ...)         M4_GNUC_PRINTF (6, 7);
-extern void m4_warn  (m4 *, int, const char *, ...)      M4_GNUC_PRINTF (3, 4);
+			      const char *, ...)	 M4_GNUC_PRINTF (6, 7);
+extern void m4_warn  (m4 *, int, const char *, ...)	 M4_GNUC_PRINTF (3, 4);
 extern void m4_warn_at_line  (m4 *, int, const char *, int,
-			      const char *, ...)         M4_GNUC_PRINTF (5, 6);
+			      const char *, ...)	 M4_GNUC_PRINTF (5, 6);
 
 
 /* --- CONTEXT MANAGEMENT --- */
@@ -216,6 +216,8 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
+extern void		m4_symbol_print	  (m4_symbol *, m4_obstack *, bool,
+					   const char *, const char *, bool);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
@@ -294,16 +296,18 @@ enum {
   M4_DEBUG_TRACE_CALLID		= (1 << 9),
   /* m: trace module actions */
   M4_DEBUG_TRACE_MODULE		= (1 << 10),
+  /* s: trace pushdef stacks */
+  M4_DEBUG_TRACE_STACK		= (1 << 11),
 
   /* V: very verbose --  print everything */
-  M4_DEBUG_TRACE_VERBOSE	= ((1 << 11) - 1)
+  M4_DEBUG_TRACE_VERBOSE	= ((1 << 12) - 1)
 };
 
 /* default flags -- equiv: aeq */
 #define M4_DEBUG_TRACE_DEFAULT		\
-	(M4_DEBUG_TRACE_ARGS|M4_DEBUG_TRACE_EXPANSION|M4_DEBUG_TRACE_QUOTE)
+	(M4_DEBUG_TRACE_ARGS | M4_DEBUG_TRACE_EXPANSION | M4_DEBUG_TRACE_QUOTE)
 
-#define m4_is_debug_bit(C,B)	(BIT_TEST (m4_get_debug_level_opt (C), (B)))
+#define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 
 extern int	m4_debug_decode		(m4 *, int, const char *);
 extern bool	m4_debug_set_output	(m4 *, const char *);

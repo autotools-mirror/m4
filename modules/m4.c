@@ -305,16 +305,22 @@ static void *
 dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
 		void *userdata)
 {
+  m4_dump_symbol_data *symbol_data = (m4_dump_symbol_data *) userdata;
+
   assert (name);
   assert (symbol);
+  assert (!m4_is_symbol_value_void (m4_get_symbol_value (symbol)));
 
-  if (!m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
+  if (symbol_data->size == 0)
     {
-      m4_dump_symbol_data *symbol_data = (m4_dump_symbol_data *) userdata;
-
-      obstack_blank (symbol_data->obs, sizeof (const char *));
-      symbol_data->base = (const char **) obstack_base (symbol_data->obs);
-      symbol_data->base[symbol_data->size++] = (const char *) name;
+      obstack_ptr_grow (symbol_data->obs, name);
+      symbol_data->size = (obstack_room (symbol_data->obs)
+			   / sizeof (const char *));
+    }
+  else
+    {
+      obstack_ptr_grow_fast (symbol_data->obs, name);
+      symbol_data->size--;
     }
 
   return NULL;
@@ -326,8 +332,7 @@ void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 		 m4_symbol_value **argv, bool complain)
 {
-  data->base = (const char **) obstack_base (data->obs);
-  data->size = 0;
+  data->size = obstack_room (data->obs) / sizeof (const char *);
 
   if (argc == 1)
     {
@@ -341,19 +346,17 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
       for (i = 1; i < argc; i++)
 	{
 	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
-	  if (symbol != NULL
-	      && !m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
-	    {
-	      dump_symbol_CB (NULL, M4ARG (i), symbol, data);
-	    }
+	  if (symbol != NULL)
+	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	  else if (complain)
 	    m4_warn (context, 0, _("%s: undefined macro `%s'"),
 		     M4ARG (0), M4ARG (i));
 	}
     }
 
-  obstack_finish (data->obs);
-  qsort ((void*) data->base, data->size, sizeof (const char*), dumpdef_cmp_CB);
+  data->size = obstack_object_size (data->obs) / sizeof (const char *);
+  data->base = (const char **) obstack_finish (data->obs);
+  qsort (data->base, data->size, sizeof (const char *), dumpdef_cmp_CB);
 }
 
 
@@ -362,7 +365,10 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 M4BUILTIN_HANDLER (dumpdef)
 {
   m4_dump_symbol_data data;
-  const m4_builtin *bp;
+  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  bool stack = m4_is_debug_bit (context, M4_DEBUG_TRACE_STACK);
+  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
 
   data.obs = obs;
   m4_dump_symbols (context, &data, argc, argv, true);
@@ -370,37 +376,18 @@ M4BUILTIN_HANDLER (dumpdef)
   for (; data.size > 0; --data.size, data.base++)
     {
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base[0]);
+      assert (symbol);
 
-      fprintf (stderr, "%s:\t", data.base[0]);
-
-      if (m4_is_symbol_text (symbol))
-	{
-	  if (m4_get_debug_level_opt (context) & M4_DEBUG_TRACE_QUOTE)
-	    fprintf (stderr, "%s%s%s\n",
-		     m4_get_syntax_lquote (M4SYNTAX),
-		     m4_get_symbol_text (symbol),
-		     m4_get_syntax_rquote (M4SYNTAX));
-	  else
-	    fprintf (stderr, "%s\n", m4_get_symbol_text (symbol));
-	}
-      else if (m4_is_symbol_func (symbol))
-	{
-	  bp = m4_builtin_find_by_func (NULL,
-					m4_get_symbol_func (symbol));
-	  assert (bp);
-	  fprintf (stderr, "<%s>\n", bp->name);
-	}
-      else if (m4_is_symbol_placeholder (symbol))
-	{
-	  fprintf (stderr, "<placeholder for %s>\n",
-		   m4_get_symbol_placeholder (symbol));
-	}
-      else
-	{
-	  assert (!"invalid token in builtin_dumpdef");
-	  abort ();
-	}
+      obstack_grow (obs, data.base[0], strlen (data.base[0]));
+      obstack_1grow (obs, ':');
+      obstack_1grow (obs, '\t');
+      m4_symbol_print (symbol, obs, quote, lquote, rquote, stack);
+      obstack_1grow (obs, '\n');
     }
+
+  obstack_1grow (obs, '\0');
+  m4_sysval_flush (context);
+  fputs ((char *) obstack_finish (obs), stderr);
 }
 
 /* The macro "defn" returns the quoted definition of the macro named by
@@ -445,9 +432,9 @@ static int  m4_sysval = 0;
 
 /* Helper macros for readability.  */
 #if UNIX || defined WEXITSTATUS
-# define M4_SYSVAL_EXITBITS(status)                       \
+# define M4_SYSVAL_EXITBITS(status)			\
    (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4_SYSVAL_TERMSIGBITS(status)                    \
+# define M4_SYSVAL_TERMSIGBITS(status)			\
    (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
 #else /* ! UNIX && ! defined WEXITSTATUS */

@@ -59,9 +59,10 @@ promoted to 2.0.
   standard error are terminals.
 
 * New `m' flag to `-d'/`--debug' option or `debugmode' macro traces
-  actions related to module loading and unloading.  Also, the `--debug'
-  option now understands `-' and `+' modifiers, the way `debugmode' has
-  always done.
+  actions related to module loading and unloading.  New `s' flag shows the
+  entire stack of `pushdef' definitions during `dumpdef'.  Also, the
+  `--debug' option now understands `-' and `+' modifiers, the way
+  `debugmode' has always done.
 
 * The semantics of `traceon' and `traceoff' now match traditional
   implementations: when called without arguments, they affect global state
