@@ -17,9 +17,7 @@
    02110-1301  USA
 */
 
-#if HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include <config.h>
 
 #include <regex.h>
 #include <string.h>
@@ -27,7 +25,7 @@
 #include "m4private.h"
 
 typedef struct {
-  const char 	*spec;
+  const char	*spec;
   const int	code;
 } m4_resyntax;
 

@@ -34,12 +34,6 @@
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_REGEX_H@
-
-/* These are not in m4's namespace so for safety undefine any errant
-   definitions before including stdbool.h.  */
-#undef bool
-#undef false
-#undef true
 @INCLUDE_STDBOOL_H@
 
 #include <gnu/exit.h>
@@ -55,12 +49,12 @@
    behaviour of the including program whether ENABLE_NLS is defined
    or not.  */
 #ifndef _
-#  ifdef ENABLE_NLS
-#    include <libintl.h>
-#    define _(Text) gettext ((Text))
-#  else
-#    define _(Text) (Text)
-#  endif
+# ifdef ENABLE_NLS
+#  include <libintl.h>
+#  define _(Text) gettext ((Text))
+# else
+#  define _(Text) (Text)
+# endif
 #endif
 
 
@@ -70,78 +64,78 @@
    everything else should go inside.  */
 
 #ifndef BEGIN_C_DECLS
-#  ifdef __cplusplus
-#    define BEGIN_C_DECLS	extern "C" {
-#    define END_C_DECLS		}
-#  else /* !__cplusplus */
-#    define BEGIN_C_DECLS	/* empty */
-#    define END_C_DECLS		/* empty */
-#  endif /* __cplusplus */
+# ifdef __cplusplus
+#  define BEGIN_C_DECLS	extern "C" {
+#  define END_C_DECLS		}
+# else /* !__cplusplus */
+#  define BEGIN_C_DECLS	/* empty */
+#  define END_C_DECLS		/* empty */
+# endif /* __cplusplus */
 #endif /* !BEGIN_C_DECLS */
 
 BEGIN_C_DECLS
 
 
 
-/* Canonicalise Windows and Cygwin recognition macros.  */
-#if defined __CYGWIN32__ && !defined __CYGWIN__
-#  define __CYGWIN__ __CYGWIN32__
-#endif
-#if defined _WIN32 && !defined WIN32
-#  define WIN32 _WIN32
-#endif
-
-#if defined WIN32 && !defined __CYGWIN__
-/* M4_DIRSEP_CHAR is accepted *in addition* to '/' as a directory
-   separator when it is set. */
-#  define M4_DIRSEP_CHAR	'\\'
-#  define M4_PATHSEP_CHAR	';'
-#endif
-#ifndef M4_PATHSEP_CHAR
-#  define M4_PATHSEP_CHAR	':'
+/* Canonicalize UNIX recognition macros.  */
+#if defined unix || defined __unix || defined __unix__ \
+  || defined _POSIX_VERSION || defined _POSIX2_VERSION \
+  || defined __NetBSD__ || defined __OpenBSD__ \
+  || defined __APPLE__ || defined __APPLE_CC__
+# define UNIX 1
 #endif
 
+/* Canonicalize Windows recognition macros.  */
+#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__
+# define W32_NATIVE 1
+#endif
+
+/* Canonicalize OS/2 recognition macro.  */
+#ifdef __EMX__
+# define OS2 1
+#endif
 
 
 /* M4_STMT_START/END are used to create macros which expand to a
    a single compound statement in a portable way, but crucially in
-   a way sympathetic to the compiler to maximise optimisation.  */
+   a way sympathetic to the compiler to maximise optimization.  */
 #undef M4_STMT_START
 #undef M4_STMT_END
 #if defined (__GNUC__) && !defined (__STRICT_ANSI__) && !defined (__cplusplus)
-#  define M4_STMT_START        (void)(
-#  define M4_STMT_END          )
+# define M4_STMT_START        (void)(
+# define M4_STMT_END          )
 #else
-#  if (defined (sun) || defined (__sun__))
-#    define M4_STMT_START      if (1)
-#    define M4_STMT_END        else (void)0
-#  else
-#    define M4_STMT_START      do
-#    define M4_STMT_END        while (0)
-#  endif
+# if (defined (sun) || defined (__sun__))
+#  define M4_STMT_START      if (1)
+#  define M4_STMT_END        else (void)0
+# else
+#  define M4_STMT_START      do
+#  define M4_STMT_END        while (0)
+# endif
 #endif
 
 
 
-/* Take advantage of GNU C compiler source level optimisation hints,
+/* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
+# define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
 #else
-#  define M4_GNUC_ATTRIBUTE(args)
+# define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_PRINTF(fmt, arg) M4_GNUC_ATTRIBUTE((format (printf, fmt, arg)))
-#define M4_GNUC_SCANF(fmt, arg)	M4_GNUC_ATTRIBUTE((format (scanf, fmt, arg)))
-#define M4_GNUC_FORMAT(arg_idx)	M4_GNUC_ATTRIBUTE((format_arg (arg_idx)))
-#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE((noreturn))
-#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE((const))
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((unused))
+#define M4_GNUC_PRINTF(fmt, arg)				\
+  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
+#define M4_GNUC_SCANF(fmt, arg)					\
+  M4_GNUC_ATTRIBUTE((__format__ (__scanf__, fmt, arg)))
+#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE((__noreturn__))
+#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE((__const__))
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
 
 
 
 #if !defined __PRETTY_FUNCTION__
-#  define __PRETTY_FUNCTION__	"<unknown>"
+# define __PRETTY_FUNCTION__	"<unknown>"
 #endif
 
 
@@ -151,13 +145,13 @@ BEGIN_C_DECLS
    if the arguments to STR() (or CONC()) are themselves macros, they will
    be expanded before being quoted.   */
 #ifndef STR
-#  define _STR(arg)	#arg
-#  define STR(arg)	_STR(arg)
+# define _STR(arg)	#arg
+# define STR(arg)	_STR(arg)
 #endif
 
 #ifndef CONC
-#  define _CONC(a, b)	a##b
-#  define CONC(a, b)	_CONC(a, b)
+# define _CONC(a, b)	a##b
+# define CONC(a, b)	_CONC(a, b)
 #endif
 
 END_C_DECLS

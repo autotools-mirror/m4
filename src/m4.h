@@ -21,69 +21,18 @@
 #ifndef M4_H
 #define M4_H
 
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
-/* Canonicalise Windows and Cygwin recognition macros.  */
-#if defined(__CYGWIN32__) && !defined(__CYGWIN__)
-# define __CYGWIN__ __CYGWIN32__
-#endif
-#if defined(_WIN32) && !defined(WIN32)
-# define WIN32 _WIN32
-#endif
-
-#include <sys/types.h>
-#include <stdio.h>
 #include <ctype.h>
-
-#include "m4module.h"
-
-/* An ANSI string.h and pre-ANSI memory.h might conflict.  */
-
-#if defined (HAVE_STRING_H) || defined (STDC_HEADERS)
-# include <string.h>
-# if !defined (STDC_HEADERS) && defined (HAVE_MEMORY_H)
-#  include <memory.h>
-# endif
-#else
-# include <strings.h>
-# ifndef memcpy
-#  define memcpy(D, S, N) bcopy((S), (D), (N))
-# endif
-# ifndef strchr
-#  define strchr(S, C) index ((S), (C))
-# endif
-# ifndef strrchr
-#  define strrchr(S, C) rindex ((S), (C))
-# endif
-# ifndef bcopy
-void bcopy ();
-# endif
-#endif
-
-#if STDC_HEADERS || HAVE_STDLIB_H
-#  include <stdlib.h>
-#else /* not STDC_HEADERS */
-
-voidstar malloc ();
-voidstar realloc ();
-char *getenv ();
-double atof ();
-long strtol ();
-
-#endif /* STDC_HEADERS */
-
 #include <errno.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#ifndef errno
-extern int errno;
-#endif
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include "m4module.h"
 
 #if HAVE_LOCALE_H
 # include <locale.h>

@@ -17,11 +17,9 @@
    02110-1301  USA
 */
 
-#if HAVE_CONFIG_H
-#  include <config.h>
-#endif
-#undef PACKAGE
+#include <config.h>
 
+#undef PACKAGE
 #include "perlxsi.c"			/* Perl stuff */
 #undef try
 #undef _

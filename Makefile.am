@@ -26,10 +26,11 @@ config_macro_dir= ltdl/m4
 SUBDIRS		= ltdl po gnu .
 
 ACLOCAL_AMFLAGS = -I ltdl/m4
+AUTOMAKE_OPTIONS = nostdinc
 AM_CPPFLAGS	= -I. -I$(srcdir) \
 		  -Ignu -I$(srcdir)/gnu \
-		  -Im4 -I$(srcdir)/m4\
-		  $(INTLINCL) $(LTDLINCL)
+		  -Im4 -I$(srcdir)/m4 \
+		  $(LTDLINCL)
 AM_LDFLAGS	= -no-undefined -export-dynamic
 
 EXTRA_DIST	= bootstrap \
@@ -85,7 +86,7 @@ endif
 if STACKOVF
 src_m4_SOURCES += src/stackovf.c
 endif
-src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src $(LTDLINCL)
+src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
 src_m4_LDADD	= m4/libm4.la
 src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
