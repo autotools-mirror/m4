@@ -332,6 +332,7 @@ void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 		 m4_symbol_value **argv, bool complain)
 {
+  assert (obstack_object_size (data->obs) == 0);
   data->size = obstack_room (data->obs) / sizeof (const char *);
 
   if (argc == 1)
@@ -683,6 +684,7 @@ M4BUILTIN_HANDLER (maketemp)
 /* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
+  assert (obstack_object_size (obs) == 0);
   m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   fputs ((char *) obstack_finish (obs), stderr);
@@ -714,6 +716,7 @@ M4BUILTIN_HANDLER (m4exit)
    version only the first.  */
 M4BUILTIN_HANDLER (m4wrap)
 {
+  assert (obstack_object_size (obs) == 0);
   if (m4_get_no_gnu_extensions_opt (context))
     m4_shipout_string (context, obs, M4ARG (1), 0, false);
   else
@@ -820,6 +823,7 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
   char from;
   char to;
 
+  assert (obstack_object_size (obs) == 0);
   for (from = '\0'; *s != '\0'; from = *s++)
     {
       if (*s == '-' && from != '\0')

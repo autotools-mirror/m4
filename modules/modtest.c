@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2006 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -67,11 +68,11 @@ m4_macro m4_macro_table[] =
  **/
 M4INIT_HANDLER (modtest)
 {
-  const char *s = "Test module loaded.";
+  const char *s = "Test module loaded.\n";
 
   /* Don't depend on OBS so that the traces are the same when used
      directly, or via a frozen file.  */
-  fprintf (stderr, "%s\n", s);
+  fputs (s, stderr);
 }
 
 
@@ -80,11 +81,11 @@ M4INIT_HANDLER (modtest)
  **/
 M4FINISH_HANDLER (modtest)
 {
-  const char *s = "Test module unloaded.";
+  const char *s = "Test module unloaded.\n";
 
   /* Don't depend on OBS so that the traces are the same when used
      directly, or via a frozen file.  */
-  fprintf (stderr, "%s\n", s);
+  fputs (s, stderr);
 }
 
 

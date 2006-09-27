@@ -98,6 +98,7 @@ M4BUILTIN_HANDLER (ctime)
 {
   time_t t;
   int i;
+  const char *s;
 
   if (argc == 2)
     {
@@ -107,7 +108,8 @@ M4BUILTIN_HANDLER (ctime)
   else
     t = time (0L);
 
-  obstack_grow (obs, ctime (&t), 24);
+  s = ctime (&t);
+  obstack_grow (obs, s, 24);
 }
 
 static void

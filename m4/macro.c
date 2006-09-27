@@ -583,10 +583,11 @@ trace_flush (m4 *context)
 {
   char *line;
 
+  obstack_1grow (&context->trace_messages, '\n');
   obstack_1grow (&context->trace_messages, '\0');
   line = obstack_finish (&context->trace_messages);
   if (m4_get_debug_file (context))
-    fprintf (m4_get_debug_file (context), "%s\n", line);
+    fputs (line, m4_get_debug_file (context));
   obstack_free (&context->trace_messages, line);
 }
 

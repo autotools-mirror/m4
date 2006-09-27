@@ -267,7 +267,10 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 
       offset = buf->regs.end[0];
       if (buf->regs.start[0] == buf->regs.end[0])
-	obstack_1grow (obs, victim[offset++]);
+	{
+	  obstack_1grow (obs, victim[offset]);
+	  offset++;
+	}
     }
 
   if (!ignore_duplicates || subst)
@@ -641,7 +644,6 @@ M4BUILTIN_HANDLER (renamesyms)
       m4_pattern_buffer *buf;	/* compiled regular expression */
 
       m4_dump_symbol_data	data;
-      m4_obstack		data_obs;
       m4_obstack		rename_obs;
 
       int resyntax;
@@ -663,8 +665,7 @@ M4BUILTIN_HANDLER (renamesyms)
 	return;
 
       obstack_init (&rename_obs);
-      obstack_init (&data_obs);
-      data.obs = &data_obs;
+      data.obs = obs;
 
       m4_dump_symbols (context, &data, 1, argv, false);
 
@@ -681,7 +682,6 @@ M4BUILTIN_HANDLER (renamesyms)
 	    }
 	}
 
-      obstack_free (&data_obs, NULL);
       obstack_free (&rename_obs, NULL);
     }
   else

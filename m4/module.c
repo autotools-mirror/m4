@@ -21,6 +21,7 @@
 #include "pathconf.h"
 #include "ltdl.h"
 #include "m4private.h"
+#include "xvasprintf.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_MODULES */
@@ -143,7 +144,7 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
       for (; bp->name != NULL; bp++)
 	{
 	  m4_symbol_value *value = m4_symbol_value_create ();
-	  char *	   name;
+	  const char *	   name;
 
 	  /* Sanity check that builtins meet the required interface.  */
 	  assert (bp->min_args <= bp->max_args);
@@ -159,20 +160,14 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 	  VALUE_MAX_ARGS (value)	= bp->max_args;
 
 	  if (m4_get_prefix_builtins_opt (context))
-	    {
-	      static const char prefix[] = "m4_";
-	      size_t len = strlen (prefix) + strlen (bp->name);
-
-	      name = (char *) xmalloc (1+ len);
-	      snprintf (name, 1+ len, "%s%s", prefix, bp->name);
-	    }
+	    name = xasprintf ("m4_%s", bp->name);
 	  else
-	    name = (char *) bp->name;
+	    name = bp->name;
 
 	  m4_symbol_pushdef (M4SYMTAB, name, value);
 
 	  if (m4_get_prefix_builtins_opt (context))
-	    free (name);
+	    free ((char *) name);
 	}
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
@@ -365,7 +360,7 @@ m4__module_init (m4 *context)
 	      module_dlerror ());
 
 #ifdef DEBUG_MODULES
-  fprintf (stderr, "Module loader initialized.\n");
+  fputs ("Module loader initialized.\n", stderr);
 #endif /* DEBUG_MODULES */
 }
 

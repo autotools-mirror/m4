@@ -215,7 +215,7 @@ include_dump (m4 *context)
 {
   m4__search_path *incl;
 
-  fprintf (stderr, "include_dump:\n");
+  fputs ("include_dump:\n", stderr);
   for (incl = m4__get_search_path (context)->list;
        incl != NULL; incl = incl->next)
     fprintf (stderr, "\t%s\n", incl->dir);

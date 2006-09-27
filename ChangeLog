@@ -1,3 +1,24 @@
+2006-09-27  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (m4_dump_symbols, errprint, m4wrap)
+	(m4_expand_ranges): Ensure we aren't picking up partial object on
+	obstack.
+	* modules/stdlib.c (setenv): Allow extra arguments.
+	* modules/time.c (ctime): Avoid side effect in call to
+	obstack_grow.
+	* modules/gnu.c (m4_regexp_substitute): Likewise.
+	(renamesyms): Avoid extra obstack_init.
+	* src/freeze.c (reload_frozen_state): Remove debug comment.
+	(produce_frozen_state): Simplify fprintf to puts where possible.
+	* modules/modtest.c (modtest_init, modtest_finish): Likewise.
+	* modules/import.c (import, symbol_fail, modules_fail): Likewise.
+	* m4/macro.c (trace_flush): Likewise.
+	* m4/debug.c (m4_debug_message_prefix): Likewise.
+	* m4/path.c (include_dump): Likewise.
+	* m4/module.c (module_remove): Likewise.
+	(install_builtin_table): Simplify malloc and string
+	concatenation.
+
 2006-09-26  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (m4_symbol_print): New prototype.

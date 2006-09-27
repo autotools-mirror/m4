@@ -204,7 +204,7 @@ m4_debug_message_prefix (m4 *context)
   assert (context);
 
   debug_file = m4_get_debug_file (context);
-  fprintf (debug_file, "m4debug:");
+  fputs ("m4debug:", debug_file);
   if (m4_get_current_line (context))
     {
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))

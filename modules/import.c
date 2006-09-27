@@ -68,7 +68,7 @@ M4BUILTIN_HANDLER (import)
   obstack_grow (obs, s, strlen(s));
 
   if (export_test && export_test (M4ARG (1)))
-    fprintf (stderr, "TRUE\n");
+    fputs ("TRUE\n", stderr);
 }
 
 /**
@@ -84,7 +84,7 @@ M4BUILTIN_HANDLER (symbol_fail)
   obstack_grow (obs, s, strlen(s));
 
   if (no_such && no_such (M4ARG (1)))
-    fprintf (stderr, "TRUE\n");
+    fputs ("TRUE\n", stderr);
 }
 
 /**
@@ -100,5 +100,5 @@ M4BUILTIN_HANDLER (module_fail)
   obstack_grow (obs, s, strlen(s));
 
   if (no_such && no_such (M4ARG (1)))
-    fprintf (stderr, "TRUE\n");
+    fputs ("TRUE\n", stderr);
 }

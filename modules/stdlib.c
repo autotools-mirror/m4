@@ -105,7 +105,7 @@ M4BUILTIN_HANDLER (setenv)
 {
   int overwrite = 1;
 
-  if (argc == 4)
+  if (argc >= 4)
     if (!m4_numeric_arg (context, argc, argv, 3, &overwrite))
       return;
 
@@ -116,6 +116,7 @@ M4BUILTIN_HANDLER (setenv)
   if (!overwrite && getenv (M4ARG (1)) != NULL)
     return;
 
+  assert (obstack_object_size (obs) == 0);
   obstack_grow (obs, M4ARG (1), strlen (M4ARG (1)));
   obstack_1grow (obs, '=');
   obstack_grow (obs, M4ARG (2), strlen (M4ARG (2)));
