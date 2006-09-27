@@ -137,9 +137,9 @@ extern void		m4_delete	(m4 *);
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,		   exit_status,	   exit_status)		\
 	M4FIELD(bool,	no_gnu_extensions_opt,	   no_gnu_extensions)	\
-	M4FIELD(int,	nesting_limit_opt,	   nesting_limit)	\
+	M4FIELD(size_t,	nesting_limit_opt,	   nesting_limit)	\
 	M4FIELD(int,	debug_level_opt,	   debug_level)		\
-	M4FIELD(int,	max_debug_arg_length_opt,  max_debug_arg_length)\
+	M4FIELD(size_t,	max_debug_arg_length_opt,  max_debug_arg_length)\
 	M4FIELD(int,	regexp_syntax_opt,	   regexp_syntax)	\
 
 
@@ -216,8 +216,11 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
-extern void		m4_symbol_print	  (m4_symbol *, m4_obstack *, bool,
-					   const char *, const char *, bool);
+extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *, bool,
+					 const char *, const char *, size_t);
+extern void	m4_symbol_print		(m4_symbol *, m4_obstack *, bool,
+					 const char *, const char *, bool,
+					 size_t);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))

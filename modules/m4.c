@@ -367,9 +367,10 @@ M4BUILTIN_HANDLER (dumpdef)
 {
   m4_dump_symbol_data data;
   bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
-  bool stack = m4_is_debug_bit (context, M4_DEBUG_TRACE_STACK);
   const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
   const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  bool stack = m4_is_debug_bit (context, M4_DEBUG_TRACE_STACK);
+  size_t arg_length = m4_get_max_debug_arg_length_opt (context);
 
   data.obs = obs;
   m4_dump_symbols (context, &data, argc, argv, true);
@@ -382,7 +383,7 @@ M4BUILTIN_HANDLER (dumpdef)
       obstack_grow (obs, data.base[0], strlen (data.base[0]));
       obstack_1grow (obs, ':');
       obstack_1grow (obs, '\t');
-      m4_symbol_print (symbol, obs, quote, lquote, rquote, stack);
+      m4_symbol_print (symbol, obs, quote, lquote, rquote, stack, arg_length);
       obstack_1grow (obs, '\n');
     }
 

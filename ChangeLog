@@ -1,5 +1,22 @@
 2006-09-27  Eric Blake  <ebb9@byu.net>
 
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	strnlen.
+	* m4/symtab.c (symbol_value_print): Rename to...
+	(m4_symbol_value_print): ...this, and...
+	(m4_symbol_print): Update to allow -L length truncation.  Now
+	truncation also affects dumpdef output and builtin names.
+	* m4/m4private.h (nesting_limit, max_debug_argument_length):
+	Switch to size_t.
+	* m4/m4module.h (m4_symbol_print): Add parameter.
+	(m4_symbol_value_print): New function.
+	* modules/m4.c (dumpdef): Allow length truncation.
+	* m4/macro.c (trace_pre): Use m4_symbol_print, rather than
+	repeating code.
+	* doc/m4.texinfo (Invoking m4): Document -l better.
+	(Dumpdef, Debug Levels): Document the effect of -l.
+	* NEWS: Document this change.
+
 	* modules/m4.c (m4_dump_symbols, errprint, m4wrap)
 	(m4_expand_ranges): Ensure we aren't picking up partial object on
 	obstack.

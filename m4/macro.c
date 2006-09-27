@@ -188,8 +188,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  break;
 
 	case M4_TOKEN_EOF:
-           m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
-                             _("end of file in argument list"));
+	   m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
+			     _("end of file in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:
@@ -608,45 +608,25 @@ trace_pre (m4 *context, const char *name, size_t id,
 	   int argc, m4_symbol_value **argv)
 {
   int i;
-  const m4_builtin *bp;
 
   trace_header (context, id);
   trace_format (context, "%s", name);
 
   if ((argc > 1) && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
     {
-      trace_format (context, "(");
+      bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+      const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+      const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+      size_t arg_length = m4_get_max_debug_arg_length_opt (context);
 
+      trace_format (context, "(");
       for (i = 1; i < argc; i++)
 	{
 	  if (i != 1)
 	    trace_format (context, ", ");
 
-	  if (m4_is_symbol_value_text (argv[i]))
-	    {
-	      trace_format (context, "%l%S%r", M4ARG (i));
-	    }
-	  else if (m4_is_symbol_value_func (argv[i]))
-	    {
-	      bp = m4_builtin_find_by_func (NULL,
-					    m4_get_symbol_value_func(argv[i]));
-	      if (bp == NULL)
-		{
-		  assert (!"INTERNAL ERROR: builtin not found in table!");
-		  abort ();
-		}
-	      trace_format (context, "<%s>", bp->name);
-	    }
-	  else if (m4_is_symbol_value_placeholder (argv[i]))
-	    {
-	      trace_format (context, "<placeholder for %s>",
-			    m4_get_symbol_value_placeholder (argv[i]));
-	    }
-	  else
-	    {
-	      assert (!"INTERNAL ERROR: bad token data type (trace_pre ())");
-	      abort ();
-	    }
+	  m4_symbol_value_print (argv[i], &context->trace_messages,
+				 quote, lquote, rquote, arg_length);
 	}
       trace_format (context, ")");
     }

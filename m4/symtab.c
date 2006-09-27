@@ -20,6 +20,8 @@
 
 #include "m4private.h"
 
+#include "strnlen.h"
+
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYM */
 
@@ -57,8 +59,6 @@ static void *	  arg_destroy_CB	(m4_hash *hash, const void *name,
 					 void *arg, void *ignored);
 static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 					 void *arg, m4_hash *dest);
-static void	  symbol_value_print	(m4_symbol_value *, m4_obstack *, bool,
-					 const char *, const char *);
 
 
 /* -- SYMBOL TABLE MANAGEMENT --
@@ -463,54 +463,63 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 }
 
 /* Grow OBS with a text representation of VALUE.  If QUOTE, then
-   surround a text definition by LQUOTE and RQUOTE.  */
-static void
-symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
-		    const char *lquote, const char *rquote)
+   surround a text definition by LQUOTE and RQUOTE.  If ARG_LENGTH is
+   non-zero, then truncate text definitions to that length.  */
+void
+m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
+		       const char *lquote, const char *rquote,
+		       size_t arg_length)
 {
+  const char *text;
+  size_t len;
+
   if (m4_is_symbol_value_text (value))
     {
-      if (quote)
-	{
-	  obstack_grow (obs, lquote, strlen (lquote));
-	  obstack_grow (obs, m4_get_symbol_value_text (value),
-			strlen (m4_get_symbol_value_text (value)));
-	  obstack_grow (obs, rquote, strlen (rquote));
-	}
-      else
-	obstack_grow (obs, m4_get_symbol_value_text (value),
-		      strlen (m4_get_symbol_value_text (value)));
+      text = m4_get_symbol_value_text (value);
     }
   else if (m4_is_symbol_value_func (value))
     {
       const m4_builtin *bp;
       bp = m4_builtin_find_by_func (NULL, m4_get_symbol_value_func (value));
       assert (bp);
-      obstack_1grow (obs, '<');
-      obstack_grow (obs, bp->name, strlen (bp->name));
-      obstack_1grow (obs, '>');
+      text = bp->name;
+      lquote = "<";
+      rquote = ">";
+      quote = true;
     }
   else if (m4_is_symbol_value_placeholder (value))
     {
+      text = m4_get_symbol_value_placeholder (value);
       /* FIXME - is it worth translating "placeholder for "?  */
-      obstack_grow (obs, "<placeholder for ", strlen ("<placeholder for "));
-      obstack_grow (obs, m4_get_symbol_value_placeholder (value),
-		    strlen (m4_get_symbol_value_placeholder (value)));
-      obstack_1grow (obs, '>');
+      lquote = "<placeholder for ";
+      rquote = ">";
+      quote = true;
     }
   else
     {
       assert (!"invalid token in symbol_value_print");
       abort ();
     }
+
+  len = arg_length ? strnlen (text, arg_length) : strlen (text);
+  if (quote)
+    obstack_grow (obs, lquote, strlen (lquote));
+  obstack_grow (obs, text, len);
+  if (len == arg_length && text[len] != '\0')
+    obstack_grow (obs, "...", 3);
+  if (quote)
+    obstack_grow (obs, rquote, strlen (rquote));
 }
 
 /* Grow OBS with a text representation of SYMBOL.  If QUOTE, then
-   surround each definition by LQUOTE and RQUOTE.  If STACK, then
-   append all pushdef'd values, rather than just the top.  */
+   surround each text definition by LQUOTE and RQUOTE.  If STACK, then
+   append all pushdef'd values, rather than just the top.  If
+   ARG_LENGTH is non-zero, then truncate text definitions to that
+   length.  */
 void
 m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
-		 const char *lquote, const char *rquote, bool stack)
+		 const char *lquote, const char *rquote, bool stack,
+		 size_t arg_length)
 {
   m4_symbol_value *value;
 
@@ -518,7 +527,7 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  symbol_value_print (value, obs, quote, lquote, rquote);
+  m4_symbol_value_print (value, obs, quote, lquote, rquote, arg_length);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -526,7 +535,8 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
 	{
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
-	  symbol_value_print (value, obs, quote, lquote, rquote);
+	  m4_symbol_value_print (value, obs, quote, lquote, rquote,
+				 arg_length);
 	  value = VALUE_NEXT (value);
 	}
     }

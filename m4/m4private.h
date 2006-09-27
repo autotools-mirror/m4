@@ -63,9 +63,9 @@ struct m4 {
 
   /* Option flags  (set in src/main.c).  */
   bool		no_gnu_extensions;		/* -G */
-  int		nesting_limit;			/* -L */
+  size_t	nesting_limit;			/* -L */
   int		debug_level;			/* -d */
-  int		max_debug_arg_length;		/* -l */
+  size_t	max_debug_arg_length;		/* -l */
   int		regexp_syntax;			/* -r */
   int		opt_flags;
 
