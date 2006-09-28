@@ -1,5 +1,12 @@
 2006-09-27  Eric Blake  <ebb9@byu.net>
 
+	* m4/m4module.h (m4_symbol_value_print, m4_symbol_print): Add
+	another parameter to print module info.
+	* m4/macro.c (trace_pre): Adjust caller.
+	* modules/m4.c (M4BUILTIN_HANDLER): Likewise.
+	* doc/m4.texinfo (Dumpdef, Debug Levels): Document this.
+	* NEWS: Document this.
+
 	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
 	strnlen.
 	* m4/symtab.c (symbol_value_print): Rename to...

@@ -464,11 +464,12 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 
 /* Grow OBS with a text representation of VALUE.  If QUOTE, then
    surround a text definition by LQUOTE and RQUOTE.  If ARG_LENGTH is
-   non-zero, then truncate text definitions to that length.  */
+   non-zero, then truncate text definitions to that length.  If
+   MODULE, then include which module defined a builtin.  */
 void
 m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
 		       const char *lquote, const char *rquote,
-		       size_t arg_length)
+		       size_t arg_length, bool module)
 {
   const char *text;
   size_t len;
@@ -509,17 +510,25 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     obstack_grow (obs, "...", 3);
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
+  if (module && VALUE_HANDLE (value))
+    {
+      obstack_1grow (obs, '{');
+      text = m4_get_module_name (VALUE_HANDLE (value));
+      obstack_grow (obs, text, strlen (text));
+      obstack_1grow (obs, '}');
+    }
 }
 
 /* Grow OBS with a text representation of SYMBOL.  If QUOTE, then
    surround each text definition by LQUOTE and RQUOTE.  If STACK, then
    append all pushdef'd values, rather than just the top.  If
    ARG_LENGTH is non-zero, then truncate text definitions to that
-   length.  */
+   length.  If MODULE, then include which module defined a
+   builtin.  */
 void
 m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
 		 const char *lquote, const char *rquote, bool stack,
-		 size_t arg_length)
+		 size_t arg_length, bool module)
 {
   m4_symbol_value *value;
 
@@ -527,7 +536,8 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  m4_symbol_value_print (value, obs, quote, lquote, rquote, arg_length);
+  m4_symbol_value_print (value, obs, quote, lquote, rquote, arg_length,
+			 module);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -536,7 +546,7 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
 	  m4_symbol_value_print (value, obs, quote, lquote, rquote,
-				 arg_length);
+				 arg_length, module);
 	  value = VALUE_NEXT (value);
 	}
     }

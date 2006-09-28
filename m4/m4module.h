@@ -217,10 +217,11 @@ extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
 extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *, bool,
-					 const char *, const char *, size_t);
+					 const char *, const char *, size_t,
+					 bool);
 extern void	m4_symbol_print		(m4_symbol *, m4_obstack *, bool,
 					 const char *, const char *, bool,
-					 size_t);
+					 size_t, bool);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))

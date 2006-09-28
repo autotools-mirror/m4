@@ -2642,12 +2642,12 @@ f(popdef(`f')dumpdef(`f'))
 @result{}f1
 @end example
 
-@xref{Debug Levels}, for information on how the @samp{q} and @samp{s}
-flags affect the details of the display.  Remember, the @samp{q} flag is
-implied when the @option{--debug} option (@option{-d}, @pxref{Invoking
-m4}) is used in the command line without arguments.  Also, the
-@option{--arglength} option (@option{-l}) can affect output, by
-truncating longer strings.
+@xref{Debug Levels}, for information on how the @samp{m}, @samp{q}, and
+@samp{s} flags affect the details of the display.  Remember, the
+@samp{q} flag is implied when the @option{--debug} option (@option{-d},
+@pxref{Invoking m4}) is used in the command line without arguments.
+Also, the @option{--arglength} option (@option{-l}) can affect output,
+by truncating longer strings.
 
 @comment options: -ds -l3
 @example
@@ -2658,8 +2658,15 @@ pushdef(`foo', defn(`divnum'))
 @result{}
 pushdef(`foo', `3')
 @result{}
-dumpdef(`foo')
-@error{}foo:@tabchar{}3, <div...>, 1 l...
+debugmode(`+m')
+@result{}
+dumpdef(`foo', `dnl', `indir', `__gnu__')
+@error{}__gnu__:@tabchar{}@{gnu@}
+@error{}dnl:@tabchar{}<dnl>@{m4@}
+@error{}foo:@tabchar{}3, <div...>@{m4@}, 1 l...
+@error{}indir:@tabchar{}<ind...>@{gnu@}
+@result{}
+debugmode(`-m')
 @result{}
 @end example
 
@@ -2919,7 +2926,8 @@ output line.
 
 @item m
 In debug output, print a message each time a module is manipulated
-(@pxref{Modules}).
+(@pxref{Modules}).  In dumpdef output, follow builtin macros with their
+module name, surrounded by braces (@samp{@{@}}).
 
 @item p
 In debug output, print a message when a named file is found through the

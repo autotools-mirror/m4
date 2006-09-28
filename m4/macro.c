@@ -618,6 +618,7 @@ trace_pre (m4 *context, const char *name, size_t id,
       const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
       const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
       size_t arg_length = m4_get_max_debug_arg_length_opt (context);
+      bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
 
       trace_format (context, "(");
       for (i = 1; i < argc; i++)
@@ -626,7 +627,7 @@ trace_pre (m4 *context, const char *name, size_t id,
 	    trace_format (context, ", ");
 
 	  m4_symbol_value_print (argv[i], &context->trace_messages,
-				 quote, lquote, rquote, arg_length);
+				 quote, lquote, rquote, arg_length, module);
 	}
       trace_format (context, ")");
     }
