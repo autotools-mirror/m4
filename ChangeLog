@@ -1,3 +1,7 @@
+2006-09-28  Eric Blake  <ebb9@byu.net>
+
+	* tests/options.at: Alphabetize the tests.
+
 2006-09-27  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (m4_symbol_value_print, m4_symbol_print): Add
