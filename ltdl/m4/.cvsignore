@@ -86,4 +86,5 @@ wint_t.m4
 xalloc.m4
 xsize.m4
 xstrndup.m4
+xstrtol.m4
 xvasprintf.m4
