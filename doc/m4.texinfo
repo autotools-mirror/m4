@@ -1119,9 +1119,8 @@ eval(`1')
 @result{}1
 @end example
 
-@ignore
 @comment options: -G
-@comment ignore
+@comment xfail
 @example
 $ @kbd{m4 -G}
 eval
@@ -1129,7 +1128,6 @@ eval
 eval(`1')
 @result{}1
 @end example
-@end ignore
 
 There is also a command line option (@option{--prefix-builtins}, or
 @option{-P}) that renames all builtin macro names to be prefixed
@@ -2969,6 +2967,10 @@ are enabled without impacting other flags, and if it starts with a
 @samp{-}, the named flags are disabled without impacting other flags.
 Without either of these starting characters, @var{flags} simply replaces
 the previous setting.
+@comment FIXME - should we accept usage like debugmode(+fl-q)?  Also,
+@comment should we add debugmode(?) which expands to the current
+@comment enabled flags, and debugmode(e?) which expands to e if e is
+@comment currently enabled?
 
 If no flags are specified with the @option{--debug} option, the default is
 @samp{aeq}. Many examples in this manual show their output using
@@ -3125,11 +3127,18 @@ to @code{m4}.
 @section Deleting whitespace in input
 
 @cindex deleting whitespace in input
+The builtin @code{dnl} stands for ``Discard to Next Line'':
+
 @deffn {Builtin (m4)} dnl
-The builtin @code{dnl} reads and discards all characters, up to and
-including the first newline and is often used in connection with
-@code{define}, to remove the newline that follow the call to
-@code{define}.  Thus
+All characters, up to and including the next newline, are discarded
+without performing any macro expansion.  A warning is issued if the end
+of the file is encountered without a newline.
+
+The expansion of @code{dnl} is void.
+@end deffn
+
+It is often used in connection with @code{define}, to remove the
+newline that follows the call to @code{define}.  Thus
 
 @example
 define(`foo', `Macro `foo'.')dnl A very simple macro, indeed.
@@ -3138,17 +3147,40 @@ foo
 @end example
 
 The input up to and including the next newline is discarded, as opposed
-to the way comments are treated (@pxref{Comments}).
-@end deffn
+to the way comments are treated (@pxref{Comments}), when the command
+line option @option{--discard-comments} is not in effect
+(@pxref{Invoking m4}).
 
 Usually, @code{dnl} is immediately followed by an end of line or some
-other whitespace.  GNU @code{m4} will produce a warning diagnostic if
+other whitespace.  @acronym{GNU} @code{m4} will produce a warning diagnostic if
 @code{dnl} is followed by an open parenthesis.  In this case, @code{dnl}
 will collect and process all arguments, looking for a matching close
 parenthesis.  All predictable side effects resulting from this
 collection will take place.  @code{dnl} will return no output.  The
 input following the matching close parenthesis up to and including the
 next newline, on whatever line containing it, will still be discarded.
+
+@example
+dnl(`args are ignored, but side effects occur',
+define(`foo', `like this')) while this text is ignored: undefine(`foo')
+@error{}m4:stdin:2: Warning: dnl: extra arguments ignored: 2 > 0
+See how `foo' was defined, foo?
+@result{}See how foo was defined, like this?
+@end example
+
+If the end of file is encountered without a newline character, a
+warning is issued and dnl stops consuming input.
+
+@example
+define(`hi', `HI')
+@result{}
+m4wrap(`m4wrap(`2 hi
+')0 hi dnl 1 hi')
+@result{}
+^D
+@error{}m4: Warning: dnl: end of file treated as newline
+@result{}0 HI 2 HI
+@end example
 
 @node Changequote
 @section Changing the quote characters

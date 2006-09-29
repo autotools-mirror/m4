@@ -593,7 +593,7 @@ M4BUILTIN_HANDLER (undivert)
    lives in input.c.  */
 M4BUILTIN_HANDLER (dnl)
 {
-  m4_skip_line (context);
+  m4_skip_line (context, M4ARG (0));
 }
 
 /* Shift all argument one to the left, discarding the first argument.  Each

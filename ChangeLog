@@ -1,5 +1,13 @@
 2006-09-29  Eric Blake  <ebb9@byu.net>
 
+	* modules/m4.c (dnl): Include macro name in warning message.
+	* m4/input.c (m4_skip_line): Add parameter.
+	* m4/m4module.h (m4_skip_line): Likewise.
+	* src/main.c (usage): Update wording.
+	* doc/m4.texinfo (Inhibiting Invocation): Add xfailed test until
+	issue of blind macros vs. POSIX is resolved.
+	(Dnl): Merge another node from branch.
+
 	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
 	xstrtol.
 	* m4/system_.h (N_): Define.

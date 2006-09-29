@@ -386,7 +386,7 @@ extern int	m4_set_syntax	(m4_syntax_table*, char, const unsigned char*);
 
 extern	void	m4_input_init	(m4 *context);
 extern	void	m4_input_exit	(void);
-extern	void	m4_skip_line	(m4 *context);
+extern	void	m4_skip_line	(m4 *context, const char *);
 
 /* push back input */
 

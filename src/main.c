@@ -146,7 +146,7 @@ FLAGS is any of:\n\
   l   include current input line number in trace and debug\n\
 "), stdout);
       fputs (_("\
-  m   show actions related to modules in debug\n\
+  m   show module information in debug and dumpdef\n\
   p   show results of path searches in debug\n\
   q   quote values as necessary in dumpdef and trace, useful with a or e\n\
   s   show full stack of pushdef values in dumpdef\n\

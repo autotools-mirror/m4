@@ -653,10 +653,11 @@ unget_input (int ch)
     m4_push_single (ch);
 }
 
-/* skip_line () simply discards all immediately following characters, up to
-   the first newline.  It is only used from m4_dnl ().  */
+/* skip_line () simply discards all immediately following characters,
+   up to the first newline.  It is only used from m4_dnl ().  NAME is
+   the spelling of argv[0], for use in any warning message.  */
 void
-m4_skip_line (m4 *context)
+m4_skip_line (m4 *context, const char *name)
 {
   int ch;
   const char *file = m4_get_current_file (context);
@@ -667,7 +668,7 @@ m4_skip_line (m4 *context)
   if (ch == CHAR_EOF)
     /* current_file changed; use the previous value we cached.  */
     m4_warn_at_line (context, 0, file, line,
-		     _("end of file treated as newline"));
+		     _("%s: end of file treated as newline"), name);
 }
 
 
