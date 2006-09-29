@@ -404,7 +404,7 @@ M4BUILTIN_HANDLER (debugfile)
   else if (m4_get_safer_opt (context) && *M4ARG (1))
     m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
   else if (!m4_debug_set_output (context, M4ARG (1)))
-    m4_error (context, 0, errno, _("%s: cannot set debug file: %s"),
+    m4_error (context, 0, errno, _("%s: cannot set debug file `%s'"),
 	      M4ARG (0), M4ARG (1));
 }
 

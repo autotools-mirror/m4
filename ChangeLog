@@ -1,5 +1,16 @@
 2006-09-29  Eric Blake  <ebb9@byu.net>
 
+	Even when not the first option, --help can't have side effects.
+	* tests/options.at (--debugfile): Detect bugs in this area.
+	* tests/testsuite.at (AT_CHECK_M4): Avoid a process when ignoring
+	stderr.
+	* src/main.c (main): Fix it by deferring debugfile change.  Also,
+	defer closing streams until after module tracing is done.
+	* modules/gnu.c (debugfile): Make message consistent with command
+	line.
+	* doc/m4.texinfo (Invoking m4): Touch up the documentation.
+	* NEWS: Document this fix.
+
 	* modules/m4.c (dnl): Include macro name in warning message.
 	* m4/input.c (m4_skip_line): Add parameter.
 	* m4/m4module.h (m4_skip_line): Likewise.

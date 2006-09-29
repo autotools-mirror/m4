@@ -105,6 +105,10 @@ promoted to 2.0.
   overflow.  Also, the option now performs argument validation and accepts
   an optional multiplier suffix.
 
+* The `--help' and `--version' command line options now consistently
+  override all earlier options.  For example, `m4 -otrace --help' now no
+  longer accidentally creates an empty file `trace'.
+
 * FIXME: `m4wrap' semantics need an update to FIFO.
 
 * FIXME: include the (long) list of changes in 1.4.x that were not already

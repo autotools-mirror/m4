@@ -239,7 +239,7 @@ AT_CLEANUP
 
 AT_SETUP([--debugfile])
 
-dnl For a while, CVS m4 mistakenly replaced debug output with stdout
+dnl For a while, CVS m4 mistakenly sent debug output to stdout
 dnl when stdout and stderr were the same file.
 
 AT_DATA([[in]], [[foo
@@ -252,6 +252,34 @@ AT_CHECK_M4([--debugfile=trace2 -tfoo -Dfoo=bar in], [0], [[bar
 ]])
 
 AT_CHECK([cmp trace1 trace2])
+
+dnl m4 1.4.x mistakenly created the trace file.  --help and --version
+dnl should always override, even if they come later in the command line
+AT_CHECK_M4([--debugfile=trace3 --help], [0], [ignore])
+AT_CHECK_M4([--debugfile=trace3 --version], [0], [ignore])
+AT_CHECK([test -f trace3], [1])
+
+dnl check that trace file failure causes an error, but allows processing
+AT_CHECK_M4([--debugfile=no_such_dir/trace -tfoo -Dfoo=bar in], [1],
+[[bar
+]], [[m4: cannot set debug file `no_such_dir/trace': No such file or directory
+m4trace: -1- foo -> `bar'
+]])
+
+dnl check that empty trace file discards trace data
+AT_CHECK_M4([--debugfile= -tfoo -Dfoo=bar in], [0],
+[[bar
+]])
+
+dnl check that all tracing gets diverted to the trace file.  Don't use
+dnl AT_CHECK_M4 on the first run, because sanitizing stderr breaks the
+dnl comparison with the raw data in the trace file of the second run.
+AT_CHECK([m4 -b -dV in], [0], [[foo
+]], [stderr])
+mv stderr expout
+AT_CHECK_M4([--debugfile=trace4 -dV in], [0], [[foo
+]])
+AT_CHECK([cat trace4], [0], [expout])
 
 AT_CLEANUP
 

@@ -45,7 +45,8 @@ m4_version_prereq([2.52e])
 # to m4:input.m4:7: cannot open module `no_such'
 m4_define([AT_CHECK_M4],
 [AT_CHECK([m4 -b -d $1 < /dev/null], [$2], [$3], m4_ifval([$4], [stderr]))
-m4_ifval([$4],
+m4_if([$4], [], [],
+      [$4], [ignore], [],
 [AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/
 	/^m4debug: module/s/opening file.*/opening file/
 	s/\(cannot open module [^:]*\):.*/\1/

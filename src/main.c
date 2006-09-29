@@ -256,17 +256,17 @@ size_opt (char const *opt, char const *msgid)
 int
 main (int argc, char *const *argv, char *const *envp)
 {
-  macro_definition *head;	/* head of deferred argument list */
-  macro_definition *tail;
+  macro_definition *head = NULL;	/* head of deferred argument list */
+  macro_definition *tail = NULL;
   macro_definition *defn;
   int optchar;			/* option character */
   size_t size;			/* for parsing numeric option arguments */
 
   macro_definition *defines;
   FILE *fp;
-  char *filename;
   bool read_stdin = false;	/* true iff we have read from stdin */
   bool import_environment = false; /* true to import environment */
+  const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
   enum interactive_choice interactive = INTERACTIVE_UNKNOWN;
@@ -296,10 +296,9 @@ main (int argc, char *const *argv, char *const *envp)
   if (getenv ("POSIXLY_CORRECT"))
     m4_set_posixly_correct_opt (context, true);
 
-  /* First, we decode the arguments, to size up tables and stuff.  */
-
-  head = tail = NULL;
-
+  /* First, we decode the arguments, to size up tables and stuff.
+     Avoid lasting side effects; for example 'm4 --debugfile=oops
+     --help' must not create the file `oops'.  */
   while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
 				 long_options, NULL)) != -1)
     switch (optchar)
@@ -465,8 +464,8 @@ main (int argc, char *const *argv, char *const *envp)
 	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
 	/* fall through */
       case DEBUGFILE_OPTION:
-	if (!m4_debug_set_output (context, optarg))
-	  error (0, errno, "%s", optarg);
+	/* Don't call m4_debug_set_output here, as it has side effects.	 */
+	debugfile = optarg;
 	break;
 
       case 's':
@@ -502,7 +501,8 @@ main (int argc, char *const *argv, char *const *envp)
 					&& isatty (STDERR_FILENO))));
 
   /* Do the basic initializations.  */
-
+  if (debugfile && !m4_debug_set_output (context, debugfile))
+    m4_error (context, 0, errno, _("cannot set debug file `%s'"), debugfile);
   m4_input_init (context);
   m4_output_init ();
   m4_include_env_init (context);
@@ -625,7 +625,8 @@ main (int argc, char *const *argv, char *const *envp)
 	  }
 	else
 	  {
-	    fp = m4_path_search (context, argv[optind], &filename);
+	    char *name;
+	    fp = m4_path_search (context, argv[optind], &name);
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
@@ -634,8 +635,8 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    else
 	      {
-		m4_push_file (context, fp, filename, true);
-		free (filename);
+		m4_push_file (context, fp, name, true);
+		free (name);
 	      }
 	  }
 	m4_macro_expand_input (context);
@@ -644,13 +645,6 @@ main (int argc, char *const *argv, char *const *envp)
   /* Now handle wrapup text.  */
   while (m4_pop_wrapup ())
     m4_macro_expand_input (context);
-
-  /* Change debug stream back to stderr, to force flushing the debug
-     stream and detect any errors it might have encountered.  Close
-     stdin if we read from it, to detect any errors.  */
-  m4_debug_set_output (context, NULL);
-  if (read_stdin && fclose (stdin) == EOF)
-    m4_error (context, 0, errno, _("error closing stdin"));
 
   if (frozen_file_to_write)
     produce_frozen_state (context, frozen_file_to_write);
@@ -669,6 +663,13 @@ main (int argc, char *const *argv, char *const *envp)
   m4__module_exit (context);
   m4_output_exit ();
   m4_input_exit ();
+
+  /* Change debug stream back to stderr, to force flushing the debug
+     stream and detect any errors it might have encountered.  Close
+     stdin if we read from it, to detect any errors.  */
+  m4_debug_set_output (context, NULL);
+  if (read_stdin && fclose (stdin) == EOF)
+    m4_error (context, 0, errno, _("error closing stdin"));
 
   if (exit_status == EXIT_SUCCESS)
     exit_status = m4_get_exit_status (context);
