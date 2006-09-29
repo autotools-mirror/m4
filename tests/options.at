@@ -133,6 +133,53 @@ m@&t@4_dnl()
 AT_CLEANUP
 
 
+## --------- ##
+## arglength ##
+## --------- ##
+
+AT_SETUP([--arglength])
+
+dnl Check for argument validation.
+
+AT_DATA([in],
+[[define(`echo', `$@')dnl
+traceon(`echo')dnl
+echo(`long string')
+]])
+
+AT_CHECK_M4([--arglength=-1 in], [1], [],
+[[m4: invalid debug argument length `-1'
+]])
+
+AT_CHECK_M4([--arglength oops in], [1], [],
+[[m4: invalid debug argument length `oops'
+]])
+
+AT_CHECK_M4([-l 10oops in], [1], [],
+[[m4: invalid character following debug argument length in `10oops'
+]])
+
+dnl MiB is the suffix to implict 1, resulting in 1048576
+AT_CHECK_M4([-lMiB in], [0], [[long string
+]], [[m4trace: -1- echo(`long string') -> ``long string''
+]])
+
+dnl this assumes size_t is no bigger than 64 bits
+AT_CHECK_M4([-l 123456789012345678901234567890 in], [1], [],
+[[m4: debug argument length `123456789012345678901234567890' too large
+]])
+
+AT_CHECK_M4([-l 3 in], [0], [[long string
+]], [[m4trace: -1- echo(`lon...') -> ``lo...'
+]])
+
+AT_CHECK_M4([--arglength=3 -l0 in], [0], [[long string
+]], [[m4trace: -1- echo(`long string') -> ``long string''
+]])
+
+AT_CLEANUP
+
+
 ## ----------- ##
 ## debug flags ##
 ## ----------- ##
@@ -294,6 +341,59 @@ OVERRIDE=It is changed.
 AT_CLEANUP
 
 
+## ------------- ##
+## nesting-limit ##
+## ------------- ##
+
+AT_SETUP([--nesting-limit])
+
+dnl Check for argument validation.
+
+AT_DATA([in],
+[[define(`echo', `$@')dnl
+echo(echo(echo(echo(`nested string'))))
+echo(echo(echo(echo(echo(echo(echo(echo(echo(`nested string')))))))))
+]])
+
+AT_CHECK_M4([--nesting-limit=-1 in], [1], [],
+[[m4: invalid nesting limit `-1'
+]])
+
+AT_CHECK_M4([--nesting-limit oops in], [1], [],
+[[m4: invalid nesting limit `oops'
+]])
+
+AT_CHECK_M4([-L 10oops in], [1], [],
+[[m4: invalid character following nesting limit in `10oops'
+]])
+
+dnl MiB is the suffix to implict 1, resulting in 1048576
+AT_CHECK_M4([-LMiB in], [0], [[nested string
+nested string
+]])
+
+dnl this assumes size_t is no bigger than 64 bits
+AT_CHECK_M4([-L 123456789012345678901234567890 in], [1], [],
+[[m4: nesting limit `123456789012345678901234567890' too large
+]])
+
+AT_CHECK_M4([-L 5 in], [1], [[nested string
+]],
+[[m4:in:3: recursion limit of 5 exceeded, use -L<N> to change it
+]])
+
+dnl per POSIX guidelines, this is a decimal number 10, not octal 8
+AT_CHECK_M4([-L 010 in], [0], [[nested string
+nested string
+]])
+
+AT_CHECK_M4([--nesting-limit=3 -L0 in], [0], [[nested string
+nested string
+]])
+
+AT_CLEANUP
+
+
 ## --------------- ##
 ## prepend-include ##
 ## --------------- ##
@@ -333,6 +433,37 @@ AT_CHECK_M4([-I post -B pre in], [1],
 in ./bar
 in post/blah
 ]], [[m4:in:3: include: cannot open `bad': No such file or directory
+]])
+
+AT_CLEANUP
+
+
+## ------------- ##
+## regexp-syntax ##
+## ------------- ##
+
+AT_SETUP([--regexp-syntax])
+
+dnl test argument validation
+
+AT_DATA([[in]], [[regexp(`(', `(')
+]])
+
+AT_CHECK_M4([--regexp-syntax=unknown in], [1], [],
+[[m4: bad regexp syntax option: `unknown'
+]])
+
+AT_CHECK_M4([--regexp-syntax '' in], [0], [[0
+]])
+
+AT_CHECK_M4([-r EXTENDED in], [1], [[
+]], [[m4:in:1: regexp: bad regular expression `(': Unmatched ( or \(
+]])
+
+AT_CHECK_M4([-rgnu-m4 in], [0], [[0
+]])
+
+AT_CHECK_M4([-r "gnu M4" in], [0], [[0
 ]])
 
 AT_CLEANUP

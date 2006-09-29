@@ -51,10 +51,12 @@
 #ifndef _
 # ifdef ENABLE_NLS
 #  include <libintl.h>
-#  define _(Text) gettext ((Text))
+#  define _(Text) gettext (Text)
 # else
 #  define _(Text) (Text)
 # endif
+# define gettext_noop(Text) Text
+# define N_(Text) gettext_noop (Text)
 #endif
 
 

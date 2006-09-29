@@ -1,3 +1,16 @@
+2006-09-29  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	xstrtol.
+	* m4/system_.h (N_): Define.
+	* src/main.c (main): Validate numeric arguments.
+	(size_opt): New function, idea borrowed from coreutils.
+	* m4/macro.c (expand_macro): -L0 implies no limit.
+	* doc/m4.texinfo (Invoking m4): Document this change.
+	* NEWS: Likewise.
+	* tests/options.at: (--arglength, --nesting-limit)
+	(--regexp-syntax): New tests of argument validation.
+
 2006-09-28  Eric Blake  <ebb9@byu.net>
 
 	* tests/options.at: Alphabetize the tests.

@@ -25,6 +25,7 @@
 #include "version-etc.h"
 #include "gnu/progname.h"
 #include "pathconf.h"
+#include "xstrtol.h"
 
 #include <limits.h>
 
@@ -236,6 +237,22 @@ enum interactive_choice
   INTERACTIVE_NO	/* -b specified last */
 };
 
+/* Convert OPT to size_t, reporting an error using MSGID if it does
+   not fit.  */
+static size_t
+size_opt (char const *opt, char const *msgid)
+{
+  unsigned long int size;
+  strtol_error status = xstrtoul (opt, NULL, 10, &size, "kKmMgGtTPEZY0");
+  if (SIZE_MAX < size && status == LONGINT_OK)
+    status = LONGINT_OVERFLOW;
+  if (status != LONGINT_OK)
+    STRTOL_FATAL_ERROR (opt, _(msgid), status);
+  return size;
+}
+
+
+/* Main entry point.  Parse arguments, load modules, then parse input.  */
 int
 main (int argc, char *const *argv, char *const *envp)
 {
@@ -243,6 +260,7 @@ main (int argc, char *const *argv, char *const *envp)
   macro_definition *tail;
   macro_definition *defn;
   int optchar;			/* option character */
+  size_t size;			/* for parsing numeric option arguments */
 
   macro_definition *defines;
   FILE *fp;
@@ -291,8 +309,8 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'H':
       case HASHSIZE_OPTION:
-        /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
-            remove support for -H after 2.0.  */
+	/* -H was supported in 1.4.x, but is a no-op now.  FIXME -
+	    remove support for -H after 2.0.  */
 	error (0, 0, _("Warning: `%s' is deprecated"),
 	       optchar == 'H' ? "-H" : "--hashsize");
 	break;
@@ -370,7 +388,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'L':
-	m4_set_nesting_limit_opt (context, atoi (optarg));
+	size = size_opt (optarg, N_("nesting limit"));
+	m4_set_nesting_limit_opt (context, size);
 	break;
 
       case 'M':
@@ -424,15 +443,15 @@ main (int argc, char *const *argv, char *const *envp)
       case 'e':
 	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
 	       "-e", "-i");
-        /* fall through */
+	/* fall through */
       case 'i':
 	interactive = INTERACTIVE_YES;
 	break;
 
       case 'l':
-	m4_set_max_debug_arg_length_opt (context, atoi (optarg));
-	if (m4_get_max_debug_arg_length_opt (context) <= 0)
-	  m4_set_max_debug_arg_length_opt (context, 0);
+	size = size_opt (optarg,
+			 N_("debug argument length"));
+	m4_set_max_debug_arg_length_opt (context, size);
 	break;
 
       case 'o':

@@ -96,7 +96,14 @@ promoted to 2.0.
   the prefix `m4' or `__'.
 
 * The `-l'/`--arglength' command line argument now affects dumpdef
-  output as well as trace output.
+  output as well as trace output.  Also, it now performs argument
+  validation and accepts an optional multiplier suffix.
+
+* The `-L'/`--nesting-limit' command line option can now be set to 0
+  to remove the default limit.  However, it is still possible that heavily
+  nested input can cause abrupt program termination due to stack
+  overflow.  Also, the option now performs argument validation and accepts
+  an optional multiplier suffix.
 
 * FIXME: `m4wrap' semantics need an update to FIFO.
 

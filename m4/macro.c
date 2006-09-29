@@ -238,7 +238,8 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   value = m4_get_symbol_value (symbol);
   VALUE_PENDING (value)++;
   expansion_level++;
-  if (expansion_level > m4_get_nesting_limit_opt (context))
+  if (m4_get_nesting_limit_opt (context) > 0
+      && expansion_level > m4_get_nesting_limit_opt (context))
     m4_error (context, EXIT_FAILURE, 0, _("\
 recursion limit of %d exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
