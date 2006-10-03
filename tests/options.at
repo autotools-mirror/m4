@@ -218,6 +218,7 @@ m4trace:in:2: -1- id 2: len(`abc') -> ???
 m4trace:in:2: -1- id 2: len(...) -> `3'
 m4debug:in:3: input exhausted
 m4debug: module gnu: symbols unloaded
+m4debug: module gnu: finish hook called
 m4debug: module gnu: closed
 m4debug: module m4: symbols unloaded
 m4debug: module m4: resident module not closed

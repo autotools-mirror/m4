@@ -109,6 +109,7 @@ typedef struct {
   struct re_registers regs;	/* match registers */
 } m4_pattern_buffer;
 
+static m4_pattern_buffer buf;	/* compiled regular expression */
 
 /* Compile a REGEXP using the RESYNTAX bits, and return the buffer.
    Report errors on behalf of CALLER.  If NO_SUB, optimize the
@@ -126,10 +127,8 @@ m4_regexp_compile (m4 *context, const char *caller,
      for its syntax (but at least the compiled regex remembers its
      syntax even if the global variable changes later), and since we
      use a static variable.  To be reentrant, we would need a mutex in
-     this method, and we should have a way to free the memory used by
-     buf when this module is unloaded.  */
+     this method, and move the storage for buf into context.  */
 
-  static m4_pattern_buffer buf;	/* compiled regular expression */
   const char *msg;		/* error message from re_compile_pattern */
 
   re_set_syntax (resyntax);
@@ -279,6 +278,17 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
   return subst;
 }
 
+
+/* Reclaim memory used by this module.  */
+M4FINISH_HANDLER(gnu)
+{
+  regfree (&buf.pat);
+  free (buf.regs.start);
+  free (buf.regs.end);
+  /* If this module was preloaded, then we need to explicitly reset
+     the memory in case it gets reloaded.  */
+  memset (&buf, 0, sizeof buf);
+}
 
 
 

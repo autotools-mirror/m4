@@ -1,3 +1,11 @@
+2006-10-03  Eric Blake  <ebb9@byu.net>
+
+	Partially plug memory leak when unloading gnu module.
+	* tests/modules.at (unload gnu module): New test.
+	* modules/gnu.c (gnu_LTX_m4_finish_module): New function.
+	(m4_regexp_compile): Move static storage to module visibility.
+	* tests/options.at (--debug): Adjust to new output.
+
 2006-09-29  Eric Blake  <ebb9@byu.net>
 
 	Even when not the first option, --help can't have side effects.

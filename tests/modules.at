@@ -436,3 +436,28 @@ AT_CHECK_M4([-M "$abs_builddir" -m load -t test input.m4],
 	    [0], [expout], [experr])
 
 AT_CLEANUP
+
+
+## ----------------- ##
+## unload gnu module ##
+## ----------------- ##
+
+AT_SETUP([unload gnu module])
+AT_CHECK_DYNAMIC_MODULE
+
+dnl Ensure that the gnu module does not leak memory.  I don't know how
+dnl to portably artificially limit the heap to cause an out-of-memory
+dnl condition in the case of a leak, but examining the run of this test
+dnl in a debugger can show whether it is leaking.
+AT_DATA([input.m4], [[divert(-1)
+define(`forloop',
+  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`_forloop',
+  `$4`'ifelse($1, `$3', `',
+    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+forloop(`i', `1', `5000', `unload(`gnu')load(`gnu')regexp(`123', `\(4\)?2')')
+]])
+
+AT_CHECK_M4([-m load input.m4], [0])
+
+AT_CLEANUP
