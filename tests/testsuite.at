@@ -21,11 +21,14 @@
 # We need a recent Autotest.
 m4_version_prereq([2.52e])
 
-# AT_CHECK_M4(ARGS, [EXIT-STATUS = 0], [STDOUT = `'], [STDERR = `'])
+# AT_CHECK_M4(ARGS, [EXIT-STATUS = 0], [STDOUT = `'], [STDERR = `'],
+#             [STDIN = `/dev/null'])
 # ------------------------------------------------------------------
-# Run m4 with ARGS, and stdin redirected from /dev/null.  Expect EXIT-STATUS,
-# with output matching STDOUT and STDERR as in AT_CHECK.  If stderr is
-# specified, normalize the observed error output.
+# Run m4 with ARGS, and stdin redirected from STDIN, or with stdin closed
+# if STDIN is `-'.  ARGS may redirect stdout and/or stderr, but should
+# not redirect stdin.  Expect EXIT-STATUS, with output matching STDOUT and
+# STDERR as in AT_CHECK.  If STDERR is specified, normalize the observed
+# error output.
 #
 # When testing an uninstalled wrapper, tests/m4 is on the path, but invokes
 # src/m4, which may itself be a libtool wrapper.  Also, some platforms
@@ -44,7 +47,9 @@ m4_version_prereq([2.52e])
 # or m4:input.m4:7: cannot open module `no_such': can't open the module
 # to m4:input.m4:7: cannot open module `no_such'
 m4_define([AT_CHECK_M4],
-[AT_CHECK([m4 -b -d $1 < /dev/null], [$2], [$3], m4_ifval([$4], [stderr]))
+[AT_CHECK([m4 -b -d $1 m4_if([$5], [-], [<&-],
+			     [< m4_default([$5], [/dev/null])])],
+          [$2], [$3], m4_ifval([$4], [stderr]))
 m4_if([$4], [], [],
       [$4], [ignore], [],
 [AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/

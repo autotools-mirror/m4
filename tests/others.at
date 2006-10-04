@@ -286,11 +286,11 @@ AT_CLEANUP
 
 
 
-## ---- ##
-## misc ##
-## ---- ##
+## -------- ##
+## maketemp ##
+## -------- ##
 
-AT_SETUP([misc])
+AT_SETUP([maketemp])
 
 [cat >expout <<EOF
 different
@@ -337,6 +337,129 @@ AT_CHECK_M4([reverse.m4], 0,
 
 AT_CLEANUP
 
+
+## ------------- ##
+## stderr closed ##
+## ------------- ##
+
+AT_SETUP([stderr closed])
+
+dnl no error when stderr is not used
+AT_CHECK_M4([2>&-], [0])
+
+dnl no error when stderr is not used
+AT_DATA([in.m4], [[hello world
+]])
+AT_CHECK_M4([in.m4], [0], [[hello world
+]])
+
+dnl must exit nonzero when error issued
+AT_CHECK([--unknown], [1])
+
+dnl must exit nonzero if stderr used
+AT_DATA([in.m4], [[errprint(`hello world
+')dnl
+]])
+AT_CHECK_M4([in.m4 2>&-], [1])
+
+dnl must exit nonzero if stderr used
+AT_DATA([in.m4], [[dnl(`hello world')
+]])
+AT_CHECK_M4([in.m4 2>&-], [1])
+
+dnl must exit nonzero on error, in spite of m4exit
+AT_DATA([in.m4], [[errprint(`hello world
+')m4exit(`0')
+]])
+AT_CHECK_M4([in.m4 2>&-], [1])
+
+dnl trace file must not collide with closed stderr
+AT_DATA([in.m4], [[errprint(`hello world
+')dnl
+]])
+AT_CHECK_M4([--debugfile=trace -terrprint in.m4 2>&-], [1])
+AT_CHECK([cat trace], [0], [[m4trace: -1- errprint(`hello world
+')
+]])
+
+AT_CLEANUP
+
+
+## ------------ ##
+## stdin closed ##
+## ------------ ##
+
+AT_SETUP([stdin closed])
+
+dnl no error when stdin is not used due to early exit
+AT_CHECK_M4([--version], [0], [ignore], [], [-])
+
+dnl no error when stdin is not used due to supplied file
+AT_DATA([in.m4], [[hello world
+]])
+AT_CHECK_M4([in.m4], [0], [[hello world
+]], [], [-])
+
+dnl error when stdin must be read
+AT_CHECK_M4([], [1], [],
+[[m4:stdin:1: error reading file `stdin'
+]], [-])
+
+dnl error when stdin must be read
+AT_CHECK_M4([-], [1], [],
+[[m4:stdin:1: error reading file `stdin'
+]], [-])
+
+dnl only error once when stdin must be read
+AT_CHECK_M4([- in.m4 -], [1], [[hello world
+]], [[m4:stdin:1: error reading file `stdin'
+]], [-])
+
+AT_CLEANUP
+
+## ------------- ##
+## stdout closed ##
+## ------------- ##
+
+AT_SETUP([stdout closed])
+
+dnl error when stdout must be used
+AT_CHECK_M4([--version >&-], [1], [],
+[[m4: write error: Bad file descriptor
+]])
+
+dnl no error when stdout is not used
+AT_CHECK_M4([>&-], [0])
+
+dnl no error when stdout is not used
+AT_DATA([in.m4], [[errprint(`hello world
+')dnl
+]])
+AT_CHECK_M4([in.m4 >&-], [0], [], [[hello world
+]])
+
+dnl error when stdout must be used
+AT_CHECK_M4([-P in.m4 >&-], [1], [],
+[[m4: write error: Bad file descriptor
+]])
+
+dnl error must occur in spite of m4exit requesting 0
+AT_DATA([in.m4], [[hello world
+m4exit(`0')
+]])
+AT_CHECK_M4([in.m4 >&-], [1], [],
+[[m4: write error: Bad file descriptor
+]])
+
+dnl trace file must not collide with closed stdout
+AT_DATA([in.m4], [[hello world
+]])
+AT_CHECK_M4([--debugfile=trace in.m4 >&-], [1], [],
+[[m4: write error: Bad file descriptor
+]])
+AT_CHECK([cat trace])
+
+AT_CLEANUP
 
 
 ## --------- ##

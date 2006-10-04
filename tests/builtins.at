@@ -19,6 +19,43 @@
 AT_BANNER([Torturing builtins.])
 
 
+## ----- ##
+## debug ##
+## ----- ##
+
+AT_SETUP([debug])
+
+AT_DATA([[debug.m4]],
+[[define(`countdown', `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')')
+debugmode(`aeqc')
+traceon(`countdown')
+countdown(2)
+]])
+
+AT_DATA([[expout]],
+[[
+
+
+2 1 0 Liftoff
+]])
+
+AT_DATA([[experr]],
+[[m4trace: -1- countdown ...
+m4trace: -1- countdown(`2') -> ???
+m4trace: -1- countdown(...) -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`1') -> ???
+m4trace: -1- countdown(...) -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
+m4trace: -1- countdown ...
+m4trace: -1- countdown(`0') -> ???
+m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
+]])
+
+AT_CHECK_M4([debug.m4], 0, expout, experr)
+
+AT_CLEANUP
+
+
 ## ------ ##
 ## define ##
 ## ------ ##
@@ -76,45 +113,6 @@ Text diverted a second time.
 ]])
 
 AT_CLEANUP
-
-
-
-## ----- ##
-## debug ##
-## ----- ##
-
-AT_SETUP([debug])
-
-AT_DATA([[debug.m4]],
-[[define(`countdown', `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')')
-debugmode(`aeqc')
-traceon(`countdown')
-countdown(2)
-]])
-
-AT_DATA([[expout]],
-[[
-
-
-2 1 0 Liftoff
-]])
-
-AT_DATA([[experr]],
-[[m4trace: -1- countdown ...
-m4trace: -1- countdown(`2') -> ???
-m4trace: -1- countdown(...) -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
-m4trace: -1- countdown ...
-m4trace: -1- countdown(`1') -> ???
-m4trace: -1- countdown(...) -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
-m4trace: -1- countdown ...
-m4trace: -1- countdown(`0') -> ???
-m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
-]])
-
-AT_CHECK_M4([debug.m4], 0, expout, experr)
-
-AT_CLEANUP
-
 
 
 ## ------- ##

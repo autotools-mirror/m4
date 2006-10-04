@@ -175,7 +175,8 @@ function new_test(input, status, output, error, options, xfail) {
   if (options ~ /-I/)
     {
       printf ("AT_DATA([expout1],\n[[%s]])\n", output);
-      printf ("sed -e \"s|\\.\\./examples|$abs_top_srcdir/examples|g\" \\\n");
+      printf ("sed -e \"s|\\\\.\\\\./examples|"\
+	      "$abs_top_srcdir/examples|g\" \\\n");
       printf ("  < expout1 > expout\n\n");
     }
 

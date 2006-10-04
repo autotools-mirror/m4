@@ -1,3 +1,11 @@
+2006-10-04  Eric Blake  <ebb9@byu.net>
+
+	* tests/builtins.at: Alphabetize tests.
+	* tests/testsuite.at (AT_CHECK_M4): Allow choosing stdin.
+	* tests/generate.awk (new_test): Fix underquoting.
+	* tests/others.at (maketemp): Rename from misc.
+	(stdin closed, stdout closed, stderr closed): New tests.
+
 2006-10-03  Eric Blake  <ebb9@byu.net>
 
 	Avoid all global variables in modules, so that --disable-static
