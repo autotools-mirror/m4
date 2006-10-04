@@ -4,9 +4,12 @@
 *.dvi
 *.fn
 *.fns
+*.html
 *.ky
 *.log
+*.pdf
 *.pg
+*.ps
 *.toc
 *.tp
 *.vr
