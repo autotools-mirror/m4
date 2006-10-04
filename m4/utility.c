@@ -21,9 +21,9 @@
 #include <config.h>
 
 #include "m4private.h"
+#include "progname.h"
 #include "verror.h"
 #include "xvasprintf.h"
-
 
 static const char * skip_space (m4 *, const char *);
 
@@ -197,4 +197,23 @@ m4_warn_at_line (m4 *context, int errnum, const char *file, int line,
 		      full_format ? full_format : format, args);
       free (full_format);
     }
+}
+
+
+/* Wrap the gnulib progname module, to avoid exporting a global
+   variable from a library.  Retrieve the program name for use in
+   error messages and the __program__ macro.  */
+const char *
+m4_get_program_name (void)
+{
+  return program_name;
+}
+
+/* Wrap the gnulib progname module, to avoid exporting a global
+   variable from a library.  Set the program name for use in error
+   messages and the __program__ macro to argv[0].  */
+void
+m4_set_program_name (const char *name)
+{
+  set_program_name (name);
 }

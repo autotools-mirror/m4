@@ -243,10 +243,10 @@ file_clean (m4 *context)
 	      m4_get_current_file (context));
   m4_set_current_file (context, isp->u.u_f.name);
   m4_set_current_line (context, isp->u.u_f.lineno);
-  m4_output_current_line = isp->u.u_f.out_lineno;
+  m4_set_output_line (context, isp->u.u_f.out_lineno);
   start_of_input_line = isp->u.u_f.advance_line;
   if (isp->prev != NULL)
-    m4_output_current_line = -1;
+    m4_set_output_line (context, -1);
 }
 
 static struct input_funcs file_funcs = {
@@ -285,13 +285,13 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close)
   i->u.u_f.end = false;
   i->u.u_f.name = m4_get_current_file (context);
   i->u.u_f.lineno = m4_get_current_line (context);
-  i->u.u_f.out_lineno = m4_output_current_line;
+  i->u.u_f.out_lineno = m4_get_output_line (context);
   i->u.u_f.advance_line = start_of_input_line;
 
   m4_set_current_file (context, obstack_copy0 (current_input, title,
 					       strlen (title)));
   m4_set_current_line (context, 1);
-  m4_output_current_line = -1;
+  m4_set_output_line (context, -1);
 
   i->prev = isp;
   isp = i;

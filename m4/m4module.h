@@ -118,6 +118,9 @@ extern void m4_warn  (m4 *, int, const char *, ...)	 M4_GNUC_PRINTF (3, 4);
 extern void m4_warn_at_line  (m4 *, int, const char *, int,
 			      const char *, ...)	 M4_GNUC_PRINTF (5, 6);
 
+extern const char *	m4_get_program_name (void);
+extern void		m4_set_program_name (const char *);
+
 
 /* --- CONTEXT MANAGEMENT --- */
 
@@ -133,9 +136,11 @@ extern void		m4_delete	(m4 *);
 	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
 	M4FIELD(const char *,	   current_file,   current_file)	\
 	M4FIELD(int,		   current_line,   current_line)	\
+	M4FIELD(int,		   output_line,	   output_line)		\
 	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,		   exit_status,	   exit_status)		\
+	M4FIELD(int,	current_diversion,	   current_diversion)	\
 	M4FIELD(bool,	no_gnu_extensions_opt,	   no_gnu_extensions)	\
 	M4FIELD(size_t,	nesting_limit_opt,	   nesting_limit)	\
 	M4FIELD(int,	debug_level_opt,	   debug_level)		\
@@ -402,17 +407,14 @@ extern	bool	m4_pop_wrapup	(void);
 
 /* --- OUTPUT MANAGEMENT --- */
 
-extern int m4_current_diversion;
-extern int m4_output_current_line;
-
-extern void	m4_output_init	  (void);
+extern void	m4_output_init	  (m4 *);
 extern void	m4_output_exit	  (void);
 extern void	m4_shipout_text	  (m4 *, m4_obstack *, const char *, int);
 extern void	m4_shipout_int    (m4_obstack *, int);
 extern void	m4_shipout_string (m4 *, m4_obstack *, const char *,
 				   int, bool);
 
-extern void	m4_make_diversion    (int);
+extern void	m4_make_diversion    (m4 *, int);
 extern void	m4_insert_diversion  (m4 *, int);
 extern void	m4_insert_file	     (m4 *, FILE *);
 extern void	m4_freeze_diversions (m4 *, FILE *);

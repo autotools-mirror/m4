@@ -172,10 +172,19 @@ function new_test(input, status, output, error, options, xfail) {
   if (xfail == 1)
     printf ("AT_XFAIL_IF([:])\n");
 
+  if (options ~ /-I/)
+    {
+      printf ("AT_DATA([expout1],\n[[%s]])\n", output);
+      printf ("sed -e \"s|\\.\\./examples|$abs_top_srcdir/examples|g\" \\\n");
+      printf ("  < expout1 > expout\n\n");
+    }
+
   printf ("AT_DATA([[input.m4]],\n[[%s]])\n\n", input);
   # Some of these tests `include' files from tests/.
   printf ("AT_CHECK_M4([[%s input.m4]], %s,", options, status);
-  if (output)
+  if (options ~ /-I/)
+    printf ("\n[expout]");
+  else if (output)
     printf ("\n[[%s]]", output);
   else
     printf (" []");

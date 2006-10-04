@@ -56,10 +56,12 @@ struct m4 {
 
   const char *		current_file;	/* Current input file.  */
   int			current_line;	/* Current input line.  */
+  int			output_line;	/* Current output line.  */
 
-  FILE *		debug_file;	/* File for debugging output.  */
-  m4_obstack		trace_messages;
-  int			exit_status;	/* Cumulative exit status.  */
+  FILE *	debug_file;		/* File for debugging output.  */
+  m4_obstack	trace_messages;
+  int		exit_status;		/* Cumulative exit status.  */
+  int		current_diversion;	/* Current output diversion.  */
 
   /* Option flags  (set in src/main.c).  */
   bool		no_gnu_extensions;		/* -G */
@@ -93,12 +95,16 @@ struct m4 {
 #  define m4_set_current_file(C, V)		((C)->current_file = (V))
 #  define m4_get_current_line(C)		((C)->current_line)
 #  define m4_set_current_line(C, V)		((C)->current_line = (V))
+#  define m4_get_output_line(C)			((C)->output_line)
+#  define m4_set_output_line(C, V)		((C)->output_line = (V))
 #  define m4_get_debug_file(C)			((C)->debug_file)
 #  define m4_set_debug_file(C, V)		((C)->debug_file = (V))
 #  define m4_get_trace_messages(C)		((C)->trace_messages)
 #  define m4_set_trace_messages(C, V)		((C)->trace_messages = (V))
 #  define m4_get_exit_status(C)			((C)->exit_status)
 #  define m4_set_exit_status(C, V)		((C)->exit_status = (V))
+#  define m4_get_current_diversion(C)		((C)->current_diversion)
+#  define m4_set_current_diversion(C, V)	((C)->current_diversion = (V))
 #  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
 #  define m4_set_no_gnu_extensions_opt(C, V)	((C)->no_gnu_extensions = (V))
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)

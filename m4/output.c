@@ -77,10 +77,6 @@ static int diversions;
 /* Total size of all in-memory buffer sizes.  */
 static int total_buffer_size;
 
-/* The number of the currently active diversion.  This variable is
-   maintained for the `divnum' builtin function.  */
-int m4_current_diversion;
-
 /* Current output diversion, NULL if output is being currently discarded.  */
 static struct diversion *output_diversion;
 
@@ -89,16 +85,12 @@ static FILE *output_file;	/* current value of (file) */
 static char *output_cursor;	/* current value of (buffer + used) */
 static int output_unused;	/* current value of (size - used) */
 
-/* Number of input line we are generating output for.  */
-int m4_output_current_line;
-
-
 
 
-/* --- OUTPUT INITIALISATION --- */
+/* --- OUTPUT INITIALIZATION --- */
 
 void
-m4_output_init (void)
+m4_output_init (m4 *context)
 {
   diversion_table = xmalloc (sizeof *diversion_table);
   diversions = 1;
@@ -108,7 +100,7 @@ m4_output_init (void)
   diversion_table[0].used = 0;
 
   total_buffer_size = 0;
-  m4_current_diversion = 0;
+  m4_set_current_diversion (context, 0);
   output_diversion = diversion_table;
   output_file = stdout;
   output_cursor = NULL;
@@ -360,23 +352,24 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	if (start_of_output_line)
 	  {
 	    start_of_output_line = false;
-	    m4_output_current_line++;
+	    m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	    printf ("DEBUG: cur %d, cur out %d\n",
-		    m4_get_current_line (context), m4_output_current_line);
+	    fprintf (stderr, "DEBUG: cur %d, cur out %d\n",
+                     m4_get_current_line (context),
+                     m4_get_output_line (context));
 #endif
 
-	    /* Output a `#line NUM' synchronisation directive if needed.
-	       If output_current_line was previously given a negative
-	       value (invalidated), rather output `#line NUM "FILE"'.  */
+	    /* Output a `#line NUM' synchronization directive if needed.
+	       If output_line was previously given a negative
+	       value (invalidated), then output `#line NUM "FILE"'.  */
 
-	    if (m4_output_current_line != m4_get_current_line (context))
+	    if (m4_get_output_line (context) != m4_get_current_line (context))
 	      {
 		sprintf (line, "#line %d", m4_get_current_line (context));
 		for (cursor = line; *cursor; cursor++)
 		  OUTPUT_CHARACTER (*cursor);
-		if (m4_output_current_line < 1
+		if (m4_get_output_line (context) < 1
 		    && m4_get_current_file (context)[0] != '\0')
 		  {
 		    OUTPUT_CHARACTER (' ');
@@ -389,7 +382,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 		    OUTPUT_CHARACTER ('"');
 		  }
 		OUTPUT_CHARACTER ('\n');
-		m4_output_current_line = m4_get_current_line (context);
+		m4_set_output_line (context, m4_get_current_line (context));
 	      }
 	  }
 	OUTPUT_CHARACTER (*text);
@@ -439,7 +432,7 @@ m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, int len,
    available file descriptors (each overflowing diversion uses one).  */
 
 void
-m4_make_diversion (int divnum)
+m4_make_diversion (m4 *context, int divnum)
 {
   struct diversion *diversion;
 
@@ -453,7 +446,7 @@ m4_make_diversion (int divnum)
       output_unused = 0;
     }
 
-  m4_current_diversion = divnum;
+  m4_set_current_diversion (context, divnum);
 
   if (divnum < 0)
     return;
@@ -478,7 +471,7 @@ m4_make_diversion (int divnum)
   output_file = output_diversion->file;
   output_cursor = output_diversion->buffer + output_diversion->used;
   output_unused = output_diversion->size - output_diversion->used;
-  m4_output_current_line = -1;
+  m4_set_output_line (context, -1);
 }
 
 /* Insert a FILE into the current output file, in the same manner
@@ -538,7 +531,7 @@ m4_insert_diversion (m4 *context, int divnum)
       else if (diversion->buffer)
 	output_text (context, diversion->buffer, diversion->used);
 
-      m4_output_current_line = -1;
+      m4_set_output_line (context, -1);
     }
 
   /* Return all space used by the diversion.  */
@@ -578,9 +571,9 @@ m4_freeze_diversions (m4 *context, FILE *file)
   struct diversion *diversion;
   struct stat file_stat;
 
-  saved_number = m4_current_diversion;
+  saved_number = m4_get_current_diversion (context);
   last_inserted = 0;
-  m4_make_diversion (0);
+  m4_make_diversion (context, 0);
   output_file = file;		/* kludge in the frozen file */
 
   for (divnum = 1; divnum < diversions; divnum++)

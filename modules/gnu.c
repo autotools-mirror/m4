@@ -315,7 +315,7 @@ M4BUILTIN_HANDLER (__line__)
  **/
 M4BUILTIN_HANDLER (__program__)
 {
-  m4_shipout_string (context, obs, program_name, 0, true);
+  m4_shipout_string (context, obs, m4_get_program_name (), 0, true);
 }
 
 

@@ -543,13 +543,13 @@ M4BUILTIN_HANDLER (divert)
   if (argc == 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
-  m4_make_diversion (i);
+  m4_make_diversion (context, i);
 }
 
 /* Expand to the current diversion number, -1 if none.  */
 M4BUILTIN_HANDLER (divnum)
 {
-  m4_shipout_int (obs, m4_current_diversion);
+  m4_shipout_int (obs, m4_get_current_diversion (context));
 }
 
 /* Bring back the diversion given by the argument list.  If none is

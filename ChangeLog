@@ -1,5 +1,32 @@
 2006-10-03  Eric Blake  <ebb9@byu.net>
 
+	Avoid all global variables in modules, so that --disable-static
+	can work on cygwin.
+	* examples/incl.m4: New file, from branch.
+	* Makefile.am (dist_pkgdata_DATA): Distribute it.
+	* doc/m4.texinfo (Location): Merge this section from branch.
+	(Include): Update the test.
+	* tests/generate.awk (new_test): Allow for VPATH build
+	pre-processing of expected __program__ output.
+	* m4/m4module.h (m4_current_diversion, m4_output_current_line):
+	Avoid global variables.
+	(m4_context_field_table): Add current_diversion, output_line.
+	(m4_output_init, m4_make_diversion): Add parameter.
+	(m4_get_program_name, m4_set_program_name): New accessors.
+	* m4/m4private.h (m4_get_current_diversion),
+	(m4_set_current_diversion, m4_get_output_line)
+	(m4_set_output_line): New accessors.
+	* m4/utility.c (m4_get_program_name, m4_set_program_name): New
+	methods.
+	* modules/m4.c (divnum, divert): Adjust callers.
+	* modules/gnu.c (__program__): Likewise.
+	* m4/output.c (m4_output_init, m4_make_diversion)
+	(m4_freeze_diversions, m4_shipout_text, m4_make_diversion)
+	(m4_insert_diversion): Likewise.
+	* m4/input.c (file_clean, m4_push_file): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/main.c (main, usage): Likewise.
+
 	Partially plug memory leak when unloading gnu module.
 	* tests/modules.at (unload gnu module): New test.
 	* modules/gnu.c (gnu_LTX_m4_finish_module): New function.

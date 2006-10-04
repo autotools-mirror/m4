@@ -337,6 +337,7 @@ dist_pkgdata_DATA = \
 		  examples/fstab.m4 \
 		  examples/hanoi.m4 \
 		  examples/incl-test.m4 \
+		  examples/incl.m4 \
 		  examples/include.m4 \
 		  examples/indir.m4 \
 		  examples/misc.m4 \

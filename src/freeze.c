@@ -694,7 +694,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 
 	      /* Select a diversion and add a string to it.  */
 
-	      m4_make_diversion (number[0]);
+	      m4_make_diversion (context, number[0]);
 	      if (number[1] > 0)
 		m4_shipout_text (context, NULL, string[1], number[1]);
 	      break;

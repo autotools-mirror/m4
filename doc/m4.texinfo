@@ -3790,19 +3790,24 @@ sinclude(`n')
 @result{}
 @end example
 
-Assume in the following that the file @file{incl.m4} contains the lines:
-@comment file: incl.m4
+This section assumes that the current directory is
+@file{m4-@value{VERSION}/@/tests}, and uses the file
+@file{m4-@value{VERSION}/@/examples/@/incl.m4} included in the
+@acronym{GNU} M4 package.  The file @file{incl.m4} contains the lines:
+@comment ignore
 @example
 Include file start
 foo
 Include file end
 @end example
-@noindent
+
 Normally file inclusion is used to insert the contents of a file
 into the input stream.  The contents of the file will be read by
 @code{m4} and macro calls in the file will be expanded:
 
+@comment options: -I"$abs_top_srcdir"/examples
 @example
+$ @kbd{m4 -I ../examples}
 define(`foo', `FOO')
 @result{}
 include(`incl.m4')
@@ -3817,7 +3822,9 @@ of the file can be used to define macros that operate on entire files.
 Here is an example, which defines @samp{bar} to expand to the contents
 of @file{incl.m4}:
 
+@comment options: -I"$abs_top_srcdir"/examples
 @example
+$ @kbd{m4 -I ../examples}
 define(`bar', include(`incl.m4'))
 @result{}
 This is `bar':  >>bar<<
@@ -5050,21 +5057,68 @@ supplied as part of the argument, as in the example.  (BSD flavored
 @node Location
 @section Printing current location
 
-To make it possible to specify the location of the error, two
+To make it possible to specify the location of the error, three
 utility builtins exist:
 
 @deffn {Builtin (gnu)} __file__
 @deffnx {Builtin (gnu)} __line__
-These expand to the @emph{quoted} name of the current input file, and
-the current input line number in that file.
+@deffnx {Builtin (gnu)} __program__
+Expand to the quoted name of the current input file, the
+current input line number in that file, and the quoted name of the
+current invocation of @code{m4}.
+@end deffn
 
 @example
-errprint(`m4:'__file__:__line__: `Input error
+errprint(__program__:__file__:__line__: `input error
 ')
-@error{}m4:stdin:1: Input error
+@error{}m4:stdin:1: input error
 @result{}
 @end example
-@end deffn
+
+Line numbers start at 1 for each file.  If the file was found due to the
+@option{-I} option or @env{M4PATH} environment variable, that is
+reflected in the file name.  Synclines, via @code{syncoutput}
+(@pxref{Syncoutput}) or the command line option @option{--synclines}
+(or @option{-s}, @pxref{Invoking m4}), and the
+@samp{f} and @samp{l} flags of @code{debugmode} (@pxref{Debug Levels}),
+also use this notion of current file and line.  Redefining the three
+location macros has no effect on syncline, debug, warning, or error
+message output.
+
+This example assumes that the current directory is
+@file{m4-@value{VERSION}/@/tests}, and reuses the file
+@file{m4-@value{VERSION}/@/examples/@/incl.m4} mentioned earlier
+(@pxref{Include}):
+
+@comment options: -I"$abs_top_srcdir"/examples
+@example
+$ @kbd{m4 -I ../examples}
+define(`foo', ``$0' called at __file__:__line__')
+@result{}
+foo
+@result{}foo called at stdin:2
+include(`incl.m4')
+@result{}Include file start
+@result{}foo called at ../examples/incl.m4:2
+@result{}Include file end
+@result{}
+@end example
+
+Currently, all text wrapped with @code{m4wrap} (@pxref{M4wrap}) behaves
+as though it came from line 0 of the file ``''.  It is hoped that a
+future release of @code{m4} can overcome this limitation and remember
+which file invoked the call to @code{m4wrap}.
+@comment FIXME - make m4wrap remember line locations.
+
+The @code{__program__} macro behaves like @samp{$0} in shell
+terminology.  If you invoke @code{m4} through an absolute path or a link
+with a different spelling, rather than by relying on a @env{PATH} search
+for plain @samp{m4}, it will affect how @code{__program__} expands.  The
+intent is that you can use it to produce error messages with the same
+formatting that @code{m4} produces internally.  It can also be used
+within @code{syscmd} (@pxref{Syscmd}) to pick the same version of
+@code{m4} that is currently running, rather than whatever version of
+@code{m4} happens to be first in @env{PATH}.
 
 @node M4exit
 @section Exiting from @code{m4}

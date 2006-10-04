@@ -23,7 +23,6 @@
 #include "m4private.h"
 #include "getopt.h"
 #include "version-etc.h"
-#include "gnu/progname.h"
 #include "pathconf.h"
 #include "xstrtol.h"
 
@@ -64,10 +63,10 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     fprintf (stderr, _("Try `%s --help' for more information.\n"),
-	     program_name);
+	     m4_get_program_name ());
   else
     {
-      printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
+      printf (_("Usage: %s [OPTION]... [FILE]...\n"), m4_get_program_name ());
       fputs (_("\
 Process macros in FILEs.\n\
 If no FILE or if FILE is `-', standard input is read.  With no FILE and both\n\
@@ -276,7 +275,7 @@ main (int argc, char *const *argv, char *const *envp)
   int exit_status;
 
   /* Initialize gnulib error module.  */
-  set_program_name (argv[0]);
+  m4_set_program_name (argv[0]);
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
@@ -504,7 +503,7 @@ main (int argc, char *const *argv, char *const *envp)
   if (debugfile && !m4_debug_set_output (context, debugfile))
     m4_error (context, 0, errno, _("cannot set debug file `%s'"), debugfile);
   m4_input_init (context);
-  m4_output_init ();
+  m4_output_init (context);
   m4_include_env_init (context);
 
   if (frozen_file_to_read)
@@ -650,7 +649,7 @@ main (int argc, char *const *argv, char *const *envp)
     produce_frozen_state (context, frozen_file_to_write);
   else
     {
-      m4_make_diversion (0);
+      m4_make_diversion (context, 0);
       m4_undivert_all (context);
     }
 
