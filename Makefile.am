@@ -240,7 +240,7 @@ m4_libm4_la_SOURCES	= \
 		  m4/utility.c
 m4_libm4_la_LIBADD = gnu/libgnu.la \
 		  $(LIBLTDL) $(LTLIBINTL) $(LIBADD_DL)
-m4_libm4_la_DEPENDENCIES = $(LIBLTDL)
+m4_libm4_la_DEPENDENCIES = $(LIBLTDL) gnu/libgnu.la
 
 m4/pathconf.h:
 	echo "#define MODULE_PATH \"$(pkglibexecdir)\"" > m4/pathconf.h

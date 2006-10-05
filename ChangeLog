@@ -1,3 +1,19 @@
+2006-10-05  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	closeout.
+	* Makefile.am (m4_libm4_la_DEPENDENCIES): Add missing dependency.
+	* src/main.c (main): Close stdout on exit.
+	* m4/debug.c (set_debug_file): Check for write failure.
+	* m4/m4.c (m4_delete): Don't mask write failure.
+	* tests/testsuite.at (AT_CHECK_M4): Allow tracing by expanding
+	macros before calling AT_CHECK.
+	(M4_ONE_MEG_DEFN): New helper macro.
+	* tests/others.at (stdout full): New test.
+	(stderr closed, stdin closed, stdout closed): Augment.
+	* tests/builtins.at (syscmd): New test.
+	(esyscmd): Augment.
+
 2006-10-04  Eric Blake  <ebb9@byu.net>
 
 	* tests/builtins.at: Alphabetize tests.

@@ -137,8 +137,37 @@ hostname = >>www.gnu.org
 hostname = >>www<<
 ]])
 
-AT_CLEANUP
+dnl Ensure that esyscmd does not inherit any unnecessary fds from trace.
+AT_DATA([in.m4], [[esyscmd(`echo hi >&3')dnl
+]])
+AT_CHECK_M4([3>&-], [0], [], [stderr], [in.m4])
+mv stderr experr
+AT_CHECK_M4([--debugfile=trace -tdnl 3>&-], [0], [], [experr], [in.m4])
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+]])
 
+dnl Ensure that esyscmd does not inherit any unnecessary fds from diversions.
+AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`1')f
+world
+divert`'esyscmd(`echo hi >&3')
+hello
+]])
+AT_CHECK_M4([3>&-], [0], [[hello
+world
+]], [experr], [in.m4 | sed -ne '/./p'])
+
+dnl Ensure that esyscmd does not inherit any unnecessary fds from input files.
+AT_DATA([in.m4], [[hello esyscmd(`cat <&3')dnl
+dnl this line should not be read by cat
+world
+]])
+AT_CHECK_M4([3>&-], [0], [[hello world
+]], [stderr], [in.m4])
+mv stderr experr
+AT_CHECK_M4([in.m4 3>&-], [0], [[hello world
+]], [experr])
+
+AT_CLEANUP
 
 
 ## --- ##
@@ -593,6 +622,44 @@ foo line three.
 
 AT_CLEANUP
 
+
+## ------ ##
+## syscmd ##
+## ------ ##
+
+AT_SETUP([syscmd])
+
+dnl Ensure that syscmd does not inherit any unnecessary fds from trace.
+AT_DATA([in.m4], [[syscmd(`echo hi >&3')dnl
+]])
+AT_CHECK_M4([3>&-], [0], [], [stderr], [in.m4])
+mv stderr experr
+AT_CHECK_M4([--debugfile=trace -tdnl 3>&-], [0], [], [experr], [in.m4])
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+]])
+
+dnl Ensure that syscmd does not inherit any unnecessary fds from diversions.
+AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`1')f
+world
+divert`'syscmd(`echo hi >&3')
+hello
+]])
+AT_CHECK_M4([3>&-], [0], [[hello
+world
+]], [experr], [in.m4 | sed -ne '/./p'])
+
+dnl Ensure that syscmd does not inherit any unnecessary fds from input files.
+AT_DATA([in.m4], [[hello syscmd(`cat <&3')dnl
+dnl this line should not be read by cat
+world
+]])
+AT_CHECK_M4([3>&-], [0], [[hello world
+]], [stderr], [in.m4])
+mv stderr experr
+AT_CHECK_M4([in.m4 3>&-], [0], [[hello world
+]], [experr])
+
+AT_CLEANUP
 
 
 ## -------- ##

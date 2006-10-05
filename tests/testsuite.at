@@ -47,8 +47,8 @@ m4_version_prereq([2.52e])
 # or m4:input.m4:7: cannot open module `no_such': can't open the module
 # to m4:input.m4:7: cannot open module `no_such'
 m4_define([AT_CHECK_M4],
-[AT_CHECK([m4 -b -d $1 m4_if([$5], [-], [<&-],
-			     [< m4_default([$5], [/dev/null])])],
+[AT_CHECK([m4 -b -d $1 ]m4_if([$5], [-], [<&-],
+			      [< m4_default([$5], [/dev/null])]),
           [$2], [$3], m4_ifval([$4], [stderr]))
 m4_if([$4], [], [],
       [$4], [ignore], [],
@@ -57,6 +57,37 @@ m4_if([$4], [], [],
 	s/\(cannot open module [^:]*\):.*/\1/
     ' stderr >&2]], [0], [], [$4])])
 ])
+
+# M4_ONE_MEG_DEFN
+# ---------------
+# emit a code snippet for use in AT_DATA that will define a macro `f' to
+# consist of 1M bytes of newlines.  With that in place, it is then easy
+# to use divert and invoke `f' in the test file to force diversions to
+# spill into a temporary file.
+m4_define([M4_ONE_MEG_DEFN],
+[pushdef(`diversion', divnum)divert(-1)
+define(`f', `
+')
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+divert(diversion)popdef(`diversion')])
 
 # AT_TEST_M4(TITLE, INPUT, [STDOUT = `'], [STDERR = `'])
 # ------------------------------------------------------

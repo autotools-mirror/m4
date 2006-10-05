@@ -21,6 +21,7 @@
 
 #include "m4.h"
 #include "m4private.h"
+#include "closeout.h"
 #include "getopt.h"
 #include "version-etc.h"
 #include "pathconf.h"
@@ -276,6 +277,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Initialize gnulib error module.  */
   m4_set_program_name (argv[0]);
+  atexit (close_stdout);
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS

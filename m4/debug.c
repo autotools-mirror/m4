@@ -22,6 +22,7 @@
 #include <stdarg.h>
 
 #include "m4private.h"
+#include "close-stream.h"
 
 static void set_debug_file (m4 *, FILE *);
 
@@ -144,8 +145,9 @@ set_debug_file (m4 *context, FILE *fp)
   assert (context);
 
   debug_file = m4_get_debug_file (context);
-  if (debug_file != NULL && debug_file != stderr && debug_file != stdout)
-    fclose (debug_file);
+  if (debug_file != NULL && debug_file != stderr && debug_file != stdout
+      && close_stream (debug_file) != 0)
+    m4_error (context, 0, errno, _("error writing to debug stream"));
 
   debug_file = fp;
   m4_set_debug_file (context, fp);
@@ -157,11 +159,14 @@ set_debug_file (m4 *context, FILE *fp)
       if (fstat (fileno (debug_file), &debug_stat) < 0)
 	return;
 
+      /* mingw has a bug where fstat on a regular file reports st_ino
+	 of 0.  On normal system, st_ino should never be 0.  */
       if (stdout_stat.st_ino == debug_stat.st_ino
-	  && stdout_stat.st_dev == debug_stat.st_dev)
+	  && stdout_stat.st_dev == debug_stat.st_dev
+	  && stdout_stat.st_ino != 0)
 	{
-	  if (debug_file != stderr)
-	    fclose (debug_file);
+	  if (debug_file != stderr && close_stream (debug_file) != 0)
+	    m4_error (context, 0, errno, _("error writing to debug stream"));
 	  m4_set_debug_file (context, stdout);
 	}
     }
