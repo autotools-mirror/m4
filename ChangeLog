@@ -1,5 +1,20 @@
 2006-10-06  Eric Blake  <ebb9@byu.net>
 
+	Replace uses of tmpfile with clean-temp, since tmpfile is
+	incompatible with closeout.
+	* tests/builtins.at (esyscmd, syscmd): Don't use pipe; it loses
+	exit status of m4.
+	* tests/others.at (stderr closed): Likewise.
+	* tests/testsuite.at (M4_ONE_MEG_DEFN): Actually hit one meg.
+	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	clean-temp.
+	* m4/output.c [!HAVE_TMPFILE]: Delete dead code.
+	(m4_tmpfile, cleanup_tmpfile): New functions.
+	(make_room_for, m4_insert_diversion): Use clean-temp module.
+	* configure.ac (AC_CHECK_FUNCS_ONCE): No longer check for
+	tmpfile.
+	* doc/m4.texinfo (Diversions): Document new use of $TMPDIR.
+
 	* m4/utility.c (m4_numeric_arg): Merge from branch.
 	* modules/gnu.c (debuglen): New builtin.
 	* src/main.c (usage, ARGLENGTH_OPTION, long_options, main):

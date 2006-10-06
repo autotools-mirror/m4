@@ -28,6 +28,10 @@
 
 #include "m4private.h"
 
+#include "binary-io.h"
+#include "clean-temp.h"
+#include "xvasprintf.h"
+
 /* Define this to see runtime debug output.  Implied by DEBUG.  */
 /*#define DEBUG_OUTPUT */
 
@@ -42,18 +46,13 @@
 /* Size of buffer size to use while copying files.  */
 #define COPY_BUFFER_SIZE (32 * 512)
 
-#ifdef HAVE_TMPFILE
-extern FILE *tmpfile ();
-#endif
-
-/* FIXME - hack until we get clean-temp gnulib module going.  */
-#undef tmpfile
-
 /* Output functions.  Most of the complexity is for handling cpp like
    sync lines.
 
    This code is fairly entangled with the code in input.c, and maybe it
    belongs there?  */
+
+typedef struct temp_dir m4_temp_dir;
 
 /* In a struct diversion, only one of file or buffer be may non-NULL,
    depending on the fact output is diverted to a file or in memory
@@ -85,6 +84,9 @@ static FILE *output_file;	/* current value of (file) */
 static char *output_cursor;	/* current value of (buffer + used) */
 static int output_unused;	/* current value of (size - used) */
 
+/* Temporary directory holding all spilled diversion files.  */
+static m4_temp_dir *output_temp_dir;
+
 
 
 /* --- OUTPUT INITIALIZATION --- */
@@ -114,26 +116,45 @@ m4_output_exit (void)
   DELETE (diversion_table);
 }
 
-#ifndef HAVE_TMPFILE
-
-/* Implement tmpfile(3) for non-USG systems.  */
-
-static FILE *
-tmpfile (void)
+/* Clean up any temporary directory.  Designed for use as an atexit
+   handler.  */
+static void
+cleanup_tmpfile (void)
 {
-  char buf[32];
-  int fd;
-
-  strcpy (buf, "/tmp/m4XXXXXX");
-  fd = mkstemp (buf);
-  if (fd < 0)
-    return NULL;
-
-  unlink (buf);
-  return fdopen (fd, "w+");
+  cleanup_temp_dir (output_temp_dir);
 }
 
-#endif /* not HAVE_TMPFILE */
+/* Create a temporary file open for reading and writing in a secure
+   temp directory.  The file will be automatically closed and deleted
+   on a fatal signal.  When done with the file, close it with
+   close_stream_temp.  Exits on failure, so the return value is always
+   an open file.  */
+static FILE *
+m4_tmpfile (m4 *context)
+{
+  static unsigned int count;
+  char *name;
+  FILE *file;
+
+  if (output_temp_dir == NULL)
+    {
+      errno = 0;
+      output_temp_dir = create_temp_dir ("m4-", NULL, true);
+      if (output_temp_dir == NULL)
+	m4_error (context, EXIT_FAILURE, errno,
+		  _("cannot create temporary file for diversion"));
+      atexit (cleanup_tmpfile);
+    }
+  name = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, count++);
+  register_temp_file (output_temp_dir, name);
+  errno = 0;
+  file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
+  if (file == NULL)
+    m4_error (context, EXIT_FAILURE, errno,
+	      _("cannot create temporary file for diversion"));
+  free (name);
+  return file;
+}
 
 /* Reorganize in-memory diversion buffers so the current diversion can
    accomodate LENGTH more characters without further reorganization.  The
@@ -187,10 +208,7 @@ make_room_for (m4 *context, int length)
       /* Create a temporary file, write the in-memory buffer of the
 	 diversion to this file, then release the buffer.  */
 
-      selected_diversion->file = tmpfile ();
-      if (selected_diversion->file == NULL)
-	m4_error (context, EXIT_FAILURE, errno,
-		  _("cannot create temporary file for diversion"));
+      selected_diversion->file = m4_tmpfile (context);
       if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
 	m4_error (context, 0, errno,
 		  _("cannot protect diversion across forks"));
@@ -538,7 +556,7 @@ m4_insert_diversion (m4 *context, int divnum)
 
   if (diversion->file)
     {
-      fclose (diversion->file);
+      close_stream_temp (diversion->file);
       diversion->file = NULL;
     }
   else if (diversion->buffer)

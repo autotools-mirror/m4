@@ -29,7 +29,7 @@ AC_CONFIG_AUX_DIR([ltdl/config])
 AC_CONFIG_MACRO_DIR([ltdl/m4])
 AC_CONFIG_LIBOBJ_DIR([gnu])
 AC_CONFIG_TESTDIR([tests])
-AC_CONFIG_HEADERS([gnu/config.h:config-h.in])
+AC_CONFIG_HEADERS([gnu/config.h:gnu/config-h.in])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
@@ -188,7 +188,7 @@ AC_SUBST([INCLUDE_STDBOOL_H])
 ## --------------------------------- ##
 ## Library functions required by M4. ##
 ## --------------------------------- ##
-AC_CHECK_FUNCS_ONCE([calloc strerror tmpfile])
+AC_CHECK_FUNCS_ONCE([calloc strerror])
 
 AM_WITH_DMALLOC
 

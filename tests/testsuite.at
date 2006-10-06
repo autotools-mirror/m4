@@ -87,6 +87,7 @@ define(`f', defn(`f')defn(`f'))
 define(`f', defn(`f')defn(`f'))
 define(`f', defn(`f')defn(`f'))
 define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
 divert(diversion)popdef(`diversion')])
 
 # AT_TEST_M4(TITLE, INPUT, [STDOUT = `'], [STDERR = `'])

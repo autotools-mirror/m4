@@ -398,11 +398,12 @@ hello`'dnl(world)
 undivert
 goodbye
 ]])
-AT_CHECK_M4([2>&-], [1],
+AT_CHECK_M4([2>&-], [1], [stdout], [], [in.m4])
+AT_CHECK([sed -ne '/./p' stdout], [0],
 [[hello
 and
 goodbye
-]], [], [in.m4 | sed -ne '/./p'])
+]])
 
 dnl command line input file must not collide with closed stderr
 AT_DATA([in.m4], [[syscmd(`cat <&2')sysval

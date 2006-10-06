@@ -152,9 +152,10 @@ world
 divert`'esyscmd(`echo hi >&3')
 hello
 ]])
-AT_CHECK_M4([3>&-], [0], [[hello
+AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
+AT_CHECK([sed -ne '/./p' stdout], [0], [[hello
 world
-]], [experr], [in.m4 | sed -ne '/./p'])
+]])
 
 dnl Ensure that esyscmd does not inherit any unnecessary fds from input files.
 AT_DATA([in.m4], [[hello esyscmd(`cat <&3')dnl
@@ -644,9 +645,10 @@ world
 divert`'syscmd(`echo hi >&3')
 hello
 ]])
-AT_CHECK_M4([3>&-], [0], [[hello
+AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
+AT_CHECK([sed -ne '/./p' stdout], [0], [[hello
 world
-]], [experr], [in.m4 | sed -ne '/./p'])
+]])
 
 dnl Ensure that syscmd does not inherit any unnecessary fds from input files.
 AT_DATA([in.m4], [[hello syscmd(`cat <&3')dnl

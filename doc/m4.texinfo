@@ -3919,6 +3919,8 @@ limit to the overall memory usable by all diversions taken altogether
 (512K, currently).  When this maximum is about to be exceeded,
 a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
+When creating the temporary file, @code{m4} honors the value of the
+environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
 So, it is theoretically possible that the number of diversions be
 limited by the number of available file descriptors.
 
