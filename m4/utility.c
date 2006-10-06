@@ -76,13 +76,20 @@ m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
 {
   char *endp;
 
-  if (*M4ARG (arg) == 0
-      || (*valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10),
-	  *skip_space (context, endp) != 0))
+  if (*M4ARG (arg) == '\0')
     {
-      m4_warn (context, 0, _("%s: argument %d non-numeric: %s"),
-	       M4ARG (0), arg - 1, M4ARG (arg));
-      return false;
+      *valuep = 0;
+      m4_warn (context, 0, _("%s: empty string treated as 0"), M4ARG (0));
+    }
+  else
+    {
+      *valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10);
+      if (*skip_space (context, endp) != 0)
+	{
+	  m4_warn (context, 0, _("%s: non-numeric argument `%s'"),
+		   M4ARG (0), M4ARG (arg));
+	  return false;
+	}
     }
   return true;
 }

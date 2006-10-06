@@ -49,8 +49,9 @@
   BUILTIN (builtin,	false,	true,	false,	1,	-1 )	\
   BUILTIN (changeresyntax,false,true,	false,	1,	1  )	\
   BUILTIN (changesyntax,false,	true,	false,	1,	-1 )	\
-  BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
   BUILTIN (debugfile,	false,	false,	false,	0,	1  )	\
+  BUILTIN (debuglen,	false,	true,	false,	1,	1  )	\
+  BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
   BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
   BUILTIN (format,	false,	true,	false,	1,	-1 )	\
   BUILTIN (indir,	false,	true,	false,	1,	-1 )	\
@@ -418,6 +419,22 @@ M4BUILTIN_HANDLER (debugfile)
 	      M4ARG (0), M4ARG (1));
 }
 
+
+/* On-the-fly control of debug length.  It takes one integer
+   argument.  */
+
+/**
+ * debuglen(LEN)
+ **/
+M4BUILTIN_HANDLER (debuglen)
+{
+  int i;
+  if (!m4_numeric_arg (context, argc, argv, 1, &i))
+    return;
+  /* FIXME - make m4_numeric_arg more powerful - we want to accept
+     suffixes, and limit the result to size_t.  */
+  m4_set_max_debug_arg_length_opt (context, i);
+}
 
 /* On-the-fly control of the format of the tracing output.  It takes one
    argument, which is a character string like given to the -d option, or

@@ -132,7 +132,7 @@ Frozen state files:\n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
-  -l, --arglength=NUM          restrict macro tracing size\n\
+  -l, --debuglen=NUM           restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
 "), stdout);
       fputs (_("\
@@ -175,7 +175,8 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
+  ARGLENGTH_OPTION = CHAR_MAX + 1,	/* not quite -l, because of message */
+  DEBUGFILE_OPTION,			/* no short opt */
   DIVERSIONS_OPTION,			/* not quite -N, because of message */
   ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
   HASHSIZE_OPTION,			/* not quite -H, because of message */
@@ -190,9 +191,9 @@ enum
 /* Decode options and launch execution.  */
 static const struct option long_options[] =
 {
-  {"arglength", required_argument, NULL, 'l'},
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
+  {"debuglen", required_argument, NULL, 'l'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -213,6 +214,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
+  {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
@@ -448,6 +450,10 @@ main (int argc, char *const *argv, char *const *envp)
 	interactive = INTERACTIVE_YES;
 	break;
 
+      case ARGLENGTH_OPTION:
+	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	       "--arglength", "--debuglen");
+	/* fall through */
       case 'l':
 	size = size_opt (optarg,
 			 N_("debug argument length"));

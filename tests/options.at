@@ -68,6 +68,11 @@ AT_CHECK_M4([-e], [0], [],
 [[m4: Warning: `-e' is deprecated, use `-i' instead
 ]])
 
+dnl --arglength is an older spelling for --debuglen
+AT_CHECK_M4([--arglength=10], [0], [],
+[[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
+]])
+
 AT_CLEANUP
 
 
@@ -128,53 +133,6 @@ m@&t@4_dnl()
 
 AT_CHECK_M4([--define=foo --debug= -- a], [0], [[ 1
 m@&t@4_dnl()
-]])
-
-AT_CLEANUP
-
-
-## --------- ##
-## arglength ##
-## --------- ##
-
-AT_SETUP([--arglength])
-
-dnl Check for argument validation.
-
-AT_DATA([in],
-[[define(`echo', `$@')dnl
-traceon(`echo')dnl
-echo(`long string')
-]])
-
-AT_CHECK_M4([--arglength=-1 in], [1], [],
-[[m4: invalid debug argument length `-1'
-]])
-
-AT_CHECK_M4([--arglength oops in], [1], [],
-[[m4: invalid debug argument length `oops'
-]])
-
-AT_CHECK_M4([-l 10oops in], [1], [],
-[[m4: invalid character following debug argument length in `10oops'
-]])
-
-dnl MiB is the suffix to implict 1, resulting in 1048576
-AT_CHECK_M4([-lMiB in], [0], [[long string
-]], [[m4trace: -1- echo(`long string') -> ``long string''
-]])
-
-dnl this assumes size_t is no bigger than 64 bits
-AT_CHECK_M4([-l 123456789012345678901234567890 in], [1], [],
-[[m4: debug argument length `123456789012345678901234567890' too large
-]])
-
-AT_CHECK_M4([-l 3 in], [0], [[long string
-]], [[m4trace: -1- echo(`lon...') -> ``lo...'
-]])
-
-AT_CHECK_M4([--arglength=3 -l0 in], [0], [[long string
-]], [[m4trace: -1- echo(`long string') -> ``long string''
 ]])
 
 AT_CLEANUP
@@ -281,6 +239,53 @@ mv stderr expout
 AT_CHECK_M4([--debugfile=trace4 -dV in], [0], [[foo
 ]])
 AT_CHECK([cat trace4], [0], [expout])
+
+AT_CLEANUP
+
+
+## -------- ##
+## debuglen ##
+## -------- ##
+
+AT_SETUP([--debuglen])
+
+dnl Check for argument validation.
+
+AT_DATA([in],
+[[define(`echo', `$@')dnl
+traceon(`echo')dnl
+echo(`long string')
+]])
+
+AT_CHECK_M4([--debuglen=-1 in], [1], [],
+[[m4: invalid debug argument length `-1'
+]])
+
+AT_CHECK_M4([--debuglen oops in], [1], [],
+[[m4: invalid debug argument length `oops'
+]])
+
+AT_CHECK_M4([-l 10oops in], [1], [],
+[[m4: invalid character following debug argument length in `10oops'
+]])
+
+dnl MiB is the suffix to implict 1, resulting in 1048576
+AT_CHECK_M4([-lMiB in], [0], [[long string
+]], [[m4trace: -1- echo(`long string') -> ``long string''
+]])
+
+dnl this assumes size_t is no bigger than 64 bits
+AT_CHECK_M4([-l 123456789012345678901234567890 in], [1], [],
+[[m4: debug argument length `123456789012345678901234567890' too large
+]])
+
+AT_CHECK_M4([-l 3 in], [0], [[long string
+]], [[m4trace: -1- echo(`lon...') -> ``lo...'
+]])
+
+AT_CHECK_M4([--debuglen=3 -l0 in], [0], [[long string
+]], [[m4trace: -1- echo(`long string') -> ``long string''
+]])
 
 AT_CLEANUP
 
