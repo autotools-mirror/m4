@@ -53,8 +53,9 @@ m4_delete (m4 *context)
   if (context->syntax)
     m4_syntax_delete (context->syntax);
 
-  /* debug_file should have been reset to stderr, which is closed later.  */
-  assert (context->debug_file == stderr);
+  /* debug_file should have been reset to stdout or stderr, both of
+     which are closed later.  */
+  assert (context->debug_file == stderr || context->debug_file == stdout);
 
   obstack_free (&context->trace_messages, NULL);
 

@@ -39,6 +39,8 @@
 #  include "m4private.h"
 #endif
 
+#include "exitfail.h"
+
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_export_table		m4_LTX_m4_export_table
 #define m4_builtin_table	m4_LTX_m4_builtin_table
@@ -703,14 +705,31 @@ M4BUILTIN_HANDLER (errprint)
    arguments are present.  */
 M4BUILTIN_HANDLER (m4exit)
 {
-  int exit_code = 0;
+  int exit_code = EXIT_SUCCESS;
 
-  if (argc == 2  && !m4_numeric_arg (context, argc, argv, 1, &exit_code))
-    exit_code = 0;
+  /* Warn on bad arguments, but still exit.  */
+  if (argc >= 2 && !m4_numeric_arg (context, argc, argv, 1, &exit_code))
+    exit_code = EXIT_FAILURE;
+  if (exit_code < 0 || exit_code > 255)
+    {
+      m4_warn (context, 0, _("%s: exit status out of range: `%d'"),
+	       M4ARG (0), exit_code);
+      exit_code = EXIT_FAILURE;
+    }
 
   /* Ensure any module exit callbacks are executed.  */
   m4__module_exit (context);
 
+  /* Change debug stream back to stderr, to force flushing debug
+     stream and detect any errors.  */
+  m4_debug_set_output (context, NULL);
+
+  /* Check for saved error.  */
+  if (exit_code == 0 && m4_get_exit_status (context) != 0)
+    exit_code == m4_get_exit_status (context);
+  /* Ensure that atexit handlers see correct nonzero status.  */
+  if (exit_code != 0)
+    exit_failure = exit_code;
   exit (exit_code);
 }
 

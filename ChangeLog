@@ -1,3 +1,8 @@
+2006-10-06  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (m4exit): Merge from branch.
+	* m4/m4.c (m4_delete): Avoid assertion triggered by last patch.
+
 2006-10-05  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: Augment with gnulib-tool --import
