@@ -1,5 +1,8 @@
 2006-10-06  Eric Blake  <ebb9@byu.net>
 
+	* modules/m4.c (m4exit): Fix typo.  Ensure desired exit status in
+	case closing a module exits.
+
 	* modules/m4.c (m4exit): Merge from branch.
 	* m4/m4.c (m4_delete): Avoid assertion triggered by last patch.
 

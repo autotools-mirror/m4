@@ -717,6 +717,10 @@ M4BUILTIN_HANDLER (m4exit)
       exit_code = EXIT_FAILURE;
     }
 
+  /* Ensure that atexit handlers see correct nonzero status.  */
+  if (exit_code != EXIT_SUCCESS)
+    exit_failure = exit_code;
+
   /* Ensure any module exit callbacks are executed.  */
   m4__module_exit (context);
 
@@ -726,10 +730,7 @@ M4BUILTIN_HANDLER (m4exit)
 
   /* Check for saved error.  */
   if (exit_code == 0 && m4_get_exit_status (context) != 0)
-    exit_code == m4_get_exit_status (context);
-  /* Ensure that atexit handlers see correct nonzero status.  */
-  if (exit_code != 0)
-    exit_failure = exit_code;
+    exit_code = m4_get_exit_status (context);
   exit (exit_code);
 }
 
