@@ -120,6 +120,7 @@ extern void m4_warn_at_line  (m4 *, int, const char *, int,
 
 extern const char *	m4_get_program_name (void);
 extern void		m4_set_program_name (const char *);
+extern void		m4_set_exit_failure (int);
 
 
 /* --- CONTEXT MANAGEMENT --- */

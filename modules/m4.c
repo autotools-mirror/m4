@@ -39,8 +39,6 @@
 #  include "m4private.h"
 #endif
 
-#include "exitfail.h"
-
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_export_table		m4_LTX_m4_export_table
 #define m4_builtin_table	m4_LTX_m4_builtin_table
@@ -719,7 +717,7 @@ M4BUILTIN_HANDLER (m4exit)
 
   /* Ensure that atexit handlers see correct nonzero status.  */
   if (exit_code != EXIT_SUCCESS)
-    exit_failure = exit_code;
+    m4_set_exit_failure (exit_code);
 
   /* Ensure any module exit callbacks are executed.  */
   m4__module_exit (context);

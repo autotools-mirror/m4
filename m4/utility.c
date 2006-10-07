@@ -21,6 +21,8 @@
 #include <config.h>
 
 #include "m4private.h"
+
+#include "exitfail.h"
 #include "progname.h"
 #include "verror.h"
 #include "xvasprintf.h"
@@ -223,4 +225,13 @@ void
 m4_set_program_name (const char *name)
 {
   set_program_name (name);
+}
+
+/* Wrap the gnulib exitfail module, to avoid exporting a global
+   variable from a library.  Set the exit status for use in gnulib
+   modules and atexit handlers.  */
+void
+m4_set_exit_failure (int status)
+{
+  exit_failure = status;
 }
