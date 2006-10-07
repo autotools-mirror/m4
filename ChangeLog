@@ -1,5 +1,9 @@
 2006-10-06  Eric Blake  <ebb9@byu.net>
 
+	* m4/output.c (cleanup_tmpfile): Exit nonzero on failure to clean
+	up.
+	* tests/others.at (stdout closed): Fix final check.
+
 	Replace uses of tmpfile with clean-temp, since tmpfile is
 	incompatible with closeout.
 	* tests/builtins.at (esyscmd, syscmd): Don't use pipe; it loses

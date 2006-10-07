@@ -30,6 +30,7 @@
 
 #include "binary-io.h"
 #include "clean-temp.h"
+#include "exitfail.h"
 #include "xvasprintf.h"
 
 /* Define this to see runtime debug output.  Implied by DEBUG.  */
@@ -117,11 +118,13 @@ m4_output_exit (void)
 }
 
 /* Clean up any temporary directory.  Designed for use as an atexit
-   handler.  */
+   handler, where it is not safe to call exit() recursively; so this
+   calls _exit if a problem is encountered.  */
 static void
 cleanup_tmpfile (void)
 {
-  cleanup_temp_dir (output_temp_dir);
+  if (cleanup_temp_dir (output_temp_dir) != 0)
+    _exit (exit_failure);
 }
 
 /* Create a temporary file open for reading and writing in a secure
