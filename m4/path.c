@@ -100,11 +100,16 @@ search_path_env_init (m4__search_path_info *info, char *path, bool isabs)
 void
 m4_include_env_init (m4 *context)
 {
+  char *m4path;
+
   if (m4_get_no_gnu_extensions_opt (context))
     return;
 
-  search_path_env_init (m4__get_search_path (context),
-			getenv ("M4PATH"), false);
+  m4path = getenv ("M4PATH");
+  if (m4path)
+    m4path = xstrdup (m4path);
+  search_path_env_init (m4__get_search_path (context), m4path, false);
+  free (m4path);
 }
 
 void

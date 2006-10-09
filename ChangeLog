@@ -1,5 +1,8 @@
 2006-10-09  Eric Blake  <ebb9@byu.net>
 
+	* m4/path.c (m4_include_env_init): Don't alter result of getenv.
+	Reported by Ralf Wildenhues.
+
 	* modules/gnu.c (gnu_buf): Rename from buf to silence -Wshadow.
 
 2006-10-07  Eric Blake  <ebb9@byu.net>
