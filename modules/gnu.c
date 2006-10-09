@@ -110,7 +110,7 @@ typedef struct {
   struct re_registers regs;	/* match registers */
 } m4_pattern_buffer;
 
-static m4_pattern_buffer buf;	/* compiled regular expression */
+static m4_pattern_buffer gnu_buf;	/* compiled regular expression */
 
 /* Compile a REGEXP using the RESYNTAX bits, and return the buffer.
    Report errors on behalf of CALLER.  If NO_SUB, optimize the
@@ -120,7 +120,7 @@ static m4_pattern_buffer *
 m4_regexp_compile (m4 *context, const char *caller,
 		   const char *regexp, int resyntax, bool no_sub)
 {
-  /* buf is guaranteed to start life 0-initialized, which works in the
+  /* gnu_buf is guaranteed to start life 0-initialized, which works in the
      below algorithm.
 
      FIXME - this method is not reentrant, since re_compile_pattern
@@ -128,14 +128,14 @@ m4_regexp_compile (m4 *context, const char *caller,
      for its syntax (but at least the compiled regex remembers its
      syntax even if the global variable changes later), and since we
      use a static variable.  To be reentrant, we would need a mutex in
-     this method, and move the storage for buf into context.  */
+     this method, and move the storage for gnu_buf into context.  */
 
   const char *msg;		/* error message from re_compile_pattern */
 
   re_set_syntax (resyntax);
-  regfree (&buf.pat);
-  buf.pat.no_sub = no_sub;
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf.pat);
+  regfree (&gnu_buf.pat);
+  gnu_buf.pat.no_sub = no_sub;
+  msg = re_compile_pattern (regexp, strlen (regexp), &gnu_buf.pat);
 
   if (msg != NULL)
     {
@@ -144,9 +144,9 @@ m4_regexp_compile (m4 *context, const char *caller,
       return NULL;
     }
 
-  re_set_registers (&buf.pat, &buf.regs, buf.regs.num_regs, buf.regs.start,
-		    buf.regs.end);
-  return &buf;
+  re_set_registers (&gnu_buf.pat, &gnu_buf.regs, gnu_buf.regs.num_regs,
+		    gnu_buf.regs.start, gnu_buf.regs.end);
+  return &gnu_buf;
 }
 
 
@@ -156,7 +156,7 @@ static int
 m4_regexp_search (m4_pattern_buffer *buf, const char *string,
 		  const int size, const int start, const int range)
 {
-  return re_search (&(buf->pat), string, size, start, range, &(buf->regs));
+  return re_search (&buf->pat, string, size, start, range, &buf->regs);
 }
 
 
@@ -283,12 +283,12 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 /* Reclaim memory used by this module.  */
 M4FINISH_HANDLER(gnu)
 {
-  regfree (&buf.pat);
-  free (buf.regs.start);
-  free (buf.regs.end);
+  regfree (&gnu_buf.pat);
+  free (gnu_buf.regs.start);
+  free (gnu_buf.regs.end);
   /* If this module was preloaded, then we need to explicitly reset
      the memory in case it gets reloaded.  */
-  memset (&buf, 0, sizeof buf);
+  memset (&gnu_buf, 0, sizeof gnu_buf);
 }
 
 
