@@ -36,6 +36,7 @@ typedef struct m4		m4;
 typedef struct m4_builtin	m4_builtin;
 typedef struct m4_macro		m4_macro;
 typedef struct m4_symbol_value	m4_symbol_value;
+typedef struct m4_input_block	m4_input_block;
 
 typedef struct obstack		m4_obstack;
 typedef lt_dlsymlist		m4_export;
@@ -396,13 +397,14 @@ extern	void	m4_skip_line	(m4 *context, const char *);
 
 /* push back input */
 
-extern	void	m4_push_file	(m4 *context, FILE *, const char *, bool);
-extern	void	m4_push_single	(int ch);
+extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
+extern	void	m4_push_single	(int);
 extern	void	m4_push_builtin	(m4_symbol_value *);
-extern	m4_obstack *m4_push_string_init (m4 *context);
-extern	const char *m4_push_string_finish (void);
+extern	m4_obstack	*m4_push_string_init	(m4 *);
+extern	m4_input_block	*m4_push_string_finish	(void);
 extern	void	m4_push_wrapup	(const char *);
 extern	bool	m4_pop_wrapup	(void);
+extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 
 
 

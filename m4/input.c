@@ -33,7 +33,7 @@
    text), single characters, or quoted builtin definitions (as returned by
    the builtin "defn").  Unread input is organized in a stack,
    implemented with an obstack.  Each input source is described by a
-   "struct input_block".  The obstack is "input_stack".  The top of the
+   "struct m4_input_block".  The obstack is "input_stack".  The top of the
    input stack is "isp".
 
    Each input_block has an associated struct input_funcs, that defines
@@ -71,34 +71,34 @@
 
 static	int   file_peek			(void);
 static	int   file_read			(m4 *);
-static	void  file_unget		(int ch);
-static	void  file_clean		(m4 *context);
-static	void  init_builtin_token	(m4 *context, m4_symbol_value *token);
+static	void  file_unget		(int);
+static	void  file_clean		(m4 *);
+static	void  init_builtin_token	(m4 *, m4_symbol_value *);
 static	int   builtin_peek		(void);
 static	int   builtin_read		(m4 *);
-static	bool  match_input		(m4 *context, const unsigned char *s,
-					 bool);
-static	int   next_char			(m4 *context);
-static	int   peek_char			(m4 *context);
-static	void  pop_input			(m4 *context);
+static	bool  match_input		(m4 *, const unsigned char *, bool);
+static	int   next_char			(m4 *);
+static	int   peek_char			(m4 *);
+static	void  pop_input			(m4 *);
 static	int   single_peek		(void);
 static	int   single_read		(m4 *);
 static	int   string_peek		(void);
 static	int   string_read		(m4 *);
-static	void  string_unget		(int ch);
-static	void  unget_input		(int ch);
+static	void  string_unget		(int);
+static	void  unget_input		(int);
 
 struct input_funcs
 {
-  int (*peek_func) (void);	/* function to peek input */
-  int (*read_func) (m4 *);	/* function to read input */
-  void (*unget_func) (int);	/* function to unread input */
-  void (*clean_func) (m4 *);	/* function to clean up */
+  int	(*peek_func)	(void);	/* function to peek input */
+  int	(*read_func)	(m4 *);	/* function to read input */
+  void	(*unget_func)	(int);	/* function to unread input */
+  void	(*clean_func)	(m4 *);	/* function to clean up */
+  void	(*print_func)	(m4 *, m4_obstack *); /* output trace expansion */
 };
 
-struct input_block
+struct m4_input_block
 {
-  struct input_block *prev;	/* previous input_block on the input stack */
+  m4_input_block *prev;		/* previous input_block on the input stack */
   struct input_funcs *funcs;	/* functions on this input_block */
 
   union
@@ -133,15 +133,13 @@ struct input_block
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  unsigned int min_args;  /* argv minima for the builtin. */
 	  unsigned int max_args;  /* argv maxima for the builtin. */
-	  bool traced;	  /* true iff builtin is traced. */
+	  bool traced;		  /* true iff builtin is traced. */
 	  bool read;		  /* true iff block has been read. */
 	}
       u_b;
     }
   u;
 };
-
-typedef struct input_block input_block;
 
 
 /* Obstack for storing individual tokens.  */
@@ -161,13 +159,13 @@ static m4_obstack *current_input;
 static char *token_bottom;
 
 /* Pointer to top of current_input.  */
-static input_block *isp;
+static m4_input_block *isp;
 
 /* Pointer to top of wrapup_stack.  */
-static input_block *wsp;
+static m4_input_block *wsp;
 
 /* Aux. for handling split m4_push_string ().  */
-static input_block *next;
+static m4_input_block *next;
 
 /* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
@@ -249,8 +247,17 @@ file_clean (m4 *context)
     m4_set_output_line (context, -1);
 }
 
+static void
+file_print (m4 *context, m4_obstack *obs)
+{
+  const char *text = m4_get_current_file (context);
+  obstack_grow (obs, "<file: ", strlen ("<file: "));
+  obstack_grow (obs, text, strlen (text));
+  obstack_1grow (obs, '>');
+}
+
 static struct input_funcs file_funcs = {
-  file_peek, file_read, file_unget, file_clean
+  file_peek, file_read, file_unget, file_clean, file_print
 };
 
 /* m4_push_file () pushes an input file FP with name TITLE on the
@@ -264,9 +271,9 @@ static struct input_funcs file_funcs = {
   alone is taken as belonging to the line it ends, and the current
   line number is not incremented until the next character is read.  */
 void
-m4_push_file (m4 *context, FILE *fp, const char *title, bool close)
+m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
 {
-  input_block *i;
+  m4_input_block *i;
 
   if (next != NULL)
     {
@@ -277,12 +284,13 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close)
   m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
 		    _("input read from %s"), title);
 
-  i = (input_block *) obstack_alloc (current_input,
-				     sizeof (struct input_block));
+  i = (m4_input_block *) obstack_alloc (current_input,
+					sizeof (m4_input_block));
   i->funcs = &file_funcs;
 
   i->u.u_f.file = fp;
   i->u.u_f.end = false;
+  i->u.u_f.close = close_file;
   i->u.u_f.name = m4_get_current_file (context);
   i->u.u_f.lineno = m4_get_current_line (context);
   i->u.u_f.out_lineno = m4_get_output_line (context);
@@ -300,7 +308,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close)
 static int
 builtin_peek (void)
 {
-  if (isp->u.u_b.read == true)
+  if (isp->u.u_b.read)
     return CHAR_RETRY;
 
   return CHAR_BUILTIN;
@@ -309,15 +317,43 @@ builtin_peek (void)
 static int
 builtin_read (m4 *context M4_GNUC_UNUSED)
 {
-  if (isp->u.u_b.read == true)
+  if (isp->u.u_b.read)
     return CHAR_RETRY;
 
   isp->u.u_b.read = true;
   return CHAR_BUILTIN;
 }
 
+static void
+builtin_unget (int ch)
+{
+  assert (ch == CHAR_BUILTIN && isp->u.u_b.read);
+  isp->u.u_b.read = false;
+}
+
+static void
+builtin_print (m4 *context, m4_obstack *obs)
+{
+  const m4_builtin *bp;
+  const char *text;
+
+  bp = m4_builtin_find_by_func (NULL, isp->u.u_b.func);
+  assert (bp);
+  text = bp->name;
+  obstack_1grow (obs, '<');
+  obstack_grow (obs, text, strlen (text));
+  obstack_1grow (obs, '>');
+  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE))
+    {
+      text = m4_get_module_name (isp->u.u_b.handle);
+      obstack_1grow (obs, '{');
+      obstack_grow (obs, text, strlen (text));
+      obstack_1grow (obs, '}');
+    }
+}
+
 static struct input_funcs builtin_funcs = {
-  builtin_peek, builtin_read, NULL, NULL
+  builtin_peek, builtin_read, builtin_unget, NULL, builtin_print
 };
 
 /* m4_push_builtin () pushes TOKEN, which contains a builtin's
@@ -327,7 +363,7 @@ static struct input_funcs builtin_funcs = {
 void
 m4_push_builtin (m4_symbol_value *token)
 {
-  input_block *i;
+  m4_input_block *i;
 
   /* Make sure we were passed a builtin function type token.  */
   assert (m4_is_symbol_value_func (token));
@@ -338,8 +374,8 @@ m4_push_builtin (m4_symbol_value *token)
       next = NULL;
     }
 
-  i = (input_block *) obstack_alloc (current_input,
-				     sizeof (struct input_block));
+  i = (m4_input_block *) obstack_alloc (current_input,
+					sizeof (m4_input_block));
   i->funcs = &builtin_funcs;
 
   i->u.u_b.func		= m4_get_symbol_value_func (token);
@@ -372,14 +408,14 @@ single_read (m4 *context M4_GNUC_UNUSED)
 }
 
 static struct input_funcs single_funcs = {
-  single_peek, single_read, NULL, NULL
+  single_peek, single_read, NULL, NULL, NULL
 };
 
 /* Push a single character CH on to the input stack.  */
 void
 m4_push_single (int ch)
 {
-  input_block *i;
+  m4_input_block *i;
 
   if (next != NULL)
     {
@@ -387,8 +423,8 @@ m4_push_single (int ch)
       next = NULL;
     }
 
-  i = (input_block *) obstack_alloc (current_input,
-				     sizeof (struct input_block));
+  i = (m4_input_block *) obstack_alloc (current_input,
+					sizeof (m4_input_block));
 
   i->funcs = &single_funcs;
 
@@ -424,8 +460,27 @@ string_unget (int ch)
     m4_push_single (ch);
 }
 
+static void
+string_print (m4 *context, m4_obstack *obs)
+{
+  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  size_t arg_length = m4_get_max_debug_arg_length_opt (context);
+  const char *text = isp->u.u_s.start;
+  size_t len = arg_length ? strnlen (text, arg_length) : strlen (text);
+
+  if (quote)
+    obstack_grow (obs, lquote, strlen (lquote));
+  obstack_grow (obs, text, len);
+  if (len == arg_length && text[len] != '\0')
+    obstack_grow (obs, "...", 3);
+  if (quote)
+    obstack_grow (obs, rquote, strlen (rquote));
+}
+
 static struct input_funcs string_funcs = {
-  string_peek, string_read, string_unget, NULL
+  string_peek, string_read, string_unget, NULL, string_print
 };
 
 /* First half of m4_push_string ().  The pointer next points to the new
@@ -439,28 +494,29 @@ m4_push_string_init (m4 *context)
       abort ();
     }
 
-  next = (input_block *) obstack_alloc (current_input,
-					sizeof (struct input_block));
+  next = (m4_input_block *) obstack_alloc (current_input,
+					   sizeof (m4_input_block));
   next->funcs = &string_funcs;
 
   return current_input;
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to
-   m4_push_file () has invalidated the previous call to
-   m4_push_string_init (), so we just give up.  If the new object is
-   void, we do not push it.  The function m4_push_string_finish ()
-   returns a pointer to the finished object.  This pointer is only for
-   temporary use, since reading the next token might release the memory
-   used for the object.  */
-
-const char *
+   m4_push_file () or m4_push_builtin () has pushed a different input
+   block to the top of the stack.  If the new object is void, we do
+   not push it.  The function m4_push_string_finish () returns the
+   opaque finished object, whether that is still a string or has been
+   replaced by a file or builtin; this object can then be used in
+   m4_input_print () during tracing.  This pointer is only for
+   temporary use, since reading the next token might release the
+   memory used for the object.  */
+m4_input_block *
 m4_push_string_finish (void)
 {
-  const char *ret = NULL;
+  m4_input_block *ret = NULL;
 
   if (next == NULL)
-    return NULL;
+    return isp;
 
   if (obstack_object_size (current_input) > 0)
     {
@@ -468,13 +524,39 @@ m4_push_string_finish (void)
       next->u.u_s.start = obstack_finish (current_input);
       next->u.u_s.current = next->u.u_s.start;
       next->prev = isp;
-      isp = next;
-      ret = isp->u.u_s.start;	/* for immediate use only */
+      ret = isp = next;
     }
   else
     obstack_free (current_input, next); /* people might leave garbage on it. */
   next = NULL;
   return ret;
+}
+
+/* When tracing, print a summary of the contents of the input block
+   created by push_string_init/push_string_finish to OBS.  */
+void
+m4_input_print (m4 *context, m4_obstack *obs, m4_input_block *input)
+{
+  assert (context && obs);
+  if (input == NULL)
+    {
+      bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+      if (quote)
+	{
+	  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+	  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+	  obstack_grow (obs, lquote, strlen (lquote));
+	  obstack_grow (obs, rquote, strlen (rquote));
+	}
+    }
+  else
+    {
+      void (*f) (m4 *, m4_obstack *);
+
+      f = input->funcs->print_func;
+      assert (f);
+      f (context, obs);
+    }
 }
 
 /* The function m4_push_wrapup () pushes a string on the wrapup stack.
@@ -488,8 +570,10 @@ m4_push_string_finish (void)
 void
 m4_push_wrapup (const char *s)
 {
-  input_block *i = (input_block *) obstack_alloc (wrapup_stack,
-						  sizeof (struct input_block));
+  m4_input_block *i;
+
+  i = (m4_input_block *) obstack_alloc (wrapup_stack,
+					sizeof (m4_input_block));
   i->prev = wsp;
 
   i->funcs = &string_funcs;
@@ -508,7 +592,7 @@ m4_push_wrapup (const char *s)
 static void
 pop_input (m4 *context)
 {
-  input_block *tmp = isp->prev;
+  m4_input_block *tmp = isp->prev;
 
   if (isp->funcs->clean_func != NULL)
     (*isp->funcs->clean_func) (context);

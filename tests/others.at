@@ -387,7 +387,7 @@ AT_DATA([in.m4], [[errprint(`hello world
 ]])
 AT_CHECK_M4([--debugfile=trace -terrprint 2>&-], [1], [], [], [in.m4])
 AT_CHECK([cat trace], [0], [[m4trace: -1- errprint(`hello world
-')
+') -> `'
 ]])
 
 dnl spilled diversion file must not collide with closed stderr
@@ -442,9 +442,10 @@ AT_CHECK_M4([-], [1], [],
 [[m4:stdin:1: error reading file `stdin'
 ]], [-])
 
-dnl only error once when stdin must be read
+dnl error once per command-line attempt to read stdin
 AT_CHECK_M4([- in.m4 -], [1], [[hello world
 ]], [[m4:stdin:1: error reading file `stdin'
+m4:stdin:1: error reading file `stdin'
 ]], [-])
 
 dnl command line and trace file must not collide with stdin
@@ -454,7 +455,7 @@ mv stderr experr
 AT_DATA([in.m4], [[syscmd(`cat')dnl
 ]])
 AT_CHECK_M4([--debugfile=trace -tdnl in.m4], [0], [], [experr], [-])
-AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 ]])
 
 dnl diversions must not collide with stdin
@@ -525,7 +526,7 @@ dnl
 AT_CHECK_M4([--debugfile=trace -tdnl >&-], [1], [],
 [[m4: write error: Bad file descriptor
 ]], [in.m4])
-AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 ]])
 
 dnl esyscmd always has valid stdout

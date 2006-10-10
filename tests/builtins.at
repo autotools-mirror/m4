@@ -40,15 +40,12 @@ AT_DATA([[expout]],
 ]])
 
 AT_DATA([[experr]],
-[[m4trace: -1- countdown ...
-m4trace: -1- countdown(`2') -> ???
-m4trace: -1- countdown(...) -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
-m4trace: -1- countdown ...
-m4trace: -1- countdown(`1') -> ???
-m4trace: -1- countdown(...) -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
-m4trace: -1- countdown ...
-m4trace: -1- countdown(`0') -> ???
-m4trace: -1- countdown(...) -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
+[[m4trace: -1- countdown ... = `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')'
+m4trace: -1- countdown(`2') -> `2 ifelse(eval(2 > 0), 1, `countdown(decr(2))', `Liftoff')'
+m4trace: -1- countdown ... = `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')'
+m4trace: -1- countdown(`1') -> `1 ifelse(eval(1 > 0), 1, `countdown(decr(1))', `Liftoff')'
+m4trace: -1- countdown ... = `$1 ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Liftoff')'
+m4trace: -1- countdown(`0') -> `0 ifelse(eval(0 > 0), 1, `countdown(decr(0))', `Liftoff')'
 ]])
 
 AT_CHECK_M4([debug.m4], 0, expout, experr)
@@ -143,7 +140,7 @@ AT_DATA([in.m4], [[esyscmd(`echo hi >&3')dnl
 AT_CHECK_M4([3>&-], [0], [], [stderr], [in.m4])
 mv stderr experr
 AT_CHECK_M4([--debugfile=trace -tdnl 3>&-], [0], [], [experr], [in.m4])
-AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 ]])
 
 dnl Ensure that esyscmd does not inherit any unnecessary fds from diversions.
@@ -455,31 +452,31 @@ foo bar
 ]])
 
 AT_DATA([[experr]],
-[[m4trace: -1- changequote(`[', `]')
-m4trace: -1- dnl
-m4trace: -1- changequote([``], [''])
-m4trace: -1- dnl
-m4trace: -1- define(``foo'', ````FOO'''')
-m4trace: -1- dnl
+[[m4trace: -1- changequote(`[', `]') -> []
+m4trace: -1- dnl -> []
+m4trace: -1- changequote([``], ['']) -> ``''
+m4trace: -1- dnl -> ``''
+m4trace: -1- define(``foo'', ````FOO'''') -> ``''
+m4trace: -1- dnl -> ``''
 foo:	````FOO''''
-m4trace: -1- dumpdef(``foo'')
-m4trace: -1- dnl
-m4trace: -1- changequote(``!'', ``!'')
-m4trace: -1- dnl
+m4trace: -1- dumpdef(``foo'') -> ``''
+m4trace: -1- dnl -> ``''
+m4trace: -1- changequote(``!'', ``!'') -> !!
+m4trace: -1- dnl -> !!
 m4trace: -1- foo -> !``FOO''!
 foo:	!``FOO''!
-m4trace: -1- dumpdef(!foo!)
-m4trace: -1- dnl
-m4trace: -1- define(!bar!, !BAR!)
+m4trace: -1- dumpdef(!foo!) -> !!
+m4trace: -1- dnl -> !!
+m4trace: -1- define(!bar!, !BAR!) -> !!
 m4trace: -1- bar -> !BAR!
-m4trace: -1- changequote(!>*>*>*>*>!, !<*<*<*<*<!)
-m4trace: -1- dnl
+m4trace: -1- changequote(!>*>*>*>*>!, !<*<*<*<*<!) -> >*>*>*>*><*<*<*<*<
+m4trace: -1- dnl -> >*>*>*>*><*<*<*<*<
 m4trace: -1- foo -> >*>*>*>*>``FOO''<*<*<*<*<
 m4trace: -1- bar -> >*>*>*>*>BAR<*<*<*<*<
 bar:	>*>*>*>*>BAR<*<*<*<*<
 foo:	>*>*>*>*>``FOO''<*<*<*<*<
-m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<)
-m4trace: -1- dnl
+m4trace: -1- dumpdef(>*>*>*>*>foo<*<*<*<*<, >*>*>*>*>bar<*<*<*<*<) -> >*>*>*>*><*<*<*<*<
+m4trace: -1- dnl -> >*>*>*>*><*<*<*<*<
 ]])
 
 AT_CHECK_M4([multiquotes.m4], 0, expout, experr)
@@ -636,7 +633,7 @@ AT_DATA([in.m4], [[syscmd(`echo hi >&3')dnl
 AT_CHECK_M4([3>&-], [0], [], [stderr], [in.m4])
 mv stderr experr
 AT_CHECK_M4([--debugfile=trace -tdnl 3>&-], [0], [], [experr], [in.m4])
-AT_CHECK([cat trace], [0], [[m4trace: -1- dnl
+AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 ]])
 
 dnl Ensure that syscmd does not inherit any unnecessary fds from diversions.

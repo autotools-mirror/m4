@@ -1,3 +1,37 @@
+2006-10-10  Eric Blake  <ebb9@byu.net>
+
+	Trace improvements: debugmode(c) was always printing the last two
+	lines paired, combine them; and show non-text expansions.
+	* m4/macro.c (trace_prepre): Update to show what the macro will
+	expand to.
+	(trace_pre): No need to special-case on debugmode(c).
+	(trace_post): Likewise.  Also, show non-text expansions.
+	(expand_macro): Update caller.  Collecting arguments can change
+	debug mode, so cache values beforehand.
+	(trace_format): Remove support for unused %l%S%r, and fix support
+	for %z to match gcc's attribute((printf)).
+	(trace_header): Update caller.
+	* m4/input.c (struct m4_input_block): Rename from input_block.
+	(struct input_funcs): Add print_func member.
+	(file_print, builtin_unget, builtin_print, string_print)
+	(m4_input_print): New functions.
+	(m4_push_string_finish): Change return type.
+	(m4_push_file): Fix missing use of close parameter.
+	* m4/debug.c (m4_debug_decode): Don't clear pending traces.
+	* m4/m4module.h (m4_input_print): New prototype.
+	* tests/builtins.at (debug, esyscmd, multiquotes, syscmd): Update
+	to match behavior change.
+	* tests/options.at (--debug): Likewise.
+	* tests/macros.at (Propagation of traceon)
+	(Propagation of --trace): Likewise.
+	* tests/others.at (stderr closed, stdout closed, stdin closed):
+	Likewise.
+	* doc/m4.texinfo (Forloop): Simplify.
+	(Trace): Update to changed behavior.
+	(Debugmode): Document this change.
+	* src/main.c (usage): Likewise.
+	* NEWS: Likewise.
+
 2006-10-09  Eric Blake  <ebb9@byu.net>
 
 	* m4/path.c (m4_include_env_init): Don't alter result of getenv.

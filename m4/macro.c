@@ -25,31 +25,26 @@
 
 #include "m4private.h"
 
-static void    collect_arguments (m4 *context, const char *name,
-				  m4_symbol *symbol, m4_obstack *argptr,
-				  m4_obstack *arguments);
-static void    expand_macro      (m4 *context, const char *name,
-				  m4_symbol *symbol);
-static void    expand_token      (m4 *context, m4_obstack *obs,
-				  m4__token_type type, m4_symbol_value *token);
-static bool    expand_argument   (m4 *context, m4_obstack *obs,
-				  m4_symbol_value *argp);
+#include "intprops.h"
 
-static void    process_macro	 (m4 *context, m4_symbol_value *value,
-				  m4_obstack *expansion, int argc,
-				  m4_symbol_value **argv);
-
-static void    trace_prepre	 (m4 *context, const char *, size_t);
-static void    trace_pre	 (m4 *context, const char *, size_t, int,
+static void    collect_arguments (m4 *, const char *, m4_symbol *,
+				  m4_obstack *, m4_obstack *);
+static void    expand_macro      (m4 *, const char *, m4_symbol *);
+static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
+				  m4_symbol_value *);
+static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *);
+static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 				  m4_symbol_value **);
-static void    trace_post	 (m4 *context, const char *, size_t, int,
-				  m4_symbol_value **, const char *);
 
-/* It would be nice if we could use M4_GNUC_PRINTF(2, 3) on
-   trace_format, but since we don't accept the same set of modifiers,
-   it would lead to compiler warnings.  */
-static void    trace_format	 (m4 *context, const char *fmt, ...);
+static void    trace_prepre	 (m4 *, const char *, size_t,
+				  m4_symbol_value *);
+static void    trace_pre	 (m4 *, const char *, size_t, int,
+				  m4_symbol_value **);
+static void    trace_post	 (m4 *, const char *, size_t, int,
+				  m4_symbol_value **, m4_input_block *, bool);
 
+static void    trace_format	 (m4 *, const char *, ...)
+  M4_GNUC_PRINTF(2, 3);
 static void    trace_header	 (m4 *, size_t);
 static void    trace_flush	 (m4 *);
 
@@ -228,14 +223,22 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   m4_symbol_value **argv;
   int argc;
   m4_obstack *expansion;
-  const char *expanded;
+  m4_input_block *expanded;
   bool traced;
+  bool trace_expansion = false;
   size_t my_call_id;
   m4_symbol_value *value;
 
   /* Grab the current value of this macro, because it may change while
-     collecting arguments.  */
+     collecting arguments.  Likewise, grab any state needed during
+     tracing.  */
   value = m4_get_symbol_value (symbol);
+  traced = (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
+	    || m4_get_symbol_traced (symbol));
+  if (traced)
+    trace_expansion = m4_is_debug_bit (context, M4_DEBUG_TRACE_EXPANSION);
+
+  /* Prepare for macro expansion.  */
   VALUE_PENDING (value)++;
   expansion_level++;
   if (m4_get_nesting_limit_opt (context) > 0
@@ -247,14 +250,11 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
-	    || m4_get_symbol_traced (symbol));
-
   obstack_init (&argptr);
   obstack_init (&arguments);
 
   if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
-    trace_prepre (context, name, my_call_id);
+    trace_prepre (context, name, my_call_id, value);
 
   collect_arguments (context, name, symbol, &argptr, &arguments);
 
@@ -269,7 +269,8 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   expanded = m4_push_string_finish ();
 
   if (traced)
-    trace_post (context, name, my_call_id, argc, argv, expanded);
+    trace_post (context, name, my_call_id, argc, argv, expanded,
+		trace_expansion);
 
   --expansion_level;
   --VALUE_PENDING (value);
@@ -478,21 +479,14 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
    various builtins.  */
 
 /* Tracing output is formatted here, by a simplified printf-to-obstack
-  function trace_format ().  Understands only %S (length-limited
-  string), %s, %d, %z (size_t value), %l (optional left quote) and %r
-  (optional right quote).  */
+   function trace_format ().  Understands only %s, %d, %zu (size_t
+   value).  */
 static void
 trace_format (m4 *context, const char *fmt, ...)
 {
   va_list args;
   char ch;
-
-  int d;
-  size_t z;
-  char nbuf[32];
   const char *s;
-  int slen;
-  int maxlen;
 
   va_start (args, fmt);
 
@@ -504,58 +498,48 @@ trace_format (m4 *context, const char *fmt, ...)
       if (ch == '\0')
 	break;
 
-      maxlen = 0;
       switch (*fmt++)
 	{
-	case 'S':
-	  maxlen = m4_get_max_debug_arg_length_opt (context);
-	  /* fall through */
-
 	case 's':
 	  s = va_arg (args, const char *);
 	  break;
 
-	case 'l':
-	  s = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE)
-		? m4_get_syntax_lquote (M4SYNTAX)
-		: "";
-	  break;
-
-	case 'r':
-	  s = m4_is_debug_bit(context, M4_DEBUG_TRACE_QUOTE)
-		? m4_get_syntax_rquote (M4SYNTAX)
-		: "";
-	  break;
-
 	case 'd':
-	  d = va_arg (args, int);
-	  sprintf (nbuf, "%d", d);
-	  s = nbuf;
+	  {
+	    int d = va_arg (args, int);
+	    char nbuf[INT_BUFSIZE_BOUND (int)];
+
+	    sprintf (nbuf, "%d", d);
+	    s = nbuf;
+	  }
 	  break;
 
 	case 'z':
-	  if (sizeof (size_t) < sizeof (int))
-	    z = va_arg (args, int);
-	  else
-	    z = va_arg (args, size_t);
-	  /* FIXME - it would be nice to assume POSIX-mandated %zu.  */
-	  sprintf (nbuf, "%lu", (unsigned long) z);
-	  s = nbuf;
+	  /* GNU assumption: Although POSIX allows size_t to be just
+	     16 bits, independently of int, GNU assumes is at least as
+	     big as int.  Likewise, although POSIX allows size_t to be
+	     bigger than unsigned long in some compilation
+	     environments, GNU assumes that size_t always fits in
+	     unsigned long.  Unfortunately, GNU does not assume that
+	     %zu is portable, yet.  */
+	  ch = *fmt++;
+	  assert (ch == 'u');
+	  assert (sizeof (size_t) >= sizeof (int));
+	  {
+	    size_t z = va_arg (args, size_t);
+	    char nbuf[INT_BUFSIZE_BOUND (size_t)];
+
+	    sprintf (nbuf, "%lu", (unsigned long) z);
+	    s = nbuf;
+	  }
 	  break;
 
 	default:
-	  s = "";
+	  abort ();
 	  break;
 	}
 
-      slen = strlen (s);
-      if (maxlen == 0 || maxlen > slen)
-	obstack_grow (&context->trace_messages, s, slen);
-      else
-	{
-	  obstack_grow (&context->trace_messages, s, maxlen);
-	  obstack_grow (&context->trace_messages, "...", 3);
-	}
+      obstack_grow (&context->trace_messages, s, strlen (s));
     }
 
   va_end (args);
@@ -573,9 +557,9 @@ trace_header (m4 *context, size_t id)
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
 	trace_format (context, "%d:", m4_get_current_line (context));
     }
-  trace_format (context, " -%z- ", expansion_level);
+  trace_format (context, " -%zu- ", expansion_level);
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALLID))
-    trace_format (context, "id %z: ", id);
+    trace_format (context, "id %zu: ", id);
 }
 
 /* Print current tracing line, and clear the obstack.  */
@@ -595,11 +579,19 @@ trace_flush (m4 *context)
 /* Do pre-argument-collction tracing for macro NAME.  Used from
    expand_macro ().  */
 static void
-trace_prepre (m4 *context, const char *name, size_t id)
+trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 {
+  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  size_t arg_length = m4_get_max_debug_arg_length_opt (context);
+  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+
   trace_header (context, id);
-  trace_format (context, "%s ...", name);
-  trace_flush  (context);
+  trace_format (context, "%s ... = ", name);
+  m4_symbol_value_print (value, &context->trace_messages,
+			 quote, lquote, rquote, arg_length, module);
+  trace_flush (context);
 }
 
 /* Format the parts of a trace line, that can be made before the macro is
@@ -632,29 +624,19 @@ trace_pre (m4 *context, const char *name, size_t id,
 	}
       trace_format (context, ")");
     }
-
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
-    {
-      trace_format (context, " -> ???");
-      trace_flush  (context);
-    }
 }
 
 /* Format the final part of a trace line and print it all.  Used from
    expand_macro ().  */
 static void
 trace_post (m4 *context, const char *name, size_t id,
-	    int argc, m4_symbol_value **argv, const char *expanded)
+	    int argc, m4_symbol_value **argv, m4_input_block *expanded,
+	    bool trace_expansion)
 {
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
+  if (trace_expansion)
     {
-      trace_header (context, id);
-      trace_format (context, "%s%s", name, (argc > 1) ? "(...)" : "");
-    }
-
-  if (expanded && m4_is_debug_bit (context, M4_DEBUG_TRACE_EXPANSION))
-    {
-      trace_format (context, " -> %l%S%r", expanded);
+      trace_format (context, " -> ");
+      m4_input_print (context, &context->trace_messages, expanded);
     }
 
   trace_flush (context);

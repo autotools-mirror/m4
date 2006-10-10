@@ -168,12 +168,10 @@ m4debug: module gnu: builtins loaded
 m4debug: module gnu: macros loaded
 m4debug: path search for `in' found `in'
 m4debug: input read from in
-m4trace:in:1: -1- id 1: divnum ...
-m4trace:in:1: -1- id 1: divnum -> ???
+m4trace:in:1: -1- id 1: divnum ... = <divnum>{m4}
 m4trace:in:1: -1- id 1: divnum -> `0'
-m4trace:in:2: -1- id 2: len ...
-m4trace:in:2: -1- id 2: len(`abc') -> ???
-m4trace:in:2: -1- id 2: len(...) -> `3'
+m4trace:in:2: -1- id 2: len ... = <len>{m4}
+m4trace:in:2: -1- id 2: len(`abc') -> `3'
 m4debug:in:3: input exhausted
 m4debug: module gnu: symbols unloaded
 m4debug: module gnu: finish hook called

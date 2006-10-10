@@ -104,12 +104,6 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
 	}
     }
 
-  /* This is to avoid screwing up the trace output due to changes in the
-     debug_level.  */
-
-  obstack_free (&context->trace_messages,
-		obstack_finish (&context->trace_messages));
-
   switch (mode)
     {
     case '\0':

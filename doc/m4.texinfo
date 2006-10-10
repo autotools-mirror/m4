@@ -2508,16 +2508,14 @@ Here is the actual implementation of @code{forloop}:
 
 @comment ignore
 @example
-define(`forloop',
-  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`forloop', `pushdef(`$1', `$2')_forloop($@@)popdef(`$1')')
 define(`_forloop',
-  `$4`'ifelse($1, `$3', ,
-    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+       `$4`'ifelse($1, `$3', `', `define(`$1', incr($1))$0($@@)')')
 @end example
 
-Notice the careful use of quotes.  Only three macro arguments are
+Notice the careful use of quotes.  Certain macro arguments are
 unquoted, each for its own reason.  Try to find out @emph{why} these
-three arguments are left unquoted, and see what happens if they are
+arguments are left unquoted, and see what happens if they are
 quoted.
 
 Now, even though these two macros are useful, they are still not robust
@@ -2814,22 +2812,22 @@ $ @kbd{m4 -d}
 traceon
 @result{}
 define(`foo', `bar')
-@error{}m4trace: -1- define(`foo', `bar')
+@error{}m4trace: -1- define(`foo', `bar') -> `'
 @result{}
 foo # traced, even though foo was not defined at traceon
 @error{}m4trace: -1- foo -> `bar'
 @result{}bar # traced, even though foo was not defined at traceon
 traceoff(`foo')
-@error{}m4trace: -1- traceoff(`foo')
+@error{}m4trace: -1- traceoff(`foo') -> `'
 @result{}
 foo # traced, since global tracing is still on
 @error{}m4trace: -1- foo -> `bar'
 @result{}bar # traced, since global tracing is still on
 traceon(`foo')
-@error{}m4trace: -1- traceon(`foo')
+@error{}m4trace: -1- traceon(`foo') -> `'
 @result{}
 traceoff
-@error{}m4trace: -1- traceoff
+@error{}m4trace: -1- traceoff -> `'
 @result{}
 foo # traced, since foo is now traced by name
 @error{}m4trace: -1- foo -> `bar'
@@ -2914,15 +2912,15 @@ invoking the macro.  Arguments are subject to length truncation
 specified by @code{debuglen} (@pxref{Debuglen}).
 
 @item c
-In trace output, show several trace lines for each macro call.  A line
-is shown when the macro is seen, but before the arguments are collected;
-a second line when the arguments have been collected and a third line
-after the call has completed.
+In trace output, show an additional line for each macro call, prior to
+the arguments being collected, that shows the definition of the macro
+that will be used for the expansion.  The definition is subject to
+length truncation specified by @code{debuglen} (@pxref{Debuglen}).
 
 @item e
-In trace output, show the expansion of each macro call, if it is not
-void.  The expansion is subject to length truncation specified by
-@code{debuglen} (@pxref{Debuglen}).
+In trace output, show the expansion of each macro call.  The expansion
+is subject to length truncation specified by @code{debuglen}
+(@pxref{Debuglen}).
 
 @item f
 In debug and trace output, include the name of the current input file in
@@ -2938,8 +2936,9 @@ output line.
 
 @item m
 In debug output, print a message each time a module is manipulated
-(@pxref{Modules}).  In dumpdef output, follow builtin macros with their
-module name, surrounded by braces (@samp{@{@}}).
+(@pxref{Modules}).  In trace output when the @samp{c} flag is in effect,
+and in dumpdef output, follow builtin macros with their module name,
+surrounded by braces (@samp{@{@}}).
 
 @item p
 In debug output, print a message when a named file is found through the
@@ -2996,10 +2995,12 @@ encountered, an error is issued.
 The expansion of @code{debugmode} is void.
 @end deffn
 
+@comment options: -d-V
 @example
-define(`foo', `FOO')
+$ @kbd{m4}
+define(`foo', `FOO$1')
 @result{}
-traceon(`foo')
+traceon(`foo', `divnum')
 @result{}
 debugmode()
 @result{}
@@ -3011,11 +3012,16 @@ debugmode
 foo
 @error{}m4trace: -1- foo
 @result{}FOO
-debugmode(`+l')
+debugmode(`+clmx')
 @result{}
-foo
-@error{}m4trace:8: -1- foo
-@result{}FOO
+foo(divnum)
+@error{}m4trace:8: -1- id 8: foo ... = FOO$1
+@error{}m4trace:8: -2- id 9: divnum ... = <divnum>@{m4@}
+@error{}m4trace:8: -2- id 9: divnum
+@error{}m4trace:8: -1- id 8: foo
+@result{}FOO0
+debugmode(`-m')
+@result{}
 @end example
 
 @node Debuglen
