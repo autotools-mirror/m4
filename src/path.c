@@ -51,14 +51,17 @@ include_env_init (void)
 {
   char *path;
   char *path_end;
+  char *env_path;
 
   if (no_gnu_extensions)
     return;
 
-  path = getenv ("M4PATH");
-  if (path == NULL)
+  env_path = getenv ("M4PATH");
+  if (env_path == NULL)
     return;
-  path = xstrdup (path);
+
+  env_path = xstrdup (env_path);
+  path = env_path;
 
   do
     {
@@ -69,7 +72,7 @@ include_env_init (void)
       path = path_end + 1;
     }
   while (path_end);
-  free (path);
+  free (env_path);
 }
 
 void

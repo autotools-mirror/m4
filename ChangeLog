@@ -1,3 +1,8 @@
+2006-10-10  Eric Blake  <ebb9@byu.net>
+
+	* src/path.c (include_env_init): Fix botched patch application.
+	Reported by Ralf Wildenhues.
+
 2006-10-09  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.c (usage, main): Detect write failures to stderr.
