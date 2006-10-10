@@ -1,5 +1,9 @@
 2006-10-09  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.c (usage, main): Detect write failures to stderr.
+	* src/builtin.c (m4_m4exit): Likewise.
+	* NEWS: Document this.
+
 	* src/macro.c (expand_macro): Allow --nesting-limit=0 to remove
 	the limit.
 	* NEWS: Document this.

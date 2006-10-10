@@ -1301,6 +1301,8 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
       if (exit_code == 0)
 	exit_code = EXIT_FAILURE;
     }
+  if (close_stream (stderr) != 0 && exit_code == 0)
+    exit_code = EXIT_FAILURE;
   if (exit_code == 0 && retcode != 0)
     exit_code = retcode;
   exit (exit_code);

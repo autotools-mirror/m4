@@ -207,6 +207,8 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 
   if (close_stream (stdout) != 0)
     M4ERROR ((EXIT_FAILURE, errno, "write error"));
+  if (close_stream (stderr) != 0)
+    exit (EXIT_FAILURE); /* Can't really do much else without stderr.  */
   exit (status);
 }
 
@@ -429,7 +431,9 @@ Written by Rene' Seindal.\n\
 ", stdout);
 
 	 if (close_stream (stdout) != 0)
-	    M4ERROR ((EXIT_FAILURE, errno, "write error"));
+	   M4ERROR ((EXIT_FAILURE, errno, "write error"));
+	 if (close_stream (stderr) != 0)
+	   exit (EXIT_FAILURE);
 	 exit (EXIT_SUCCESS);
 	break;
 
@@ -569,5 +573,7 @@ Written by Rene' Seindal.\n\
 
   if (close_stream (stdout) != 0)
     M4ERROR ((EXIT_FAILURE, errno, "write error"));
+  if (close_stream (stderr) != 0)
+    exit (EXIT_FAILURE); /* Can't really do much else without stderr.  */
   exit (retcode);
 }

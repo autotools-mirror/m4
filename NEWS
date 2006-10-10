@@ -11,6 +11,8 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
   to remove the default limit of 1024.  However, it is still possible that
   heavily nested input can cause abrupt program termination due to stack
   overflow.
+* Problems encountered when writing to standard error, such as with the
+  `errprint' macro, now always cause a non-zero exit status.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 
