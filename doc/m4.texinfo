@@ -409,11 +409,13 @@ Several options control the overall operation of @code{m4}:
 @table @code
 @item --help
 Print a help summary on standard output, then immediately exit
-@code{m4} without reading any input files.
+@code{m4} without reading any input files or performing any other
+actions.
 
 @item --version
 Print the version number of the program on standard output, then
-immediately exit @code{m4} without reading any input files.
+immediately exit @code{m4} without reading any input files or
+performing any other actions.
 
 @item -E
 @itemx --fatal-warnings
@@ -614,8 +616,8 @@ This option may be given more than once.  @xref{Trace}, for more details.
 @cindex command line, file names on the
 @cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
-names.  If no names are present, the standard input is read.  A file
-name of @file{-} is taken to mean the standard input.  It is
+names.  If no names are present, standard input is read.  A file
+name of @file{-} is taken to mean standard input.  It is
 conventional, but not required, for input files to end in @samp{.m4}.
 
 The input files are read in the sequence given.  Standard input can be

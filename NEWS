@@ -7,6 +7,10 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
 * The `--help' and `--version' command line options now consistently
   override all earlier options.  For example, `m4 --debugfile=trace
   --help' now no longer accidentally creates an empty file `trace'.
+* The `-L'/`--nesting-limit' command line option can now be set to 0
+  to remove the default limit of 1024.  However, it is still possible that
+  heavily nested input can cause abrupt program termination due to stack
+  overflow.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 

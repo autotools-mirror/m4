@@ -1,3 +1,10 @@
+2006-10-09  Eric Blake  <ebb9@byu.net>
+
+	* src/macro.c (expand_macro): Allow --nesting-limit=0 to remove
+	the limit.
+	* NEWS: Document this.
+	* doc/m4.texinfo (Invoking m4): Likewise.
+
 2006-10-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* src/path.c (include_env_init): Copy the string returned
