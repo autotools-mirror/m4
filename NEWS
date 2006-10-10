@@ -2,6 +2,12 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
+
+* The `--help' and `--version' command line options now consistently
+  override all earlier options.  For example, `m4 --debugfile=trace
+  --help' now no longer accidentally creates an empty file `trace'.
+
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 
 * Fix regression from 1.4.5 in handling a file that ends in a macro

@@ -278,6 +278,7 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
   boolean read_stdin = FALSE;
   boolean interactive = FALSE;
+  const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
 
@@ -409,8 +410,8 @@ main (int argc, char *const *argv, char *const *envp)
 	   or later is more widely established, as such a warning
 	   would interfere with all earlier versions of autoconf.  */
       case DEBUGFILE_OPTION:
-	if (!debug_set_output (optarg))
-	  error (0, errno, "%s", optarg);
+	/* Don't call debug_set_output here, as it has side effects.  */
+	debugfile = optarg;
 	break;
 
       case 's':
@@ -439,7 +440,9 @@ Written by Rene' Seindal.\n\
 
   defines = head;
 
-  /* Do the basic initialisations.  */
+  /* Do the basic initializations.  */
+  if (debugfile && !debug_set_output (debugfile))
+    M4ERROR ((0, errno, "cannot set debug file `%s'", debugfile));
 
   input_init ();
   output_init ();
