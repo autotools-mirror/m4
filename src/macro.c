@@ -33,6 +33,23 @@ int expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
 
+/* The shared stack of collected arguments for macro calls; as each
+   argument is collected, it is finished and its location stored in
+   argv_stack.  Normally, this stack can be used simultaneously by
+   multiple macro calls; the exception is when an outer macro has
+   generated some text, then calls a nested macro, in which case the
+   nested macro must use a local stack to leave the unfinished text
+   alone.  Too bad obstack.h does not provide an easy way to reopen a
+   finished object for further growth, but in practice this does not
+   hurt us too much.  */
+static struct obstack argc_stack;
+
+/* The shared stack of pointers to collected arguments for macro
+   calls.  This object is never finished; we exploit the fact that
+   obstack_blank is documented to take a negative size to reduce the
+   size again.  */
+static struct obstack argv_stack;
+
 /*----------------------------------------------------------------------.
 | This function read all input, and expands each token, one at a time.  |
 `----------------------------------------------------------------------*/
@@ -43,8 +60,14 @@ expand_input (void)
   token_type t;
   token_data td;
 
+  obstack_init (&argc_stack);
+  obstack_init (&argv_stack);
+
   while ((t = next_token (&td)) != TOKEN_EOF)
     expand_token ((struct obstack *) NULL, t, &td);
+
+  obstack_free (&argc_stack, NULL);
+  obstack_free (&argv_stack, NULL);
 }
 
 
@@ -211,8 +234,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, &td, sizeof (td));
-  obstack_grow (argptr, &tdp, sizeof (tdp));
+  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+  obstack_ptr_grow (argptr, tdp);
 
   if (peek_token () == TOKEN_OPEN)
     {
@@ -226,9 +249,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (&td) = "";
 	    }
-	  tdp = (token_data *)
-	    obstack_copy (arguments, &td, sizeof (td));
-	  obstack_grow (argptr, &tdp, sizeof (tdp));
+	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+	  obstack_ptr_grow (argptr, tdp);
 	}
       while (more_args);
     }
@@ -278,8 +300,9 @@ call_macro (symbol *sym, int argc, token_data **argv,
 static void
 expand_macro (symbol *sym)
 {
-  struct obstack arguments;
-  struct obstack argptr;
+  struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
+  unsigned argv_base;		/* Size of argv_stack on entry.  */
+  boolean use_argc_stack = TRUE;	/* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
   struct obstack *expansion;
@@ -299,16 +322,25 @@ expand_macro (symbol *sym)
 
   traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym));
 
-  obstack_init (&argptr);
-  obstack_init (&arguments);
+  argv_base = obstack_object_size (&argv_stack);
+  if (obstack_object_size (&argc_stack) > 0)
+  {
+    /* We cannot use argc_stack if this is a nested invocation, and an
+       outer invocation has an unfinished argument being
+       collected.  */
+     obstack_init (&arguments);
+     use_argc_stack = FALSE;
+  }
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  collect_arguments (sym, &argptr, &arguments);
+  collect_arguments (sym, &argv_stack,
+		     use_argc_stack ? &argc_stack : &arguments);
 
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
+  argc = ((obstack_object_size (&argv_stack) - argv_base)
+	  / sizeof (token_data *));
+  argv = (token_data **) (obstack_base (&argv_stack) + argv_base);
 
   if (traced)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);
@@ -326,6 +358,9 @@ expand_macro (symbol *sym)
   if (SYMBOL_DELETED (sym))
     free_symbol (sym);
 
-  obstack_free (&arguments, NULL);
-  obstack_free (&argptr, NULL);
+  if (use_argc_stack)
+    obstack_free (&argc_stack, argv[0]);
+  else
+    obstack_free (&arguments, NULL);
+  obstack_blank (&argv_stack, -argc * sizeof (token_data *));
 }

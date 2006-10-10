@@ -1,5 +1,12 @@
 2006-10-10  Eric Blake  <ebb9@byu.net>
 
+	* src/macro.c (argc_stack, argv_stack): New variables for sharing
+	obstacks across multiple macro calls.
+	(expand_input): Initialize and tear down stack once per input
+	file, instead of once per macro.
+	(expand_macro): Reuse existing stacks when possible.
+	(collect_arguments): Simplify slightly.
+
 	* src/path.c (include_env_init): Fix botched patch application.
 	Reported by Ralf Wildenhues.
 
