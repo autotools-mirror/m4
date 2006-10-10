@@ -58,6 +58,7 @@ include_env_init (void)
   path = getenv ("M4PATH");
   if (path == NULL)
     return;
+  path = xstrdup (path);
 
   do
     {
@@ -68,6 +69,7 @@ include_env_init (void)
       path = path_end + 1;
     }
   while (path_end);
+  free (path);
 }
 
 void

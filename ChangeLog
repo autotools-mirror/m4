@@ -1,3 +1,8 @@
+2006-10-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* src/path.c (include_env_init): Copy the string returned
+	by getenv before overwriting it; POSIX disallows this.
+
 2006-10-09  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.c (main): Defer debugfile until after --help.
