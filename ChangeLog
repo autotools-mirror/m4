@@ -1,5 +1,28 @@
 2006-10-11  Eric Blake  <ebb9@byu.net>
 
+	* src/input.c (enum input_type): Add additional types, to shave
+	time off the common case.
+	(push_wrapup): Wrapped strings remember location.
+	(push_string_finish): Normal strings carry no location.
+	(push_file): Start new files uninitialized.
+	(peek_input, next_char_1): Optimize common cases by updating
+	location only on new input types.
+	(pop_input): Update to honor new input types.
+	(skip_line, push_string_finish): Fix regression in previous patch
+	when dnl is not followed by newline in included file.
+	(push_string_init): Initialize all fields of INPUT_STRING sooner.
+	(peek_token): Simplify.
+	(peek_input): Don't pop input files on peek, so that __file__ and
+	__line__ as last token of include file work correctly.
+	* doc/m4.texinfo (History): Mention 1.4.8.
+	(Answers): Split into sections, one per answer.
+	(Improved exch, Improved cleardivert, Improved fatal_error): New
+	nodes.
+	(Dnl, M4wrap, Location, M4exit, Improved fatal_error): Update to
+	new m4wrap location semantics.
+	(Changeword): Add test that caught the regression.
+	* NEWS: Document this.
+
 	* src/macro.c (expand_macro): In macro expansion errors, report
 	line number at open parenthesis.
 	* src/input.c (next_token): Fix off-by-one bug in reporting end

@@ -248,6 +248,12 @@ Compatibility with other versions of @code{m4}
 * Incompatibilities::           Facilities in System V m4 not in GNU M4
 * Other Incompatibilities::     Other incompatibilities
 
+Correct version of some examples
+
+* Improved exch::               Solution for @code{exch}
+* Improved cleardivert::        Solution for @code{cleardivert}
+* Improved fatal_error::        Solution for @code{fatal_error}
+
 How to make copies of this manual
 
 * GNU Free Documentation License::  License for copying this manual
@@ -360,7 +366,7 @@ addressed some long standing bugs in the venerable 1.4 release.
 Then in 2005 Gary V. Vaughan collected together the many
 patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, and 1.4.7.
+prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -2464,13 +2470,13 @@ If the end of file is encountered without a newline character, a
 warning is issued and dnl stops consuming input.
 
 @example
-define(`hi', `HI')
-@result{}
 m4wrap(`m4wrap(`2 hi
 ')0 hi dnl 1 hi')
 @result{}
+define(`hi', `HI')
+@result{}
 ^D
-@error{}m4: Warning: end of file treated as newline
+@error{}m4:stdin:1: Warning: end of file treated as newline
 @result{}0 HI 2 HI
 @end example
 
@@ -2879,6 +2885,41 @@ foo
 @result{}bar
 @end example
 
+@ignore
+@comment One more test of including newline in a macro name; but this
+@comment does not need to be displayed in the manual.  This ensures
+@comment that line numbering is correct when dnl cuts across include
+@comment file boundaries, and when __file__ or __line__ is the last
+@comment token in an include file.
+
+@example
+ifdef(`changeword', `', `errprint(` skipping: no changeword support
+')m4exit(`77')')dnl
+define(`bar
+', defn(`dnl'))dnl
+changeword(`\([_a-zA-Z][_a-zA-Z0-9]*\|bar
+\)')
+@result{}
+__file__:__line__
+@result{}stdin:7
+include(`foo') still ignored
+__file__:__line__
+@result{}stdin:9
+define(`bar
+', defn(`__file__'))
+@result{}
+include(`foo')
+@result{}../examples/foo
+define(`bar
+', defn(`__line__'))
+@result{}
+include(`foo')
+@result{}1
+__file__:__line__
+@result{}stdin:16
+@end example
+@end ignore
+
 @code{changeword} has another function.  If the regular expression
 supplied contains any grouped subexpressions, then text outside
 the first of these is discarded before symbol lookup.  So:
@@ -3032,7 +3073,7 @@ file condition between two input files.
 m4wrap(`m4wrap(`)')len(abc')
 @result{}
 ^D
-@error{}m4: ERROR: end of file in argument list
+@error{}m4:stdin:1: ERROR: end of file in argument list
 @end example
 
 @node File Inclusion
@@ -4427,10 +4468,34 @@ include(`incl.m4')
 @result{}
 @end example
 
-Currently, all text wrapped with @code{m4wrap} (@pxref{M4wrap}) behaves
-as though it came from line 0 of the file ``''.  It is hoped that a
-future release of @code{m4} can overcome this limitation and remember
-which file invoked the call to @code{m4wrap}.
+The location of macros invoked during the rescanning of macro expansion
+text corresponds to the location in the file where the expansion was
+triggered, regardless of how many newline characters the expansion text
+contains.  As of @acronym{GNU} M4 1.4.8, the location of text wrapped
+with @code{m4wrap} (@pxref{M4wrap}) is the point at which the
+@code{m4wrap} was invoked.  Previous versions, however, behaved as
+though wrapped text came from line 0 of the file ``''.
+
+@example
+define(`echo', `$@')
+@result{}
+define(`foo', `echo(__line__
+__line__)')
+@result{}
+echo(__line__
+__line__)
+@result{}4
+@result{}5
+m4wrap(`foo
+')
+@result{}
+foo
+@result{}8
+@result{}8
+^D
+@result{}6
+@result{}6
+@end example
 
 The @code{__program__} macro behaves like @samp{$0} in shell
 terminology.  If you invoke @code{m4} through an absolute path or a link
@@ -4440,7 +4505,8 @@ intent is that you can use it to produce error messages with the same
 formatting that @code{m4} produces internally.  It can also be used
 within @code{syscmd} (@pxref{Syscmd}) to pick the same version of
 @code{m4} that is currently running, rather than whatever version of
-@code{m4} happens to be first in @env{PATH}.
+@code{m4} happens to be first in @env{PATH}.  It was first introduced
+in @acronym{GNU} M4 1.4.6.
 
 @node M4exit
 @section Exiting from @code{m4}
@@ -4456,6 +4522,15 @@ left out, the exit status is zero.  If @var{code} cannot be parsed, or
 is outside the range of 0 to 255, the exit status is one.  No further
 input is read, and all wrapped and diverted text is discarded.
 @end deffn
+
+@example
+m4wrap(`This text is lost due to `m4exit'.')
+@result{}
+divert(`1') So is this.
+divert
+@result{}
+m4exit And this is never read.
+@end example
 
 A common use of this is to abort processing:
 
@@ -4477,22 +4552,13 @@ fatal_error(`this is a BAD one, buster')
 After this macro call, @code{m4} will exit with exit status 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
-(@pxref{M4wrap}) is not reread.  (This macro has a subtle bug, when
-invoked from wrapped text.  You should try to see if you can find it and
-correct it.  @pxref{Answers})
-
-@example
-m4wrap(`This text is lost to `m4exit'.')
-@result{}
-divert(`1') And so is this.
-divert
-@result{}
-m4exit
-@end example
+(@pxref{M4wrap}) is not reread.  (This macro could be made more robust
+to earlier versions of @code{m4}.  You should try to see if you can find
+weaknesses and correct them.  @pxref{Answers})
 
 Note that it is still possible for the exit status to be different than
 what was requested by @code{m4exit}.  If @code{m4} detects some other
-error, such as a write error on standard out, the exit status will be
+error, such as a write error on standard output, the exit status will be
 non-zero even if @code{m4exit} requested zero.
 
 If standard input is seekable, then the file will be positioned at the
@@ -5017,8 +5083,18 @@ in traditional programming languages.
 @node Answers
 @chapter Correct version of some examples
 
-Some of the examples in this manuals are buggy, for demonstration
-purposes.  Correctly working macros are presented here.
+Some of the examples in this manuals are buggy or not very robust, for
+demonstration purposes.  Improved versions of these composite macros are
+presented here.
+
+@menu
+* Improved exch::               Solution for @code{exch}
+* Improved cleardivert::        Solution for @code{cleardivert}
+* Improved fatal_error::        Solution for @code{fatal_error}
+@end menu
+
+@node Improved exch
+@section Solution for @code{exch}
 
 The @code{exch} macro (@pxref{Arguments}) as presented requires clients
 to double quote their arguments.  A nicer definition, which lets
@@ -5034,6 +5110,9 @@ define(exch(`expansion text', `macro'))
 macro
 @result{}expansion text
 @end example
+
+@node Improved cleardivert
+@section Solution for @code{cleardivert}
 
 The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
 called without arguments to clear all pending diversions.  That is
@@ -5066,17 +5145,21 @@ undivert
 @result{}
 @end example
 
-The @code{fatal_error} macro (@pxref{M4exit}) does not quite match the
-format of internal error messages when invoked inside wrapped text, due
-to the current limitations of @code{__file__} (@pxref{Location}) when
-invoked inside @code{m4wrap}.  Since @code{m4} omits the file and line
-number from its warning messages when there is no current file (or
-equivalently, when the current line is 0, since all files start at line
-1), a better implementation would be:
+@node Improved fatal_error
+@section Solution for @code{fatal_error}
+
+The @code{fatal_error} macro (@pxref{M4exit}) is not robust to versions
+of @acronym{GNU} M4 earlier than 1.4.8, where invoking @code{__file__}
+(@pxref{Location}) inside @code{m4wrap} would result in an empty string,
+and @code{__line__} resulted in @samp{0} even though all files start at
+line 1.  Furthermore, versions earlier than 1.4.6 did not support the
+@code{__program__} macro.  If you want @code{fatal_error} to work across
+the entire 1.4.x release series, a better implementation would be:
 
 @example
 define(`fatal_error',
-  `errprint(__program__:ifelse(__line__, `0', `',
+  `errprint(ifdef(`__program', `__program__', ``m4'')'dnl
+`:ifelse(__line__, `0', `',
     `__file__:__line__:')` fatal error: $*
 ')m4exit(`1')')
 @result{}
@@ -5084,9 +5167,9 @@ m4wrap(`divnum(`demo of internal message')
 fatal_error(`inside wrapped text')')
 @result{}
 ^D
-@error{}m4: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:6: Warning: excess arguments to builtin `divnum' ignored
 @result{}0
-@error{}m4: fatal error: inside wrapped text
+@error{}m4:stdin:6: fatal error: inside wrapped text
 @end example
 
 @c ========================================================== Appendices

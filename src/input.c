@@ -61,9 +61,11 @@
 
 enum input_type
 {
-  INPUT_FILE,
-  INPUT_STRING,
-  INPUT_MACRO
+  INPUT_STRING,		/* String resulting from macro expansion.  */
+  INPUT_STRING_WRAP,	/* String resulting from m4wrap.  */
+  INPUT_FILE,		/* File which has had at least one character read.  */
+  INPUT_FILE_INIT,	/* File which has not yet been read.  */
+  INPUT_MACRO		/* Builtin resulting from defn.  */
 };
 
 typedef enum input_type input_type;
@@ -71,14 +73,16 @@ typedef enum input_type input_type;
 struct input_block
 {
   struct input_block *prev;	/* previous input_block on the input stack */
-  input_type type;		/* INPUT_FILE, INPUT_STRING or INPUT_MACRO */
+  input_type type;		/* see enum values */
   union
     {
       struct
 	{
 	  char *string;		/* string value */
+	  const char *name;	/* file where wrapped text is from */
+	  int lineno;		/* line where wrapped text is from */
 	}
-      u_s;
+	u_s;	/* INPUT_STRING, INPUT_STRING_WRAP */
       struct
 	{
 	  FILE *file;		/* input file handle */
@@ -89,7 +93,7 @@ struct input_block
 	  int out_lineno;	/* current output line of previous file */
 	  boolean advance_line;	/* start_of_input_line from next_char () */
 	}
-      u_f;
+	u_f;	/* INPUT_FILE, INPUT_FILE_INIT */
       builtin_func *func;	/* pointer to macro's function */
     }
   u;
@@ -184,7 +188,7 @@ push_file (FILE *fp, const char *title, boolean close)
 
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
-  i->type = INPUT_FILE;
+  i->type = INPUT_FILE_INIT;
 
   i->u.u_f.end = FALSE;
   i->u.u_f.close = close;
@@ -196,10 +200,11 @@ push_file (FILE *fp, const char *title, boolean close)
      to expand_macro remembering where the include or sinclude builtin
      invocation began, so don't modify them here.  However, we are
      guaranteed that they are consistent in the context of read or
-     peek.  So we use u_f.lineno == 0 and a non-empty u_f.name as a
-     key that this file is newly pushed, and that current_file/line
-     still needs an update (lineno == 0 and an empty name imply that
-     when we pop this file, there is no more input to return to).
+     peek.  So we use the temporary type INPUT_FILE_INIT as key that
+     this file is newly pushed, u_f.name is the name of this file, and
+     that current_file/line still needs an update; and the
+     longer-lasting type INPUT_FILE as key that the file is in use,
+     with u_f.name as the name of the file that included this file.
      Also, we must save title on a separate obstack, again since
      expand_macro hangs on to file names even after the file is
      closed.  */
@@ -255,6 +260,8 @@ push_string_init (void)
   next = (input_block *) obstack_alloc (current_input,
 					sizeof (struct input_block));
   next->type = INPUT_STRING;
+  next->u.u_s.name = NULL;
+  next->u.u_s.lineno = 0;
   return current_input;
 }
 
@@ -275,7 +282,8 @@ push_string_finish (void)
   if (next == NULL)
     return NULL;
 
-  if (obstack_object_size (current_input) > 0)
+  if (obstack_object_size (current_input) > 0
+      || isp->type == INPUT_STRING_WRAP)
     {
       obstack_1grow (current_input, '\0');
       next->u.u_s.string = obstack_finish (current_input);
@@ -304,8 +312,10 @@ push_wrapup (const char *s)
   i = (input_block *) obstack_alloc (wrapup_stack,
 				     sizeof (struct input_block));
   i->prev = wsp;
-  i->type = INPUT_STRING;
+  i->type = INPUT_STRING_WRAP;
   i->u.u_s.string = obstack_copy0 (wrapup_stack, s, strlen (s));
+  i->u.u_s.name = current_file;
+  i->u.u_s.lineno = current_line;
   wsp = i;
 }
 
@@ -323,6 +333,12 @@ pop_input (void)
 
   switch (isp->type)
     {
+    case INPUT_STRING_WRAP:
+    case INPUT_FILE_INIT:
+      M4ERROR ((warning_status, 0,
+		"INTERNAL ERROR: input stack botch in pop_input ()"));
+      abort ();
+
     case INPUT_STRING:
     case INPUT_MACRO:
       break;
@@ -446,38 +462,31 @@ static int
 peek_input (void)
 {
   int ch;
+  input_block *block = isp;
 
   while (1)
     {
-      if (isp == NULL)
+      if (block == NULL)
 	return CHAR_EOF;
 
-      switch (isp->type)
+      switch (block->type)
 	{
+	case INPUT_STRING_WRAP:
 	case INPUT_STRING:
-	  ch = to_uchar (isp->u.u_s.string[0]);
+	  ch = to_uchar (block->u.u_s.string[0]);
 	  if (ch != '\0')
 	    return ch;
 	  break;
 
+	case INPUT_FILE_INIT:
 	case INPUT_FILE:
-	  /* See comments in push_file.  */
-	  if (isp->u.u_f.lineno == 0 && isp->u.u_f.name[0] != '\0')
-	    {
-	      const char *tmp = isp->u.u_f.name;
-	      isp->u.u_f.name = current_file;
-	      isp->u.u_f.lineno = current_line;
-	      current_file = tmp;
-	      current_line = 1;
-	    }
-
-	  ch = getc (isp->u.u_f.file);
+	  ch = getc (block->u.u_f.file);
 	  if (ch != EOF)
 	    {
-	      ungetc (ch, isp->u.u_f.file);
+	      ungetc (ch, block->u.u_f.file);
 	      return ch;
 	    }
-	  isp->u.u_f.end = TRUE;
+	  block->u.u_f.end = TRUE;
 	  break;
 
 	case INPUT_MACRO:
@@ -488,12 +497,7 @@ peek_input (void)
 		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
-      /* End of current input source --- pop one level if another
-	 level still exists.  */
-      if (isp->prev != NULL)
-	pop_input ();
-      else
-	return CHAR_EOF;
+      block = block->prev;
     }
 }
 
@@ -508,8 +512,8 @@ peek_input (void)
 `-------------------------------------------------------------------------*/
 
 #define next_char() \
-  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]		\
-   ? to_uchar (*isp->u.u_s.string++)					\
+  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]	\
+   ? to_uchar (*isp->u.u_s.string++)				\
    : next_char_1 ())
 
 static int
@@ -530,23 +534,29 @@ next_char_1 (void)
 
       switch (isp->type)
 	{
+	case INPUT_STRING_WRAP:
+	  current_file = isp->u.u_s.name;
+	  current_line = isp->u.u_s.lineno;
+	  isp->type = INPUT_STRING;
+	  /* fall through */
 	case INPUT_STRING:
 	  ch = to_uchar (*isp->u.u_s.string++);
 	  if (ch != '\0')
 	    return ch;
 	  break;
 
-	case INPUT_FILE:
+	case INPUT_FILE_INIT:
 	  /* See comments in push_file.  */
-	  if (isp->u.u_f.lineno == 0 && isp->u.u_f.name[0] != '\0')
-	    {
-	      const char *tmp = isp->u.u_f.name;
-	      isp->u.u_f.name = current_file;
-	      isp->u.u_f.lineno = current_line;
-	      current_file = tmp;
-	      current_line = 1;
-	    }
-
+	  {
+	    const char *tmp = isp->u.u_f.name;
+	    isp->u.u_f.name = current_file;
+	    isp->u.u_f.lineno = current_line;
+	    current_file = tmp;
+	    current_line = 1;
+	  }
+	  isp->type = INPUT_FILE;
+	  /* fall through */
+	case INPUT_FILE:
 	  /* If stdin is a terminal, calling getc after peek_input
 	     already called it would make the user have to hit ^D
 	     twice to quit.  */
@@ -594,6 +604,25 @@ skip_line (void)
        previous value we stored earlier.  */
     M4ERROR_AT_LINE ((warning_status, 0, file, line,
 		      "Warning: end of file treated as newline"));
+  /* On the rare occasion that dnl crosses include file boundaries
+     (either the input file did not end in a newline, or changeword
+     was used), calling next_char can update current_file and
+     current_line, and that update will be undone as we return to
+     expand_macro.  This hack of sticking an empty INPUT_STRING_WRAP
+     with the correct location as the next thing to parse works around
+     the problem.  */
+  if (file != current_file || line != current_line)
+    {
+      input_block *i;
+      i = (input_block *) obstack_alloc (current_input,
+					 sizeof (struct input_block));
+      i->prev = isp;
+      i->type = INPUT_STRING_WRAP;
+      i->u.u_s.string = "";
+      i->u.u_s.name = current_file;
+      i->u.u_s.lineno = current_line + 1;  /* Account for parsed `\n'.  */
+      isp = i;
+    }
 }
 
 
@@ -828,7 +857,7 @@ next_token (token_data *td)
   token_type type;
 #ifdef ENABLE_CHANGEWORD
   int startpos;
-  char *orig_text = 0;
+  char *orig_text = NULL;
 #endif
   const char *file;
   int line;
@@ -995,74 +1024,53 @@ next_token (token_data *td)
 token_type
 peek_token (void)
 {
+  token_type result;
   int ch = peek_input ();
 
   if (ch == CHAR_EOF)
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> EOF\n");
-#endif
-      return TOKEN_EOF;
+      result = TOKEN_EOF;
     }
-  if (ch == CHAR_MACRO)
+  else if (ch == CHAR_MACRO)
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> MACDEF\n");
-#endif
-      return TOKEN_MACDEF;
+      result = TOKEN_MACDEF;
     }
-
-  if (MATCH (ch, bcomm.string, FALSE))
+  else if (MATCH (ch, bcomm.string, FALSE))
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> COMMENT\n");
-#endif
-      return TOKEN_STRING;
+      result = TOKEN_STRING;
     }
-
-  if ((default_word_regexp && (isalpha (ch) || ch == '_'))
+  else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
       || (! default_word_regexp && word_start[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> WORD\n");
-#endif
-      return TOKEN_WORD;
+      result = TOKEN_WORD;
     }
-
-  if (MATCH (ch, lquote.string, FALSE))
+  else if (MATCH (ch, lquote.string, FALSE))
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> QUOTE\n");
-#endif
-      return TOKEN_STRING;
+      result = TOKEN_STRING;
     }
+  else
+    switch (ch)
+      {
+      case '(':
+	result = TOKEN_OPEN;
+	break;
+      case ',':
+	result = TOKEN_COMMA;
+	break;
+      case ')':
+	result = TOKEN_CLOSE;
+	break;
+      default:
+	result = TOKEN_SIMPLE;
+      }
 
-  switch (ch)
-    {
-    case '(':
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> OPEN\n");
-#endif
-      return TOKEN_OPEN;
-    case ',':
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> COMMA\n");
-#endif
-      return TOKEN_COMMA;
-    case ')':
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> CLOSE\n");
-#endif
-      return TOKEN_CLOSE;
-    default:
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> SIMPLE\n");
-#endif
-      return TOKEN_SIMPLE;
-    }
+  fprintf (stderr, "peek_token -> %s\n", token_type_string (result));
+#endif /* DEBUG_INPUT */
+  return result;
 }
 
 

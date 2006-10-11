@@ -15,7 +15,11 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
   `errprint' macro, now always cause a non-zero exit status.
 * Warnings and errors issued during macro expansion are now consistently
   reported at the line where the macro name was detected, rather than
-  where the close parenthesis resides.
+  where the close parenthesis resides.  Text wrapped by `m4wrap' now
+  remembers the location that was in effect when m4wrap was invoked,
+  rather than changing to line 0 and the empty string for a file.  The
+  macros `__line__' and `__file__' now work correctly even as the last
+  token in an included file.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 
