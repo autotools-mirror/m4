@@ -310,6 +310,17 @@ expand_macro (symbol *sym)
   boolean traced;
   int my_call_id;
 
+  /* Report errors at the location where the open parenthesis (if any)
+     was found, but after expansion, restore global state back to the
+     location of the close parenthesis.  This is safe since we
+     guarantee that macro expansion does not alter the state of
+     current_file/current_line (dnl, include, and sinclude are special
+     cased in the input engine to ensure this fact).  */
+  const char *loc_open_file = current_file;
+  int loc_open_line = current_line;
+  const char *loc_close_file;
+  int loc_close_line;
+
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
@@ -342,6 +353,11 @@ expand_macro (symbol *sym)
 	  / sizeof (token_data *));
   argv = (token_data **) (obstack_base (&argv_stack) + argv_base);
 
+  loc_close_file = current_file;
+  loc_close_line = current_line;
+  current_file = loc_open_file;
+  current_line = loc_open_line;
+
   if (traced)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);
 
@@ -351,6 +367,9 @@ expand_macro (symbol *sym)
 
   if (traced)
     trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
+
+  current_file = loc_close_file;
+  current_line = loc_close_line;
 
   --expansion_level;
   --SYMBOL_PENDING_EXPANSIONS (sym);

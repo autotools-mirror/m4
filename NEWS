@@ -13,6 +13,9 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
   overflow.
 * Problems encountered when writing to standard error, such as with the
   `errprint' macro, now always cause a non-zero exit status.
+* Warnings and errors issued during macro expansion are now consistently
+  reported at the line where the macro name was detected, rather than
+  where the close parenthesis resides.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 

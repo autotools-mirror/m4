@@ -1104,9 +1104,11 @@ f
 It is an error if the end of file occurs while collecting arguments.
 
 @example
+hello world
+@result{}hello world
 define(
 ^D
-@error{}m4:stdin:1: ERROR: end of file in argument list
+@error{}m4:stdin:2: ERROR: end of file in argument list
 @end example
 
 @node Quoting Arguments
@@ -2453,7 +2455,7 @@ next newline, on whatever line containing it, will still be discarded.
 @example
 dnl(`args are ignored, but side effects occur',
 define(`foo', `like this')) while this text is ignored: undefine(`foo')
-@error{}m4:stdin:2: Warning: excess arguments to builtin `dnl' ignored
+@error{}m4:stdin:1: Warning: excess arguments to builtin `dnl' ignored
 See how `foo' was defined, foo?
 @result{}See how foo was defined, like this?
 @end example
@@ -2634,9 +2636,11 @@ changequote(`"', `"')
 It is an error if the end of file occurs within a quoted string.
 
 @example
+`hello world'
+@result{}hello world
 `dangling quote
 ^D
-@error{}m4:stdin:1: ERROR: end of file in string
+@error{}m4:stdin:2: ERROR: end of file in string
 @end example
 
 @node Changecom
@@ -2763,7 +2767,7 @@ changecom(`/*', `*/')
 @result{}
 /*dangling comment
 ^D
-@error{}m4:stdin:1: ERROR: end of file in comment
+@error{}m4:stdin:2: ERROR: end of file in comment
 @end example
 
 @node Changeword

@@ -107,6 +107,9 @@ int current_line;
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;
 
+/* Obstack for storing file names.  */
+static struct obstack file_names;
+
 /* Wrapup input stack.  */
 static struct obstack *wrapup_stack;
 
@@ -185,13 +188,23 @@ push_file (FILE *fp, const char *title, boolean close)
 
   i->u.u_f.end = FALSE;
   i->u.u_f.close = close;
-  i->u.u_f.name = current_file;
-  i->u.u_f.lineno = current_line;
   i->u.u_f.out_lineno = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
-  current_file = obstack_copy0 (current_input, title, strlen (title));
-  current_line = 1;
   output_current_line = -1;
+
+  /* current_file and current_line may be temporarily inaccurate due
+     to expand_macro remembering where the include or sinclude builtin
+     invocation began, so don't modify them here.  However, we are
+     guaranteed that they are consistent in the context of read or
+     peek.  So we use u_f.lineno == 0 and a non-empty u_f.name as a
+     key that this file is newly pushed, and that current_file/line
+     still needs an update (lineno == 0 and an empty name imply that
+     when we pop this file, there is no more input to return to).
+     Also, we must save title on a separate obstack, again since
+     expand_macro hangs on to file names even after the file is
+     closed.  */
+  i->u.u_f.name = obstack_copy0 (&file_names, title, strlen (title));
+  i->u.u_f.lineno = 0;
 
   i->u.u_f.file = fp;
   i->prev = isp;
@@ -383,6 +396,10 @@ pop_wrapup (void)
 
   if (wsp == NULL)
     {
+      /* End of the program.  Free all memory even though we are about
+	 to exit, since it makes leak detection easier.  */
+      obstack_free (&token_stack, NULL);
+      obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
       return FALSE;
@@ -444,6 +461,16 @@ peek_input (void)
 	  break;
 
 	case INPUT_FILE:
+	  /* See comments in push_file.  */
+	  if (isp->u.u_f.lineno == 0 && isp->u.u_f.name[0] != '\0')
+	    {
+	      const char *tmp = isp->u.u_f.name;
+	      isp->u.u_f.name = current_file;
+	      isp->u.u_f.lineno = current_line;
+	      current_file = tmp;
+	      current_line = 1;
+	    }
+
 	  ch = getc (isp->u.u_f.file);
 	  if (ch != EOF)
 	    {
@@ -510,6 +537,16 @@ next_char_1 (void)
 	  break;
 
 	case INPUT_FILE:
+	  /* See comments in push_file.  */
+	  if (isp->u.u_f.lineno == 0 && isp->u.u_f.name[0] != '\0')
+	    {
+	      const char *tmp = isp->u.u_f.name;
+	      isp->u.u_f.name = current_file;
+	      isp->u.u_f.lineno = current_line;
+	      current_file = tmp;
+	      current_line = 1;
+	    }
+
 	  /* If stdin is a terminal, calling getc after peek_input
 	     already called it would make the user have to hit ^D
 	     twice to quit.  */
@@ -638,15 +675,19 @@ input_init (void)
   current_file = "";
   current_line = 0;
 
-  obstack_init (&token_stack);
-
   current_input = (struct obstack *) xmalloc (sizeof (struct obstack));
   obstack_init (current_input);
   wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
   obstack_init (wrapup_stack);
 
-  obstack_1grow (&token_stack, '\0');
-  token_bottom = obstack_finish (&token_stack);
+  obstack_init (&file_names);
+
+  /* Allocate an object in the current chunk, so that obstack_free
+     will always work even if the first token parsed spills to a new
+     chunk.  */
+  obstack_init (&token_stack);
+  obstack_alloc (&token_stack, 1);
+  token_bottom = obstack_base (&token_stack);
 
   isp = NULL;
   wsp = NULL;
@@ -789,12 +830,10 @@ next_token (token_data *td)
   int startpos;
   char *orig_text = 0;
 #endif
-  const char *file = current_file;
-  int line = current_line;
+  const char *file;
+  int line;
 
   obstack_free (&token_stack, token_bottom);
-  obstack_1grow (&token_stack, '\0');
-  token_bottom = obstack_finish (&token_stack);
 
  /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
@@ -818,6 +857,8 @@ next_token (token_data *td)
     }
 
   next_char (); /* Consume character we already peeked at.  */
+  file = current_file;
+  line = current_line;
   if (MATCH (ch, bcomm.string, TRUE))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);

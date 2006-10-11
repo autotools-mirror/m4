@@ -1,3 +1,21 @@
+2006-10-11  Eric Blake  <ebb9@byu.net>
+
+	* src/macro.c (expand_macro): In macro expansion errors, report
+	line number at open parenthesis.
+	* src/input.c (next_token): Fix off-by-one bug in reporting end
+	of file in unterminated comment and string.
+	(file_names): New obstack, necessary since expand_macro now hangs
+	on to file names longer than the files remain open.
+	(input_init): Initialize new obstack.
+	(push_file): Use new obstack.  Delay updates to current_file
+	until after expand_macro has restored state.
+	(peek_input, next_char_1): Update current_file if necessary.
+	(pop_wrapup): Release memory.
+	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom): Catch
+	the off-by-one bug.
+	(Dnl): Update to the new location reporting rules.
+	* NEWS: Document these changes.
+
 2006-10-10  Eric Blake  <ebb9@byu.net>
 
 	* src/macro.c (argc_stack, argv_stack): New variables for sharing
