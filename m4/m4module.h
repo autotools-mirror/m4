@@ -366,22 +366,21 @@ enum {
   M4_SYNTAX_ASSIGN		= (1 << 9),
   M4_SYNTAX_ALPHA		= (1 << 10),
   M4_SYNTAX_NUM			= (1 << 11),
+  M4_SYNTAX_LQUOTE		= (1 << 12),
+  M4_SYNTAX_BCOMM		= (1 << 13),
 
-  /* These values are bit masks to AND with categories above, a syntax entry
+  /* These values are bit masks to OR with categories above, a syntax entry
      may have any number of these in addition to a maximum of one of the
      values above.  */
-  M4_SYNTAX_LQUOTE		= (1 << 12),
-  M4_SYNTAX_RQUOTE		= (1 << 13),
-  M4_SYNTAX_BCOMM		= (1 << 14),
+  M4_SYNTAX_RQUOTE		= (1 << 14),
   M4_SYNTAX_ECOMM		= (1 << 15),
 };
 
-#define M4_SYNTAX_MASKS		(M4_SYNTAX_LQUOTE|M4_SYNTAX_RQUOTE|M4_SYNTAX_BCOMM|M4_SYNTAX_ECOMM)
-#define M4_SYNTAX_VALUE		(~(M4_SYNTAX_RQUOTE|M4_SYNTAX_ECOMM))
+#define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM)
+#define M4_SYNTAX_VALUE		(~(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM))
 
-#define m4_syntab(S,C)		((S)->table[(int)(C)])
-#define m4_has_syntax(S,C,T)	((m4_syntab((S),(C)) & (T)) > 0)
-#define m4_is_syntax(S,C,T)	((m4_syntab((S),(C)) & M4_SYNTAX_VALUE) == (T))
+#define m4_syntab(S, C)		((S)->table[(C)])
+#define m4_has_syntax(S, C, T)	((m4_syntab ((S), (C)) & (T)) > 0)
 
 extern void	m4_set_quotes	(m4_syntax_table*, const char*, const char*);
 extern void	m4_set_comment	(m4_syntax_table*, const char*, const char*);
@@ -398,11 +397,10 @@ extern	void	m4_skip_line	(m4 *context, const char *);
 /* push back input */
 
 extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
-extern	void	m4_push_single	(int);
 extern	void	m4_push_builtin	(m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
 extern	m4_input_block	*m4_push_string_finish	(void);
-extern	void	m4_push_wrapup	(const char *);
+extern	void	m4_push_wrapup	(m4 *, const char *);
 extern	bool	m4_pop_wrapup	(void);
 extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 

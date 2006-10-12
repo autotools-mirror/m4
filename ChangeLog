@@ -1,3 +1,52 @@
+2006-10-12  Eric Blake  <eric.b.blake@l-3com.com>
+
+	* m4/m4private.h (m4__next_token_is_open): New prototype.
+	* m4/m4module.h (m4_push_single): Delete; push_string is an
+	adequate interface, and removing support for this simplifies the
+	input engine.
+	(m4_push_wrapup): New parameter.
+	(m4_is_syntax): Delete; m4_has_syntax is sufficient.
+	(M4_SYNTAX_LQUOTE, M4_SYNTAX_BCOMM, M4_SYNTAX_MASKS): Make
+	start-quote and start-comment exclusive from other syntax
+	categories.
+	* m4/syntax.c: Likewise.
+	* m4/input.c (input_funcs): Make polymorphic without requiring
+	clients to know whether they are located at isp.  All users
+	changed.
+	(file_names): New variable.
+	(m4_input_init): Initialize it.
+	(m4_push_file): Use it.
+	(m4_input_exit): Free it after use.
+	(m4__next_token): Simplify slightly.
+	(m4__peek_token): Rename and simplify...
+	(m4__next_token_is_open): ... to this.  In particular, this
+	allows us to avoid a double ungetc, which POSIX doesn't
+	guarantee.
+	(struct m4_input_block, m4_push_single, single_peek, single_read):
+	Remove support for single characters, as the input engine now
+	guarantees we don't need it.
+	(file_unget, string_unget, m4_input_print, unget_input):
+	Strengthen assertions.
+	(file_init_funcs, file_read_init): New for file reading.
+	(string_init_funcs, string_read_init): New for wrapped text.
+	(m4_push_string_init, m4_push_string_finish, m4_push_wrapup):
+	Support wrapped text with locations.
+	(m4_skip_line): Support dnl across include file boundary.
+	(peek_char): Don't pop input when peeking.
+	(file_peek): Peek can be called at the end of the file.
+	(string_read): Don't read beyond string bounds.
+	* m4/macro.c (expand_token, collect_arguments): Update callers.
+	(expand_macro): Report errors at location of open parenthesis.
+	(expand_token, expand_argument, process_macro): Avoid negative
+	array dereferences with m4_has_syntax.
+	* m4/utility.c (skip_space): Likewise.
+	* modules/m4.c (m4wrap): Update caller.
+	* tests/builtins.at (__file__, __line__, dnl): New tests.
+	* tests/options.at (--debugmode): Normalize the output.
+	* doc/m4.texinfo (Macro Arguments, Dnl, History, Location):
+	Remerge recent changes from branch.
+	(Improved fatal_error): New node from branch.
+
 2006-10-11  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (usage, long_options): Add --debugmode as an alias

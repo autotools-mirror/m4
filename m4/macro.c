@@ -98,7 +98,7 @@ expand_token (m4 *context, m4_obstack *obs,
 
     case M4_TOKEN_WORD:
       {
-	char *textp = text;
+	unsigned char *textp = text;
 
 	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
 	  ++textp;
@@ -108,7 +108,7 @@ expand_token (m4 *context, m4_obstack *obs,
 	if (symbol == NULL
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
-		&& m4__peek_token (context) != M4_TOKEN_OPEN))
+		&& ! m4__next_token_is_open (context)))
 	  {
 	    m4_shipout_text (context, obs, text, strlen (text));
 	  }
@@ -132,13 +132,13 @@ expand_token (m4 *context, m4_obstack *obs,
    until it finds a comma or a right parenthesis at the same level of
    parentheses.  It returns a flag indicating whether the argument read is
    the last for the active macro call.  The arguments are built on the
-   obstack OBS, indirectly through expand_token ().	 */
+   obstack OBS, indirectly through expand_token ().  */
 static bool
 expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
   m4_symbol_value token;
-  char *text;
+  unsigned char *text;
   int paren_level = 0;
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
@@ -229,6 +229,17 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   size_t my_call_id;
   m4_symbol_value *value;
 
+  /* Report errors at the location where the open parenthesis (if any)
+     was found, but after expansion, restore global state back to the
+     location of the close parenthesis.  This is safe since we
+     guarantee that macro expansion does not alter the state of
+     current_file/current_line (dnl, include, and sinclude are special
+     cased in the input engine to ensure this fact).  */
+  const char *loc_open_file = m4_get_current_file (context);
+  int loc_open_line = m4_get_current_line (context);
+  const char *loc_close_file;
+  int loc_close_line;
+
   /* Grab the current value of this macro, because it may change while
      collecting arguments.  Likewise, grab any state needed during
      tracing.  */
@@ -261,6 +272,11 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   argc = obstack_object_size (&argptr) / sizeof (m4_symbol_value *);
   argv = (m4_symbol_value **) obstack_finish (&argptr);
 
+  loc_close_file = m4_get_current_file (context);
+  loc_close_line = m4_get_current_line (context);
+  m4_set_current_file (context, loc_open_file);
+  m4_set_current_line (context, loc_open_line);
+
   if (traced)
     trace_pre (context, name, my_call_id, argc, argv);
 
@@ -271,6 +287,9 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   if (traced)
     trace_post (context, name, my_call_id, argc, argv, expanded,
 		trace_expansion);
+
+  m4_set_current_file (context, loc_close_file);
+  m4_set_current_line (context, loc_close_line);
 
   --expansion_level;
   --VALUE_PENDING (value);
@@ -300,7 +319,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 				      sizeof (token));
   obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
 
-  if (m4__peek_token (context) == M4_TOKEN_OPEN)
+  if (m4__next_token_is_open (context))
     {
       m4__next_token (context, &token);		/* gobble parenthesis */
       do
@@ -420,9 +439,9 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	    }
 	  else
 	    {
-	      size_t       len  = 0;
-	      const char * endp;
-	      const char * key;
+	      size_t len  = 0;
+	      const unsigned char *endp;
+	      const char *key;
 
 	      for (endp = ++text;
 		   *endp && m4_has_syntax (M4SYNTAX, *endp,

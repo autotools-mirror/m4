@@ -105,7 +105,7 @@ typedef unsigned long int unumber;
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
-static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char*name,
+static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char *name,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(m4_obstack *obs, const number value,
@@ -743,7 +743,7 @@ M4BUILTIN_HANDLER (m4wrap)
   else
     m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
-  m4_push_wrapup (obstack_finish (obs));
+  m4_push_wrapup (context, obstack_finish (obs));
 }
 
 /* Enable tracing of all specified macros, or all, if none is specified.

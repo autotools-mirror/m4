@@ -19,6 +19,58 @@
 AT_BANNER([Torturing builtins.])
 
 
+## -------- ##
+## __file__ ##
+## -------- ##
+
+AT_SETUP([__@&t@file__])
+
+dnl Unfortunately, AT_DATA does not make it easy to create files without
+dnl a trailing newline.
+[echo $ECHO_N "__line"__:__"file__$ECHO_C"] > nested
+AT_DATA([outer],
+[[__file__:__line__
+include(`nested')
+__file__:__line__
+]])
+
+dnl Make sure line numbers are consistent, even if include file does not
+dnl end with a newline
+AT_CHECK_M4([outer], [0],
+[[outer:1
+1:nested
+outer:3
+]])
+
+AT_CLEANUP
+
+
+## -------- ##
+## __line__ ##
+## -------- ##
+
+AT_SETUP([__@&t@line__])
+
+dnl Unfortunately, AT_DATA does not make it easy to create files without
+dnl a trailing newline.
+[echo $ECHO_N "__file"__:__"line__$ECHO_C"] > nested
+AT_DATA([outer],
+[[__file__:__line__
+include(`nested')
+__file__:__line__
+]])
+
+dnl Make sure line numbers are consistent, even if include file does not
+dnl end with a newline
+AT_CHECK_M4([outer], [0],
+[[outer:1
+nested:1
+outer:3
+]])
+
+AT_CLEANUP
+
+
 ## ----- ##
 ## debug ##
 ## ----- ##
@@ -107,6 +159,37 @@ divert(0)undivert(1)dnl
 AT_CHECK_M4([divert.m4], 0,
 [[Text diverted a first time.
 Text diverted a second time.
+]])
+
+AT_CLEANUP
+
+
+## --- ##
+## dnl ##
+## --- ##
+
+AT_SETUP([d@&t@nl])
+
+dnl Unfortunately, AT_DATA does not make it easy to create files without
+dnl a trailing newline.
+[echo $ECHO_N "__file"__:__"line__ d""nl ignored$ECHO_C"] > nested
+AT_DATA([outer],
+[[__file__:__line__
+include(`nested') still ignored
+__file__:__line__
+define(`foo', `dnl
+__file__:__line__ include(`nested') ignored
+dnl')dnl
+foo ignored
+__file__:__line__
+]])
+
+dnl Make sure line numbers are consistent, even if include file does not
+dnl end with a newline
+AT_CHECK_M4([outer], [0],
+[[outer:1
+nested:1 outer:3
+outer:7 nested:1 outer:8
 ]])
 
 AT_CLEANUP

@@ -264,6 +264,8 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 
 /* --- SYNTAX TABLE MANAGEMENT --- */
 
+/* CHAR_RETRY must be last, because we size the syntax table to hold
+   all other characters and sentinels. */
 #define CHAR_EOF	256	/* character return on EOF */
 #define CHAR_BUILTIN	257	/* character return for BUILTIN token */
 #define CHAR_RETRY	258	/* character return for end of input block */
@@ -280,7 +282,7 @@ typedef struct {
 
 struct m4_syntax_table {
   /* Please read the comment at the top of input.c for details */
-  unsigned short table[256];
+  unsigned short table[CHAR_RETRY];
 
   m4_string lquote, rquote;
   m4_string bcomm, ecomm;
@@ -323,8 +325,8 @@ typedef enum {
   M4_TOKEN_MACDEF		/* a macro's definition (see "defn") */
 } m4__token_type;
 
-extern	m4__token_type m4__next_token (m4 *, m4_symbol_value *);
-extern	m4__token_type m4__peek_token (m4 *);
+extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *);
+extern	bool		m4__next_token_is_open (m4 *);
 
 
 

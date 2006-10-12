@@ -286,7 +286,8 @@ m4trace: -1- id 2: len(`abc')
 ]])
 
 dnl Test that shorter prefix is ambiguous.
-AT_CHECK_M4([--debu], [1], [],
+AT_CHECK_M4([--debu], [1], [], [stderr])
+AT_CHECK([sed -e 's/Try.*--help/Try `m4 --help/' stderr], [0],
 [[m4: option `--debu' is ambiguous
 Try `m4 --help' for more information.
 ]])

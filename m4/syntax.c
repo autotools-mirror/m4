@@ -44,10 +44,11 @@
    M4_SYNTAX_NUM	Numeric characters
    M4_SYNTAX_ALNUM	Alphanumeric characters (can form macro names)
 
-   (These are bit masks)
    M4_SYNTAX_LQUOTE	A single characters left quote
-   M4_SYNTAX_RQUOTE	A single characters right quote
    M4_SYNTAX_BCOMM	A single characters begin comment delimiter
+
+   (These are bit masks)
+   M4_SYNTAX_RQUOTE	A single characters right quote
    M4_SYNTAX_ECOMM	A single characters end comment delimiter
 
    Besides adding new facilities, the use of a syntax table will reduce
@@ -64,7 +65,7 @@
 
    Default '\n' is both ECOMM and SPACE, depending on the context.  To
    solve the problem of quotes and comments that have diffent syntax
-   code based on the context, the [LR]QUOTE and [BE]COMM codes are bit
+   code based on the context, the RQUOTE and ECOMM codes are bit
    masks to add to an ordinary code.  If a character is made a quote it
    will be recognised if the basis code does not have precedence.
 
