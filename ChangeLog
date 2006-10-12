@@ -1,4 +1,6 @@
-2006-10-12  Eric Blake  <eric.b.blake@l-3com.com>
+2006-10-12  Eric Blake  <ebb9@byu.net>
+
+	* m4/input.c (m4_print_token) [DEBUG_INPUT]: Modernize.
 
 	* m4/m4private.h (m4__next_token_is_open): New prototype.
 	* m4/m4module.h (m4_push_single): Delete; push_string is an
