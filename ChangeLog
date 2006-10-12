@@ -1,3 +1,13 @@
+2006-10-11  Eric Blake  <ebb9@byu.net>
+
+	* src/main.c (usage, long_options): Add --debugmode as an alias
+	for --debug, to match macro name.
+	* tests/options.at (--debugmode): Rename from --debug, and test
+	for new alias.
+	(--discard-comments): Augment test.
+	* doc/m4.texinfo (Invoking m4, Debugmode): Document this.
+	* NEWS: Likewise.
+
 2006-10-10  Eric Blake  <ebb9@byu.net>
 
 	Trace improvements: debugmode(c) was always printing the last two

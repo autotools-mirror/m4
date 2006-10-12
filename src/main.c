@@ -130,7 +130,8 @@ Frozen state files:\n\
       fputs (_("\
 \n\
 Debugging:\n\
-  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug[=FLAGS], --debugmode[=FLAGS]\n\
+                               set debug level (no FLAGS implies `aeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
   -l, --debuglen=NUM           restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
@@ -194,6 +195,7 @@ static const struct option long_options[] =
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
   {"debuglen", required_argument, NULL, 'l'},
+  {"debugmode", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -471,7 +473,7 @@ main (int argc, char *const *argv, char *const *envp)
 	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
 	/* fall through */
       case DEBUGFILE_OPTION:
-	/* Don't call m4_debug_set_output here, as it has side effects.	 */
+	/* Don't call m4_debug_set_output here, as it has side effects.  */
 	debugfile = optarg;
 	break;
 

@@ -138,58 +138,6 @@ m@&t@4_dnl()
 AT_CLEANUP
 
 
-## ----------- ##
-## debug flags ##
-## ----------- ##
-
-AT_SETUP([--debug])
-
-AT_DATA([[in]],
-[[divnum
-len(`abc')
-]])
-
-dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
-AT_CHECK_M4([-tlen in], [0], [[0
-3
-]], [[m4trace: -1- len(`abc') -> `3'
-]])
-
-dnl Test all flags.
-AT_CHECK_M4([-dV in], [0], [[0
-3
-]], [[m4debug: module m4: opening file
-m4debug: module m4: init hook called
-m4debug: module m4: opened
-m4debug: module m4: builtins loaded
-m4debug: module gnu: opening file
-m4debug: module gnu: opened
-m4debug: module gnu: builtins loaded
-m4debug: module gnu: macros loaded
-m4debug: path search for `in' found `in'
-m4debug: input read from in
-m4trace:in:1: -1- id 1: divnum ... = <divnum>{m4}
-m4trace:in:1: -1- id 1: divnum -> `0'
-m4trace:in:2: -1- id 2: len ... = <len>{m4}
-m4trace:in:2: -1- id 2: len(`abc') -> `3'
-m4debug:in:3: input exhausted
-m4debug: module gnu: symbols unloaded
-m4debug: module gnu: finish hook called
-m4debug: module gnu: closed
-m4debug: module m4: symbols unloaded
-m4debug: module m4: resident module not closed
-]])
-
-dnl Test addition and subtraction of flags.
-AT_CHECK_M4([-d-e -d+xt in], [0], [[0
-3
-]], [[m4trace: -1- id 1: divnum
-m4trace: -1- id 2: len(`abc')
-]])
-
-AT_CLEANUP
-
-
 ## --------- ##
 ## debugfile ##
 ## --------- ##
@@ -288,6 +236,64 @@ AT_CHECK_M4([--debuglen=3 -l0 in], [0], [[long string
 AT_CLEANUP
 
 
+## --------- ##
+## debugmode ##
+## --------- ##
+
+AT_SETUP([--debugmode])
+
+AT_DATA([[in]],
+[[divnum
+len(`abc')
+]])
+
+dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
+AT_CHECK_M4([-tlen in], [0], [[0
+3
+]], [[m4trace: -1- len(`abc') -> `3'
+]])
+
+dnl Test all flags.
+AT_CHECK_M4([-dV in], [0], [[0
+3
+]], [[m4debug: module m4: opening file
+m4debug: module m4: init hook called
+m4debug: module m4: opened
+m4debug: module m4: builtins loaded
+m4debug: module gnu: opening file
+m4debug: module gnu: opened
+m4debug: module gnu: builtins loaded
+m4debug: module gnu: macros loaded
+m4debug: path search for `in' found `in'
+m4debug: input read from in
+m4trace:in:1: -1- id 1: divnum ... = <divnum>{m4}
+m4trace:in:1: -1- id 1: divnum -> `0'
+m4trace:in:2: -1- id 2: len ... = <len>{m4}
+m4trace:in:2: -1- id 2: len(`abc') -> `3'
+m4debug:in:3: input exhausted
+m4debug: module gnu: symbols unloaded
+m4debug: module gnu: finish hook called
+m4debug: module gnu: closed
+m4debug: module m4: symbols unloaded
+m4debug: module m4: resident module not closed
+]])
+
+dnl Test addition and subtraction of flags.
+AT_CHECK_M4([--debug=-e --debugmode=+xt in], [0], [[0
+3
+]], [[m4trace: -1- id 1: divnum
+m4trace: -1- id 2: len(`abc')
+]])
+
+dnl Test that shorter prefix is ambiguous.
+AT_CHECK_M4([--debu], [1], [],
+[[m4: option `--debu' is ambiguous
+Try `m4 --help' for more information.
+]])
+
+AT_CLEANUP
+
+
 ## ---------------- ##
 ## discard comments ##
 ## ---------------- ##
@@ -296,7 +302,7 @@ AT_SETUP([--discard-comments])
 
 AT_DATA([[in]],
 [[This is not a comment # but this is.
-# This line should dissappear completely.
+# This line should disappear completely.
 This should not disappear.
 changecom(`<!--', `-->')
 html <!--
@@ -308,6 +314,14 @@ AT_CHECK_M4([-c in], [0],
 [[This is not a comment This should not disappear.
 
 html  ends.
+]])
+
+dnl check that even when discarding, a comment must be terminated by EOF
+AT_DATA([in], [[changecom(`/*', `*/')dnl
+/* unterminated comment
+]])
+AT_CHECK_M4([--discard-comments in], [1], [],
+[[m4:in:2: end of file in comment
 ]])
 
 AT_CLEANUP

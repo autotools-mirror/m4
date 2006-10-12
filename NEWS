@@ -67,6 +67,7 @@ promoted to 2.0.
   the definition of the macro being expanded.  The 'e' flag has been
   updated to output non-text expansions.  Also, the `--debug' option now
   understands `-' and `+' modifiers, the way `debugmode' has always done.
+  The option `--debugmode' is added as an alias for `-d'.
 
 * The semantics of `traceon' and `traceoff' now match traditional
   implementations: when called without arguments, they affect global state

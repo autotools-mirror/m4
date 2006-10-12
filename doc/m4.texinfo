@@ -678,13 +678,18 @@ scripts.
 @table @code
 @item -d@r{[}@var{FLAGS}@r{]}
 @itemx --debug@r{[}=@var{FLAGS}@r{]}
+@itemx --debugmode@r{[}=@var{FLAGS}@r{]}
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
 meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
 @samp{aeq}.  When the option is presented multiple times, if later
 @var{FLAGS} starts with @samp{-} or @samp{+}, they are cumulative,
-otherwise the later flags override all earlier occurrences.
+otherwise the later flags override all earlier occurrences.  The
+spelling @option{--debug} is recognized as an unambiguous option for
+compatibility with earlier versions of @acronym{GNU} M4, but for
+consistency with the builtin name, you can also use the spelling
+@option{--debugmode}.
 
 @item --debugfile=@var{FILE}
 @itemx -o @var{FILE}
@@ -1316,6 +1321,8 @@ It is an error if the end of file occurs while collecting arguments.
 
 @comment status: 1
 @example
+hello world
+@result{}hello world
 define(
 ^D
 @error{}m4:stdin:1: end of file in argument list
@@ -2893,7 +2900,8 @@ display.
 
 @cindex controlling debugging output
 @cindex debugging output, controlling
-The @option{--debug} option to @code{m4} (or @option{-d},
+The @option{--debug} option to @code{m4} (also spelled
+@option{--debugmode} or @option{-d},
 @pxref{Invoking m4}) controls the amount of details presented in three
 categories of output.  Trace output is requested by @code{traceon}
 (@pxref{Trace}), and each line is prefixed by @samp{m4trace:} in
@@ -3212,7 +3220,7 @@ next newline, on whatever line containing it, will still be discarded.
 @example
 dnl(`args are ignored, but side effects occur',
 define(`foo', `like this')) while this text is ignored: undefine(`foo')
-@error{}m4:stdin:2: Warning: dnl: extra arguments ignored: 2 > 0
+@error{}m4:stdin:1: Warning: dnl: extra arguments ignored: 2 > 0
 See how `foo' was defined, foo?
 @result{}See how foo was defined, like this?
 @end example
