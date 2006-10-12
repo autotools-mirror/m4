@@ -620,7 +620,7 @@ skip_line (void)
       i->type = INPUT_STRING_WRAP;
       i->u.u_s.string = "";
       i->u.u_s.name = current_file;
-      i->u.u_s.lineno = current_line + 1;  /* Account for parsed `\n'.  */
+      i->u.u_s.lineno = current_line + start_of_input_line;
       isp = i;
     }
 }

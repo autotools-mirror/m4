@@ -1,3 +1,10 @@
+2006-10-12  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Location): Fix typo in previous commit.
+	(Changeword): Catch one more case.
+	* src/input.c (skip_line): Fix case when outer file used macro to
+	supply the \n.
+
 2006-10-11  Eric Blake  <ebb9@byu.net>
 
 	* src/input.c (enum input_type): Add additional types, to shave

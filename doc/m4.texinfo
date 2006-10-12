@@ -2897,14 +2897,20 @@ ifdef(`changeword', `', `errprint(` skipping: no changeword support
 ')m4exit(`77')')dnl
 define(`bar
 ', defn(`dnl'))dnl
+define(`baz', `dnl
+include(`foo') ignored
+dnl')dnl
 changeword(`\([_a-zA-Z][_a-zA-Z0-9]*\|bar
 \)')
 @result{}
 __file__:__line__
-@result{}stdin:7
-include(`foo') still ignored
+@result{}stdin:10
+include(`foo') ignored
 __file__:__line__
-@result{}stdin:9
+@result{}stdin:12
+baz ignored
+__file__:__line__
+@result{}stdin:14
 define(`bar
 ', defn(`__file__'))
 @result{}
@@ -2916,7 +2922,7 @@ define(`bar
 include(`foo')
 @result{}1
 __file__:__line__
-@result{}stdin:16
+@result{}stdin:21
 @end example
 @end ignore
 
@@ -4477,7 +4483,7 @@ with @code{m4wrap} (@pxref{M4wrap}) is the point at which the
 though wrapped text came from line 0 of the file ``''.
 
 @example
-define(`echo', `$@')
+define(`echo', `$@@')
 @result{}
 define(`foo', `echo(__line__
 __line__)')
