@@ -1,3 +1,10 @@
+2006-10-13  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_builtin, m4_indir): Allow transparent
+	handling of defn results.
+	* doc/m4.texinfo (Builtin, Indir): Add test cases.
+	* NEWS: Document this.
+
 2006-10-12  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Location): Fix typo in previous commit.

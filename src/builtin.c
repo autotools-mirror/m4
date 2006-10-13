@@ -19,7 +19,7 @@
    02110-1301  USA
 */
 
-/* Code for all builtin macros, initialisation of symbol table, and
+/* Code for all builtin macros, initialization of symbol table, and
    expansion of user defined macros.  */
 
 #include "m4.h"
@@ -34,8 +34,8 @@ extern FILE *popen ();
 
 #define ARG(i)	(argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
 
-/* Initialisation of builtin and predefined macros.  The table
-   "builtin_tab" is both used for initialisation, and by the "builtin"
+/* Initialization of builtin and predefined macros.  The table
+   "builtin_tab" is both used for initialization, and by the "builtin"
    builtin.  */
 
 #define DECLARE(name) \
@@ -99,7 +99,7 @@ builtin_tab[] =
   { "__file__",		TRUE,	FALSE,	FALSE,	m4___file__ },
   { "__line__",		TRUE,	FALSE,	FALSE,	m4___line__ },
   { "__program__",	TRUE,	FALSE,	FALSE,	m4___program__ },
-  { "builtin",		TRUE,	FALSE,	TRUE,	m4_builtin },
+  { "builtin",		TRUE,	TRUE,	TRUE,	m4_builtin },
   { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
   { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
 #ifdef ENABLE_CHANGEWORD
@@ -123,7 +123,7 @@ builtin_tab[] =
   { "include",		FALSE,	FALSE,	TRUE,	m4_include },
   { "incr",		FALSE,	FALSE,	TRUE,	m4_incr },
   { "index",		FALSE,	FALSE,	TRUE,	m4_index },
-  { "indir",		TRUE,	FALSE,	TRUE,	m4_indir },
+  { "indir",		TRUE,	TRUE,	TRUE,	m4_indir },
   { "len",		FALSE,	FALSE,	TRUE,	m4_len },
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
   { "m4wrap",		FALSE,	FALSE,	TRUE,	m4_m4wrap },
@@ -239,7 +239,7 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 }
 
 /*-----------------------------------------------.
-| Initialise all builtin and predefined macros.	 |
+| Initialize all builtin and predefined macros.	 |
 `-----------------------------------------------*/
 
 void
@@ -712,17 +712,34 @@ static void
 m4_builtin (struct obstack *obs, int argc, token_data **argv)
 {
   const builtin *bp;
-  const char *name = ARG (1);
+  const char *name;
 
   if (bad_argc (argv[0], argc, 2, -1))
     return;
+  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+    {
+      M4ERROR ((warning_status, 0,
+		"Warning: %s: invalid macro name ignored", ARG (0)));
+      return;
+    }
 
+  name = ARG (1);
   bp = find_builtin_by_name (name);
   if (bp->func == m4_placeholder)
     M4ERROR ((warning_status, 0,
 	      "undefined builtin `%s'", name));
   else
-    (*bp->func) (obs, argc - 1, argv + 1);
+    {
+      int i;
+      if (! bp->groks_macro_args)
+	for (i = 2; i < argc; i++)
+	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
+	    {
+	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
+	      TOKEN_DATA_TEXT (argv[i]) = "";
+	    }
+      bp->func (obs, argc - 1, argv + 1);
+    }
 }
 
 /*------------------------------------------------------------------------.
@@ -736,23 +753,40 @@ static void
 m4_indir (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
-  const char *name = ARG (1);
+  const char *name;
 
   if (bad_argc (argv[0], argc, 2, -1))
     return;
+  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+    {
+      M4ERROR ((warning_status, 0,
+		"Warning: %s: invalid macro name ignored", ARG (0)));
+      return;
+    }
 
+  name = ARG (1);
   s = lookup_symbol (name, SYMBOL_LOOKUP);
   if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
     M4ERROR ((warning_status, 0,
 	      "undefined macro `%s'", name));
   else
-    call_macro (s, argc - 1, argv + 1, obs);
+    {
+      int i;
+      if (! SYMBOL_MACRO_ARGS (s))
+	for (i = 2; i < argc; i++)
+	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
+	    {
+	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
+	      TOKEN_DATA_TEXT (argv[i]) = "";
+	    }
+      call_macro (s, argc - 1, argv + 1, obs);
+    }
 }
 
 /*-------------------------------------------------------------------------.
 | The macro "defn" returns the quoted definition of the macro named by the |
 | first argument.  If the macro is builtin, it will push a special	   |
-| macro-definition token on ht input stack.				   |
+| macro-definition token on the input stack.				   |
 `-------------------------------------------------------------------------*/
 
 static void
