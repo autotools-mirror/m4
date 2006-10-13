@@ -1,3 +1,24 @@
+2006-10-13  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_CONFIG_HEADERS): Name the template config.hin,
+	not config-h.in.
+	* modules/gnu.c (builtin, indir): Transparently handle builtin
+	tokens from defn.
+	* doc/m4.texinfo (Indir, Builtin): Remerge from branch.
+	* m4/input.c (m4_pop_wrapup): Display debug message when switching
+	to wrapped text.
+	(m4_input_init): No need to use empty file any more.
+	(file_print): Display correct file name.
+	* m4/utility.c (m4_error, m4_warn): Ensure we don't try to
+	dereference a NULL file name.
+	* m4/m4module.h (m4_pop_wrapup): New parameter.
+	(m4_symbol_value_groks_macro, m4_symbol_groks_macro): New
+	prototypes.
+	* m4/m4private.h (m4_symbol_value_groks_macro): Faster version.
+	* m4/symtab.c (m4_symbol_value_groks_macro): New method.
+	* src/main.c (main): Adjust caller.
+	* tests/options.at (--debugmode): Test more output from -dV.
+
 2006-10-12  Eric Blake  <ebb9@byu.net>
 
 	* m4/input.c (m4_print_token) [DEBUG_INPUT]: Modernize.

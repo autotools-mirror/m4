@@ -580,6 +580,14 @@ m4_symbol_value_create (void)
   return xzalloc (sizeof (m4_symbol_value));
 }
 
+#undef m4_symbol_groks_macro
+bool
+m4_symbol_value_groks_macro (m4_symbol_value *value)
+{
+  assert (value);
+  return BIT_TEST (value->flags, VALUE_MACRO_ARGS_BIT);
+}
+
 #undef m4_get_symbol_value
 m4_symbol_value *
 m4_get_symbol_value (m4_symbol *symbol)

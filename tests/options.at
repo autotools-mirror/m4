@@ -243,19 +243,24 @@ AT_CLEANUP
 AT_SETUP([--debugmode])
 
 AT_DATA([[in]],
-[[divnum
+[[include(`nested')dnl
 len(`abc')
 ]])
 
+AT_DATA([[nested]],
+[[m4wrap(`divnum
+')dnl
+]])
+
 dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
-AT_CHECK_M4([-tlen in], [0], [[0
-3
+AT_CHECK_M4([-tlen in], [0], [[3
+0
 ]], [[m4trace: -1- len(`abc') -> `3'
 ]])
 
 dnl Test all flags.
-AT_CHECK_M4([-dV in], [0], [[0
-3
+AT_CHECK_M4([-dV in], [0], [[3
+0
 ]], [[m4debug: module m4: opening file
 m4debug: module m4: init hook called
 m4debug: module m4: opened
@@ -266,11 +271,25 @@ m4debug: module gnu: builtins loaded
 m4debug: module gnu: macros loaded
 m4debug: path search for `in' found `in'
 m4debug: input read from in
-m4trace:in:1: -1- id 1: divnum ... = <divnum>{m4}
-m4trace:in:1: -1- id 1: divnum -> `0'
-m4trace:in:2: -1- id 2: len ... = <len>{m4}
-m4trace:in:2: -1- id 2: len(`abc') -> `3'
+m4trace:in:1: -1- id 1: include ... = <include>{m4}
+m4debug:in:1: path search for `nested' found `nested'
+m4debug:in:1: input read from nested
+m4trace:in:1: -1- id 1: include(`nested') -> <file: nested>
+m4trace:nested:1: -1- id 2: m4wrap ... = <m4wrap>{m4}
+m4trace:nested:1: -1- id 2: m4wrap(`divnum
+') -> `'
+m4trace:nested:2: -1- id 3: dnl ... = <dnl>{m4}
+m4trace:nested:2: -1- id 3: dnl -> `'
+m4debug:nested:3: input reverted to in, line 1
+m4trace:in:1: -1- id 4: dnl ... = <dnl>{m4}
+m4trace:in:1: -1- id 4: dnl -> `'
+m4trace:in:2: -1- id 5: len ... = <len>{m4}
+m4trace:in:2: -1- id 5: len(`abc') -> `3'
 m4debug:in:3: input exhausted
+m4debug: input from m4wrap recursion level 1
+m4trace:nested:1: -1- id 6: divnum ... = <divnum>{m4}
+m4trace:nested:1: -1- id 6: divnum -> `0'
+m4debug: input from m4wrap exhausted
 m4debug: module gnu: symbols unloaded
 m4debug: module gnu: finish hook called
 m4debug: module gnu: closed
@@ -279,10 +298,15 @@ m4debug: module m4: resident module not closed
 ]])
 
 dnl Test addition and subtraction of flags.
-AT_CHECK_M4([--debug=-e --debugmode=+xt in], [0], [[0
-3
-]], [[m4trace: -1- id 1: divnum
-m4trace: -1- id 2: len(`abc')
+AT_CHECK_M4([--debug=-e --debugmode=+xt in], [0], [[3
+0
+]], [[m4trace: -1- id 1: include(`nested')
+m4trace: -1- id 2: m4wrap(`divnum
+')
+m4trace: -1- id 3: dnl
+m4trace: -1- id 4: dnl
+m4trace: -1- id 5: len(`abc')
+m4trace: -1- id 6: divnum
 ]])
 
 dnl Test that shorter prefix is ambiguous.

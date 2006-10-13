@@ -2106,6 +2106,7 @@ where the definition that was in effect before argument collection is
 used.
 
 @example
+$ @kbd{m4 -d}
 define(`f', `1')
 @result{}
 f(define(`f', `2'))
@@ -2114,6 +2115,28 @@ indir(`f', define(`f', `3'))
 @result{}3
 indir(`f', undefine(`f'))
 @error{}m4:stdin:4: Warning: indir: undefined macro `f'
+@result{}
+@end example
+
+When handed the result of @code{defn} (@pxref{Defn}) as one of its
+arguments, @code{indir} defers to the invoked @var{name} for whether a
+token representing a builtin is recognized or flattened to the empty
+string.
+
+@example
+$ @kbd{m4 -d}
+indir(defn(`defn'), `divnum')
+@error{}m4:stdin:1: Warning: indir: invalid macro name ignored
+@result{}
+indir(`define', defn(`defn'), `divnum')
+@error{}m4:stdin:2: Warning: define: invalid macro name ignored
+@result{}
+indir(`define', `foo', defn(`divnum'))
+@result{}
+foo
+@result{}0
+indir(`divert', defn(`foo'))
+@error{}m4:stdin:5: Warning: divert: empty string treated as 0
 @result{}
 @end example
 
@@ -2147,6 +2170,10 @@ define(`foo', `bar')
 @result{}hidden
 foo
 @result{}foo
+builtin(`define', `foo', defn(`divnum'))
+@result{}
+foo
+@result{}0
 builtin(`define', `foo', `BAR')
 @result{}
 foo

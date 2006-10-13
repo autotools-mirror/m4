@@ -29,7 +29,7 @@ AC_CONFIG_AUX_DIR([ltdl/config])
 AC_CONFIG_MACRO_DIR([ltdl/m4])
 AC_CONFIG_LIBOBJ_DIR([gnu])
 AC_CONFIG_TESTDIR([tests])
-AC_CONFIG_HEADERS([gnu/config.h:gnu/config-h.in])
+AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
@@ -57,8 +57,7 @@ AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
 dnl Autoconf recommends that packages use lowercase for their package-specific
 dnl prefix for cache variables.  But in the case of m4, that collides with
 dnl the m4_ namespace provided by m4sugar, so we prefer M4_ as our
-dnl package-specific prefix.  FIXME - consistently use M4_ in the m4 macros
-dnl that feed the creation of configure.
+dnl package-specific prefix.
 m4_pattern_forbid([^M4_[A-Z]])
 
 AC_DEFUN([M4_DEFAULT_PRELOAD], [m4 traditional gnu])

@@ -652,7 +652,7 @@ main (int argc, char *const *argv, char *const *envp)
       }
 
   /* Now handle wrapup text.  */
-  while (m4_pop_wrapup ())
+  while (m4_pop_wrapup (context))
     m4_macro_expand_input (context);
 
   if (frozen_file_to_write)

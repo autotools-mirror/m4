@@ -314,7 +314,8 @@ file_clean (m4_input_block *me, m4 *context)
 static void
 file_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  const char *text = m4_get_current_file (context);
+  const char *text = (me->funcs == &file_init_funcs ? me->u.u_f.name
+		      : m4_get_current_file (context));
   obstack_grow (obs, "<file: ", strlen ("<file: "));
   obstack_grow (obs, text, strlen (text));
   obstack_1grow (obs, '>');
@@ -646,8 +647,10 @@ pop_input (m4 *context)
    Since wrapup text can install new wrapup text, pop_wrapup () returns
    false when there is no wrapup text on the stack, and true otherwise.  */
 bool
-m4_pop_wrapup (void)
+m4_pop_wrapup (m4 *context)
 {
+  static size_t level = 0;
+
   next = NULL;
   obstack_free (current_input, NULL);
   free (current_input);
@@ -655,10 +658,17 @@ m4_pop_wrapup (void)
   if (wsp == NULL)
     {
       obstack_free (wrapup_stack, NULL);
+      m4_set_current_file (context, NULL);
+      m4_set_current_line (context, 0);
+      m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
+			_("input from m4wrap exhausted"));
       current_input = NULL;
       DELETE (wrapup_stack);
       return false;
     }
+
+  m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
+		    _("input from m4wrap recursion level %d"), ++level);
 
   current_input = wrapup_stack;
   wrapup_stack = (m4_obstack *) xmalloc (sizeof (m4_obstack));
@@ -897,18 +907,14 @@ consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 void
 m4_input_init (m4 *context)
 {
-  /* FIXME: The user should never be able to see the empty string as a
-     file name, even during m4wrap expansion.  */
-  m4_set_current_file (context, "");
+  obstack_init (&file_names);
+  m4_set_current_file (context, NULL);
   m4_set_current_line (context, 0);
-
 
   current_input = (m4_obstack *) xmalloc (sizeof (m4_obstack));
   obstack_init (current_input);
   wrapup_stack = (m4_obstack *) xmalloc (sizeof (m4_obstack));
   obstack_init (wrapup_stack);
-
-  obstack_init (&file_names);
 
   /* Allocate an object in the current chunk, so that obstack_free
      will always work even if the first token parsed spills to a new

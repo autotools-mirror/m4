@@ -127,6 +127,7 @@ m4_error (m4 *context, int status, int errnum, const char *format, ...)
 {
   va_list args;
   int line = m4_get_current_line (context);
+  assert (m4_get_current_file (context) || ! line);
   va_start (args, format);
   if (status == EXIT_SUCCESS && m4_get_fatal_warnings_opt (context))
     status = EXIT_FAILURE;
@@ -170,6 +171,8 @@ m4_warn (m4 *context, int errnum, const char *format, ...)
       int status = EXIT_SUCCESS;
       int line = m4_get_current_line (context);
       char *full_format = xasprintf(_("Warning: %s"), format);
+
+      assert (m4_get_current_file (context) || ! line);
       va_start (args, format);
       if (m4_get_fatal_warnings_opt (context))
 	status = EXIT_FAILURE;

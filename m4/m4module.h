@@ -229,6 +229,7 @@ extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *, bool,
 extern void	m4_symbol_print		(m4_symbol *, m4_obstack *, bool,
 					 const char *, const char *, bool,
 					 size_t, bool);
+extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
@@ -244,6 +245,8 @@ extern void	m4_symbol_print		(m4_symbol *, m4_obstack *, bool,
 	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_placeholder(symbol)				\
 	(m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
+#define m4_symbol_groks_macro(symbol)					\
+	(m4_symbol_value_groks_macro (m4_get_symbol_value (symbol)))
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);
@@ -401,7 +404,7 @@ extern	void	m4_push_builtin	(m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
 extern	m4_input_block	*m4_push_string_finish	(void);
 extern	void	m4_push_wrapup	(m4 *, const char *);
-extern	bool	m4_pop_wrapup	(void);
+extern	bool	m4_pop_wrapup	(m4 *);
 extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 
 

@@ -46,7 +46,7 @@
   BUILTIN (__file__,	false,	false,	false,	0,	0 )	\
   BUILTIN (__line__,	false,	false,	false,	0,	0  )	\
   BUILTIN (__program__,	false,	false,	false,	0,	0  )	\
-  BUILTIN (builtin,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (builtin,	true,	true,	false,	1,	-1 )	\
   BUILTIN (changeresyntax,false,true,	false,	1,	1  )	\
   BUILTIN (changesyntax,false,	true,	false,	1,	-1 )	\
   BUILTIN (debugfile,	false,	false,	false,	0,	1  )	\
@@ -54,7 +54,7 @@
   BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
   BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
   BUILTIN (format,	false,	true,	false,	1,	-1 )	\
-  BUILTIN (indir,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (indir,	true,	true,	false,	1,	-1 )	\
   BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
   BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
   BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
@@ -329,17 +329,27 @@ M4BUILTIN_HANDLER (__program__)
  **/
 M4BUILTIN_HANDLER (builtin)
 {
-  const m4_builtin *bp = NULL;
-  const char *name = M4ARG (1);
+  if (! m4_is_symbol_value_text (argv[1]))
+    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+  else
+    {
+      const char *name = M4ARG (1);
+      const m4_builtin *bp = m4_builtin_find_by_name (NULL, name);
 
-  bp = m4_builtin_find_by_name (NULL, name);
-
-  if (bp == NULL)
-    m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
-  else if (!m4_bad_argc (context, argc - 1, argv + 1,
-			 bp->min_args, bp->max_args,
-			 (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
-    bp->func (context, obs, argc - 1, argv + 1);
+      if (bp == NULL)
+	m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
+      else if (!m4_bad_argc (context, argc - 1, argv + 1,
+			     bp->min_args, bp->max_args,
+			     (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
+	{
+	  int i;
+	  if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
+	    for (i = 2; i < argc; i++)
+	      if (! m4_is_symbol_value_text (argv[i]))
+		m4_set_symbol_value_text (argv[i], "");
+	  bp->func (context, obs, argc - 1, argv + 1);
+	}
+    }
 }
 
 
@@ -537,14 +547,26 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (indir)
 {
-  const char * name   = M4ARG (1);
-  m4_symbol *  symbol = m4_symbol_lookup (M4SYMTAB, name);
-
-  if (symbol == NULL)
-    m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+  if (! m4_is_symbol_value_text (argv[1]))
+    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
   else
-    m4_macro_call (context, m4_get_symbol_value (symbol), obs,
-		   argc - 1, argv + 1);
+    {
+      const char *name = M4ARG (1);
+      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
+
+      if (symbol == NULL)
+	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+      else
+	{
+	  int i;
+	  if (! m4_symbol_groks_macro (symbol))
+	    for (i = 2; i < argc; i++)
+	      if (! m4_is_symbol_value_text (argv[i]))
+		m4_set_symbol_value_text (argv[i], "");
+	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
+			 argc - 1, argv + 1);
+	}
+    }
 }
 
 
