@@ -23,8 +23,7 @@ AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 
-m4_pattern_forbid([^M4_])
-m4_pattern_allow([^M4_cv_])
+m4_pattern_forbid([^M4_[A-Z]])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])

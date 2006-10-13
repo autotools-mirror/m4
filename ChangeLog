@@ -1,5 +1,8 @@
 2006-10-13  Eric Blake  <ebb9@byu.net>
 
+	* configure.ac (m4_pattern_forbid): Narrow the range of forbidden
+	macros, to work with recent gnulib-tool update.
+
 	* src/builtin.c (m4_builtin, m4_indir): Allow transparent
 	handling of defn results.
 	* doc/m4.texinfo (Builtin, Indir): Add test cases.
