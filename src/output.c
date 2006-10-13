@@ -76,6 +76,13 @@ static int output_unused;	/* current value of (size - used) */
 
 /* Number of input line we are generating output for.  */
 int output_current_line;
+
+typedef struct temp_dir m4_temp_dir;
+
+/* Temporary directory holding all spilled diversion files.  */
+static m4_temp_dir *output_temp_dir;
+
+
 
 /*------------------------.
 | Output initialisation.  |
@@ -97,6 +104,48 @@ output_init (void)
   output_file = stdout;
   output_cursor = NULL;
   output_unused = 0;
+}
+
+/* Clean up any temporary directory.  Designed for use as an atexit
+   handler, where it is not safe to call exit() recursively; so this
+   calls _exit if a problem is encountered.  */
+static void
+cleanup_tmpfile (void)
+{
+  if (cleanup_temp_dir (output_temp_dir) != 0)
+    _exit (exit_failure);
+}
+
+/* Create a temporary file open for reading and writing in a secure
+   temp directory.  The file will be automatically closed and deleted
+   on a fatal signal.  When done with the file, close it with
+   close_stream_temp.  Exits on failure, so the return value is always
+   an open file.  */
+static FILE *
+m4_tmpfile (void)
+{
+  static unsigned int count;
+  char *name;
+  FILE *file;
+
+  if (output_temp_dir == NULL)
+    {
+      errno = 0;
+      output_temp_dir = create_temp_dir ("m4-", NULL, true);
+      if (output_temp_dir == NULL)
+	M4ERROR ((EXIT_FAILURE, errno,
+		  "cannot create temporary file for diversion"));
+      atexit (cleanup_tmpfile);
+    }
+  name = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, count++);
+  register_temp_file (output_temp_dir, name);
+  errno = 0;
+  file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
+  if (file == NULL)
+    M4ERROR ((EXIT_FAILURE, errno,
+	      "cannot create temporary file for diversion"));
+  free (name);
+  return file;
 }
 
 /*-----------------------------------------------------------------------.
@@ -154,10 +203,7 @@ make_room_for (int length)
       /* Create a temporary file, write the in-memory buffer of the
 	 diversion to this file, then release the buffer.  */
 
-      selected_diversion->file = tmpfile ();
-      if (selected_diversion->file == NULL)
-	M4ERROR ((EXIT_FAILURE, errno,
-		  "ERROR: cannot create temporary file for diversion"));
+      selected_diversion->file = m4_tmpfile ();
       if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
 	M4ERROR ((warning_status, errno,
 		  "Warning: cannot protect diversion across forks"));
@@ -485,7 +531,7 @@ insert_diversion (int divnum)
 
   if (diversion->file)
     {
-      fclose (diversion->file);
+      close_stream_temp (diversion->file);
       diversion->file = NULL;
     }
   else if (diversion->buffer)

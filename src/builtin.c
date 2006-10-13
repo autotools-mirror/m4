@@ -1088,7 +1088,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 		    "non-numeric argument to builtin `%s'", ARG (0)));
 	else
 	  {
-	    fp = path_search (ARG (i), NULL);
+	    fp = m4_path_search (ARG (i), NULL);
 	    if (fp != NULL)
 	      {
 		insert_file (fp);
@@ -1200,7 +1200,7 @@ include (int argc, token_data **argv, boolean silent)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = path_search (ARG (1), &name);
+  fp = m4_path_search (ARG (1), &name);
   if (fp == NULL)
     {
       if (!silent)
@@ -1329,16 +1329,11 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
      detect any errors it might have encountered.  */
   debug_set_output (NULL);
   debug_flush_files ();
-  if (close_stream (stdout) != 0)
-    {
-      M4ERROR ((warning_status, errno, "write error"));
-      if (exit_code == 0)
-	exit_code = EXIT_FAILURE;
-    }
-  if (close_stream (stderr) != 0 && exit_code == 0)
-    exit_code = EXIT_FAILURE;
-  if (exit_code == 0 && retcode != 0)
+  if (exit_code == EXIT_SUCCESS && retcode != EXIT_SUCCESS)
     exit_code = retcode;
+  /* Propagate non-zero status to atexit handlers.  */
+  if (exit_code != EXIT_SUCCESS)
+    exit_failure = exit_code;
   exit (exit_code);
 }
 

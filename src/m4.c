@@ -204,11 +204,6 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
       printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
-
-  if (close_stream (stdout) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "write error"));
-  if (close_stream (stderr) != 0)
-    exit (EXIT_FAILURE); /* Can't really do much else without stderr.  */
   exit (status);
 }
 
@@ -286,6 +281,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
+  atexit (close_stdout);
 
   include_init ();
   debug_init ();
@@ -421,20 +417,15 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case VERSION_OPTION:
-	 printf ("%s\n", PACKAGE_STRING);
-	 fputs ("\
+	printf ("%s\n", PACKAGE_STRING);
+	fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 \n\
 Written by Rene' Seindal.\n\
 ", stdout);
-
-	 if (close_stream (stdout) != 0)
-	   M4ERROR ((EXIT_FAILURE, errno, "write error"));
-	 if (close_stream (stderr) != 0)
-	   exit (EXIT_FAILURE);
-	 exit (EXIT_SUCCESS);
+	exit (EXIT_SUCCESS);
 	break;
 
       case HELP_OPTION:
@@ -532,7 +523,7 @@ Written by Rene' Seindal.\n\
 	else
 	  {
 	    const char *name;
-	    fp = path_search (argv[optind], &name);
+	    fp = m4_path_search (argv[optind], &name);
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
@@ -570,10 +561,5 @@ Written by Rene' Seindal.\n\
       make_diversion (0);
       undivert_all ();
     }
-
-  if (close_stream (stdout) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "write error"));
-  if (close_stream (stderr) != 0)
-    exit (EXIT_FAILURE); /* Can't really do much else without stderr.  */
   exit (retcode);
 }

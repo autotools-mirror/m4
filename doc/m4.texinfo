@@ -3240,8 +3240,45 @@ limit to the overall memory usable by all diversions taken altogether
 (512K, currently).  When this maximum is about to be exceeded,
 a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
+When creating the temporary file, @code{m4} honors the value of the
+environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
 So, it is theoretically possible that the number of diversions be
 limited by the number of available file descriptors.
+
+@ignore
+@comment We need to test spilled diversions, but don't need to expose
+@comment this highly repetitive test in the manual.
+
+@example
+divert(`-1')define(`f', `.')
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+divert`'dnl
+len(f)
+@result{}1048576
+divert(`1')
+f
+divert(`-1')undivert
+@end example
+@end ignore
 
 @c FIXME: need some explanation here why this is a useful feature, not
 @c just how you use it.
@@ -4394,16 +4431,9 @@ addition of a new macro @code{mkstemp} that behaves like @acronym{GNU}
 @code{maketemp}, so a future version of @acronym{GNU} M4 may have
 changes in this area.
 
-@ignore
-@c This test makes sure maketemp gets testsuite coverage, but is
-@c somewhat complex for use in the manual.
 @example
-dnl This test assumes /tmp is a valid directory name, which is not true
-dnl for native Windows.
-ifdef(`__unix__', , `errprint(` skipping: not sure /tmp exists
-')m4exit(`77')')dnl
-define(`file1', maketemp(`/tmp/fooXXXXXX'))dnl
-define(`file2', maketemp(`/tmp/fooXXXXXX'))dnl
+define(`file1', maketemp(`fooXXXXXX'))dnl
+define(`file2', maketemp(`fooXXXXXX'))dnl
 ifelse(file1, file2, `same', `different')
 @result{}different
 syscmd(`rm 'file1 file2)
@@ -4411,7 +4441,6 @@ syscmd(`rm 'file1 file2)
 sysval
 @result{}0
 @end example
-@end ignore
 
 @node Miscellaneous
 @chapter Miscellaneous builtin macros
@@ -5189,7 +5218,7 @@ the entire 1.4.x release series, a better implementation would be:
 
 @example
 define(`fatal_error',
-  `errprint(ifdef(`__program', `__program__', ``m4'')'dnl
+  `errprint(ifdef(`__program__', `__program__', ``m4'')'dnl
 `:ifelse(__line__, `0', `',
     `__file__:__line__:')` fatal error: $*
 ')m4exit(`1')')

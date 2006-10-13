@@ -111,7 +111,7 @@ add_include_directory (const char *dir)
    respect to the current working directory.  */
 
 FILE *
-path_search (const char *file, const char **result)
+m4_path_search (const char *file, const char **result)
 {
   FILE *fp;
   includes *incl;
@@ -154,7 +154,7 @@ path_search (const char *file, const char **result)
       strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
+      fprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");

@@ -49,16 +49,20 @@
 #include <sys/types.h>
 
 #include "binary-io.h"
+#include "clean-temp.h"
 #include "cloexec.h"
 #include "close-stream.h"
+#include "closeout.h"
 #include "error.h"
 #include "exit.h"
+#include "exitfail.h"
 #include "obstack.h"
 #include "stdio--.h"
 #include "stdlib--.h"
 #include "unistd--.h"
 #include "verror.h"
 #include "xalloc.h"
+#include "xvasprintf.h"
 
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
    merely typedef boolean as being int.  Or else, define these all.  */
@@ -418,7 +422,7 @@ const builtin *find_builtin_by_name (const char *);
 void include_init (void);
 void include_env_init (void);
 void add_include_directory (const char *);
-FILE *path_search (const char *, const char **);
+FILE *m4_path_search (const char *, const char **);
 
 /* File: eval.c  --- expression evaluation.  */
 

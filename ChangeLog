@@ -1,5 +1,27 @@
 2006-10-13  Eric Blake  <ebb9@byu.net>
 
+	Backport head's usage of clean-temp module, as it is cleaner than
+	using tmpfile-safer.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	clean-temp closeout', and remove tmpfile-safer.
+	* src/m4.h (includes): Adjust.
+	(m4_path_search): Rename from path_search, to avoid collision
+	with gnulib.
+	* src/m4.c (main): Install closeout handler.  Adjust caller.
+	(usage): Now done by closeout module.
+	* src/builtin.c (m4_m4exit): Likewise.
+	(m4_undivert, include): Adjust callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/path.c (m4_path_search): Rename from path_search.
+	* src/output.c (output_temp_dir): New variable.
+	(cleanup_tmpfile, m4_tmpfile): New functions, from head.
+	(insert_diversion, make_room_for): Use them.
+	* doc/m4.texinfo (Diversions): Document this, and add a test.
+	(Improved fatal_error): Fix typo.
+	(Maketemp): Port test to mingw, and no longer hide from
+	documentation.
+	* NEWS: Document the change in TMPDIR behavior.
+
 	* configure.ac (m4_pattern_forbid): Narrow the range of forbidden
 	macros, to work with recent gnulib-tool update.
 
