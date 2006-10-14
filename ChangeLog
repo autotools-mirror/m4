@@ -1,5 +1,7 @@
 2006-10-14  Eric Blake  <ebb9@byu.net>
 
+	* tests/others.at (stdin closed): Update to match previous patch.
+
 	* m4/input.c (file_clean): Don't close stdin twice, POSIX says it
 	is not portable.
 	Reported by Ralf Wildenhues.
