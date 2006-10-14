@@ -1,3 +1,11 @@
+2006-10-14  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (undivert): Merge from branch.
+	* doc/m4.texinfo (Improved fatal_error): Fix typo.
+	(Improved exch): New node, copied from branch.
+	(Improved cleardivert): Update from branch.
+	* THANKS: Update.
+
 2006-10-13  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (AC_CONFIG_HEADERS): Name the template config.hin,

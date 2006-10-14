@@ -268,6 +268,7 @@ Compatibility with other versions of @code{m4}
 
 Correct version of some examples
 
+* Improved exch::               Solution for @code{exch}
 * Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
@@ -5706,10 +5707,29 @@ demonstration purposes.  Improved versions of these composite macros are
 presented here.
 
 @menu
+* Improved exch::               Solution for @code{exch}
 * Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 @end menu
+
+@node Improved exch
+@section Solution for @code{exch}
+
+The @code{exch} macro (@pxref{Arguments}) as presented requires clients
+to double quote their arguments.  A nicer definition, which lets
+clients follow the rule of thumb of one level of quoting per level of
+parentheses, involves adding quotes in the definition of @code{exch}, as
+follows:
+
+@example
+define(`exch', ``$2', `$1'')
+@result{}
+define(exch(`expansion text', `macro'))
+@result{}
+macro
+@result{}expansion text
+@end example
 
 @node Improved foreach
 @section Solution for @code{foreach}
@@ -5795,19 +5815,35 @@ foreach(`a', ``1',`2',`3'', `a
 @section Solution for @code{cleardivert}
 
 The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
-called without arguments to clear all pending diversions.  A macro that
-achieves that as well is:
+called without arguments to clear all pending diversions.  That is
+because using undivert with an empty string for an argument is different
+than using it with no arguments at all.  Compare the earlier definition
+with one that takes the number of arguments into account:
 
-@comment ignore
 @example
 define(`cleardivert',
-`pushdef(`_num', divnum)divert(-1)ifelse($#, 0,
-  `undivert`'', `undivert($@@)')divert(_num)popdef(`_num')')
+  `pushdef(`_n', divnum)divert(`-1')undivert($@@)divert(_n)popdef(`_n')')
+@result{}
+divert(`1')one
+divert
+@result{}
+cleardivert
+@result{}
+undivert
+@result{}one
+@result{}
+define(`cleardivert',
+  `pushdef(`_num', divnum)divert(`-1')ifelse(`$#', `0',
+    `undivert`'', `undivert($@@)')divert(_num)popdef(`_num')')
+@result{}
+divert(`2')two
+divert
+@result{}
+cleardivert
+@result{}
+undivert
+@result{}
 @end example
-
-@noindent
-If called without arguments, it will call undivert without argument,
-otherwise they will be passed to undivert().
 
 @node Improved fatal_error
 @section Solution for @code{fatal_error}
@@ -5823,7 +5859,7 @@ the entire 1.4.x release series, a better implementation would be:
 @comment status: 1
 @example
 define(`fatal_error',
-  `errprint(ifdef(`__program', `__program__', ``m4'')'dnl
+  `errprint(ifdef(`__program__', `__program__', ``m4'')'dnl
 `:ifelse(__line__, `0', `',
     `__file__:__line__:')` fatal error: $*
 ')m4exit(`1')')

@@ -560,28 +560,35 @@ M4BUILTIN_HANDLER (divnum)
 M4BUILTIN_HANDLER (undivert)
 {
   int i = 0;
+  const char *me = M4ARG (0);
 
   if (argc == 1)
     m4_undivert_all (context);
   else
-    {
-      if (sscanf (M4ARG (1), "%d", &i) == 1)
-	m4_insert_diversion (context, i);
-      else if (m4_get_posixly_correct_opt (context))
-	m4_numeric_arg (context, argc, argv, 1, &i);
-      else
-	{
-	  FILE *fp = m4_path_search (context, M4ARG (1), (char **) NULL);
-	  if (fp != NULL)
-	    {
-	      m4_insert_file (context, fp);
-	      fclose (fp);
-	    }
-	  else
-	    m4_error (context, 0, errno, _("%s: cannot undivert `%s'"),
-		      M4ARG (0), M4ARG (1));
-	}
-    }
+    for (i = 1; i < argc; i++)
+      {
+	const char *str = M4ARG (i);
+	char *endp;
+	int diversion = strtol (str, &endp, 10);
+	if (*endp == '\0' && !isspace ((unsigned char) *str))
+	  m4_insert_diversion (context, diversion);
+	else if (m4_get_posixly_correct_opt (context))
+	  m4_numeric_arg (context, argc, argv, i, &diversion);
+	else
+	  {
+	    FILE *fp = m4_path_search (context, str, NULL);
+	    if (fp != NULL)
+	      {
+		m4_insert_file (context, fp);
+		if (fclose (fp) == EOF)
+		  m4_error (context, 0, errno, _("%s: error undiverting `%s'"),
+			    me, str);
+	      }
+	    else
+	      m4_error (context, 0, errno, _("%s: cannot undivert `%s'"),
+			me, str);
+	  }
+      }
 }
 
 
