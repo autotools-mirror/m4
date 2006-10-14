@@ -1,5 +1,9 @@
 2006-10-14  Eric Blake  <ebb9@byu.net>
 
+	* m4/input.c (file_clean): Don't close stdin twice, POSIX says it
+	is not portable.
+	Reported by Ralf Wildenhues.
+
 	* modules/m4.c (undivert): Merge from branch.
 	* doc/m4.texinfo (Improved fatal_error): Fix typo.
 	(Improved exch): New node, copied from branch.

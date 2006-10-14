@@ -298,7 +298,8 @@ file_clean (m4_input_block *me, m4 *context)
     {
       m4_error (context, 0, 0, _("error reading file `%s'"),
 		m4_get_current_file (context));
-      fclose (me->u.u_f.file);
+      if (me->u.u_f.close)
+	fclose (me->u.u_f.file);
     }
   else if (me->u.u_f.close && fclose (me->u.u_f.file) == EOF)
     m4_error (context, 0, errno, _("error reading file `%s'"),
