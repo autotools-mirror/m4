@@ -1,5 +1,10 @@
 2006-10-13  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.h (UNIX, W32_NATIVE, OS2): Move platform checks after
+	header files are included, since <unistd.h> can affect the tests.
+	* THANKS: Updated.
+	Reported by Martin Koeppe.
+
 	Backport head's usage of clean-temp module, as it is cleaner than
 	using tmpfile-safer.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import

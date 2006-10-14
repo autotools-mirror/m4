@@ -25,24 +25,6 @@
 
 #include <config.h>
 
-/* Canonicalize UNIX recognition macros.  */
-#if defined unix || defined __unix || defined __unix__ \
-  || defined _POSIX_VERSION || defined _POSIX2_VERSION \
-  || defined __NetBSD__ || defined __OpenBSD__ \
-  || defined __APPLE__ || defined __APPLE_CC__
-# define UNIX 1
-#endif
-
-/* Canonicalize Windows recognition macros.  */
-#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__
-# define W32_NATIVE 1
-#endif
-
-/* Canonicalize OS/2 recognition macro.  */
-#ifdef __EMX__
-# define OS2 1
-#endif
-
 #include <ctype.h>
 #include <errno.h>
 #include <string.h>
@@ -63,6 +45,24 @@
 #include "verror.h"
 #include "xalloc.h"
 #include "xvasprintf.h"
+
+/* Canonicalize UNIX recognition macros.  */
+#if defined unix || defined __unix || defined __unix__ \
+  || defined _POSIX_VERSION || defined _POSIX2_VERSION \
+  || defined __NetBSD__ || defined __OpenBSD__ \
+  || defined __APPLE__ || defined __APPLE_CC__
+# define UNIX 1
+#endif
+
+/* Canonicalize Windows recognition macros.  */
+#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__
+# define W32_NATIVE 1
+#endif
+
+/* Canonicalize OS/2 recognition macro.  */
+#ifdef __EMX__
+# define OS2 1
+#endif
 
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
    merely typedef boolean as being int.  Or else, define these all.  */
