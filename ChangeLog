@@ -1,3 +1,7 @@
+2006-10-14  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_undivert): Check for read error.
+
 2006-10-13  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.h (UNIX, W32_NATIVE, OS2): Move platform checks after

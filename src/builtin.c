@@ -1092,7 +1092,9 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 	    if (fp != NULL)
 	      {
 		insert_file (fp);
-		fclose (fp);
+		if (fclose (fp) == EOF)
+		  M4ERROR ((warning_status, errno,
+			    "error undiverting `%s'", ARG (i)));
 	      }
 	    else
 	      M4ERROR ((warning_status, errno,
