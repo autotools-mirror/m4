@@ -356,7 +356,8 @@ pop_input (void)
       if (ferror (isp->u.u_f.file))
 	{
 	  M4ERROR ((warning_status, 0, "read error"));
-	  fclose (isp->u.u_f.file);
+	  if (isp->u.u_f.close)
+	    fclose (isp->u.u_f.file);
 	  retcode = EXIT_FAILURE;
 	}
       else if (isp->u.u_f.close && fclose (isp->u.u_f.file) == EOF)

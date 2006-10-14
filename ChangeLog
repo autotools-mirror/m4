@@ -1,5 +1,9 @@
 2006-10-14  Eric Blake  <ebb9@byu.net>
 
+	* m4/input.c (file_clean): Don't close stdin twice, POSIX says it
+	is not portable.
+	Reported by Ralf Wildenhues.
+
 	* src/builtin.c (m4_undivert): Check for read error.
 
 2006-10-13  Eric Blake  <ebb9@byu.net>
