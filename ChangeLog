@@ -1,3 +1,13 @@
+2006-10-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Port some changes from the branch.
+	(Invoking m4): Promote to a chapter, instead of a section of
+	Preliminaries.
+	(Operation modes, Dynamic loading features, Preprocessor features)
+	(Limits control Frozen state, Debugging options)
+	(Command line files): Subdivide into new sections.
+	(Cleardivert): Rename from cleardiv.
+
 2006-10-14  Eric Blake  <ebb9@byu.net>
 
 	* tests/others.at (stdin closed): Update to match previous patch.
