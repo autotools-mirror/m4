@@ -580,7 +580,7 @@ m4_symbol_value_create (void)
   return xzalloc (sizeof (m4_symbol_value));
 }
 
-#undef m4_symbol_groks_macro
+#undef m4_symbol_value_groks_macro
 bool
 m4_symbol_value_groks_macro (m4_symbol_value *value)
 {

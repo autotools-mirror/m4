@@ -15,11 +15,11 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert binary-io clean-temp cloexec close-stream closeout dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strnlen strtol unlocked-io verror xalloc xalloc-die xstrndup xstrtol xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert binary-io clean-temp cloexec close-stream closeout configmake dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strnlen strtol unlocked-io verror xalloc xalloc-die xstrndup xstrtol xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
-gl_MODULES([assert binary-io clean-temp cloexec close-stream closeout dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strnlen strtol unlocked-io verror xalloc xalloc-die xstrndup xstrtol xvasprintf])
+gl_MODULES([assert binary-io clean-temp cloexec close-stream closeout configmake dirname error exit fdl filenamecat fopen-safer free gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic stdbool stdlib-safer strnlen strtol unlocked-io verror xalloc xalloc-die xstrndup xstrtol xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([gnu])
 gl_M4_BASE([ltdl/m4])

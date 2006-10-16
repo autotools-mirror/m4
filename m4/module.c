@@ -18,7 +18,7 @@
    02110-1301  USA
 */
 
-#include "pathconf.h"
+#include "configmake.h"
 #include "ltdl.h"
 #include "m4private.h"
 #include "xvasprintf.h"
@@ -341,7 +341,7 @@ m4__module_init (m4 *context)
     }
 
   if (!errors)
-    errors = lt_dlsetsearchpath (MODULE_PATH);
+    errors = lt_dlsetsearchpath (PKGLIBEXECDIR);
 
   /* If the user set M4MODPATH, then use that as the start of the module
      search path.  */

@@ -122,8 +122,7 @@ MOSTLYCLEANFILES += src/getopt.h src/getopt.h-t
 ## Modules. ##
 ## -------- ##
 
-pkgmodincludedir= $(includedir)/$(PACKAGE)/modules
-pkglibexecdir	= $(libexecdir)/$(PACKAGE)
+pkgmodincludedir= $(pkgincludedir)/modules
 
 ETAGS_ARGS	= --regex='/M4BUILTIN_HANDLER[ \t]*)\([^)]*\)/\1/'
 
@@ -233,7 +232,6 @@ m4_libm4_la_SOURCES	= \
 		  m4/module.c \
 		  m4/output.c \
 		  m4/path.c \
-		  m4/pathconf.h \
 		  m4/resyntax.c \
 		  m4/symtab.c \
 		  m4/syntax.c \
@@ -241,12 +239,6 @@ m4_libm4_la_SOURCES	= \
 m4_libm4_la_LIBADD = gnu/libgnu.la \
 		  $(LIBLTDL) $(LTLIBINTL) $(LIBADD_DL)
 m4_libm4_la_DEPENDENCIES = $(LIBLTDL) gnu/libgnu.la
-
-m4/pathconf.h:
-	echo "#define MODULE_PATH \"$(pkglibexecdir)\"" > m4/pathconf.h
-
-MOSTLYCLEANFILES += m4/pathconf.h
-BUILT_SOURCES    += m4/pathconf.h
 
 # This file needs to be regenerated at configure time.
 dist-hook:

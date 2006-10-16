@@ -1,5 +1,17 @@
 2006-10-16  Eric Blake  <ebb9@byu.net>
 
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	configmake'.
+	* configure.ac (AM_INIT_AUTOMAKE): Bump requirement to 1.10a, for
+	pkglibexecdir support.
+	* Makefile.am (m4_libm4_la_SOURCES, m4/pathconf.h): No longer
+	worry about pathconf.h, now that gnulib does it for us.
+	(pkgmodincludedir): Simplify.
+	(pkglibexecdir): Delete, now that automake does this.
+	* m4/module.c (m4__module_init): Use PKGLIBEXECDIR.
+	* src/main.c (usage): Likewise.
+	* m4/symtab.c (m4_symbol_value_groks_macro): Fix typo.
+
 	* doc/m4.texinfo: Port some changes from the branch.
 	(Invoking m4): Promote to a chapter, instead of a section of
 	Preliminaries.

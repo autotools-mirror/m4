@@ -67,7 +67,7 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 ## ------------------------ ##
 ## Automake Initialization. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.9b subdir-objects dist-bzip2 gnits])
+AM_INIT_AUTOMAKE([1.10a subdir-objects dist-bzip2 gnits])
 
 
 

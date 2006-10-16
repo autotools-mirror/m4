@@ -21,10 +21,11 @@
 
 #include "m4.h"
 #include "m4private.h"
+
 #include "closeout.h"
+#include "configmake.h"
 #include "getopt.h"
 #include "version-etc.h"
-#include "pathconf.h"
 #include "xstrtol.h"
 
 #include <limits.h>
@@ -104,7 +105,7 @@ Dynamic loading features:\n\
   -M, --module-directory=DIR   add DIR to module search path before\n\
                                `%s'\n\
   -m, --load-module=MODULE     load dynamic MODULE\n\
-"), MODULE_PATH);
+"), PKGLIBEXECDIR);
       fputs (_("\
 \n\
 Preprocessor features:\n\
@@ -159,7 +160,7 @@ FLAGS is any of:\n\
 \n\
 If defined, the environment variable `M4PATH' is a colon-separated list\n\
 of directories included after any specified by `-I', and the variable\n\
-`M4MODPATH' is a colon-separated list of directories searched after any\n\
+`M4MODPATH' is a colon-separated list of directories searched before any\n\
 specified by `-M'.\n\
 "), stdout);
       fputs (_("\
