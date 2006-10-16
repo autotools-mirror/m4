@@ -1,3 +1,19 @@
+2006-10-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Invoking m4): Promote to a chapter, instead of
+	a section of Preliminaries.
+	(Operation modes, Preprocessor features, Limits control)
+	(Frozen state, Debugging options, Command line files): Subdivide
+	into new sections.
+	(Input processing, Quoting Arguments, Define, Arguments)
+	(Cleardiv, Format, M4exit): Fix grammar of references.
+	(Inhibiting Invocation, Macro Arguments, Builtin, Trace)
+	(Debug Levels, Debug Output, Include, Search Path, Divert)
+	(Platform macros, Syscmd, Location, Extensions): Point to new
+	sections.
+	(Top, Loops, Include, Undivert, Location, Incompatibilities):
+	Improve file references.
+
 2006-10-14  Eric Blake  <ebb9@byu.net>
 
 	* m4/input.c (file_clean): Don't close stdin twice, POSIX says it
