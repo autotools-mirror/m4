@@ -151,14 +151,12 @@ Introduction and preliminaries
 
 Invoking @code{m4}
 
-@menu
 * Operation modes::             Command line options for operation modes
 * Preprocessor features::       Command line options for preprocessor features
 * Limits control::              Command line options for limits control
 * Frozen state::                Command line options for frozen state
 * Debugging options::           Command line options for debugging
 * Command line files::          Specifying input files on the command line
-@end menu
 
 Lexical and syntactic conventions
 
@@ -219,7 +217,7 @@ Diverting and undiverting output
 * Divert::                      Diverting output
 * Undivert::                    Undiverting output
 * Divnum::                      Diversion numbers
-* Cleardiv::                    Discarding diverted text
+* Cleardivert::                 Discarding diverted text
 
 Macros for text handling
 
@@ -654,7 +652,9 @@ increase this value, unless you define an excessive number of macros.
 @itemx --nesting-limit=@var{NUM}
 Artificially limit the nesting of macro calls to @var{NUM} levels,
 stopping program execution if this limit is ever exceeded.  When not
-specified, nesting is limited to 1024 levels.
+specified, nesting is limited to 1024 levels.  A value of zero means
+unlimited; but then heavily nested code could potentially cause a stack
+overflow.
 
 The precise effect of this option might be more correctly associated
 with textual nesting than dynamic recursion.  It has been useful
@@ -1006,9 +1006,8 @@ specific provision.
 
 There is also a command line option (@option{--prefix-builtins}, or
 @option{-P}, @pxref{Operation modes, , Invoking m4}) that renames all
-builtin macro with a
-prefix of @samp{m4_} at startup.  The option has no effect
-whatsoever on user defined macros.  For example, with this option,
+builtin macros with a prefix of @samp{m4_} at startup.  The option has
+no effect whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.  It also has
 no effect on whether a macro requires parameters.
 
@@ -1767,10 +1766,10 @@ and @code{defn}.
 @cindex @acronym{GNU} extensions
 Any macro can be called indirectly with @code{indir}:
 
-@deffn Builtin indir (@var{name}, @dots{})
+@deffn Builtin indir (@var{name}, @ovar{args@dots{}})
 Results in a call to the macro @var{name}, which is passed the
-rest of the arguments.  If @var{name} is not defined, an error message
-is printed, and the expansion is void.
+rest of the arguments @var{args}.  If @var{name} is not defined, an
+error message is printed, and the expansion is void.
 
 The macro @code{indir} is recognized only with parameters.
 @end deffn
@@ -1840,10 +1839,10 @@ indir(`divert', defn(`foo'))
 @cindex @acronym{GNU} extensions
 Builtin macros can be called indirectly with @code{builtin}:
 
-@deffn Builtin builtin (@var{name}, @dots{})
+@deffn Builtin builtin (@var{name}, @ovar{args@dots{}})
 Results in a call to the builtin @var{name}, which is passed the
-rest of the arguments.  If @var{name} does not name a builtin, an error
-message is printed, and the expansion is void.
+rest of the arguments @var{args}.  If @var{name} does not name a
+builtin, an error message is printed, and the expansion is void.
 
 The macro @code{builtin} is recognized only with parameters.
 @end deffn
@@ -2196,10 +2195,10 @@ Fortunately, there is support for macro debugging in @code{m4}.
 If you want to see what a name expands into, you can use the builtin
 @code{dumpdef}:
 
-@deffn Builtin dumpdef (@dots{})
+@deffn Builtin dumpdef (@ovar{names@dots{}})
 Accepts any number of arguments.  If called without any arguments,
 it displays the definitions of all known names, otherwise it displays
-the definitions of the names given.  The output is printed to the
+the definitions of the @var{names} given.  The output is printed to the
 current debug file (usually standard error), and is sorted by name.  If
 an unknown name is encountered, a warning is printed.
 
@@ -2245,12 +2244,13 @@ display.
 It is possible to trace macro calls and expansions through the builtins
 @code{traceon} and @code{traceoff}:
 
-@deffn Builtin traceon (@dots{})
-@deffnx Builtin traceoff (@dots{})
+@deffn Builtin traceon (@ovar{names@dots{}})
+@deffnx Builtin traceoff (@ovar{names@dots{}})
 When called without any arguments, @code{traceon} and @code{traceoff}
 will turn tracing on and off, respectively, for all defined macros.
-When called with arguments, only the named macros are affected, whether
-or not they are currently defined.
+
+When called with arguments, only the macros listed in @var{names} are
+affected, whether or not they are currently defined.
 
 The expansion of @code{traceon} and @code{traceoff} is void.
 @end deffn
@@ -2258,7 +2258,8 @@ The expansion of @code{traceon} and @code{traceoff} is void.
 Whenever a traced macro is called and the arguments have been collected,
 the call is displayed.  If the expansion of the macro call is not void,
 the expansion can be displayed after the call.  The output is printed
-to the current debug file (usually standard error).
+to the current debug file (defaulting to standard error, @pxref{Debug
+output}).
 
 @example
 define(`foo', `Hello World.')
@@ -2447,13 +2448,13 @@ Debug and tracing output can be redirected to files using either the
 Invoking m4}), or with the builtin macro @code{debugfile}:
 
 @deffn Builtin debugfile (@ovar{file})
-Sends all further debug and trace output to @var{file}.  If
-@var{file} is empty, debug and trace output are discarded.  If
-@code{debugfile} is called without any arguments, debug and trace output
-are sent to standard error.  This does not affect warnings, error
-messages, or @code{errprint} output, which are
+Sends all further debug and trace output to @var{file}, opened in append
+mode.  If @var{file} is the empty string, debug and trace output are
+discarded.  If @code{debugfile} is called without any arguments, debug
+and trace output are sent to standard error.  This does not affect
+warnings, error messages, or @code{errprint} output, which are
 always sent to standard error.  If @var{file} cannot be opened, the
-current debug file is unchanged.
+current debug file is unchanged, and an error is issued.
 
 The expansion of @code{debugfile} is void.
 @end deffn
@@ -2499,7 +2500,8 @@ The builtin @code{dnl} stands for ``Discard to Next Line'':
 
 @deffn Builtin dnl
 All characters, up to and including the next newline, are discarded
-without performing any macro expansion.
+without performing any macro expansion.  A warning is issued if the end
+of the file is encountered without a newline.
 
 The expansion of @code{dnl} is void.
 @end deffn
@@ -3331,7 +3333,7 @@ divert(`-1')undivert
 * Divert::                      Diverting output
 * Undivert::                    Undiverting output
 * Divnum::                      Diversion numbers
-* Cleardiv::                    Discarding diverted text
+* Cleardivert::                 Discarding diverted text
 @end menu
 
 @node Divert
@@ -3422,11 +3424,14 @@ We decided to divert the stream for irrigation.
 Diverted text can be undiverted explicitly using the builtin
 @code{undivert}:
 
-@deffn Builtin undivert (@ovar{number}@dots{})
-Undiverts the diversions given by the arguments, in the order
-given.  If no arguments are supplied, all diversions are undiverted, in
-numerical order.  As a @acronym{GNU} extension, if @var{number} is not numeric,
-treat it as a file name instead.
+@deffn Builtin undivert (@ovar{diversions@dots{}})
+Undiverts the numeric @var{diversions} given by the arguments, in the
+order given.  If no arguments are supplied, all diversions are
+undiverted, in numerical order.
+
+As a @acronym{GNU} extension, @var{diversions} may contain non-numeric
+strings, which are treated as the names of files to copy into the output
+without expansion.  A warning is issued if a file could not be opened.
 
 The expansion of @code{undivert} is void.
 @end deffn
@@ -3548,7 +3553,7 @@ Diversion two: divnum
 @result{}Diversion two: 2
 @end example
 
-@node Cleardiv
+@node Cleardivert
 @section Discarding diverted text
 
 @cindex discarding diverted text
@@ -3575,8 +3580,8 @@ No output is produced at all.
 
 Clearing selected diversions can be done with the following macro:
 
-@deffn Composite cleardivert (@ovar{diversion}@dots{})
-Discard the contents of each listed diversion.
+@deffn Composite cleardivert (@ovar{diversions@dots{}})
+Discard the contents of each of the listed numeric @var{diversions}.
 @end deffn
 
 @example
@@ -5222,7 +5227,7 @@ macro
 @node Improved cleardivert
 @section Solution for @code{cleardivert}
 
-The @code{cleardivert} macro (@pxref{Cleardiv}) cannot, as it stands, be
+The @code{cleardivert} macro (@pxref{Cleardivert}) cannot, as it stands, be
 called without arguments to clear all pending diversions.  That is
 because using undivert with an empty string for an argument is different
 than using it with no arguments at all.  Compare the earlier definition
