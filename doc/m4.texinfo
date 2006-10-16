@@ -2259,7 +2259,7 @@ Whenever a traced macro is called and the arguments have been collected,
 the call is displayed.  If the expansion of the macro call is not void,
 the expansion can be displayed after the call.  The output is printed
 to the current debug file (defaulting to standard error, @pxref{Debug
-output}).
+Output}).
 
 @example
 define(`foo', `Hello World.')
