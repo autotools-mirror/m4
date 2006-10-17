@@ -1,3 +1,12 @@
+2006-10-17  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Update with 'gnulib-tool --import
+	config-h'.
+	* configure.ac (AC_CONFIG_HEADERS): Create config.h alongside
+	gnulib headers, rather than in top directory.
+	* src/Makefile.am (AUTOMAKE_OPTIONS): Add nostdinc, to reduce make
+	output clutter.
+
 2006-10-16  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Backport some minor cleanups from head.

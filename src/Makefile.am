@@ -19,6 +19,7 @@
 ##
 ## This file written by Eric Blake <ebb9@byu.net>
 
+AUTOMAKE_OPTIONS = nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/lib -I../lib
 bin_PROGRAMS = m4
 m4_SOURCES = m4.h m4.c builtin.c debug.c eval.c format.c freeze.c input.c \

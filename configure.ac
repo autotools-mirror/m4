@@ -26,7 +26,7 @@ VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 m4_pattern_forbid([^M4_[A-Z]])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_HEADERS([config.h:config-h.in])
+AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
