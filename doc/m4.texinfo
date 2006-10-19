@@ -258,7 +258,7 @@ Macros for running shell commands
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
-* Maketemp::                    Making temporary files
+* Mkstemp::                     Making temporary files
 
 Miscellaneous builtin macros
 
@@ -644,7 +644,7 @@ regular expressions.  @xref{Changeresyntax}, for more details on the
 format and meaning of @var{RESYNTAX-SPEC}.
 
 @item --safer
-Cripple the builtins @code{maketemp} (@pxref{Maketemp}),
+Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
 @code{debugfile} (@pxref{Debugfile}), @code{syscmd} (@pxref{Syscmd}),
 and @code{esyscmd} (@pxref{Esyscmd}), since they can perform potentially
 unsafe actions.  An attempt to use these macros will result in an error.
@@ -5024,7 +5024,7 @@ commands from within @code{m4}.
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
-* Maketemp::                    Making temporary files
+* Mkstemp::                     Making temporary files
 @end menu
 
 @node Platform macros
@@ -5158,44 +5158,127 @@ sysval
 @result{}0
 @end example
 
-@node Maketemp
+@node Mkstemp
 @section Making temporary files
 
 @cindex temporary file names
 @cindex files, names of temporary
 Commands specified to @code{syscmd} or @code{esyscmd} might need a
-temporary file, for output or for some other purpose.
+temporary file, for output or for some other purpose.  There is a
+builtin macro, @code{mkstemp}, for making a temporary file:
 
-@deffn {Builtin (m4)} maketemp (@var{template})
-There is a builtin macro, @code{maketemp}, for making temporary file
-names, which expands to a name of a new, empty file, made from the
-string @var{template}, which should end with the string @samp{XXXXXX}.
-The six @code{X}'s are then replaced, usually with something that
-includes the process id of the @code{m4} process, in order to make the
-file name unique.
+@deffn {Builtin (m4)} mkstemp (@var{template})
+@deffnx {Builtin (m4)} maketemp (@var{template})
+Expands to a name of a new, empty file, made from the string
+@var{template}, which should end with the string @samp{XXXXXX}.  The six
+@samp{X} characters are then replaced with random characters matching
+the regular expression @samp{[a-zA-Z0-9._-]}, in order to make the file
+name unique.  If fewer than six @samp{X} characters are found at the end
+of @code{template}, the result will be longer than the template.  The
+created file will have access permissions as if by @kbd{chmod =rw,go=},
+meaning that the current umask of the @code{m4} process is taken into
+account, and at most only the current user can read and write the file.
+
+The traditional behavior, standardized by @acronym{POSIX}, is that
+@code{maketemp} merely replaces the trailing @samp{X} with the process
+id, without creating a file, and without ensuring that the resulting
+string is a unique file name.  In part, this means that using the same
+@var{template} twice in the same input file will result in the same
+expansion.  This behavior is a security hole, as it is very easy for
+another process to guess the name that will be generated, and thus
+interfere with a subsequent use of @code{syscmd} trying to manipulate
+that file name.  Hence, @acronym{POSIX} has recommended that all new
+implementations of @code{m4} provide the secure @code{mkstemp} builtin,
+and that users of @code{m4} check for its existence.
+
+The expansion is void and an error issued if a temporary file could
+not be created.
+
+When the @option{--safer} option (@pxref{Operation modes, Invoking m4})
+is in effect, @code{mkstemp} and @acronym{GNU}-mode @code{maketemp}
+result in an error, since otherwise an input file could perform a mild
+denial-of-service attack by filling up a disk with multiple empty files.
+
+The macros @code{mkstemp} and @code{maketemp} are recognized only with
+parameters.
+@end deffn
+
+If you try this next example, you will most likely get different output
+for the two file names, since the replacement characters are randomly
+chosen:
 
 @comment ignore
 @example
+$ @kbd{m4}
 maketemp(`/tmp/fooXXXXXX')
+@error{}m4:stdin:1: Warning: maketemp: recommend using mkstemp instead
 @result{}/tmp/fooa07346
+ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
+      `define(`mkstemp', defn(`maketemp'))dnl
+errprint(`warning: potentially insecure maketemp implementation
+')')
+@result{}
+mkstemp(`doc')
+@result{}docQv83Uw
 @end example
-
-When the @option{--safer} option (@pxref{Operation modes, Invoking m4})
-is in effect, @code{maketemp} results in an error, since otherwise an
-input file could perform a mild denial-of-service attack by filling up a
-disk with multiple empty files.
-
-The builtin macro @code{maketemp} is recognized only when given
-arguments.
-@end deffn
 
 @comment options: --safer
 @comment status: 1
 @example
 $ @kbd{m4 --safer}
 maketemp(`/tmp/fooXXXXXX')
+@error{}m4:stdin:1: Warning: maketemp: recommend using mkstemp instead
 @error{}m4:stdin:1: maketemp: disabled by --safer
 @result{}
+mkstemp(`/tmp/fooXXXXXX')
+@error{}m4:stdin:2: mkstemp: disabled by --safer
+@result{}
+@end example
+
+@cindex @acronym{GNU} extensions
+Unless you use the @option{--traditional} command line option (or
+@option{-G}, @pxref{Limits control, , Invoking m4}), the @acronym{GNU}
+version of @code{maketemp} is secure.  This means that using the same
+template to multiple calls will generate multiple files.  However, we
+recommend that you use the new @code{mkstemp} macro, introduced in
+@acronym{GNU} M4 1.4.8, which is secure even in traditional mode.
+
+@example
+$ @kbd{m4}
+syscmd(`echo foo??????')dnl
+@result{}foo??????
+define(`file1', maketemp(`fooXXXXXX'))dnl
+@error{}m4:stdin:2: Warning: maketemp: recommend using mkstemp instead
+ifelse(esyscmd(`echo foo??????'), `foo??????', `no file', `created')
+@result{}created
+define(`file2', maketemp(`fooXX'))dnl
+@error{}m4:stdin:4: Warning: maketemp: recommend using mkstemp instead
+define(`file3', mkstemp(`fooXXXXXX'))dnl
+ifelse(len(file1), len(file2), `same length', `different')
+@result{}same length
+ifelse(file1, file2, `same', `different file')
+@result{}different file
+ifelse(file2, file3, `same', `different file')
+@result{}different file
+ifelse(file1, file3, `same', `different file')
+@result{}different file
+syscmd(`rm 'file1 file2 file3)
+@result{}
+sysval
+@result{}0
+@end example
+
+@comment options: -G
+@example
+$ @kbd{m4 -G}
+define(`file1', maketemp(`fooXXXXXX'))dnl
+@error{}m4:stdin:1: Warning: maketemp: recommend using mkstemp instead
+define(`file2', maketemp(`fooXXXXXX'))dnl
+@error{}m4:stdin:2: Warning: maketemp: recommend using mkstemp instead
+ifelse(file1, file2, `same', `different file')
+@result{}same
+syscmd(`echo foo??????')dnl
+@result{}foo??????
 @end example
 
 @node Miscellaneous
@@ -5591,7 +5674,7 @@ is made to summarize these here.
 @cindex GNU extensions
 @cindex @acronym{POSIX}
 @cindex @env{POSIXLY_CORRECT}
-This version of @code{m4} contains a few facilities, that do not exist
+This version of @code{m4} contains a few facilities that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
 using the @samp{-G} command line option, unless overridden by other
 command line options.
@@ -5664,6 +5747,15 @@ controlled with @code{debugmode} (@pxref{Debugmode}).
 @item
 The destination of trace and debug output can be controlled with
 @code{debugfile} (@pxref{Debugfile}).
+
+@item
+The @code{maketemp} (@pxref{Mkstemp}) macro behaves like @code{mkstemp},
+creating a new file with a unique name on every invocation, rather than
+following the insecure behavior of replacing the trailing @samp{X}
+characters with the @code{m4} process id.  @acronym{POSIX} does not
+allow this extension, so @code{maketemp} is insecure if
+@env{POSIXLY_CORRECT} is set, but you should be using @code{mkstemp} in
+the first place.
 @end itemize
 
 Additionally, @acronym{POSIX} only requires support for the command line

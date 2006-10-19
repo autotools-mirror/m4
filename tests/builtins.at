@@ -495,6 +495,52 @@ AT_CHECK_M4([indir.m4], 0, expout)
 AT_CLEANUP
 
 
+## -------- ##
+## maketemp ##
+## -------- ##
+
+AT_SETUP([mkstemp])
+
+dnl Check that on error, the expansion is void
+AT_DATA([[in]],
+[[mkstemp(`no_such_dir/m4-fooXXXXXX')
+]])
+AT_CHECK_M4([in], [1], [[
+]], [[m4:in:1: mkstemp: cannot create tempfile `no_such_dir/m4-fooXXXXXX': No such file or directory
+]])
+
+dnl Check for Solaris compatibility of maketemp.  Hopefully the pid is
+dnl less than 20 decimal digits.  Also check that --safer does not affect
+dnl traditional behavior of maketemp, which is textual only.
+AT_DATA([[stdin]],
+[[maketemp()
+maketemp(X)
+maketemp(XX)
+maketemp(XXXXXXXXXXXXXXXXXXXXX)
+maketemp(no_such_dir/XXXXXX)
+]])
+dnl Abuse our knowledge of AT_CHECK_M4 so that we can get stderr filtering...
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+AT_CHECK_M4([-G --safer], [0], [stdout],
+[[m4:stdin:1: Warning: maketemp: recommend using mkstemp instead
+m4:stdin:2: Warning: maketemp: recommend using mkstemp instead
+m4:stdin:3: Warning: maketemp: recommend using mkstemp instead
+m4:stdin:4: Warning: maketemp: recommend using mkstemp instead
+m4:stdin:5: Warning: maketemp: recommend using mkstemp instead
+]], [stdin& echo $! > pid; wait $!])
+pid=`cat pid`
+cat >expout <<EOF
+
+X
+X`sed -e 's/.*\(.\)$/\1/' pid`
+X`echo "$pid" | sed -e "s/.*/00000000000000000000&/" -e 's/.*\(.\{20\}$\)/\1/'`
+no_such_dir/`echo "$pid" | sed -e "s/.*/000000&/" -e 's/.*\(.\{6\}$\)/\1/'`
+EOF
+AT_CHECK([cat stdout], [0], [expout])
+
+AT_CLEANUP
+
 
 ## ----------- ##
 ## multiquotes ##

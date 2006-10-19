@@ -566,16 +566,16 @@ AT_CHECK([cat trace1], [0],
 m4trace: -1- foo -> `2'
 ]])
 
-dnl make sure builtin cannot bypass --safer, and that maketemp does not
+dnl make sure builtin cannot bypass --safer, and that mkstemp does not
 dnl create file
-AT_DATA([[in]], [[builtin(`maketemp', `./fooXXXXXX')
+AT_DATA([[in]], [[builtin(`mkstemp', `./fooXXXXXX')
 ]])
 
 AT_CHECK([echo foo*], [0], [foo*
 ])
 
 AT_CHECK_M4([--safer in], [1], [[
-]], [[m4:in:1: maketemp: disabled by --safer
+]], [[m4:in:1: mkstemp: disabled by --safer
 ]])
 
 AT_CHECK([echo foo*], [0], [foo*

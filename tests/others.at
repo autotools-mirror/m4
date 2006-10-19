@@ -285,36 +285,6 @@ AT_CHECK_M4([$abs_srcdir/iso8859.m4], 0, expout)
 AT_CLEANUP
 
 
-
-## -------- ##
-## maketemp ##
-## -------- ##
-
-AT_SETUP([maketemp])
-
-[cat >expout <<EOF
-different
-
-0
-EOF]
-
-AT_DATA([[misc.m4]],
-[[dnl This test assumes /tmp is a valid directory name, which is not true
-dnl for native Windows.
-ifdef(`__unix__', , `m4exit(`77')')dnl
-define(`file1', maketemp(`/tmp/m4-fooXXXXXX'))dnl
-define(`file2', maketemp(`/tmp/m4-fooXXXXXX'))dnl
-ifelse(file1, file2, `same', `different')
-syscmd(`rm 'file1 file2)
-sysval
-]])
-
-AT_CHECK_M4([misc.m4], 0, expout)
-
-AT_CLEANUP
-
-
-
 ## ------- ##
 ## reverse ##
 ## ------- ##

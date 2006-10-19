@@ -79,6 +79,7 @@ extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
   BUILTIN (m4exit,	false,	false,	false,	0,	1  )	\
   BUILTIN (m4wrap,	false,	true,	false,	1,	-1 )	\
   BUILTIN (maketemp,	false,	true,	false,	1,	1  )	\
+  BUILTIN (mkstemp,	false,	true,	false,	1,	1  )	\
   BUILTIN (popdef,	false,	true,	false,	1,	-1 )	\
   BUILTIN (pushdef,	true,	true,	false,	1,	2  )	\
   BUILTIN (shift,	false,	true,	false,	1,	-1 )	\
@@ -669,10 +670,16 @@ M4BUILTIN_HANDLER (sinclude)
 
 /* More miscellaneous builtins -- "maketemp", "errprint".  */
 
-/* Use the first argument as at template for a temporary file name.  */
-M4BUILTIN_HANDLER (maketemp)
+/* Use the first argument as at template for a temporary file name.
+   FIXME - should we add a mkdtemp builtin in the gnu module, then
+   export this function as a helper to that?  */
+static void
+m4_make_temp (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 {
   int fd;
+  int len;
+  int i;
+  const char *name = M4ARG (1);
 
   if (m4_get_safer_opt (context))
     {
@@ -680,15 +687,74 @@ M4BUILTIN_HANDLER (maketemp)
       return;
     }
 
+  /* Guarantee that there are six trailing 'X' characters, even if the
+     user forgot to supply them.  */
+  assert (obstack_object_size (obs) == 0);
+  len = strlen (name);
+  obstack_grow (obs, name, len);
+  for (i = 0; len > 0 && i < 6; i++)
+    if (name[--len] != 'X')
+      break;
+  for (; i < 6; i++)
+    obstack_1grow (obs, 'X');
+  obstack_1grow (obs, '\0');
+
   errno = 0;
-  if ((fd = mkstemp (M4ARG(1))) < 0)
+  fd = mkstemp (obstack_base (obs));
+  if (fd < 0)
     {
       m4_error (context, 0, errno, _("%s: cannot create tempfile `%s'"),
-		M4ARG (0), M4ARG (1));
-      return;
+		M4ARG (0), name);
+      obstack_free (obs, obstack_finish (obs));
     }
-  close (fd);
-  m4_shipout_string (context, obs, M4ARG (1), 0, false);
+  else
+     close (fd);
+}
+
+/* Use the first argument as at template for a temporary file name.  */
+M4BUILTIN_HANDLER (maketemp)
+{
+  m4_warn (context, 0, _("%s: recommend using mkstemp instead"), M4ARG (0));
+  if (m4_get_posixly_correct_opt (context))
+    {
+      /* POSIX states "any trailing 'X' characters [are] replaced with
+	 the current process ID as a string", without referencing the
+	 file system.  Horribly insecure, but we have to do it.
+
+	 For reference, Solaris m4 does:
+	   maketemp() -> `'
+	   maketemp(X) -> `X'
+	   maketemp(XX) -> `Xn', where n is last digit of pid
+	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+      */
+      const char *str = M4ARG (1);
+      int len = strlen (str);
+      int i;
+      int len2;
+
+      for (i = len; i > 1; i--)
+	if (str[i - 1] != 'X')
+	  break;
+      obstack_grow (obs, str, i);
+      str = ntoa ((number) getpid (), 10);
+      len2 = strlen (str);
+      if (len2 > len - i)
+	obstack_grow0 (obs, str + len2 - (len - i), len - i);
+      else
+	{
+	  while (i++ < len - len2)
+	    obstack_1grow (obs, '0');
+	  obstack_grow0 (obs, str, len2);
+	}
+    }
+  else
+    m4_make_temp (context, obs, argc, argv);
+}
+
+/* Use the first argument as a template for a temporary file name.  */
+M4BUILTIN_HANDLER (mkstemp)
+{
+  m4_make_temp (context, obs, argc, argv);
 }
 
 /* Print all arguments on standard error.  */
