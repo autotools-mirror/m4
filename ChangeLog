@@ -1,3 +1,10 @@
+2006-10-19  Eric Blake  <ebb9@byu.net>
+
+	* m4/system_.h (includes): Pick up <unistd.h> before checking for
+	_POSIX_VERSION.
+	(gettext_noop): Don't define here, let gettext.h do it instead.
+	* po/POTFILES.in: Update entries to reflect gnulib imports.
+
 2006-10-16  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import

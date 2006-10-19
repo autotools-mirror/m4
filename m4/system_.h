@@ -27,10 +27,12 @@
 #ifndef M4_SYSTEM_H
 #define M4_SYSTEM_H 1
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <unistd.h>
+
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
 @INCLUDE_REGEX_H@
@@ -52,11 +54,11 @@
 # ifdef ENABLE_NLS
 #  include <libintl.h>
 #  define _(Text) gettext (Text)
+#  define N_(Text) gettext_noop (Text)
 # else
 #  define _(Text) (Text)
+#  define N_(Text) (Text)
 # endif
-# define gettext_noop(Text) Text
-# define N_(Text) gettext_noop (Text)
 #endif
 
 

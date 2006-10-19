@@ -1,8 +1,12 @@
+gnu/clean-temp.c
+gnu/closeout.c
 gnu/error.c
 gnu/obstack.c
-gnu/strtol.c
+gnu/quotearg.c
+gnu/regcomp.c
 gnu/verror.c
 gnu/xalloc-die.c
+gnu/xstrtol.h
 m4/builtin.c
 m4/debug.c
 m4/input.c
