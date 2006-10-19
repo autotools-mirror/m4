@@ -1,5 +1,15 @@
 2006-10-19  Eric Blake  <ebb9@byu.net>
 
+	* tests/generate.awk: For ease of doc-writing, simplify selection
+	of '-Ipath/to/examples' to '@comment examples'.
+	* examples/forloop.m4: Simplify.
+	* examples/forloop2.m4: New file.
+	* examples/quote.m4: New file.
+	* doc/m4.texinfo (Improved forloop): New node.
+	(Manual): Clarify use of examples directory.
+	(Shift, Forloop): Resync from branch.
+	(Include, Location): Update to new usage of examples directory.
+
 	* m4/system_.h (includes): Pick up <unistd.h> before checking for
 	_POSIX_VERSION.
 	(gettext_noop): Don't define here, let gettext.h do it instead.

@@ -22,7 +22,7 @@
 
 BEGIN {
   seq = -1;
-  status = xfail = 0;
+  status = xfail = examples = 0;
   file = options = "";
   print "# This file is part of the GNU m4 test suite.  -*- Autotest -*-";
   # I don't know how to get this file's name, so it's hard coded :(
@@ -35,7 +35,7 @@ BEGIN {
   print ;
 }
 
-/^@node / {
+/^@node / { # Start a new test group.
   if (seq > 0)
     print "AT_CLEANUP";
 
@@ -44,31 +44,35 @@ BEGIN {
   seq = 0;
 }
 
-/^@comment file: / {
+/^@comment file: / { # Produce a data file instead of a test.
   file = $3;
 }
 
-/^@comment options: / {
+/^@comment options: / { # Pass additional options to m4.
   options = $0;
   gsub ("@comment options:", "", options);
 }
 
-/^@comment xfail$/ {
+/^@comment xfail$/ { # Expect the test to fail.
   xfail = 1;
 }
 
-/^@comment ignore$/ {
+/^@comment examples$/ { # The test uses files from the examples dir.
+  examples = 1;
+}
+
+/^@comment ignore$/ { # This is just formatted doc text, not an actual test.
   getline;
-  status = xfail = 0;
+  status = xfail = examples = 0;
   options = file = "";
   next;
 }
 
-/^@comment status: / {
+/^@comment status: / { # Expected exit status of a test.
   status = $3;
 }
 
-/^@example$/, /^@end example$/ {
+/^@example$/, /^@end example$/ { # The body of the test.
   if (seq < 0)
     next;
 
@@ -97,9 +101,9 @@ BEGIN {
 	}
       else
 	{
-	  new_test(input, status, output, error, options, xfail);
+	  new_test(input, status, output, error, options, xfail, examples);
 	}
-      status = xfail = 0;
+      status = xfail = examples = 0;
       file = input = output = error = options = "";
       next;
     }
@@ -162,7 +166,7 @@ function new_group(node) {
   printf ("AT_KEYWORDS([[documentation]])\n\n");
 }
 
-function new_test(input, status, output, error, options, xfail) {
+function new_test(input, status, output, error, options, xfail, examples) {
   input = normalize(input);
   output = normalize(output);
   error = normalize(error);
@@ -172,18 +176,18 @@ function new_test(input, status, output, error, options, xfail) {
   if (xfail == 1)
     printf ("AT_XFAIL_IF([:])\n");
 
-  if (options ~ /-I/)
+  if (examples == 1)
     {
       printf ("AT_DATA([expout1],\n[[%s]])\n", output);
-      printf ("sed -e \"s|\\\\.\\\\./examples|"\
-	      "$abs_top_srcdir/examples|g\" \\\n");
+      printf ("sed -e \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
       printf ("  < expout1 > expout\n\n");
+      options = options " -I\"$abs_top_srcdir/examples\"";
     }
 
   printf ("AT_DATA([[input.m4]],\n[[%s]])\n\n", input);
   # Some of these tests `include' files from tests/.
   printf ("AT_CHECK_M4([[%s input.m4]], %s,", options, status);
-  if (options ~ /-I/)
+  if (examples == 1)
     printf ("\n[expout]");
   else if (output)
     printf ("\n[[%s]]", output);
