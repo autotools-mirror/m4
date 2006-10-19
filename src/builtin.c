@@ -73,6 +73,7 @@ DECLARE (m4_len);
 DECLARE (m4_m4exit);
 DECLARE (m4_m4wrap);
 DECLARE (m4_maketemp);
+DECLARE (m4_mkstemp);
 DECLARE (m4_patsubst);
 DECLARE (m4_popdef);
 DECLARE (m4_pushdef);
@@ -128,6 +129,7 @@ builtin_tab[] =
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
   { "m4wrap",		FALSE,	FALSE,	TRUE,	m4_m4wrap },
   { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
+  { "mkstemp",		FALSE,	FALSE,	TRUE,	m4_mkstemp },
   { "patsubst",		TRUE,	FALSE,	TRUE,	m4_patsubst },
   { "popdef",		FALSE,	FALSE,	TRUE,	m4_popdef },
   { "pushdef",		FALSE,	TRUE,	TRUE,	m4_pushdef },
@@ -1242,21 +1244,86 @@ m4_sinclude (struct obstack *obs, int argc, token_data **argv)
 | Use the first argument as at template for a temporary file name.  |
 `------------------------------------------------------------------*/
 
+/* Add trailing 'X' to NAME if necessary, securely create the file,
+   and place the new file name on OBS.  */
+static void
+mkstemp_helper (struct obstack *obs, const char *name)
+{
+  int fd;
+  int len;
+  int i;
+
+  /* Guarantee that there are six trailing 'X' characters, even if the
+     user forgot to supply them.  */
+  len = strlen (name);
+  obstack_grow (obs, name, len);
+  for (i = 0; len > 0 && i < 6; i++)
+    if (name[--len] != 'X')
+      break;
+  for (; i < 6; i++)
+    obstack_1grow (obs, 'X');
+  obstack_1grow (obs, '\0');
+
+  errno = 0;
+  fd = mkstemp (obstack_base (obs));
+  if (fd < 0)
+    {
+      M4ERROR ((0, errno, "cannot create tempfile `%s'", name));
+      obstack_free (obs, obstack_finish (obs));
+    }
+  else
+    close (fd);
+}
+
 static void
 m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 {
-  int fd;
   if (bad_argc (argv[0], argc, 2, 2))
     return;
-  errno = 0;
-  if ((fd = mkstemp (ARG (1))) < 0)
+  if (no_gnu_extensions)
     {
-      M4ERROR ((warning_status, errno, "cannot create tempfile `%s'",
-		ARG (1)));
-      return;
+      /* POSIX states "any trailing 'X' characters [are] replaced with
+	 the current process ID as a string", without referencing the
+	 file system.  Horribly insecure, but we have to do it when we
+	 are in traditional mode.
+
+	 For reference, Solaris m4 does:
+	   maketemp() -> `'
+	   maketemp(X) -> `X'
+	   maketemp(XX) -> `Xn', where n is last digit of pid
+	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+      */
+      const char *str = ARG (1);
+      int len = strlen (str);
+      int i;
+      int len2;
+
+      M4ERROR ((warning_status, 0, "recommend using mkstemp instead"));
+      for (i = len; i > 1; i--)
+	if (str[i - 1] != 'X')
+	  break;
+      obstack_grow (obs, str, i);
+      str = ntoa ((eval_t) getpid (), 10);
+      len2 = strlen (str);
+      if (len2 > len - i)
+	obstack_grow0 (obs, str + len2 - (len - i), len - i);
+      else
+	{
+	  while (i++ < len - len2)
+	    obstack_1grow (obs, '0');
+	  obstack_grow0 (obs, str, len2);
+	}
     }
-  close(fd);
-  obstack_grow (obs, ARG (1), strlen (ARG (1)));
+  else
+    mkstemp_helper (obs, ARG (1));
+}
+
+static void
+m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
+{
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+  mkstemp_helper (obs, ARG (1));
 }
 
 /*----------------------------------------.

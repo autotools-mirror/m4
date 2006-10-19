@@ -1,5 +1,13 @@
 2006-10-19  Eric Blake  <ebb9@byu.net>
 
+	* src/builtin.c (mkstemp_helper, m4_mkstemp): New functions.
+	(m4_maketemp): Provide traditional behavior.
+	* doc/m4.texinfo (Mkstemp): Rename from Maketemp.  Document the
+	new `mkstemp' macro and the flaws of the old `maketemp'.
+	(Incompatibilities): Move maketemp discussion to...
+	(Extensions): ...here, since -G now supresses the GNU extension.
+	* NEWS: Document this.
+
 	* examples/forloop.m4: Simplify.
 	* examples/forloop2.m4: New file.
 	* examples/quote.m4: New file.

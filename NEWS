@@ -26,6 +26,16 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
   M4 must use temporary files, the environment variable $TMPDIR is now
   consulted, and a better effort is made to clean up those files in the
   event of a fatal signal.
+* The `mkstemp' builtin is added with the same GNU semantics as `maketemp',
+  based on the recommendation of POSIX to deprecate the POSIX semantics of
+  `maketemp' as inherently insecure.  In GNU mode (no -G supplied on the
+  command line), `maketemp' silently retains the secure GNU semantics, but
+  a future release of M4 will change this to emit a warning.  In
+  traditional mode (m4 -G), `maketemp' now uses the POSIX-mandated insecure
+  semantics, and issues a warning that you should convert your script to
+  use `mkstemp' instead.  Additionally, `mkstemp' and `maketemp' are now
+  well-defined even if the template argument does not end in six `X'
+  characters.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 

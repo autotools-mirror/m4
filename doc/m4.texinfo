@@ -242,7 +242,7 @@ Macros for running shell commands
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
-* Maketemp::                    Making temporary files
+* Mkstemp::                     Making temporary files
 
 Miscellaneous builtin macros
 
@@ -4283,7 +4283,7 @@ exit value if this is not the case.
 * Syscmd::                      Executing simple commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
-* Maketemp::                    Making temporary files
+* Mkstemp::                     Making temporary files
 @end menu
 
 @node Platform macros
@@ -4520,45 +4520,85 @@ sysval
 @result{}2304
 @end example
 
-@node Maketemp
+@node Mkstemp
 @section Making temporary files
 
 @cindex temporary file names
 @cindex files, names of temporary
 Commands specified to @code{syscmd} or @code{esyscmd} might need a
-temporary file, for output or for some other purpose.
-There is a builtin macro, @code{maketemp}, for making temporary file
-names:
+temporary file, for output or for some other purpose.  There is a
+builtin macro, @code{mkstemp}, for making a temporary file:
 
-@deffn Builtin maketemp (@var{template})
+@deffn Builtin mkstemp (@var{template})
+@deffnx Builtin maketemp (@var{template})
 Expands to a name of a new, empty file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
-@code{X} characters are then replaced with random data, in order to make
-the file name unique.
+@samp{X} characters are then replaced with random characters matching
+the regular expression @samp{[a-zA-Z0-9._-]}, in order to make the file
+name unique.  If fewer than six @samp{X} characters are found at the end
+of @code{template}, the result will be longer than the template.  The
+created file will have access permissions as if by @kbd{chmod =rw,go=},
+meaning that the current umask of the @code{m4} process is taken into
+account, and at most only the current user can read and write the file.
 
-The macro @code{maketemp} is recognized only with parameters.
+The traditional behavior, standardized by @acronym{POSIX}, is that
+@code{maketemp} merely replaces the trailing @samp{X} with the process
+id, without creating a file, and without ensuring that the resulting
+string is a unique file name.  In part, this means that using the same
+@var{template} twice in the same input file will result in the same
+expansion.  This behavior is a security hole, as it is very easy for
+another process to guess the name that will be generated, and thus
+interfere with a subsequent use of @code{syscmd} trying to manipulate
+that file name.  Hence, @acronym{POSIX} has recommended that all new
+implementations of @code{m4} provide the secure @code{mkstemp} builtin,
+and that users of @code{m4} check for its existence.
+
+The macros @code{mkstemp} and @code{maketemp} are recognized only with
+parameters.
 @end deffn
+
+If you try this next example, you will most likely get different output
+for the two file names, since the replacement characters are randomly
+chosen:
 
 @comment ignore
 @example
 maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
+ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
+      `define(`mkstemp', defn(`maketemp'))dnl
+errprint(`warning: potentially insecure maketemp implementation
+')')
+@result{}
+mkstemp(`doc')
+@result{}docQv83Uw
 @end example
 
-Traditional implementations of @code{m4} replaced the trailing @samp{X}
-sequence with the process id, without creating the file; meaning you
-only get one result no matter how many times you use maketemp on the
-same string.  As of this release, @acronym{POSIX} is considering the
-addition of a new macro @code{mkstemp} that behaves like @acronym{GNU}
-@code{maketemp}, so a future version of @acronym{GNU} M4 may have
-changes in this area.
+@cindex @acronym{GNU} extensions
+Unless you use the @option{--traditional} command line option (or
+@option{-G}, @pxref{Limits control, , Invoking m4}), the @acronym{GNU}
+version of @code{maketemp} is secure.  This means that using the same
+template to multiple calls will generate multiple files.  However, we
+recommend that you use the new @code{mkstemp} macro, introduced in
+@acronym{GNU} M4 1.4.8, which is secure even in traditional mode.
 
 @example
+syscmd(`echo foo??????')dnl
+@result{}foo??????
 define(`file1', maketemp(`fooXXXXXX'))dnl
-define(`file2', maketemp(`fooXXXXXX'))dnl
-ifelse(file1, file2, `same', `different')
-@result{}different
-syscmd(`rm 'file1 file2)
+ifelse(esyscmd(`echo foo??????'), `foo??????', `no file', `created')
+@result{}created
+define(`file2', maketemp(`fooXX'))dnl
+define(`file3', mkstemp(`fooXXXXXX'))dnl
+ifelse(len(file1), len(file2), `same length', `different')
+@result{}same length
+ifelse(file1, file2, `same', `different file')
+@result{}different file
+ifelse(file2, file3, `same', `different file')
+@result{}different file
+ifelse(file1, file3, `same', `different file')
+@result{}different file
+syscmd(`rm 'file1 file2 file3)
 @result{}
 sysval
 @result{}0
@@ -5039,6 +5079,12 @@ controlled with @code{debugmode} (@pxref{Debug Levels}).
 @item
 The destination of trace and debug output can be controlled with
 @code{debugfile} (@pxref{Debug Output}).
+
+@item
+The @code{maketemp} (@pxref{Mkstemp}) macro behaves like @code{mkstemp},
+creating a new file with a unique name on every invocation, rather than
+following the insecure behavior of replacing the trailing @samp{X}
+characters with the @code{m4} process id.
 @end itemize
 
 In addition to the above extensions, @acronym{GNU} @code{m4} implements the
@@ -5133,15 +5179,6 @@ in @acronym{POSIX} since traditional implementations did not do this.
 @acronym{GNU} @code{m4} follows traditional behavior in @code{syscmd}, and
 provides the extension @code{esyscmd} that provides the @acronym{POSIX}
 semantics.
-
-@item
-@acronym{POSIX} requires @code{maketemp} (@pxref{Maketemp}) to replace
-the trailing @samp{X} characters with the @code{m4} process id, giving
-the same result on identical input, without creating any files, which
-leaves the door open for a data race in which other processes can create
-a file by the same name.  @acronym{GNU} @code{m4} actually creates a temporary
-file for each invocation of @code{maketemp}, which means that the output
-of the macro is different even if the input is identical.
 
 @item
 @acronym{POSIX} requires @code{changequote(@var{arg})}
