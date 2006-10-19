@@ -190,7 +190,9 @@ Conditionals, loops, and recursion
 
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
-* Loops::                       Loops and recursion in m4
+* Shift::                       Recursion in @code{m4}
+* Forloop::                     Iteration by counting
+* Foreach::                     Iteration by list contents
 
 How to debug macros and input
 
@@ -262,6 +264,8 @@ Compatibility with other versions of @code{m4}
 Correct version of some examples
 
 * Improved exch::               Solution for @code{exch}
+* Improved forloop::            Solution for @code{forloop}
+* Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 
@@ -1913,7 +1917,9 @@ something a number of times, or while some condition is true.
 @menu
 * Ifdef::                       Testing if a macro is defined
 * Ifelse::                      If-else construct, or multibranch
-* Loops::                       Loops and recursion in m4
+* Shift::                       Recursion in @code{m4}
+* Forloop::                     Iteration by counting
+* Foreach::                     Iteration by list contents
 @end menu
 
 @node Ifdef
@@ -2042,8 +2048,8 @@ Naturally, the normal case will be slightly more advanced than these
 examples.  A common use of @code{ifelse} is in macros implementing loops
 of various kinds.
 
-@node Loops
-@section Loops and recursion
+@node Shift
+@section Recursion in @code{m4}
 
 @cindex recursive macros
 @cindex macros, recursive
@@ -2077,7 +2083,7 @@ shift(`foo', `bar', `baz')
 An example of the use of @code{shift} is this macro:
 
 @deffn Composite reverse (@dots{})
-Takes any number of arguments, and reverse their order.
+Takes any number of arguments, and reverses their order.
 @end deffn
 
 It is implemented as:
@@ -2096,7 +2102,70 @@ reverse(`foo', `bar', `gnats', `and gnus')
 
 While not a very interesting macro, it does show how simple loops can be
 made with @code{shift}, @code{ifelse} and recursion.  It also shows
-that @code{shift} is usually used with @samp{$@@}.
+that @code{shift} is usually used with @samp{$@@}.  Sometimes, a
+recursive algorithm requires adding quotes to each element:
+
+@deffn Composite quote (@dots{})
+@deffnx Composite dquote (@dots{})
+@deffnx Composite dquote_elt (@dots{})
+Takes any number of arguments, and adds quoting.  With @code{quote},
+only one level of quoting is added, effectively removing whitespace
+after commas and turning multiple arguments into a single string.  With
+@code{dquote}, two levels of quoting are added, one around each element,
+and one around the list.  And with @code{dquote_elt}, two levels of
+quoting are added around each element.
+@end deffn
+
+An actual implementation of these three macros is distributed as
+@file{m4-@value{VERSION}/@/examples/@/quote.m4} in this package.  First,
+let's examine their usage:
+
+@example
+include(`quote.m4')
+@result{}
+-quote-dquote-dquote_elt-
+@result{}----
+-quote()-dquote()-dquote_elt()-
+@result{}--`'-`'-
+-quote(`1')-dquote(`1')-dquote_elt(`1')-
+@result{}-1-`1'-`1'-
+-quote(`1', `2')-dquote(`1', `2')-dquote_elt(`1', `2')-
+@result{}-1,2-`1',`2'-`1',`2'-
+define(`n', `$#')dnl
+-n(quote(`1', `2'))-n(dquote(`1', `2'))-n(dquote_elt(`1', `2'))-
+@result{}-1-1-2-
+dquote(dquote_elt(`1', `2'))
+@result{}``1'',``2''
+dquote_elt(dquote(`1', `2'))
+@result{}``1',`2''
+@end example
+
+The last two lines show that when given two arguments, @code{dquote}
+results in one string, while @code{dquote_elt} results in two.  Now,
+examine the implementation.  Note that @code{quote} and
+@code{dquote_elt} make decisions based on their number of arguments, so
+that when called without arguments, they result in nothing instead of a
+quoted empty string; this is so that it is possible to distinquish
+between no arguments and an empty first argument.  @code{dquote}, on the
+other hand, results in a string no matter what, since it is still
+possible to tell whether it was invoked without arguments based on the
+resulting string.
+
+@example
+undivert(`quote.m4')dnl
+@result{}divert(`-1')
+@result{}# quote(args) - convert args to single-quoted string
+@result{}define(`quote', `ifelse(`$#', `0', `', ``$*'')')
+@result{}# dquote(args) - convert args to quoted list of quoted strings
+@result{}define(`dquote', ``$@@'')
+@result{}# dquote_elt(args) - convert args to list of double-quoted strings
+@result{}define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
+@result{}                             ```$1'',$0(shift($@@))')')
+@result{}divert`'dnl
+@end example
+
+@node Forloop
+@section Iteration by counting
 
 @cindex for loops
 @cindex loops, counting
@@ -2142,35 +2211,36 @@ internal macro @code{_forloop}, and re-establishes the saved definition of
 the first argument.
 
 The macro @code{_forloop} expands the fourth argument once, and tests
-to see if it is finished.  If it has not finished, it increments
-the iteration variable (using the predefined macro @code{incr},
-@pxref{Incr}), and recurses.
+to see if the iterator has reached the final value.  If it has not
+finished, it increments the iterator (using the predefined macro
+@code{incr}, @pxref{Incr}), and recurses.
 
-Here is the actual implementation of @code{forloop}, distributed as
+Here is an actual implementation of @code{forloop}, distributed as
 @file{m4-@value{VERSION}/@/examples/@/forloop.m4} in this package:
 
 @example
-undivert(`forloop.m4')
+undivert(`forloop.m4')dnl
 @result{}divert(`-1')
-@result{}# forloop(var, from, to, stmt)
-@result{}define(`forloop',
-@result{}  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+@result{}# forloop(var, from, to, stmt) - simple version
+@result{}define(`forloop', `pushdef(`$1', `$2')_forloop($@@)popdef(`$1')')
 @result{}define(`_forloop',
-@result{}  `$4`'ifelse($1, `$3', ,
-@result{}    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+@result{}       `$4`'ifelse($1, `$3', `', `define(`$1', incr($1))$0($@@)')')
 @result{}divert`'dnl
-@result{}
 @end example
 
-Notice the careful use of quotes.  Only three macro arguments are
+Notice the careful use of quotes.  Certain macro arguments are left
 unquoted, each for its own reason.  Try to find out @emph{why} these
-three arguments are left unquoted, and see what happens if they are
-quoted.
+arguments are left unquoted, and see what happens if they are quoted.
+(As presented, these two macros are useful but not very robust for
+general use.  They lack even basic error handling for cases like
+@var{start} less than @var{end}, @var{end} not numeric, or
+@var{iterator} not being a macro name.  See if you can improve these
+macros; or @pxref{Improved forloop, , Answers}).
 
-Now, even though these two macros are useful, they are still not robust
-enough for general use. They lack even basic error handling of cases
-like start value less than final value, and the first argument not being
-a name.  Correcting these errors are left as an exercise to the reader.
+@node Foreach
+@section Iteration by list contents
+
+FIXME - Fill out this section.
 
 @node Debugging
 @chapter How to debug macros and input
@@ -3952,7 +4022,7 @@ len(format(`%-*X', `300', `1'))
 @result{}300
 @end example
 
-Using the @code{forloop} macro defined earlier (@pxref{Loops}), this
+Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
 example shows how @code{format} can be used to produce tabular output.
 
 @example
@@ -5202,6 +5272,8 @@ presented here.
 
 @menu
 * Improved exch::               Solution for @code{exch}
+* Improved forloop::            Solution for @code{forloop}
+* Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 @end menu
@@ -5223,6 +5295,54 @@ define(exch(`expansion text', `macro'))
 macro
 @result{}expansion text
 @end example
+
+@node Improved forloop
+@section Solution for @code{forloop}
+
+The @code{forloop} macro (@pxref{Forloop}) as presented earlier can go
+into an infinite loop if given an iterator that is not parsed as a macro
+name.  It does not do any sanity checking on its numeric bounds, and
+only permits decimal numbers for bounds.  Here is an improved version,
+shipped as @file{m4-@value{VERSION}/@/examples/@/forloop2.m4}; this
+version also optimizes based on the fact that the starting bound does
+not need to be passed to the helper @code{_forloop}.
+
+@example
+undivert(`forloop2.m4')dnl
+@result{}divert(`-1')
+@result{}# forloop(var, from, to, stmt) - improved version:
+@result{}#   works even if VAR is not a strict macro name
+@result{}#   performs sanity check that FROM is larger than TO
+@result{}#   allows complex numerical expressions in TO and FROM
+@result{}define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
+@result{}  `pushdef(`$1', eval(`$2'))_forloop(`$1',
+@result{}    eval(`$3'), `$4')popdef(`$1')')')
+@result{}define(`_forloop',
+@result{}  `$3`'ifelse(indir(`$1'), `$2', `',
+@result{}    `define(`$1', incr(indir(`$1')))$0($@@)')')
+@result{}divert`'dnl
+include(`forloop2.m4')
+@result{}
+forloop(`i', `2', `1', `no iteration occurs')
+@result{}
+forloop(`', `1', `2', ` odd iterator name')
+@result{} odd iterator name odd iterator name
+forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
+@result{} 0xa 0xb 0xc
+forloop(`i', `a', `b', `non-numeric bounds')
+@error{}m4:stdin:6: bad expression in eval (bad input): (b) >= (a)
+@result{}
+@end example
+
+Of course, it is possible to make even more improvements, such as
+adding an optional step argument, or allowing iteration through
+descending sequences.  @acronym{GNU} Autoconf provides some of these
+additional bells and whistles in its @code{m4_for} macro.
+
+@node Improved foreach
+@section Solution for @code{foreach}
+
+FIXME - add content.
 
 @node Improved cleardivert
 @section Solution for @code{cleardivert}

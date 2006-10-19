@@ -1,3 +1,13 @@
+2006-10-19  Eric Blake  <ebb9@byu.net>
+
+	* examples/forloop.m4: Simplify.
+	* examples/forloop2.m4: New file.
+	* examples/quote.m4: New file.
+	* doc/m4.texinfo (Loops): Rename to...
+	(Shift): ...this node.
+	(Forloop, Foreach, Improved forloop, Improved foreach): New
+	nodes.
+
 2006-10-17  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Update with 'gnulib-tool --import
