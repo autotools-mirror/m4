@@ -55,6 +55,7 @@
   BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
   BUILTIN (format,	false,	true,	false,	1,	-1 )	\
   BUILTIN (indir,	true,	true,	false,	1,	-1 )	\
+  BUILTIN (mkdtemp,	false,	true,	false,	1,	1  )	\
   BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
   BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
   BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
@@ -567,6 +568,22 @@ M4BUILTIN_HANDLER (indir)
 			 argc - 1, argv + 1);
 	}
     }
+}
+
+
+/* The builtin "mkdtemp" allows creation of temporary directories.  */
+
+/**
+ * mkdtemp(TEMPLATE)
+ **/
+M4BUILTIN_HANDLER (mkdtemp)
+{
+  M4_MODULE_IMPORT (m4, m4_make_temp);
+
+  if (m4_make_temp)
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), true);
+  else
+    assert (!"Unable to import from m4 module");
 }
 
 

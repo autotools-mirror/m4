@@ -495,6 +495,32 @@ AT_CHECK_M4([indir.m4], 0, expout)
 AT_CLEANUP
 
 
+## ------- ##
+## mkdtemp ##
+## ------- ##
+
+AT_SETUP([mkdtemp])
+
+dnl Check that on error, the expansion is void
+AT_DATA([[in]],
+[[mkdtemp(`no_such_dir/m4-fooXXXXXX')
+]])
+AT_CHECK_M4([in], [1], [[
+]], [[m4:in:1: mkdtemp: cannot create directory `no_such_dir/m4-fooXXXXXX': No such file or directory
+]])
+
+dnl Check that umask has an effect
+AT_DATA([[in]],
+[[substr(esyscmd(`ls -ld 'mkdtemp(`m4-fooXXXXXX')), `0', `10')
+]])
+AT_CHECK([m4 < in], [0], [[drwx------
+]])
+AT_CHECK([umask 700; m4 < in], [0], [[d---------
+]])
+
+AT_CLEANUP
+
+
 ## -------- ##
 ## maketemp ##
 ## -------- ##
@@ -506,7 +532,16 @@ AT_DATA([[in]],
 [[mkstemp(`no_such_dir/m4-fooXXXXXX')
 ]])
 AT_CHECK_M4([in], [1], [[
-]], [[m4:in:1: mkstemp: cannot create tempfile `no_such_dir/m4-fooXXXXXX': No such file or directory
+]], [[m4:in:1: mkstemp: cannot create file `no_such_dir/m4-fooXXXXXX': No such file or directory
+]])
+
+dnl Check that umask has an effect
+AT_DATA([[in]],
+[[substr(esyscmd(`ls -ld 'mkstemp(`m4-fooXXXXXX')), `0', `10')
+]])
+AT_CHECK([m4 < in], [0], [[-rw-------
+]])
+AT_CHECK([umask 700; m4 < in], [0], [[----------
 ]])
 
 dnl Check for Solaris compatibility of maketemp.  Hopefully the pid is

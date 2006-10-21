@@ -53,6 +53,8 @@ extern void m4_sysval_flush  (m4 *context);
 extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
 			      m4_symbol_value **argv, bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
+extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
+			      const char *name, bool dir);
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -673,17 +675,17 @@ M4BUILTIN_HANDLER (sinclude)
 /* Use the first argument as at template for a temporary file name.
    FIXME - should we add a mkdtemp builtin in the gnu module, then
    export this function as a helper to that?  */
-static void
-m4_make_temp (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
+void
+m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
+	      const char *name, bool dir)
 {
   int fd;
   int len;
   int i;
-  const char *name = M4ARG (1);
 
   if (m4_get_safer_opt (context))
     {
-      m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+      m4_error (context, 0, 0, _("%s: disabled by --safer"), macro);
       return;
     }
 
@@ -699,16 +701,25 @@ m4_make_temp (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
     obstack_1grow (obs, 'X');
   obstack_1grow (obs, '\0');
 
+  /* Make the temporary object.  */
   errno = 0;
-  fd = mkstemp (obstack_base (obs));
+  if (dir)
+    fd = mkdtemp (obstack_base (obs)) ? 0 : -1;
+  else
+    fd = mkstemp (obstack_base (obs));
   if (fd < 0)
     {
-      m4_error (context, 0, errno, _("%s: cannot create tempfile `%s'"),
-		M4ARG (0), name);
+      /* This use of _() will need to change if xgettext ever changes
+	 its undocumented behavior of parsing both string options.  */
+
+      m4_error (context, 0, errno,
+		_(dir ? "%s: cannot create directory `%s'"
+		  : "%s: cannot create file `%s'"),
+		macro, name);
       obstack_free (obs, obstack_finish (obs));
     }
-  else
-     close (fd);
+  else if (! dir)
+    close (fd);
 }
 
 /* Use the first argument as at template for a temporary file name.  */
@@ -748,13 +759,13 @@ M4BUILTIN_HANDLER (maketemp)
 	}
     }
   else
-    m4_make_temp (context, obs, argc, argv);
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), false);
 }
 
 /* Use the first argument as a template for a temporary file name.  */
 M4BUILTIN_HANDLER (mkstemp)
 {
-  m4_make_temp (context, obs, argc, argv);
+  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), false);
 }
 
 /* Print all arguments on standard error.  */

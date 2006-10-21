@@ -50,12 +50,16 @@ promoted to 2.0.
   the include path, rather than always searching `.' first.
 
 * New `--safer' command-line option cripples the potentially unsafe
-  macros `debugfile', `syscmd', `esyscmd', `maketemp', and `mkstemp'.
+  macros `debugfile', `esyscmd', `maketemp', `mkdtemp', `mkstemp', and
+  `syscmd'.
 
 * The `maketemp' builtin now always warns that it is obsolete, even in GNU
   mode where it uses the same secure algorithm as `mkstemp', because of
   the recommendation of POSIX to obsolete `maketemp' as inherently
   insecure when obeying POSIX.
+
+* New builtin `mkdtemp' parallels `mkstemp', but allows the creation of
+  temporary directories instead of files.
 
 * New `-b'/`--batch' command line option to force non-interactive mode.
   Also, in addition to `-e'/`--interactive' requesting interactive mode, m4

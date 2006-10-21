@@ -260,6 +260,7 @@ Macros for running shell commands
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
 * Mkstemp::                     Making temporary files
+* Mkdtemp::                     Making temporary directories
 
 Miscellaneous builtin macros
 
@@ -646,11 +647,11 @@ format and meaning of @var{RESYNTAX-SPEC}.
 
 @item --safer
 Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
-@code{debugfile} (@pxref{Debugfile}), @code{syscmd} (@pxref{Syscmd}),
-and @code{esyscmd} (@pxref{Esyscmd}), since they can perform potentially
-unsafe actions.  An attempt to use these macros will result in an error.
-This option is intended to make it safer to preprocess an input file of
-unknown origin.
+@code{mkdtemp} (@pxref{Mkdtemp}), @code{debugfile} (@pxref{Debugfile}),
+@code{syscmd} (@pxref{Syscmd}), and @code{esyscmd} (@pxref{Esyscmd}),
+since they can perform potentially unsafe actions.  An attempt to use
+these macros will result in an error.  This option is intended to make
+it safer to preprocess an input file of unknown origin.
 @end table
 
 @node Dynamic loading features
@@ -2078,6 +2079,7 @@ regular expression.
 
 The expansion of @code{renamesyms} is void.
 The macro @code{renamesyms} is recognized only with parameters.
+This macro was added in M4 2.0.
 @end deffn
 
 Here is an example that performs the same renaming as the
@@ -2302,6 +2304,7 @@ programs.
 
 When given arguments, @code{m4symbols} returns the sorted subset of the
 @var{names} currently defined, and silently ignores the rest.
+This macro was added in M4 2.0.
 @end deffn
 
 @example
@@ -5147,6 +5150,7 @@ commands from within @code{m4}.
 * Esyscmd::                     Reading the output of commands
 * Sysval::                      Exit status
 * Mkstemp::                     Making temporary files
+* Mkdtemp::                     Making temporary directories
 @end menu
 
 @node Platform macros
@@ -5401,6 +5405,81 @@ ifelse(file1, file2, `same', `different file')
 @result{}same
 syscmd(`echo foo??????')dnl
 @result{}foo??????
+@end example
+
+@node Mkdtemp
+@section Making temporary directories
+
+@cindex temporary directory
+@cindex directories, temporary
+@cindex @acronym{GNU} extensions
+Commands specified to @code{syscmd} or @code{esyscmd} might need a
+temporary directory, for holding multiple temporary files; such a
+directory can be created with @code{mkdtemp}:
+
+@deffn {Builtin (gnu)} mkdtemp (@var{template})
+Expands to a name of a new, empty directory, made from the string
+@var{template}, which should end with the string @samp{XXXXXX}.  The six
+@samp{X} characters are then replaced with random characters matching
+the regular expression @samp{[a-zA-Z0-9._-]}, in order to make the name
+unique.  If fewer than six @samp{X} characters are found at the end of
+@code{template}, the result will be longer than the template.  The
+created directory will have access permissions as if by @kbd{chmod
+=rwx,go=}, meaning that the current umask of the @code{m4} process is
+taken into account, and at most only the current user can read, write,
+and search the directory.
+
+The expansion is void and an error issued if a temporary directory could
+not be created.
+
+When the @option{--safer} option (@pxref{Operation modes, Invoking m4})
+is in effect, @code{mkdtemp} results in an error, since otherwise an
+input file could perform a mild denial-of-service attack by filling up a
+disk with multiple directories.
+
+The macro @code{mkdtemp} is recognized only with parameters.
+This macro was added in M4 2.0.
+@end deffn
+
+If you try this next example, you will most likely get different output
+for the directory names, since the replacement characters are randomly
+chosen:
+
+@comment ignore
+@example
+$ @kbd{m4}
+mkdtemp(`/tmp/fooXXXXXX')
+@result{}/tmp/foo2h89Vo
+mkdtemp(`dir)
+@result{}dirrg079A
+@end example
+
+@comment options: --safer
+@comment status: 1
+@example
+$ @kbd{m4 --safer}
+mkdtemp(`/tmp/fooXXXXXX')
+@error{}m4:stdin:1: mkdtemp: disabled by --safer
+@result{}
+@end example
+
+Multiple calls with the same template will generate multiple
+directories.
+
+@example
+$ @kbd{m4}
+syscmd(`echo foo??????')dnl
+@result{}foo??????
+define(`dir1', mkdtemp(`fooXXXXXX'))dnl
+ifelse(esyscmd(`echo foo??????'), `foo??????', `no dir', `created')
+@result{}created
+define(`dir2', mkdtemp(`fooXXXXXX'))dnl
+ifelse(dir1, dir2, `same', `different directories')
+@result{}different directories
+syscmd(`rmdir 'dir1 dir2)
+@result{}
+sysval
+@result{}0
 @end example
 
 @node Miscellaneous

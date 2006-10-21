@@ -1,5 +1,16 @@
 2006-10-21  Eric Blake  <ebb9@byu.net>
 
+	* modules/m4.c (m4_make_temp): Change signature.
+	(maketemp, mkstemp): Update callers.
+	* modules/m4.h (m4_make_temp_func): New export.
+	* modules/gnu.c (mkdtemp): New macro.
+	* doc/m4.texinfo (Operation modes): Document interaction with
+	--safer.
+	(Mkdtemp): New node.
+	* tests/builtins.at (mkdtemp): New test.
+	(mkstemp): Check for umask effect.
+	* NEWS: Document new builtin.
+
 	* tests/generate.awk (normalize): Update recognition of trailing
 	spaces in tests.
 	* doc/m4.texinfo: Minor formatting fixes from branch.
