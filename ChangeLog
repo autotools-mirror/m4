@@ -1,5 +1,14 @@
 2006-10-21  Eric Blake  <ebb9@byu.net>
 
+	* tests/generate.awk (normalize): Update recognition of trailing
+	spaces in tests.
+	* doc/m4.texinfo: Minor formatting fixes from branch.
+	(Foreach, Improved foreach): Merge from branch.
+	* examples/foreach.m4: Merge from branch.
+	* examples/foreachq.m4: New file from branch.
+	* examples/foreach2.m4: Likewise.
+	* examples/foreachq2.m4: Likewise.
+
 	* doc/m4.texinfo (titlepage): Add myself as author.
 	* src/main.c (AUTHORS): Likewise.
 

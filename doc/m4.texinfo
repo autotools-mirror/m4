@@ -100,7 +100,7 @@ files @file{m4-@value{VERSION}/@/AUTHORS} and
 distribution.
 
 @ifclear beta
-This is release @value{VERSION}.  It is now considered stable: future
+This is release @value{VERSION}.  It is now considered stable:  future
 releases on this branch are only meant to fix bugs, increase speed, or
 improve documentation.
 @end ifclear
@@ -1203,7 +1203,7 @@ eval(`1')
 @end example
 
 There is also a command line option (@option{--prefix-builtins}, or
-@option{-P}, @pxref{Operation modes, , Invoking m4})) that renames all
+@option{-P}, @pxref{Operation modes, , Invoking m4}) that renames all
 builtin macros with a prefix of @samp{m4_} at startup.  The option has
 no effect whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.  It also has
@@ -1882,7 +1882,7 @@ define(`string', `The macro dnl is very useful
 ')
 @result{}
 string
-@result{}The macro @comment
+@result{}The macro@w{ }
 defn(`string')
 @result{}The macro dnl is very useful
 @result{}
@@ -2597,7 +2597,7 @@ $ @kbd{m4 -I examples}
 include(`forloop.m4')
 @result{}
 forloop(`i', `1', `8', `i ')
-@result{}1 2 3 4 5 6 7 8 @comment
+@result{}1 2 3 4 5 6 7 8@w{ }
 @end example
 
 For-loops can be nested, like:
@@ -2619,12 +2619,12 @@ forloop(`i', `1', `4', `forloop(`j', `1', `8', ` (i, j)')
 The implementation of the @code{forloop} macro is fairly
 straightforward.  The @code{forloop} macro itself is simply a wrapper,
 which saves the previous definition of the first argument, calls the
-internal macro @code{_forloop}, and re-establishes the saved definition of
-the first argument.
+internal macro @code{@w{_forloop}}, and re-establishes the saved
+definition of the first argument.
 
-The macro @code{_forloop} expands the fourth argument once, and tests
-to see if the iterator has reached the final value.  If it has not
-finished, it increments the iterator (using the predefined macro
+The macro @code{@w{_forloop}} expands the fourth argument once, and
+tests to see if the iterator has reached the final value.  If it has
+not finished, it increments the iterator (using the predefined macro
 @code{incr}, @pxref{Incr}), and recurses.
 
 Here is an actual implementation of @code{forloop}, distributed as
@@ -2658,63 +2658,184 @@ macros; or @pxref{Improved forloop, , Answers}).
 @cindex loops, list iteration
 @cindex iterating over lists
 Here is an example of a loop macro that implements list iteration.
-@comment FIXME - this section still needs some work done
 
 @deffn Composite foreach (@var{iterator}, @var{paren-list}, @var{text})
+@deffnx Composite foreachq (@var{iterator}, @var{quote-list}, @var{text})
 Takes the name in @var{iterator}, which must be a valid macro name, and
-successively assign it each value from @var{paren-list}.
-@var{paren-list} is a comma-separated list of elements surrounded by
-parentheses.  For each assignment to @var{iterator}, append @var{text}
-to the expansion of @code{foreach}.  @var{text} may refer to
+successively assign it each value from @var{paren-list} or
+@var{quote-list}.  In @code{foreach}, @var{paren-list} is a
+comma-separated list of elements contained in parentheses.  In
+@code{foreachq}, @var{quote-list} is a comma-separated list of elements
+contained in a quoted string.  For each assignment to @var{iterator},
+append @var{text} to the overall expansion.  @var{text} may refer to
 @var{iterator}.  Any definition of @var{iterator} prior to this
 invocation is restored.
 @end deffn
 
-As an example, this displays each word in a list inside of a sentence.
+As an example, this displays each word in a list inside of a sentence,
+using an implementation of @code{foreach} distributed as
+@file{m4-@value{VERSION}/@/examples/@/foreach.m4}, and @code{foreachq}
+in @file{m4-@value{VERSION}/@/examples/@/foreachq.m4}.
 
-@comment FIXME - include(`foreach.m4')
-@comment ignore
+@comment examples
 @example
-foreach(`x', `(foo, bar, foobar)', `Word was: x
-')
+$ @kbd{m4 -I examples}
+include(`foreach.m4')
+@result{}
+foreach(`x', (foo, bar, foobar), `Word was: x
+')dnl
+@result{}Word was: foo
+@result{}Word was: bar
+@result{}Word was: foobar
+include(`foreachq.m4')
+@result{}
+foreachq(`x', `foo, bar, foobar', `Word was: x
+')dnl
 @result{}Word was: foo
 @result{}Word was: bar
 @result{}Word was: foobar
 @end example
 
-The implementation of the @code{foreach} macro is a bit more involved;
-it is a wrapper around two helper macros.  First, @code{_arg1} is needed
-to grab the first element of a list.  Second, @code{_foreach} implements
-the recursion, successively walking through the original list.
+It is possible to be more complex; each element of the @var{paren-list}
+or @var{quote-list} can itself be a list, to pass as further arguments
+to a helper macro.  This example generates a shell case statement:
 
-Here is an actual implementation of @code{forloop}, followed by a
-demonstration of using it to filter out a list of symbols that contain
-@samp{if}.
-
-@comment FIXME - include(foreach.m4),include(quote.m4)
+@comment examples
 @example
-define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
-define(`_arg1', ``$1'')dnl
-define(`_foreach',
-       `ifelse($2, `()', ,
-               `define(`$1',
-                       `_arg1$2')$3`'_foreach(`$1', `(shift$2)',
-                                              `$3')')')dnl
-define(`dquote', ``$@@'')
+$ @kbd{m4 -I examples}
+include(`foreach.m4')
 @result{}
-foreach(`macro', (dquote(m4symbols)),
-        `regexp(macro, `.*if.*', ``\&',')')
-@result{}ifdef,ifelse,shift,
+define(`_case', `  $1)
+    $2=" $1";;
+')dnl
+define(`_cat', `$1$2')dnl
+case $`'1 in
+@result{}case $1 in
+foreach(`x', `(`(`a', `vara')', `(`b', `varb')', `(`c', `varc')')',
+        `_cat(`_case', x)')dnl
+@result{}  a)
+@result{}    vara=" a";;
+@result{}  b)
+@result{}    varb=" b";;
+@result{}  c)
+@result{}    varc=" c";;
+esac
+@result{}esac
 @end example
 
-The example had to use a helper @code{quote} to ensure that the output
-from @code{m4symbols} was double quoted; without it, the macro would have
-gone into an infinite loop thanks to macros being reinvoked during the
-rescanning.  Choosing @samp{()} as the list delimiters made this
-example rather awkward in terms of proper quoting.  (A different
-implementation can be acheived by changing @var{list} from a
-parenthesized list to a quoted list.  Try reimplementing @code{foreach}
-with these semantics yourself; or @pxref{Improved foreach, , Answers}).
+The implementation of the @code{foreach} macro is a bit more involved;
+it is a wrapper around two helper macros.  First, @code{@w{_arg1}} is
+needed to grab the first element of a list.  Second,
+@code{@w{_foreach}} implements the recursion, successively walking
+through the original list.  Here is a simple implementation of
+@code{foreach}:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`foreach.m4')dnl
+@result{}divert(`-1')
+@result{}# foreach(x, (item_1, item_2, ..., item_n), stmt)
+@result{}#   parenthesized list, simple version
+@result{}define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')
+@result{}define(`_arg1', `$1')
+@result{}define(`_foreach', `ifelse(`$2', `()', `',
+@result{}  `define(`$1', _arg1$2)$3`'$0(`$1', (shift$2), `$3')')')
+@result{}divert`'dnl
+@end example
+
+Unfortunately, that implementation is not robust to macro names as list
+elements.  Each iteration of @code{@w{_foreach}} is stripping another
+layer of quotes, leading to erratic results if list elements are not
+already fully expanded.  The first cut at implementing @code{foreachq}
+takes this into account.  Also, when using quoted elements in a
+@var{paren-list}, the overall list must be quoted.  A @var{quote-list}
+has the nice property of requiring fewer characters to create a list
+containing the same quoted elements.  To see the difference between the
+two macros, we attempt to pass double-quoted macro names in a list,
+expecting the macro name on output after one layer of quotes is removed
+during list iteration and the final layer removed during the final
+rescan:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+define(`a', `1')define(`b', `2')define(`c', `3')
+@result{}
+include(`foreach.m4')
+@result{}
+include(`foreachq.m4')
+@result{}
+foreach(`x', `(``a'', ``(b'', ``c)'')', `x
+')
+@result{}1
+@result{}(2)1
+@result{}
+@result{}, x
+@result{})
+foreachq(`x', ```a'', ``(b'', ``c)''', `x
+')dnl
+@result{}a
+@result{}(b
+@result{}c)
+@end example
+
+Obviously, @code{foreachq} did a better job; here is its implementation:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`foreachq.m4')dnl
+@result{}include(`quote.m4')dnl
+@result{}divert(`-1')
+@result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+@result{}#   quoted list, simple version
+@result{}define(`foreachq', `pushdef(`$1')_foreachq($@@)popdef(`$1')')
+@result{}define(`_arg1', `$1')
+@result{}define(`_foreachq', `ifelse(quote($2), `', `',
+@result{}  `define(`$1', `_arg1($2)')$3`'$0(`$1', `shift($2)', `$3')')')
+@result{}divert`'dnl
+@end example
+
+Notice that @code{@w{_foreachq}} had to use the helper macro
+@code{quote} defined earlier (@pxref{Shift}), to ensure that the
+embedded @code{ifelse} call does not go haywire if a list element
+contains a comma.  Unfortunately, this implementation of @code{foreachq}
+has its own severe flaw.  Whereas the @code{foreach} implementation was
+linear, this macro is quadratic in the number of list elements, and is
+much more likely to trip up the limit set by the command line option
+@option{--nesting-limit} (or @option{-L}, @pxref{Limits control, ,
+Invoking m4}).  (It is possible to have robust iteration with linear
+behavior for either list style.  See if you can learn from the best
+elements of both of these implementations to create robust macros; or
+@pxref{Improved foreach, , Answers}).
+
+With a robust @code{foreach} implementation, it is possible to create a
+filter on a list of defined symbols.  This next example will find all
+symbols that contain @samp{if}.  Notice the use of @code{dquote} and
+@code{dquote_elt} to ensure that the list of macro names is properly
+quoted; without these, the iteration would be invoking various macros
+with catastrophic effects.  This example also shows a trick for
+generating the correct number of commas in the resulting output.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`quote.m4')include(`foreachq.m4')
+@result{}
+pushdef(`sep', ``, '')
+@result{}
+pushdef(`cleanup', `popdef(`sep', `cleanup')')
+@result{}
+pushdef(`sep', `define(`cleanup',
+  `popdef(`cleanup')')popdef(`sep')')
+@result{}
+foreachq(`macro', dquote(dquote_elt(m4symbols)),
+  `regexp(macro, `.*if.*', `sep`\&'')')
+@result{}ifdef, ifelse, shift
+cleanup
+@result{}
+@end example
 
 @node Debugging
 @chapter How to debug macros and input
@@ -4727,7 +4848,7 @@ patsubst(`GNUs not Unix', `\w*', `(\&)')
 patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
-@result{}GN not @comment
+@result{}GN not@w{ }
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
@@ -5398,16 +5519,16 @@ foo
 @result{}6
 @end example
 
-The @code{__program__} macro behaves like @samp{$0} in shell
+The @code{@w{__program__}} macro behaves like @samp{$0} in shell
 terminology.  If you invoke @code{m4} through an absolute path or a link
 with a different spelling, rather than by relying on a @env{PATH} search
-for plain @samp{m4}, it will affect how @code{__program__} expands.  The
-intent is that you can use it to produce error messages with the same
-formatting that @code{m4} produces internally.  It can also be used
+for plain @samp{m4}, it will affect how @code{@w{__program__}} expands.
+The intent is that you can use it to produce error messages with the
+same formatting that @code{m4} produces internally.  It can also be used
 within @code{syscmd} (@pxref{Syscmd}) to pick the same version of
 @code{m4} that is currently running, rather than whatever version of
-@code{m4} happens to be first in @env{PATH}.  It was first introduced
-in @acronym{GNU} M4 1.4.6.
+@code{m4} happens to be first in @env{PATH}.  It was first introduced in
+@acronym{GNU} M4 1.4.6.
 
 @node M4exit
 @section Exiting from @code{m4}
@@ -5734,8 +5855,8 @@ Macros can be called indirectly through @code{indir} (@pxref{Indir}).
 
 @item
 The name of the current input file and the current input line number are
-accessible through the builtins @code{__file__} and @code{__line__}
-(@pxref{Errprint}).
+accessible through the builtins @code{@w{__file__}} and
+@code{@w{__line__}} (@pxref{Errprint}).
 
 @item
 The generation of sync lines can be controlled through @code{syncoutput}
@@ -5832,19 +5953,20 @@ and without @env{POSIXLY_CORRECT} set, treat
 @item
 @findex __gnu__
 GNU @code{m4} without @samp{-G} option will define the macro
-@code{__gnu__} to expand to the empty string.
+@code{@w{__gnu__}} to expand to the empty string.
 
 @item
 @findex unix
 @findex __unix__
-On UNIX systems, GNU @code{m4} without the @option{-G} option will define
-the macro @code{__unix__}, otherwise the macro @code{unix}.  Both will
-expand to the empty string.
+On UNIX systems, GNU @code{m4} without the @option{-G} option will
+define the macro @code{@w{__unix__}}, otherwise the macro @code{unix}.
+Both will expand to the empty string.
 
 @item
 @findex __windows__
 On Windows systems, GNU @code{m4} without the @option{-G} option will
-define the macro @code{__windows__}, which expands to the empty string.
+define the macro @code{@w{__windows__}}, which expands to the empty
+string.
 @end itemize
 
 @node  Experiments
@@ -5925,7 +6047,7 @@ name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
 shipped as @file{m4-@value{VERSION}/@/examples/@/forloop2.m4}; this
 version also optimizes based on the fact that the starting bound does
-not need to be passed to the helper @code{_forloop}.
+not need to be passed to the helper @code{@w{_forloop}}.
 
 @comment examples
 @comment status: 1
@@ -5965,81 +6087,206 @@ additional bells and whistles in its @code{m4_for} macro.
 @node Improved foreach
 @section Solution for @code{foreach}
 
-The @code{foreach} macro (@pxref{Foreach}) as presented required the
-user to use parentheses to delineate the list.  This approach is
-quadratic, because the entire list is propagated through each recursion,
-with additional invocations of the shift macro added on each iteration:
+The @code{foreach} and @code{foreachq} macros (@pxref{Foreach}) as
+presented earlier each have flaws.  First, we will examine and fix the
+quadratic behavior of @code{foreachq}:
 
-@comment FIXME - include(foreach.m4),include(quote.m4)
-@comment options: -d-V
+@comment examples
 @example
-define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
-define(`_arg1', ``$1'')dnl
-define(`_foreach',
-       `ifelse($2, `()', ,
-               `define(`$1',
-                       `_arg1$2')$3`'_foreach(`$1', `(shift$2)',
-                                              `$3')')')dnl
-define(`dquote', ``$@@'')
+$ @kbd{m4 -I examples}
+include(`foreachq.m4')
 @result{}
-foreach(`macro', (dquote(m4symbols)), `regexp(macro, `shift', `\&')')
-@result{}shift
-traceon(`shift')
+traceon(`shift')debugmode(`aq')
 @result{}
-foreach(`a', `(1,2,3)', `a
-')
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
 @result{}1
-@error{}m4trace: -2- shift
-@error{}m4trace: -2- shift
+@error{}m4trace: -3- shift(`1', `2', `3', `4')
+@error{}m4trace: -2- shift(`1', `2', `3', `4')
 @result{}2
-@error{}m4trace: -3- shift
-@error{}m4trace: -2- shift
-@error{}m4trace: -3- shift
-@error{}m4trace: -2- shift
+@error{}m4trace: -4- shift(`1', `2', `3', `4')
+@error{}m4trace: -3- shift(`2', `3', `4')
+@error{}m4trace: -3- shift(`1', `2', `3', `4')
+@error{}m4trace: -2- shift(`2', `3', `4')
 @result{}3
-@error{}m4trace: -4- shift
-@error{}m4trace: -3- shift
-@error{}m4trace: -2- shift
-@result{}
+@error{}m4trace: -5- shift(`1', `2', `3', `4')
+@error{}m4trace: -4- shift(`2', `3', `4')
+@error{}m4trace: -3- shift(`3', `4')
+@error{}m4trace: -4- shift(`1', `2', `3', `4')
+@error{}m4trace: -3- shift(`2', `3', `4')
+@error{}m4trace: -2- shift(`3', `4')
+@result{}4
+@error{}m4trace: -6- shift(`1', `2', `3', `4')
+@error{}m4trace: -5- shift(`2', `3', `4')
+@error{}m4trace: -4- shift(`3', `4')
+@error{}m4trace: -3- shift(`4')
 @end example
 
-An alternative implementation takes a quoted list, with semantics that
-the list is expanded once before iteration, and has the benefit that
-each iteration operates on a shorter list, giving linear performance on
-long lists.  Another way of viewing these semantics is that the
-outermost quotes delineates the list, then each element of the list must
-be quoted as though the list delimiters were not present.  Notice the
-difference when iterating over @code{m4symbols}; we must use
-@code{dquote_elt} instead of @code{dquote} to get the necessary quoting.
+Each successive iteration was adding more quoted @code{shift}
+invocations, and the entire list contents were passing through every
+iteration.  In general, when recursing, it is a good idea to make the
+recursion use fewer arguments, rather than adding additional quoted
+uses of @code{shift}.  By doing so, @code{m4} uses less memory, invokes
+fewer macros, is less likely to run into machine limits, and most
+importantly, performs faster.  The fixed version of @code{foreachq} can
+be found in @file{m4-@value{VERSION}/@/examples/@/foreachq2.m4}:
 
-@comment FIXME - include(foreach.m4),include(quote.m4)
-@comment options: -d-V
+@comment examples
 @example
-define(`foreach', `pushdef(`$1')_foreach($@@)popdef(`$1')')dnl
-define(`_arg1', ``$1'')dnl
-define(`quote', `ifelse(`$#', `0', `', ``$*'')')dnl
-define(`dquote', ``$@@'')dnl
-define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
-                             ```$1'',dquote_elt(shift($@@))')')dnl
-define(`_rest', `ifelse(`$#', `1', , `dquote(shift($@@))')')dnl
-define(`_foreach',
-       `ifelse(quote($2), , ,
-               `define(`$1',
-                       `_arg1($2)')$3`'_foreach(`$1', _rest($2),
-                                                `$3')')')dnl
-foreach(`macro', `dquote_elt(m4symbols)',
-        `regexp(macro, `shift', `\&')')
-@result{}shift
-traceon(`shift')
+$ @kbd{m4 -I examples}
+include(`foreachq2.m4')
 @result{}
-foreach(`a', ``1',`2',`3'', `a
-')
+undivert(`foreachq2.m4')dnl
+@result{}include(`quote.m4')dnl
+@result{}divert(`-1')
+@result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+@result{}#   quoted list, improved version
+@result{}define(`foreachq', `pushdef(`$1')_foreachq($@@)popdef(`$1')')
+@result{}define(`_arg1q', ``$1'')
+@result{}define(`_rest', `ifelse(`$#', `1', `', `dquote(shift($@@))')')
+@result{}define(`_foreachq', `ifelse(`$2', `', `',
+@result{}  `define(`$1', _arg1q($2))$3`'$0(`$1', _rest($2), `$3')')')
+@result{}divert`'dnl
+traceon(`shift')debugmode(`aq')
+@result{}
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
 @result{}1
-@error{}m4trace: -3- shift
+@error{}m4trace: -3- shift(`1', `2', `3', `4')
 @result{}2
-@error{}m4trace: -3- shift
+@error{}m4trace: -3- shift(`2', `3', `4')
 @result{}3
+@error{}m4trace: -3- shift(`3', `4')
+@result{}4
+@end example
+
+Note that the fixed version calls unquoted helper macros in
+@code{@w{_foreachq}} to trim elements immediately; those helper macros
+in turn must re-supply the layer of quotes lost in the macro invocation.
+Contrast the use of @code{@w{_arg1q}}, which quotes the first list
+element, with @code{@w{_arg1}} of the earlier implementation that
+returned the first list element directly.
+
+For a different approach, the improved version of @code{foreach},
+available in @file{m4-@value{VERSION}/@/examples/@/foreach2.m4}, simply
+overquotes the arguments to @code{@w{_foreach}} to begin with, using
+@code{dquote_elt}.  Then @code{@w{_foreach}} can just use
+@code{@w{_arg1}} to remove the extra layer of quoting that was added up
+front:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`foreach2.m4')
 @result{}
+undivert(`foreach2.m4')dnl
+@result{}include(`quote.m4')dnl
+@result{}divert(`-1')
+@result{}# foreach(x, (item_1, item_2, ..., item_n), stmt)
+@result{}#   parenthesized list, improved version
+@result{}define(`foreach', `pushdef(`$1')_foreach(`$1',
+@result{}  (dquote(dquote_elt$2)), `$3')popdef(`$1')')
+@result{}define(`_arg1', `$1')
+@result{}define(`_foreach', `ifelse(`$2', `(`')', `',
+@result{}  `define(`$1', _arg1$2)$3`'$0(`$1', (dquote(shift$2)), `$3')')')
+@result{}divert`'dnl
+traceon(`shift')debugmode(`aq')
+@result{}
+foreach(`x', `(`1', `2', `3', `4')', `x
+')dnl
+@error{}m4trace: -4- shift(`1', `2', `3', `4')
+@error{}m4trace: -4- shift(`2', `3', `4')
+@error{}m4trace: -4- shift(`3', `4')
+@result{}1
+@error{}m4trace: -3- shift(``1'', ``2'', ``3'', ``4'')
+@result{}2
+@error{}m4trace: -3- shift(``2'', ``3'', ``4'')
+@result{}3
+@error{}m4trace: -3- shift(``3'', ``4'')
+@result{}4
+@error{}m4trace: -3- shift(``4'')
+@end example
+
+In summary, recursion over list elements is trickier than it appeared at
+first glance, but provides a powerful idiom within @code{m4} processing.
+As a final demonstration, both list styles are now able to handle
+several scenarios that would wreak havoc on the original
+implementations.  This points out one other difference between the two
+list styles.  @code{foreach} evaluates unquoted list elements only once,
+in preparation for calling @code{@w{_foreach}}.  But @code{foreachq}
+evaluates unquoted list elements twice while visiting the first list
+element, once in @code{@w{_arg1q}} and once in @code{@w{_rest}}.  When
+deciding which list style to use, one must take into account whether
+repeating the side effects of unquoted list elements will have any
+detrimental effects.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`foreach2.m4')
+@result{}
+include(`foreachq2.m4')
+@result{}
+dnl 0-element list:
+foreach(`x', `', `<x>') / foreachq(`x', `', `<x>')
+@result{} /@w{ }
+dnl 1-element list of empty element
+foreach(`x', `()', `<x>') / foreachq(`x', ``'', `<x>')
+@result{}<> / <>
+dnl 2-element list of empty elements
+foreach(`x', `(`',`')', `<x>') / foreachq(`x', ``',`'', `<x>')
+@result{}<><> / <><>
+dnl 1-element list of a comma
+foreach(`x', `(`,')', `<x>') / foreachq(`x', ``,'', `<x>')
+@result{}<,> / <,>
+dnl 2-element list of unbalanced parentheses
+foreach(`x', `(`(', `)')', `<x>') / foreachq(`x', ``(', `)'', `<x>')
+@result{}<(><)> / <(><)>
+define(`active', `ACT, IVE')
+@result{}
+traceon(`active')
+@result{}
+dnl list of unquoted macros; expansion occurs before recursion
+foreach(`x', `(active, active)', `<x>
+')dnl
+@error{}m4trace: -4- active -> `ACT, IVE'
+@error{}m4trace: -4- active -> `ACT, IVE'
+@result{}<ACT>
+@result{}<IVE>
+@result{}<ACT>
+@result{}<IVE>
+foreachq(`x', `active, active', `<x>
+')dnl
+@error{}m4trace: -3- active -> `ACT, IVE'
+@error{}m4trace: -3- active -> `ACT, IVE'
+@result{}<ACT>
+@error{}m4trace: -3- active -> `ACT, IVE'
+@error{}m4trace: -3- active -> `ACT, IVE'
+@result{}<IVE>
+@result{}<ACT>
+@result{}<IVE>
+dnl list of quoted macros; expansion occurs during recursion
+foreach(`x', `(`active', `active')', `<x>
+')dnl
+@error{}m4trace: -1- active -> `ACT, IVE'
+@result{}<ACT, IVE>
+@error{}m4trace: -1- active -> `ACT, IVE'
+@result{}<ACT, IVE>
+foreachq(`x', ``active', `active'', `<x>
+')dnl
+@error{}m4trace: -1- active -> `ACT, IVE'
+@result{}<ACT, IVE>
+@error{}m4trace: -1- active -> `ACT, IVE'
+@result{}<ACT, IVE>
+dnl list of double-quoted macro names; no expansion
+foreach(`x', `(``active'', ``active'')', `<x>
+')dnl
+@result{}<active>
+@result{}<active>
+foreachq(`x', ```active'', ``active''', `<x>
+')dnl
+@result{}<active>
+@result{}<active>
 @end example
 
 @node Improved cleardivert
@@ -6080,12 +6327,13 @@ undivert
 @section Solution for @code{fatal_error}
 
 The @code{fatal_error} macro (@pxref{M4exit}) is not robust to versions
-of @acronym{GNU} M4 earlier than 1.4.8, where invoking @code{__file__}
-(@pxref{Location}) inside @code{m4wrap} would result in an empty string,
-and @code{__line__} resulted in @samp{0} even though all files start at
-line 1.  Furthermore, versions earlier than 1.4.6 did not support the
-@code{__program__} macro.  If you want @code{fatal_error} to work across
-the entire 1.4.x release series, a better implementation would be:
+of @acronym{GNU} M4 earlier than 1.4.8, where invoking
+@code{@w{__file__}} (@pxref{Location}) inside @code{m4wrap} would result
+in an empty string, and @code{@w{__line__}} resulted in @samp{0} even
+though all files start at line 1.  Furthermore, versions earlier than
+1.4.6 did not support the @code{@w{__program__}} macro.  If you want
+@code{fatal_error} to work across the entire 1.4.x release series, a
+better implementation would be:
 
 @comment status: 1
 @example

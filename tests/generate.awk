@@ -141,7 +141,7 @@ function normalize(contents,    i, lines, n, line, res) {
       gsub ("@}", "}", line);
       gsub ("@@", "@", line);
       gsub ("@tabchar{}", "\t", line);
-      gsub ("@comment.*", "@\\&t@", line);
+      gsub ("@w{ }", " @\\&t@", line);
       gsub ("m4_", "m@\\&t@4_", line);
       gsub ("stdin", "input.m4", line);
 
