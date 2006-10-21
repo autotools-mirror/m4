@@ -1,4 +1,9 @@
-2006-10-19  Eric Blake  <eric.b.blake@l-3com.com>
+2006-10-21  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (titlepage): Add myself as author.
+	* src/main.c (AUTHORS): Likewise.
+
+2006-10-19  Eric Blake  <ebb9@byu.net>
 
 	* modules/m4.c (m4_make_temp, mkstemp): New functions.
 	(maketemp): Add POSIX behavior and a warning.
@@ -8,8 +13,6 @@
 	* doc/m4.texinfo (Mkstemp): Sync from branch.
 	(Extensions): Update maketemp behavior.
 	* NEWS: Document that maketemp now always warns.
-
-2006-10-19  Eric Blake  <ebb9@byu.net>
 
 	* tests/generate.awk: For ease of doc-writing, simplify selection
 	of '-Ipath/to/examples' to '@comment examples'.

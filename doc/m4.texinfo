@@ -69,6 +69,7 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @subtitle Edition @value{EDITION}, @value{UPDATED}
 @author by Ren@'e Seindal
 @author and Gary V. Vaughan
+@author and Eric Blake
 
 @page
 @vskip 0pt plus 1filll

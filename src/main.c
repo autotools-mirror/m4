@@ -30,7 +30,7 @@
 
 #include <limits.h>
 
-#define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan"
+#define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan", "Eric Blake"
 
 typedef struct macro_definition
 {
