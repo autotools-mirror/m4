@@ -36,6 +36,8 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
   use `mkstemp' instead.  Additionally, `mkstemp' and `maketemp' are now
   well-defined even if the template argument does not end in six `X'
   characters.
+* The manual has been improved, including a new section on a composite
+  macro `foreach'.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 

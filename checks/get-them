@@ -64,7 +64,7 @@ BEGIN {
   else
     prefix = "";
   gsub("@@", "@", $0);
-  gsub("@comment.*", "", $0);
+  gsub("@w{ }", " ", $0);
   gsub("@tabchar{}", "\t", $0);
   printf("%s%s\n", prefix, $0) >> file;
 }

@@ -1,3 +1,18 @@
+2006-10-20  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Trailing '@comment' doesn't format nicely in
+	TeX, so recognize '@w{ }' instead.  Likewise, @code{_name} at the
+	end of a TeX line splits incorrectly.
+	(Foreach, Improved foreach): Write these sections, borrowing ideas
+	from CVS head and from m4sugar.
+	* checks/get-them: Accomodate new way to show trailing space in
+	examples.
+	* examples/foreach.m4: Make usable in documentation.
+	* examples/foreachq.m4: New file.
+	* examples/foreachq2.m4: New file.
+	* examples/foreach2.m4: New file.
+	* NEWS: Document the documentation updates.
+
 2006-10-19  Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (mkstemp_helper, m4_mkstemp): New functions.
