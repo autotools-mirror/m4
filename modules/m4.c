@@ -21,8 +21,9 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
+
+#include "stdlib--.h"
+#include "unistd--.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -55,6 +56,10 @@ extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 			      const char *name, bool dir);
+
+/* stdlib--.h defines mkstemp to a safer replacement, but this
+   interferes with our preprocessor table of builtin definitions.  */
+#undef mkstemp
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -706,7 +711,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
   if (dir)
     fd = mkdtemp (obstack_base (obs)) ? 0 : -1;
   else
-    fd = mkstemp (obstack_base (obs));
+    fd = mkstemp_safer (obstack_base (obs));
   if (fd < 0)
     {
       /* This use of _() will need to change if xgettext ever changes

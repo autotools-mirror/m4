@@ -1,3 +1,10 @@
+2006-10-23  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (includes): Use safe headers even when configured
+	with --enable-assert.
+	(m4_builtin_table, m4_make_temp): Work around fact that mkstemp is
+	#defined as mkstemp_safer.
+
 2006-10-21  Eric Blake  <ebb9@byu.net>
 
 	* modules/m4.c (m4_make_temp): Change signature.
