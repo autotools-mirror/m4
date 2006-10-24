@@ -1,3 +1,7 @@
+2006-10-24  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (includes): Add gettext.h, for N_.  Assume setlocale.
+
 2006-10-23  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Macro Arguments, Incompatibilities): Remerge

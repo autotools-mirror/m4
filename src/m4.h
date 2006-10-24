@@ -34,12 +34,7 @@
 
 #include "m4module.h"
 
-#if HAVE_LOCALE_H
-# include <locale.h>
-#else
-# define setlocale(Category, Locale)
-#endif
-
+#include "gettext.h"
 #include "ltdl.h"
 
 /* Error handling.  */
