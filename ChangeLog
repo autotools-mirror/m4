@@ -1,5 +1,8 @@
 2006-10-23  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Macro Arguments, Incompatibilities): Remerge
+	from branch regarding stripped leading whitespace.
+
 	* modules/m4.c (includes): Use safe headers even when configured
 	with --enable-assert.
 	(m4_builtin_table, m4_make_temp): Work around fact that mkstemp is
