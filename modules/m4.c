@@ -419,7 +419,7 @@ M4BUILTIN_HANDLER (defn)
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
-	m4_push_builtin (m4_get_symbol_value (symbol));
+	m4_push_builtin (context, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
 	m4_warn (context, 0,
 		 _("%s: builtin `%s' requested by frozen file not found"),

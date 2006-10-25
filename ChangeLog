@@ -1,5 +1,28 @@
 2006-10-25  Eric Blake  <ebb9@byu.net>
 
+	* m4/m4module.h (m4_push_builtin): Add parameter.
+	* modules/m4.c (defn): Update caller.
+	* m4/input.c (file_read_init, string_read_init): No longer
+	needed.
+	(input_funcs): Change signature of read_func, all callers
+	updated.
+	(composite_peek, composite_read, composite_unget),
+	(composite_print, composite_funcs): New input type.  Not yet
+	fully utilized, but one step closer to fixing defn.
+	(m4_input_block): Make every input block track current file and
+	line.  Rename some members.  Remove unused out_line.  Add support
+	for composite input block.
+	(input_change): New flag.
+	(file_peek, file_read, file_clean, file_unget, file_print):
+	Update callers.
+	(m4_push_file, m4_push_builtin, m4_push_string_init)
+	(m4_push_string_finish, m4_push_wrapup, m4_pop_wrapup)
+	(m4_skip_line, pop_input): Track input block changes.
+	(m4_pop_wrapup): Avoid overflow.
+	(init_builtin_token): Handle composite input.
+	(next_char): Handle input block changes.
+	* doc/m4.texinfo (Location): Remerge from branch.
+
 	* src/m4.h (includes): Need <locale.h> after all; fixes
 	regression from yesterday.
 

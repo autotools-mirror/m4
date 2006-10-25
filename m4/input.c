@@ -42,8 +42,8 @@
    through the function pointers of the input_funcs on the given
    input_block, and all characters are unsigned, to distinguish
    between stdio EOF and between special sentinel characters.  When a
-   input_block is exausted, its reader returns CHAR_RETRY which causes
-   the input_block to be popped from the input_stack.
+   input_block is exhausted, its reader returns CHAR_RETRY which
+   causes the input_block to be popped from the input_stack.
 
    The macro "m4wrap" places the text to be saved on another input
    stack, on the obstack "wrapup_stack", whose top is "wsp".  When EOF
@@ -71,30 +71,39 @@
    collecting a macro's expansion.  The input_block *next is used to
    manage the coordination between the different push routines.
 
+   Normally, input sources behave in LIFO order, resembling a stack.
+   But thanks to the defn macro, when collecting the expansion of a
+   macro, it is possible that we must intermix multiple input blocks
+   in FIFO order.  This also applies to the POSIX requirements of
+   m4wrap.  Therefore, when collecting an expansion, a meta-input
+   block is formed which will visit its children in FIFO order,
+   without losing data when the obstack is cleared in LIFO order.
+
    The current file and line number are stored in the context, for use
-   by the error handling functions in utility.c.  Whenever a file
-   input_block is pushed, the current file name and line number are
-   saved in the input_block, and the two variables are reset to match
-   the new input file.  When collecting a macro's expansion, these
-   variables can be temporarily inconsistent in order to provide
-   better error message locations, but they must be restored before
-   further parsing takes place.  */
+   by the error handling functions in utility.c.  When collecting a
+   macro's expansion, these variables can be temporarily inconsistent
+   in order to provide better error message locations, but they must
+   be restored before further parsing takes place.  Each input block
+   maintains its own notion of the current file and line, so swapping
+   between input blocks must update the context accordingly.  */
 
 static	int	file_peek		(m4_input_block *);
-static	int	file_read_init		(m4_input_block *, m4 *);
-static	int	file_read		(m4_input_block *, m4 *);
+static	int	file_read		(m4_input_block *, m4 *, bool);
 static	void	file_unget		(m4_input_block *, int);
 static	void	file_clean		(m4_input_block *, m4 *);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	builtin_peek		(m4_input_block *);
-static	int	builtin_read		(m4_input_block *, m4 *);
+static	int	builtin_read		(m4_input_block *, m4 *, bool);
 static	void	builtin_unget		(m4_input_block *, int);
 static	void	builtin_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	string_peek		(m4_input_block *);
-static	int	string_read		(m4_input_block *, m4 *);
-static	int	string_read_init	(m4_input_block *, m4 *);
+static	int	string_read		(m4_input_block *, m4 *, bool);
 static	void	string_unget		(m4_input_block *, int);
 static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
+static	int	composite_peek		(m4_input_block *);
+static	int	composite_read		(m4_input_block *, m4 *, bool);
+static	void	composite_unget		(m4_input_block *, int);
+static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
 static	void	init_builtin_token	(m4 *, m4_symbol_value *);
 static	bool	match_input		(m4 *, const unsigned char *, bool);
@@ -113,8 +122,9 @@ struct input_funcs
   /* Peek at input, return CHAR_RETRY if none available.  */
   int	(*peek_func)	(m4_input_block *);
 
-  /* Read input, return CHAR_RETRY if none available.  */
-  int	(*read_func)	(m4_input_block *, m4 *);
+  /* Read input, return CHAR_RETRY if none available.  If the flag is
+     false, then do not alter the current file or line.  */
+  int	(*read_func)	(m4_input_block *, m4 *, bool);
 
   /* Unread a single character, previously read by read_func.  */
   void	(*unget_func)	(m4_input_block *, int);
@@ -131,6 +141,8 @@ struct m4_input_block
 {
   m4_input_block *prev;		/* previous input_block on the input stack */
   struct input_funcs *funcs;	/* functions on this input_block */
+  const char *file;		/* file where this input is from */
+  int line;			/* line where this input is from */
 
   union
     {
@@ -138,18 +150,13 @@ struct m4_input_block
 	{
 	  unsigned char *start;		/* string value */
 	  unsigned char *current;	/* current value */
-	  const char *name;	/* file where wrapped text is from */
-	  int line;		/* line where wrapped text is from */
 	}
       u_s;
       struct
 	{
-	  FILE *file;		/* input file handle */
+	  FILE *fp;		/* input file handle */
 	  bool end;		/* true iff peek returned EOF */
 	  bool close;		/* true if file should be closed on EOF */
-	  const char *name;	/* name of PREVIOUS input file */
-	  int line;		/* current line of previous file */
-	  int out_line;		/* current output line of previous file */
 	  bool advance_line;	/* start_of_input_line from next_char () */
 	}
       u_f;
@@ -165,6 +172,12 @@ struct m4_input_block
 	  bool read;		  /* true iff block has been read. */
 	}
       u_b;
+      struct
+	{
+	  m4_input_block *current; /* pointer to current sub-block. */
+	  m4_input_block *tail;	   /* pointer to last sub-block. */
+	}
+      u_c;
     }
   u;
 };
@@ -201,18 +214,11 @@ static m4_input_block *next;
 /* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
 
+/* Flag for next_char () to recognize change in input block.  */
+static bool input_change;
 
 
-
-/* Input files.  For speed in the common case, use two different sets
-   of vtables depending on whether the file has just been pushed but
-   not yet read (u_f.name refers to the current file name), or if any
-   characters have been read (u_f.name refers to the name of the file
-   that included this file).  */
-static struct input_funcs file_init_funcs = {
-  file_peek, file_read_init, NULL, NULL, file_print
-};
-
+/* Input files, from command line or [s]include.  */
 static struct input_funcs file_funcs = {
   file_peek, file_read, file_unget, file_clean, file_print
 };
@@ -222,43 +228,31 @@ file_peek (m4_input_block *me)
 {
   int ch;
 
-  ch = me->u.u_f.end ? EOF : getc (me->u.u_f.file);
+  ch = me->u.u_f.end ? EOF : getc (me->u.u_f.fp);
   if (ch == EOF)
     {
       me->u.u_f.end = true;
       return CHAR_RETRY;
     }
 
-  ungetc (ch, me->u.u_f.file);
+  ungetc (ch, me->u.u_f.fp);
   return ch;
 }
 
 static int
-file_read_init (m4_input_block *me, m4 *context)
-{
-  const char *tmp = me->u.u_f.name;
-  me->u.u_f.name = m4_get_current_file (context);
-  me->u.u_f.line = m4_get_current_line (context);
-  m4_set_current_file (context, tmp);
-  m4_set_current_line (context, 1);
-  me->funcs = &file_funcs;
-  return file_read (me, context);
-}
-
-static int
-file_read (m4_input_block *me, m4 *context)
+file_read (m4_input_block *me, m4 *context, bool retry M4_GNUC_UNUSED)
 {
   int ch;
 
   if (start_of_input_line)
     {
       start_of_input_line = false;
-      m4_set_current_line (context, m4_get_current_line (context) + 1);
+      m4_set_current_line (context, ++me->line);
     }
 
   /* If stdin is a terminal, calling getc after peek_char already
      called it would make the user have to hit ^D twice to quit.  */
-  ch = me->u.u_f.end ? EOF : getc (me->u.u_f.file);
+  ch = me->u.u_f.end ? EOF : getc (me->u.u_f.fp);
   if (ch == EOF)
     {
       me->u.u_f.end = true;
@@ -274,7 +268,7 @@ static void
 file_unget (m4_input_block *me, int ch)
 {
   assert (ch < CHAR_EOF);
-  if (ungetc (ch, me->u.u_f.file) < 0)
+  if (ungetc (ch, me->u.u_f.fp) < 0)
     {
       assert (!"INTERNAL ERROR: failed ungetc!");
       abort (); /* ungetc should not be called without a previous read.  */
@@ -287,36 +281,29 @@ file_unget (m4_input_block *me, int ch)
 static void
 file_clean (m4_input_block *me, m4 *context)
 {
-  if (me->u.u_f.line)
+  if (me->prev)
     m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
 		      _("input reverted to %s, line %d"),
-		      me->u.u_f.name, me->u.u_f.line);
+		      me->prev->file, me->prev->line);
   else
     m4_debug_message (context, M4_DEBUG_TRACE_INPUT, _("input exhausted"));
 
-  if (ferror (me->u.u_f.file))
+  if (ferror (me->u.u_f.fp))
     {
-      m4_error (context, 0, 0, _("error reading file `%s'"),
-		m4_get_current_file (context));
+      m4_error (context, 0, 0, _("error reading file `%s'"), me->file);
       if (me->u.u_f.close)
-	fclose (me->u.u_f.file);
+	fclose (me->u.u_f.fp);
     }
-  else if (me->u.u_f.close && fclose (me->u.u_f.file) == EOF)
-    m4_error (context, 0, errno, _("error reading file `%s'"),
-	      m4_get_current_file (context));
-  m4_set_current_file (context, me->u.u_f.name);
-  m4_set_current_line (context, me->u.u_f.line);
-  m4_set_output_line (context, me->u.u_f.out_line);
+  else if (me->u.u_f.close && fclose (me->u.u_f.fp) == EOF)
+    m4_error (context, 0, errno, _("error reading file `%s'"), me->file);
   start_of_input_line = me->u.u_f.advance_line;
-  if (me->prev != NULL)
-    m4_set_output_line (context, -1);
+  m4_set_output_line (context, -1);
 }
 
 static void
 file_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  const char *text = (me->funcs == &file_init_funcs ? me->u.u_f.name
-		      : m4_get_current_file (context));
+  const char *text = me->file;
   obstack_grow (obs, "<file: ", strlen ("<file: "));
   obstack_grow (obs, text, strlen (text));
   obstack_1grow (obs, '>');
@@ -348,23 +335,22 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
 
   i = (m4_input_block *) obstack_alloc (current_input,
 					sizeof (m4_input_block));
-  i->funcs = &file_init_funcs;
-
-  i->u.u_f.file = fp;
-  i->u.u_f.end = false;
-  i->u.u_f.close = close_file;
-  i->u.u_f.out_line = m4_get_output_line (context);
-  i->u.u_f.advance_line = start_of_input_line;
-
+  i->funcs = &file_funcs;
   /* Save title on a separate obstack, so that wrapped text can refer
      to it even after the file is popped.  */
-  i->u.u_f.name = obstack_copy0 (&file_names, title, strlen (title));
-  i->u.u_f.line = 0;
+  i->file = obstack_copy0 (&file_names, title, strlen (title));
+  i->line = 1;
+
+  i->u.u_f.fp = fp;
+  i->u.u_f.end = false;
+  i->u.u_f.close = close_file;
+  i->u.u_f.advance_line = start_of_input_line;
 
   m4_set_output_line (context, -1);
 
   i->prev = isp;
   isp = i;
+  input_change = true;
 }
 
 
@@ -383,7 +369,8 @@ builtin_peek (m4_input_block *me)
 }
 
 static int
-builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED)
+builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
+	      bool retry M4_GNUC_UNUSED)
 {
   if (me->u.u_b.read)
     return CHAR_RETRY;
@@ -425,7 +412,7 @@ builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
    invalidates a call to m4_push_string_init (), whose storage is
    consequently released.  */
 void
-m4_push_builtin (m4_symbol_value *token)
+m4_push_builtin (m4 *context, m4_symbol_value *token)
 {
   m4_input_block *i;
 
@@ -441,6 +428,8 @@ m4_push_builtin (m4_symbol_value *token)
   i = (m4_input_block *) obstack_alloc (current_input,
 					sizeof (m4_input_block));
   i->funcs = &builtin_funcs;
+  i->file = m4_get_current_file (context);
+  i->line = m4_get_current_line (context);
 
   i->u.u_b.func		= m4_get_symbol_value_func (token);
   i->u.u_b.handle	= VALUE_HANDLE (token);
@@ -452,16 +441,11 @@ m4_push_builtin (m4_symbol_value *token)
 
   i->prev = isp;
   isp = i;
+  input_change = true;
 }
 
 
-/* Handle string expansion text.  Wrapped text needs to know what the
-   location it was invoked from, while normal text does not.  So to
-   speed up the common case, this is divided into two vtables.  */
-static struct input_funcs string_init_funcs = {
-  string_peek, string_read_init, NULL, NULL, string_print
-};
-
+/* Handle string expansion text.  */
 static struct input_funcs string_funcs = {
   string_peek, string_read, string_unget, NULL, string_print
 };
@@ -475,16 +459,8 @@ string_peek (m4_input_block *me)
 }
 
 static int
-string_read_init (m4_input_block *me, m4 *context)
-{
-  m4_set_current_file (context, me->u.u_s.name);
-  m4_set_current_line (context, me->u.u_s.line);
-  me->funcs = &string_funcs;
-  return string_read (me, context);
-}
-
-static int
-string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED)
+string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
+	     bool retry M4_GNUC_UNUSED)
 {
   int ch = (unsigned char) *me->u.u_s.current;
   if (ch == '\0')
@@ -533,8 +509,8 @@ m4_push_string_init (m4 *context)
   next = (m4_input_block *) obstack_alloc (current_input,
 					   sizeof (m4_input_block));
   next->funcs = &string_funcs;
-  next->u.u_s.name = NULL;
-  next->u.u_s.line = 0;
+  next->file = m4_get_current_file (context);
+  next->line = m4_get_current_line (context);
 
   return current_input;
 }
@@ -556,14 +532,14 @@ m4_push_string_finish (void)
   if (next == NULL)
     return isp;
 
-  if (obstack_object_size (current_input) > 0
-      || next->funcs == &string_init_funcs)
+  if (obstack_object_size (current_input) > 0)
     {
       obstack_1grow (current_input, '\0');
       next->u.u_s.start = obstack_finish (current_input);
       next->u.u_s.current = next->u.u_s.start;
       next->prev = isp;
       ret = isp = next;
+      input_change = true;
     }
   else
     obstack_free (current_input, next); /* people might leave garbage on it. */
@@ -571,6 +547,84 @@ m4_push_string_finish (void)
   return ret;
 }
 
+
+/* A composite block contains multiple sub-blocks which are processed
+   in FIFO order, even though the obstack allocates memory in LIFO
+   order.  */
+static struct input_funcs composite_funcs = {
+  composite_peek, composite_read, composite_unget, NULL, composite_print
+};
+
+static int
+composite_peek (m4_input_block *me)
+{
+  int ch = CHAR_RETRY;
+  m4_input_block *subblock = me->u.u_c.current;
+  while (ch == CHAR_RETRY && subblock != NULL)
+    {
+      ch = subblock->funcs->peek_func (subblock);
+      subblock = subblock->prev;
+    }
+  return ch;
+}
+
+static int
+composite_read (m4_input_block *me, m4 *context, bool retry)
+{
+  int ch;
+  m4_input_block *subblock;
+
+  /* Check if input exhausted.  */
+  subblock = me->u.u_c.current;
+  if (subblock == NULL)
+    return CHAR_RETRY;
+
+  /* See if current block has real character.  */
+  ch = subblock->funcs->read_func (subblock, context, retry);
+  if (ch != CHAR_RETRY || ! retry)
+    {
+      me->line = subblock->line;
+      return ch;
+    }
+
+  /* Pop blocks until we get real character.  */
+  while (ch == CHAR_RETRY && subblock != NULL)
+    {
+      if (subblock->funcs->clean_func)
+	subblock->funcs->clean_func (subblock, context);
+      subblock = me->u.u_c.current->prev;
+      me->u.u_c.current = subblock;
+      input_change = true;
+      if (subblock)
+	ch = subblock->funcs->read_func (subblock, context, retry);
+    }
+  me->file = subblock->file;
+  me->line = subblock->line;
+  return ch;
+}
+
+static void
+composite_unget (m4_input_block *me, int ch)
+{
+  assert (me->u.u_c.current);
+  me->u.u_c.current->funcs->unget_func (me->u.u_c.current, ch);
+}
+
+static void
+composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
+{
+  m4_input_block *subblock = me->u.u_c.current;
+  while (subblock)
+    {
+      subblock->funcs->print_func (subblock, context, obs);
+      subblock = subblock->prev;
+    }
+}
+
+/*TODO FIXME - in m4_push_file/m4_push_builtin, if next is not NULL,
+  call create_composite. */
+
+
 /* When tracing, print a summary of the contents of the input block
    created by push_string_init/push_string_finish to OBS.  */
 void
@@ -612,21 +666,19 @@ m4_push_wrapup (m4 *context, const char *s)
 					sizeof (m4_input_block));
   i->prev = wsp;
 
-  i->funcs = &string_init_funcs;
+  i->funcs = &string_funcs;
+  i->file = m4_get_current_file (context);
+  i->line = m4_get_current_line (context);
 
   i->u.u_s.start = obstack_copy0 (wrapup_stack, s, strlen (s));
   i->u.u_s.current = i->u.u_s.start;
-  i->u.u_s.name = m4_get_current_file (context);
-  i->u.u_s.line = m4_get_current_line (context);
 
   wsp = i;
 }
-
 
-/* The function pop_input () pops one level of input sources.  If the
-   popped input_block is a file, current_file and current_line are
-   reset to the saved values before the memory for the input_block is
-   released.  */
+
+/* The function pop_input () pops one level of input sources.  The
+   current_file and current_line are restored as needed.  */
 static void
 pop_input (m4 *context)
 {
@@ -642,6 +694,7 @@ pop_input (m4 *context)
     }
 
   isp = tmp;
+  input_change = true;
 }
 
 /* To switch input over to the wrapup stack, main () calls pop_wrapup.
@@ -662,14 +715,15 @@ m4_pop_wrapup (m4 *context)
       m4_set_current_file (context, NULL);
       m4_set_current_line (context, 0);
       m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
-			_("input from m4wrap exhausted"));
+		       _("input from m4wrap exhausted"));
       current_input = NULL;
       DELETE (wrapup_stack);
       return false;
     }
 
   m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
-		    _("input from m4wrap recursion level %d"), ++level);
+		    _("input from m4wrap recursion level %lu"),
+		    (unsigned long int) ++level);
 
   current_input = wrapup_stack;
   wrapup_stack = (m4_obstack *) xmalloc (sizeof (m4_obstack));
@@ -677,6 +731,7 @@ m4_pop_wrapup (m4 *context)
 
   isp = wsp;
   wsp = NULL;
+  input_change = true;
 
   return true;
 }
@@ -686,18 +741,17 @@ m4_pop_wrapup (m4 *context)
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
-  if (isp->funcs->read_func != builtin_read)
-    {
-      assert (!"INTERNAL ERROR: bad call to init_builtin_token ()");
-      abort ();
-    }
+  m4_input_block *block = isp;
+  if (block->funcs == &composite_funcs)
+    block = block->u.u_c.current;
+  assert (block->funcs->read_func == builtin_read && ! block->u.u_b.read);
 
-  m4_set_symbol_value_func (token, isp->u.u_b.func);
-  VALUE_HANDLE (token)		= isp->u.u_b.handle;
-  VALUE_FLAGS (token)		= isp->u.u_b.flags;
-  VALUE_ARG_SIGNATURE (token)	= isp->u.u_b.arg_signature;
-  VALUE_MIN_ARGS (token)	= isp->u.u_b.min_args;
-  VALUE_MAX_ARGS (token)	= isp->u.u_b.max_args;
+  m4_set_symbol_value_func (token, block->u.u_b.func);
+  VALUE_HANDLE (token)		= block->u.u_b.handle;
+  VALUE_FLAGS (token)		= block->u.u_b.flags;
+  VALUE_ARG_SIGNATURE (token)	= block->u.u_b.arg_signature;
+  VALUE_MIN_ARGS (token)	= block->u.u_b.min_args;
+  VALUE_MAX_ARGS (token)	= block->u.u_b.max_args;
 }
 
 
@@ -713,10 +767,20 @@ next_char (m4 *context, bool retry)
   while (1)
     {
       if (isp == NULL)
-	return CHAR_EOF;
+	{
+	  m4_set_current_file (context, NULL);
+	  m4_set_current_line (context, 0);
+	  return CHAR_EOF;
+	}
+
+      if (input_change)
+	{
+	  m4_set_current_file (context, isp->file);
+	  m4_set_current_line (context, isp->line);
+	}
 
       assert (isp->funcs->read_func);
-      while ((ch = isp->funcs->read_func (isp, context)) != CHAR_RETRY
+      while ((ch = isp->funcs->read_func (isp, context, retry)) != CHAR_RETRY
 	     || ! retry)
 	{
 	  /* if (!IS_IGNORE (ch)) */
@@ -754,7 +818,7 @@ peek_char (m4 *context)
 
 /* The function unget_input () puts back a character on the input
    stack, using an existing input_block if possible.  This is not safe
-   to call more than once without an intervening next_char.  */
+   to call except immediately after next_char(context, false).  */
 static void
 unget_input (int ch)
 {
@@ -779,29 +843,16 @@ m4_skip_line (m4 *context, const char *name)
     m4_warn_at_line (context, 0, file, line,
 		     _("%s: end of file treated as newline"), name);
   /* On the rare occasion that dnl crosses include file boundaries
-     (either the input file did not end in a newline, or changeword
+     (either the input file did not end in a newline, or changesyntax
      was used), calling next_char can update current_file and
      current_line, and that update will be undone as we return to
-     expand_macro.  This hack of sticking an empty INPUT_STRING_WRAP
-     with the correct location as the next thing to parse works around
-     the problem.  */
+     expand_macro.  This tells next_char () to restore the location.  */
   if (file != m4_get_current_file (context)
       || line != m4_get_current_line (context))
-    {
-      m4_input_block *i;
-      i = (m4_input_block *) obstack_alloc (current_input,
-					    sizeof (m4_input_block));
-      i->prev = isp;
-      i->funcs = &string_init_funcs;
-      i->u.u_s.current = i->u.u_s.start = "";
-      i->u.u_s.name = m4_get_current_file (context);
-      i->u.u_s.line = m4_get_current_line (context);
-      isp = i;
-    }
+    input_change = true;
 }
+
 
-
-
 /* This function is for matching a string against a prefix of the
    input stream.  If the string S matches the input and CONSUME is
    true, the input is discarded; otherwise any characters read are
@@ -902,8 +953,6 @@ consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 }
 
 
-
-
 /* Inititialize input stacks, and quote/comment characters.  */
 void
 m4_input_init (m4 *context)
@@ -940,10 +989,7 @@ m4_input_exit (void)
   obstack_free (&token_stack, NULL);
 }
 
-
 
-
-
 /* Parse and return a single token from the input stream.  A token can
    either be M4_TOKEN_EOF, if the input_stack is empty; it can be
    M4_TOKEN_STRING for a quoted string; M4_TOKEN_WORD for something that
@@ -1197,7 +1243,6 @@ m4__next_token_is_open (m4 *context)
 }
 
 
-
 #ifdef DEBUG_INPUT
 
 int

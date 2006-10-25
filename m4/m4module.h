@@ -400,7 +400,7 @@ extern	void	m4_skip_line	(m4 *context, const char *);
 /* push back input */
 
 extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
-extern	void	m4_push_builtin	(m4_symbol_value *);
+extern	void	m4_push_builtin	(m4 *, m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
 extern	m4_input_block	*m4_push_string_finish	(void);
 extern	void	m4_push_wrapup	(m4 *, const char *);
