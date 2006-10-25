@@ -4878,9 +4878,15 @@ __line__)
 m4wrap(`foo
 ')
 @result{}
-foo
+foo(errprint(__line__
+__line__
+))
+@error{}8
+@error{}9
 @result{}8
 @result{}8
+__line__
+@result{}11
 ^D
 @result{}6
 @result{}6
