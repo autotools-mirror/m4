@@ -55,6 +55,19 @@ static size_t expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static size_t macro_call_id = 0;
 
+/* The shared stack of collected arguments for macro calls; as each
+   argument is collected, it is finished and its location stored in
+   argv_stack.  This stack can be used simultaneously by multiple
+   macro calls, using obstack_regrow to handle partial objects
+   embedded in the stack.  */
+static struct obstack argc_stack;
+
+/* The shared stack of pointers to collected arguments for macro
+   calls.  This object is never finished; we exploit the fact that
+   obstack_blank is documented to take a negative size to reduce the
+   size again.  */
+static struct obstack argv_stack;
+
 /* This function reads all input, and expands each token, one at a time.  */
 void
 m4_macro_expand_input (m4 *context)
@@ -62,8 +75,14 @@ m4_macro_expand_input (m4 *context)
   m4__token_type type;
   m4_symbol_value token;
 
+  obstack_init (&argc_stack);
+  obstack_init (&argv_stack);
+
   while ((type = m4__next_token (context, &token)) != M4_TOKEN_EOF)
     expand_token (context, (m4_obstack *) NULL, type, &token);
+
+  obstack_free (&argc_stack, NULL);
+  obstack_free (&argv_stack, NULL);
 }
 
 
@@ -76,10 +95,8 @@ expand_token (m4 *context, m4_obstack *obs,
 	      m4__token_type type, m4_symbol_value *token)
 {
   m4_symbol *symbol;
-  /* Copy name, since expand_macro can consume additional tokens,
-     invalidating the current token.  */
   char *text = (m4_is_symbol_value_text (token)
-		? xstrdup (m4_get_symbol_value_text (token)) : NULL);
+		? m4_get_symbol_value_text (token) : NULL);
 
   switch (type)
     {				/* TOKSW */
@@ -121,8 +138,6 @@ expand_token (m4 *context, m4_obstack *obs,
       assert (!"INTERNAL ERROR: bad token type in expand_token ()");
       abort ();
     }
-
-  free (text);
 }
 
 
@@ -214,12 +229,17 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
    Expand_macro () uses call_macro () to do the call of the macro.
 
    Expand_macro () is potentially recursive, since it calls expand_argument
-   (), which might call expand_token (), which might call expand_macro ().  */
+   (), which might call expand_token (), which might call expand_macro ().
+
+   NAME points to storage on the token stack, so it is only valid
+   until a call to collect_arguments parses more tokens.  SYMBOL is
+   the result of the symbol table lookup on NAME.  */
 static void
 expand_macro (m4 *context, const char *name, m4_symbol *symbol)
 {
-  m4_obstack arguments;
-  m4_obstack argptr;
+  char *argc_base;		/* Base of argc_stack on entry.  */
+  unsigned int argc_size;	/* Size of argc_stack on entry.  */
+  unsigned int argv_size;	/* Size of argv_stack on entry.  */
   m4_symbol_value **argv;
   int argc;
   m4_obstack *expansion;
@@ -261,16 +281,22 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  obstack_init (&argptr);
-  obstack_init (&arguments);
+  argc_size = obstack_object_size (&argc_stack);
+  argv_size = obstack_object_size (&argv_stack);
+  if (0 < argc_size)
+    argc_base = obstack_finish (&argc_stack);
 
   if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
     trace_prepre (context, name, my_call_id, value);
 
-  collect_arguments (context, name, symbol, &argptr, &arguments);
+  collect_arguments (context, name, symbol, &argv_stack, &argc_stack);
 
-  argc = obstack_object_size (&argptr) / sizeof (m4_symbol_value *);
-  argv = (m4_symbol_value **) obstack_finish (&argptr);
+  argc = ((obstack_object_size (&argv_stack) - argv_size)
+	  / sizeof (m4_symbol_value *));
+  argv = (m4_symbol_value **) (obstack_base (&argv_stack) + argv_size);
+  /* Calling collect_arguments invalidated name, but we copied it as
+     argv[0].  */
+  name = m4_get_symbol_value_text (argv[0]);
 
   loc_close_file = m4_get_current_file (context);
   loc_close_line = m4_get_current_line (context);
@@ -296,8 +322,11 @@ recursion limit of %d exceeded, use -L<N> to change it"),
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
 
-  obstack_free (&arguments, NULL);
-  obstack_free (&argptr, NULL);
+  if (0 < argc_size)
+    obstack_regrow (&argc_stack, argc_base, argc_size);
+  else
+    obstack_free (&argc_stack, argv[0]);
+  obstack_blank (&argv_stack, -argc * sizeof (m4_symbol_value *));
 }
 
 /* Collect all the arguments to a call of the macro SYMBOL (called NAME).
@@ -314,10 +343,10 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 
   groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
-  m4_set_symbol_value_text (&token, (char *) name);
-  tokenp = (m4_symbol_value *) obstack_copy (arguments, (void *) &token,
-				      sizeof (token));
-  obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
+  tokenp = (m4_symbol_value *) obstack_alloc (arguments, sizeof *tokenp);
+  m4_set_symbol_value_text (tokenp, (char *) obstack_copy0 (arguments, name,
+							    strlen (name)));
+  obstack_ptr_grow (argptr, tokenp);
 
   if (m4__next_token_is_open (context))
     {
@@ -330,9 +359,9 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 	    {
 	      m4_set_symbol_value_text (&token, "");
 	    }
-	  tokenp = (m4_symbol_value *)
-	    obstack_copy (arguments, (void *) &token, sizeof (token));
-	  obstack_grow (argptr, (void *) &tokenp, sizeof (tokenp));
+	  tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
+						     sizeof token);
+	  obstack_ptr_grow (argptr, tokenp);
 	}
       while (more_args);
     }
