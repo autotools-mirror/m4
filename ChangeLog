@@ -1,3 +1,18 @@
+2006-10-26  Eric Blake  <ebb9@byu.net>
+
+	Convert diversions to list instead of sparse array, part 1.
+	* m4/m4module.h (m4_shipout_text, m4_shipout_string): Use size_t
+	for length.
+	* m4/output.c (diversion, total_buffer_size, output_unused):
+	Track size in size_t.  All users changed.
+	(struct diversion): Reduce size now, to compensate for part 2.
+	(m4_make_diversion, make_room_for): Avoid malloc overflow.
+	(m4_output_exit): Fix typo in assert.
+	(m4_output_init, make_room_for, m4_make_diversion)
+	(m4_insert_diversion, m4_freeze_diversions): Adjust users of
+	struct m4_diversion to disambiguate the new union.
+	* tests/builtins.at (divert): Detect this failure.
+
 2006-10-25  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (m4_push_builtin): Add parameter.

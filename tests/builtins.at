@@ -161,6 +161,22 @@ AT_CHECK_M4([divert.m4], 0,
 Text diverted a second time.
 ]])
 
+dnl Test for allocation overflow.  On 32-bit platforms, this used to
+dnl coredump due to wraparound allocating a smaller array, then referencing
+dnl unallocated memory; it should now cleanly fail outright.  On 64-bit
+dnl platforms, failure is determined by the amount of memory.  If the
+dnl allocation succeeds (hopefully, the testers don't mind the memory
+dnl thrashing), then fake the same exit symptoms as on 32-bit so that the
+dnl test will still pass.
+AT_DATA([[in]], [[divert(eval(`1<<28'))
+divert(`2')
+errprint(__program__`: memory exhausted
+')m4exit(`1')
+]])
+AT_CHECK_M4([in], [1], [],
+[[m4: memory exhausted
+]])
+
 AT_CLEANUP
 
 

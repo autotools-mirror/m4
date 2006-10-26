@@ -55,35 +55,40 @@
 
 typedef struct temp_dir m4_temp_dir;
 
-/* In a struct diversion, only one of file or buffer be may non-NULL,
-   depending on the fact output is diverted to a file or in memory
-   buffer.  Further, if buffer is NULL, then pointer is NULL, size and
-   unused are zero.  */
+/* When part of diversion_table, each struct diversion either
+   represents an open file (zero size, non-NULL u.file), an in-memory
+   buffer (non-zero size, non-NULL u.buffer), or an unused placeholder
+   diversion (zero size, u is NULL).  */
 
-struct diversion
+typedef struct m4_diversion m4_diversion;
+
+struct m4_diversion
   {
-    FILE *file;			/* diversion file on disk */
-    char *buffer;		/* in-memory diversion buffer */
-    int size;			/* usable size before reallocation */
-    int used;			/* used length in characters */
+    union
+      {
+	FILE *file;		/* diversion file on disk */
+	char *buffer;		/* in-memory diversion buffer */
+      } u;
+    size_t size;		/* usable size before reallocation */
+    size_t used;		/* used length in characters */
   };
 
 /* Table of diversions.  */
-static struct diversion *diversion_table;
+static m4_diversion *diversion_table;
 
 /* Number of entries in diversion table.  */
 static int diversions;
 
 /* Total size of all in-memory buffer sizes.  */
-static int total_buffer_size;
+static size_t total_buffer_size;
 
 /* Current output diversion, NULL if output is being currently discarded.  */
-static struct diversion *output_diversion;
+static m4_diversion *output_diversion;
 
 /* Values of some output_diversion fields, cached out for speed.  */
 static FILE *output_file;	/* current value of (file) */
 static char *output_cursor;	/* current value of (buffer + used) */
-static int output_unused;	/* current value of (size - used) */
+static size_t output_unused;	/* current value of (size - used) */
 
 /* Temporary directory holding all spilled diversion files.  */
 static m4_temp_dir *output_temp_dir;
@@ -97,8 +102,7 @@ m4_output_init (m4 *context)
 {
   diversion_table = xmalloc (sizeof *diversion_table);
   diversions = 1;
-  diversion_table[0].file = stdout;
-  diversion_table[0].buffer = NULL;
+  diversion_table[0].u.file = stdout;
   diversion_table[0].size = 0;
   diversion_table[0].used = 0;
 
@@ -113,7 +117,12 @@ m4_output_init (m4 *context)
 void
 m4_output_exit (void)
 {
-  assert (diversions = 1);
+#ifndef NDEBUG
+  int divnum;
+  for (divnum = 1; divnum < diversions; divnum++)
+    assert (!diversion_table[divnum].size
+	    && !diversion_table[divnum].u.file);
+#endif
   DELETE (diversion_table);
 }
 
@@ -166,9 +175,14 @@ m4_tmpfile (m4 *context)
    to be flushed to a newly created temporary file.  This flushed buffer
    might well be the current one.  */
 static void
-make_room_for (m4 *context, int length)
+make_room_for (m4 *context, size_t length)
 {
-  int wanted_size;
+  size_t wanted_size;
+  m4_diversion *selected_diversion = NULL;
+
+  assert (!output_file);
+  assert (output_diversion);
+  assert (output_diversion->size || !output_diversion->u.file);
 
   /* Compute needed size for in-memory buffer.  Diversions in-memory
      buffers start at 0 bytes, then 512, then keep doubling until it is
@@ -177,7 +191,8 @@ make_room_for (m4 *context, int length)
   output_diversion->used = output_diversion->size - output_unused;
 
   for (wanted_size = output_diversion->size;
-       wanted_size < output_diversion->used + length;
+       wanted_size <= MAXIMUM_TOTAL_SIZE
+	 && wanted_size - output_diversion->used < length;
        wanted_size = wanted_size == 0 ? INITIAL_BUFFER_SIZE : wanted_size * 2)
     ;
 
@@ -186,10 +201,10 @@ make_room_for (m4 *context, int length)
   if (total_buffer_size - output_diversion->size + wanted_size
       > MAXIMUM_TOTAL_SIZE)
     {
-      struct diversion *selected_diversion;
-      int selected_used;
-      struct diversion *diversion;
-      int count;
+      size_t selected_used;
+      char *selected_buffer;
+      m4_diversion *diversion;
+      size_t count;
 
       /* Find out the buffer having most data, in view of flushing it to
 	 disk.  Fake the current buffer as having already received the
@@ -211,17 +226,16 @@ make_room_for (m4 *context, int length)
       /* Create a temporary file, write the in-memory buffer of the
 	 diversion to this file, then release the buffer.  */
 
-      selected_diversion->file = m4_tmpfile (context);
-      if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
+      selected_buffer = selected_diversion->u.buffer;
+      selected_diversion->u.file = m4_tmpfile (context);
+      if (set_cloexec_flag (fileno (selected_diversion->u.file), true) != 0)
 	m4_error (context, 0, errno,
 		  _("cannot protect diversion across forks"));
 
       if (selected_diversion->used > 0)
 	{
-	  count = fwrite (selected_diversion->buffer,
-			  (size_t) selected_diversion->used,
-			  1,
-			  selected_diversion->file);
+	  count = fwrite (selected_buffer, selected_diversion->used, 1,
+			  selected_diversion->u.file);
 	  if (count != 1)
 	    m4_error (context, EXIT_FAILURE, errno,
 		      _("cannot flush diversion to temporary file"));
@@ -229,37 +243,36 @@ make_room_for (m4 *context, int length)
 
       /* Reclaim the buffer space for other diversions.  */
 
-      free (selected_diversion->buffer);
+      free (selected_buffer);
       total_buffer_size -= selected_diversion->size;
 
-      selected_diversion->buffer = NULL;
       selected_diversion->size = 0;
       selected_diversion->used = 0;
     }
 
   /* Reload output_file, just in case the flushed diversion was current.  */
 
-  output_file = output_diversion->file;
-  if (output_file)
+  if (output_diversion == selected_diversion)
     {
 
       /* The flushed diversion was current indeed.  */
 
+      output_file = output_diversion->u.file;
       output_cursor = NULL;
       output_unused = 0;
     }
   else
     {
-
       /* The buffer may be safely reallocated.  */
 
-      output_diversion->buffer
-	= xrealloc (output_diversion->buffer, (size_t) wanted_size);
+      output_diversion->u.buffer
+	= xrealloc (output_diversion->u.buffer,
+		    wanted_size > length ? wanted_size : length);
 
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
 
-      output_cursor = output_diversion->buffer + output_diversion->used;
+      output_cursor = output_diversion->u.buffer + output_diversion->used;
       output_unused = wanted_size - output_diversion->used;
     }
 }
@@ -292,9 +305,9 @@ output_character_helper (m4 *context, int character)
 /* Output one TEXT having LENGTH characters, when it is known that it goes
    to a diversion file or an in-memory diversion buffer.  */
 static void
-output_text (m4 *context, const char *text, int length)
+output_text (m4 *context, const char *text, size_t length)
 {
-  int count;
+  size_t count;
 
   if (!output_file && length > output_unused)
     make_room_for (context, length);
@@ -307,7 +320,7 @@ output_text (m4 *context, const char *text, int length)
     }
   else
     {
-      memcpy (output_cursor, text, (size_t) length);
+      memcpy (output_cursor, text, length);
       output_cursor += length;
       output_unused -= length;
     }
@@ -324,7 +337,7 @@ output_text (m4 *context, const char *text, int length)
    output lines, or when several input lines does not generate any output.  */
 void
 m4_shipout_text (m4 *context, m4_obstack *obs,
-		 const char *text, int length)
+		 const char *text, size_t length)
 {
   static bool start_of_output_line = true;
   char line[20];
@@ -376,9 +389,9 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	    m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	    fprintf (stderr, "DEBUG: cur %d, cur out %d\n",
-                     m4_get_current_line (context),
-                     m4_get_output_line (context));
+	    fprintf (stderr, "DEBUG: cur %lu, cur out %lu\n",
+		     (unsigned long int) m4_get_current_line (context),
+		     (unsigned long int) m4_get_output_line (context));
 #endif
 
 	    /* Output a `#line NUM' synchronization directive if needed.
@@ -387,7 +400,8 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 
 	    if (m4_get_output_line (context) != m4_get_current_line (context))
 	      {
-		sprintf (line, "#line %d", m4_get_current_line (context));
+		sprintf (line, "#line %lu",
+			 (unsigned long int) m4_get_current_line (context));
 		for (cursor = line; *cursor; cursor++)
 		  OUTPUT_CHARACTER (*cursor);
 		if (m4_get_output_line (context) < 1
@@ -412,8 +426,9 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
       }
 }
 
-/* Format an int VAL, and stuff it into an obstack OBS.  Used for macros
-   expanding to numbers.  */
+/* Format an int VAL, and stuff it into an obstack OBS.  Used for
+   macros expanding to numbers.  FIXME - support wider types, and
+   unsigned types.  */
 void
 m4_shipout_int (m4_obstack *obs, int val)
 {
@@ -424,7 +439,7 @@ m4_shipout_int (m4_obstack *obs, int val)
 }
 
 void
-m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, int len,
+m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
 		   bool quoted)
 {
   if (s == NULL)
@@ -455,11 +470,11 @@ m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, int len,
 void
 m4_make_diversion (m4 *context, int divnum)
 {
-  struct diversion *diversion;
+  m4_diversion *diversion;
 
   if (output_diversion)
     {
-      output_diversion->file = output_file;
+      assert (!output_file || output_diversion->u.file == output_file);
       output_diversion->used = output_diversion->size - output_unused;
       output_diversion = NULL;
       output_file = NULL;
@@ -474,14 +489,14 @@ m4_make_diversion (m4 *context, int divnum)
 
   if (divnum >= diversions)
     {
-      diversion_table = (struct diversion *)
-	xrealloc (diversion_table, (divnum + 1) * sizeof (struct diversion));
+      diversion_table = (m4_diversion *) xnrealloc (diversion_table,
+						    divnum + 1,
+						    sizeof (*diversion_table));
       for (diversion = diversion_table + diversions;
 	   diversion <= diversion_table + divnum;
 	   diversion++)
 	{
-	  diversion->file = NULL;
-	  diversion->buffer = NULL;
+	  diversion->u.file = NULL;
 	  diversion->size = 0;
 	  diversion->used = 0;
 	}
@@ -489,9 +504,14 @@ m4_make_diversion (m4 *context, int divnum)
     }
 
   output_diversion = diversion_table + divnum;
-  output_file = output_diversion->file;
-  output_cursor = output_diversion->buffer + output_diversion->used;
-  output_unused = output_diversion->size - output_diversion->used;
+  if (output_diversion->size)
+    {
+      output_cursor = output_diversion->u.buffer + output_diversion->used;
+      output_unused = output_diversion->size - output_diversion->used;
+    }
+  else
+    output_file = output_diversion->u.file;
+
   m4_set_output_line (context, -1);
 }
 
@@ -527,7 +547,7 @@ m4_insert_file (m4 *context, FILE *file)
 void
 m4_insert_diversion (m4 *context, int divnum)
 {
-  struct diversion *diversion;
+  m4_diversion *diversion;
 
   /* Do not care about unexisting diversions.  */
 
@@ -544,31 +564,28 @@ m4_insert_diversion (m4 *context, int divnum)
 
   if (output_diversion)
     {
-      if (diversion->file)
+      if (diversion->size)
+	output_text (context, diversion->u.buffer, diversion->used);
+      else if (diversion->u.file)
 	{
-	  rewind (diversion->file);
-	  m4_insert_file (context, diversion->file);
+	  rewind (diversion->u.file);
+	  m4_insert_file (context, diversion->u.file);
 	}
-      else if (diversion->buffer)
-	output_text (context, diversion->buffer, diversion->used);
 
       m4_set_output_line (context, -1);
     }
 
   /* Return all space used by the diversion.  */
 
-  if (diversion->file)
+  if (diversion->size)
     {
-      close_stream_temp (diversion->file);
-      diversion->file = NULL;
-    }
-  else if (diversion->buffer)
-    {
-      free (diversion->buffer);
-      diversion->buffer = NULL;
+      free (diversion->u.buffer);
       diversion->size = 0;
       diversion->used = 0;
     }
+  else if (diversion->u.file)
+    close_stream_temp (diversion->u.file);
+  diversion->u.file = NULL;
 }
 
 /* Get back all diversions.  This is done just before exiting from main (),
@@ -589,7 +606,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
   int saved_number;
   int last_inserted;
   int divnum;
-  struct diversion *diversion;
+  m4_diversion *diversion;
   struct stat file_stat;
 
   saved_number = m4_get_current_diversion (context);
@@ -600,14 +617,22 @@ m4_freeze_diversions (m4 *context, FILE *file)
   for (divnum = 1; divnum < diversions; divnum++)
     {
       diversion = diversion_table + divnum;
-      if (diversion->file || diversion->buffer)
+      if (diversion->size || diversion->u.file)
 	{
-	  if (diversion->file)
+	  if (diversion->size)
 	    {
-	      fflush (diversion->file);
-	      if (fstat (fileno (diversion->file), &file_stat) < 0)
+	      assert (diversion->used == (int) diversion->used);
+	      fprintf (file, "D%d,%d\n", divnum, (int) diversion->used);
+	    }
+	  else
+	    {
+	      fflush (diversion->u.file);
+	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("cannot stat diversion"));
+	      /* FIXME - support 64-bit off_t with 32-bit long, and
+		 fix frozen file format to support 64-bit
+		 integers.  */
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno,
@@ -615,8 +640,6 @@ m4_freeze_diversions (m4 *context, FILE *file)
 	      fprintf (file, "D%d,%lu", divnum,
 		       (unsigned long) file_stat.st_size);
 	    }
-	  else
-	    fprintf (file, "D%d,%d\n", divnum, diversion->used);
 
 	  m4_insert_diversion (context, divnum);
 	  putc ('\n', file);
