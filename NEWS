@@ -4,8 +4,8 @@ Foundation, Inc.
 
 Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
 
-* The `divert' macro no longer causes a core dump when handed extra large
-  values.
+* The `divert' macro and `-H'/`--hashsize' command line option no longer
+  cause a core dump when handed extra large values.
 * The `--help' and `--version' command line options now consistently
   override all earlier options.  For example, `m4 --debugfile=trace
   --help' now no longer accidentally creates an empty file `trace'.
