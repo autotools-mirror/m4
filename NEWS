@@ -127,6 +127,11 @@ promoted to 2.0.
   override all earlier options.  For example, `m4 -otrace --help' now no
   longer accidentally creates an empty file `trace'.
 
+* The builtin `divert' now uses memory proportional to the number of
+  diversions created, rather than to the maximum diversion number
+  encountered, allowing larger diversion numbers without exhausting system
+  memory.
+
 * FIXME: `m4wrap' semantics need an update to FIFO.
 
 * FIXME: include the (long) list of changes in 1.4.x that were not already

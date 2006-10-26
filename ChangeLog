@@ -1,5 +1,22 @@
 2006-10-26  Eric Blake  <ebb9@byu.net>
 
+	Convert diversions to list instead of sparse array, part 2.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	avltree-list'.
+	* m4/output.c (m4_diversion): Add next pointer and divnum members.
+	(diversion_table): Convert to a list instead of a sparse array.
+	(free_list): Maintain free list of reclaimed diversions.
+	(equal_diversion_CB, cmp_diversion_CB): New functions.
+	(m4_output_init): Set up list.
+	(m4_output_exit): Tear down list.
+	(make_room_for, m4_undivert_all, m4_freeze_diversions): Change
+	list iteration.
+	(m4_make_diversion): Change creation of new diversions.
+	(m4_insert_diversion_helper): New function, to avoid list
+	searches.
+	* tests/builtins.at (divert): The test now passes.
+	* NEWS: Document this improvement.
+
 	Convert diversions to list instead of sparse array, part 1.
 	* m4/m4module.h (m4_shipout_text, m4_shipout_string): Use size_t
 	for length.

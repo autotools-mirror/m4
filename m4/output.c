@@ -30,6 +30,7 @@
 
 #include "binary-io.h"
 #include "clean-temp.h"
+#include "gl_avltree_list.h"
 #include "exitfail.h"
 #include "xvasprintf.h"
 
@@ -58,7 +59,8 @@ typedef struct temp_dir m4_temp_dir;
 /* When part of diversion_table, each struct diversion either
    represents an open file (zero size, non-NULL u.file), an in-memory
    buffer (non-zero size, non-NULL u.buffer), or an unused placeholder
-   diversion (zero size, u is NULL).  */
+   diversion (zero size, u is NULL).  When not part of
+   diversion_table, u.next is a pointer to the free_list chain.  */
 
 typedef struct m4_diversion m4_diversion;
 
@@ -68,16 +70,21 @@ struct m4_diversion
       {
 	FILE *file;		/* diversion file on disk */
 	char *buffer;		/* in-memory diversion buffer */
+	m4_diversion *next;	/* free-list pointer */
       } u;
+    int divnum;			/* which diversion this represents */
     size_t size;		/* usable size before reallocation */
     size_t used;		/* used length in characters */
   };
 
-/* Table of diversions.  */
-static m4_diversion *diversion_table;
+/* Sorted list of current diversions.  */
+static gl_list_t diversion_table;
 
 /* Number of entries in diversion table.  */
 static int diversions;
+
+/* Linked list of reclaimed diversion storage.  */
+static m4_diversion *free_list;
 
 /* Total size of all in-memory buffer sizes.  */
 static size_t total_buffer_size;
@@ -97,33 +104,58 @@ static m4_temp_dir *output_temp_dir;
 
 /* --- OUTPUT INITIALIZATION --- */
 
+/* Callback for comparing list elements ELT1 and ELT2 for equality in
+   diversion_table.  */
+static bool
+equal_diversion_CB (const void *elt1, const void *elt2)
+{
+  const m4_diversion *d1 = (const m4_diversion *) elt1;
+  const m4_diversion *d2 = (const m4_diversion *) elt2;
+  return d1->divnum == d2->divnum;
+}
+
+/* Callback for comparing list elements ELT1 and ELT2 for order in
+   diversion_table.  */
+static int
+cmp_diversion_CB (const void *elt1, const void *elt2)
+{
+  const m4_diversion *d1 = (const m4_diversion *) elt1;
+  const m4_diversion *d2 = (const m4_diversion *) elt2;
+  /* No need to worry about overflow, since we don't create diversions
+     with negative divnum.  */
+  return d1->divnum - d2->divnum;
+}
+
 void
 m4_output_init (m4 *context)
 {
-  diversion_table = xmalloc (sizeof *diversion_table);
-  diversions = 1;
-  diversion_table[0].u.file = stdout;
-  diversion_table[0].size = 0;
-  diversion_table[0].used = 0;
+  m4_diversion *diversion = xmalloc (sizeof *diversion);
+  diversion->u.file = stdout;
+  diversion->divnum = 0;
+  diversion->size = 0;
+  diversion->used = 0;
+  diversion_table = gl_list_create (GL_AVLTREE_LIST, equal_diversion_CB, NULL,
+				    false, 1, (const void **) &diversion);
 
-  total_buffer_size = 0;
+  diversions = 1;
   m4_set_current_diversion (context, 0);
-  output_diversion = diversion_table;
+  output_diversion = diversion;
   output_file = stdout;
-  output_cursor = NULL;
-  output_unused = 0;
 }
 
 void
 m4_output_exit (void)
 {
-#ifndef NDEBUG
-  int divnum;
-  for (divnum = 1; divnum < diversions; divnum++)
-    assert (!diversion_table[divnum].size
-	    && !diversion_table[divnum].u.file);
-#endif
-  DELETE (diversion_table);
+  m4_diversion *diversion = free_list;
+  assert (gl_list_size (diversion_table) == 1);
+  free ((void *) gl_list_get_at (diversion_table, 0));
+  gl_list_free (diversion_table);
+  while (diversion)
+    {
+      m4_diversion *stale = diversion;
+      diversion = diversion->u.next;
+      free (stale);
+    }
 }
 
 /* Clean up any temporary directory.  Designed for use as an atexit
@@ -205,6 +237,7 @@ make_room_for (m4 *context, size_t length)
       char *selected_buffer;
       m4_diversion *diversion;
       size_t count;
+      gl_list_iterator_t iter;
 
       /* Find out the buffer having most data, in view of flushing it to
 	 disk.  Fake the current buffer as having already received the
@@ -214,14 +247,15 @@ make_room_for (m4 *context, size_t length)
       selected_diversion = output_diversion;
       selected_used = output_diversion->used + length;
 
-      for (diversion = diversion_table + 1;
-	   diversion < diversion_table + diversions;
-	   diversion++)
+      iter = gl_list_iterator_from_to (diversion_table, 1,
+				       gl_list_size (diversion_table));
+      while (gl_list_iterator_next (&iter, (const void **) &diversion, NULL))
 	if (diversion->used > selected_used)
 	  {
 	    selected_diversion = diversion;
 	    selected_used = diversion->used;
 	  }
+      gl_list_iterator_free (&iter);
 
       /* Create a temporary file, write the in-memory buffer of the
 	 diversion to this file, then release the buffer.  */
@@ -265,9 +299,9 @@ make_room_for (m4 *context, size_t length)
     {
       /* The buffer may be safely reallocated.  */
 
-      output_diversion->u.buffer
-	= xrealloc (output_diversion->u.buffer,
-		    wanted_size > length ? wanted_size : length);
+      assert (wanted_size > length);
+      output_diversion->u.buffer = xrealloc (output_diversion->u.buffer,
+					     wanted_size);
 
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
@@ -471,10 +505,15 @@ void
 m4_make_diversion (m4 *context, int divnum)
 {
   m4_diversion *diversion;
+  gl_list_node_t node = NULL;
+
+  if (m4_get_current_diversion (context) == divnum)
+    return;
 
   if (output_diversion)
     {
       assert (!output_file || output_diversion->u.file == output_file);
+      assert (output_diversion->divnum != divnum);
       output_diversion->used = output_diversion->size - output_unused;
       output_diversion = NULL;
       output_file = NULL;
@@ -488,22 +527,36 @@ m4_make_diversion (m4 *context, int divnum)
     return;
 
   if (divnum >= diversions)
+    diversions = divnum + 1;
+  else
     {
-      diversion_table = (m4_diversion *) xnrealloc (diversion_table,
-						    divnum + 1,
-						    sizeof (*diversion_table));
-      for (diversion = diversion_table + diversions;
-	   diversion <= diversion_table + divnum;
-	   diversion++)
+      m4_diversion temp;
+      temp.divnum = divnum;
+      node = gl_sortedlist_search (diversion_table, cmp_diversion_CB, &temp);
+    }
+  if (node != NULL)
+    diversion = (m4_diversion *) gl_list_node_value (diversion_table, node);
+  else
+    {
+      /* First time visiting this diversion.  */
+      if (free_list)
 	{
-	  diversion->u.file = NULL;
+	  diversion = free_list;
+	  free_list = diversion->u.next;
+	  assert (!diversion->size && !diversion->used);
+	}
+      else
+	{
+	  diversion = (m4_diversion *) xmalloc (sizeof *diversion);
 	  diversion->size = 0;
 	  diversion->used = 0;
 	}
-      diversions = divnum + 1;
+      diversion->u.file = NULL;
+      diversion->divnum = divnum;
+      gl_sortedlist_add (diversion_table, cmp_diversion_CB, diversion);
     }
 
-  output_diversion = diversion_table + divnum;
+  output_diversion = diversion;
   if (output_diversion->size)
     {
       output_cursor = output_diversion->u.buffer + output_diversion->used;
@@ -541,27 +594,17 @@ m4_insert_file (m4 *context, FILE *file)
     }
 }
 
-/* Insert diversion number DIVNUM into the current output file.  The
-   diversion is NOT placed on the expansion obstack, because it must not
-   be rescanned.  When the file is closed, it is deleted by the system.  */
-void
-m4_insert_diversion (m4 *context, int divnum)
+/* Insert DIVERSION living at NODE into the current output file.  The
+   diversion is NOT placed on the expansion obstack, because it must
+   not be rescanned.  When the file is closed, it is deleted by the
+   system.  */
+static void
+m4_insert_diversion_helper (m4 *context, m4_diversion *diversion,
+			    gl_list_node_t node)
 {
-  m4_diversion *diversion;
-
-  /* Do not care about unexisting diversions.  */
-
-  if (divnum <= 0 || divnum >= diversions)
-    return;
-
-  /* Also avoid undiverting into self.  */
-
-  diversion = diversion_table + divnum;
-  if (diversion == output_diversion)
-    return;
-
+  assert (diversion->divnum > 0
+	  && diversion->divnum != m4_get_current_diversion (context));
   /* Effectively undivert only if an output stream is active.  */
-
   if (output_diversion)
     {
       if (diversion->size)
@@ -576,7 +619,6 @@ m4_insert_diversion (m4 *context, int divnum)
     }
 
   /* Return all space used by the diversion.  */
-
   if (diversion->size)
     {
       free (diversion->u.buffer);
@@ -585,7 +627,32 @@ m4_insert_diversion (m4 *context, int divnum)
     }
   else if (diversion->u.file)
     close_stream_temp (diversion->u.file);
-  diversion->u.file = NULL;
+  gl_list_remove_node (diversion_table, node);
+  diversion->u.next = free_list;
+  free_list = diversion;
+}
+
+/* Insert diversion number DIVNUM into the current output file.  The
+   diversion is NOT placed on the expansion obstack, because it must not
+   be rescanned.  When the file is closed, it is deleted by the system.  */
+void
+m4_insert_diversion (m4 *context, int divnum)
+{
+  m4_diversion *diversion;
+  m4_diversion temp;
+  gl_list_node_t node;
+
+  /* Do not care about nonexistent diversions, and undiverting stdout
+     or self is a no-op.  */
+  if (divnum <= 0 || divnum >= diversions
+      || m4_get_current_diversion (context) == divnum)
+    return;
+  temp.divnum = divnum;
+  node = gl_sortedlist_search (diversion_table, cmp_diversion_CB, &temp);
+  if (node == NULL)
+    return;
+  diversion = (m4_diversion *) gl_list_node_value (diversion_table, node);
+  m4_insert_diversion_helper (context, diversion, node);
 }
 
 /* Get back all diversions.  This is done just before exiting from main (),
@@ -593,10 +660,17 @@ m4_insert_diversion (m4 *context, int divnum)
 void
 m4_undivert_all (m4 *context)
 {
-  int divnum;
+  m4_diversion *diversion;
+  gl_list_iterator_t iter;
+  gl_list_node_t node;
+  int divnum = m4_get_current_diversion (context);
 
-  for (divnum = 1; divnum < diversions; divnum++)
-    m4_insert_diversion (context, divnum);
+  iter = gl_list_iterator_from_to (diversion_table, 1,
+				   gl_list_size (diversion_table));
+  while (gl_list_iterator_next (&iter, (const void **) &diversion, &node))
+    if (diversion->divnum != divnum)
+      m4_insert_diversion_helper (context, diversion, node);
+  gl_list_iterator_free (&iter);
 }
 
 /* Produce all diversion information in frozen format on FILE.  */
@@ -608,15 +682,18 @@ m4_freeze_diversions (m4 *context, FILE *file)
   int divnum;
   m4_diversion *diversion;
   struct stat file_stat;
+  gl_list_iterator_t iter;
+  gl_list_node_t node;
 
   saved_number = m4_get_current_diversion (context);
   last_inserted = 0;
   m4_make_diversion (context, 0);
   output_file = file;		/* kludge in the frozen file */
 
-  for (divnum = 1; divnum < diversions; divnum++)
+  iter = gl_list_iterator_from_to (diversion_table, 1,
+				   gl_list_size (diversion_table));
+  while (gl_list_iterator_next (&iter, (const void **) &diversion, &node))
     {
-      diversion = diversion_table + divnum;
       if (diversion->size || diversion->u.file)
 	{
 	  if (diversion->size)
@@ -641,12 +718,13 @@ m4_freeze_diversions (m4 *context, FILE *file)
 		       (unsigned long) file_stat.st_size);
 	    }
 
-	  m4_insert_diversion (context, divnum);
+	  m4_insert_diversion_helper (context, diversion, node);
 	  putc ('\n', file);
 
 	  last_inserted = divnum;
 	}
     }
+  gl_list_iterator_free (&iter);
 
   /* Save the active diversion number, if not already.  */
 
