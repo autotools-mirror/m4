@@ -1,3 +1,7 @@
+2006-10-26  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (pop_input): Remove unnecessary code.
+
 2006-10-25  Eric Blake  <ebb9@byu.net>
 
 	* src/symtab.c (symtab_init): Avoid size_t overflow.

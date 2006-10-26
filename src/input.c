@@ -353,21 +353,6 @@ pop_input (void)
 	  retcode = EXIT_FAILURE;
 	}
       start_of_input_line = isp->u.u_f.advance_line;
-      if (tmp == NULL)
-	{
-	  /* We have exhausted the current input stack.  However,
-	     freeing the obstack now is a bad idea, since if we are in
-	     the middle of a quote, comment, dnl, or argument
-	     collection, there is still a pointer to the former
-	     current_file that we must not invalidate until after the
-	     warning message has been issued.  Setting next to a
-	     non-string is safe in this case, because the only place
-	     more input could come from is another push_file or
-	     pop_wrapup, both of which then free the input_block.  */
-	  next = isp;
-	  isp = NULL;
-	  return;
-	}
       output_current_line = -1;
       break;
 
