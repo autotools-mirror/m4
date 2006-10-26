@@ -101,7 +101,7 @@ symtab_init (void)
   size_t i;
   symbol **s;
 
-  s = symtab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
+  s = symtab = (symbol **) xnmalloc (hash_table_size, sizeof (symbol *));
 
   for (i = 0; i < hash_table_size; i++)
     s[i] = NULL;
