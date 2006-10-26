@@ -237,7 +237,7 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
     free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
-  SYMBOL_TEXT (s) = xstrdup (text);
+  SYMBOL_TEXT (s) = xstrdup (text ? text : "");
 }
 
 /*-----------------------------------------------.
@@ -738,7 +738,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
 	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
 	    {
 	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (argv[i]) = "";
+	      TOKEN_DATA_TEXT (argv[i]) = (char *) "";
 	    }
       bp->func (obs, argc - 1, argv + 1);
     }
@@ -779,7 +779,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
 	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
 	    {
 	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (argv[i]) = "";
+	      TOKEN_DATA_TEXT (argv[i]) = (char *) "";
 	    }
       call_macro (s, argc - 1, argv + 1, obs);
     }

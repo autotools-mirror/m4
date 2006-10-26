@@ -77,7 +77,7 @@ format (struct obstack *obs, int argc, token_data **argv)
   char *str;			/* malloc'd buffer of formatted text */
   enum {INT, UINT, LONG, ULONG, DOUBLE, STR} datatype;
 
-  fmt = ARG_STR (argc, argv);
+  fmt = (char *) ARG_STR (argc, argv);
   for (;;)
     {
       while ((c = *fmt++) != '%')

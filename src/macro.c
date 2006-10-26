@@ -247,7 +247,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
 	    {
 	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = "";
+	      TOKEN_DATA_TEXT (&td) = (char *) "";
 	    }
 	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
 	  obstack_ptr_grow (argptr, tdp);
@@ -351,7 +351,7 @@ expand_macro (symbol *sym)
 
   argc = ((obstack_object_size (&argv_stack) - argv_base)
 	  / sizeof (token_data *));
-  argv = (token_data **) (obstack_base (&argv_stack) + argv_base);
+  argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
 
   loc_close_file = current_file;
   loc_close_line = current_line;

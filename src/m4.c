@@ -462,9 +462,7 @@ Written by Rene' Seindal.\n\
 	{
 	case 'D':
 	  macro_value = strchr (defines->macro, '=');
-	  if (macro_value == NULL)
-	    macro_value = "";
-	  else
+	  if (macro_value)
 	    *macro_value++ = '\0';
 	  define_user_macro (defines->macro, macro_value, SYMBOL_INSERT);
 	  break;

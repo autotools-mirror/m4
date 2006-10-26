@@ -379,7 +379,7 @@ shipout_text (struct obstack *obs, const char *text, int length)
 		    current_line, output_current_line);
 #endif
 
-	    /* Output a `#line NUM' synchronisation directive if needed.
+	    /* Output a `#line NUM' synchronization directive if needed.
 	       If output_current_line was previously given a negative
 	       value (invalidated), rather output `#line NUM "FILE"'.  */
 
@@ -585,7 +585,11 @@ freeze_diversions (FILE *file)
 	      fflush (diversion->file);
 	      if (fstat (fileno (diversion->file), &file_stat) < 0)
 		M4ERROR ((EXIT_FAILURE, errno, "cannot stat diversion"));
-	      fprintf (file, "D%d,%d", divnum, (int) file_stat.st_size);
+	      if (file_stat.st_size < 0
+		  || file_stat.st_size != (unsigned long) file_stat.st_size)
+		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
+	      fprintf (file, "D%d,%lu", divnum,
+		       (unsigned long int) file_stat.st_size);
 	    }
 	  else
 	    fprintf (file, "D%d,%d\n", divnum, diversion->used);
