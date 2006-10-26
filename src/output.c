@@ -439,7 +439,7 @@ make_diversion (int divnum)
   if (divnum >= diversions)
     {
       diversion_table = (struct diversion *)
-	xrealloc (diversion_table, (divnum + 1) * sizeof (struct diversion));
+	xnrealloc (diversion_table, divnum + 1, sizeof (struct diversion));
       for (diversion = diversion_table + diversions;
 	   diversion <= diversion_table + divnum;
 	   diversion++)

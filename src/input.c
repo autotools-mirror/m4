@@ -87,10 +87,9 @@ struct input_block
       struct
 	{
 	  FILE *fp;		/* input file handle */
-	  boolean end;		/* true if peek has seen EOF */
-	  boolean close;	/* true if we should close file on pop */
-	  int out_line;		/* current output line of previous file */
-	  boolean advance_line;	/* start_of_input_line from next_char () */
+	  boolean end : 1;	/* true if peek has seen EOF */
+	  boolean close : 1;	/* true if we should close file on pop */
+	  boolean advance_line : 1; /* track previous start_of_input_line */
 	}
 	u_f;	/* INPUT_FILE */
       builtin_func *func;	/* pointer to macro's function */
@@ -198,7 +197,6 @@ push_file (FILE *fp, const char *title, boolean close)
   i->u.u_f.fp = fp;
   i->u.u_f.end = FALSE;
   i->u.u_f.close = close;
-  i->u.u_f.out_line = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
   output_current_line = -1;
 
@@ -354,7 +352,6 @@ pop_input (void)
 	  M4ERROR ((warning_status, errno, "error reading file"));
 	  retcode = EXIT_FAILURE;
 	}
-      output_current_line = isp->u.u_f.out_line;
       start_of_input_line = isp->u.u_f.advance_line;
       if (tmp == NULL)
 	{

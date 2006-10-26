@@ -3561,6 +3561,20 @@ divert(`1')
 f
 divert(`-1')undivert
 @end example
+
+@comment We also need to test allocation overflow.  On 32-bit
+@comment platforms, this should fail outright.  But on 64-bit platforms
+@comment with enough memory, the allocation might succeed (hopefully
+@comment testers don't mind the memory thrashing), so fake the same
+@comment output for test success.
+
+@example
+divert(eval(`1<<28'))
+divert(`2')
+errprint(__program__`: memory exhausted
+')m4exit(`1')
+@error{}m4: memory exhausted
+@end example
 @end ignore
 
 @c FIXME: need some explanation here why this is a useful feature, not
