@@ -1,3 +1,8 @@
+2006-10-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (dist_pkgdata_DATA): Distribute recently-added
+	files.
+
 2006-10-26  Eric Blake  <ebb9@byu.net>
 
 	Silence -O2 -Wall -Wwrite-strings warnings.

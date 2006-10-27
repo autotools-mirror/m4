@@ -325,7 +325,11 @@ dist_pkgdata_DATA = \
 		  examples/esyscmd.m4 \
 		  examples/exp.m4 \
 		  examples/foreach.m4 \
+		  examples/foreach2.m4 \
+		  examples/foreachq.m4 \
+		  examples/foreachq2.m4 \
 		  examples/forloop.m4 \
+		  examples/forloop2.m4 \
 		  examples/fstab.m4 \
 		  examples/hanoi.m4 \
 		  examples/incl-test.m4 \
@@ -336,6 +340,7 @@ dist_pkgdata_DATA = \
 		  examples/multiquotes.m4 \
 		  examples/patsubst.m4 \
 		  examples/pushpop.m4 \
+		  examples/quote.m4 \
 		  examples/regexp.m4 \
 		  examples/reverse.m4 \
 		  examples/sysv-args.m4 \
