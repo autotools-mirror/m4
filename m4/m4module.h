@@ -243,6 +243,8 @@ extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
 	(m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_func(symbol)					\
 	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
+#define m4_get_symbol_builtin(symbol)					\
+	(m4_get_symbol_value_builtin (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_placeholder(symbol)				\
 	(m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 #define m4_symbol_groks_macro(symbol)					\
@@ -258,20 +260,21 @@ extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
 extern bool		m4_is_symbol_value_void	  (m4_symbol_value *);
 extern const char      *m4_get_symbol_value_text  (m4_symbol_value *);
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
-extern const char      *m4_get_symbol_value_placeholder  (m4_symbol_value *);
+extern const m4_builtin *m4_get_symbol_value_builtin	(m4_symbol_value *);
+extern const char      *m4_get_symbol_value_placeholder	(m4_symbol_value *);
 extern void		m4_set_symbol_value_text  (m4_symbol_value *,
-                                                   const char *);
-extern void		m4_set_symbol_value_func  (m4_symbol_value *,
-						   m4_builtin_func *);
-extern void		m4_set_symbol_value_placeholder  (m4_symbol_value *,
-							  const char *);
+						   const char *);
+extern void		m4_set_symbol_value_builtin	(m4_symbol_value *,
+							 const m4_builtin *);
+extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
+							 const char *);
 
 
 
 /* --- BUILTIN MANAGEMENT --- */
 
-extern const m4_builtin *m4_builtin_find_by_name (lt_dlhandle, const char *);
-extern const m4_builtin *m4_builtin_find_by_func (lt_dlhandle,
+extern m4_symbol_value	*m4_builtin_find_by_name (lt_dlhandle, const char *);
+extern const m4_builtin	*m4_builtin_find_by_func (lt_dlhandle,
 						  m4_builtin_func *);
 
 

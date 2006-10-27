@@ -2231,9 +2231,16 @@ indir(`divert', defn(`foo'))
 Builtin macros can be called indirectly with @code{builtin}:
 
 @deffn {Builtin (gnu)} builtin (@var{name}, @ovar{args@dots{}})
+@deffnx {Builtin (gnu)} builtin (@code{defn(`builtin')}, @var{name1})
 Results in a call to the builtin @var{name}, which is passed the
 rest of the arguments @var{args}.  If @var{name} does not name a
 builtin, a warning message is printed, and the expansion is void.
+
+As a special case, if @var{name} is exactly the special token
+representing the @code{builtin} macro, as obtained by @code{defn}
+(@pxref{Defn}), then @var{args} must consist of a single @var{name1},
+and the expansion is the special token representing the builtin macro
+named by @var{name1}.
 
 The macro @code{builtin} is recognized only with parameters.
 @end deffn
@@ -2309,6 +2316,65 @@ builtin(`builtin',)
 indir(`index')
 @error{}m4:stdin:5: Warning: index: too few arguments: 0 < 2
 @result{}0
+@end example
+
+Normally, once a builtin macro is undefined, the only way to retrieve
+its functionality is by defining a new macro that expands to
+@code{builtin} under the hood.  But this extra layer of expansion is
+slightly inefficient, not to mention the fact that it is not robust to
+changes in the current quoting scheme due to @code{changequote}
+(@pxref{Changequote}).  On the other hand, defining a macro to the
+special token produced by @code{defn} (@pxref{Defn}) is very efficient,
+and avoids the need for quoting within the macro definition; but
+@code{defn} only works if the desired macro is already defined by some
+other name.  So @code{builtin} provides a special case where it is
+possible to retrieve the same special token representing a builtin as
+what @code{defn} would provide, were the desired macro still defined.
+This feature is activated by passing @code{defn(`builtin')} as the first
+argument to builtin.  Normally, passing a special token representing a
+macro as @var{name} results in a warning and an empty expansion, but in
+this case, if the second argument @var{name1} names a valid builtin,
+there is no warning and the expansion is the appropriate special
+token.  In fact, with just the @code{builtin} macro accessible, it is
+possible to reconstitute the entire startup state of @code{m4}.
+
+In the example below, compare the number of macro invocations performed
+by @code{defn1} and @code{defn2}, and the differences once quoting is
+changed.
+
+@example
+$ @kbd{m4 -d}
+undefine(`defn')
+@result{}
+define(`foo', `bar')
+@result{}
+define(`defn1', `builtin(`defn', $@@)')
+@result{}
+define(`defn2', builtin(builtin(`defn', `builtin'), `defn'))
+@result{}
+dumpdef(`defn1', `defn2')
+@error{}defn1:@tabchar{}`builtin(`defn', $@@)'
+@error{}defn2:@tabchar{}<defn>
+@result{}
+traceon
+@result{}
+defn1(`foo')
+@error{}m4trace: -1- defn1(`foo') -> `builtin(`defn', `foo')'
+@error{}m4trace: -1- builtin(`defn', `foo') -> ``bar''
+@result{}bar
+defn2(`foo')
+@error{}m4trace: -1- defn2(`foo') -> ``bar''
+@result{}bar
+traceoff
+@error{}m4trace: -1- traceoff -> `'
+@result{}
+changequote(`[', `]')
+@result{}
+defn1([foo])
+@error{}m4:stdin:11: Warning: builtin: undefined builtin ``defn''
+@result{}
+defn2([foo])
+@result{}bar
 @end example
 
 @node M4symbols

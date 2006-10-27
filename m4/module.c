@@ -138,7 +138,7 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
   assert (context);
   assert (handle);
 
-  bp = (const m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
+  bp = (m4_builtin *) lt_dlsym (handle, BUILTIN_SYMBOL);
   if (bp)
     {
       for (; bp->name != NULL; bp++)
@@ -153,7 +153,7 @@ install_builtin_table (m4 *context, lt_dlhandle handle)
 				   | M4_BUILTIN_SIDE_EFFECT)) == 0);
 	  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
 
-	  m4_set_symbol_value_func (value, bp->func);
+	  m4_set_symbol_value_builtin (value, bp);
 	  VALUE_HANDLE   (value)	= handle;
 	  VALUE_FLAGS    (value)	= bp->flags;
 	  VALUE_MIN_ARGS (value)	= bp->min_args;

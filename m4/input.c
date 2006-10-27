@@ -162,7 +162,7 @@ struct m4_input_block
       u_f;
       struct
 	{
-	  m4_builtin_func *func;  /* pointer to builtin's function. */
+	  const m4_builtin *builtin;  /* pointer to builtin's function. */
 	  lt_dlhandle handle;	  /* originating module. */
 	  int flags;		  /* flags associated with the builtin. */
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
@@ -389,12 +389,9 @@ builtin_unget (m4_input_block *me, int ch)
 static void
 builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  const m4_builtin *bp;
-  const char *text;
+  const m4_builtin *bp = me->u.u_b.builtin;
+  const char *text = bp->name;
 
-  bp = m4_builtin_find_by_func (NULL, me->u.u_b.func);
-  assert (bp);
-  text = bp->name;
   obstack_1grow (obs, '<');
   obstack_grow (obs, text, strlen (text));
   obstack_1grow (obs, '>');
@@ -431,9 +428,9 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
   i->file = m4_get_current_file (context);
   i->line = m4_get_current_line (context);
 
-  i->u.u_b.func		= m4_get_symbol_value_func (token);
+  i->u.u_b.builtin	= m4_get_symbol_value_builtin (token);
   i->u.u_b.handle	= VALUE_HANDLE (token);
-  i->u.u_b.arg_signature= VALUE_ARG_SIGNATURE (token);
+  i->u.u_b.arg_signature = VALUE_ARG_SIGNATURE (token);
   i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
   i->u.u_b.max_args	= VALUE_MAX_ARGS (token);
   i->u.u_b.flags	= VALUE_FLAGS (token);
@@ -746,7 +743,7 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
     block = block->u.u_c.current;
   assert (block->funcs->read_func == builtin_read && ! block->u.u_b.read);
 
-  m4_set_symbol_value_func (token, block->u.u_b.func);
+  m4_set_symbol_value_builtin (token, block->u.u_b.builtin);
   VALUE_HANDLE (token)		= block->u.u_b.handle;
   VALUE_FLAGS (token)		= block->u.u_b.flags;
   VALUE_ARG_SIGNATURE (token)	= block->u.u_b.arg_signature;

@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989-1994, 1999, 2000, 2005 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2005,
+   2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,9 +23,11 @@
 
 #include "m4private.h"
 
-/* Find the builtin which has NAME.  If HANDLE argument is supplied
-   then search only in HANDLE's builtin table.  */
-const m4_builtin *
+/* Find the builtin which has NAME.  If HANDLE is not NULL, then
+   search only in HANDLE's builtin table.  The result is a malloc'd
+   symbol value, suitable for use in the symbol table or for an
+   argument to m4_push_builtin.  */
+m4_symbol_value *
 m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 {
   lt_dlhandle cur = handle ? handle : m4__module_next (0);
@@ -32,18 +35,27 @@ m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
   do
     {
       const m4_builtin *builtin =
-	(const m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
+	(m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
 
       if (builtin)
 	{
 	  for (; builtin->name != NULL; builtin++)
 	    if (!strcmp (builtin->name, name))
-	      return builtin;
+	      {
+		m4_symbol_value *token = xzalloc (sizeof *token);
+
+		m4_set_symbol_value_builtin (token, builtin);
+		VALUE_HANDLE (token) = cur;
+		VALUE_FLAGS (token) = builtin->flags;
+		VALUE_MIN_ARGS (token) = builtin->min_args;
+		VALUE_MAX_ARGS (token) = builtin->max_args;
+		return token;
+	      }
 	}
     }
   while (!handle && (cur = m4__module_next (cur)));
 
-  return 0;
+  return NULL;
 }
 
 /* Find the builtin which has FUNC.  If HANDLE argument is supplied

@@ -1,5 +1,33 @@
 2006-10-27  Eric Blake  <ebb9@byu.net>
 
+	* m4/macro.c (expand_argument): Fix missing initialization.
+	* m4/m4private.h (struct m4_symbol_value): Store entire
+	m4_builtin, not just the func.
+	(m4_get_symbol_value_func): Update.
+	(m4_get_symbol_value_builtin, m4_set_symbol_value_builtin): New
+	fast accessors.
+	* m4/m4module.h (m4_get_symbol_value_builtin)
+	(m4_get_symbol_builtin): New prototypes.
+	(m4_set_symbol_value_func): Delete, replace with...
+	(m4_set_symbol_value_builtin): New function.
+	(m4_builtin_find_by_name): Change signature.
+	* m4/symtab.c (m4_symbol_value_print): Simplify.
+	(m4_get_symbol_value_func): Update.
+	(m4_get_symbol_value_builtin): New function.
+	(m4_set_symbol_value_func): Delete, replace with...
+	(m4_set_symbol_value_builtin): New function.
+	(dump_symbol_CB) [DEBUG_SYM]: Simplify.
+	* m4/builtin.c (m4_builtin_find_by_name): Change signature.
+	* m4/input.c (struct m4_input_block): Remove unused trace member.
+	(m4_push_builtin, builtin_print, init_builtin_token): Update
+	callers.
+	* m4/module.c (install_builtin_table): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* modules/gnu.c (builtin): Make it possible to retrieve a builtin
+	token, even after the builtin has been undefined.
+	* doc/m4.texinfo (Builtin): Document new capability.
+	* NEWS: Likewise.
+
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	tempname'.
 	* modules/m4.c (m4_make_temp): Use it.

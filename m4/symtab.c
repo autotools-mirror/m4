@@ -480,9 +480,7 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     }
   else if (m4_is_symbol_value_func (value))
     {
-      const m4_builtin *bp;
-      bp = m4_builtin_find_by_func (NULL, m4_get_symbol_value_func (value));
-      assert (bp);
+      const m4_builtin *bp = m4_get_symbol_value_builtin (value);
       text = bp->name;
       lquote = "<";
       rquote = ">";
@@ -641,7 +639,15 @@ m4_builtin_func *
 m4_get_symbol_value_func (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_FUNC);
-  return value->u.func;
+  return value->u.builtin->func;
+}
+
+#undef m4_get_symbol_value_builtin
+const m4_builtin *
+m4_get_symbol_value_builtin (m4_symbol_value *value)
+{
+  assert (value && value->type == M4_SYMBOL_FUNC);
+  return value->u.builtin;
 }
 
 #undef m4_get_symbol_value_placeholder
@@ -650,6 +656,14 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_PLACEHOLDER);
   return value->u.text;
+}
+
+#undef m4_get_symbol_value_module
+lt_dlhandle
+m4_get_symbol_value_module (m4_symbol_value *value)
+{
+  assert (value);
+  return VALUE_HANDLE (value);
 }
 
 #undef m4_set_symbol_value_text
@@ -663,15 +677,15 @@ m4_set_symbol_value_text (m4_symbol_value *value, const char *text)
   value->u.text = text;
 }
 
-#undef m4_set_symbol_value_func
+#undef m4_set_symbol_value_builtin
 void
-m4_set_symbol_value_func (m4_symbol_value *value, m4_builtin_func *func)
+m4_set_symbol_value_builtin (m4_symbol_value *value, const m4_builtin *builtin)
 {
   assert (value);
-  assert (func);
+  assert (builtin);
 
   value->type   = M4_SYMBOL_FUNC;
-  value->u.func = func;
+  value->u.builtin = builtin;
 }
 
 #undef m4_set_symbol_value_placeholder
@@ -684,7 +698,6 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
   value->type   = M4_SYMBOL_PLACEHOLDER;
   value->u.text = text;
 }
-
 
 
 #ifdef DEBUG_SYM
@@ -712,26 +725,16 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 
   if (!value)
     fputs ("<!UNDEFINED!>", stderr);
+  else if (m4_is_symbol_value_void (value))
+    fputs ("<!VOID!>", stderr);
   else
-    switch (value->type)
-      {
-      case M4_SYMBOL_TEXT:
-	fputs (m4_get_symbol_text (symbol), stderr);
-	break;
-
-      case M4_SYMBOL_FUNC:
-	bp = m4_builtin_find_by_func (handle, m4_get_symbol_func (symbol));
-	fprintf (stderr, "<%s>",
-		 bp ? bp->name : "!ERROR!");
-	break;
-      case M4_SYMBOL_PLACEHOLDER:
-	fprintf (stderr, "<placeholder for %s>",
-		 m4_get_symbol_placeholder (symbol));
-	break;
-      case M4_SYMBOL_VOID:
-	fputs ("<!VOID!>", stderr);
-	break;
-      }
+    {
+      m4_obstack obs;
+      obstack_init (&obs);
+      m4_symbol_value_print (value, &obs, false, NULL, NULL, 0, true);
+      fprintf (stderr, "%s", obstack_finish (&obs));
+      obstack_free (&obs, NULL);
+    }
   fputc ('\n', stderr);
   return NULL;
 }

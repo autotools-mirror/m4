@@ -35,6 +35,13 @@ promoted to 2.0.
   - FIXME: This feature can cause core dumps when renaming multiple
   symbols to the same name.
 
+* The `builtin' macro now has a special form, where if the first argument
+  is exactly the special token representing defn(`builtin'), the expansion
+  is the special token representing the builtin named in the second
+  argument.  This allows regenerating a macro with a more efficient
+  mapping directly to a builtin function, rather than through textual
+  indirection through further expansions of `builtin'.
+
 * New `-r'/`--regexp-syntax' command-line option changes the default
   regular expression syntax used by M4.  Without this option, M4 continues
   to use EMACS style expressions.  A new section in the info docs

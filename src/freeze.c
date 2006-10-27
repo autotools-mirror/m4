@@ -531,26 +531,18 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	  /* Enter a macro having a builtin function as a definition.  */
 	  {
-	    const m4_builtin *bp;
 	    lt_dlhandle handle   = 0;
-	    m4_symbol_value *token = xzalloc (sizeof *token);
+	    m4_symbol_value *token;
 
 	    if (number[2] > 0)
 	      handle = m4__module_find (string[2]);
+	    token = m4_builtin_find_by_name (handle, string[1]);
 
-	    bp = m4_builtin_find_by_name (handle, string[1]);
-	    VALUE_HANDLE (token) = handle;
-
-	    if (bp)
+	    if (token == NULL)
 	      {
-		m4_set_symbol_value_func (token, bp->func);
-		VALUE_FLAGS    (token)	= bp->flags;
-		VALUE_MIN_ARGS (token)	= bp->min_args;
-		VALUE_MAX_ARGS (token)	= bp->max_args;
-	      }
-	    else
-	      {
+		token = xzalloc (sizeof *token);
 		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
+		VALUE_HANDLE (token) = handle;
 		VALUE_MIN_ARGS (token) = 0;
 		VALUE_MAX_ARGS (token) = -1;
 	      }

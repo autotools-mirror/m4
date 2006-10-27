@@ -323,32 +323,68 @@ M4BUILTIN_HANDLER (__program__)
 
 /* The builtin "builtin" allows calls to builtin macros, even if their
    definition has been overridden or shadowed.  It is thus possible to
-   redefine builtins, and still access their original definition.  */
+   redefine builtins, and still access their original definition.  A
+   special form allows one to retrieve the special token that defn
+   would normally return, even if that builtin is not currently
+   defined and hence can't be passed to defn.  */
 
 /**
  * builtin(MACRO, [...])
+ * builtin(defn(`builtin'), MACRO)
  **/
 M4BUILTIN_HANDLER (builtin)
 {
+  const char *name;
+  m4_symbol_value *value;
+
   if (! m4_is_symbol_value_text (argv[1]))
-    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+    {
+      if (m4_is_symbol_value_func (argv[1])
+	 && m4_get_symbol_value_func (argv[1]) == builtin_builtin)
+       {
+	 if (m4_bad_argc (context, argc, argv, 2, 2, false))
+	   return;
+	 if (! m4_is_symbol_value_text (argv[2]))
+	   {
+	     m4_warn (context, 0, _("%s: invalid macro name ignored"),
+		      M4ARG (0));
+	     return;
+	   }
+	 name = M4ARG (2);
+	 value = m4_builtin_find_by_name (NULL, name);
+	 if (value == NULL)
+	   m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0),
+		    name);
+	 else
+	   {
+	     m4_push_builtin (context, value);
+	     free (value);
+	   }
+       }
+      else
+       m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+    }
   else
     {
-      const char *name = M4ARG (1);
-      const m4_builtin *bp = m4_builtin_find_by_name (NULL, name);
-
-      if (bp == NULL)
+      name = M4ARG (1);
+      value = m4_builtin_find_by_name (NULL, name);
+      if (value == NULL)
 	m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
-      else if (!m4_bad_argc (context, argc - 1, argv + 1,
-			     bp->min_args, bp->max_args,
-			     (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
+      else
 	{
-	  int i;
-	  if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
-	    for (i = 2; i < argc; i++)
-	      if (! m4_is_symbol_value_text (argv[i]))
-		m4_set_symbol_value_text (argv[i], "");
-	  bp->func (context, obs, argc - 1, argv + 1);
+	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+	  if (!m4_bad_argc (context, argc - 1, argv + 1,
+			    bp->min_args, bp->max_args,
+			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
+	    {
+	      int i;
+	      if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
+		for (i = 2; i < argc; i++)
+		  if (! m4_is_symbol_value_text (argv[i]))
+		    m4_set_symbol_value_text (argv[i], "");
+	      bp->func (context, obs, argc - 1, argv + 1);
+	    }
+	  free (value);
 	}
     }
 }
