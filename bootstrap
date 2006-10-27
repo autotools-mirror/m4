@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-09-21
+# bootstrap (GNU M4) version 2006-10-27
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -39,8 +39,8 @@
 
 # This script bootstraps a CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
-# requires GNU Gettext 0.15 or better, and Autoconf 2.60 or better
-# Automake 1.9b or better, and bleeding edge CVS snapshots of
+# requires GNU Gettext 0.16 or better, and Autoconf 2.60 or better
+# Automake 1.10a or better, and bleeding edge CVS snapshots of
 # Libtool and Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
@@ -356,11 +356,6 @@ gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
 
 func_echo "running: ${GNULIB_TOOL} --update"
 ${GNULIB_TOOL} --update
-
-func_echo "patching include directories in gnulib regex module"
-mv $config_macro_dir/regex.m4 $config_macro_dir/regex-m4.old
-sed 's,lib/regex.c,gnu/regex.c,g' $config_macro_dir/regex-m4.old > $config_macro_dir/regex.m4 && \
-  $RM $config_macro_dir/regex-m4.old
 
 
 ## --------------------------------- ##

@@ -43,9 +43,9 @@ and is not part of a release distribution.
 ================
 
 * Before you can build from CVS, you need to bootstrap.  This requires a
-  pre-installed version of GNU M4 1.4.x or later, built from a package,
-  Autoconf 2.60 or later, Automake 1.10a or later, CVS Head of Libtool
-  (will become Libtool 2.0), Gettext 0.15 or later, and a CVS checkout
+  pre-installed version of GNU M4 1.4.x or later, built from a package;
+  Autoconf 2.60 or later; Automake 1.10a or later; CVS Head of Libtool
+  (will become Libtool 2.0); Gettext 0.16 or later; and a CVS checkout
   of gnulib.  Gnulib can be obtained by:
     cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/gnulib co gnulib
 

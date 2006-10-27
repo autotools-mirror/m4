@@ -1,5 +1,10 @@
 2006-10-27  Eric Blake  <ebb9@byu.net>
 
+	* bootstrap (gnulib): No longer a need to patch after gnulib-tool
+	--update.
+	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump requirement to
+	0.16, since 0.15 is incompatible with our automake requirement.
+
 	* m4/macro.c (expand_argument): Fix missing initialization.
 	* m4/m4private.h (struct m4_symbol_value): Store entire
 	m4_builtin, not just the func.
