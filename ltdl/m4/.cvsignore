@@ -28,6 +28,8 @@ gnulib-tool.m4
 gnulib.m4
 iconv.m4
 intdiv0.m4
+intl.m4
+intldir.m4
 intmax.m4
 intmax_t.m4
 inttypes-h.m4
@@ -83,6 +85,7 @@ strndup.m4
 strnlen.m4
 strtol.m4
 sys_stat_h.m4
+tempname.m4
 tmpdir.m4
 uintmax_t.m4
 ulonglong.m4
