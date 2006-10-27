@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "stdlib--.h"
+#include "tempname.h"
 #include "unistd--.h"
 
 #if HAVE_SYS_WAIT_H
@@ -708,18 +709,15 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 
   /* Make the temporary object.  */
   errno = 0;
-  if (dir)
-    fd = mkdtemp (obstack_base (obs)) ? 0 : -1;
-  else
-    fd = mkstemp_safer (obstack_base (obs));
+  fd = gen_tempname (obstack_base (obs), dir ? GT_DIR : GT_FILE);
   if (fd < 0)
     {
       /* This use of _() will need to change if xgettext ever changes
 	 its undocumented behavior of parsing both string options.  */
 
       m4_error (context, 0, errno,
-		_(dir ? "%s: cannot create directory `%s'"
-		  : "%s: cannot create file `%s'"),
+		_(dir ? "%s: cannot create directory from template `%s'"
+		  : "%s: cannot create file from template `%s'"),
 		macro, name);
       obstack_free (obs, obstack_finish (obs));
     }

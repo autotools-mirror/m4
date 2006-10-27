@@ -1,3 +1,10 @@
+2006-10-27  Eric Blake  <ebb9@byu.net>
+
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	tempname'.
+	* modules/m4.c (m4_make_temp): Use it.
+	* tests/builtins.at (mkstemp, mkdtemp): Update message wording.
+
 2006-10-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (dist_pkgdata_DATA): Distribute recently-added

@@ -515,7 +515,7 @@ AT_DATA([[in]],
 [[mkdtemp(`no_such_dir/m4-fooXXXXXX')
 ]])
 AT_CHECK_M4([in], [1], [[
-]], [[m4:in:1: mkdtemp: cannot create directory `no_such_dir/m4-fooXXXXXX': No such file or directory
+]], [[m4:in:1: mkdtemp: cannot create directory from template `no_such_dir/m4-fooXXXXXX': No such file or directory
 ]])
 
 dnl Check that umask has an effect
@@ -541,7 +541,7 @@ AT_DATA([[in]],
 [[mkstemp(`no_such_dir/m4-fooXXXXXX')
 ]])
 AT_CHECK_M4([in], [1], [[
-]], [[m4:in:1: mkstemp: cannot create file `no_such_dir/m4-fooXXXXXX': No such file or directory
+]], [[m4:in:1: mkstemp: cannot create file from template `no_such_dir/m4-fooXXXXXX': No such file or directory
 ]])
 
 dnl Check that umask has an effect
