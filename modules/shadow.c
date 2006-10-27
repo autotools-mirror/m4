@@ -70,7 +70,7 @@ M4INIT_HANDLER (shadow)
 
   /* Only display the message on first load.  */
   if (obs && info && (info->ref_count == 1))
-    obstack_grow (obs, s, strlen(s));
+    obstack_grow (obs, s, strlen (s));
 }
 
 
@@ -80,8 +80,8 @@ M4INIT_HANDLER (shadow)
  **/
 M4BUILTIN_HANDLER (shadow)
 {
-  char *s = "Shadow::`shadow' called.";
-  obstack_grow (obs, s, strlen(s));
+  const char *s = "Shadow::`shadow' called.";
+  obstack_grow (obs, s, strlen (s));
 }
 
 /**
@@ -89,6 +89,6 @@ M4BUILTIN_HANDLER (shadow)
  **/
 M4BUILTIN_HANDLER (test)
 {
-  char *s = "Shadow::`test' called.";
-  obstack_grow (obs, s, strlen(s));
+  const char *s = "Shadow::`test' called.";
+  obstack_grow (obs, s, strlen (s));
 }

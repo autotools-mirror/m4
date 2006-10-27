@@ -95,8 +95,8 @@ expand_token (m4 *context, m4_obstack *obs,
 	      m4__token_type type, m4_symbol_value *token)
 {
   m4_symbol *symbol;
-  char *text = (m4_is_symbol_value_text (token)
-		? m4_get_symbol_value_text (token) : NULL);
+  const char *text = (m4_is_symbol_value_text (token)
+		      ? m4_get_symbol_value_text (token) : NULL);
 
   switch (type)
     {				/* TOKSW */
@@ -115,7 +115,7 @@ expand_token (m4 *context, m4_obstack *obs,
 
     case M4_TOKEN_WORD:
       {
-	unsigned char *textp = text;
+	const unsigned char *textp = text;
 
 	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
 	  ++textp;
@@ -153,7 +153,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
   m4_symbol_value token;
-  unsigned char *text;
+  const unsigned char *text;
   int paren_level = 0;
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
@@ -237,7 +237,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 static void
 expand_macro (m4 *context, const char *name, m4_symbol *symbol)
 {
-  char *argc_base;		/* Base of argc_stack on entry.  */
+  char *argc_base = NULL;	/* Base of argc_stack on entry.  */
   unsigned int argc_size;	/* Size of argc_stack on entry.  */
   unsigned int argv_size;	/* Size of argv_stack on entry.  */
   m4_symbol_value **argv;
@@ -293,7 +293,8 @@ recursion limit of %d exceeded, use -L<N> to change it"),
 
   argc = ((obstack_object_size (&argv_stack) - argv_size)
 	  / sizeof (m4_symbol_value *));
-  argv = (m4_symbol_value **) (obstack_base (&argv_stack) + argv_size);
+  argv = (m4_symbol_value **) ((char *) obstack_base (&argv_stack)
+			       + argv_size);
   /* Calling collect_arguments invalidated name, but we copied it as
      argv[0].  */
   name = m4_get_symbol_value_text (argv[0]);

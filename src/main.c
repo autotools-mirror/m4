@@ -564,11 +564,10 @@ main (int argc, char *const *argv, char *const *envp)
 	      m4_symbol_value *value = m4_symbol_value_create ();
 
 	      macro_value = strchr (arg, '=');
-	      if (macro_value == NULL)
-		macro_value = "";
-	      else
+	      if (macro_value != NULL)
 		*macro_value++ = '\0';
-	      m4_set_symbol_value_text (value, xstrdup (macro_value));
+	      m4_set_symbol_value_text (value, xstrdup (macro_value
+                                                        ? macro_value : ""));
 
 	      m4_symbol_pushdef (M4SYMTAB, arg, value);
 	    }

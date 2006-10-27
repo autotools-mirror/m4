@@ -180,7 +180,7 @@ struct m4_symbol_value {
 
   m4__symbol_type	type;
   union {
-    char *		text; /* Valid when type is TEXT, PLACEHOLDER.  */
+    const char *	text; /* Valid when type is TEXT, PLACEHOLDER.  */
     m4_builtin_func *	func; /* Valid when type is FUNC.  */
   } u;
 };
@@ -221,7 +221,7 @@ struct m4_symbol_value {
 #  define m4_get_symbol_value_placeholder(V)				\
 					((V)->u.text)
 #  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
-                                                    VALUE_MACRO_ARGS_BIT))
+						    VALUE_MACRO_ARGS_BIT))
 
 #  define m4_set_symbol_value_text(V, T)				\
 	((V)->type = M4_SYMBOL_TEXT, (V)->u.text = (T))

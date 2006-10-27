@@ -130,12 +130,13 @@ void
 m4_output_init (m4 *context)
 {
   m4_diversion *diversion = xmalloc (sizeof *diversion);
+  const void *tmp = diversion;
   diversion->u.file = stdout;
   diversion->divnum = 0;
   diversion->size = 0;
   diversion->used = 0;
   diversion_table = gl_list_create (GL_AVLTREE_LIST, equal_diversion_CB, NULL,
-				    false, 1, (const void **) &diversion);
+				    false, 1, &tmp);
 
   diversions = 1;
   m4_set_current_diversion (context, 0);
@@ -238,6 +239,7 @@ make_room_for (m4 *context, size_t length)
       m4_diversion *diversion;
       size_t count;
       gl_list_iterator_t iter;
+      const void *elt;
 
       /* Find out the buffer having most data, in view of flushing it to
 	 disk.  Fake the current buffer as having already received the
@@ -249,12 +251,15 @@ make_room_for (m4 *context, size_t length)
 
       iter = gl_list_iterator_from_to (diversion_table, 1,
 				       gl_list_size (diversion_table));
-      while (gl_list_iterator_next (&iter, (const void **) &diversion, NULL))
-	if (diversion->used > selected_used)
-	  {
-	    selected_diversion = diversion;
-	    selected_used = diversion->used;
-	  }
+      while (gl_list_iterator_next (&iter, &elt, NULL))
+	{
+	  diversion = (m4_diversion *) elt;
+	  if (diversion->used > selected_used)
+	    {
+	      selected_diversion = diversion;
+	      selected_used = diversion->used;
+	    }
+	}
       gl_list_iterator_free (&iter);
 
       /* Create a temporary file, write the in-memory buffer of the
@@ -514,7 +519,15 @@ m4_make_diversion (m4 *context, int divnum)
     {
       assert (!output_file || output_diversion->u.file == output_file);
       assert (output_diversion->divnum != divnum);
-      output_diversion->used = output_diversion->size - output_unused;
+      if (!output_diversion->size && !output_diversion->u.file)
+	{
+	  if (!gl_list_remove (diversion_table, output_diversion))
+	    assert (false);
+	  output_diversion->u.next = free_list;
+	  free_list = output_diversion;
+	}
+      else
+	output_diversion->used = output_diversion->size - output_unused;
       output_diversion = NULL;
       output_file = NULL;
       output_cursor = NULL;
@@ -664,12 +677,16 @@ m4_undivert_all (m4 *context)
   gl_list_iterator_t iter;
   gl_list_node_t node;
   int divnum = m4_get_current_diversion (context);
+  const void *elt;
 
   iter = gl_list_iterator_from_to (diversion_table, 1,
 				   gl_list_size (diversion_table));
-  while (gl_list_iterator_next (&iter, (const void **) &diversion, &node))
-    if (diversion->divnum != divnum)
-      m4_insert_diversion_helper (context, diversion, node);
+  while (gl_list_iterator_next (&iter, &elt, &node))
+    {
+      diversion = (m4_diversion *) elt;
+      if (diversion->divnum != divnum)
+	m4_insert_diversion_helper (context, diversion, node);
+    }
   gl_list_iterator_free (&iter);
 }
 
@@ -679,11 +696,11 @@ m4_freeze_diversions (m4 *context, FILE *file)
 {
   int saved_number;
   int last_inserted;
-  int divnum;
   m4_diversion *diversion;
   struct stat file_stat;
   gl_list_iterator_t iter;
   gl_list_node_t node;
+  const void *elt;
 
   saved_number = m4_get_current_diversion (context);
   last_inserted = 0;
@@ -692,14 +709,16 @@ m4_freeze_diversions (m4 *context, FILE *file)
 
   iter = gl_list_iterator_from_to (diversion_table, 1,
 				   gl_list_size (diversion_table));
-  while (gl_list_iterator_next (&iter, (const void **) &diversion, &node))
+  while (gl_list_iterator_next (&iter, &elt, &node))
     {
+      diversion = (m4_diversion *) elt;
       if (diversion->size || diversion->u.file)
 	{
 	  if (diversion->size)
 	    {
 	      assert (diversion->used == (int) diversion->used);
-	      fprintf (file, "D%d,%d\n", divnum, (int) diversion->used);
+	      fprintf (file, "D%d,%d\n", diversion->divnum,
+		       (int) diversion->used);
 	    }
 	  else
 	    {
@@ -714,14 +733,14 @@ m4_freeze_diversions (m4 *context, FILE *file)
 		  || file_stat.st_size != (unsigned long) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("diversion too large"));
-	      fprintf (file, "D%d,%lu", divnum,
+	      fprintf (file, "D%d,%lu", diversion->divnum,
 		       (unsigned long) file_stat.st_size);
 	    }
 
 	  m4_insert_diversion_helper (context, diversion, node);
 	  putc ('\n', file);
 
-	  last_inserted = divnum;
+	  last_inserted = diversion->divnum;
 	}
     }
   gl_list_iterator_free (&iter);

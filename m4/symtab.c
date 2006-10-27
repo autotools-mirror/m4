@@ -320,9 +320,9 @@ m4_symbol_value_delete (m4_symbol_value *value)
 	  m4_hash_delete (VALUE_ARG_SIGNATURE (value));
 	}
       if (m4_is_symbol_value_text (value))
-	free (m4_get_symbol_value_text (value));
+	free ((char *) m4_get_symbol_value_text (value));
       else if (m4_is_symbol_value_placeholder (value))
-	free (m4_get_symbol_value_placeholder (value));
+	free ((char *) m4_get_symbol_value_placeholder (value));
       free (value);
     }
 }
@@ -386,9 +386,9 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
   assert (src);
 
   if (m4_is_symbol_value_text (dest))
-    free (m4_get_symbol_value_text (dest));
+    free ((char *) m4_get_symbol_value_text (dest));
   else if (m4_is_symbol_value_placeholder (dest))
-    free (m4_get_symbol_value_placeholder (dest));
+    free ((char *) m4_get_symbol_value_placeholder (dest));
 
   if (VALUE_ARG_SIGNATURE (dest))
     {
@@ -629,7 +629,7 @@ m4_is_symbol_value_void (m4_symbol_value *value)
 }
 
 #undef m4_get_symbol_value_text
-char *
+const char *
 m4_get_symbol_value_text (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_TEXT);
@@ -645,7 +645,7 @@ m4_get_symbol_value_func (m4_symbol_value *value)
 }
 
 #undef m4_get_symbol_value_placeholder
-char *
+const char *
 m4_get_symbol_value_placeholder (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_PLACEHOLDER);
@@ -654,7 +654,7 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
 
 #undef m4_set_symbol_value_text
 void
-m4_set_symbol_value_text (m4_symbol_value *value, char *text)
+m4_set_symbol_value_text (m4_symbol_value *value, const char *text)
 {
   assert (value);
   assert (text);
@@ -676,7 +676,7 @@ m4_set_symbol_value_func (m4_symbol_value *value, m4_builtin_func *func)
 
 #undef m4_set_symbol_value_placeholder
 void
-m4_set_symbol_value_placeholder (m4_symbol_value *value, char *text)
+m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
 {
   assert (value);
   assert (text);

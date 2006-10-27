@@ -256,14 +256,15 @@ extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
 extern bool		m4_is_symbol_value_void	  (m4_symbol_value *);
-extern char	       *m4_get_symbol_value_text  (m4_symbol_value *);
+extern const char      *m4_get_symbol_value_text  (m4_symbol_value *);
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
-extern char	       *m4_get_symbol_value_placeholder  (m4_symbol_value *);
-extern void		m4_set_symbol_value_text  (m4_symbol_value *, char *);
+extern const char      *m4_get_symbol_value_placeholder  (m4_symbol_value *);
+extern void		m4_set_symbol_value_text  (m4_symbol_value *,
+                                                   const char *);
 extern void		m4_set_symbol_value_func  (m4_symbol_value *,
 						   m4_builtin_func *);
 extern void		m4_set_symbol_value_placeholder  (m4_symbol_value *,
-							  char *);
+							  const char *);
 
 
 

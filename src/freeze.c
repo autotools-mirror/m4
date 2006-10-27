@@ -153,9 +153,7 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
 void
 produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
-  const char *errormsg = m4_symtab_apply (symtab, dump_symbol_CB, file);
-
-  if (errormsg != NULL)
+  if (m4_symtab_apply (symtab, dump_symbol_CB, file))
     assert (false);
 }
 
@@ -188,7 +186,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 						m4_get_symbol_func (symbol));
 
       if (bp == NULL)
-	return "INTERNAL ERROR: builtin not found in builtin table!";
+	assert (!"INTERNAL ERROR: builtin not found in builtin table!");
 
       fprintf (file, "F%lu,%lu",
 	       (unsigned long) strlen (symbol_name),
@@ -208,7 +206,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   else if (m4_is_symbol_placeholder (symbol))
     ; /* Nothing to do for a builtin we couldn't reload earlier.  */
   else
-    return "INTERNAL ERROR: bad token data type in produce_symbol_dump ()";
+    assert (!"INTERNAL ERROR: bad token data type in produce_symbol_dump ()");
 
   return NULL;
 }

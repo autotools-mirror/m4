@@ -61,6 +61,7 @@ static void
 format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 {
   char *fmt;			/* format control string */
+  char *copy;			/* we temporarily edit fmt */
   const char *fstart;		/* beginning of current format spec */
   int c;			/* a simple character */
 
@@ -77,13 +78,16 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
   char *str;			/* malloc'd buffer for formatted text */
   enum {INT, UINT, LONG, ULONG, DOUBLE, STR} datatype;
 
-  fmt = ARG_STR (argc, argv);
+  fmt = copy = xstrdup (ARG_STR (argc, argv));
   for (;;)
     {
       while ((c = *fmt++) != '%')
 	{
 	  if (c == '\0')
-	    return;
+	    {
+	      free (copy);
+	      return;
+	    }
 	  obstack_1grow (obs, c);
 	}
 
@@ -164,6 +168,7 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 
 	case '\0':
 	  /* TODO - warn about incomplete % specifier.  */
+	  free (copy);
 	  return;
 
 	case 'c':
@@ -216,72 +221,72 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
       c = *fmt;
       *fmt = '\0';
 
-      switch(datatype)
+      switch (datatype)
 	{
 	case INT:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, width, ARG_INT (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_INT (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_INT(argc, argv));
+	    str = xasprintf (fstart, ARG_INT (argc, argv));
 	  break;
 
 	case UINT:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_UINT (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, width, ARG_UINT (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_UINT (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_UINT(argc, argv));
+	    str = xasprintf (fstart, ARG_UINT (argc, argv));
 	  break;
 
 	case LONG:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, width, ARG_LONG (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_LONG (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_LONG(argc, argv));
+	    str = xasprintf (fstart, ARG_LONG (argc, argv));
 	  break;
 
 	case ULONG:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_ULONG (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, width, ARG_ULONG (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_ULONG (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_ULONG(argc, argv));
+	    str = xasprintf (fstart, ARG_ULONG (argc, argv));
 	  break;
 
 	case DOUBLE:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, width, ARG_DOUBLE (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_DOUBLE (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_DOUBLE(argc, argv));
+	    str = xasprintf (fstart, ARG_DOUBLE (argc, argv));
 	  break;
 
 	case STR:
 	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
 	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, width, ARG_STR (argc, argv));
 	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, prec, ARG_STR (argc, argv));
 	  else
-	    str = xasprintf (fstart, ARG_STR(argc, argv));
+	    str = xasprintf (fstart, ARG_STR (argc, argv));
 	  break;
 
 	default:
@@ -298,4 +303,5 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
       obstack_grow (obs, str, strlen (str));
       free (str);
     }
+  free (copy);
 }
