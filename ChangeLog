@@ -1,3 +1,14 @@
+2006-10-28  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (set_quotes): Don't allow empty end-quote with
+	non-empty start-quote.
+	(set_comment): Likewise for end-comment.
+	* src/builtin.c (m4_changecom): Adjust caller.
+	* doc/m4.texinfo (Changequote, Changecom): Update documentation to
+	match behavior.
+	(Incompatibilities): Document another POSIX bug.
+	* NEWS: Mention this change.
+
 2006-10-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* examples/Makefile.am (EXTRA_DIST): Distribute recently-added

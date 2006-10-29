@@ -1146,6 +1146,7 @@ m4_changequote (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 3))
     return;
 
+  /* Explicit NULL distinguishes between empty and missing argument.  */
   set_quotes ((argc >= 2) ? TOKEN_DATA_TEXT (argv[1]) : NULL,
 	     (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
@@ -1161,11 +1162,9 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 3))
     return;
 
-  if (argc == 1)
-    set_comment ("", "");	/* disable comments */
-  else
-    set_comment (TOKEN_DATA_TEXT (argv[1]),
-		(argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
+  /* Explicit NULL distinguishes between empty and missing argument.  */
+  set_comment ((argc >= 2) ? TOKEN_DATA_TEXT (argv[1]) : NULL,
+	       (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
 
 #ifdef ENABLE_CHANGEWORD

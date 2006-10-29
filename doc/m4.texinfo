@@ -2795,11 +2795,12 @@ The default quote delimiters can be changed with the builtin
 @code{changequote}:
 
 @deffn Builtin changequote (@dvar{start, `}, @dvar{end, '})
-This sets @var{start} as the new begin-quote delimiter and @var{end} as the
-new end-quote delimiter.  If any of the arguments are missing, the default
-quotes (@code{`} and @code{'}) are used instead of the void arguments.
-@comment FIXME POSIX requires that with one argument, the closing quote
-@comment be set to newline, not '.
+This sets @var{start} as the new begin-quote delimiter and @var{end} as
+the new end-quote delimiter.  If both arguments are missing, the default
+quotes (@code{`} and @code{'}) are used.  If @var{start} is void, then
+quoting is disabled.  Otherwise, if @var{end} is missing or void, the
+default end-quote delimiter (@code{'}) is used.  The quote delimiters
+can be of any length.
 
 The expansion of @code{changequote} is void.
 @end deffn
@@ -2831,7 +2832,8 @@ changequote(`«', `»')
 @end example
 @end ignore
 If no single character is appropriate, @var{start} and @var{end} can be
-of any length.
+of any length.  Other implementations cap the delimiter length to five
+characters, but @acronym{GNU} has no inherent limit.
 
 @example
 changequote(`[[[', `]]]')
@@ -2842,18 +2844,32 @@ foo
 @result{}Macro [[foo]].
 @end example
 
-Changing the quotes to the empty strings will effectively disable the
-quoting mechanism, leaving no way to quote text.
+Calling @code{changequote} with @var{start} as the empty string will
+effectively disable the quoting mechanism, leaving no way to quote text.
+However, using an empty string is not portable, as some other
+implementations of @code{m4} revert to the default quoting, while others
+preserve the prior non-empty delimiter.  If @var{start} is not empty,
+then an empty @var{end} will use the default end-quote delimiter of
+@samp{'}, as otherwise, it would be impossible to end a quoted string.
+Again, this is not portable, as some other @code{m4} implementations
+reuse @var{start} as the end-quote delimiter, while others preserve the
+previous non-empty value.  Omitting both arguments restores the default
+begin-quote and end-quote delimiters; fortunately this behavior is
+portable to all implementations of @code{m4}.
 
 @example
 define(`foo', `Macro `FOO'.')
 @result{}
-changequote(, )
+changequote(`', `')
 @result{}
 foo
 @result{}Macro `FOO'.
 `foo'
 @result{}`Macro `FOO'.'
+changequote(`,)
+@result{}
+foo
+@result{}Macro FOO.
 @end example
 
 There is no way in @code{m4} to quote a string containing an unmatched
@@ -2866,24 +2882,39 @@ calls of @code{changequote} must be made, one for the temporary quotes
 and one for the new quotes.
 
 Macros are recognized in preference to the begin-quote string, so if a
-prefix of @var{start} can be recognized as a potential macro name, the
-quoting mechanism is effectively disabled.  Unless you use
+prefix of @var{start} can be recognized as part of a potential macro
+name, the quoting mechanism is effectively disabled.  Unless you use
 @code{changeword} (@pxref{Changeword}), this means that @var{start}
-should not begin with a letter or @samp{_} (underscore).
+should not begin with a letter, digit, or @samp{_} (underscore).
+However, even though quoted strings are not recognized, the quote
+characters can still be discerned in macro expansion and in trace
+output.
 
 @example
+define(`echo', `$@@')
+@result{}
 define(`hi', `HI')
 @result{}
 changequote(`q', `Q')
 @result{}
 q hi Q hi
 @result{}q HI Q HI
+echo(hi)
+@result{}qHIQ
 changequote
 @result{}
 changequote(`-', `EOF')
 @result{}
 - hi EOF hi
 @result{} hi  HI
+changequote
+@result{}
+changequote(`1', `2')
+@result{}
+hi1hi2
+@result{}hi1hi2
+hi 1hi2
+@result{}HI hi
 @end example
 
 Quotes are recognized in preference to argument collection.  In
@@ -2963,12 +2994,12 @@ It is an error if the end of file occurs within a quoted string.
 The default comment delimiters can be changed with the builtin
 macro @code{changecom}:
 
-@deffn Builtin changecom (@ovar{start}, @ovar{end})
-This sets @var{start} as the new begin-comment delimiter and @var{end} as
-the new end-comment delimiter.  If only one argument is provided,
-newline becomes the new end-comment delimiter.  The comment delimiters
-can be of any length.  Omitting the first argument, or using the empty
-string as the first argument, disables comments.
+@deffn Builtin changecom (@ovar{start}, @dvar{end, @key{NL}})
+This sets @var{start} as the new begin-comment delimiter and @var{end}
+as the new end-comment delimiter.  If both arguments are missing, or
+@var{start} is void, then comments are disabled.  Otherwise, if
+@var{end} is missing or void, the default end-comment delimiter of
+newline is used.  The comment delimiters can be of any length.
 
 The expansion of @code{changecom} is void.
 @end deffn
@@ -2991,10 +3022,14 @@ Note how comments are copied to the output, much as if they were quoted
 strings.  If you want the text inside a comment expanded, quote the
 begin-comment delimiter.
 
-Calling @code{changecom} without any arguments, or with an empty string
-for the first argument, disables the commenting mechanism completely.
-To restore the original comment start of @samp{#}, you must explicitly
-ask for it.
+Calling @code{changecom} without any arguments, or with @var{start} as
+the empty string, will effectively disable the commenting mechanism.  To
+restore the original comment start of @samp{#}, you must explicitly ask
+for it.  If @var{start} is not empty, then an empty @var{end} will use
+the default end-comment delimiter of newline, as otherwise, it would be
+impossible to end a comment.  However, this is not portable, as some
+other @code{m4} implementations preserve the previous non-empty
+delimiters instead.
 
 @example
 define(`comment', `COMMENT')
@@ -3003,7 +3038,7 @@ changecom
 @result{}
 # Not a comment anymore
 @result{}# Not a COMMENT anymore
-changecom(`#')
+changecom(`#', `')
 @result{}
 # comment again
 @result{}# comment again
@@ -3026,21 +3061,33 @@ changecom(`«', `»')
 @result{}«a»
 @end example
 @end ignore
+If no single character is appropriate, @var{start} and @var{end} can be
+of any length.  Other implementations cap the delimiter length to five
+characters, but @acronym{GNU} has no inherent limit.
 
 Comments are recognized in preference to macros.  However, this is not
 compatible with other implementations, where macros and even quoting
 takes precedence over comments, so it may change in a future release.
 For portability, this means that @var{start} should not begin with a
-letter or @samp{_} (underscore), and that neither the start-quote nor
-the start-comment string should be a prefix of the other.
+letter, digit, or @samp{_} (underscore), and that neither the
+start-quote nor the start-comment string should be a prefix of the
+other.
 
 @example
 define(`hi', `HI')
+@result{}
+define(`hi1hi2', `hello')
 @result{}
 changecom(`q', `Q')
 @result{}
 q hi Q hi
 @result{}q hi Q HI
+changecom(`1', `2')
+@result{}
+hi1hi2
+@result{}hello
+hi 1hi2
+@result{}HI 1hi2
 @end example
 
 Comments are recognized in preference to argument collection.  In
@@ -5368,20 +5415,36 @@ provides the extension @code{esyscmd} that provides the @acronym{POSIX}
 semantics.
 
 @item
-@acronym{POSIX} requires @code{changequote(@var{arg})}
-(@pxref{Changequote}) to use newline as the close quote, but @acronym{GNU}
-@code{m4} uses @samp{'} as the close quote.  Meanwhile, some
-traditional implementations use @var{arg} as the close quote, making it
-impossible to nest quotes.  For predictable results, never call
-changequote with just one argument.
+At one point, @acronym{POSIX} required @code{changequote(@var{arg})}
+(@pxref{Changequote}) to use newline as the close quote, but this was a
+bug, and the next version of @acronym{POSIX} is anticipated to state
+that using empty strings or just one argument is unspecified.
+Meanwhile, the @acronym{GNU} @code{m4} behavior of treating an empty
+end-quote delimiter as @samp{'} is not portable, as Solaris treats it as
+repeating the start-quote delimiter, and BSD treats it as leaving the
+previous end-quote delimiter unchanged.  For predictable results, never
+call changequote with just one argument, or with empty strings for
+arguments.
 
 @item
-Some implementations of @code{m4} give macros a higher precedence than
+At one point, @acronym{POSIX} required @code{changecom(@var{arg},)}
+(@pxref{Changecom}) to make it impossible to end a comment, but this is
+a bug, and the next version of @acronym{POSIX} is anticipated to state
+that using empty strings is unspecified.  Meanwhile, the @acronym{GNU}
+@code{m4} behavior of treating an empty end-comment delimiter as newline
+is not portable, as BSD treats it as leaving the previous end-comment
+delimiter unchanged.  It is also impossible in BSD implementations to
+disable comments, even though that is required by @acronym{POSIX}.  For
+predictable results, never call changecom with empty strings for
+arguments.
+
+@item
+Most implementations of @code{m4} give macros a higher precedence than
 comments when parsing, meaning that if the start delimiter given to
 @code{changecom} (@pxref{Changecom}) starts with a macro name, comments
 are effectively disabled.  @acronym{POSIX} does not specify what the
-precedence is, so the @acronym{GNU} @code{m4} parser recognizes comments, then
-macros, then quoted strings.
+precedence is, so the @acronym{GNU} @code{m4} parser recognizes
+comments, then macros, then quoted strings.
 
 @item
 Traditional implementations allow argument collection, but not string

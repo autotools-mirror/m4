@@ -693,10 +693,11 @@ input_init (void)
 }
 
 
-/*--------------------------------------------------------------.
-| Functions for setting quotes and comment delimiters.  Used by |
-| m4_changecom () and m4_changequote ().		        |
-`--------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Functions for setting quotes and comment delimiters.  Used by	    |
+| m4_changecom () and m4_changequote ().  Pass NULL if the argument |
+| was not present, to distinguish from an explicit empty string.    |
+`------------------------------------------------------------------*/
 
 void
 set_quotes (const char *lq, const char *rq)
@@ -704,9 +705,24 @@ set_quotes (const char *lq, const char *rq)
   free (lquote.string);
   free (rquote.string);
 
-  lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
+  /* POSIX states that with 0 arguments, the default quotes are used.
+     POSIX XCU ERN 112 states that behavior is implementation-defined
+     if there was only one argument, or if there is an empty string in
+     either position when there are two arguments.  We allow an empty
+     left quote to disable quoting, but a non-empty left quote will
+     always create a non-empty right quote.  See the texinfo for what
+     some other implementations do.  */
+  if (!lq)
+    {
+      lq = DEF_LQUOTE;
+      rq = DEF_RQUOTE;
+    }
+  else if (!rq || (*lq && !*rq))
+    rq = DEF_RQUOTE;
+
+  lquote.string = xstrdup (lq);
   lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
+  rquote.string = xstrdup (rq);
   rquote.length = strlen (rquote.string);
 }
 
@@ -716,9 +732,21 @@ set_comment (const char *bc, const char *ec)
   free (bcomm.string);
   free (ecomm.string);
 
-  bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
+  /* POSIX requires no arguments to disable comments.  It requires
+     empty arguments to be used as-is, but this is counter to
+     traditional behavior, because a non-null begin and null end makes
+     it impossible to end a comment.  An aardvark has been filed:
+     http://www.opengroup.org/austin/mailarchives/ag-review/msg02168.html
+     This implementation assumes the aardvark will be approved.  See
+     the texinfo for what some other implementations do.  */
+  if (!bc)
+    bc = ec = "";
+  else if (!ec || (*bc && !*ec))
+    ec = DEF_ECOMM;
+
+  bcomm.string = xstrdup (bc);
   bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
+  ecomm.string = xstrdup (ec);
   ecomm.length = strlen (ecomm.string);
 }
 
