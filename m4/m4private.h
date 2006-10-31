@@ -221,7 +221,6 @@ struct m4_symbol_value {
 #  define m4_get_symbol_value_builtin(V) ((V)->u.builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
 					((V)->u.text)
-#  define m4_get_symbol_value_module(V)	(VALUE_HANDLE (V))
 #  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
 						    VALUE_MACRO_ARGS_BIT))
 

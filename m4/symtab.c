@@ -658,14 +658,6 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
   return value->u.text;
 }
 
-#undef m4_get_symbol_value_module
-lt_dlhandle
-m4_get_symbol_value_module (m4_symbol_value *value)
-{
-  assert (value);
-  return VALUE_HANDLE (value);
-}
-
 #undef m4_set_symbol_value_text
 void
 m4_set_symbol_value_text (m4_symbol_value *value, const char *text)

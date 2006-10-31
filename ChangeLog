@@ -1,5 +1,9 @@
 2006-10-30  Eric Blake  <ebb9@byu.net>
 
+	* m4/m4private.h (m4_get_symbol_value_module): Delete accidental
+	checkin.
+	* m4/symtab.c (m4_get_symbol_value_module): Likewise.
+
 	* modules/m4.c (m4_make_temp): Make safe across libtool.
 	* m4/symtab.c (dump_symbol_CB) [DEBUG_SYM]: Avoid warnings.
 	* configure.ac (--with-modules): Accomodate changed module
