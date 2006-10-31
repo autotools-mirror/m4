@@ -84,6 +84,7 @@ strcase.m4
 strerror_r.m4
 strndup.m4
 strnlen.m4
+strstr.m4
 strtol.m4
 sys_stat_h.m4
 tempname.m4
