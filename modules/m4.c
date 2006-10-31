@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "stdlib--.h"
+#include "strstr.h"
 #include "tempname.h"
 #include "unistd--.h"
 
@@ -550,7 +551,7 @@ M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
 
-  if (argc == 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
+  if (argc >= 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
   m4_make_diversion (context, i);
@@ -878,20 +879,9 @@ M4BUILTIN_HANDLER (len)
    argument.  */
 M4BUILTIN_HANDLER (index)
 {
-  const char *cp, *last;
-  int l1, l2, retval;
-
-  l1 = strlen (M4ARG (1));
-  l2 = strlen (M4ARG (2));
-
-  last = M4ARG (1) + l1 - l2;
-
-  for (cp = M4ARG (1); cp <= last; cp++)
-    {
-      if (strncmp (cp, M4ARG (2), l2) == 0)
-	break;
-    }
-  retval = (cp <= last) ? cp - M4ARG (1) : -1;
+  const char *haystack = M4ARG (1);
+  const char *result = strstr (haystack, M4ARG (2));
+  int retval = result ? result - haystack : -1;
 
   m4_shipout_int (obs, retval);
 }
@@ -908,7 +898,7 @@ M4BUILTIN_HANDLER (substr)
   if (!m4_numeric_arg (context, argc, argv, 2, &start))
     return;
 
-  if (argc == 4 && !m4_numeric_arg (context, argc, argv, 3, &length))
+  if (argc >= 4 && !m4_numeric_arg (context, argc, argv, 3, &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)
@@ -969,45 +959,49 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
    deleted from the first (pueh)  */
 M4BUILTIN_HANDLER (translit)
 {
-  register const char *data, *tmp;
-  const char *from, *to;
-  int tolen;
+  const unsigned char *data;
+  const unsigned char *from;
+  const unsigned char *to;
+  char map[256] = {0};
+  char found[256] = {0};
 
   from = M4ARG (2);
   if (strchr (from, '-') != NULL)
     {
       from = m4_expand_ranges (from, obs);
-      if (from == NULL)
-	return;
+      assert (from);
     }
 
-  if (argc == 4)
+  to = M4ARG (3);
+  if (strchr (to, '-') != NULL)
     {
-      to = M4ARG (3);
-      if (strchr (to, '-') != NULL)
-	{
-	  to = m4_expand_ranges (to, obs);
-	  if (to == NULL)
-	    return;
-	}
+      to = m4_expand_ranges (to, obs);
+      assert (to);
     }
-  else
-    to = "";
 
-  tolen = strlen (to);
+  /* Calling strchr(from) for each character in data is quadratic,
+     since both strings can be arbitrarily long.  Instead, create a
+     from-to mapping in one pass of data, then use that map in one
+     pass of from, for linear behavior.  Traditional behavior is that
+     only the first instance of a character in from is consulted,
+     hence the found map.  */
+  for ( ; *from; from++)
+    {
+      if (! found[*from])
+	{
+	  found[*from] = 1;
+	  map[*from] = *to;
+	}
+      if (*to != '\0')
+	to++;
+    }
 
   for (data = M4ARG (1); *data; data++)
     {
-      tmp = strchr (from, *data);
-      if (tmp == NULL)
-	{
-	  obstack_1grow (obs, *data);
-	}
-      else
-	{
-	  if (tmp - from < tolen)
-	    obstack_1grow (obs, *(to + (tmp - from)));
-	}
+      if (! found[*data])
+	obstack_1grow (obs, *data);
+      else if (map[*data])
+	obstack_1grow (obs, map[*data]);
     }
 }
 

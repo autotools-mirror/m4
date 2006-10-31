@@ -862,6 +862,16 @@ z
 tmfs not fnix
 ]])
 
+dnl This used to be quadratic, taking more than 25 million comparisons,
+dnl but should now operate in linear time with only several thousand checks.
+AT_DATA([[in]],
+[[translit(`a]m4_for([i],[1],[5000],[],[[b]])[',
+ `]m4_for([i],[1],[5000],[],[[a]])[b',
+ `c]m4_for([i],[1],[5000],[],[[d]])[')
+]])
+AT_CHECK_M4([in], [0], [[c]m4_for([i],[1],[5000],[],[[d]])
+])
+
 AT_CLEANUP
 
 

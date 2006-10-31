@@ -4853,28 +4853,35 @@ The builtin macro @code{substr} is recognized only when given arguments.
 
 @cindex translating characters
 @cindex characters, translating
+Character translation is done with @code{translit}:
+
 @deffn {Builtin (m4)} translit (@var{string}, @var{chars}, @var{replacement})
-Character translation is done with @code{translit}, which expands to
-@var{string}, with each character that occurs in @var{chars} translated
-into the character from @var{replacement} with the same index.
+Expands to @var{string}, with each character that occurs in
+@var{chars} translated into the character from @var{replacement} with
+the same index.
 
 If @var{replacement} is shorter than @var{chars}, the excess characters
-are deleted from the expansion.  If @var{replacement} is omitted, all
-characters in @var{string}, that are present in @var{chars} are deleted
-from the expansion.
+of @var{chars} are deleted from the expansion; if @var{chars} is
+shorter, the excess characters in @var{replacement} are silently
+ignored.  If @var{replacement} is omitted, all characters in
+@var{string} that are present in @var{chars} are deleted from the
+expansion.  If a character appears more than once in @var{chars}, only
+the first instance is used in making the translation.  Only a single
+translation pass is made, even if characters in @var{replacement} also
+appear in @var{chars}.
 
-Both @var{chars} and @var{replacement} can contain character-ranges,
+As a @acronym{GNU} extension, both @var{chars} and @var{replacement} can
+contain character-ranges,
 e.g., @samp{a-z} (meaning all lowercase letters) or @samp{0-9} (meaning
 all digits).  To include a dash @samp{-} in @var{chars} or
 @var{replacement}, place it first or last.
 
-The builtin macro @code{translit} is recognized only when given
-arguments.
-@end deffn
-
-It is not an error for the last character in the range to be `smaller'
+It is not an error for the last character in the range to be `larger'
 than the first.  In that case, the range runs backwards, i.e.,
 @samp{9-0} means the string @samp{9876543210}.
+
+The macro @code{translit} is recognized only with parameters.
+@end deffn
 
 @example
 translit(`GNUs not Unix', `A-Z')
@@ -4883,12 +4890,25 @@ translit(`GNUs not Unix', `a-z', `A-Z')
 @result{}GNUS NOT UNIX
 translit(`GNUs not Unix', `A-Z', `z-a')
 @result{}tmfs not fnix
+translit(`abcdef', `aabdef', `bcged')
+@result{}bgced
 @end example
 
 The first example deletes all uppercase letters, the second converts
 lowercase to uppercase, and the third `mirrors' all uppercase letters,
 while converting them to lowercase.  The two first cases are by far the
-most common.
+most common.  The final example shows that @samp{a} is mapped to
+@samp{b}, not @samp{c}; the resulting @samp{b} is not further remapped
+to @samp{g}; the @samp{d} and @samp{e} are swapped, and the @samp{f} is
+discarded.
+
+Omitting @var{chars} evokes a warning, but still produces output.
+
+@example
+translit(`abc')
+@error{}m4:stdin:1: Warning: translit: too few arguments: 1 < 2
+@result{}abc
+@end example
 
 @node Patsubst
 @section Substituting text by regular expression
