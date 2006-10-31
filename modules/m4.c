@@ -49,6 +49,7 @@
 #define m4_sysval_flush		m4_LTX_m4_sysval_flush
 #define m4_dump_symbols		m4_LTX_m4_dump_symbols
 #define m4_expand_ranges	m4_LTX_m4_expand_ranges
+#define m4_make_temp		m4_LTX_m4_make_temp
 
 extern void m4_set_sysval    (int value);
 extern void m4_sysval_flush  (m4 *context);

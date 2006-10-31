@@ -124,8 +124,15 @@ AC_MSG_CHECKING([for modules to preload])
   else
     if test "$use_modules" != yes; then
       for module in $use_modules; do
-	DLPREOPEN="$DLPREOPEN -dlpreopen modules/$module.la"
-	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES modules/$module.la"
+	case $module in
+	  no|none) break ;;
+	  m4|traditional|gnu|load|mpeval) dir=modules ;;
+	  import|modtest|shadow|stdlib|time) dir=tests ;;
+	  *) AC_MSG_ERROR([Unrecognized module `$module' in --with-modules])
+	    ;;
+	esac
+	DLPREOPEN="$DLPREOPEN -dlpreopen $dir/$module.la"
+	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES $dir/$module.la"
       done
     fi
   fi

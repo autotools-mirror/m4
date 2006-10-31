@@ -1,3 +1,10 @@
+2006-10-30  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (m4_make_temp): Make safe across libtool.
+	* m4/symtab.c (dump_symbol_CB) [DEBUG_SYM]: Avoid warnings.
+	* configure.ac (--with-modules): Accomodate changed module
+	location when doing './configure --enable-debug'.
+
 2006-10-28  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import

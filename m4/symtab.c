@@ -718,7 +718,6 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
   int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
   lt_dlhandle      handle	= value ? SYMBOL_HANDLE (symbol) : 0;
   const char *     module_name	= handle ? m4_get_module_name (handle) : "NONE";
-  const m4_builtin *bp;
 
   fprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
 	   m4_get_symbol_traced (symbol) ? "!" : "", name);
@@ -732,7 +731,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
       m4_obstack obs;
       obstack_init (&obs);
       m4_symbol_value_print (value, &obs, false, NULL, NULL, 0, true);
-      fprintf (stderr, "%s", obstack_finish (&obs));
+      fprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }
   fputc ('\n', stderr);
