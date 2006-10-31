@@ -43,6 +43,7 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
 * The `changecom' and `changequote' macros now treat an empty second
   argument the same as if it were missing, rather than using the empty
   string and making it impossible to end a comment or quote.
+* The `translit' macro now operates in linear instead of quadratic time.
 
 Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
 

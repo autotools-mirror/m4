@@ -27,6 +27,7 @@
 extern FILE *popen ();
 
 #include "regex.h"
+#include "strstr.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -1575,8 +1576,9 @@ m4_len (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_index (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *cp, *last;
-  int l1, l2, retval;
+  const char *haystack;
+  const char *result;
+  int retval;
 
   if (bad_argc (argv[0], argc, 3, 3))
     {
@@ -1586,17 +1588,9 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  l1 = strlen (ARG (1));
-  l2 = strlen (ARG (2));
-
-  last = ARG (1) + l1 - l2;
-
-  for (cp = ARG (1); cp <= last; cp++)
-    {
-      if (strncmp (cp, ARG (2), l2) == 0)
-	break;
-    }
-  retval = (cp <= last) ? cp - ARG (1) : -1;
+  haystack = ARG (1);
+  result = strstr (haystack, ARG (2));
+  retval = result ? result - haystack : -1;
 
   shipout_int (obs, retval);
 }
@@ -1693,9 +1687,11 @@ expand_ranges (const char *s, struct obstack *obs)
 static void
 m4_translit (struct obstack *obs, int argc, token_data **argv)
 {
-  register const char *data, *tmp;
-  const char *from, *to;
-  int tolen;
+  const unsigned char *data;
+  const unsigned char *from;
+  const unsigned char *to;
+  char map[256] = {0};
+  char found[256] = {0};
 
   if (bad_argc (argv[0], argc, 3, 4))
     {
@@ -1713,33 +1709,37 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 	return;
     }
 
-  if (argc >= 4)
+  to = ARG (3);
+  if (strchr (to, '-') != NULL)
     {
-      to = ARG (3);
-      if (strchr (to, '-') != NULL)
-	{
-	  to = expand_ranges (to, obs);
-	  if (to == NULL)
-	    return;
-	}
+      to = expand_ranges (to, obs);
+      if (to == NULL)
+	return;
     }
-  else
-    to = "";
 
-  tolen = strlen (to);
+  /* Calling strchr(from) for each character in data is quadratic,
+     since both strings can be arbitrarily long.  Instead, create a
+     from-to mapping in one pass of data, then use that map in one
+     pass of from, for linear behavior.  Traditional behavior is that
+     only the first instance of a character in from is consulted,
+     hence the found map.  */
+  for ( ; *from; from++)
+    {
+      if (! found[*from])
+	{
+	  found[*from] = 1;
+	  map[*from] = *to;
+	}
+      if (*to != '\0')
+	to++;
+    }
 
   for (data = ARG (1); *data; data++)
     {
-      tmp = strchr (from, *data);
-      if (tmp == NULL)
-	{
-	  obstack_1grow (obs, *data);
-	}
-      else
-	{
-	  if (tmp - from < tolen)
-	    obstack_1grow (obs, *(to + (tmp - from)));
-	}
+      if (! found[*data])
+	obstack_1grow (obs, *data);
+      else if (map[*data])
+	obstack_1grow (obs, map[*data]);
     }
 }
 

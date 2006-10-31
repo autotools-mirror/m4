@@ -4080,9 +4080,14 @@ Expands to @var{string}, with each character that occurs in
 the same index.
 
 If @var{replacement} is shorter than @var{chars}, the excess characters
-are deleted from the expansion.  If @var{replacement} is omitted, all
-characters in @var{string} that are present in @var{chars} are deleted
-from the expansion.
+of @var{chars} are deleted from the expansion; if @var{chars} is
+shorter, the excess characters in @var{replacement} are silently
+ignored.  If @var{replacement} is omitted, all characters in
+@var{string} that are present in @var{chars} are deleted from the
+expansion.  If a character appears more than once in @var{chars}, only
+the first instance is used in making the translation.  Only a single
+translation pass is made, even if characters in @var{replacement} also
+appear in @var{chars}.
 
 As a @acronym{GNU} extension, both @var{chars} and @var{replacement} can
 contain character-ranges,
@@ -4104,12 +4109,17 @@ translit(`GNUs not Unix', `a-z', `A-Z')
 @result{}GNUS NOT UNIX
 translit(`GNUs not Unix', `A-Z', `z-a')
 @result{}tmfs not fnix
+translit(`abcdef', `aabdef', `bcged')
+@result{}bgced
 @end example
 
 The first example deletes all uppercase letters, the second converts
 lowercase to uppercase, and the third `mirrors' all uppercase letters,
 while converting them to lowercase.  The two first cases are by far the
-most common.
+most common.  The final example shows that @samp{a} is mapped to
+@samp{b}, not @samp{c}; the resulting @samp{b} is not further remapped
+to @samp{g}; the @samp{d} and @samp{e} are swapped, and the @samp{f} is
+discarded.
 
 Omitting @var{chars} evokes a warning, but still produces output.
 
