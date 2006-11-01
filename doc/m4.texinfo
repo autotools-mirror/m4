@@ -495,19 +495,22 @@ The format of the @code{m4} command is:
 @cindex @env{POSIXLY_CORRECT}
 All options begin with @samp{-}, or if long option names are used, with
 @samp{--}.  A long option name need not be written completely, any
-unambiguous prefix is sufficient.  Unless @env{POSIXLY_CORRECT} is set
-in the environment, options may be intermixed with files.  The argument
-@option{--} is a marker to denote the end of options.
+unambiguous prefix is sufficient.  @acronym{POSIX} requires @code{m4} to
+recognize arguments intermixed with files, even when
+@env{POSIXLY_CORRECT} is set in the environment.  Most options take
+effect at startup regardless of their position, but some are documented
+below as taking effect after any files that occurred earlier in the
+command line.  The argument @option{--} is a marker to denote the end of
+options.
 
 With short options, options that do not take arguments may be combined
 into a single command line argument with subsequent options, options
 with mandatory arguments may be provided either as a single command line
 argument or as two arguments, and options with optional arguments must
-be provided as a single argument.  In other words, without
-@env{POSIXLY_CORRECT}, @kbd{m4 -QPDfoo -d a -d+f} is equivalent to
+be provided as a single argument.  In other words,
+@kbd{m4 -QPDfoo -d a -d+f} is equivalent to
 @kbd{m4 -Q -P -D foo -d -d+f -- ./a}, although the latter form is
-considered canonical.  (With @env{POSIXLY_CORRECT}, it is equivalent to
-@kbd{m4 -Q -P -D foo -d -- ./a ./-d+f}).
+considered canonical.
 
 With long options, options with mandatory arguments may be provided with
 an equal sign (@samp{=}) in a single argument, or as two arguments, and
@@ -596,8 +599,9 @@ This enters @var{NAME} into the symbol table, before any input files are
 read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
 empty string.  The @var{VALUE} can be any string, and the macro can be
 defined to take arguments, just as if it was defined from within the
-input.  This option may be given more than once; order is significant,
-and redefining the same @var{NAME} loses the previous value.
+input.  This option may be given more than once; order with respect to
+file names is significant, and redefining the same @var{NAME} loses the
+previous value.
 
 @item -I @var{DIRECTORY}
 @itemx --include=@var{DIRECTORY}
@@ -608,7 +612,8 @@ details.  This option may be given more than once.
 @item -s
 @itemx --synclines
 Generate synchronization lines, for use by the C preprocessor or other
-similar tools.  This is useful, for example, when @code{m4} is used as a
+similar tools.  Order is significant with respect to file names.  This
+option is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
 is conveyed by directives of the form @samp{#line @var{linenum}
 "@var{file}"}, which are inserted as needed into the middle of the
@@ -627,7 +632,8 @@ until the beginning of the next generated line.
 This deletes any predefined meaning @var{NAME} might have.  Obviously,
 only predefined macros can be deleted in this way.  This option may be
 given more than once; undefining a @var{NAME} that does not have a
-definition is silently ignored.
+definition is silently ignored.  Order is significant with respect to
+file names.
 @end table
 
 @node Limits control
@@ -752,7 +758,8 @@ unlimited.  @xref{Debug Levels}, for more details.
 @itemx --trace=@var{NAME}
 This enables tracing for the macro @var{NAME}, at any point where it is
 defined.  @var{NAME} need not be defined when this option is given.
-This option may be given more than once.  @xref{Trace}, for more details.
+This option may be given more than once, and order is significant with
+respect to file names.  @xref{Trace}, for more details.
 @end table
 
 @node Command line files
@@ -771,6 +778,11 @@ on the command line; this makes a difference when input is from a
 terminal or other special file type.  It is an error if an input file
 ends in the middle of argument collection, a comment, or a quoted
 string.
+
+The options @option{--define} (@option{-D}), @option{--undefine}
+(@option{-U}), @option{--synclines} (@option{-s}), and @option{--trace}
+(@option{-t}) only take effect after processing input from any file
+names that occur earlier on the command line.
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure

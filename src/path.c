@@ -111,7 +111,7 @@ add_include_directory (const char *dir)
    respect to the current working directory.  */
 
 FILE *
-m4_path_search (const char *file, const char **result)
+m4_path_search (const char *file, char **result)
 {
   FILE *fp;
   includes *incl;

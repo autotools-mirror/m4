@@ -1,3 +1,15 @@
+2006-11-01  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Invoking m4): Update according to POSIX 200x
+	draft wording.
+	* src/m4.h (m4_path_search): Tweak signature.
+	* src/path.c (m4_path_search): Likewise.
+	* src/builtin.c (include): Update caller.
+	* src/m4.c (main): Allow -D, -U, -t, and -s to be interspersed
+	with file names.  Don't write to **argv.
+	(process_file): New helper method.
+	* NEWS: Document this fix.
+
 2006-10-31  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import strstr'.

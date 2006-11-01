@@ -1199,7 +1199,7 @@ static void
 include (int argc, token_data **argv, boolean silent)
 {
   FILE *fp;
-  const char *name;
+  char *name;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1214,7 +1214,7 @@ include (int argc, token_data **argv, boolean silent)
     }
 
   push_file (fp, name, TRUE);
-  free ((char *) name);
+  free (name);
 }
 
 /*------------------------------------------------.
