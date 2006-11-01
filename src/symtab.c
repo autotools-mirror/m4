@@ -141,7 +141,7 @@ void
 free_symbol (symbol *sym)
 {
   if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
-    SYMBOL_DELETED (sym) = TRUE;
+    SYMBOL_DELETED (sym) = true;
   else
     {
       free (SYMBOL_NAME (sym));
@@ -211,16 +211,16 @@ lookup_symbol (const char *name, symbol_lookup mode)
 	  if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
 	    {
 	      symbol *old = sym;
-	      SYMBOL_DELETED (old) = TRUE;
+	      SYMBOL_DELETED (old) = true;
 
 	      sym = (symbol *) xmalloc (sizeof (symbol));
 	      SYMBOL_TYPE (sym) = TOKEN_VOID;
 	      SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
 	      SYMBOL_NAME (sym) = xstrdup (name);
-	      SYMBOL_SHADOWED (sym) = FALSE;
-	      SYMBOL_MACRO_ARGS (sym) = FALSE;
-	      SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
-	      SYMBOL_DELETED (sym) = FALSE;
+	      SYMBOL_SHADOWED (sym) = false;
+	      SYMBOL_MACRO_ARGS (sym) = false;
+	      SYMBOL_BLIND_NO_ARGS (sym) = false;
+	      SYMBOL_DELETED (sym) = false;
 	      SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
 	      SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
@@ -239,12 +239,12 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
-      SYMBOL_TRACED (sym) = FALSE;
+      SYMBOL_TRACED (sym) = false;
       SYMBOL_NAME (sym) = xstrdup (name);
-      SYMBOL_SHADOWED (sym) = FALSE;
-      SYMBOL_MACRO_ARGS (sym) = FALSE;
-      SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
-      SYMBOL_DELETED (sym) = FALSE;
+      SYMBOL_SHADOWED (sym) = false;
+      SYMBOL_MACRO_ARGS (sym) = false;
+      SYMBOL_BLIND_NO_ARGS (sym) = false;
+      SYMBOL_DELETED (sym) = false;
       SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
       SYMBOL_NEXT (sym) = *spp;
@@ -252,7 +252,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
       if (mode == SYMBOL_PUSHDEF && cmp == 0)
 	{
-	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = TRUE;
+	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = true;
 	  SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
 	}
       return sym;
@@ -270,12 +270,12 @@ lookup_symbol (const char *name, symbol_lookup mode)
       if (cmp != 0 || sym == NULL)
 	return NULL;
       {
-	boolean traced = FALSE;
+	bool traced = false;
 	if (SYMBOL_NEXT (sym) != NULL
 	    && SYMBOL_SHADOWED (SYMBOL_NEXT (sym))
 	    && mode == SYMBOL_POPDEF)
 	  {
-	    SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
+	    SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = false;
 	    SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
 	  }
 	else
@@ -292,12 +292,12 @@ lookup_symbol (const char *name, symbol_lookup mode)
 	  {
 	    sym = (symbol *) xmalloc (sizeof (symbol));
 	    SYMBOL_TYPE (sym) = TOKEN_VOID;
-	    SYMBOL_TRACED (sym) = TRUE;
+	    SYMBOL_TRACED (sym) = true;
 	    SYMBOL_NAME (sym) = xstrdup (name);
-	    SYMBOL_SHADOWED (sym) = FALSE;
-	    SYMBOL_MACRO_ARGS (sym) = FALSE;
-	    SYMBOL_BLIND_NO_ARGS (sym) = FALSE;
-	    SYMBOL_DELETED (sym) = FALSE;
+	    SYMBOL_SHADOWED (sym) = false;
+	    SYMBOL_MACRO_ARGS (sym) = false;
+	    SYMBOL_BLIND_NO_ARGS (sym) = false;
+	    SYMBOL_DELETED (sym) = false;
 	    SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
 	    SYMBOL_NEXT (sym) = *spp;
@@ -325,7 +325,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 `-----------------------------------------------------------------*/
 
 void
-hack_all_symbols (hack_symbol *func, const char *data)
+hack_all_symbols (hack_symbol *func, void *data)
 {
   size_t h;
   symbol *sym;
@@ -339,7 +339,7 @@ hack_all_symbols (hack_symbol *func, const char *data)
       for (sym = symtab[h]; sym != NULL; sym = next)
 	{
 	  next = SYMBOL_NEXT (sym);
-	  (*func) (sym, data);
+	  func (sym, data);
 	}
     }
 }

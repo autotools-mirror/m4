@@ -134,7 +134,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 | obstack OBS, indirectly through expand_token ().			   |
 `-------------------------------------------------------------------------*/
 
-static boolean
+static bool
 expand_argument (struct obstack *obs, token_data *argp)
 {
   token_type t;
@@ -166,14 +166,14 @@ expand_argument (struct obstack *obs, token_data *argp)
 	    {
 	      /* The argument MUST be finished, whether we want it or not.  */
 	      obstack_1grow (obs, '\0');
-	      text = obstack_finish (obs);
+	      text = (char *) obstack_finish (obs);
 
 	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
 		{
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 		  TOKEN_DATA_TEXT (argp) = text;
 		}
-	      return (boolean) (t == TOKEN_COMMA);
+	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
 	case TOKEN_OPEN:
@@ -229,8 +229,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 {
   token_data td;
   token_data *tdp;
-  boolean more_args;
-  boolean groks_macro_args = SYMBOL_MACRO_ARGS (sym);
+  bool more_args;
+  bool groks_macro_args = SYMBOL_MACRO_ARGS (sym);
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
@@ -302,12 +302,12 @@ expand_macro (symbol *sym)
 {
   struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
   unsigned argv_base;		/* Size of argv_stack on entry.  */
-  boolean use_argc_stack = TRUE;	/* Whether argc_stack is safe.  */
+  bool use_argc_stack = true;	/* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
   struct obstack *expansion;
   const char *expanded;
-  boolean traced;
+  bool traced;
   int my_call_id;
 
   /* Report errors at the location where the open parenthesis (if any)
@@ -331,17 +331,17 @@ expand_macro (symbol *sym)
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym));
+  traced = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
 
   argv_base = obstack_object_size (&argv_stack);
   if (obstack_object_size (&argc_stack) > 0)
-  {
-    /* We cannot use argc_stack if this is a nested invocation, and an
-       outer invocation has an unfinished argument being
-       collected.  */
-     obstack_init (&arguments);
-     use_argc_stack = FALSE;
-  }
+    {
+      /* We cannot use argc_stack if this is a nested invocation, and an
+	 outer invocation has an unfinished argument being
+	 collected.  */
+      obstack_init (&arguments);
+      use_argc_stack = false;
+    }
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);

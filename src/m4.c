@@ -257,20 +257,20 @@ static const struct option long_options[] =
    where we try to continue execution in the meantime.  */
 int retcode;
 
-/* Process a command line file NAME, and return TRUE only if it was
+/* Process a command line file NAME, and return true only if it was
    stdin.  */
-static boolean
+static bool
 process_file (const char *name)
 {
-  boolean result = FALSE;
+  bool result = false;
   if (strcmp (name, "-") == 0)
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
 	 to read input from stdin twice, like GNU cat.  Besides,
 	 there is no point closing stdin before wrapped text, to
 	 minimize bugs in syscmd called from wrapped text.  */
-      push_file (stdin, "stdin", FALSE);
-      result = TRUE;
+      push_file (stdin, "stdin", false);
+      result = true;
     }
   else
     {
@@ -282,9 +282,9 @@ process_file (const char *name)
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;
-	  return FALSE;
+	  return false;
 	}
-      push_file (fp, full_name, TRUE);
+      push_file (fp, full_name, true);
       free (full_name);
     }
   expand_input ();
@@ -311,9 +311,9 @@ main (int argc, char *const *argv, char *const *envp)
   int optchar;			/* option character */
 
   macro_definition *defines;
-  boolean read_stdin = FALSE;
-  boolean interactive = FALSE;
-  boolean seen_file = FALSE;
+  bool read_stdin = false;
+  bool interactive = false;
+  bool seen_file = false;
   const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
@@ -432,7 +432,7 @@ main (int argc, char *const *argv, char *const *envp)
 	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
 	/* fall through */
       case 'i':
-	interactive = TRUE;
+	interactive = true;
 	break;
 
       case 'l':
@@ -520,7 +520,7 @@ Written by Rene' Seindal.\n\
 
 	case 't':
 	  sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
-	  SYMBOL_TRACED (sym) = TRUE;
+	  SYMBOL_TRACED (sym) = true;
 	  break;
 
 	case 's':
@@ -528,8 +528,9 @@ Written by Rene' Seindal.\n\
 	  break;
 
 	case '\1':
-	  seen_file = TRUE;
-	  read_stdin |= process_file (defines->arg);
+	  seen_file = true;
+	  if (process_file (defines->arg))
+	    read_stdin = true;
 	  break;
 
 	default:
@@ -550,7 +551,8 @@ Written by Rene' Seindal.\n\
     read_stdin = process_file ("-");
   else
     for (; optind < argc; optind++)
-      read_stdin |= process_file (argv[optind]);
+      if (process_file (defines->arg))
+	read_stdin = true;
 
   /* Now handle wrapup text.  */
 

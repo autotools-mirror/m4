@@ -98,60 +98,60 @@ builtin_tab[] =
 
   /* name		GNUext	macros	blind	function */
 
-  { "__file__",		TRUE,	FALSE,	FALSE,	m4___file__ },
-  { "__line__",		TRUE,	FALSE,	FALSE,	m4___line__ },
-  { "__program__",	TRUE,	FALSE,	FALSE,	m4___program__ },
-  { "builtin",		TRUE,	TRUE,	TRUE,	m4_builtin },
-  { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
-  { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
+  { "__file__",		true,	false,	false,	m4___file__ },
+  { "__line__",		true,	false,	false,	m4___line__ },
+  { "__program__",	true,	false,	false,	m4___program__ },
+  { "builtin",		true,	true,	true,	m4_builtin },
+  { "changecom",	false,	false,	false,	m4_changecom },
+  { "changequote",	false,	false,	false,	m4_changequote },
 #ifdef ENABLE_CHANGEWORD
-  { "changeword",	TRUE,	FALSE,	TRUE,	m4_changeword },
+  { "changeword",	true,	false,	true,	m4_changeword },
 #endif
-  { "debugmode",	TRUE,	FALSE,	FALSE,	m4_debugmode },
-  { "debugfile",	TRUE,	FALSE,	FALSE,	m4_debugfile },
-  { "decr",		FALSE,	FALSE,	TRUE,	m4_decr },
-  { "define",		FALSE,	TRUE,	TRUE,	m4_define },
-  { "defn",		FALSE,	FALSE,	TRUE,	m4_defn },
-  { "divert",		FALSE,	FALSE,	FALSE,	m4_divert },
-  { "divnum",		FALSE,	FALSE,	FALSE,	m4_divnum },
-  { "dnl",		FALSE,	FALSE,	FALSE,	m4_dnl },
-  { "dumpdef",		FALSE,	FALSE,	FALSE,	m4_dumpdef },
-  { "errprint",		FALSE,	FALSE,	TRUE,	m4_errprint },
-  { "esyscmd",		TRUE,	FALSE,	TRUE,	m4_esyscmd },
-  { "eval",		FALSE,	FALSE,	TRUE,	m4_eval },
-  { "format",		TRUE,	FALSE,	TRUE,	m4_format },
-  { "ifdef",		FALSE,	FALSE,	TRUE,	m4_ifdef },
-  { "ifelse",		FALSE,	FALSE,	TRUE,	m4_ifelse },
-  { "include",		FALSE,	FALSE,	TRUE,	m4_include },
-  { "incr",		FALSE,	FALSE,	TRUE,	m4_incr },
-  { "index",		FALSE,	FALSE,	TRUE,	m4_index },
-  { "indir",		TRUE,	TRUE,	TRUE,	m4_indir },
-  { "len",		FALSE,	FALSE,	TRUE,	m4_len },
-  { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
-  { "m4wrap",		FALSE,	FALSE,	TRUE,	m4_m4wrap },
-  { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
-  { "mkstemp",		FALSE,	FALSE,	TRUE,	m4_mkstemp },
-  { "patsubst",		TRUE,	FALSE,	TRUE,	m4_patsubst },
-  { "popdef",		FALSE,	FALSE,	TRUE,	m4_popdef },
-  { "pushdef",		FALSE,	TRUE,	TRUE,	m4_pushdef },
-  { "regexp",		TRUE,	FALSE,	TRUE,	m4_regexp },
-  { "shift",		FALSE,	FALSE,	TRUE,	m4_shift },
-  { "sinclude",		FALSE,	FALSE,	TRUE,	m4_sinclude },
-  { "substr",		FALSE,	FALSE,	TRUE,	m4_substr },
-  { "syscmd",		FALSE,	FALSE,	TRUE,	m4_syscmd },
-  { "sysval",		FALSE,	FALSE,	FALSE,	m4_sysval },
-  { "traceoff",		FALSE,	FALSE,	FALSE,	m4_traceoff },
-  { "traceon",		FALSE,	FALSE,	FALSE,	m4_traceon },
-  { "translit",		FALSE,	FALSE,	TRUE,	m4_translit },
-  { "undefine",		FALSE,	FALSE,	TRUE,	m4_undefine },
-  { "undivert",		FALSE,	FALSE,	FALSE,	m4_undivert },
+  { "debugmode",	true,	false,	false,	m4_debugmode },
+  { "debugfile",	true,	false,	false,	m4_debugfile },
+  { "decr",		false,	false,	true,	m4_decr },
+  { "define",		false,	true,	true,	m4_define },
+  { "defn",		false,	false,	true,	m4_defn },
+  { "divert",		false,	false,	false,	m4_divert },
+  { "divnum",		false,	false,	false,	m4_divnum },
+  { "dnl",		false,	false,	false,	m4_dnl },
+  { "dumpdef",		false,	false,	false,	m4_dumpdef },
+  { "errprint",		false,	false,	true,	m4_errprint },
+  { "esyscmd",		true,	false,	true,	m4_esyscmd },
+  { "eval",		false,	false,	true,	m4_eval },
+  { "format",		true,	false,	true,	m4_format },
+  { "ifdef",		false,	false,	true,	m4_ifdef },
+  { "ifelse",		false,	false,	true,	m4_ifelse },
+  { "include",		false,	false,	true,	m4_include },
+  { "incr",		false,	false,	true,	m4_incr },
+  { "index",		false,	false,	true,	m4_index },
+  { "indir",		true,	true,	true,	m4_indir },
+  { "len",		false,	false,	true,	m4_len },
+  { "m4exit",		false,	false,	false,	m4_m4exit },
+  { "m4wrap",		false,	false,	true,	m4_m4wrap },
+  { "maketemp",		false,	false,	true,	m4_maketemp },
+  { "mkstemp",		false,	false,	true,	m4_mkstemp },
+  { "patsubst",		true,	false,	true,	m4_patsubst },
+  { "popdef",		false,	false,	true,	m4_popdef },
+  { "pushdef",		false,	true,	true,	m4_pushdef },
+  { "regexp",		true,	false,	true,	m4_regexp },
+  { "shift",		false,	false,	true,	m4_shift },
+  { "sinclude",		false,	false,	true,	m4_sinclude },
+  { "substr",		false,	false,	true,	m4_substr },
+  { "syscmd",		false,	false,	true,	m4_syscmd },
+  { "sysval",		false,	false,	false,	m4_sysval },
+  { "traceoff",		false,	false,	false,	m4_traceoff },
+  { "traceon",		false,	false,	false,	m4_traceon },
+  { "translit",		false,	false,	true,	m4_translit },
+  { "undefine",		false,	false,	true,	m4_undefine },
+  { "undivert",		false,	false,	false,	m4_undivert },
 
-  { 0,			FALSE,	FALSE,	FALSE,	0 },
+  { 0,			false,	false,	false,	0 },
 
   /* placeholder is intentionally stuck after the table end delimiter,
      so that we can easily find it, while not treating it as a real
      builtin.  */
-  { "placeholder",	TRUE,	FALSE,	FALSE,	m4_placeholder },
+  { "placeholder",	true,	false,	false,	m4_placeholder },
 };
 
 static predefined const
@@ -288,10 +288,10 @@ builtin_init (void)
 | applicable.								  |
 `------------------------------------------------------------------------*/
 
-static boolean
+static bool
 bad_argc (token_data *name, int argc, int min, int max)
 {
-  boolean isbad = FALSE;
+  bool isbad = false;
 
   if (min > 0 && argc < min)
     {
@@ -299,7 +299,7 @@ bad_argc (token_data *name, int argc, int min, int max)
 	M4ERROR ((warning_status, 0,
 		  "Warning: too few arguments to builtin `%s'",
 		  TOKEN_DATA_TEXT (name)));
-      isbad = TRUE;
+      isbad = true;
     }
   else if (max > 0 && argc > max && !suppress_warnings)
     M4ERROR ((warning_status, 0,
@@ -312,10 +312,10 @@ bad_argc (token_data *name, int argc, int min, int max)
 /*--------------------------------------------------------------------------.
 | The function numeric_arg () converts ARG to an int pointed to by VALUEP.  |
 | If the conversion fails, print error message for macro MACRO.  Return	    |
-| TRUE iff conversion succeeds.						    |
+| true iff conversion succeeds.						    |
 `--------------------------------------------------------------------------*/
 
-static boolean
+static bool
 numeric_arg (token_data *macro, const char *arg, int *valuep)
 {
   char *endp;
@@ -336,7 +336,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 	  M4ERROR ((warning_status, 0,
 		    "non-numeric argument to builtin `%s'",
 		    TOKEN_DATA_TEXT (macro)));
-	  return FALSE;
+	  return false;
 	}
       if (isspace (to_uchar (*arg)))
 	M4ERROR ((warning_status, 0,
@@ -347,7 +347,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 		  "numeric overflow detected in builtin `%s'",
 		  TOKEN_DATA_TEXT (macro)));
     }
-  return TRUE;
+  return true;
 }
 
 /*------------------------------------------------------------------------.
@@ -361,7 +361,7 @@ static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 static const char *
 ntoa (register eval_t value, int radix)
 {
-  boolean negative;
+  bool negative;
   unsigned_eval_t uvalue;
   static char str[256];
   register char *s = &str[sizeof str];
@@ -370,12 +370,12 @@ ntoa (register eval_t value, int radix)
 
   if (value < 0)
     {
-      negative = TRUE;
+      negative = true;
       uvalue = (unsigned_eval_t) -value;
     }
   else
     {
-      negative = FALSE;
+      negative = false;
       uvalue = (unsigned_eval_t) value;
     }
 
@@ -407,12 +407,12 @@ shipout_int (struct obstack *obs, int val)
 
 /*----------------------------------------------------------------------.
 | Print ARGC arguments from the table ARGV to obstack OBS, separated by |
-| SEP, and quoted by the current quotes, if QUOTED is TRUE.	        |
+| SEP, and quoted by the current quotes, if QUOTED is true.	        |
 `----------------------------------------------------------------------*/
 
 static void
 dump_args (struct obstack *obs, int argc, token_data **argv,
-	   const char *sep, boolean quoted)
+	   const char *sep, bool quoted)
 {
   int i;
   size_t len = strlen (sep);
@@ -609,8 +609,9 @@ struct dump_symbol_data
 };
 
 static void
-dump_symbol (symbol *sym, struct dump_symbol_data *data)
+dump_symbol (symbol *sym, void *arg)
 {
+  struct dump_symbol_data *data = (struct dump_symbol_data *) arg;
   if (!SYMBOL_SHADOWED (sym) && SYMBOL_TYPE (sym) != TOKEN_VOID)
     {
       obstack_blank (data->obs, sizeof (symbol *));
@@ -649,7 +650,7 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 
   if (argc == 1)
     {
-      hack_all_symbols (dump_symbol, (char *) &data);
+      hack_all_symbols (dump_symbol, &data);
     }
   else
     {
@@ -1134,7 +1135,7 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  dump_args (obs, argc - 1, argv + 1, ",", TRUE);
+  dump_args (obs, argc - 1, argv + 1, ",", true);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1192,11 +1193,11 @@ m4_changeword (struct obstack *obs, int argc, token_data **argv)
 
 /*-------------------------------------------------------------------------.
 | Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccesible files iff SILENT is FALSE.	   |
+| if it exists.  Complain about inaccesible files iff SILENT is false.	   |
 `-------------------------------------------------------------------------*/
 
 static void
-include (int argc, token_data **argv, boolean silent)
+include (int argc, token_data **argv, bool silent)
 {
   FILE *fp;
   char *name;
@@ -1213,7 +1214,7 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, name, TRUE);
+  push_file (fp, name, true);
   free (name);
 }
 
@@ -1224,7 +1225,7 @@ include (int argc, token_data **argv, boolean silent)
 static void
 m4_include (struct obstack *obs, int argc, token_data **argv)
 {
-  include (argc, argv, FALSE);
+  include (argc, argv, false);
 }
 
 /*----------------------------------.
@@ -1234,7 +1235,7 @@ m4_include (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_sinclude (struct obstack *obs, int argc, token_data **argv)
 {
-  include (argc, argv, TRUE);
+  include (argc, argv, true);
 }
 
 /* More miscellaneous builtins -- "maketemp", "errprint", "__file__",
@@ -1265,7 +1266,7 @@ mkstemp_helper (struct obstack *obs, const char *name)
   obstack_1grow (obs, '\0');
 
   errno = 0;
-  fd = mkstemp (obstack_base (obs));
+  fd = mkstemp ((char *) obstack_base (obs));
   if (fd < 0)
     {
       M4ERROR ((0, errno, "cannot create tempfile `%s'", name));
@@ -1335,7 +1336,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  dump_args (obs, argc, argv, " ", FALSE);
+  dump_args (obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   debug_flush_files ();
   fprintf (stderr, "%s", (char *) obstack_finish (obs));
@@ -1420,9 +1421,9 @@ m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
   else
-    dump_args (obs, argc, argv, " ", FALSE);
+    dump_args (obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
-  push_wrapup (obstack_finish (obs));
+  push_wrapup ((char *) obstack_finish (obs));
 }
 
 /* Enable tracing of all specified macros, or all, if none is specified.
@@ -1436,9 +1437,9 @@ m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-set_trace (symbol *sym, const char *data)
+set_trace (symbol *sym, void *data)
 {
-  SYMBOL_TRACED (sym) = (boolean) (data != NULL);
+  SYMBOL_TRACED (sym) = data != NULL;
   /* Remove placeholder from table if macro is undefined and untraced.  */
   if (SYMBOL_TYPE (sym) == TOKEN_VOID && data == NULL)
     lookup_symbol (SYMBOL_NAME (sym), SYMBOL_POPDEF);
@@ -1451,12 +1452,12 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   int i;
 
   if (argc == 1)
-    hack_all_symbols (set_trace, (char *) obs);
+    hack_all_symbols (set_trace, obs);
   else
     for (i = 1; i < argc; i++)
       {
 	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_INSERT);
-	set_trace (s, (char *) obs);
+	set_trace (s, obs);
       }
 }
 
@@ -1673,7 +1674,7 @@ expand_ranges (const char *s, struct obstack *obs)
 	obstack_1grow (obs, *s);
     }
   obstack_1grow (obs, '\0');
-  return obstack_finish (obs);
+  return (char *) obstack_finish (obs);
 }
 
 /*----------------------------------------------------------------------.
@@ -1687,9 +1688,9 @@ expand_ranges (const char *s, struct obstack *obs)
 static void
 m4_translit (struct obstack *obs, int argc, token_data **argv)
 {
-  const unsigned char *data;
-  const unsigned char *from;
-  const unsigned char *to;
+  const char *data;
+  const char *from;
+  const char *to;
   char map[256] = {0};
   char found[256] = {0};
 
@@ -1725,10 +1726,10 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      hence the found map.  */
   for ( ; *from; from++)
     {
-      if (! found[*from])
+      if (! found[to_uchar (*from)])
 	{
-	  found[*from] = 1;
-	  map[*from] = *to;
+	  found[to_uchar (*from)] = 1;
+	  map[to_uchar (*from)] = *to;
 	}
       if (*to != '\0')
 	to++;
@@ -1736,10 +1737,10 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 
   for (data = ARG (1); *data; data++)
     {
-      if (! found[*data])
+      if (! found[to_uchar (*data)])
 	obstack_1grow (obs, *data);
-      else if (map[*data])
-	obstack_1grow (obs, map[*data]);
+      else if (map[to_uchar (*data)])
+	obstack_1grow (obs, map[to_uchar (*data)]);
     }
 }
 

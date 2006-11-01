@@ -267,7 +267,7 @@ eval_lex (eval_t *val)
 | Main entry point, called from "eval".	 |
 `---------------------------------------*/
 
-boolean
+bool
 evaluate (const char *expr, eval_t *val)
 {
   eval_token et;
@@ -322,7 +322,7 @@ evaluate (const char *expr, eval_t *val)
       abort ();
     }
 
-  return (boolean) (err != NO_ERROR);
+  return err != NO_ERROR;
 }
 
 /*---------------------------.

@@ -200,11 +200,11 @@ debug_flush_files (void)
 
 /*-------------------------------------------------------------------------.
 | Change the debug output to file NAME.  If NAME is NULL, debug output is  |
-| reverted to stderr, and if empty debug output is discarded.  Return TRUE |
+| reverted to stderr, and if empty debug output is discarded.  Return true |
 | iff the output stream was changed.					   |
 `-------------------------------------------------------------------------*/
 
-boolean
+bool
 debug_set_output (const char *name)
 {
   FILE *fp;
@@ -217,14 +217,14 @@ debug_set_output (const char *name)
     {
       fp = fopen (name, "a");
       if (fp == NULL)
-	return FALSE;
+	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
 	M4ERROR ((warning_status, errno,
 		  "Warning: cannot protect debug file across forks"));
       debug_set_file (fp);
     }
-  return TRUE;
+  return true;
 }
 
 /*-----------------------------------------------------------------------.
@@ -271,7 +271,7 @@ trace_format (const char *fmt, ...)
 
   va_start (args, fmt);
 
-  while (TRUE)
+  while (true)
     {
       while ((ch = *fmt++) != '\0' && ch != '%')
 	obstack_1grow (&trace, ch);
@@ -352,7 +352,7 @@ trace_flush (void)
   char *line;
 
   obstack_1grow (&trace, '\0');
-  line = obstack_finish (&trace);
+  line = (char *) obstack_finish (&trace);
   DEBUG_PRINT1 ("%s\n", line);
   obstack_free (&trace, line);
 }

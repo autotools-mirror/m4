@@ -87,9 +87,9 @@ struct input_block
       struct
 	{
 	  FILE *fp;		/* input file handle */
-	  boolean end : 1;	/* true if peek has seen EOF */
-	  boolean close : 1;	/* true if we should close file on pop */
-	  boolean advance_line : 1; /* track previous start_of_input_line */
+	  bool end : 1;		/* true if peek has seen EOF */
+	  bool close : 1;	/* true if we should close file on pop */
+	  bool advance_line : 1; /* track previous start_of_input_line */
 	}
 	u_f;	/* INPUT_FILE */
       builtin_func *func;	/* pointer to macro's function */
@@ -119,7 +119,7 @@ static struct obstack *wrapup_stack;
 static struct obstack *current_input;
 
 /* Bottom of token_stack, for obstack_free.  */
-static char *token_bottom;
+static void *token_bottom;
 
 /* Pointer to top of current_input.  */
 static input_block *isp;
@@ -131,10 +131,10 @@ static input_block *wsp;
 static input_block *next;
 
 /* Flag for next_char () to increment current_line.  */
-static boolean start_of_input_line;
+static bool start_of_input_line;
 
 /* Flag for next_char () to recognize change in input block.  */
-static boolean input_change;
+static bool input_change;
 
 #define CHAR_EOF	256	/* character return on EOF */
 #define CHAR_MACRO	257	/* character return for MACRO token */
@@ -174,7 +174,7 @@ static const char *token_type_string (token_type);
 `-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title, boolean close)
+push_file (FILE *fp, const char *title, bool close)
 {
   input_block *i;
 
@@ -190,12 +190,12 @@ push_file (FILE *fp, const char *title, boolean close)
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
   i->type = INPUT_FILE;
-  i->file = obstack_copy0 (&file_names, title, strlen (title));
+  i->file = (char *) obstack_copy0 (&file_names, title, strlen (title));
   i->line = 1;
-  input_change = TRUE;
+  input_change = true;
 
   i->u.u_f.fp = fp;
-  i->u.u_f.end = FALSE;
+  i->u.u_f.end = false;
   i->u.u_f.close = close;
   i->u.u_f.advance_line = start_of_input_line;
   output_current_line = -1;
@@ -226,7 +226,7 @@ push_macro (builtin_func *func)
   i->type = INPUT_MACRO;
   i->file = current_file;
   i->line = current_line;
-  input_change = TRUE;
+  input_change = true;
 
   i->u.func = func;
   i->prev = isp;
@@ -277,11 +277,11 @@ push_string_finish (void)
   if (obstack_object_size (current_input) > 0)
     {
       obstack_1grow (current_input, '\0');
-      next->u.u_s.string = obstack_finish (current_input);
+      next->u.u_s.string = (char *) obstack_finish (current_input);
       next->prev = isp;
       isp = next;
       ret = isp->u.u_s.string;	/* for immediate use only */
-      input_change = TRUE;
+      input_change = true;
     }
   else
     obstack_free (current_input, next); /* people might leave garbage on it. */
@@ -308,7 +308,7 @@ push_wrapup (const char *s)
   i->type = INPUT_STRING;
   i->file = current_file;
   i->line = current_line;
-  i->u.u_s.string = obstack_copy0 (wrapup_stack, s, strlen (s));
+  i->u.u_s.string = (char *) obstack_copy0 (wrapup_stack, s, strlen (s));
   wsp = i;
 }
 
@@ -365,16 +365,16 @@ pop_input (void)
   next = NULL;			/* might be set in push_string_init () */
 
   isp = tmp;
-  input_change = TRUE;
+  input_change = true;
 }
 
 /*------------------------------------------------------------------------.
 | To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
 | Since wrapup text can install new wrapup text, pop_wrapup () returns	  |
-| FALSE when there is no wrapup text on the stack, and TRUE otherwise.	  |
+| false when there is no wrapup text on the stack, and true otherwise.	  |
 `------------------------------------------------------------------------*/
 
-boolean
+bool
 pop_wrapup (void)
 {
   next = NULL;
@@ -389,7 +389,7 @@ pop_wrapup (void)
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
-      return FALSE;
+      return false;
     }
 
   current_input = wrapup_stack;
@@ -398,9 +398,9 @@ pop_wrapup (void)
 
   isp = wsp;
   wsp = NULL;
-  input_change = TRUE;
+  input_change = true;
 
-  return TRUE;
+  return true;
 }
 
 /*-------------------------------------------------------------------.
@@ -456,7 +456,7 @@ peek_input (void)
 	      ungetc (ch, block->u.u_f.fp);
 	      return ch;
 	    }
-	  block->u.u_f.end = TRUE;
+	  block->u.u_f.end = true;
 	  break;
 
 	case INPUT_MACRO:
@@ -505,7 +505,7 @@ next_char_1 (void)
 	{
 	  current_file = isp->file;
 	  current_line = isp->line;
-	  input_change = FALSE;
+	  input_change = false;
 	}
 
       switch (isp->type)
@@ -519,7 +519,7 @@ next_char_1 (void)
 	case INPUT_FILE:
 	  if (start_of_input_line)
 	    {
-	      start_of_input_line = FALSE;
+	      start_of_input_line = false;
 	      current_line = ++isp->line;
 	    }
 
@@ -530,7 +530,7 @@ next_char_1 (void)
 	  if (ch != EOF)
 	    {
 	      if (ch == '\n')
-		start_of_input_line = TRUE;
+		start_of_input_line = true;
 	      return ch;
 	    }
 	  break;
@@ -576,35 +576,35 @@ skip_line (void)
      current_line, and that update will be undone as we return to
      expand_macro.  This informs next_char to fix things again.  */
   if (file != current_file || line != current_line)
-    input_change = TRUE;
+    input_change = true;
 }
 
 
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
 | input stream.  If the string matches the input and consume is     |
-| TRUE, the input is discarded; otherwise any characters read are   |
+| true, the input is discarded; otherwise any characters read are   |
 | pushed back again.  The function is used only when multicharacter |
 | quotes or comment delimiters are used.                            |
 `------------------------------------------------------------------*/
 
-static boolean
-match_input (const char *s, boolean consume)
+static bool
+match_input (const char *s, bool consume)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
   const char *t;
-  boolean result = FALSE;
+  bool result = false;
 
   ch = peek_input ();
   if (ch != to_uchar (*s))
-    return FALSE;			/* fail */
+    return false;			/* fail */
 
   if (s[1] == '\0')
     {
       if (consume)
 	(void) next_char ();
-      return TRUE;			/* short match */
+      return true;			/* short match */
     }
 
   (void) next_char ();
@@ -615,8 +615,8 @@ match_input (const char *s, boolean consume)
       if (*s == '\0')		/* long match */
 	{
 	  if (consume)
-	    return TRUE;
-	  result = TRUE;
+	    return true;
+	  result = true;
 	  break;
 	}
     }
@@ -676,7 +676,7 @@ input_init (void)
   wsp = NULL;
   next = NULL;
 
-  start_of_input_line = FALSE;
+  start_of_input_line = false;
 
   lquote.string = xstrdup (DEF_LQUOTE);
   lquote.length = strlen (lquote.string);
@@ -771,7 +771,7 @@ set_word_regexp (const char *regexp)
 
   if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
-      default_word_regexp = TRUE;
+      default_word_regexp = true;
       return;
     }
 
@@ -800,10 +800,10 @@ set_word_regexp (const char *regexp)
 		regexp, msg));
     }
 
-  default_word_regexp = FALSE;
+  default_word_regexp = false;
 
   if (word_start == NULL)
-    word_start = xmalloc (256);
+    word_start = (char *) xmalloc (256);
 
   word_start[0] = '\0';
   test[1] = '\0';
@@ -870,11 +870,11 @@ next_token (token_data *td)
   next_char (); /* Consume character we already peeked at.  */
   file = current_file;
   line = current_line;
-  if (MATCH (ch, bcomm.string, TRUE))
+  if (MATCH (ch, bcomm.string, true))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);
       while ((ch = next_char ()) != CHAR_EOF
-	     && !MATCH (ch, ecomm.string, TRUE))
+	     && !MATCH (ch, ecomm.string, true))
 	obstack_1grow (&token_stack, ch);
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
@@ -908,7 +908,8 @@ next_token (token_data *td)
 	  if (ch == CHAR_EOF)
 	    break;
 	  obstack_1grow (&token_stack, ch);
-	  startpos = re_search (&word_regexp, obstack_base (&token_stack),
+	  startpos = re_search (&word_regexp,
+				(char *) obstack_base (&token_stack),
 				obstack_object_size (&token_stack), 0, 0,
 				&regs);
 	  if (startpos != 0 ||
@@ -922,7 +923,7 @@ next_token (token_data *td)
 	}
 
       obstack_1grow (&token_stack, '\0');
-      orig_text = obstack_finish (&token_stack);
+      orig_text = (char *) obstack_finish (&token_stack);
 
       if (regs.start[1] != -1)
 	obstack_grow (&token_stack,orig_text + regs.start[1],
@@ -935,7 +936,7 @@ next_token (token_data *td)
 
 #endif /* ENABLE_CHANGEWORD */
 
-  else if (!MATCH (ch, lquote.string, TRUE))
+  else if (!MATCH (ch, lquote.string, true))
     {
       switch (ch)
 	{
@@ -966,13 +967,13 @@ next_token (token_data *td)
 	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
 			      "ERROR: end of file in string"));
 
-	  if (MATCH (ch, rquote.string, TRUE))
+	  if (MATCH (ch, rquote.string, true))
 	    {
 	      if (--quote_level == 0)
 		break;
 	      obstack_grow (&token_stack, rquote.string, rquote.length);
 	    }
-	  else if (MATCH (ch, lquote.string, TRUE))
+	  else if (MATCH (ch, lquote.string, true))
 	    {
 	      quote_level++;
 	      obstack_grow (&token_stack, lquote.string, lquote.length);
@@ -986,7 +987,7 @@ next_token (token_data *td)
   obstack_1grow (&token_stack, '\0');
 
   TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (td) = obstack_finish (&token_stack);
+  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
     orig_text = TOKEN_DATA_TEXT (td);
@@ -1017,7 +1018,7 @@ peek_token (void)
     {
       result = TOKEN_MACDEF;
     }
-  else if (MATCH (ch, bcomm.string, FALSE))
+  else if (MATCH (ch, bcomm.string, false))
     {
       result = TOKEN_STRING;
     }
@@ -1029,7 +1030,7 @@ peek_token (void)
     {
       result = TOKEN_WORD;
     }
-  else if (MATCH (ch, lquote.string, FALSE))
+  else if (MATCH (ch, lquote.string, false))
     {
       result = TOKEN_STRING;
     }

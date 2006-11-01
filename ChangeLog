@@ -1,5 +1,24 @@
 2006-11-01  Eric Blake  <ebb9@byu.net>
 
+	Allow C++ compilation on Linux, as a safety measure in type
+	checking.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	stdbool'.
+	* src/m4.h (hack_symbol, hack_all_symbols): Use full prototype.
+	(boolean): Kill this, and use stdbool.h instead.
+	* src/debug.c, src/eval.c, src/input.c, src/macro.c, src/m4.c:
+	* src/output.c, src/symtab.c: All users changed.
+	* src/symtab.c (hack_all_symbols): Update prototype.
+	* src/builtin.c (dump_symbol, set_trace): Update signature.
+	(m4_dumpdef, m4_traceon, m4_traceoff): Update callers.
+	(mkstemp_helper, m4_m4wrap, expand_ranges, m4_translit): Allow
+	C++ compilation.
+	* src/debug.c (trace_flush): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/input.c (push_file, push_string_finish, push_wrapup):
+	(token_bottom, next_token): Likewise.
+	* src/m4.c (main): Likewise.
+
 	* doc/m4.texinfo (Invoking m4): Update according to POSIX 200x
 	draft wording.
 	* src/m4.h (m4_path_search): Tweak signature.

@@ -325,7 +325,7 @@ output_text (const char *text, int length)
 void
 shipout_text (struct obstack *obs, const char *text, int length)
 {
-  static boolean start_of_output_line = TRUE;
+  static bool start_of_output_line = true;
   char line[20];
   const char *cursor;
 
@@ -371,7 +371,7 @@ shipout_text (struct obstack *obs, const char *text, int length)
       {
 	if (start_of_output_line)
 	  {
-	    start_of_output_line = FALSE;
+	    start_of_output_line = false;
 	    output_current_line++;
 
 #ifdef DEBUG_OUTPUT
@@ -402,7 +402,7 @@ shipout_text (struct obstack *obs, const char *text, int length)
 	  }
 	OUTPUT_CHARACTER (*text);
 	if (*text == '\n')
-	  start_of_output_line = TRUE;
+	  start_of_output_line = true;
       }
 }
 

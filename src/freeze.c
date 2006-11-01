@@ -227,9 +227,9 @@ reload_frozen_state (const char *name)
     M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
 
   allocated[0] = 100;
-  string[0] = xmalloc ((size_t) allocated[0]);
+  string[0] = xcharalloc ((size_t) allocated[0]);
   allocated[1] = 100;
-  string[1] = xmalloc ((size_t) allocated[1]);
+  string[1] = xcharalloc ((size_t) allocated[1]);
 
   /* Validate format version.  Only `1' is acceptable for now.  */
   GET_DIRECTIVE;
@@ -285,7 +285,7 @@ reload_frozen_state (const char *name)
                 {
                   free (string[0]);
                   allocated[0] = number[0] + 1;
-                  string[0] = xmalloc ((size_t) allocated[0]);
+                  string[0] = xcharalloc ((size_t) allocated[0]);
                 }
 
               if (number[0] > 0)
@@ -301,7 +301,7 @@ reload_frozen_state (const char *name)
             {
               free (string[1]);
               allocated[1] = number[1] + 1;
-              string[1] = xmalloc ((size_t) allocated[1]);
+              string[1] = xcharalloc ((size_t) allocated[1]);
             }
 
           if (number[1] > 0)
