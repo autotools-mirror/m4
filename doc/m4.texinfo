@@ -4670,7 +4670,7 @@ Expands to the standard output of the shell command
 @var{shell-command}.
 
 Prior to executing the command, @code{m4} flushes its buffers.
-The default standard input and error output of @var{shell-command} are
+The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
@@ -4875,8 +4875,9 @@ any of the previous chapters.
 You can print error messages using @code{errprint}:
 
 @deffn Builtin errprint (@var{message}, @dots{})
-Prints @var{message} and the rest of the arguments on the
-standard error output, separated by spaces.
+Prints @var{message} and the rest of the arguments to standard error,
+separated by spaces.  Standard error is used, regardless of the
+@option{--debugfile} option (@pxref{Debugging options, , Invoking m4}).
 
 The expansion of @code{errprint} is void.
 The macro @code{errprint} is recognized only with parameters.
@@ -4887,13 +4888,20 @@ errprint(`Invalid arguments to forloop
 ')
 @error{}Invalid arguments to forloop
 @result{}
+errprint(`1')errprint(`2',`3
+')
+@error{}12 3
+@result{}
 @end example
 
-A trailing newline is @emph{not} printed automatically, so it must be
-supplied as part of the argument, as in the example.  BSD
-implementations of @code{m4} do append a trailing newline on each
-@code{errprint} call, while some other implementations only print the
-first argument.
+A trailing newline is @emph{not} printed automatically, so it should be
+supplied as part of the argument, as in the example.  Unfortunately, the
+exact output of @code{errprint} is not very portable to other @code{m4}
+implementations: @acronym{POSIX} requires that all arguments be printed,
+but some implementations of @code{m4} only print the first.
+Furthermore, some BSD implementations always append a newline for each
+@code{errprint} call, regardless of whether the last argument already
+had one, and @acronym{POSIX} is silent on whether this is acceptable.
 
 @node Location
 @section Printing current location
