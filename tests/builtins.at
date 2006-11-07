@@ -205,6 +205,47 @@ AT_CLEANUP
 
 
 ## ------- ##
+## dumpdef ##
+## ------- ##
+
+AT_SETUP([dumpdef])
+
+dnl Make sure that stderr and stdout are properly interleaved when directed
+dnl to the same file.
+AT_DATA([in], [[1dumpdef(`defn')3
+]])
+AT_CHECK_M4([in], [0], [[13
+]], [[defn:	<defn>
+]])
+AT_CHECK_M4([in 2>&1], [0], [[1defn:	<defn>
+3
+]])
+
+AT_CLEANUP
+
+
+## -------- ##
+## errprint ##
+## -------- ##
+
+AT_SETUP([errprint])
+
+dnl Make sure that stderr and stdout are properly interleaved when directed
+dnl to the same file.
+AT_DATA([in], [[1errprint(`2')3errprint(`
+')
+]])
+AT_CHECK_M4([in], [0], [[13
+]], [[2
+]])
+AT_CHECK_M4([in 2>&1], [0], [[123
+
+]])
+
+AT_CLEANUP
+
+
+## ------- ##
 ## esyscmd ##
 ## ------- ##
 

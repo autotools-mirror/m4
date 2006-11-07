@@ -5610,13 +5610,15 @@ any of the previous chapters.
 @cindex printing error messages
 @cindex error messages, printing
 @cindex messages, printing error
+You can print error messages using @code{errprint}:
+
 @deffn {Builtin (m4)} errprint (@var{message}, @dots{})
-You can print error messages using @code{errprint}, which simply prints
-@var{message} and the rest of the arguments on standard error,
-independently of the @option{--debugfile} option (@pxref{Debugging
-options, , Invoking m4}).
+Prints @var{message} and the rest of the arguments to standard error,
+separated by spaces.  Standard error is used, regardless of the
+@option{--debugfile} option (@pxref{Debugging options, , Invoking m4}).
 
 The expansion of @code{errprint} is void.
+The macro @code{errprint} is recognized only with parameters.
 @end deffn
 
 @example
@@ -5624,11 +5626,20 @@ errprint(`Illegal arguments to forloop
 ')
 @error{}Illegal arguments to forloop
 @result{}
+errprint(`1')errprint(`2',`3
+')
+@error{}12 3
+@result{}
 @end example
 
-A trailing newline is @emph{not} printed automatically, so it must be
-supplied as part of the argument, as in the example.  (BSD flavored
-@code{m4}'s do append a trailing newline on each @code{errprint} call).
+A trailing newline is @emph{not} printed automatically, so it should be
+supplied as part of the argument, as in the example.  Unfortunately, the
+exact output of @code{errprint} is not very portable to other @code{m4}
+implementations: @acronym{POSIX} requires that all arguments be printed,
+but some implementations of @code{m4} only print the first.
+Furthermore, some BSD implementations always append a newline for each
+@code{errprint} call, regardless of whether the last argument already
+had one, and @acronym{POSIX} is silent on whether this is acceptable.
 
 @node Location
 @section Printing current location

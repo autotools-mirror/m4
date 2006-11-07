@@ -557,7 +557,7 @@ M4BUILTIN_HANDLER (divert)
   m4_make_diversion (context, i);
 }
 
-/* Expand to the current diversion number, -1 if none.  */
+/* Expand to the current diversion number.  */
 M4BUILTIN_HANDLER (divnum)
 {
   m4_shipout_int (obs, m4_get_current_diversion (context));
@@ -779,6 +779,7 @@ M4BUILTIN_HANDLER (errprint)
   assert (obstack_object_size (obs) == 0);
   m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
+  m4_sysval_flush (context);
   fputs ((char *) obstack_finish (obs), stderr);
   fflush (stderr);
 }

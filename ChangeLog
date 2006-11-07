@@ -1,3 +1,10 @@
+2006-11-07  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Errprint): Merge another doc node.
+	* tests/builtins.at (dumpdef, errprint): New tests.
+	* modules/m4.c (errprint): Merge from branch: flush before
+	printing to stderr.
+
 2006-11-02  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap: Update bootstrap requirement wording.
