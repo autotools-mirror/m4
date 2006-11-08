@@ -148,9 +148,14 @@ void
 m4_output_exit (void)
 {
   m4_diversion *diversion = free_list;
+  gl_list_t table = diversion_table;
+
+  /* Order is important, since we may have registered cleanup_tmpfile
+     as an atexit handler, and it must not traverse stale memory.  */
   assert (gl_list_size (diversion_table) == 1);
-  free ((void *) gl_list_get_at (diversion_table, 0));
-  gl_list_free (diversion_table);
+  diversion_table = NULL;
+  free ((void *) gl_list_get_at (table, 0));
+  gl_list_free (table);
   while (diversion)
     {
       m4_diversion *stale = diversion;
@@ -165,6 +170,25 @@ m4_output_exit (void)
 static void
 cleanup_tmpfile (void)
 {
+  /* Close any open diversions.  */
+  m4_diversion *diversion;
+  gl_list_iterator_t iter;
+  const void *elt;
+
+  if (diversion_table)
+    {
+      iter = gl_list_iterator_from_to (diversion_table, 1,
+				       gl_list_size (diversion_table));
+      while (gl_list_iterator_next (&iter, &elt, NULL))
+	{
+	  diversion = (m4_diversion *) elt;
+	  if (!diversion->size && diversion->u.file)
+	    close_stream_temp (diversion->u.file);
+	}
+      gl_list_iterator_free (&iter);
+    }
+
+  /* Clean up the temporary directory.  */
   if (cleanup_temp_dir (output_temp_dir) != 0)
     _exit (exit_failure);
 }
@@ -263,10 +287,15 @@ make_room_for (m4 *context, size_t length)
       gl_list_iterator_free (&iter);
 
       /* Create a temporary file, write the in-memory buffer of the
-	 diversion to this file, then release the buffer.  */
+	 diversion to this file, then release the buffer.  Set the
+	 size to zero before doing anything that can exit (), so that
+	 the atexit handler recognizes a file that must be closed.  */
 
       selected_buffer = selected_diversion->u.buffer;
+      total_buffer_size -= selected_diversion->size;
+      selected_diversion->size = 0;
       selected_diversion->u.file = m4_tmpfile (context);
+
       if (set_cloexec_flag (fileno (selected_diversion->u.file), true) != 0)
 	m4_error (context, 0, errno,
 		  _("cannot protect diversion across forks"));
@@ -283,9 +312,6 @@ make_room_for (m4 *context, size_t length)
       /* Reclaim the buffer space for other diversions.  */
 
       free (selected_buffer);
-      total_buffer_size -= selected_diversion->size;
-
-      selected_diversion->size = 0;
       selected_diversion->used = 0;
     }
 

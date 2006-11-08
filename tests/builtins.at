@@ -545,6 +545,25 @@ AT_CHECK_M4([indir.m4], 0, expout)
 AT_CLEANUP
 
 
+## ------ ##
+## m4exit ##
+## ------ ##
+
+AT_SETUP([m4exit])
+
+dnl Ensure that spilled diversions are gracefully cleaned up
+AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`1')f
+m4exit
+]])
+AT_CHECK([rm -Rf tmpdir && mkdir tmpdir && test -d tmpdir])
+TMPDIR=tmpdir
+export TMPDIR
+AT_CHECK_M4([in.m4], [0])
+AT_CHECK([rmdir tmpdir])
+
+AT_CLEANUP
+
+
 ## ------- ##
 ## mkdtemp ##
 ## ------- ##
