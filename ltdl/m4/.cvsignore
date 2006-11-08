@@ -28,6 +28,7 @@ gnulib-comp.m4
 gnulib-tool.m4
 gnulib.m4
 iconv.m4
+inline.m4
 intdiv0.m4
 intl.m4
 intldir.m4
