@@ -1,10 +1,14 @@
 2006-11-07  Eric Blake  <ebb9@byu.net>
 
+	* m4/output.c (cleanup_tmpfile, m4_insert_diversion_helper): Check
+	for failure.
+
 	* tests/builtins.at (m4exit): New test; failed on cygwin before
 	this patch.
 	* m4/output.c (cleanup_tmpfile): Close files before removing
 	directory.
-	(make_room_for): Ensure that m4_error sees consistent state.
+	(make_room_for, m4_output_exit): Ensure that atexit handler
+	invoked from m4_error sees consistent state.
 
 	* doc/m4.texinfo (Errprint): Merge another doc node.
 	* tests/builtins.at (dumpdef, errprint): New tests.

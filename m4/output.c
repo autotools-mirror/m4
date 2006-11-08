@@ -174,6 +174,7 @@ cleanup_tmpfile (void)
   m4_diversion *diversion;
   gl_list_iterator_t iter;
   const void *elt;
+  bool fail = false;
 
   if (diversion_table)
     {
@@ -182,14 +183,21 @@ cleanup_tmpfile (void)
       while (gl_list_iterator_next (&iter, &elt, NULL))
 	{
 	  diversion = (m4_diversion *) elt;
-	  if (!diversion->size && diversion->u.file)
-	    close_stream_temp (diversion->u.file);
+	  if (!diversion->size && diversion->u.file &&
+	      close_stream_temp (diversion->u.file) != 0)
+	    {
+	      error (0, errno,
+		     _("cannot clean temporary file for diversion"));
+	      fail = true;
+	    }
 	}
       gl_list_iterator_free (&iter);
     }
 
   /* Clean up the temporary directory.  */
   if (cleanup_temp_dir (output_temp_dir) != 0)
+    fail = true;
+  if (fail)
     _exit (exit_failure);
 }
 
@@ -664,8 +672,9 @@ m4_insert_diversion_helper (m4 *context, m4_diversion *diversion,
       diversion->size = 0;
       diversion->used = 0;
     }
-  else if (diversion->u.file)
-    close_stream_temp (diversion->u.file);
+  else if (diversion->u.file && close_stream_temp (diversion->u.file) != 0)
+    m4_error (context, 0, errno,
+	      _("cannot clean temporary file for diversion"));
   gl_list_remove_node (diversion_table, node);
   diversion->u.next = free_list;
   free_list = diversion;
