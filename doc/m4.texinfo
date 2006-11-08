@@ -537,19 +537,22 @@ The format of the @code{m4} command is:
 @cindex @env{POSIXLY_CORRECT}
 All options begin with @samp{-}, or if long option names are used, with
 @samp{--}.  A long option name need not be written completely, any
-unambiguous prefix is sufficient.  Unless @env{POSIXLY_CORRECT} is set
-in the environment, options may be intermixed with files.  The argument
-@option{--} is a marker to denote the end of options.
+unambiguous prefix is sufficient.  @acronym{POSIX} requires @code{m4} to
+recognize arguments intermixed with files, even when
+@env{POSIXLY_CORRECT} is set in the environment.  Most options take
+effect at startup regardless of their position, but some are documented
+below as taking effect after any files that occurred earlier in the
+command line.  The argument @option{--} is a marker to denote the end of
+options.
 
 With short options, options that do not take arguments may be combined
 into a single command line argument with subsequent options, options
 with mandatory arguments may be provided either as a single command line
 argument or as two arguments, and options with optional arguments must
-be provided as a single argument.  In other words, without
-@env{POSIXLY_CORRECT}, @kbd{m4 -QPDfoo -d a -d+f} is equivalent to
+be provided as a single argument.  In other words,
+@kbd{m4 -QPDfoo -d a -d+f} is equivalent to
 @kbd{m4 -Q -P -D foo -d -d+f -- ./a}, although the latter form is
-considered canonical.  (With @env{POSIXLY_CORRECT}, it is equivalent to
-@kbd{m4 -Q -P -D foo -d -- ./a ./-d+f}).
+considered canonical.
 
 With long options, options with mandatory arguments may be provided with
 an equal sign (@samp{=}) in a single argument, or as two arguments, and
@@ -643,7 +646,8 @@ expectations, please report that as a bug.
 Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
 When this option is not given, @acronym{GNU} M4 uses emacs compatible
 regular expressions.  @xref{Changeresyntax}, for more details on the
-format and meaning of @var{RESYNTAX-SPEC}.
+format and meaning of @var{RESYNTAX-SPEC}.  This option may be given
+more than once, and order with respect to file names is significant.
 
 @item --safer
 Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
@@ -675,7 +679,8 @@ is found or the list is exhausted.  @xref{Modules}, for more details.
 By default, the modules @samp{m4}, @samp{traditional}, and @samp{gnu}
 are preloaded, although this can be controlled during configuration
 with the @option{--with-modules} option to
-@file{m4-@value{VERSION}/@/configure}.
+@file{m4-@value{VERSION}/@/configure}.  This option may be given more
+than once, and order with respect to file names is significant.
 @end table
 
 @node Preprocessor features
@@ -713,8 +718,9 @@ This enters @var{NAME} into the symbol table, before any input files are
 read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
 empty string.  The @var{VALUE} can be any string, and the macro can be
 defined to take arguments, just as if it was defined from within the
-input.  This option may be given more than once; order is significant,
-and redefining the same @var{NAME} loses the previous value.
+input.  This option may be given more than once; order with respect to
+file names is significant, and redefining the same @var{NAME} loses the
+previous value.
 
 @item -I @var{DIRECTORY}
 @itemx --include=@var{DIRECTORY}
@@ -725,7 +731,8 @@ details.  This option may be given more than once.
 @item -s
 @itemx --synclines
 Generate synchronization lines, for use by the C preprocessor or other
-similar tools.  This is useful, for example, when @code{m4} is used as a
+similar tools.  Order is significant with respect to file names.  This
+option is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
 is conveyed by directives of the form @samp{#line @var{linenum}
 "@var{file}"}, which are inserted as needed into the middle of the
@@ -745,7 +752,8 @@ runtime control.
 This deletes any predefined meaning @var{NAME} might have.  Obviously,
 only predefined macros can be deleted in this way.  This option may be
 given more than once; undefining a @var{NAME} that does not have a
-definition is silently ignored.
+definition is silently ignored.  Order is significant with respect to
+file names.
 @end table
 
 @node Limits control
@@ -890,7 +898,8 @@ withdrawn in a future release.
 @itemx --trace=@var{NAME}
 This enables tracing for the macro @var{NAME}, at any point where it is
 defined.  @var{NAME} need not be defined when this option is given.
-This option may be given more than once.  @xref{Trace}, for more details.
+This option may be given more than once, and order is significant with
+respect to file names.  @xref{Trace}, for more details.
 @end table
 
 @node Command line files
@@ -913,6 +922,29 @@ string.
 @comment continue across file boundaries, provided that we warn in
 @comment interactive use when switching to stdin in a non-default parse
 @comment state.
+
+The options @option{--define} (@option{-D}), @option{--undefine}
+(@option{-U}), @option{--synclines} (@option{-s}), @option{--trace}
+(@option{-t}), @option{--regexp-syntax} (@option{-r}), and
+@option{--load-module} (@option{-m}) only take effect after processing
+input from any file names that occur earlier on the command line.  For
+example, assume the file @file{foo} contains:
+
+@comment file: foo
+@example
+$ @kbd{cat foo}
+bar
+@end example
+
+The text @samp{bar} can then be redefined over multiple uses of
+@file{foo}:
+
+@comment options: -Dbar=hello foo -Dbar=world foo
+@example
+$ @kbd{m4 -Dbar=hello foo -Dbar=world foo}
+@result{}hello
+@result{}world
+@end example
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
@@ -4401,6 +4433,7 @@ the current output.  This complements the builtin @code{include}
 
 @comment file: foo
 @example
+$ @kbd{cat foo}
 bar
 @end example
 

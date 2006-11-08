@@ -35,7 +35,7 @@
 typedef struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U or t */
+  int code;			/* deferred optchar */
   const char *macro;
 } macro_definition;
 
@@ -232,7 +232,12 @@ static const struct option long_options[] =
   { NULL, 0, NULL, 0 },
 };
 
-#define OPTSTRING "B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::eil:m:o:r:st:"
+/* POSIX requires only -D, -U, and -s; and says that the first two
+   must be recognized when interspersed with file names.  Traditional
+   behavior also handles -s between files.  Starting OPTSTRING with
+   '-' forces getopt_long to hand back file names as arguments to opt
+   '\1', rather than reordering the command line.  */
+#define OPTSTRING "-B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::eil:m:o:r:st:"
 
 /* For determining whether to be interactive.  */
 enum interactive_choice
@@ -256,6 +261,33 @@ size_opt (char const *opt, char const *msgid)
   return size;
 }
 
+/* Process a command line file NAME, and return true only if it was
+   stdin.  */
+static bool
+process_file (m4 *context, const char *name)
+{
+  bool result = false;
+  if (strcmp (name, "-") == 0)
+    {
+      m4_push_file (context, stdin, "stdin", false);
+      result = true;
+    }
+  else
+    {
+      char *full_name;
+      FILE *fp = m4_path_search (context, name, &full_name);
+      if (fp == NULL)
+	{
+	  m4_error (context, 0, errno, _("cannot open file `%s'"), name);
+	  return false;
+	}
+      m4_push_file (context, fp, full_name, true);
+      free (full_name);
+    }
+  m4_macro_expand_input (context);
+  return result;
+}
+
 
 /* Main entry point.  Parse arguments, load modules, then parse input.  */
 int
@@ -268,9 +300,9 @@ main (int argc, char *const *argv, char *const *envp)
   size_t size;			/* for parsing numeric option arguments */
 
   macro_definition *defines;
-  FILE *fp;
   bool read_stdin = false;	/* true iff we have read from stdin */
   bool import_environment = false; /* true to import environment */
+  bool seen_file = false;
   const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
@@ -339,9 +371,11 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'D':
       case 'U':
-      case 't':
       case 'm':
       case 'r':
+      case 's':
+      case 't':
+      case '\1':
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	defn = xmalloc (sizeof *defn);
@@ -478,10 +512,6 @@ main (int argc, char *const *argv, char *const *envp)
 	debugfile = optarg;
 	break;
 
-      case 's':
-	m4_set_sync_output_opt (context, true);
-	break;
-
       case IMPORT_ENVIRONMENT_OPTION:
 	import_environment = true;
 	break;
@@ -502,13 +532,20 @@ main (int argc, char *const *argv, char *const *envp)
       }
 
   /* Interactive if specified, or if no input files and stdin and
-     stderr are terminals, to match sh behavior.  */
+     stderr are terminals, to match sh behavior.  Interactive mode
+     means unbuffered output, and interrupts ignored.  */
 
   m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
 				    || (interactive == INTERACTIVE_UNKNOWN
 					&& optind == argc
 					&& isatty (STDIN_FILENO)
 					&& isatty (STDERR_FILENO))));
+  if (m4_get_interactive_opt (context))
+    {
+      signal (SIGINT, SIG_IGN);
+      setbuf (stdout, NULL);
+    }
+
 
   /* Do the basic initializations.  */
   if (debugfile && !m4_debug_set_output (context, debugfile))
@@ -554,7 +591,6 @@ main (int argc, char *const *argv, char *const *envp)
     while (defines != NULL)
       {
 	macro_definition *next;
-	char *macro_value;
 	const char *arg = defines->macro;
 
 	switch (defines->code)
@@ -563,22 +599,22 @@ main (int argc, char *const *argv, char *const *envp)
 	    {
 	      m4_symbol_value *value = m4_symbol_value_create ();
 
-	      macro_value = strchr (arg, '=');
+	      /* defines->arg is read-only, so we need a copy.	*/
+	      char *macro_name = xstrdup (arg);
+	      char *macro_value = strchr (macro_name, '=');
+
 	      if (macro_value != NULL)
 		*macro_value++ = '\0';
 	      m4_set_symbol_value_text (value, xstrdup (macro_value
-                                                        ? macro_value : ""));
+							? macro_value : ""));
 
-	      m4_symbol_pushdef (M4SYMTAB, arg, value);
+	      m4_symbol_define (M4SYMTAB, macro_name, value);
+	      free (macro_name);
 	    }
 	    break;
 
 	  case 'U':
 	    m4_symbol_delete (M4SYMTAB, arg);
-	    break;
-
-	  case 't':
-	    m4_set_symbol_name_traced (M4SYMTAB, arg, true);
 	    break;
 
 	  case 'm':
@@ -595,6 +631,19 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    break;
 
+	  case 's':
+	    m4_set_sync_output_opt (context, true);
+	    break;
+
+	  case 't':
+	    m4_set_symbol_name_traced (M4SYMTAB, arg, true);
+	    break;
+
+	  case '\1':
+	    seen_file = true;
+	    read_stdin |= process_file (context, arg);
+	    break;
+
 	  default:
 	    assert (!"INTERNAL ERROR: bad code in deferred arguments");
 	    abort ();
@@ -606,52 +655,17 @@ main (int argc, char *const *argv, char *const *envp)
       }
   }
 
-  /* Interactive mode means unbuffered output, and interrupts ignored.  */
+  /* Handle remaining input files.  Each file is pushed on the input,
+     and the input read.  */
 
-  if (m4_get_interactive_opt (context))
-    {
-      signal (SIGINT, SIG_IGN);
-      setbuf (stdout, (char *) NULL);
-    }
-
-  /* Handle the various input files.  Each file is pushed on the input,
-     and the input read.  Wrapup text is handled separately later.  */
-
-  exit_status = EXIT_SUCCESS;
-  if (optind == argc)
-    {
-      m4_push_file (context, stdin, "stdin", false);
-      read_stdin = true;
-      m4_macro_expand_input (context);
-    }
+  if (optind == argc && !seen_file)
+    read_stdin = process_file (context, "-");
   else
     for (; optind < argc; optind++)
-      {
-	if (strcmp (argv[optind], "-") == 0)
-	  {
-	    m4_push_file (context, stdin, "stdin", false);
-	    read_stdin = true;
-	  }
-	else
-	  {
-	    char *name;
-	    fp = m4_path_search (context, argv[optind], &name);
-	    if (fp == NULL)
-	      {
-		error (0, errno, "%s", argv[optind]);
-		exit_status = EXIT_FAILURE;
-		continue;
-	      }
-	    else
-	      {
-		m4_push_file (context, fp, name, true);
-		free (name);
-	      }
-	  }
-	m4_macro_expand_input (context);
-      }
+      read_stdin |= process_file (context, argv[optind]);
 
-  /* Now handle wrapup text.  */
+  /* Now handle wrapup text.
+     FIXME - when -F is in effect, should wrapped text be frozen?  */
   while (m4_pop_wrapup (context))
     m4_macro_expand_input (context);
 
@@ -680,8 +694,7 @@ main (int argc, char *const *argv, char *const *envp)
   if (read_stdin && fclose (stdin) == EOF)
     m4_error (context, 0, errno, _("error closing stdin"));
 
-  if (exit_status == EXIT_SUCCESS)
-    exit_status = m4_get_exit_status (context);
+  exit_status = m4_get_exit_status (context);
   m4_delete (context);
 
   m4_hash_exit ();

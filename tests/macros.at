@@ -99,6 +99,41 @@ AT_CHECK_M4([--reload-state=frozen.m4f input.m4], 0, expout,
 AT_CLEANUP(freezeme.m4 frozen.m4f)
 
 
+## ------------------- ##
+## Command line define ##
+## ------------------- ##
+
+AT_SETUP([Command line define])
+
+dnl Test that -D after last file still affects m4wrap'd text.
+AT_DATA([in1], [[m4wrap(`foo
+')foo
+]])
+AT_DATA([in2], [[foo
+]])
+AT_CHECK_M4([-Dfoo=1 in1 -Dfoo=2 in2 -Dfoo=3], [0],
+[[1
+2
+3
+]])
+
+dnl Test that -D only affects top-most definition.
+AT_DATA([in1], [[define(`foo', `1')pushdef(`foo', `2')dnl
+]])
+AT_DATA([in2], [[foo
+popdef(`foo')foo
+popdef(`foo')foo
+]])
+AT_CHECK_M4([in1 -Dfoo=3 in2], [0],
+[[3
+1
+foo
+]])
+
+AT_CLEANUP
+
+
+
 ## ---------------- ##
 ## pushdef/popdef.  ##
 ## ---------------- ##

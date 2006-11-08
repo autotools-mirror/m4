@@ -80,8 +80,7 @@ BEGIN {
     {
       if (seq == 0)
 	new_group(node);
-      if (!file)
-	seq++;
+      seq++;
       printf ("echo \"$at_srcdir/%s:%d:\"\n", FILENAME, NR)
       next;
     }

@@ -1,3 +1,19 @@
+2006-11-08  Eric Blake  <ebb9@byu.net>
+
+	Merge deferred handling of -D option from branch.
+	* doc/m4.texinfo (Debugging options, Preprocessor features)
+	(Dynamic loading features, Operation modes, Invoking m4):
+	Document this change.
+	* src/main.c (OPTSTRING): Specify in-order processing.
+	(process_file): New function.
+	(main): Use it to interleave files and deferred options.
+	* tests/macros.at (Command line define): New test.
+	* tests/generate.awk: Allow '@comment file' as first example
+	within a node.
+	* tests/options.at (option grouping): Update to reflect actual
+	POSIX semantics.
+	(file names): New test.
+
 2006-11-07  Eric Blake  <ebb9@byu.net>
 
 	* m4/output.c (cleanup_tmpfile, m4_insert_diversion_helper): Check
