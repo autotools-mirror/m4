@@ -576,5 +576,6 @@ Written by Rene' Seindal.\n\
       make_diversion (0);
       undivert_all ();
     }
+  output_exit ();
   exit (retcode);
 }

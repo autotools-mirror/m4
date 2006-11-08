@@ -1,5 +1,13 @@
 2006-11-07  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.h (output_exit): New prototype.
+	* src/m4.c (main): Use it.
+	* src/output.c (cleanup_tmpfile): Close files before removing
+	directory.
+	(insert_diversion): Check for failure.
+	(output_exit): Avoid memory leak.
+	* doc/m4.texinfo (Diversions): Test this bug.
+
 	* doc/m4.texinfo (Esyscmd, Errprint): Minor touchups.
 
 2006-11-01  Eric Blake  <ebb9@byu.net>

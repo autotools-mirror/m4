@@ -106,13 +106,39 @@ output_init (void)
   output_unused = 0;
 }
 
+void
+output_exit (void)
+{
+  free (diversion_table);
+  diversion_table = NULL;
+}
+
 /* Clean up any temporary directory.  Designed for use as an atexit
    handler, where it is not safe to call exit() recursively; so this
    calls _exit if a problem is encountered.  */
 static void
 cleanup_tmpfile (void)
 {
+  /* Close any open diversions.  */
+  int divnum;
+  struct diversion *diversion;
+  bool fail = false;
+
+  if (diversion_table)
+    for (divnum = 1; divnum < diversions; divnum++)
+      {
+	diversion = diversion_table + divnum;
+	if (diversion->file && close_stream_temp (diversion->file) != 0)
+	  {
+	    M4ERROR ((0, errno, "cannot clean temporary file for diversion"));
+	    fail = true;
+	  }
+      }
+
+  /* Clean up the temporary directory.  */
   if (cleanup_temp_dir (output_temp_dir) != 0)
+    fail = true;
+  if (fail)
     _exit (exit_failure);
 }
 
@@ -531,7 +557,8 @@ insert_diversion (int divnum)
 
   if (diversion->file)
     {
-      close_stream_temp (diversion->file);
+      if (close_stream_temp (diversion->file) != 0)
+	M4ERROR ((0, errno, "cannot clean temporary file for diversion"));
       diversion->file = NULL;
     }
   else if (diversion->buffer)

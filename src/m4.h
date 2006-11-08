@@ -311,6 +311,7 @@ extern int current_diversion;
 extern int output_current_line;
 
 void output_init (void);
+void output_exit (void);
 void shipout_text (struct obstack *, const char *, int);
 void make_diversion (int);
 void insert_diversion (int);

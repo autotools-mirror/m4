@@ -3621,6 +3621,38 @@ f
 divert(`-1')undivert
 @end example
 
+@comment Another test of spilled diversions.
+
+@example
+divert(`-1')define(`f', `.')
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+define(`f', defn(`f')defn(`f'))
+divert`'dnl
+len(f)
+@result{}1048576
+divert(`1')
+f
+m4exit
+@end example
+
 @comment We also need to test allocation overflow.  On 32-bit
 @comment platforms, this should fail outright.  But on 64-bit platforms
 @comment with enough memory, the allocation might succeed (hopefully
