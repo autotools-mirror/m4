@@ -1,3 +1,8 @@
+2006-11-09  Eric Blake  <ebb9@byu.net>
+
+	* bootstrap: Validate that installed M4 is powerful enough.
+	Reported by Gary V. Vaughan, analyzed by Stepan Kasal.
+
 2006-11-08  Eric Blake  <ebb9@byu.net>
 
 	Merge deferred handling of -D option from branch.

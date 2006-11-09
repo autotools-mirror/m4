@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-11-02
+# bootstrap (GNU M4) version 2006-11-09
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -35,15 +35,16 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTOPOINT, AUTORECONF, AWK, GNULIB_TOOL, RM, SED, WGET
+#   AUTOPOINT, AUTORECONF, AWK, GNULIB_TOOL, M4, RM, SED, WGET
 
 # This script bootstraps a CVS checkout of GNU M4 by correctly calling
 # out to parts of the GNU Build Platform.  Currently this requires GNU
-# Gettext 0.16 or better, Autoconf 2.60 or better, a CVS snapshot of
-# Automake 1.10a or better, a CVS snapshot of Libtool 2.1a or better,
-# and the latest CVS checkout of Gnulib.  Libtool must be installed;
-# either with the same --prefix as automake, or made accessible to
-# aclocal's search path via $AUTOMAKE_prefix/share/aclocal/dirlist.
+# Gettext 0.16 or better, Autoconf 2.60 or better, GNU M4 1.4.5 or
+# better, a CVS snapshot of Automake 1.10a or better, a CVS snapshot
+# of Libtool 2.1a or better, and the latest CVS checkout of Gnulib.
+# Libtool must be installed; either with the same --prefix as
+# automake, or made accessible to aclocal's search path via
+# $AUTOMAKE_prefix/share/aclocal/dirlist.
 
 # Report bugs to <bug-m4@gnu.org>
 
@@ -51,6 +52,7 @@
 : ${AUTORECONF=autoreconf}
 : ${AWK=awk}
 : ${GNULIB_TOOL=gnulib-tool}
+: ${M4=m4}
 : ${RM=rm -f}
 : ${SED=sed}
 : ${WGET=wget}
@@ -243,6 +245,14 @@ func_version ()
     func_fatal_error "Bootstrapping from a non-CVS distribution is risky."
   fi
 }
+
+## ---------------------------------------------- ##
+## Test that the installed M4 is powerful enough. ##
+## M4 1.4.4 and earlier are insufficient.         ##
+## ---------------------------------------------- ##
+if test -n "`echo 'ifdef(mac,bug)dnl' | $M4 --trace=mac`" ; then
+  func_fatal_error "Bootstrapping requires installed GNU M4 1.4.5 or greater."
+fi
 
 ## ------------------------------ ##
 ## Fetch translations.            ##
