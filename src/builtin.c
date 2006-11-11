@@ -1693,6 +1693,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   const char *to;
   char map[256] = {0};
   char found[256] = {0};
+  unsigned char ch;
 
   if (bad_argc (argv[0], argc, 3, 4))
     {
@@ -1720,27 +1721,27 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 
   /* Calling strchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a
-     from-to mapping in one pass of data, then use that map in one
-     pass of from, for linear behavior.  Traditional behavior is that
+     from-to mapping in one pass of from, then use that map in one
+     pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
-  for ( ; *from; from++)
+  for ( ; (ch = *from) != '\0'; from++)
     {
-      if (! found[to_uchar (*from)])
+      if (! found[ch])
 	{
-	  found[to_uchar (*from)] = 1;
-	  map[to_uchar (*from)] = *to;
+	  found[ch] = 1;
+	  map[ch] = *to;
 	}
       if (*to != '\0')
 	to++;
     }
 
-  for (data = ARG (1); *data; data++)
+  for (data = ARG (1); (ch = *data) != '\0'; data++)
     {
-      if (! found[to_uchar (*data)])
-	obstack_1grow (obs, *data);
-      else if (map[to_uchar (*data)])
-	obstack_1grow (obs, map[to_uchar (*data)]);
+      if (! found[ch])
+	obstack_1grow (obs, ch);
+      else if (map[ch])
+	obstack_1grow (obs, map[ch]);
     }
 }
 
