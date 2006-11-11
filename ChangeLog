@@ -1,5 +1,7 @@
 2006-11-11  Eric Blake  <ebb9@byu.net>
 
+	* src/m4.h (to_uchar): Depend on HAVE_INLINE.
+
 	* src/builtin.c: Remove unnecessary casts.
 	(expand_ranges): Make 8-bit clean.
 	* doc/m4.texinfo (Translit): Add tests and wording.
