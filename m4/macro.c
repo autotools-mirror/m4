@@ -580,7 +580,7 @@ trace_format (m4 *context, const char *fmt, ...)
 	    size_t z = va_arg (args, size_t);
 	    char nbuf[INT_BUFSIZE_BOUND (size_t)];
 
-	    sprintf (nbuf, "%lu", (unsigned long) z);
+	    sprintf (nbuf, "%lu", (unsigned long int) z);
 	    s = nbuf;
 	  }
 	  break;

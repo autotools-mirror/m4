@@ -932,6 +932,12 @@ AT_DATA([[in]],
 AT_CHECK_M4([in], [0], [[c]m4_for([i],[1],[5000],[],[[d]])
 ])
 
+dnl This validates that ranges are built using unsigned chars.
+AT_DATA([in], [[translit(`«abc~', `~-»')
+]])
+AT_CHECK_M4([in], [0], [[abc
+]])
+
 AT_CLEANUP
 
 

@@ -395,7 +395,7 @@ main (int argc, char *const *argv, char *const *envp)
 	/* In 1.4.x, -B<num> was a no-op option for compatibility with
 	   Solaris m4.  Warn if optarg is all numeric.  FIXME -
 	   silence this warning after 2.0.  */
-	if (isdigit ((unsigned char) *optarg))
+	if (isdigit (to_uchar (*optarg)))
 	  {
 	    char *end;
 	    errno = 0;

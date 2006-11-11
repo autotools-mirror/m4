@@ -765,11 +765,11 @@ m4_freeze_diversions (m4 *context, FILE *file)
 		 fix frozen file format to support 64-bit
 		 integers.  */
 	      if (file_stat.st_size < 0
-		  || file_stat.st_size != (unsigned long) file_stat.st_size)
+		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("diversion too large"));
 	      fprintf (file, "D%d,%lu", diversion->divnum,
-		       (unsigned long) file_stat.st_size);
+		       (unsigned long int) file_stat.st_size);
 	    }
 
 	  m4_insert_diversion_helper (context, diversion, node);

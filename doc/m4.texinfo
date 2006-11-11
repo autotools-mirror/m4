@@ -4904,14 +4904,15 @@ translation pass is made, even if characters in @var{replacement} also
 appear in @var{chars}.
 
 As a @acronym{GNU} extension, both @var{chars} and @var{replacement} can
-contain character-ranges,
-e.g., @samp{a-z} (meaning all lowercase letters) or @samp{0-9} (meaning
-all digits).  To include a dash @samp{-} in @var{chars} or
-@var{replacement}, place it first or last.
-
-It is not an error for the last character in the range to be `larger'
-than the first.  In that case, the range runs backwards, i.e.,
-@samp{9-0} means the string @samp{9876543210}.
+contain character-ranges, e.g., @samp{a-z} (meaning all lowercase
+letters) or @samp{0-9} (meaning all digits).  To include a dash @samp{-}
+in @var{chars} or @var{replacement}, place it first or last in the
+entire string, or as the last character of a range.  Back-to-back ranges
+can share a common endpoint.  It is not an error for the last character
+in the range to be `larger' than the first.  In that case, the range
+runs backwards, i.e., @samp{9-0} means the string @samp{9876543210}.
+The expansion of a range is dependent on the underlying encoding of
+characters, so using ranges is not always portable between machines.
 
 The macro @code{translit} is recognized only with parameters.
 @end deffn
@@ -4923,17 +4924,21 @@ translit(`GNUs not Unix', `a-z', `A-Z')
 @result{}GNUS NOT UNIX
 translit(`GNUs not Unix', `A-Z', `z-a')
 @result{}tmfs not fnix
+translit(`+,-12345', `+--1-5', `<;>a-c-a')
+@result{}<;>abcba
 translit(`abcdef', `aabdef', `bcged')
 @result{}bgced
 @end example
 
-The first example deletes all uppercase letters, the second converts
-lowercase to uppercase, and the third `mirrors' all uppercase letters,
-while converting them to lowercase.  The two first cases are by far the
-most common.  The final example shows that @samp{a} is mapped to
-@samp{b}, not @samp{c}; the resulting @samp{b} is not further remapped
-to @samp{g}; the @samp{d} and @samp{e} are swapped, and the @samp{f} is
-discarded.
+In the @sc{ascii} encoding, the first example deletes all uppercase
+letters, the second converts lowercase to uppercase, and the third
+`mirrors' all uppercase letters, while converting them to lowercase.
+The two first cases are by far the most common, even though they are not
+portable to @sc{ebcdic} or other encodings.  The fourth example shows a
+range ending in @samp{-}, as well as back-to-back ranges.  The final
+example shows that @samp{a} is mapped to @samp{b}, not @samp{c}; the
+resulting @samp{b} is not further remapped to @samp{g}; the @samp{d} and
+@samp{e} are swapped, and the @samp{f} is discarded.
 
 Omitting @var{chars} evokes a warning, but still produces output.
 

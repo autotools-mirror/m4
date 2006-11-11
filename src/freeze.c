@@ -142,7 +142,7 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
   if (handle)
     produce_module_dump (file, handle);
 
-  fprintf (file, "M%lu\n", (unsigned long) strlen (name));
+  fprintf (file, "M%lu\n", (unsigned long int) strlen (name));
   fputs (name, file);
   fputc ('\n', file);
 }
@@ -168,10 +168,10 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   if (m4_is_symbol_text (symbol))
     {
       fprintf (file, "T%lu,%lu",
-	       (unsigned long) strlen (symbol_name),
-	       (unsigned long) strlen (m4_get_symbol_text (symbol)));
+	       (unsigned long int) strlen (symbol_name),
+	       (unsigned long int) strlen (m4_get_symbol_text (symbol)));
       if (handle)
-	fprintf (file, ",%lu", (unsigned long) strlen (module_name));
+	fprintf (file, ",%lu", (unsigned long int) strlen (module_name));
       fputc ('\n', file);
 
       fputs (symbol_name, file);
@@ -189,12 +189,12 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	assert (!"INTERNAL ERROR: builtin not found in builtin table!");
 
       fprintf (file, "F%lu,%lu",
-	       (unsigned long) strlen (symbol_name),
-	       (unsigned long) strlen (bp->name));
+	       (unsigned long int) strlen (symbol_name),
+	       (unsigned long int) strlen (bp->name));
 
       if (handle)
 	fprintf (file, ",%lu",
-		 (unsigned long) strlen (module_name));
+		 (unsigned long int) strlen (module_name));
       fputc ('\n', file);
 
       fputs (symbol_name, file);
@@ -241,8 +241,8 @@ produce_frozen_state (m4 *context, const char *name)
       || strcmp (m4_get_syntax_rquote (M4SYNTAX), DEF_RQUOTE))
     {
       fprintf (file, "Q%lu,%lu\n",
-	       (unsigned long) context->syntax->lquote.length,
-	       (unsigned long) context->syntax->rquote.length);
+	       (unsigned long int) context->syntax->lquote.length,
+	       (unsigned long int) context->syntax->rquote.length);
       fputs (context->syntax->lquote.string, file);
       fputs (context->syntax->rquote.string, file);
       fputc ('\n', file);
@@ -254,8 +254,8 @@ produce_frozen_state (m4 *context, const char *name)
       || strcmp (m4_get_syntax_ecomm (M4SYNTAX), DEF_ECOMM))
     {
       fprintf (file, "C%lu,%lu\n",
-	       (unsigned long) context->syntax->bcomm.length,
-	       (unsigned long) context->syntax->ecomm.length);
+	       (unsigned long int) context->syntax->bcomm.length,
+	       (unsigned long int) context->syntax->ecomm.length);
       fputs (context->syntax->bcomm.string, file);
       fputs (context->syntax->ecomm.string, file);
       fputc ('\n', file);

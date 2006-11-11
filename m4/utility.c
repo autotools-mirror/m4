@@ -62,7 +62,7 @@ m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv,
 static const char *
 skip_space (m4 *context, const char *arg)
 {
-  while (m4_has_syntax (M4SYNTAX, (unsigned char) *arg, M4_SYNTAX_SPACE))
+  while (m4_has_syntax (M4SYNTAX, to_uchar (*arg), M4_SYNTAX_SPACE))
     arg++;
   return arg;
 }

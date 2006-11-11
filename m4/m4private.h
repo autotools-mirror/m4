@@ -352,6 +352,16 @@ struct m4__search_path_info {
 extern void m4__include_init (m4 *);
 
 
+/* Convert a possibly-signed character to an unsigned character.  This is
+   a bit safer than casting to unsigned char, since it catches some type
+   errors that the cast doesn't.  */
+#if HAVE_INLINE
+static inline unsigned char to_uchar (char ch) { return ch; }
+#else
+# define to_uchar(C) ((unsigned char) (C))
+#endif
+
+
 /* Debugging the memory allocator.  */
 
 #if WITH_DMALLOC

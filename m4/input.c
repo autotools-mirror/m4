@@ -450,7 +450,7 @@ static struct input_funcs string_funcs = {
 static int
 string_peek (m4_input_block *me)
 {
-  int ch = (unsigned char) *me->u.u_s.current;
+  int ch = to_uchar (*me->u.u_s.current);
 
   return (ch == '\0') ? CHAR_RETRY : ch;
 }
@@ -459,7 +459,7 @@ static int
 string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 	     bool retry M4_GNUC_UNUSED)
 {
-  int ch = (unsigned char) *me->u.u_s.current;
+  int ch = to_uchar (*me->u.u_s.current);
   if (ch == '\0')
     return CHAR_RETRY;
   me->u.u_s.current++;

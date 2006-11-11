@@ -920,8 +920,8 @@ M4BUILTIN_HANDLER (substr)
 const char *
 m4_expand_ranges (const char *s, m4_obstack *obs)
 {
-  char from;
-  char to;
+  unsigned char from;
+  unsigned char to;
 
   assert (obstack_object_size (obs) == 0);
   for (from = '\0'; *s != '\0'; from = *s++)

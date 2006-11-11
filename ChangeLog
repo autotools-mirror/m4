@@ -1,3 +1,17 @@
+2006-11-11  Eric Blake  <ebb9@byu.net>
+
+	* m4/macro.c (trace_format): Use canonical type name.
+	* m4/output.c (m4_freeze_diversions): Likewise.
+	* src/freeze.c (produce_module_dump, dump_symbol_CB)
+	(produce_frozen_state): Likewise.
+	* m4/m4private.h (to_uchar): Grab from branch.
+	* m4/input.c (string_peek, string_read): Use it.
+	* m4/utility.c (skip_space): Likewise.
+	* src/main.c (main): Likewise.
+	* doc/m4.texinfo (Translit): Remerge from branch.
+	* tests/builtins.at (translit): Test 8-bit range.
+	* modules/m4.c (m4_expand_ranges): Merge from branch.
+
 2006-11-09  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap: Validate that installed M4 is powerful enough.
