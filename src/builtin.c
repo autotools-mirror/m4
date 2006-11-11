@@ -359,12 +359,12 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 static const char *
-ntoa (register eval_t value, int radix)
+ntoa (eval_t value, int radix)
 {
   bool negative;
   unsigned_eval_t uvalue;
   static char str[256];
-  register char *s = &str[sizeof str];
+  char *s = &str[sizeof str];
 
   *--s = '\0';
 
@@ -667,9 +667,9 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 
   /* Make table of symbols invisible to expand_macro ().  */
 
-  (void) obstack_finish (obs);
+  obstack_finish (obs);
 
-  qsort ((char *) data.base, data.size, sizeof (symbol *), dumpdef_cmp);
+  qsort (data.base, data.size, sizeof (symbol *), dumpdef_cmp);
 
   for (; data.size > 0; --data.size, data.base++)
     {
@@ -1645,14 +1645,14 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
 static const char *
 expand_ranges (const char *s, struct obstack *obs)
 {
-  char from;
-  char to;
+  unsigned char from;
+  unsigned char to;
 
-  for (from = '\0'; *s != '\0'; from = *s++)
+  for (from = '\0'; *s != '\0'; from = to_uchar (*s++))
     {
       if (*s == '-' && from != '\0')
 	{
-	  to = *++s;
+	  to = to_uchar (*++s);
 	  if (to == '\0')
 	    {
 	      /* trailing dash */
@@ -1772,7 +1772,7 @@ static void
 substitute (struct obstack *obs, const char *victim, const char *repl,
 	    struct re_registers *regs)
 {
-  register unsigned int ch;
+  int ch;
 
   for (;;)
     {
@@ -2031,7 +2031,7 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, token_data **argv)
 {
-  register const char *text;
+  const char *text;
   int i;
 
   for (text = SYMBOL_TEXT (sym); *text != '\0';)

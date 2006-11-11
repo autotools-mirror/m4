@@ -43,7 +43,8 @@ Version 1.4.8 - ?? ??? 2006, by ??  (CVS version 1.4.7a)
 * The `changecom' and `changequote' macros now treat an empty second
   argument the same as if it were missing, rather than using the empty
   string and making it impossible to end a comment or quote.
-* The `translit' macro now operates in linear instead of quadratic time.
+* The `translit' macro now operates in linear instead of quadratic time,
+  and is now eight-bit clean.
 * The `-D', `-U', `-s', and `-t' command line options now take effect
   after any files encountered earlier on the command line, rather than up
   front, as is done in traditional implementations and required by POSIX.
