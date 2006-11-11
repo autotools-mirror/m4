@@ -1,5 +1,20 @@
 2006-11-11  Eric Blake  <ebb9@byu.net>
 
+	One step closer to allowing C++ compilation - don't blindly
+	convert between char* and unsigned char*.
+	* m4/m4module.h (m4_set_syntax): Change signature.
+	* m4/m4private.h (m4_string): Use signed char.
+	(m4_get_syntax_lquote, m4_get_syntax_rquote, m4_get_syntax_bcomm)
+	(m4_get_syntax_ecomm): No longer a need to cast.
+	* m4/syntax.c (m4_set_syntax, m4_syntax_create, m4_set_quotes):
+	Reflect this change.
+	* m4/macro.c (expand_argument): Simplify.
+	(expand_token): Use proper type.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* m4/input.c (MATCH, match_input): Likewise.
+	* modules/m4.c (translit): Likewise.
+	* modules/gnu.c (substitute): Simplify.
+
 	* m4/macro.c (trace_format): Use canonical type name.
 	* m4/output.c (m4_freeze_diversions): Likewise.
 	* src/freeze.c (produce_module_dump, dump_symbol_CB)

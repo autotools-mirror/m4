@@ -960,11 +960,12 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
    deleted from the first (pueh)  */
 M4BUILTIN_HANDLER (translit)
 {
-  const unsigned char *data;
-  const unsigned char *from;
-  const unsigned char *to;
+  const char *data;
+  const char *from;
+  const char *to;
   char map[256] = {0};
   char found[256] = {0};
+  unsigned char ch;
 
   from = M4ARG (2);
   if (strchr (from, '-') != NULL)
@@ -982,27 +983,27 @@ M4BUILTIN_HANDLER (translit)
 
   /* Calling strchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a
-     from-to mapping in one pass of data, then use that map in one
-     pass of from, for linear behavior.  Traditional behavior is that
+     from-to mapping in one pass of from, then use that map in one
+     pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
-  for ( ; *from; from++)
+  for ( ; (ch = *from) != '\0'; from++)
     {
-      if (! found[*from])
+      if (! found[ch])
 	{
-	  found[*from] = 1;
-	  map[*from] = *to;
+	  found[ch] = 1;
+	  map[ch] = *to;
 	}
       if (*to != '\0')
 	to++;
     }
 
-  for (data = M4ARG (1); *data; data++)
+  for (data = M4ARG (1); (ch = *data) != '\0'; data++)
     {
-      if (! found[*data])
-	obstack_1grow (obs, *data);
-      else if (map[*data])
-	obstack_1grow (obs, map[*data]);
+      if (! found[ch])
+	obstack_1grow (obs, ch);
+      else if (map[ch])
+	obstack_1grow (obs, map[ch]);
     }
 }
 

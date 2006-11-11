@@ -115,9 +115,9 @@ expand_token (m4 *context, m4_obstack *obs,
 
     case M4_TOKEN_WORD:
       {
-	const unsigned char *textp = text;
+	const char *textp = text;
 
-	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
+	if (m4_has_syntax (M4SYNTAX, to_uchar (*textp), M4_SYNTAX_ESCAPE))
 	  ++textp;
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
@@ -153,7 +153,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 {
   m4__token_type type;
   m4_symbol_value token;
-  const unsigned char *text;
+  const char *text;
   int paren_level = 0;
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
@@ -190,10 +190,9 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  /* fallthru */
 	case M4_TOKEN_OPEN:
 	case M4_TOKEN_SIMPLE:
-	  text = m4_get_symbol_value_text (&token);
-	  if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_OPEN))
+	  if (type == M4_TOKEN_OPEN)
 	    paren_level++;
-	  else if (m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_CLOSE))
+	  else if (type == M4_TOKEN_CLOSE)
 	    paren_level--;
 	  expand_token (context, obs, type, &token);
 	  break;

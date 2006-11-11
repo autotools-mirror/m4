@@ -279,16 +279,18 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
 #define DEF_ECOMM "\n"
 
 typedef struct {
-    unsigned char *string;	/* characters of the string */
-    size_t length;		/* length of the string */
+  char *string;		/* characters of the string */
+  size_t length;	/* length of the string */
 } m4_string;
 
 struct m4_syntax_table {
   /* Please read the comment at the top of input.c for details */
   unsigned short table[CHAR_RETRY];
 
-  m4_string lquote, rquote;
-  m4_string bcomm, ecomm;
+  m4_string lquote;
+  m4_string rquote;
+  m4_string bcomm;
+  m4_string ecomm;
 
   /* true iff strlen(rquote) == strlen(lquote) == 1 */
   bool is_single_quotes;
@@ -303,10 +305,10 @@ struct m4_syntax_table {
 /* Fast macro versions of syntax table accessor functions,
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
-#  define m4_get_syntax_lquote(S)	((const char *) (S)->lquote.string)
-#  define m4_get_syntax_rquote(S)	((const char *) (S)->rquote.string)
-#  define m4_get_syntax_bcomm(S)	((const char *) (S)->bcomm.string)
-#  define m4_get_syntax_ecomm(S)	((const char *) (S)->ecomm.string)
+#  define m4_get_syntax_lquote(S)		((S)->lquote.string)
+#  define m4_get_syntax_rquote(S)		((S)->rquote.string)
+#  define m4_get_syntax_bcomm(S)		((S)->bcomm.string)
+#  define m4_get_syntax_ecomm(S)		((S)->ecomm.string)
 
 #  define m4_is_syntax_single_quotes(S)		((S)->is_single_quotes)
 #  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)

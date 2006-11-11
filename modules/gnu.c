@@ -171,7 +171,7 @@ static void
 substitute (m4 *context, m4_obstack *obs, const char *caller,
 	    const char *victim, const char *repl, m4_pattern_buffer *buf)
 {
-  unsigned int ch;
+  int ch;
 
   for (;;)
     {

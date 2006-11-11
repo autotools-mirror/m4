@@ -106,7 +106,7 @@ static	void	composite_unget		(m4_input_block *, int);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
 static	void	init_builtin_token	(m4 *, m4_symbol_value *);
-static	bool	match_input		(m4 *, const unsigned char *, bool);
+static	bool	match_input		(m4 *, const char *, bool);
 static	int	next_char		(m4 *, bool);
 static	int	peek_char		(m4 *);
 static	void	pop_input		(m4 *);
@@ -863,16 +863,16 @@ m4_skip_line (m4 *context, const char *name)
    not properly restore the current input file and line when we
    restore unconsumed characters.  */
 static bool
-match_input (m4 *context, const unsigned char *s, bool consume)
+match_input (m4 *context, const char *s, bool consume)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
-  const unsigned char *t;
+  const char *t;
   m4_obstack *st;
   bool result = false;
 
   ch = peek_char (context);
-  if (ch != *s)
+  if (ch != to_uchar (*s))
     return false;			/* fail */
 
   if (s[1] == '\0')
@@ -883,7 +883,7 @@ match_input (m4 *context, const unsigned char *s, bool consume)
     }
 
   next_char (context, true);
-  for (n = 1, t = s++; (ch = peek_char (context)) == *s++; )
+  for (n = 1, t = s++; (ch = peek_char (context)) == to_uchar (*s++); )
     {
       next_char (context, true);
       n++;
@@ -911,7 +911,7 @@ match_input (m4 *context, const unsigned char *s, bool consume)
   will discard the matched string.  Otherwise, CH is the result of
   peek_char, and the input stream is effectively unchanged.  */
 #define MATCH(C, ch, s, consume)					\
-  ((s)[0] == (ch)							\
+  (to_uchar ((s)[0]) == (ch)						\
    && (ch) != '\0'							\
    && ((s)[1] == '\0' || (match_input (C, (s) + (consume), consume))))
 

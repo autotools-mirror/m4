@@ -140,10 +140,14 @@ m4_syntax_create (void)
   syntax->is_single_comments	= true;
   syntax->is_macro_escaped	= false;
 
-  add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
-  add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
-  add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
-  add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
+  add_syntax_attribute (syntax, to_uchar (syntax->lquote.string[0]),
+			M4_SYNTAX_LQUOTE);
+  add_syntax_attribute (syntax, to_uchar (syntax->rquote.string[0]),
+			M4_SYNTAX_RQUOTE);
+  add_syntax_attribute (syntax, to_uchar (syntax->bcomm.string[0]),
+			M4_SYNTAX_BCOMM);
+  add_syntax_attribute (syntax, to_uchar (syntax->ecomm.string[0]),
+			M4_SYNTAX_ECOMM);
 
   return syntax;
 }
@@ -228,7 +232,7 @@ remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
 }
 
 int
-m4_set_syntax (m4_syntax_table *syntax, char key, const unsigned char *chars)
+m4_set_syntax (m4_syntax_table *syntax, const char key, const char *chars)
 {
   int ch, code;
 
@@ -242,7 +246,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, const unsigned char *chars)
     }
 
   if (*chars != '\0')
-    while ((ch = *chars++))
+    while ((ch = to_uchar (*chars++)))
       add_syntax_attribute (syntax, ch, code);
   else
     for (ch = 256; --ch > 0; )
@@ -299,8 +303,10 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 
   if (syntax->is_single_quotes)
     {
-      add_syntax_attribute (syntax, syntax->lquote.string[0], M4_SYNTAX_LQUOTE);
-      add_syntax_attribute (syntax, syntax->rquote.string[0], M4_SYNTAX_RQUOTE);
+      add_syntax_attribute (syntax, to_uchar (syntax->lquote.string[0]),
+			    M4_SYNTAX_LQUOTE);
+      add_syntax_attribute (syntax, to_uchar (syntax->rquote.string[0]),
+			    M4_SYNTAX_RQUOTE);
     }
 
   if (syntax->is_macro_escaped)
@@ -331,8 +337,10 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
 
   if (syntax->is_single_comments)
     {
-      add_syntax_attribute (syntax, syntax->bcomm.string[0], M4_SYNTAX_BCOMM);
-      add_syntax_attribute (syntax, syntax->ecomm.string[0], M4_SYNTAX_ECOMM);
+      add_syntax_attribute (syntax, to_uchar (syntax->bcomm.string[0]),
+			    M4_SYNTAX_BCOMM);
+      add_syntax_attribute (syntax, to_uchar (syntax->ecomm.string[0]),
+			    M4_SYNTAX_ECOMM);
     }
 
   if (syntax->is_macro_escaped)

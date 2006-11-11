@@ -332,7 +332,7 @@ decode_char (FILE *in)
 	  int next;
 
 	  /* first octal digit */
-	  ch  = (ch - '0') * 64;
+	  ch = (ch - '0') * 64;
 
 	  /* second octal digit */
 	  next = fgetc (in);
@@ -364,7 +364,7 @@ reload_frozen_state (m4 *context, const char *name)
   int character;
   int operation;
   char syntax;
-  unsigned char *string[3];
+  char *string[3];
   int allocated[3];
   int number[3] = {0};
 
@@ -627,7 +627,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 		    m4_error (context, EXIT_FAILURE, 0,
 			      _("premature end of frozen file"));
 
-		  string[0][i] = (unsigned char) ch;
+		  string[0][i] = ch;
 		}
 	    }
 	  string[0][number[0]] = '\0';
