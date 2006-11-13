@@ -1,5 +1,17 @@
 2006-11-13  Eric Blake  <ebb9@byu.net>
 
+	* src/output.c (cleanup_tmpfile): Avoid double error message when
+	umask is prohibitive.
+	(m4_tmpname, m4_tmpopen, m4_tmpclose, m4_tmpremove): New
+	functions.
+	(m4_tmpfile): Add parameter, move cloexec action here.
+	(make_room_for): Adjust caller.  Don't keep too many files open.
+	(insert_diversion_helper): Unlink emptied temp files.
+	(make_diversion): Don't keep too many files open.
+	* doc/m4.texinfo (Diversions): Tweak wording, now that open file
+	descriptors are no longer a limiting factor.
+	* NEWS: Document this change.
+
 	Backport sparse diversion handling from head.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	avltree-oset'.

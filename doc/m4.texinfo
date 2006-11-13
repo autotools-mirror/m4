@@ -3584,8 +3584,8 @@ a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
 When creating the temporary file, @code{m4} honors the value of the
 environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
-So, it is theoretically possible that the number of diversions be
-limited by the number of available file descriptors.
+So, it is theoretically possible that the number and aggregate size of
+diversions is limited only by available disk space.
 
 @ignore
 @comment We need to test spilled diversions, but don't need to expose
