@@ -1,3 +1,24 @@
+2006-11-13  Eric Blake  <ebb9@byu.net>
+
+	Backport sparse diversion handling from head.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	avltree-oset'.
+	* src/output.c (struct m4_diversion): Rename from struct
+	diversion, and update members.  All users changed.
+	(diversion_table): Change to an ordered set, instead of an array.
+	(div0): New storage for diversion 0.
+	(diversions): No longer needed.
+	(free_list): New list to allow recycling diversion storage.
+	(diversion_storage): New storage to reduce malloc overhead.
+	(cmp_diversion_CB, threshold_diversion_CB): New callbacks.
+	(output_init, output_exit, cleanup_tmpfile, make_room_for)
+	(make_diversion): Handle new diversion storage scheme.
+	(insert_diversion_helper): New function.
+	(insert_diversion, undivert_all, freeze_diversions): Use it.
+	* doc/m4.texinfo (Divert, Diversions): Move hidden test of memory
+	exhaustion to visible test of large diversion numbers.
+	* NEWS: Document this fix.
+
 2006-11-11  Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (m4_translit): Slight optimization.

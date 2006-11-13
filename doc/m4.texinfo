@@ -3652,20 +3652,6 @@ divert(`1')
 f
 m4exit
 @end example
-
-@comment We also need to test allocation overflow.  On 32-bit
-@comment platforms, this should fail outright.  But on 64-bit platforms
-@comment with enough memory, the allocation might succeed (hopefully
-@comment testers don't mind the memory thrashing), so fake the same
-@comment output for test success.
-
-@example
-divert(eval(`1<<28'))
-divert(`2')
-errprint(__program__`: memory exhausted
-')m4exit(`1')
-@error{}m4: memory exhausted
-@end example
 @end ignore
 
 @c FIXME: need some explanation here why this is a useful feature, not
@@ -3725,10 +3711,10 @@ m4wrap(`Wrapped text preceeds ')
 @result{}Wrapped TEXT preceeds diverted text.
 @end example
 
-If output is diverted to a non-existent diversion, it is simply
-discarded.  This can be used to suppress unwanted output.  A common
-example of unwanted output is the trailing newlines after macro
-definitions.  Here is how to avoid them.
+If output is diverted to a negative diversion, it is simply discarded.
+This can be used to suppress unwanted output.  A common example of
+unwanted output is the trailing newlines after macro definitions.  Here
+is a common programming idiom in @code{m4} for avoiding them.
 
 @example
 divert(`-1')
@@ -3738,7 +3724,19 @@ divert
 @result{}
 @end example
 
-This is a common programming idiom in @code{m4}.
+@cindex @acronym{GNU} extensions
+Traditional implementations only supported ten diversions.  But as a
+@acronym{GNU} extension, diversion numbers can be as large as positive
+integers will allow, rather than treating a multi-digit diversion number
+as a request to discard text.
+
+@example
+divert(eval(`1<<28'))world
+divert(`2')hello
+^D
+@result{}hello
+@result{}world
+@end example
 
 Note that @code{divert} is an English word, but also an active macro
 without arguments.  When processing plain text, the word might appear in
