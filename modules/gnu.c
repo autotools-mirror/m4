@@ -825,29 +825,15 @@ M4BUILTIN_HANDLER (m4symbols)
 
 /* This contains macro which implements syncoutput() which takes one arg
      1, on, yes - turn on sync lines
-     0, off, no - turn off sync lines
+     0, off, no, blank - turn off sync lines
      everything else is silently ignored  */
 
 /**
- * syncoutput(SYNC?)
+ * syncoutput(TRUTH)
  **/
 M4BUILTIN_HANDLER (syncoutput)
 {
-  const char *arg = M4ARG (1);
-
-  if (arg[0] == '\0'
-      || arg[0] == '0'
-      || arg[0] == 'n'
-      || arg[0] == 'N'
-      || ((arg[0] == 'o' || arg[0] == 'O')
-	  && (arg[1] == 'f' || arg[1] == 'F')))
-    m4_set_sync_output_opt (context, false);
-  else if (arg[0] == '1'
-	   || arg[0] == 'y'
-	   || arg[0] == 'Y'
-	   || ((arg[0] == 'o' || arg[0] == 'O')
-	       && (arg[1] == 'n' || arg[1] == 'N')))
-    m4_set_sync_output_opt (context, true);
-  else
-    m4_warn (context, 0, _("%s: unknown directive `%s'"), M4ARG (0), arg);
+  bool value = m4_get_syncoutput_opt (context);
+  value = m4_parse_truth_arg (context, M4ARG (1), M4ARG (0), value);
+  m4_set_syncoutput_opt (context, value);
 }

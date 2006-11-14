@@ -2,500 +2,540 @@ GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
 Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006 Free Software
 Foundation, Inc.
 
-Version beta 1.9b - ???, by ??? (CVS version 1.9a)
+* Version beta 1.9b - ???, by ??? (CVS version 1.9a)
 
 NOTE - there are still a number of FIXMEs to resolve before this can be
 promoted to 2.0.
 
-* The build environment has been updated to modern GNU practices,
-  depending on newer features of Autoconf, Automake, Libtool, Gettext,
-  and Gnulib to be more portable to a wide variety of platforms.
+** Building M4
 
-* If the POSIXLY_CORRECT environment variable is set, m4 now disables
-  GNU extensions that are incompatible with POSIX.
-  - FIXME: POSIXLY_CORRECT should imply -G, rather than being a separate
-  conditional in the code.  And we should have -g to override the
-  environment.  Also, the list of features incompatible with POSIX is
-  still larger than what either flag currently affects.
+*** The build environment has been updated to modern GNU practices,
+    depending on newer features of Autoconf, Automake, Libtool, Gettext,
+    and Gnulib to be more portable to a wide variety of platforms.
 
-* POSIXLY_CORRECT and `m4 --traditional' now makes the `define' builtin
+** New command line behavior
+
+*** If the POSIXLY_CORRECT environment variable is set, it implies the
+    `-G' and `-Q' options, effectively giving a more fully POSIX-compliant
+    implementation with only compatible GNU extensions.
+
+*** New `-b'/`--batch' command-line option to force non-interactive mode.
+    Also, in addition to `-e'/`--interactive' requesting interactive mode,
+    m4 now follows the lead of sh, and automatically enters interactive
+    mode when there are no files specified, and when both standard input
+    and standard error are terminals.
+
+*** New `-B'/`--prepend-include' command-line option allows prepending to
+    the include path, rather than always searching `.' first.
+
+*** The `-d'/`--debug' command-line option now understands `-' and `+'
+     modifiers, the way `debugmode' has always done.  The option
+    `--debugmode' is added as an alias for `-d'.
+
+*** New `--debuglen' command-line option matches the spelling of a new
+    macro, and the old spelling `--arglength' now issues a warning that it
+    might be withdrawn in the future.
+
+*** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional',
+    allowing the GNU module to be selected even when POSIXLY_CORRECT.
+
+*** The `-H'/`--hashsize' options, which were made no-ops in a previous
+    beta, now issue a deprecation warning.
+
+*** The `-L'/`--nesting-limit' command-line option now performs argument
+    validation and accepts an optional multiplier suffix.
+
+*** The `-o'/`--error-output' options, which were replaced by
+    `--debugfile' in M4 1.4.7, now issue a deprecation warning.  This
+    warning interferes with all versions of Autoconf prior to 2.61, so plan
+    on installing an updated Autoconf when installing M4 2.0.
+
+*** New `-p'/`--pushdef' and `--popdef' command-line options allow more
+    control over macro definitions from the command line between input
+    files.
+
+*** New `-r'/`--regexp-syntax' command-line option changes the default
+    regular expression syntax used by M4.  Without this option, M4
+    continues to use EMACS style expressions.  A new section in the info
+    docs explains the differences between them, and what builtins are
+    affected.
+
+*** New `--safer' command-line option cripples the potentially unsafe
+    builtins `debugfile', `esyscmd', `maketemp', `mkdtemp', `mkstemp', and
+    `syscmd'.
+
+*** New `--syncoutput' command-line option matches the builtin added in a
+    previous beta, and provides more control over sync line generation
+    from the command line between input files.  The previous options
+    `-s'/`--synclines' remain as aliases for `--syncoutput=1'.
+
+*** New `--traceoff' command-line option, and new spelling `--traceon' for
+    `--trace', allow more control over macro tracing from the command line
+    between input files.
+
+*** New `--unload-module' command-line option allows more control over
+    dynamic modules from the command line.  Also, `-m'/`--load-module' now
+    acts between input files.
+
+*** New `--warnings' command-line option re-enables warnings, overriding
+    `-Q'/`--quiet'/`--silent', allowing warnings even when POSIXLY_CORRECT.
+
+** POSIX conformance
+
+*** POSIXLY_CORRECT and `m4 --traditional' now makes the `define' builtin
   replace all `pushdef'ed values of a macro.
   - FIXME: The Austin group clarified that this was never a POSIX
   requirement; consider reverting this change.
 
-* The `defn' builtin now allows any number of arguments, as POSIX requires.
+*** The `defn' builtin now allows any number of arguments, as POSIX requires.
   - FIXME: This still doesn't work with concatenating builtins with text.
 
-* The '$' syntax class is now enabled.  See the manual for examples.
   - FIXME: POSIX recommends using ${10} instead of $10 for the tenth
   positional argument.  We should deprecate $10.
 
-* New builtin `renamesyms' allows programmatic renaming of all symbols
-  according to a regular expression.
+ - FIXME: `m4wrap' semantics need an update to FIFO.
+
+** Removed builtins
+
+*** The experimental `epatsubst' and `eregexp' builtins have been removed
+    in favor of a new `changeresyntax' builtin.
+
+** New builtins
+
+*** New `changeresyntax' builtin allows programmtic setting of the default
+    regular expression flavor, to match `-r'/`--regexp-syntax' command-line
+    option.
+
+*** A new builtin `debuglen' is introduced which allows runtime setting
+    of debug output length, previously controlled only by the `-l' command
+    line argument.  Additionally, whether using the new macro or the
+    command line argument, the length limitation now affects dumpdef output
+    as well as trace output, undergoes argument validation, and accepts an
+    optional multiplier suffix.
+  - FIXME the multiplier suffix isn't reliable yet
+
+*** New builtin `mkdtemp' parallels `mkstemp', but allows the creation of
+    temporary directories instead of files.
+
+*** New `renamesyms' builtin allows programmatic renaming of all symbols
+    according to a regular expression.
   - FIXME: This feature can cause core dumps when renaming multiple
   symbols to the same name.
 
-* The `builtin' macro now has a special form, where if the first argument
-  is exactly the special token representing defn(`builtin'), the expansion
-  is the special token representing the builtin named in the second
-  argument.  This allows regenerating a macro with a more efficient
-  mapping directly to a builtin function, rather than through textual
-  indirection through further expansions of `builtin'.
+*** The `modules' and `symbols' builtins, introduced in previous betas,
+    have been renamed `m4modules' and `m4symbols', in order to minimize
+    problems when upgrading from 1.4.x and processing English text.  To
+    prevent future problems, any future macro added as a GNU extension will
+    either be blind (ie. be unrecognized without arguments), or begin with
+    the prefix `m4' or `__'.
 
-* New `-r'/`--regexp-syntax' command-line option changes the default
-  regular expression syntax used by M4.  Without this option, M4 continues
-  to use EMACS style expressions.  A new section in the info docs
-  explains the differences between them, and what builtins are affected.
+** Changed behavior of builtins
 
-* The experimental `epatsubst' and `eregexp' have been removed in favor
-  of a new `changeresyntax' builtin.
+*** The '$' syntax class to the `changeresyntax' builtin is now enabled.
+    See the manual for examples.
 
-* `patsubst' and `regexp' have a new optional 4th argument to use a
-  different regular expression syntax for the duration of that invocation.
+*** The `builtin' builtin now has a special form, where if the first
+    argument is exactly the special token representing defn(`builtin'), the
+    expansion is the special token representing the builtin named in the
+    second argument.  This allows regenerating a macro with a more
+    efficient mapping directly to a builtin function, rather than through
+    textual indirection through further expansions of `builtin'.
 
-* New `-B'/`--prepend-include' command-line option allows prepending to
-  the include path, rather than always searching `.' first.
+*** New `m' flag to `-d'/`--debug' option or `debugmode' macro traces
+    actions related to module loading and unloading, and affects `dumpdef'
+    and trace output to show where builtins come from.  New `s' flag shows
+    the entire stack of `pushdef' definitions during `dumpdef'.  The `c'
+    flag has been updated to output two lines instead of three (since the
+    last two had always been paired), and to add information to the first
+    line to show the definition of the macro being expanded.  The 'e' flag
+    has been updated to output non-text expansions.
 
-* New `--safer' command-line option cripples the potentially unsafe
-  macros `debugfile', `esyscmd', `maketemp', `mkdtemp', `mkstemp', and
-  `syscmd'.
+*** The `dumpdef' macro now always outputs to standard error, rather than
+    the debug file specified by the `--debugfile' option or `debugfile'
+    macro.
 
-* The `maketemp' builtin now always warns that it is obsolete, even in GNU
-  mode where it uses the same secure algorithm as `mkstemp', because of
-  the recommendation of POSIX to obsolete `maketemp' as inherently
-  insecure when obeying POSIX.
+*** The `maketemp' builtin now always warns that it is obsolete, even in GNU
+    mode where it uses the same secure algorithm as `mkstemp', because of
+    the recommendation of POSIX to obsolete `maketemp' as inherently
+    insecure when obeying POSIX.
 
-* New builtin `mkdtemp' parallels `mkstemp', but allows the creation of
-  temporary directories instead of files.
+*** The `patsubst' and `regexp' builtins have a new optional 4th argument
+    to use a different regular expression syntax for the duration of that
+    invocation.
 
-* New `-b'/`--batch' command line option to force non-interactive mode.
-  Also, in addition to `-e'/`--interactive' requesting interactive mode, m4
-  now follows the lead of sh, and automatically enters interactive mode
-  when there are no files specified, and when both standard input and
-  standard error are terminals.
+*** The semantics of `traceon' and `traceoff' now match traditional
+    implementations: when called without arguments, they affect global
+    state rather than affecting only the macros defined at that moment.
+    The manual includes an example of how to recover 1.4.x semantics.
 
-* New `m' flag to `-d'/`--debug' option or `debugmode' macro traces
-  actions related to module loading and unloading, and affects `dumpdef'
-  and trace output to show where builtins come from.  New `s' flag shows
-  the entire stack of `pushdef' definitions during `dumpdef'.  The `c' flag
-  has been updated to output two lines instead of three (since the last two
-  had always been paired), and to add information to the first line to show
-  the definition of the macro being expanded.  The 'e' flag has been
-  updated to output non-text expansions.  Also, the `--debug' option now
-  understands `-' and `+' modifiers, the way `debugmode' has always done.
-  The option `--debugmode' is added as an alias for `-d'.
+** Other changes
 
-* The semantics of `traceon' and `traceoff' now match traditional
-  implementations: when called without arguments, they affect global state
-  rather than affecting only the macros defined at that moment.  The
-  manual includes an example of how to recover 1.4.x semantics.
-
-* The syntax of frozen files format V2 has been improved to save
-  additional state.
+*** The syntax of frozen files format V2 has been improved to save
+    additional state.
   - FIXME: format 2 still needs to be tweaked to allow complete ASCII
   representation and to catch any more missing state; once 2.0 is released,
   any further changes would introduce format 3.
 
-* The `-o'/`--error-output' options, which were replaced by
-  `--debugfile' in M4 1.4.7, now issue a deprecation warning.  This warning
-  interferes with all versions of Autoconf prior to 2.61, so plan on
-  installing an updated Autoconf when installing M4 2.0.
-
-* The `-H'/`--hashsize' options, which were made no-ops in a previous
-  beta, now issue a deprecation warning.
-
-* The `dumpdef' macro now always outputs to standard error, rather than
-  the debug file specified by the `--debugfile' option or `debugfile'
-  macro.
-
-* The builtins `modules' and `symbols', introduced in previous betas,
-  have been renamed `m4modules' and `m4symbols', in order to minimize
-  problems when upgrading from 1.4.x and processing English text.  To
-  prevent future problems, any future macro added as a GNU extension will
-  either be blind (ie. be unrecognized without arguments), or begin with
-  the prefix `m4' or `__'.
-
-* A new builtin `debuglen' is introduced which allows runtime setting
-  of debug output length, previously controlled only by the `-l' command
-  line argument.  A new command line argument `--debuglen' matches the
-  spelling of the new macro, and the old spelling `--arglength' now issues
-  a warning that it might be withdrawn in the future.  Additionally,
-  whether using the new macro or the command line argument, the length
-  limitation now affects dumpdef output as well as trace output, undergoes
-  argument validation, and accepts an optional multiplier suffix.
-
-* The `-L'/`--nesting-limit' command line option can now be set to 0
-  to remove the default limit.  However, it is still possible that heavily
-  nested input can cause abrupt program termination due to stack
-  overflow.  Also, the option now performs argument validation and accepts
-  an optional multiplier suffix.
-
-* The `--help' and `--version' command line options now consistently
-  override all earlier options.  For example, `m4 -otrace --help' now no
-  longer accidentally creates an empty file `trace'.
-
-* The builtin `divert' now uses memory proportional to the number of
-  diversions created, rather than to the maximum diversion number
-  encountered, allowing larger diversion numbers without exhausting system
-  memory.
-
-* FIXME: `m4wrap' semantics need an update to FIFO.
-
-* FIXME: include the (long) list of changes in 1.4.x that were not already
+FIXME: include the (long) list of changes in 1.4.x that were not already
   in earlier betas.
+* Version 1.4.8
+* Version 1.4.7
+* Version 1.4.6
+* Version 1.4.5
 
-Version beta 1.4q - August 2001, by Gary V. Vaughan
+* Version beta 1.4q - August 2001, by Gary V. Vaughan
 
-* Support for the experimental `changeword' has been dropped.
+** Support for the experimental `changeword' has been dropped.
 
-* `m4 --hashsize' and `-H' are still accepted, but have no effect.  M4
-  will grow its internal symbol table if the symbol density is having
-  an effect on performance.
+** `m4 --hashsize' and `-H' are still accepted, but have no effect.  M4
+   will grow its internal symbol table if the symbol density is having an
+   effect on performance.
 
-* `configure --without-modules' will build an m4 binary with no preloaded
-  modules.  At startup it will search for and load modules `m4' and either
-  `gnu' or `traditional'.  This mode of operation can be used for
-  development and debugging of the base modules without the need to
-  recompile all of m4 with each modification.
+** `configure --without-modules' will build an m4 binary with no preloaded
+   modules.  At startup it will search for and load modules `m4' and either
+   `gnu' or `traditional'.  This mode of operation can be used for
+   development and debugging of the base modules without the need to
+   recompile all of m4 with each modification.
 
-* `configure --with-modules="gnu m4 traditional load"', for example,
-  will build an m4 binary with the named modules preloaded, ready to
-  be activated (even on static lib only machines) with the `-m' option
-  or using the `load' builtin.
+** `configure --with-modules="gnu m4 traditional load"', for example,
+   will build an m4 binary with the named modules preloaded, ready to be
+   activated (even on static lib only machines) with the `-m' option or
+   using the `load' builtin.
 
-* M4 has no builtins or macros in core, they are all loaded from modules
-  at startup.  This means that modules are no longer optional, though
-  the standard build will statically link the modules `m4', `gnu' and
-  `traditional', so even on machines with no ltdl support, all of the
-  functionality from previous releases is available.
+** M4 has no builtins or macros in core, they are all loaded from modules
+   at startup.  This means that modules are no longer optional, though the
+   standard build will statically link the modules `m4', `gnu' and
+   `traditional', so even on machines with no ltdl support, all of the
+   functionality from previous releases is available.
 
-* New builtin `load' to dynamically load modules which can define new
-  builtins and user macros.
+** New builtin `load' to dynamically load modules which can define new
+   builtins and user macros.
 
-* New builtin `unload' to remove loaded modules (and the builtins and user
-  macros they define) from the running m4 interpreter.
+** New builtin `unload' to remove loaded modules (and the builtins and user
+   macros they define) from the running m4 interpreter.
 
-* New builtins `eregexp' and `epatsubst' to use Extended Regular Expressions
-  syntax in lieu of Basic Regular Expressions as used by `regexp' and
-  `patsubst'.
+** New builtins `eregexp' and `epatsubst' to use Extended Regular
+   Expressions syntax in lieu of Basic Regular Expressions as used by
+   `regexp' and `patsubst'.
 
-* The names of all currently loaded modules are returned by the new
-  builtin, ``modules''.
+** The names of all currently loaded modules are returned by the new
+   builtin, ``modules''.
 
-* Loadable modules can define new builtin functions or text expansion
-  macros.
+** Loadable modules can define new builtin functions or text expansion
+   macros.
 
-* The module code has been rewritten to use libltdl, the libtool dynamic
-  loader, which means GNU m4 can now load (and unload) modules just about
-  anywhere which it can be built.  This includes obscure hosts such as
-  cygwin and BeOS, and also on hosts which do not have shared libraries,
-  through preloading (see libtool manual) and GNU dld.
+** The module code has been rewritten to use libltdl, the libtool dynamic
+   loader, which means GNU m4 can now load (and unload) modules just about
+   anywhere which it can be built.  This includes obscure hosts such as
+   cygwin and BeOS, and also on hosts which do not have shared libraries,
+   through preloading (see libtool manual) and GNU dld.
 
-* Modules can now be built without the m4 source being available using the
-  installed m4module.h header file (and some other headers that it includes
-  for you), and the installed libm4.la libtool library.  All symbols
-  exported from libm4.la have a prefix of `m4_' or `M4_'.  See the modules
-  directory for examples of usage.
+** Modules can now be built without the m4 source being available using the
+   installed m4module.h header file (and some other headers that it
+   includes for you), and the installed libm4.la libtool library.  All
+   symbols exported from libm4.la have a prefix of `m4_' or `M4_'.  See the
+   modules directory for examples of usage.
 
-* A new V2 format for frozen files that saves module and syntax information.
+** A new V2 format for frozen files that saves module and syntax information.
 
-Version beta 1.4o - January 2000, by Rene' Seindal
+* Version beta 1.4o - January 2000, by Rene' Seindal
 
-* Modules can be loaded from the command line with --load-module
+** Modules can be loaded from the command line with --load-module
 
-* Modules now use libtool's wrapper libltdl.
+** Modules now use libtool's wrapper libltdl.
 
-* New builtin `symbols' allows dynamic queries of all currently defined
-  macros.
+** New builtin `symbols' allows dynamic queries of all currently defined
+   macros.
 
-* Bug fixes.
+** Various Bug fixes.
 
-Version beta 1.4n - November 1998, by Rene' Seindal
+* Version beta 1.4n - November 1998, by Rene' Seindal
 
-* The module code has been reorganised yet again, and now compiles
-  correctly on GNU/Linux, HPUX 9 and 10, SunOS 5 and Solaris 5.
+** The module code has been reorganised yet again, and now compiles
+   correctly on GNU/Linux, HPUX 9 and 10, SunOS 5 and Solaris 5.
 
-* When configured --with-gmp a new builtin `mpeval' is now defined.  The
-  builtin `eval' retains its normal behaviour.
+** When configured --with-gmp a new builtin `mpeval' is now defined.  The
+   builtin `eval' retains its normal behaviour.
 
-* m4 --version also shows which options were used for compilation, such as:
-  "GNU m4 1.4n (options: modules gmp changeword)"
+** m4 --version also shows which options were used for compilation, such as:
+   "GNU m4 1.4n (options: modules gmp changeword)"
 
-* New option --import-environment defines all environment variables as
-  macros.  This is done before -D and -U are handled, so the macros can be
-  changed through these options.
+** New option --import-environment defines all environment variables as
+   macros.  This is done before -D and -U are handled, so the macros can be
+   changed through these options.
 
-* Error messages now always print program name before input file name as
-  specified by GNU coding standards.  Reported by Akim Demaille
-  <demaille@inf.enst.fr>.
+** Error messages now always print program name before input file name as
+   specified by GNU coding standards.  Reported by Akim Demaille.
 
-* Bug fixed: "undivert(0)" could cause m4 to read standard output.  A call
-  of "undivert(0)" is now silently ignored.
+** Bug fixed: "undivert(0)" could cause m4 to read standard output.  A call
+   of "undivert(0)" is now silently ignored.
 
-* Bug fixed: when compiling --with-included-gettext, <libintl.h> wasn't
-  found in intl/ directory.  Reported by Andrew Bettison
-  <andrewb@zip.com.au>.
+** Bug fixed: when compiling --with-included-gettext, <libintl.h> wasn't
+   found in intl/ directory.  Reported by Andrew Bettison.
 
-Version beta 1.4m - November 1998, by Rene' Seindal
+* Version beta 1.4m - November 1998, by Rene' Seindal
 
-* Using libtool for compiling modules and for linking main app.
+** Using libtool for compiling modules and for linking main app.
 
-* Reorganised the dynamic module code to encapsulate system dependencies
-  better.  The code for HPUX shl_load() still needs testing and debugging.
-  A dld interface is also missing.  Any volunteers?
+** Reorganised the dynamic module code to encapsulate system dependencies
+   better.  The code for HPUX shl_load() still needs testing and debugging.
+   A dld interface is also missing.  Any volunteers?
 
-* The files from the GNU m4 web-site is now in examples/WWW as a more
-  complete example of what GNU m4 can do.
+** The files from the GNU m4 web-site is now in examples/WWW as a more
+   complete example of what GNU m4 can do.
 
-Version beta 1.4l - November 1998, by Rene' Seindal
+* Version beta 1.4l - November 1998, by Rene' Seindal
 
-* GNU m4 now has an escape syntax category.  If a character is marked as
-  an escape, words are only recognised as macros if preceded by an escape
-  character.  It is a bit like -P, but dynamic: it can be turned on and
-  off.  The GNU m4 web-site on http://www.seindal.dk/rene/gnu/ is
-  maintained with this feature - the m4 source is available on the site.
+** GNU m4 now has an escape syntax category.  If a character is marked as
+   an escape, words are only recognised as macros if preceded by an escape
+   character.  It is a bit like -P, but dynamic: it can be turned on and
+   off.  The GNU m4 web-site on http://www.seindal.dk/rene/gnu/ is
+   maintained with this feature - the m4 source is available on the site.
 
-* The module interface is improved, thanks to "Brian J. Fox"
-  <bfox@datawave.net>, who have contributed some code from Meta-HTML.  The
-  modules now build automatically and installs properly, by default in
-  /usr/local/libexec/m4.  There is a preliminary, untested support for
-  shl_load().
+** The module interface is improved, thanks to "Brian J. Fox",
+   who has contributed some code from Meta-HTML.  The modules now build
+   automatically and installs properly, by default in
+   /usr/local/libexec/m4.  There is a preliminary, untested support for
+   shl_load().
 
-* There is now a __m4_version__ macro that expands to the current version
-  number.
+** There is now a __m4_version__ macro that expands to the current version
+   number.
 
-Version beta 1.4k - November 1998, by Erick Branderhorst and Rene' Seindal
+* Version beta 1.4k - November 1998, by Erick Branderhorst and Rene' Seindal
 
-* GNU m4 now uses gettext to support internationalization.
+** GNU m4 now uses gettext to support internationalization.
 
-* GNU m4 now uses automake to control Makefile.in generation.  This
-  should make it more consistent with the GNU standards.
+** GNU m4 now uses automake to control Makefile.in generation.  This
+   should make it more consistent with the GNU standards.
 
-* GNU m4 will use the gmp library for multiple precision integral and
-  rational arithmetic in `eval' if configured with `--with-gmp'.  If
-  configured without `--with-gmp' or if gmp is not available, and the type
-  `long long int' is, GNU m4 will use that for `eval' arithmetic.
+** GNU m4 will use the gmp library for multiple precision integral and
+   rational arithmetic in `eval' if configured with `--with-gmp'.  If
+   configured without `--with-gmp' or if gmp is not available, and the type
+   `long long int' is, GNU m4 will use that for `eval' arithmetic.
 
-* GNU m4 now parses the input according to a syntax table, that can be
-  modified through the new builtin `changesyntax'.  It is a generalisation
-  of the existing builtins `changecom' and `changequote'.  The changes are
-  completely backwards compatible (except for the existence of
-  `changesyntax').
+** GNU m4 now parses the input according to a syntax table, that can be
+   modified through the new builtin `changesyntax'.  It is a generalisation
+   of the existing builtins `changecom' and `changequote'.  The changes are
+   completely backwards compatible (except for the existence of
+   `changesyntax').
 
-* Sync lines can be turned on and off with the `syncoutput' builtin.  The
-  builtin `syncoutput' is a GNU extension.
+** Sync lines can be turned on and off with the `syncoutput' builtin.  The
+   builtin `syncoutput' is a GNU extension.
 
-* New experimental feature: dynamically loadable modules.  New builtin
-  `loadmodules' loads shared libraries, that can define new builtin
-  macros, ie, new macros can be written in C.  Depends on the dlopen()
-  interface, and is currently only tested on Linux.  Enabled at configure
-  time with `--with-modules'.  Documentation is in src/module.c and
-  module/README.
+** New experimental feature: dynamically loadable modules.  New builtin
+   `loadmodules' loads shared libraries, that can define new builtin
+   macros, ie, new macros can be written in C.  Depends on the dlopen()
+   interface, and is currently only tested on Linux.  Enabled at configure
+   time with `--with-modules'.  Documentation is in src/module.c and
+   module/README.
 
-* Implement a GNU message catalog for French (Franc,ois Pinard).
+** Implement a GNU message catalog for French (Franc,ois Pinard).
 
-* Filenames found through path searches are now correctly reflected in
-  error and debug messages and through the `__file__' macro.
+** Filenames found through path searches are now correctly reflected in
+   error and debug messages and through the `__file__' macro.
 
-Bugs fixed
+** Bugs fixed:
 
-* All 8-bit characters can now be used for quotes.
+*** All 8-bit characters can now be used for quotes.
 
-
-Version 1.4 - October 1994, by Franc,ois Pinard
+FIXME: include the (long) list of changes in 1.4.x that were not already
+  in earlier betas.
+* Version 1.4.4
+* Version 1.4.3
+* Version 1.4.2
+* Version 1.4.1
 
-(No user visible changes)
+* Version 1.4 - October 1994, by Franc,ois Pinard
 
-
-Version 1.3 - September 1994, by Franc,ois Pinard
+** (No user visible changes)
 
-* Diversions are created as needed.  Option `-N' is still accepted, but
-otherwise ignored.  Users should use only negative diversion numbers,
-instead of high positive numbers, for diverting to nowhere.
+* Version 1.3 - September 1994, by Franc,ois Pinard
 
-* Diversions should also work faster.  No temporary files will be needed
-at all if all diversions taken altogether do not use more than 512K.
+** Diversions are created as needed.  Option `-N' is still accepted, but
+   otherwise ignored.  Users should use only negative diversion numbers,
+   instead of high positive numbers, for diverting to nowhere.
 
-* Frozen state files may be produced with the `--freeze-state' (-F)
-option and later brought back through the `--reload-state' (-R) option.
+** Diversions should also work faster.  No temporary files will be needed
+   at all if all diversions taken altogether do not use more than 512K.
 
-
-Version 1.2 - July 1994, by Franc,ois Pinard
+** Frozen state files may be produced with the `--freeze-state' (-F)
+   option and later brought back through the `--reload-state' (-R) option.
 
-* In patsubst(STRING, REGEXP, REPLACEMENT), \& in REPLACEMENT has been
-changed to represent this part of STRING matched by the whole REGEXP,
-instead of the whole STRING as before.  \0 does the same, but emits a
-diagnostic saying it will disappear in some subsequent release.
+* Version 1.2 - July 1994, by Franc,ois Pinard
 
-* eval(EXPR) emits a diagnostic if EXPR has suffixed crumb.  The same for
-other numeric conversions in incr(), decr(), divert(), etc.
+** In patsubst(STRING, REGEXP, REPLACEMENT), \& in REPLACEMENT has been
+   changed to represent this part of STRING matched by the whole REGEXP,
+   instead of the whole STRING as before.  \0 does the same, but emits a
+   diagnostic saying it will disappear in some subsequent release.
 
-* `--fatal-warnings' (-E) stops execution at first warning.
+** eval(EXPR) emits a diagnostic if EXPR has suffixed crumb.  The same for
+   other numeric conversions in incr(), decr(), divert(), etc.
 
-* `--nesting-limit=LEVEL' (-L LEVEL) sets a limit to macro nesting.
-It is initially fixed at 250.
+** `--fatal-warnings' (-E) stops execution at first warning.
 
-* `--word-regexp=REGEXP' (-W REGEXP) modifies macro name syntax, like
-does the new `changeword(REGEXP)' macro.  This feature is experimental,
-tell me your opinions about it.  You do need --enable-changeword at
-configure time to get these things.  Do *not* depend on them yet.
+** `--nesting-limit=LEVEL' (-L LEVEL) sets a limit to macro nesting.
+   It is initially fixed at 250.
 
-* Trace output format is scannable by GNU Emacs' next-error function.
+** `--word-regexp=REGEXP' (-W REGEXP) modifies macro name syntax, like
+   does the new `changeword(REGEXP)' macro.  This feature is experimental,
+   tell me your opinions about it.  You do need --enable-changeword at
+   configure time to get these things.  Do *not* depend on them yet.
 
-* Stack overflow is detected and diagnosed on some capable systems.
+** Trace output format is scannable by GNU Emacs' next-error function.
 
-* Various bugs have been corrected, m4 should be more portable.  See the
-ChangeLog for details.
+** Stack overflow is detected and diagnosed on some capable systems.
 
-
-Version 1.1 - November 1993, by Franc,ois Pinard
+** Various bugs have been corrected, m4 should be more portable.  See the
+   ChangeLog for details.
 
-Changes which might affect existing GNU m4 scripts:
+* Version 1.1 - November 1993, by Franc,ois Pinard
 
-* Option `-V' has been removed, use `--version' instead.  `--version'
-writes on standard output instead of standard error, and inhibits any
-script execution.
+** Changes which might affect existing GNU m4 scripts:
 
-* `--no-gnu-extensions' has been renamed `--traditional'.
+*** Option `-V' has been removed, use `--version' instead.  `--version'
+    writes on standard output instead of standard error, and inhibits any
+    script execution.
 
-* In `eval', `^' used to indicate exponentiation, use `**' instead.
+*** `--no-gnu-extensions' has been renamed `--traditional'.
 
-* The automatic undiversion which takes place at end of all input is
-forced into the main output stream.
+*** In `eval', `^' used to indicate exponentiation, use `**' instead.
 
-Changes which are unlikely to affect existing scripts:
+*** The automatic undiversion which takes place at end of all input is
+    forced into the main output stream.
 
-* `--help' prints an usage summary on standard output.  Script execution
-is then inhibited.
+** Changes which are unlikely to affect existing scripts:
 
-* `--prefix-builtins' (-P) prefixes all builtin macros by `m4_'.
+*** `--help' prints an usage summary on standard output.  Script execution
+    is then inhibited.
 
-* Most builtin macros for which arguments are mandatory, called without
-any arguments, are no more recognized as builtin macros: they are
-consequently copied verbatim to the output stream.
+*** `--prefix-builtins' (-P) prefixes all builtin macros by `m4_'.
 
-* `define' and `pushdef' are usable with only one argument, they give
-this argument an empty definition.
+*** Most builtin macros for which arguments are mandatory, called without
+    any arguments, are no more recognized as builtin macros: they are
+    consequently copied verbatim to the output stream.
 
-* `eval' new operators for binary representation handling: `^' for
-exclusive-or, `~' for the bitwise negation, `<<' and `>>' for shifts.
+*** `define' and `pushdef' are usable with only one argument, they give
+    this argument an empty definition.
 
-* `eval' recognizes the notation 0bDIGITS for binary numbers and the
-notation 0rRADIX:DIGITS for numbers in any radix from 1 to 36.
-
-Version 1.0.3 - December 1992, by Franc,ois Pinard
+*** `eval' new operators for binary representation handling: `^' for
+    exclusive-or, `~' for the bitwise negation, `<<' and `>>' for shifts.
 
-Changes for the user:
+*** `eval' recognizes the notation 0bDIGITS for binary numbers and the
+    notation 0rRADIX:DIGITS for numbers in any radix from 1 to 36.
 
-* `dnl' outputs a diagnostic if immediately followed by `('.  Usually,
-`dnl' is followed by newline or whitespace.
+* Version 1.0.3 - December 1992, by Franc,ois Pinard
 
-* `ifelse' accepts without complaining the common idiom of having only
-one argument.  This is useful for introducing long comments.
+** Changes for the user:
 
-* `eval' always expresses values as signed, whatever the radix.
+*** `dnl' outputs a diagnostic if immediately followed by `('.  Usually,
+    `dnl' is followed by newline or whitespace.
 
-* M4OPTS environment variable is no longer obeyed.
+*** `ifelse' accepts without complaining the common idiom of having only
+    one argument.  This is useful for introducing long comments.
 
-* `--no-warnings' option is renamed `--silent'.
+*** `eval' always expresses values as signed, whatever the radix.
 
-* Debug lines use a new format more compatible with GNU standards.
+*** M4OPTS environment variable is no longer obeyed.
 
-* Various bugs have been corrected.  See the ChangeLog for details.
+*** `--no-warnings' option is renamed `--silent'.
 
-Changes for the installer:
+*** Debug lines use a new format more compatible with GNU standards.
 
-* GNU m4 now uses an Autoconf-generated configure script, and should be
-more easily portable in many ways.  (Cray is not supported yet).
+*** Various bugs have been corrected.  See the ChangeLog for details.
 
-* `make check' has been made more portable, expect no errors.
+** Changes for the installer:
 
-Changes for the programmer:
+*** GNU m4 now uses an Autoconf-generated configure script, and should be
+    more easily portable in many ways.  (Cray is not supported yet).
 
-* Sources have been fully reindented to comply with GNU standards, and
-cleaned up in many ways.
+*** `make check' has been made more portable, expect no errors.
 
-* Sources have been protoized.  Non-ANSI compilers are automatically
-detected, then sources are unprotoized on the fly before compilation.
+** Changes for the programmer:
 
-* GNU m4 uses newer versions of obstack, regex, getopt, etc.
-
-Version 1.0 - October 1991, by Rene' Seindal
+*** Sources have been fully reindented to comply with GNU standards, and
+    cleaned up in many ways.
 
-* Uses GNU configure, taken from the gdb distribution.
+*** Sources have been protoized.  Non-ANSI compilers are automatically
+    detected, then sources are unprotoized on the fly before compilation.
 
-* Uses GNU getopt(), with long option names.
+*** GNU m4 uses newer versions of obstack, regex, getopt, etc.
 
-* The -Q/+quiet option is added, which suppresses warnings about missing
-or superflous arguments to builtin macros.
+* Version 1.0 - October 1991, by Rene' Seindal
 
-* Added default options via the M4OPTS environment variable.
+** Uses GNU configure, taken from the gdb distribution.
 
-* Several minor bugs have been fixed.
-
-Version 0.99 - July 1991, by Rene' Seindal
+** Uses GNU getopt(), with long option names.
 
-* The builtins `incr' and `decr' are now implemented without use of
-`eval'.
+** The -Q/+quiet option is added, which suppresses warnings about missing
+   or superflous arguments to builtin macros.
 
-* The builtin `indir' is added, to allow for indirect macro calls
-(allows use of "illegal" macro names).
+** Added default options via the M4OPTS environment variable.
 
-* The debugging and tracing facilities has been enhanced considerably.
-See the manual for details.
+** Several minor bugs have been fixed.
 
-* The -tMACRO option is added, marks MACRO for tracing as soon as it
-is defined.
+* Version 0.99 - July 1991, by Rene' Seindal
 
-* Builtins are traced after renaming iff they were before.
+** The builtins `incr' and `decr' are now implemented without use of
+   `eval'.
 
-* Named files can now be undiverted.
+** The builtin `indir' is added, to allow for indirect macro calls
+   (allows use of "illegal" macro names).
 
-* The -Nnum option can be used to increase the number of divertions
-available.
+** The debugging and tracing facilities has been enhanced considerably.
+   See the manual for details.
 
-* Calling changecom without arguments now disables all comment handling.
+** The -tMACRO option is added, marks MACRO for tracing as soon as it
+   is defined.
 
-* A bug in `dnl' is fixed.
+** Builtins are traced after renaming iff they were before.
 
-* A bug in the multi-character quoting code is fixed.
+** Named files can now be undiverted.
 
-* Several typos in the manual has been corrected.  More probably persist.
-
-Version 0.75 - November 1990, by Rene' Seindal
+** The -Nnum option can be used to increase the number of divertions
+   available.
 
-* Implemented search path for include files (-I option and M4PATH
-environment variable).
+** Calling changecom without arguments now disables all comment handling.
 
-* Implemented builtin `format' for printf-like formatting.
+** A bug in `dnl' is fixed.
 
-* Implemented builtin `regexp' for searching for regular expressions.
+** A bug in the multi-character quoting code is fixed.
 
-* Implemented builtin `patsubst' for substitution with regular
-expressions.
+** Several typos in the manual has been corrected.  More probably persist.
 
-* Implemented builtin `esyscmd', which expands to a shell commands output.
+* Version 0.75 - November 1990, by Rene' Seindal
 
-* Implemented `__file__' and `__line__' for use in error messages.
+** Implemented search path for include files (-I option and M4PATH
+   environment variable).
 
-* Implemented character ranges in `translit'.
+** Implemented builtin `format' for printf-like formatting.
 
-* Implemented control over debugging output.
+** Implemented builtin `regexp' for searching for regular expressions.
 
-* Implemented multi-character quotes.
+** Implemented builtin `patsubst' for substitution with regular
+   expressions.
 
-* Implemented multi-character comment delimiters.
+** Implemented builtin `esyscmd', which expands to a shell commands output.
 
-* Changed predefined macro `gnu' to `__gnu__'.
+** Implemented `__file__' and `__line__' for use in error messages.
 
-* Changed predefined macro `unix' to `__unix__', when the -G option is
-not used.  With -G, `unix' is still defined.
+** Implemented character ranges in `translit'.
 
-* Added program name to error messages.
+** Implemented control over debugging output.
 
-* Fixed two missing null bytes bugs.
-
-Version 0.50 - January 1990, by Rene' Seindal
+** Implemented multi-character quotes.
+
+** Implemented multi-character comment delimiters.
+
+** Changed predefined macro `gnu' to `__gnu__'.
+
+** Changed predefined macro `unix' to `__unix__', when the -G option is
+   not used.  With -G, `unix' is still defined.
+
+** Added program name to error messages.
+
+** Fixed two missing null bytes bugs.
+
+* Version 0.50 - January 1990, by Rene' Seindal
 
 * Initial beta release.
 

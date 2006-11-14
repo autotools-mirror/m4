@@ -624,15 +624,8 @@ maketemp(XXXXXXXXXXXXXXXXXXXXX)
 maketemp(no_such_dir/XXXXXX)
 ]])
 dnl Abuse our knowledge of AT_CHECK_M4 so that we can get stderr filtering...
-POSIXLY_CORRECT=1
-export POSIXLY_CORRECT
-AT_CHECK_M4([-G --safer], [0], [stdout],
-[[m4:stdin:1: Warning: maketemp: recommend using mkstemp instead
-m4:stdin:2: Warning: maketemp: recommend using mkstemp instead
-m4:stdin:3: Warning: maketemp: recommend using mkstemp instead
-m4:stdin:4: Warning: maketemp: recommend using mkstemp instead
-m4:stdin:5: Warning: maketemp: recommend using mkstemp instead
-]], [stdin& echo $! > pid; wait $!])
+AT_CHECK_M4([-G -Q --safer], [0], [stdout], [],
+[stdin& echo $! > pid; wait $!])
 pid=`cat pid`
 cat >expout <<EOF
 

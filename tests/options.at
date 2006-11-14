@@ -73,6 +73,12 @@ AT_CHECK_M4([--arglength=10], [0], [],
 [[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
 ]])
 
+dnl --word-regexp from 1.4.x is no longer supported.  Can't test for its
+dnl alternate spelling -W, as that now means --warnings.
+AT_CHECK_M4([[--word-regexp='[a-zA-Z0-9_]+']], [0], [],
+[[m4: Warning: `--word-regexp' is deprecated
+]])
+
 AT_CLEANUP
 
 
@@ -176,6 +182,63 @@ m@&t@4_dnl()
 
 AT_CHECK_M4([--define=foo --debug= -- a], [0], [[ 1
 m@&t@4_dnl()
+]])
+
+AT_CLEANUP
+
+
+## --------------- ##
+## POSIXLY_CORRECT ##
+## --------------- ##
+
+AT_SETUP([POSIXLY_CORRECT])
+
+dnl this test group depends on correct settings of POSIXLY_CORRECT
+if test -n "${POSIXLY_CORRECT+set}" ; then
+  (unset POSIXLY_CORRECT) >/dev/null 2>&1 || {
+    echo "Problem unsetting POSIXLY_CORRECT"
+    AT_CHECK([exit 77])
+  }
+  unset POSIXLY_CORRECT
+fi
+
+dnl By default, GNU extensions and warnings are enabled
+AT_DATA([in], [[__line__
+dnl()
+]])
+AT_CHECK_M4([in], [0], [[1
+]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+AT_CHECK_M4([in -g], [0], [[1
+]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+AT_CHECK_M4([in -G], [0], [[__line__
+]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+AT_CHECK_M4([in -W], [0], [[1
+]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+AT_CHECK_M4([in -Q], [0], [[1
+]])
+
+dnl Next, run with POSIX semantics
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+
+dnl POSIXLY_CORRECT implies -G -Q
+AT_DATA([in], [[__line__
+dnl()
+]])
+AT_CHECK_M4([in], [0], [[__line__
+]])
+AT_CHECK_M4([in -g], [0], [[1
+]])
+AT_CHECK_M4([in -G], [0], [[__line__
+]])
+AT_CHECK_M4([in -W], [0], [[__line__
+]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+AT_CHECK_M4([in -Q], [0], [[__line__
 ]])
 
 AT_CLEANUP
@@ -567,17 +630,23 @@ AT_CHECK_M4([--regexp-syntax=unknown in], [1], [],
 [[m4: bad regexp syntax option: `unknown'
 ]])
 
-AT_CHECK_M4([--regexp-syntax '' in], [0], [[0
+AT_CHECK_M4([--regexp-syntax= in], [0], [[0
 ]])
 
-AT_CHECK_M4([-r EXTENDED in], [1], [[
+AT_CHECK_M4([-rEXTENDED in], [1], [[
 ]], [[m4:in:1: regexp: bad regular expression `(': Unmatched ( or \(
 ]])
 
 AT_CHECK_M4([-rgnu-m4 in], [0], [[0
 ]])
 
-AT_CHECK_M4([-r "gnu M4" in], [0], [[0
+AT_CHECK_M4([-r"gnu M4" in], [0], [[0
+]])
+
+dnl Test behavior of -r intermixed with files
+AT_CHECK_M4([-rEXTENDED in --regexp-syntax in], [1], [[
+0
+]], [[m4:in:1: regexp: bad regular expression `(': Unmatched ( or \(
 ]])
 
 AT_CLEANUP
@@ -623,5 +692,56 @@ AT_CHECK_M4([--safer in], [1], [[
 
 AT_CHECK([echo foo*], [0], [foo*
 ])
+
+AT_CLEANUP
+
+
+## ---------- ##
+## syncoutput ##
+## ---------- ##
+
+AT_SETUP([--syncoutput])
+
+dnl -s/--synclines implies --syncoutput=1
+AT_DATA([in], [[hi
+]])
+AT_CHECK_M4([-s in], [0],
+[[#line 1 "in"
+hi
+]])
+AT_CHECK_M4([--synclines in], [0],
+[[#line 1 "in"
+hi
+]])
+
+dnl test intermixing option and files
+AT_CHECK_M4([in --syncoutput=1 in --syncoutput in], [0],
+[[hi
+#line 1 "in"
+hi
+hi
+]])
+
+AT_CLEANUP
+
+
+## -------------------- ##
+## traceon and traceoff ##
+## -------------------- ##
+
+AT_SETUP([--traceon and --traceoff])
+
+dnl test intermixing with files
+AT_DATA([[in]], [[divnum
+]])
+AT_CHECK_M4([-d+x in --traceon=divnum in --traceoff=divnum in], [0],
+[[0
+0
+0
+]], [[m4trace: -1- id 2: divnum -> `0'
+]])
+
+dnl test that --traceoff does not warn on untraced name
+AT_CHECK_M4([--traceoff=unknown], [0])
 
 AT_CLEANUP

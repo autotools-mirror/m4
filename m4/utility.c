@@ -115,6 +115,31 @@ m4_dump_args (m4 *context, m4_obstack *obs, int argc,
     }
 }
 
+
+/* Parse ARG as a truth value.  If unrecognized, issue a warning on
+   behalf of ME and return PREVIOUS; otherwise return the parsed
+   value.  */
+bool
+m4_parse_truth_arg (m4 *context, const char *arg, const char *me,
+		    bool previous)
+{
+  /* 0, no, off, blank... */
+  if (!arg || arg[0] == '\0'
+      || arg[0] == '0'
+      || arg[0] == 'n' || arg[0] == 'N'
+      || ((arg[0] == 'o' || arg[0] == 'O')
+	  && (arg[1] == 'f' || arg[1] == 'F')))
+    return false;
+  /* 1, yes, on... */
+  if (arg[0] == '1'
+      || arg[0] == 'y' || arg[0] == 'Y'
+      || ((arg[0] == 'o' || arg[0] == 'O')
+	  && (arg[1] == 'n' || arg[1] == 'N')))
+    return true;
+  m4_warn (context, 0, _("%s: unknown directive `%s'"), me, arg);
+  return previous;
+}
+
 /* Issue an error.  The message is printf-style, based on FORMAT and
    any other arguments, and the program name and location (if we are
    currently parsing an input file) are automatically prepended.  If

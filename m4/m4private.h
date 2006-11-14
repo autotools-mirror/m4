@@ -79,7 +79,7 @@ struct m4 {
 #define M4_OPT_SUPPRESS_WARN_BIT	(1 << 1) /* -Q */
 #define M4_OPT_DISCARD_COMMENTS_BIT	(1 << 2) /* -c */
 #define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
-#define M4_OPT_SYNC_OUTPUT_BIT		(1 << 4) /* -s */
+#define M4_OPT_SYNCOUTPUT_BIT		(1 << 4) /* -s */
 #define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
 #define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E */
 #define M4_OPT_SAFER_BIT		(1 << 7) /* --safer */
@@ -124,8 +124,8 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_DISCARD_COMMENTS_BIT))
 #  define m4_get_interactive_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_INTERACTIVE_BIT))
-#  define m4_get_sync_output_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_SYNC_OUTPUT_BIT))
+#  define m4_get_syncoutput_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_SYNCOUTPUT_BIT))
 #  define m4_get_posixly_correct_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #  define m4_get_fatal_warnings_opt(C)					\

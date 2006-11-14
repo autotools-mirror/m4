@@ -130,6 +130,63 @@ AT_CHECK_M4([in1 -Dfoo=3 in2], [0],
 foo
 ]])
 
+dnl Test that -D and -U interact in correct order
+AT_DATA([in], [[foo
+]])
+AT_CHECK_M4([-Dfoo=bar in -Ufoo in], [0], [[bar
+foo
+]])
+AT_CHECK_M4([-Ufoo in -Dfoo=bar in], [0], [[foo
+bar
+]])
+
+AT_CLEANUP
+
+
+
+## -------------------- ##
+## Command line pushdef ##
+## -------------------- ##
+
+AT_SETUP([Command line pushdef])
+
+dnl Test that -p after last file still affects m4wrap'd text.
+AT_DATA([in1], [[m4wrap(`foo
+')foo
+]])
+AT_DATA([in2], [[foo
+]])
+AT_CHECK_M4([-pfoo=1 in1 -pfoo=2 in2 -pfoo=3], [0],
+[[1
+2
+3
+]])
+
+dnl Test that -p adds a definition.
+AT_DATA([in1], [[define(`foo', `1')pushdef(`foo', `2')dnl
+]])
+AT_DATA([in2], [[foo
+popdef(`foo')foo
+popdef(`foo')foo
+]])
+AT_CHECK_M4([in1 -pfoo=3 in2], [0],
+[[3
+2
+1
+]])
+
+dnl Test that --pushdef and --popdef interact in correct order
+AT_DATA([in], [[foo
+]])
+AT_CHECK_M4([-Dfoo=1 --pushdef=foo=2 in --popdef=foo in], [0],
+[[2
+1
+]])
+AT_CHECK_M4([--popdef=foo in --pushdef=foo=1 in], [0],
+[[foo
+1
+]])
+
 AT_CLEANUP
 
 

@@ -71,11 +71,11 @@ usage (int status)
       printf (_("Usage: %s [OPTION]... [FILE]...\n"), m4_get_program_name ());
       fputs (_("\
 Process macros in FILEs.\n\
-If no FILE or if FILE is `-', standard input is read.  With no FILE and both\n\
-standard input and standard output are terminals, -e is implied.\n\
+If no FILE or if FILE is `-', standard input is read.  If no FILE, and both\n\
+standard input and standard output are terminals, -i is implied.\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -86,59 +86,70 @@ Operation modes:\n\
       fputs (_("\
   -b, --batch                  buffer output, process interrupts\n\
   -c, --discard-comments       do not copy comments to the output\n\
-  -E, --fatal-warnings         stop execution after first warning\n\
+  -E, --fatal-warnings         stop execution after first warning or error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -r, --regexp-syntax=SPEC     change the default regexp syntax\n\
+  -r, --regexp-syntax[=SPEC]   set default regexp syntax to SPEC [EMACS]\n\
       --safer                  disable potentially unsafe builtins\n\
+  -W, --warnings               enable all warnings\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 SPEC is any one of:\n\
   AWK, BASIC, BSD_M4, ED, EMACS, EXTENDED, GNU_AWK, GNU_EGREP, GNU_M4,\n\
   GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n\
 "), stdout);
+      puts ("");
       printf (_("\
-\n\
 Dynamic loading features:\n\
   -M, --module-directory=DIR   add DIR to module search path before\n\
                                `%s'\n\
   -m, --load-module=MODULE     load dynamic MODULE\n\
+      --unload-module=MODULE   unload dynamic MODULE\n\
 "), PKGLIBEXECDIR);
+      puts ("");
       fputs (_("\
-\n\
 Preprocessor features:\n\
-      --import-environment     import all environment variables as macros\n\
   -B, --prepend-include=DIR    add DIR to include path before `.'\n\
   -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
+      --import-environment     import all environment variables as macros\n\
   -I, --include=DIR            add DIR to include path after `.'\n\
-  -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
-  -U, --undefine=NAME          undefine NAME\n\
 "), stdout);
       fputs (_("\
-\n\
+      --popdef=NAME            popdef NAME\n\
+  -p, --pushdef=NAME[=VALUE]   pushdef NAME as having VALUE, or empty\n\
+  -s, --synclines              short for --syncoutput=1\n\
+      --syncoutput[=STATE]     set generation of `#line NUM \"FILE\"' lines\n\
+                               to STATE (0=off, 1=on, default 0 if omitted)\n\
+  -U, --undefine=NAME          undefine NAME\n\
+"), stdout);
+      puts ("");
+      fputs (_("\
 Limits control:\n\
+  -g, --gnu                    override -G to re-enable GNU extensions\n\
   -G, --traditional            suppress all GNU extensions\n\
   -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
   -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 Debugging:\n\
   -d, --debug[=FLAGS], --debugmode[=FLAGS]\n\
                                set debug level (no FLAGS implies `aeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
   -l, --debuglen=NUM           restrict macro tracing size\n\
-  -t, --trace=NAME             trace NAME when it is defined\n\
+  -t, --trace=NAME, --traceon=NAME\n\
+                               trace NAME when it is defined\n\
+      --traceoff=NAME          no longer trace NAME\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 FLAGS is any of:\n\
   a   show actual arguments in trace\n\
   c   show definition line in trace\n\
@@ -156,19 +167,24 @@ FLAGS is any of:\n\
   x   include unique macro call id in trace, useful with c\n\
   V   shorthand for all of the above flags\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 If defined, the environment variable `M4PATH' is a colon-separated list\n\
 of directories included after any specified by `-I', and the variable\n\
 `M4MODPATH' is a colon-separated list of directories searched before any\n\
-specified by `-M'.\n\
+specified by `-M'.  The environment variable `POSIXLY_CORRECT' implies\n\
+-G -Q; otherwise GNU extensions are enabled by default.\n\
 "), stdout);
+      puts ("");
       fputs (_("\
-\n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 "), stdout);
-      printf (_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
+      puts ("");
+      /* TRANSLATORS: the placeholder indicates the bug-reporting
+	 address for this application. Please add _another line_ with
+	 the address for translation bugs.  */
+      printf (_("Report bugs to <%s>.\n"), PACKAGE_BUGREPORT);
     }
   exit (status);
 }
@@ -183,8 +199,13 @@ enum
   ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
   HASHSIZE_OPTION,			/* not quite -H, because of message */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
+  POPDEF_OPTION,			/* no short opt */
   PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
   SAFER_OPTION,				/* -S still has old no-op semantics */
+  SYNCOUTPUT_OPTION,			/* not quite -s, because of opt arg */
+  TRACEOFF_OPTION,			/* no short opt */
+  UNLOAD_MODULE_OPTION,			/* no short opt */
+  WORD_REGEXP_OPTION,			/* deprecated, used to be -W */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -201,21 +222,24 @@ static const struct option long_options[] =
   {"discard-comments", no_argument, NULL, 'c'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
+  {"gnu", no_argument, NULL, 'g'},
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'i'},
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
+  {"pushdef", required_argument, NULL, 'p'},
   {"quiet", no_argument, NULL, 'Q'},
-  {"regexp-syntax", required_argument, NULL, 'r'},
+  {"regexp-syntax", optional_argument, NULL, 'r'},
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
   {"trace", required_argument, NULL, 't'},
+  {"traceon", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
   {"undefine", required_argument, NULL, 'U'},
-  {"word-regexp", required_argument, NULL, 'W'},
+  {"warnings", no_argument, NULL, 'W'},
 
   {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
@@ -223,8 +247,13 @@ static const struct option long_options[] =
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
   {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
+  {"popdef", required_argument, NULL, POPDEF_OPTION},
   {"prepend-include", required_argument, NULL, PREPEND_INCLUDE_OPTION},
   {"safer", no_argument, NULL, SAFER_OPTION},
+  {"syncoutput", optional_argument, NULL, SYNCOUTPUT_OPTION},
+  {"traceoff", required_argument, NULL, TRACEOFF_OPTION},
+  {"unload-module", required_argument, NULL, UNLOAD_MODULE_OPTION},
+  {"word-regexp", required_argument, NULL, WORD_REGEXP_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
@@ -237,7 +266,7 @@ static const struct option long_options[] =
    behavior also handles -s between files.  Starting OPTSTRING with
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
-#define OPTSTRING "-B:D:EF:GH:I:L:M:N:PQR:S:T:U:bcd::eil:m:o:r:st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:M:N:PQR:S:T:U:Wbcd::egil:m:o:p:r::st:"
 
 /* For determining whether to be interactive.  */
 enum interactive_choice
@@ -332,7 +361,11 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
   if (getenv ("POSIXLY_CORRECT"))
-    m4_set_posixly_correct_opt (context, true);
+    {
+      m4_set_no_gnu_extensions_opt (context, true);
+      m4_set_posixly_correct_opt (context, true);
+      m4_set_suppress_warnings_opt (context, true);
+    }
 
   /* First, we decode the arguments, to size up tables and stuff.
      Avoid lasting side effects; for example 'm4 --debugfile=oops
@@ -369,13 +402,26 @@ main (int argc, char *const *argv, char *const *envp)
 	       optchar);
 	break;
 
+      case WORD_REGEXP_OPTION:
+	/* Supported in 1.4.x as -W, but no longer present.  */
+	error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
+	break;
+
+      case 's':
+	optchar = SYNCOUTPUT_OPTION;
+	optarg = "1";
+	/* fall through */
       case 'D':
       case 'U':
       case 'm':
+      case 'p':
       case 'r':
-      case 's':
       case 't':
       case '\1':
+      case POPDEF_OPTION:
+      case SYNCOUTPUT_OPTION:
+      case TRACEOFF_OPTION:
+      case UNLOAD_MODULE_OPTION:
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	defn = xmalloc (sizeof *defn);
@@ -388,6 +434,9 @@ main (int argc, char *const *argv, char *const *envp)
 	else
 	  tail->next = defn;
 	tail = defn;
+
+	if (optchar == '\1')
+	  seen_file = true;
 
 	break;
 
@@ -458,6 +507,13 @@ main (int argc, char *const *argv, char *const *envp)
 	frozen_file_to_read = optarg;
 	break;
 
+      case 'W':
+	/* FIXME - should W take an optional argument, to allow -Wall,
+	   -Wnone, -Werror, -Wcategory, -Wno-category?	If so, then have
+	   -W == -Wall.	 */
+	m4_set_suppress_warnings_opt (context, false);
+	break;
+
       case 'b':
 	interactive = INTERACTIVE_NO;
 	break;
@@ -485,6 +541,11 @@ main (int argc, char *const *argv, char *const *envp)
 	/* fall through */
       case 'i':
 	interactive = INTERACTIVE_YES;
+	break;
+
+      case 'g':
+	m4_set_no_gnu_extensions_opt (context, false);
+	m4_set_posixly_correct_opt (context, false);
 	break;
 
       case ARGLENGTH_OPTION:
@@ -537,7 +598,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
 				    || (interactive == INTERACTIVE_UNKNOWN
-					&& optind == argc
+					&& optind == argc && !seen_file
 					&& isatty (STDIN_FILENO)
 					&& isatty (STDERR_FILENO))));
   if (m4_get_interactive_opt (context))
@@ -596,6 +657,7 @@ main (int argc, char *const *argv, char *const *envp)
 	switch (defines->code)
 	  {
 	  case 'D':
+	  case 'p':
 	    {
 	      m4_symbol_value *value = m4_symbol_value_create ();
 
@@ -608,7 +670,10 @@ main (int argc, char *const *argv, char *const *envp)
 	      m4_set_symbol_value_text (value, xstrdup (macro_value
 							? macro_value : ""));
 
-	      m4_symbol_define (M4SYMTAB, macro_name, value);
+	      if (defines->code == 'D')
+		m4_symbol_define (M4SYMTAB, macro_name, value);
+	      else
+		m4_symbol_pushdef (M4SYMTAB, macro_name, value);
 	      free (macro_name);
 	    }
 	    break;
@@ -618,7 +683,8 @@ main (int argc, char *const *argv, char *const *envp)
 	    break;
 
 	  case 'm':
-	    m4_module_load (context, arg, 0);
+	    /* FIXME - should loading a module result in output?  */
+	    m4_module_load (context, arg, NULL);
 	    break;
 
 	  case 'r':
@@ -631,17 +697,36 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    break;
 
-	  case 's':
-	    m4_set_sync_output_opt (context, true);
-	    break;
-
 	  case 't':
 	    m4_set_symbol_name_traced (M4SYMTAB, arg, true);
 	    break;
 
 	  case '\1':
-	    seen_file = true;
 	    read_stdin |= process_file (context, arg);
+	    break;
+
+	  case POPDEF_OPTION:
+	    if (m4_symbol_lookup (M4SYMTAB, arg))
+	      m4_symbol_popdef (M4SYMTAB, arg);
+	    break;
+
+	  case SYNCOUTPUT_OPTION:
+	    {
+	      bool previous = m4_get_syncoutput_opt (context);
+	      m4_set_syncoutput_opt (context,
+				     m4_parse_truth_arg (context, arg,
+							 "--syncoutput",
+							 previous));
+	    }
+	    break;
+
+	  case TRACEOFF_OPTION:
+	    m4_set_symbol_name_traced (M4SYMTAB, arg, false);
+	    break;
+
+	  case UNLOAD_MODULE_OPTION:
+	    /* FIXME - should unloading a module result in output?  */
+	    m4_module_unload (context, arg, NULL);
 	    break;
 
 	  default:

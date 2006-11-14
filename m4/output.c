@@ -183,8 +183,8 @@ cleanup_tmpfile (void)
       while (gl_list_iterator_next (&iter, &elt, NULL))
 	{
 	  diversion = (m4_diversion *) elt;
-	  if (!diversion->size && diversion->u.file &&
-	      close_stream_temp (diversion->u.file) != 0)
+	  if (!diversion->size && diversion->u.file
+	      && close_stream_temp (diversion->u.file) != 0)
 	    {
 	      error (0, errno,
 		     _("cannot clean temporary file for diversion"));
@@ -431,7 +431,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 
-  if (!m4_get_sync_output_opt (context))
+  if (!m4_get_syncoutput_opt (context))
     switch (length)
       {
 

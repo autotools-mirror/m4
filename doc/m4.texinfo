@@ -607,8 +607,8 @@ Discard all comments instead of copying them to the output.
 
 @item -E
 @itemx --fatal-warnings
-Stop execution and exit @code{m4} once the first warning has been
-issued, considering all of them to be fatal.
+Stop execution and exit @code{m4} once the first warning or error has
+been issued, considering all of them to be fatal.
 
 @item -i
 @itemx --interactive
@@ -639,15 +639,17 @@ Suppress warnings, such as missing or superfluous arguments in macro
 calls, or treating the empty string as zero.  Error messages are still
 printed.  The distinction between error and warning is fuzzy, and if
 you encounter a situation where the message output did not match your
-expectations, please report that as a bug.
+expectations, please report that as a bug.  This option is implied if
+@env{POSIXLY_CORRECT} is set in the environment.
 
-@item -r @var{RESYNTAX-SPEC}
-@itemx --regexp-syntax=@var{RESYNTAX-SPEC}
+@item -r@r{[}@var{RESYNTAX-SPEC}@r{]}
+@itemx --regexp-syntax@r{[}=@var{RESYNTAX-SPEC}@r{]}
 Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
-When this option is not given, @acronym{GNU} M4 uses emacs compatible
-regular expressions.  @xref{Changeresyntax}, for more details on the
-format and meaning of @var{RESYNTAX-SPEC}.  This option may be given
-more than once, and order with respect to file names is significant.
+When this option is not given, @var{RESYNTAX-SPEC} is omitted,
+@acronym{GNU} M4 uses emacs compatible regular expressions.
+@xref{Changeresyntax}, for more details on the format and meaning of
+@var{RESYNTAX-SPEC}.  This option may be given more than once, and order
+with respect to file names is significant.
 
 @item --safer
 Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
@@ -656,6 +658,14 @@ Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
 since they can perform potentially unsafe actions.  An attempt to use
 these macros will result in an error.  This option is intended to make
 it safer to preprocess an input file of unknown origin.
+
+@item -W
+@itemx --warnings
+Enable warnings.  Warnings are on by default unless
+@env{POSIXLY_CORRECT} was set in the environment; this option exists to
+allow overriding @option{--silent}.
+@comment FIXME should we accept -Wall, -Wnone, -Wcategory,
+@comment -Wno-category...?
 @end table
 
 @node Dynamic loading features
@@ -673,14 +683,19 @@ module search path.  @xref{Modules}, for more details.
 
 @item -m @var{MODULE}
 @itemx --load-module=@var{MODULE}
-Load @var{MODULE} before parsing input files.  @var{MODULE} is searched
-for in each directory of the module search path, until the first match
-is found or the list is exhausted.  @xref{Modules}, for more details.
-By default, the modules @samp{m4}, @samp{traditional}, and @samp{gnu}
-are preloaded, although this can be controlled during configuration
-with the @option{--with-modules} option to
+Load @var{MODULE} before parsing more input files.  @var{MODULE} is
+searched for in each directory of the module search path, until the
+first match is found or the list is exhausted.  @xref{Modules}, for more
+details.  By default, the modules @samp{m4}, @samp{traditional}, and
+@samp{gnu} are preloaded, although this can be controlled during
+configuration with the @option{--with-modules} option to
 @file{m4-@value{VERSION}/@/configure}.  This option may be given more
 than once, and order with respect to file names is significant.
+
+@item --unload-module=@var{MODULE}
+Unload @var{MODULE} before parsing more input files.  @xref{Modules},
+for more details.  This option may be given more than once, and order
+with respect to file names is significant.
 @end table
 
 @node Preprocessor features
@@ -694,11 +709,6 @@ search path can be altered, and the output file can track where the
 input came from.  These features occur with the following options:
 
 @table @code
-@item --import-environment
-Imports every variable in the environment as a macro.  This is done
-before @option{-D} and @option{-U}, so they can override the
-environment.
-
 @item -B @var{DIRECTORY}
 @itemx --prepend-include=@var{DIRECTORY}
 Make @code{m4} search @var{DIRECTORY} for included files, prior to
@@ -722,15 +732,41 @@ input.  This option may be given more than once; order with respect to
 file names is significant, and redefining the same @var{NAME} loses the
 previous value.
 
+@item --import-environment
+Imports every variable in the environment as a macro.  This is done
+before @option{-D} and @option{-U}, so they can override the
+environment.
+
 @item -I @var{DIRECTORY}
 @itemx --include=@var{DIRECTORY}
 Make @code{m4} search @var{DIRECTORY} for included files that are not
 found in the current working directory.  @xref{Search Path}, for more
 details.  This option may be given more than once.
 
+@item --popdef=@var{NAME}
+This deletes the top-most meaning @var{NAME} might have.  Obviously,
+only predefined macros can be deleted in this way.  This option may be
+given more than once; popping a @var{NAME} that does not have a
+definition is silently ignored.  Order is significant with respect to
+file names.
+
+@item -p @var{NAME}@r{[}=@var{VALUE}@r{]}
+@itemx --pushdef=@var{NAME}@r{[}=@var{VALUE}@r{]}
+This enters @var{NAME} into the symbol table, before any input files are
+read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
+empty string.  The @var{VALUE} can be any string, and the macro can be
+defined to take arguments, just as if it was defined from within the
+input.  This option may be given more than once; order with respect to
+file names is significant, and redefining the same @var{NAME} adds
+another definition to its stack.
+
 @item -s
 @itemx --synclines
-Generate synchronization lines, for use by the C preprocessor or other
+Short for @option{--syncoutput=1}, turning synchronization lines on.
+
+@item --syncoutput@r{[}=STATE@r{]}
+Control the generation of synchronization lines from the command line.
+Synchronization lines are for use by the C preprocessor or other
 similar tools.  Order is significant with respect to file names.  This
 option is useful, for example, when @code{m4} is used as a
 front end to a compiler.  Source file name and line number information
@@ -745,7 +781,9 @@ Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
 until the beginning of the next generated line.  @xref{Syncoutput}, for
-runtime control.
+runtime control.  @var{TRUTH} is interpreted the same as the argument to
+@code{syncoutput}; if @var{TRUTH} is omitted, or @option{--syncoutput}
+is not used, synchronization lines are disabled.
 
 @item -U @var{NAME}
 @itemx --undefine=@var{NAME}
@@ -766,16 +804,18 @@ only by your hardware and operating system constraints) in @acronym{GNU}
 @code{m4}.
 
 @table @code
-@comment FIXME - clean this up.  POSIXLY_CORRECT should imply -G (as
-@comment well as -Q), such that POSIX and traditional are identical.
-@comment We should also provide -g, to match BSD implementations, which
-@comment enables GNU mode and overrides POSIXLY_CORRECT in the
-@comment environment.
+@item -g
+@itemx --gnu
+Enable all the extensions in this implementation.  This is on by
+default unless @env{POSIXLY_CORRECT} is set in the environment; it
+exists to allow overriding @option{--traditional}.
+
 @item -G
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
 System V version.  @xref{Compatibility}, for a list of these.  This
 loads the @samp{traditional} module in place of the @samp{gnu} module.
+It is implied if @env{POSIXLY_CORRECT} is set in the environment.
 
 @item -L @var{NUM}
 @itemx --nesting-limit=@var{NUM}
@@ -808,14 +848,17 @@ problem in general, if not undecidable!
 
 @item -H @var{NUM}
 @itemx --hashsize=@var{NUM}
-@item -N @var{NUM}
+@itemx -N @var{NUM}
 @itemx --diversions=@var{NUM}
-These options are present only for compatibility with previous
-versions of GNU @code{m4}.  They do nothing except issue a warning,
-because the symbol table size and number of diversions are not fixed
-anymore.  They will eventually disappear in future releases.
+@itemx --word-regexp=@var{REGEXP}
+These options are present only for compatibility with previous versions
+of GNU @code{m4}.  They do nothing except issue a warning, because the
+symbol table size and number of diversions are not fixed anymore, and
+because the new @code{changesyntax} feature is more efficient than the
+withdrawn experimental @code{changeword}.  These options will eventually
+disappear in future releases.
 
-@itemx -S @var{NUM}
+@item -S @var{NUM}
 @itemx -T @var{NUM}
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.  They may disappear in future
@@ -896,7 +939,14 @@ withdrawn in a future release.
 
 @item -t @var{NAME}
 @itemx --trace=@var{NAME}
+@itemx --traceon=@var{NAME}
 This enables tracing for the macro @var{NAME}, at any point where it is
+defined.  @var{NAME} need not be defined when this option is given.
+This option may be given more than once, and order is significant with
+respect to file names.  @xref{Trace}, for more details.
+
+@item --traceoff=@var{NAME}
+This disables tracing for the macro @var{NAME}, at any point where it is
 defined.  @var{NAME} need not be defined when this option is given.
 This option may be given more than once, and order is significant with
 respect to file names.  @xref{Trace}, for more details.
@@ -923,10 +973,10 @@ string.
 @comment interactive use when switching to stdin in a non-default parse
 @comment state.
 
-The options @option{--define} (@option{-D}), @option{--undefine}
+Various options, such as @option{--define} (@option{-D}), @option{--undefine}
 (@option{-U}), @option{--synclines} (@option{-s}), @option{--trace}
 (@option{-t}), @option{--regexp-syntax} (@option{-r}), and
-@option{--load-module} (@option{-m}) only take effect after processing
+@option{--load-module} (@option{-m}), only take effect after processing
 input from any file names that occur earlier on the command line.  For
 example, assume the file @file{foo} contains:
 

@@ -1,3 +1,34 @@
+2006-11-13  Eric Blake  <ebb9@byu.net>
+
+	Add several new command line options.
+	* src/main.c (usage): Update.
+	(OPTSTRING, long_options): Add --pushdef, --popdef, --gnu,
+	--traceon, --traceoff, --syncoutput, --warnings, --unload-module.
+	Make --regexp-syntax argument optional.
+	(main): Support new options.  Fix regression in interactive
+	behavior from Nov 8.
+	* m4/m4private.h (M4_OPT_SYNCOUTPUT_BIT): Rename from
+	M4_OPT_SYNC_OUTPUT_BIT.
+	* m4/m4module.h (m4_context_opt_bit_table): Rename sync_output to
+	syncoutput, to match option.
+	(m4_parse_truth_arg): New prototype.
+	* m4/utility.c (m4_parse_truth_arg): Implement it.
+	* m4/output.c (m4_shipout_text): Adjust sync_output caller.
+	* modules/gnu.c (syncoutput): Adjust sync_output caller, and use
+	m4_parse_truth_arg.
+	* doc/m4.texinfo (Operation modes, Dynamic loading features)
+	(Preprocessor features, Limits control, Debugging options)
+	(Command line files): Update documentation.
+	* tests/builtins.at (mkstemp): Simplify.
+	* tests/macros.at (Command line pushdef): New test.
+	(Command line define): Improve.
+	* tests/options.at (--traceon and --traceoff, --syncoutput): New
+	tests.
+	(POSIXLY_CORRECT): Likewise.
+	(deprecated options): Augment.
+	(--regexp-syntax): Update, now that -r takes optional arg.
+	* NEWS: Reformat.  Document new options.
+
 2006-11-11  Eric Blake  <ebb9@byu.net>
 
 	One step closer to allowing C++ compilation - don't blindly

@@ -103,13 +103,12 @@ struct m4_macro
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
-extern bool	    m4_bad_argc	      (m4 *, int, m4_symbol_value **,
-				       unsigned int, unsigned int, bool);
-extern bool	    m4_numeric_arg    (m4 *, int, m4_symbol_value **,
-				       int, int *);
-extern void	    m4_dump_args      (m4 *, m4_obstack *, int,
-				       m4_symbol_value **, const char *,
-				       bool);
+extern bool	m4_bad_argc	   (m4 *, int, m4_symbol_value **,
+				    unsigned int, unsigned int, bool);
+extern bool	m4_numeric_arg	   (m4 *, int, m4_symbol_value **, int, int *);
+extern void	m4_dump_args	   (m4 *, m4_obstack *, int,
+				    m4_symbol_value **, const char *, bool);
+extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const char *, ...) M4_GNUC_PRINTF (4, 5);
@@ -155,7 +154,7 @@ extern void		m4_delete	(m4 *);
 	M4OPT_BIT(M4_OPT_SUPPRESS_WARN_BIT,	suppress_warnings_opt)	\
 	M4OPT_BIT(M4_OPT_DISCARD_COMMENTS_BIT,	discard_comments_opt)	\
 	M4OPT_BIT(M4_OPT_INTERACTIVE_BIT,	interactive_opt)	\
-	M4OPT_BIT(M4_OPT_SYNC_OUTPUT_BIT,	sync_output_opt)	\
+	M4OPT_BIT(M4_OPT_SYNCOUTPUT_BIT,	syncoutput_opt)		\
 	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
 	M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
 	M4OPT_BIT(M4_OPT_SAFER_BIT,		safer_opt)		\
