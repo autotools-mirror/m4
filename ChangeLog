@@ -1,3 +1,8 @@
+2006-11-14  Eric Blake  <ebb9@byu.net>
+
+	* m4/resyntax.c (m4_regexp_syntax_encode): Avoid bug with signed
+	char.
+
 2006-11-13  Eric Blake  <ebb9@byu.net>
 
 	Add several new command line options.

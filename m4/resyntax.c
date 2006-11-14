@@ -93,8 +93,8 @@ m4_regexp_syntax_encode (const char *spec)
     {
       if ((*p == ' ') || (*p == '-'))
 	*p = '_';
-      else if (islower (*p))
-	*p = toupper (*p);
+      else if (islower (to_uchar (*p)))
+	*p = toupper (to_uchar (*p));
     }
 
   for (resyntax = m4_resyntax_map; resyntax->spec != NULL; ++resyntax)
