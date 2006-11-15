@@ -1,5 +1,19 @@
 2006-11-14  Eric Blake  <ebb9@byu.net>
 
+	Remerge sparse diversion handling from branch.
+	* ltdl/m4/gnulib-cache.m4: Replace avltree-list with
+	avltree-oset.
+	* m4/output.c (diversion_table): Change type to gl_oset_t.
+	(m4_output_init, m4_output_exit, cleanup_tmpfile, make_room_for)
+	(m4_make_diversion, insert_diversion_helper, m4_insert_diversion)
+	(m4_undivert_all, m4_freeze_diversions): Adjust all callers.
+	(div0, diversion_storage): New variables.
+	(diversions, equal_diversion_CB): Deleted.
+	(threshold_diversion_CB): New callback.
+	(m4_tmpname, m4_tmpopen, m4_tmpclose, m4_tmpremove): New
+	functions.
+	(m4_tmpfile): Move cloexec action here.
+
 	* m4/resyntax.c (m4_regexp_syntax_encode): Avoid bug with signed
 	char.
 
