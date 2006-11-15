@@ -173,6 +173,7 @@ cleanup_tmpfile (void)
 	      fail = true;
 	    }
 	}
+      gl_oset_iterator_free (&iter);
     }
 
   /* Clean up the temporary directory.  */
@@ -192,6 +193,7 @@ m4_tmpname (int divnum)
     {
       tail = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, INT_MAX);
       buffer = obstack_copy0 (&diversion_storage, tail, strlen (tail));
+      free (tail);
       tail = strrchr (buffer, '-') + 1;
     }
   sprintf (tail, "%d", divnum);
@@ -804,6 +806,7 @@ freeze_diversions (FILE *file)
 	  last_inserted = diversion->divnum;
 	}
     }
+  gl_oset_iterator_free (&iter);
 
   /* Save the active diversion number, if not already.  */
 

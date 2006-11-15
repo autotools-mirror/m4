@@ -1,3 +1,9 @@
+2006-11-14  Eric Blake  <ebb9@byu.net>
+
+	* src/output.c (cleanup_tmpfile, freeze_diversions): Clean up
+	spent iterators.
+	(m4_tmpname): Avoid memory leak.
+
 2006-11-13  Eric Blake  <ebb9@byu.net>
 
 	* src/output.c (cleanup_tmpfile): Avoid double error message when
