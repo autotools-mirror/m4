@@ -1,5 +1,9 @@
 2006-11-16  Eric Blake  <ebb9@byu.net>
 
+	* bootstrap: Relax m4 requirement, thanks to...
+	* configure.ac (Gettext support): ...this workaround to the 1.4.4
+	bug.  Undoes restriction added on 2006-11-09.
+
 	* tests/builtins.at (esyscmd, syscmd): Redo, since spilled
 	diversions are now closed when not active.
 	(divert): Remove check now in the manual.

@@ -144,6 +144,18 @@ AC_SUBST([PREOPEN_DEPENDENCIES])
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
+dnl M4 1.4.4 and earlier had a bug that tracing a macro made it falsely
+dnl appear as defined with an empty definition, even though `invoking'
+dnl the macro resulted in the macro name.  Gettext relies on whether
+dnl AM_GNU_GETTEXT_INTL_SUBDIR is defined, and automake traces this
+dnl macro, but we don't want to use an intl subdir, hence this workaround
+dnl to allow bootstrapping even on systems with old M4.
+dnl http://lists.gnu.org/archive/html/bug-gnu-utils/2006-11/msg00096.html
+m4_ifdef([AM_GNU_GETTEXT_INTL_SUBDIR],
+  [m4_if(m4_defn([AM_GNU_GETTEXT_INTL_SUBDIR]),[],
+    [m4_ifval(AM_GNU_GETTEXT_INTL_SUBDIR,
+      [m4_popdef([AM_GNU_GETTEXT_INTL_SUBDIR])])])])
+
 AM_GNU_GETTEXT([external], [need-formatstring-macros])
 AM_GNU_GETTEXT_VERSION([0.16])
 M4_GNU_GETTEXT
