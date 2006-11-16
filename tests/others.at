@@ -362,7 +362,7 @@ AT_CHECK([cat trace], [0], [[m4trace: -1- errprint(`hello world
 
 dnl spilled diversion file must not collide with closed stderr
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(1)f
-and
+and`'dnl(not)
 divert
 hello`'dnl(world)
 undivert
@@ -510,10 +510,19 @@ AT_CHECK_M4([>&-], [0], [], [[hello
 ]], [in.m4])
 
 dnl syscmd inherits closed stdout
-AT_CHECK([cat >&- && { echo "skipping: can't detect closed stdout"; exit 77; }],
+AT_DATA([hi], [[hi
+]])
+AT_CHECK([cat hi >&- && { echo "skipping: can't detect closed stdout"; exit 77; }],
 [1], [], [stderr])
 mv stderr experr
-AT_DATA([in.m4], [[syscmd(`cat')dnl
+AT_DATA([in.m4], [[syscmd(`cat hi')dnl
+]])
+AT_CHECK_M4([>&-], [0], [], [experr], [in.m4])
+
+dnl spilled diversion file must not collide with closed stdout
+AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(1)f
+syscmd(`cat hi')
+divert(`-1')undivert
 ]])
 AT_CHECK_M4([>&-], [0], [], [experr], [in.m4])
 

@@ -1,3 +1,13 @@
+2006-11-16  Eric Blake  <ebb9@byu.net>
+
+	* tests/builtins.at (esyscmd, syscmd): Redo, since spilled
+	diversions are now closed when not active.
+	(divert): Remove check now in the manual.
+	* tests/others.at (stderr closed): Likewise.
+	(stdout closed): Add a check.
+	* doc/m4.texinfo (Include, Search Path, Diversions, Divert): Sync
+	more docs with branch.
+
 2006-11-14  Eric Blake  <ebb9@byu.net>
 
 	Remerge sparse diversion handling from branch.

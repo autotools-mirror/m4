@@ -161,15 +161,6 @@ AT_CHECK_M4([divert.m4], 0,
 Text diverted a second time.
 ]])
 
-dnl Handle large diversions.  In 1.4.7, this caused core dumps; in 1.4.8,
-dnl it exhausted memory on 32-bit platforms.
-AT_DATA([[in]], [[divert(eval(`1<<28'))world
-divert(`2')hello
-]])
-AT_CHECK_M4([in], [0], [[hello
-world
-]])
-
 AT_CLEANUP
 
 
@@ -279,7 +270,7 @@ AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 dnl Ensure that esyscmd does not inherit any unnecessary fds from diversions.
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`1')f
 world
-divert`'esyscmd(`echo hi >&3')
+esyscmd(`echo hi >&3')divert
 hello
 ]])
 AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
@@ -865,7 +856,7 @@ AT_CHECK([cat trace], [0], [[m4trace: -1- dnl -> `'
 dnl Ensure that syscmd does not inherit any unnecessary fds from diversions.
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`1')f
 world
-divert`'syscmd(`echo hi >&3')
+syscmd(`echo hi >&3')divert
 hello
 ]])
 AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])

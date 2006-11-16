@@ -4236,36 +4236,45 @@ in which they were saved (LIFO---last in, first out).
 @node Include
 @section Including named files
 
-@deffn {Builtin (m4)} include (@var{filename})
-@deffnx {Builtin (m4)} sinclude (@var{filename})
-These two builtin macros are for including files.  Both cause the file
-named @var{filename} to be read by @code{m4}.  When the end of the file
-is reached, input is resumed from the previous input file.
+There are two builtin macros in @code{m4} for including files:
+
+@deffn {Builtin (m4)} include (@var{file})
+@deffnx {Builtin (m4)} sinclude (@var{file})
+Both macros cause the file named @var{file} to be read by
+@code{m4}.  When the end of the file is reached, input is resumed from
+the previous input file.
 
 The expansion of @code{include} and @code{sinclude} is therefore the
-contents of @var{filename}.
+contents of @var{file}.
 
-It is an error for an @code{include}d file not to exist.  If you do
-not want error messages about non-existent files, @code{sinclude} can
-be used to include a file, if it exists, expanding to nothing if it
-does not.
+If @var{file} does not exist (or cannot be read), the expansion is void,
+and @code{include} will fail with an error while @code{sinclude} is
+silent.  The empty string counts as a file that does not exist.
 
-The builtin macros @code{include} and @code{sinclude} are recognized
-only when given arguments.
+The macros @code{include} and @code{sinclude} are recognized only with
+parameters.
 @end deffn
 
 @comment status: 1
 @example
 include(`n')
-@result{}
 @error{}m4:stdin:1: include: cannot open `n': No such file or directory
+@result{}
+include()
+@error{}m4:stdin:2: include: cannot open `': No such file or directory
+@result{}
 sinclude(`n')
+@result{}
+sinclude()
 @result{}
 @end example
 
-This section uses the file
-@file{m4-@value{VERSION}/@/examples/@/incl.m4} included in the
-@acronym{GNU} M4 package:
+This section uses the @option{--include} command-line option (or
+@option{-I}, @pxref{Preprocessor features, , Invoking m4}) to grab
+files from the @file{m4-@value{VERSION}/@/examples}
+directory shipped as part of the @acronym{GNU} @code{m4} package.  The
+file @file{m4-@value{VERSION}/@/examples/@/incl.m4} in the distribution
+contains the lines:
 
 @comment ignore
 @example
@@ -4309,30 +4318,34 @@ This is `bar':  >>bar<<
 @end example
 
 This use of @code{include} is not trivial, though, as files can contain
-quotes, commas and parentheses, which can interfere with the way the
-@code{m4} parser works.
+quotes, commas, and parentheses, which can interfere with the way the
+@code{m4} parser works.  @acronym{GNU} @code{m4} seamlessly concatenates
+the file contents with the next character, even if the included file
+ended in the middle of a comment, string, or macro call.  These
+conditions are only treated as end of file errors if specified as input
+files on the command line.
 
-In GNU @code{m4}, an alternative method of reading files is using
-@ref{Undivert} on a named file.
+In @acronym{GNU} @code{m4}, an alternative method of reading files is
+using @code{undivert} (@pxref{Undivert}) on a named file.
 
 @node Search Path
 @section Searching for include files
 
 @cindex search path for included files
 @cindex included files, search path for
-@cindex GNU extensions
-GNU @code{m4} allows included files to be found in other directories
+@cindex @acronym{GNU} extensions
+@acronym{GNU} @code{m4} allows included files to be found in other directories
 than the current working directory.
 
-If the @option{--prepend-include} or @option{-B} option was provided
-(@pxref{Preprocessor features, , Invoking m4}), those directories are
-searched first, in reverse
-order that those options were listed on the command line.  Then
-@code{m4} looks in the current working directory.  Next comes the
-directories specified with the @option{--include} or @option{-I} option
-will be searched, in the order found on the command line.  Finally, if
-the @env{M4PATH} environment variable is set, it is expected to contain
-a colon-separated list of directories, which will be searched in order.
+If the @option{--prepend-include} or @option{-B} command-line option was
+provided (@pxref{Preprocessor features, , Invoking m4}), those
+directories are searched first, in reverse order that those options were
+listed on the command line.  Then @code{m4} looks in the current working
+directory.  Next comes the directories specified with the
+@option{--include} or @option{-I} option, in the order found on the
+command line.  Finally, if the @env{M4PATH} environment variable is set,
+it is expected to contain a colon-separated list of directories, which
+will be searched in order.
 
 If the automatic search for include-files causes trouble, the @samp{p}
 debug flag (@pxref{Debugmode}) can help isolate the problem.
@@ -4347,7 +4360,7 @@ time.
 
 Numbered diversions are counted from 0 upwards, diversion number 0
 being the normal output stream.  The number of simultaneous diversions
-is limited mainly by the memory used to describe them, because GNU
+is limited mainly by the memory used to describe them, because @acronym{GNU}
 @code{m4} tries to keep diversions in memory.  However, there is a
 limit to the overall memory usable by all diversions taken altogether
 (512K, currently).  When this maximum is about to be exceeded,
@@ -4355,11 +4368,16 @@ a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
 When creating the temporary file, @code{m4} honors the value of the
 environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
-So, it is theoretically possible that the number of diversions be
-limited by the number of available file descriptors.
+So, it is theoretically possible that the number and aggregate size of
+diversions is limited only by available disk space.
 
-@c FIXME: need some explanation here why this is a useful feature, not
-@c just how you use it.
+Diversions make it possible to generate output in a different order than
+the input was read.  It is possible to implement topological sorting
+dependencies.  For example, @acronym{GNU} Autoconf makes use of
+diversions under the hood to ensure that the expansion of a prerequisite
+macro appears in the output prior to the expansion of a dependent macro,
+regardless of which order the two macros were invoked in the user's
+input file.
 
 @menu
 * Divert::                      Diverting output
@@ -4374,11 +4392,12 @@ limited by the number of available file descriptors.
 @cindex diverting output to files
 @cindex output, diverting to files
 @cindex files, diverting output to
-@deffn {Builtin (m4)} divert
-@deffnx {Builtin (m4)} divert (@ovar{number})
-Output is diverted using @code{divert} where @var{number} is the
-diversion to be used.  If @var{number} is left out, it is assumed to be
-zero.
+Output is diverted using @code{divert}:
+
+@deffn {Builtin (m4)} divert (@dvar{number, 0})
+The current diversion is changed to @var{number}.  If @var{number} is left
+out or empty, it is assumed to be zero.  If @var{number} cannot be
+parsed, the diversion is unchanged.
 
 The expansion of @code{divert} is void.
 @end deffn
@@ -4387,7 +4406,7 @@ When all the @code{m4} input will have been processed, all existing
 diversions are automatically undiverted, in numerical order.
 
 @example
-divert(1)
+divert(`1')
 This text is diverted.
 divert
 @result{}
@@ -4399,22 +4418,67 @@ This text is not diverted.
 @end example
 
 Several calls of @code{divert} with the same argument do not overwrite
-the previous diverted text, but append to it.
-
-If output is diverted to a non-existent diversion, it is simply
-discarded.  This can be used to suppress unwanted output.  A common
-example of unwanted output is the trailing newlines after macro
-definitions.  Here is how to avoid them.
+the previous diverted text, but append to it.  Diversions are printed
+after any wrapped text is expanded.
 
 @example
-divert(-1)
+define(`text', `TEXT')
+@result{}
+divert(`1')`diverted text.'
+divert
+@result{}
+m4wrap(`Wrapped text preceeds ')
+@result{}
+^D
+@result{}Wrapped TEXT preceeds diverted text.
+@end example
+
+If output is diverted to a negative diversion, it is simply discarded.
+This can be used to suppress unwanted output.  A common example of
+unwanted output is the trailing newlines after macro definitions.  Here
+is a common programming idiom in @code{m4} for avoiding them.
+
+@example
+divert(`-1')
 define(`foo', `Macro `foo'.')
 define(`bar', `Macro `bar'.')
 divert
 @result{}
 @end example
 
-This is a common programming idiom in @code{m4}.
+@cindex @acronym{GNU} extensions
+Traditional implementations only supported ten diversions.  But as a
+@acronym{GNU} extension, diversion numbers can be as large as positive
+integers will allow, rather than treating a multi-digit diversion number
+as a request to discard text.
+
+@example
+divert(eval(`1<<28'))world
+divert(`2')hello
+^D
+@result{}hello
+@result{}world
+@end example
+
+Note that @code{divert} is an English word, but also an active macro
+without arguments.  When processing plain text, the word might appear in
+normal text and be unintentionally swallowed as a macro invocation.  One
+way to avoid this is to use the @option{-P} option to rename all
+builtins (@pxref{Operation modes, , Invoking m4}).  Another is to write
+a wrapper that requires a parameter to be recognized.
+
+@example
+We decided to divert the stream for irrigation.
+@result{}We decided to  the stream for irrigation.
+define(`divert', `ifelse(`$#', `0', ``$0'', `builtin(`$0', $@@)')')
+@result{}
+divert(`-1')
+Ignored text.
+divert(`0')
+@result{}
+We decided to divert the stream for irrigation.
+@result{}We decided to divert the stream for irrigation.
+@end example
 
 @node Undivert
 @section Undiverting output
