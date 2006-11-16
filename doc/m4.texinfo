@@ -3484,11 +3484,11 @@ parameters.
 
 @example
 include(`none')
-@result{}
 @error{}m4:stdin:1: cannot open `none': No such file or directory
-include()
 @result{}
+include()
 @error{}m4:stdin:2: cannot open `': No such file or directory
+@result{}
 sinclude(`none')
 @result{}
 sinclude()
@@ -3501,13 +3501,14 @@ pointing to the @file{m4-@value{VERSION}/@/examples}
 directory shipped as part of the @acronym{GNU} @code{m4} package.  The
 file @file{m4-@value{VERSION}/@/examples/@/incl.m4} in the distribution
 contains the lines:
+
 @comment ignore
 @example
 Include file start
 foo
 Include file end
 @end example
-@noindent
+
 Normally file inclusion is used to insert the contents of a file
 into the input stream.  The contents of the file will be read by
 @code{m4} and macro calls in the file will be expanded:
@@ -3540,11 +3541,13 @@ This is `bar':  >>bar<<
 This use of @code{include} is not trivial, though, as files can contain
 quotes, commas, and parentheses, which can interfere with the way the
 @code{m4} parser works.  @acronym{GNU} @code{m4} seamlessly concatenates
-the file
-contents with the next character, even if the included file ended in
-the middle of a comment, string, or macro call.  These conditions are
-only treated as end of file errors if specified as input files on the
-command line.
+the file contents with the next character, even if the included file
+ended in the middle of a comment, string, or macro call.  These
+conditions are only treated as end of file errors if specified as input
+files on the command line.
+
+In @acronym{GNU} @code{m4}, an alternative method of reading files is
+using @code{undivert} (@pxref{Undivert}) on a named file.
 
 @node Search Path
 @section Searching for include files
@@ -3555,13 +3558,15 @@ command line.
 @acronym{GNU} @code{m4} allows included files to be found in other directories
 than the current working directory.
 
-If a file is not found in the current working directory, and the file
-name is not absolute, the file will be looked for in a specified search
-path.  First, the directories specified with the @option{-I} option will
-be searched, in the order found on the command line (@pxref{Preprocessor
-features, , Invoking m4}).  Second, if the
-@env{M4PATH} environment variable is set, it is expected to contain a
-colon-separated list of directories, which will be searched in order.
+If the @option{--prepend-include} or @option{-B} command-line option was
+provided (@pxref{Preprocessor features, , Invoking m4}), those
+directories are searched first, in reverse order that those options were
+listed on the command line.  Then @code{m4} looks in the current working
+directory.  Next comes the directories specified with the
+@option{--include} or @option{-I} option, in the order found on the
+command line.  Finally, if the @env{M4PATH} environment variable is set,
+it is expected to contain a colon-separated list of directories, which
+will be searched in order.
 
 If the automatic search for include-files causes trouble, the @samp{p}
 debug flag (@pxref{Debug Levels}) can help isolate the problem.
@@ -3654,8 +3659,13 @@ m4exit
 @end example
 @end ignore
 
-@c FIXME: need some explanation here why this is a useful feature, not
-@c just how you use it.
+Diversions make it possible to generate output in a different order than
+the input was read.  It is possible to implement topological sorting
+dependencies.  For example, @acronym{GNU} Autoconf makes use of
+diversions under the hood to ensure that the expansion of a prerequisite
+macro appears in the output prior to the expansion of a dependent macro,
+regardless of which order the two macros were invoked in the user's
+input file.
 
 @menu
 * Divert::                      Diverting output
@@ -3750,9 +3760,9 @@ We decided to divert the stream for irrigation.
 @result{}We decided to  the stream for irrigation.
 define(`divert', `ifelse(`$#', `0', ``$0'', `builtin(`$0', $@@)')')
 @result{}
-divert(-1)
+divert(`-1')
 Ignored text.
-divert(0)
+divert(`0')
 @result{}
 We decided to divert the stream for irrigation.
 @result{}We decided to divert the stream for irrigation.

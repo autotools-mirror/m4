@@ -1,3 +1,8 @@
+2006-11-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Include, Search Path, Diversions, Divert):
+	Minor tweaks noticed while porting to head.
+
 2006-11-14  Eric Blake  <ebb9@byu.net>
 
 	* src/output.c (cleanup_tmpfile, freeze_diversions): Clean up
