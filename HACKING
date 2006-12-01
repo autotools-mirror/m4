@@ -221,6 +221,13 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * For non-alpha releases, update the webpages.  Replace manual.html with
   the new one (generate with `make web-manual').
 
+* Update the M4 entry in the GNU Software directory, located at
+  http://directory.fsf.org/GNU/gnum4.html.  To do this, check out the
+  directory template:
+    cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
+       co directory/gnum4.txt
+  then mail the patch to bug-directory@gnu.org.
+
 
 7. Alpha release note template
 ==============================
