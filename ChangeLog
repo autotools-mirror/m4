@@ -1,3 +1,9 @@
+2006-12-04  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Undivert, Divnum, Cleardivert): Merge more doc
+	sections.
+	(Modules): Make style consistent.
+
 2006-11-16  Eric Blake  <ebb9@byu.net>
 
 	* bootstrap: Relax m4 requirement, thanks to...

@@ -4483,26 +4483,30 @@ We decided to divert the stream for irrigation.
 @node Undivert
 @section Undiverting output
 
-@deffn {Builtin (m4)} undivert (@ovar{diversions@dots{}})
 Diverted text can be undiverted explicitly using the builtin
-@code{undivert},  which reinserts the diverted output given by the
-arguments into the current output stream, in the order given.  If no
-arguments are supplied, all diversions are undiverted, in numerical
-order.
+@code{undivert}:
 
-@c FIXME: Explain what happens when undiverting all to else than 0.
+@deffn {Builtin (m4)} undivert (@ovar{diversions@dots{}})
+Undiverts the numeric @var{diversions} given by the arguments, in the
+order given.  If no arguments are supplied, all diversions are
+undiverted, in numerical order.
+
+@cindex @acronym{GNU} extensions
+As a @acronym{GNU} extension, @var{diversions} may contain non-numeric
+strings, which are treated as the names of files to copy into the output
+without expansion.  A warning is issued if a file could not be opened.
 
 The expansion of @code{undivert} is void.
 @end deffn
 
 @example
-divert(1)
+divert(`1')
 This text is diverted.
 divert
 @result{}
 This text is not diverted.
 @result{}This text is not diverted.
-undivert(1)
+undivert(`1')
 @result{}
 @result{}This text is diverted.
 @result{}
@@ -4514,36 +4518,69 @@ following @code{undivert}, the other from the newline that followed the
 
 When diverted text is undiverted, it is @emph{not} reread by @code{m4},
 but rather copied directly to the current output, and it is therefore
-not an error to undivert into a diversion.
+not an error to undivert into a diversion.  Undiverting the empty string
+is the same as specifying diversion 0; in either case nothing happens
+since the output has already been flushed.
+
+@example
+divert(`1')diverted text
+divert
+@result{}
+undivert()
+@result{}
+undivert(`0')
+@result{}
+undivert
+@result{}diverted text
+@result{}
+@end example
 
 When a diversion has been undiverted, the diverted text is discarded,
 and it is not possible to bring back diverted text more than once.
 
 @example
-divert(1)
+divert(`1')
 This text is diverted first.
-divert(0)undivert(1)dnl
+divert(`0')undivert(`1')dnl
 @result{}
 @result{}This text is diverted first.
-undivert(1)
+undivert(`1')
 @result{}
-divert(1)
+divert(`1')
 This text is also diverted but not appended.
-divert(0)undivert(1)dnl
+divert(`0')undivert(`1')dnl
 @result{}
 @result{}This text is also diverted but not appended.
 @end example
 
-Attempts to undivert the current diversion are silently ignored.
+Attempts to undivert the current diversion are silently ignored.  Thus,
+when the current diversion is not 0, the current diversion does not get
+rearranged among the other diversions.
 
-@cindex GNU extensions
+@example
+divert(`1')one
+divert(`2')two
+divert(`3')three
+divert(`4')four
+divert(`5')five
+divert(`2')undivert(`5', `2', `4')dnl
+undivert`'dnl effectively undivert(`1', `2', `3', `4', `5')
+divert`'undivert`'dnl
+@result{}two
+@result{}five
+@result{}four
+@result{}one
+@result{}three
+@end example
+
+@cindex @acronym{GNU} extensions
 @cindex file inclusion
 @cindex inclusion, of files
-GNU @code{m4} allows named files to be undiverted.  Given a non-numeric
-argument, the contents of the file named will be copied, uninterpreted, to
-the current output.  This complements the builtin @code{include}
-(@pxref{Include}).  To illustrate the difference, assume the file
-@file{foo} contains:
+@acronym{GNU} @code{m4} allows named files to be undiverted.  Given a
+non-numeric argument, the contents of the file named will be copied,
+uninterpreted, to the current output.  This complements the builtin
+@code{include} (@pxref{Include}).  To illustrate the difference, assume
+the file @file{foo} contains:
 
 @comment file: foo
 @example
@@ -4565,21 +4602,38 @@ include(`foo')
 @result{}
 @end example
 
+If the file is not found (or cannot be read), an error message is
+issued, and the expansion is void.  It is possible to intermix files
+and diversion numbers.
+
+@example
+divert(`1')diversion one
+divert(`2')undivert(`foo')dnl
+divert(`3')diversion three
+divert`'dnl
+undivert(`1', `2', `foo', `3')dnl
+@result{}diversion one
+@result{}bar
+@result{}bar
+@result{}diversion three
+@end example
+
 @node Divnum
 @section Diversion numbers
 
 @cindex diversion numbers
+The current diversion is tracked by the builtin @code{divnum}:
+
 @deffn {Builtin (m4)} divnum
-The builtin @code{divnum} expands to the number of the current
-diversion.
+Expands to the number of the current diversion.
 @end deffn
 
 @example
 Initial divnum
 @result{}Initial 0
-divert(1)
+divert(`1')
 Diversion one: divnum
-divert(2)
+divert(`2')
 Diversion two: divnum
 divert
 @result{}
@@ -4589,9 +4643,6 @@ divert
 @result{}
 @result{}Diversion two: 2
 @end example
-
-The last call of @code{divert} without arguments is necessary because the
-undiverted text would otherwise be diverted itself.
 
 @node Cleardivert
 @section Discarding diverted text
@@ -4603,14 +4654,14 @@ text is actually needed.  Since all non-empty diversion are brought back
 on the main output stream when the end of input is seen, a method of
 discarding a diversion is needed.  If all diversions should be
 discarded, the easiest is to end the input to @code{m4} with
-@samp{divert(-1)} followed by an explicit @samp{undivert}:
+@samp{divert(`-1')} followed by an explicit @samp{undivert}:
 
 @example
-divert(1)
+divert(`1')
 Diversion one: divnum
-divert(2)
+divert(`2')
 Diversion two: divnum
-divert(-1)
+divert(`-1')
 undivert
 ^D
 @end example
@@ -4619,6 +4670,10 @@ undivert
 No output is produced at all.
 
 Clearing selected diversions can be done with the following macro:
+
+@deffn Composite cleardivert (@ovar{diversions@dots{}})
+Discard the contents of each of the listed numeric @var{diversions}.
+@end deffn
 
 @example
 define(`cleardivert',
@@ -4642,14 +4697,14 @@ extreme by hacking the sources and recompiling the whole thing to make
 a custom M4 installation.
 
 Starting with release 2.0, M4 uses Libtool's @code{libltdl} facilities
-(@pxref{Using libltdl, ,libltdl ,libtool , The GNU Libtool Manual})
+(@pxref{Using libltdl, , libltdl, libtool, The GNU Libtool Manual})
 to move all of M4's builtins out to pluggable modules.  Unless compile
 time options are set to change the default build, the installed M4 2.0
 binary is virtually identical to 1.4.x, supporting the same builtins.
 However, an optional module can be loaded into the running M4 interpreter
 to provide a new @code{load} builtin.  This facilitates runtime
 extension of the M4 builtin macro list using compiled C code linked
-against a new @file{libm4.so}.
+against a new shared library, typically named @file{libm4.so}.
 
 For example, you might want to add a @code{setenv} builtin to M4, to
 use before invoking @code{esyscmd}.  We might write a @file{setenv.c}
@@ -4662,11 +4717,11 @@ something like this:
 M4BUILTIN(setenv);
 
 m4_builtin m4_builtin_table[] =
-  @{
-    /* name     handler         macros blind minargs maxargs */
-    @{ "setenv", builtin_setenv, false, false,   3,     4 @},
+@{
+  /* name      handler         flags             minargs maxargs */
+  @{ "setenv", builtin_setenv, M4_BUILTIN_BLIND, 2,      3 @},
 
-    @{ NULL,     NULL,           false, false,    0,     0 @}
+  @{ NULL,     NULL,           0,                0,      0 @}
 @};
 
 /**
@@ -4689,9 +4744,11 @@ M4 code:
 
 @comment ignore
 @example
-$ M4MODPATH=`pwd` m4 --load-module=setenv
+$ @kbd{M4MODPATH=`pwd` m4 --load-module=setenv}
 setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
-esyscmd(`ifconfig -a')
+@result{}
+esyscmd(`ifconfig -a')dnl
+@result{}@dots{}
 @end example
 
 Or instead of loading the module from the M4 invocation, you can use
@@ -4699,9 +4756,11 @@ the new @code{load} builtin:
 
 @comment ignore
 @example
-$ M4MODPATH=`pwd` m4 --load-module=load
+$ @kbd{M4MODPATH=`pwd` m4 --load-module=load}
 load(`setenv')
+@result{}
 setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
+@result{}
 @end example
 
 Also, at build time, you can choose which modules to build into
@@ -4712,13 +4771,13 @@ module @samp{load} and so on.
 
 We hinted earlier that the @code{m4} and @code{gnu} modules are
 preloaded into the installed M4 binary, but it is possible to install
-a @emph{thinner} binary minus GNU extensions, for example, by
-configuring the distribution with @samp{./configure
+a @emph{thinner} binary; for example, omitting the @acronym{GNU}
+extensions by configuring the distribution with @kbd{./configure
 --with-modules=m4}.  For a binary built with that option to understand
-code that uses @acronym{GNU} extensions, you must then run @samp{m4
+code that uses @acronym{GNU} extensions, you must then run @kbd{m4
 --load-module=gnu}.  It is also possible to build a @emph{fatter}
 binary with additional modules preloaded: adding, say, the @code{load}
-builtin using @samp{./configure --with-modules="m4 gnu load"}.
+builtin using @kbd{./configure --with-modules="m4 gnu load"}.
 
 @acronym{GNU} M4 now has a facility for defining additional builtins without
 recompiling the sources.  In actual fact, all of the builtins provided
