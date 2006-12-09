@@ -2,6 +2,10 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.9 - ?? ??? 200?, by ????  (CVS version 1.4.8a)
+
+* No user visible changes so far...
+
 Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)
 
 * The `divert' macro and `-H'/`--hashsize' command line option no longer

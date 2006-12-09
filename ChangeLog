@@ -1,3 +1,8 @@
+2006-12-09  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Start changes of 1.4.8a.
+
 2006-11-20  Eric Blake  <ebb9@byu.net>
 
 	Release	1.4.8:
