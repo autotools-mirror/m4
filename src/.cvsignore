@@ -6,6 +6,7 @@
 .libs
 getopt*
 m4
+m4.exe
 Makefile
 Makefile.in
 version-etc*
