@@ -451,6 +451,64 @@ m4: error closing stdin: Bad file descriptor
 
 AT_CLEANUP
 
+## -------------- ##
+## stdin seekable ##
+## -------------- ##
+
+AT_SETUP([stdin seekable])
+
+dnl POSIX requires that if stdin is seekable, m4 must seek to the location
+dnl of unprocessed data for the benefit of other copies of the fd.
+
+dnl Check internal follow-on process.
+AT_DATA([in.m4], [[syscmd(`cat')m4exit(15)
+]])
+AT_CHECK_M4([], [0], [[m4exit(15)
+]], [], [in.m4])
+
+dnl Check external follow-on process, after m4exit.
+AT_DATA([in.m4], [[m4exit(
+0)trailing data
+]])
+AT_CHECK([(m4; cat) < in.m4], [0], [[trailing data
+]])
+
+dnl Not all OS's have a libc that gets the remaining tests right (for
+dnl example, cygwin 1.5.22 and earlier).
+AT_CHECK([(sed -ne 1q; cat) < in.m4], [0], [stdout])
+AT_CHECK([test "x`cat stdout`" = "x0)trailing data" || \
+  { echo "skipping: sed is too greedy on seekable stdin"; exit 77; }])
+
+dnl Check external follow-on process, after fatal error.
+AT_DATA([in.m4], [[dnl(
+0)trailing data
+]])
+AT_CHECK([(m4 -E; cat) < in.m4], [0], [[trailing data
+]], [[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+
+dnl Ensure that esyscmd resumes parsing where the child process left off.
+AT_DATA([in.m4], [[define(`foo', `FOO')m4 foo
+esyscmd(`sed -e "s/foo/bar/;q"')sed foo
+m4 foo
+]])
+AT_CHECK_M4([], [0], [[m4 FOO
+sed bar
+m4 FOO
+]], [], [in.m4])
+
+dnl Ensure that syscmd resumes parsing where the child process left off.
+AT_DATA([in.m4], [[define(`foo', `FOO')m4 foo
+syscmd(`sed -e "s/foo/bar/;q"')sed foo
+m4 foo
+]])
+AT_CHECK_M4([], [0], [[m4 FOO
+sed bar
+m4 FOO
+]], [], [in.m4])
+
+AT_CLEANUP
+
 ## ------------- ##
 ## stdout closed ##
 ## ------------- ##
