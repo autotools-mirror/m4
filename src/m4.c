@@ -563,9 +563,9 @@ Written by Rene' Seindal.\n\
      stream and detect any errors it might have encountered.  Close
      stdin if we read from it, to detect any errors.  */
   debug_set_output (NULL);
-  if (read_stdin && fclose (stdin) == EOF)
+  if (read_stdin && close_stream (stdin) == EOF)
     {
-      M4ERROR ((warning_status, errno, "error reading file"));
+      M4ERROR ((warning_status, errno, "error reading stdin"));
       retcode = EXIT_FAILURE;
     }
 
