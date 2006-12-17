@@ -839,6 +839,7 @@ M4BUILTIN_HANDLER (m4exit)
   /* Change debug stream back to stderr, to force flushing debug
      stream and detect any errors.  */
   m4_debug_set_output (context, NULL);
+  m4_sysval_flush (context);
 
   /* Check for saved error.  */
   if (exit_code == 0 && m4_get_exit_status (context) != 0)

@@ -776,7 +776,7 @@ main (int argc, char *const *argv, char *const *envp)
      stream and detect any errors it might have encountered.  Close
      stdin if we read from it, to detect any errors.  */
   m4_debug_set_output (context, NULL);
-  if (read_stdin && fclose (stdin) == EOF)
+  if (read_stdin && close_stream (stdin) == EOF)
     m4_error (context, 0, errno, _("error closing stdin"));
 
   exit_status = m4_get_exit_status (context);

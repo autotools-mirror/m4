@@ -1,3 +1,10 @@
+2006-12-16  Eric Blake  <ebb9@byu.net>
+
+	* src/main.c (main): Check for errors when closing stdin.
+	* modules/m4.c (m4exit): Missed part of previous patch: flush
+	stdin before a successful exit.
+	Reported by Ralf Wildenhues.
+
 2006-12-14  Eric Blake  <ebb9@byu.net>
 
 	* modules/m4.c (m4_sysval_flush): Flush stdin before exiting, as
