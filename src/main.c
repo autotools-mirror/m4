@@ -22,6 +22,7 @@
 #include "m4.h"
 #include "m4private.h"
 
+#include "close-stream.h"
 #include "closeout.h"
 #include "configmake.h"
 #include "getopt.h"
