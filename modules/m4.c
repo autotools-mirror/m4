@@ -53,7 +53,7 @@
 #define m4_make_temp		m4_LTX_m4_make_temp
 
 extern void m4_set_sysval    (int value);
-extern void m4_sysval_flush  (m4 *context);
+extern void m4_sysval_flush  (m4 *context, bool report);
 extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
 			      m4_symbol_value **argv, bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
@@ -401,7 +401,7 @@ M4BUILTIN_HANDLER (dumpdef)
     }
 
   obstack_1grow (obs, '\0');
-  m4_sysval_flush (context);
+  m4_sysval_flush (context, false);
   fputs ((char *) obstack_finish (obs), stderr);
 }
 
@@ -481,17 +481,37 @@ m4_set_sysval (int value)
   m4_sysval = value;
 }
 
+/* Flush a given output STREAM.  If REPORT, also print an error
+   message and clear the stream error bit.  */
+static void
+sysval_flush_helper (m4 *context, FILE *stream, bool report)
+{
+  if (fflush (stream) == EOF && report)
+    {
+      m4_error (context, 0, errno, _("write error"));
+      clearerr (stream);
+    }
+}
+
+/* Flush all user output streams, prior to doing something that can
+   could lose unflushed data or interleave debug and normal output
+   incorrectly.  If REPORT, then print an error message on failure and
+   clear the stream error bit; otherwise a subsequent ferror can track
+   that an error occurred.  */
 void
-m4_sysval_flush (m4 *context)
+m4_sysval_flush (m4 *context, bool report)
 {
   FILE *debug_file = m4_get_debug_file (context);
 
   if (debug_file != stdout)
-    fflush (stdout);
+    sysval_flush_helper (context, stdout, report);
   if (debug_file != stderr)
+    /* If we have problems with stderr, we can't really report that
+       problem to stderr.  The closeout module will ensure the exit
+       status reflects the problem, though.  */
     fflush (stderr);
   if (debug_file != NULL)
-    fflush (debug_file);
+    sysval_flush_helper (context, debug_file, report);
   /* POSIX requires that if m4 doesn't consume all input, but stdin is
      opened on a seekable file, that the file pointer be left at the
      next character on exit (but places no restrictions on the file
@@ -529,7 +549,7 @@ M4BUILTIN_HANDLER (syscmd)
       m4_set_sysval (0);
       return;
     }
-  m4_sysval_flush (context);
+  m4_sysval_flush (context, false);
   m4_sysval = system (M4ARG (1));
   /* FIXME - determine if libtool works for OS/2, in which case the
      FUNC_SYSTEM_BROKEN section on the branch must be ported to work
@@ -803,7 +823,7 @@ M4BUILTIN_HANDLER (errprint)
   assert (obstack_object_size (obs) == 0);
   m4_dump_args (context, obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
-  m4_sysval_flush (context);
+  m4_sysval_flush (context, false);
   fputs ((char *) obstack_finish (obs), stderr);
   fflush (stderr);
 }
@@ -839,7 +859,7 @@ M4BUILTIN_HANDLER (m4exit)
   /* Change debug stream back to stderr, to force flushing debug
      stream and detect any errors.  */
   m4_debug_set_output (context, NULL);
-  m4_sysval_flush (context);
+  m4_sysval_flush (context, true);
 
   /* Check for saved error.  */
   if (exit_code == 0 && m4_get_exit_status (context) != 0)

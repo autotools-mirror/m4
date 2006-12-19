@@ -539,7 +539,7 @@ M4BUILTIN_HANDLER (esyscmd)
 	  return;
 	}
 
-      m4_sysval_flush (context);
+      m4_sysval_flush (context, false);
       errno = 0;
       pin = popen (M4ARG (1), "r");
       if (pin == NULL)

@@ -36,7 +36,7 @@ typedef struct
 
 /* Types used to cast imported symbols to, so we get type checking
    across the interface boundary.  */
-typedef void m4_sysval_flush_func (m4 *context);
+typedef void m4_sysval_flush_func (m4 *context, bool report);
 typedef void m4_set_sysval_func (int value);
 typedef void m4_dump_symbols_func (m4 *context, m4_dump_symbol_data *data,
 				   int argc, m4_symbol_value **argv,

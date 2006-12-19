@@ -540,7 +540,7 @@ AT_DATA([in.m4], [[hello world
 m4exit(`0')
 ]])
 AT_CHECK_M4([>&-], [1], [],
-[[m4: write error: Bad file descriptor
+[[m4:stdin:2: write error: Bad file descriptor
 ]], [in.m4])
 
 dnl preserve m4exit's failure value
@@ -548,7 +548,7 @@ AT_DATA([in.m4], [[hello world
 m4exit(`2')
 ]])
 AT_CHECK_M4([>&-], [2], [],
-[[m4: write error: Bad file descriptor
+[[m4:stdin:2: write error: Bad file descriptor
 ]], [in.m4])
 
 dnl trace file must not collide with closed stdout
@@ -647,14 +647,14 @@ dnl write failures must override m4exit requesting 0
 AT_DATA([in.m4], [[hello world m4exit(`0')
 ]])
 AT_CHECK_M4([in.m4 >/dev/full], [1], [],
-[[m4: write error: No space left on device
+[[m4:in.m4:1: write error: No space left on device
 ]])
 
 dnl preserve m4exit's failure value
 AT_DATA([in.m4], [[hello world m4exit(`2')
 ]])
 AT_CHECK_M4([in.m4 >/dev/full], [2], [],
-[[m4: write error: No space left on device
+[[m4:in.m4:1: write error: No space left on device
 ]])
 
 AT_CLEANUP
