@@ -4936,11 +4936,12 @@ various ways, extracting substrings, searching, substituting, and so on.
 
 @cindex length of strings
 @cindex strings, length of
-@deffn {Builtin (m4)} len (@var{string})
-The length of a string can be calculated by @code{len},
-which expands to the length of @var{string}, as a decimal number.
+The length of a string can be calculated by @code{len}:
 
-The builtin macro @code{len} is recognized only when given arguments.
+@deffn {Builtin (m4)} len (@var{string})
+Expands to the length of @var{string}, as a decimal number.
+
+The macro @code{len} is recognized only with parameters.
 @end deffn
 
 @example
@@ -4953,9 +4954,10 @@ len(`abcdef')
 @node Index macro
 @section Searching for substrings
 
+Searching for substrings is done with @code{index}:
+
 @deffn {Builtin (m4)} index (@var{string}, @var{substring})
-Searching for substrings is done with @code{index},
-which expands to the index of the first occurrence of @var{substring} in
+Expands to the index of the first occurrence of @var{substring} in
 @var{string}.  The first character in @var{string} has index 0.  If
 @var{substring} does not occur in @var{string}, @code{index} expands to
 @samp{-1}.
@@ -4970,30 +4972,49 @@ index(`gnus, gnats, and armadillos', `dag')
 @result{}-1
 @end example
 
+Omitting @var{substring} evokes a warning, but still produces output.
+
+@example
+index(`abc')
+@error{}m4:stdin:1: Warning: index: too few arguments: 1 < 2
+@result{}0
+@end example
+
 @node Regexp
 @section Searching for regular expressions
 
 @cindex regular expressions
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
+Searching for regular expressions is done with the builtin
+@code{regexp}:
+
 @deffn {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @var{resyntax})
 @deffnx {Builtin (gnu)} regexp (@var{string}, @var{regexp}, @
   @ovar{replacement}, @ovar{resyntax})
-Searching for regular expressions is done with the builtin
-@code{regexp}, which searches for @var{regexp} in @var{string}.  The
-syntax of regular expressions is similar to that of Perl, @acronym{GNU} Awk
-and Egrep: so called ``Extended Regular Expression''.
+Searches for @var{regexp} in @var{string}.
+
+If @var{resyntax} is given, the particular flavor of regular expression
+understood with respect to @var{regexp} can be changed from the current
+default.  @xref{Changeresyntax}, for details of the values that can be
+given for this argument.  If exactly three arguments given, then the
+third argument is treated as @var{resyntax} only if it matches a known
+syntax name, otherwise it is treated as @var{replacement}.
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
-the first match of @var{regexp} in @var{string}.  If @var{replacement}
-is specified and matches, then it expands into @var{replacement}. If
-@var{regexp} does not match anywhere in @var{string}, it expands to -1.
+the first match of @var{regexp} in @var{string}.  If @var{regexp} does
+not match anywhere in @var{string}, it expands to -1.
 
-If @var{resyntax} is given, the particular flavor of regular
-expression understood with respect to @var{regexp} can be changed from
-the current default.  @xref{Changeresyntax}, for details of the values
-that can be given for this argument.
+If @var{replacement} is supplied, and there was a match, @code{regexp}
+changes the expansion to this argument, with @samp{\@var{n}} substituted
+by the text matched by the @var{n}th parenthesized sub-expression of
+@var{regexp}, up to nine sub-expressions.  The escape @samp{\&} is
+replaced by the text of the entire regular expression matched.  For
+all other characters, @samp{\} treats the next character literally.  A
+warning is issued if there were fewer sub-expressions than the
+@samp{\@var{n}} requested, or if there is a trailing @samp{\}.  If there
+was no match, @code{regexp} expands to the empty string.
 
-The builtin macro @code{regexp} is recognized only when given arguments.
+The macro @code{regexp} is recognized only with parameters.
 @end deffn
 
 @example
@@ -5001,16 +5022,34 @@ regexp(`GNUs not Unix', `\<[a-z]\w+')
 @result{}5
 regexp(`GNUs not Unix', `\<Q\w*')
 @result{}-1
-@end example
-
-If @var{replacement} is supplied, @code{regexp} changes the expansion
-to this argument, with @samp{\@var{n}} substituted by the text
-matched by the @var{n}th parenthesized sub-expression of @var{regexp},
-@samp{\&} being the text the entire regular expression matched.
-
-@example
 regexp(`GNUs not Unix', `\w\(\w+\)$', `*** \& *** \1 ***')
 @result{}*** Unix *** nix ***
+regexp(`GNUs not Unix', `\<Q\w*', `*** \& *** \1 ***')
+@result{}
+@end example
+
+Here are some more examples on the handling of backslash:
+
+@example
+regexp(`abc', `\(b\)', `\\\10\a')
+@result{}\b0a
+regexp(`abc', `b', `\1\')
+@error{}m4:stdin:2: Warning: regexp: sub-expression 1 not present
+@error{}m4:stdin:2: Warning: regexp: trailing \ ignored in replacement
+@result{}
+regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
+@error{}m4:stdin:3: Warning: regexp: sub-expression 4 not present
+@error{}m4:stdin:3: Warning: regexp: sub-expression 5 not present
+@error{}m4:stdin:3: Warning: regexp: sub-expression 6 not present
+@result{}c
+@end example
+
+Omitting @var{regexp} evokes a warning, but still produces output.
+
+@example
+regexp(`abc')
+@error{}m4:stdin:1: Warning: regexp: too few arguments: 1 < 2
+@result{}0
 @end example
 
 If @var{resyntax} is given, @var{regexp} must be given according to
@@ -5021,16 +5060,24 @@ remains unchanged for other invocations:
 regexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***',
        `POSIX_EXTENDED')
 @result{}*** Unix *** nix ***
+regexp(`GNUs not Unix', `\w(\w+)$', `*** \& *** \1 ***')
+@result{}
 @end example
 
-Occasionally, you might want to pass an @var{resyntax} argument
-without wishing to give @var{replacement}.  If the @strong{last}
-argument is a valid @var{resyntax} it is used as such whether
-or not a @var{replacement} argument is also given:
+Occasionally, you might want to pass an @var{resyntax} argument without
+wishing to give @var{replacement}.  If there are exactly three
+arguments, and the last argument is a valid @var{resyntax}, it is used
+as such, rather than as a replacement.
 
 @example
 regexp(`GNUs not Unix', `\w(\w+)$', `POSIX_EXTENDED')
 @result{}9
+regexp(`GNUs not Unix', `\w(\w+)$', `POSIX_EXTENDED', `POSIX_EXTENDED')
+@result{}POSIX_EXTENDED
+regexp(`GNUs not Unix', `\w(\w+)$', `POSIX_EXTENDED', `')
+@result{}
+regexp(`GNUs not Unix', `\w\(\w+\)$', `POSIX_EXTENDED', `')
+@result{}POSIX_EXTENDED
 @end example
 
 @node Substr
