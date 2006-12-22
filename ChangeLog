@@ -1,3 +1,9 @@
+2006-12-22  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Operation modes): Avoid underfull hbox.
+	(M4wrap, Eval, Errprint): Fix typos.
+	(Divnum): Not necessary to redivert in example.
+
 2006-12-21  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Len, Index macro, Regexp): More section merging

@@ -652,12 +652,13 @@ When this option is not given, @var{RESYNTAX-SPEC} is omitted,
 with respect to file names is significant.
 
 @item --safer
-Cripple the builtins @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
+Cripple the following builtins, since each can perform potentially
+unsafe actions: @code{maketemp}, @code{mkstemp} (@pxref{Mkstemp}),
 @code{mkdtemp} (@pxref{Mkdtemp}), @code{debugfile} (@pxref{Debugfile}),
-@code{syscmd} (@pxref{Syscmd}), and @code{esyscmd} (@pxref{Esyscmd}),
-since they can perform potentially unsafe actions.  An attempt to use
-these macros will result in an error.  This option is intended to make
-it safer to preprocess an input file of unknown origin.
+@code{syscmd} (@pxref{Syscmd}), and @code{esyscmd} (@pxref{Esyscmd}).
+An attempt to use any of these macros will result in an error.  This
+option is intended to make it safer to preprocess an input file of
+unknown origin.
 
 @item -W
 @itemx --warnings
@@ -4201,7 +4202,7 @@ to be reread when end of input is reached.
 @end deffn
 
 @example
-define(`cleanup', `This is the `cleanup' actions.
+define(`cleanup', `This is the `cleanup' action.
 ')
 @result{}
 m4wrap(`cleanup')
@@ -4209,7 +4210,7 @@ m4wrap(`cleanup')
 This is the first and last normal input line.
 @result{}This is the first and last normal input line.
 ^D
-@result{}This is the cleanup actions.
+@result{}This is the cleanup action.
 @end example
 
 The saved input is only reread when the end of normal input is seen, and
@@ -4635,8 +4636,6 @@ divert(`1')
 Diversion one: divnum
 divert(`2')
 Diversion two: divnum
-divert
-@result{}
 ^D
 @result{}
 @result{}Diversion one: 1
@@ -5411,7 +5410,7 @@ bitwise exclusive-or.  GNU @code{m4} changed its behavior: it used to
 exponentiate for @samp{^}, it now computes the bitwise exclusive-or.
 
 Numbers without special prefix are given decimal.  A simple @samp{0}
-prefix introduces an octal number.  @samp{0x} introduces an hexadecimal
+prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
 number.  @samp{0b} introduces a binary number.  @samp{0r} introduces a
 number expressed in any radix between 1 and 36: the prefix should be
 immediately followed by the decimal expression of the radix, a colon,
@@ -5880,9 +5879,9 @@ The macro @code{errprint} is recognized only with parameters.
 @end deffn
 
 @example
-errprint(`Illegal arguments to forloop
+errprint(`Invalid arguments to forloop
 ')
-@error{}Illegal arguments to forloop
+@error{}Invalid arguments to forloop
 @result{}
 errprint(`1')errprint(`2',`3
 ')
