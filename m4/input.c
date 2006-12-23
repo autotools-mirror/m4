@@ -1037,41 +1037,7 @@ m4__next_token (m4 *context, m4_symbol_value *token)
     file = m4_get_current_file (context);
     line = m4_get_current_line (context);
 
-    /* FIXME - other implementations, such as Solaris, parse macro
-       names, then quotes, then comments.  We should probably
-       rearrange this to match.  */
-    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
-      {					/* COMMENT, SHORT DELIM */
-	obstack_1grow (&token_stack, ch);
-	while ((ch = next_char (context, true)) != CHAR_EOF
-	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
-	  obstack_1grow (&token_stack, ch);
-	if (ch != CHAR_EOF)
-	  obstack_1grow (&token_stack, ch);
-	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
-			    _("end of file in comment"));
-	type = (m4_get_discard_comments_opt (context)
-		? M4_TOKEN_NONE : M4_TOKEN_STRING);
-      }
-    else if (!m4_is_syntax_single_comments (M4SYNTAX)
-	     && MATCH (context, ch, context->syntax->bcomm.string, true))
-      {					/* COMMENT, LONGER DELIM */
-	obstack_grow (&token_stack, context->syntax->bcomm.string,
-		      context->syntax->bcomm.length);
-	while ((ch = next_char (context, true)) != CHAR_EOF
-	       && !MATCH (context, ch, context->syntax->ecomm.string, true))
-	  obstack_1grow (&token_stack, ch);
-	if (ch != CHAR_EOF)
-	  obstack_grow (&token_stack, context->syntax->ecomm.string,
-			context->syntax->ecomm.length);
-	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
-			    _("end of file in comment"));
-	type = (m4_get_discard_comments_opt (context)
-		? M4_TOKEN_NONE : M4_TOKEN_STRING);
-      }
-    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
+    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
       {					/* ESCAPED WORD */
 	obstack_1grow (&token_stack, ch);
 	if ((ch = next_char (context, true)) != CHAR_EOF)
@@ -1146,6 +1112,37 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	      obstack_1grow (&token_stack, ch);
 	  }
 	type = M4_TOKEN_STRING;
+      }
+    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
+      {					/* COMMENT, SHORT DELIM */
+	obstack_1grow (&token_stack, ch);
+	while ((ch = next_char (context, true)) != CHAR_EOF
+	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
+	  obstack_1grow (&token_stack, ch);
+	if (ch != CHAR_EOF)
+	  obstack_1grow (&token_stack, ch);
+	else
+	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
+			    _("end of file in comment"));
+	type = (m4_get_discard_comments_opt (context)
+		? M4_TOKEN_NONE : M4_TOKEN_STRING);
+      }
+    else if (!m4_is_syntax_single_comments (M4SYNTAX)
+	     && MATCH (context, ch, context->syntax->bcomm.string, true))
+      {					/* COMMENT, LONGER DELIM */
+	obstack_grow (&token_stack, context->syntax->bcomm.string,
+		      context->syntax->bcomm.length);
+	while ((ch = next_char (context, true)) != CHAR_EOF
+	       && !MATCH (context, ch, context->syntax->ecomm.string, true))
+	  obstack_1grow (&token_stack, ch);
+	if (ch != CHAR_EOF)
+	  obstack_grow (&token_stack, context->syntax->ecomm.string,
+			context->syntax->ecomm.length);
+	else
+	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
+			    _("end of file in comment"));
+	type = (m4_get_discard_comments_opt (context)
+		? M4_TOKEN_NONE : M4_TOKEN_STRING);
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ACTIVE))
       {					/* ACTIVE CHARACTER */

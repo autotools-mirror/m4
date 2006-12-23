@@ -665,7 +665,8 @@ M4BUILTIN_HANDLER (shift)
   m4_dump_args (context, obs, argc - 1, argv + 1, ",", true);
 }
 
-/* Change the current quotes.  The function set_quotes () lives in input.c.  */
+/* Change the current quotes.  The function set_quotes () lives in
+   syntax.c.  */
 M4BUILTIN_HANDLER (changequote)
 {
   m4_set_quotes (M4SYNTAX,
@@ -674,13 +675,12 @@ M4BUILTIN_HANDLER (changequote)
 }
 
 /* Change the current comment delimiters.  The function set_comment ()
-   lives in input.c.  */
+   lives in syntax.c.  */
 M4BUILTIN_HANDLER (changecom)
 {
-  if (argc == 1)
-    m4_set_comment (M4SYNTAX, "", "");	/* disable comments */
-  else
-    m4_set_comment (M4SYNTAX, M4ARG (1), (argc >= 3) ? M4ARG (2) : NULL);
+  m4_set_comment (M4SYNTAX,
+		  (argc >= 2) ? M4ARG (1) : NULL,
+		  (argc >= 3) ? M4ARG (2) : NULL);
 }
 
 

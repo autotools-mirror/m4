@@ -390,7 +390,7 @@ enum {
 
 extern void	m4_set_quotes	(m4_syntax_table*, const char*, const char*);
 extern void	m4_set_comment	(m4_syntax_table*, const char*, const char*);
-extern int	m4_set_syntax	(m4_syntax_table*, const char, const char*);
+extern int	m4_set_syntax	(m4_syntax_table*, char, char, const char*);
 
 
 

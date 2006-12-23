@@ -632,7 +632,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	    }
 	  string[0][number[0]] = '\0';
 
-	  if ((m4_set_syntax (context->syntax, syntax, string[0]) < 0)
+	  if ((m4_set_syntax (context->syntax, syntax, '=', string[0]) < 0)
 	      && (syntax != '\0'))
 	    {
 	      m4_error (context, 0, 0,

@@ -399,7 +399,7 @@ m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
   int resyntax = m4_regexp_syntax_encode (spec);
 
   if (resyntax < 0)
-    m4_error (context, 0, 0, _("%s: bad syntax-spec: `%s'"), caller, spec);
+    m4_warn (context, 0, _("%s: bad syntax-spec: `%s'"), caller, spec);
 
   return resyntax;
 }
@@ -434,14 +434,26 @@ M4BUILTIN_HANDLER (changesyntax)
       int i;
       for (i = 1; i < argc; i++)
 	{
-	  char key = *M4ARG (i);
-	  if (key != '\0'
-	      && (m4_set_syntax (M4SYNTAX, key,
-				 m4_expand_ranges (M4ARG (i) + 1, obs)) < 0))
+	  const char *spec = M4ARG (i);
+	  char key = *spec++;
+	  char action = key ? *spec : '\0';
+	  switch (action)
 	    {
-	      m4_error (context, 0, 0, _("%s: undefined syntax code: `%c'"),
-			M4ARG (0), key);
+	    case '-':
+	    case '+':
+	    case '=':
+	      spec++;
+	      break;
+	    case '\0':
+	      break;
+	    default:
+	      action = '=';
+	      break;
 	    }
+	  if (m4_set_syntax (M4SYNTAX, key, action,
+			     key ? m4_expand_ranges (spec, obs) : "") < 0)
+	    m4_warn (context, 0, _("%s: undefined syntax code: `%c'"),
+		     M4ARG (0), key);
 	}
     }
   else

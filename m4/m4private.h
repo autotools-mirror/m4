@@ -284,21 +284,25 @@ typedef struct {
 } m4_string;
 
 struct m4_syntax_table {
-  /* Please read the comment at the top of input.c for details */
+  /* Please read the comment at the top of input.c for details.  table
+     holds the current syntax, and orig holds the default syntax.  */
   unsigned short table[CHAR_RETRY];
+  unsigned short orig[CHAR_RETRY];
 
   m4_string lquote;
   m4_string rquote;
   m4_string bcomm;
   m4_string ecomm;
 
-  /* true iff strlen(rquote) == strlen(lquote) == 1 */
+  /* True iff strlen(lquote) == strlen(rquote) == 1 and lquote is not
+     interfering with macro names.  */
   bool is_single_quotes;
 
-  /* true iff strlen(bcomm) == strlen(ecomm) == 1 */
+  /* True iff strlen(bcomm) == strlen(ecomm) == 1 and bcomm is not
+     interfering with macros or quotes.  */
   bool is_single_comments;
 
-  /* true iff some character has M4_SYNTAX_ESCAPE */
+  /* True iff some character has M4_SYNTAX_ESCAPE.  */
   bool is_macro_escaped;
 };
 
