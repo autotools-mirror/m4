@@ -4287,6 +4287,8 @@ With @code{changesyntax} we can modify what characters form a word.
 @example
 define(`test.1', `TEST ONE')
 @result{}
+define(`1', `one')
+@result{}
 __file__
 @result{}stdin
 test.1
@@ -4297,6 +4299,12 @@ __file__
 @result{}__file__
 test.1
 @result{}TEST ONE
+changesyntax(`W=a-zA-Z0-9_')
+@result{}
+__file__
+@result{}stdin
+test.1
+@result{}test.one
 changesyntax(`W')
 @result{}
 __file__
