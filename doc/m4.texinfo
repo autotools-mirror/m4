@@ -5269,7 +5269,7 @@ Expands to the index of the first occurrence of @var{substring} in
 @var{substring} does not occur in @var{string}, @code{index} expands to
 @samp{-1}.
 
-The builtin macro @code{index} is recognized only when given arguments.
+The macro @code{index} is recognized only with parameters.
 @end deffn
 
 @example
@@ -5392,21 +5392,36 @@ regexp(`GNUs not Unix', `\w\(\w+\)$', `POSIX_EXTENDED', `')
 
 @cindex extracting substrings
 @cindex substrings, extracting
+Substrings are extracted with @code{substr}:
+
 @deffn {Builtin (m4)} substr (@var{string}, @var{from}, @ovar{length})
-Substrings are extracted with @code{substr}, which expands to the
-substring of @var{string}, which starts at index @var{from}, and extends
-for @var{length} characters, or to the end of @var{string}, if
-@var{length} is omitted.  The starting index of a string is always 0.
+Expands to the substring of @var{string}, which starts at index
+@var{from}, and extends for @var{length} characters, or to the end of
+@var{string}, if @var{length} is omitted.  The starting index of a
+is always 0.  The expansion is empty if there is an error parsing
+@var{from} or @var{length}, if @var{from} is beyond the end of
+@var{string}, or if @var{length} is negative.
+
+The macro @code{substr} is recognized only with parameters.
+@end deffn
 
 @example
-substr(`gnus, gnats, and armadillos', 6)
+substr(`gnus, gnats, and armadillos', `6')
 @result{}gnats, and armadillos
-substr(`gnus, gnats, and armadillos', 6, 5)
+substr(`gnus, gnats, and armadillos', `6', `5')
 @result{}gnats
 @end example
 
-The builtin macro @code{substr} is recognized only when given arguments.
-@end deffn
+Omitting @var{from} evokes a warning, but still produces output.
+
+@example
+substr(`abc')
+@error{}m4:stdin:1: Warning: substr: too few arguments: 1 < 2
+@result{}abc
+substr(`abc',)
+@error{}m4:stdin:2: Warning: substr: empty string treated as 0
+@result{}abc
+@end example
 
 @node Translit
 @section Translating characters
@@ -5415,7 +5430,7 @@ The builtin macro @code{substr} is recognized only when given arguments.
 @cindex characters, translating
 Character translation is done with @code{translit}:
 
-@deffn {Builtin (m4)} translit (@var{string}, @var{chars}, @var{replacement})
+@deffn {Builtin (m4)} translit (@var{string}, @var{chars}, @ovar{replacement})
 Expands to @var{string}, with each character that occurs in
 @var{chars} translated into the character from @var{replacement} with
 the same index.
@@ -5481,17 +5496,20 @@ translit(`abc')
 @cindex regular expressions
 @cindex pattern substitution
 @cindex substitution by regular expression
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
+Global substitution in a string is done by @code{patsubst}:
+
 @deffn {Builtin (gnu)} patsubst (@var{string}, @var{regexp}, @
   @ovar{replacement}, @ovar{resyntax})
-Global substitution in a string is done by @code{patsubst}, which
-searches @var{string} for matches of @var{regexp}, and substitutes
+Searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.
 
-If @var{resyntax} is given, the particular flavor of regular
-expression understood with respect to @var{regexp} can be changed from
-the current default.  @xref{Changeresyntax}, for details of the values
-that can be given for this parameter.
+If @var{resyntax} is given, the particular flavor of regular expression
+understood with respect to @var{regexp} can be changed from the current
+default.  @xref{Changeresyntax}, for details of the values that can be
+given for this argument.  Unlike @var{regexp}, if exactly three
+arguments given, the third argument is always treated as
+@var{replacement}, even if it matches a known syntax name.
 
 The parts of @var{string} that are not covered by any match of
 @var{regexp} are copied to the expansion.  Whenever a match is found, the
@@ -5502,18 +5520,21 @@ to avoid infinite loops.
 
 When a replacement is to be made, @var{replacement} is inserted into
 the expansion, with @samp{\@var{n}} substituted by the text matched by
-the @var{n}th parenthesized sub-expression of @var{regexp}, @samp{\&}
-being the text the entire regular expression matched.
+the @var{n}th parenthesized sub-expression of @var{patsubst}, for up to
+nine sub-expressions.  The escape @samp{\&} is replaced by the text of
+the entire regular expression matched.  For all other characters,
+@samp{\} treats the next character literally.  A warning is issued if
+there were fewer sub-expressions than the @samp{\@var{n}} requested, or
+if there is a trailing @samp{\}.
 
 The @var{replacement} argument can be omitted, in which case the text
 matched by @var{regexp} is deleted.
 
-The builtin macro @code{patsubst} is recognized only when given
-arguments.
+The macro @code{patsubst} is recognized only with parameters.
 @end deffn
 
-When used with two arguments, while @code{regexp} returns the position
-of the match, @code{patsubst} deletes it:
+When used with two arguments, @code{regexp} returns the position of the
+match, but @code{patsubst} deletes the match:
 
 @example
 patsubst(`GNUs not Unix', `^', `OBS: ')
@@ -5526,14 +5547,26 @@ patsubst(`GNUs not Unix', `\w+', `(\&)')
 @result{}(GNUs) (not) (Unix)
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
 @result{}GN not@w{ }
+patsubst(`GNUs not Unix', `not', `NOT\')
+@error{}m4:stdin:6: Warning: patsubst: trailing \ ignored in replacement
+@result{}GNUs NOT Unix
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
 words or whole sentences, by substituting calls of the macros
 @code{upcase} and @code{downcase} into the strings.
 
+@deffn Composite upcase (@var{text})
+@deffnx Composite downcase (@var{text})
+@deffnx Composite capitalize (@var{text})
+Expand to @var{text}, but with capitalization changed: @code{upcase}
+changes all letters to upper case, @code{downcase} changes all letters
+to lower case, and @code{capitalize} changes the first character of each
+word to upper case and the remaining characters to lower case.
+@end deffn
+
 @example
-define(`upcase',   `translit(`$*', `a-z', `A-Z')')dnl
+define(`upcase', `translit(`$*', `a-z', `A-Z')')dnl
 define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
 define(`capitalize1',
        `regexp(`$1', `^\(\w\)\(\w*\)',
@@ -5559,7 +5592,7 @@ patsubst(`bar foo baz Foo', `\(\w*\) \(foo\|Foo\)', `_\1_')
 
 While @code{regexp} replaces the whole input with the replacement as
 soon as there is a match, @code{patsubst} replaces each
-@emph{occurrence} of a match and preserves non matching pieces:
+@emph{occurrence} of a match and preserves non-matching pieces:
 
 @example
 define(`patreg',
@@ -5571,6 +5604,14 @@ patreg(`bar foo baz Foo', `foo\|Foo', `FOO')
 patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 @result{}bab abb 212
 @result{}bab
+@end example
+
+Omitting @var{regexp} evokes a warning, but still produces output.
+
+@example
+patsubst(`abc')
+@error{}m4:stdin:1: Warning: patsubst: too few arguments: 1 < 2
+@result{}abc
 @end example
 
 @node Format

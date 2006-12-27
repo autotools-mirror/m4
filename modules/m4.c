@@ -938,7 +938,15 @@ M4BUILTIN_HANDLER (index)
    substring extends to the end of the first argument.  */
 M4BUILTIN_HANDLER (substr)
 {
-  int start, length, avail;
+  int start = 0;
+  int length;
+  int avail;
+
+  if (argc <= 2)
+    {
+      obstack_grow (obs, M4ARG (1), strlen (M4ARG (1)));
+      return;
+    }
 
   length = avail = strlen (M4ARG (1));
   if (!m4_numeric_arg (context, argc, argv, 2, &start))
