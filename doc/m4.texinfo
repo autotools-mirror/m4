@@ -4249,7 +4249,7 @@ patsubst(`GNUs not Unix', `not', `NOT\')
 @end example
 
 Here is a slightly more realistic example, which capitalizes individual
-word or whole sentences, by substituting calls of the macros
+words or whole sentences, by substituting calls of the macros
 @code{upcase} and @code{downcase} into the strings.
 
 @deffn Composite upcase (@var{text})
