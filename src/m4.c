@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,10 @@
 #include <getopt.h>
 #include <limits.h>
 #include <signal.h>
+
+#include "version-etc.h"
+
+#define AUTHORS "Rene' Seindal"
 
 static void usage (int);
 
@@ -452,14 +456,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case VERSION_OPTION:
-	printf ("%s\n", PACKAGE_STRING);
-	fputs ("\
-Copyright (C) 2006 Free Software Foundation, Inc.\n\
-This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-\n\
-Written by Rene' Seindal.\n\
-", stdout);
+	version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
 	exit (EXIT_SUCCESS);
 	break;
 

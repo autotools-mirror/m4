@@ -1,3 +1,10 @@
+2007-01-03  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	version-etc-fsf'.
+	* src/m4.c (AUTHORS, main): Use FSF wording for --version (plus
+	it bumps the copyright year).
+
 2006-12-27  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Patsubst): Fix typo.
