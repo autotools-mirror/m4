@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1062,55 +1062,52 @@ M4BUILTIN_HANDLER (translit)
 
 
 
-/* The rest of this  file contains the functions to evaluate integer
+/* The rest of this file contains the functions to evaluate integer
  * expressions for the "eval" macro.  `number' should be at least 32 bits.
  */
-#define int2numb(i) ((number)(i))
-#define numb2int(n) ((n))
+#define numb_set(ans, x) ((ans) = (x))
+#define numb_set_si(ans, si) (*(ans) = (number) (si))
 
-#define numb_set(ans,x) ((ans) = x)
-#define numb_set_si(ans,si) (*(ans) = int2numb(si))
+#define numb_ZERO ((number) 0)
+#define numb_ONE  ((number) 1)
 
-#define numb_init(x) x=((number)0)
+#define numb_init(x) ((x) = numb_ZERO)
 #define numb_fini(x)
 
-#define numb_decr(n) (n) -= 1
-
-#define numb_ZERO ((number)0)
-#define numb_ONE  ((number)1)
+#define numb_decr(n) ((n) -= numb_ONE)
 
 #define numb_zerop(x)     ((x) == numb_ZERO)
 #define numb_positivep(x) ((x) >  numb_ZERO)
 #define numb_negativep(x) ((x) <  numb_ZERO)
 
-#define numb_eq(x,y) ((x) = ((x) == (y)))
-#define numb_ne(x,y) ((x) = ((x) != (y)))
-#define numb_lt(x,y) ((x) = ((x) <  (y)))
-#define numb_le(x,y) ((x) = ((x) <= (y)))
-#define numb_gt(x,y) ((x) = ((x) >  (y)))
-#define numb_ge(x,y) ((x) = ((x) >= (y)))
+#define numb_eq(x, y) ((x) = ((x) == (y)))
+#define numb_ne(x, y) ((x) = ((x) != (y)))
+#define numb_lt(x, y) ((x) = ((x) <  (y)))
+#define numb_le(x, y) ((x) = ((x) <= (y)))
+#define numb_gt(x, y) ((x) = ((x) >  (y)))
+#define numb_ge(x, y) ((x) = ((x) >= (y)))
 
-#define numb_lnot(x)   ((x) = (! (x)))
-#define numb_lior(x,y) ((x) = ((x) || (y)))
-#define numb_land(x,y) ((x) = ((x) && (y)))
+#define numb_lnot(x)    ((x) = (! (x)))
+#define numb_lior(x, y) ((x) = ((x) || (y)))
+#define numb_land(x, y) ((x) = ((x) && (y)))
 
-#define numb_not(c,x)   (*(x) = int2numb(~numb2int(*(x))))
-#define numb_eor(c,x,y) (*(x) = int2numb(numb2int(*(x)) ^ numb2int(*(y))))
-#define numb_ior(c,x,y) (*(x) = int2numb(numb2int(*(x)) | numb2int(*(y))))
-#define numb_and(c,x,y) (*(x) = int2numb(numb2int(*(x)) & numb2int(*(y))))
+#define numb_not(c, x)    (*(x) = ~ *(x))
+#define numb_eor(c, x, y) (*(x) = *(x) ^ *(y))
+#define numb_ior(c, x, y) (*(x) = *(x) | *(y))
+#define numb_and(c, x, y) (*(x) = *(x) & *(y))
 
-#define numb_plus(x,y)  ((x) = ((x) + (y)))
-#define numb_minus(x,y) ((x) = ((x) - (y)))
-#define numb_negate(x)  ((x) = (- (x)))
+#define numb_plus(x, y)  ((x) = ((x) + (y)))
+#define numb_minus(x, y) ((x) = ((x) - (y)))
+#define numb_negate(x)   ((x) = (- (x)))
 
-#define numb_times(x,y)  ((x) = ((x) * (y)))
-#define numb_ratio(x,y)  ((x) = ((x) / ((y))))
-#define numb_divide(x,y) (*(x) = (*(x) / (*(y))))
-#define numb_modulo(c,x,y) (*(x) = (*(x) % *(y)))
-#define numb_invert(x)   ((x) = 1 / (x))
+#define numb_times(x, y)     ((x) = ((x) * (y)))
+#define numb_ratio(x, y)     ((x) = ((x) / ((y))))
+#define numb_divide(x, y)    (*(x) = (*(x) / (*(y))))
+#define numb_modulo(c, x, y) (*(x) = (*(x) % *(y)))
+#define numb_invert(x)       ((x) = numb_ONE / (x))
 
-#define numb_lshift(c,x,y) (*(x) = (*(x) << *(y)))
-#define numb_rshift(c,x,y) (*(x) = (*(x) >> *(y)))
+#define numb_lshift(c, x, y) (*(x) = (*(x) << *(y)))
+#define numb_rshift(c, x, y) (*(x) = (*(x) >> *(y)))
 
 
 /* The function ntoa () converts VALUE to a signed ascii representation in

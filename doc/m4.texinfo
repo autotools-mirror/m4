@@ -46,7 +46,7 @@ This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
-2000, 2001, 2004, 2005, 2006 Free Software Foundation, Inc.
+2000, 2001, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -5619,14 +5619,16 @@ patsubst(`abc')
 
 @cindex formatted output
 @cindex output, formatted
-@cindex GNU extensions
-@deffn {Builtin (gnu)} format (@var{format-string}, @dots{})
-Formatted output can be made with @code{format}, which works much like
-the C function @code{printf}.  The first argument is a format string,
-which can contain @samp{%} specifications, and the expansion of
-@code{format} is the formatted string.
+@cindex @acronym{GNU} extensions
+Formatted output can be made with @code{format}:
 
-The builtin macros @code{format} is recognized only when given arguments.
+@deffn {Builtin (gnu)} format (@var{format-string}, @dots{})
+Works much like the C function @code{printf}.  The first argument
+@var{format-string} can contain @samp{%} specifications which are
+satisfied by additional arguments, and the expansion of @code{format} is
+the formatted string.
+
+The macro @code{format} is recognized only with parameters.
 @end deffn
 
 Its use is best described by a few examples:
@@ -5642,12 +5644,15 @@ len(format(`%-*X', `5000', `1'))
 @result{}5000
 @end example
 
-Using the @code{forloop} macro defined in @xref{Forloop}, this
+Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
 example shows how @code{format} can be used to produce tabular output.
 
-@comment ignore
+@comment examples
 @example
-forloop(`i', 1, 10, `format(`%6d squared is %10d
+$ @kbd{m4 -I examples}
+include(`forloop.m4')
+@result{}
+forloop(`i', `1', `10', `format(`%6d squared is %10d
 ', i, eval(i**2))')
 @result{}     1 squared is          1
 @result{}     2 squared is          4
@@ -5659,18 +5664,23 @@ forloop(`i', 1, 10, `format(`%6d squared is %10d
 @result{}     8 squared is         64
 @result{}     9 squared is         81
 @result{}    10 squared is        100
+@result{}
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
-function, and supports the normal @samp{%} specifiers: @samp{c},
+function, and supports these @samp{%} specifiers: @samp{c},
 @samp{s}, @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{e},
-@samp{E}, @samp{f}, @samp{F}, @samp{g}, and @samp{G}; it supports
-field widths and precisions, and the
+@samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and @samp{%}; it
+supports field widths and precisions, and the
 modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
 C Library Manual.
 
 @c FIXME - format still needs some improvements.
+For now, unrecognized specifiers are silently ignored, but it is
+anticipated that a future release of @acronym{GNU} @code{m4} will support more
+specifiers, and give warnings when problems are encountered.  Likewise,
+escape sequences are not yet recognized.
 
 @node Arithmetic
 @chapter Macros for doing arithmetic
@@ -5692,22 +5702,34 @@ decrement operations.
 
 @cindex decrement operator
 @cindex increment operator
+Increment and decrement of integers are supported using the builtins
+@code{incr} and @code{decr}:
+
 @deffn {Builtin (m4)} incr (@var{number})
 @deffnx {Builtin (m4)} decr (@var{number})
-Increment and decrement of integers are supported using the builtins
-@code{incr} and @code{decr}, which expand to the numerical value of
-@var{number}, incremented, or decremented, respectively, by one.
+Expand to the numerical value of @var{number}, incremented
+or decremented, respectively, by one.  Except for the empty string, the
+expansion is empty if @var{number} could not be parsed.
+
+The macros @code{incr} and @code{decr} are recognized only with
+parameters.
+@end deffn
 
 @example
-incr(4)
+incr(`4')
 @result{}5
-decr(7)
+decr(`7')
 @result{}6
+incr()
+@error{}m4:stdin:3: Warning: incr: empty string treated as 0
+@result{}1
+decr()
+@error{}m4:stdin:4: Warning: decr: empty string treated as 0
+@result{}-1
 @end example
 
 The builtin macros @code{incr} and @code{decr} are recognized only when
 given arguments.
-@end deffn
 
 @node Eval
 @section Evaluating integer expressions
@@ -5715,30 +5737,37 @@ given arguments.
 @cindex integer expression evaluation
 @cindex evaluation, of integer expressions
 @cindex expressions, evaluation of integer
-@deffn {Builtin (m4)} eval (@var{expression}, @ovar{radix}, @ovar{width})
-Integer expressions are evaluated with @code{eval}, which expands to the
-value of @var{expression}.
+Integer expressions are evaluated with @code{eval}:
+
+@deffn {Builtin (m4)} eval (@var{expression}, @dvar{radix, 10}, @ovar{width})
+Expands to the value of @var{expression}.  The expansion is empty
+if an error is encountered while parsing the arguments.  If specified,
+@var{radix} and @var{width} control the format of the output.  An error
+is issued if division by zero is attempted.
+
+The macro @code{eval} is recognized only with parameters.
+@end deffn
 
 Expressions can contain the following operators, listed in order of
 decreasing precedence.
 
 @table @code
-@item -
-Unary minus
+@item ()
+Parenthesis
+@item +  -  ~  !
+Unary plus and minus, and bitwise and logical negation
 @item **
 Exponentiation
-@item *  /  %  :
-Multiplication, division, modulo and ratio
+@item *  /  %
+Multiplication, division, and modulo
 @item +  -
 Addition and subtraction
 @item <<  >>
 Shift left or right
-@item ==  !=  >  >=  <  <=
+@item >  >=  <  <=
 Relational operators
-@item !
-Logical negation
-@item ~
-Bitwise negation
+@item ==  !=
+Equality operators
 @item &
 Bitwise and
 @item ^
@@ -5751,12 +5780,67 @@ Logical and
 Logical or
 @end table
 
-All operators, except exponentiation, are left associative.
+All operators, except exponentiation, are left associative.  C
+operators that perform variable assignment, such as @samp{=} or
+@samp{--}, are forbidden, since @code{eval} only operates on constants,
+not variables.
 
-Note that many @code{m4} implementations use @samp{^} as an alternate
-operator for the exponentiation, while many others use @samp{^} for the
-bitwise exclusive-or.  GNU @code{m4} changed its behavior: it used to
-exponentiate for @samp{^}, it now computes the bitwise exclusive-or.
+Note that some older @code{m4} implementations use @samp{^} as an
+alternate operator for the exponentiation, although @acronym{POSIX}
+requires the C behavior of bitwise exclusive-or.  The precedence of the
+negation operators, @samp{~} and @samp{!}, was traditionally lower than
+equality.  The unary operators @samp{-} and @samp{+} could not be used
+more than once on the same term.  The traditional precedence of the
+equality operators @samp{==} and @samp{!=} was identical instead of
+lower than the relational operators such as @samp{<}, even in
+@acronym{GNU} M4 1.4.x.  Starting with version 2.0, @acronym{GNU} M4
+correctly follows @acronym{POSIX} precedence rules.  M4 scripts designed
+to be portable between releases must be aware that parentheses may be
+required to enforce C precedence rules.  Likewise, division by zero,
+even in the unused branch of a short-circuiting operator, is not always
+well-defined in other implementations.
+
+Following are some examples where the current version of M4 follows C
+precedence rules, but where older versions and some other
+implementations of @code{m4} require explicit parenthesis to get the
+correct result:
+
+@comment status: 1
+@example
+eval(`1 == 2 > 0')
+@result{}1
+eval(`(1 == 2) > 0')
+@result{}0
+eval(`! 0 * 2')
+@result{}2
+eval(`! (0 * 2)')
+@result{}1
+eval(`1 | 1 ^ 1')
+@result{}1
+eval(`(1 | 1) ^ 1')
+@result{}0
+eval(`+ + - ~ ! ~ 0')
+@result{}1
+eval(`++0')
+@error{}m4:stdin:8: eval: invalid operator: ++0
+@result{}
+eval(`1 = 1')
+@error{}m4:stdin:9: eval: invalid operator: 1 = 1
+@result{}
+eval(`0 |= 1')
+@error{}m4:stdin:10: eval: invalid operator: 0 |= 1
+@result{}
+eval(`2 || 1 / 0')
+@result{}1
+eval(`0 || 1 / 0')
+@error{}m4:stdin:12: eval: divide by zero: 0 || 1 / 0
+@result{}
+eval(`0 && 1 % 0')
+@result{}0
+eval(`2 && 1 % 0')
+@error{}m4:stdin:14: eval: modulo by zero: 2 && 1 % 0
+@result{}
+@end example
 
 Numbers without special prefix are given decimal.  A simple @samp{0}
 prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
@@ -5776,7 +5860,6 @@ relational operators, a true relation returns @code{1}, and a false
 relation return @code{0}.
 
 The builtin macro @code{eval} is recognized only when given arguments.
-@end deffn
 
 Here are a few examples of use of @code{eval}.
 
@@ -5786,18 +5869,18 @@ eval(`-3 * 5')
 @result{}-15
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
-define(`square', `eval(`($1)**2')')
+define(`square', `eval(`($1) ** 2')')
 @result{}
 square(`9')
 @result{}81
-square(square(5)+1)
+square(square(`5')` + 1')
 @result{}676
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
 @error{}m4:stdin:7: eval: bad expression: foo / 6
 @result{}
-eval(foo/6)
+eval(foo / 6)
 @result{}111
 @end example
 
@@ -5837,7 +5920,9 @@ When @code{m4} is compiled with a multiple precision arithmetic library
 It is almost identical to @code{eval}, except the calculations are done
 with infinite precision.  Numbers may be of any length.
 
-The @code{:} operator rationally divides two numbers and canonicalizes
+@comment `:' as ratio conflicts with `?:' - is it worth using `\' instead?
+A new operator, @code{:}, is provided with the same precedence as
+division, and rationally divides two numbers and canonicalizes
 the result.  The @code{/} operator always returns the quotient of the
 division.  To convert a rational value to integral, divide (@code{/}) by
 1.  Some operators such as @code{%}, @code{<<}, @code{>>}, @code{~},

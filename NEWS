@@ -1,5 +1,5 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
-Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006 Free Software
+Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007 Free Software
 Foundation, Inc.
 
 * Version beta 1.9b - ???, by ??? (CVS version 1.9a)
@@ -89,6 +89,9 @@ promoted to 2.0.
 
 *** The `defn' builtin now allows any number of arguments, as POSIX requires.
   - FIXME: This still doesn't work with concatenating builtins with text.
+
+*** The `eval' builtin now follows C precedence rules.  Additionally,
+    short-circuit operators correctly short-circuit division by zero.
 
   - FIXME: POSIX recommends using ${10} instead of $10 for the tenth
   positional argument.  We should deprecate $10.

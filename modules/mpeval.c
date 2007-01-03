@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,41 +40,57 @@
 
 
 
-#define numb_set(ans,i) mpq_set(ans,i)
-#define numb_set_si(ans,i) mpq_set_si(*(ans),(long)i,(unsigned long)1)
+#define numb_set(ans, i) mpq_set (ans, i)
+#define numb_set_si(ans, i) mpq_set_si (*(ans), (long) i, (unsigned long) 1)
 
-#define numb_init(x) mpq_init((x))
-#define numb_fini(x) mpq_clear((x))
+#define numb_init(x) mpq_init (x)
+#define numb_fini(x) mpq_clear (x)
 
-#define numb_zerop(x)     (mpq_cmp(x,numb_ZERO) == 0)
-#define numb_positivep(x) (mpq_cmp(x,numb_ZERO) >  0)
-#define numb_negativep(x) (mpq_cmp(x,numb_ZERO) <  0)
+#define numb_zerop(x)     (mpq_cmp (x, numb_ZERO) == 0)
+#define numb_positivep(x) (mpq_cmp (x, numb_ZERO) >  0)
+#define numb_negativep(x) (mpq_cmp (x, numb_ZERO) <  0)
 
-#define numb_eq(x,y) numb_set(x,mpq_cmp(x,y)==0? numb_ONE: numb_ZERO)
-#define numb_ne(x,y) numb_set(x,mpq_cmp(x,y)!=0? numb_ONE: numb_ZERO)
-#define numb_lt(x,y) numb_set(x,mpq_cmp(x,y)< 0? numb_ONE: numb_ZERO)
-#define numb_le(x,y) numb_set(x,mpq_cmp(x,y)<=0? numb_ONE: numb_ZERO)
-#define numb_gt(x,y) numb_set(x,mpq_cmp(x,y)> 0? numb_ONE: numb_ZERO)
-#define numb_ge(x,y) numb_set(x,mpq_cmp(x,y)>=0? numb_ONE: numb_ZERO)
+#define numb_eq(x, y) numb_set (x, mpq_cmp (x, y) == 0 ? numb_ONE : numb_ZERO)
+#define numb_ne(x, y) numb_set (x, mpq_cmp (x, y) != 0 ? numb_ONE : numb_ZERO)
+#define numb_lt(x, y) numb_set (x, mpq_cmp (x, y) <  0 ? numb_ONE : numb_ZERO)
+#define numb_le(x, y) numb_set (x, mpq_cmp (x, y) <= 0 ? numb_ONE : numb_ZERO)
+#define numb_gt(x, y) numb_set (x, mpq_cmp (x, y) >  0 ? numb_ONE : numb_ZERO)
+#define numb_ge(x, y) numb_set (x, mpq_cmp (x, y) >= 0 ? numb_ONE : numb_ZERO)
 
-#define numb_lnot(x)   numb_set(x,numb_zerop(x)? numb_ONE: numb_ZERO)
-#define numb_lior(x,y) numb_set(x,numb_zerop(x)? y: numb_ONE)
-#define numb_land(x,y) numb_set(x,numb_zerop(x)? numb_ZERO: y)
+#define numb_lnot(x)    numb_set (x, numb_zerop (x) ? numb_ONE : numb_ZERO)
+#define numb_lior(x, y) numb_set (x, numb_zerop (x) ? y : numb_ONE)
+#define numb_land(x, y) numb_set (x, numb_zerop (x) ? numb_ZERO : y)
 
-#define reduce1(f1,x) \
-  { number T; mpq_init(T); f1(T,x);   mpq_set(x,T); mpq_clear(T); }
-#define reduce2(f2,x,y) \
-  { number T; mpq_init(T); f2(T,(x),(y)); mpq_set((x),T); mpq_clear(T); }
+#define reduce1(f1, x)							\
+  do									\
+    {									\
+      number T;								\
+      mpq_init (T);							\
+      f1 (T, x);							\
+      mpq_set (x, T);							\
+      mpq_clear (T);							\
+    }									\
+  while (0)
+#define reduce2(f2,x,y)							\
+  do									\
+    {									\
+      number T;								\
+      mpq_init (T);							\
+      f2 (T, (x), (y));							\
+      mpq_set ((x), T);							\
+      mpq_clear (T);							\
+    }									\
+  while (0)
 
-#define numb_plus(x,y)  reduce2(mpq_add,x,y)
-#define numb_minus(x,y) reduce2(mpq_sub,x,y)
-#define numb_negate(x)  reduce1(mpq_neg,x)
+#define numb_plus(x, y)  reduce2 (mpq_add, x, y)
+#define numb_minus(x, y) reduce2 (mpq_sub, x, y)
+#define numb_negate(x)   reduce1 (mpq_neg, x)
 
-#define numb_times(x,y) reduce2(mpq_mul,x,y)
-#define numb_ratio(x,y) reduce2(mpq_div,x,y)
-#define numb_invert(x)  reduce1(mpq_inv,x)
+#define numb_times(x, y) reduce2 (mpq_mul, x, y)
+#define numb_ratio(x, y) reduce2 (mpq_div, x, y)
+#define numb_invert(x)   reduce1 (mpq_inv, x)
 
-#define numb_decr(n) numb_minus(n,numb_ONE)
+#define numb_decr(n) numb_minus (n, numb_ONE)
 
 /* Generate prototypes for each builtin handler function. */
 #define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
