@@ -548,8 +548,7 @@ main (int argc, char *const *argv, char *const *envp)
     read_stdin = process_file ("-");
   else
     for (; optind < argc; optind++)
-      if (process_file (defines->arg))
-	read_stdin = true;
+      read_stdin |= process_file (argv[optind]);
 
   /* Now handle wrapup text.  */
 

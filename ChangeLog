@@ -1,3 +1,10 @@
+2007-01-04  Sami Liedes  <sliedes@cc.hut.fi>  (tiny change)
+
+	Fix Debian bug 405594, introduced 2006-11-01 from a bad
+	copy-n-paste from head.
+	* src/m4.c (main): Use correct file name after --.
+	* THANKS: Update.
+
 2007-01-04  Eric Blake  <ebb9@byu.net>
 
 	Fix regression from 1.4.7 in large file handling on some
