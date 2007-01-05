@@ -1,9 +1,13 @@
+2007-01-04  Eric Blake  <ebb9@byu.net>
+
+	* NEWS: Document previous fix.
+	* THANKS: Update.
+
 2007-01-04  Sami Liedes  <sliedes@cc.hut.fi>  (tiny change)
 
 	Fix Debian bug 405594, introduced 2006-11-01 from a bad
 	copy-n-paste from head.
 	* src/m4.c (main): Use correct file name after --.
-	* THANKS: Update.
 
 2007-01-04  Eric Blake  <ebb9@byu.net>
 
