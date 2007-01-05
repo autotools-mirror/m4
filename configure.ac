@@ -1,5 +1,5 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006 Free Software
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 # Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
+AC_SYS_LARGEFILE
 AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>

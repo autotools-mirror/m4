@@ -1,3 +1,11 @@
+2007-01-04  Eric Blake  <ebb9@byu.net>
+
+	Fix regression from 1.4.7 in large file handling on some
+	platforms, introduced on 2006-10-13.
+	* configure.ac (AC_LARGE_SYSFILE): Guarantee that large files
+	will be handled.
+	* NEWS: Document this fix.
+
 2007-01-03  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
