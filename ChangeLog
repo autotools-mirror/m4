@@ -1,19 +1,5 @@
 2007-01-04  Eric Blake  <ebb9@byu.net>
 
-	* modules/m4.c (numb_invert): Detect unsupported x**-y.
-	* modules/evalparse.c (URSHIFT, NEGATIVE_EXPONENT): New
-	enumerators.
-	(eval_error): Rearrange, so that all ignorable errors are less
-	than SYNTAX_ERROR.
-	(numb_pow): Change return type.
-	(exp_term): Adjust caller.
-	(m4_evaluate): Fail on bad exponent.
-	(logical_or_term, logical_and_term): Ignore failed ** in short
-	circuit.
-	(eval_lex): Fix typos when detecting <<= and >>=.  Use \ instead
-	of : for ratio.  Support >>>.
-	* doc/m4.texinfo (Eval): Document these changes.
-
 	* configure.ac (AC_SYS_LARGEFILE): Guarantee large file support.
 
 2007-01-03  Eric Blake  <ebb9@byu.net>
