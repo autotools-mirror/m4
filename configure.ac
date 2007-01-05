@@ -1,6 +1,6 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005, 2006
-# Free Software Foundation, Inc.
+# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005, 2006,
+# 2007 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ AM_INIT_AUTOMAKE([1.10a subdir-objects dist-bzip2 gnits])
 AC_PROG_CC
 M4_EARLY
 
+AC_SYS_LARGEFILE
 AC_PROG_CPP
 AM_PROG_CC_C_O
 M4_CHECK_DEBUGGING
