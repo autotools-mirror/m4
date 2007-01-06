@@ -508,6 +508,7 @@ be loaded to use that macro.  The standard modules include
 m4 extensions), and @samp{traditional} (for compatibility with System V
 m4).  @xref{Modules}.
 
+@cindex numbers
 All macro arguments in @code{m4} are strings, but some are given
 special interpretation, e.g., as numbers, file names, regular
 expressions, etc.  The documentation for each macro will state how the
@@ -812,6 +813,7 @@ default unless @env{POSIXLY_CORRECT} is set in the environment; it
 exists to allow overriding @option{--traditional}.
 
 @item -G
+@itemx --posix
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
 System V version.  @xref{Compatibility}, for a list of these.  This
@@ -4646,6 +4648,7 @@ using @code{undivert} (@pxref{Undivert}) on a named file.
 @acronym{GNU} @code{m4} allows included files to be found in other directories
 than the current working directory.
 
+@cindex @env{M4PATH}
 If the @option{--prepend-include} or @option{-B} command-line option was
 provided (@pxref{Preprocessor features, , Invoking m4}), those
 directories are searched first, in reverse order that those options were
@@ -4667,6 +4670,7 @@ Diversions are a way of temporarily saving output.  The output of
 reinserted into the output stream, @dfn{undiverted}, again at a later
 time.
 
+@cindex @env{TMPDIR}
 Numbered diversions are counted from 0 upwards, diversion number 0
 being the normal output stream.  The number of simultaneous diversions
 is limited mainly by the memory used to describe them, because @acronym{GNU}
@@ -5741,29 +5745,32 @@ Integer expressions are evaluated with @code{eval}:
 
 @deffn {Builtin (m4)} eval (@var{expression}, @dvar{radix, 10}, @ovar{width})
 Expands to the value of @var{expression}.  The expansion is empty
-if an error is encountered while parsing the arguments.  If specified,
-@var{radix} and @var{width} control the format of the output.  An error
-is issued if division by zero is attempted.
+if a problem is encountered while parsing the arguments.  If specified,
+@var{radix} and @var{width} control the format of the output.
 
-The macro @code{eval} is recognized only with parameters.
-@end deffn
+Calculations are done with signed numbers, using at least 31-bit
+precision, but as a @acronym{GNU} extension, @code{m4} will use wider
+integers if available.  Precision is finite, based on the platform's
+notion of @code{intmax_t}, and overflow silently results in wraparound.
+A warning is issued if division by zero is attempted, or if
+@var{expression} could not be parsed.
 
 Expressions can contain the following operators, listed in order of
 decreasing precedence.
 
-@table @code
+@table @samp
 @item ()
-Parenthesis
+Parentheses
 @item +  -  ~  !
 Unary plus and minus, and bitwise and logical negation
 @item **
 Exponentiation
-@item *  /  %
-Multiplication, division, and modulo
+@item *  /  %  \
+Multiplication, division, modulo, and ratio
 @item +  -
 Addition and subtraction
-@item <<  >>
-Shift left or right
+@item <<  >>  >>>
+Shift left, shift right, unsigned shift right
 @item >  >=  <  <=
 Relational operators
 @item ==  !=
@@ -5778,31 +5785,42 @@ Bitwise or
 Logical and
 @item ||
 Logical or
+@item ?:
+Conditional ternary
+@item ,
+Sequential evaluation
 @end table
 
-All operators, except exponentiation, are left associative.  C
+The macro @code{eval} is recognized only with parameters.
+@end deffn
+
+All binary operators, except exponentiation, are left associative.  C
 operators that perform variable assignment, such as @samp{=} or
-@samp{--}, are forbidden, since @code{eval} only operates on constants,
-not variables.
+@samp{--}, are forbidden by @acronym{POSIX}, since @code{eval} only
+operates on constants, not variables.  Attempting to use them results
+in an error.
+@comment fixme If XCU ERN 137 is approved, then we could provide an
+@comment extension that supported assignment operators.
 
 Note that some older @code{m4} implementations use @samp{^} as an
 alternate operator for the exponentiation, although @acronym{POSIX}
 requires the C behavior of bitwise exclusive-or.  The precedence of the
 negation operators, @samp{~} and @samp{!}, was traditionally lower than
-equality.  The unary operators @samp{-} and @samp{+} could not be used
-more than once on the same term.  The traditional precedence of the
-equality operators @samp{==} and @samp{!=} was identical instead of
-lower than the relational operators such as @samp{<}, even in
-@acronym{GNU} M4 1.4.x.  Starting with version 2.0, @acronym{GNU} M4
-correctly follows @acronym{POSIX} precedence rules.  M4 scripts designed
-to be portable between releases must be aware that parentheses may be
-required to enforce C precedence rules.  Likewise, division by zero,
-even in the unused branch of a short-circuiting operator, is not always
-well-defined in other implementations.
+equality.  The unary operators could not be used reliably more than once
+on the same term without intervening parentheses.  The traditional
+precedence of the equality operators @samp{==} and @samp{!=} was
+identical instead of lower than the relational operators such as
+@samp{<}, even through @acronym{GNU} M4 1.4.8.  Starting with version
+1.4.9, @acronym{GNU} M4 correctly follows @acronym{POSIX} precedence
+rules.  M4 scripts designed to be portable between releases must be
+aware that parentheses may be required to enforce C precedence rules.
+Likewise, division by zero, even in the unused branch of a
+short-circuiting operator, is not always well-defined in other
+implementations.
 
 Following are some examples where the current version of M4 follows C
 precedence rules, but where older versions and some other
-implementations of @code{m4} require explicit parenthesis to get the
+implementations of @code{m4} require explicit parentheses to get the
 correct result:
 
 @comment status: 1
@@ -5833,42 +5851,110 @@ eval(`0 |= 1')
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:12: eval: divide by zero: 0 || 1 / 0
+@error{}m4:stdin:12: Warning: eval: divide by zero: 0 || 1 / 0
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:14: eval: modulo by zero: 2 && 1 % 0
+@error{}m4:stdin:14: Warning: eval: modulo by zero: 2 && 1 % 0
 @result{}
 @end example
 
-Numbers without special prefix are given decimal.  A simple @samp{0}
-prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
-number.  @samp{0b} introduces a binary number.  @samp{0r} introduces a
-number expressed in any radix between 1 and 36: the prefix should be
-immediately followed by the decimal expression of the radix, a colon,
-then the digits making the number.  For any radix, the digits are
-@samp{0}, @samp{1}, @samp{2}, @dots{}.  Beyond @samp{9}, the digits are
-@samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
-can be used interchangeably in numbers prefixes and as number digits.
+@cindex @acronym{GNU} extensions
+As a @acronym{GNU} extension, @code{eval} supports several operators
+that do not appear in C.  A right-associative exponentiation operator
+@samp{**} computes the value of the left argument raised to the right,
+modulo the numeric precision width.  If evaluated, the exponent must be
+non-negative, and at least one of the arguments must be non-zero, or a
+warning is issued.  An unsigned shift operator @samp{>>>} allows
+shifting a negative number as though it were an unsigned bit pattern,
+which shifts in 0 bits rather than twos-complement sign-extension.  A
+ratio operator @samp{\} behaves like normal division @samp{/} on
+integers, but is provided for symmetry with @code{mpeval}.
 
-Calculations are done in at least 32 bit, but @code{m4} will use wider
-integers if available.
+@example
+eval(`2 ** 3 ** 2')
+@result{}512
+eval(`(2 ** 3) ** 2')
+@result{}64
+eval(`0 ** 1')
+@result{}0
+eval(`2 ** 0')
+@result{}1
+eval(`0 ** 0')
+@result{}
+@error{}m4:stdin:5: Warning: eval: divide by zero: 0 ** 0
+eval(`4 ** -2')
+@error{}m4:stdin:6: Warning: eval: negative exponent: 4 ** -2
+@result{}
+eval(`2 || 4 ** -2')
+@result{}1
+eval(`(-1 >> 1) == -1')
+@result{}1
+eval(`(-1 >>> 1) > (1 << 30)')
+@result{}1
+eval(`6 \ 3')
+@result{}2
+@end example
+
+Furthermore, when you do not use the @option{--traditional} command line
+option (or @option{-G}, @pxref{Limits control, , Invoking m4}), the C
+operators @samp{,} and @samp{?:} are supported.  But in traditional
+mode, @acronym{POSIX} requires that the use of these two operators cause
+an error.
+
+@example
+$ @kbd{m4}
+eval(`1?2:3')
+@result{}2
+eval(`0?2:3')
+@result{}3
+eval(`1?2:1/0')
+@result{}2
+eval(`0?1/0:3')
+@result{}3
+eval(`4,5')
+@result{}5
+@end example
+
+@comment options: -G
+@comment status: 1
+@example
+$ @kbd{m4 --posix}
+eval(`1?2:3')
+@error{}m4:stdin:1: eval: invalid operator: 1?2:3
+@result{}
+eval(`4,5')
+@error{}m4:stdin:2: eval: invalid operator: 4,5
+@result{}
+@end example
+
+Within @var{expression}, (but not @var{radix} or @var{width}), numbers
+without a special prefix are decimal.  A simple @samp{0} prefix
+introduces an octal number.  @samp{0x} introduces a hexadecimal number.
+As @acronym{GNU} extensions, @samp{0b} introduces a binary number.
+@samp{0r} introduces a number expressed in any radix between 1 and 36:
+the prefix should be immediately followed by the decimal expression of
+the radix, a colon, then the digits making the number.  For radix 1,
+leading zeros are ignored, and all remaining digits must be @samp{1};
+for all other radices, the digits are @samp{0}, @samp{1}, @samp{2},
+@dots{}.  Beyond @samp{9}, the digits are @samp{a}, @samp{b} @dots{} up
+to @samp{z}.  Lower and upper case letters can be used interchangeably
+in numbers prefixes and as number digits.
 
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
 relation return @code{0}.
 
-The builtin macro @code{eval} is recognized only when given arguments.
-
 Here are a few examples of use of @code{eval}.
 
-@comment status: 1
 @example
 eval(`-3 * 5')
 @result{}-15
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
+eval(`0r1:0111 + 0b100 + 0r3:12')
+@result{}12
 define(`square', `eval(`($1) ** 2')')
 @result{}
 square(`9')
@@ -5878,37 +5964,85 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:7: eval: bad expression: foo / 6
+@error{}m4:stdin:8: Warning: eval: bad expression: foo / 6
 @result{}
 eval(foo / 6)
 @result{}111
 @end example
 
-As the second to last example shows, @code{eval} does not handle macro
+As the last two lines show, @code{eval} does not handle macro
 names, even if they expand to a valid expression (or part of a valid
 expression).  Therefore all macros must be expanded before they are
 passed to @code{eval}.
+@comment update this if we add support for variables.
 
-If @var{radix} is specified, it specifies the radix to be used in the
-expansion.  The default radix is 10.  The result of @code{eval} is
-always taken to be signed.  The @var{width} argument specifies a minimum
-output width.  The result is zero-padded to extend the expansion to the
-requested width.
+Some calculations are not portable to other implementations, since they
+have undefined semantics in C, but @acronym{GNU} @code{m4} has
+well-defined behavior on overflow.  When shifting, an out-of-range shift
+amount is implicitly brought into the range of the precision using
+modulo arithmetic (for example, on 32-bit integers, this would be an
+implicit bit-wise and with 0x1f).  This example should work whether your
+platform uses 32-bit integers, 64-bit integers, or even some other
+atypical size.
 
 @example
-eval(666, 10)
-@result{}666
-eval(666, 11)
-@result{}556
-eval(666, 6)
-@result{}3030
-eval(666, 6, 10)
-@result{}0000003030
-eval(-666, 6, 10)
-@result{}-000003030
+define(`max_int', eval(`-1 >>> 1'))
+@result{}
+define(`min_int', eval(max_int` + 1'))
+@result{}
+eval(min_int` < 0')
+@result{}1
+eval(max_int` > 0')
+@result{}1
+ifelse(eval(min_int` / -1'), min_int, `overflow occurred')
+@result{}overflow occurred
+eval(`0x80000000 % -1')
+@result{}0
+eval(`-4 >> 1')
+@result{}-2
+eval(`-4 >> 'eval(len(eval(max_int, `2'))` + 2'))
+@result{}-2
 @end example
 
-Take note that @var{radix} cannot be larger than 36.
+If @var{radix} is specified, it specifies the radix to be used in the
+expansion.  The default radix is 10; this is also the case if
+@var{radix} is the empty string.  A warning results if the radix is
+outside the range of 1 through 36, inclusive.  The result of @code{eval}
+is always taken to be signed.  No radix prefix is output, and for
+radices greater than 10, the digits are lower case.  The @var{width}
+argument specifies the minimum output width, excluding any negative
+sign.  The result is zero-padded to extend the expansion to the
+requested width.  A warning results if the width is negative.  If
+@var{radix} or @var{width} is out of bounds, the expansion of
+@code{eval} is empty.
+
+@example
+eval(`666', `10')
+@result{}666
+eval(`666', `11')
+@result{}556
+eval(`666', `6')
+@result{}3030
+eval(`666', `6', `10')
+@result{}0000003030
+eval(`-666', `6', `10')
+@result{}-0000003030
+eval(`10', `', `0')
+@result{}10
+`0r1:'eval(`10', `1', `11')
+@result{}0r1:01111111111
+eval(`10', `16')
+@result{}a
+eval(`1', `37')
+@error{}m4:stdin:9: Warning: eval: radix out of range: 37
+@result{}
+eval(`1', , `-1')
+@error{}m4:stdin:10: Warning: eval: negative width: -1
+@result{}
+eval()
+@error{}m4:stdin:11: Warning: eval: empty string treated as zero
+@result{}0
+@end example
 
 @node Mpeval
 @section Multiple precision arithmetic
@@ -5916,22 +6050,35 @@ Take note that @var{radix} cannot be larger than 36.
 When @code{m4} is compiled with a multiple precision arithmetic library
 (@pxref{Experiments}), a builtin @code{mpeval} is defined.
 
-@deffn {Builtin (mpeval)} mpeval (@var{expression}, @ovar{radix}, @ovar{width})
-It is almost identical to @code{eval}, except the calculations are done
-with infinite precision.  Numbers may be of any length.
+@deffn {Builtin (mpeval)} mpeval (@var{expression}, @dvar{radix, 10}, @
+  @ovar{width})
+Behaves similarly to @code{eval}, except the calculations are done with
+infinite precision, and rational numbers are supported.  Numbers may be
+of any length.
 
-@comment `:' as ratio conflicts with `?:' - is it worth using `\' instead?
-A new operator, @code{:}, is provided with the same precedence as
-division, and rationally divides two numbers and canonicalizes
-the result.  The @code{/} operator always returns the quotient of the
-division.  To convert a rational value to integral, divide (@code{/}) by
-1.  Some operators such as @code{%}, @code{<<}, @code{>>}, @code{~},
-@code{&}, @code{|} and @code{^} operate only on integers and will
-truncate any rational remainder.  @code{**} assumes that the exponent is
-integral.
-
-The builtin macro @code{mpeval} is recognized only when given arguments.
+The macro @code{mpeval} is recognized only with parameters.
 @end deffn
+
+The ratio operator, @samp{\}, is provided with the same precedence as
+division, and rationally divides two numbers and canonicalizes the
+result, whereas the division operator @samp{/} always returns the
+integer quotient of the division.  To convert a rational value to
+integral, divide (@samp{/}) by 1.  Some operators, such as @samp{%},
+@samp{<<}, @samp{>>}, @samp{~}, @samp{&}, @samp{|} and @samp{^} operate
+only on integers and will truncate any rational remainder.  The unsigned
+shift operator, @samp{>>>}, behaves identically with regular right
+shifts, @samp{>>}, since with infinite precision, it is not possible to
+convert a negative number to a positive using shifts.  The
+exponentiation operator, @samp{**}, assumes that the exponent is
+integral, but allows negative exponents.  With the short-circuit logical
+operators, @samp{||} and @samp{&&}, a non-zero result preserves the
+value of the argument that ended evaluation, rather than collapsing to
+@samp{1}.  The operators @samp{?:} and @samp{,} are always available,
+even in @acronym{POSIX} mode, since @code{mpeval} does not have to
+conform to the @acronym{POSIX} rules for @code{eval}.
+
+@comment fixme - need some examples, but conditional on whether modules
+@comment and mpeval are both supported
 
 @node Shell commands
 @chapter Macros for running shell commands
@@ -6003,7 +6150,7 @@ syscmd(`echo hi')
 @node Esyscmd
 @section Reading the output of commands
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 @deffn {Builtin (gnu)} esyscmd (@var{shell-command})
 If you want @code{m4} to read the output of a shell command, use
 @code{esyscmd}, which expands to the standard output of the shell
@@ -6495,7 +6642,7 @@ user's input file, or else, @code{include}'d from this input file.
 @cindex initialization, frozen state
 @cindex dumping into frozen file
 @cindex reloading a frozen file
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 Reading the common base of a big application, over and over again, may
 be time consuming.  GNU @code{m4} offers some machinery to speed up
 the start of an application using lengthy common bases.  Presume the
@@ -6689,7 +6836,7 @@ is made to summarize these here.
 @node Extensions
 @section Extensions in @acronym{GNU} M4
 
-@cindex GNU extensions
+@cindex @acronym{GNU} extensions
 @cindex @acronym{POSIX}
 @cindex @env{POSIXLY_CORRECT}
 This version of @code{m4} contains a few facilities that do not exist
@@ -6954,7 +7101,6 @@ version also optimizes based on the fact that the starting bound does
 not need to be passed to the helper @code{@w{_forloop}}.
 
 @comment examples
-@comment status: 1
 @example
 $ @kbd{m4 -I examples}
 undivert(`forloop2.m4')dnl
@@ -6979,7 +7125,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: eval: bad input: (b) >= (a)
+@error{}m4:stdin:6: Warning: eval: bad input: (b) >= (a)
 @result{}
 @end example
 

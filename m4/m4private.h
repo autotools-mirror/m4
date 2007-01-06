@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -356,16 +356,6 @@ struct m4__search_path_info {
 };
 
 extern void m4__include_init (m4 *);
-
-
-/* Convert a possibly-signed character to an unsigned character.  This is
-   a bit safer than casting to unsigned char, since it catches some type
-   errors that the cast doesn't.  */
-#if HAVE_INLINE
-static inline unsigned char to_uchar (char ch) { return ch; }
-#else
-# define to_uchar(C) ((unsigned char) (C))
-#endif
 
 
 /* Debugging the memory allocator.  */

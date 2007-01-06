@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
-   2004, 2005, 2006 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ Preprocessor features:\n\
       fputs (_("\
 Limits control:\n\
   -g, --gnu                    override -G to re-enable GNU extensions\n\
-  -G, --traditional            suppress all GNU extensions\n\
+  -G, --traditional, --posix   suppress all GNU extensions\n\
   -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
 "), stdout);
       puts ("");
@@ -229,6 +229,7 @@ static const struct option long_options[] =
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
   {"nesting-limit", required_argument, NULL, 'L'},
+  {"posix", no_argument, NULL, 'G'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"pushdef", required_argument, NULL, 'p'},
   {"quiet", no_argument, NULL, 'Q'},

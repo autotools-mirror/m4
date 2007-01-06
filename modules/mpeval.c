@@ -20,6 +20,7 @@
 #include <config.h>
 
 #include <m4module.h>
+#include <m4private.h>
 
 #if HAVE_GMP_H
 #  include <gmp.h>
@@ -58,7 +59,7 @@
 #define numb_ge(x, y) numb_set (x, mpq_cmp (x, y) >= 0 ? numb_ONE : numb_ZERO)
 
 #define numb_lnot(x)    numb_set (x, numb_zerop (x) ? numb_ONE : numb_ZERO)
-#define numb_lior(x, y) numb_set (x, numb_zerop (x) ? y : numb_ONE)
+#define numb_lior(x, y) numb_set (x, numb_zerop (x) ? y : x)
 #define numb_land(x, y) numb_set (x, numb_zerop (x) ? numb_ZERO : y)
 
 #define reduce1(f1, x)							\
@@ -90,6 +91,7 @@
 #define numb_ratio(x, y) reduce2 (mpq_div, x, y)
 #define numb_invert(x)   reduce1 (mpq_inv, x)
 
+#define numb_incr(n) numb_plus  (n, numb_ONE)
 #define numb_decr(n) numb_minus (n, numb_ONE)
 
 /* Generate prototypes for each builtin handler function. */
@@ -140,6 +142,8 @@ static void numb_eor (m4 *context, number *x, number *y);
 static void numb_not (m4 *context, number *x);
 static void numb_lshift (m4 *context, number *x, number *y);
 static void numb_rshift (m4 *context, number *x, number *y);
+#define numb_urshift(c, x, y) numb_rshift (c, x, y)
+#define numb_extension(c) /* no-op */
 
 
 static number numb_ZERO;
@@ -172,12 +176,11 @@ numb_obstack (m4_obstack *obs, const number value, const int radix,
   mpz_init (i);
 
   mpq_get_num (i, value);
-  s = mpz_get_str ((char *) 0, radix, i);
+  s = mpz_get_str (NULL, radix, i);
 
   if (*s == '-')
     {
       obstack_1grow (obs, '-');
-      min--;
       s++;
     }
   for (min -= strlen (s); --min >= 0;)
@@ -188,7 +191,7 @@ numb_obstack (m4_obstack *obs, const number value, const int radix,
   mpq_get_den (i, value);
   if (mpz_cmp_si (i, (long) 1) != 0)
     {
-      obstack_1grow (obs, ':');
+      obstack_1grow (obs, '\\');
       s = mpz_get_str ((char *) 0, radix, i);
       obstack_grow (obs, s, strlen (s));
     }
@@ -203,7 +206,7 @@ static void
 mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily)
 {
   if (noisily && mpz_cmp_si (mpq_denref (q), (long) 1) != 0)
-    m4_error (context, 0, 0, _("loss of precision in eval: %s"), noisily);
+    m4_warn (context, 0, _("loss of precision in eval: %s"), noisily);
 
   mpz_div (z, mpq_numref (q), mpq_denref (q));
 }

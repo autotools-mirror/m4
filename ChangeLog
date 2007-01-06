@@ -1,3 +1,35 @@
+2007-01-06  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4private.h (to_uchar): Move...
+	* m4/m4module.h: here, so modules can use it.
+	* src/main.c (usage, long_options): Support --posix as a synonym
+	for --traditional.
+	* modules/m4.c (numb_invert): Detect unsupported x**-y.
+	(numb_incr, numb_urshift, numb_extension): New macros.
+	(numb_obstack): Port patch from branch to support radix 1 output.
+	* modules/mpeval.c (numb_obstack): Use \ for ratios.
+	(numb_incr, numb_urshift, numb_extension): New macros.
+	(mpq2mpz): Warn rather than error.
+	* modules/evalparse.c (URSHIFT, NEGATIVE_EXPONENT): New
+	enumerators.
+	(eval_error): Rearrange, so that all ignorable errors are less
+	than SYNTAX_ERROR.
+	(eval_text, last_text): Obey C++ type safety rules.
+	(numb_pow): Change return type.
+	(exp_term): Adjust caller.
+	(m4_evaluate): Fail on bad exponent.
+	(logical_or_term, logical_and_term): Ignore failed ** in short
+	circuit.
+	(eval_lex): Fix typos when detecting <<= and >>=.  Use \ instead
+	of : for ratio.  Support >>>, ,, and ?:.  Port patch from branch
+	to parse radix 1 numbers.
+	(condition_term, comma_term): New parse functions.
+	(shift_term): Support >>>.
+	(m4_evaluate): Port patch from branch to output radix 1 numbers.
+	Warn instead of error for most parse problems.
+	* doc/m4.texinfo (Limits control, Eval): Document these changes.
+	* NEWS: Document new operators and new command line option.
+
 2007-01-04  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (AC_SYS_LARGEFILE): Guarantee large file support.

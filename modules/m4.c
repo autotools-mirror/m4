@@ -119,8 +119,8 @@ static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char *name,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
-static void	numb_obstack	(m4_obstack *obs, const number value,
-				 const int radix, int min);
+static void	numb_obstack	(m4_obstack *obs, number value,
+				 int radix, int min);
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -1074,6 +1074,7 @@ M4BUILTIN_HANDLER (translit)
 #define numb_init(x) ((x) = numb_ZERO)
 #define numb_fini(x)
 
+#define numb_incr(n) ((n) += numb_ONE)
 #define numb_decr(n) ((n) -= numb_ONE)
 
 #define numb_zerop(x)     ((x) == numb_ZERO)
@@ -1104,10 +1105,23 @@ M4BUILTIN_HANDLER (translit)
 #define numb_ratio(x, y)     ((x) = ((x) / ((y))))
 #define numb_divide(x, y)    (*(x) = (*(x) / (*(y))))
 #define numb_modulo(c, x, y) (*(x) = (*(x) % *(y)))
-#define numb_invert(x)       ((x) = numb_ONE / (x))
+/* numb_invert is only used in the context of x**-y, which integral math
+   does not support.  */
+#define numb_invert(x)       return NEGATIVE_EXPONENT
 
-#define numb_lshift(c, x, y) (*(x) = (*(x) << *(y)))
-#define numb_rshift(c, x, y) (*(x) = (*(x) >> *(y)))
+#define numb_lshift(c, x, y)  (*(x) = (*(x) << *(y)))
+#define numb_rshift(c, x, y)  (*(x) = (*(x) >> *(y)))
+#define numb_urshift(c, x, y)				\
+   (*(x) = (number) ((unumber) *(x) >> (unumber) *(y)))
+
+#define numb_extension(c)			      \
+  do						      \
+    {						      \
+      /* Revisit this if XCU ERN 137 is approved.  */ \
+      if (m4_get_posixly_correct_opt (context))	      \
+	return INVALID_OPERATOR;		      \
+    }						      \
+  while (0)
 
 
 /* The function ntoa () converts VALUE to a signed ascii representation in
@@ -1149,15 +1163,30 @@ ntoa (number value, int radix)
 }
 
 static void
-numb_obstack(m4_obstack *obs, const number value,
-	     const int radix, int min)
+numb_obstack(m4_obstack *obs, number value, int radix, int min)
 {
-  const char *s = ntoa (value, radix);
+  const char *s;
+  if (radix == 1)
+    {
+      /* FIXME - this code currently depends on undefined behavior.  */
+      if (value < 0)
+	{
+	  obstack_1grow (obs, '-');
+	  value = -value;
+	}
+      while (min-- - value > 0)
+	obstack_1grow (obs, '0');
+      while (value-- != 0)
+	obstack_1grow (obs, '1');
+      obstack_1grow (obs, '\0');
+      return;
+    }
+
+  s = ntoa (value, radix);
 
   if (*s == '-')
     {
       obstack_1grow (obs, '-');
-      min--;
       s++;
     }
   for (min -= strlen (s); --min >= 0;)
