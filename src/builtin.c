@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -359,10 +359,10 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 static const char *
-ntoa (eval_t value, int radix)
+ntoa (int32_t value, int radix)
 {
   bool negative;
-  unsigned_eval_t uvalue;
+  uint32_t uvalue;
   static char str[256];
   char *s = &str[sizeof str];
 
@@ -371,12 +371,12 @@ ntoa (eval_t value, int radix)
   if (value < 0)
     {
       negative = true;
-      uvalue = (unsigned_eval_t) -value;
+      uvalue = -(uint32_t) value;
     }
   else
     {
       negative = false;
-      uvalue = (unsigned_eval_t) value;
+      uvalue = (uint32_t) value;
     }
 
   do
@@ -401,7 +401,7 @@ shipout_int (struct obstack *obs, int val)
 {
   const char *s;
 
-  s = ntoa ((eval_t) val, 10);
+  s = ntoa ((int32_t) val, 10);
   obstack_grow (obs, s, strlen (s));
 }
 
@@ -940,7 +940,7 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  eval_t value = 0;
+  int32_t value = 0;
   int radix = 10;
   int min = 1;
   const char *s;
@@ -954,8 +954,8 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (radix < 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
-		"radix in builtin `%s' out of range (radix = %d)",
-		ARG (0), radix));
+		"radix %d in builtin `%s' out of range",
+		radix, ARG (0)));
       return;
     }
 
@@ -1304,7 +1304,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 	if (str[i - 1] != 'X')
 	  break;
       obstack_grow (obs, str, i);
-      str = ntoa ((eval_t) getpid (), 10);
+      str = ntoa ((int32_t) getpid (), 10);
       len2 = strlen (str);
       if (len2 > len - i)
 	obstack_grow0 (obs, str + len2 - (len - i), len - i);

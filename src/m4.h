@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -415,11 +416,7 @@ FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-/* eval_t and unsigned_eval_t should be at least 32 bits.  */
-typedef int eval_t;
-typedef unsigned int unsigned_eval_t;
-
-bool evaluate (const char *, eval_t *);
+bool evaluate (const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 

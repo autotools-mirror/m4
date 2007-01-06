@@ -44,7 +44,7 @@ This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006 Free Software Foundation, Inc.
+2006, 2007 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -376,11 +376,13 @@ engine, since all other implementations of @code{m4} had too many
 limitations.
 
 More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
-addressed some long standing bugs in the venerable 1.4 release.
-Then in 2005 Gary V. Vaughan collected together the many
-patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
+addressed some long standing bugs in the venerable 1.4 release.  Then in
+2005 Gary V. Vaughan collected together the many patches to
+@acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
+prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
+1.4.x series remains open for bug fixes, including release 1.4.9 in
+2007.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -1189,6 +1191,7 @@ f
 
 It is an error if the end of file occurs while collecting arguments.
 
+@comment status: 1
 @example
 hello world
 @result{}hello world
@@ -2990,6 +2993,7 @@ changequote(`"', `"')
 
 It is an error if the end of file occurs within a quoted string.
 
+@comment status: 1
 @example
 `hello world'
 @result{}hello world
@@ -3133,6 +3137,7 @@ echo(hi,hi)bye)
 
 It is an error if the end of file occurs within a comment.
 
+@comment status: 1
 @example
 changecom(`/*', `*/')
 @result{}
@@ -3440,6 +3445,7 @@ m4wrap(`a')m4wrap(`a')
 however, the transition between recursion levels behaves like an end of
 file condition between two input files.
 
+@comment status: 1
 @example
 m4wrap(`m4wrap(`)')len(abc')
 @result{}
@@ -4298,7 +4304,7 @@ patsubst(`abc')
 @end example
 
 @node Format
-@section Formatted output
+@section Formatting strings (printf-like)
 
 @cindex formatted output
 @cindex output, formatted
@@ -4417,32 +4423,33 @@ Integer expressions are evaluated with @code{eval}:
 
 @deffn Builtin eval (@var{expression}, @dvar{radix, 10}, @ovar{width})
 Expands to the value of @var{expression}.  The expansion is empty
-if an error is encountered while parsing the arguments.  If specified,
+if a problem is encountered while parsing the arguments.  If specified,
 @var{radix} and @var{width} control the format of the output.
 
-The macro @code{eval} is recognized only with parameters.
-@end deffn
+Calculations are done with 32-bit signed numbers.  Overflow silently
+results in wraparound.  A warning is issued if division by zero is
+attempted, or if @var{expression} could not be parsed.
 
 Expressions can contain the following operators, listed in order of
 decreasing precedence.
 
-@table @code
-@item + -
-Unary plus and minus
+@table @samp
+@item ()
+Parentheses
+@item +  -  ~  !
+Unary plus and minus, and bitwise and logical negation
 @item **
 Exponentiation
 @item *  /  %
-Multiplication, division and modulo
+Multiplication, division, and modulo
 @item +  -
 Addition and subtraction
 @item <<  >>
 Shift left or right
-@item ==  !=  >  >=  <  <=
+@item >  >=  <  <=
 Relational operators
-@item !
-Logical negation
-@item ~
-Bitwise negation
+@item ==  !=
+Equality operators
 @item &
 Bitwise and
 @item ^
@@ -4455,30 +4462,108 @@ Logical and
 Logical or
 @end table
 
-All operators, except exponentiation, are left associative.
+The macro @code{eval} is recognized only with parameters.
+@end deffn
+
+All binary operators, except exponentiation, are left associative.  C
+operators that perform variable assignment, such as @samp{=} or
+@samp{--}, are forbidden by @acronym{POSIX}, since @code{eval} only
+operates on constants, not variables.  Attempting to use them results
+in an error.
 
 Note that some older @code{m4} implementations use @samp{^} as an
-alternate operator for exponentiation, although @acronym{POSIX} requires
-the C behavior of bitwise exclusive-or.  On the other hand, the
-precedence of @samp{~} and @samp{!} are different in @acronym{GNU}
-@code{m4} than
-they are in C, matching the precedence in traditional @code{m4}
-implementations.  This behavior is likely to change in a future
-version to match @acronym{POSIX}, so use parentheses to force the
-desired precedence.
+alternate operator for the exponentiation, although @acronym{POSIX}
+requires the C behavior of bitwise exclusive-or.  The precedence of the
+negation operators, @samp{~} and @samp{!}, was traditionally lower than
+equality.  The unary operators could not be used reliably more than once
+on the same term without intervening parentheses.  The traditional
+precedence of the equality operators @samp{==} and @samp{!=} was
+identical instead of lower than the relational operators such as
+@samp{<}, even through @acronym{GNU} M4 1.4.8.  Starting with version
+1.4.9, @acronym{GNU} M4 correctly follows @acronym{POSIX} precedence
+rules.  M4 scripts designed to be portable between releases must be
+aware that parentheses may be required to enforce C precedence rules.
+Likewise, division by zero, even in the unused branch of a
+short-circuiting operator, is not always well-defined in other
+implementations.
 
-Within @var{expression}, (but not @var{radix} or @var{width}),
-numbers without a special prefix are decimal.  A simple @samp{0}
-prefix introduces an octal number.  @samp{0x} introduces a hexadecimal
-number.  @samp{0b} introduces a binary number.  @samp{0r} introduces a
-number expressed in any radix between 1 and 36: the prefix should be
-immediately followed by the decimal expression of the radix, a colon,
-then the digits making the number.  For radix 1, leading zeros are
-ignored and all remaining digits must be @samp{1}; for all other
-radices, the digits are
-@samp{0}, @samp{1}, @samp{2}, @dots{}.  Beyond @samp{9}, the digits are
-@samp{a}, @samp{b} @dots{} up to @samp{z}.  Lower and upper case letters
-can be used interchangeably in numbers prefixes and as number digits.
+Following are some examples where the current version of M4 follows C
+precedence rules, but where older versions and some other
+implementations of @code{m4} require explicit parentheses to get the
+correct result:
+
+@comment status: 1
+@example
+eval(`1 == 2 > 0')
+@result{}1
+eval(`(1 == 2) > 0')
+@result{}0
+eval(`! 0 * 2')
+@result{}2
+eval(`! (0 * 2)')
+@result{}1
+eval(`1 | 1 ^ 1')
+@result{}1
+eval(`(1 | 1) ^ 1')
+@result{}0
+eval(`+ + - ~ ! ~ 0')
+@result{}1
+eval(`++0')
+@error{}m4:stdin:8: invalid operator in eval: ++0
+@result{}
+eval(`1 = 1')
+@error{}m4:stdin:9: invalid operator in eval: 1 = 1
+@result{}
+eval(`0 |= 1')
+@error{}m4:stdin:10: invalid operator in eval: 0 |= 1
+@result{}
+eval(`2 || 1 / 0')
+@result{}1
+eval(`0 || 1 / 0')
+@error{}m4:stdin:12: divide by zero in eval: 0 || 1 / 0
+@result{}
+eval(`0 && 1 % 0')
+@result{}0
+eval(`2 && 1 % 0')
+@error{}m4:stdin:14: modulo by zero in eval: 2 && 1 % 0
+@result{}
+@end example
+
+@cindex @acronym{GNU} extensions
+As a @acronym{GNU} extension, the operator @samp{**} performs integral
+exponentiation.  The operator is right-associative, and if evaluated,
+the exponent must be non-negative, and at least one of the arguments
+must be non-zero, or a warning is issued.
+
+@example
+eval(`2 ** 3 ** 2')
+@result{}512
+eval(`(2 ** 3) ** 2')
+@result{}64
+eval(`0 ** 1')
+@result{}0
+eval(`2 ** 0')
+@result{}1
+eval(`0 ** 0')
+@result{}
+@error{}m4:stdin:5: divide by zero in eval: 0 ** 0
+eval(`4 ** -2')
+@error{}m4:stdin:6: negative exponent in eval: 4 ** -2
+@result{}
+@end example
+
+Within @var{expression}, (but not @var{radix} or @var{width}), numbers
+without a special prefix are decimal.  A simple @samp{0} prefix
+introduces an octal number.  @samp{0x} introduces a hexadecimal number.
+As @acronym{GNU} extensions, @samp{0b} introduces a binary number.
+@samp{0r} introduces a number expressed in any radix between 1 and 36:
+the prefix should be immediately followed by the decimal expression of
+the radix, a colon, then the digits making the number.  For radix 1,
+leading zeros are ignored, and all remaining digits must be @samp{1};
+for all other radices, the digits are @samp{0}, @samp{1}, @samp{2},
+@dots{}.  Beyond @samp{9}, the digits are @samp{a}, @samp{b} @dots{} up
+to @samp{z}.  Lower and upper case letters can be used interchangeably
+in numbers prefixes and as number digits.
 
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
@@ -4493,18 +4578,18 @@ eval(index(`Hello world', `llo') >= 0)
 @result{}1
 eval(`0r1:0111 + 0b100 + 0r3:12')
 @result{}12
-define(`square', `eval(`('$1`)**2')')
+define(`square', `eval(`($1) ** 2')')
 @result{}
 square(`9')
 @result{}81
-square(square(`5')`+1')
+square(square(`5')` + 1')
 @result{}676
 define(`foo', `666')
 @result{}
-eval(`foo/6')
-@error{}m4:stdin:8: bad expression in eval: foo/6
+eval(`foo / 6')
+@error{}m4:stdin:8: bad expression in eval: foo / 6
 @result{}
-eval(foo/6)
+eval(foo / 6)
 @result{}111
 @end example
 
@@ -4513,34 +4598,43 @@ names, even if they expand to a valid expression (or part of a valid
 expression).  Therefore all macros must be expanded before they are
 passed to @code{eval}.
 
-All evaluation is done with 32-bit signed integers, assuming
-2's-complement with wrap-around.  The shift operators are defined in
-@acronym{GNU}
-@code{m4} by doing an implicit bit-wise and of the right-hand operand
-with 0x1f, and sign-extension with right shift.
+Some calculations are not portable to other implementations, since they
+have undefined semantics in C, but @acronym{GNU} @code{m4} has
+well-defined behavior on overflow.  When shifting, an out-of-range shift
+amount is implicitly brought into the range of 32-bit signed integers
+using an implicit bit-wise and with 0x1f).
 
 @example
-eval(0x80000000 / -1)
+define(`max_int', eval(`0x7fffffff'))
+@result{}
+define(`min_int', incr(max_int))
+@result{}
+eval(min_int` < 0')
+@result{}1
+eval(max_int` > 0')
+@result{}1
+ifelse(eval(min_int` / -1'), min_int, `overflow occurred')
+@result{}overflow occurred
+min_int
 @result{}-2147483648
-eval(0x80000000 % -1)
+eval(`0x80000000 % -1')
 @result{}0
-eval(0x7fffffff)
-@result{}2147483647
-incr(eval(0x7fffffff))
-@result{}-2147483648
-eval(-4 >> 33)
+eval(`-4 >> 1')
+@result{}-2
+eval(`-4 >> 33')
 @result{}-2
 @end example
 
 If @var{radix} is specified, it specifies the radix to be used in the
 expansion.  The default radix is 10; this is also the case if
-@var{radix} is the empty string.  It is an error if the radix is outside
-the range of 1 through 36, inclusive.  The result of @code{eval} is
-always taken to be signed.  No radix prefix is output, and for radices
-greater than 10, the digits are lower case.  The @var{width} argument
-specifies the minimum output width, excluding any negative sign.  The
-result is zero-padded to extend the expansion to the requested width.
-It is an error if the width is negative.  On error, the expansion of
+@var{radix} is the empty string.  A warning results if the radix is
+outside the range of 1 through 36, inclusive.  The result of @code{eval}
+is always taken to be signed.  No radix prefix is output, and for
+radices greater than 10, the digits are lower case.  The @var{width}
+argument specifies the minimum output width, excluding any negative
+sign.  The result is zero-padded to extend the expansion to the
+requested width.  A warning results if the width is negative.  If
+@var{radix} or @var{width} is out of bounds, the expansion of
 @code{eval} is empty.
 
 @example
@@ -4560,6 +4654,15 @@ eval(`10', `', `0')
 @result{}0r1:01111111111
 eval(`10', `16')
 @result{}a
+eval(`1', `37')
+@error{}m4:stdin:9: radix 37 in builtin `eval' out of range
+@result{}
+eval(`1', , `-1')
+@error{}m4:stdin:10: negative width to builtin `eval'
+@result{}
+eval()
+@error{}m4:stdin:11: empty string treated as 0 in builtin `eval'
+@result{}0
 @end example
 
 @node Shell commands
@@ -5081,6 +5184,7 @@ Abort processing with an error message and non-zero status.  Prefix
 resulting string to standard error.
 @end deffn
 
+@comment status: 1
 @example
 define(`fatal_error',
        `errprint(__program__:__file__:__line__`: fatal error: $*
@@ -5559,15 +5663,16 @@ that is preserved even if the macro is currently undefined.
 
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all
-operators with the same precedence as C.  However, @acronym{GNU} @code{m4}
-currently follows the traditional precedence of other @code{m4}
-implementations, where bitwise and logical negation (@samp{~} and
-@samp{!}) have lower precedence than equality operators, rather than
-equal precedence with other unary operators.  Use explicit parentheses
-to ensure proper precedence.  As extensions to @acronym{POSIX}, @acronym{GNU}
-@code{m4} treats the shift operators @samp{<<} and @samp{>>} as
-well-defined on signed integers (even though they are not in C), and
-adds the exponentiation operator @samp{**}.
+operators with the same precedence as C.  However, earlier versions of
+@acronym{GNU} @code{m4} followed the traditional behavior of other
+@code{m4} implementations, where bitwise and logical negation (@samp{~}
+and @samp{!}) have lower precedence than equality operators; and where
+equality operators (@samp{==} and @samp{!=}) had the same precedence as
+relational operators (such as @samp{<}).  Use explicit parentheses to
+ensure proper precedence.  As extensions to @acronym{POSIX},
+@acronym{GNU} @code{m4} gives well-defined semantics to operations that
+C leaves undefined, such as when overflow occurs, when shifting negative
+numbers, or when performing division by zero.
 
 @item
 @acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat
@@ -5962,6 +6067,7 @@ though all files start at line 1.  Furthermore, versions earlier than
 @code{fatal_error} to work across the entire 1.4.x release series, a
 better implementation would be:
 
+@comment status: 1
 @example
 define(`fatal_error',
   `errprint(ifdef(`__program__', `__program__', ``m4'')'dnl

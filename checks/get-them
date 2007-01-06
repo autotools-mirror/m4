@@ -1,6 +1,7 @@
 #!/bin/sh
+# -*- AWK -*-
 # Extract all examples from the manual source.
-# Copyright (C) 1992, 2005, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 # This script is for use with GNU awk.
 
@@ -13,6 +14,7 @@ BEGIN {
   seq = -1;
   count = 0;
   file = "NONE";
+  status = 0;
 }
 
 /^@node / {
@@ -34,7 +36,12 @@ BEGIN {
 
 /^@comment ignore$/ {
   getline;
+  status = 0;
   next;
+}
+
+/^@comment status: / {
+  status = $3;
 }
 
 /^@example$/, /^@end example$/ {
@@ -47,11 +54,13 @@ BEGIN {
     count++;
     file = sprintf("%03d.%s", count, node);
     printf("dnl @ %s:%d: Origin of test\n"\
-	   "dnl @ Copyright (C) 2006 Free Software Foundation\n"\
+	   "dnl @ expected status: %d\n"\
+	   "dnl @ Copyright (C) 2006, 2007 Free Software Foundation\n"\
 	   "dnl @ This file is free software; the Free Software Foundation\n"\
 	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
 	   "dnl @ with or without modifications, as long as this notice\n"\
-	   "dnl @ is preserved.\n", FILENAME, NR) > file;
+	   "dnl @ is preserved.\n", FILENAME, NR, status) > file;
+    status = 0;
     next;
   }
   if ($0 ~ /^@end example$/) {

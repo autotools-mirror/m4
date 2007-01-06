@@ -1,3 +1,22 @@
+2007-01-06  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import stdint'.
+	* checks/check-them: Record expected exit status.
+	* checks/get-them: Check exit status.
+	* src/m4.h (eval_t, unsigned_eval_t): Delete, use POSIX int32_t
+	instead.
+	* src/builtin.c: All users changed.
+	* src/eval.c: Likewise.  Also document where we are triggering
+	undefined or implementation-defined behavior.
+	(BADOP, NEGATIVE_EXPONENT, INVALID_OPERATOR, eval_lex, evaluate)
+	(logical_or_term, logical_and_term, logical_not_term, not_term)
+	(equality_term, unary_term): Port from head to follow POSIX
+	semantics.
+	(exp_term): Reject 0**0 as undefined.
+	* doc/m4.texinfo (History): Mention 1.4.9.
+	(Format, Incompatibilities): Update to document POSIX compliance.
+	* NEWS: Document this change.
+
 2007-01-04  Eric Blake  <ebb9@byu.net>
 
 	* NEWS: Document previous fix.

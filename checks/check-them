@@ -1,6 +1,6 @@
 #!/bin/sh
 # Check GNU m4 against examples from the manual source.
-# Copyright (C) 1992, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2006, 2007 Free Software Foundation, Inc.
 
 # Sanity check what we are testing
 m4 --version
@@ -59,12 +59,22 @@ do
   echo "Checking $file"
   sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
     | LC_MESSAGES=C m4 -d -I "$examples" - >$out 2>$err
+  stat=$?
 
-  if test $? = 77 ; then
-    skipped="$skipped $file"
-    cat $err
-    continue
-  fi
+  xstat=`sed -ne '2s/^dnl @ expected status: //p;2q' "$file"`
+  case $stat in
+    77)
+      skipped="$skipped $file"
+      cat $err
+      continue
+      ;;
+    $xstat) ;;
+    *)
+      failed="$failed $file:status"
+      echo `sed -e 's/^dnl //' -e 1q $file`
+      echo "$file: status was $stat, expected $xstat"
+      ;;
+  esac
 
   sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
     "$file" > $xout
