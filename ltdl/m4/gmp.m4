@@ -1,5 +1,5 @@
 # -*- Autoconf -*-
-# Copyright (C) 2000, 2001, 2003, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2003, 2006, 2007 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
-# serial 8
+# serial 9
 
 m4_define([_M4_LIB_GMP],
 [AC_ARG_WITH([gmp],
@@ -25,6 +25,9 @@ m4_define([_M4_LIB_GMP],
 [use_gmp=$withval], [use_gmp=yes])
 
 case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
+  no:*)
+    M4_cv_using_lib_gmp=no
+    ;;
   *::yes)
     AC_MSG_WARN([gmp library not found or does not appear to work
                  but `gmp.h' is present])
@@ -37,8 +40,9 @@ case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
   yes:*:yes)
     M4_cv_using_lib_gmp=yes
     ;;
-  no:*)
+  *)
     M4_cv_using_lib_gmp=no
+    AC_MSG_WARN([could not detect gmp library])
     ;;
 esac
 ])# _M4_LIB_GMP
