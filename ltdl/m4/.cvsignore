@@ -26,6 +26,7 @@ gettext.m4
 gl_list.m4
 glibc2.m4
 glibc21.m4
+gnulib-common.m4
 gnulib-comp.m4
 gnulib-tool.m4
 gnulib.m4
