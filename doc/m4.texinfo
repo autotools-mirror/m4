@@ -4010,7 +4010,7 @@ Changes the default regular expression syntax used by M4 according to
 the value of @var{resyntax}, equivalent to passing @var{resyntax} as the
 argument to the command line option @option{--regexp-syntax}
 (@pxref{Operation modes, , Invoking m4}).  If @var{resyntax} is empty,
-the default flaver is reverted to emacs style.
+the default flavor is reverted to emacs style.
 
 @var{resyntax} can be any one of the values in the table below.  Case is
 not important, and @kbd{-} or @kbd{ } can be substituted for @kbd{_} in
@@ -4208,7 +4208,7 @@ that @samp{'} also defaults to the syntax category `Other', when it
 appears in isolation.
 
 @item End comment
-The set of characters that can end a single-character commet.  The
+The set of characters that can end a single-character comment.  The
 default is the single character @kbd{newline}.  For multiple-character
 comment delimiters, use @code{changecom} (@pxref{Changecom}).  Note that
 newline also defaults to the syntax category `White space', when it

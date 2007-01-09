@@ -1,3 +1,7 @@
+2007-01-08  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* doc/m4.texinfo: Fix a couple of typos.
+
 2007-01-08  Eric Blake  <ebb9@byu.net>
 
 	* ltdl/m4/gnulib-cache.m4: Update for new year.
