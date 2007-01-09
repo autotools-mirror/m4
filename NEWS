@@ -8,11 +8,11 @@ Version 1.4.9 - ?? ??? 2007, by ????  (CVS version 1.4.8a)
   files larger than 2GiB on some platforms.
 * Fix a regression introduced in 1.4.8 that made m4 dump core when
   invoked as 'm4 -- file'.
-* The `eval' builtin now follows C precedence rules.  Additionally,
-  short-circuit operators correctly short-circuit division by zero.
-  The undocumented alias of '=' meaning '==' in eval now triggers
-  an error, so that a future version of M4 can implement a form of
-  variable assignment as an extension.
+* The `eval' builtin now follows C precedence rules.  Additionally, the
+  short-circuit operators correctly short-circuit division by zero.  The
+  previously undocumented alias of '=' meaning '==' in eval now triggers a
+  deprecation warning, so that a future version of M4 can implement a form
+  of variable assignment as an extension.
 
 Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)
 

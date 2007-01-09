@@ -4466,10 +4466,28 @@ The macro @code{eval} is recognized only with parameters.
 @end deffn
 
 All binary operators, except exponentiation, are left associative.  C
-operators that perform variable assignment, such as @samp{=} or
+operators that perform variable assignment, such as @samp{+=} or
 @samp{--}, are forbidden by @acronym{POSIX}, since @code{eval} only
 operates on constants, not variables.  Attempting to use them results
-in an error.
+in an error.  However, since traditional implementations treated
+@samp{=} as an undocumented alias for @samp{==} as opposed to an
+assignment operator, this usage is supported as a special case.  Be
+aware that a future version of @acronym{GNU} M4 may support assignment
+semantics as an extension when @acronym{POSIX} mode is not requested,
+and that using @samp{=} to check equality is not portable.
+
+@comment status: 1
+@example
+eval(`2 = 2')
+@error{}m4:stdin:1: Warning: recommend ==, not =, for equality operator
+@result{}1
+eval(`++0')
+@error{}m4:stdin:2: invalid operator in eval: ++0
+@result{}
+eval(`0 |= 1')
+@error{}m4:stdin:3: invalid operator in eval: 0 |= 1
+@result{}
+@end example
 
 Note that some older @code{m4} implementations use @samp{^} as an
 alternate operator for the exponentiation, although @acronym{POSIX}
@@ -4492,7 +4510,6 @@ precedence rules, but where older versions and some other
 implementations of @code{m4} require explicit parentheses to get the
 correct result:
 
-@comment status: 1
 @example
 eval(`1 == 2 > 0')
 @result{}1
@@ -4508,24 +4525,15 @@ eval(`(1 | 1) ^ 1')
 @result{}0
 eval(`+ + - ~ ! ~ 0')
 @result{}1
-eval(`++0')
-@error{}m4:stdin:8: invalid operator in eval: ++0
-@result{}
-eval(`1 = 1')
-@error{}m4:stdin:9: invalid operator in eval: 1 = 1
-@result{}
-eval(`0 |= 1')
-@error{}m4:stdin:10: invalid operator in eval: 0 |= 1
-@result{}
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:12: divide by zero in eval: 0 || 1 / 0
+@error{}m4:stdin:9: divide by zero in eval: 0 || 1 / 0
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:14: modulo by zero in eval: 2 && 1 % 0
+@error{}m4:stdin:11: modulo by zero in eval: 2 && 1 % 0
 @result{}
 @end example
 
@@ -5672,7 +5680,9 @@ relational operators (such as @samp{<}).  Use explicit parentheses to
 ensure proper precedence.  As extensions to @acronym{POSIX},
 @acronym{GNU} @code{m4} gives well-defined semantics to operations that
 C leaves undefined, such as when overflow occurs, when shifting negative
-numbers, or when performing division by zero.
+numbers, or when performing division by zero.  @acronym{POSIX} also
+requires @samp{=} to cause an error, but many traditional
+implementations allowed it as an alias for @samp{==}.
 
 @item
 @acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat

@@ -34,7 +34,7 @@ typedef enum eval_token
     PLUS, MINUS,
     EXPONENT,
     TIMES, DIVIDE, MODULO,
-    EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
+    ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
     LSHIFT, RSHIFT,
     LNOT, LAND, LOR,
     NOT, AND, OR, XOR,
@@ -215,7 +215,7 @@ eval_lex (int32_t *val)
 	  eval_text++;
 	  return EQ;
 	}
-      return BADOP;
+      return ASSIGN;
     case '!':
       if (*eval_text == '=')
 	{
@@ -517,7 +517,10 @@ equality_term (eval_token et, int32_t *v1)
   if ((er = cmp_term (et, v1)) != NO_ERROR)
     return er;
 
-  while ((op = eval_lex (&v2)) == EQ || op == NOTEQ)
+  /* In the 1.4.x series, we maintain the traditional behavior that
+     '=' is a synonym for '=='; however, this is contrary to POSIX and
+     we hope to convert '=' to mean assignment in 2.0.  */
+  while ((op = eval_lex (&v2)) == EQ || op == NOTEQ || op == ASSIGN)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
@@ -525,6 +528,13 @@ equality_term (eval_token et, int32_t *v1)
 
       if ((er = cmp_term (et, &v2)) != NO_ERROR)
 	return er;
+
+      if (op == ASSIGN)
+      {
+	M4ERROR ((warning_status, 0, "\
+Warning: recommend ==, not =, for equality operator"));
+	op = EQ;
+      }
       *v1 = (op == EQ) == (*v1 == v2);
     }
   if (op == ERROR)
