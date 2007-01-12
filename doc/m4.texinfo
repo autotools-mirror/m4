@@ -1257,33 +1257,26 @@ sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
 @code{m4} offers several mechanisms or techniques for inhibiting the
 recognition of names as macro calls.
 
-First of all, many builtin macros cannot meaningfully be called
-without arguments.  For any of these macros, whenever an opening
-parenthesis does not immediately follow their name, the builtin macro
-call is not triggered.  This solves the most usual cases, like for
-@samp{include} or @samp{eval}.  Later in this document, the sentence
-``This macro is recognized only with parameters'' refers to this
-specific provision.
-
-@comment FIXME - The feature of blind macros is incompatible with
-@comment @acronym{POSIX} and @comment traditional implementations.
-@comment Should we  suppress it with the @comment @option{--traditional}
-@comment or @option{-G} command line option?
+@cindex @acronym{GNU} extensions
+@cindex blind macro
+@cindex macro, blind
+First of all, many builtin macros cannot meaningfully be called without
+arguments.  As a @acronym{GNU} extension, for any of these macros,
+whenever an opening parenthesis does not immediately follow their name,
+the builtin macro call is not triggered.  This solves the most usual
+cases, like for @samp{include} or @samp{eval}.  Later in this document,
+the sentence ``This macro is recognized only with parameters'' refers to
+this specific provision of @acronym{GNU} M4, also known as a blind
+builtin macro.  For the builtins defined by @acronym{POSIX} that bear
+this disclaimer, @acronym{POSIX} specifically states that invoking those
+builtins without arguments is unspecified, because many other
+implementations simply invoke the builtin as though it were given one
+empty argument instead.
 
 @example
 $ @kbd{m4}
 eval
 @result{}eval
-eval(`1')
-@result{}1
-@end example
-
-@comment options: -G
-@comment xfail
-@example
-$ @kbd{m4 -G}
-eval
-@result{}0
 eval(`1')
 @result{}1
 @end example
@@ -2588,10 +2581,12 @@ ifelse(foo, `foo', `true', `false')
 @result{}false
 @end example
 
+@cindex macro, blind
+@cindex blind macro
 Notice how the first argument was used unquoted; it is common to compare
 the expansion of a macro with a string.  With this macro, you can now
-reproduce the behavior of many of the builtins, where the macro is
-recognized only with arguments.
+reproduce the behavior of blind builtins, where the macro is recognized
+only with arguments.
 
 @example
 define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')

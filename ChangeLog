@@ -1,3 +1,12 @@
+2007-01-12  Eric Blake  <ebb9@byu.net>
+
+	* m4/syntax.c (m4_set_comment): XCU ERN 131 was approved by
+	POSIX, so update the comment.
+	* doc/m4.texinfo (Inhibiting Invocation): XCU ERN 130 was
+	approved by POSIX, so we can always have blind macros, even when
+	POSIXLY_CORRECT.
+	(Ifelse): Mention the term `blind builtin'.
+
 2007-01-08  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* doc/m4.texinfo: Fix a couple of typos.

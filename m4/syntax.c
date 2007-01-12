@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006, 2007
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -611,13 +611,13 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
   free (syntax->bcomm.string);
   free (syntax->ecomm.string);
 
-  /* POSIX requires no arguments to disable comments.  It requires
-     empty arguments to be used as-is, but this is counter to
-     traditional behavior, because a non-null begin and null end makes
-     it impossible to end a comment.  An aardvark has been filed:
-     http://www.opengroup.org/austin/mailarchives/ag-review/msg02168.html
-     This implementation assumes the aardvark will be approved.  See
-     the texinfo for what some other implementations do.  */
+  /* POSIX requires no arguments to disable comments, and that one
+     argument use newline as the close-comment.  POSIX XCU ERN 131
+     states that empty arguments invoke implementation-defined
+     behavior.  We allow an empty begin comment to disable comments,
+     and a non-empty begin comment will always create a non-empty end
+     comment.  See the texinfo for what some other implementations
+     do.  */
   if (!bc)
     bc = ec = "";
   else if (!ec || (*bc && !*ec))
