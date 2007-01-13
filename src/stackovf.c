@@ -1,5 +1,5 @@
 /* Detect stack overflow (when getrlimit and sigaction or sigvec are available)
-   Copyright (C) 1993, 1994, 2006 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006, 2007 Free Software Foundation, Inc.
    Jim Avera <jima@netcom.com>, October 1993.
 
    This program is free software; you can redistribute it and/or modify
@@ -341,6 +341,11 @@ Error - Do not know how to set up stack-ovf trap handler...
 
   {
     stack_t ss;
+# ifndef HAVE_STACK_T_SS_SP
+    /* This workaround is for BSD/OS 4.0.1:
+       http://lists.gnu.org/archive/html/bug-m4/2006-12/msg00004.html  */
+#  define ss_sp ss_base
+# endif
 
     ss.ss_size = SIGSTKSZ;
     ss.ss_sp = xmalloc ((unsigned) ss.ss_size);

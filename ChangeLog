@@ -1,3 +1,13 @@
+2007-01-13  Eric Blake  <ebb9@byu.net>
+
+	* configure.ac (AC_CHECK_MEMBERS): Check for stack_t.ss_sp, and
+	assume the fallback of ss_base for BSDI 4.0.1.
+	* src/stackovf.c (setup_stackovf_trap) [HAVE_SIGALTSTACK &&
+	! HAVE_STACK_T_SS_SP]: Use this check.
+	Reported by Chris McGuire.
+	* THANKS: Update.
+	* NEWS: Document the improvement.
+
 2007-01-09  Eric Blake  <ebb9@byu.net>
 
 	* src/eval.c (ASSIGN): New enumerator.

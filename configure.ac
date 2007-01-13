@@ -44,6 +44,12 @@ AC_CHECK_TYPES([siginfo_t], [], [],
 AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
 [[#include <signal.h>
 ]])
+AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
+[[#include <signal.h>
+#if HAVE_SIGINFO_H
+# include <siginfo.h>
+#endif
+]])
 
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
