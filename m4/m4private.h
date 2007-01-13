@@ -64,7 +64,6 @@ struct m4 {
   int		current_diversion;	/* Current output diversion.  */
 
   /* Option flags  (set in src/main.c).  */
-  bool		no_gnu_extensions;		/* -G */
   size_t	nesting_limit;			/* -L */
   int		debug_level;			/* -d */
   size_t	max_debug_arg_length;		/* -l */
@@ -80,7 +79,7 @@ struct m4 {
 #define M4_OPT_DISCARD_COMMENTS_BIT	(1 << 2) /* -c */
 #define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
 #define M4_OPT_SYNCOUTPUT_BIT		(1 << 4) /* -s */
-#define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* POSIXLY_CORRECT */
+#define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* -G/POSIXLY_CORRECT */
 #define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E */
 #define M4_OPT_SAFER_BIT		(1 << 7) /* --safer */
 
@@ -105,8 +104,6 @@ struct m4 {
 #  define m4_set_exit_status(C, V)		((C)->exit_status = (V))
 #  define m4_get_current_diversion(C)		((C)->current_diversion)
 #  define m4_set_current_diversion(C, V)	((C)->current_diversion = (V))
-#  define m4_get_no_gnu_extensions_opt(C)	((C)->no_gnu_extensions)
-#  define m4_set_no_gnu_extensions_opt(C, V)	((C)->no_gnu_extensions = (V))
 #  define m4_get_nesting_limit_opt(C)		((C)->nesting_limit)
 #  define m4_set_nesting_limit_opt(C, V)	((C)->nesting_limit = (V))
 #  define m4_get_debug_level_opt(C)		((C)->debug_level)

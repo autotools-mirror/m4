@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -462,7 +462,7 @@ reload_frozen_state (m4 *context, const char *name)
     case 1:
       {
 	m4__module_open (context, "m4", NULL);
-	if (m4_get_no_gnu_extensions_opt (context))
+	if (m4_get_posixly_correct_opt (context))
 	  m4__module_open (context, "traditional", NULL);
 	else
 	  m4__module_open (context, "gnu", NULL);

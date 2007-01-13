@@ -1,7 +1,7 @@
 # Extract all examples from the manual source.            -*- AWK -*-
 
 # This file is part of GNU M4
-# Copyright (C) 1992, 2000, 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -172,6 +172,8 @@ function new_test(input, status, output, error, options, xfail, examples) {
 
   if (options ~ /-m/)
     printf ("AT_CHECK_DYNAMIC_MODULE\n");
+  if (options ~ /-m mpeval/)
+    printf ("AT_CHECK_GMP\n");
   if (xfail == 1)
     printf ("AT_XFAIL_IF([:])\n");
 

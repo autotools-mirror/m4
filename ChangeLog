@@ -1,3 +1,19 @@
+2007-01-13  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Mpeval): Add tests.
+	* tests/testsuite.at (AT_CHECK_GMP): New filter, factored from...
+	* tests/builtins.at (gmp): ...here.  Rename test to...
+	(mpeval): ...this.
+	* tests/generate.awk (new_test): Filter out mpeval tests when gmp
+	is not available.
+	* m4/m4module.h (m4_get_no_gnu_extensions_opt): Merge
+	no_gnu_extensions with posixly_correct_opt, since they were set in
+	sync.
+	* m4/m4private.h (struct m4): Remove no_gnu_extensions.
+	* src/main.c (main): Update caller.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* modules/m4.c (m4wrap): Likewise.
+
 2007-01-12  Eric Blake  <ebb9@byu.net>
 
 	* m4/syntax.c (m4_set_comment): XCU ERN 131 was approved by

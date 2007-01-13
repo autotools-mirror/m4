@@ -873,7 +873,7 @@ M4BUILTIN_HANDLER (m4exit)
 M4BUILTIN_HANDLER (m4wrap)
 {
   assert (obstack_object_size (obs) == 0);
-  if (m4_get_no_gnu_extensions_opt (context))
+  if (m4_get_posixly_correct_opt (context))
     m4_shipout_string (context, obs, M4ARG (1), 0, false);
   else
     m4_dump_args (context, obs, argc, argv, " ", false);

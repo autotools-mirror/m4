@@ -364,7 +364,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (getenv ("POSIXLY_CORRECT"))
     {
-      m4_set_no_gnu_extensions_opt (context, true);
       m4_set_posixly_correct_opt (context, true);
       m4_set_suppress_warnings_opt (context, true);
     }
@@ -469,7 +468,6 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'G':
-	m4_set_no_gnu_extensions_opt (context, true);
 	m4_set_posixly_correct_opt (context, true);
 	break;
 
@@ -546,7 +544,6 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'g':
-	m4_set_no_gnu_extensions_opt (context, false);
 	m4_set_posixly_correct_opt (context, false);
 	break;
 
@@ -622,7 +619,7 @@ main (int argc, char *const *argv, char *const *envp)
   else
     {
       m4_module_load (context, "m4", 0);
-      if (m4_get_no_gnu_extensions_opt (context))
+      if (m4_get_posixly_correct_opt (context))
 	m4_module_load (context, "traditional", 0);
       else
 	m4_module_load (context, "gnu", 0);

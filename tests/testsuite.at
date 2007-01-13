@@ -1,7 +1,7 @@
 # Process with autom4te to create an -*- Autotest -*- test suite.
 
 # Test suite for GNU M4.
-# Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -114,6 +114,17 @@ m4_define([AT_CHECK_DYNAMIC_MODULE],
 [AT_KEYWORDS([module])
 AT_CHECK([if test "x$DYNAMIC_MODULES" = xno ; then
   echo Dynamic module support not detected, skipping this test.
+  exit 77
+fi])])
+
+# AT_CHECK_GMP
+# -----------------------
+# Add keyword `gmp' to the test, and skip the test if the use of GMP
+# was disabled at configure time.
+m4_define([AT_CHECK_GMP],
+[AT_KEYWORDS([gmp])
+AT_CHECK([if test "x$USE_GMP" = xno ; then
+  echo libgmp support not detected, skipping this test.
   exit 77
 fi])])
 

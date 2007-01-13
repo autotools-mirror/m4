@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -102,7 +102,7 @@ m4_include_env_init (m4 *context)
 {
   char *m4path;
 
-  if (m4_get_no_gnu_extensions_opt (context))
+  if (m4_get_posixly_correct_opt (context))
     return;
 
   m4path = getenv ("M4PATH");
@@ -115,7 +115,7 @@ m4_include_env_init (m4 *context)
 void
 m4_add_include_directory (m4 *context, const char *dir, bool prepend)
 {
-  if (m4_get_no_gnu_extensions_opt (context))
+  if (m4_get_posixly_correct_opt (context))
     return;
 
   search_path_add (m4__get_search_path (context), dir, prepend);
@@ -153,7 +153,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
 
   /* If file is absolute, or if we are not searching a path, a single
      lookup will do the trick.  */
-  if (IS_ABSOLUTE_FILE_NAME (file) || m4_get_no_gnu_extensions_opt (context))
+  if (IS_ABSOLUTE_FILE_NAME (file) || m4_get_posixly_correct_opt (context))
     {
       fp = fopen (file, "r");
       if (fp != NULL)

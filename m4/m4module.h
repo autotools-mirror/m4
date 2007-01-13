@@ -142,7 +142,6 @@ extern void		m4_delete	(m4 *);
 	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
 	M4FIELD(int,		   exit_status,	   exit_status)		\
 	M4FIELD(int,	current_diversion,	   current_diversion)	\
-	M4FIELD(bool,	no_gnu_extensions_opt,	   no_gnu_extensions)	\
 	M4FIELD(size_t,	nesting_limit_opt,	   nesting_limit)	\
 	M4FIELD(int,	debug_level_opt,	   debug_level)		\
 	M4FIELD(size_t,	max_debug_arg_length_opt,  max_debug_arg_length)\

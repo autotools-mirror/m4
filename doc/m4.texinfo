@@ -6054,6 +6054,17 @@ of any length.
 The macro @code{mpeval} is recognized only with parameters.
 @end deffn
 
+For the most part, using @code{mpeval} is similar to using @code{eval}:
+
+@comment options: -m mpeval
+@example
+$ @kbd{m4 -m mpeval}
+mpeval(`(1 << 70) + 2 ** 68 * 3', `16')
+@result{}700000000000000000
+`0r24:'mpeval(`0r36:zYx', `24', `5')
+@result{}0r24:038m9
+@end example
+
 The ratio operator, @samp{\}, is provided with the same precedence as
 division, and rationally divides two numbers and canonicalizes the
 result, whereas the division operator @samp{/} always returns the
@@ -6072,8 +6083,22 @@ value of the argument that ended evaluation, rather than collapsing to
 even in @acronym{POSIX} mode, since @code{mpeval} does not have to
 conform to the @acronym{POSIX} rules for @code{eval}.
 
-@comment fixme - need some examples, but conditional on whether modules
-@comment and mpeval are both supported
+@comment options: -m mpeval
+@example
+$ @kbd{m4 -m mpeval}
+mpeval(`2 / 4')
+@result{}0
+mpeval(`2 \ 4')
+@result{}1\2
+mpeval(`2 || 3')
+@result{}2
+mpeval(`1 && 3')
+@result{}3
+mpeval(`-1 >> 1')
+@result{}-1
+mpeval(`-1 >>> 1')
+@result{}-1
+@end example
 
 @node Shell commands
 @chapter Macros for running shell commands
