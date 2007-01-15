@@ -127,6 +127,9 @@ promoted to 2.0.
   - FIXME: This feature can cause core dumps when renaming multiple
   symbols to the same name.
 
+*** New `__traditional__' builtin identifies when the traditional module
+    is loaded instead of the gnu module.
+
 *** The `modules' and `symbols' builtins, introduced in previous betas,
     have been renamed `m4modules' and `m4symbols', in order to minimize
     problems when upgrading from 1.4.x and processing English text.  To

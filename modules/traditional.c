@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,15 @@
 m4_macro m4_macro_table[] =
 {
   /* name		text */
+#if UNIX
   { "unix",		"" },
-  { 0,			0 },
+#elif W32_NATIVE
+  { "windows",		"" },
+#elif OS2
+  { "os2",		"" },
+#else
+# warning Platform macro not provided
+#endif
+  { "__traditional__",	"" },
+  { NULL,		NULL },
 };

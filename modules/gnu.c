@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -88,14 +88,18 @@ m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
-  /* name			text */
-#ifdef _WIN32
-  { "__windows__",		"" },
+  /* name		text */
+#if UNIX
+  { "__unix__",		"" },
+#elif W32_NATIVE
+  { "__windows__",	"" },
+#elif OS2
+  { "__os2__",		"" },
 #else
-  { "__unix__",			"" },
+# warning Platform macro not provided
 #endif
-  { "__gnu__",			"" },
-  { "__m4_version__",		VERSION/**/TIMESTAMP },
+  { "__gnu__",		"" },
+  { "__m4_version__",	VERSION/**/TIMESTAMP },
 
   { NULL, NULL },
 };

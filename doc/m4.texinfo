@@ -396,11 +396,13 @@ engine, since all other implementations of @code{m4} had too many
 limitations.
 
 More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
-addressed some long standing bugs in the venerable 1.4 release.
-Then in 2005 Gary V. Vaughan collected together the many
-patches to @acronym{GNU} @code{m4} 1.4 that were floating around the net and
+addressed some long standing bugs in the venerable 1.4 release.  Then in
+2005, Gary V. Vaughan collected together the many patches to
+@acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
+prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
+1.4.x series remains open for bug fixes, including release 1.4.9 in
+2007.
 
 Meanwhile, development was underway for new features for @code{m4},
 such as dynamic module loading and additional builtins, practically
@@ -629,8 +631,8 @@ issues a warning because it may be withdrawn in a future version of
 @itemx --prefix-builtins
 Internally modify @emph{all} builtin macro names so they all start with
 the prefix @samp{m4_}.  For example, using this option, one should write
-@samp{m4_define} instead of @samp{define}, and @samp{m4___file__}
-instead of @samp{__file__}.  This option has no effect if @option{-R}
+@samp{m4_define} instead of @samp{define}, and @samp{@w{m4___file__}}
+instead of @samp{@w{__file__}}.  This option has no effect if @option{-R}
 is also specified.
 
 @item -Q
@@ -5115,7 +5117,7 @@ position depends on when the module was @emph{first} loaded.
 @end deffn
 
 For example, if @acronym{GNU} @code{m4} is started with the
-@option{-mload} option to load the module @samp{load} and make this
+@option{-m load} option to load the module @samp{load} and make this
 builtin available, @code{m4modules} will yield the following:
 
 @comment options: -m load
@@ -5141,14 +5143,17 @@ Once the @code{load} module has successfully loaded, use of the
 @samp{load} macro is entirely equivalent to the @option{-m} command line
 option.
 
-@comment ignore
+@c The -mmpeval/--unload=mpeval pair allows the testsuite to skip this
+@c test if mpeval was not configured for usage.
+@comment options: -m load -m mpeval --unload-module=mpeval
 @example
+$ @kbd{m4 -m load}
 m4modules
 @result{}load,gnu,m4
-load(`mymodule')
+load(`mpeval')
 @result{}
 m4modules
-@result{}mymodule,load,gnu,m4
+@result{}mpeval,load,gnu,m4
 @end example
 
 @node Unload
@@ -5164,62 +5169,100 @@ running the module's finalization method (if any).
 The macro @code{unload} is recognized only with parameters.
 @end deffn
 
+@comment options: -m mpeval -m load
+@example
+$ @kbd{m4 -m mpeval -m load}
+m4modules
+@result{}load,mpeval,gnu,m4
+unload(`mpeval')
+@result{}
+m4modules
+@result{}load,gnu,m4
+@end example
+
 @node Standard Modules
 @section Standard bundled modules
 
 @acronym{GNU} @code{m4} ships with several bundled modules as standard.
-By convention these modules define a text macro that can be tested with
-@code{ifdef} when they have loaded.
+By convention, these modules define a text macro that can be tested
+with @code{ifdef} when they are loaded; only the @code{m4} module lacks
+this feature test macro.
 
 @table @code
 @item m4
-Provides all of the builtins defined by System V @code{m4}.  This module
-is always loaded -- @acronym{GNU} @code{m4} would only be a very slow
-version of @samp{cat} without the builtins supplied by this module.
+Provides all of the builtins defined by @acronym{POSIX}.  This module
+is always loaded --- @acronym{GNU} @code{m4} would only be a very slow
+version of @command{cat} without the builtins supplied by this module.
 
 @item gnu
 Provides all of the @acronym{GNU} extensions, as defined by
-@acronym{GNU} M4 through the 1.4.x release series.  In addition to the
-@samp{__gnu__} text macro, this module also defines either
-@samp{__unix__} or @samp{__windows__} as appropriate, and the following:
+@acronym{GNU} M4 through the 1.4.x release series.  It also provides a
+couple of feature test macros:
 
-@deffn {Macro (gnu)} __m4_version__
-This macro expand to the release version number of the running GNU
-@code{m4} executable.
+@deffn {Macro (gnu)} __gnu__
+Expands to the empty string, as an indication that the @samp{gnu}
+module is loaded.
 @end deffn
 
-This module is always loaded, unless the @option{-G} option is supplied
-at startup.
+@deffn {Macro (gnu)} __m4_version__
+Expands to a quoted string containing the release version number of the
+running @acronym{GNU} @code{m4} executable.
+@end deffn
+
+This module is always loaded, unless the @option{-G} command line
+option is supplied at startup (@pxref{Limits control, , Invoking m4}).
 
 @item traditional
-This module defines a single text macro for compatibility with System V
-@code{m4}, and is loaded instead of the @samp{gnu} module if @option{-G}
-is specified.
+This module provides compatibility with System V @code{m4}, for anything
+not specified by @acronym{POSIX}, and is loaded instead of the
+@samp{gnu} module if the @option{-G} command line option is specified.
 
-@deffn {Macro (traditional)} unix
-Expands to the empty string.
+@deffn {Macro (traditional)} __traditional__
+Expands to the empty string, as an indication that the
+@samp{traditional} module is loaded.
 @end deffn
 
 @item load
 This module supplies the builtins required to use modules from within a
-GNU @code{m4} program.  @xref{Modules}, for more details.  The module
-also defines the following macro:
+@acronym{GNU} @code{m4} program.  @xref{Modules}, for more details.  The
+module also defines the following macro:
 
-@deffn {Macro (load)} __modules__
-Expands to the empty string.
+@deffn {Macro (load)} __load__
+Expands to the empty string, as an indication that the @samp{load}
+module is loaded.
 @end deffn
 
 @item mpeval
 This module provides the implementation for the experimental
-@code{mpeval} feature.  If the host machine does not have the GNU gmp
-library, the builtin will generate an error if called.  @xref{Mpeval},
-for more details.  The module also defines the following macro:
+@code{mpeval} feature.  If the host machine does not have the
+@acronym{GNU} gmp library, the builtin will generate an error if called.
+@xref{Mpeval}, for more details.  The module also defines the following
+macro:
 
-@deffn {Macro (mpeval)} __gmp__
-Expands to the empty string.
+@deffn {Macro (mpeval)} __mpeval__
+Expands to the empty string, as an indication that the @samp{mpeval}
+module is loaded.
 @end deffn
-
 @end table
+
+Here is an example of using the feature test macros.
+
+@example
+$ @kbd{m4}
+__gnu__-__traditional__
+@result{}-__traditional__
+ifdef(`__gnu__', `Extensions are active', `Minimal features')
+@result{}Extensions are active
+@end example
+
+@comment options: -G
+@example
+$ @kbd{m4 --traditional}
+__gnu__-__traditional__
+@result{}__gnu__-
+ifdef(`__gnu__', `Extensions are active', `Minimal features')
+@result{}Minimal features
+@end example
 
 @node Text handling
 @chapter Macros for text handling
@@ -6111,6 +6154,13 @@ mpeval(`-1 >>> 1')
 There are a few builtin macros in @code{m4} that allow you to run shell
 commands from within @code{m4}.
 
+Note that the definition of a valid shell command is system dependent.
+On UNIX systems, this is the typical @code{/bin/sh}.  But on other
+systems, such as native Windows, the shell has a different syntax of
+commands that it understands.  Some examples in this chapter assume
+@code{/bin/sh}, and also demonstrate how to quit early with a known
+exit value if this is not the case.
+
 @menu
 * Platform macros::             Determining the platform
 * Syscmd::                      Executing simple commands
@@ -6122,7 +6172,50 @@ commands from within @code{m4}.
 
 @node Platform macros
 @section Determining the platform
-@comment FIXME - port from branch
+Sometimes it is desirable for an input file to know which platform
+@code{m4} is running on.  @acronym{GNU} @code{m4} provides several
+macros that are predefined to expand to the empty string; checking for
+their existence will confirm platform details.
+
+@deffn {Optional builtin (gnu)} __os2__
+@deffnx {Optional builtin (traditional)} os2
+@deffnx {Optional builtin (gnu)} __unix__
+@deffnx {Optional builtin (traditional)} unix
+@deffnx {Optional builtin (gnu)} __windows__
+@deffnx {Optional builtin (traditional)} windows
+Each of these macros is conditionally defined as needed to describe the
+environment of @code{m4}.  If defined, each macro expands to the empty
+string.
+@end deffn
+
+@cindex platform macro
+On UNIX systems, @acronym{GNU} @code{m4} will define @code{@w{__unix__}}
+in the @samp{gnu} module, and @code{unix} in the @samp{traditional}
+module.
+
+On native Windows systems, @acronym{GNU} @code{m4} will define
+@code{@w{__windows__}} in the @samp{gnu} module, and @code{windows} in
+the @samp{traditional} module.
+
+On OS/2 systems, @acronym{GNU} @code{m4} will define @code{@w{__os2__}}
+in the @samp{gnu} module, and @code{os2} in the @samp{traditional}
+module.
+
+If @acronym{GNU} M4 does not provide a platform macro for your system,
+please report that as a bug.
+
+@example
+define(`provided', `0')
+@result{}
+ifdef(`__unix__', `define(`provided', incr(provided))')
+@result{}
+ifdef(`__windows__', `define(`provided', incr(provided))')
+@result{}
+ifdef(`__os2__', `define(`provided', incr(provided))')
+@result{}
+provided
+@result{}1
+@end example
 
 @node Syscmd
 @section Executing simple commands
@@ -7020,27 +7113,9 @@ However, this appears to be a bug in @acronym{POSIX}, since most
 traditional implementations also ignore all whitespace (formfeed,
 carriage return, and vertical tab).  @acronym{GNU} @code{m4} follows
 tradition and ignores all leading unquoted whitespace.
-
-@item
-@findex __gnu__
-GNU @code{m4} without @samp{-G} option will define the macro
-@code{@w{__gnu__}} to expand to the empty string.
-
-@item
-@findex unix
-@findex __unix__
-On UNIX systems, GNU @code{m4} without the @option{-G} option will
-define the macro @code{@w{__unix__}}, otherwise the macro @code{unix}.
-Both will expand to the empty string.
-
-@item
-@findex __windows__
-On Windows systems, GNU @code{m4} without the @option{-G} option will
-define the macro @code{@w{__windows__}}, which expands to the empty
-string.
 @end itemize
 
-@node  Experiments
+@node Experiments
 @section Experimental features in @acronym{GNU} M4
 
 Certain features of GNU @code{m4} are experimental.

@@ -1,3 +1,20 @@
+2007-01-15  Eric Blake  <ebb9@byu.net>
+
+	* tests/builtins.at (__m4_version__): New test.
+	* modules/traditional.c (m4_macro_table): Provide windows and os2
+	macros, as appropriate.  Add __traditional__ macro.
+	* modules/mpeval.c (m4_macro_table): Name the macro __mpeval__,
+	not __gmp__, to match module name.
+	* modules/load.c (m4_macro_table): Name the macro __load__, not
+	__modules__, to match module name.
+	* doc/m4.texinfo (History, Shell commands, Platform macros): Merge
+	from the branch.
+	(Standard Modules): Improve wording.
+	(Incompatibilities): Move platform macros into their own node.
+	(Load, Unload): Use actual examples.
+	* NEWS: Document this change.
+	* THANKS: Update.
+
 2007-01-13  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Mpeval): Add tests.
