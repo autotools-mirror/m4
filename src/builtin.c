@@ -1209,8 +1209,10 @@ include (int argc, token_data **argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	M4ERROR ((warning_status, errno,
-		  "cannot open `%s'", ARG (1)));
+	{
+	  M4ERROR ((warning_status, errno, "cannot open `%s'", ARG (1)));
+	  retcode = EXIT_FAILURE;
+	}
       return;
     }
 

@@ -1,3 +1,9 @@
+2007-01-15  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Pull in various improvements from head.
+	* src/builtin.c (include): Alter exit status on failure.
+	* NEWS: Document this fix.
+
 2007-01-13  Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (AC_CHECK_MEMBERS): Check for stack_t.ss_sp, and

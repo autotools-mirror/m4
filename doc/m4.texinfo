@@ -377,7 +377,7 @@ limitations.
 
 More recently, in 2004, Paul Eggert released 1.4.1 and 1.4.2 which
 addressed some long standing bugs in the venerable 1.4 release.  Then in
-2005 Gary V. Vaughan collected together the many patches to
+2005, Gary V. Vaughan collected together the many patches to
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
@@ -551,8 +551,8 @@ performing any other actions.
 
 @item -E
 @itemx --fatal-warnings
-Stop execution and exit @code{m4} once the first warning has been
-issued, considering all of them to be fatal.
+Stop execution and exit @code{m4} once the first warning or error has
+been issued, considering all of them to be fatal.
 
 @item -i
 @itemx --interactive
@@ -805,7 +805,9 @@ token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
 contain comments.  @acronym{GNU} @code{m4} does not yet understand
 locales; all operations are byte-oriented rather than
-character-oriented.  However, @code{m4} is eight-bit clean, so you can
+character-oriented (although if your locale uses a single byte
+encoding, such as @sc{ISO-8859-1}, you will not notice a difference).
+However, @code{m4} is eight-bit clean, so you can
 use non-@sc{ascii} characters in quoted strings (@pxref{Changequote}),
 comments (@pxref{Changecom}), and macro names (@pxref{Indir}), with the
 exception of the @sc{nul} character (the zero byte @samp{'\0'}).
@@ -1014,13 +1016,28 @@ sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
 @code{m4} offers several mechanisms or techniques for inhibiting the
 recognition of names as macro calls.
 
-First of all, many builtin macros cannot meaningfully be called
-without arguments.  For any of these macros, whenever an opening
-parenthesis does not immediately follow their name, the builtin macro
-call is not triggered.  This solves the most usual cases, like for
-@samp{include} or @samp{eval}.  Later in this document, the sentence
-``This macro is recognized only with parameters'' refers to this
-specific provision.
+@cindex @acronym{GNU} extensions
+@cindex blind macro
+@cindex macro, blind
+First of all, many builtin macros cannot meaningfully be called without
+arguments.  As a @acronym{GNU} extension, for any of these macros,
+whenever an opening parenthesis does not immediately follow their name,
+the builtin macro call is not triggered.  This solves the most usual
+cases, like for @samp{include} or @samp{eval}.  Later in this document,
+the sentence ``This macro is recognized only with parameters'' refers to
+this specific provision of @acronym{GNU} M4, also known as a blind
+builtin macro.  For the builtins defined by @acronym{POSIX} that bear
+this disclaimer, @acronym{POSIX} specifically states that invoking those
+builtins without arguments is unspecified, because many other
+implementations simply invoke the builtin as though it were given one
+empty argument instead.
+
+@example
+eval
+@result{}eval
+eval(`1')
+@result{}1
+@end example
 
 There is also a command line option (@option{--prefix-builtins}, or
 @option{-P}, @pxref{Operation modes, , Invoking m4}) that renames all
@@ -2045,10 +2062,12 @@ ifelse(foo, `foo', `true', `false')
 @result{}false
 @end example
 
+@cindex macro, blind
+@cindex blind macro
 Notice how the first argument was used unquoted; it is common to compare
 the expansion of a macro with a string.  With this macro, you can now
-reproduce the behavior of many of the builtins, where the macro is
-recognized only with arguments.
+reproduce the behavior of blind builtins, where the macro is recognized
+only with arguments.
 
 @example
 define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')
@@ -2499,7 +2518,8 @@ It is possible to trace macro calls and expansions through the builtins
 @deffn Builtin traceon (@ovar{names@dots{}})
 @deffnx Builtin traceoff (@ovar{names@dots{}})
 When called without any arguments, @code{traceon} and @code{traceoff}
-will turn tracing on and off, respectively, for all defined macros.
+will turn tracing on and off, respectively, for all currently defined
+macros.
 
 When called with arguments, only the macros listed in @var{names} are
 affected, whether or not they are currently defined.
@@ -2594,54 +2614,66 @@ display.
 
 @cindex controlling debugging output
 @cindex debugging output, controlling
-The @option{-d} option to @code{m4} (@pxref{Debugging options, ,
-Invoking m4}) controls the amount of details presented, when using the
-macros described in the preceding sections.
+The @option{-d} option to @code{m4} (or @option{--debug},
+@pxref{Debugging options, , Invoking m4}) controls the amount of details
+presented in three
+categories of output.  Trace output is requested by @code{traceon}
+(@pxref{Trace}), and each line is prefixed by @samp{m4trace:} in
+relation to a macro invocation.  Debug output tracks useful events not
+associated with a macro invocation, and each line is prefixed by
+@samp{m4debug:}.  Finally, @code{dumpdef} (@pxref{Dumpdef}) output is
+affected, with no prefix added to the output lines.
 
 The @var{flags} following the option can be one or more of the
 following:
 
 @table @code
 @item a
-Show the actual arguments in each macro call.  This applies to all macro
-calls if the @samp{t} flag is used, otherwise only the macros covered by
-calls of @code{traceon}.
+In trace output, show the actual arguments that were collected before
+invoking the macro.  This applies to all macro calls if the @samp{t}
+flag is used, otherwise only the macros covered by calls of
+@code{traceon}.
 
 @item c
-Show several trace lines for each macro call.  A line is shown when the
-macro is seen, but before the arguments are collected; a second line
-when the arguments have been collected and a third line after the call
-has completed.
+In trace output, show several trace lines for each macro call.  A line
+is shown when the macro is seen, but before the arguments are collected;
+a second line when the arguments have been collected and a third line
+after the call has completed.
 
 @item e
-Show the expansion of each macro call, if it is not void.  This applies
-to all macro calls if the @samp{t} flag is used, otherwise only the
-macros covered by calls of @code{traceon}.
+In trace output, show the expansion of each macro call, if it is not
+void.  This applies to all macro calls if the @samp{t} flag is used,
+otherwise only the macros covered by calls of @code{traceon}.
 
 @item f
-Show the name of the current input file in each trace output line.
+In debug and trace output, include the name of the current input file in
+the output line.
 
 @item i
-Print a message each time the current input file is changed, giving file
-name and input line number.
+In debug output, print a message each time the current input file is
+changed.
 
 @item l
-Show the current input line number in each trace output line.
+In debug and trace output, include the current input line number in the
+output line.
 
 @item p
-Print a message when a named file is found through the path search
-mechanism (@pxref{Search Path}), giving the actual file name used.
+In debug output, print a message when a named file is found through the
+path search mechanism (@pxref{Search Path}), giving the actual file name
+used.
 
 @item q
-Quote actual arguments and macro expansions in the display with the
-current quotes.
+In trace and dumpdef output, quote actual arguments and macro expansions
+in the display with the current quotes.  This is useful in connection
+with the @samp{a} and @samp{e} flags above.
 
 @item t
-Trace all macro calls made in this invocation of @code{m4}.
+In trace output, trace all macro calls made in this invocation of
+@code{m4}, regardless of the settings of @code{traceon}.
 
 @item x
-Add a unique `macro call id' to each line of the trace output.  This is
-useful in connection with the @samp{c} flag above.
+In trace output, add a unique `macro call id' to each line of the trace
+output.  This is useful in connection with the @samp{c} flag above.
 
 @item V
 A shorthand for all of the above flags.
@@ -3488,6 +3520,7 @@ The macros @code{include} and @code{sinclude} are recognized only with
 parameters.
 @end deffn
 
+@comment status: 1
 @example
 include(`none')
 @error{}m4:stdin:1: cannot open `none': No such file or directory
@@ -4706,8 +4739,8 @@ exit value if this is not the case.
 @section Determining the platform
 
 @cindex platform macros
-Sometimes it is desirable for an input file to know which
-platform @code{m4} is running on.  @acronym{GNU} @code{m4} provides several
+Sometimes it is desirable for an input file to know which platform
+@code{m4} is running on.  @acronym{GNU} @code{m4} provides several
 macros that are predefined to expand to the empty string; checking for
 their existence will confirm platform details.
 

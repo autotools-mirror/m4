@@ -13,6 +13,8 @@ Version 1.4.9 - ?? ??? 2007, by ????  (CVS version 1.4.8a)
   previously undocumented alias of '=' meaning '==' in eval now triggers a
   deprecation warning, so that a future version of M4 can implement a form
   of variable assignment as an extension.
+* The `include' builtin now affects exit status on failure, as required by
+  POSIX.  Use `sinclude' if you need a successful exit status.
 * Improved portability to platforms such as BSD/OS.
 
 Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)
