@@ -1,7 +1,7 @@
 #                                                            -*- Autoconf -*-
 # stackovf.m4 -- how do we deal with stack overflow?
 #
-# Copyright (C) 2000, 2003, 2006 Gary V. Vaughan <gary@gnu.org>
+# Copyright (C) 2000, 2003, 2006, 2007 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-# serial 4
+# serial 5
 
 # M4_SYS_STACKOVF
 # ---------------
@@ -28,6 +28,13 @@ AC_REQUIRE([AC_TYPE_SIGNAL])dnl
 
 AC_CHECK_HEADERS_ONCE([siginfo.h])
 AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec])
+AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
+[[#include <signal.h>
+#if HAVE_SIGINFO_H
+# include <siginfo.h>
+#endif
+]])
+
 # Code from Jim Avera <jima@netcom.com>.
 # stackovf.c requires:
 #  1. Either sigaction with SA_ONSTACK, or sigvec with SV_ONSTACK

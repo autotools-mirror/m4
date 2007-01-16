@@ -1,3 +1,11 @@
+2007-01-16  Eric Blake  <ebb9@byu.net>
+
+	Port patch from branch for stack overflow detection on BSD/OS.
+	* ltdl/m4/stackovf.m4 (M4_SYS_STACKOVF): Check for stack_t.ss_sp.
+	* src/stackovf.c (setup_stackovf_trap) [HAVE_SIGALTSTACK &&
+	! HAVE_STACK_T_SS_SP]: Use this check.
+	Reported by Chris McGuire.
+
 2007-01-15  Eric Blake  <ebb9@byu.net>
 
 	* tests/builtins.at (__m4_version__): New test.
