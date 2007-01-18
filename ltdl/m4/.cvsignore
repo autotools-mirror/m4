@@ -23,6 +23,7 @@ fpending.m4
 free.m4
 getopt.m4
 gettext.m4
+gettimeofday.m4
 gl_list.m4
 glibc2.m4
 glibc21.m4
@@ -91,6 +92,7 @@ strnlen.m4
 strstr.m4
 strtol.m4
 sys_stat_h.m4
+sys_time_h.m4
 tempname.m4
 tmpdir.m4
 uintmax_t.m4
