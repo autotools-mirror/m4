@@ -192,10 +192,14 @@ promoted to 2.0.
 ** Other changes
 
 *** The syntax of frozen files format V2 has been improved to save
-    additional state.
-  - FIXME: format 2 still needs to be tweaked to allow complete ASCII
-  representation and to catch any more missing state; once 2.0 is released,
-  any further changes would introduce format 3.
+    additional state.  This includes the 'R' directive for default regular
+    expression syntax.  Also, a V2 file can now be represented completely
+    in ASCII, thanks to escape sequences.  Unfortunately, files frozen by
+    M4 1.4q that contain \ in macros cannot be read by 1.9b, but since 1.4q
+    was not widely distributed, this is not expected to be much of an
+    issue, and comes with the territory of using a beta release.
+  - FIXME: format 2 still needs to catch more missing state; once 2.0 is
+    released, any further changes would introduce format 3.
 
 FIXME: include the (long) list of changes in 1.4.x that were not already
   in earlier betas.

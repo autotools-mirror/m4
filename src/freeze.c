@@ -23,57 +23,52 @@
 #include "m4/system.h"
 #include "m4.h"
 #include "m4private.h"
+#include "binary-io.h"
 
-static	int   decode_char	    (FILE *);
-static	void  issue_expect_message  (m4 *, int);
-static	int   produce_char_dump     (char *, int);
-static	void  produce_resyntax_dump (m4 *, FILE *);
-static	void  produce_syntax_dump   (FILE *, m4_syntax_table *, char);
-static	void  produce_module_dump   (FILE *, lt_dlhandle);
-static	void  produce_symbol_dump   (m4 *, FILE *, m4_symbol_table *);
-static	void *dump_symbol_CB	    (m4_symbol_table *, const char *,
-				     m4_symbol *, void *);
+static	void  produce_mem_dump		(FILE *, const char *, size_t);
+static	void  produce_resyntax_dump	(m4 *, FILE *);
+static	void  produce_syntax_dump	(FILE *, m4_syntax_table *, char);
+static	void  produce_module_dump	(FILE *, lt_dlhandle);
+static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
+static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
+					 m4_symbol *, void *);
+static	void  issue_expect_message	(m4 *, int);
+static	int   decode_char		(FILE *);
 
 
-/* Produce a frozen state to the given file NAME. */
-
-static int
-produce_char_dump (char *buf, int ch)
+/* Dump an ASCII-encoded representation of LEN bytes at MEM to FILE.
+   MEM may contain embedded NUL characters.  */
+static void
+produce_mem_dump (FILE *file, const char *mem, size_t len)
 {
-  char *p = buf;
-  int digit;
-
-  if (ch > 127 || ch < 32)
+  while (len--)
     {
-      *p++  = '\\';
-
-      digit = ch / 64;
-      ch    = ch - (64 * digit);
-      *p++  = digit + '0';
-
-      digit = ch / 8;
-      ch    = ch - (8 * digit);
-      *p++  = digit + '0';
-
-      *p++  = ch + '0';
-    }
-  else
-    {
+      int ch = to_uchar (*mem++);
       switch (ch)
 	{
-	case '\\':
-	  *p++ = '\\';
-	  *p++ = '\\';
-	  break;
-
+	case '\a': putc ('\\', file); putc ('a', file); break;
+	case '\b': putc ('\\', file); putc ('b', file); break;
+	case '\f': putc ('\\', file); putc ('f', file); break;
+	case '\n': putc ('\\', file); putc ('n', file); break;
+	case '\r': putc ('\\', file); putc ('r', file); break;
+	case '\t': putc ('\\', file); putc ('t', file); break;
+	case '\v': putc ('\\', file); putc ('v', file); break;
+	case '\\': putc ('\\', file); putc ('\\', file); break;
 	default:
-	  *p++ = ch;
+	  if (ch >= 0x7f || ch < 0x20)
+	    {
+	      int digit = ch / 16;
+	      ch %= 16;
+	      digit += digit > 9 ? 'a' - 10 : '0';
+	      ch += ch > 9 ? 'a' - 10 : '0';
+	      putc ('\\', file);
+	      putc ('x', file);
+	      putc (digit, file);
+	    }
+	  putc (ch, file);
 	  break;
 	}
     }
-  *p = '\0';
-
-  return strlen (buf);
 }
 
 
@@ -87,7 +82,7 @@ produce_char_dump (char *buf, int ch)
 static void
 produce_resyntax_dump (m4 *context, FILE *file)
 {
-  int code  = m4_get_regexp_syntax_opt (context);
+  int code = m4_get_regexp_syntax_opt (context);
 
   /* Don't dump default syntax code (`0' for GNU_EMACS).  */
   if (code)
@@ -98,59 +93,67 @@ produce_resyntax_dump (m4 *context, FILE *file)
 	m4_error (context, EXIT_FAILURE, 0,
 		  _("invalid regexp syntax code `%d'"), code);
 
+      /* No need to use produce_mem_dump, since we know all resyntax
+	 names are already ASCII-encoded.  */
       fprintf (file, "R%d\n%s\n", strlen (resyntax), resyntax);
     }
 }
 
-#define MAX_CHAR_LENGTH 4	/* '\377' -> 4 characters */
-
 static void
 produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
 {
-  char buf[1+ MAX_CHAR_LENGTH * sizeof (m4_syntax_table)];
+  char buf[256];
   int code = m4_syntax_code (ch);
   int count = 0;
-  int offset = 0;
   int i;
 
-  /* FIXME:  Can't set the syntax of '\000' since that character marks
-	     the end of a string, and when passed to `m4_set_syntax', tells
-	     it to set the syntax of every table entry. */
+  for (i = 0; i < 256; ++i)
+    if (m4_has_syntax (syntax, i, code) && code != syntax->orig[i])
+      buf[count++] = i;
 
-  for (i = 1; i < 256; ++i)
+  /* If code falls in M4_SYNTAX_MASKS, then we must treat it
+     specially, since it will not be found in syntax->orig.  */
+  if (count == 1
+      && ((code == M4_SYNTAX_RQUOTE && *buf == *DEF_RQUOTE)
+	  || (code == M4_SYNTAX_ECOMM && *buf == *DEF_ECOMM)))
+    return;
+
+  if (count || (code & M4_SYNTAX_MASKS))
     {
-      if (m4_has_syntax (syntax, i, code))
-	{
-	  offset += produce_char_dump (buf + offset, i);
-	  ++count;
-	}
+      fprintf (file, "S%c%d\n", ch, count);
+      produce_mem_dump (file, buf, count);
+      fputc ('\n', file);
     }
-
-  if (offset)
-      fprintf (file, "S%c%d\n%s\n", ch, count, buf);
 }
 
 /* The modules must be dumped in the order in which they will be
    reloaded from the frozen file.  libltdl stores handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
-void
+static void
 produce_module_dump (FILE *file, lt_dlhandle handle)
 {
   const char *name = m4_get_module_name (handle);
+  size_t len = strlen (name);
 
   handle = m4__module_next (handle);
   if (handle)
     produce_module_dump (file, handle);
 
-  fprintf (file, "M%lu\n", (unsigned long int) strlen (name));
-  fputs (name, file);
+  /* GNU assumption: Although POSIX allows size_t to be just 16 bits,
+     independently of int, GNU assumes is at least as big as int.
+     Likewise, although POSIX allows size_t to be bigger than unsigned
+     long in some compilation environments, GNU assumes that size_t
+     always fits in unsigned long.  Unfortunately, GNU does not assume
+     that %zu is portable, yet.  */
+  fprintf (file, "M%lu\n", (unsigned long int) len);
+  produce_mem_dump (file, name, len);
   fputc ('\n', file);
 }
 
 /* Process all entries in one bucket, from the last to the first.
    This order ensures that, at reload time, pushdef's will be
    executed with the oldest definitions first.  */
-void
+static void
 produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
   if (m4_symtab_apply (symtab, dump_symbol_CB, file))
@@ -164,43 +167,43 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   lt_dlhandle   handle		= SYMBOL_HANDLE (symbol);
   const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
   FILE *	file		= (FILE *) userdata;
+  size_t	symbol_len	= strlen (symbol_name);
+  size_t	module_len	= module_name ? strlen (module_name) : 0;
 
   if (m4_is_symbol_text (symbol))
     {
-      fprintf (file, "T%lu,%lu",
-	       (unsigned long int) strlen (symbol_name),
-	       (unsigned long int) strlen (m4_get_symbol_text (symbol)));
+      const char *text = m4_get_symbol_text (symbol);
+      size_t text_len = strlen (text);
+      fprintf (file, "T%lu,%lu", (unsigned long int) symbol_len,
+	       (unsigned long int) text_len);
       if (handle)
-	fprintf (file, ",%lu", (unsigned long int) strlen (module_name));
+	fprintf (file, ",%lu", (unsigned long int) module_len);
       fputc ('\n', file);
 
-      fputs (symbol_name, file);
-      fputs (m4_get_symbol_text (symbol), file);
+      produce_mem_dump (file, symbol_name, symbol_len);
+      produce_mem_dump (file, text, text_len);
       if (handle)
-	fputs (module_name, file);
+	produce_mem_dump (file, module_name, module_len);
       fputc ('\n', file);
     }
   else if (m4_is_symbol_func (symbol))
     {
-      const m4_builtin *bp = m4_builtin_find_by_func (SYMBOL_HANDLE (symbol),
-						m4_get_symbol_func (symbol));
-
+      const m4_builtin *bp = m4_get_symbol_builtin (symbol);
+      size_t bp_len;
       if (bp == NULL)
 	assert (!"INTERNAL ERROR: builtin not found in builtin table!");
+      bp_len = strlen (bp->name);
 
-      fprintf (file, "F%lu,%lu",
-	       (unsigned long int) strlen (symbol_name),
-	       (unsigned long int) strlen (bp->name));
-
+      fprintf (file, "F%lu,%lu", (unsigned long int) symbol_len,
+	       (unsigned long int) bp_len);
       if (handle)
-	fprintf (file, ",%lu",
-		 (unsigned long int) strlen (module_name));
+	fprintf (file, ",%lu", (unsigned long int) module_len);
       fputc ('\n', file);
 
-      fputs (symbol_name, file);
-      fputs (bp->name, file);
+      produce_mem_dump (file, symbol_name, symbol_len);
+      produce_mem_dump (file, bp->name, bp_len);
       if (handle)
-	fputs (module_name, file);
+	produce_mem_dump (file, module_name, module_len);
       fputc ('\n', file);
     }
   else if (m4_is_symbol_placeholder (symbol))
@@ -211,18 +214,13 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   return NULL;
 }
 
+/* Produce a frozen state to the given file NAME. */
 void
 produce_frozen_state (m4 *context, const char *name)
 {
-  FILE *file;
+  FILE *file = fopen (name, O_BINARY ? "wb" : "w");
+  const char *str;
 
-#ifdef WIN32
-# define FROZEN_WRITE "wb"
-#else
-# define FROZEN_WRITE "w"
-#endif
-
-  file = fopen (name, FROZEN_WRITE);
   if (!file)
     {
       m4_error (context, 0, errno, _("cannot open `%s'"), name);
@@ -243,8 +241,10 @@ produce_frozen_state (m4 *context, const char *name)
       fprintf (file, "Q%lu,%lu\n",
 	       (unsigned long int) context->syntax->lquote.length,
 	       (unsigned long int) context->syntax->rquote.length);
-      fputs (context->syntax->lquote.string, file);
-      fputs (context->syntax->rquote.string, file);
+      produce_mem_dump (file, context->syntax->lquote.string,
+			context->syntax->lquote.length);
+      produce_mem_dump (file, context->syntax->rquote.string,
+			context->syntax->rquote.length);
       fputc ('\n', file);
     }
 
@@ -256,8 +256,10 @@ produce_frozen_state (m4 *context, const char *name)
       fprintf (file, "C%lu,%lu\n",
 	       (unsigned long int) context->syntax->bcomm.length,
 	       (unsigned long int) context->syntax->ecomm.length);
-      fputs (context->syntax->bcomm.string, file);
-      fputs (context->syntax->ecomm.string, file);
+      produce_mem_dump (file, context->syntax->bcomm.string,
+			context->syntax->bcomm.length);
+      produce_mem_dump (file, context->syntax->ecomm.string,
+			context->syntax->ecomm.length);
       fputc ('\n', file);
     }
 
@@ -267,23 +269,9 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Dump syntax table. */
 
-  produce_syntax_dump (file, M4SYNTAX, 'I');
-  produce_syntax_dump (file, M4SYNTAX, 'S');
-  produce_syntax_dump (file, M4SYNTAX, '(');
-  produce_syntax_dump (file, M4SYNTAX, ')');
-  produce_syntax_dump (file, M4SYNTAX, ',');
-  produce_syntax_dump (file, M4SYNTAX, '$');
-  produce_syntax_dump (file, M4SYNTAX, 'A');
-  produce_syntax_dump (file, M4SYNTAX, '@');
-  produce_syntax_dump (file, M4SYNTAX, 'O');
-
-  produce_syntax_dump (file, M4SYNTAX, 'W');
-  produce_syntax_dump (file, M4SYNTAX, 'D');
-
-  produce_syntax_dump (file, M4SYNTAX, 'L');
-  produce_syntax_dump (file, M4SYNTAX, 'R');
-  produce_syntax_dump (file, M4SYNTAX, 'B');
-  produce_syntax_dump (file, M4SYNTAX, 'E');
+  str = "IS(),$A@OWDLRBE";
+  while (*str)
+    produce_syntax_dump (file, M4SYNTAX, *str++);
 
   /* Dump all loaded modules.  */
   produce_module_dump (file, m4__module_next (0));
@@ -313,40 +301,78 @@ issue_expect_message (m4 *context, int expected)
 	      _("expecting character `%c' in frozen file"), expected);
 }
 
-/* Reload a frozen state from the given file NAME. */
+
+/* Reload frozen state.  */
 
-/* Read the next character from the IN stream.  Octal characters of the
-   form ``\nnn'' are converted, and returned.  EOF is returned if the end
-   of file is reached whilst reading the character.  */
+/* Read the next character from the IN stream.  Various escape
+   sequences are converted, and returned.  EOF is returned if the end
+   of file is reached whilst reading the character, or on an
+   unrecognized escape sequence.  */
 
 static int
 decode_char (FILE *in)
 {
-  int ch = fgetc (in);
+  int ch = getc (in);
+  int next;
+  int value = 0;
 
   if (ch == '\\')
     {
-      ch = fgetc (in);
-      if ((ch != EOF) && (ch != '\\'))
+      ch = getc (in);
+      switch (ch)
 	{
-	  int next;
+	case 'a': return '\a';
+	case 'b': return '\b';
+	case 'f': return '\f';
+	case 'n': return '\n';
+	case 'r': return '\r';
+	case 't': return '\t';
+	case 'v': return '\v';
+	case '\\': return '\\';
 
-	  /* first octal digit */
-	  ch = (ch - '0') * 64;
-
-	  /* second octal digit */
-	  next = fgetc (in);
-	  if (next == EOF)
-	    ch = EOF;
+	case 'x': case 'X':
+	  next = getc (in);
+	  if (next >= '0' && next <= '9')
+	    ch = (next - '0') * 16;
+	  else if (next >= 'a' && next <= 'f')
+	    ch = (next - 'a' + 10) * 16;
+	  else if (next >= 'A' && next <= 'F')
+	    ch = (next - 'A' + 10) * 16;
 	  else
-	    ch += 8 * (next - '0');
-
-	  /* third octal digit */
-	  next = fgetc (in);
-	  if (next == EOF)
-	    ch = EOF;
+	    return EOF;
+	  next = getc (in);
+	  if (next >= '0' && next <= '9')
+	    ch += next - '0';
+	  else if (next >= 'a' && next <= 'f')
+	    ch += next - 'a' + 10;
+	  else if (next >= 'A' && next <= 'F')
+	    ch += next - 'A' + 10;
 	  else
-	    ch += (next - '0');
+	    return EOF;
+	  return ch;
+	case '0': case '1': case '2': case '3':
+	  value = ch - '0';
+	  ch = getc (in);
+	  /* fall through */
+	case '4': case '5': case '6': case '7':
+	  if (ch >= '0' && ch <= '7')
+	    {
+	      value = value * 8 + ch - '0';
+	      ch = getc (in);
+	    }
+	  else
+	    {
+	      ungetc (ch, in);
+	      return value;
+	    }
+	  if (ch >= '0' && ch <= '7')
+	    value = value * 8 + ch - '0';
+	  else
+	    ungetc (ch, in);
+	  return value;
+
+	default:
+	  return EOF;
 	}
     }
 
@@ -354,7 +380,8 @@ decode_char (FILE *in)
 }
 
 
-/* We are seeking speed, here.  */
+/*  Reload state from the given file NAME.  We are seeking speed,
+    here.  */
 
 void
 reload_frozen_state (m4 *context, const char *name)
@@ -365,7 +392,7 @@ reload_frozen_state (m4 *context, const char *name)
   int operation;
   char syntax;
   char *string[3];
-  int allocated[3];
+  size_t allocated[3];
   int number[3] = {0};
 
 #define GET_CHARACTER						\
@@ -386,12 +413,19 @@ reload_frozen_state (m4 *context, const char *name)
 #define GET_STRING(File, Buf, BufSize, StrLen)			\
   do								\
     {								\
-      CHECK_ALLOCATION ((Buf), (BufSize), (StrLen));		\
-      if ((StrLen) > 0)						\
-	if (!fread ((Buf), (size_t) (StrLen), 1, (File)))	\
-	  m4_error (context, EXIT_FAILURE, 0,			\
-		    _("premature end of frozen file"));		\
-      (Buf)[(StrLen)] = '\0';					\
+      size_t len = (StrLen);					\
+      char *p = (Buf);						\
+      CHECK_ALLOCATION (p, (BufSize), len);			\
+      while (len-- > 0)						\
+	{							\
+	  int ch = (version > 1 ? decode_char (File)		\
+		    : getc (File));				\
+	  if (ch == EOF)					\
+	    m4_error (context, EXIT_FAILURE, 0,			\
+		      _("premature end of frozen file"));	\
+	  *p++ = ch;						\
+	}							\
+      *p = '\0';						\
     }								\
   while (0)
 
@@ -410,7 +444,7 @@ reload_frozen_state (m4 *context, const char *name)
 	{							\
 	  free (Where);						\
 	  (Allocated) = (Needed) + 1;				\
-	  (Where) = xmalloc ((size_t) (Allocated));		\
+	  (Where) = xmalloc (Allocated);			\
 	}							\
     }								\
   while (0)
@@ -436,11 +470,11 @@ reload_frozen_state (m4 *context, const char *name)
     m4_error (context, EXIT_FAILURE, errno, _("cannot open `%s'"), name);
 
   allocated[0] = 100;
-  string[0] = xmalloc ((size_t) allocated[0]);
+  string[0] = xmalloc (allocated[0]);
   allocated[1] = 100;
-  string[1] = xmalloc ((size_t) allocated[1]);
+  string[1] = xmalloc (allocated[1]);
   allocated[2] = 100;
-  string[2] = xmalloc ((size_t) allocated[2]);
+  string[2] = xmalloc (allocated[2]);
 
   /* Validate format version.  Accept both `1' (m4 1.3 and 1.4.x) and
      `2' (m4 2.0).  */
@@ -451,22 +485,13 @@ reload_frozen_state (m4 *context, const char *name)
   switch (version)
     {
     case 2:
-      {
-	int ch;
-
-	/* Take care not to mix frozen state with startup state.  */
-	for (ch = 256; --ch > 0;)
-	  context->syntax->table[ch] = 0;
-      }
       break;
     case 1:
-      {
-	m4__module_open (context, "m4", NULL);
-	if (m4_get_posixly_correct_opt (context))
-	  m4__module_open (context, "traditional", NULL);
-	else
-	  m4__module_open (context, "gnu", NULL);
-      }
+      m4__module_open (context, "m4", NULL);
+      if (m4_get_posixly_correct_opt (context))
+	m4__module_open (context, "traditional", NULL);
+      else
+	m4__module_open (context, "gnu", NULL);
       break;
     default:
       if (version > 2)
@@ -613,26 +638,13 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0]);
 	  VALIDATE ('\n');
+	  GET_STRING (file, string[0], allocated[0], number[0]);
 
-	  CHECK_ALLOCATION (string[0], allocated[0], number[0]);
-	  if (number[0] > 0)
-	    {
-	      int i;
-
-	      for (i = 0; i < number[0]; ++i)
-		{
-		  int ch = decode_char (file);
-
-		  if (ch < 0)
-		    m4_error (context, EXIT_FAILURE, 0,
-			      _("premature end of frozen file"));
-
-		  string[0][i] = ch;
-		}
-	    }
-	  string[0][number[0]] = '\0';
-
-	  if ((m4_set_syntax (context->syntax, syntax, '=', string[0]) < 0)
+	  /* Syntax under M4_SYNTAX_MASKS is handled specially; all
+	     other characters are additive.  */
+	  if ((m4_set_syntax (context->syntax, syntax,
+			      (m4_syntax_code (syntax) & M4_SYNTAX_MASKS
+			       ? '=' : '+'), string[0]) < 0)
 	      && (syntax != '\0'))
 	    {
 	      m4_error (context, 0, 0,

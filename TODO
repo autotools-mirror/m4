@@ -1,5 +1,5 @@
 GNU m4 TODO - Tasks that need implementing.		-*- outline -*-
-Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
+Copyright (C) 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
 
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
@@ -65,10 +65,6 @@ for any of these ideas or if you have others to add.
 
   + Make m4 show include dependencies like gcc so Makefile targets are
     updated when their (included) input files are updated (Erick B).
-
-  + Sort out all the weird forms of interaction between changesyntax,
-    changecom and changequote.  What happens if you install a quote with
-    changequote and removes it with changesyntax and vice versa.
 
   + Add support for wide character sets.
 

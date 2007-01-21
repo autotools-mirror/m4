@@ -1,3 +1,15 @@
+2007-01-20  Eric Blake  <ebb9@byu.net>
+
+	* src/freeze.c (produce_char_dump): Delete.  Replace with...
+	(produce_mem_dump): ...this new function, to encode more strings.
+	Also make the coding easier to read and slightly more compact.
+	(produce_syntax_dump): Only dump non-default syntax codes.
+	(produce_module_dump, dump_symbol_CB, produce_frozen_state):
+	Encode non-ASCII characters in user-supplied strings.
+	(GET_STRING): Accept escape sequences in version 2.
+	* NEWS: Document this change.
+	* TODO: Update.
+
 2007-01-16  Eric Blake  <ebb9@byu.net>
 
 	Port patch from branch for stack overflow detection on BSD/OS.
