@@ -267,9 +267,9 @@ produce_frozen_state (m4 *context, const char *name)
 
   produce_resyntax_dump (context, file);
 
-  /* Dump syntax table. */
+  /* Dump syntax table.  */
 
-  str = "IS(),$A@OWDLRBE";
+  str = "I@WLBOD${}SA(),RE";
   while (*str)
     produce_syntax_dump (file, M4SYNTAX, *str++);
 
@@ -492,6 +492,9 @@ reload_frozen_state (m4 *context, const char *name)
 	m4__module_open (context, "traditional", NULL);
       else
 	m4__module_open (context, "gnu", NULL);
+      /* Disable { and } categories, since ${11} was not supported in
+         1.4.x.  */
+      m4_set_syntax (context->syntax, 'O', '+', "{}");
       break;
     default:
       if (version > 2)

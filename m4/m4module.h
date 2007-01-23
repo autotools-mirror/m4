@@ -355,30 +355,32 @@ extern	bool		 m4_is_syntax_single_quotes	(m4_syntax_table *);
 extern	bool		 m4_is_syntax_single_comments	(m4_syntax_table *);
 extern	bool		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 
-/* These are values to be assigned to syntax table entries, although they
-   are bit masks for fast categorisation in m4__next_token(), only one
-   value per syntax table entry is allowed.  */
+/* These are values to be assigned to syntax table entries.  Although
+   they are bit masks for fast categorization in m4__next_token(),
+   only one value per syntax table entry is allowed.  The enumeration
+   is currently sorted in order of parsing precedence.  */
 enum {
-  M4_SYNTAX_OTHER		= (1 << 0),
-  M4_SYNTAX_IGNORE		= (1 << 1),
-  M4_SYNTAX_SPACE		= (1 << 2),
-  M4_SYNTAX_OPEN		= (1 << 3),
-  M4_SYNTAX_CLOSE		= (1 << 4),
-  M4_SYNTAX_COMMA		= (1 << 5),
-  M4_SYNTAX_DOLLAR		= (1 << 6),
-  M4_SYNTAX_ACTIVE		= (1 << 7),
-  M4_SYNTAX_ESCAPE		= (1 << 8),
-  M4_SYNTAX_ASSIGN		= (1 << 9),
-  M4_SYNTAX_ALPHA		= (1 << 10),
-  M4_SYNTAX_NUM			= (1 << 11),
-  M4_SYNTAX_LQUOTE		= (1 << 12),
-  M4_SYNTAX_BCOMM		= (1 << 13),
+  M4_SYNTAX_IGNORE		= 0,
+  M4_SYNTAX_ESCAPE		= 1 << 0,
+  M4_SYNTAX_ALPHA		= 1 << 1,
+  M4_SYNTAX_LQUOTE		= 1 << 2,
+  M4_SYNTAX_BCOMM		= 1 << 3,
+  M4_SYNTAX_OTHER		= 1 << 4,
+  M4_SYNTAX_NUM			= 1 << 5,
+  M4_SYNTAX_DOLLAR		= 1 << 6,
+  M4_SYNTAX_LBRACE		= 1 << 7,
+  M4_SYNTAX_RBRACE		= 1 << 8,
+  M4_SYNTAX_SPACE		= 1 << 9,
+  M4_SYNTAX_ACTIVE		= 1 << 10,
+  M4_SYNTAX_OPEN		= 1 << 11,
+  M4_SYNTAX_CLOSE		= 1 << 12,
+  M4_SYNTAX_COMMA		= 1 << 13,
 
   /* These values are bit masks to OR with categories above, a syntax entry
      may have any number of these in addition to a maximum of one of the
      values above.  */
-  M4_SYNTAX_RQUOTE		= (1 << 14),
-  M4_SYNTAX_ECOMM		= (1 << 15),
+  M4_SYNTAX_RQUOTE		= 1 << 14,
+  M4_SYNTAX_ECOMM		= 1 << 15
 };
 
 #define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM)

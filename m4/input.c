@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -1170,11 +1170,13 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	obstack_1grow (&token_stack, ch);
 
 	if (m4_has_syntax (M4SYNTAX, ch,
-			   M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR))
+			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
+                            | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
 	  {
 	    consume_syntax (context, &token_stack,
 			    (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
-			     | M4_SYNTAX_DOLLAR));
+                             | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
+                             | M4_SYNTAX_RBRACE));
 	    type = M4_TOKEN_STRING;
 	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
@@ -1192,7 +1194,8 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	obstack_1grow (&token_stack, ch);
 
 	if (m4_has_syntax (M4SYNTAX, ch,
-			   M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR))
+			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
+                            | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
 	  type = M4_TOKEN_STRING;
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  type = M4_TOKEN_SPACE;

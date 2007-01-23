@@ -1706,12 +1706,13 @@ consist of one
 or more digits, allowing macros to have any number of arguments.  This
 is not so in UNIX implementations of @code{m4}, which only recognize
 one digit.
-@comment FIXME - See Austin group XCU ERN 111.  This is controversial,
-@comment and POSIX is moving to reserve ${ for implementation use.  We
-@comment should phase out $10 and replace it with ${10}, and consider
-@comment other extensions like ${1-default}.  There are existing m4
-@comment scripts that depend on $10 being the first parameter
-@comment concatenated with 0, not the tenth argument.
+@comment FIXME - See Austin group XCU ERN 111.  POSIX says that $11 must
+@comment be the first argument concatenated with 1, and instead reserves
+@comment ${11} for implementation use.  Once this is implemented, the
+@comment documentation needs to reflect how these extended arguments
+@comment are handled, as well as backwards compatibility issues with
+@comment 1.4.x.  Also, consider adding further extensions such as
+@comment ${1-default}, which expands to `default' if $1 is empty.
 
 As a special case, the zeroth argument, @code{$0}, is always the name
 of the macro being expanded.
@@ -4154,6 +4155,15 @@ the single character @samp{,}.
 Characters that can introduce an argument reference in the body of a
 macro.  The default is the single character @samp{$}.
 
+@item Left brace
+Characters that introduce an extended argument reference in the body of
+a macro immediately after a character in the Dollar category.  The
+default is the single character @samp{@{}.
+
+@item Right brace
+Characters that conclude an extended argument reference in the body of a
+macro.  The default is the single character @samp{@}}.
+
 @item Left quote
 The set of characters that can start a single-character quoted string.
 The default is the single character @samp{`}.  For multiple-character
@@ -4523,10 +4533,53 @@ This is the first and last normal input line.
 The saved input is only reread when the end of normal input is seen, and
 not if @code{m4exit} is used to exit @code{m4}.
 
+@comment FIXME: this contradicts POSIX, which requires that "If the
+@comment m4wrap macro is used multiple times, the arguments specified
+@comment shall be processed in the order in which the m4wrap macros were
+@comment processed."
 It is safe to call @code{m4wrap} from saved text, but then the order in
 which the saved text is reread is undefined.  If @code{m4wrap} is not used
 recursively, the saved pieces of text are reread in the opposite order
 in which they were saved (LIFO---last in, first out).
+
+Here is an example of implementing a factorial function using
+@code{m4wrap}:
+
+@example
+define(`f', `ifelse(`$1', `0', `Answer: 0!=1
+', eval(`$1>1'), `0', `Answer: $2$1=eval(`$2$1')
+', `m4wrap(`f(decr(`$1'), `$2$1*')')')')
+@result{}
+f(`10')
+@result{}
+^D
+@result{}Answer: 10*9*8*7*6*5*4*3*2*1=3628800
+@end example
+
+Invocations of @code{m4wrap} at the same recursion level are
+concatenated and rescanned as usual:
+
+@example
+define(`aa', `AA
+')
+@result{}
+m4wrap(`a')m4wrap(`a')
+@result{}
+^D
+@result{}AA
+@end example
+
+@noindent
+however, the transition between recursion levels behaves like an end of
+file condition between two input files.
+
+@comment status: 1
+@example
+m4wrap(`m4wrap(`)')len(abc')
+@result{}
+^D
+@error{}m4:stdin:1: end of file in argument list
+@end example
 
 @node File Inclusion
 @chapter File inclusion
@@ -6739,7 +6792,11 @@ Some bigger @code{m4} applications may be built over a common base
 containing hundreds of definitions and other costly initializations.
 Usually, the common base is kept in one or more declarative files,
 which files are listed on each @code{m4} invocation prior to the
-user's input file, or else, @code{include}'d from this input file.
+user's input file, or else each input file uses @code{include}.
+
+Reading the common base of a big application, over and over again, may
+be time consuming.  @acronym{GNU} @code{m4} offers some machinery to
+speed up the start of an application using lengthy common bases.
 
 @menu
 * Using frozen files::          Using frozen files
@@ -6756,23 +6813,22 @@ user's input file, or else, @code{include}'d from this input file.
 @cindex dumping into frozen file
 @cindex reloading a frozen file
 @cindex @acronym{GNU} extensions
-Reading the common base of a big application, over and over again, may
-be time consuming.  GNU @code{m4} offers some machinery to speed up
-the start of an application using lengthy common bases.  Presume the
-user repeatedly uses:
+Suppose a user has a library of @code{m4} initializations in
+@file{base.m4}, which is then used with multiple input files:
 
 @comment ignore
 @example
-m4 base.m4 input.m4
+$ @kbd{m4 base.m4 input1.m4}
+$ @kbd{m4 base.m4 input2.m4}
+$ @kbd{m4 base.m4 input3.m4}
 @end example
 
-@noindent
-with a varying contents of @file{input.m4}, but a rather fixed contents
-for @file{base.m4}.  Then, the user might rather execute:
+Rather than spending time parsing the fixed contents of @file{base.m4}
+every time, the user might rather execute:
 
 @comment ignore
 @example
-m4 -F base.m4f base.m4
+$ @kbd{m4 -F base.m4f base.m4}
 @end example
 
 @noindent
@@ -6780,20 +6836,22 @@ once, and further execute, as often as needed:
 
 @comment ignore
 @example
-m4 -R base.m4f input.m4
+$ @kbd{m4 -R base.m4f input1.m4}
+$ @kbd{m4 -R base.m4f input2.m4}
+$ @kbd{m4 -R base.m4f input3.m4}
 @end example
 
 @noindent
 with the varying input.  The first call, containing the @code{-F}
-option, only reads and executes file @file{base.m4}, so defining
-various application macros and computing other initializations.  Only
-once the input file @file{base.m4} has been completely processed, GNU
-@code{m4} produces on @file{base.m4f} a @dfn{frozen} file, that is, a
+option, only reads and executes file @file{base.m4}, defining
+various application macros and computing other initializations.
+Once the input file @file{base.m4} has been completely processed, @acronym{GNU}
+@code{m4} produces in @file{base.m4f} a @dfn{frozen} file, that is, a
 file which contains a kind of snapshot of the @code{m4} internal state.
 
 Later calls, containing the @code{-R} option, are able to reload
-the internal state of @code{m4}'s memory, from @file{base.m4f},
-@emph{prior} to reading any other input files.  By this mean,
+the internal state of @code{m4}, from @file{base.m4f},
+@emph{prior} to reading any other input files.  This means
 instead of starting with a virgin copy of @code{m4}, input will be
 read after having effectively recovered the effect of a prior run.
 In our example, the effect is the same as if file @file{base.m4} has
@@ -6807,7 +6865,7 @@ some care is taken, the command:
 
 @comment ignore
 @example
-m4 file1.m4 file2.m4 file3.m4 file4.m4
+$ @kbd{m4 file1.m4 file2.m4 file3.m4 file4.m4}
 @end example
 
 @noindent
@@ -6816,20 +6874,13 @@ output:
 
 @comment ignore
 @example
-m4 -F file1.m4f file1.m4
-m4 -R file1.m4f -F file2.m4f file2.m4
-m4 -R file2.m4f -F file3.m4f file3.m4
-m4 -R file3.m4f file4.m4
+$ @kbd{m4 -F file1.m4f file1.m4}
+$ @kbd{m4 -R file1.m4f -F file2.m4f file2.m4}
+$ @kbd{m4 -R file2.m4f -F file3.m4f file3.m4}
+$ @kbd{m4 -R file3.m4f file4.m4}
 @end example
 
-This could also be done in a simple way, if everything has been prepared
-before:
-
-@comment ignore
-@example
-m4 -F file1.m4f file1.m4 file2.m4 file3.m4 file4.m4
-@end example
-
+@comment FIXME - merge the rest of this section.
 Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
 macros is not handled.
@@ -6854,6 +6905,13 @@ Path}).
 Wow - thanks for really reading the manual.  Report this as a bug if
 this text is not removed before a release.
 FIXME - split out the two formats into separate nodes.
+
+When loading format 1, the syntax categories @samp{@{} and @samp{@}} are
+disabled (reverting braces to be treated like plain characters).  This
+is because frozen files created with M4 1.4.x did not understand
+@samp{$@{@dots{}@}} extended argument notation, and a frozen macro that
+contained this character sequence should not behave differently just
+because a newer version of M4 reloaded the file.
 
 @node Frozen file format 2
 @section Frozen file format 2

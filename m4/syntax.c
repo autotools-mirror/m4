@@ -36,9 +36,10 @@
    M4_SYNTAX_CLOSE	Close list of macro arguments
    M4_SYNTAX_COMMA	Separates macro arguments
    M4_SYNTAX_DOLLAR	Indicates macro argument in user macros
+   M4_SYNTAX_LBRACE	Indicates start of extended macro argument
+   M4_SYNTAX_RBRACE	Indicates end of extended macro argument
    M4_SYNTAX_ACTIVE	This character is a macro name by itself
    M4_SYNTAX_ESCAPE	Use this character to prefix all macro names
-   M4_SYNTAX_ASSIGN	*Used to assign defaults in parameter lists
 
    M4_SYNTAX_ALPHA	Alphabetic characters (can start macro names)
    M4_SYNTAX_NUM	Numeric characters (can form macro names)
@@ -75,22 +76,29 @@
    The precedence as implemented by next_token () is:
 
    M4_SYNTAX_IGNORE	*Filtered out below next_token ()
-   M4_SYNTAX_ESCAPE	Reads macro name iff set, else next
-   M4_SYNTAX_ALPHA	Reads macro name
+   M4_SYNTAX_ESCAPE	Reads macro name iff set, else next character
+   M4_SYNTAX_ALPHA	Reads M4_SYNTAX_ALPHA and M4_SYNTAX_NUM as macro name
    M4_SYNTAX_LQUOTE	Reads all until balanced M4_SYNTAX_RQUOTE
    M4_SYNTAX_BCOMM	Reads all until M4_SYNTAX_ECOMM
 
    M4_SYNTAX_OTHER  }	Reads all M4_SYNTAX_OTHER, M4_SYNTAX_NUM
-   M4_SYNTAX_NUM    }	and M4_SYNTAX_DOLLAR
+   M4_SYNTAX_NUM    }	M4_SYNTAX_DOLLAR, M4_SYNTAX_LBRACE, M4_SYNTAX_RBRACE
    M4_SYNTAX_DOLLAR }
+   M4_SYNTAX_LBRACE }
+   M4_SYNTAX_RBRACE }
 
-   M4_SYNTAX_SPACE	Reads all M4_SYNTAX_SPACE
-   M4_SYNTAX_ACTIVE	Returns a single char as a word
-   the rest		Returned as a single char
+   M4_SYNTAX_SPACE	Reads all M4_SYNTAX_SPACE, depending on buffering
+   M4_SYNTAX_ACTIVE	Returns a single char as a macro name
 
-   The $ is not really a part of m4's input syntax in the sense that a
-   string is parsed equally whether there is a $ or not.  The character
-   $ is used by convention in user macros.  */
+   M4_SYNTAX_OPEN   }	Returned as a single char
+   M4_SYNTAX_CLOSE  }
+   M4_SYNTAX_COMMA  }
+
+   The $, {, and } are not really a part of m4's input syntax, because a
+   a string is parsed equally whether there is a $ or not.  These characters
+   are instead used during user macro expansion.
+
+   M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM do not start tokens.  */
 
 static bool	check_is_single_quotes		(m4_syntax_table *);
 static bool	check_is_single_comments	(m4_syntax_table *);
@@ -120,16 +128,18 @@ m4_syntax_create (void)
       case '$':
 	syntax->orig[ch] = M4_SYNTAX_DOLLAR;
 	break;
+      case '{':
+	syntax->orig[ch] = M4_SYNTAX_LBRACE;
+	break;
+      case '}':
+	syntax->orig[ch] = M4_SYNTAX_RBRACE;
+	break;
       case '`':
 	syntax->orig[ch] = M4_SYNTAX_LQUOTE;
 	break;
       case '#':
 	syntax->orig[ch] = M4_SYNTAX_BCOMM;
 	break;
-      case '=':
-	/* FIXME -revisit the assign syntax attribute.  */
-	/* syntax->orig[ch] = M4_SYNTAX_ASSIGN; */
-	/* break; */
       case '\0':
 	/* FIXME - revisit the ignore syntax attribute.  */
 	/* syntax->orig[ch] = M4_SYNTAX_IGNORE; */
@@ -169,26 +179,26 @@ m4_syntax_code (char ch)
 
   switch (ch)
     {
-    /* FIXME - revisit the ignore syntax attribute.  */
-    case 'I': case 'i': code = M4_SYNTAX_IGNORE; break;
-    case 'O': case 'o': code = M4_SYNTAX_OTHER;  break;
-    case 'S': case 's': code = M4_SYNTAX_SPACE;  break;
-    case 'W': case 'w': code = M4_SYNTAX_ALPHA;  break;
-    case 'D': case 'd': code = M4_SYNTAX_NUM;    break;
+       /* Sorted according to the order of M4_SYNTAX_* in m4module.h.  */
+       /* FIXME - revisit the ignore syntax attribute.  */
+    case 'I': case 'i':	code = M4_SYNTAX_IGNORE; break;
+    case '@':		code = M4_SYNTAX_ESCAPE; break;
+    case 'W': case 'w':	code = M4_SYNTAX_ALPHA;  break;
+    case 'L': case 'l':	code = M4_SYNTAX_LQUOTE; break;
+    case 'B': case 'b':	code = M4_SYNTAX_BCOMM;  break;
+    case 'O': case 'o':	code = M4_SYNTAX_OTHER;  break;
+    case 'D': case 'd':	code = M4_SYNTAX_NUM;    break;
+    case '$':		code = M4_SYNTAX_DOLLAR; break;
+    case '{':		code = M4_SYNTAX_LBRACE; break;
+    case '}':		code = M4_SYNTAX_RBRACE; break;
+    case 'S': case 's':	code = M4_SYNTAX_SPACE;  break;
+    case 'A': case 'a':	code = M4_SYNTAX_ACTIVE; break;
+    case '(':		code = M4_SYNTAX_OPEN;   break;
+    case ')':		code = M4_SYNTAX_CLOSE;  break;
+    case ',':		code = M4_SYNTAX_COMMA;  break;
 
-    case '(': code = M4_SYNTAX_OPEN;   break;
-    case ')': code = M4_SYNTAX_CLOSE;  break;
-    case ',': code = M4_SYNTAX_COMMA;  break;
-    /* FIXME - revisit the assign syntax attribute.  */
-    case '=': code = M4_SYNTAX_ASSIGN; break;
-    case '@': code = M4_SYNTAX_ESCAPE; break;
-    case '$': code = M4_SYNTAX_DOLLAR; break;
-
-    case 'L': case 'l': code = M4_SYNTAX_LQUOTE; break;
-    case 'R': case 'r': code = M4_SYNTAX_RQUOTE; break;
-    case 'B': case 'b': code = M4_SYNTAX_BCOMM;  break;
-    case 'E': case 'e': code = M4_SYNTAX_ECOMM;  break;
-    case 'A': case 'a': code = M4_SYNTAX_ACTIVE;  break;
+    case 'R': case 'r':	code = M4_SYNTAX_RQUOTE; break;
+    case 'E': case 'e':	code = M4_SYNTAX_ECOMM;  break;
 
     default: code = -1;  break;
     }

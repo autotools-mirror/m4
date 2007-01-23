@@ -155,7 +155,9 @@ promoted to 2.0.
 
 *** The `changesyntax' builtin has been improved, to make it easier to add
     and remove characters from a syntax class without having to specify the
-    entire set of characters in that class.
+    entire set of characters in that class.  It also supports two new
+    syntax categories, `{' and `}', for extended argument handling in macro
+    definitions.
 
 *** New `m' flag to `-d'/`--debug' command-line option or `debugmode'
     builtin traces actions related to module loading and unloading, and
@@ -192,7 +194,7 @@ promoted to 2.0.
 ** Other changes
 
 *** The syntax of frozen files format V2 has been improved to save
-    additional state.  This includes the 'R' directive for default regular
+    additional state.  This includes the `R' directive for default regular
     expression syntax.  Also, a V2 file can now be represented completely
     in ASCII, thanks to escape sequences.  Unfortunately, files frozen by
     M4 1.4q that contain \ in macros cannot be read by 1.9b, but since 1.4q

@@ -1,3 +1,30 @@
+2007-01-23  Eric Blake  <ebb9@byu.net>
+
+	* m4/m4module.h (M4_SYNTAX_ASSIGN): Delete this unused
+	extension to make enough room.
+	(M4_SYNTAX_IGNORE): Change value to zero, since the (commented)
+	code in input.c special cases this category.
+	(M4_SYNTAX_LBRACE, M4_SYNTAX_RBRACE): New values in preparation
+	for define(eleventh,${11}) extension.
+	* m4/syntax.c: Update comments accordingly.
+	(m4_syntax_create, m4_syntax_code): Handle { and }.
+	* m4/input.c (m4__next_token): Likewise.
+	* src/freeze.c (produce_frozen_state): Support new categories.
+	(reload_frozen_state): When loading version 1, disable syntax
+	features not present in 1.4.x.
+	* tests/freeze.at: Sort and rename existing tests.
+	(loading format 1): Ensure we don't break v1 frozen files that
+	used raw ${.
+	(loading format 2, reloading changecom, reloading changesyntax):
+	New tests.
+	* doc/m4.texinfo (Changesyntax, Frozen file format 1): Document
+	the new syntax categories.
+	(Arguments): Update the FIXME comment.
+	(M4wrap): Merge examples from branch, before worrying about fixing
+	m4wrap to obey POSIX.
+	(Using frozen files): Start merging from branch.
+	* NEWS: Update.
+
 2007-01-20  Eric Blake  <ebb9@byu.net>
 
 	* src/freeze.c (produce_char_dump): Delete.  Replace with...
