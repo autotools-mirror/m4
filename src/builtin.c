@@ -27,7 +27,6 @@
 extern FILE *popen ();
 
 #include "regex.h"
-#include "strstr.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>

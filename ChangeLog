@@ -1,3 +1,7 @@
+2007-01-26  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (includes): Adjust to gnulib changes.
+
 2007-01-15  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Pull in various improvements from head.
