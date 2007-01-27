@@ -23,7 +23,6 @@
 #include <errno.h>
 
 #include "stdlib--.h"
-#include "strstr.h"
 #include "tempname.h"
 #include "unistd--.h"
 

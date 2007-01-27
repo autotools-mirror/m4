@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
 */
 
 #include "m4private.h"
-
-#include "strnlen.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYM */

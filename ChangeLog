@@ -1,3 +1,8 @@
+2007-01-26  Eric Blake  <ebb9@byu.net>
+
+	* m4/symtab.c (includes): Adjust to latest gnulib.
+	* modules/m4.c (includes): Likewise.
+
 2007-01-23  Eric Blake  <ebb9@byu.net>
 
 	* m4/m4module.h (M4_SYNTAX_ASSIGN): Delete this unused
