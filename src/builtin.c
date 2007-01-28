@@ -231,6 +231,7 @@ void
 define_user_macro (const char *name, const char *text, symbol_lookup mode)
 {
   symbol *s;
+  size_t len;
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
@@ -238,6 +239,43 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = xstrdup (text ? text : "");
+
+  /* In M4 2.0, $11 will mean the first argument concatenated with 1,
+     not the eleventh argument.  Also, ${1} will mean the first
+     argument, rather than literal text (although for compatibility
+     sake, it will be possible to restore the traditional meaning of
+     ${1} using changesyntax).  Needing more than 9 arguments is
+     somewhat rare, but using M4 to process shell code is quite
+     common; either way, warn on usages that will change in
+     semantics.  */
+  if (warn_syntax && text && (len = strlen (text)) >= 3)
+    {
+      static struct re_pattern_buffer buf;
+      static bool init = false;
+      regoff_t offset = 0;
+
+      if (! init)
+	{
+	  const char *msg = "\\$[{0-9][0-9]";
+	  init_pattern_buffer (&buf, NULL);
+	  msg = re_compile_pattern (msg, strlen (msg), &buf);
+	  if (msg != NULL)
+	    {
+	      M4ERROR ((EXIT_FAILURE, 0,
+			"unable to check --warn-syntax: %s", msg));
+	    }
+	  init = true;
+	}
+      while ((offset = re_search (&buf, text, len, offset, len - offset,
+				  NULL)) >= 0)
+	{
+	  M4ERROR ((warning_status, 0,
+		    "Warning: semantics of `$%c%c%s' in `%s' will change",
+		    text[offset + 1], text[offset + 2],
+		    text[offset + 1] == '{' ? "...}" : "", name));
+	  offset += 3;
+	}
+    }
 }
 
 /*-----------------------------------------------.
@@ -1828,15 +1866,18 @@ Warning: trailing \\ ignored in replacement"));
 | Initialize regular expression variables.  |
 `------------------------------------------*/
 
-static void
+void
 init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 {
   buf->translate = NULL;
   buf->fastmap = NULL;
   buf->buffer = NULL;
   buf->allocated = 0;
-  regs->start = NULL;
-  regs->end = NULL;
+  if (regs)
+    {
+      regs->start = NULL;
+      regs->end = NULL;
+    }
 }
 
 /*----------------------------------------.

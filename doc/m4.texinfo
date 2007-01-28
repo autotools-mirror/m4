@@ -577,6 +577,13 @@ is also specified.
 Suppress warnings, such as missing or superfluous arguments in macro
 calls, or treating the empty string as zero.
 
+@item --warn-syntax
+Issue warnings when syntax is encountered that will change semantics in
+@acronym{GNU} M4 2.0.  For now, the only semantics that will change have
+to do with how more than 9 arguments in a macro definition are handled
+(@pxref{Arguments}).  This warning is disabled by default because it
+triggers spurious failures in @acronym{GNU} Autoconf 2.61.
+
 @item -W @var{REGEXP}
 @itemx --word-regexp=@var{REGEXP}
 Use @var{REGEXP} as an alternative syntax for macro names.  This
@@ -1354,8 +1361,8 @@ As a @acronym{GNU} extension, the first argument to @code{define} does
 not have to be a simple word.
 It can be any text string, even the empty string.  A macro with a
 non-standard name cannot be invoked in the normal way, as the name is
-not recognized.  It can only be referenced by the builtins @code{Indir}
-(@pxref{Indir}) and @code{Defn} (@pxref{Defn}).
+not recognized.  It can only be referenced by the builtins @code{indir}
+(@pxref{Indir}) and @code{defn} (@pxref{Defn}).
 
 @cindex arrays
 Arrays and associative arrays can be simulated by using this trick.
@@ -1375,7 +1382,7 @@ array(eval(`10 + 7'))
 @result{}array element no. 17
 @end example
 
-Change the @code{%d} to @code{%s} and it is an associative array.
+Change the @samp{%d} to @samp{%s} and it is an associative array.
 
 @node Arguments
 @section Arguments to macros
@@ -1412,13 +1419,6 @@ macro
 (You should try and improve this example so that clients of @code{exch}
 do not have to double quote; or @pxref{Improved exch, , Answers}).
 
-@cindex @acronym{GNU} extensions
-@acronym{GNU} @code{m4} allows the number following the @samp{$} to
-consist of one
-or more digits, allowing macros to have any number of arguments.  This
-is not so in UNIX implementations of @code{m4}, which only recognize
-one digit.
-
 As a special case, the zeroth argument, @code{$0}, is always the name
 of the macro being expanded.
 
@@ -1442,6 +1442,51 @@ foo
 @noindent
 The @samp{foo} in the expansion text is @emph{not} expanded, since it is
 a quoted string, and not a name.
+
+@cindex @acronym{GNU} extensions
+@cindex nine arguments, more than
+@cindex more than nine arguments
+@cindex arguments, more than nine
+@cindex positional parameters, more than nine
+@acronym{GNU} @code{m4} allows the number following the @samp{$} to
+consist of one or more digits, allowing macros to have any number of
+arguments.  The extension of accepting multiple digits is incompatible
+with @acronym{POSIX}, and is different than traditional implementations
+of @code{m4}, which only recognize one digit.  Therefore, future
+versions of @acronym{GNU} M4 will phase out this feature.
+@xref{Extensions}, for an example of how to portably access the eleventh
+argument.
+
+@acronym{POSIX} also states that @samp{$} followed immediately by
+@samp{@{} in a macro definition is implementation-defined.  This version
+of M4 passes the literal characters @samp{$@{} through unchanged, but M4
+2.0 will implement an optional feature similar to @command{sh}, where
+@samp{$@{11@}} expands to the eleventh argument, to replace the current
+recognition of @samp{$11}.  Meanwhile, if you want to guarantee that you
+will get a literal @samp{$@{} in output when expanding a macro, even
+when you upgrade to M4 2.0, you can use nested quoting to your
+advantage:
+
+@example
+define(`foo', `single quoted $`'@{1@} output')
+@result{}
+define(`bar', ``double quoted $'`@{2@} output'')
+@result{}
+foo(`a', `b')
+@result{}single quoted $@{1@} output
+bar(`a', `b')
+@result{}double quoted $@{2@} output
+@end example
+
+To help you detect places in your M4 input files that might change in
+behavior due to the changed behavior of M4 2.0, you can use the
+@option{--warn-syntax} command-line option (@pxref{Operation modes, ,
+Invoking m4}).  This will add a warning any time a macro definition
+includes @samp{$} followed by multiple digits, or by @samp{@{} and a
+digit.  The warning is not enabled by default, because it triggers a
+number of warnings in Autoconf 2.61 (and Autoconf uses @option{-E} to
+treat warnings as errors), and because it will still be possible to
+restore traditional behavior in M4 2.0.
 
 @node Pseudo Arguments
 @section Special arguments to macros
@@ -2588,7 +2633,7 @@ foo
 @result{}blah
 @end example
 
-Tracing even works on builtins.  However, @command{defn} (@pxref{Defn})
+Tracing even works on builtins.  However, @code{defn} (@pxref{Defn})
 does not transfer tracing status.
 
 @example
@@ -4721,10 +4766,10 @@ There are a few builtin macros in @code{m4} that allow you to run shell
 commands from within @code{m4}.
 
 Note that the definition of a valid shell command is system dependent.
-On UNIX systems, this is the typical @code{/bin/sh}.  But on other
+On UNIX systems, this is the typical @command{/bin/sh}.  But on other
 systems, such as native Windows, the shell has a different syntax of
 commands that it understands.  Some examples in this chapter assume
-@code{/bin/sh}, and also demonstrate how to quit early with a known
+@command{/bin/sh}, and also demonstrate how to quit early with a known
 exit value if this is not the case.
 
 @menu
@@ -4934,7 +4979,7 @@ sysval
 @result{}0
 @end example
 
-@command{sysval} results in 127 if there was a problem executing the
+@code{sysval} results in 127 if there was a problem executing the
 command, for example, if the system-imposed argument length is exceeded,
 or if there were not enough resources to fork.  It is not possible to
 distinguish between failed execution and successful execution that had
@@ -5262,8 +5307,8 @@ which files are listed on each @code{m4} invocation prior to the
 user's input file, or else each input file uses @code{include}.
 
 Reading the common base of a big application, over and over again, may
-be time consuming.  @acronym{GNU} @code{m4} offers some machinery to speed up
-the start of an application using lengthy common bases.
+be time consuming.  @acronym{GNU} @code{m4} offers some machinery to
+speed up the start of an application using lengthy common bases.
 
 @menu
 * Using frozen files::          Using frozen files
@@ -5311,7 +5356,7 @@ with the varying input.  The first call, containing the @option{-F}
 option, only reads and executes file @file{base.m4}, defining
 various application macros and computing other initializations.
 Once the input file @file{base.m4} has been completely processed, @acronym{GNU}
-@code{m4} produces on @file{base.m4f} a @dfn{frozen} file, that is, a
+@code{m4} produces in @file{base.m4f} a @dfn{frozen} file, that is, a
 file which contains a kind of snapshot of the @code{m4} internal state.
 
 Later calls, containing the @option{-R} option, are able to reload
@@ -5466,7 +5511,7 @@ Invoking m4}), unless overridden by other command line options.
 
 @itemize @bullet
 @item
-In the @code{$}@var{n} notation for macro arguments, @var{n} can contain
+In the @code{$@var{n}} notation for macro arguments, @var{n} can contain
 several digits, while the System V @code{m4} only accepts one digit.
 This allows macros in @acronym{GNU} @code{m4} to take any number of
 arguments, and not only nine (@pxref{Arguments}).
@@ -5623,10 +5668,11 @@ m4wrap(`a`'m4wrap(`c
 @end example
 
 @item
-@acronym{POSIX} requires that all builtins that require arguments, but
-are called without arguments, behave as though empty strings had been
-passed.  For example, @code{a`'define`'b} would expand to @code{ab}.
-But @acronym{GNU} @code{m4} ignores certain builtins if they have missing
+@acronym{POSIX} states that builtins that require arguments, but are
+called without arguments, have undefined behavior.  Traditional
+implementations simply behave as though empty strings had been passed.
+For example, @code{a`'define`'b} would expand to @code{ab}.  But
+@acronym{GNU} @code{m4} ignores certain builtins if they have missing
 arguments, giving @code{adefineb} for the above example.
 
 @item

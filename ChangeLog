@@ -1,3 +1,18 @@
+2007-01-27  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (warn_syntax): Declare.
+	(init_pattern_buffer): Export.
+	* src/m4.c (warn_syntax, usage, WARN_SYNTAX_OPTIONS)
+	(long_options, main): Implement new option.
+	* src/builtin.c (init_pattern_buffer): Allow NULL regs argument.
+	(define_user_macro): Warn on $11 and ${1} if requested.
+	* src/input.c (init_pattern_buffer): Delete duplicate method.
+	* doc/m4.texinfo (Operation modes): Document it.
+	(Arguments): Document future direction of ${11} vs. $11.
+	(Incompatibilities): Fix wording on POSIX limitations.
+	* checks/get-them: Parse @{ and @} correctly.
+	* NEWS: Document this change.
+
 2007-01-26  Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (includes): Adjust to gnulib changes.

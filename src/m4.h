@@ -110,6 +110,7 @@ extern int max_debug_argument_length;	/* -l */
 extern int suppress_warnings;		/* -Q */
 extern int warning_status;		/* -E */
 extern int nesting_limit;		/* -L */
+extern bool warn_syntax;		/* --warn-syntax */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;	/* -W */
 #endif
@@ -396,6 +397,8 @@ struct predefined
 
 typedef struct builtin builtin;
 typedef struct predefined predefined;
+struct re_pattern_buffer;
+struct re_registers;
 
 void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
@@ -403,6 +406,7 @@ void define_user_macro (const char *, const char *, symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, token_data **);
 void m4_placeholder (struct obstack *, int, token_data **);
+void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);

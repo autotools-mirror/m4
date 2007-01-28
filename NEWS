@@ -15,6 +15,14 @@ Version 1.4.9 - ?? ??? 2007, by ????  (CVS version 1.4.8a)
   of variable assignment as an extension.
 * The `include' builtin now affects exit status on failure, as required by
   POSIX.  Use `sinclude' if you need a successful exit status.
+* A new `--warn-syntax' command-line option allows detection of
+  non-portable syntax that might be broken when upgrading to M4 2.0.  For
+  example, POSIX requires a macro definition containing `$11' to expand to
+  the first argument concatenated with 1, rather than the eleventh
+  argument; and allows implementations to choose whether `${11}' is treated
+  as literal text, as in M4 1.4.x, or as the eleventh argument, as in the
+  eventual M4 2.0.  Be aware that Autoconf 2.61 will not work with this
+  option enabled.
 * Improved portability to platforms such as BSD/OS.
 
 Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)

@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -752,15 +752,6 @@ set_comment (const char *bc, const char *ec)
 
 #ifdef ENABLE_CHANGEWORD
 
-static void
-init_pattern_buffer (struct re_pattern_buffer *buf)
-{
-  buf->translate = NULL;
-  buf->fastmap = NULL;
-  buf->buffer = NULL;
-  buf->allocated = 0;
-}
-
 void
 set_word_regexp (const char *regexp)
 {
@@ -776,7 +767,7 @@ set_word_regexp (const char *regexp)
     }
 
   /* Dry run to see whether the new expression is compilable.  */
-  init_pattern_buffer (&new_word_regexp);
+  init_pattern_buffer (&new_word_regexp, NULL);
   msg = re_compile_pattern (regexp, strlen (regexp), &new_word_regexp);
   regfree (&new_word_regexp);
 

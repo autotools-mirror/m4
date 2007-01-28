@@ -55,6 +55,9 @@ int suppress_warnings = 0;
 /* If not zero, then value of exit status for warning diagnostics.  */
 int warning_status = 0;
 
+/* If true, then warn about usage of ${1} in macro definitions.  */
+bool warn_syntax = false;
+
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 1024;
 
@@ -142,10 +145,13 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
+", stdout);
+      fputs ("\
   -E, --fatal-warnings         stop execution after first warning\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
+      --warn-syntax            warn on syntax that will change in future\n\
 ", stdout);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
@@ -221,6 +227,7 @@ enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
   DIVERSIONS_OPTION,			/* not quite -N, because of message */
+  WARN_SYNTAX_OPTION,			/* no short opt */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -250,6 +257,7 @@ static const struct option long_options[] =
 
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
+  {"warn-syntax", no_argument, NULL, WARN_SYNTAX_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
@@ -453,6 +461,10 @@ main (int argc, char *const *argv, char *const *envp)
       case DEBUGFILE_OPTION:
 	/* Don't call debug_set_output here, as it has side effects.  */
 	debugfile = optarg;
+	break;
+
+      case WARN_SYNTAX_OPTION:
+	warn_syntax = true;
 	break;
 
       case VERSION_OPTION:
