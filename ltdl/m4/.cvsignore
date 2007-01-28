@@ -87,6 +87,7 @@ stdio-safer.m4
 stdlib-safer.m4
 strcase.m4
 strerror_r.m4
+string_h.m4
 strndup.m4
 strnlen.m4
 strstr.m4
