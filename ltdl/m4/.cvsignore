@@ -61,6 +61,7 @@ mbiter.m4
 mbrtowc.m4
 mbstate_t.m4
 memchr.m4
+mempcpy.m4
 mkdtemp.m4
 mkstemp.m4
 nls.m4
