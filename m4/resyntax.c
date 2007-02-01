@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2006 Free Software Foundation, Inc.
+   Copyright (C) 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ m4_regexp_syntax_encode (const char *spec)
   if (!spec)
     return RE_SYNTAX_EMACS;
 
-  canonical = strdup (spec);
+  canonical = xstrdup (spec);
 
   /* Canonicalise SPEC.  */
   for (p = canonical; *p != '\0'; ++p)
