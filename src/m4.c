@@ -52,6 +52,9 @@ int max_debug_argument_length = 0;
 /* Suppress warnings about missing arguments.  */
 int suppress_warnings = 0;
 
+/* If true, then warnings affect exit status.  */
+static bool fatal_warnings = false;
+
 /* If not zero, then value of exit status for warning diagnostics.  */
 int warning_status = 0;
 
@@ -68,6 +71,10 @@ const char *user_word_regexp = "";
 
 /* The name this program was run with. */
 const char *program_name;
+
+/* Global catchall for any errors that should affect final error status, but
+   where we try to continue execution in the meantime.  */
+int retcode;
 
 struct macro_definition
 {
@@ -90,6 +97,8 @@ m4_error (int status, int errnum, const char *format, ...)
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
 		  current_line, format, args);
+  if (fatal_warnings && ! retcode)
+    retcode = EXIT_FAILURE;
 }
 
 /*-------------------------------.
@@ -103,6 +112,8 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, line ? file : NULL, line, format, args);
+  if (fatal_warnings && ! retcode)
+    retcode = EXIT_FAILURE;
 }
 
 #ifdef USE_STACKOVF
@@ -147,7 +158,8 @@ Operation modes:\n\
       --version                output version information and exit\n\
 ", stdout);
       fputs ("\
-  -E, --fatal-warnings         stop execution after first warning\n\
+  -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
+                               execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
@@ -264,10 +276,6 @@ static const struct option long_options[] =
 
   { NULL, 0, NULL, 0 },
 };
-
-/* Global catchall for any errors that should affect final error status, but
-   where we try to continue execution in the meantime.  */
-int retcode;
 
 /* Process a command line file NAME, and return true only if it was
    stdin.  */
@@ -388,7 +396,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	warning_status = EXIT_FAILURE;
+	if (! fatal_warnings)
+	  fatal_warnings = true;
+	else
+	  warning_status = EXIT_FAILURE;
 	break;
 
       case 'F':
@@ -543,8 +554,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad code in deferred arguments"));
+	  M4ERROR ((0, 0, "INTERNAL ERROR: bad code in deferred arguments"));
 	  abort ();
 	}
 

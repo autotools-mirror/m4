@@ -551,8 +551,14 @@ performing any other actions.
 
 @item -E
 @itemx --fatal-warnings
-Stop execution and exit @code{m4} once the first warning or error has
-been issued, considering all of them to be fatal.
+Controls the effect of warnings.  If unspecified, then execution
+continues and exit status is unaffected when a warning is printed.  If
+specified exactly once, warnings become fatal; when one is issued,
+execution continues, but the exit status will be non-zero.  If specified
+multiple times, then execution halts with non-zero status the first time
+a warning is issued.  The introduction of behavior levels is new to M4
+1.4.9; for behavior consistent with earlier versions, you should specify
+@option{-E} twice.
 
 @item -i
 @itemx --interactive
