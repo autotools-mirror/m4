@@ -966,10 +966,10 @@ example from the Gnulib project@footnote{Derived from a patch in
 @uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-01/@/msg00389.html},
 and a followup patch in
 @uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-02/@/msg00000.html}},
-showing both both a buggy approach and the desired results.  In the
-original attempt, the user desires to output a shell assignment
-statement that takes its argument and turns it into a shell variable by
-converting it to uppercase and prepending a prefix.
+showing both a buggy approach and the desired results.  The user desires
+to output a shell assignment statement that takes its argument and turns
+it into a shell variable by converting it to uppercase and prepending a
+prefix.  The original attempt looks like this:
 
 @example
 changequote([,])dnl
@@ -1043,7 +1043,9 @@ macro invocation is scanned and output literally.
 Now for a corrected approach.  This rearranges the use of newlines and
 whitespace so that less whitespace is output (which, although harmless
 to shell scripts, can be visually unappealing), and fixes the quoting
-issues so that the desired capitalization occurs.
+issues so that the capitalization occurs when the macro
+@samp{gl_STRING_MODULE_INDICATOR} is invoked, rather then when it is
+defined.
 
 @example
 changequote([,])dnl
