@@ -1,3 +1,10 @@
+2007-02-03  Eric Blake  <ebb9@byu.net>
+	and Bruno Haible  <bruno@clisp.org>  (tiny change)
+
+	* doc/m4.texinfo (Input processing, Quoting Arguments): Beef up
+	the examples.
+	Reported by Bruno Haible.
+
 2007-01-31  Eric Blake  <ebb9@byu.net>
 
 	* m4/resyntax.c (m4_regexp_syntax_encode): Detect allocation
@@ -1999,7 +2006,7 @@
 	* Makefile.am (modules_mpeval_la_LIBADD): Readd $(LIBADD_GMP).
 
 2006-06-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
-	    Eric Blake  <ebb9@byu.net>
+	and Eric Blake  <ebb9@byu.net>
 
 	Allow `make dist' to work again.
 	* Makefile.am (EXTRA_DIST): doc/helptoman.pl is gone.
@@ -2106,7 +2113,7 @@
 	* THANKS: Update.
 
 2006-05-05  Bruno Haible  <bruno@clisp.org>
-	    Eric Blake  <ebb9@byu.net>
+	and Eric Blake  <ebb9@byu.net>
 
 	* configure.ac (gl_SOURCE_BASE, gl_M4_BASE, gl_MODULES): Move to...
 	* ltdl/m4/gnulib-cache.m4: ...this new file, per new gnulib-tool
