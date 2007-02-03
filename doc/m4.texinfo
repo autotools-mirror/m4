@@ -438,7 +438,8 @@ Example of input line
 @error{}and an error message
 @end example
 
-The sequence @samp{^D} in an example indicates the end of the input file.
+The sequence @samp{^D} in an example indicates the end of the input
+file.  The sequence @samp{@key{NL}} refers to the newline character.
 The majority of these examples are self-contained, and you can run them
 with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
 that is bundled in the @acronym{GNU} M4 package consists of the examples
@@ -921,9 +922,11 @@ of the remaining input.  In other words, the resulting text from a macro
 call will be read and parsed into tokens again.
 
 @code{m4} expands a macro as soon as possible.  If it finds a macro call
-when collecting the arguments to another, it will expand the second
-call first.  For a running example, examine how @code{m4} handles this
-input:
+when collecting the arguments to another, it will expand the second call
+first.  This process continues until there are no more macro calls to
+expand and all the input has been consumed.
+
+For a running example, examine how @code{m4} handles this input:
 
 @comment ignore
 @example
@@ -958,11 +961,132 @@ round of scanning for the tokens @samp{Result}, @samp{@w{ }},
 @result{}Result is 32768
 @end example
 
-The order in which @code{m4} expands the macros can be explored using
-the trace facilities of @acronym{GNU} @code{m4} (@pxref{Trace}).
+As a more complicated example, we will contrast an actual code
+example from the Gnulib project@footnote{Derived from a patch in
+@uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-01/@/msg00389.html},
+and a followup patch in
+@uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-02/@/msg00000.html}},
+showing both both a buggy approach and the desired results.  In the
+original attempt, the user desires to output a shell assignment
+statement that takes its argument and turns it into a shell variable by
+converting it to uppercase and prepending a prefix.
 
-This process continues until there are no more macro calls to expand and
-all the input has been consumed.
+@example
+changequote([,])dnl
+define([gl_STRING_MODULE_INDICATOR],
+  [
+    dnl comment
+    GNULIB_]translit([$1],[a-z],[A-Z])[=1
+  ])dnl
+  gl_STRING_MODULE_INDICATOR([strcase])
+@result{} @w{ }
+@result{}        GNULIB_strcase=1
+@result{} @w{ }
+@end example
+
+Oops -- the argument did not get capitalized.  And although the manual
+is not able to easily show it, both lines that appear empty actually
+contain two trailing spaces.  By stepping through the parse, it is easy
+to see what happened.  First, @code{m4} sees the token
+@samp{changequote}, which it recognizes as a macro, followed by
+@samp{(}, @samp{[}, @samp{,}, @samp{]}, and @samp{)} to form the
+argument list.  The macro expands to the empty string, but changes the
+quoting characters to something more useful for generating shell code
+(unbalanced @samp{`} and @samp{'} appear all the time in shell scripts,
+but unbalanced @samp{[]} tend to be rare).  Also in the first line,
+@code{m4} sees the token @samp{dnl}, which it recognizes as a builtin
+macro that consumes the rest of the line, resulting in no output for
+that line.
+
+The second line starts a macro definition.  @code{m4} sees the token
+@samp{define}, which it recognizes as a macro, followed by a @samp{(},
+@samp{[gl_STRING_MODULE_INDICATOR]}, and @samp{,}.  Because an unquoted
+comma was encountered, the first argument is known to be the expansion
+of the single-quoted string token, or @samp{gl_STRING_MODULE_INDICATOR}.
+Next, @code{m4} sees @samp{@key{NL}}, @samp{ }, and @samp{ }, but this
+whitespace is discarded as part of argument collection.  Then comes a
+rather lengthy single-quoted string token, @samp{[@key{NL}@ @ @ @ dnl
+comment@key{NL}@ @ @ @ GNULIB_]}.  This is followed by the token
+@samp{translit}, which @code{m4} recognizes as a macro name, so a nested
+macro expansion has started.
+
+The arguments to the @code{translit} are found by the tokens @samp{(},
+@samp{[$1]}, @samp{,}, @samp{[a-z]}, @samp{,}, @samp{[A-Z]}, and finally
+@samp{)}.  All three string arguments are expanded (or in other words,
+the quotes are stripped), and since neither @samp{$} nor @samp{1} need
+capitalization, the result of the macro is @samp{$1}.  This expansion is
+rescanned, resulting in the two literal characters @samp{$} and
+@samp{1}.
+
+Scanning of the outer macro resumes, and picks up with
+@samp{[=1@key{NL}@ @ ]}, and finally @samp{)}.  The collected pieces of
+expanded text are concatenated, with the end result that the macro
+@samp{gl_STRING_MODULE_INDICATOR} is now defined to be the sequence
+@samp{@key{NL}@ @ @ @ dnl comment@key{NL}@ @ @ @ GNULIB_$1=1@key{NL}@ @ }.
+Once again, @samp{dnl} is recognized and avoids a newline in the output.
+
+The final line is then parsed, beginning with @samp{ } and @samp{ }
+that are output literally.  Then @samp{gl_STRING_MODULE_INDICATOR} is
+recognized as a macro name, with an argument list of @samp{(},
+@samp{[strcase]}, and @samp{)}.  Since the definition of the macro
+contains the sequence @samp{$1}, that sequence is replaced with the
+argument @samp{strcase} prior to starting the rescan.  The rescan sees
+@samp{@key{NL}} and four spaces, which are output literally, then
+@samp{dnl}, which discards the text @samp{ comment@key{NL}}.  Next
+comes four more spaces, also output literally, and the token
+@samp{GNULIB_strcase}, which resulted from the earlier parameter
+substitution.  Since that is not a macro name, it is output literally,
+followed by the literal tokens @samp{=}, @samp{1}, @samp{@key{NL}}, and
+two more spaces.  Finally, the original @samp{@key{NL}} seen after the
+macro invocation is scanned and output literally.
+
+Now for a corrected approach.  This rearranges the use of newlines and
+whitespace so that less whitespace is output (which, although harmless
+to shell scripts, can be visually unappealing), and fixes the quoting
+issues so that the desired capitalization occurs.
+
+@example
+changequote([,])dnl
+define([gl_STRING_MODULE_INDICATOR],
+  [dnl comment
+  GNULIB_[]translit([$1], [a-z], [A-Z])=1dnl
+])dnl
+  gl_STRING_MODULE_INDICATOR([strcase])
+@result{}    GNULIB_STRCASE=1
+@end example
+
+The parsing of the first line is unchanged.  The second line sees the
+name of the macro to define, then sees the discarded @samp{@key{NL}}
+and two spaces, as before.  But this time, the next token is
+@samp{[dnl comment@key{NL}@ @ GNULIB_[]translit([$1], [a-z],
+[A-Z])=1dnl@key{NL}]}, which includes nested quotes, followed by
+@samp{)} to end the macro definition and @samp{dnl} to skip the
+newline.  No early expansion of @code{translit} occurs, so the entire
+string becomes the definition of the macro.
+
+The final line is then parsed, beginning with two spaces that are
+output literally, and an invocation of
+@code{gl_STRING_MODULE_INDICATOR} with the argument @samp{strcase}.
+Again, the @samp{$1} in the macro definition is substituted prior to
+rescanning.  Rescanning first encounters @samp{dnl}, and discards
+@samp{ comment@key{NL}}.  Then two spaces are output literally.  Next
+comes the token @samp{GNULIB_}, but that is not a macro, so it is
+output literally.  The token @samp{[]} is an empty string, so it does
+not affect output.  Then the token @samp{translit} is encountered.
+
+This time, the arguments to @code{translit} are parsed as @samp{(},
+@samp{[strcase]}, @samp{,}, @samp{ }, @samp{[a-z]}, @samp{,}, @samp{ },
+@samp{[A-Z]}, and @samp{)}.  The two spaces are discarded, and the
+translit results in the desired result @samp{STRCASE}.  This is
+rescanned, but since it is not a macro name, it is output literally.
+Then the scanner sees @samp{=} and @samp{1}, which are output
+literally, followed by @samp{dnl} which discards the rest of the
+definition of @code{gl_STRING_MODULE_INDICATOR}.  The newline at the
+end of output is the literal @samp{@key{NL}} that appeared after the
+invocation of the macro.
+
+The order in which @code{m4} expands the macros can be further explored
+using the trace facilities of @acronym{GNU} @code{m4} (@pxref{Trace}).
 
 @node Macros
 @chapter How to invoke macros
@@ -1260,14 +1384,37 @@ example with the parentheses, the `right' way to do it is like this:
 foo(`() (() (')
 @end example
 
-It is, however, in certain cases necessary or convenient to leave out
-quotes for some arguments, and there is nothing wrong in doing it.  It
-just makes life a bit harder, if you are not careful.  For consistency,
-this manual follows the rule of thumb that each layer of parentheses
-introduces another layer of single quoting, except when showing the
-consequences of quoting rules.  This is done even when the quoted string
-cannot be a macro, such as with integers when you have not changed the
-syntax via @code{changeword} (@pxref{Changeword}).
+It is, however, in certain cases necessary (because nested expansion
+must occur to create the arguments for the outer macro) or convenient
+(because it uses fewer characters) to leave out quotes for some
+arguments, and there is nothing wrong in doing it.  It just makes life a
+bit harder, if you are not careful to follow a consistent quoting style.
+For consistency, this manual follows the rule of thumb that each layer
+of parentheses introduces another layer of single quoting, except when
+showing the consequences of quoting rules.  This is done even when the
+quoted string cannot be a macro, such as with integers when you have not
+changed the syntax via @code{changeword} (@pxref{Changeword}).
+
+The quoting rule of thumb of one level of quoting per parentheses has a
+nice property: when a macro name appears inside parentheses, you can
+determine when it will be expanded.  If it is not quoted, it will be
+expanded prior to the outer macro, so that its expansion becomes the
+argument.  If it is single-quoted, it will be expanded after the outer
+macro.  And if it is double-quoted, it will be used as literal text
+instead of a macro name.
+
+@example
+define(`active', `ACT, IVE')
+@result{}
+define(`show', `$1 $1')
+@result{}
+show(active)
+@result{}ACT ACT
+show(`active')
+@result{}ACT, IVE ACT, IVE
+show(``active'')
+@result{}active active
+@end example
 
 @node Macro expansion
 @section Macro expansion
