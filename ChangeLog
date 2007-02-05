@@ -1,5 +1,7 @@
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
+	* m4/gnulib-cache.m4: Module strstr no longer exists.
+
 	Avoid bool bitfields, as they don't work on AIX.
 	* src/m4.h (bool_bitfield): New typedef.
 	(struct symbol, struct builtin): Use it.
