@@ -168,7 +168,6 @@ struct m4_input_block
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  unsigned int min_args;  /* argv minima for the builtin. */
 	  unsigned int max_args;  /* argv maxima for the builtin. */
-	  bool traced;		  /* true iff builtin is traced. */
 	  bool read;		  /* true iff block has been read. */
 	}
       u_b;
