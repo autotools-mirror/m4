@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -480,11 +480,14 @@ AT_CHECK([test "x`cat stdout`" = "x0)trailing data" || \
   { echo "skipping: sed is too greedy on seekable stdin"; exit 77; }])
 
 dnl Check external follow-on process, after fatal error.
+dnl We can't use AT_CHECK_M4, so we must post-process stderr ourselves.
 AT_DATA([in.m4], [[dnl(
 0)trailing data
 ]])
 AT_CHECK([(m4 -E; cat) < in.m4], [0], [[trailing data
-]], [[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
+]], [stderr])
+AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
+[[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl Ensure that esyscmd resumes parsing where the child process left off.

@@ -1,5 +1,8 @@
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
+	* tests/others.at (stdin seekable): Fix bug in test.
+	* ltdl/m4/gnulib-cache.m4: Gnulib module strstr no longer exists.
+
 	* m4/input.c (struct m4_input_block): Remove unused field traced.
 
 2007-02-03  Eric Blake  <ebb9@byu.net>
