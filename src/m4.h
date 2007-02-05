@@ -86,6 +86,15 @@ typedef struct string STRING;
 typedef struct token_data token_data;
 typedef void builtin_func (struct obstack *, int, token_data **);
 
+/* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
+   debugging, use bool when we know it works, but use the more
+   portable unsigned int elsewhere.  */
+#if __GNUC__ > 2
+typedef bool bool_bitfield;
+#else
+typedef unsigned int bool_bitfield;
+#endif /* ! __GNUC__ */
+
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
@@ -336,11 +345,11 @@ enum symbol_lookup
 struct symbol
 {
   struct symbol *next;
-  bool traced : 1;
-  bool shadowed : 1;
-  bool macro_args : 1;
-  bool blind_no_args : 1;
-  bool deleted : 1;
+  bool_bitfield traced : 1;
+  bool_bitfield shadowed : 1;
+  bool_bitfield macro_args : 1;
+  bool_bitfield blind_no_args : 1;
+  bool_bitfield deleted : 1;
   int pending_expansions;
 
   char *name;
@@ -382,9 +391,9 @@ void call_macro (symbol *, int, token_data **, struct obstack *);
 struct builtin
 {
   const char *name;
-  bool gnu_extension : 1;
-  bool groks_macro_args : 1;
-  bool blind_if_no_args : 1;
+  bool_bitfield gnu_extension : 1;
+  bool_bitfield groks_macro_args : 1;
+  bool_bitfield blind_if_no_args : 1;
   builtin_func *func;
 };
 

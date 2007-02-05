@@ -1,5 +1,11 @@
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
+	Avoid bool bitfields, as they don't work on AIX.
+	* src/m4.h (bool_bitfield): New typedef.
+	(struct symbol, struct builtin): Use it.
+	* src/input.c (struct input_block): Likewise.
+	Reported by Albert Chin.
+
 	* doc/m4.texinfo (Sysval): Avoid SIGPIPE in test as unreliable.
 	Reported by Albert Chin.
 	* THANKS: Update.
