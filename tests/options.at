@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -454,6 +454,43 @@ AT_DATA([in], [[changecom(`/*', `*/')dnl
 AT_CHECK_M4([--discard-comments in], [1], [],
 [[m4:in:2: end of file in comment
 ]])
+
+AT_CLEANUP
+
+
+## -------------- ##
+## fatal warnings ##
+## -------------- ##
+
+AT_SETUP([--fatal-warnings])
+
+AT_DATA([[in]],
+[[dnl()
+dnl()
+dnl()
+]])
+
+dnl By default, warnings don't affect exit status
+AT_CHECK_M4([in], [0], [],
+[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
+m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+m4:in:3: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+
+dnl With one -E, exit status changes, but execution continues
+AT_CHECK_M4([-E in], [1], [],
+[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
+m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+m4:in:3: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+
+dnl With two -E, execution halts immediately
+AT_CHECK_M4([--fatal-warnings --fatal-warnings in], [1], [],
+[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
+]])
+
+dnl Exit status can't be affected if there were no warnings
+AT_CHECK_M4([-EEQ in], [0])
 
 AT_CLEANUP
 

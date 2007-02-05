@@ -87,7 +87,8 @@ Operation modes:\n\
       fputs (_("\
   -b, --batch                  buffer output, process interrupts\n\
   -c, --discard-comments       do not copy comments to the output\n\
-  -E, --fatal-warnings         stop execution after first warning or error\n\
+  -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
+                               execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
@@ -460,7 +461,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	m4_set_fatal_warnings_opt (context, true);
+	if (m4_get_fatal_warnings_opt (context))
+	  m4_set_warnings_exit_opt (context, true);
+	else
+	  m4_set_fatal_warnings_opt (context, true);
 	break;
 
       case 'F':

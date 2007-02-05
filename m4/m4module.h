@@ -156,6 +156,7 @@ extern void		m4_delete	(m4 *);
 	M4OPT_BIT(M4_OPT_SYNCOUTPUT_BIT,	syncoutput_opt)		\
 	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
 	M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
+	M4OPT_BIT(M4_OPT_WARN_EXIT_BIT,		warnings_exit_opt)	\
 	M4OPT_BIT(M4_OPT_SAFER_BIT,		safer_opt)		\
 
 

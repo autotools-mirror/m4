@@ -80,8 +80,9 @@ struct m4 {
 #define M4_OPT_INTERACTIVE_BIT		(1 << 3) /* -e */
 #define M4_OPT_SYNCOUTPUT_BIT		(1 << 4) /* -s */
 #define M4_OPT_POSIXLY_CORRECT_BIT	(1 << 5) /* -G/POSIXLY_CORRECT */
-#define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E */
-#define M4_OPT_SAFER_BIT		(1 << 7) /* --safer */
+#define M4_OPT_FATAL_WARN_BIT		(1 << 6) /* -E once */
+#define M4_OPT_WARN_EXIT_BIT		(1 << 7) /* -E twice */
+#define M4_OPT_SAFER_BIT		(1 << 8) /* --safer */
 
 /* Fast macro versions of accessor functions for public fields of m4,
    that also have an identically named function exported in m4module.h.  */
@@ -127,6 +128,8 @@ struct m4 {
 		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #  define m4_get_fatal_warnings_opt(C)					\
 		(BIT_TEST((C)->opt_flags, M4_OPT_FATAL_WARN_BIT))
+#  define m4_get_warnings_exit_opt(C)					\
+		(BIT_TEST((C)->opt_flags, M4_OPT_WARN_EXIT_BIT))
 #  define m4_get_safer_opt(C)						\
 		(BIT_TEST((C)->opt_flags, M4_OPT_SAFER_BIT))
 

@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2003,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -154,7 +154,7 @@ m4_error (m4 *context, int status, int errnum, const char *format, ...)
   int line = m4_get_current_line (context);
   assert (m4_get_current_file (context) || ! line);
   va_start (args, format);
-  if (status == EXIT_SUCCESS && m4_get_fatal_warnings_opt (context))
+  if (status == EXIT_SUCCESS && m4_get_warnings_exit_opt (context))
     status = EXIT_FAILURE;
   verror_at_line (status, errnum, line ? m4_get_current_file (context) : NULL,
 		  line, format, args);
@@ -174,7 +174,7 @@ m4_error_at_line (m4 *context, int status, int errnum, const char *file,
 {
   va_list args;
   va_start (args, format);
-  if (status == EXIT_SUCCESS && m4_get_fatal_warnings_opt (context))
+  if (status == EXIT_SUCCESS && m4_get_warnings_exit_opt (context))
     status = EXIT_FAILURE;
   verror_at_line (status, errnum, line ? file : NULL,
 		  line, format, args);
@@ -199,7 +199,7 @@ m4_warn (m4 *context, int errnum, const char *format, ...)
 
       assert (m4_get_current_file (context) || ! line);
       va_start (args, format);
-      if (m4_get_fatal_warnings_opt (context))
+      if (m4_get_warnings_exit_opt (context))
 	status = EXIT_FAILURE;
       /* If the full_format failed (unlikely though that may be), at
 	 least fall back on the original format.  */
@@ -207,6 +207,9 @@ m4_warn (m4 *context, int errnum, const char *format, ...)
 		      line ? m4_get_current_file (context) : NULL, line,
 		      full_format ? full_format : format, args);
       free (full_format);
+      if (m4_get_fatal_warnings_opt (context)
+	  && ! m4_get_exit_status (context))
+	m4_set_exit_status (context, EXIT_FAILURE);
     }
 }
 
@@ -226,13 +229,16 @@ m4_warn_at_line (m4 *context, int errnum, const char *file, int line,
       int status = EXIT_SUCCESS;
       char *full_format = xasprintf(_("Warning: %s"), format);
       va_start (args, format);
-      if (m4_get_fatal_warnings_opt (context))
+      if (m4_get_warnings_exit_opt (context))
 	status = EXIT_FAILURE;
       /* If the full_format failed (unlikely though that may be), at
 	 least fall back on the original format.  */
       verror_at_line (status, errnum, line ? file : NULL, line,
 		      full_format ? full_format : format, args);
       free (full_format);
+      if (m4_get_fatal_warnings_opt (context)
+	  && ! m4_get_exit_status (context))
+	m4_set_exit_status (context, EXIT_FAILURE);
     }
 }
 

@@ -1,3 +1,19 @@
+2007-02-05  Eric Blake  <eric.b.blake@l-3com.com>
+
+	* tests/options.at (--fatal-warnings): New test.
+	* tests/others.at (stdin seekable): Exit on error.
+	* m4/m4private.h (M4_OPT_WARN_EXIT_BIT): New bit.
+	(m4_get_warnings_exit_opt): Access it.
+	* m4/m4module.h (m4_context_opt_bit_table): Access it.
+	* m4/utility.c (m4_error, m4_error_at_line): Only force an exit
+	on -EE.
+	(m4_warn, m4_warn_at_line): Change exit status on -E, and force
+	exit on -EE.
+	* src/m4.c (usage): Document new -E behavior.
+	(main): Make -E an additive option.
+	* doc/m4.texinfo (Operation modes): Document the change.
+	Reported by Ralf Wildenhues.
+
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
 	* tests/others.at (stdin seekable): Fix bug in test.
