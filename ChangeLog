@@ -1,3 +1,9 @@
+2007-02-05  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Sysval): Avoid SIGPIPE in test as unreliable.
+	Reported by Albert Chin.
+	* THANKS: Update.
+
 2006-06-18  Bruno Haible  <bruno@clisp.org>  (tiny change)
 
 	* doc/m4.texinfo (Input processing): Further clarifications.
