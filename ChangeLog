@@ -1,4 +1,4 @@
-2007-02-05  Eric Blake  <eric.b.blake@l-3com.com>
+2007-02-05  Eric Blake  <ebb9@byu.net>
 
 	* tests/options.at (--fatal-warnings): New test.
 	* tests/others.at (stdin seekable): Exit on error.
@@ -13,8 +13,6 @@
 	(main): Make -E an additive option.
 	* doc/m4.texinfo (Operation modes): Document the change.
 	Reported by Ralf Wildenhues.
-
-2007-02-05  Eric Blake  <ebb9@byu.net>
 
 	* tests/others.at (stdin seekable): Fix bug in test.
 	* ltdl/m4/gnulib-cache.m4: Gnulib module strstr no longer exists.
