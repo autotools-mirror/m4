@@ -221,6 +221,68 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode)
   SYMBOL_FUNC (sym) = bp->func;
 }
 
+/* Storage for the compiled regular expression of
+   --warn-macro-sequence.  */
+static struct re_pattern_buffer macro_sequence_buf;
+
+/* Storage for the matches of --warn-macro-sequence.  */
+static struct re_registers macro_sequence_regs;
+
+/* True if --warn-macro-sequence is in effect.  */
+static bool macro_sequence_inuse;
+
+/*----------------------------------------.
+| Clean up regular expression variables.  |
+`----------------------------------------*/
+
+static void
+free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  regfree (buf);
+  free (regs->start);
+  free (regs->end);
+}
+
+/*-----------------------------------------------------------------.
+| Set the regular expression of --warn-macro-sequence that will be |
+| checked during define and pushdef.  Exit on failure.             |
+`-----------------------------------------------------------------*/
+void
+set_macro_sequence (const char *regexp)
+{
+  const char *msg;
+
+  if (! regexp)
+    regexp = "\\$\\({[0-9][^}]*}\\|[0-9][0-9]+\\)";
+  else if (regexp[0] == '\0')
+    {
+      macro_sequence_inuse = false;
+      return;
+    }
+
+  msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
+  if (msg != NULL)
+    {
+      M4ERROR ((EXIT_FAILURE, 0,
+		"--warn-macro-sequence: bad regular expression `%s': %s",
+		regexp, msg));
+    }
+  re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
+		    macro_sequence_regs.num_regs,
+		    macro_sequence_regs.start, macro_sequence_regs.end);
+  macro_sequence_inuse = true;
+}
+
+/*------------------------------------------------------------.
+| Free dynamic memory utilized by the define sequence regular |
+| expression.						      |
+`------------------------------------------------------------*/
+void
+free_macro_sequence (void)
+{
+  free_pattern_buffer (&macro_sequence_buf, &macro_sequence_regs);
+}
+
 /*-------------------------------------------------------------------------.
 | Define a predefined or user-defined macro, with name NAME, and expansion |
 | TEXT.  MODE destinguishes between the "define" and the "pushdef" case.   |
@@ -231,50 +293,43 @@ void
 define_user_macro (const char *name, const char *text, symbol_lookup mode)
 {
   symbol *s;
-  size_t len;
+  char *defn = xstrdup (text ? text : "");
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
-  SYMBOL_TEXT (s) = xstrdup (text ? text : "");
+  SYMBOL_TEXT (s) = defn;
 
-  /* In M4 2.0, $11 will mean the first argument concatenated with 1,
-     not the eleventh argument.  Also, ${1} will mean the first
-     argument, rather than literal text (although for compatibility
-     sake, it will be possible to restore the traditional meaning of
-     ${1} using changesyntax).  Needing more than 9 arguments is
-     somewhat rare, but using M4 to process shell code is quite
-     common; either way, warn on usages that will change in
-     semantics.  */
-  if (warn_syntax && text && (len = strlen (text)) >= 3)
+  /* Implement --warn-macro-sequence.  */
+  if (macro_sequence_inuse && text)
     {
-      static struct re_pattern_buffer buf;
-      static bool init = false;
       regoff_t offset = 0;
+      size_t len = strlen (defn);
 
-      if (! init)
+      while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
+				  len - offset, &macro_sequence_regs)) >= 0)
 	{
-	  const char *msg = "\\$[{0-9][0-9]";
-	  init_pattern_buffer (&buf, NULL);
-	  msg = re_compile_pattern (msg, strlen (msg), &buf);
-	  if (msg != NULL)
+	  /* Skip empty matches.  */
+	  if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
+	    offset++;
+	  else
 	    {
-	      M4ERROR ((EXIT_FAILURE, 0,
-			"unable to check --warn-syntax: %s", msg));
+	      char tmp;
+	      offset = macro_sequence_regs.end[0];
+	      tmp = defn[offset];
+	      defn[offset] = '\0';
+	      M4ERROR ((warning_status, 0,
+			"Warning: definition of `%s' contains sequence `%s'",
+			name, defn + macro_sequence_regs.start[0]));
+	      defn[offset] = tmp;
 	    }
-	  init = true;
 	}
-      while ((offset = re_search (&buf, text, len, offset, len - offset,
-				  NULL)) >= 0)
-	{
-	  M4ERROR ((warning_status, 0,
-		    "Warning: semantics of `$%c%c%s' in `%s' will change",
-		    text[offset + 1], text[offset + 2],
-		    text[offset + 1] == '{' ? "...}" : "", name));
-	  offset += 3;
-	}
+      if (offset == -2)
+	M4ERROR ((warning_status, 0,
+		  "error checking --warn-define-sequence for macro `%s'",
+		  name));
     }
 }
 
@@ -1878,18 +1933,6 @@ init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
       regs->start = NULL;
       regs->end = NULL;
     }
-}
-
-/*----------------------------------------.
-| Clean up regular expression variables.  |
-`----------------------------------------*/
-
-static void
-free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
-{
-  regfree (buf);
-  free (regs->start);
-  free (regs->end);
 }
 
 /*--------------------------------------------------------------------------.

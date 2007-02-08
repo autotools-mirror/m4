@@ -119,7 +119,6 @@ extern int max_debug_argument_length;	/* -l */
 extern int suppress_warnings;		/* -Q */
 extern int warning_status;		/* -E */
 extern int nesting_limit;		/* -L */
-extern bool warn_syntax;		/* --warn-syntax */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;	/* -W */
 #endif
@@ -411,6 +410,8 @@ struct re_registers;
 
 void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
+void set_macro_sequence (const char *);
+void free_macro_sequence (void);
 void define_user_macro (const char *, const char *, symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, token_data **);

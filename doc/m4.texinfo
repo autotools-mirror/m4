@@ -584,12 +584,19 @@ is also specified.
 Suppress warnings, such as missing or superfluous arguments in macro
 calls, or treating the empty string as zero.
 
-@item --warn-syntax
-Issue warnings when syntax is encountered that will change semantics in
-@acronym{GNU} M4 2.0.  For now, the only semantics that will change have
-to do with how more than 9 arguments in a macro definition are handled
-(@pxref{Arguments}).  This warning is disabled by default because it
-triggers spurious failures in @acronym{GNU} Autoconf 2.61.
+@item --warn-macro-sequence@r{[}=@var{REGEXP}@r{]}
+Issue a warning if the regular expression @var{REGEXP} has a non-empty
+match in any macro definition (either by @code{define} or
+@code{pushdef}).  Empty matches are ignored; therefore, supplying the
+empty string as @var{REGEXP} disables any warning.  If the optional
+@var{REGEXP} is not supplied, then the default regular expression is
+@samp{\$\(@{[0-9][^@}]*@}\|[0-9][0-9]+\)} (a literal @samp{$} followed
+by multiple digits or by an open brace and a digit), since these
+sequences will change semantics in the default operation of
+@acronym{GNU} M4 2.0 (due to a change in how more than 9 arguments in a
+macro definition will be handled, @pxref{Arguments}).  Providing an
+alternate regular expression can provide a useful reverse lookup feature
+of finding where a macro is defined to have a given definition.
 
 @item -W @var{REGEXP}
 @itemx --word-regexp=@var{REGEXP}
@@ -1635,13 +1642,24 @@ bar(`a', `b')
 
 To help you detect places in your M4 input files that might change in
 behavior due to the changed behavior of M4 2.0, you can use the
-@option{--warn-syntax} command-line option (@pxref{Operation modes, ,
-Invoking m4}).  This will add a warning any time a macro definition
-includes @samp{$} followed by multiple digits, or by @samp{@{} and a
-digit.  The warning is not enabled by default, because it triggers a
-number of warnings in Autoconf 2.61 (and Autoconf uses @option{-E} to
-treat warnings as errors), and because it will still be possible to
-restore traditional behavior in M4 2.0.
+@option{--warn-macro-sequence} command-line option (@pxref{Operation
+modes, , Invoking m4}) with the default regular expression.  This will
+add a warning any time a macro definition includes @samp{$} followed by
+multiple digits, or by @samp{@{} and a digit.  The warning is not
+enabled by default, because it triggers a number of warnings in Autoconf
+2.61 (and Autoconf uses @option{-E} to treat warnings as errors), and
+because it will still be possible to restore older behavior in M4 2.0.
+
+@comment ignore
+@example
+$ @kbd{m4 --warn-macro-sequence}
+define(`foo', `$001 $@{1@} $1')
+@error{}m4:stdin:1: Warning: definition of `foo' contains sequence `$001'
+@error{}m4:stdin:1: Warning: definition of `foo' contains sequence `$@{1@}'
+@result{}
+foo(`bar')
+@result{}bar $@{1@} bar
+@end example
 
 @node Pseudo Arguments
 @section Special arguments to macros

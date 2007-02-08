@@ -1,3 +1,21 @@
+2007-02-08  Eric Blake  <ebb9@byu.net>
+
+	Rename --warn-syntax to --warn-macro-sequence[=regex], to make it
+	more flexible, and so that autoconf can use it.
+	* src/m4.h (set_macro_sequence, free_macro_sequence): New
+	prototypes.
+	* src/builtin.c (macro_sequence_buf, macro_sequence_regs)
+	(macro_sequence_inuse, set_macro_sequence, free_macro_sequence):
+	New variables and functions.
+	(define_user_macro): Allow flexibility in regular expression used
+	to trigger warning.
+	* src/m4.c (warn_syntax): Delete.
+	(usage, WARN_MACRO_SEQUENCE_OPTION, main): Implement changed
+	spelling of option, along with optional argument.
+	* doc/m4.texinfo (Operation modes, Arguments): Document this
+	change.
+	* NEWS: Document this change.
+
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Module strstr no longer exists.

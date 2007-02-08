@@ -58,9 +58,6 @@ static bool fatal_warnings = false;
 /* If not zero, then value of exit status for warning diagnostics.  */
 int warning_status = 0;
 
-/* If true, then warn about usage of ${1} in macro definitions.  */
-bool warn_syntax = false;
-
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 1024;
 
@@ -163,7 +160,9 @@ Operation modes:\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-      --warn-syntax            warn on syntax that will change in future\n\
+      --warn-macro-sequence[=REGEXP]\n\
+                               warn if macro definition matches REGEXP,\n\
+                               default \\$\\({[0-9][^}]*}\\|[0-9]+\\)\n\
 ", stdout);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
@@ -239,7 +238,7 @@ enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
   DIVERSIONS_OPTION,			/* not quite -N, because of message */
-  WARN_SYNTAX_OPTION,			/* no short opt */
+  WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -269,7 +268,7 @@ static const struct option long_options[] =
 
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
-  {"warn-syntax", no_argument, NULL, WARN_SYNTAX_OPTION},
+  {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
@@ -337,6 +336,7 @@ main (int argc, char *const *argv, char *const *envp)
   const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
+  const char *macro_sequence = "";
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
@@ -474,8 +474,12 @@ main (int argc, char *const *argv, char *const *envp)
 	debugfile = optarg;
 	break;
 
-      case WARN_SYNTAX_OPTION:
-	warn_syntax = true;
+      case WARN_MACRO_SEQUENCE_OPTION:
+         /* Don't call set_macro_sequence here, as it can exit.
+            --warn-macro-sequence sets optarg to NULL (which uses the
+            default regexp); --warn-macro-sequence= sets optarg to ""
+            (which disables these warnings).  */
+        macro_sequence = optarg;
 	break;
 
       case VERSION_OPTION:
@@ -497,6 +501,7 @@ main (int argc, char *const *argv, char *const *envp)
   input_init ();
   output_init ();
   symtab_init ();
+  set_macro_sequence (macro_sequence);
   include_env_init ();
 
   if (frozen_file_to_read)
@@ -595,5 +600,6 @@ main (int argc, char *const *argv, char *const *envp)
       undivert_all ();
     }
   output_exit ();
+  free_macro_sequence ();
   exit (retcode);
 }
