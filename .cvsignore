@@ -18,6 +18,7 @@ gnupload
 INSTALL
 install-sh
 lib
+link-warning.h
 m4-*
 Makefile.in
 Makefile
