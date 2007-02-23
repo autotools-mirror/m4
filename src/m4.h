@@ -38,7 +38,6 @@
 #include "close-stream.h"
 #include "closeout.h"
 #include "error.h"
-#include "exit.h"
 #include "exitfail.h"
 #include "obstack.h"
 #include "stdio--.h"
