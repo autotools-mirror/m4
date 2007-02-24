@@ -253,7 +253,7 @@ set_macro_sequence (const char *regexp)
   const char *msg;
 
   if (! regexp)
-    regexp = "\\$\\({[0-9][^}]*}\\|[0-9][0-9]+\\)";
+    regexp = "\\$\\({[^}]*}\\|[0-9][0-9]+\\)";
   else if (regexp[0] == '\0')
     {
       macro_sequence_inuse = false;

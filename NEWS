@@ -23,9 +23,9 @@ Version 1.4.9 - ?? ??? 2007, by ????  (CVS version 1.4.8a)
 * A new `--warn-macro-sequence' command-line option allows detection of
   sequences in `define' and `pushdef' definitions that match an optional
   regular expression.  The default regular expression is
-  `\$\({[0-9][^}]*}\|[0-9][0-9]+\)', corresponding to the sequences that
-  might not behave correctly when upgrading to the eventual M4 2.0.  By
-  default, M4 2.0 will follow the POSIX requirement that a macro definition
+  `\$\({[^}]*}\|[0-9][0-9]+\)', corresponding to the sequences that might
+  not behave correctly when upgrading to the eventual M4 2.0.  By default,
+  M4 2.0 will follow the POSIX requirement that a macro definition
   containing `$11' must expand to the first argument concatenated with 1,
   rather than the eleventh argument; and will take advantage of the POSIX
   wording that allows implementations to treat `${11}' as the eleventh

@@ -590,13 +590,13 @@ match in any macro definition (either by @code{define} or
 @code{pushdef}).  Empty matches are ignored; therefore, supplying the
 empty string as @var{REGEXP} disables any warning.  If the optional
 @var{REGEXP} is not supplied, then the default regular expression is
-@samp{\$\(@{[0-9][^@}]*@}\|[0-9][0-9]+\)} (a literal @samp{$} followed
-by multiple digits or by an open brace and a digit), since these
-sequences will change semantics in the default operation of
-@acronym{GNU} M4 2.0 (due to a change in how more than 9 arguments in a
-macro definition will be handled, @pxref{Arguments}).  Providing an
-alternate regular expression can provide a useful reverse lookup feature
-of finding where a macro is defined to have a given definition.
+@samp{\$\(@{[^@}]*@}\|[0-9][0-9]+\)} (a literal @samp{$} followed by
+multiple digits or by an open brace), since these sequences will
+change semantics in the default operation of @acronym{GNU} M4 2.0 (due
+to a change in how more than 9 arguments in a macro definition will be
+handled, @pxref{Arguments}).  Providing an alternate regular
+expression can provide a useful reverse lookup feature of finding
+where a macro is defined to have a given definition.
 
 @item -W @var{REGEXP}
 @itemx --word-regexp=@var{REGEXP}
@@ -6388,7 +6388,7 @@ the first time.
 @bye
 
 @c Local Variables:
-@c coding: ISO-8859-1
+@c coding: iso-8859-1
 @c fill-column: 72
 @c ispell-local-dictionary: "american"
 @c indent-tabs-mode: nil

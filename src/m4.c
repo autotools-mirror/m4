@@ -162,7 +162,7 @@ Operation modes:\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
       --warn-macro-sequence[=REGEXP]\n\
                                warn if macro definition matches REGEXP,\n\
-                               default \\$\\({[0-9][^}]*}\\|[0-9]+\\)\n\
+                               default \\$\\({[^}]*}\\|[0-9][0-9]+\\)\n\
 ", stdout);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\

@@ -1,3 +1,13 @@
+2007-02-24  Eric Blake  <ebb9@byu.net>
+
+	Reserve all uses of raw ${} in macro definitions, not just
+	${<digit>}.
+	* src/builtin.c (set_macro_sequence): Change default macro
+	sequence.
+	* doc/m4.texinfo (Operation modes): Update to match.
+	* src/m4.c (usage): Likewise.
+	* NEWS: Likewise.
+
 2007-02-23  Eric Blake  <ebb9@byu.net>
 
 	* src/m4.h (includes): Update to latest gnulib.
