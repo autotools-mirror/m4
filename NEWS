@@ -2,7 +2,7 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 
-Version 1.4.9 - ?? ??? 2007, by ????  (CVS version 1.4.8a)
+Version 1.4.8b - 24 Feb 2007, by Eric Blake  (CVS version 1.4.8a)
 
 * Fix a regression introduced in 1.4.8 that made m4 unable to process
   files larger than 2GiB on some platforms.

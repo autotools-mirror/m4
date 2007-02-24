@@ -1,5 +1,9 @@
 2007-02-24  Eric Blake  <ebb9@byu.net>
 
+	Beta Release 1.4.8b:
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.8.
+
 	Reserve all uses of raw ${} in macro definitions, not just
 	${<digit>}.
 	* src/builtin.c (set_macro_sequence): Change default macro
@@ -173,8 +177,7 @@
 
 2006-11-20  Eric Blake  <ebb9@byu.net>
 
-	Release	1.4.8:
-
+	Release 1.4.8:
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.7.
 
@@ -539,8 +542,7 @@
 
 2006-09-25  Eric Blake  <ebb9@byu.net>
 
-	Release	1.4.7:
-
+	Release 1.4.7:
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.6.
 
@@ -641,7 +643,6 @@
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.6:
-
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.5.
 
@@ -1003,7 +1004,6 @@
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.5:
-
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.4.
 
@@ -1443,8 +1443,7 @@
 
 2006-06-17  Eric Blake  <ebb9@byu.net>
 
-	Release 1.4.4b:
-
+	Beta Release 1.4.4b:
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.4.
 	* Makefile.maint (cvs-news): Accomodate copyright line wrapping.
@@ -1773,7 +1772,6 @@
 2005-10-19  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	Release 1.4.4:
-
 	* configure.ac (AC_INIT): Bump to 1.4.4.
 	* NEWS: Describe 1.4.4's changes.
 	* INSTALL, install-sh, doc/texinfo.tex: Updated from upstream.
@@ -1834,7 +1832,6 @@
 2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
 	Release 1.4.3:
-
 	* configure.in (AC_INIT): Bump to 1.4.3.
 	* NEWS: Describe 1.4.3's changes.
 
@@ -1943,8 +1940,7 @@
 
 2004-08-19  Paul Eggert  <eggert@twinsun.com>
 
-	* Release 1.4.2.
-
+	Release 1.4.2.
 	* configure.in (VERSION): Bump to 1.4.2.
 	* News: Describe 1.4.2's changes.
 
@@ -1966,8 +1962,7 @@
 
 2004-06-03  Paul Eggert  <eggert@cs.ucla.edu>
 
-	* Release 1.4.1.
-
+	Release 1.4.1.
 	* configure.in (VERSION): Bump to 1.4.1.
 	* NEWS: Describe 1.4.1's changes.
 
@@ -2017,8 +2012,7 @@
 
 Sat Nov  5 15:52:47 1994  Francois Pinard  (pinard@icule)
 
-	* Release 1.4.
-
+	Release 1.4.
 	* doc/Makefile.in (realclean): Also remove stamp-vti.
 	Reported by Eric Backus.
 
@@ -2175,8 +2169,7 @@ Wed Sep 14 10:00:22 1994  Francois Pinard  (pinard@icule)
 
 Tue Sep 13 19:21:05 1994  Francois Pinard  (pinard@icule)
 
-	* Release 1.3.
-
+	Release 1.3.
 	* Makefile.in: Group all *clean-recursive goals in one, using sed
 	to remove `-recursive' while calling make recursively.  Also, use
 	a subshell for each recursive $(MAKE).
