@@ -1,3 +1,8 @@
+2007-02-25  Eric Blake  <ebb9@byu.net>
+
+	* m4/system_.h (includes, EXIT_SUCCESS, EXIT_FAILURE): Adjust to
+	latest gnulib.
+
 2007-02-05  Eric Blake  <ebb9@byu.net>
 
 	* tests/options.at (--fatal-warnings): New test.

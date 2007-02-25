@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2001, 2003, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2003, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@
 @INCLUDE_REGEX_H@
 @INCLUDE_STDBOOL_H@
 
-#include <gnu/exit.h>
 #include <gnu/xalloc.h>
 #include <gnu/xstrndup.h>
 
@@ -49,6 +48,16 @@
 #define obstack_regrow(OBS, OBJECT, SIZE)               \
   (obstack_free (OBS, (char *)(OBJECT) + SIZE),         \
    (OBS)->object_base = (char *)(OBJECT))
+
+/* Some systems do not define EXIT_*, despite otherwise supporting
+   C89.  This definition is copied from gnulib's stdlib_.h, since we
+   don't always install gnulib's stdlib.h.  */
+#ifndef EXIT_SUCCESS
+# define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+# define EXIT_FAILURE 1
+#endif
 
 /* In addition to EXIT_SUCCESS and EXIT_FAILURE, m4 can fail with version
    mismatch when trying to load a frozen file produced by a newer m4 than
