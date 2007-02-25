@@ -414,8 +414,9 @@ reload_frozen_state (m4 *context, const char *name)
   do								\
     {								\
       size_t len = (StrLen);					\
-      char *p = (Buf);						\
-      CHECK_ALLOCATION (p, (BufSize), len);			\
+      char *p;							\
+      CHECK_ALLOCATION ((Buf), (BufSize), len);			\
+      p = (Buf);						\
       while (len-- > 0)						\
 	{							\
 	  int ch = (version > 1 ? decode_char (File)		\
