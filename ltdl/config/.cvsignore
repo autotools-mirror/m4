@@ -4,6 +4,7 @@ depcomp
 gendocs.sh
 gnupload
 install-sh
+link-warning.h
 ltmain.sh
 mdate-sh
 missing

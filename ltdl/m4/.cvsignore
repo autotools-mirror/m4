@@ -48,6 +48,7 @@ lib-ld.m4
 lib-link.m4
 lib-prefix.m4
 libtool.m4
+localcharset.m4
 lock.m4
 longdouble.m4
 longlong.m4
@@ -86,6 +87,7 @@ stdint.m4
 stdint_h.m4
 stdio-safer.m4
 stdlib-safer.m4
+stdlib_h.m4
 strcase.m4
 strerror_r.m4
 string_h.m4
