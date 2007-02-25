@@ -131,6 +131,12 @@ builtinbuiltingnu
 # Testing escape sequences
 T4,5
 blah\t\477\040\X5C
+# Long macro definition.  Catches a regression introduced on 2007-01-20
+# and patched 2007-02-25.
+T4,122
+long01234567890123456789012345678901234567890123456789
+01234567890123456789012345678901234567890123456789
+01234567890123456789
 ]])
 
 AT_DATA([input.m4],
