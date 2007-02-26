@@ -1,3 +1,10 @@
+2007-02-26  Eric Blake  <ebb9@byu.net>
+
+	Re-enable clean bootstrap on cygwin.
+	* Makefile.am (AM_LDFLAGS): For now, export all symbols from
+	modules, since otherwise we run afoul of current libtool
+	limitations on cygwin and mingw.
+
 2007-02-25  M. Levinson  <levinsm@users.sourceforge.net>  (tiny change)
 
 	* src/freeze.c (reload_frozen_state): Avoid dereferencing freed

@@ -1,6 +1,6 @@
 ## This file is part of GNU M4.
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006 Free Software
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
 ## Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,12 @@ AM_CPPFLAGS	= -I. -I$(srcdir) \
 		  -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4 \
 		  $(LTDLINCL)
-AM_LDFLAGS	= -no-undefined -export-dynamic
+# FIXME - the -export-symbols-regex ".*" is a hack to work around the
+# fact that on cygwin, the convenience library libltdl exports symbols,
+# which effectively disables the auto-exporting of all other symbols.
+# Revisit this if libtool on cygwin improves.
+# See http://lists.gnu.org/archive/html/libtool-patches/2007-02/msg00062.html
+AM_LDFLAGS	= -no-undefined -export-dynamic -export-symbols-regex ".*"
 
 EXTRA_DIST	= bootstrap \
 		  $(config_aux_dir)/mkstamp \
