@@ -154,7 +154,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
 ", stdout);
-      fputs ("\
+      printf ("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
                                execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
@@ -162,8 +162,8 @@ Operation modes:\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
       --warn-macro-sequence[=REGEXP]\n\
                                warn if macro definition matches REGEXP,\n\
-                               default \\$\\({[^}]*}\\|[0-9][0-9]+\\)\n\
-", stdout);
+                               default %s\n\
+", DEFAULT_MACRO_SEQUENCE);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
   -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\

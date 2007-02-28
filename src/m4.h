@@ -407,6 +407,11 @@ typedef struct predefined predefined;
 struct re_pattern_buffer;
 struct re_registers;
 
+/* The default sequence detects multi-digit parameters (obsolete after
+   1.4.x), and any use of extended arguments with the default ${}
+   syntax (new in 2.0).  */
+#define DEFAULT_MACRO_SEQUENCE "\\$\\({[^}]*}\\|[0-9][0-9]+\\)"
+
 void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);

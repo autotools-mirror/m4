@@ -253,7 +253,7 @@ set_macro_sequence (const char *regexp)
   const char *msg;
 
   if (! regexp)
-    regexp = "\\$\\({[^}]*}\\|[0-9][0-9]+\\)";
+    regexp = DEFAULT_MACRO_SEQUENCE;
   else if (regexp[0] == '\0')
     {
       macro_sequence_inuse = false;
@@ -328,7 +328,7 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 	}
       if (offset == -2)
 	M4ERROR ((warning_status, 0,
-		  "error checking --warn-define-sequence for macro `%s'",
+		  "error checking --warn-macro-sequence for macro `%s'",
 		  name));
     }
 }

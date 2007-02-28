@@ -618,13 +618,12 @@ input came from.  These features occur with the following options:
 @table @code
 @item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
 @itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table, before any input files are
-read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
-empty string.  The @var{VALUE} can be any string, and the macro can be
-defined to take arguments, just as if it was defined from within the
-input.  This option may be given more than once; order with respect to
-file names is significant, and redefining the same @var{NAME} loses the
-previous value.
+This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
+missing, the value is taken to be the empty string.  The @var{VALUE} can
+be any string, and the macro can be defined to take arguments, just as
+if it was defined from within the input.  This option may be given more
+than once; order with respect to file names is significant, and
+redefining the same @var{NAME} loses the previous value.
 
 @item -I @var{DIRECTORY}
 @itemx --include=@var{DIRECTORY}
@@ -1615,9 +1614,9 @@ consist of one or more digits, allowing macros to have any number of
 arguments.  The extension of accepting multiple digits is incompatible
 with @acronym{POSIX}, and is different than traditional implementations
 of @code{m4}, which only recognize one digit.  Therefore, future
-versions of @acronym{GNU} M4 will phase out this feature.
-@xref{Extensions}, for an example of how to portably access the eleventh
-argument.
+versions of @acronym{GNU} M4 will phase out this feature.  To portably
+access beyond the ninth argument, you can use the @code{argn} macro
+documented later (@pxref{Shift}).
 
 @acronym{POSIX} also states that @samp{$} followed immediately by
 @samp{@{} in a macro definition is implementation-defined.  This version
@@ -1645,10 +1644,10 @@ behavior due to the changed behavior of M4 2.0, you can use the
 @option{--warn-macro-sequence} command-line option (@pxref{Operation
 modes, , Invoking m4}) with the default regular expression.  This will
 add a warning any time a macro definition includes @samp{$} followed by
-multiple digits, or by @samp{@{} and a digit.  The warning is not
-enabled by default, because it triggers a number of warnings in Autoconf
-2.61 (and Autoconf uses @option{-E} to treat warnings as errors), and
-because it will still be possible to restore older behavior in M4 2.0.
+multiple digits, or by @samp{@{}.  The warning is not enabled by
+default, because it triggers a number of warnings in Autoconf 2.61 (and
+Autoconf uses @option{-E} to treat warnings as errors), and because it
+will still be possible to restore older behavior in M4 2.0.
 
 @comment ignore
 @example
@@ -2437,6 +2436,34 @@ undivert(`quote.m4')dnl
 @result{}define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
 @result{}                             ```$1'',$0(shift($@@))')')
 @result{}divert`'dnl
+@end example
+
+@cindex nine arguments, more than
+@cindex more than nine arguments
+@cindex arguments, more than nine
+One more useful macro based on @code{shift} allows portably selecting
+an arbitrary argument (usually greater than the ninth argument), without
+relying on the @acronym{GNU} extension of multi-digit arguments
+(@pxref{Arguments}).
+
+@deffn Composite argn (@var{n}, @dots{})
+Expands to argument @var{n} out of the remaining arguments.  @var{n}
+must be a positive number.  Usually invoked as
+@samp{argn(`@var{n}',$@@)}.
+@end deffn
+
+It is implemented as:
+
+@example
+define(`argn', `ifelse(`$1', 1, ``$2'',
+  `argn(decr(`$1'), shift(shift($@@)))')')
+@result{}
+argn(`1', `a')
+@result{}a
+define(`foo', `argn(`11', $@@)')
+@result{}
+foo(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k', `l')
+@result{}k
 @end example
 
 @node Forloop
@@ -5715,6 +5742,9 @@ eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 Eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 @result{}k
 @end example
+
+@noindent
+Also see the @code{argn} macro (@pxref{Shift}).
 
 @item
 The @code{divert} (@pxref{Divert}) macro can manage more than 9
