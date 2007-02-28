@@ -84,16 +84,8 @@ promoted to 2.0.
 
 ** POSIX conformance
 
-*** POSIXLY_CORRECT and `m4 --traditional' now makes the `define' builtin
-  replace all `pushdef'ed values of a macro.
-  - FIXME: The Austin group clarified that this was never a POSIX
-  requirement; consider reverting this change.
-
 *** The `defn' builtin now allows any number of arguments, as POSIX requires.
   - FIXME: This still doesn't work with concatenating builtins with text.
-
-*** The `eval' builtin now follows C precedence rules.  Additionally,
-    short-circuit operators correctly short-circuit division by zero.
 
   - FIXME: POSIX recommends using ${10} instead of $10 for the tenth
   positional argument.  We should deprecate $10.
@@ -107,7 +99,7 @@ promoted to 2.0.
 
 ** New builtins
 
-*** New `changeresyntax' builtin allows programmtic setting of the default
+*** New `changeresyntax' builtin allows programmatic setting of the default
     regular expression flavor, to match `-r'/`--regexp-syntax' command-line
     option.
 
@@ -139,9 +131,6 @@ promoted to 2.0.
 
 ** Changed behavior of builtins
 
-*** The '$' syntax class to the `changeresyntax' builtin is now enabled.
-    See the manual for examples.
-
 *** The `builtin' builtin now has a special form, where if the first
     argument is exactly the special token representing defn(`builtin'), the
     expansion is the special token representing the builtin named in the
@@ -155,9 +144,9 @@ promoted to 2.0.
 
 *** The `changesyntax' builtin has been improved, to make it easier to add
     and remove characters from a syntax class without having to specify the
-    entire set of characters in that class.  It also supports two new
-    syntax categories, `{' and `}', for extended argument handling in macro
-    definitions.
+    entire set of characters in that class.  It also supports new syntax
+    categories, `$', `{' and `}', for extended argument handling in macro
+    definitions.  See the manual for more examples.
 
 *** New `m' flag to `-d'/`--debug' command-line option or `debugmode'
     builtin traces actions related to module loading and unloading, and

@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -179,9 +180,6 @@ M4BUILTIN_HANDLER (define)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
 	m4_symbol_value_copy (value, argv[2]);
-
-      if (m4_get_posixly_correct_opt (context))
-	m4_symbol_delete (M4SYMTAB, M4ARG (1));
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }

@@ -2265,7 +2265,12 @@ foo
 If a macro with several definitions is redefined with @code{define}, the
 topmost definition is @emph{replaced} with the new definition.  If it is
 removed with @code{undefine}, @emph{all} the definitions are removed,
-and not only the topmost one.
+and not only the topmost one.  However, @acronym{POSIX} allows other
+implementations that treat @code{define} as replacing an entire stack
+of definitions with a single new definition, so to be portable to other
+implementations, it may be worth explicitly using @code{popdef} and
+@code{pushdef} rather than relying on the @acronym{GNU} behavior of
+@code{define}.
 
 @example
 define(`foo', `Expansion one.')
@@ -7311,13 +7316,11 @@ avoided through careful programming, a little like for endless loops
 in traditional programming languages.
 
 @item
-Some implementations of @code{m4} (Solaris for example) conform to
-@acronym{POSIX}, which requires @code{define(@var{macro})} to behave
-like @code{undefine(@var{macro})pushdef(@var{macro})}.  Other
-implementations, including GNU @code{m4} without the @samp{-G} option
-and without @env{POSIXLY_CORRECT} set, treat
-@code{define(@var{macro})} as
-@code{popdef(@var{macro})pushdef(@var{macro})}.
+Traditional implementations handle @code{define(`f',`1')} (@pxref{Define})
+by undefining the entire stack of previous definitions, and if doing
+@code{undefine(`f')} first.  @acronym{GNU} @code{m4} replaces just the top
+definition on the stack, as if doing @code{popdef(`f')} followed by
+@code{pushdef(`f',`1')}.  @acronym{POSIX} allows either behavior.
 
 @item
 @acronym{POSIX} states that only unquoted leading newlines and blanks
