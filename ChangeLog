@@ -1,5 +1,8 @@
 2007-02-28  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo (Pushdef, Incompatibilities): Clean up wording to
+	reflect POSIX XCU ERN 118.
+
 	* src/m4.h (DEFAULT_MACRO_SEQUENCE): Factor out from...
 	* src/m4.c (usage): ...here,...
 	* src/builtin.c (set_macro_sequence): ...and here.
