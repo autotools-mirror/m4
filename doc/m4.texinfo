@@ -1691,6 +1691,20 @@ nargs((unquoted parentheses, like this, group arguments))
 @result{}1
 @end example
 
+Remember that @samp{#} defaults to the comment character; if you forget
+quotes to inhibit the comment behavior, your macro definition may not
+end where you expected.
+
+@example
+dnl Attempt to define a macro to just `$#'
+define(underquoted, $#)
+oops)
+@result{}
+underquoted
+@result{}0)
+@result{}oops
+@end example
+
 The notation @code{$*} can be used in the expansion text to denote all
 the actual arguments, unquoted, with commas in between.  For example
 
@@ -4750,14 +4764,14 @@ The macro @code{eval} is recognized only with parameters.
 
 All binary operators, except exponentiation, are left associative.  C
 operators that perform variable assignment, such as @samp{+=} or
-@samp{--}, are forbidden by @acronym{POSIX}, since @code{eval} only
-operates on constants, not variables.  Attempting to use them results
-in an error.  However, since traditional implementations treated
-@samp{=} as an undocumented alias for @samp{==} as opposed to an
-assignment operator, this usage is supported as a special case.  Be
-aware that a future version of @acronym{GNU} M4 may support assignment
-semantics as an extension when @acronym{POSIX} mode is not requested,
-and that using @samp{=} to check equality is not portable.
+@samp{--}, are not implemented, since @code{eval} only operates on
+constants, not variables.  Attempting to use them results in an error.
+However, since traditional implementations treated @samp{=} as an
+undocumented alias for @samp{==} as opposed to an assignment operator,
+this usage is supported as a special case.  Be aware that a future
+version of @acronym{GNU} M4 may support assignment semantics as an
+extension when @acronym{POSIX} mode is not requested, and that using
+@samp{=} to check equality is not portable.
 
 @comment status: 1
 @example
