@@ -33,12 +33,12 @@
 
 #define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan", "Eric Blake"
 
-typedef struct macro_definition
+typedef struct deferred
 {
-  struct macro_definition *next;
+  struct deferred *next;
   int code;			/* deferred optchar */
-  const char *macro;
-} macro_definition;
+  const char *value;
+} deferred;
 
 
 /* Error handling functions.  */
@@ -92,7 +92,7 @@ Operation modes:\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -r, --regexp-syntax[=SPEC]   set default regexp syntax to SPEC [EMACS]\n\
+  -r, --regexp-syntax[=SPEC]   set default regexp syntax to SPEC [GNU_M4]\n\
       --safer                  disable potentially unsafe builtins\n\
   -W, --warnings               enable all warnings\n\
 "), stdout);
@@ -325,13 +325,12 @@ process_file (m4 *context, const char *name)
 int
 main (int argc, char *const *argv, char *const *envp)
 {
-  macro_definition *head = NULL;	/* head of deferred argument list */
-  macro_definition *tail = NULL;
-  macro_definition *defn;
+  deferred *head = NULL;	/* head of deferred argument list */
+  deferred *tail = NULL;
+  deferred *defn;
   int optchar;			/* option character */
   size_t size;			/* for parsing numeric option arguments */
 
-  macro_definition *defines;
   bool read_stdin = false;	/* true iff we have read from stdin */
   bool import_environment = false; /* true to import environment */
   bool seen_file = false;
@@ -428,7 +427,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	defn = xmalloc (sizeof *defn);
 	defn->code = optchar;
-	defn->macro = optarg;
+	defn->value = optarg;
 	defn->next = NULL;
 
 	if (head == NULL)
@@ -513,8 +512,8 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'W':
 	/* FIXME - should W take an optional argument, to allow -Wall,
-	   -Wnone, -Werror, -Wcategory, -Wno-category?	If so, then have
-	   -W == -Wall.	 */
+	   -Wnone, -Werror, -Wcategory, -Wno-category?  If so, then have
+	   -W == -Wall.  */
 	m4_set_suppress_warnings_opt (context, false);
 	break;
 
@@ -641,7 +640,7 @@ main (int argc, char *const *argv, char *const *envp)
 	{
 	  defn = xmalloc (sizeof *defn);
 	  defn->code = 'D';
-	  defn->macro = *env;
+	  defn->value = *env;
 	  defn->next = head;
 	  head = defn;
 	}
@@ -649,99 +648,93 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Handle deferred command line macro definitions.  Must come after
      initialization of the symbol table.  */
-  {
-    defines = head;
+  defn = head;
+  while (defn != NULL)
+    {
+      deferred *next;
+      const char *arg = defn->value;
 
-    while (defines != NULL)
-      {
-	macro_definition *next;
-	const char *arg = defines->macro;
-
-	switch (defines->code)
+      switch (defn->code)
+	{
+	case 'D':
+	case 'p':
 	  {
-	  case 'D':
-	  case 'p':
-	    {
-	      m4_symbol_value *value = m4_symbol_value_create ();
+	    m4_symbol_value *value = m4_symbol_value_create ();
 
-	      /* defines->arg is read-only, so we need a copy.	*/
-	      char *macro_name = xstrdup (arg);
-	      char *macro_value = strchr (macro_name, '=');
+	    /* defn->value is read-only, so we need a copy.  */
+	    char *macro_name = xstrdup (arg);
+	    char *macro_value = strchr (macro_name, '=');
 
-	      if (macro_value != NULL)
-		*macro_value++ = '\0';
-	      m4_set_symbol_value_text (value, xstrdup (macro_value
-							? macro_value : ""));
+	    if (macro_value != NULL)
+	      *macro_value++ = '\0';
+	    m4_set_symbol_value_text (value, xstrdup (macro_value
+						      ? macro_value : ""));
 
-	      if (defines->code == 'D')
-		m4_symbol_define (M4SYMTAB, macro_name, value);
-	      else
-		m4_symbol_pushdef (M4SYMTAB, macro_name, value);
-	      free (macro_name);
-	    }
-	    break;
-
-	  case 'U':
-	    m4_symbol_delete (M4SYMTAB, arg);
-	    break;
-
-	  case 'm':
-	    /* FIXME - should loading a module result in output?  */
-	    m4_module_load (context, arg, NULL);
-	    break;
-
-	  case 'r':
-	    m4_set_regexp_syntax_opt (context,
-				      m4_regexp_syntax_encode (arg));
-	    if (m4_get_regexp_syntax_opt (context) < 0)
-	      {
-		m4_error (context, EXIT_FAILURE, 0,
-			  _("bad regexp syntax option: `%s'"), arg);
-	      }
-	    break;
-
-	  case 't':
-	    m4_set_symbol_name_traced (M4SYMTAB, arg, true);
-	    break;
-
-	  case '\1':
-	    read_stdin |= process_file (context, arg);
-	    break;
-
-	  case POPDEF_OPTION:
-	    if (m4_symbol_lookup (M4SYMTAB, arg))
-	      m4_symbol_popdef (M4SYMTAB, arg);
-	    break;
-
-	  case SYNCOUTPUT_OPTION:
-	    {
-	      bool previous = m4_get_syncoutput_opt (context);
-	      m4_set_syncoutput_opt (context,
-				     m4_parse_truth_arg (context, arg,
-							 "--syncoutput",
-							 previous));
-	    }
-	    break;
-
-	  case TRACEOFF_OPTION:
-	    m4_set_symbol_name_traced (M4SYMTAB, arg, false);
-	    break;
-
-	  case UNLOAD_MODULE_OPTION:
-	    /* FIXME - should unloading a module result in output?  */
-	    m4_module_unload (context, arg, NULL);
-	    break;
-
-	  default:
-	    assert (!"INTERNAL ERROR: bad code in deferred arguments");
-	    abort ();
+	    if (defn->code == 'D')
+	      m4_symbol_define (M4SYMTAB, macro_name, value);
+	    else
+	      m4_symbol_pushdef (M4SYMTAB, macro_name, value);
+	    free (macro_name);
 	  }
+	  break;
 
-	next = defines->next;
-	free (defines);
-	defines = next;
-      }
-  }
+	case 'U':
+	  m4_symbol_delete (M4SYMTAB, arg);
+	  break;
+
+	case 'm':
+	  /* FIXME - should loading a module result in output?  */
+	  m4_module_load (context, arg, NULL);
+	  break;
+
+	case 'r':
+	  m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
+	  if (m4_get_regexp_syntax_opt (context) < 0)
+	    m4_error (context, EXIT_FAILURE, 0,
+		      _("bad regexp syntax option: `%s'"), arg);
+	  break;
+
+	case 't':
+	  m4_set_symbol_name_traced (M4SYMTAB, arg, true);
+	  break;
+
+	case '\1':
+	  read_stdin |= process_file (context, arg);
+	  break;
+
+	case POPDEF_OPTION:
+	  if (m4_symbol_lookup (M4SYMTAB, arg))
+	    m4_symbol_popdef (M4SYMTAB, arg);
+	  break;
+
+	case SYNCOUTPUT_OPTION:
+	  {
+	    bool previous = m4_get_syncoutput_opt (context);
+	    m4_set_syncoutput_opt (context,
+				   m4_parse_truth_arg (context, arg,
+						       "--syncoutput",
+						       previous));
+	  }
+	  break;
+
+	case TRACEOFF_OPTION:
+	  m4_set_symbol_name_traced (M4SYMTAB, arg, false);
+	  break;
+
+	case UNLOAD_MODULE_OPTION:
+	  /* FIXME - should unloading a module result in output?  */
+	  m4_module_unload (context, arg, NULL);
+	  break;
+
+	default:
+	  assert (!"INTERNAL ERROR: bad code in deferred arguments");
+	  abort ();
+	}
+
+      next = defn->next;
+      free (defn);
+      defn = next;
+    }
 
   /* Handle remaining input files.  Each file is pushed on the input,
      and the input read.  */

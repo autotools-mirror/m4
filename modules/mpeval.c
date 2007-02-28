@@ -143,7 +143,6 @@ static void numb_not (m4 *context, number *x);
 static void numb_lshift (m4 *context, number *x, number *y);
 static void numb_rshift (m4 *context, number *x, number *y);
 #define numb_urshift(c, x, y) numb_rshift (c, x, y)
-#define numb_extension(c) /* no-op */
 
 
 static number numb_ZERO;

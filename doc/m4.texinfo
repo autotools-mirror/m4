@@ -655,11 +655,12 @@ expectations, please report that as a bug.  This option is implied if
 @item -r@r{[}@var{RESYNTAX-SPEC}@r{]}
 @itemx --regexp-syntax@r{[}=@var{RESYNTAX-SPEC}@r{]}
 Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
-When this option is not given, @var{RESYNTAX-SPEC} is omitted,
-@acronym{GNU} M4 uses emacs compatible regular expressions.
-@xref{Changeresyntax}, for more details on the format and meaning of
-@var{RESYNTAX-SPEC}.  This option may be given more than once, and order
-with respect to file names is significant.
+When this option is not given, or @var{RESYNTAX-SPEC} is omitted,
+@acronym{GNU} M4 uses the flavor @code{GNU_M4}, which provides
+emacs-compatible regular expressions.  @xref{Changeresyntax}, for more
+details on the format and meaning of @var{RESYNTAX-SPEC}.  This option
+may be given more than once, and order with respect to file names is
+significant.
 
 @item --safer
 Cripple the following builtins, since each can perform potentially
@@ -735,13 +736,12 @@ spelling, or by using @samp{./@var{number}} if you really meant it.
 
 @item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
 @itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table, before any input files are
-read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
-empty string.  The @var{VALUE} can be any string, and the macro can be
-defined to take arguments, just as if it was defined from within the
-input.  This option may be given more than once; order with respect to
-file names is significant, and redefining the same @var{NAME} loses the
-previous value.
+This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
+missing, the value is taken to be the empty string.  The @var{VALUE} can
+be any string, and the macro can be defined to take arguments, just as
+if it was defined from within the input.  This option may be given more
+than once; order with respect to file names is significant, and
+redefining the same @var{NAME} loses the previous value.
 
 @item --import-environment
 Imports every variable in the environment as a macro.  This is done
@@ -763,13 +763,12 @@ file names.
 
 @item -p @var{NAME}@r{[}=@var{VALUE}@r{]}
 @itemx --pushdef=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table, before any input files are
-read.  If @samp{=@var{VALUE}} is missing, the value is taken to be the
-empty string.  The @var{VALUE} can be any string, and the macro can be
-defined to take arguments, just as if it was defined from within the
-input.  This option may be given more than once; order with respect to
-file names is significant, and redefining the same @var{NAME} adds
-another definition to its stack.
+This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
+missing, the value is taken to be the empty string.  The @var{VALUE} can
+be any string, and the macro can be defined to take arguments, just as
+if it was defined from within the input.  This option may be given more
+than once; order with respect to file names is significant, and
+redefining the same @var{NAME} adds another definition to its stack.
 
 @item -s
 @itemx --synclines
@@ -1922,6 +1921,20 @@ still arg1)
 @result{}1
 nargs((unquoted parentheses, like this, group arguments))
 @result{}1
+@end example
+
+Remember that @samp{#} defaults to the comment character; if you forget
+quotes to inhibit the comment behavior, your macro definition may not
+end where you expected.
+
+@example
+dnl Attempt to define a macro to just `$#'
+define(underquoted, $#)
+oops)
+@result{}
+underquoted
+@result{}0)
+@result{}oops
 @end example
 
 The notation @code{$*} can be used in the expansion text to denote all
@@ -4168,7 +4181,8 @@ Changes the default regular expression syntax used by M4 according to
 the value of @var{resyntax}, equivalent to passing @var{resyntax} as the
 argument to the command line option @option{--regexp-syntax}
 (@pxref{Operation modes, , Invoking m4}).  If @var{resyntax} is empty,
-the default flavor is reverted to emacs style.
+the default flavor is reverted to the @code{GNU_M4} style, compatible
+with emacs.
 
 @var{resyntax} can be any one of the values in the table below.  Case is
 not important, and @kbd{-} or @kbd{ } can be substituted for @kbd{_} in
@@ -4354,8 +4368,6 @@ escapes.
 @comment FIXME - we should also consider supporting:
 @comment @item Ignore - characters that are ignored if they appear in
 @comment the input; perhaps defaulting to '\0', category 'I'.
-@comment @item Assign -character used in macro definitions for default
-@comment variables, category '='.
 @end table
 
 @noindent
@@ -4412,6 +4424,10 @@ Close parenthesis
 Argument separator
 @item $
 Dollar
+@item @{
+Left brace
+@item @}
+Right brace
 @item O
 Other
 @item @@
@@ -4428,8 +4444,6 @@ Begin comment
 End comment
 @comment @item I
 @comment Ignore
-@comment @item =
-@comment Assign
 @end table
 
 The remaining characters of each @var{syntax-spec} form the set of
@@ -6046,11 +6060,10 @@ The macro @code{eval} is recognized only with parameters.
 @end deffn
 
 All binary operators, except exponentiation, are left associative.  C
-operators that perform variable assignment, such as @samp{=} or
-@samp{--}, are forbidden by @acronym{POSIX}, since @code{eval} only
-operates on constants, not variables.  Attempting to use them results
-in an error.
-@comment fixme If XCU ERN 137 is approved, then we could provide an
+operators that perform variable assignment, such as @samp{+=} or
+@samp{--}, are not implemented, since @code{eval} only operates on
+constants, not variables.  Attempting to use them results in an error.
+@comment FIXME - since XCU ERN 137 is approved, we could provide an
 @comment extension that supported assignment operators.
 
 Note that some older @code{m4} implementations use @samp{^} as an
@@ -6122,6 +6135,7 @@ shifting a negative number as though it were an unsigned bit pattern,
 which shifts in 0 bits rather than twos-complement sign-extension.  A
 ratio operator @samp{\} behaves like normal division @samp{/} on
 integers, but is provided for symmetry with @code{mpeval}.
+Additionally, the C operators @samp{,} and @samp{?:} are supported.
 
 @example
 eval(`2 ** 3 ** 2')
@@ -6146,38 +6160,16 @@ eval(`(-1 >>> 1) > (1 << 30)')
 @result{}1
 eval(`6 \ 3')
 @result{}2
-@end example
-
-Furthermore, when you do not use the @option{--traditional} command line
-option (or @option{-G}, @pxref{Limits control, , Invoking m4}), the C
-operators @samp{,} and @samp{?:} are supported.  But in traditional
-mode, @acronym{POSIX} requires that the use of these two operators cause
-an error.
-
-@example
-$ @kbd{m4}
-eval(`1?2:3')
+eval(`1 ? 2 : 3')
 @result{}2
-eval(`0?2:3')
+eval(`0 ? 2 : 3')
 @result{}3
-eval(`1?2:1/0')
+eval(`1 ? 2 : 1/0')
 @result{}2
-eval(`0?1/0:3')
+eval(`0 ? 1/0 : 3')
 @result{}3
-eval(`4,5')
+eval(`4, 5')
 @result{}5
-@end example
-
-@comment options: -G
-@comment status: 1
-@example
-$ @kbd{m4 --posix}
-eval(`1?2:3')
-@error{}m4:stdin:1: eval: invalid operator: 1?2:3
-@result{}
-eval(`4,5')
-@error{}m4:stdin:2: eval: invalid operator: 4,5
-@result{}
 @end example
 
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers

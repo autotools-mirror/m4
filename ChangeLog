@@ -1,5 +1,23 @@
 2007-02-28  Eric Blake  <ebb9@byu.net>
 
+	POSIX XCU ERN 137 was approved.
+	* modules/mpeval.c (numb_extension): Delete.
+	* modules/m4.c (numb_extension): Likewise.
+	* modules/evalparse.c (comma_term, condition_term): Always
+	implement ?: and , operators.
+	* m4/symtab.c: Update comment to match reality.
+	* src/freeze.c (produce_frozen_state, reload_frozen_state): Avoid
+	dereferencing context directly when accessor exists.
+	* src/main.c (usage): Prefer GNU_M4 over EMACS.
+	(struct macro_definition): Rename...
+	(struct deferred): ...to match usage.  All uses changed.
+	* doc/m4.texinfo (Eval): Document this change.
+	(Operation modes, Changeresyntax): Fix wording to prefer GNU_M4
+	over emacs.
+	(Preprocessor features, Changesyntax): Fix inaccuracies.
+	* NEWS: Import branch NEWS items for 1.4.x series.  Document
+	change in eval.
+
 	POSIX XCU ERN 118 was approved.
 	* modules/m4.c (define): Kill posixly_correct distinction in
 	define behavior, since POSIX says GNU behavior complies.

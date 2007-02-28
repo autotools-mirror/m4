@@ -32,15 +32,16 @@
    simply ordered on the stack by age.  The most recently pushed definition
    will then always be the first found.
 
-   Also worthy of mention is the way traced symbols are managed:  the trace
-   bit is associated with a particular symbol name.  If a symbol is
-   undefined and then redefined, it does not lose its trace bit (in GNU
-   mode).  This is achieved by not removing traced symbol names from the
-   symbol table, even if their value stack is empty.  That way, when the
-   name is given a new value, it is pushed onto the empty stack, and the
-   trace bit attached to the name was never lost.  There is a small amount
-   of fluff in these functions to make sure that such symbols (with empty
-   value stacks) are invisible to the users of this module.  */
+   Also worthy of mention is the way traced symbols are managed: the
+   trace bit is associated with a particular symbol name.  If a symbol
+   is undefined and then redefined, it does not lose its trace bit.
+   This is achieved by not removing traced symbol names from the
+   symbol table, even if their value stack is empty.  That way, when
+   the name is given a new value, it is pushed onto the empty stack,
+   and the trace bit attached to the name was never lost.  There is a
+   small amount of fluff in these functions to make sure that such
+   symbols (with empty value stacks) are invisible to the users of
+   this module.  */
 
 #define M4_SYMTAB_DEFAULT_SIZE		2047
 

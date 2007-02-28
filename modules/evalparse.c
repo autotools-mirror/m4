@@ -341,9 +341,6 @@ comma_term (m4 *context, eval_token et, number *v1)
   numb_init (v2);
   while ((et = eval_lex (&v2)) == COMMA)
     {
-      /* Unless XCU ERN 137 is approved, eval must reject this in
-	 POSIX mode.  */
-      numb_extension (context);
       et = eval_lex (&v2);
       if (et == ERROR)
 	return UNKNOWN_INPUT;
@@ -374,9 +371,6 @@ condition_term (m4 *context, eval_token et, number *v1)
   numb_init (v3);
   if ((et = eval_lex (&v2)) == QUESTION)
     {
-      /* Unless XCU ERN 137 is approved, eval must reject this in
-	 POSIX mode.  */
-      numb_extension (context);
       et = eval_lex (&v2);
       if (et == ERROR)
 	return UNKNOWN_INPUT;

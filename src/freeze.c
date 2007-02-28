@@ -239,12 +239,12 @@ produce_frozen_state (m4 *context, const char *name)
       || strcmp (m4_get_syntax_rquote (M4SYNTAX), DEF_RQUOTE))
     {
       fprintf (file, "Q%lu,%lu\n",
-	       (unsigned long int) context->syntax->lquote.length,
-	       (unsigned long int) context->syntax->rquote.length);
-      produce_mem_dump (file, context->syntax->lquote.string,
-			context->syntax->lquote.length);
-      produce_mem_dump (file, context->syntax->rquote.string,
-			context->syntax->rquote.length);
+	       (unsigned long int) M4SYNTAX->lquote.length,
+	       (unsigned long int) M4SYNTAX->rquote.length);
+      produce_mem_dump (file, M4SYNTAX->lquote.string,
+			M4SYNTAX->lquote.length);
+      produce_mem_dump (file, M4SYNTAX->rquote.string,
+                        M4SYNTAX->rquote.length);
       fputc ('\n', file);
     }
 
@@ -254,12 +254,10 @@ produce_frozen_state (m4 *context, const char *name)
       || strcmp (m4_get_syntax_ecomm (M4SYNTAX), DEF_ECOMM))
     {
       fprintf (file, "C%lu,%lu\n",
-	       (unsigned long int) context->syntax->bcomm.length,
-	       (unsigned long int) context->syntax->ecomm.length);
-      produce_mem_dump (file, context->syntax->bcomm.string,
-			context->syntax->bcomm.length);
-      produce_mem_dump (file, context->syntax->ecomm.string,
-			context->syntax->ecomm.length);
+	       (unsigned long int) M4SYNTAX->bcomm.length,
+	       (unsigned long int) M4SYNTAX->ecomm.length);
+      produce_mem_dump (file, M4SYNTAX->bcomm.string, M4SYNTAX->bcomm.length);
+      produce_mem_dump (file, M4SYNTAX->ecomm.string, M4SYNTAX->ecomm.length);
       fputc ('\n', file);
     }
 
@@ -495,7 +493,7 @@ reload_frozen_state (m4 *context, const char *name)
 	m4__module_open (context, "gnu", NULL);
       /* Disable { and } categories, since ${11} was not supported in
          1.4.x.  */
-      m4_set_syntax (context->syntax, 'O', '+', "{}");
+      m4_set_syntax (M4SYNTAX, 'O', '+', "{}");
       break;
     default:
       if (version > 2)
@@ -646,7 +644,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 
 	  /* Syntax under M4_SYNTAX_MASKS is handled specially; all
 	     other characters are additive.  */
-	  if ((m4_set_syntax (context->syntax, syntax,
+	  if ((m4_set_syntax (M4SYNTAX, syntax,
 			      (m4_syntax_code (syntax) & M4_SYNTAX_MASKS
 			       ? '=' : '+'), string[0]) < 0)
 	      && (syntax != '\0'))

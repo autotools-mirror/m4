@@ -1111,15 +1111,6 @@ M4BUILTIN_HANDLER (translit)
 #define numb_urshift(c, x, y)				\
    (*(x) = (number) ((unumber) *(x) >> (unumber) *(y)))
 
-#define numb_extension(c)			      \
-  do						      \
-    {						      \
-      /* Revisit this if XCU ERN 137 is approved.  */ \
-      if (m4_get_posixly_correct_opt (context))	      \
-	return INVALID_OPERATOR;		      \
-    }						      \
-  while (0)
-
 
 /* The function ntoa () converts VALUE to a signed ascii representation in
    radix RADIX.  */
