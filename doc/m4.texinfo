@@ -6351,19 +6351,19 @@ mpeval(`-1 >>> 1')
 @node Shell commands
 @chapter Macros for running shell commands
 
+@cindex UNIX commands, running
 @cindex executing shell commands
 @cindex running shell commands
 @cindex shell commands, running
-@cindex UNIX commands, running
 @cindex commands, running shell
 There are a few builtin macros in @code{m4} that allow you to run shell
 commands from within @code{m4}.
 
 Note that the definition of a valid shell command is system dependent.
-On UNIX systems, this is the typical @code{/bin/sh}.  But on other
+On UNIX systems, this is the typical @command{/bin/sh}.  But on other
 systems, such as native Windows, the shell has a different syntax of
 commands that it understands.  Some examples in this chapter assume
-@code{/bin/sh}, and also demonstrate how to quit early with a known
+@command{/bin/sh}, and also demonstrate how to quit early with a known
 exit value if this is not the case.
 
 @menu
@@ -6377,6 +6377,8 @@ exit value if this is not the case.
 
 @node Platform macros
 @section Determining the platform
+
+@cindex platform macros
 Sometimes it is desirable for an input file to know which platform
 @code{m4} is running on.  @acronym{GNU} @code{m4} provides several
 macros that are predefined to expand to the empty string; checking for
@@ -6425,16 +6427,17 @@ provided
 @node Syscmd
 @section Executing simple commands
 
+Any shell command can be executed, using @code{syscmd}:
+
 @deffn {Builtin (m4)} syscmd (@var{shell-command})
-Any shell command can be executed, using @code{syscmd}, which executes
-@var{shell-command} as a shell command.
+Executes @var{shell-command} as a shell command.
 
 The expansion of @code{syscmd} is void, @emph{not} the output from
 @var{shell-command}!  Output or error messages from @var{shell-command}
 are not read by @code{m4}.  @xref{Esyscmd}, if you need to process the
 command output.
 
-Prior to executing the command, @code{m4} flushes its output buffers.
+Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
@@ -6442,7 +6445,7 @@ When the @option{--safer} option (@pxref{Operation modes, , Invoking
 m4}) is in effect, @code{syscmd} results in an error, since otherwise an
 input file could execute arbitrary code.
 
-The builtin macro @code{syscmd} is recognized only when given arguments.
+The macro @code{syscmd} is recognized only with parameters.
 @end deffn
 
 @example
@@ -6455,6 +6458,33 @@ syscmd(`echo foo')
 
 Note how the expansion of @code{syscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
+
+The following is an example of @var{shell-command} using the same
+standard input as @code{m4}:
+
+@comment The testsuite does not know how to parse pipes from the
+@comment texinfo.  Fortunately, there are other tests in the testsuite
+@comment that test this same feature.
+@comment ignore
+@example
+$ @kbd{echo "m4wrap(\`syscmd(\`cat')')" | m4}
+@result{}
+@end example
+
+It tells @code{m4} to read all of its input before executing the wrapped
+text, then hands a valid (albeit emptied) pipe as standard input for the
+@code{cat} subcommand.  Therefore, you should be careful when using
+standard input (either by specifying no files, or by passing @samp{-} as
+a file name on the command line, @pxref{Command line files, , Invoking
+m4}), and also invoking subcommands via @code{syscmd} or @code{esyscmd}
+that consume data from standard input.  When standard input is a
+seekable file, the subprocess will pick up with the next character not
+yet processed by @code{m4}; when it is a pipe or other non-seekable
+file, there is no guarantee how much data will already be buffered by
+@code{m4} and thus unavailable to the child.
+
+Following is an example of how potentially unsafe actions can be
+suppressed.
 
 @comment options: --safer
 @comment status: 1
@@ -6469,16 +6499,25 @@ syscmd(`echo hi')
 @section Reading the output of commands
 
 @cindex @acronym{GNU} extensions
-@deffn {Builtin (gnu)} esyscmd (@var{shell-command})
 If you want @code{m4} to read the output of a shell command, use
-@code{esyscmd}, which expands to the standard output of the shell
-command @var{shell-command}.
+@code{esyscmd}:
 
-Prior to executing the command, @code{m4} flushes its output buffers.
+@deffn {Builtin (gnu)} esyscmd (@var{shell-command})
+Expands to the standard output of the shell command
+@var{shell-command}.
+
+Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
+
+When the @option{--safer} option (@pxref{Operation modes, , Invoking
+m4}) is in effect, @code{esyscmd} results in an error, since otherwise
+an input file could execute arbitrary code.
+
+The macro @code{esyscmd} is recognized only with parameters.
+@end deffn
 
 @example
 define(`foo', `FOO')
@@ -6491,13 +6530,9 @@ esyscmd(`echo foo')
 Note how the expansion of @code{esyscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
-When the @option{--safer} option (@pxref{Operation modes, , Invoking
-m4}) is in effect, @code{esyscmd} results in an error, since otherwise
-an input file could execute arbitrary code.
-
-The builtin macro @code{esyscmd} is recognized only when given
-arguments.
-@end deffn
+Just as with @code{syscmd}, care must be exercised when sharing standard
+input between @code{m4} and the child process of @code{esyscmd}.
+Likewise, potentially unsafe actions can be suppressed.
 
 @comment options: --safer
 @comment status: 1
