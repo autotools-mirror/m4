@@ -1,5 +1,9 @@
 2007-03-01  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Improve the indices.
+	(Concept index): Rearrange to be last.
+	(Sysval): Merge from branch.
+
 	* doc/m4.texinfo (Syscmd, Esyscmd): Merge more doc sections.
 
 2007-02-28  Eric Blake  <ebb9@byu.net>
