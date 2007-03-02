@@ -1,5 +1,9 @@
 2007-03-01  Eric Blake  <ebb9@byu.net>
 
+	* doc/m4.texinfo: Pick up more index entries from head.  Follow
+	more texinfo recommendations.
+	(Sysval): Improve tests.
+
 	Avoid overfull \vbox warning from texinfo, due to indices that
 	weren't quite big enough to split across page boundaries.
 	* doc/m4.texinfo: Add lots of concept index entries.

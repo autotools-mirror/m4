@@ -2,14 +2,13 @@
 @comment ========================================================
 @comment %**start of header
 @setfilename m4.info
-@settitle GNU M4 macro processor
+@include version.texi
+@settitle GNU M4 @value{VERSION} macro processor
 @setchapternewpage odd
 @ifnothtml
 @setcontentsaftertitlepage
 @end ifnothtml
 @finalout
-
-@include version.texi
 
 @c @tabchar{}
 @c ----------
@@ -476,6 +475,7 @@ would explicitly pass the empty string for @var{count}.  The ellipses
 after @var{argument}, rather than ignoring them.
 @end deffn
 
+@cindex numbers
 All macro arguments in @code{m4} are strings, but some are given
 special interpretation, e.g., as numbers, file names, regular
 expressions, etc.  The documentation for each macro will state how the
@@ -645,7 +645,7 @@ details.  This option may be given more than once.
 
 @item -s
 @itemx --synclines
-@cindex syncronization lines
+@cindex synchronization lines
 @cindex location, input
 @cindex input location
 Generate synchronization lines, for use by the C preprocessor or other
@@ -2786,6 +2786,7 @@ Fortunately, there is support for macro debugging in @code{m4}.
 @cindex displaying macro definitions
 @cindex macros, displaying definitions
 @cindex definitions, displaying macro
+@cindex standard error, output to
 If you want to see what a name expands into, you can use the builtin
 @code{dumpdef}:
 
@@ -2835,6 +2836,7 @@ display.
 @cindex tracing macro expansion
 @cindex macro expansion, tracing
 @cindex expansion, tracing macro
+@cindex standard error, output to
 It is possible to trace macro calls and expansions through the builtins
 @code{traceon} and @code{traceoff}:
 
@@ -3822,7 +3824,6 @@ m4wrap(`m4wrap(`)')len(abc')
 
 @cindex file inclusion
 @cindex inclusion, of files
-
 @code{m4} allows you to include named files at any point in the input.
 
 @menu
@@ -3929,6 +3930,7 @@ using @code{undivert} (@pxref{Undivert}) on a named file.
 @acronym{GNU} @code{m4} allows included files to be found in other directories
 than the current working directory.
 
+@cindex @env{M4PATH}
 If the @option{--prepend-include} or @option{-B} command-line option was
 provided (@pxref{Preprocessor features, , Invoking m4}), those
 directories are searched first, in reverse order that those options were
@@ -3951,6 +3953,7 @@ Diversions are a way of temporarily saving output.  The output of
 reinserted into the output stream, @dfn{undiverted}, again at a later
 time.
 
+@cindex @env{TMPDIR}
 Numbered diversions are counted from 0 upwards, diversion number 0
 being the normal output stream.  The number of simultaneous diversions
 is limited mainly by the memory used to describe them, because @acronym{GNU}
@@ -4155,6 +4158,7 @@ undiverted, in numerical order.
 
 @cindex file inclusion
 @cindex inclusion, of files
+@cindex @acronym{GNU} extensions
 As a @acronym{GNU} extension, @var{diversions} may contain non-numeric
 strings, which are treated as the names of files to copy into the output
 without expansion.  A warning is issued if a file could not be opened.
@@ -5249,6 +5253,8 @@ run yet.
 @end deffn
 
 @example
+sysval
+@result{}0
 syscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
@@ -5306,6 +5312,10 @@ syscmd(`kill -9 $$')
 @result{}
 sysval
 @result{}2304
+syscmd()
+@result{}
+sysval
+@result{}0
 esyscmd(`kill -9 $$')
 @result{}
 sysval
@@ -5414,6 +5424,7 @@ any of the previous chapters.
 @cindex printing error messages
 @cindex error messages, printing
 @cindex messages, printing error
+@cindex standard error, output to
 You can print error messages using @code{errprint}:
 
 @deffn Builtin errprint (@var{message}, @dots{})
@@ -5617,9 +5628,10 @@ speed up the start of an application using lengthy common bases.
 
 @node Using frozen files
 @section Using frozen files
+
 @cindex fast loading of frozen files
 @cindex frozen files for fast loading
-@cindex initialization, frozen states
+@cindex initialization, frozen state
 @cindex dumping into frozen file
 @cindex reloading a frozen file
 @cindex @acronym{GNU} extensions
@@ -5717,6 +5729,7 @@ exit with status 63 to indicate version mismatch.
 
 @node Frozen file format
 @section Frozen file format
+
 @cindex frozen file format
 @cindex file format, frozen file
 Frozen files are sharable across architectures.  It is safe to write
@@ -5804,6 +5817,7 @@ is made to summarize these here.
 @section Extensions in @acronym{GNU} @code{m4}
 
 @cindex @acronym{GNU} extensions
+@cindex @acronym{POSIX}
 This version of @code{m4} contains a few facilities that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
 using the @option{-G} command line option (@pxref{Limits control, ,
