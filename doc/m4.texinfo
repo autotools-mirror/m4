@@ -783,7 +783,8 @@ redefining the same @var{NAME} adds another definition to its stack.
 
 @item -s
 @itemx --synclines
-Short for @option{--syncoutput=1}, turning synchronization lines on.
+Short for @option{--syncoutput=1}, turning on synchronization lines
+(sometimes called @dfn{synclines}).
 
 @item --syncoutput@r{[}=STATE@r{]}
 @cindex synchronization lines
@@ -6946,6 +6947,7 @@ any of the previous chapters.
 @cindex printing error messages
 @cindex error messages, printing
 @cindex messages, printing error
+@cindex standard error, output to
 You can print error messages using @code{errprint}:
 
 @deffn {Builtin (m4)} errprint (@var{message}, @dots{})
@@ -7082,26 +7084,55 @@ If you need to exit from @code{m4} before the entire input has been
 read, you can use @code{m4exit}:
 
 @deffn {Builtin (m4)} m4exit (@ovar{code})
-If you need to exit from @code{m4} before the entire input has been
-read, you can use @code{m4exit}, which causes @code{m4} to exit, with
-exit code @var{code}.  If @var{code} is left out, the exit code is
-zero.
+Causes @code{m4} to exit, with exit status @var{code}.  If @var{code} is
+left out, the exit status is zero.  If @var{code} cannot be parsed, or
+is outside the range of 0 to 255, the exit status is one.  No further
+input is read, and all wrapped and diverted text is discarded.
+@end deffn
+
+@example
+m4wrap(`This text is lost due to `m4exit'.')
+@result{}
+divert(`1') So is this.
+divert
+@result{}
+m4exit And this is never read.
+@end example
+
+A common use of this is to abort processing:
+
+@deffn Composite fatal_error (@var{message})
+Abort processing with an error message and non-zero status.  Prefix
+@var{message} with details about where the error occurred, and print the
+resulting string to standard error.
 @end deffn
 
 @comment status: 1
 @example
 define(`fatal_error',
-       `errprint(`m4:'__file__:__line__`: fatal error: $*
-')m4exit(1)')
+       `errprint(__program__:__file__:__line__`: fatal error: $*
+')m4exit(`1')')
 @result{}
-fatal_error(`This is a BAD one, buster')
-@error{}m4:stdin:4: fatal error: This is a BAD one, buster
+fatal_error(`this is a BAD one, buster')
+@error{}m4:stdin:4: fatal error: this is a BAD one, buster
 @end example
 
-After this macro call, @code{m4} will exit with exit code 1.  This macro
+After this macro call, @code{m4} will exit with exit status 1.  This macro
 is only intended for error exits, since the normal exit procedures are
 not followed, e.g., diverted text is not undiverted, and saved text
-(@pxref{M4wrap}) is not reread.
+(@pxref{M4wrap}) is not reread.  (This macro could be made more robust
+to earlier versions of @code{m4}.  You should try to see if you can find
+weaknesses and correct them; or @pxref{Improved fatal_error, , Answers}).
+
+Note that it is still possible for the exit status to be different than
+what was requested by @code{m4exit}.  If @code{m4} detects some other
+error, such as a write error on standard output, the exit status will be
+non-zero even if @code{m4exit} requested zero.
+
+If standard input is seekable, then the file will be positioned at the
+next unread character.  If it is a pipe or other non-seekable file,
+then there are no guarantees how much data @code{m4} might have read
+into buffers, and thus discarded.
 
 @node Syncoutput
 @section Turning on and off sync lines
@@ -7110,11 +7141,9 @@ not followed, e.g., diverted text is not undiverted, and saved text
 @cindex synchronization lines
 @cindex location, input
 @cindex input location
-@deffn {Builtin (gnu)} syncoutput (@var{truth})
-If you need to toggle sync lines on and off while processing macros, or
-to insure that they are off or on, you may do so using
-@code{syncoutput}.
+It is possible to adjust whether synclines are printed to output:
 
+@deffn {Builtin (gnu)} syncoutput (@var{truth})
 If @var{truth} matches the extended regular expression
 @samp{^[1yY]|^([oO][nN])}, it causes @code{m4} to emit sync lines of the
 form: @code{#line <number> ["<file>"]}.
@@ -7122,9 +7151,66 @@ form: @code{#line <number> ["<file>"]}.
 If @var{truth} is empty, or matches the extended regular expression
 @samp{^[0nN]|^([oO][fF])}, it causes @code{m4} to turn sync lines off.
 
-All other arguments are ignored and issue a warning.  The macro
-@code{syncoutput} is only recognized with arguments.
+All other arguments are ignored and issue a warning.
+
+The macro @code{syncoutput} is recognized only with parameters.
+This macro was added in M4 2.0.
 @end deffn
+
+@example
+define(`twoline', `1
+2')
+@result{}
+twoline
+@result{}1
+@result{}2
+dnl no line
+syncoutput(`on')
+@result{}#line 5 "stdin"
+@result{}
+twoline
+@result{}1
+@result{}#line 6
+@result{}2
+dnl no line
+hello
+@result{}#line 8
+@result{}hello
+syncoutput(`off')
+@result{}
+twoline
+@result{}1
+@result{}2
+syncoutput(`blah')
+@error{}m4:stdin:11: Warning: syncoutput: unknown directive `blah'
+@result{}
+@end example
+
+Notice that a syncline is output any time a single source line expands
+to multiple output lines, or any time multiple source lines expand to a
+single output line.  When there is a one-for-one correspondence, no
+additional synclines are needed.
+
+Synchronization lines can be used to track where input comes from; an
+optional file designation is printed when the syncline algorithm
+detects that consecutive output lines come from different files.  You
+can also use the @option{--synclines} command-line option (or
+@option{-s}, @pxref{Preprocessor features, , Invoking m4}) to start
+with synchronization on.  This example reuses the file @file{incl.m4}
+mentioned earlier (@pxref{Include}):
+
+@comment examples
+@comment options: -s
+@example
+$ @kbd{m4 --synclines -I examples}
+include(`incl.m4')
+@result{}#line 1 "examples/incl.m4"
+@result{}Include file start
+@result{}foo
+@result{}Include file end
+@result{}#line 1 "stdin"
+@result{}
+@end example
 
 @node Frozen files
 @chapter Fast loading of frozen state

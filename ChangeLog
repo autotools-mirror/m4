@@ -1,3 +1,9 @@
+2007-03-03  Eric Blake  <ebb9@byu.net>
+
+	* m4/input.c (m4__next_token): Fix synclines when in batch mode.
+	* doc/m4.texinfo (M4exit): Synch another section.
+	(Syncoutput): Make similar to other sections.
+
 2007-03-01  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo: Improve the indices.

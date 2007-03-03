@@ -1180,8 +1180,10 @@ m4__next_token (m4 *context, m4_symbol_value *token)
 	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  {
-	    /* Coalescing newlines when interactive is wrong.  */
-	    if (!m4_get_interactive_opt (context))
+	    /* Coalescing newlines when interactive or when synclines
+	       are enabled is wrong.  */
+	    if (!m4_get_interactive_opt (context)
+		&& !m4_get_syncoutput_opt (context))
 	      consume_syntax (context, &token_stack, M4_SYNTAX_SPACE);
 	    type = M4_TOKEN_SPACE;
 	  }
