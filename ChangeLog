@@ -1,5 +1,7 @@
 2007-03-07  Eric Blake  <ebb9@byu.net>
 
+	* AUTHORS: Update
+
 	Exercise gnulib's new POSIX *printf modules.
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	vasprintf-posix'.
