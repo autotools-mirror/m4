@@ -66,9 +66,9 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @title GNU M4, version @value{VERSION}
 @subtitle A powerful macro processor
 @subtitle Edition @value{EDITION}, @value{UPDATED}
-@author by Ren@'e Seindal
-@author and Gary V. Vaughan
-@author and Eric Blake
+@author by Ren@'e Seindal, Fran@,{c}ois Pinard,
+@author Gary V. Vaughan, and Eric Blake
+@author (@email{bug-m4@@gnu.org})
 
 @page
 @vskip 0pt plus 1filll
@@ -431,11 +431,11 @@ send us the input file and the exact results @code{m4} gave you.  Also
 say what you expected to occur; this will help us decide whether the
 problem was really in the documentation.
 
-Once you've got a precise problem, send e-mail to (Internet)
+Once you've got a precise problem, send e-mail to
 @email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
 you are using.  You can get this information with the command
-@kbd{m4 --version}.  You can also run @kbd{make check} to generate the file
-@file{tests/@/testsuite.log}, useful for including in your report.
+@kbd{m4 --version}.  You can also run @kbd{make check} to generate the
+file @file{tests/@/testsuite.log}, useful for including in your report.
 
 Non-bug suggestions are always welcome as well.  If you have questions
 about things that are unclear in the documentation or are just obscure
@@ -5996,6 +5996,10 @@ format(`%.0f', `56789.9876')
 @result{}56790
 len(format(`%-*X', `5000', `1'))
 @result{}5000
+ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
+       format(`%.1A', `1.999'), `0X2.0P+0', `success',
+       `fail')
+@result{}success
 @end example
 
 Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
@@ -6022,13 +6026,15 @@ forloop(`i', `1', `10', `format(`%6d squared is %10d
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
-function, and supports these @samp{%} specifiers: @samp{c},
-@samp{s}, @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{e},
-@samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and @samp{%}; it
-supports field widths and precisions, and the
-modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
+function, and supports these @samp{%} specifiers: @samp{c}, @samp{s},
+@samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{a}, @samp{A},
+@samp{e}, @samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and
+@samp{%}; it supports field widths and precisions, and the modifiers
+@samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
 @samp{l}.  For more details on the functioning of @code{printf}, see the
-C Library Manual.
+C Library Manual, or the @acronym{POSIX} specification (for example,
+@samp{%a} is supported even on platforms that haven't yet implemented
+C99 hexadecimal floating point output natively).
 
 @c FIXME - format still needs some improvements.
 For now, unrecognized specifiers are silently ignored, but it is

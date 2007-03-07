@@ -1,3 +1,12 @@
+2007-03-07  Eric Blake  <ebb9@byu.net>
+
+	Exercise gnulib's new POSIX *printf modules.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	vasprintf-posix'.
+	* modules/format.c (format): Support %a and %A.
+	* doc/m4.texinfo (Format): Test this addition.
+	* NEWS: Document this addition.
+
 2007-03-03  Eric Blake  <ebb9@byu.net>
 
 	* m4/input.c (m4__next_token): Fix synclines when in batch mode.

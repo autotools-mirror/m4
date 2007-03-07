@@ -164,6 +164,9 @@ promoted to 2.0.
 *** The `eval' and `mpeval' builtins now support the following new
     operators: `>>>', `\', `?:', and  `,'.
 
+*** The `format' builtin now supports the C99 specifiers of %a and %A, even
+    on platforms that don't yet support C99.
+
 *** The `maketemp' builtin now always warns that it is obsolete, even in GNU
     mode where it uses the same secure algorithm as `mkstemp', because of
     the recommendation of POSIX to obsolete `maketemp' as inherently

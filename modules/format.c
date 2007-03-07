@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -205,6 +205,8 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	    }
 	  break;
 
+	case 'a':
+	case 'A':
 	case 'e':
 	case 'E':
 	case 'f':
