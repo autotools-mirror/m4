@@ -64,7 +64,9 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @title GNU M4, version @value{VERSION}
 @subtitle A powerful macro processor
 @subtitle Edition @value{EDITION}, @value{UPDATED}
-@author by Ren@'e Seindal
+@author by Ren@'e Seindal, Fran@,{c}ois Pinard,
+@author Gary V. Vaughan, and Eric Blake
+@author (@email{bug-m4@@gnu.org})
 
 @page
 @vskip 0pt plus 1filll
@@ -409,7 +411,7 @@ send us the input file and the exact results @code{m4} gave you.  Also
 say what you expected to occur; this will help us decide whether the
 problem was really in the documentation.
 
-Once you've got a precise problem, send e-mail to (Internet)
+Once you've got a precise problem, send e-mail to
 @email{bug-m4@@gnu.org}.  Please include the version number of @code{m4}
 you are using.  You can get this information with the command
 @kbd{m4 --version}.  Also provide details about the platform you are
@@ -4404,7 +4406,7 @@ Searching for regular expressions is done with the builtin
 @deffn Builtin regexp (@var{string}, @var{regexp}, @ovar{replacement})
 Searches for @var{regexp} in @var{string}.  The syntax for regular
 expressions is the same as in @acronym{GNU} Emacs, which is similar to
-Basic Regular Expressions (@sc{BRE}) in @acronym{POSIX}.
+@acronym{BRE, Basic Regular Expressions} in @acronym{POSIX}.
 @ifnothtml
 @xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
 Manual}.
@@ -4414,8 +4416,8 @@ See
 @uref{http://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
 Syntax of Regular Expressions} in the @acronym{GNU} Emacs Manual.
 @end ifhtml
-Support for Extended Regular Expressions (@sc{ERE}) is not available,
-but will be added in @acronym{GNU} M4 2.0.
+Support for @acronym{ERE, Extended Regular Expressions} is not
+available, but will be added in @acronym{GNU} M4 2.0.
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
 the first match of @var{regexp} in @var{string}.  If @var{regexp} does
