@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -131,7 +131,8 @@ threshold_diversion_CB (const void *elt, const void *threshold)
 void
 output_init (void)
 {
-  diversion_table = gl_oset_create_empty (GL_AVLTREE_OSET, cmp_diversion_CB);
+  diversion_table = gl_oset_create_empty (GL_AVLTREE_OSET, cmp_diversion_CB,
+					  NULL);
   div0.u.file = stdout;
   output_diversion = &div0;
   output_file = stdout;

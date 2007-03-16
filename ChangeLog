@@ -1,3 +1,8 @@
+2007-03-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Mkstemp): Tweak wording.
+	* src/output.c (output_init): Adjust to latest gnulib.
+
 2007-03-15  Eric Blake  <ebb9@byu.net>
 
 	Avoid Tandem/NSK's broken long long (without a symmetric unsigned

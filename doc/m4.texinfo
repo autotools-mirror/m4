@@ -5357,6 +5357,9 @@ that file name.  Hence, @acronym{POSIX} has recommended that all new
 implementations of @code{m4} provide the secure @code{mkstemp} builtin,
 and that users of @code{m4} check for its existence.
 
+The expansion is void and an error issued if a temporary file could
+not be created.
+
 The macros @code{mkstemp} and @code{maketemp} are recognized only with
 parameters.
 @end deffn
