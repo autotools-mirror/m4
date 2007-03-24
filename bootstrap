@@ -1,9 +1,9 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2006-11-16
+# bootstrap (GNU M4) version 2007-03-24
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
-# Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -315,6 +315,62 @@ case $DOWNLOAD_PO in
   yes)  func_update_po ;;
   *)    func_update_po $DOWNLOAD_PO ;;
 esac
+
+## ---------------- ##
+## Version control. ##
+## ---------------- ##
+
+# gnulib-tool updates ltdl/m4/.cvsignore and gnu/.cvsignore, and keeping
+# generated files under version control does not make sense.  Prepopulate
+# ltdl/m4's version with generated files not tracked by gnulib-tool.
+if test -f $config_macro_dir/.cvsignore ; then
+  :
+else
+  func_echo "creating initial $config_macro_dir/.cvsignore"
+  cat > $config_macro_dir/.cvsignore <<\EOF
+*~
+.cvsignore
+argz.m4
+codeset.m4
+getopt.m4
+gettext.m4
+glibc2.m4
+glibc21.m4
+gnulib-comp.m4
+iconv.m4
+intdiv0.m4
+intl.m4
+intldir.m4
+intmax.m4
+inttypes-pri.m4
+inttypes_h.m4
+lcmessage.m4
+lib-ld.m4
+lib-link.m4
+lib-prefix.m4
+libtool.m4
+lock.m4
+longdouble.m4
+longlong.m4
+ltdl.m4
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
+nls.m4
+po.m4
+printf-posix.m4
+progtest.m4
+size_max.m4
+stdint_h.m4
+uintmax_t.m4
+ulonglong.m4
+visibility.m4
+wchar_t.m4
+wint_t.m4
+xsize.m4
+EOF
+fi
 
 ## ---------- ##
 ## Autopoint. ##
