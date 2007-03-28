@@ -1,5 +1,8 @@
 2007-03-28  Eric Blake  <ebb9@byu.net>
 
+	* src/main.c (usage): Improve note to TRANSLATORS.
+	* m4/system_.h (EXIT_FAILURE): Reflect gnulib changes.
+
 	* tests/builtins.at (__m4_version__): Fix bug when TIMESTAMP is
 	empty.
 

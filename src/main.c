@@ -184,8 +184,10 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 "), stdout);
       puts ("");
       /* TRANSLATORS: the placeholder indicates the bug-reporting
-	 address for this application. Please add _another line_ with
-	 the address for translation bugs.  */
+	 address for this application.  Please add _another line_
+	 saying "Report translation bugs to <...>\n" with the address
+	 for translation bugs (typically your translation team's web
+	 or email address).  */
       printf (_("Report bugs to <%s>.\n"), PACKAGE_BUGREPORT);
     }
   exit (status);
