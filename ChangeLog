@@ -1,3 +1,8 @@
+2007-03-28  Eric Blake  <ebb9@byu.net>
+
+	* tests/builtins.at (__m4_version__): Fix bug when TIMESTAMP is
+	empty.
+
 2007-03-24  Eric Blake  <ebb9@byu.net>
 
 	* m4/output.c (m4_output_init): Update to latest gnulib.
