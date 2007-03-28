@@ -164,7 +164,7 @@ M4_GNU_GETTEXT
 
 
 ## --------------- ##
-## Gnulib support, ##
+## Gnulib support. ##
 ## --------------- ##
 M4_INIT
 

@@ -1,3 +1,8 @@
+2007-03-28  Gary V. Vaughan  <gary@gnu.org>
+
+	* Makefile.am (stamp-vcl): Removed.
+	(CONFIG_STATUS_DEPENDENCIES): Depend directly on ChangeLog.
+
 2007-03-28  Eric Blake  <ebb9@byu.net>
 
 	* src/main.c (usage): Improve note to TRANSLATORS.

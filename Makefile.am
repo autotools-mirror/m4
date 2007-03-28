@@ -51,23 +51,10 @@ MAINTAINERCLEANFILES = \
 
 BUILT_SOURCES	=
 
-## We know that $(srcdir)/ChangeLog has been edited if stamp-vcl
-## needs updating, so we assume we have write access to $(srcdir).
-## If we try to maintain ./stamp-vcl to avoid writing to a possibly
-## read-only $(srcdir), then when the two stamp-vcls differ, distcheck
-## will try to update the one in the read-only source tree it makes.
 MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
-$(srcdir)/stamp-vcl: vcl-tmp ChangeLog
-vcl-tmp:
-	@set dummy `$(MKSTAMP) < $(srcdir)/ChangeLog`; shift; \
-	echo "$$1" > vcl.tmp; \
-	diff vcl.tmp $(srcdir)/stamp-vcl >/dev/null 2>&1 \
-	  || (echo "Updating stamp-vcl"; cp vcl.tmp $(srcdir)/stamp-vcl)
-	-@rm -f vcl.tmp
 
 # Make sure config.status is regenerated when the version timestamp changes
-CONFIG_STATUS_DEPENDENCIES = stamp-vcl
-EXTRA_DIST += stamp-vcl
+CONFIG_STATUS_DEPENDENCIES = ChangeLog
 
 
 ## ------- ##
