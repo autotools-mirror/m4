@@ -21,17 +21,23 @@
  * @configure_output@
  *
  * This file is installed, so cannot rely on the contents of config.h.
- * It works best if included _after_ system headers.
+ * It works best if included _before_ system headers.
  **/
 
 #ifndef M4_SYSTEM_H
 #define M4_SYSTEM_H 1
 
+#include <gnu/stdlib--.h>
+#include <gnu/stdio--.h>
+#include <gnu/unistd--.h>
+
+#include <assert.h>
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include <sys/stat.h>
+
 
 @INCLUDE_ERROR_H@
 @INCLUDE_OBSTACK_H@
@@ -48,21 +54,6 @@
 #define obstack_regrow(OBS, OBJECT, SIZE)               \
   (obstack_free (OBS, (char *)(OBJECT) + SIZE),         \
    (OBS)->object_base = (char *)(OBJECT))
-
-/* Some systems do not define EXIT_*, despite otherwise supporting
-   C89.  This definition is copied from gnulib's stdlib_.h, since we
-   don't always install gnulib's stdlib.h.  */
-#ifndef EXIT_SUCCESS
-# define EXIT_SUCCESS 0
-#endif
-/* Tandem/NSK and other platforms that define EXIT_FAILURE as -1 interfere
-   with proper operation of xargs.  */
-#ifndef EXIT_FAILURE
-# define EXIT_FAILURE 1
-#elif EXIT_FAILURE != 1
-# undef EXIT_FAILURE
-# define EXIT_FAILURE 1
-#endif
 
 /* In addition to EXIT_SUCCESS and EXIT_FAILURE, m4 can fail with version
    mismatch when trying to load a frozen file produced by a newer m4 than

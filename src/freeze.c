@@ -20,9 +20,8 @@
 
 /* This module handles frozen files.  */
 
-#include "m4/system.h"
 #include "m4.h"
-#include "m4private.h"
+
 #include "binary-io.h"
 
 static	void  produce_mem_dump		(FILE *, const char *, size_t);

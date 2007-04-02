@@ -19,19 +19,15 @@
 
 #include <config.h>
 
-#include <m4module.h>
-#include <modules/m4.h>
-
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdlib.h>
-
-#ifdef NDEBUG
+/* Build using only the exported interfaces, unles NDEBUG is set, in
+   which case use private symbols to speed things up as much as possible.  */
+#ifndef NDEBUG
+#  include <m4/m4module.h>
+#else
 #  include "m4private.h"
 #endif
 
-#include "progname.h"
+#include "modules/m4.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table

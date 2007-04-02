@@ -35,9 +35,6 @@
    both `eval' and `mpeval', but which is redefined appropriately when
    this file is #included into its clients.  */
 
-#include <assert.h>
-#include <ctype.h>
-
 typedef enum eval_token
   {
     ERROR, BADOP,

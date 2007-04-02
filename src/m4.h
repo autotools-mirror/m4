@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -23,20 +23,11 @@
 
 #include <config.h>
 
-#include <ctype.h>
-#include <errno.h>
-#include <locale.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-#include "m4module.h"
+#include "m4private.h"
 
 #include "gettext.h"
-#include "ltdl.h"
 
 /* Error handling.  */
 #ifdef USE_STACKOVF

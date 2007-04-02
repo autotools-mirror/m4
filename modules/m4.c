@@ -20,8 +20,13 @@
 
 #include <config.h>
 
-#include <assert.h>
-#include <errno.h>
+/* Build using only the exported interfaces, unless NDEBUG is set, in
+   which case use private symbols to speed things up as much as possible.  */
+#ifndef NDEBUG
+#  include <m4/m4module.h>
+#else
+#  include "m4private.h"
+#endif
 
 #include "stdlib--.h"
 #include "tempname.h"
@@ -31,16 +36,7 @@
 # include <sys/wait.h>
 #endif
 
-#include <m4module.h>
 #include <modules/m4.h>
-
-#ifdef NDEBUG
-/* Include this header for speed, which gives us direct access to
-   the fields of internal structures at the expense of maintaining
-   interface/implementation separation.   The builtins in this file
-   are the core of m4 and must be optimised for speed.  */
-#  include "m4private.h"
-#endif
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_export_table		m4_LTX_m4_export_table

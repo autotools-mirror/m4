@@ -23,8 +23,8 @@
 #define M4MODULE_H 1
 
 #include <ltdl.h>
-#include <m4/system.h>
 #include <m4/hash.h>
+#include <m4/system.h>
 
 BEGIN_C_DECLS
 

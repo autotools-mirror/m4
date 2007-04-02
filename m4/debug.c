@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1991, 1992, 1993, 1994, 2006 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2006.
+                 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,7 +18,6 @@
    02110-1301  USA
 */
 
-#include <stdio.h>
 #include <sys/stat.h>
 #include <stdarg.h>
 

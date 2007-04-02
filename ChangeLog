@@ -1,3 +1,61 @@
+2007-04-02  Gary V. Vaughan  <gary@gnu.org>
+
+	M4 was designed to have a small number of header files defining
+	the interfaces to several source files each.  Keeping this in
+	mind allows us to tidy things up considerably.  Having done this,
+	it becomes clear that some of the installed headers reference
+	other headers which are not installed (but that's another patch):
+
+	* m4/m4private.h (stdio--.h, stdlib--.h, unistd--.h): Moved from
+	here...
+	* m4/system_.h (gnu/stdio--.h, gnu/stdlib--.h, gnu/unistd--.h):
+	...to here, so client modules can benefit too.
+	(assert.h, errno.h, limits.h, sys/stat.h): Include one here at the
+	lowest level to save doing it multiple times elsewhere.
+	* m4/debug.c (stdio.h): Removed.  The portable <gnu/stdio--.h>
+	is already included via m4private.h.
+	* modules/time.c (stdio.h): Ditto.
+	* modules/gnu.c (stdlib.h): Ditto resp <gnu/stdlib--.h>.
+	* modules/stdlib.c (stdlib.h, unistd.h): Ditto resp <gnu/stdlib--.h>
+	and <gnu/unistd--.h>,
+	* m4/m4private.h (m4module.h): Use angle brackets for an installed
+	file.
+	* m4/hash.h (system.h): Ditto.
+	* modules/gnu.c (progname.h): Removed.
+	* src/freeze.c (m4/system.h, m4private.h): Already included vi m4.h.
+	* m4/m4private.h (assert.h, errno.h): Already included via
+	m4/m4module.h.
+	* m4/input.c (ctype.h): Ditto.
+	* m4/module.c (ltdl.h): Ditto.
+	* m4/output.c (errno.h, limits.h, stdio.h, sys/types.h, sys/stat.h)
+	(unistd.h): Ditto.
+	* m4/path.c (config.h, stdlib.h): Ditto.
+	* m4/utility.c (config.h): Ditto.
+	* modules/evalparse.c (assert.h, ctype.h): Ditto.
+	* modules/gnu.c (assert.h, ctype.h, errno.h): Ditto.
+	* modules/import.c (assert.h): Ditto.
+	* modules/m4.c (assert.h, errno.h): Ditto.
+	* modules/modtest.c (assert.h): Ditto.
+	* modules/stdlib.c (sys/types.h): DittAo.
+	* src/m4.h (ctype.h, errno.h, string.h, sys/types.h, ltdl.h):
+	Ditto.
+	* src/stackovf.c (assert.h): Ditto.
+	* modules/gnu.c (m4/m4module.h, m4private.h): Build using the faster
+	private interfaces when NDEBUG is defined.
+	* modules/import.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/load.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/m4.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/modtest.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/mpeval.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/perl.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/shadow.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/time.c (m4/m4module.h, m4private.h): Ditto.
+	* modules/traditional.c (m4/m4module.h, m4private.h): Ditto.
+	* src/m4.h (locale.h): Moved from here...
+	* src/main.h: ...to here.
+	(m4private.h): Already included via m4.h.
+	* src/stackovf.c (m4private.h): Ditto.
+
 2007-03-28  Gary V. Vaughan  <gary@gnu.org>
 
 	* Makefile.am (stamp-vcl): Removed.

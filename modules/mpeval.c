@@ -19,13 +19,17 @@
 
 #include <config.h>
 
-#include <m4module.h>
-#include <m4private.h>
+/* Build using only the exported interfaces, unless NDEBUG is set, in
+   which case use private symbols to speed things up as much as possible.  */
+#ifndef NDEBUG
+#  include <m4/m4module.h>
+#else
+#  include "m4private.h"
+#endif
 
 #if HAVE_GMP_H
 #  include <gmp.h>
 #endif
-
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	mpeval_LTX_m4_builtin_table

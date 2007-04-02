@@ -19,8 +19,11 @@
    02110-1301  USA
 */
 
+#include <config.h>
+
+#include <locale.h>
+
 #include "m4.h"
-#include "m4private.h"
 
 #include "close-stream.h"
 #include "closeout.h"
@@ -28,8 +31,6 @@
 #include "getopt.h"
 #include "version-etc.h"
 #include "xstrtol.h"
-
-#include <limits.h>
 
 #define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan", "Eric Blake"
 

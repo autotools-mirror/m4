@@ -79,11 +79,9 @@
 /*#define DEBUG_STKOVF */
 
 #include "m4.h"
-#include "m4private.h"			/* stdlib.h, xmalloc() */
 
 #ifdef USE_STACKOVF
 
-#include <assert.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 

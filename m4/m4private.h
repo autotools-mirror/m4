@@ -24,15 +24,9 @@
 
 #include <config.h>
 
-#include <assert.h>
-#include <errno.h>
-
-#include "m4module.h"
+#include <m4/m4module.h>
 
 #include "cloexec.h"
-#include "stdio--.h"
-#include "stdlib--.h"
-#include "unistd--.h"
 
 typedef struct m4__search_path_info m4__search_path_info;
 

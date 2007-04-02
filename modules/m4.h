@@ -20,7 +20,7 @@
 #ifndef MODULES_M4_H
 #define MODULES_M4_H 1
 
-#include <m4module.h>
+#include <m4/m4module.h>
 
 BEGIN_C_DECLS
 

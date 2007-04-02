@@ -20,13 +20,6 @@
 
 #include <config.h>
 
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "m4private.h"
 
 #include "binary-io.h"

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #ifndef M4_HASH_H
 #define M4_HASH_H 1
 
-#include "system.h"
+#include <m4/system.h>
 
 /* Must be 1 less than a power of 2 for the resize algorithm to
    be efficient.  */

@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2006 Free Software
+   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2006, 2007 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,15 @@
 
 #include <config.h>
 
-#include <m4module.h>
+/* Build using only the exported interfaces, unless NDEBUG is set, in
+   which case use private symbols to speed things up as much as possible.  */
+#ifndef NDEBUG
+#  include <m4/m4module.h>
+#else
+#  include "m4private.h"
+#endif
 
-#include <assert.h>
-
+/* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	modtest_LTX_m4_builtin_table
 #define m4_macro_table		modtest_LTX_m4_macro_table
 

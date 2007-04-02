@@ -19,8 +19,10 @@
 
 #include <config.h>
 
-#include <m4module.h>
+/* This module needs private symbols, and may not compile correctly if
+   m4private.h isn't included.  */
 #include "m4private.h"
+
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	load_LTX_m4_builtin_table

@@ -24,10 +24,8 @@
 
 #include <config.h>
 
-#include <stdlib.h>
 #include <string.h>
 
-#include "m4module.h"
 #include "m4private.h"
 
 #include "dirname.h"
