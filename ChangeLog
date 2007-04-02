@@ -1,5 +1,16 @@
 2007-04-02  Gary V. Vaughan  <gary@gnu.org>
 
+	Get rid of the last 'differs in signedness' compiler warnings:
+	
+	* m4/macro.c (process_macro): m4_get_symbol_value_text() returns
+	a regular 'char *', so variables to store the return address,
+	and iterate through it should be regular 'char *' too.
+	* m4/input.c (m4_input_block): The start and current members of
+	the string part of this union store regular 'char *' types, so
+	they should be regular 'char *' types too.
+
+2007-04-02  Gary V. Vaughan  <gary@gnu.org>
+
 	M4 was designed to have a small number of header files defining
 	the interfaces to several source files each.  Keeping this in
 	mind allows us to tidy things up considerably.  Having done this,

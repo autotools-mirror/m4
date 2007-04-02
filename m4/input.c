@@ -146,8 +146,8 @@ struct m4_input_block
     {
       struct
 	{
-	  unsigned char *start;		/* string value */
-	  unsigned char *current;	/* current value */
+	  char *start;		/* string value */
+	  char *current;	/* current value */
 	}
       u_s;
       struct

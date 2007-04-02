@@ -415,7 +415,7 @@ static void
 process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	       int argc, m4_symbol_value **argv)
 {
-  const unsigned char *text;
+  const char *text;
   int i;
 
   for (text = m4_get_symbol_value_text (value); *text != '\0';)
@@ -471,7 +471,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	  else
 	    {
 	      size_t len  = 0;
-	      const unsigned char *endp;
+	      const char *endp;
 	      const char *key;
 
 	      for (endp = ++text;
