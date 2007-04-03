@@ -1,3 +1,9 @@
+2007-04-03  Eric Blake  <ebb9@byu.net>
+
+	* modules/m4.c (numb_ratio, numb_divide, numb_modulo): Avoid
+	SIGFPE on x86 architectures.
+	Reported by Ralf Wildenhues.
+
 2007-04-02  Eric Blake  <ebb9@byu.net>
 
 	Fix warnings from last commit.

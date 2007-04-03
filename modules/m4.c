@@ -1095,9 +1095,13 @@ M4BUILTIN_HANDLER (translit)
 #define numb_negate(x)   ((x) = (- (x)))
 
 #define numb_times(x, y)     ((x) = ((x) * (y)))
-#define numb_ratio(x, y)     ((x) = ((x) / ((y))))
-#define numb_divide(x, y)    (*(x) = (*(x) / (*(y))))
-#define numb_modulo(c, x, y) (*(x) = (*(x) % *(y)))
+/* Be careful of x86 SIGFPE.  */
+#define numb_ratio(x, y)						\
+  (((y) == -1) ? (numb_negate (x)) : ((x) /= (y)))
+#define numb_divide(x, y)						\
+  ((*(y) == -1) ? (numb_negate (*(y))) : (*(x) /= *(y)))
+#define numb_modulo(c, x, y)						\
+  ((*(y) == -1) ? (*(x) = numb_ZERO) : (*(x) %= *(y)))
 /* numb_invert is only used in the context of x**-y, which integral math
    does not support.  */
 #define numb_invert(x)       return NEGATIVE_EXPONENT
