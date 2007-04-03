@@ -94,7 +94,7 @@ produce_resyntax_dump (m4 *context, FILE *file)
 
       /* No need to use produce_mem_dump, since we know all resyntax
 	 names are already ASCII-encoded.  */
-      fprintf (file, "R%d\n%s\n", strlen (resyntax), resyntax);
+      fprintf (file, "R%zu\n%s\n", strlen (resyntax), resyntax);
     }
 }
 
@@ -138,13 +138,7 @@ produce_module_dump (FILE *file, lt_dlhandle handle)
   if (handle)
     produce_module_dump (file, handle);
 
-  /* GNU assumption: Although POSIX allows size_t to be just 16 bits,
-     independently of int, GNU assumes is at least as big as int.
-     Likewise, although POSIX allows size_t to be bigger than unsigned
-     long in some compilation environments, GNU assumes that size_t
-     always fits in unsigned long.  Unfortunately, GNU does not assume
-     that %zu is portable, yet.  */
-  fprintf (file, "M%lu\n", (unsigned long int) len);
+  fprintf (file, "M%zu\n", len);
   produce_mem_dump (file, name, len);
   fputc ('\n', file);
 }
@@ -173,10 +167,9 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
     {
       const char *text = m4_get_symbol_text (symbol);
       size_t text_len = strlen (text);
-      fprintf (file, "T%lu,%lu", (unsigned long int) symbol_len,
-	       (unsigned long int) text_len);
+      fprintf (file, "T%zu,%zu", symbol_len, text_len);
       if (handle)
-	fprintf (file, ",%lu", (unsigned long int) module_len);
+	fprintf (file, ",%zu", module_len);
       fputc ('\n', file);
 
       produce_mem_dump (file, symbol_name, symbol_len);
@@ -193,10 +186,9 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	assert (!"INTERNAL ERROR: builtin not found in builtin table!");
       bp_len = strlen (bp->name);
 
-      fprintf (file, "F%lu,%lu", (unsigned long int) symbol_len,
-	       (unsigned long int) bp_len);
+      fprintf (file, "F%zu,%zu", symbol_len, bp_len);
       if (handle)
-	fprintf (file, ",%lu", (unsigned long int) module_len);
+	fprintf (file, ",%zu", module_len);
       fputc ('\n', file);
 
       produce_mem_dump (file, symbol_name, symbol_len);
@@ -237,9 +229,8 @@ produce_frozen_state (m4 *context, const char *name)
   if (strcmp (m4_get_syntax_lquote (M4SYNTAX), DEF_LQUOTE)
       || strcmp (m4_get_syntax_rquote (M4SYNTAX), DEF_RQUOTE))
     {
-      fprintf (file, "Q%lu,%lu\n",
-	       (unsigned long int) M4SYNTAX->lquote.length,
-	       (unsigned long int) M4SYNTAX->rquote.length);
+      fprintf (file, "Q%zu,%zu\n", M4SYNTAX->lquote.length,
+	       M4SYNTAX->rquote.length);
       produce_mem_dump (file, M4SYNTAX->lquote.string,
 			M4SYNTAX->lquote.length);
       produce_mem_dump (file, M4SYNTAX->rquote.string,
@@ -252,9 +243,8 @@ produce_frozen_state (m4 *context, const char *name)
   if (strcmp (m4_get_syntax_bcomm (M4SYNTAX), DEF_BCOMM)
       || strcmp (m4_get_syntax_ecomm (M4SYNTAX), DEF_ECOMM))
     {
-      fprintf (file, "C%lu,%lu\n",
-	       (unsigned long int) M4SYNTAX->bcomm.length,
-	       (unsigned long int) M4SYNTAX->ecomm.length);
+      fprintf (file, "C%zu,%zu\n", M4SYNTAX->bcomm.length,
+	       M4SYNTAX->ecomm.length);
       produce_mem_dump (file, M4SYNTAX->bcomm.string, M4SYNTAX->bcomm.length);
       produce_mem_dump (file, M4SYNTAX->ecomm.string, M4SYNTAX->ecomm.length);
       fputc ('\n', file);

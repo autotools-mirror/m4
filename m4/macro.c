@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -275,7 +275,7 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   if (m4_get_nesting_limit_opt (context) > 0
       && expansion_level > m4_get_nesting_limit_opt (context))
     m4_error (context, EXIT_FAILURE, 0, _("\
-recursion limit of %d exceeded, use -L<N> to change it"),
+recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
 
   macro_call_id++;
@@ -422,7 +422,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
     {
       char ch;
 
-      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR))
+      if (!m4_has_syntax (M4SYNTAX, to_uchar (*text), M4_SYNTAX_DOLLAR))
 	{
 	  obstack_1grow (obs, *text);
 	  text++;
@@ -475,7 +475,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	      const char *key;
 
 	      for (endp = ++text;
-		   *endp && m4_has_syntax (M4SYNTAX, *endp,
+		   *endp && m4_has_syntax (M4SYNTAX, to_uchar (*endp),
 					   (M4_SYNTAX_OTHER | M4_SYNTAX_ALPHA
 					    | M4_SYNTAX_NUM));
 		   ++endp)
@@ -565,21 +565,13 @@ trace_format (m4 *context, const char *fmt, ...)
 	  break;
 
 	case 'z':
-	  /* GNU assumption: Although POSIX allows size_t to be just
-	     16 bits, independently of int, GNU assumes is at least as
-	     big as int.  Likewise, although POSIX allows size_t to be
-	     bigger than unsigned long in some compilation
-	     environments, GNU assumes that size_t always fits in
-	     unsigned long.  Unfortunately, GNU does not assume that
-	     %zu is portable, yet.  */
 	  ch = *fmt++;
 	  assert (ch == 'u');
-	  assert (sizeof (size_t) >= sizeof (int));
 	  {
 	    size_t z = va_arg (args, size_t);
 	    char nbuf[INT_BUFSIZE_BOUND (size_t)];
 
-	    sprintf (nbuf, "%lu", (unsigned long int) z);
+	    sprintf (nbuf, "%zu", z);
 	    s = nbuf;
 	  }
 	  break;
