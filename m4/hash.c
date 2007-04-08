@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,8 @@
    - Use an obstack to manage the node memory.
    - Implement the macroized magic values with the API.
  */
+
+#include <config.h>
 
 #include "hash.h"
 #include "m4private.h"

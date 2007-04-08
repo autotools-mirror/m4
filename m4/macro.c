@@ -21,6 +21,8 @@
 /* This file contains the functions that perform the basic argument
    parsing and macro expansion.  */
 
+#include <config.h>
+
 #include <stdarg.h>
 
 #include "m4private.h"

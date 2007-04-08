@@ -20,6 +20,8 @@
 
 /* Handling of different input sources, and lexical analysis.  */
 
+#include <config.h>
+
 #include "m4private.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */

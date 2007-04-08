@@ -78,6 +78,8 @@
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_STKOVF */
 
+#include <config.h>
+
 #include "m4.h"
 
 #ifdef USE_STACKOVF

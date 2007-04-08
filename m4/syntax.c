@@ -18,6 +18,8 @@
    02110-1301  USA
 */
 
+#include <config.h>
+
 #include "m4private.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */

@@ -18,6 +18,8 @@
    02110-1301  USA
 */
 
+#include <config.h>
+
 #include "configmake.h"
 #include "m4private.h"
 #include "xvasprintf.h"

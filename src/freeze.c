@@ -20,6 +20,8 @@
 
 /* This module handles frozen files.  */
 
+#include <config.h>
+
 #include "m4.h"
 
 #include "binary-io.h"

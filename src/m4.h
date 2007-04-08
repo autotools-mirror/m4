@@ -21,8 +21,6 @@
 #ifndef M4_H
 #define M4_H
 
-#include <config.h>
-
 #include <signal.h>
 
 #include "m4private.h"

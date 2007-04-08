@@ -1,3 +1,22 @@
+2007-04-07  Eric Blake  <ebb9@byu.net>
+
+	Include <config.h> first in all C files, and not in headers.
+	Fixes regression for --disable-assert builds from 2007-04-02.
+	* src/m4.h (includes): Don't include config.h here.
+	* m4/m4private.h (includes): Likewise.
+	* m4/builtin.c: Include config.h before anything else.
+	* m4/debug.c: Likewise.
+	* m4/hash.c: Likewise.
+	* m4/input.c: Likewise.
+	* m4/m4.c: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/symtab.c: Likewise.
+	* m4/syntax.c: Likewise.
+	* m4/utility.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/stackovf.c: Likewise.
+
 2007-04-03  Eric Blake  <ebb9@byu.net>
 
 	* modules/m4.c (numb_ratio, numb_divide, numb_modulo): Avoid

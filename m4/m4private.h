@@ -22,8 +22,6 @@
 #ifndef M4PRIVATE_H
 #define M4PRIVATE_H 1
 
-#include <config.h>
-
 #include <m4/m4module.h>
 
 #include "cloexec.h"
