@@ -38,6 +38,14 @@ and is not part of a release distribution.
   environment or the -G option was passed on the command line):
     http://www.opengroup.org/onlinepubs/009695399/utilities/m4.html
 
+* Except for third-party files (libtool, gnulib, ...), all .c files
+  should #include <config.h> before anything else (since there are some
+  #defines in config.h that potentially impact system headers, such as
+  when the user does ./configure --disable-assert).  This means that no
+  .h files need to #include <config.h>.  However, users compiling
+  external modules should be able to compile without <config.h>, since
+  <config.h> is specific to the M4 build and is not installable.
+
 
 3. Bootstrapping
 ================
