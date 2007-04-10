@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,12 +35,12 @@ AT_DATA([[input.m4]],
 define
 define(`foo')
 define(`foo', `bar')
-define(`foo', `bar', baz')
+define(`foo', `bar', `baz')
 
 defun
 defun(`foo')
 defun(`foo', `bar')
-defun(`foo', `bar', baz')
+defun(`foo', `bar', `baz')
 ]])
 
 AT_DATA([[expout]],
