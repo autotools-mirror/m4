@@ -1,3 +1,10 @@
+2007-04-11  Eric Blake  <ebb9@byu.net>
+
+	Address testsuite shortcoming in 'stdout full' on glibc.
+	* tests/others.at (stdout full): Adjust expected output when more
+	than 1k text is printed to /dev/full.
+	Reported by Ralf Wildenhues.
+
 2007-04-10  Eric Blake  <ebb9@byu.net>
 
 	* tests/macros.at (Arity and defn): Fix quoting.

@@ -609,10 +609,14 @@ AT_CHECK([test -w /dev/full && test -c /dev/full || {
   exit 77
 }])
 
+dnl Be careful when modifying these tests.  Writes that exceed stdio buffering
+dnl limits trigger different but legal behavior where errno is lost.  Tests
+dnl that currently require "No space left on device" may fail if the amount of
+dnl output changes.  The --help test shows how to handle this.
+
 dnl detect write failures on --help
-AT_CHECK_M4([--help >/dev/full], [1], [],
-[[m4: write error: No space left on device
-]])
+AT_CHECK_M4([--help >/dev/full], [1], [], [stderr])
+AT_CHECK([grep '^m4: write error' stderr], [0], [ignore])
 
 dnl detect write failures on --version
 AT_CHECK_M4([--version >/dev/full], [1], [],
