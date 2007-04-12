@@ -26,7 +26,7 @@
 #include "m4.h"
 
 #include "close-stream.h"
-#include "closeout.h"
+#include "closein.h"
 #include "configmake.h"
 #include "getopt.h"
 #include "version-etc.h"
@@ -298,15 +298,11 @@ size_opt (char const *opt, char const *msgid)
 
 /* Process a command line file NAME, and return true only if it was
    stdin.  */
-static bool
+static void
 process_file (m4 *context, const char *name)
 {
-  bool result = false;
   if (strcmp (name, "-") == 0)
-    {
-      m4_push_file (context, stdin, "stdin", false);
-      result = true;
-    }
+    m4_push_file (context, stdin, "stdin", false);
   else
     {
       char *full_name;
@@ -314,13 +310,12 @@ process_file (m4 *context, const char *name)
       if (fp == NULL)
 	{
 	  m4_error (context, 0, errno, _("cannot open file `%s'"), name);
-	  return false;
+	  return;
 	}
       m4_push_file (context, fp, full_name, true);
       free (full_name);
     }
   m4_macro_expand_input (context);
-  return result;
 }
 
 
@@ -334,7 +329,6 @@ main (int argc, char *const *argv, char *const *envp)
   int optchar;			/* option character */
   size_t size;			/* for parsing numeric option arguments */
 
-  bool read_stdin = false;	/* true iff we have read from stdin */
   bool import_environment = false; /* true to import environment */
   bool seen_file = false;
   const char *debugfile = NULL;
@@ -348,7 +342,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Initialize gnulib error module.  */
   m4_set_program_name (argv[0]);
-  atexit (close_stdout);
+  atexit (close_stdin);
 
   setlocale (LC_ALL, "");
 #ifdef ENABLE_NLS
@@ -702,7 +696,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case '\1':
-	  read_stdin |= process_file (context, arg);
+	  process_file (context, arg);
 	  break;
 
 	case POPDEF_OPTION:
@@ -743,10 +737,10 @@ main (int argc, char *const *argv, char *const *envp)
      and the input read.  */
 
   if (optind == argc && !seen_file)
-    read_stdin = process_file (context, "-");
+    process_file (context, "-");
   else
     for (; optind < argc; optind++)
-      read_stdin |= process_file (context, argv[optind]);
+      process_file (context, argv[optind]);
 
   /* Now handle wrapup text.
      FIXME - when -F is in effect, should wrapped text be frozen?  */
@@ -772,11 +766,9 @@ main (int argc, char *const *argv, char *const *envp)
   m4_input_exit ();
 
   /* Change debug stream back to stderr, to force flushing the debug
-     stream and detect any errors it might have encountered.  Close
-     stdin if we read from it, to detect any errors.  */
+     stream and detect any errors it might have encountered.  The
+     three standard streams are closed by close_stdin.  */
   m4_debug_set_output (context, NULL);
-  if (read_stdin && close_stream (stdin) == EOF)
-    m4_error (context, 0, errno, _("error closing stdin"));
 
   exit_status = m4_get_exit_status (context);
   m4_delete (context);

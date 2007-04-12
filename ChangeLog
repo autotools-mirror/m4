@@ -1,5 +1,12 @@
 2007-04-12  Eric Blake  <ebb9@byu.net>
 
+	Work around 'stdin seekable' shortcoming on glibc.
+	* ltdl/m4/gnulib-cache.m4: Use closein instead of closeout.
+	* tests/others.at (stdin closed): Adjust to new output.
+	* src/main.c (process_file): No need to return anything.
+	(main): Use close_stdin instead of close_stdout.
+	Reported by Ralf Wildenhues.
+
 	Enable autobuild usage.
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	autobuild'.

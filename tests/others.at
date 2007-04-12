@@ -405,20 +405,20 @@ AT_CHECK_M4([in.m4], [0], [[hello world
 dnl error when stdin must be read
 AT_CHECK_M4([], [1], [],
 [[m4:stdin:1: error reading file `stdin'
-m4: error closing stdin: Bad file descriptor
+m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl error when stdin must be read
 AT_CHECK_M4([-], [1], [],
 [[m4:stdin:1: error reading file `stdin'
-m4: error closing stdin: Bad file descriptor
+m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl error once per command-line attempt to read stdin
 AT_CHECK_M4([- in.m4 -], [1], [[hello world
 ]], [[m4:stdin:1: error reading file `stdin'
 m4:stdin:1: error reading file `stdin'
-m4: error closing stdin: Bad file descriptor
+m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl command line and trace file must not collide with stdin
@@ -446,7 +446,7 @@ divert`'world
 ]])
 AT_CHECK_M4([in.m4 - in2.m4], [1], [[hello world
 ]], [[m4:stdin:1: error reading file `stdin'
-m4: error closing stdin: Bad file descriptor
+m4: error closing file: Bad file descriptor
 ]], [-])
 
 AT_CLEANUP
