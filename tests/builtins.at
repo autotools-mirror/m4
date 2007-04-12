@@ -451,9 +451,10 @@ AT_CHECK_M4([in], [1], [[
 ]], [[m4:in:1: mkdtemp: cannot create directory from template `no_such_dir/m4-fooXXXXXX': No such file or directory
 ]])
 
-dnl Check that umask has an effect
+dnl Check that umask has an effect.  drws--S--T is okay.
 AT_DATA([[in]],
-[[substr(esyscmd(`ls -ld 'mkdtemp(`m4-fooXXXXXX')), `0', `10')
+[[translit(substr(esyscmd(`ls -ld 'mkdtemp(`m4-fooXXXXXX')), `0', `10'),
+           `SsT', `-x-')
 ]])
 AT_CHECK([m4 < in], [0], [[drwx------
 ]])

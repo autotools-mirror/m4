@@ -1,5 +1,8 @@
 2007-04-12  Eric Blake  <ebb9@byu.net>
 
+	Allow for running test in sticky or setgid directory.
+	* tests/builtins.at (mkdtemp): Adjust test.
+
 	Don't test for broken sed too soon.
 	* tests/others.at (stdin seekable): Rearrange subtests.
 
