@@ -473,12 +473,6 @@ AT_DATA([in.m4], [[m4exit(
 AT_CHECK([(m4; cat) < in.m4], [0], [[trailing data
 ]])
 
-dnl Not all OS's have a libc that gets the remaining tests right (for
-dnl example, cygwin 1.5.22 and earlier).
-AT_CHECK([(sed -ne 1q; cat) < in.m4], [0], [stdout])
-AT_CHECK([test "x`cat stdout`" = "x0)trailing data" || \
-  { echo "skipping: sed is too greedy on seekable stdin"; exit 77; }])
-
 dnl Check external follow-on process, after fatal error.
 dnl We can't use AT_CHECK_M4, so we must post-process stderr ourselves.
 AT_DATA([in.m4], [[dnl(
@@ -489,6 +483,12 @@ AT_CHECK([(m4 -EE; cat) < in.m4], [0], [[trailing data
 AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
 [[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
 ]])
+
+dnl Not all sed and libc combinations get the remaining tests right (for
+dnl example, sed 4.1.4 on glibc, or cygwin 1.5.22 and earlier).
+AT_CHECK([(sed -ne 1q; cat) < in.m4], [0], [stdout])
+AT_CHECK([test "x`cat stdout`" = "x0)trailing data" || \
+  { echo "skipping: sed is too greedy on seekable stdin"; exit 77; }])
 
 dnl Ensure that esyscmd resumes parsing where the child process left off.
 AT_DATA([in.m4], [[define(`foo', `FOO')m4 foo
