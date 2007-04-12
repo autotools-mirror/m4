@@ -33,7 +33,6 @@ AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
-
 ## ---------------------------------------- ##
 ## Display a configure time version banner. ##
 ## ---------------------------------------- ##
@@ -48,7 +47,7 @@ case AC_PACKAGE_VERSION in
 esac
 AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
     [Defined to a CVS timestamp for alpha releases of M4])
-
+AB_INIT()
 
 
 ## -------------------------- ##

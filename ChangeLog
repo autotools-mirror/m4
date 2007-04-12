@@ -1,3 +1,10 @@
+2007-04-12  Eric Blake  <ebb9@byu.net>
+
+	Enable autobuild usage.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	autobuild'.
+	* configure.ac (AB_INIT): Output autobuild information.
+
 2007-04-11  Eric Blake  <ebb9@byu.net>
 
 	Address testsuite shortcoming in 'stdout full' on glibc.
@@ -13,7 +20,7 @@
 
 	Address failure of 'seekable stdin' on Mac OS X.
 	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
-	fflush.
+	fflush'.
 
 2007-04-07  Eric Blake  <ebb9@byu.net>
 
