@@ -2,6 +2,10 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 
+Version 1.4.10 - ?? ??? 2007, by ????  (CVS version 1.4.9a)
+
+*
+
 Version 1.4.9 - 23 Mar 2007, by Eric Blake  (CVS version 1.4.8c)
 
 * Minor documentation and portability cleanups.
