@@ -4,7 +4,8 @@ Foundation, Inc.
 
 Version 1.4.10 - ?? ??? 2007, by ????  (CVS version 1.4.9a)
 
-*
+* Fix regression introduced in 1.4.9 in the `eval' builtin when performing
+  division.
 
 Version 1.4.9 - 23 Mar 2007, by Eric Blake  (CVS version 1.4.8c)
 

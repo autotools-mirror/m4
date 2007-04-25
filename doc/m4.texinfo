@@ -4966,6 +4966,12 @@ Here are a few examples of use of @code{eval}.
 @example
 eval(`-3 * 5')
 @result{}-15
+eval(`-99 / 10')
+@result{}-9
+eval(`-99 % 10')
+@result{}-9
+eval(`99 % -10')
+@result{}9
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
 eval(`0r1:0111 + 0b100 + 0r3:12')
@@ -4979,7 +4985,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:8: bad expression in eval: foo / 6
+@error{}m4:stdin:11: bad expression in eval: foo / 6
 @result{}
 eval(foo / 6)
 @result{}111

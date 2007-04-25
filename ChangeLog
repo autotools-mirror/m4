@@ -1,3 +1,12 @@
+2007-04-25  Eric Blake  <ebb9@byu.net>
+
+	Fix negative division within eval, regression of 2007-01-06.
+	* doc/m4.texinfo (Eval): Catch this bug.
+	* src/eval.c (mult_term): Fix it.
+	* NEWS: Document this.
+	* THANKS: Update.
+	Reported by Cesar Strauss.
+
 2007-04-23  Eric Blake  <ebb9@byu.net>
 
 	Start 1.4.9a.

@@ -718,10 +718,10 @@ mult_term (eval_token et, int32_t *v1)
 	  if (v2 == 0)
 	    return DIVIDE_ZERO;
 	  else if (v2 == -1)
-	    /* Avoid the x86 SIGFPE on INT_MIN / -1.  */
+	    /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
 	    *v1 = (int32_t) -(uint32_t) *v1;
 	  else
-	    *v1 = (int32_t) ((uint32_t) *v1 / (uint32_t) v2);
+	    *v1 /= v2;
 	  break;
 
 	case MODULO:
