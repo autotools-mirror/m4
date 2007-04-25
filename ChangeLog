@@ -1,3 +1,9 @@
+2007-04-25  Eric Blake  <ebb9@byu.net>
+
+	Test that regression in 1.4.9's eval doesn't recur.
+	* doc/m4.texinfo (Eval): Check negative division.
+	* THANKS: Update.
+
 2007-04-12  Eric Blake  <ebb9@byu.net>
 
 	Allow for running test in sticky or setgid directory.
