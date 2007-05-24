@@ -510,22 +510,19 @@ m4_sysval_flush (m4 *context, bool report)
      next character on exit (but places no restrictions on the file
      pointer location on a non-seekable file).  It also requires that
      fflush() followed by fseeko() on an input file set the underlying
-     file pointer.  However, fflush() on a non-seekable file can lose
-     buffered data, which we might otherwise want to process after
-     syscmd.  Hence, we must check whether stdin is seekable.  We must
-     also be tolerant of operating with stdin closed, so we don't
-     report any failures in this attempt.  The stdio-safer module and
-     friends are essential, so that if stdin was closed, this lseek is
-     not on some other file that we have since opened.  Mingw has bugs
-     when using fseek on text files, so we only strive for POSIX
-     behavior when we detect a UNIX environment.  */
-#if UNIX
+     file pointer, and gnulib guarantees these semantics.  However,
+     fflush() on a non-seekable file can lose buffered data, which we
+     might otherwise want to process after syscmd.  Hence, we must
+     check whether stdin is seekable.  We must also be tolerant of
+     operating with stdin closed, so we don't report any failures in
+     this attempt.  The stdio-safer module and friends are essential,
+     so that if stdin was closed, this lseek is not on some other file
+     that we have since opened.  */
   if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0
       && fflush (stdin) == 0)
     {
       fseeko (stdin, 0, SEEK_CUR);
     }
-#endif /* UNIX */
 }
 
 M4BUILTIN_HANDLER (syscmd)
