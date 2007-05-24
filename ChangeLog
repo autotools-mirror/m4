@@ -1,5 +1,11 @@
 2007-05-24  Eric Blake  <ebb9@byu.net>
 
+	Provide consistent shift semantics regardless of hardware.
+	* modules/m4.c (numb_lshift, numb_rshift, numb_urshift): Mask
+	before shifting.
+	(number, unumber): Always use [u]intmax_t.
+	Reported by Gary V. Vaughan.
+
 	Support POSIX flush semantics on all platforms.
 	* modules/m4.c (m4_sysval_flush): Rely on gnulib.
 	* ltdl/m4/gnulib-cache.m4: Fix typo in previous commit.

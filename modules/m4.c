@@ -100,14 +100,8 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
   BUILTIN (undivert,	false,	false,	false,	0,	-1 )	\
 
 
-#if defined(SIZEOF_LONG_LONG_INT) && SIZEOF_LONG_LONG_INT > 0
-/* Use GNU long long int if available.  */
-typedef long long int number;
-typedef unsigned long long int unumber;
-#else
-typedef long int number;
-typedef unsigned long int unumber;
-#endif
+typedef intmax_t number;
+typedef uintmax_t unumber;
 
 static void	include		(m4 *context, int argc, m4_symbol_value **argv,
 				 bool silent);
@@ -1103,10 +1097,21 @@ M4BUILTIN_HANDLER (translit)
    does not support.  */
 #define numb_invert(x)       return NEGATIVE_EXPONENT
 
-#define numb_lshift(c, x, y)  (*(x) = (*(x) << *(y)))
-#define numb_rshift(c, x, y)  (*(x) = (*(x) >> *(y)))
-#define numb_urshift(c, x, y)				\
-   (*(x) = (number) ((unumber) *(x) >> (unumber) *(y)))
+/* Minimize undefined C behavior (shifting by a negative number,
+   shifting by the width or greater, left shift overflow, or right
+   shift of a negative number).  Implement Java wrap-around semantics,
+   with implicit masking of shift amount.  This code assumes that the
+   implementation-defined overflow when casting unsigned to signed is
+   a silent twos-complement wrap-around.  */
+#define shift_mask (sizeof (number) * CHAR_BIT - 1)
+#define numb_lshift(c, x, y)					\
+  (*(x) = (number) ((unumber) *(x) << (*(y) & shift_mask)))
+#define numb_rshift(c, x, y)					\
+  (*(x) = (number) (*(x) < 0					\
+		    ? ~(~(unumber) *(x) >> (*(y) & shift_mask)) \
+		    : (unumber) *(x) >> (*(y) & shift_mask)))
+#define numb_urshift(c, x, y)					\
+  (*(x) = (number) ((unumber) *(x) >> (*(y) & shift_mask)))
 
 
 /* The function ntoa () converts VALUE to a signed ascii representation in
