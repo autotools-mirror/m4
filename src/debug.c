@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006 Free Software
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -179,7 +179,7 @@ debug_flush_files (void)
      opened on a seekable file, that the file pointer be left at the
      next character on exit (but places no restrictions on the file
      pointer location on a non-seekable file).  It also requires that
-     fflush() followed by fseek() on an input file set the underlying
+     fflush() followed by fseeko() on an input file set the underlying
      file pointer.  However, fflush() on a non-seekable file can lose
      buffered data, which we might otherwise want to process after
      syscmd.  Hence, we must check whether stdin is seekable.  We must
@@ -188,12 +188,12 @@ debug_flush_files (void)
      friends are essential, so that if stdin was closed, this lseek is
      not on some other file that we have since opened.  Mingw has bugs
      when using fseek on text files, so we only strive for POSIX
-     behavior when we detect a UNIX environment.  */
+     behavior when we detect a UNIX environment, until gnulib is improved.  */
 #if UNIX
   if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0
       && fflush (stdin) == 0)
     {
-      fseek (stdin, 0, SEEK_CUR);
+      fseeko (stdin, 0, SEEK_CUR);
     }
 #endif /* UNIX */
 }
