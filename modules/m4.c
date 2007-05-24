@@ -509,7 +509,7 @@ m4_sysval_flush (m4 *context, bool report)
      opened on a seekable file, that the file pointer be left at the
      next character on exit (but places no restrictions on the file
      pointer location on a non-seekable file).  It also requires that
-     fflush() followed by fseek() on an input file set the underlying
+     fflush() followed by fseeko() on an input file set the underlying
      file pointer.  However, fflush() on a non-seekable file can lose
      buffered data, which we might otherwise want to process after
      syscmd.  Hence, we must check whether stdin is seekable.  We must
@@ -523,7 +523,7 @@ m4_sysval_flush (m4 *context, bool report)
   if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0
       && fflush (stdin) == 0)
     {
-      fseek (stdin, 0, SEEK_CUR);
+      fseeko (stdin, 0, SEEK_CUR);
     }
 #endif /* UNIX */
 }
