@@ -278,10 +278,9 @@ static const struct option long_options[] =
 
 /* Process a command line file NAME, and return true only if it was
    stdin.  */
-static bool
+static void
 process_file (const char *name)
 {
-  bool result = false;
   if (strcmp (name, "-") == 0)
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
@@ -289,7 +288,6 @@ process_file (const char *name)
 	 there is no point closing stdin before wrapped text, to
 	 minimize bugs in syscmd called from wrapped text.  */
       push_file (stdin, "stdin", false);
-      result = true;
     }
   else
     {
@@ -301,13 +299,12 @@ process_file (const char *name)
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;
-	  return false;
+	  return;
 	}
       push_file (fp, full_name, true);
       free (full_name);
     }
   expand_input ();
-  return result;
 }
 
 /* POSIX requires only -D, -U, and -s; and says that the first two
@@ -330,7 +327,6 @@ main (int argc, char *const *argv, char *const *envp)
   int optchar;			/* option character */
 
   macro_definition *defines;
-  bool read_stdin = false;
   bool interactive = false;
   bool seen_file = false;
   const char *debugfile = NULL;
@@ -340,7 +336,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
-  atexit (close_stdout);
+  atexit (close_stdin);
 
   include_init ();
   debug_init ();
@@ -554,8 +550,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case '\1':
 	  seen_file = true;
-	  if (process_file (defines->arg))
-	    read_stdin = true;
+          process_file (defines->arg);
 	  break;
 
 	default:
@@ -572,10 +567,10 @@ main (int argc, char *const *argv, char *const *envp)
      and the input read.  Wrapup text is handled separately later.  */
 
   if (optind == argc && !seen_file)
-    read_stdin = process_file ("-");
+    process_file ("-");
   else
     for (; optind < argc; optind++)
-      read_stdin |= process_file (argv[optind]);
+      process_file (argv[optind]);
 
   /* Now handle wrapup text.  */
 
@@ -583,14 +578,9 @@ main (int argc, char *const *argv, char *const *envp)
     expand_input ();
 
   /* Change debug stream back to stderr, to force flushing the debug
-     stream and detect any errors it might have encountered.  Close
-     stdin if we read from it, to detect any errors.  */
+     stream and detect any errors it might have encountered.  The
+     three standard streams are closed by close_stdin.  */
   debug_set_output (NULL);
-  if (read_stdin && close_stream (stdin) == EOF)
-    {
-      M4ERROR ((warning_status, errno, "error reading stdin"));
-      retcode = EXIT_FAILURE;
-    }
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);

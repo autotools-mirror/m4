@@ -36,7 +36,7 @@
 #include "clean-temp.h"
 #include "cloexec.h"
 #include "close-stream.h"
-#include "closeout.h"
+#include "closein.h"
 #include "error.h"
 #include "exitfail.h"
 #include "obstack.h"

@@ -1,5 +1,16 @@
 2007-05-24  Eric Blake  <ebb9@byu.net>
 
+	Support POSIX flush semantics on all platforms.
+	* m4/gnulib-cache.m4: Remove closout, and augment with
+	'gnulib-tool --import closein fflush'.
+	* src/m4.h (includes): Use closein, not closeout.
+	* src/m4.c (main): Ensure stdin is flushed when not all input is
+	consumed.
+	(process_file): No return needed.
+	* src/debug.c (debug_flush_files): Rely on gnulib module, rather
+	than excluding mingw.
+	* NEWS: Document this change.
+
 	Work around cygwin and mingw fseeko bugs.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import fseeko'.
 	* src/debug.c (debug_flush_files): Prefer fseeko over fseek.
