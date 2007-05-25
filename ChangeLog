@@ -1,5 +1,23 @@
 2007-05-25  Eric Blake  <ebb9@byu.net>
 
+	Fix sync line interaction with multiline comments.
+	* doc/m4.texinfo (Other Incompatibilities): Add example, and
+	document bug in --syncline/divert interaction.
+	(Preprocessor features): Augment test.
+	* src/m4.h (output_text): Export.
+	(shipout_text, next_token): Add parameter.
+	* src/freeze.c (reload_frozen_state): Don't interfere with
+	synclines when reloading state.
+	* src/output.c (output_text): Export.
+	(shipout_text): Take new parameter for start line of token.
+	Output at most one syncline per token.
+	* src/input.c (next_token): Report line where multiline tokens
+	start.
+	* src/macro.c (expand_input, expand_token, expand_argument):
+	Adjust callers so that line is passed from input to output.
+	* NEWS: Document this fix.
+	Reported by Sergey Poznyakoff.
+
 	Test -s in testsuite.
 	* doc/m4.texinfo (Preprocessor features): Add a test.
 	* checks/get-them: Support extra options in testsuite.
@@ -10,7 +28,7 @@
 2007-05-24  Eric Blake  <ebb9@byu.net>
 
 	Support POSIX flush semantics on all platforms.
-	* m4/gnulib-cache.m4: Remove closout, and augment with
+	* m4/gnulib-cache.m4: Remove closeout, and augment with
 	'gnulib-tool --import closein fflush'.
 	* src/m4.h (includes): Use closein, not closeout.
 	* src/m4.c (main): Ensure stdin is flushed when not all input is

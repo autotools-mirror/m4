@@ -285,7 +285,7 @@ typedef enum token_data_type token_data_type;
 
 void input_init (void);
 token_type peek_token (void);
-token_type next_token (token_data *);
+token_type next_token (token_data *, int *);
 void skip_line (void);
 
 /* push back input */
@@ -321,7 +321,8 @@ extern int output_current_line;
 
 void output_init (void);
 void output_exit (void);
-void shipout_text (struct obstack *, const char *, int);
+void output_text (const char *, int);
+void shipout_text (struct obstack *, const char *, int, int);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);

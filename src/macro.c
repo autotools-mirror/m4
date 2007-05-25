@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
-   Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free
+   Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "m4.h"
 
 static void expand_macro (symbol *);
-static void expand_token (struct obstack *, token_type, token_data *);
+static void expand_token (struct obstack *, token_type, token_data *, int);
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -59,12 +59,13 @@ expand_input (void)
 {
   token_type t;
   token_data td;
+  int line;
 
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
 
-  while ((t = next_token (&td)) != TOKEN_EOF)
-    expand_token ((struct obstack *) NULL, t, &td);
+  while ((t = next_token (&td, &line)) != TOKEN_EOF)
+    expand_token ((struct obstack *) NULL, t, &td, line);
 
   obstack_free (&argc_stack, NULL);
   obstack_free (&argv_stack, NULL);
@@ -79,7 +80,7 @@ expand_input (void)
 `------------------------------------------------------------------------*/
 
 static void
-expand_token (struct obstack *obs, token_type t, token_data *td)
+expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 {
   symbol *sym;
 
@@ -94,7 +95,8 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
     case TOKEN_CLOSE:
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
-      shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
+      shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)),
+		    line);
       break;
 
     case TOKEN_WORD:
@@ -106,10 +108,10 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 	{
 #ifdef ENABLE_CHANGEWORD
 	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			strlen (TOKEN_DATA_ORIG_TEXT (td)));
+			strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
 #else
 	  shipout_text (obs, TOKEN_DATA_TEXT (td),
-			strlen (TOKEN_DATA_TEXT (td)));
+			strlen (TOKEN_DATA_TEXT (td)), line);
 #endif
 	}
       else
@@ -149,7 +151,7 @@ expand_argument (struct obstack *obs, token_data *argp)
   /* Skip leading white space.  */
   do
     {
-      t = next_token (&td);
+      t = next_token (&td, NULL);
     }
   while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
 
@@ -184,7 +186,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	    paren_level++;
 	  else if (*text == ')')
 	    paren_level--;
-	  expand_token (obs, t, &td);
+	  expand_token (obs, t, &td, line);
 	  break;
 
 	case TOKEN_EOF:
@@ -196,7 +198,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 
 	case TOKEN_WORD:
 	case TOKEN_STRING:
-	  expand_token (obs, t, &td);
+	  expand_token (obs, t, &td, line);
 	  break;
 
 	case TOKEN_MACDEF:
@@ -213,7 +215,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  abort ();
 	}
 
-      t = next_token (&td);
+      t = next_token (&td, NULL);
     }
 }
 
@@ -239,7 +241,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   if (peek_token () == TOKEN_OPEN)
     {
-      next_token (&td);		/* gobble parenthesis */
+      next_token (&td, NULL); /* gobble parenthesis */
       do
 	{
 	  more_args = expand_argument (arguments, &td);

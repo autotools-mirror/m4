@@ -664,7 +664,8 @@ the file name did not change from the previous directive.
 Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
-until the beginning of the next generated line.
+until the next newline that does not occur in the middle of a quoted
+string or comment.
 
 @comment options: -s
 @example
@@ -672,15 +673,31 @@ define(`twoline', `1
 2')
 @result{}#line 2 "stdin"
 @result{}
+changecom(`/*', `*/')
+@result{}
+define(`comment', `/*1
+2*/')
+@result{}#line 5
+@result{}
 dnl no line
 hello
-@result{}#line 4
+@result{}#line 7
 @result{}hello
 twoline
 @result{}1
-@result{}#line 5
+@result{}#line 8
 @result{}2
+comment
+@result{}/*1
+@result{}2*/
+one comment `two
+three'
+@result{}#line 10
+@result{}one /*1
+@result{}2*/ two
+@result{}three
 goodbye
+@result{}#line 12
 @result{}goodbye
 @end example
 
@@ -6151,7 +6168,29 @@ diverted text as being generated at the time it is diverted.
 The sync line option is used mostly when using @code{m4} as
 a front end to a compiler.  If a diverted line causes a compiler error,
 the error messages should most probably refer to the place where the
-diversion were made, and not where it was inserted again.
+diversion was made, and not where it was inserted again.
+
+@comment options: -s
+@example
+divert(2)2
+divert(1)1
+divert`'0
+@result{}#line 3 "stdin"
+@result{}0
+^D
+@result{}#line 2 "stdin"
+@result{}1
+@result{}#line 1 "stdin"
+@result{}2
+@end example
+
+The current @code{m4} implementation has a limitation that the syncline
+output at the start of each diversion occurs no matter what, even if the
+previous diversion did not end with a newline.  This goes contrary to
+the claim that synclines appear on a line by themselves, so this
+limitation may be corrected in a future version of @code{m4}.  In the
+meantime, when using @option{-s}, it is wisest to make sure all
+diversions end with newline.
 
 @item
 @acronym{GNU} @code{m4} makes no attempt at prohibiting self-referential

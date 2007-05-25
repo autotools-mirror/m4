@@ -808,22 +808,23 @@ set_word_regexp (const char *regexp)
 #endif /* ENABLE_CHANGEWORD */
 
 
-/*-------------------------------------------------------------------------.
-| Parse and return a single token from the input stream.  A token can	   |
-| either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_STRING |
-| for a quoted string; TOKEN_WORD for something that is a potential macro  |
-| name; and TOKEN_SIMPLE for any single character that is not a part of	   |
-| any of the previous types.						   |
-|									   |
-| Next_token () return the token type, and passes back a pointer to the	   |
-| token data through TD.  The token text is collected on the obstack	   |
-| token_stack, which never contains more than one token text at a time.	   |
-| The storage pointed to by the fields in TD is therefore subject to	   |
-| change the next time next_token () is called.				   |
-`-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| Parse and return a single token from the input stream.  A token     |
+| can either be TOKEN_EOF, if the input_stack is empty; it can be     |
+| TOKEN_STRING for a quoted string; TOKEN_WORD for something that is  |
+| a potential macro name; and TOKEN_SIMPLE for any single character   |
+| that is not a part of any of the previous types.  If LINE is not    |
+| NULL, set *LINE to the line where the token starts.                 |
+|                                                                     |
+| Next_token () return the token type, and passes back a pointer to   |
+| the token data through TD.  The token text is collected on the      |
+| obstack token_stack, which never contains more than one token text  |
+| at a time.  The storage pointed to by the fields in TD is           |
+| therefore subject to change the next time next_token () is called.  |
+`--------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td)
+next_token (token_data *td, int *line)
 {
   int ch;
   int quote_level;
@@ -833,9 +834,11 @@ next_token (token_data *td)
   char *orig_text = NULL;
 #endif
   const char *file;
-  int line;
+  int dummy;
 
   obstack_free (&token_stack, token_bottom);
+  if (!line)
+    line = &dummy;
 
  /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
@@ -860,7 +863,7 @@ next_token (token_data *td)
 
   next_char (); /* Consume character we already peeked at.  */
   file = current_file;
-  line = current_line;
+  *line = current_line;
   if (MATCH (ch, bcomm.string, true))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);
@@ -872,7 +875,7 @@ next_token (token_data *td)
       else
 	/* current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
-	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
 			  "ERROR: end of file in comment"));
 
       type = TOKEN_STRING;
@@ -955,7 +958,7 @@ next_token (token_data *td)
 	  if (ch == CHAR_EOF)
 	    /* current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
-	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
 			      "ERROR: end of file in string"));
 
 	  if (MATCH (ch, rquote.string, true))

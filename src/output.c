@@ -422,7 +422,7 @@ output_character_helper (int character)
 | to a diversion file or an in-memory diversion buffer.			  |
 `------------------------------------------------------------------------*/
 
-static void
+void
 output_text (const char *text, int length)
 {
   int count;
@@ -444,23 +444,26 @@ output_text (const char *text, int length)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Add some text into an obstack OBS, taken from TEXT, having LENGTH	   |
-| characters.  If OBS is NULL, rather output the text to an external file  |
-| or an in-memory diversion buffer.  If OBS is NULL, and there is no	   |
-| output file, the text is discarded.					   |
-|									   |
-| If we are generating sync lines, the output have to be examined, because |
-| we need to know how much output each input line generates.  In general,  |
-| sync lines are output whenever a single input lines generates several	   |
-| output lines, or when several input lines does not generate any output.  |
-`-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| Add some text into an obstack OBS, taken from TEXT, having LENGTH   |
+| characters.  If OBS is NULL, output the text to an external file    |
+| or an in-memory diversion buffer instead.  If OBS is NULL, and      |
+| there is no output file, the text is discarded.  LINE is the line   |
+| where the token starts (not necessarily current_line, in the case   |
+| of multiline tokens).                                               |
+|                                                                     |
+| If we are generating sync lines, the output has to be examined,     |
+| because we need to know how much output each input line generates.  |
+| In general, sync lines are output whenever a single input lines     |
+| generates several output lines, or when several input lines do not  |
+| generate any output.                                                |
+`--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length)
+shipout_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
-  char line[20];
+  char linebuf[20];
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -501,43 +504,59 @@ shipout_text (struct obstack *obs, const char *text, int length)
 	output_text (text, length);
       }
   else
-    for (; length-- > 0; text++)
-      {
-	if (start_of_output_line)
-	  {
-	    start_of_output_line = false;
-	    output_current_line++;
-
+    {
+      /* Check for syncline only at the start of a token.  Multiline
+	 tokens, and tokens that are out of sync but in the middle of
+	 the line, must wait until the next raw newline triggers a
+	 syncline.  */
+      if (start_of_output_line)
+	{
+	  start_of_output_line = false;
+	  output_current_line++;
 #ifdef DEBUG_OUTPUT
-	    printf ("DEBUG: cur %d, cur out %d\n",
-		    current_line, output_current_line);
+	  fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+		   line, current_line, output_current_line);
 #endif
 
-	    /* Output a `#line NUM' synchronization directive if needed.
-	       If output_current_line was previously given a negative
-	       value (invalidated), rather output `#line NUM "FILE"'.  */
+	  /* Output a `#line NUM' synchronization directive if needed.
+	     If output_current_line was previously given a negative
+	     value (invalidated), output `#line NUM "FILE"' instead.  */
 
-	    if (output_current_line != current_line)
-	      {
-		sprintf (line, "#line %d", current_line);
-		for (cursor = line; *cursor; cursor++)
-		  OUTPUT_CHARACTER (*cursor);
-		if (output_current_line < 1 && current_file[0] != '\0')
-		  {
-		    OUTPUT_CHARACTER (' ');
-		    OUTPUT_CHARACTER ('"');
-		    for (cursor = current_file; *cursor; cursor++)
-		      OUTPUT_CHARACTER (*cursor);
-		    OUTPUT_CHARACTER ('"');
-		  }
-		OUTPUT_CHARACTER ('\n');
-		output_current_line = current_line;
-	      }
-	  }
-	OUTPUT_CHARACTER (*text);
-	if (*text == '\n')
-	  start_of_output_line = true;
-      }
+	  if (output_current_line != line)
+	    {
+	      sprintf (linebuf, "#line %d", line);
+	      for (cursor = linebuf; *cursor; cursor++)
+		OUTPUT_CHARACTER (*cursor);
+	      if (output_current_line < 1 && current_file[0] != '\0')
+		{
+		  OUTPUT_CHARACTER (' ');
+		  OUTPUT_CHARACTER ('"');
+		  for (cursor = current_file; *cursor; cursor++)
+		    OUTPUT_CHARACTER (*cursor);
+		  OUTPUT_CHARACTER ('"');
+		}
+	      OUTPUT_CHARACTER ('\n');
+	      output_current_line = line;
+	    }
+	}
+
+      /* Output the token, and track embedded newlines.  */
+      for (; length-- > 0; text++)
+	{
+	  if (start_of_output_line)
+	    {
+	      start_of_output_line = false;
+	      output_current_line++;
+#ifdef DEBUG_OUTPUT
+	      fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+		       line, current_line, output_current_line);
+#endif
+	    }
+	  OUTPUT_CHARACTER (*text);
+	  if (*text == '\n')
+	    start_of_output_line = true;
+	}
+    }
 }
 
 /* Functions for use by diversions.  */
