@@ -57,8 +57,9 @@ do
     continue
   }
   echo "Checking $file"
+  options=`sed -ne '3s/^dnl @ extra options: //p;3q' "$file"`
   sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
-    | LC_MESSAGES=C m4 -d -I "$examples" - >$out 2>$err
+    | LC_MESSAGES=C m4 -d -I "$examples" $options - >$out 2>$err
   stat=$?
 
   xstat=`sed -ne '2s/^dnl @ expected status: //p;2q' "$file"`

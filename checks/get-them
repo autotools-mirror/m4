@@ -15,6 +15,7 @@ BEGIN {
   count = 0;
   file = "NONE";
   status = 0;
+  options = "";
 }
 
 /^@node / {
@@ -37,11 +38,17 @@ BEGIN {
 /^@comment ignore$/ {
   getline;
   status = 0;
+  options = "";
   next;
 }
 
 /^@comment status: / {
   status = $3;
+}
+
+/^@comment options: / {
+  options = $0;
+  gsub ("@comment options:", "", options);
 }
 
 /^@example$/, /^@end example$/ {
@@ -55,12 +62,14 @@ BEGIN {
     file = sprintf("%03d.%s", count, node);
     printf("dnl @ %s:%d: Origin of test\n"\
 	   "dnl @ expected status: %d\n"\
+	   "dnl @ extra options: %s\n"\
 	   "dnl @ Copyright (C) 2006, 2007 Free Software Foundation\n"\
 	   "dnl @ This file is free software; the Free Software Foundation\n"\
 	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
 	   "dnl @ with or without modifications, as long as this notice\n"\
-	   "dnl @ is preserved.\n", FILENAME, NR, status) > file;
+	   "dnl @ is preserved.\n", FILENAME, NR, status, options) > file;
     status = 0;
+    options = "";
     next;
   }
   if ($0 ~ /^@end example$/) {

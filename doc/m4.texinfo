@@ -666,6 +666,24 @@ themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
 until the beginning of the next generated line.
 
+@comment options: -s
+@example
+define(`twoline', `1
+2')
+@result{}#line 2 "stdin"
+@result{}
+dnl no line
+hello
+@result{}#line 4
+@result{}hello
+twoline
+@result{}1
+@result{}#line 5
+@result{}2
+goodbye
+@result{}goodbye
+@end example
+
 @item -U @var{NAME}
 @itemx --undefine=@var{NAME}
 This deletes any predefined meaning @var{NAME} might have.  Obviously,
