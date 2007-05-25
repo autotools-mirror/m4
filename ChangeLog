@@ -1,5 +1,15 @@
 2007-05-25  Eric Blake  <ebb9@byu.net>
 
+	Backport prompts in examples from head.
+	* src/macro.c (expand_macro): Shorten message.
+	* doc/m4.texinfo (Manual, Command line files, Comments)
+	(Inhibiting Invocation, Macro Arguments, Macro expansion, Indir)
+	(Builtin, Shift, Forloop, Foreach, Dumpdef, Trace, Debug Levels)
+	(Debug Output, Include, Format, Syscmd, Mkstemp, Location)
+	(Using frozen files, Improved forloop, Improved foreach): Add
+	prompts to examples.
+	* checks/get-them: Ignore prompts in examples.
+
 	Fix sync line interaction with multiline comments.
 	* doc/m4.texinfo (Other Incompatibilities): Add example, and
 	document bug in --syncline/divert interaction.

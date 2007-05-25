@@ -327,7 +327,7 @@ expand_macro (symbol *sym)
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
-	      "ERROR: recursion limit of %d exceeded, use -L<N> to change it",
+	      "recursion limit of %d exceeded, use -L<N> to change it",
 	      nesting_limit));
 
   macro_call_id++;

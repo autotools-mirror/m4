@@ -77,6 +77,8 @@ BEGIN {
   }
   if ($0 ~ /^\^D$/)
     next;
+  if ($0 ~ /^\$ @kbd/)
+    next;
   if ($0 ~ /^@result\{\}/ || $0 ~ /^@error\{\}/)
     prefix = "dnl ";
   else
