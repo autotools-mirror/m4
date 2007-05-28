@@ -1,3 +1,11 @@
+2007-05-28  Eric Blake  <ebb9@byu.net>
+
+	Also run gnulib unit tests during make check.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool
+	--tests-base=tests --with-tests'.
+	* configure.ac (AC_CONFIG_FILES): Build gnulib testdir.
+	* Makefile.am (SUBDIRS): Run gnulib tests before ours.
+
 2007-05-25  Eric Blake  <ebb9@byu.net>
 
 	Backport prompts in examples from head.

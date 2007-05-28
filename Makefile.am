@@ -1,6 +1,6 @@
 ## This file is part of GNU M4.
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006 Free Software
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
 ## Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS = . examples lib src doc checks
+SUBDIRS = . examples lib src doc tests checks
 EXTRA_DIST = bootstrap c-boxes.el gendocs.sh GNUmakefile Makefile.maint \
 	m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h

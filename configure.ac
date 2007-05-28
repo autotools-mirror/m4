@@ -165,6 +165,7 @@ AC_CONFIG_FILES([Makefile
 		 doc/Makefile
 		 lib/Makefile
 		 src/Makefile
+		 tests/Makefile
 		 checks/Makefile
 		 examples/Makefile
 ])
