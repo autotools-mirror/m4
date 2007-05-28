@@ -737,7 +737,7 @@ input came from.  These features occur with the following options:
 Make @code{m4} search @var{DIRECTORY} for included files, prior to
 searching the current working directory.  @xref{Search Path}, for more
 details.  This option may be given more than once.  Some other
-implementations of @code{m4} use @code{-B @var{number}} to change their
+implementations of @code{m4} use @option{-B @var{number}} to change their
 hard-coded limits, but that is unnecessary in @acronym{GNU} where the
 only limit is your hardware capability.  So although it is unlikely that
 you will want to include a relative directory whose name is purely
@@ -805,10 +805,11 @@ the file name did not change from the previous directive.
 Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
-until the beginning of the next generated line.  @xref{Syncoutput}, for
-runtime control.  @var{TRUTH} is interpreted the same as the argument to
-@code{syncoutput}; if @var{TRUTH} is omitted, or @option{--syncoutput}
-is not used, synchronization lines are disabled.
+until the next newline that does not occur in the middle of a quoted
+string or comment.  @xref{Syncoutput}, for runtime control.  @var{TRUTH}
+is interpreted the same as the argument to @code{syncoutput}; if
+@var{TRUTH} is omitted, or @option{--syncoutput} is not used,
+synchronization lines are disabled.
 
 @item -U @var{NAME}
 @itemx --undefine=@var{NAME}
@@ -3316,7 +3317,7 @@ f(popdef(`f')dumpdef(`f'))
 @samp{s} flags affect the details of the display.  Remember, the
 @samp{q} flag is implied when the @option{--debug} option (@option{-d},
 @pxref{Debugging options, , Invoking m4}) is used in the command line
-without arguments. Also, @code{--debuglen} (@pxref{Debuglen}) can affect
+without arguments. Also, @option{--debuglen} (@pxref{Debuglen}) can affect
 output, by truncating longer strings.
 
 @comment options: -ds -l3
@@ -3443,7 +3444,7 @@ foo
 @result{}blah
 @end example
 
-Tracing even works on builtins.  However, @command{defn} (@pxref{Defn})
+Tracing even works on builtins.  However, @code{defn} (@pxref{Defn})
 does not transfer tracing status.
 
 @example
@@ -4258,7 +4259,7 @@ the default flavor is reverted to the @code{GNU_M4} style, compatible
 with emacs.
 
 @var{resyntax} can be any one of the values in the table below.  Case is
-not important, and @kbd{-} or @kbd{ } can be substituted for @kbd{_} in
+not important, and @samp{-} or @samp{ } can be substituted for @samp{_} in
 the given names.  If @var{resyntax} is unrecognized, a warning is
 issued and the default flavor is not changed.
 
@@ -7158,7 +7159,7 @@ It is possible to adjust whether synclines are printed to output:
 @deffn {Builtin (gnu)} syncoutput (@var{truth})
 If @var{truth} matches the extended regular expression
 @samp{^[1yY]|^([oO][nN])}, it causes @code{m4} to emit sync lines of the
-form: @code{#line <number> ["<file>"]}.
+form: @samp{#line <number> ["<file>"]}.
 
 If @var{truth} is empty, or matches the extended regular expression
 @samp{^[0nN]|^([oO][fF])}, it causes @code{m4} to turn sync lines off.
@@ -7173,28 +7174,45 @@ This macro was added in M4 2.0.
 define(`twoline', `1
 2')
 @result{}
+changecom(`/*', `*/')
+@result{}
+define(`comment', `/*1
+2*/')
+@result{}
 twoline
 @result{}1
 @result{}2
 dnl no line
 syncoutput(`on')
-@result{}#line 5 "stdin"
+@result{}#line 8 "stdin"
 @result{}
 twoline
 @result{}1
-@result{}#line 6
+@result{}#line 9
 @result{}2
 dnl no line
 hello
-@result{}#line 8
+@result{}#line 11
 @result{}hello
+comment
+@result{}/*1
+@result{}2*/
+one comment `two
+three'
+@result{}#line 13
+@result{}one /*1
+@result{}2*/ two
+@result{}three
+goodbye
+@result{}#line 15
+@result{}goodbye
 syncoutput(`off')
 @result{}
 twoline
 @result{}1
 @result{}2
 syncoutput(`blah')
-@error{}m4:stdin:11: Warning: syncoutput: unknown directive `blah'
+@error{}m4:stdin:18: Warning: syncoutput: unknown directive `blah'
 @result{}
 @end example
 
@@ -7281,14 +7299,14 @@ $ @kbd{m4 -R base.m4f input3.m4}
 @end example
 
 @noindent
-with the varying input.  The first call, containing the @code{-F}
+with the varying input.  The first call, containing the @option{-F}
 option, only reads and executes file @file{base.m4}, defining
 various application macros and computing other initializations.
 Once the input file @file{base.m4} has been completely processed, @acronym{GNU}
 @code{m4} produces in @file{base.m4f} a @dfn{frozen} file, that is, a
 file which contains a kind of snapshot of the @code{m4} internal state.
 
-Later calls, containing the @code{-R} option, are able to reload
+Later calls, containing the @option{-R} option, are able to reload
 the internal state of @code{m4}, from @file{base.m4f},
 @emph{prior} to reading any other input files.  This means
 instead of starting with a virgin copy of @code{m4}, input will be
@@ -7299,7 +7317,7 @@ been read anew.  However, this effect is achieved a lot faster.
 Only one frozen file may be created or read in any one @code{m4}
 invocation.  It is not possible to recover two frozen files at once.
 However, frozen files may be updated incrementally, through using
-@code{-R} and @code{-F} options simultaneously.  For example, if
+@option{-R} and @option{-F} options simultaneously.  For example, if
 some care is taken, the command:
 
 @comment ignore
@@ -7365,7 +7383,7 @@ second machine uses the same, or a newer version of GNU @code{m4}.
 These are simple (editable) text files, made up of directives,
 each starting with a capital letter and ending with a newline
 (@key{NL}).  Wherever a directive is expected, the character
-@kbd{#} introduces a comment line, empty lines are also ignored.
+@samp{#} introduces a comment line, empty lines are also ignored.
 In the following descriptions, @var{length}s always refer to
 corresponding @var{string}s.  Numbers are always expressed in decimal.
 The directives are:
@@ -7394,7 +7412,7 @@ Names a module which will be searched for according to the module search path
 and loaded.  Modules loaded from a frozen file don't add their builtin entries
 to the symbol table.
 
-@item F @var{length} @key{NL} @var{string} @key{ML}
+@item F @var{length} @key{NL} @var{string} @key{NL}
 Defines, through @code{pushdef}, a definition for @var{string}
 expanding to the function whose builtin name is also @var{string}. The builtin
 name is searched for among the intrinsic builtin functions only.
@@ -7455,7 +7473,7 @@ is made to summarize these here.
 @cindex @env{POSIXLY_CORRECT}
 This version of @code{m4} contains a few facilities that do not exist
 in System V @code{m4}.  These extra facilities are all suppressed by
-using the @samp{-G} command line option, unless overridden by other
+using the @option{-G} command line option, unless overridden by other
 command line options.
 Most of these extensions are compatible with
 @uref{http://www.unix.org/single_unix_specification/,
@@ -7474,7 +7492,7 @@ not only nine (@pxref{Arguments}).
 @item
 Files included with @code{include} and @code{sinclude} are sought in a
 user specified search path, if they are not found in the working
-directory.  The search path is specified by the @samp{-I} option and the
+directory.  The search path is specified by the @option{-I} option and the
 @samp{M4PATH} environment variable (@pxref{Search Path}).
 
 @item
@@ -7538,7 +7556,7 @@ the first place.
 @end itemize
 
 Additionally, @acronym{POSIX} only requires support for the command line
-options @samp{-s}, @samp{-D}, and @samp{-U}, so all other options
+options @option{-s}, @option{-D}, and @option{-U}, so all other options
 accepted by @acronym{GNU} M4 are extensions.  @xref{Invoking m4},
 for a description of these options.
 
@@ -7564,10 +7582,33 @@ diverted text as being generated by the source line containing the
 @code{undivert} call, whereas GNU @code{m4} regards the diverted text as
 being generated at the time it is diverted.
 
-I expect the sync line option to be used mostly when using @code{m4} as
+The sync line option is used mostly when using @code{m4} as
 a front end to a compiler.  If a diverted line causes a compiler error,
 the error messages should most probably refer to the place where the
-diversion were made, and not where it was inserted again.
+diversion was made, and not where it was inserted again.
+
+@comment options: -s
+@example
+divert(2)2
+divert(1)1
+divert`'0
+@result{}#line 3 "stdin"
+@result{}0
+^D
+@result{}#line 2 "stdin"
+@result{}1
+@result{}#line 1 "stdin"
+@result{}2
+@end example
+
+@comment FIXME - this needs to be fixed before 2.0.
+The current @code{m4} implementation has a limitation that the syncline
+output at the start of each diversion occurs no matter what, even if the
+previous diversion did not end with a newline.  This goes contrary to
+the claim that synclines appear on a line by themselves, so this
+limitation may be corrected in a future version of @code{m4}.  In the
+meantime, when using @option{-s}, it is wisest to make sure all
+diversions end with newline.
 
 @item
 GNU @code{m4} makes no attempt at prohibiting self-referential definitions

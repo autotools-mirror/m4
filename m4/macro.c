@@ -33,7 +33,7 @@ static void    collect_arguments (m4 *, const char *, m4_symbol *,
 				  m4_obstack *, m4_obstack *);
 static void    expand_macro      (m4 *, const char *, m4_symbol *);
 static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
-				  m4_symbol_value *);
+				  m4_symbol_value *, int);
 static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *);
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 				  m4_symbol_value **);
@@ -76,12 +76,13 @@ m4_macro_expand_input (m4 *context)
 {
   m4__token_type type;
   m4_symbol_value token;
+  int line;
 
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
 
-  while ((type = m4__next_token (context, &token)) != M4_TOKEN_EOF)
-    expand_token (context, (m4_obstack *) NULL, type, &token);
+  while ((type = m4__next_token (context, &token, &line)) != M4_TOKEN_EOF)
+    expand_token (context, (m4_obstack *) NULL, type, &token, line);
 
   obstack_free (&argc_stack, NULL);
   obstack_free (&argv_stack, NULL);
@@ -94,7 +95,7 @@ m4_macro_expand_input (m4 *context)
    the text are just copied to the output.  */
 static void
 expand_token (m4 *context, m4_obstack *obs,
-	      m4__token_type type, m4_symbol_value *token)
+	      m4__token_type type, m4_symbol_value *token, int line)
 {
   m4_symbol *symbol;
   const char *text = (m4_is_symbol_value_text (token)
@@ -112,7 +113,7 @@ expand_token (m4 *context, m4_obstack *obs,
     case M4_TOKEN_SIMPLE:
     case M4_TOKEN_STRING:
     case M4_TOKEN_SPACE:
-      m4_shipout_text (context, obs, text, strlen (text));
+      m4_shipout_text (context, obs, text, strlen (text), line);
       break;
 
     case M4_TOKEN_WORD:
@@ -129,7 +130,7 @@ expand_token (m4 *context, m4_obstack *obs,
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& ! m4__next_token_is_open (context)))
 	  {
-	    m4_shipout_text (context, obs, text, strlen (text));
+	    m4_shipout_text (context, obs, text, strlen (text), line);
 	  }
 	else
 	  expand_macro (context, textp, symbol);
@@ -165,7 +166,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
   /* Skip leading white space.  */
   do
     {
-      type = m4__next_token (context, &token);
+      type = m4__next_token (context, &token, NULL);
     }
   while (type == M4_TOKEN_SPACE);
 
@@ -196,7 +197,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	    paren_level++;
 	  else if (type == M4_TOKEN_CLOSE)
 	    paren_level--;
-	  expand_token (context, obs, type, &token);
+	  expand_token (context, obs, type, &token, line);
 	  break;
 
 	case M4_TOKEN_EOF:
@@ -207,7 +208,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	case M4_TOKEN_WORD:
 	case M4_TOKEN_SPACE:
 	case M4_TOKEN_STRING:
-	  expand_token (context, obs, type, &token);
+	  expand_token (context, obs, type, &token, line);
 	  break;
 
 	case M4_TOKEN_MACDEF:
@@ -220,7 +221,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  abort ();
 	}
 
-      type = m4__next_token (context, &token);
+      type = m4__next_token (context, &token, NULL);
     }
 }
 
@@ -353,7 +354,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 
   if (m4__next_token_is_open (context))
     {
-      m4__next_token (context, &token);		/* gobble parenthesis */
+      m4__next_token (context, &token, NULL); /* gobble parenthesis */
       do
 	{
 	  more_args = expand_argument (context, arguments, &token);

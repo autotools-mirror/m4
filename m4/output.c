@@ -418,8 +418,8 @@ output_character_helper (m4 *context, int character)
 
 /* Output one TEXT having LENGTH characters, when it is known that it goes
    to a diversion file or an in-memory diversion buffer.  */
-static void
-output_text (m4 *context, const char *text, size_t length)
+void
+m4_output_text (m4 *context, const char *text, size_t length)
 {
   size_t count;
 
@@ -441,20 +441,23 @@ output_text (m4 *context, const char *text, size_t length)
 }
 
 /* Add some text into an obstack OBS, taken from TEXT, having LENGTH
-   characters.  If OBS is NULL, rather output the text to an external file
-   or an in-memory diversion buffer.  If OBS is NULL, and there is no
-   output file, the text is discarded.
+   characters.  If OBS is NULL, output the text to an external file or
+   an in-memory diversion buffer instead.  If OBS is NULL, and there
+   is no output file, the text is discarded.  LINE is the line where
+   the token starts (not necessarily m4_get_output_line, in the case
+   of multiline tokens).
 
-   If we are generating sync lines, the output have to be examined, because
-   we need to know how much output each input line generates.  In general,
-   sync lines are output whenever a single input lines generates several
-   output lines, or when several input lines does not generate any output.  */
+   If we are generating sync lines, the output has to be examined,
+   because we need to know how much output each input line generates.
+   In general, sync lines are output whenever a single input line
+   generates several output lines, or when several input lines do not
+   generate any output.  */
 void
 m4_shipout_text (m4 *context, m4_obstack *obs,
-		 const char *text, size_t length)
+		 const char *text, size_t length, int line)
 {
   static bool start_of_output_line = true;
-  char line[20];
+  char linebuf[20];
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -492,52 +495,71 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	/* Optimize longer texts.  */
 
       default:
-	output_text (context, text, length);
+	m4_output_text (context, text, length);
       }
   else
-    for (; length-- > 0; text++)
-      {
-	if (start_of_output_line)
-	  {
-	    start_of_output_line = false;
-	    m4_set_output_line (context, m4_get_output_line (context) + 1);
+    {
+      /* Check for syncline only at the start of a token.  Multiline
+	 tokens, and tokens that are out of sync but in the middle of
+	 the line, must wait until the next raw newline triggers a
+	 syncline.  */
+      if (start_of_output_line)
+	{
+	  start_of_output_line = false;
+	  m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	    fprintf (stderr, "DEBUG: cur %lu, cur out %lu\n",
-		     (unsigned long int) m4_get_current_line (context),
-		     (unsigned long int) m4_get_output_line (context));
+	  fprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+		   (unsigned long int) m4_get_current_line (context),
+		   (unsigned long int) m4_get_output_line (context));
 #endif
 
-	    /* Output a `#line NUM' synchronization directive if needed.
-	       If output_line was previously given a negative
-	       value (invalidated), then output `#line NUM "FILE"'.  */
+	  /* Output a `#line NUM' synchronization directive if needed.
+	     If output_line was previously given a negative
+	     value (invalidated), then output `#line NUM "FILE"'.  */
 
-	    if (m4_get_output_line (context) != m4_get_current_line (context))
-	      {
-		sprintf (line, "#line %lu",
-			 (unsigned long int) m4_get_current_line (context));
-		for (cursor = line; *cursor; cursor++)
-		  OUTPUT_CHARACTER (*cursor);
-		if (m4_get_output_line (context) < 1
-		    && m4_get_current_file (context)[0] != '\0')
-		  {
-		    OUTPUT_CHARACTER (' ');
-		    OUTPUT_CHARACTER ('"');
-		    for (cursor = m4_get_current_file (context);
-			 *cursor; cursor++)
-		      {
-			OUTPUT_CHARACTER (*cursor);
-		      }
-		    OUTPUT_CHARACTER ('"');
-		  }
-		OUTPUT_CHARACTER ('\n');
-		m4_set_output_line (context, m4_get_current_line (context));
-	      }
-	  }
-	OUTPUT_CHARACTER (*text);
-	if (*text == '\n')
-	  start_of_output_line = true;
-      }
+	  if (m4_get_output_line (context) != line)
+	    {
+	      sprintf (linebuf, "#line %lu",
+		       (unsigned long int) m4_get_current_line (context));
+	      for (cursor = linebuf; *cursor; cursor++)
+		OUTPUT_CHARACTER (*cursor);
+	      if (m4_get_output_line (context) < 1
+		  && m4_get_current_file (context)[0] != '\0')
+		{
+		  OUTPUT_CHARACTER (' ');
+		  OUTPUT_CHARACTER ('"');
+		  for (cursor = m4_get_current_file (context);
+		       *cursor; cursor++)
+		    {
+		      OUTPUT_CHARACTER (*cursor);
+		    }
+		  OUTPUT_CHARACTER ('"');
+		}
+	      OUTPUT_CHARACTER ('\n');
+	      m4_set_output_line (context, line);
+	    }
+	}
+
+      /* Output the token, and track embedded newlines.  */
+      for (; length-- > 0; text++)
+	{
+	  if (start_of_output_line)
+	    {
+	      start_of_output_line = false;
+	      m4_set_output_line (context, m4_get_output_line (context) + 1);
+
+#ifdef DEBUG_OUTPUT
+	      fprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+		       (unsigned long int) m4_get_current_line (context),
+		       (unsigned long int) m4_get_output_line (context));
+#endif
+	    }
+	  OUTPUT_CHARACTER (*text);
+	  if (*text == '\n')
+	    start_of_output_line = true;
+	}
+    }
 }
 
 /* Format an int VAL, and stuff it into an obstack OBS.  Used for
@@ -697,7 +719,7 @@ m4_insert_file (m4 *context, FILE *file)
 	m4_error (context, EXIT_FAILURE, errno, _("reading inserted file"));
       if (length == 0)
 	break;
-      output_text (context, buffer, length);
+      m4_output_text (context, buffer, length);
     }
 }
 
@@ -714,7 +736,7 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion)
   if (output_diversion)
     {
       if (diversion->size)
-	output_text (context, diversion->u.buffer, diversion->used);
+	m4_output_text (context, diversion->u.buffer, diversion->used);
       else
 	{
 	  assert (diversion->used);

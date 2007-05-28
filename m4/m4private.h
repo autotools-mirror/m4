@@ -326,7 +326,7 @@ typedef enum {
   M4_TOKEN_MACDEF		/* a macro's definition (see "defn") */
 } m4__token_type;
 
-extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *);
+extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *);
 extern	bool		m4__next_token_is_open (m4 *);
 
 

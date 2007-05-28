@@ -1,5 +1,26 @@
 2007-05-28  Eric Blake  <ebb9@byu.net>
 
+	Fix sync line interaction with multiline comments.
+	* doc/m4.texinfo (Preprocessor features): Improve documentation.
+	(Syncoutput): Improve testsuite.
+	(Incompatibilities): Add testcase, and document bug.
+	* src/freeze.c (reload_frozen_state): Don't interfere with
+	synclines when reloading state.
+	* m4/input.c (m4__next_token): Report line where multiline tokens
+	start.
+	* m4/m4private.h (m4__token_type): Add parameter.
+	* m4/m4module.h (m4_output_text): Export.
+	(m4_shipout_text): Add parameter.
+	* src/macro.c (m4_macro_expand_input, expand_token)
+	(expand_argument): Adjust callers so that line is passed from
+	input to output.
+	* m4/output.c (output_text): Rename...
+	(m4_output_text): ...to this, and export.
+	(m4_insert_file, insert_diversion_helper): Update callers.
+	(m4_shipout_text): Take new parameter for start line of token.
+	Output at most one syncline per token.
+	Reported by Sergey Poznyakoff.
+
 	Fix large diversion corner cases.
 	* tests/freeze.at (large diversion): New test.
 	* m4/output.c (m4_tmpfile, m4_tmpopen): Simplify use of errno.

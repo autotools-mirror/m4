@@ -418,7 +418,9 @@ extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 
 extern void	m4_output_init	  (m4 *);
 extern void	m4_output_exit	  (void);
-extern void	m4_shipout_text	  (m4 *, m4_obstack *, const char *, size_t);
+extern void	m4_output_text	  (m4 *, const char *, size_t);
+extern void	m4_shipout_text	  (m4 *, m4_obstack *, const char *, size_t,
+				   int);
 extern void	m4_shipout_int    (m4_obstack *, int);
 extern void	m4_shipout_string (m4 *, m4_obstack *, const char *,
 				   size_t, bool);
