@@ -1,5 +1,7 @@
 2007-05-28  Eric Blake  <ebb9@byu.net>
 
+	* tests/options.at (--syncoutput): Add xfailed test.
+
 	Fix sync line interaction with multiline comments.
 	* doc/m4.texinfo (Preprocessor features): Improve documentation.
 	(Syncoutput): Improve testsuite.

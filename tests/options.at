@@ -759,6 +759,20 @@ hi
 hi
 ]])
 
+dnl synclines should always start at the beginning of a line.
+dnl this does not (yet) happen reliably when diversions do not
+dnl always end in newline
+AT_XFAIL_IF([:])
+AT_DATA([in.m4], [[divert(2)2divert(1)1
+dnl
+undivert
+]])
+
+AT_CHECK_M4([-s in.m4], [0], [[1
+#line 1 "stdin"
+2
+]])
+
 AT_CLEANUP
 
 
