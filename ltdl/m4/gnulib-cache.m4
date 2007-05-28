@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h configmake dirname error exit fdl fflush filenamecat fopen-safer fprintf-posix free fseeko gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic sprintf-posix stdbool stdlib-safer strnlen strtol tempname unlocked-io vasprintf-posix verror xalloc xalloc-die xstrndup xstrtol xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=ltdl/config --with-tests --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h configmake dirname error exit fdl fflush filenamecat fopen-safer fprintf-posix free fseeko gendocs gettext gnupload mkstemp obstack progname regex regexprops-generic sprintf-posix stdbool stdlib-safer strnlen strtol tempname unlocked-io vasprintf-posix verror xalloc xalloc-die xstrndup xstrtol xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -24,7 +24,8 @@ gl_AVOID([])
 gl_SOURCE_BASE([gnu])
 gl_M4_BASE([ltdl/m4])
 gl_DOC_BASE([doc])
-gl_TESTS_BASE([tests])
+gl_TESTS_BASE([tests/gnu])
+gl_WITH_TESTS
 gl_LIB([libgnu])
 gl_MAKEFILE_NAME([])
 gl_LIBTOOL

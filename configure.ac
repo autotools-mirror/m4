@@ -231,6 +231,7 @@ Makefile
 gnu/Makefile
 m4/system.h:m4/system_.h
 tests/atlocal
+tests/gnu/Makefile
 ])
 
 AC_OUTPUT

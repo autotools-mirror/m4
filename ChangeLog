@@ -1,3 +1,11 @@
+2007-05-28  Eric Blake  <ebb9@byu.net>
+
+	Also run gnulib unit tests during make check.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool
+	--tests-base=tests/gnu --with-tests'.
+	* configure.ac (AC_CONFIG_FILES): Build tests/gnu testdir.
+	* Makefile.am (SUBDIRS): Run gnulib tests before ours.
+
 2007-05-25  Eric Blake  <ebb9@byu.net>
 
 	* m4/system_.h: Include <stdint.h>, for intmax_t.
