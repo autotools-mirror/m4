@@ -1,5 +1,12 @@
 2007-05-28  Eric Blake  <ebb9@byu.net>
 
+	Fix large diversion corner cases, including 1.4.8 regression.
+	* src/output.c (m4_tmpfile, m4_tmpopen): Simplify use of errno.
+	(make_room_for): Use NULL, not 0, for pointers.
+	(insert_diversion_helper): Avoid using rewind.
+	(freeze_diversions): Allow freezing large diversions.
+	* NEWS: Document this fix.
+
 	Also run gnulib unit tests during make check.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool
 	--tests-base=tests --with-tests'.

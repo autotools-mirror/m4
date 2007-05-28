@@ -215,7 +215,6 @@ m4_tmpfile (int divnum)
 
   if (output_temp_dir == NULL)
     {
-      errno = 0;
       output_temp_dir = create_temp_dir ("m4-", NULL, true);
       if (output_temp_dir == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
@@ -224,7 +223,6 @@ m4_tmpfile (int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
   if (file == NULL)
     {
@@ -247,7 +245,6 @@ m4_tmpopen (int divnum)
   const char *name = m4_tmpname (divnum);
   FILE *file;
 
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "ab+" : "a+");
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno,
@@ -373,7 +370,7 @@ make_room_for (int length)
       if (selected_diversion)
 	{
 	  FILE *file = selected_diversion->u.file;
-	  selected_diversion->u.file = 0;
+	  selected_diversion->u.file = NULL;
 	  if (m4_tmpclose (file) != 0)
 	    M4ERROR ((0, errno, "cannot close temporary file for diversion"));
 	}
@@ -702,13 +699,9 @@ insert_diversion_helper (m4_diversion *diversion)
 	output_text (diversion->u.buffer, diversion->used);
       else
 	{
-	  if (!diversion->u.file && diversion->used)
+	  if (!diversion->u.file)
 	    diversion->u.file = m4_tmpopen (diversion->divnum);
-	  if (diversion->u.file)
-	    {
-	      rewind (diversion->u.file);
-	      insert_file (diversion->u.file);
-	    }
+	  insert_file (diversion->u.file);
 	}
 
       output_current_line = -1;
@@ -803,20 +796,20 @@ freeze_diversions (FILE *file)
   while (gl_oset_iterator_next (&iter, &elt))
     {
       m4_diversion *diversion = (m4_diversion *) elt;;
-      if (diversion->size || diversion->u.file)
+      if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
 	    fprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
 	  else
 	    {
 	      struct stat file_stat;
-	      fflush (diversion->u.file);
+	      diversion->u.file = m4_tmpopen (diversion->divnum);
 	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		M4ERROR ((EXIT_FAILURE, errno, "cannot stat diversion"));
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
-	      fprintf (file, "D%d,%lu", diversion->divnum,
+	      fprintf (file, "D%d,%lu\n", diversion->divnum,
 		       (unsigned long int) file_stat.st_size);
 	    }
 
