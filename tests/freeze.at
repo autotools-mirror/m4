@@ -19,6 +19,41 @@
 
 AT_BANNER([Freezing state.])
 
+## --------------- ##
+## large diversion ##
+## --------------- ##
+
+AT_SETUP([large diversion])
+AT_KEYWORDS([frozen])
+
+# Check that large diversions are handled across freeze boundaries.
+
+AT_DATA([[frozen.m4]], [M4_ONE_MEG_DEFN[divert(2)f
+divert(1)hi
+]])
+
+AT_DATA([[unfrozen.m4]],
+[[divert(3)bye
+]])
+
+# First generate the `expout' output by running over the sources before
+# freezing.
+AT_CHECK_M4([frozen.m4 unfrozen.m4], [0],
+	    [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK_M4([-F frozen.m4f frozen.m4], [0])
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0],
+	    [expout], [experr])
+
+AT_CLEANUP
+
+
 ## ---------------- ##
 ## loading format 1 ##
 ## ---------------- ##

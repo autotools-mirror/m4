@@ -215,7 +215,6 @@ m4_tmpfile (m4 *context, int divnum)
 
   if (output_temp_dir == NULL)
     {
-      errno = 0;
       output_temp_dir = create_temp_dir ("m4-", NULL, true);
       if (output_temp_dir == NULL)
 	m4_error (context, EXIT_FAILURE, errno,
@@ -224,7 +223,6 @@ m4_tmpfile (m4 *context, int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
   if (file == NULL)
     {
@@ -246,7 +244,6 @@ m4_tmpopen (m4 *context, int divnum)
   const char *name = m4_tmpname (divnum);
   FILE *file;
 
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "ab+" : "a+");
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno,
@@ -374,7 +371,7 @@ make_room_for (m4 *context, size_t length)
       if (selected_diversion)
 	{
 	  FILE *file = selected_diversion->u.file;
-	  selected_diversion->u.file = 0;
+	  selected_diversion->u.file = NULL;
 	  if (m4_tmpclose (file) != 0)
 	    m4_error (context, 0, errno,
 		      _("cannot close temporary file for diversion"));
@@ -720,13 +717,10 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion)
 	output_text (context, diversion->u.buffer, diversion->used);
       else
 	{
-	  if (!diversion->u.file && diversion->used)
+	  assert (diversion->used);
+	  if (!diversion->u.file)
 	    diversion->u.file = m4_tmpopen (context, diversion->divnum);
-	  if (diversion->u.file)
-	    {
-	      rewind (diversion->u.file);
-	      m4_insert_file (context, diversion->u.file);
-	    }
+	  m4_insert_file (context, diversion->u.file);
 	}
 
       m4_set_output_line (context, -1);
@@ -816,7 +810,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
   while (gl_oset_iterator_next (&iter, &elt))
     {
       m4_diversion *diversion = (m4_diversion *) elt;
-      if (diversion->size || diversion->u.file)
+      if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
 	    {
@@ -827,18 +821,19 @@ m4_freeze_diversions (m4 *context, FILE *file)
 	  else
 	    {
 	      struct stat file_stat;
-	      fflush (diversion->u.file);
+	      assert (!diversion->u.file);
+	      diversion->u.file = m4_tmpopen (context, diversion->divnum);
 	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("cannot stat diversion"));
 	      /* FIXME - support 64-bit off_t with 32-bit long, and
-		 fix frozen file format to support 64-bit
-		 integers.  */
+		 fix frozen file format to support 64-bit integers.
+		 This implies fixing shipout_text to take off_t.  */
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("diversion too large"));
-	      fprintf (file, "D%d,%lu", diversion->divnum,
+	      fprintf (file, "D%d,%lu\n", diversion->divnum,
 		       (unsigned long int) file_stat.st_size);
 	    }
 
