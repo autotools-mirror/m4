@@ -1,3 +1,14 @@
+2007-05-29  Eric Blake  <ebb9@byu.net>
+
+	Improve format support.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	vasprintf-posix'.
+	* src/format.c (format): Parse %'hhd, %a, %A.  Avoid calling
+	printf with too few arguments, as in format(%*.*d,-1,-1,1).
+	* doc/m4.texinfo (Format): Expand tests, and improve
+	documentation.
+	* NEWS: Document this change.
+
 2007-05-28  Eric Blake  <ebb9@byu.net>
 
 	Fix large diversion corner cases, including 1.4.8 regression.

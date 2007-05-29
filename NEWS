@@ -13,6 +13,9 @@ Version 1.4.10 - ?? ??? 2007, by ????  (CVS version 1.4.9a)
 * Work around a number of corner-case POSIX compliance bugs in various
   broken stdio libraries.  In particular, the `syscmd' builtin behaves
   more predictably when stdin is seekable.
+* The `format' builtin now understands formats such as %a, %A, and %'hhd,
+  and works around a number of platform printf bugs.  Furthermore, the
+  sequence format(%*.*d,-1,-1,1) no longer outputs random data.
 
 Version 1.4.9 - 23 Mar 2007, by Eric Blake  (CVS version 1.4.8c)
 
