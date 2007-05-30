@@ -1,5 +1,9 @@
 2007-05-29  Eric Blake  <ebb9@byu.net>
 
+	Beta Release 1.4.9b:
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.9.
+
 	Improve format support.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	vasprintf-posix'.
