@@ -1,5 +1,9 @@
 2007-05-29  Eric Blake  <ebb9@byu.net>
 
+	Start 1.4.9c.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Start changes since 1.4.9b, and fix typo.
+
 	Beta Release 1.4.9b:
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.9.
