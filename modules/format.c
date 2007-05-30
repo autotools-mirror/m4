@@ -22,7 +22,9 @@
 
 #include "xvasprintf.h"
 
-/* Simple varargs substitute.
+/* Simple varargs substitute.  We assume int and unsigned int are the
+   same size; likewise for long and unsigned long.
+
    TODO - warn if we use these because too many % specifiers were used in
    relation to number of arguments passed.
    TODO - use xstrtoimax, not atoi, to catch overflow, non-numeric
@@ -32,17 +34,9 @@
 	((argc == 0) ? 0 : \
 	 (--argc, argv++, atoi (M4ARG (-1))))
 
-#define ARG_UINT(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned int) atoi (M4ARG (-1))))
-
 #define ARG_LONG(argc, argv) \
 	((argc == 0) ? 0 : \
 	 (--argc, argv++, atol (M4ARG (-1))))
-
-#define ARG_ULONG(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, (unsigned long) atol (M4ARG (-1))))
 
 #define ARG_STR(argc, argv) \
 	((argc == 0) ? "" : \
@@ -53,45 +47,58 @@
 	 (--argc, argv++, atof (M4ARG (-1))))
 
 
-/* The main formatting function.  Output is placed on the obstack OBS, the
-   first argument in ARGV is the formatting string, and the rest is
-   arguments for the string.  */
+/* The main formatting function.  Output is placed on the obstack OBS,
+   the first argument in ARGV is the formatting string, and the rest
+   is arguments for the string.  Warn rather than invoke unspecified
+   behavior in the underlying printf when we do not recognize a
+   format.  */
 
 static void
-format (m4_obstack *obs, int argc, m4_symbol_value **argv)
+format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 {
-  char *fmt;			/* format control string */
-  char *copy;			/* we temporarily edit fmt */
-  const char *fstart;		/* beginning of current format spec */
-  int c;			/* a simple character */
+  const char *name = ARG_STR (argc, argv);	/* macro name */
+  const char *f;			/* format control string */
+  const char *fmt;			/* position within f */
+  char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */
+  char *p;				/* position within fstart */
+  unsigned char c;			/* a simple character */
 
   /* Flags.  */
-  char flags;			/* 1 iff treating flags */
+  char flags;				/* flags to use in fstart */
+  enum {
+    THOUSANDS	= 0x01, /* ' */
+    PLUS	= 0x02, /* + */
+    MINUS	= 0x04, /* - */
+    SPACE	= 0x08, /*   */
+    ZERO	= 0x10, /* 0 */
+    ALT		= 0x20, /* # */
+    DONE	= 0x40  /* no more flags */
+  };
 
   /* Precision specifiers.  */
   int width;			/* minimum field width */
   int prec;			/* precision */
   char lflag;			/* long flag */
-  char hflag;			/* short flag */
+
+  /* Specifiers we are willing to accept.  ok['x'] implies %x is ok.
+     Various modifiers reduce the set, in order to avoid undefined
+     behavior in printf.  */
+  char ok[128];
 
   /* Buffer and stuff.  */
-  char *str;			/* malloc'd buffer for formatted text */
-  enum {INT, UINT, LONG, ULONG, DOUBLE, STR} datatype;
+  char *str;			/* malloc'd buffer of formatted text */
+  enum {INT, LONG, DOUBLE, STR} datatype;
 
-  fmt = copy = xstrdup (ARG_STR (argc, argv));
+  f = fmt = ARG_STR (argc, argv);
+  memset (ok, 0, sizeof ok);
   for (;;)
     {
       while ((c = *fmt++) != '%')
 	{
 	  if (c == '\0')
-	    {
-	      free (copy);
-	      return;
-	    }
+	    return;
 	  obstack_1grow (obs, c);
 	}
-
-      fstart = fmt - 1;
 
       if (*fmt == '%')
 	{
@@ -100,77 +107,143 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	  continue;
 	}
 
+      p = fstart + 1; /* % */
+      lflag = 0;
+      ok['a'] = ok['A'] = ok['c'] = ok['d'] = ok['e'] = ok['E']
+	= ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
+	= ok['s'] = ok['u'] = ok['x'] = ok['X'] = 1;
+
       /* Parse flags.  */
-      /* TODO - borrow ideas from coreutils printf(1) for argument validation,
-	 and for supporting specifiers for larger types.  */
-      flags = 1;
+      flags = 0;
       do
 	{
 	  switch (*fmt)
 	    {
-	    case '-':		/* left justification */
+	    case '\'':		/* thousands separator */
+	      ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
+		= ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
+	      flags |= THOUSANDS;
+	      break;
+
 	    case '+':		/* mandatory sign */
+	      ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+	      flags |= PLUS;
+	      break;
+
 	    case ' ':		/* space instead of positive sign */
+	      ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+	      flags |= SPACE;
+	      break;
+
 	    case '0':		/* zero padding */
+	      ok['c'] = ok['s'] = 0;
+	      flags |= ZERO;
+	      break;
+
 	    case '#':		/* alternate output */
+	      ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
+	      flags |= ALT;
+	      break;
+
+	    case '-':		/* left justification */
+	      flags |= MINUS;
 	      break;
 
 	    default:
-	      flags = 0;
+	      flags |= DONE;
 	      break;
 	    }
 	}
-      while (flags && fmt++);
+      while (!(flags & DONE) && fmt++);
+      if (flags & THOUSANDS)
+	*p++ = '\'';
+      if (flags & PLUS)
+	*p++ = '+';
+      if (flags & MINUS)
+	*p++ = '-';
+      if (flags & SPACE)
+	*p++ = ' ';
+      if (flags & ZERO)
+	*p++ = '0';
+      if (flags & ALT)
+	*p++ = '#';
 
-      /* Minimum field width.  */
-      width = -1;
+      /* Minimum field width; an explicit 0 is the same as not giving
+	 the width.  */
+      width = 0;
+      *p++ = '*';
       if (*fmt == '*')
 	{
 	  width = ARG_INT (argc, argv);
 	  fmt++;
 	}
-      else if (isdigit ((unsigned char) *fmt))
-	{
-	  do
-	    {
-	      fmt++;
-	    }
-	  while (isdigit ((unsigned char) *fmt));
-	}
+      else
+	while (isdigit ((unsigned char) *fmt))
+	  {
+	    width = 10 * width + *fmt - '0';
+	    fmt++;
+	  }
 
-      /* Maximum precision.  */
+      /* Maximum precision; an explicit negative precision is the same
+	 as not giving the precision.  A lone '.' is a precision of 0.  */
       prec = -1;
+      *p++ = '.';
+      *p++ = '*';
       if (*fmt == '.')
 	{
+	  ok['c'] = 0;
 	  if (*(++fmt) == '*')
 	    {
 	      prec = ARG_INT (argc, argv);
 	      ++fmt;
 	    }
-	  else if (isdigit ((unsigned char) *fmt))
+	  else
 	    {
-	      do
+	      prec = 0;
+	      while (isdigit ((unsigned char) *fmt))
 		{
+		  prec = 10 * prec + *fmt - '0';
 		  fmt++;
 		}
-	      while (isdigit ((unsigned char) *fmt));
 	    }
 	}
 
-      /* Length modifiers.  */
-      lflag = (*fmt == 'l');
-      hflag = (*fmt == 'h');
-      if (lflag || hflag)
-	fmt++;
-
-      switch (*fmt++)
+      /* Length modifiers.  We don't yet recognize ll, j, t, or z.  */
+      if (*fmt == 'l')
 	{
+	  *p++ = 'l';
+	  lflag = 1;
+	  fmt++;
+	  ok['c'] = ok['s'] = 0;
+	}
+      else if (*fmt == 'h')
+	{
+	  *p++ = 'h';
+	  fmt++;
+	  if (*fmt == 'h')
+	    {
+	      *p++ = 'h';
+	      fmt++;
+	    }
+	  ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
+	    = ok['g'] = ok['G'] = ok['s'] = 0;
+	}
 
-	case '\0':
-	  /* TODO - warn about incomplete % specifier.  */
-	  free (copy);
-	  return;
+      c = *fmt++;
+      if (c > sizeof ok || !ok[c])
+	{
+	  m4_warn (context, 0, "%s: unrecognized specifier in `%s'",
+		   name, f);
+	  if (c == '\0')
+	    fmt--;
+	  continue;
+	}
+      *p++ = c;
+      *p = '\0';
 
+      /* Specifiers.  We don't yet recognize C, S, n, or p.  */
+      switch (c)
+	{
 	case 'c':
 	  datatype = INT;
 	  break;
@@ -181,28 +254,11 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 
 	case 'd':
 	case 'i':
-	  if (lflag)
-	    {
-	      datatype = LONG;
-	    }
-	  else
-	    {
-	      datatype = INT;
-	    }
-	  break;
-
 	case 'o':
 	case 'x':
 	case 'X':
 	case 'u':
-	  if (lflag)
-	    {
-	      datatype = ULONG;
-	    }
-	  else
-	    {
-	      datatype = UINT;
-	    }
+	  datatype = lflag ? LONG : INT;
 	  break;
 
 	case 'a':
@@ -217,85 +273,30 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
 	  break;
 
 	default:
-	  continue;
+	  abort ();
 	}
-
-      c = *fmt;
-      *fmt = '\0';
 
       switch (datatype)
 	{
 	case INT:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_INT (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_INT (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_INT (argc, argv));
-	  break;
-
-	case UINT:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_UINT (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_UINT (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_UINT (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_UINT (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
 	  break;
 
 	case LONG:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_LONG (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_LONG (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_LONG (argc, argv));
-	  break;
-
-	case ULONG:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_ULONG (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_ULONG (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_ULONG (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_ULONG (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
 	  break;
 
 	case DOUBLE:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_DOUBLE (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_DOUBLE (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_DOUBLE (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
 	  break;
 
 	case STR:
-	  if (width != -1 && prec != -1)
-	    str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
-	  else if (width != -1)
-	    str = xasprintf (fstart, width, ARG_STR (argc, argv));
-	  else if (prec != -1)
-	    str = xasprintf (fstart, prec, ARG_STR (argc, argv));
-	  else
-	    str = xasprintf (fstart, ARG_STR (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
 	  break;
 
 	default:
 	  abort ();
 	}
-
-      *fmt = c;
 
       /* NULL was returned on failure, such as invalid format string.  For
 	 now, just silently ignore that bad specifier.  */
@@ -305,5 +306,4 @@ format (m4_obstack *obs, int argc, m4_symbol_value **argv)
       obstack_grow (obs, str, strlen (str));
       free (str);
     }
-  free (copy);
 }

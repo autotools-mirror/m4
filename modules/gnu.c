@@ -583,7 +583,7 @@ M4BUILTIN_HANDLER (esyscmd)
  **/
 M4BUILTIN_HANDLER (format)
 {
-  format (obs, argc - 1, argv + 1);
+  format (context, obs, argc, argv);
 }
 
 

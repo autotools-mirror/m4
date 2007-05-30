@@ -1,3 +1,12 @@
+2007-05-30  Eric Blake  <ebb9@byu.net>
+
+	Port format improvements from branch.
+	* doc/m4.texinfo (History): Mention upcoming 1.4.10 release.
+	(Format): Enhance section.
+	* modules/format.c (format): Accept %'hhd, and issue warnings on
+	unrecognized specifiers.
+	* modules/gnu.c (builtin_format): Adjust how format is called.
+
 2007-05-28  Eric Blake  <ebb9@byu.net>
 
 	* tests/options.at (--syncoutput): Add xfailed test.

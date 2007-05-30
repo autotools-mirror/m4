@@ -403,8 +403,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including release 1.4.9 in
-2007.
+1.4.x series remains open for bug fixes, including release 1.4.9 and
+1.4.10 in 2007.
 
 Meanwhile, development was underway for new features for @code{m4},
 such as dynamic module loading and additional builtins, practically
@@ -5988,18 +5988,26 @@ The macro @code{format} is recognized only with parameters.
 
 Its use is best described by a few examples:
 
+@comment This test is a bit fragile, if someone tries to port to a
+@comment platform without infinity.
 @example
 define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
 format(`The string "%s" uses %d characters', foo, len(foo))
 @result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
+format(`%*.*d', `-1', `-1', `1')
+@result{}1
 format(`%.0f', `56789.9876')
 @result{}56790
 len(format(`%-*X', `5000', `1'))
 @result{}5000
+ifelse(format(`%010F', `infinity'), `       INF', `success',
+       format(`%010F', `infinity'), `  INFINITY', `success',
+       format(`%010F', `infinity'))
+@result{}success
 ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
        format(`%.1A', `1.999'), `0X2.0P+0', `success',
-       `fail')
+       format(`%.1A', `1.999'))
 @result{}success
 @end example
 
@@ -6030,18 +6038,30 @@ The builtin @code{format} is modeled after the ANSI C @samp{printf}
 function, and supports these @samp{%} specifiers: @samp{c}, @samp{s},
 @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{a}, @samp{A},
 @samp{e}, @samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and
-@samp{%}; it supports field widths and precisions, and the modifiers
-@samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
-@samp{l}.  For more details on the functioning of @code{printf}, see the
-C Library Manual, or the @acronym{POSIX} specification (for example,
-@samp{%a} is supported even on platforms that haven't yet implemented
-C99 hexadecimal floating point output natively).
+@samp{%}; it supports field widths and precisions, and the flags
+@samp{+}, @samp{-}, @samp{ }, @samp{0}, @samp{#}, and @samp{'}.  For
+integer specifiers, the width modifiers @samp{hh}, @samp{h}, and
+@samp{l} are recognized, and for floating point specifiers, the width
+modifier @samp{l} is recognized.  Items not yet supported include
+positional arguments, the @samp{n}, @samp{p}, @samp{S}, and @samp{C}
+specifiers, the @samp{z}, @samp{t}, @samp{j}, @samp{L} and @samp{ll}
+modifiers, and any platform extensions available in the native
+@code{printf}.  For more details on the functioning of @code{printf},
+see the C Library Manual, or the @acronym{POSIX} specification (for
+example, @samp{%a} is supported even on platforms that haven't yet
+implemented C99 hexadecimal floating point output natively).
 
 @c FIXME - format still needs some improvements.
-For now, unrecognized specifiers are silently ignored, but it is
-anticipated that a future release of @acronym{GNU} @code{m4} will support more
-specifiers, and give warnings when problems are encountered.  Likewise,
-escape sequences are not yet recognized.
+Unrecognized specifiers result in a warning.  It is anticipated that a
+future release of @acronym{GNU} @code{m4} will support more specifiers,
+and give better warnings when various problems such as overflow are
+encountered.  Likewise, escape sequences are not yet recognized.
+
+@example
+format(`%p', `0')
+@error{}m4:stdin:1: Warning: format: unrecognized specifier in `%p'
+@result{}
+@end example
 
 @node Arithmetic
 @chapter Macros for doing arithmetic
