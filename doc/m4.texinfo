@@ -385,8 +385,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including release 1.4.9 in
-2007.
+1.4.x series remains open for bug fixes, including release 1.4.9 and
+1.4.10 in 2007.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -4902,11 +4902,11 @@ len(format(`%-*X', `5000', `1'))
 @result{}5000
 ifelse(format(`%010F', `infinity'), `       INF', `success',
        format(`%010F', `infinity'), `  INFINITY', `success',
-       `fail')
+       format(`%010F', `infinity'))
 @result{}success
 ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
        format(`%.1A', `1.999'), `0X2.0P+0', `success',
-       `fail')
+       format(`%.1A', `1.999'))
 @result{}success
 @end example
 

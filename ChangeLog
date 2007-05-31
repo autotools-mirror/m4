@@ -1,3 +1,9 @@
+2007-05-31  Eric Blake  <ebb9@byu.net>
+
+	* src/output.c (output_text): Fix regression from 2007-05-28.
+	* doc/m4.texinfo (History): Mention 1.4.10.
+	(Format): Make testsuite output easier to debug.
+
 2007-05-29  Eric Blake  <ebb9@byu.net>
 
 	Start 1.4.9c.

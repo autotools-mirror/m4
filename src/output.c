@@ -424,6 +424,9 @@ output_text (const char *text, int length)
 {
   int count;
 
+  if (!output_diversion || !length)
+    return;
+
   if (!output_file && length > output_unused)
     make_room_for (length);
 
