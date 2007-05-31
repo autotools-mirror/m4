@@ -177,6 +177,17 @@ AT_CHECK_M4([divert.m4], 0,
 Text diverted a second time.
 ]])
 
+dnl Test second divert argument, added for m4 2.0
+AT_DATA([in.m4], [[define(`echo',`$1')dnl
+divert(`-1', `discarded without warning')
+divert`'dnl
+echo(` world'divert(divnum, `hello'))
+]])
+
+AT_CHECK_M4([-s in.m4], [0], [[#line 4 "in.m4"
+hello world
+]])
+
 AT_CLEANUP
 
 

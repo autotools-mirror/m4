@@ -5008,10 +5008,16 @@ input file.
 @cindex files, diverting output to
 Output is diverted using @code{divert}:
 
-@deffn {Builtin (m4)} divert (@dvar{number, 0})
+@deffn {Builtin (m4)} divert (@dvar{number, 0}, @ovar{text})
 The current diversion is changed to @var{number}.  If @var{number} is left
 out or empty, it is assumed to be zero.  If @var{number} cannot be
 parsed, the diversion is unchanged.
+
+@cindex @acronym{GNU} extensions
+As a @acronym{GNU} extension, if optional @var{text} is supplied and
+@var{number} was valid, then @var{text} is immediately output to the
+new diversion, regardless of whether the expansion of @code{divert}
+occurred while collecting arguments for another macro.
 
 The expansion of @code{divert} is void.
 @end deffn
@@ -5074,6 +5080,44 @@ divert(`2')hello
 ^D
 @result{}hello
 @result{}world
+@end example
+
+The ability to immediately output extra text is a @acronym{GNU}
+extension, but it can prove useful for ensuring that text goes to a
+particular diversion no matter how many pending macro expansions are in
+progress.  For a demonstration of why this is useful, it is important to
+understand in the example below why @samp{one} is output in diversion 2,
+not diversion 1, while @samp{three} and @samp{five} both end up in the
+correctly numbered diversion.  The key point is that when @code{divert}
+is executed unquoted as part of the argument collection of another
+macro, the side effect takes place immediately, but the text @samp{one}
+is not passed to any diversion until after the @samp{divert(`2')} and
+the enclosing @code{echo} have also taken place.  The example with
+@samp{three} shows how following the quoting rule of thumb delays the
+invocation of @code{divert} until it is not nested in any argument
+collection context, while the example with @samp{five} shows the use of
+the optional argument to speed up the output process.
+
+@example
+define(`echo', `$1')
+@result{}
+echo(divert(`1')`one'divert(`2'))`'dnl
+echo(`divert(`3')three`'divert(`4')')`'dnl
+echo(divert(`5', `five')divert(`6'))`'dnl
+divert
+@result{}
+undivert(`1')
+@result{}
+undivert(`2')
+@result{}one
+undivert(`3')
+@result{}three
+undivert(`4')
+@result{}
+undivert(`5')
+@result{}five
+undivert(`6')
+@result{}
 @end example
 
 Note that @code{divert} is an English word, but also an active macro

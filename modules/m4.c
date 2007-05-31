@@ -70,7 +70,7 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
   BUILTIN (decr,	false,	true,	true,	1,	1  )	\
   BUILTIN (define,	true,	true,	false,	1,	2  )	\
   BUILTIN (defn,	false,	true,	false,	1,	-1 )	\
-  BUILTIN (divert,	false,	false,	false,	0,	1  )	\
+  BUILTIN (divert,	false,	false,	false,	0,	2  )	\
   BUILTIN (divnum,	false,	false,	false,	0,	0  )	\
   BUILTIN (dnl,		false,	false,	false,	0,	0  )	\
   BUILTIN (dumpdef,	false,	false,	false,	0,	-1 )	\
@@ -578,11 +578,16 @@ M4BUILTIN_HANDLER (decr)
 M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
+  const char *text;
 
   if (argc >= 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
     return;
 
   m4_make_diversion (context, i);
+
+  text = M4ARG (2);
+  m4_shipout_text (context, NULL, text, strlen (text),
+		   m4_get_current_line (context));
 }
 
 /* Expand to the current diversion number.  */

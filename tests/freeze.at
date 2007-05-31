@@ -163,6 +163,12 @@ M3
 gnu
 F7,7,3
 builtinbuiltingnu
+# Text to negative diversion must not crash.  Catches a regression
+# introduced 2007-05-28 and fixed 2007-05-31.
+D-1,5
+12345
+D0,0
+
 # Testing escape sequences
 T4,5
 blah\t\477\040\X5C
@@ -186,6 +192,13 @@ AT_CHECK_M4([-R frozen.m4f input.m4], [0],
 
 bar
 	'7 \
+]])
+
+dnl We don't support anything larger than format 2; make sure of that...
+AT_DATA([bogus.m4f], [[V3
+]])
+AT_CHECK_M4([-R bogus.m4f], [63], [],
+[[m4: frozen file version 3 greater than max supported of 2
 ]])
 
 AT_CLEANUP

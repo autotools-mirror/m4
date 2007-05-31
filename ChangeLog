@@ -1,3 +1,18 @@
+2007-05-31  Eric Blake  <ebb9@byu.net>
+
+	Add extension to divert builtin.
+	* modules/m4.c (builtin_divert): Immediately divert second
+	argument.
+	* m4/output.c (m4_output_text): Allow 0 length.  Fixes regression
+	from two days ago.
+	(m4_shipout_text): Short-circuit on zero length.
+	* tests/freeze.at (loading format 2): Expand test to catch
+	regression.  Also check out-of-range version.
+	* tests/builtins.at (divert): Expand test to check corner cases
+	of extension.
+	* NEWS: Document the extension.
+	Reported by Daniel Richard G.
+
 2007-05-30  Eric Blake  <ebb9@byu.net>
 
 	Port format improvements from branch.

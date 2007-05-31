@@ -423,6 +423,9 @@ m4_output_text (m4 *context, const char *text, size_t length)
 {
   size_t count;
 
+  if (!output_diversion || !length)
+    return;
+
   if (!output_file && length > output_unused)
     make_room_for (context, length);
 
@@ -470,7 +473,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 
   /* Do nothing if TEXT should be discarded.  */
 
-  if (output_diversion == NULL)
+  if (!output_diversion || !length)
     return;
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
