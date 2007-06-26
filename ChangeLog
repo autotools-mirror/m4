@@ -1,3 +1,7 @@
+2007-06-26  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import assert'.
+
 2007-06-26  Karl Berry  <karl@freefriends.org>  (tiny change)
 
 	Match Free Software Directory categories.
