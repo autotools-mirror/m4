@@ -57,7 +57,7 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @end quotation
 @end copying
 
-@dircategory GNU programming tools
+@dircategory Text creation and manipulation
 @direntry
 * M4: (m4).                     A powerful macro processor.
 @end direntry
