@@ -1,3 +1,10 @@
+2007-07-01  Gary V. Vaughan  <gary@gnu.org>
+
+	The translation project has moved.
+	* bootstrap (func_get_translations): Use the new translation
+	project url.
+	(TP_URL): Removed.
+
 2007-06-26  Karl Berry  <karl@freefriends.org>  (tiny change)
 
 	Match Free Software Directory categories.

@@ -60,9 +60,6 @@ export WGET
 
 : ${DOWNLOAD_PO=yes}
 
-# Translation Project URL, for the registry of all projects.
-TP_URL="http://www.iro.umontreal.ca/translation/registry.cgi?domain="
-
 # Ensure file names are sorted consistently across platforms.
 # Also, ensure diagnostics are in English, e.g., "wget --help" below.
 LC_ALL=C
@@ -257,29 +254,31 @@ func_get_translations()
   domain=$2
   po_file=$3
 
+  url=http://translationproject.org/domain/$2.html
+  baseurl=`expr "$url" : '\(.*\)/.*'`
+
   func_echo "getting translations into $subdir for $domain..."
 
   case $po_file in
     '') (cd $subdir && rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'`);;
   esac &&
 
-  $WGET -nv --cache=off -O "$subdir/$domain.html" "$TP_URL$domain" &&
+  $WGET -nv --cache=off -O "$subdir/$domain.html" "$url" &&
 
-  $SED -n 's|.*"http://[^"]*/translation/teams/PO/\([^/"]*\)/'"$domain"'-\([^/"]*\)\.[^."]*\.po".*|\1.\2|p' <"$subdir/$domain.html" |
-  sort -k 1,1 -k 2,2n -k2,2 -k3,3n -k3,3 -k4,4n -k4,4 -k5,5n -k5.5 |
-  $AWK -F. '
-    { if (lang && $1 != lang) print lang, ver }
-    { lang = $1; ver = substr($0, index($0, ".") + 1) }
-    END { if (lang) print lang, ver }
-  ' |
-  $AWK -v domain="$domain" -v po_file="$po_file" -v subdir="$subdir" '
+  sed -n 's|.*href="\(.*\)/\([^/][^/]*\)/'"$domain"'-\([^/"]*\)\.[^."]*\.po".*|\2:\3:\1|p' <"$subdir/$domain.html" |
+  sort -t: -k 1,1 -k 2,2n -k2,2 -k3,3n -k3,3 -k4,4n -k4,4 -k5,5n -k5.5 |
+  awk -F: '
+    { if (lang && $1 != lang) print lang, ver, $3 }
+    { lang = $1; ver = $2 }
+    END { if (lang) print lang, ver, $3 }
+  ' | awk -v domain="$domain" -v po_file="$po_file" -v baseurl="$baseurl" -v subdir="$subdir" '
     {
       lang = $1
       if (po_file == (lang ".po")) next
 
       ver = $2
       urlfmt = ""
-      printf "$WGET -nv --cache=off -O %s/%s.po 'http://www.iro.umontreal.ca/translation/teams/PO/%s/%s-%s.%s.po' &&\n", subdir, lang, lang, domain, ver, lang
+      printf "$WGET -nv --cache=off -O %s/%s.po %s/%s/%s/%s-%s.%s.po &&\n", subdir, lang, baseurl, $3, lang, domain, ver, lang
     }
     END { print ":" }
   ' |
