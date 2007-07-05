@@ -1,3 +1,38 @@
+2007-07-04  Eric Blake  <ebb9@byu.net>
+
+	Upgrade to GPL version 3 or later.
+	* bootstrap: Pick up GPLv3.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool
+	--local-dir=. --import gpl-3.0'.
+	* doc/m4.texinfo (Copying This Package): New appendix.
+	* NEWS: Mention this change.
+	* README: Mention why some files still claim to be version 2.
+	* version-etc.c.diff: New file, to make sure --version claims
+	correct GPL version.  Temporary until gnulib makes move.
+	* gpl-3.0.texi.diff: New file, to allow inclusion of GPLv3 as
+	appendix, rather than section, of the manual.
+	* GNUmakefile: Update to new license.
+	* Makefile.am: Likewise.
+	* Makefile.maint: Likewise.
+	* commit: Likewise.
+	* configure.ac: Likewise.
+	* checks/Makefile.in: Likewise.
+	* doc/Makefile.am: Likewise.
+	* examples/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* src/symtab.c: Likewise.
+
 2007-06-26  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import assert'.

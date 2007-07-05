@@ -1,0 +1,20 @@
+--- ../gnulib/lib/version-etc.c	2007-03-24 07:08:51.698250000 -0600
++++ lib/version-etc.c	2007-07-04 20:26:39.296875000 -0600
+@@ -3,7 +3,7 @@
+ 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+-   the Free Software Foundation; either version 2, or (at your option)
++   the Free Software Foundation; either version 3, or (at your option)
+    any later version.
+ 
+    This program is distributed in the hope that it will be useful,
+@@ -67,7 +67,7 @@
+ 
+   fputs (_("\
+ \n\
+-License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>\n\
++License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
+ This is free software: you are free to change and redistribute it.\n\
+ There is NO WARRANTY, to the extent permitted by law.\n\
+ \n\

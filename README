@@ -23,7 +23,12 @@ from trivial test files to rather advanced macros.  If you intend to
 use m4 seriously, you might find useful material down there.
 
 See file `BACKLOG' for a summary of pending mail and articles.
-See file `COPYING' for copying conditions.
+See file `COPYING' for copying conditions.  Note that M4 is distributed
+under the GNU Public License version 3 or later.  Some files in the
+distribution are copied from the gnulib project, and hence bear the
+designation version 2 or later because they are unmodified from gnulib;
+however, if you modify these files using M4 rather than gnulib as the
+source, you must update the license to be GPLv3 or later.
 See file `INSTALL' for compilation and installation instructions.
 See file `NEWS' for a list of major changes in the current release.
 See file `THANKS' for a list of contributors.

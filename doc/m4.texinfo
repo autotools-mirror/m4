@@ -137,6 +137,7 @@ changeword will go away and @emph{you should not count on it}.
 
 * Compatibility::               Compatibility with other versions of @code{m4}
 * Answers::                     Correct version of some examples
+* Copying This Package::        How to make copies of the overall M4 package
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
 
@@ -270,8 +271,9 @@ Correct version of some examples
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 
-How to make copies of this manual
+How to make copies of this package or manual
 
+* Copying::                     GNU General Public License
 * GNU Free Documentation License::  License for copying this manual
 
 Indices of concepts and macros
@@ -6750,9 +6752,28 @@ fatal_error(`inside wrapped text')')
 
 @c ========================================================== Appendices
 
+@node Copying This Package
+@appendix How to make copies of the overall M4 package
+@cindex License, code
+
+This appendix covers the license for copying the source code of the
+overall M4 package.  This manual is under a different set of
+restrictions, covered later (@pxref{Copying This Manual}).
+
+@menu
+* Copying::                     GNU General Public License
+@end menu
+
+@include gpl-3.0.texi
+
 @node Copying This Manual
 @appendix How to make copies of this manual
-@cindex License
+@cindex License, manual
+
+This appendix covers the license for copying this manual.  Note that
+some of the longer examples in this manual are also distributed in the
+directory @file{m4-@value{VERSION}/@/examples/}, where a more
+permissive license is in effect when copying just the examples.
 
 @menu
 * GNU Free Documentation License::  License for copying this manual
