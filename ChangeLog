@@ -1,3 +1,12 @@
+2007-07-05  Eric Blake  <ebb9@byu.net>
+
+	Fix up gnulib-tool usage.
+	* m4/gnulib-cache.m4: Change local-dir to local, not `.'.
+	* version-etc.c.diff: Move to...
+	* local/lib/version-etc.c.diff: ...here.
+	* gpl-3.0.texi.diff: Move to...
+	* local/doc/gpl-3.0.texi.diff: ...here.
+
 2007-07-04  Eric Blake  <ebb9@byu.net>
 
 	Upgrade to GPL version 3 or later.

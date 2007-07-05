@@ -15,10 +15,10 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=. --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --with-tests --no-libtool --macro-prefix=M4 assert avltree-oset binary-io clean-temp cloexec close-stream closein config-h error fdl fflush fopen-safer free fseeko gendocs getopt gnupload gpl-3.0 mkstemp obstack regex stdbool stdint stdlib-safer strtol unlocked-io vasprintf-posix verror version-etc version-etc-fsf xalloc xvasprintf
+#   gnulib-tool --import --dir=. --local-dir=local --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --with-tests --no-libtool --macro-prefix=M4 assert avltree-oset binary-io clean-temp cloexec close-stream closein config-h error fdl fflush fopen-safer free fseeko gendocs getopt gnupload gpl-3.0 mkstemp obstack regex stdbool stdint stdlib-safer strtol unlocked-io vasprintf-posix verror version-etc version-etc-fsf xalloc xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_LOCAL_DIR([.])
+gl_LOCAL_DIR([local])
 gl_MODULES([assert avltree-oset binary-io clean-temp cloexec close-stream closein config-h error fdl fflush fopen-safer free fseeko gendocs getopt gnupload gpl-3.0 mkstemp obstack regex stdbool stdint stdlib-safer strtol unlocked-io vasprintf-posix verror version-etc version-etc-fsf xalloc xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
