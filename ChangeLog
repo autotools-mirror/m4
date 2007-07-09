@@ -1,3 +1,7 @@
+2007-07-09  Eric Blake  <ebb9@byu.net>
+
+	* modules/format.c (format): Avoid undefined behavior with %c.
+
 2007-07-01  Gary V. Vaughan  <gary@gnu.org>
 
 	The translation project has moved.

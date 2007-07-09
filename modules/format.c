@@ -87,7 +87,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 
   /* Buffer and stuff.  */
   char *str;			/* malloc'd buffer of formatted text */
-  enum {INT, LONG, DOUBLE, STR} datatype;
+  enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
   f = fmt = ARG_STR (argc, argv);
   memset (ok, 0, sizeof ok);
@@ -238,14 +238,13 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 	    fmt--;
 	  continue;
 	}
-      *p++ = c;
-      *p = '\0';
 
       /* Specifiers.  We don't yet recognize C, S, n, or p.  */
       switch (c)
 	{
 	case 'c':
-	  datatype = INT;
+	  datatype = CHAR;
+	  p -= 2; /* %.*c is undefined, so undo the '.*'.  */
 	  break;
 
 	case 's':
@@ -275,9 +274,15 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 	default:
 	  abort ();
 	}
+      *p++ = c;
+      *p = '\0';
 
       switch (datatype)
 	{
+	case CHAR:
+	  str = xasprintf (fstart, width, ARG_INT (argc, argv));
+	  break;
+
 	case INT:
 	  str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
 	  break;
