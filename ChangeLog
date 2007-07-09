@@ -1,5 +1,7 @@
 2007-07-09  Eric Blake  <ebb9@byu.net>
 
+	* src/format.c: Missed a GPLv3 conversion.
+
 	Avoid undefined behavior of %.*c in printf.
 	* src/format.c (format): Special case %c.
 	* TODO: Document that more remains to be done.
