@@ -5,6 +5,11 @@ Foundation, Inc.
 Version 1.4.10 - ?? ??? 2007, by ????  (CVS version 1.4.9c)
 
 * Upgrade from GPL version 2 to GPL version 3 or later.
+* A number of portability improvements inherited from gnulib.
+* Avoid undefined behavior introduced in 1.4.9b in the `format' builtin
+  when handling %c.  However, this area of code has never been documented,
+  and currently does not match the POSIX behavior of printf(1), so it may
+  have further changes in the next version.
 
 Version 1.4.9b - 29 May 2007, by Eric Blake  (CVS version 1.4.9a)
 
@@ -19,7 +24,9 @@ Version 1.4.9b - 29 May 2007, by Eric Blake  (CVS version 1.4.9a)
   more predictably when stdin is seekable.
 * The `format' builtin now understands formats such as %a, %A, and %'hhd,
   and works around a number of platform printf bugs.  Furthermore, the
-  sequence format(%*.*d,-1,-1,1) no longer outputs random data.
+  sequence format(%*.*d,-1,-1,1) no longer outputs random data.  However,
+  some non-compliant platforms such as mingw still have known bugs in
+  strtod that may cause testsuite failures.
 * The testsuite is improved to also run gnulib portability tests for the
   features that M4 imports from gnulib.
 

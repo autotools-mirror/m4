@@ -85,9 +85,9 @@ format (struct obstack *obs, int argc, token_data **argv)
 
   /* Buffer and stuff.  */
   char *str;			/* malloc'd buffer of formatted text */
-  enum {INT, LONG, DOUBLE, STR} datatype;
+  enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  f = fmt = (const char *) ARG_STR (argc, argv);
+  f = fmt = ARG_STR (argc, argv);
   memset (ok, 0, sizeof ok);
   for (;;)
     {
@@ -176,13 +176,11 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  fmt++;
 	}
       else
-	{
-	  while (isdigit (to_uchar (*fmt)))
-	    {
-	      width = 10 * width + *fmt - '0';
-	      fmt++;
-	    }
-	}
+	while (isdigit (to_uchar (*fmt)))
+	  {
+	    width = 10 * width + *fmt - '0';
+	    fmt++;
+	  }
 
       /* Maximum precision; an explicit negative precision is the same
 	 as not giving the precision.  A lone '.' is a precision of 0.  */
@@ -238,14 +236,13 @@ format (struct obstack *obs, int argc, token_data **argv)
 	    fmt--;
 	  continue;
 	}
-      *p++ = c;
-      *p = '\0';
 
       /* Specifiers.  We don't yet recognize C, S, n, or p.  */
       switch (c)
 	{
 	case 'c':
-	  datatype = INT;
+	  datatype = CHAR;
+	  p -= 2; /* %.*c is undefined, so undo the '.*'.  */
 	  break;
 
 	case 's':
@@ -275,9 +272,15 @@ format (struct obstack *obs, int argc, token_data **argv)
 	default:
 	  abort ();
 	}
+      *p++ = c;
+      *p = '\0';
 
-      switch(datatype)
+      switch (datatype)
 	{
+	case CHAR:
+	  str = xasprintf (fstart, width, ARG_INT(argc, argv));
+	  break;
+
 	case INT:
 	  str = xasprintf (fstart, width, prec, ARG_INT(argc, argv));
 	  break;
