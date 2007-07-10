@@ -22,8 +22,7 @@
 
 SUBDIRS = . examples lib src doc tests checks
 EXTRA_DIST = bootstrap c-boxes.el gendocs.sh GNUmakefile Makefile.maint \
-	m4/gnulib-cache.m4 local/doc/gpl-3.0.texi.diff \
-	local/lib/version-etc.c.diff
+	m4/gnulib-cache.m4 local/doc/gpl-3.0.texi.diff
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
