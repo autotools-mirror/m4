@@ -2,7 +2,7 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 
-Version 1.4.10 - ?? ??? 2007, by ????  (CVS version 1.4.9c)
+Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)
 
 * Upgrade from GPL version 2 to GPL version 3 or later.
 * A number of portability improvements inherited from gnulib.

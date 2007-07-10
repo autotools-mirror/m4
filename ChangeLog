@@ -1,5 +1,11 @@
 2007-07-09  Eric Blake  <ebb9@byu.net>
 
+	Release 1.4.10:
+	* doc/Makefile.am (m4_TEXINFOS): Distribute gpl-3.0.texi.
+	* Makefile.am (EXTRA_DIST): Distribute gnulib diffs.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.9.
+
 	* src/format.c: Missed a GPLv3 conversion.
 
 	Avoid undefined behavior of %.*c in printf.
