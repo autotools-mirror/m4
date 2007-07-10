@@ -2,11 +2,11 @@
 # m4-getopt.m4 -- Use the installed version of getopt.h if available.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2005, 2006 Free Software Foundation, Inc
+# Copyright (C) 2005, 2006, 2007 Free Software Foundation, Inc
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -44,7 +44,7 @@ if test -z "$GETOPT_H"; then
   AC_CACHE_CHECK([for working gnu getopt function], [gl_cv_func_gnu_getopt],
     [AC_RUN_IFELSE(
       [AC_LANG_PROGRAM([#include <getopt.h>],
-        [[
+	[[
 	  char *myargv[3];
 	  myargv[0] = "conftest";
 	  myargv[1] = "-+";
@@ -57,7 +57,7 @@ if test -z "$GETOPT_H"; then
        dnl Solaris 10 getopt doesn't handle `+' as a leading character in an
        dnl option string (as of 2005-05-05).
        AC_CHECK_DECL([getopt_clip],
-         [gl_cv_func_gnu_getopt=no], [gl_cv_func_gnu_getopt=yes],
+	 [gl_cv_func_gnu_getopt=no], [gl_cv_func_gnu_getopt=yes],
 	 [#include <getopt.h>])])])
   test X"$gl_cv_func_gnu_getopt" = Xno && GETOPT_H=getopt.h
 fi

@@ -16,6 +16,7 @@
 .dirstamp
 fdl.texi
 gendocs_template
+gpl-3.0.texi
 Makefile.in
 Makefile
 manual

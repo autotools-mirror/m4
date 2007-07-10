@@ -1,13 +1,13 @@
 ##                                                           -*- Autoconf -*-
 ## debug.m4 -- massage compiler flags for debugging/optimisation
 ##
-## Copyright (C) 1999-2000, 2006 Ralf S. Engelschall
+## Copyright (C) 1999-2000, 2006, 2007 Ralf S. Engelschall
 ## Written by <rse@engelschall.com>
 ## Modified for M4 by Gary V. Vaughan <gary@gnu.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
+## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,

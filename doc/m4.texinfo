@@ -138,6 +138,8 @@ problems, please do not hesitate to report them (see the
 
 * Compatibility::               Compatibility with other versions of @code{m4}
 * Answers::                     Correct version of some examples
+
+* Copying This Package::        How to make copies of the overall M4 package
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
 
@@ -288,6 +290,10 @@ Correct version of some examples
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 
+How to make copies of the overall M4 package
+
+* Copying::                     GNU General Public License
+
 How to make copies of this manual
 
 * GNU Free Documentation License::  License for copying this manual
@@ -403,8 +409,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including release 1.4.9 and
-1.4.10 in 2007.
+1.4.x series remains open for bug fixes, including releases 1.4.9,
+1.4.10, and 1.4.11 in 2007.
 
 Meanwhile, development was underway for new features for @code{m4},
 such as dynamic module loading and additional builtins, practically
@@ -8105,9 +8111,31 @@ fatal_error(`inside wrapped text')')
 
 @c ========================================================== Appendices
 
+@node Copying This Package
+@appendix How to make copies of the overall M4 package
+@cindex License, code
+@cindex GPL, GNU Public License
+@cindex GNU Public License
+
+This appendix covers the license for copying the source code of the
+overall M4 package.  This manual is under a different set of
+restrictions, covered later (@pxref{Copying This Manual}).
+
+@menu
+* Copying::                     GNU General Public License
+@end menu
+
+@include gpl-3.0.texi
+
 @node Copying This Manual
 @appendix How to make copies of this manual
-@cindex License
+@cindex License, manual
+@cindex GNU Free Documentation License
+
+This appendix covers the license for copying this manual.  Note that
+some of the longer examples in this manual are also distributed in the
+directory @file{m4-@value{VERSION}/@/examples/}, where a more
+permissive license is in effect when copying just the examples.
 
 @menu
 * GNU Free Documentation License::  License for copying this manual

@@ -3,13 +3,13 @@
 # mailnotify (GNU cvs-utils) version 0.2
 # Written by Gary V. Vaughan <gary@gnu.org>
 
-# Copyright (C) 2004 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2007 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful, but
@@ -137,7 +137,7 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
     }; d' < "$progpath"
@@ -151,7 +151,7 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
      }; d' < "$progpath"
@@ -163,9 +163,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-        s/^# //; s/^# *$//;
-        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-        p;
+	s/^# //; s/^# *$//;
+	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+	p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -276,9 +276,9 @@ func_version ()
     fi
   else
     eval test -n \"\$datafile$multipart\" ||
-        func_fatal_error "-f is required."
+	func_fatal_error "-f is required."
     eval test -n \"\$ctype$multipart\" ||
-        func_fatal_error "with output directed to a file, -m is required"
+	func_fatal_error "with output directed to a file, -m is required"
   fi
   eval test -f \"\$datafile$multipart\" ||
     eval func_fatal_error \"\$datafile$multipart: file not found\"
@@ -380,17 +380,17 @@ func_sendmail ()
 
     func_verbose "Delivering mail, please wait..."
     if test -n "$from_name"; then
-        $SENDMAIL -F "$from_name" -f "$from_addr" $my_destination < "$my_infile"
+	$SENDMAIL -F "$from_name" -f "$from_addr" $my_destination < "$my_infile"
     elif test -n "$from_addr"; then
-        $SENDMAIL -f "$from_addr" $my_destination < "$my_infile"
+	$SENDMAIL -f "$from_addr" $my_destination < "$my_infile"
     else
-        $SENDMAIL $my_destination < "$my_infile"
+	$SENDMAIL $my_destination < "$my_infile"
     fi
     if test $? -eq 0; then
-        func_verbose "...succeeded."
-        rm $my_infile
+	func_verbose "...succeeded."
+	rm $my_infile
     else
-        func_fatal_error "Mail delivery failed, draft mail is in $my_infile"
+	func_fatal_error "Mail delivery failed, draft mail is in $my_infile"
     fi
 }
 
@@ -409,7 +409,7 @@ func_sendmail ()
   do
       case $destination in
 	  "") destination="$to" ;;
-          *)  destination="$destination, $to" ;;
+	  *)  destination="$destination, $to" ;;
       esac
   done
 
@@ -423,7 +423,7 @@ func_sendmail ()
   if test -z "$outputfile"; then
       destination=""
       for to; do
-          to_addr=`echo "$to" | sed "$sed_mail_address"`
+	  to_addr=`echo "$to" | sed "$sed_mail_address"`
 	  test -n "$to_addr" || to_addr="$to"
 	  destination="$destination $to_addr"
       done

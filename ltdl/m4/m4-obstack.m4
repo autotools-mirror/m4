@@ -1,12 +1,12 @@
 #                                                            -*- Autoconf -*-
 # m4-obstack.m4 -- the libc supplied version of obstacks if available.
 #
-# Copyright (C) 2000, 2001, 2003, 2004, 2006 Free Software Foundation, Inc
+# Copyright (C) 2000, 2001, 2003, 2004, 2006, 2007 Free Software Foundation, Inc
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -29,7 +29,7 @@ AC_DEFUN([M4_OBSTACK],
 AC_BEFORE([gl_OBSTACK], [M4_OBSTACK])
 AC_ARG_WITH([included-obstack],
     [AS_HELP_STRING([--with-included-obstack],
-                    [use the obstack implementation included here])])
+		    [use the obstack implementation included here])])
 
 AC_CHECK_HEADERS([obstack.h], [], [], [AC_INCLUDES_DEFAULT])
 

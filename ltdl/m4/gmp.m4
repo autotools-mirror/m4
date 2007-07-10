@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -30,7 +30,7 @@ case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
     ;;
   *::yes)
     AC_MSG_WARN([gmp library not found or does not appear to work
-                 but `gmp.h' is present])
+		 but `gmp.h' is present])
     M4_cv_using_lib_gmp=no
     ;;
   *:-lgmp:no)
@@ -65,8 +65,8 @@ LIBS=$M4_gmp_save_LIBS
 AC_SUBST([LIBADD_GMP])
 
 AC_CACHE_CHECK([if using GNU multiple precision arithmetic library],
-               [M4_cv_using_lib_gmp],
-               [_M4_LIB_GMP])
+	       [M4_cv_using_lib_gmp],
+	       [_M4_LIB_GMP])
 
 # Don't try to link in libgmp if we are not using it after the last call
 if test "$M4_cv_using_lib_gmp" = yes; then

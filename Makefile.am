@@ -5,7 +5,7 @@
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
+## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -40,7 +40,8 @@ AM_LDFLAGS	= -no-undefined -export-dynamic -export-symbols-regex ".*"
 
 EXTRA_DIST	= bootstrap \
 		  $(config_aux_dir)/mkstamp \
-		  $(config_macro_dir)/gnulib-cache.m4
+		  $(config_macro_dir)/gnulib-cache.m4 \
+		  local/doc/gpl-3.0.texi.diff
 CLEANFILES	=
 DISTCLEANFILES	=
 MOSTLYCLEANFILES=
@@ -250,7 +251,7 @@ ltdl/libltdlc.la:
 ## -------------- ##
 
 info_TEXINFOS	= doc/m4.texinfo
-doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl.texi
+doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl.texi doc/gpl-3.0.texi
 dist_man_MANS	= doc/m4.1
 EXTRA_DIST     += $(config_aux_dir)/gendocs.sh doc/gendocs_template
 MAINTAINERCLEANFILES += $(config_aux_dir)/gendocs.sh doc/gendocs_template \

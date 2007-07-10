@@ -401,14 +401,14 @@ issue.
 
 
 -- 
-Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 The canonical source of this file is maintained with the
 GNU M4 package.  Report bugs to bug-m4@gnu.org.
 
 GNU M4 is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2
+published by the Free Software Foundation; either version 3
 of the License, or (at your option) any later version.
 
 GNU M4 is distributed in the hope that it will be useful,

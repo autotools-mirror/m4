@@ -1,3 +1,75 @@
+2007-07-10  Eric Blake  <ebb9@byu.net>
+
+	Upgrade to GPLv3, and document 1.4.10.
+	* bootstrap: Adjust to GPLv3.
+	(func_update): Port from branch.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool
+	--local-dir=local --import gpl-3.0'.
+	* doc/m4.texinfo (History): Mention 1.4.11.
+	(Copying This Package): New appendix.
+	* NEWS: Document 1.4.10.
+	* local/doc/gpl-3.0.texi.diff: New file.
+	* Makefile.am: Update license.
+	(doc_m4_TEXINFOS, EXTRA_DIST): Distribute additions.
+	* commit: Update license.
+	* configure.ac: Likewise.
+	* ltdl/config/mailnotify: Likewise.
+	* ltdl/config/mkstamp: Likewise.
+	* ltdl/m4/debug.m4: Likewise.
+	* ltdl/m4/gmp.m4: Likewise.
+	* ltdl/m4/m4-error.m4: Likewise.
+	* ltdl/m4/m4-getopt.m4: Likewise.
+	* ltdl/m4/m4-gettext.m4: Likewise.
+	* ltdl/m4/m4-obstack.m4: Likewise.
+	* ltdl/m4/m4-regex.m4: Likewise.
+	* ltdl/m4/stackovf.m4: Likewise.
+	* m4/builtin.c: Likewise.
+	* m4/debug.c: Likewise.
+	* m4/hash.c: Likewise.
+	* m4/hash.h: Likewise.
+	* m4/input.c: Likewise.
+	* m4/m4.c: Likewise.
+	* m4/m4module.h: Likewise.
+	* m4/m4private.h: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/path.c: Likewise.
+	* m4/resyntax.c: Likewise.
+	* m4/symtab.c: Likewise.
+	* m4/syntax.c: Likewise.
+	* m4/system_.h: Likewise.
+	* m4/utility.c: Likewise.
+	* modules/evalparse.c: Likewise.
+	* modules/format.c: Likewise.
+	* modules/gnu.c: Likewise.
+	* modules/import.c: Likewise.
+	* modules/load.c: Likewise.
+	* modules/m4.c: Likewise.
+	* modules/m4.h: Likewise.
+	* modules/modtest.c: Likewise.
+	* modules/mpeval.c: Likewise.
+	* modules/perl.c: Likewise.
+	* modules/shadow.c: Likewise.
+	* modules/stdlib.c: Likewise.
+	* modules/time.c: Likewise.
+	* modules/traditional.c: Likewise.
+	* po/Makevars: Likewise.
+	* src/freeze.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/main.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* tests/builtins.at: Likewise.
+	* tests/freeze.at: Likewise.
+	* tests/generate.awk: Likewise.
+	* tests/m4.in: Likewise.
+	* tests/macros.at: Likewise.
+	* tests/modules.at: Likewise.
+	* tests/options.at: Likewise.
+	* tests/others.at: Likewise.
+	* tests/stackovf.test: Likewise.
+	* tests/testsuite.at: Likewise.
+
 2007-07-09  Eric Blake  <ebb9@byu.net>
 
 	* modules/format.c (format): Avoid undefined behavior with %c.

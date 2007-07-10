@@ -4,13 +4,13 @@
 # Written by Gary V. Vaughan <gary@gnu.org>
 # and Alexandre Oliva <aoliva@redhat.com>
 
-# Copyright (C) 1999, 2000, 2004, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2004, 2006, 2007 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful, but
@@ -165,7 +165,7 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
     }; d' < "$progpath"
@@ -179,7 +179,7 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
      }; d' < "$progpath"
@@ -191,9 +191,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-        s/^# //; s/^# *$//;
-        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-        p;
+	s/^# //; s/^# *$//;
+	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+	p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -346,10 +346,10 @@ func_version ()
 $opt_update && {
    func_error "$progname: checking for conflicts..."
    if ( $CVS $cvs_flags -q -n update $update_flags ${1+"$@"} |
-          while read line; do
+	  while read line; do
 	    echo "$line"
 	    echo "$line" >&3
-          done | grep '^C'
+	  done | grep '^C'
       ) 3>&1 >/dev/null; then
     func_fatal_error "some conflicts were found, aborting..."
   fi
@@ -359,8 +359,8 @@ if test -f "$log_file"; then :; else
   if test -z "$ChangeLog"; then
     for f in ${1+"$@"}; do
       case "$f" in
-        ChangeLog* | */ChangeLog*)
-          if test -z "$ChangeLog"; then
+	ChangeLog* | */ChangeLog*)
+	  if test -z "$ChangeLog"; then
 	    ChangeLog="$f"
 	  else
 	    func_fatal_error "multiple ChangeLog files: $ChangeLog and $f"
@@ -375,32 +375,32 @@ if test -f "$log_file"; then :; else
     skipping=:
     sed 's,^,+,' < ${ChangeLog-ChangeLog} |
       while read line; do
-        case "$line" in
-          "+") if $skipping; then skipping=false; else break; fi;;
-          "+ "*)
+	case "$line" in
+	  "+") if $skipping; then skipping=false; else break; fi;;
+	  "+ "*)
 	    func_error "*** Warning: lines should start with tabs, not spaces; ignoring line:"
 	    echo "$line" | sed 's/^.//' >&2;;
-          "+	"*)
-            $skipping || echo "$line" ;;
-        esac
+	  "+	"*)
+	    $skipping || echo "$line" ;;
+	esac
       done |
-        sed 's,^\+	,,' > "$log_file" || exit $EXIT_FAILURE
+	sed 's,^\+	,,' > "$log_file" || exit $EXIT_FAILURE
   else
     $CVS $cvs_flags diff -u ${ChangeLog-ChangeLog} |
       while read line; do
-        case $line in
-          "--- "*) :;;
-          "-"*)
+	case $line in
+	  "--- "*) :;;
+	  "-"*)
 	    func_error "*** Warning: the following line in ChangeLog diff is suspicious:"
 	    echo "$line" | sed 's/^.//' >&2;;
-          "+ "*)
+	  "+ "*)
 	    func_error "*** Warning: lines should start with tabs, not spaces; ignoring line:"
 	    echo "$line" | sed 's/^.//' >&2;;
-          "+") echo ;;
-          "+	"*) echo "$line";;
-        esac
+	  "+") echo ;;
+	  "+	"*) echo "$line";;
+	esac
       done |
-        sed -e 's,\+	,,' -e '/./p' -e '/./d' -e '1d' -e '$d' > "$log_file" \
+	sed -e 's,\+	,,' -e '/./p' -e '/./d' -e '1d' -e '$d' > "$log_file" \
     || exit $EXIT_FAILURE
   fi
   # The sed script above removes "+TAB" from the beginning of a line, then
@@ -436,15 +436,15 @@ if test -n "$sendmail_to"; then
 
   {
     test -f CVS/Root &&
-        echo "CVSROOT:	`sed -e 's,.*:,,g' CVS/Root`"
+	echo "CVSROOT:	`sed -e 's,.*:,,g' CVS/Root`"
     test -f $MKSTAMP &&
-        echo "TIMESTAMP:	`$SHELL $MKSTAMP < ./ChangeLog`"
+	echo "TIMESTAMP:	`$SHELL $MKSTAMP < ./ChangeLog`"
     test -f CVS/Repository &&
-        echo "Module name:	`cat CVS/Repository`"
+	echo "Module name:	`cat CVS/Repository`"
     test -f CVS/Tag &&
-        echo "Branch:		`sed -e 's,^T,,;1q' CVS/Tag`"
+	echo "Branch:		`sed -e 's,^T,,;1q' CVS/Tag`"
     test -f CVS/Root &&
-        echo "Changes by:	`sed -e 's,:.*$,,g;s,^.*:,,' CVS/Root`"
+	echo "Changes by:	`sed -e 's,:.*$,,g;s,^.*:,,' CVS/Root`"
     echo ""
     echo "Log Message:"
     sed -e 's,^,	,' "$log_file"
