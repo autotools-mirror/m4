@@ -1,3 +1,11 @@
+2007-07-14  Eric Blake  <ebb9@byu.net>
+
+	Reflect upstream license .texi changes.
+	* doc/m4.texinfo (Copying): Rename node...
+	(GNU General Public License): ...to this.
+	(GNU Free Documentation License): Adjust node location.
+	* local/doc/gpl-3.0.texi.diff: Remove file.
+
 2007-07-10  Eric Blake  <ebb9@byu.net>
 
 	Start 1.4.10a.

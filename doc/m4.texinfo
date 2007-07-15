@@ -274,7 +274,7 @@ Correct version of some examples
 
 How to make copies of the overall M4 package
 
-* Copying::                     GNU General Public License
+* GNU General Public License::  License for copying the M4 package
 
 How to make copies of this manual
 
@@ -6759,23 +6759,25 @@ fatal_error(`inside wrapped text')')
 @node Copying This Package
 @appendix How to make copies of the overall M4 package
 @cindex License, code
-@cindex GPL, GNU Public License
-@cindex GNU Public License
 
 This appendix covers the license for copying the source code of the
 overall M4 package.  This manual is under a different set of
 restrictions, covered later (@pxref{Copying This Manual}).
 
 @menu
-* Copying::                     GNU General Public License
+* GNU General Public License::  License for copying the M4 package
 @end menu
 
+@node GNU General Public License
+@appendixsec License for copying the M4 package
+@cindex GPL, GNU General Public License
+@cindex GNU General Public License
+@cindex General Public License (GPL), GNU
 @include gpl-3.0.texi
 
 @node Copying This Manual
 @appendix How to make copies of this manual
 @cindex License, manual
-@cindex GNU Free Documentation License
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
@@ -6786,6 +6788,11 @@ permissive license is in effect when copying just the examples.
 * GNU Free Documentation License::  License for copying this manual
 @end menu
 
+@node GNU Free Documentation License
+@appendixsec License for copying this manual
+@cindex FDL, GNU Free Documentation License
+@cindex GNU Free Documentation License
+@cindex Free Documentation License (FDL), GNU
 @include fdl.texi
 
 @node Indices
