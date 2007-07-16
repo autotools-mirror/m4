@@ -1,4 +1,5 @@
 gnu/clean-temp.c
+gnu/closein.c
 gnu/closeout.c
 gnu/error.c
 gnu/obstack.c

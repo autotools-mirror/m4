@@ -1,3 +1,8 @@
+2007-07-16  Eric Blake  <ebb9@byu.net>
+
+	* po/POTFILES.in: Track recent translation additions from gnulib
+	updates.
+
 2007-07-14  Eric Blake  <ebb9@byu.net>
 
 	Reflect upstream license .texi changes.
