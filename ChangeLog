@@ -1,3 +1,11 @@
+2007-07-20  Eric Blake  <ebb9@byu.net>
+
+	Fix 'make distcheck' issues.
+	* bootstrap: Add more files that might be more up-to-date in
+	gnulib.
+	* Makefile.am (EXTRA_DIST): No longer distribute removed diff.
+	* config/m4/gnulib-cache.m4: Update to latest gnulib.
+
 2007-07-16  Eric Blake  <ebb9@byu.net>
 
 	* po/POTFILES.in: Track recent translation additions from gnulib

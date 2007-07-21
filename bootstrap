@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-07-10
+# bootstrap (GNU M4) version 2007-07-20
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -479,6 +479,8 @@ func_update "$gnulibdir"/build-aux/install-sh $config_aux_dir/install-sh
 func_update "$gnulibdir"/build-aux/mdate-sh $config_aux_dir/mdate-sh
 func_update "$gnulibdir"/build-aux/missing $config_aux_dir/missing
 func_update "$gnulibdir"/build-aux/texinfo.tex $config_aux_dir/texinfo.tex
+func_update "$gnulibdir"/build-aux/po/Makefile.in.in po/Makefile.in.in
+func_update "$gnulibdir"/build-aux/po/remove-potcdate.sin po/remove-potcdate.sin
 func_update "$gnulibdir"/doc/COPYINGv3 COPYING
 func_update "$gnulibdir"/doc/INSTALL INSTALL
 

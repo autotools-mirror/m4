@@ -40,8 +40,7 @@ AM_LDFLAGS	= -no-undefined -export-dynamic -export-symbols-regex ".*"
 
 EXTRA_DIST	= bootstrap \
 		  $(config_aux_dir)/mkstamp \
-		  $(config_macro_dir)/gnulib-cache.m4 \
-		  local/doc/gpl-3.0.texi.diff
+		  $(config_macro_dir)/gnulib-cache.m4
 CLEANFILES	=
 DISTCLEANFILES	=
 MOSTLYCLEANFILES=

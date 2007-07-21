@@ -23,6 +23,7 @@ gl_MODULES([assert autobuild avltree-oset binary-io clean-temp cloexec close-str
 gl_AVOID([])
 gl_SOURCE_BASE([gnu])
 gl_M4_BASE([ltdl/m4])
+gl_PO_BASE([])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests/gnu])
 gl_WITH_TESTS
@@ -30,3 +31,4 @@ gl_LIB([libgnu])
 gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([M4])
+gl_PO_DOMAIN([])
