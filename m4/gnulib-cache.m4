@@ -23,9 +23,11 @@ gl_MODULES([assert avltree-oset binary-io clean-temp cloexec close-stream closei
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
+gl_PO_BASE([])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_WITH_TESTS
 gl_LIB([libm4])
 gl_MAKEFILE_NAME([])
 gl_MACRO_PREFIX([M4])
+gl_PO_DOMAIN([])
