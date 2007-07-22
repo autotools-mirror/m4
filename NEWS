@@ -4,7 +4,9 @@ Foundation, Inc.
 
 Version 1.4.11 - ?? ??? 2007, by ????  (CVS version 1.4.10a)
 
-* No user visible changes yet...
+* Fix regression introduced in 1.4.9b in the `divert' builtin when more
+  than 512 kibibytes are saved in diversions on platforms like NetBSD
+  where fopen(name,"a+") seeks to the end of the file.
 
 Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)
 

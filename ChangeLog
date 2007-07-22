@@ -1,3 +1,12 @@
+2007-07-21  Eric Blake  <ebb9@byu.net>
+
+	Fix regression on NetBSD from 2007-05-28.
+	* src/output.c (m4_tmpopen): Explicitly reset append-mode stream
+	position to byte 0.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+	Reported by Thomas Klausner.
+
 2007-07-20  Eric Blake  <ebb9@byu.net>
 
 	Fix 'make distcheck' issues.
