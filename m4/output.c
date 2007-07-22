@@ -250,6 +250,11 @@ m4_tmpopen (m4 *context, int divnum)
 	      _("cannot create temporary file for diversion"));
   else if (set_cloexec_flag (fileno (file), true) != 0)
     m4_warn (context, errno, _("cannot protect diversion across forks"));
+  /* POSIX states that it is undefined whether an append stream starts
+     at offset 0 or at the end.  We want the beginning.  */
+  else if (fseeko (file, 0, SEEK_SET) != 0)
+    m4_error (context, EXIT_FAILURE, errno,
+	      _("cannot seek to beginning of diversion"));
   return file;
 }
 

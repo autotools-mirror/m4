@@ -1,3 +1,11 @@
+2007-07-22  Eric Blake  <ebb9@byu.net>
+
+	Fix diversions on NetBSD, when fopen(name,"a+") seeks to end.
+	* m4/output.c (m4_tmpopen): Explicitly seek to beginning.
+	* tests/builtins.at (divert): Enhance test to cover this.
+	* THANKS: Update.
+	Reported by Thomas Klausner.
+
 2007-07-20  Eric Blake  <ebb9@byu.net>
 
 	Fix 'make distcheck' issues.
