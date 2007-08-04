@@ -1,3 +1,30 @@
+2007-08-04  Eric Blake  <ebb9@byu.net>
+
+	Normalize all GPL license notices.
+	* GNUmakefile: Update license wording.
+	* Makefile.am: Likewise.
+	* Makefile.maint: Likewise.
+	* bootstrap: Likewise.
+	* commit: Likewise.
+	* configure.ac: Likewise.
+	* checks/Makefile.in: Likewise.
+	* doc/Makefile.am: Likewise.
+	* examples/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* src/symtab.c: Likewise.
+
 2007-07-21  Eric Blake  <ebb9@byu.net>
 
 	Fix regression on NetBSD from 2007-05-28.
