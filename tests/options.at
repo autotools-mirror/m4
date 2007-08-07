@@ -73,6 +73,11 @@ AT_CHECK_M4([--arglength=10], [0], [],
 [[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
 ]])
 
+AT_CHECK_M4([--arglength=x], [1], [],
+[[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
+m4: invalid --arglength argument `x'
+]])
+
 dnl --word-regexp from 1.4.x is no longer supported.  Can't test for its
 dnl alternate spelling -W, as that now means --warnings.
 AT_CHECK_M4([[--word-regexp='[a-zA-Z0-9_]+']], [0], [],
@@ -310,15 +315,15 @@ echo(`long string')
 ]])
 
 AT_CHECK_M4([--debuglen=-1 in], [1], [],
-[[m4: invalid debug argument length `-1'
+[[m4: invalid --debuglen argument `-1'
 ]])
 
 AT_CHECK_M4([--debuglen oops in], [1], [],
-[[m4: invalid debug argument length `oops'
+[[m4: invalid --debuglen argument `oops'
 ]])
 
 AT_CHECK_M4([-l 10oops in], [1], [],
-[[m4: invalid character following debug argument length in `10oops'
+[[m4: invalid suffix in -l argument `10oops'
 ]])
 
 dnl MiB is the suffix to implict 1, resulting in 1048576
@@ -328,7 +333,15 @@ AT_CHECK_M4([-lMiB in], [0], [[long string
 
 dnl this assumes size_t is no bigger than 64 bits
 AT_CHECK_M4([-l 123456789012345678901234567890 in], [1], [],
-[[m4: debug argument length `123456789012345678901234567890' too large
+[[m4: -l argument `123456789012345678901234567890' too large
+]])
+AT_CHECK_M4([--debugl 123456789012345678901234567890 in], [1], [],
+[[m4: --debuglen argument `123456789012345678901234567890' too large
+]])
+
+dnl per POSIX guidelines, this is a decimal number 10, not octal 8
+AT_CHECK_M4([-l 010 in], [0], [[long string
+]], [[m4trace: -1- echo(`long strin...') -> ``long stri...'
 ]])
 
 AT_CHECK_M4([-l 3 in], [0], [[long string
@@ -570,15 +583,15 @@ echo(echo(echo(echo(echo(echo(echo(echo(echo(`nested string')))))))))
 ]])
 
 AT_CHECK_M4([--nesting-limit=-1 in], [1], [],
-[[m4: invalid nesting limit `-1'
+[[m4: invalid --nesting-limit argument `-1'
 ]])
 
 AT_CHECK_M4([--nesting-limit oops in], [1], [],
-[[m4: invalid nesting limit `oops'
+[[m4: invalid --nesting-limit argument `oops'
 ]])
 
 AT_CHECK_M4([-L 10oops in], [1], [],
-[[m4: invalid character following nesting limit in `10oops'
+[[m4: invalid suffix in -L argument `10oops'
 ]])
 
 dnl MiB is the suffix to implict 1, resulting in 1048576
@@ -588,7 +601,10 @@ nested string
 
 dnl this assumes size_t is no bigger than 64 bits
 AT_CHECK_M4([-L 123456789012345678901234567890 in], [1], [],
-[[m4: nesting limit `123456789012345678901234567890' too large
+[[m4: -L argument `123456789012345678901234567890' too large
+]])
+AT_CHECK_M4([--nest 123456789012345678901234567890 in], [1], [],
+[[m4: --nesting-limit argument `123456789012345678901234567890' too large
 ]])
 
 AT_CHECK_M4([-L 5 in], [1], [[nested string

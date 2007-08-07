@@ -216,12 +216,37 @@ enum
   VERSION_OPTION			/* no short opt */
 };
 
+/* Use OPT_IDX to decide whether to return either a short option
+   string "-C", or a long option string derived from LONG_OPTIONS.
+   OPT_IDX is -1 if the short option C was used; otherwise it is an
+   index into LONG_OPTIONS, which should have a name preceded by two
+   '-' characters.  */
+#define OPT_STR(opt_idx, c, long_options)	\
+  ((opt_idx) < 0				\
+   ? short_opt_str (c)				\
+   : LONG_OPT_STR (opt_idx, long_options))
+
+/* Likewise, but assume OPT_IDX is nonnegative.  */
+#define LONG_OPT_STR(opt_idx, long_options) ((long_options)[opt_idx].name - 2)
+
+/* Given the byte, C, return the string "-C" in static storage.  */
+static inline char *
+short_opt_str (char c)
+{
+  static char opt_str_storage[3] = {'-', 0, 0};
+  opt_str_storage[1] = c;
+  return opt_str_storage;
+}
+
+/* Define an option string that will be used with OPT_STR or LONG_OPT_STR.  */
+#define OPT_STR_INIT(name) ("--" name + 2)
+
 /* Decode options and launch execution.  */
 static const struct option long_options[] =
 {
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
-  {"debuglen", required_argument, NULL, 'l'},
+  {OPT_STR_INIT ("debuglen"), required_argument, NULL, 'l'},
   {"debugmode", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
@@ -232,7 +257,7 @@ static const struct option long_options[] =
   {"interactive", no_argument, NULL, 'i'},
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
-  {"nesting-limit", required_argument, NULL, 'L'},
+  {OPT_STR_INIT ("nesting-limit"), required_argument, NULL, 'L'},
   {"posix", no_argument, NULL, 'G'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"pushdef", required_argument, NULL, 'p'},
@@ -247,7 +272,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"warnings", no_argument, NULL, 'W'},
 
-  {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
+  {OPT_STR_INIT ("arglength"), required_argument, NULL, ARGLENGTH_OPTION},
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
@@ -282,17 +307,17 @@ enum interactive_choice
   INTERACTIVE_NO	/* -b specified last */
 };
 
-/* Convert OPT to size_t, reporting an error using MSGID if it does
-   not fit.  */
+/* Convert OPT to size_t, reporting an error using long option index
+   OI or short option character OPTCHAR if it does not fit.  */
 static size_t
-size_opt (char const *opt, char const *msgid)
+size_opt (char const *opt, int oi, int optchar)
 {
   unsigned long int size;
   strtol_error status = xstrtoul (opt, NULL, 10, &size, "kKmMgGtTPEZY0");
   if (SIZE_MAX < size && status == LONGINT_OK)
     status = LONGINT_OVERFLOW;
   if (status != LONGINT_OK)
-    STRTOL_FATAL_ERROR (opt, _(msgid), status);
+    STRTOL_FATAL_ERROR (OPT_STR (oi, optchar, long_options), opt, status);
   return size;
 }
 
@@ -326,7 +351,6 @@ main (int argc, char *const *argv, char *const *envp)
   deferred *head = NULL;	/* head of deferred argument list */
   deferred *tail = NULL;
   deferred *defn;
-  int optchar;			/* option character */
   size_t size;			/* for parsing numeric option arguments */
 
   bool import_environment = false; /* true to import environment */
@@ -368,228 +392,234 @@ main (int argc, char *const *argv, char *const *envp)
   /* First, we decode the arguments, to size up tables and stuff.
      Avoid lasting side effects; for example 'm4 --debugfile=oops
      --help' must not create the file `oops'.  */
-  while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				 long_options, NULL)) != -1)
-    switch (optchar)
-      {
-      default:
-	usage (EXIT_FAILURE);
-
-      case 'H':
-      case HASHSIZE_OPTION:
-	/* -H was supported in 1.4.x, but is a no-op now.  FIXME -
-	    remove support for -H after 2.0.  */
-	error (0, 0, _("Warning: `%s' is deprecated"),
-	       optchar == 'H' ? "-H" : "--hashsize");
+  while (1)
+    {
+      int oi = -1;
+      int optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+				 long_options, &oi);
+      if (optchar == -1)
 	break;
 
-      case 'N':
-      case DIVERSIONS_OPTION:
-	/* -N became an obsolete no-op in 1.4.x.  FIXME - remove
-	   support for -N after 2.0.  */
-	error (0, 0, _("Warning: `%s' is deprecated"),
-	       optchar == 'N' ? "-N" : "--diversions");
-	break;
-
-      case 'S':
-      case 'T':
-	/* Compatibility junk: options that other implementations
-	   support, but which we ignore as no-ops and don't list in
-	   --help.  */
-	error (0, 0, _("Warning: `-%c' is deprecated"),
-	       optchar);
-	break;
-
-      case WORD_REGEXP_OPTION:
-	/* Supported in 1.4.x as -W, but no longer present.  */
-	error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
-	break;
-
-      case 's':
-	optchar = SYNCOUTPUT_OPTION;
-	optarg = "1";
-	/* fall through */
-      case 'D':
-      case 'U':
-      case 'm':
-      case 'p':
-      case 'r':
-      case 't':
-      case '\1':
-      case POPDEF_OPTION:
-      case SYNCOUTPUT_OPTION:
-      case TRACEOFF_OPTION:
-      case UNLOAD_MODULE_OPTION:
-	/* Arguments that cannot be handled until later are accumulated.  */
-
-	defn = xmalloc (sizeof *defn);
-	defn->code = optchar;
-	defn->value = optarg;
-	defn->next = NULL;
-
-	if (head == NULL)
-	  head = defn;
-	else
-	  tail->next = defn;
-	tail = defn;
-
-	if (optchar == '\1')
-	  seen_file = true;
-
-	break;
-
-      case 'B':
-	/* In 1.4.x, -B<num> was a no-op option for compatibility with
-	   Solaris m4.  Warn if optarg is all numeric.  FIXME -
-	   silence this warning after 2.0.  */
-	if (isdigit (to_uchar (*optarg)))
-	  {
-	    char *end;
-	    errno = 0;
-	    strtol (optarg, &end, 10);
-	    if (*end == '\0' && errno == 0)
-	      error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
-		     optarg);
-	  }
-	/* fall through */
-      case PREPEND_INCLUDE_OPTION:
-	m4_add_include_directory (context, optarg, true);
-	break;
-
-      case 'E':
-	if (m4_get_fatal_warnings_opt (context))
-	  m4_set_warnings_exit_opt (context, true);
-	else
-	  m4_set_fatal_warnings_opt (context, true);
-	break;
-
-      case 'F':
-	frozen_file_to_write = optarg;
-	break;
-
-      case 'G':
-	m4_set_posixly_correct_opt (context, true);
-	break;
-
-      case 'I':
-	m4_add_include_directory (context, optarg, false);
-	break;
-
-      case 'L':
-	size = size_opt (optarg, N_("nesting limit"));
-	m4_set_nesting_limit_opt (context, size);
-	break;
-
-      case 'M':
-	if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
-	  {
-	    const char *dlerr = lt_dlerror ();
-	    if (dlerr == NULL)
-	      m4_error (context, EXIT_FAILURE, 0,
-			_("failed to add search directory `%s'"),
-			optarg);
-	    else
-	      m4_error (context, EXIT_FAILURE, 0,
-			_("failed to add search directory `%s': %s"),
-			optarg, dlerr);
-	  }
-	break;
-
-      case 'P':
-	m4_set_prefix_builtins_opt (context, true);
-	break;
-
-      case 'Q':
-	m4_set_suppress_warnings_opt (context, true);
-	break;
-
-      case 'R':
-	frozen_file_to_read = optarg;
-	break;
-
-      case 'W':
-	/* FIXME - should W take an optional argument, to allow -Wall,
-	   -Wnone, -Werror, -Wcategory, -Wno-category?  If so, then have
-	   -W == -Wall.  */
-	m4_set_suppress_warnings_opt (context, false);
-	break;
-
-      case 'b':
-	interactive = INTERACTIVE_NO;
-	break;
-
-      case 'c':
-	m4_set_discard_comments_opt (context, true);
-	break;
-
-      case 'd':
+      switch (optchar)
 	{
-	  int old = m4_get_debug_level_opt (context);
-	  m4_set_debug_level_opt (context, m4_debug_decode (context, old,
-							    optarg));
-	}
-	if (m4_get_debug_level_opt (context) < 0)
+	default:
+	  usage (EXIT_FAILURE);
+
+	case 'H':
+	case HASHSIZE_OPTION:
+	  /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
+	     remove support for -H after 2.0.  */
+	  error (0, 0, _("Warning: `%s' is deprecated"),
+		 optchar == 'H' ? "-H" : "--hashsize");
+	  break;
+
+	case 'N':
+	case DIVERSIONS_OPTION:
+	  /* -N became an obsolete no-op in 1.4.x.  FIXME - remove
+	     support for -N after 2.0.	*/
+	  error (0, 0, _("Warning: `%s' is deprecated"),
+		 optchar == 'N' ? "-N" : "--diversions");
+	  break;
+
+	case 'S':
+	case 'T':
+	  /* Compatibility junk: options that other implementations
+	     support, but which we ignore as no-ops and don't list in
+	     --help.  */
+	  error (0, 0, _("Warning: `-%c' is deprecated"),
+		 optchar);
+	  break;
+
+	case WORD_REGEXP_OPTION:
+	  /* Supported in 1.4.x as -W, but no longer present.  */
+	  error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
+	  break;
+
+	case 's':
+	  optchar = SYNCOUTPUT_OPTION;
+	  optarg = "1";
+	  /* fall through */
+	case 'D':
+	case 'U':
+	case 'm':
+	case 'p':
+	case 'r':
+	case 't':
+	case '\1':
+	case POPDEF_OPTION:
+	case SYNCOUTPUT_OPTION:
+	case TRACEOFF_OPTION:
+	case UNLOAD_MODULE_OPTION:
+	  /* Arguments that cannot be handled until later are accumulated.  */
+
+	  defn = xmalloc (sizeof *defn);
+	  defn->code = optchar;
+	  defn->value = optarg;
+	  defn->next = NULL;
+
+	  if (head == NULL)
+	    head = defn;
+	  else
+	    tail->next = defn;
+	  tail = defn;
+
+	  if (optchar == '\1')
+	    seen_file = true;
+
+	  break;
+
+	case 'B':
+	  /* In 1.4.x, -B<num> was a no-op option for compatibility with
+	     Solaris m4.  Warn if optarg is all numeric.  FIXME -
+	     silence this warning after 2.0.  */
+	  if (isdigit (to_uchar (*optarg)))
+	    {
+	      char *end;
+	      errno = 0;
+	      strtol (optarg, &end, 10);
+	      if (*end == '\0' && errno == 0)
+		error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
+		       optarg);
+	    }
+	  /* fall through */
+	case PREPEND_INCLUDE_OPTION:
+	  m4_add_include_directory (context, optarg, true);
+	  break;
+
+	case 'E':
+	  if (m4_get_fatal_warnings_opt (context))
+	    m4_set_warnings_exit_opt (context, true);
+	  else
+	    m4_set_fatal_warnings_opt (context, true);
+	  break;
+
+	case 'F':
+	  frozen_file_to_write = optarg;
+	  break;
+
+	case 'G':
+	  m4_set_posixly_correct_opt (context, true);
+	  break;
+
+	case 'I':
+	  m4_add_include_directory (context, optarg, false);
+	  break;
+
+	case 'L':
+	  size = size_opt (optarg, oi, optchar);
+	  m4_set_nesting_limit_opt (context, size);
+	  break;
+
+	case 'M':
+	  if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
+	    {
+	      const char *dlerr = lt_dlerror ();
+	      if (dlerr == NULL)
+		m4_error (context, EXIT_FAILURE, 0,
+			  _("failed to add search directory `%s'"),
+			  optarg);
+	      else
+		m4_error (context, EXIT_FAILURE, 0,
+			  _("failed to add search directory `%s': %s"),
+			  optarg, dlerr);
+	    }
+	  break;
+
+	case 'P':
+	  m4_set_prefix_builtins_opt (context, true);
+	  break;
+
+	case 'Q':
+	  m4_set_suppress_warnings_opt (context, true);
+	  break;
+
+	case 'R':
+	  frozen_file_to_read = optarg;
+	  break;
+
+	case 'W':
+	  /* FIXME - should W take an optional argument, to allow -Wall,
+	     -Wnone, -Werror, -Wcategory, -Wno-category?  If so, then have
+	     -W == -Wall.  */
+	  m4_set_suppress_warnings_opt (context, false);
+	  break;
+
+	case 'b':
+	  interactive = INTERACTIVE_NO;
+	  break;
+
+	case 'c':
+	  m4_set_discard_comments_opt (context, true);
+	  break;
+
+	case 'd':
 	  {
-	    error (0, 0, _("bad debug flags: `%s'"), optarg);
-	    m4_set_debug_level_opt (context, 0);
+	    int old = m4_get_debug_level_opt (context);
+	    m4_set_debug_level_opt (context, m4_debug_decode (context, old,
+							      optarg));
 	  }
-	break;
+	  if (m4_get_debug_level_opt (context) < 0)
+	    {
+	      error (0, 0, _("bad debug flags: `%s'"), optarg);
+	      m4_set_debug_level_opt (context, 0);
+	    }
+	  break;
 
-      case 'e':
-	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-	       "-e", "-i");
-	/* fall through */
-      case 'i':
-	interactive = INTERACTIVE_YES;
-	break;
+	case 'e':
+	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+		 "-e", "-i");
+	  /* fall through */
+	case 'i':
+	  interactive = INTERACTIVE_YES;
+	  break;
 
-      case 'g':
-	m4_set_posixly_correct_opt (context, false);
-	break;
+	case 'g':
+	  m4_set_posixly_correct_opt (context, false);
+	  break;
 
-      case ARGLENGTH_OPTION:
-	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-	       "--arglength", "--debuglen");
-	/* fall through */
-      case 'l':
-	size = size_opt (optarg,
-			 N_("debug argument length"));
-	m4_set_max_debug_arg_length_opt (context, size);
-	break;
+	case ARGLENGTH_OPTION:
+	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+		 "--arglength", "--debuglen");
+	  /* fall through */
+	case 'l':
+	  size = size_opt (optarg, oi, optchar);
+	  m4_set_max_debug_arg_length_opt (context, size);
+	  break;
 
-      case 'o':
-      case ERROR_OUTPUT_OPTION:
-	/* FIXME: -o is inconsistent with other tools' use of
-	   -o/--output for creating an output file instead of using
-	   stdout, and --error-output is misnamed since it does not
-	   affect error messages to stderr.  Change the meaning of -o
-	   after 2.1.  */
-	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
-	/* fall through */
-      case DEBUGFILE_OPTION:
-	/* Don't call m4_debug_set_output here, as it has side effects.  */
-	debugfile = optarg;
-	break;
+	case 'o':
+	case ERROR_OUTPUT_OPTION:
+	  /* FIXME: -o is inconsistent with other tools' use of
+	     -o/--output for creating an output file instead of using
+	     stdout, and --error-output is misnamed since it does not
+	     affect error messages to stderr.  Change the meaning of -o
+	     after 2.1.	 */
+	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+		 optchar == 'o' ? "-o" : "--error-output", "--debugfile");
+	  /* fall through */
+	case DEBUGFILE_OPTION:
+	  /* Don't call m4_debug_set_output here, as it has side effects.  */
+	  debugfile = optarg;
+	  break;
 
-      case IMPORT_ENVIRONMENT_OPTION:
-	import_environment = true;
-	break;
+	case IMPORT_ENVIRONMENT_OPTION:
+	  import_environment = true;
+	  break;
 
-      case SAFER_OPTION:
-	m4_set_safer_opt (context, true);
-	break;
+	case SAFER_OPTION:
+	  m4_set_safer_opt (context, true);
+	  break;
 
-      case VERSION_OPTION:
-	version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
-		     VERSION, AUTHORS, NULL);
-	exit (EXIT_SUCCESS);
-	break;
+	case VERSION_OPTION:
+	  version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
+		       VERSION, AUTHORS, NULL);
+	  exit (EXIT_SUCCESS);
+	  break;
 
-      case HELP_OPTION:
-	usage (EXIT_SUCCESS);
-	break;
-      }
+	case HELP_OPTION:
+	  usage (EXIT_SUCCESS);
+	  break;
+	}
+    }
 
   /* Interactive if specified, or if no input files and stdin and
      stderr are terminals, to match sh behavior.  Interactive mode

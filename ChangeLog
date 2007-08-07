@@ -1,3 +1,16 @@
+2007-08-07  Eric Blake  <ebb9@byu.net>
+
+	Adjust to gnulib xstrtol changes.
+	* src/main.c (size_opt): Adjust signature, so that error strings
+	are easier to translate.
+	(OPT_STR, LONG_OPT_STR, short_opt_str, OPT_STR_INIT): New macros
+	for tracking long options.
+	(main): Track which long option was used.
+	* tests/options.at (--debuglen, --nesting-limit): Adjust to change
+	in error message.
+	(deprecated options): Test that --arglength spelling shows up in
+	error message.
+
 2007-08-06  Eric Blake  <ebb9@byu.net>
 
 	Normalize all GPL license notices.
