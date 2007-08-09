@@ -890,38 +890,43 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
+  int i;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
-  if (s == NULL)
-    return;
-
-  switch (SYMBOL_TYPE (s))
+  for (i = 1; i < argc; i++)
     {
-    case TOKEN_TEXT:
-      obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      obstack_grow (obs, rquote.string, rquote.length);
-      break;
+      s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+      if (s == NULL)
+	continue;
 
-    case TOKEN_FUNC:
-      b = SYMBOL_FUNC (s);
-      if (b == m4_placeholder)
-	M4ERROR ((warning_status, 0, "\
-builtin `%s' requested by frozen file is not supported", ARG (1)));
-      else
-	push_macro (b);
-      break;
+      switch (SYMBOL_TYPE (s))
+	{
+	case TOKEN_TEXT:
+	  obstack_grow (obs, lquote.string, lquote.length);
+	  obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
+	  obstack_grow (obs, rquote.string, rquote.length);
+	  break;
 
-    case TOKEN_VOID:
-      break;
+	case TOKEN_FUNC:
+	  b = SYMBOL_FUNC (s);
+	  if (b == m4_placeholder)
+	    M4ERROR ((warning_status, 0, "\
+builtin `%s' requested by frozen file is not supported", ARG (i)));
+	  else if (argc != 2)
+	    M4ERROR ((warning_status, 0,
+		      "Warning: cannot concatenate builtin `%s'",
+		      ARG (i)));
+	  else
+	    push_macro (b);
+	  break;
 
-    default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad symbol type in m4_defn ()"));
-      abort ();
+	default:
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: bad symbol type in m4_defn ()"));
+	  abort ();
+	}
     }
 }
 
@@ -1898,16 +1903,16 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '7': case '8': case '9':
 	  ch -= '0';
 	  if (regs->num_regs - 1 <= ch)
-	    M4ERROR ((warning_status, 0, "\
-Warning: sub-expression %d not present", ch));
+	    M4ERROR ((warning_status, 0,
+		      "Warning: sub-expression %d not present", ch));
 	  else if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
 	  break;
 
 	case '\0':
-	  M4ERROR ((warning_status, 0, "\
-Warning: trailing \\ ignored in replacement"));
+	  M4ERROR ((warning_status, 0,
+		    "Warning: trailing \\ ignored in replacement"));
 	  return;
 
 	default:

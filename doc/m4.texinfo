@@ -2023,16 +2023,20 @@ case, @code{undefine} does nothing.
 It is possible to rename an already defined macro.  To do this, you need
 the builtin @code{defn}:
 
-@deffn Builtin defn (@var{name})
-Expands to the @emph{quoted definition} of @var{name}.  If the
-argument is not a defined macro, the expansion is void.
+@deffn Builtin defn (@var{name}@dots{})
+Expands to the @emph{quoted definition} of each @var{name}.  If an
+argument is not a defined macro, the expansion for that argument is
+empty.
 
 If @var{name} is a user-defined macro, the quoted definition is simply
-the quoted expansion text.  If, instead, @var{name} is a builtin, the
+the quoted expansion text.  If, instead, there is only one @var{name}
+and it is a builtin, the
 expansion is a special token, which points to the builtin's internal
 definition.  This token is only meaningful as the second argument to
 @code{define} (and @code{pushdef}), and is silently converted to an
-empty string in most other contexts.
+empty string in most other contexts.  Combining a builtin with anything
+else is not supported; a warning is issued and the builtin is omitted
+from the final expansion.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2101,6 +2105,34 @@ defn(`foo')
 @result{}aA'
 echo(foo)
 @result{}AA'
+@end example
+
+On the other hand, it is possible to exploit the fact that @code{defn}
+can concatenate multiple macros prior to the rescanning phase, in order
+to join the definitions of macros that, in isolation, have unbalanced
+quotes.  In the example below, note how the use of @code{defn} on
+@code{l} in isolation opens a string, which is not closed until the next
+line; but used on @code{l} and @code{r} together results in nested
+quoting.  Also note that @code{defn} with multiple arguments can only
+join text macros, not builtins, although a future version of
+@acronym{GNU} M4 may lift this restriction.
+
+@example
+define(`l', `<[>')define(`r', `<]>')
+@result{}
+changequote(`[', `]')
+@result{}
+defn([l])defn([r])
+])
+@result{}<[>]defn([r])
+@result{})
+defn([l], [r])
+@result{}<[>][<]>
+define([a], [A])
+@result{}
+defn([a], [defn], [a])
+@error{}m4:stdin:7: Warning: cannot concatenate builtin `defn'
+@result{}AA
 @end example
 
 @cindex builtins, special tokens
@@ -6167,18 +6199,21 @@ future release of @acronym{GNU} @code{m4} may change.
 
 @itemize @bullet
 @item
-System V @code{m4} supports multiple arguments to @code{defn}, and
-@acronym{POSIX} requires it.  This is not yet implemented in @acronym{GNU}
-@code{m4}.  Unfortunately, this means it is not possible to mix builtins
-and other text into a single macro; a helper macro is required.
+@acronym{POSIX} requires support for multiple arguments to @code{defn},
+without any clarification on how @code{defn} behaves when one of the
+multiple arguments names a builtin.  System V @code{m4} and some other
+implementations allow mixing builtins and text macros into a single
+macro.  @acronym{GNU} @code{m4} only supports joining multiple text
+arguments, although a future implementation may lift this restriction to
+behave more like System V.  The only portable way to join text macros
+with builtins is via helper macros and implicit concatenation of macro
+results.
 
 @item
 @acronym{POSIX} requires an application to exit with non-zero status if
 it wrote an error message to stderr.  This has not yet been consistently
 implemented for the various builtins that are required to issue an error
-(such as @code{include} (@pxref{Include}) when a file is unreadable,
-@code{eval} (@pxref{Eval}) when an argument cannot be parsed, or using
-@code{m4exit} (@pxref{M4exit}) with a non-numeric argument).
+(such as @code{eval} (@pxref{Eval}) when an argument cannot be parsed).
 
 @item
 Some traditional implementations only allow reading standard input
@@ -6234,12 +6269,12 @@ definition on the stack, as if doing @code{popdef(`f')} followed by
 @code{pushdef(`f',`1')}.  @acronym{POSIX} allows either behavior.
 
 @item
-@acronym{POSIX} requires @code{syscmd} (@pxref{Syscmd}) to evaluate
-command output for macro expansion, but this appears to be a mistake
-in @acronym{POSIX} since traditional implementations did not do this.
-@acronym{GNU} @code{m4} follows traditional behavior in @code{syscmd}, and
-provides the extension @code{esyscmd} that provides the @acronym{POSIX}
-semantics.
+@acronym{POSIX} 2001 requires @code{syscmd} (@pxref{Syscmd}) to evaluate
+command output for macro expansion, but this was a mistake that is
+anticipated to be corrected in the next version of @acronym{POSIX}.
+@acronym{GNU} @code{m4} follows traditional behavior in @code{syscmd}
+where output is not rescanned, and provides the extension @code{esyscmd}
+that does scan the output.
 
 @item
 At one point, @acronym{POSIX} required @code{changequote(@var{arg})}
@@ -6270,8 +6305,8 @@ Most implementations of @code{m4} give macros a higher precedence than
 comments when parsing, meaning that if the start delimiter given to
 @code{changecom} (@pxref{Changecom}) starts with a macro name, comments
 are effectively disabled.  @acronym{POSIX} does not specify what the
-precedence is, so the @acronym{GNU} @code{m4} parser recognizes
-comments, then macros, then quoted strings.
+precedence is, so this version of @acronym{GNU} @code{m4} parser
+recognizes comments, then macros, then quoted strings.
 
 @item
 Traditional implementations allow argument collection, but not string
@@ -6315,9 +6350,11 @@ requires @samp{=} to cause an error, but many traditional
 implementations allowed it as an alias for @samp{==}.
 
 @item
-@acronym{POSIX} requires @code{translit} (@pxref{Translit}) to treat
-each character of the second and third arguments literally, but @acronym{GNU}
-@code{m4} treats @samp{-} as a range operator.
+@acronym{POSIX} 2001 requires @code{translit} (@pxref{Translit}) to
+treat each character of the second and third arguments literally.
+However, it is anticipated that the next version of @acronym{POSIX} will
+allow the @acronym{GNU} @code{m4} behavior of treating @samp{-} as a
+range operator.
 
 @item
 @acronym{POSIX} requires @code{m4} to honor the locale environment
