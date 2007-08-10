@@ -1,3 +1,7 @@
+2007-08-10  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Compatibility): Sync with head.
+
 2007-08-10  Konrad Schwarz  <konrad.schwarz@siemens.com>  (tiny change)
 	and Eric Blake  <ebb9@byu.net>
 
