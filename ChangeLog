@@ -1,3 +1,8 @@
+2007-08-10  Konrad Schwarz  <konrad.schwarz@siemens.com>  (tiny change)
+	and Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Defn): Update wording.
+
 2007-08-09  Eric Blake  <ebb9@byu.net>
 
 	POSIX requires defn(`a',`b') to concatenate definitions.

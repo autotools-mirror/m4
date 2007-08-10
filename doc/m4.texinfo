@@ -2110,12 +2110,11 @@ echo(foo)
 On the other hand, it is possible to exploit the fact that @code{defn}
 can concatenate multiple macros prior to the rescanning phase, in order
 to join the definitions of macros that, in isolation, have unbalanced
-quotes.  In the example below, note how the use of @code{defn} on
-@code{l} in isolation opens a string, which is not closed until the next
-line; but used on @code{l} and @code{r} together results in nested
-quoting.  Also note that @code{defn} with multiple arguments can only
-join text macros, not builtins, although a future version of
-@acronym{GNU} M4 may lift this restriction.
+quotes.  This is particularly useful when one has used several macros to
+accumulate text that M4 should rescan as a whole.  In the example below,
+note how the use of @code{defn} on @code{l} in isolation opens a string,
+which is not closed until the next line; but used on @code{l} and
+@code{r} together results in nested quoting.
 
 @example
 define(`l', `<[>')define(`r', `<]>')
@@ -2128,11 +2127,6 @@ defn([l])defn([r])
 @result{})
 defn([l], [r])
 @result{}<[>][<]>
-define([a], [A])
-@result{}
-defn([a], [defn], [a])
-@error{}m4:stdin:7: Warning: cannot concatenate builtin `defn'
-@result{}AA
 @end example
 
 @cindex builtins, special tokens
@@ -2149,6 +2143,18 @@ define(defn(`divnum'), `cannot redefine a builtin token')
 @result{}
 divnum
 @result{}0
+@end example
+
+Also note that @code{defn} with multiple arguments can only join text
+macros, not builtins, although a future version of @acronym{GNU} M4 may
+lift this restriction.
+
+@example
+define(`a', `A')
+@result{}
+defn(`a', `defn', `a')
+@error{}m4:stdin:2: Warning: cannot concatenate builtin `defn'
+@result{}AA
 @end example
 
 @node Pushdef
