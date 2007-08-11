@@ -1,3 +1,13 @@
+2007-08-11  Eric Blake  <ebb9@byu.net>
+
+	Another upstream xstrtol change.
+	* po/POTFILES.in: Track changes in files containing messages.
+	* bootstrap (src_modules): getopt is now pulled into libgnu.a, no
+	need to grab it separately.
+	* src/main.c (OPT_STR, LONG_OPT_STR, short_opt_str, OPT_STR_INIT):
+	No longer needed.
+	(size_opt): Adjust to latest xstrtol interface.
+
 2007-08-10  Eric Blake  <ebb9@byu.net>
 
 	Documentation improvements.

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-07-24
+# bootstrap (GNU M4) version 2007-08-11
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -70,7 +70,7 @@ bailout_cb=:
 
 # List dependencies here too; we don't extract them, otherwise dependent
 # modules could end up being imported to src/ *and* gnu/!
-src_modules='getopt version-etc-fsf version-etc'
+src_modules='version-etc-fsf version-etc'
 
 dirname="s,/[^/]*$,,"
 basename="s,^.*/,,g"

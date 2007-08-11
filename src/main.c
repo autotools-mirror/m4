@@ -216,37 +216,12 @@ enum
   VERSION_OPTION			/* no short opt */
 };
 
-/* Use OPT_IDX to decide whether to return either a short option
-   string "-C", or a long option string derived from LONG_OPTIONS.
-   OPT_IDX is -1 if the short option C was used; otherwise it is an
-   index into LONG_OPTIONS, which should have a name preceded by two
-   '-' characters.  */
-#define OPT_STR(opt_idx, c, long_options)	\
-  ((opt_idx) < 0				\
-   ? short_opt_str (c)				\
-   : LONG_OPT_STR (opt_idx, long_options))
-
-/* Likewise, but assume OPT_IDX is nonnegative.  */
-#define LONG_OPT_STR(opt_idx, long_options) ((long_options)[opt_idx].name - 2)
-
-/* Given the byte, C, return the string "-C" in static storage.  */
-static inline char *
-short_opt_str (char c)
-{
-  static char opt_str_storage[3] = {'-', 0, 0};
-  opt_str_storage[1] = c;
-  return opt_str_storage;
-}
-
-/* Define an option string that will be used with OPT_STR or LONG_OPT_STR.  */
-#define OPT_STR_INIT(name) ("--" name + 2)
-
 /* Decode options and launch execution.  */
 static const struct option long_options[] =
 {
   {"batch", no_argument, NULL, 'b'},
   {"debug", optional_argument, NULL, 'd'},
-  {OPT_STR_INIT ("debuglen"), required_argument, NULL, 'l'},
+  {"debuglen", required_argument, NULL, 'l'},
   {"debugmode", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
   {"discard-comments", no_argument, NULL, 'c'},
@@ -257,7 +232,7 @@ static const struct option long_options[] =
   {"interactive", no_argument, NULL, 'i'},
   {"load-module", required_argument, NULL, 'm'},
   {"module-directory", required_argument, NULL, 'M'},
-  {OPT_STR_INIT ("nesting-limit"), required_argument, NULL, 'L'},
+  {"nesting-limit", required_argument, NULL, 'L'},
   {"posix", no_argument, NULL, 'G'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"pushdef", required_argument, NULL, 'p'},
@@ -272,7 +247,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"warnings", no_argument, NULL, 'W'},
 
-  {OPT_STR_INIT ("arglength"), required_argument, NULL, ARGLENGTH_OPTION},
+  {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
@@ -317,7 +292,7 @@ size_opt (char const *opt, int oi, int optchar)
   if (SIZE_MAX < size && status == LONGINT_OK)
     status = LONGINT_OVERFLOW;
   if (status != LONGINT_OK)
-    STRTOL_FATAL_ERROR (OPT_STR (oi, optchar, long_options), opt, status);
+    xstrtol_fatal (status, oi, optchar, long_options, opt);
   return size;
 }
 
