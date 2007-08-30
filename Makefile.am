@@ -63,6 +63,10 @@ CONFIG_STATUS_DEPENDENCIES = ChangeLog
 
 bin_PROGRAMS	= src/m4
 src_m4_SOURCES	= \
+		  src/xstrtoul.c \
+		  src/xstrtol-error.c \
+		  src/xstrtol.c \
+		  src/xstrtol.h \
 		  src/version-etc-fsf.c \
 		  src/version-etc.c \
 		  src/version-etc.h \

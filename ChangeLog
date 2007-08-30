@@ -1,3 +1,14 @@
+2007-08-29  Gary V. Vaughan  <gary@gnu.org>
+
+	As gnulib xstrtol is only used by main, and unconditionally pulls
+	in a copy of getopt, undo bootstrap change from 2007-08-11 below,
+	and copy the xstrtol code into src/ so that main() can use it
+	without pushing the extra code into libm4:
+
+	* bootstrap (src_modules): Add getopt and xstrtol modules.
+	* Makefile.am (src_m4_SOURCES): Add xstrtol sources.
+	* po/POTFILES.in: Move gnu/xstrtol-error.c to src/xstrtol-error.c.
+
 2007-08-11  Eric Blake  <ebb9@byu.net>
 
 	Another upstream xstrtol change.

@@ -7,7 +7,6 @@ gnu/quotearg.c
 gnu/regcomp.c
 gnu/verror.c
 gnu/xalloc-die.c
-gnu/xstrtol-error.c
 m4/builtin.c
 m4/debug.c
 m4/input.c
@@ -30,3 +29,4 @@ src/getopt.c
 src/main.c
 src/stackovf.c
 src/version-etc.c
+src/xstrtol-error.c
