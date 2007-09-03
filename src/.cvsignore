@@ -10,3 +10,5 @@ m4.exe
 Makefile
 Makefile.in
 version-etc*
+xstrtol*
+xstrtoul*

@@ -1,5 +1,10 @@
 2007-09-03  Gary V. Vaughan  <gary@gnu.org>
 
+	* bootstrap (ltdl/m4/.cvsignore): Add xstrtol module macros.
+	* src/m4/.cvsignore: Add xstrtol module sources.
+
+2007-09-03  Gary V. Vaughan  <gary@gnu.org>
+
 	Work around a bug in darwin's awk:
 
 	* bootstrap (func_get_translations): Use $AWK instead of raw
