@@ -276,11 +276,11 @@ func_get_translations()
 
   sed -n 's|.*href="\(.*\)/\([^/][^/]*\)/'"$domain"'-\([^/"]*\)\.[^."]*\.po".*|\2:\3:\1|p' <"$subdir/$domain.html" |
   sort -t: -k 1,1 -k 2,2n -k2,2 -k3,3n -k3,3 -k4,4n -k4,4 -k5,5n -k5.5 |
-  awk -F: '
-    { if (lang && $1 != lang) print lang, ver, $3 }
-    { lang = $1; ver = $2 }
-    END { if (lang) print lang, ver, $3 }
-  ' | awk -v domain="$domain" -v po_file="$po_file" -v baseurl="$baseurl" -v subdir="$subdir" '
+  $AWK -F: '
+    { if (lang && $1 != lang) print lang, ver, subdir }
+    { lang = $1; ver = $2; subdir = $3 }
+    END { if (lang) print lang, ver, subdir }
+  ' | $AWK -v domain="$domain" -v po_file="$po_file" -v baseurl="$baseurl" -v subdir="$subdir" '
     {
       lang = $1
       if (po_file == (lang ".po")) next

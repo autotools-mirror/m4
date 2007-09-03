@@ -1,3 +1,15 @@
+2007-09-03  Gary V. Vaughan  <gary@gnu.org>
+
+	Work around a bug in darwin's awk:
+
+	* bootstrap (func_get_translations): Use $AWK instead of raw
+	`awk' so that the user can use an alternative implementation
+	if the first awk in PATH doesn't behave as expected.
+	(func_get_translations): The first awk script mangles the last
+	entry passed to it for at least the awk implementation shipped
+	with Darwin 8.10.1.  Capture $3 into a variable too to work-
+	around that problem.
+
 2007-08-29  Gary V. Vaughan  <gary@gnu.org>
 
 	As gnulib xstrtol is only used by main, and unconditionally pulls
