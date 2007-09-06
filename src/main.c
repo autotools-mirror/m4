@@ -623,11 +623,11 @@ main (int argc, char *const *argv, char *const *envp)
     reload_frozen_state (context, frozen_file_to_read);
   else
     {
-      m4_module_load (context, "m4", 0);
+      m4_module_load (context, "m4", NULL);
       if (m4_get_posixly_correct_opt (context))
-	m4_module_load (context, "traditional", 0);
+	m4_module_load (context, "traditional", NULL);
       else
-	m4_module_load (context, "gnu", 0);
+	m4_module_load (context, "gnu", NULL);
     }
 
   /* Import environment variables as macros.  The definition are

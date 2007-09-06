@@ -263,7 +263,7 @@ produce_frozen_state (m4 *context, const char *name)
     produce_syntax_dump (file, M4SYNTAX, *str++);
 
   /* Dump all loaded modules.  */
-  produce_module_dump (file, m4__module_next (0));
+  produce_module_dump (file, m4__module_next (NULL));
 
   /* Dump all symbols.  */
   produce_symbol_dump (context, file, M4SYMTAB);

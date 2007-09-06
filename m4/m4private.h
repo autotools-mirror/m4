@@ -23,6 +23,7 @@
 #define M4PRIVATE_H 1
 
 #include <m4/m4module.h>
+#include <ltdl.h>
 
 #include "cloexec.h"
 
@@ -143,12 +144,22 @@ struct m4 {
 #define INIT_SYMBOL		"m4_init_module"
 #define FINISH_SYMBOL		"m4_finish_module"
 
+struct m4_module
+{
+  lt_dlhandle	handle;		/* ltdl module information.  */
+  /* TODO: add struct members, such as copy of builtins (so that we
+     can store additional information about builtins, and so that the
+     list isn't changed by the module behind our backs once we have
+     initialized it) or cached pointers (to reduce the number of calls
+     needed to lt_dlsym).  */
+};
+
 extern void	    m4__module_init (m4 *context);
-extern lt_dlhandle  m4__module_open (m4 *context, const char *name,
+extern m4_module *  m4__module_open (m4 *context, const char *name,
 				     m4_obstack *obs);
 extern void	    m4__module_exit (m4 *context);
-extern lt_dlhandle  m4__module_next (lt_dlhandle);
-extern lt_dlhandle  m4__module_find (const char *name);
+extern m4_module *  m4__module_next (m4_module *);
+extern m4_module *  m4__module_find (const char *name);
 
 
 
@@ -162,8 +173,8 @@ struct m4_symbol
 
 struct m4_symbol_value {
   m4_symbol_value *	next;
-  lt_dlhandle		handle;
-  int			flags;
+  m4_module *		handle;
+  unsigned int		flags;
 
   m4_hash *		arg_signature;
   unsigned int		min_args;
@@ -252,7 +263,8 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_REST_BIT	(1 << 0)
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-extern void m4__symtab_remove_module_references (m4_symbol_table*, lt_dlhandle);
+extern void m4__symtab_remove_module_references (m4_symbol_table*,
+						 m4_module *);
 
 
 

@@ -143,7 +143,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
    the symbol table.  */
 void
 m4__symtab_remove_module_references (m4_symbol_table *symtab,
-				     lt_dlhandle handle)
+				     m4_module *handle)
 {
   m4_hash_iterator *place = 0;
 

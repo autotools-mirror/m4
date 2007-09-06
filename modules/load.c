@@ -75,9 +75,10 @@ m4_macro m4_macro_table[] =
    unload is in progress.  */
 M4INIT_HANDLER (load)
 {
-  if (handle && lt_dlmakeresident (handle) != 0)
+  const char *err = m4_module_makeresident (handle);
+  if (err)
     m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
-	      m4_get_module_name (handle), lt_dlerror ());
+	      m4_get_module_name (handle), err);
 }
 
 

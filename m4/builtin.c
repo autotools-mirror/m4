@@ -30,14 +30,14 @@
    symbol value, suitable for use in the symbol table or for an
    argument to m4_push_builtin.  */
 m4_symbol_value *
-m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
+m4_builtin_find_by_name (m4_module *handle, const char *name)
 {
-  lt_dlhandle cur = handle ? handle : m4__module_next (0);
+  m4_module *cur = handle ? handle : m4__module_next (NULL);
 
   do
     {
       const m4_builtin *builtin =
-	(m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
+	(m4_builtin *) lt_dlsym (cur->handle, BUILTIN_SYMBOL);
 
       if (builtin)
 	{
@@ -63,14 +63,14 @@ m4_builtin_find_by_name (lt_dlhandle handle, const char *name)
 /* Find the builtin which has FUNC.  If HANDLE argument is supplied
    then search only in HANDLE's builtin table.  */
 const m4_builtin *
-m4_builtin_find_by_func (lt_dlhandle handle, m4_builtin_func *func)
+m4_builtin_find_by_func (m4_module *handle, m4_builtin_func *func)
 {
-  lt_dlhandle cur = handle ? handle : m4__module_next (0);
+  m4_module *cur = handle ? handle : m4__module_next (NULL);
 
   do
     {
       const m4_builtin *builtin =
-	(const m4_builtin *) lt_dlsym (cur, BUILTIN_SYMBOL);
+	(const m4_builtin *) lt_dlsym (cur->handle, BUILTIN_SYMBOL);
 
       if (builtin)
 	{

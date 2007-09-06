@@ -39,7 +39,6 @@
 #include <modules/m4.h>
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_export_table		m4_LTX_m4_export_table
 #define m4_builtin_table	m4_LTX_m4_builtin_table
 
 #define m4_set_sysval		m4_LTX_m4_set_sysval
@@ -141,11 +140,10 @@ m4_builtin m4_builtin_table[] =
    progress.  */
 M4INIT_HANDLER (m4)
 {
-  if (handle && lt_dlmakeresident (handle) != 0)
-    {
-      m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
-		m4_get_module_name (handle), lt_dlerror ());
-    }
+  const char *err = m4_module_makeresident (handle);
+  if (err)
+    m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
+	      m4_get_module_name (handle), err);
 }
 
 

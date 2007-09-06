@@ -67,14 +67,11 @@ m4_macro m4_macro_table[] =
 
 M4INIT_HANDLER (shadow)
 {
-  const lt_dlinfo *info = 0;
   const char *s = "Shadow module loaded.";
-
-  if (handle)
-    info = lt_dlgetinfo (handle);
+  int refcount = m4_module_refcount (handle);
 
   /* Only display the message on first load.  */
-  if (obs && info && (info->ref_count == 1))
+  if (obs && refcount == 1)
     obstack_grow (obs, s, strlen (s));
 }
 

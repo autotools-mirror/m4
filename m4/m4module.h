@@ -22,7 +22,6 @@
 #ifndef M4MODULE_H
 #define M4MODULE_H 1
 
-#include <ltdl.h>
 #include <m4/hash.h>
 #include <m4/system.h>
 
@@ -37,9 +36,9 @@ typedef struct m4_builtin	m4_builtin;
 typedef struct m4_macro		m4_macro;
 typedef struct m4_symbol_value	m4_symbol_value;
 typedef struct m4_input_block	m4_input_block;
+typedef struct m4_module	m4_module;
 
 typedef struct obstack		m4_obstack;
-typedef lt_dlsymlist		m4_export;
 
 typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
 
@@ -87,15 +86,15 @@ struct m4_macro
 
 #define M4INIT_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_init_module))			\
-	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
+	(m4 *context, m4_module *handle, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_init_module))			\
-	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
+	(m4 *context, m4_module *handle, m4_obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_finish_module))		\
-	(m4 *context, lt_dlhandle handle, m4_obstack *obs);	\
+	(m4 *context, m4_module *handle, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_finish_module))		\
-	(m4 *context, lt_dlhandle handle, m4_obstack *obs)
+	(m4 *context, m4_module *handle, m4_obstack *obs)
 
 #define M4_MODULE_IMPORT(M, S)					\
   CONC(S, _func) *S = (CONC(S, _func) *)			\
@@ -179,16 +178,18 @@ m4_context_opt_bit_table
 
 /* --- MODULE MANAGEMENT --- */
 
-typedef void m4_module_init_func   (m4 *, lt_dlhandle, m4_obstack*);
-typedef void m4_module_finish_func (m4 *, lt_dlhandle, m4_obstack*);
+typedef void m4_module_init_func   (m4 *, m4_module *, m4_obstack *);
+typedef void m4_module_finish_func (m4 *, m4_module *, m4_obstack *);
 
-extern lt_dlhandle  m4_module_load     (m4 *, const char*, m4_obstack*);
+extern m4_module *  m4_module_load     (m4 *, const char*, m4_obstack*);
+extern const char * m4_module_makeresident (m4_module *);
+extern int	    m4_module_refcount (const m4_module *);
 extern void	    m4_module_unload   (m4 *, const char*, m4_obstack*);
 extern void *	    m4_module_import   (m4 *, const char*, const char*,
 					m4_obstack*);
 
-extern const char * m4_get_module_name (lt_dlhandle);
-extern void	    m4__module_exit    (m4 *context);
+extern const char * m4_get_module_name (const m4_module *);
+extern void	    m4__module_exit    (m4 *);
 
 
 
@@ -272,8 +273,8 @@ extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 
 /* --- BUILTIN MANAGEMENT --- */
 
-extern m4_symbol_value	*m4_builtin_find_by_name (lt_dlhandle, const char *);
-extern const m4_builtin	*m4_builtin_find_by_func (lt_dlhandle,
+extern m4_symbol_value	*m4_builtin_find_by_name (m4_module *, const char *);
+extern const m4_builtin	*m4_builtin_find_by_func (m4_module *,
 						  m4_builtin_func *);
 
 

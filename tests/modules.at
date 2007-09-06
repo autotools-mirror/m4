@@ -487,3 +487,45 @@ forloop(`i', `1', `5000', `unload(`gnu')load(`gnu')regexp(`123', `\(4\)?2')')
 AT_CHECK_M4([-m load input.m4], [0])
 
 AT_CLEANUP
+
+
+## ------------------ ##
+## unload load module ##
+## ------------------ ##
+
+AT_SETUP([unload load module])
+AT_CHECK_DYNAMIC_MODULE
+
+dnl Ensure that the load module can be unloaded and reloaded (obviously,
+dnl it can't reload itself; the reload occurs on the command line).  Since
+dnl the module must be resident (after all, the `unload' builtin had better
+dnl not unmap the memory for the code it is currently executing), make sure
+dnl that resident modules are handled gracefully.
+AT_DATA([in1.m4], [[__load__ 1
+unload(`load') 2
+__load__ 3
+]])
+
+AT_DATA([in2.m4], [[__load__ 4
+load(`load') 5
+__load__ 6
+unload(`load') 7
+__load__ 8
+unload(`load') 9
+__load__ 10
+]])
+
+AT_CHECK_M4([-m load in1.m4 -m load in2.m4], [0],
+[[ 1
+ 2
+__load__ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+__load__ 10
+]])
+
+AT_CLEANUP

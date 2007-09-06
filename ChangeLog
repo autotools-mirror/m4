@@ -1,3 +1,45 @@
+2007-09-06  Eric Blake  <ebb9@byu.net>
+
+	Wrap lt_dlhandle in struct m4_module.
+	* m4/m4module.h (includes): No longer require clients to know
+	about lt_dlhandle.
+	(m4_module): New opaque declaration.
+	(m4_export): Delete unused type.
+	(M4INIT_HANDLER, M4FINISH_HANDLER, m4_module_init_func)
+	(m4_module_finish_func, m4_module_load, m4_get_module_name)
+	(m4_builtin_find_by_name, m4_builtin_find_by_func): Use new
+	wrapper.
+	(m4_module_makeresident, m4_module_refcount): New declarations.
+	* m4/m4private.h (includes): Move <ltdl.h> here.
+	(m4_module): New declaration.  Simple for now, but intended for
+	growth.
+	(m4__module_open, m4__module_next, m4__module_find)
+	(m4__symtab_remove_module_references): Use new wrapper.
+	* m4/builtin.c (m4_builtin_find_by_name, m4_builtin_find_by_func):
+	Likewise.
+	* m4/module.c (m4_get_module_name, m4_module_import)
+	(m4_module_load): Likewise.
+	(install_builtin_table, install_macro_table): Likewise.  Also,
+	change return type since these always returned NULL and no one
+	used the result.
+	(m4_module_makeresident, m4_module_refcount): New functions.
+	(m4_module_unload, m4__module_next, m4__module_find): Use new
+	wrapper.
+	(m4__module_open): Populate new wrapper, and associate it with the
+	lt_dlhandle.
+	(m4__module_exit): Use new wrapper.
+	(module_remove): Likewise.  Reclaim storage on last use.
+	(module_close): Delete, and inline into module_remove.
+	* m4/symtab.c (m4__symtab_remove_module_references): Use new
+	wrapper.
+	* modules/load.c (load_init): Use new API.
+	* modules/m4.c (m4_export_table): Kill unused declaration.
+	(m4_init): Use new API.
+	* modules/shadow.c (shadow_init): Use new API.
+	* src/main.c (main): Adjust callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* tests/modules.at (unload load module): New test.
+
 2007-09-03  Gary V. Vaughan  <gary@gnu.org>
 
 	* bootstrap (ltdl/m4/.cvsignore): Add xstrtol module macros.
