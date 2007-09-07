@@ -709,7 +709,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 {
   m4_symbol_value *value	= m4_get_symbol_value (symbol);
   int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
-  lt_dlhandle      handle	= value ? SYMBOL_HANDLE (symbol) : 0;
+  m4_module *      handle	= value ? SYMBOL_HANDLE (symbol) : NULL;
   const char *     module_name	= handle ? m4_get_module_name (handle) : "NONE";
 
   fprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,

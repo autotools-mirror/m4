@@ -163,7 +163,7 @@ struct m4_input_block
       struct
 	{
 	  const m4_builtin *builtin;  /* pointer to builtin's function. */
-	  lt_dlhandle handle;	  /* originating module. */
+	  m4_module *handle;	  /* originating module. */
 	  int flags;		  /* flags associated with the builtin. */
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  unsigned int min_args;  /* argv minima for the builtin. */

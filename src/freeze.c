@@ -29,7 +29,7 @@
 static	void  produce_mem_dump		(FILE *, const char *, size_t);
 static	void  produce_resyntax_dump	(m4 *, FILE *);
 static	void  produce_syntax_dump	(FILE *, m4_syntax_table *, char);
-static	void  produce_module_dump	(FILE *, lt_dlhandle);
+static	void  produce_module_dump	(FILE *, m4_module *);
 static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
 static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
 					 m4_symbol *, void *);
@@ -131,7 +131,7 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
    reloaded from the frozen file.  libltdl stores handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
 static void
-produce_module_dump (FILE *file, lt_dlhandle handle)
+produce_module_dump (FILE *file, m4_module *handle)
 {
   const char *name = m4_get_module_name (handle);
   size_t len = strlen (name);
@@ -159,7 +159,7 @@ static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 		m4_symbol *symbol, void *userdata)
 {
-  lt_dlhandle   handle		= SYMBOL_HANDLE (symbol);
+  m4_module *   handle		= SYMBOL_HANDLE (symbol);
   const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
   FILE *	file		= (FILE *) userdata;
   size_t	symbol_len	= strlen (symbol_name);
@@ -549,7 +549,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	  /* Enter a macro having a builtin function as a definition.  */
 	  {
-	    lt_dlhandle handle   = 0;
+	    m4_module *handle = NULL;
 	    m4_symbol_value *token;
 
 	    if (number[2] > 0)
@@ -750,14 +750,14 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	  /* Enter a macro having an expansion text as a definition.  */
 	  {
 	    m4_symbol_value *token = xzalloc (sizeof *token);
-	    lt_dlhandle handle = 0;
+	    m4_module *handle = NULL;
 
 	    if (number[2] > 0)
 	      handle = m4__module_find (string[2]);
 
 	    m4_set_symbol_value_text (token, xstrdup (string[1]));
-	    VALUE_HANDLE (token)		= handle;
-	    VALUE_MAX_ARGS (token)	= -1;
+	    VALUE_HANDLE (token) = handle;
+	    VALUE_MAX_ARGS (token) = -1;
 
 	    m4_symbol_pushdef (M4SYMTAB, string[0], token);
 	  }

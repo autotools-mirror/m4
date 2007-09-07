@@ -1,5 +1,11 @@
 2007-09-07  Eric Blake  <ebb9@byu.net>
 
+	More conversion to m4_module*.
+	* src/freeze.c (produce_module_dump, dump_symbol_CB)
+	(reload_frozen_state): Use correct type.
+	* m4/input.c (struct m4_input_block): Likewise.
+	* m4/symtab.c (dump_symbol_CB): Likewise.
+
 	* AUTHORS: Simplify, to match libtool and autoconf layout.
 	* THANKS: Sync with branch.
 
