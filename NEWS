@@ -114,6 +114,9 @@ promoted to 2.0.
 *** New `mkdtemp' builtin parallels `mkstemp', but allows the creation of
     temporary directories instead of files.
 
+*** New `refcount' builtin allows tracking how many times a module has
+    been loaded.
+
 *** New `renamesyms' builtin allows programmatic renaming of all symbols
     according to a regular expression.
   - FIXME: This feature can cause core dumps when renaming multiple

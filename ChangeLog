@@ -1,5 +1,23 @@
 2007-09-07  Eric Blake  <ebb9@byu.net>
 
+	Add refcount builtin.
+	* modules/load.c (refcount): New builtin.
+	(m4modules): Use correct type.
+	* doc/m4.texinfo (Refcount): New section.
+	* m4/m4private.h (struct m4_module): Add refcount member.
+	(m4_module_refcount) [NDEBUG]: Add faster accessor macro.
+	* m4/module.c (m4_module_load): Add symbols to table on first
+	load by m4, regardless of other libltdl loads of same module.
+	(m4_module_refcount): Use new struct member, rather than relying
+	on libltdl count which might be inflated by unrelated loads.
+	(m4__module_interface): Optimize.
+	(m4__module_next, m4__module_find): Avoid assertions that could
+	trigger with unrelated libltdl loads.
+	(m4__module_open): Track m4 load count.
+	(m4__module_exit): Only unload what m4 loaded.
+	(module_remove): Track m4 unloads.
+	* NEWS: Document new builtin.
+
 	More conversion to m4_module*.
 	* src/freeze.c (produce_module_dump, dump_symbol_CB)
 	(reload_frozen_state): Use correct type.

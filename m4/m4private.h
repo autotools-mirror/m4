@@ -147,6 +147,7 @@ struct m4 {
 struct m4_module
 {
   lt_dlhandle	handle;		/* ltdl module information.  */
+  int		refcount;	/* count of loads not matched by unload.  */
   /* TODO: add struct members, such as copy of builtins (so that we
      can store additional information about builtins, and so that the
      list isn't changed by the module behind our backs once we have
@@ -161,6 +162,11 @@ extern void	    m4__module_exit (m4 *context);
 extern m4_module *  m4__module_next (m4_module *);
 extern m4_module *  m4__module_find (const char *name);
 
+/* Fast macro versions of symbol table accessor functions, that also
+   have an identically named function exported in m4module.h.  */
+#ifdef NDEBUG
+# define m4_module_refcount(M)	((M)->refcount)
+#endif
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */

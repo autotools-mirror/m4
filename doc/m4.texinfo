@@ -236,6 +236,7 @@ Extending M4 with dynamic runtime modules
 * M4modules::                   Listing loaded modules
 * Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
+* Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
 
 Macros for text handling
@@ -5485,6 +5486,7 @@ two modes of startup.
 * M4modules::                   Listing loaded modules
 * Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
+* Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
 @end menu
 
@@ -5542,7 +5544,7 @@ m4modules
 @section Removing loaded modules
 
 @deffn {Builtin (load)} unload (@var{module-name})
-Any loaded modules that can be listed by the @code{modules} macro can be
+Any loaded modules that can be listed by the @code{m4modules} macro can be
 removed by naming them as the @var{module-name} parameter of the
 @code{unload} macro.  Unloading a module consists of removing all of the
 macros it provides from the internal table of visible macros, and
@@ -5560,6 +5562,49 @@ unload(`mpeval')
 @result{}
 m4modules
 @result{}load,gnu,m4
+@end example
+
+@node Refcount
+@section Tracking module references
+
+@deffn {Builtin (load)} refcount (@var{module-name})
+This macro expands to an integer representing the number of times
+@var{module-name} has been loaded but not yet unloaded.  No warning is
+issued, even if @var{module-name} does not represent a valid module.
+
+The macro @code{refcount} is recognized only with parameters.
+@end deffn
+
+This example demonstrates tracking the reference count of the gnu
+module.
+
+@comment options: -m load
+@example
+$ @kbd{m4 -m load}
+m4modules
+@result{}load,gnu,m4
+refcount(`gnu')
+@result{}1
+m4modules
+@result{}load,gnu,m4
+load(`gnu')
+@result{}
+refcount(`gnu')
+@result{}2
+unload(`gnu')
+@result{}
+m4modules
+@result{}load,gnu,m4
+refcount(`gnu')
+@result{}1
+unload(`gnu')
+@result{}
+m4modules
+@result{}load,m4
+refcount(`gnu')
+@result{}0
+refcount(`NoSuchModule')
+@result{}0
 @end example
 
 @node Standard Modules

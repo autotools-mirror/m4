@@ -84,8 +84,6 @@
 static const char*  module_dlerror (void);
 static int	    module_remove  (m4 *context, m4_module *handle,
 				    m4_obstack *obs);
-//static void	    module_close   (m4 *context, m4_module *handle,
-//				    m4_obstack *obs);
 
 static void	    install_builtin_table (m4*, m4_module *);
 static void	    install_macro_table   (m4*, m4_module *);
@@ -104,7 +102,7 @@ m4_get_module_name (const m4_module *m4_handle)
 
   info = lt_dlgetinfo (m4_handle->handle);
 
-  return info ? info->name : 0;
+  return info ? info->name : NULL;
 }
 
 void *
@@ -212,26 +210,10 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
   m4_module *handle = m4__module_open (context, name, obs);
 
-  if (handle)
+  if (handle && handle->refcount == 1)
     {
-      const lt_dlinfo  *info	= lt_dlgetinfo (handle->handle);
-
-      if (!info)
-	{
-	  /* If name is not set we are getting a reflective handle, but we
-	     need to display an error message so we set an appropriate
-	     value here.  */
-	  if (!name)
-	    name = MODULE_SELF_NAME;
-
-	  m4_error (context, 0, 0, _("cannot load module `%s': %s"),
-		    name, module_dlerror ());
-	}
-      else if (info->ref_count == 1)
-	{
-	  install_builtin_table (context, handle);
-	  install_macro_table (context, handle);
-	}
+      install_builtin_table (context, handle);
+      install_macro_table (context, handle);
     }
 
   return handle;
@@ -244,22 +226,6 @@ m4_module_makeresident (m4_module *m4_handle)
 {
   assert (m4_handle);
   return lt_dlmakeresident (m4_handle->handle) ? module_dlerror () : NULL;
-}
-
-/* Return the current refcount, or times that module HANDLE has been
-   opened.  */
-int
-m4_module_refcount (const m4_module *handle)
-{
-  /* FIXME - we should track refcounts in struct m4_module, since it
-     is conceivable that the m4 load refcount could be different than
-     the libltdl refcount, if a single module can be loaded both by
-     m4_module_load and as a dependent of some other module.  */
-  const lt_dlinfo *info;
-  assert (handle);
-  info = lt_dlgetinfo (handle->handle);
-  assert (info);
-  return info->ref_count;
 }
 
 /* Unload a module.  */
@@ -297,6 +263,13 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 static int
 m4__module_interface (lt_dlhandle handle, const char *id_string)
 {
+  /* Shortcut.  If we've already associated our wrapper with this
+     handle, then we've validated the handle in the past, and don't
+     need to waste any time on additional lt_dlsym calls.  */
+  m4_module *m4_handle = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
+  if (m4_handle)
+    return 0;
+
   /* A valid m4 module must provide at least one of these symbols.  */
   return !(lt_dlsym (handle, INIT_SYMBOL)
 	   || lt_dlsym (handle, FINISH_SYMBOL)
@@ -321,15 +294,9 @@ m4__module_next (m4_module *m4_handle)
       if (!handle)
 	return NULL;
       m4_handle = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
-      if (m4_handle)
-	assert (m4_handle->handle == handle);
-      else
-	{
-	  assert (lt_dlisresident (handle));
-	  assert (lt_dlgetinfo (handle)->ref_count <= 1);
-	}
     }
   while (!m4_handle);
+  assert (m4_handle->handle == handle);
   return m4_handle;
 }
 
@@ -348,11 +315,6 @@ m4__module_find (const char *name)
   m4_handle = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
   if (m4_handle)
     assert (m4_handle->handle == handle);
-  else
-    {
-      assert (lt_dlisresident (handle));
-      assert (lt_dlgetinfo (handle)->ref_count <= 1);
-    }
   return m4_handle;
 }
 
@@ -440,6 +402,14 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
       /* If we have a handle, there must be handle info.  */
       assert (info);
 
+#ifdef DEBUG_MODULES
+      if (info->ref_count > 1)
+	{
+	  fprintf (stderr, "module %s: now has %d libtool references.",
+		   name, info->ref_count);
+	}
+#endif /* DEBUG_MODULES */
+
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
 			_("module %s: opening file `%s'"),
 			name ? name : MODULE_SELF_NAME, info->filename);
@@ -452,7 +422,6 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  void *old;
 	  const char *err;
 
-	  assert (info->ref_count == 1);
 	  m4_handle = (m4_module *) xzalloc (sizeof *m4_handle);
 	  m4_handle->handle = handle;
 
@@ -470,6 +439,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 
       /* Find and run any initializing function in the opened module,
 	 each time the module is opened.  */
+      m4_handle->refcount++;
       init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
       if (init_func)
 	{
@@ -507,15 +477,14 @@ m4__module_exit (m4 *context)
 
   while (handle && !errors)
     {
-      const lt_dlinfo *info	= lt_dlgetinfo (handle->handle);
       m4_module *      pending	= handle;
 
       /* If we are about to unload the final reference, move on to the
 	 next handle before we unload the current one.  */
-      if (info->ref_count <= 1)
+      if (pending->refcount <= 1)
 	handle = m4__module_next (handle);
 
-      errors = module_remove (context, pending, 0);
+      errors = module_remove (context, pending, NULL);
     }
 
   assert (iface_id);		/* need to have called m4__module_init */
@@ -576,12 +545,12 @@ module_remove (m4 *context, m4_module *m4_handle, m4_obstack *obs)
 #ifdef DEBUG_MODULES
   if (info->ref_count > 1)
     {
-      fprintf (stderr, "module %s: now has %d references.",
+      fprintf (stderr, "module %s: now has %d libtool references.",
 	       name, info->ref_count - 1);
     }
 #endif /* DEBUG_MODULES */
 
-  if (info->ref_count == 1)
+  if (m4_handle->refcount-- == 1)
     {
       /* Remove the table references only when ref_count is *exactly*
 	 equal to 1.  If module_close is called again on a
@@ -643,4 +612,22 @@ module_remove (m4 *context, m4_module *m4_handle, m4_obstack *obs)
   DELETE (name);
 
   return errors;
+}
+
+
+/* Below here are the accessor functions behind fast macros.  Declare
+   them last, so the rest of the file can use the macros.  */
+
+/* Return the current refcount, or times that module HANDLE has been
+   opened.  */
+#undef m4_module_refcount
+int
+m4_module_refcount (const m4_module *handle)
+{
+  const lt_dlinfo *info;
+  assert (handle);
+  info = lt_dlgetinfo (handle->handle);
+  assert (info);
+  assert (handle->refcount <= info->ref_count);
+  return handle->refcount;
 }

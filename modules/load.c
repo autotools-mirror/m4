@@ -34,8 +34,9 @@
 
 	   function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
-  BUILTIN (m4modules,	false,	false,	false,	0,	0  )	\
   BUILTIN (load,	false,	true,	false,	1,	1  )	\
+  BUILTIN (m4modules,	false,	false,	false,	0,	0  )	\
+  BUILTIN (refcount,	false,	true,	false,	1,	1  )	\
   BUILTIN (unload,	false,	true,	false,	1,	1  )	\
 
 
@@ -94,7 +95,7 @@ M4BUILTIN_HANDLER (m4modules)
 {
   /* The expansion of this builtin is a comma separated list of
      loaded modules.  */
-  lt_dlhandle handle = m4__module_next (NULL);
+  m4_module *handle = m4__module_next (NULL);
 
   if (handle)
     do
@@ -105,6 +106,15 @@ M4BUILTIN_HANDLER (m4modules)
 	  obstack_1grow (obs, ',');
       }
     while (handle);
+}
+
+/**
+ * refcount(module)
+ **/
+M4BUILTIN_HANDLER (refcount)
+{
+  m4_module *handle = m4__module_find (M4ARG (1));
+  m4_shipout_int (obs, handle ? m4_module_refcount (handle) : 0);
 }
 
 /**
