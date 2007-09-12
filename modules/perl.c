@@ -77,8 +77,8 @@ M4INIT_HANDLER (perl)
   const lt_dlinfo *info = 0;
   char *embedding[] = { "", "-e", "0" };
 
-  if (handle)
-    info = lt_dlgetinfo (handle);
+  if (module)
+    info = lt_dlgetinfo (module);
 
   /* Start up a perl parser, when loaded for the first time.  */
   if (info && (info->ref_count == 1))
@@ -95,8 +95,8 @@ M4FINISH_HANDLER (perl)
 {
   const lt_dlinfo *info = 0;
 
-  if (handle)
-    info = lt_dlgetinfo (handle);
+  if (module)
+    info = lt_dlgetinfo (module);
 
   /* Recycle the perl parser, when unloaded for the last time.  */
   if (info && (info->ref_count == 1))

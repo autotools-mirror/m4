@@ -163,7 +163,7 @@ struct m4_input_block
       struct
 	{
 	  const m4_builtin *builtin;  /* pointer to builtin's function. */
-	  m4_module *handle;	  /* originating module. */
+	  m4_module *module;	  /* originating module. */
 	  int flags;		  /* flags associated with the builtin. */
 	  m4_hash *arg_signature; /* argument signature for builtin.  */
 	  unsigned int min_args;  /* argv minima for the builtin. */
@@ -396,7 +396,7 @@ builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
   obstack_1grow (obs, '>');
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE))
     {
-      text = m4_get_module_name (me->u.u_b.handle);
+      text = m4_get_module_name (me->u.u_b.module);
       obstack_1grow (obs, '{');
       obstack_grow (obs, text, strlen (text));
       obstack_1grow (obs, '}');
@@ -428,7 +428,7 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
   i->line = m4_get_current_line (context);
 
   i->u.u_b.builtin	= m4_get_symbol_value_builtin (token);
-  i->u.u_b.handle	= VALUE_HANDLE (token);
+  i->u.u_b.module	= VALUE_MODULE (token);
   i->u.u_b.arg_signature = VALUE_ARG_SIGNATURE (token);
   i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
   i->u.u_b.max_args	= VALUE_MAX_ARGS (token);
@@ -743,7 +743,7 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
   assert (block->funcs->read_func == builtin_read && ! block->u.u_b.read);
 
   m4_set_symbol_value_builtin (token, block->u.u_b.builtin);
-  VALUE_HANDLE (token)		= block->u.u_b.handle;
+  VALUE_MODULE (token)		= block->u.u_b.module;
   VALUE_FLAGS (token)		= block->u.u_b.flags;
   VALUE_ARG_SIGNATURE (token)	= block->u.u_b.arg_signature;
   VALUE_MIN_ARGS (token)	= block->u.u_b.min_args;
@@ -1285,7 +1285,7 @@ m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
 	bp = m4_builtin_find_by_func (NULL, m4_get_symbol_value_func (token));
 	assert (bp);
 	fprintf (stderr, "builtin\t<%s>{%s}\n", bp->name,
-		 m4_get_module_name (VALUE_HANDLE (token)));
+		 m4_get_module_name (VALUE_MODULE (token)));
       }
       break;
     }

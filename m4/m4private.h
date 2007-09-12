@@ -179,7 +179,7 @@ struct m4_symbol
 
 struct m4_symbol_value {
   m4_symbol_value *	next;
-  m4_module *		handle;
+  m4_module *		module;
   unsigned int		flags;
 
   m4_hash *		arg_signature;
@@ -195,7 +195,7 @@ struct m4_symbol_value {
 };
 
 #define VALUE_NEXT(T)		((T)->next)
-#define VALUE_HANDLE(T)		((T)->handle)
+#define VALUE_MODULE(T)		((T)->module)
 #define VALUE_FLAGS(T)		((T)->flags)
 #define VALUE_ARG_SIGNATURE(T)	((T)->arg_signature)
 #define VALUE_MIN_ARGS(T)	((T)->min_args)
@@ -203,7 +203,7 @@ struct m4_symbol_value {
 #define VALUE_PENDING(T)	((T)->pending_expansions)
 
 #define SYMBOL_NEXT(S)		(VALUE_NEXT	     ((S)->value))
-#define SYMBOL_HANDLE(S)	(VALUE_HANDLE	     ((S)->value))
+#define SYMBOL_MODULE(S)	(VALUE_MODULE	     ((S)->value))
 #define SYMBOL_FLAGS(S)		(VALUE_FLAGS	     ((S)->value))
 #define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE ((S)->value))
 #define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))

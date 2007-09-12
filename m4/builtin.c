@@ -25,14 +25,14 @@
 
 #include "m4private.h"
 
-/* Find the builtin which has NAME.  If HANDLE is not NULL, then
-   search only in HANDLE's builtin table.  The result is a malloc'd
+/* Find the builtin which has NAME.  If MODULE is not NULL, then
+   search only in MODULE's builtin table.  The result is a malloc'd
    symbol value, suitable for use in the symbol table or for an
    argument to m4_push_builtin.  */
 m4_symbol_value *
-m4_builtin_find_by_name (m4_module *handle, const char *name)
+m4_builtin_find_by_name (m4_module *module, const char *name)
 {
-  m4_module *cur = handle ? handle : m4__module_next (NULL);
+  m4_module *cur = module ? module : m4__module_next (NULL);
 
   do
     {
@@ -47,7 +47,7 @@ m4_builtin_find_by_name (m4_module *handle, const char *name)
 		m4_symbol_value *token = xzalloc (sizeof *token);
 
 		m4_set_symbol_value_builtin (token, builtin);
-		VALUE_HANDLE (token) = cur;
+		VALUE_MODULE (token) = cur;
 		VALUE_FLAGS (token) = builtin->flags;
 		VALUE_MIN_ARGS (token) = builtin->min_args;
 		VALUE_MAX_ARGS (token) = builtin->max_args;
@@ -55,17 +55,17 @@ m4_builtin_find_by_name (m4_module *handle, const char *name)
 	      }
 	}
     }
-  while (!handle && (cur = m4__module_next (cur)));
+  while (!module && (cur = m4__module_next (cur)));
 
   return NULL;
 }
 
-/* Find the builtin which has FUNC.  If HANDLE argument is supplied
-   then search only in HANDLE's builtin table.  */
+/* Find the builtin which has FUNC.  If MODULE argument is supplied
+   then search only in MODULE's builtin table.  */
 const m4_builtin *
-m4_builtin_find_by_func (m4_module *handle, m4_builtin_func *func)
+m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
 {
-  m4_module *cur = handle ? handle : m4__module_next (NULL);
+  m4_module *cur = module ? module : m4__module_next (NULL);
 
   do
     {
@@ -79,7 +79,7 @@ m4_builtin_find_by_func (m4_module *handle, m4_builtin_func *func)
 	      return builtin;
 	}
     }
-  while (!handle && (cur = m4__module_next (cur)));
+  while (!module && (cur = m4__module_next (cur)));
 
   return 0;
 }

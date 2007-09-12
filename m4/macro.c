@@ -185,7 +185,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 
 	      if (argp->type == M4_SYMBOL_VOID)
 		{
-		  VALUE_HANDLE (argp) = NULL;
+		  VALUE_MODULE (argp) = NULL;
 		  m4_set_symbol_value_text (argp, text);
 		}
 	      return type == M4_TOKEN_COMMA;
@@ -361,7 +361,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 
 	  if (!groks_macro_args && m4_is_symbol_value_func (&token))
 	    {
-	      VALUE_HANDLE (&token) = NULL;
+	      VALUE_MODULE (&token) = NULL;
 	      m4_set_symbol_value_text (&token, "");
 	    }
 	  tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,

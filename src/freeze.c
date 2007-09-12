@@ -131,14 +131,14 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
    reloaded from the frozen file.  libltdl stores handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
 static void
-produce_module_dump (FILE *file, m4_module *handle)
+produce_module_dump (FILE *file, m4_module *module)
 {
-  const char *name = m4_get_module_name (handle);
+  const char *name = m4_get_module_name (module);
   size_t len = strlen (name);
 
-  handle = m4__module_next (handle);
-  if (handle)
-    produce_module_dump (file, handle);
+  module = m4__module_next (module);
+  if (module)
+    produce_module_dump (file, module);
 
   fprintf (file, "M%zu\n", len);
   produce_mem_dump (file, name, len);
@@ -159,8 +159,8 @@ static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 		m4_symbol *symbol, void *userdata)
 {
-  m4_module *   handle		= SYMBOL_HANDLE (symbol);
-  const char   *module_name	= handle ? m4_get_module_name (handle) : NULL;
+  m4_module *   module		= SYMBOL_MODULE (symbol);
+  const char   *module_name	= module ? m4_get_module_name (module) : NULL;
   FILE *	file		= (FILE *) userdata;
   size_t	symbol_len	= strlen (symbol_name);
   size_t	module_len	= module_name ? strlen (module_name) : 0;
@@ -170,13 +170,13 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
       const char *text = m4_get_symbol_text (symbol);
       size_t text_len = strlen (text);
       fprintf (file, "T%zu,%zu", symbol_len, text_len);
-      if (handle)
+      if (module)
 	fprintf (file, ",%zu", module_len);
       fputc ('\n', file);
 
       produce_mem_dump (file, symbol_name, symbol_len);
       produce_mem_dump (file, text, text_len);
-      if (handle)
+      if (module)
 	produce_mem_dump (file, module_name, module_len);
       fputc ('\n', file);
     }
@@ -189,13 +189,13 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
       bp_len = strlen (bp->name);
 
       fprintf (file, "F%zu,%zu", symbol_len, bp_len);
-      if (handle)
+      if (module)
 	fprintf (file, ",%zu", module_len);
       fputc ('\n', file);
 
       produce_mem_dump (file, symbol_name, symbol_len);
       produce_mem_dump (file, bp->name, bp_len);
-      if (handle)
+      if (module)
 	produce_mem_dump (file, module_name, module_len);
       fputc ('\n', file);
     }
@@ -549,18 +549,18 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	  /* Enter a macro having a builtin function as a definition.  */
 	  {
-	    m4_module *handle = NULL;
+	    m4_module *module = NULL;
 	    m4_symbol_value *token;
 
 	    if (number[2] > 0)
-	      handle = m4__module_find (string[2]);
-	    token = m4_builtin_find_by_name (handle, string[1]);
+	      module = m4__module_find (string[2]);
+	    token = m4_builtin_find_by_name (module, string[1]);
 
 	    if (token == NULL)
 	      {
 		token = xzalloc (sizeof *token);
 		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
-		VALUE_HANDLE (token) = handle;
+		VALUE_MODULE (token) = module;
 		VALUE_MIN_ARGS (token) = 0;
 		VALUE_MAX_ARGS (token) = -1;
 	      }
@@ -750,13 +750,13 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	  /* Enter a macro having an expansion text as a definition.  */
 	  {
 	    m4_symbol_value *token = xzalloc (sizeof *token);
-	    m4_module *handle = NULL;
+	    m4_module *module = NULL;
 
 	    if (number[2] > 0)
-	      handle = m4__module_find (string[2]);
+	      module = m4__module_find (string[2]);
 
 	    m4_set_symbol_value_text (token, xstrdup (string[1]));
-	    VALUE_HANDLE (token) = handle;
+	    VALUE_MODULE (token) = module;
 	    VALUE_MAX_ARGS (token) = -1;
 
 	    m4_symbol_pushdef (M4SYMTAB, string[0], token);

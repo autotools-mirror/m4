@@ -68,7 +68,7 @@ m4_macro m4_macro_table[] =
 M4INIT_HANDLER (shadow)
 {
   const char *s = "Shadow module loaded.";
-  int refcount = m4_module_refcount (handle);
+  int refcount = m4_module_refcount (module);
 
   /* Only display the message on first load.  */
   if (obs && refcount == 1)

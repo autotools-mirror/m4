@@ -76,10 +76,10 @@ m4_macro m4_macro_table[] =
    unload is in progress.  */
 M4INIT_HANDLER (load)
 {
-  const char *err = m4_module_makeresident (handle);
+  const char *err = m4_module_makeresident (module);
   if (err)
     m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
-	      m4_get_module_name (handle), err);
+	      m4_get_module_name (module), err);
 }
 
 
@@ -95,17 +95,17 @@ M4BUILTIN_HANDLER (m4modules)
 {
   /* The expansion of this builtin is a comma separated list of
      loaded modules.  */
-  m4_module *handle = m4__module_next (NULL);
+  m4_module *module = m4__module_next (NULL);
 
-  if (handle)
+  if (module)
     do
       {
-	m4_shipout_string (context, obs, m4_get_module_name (handle), 0, true);
+	m4_shipout_string (context, obs, m4_get_module_name (module), 0, true);
 
-	if ((handle = m4__module_next (handle)))
+	if ((module = m4__module_next (module)))
 	  obstack_1grow (obs, ',');
       }
-    while (handle);
+    while (module);
 }
 
 /**
@@ -113,8 +113,8 @@ M4BUILTIN_HANDLER (m4modules)
  **/
 M4BUILTIN_HANDLER (refcount)
 {
-  m4_module *handle = m4__module_find (M4ARG (1));
-  m4_shipout_int (obs, handle ? m4_module_refcount (handle) : 0);
+  m4_module *module = m4__module_find (M4ARG (1));
+  m4_shipout_int (obs, module ? m4_module_refcount (module) : 0);
 }
 
 /**

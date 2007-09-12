@@ -86,15 +86,15 @@ struct m4_macro
 
 #define M4INIT_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_init_module))			\
-	(m4 *context, m4_module *handle, m4_obstack *obs);	\
+	(m4 *context, m4_module *module, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_init_module))			\
-	(m4 *context, m4_module *handle, m4_obstack *obs)
+	(m4 *context, m4_module *module, m4_obstack *obs)
 
 #define M4FINISH_HANDLER(name)					\
   void CONC(name, CONC(_LTX_, m4_finish_module))		\
-	(m4 *context, m4_module *handle, m4_obstack *obs);	\
+	(m4 *context, m4_module *module, m4_obstack *obs);	\
   void CONC(name, CONC(_LTX_, m4_finish_module))		\
-	(m4 *context, m4_module *handle, m4_obstack *obs)
+	(m4 *context, m4_module *module, m4_obstack *obs)
 
 #define M4_MODULE_IMPORT(M, S)					\
   CONC(S, _func) *S = (CONC(S, _func) *)			\

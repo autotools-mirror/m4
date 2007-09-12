@@ -140,10 +140,10 @@ m4_builtin m4_builtin_table[] =
    progress.  */
 M4INIT_HANDLER (m4)
 {
-  const char *err = m4_module_makeresident (handle);
+  const char *err = m4_module_makeresident (module);
   if (err)
     m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
-	      m4_get_module_name (handle), err);
+	      m4_get_module_name (module), err);
 }
 
 

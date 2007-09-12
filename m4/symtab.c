@@ -139,15 +139,15 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
   return symbol;
 }
 
-/* Remove every symbol that references the given module handle from
+/* Remove every symbol that references the given module from
    the symbol table.  */
 void
 m4__symtab_remove_module_references (m4_symbol_table *symtab,
-				     m4_module *handle)
+				     m4_module *module)
 {
   m4_hash_iterator *place = 0;
 
-  assert (handle);
+  assert (module);
 
    /* Traverse each symbol name in the hash table.  */
   while ((place = m4_get_hash_iterator_next (symtab->table, place)))
@@ -163,7 +163,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
 	    {
 	      m4_symbol_value *next = VALUE_NEXT (data);
 
-	      if (VALUE_HANDLE (next) == handle)
+	      if (VALUE_MODULE (next) == module)
 		{
 		  VALUE_NEXT (data) = VALUE_NEXT (next);
 
@@ -175,7 +175,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
 	    }
 
 	  /* Purge the live reference if necessary.  */
-	  if (SYMBOL_HANDLE (symbol) == handle)
+	  if (SYMBOL_MODULE (symbol) == module)
 	    m4_symbol_popdef (symtab, m4_get_hash_iterator_key (place));
 	}
     }
@@ -509,10 +509,10 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     obstack_grow (obs, "...", 3);
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
-  if (module && VALUE_HANDLE (value))
+  if (module && VALUE_MODULE (value))
     {
       obstack_1grow (obs, '{');
-      text = m4_get_module_name (VALUE_HANDLE (value));
+      text = m4_get_module_name (VALUE_MODULE (value));
       obstack_grow (obs, text, strlen (text));
       obstack_1grow (obs, '}');
     }
@@ -709,8 +709,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
 {
   m4_symbol_value *value	= m4_get_symbol_value (symbol);
   int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
-  m4_module *      handle	= value ? SYMBOL_HANDLE (symbol) : NULL;
-  const char *     module_name	= handle ? m4_get_module_name (handle) : "NONE";
+  m4_module *      module	= value ? SYMBOL_MODULE (symbol) : NULL;
+  const char *     module_name	= module ? m4_get_module_name (module) : "NONE";
 
   fprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
 	   m4_get_symbol_traced (symbol) ? "!" : "", name);
