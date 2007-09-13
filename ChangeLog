@@ -1,3 +1,7 @@
+2007-09-13  Eric Blake  <ebb9@byu.net>
+
+	* AUTHORS: Fix typo.
+
 2007-09-12  Gary V. Vaughan  <gary@gnu.org>
 
 	Be consistent about using 'module' for m4_module types and
