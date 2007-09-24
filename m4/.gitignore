@@ -1,0 +1,11 @@
+*.o
+*.lo
+*.la
+.deps
+.dirstamp
+.libs
+obstack.h
+pathconf.h
+system.h
+Makefile
+Makefile.in

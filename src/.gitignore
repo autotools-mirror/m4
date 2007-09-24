@@ -1,0 +1,14 @@
+*.o
+*.lo
+*.la
+.deps
+.dirstamp
+.libs
+getopt*
+m4
+m4.exe
+Makefile
+Makefile.in
+version-etc*
+xstrtol*
+xstrtoul*

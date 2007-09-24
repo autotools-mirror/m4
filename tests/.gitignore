@@ -1,0 +1,15 @@
+*.la
+.dirstamp
+.libs
+at-*
+atconfig
+atlocal
+m4
+Makefile
+Makefile.in
+generated.at
+gnu
+package.m4
+testsuite
+testsuite.dir
+testsuite.log

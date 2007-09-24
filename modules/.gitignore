@@ -1,0 +1,11 @@
+*.o
+*.lo
+*.la
+.deps
+.dirstamp
+.libs
+compile
+Makefile
+Makefile.in
+perlxsi.c
+testSubDir
