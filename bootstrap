@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-07-24
+# bootstrap (GNU M4) version 2007-09-24
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -28,12 +28,12 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTORECONF, GNULIB_TOOL, RM, SED
+#   AUTORECONF, GNULIB_TOOL, M4, RM, SED
 
-# This script bootstraps a CVS checkout of GNU M4 by correctly
+# This script bootstraps a git or CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
 # requires GNU Autoconf 2.60, GNU Automake 1.9.6, and bleeding edge
-# CVS snapshots of GNU Gnulib.
+# git or CVS snapshots of GNU Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
 
@@ -41,6 +41,12 @@
 : ${GNULIB_TOOL=gnulib-tool}
 : ${RM=rm -f}
 : ${SED=sed}
+
+# Ensure file names are sorted consistently across platforms.
+LC_ALL=C
+export LC_ALL
+
+config_macro_dir=m4
 
 dirname="s,/[^/]*$,,"
 basename="s,^.*/,,g"
@@ -121,7 +127,7 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
     }; d' < "$progpath"
@@ -135,7 +141,7 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-        s/^# //; s/^# *$//;
+	s/^# //; s/^# *$//;
 	s/\$progname/'$progname'/;
 	p;
      }; d' < "$progpath"
@@ -147,9 +153,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-        s/^# //; s/^# *$//;
-        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-        p;
+	s/^# //; s/^# *$//;
+	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+	p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -199,6 +205,30 @@ func_update ()
   fi
 }
 
+## ---------------- ##
+## Version control. ##
+## ---------------- ##
+
+# gnulib-tool updates m4/.{git,cvs}ignore and lib/.{git,cvs}ignore, and
+# keeping generated files under version control does not make sense.
+# Since lib is entirely ignored, we only need to prepopulate the m4 ignore
+# files with generated files not tracked by gnulib-tool.
+if test -f $config_macro_dir/.gitignore ; then
+  :
+else
+  func_echo "creating initial $config_macro_dir/.cvsignore"
+  cat > $config_macro_dir/.cvsignore <<\EOF
+# files created by gnulib, but that gnulib doesn't track
+*~
+.cvsignore
+.gitignore
+gnulib-comp.m4
+# gnulib-tool edits below here
+EOF
+  func_echo "creating initial $config_macro_dir/.gitignore"
+  cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
+fi
+
 ## ---------------------------- ##
 ## Find the gnulib module tree. ##
 ## ---------------------------- ##
@@ -215,7 +245,7 @@ while test -h "$gnulibdir"; do
     # Resolve symbolic link.
     sedexpr1='s, -> ,#%%#,'
     sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
-    linkval=`LC_ALL=C ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
+    linkval=`ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
     test -n "$linkval" || break
 
     case "$linkval" in
