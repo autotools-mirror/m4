@@ -1,3 +1,9 @@
+2007-09-29  Eric Blake  <ebb9@byu.net>
+
+	Optimize for Autoconf usage pattern.
+	* src/builtin.c (m4_regexp, m4_patsubst): Handle empty regex
+	faster.
+
 2007-09-24  Eric Blake  <ebb9@byu.net>
 
 	Create .gitignore alongside .cvsignore.

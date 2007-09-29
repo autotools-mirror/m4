@@ -1968,8 +1968,19 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  victim = TOKEN_DATA_TEXT (argv[1]);
-  regexp = TOKEN_DATA_TEXT (argv[2]);
+  victim = ARG (1);
+  regexp = ARG (2);
+  repl = ARG (3);
+
+  if (!*regexp)
+    {
+      /* The empty regex matches everything!  */
+      if (argc == 3)
+	shipout_int (obs, 0);
+      else
+	obstack_grow (obs, repl, strlen (repl));
+      return;
+    }
 
   init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
@@ -1993,10 +2004,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
-    {
-      repl = TOKEN_DATA_TEXT (argv[3]);
-      substitute (obs, victim, repl, &regs);
-    }
+    substitute (obs, victim, repl, &regs);
 
   free_pattern_buffer (&buf, &regs);
 }
@@ -2013,6 +2021,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 {
   const char *victim;		/* first argument */
   const char *regexp;		/* regular expression */
+  const char *repl;
 
   struct re_pattern_buffer buf;	/* compiled regular expression */
   struct re_registers regs;	/* for subexpression matches */
@@ -2029,7 +2038,17 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  regexp = TOKEN_DATA_TEXT (argv[2]);
+  victim = ARG (1);
+  regexp = ARG (2);
+  repl = ARG (3);
+
+  /* The empty regex matches everywhere, but if there is no
+     replacement, we need not waste time with it.  */
+  if (!*regexp && !*repl)
+    {
+      obstack_grow (obs, victim, strlen (victim));
+      return;
+    }
 
   init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
@@ -2042,7 +2061,6 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  victim = TOKEN_DATA_TEXT (argv[1]);
   length = strlen (victim);
 
   offset = 0;
@@ -2073,7 +2091,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (obs, victim, ARG (3), &regs);
+      substitute (obs, victim, repl, &regs);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
