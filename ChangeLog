@@ -1,5 +1,8 @@
 2007-09-29  Eric Blake  <ebb9@byu.net>
 
+	Optimize for Autoconf usage pattern.
+	* modules/gnu.c (regexp, patsubst): Handle empty regex faster.
+
 	* tests/testsuite.at (AT_CHECK_M4): Slight optimization.
 
 2007-09-24  Eric Blake  <ebb9@byu.net>

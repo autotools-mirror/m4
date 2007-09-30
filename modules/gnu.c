@@ -646,10 +646,14 @@ M4BUILTIN_HANDLER (mkdtemp)
 M4BUILTIN_HANDLER (patsubst)
 {
   const char *me;		/* name of this macro */
+  const char *pattern;		/* regular expression */
+  const char *replace;		/* replacement */
   m4_pattern_buffer *buf;	/* compiled regular expression */
   int resyntax;
 
   me = M4ARG (0);
+  pattern = M4ARG (2);
+  replace = M4ARG (3);
 
   resyntax = m4_get_regexp_syntax_opt (context);
   if (argc >= 5)		/* additional args ignored */
@@ -659,12 +663,21 @@ M4BUILTIN_HANDLER (patsubst)
 	return;
     }
 
-  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, false);
+  /* The empty regex matches everywhere, but if there is no
+     replacement, we need not waste time with it.  */
+  if (!*pattern && !*replace)
+    {
+      const char *str = M4ARG (1);
+      obstack_grow (obs, str, strlen (str));
+      return;
+    }
+
+  buf = m4_regexp_compile (context, me, pattern, resyntax, false);
   if (!buf)
     return;
 
-  m4_regexp_substitute (context, obs, me, M4ARG (1), M4ARG (2), buf,
-			M4ARG (3), false);
+  m4_regexp_substitute (context, obs, me, M4ARG (1), pattern, buf,
+			replace, false);
 }
 
 
@@ -680,6 +693,7 @@ M4BUILTIN_HANDLER (patsubst)
 M4BUILTIN_HANDLER (regexp)
 {
   const char *me;		/* name of this macro */
+  const char *pattern;		/* regular expression */
   const char *replace;		/* optional replacement string */
   m4_pattern_buffer *buf;	/* compiled regular expression */
   int startpos;			/* start position of match */
@@ -687,6 +701,7 @@ M4BUILTIN_HANDLER (regexp)
   int resyntax;
 
   me = M4ARG (0);
+  pattern = M4ARG (2);
   replace = M4ARG (3);
   resyntax = m4_get_regexp_syntax_opt (context);
 
@@ -716,7 +731,17 @@ M4BUILTIN_HANDLER (regexp)
     /* regexp(VICTIM, REGEXP)  */
     replace = NULL;
 
-  buf = m4_regexp_compile (context, me, M4ARG (2), resyntax, replace == NULL);
+  if (!*pattern)
+    {
+      /* The empty regex matches everything.  */
+      if (replace)
+	obstack_grow (obs, replace, strlen (replace));
+      else
+	m4_shipout_int (obs, 0);
+      return;
+    }
+
+  buf = m4_regexp_compile (context, me, pattern, resyntax, replace == NULL);
   if (!buf)
     return;
 
@@ -726,7 +751,7 @@ M4BUILTIN_HANDLER (regexp)
   if (startpos == -2)
     {
       m4_error (context, 0, 0, _("%s: error matching regular expression `%s'"),
-		me, M4ARG (2));
+		me, pattern);
       return;
     }
 
@@ -734,8 +759,6 @@ M4BUILTIN_HANDLER (regexp)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
     substitute (context, obs, me, M4ARG (1), replace, buf);
-
-  return;
 }
 
 
