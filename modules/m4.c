@@ -913,8 +913,20 @@ M4BUILTIN_HANDLER (len)
 M4BUILTIN_HANDLER (index)
 {
   const char *haystack = M4ARG (1);
-  const char *result = strstr (haystack, M4ARG (2));
-  int retval = result ? result - haystack : -1;
+  const char *needle = M4ARG (2);
+  const char *result = NULL;
+  int retval = -1;
+
+  /* Optimize searching for the empty string (always 0) and one byte
+     (strchr tends to be more efficient than strstr).  */
+  if (!needle[0])
+    retval = 0;
+  else if (!needle[1])
+    result = strchr (haystack, *needle);
+  else
+    result = strstr (haystack, needle);
+  if (result)
+    retval = result - haystack;
 
   m4_shipout_int (obs, retval);
 }

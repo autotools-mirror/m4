@@ -1,3 +1,10 @@
+2007-10-01  Eric Blake  <ebb9@byu.net>
+
+	Another Autoconf usage pattern optimization.
+	* modules/m4.c (m4_index): Optimize search for one byte.
+	* doc/m4.texinfo (Index macro, Regexp, Patsubst): Test the new
+	code paths.
+
 2007-09-29  Eric Blake  <ebb9@byu.net>
 
 	Optimize for Autoconf usage pattern.

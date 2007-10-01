@@ -5749,12 +5749,17 @@ index(`gnus, gnats, and armadillos', `dag')
 @result{}-1
 @end example
 
-Omitting @var{substring} evokes a warning, but still produces output.
+Omitting @var{substring} evokes a warning, but still produces output;
+contrast this with an empty @var{substring}.
 
 @example
 index(`abc')
 @error{}m4:stdin:1: Warning: index: too few arguments: 1 < 2
 @result{}0
+index(`abc', `')
+@result{}0
+index(`abc', `b')
+@result{}1
 @end example
 
 @node Regexp
@@ -5822,12 +5827,17 @@ regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
 @result{}c
 @end example
 
-Omitting @var{regexp} evokes a warning, but still produces output.
+Omitting @var{regexp} evokes a warning, but still produces output;
+contrast this with an empty @var{regexp} argument.
 
 @example
 regexp(`abc')
 @error{}m4:stdin:1: Warning: regexp: too few arguments: 1 < 2
 @result{}0
+regexp(`abc', `')
+@result{}0
+regexp(`abc', `', `def')
+@result{}def
 @end example
 
 If @var{resyntax} is given, @var{regexp} must be given according to
@@ -6078,12 +6088,17 @@ patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 @result{}bab
 @end example
 
-Omitting @var{regexp} evokes a warning, but still produces output.
+Omitting @var{regexp} evokes a warning, but still produces output;
+contrast this with an empty @var{regexp} argument.
 
 @example
 patsubst(`abc')
 @error{}m4:stdin:1: Warning: patsubst: too few arguments: 1 < 2
 @result{}abc
+patsubst(`abc', `')
+@result{}abc
+patsubst(`abc', `', `-')
+@result{}-a-b-c-
 @end example
 
 @node Format
