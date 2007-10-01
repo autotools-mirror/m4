@@ -1677,8 +1677,9 @@ static void
 m4_index (struct obstack *obs, int argc, token_data **argv)
 {
   const char *haystack;
-  const char *result;
-  int retval;
+  const char *needle;
+  const char *result = NULL;
+  int retval = -1;
 
   if (bad_argc (argv[0], argc, 3, 3))
     {
@@ -1689,8 +1690,18 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
     }
 
   haystack = ARG (1);
-  result = strstr (haystack, ARG (2));
-  retval = result ? result - haystack : -1;
+  needle = ARG (2);
+
+  /* Optimize searching for the empty string (always 0) and one byte
+     (strchr tends to be more efficient than strstr).  */
+  if (!needle[0])
+    retval = 0;
+  else if (!needle[1])
+    result = strchr (haystack, *needle);
+  else
+    result = strstr (haystack, needle);
+  if (result)
+    retval = result - haystack;
 
   shipout_int (obs, retval);
 }
