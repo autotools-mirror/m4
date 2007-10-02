@@ -1,3 +1,12 @@
+2007-10-02  Eric Blake  <ebb9@byu.net>
+
+	Document quoting pitfalls in capitalize.
+	* doc/m4.texinfo (Patsubst): Use the examples directory.  Also
+	document shortfall.
+	(Improved capitalize): New node.
+	* examples/capitalize.m4: Update to match manual.
+	* examples/capitalize2.m4: New file.
+
 2007-10-01  Eric Blake  <ebb9@byu.net>
 
 	Another Autoconf usage pattern optimization.
