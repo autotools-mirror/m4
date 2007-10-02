@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -21,6 +21,7 @@
 
 EXTRA_DIST =\
 capitalize.m4 \
+capitalize2.m4 \
 comments.m4 \
 ddivert.m4 \
 debug.m4 \
@@ -32,6 +33,7 @@ foreach.m4 \
 foreach2.m4 \
 foreachq.m4 \
 foreachq2.m4 \
+foreachq3.m4 \
 forloop.m4 \
 forloop2.m4 \
 fstab.m4 \
@@ -40,6 +42,8 @@ incl-test.m4 \
 incl.m4 \
 include.m4 \
 indir.m4 \
+join.m4 \
+loop.m4 \
 misc.m4 \
 multiquotes.m4 \
 patsubst.m4 \
@@ -55,4 +59,6 @@ translit.m4 \
 undivert.incl \
 undivert.m4 \
 wrap.m4 \
-wrapfifo.m4
+wrapfifo.m4 \
+wraplifo.m4 \
+wraplifo2.m4

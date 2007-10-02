@@ -270,6 +270,7 @@ Correct version of some examples
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
+* Improved capitalize::         Solution for @code{capitalize}
 * Improved fatal_error::        Solution for @code{fatal_error}
 
 How to make copies of the overall M4 package
@@ -4610,12 +4611,17 @@ index(`gnus, gnats, and armadillos', `dag')
 @result{}-1
 @end example
 
-Omitting @var{substring} evokes a warning, but still produces output.
+Omitting @var{substring} evokes a warning, but still produces output;
+contrast this with an empty @var{substring}.
 
 @example
 index(`abc')
 @error{}m4:stdin:1: Warning: too few arguments to builtin `index'
 @result{}0
+index(`abc', `')
+@result{}0
+index(`abc', `b')
+@result{}1
 @end example
 
 @node Regexp
@@ -4688,12 +4694,17 @@ regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
 @result{}c
 @end example
 
-Omitting @var{regexp} evokes a warning, but still produces output.
+Omitting @var{regexp} evokes a warning, but still produces output;
+contrast this with an empty @var{regexp} argument.
 
 @example
 regexp(`abc')
 @error{}m4:stdin:1: Warning: too few arguments to builtin `regexp'
 @result{}0
+regexp(`abc', `')
+@result{}0
+regexp(`abc', `', `def')
+@result{}def
 @end example
 
 @node Substr
@@ -4876,16 +4887,43 @@ to lower case, and @code{capitalize} changes the first character of each
 word to upper case and the remaining characters to lower case.
 @end deffn
 
+First, an example of their usage, using implementations distributed in
+@file{m4-@value{VERSION}/@/examples/@/capitalize.m4}.
+
 @example
-define(`upcase', `translit(`$*', `a-z', `A-Z')')dnl
-define(`downcase', `translit(`$*', `A-Z', `a-z')')dnl
-define(`capitalize1',
-       `regexp(`$1', `^\(\w\)\(\w*\)',
-               `upcase(`\1')`'downcase(`\2')')')dnl
-define(`capitalize',
-       `patsubst(`$1', `\w+', `capitalize1(`\&')')')dnl
+$ @kbd{m4 -I examples}
+include(`capitalize.m4')
+@result{}
+upcase(`GNUs not Unix')
+@result{}GNUS NOT UNIX
+downcase(`GNUs not Unix')
+@result{}gnus not unix
 capitalize(`GNUs not Unix')
 @result{}Gnus Not Unix
+@end example
+
+Now for the implementation.  There is a helper macro @code{_capitalize}
+which puts only its first word in mixed case.  Then @code{capitalize}
+merely parses out the words, and replaces them with an invocation of
+@code{_capitalize}.  (As presented here, the @code{capitalize} macro has
+some subtle flaws.  You should try to see if you can find and correct
+them; or @pxref{Improved capitalize, , Answers}).
+
+@example
+$ @kbd{m4 -I examples}
+undivert(`capitalize.m4')dnl
+@result{}divert(`-1')
+@result{}# upcase(text)
+@result{}# downcase(text)
+@result{}# capitalize(text)
+@result{}#   change case of text, simple version
+@result{}define(`upcase', `translit(`$*', `a-z', `A-Z')')
+@result{}define(`downcase', `translit(`$*', `A-Z', `a-z')')
+@result{}define(`_capitalize',
+@result{}       `regexp(`$1', `^\(\w\)\(\w*\)',
+@result{}               `upcase(`\1')`'downcase(`\2')')')
+@result{}define(`capitalize', `patsubst(`$1', `\w+', `_$0(`\&')')')
+@result{}divert`'dnl
 @end example
 
 While @code{regexp} replaces the whole input with the replacement as
@@ -4904,12 +4942,17 @@ patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
 @result{}bab
 @end example
 
-Omitting @var{regexp} evokes a warning, but still produces output.
+Omitting @var{regexp} evokes a warning, but still produces output;
+contrast this with an empty @var{regexp} argument.
 
 @example
 patsubst(`abc')
 @error{}m4:stdin:1: Warning: too few arguments to builtin `patsubst'
 @result{}abc
+patsubst(`abc', `')
+@result{}abc
+patsubst(`abc', `', `-')
+@result{}-a-b-c-
 @end example
 
 @node Format
@@ -6475,6 +6518,7 @@ presented here.
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
 * Improved cleardivert::        Solution for @code{cleardivert}
+* Improved capitalize::         Solution for @code{capitalize}
 * Improved fatal_error::        Solution for @code{fatal_error}
 @end menu
 
@@ -6775,6 +6819,129 @@ cleardivert
 @result{}
 undivert
 @result{}
+@end example
+
+@node Improved capitalize
+@section Solution for @code{capitalize}
+
+The @code{capitalize} macro (@pxref{Patsubst}) as presented earlier does
+not allow clients to follow the quoting rule of thumb.  Consider the
+three macros @code{active}, @code{Active}, and @code{ACTIVE}, and the
+difference between calling @code{capitalize} with the expansion of a
+macro, expanding the result of a case change, and changing the case of a
+double-quoted string:
+
+@example
+$ @kbd{m4 -I examples}
+include(`capitalize.m4')dnl
+define(`active', `act1, ive')dnl
+define(`Active', `Act2, Ive')dnl
+define(`ACTIVE', `ACT3, IVE')dnl
+upcase(active)
+@result{}ACT1,IVE
+upcase(`active')
+@result{}ACT3, IVE
+upcase(``active'')
+@result{}ACTIVE
+downcase(ACTIVE)
+@result{}act3,ive
+downcase(`ACTIVE')
+@result{}act1, ive
+downcase(``ACTIVE'')
+@result{}active
+capitalize(active)
+@result{}Act1
+capitalize(`active')
+@result{}Active
+capitalize(``active'')
+@result{}_capitalize(`active')
+define(`A', `OOPS')
+@result{}
+capitalize(active)
+@result{}OOPSct1
+capitalize(`active')
+@result{}OOPSctive
+@end example
+
+First, when @code{capitalize} is called with more than one argument, it
+was throwing away later arguments, whereas @code{upcase} and
+@code{downcase} used @samp{$*} to collect them all.  The fix is simple:
+use @samp{$*} consistently.
+
+Next, with single-quoting, @code{capitalize} outputs a single character,
+a set of quotes, then the rest of the characters, making it impossible
+to invoke @code{Active} after the fact, and allowing the alternate macro
+@code{A} to interfere.  Here, the solution is to use additional quoting
+in the helper macros, then pass the final over-quoted output string
+through @code{_arg1} to remove the extra quoting and finally invoke the
+concatenated portions as a single string.
+
+Finally, when passed a double-quoted string, the nested macro
+@code{_capitalize} is never invoked because it ended up nested inside
+quotes.  This one is the toughest to fix.  In short, we have no idea how
+many levels of quotes are in effect on the substring being altered by
+@code{patsubst}.  If the replacement string cannot be expressed entirely
+in terms of literal text and backslash substitutions, then we need a
+mechanism to guarantee that the helper macros are invoked outside of
+quotes.  In other words, this sounds like a job for @code{changequote}
+(@pxref{Changequote}).  By changing the active quoting characters, we
+can guarantee that replacement text injected by @code{patsubst} always
+occurs in the middle of a string that has exactly one level of
+over-quoting using alternate quotes; so the replacement text closes the
+quoted string, invokes the helper macros, then reopens the quoted
+string.  In turn, that means the replacement text has unbalanced quotes,
+necessitating another round of @code{changequote}.
+
+In the fixed version below, (also shipped as
+@file{m4-@value{VERSION}/@/examples/@/capitalize.m4}), @code{capitalize}
+uses the alternate quotes of @samp{<<[} and @samp{]>>} (the longer
+strings are chosen so as to be less likely to appear in the text being
+converted).  The helpers @code{_to_alt} and @code{_from_alt} merely
+reduce the number of characters required to perform a
+@code{changequote}, since the definition changes twice.  The outermost
+pair means that @code{patsubst} and @code{_capitalize_alt} are invoked
+with alternate quoting; the innermost pair is used so that the third
+argument to @code{patsubst} can contain an unbalanced
+@samp{]>>}/@samp{<<[} pair.  Note that @code{upcase} and @code{downcase}
+must be redefined as @code{_upcase_alt} and @code{_downcase_alt}, since
+they contain nested quotes but are invoked with the alternate quoting
+scheme in effect.
+
+@example
+$ @kbd{m4 -I examples}
+include(`capitalize2.m4')dnl
+define(`active', `act1, ive')dnl
+define(`Active', `Act2, Ive')dnl
+define(`ACTIVE', `ACT3, IVE')dnl
+define(`A', `OOPS')dnl
+capitalize(active)
+@result{}Act1,Ive
+capitalize(`active')
+@result{}Act2, Ive
+capitalize(``active'')
+@result{}Active
+capitalize(```actIVE''')
+@result{}`Active'
+undivert(`capitalize2.m4')dnl
+@result{}divert(`-1')
+@result{}# upcase(text)
+@result{}# downcase(text)
+@result{}# capitalize(text)
+@result{}#   change case of text, improved version
+@result{}define(`upcase', `translit(`$*', `a-z', `A-Z')')
+@result{}define(`downcase', `translit(`$*', `A-Z', `a-z')')
+@result{}define(`_arg1', `$1')
+@result{}define(`_to_alt', `changequote(`<<[', `]>>')')
+@result{}define(`_from_alt', `changequote(<<[`]>>, <<[']>>)')
+@result{}define(`_upcase_alt', `translit(<<[$*]>>, <<[a-z]>>, <<[A-Z]>>)')
+@result{}define(`_downcase_alt', `translit(<<[$*]>>, <<[A-Z]>>, <<[a-z]>>)')
+@result{}define(`_capitalize_alt',
+@result{}  `regexp(<<[$1]>>, <<[^\(\w\)\(\w*\)]>>,
+@result{}    <<[_upcase_alt(<<[<<[\1]>>]>>)_downcase_alt(<<[<<[\2]>>]>>)]>>)')
+@result{}define(`capitalize',
+@result{}  `_arg1(_to_alt()patsubst(<<[<<[$*]>>]>>, <<[\w+]>>,
+@result{}    _from_alt()`]>>_$0_alt(<<[\&]>>)<<['_to_alt())_from_alt())')
+@result{}divert`'dnl
 @end example
 
 @node Improved fatal_error
