@@ -6,6 +6,7 @@
 aclocal.m4
 argz.c
 argz_.h
+argz.h
 autom4te.cache
 config-h.in
 config.*
