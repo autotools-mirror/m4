@@ -223,11 +223,13 @@ regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
 }
 
 
-/* Function to perform substitution by regular expressions.  Used by the
-   builtins regexp, patsubst and renamesyms.  The changed text is placed on
-   the obstack.  The substitution is REPL, with \& substituted by this part
-   of VICTIM matched by the last whole regular expression, and \N
-   substituted by the text matched by the Nth parenthesized sub-expression.  */
+/* Function to perform substitution by regular expressions.  Used by
+   the builtins regexp, patsubst and renamesyms.  The changed text is
+   placed on the obstack OBS.  The substitution is REPL, with \&
+   substituted by this part of VICTIM matched by the last whole
+   regular expression, and \N substituted by the text matched by the
+   Nth parenthesized sub-expression in BUF.  Any warnings are issued
+   on behalf of CALLER.  BUF may be NULL for the empty regex.  */
 
 static void
 substitute (m4 *context, m4_obstack *obs, const char *caller,
@@ -247,14 +249,15 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
       switch ((ch = *repl++))
 	{
 	case '&':
-	  obstack_grow (obs, victim + buf->regs.start[0],
-			buf->regs.end[0] - buf->regs.start[0]);
+	  if (buf)
+	    obstack_grow (obs, victim + buf->regs.start[0],
+			  buf->regs.end[0] - buf->regs.start[0]);
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (buf->pat->re_nsub < ch)
+	  if (!buf || buf->pat->re_nsub < ch)
 	    m4_warn (context, 0, _("%s: sub-expression %d not present"),
 		     caller, ch);
 	  else if (buf->regs.end[ch] > 0)
@@ -704,10 +707,12 @@ M4BUILTIN_HANDLER (mkdtemp)
 }
 
 
-/* Substitute all matches of a regexp occuring in a string.  Each match of
-   the second argument (a regexp) in the first argument is changed to the
-   third argument, with \& substituted by the matched text, and \N
-   substituted by the text matched by the Nth parenthesized sub-expression.  */
+/* Substitute all matches of a regexp occurring in a string.  Each
+   match of the second argument (a regexp) in the first argument is
+   changed to the optional third argument, with \& substituted by the
+   matched text, and \N substituted by the text matched by the Nth
+   parenthesized sub-expression.  The optional fourth argument changes
+   the regex flavor.  */
 
 /**
  * patsubst(VICTIM, REGEXP, [REPLACEMENT], [RESYNTAX])
@@ -750,10 +755,11 @@ M4BUILTIN_HANDLER (patsubst)
 }
 
 
-/* Regular expression version of index.  Given two arguments, expand to the
-   index of the first match of the second argument (a regexp) in the first.
-   Expand to -1 if here is no match.  Given a third argument, it changes
-   the expansion to this argument.  */
+/* Regular expression version of index.  Given two arguments, expand
+   to the index of the first match of the second argument (a regexp)
+   in the first.  Expand to -1 if there is no match.  Given a third
+   argument, a match is substituted according to this argument.  The
+   optional fourth argument changes the regex flavor.  */
 
 /**
  * regexp(VICTIM, REGEXP, RESYNTAX)
@@ -804,7 +810,7 @@ M4BUILTIN_HANDLER (regexp)
     {
       /* The empty regex matches everything.  */
       if (replace)
-	obstack_grow (obs, replace, strlen (replace));
+	substitute (context, obs, me, M4ARG (1), replace, NULL);
       else
 	m4_shipout_int (obs, 0);
       return;

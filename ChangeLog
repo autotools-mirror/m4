@@ -1,5 +1,11 @@
 2007-10-09  Eric Blake  <ebb9@byu.net>
 
+	Fix regexp regression of 2007-09-29.
+	* modules/gnu.c (substitute): Allow NULL buf when no
+	subexpressions were present.
+	(regexp): Handle \ escapes even with empty regex.
+	* doc/m4.texinfo (Regexp, Patsubst): Catch this bug.
+
 	Cache regex compilation for another autoconf speedup.
 	* modules/gnu.c	(gnu_buf): Replace...
 	(REGEX_CACHE_SIZE, regex_cache): ...with new declarations.
