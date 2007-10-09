@@ -2009,14 +2009,15 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	  /* Fall through.  */
 
 	case '&':
-	  obstack_grow (obs, victim + regs->start[0],
-			regs->end[0] - regs->start[0]);
+	  if (regs)
+	    obstack_grow (obs, victim + regs->start[0],
+			  regs->end[0] - regs->start[0]);
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (regs->num_regs - 1 <= ch)
+	  if (!regs || regs->num_regs - 1 <= ch)
 	    M4ERROR ((warning_status, 0,
 		      "Warning: sub-expression %d not present", ch));
 	  else if (regs->end[ch] > 0)
@@ -2054,12 +2055,12 @@ init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
     }
 }
 
-/*--------------------------------------------------------------------------.
-| Regular expression version of index.  Given two arguments, expand to the  |
-| index of the first match of the second argument (a regexp) in the first.  |
-| Expand to -1 if here is no match.  Given a third argument, is changes	    |
-| the expansion to this argument.					    |
-`--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Regular expression version of index.  Given two arguments, expand |
+| to the index of the first match of the second argument (a regexp) |
+| in the first.  Expand to -1 if there is no match.  Given a third  |
+| argument, a match is substituted according to this argument.      |
+`------------------------------------------------------------------*/
 
 static void
 m4_regexp (struct obstack *obs, int argc, token_data **argv)
@@ -2092,7 +2093,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       if (argc == 3)
 	shipout_int (obs, 0);
       else
-	obstack_grow (obs, repl, strlen (repl));
+	substitute (obs, victim, repl, NULL);
       return;
     }
 
@@ -2118,12 +2119,13 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
     substitute (obs, victim, repl, regs);
 }
 
-/*--------------------------------------------------------------------------.
-| Substitute all matches of a regexp occuring in a string.  Each match of   |
-| the second argument (a regexp) in the first argument is changed to the    |
-| third argument, with \& substituted by the matched text, and \N	    |
-| substituted by the text matched by the Nth parenthesized sub-expression.  |
-`--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Substitute all matches of a regexp occurring in a string.  Each   |
+| match of the second argument (a regexp) in the first argument is  |
+| changed to the third argument, with \& substituted by the matched |
+| text, and \N substituted by the text matched by the Nth           |
+| parenthesized sub-expression.                                     |
+`------------------------------------------------------------------*/
 
 static void
 m4_patsubst (struct obstack *obs, int argc, token_data **argv)

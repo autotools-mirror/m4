@@ -1,5 +1,11 @@
 2007-10-09  Eric Blake  <ebb9@byu.net>
 
+	Fix regexp regression of 2007-09-29.
+	* src/builtin.c (substitute): Allow NULL regs when no
+	subexpressions were present.
+	(m4_regexp): Handle \ escapes even with empty regex.
+	* doc/m4.texinfo (Regexp, Patsubst): Catch this bug.
+
 	Cache regex compilation for another autoconf speedup.
 	* src/m4.h (free_macro_sequence): Rename...
 	(free_regex): ...to this.
