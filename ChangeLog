@@ -1,5 +1,7 @@
 2007-10-09  Eric Blake  <ebb9@byu.net>
 
+	* NEWS: Document recent speedups.
+
 	Fix regexp regression of 2007-09-29.
 	* src/builtin.c (substitute): Allow NULL regs when no
 	subexpressions were present.

@@ -10,6 +10,8 @@ Version 1.4.11 - ?? ??? 2007, by ????  (CVS version 1.4.10a)
 * Enhance the `defn' builtin to support concatenation of multiple text
   arguments, as required by POSIX.  However, at this time, it is not
   possible to concatenate a builtin macro with anything else.
+* Several improvements in `index', `regexp', and `patsubst' builtins to
+  speed up typical Autoconf usage.
 * A number of portability improvements inherited from gnulib.
 
 Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)
