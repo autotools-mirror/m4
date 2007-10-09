@@ -4703,8 +4703,8 @@ regexp(`abc')
 @result{}0
 regexp(`abc', `')
 @result{}0
-regexp(`abc', `', `def')
-@result{}def
+regexp(`abc', `', `\\def')
+@result{}\def
 @end example
 
 @node Substr
@@ -4951,8 +4951,8 @@ patsubst(`abc')
 @result{}abc
 patsubst(`abc', `')
 @result{}abc
-patsubst(`abc', `', `-')
-@result{}-a-b-c-
+patsubst(`abc', `', `\\-')
+@result{}\-a\-b\-c\-
 @end example
 
 @node Format
