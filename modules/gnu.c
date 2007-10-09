@@ -102,62 +102,124 @@ m4_macro m4_macro_table[] =
 
 
 
-/* The regs_allocated field in an re_pattern_buffer refers to the
-   state of the re_registers struct used in successive matches with
-   the same compiled pattern:  */
+/* Regular expressions.  Reuse re_registers among multiple
+   re_pattern_buffer allocations to reduce malloc usage.  */
 
+/* Maybe this is worth making runtime tunable.  Too small, and nothing
+   gets cached because the working set of active regex is larger than
+   the cache, and we are always swapping out entries.  Too large, and
+   the time spent searching the cache for a match overtakes the time
+   saved by caching.  For now, this size proved reasonable for the
+   typical working set of Autoconf 2.62.  */
+#define REGEX_CACHE_SIZE 16
+
+/* Structure for using a compiled regex, as well as making it easier
+   to cache frequently used expressions.  */
 typedef struct {
-  struct re_pattern_buffer pat;	/* compiled regular expression */
-  struct re_registers regs;	/* match registers */
+  unsigned count;			/* usage counter */
+  int resyntax;				/* flavor of regex */
+  size_t len;				/* length of string */
+  char *str;				/* copy of compiled string */
+  struct re_pattern_buffer *pat;	/* compiled regex, allocated */
+  struct re_registers regs;		/* match registers, reused */
 } m4_pattern_buffer;
 
-static m4_pattern_buffer gnu_buf;	/* compiled regular expression */
+/* Storage for the cache of regular expressions.  */
+static m4_pattern_buffer regex_cache[REGEX_CACHE_SIZE];
 
-/* Compile a REGEXP using the RESYNTAX bits, and return the buffer.
-   Report errors on behalf of CALLER.  If NO_SUB, optimize the
-   compilation to skip filling out the regs member of the buffer.  */
+/* Compile a REGEXP using the RESYNTAX flavor, and return the buffer.
+   On error, report the problem on behalf of CALLER, and return
+   NULL.  */
 
 static m4_pattern_buffer *
-m4_regexp_compile (m4 *context, const char *caller,
-		   const char *regexp, int resyntax, bool no_sub)
+regexp_compile (m4 *context, const char *caller, const char *regexp,
+		int resyntax)
 {
-  /* gnu_buf is guaranteed to start life 0-initialized, which works in the
-     below algorithm.
+  /* regex_cache is guaranteed to start life 0-initialized, which
+     works in the algorithm below.
 
      FIXME - this method is not reentrant, since re_compile_pattern
      mallocs memory, depends on the global variable re_syntax_options
      for its syntax (but at least the compiled regex remembers its
      syntax even if the global variable changes later), and since we
      use a static variable.  To be reentrant, we would need a mutex in
-     this method, and move the storage for gnu_buf into context.  */
+     this method, and move the storage for regex_cache into context.  */
 
   const char *msg;		/* error message from re_compile_pattern */
+  int i;			/* iterator */
+  m4_pattern_buffer *victim;	/* cache slot to replace */
+  unsigned victim_count;	/* track which victim to replace */
+  struct re_pattern_buffer *pat;/* newly compiled regex */
+  size_t len = strlen (regexp);	/* regex length */
 
+  /* First, check if REGEXP is already cached with the given RESYNTAX.
+     If so, increase its use count and return it.  */
+  for (i = 0; i < REGEX_CACHE_SIZE; i++)
+    if (len == regex_cache[i].len && resyntax == regex_cache[i].resyntax
+	&& regex_cache[i].str && memcmp (regexp, regex_cache[i].str, len) == 0)
+      {
+	regex_cache[i].count++;
+	return &regex_cache[i];
+      }
+
+  /* Next, check if REGEXP can be compiled.  */
+  pat = xzalloc (sizeof *pat);
   re_set_syntax (resyntax);
-  regfree (&gnu_buf.pat);
-  gnu_buf.pat.no_sub = no_sub;
-  msg = re_compile_pattern (regexp, strlen (regexp), &gnu_buf.pat);
+  msg = re_compile_pattern (regexp, len, pat);
 
   if (msg != NULL)
     {
       m4_error (context, 0, 0, _("%s: bad regular expression `%s': %s"),
 		caller, regexp, msg);
+      regfree (pat);
+      free (pat);
       return NULL;
     }
 
-  re_set_registers (&gnu_buf.pat, &gnu_buf.regs, gnu_buf.regs.num_regs,
-		    gnu_buf.regs.start, gnu_buf.regs.end);
-  return &gnu_buf;
+  /* Now, find a victim slot.  Decrease the count of all entries, then
+     prime the count of the victim slot at REGEX_CACHE_SIZE.  This
+     way, frequently used entries and newly created entries are least
+     likely to be victims next time we have a cache miss.  */
+  victim = regex_cache;
+  victim_count = victim->count;
+  if (victim_count)
+    victim->count--;
+  for (i = 1; i < REGEX_CACHE_SIZE; i++)
+    {
+      if (regex_cache[i].count < victim_count)
+	{
+	  victim_count = regex_cache[i].count;
+	  victim = &regex_cache[i];
+	}
+      if (regex_cache[i].count)
+	regex_cache[i].count--;
+    }
+  victim->count = REGEX_CACHE_SIZE;
+  victim->resyntax = resyntax;
+  victim->len = len;
+  if (victim->str)
+    {
+      free (victim->str);
+      regfree (victim->pat);
+      free (victim->pat);
+    }
+  victim->str = xstrdup (regexp);
+  victim->pat = pat;
+  re_set_registers (pat, &victim->regs, victim->regs.num_regs,
+		    victim->regs.start, victim->regs.end);
+  return victim;
 }
 
 
-/* Wrap up GNU Regex re_search call to work with an m4_pattern_buffer.  */
+/* Wrap up GNU Regex re_search call to work with an m4_pattern_buffer.
+   If NO_SUB, then storing matches in buf->regs is not necessary.  */
 
 static int
-m4_regexp_search (m4_pattern_buffer *buf, const char *string,
-		  const int size, const int start, const int range)
+regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
+	       const int start, const int range, bool no_sub)
 {
-  return re_search (&buf->pat, string, size, start, range, &buf->regs);
+  return re_search (buf->pat, string, size, start, range,
+		    no_sub ? NULL : &buf->regs);
 }
 
 
@@ -192,7 +254,7 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (buf->pat.re_nsub < ch)
+	  if (buf->pat->re_nsub < ch)
 	    m4_warn (context, 0, _("%s: sub-expression %d not present"),
 		     caller, ch);
 	  else if (buf->regs.end[ch] > 0)
@@ -214,17 +276,17 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 
 
 /* For each match against compiled REGEXP (held in BUF -- as returned
-   by m4_regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
+   by regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
    characters are copied verbatim, and the result copied to the
    obstack.  Errors are reported on behalf of CALLER.  Return true if
    a substitution was made.  If IGNORE_DUPLICATES is set, don't worry
    about completing the obstack when returning false.  */
 
 static bool
-m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
-		      const char *victim, const char *regexp,
-		      m4_pattern_buffer *buf, const char *replace,
-		      bool ignore_duplicates)
+regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
+		   const char *victim, const char *regexp,
+		   m4_pattern_buffer *buf, const char *replace,
+		   bool ignore_duplicates)
 {
   int matchpos	= 0;		/* start position of match */
   int offset	= 0;		/* current match offset */
@@ -233,8 +295,8 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 
   while (offset <= length)
     {
-      matchpos = m4_regexp_search (buf, victim, length,
-				   offset, length - offset);
+      matchpos = regexp_search (buf, victim, length, offset, length - offset,
+				false);
 
       if (matchpos < 0)
 	{
@@ -284,12 +346,19 @@ m4_regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 /* Reclaim memory used by this module.  */
 M4FINISH_HANDLER(gnu)
 {
-  regfree (&gnu_buf.pat);
-  free (gnu_buf.regs.start);
-  free (gnu_buf.regs.end);
+  int i;
+  for (i = 0; i < REGEX_CACHE_SIZE; i++)
+    if (regex_cache[i].str)
+      {
+	free (regex_cache[i].str);
+	regfree (regex_cache[i].pat);
+	free (regex_cache[i].pat);
+	free (regex_cache[i].regs.start);
+	free (regex_cache[i].regs.end);
+      }
   /* If this module was preloaded, then we need to explicitly reset
      the memory in case it gets reloaded.  */
-  memset (&gnu_buf, 0, sizeof gnu_buf);
+  memset (&regex_cache, 0, sizeof regex_cache);
 }
 
 
@@ -672,12 +741,12 @@ M4BUILTIN_HANDLER (patsubst)
       return;
     }
 
-  buf = m4_regexp_compile (context, me, pattern, resyntax, false);
+  buf = regexp_compile (context, me, pattern, resyntax);
   if (!buf)
     return;
 
-  m4_regexp_substitute (context, obs, me, M4ARG (1), pattern, buf,
-			replace, false);
+  regexp_substitute (context, obs, me, M4ARG (1), pattern, buf,
+		     replace, false);
 }
 
 
@@ -741,12 +810,12 @@ M4BUILTIN_HANDLER (regexp)
       return;
     }
 
-  buf = m4_regexp_compile (context, me, pattern, resyntax, replace == NULL);
+  buf = regexp_compile (context, me, pattern, resyntax);
   if (!buf)
     return;
 
   length = strlen (M4ARG (1));
-  startpos = m4_regexp_search (buf, M4ARG (1), length, 0, length);
+  startpos = regexp_search (buf, M4ARG (1), length, 0, length, replace == NULL);
 
   if (startpos == -2)
     {
@@ -797,7 +866,7 @@ M4BUILTIN_HANDLER (renamesyms)
 	    return;
 	}
 
-      buf = m4_regexp_compile (context, me, regexp, resyntax, false);
+      buf = regexp_compile (context, me, regexp, resyntax);
       if (!buf)
 	return;
 
@@ -810,8 +879,8 @@ M4BUILTIN_HANDLER (renamesyms)
 	{
 	  const char *name = data.base[0];
 
-	  if (m4_regexp_substitute (context, &rename_obs, me, name, regexp,
-				    buf, replace, true))
+	  if (regexp_substitute (context, &rename_obs, me, name, regexp,
+				 buf, replace, true))
 	    {
 	      const char *renamed = obstack_finish (&rename_obs);
 

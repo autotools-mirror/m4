@@ -1,3 +1,20 @@
+2007-10-09  Eric Blake  <ebb9@byu.net>
+
+	Cache regex compilation for another autoconf speedup.
+	* modules/gnu.c	(gnu_buf): Replace...
+	(REGEX_CACHE_SIZE, regex_cache): ...with new declarations.
+	(m4_pattern_buffer): Add fields.
+	(m4_regexp_compile): Rename...
+	(regexp_compile): ...to this, and drop no_sub parameter.
+	Implement caching.
+	(M4FINISH_HANDLER): Clean up entire cache.
+	(m4_regexp_search): Rename...
+	(regex_search): ...to this, adjust to new struct contents, and add
+	no_sub parameter.
+	(m4_regexp_substitute): Rename...
+	(regexp_substitute): ...to this.
+	(substitute, patsubst, regexp, renamesyms): Adjust callers.
+
 2007-10-02  Eric Blake  <ebb9@byu.net>
 
 	Document quoting pitfalls in capitalize.
