@@ -416,7 +416,7 @@ struct re_registers;
 void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
-void free_macro_sequence (void);
+void free_regex (void);
 void define_user_macro (const char *, const char *, symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, token_data **);

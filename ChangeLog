@@ -1,3 +1,15 @@
+2007-10-09  Eric Blake  <ebb9@byu.net>
+
+	Cache regex compilation for another autoconf speedup.
+	* src/m4.h (free_macro_sequence): Rename...
+	(free_regex): ...to this.
+	* src/m4.c (main): Update caller.
+	* src/builtin.c (REGEX_CACHE_SIZE, m4_regex, regex_cache): New
+	declarations.
+	(compile_pattern): New function; cache recent regexes.
+	(free_regex): Rename, and clean up additional memory.
+	(m4_regexp, m4_patsubst): Use new function.
+
 2007-10-02  Eric Blake  <ebb9@byu.net>
 
 	Document quoting pitfalls in capitalize.

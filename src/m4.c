@@ -590,6 +590,6 @@ main (int argc, char *const *argv, char *const *envp)
       undivert_all ();
     }
   output_exit ();
-  free_macro_sequence ();
+  free_regex ();
   exit (retcode);
 }

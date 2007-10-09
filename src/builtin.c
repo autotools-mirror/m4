@@ -231,6 +231,102 @@ static struct re_registers macro_sequence_regs;
 /* True if --warn-macro-sequence is in effect.  */
 static bool macro_sequence_inuse;
 
+/* Maybe this is worth making runtime tunable.  Too small, and nothing
+   gets cached because the working set of active regex is larger than
+   the cache, and we are always swapping out entries.  Too large, and
+   the time spent searching the cache for a match overtakes the time
+   saved by caching.  For now, this size proved reasonable for the
+   typical working set of Autoconf 2.62.  */
+#define REGEX_CACHE_SIZE 16
+
+/* Structure for caching compiled regex.  */
+struct m4_regex {
+  unsigned count;			/* usage counter */
+  size_t len;				/* length of string */
+  char *str;				/* copy of compiled string */
+  struct re_pattern_buffer *buf;	/* compiled regex, allocated */
+  struct re_registers regs;		/* match registers, reused */
+};
+typedef struct m4_regex m4_regex;
+
+/* Storage for the cache of regular expressions.  */
+static m4_regex regex_cache[REGEX_CACHE_SIZE];
+
+/*------------------------------------------------------------------.
+| Compile STR, with length LEN, into a regex.  On success, set BUF  |
+| and REGS to the compiled regex.  Compilation is cached, so do not |
+| free the results here; rather, use free_regex at the end of the   |
+| program.  Return NULL on success, or an error message.	    |
+`------------------------------------------------------------------*/
+static const char *
+compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
+		 struct re_registers **regs)
+{
+  int i;
+  m4_regex *victim;
+  unsigned victim_count;
+  struct re_pattern_buffer *new_buf;
+  struct re_registers *new_regs;
+  const char *msg;
+
+  /* First, check if STR is already cached.  If so, increase its use
+     count and return it.  */
+  for (i = 0; i < REGEX_CACHE_SIZE; i++)
+    if (len == regex_cache[i].len && regex_cache[i].str
+	&& memcmp (str, regex_cache[i].str, len) == 0)
+      {
+	*buf = regex_cache[i].buf;
+	*regs = &regex_cache[i].regs;
+	regex_cache[i].count++;
+	return NULL;
+      }
+
+  /* Next, check if STR can be compiled.  */
+  new_buf = xzalloc (sizeof *new_buf);
+  msg = re_compile_pattern (str, len, new_buf);
+  if (msg)
+    {
+      regfree (new_buf);
+      free (new_buf);
+      return msg;
+    }
+
+  /* Now, find a victim slot.  Decrease the count of all entries, then
+     prime the count of the victim slot at REGEX_CACHE_SIZE.  This
+     way, frequently used entries and newly created entries are least
+     likely to be victims next time we have a cache miss.  */
+  victim = regex_cache;
+  victim_count = victim->count;
+  if (victim_count)
+    victim->count--;
+  for (i = 1; i < REGEX_CACHE_SIZE; i++)
+    {
+      if (regex_cache[i].count < victim_count)
+	{
+	  victim_count = regex_cache[i].count;
+	  victim = &regex_cache[i];
+	}
+      if (regex_cache[i].count)
+	regex_cache[i].count--;
+    }
+  victim->count = REGEX_CACHE_SIZE;
+  victim->len = len;
+  if (victim->str)
+    {
+      free (victim->str);
+      regfree (victim->buf);
+      free (victim->buf);
+    }
+  victim->str = xstrdup (str);
+  victim->buf = new_buf;
+  new_regs = &victim->regs;
+  re_set_registers (new_buf, new_regs, new_regs->num_regs,
+		    new_regs->start, new_regs->end);
+  *buf = new_buf;
+  *regs = new_regs;
+  return NULL;
+}
+
 /*----------------------------------------.
 | Clean up regular expression variables.  |
 `----------------------------------------*/
@@ -273,14 +369,21 @@ set_macro_sequence (const char *regexp)
   macro_sequence_inuse = true;
 }
 
-/*------------------------------------------------------------.
-| Free dynamic memory utilized by the define sequence regular |
-| expression.						      |
-`------------------------------------------------------------*/
+/*------------------------------------------------------.
+| Free dynamic memory utilized by regular expressions.  |
+`------------------------------------------------------*/
 void
-free_macro_sequence (void)
+free_regex (void)
 {
+  int i;
   free_pattern_buffer (&macro_sequence_buf, &macro_sequence_regs);
+  for (i = 0; i < REGEX_CACHE_SIZE; i++)
+    if (regex_cache[i].str)
+      {
+	free (regex_cache[i].str);
+	free_pattern_buffer (regex_cache[i].buf, &regex_cache[i].regs);
+	free (regex_cache[i].buf);
+      }
 }
 
 /*-------------------------------------------------------------------------.
@@ -1965,8 +2068,8 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   const char *regexp;		/* regular expression */
   const char *repl;		/* replacement string */
 
-  struct re_pattern_buffer buf;	/* compiled regular expression */
-  struct re_registers regs;	/* for subexpression matches */
+  struct re_pattern_buffer *buf;/* compiled regular expression */
+  struct re_registers *regs;	/* for subexpression matches */
   const char *msg;		/* error message from re_compile_pattern */
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
@@ -1993,21 +2096,18 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  init_pattern_buffer (&buf, &regs);
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
-
+  msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression: `%s': %s", regexp, msg));
-      free_pattern_buffer (&buf, &regs);
       return;
     }
 
   length = strlen (victim);
   /* Avoid overhead of allocating regs if we won't use it.  */
-  startpos = re_search (&buf, victim, length, 0, length,
-			argc == 3 ? NULL : &regs);
+  startpos = re_search (buf, victim, length, 0, length,
+			argc == 3 ? NULL : regs);
 
   if (startpos == -2)
     M4ERROR ((warning_status, 0,
@@ -2015,9 +2115,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (obs, victim, repl, &regs);
-
-  free_pattern_buffer (&buf, &regs);
+    substitute (obs, victim, repl, regs);
 }
 
 /*--------------------------------------------------------------------------.
@@ -2034,8 +2132,8 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   const char *regexp;		/* regular expression */
   const char *repl;
 
-  struct re_pattern_buffer buf;	/* compiled regular expression */
-  struct re_registers regs;	/* for subexpression matches */
+  struct re_pattern_buffer *buf;/* compiled regular expression */
+  struct re_registers *regs;	/* for subexpression matches */
   const char *msg;		/* error message from re_compile_pattern */
   int matchpos;			/* start position of match */
   int offset;			/* current match offset */
@@ -2061,14 +2159,11 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  init_pattern_buffer (&buf, &regs);
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
-
+  msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression `%s': %s", regexp, msg));
-      free (buf.buffer);
       return;
     }
 
@@ -2078,8 +2173,8 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   matchpos = 0;
   while (offset <= length)
     {
-      matchpos = re_search (&buf, victim, length,
-			    offset, length - offset, &regs);
+      matchpos = re_search (buf, victim, length,
+			    offset, length - offset, regs);
       if (matchpos < 0)
 	{
 
@@ -2102,19 +2197,17 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (obs, victim, repl, &regs);
+      substitute (obs, victim, repl, regs);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid
 	 infinite loops.  */
 
-      offset = regs.end[0];
-      if (regs.start[0] == regs.end[0])
+      offset = regs->end[0];
+      if (regs->start[0] == regs->end[0])
 	obstack_1grow (obs, victim[offset++]);
     }
   obstack_1grow (obs, '\0');
-
-  free_pattern_buffer (&buf, &regs);
 }
 
 /* Finally, a placeholder builtin.  This builtin is not installed by
