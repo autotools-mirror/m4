@@ -43,7 +43,7 @@ This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007, 2008 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -6028,6 +6028,19 @@ end, you may be confident that stacks of @code{pushdef} definitions
 are handled correctly, as well as undefined or renamed builtins, and
 changed strings for quotes or comments.  And future releases of
 @acronym{GNU} M4 will improve on the utility of frozen files.
+
+@ignore
+@c This example is not worth putting in the manual, but caused core
+@c dumps in all versions prior to 1.4.11.
+
+@comment options: -F /dev/null
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: /dev/null not known to exist
+')m4exit(`77')')dnl
+traceon(`undefined')dnl
+@end example
+@end ignore
 
 When an @code{m4} run is to be frozen, the automatic undiversion
 which takes place at end of execution is inhibited.  Instead, all
