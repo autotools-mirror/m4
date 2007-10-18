@@ -127,6 +127,10 @@ INTERNAL ERROR: builtin not found in builtin table!"));
 	      fputc ('\n', file);
 	      break;
 
+	    case TOKEN_VOID:
+	      /* Ignore placeholder tokens that exist due to traceon.  */
+	      break;
+
 	    default:
 	      M4ERROR ((warning_status, 0, "\
 INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
@@ -210,15 +214,15 @@ reload_frozen_state (const char *name)
      character to the next directive or to EOF.  */
 
 #define GET_DIRECTIVE \
-  do                                                            \
-    {                                                           \
-      GET_CHARACTER;                                            \
-      if (character == '#')                                     \
-        {                                                       \
-          while (character != EOF && character != '\n')         \
-            GET_CHARACTER;                                      \
-          VALIDATE ('\n');                                      \
-        }                                                       \
+  do								\
+    {								\
+      GET_CHARACTER;						\
+      if (character == '#')					\
+	{							\
+	  while (character != EOF && character != '\n')		\
+	    GET_CHARACTER;					\
+	  VALIDATE ('\n');					\
+	}							\
     }                                                           \
   while (character == '\n')
 
@@ -238,131 +242,131 @@ reload_frozen_state (const char *name)
   GET_NUMBER (number[0]);
   if (number[0] > 1)
     M4ERROR ((EXIT_MISMATCH, 0,
-              "frozen file version %d greater than max supported of 1",
+	      "frozen file version %d greater than max supported of 1",
 	      number[0]));
   else if (number[0] < 1)
     M4ERROR ((EXIT_FAILURE, 0,
-              "ill-formed frozen file, version directive expected"));
+	      "ill-formed frozen file, version directive expected"));
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
   while (character != EOF)
     {
       switch (character)
-        {
-        default:
-          M4ERROR ((EXIT_FAILURE, 0, "ill-formed frozen file"));
+	{
+	default:
+	  M4ERROR ((EXIT_FAILURE, 0, "ill-formed frozen file"));
 
-        case 'C':
-        case 'D':
-        case 'F':
-        case 'T':
-        case 'Q':
-          operation = character;
-          GET_CHARACTER;
+	case 'C':
+	case 'D':
+	case 'F':
+	case 'T':
+	case 'Q':
+	  operation = character;
+	  GET_CHARACTER;
 
-          /* Get string lengths.  Accept a negative diversion number.  */
+	  /* Get string lengths.  Accept a negative diversion number.  */
 
-          if (operation == 'D' && character == '-')
-            {
-              GET_CHARACTER;
-              GET_NUMBER (number[0]);
-              number[0] = -number[0];
-            }
-          else
-            GET_NUMBER (number[0]);
-          VALIDATE (',');
-          GET_CHARACTER;
-          GET_NUMBER (number[1]);
-          VALIDATE ('\n');
+	  if (operation == 'D' && character == '-')
+	    {
+	      GET_CHARACTER;
+	      GET_NUMBER (number[0]);
+	      number[0] = -number[0];
+	    }
+	  else
+	    GET_NUMBER (number[0]);
+	  VALIDATE (',');
+	  GET_CHARACTER;
+	  GET_NUMBER (number[1]);
+	  VALIDATE ('\n');
 
-          if (operation != 'D')
-            {
+	  if (operation != 'D')
+	    {
 
-              /* Get first string contents.  */
+	      /* Get first string contents.  */
 
-              if (number[0] + 1 > allocated[0])
-                {
-                  free (string[0]);
-                  allocated[0] = number[0] + 1;
-                  string[0] = xcharalloc ((size_t) allocated[0]);
-                }
+	      if (number[0] + 1 > allocated[0])
+		{
+		  free (string[0]);
+		  allocated[0] = number[0] + 1;
+		  string[0] = xcharalloc ((size_t) allocated[0]);
+		}
 
-              if (number[0] > 0)
-                if (!fread (string[0], (size_t) number[0], 1, file))
-                  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
+	      if (number[0] > 0)
+		if (!fread (string[0], (size_t) number[0], 1, file))
+		  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
-              string[0][number[0]] = '\0';
-            }
+	      string[0][number[0]] = '\0';
+	    }
 
-          /* Get second string contents.  */
+	  /* Get second string contents.  */
 
-          if (number[1] + 1 > allocated[1])
-            {
-              free (string[1]);
-              allocated[1] = number[1] + 1;
-              string[1] = xcharalloc ((size_t) allocated[1]);
-            }
+	  if (number[1] + 1 > allocated[1])
+	    {
+	      free (string[1]);
+	      allocated[1] = number[1] + 1;
+	      string[1] = xcharalloc ((size_t) allocated[1]);
+	    }
 
-          if (number[1] > 0)
-            if (!fread (string[1], (size_t) number[1], 1, file))
-              M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
+	  if (number[1] > 0)
+	    if (!fread (string[1], (size_t) number[1], 1, file))
+	      M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
-          string[1][number[1]] = '\0';
-          GET_CHARACTER;
-          VALIDATE ('\n');
+	  string[1][number[1]] = '\0';
+	  GET_CHARACTER;
+	  VALIDATE ('\n');
 
-          /* Act according to operation letter.  */
+	  /* Act according to operation letter.  */
 
-          switch (operation)
-            {
-            case 'C':
+	  switch (operation)
+	    {
+	    case 'C':
 
-              /* Change comment strings.  */
+	      /* Change comment strings.  */
 
-              set_comment (string[0], string[1]);
-              break;
+	      set_comment (string[0], string[1]);
+	      break;
 
-            case 'D':
+	    case 'D':
 
-              /* Select a diversion and add a string to it.  */
+	      /* Select a diversion and add a string to it.  */
 
-              make_diversion (number[0]);
-              if (number[1] > 0)
-                output_text (string[1], number[1]);
-              break;
+	      make_diversion (number[0]);
+	      if (number[1] > 0)
+		output_text (string[1], number[1]);
+	      break;
 
-            case 'F':
+	    case 'F':
 
-              /* Enter a macro having a builtin function as a definition.  */
+	      /* Enter a macro having a builtin function as a definition.  */
 
-              bp = find_builtin_by_name (string[1]);
-              define_builtin (string[0], bp, SYMBOL_PUSHDEF);
-              break;
+	      bp = find_builtin_by_name (string[1]);
+	      define_builtin (string[0], bp, SYMBOL_PUSHDEF);
+	      break;
 
-            case 'T':
+	    case 'T':
 
-              /* Enter a macro having an expansion text as a definition.  */
+	      /* Enter a macro having an expansion text as a definition.  */
 
-              define_user_macro (string[0], string[1], SYMBOL_PUSHDEF);
-              break;
+	      define_user_macro (string[0], string[1], SYMBOL_PUSHDEF);
+	      break;
 
-            case 'Q':
+	    case 'Q':
 
-              /* Change quote strings.  */
+	      /* Change quote strings.  */
 
-              set_quotes (string[0], string[1]);
-              break;
+	      set_quotes (string[0], string[1]);
+	      break;
 
-            default:
+	    default:
 
-              /* Cannot happen.  */
+	      /* Cannot happen.  */
 
-              break;
-            }
-          break;
+	      break;
+	    }
+	  break;
 
-        }
+	}
       GET_DIRECTIVE;
     }
 

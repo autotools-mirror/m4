@@ -6029,6 +6029,16 @@ are handled correctly, as well as undefined or renamed builtins, and
 changed strings for quotes or comments.  And future releases of
 @acronym{GNU} M4 will improve on the utility of frozen files.
 
+@ignore
+@c This example is not worth putting in the manual, but caused core
+@c dumps in all versions prior to 1.4.11.
+
+@comment options: -F /dev/null
+@example
+traceon(`undefined')dnl
+@end example
+@end ignore
+
 When an @code{m4} run is to be frozen, the automatic undiversion
 which takes place at end of execution is inhibited.  Instead, all
 positively numbered diversions are saved into the frozen file.
