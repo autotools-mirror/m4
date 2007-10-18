@@ -151,7 +151,7 @@ produce_module_dump (FILE *file, m4_module *module)
 static void
 produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
-  if (m4_symtab_apply (symtab, dump_symbol_CB, file))
+  if (m4_symtab_apply (symtab, false, dump_symbol_CB, file))
     assert (false);
 }
 
@@ -236,7 +236,7 @@ produce_frozen_state (m4 *context, const char *name)
       produce_mem_dump (file, M4SYNTAX->lquote.string,
 			M4SYNTAX->lquote.length);
       produce_mem_dump (file, M4SYNTAX->rquote.string,
-                        M4SYNTAX->rquote.length);
+			M4SYNTAX->rquote.length);
       fputc ('\n', file);
     }
 
@@ -483,7 +483,7 @@ reload_frozen_state (m4 *context, const char *name)
       else
 	m4__module_open (context, "gnu", NULL);
       /* Disable { and } categories, since ${11} was not supported in
-         1.4.x.  */
+	 1.4.x.  */
       m4_set_syntax (M4SYNTAX, 'O', '+', "{}");
       break;
     default:

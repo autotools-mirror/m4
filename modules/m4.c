@@ -332,9 +332,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
   data->size = obstack_room (data->obs) / sizeof (const char *);
 
   if (argc == 1)
-    {
-      m4_symtab_apply (M4SYMTAB, dump_symbol_CB, data);
-    }
+    m4_symtab_apply (M4SYMTAB, false, dump_symbol_CB, data);
   else
     {
       int i;

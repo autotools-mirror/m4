@@ -322,8 +322,8 @@ AT_KEYWORDS([frozen])
 
 AT_DATA([[empty.m4]])
 
-# Freeze default state.
-AT_CHECK_M4([-F frozen.m4f empty.m4])
+# Freeze default state.  Also check for bug fixed 18 Oct, 2007.
+AT_CHECK_M4([-F frozen.m4f -t undefined empty.m4])
 
 # Add an unknown builtin.
 echo 'F1,1' >> frozen.m4f

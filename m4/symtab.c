@@ -82,13 +82,19 @@ m4_symtab_delete (m4_symbol_table *symtab)
   assert (symtab);
   assert (symtab->table);
 
-  m4_symtab_apply  (symtab, symbol_destroy_CB, NULL);
+  m4_symtab_apply (symtab, true, symbol_destroy_CB, NULL);
   m4_hash_delete (symtab->table);
   free (symtab);
 }
 
+/* For every symbol in SYMTAB, execute the callback FUNC with the name
+   and value of the symbol being visited, and the opaque parameter
+   USERDATA.  Skip undefined symbols that are placeholders for
+   traceon, unless INCLUDE_TRACE is true.  If FUNC returns non-NULL,
+   abort the iteration and return the same result; otherwise return
+   NULL when iteration completes.  */
 void *
-m4_symtab_apply (m4_symbol_table *symtab,
+m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
 		 m4_symtab_apply_func *func, void *userdata)
 {
   m4_hash_iterator *place  = NULL;
@@ -100,10 +106,10 @@ m4_symtab_apply (m4_symbol_table *symtab,
 
   while ((place = m4_get_hash_iterator_next (symtab->table, place)))
     {
-      result = (*func) (symtab,
-			(const char *) m4_get_hash_iterator_key   (place),
-			(m4_symbol *)  m4_get_hash_iterator_value (place),
-			userdata);
+      m4_symbol *symbol = m4_get_hash_iterator_value (place);
+      if (symbol->value || include_trace)
+	result = func (symtab, (const char *) m4_get_hash_iterator_key (place),
+		       symbol, userdata);
 
       if (result != NULL)
 	{
@@ -700,7 +706,7 @@ static void *dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
 static M4_GNUC_UNUSED void *
 symtab_dump (m4_symbol_table *symtab)
 {
-  return m4_symtab_apply (symtab, dump_symbol_CB, NULL);
+  return m4_symtab_apply (symtab, true, dump_symbol_CB, NULL);
 }
 
 static void *
