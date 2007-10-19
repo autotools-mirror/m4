@@ -59,8 +59,8 @@
    accordingly.  */
 
 #ifdef ENABLE_CHANGEWORD
-#include "regex.h"
-#endif
+# include "regex.h"
+#endif /* ENABLE_CHANGEWORD */
 
 enum input_type
 {
@@ -164,7 +164,7 @@ static bool pop_input (bool);
 
 #ifdef DEBUG_INPUT
 static const char *token_type_string (token_type);
-#endif
+#endif /* DEBUG_INPUT */
 
 
 /*-------------------------------------------------------------------.
@@ -688,7 +688,7 @@ input_init (void)
 
 #ifdef ENABLE_CHANGEWORD
   set_word_regexp (NULL, user_word_regexp);
-#endif
+#endif /* ENABLE_CHANGEWORD */
 }
 
 
@@ -827,7 +827,7 @@ next_token (token_data *td, int *line, const char *caller)
 #ifdef ENABLE_CHANGEWORD
   int startpos;
   char *orig_text = NULL;
-#endif
+#endif /* ENABLE_CHANGEWORD */
   const char *file;
   int dummy;
 
@@ -841,7 +841,7 @@ next_token (token_data *td, int *line, const char *caller)
     {
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> EOF\n");
-#endif
+#endif /* DEBUG_INPUT */
       next_char ();
       return TOKEN_EOF;
     }
@@ -852,7 +852,7 @@ next_token (token_data *td, int *line, const char *caller)
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> MACDEF (%s)\n",
 		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
-#endif
+#endif /* DEBUG_INPUT */
       return TOKEN_MACDEF;
     }
 
@@ -973,19 +973,24 @@ next_token (token_data *td, int *line, const char *caller)
       type = TOKEN_STRING;
     }
 
-  obstack_1grow (&token_stack, '\0');
-
   TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
+  TOKEN_DATA_LEN (td) = obstack_object_size (&token_stack);
+  obstack_1grow (&token_stack, '\0');
   TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
-    orig_text = TOKEN_DATA_TEXT (td);
-  TOKEN_DATA_ORIG_TEXT (td) = orig_text;
-#endif
+    TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
+  else
+    {
+      TOKEN_DATA_ORIG_TEXT (td) = orig_text;
+      TOKEN_DATA_LEN (td) = strlen (orig_text);
+    }
+#endif /* ENABLE_CHANGEWORD */
 #ifdef DEBUG_INPUT
-  xfprintf (stderr, "next_token -> %s (%s)\n",
-	    token_type_string (type), TOKEN_DATA_TEXT (td));
-#endif
+  xfprintf (stderr, "next_token -> %s (%s), len %zu\n",
+	    token_type_string (type), TOKEN_DATA_TEXT (td),
+	    TOKEN_DATA_LEN (td));
+#endif /* DEBUG_INPUT */
   return type;
 }
 
@@ -1115,4 +1120,4 @@ lex_debug (void)
   while ((t = next_token (&td, NULL, "<debug>")) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
-#endif
+#endif /* DEBUG_INPUT */

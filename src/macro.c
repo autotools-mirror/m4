@@ -95,8 +95,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
     case TOKEN_CLOSE:
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
-      shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)),
-		    line);
+      shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
       break;
 
     case TOKEN_WORD:
@@ -108,11 +107,10 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 	{
 #ifdef ENABLE_CHANGEWORD
 	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
+			TOKEN_DATA_LEN (td), line);
 #else
-	  shipout_text (obs, TOKEN_DATA_TEXT (td),
-			strlen (TOKEN_DATA_TEXT (td)), line);
-#endif
+	  shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+#endif /* !ENABLE_CHANGEWORD */
 	}
       else
 	expand_macro (sym);
@@ -183,6 +181,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		    return t == TOKEN_COMMA;
 		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		}
+	      TOKEN_DATA_LEN (argp) = obstack_object_size (obs);
 	      obstack_1grow (obs, '\0');
 	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
@@ -255,6 +254,7 @@ collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
   args.argc = 1;
   args.inuse = false;
   args.argv0 = SYMBOL_NAME (sym);
+  args.argv0_len = strlen (args.argv0);
   args.arraylen = 0;
   obstack_grow (argptr, &args, offsetof (macro_arguments, array));
 
@@ -269,6 +269,7 @@ collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
 	    {
 	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (&td) = (char *) "";
+	      TOKEN_DATA_LEN (&td) = 0;
 	    }
 	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
 	  obstack_ptr_grow (argptr, tdp);
@@ -448,14 +449,13 @@ arg_text (macro_arguments *argv, unsigned int index)
 size_t
 arg_len (macro_arguments *argv, unsigned int index)
 {
-  // TODO - update macro_arguments to cache this...
   if (index == 0)
-    return strlen (argv->argv0);
+    return argv->argv0_len;
   if (index >= argv->argc)
     return 0;
   if (TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_TEXT)
     return SIZE_MAX;
-  return strlen (TOKEN_DATA_TEXT (argv->array[index - 1]));
+  return TOKEN_DATA_LEN (argv->array[index - 1]);
 }
 
 /* Given ARGV, return the builtin function referenced by argument

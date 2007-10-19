@@ -626,7 +626,8 @@ main (int argc, char *const *argv, char *const *envp)
 	    char *macro_value = strchr (macro_name, '=');
 	    if (macro_value)
 	      *macro_value++ = '\0';
-	    define_user_macro (macro_name, macro_value, SYMBOL_INSERT);
+	    define_user_macro (macro_name, strlen (macro_name),
+			       macro_value, SYMBOL_INSERT);
 	    free (macro_name);
 	  }
 	  break;
