@@ -242,7 +242,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 `-------------------------------------------------------------------------*/
 
 static macro_arguments *
-collect_arguments (symbol *sym, struct obstack *argptr, unsigned argv_base,
+collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
 		   struct obstack *arguments)
 {
   token_data td;
@@ -327,7 +327,7 @@ static void
 expand_macro (symbol *sym)
 {
   struct obstack arguments;	/* Alternate obstack if arg_stack is busy.  */
-  unsigned argv_base;		/* Size of argv_stack on entry.  */
+  unsigned int argv_base;	/* Size of argv_stack on entry.  */
   void *arg_start;		/* Start of arg_stack, else NULL if unsafe.  */
   macro_arguments *argv;
   int argc;
@@ -408,4 +408,64 @@ expand_macro (symbol *sym)
   else
     obstack_free (&arguments, NULL);
   obstack_blank (&argv_stack, argv_base - obstack_object_size (&argv_stack));
+}
+
+
+/* Given ARGV, return how many arguments it refers to.  */
+unsigned int
+arg_argc (macro_arguments *argv)
+{
+  return argv->argc;
+}
+
+/* Given ARGV, return the type of argument INDEX.  Index 0 is always
+   text, and indices beyond argc are likewise treated as text.  */
+token_data_type
+arg_type (macro_arguments *argv, unsigned int index)
+{
+  if (index == 0 || index >= argv->argc)
+    return TOKEN_TEXT;
+  return TOKEN_DATA_TYPE (argv->array[index - 1]);
+}
+
+/* Given ARGV, return the text at argument INDEX, or NULL if the
+   argument is not text.  Index 0 is always text, and indices beyond
+   argc return the empty string.  */
+const char *
+arg_text (macro_arguments *argv, unsigned int index)
+{
+  if (index == 0)
+    return argv->argv0;
+  if (index >= argv->argc)
+    return "";
+  if (TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_TEXT)
+    return NULL;
+  return TOKEN_DATA_TEXT (argv->array[index - 1]);
+}
+
+/* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
+   argument is not text.  Indices beyond argc return 0.  */
+size_t
+arg_len (macro_arguments *argv, unsigned int index)
+{
+  // TODO - update macro_arguments to cache this...
+  if (index == 0)
+    return strlen (argv->argv0);
+  if (index >= argv->argc)
+    return 0;
+  if (TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_TEXT)
+    return SIZE_MAX;
+  return strlen (TOKEN_DATA_TEXT (argv->array[index - 1]));
+}
+
+/* Given ARGV, return the builtin function referenced by argument
+   INDEX, or NULL if it is not a builtin.  Index 0, and indices beyond
+   argc, return NULL.  */
+builtin_func *
+arg_func (macro_arguments *argv, unsigned int index)
+{
+  if (index == 0 || index >= argv->argc
+      || TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_FUNC)
+    return NULL;
+  return TOKEN_DATA_FUNC (argv->array[index - 1]);
 }

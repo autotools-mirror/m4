@@ -178,7 +178,7 @@ extern FILE *debug;
 /* default flags -- equiv: aeq */
 #define DEBUG_TRACE_DEFAULT 7
 
-#define DEBUG_PRINT1(Fmt, Arg1) \
+#define DEBUG_PRINT1(Fmt, Arg1)                                 \
   do								\
     {								\
       if (debug != NULL)					\
@@ -186,7 +186,7 @@ extern FILE *debug;
     }								\
   while (0)
 
-#define DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3) \
+#define DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3)                     \
   do								\
     {								\
       if (debug != NULL)					\
@@ -194,7 +194,7 @@ extern FILE *debug;
     }								\
   while (0)
 
-#define DEBUG_MESSAGE(Fmt) \
+#define DEBUG_MESSAGE(Fmt)                                      \
   do								\
     {								\
       if (debug != NULL)					\
@@ -206,7 +206,7 @@ extern FILE *debug;
     }								\
   while (0)
 
-#define DEBUG_MESSAGE1(Fmt, Arg1) \
+#define DEBUG_MESSAGE1(Fmt, Arg1)                               \
   do								\
     {								\
       if (debug != NULL)					\
@@ -218,7 +218,7 @@ extern FILE *debug;
     }								\
   while (0)
 
-#define DEBUG_MESSAGE2(Fmt, Arg1, Arg2) \
+#define DEBUG_MESSAGE2(Fmt, Arg1, Arg2)                         \
   do								\
     {								\
       if (debug != NULL)					\
@@ -244,37 +244,39 @@ void trace_post (const char *, int, int, macro_arguments *, const char *);
 
 typedef struct token_chain token_chain;
 
-/* Various different token types.  */
+/* Various different token types.  Avoid overlap with token_data_type,
+   since the shared prefix of the enumerators is a bit confusing.  */
 enum token_type
 {
-  TOKEN_EOF,			/* end of file */
-  TOKEN_STRING,			/* a quoted string or comment */
-  TOKEN_WORD,			/* an identifier */
-  TOKEN_OPEN,			/* ( */
-  TOKEN_COMMA,			/* , */
-  TOKEN_CLOSE,			/* ) */
-  TOKEN_SIMPLE,			/* any other single character */
-  TOKEN_MACDEF			/* a macro's definition (see "defn") */
+  TOKEN_EOF = 4,/* End of file, TOKEN_VOID.  */
+  TOKEN_STRING,	/* Quoted string or comment, TOKEN_TEXT or TOKEN_COMP.  */
+  TOKEN_WORD,	/* An identifier, TOKEN_TEXT.  */
+  TOKEN_OPEN,	/* Active character `(', TOKEN_TEXT.  */
+  TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */
+  TOKEN_CLOSE,	/* Active character `)', TOKEN_TEXT.  */
+  TOKEN_SIMPLE,	/* Any other single character, TOKEN_TEXT.  */
+  TOKEN_MACDEF	/* A macro's definition (see "defn"), TOKEN_FUNC.  */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
 enum token_data_type
 {
-  TOKEN_VOID, /* Token still being constructed, u is invalid.  */
-  TOKEN_TEXT, /* Straight text, u.u_t is valid.  */
-  TOKEN_FUNC, /* Builtin function definition, u.func is valid.  */
-  TOKEN_COMP  /* Composite argument, u.chain is valid.  */
+  TOKEN_VOID,	/* Token still being constructed, u is invalid.  */
+  TOKEN_TEXT,	/* Straight text, u.u_t is valid.  */
+  TOKEN_FUNC,	/* Builtin function definition, u.func is valid.  */
+  TOKEN_COMP	/* Composite argument, u.chain is valid.  */
 };
 
 /* Composite tokens are built of a linked list of chains.  */
 struct token_chain
 {
-  token_chain *next; /* Pointer to next link of chain.  */
-  char *str; /* NUL-terminated string if text, else NULL.  */
-  macro_arguments *argv; /* Reference to earlier $@.  */
-  unsigned int index; /* Index within argv to start reading from.  */
+  token_chain *next;	/* Pointer to next link of chain.  */
+  char *str;		/* NUL-terminated string if text, else NULL.  */
+  macro_arguments *argv;/* Reference to earlier $@.  */
+  unsigned int index;	/* Argument index within argv.  */
 };
 
+/* The content of a token or macro argument.  */
 struct token_data
 {
   enum token_data_type type;
@@ -297,6 +299,9 @@ struct token_data
   u;
 };
 
+// TODO - make this struct opaque, and move definition to macro.c
+/* Opaque structure describing all arguments to a macro, including the
+   macro name at index 0.  */
 struct macro_arguments
 {
   /* Number of arguments owned by this object, may be larger than
@@ -427,6 +432,13 @@ extern int expansion_level;
 
 void expand_input (void);
 void call_macro (symbol *, int, macro_arguments *, struct obstack *);
+
+unsigned int arg_argc (macro_arguments *);
+token_data_type arg_type (macro_arguments *, unsigned int);
+const char *arg_text (macro_arguments *, unsigned int);
+size_t arg_len (macro_arguments *, unsigned int);
+builtin_func *arg_func (macro_arguments *, unsigned int);
+
 
 /* File: builtin.c  --- builtins.  */
 

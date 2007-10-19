@@ -28,16 +28,16 @@
    same size; likewise for long and unsigned long.  */
 
 #define ARG_INT(i, argc, argv)						\
-	((i == argc) ? 0 : atoi (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
+  ((i == argc) ? 0 : atoi (arg_text (argv, i++)))
 
 #define ARG_LONG(i, argc, argv)						\
-	((i == argc) ? 0L : atol (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
+  ((i == argc) ? 0L : atol (arg_text (argv, i++)))
 
 #define ARG_STR(i, argc, argv)						\
-	((i == argc) ? "" : TOKEN_DATA_TEXT (argv->array[i++ - 1]))
+  ((i == argc) ? "" : arg_text (argv, i++))
 
 #define ARG_DOUBLE(i, argc, argv)					\
-	((i == argc) ? 0.0 : atof (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
+  ((i == argc) ? 0.0 : atof (arg_text (argv, i++)))
 
 
 /*------------------------------------------------------------------.

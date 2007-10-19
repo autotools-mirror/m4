@@ -379,14 +379,14 @@ trace_pre (const char *name, int id, int argc, macro_arguments *argv)
 	  if (i != 1)
 	    trace_format (", ");
 
-	  switch (TOKEN_DATA_TYPE (argv->array[i - 1]))
+	  switch (arg_type (argv, i))
 	    {
 	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv->array[i - 1]));
+	      trace_format ("%l%S%r", arg_text (argv, i));
 	      break;
 
 	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv->array[i - 1]));
+	      bp = find_builtin_by_addr (arg_func (argv, i));
 	      if (bp == NULL)
 		{
 		  assert (!"trace_pre");
