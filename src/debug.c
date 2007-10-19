@@ -362,7 +362,7 @@ trace_prepre (const char *name, int id)
 `-----------------------------------------------------------------------*/
 
 void
-trace_pre (const char *name, int id, int argc, token_data **argv)
+trace_pre (const char *name, int id, int argc, macro_arguments *argv)
 {
   int i;
   const builtin *bp;
@@ -379,14 +379,14 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 	  if (i != 1)
 	    trace_format (", ");
 
-	  switch (TOKEN_DATA_TYPE (argv[i]))
+	  switch (TOKEN_DATA_TYPE (argv->array[i - 1]))
 	    {
 	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv[i]));
+	      trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv->array[i - 1]));
 	      break;
 
 	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
+	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv->array[i - 1]));
 	      if (bp == NULL)
 		{
 		  assert (!"trace_pre");
@@ -417,7 +417,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 `-------------------------------------------------------------------*/
 
 void
-trace_post (const char *name, int id, int argc, token_data **argv,
+trace_post (const char *name, int id, int argc, macro_arguments *argv,
 	    const char *expanded)
 {
   if (debug_level & DEBUG_TRACE_CALL)

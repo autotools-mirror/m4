@@ -27,21 +27,17 @@
 /* Simple varargs substitute.  We assume int and unsigned int are the
    same size; likewise for long and unsigned long.  */
 
-#define ARG_INT(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (TOKEN_DATA_TEXT (argv[-1]))))
+#define ARG_INT(i, argc, argv)						\
+	((i == argc) ? 0 : atoi (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
 
-#define ARG_LONG(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (TOKEN_DATA_TEXT (argv[-1]))))
+#define ARG_LONG(i, argc, argv)						\
+	((i == argc) ? 0L : atol (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
 
-#define ARG_STR(argc, argv) \
-	((argc == 0) ? "" : \
-	 (--argc, argv++, TOKEN_DATA_TEXT (argv[-1])))
+#define ARG_STR(i, argc, argv)						\
+	((i == argc) ? "" : TOKEN_DATA_TEXT (argv->array[i++ - 1]))
 
-#define ARG_DOUBLE(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atof (TOKEN_DATA_TEXT (argv[-1]))))
+#define ARG_DOUBLE(i, argc, argv)					\
+	((i == argc) ? 0.0 : atof (TOKEN_DATA_TEXT (argv->array[i++ - 1])))
 
 
 /*------------------------------------------------------------------.
@@ -53,14 +49,15 @@
 `------------------------------------------------------------------*/
 
 void
-format (struct obstack *obs, int argc, token_data **argv)
+format (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *me = TOKEN_DATA_TEXT (argv[0]);
+  const char *me = argv->argv0;
   const char *f;			/* format control string */
   const char *fmt;			/* position within f */
   char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */
   char *p;				/* position within fstart */
   unsigned char c;			/* a simple character */
+  int index = 1;			/* index within argc used so far */
 
   /* Flags.  */
   char flags;				/* flags to use in fstart */
@@ -88,9 +85,7 @@ format (struct obstack *obs, int argc, token_data **argv)
   char *str;			/* malloc'd buffer of formatted text */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  argv++;
-  argc--;
-  f = fmt = ARG_STR (argc, argv);
+  f = fmt = ARG_STR (index, argc, argv);
   memset (ok, 0, sizeof ok);
   for (;;)
     {
@@ -175,7 +170,7 @@ format (struct obstack *obs, int argc, token_data **argv)
       *p++ = '*';
       if (*fmt == '*')
 	{
-	  width = ARG_INT (argc, argv);
+	  width = ARG_INT (index, argc, argv);
 	  fmt++;
 	}
       else
@@ -195,7 +190,7 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  ok['c'] = 0;
 	  if (*(++fmt) == '*')
 	    {
-	      prec = ARG_INT (argc, argv);
+	      prec = ARG_INT (index, argc, argv);
 	      ++fmt;
 	    }
 	  else
@@ -280,27 +275,27 @@ format (struct obstack *obs, int argc, token_data **argv)
       switch (datatype)
 	{
 	case CHAR:
-	  str = xasprintf (fstart, width, ARG_INT(argc, argv));
+	  str = xasprintf (fstart, width, ARG_INT (index, argc, argv));
 	  break;
 
 	case INT:
-	  str = xasprintf (fstart, width, prec, ARG_INT(argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_INT (index, argc, argv));
 	  break;
 
 	case LONG:
-	  str = xasprintf (fstart, width, prec, ARG_LONG(argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_LONG (index, argc, argv));
 	  break;
 
 	case DOUBLE:
-	  str = xasprintf (fstart, width, prec, ARG_DOUBLE(argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_DOUBLE (index, argc, argv));
 	  break;
 
 	case STR:
-	  str = xasprintf (fstart, width, prec, ARG_STR(argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_STR (index, argc, argv));
 	  break;
 
 	default:
-	  abort();
+	  abort ();
 	}
 
       /* NULL was returned on failure, such as invalid format string.
