@@ -1,3 +1,20 @@
+2007-11-24  Eric Blake  <ebb9@byu.net>
+
+	Stage 1: convert token_data** into new object.
+	* m4/gnulib-cache.m4: Import flexmember module.
+	* src/m4.h (struct macro_arguments, struct token_chain): New
+	structs.
+	(builtin_func): Alter signature.
+	(token_data): Add new TOKEN_COMP alternative.
+	* src/builtin.c: All builtins changed.
+	(ARG, dump_args, define_macro, expand_user_macro): Update to use
+	struct.
+	* src/debug.c (trace_pre, trace_post): Likewise.
+	* src/format.c (ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE, format):
+	Likewise.
+	* src/macro.c (collect_arguments): Build new struct.
+	(call_macro, expand_macro): Update to use new struct.
+
 2007-11-22  Eric Blake  <ebb9@byu.net>
 
 	More error messages tied to macro names.

@@ -30,14 +30,16 @@
 # include <sys/wait.h>
 #endif
 
-#define ARG(i)	(argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
+#define ARG(i)								\
+  ((i) == 0 ? argv->argv0						\
+   : argv->argc > (i) ? TOKEN_DATA_TEXT (argv->array[(i) - 1]) : "")
 
 /* Initialization of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialization, and by the "builtin"
    builtin.  */
 
 #define DECLARE(name) \
-  static void name (struct obstack *, int, token_data **)
+  static void name (struct obstack *, int, macro_arguments *)
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
@@ -602,16 +604,19 @@ shipout_int (struct obstack *obs, int val)
 `----------------------------------------------------------------------*/
 
 static void
-dump_args (struct obstack *obs, int argc, token_data **argv,
+dump_args (struct obstack *obs, int start, macro_arguments *argv,
 	   const char *sep, bool quoted)
 {
   int i;
+  bool dump_sep = false;
   size_t len = strlen (sep);
 
-  for (i = 1; i < argc; i++)
+  for (i = start; i < argv->argc; i++)
     {
-      if (i > 1)
+      if (dump_sep)
 	obstack_grow (obs, sep, len);
+      else
+	dump_sep = true;
       if (quoted)
 	obstack_grow (obs, lquote.string, lquote.length);
       obstack_grow (obs, ARG (i), strlen (ARG (i)));
@@ -623,14 +628,15 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
-	void m4_MACRONAME (struct obstack *obs, int argc, char *argv[]);
+     void m4_MACRONAME (struct obstack *obs, int argc, macro_arguments *argv);
 
-   The function are expected to leave their expansion on the obstack OBS,
-   as an unfinished object.  ARGV is a table of ARGC pointers to the
-   individual arguments to the macro.  Please note that in general
-   argv[argc] != NULL.  */
+   The functions are expected to leave their expansion on the obstack OBS,
+   as an unfinished object.  ARGV is an object representing ARGC pointers
+   to the individual arguments to the macro; the object may be compressed
+   due to references to $@ expansions, so accessors should be used.  Please
+   note that in general argv[argc] != NULL.  */
 
-/* The first section are macros for definining, undefining, examining,
+/* The first section are macros for defining, undefining, examining,
    changing, ... other macros.  */
 
 /*-------------------------------------------------------------------------.
@@ -641,7 +647,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 `-------------------------------------------------------------------------*/
 
 static void
-define_macro (int argc, token_data **argv, symbol_lookup mode)
+define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 {
   const builtin *bp;
   const char *me = ARG (0);
@@ -649,7 +655,7 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
   if (bad_argc (me, argc, 1, 2))
     return;
 
-  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -661,14 +667,14 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
       return;
     }
 
-  switch (TOKEN_DATA_TYPE (argv[2]))
+  switch (TOKEN_DATA_TYPE (argv->array[1]))
     {
     case TOKEN_TEXT:
       define_user_macro (ARG (1), ARG (2), mode);
       break;
 
     case TOKEN_FUNC:
-      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[2]));
+      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv->array[1]));
       if (bp == NULL)
 	return;
       else
@@ -682,13 +688,13 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 }
 
 static void
-m4_define (struct obstack *obs, int argc, token_data **argv)
+m4_define (struct obstack *obs, int argc, macro_arguments *argv)
 {
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
 static void
-m4_undefine (struct obstack *obs, int argc, token_data **argv)
+m4_undefine (struct obstack *obs, int argc, macro_arguments *argv)
 {
   int i;
   if (bad_argc (ARG (0), argc, 1, -1))
@@ -698,13 +704,13 @@ m4_undefine (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_pushdef (struct obstack *obs, int argc, token_data **argv)
+m4_pushdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  define_macro (argc, argv,  SYMBOL_PUSHDEF);
+  define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
 
 static void
-m4_popdef (struct obstack *obs, int argc, token_data **argv)
+m4_popdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
   int i;
   if (bad_argc (ARG (0), argc, 1, -1))
@@ -718,7 +724,7 @@ m4_popdef (struct obstack *obs, int argc, token_data **argv)
 `---------------------*/
 
 static void
-m4_ifdef (struct obstack *obs, int argc, token_data **argv)
+m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
   symbol *s;
   const char *result;
@@ -739,10 +745,11 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_ifelse (struct obstack *obs, int argc, token_data **argv)
+m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *result;
   const char *me;
+  int index;
 
   if (argc == 2)
     return;
@@ -754,14 +761,14 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     bad_argc (me, argc, 0, argc - 2);
 
-  argv++;
+  index = 1;
   argc--;
 
   result = NULL;
   while (result == NULL)
 
-    if (strcmp (ARG (0), ARG (1)) == 0)
-      result = ARG (2);
+    if (strcmp (ARG (index), ARG (index + 1)) == 0)
+      result = ARG (index + 2);
 
     else
       switch (argc)
@@ -771,12 +778,12 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 
 	case 4:
 	case 5:
-	  result = ARG (3);
+	  result = ARG (index + 3);
 	  break;
 
 	default:
 	  argc -= 3;
-	  argv += 3;
+	  index += 3;
 	}
 
   obstack_grow (obs, result, strlen (result));
@@ -826,7 +833,7 @@ dumpdef_cmp (const void *s1, const void *s2)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
+m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   symbol *s;
@@ -900,7 +907,7 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 `---------------------------------------------------------------------*/
 
 static void
-m4_builtin (struct obstack *obs, int argc, token_data **argv)
+m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   const builtin *bp;
@@ -908,7 +915,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
 
   if (bad_argc (me, argc, 1, -1))
     return;
-  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -921,14 +928,25 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
   else
     {
       int i;
+      /* TODO make use of $@ reference, instead of copying argv.  */
+      macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
+					   + ((argc - 2)
+					      * sizeof (token_data *)));
+      new_argv->argc = argc - 1;
+      new_argv->inuse = false;
+      new_argv->argv0 = name;
+      new_argv->arraylen = argc - 2;
+      memcpy (&new_argv->array[0], &argv->array[1],
+	      (argc - 2) * sizeof (token_data *));
       if (!bp->groks_macro_args)
 	for (i = 2; i < argc; i++)
-	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
+	  if (TOKEN_DATA_TYPE (new_argv->array[i - 2]) != TOKEN_TEXT)
 	    {
-	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (argv[i]) = (char *) "";
+	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
+	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";
 	    }
-      bp->func (obs, argc - 1, argv + 1);
+      bp->func (obs, argc - 1, new_argv);
+      free (new_argv);
     }
 }
 
@@ -940,7 +958,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_indir (struct obstack *obs, int argc, token_data **argv)
+m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   symbol *s;
@@ -948,7 +966,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
 
   if (bad_argc (me, argc, 1, -1))
     return;
-  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -961,14 +979,25 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   else
     {
       int i;
+      /* TODO make use of $@ reference, instead of copying argv.  */
+      macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
+					   + ((argc - 2)
+					      * sizeof (token_data *)));
+      new_argv->argc = argc - 1;
+      new_argv->inuse = false;
+      new_argv->argv0 = name;
+      new_argv->arraylen = argc - 2;
+      memcpy (&new_argv->array[0], &argv->array[1],
+	      (argc - 2) * sizeof (token_data *));
       if (!SYMBOL_MACRO_ARGS (s))
 	for (i = 2; i < argc; i++)
-	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
+	  if (TOKEN_DATA_TYPE (new_argv->array[i - 2]) != TOKEN_TEXT)
 	    {
-	      TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (argv[i]) = (char *) "";
+	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
+	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";
 	    }
-      call_macro (s, argc - 1, argv + 1, obs);
+      call_macro (s, argc - 1, new_argv, obs);
+      free (new_argv);
     }
 }
 
@@ -979,7 +1008,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_defn (struct obstack *obs, int argc, token_data **argv)
+m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   symbol *s;
@@ -1060,7 +1089,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 static int sysval;
 
 static void
-m4_syscmd (struct obstack *obs, int argc, token_data **argv)
+m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, 1))
     {
@@ -1084,7 +1113,7 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
+m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   FILE *pin;
@@ -1114,7 +1143,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_sysval (struct obstack *obs, int argc, token_data **argv)
+m4_sysval (struct obstack *obs, int argc, macro_arguments *argv)
 {
   shipout_int (obs, (sysval == -1 ? 127
 		     : (M4SYSVAL_EXITBITS (sysval)
@@ -1127,7 +1156,7 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_eval (struct obstack *obs, int argc, token_data **argv)
+m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int32_t value = 0;
@@ -1190,7 +1219,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_incr (struct obstack *obs, int argc, token_data **argv)
+m4_incr (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int value;
@@ -1205,7 +1234,7 @@ m4_incr (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_decr (struct obstack *obs, int argc, token_data **argv)
+m4_decr (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int value;
@@ -1228,7 +1257,7 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_divert (struct obstack *obs, int argc, token_data **argv)
+m4_divert (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int i = 0;
@@ -1245,7 +1274,7 @@ m4_divert (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------*/
 
 static void
-m4_divnum (struct obstack *obs, int argc, token_data **argv)
+m4_divnum (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
   shipout_int (obs, current_diversion);
@@ -1259,7 +1288,7 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_undivert (struct obstack *obs, int argc, token_data **argv)
+m4_undivert (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int i;
@@ -1303,7 +1332,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_dnl (struct obstack *obs, int argc, token_data **argv)
+m4_dnl (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
 
@@ -1317,11 +1346,12 @@ m4_dnl (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_shift (struct obstack *obs, int argc, token_data **argv)
+m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  dump_args (obs, argc - 1, argv + 1, ",", true);
+  /* TODO push a $@ reference.  */
+  dump_args (obs, 2, argv, ",", true);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1329,13 +1359,13 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_changequote (struct obstack *obs, int argc, token_data **argv)
+m4_changequote (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_quotes ((argc >= 2) ? ARG (1) : NULL,
-	     (argc >= 3) ? ARG (2) : NULL);
+	      (argc >= 3) ? ARG (2) : NULL);
 }
 
 /*--------------------------------------------------------------------.
@@ -1344,7 +1374,7 @@ m4_changequote (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 static void
-m4_changecom (struct obstack *obs, int argc, token_data **argv)
+m4_changecom (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 2);
 
@@ -1361,7 +1391,7 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_changeword (struct obstack *obs, int argc, token_data **argv)
+m4_changeword (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
 
@@ -1382,7 +1412,7 @@ m4_changeword (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-include (int argc, token_data **argv, bool silent)
+include (int argc, macro_arguments *argv, bool silent)
 {
   const char *me = ARG (0);
   FILE *fp;
@@ -1408,7 +1438,7 @@ include (int argc, token_data **argv, bool silent)
 `------------------------------------------------*/
 
 static void
-m4_include (struct obstack *obs, int argc, token_data **argv)
+m4_include (struct obstack *obs, int argc, macro_arguments *argv)
 {
   include (argc, argv, false);
 }
@@ -1418,7 +1448,7 @@ m4_include (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------*/
 
 static void
-m4_sinclude (struct obstack *obs, int argc, token_data **argv)
+m4_sinclude (struct obstack *obs, int argc, macro_arguments *argv)
 {
   include (argc, argv, true);
 }
@@ -1462,7 +1492,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *name)
 }
 
 static void
-m4_maketemp (struct obstack *obs, int argc, token_data **argv)
+m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
 
@@ -1507,7 +1537,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
+m4_mkstemp (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
 
@@ -1521,11 +1551,11 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------------*/
 
 static void
-m4_errprint (struct obstack *obs, int argc, token_data **argv)
+m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  dump_args (obs, argc, argv, " ", false);
+  dump_args (obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
   debug_flush_files ();
   xfprintf (stderr, "%s", (char *) obstack_finish (obs));
@@ -1533,7 +1563,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4___file__ (struct obstack *obs, int argc, token_data **argv)
+m4___file__ (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
   obstack_grow (obs, lquote.string, lquote.length);
@@ -1542,14 +1572,14 @@ m4___file__ (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4___line__ (struct obstack *obs, int argc, token_data **argv)
+m4___line__ (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
   shipout_int (obs, current_line);
 }
 
 static void
-m4___program__ (struct obstack *obs, int argc, token_data **argv)
+m4___program__ (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
   obstack_grow (obs, lquote.string, lquote.length);
@@ -1567,7 +1597,7 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_m4exit (struct obstack *obs, int argc, token_data **argv)
+m4_m4exit (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int exit_code = EXIT_SUCCESS;
@@ -1600,14 +1630,14 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
+m4_m4wrap (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
   else
-    dump_args (obs, argc, argv, " ", false);
+    dump_args (obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
   push_wrapup ((char *) obstack_finish (obs));
 }
@@ -1632,7 +1662,7 @@ set_trace (symbol *sym, void *data)
 }
 
 static void
-m4_traceon (struct obstack *obs, int argc, token_data **argv)
+m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 {
   symbol *s;
   int i;
@@ -1652,7 +1682,7 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_traceoff (struct obstack *obs, int argc, token_data **argv)
+m4_traceoff (struct obstack *obs, int argc, macro_arguments *argv)
 {
   symbol *s;
   int i;
@@ -1675,7 +1705,7 @@ m4_traceoff (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------------------------------------------*/
 
 static void
-m4_debugmode (struct obstack *obs, int argc, token_data **argv)
+m4_debugmode (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   const char *str = ARG (1);
@@ -1727,7 +1757,7 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_debugfile (struct obstack *obs, int argc, token_data **argv)
+m4_debugfile (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
 
@@ -1748,7 +1778,7 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
 `---------------------------------------------*/
 
 static void
-m4_len (struct obstack *obs, int argc, token_data **argv)
+m4_len (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, 1))
     return;
@@ -1761,7 +1791,7 @@ m4_len (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_index (struct obstack *obs, int argc, token_data **argv)
+m4_index (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *haystack;
   const char *needle;
@@ -1801,7 +1831,7 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_substr (struct obstack *obs, int argc, token_data **argv)
+m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   int start = 0;
@@ -1885,7 +1915,7 @@ expand_ranges (const char *s, struct obstack *obs)
 `----------------------------------------------------------------------*/
 
 static void
-m4_translit (struct obstack *obs, int argc, token_data **argv)
+m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *data;
   const char *from;
@@ -1950,7 +1980,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------*/
 
 static void
-m4_format (struct obstack *obs, int argc, token_data **argv)
+m4_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
@@ -2047,7 +2077,7 @@ init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 `------------------------------------------------------------------*/
 
 static void
-m4_regexp (struct obstack *obs, int argc, token_data **argv)
+m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   const char *victim;		/* first argument */
@@ -2117,7 +2147,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_patsubst (struct obstack *obs, int argc, token_data **argv)
+m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
   const char *victim;		/* first argument */
@@ -2222,7 +2252,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 void
-m4_placeholder (struct obstack *obs, int argc, token_data **argv)
+m4_placeholder (struct obstack *obs, int argc, macro_arguments *argv)
 {
   m4_warn (0, NULL, _("builtin `%s' requested by frozen file not found"),
 	   ARG (0));
@@ -2238,7 +2268,7 @@ m4_placeholder (struct obstack *obs, int argc, token_data **argv)
 
 void
 expand_user_macro (struct obstack *obs, symbol *sym,
-		   int argc, token_data **argv)
+		   int argc, macro_arguments *argv)
 {
   const char *text;
   int i;
@@ -2263,7 +2293,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	  else
 	    {
 	      for (i = 0; isdigit (to_uchar (*text)); text++)
-		i = i*10 + (*text - '0');
+		i = i * 10 + (*text - '0');
 	    }
 	  if (i < argc)
 	    obstack_grow (obs, ARG (i), strlen (ARG (i)));
@@ -2276,7 +2306,8 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 
 	case '*':		/* all arguments */
 	case '@':		/* ... same, but quoted */
-	  dump_args (obs, argc, argv, ",", *text == '@');
+	  /* TODO push a $@ reference.  */
+	  dump_args (obs, 1, argv, ",", *text == '@');
 	  text++;
 	  break;
 

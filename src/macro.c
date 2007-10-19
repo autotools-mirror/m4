@@ -241,19 +241,22 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 | on the obstack ARGPTR.						   |
 `-------------------------------------------------------------------------*/
 
-static void
-collect_arguments (symbol *sym, struct obstack *argptr,
+static macro_arguments *
+collect_arguments (symbol *sym, struct obstack *argptr, unsigned argv_base,
 		   struct obstack *arguments)
 {
   token_data td;
   token_data *tdp;
   bool more_args;
   bool groks_macro_args = SYMBOL_MACRO_ARGS (sym);
+  macro_arguments args;
+  macro_arguments *argv;
 
-  TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
-  obstack_ptr_grow (argptr, tdp);
+  args.argc = 1;
+  args.inuse = false;
+  args.argv0 = SYMBOL_NAME (sym);
+  args.arraylen = 0;
+  obstack_grow (argptr, &args, offsetof (macro_arguments, array));
 
   if (peek_token () == TOKEN_OPEN)
     {
@@ -269,9 +272,15 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	    }
 	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
 	  obstack_ptr_grow (argptr, tdp);
+	  args.arraylen++;
+	  args.argc++;
 	}
       while (more_args);
     }
+  argv = (macro_arguments *) ((char *) obstack_base (argptr) + argv_base);
+  argv->argc = args.argc;
+  argv->arraylen = args.arraylen;
+  return argv;
 }
 
 
@@ -285,13 +294,13 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 `------------------------------------------------------------------------*/
 
 void
-call_macro (symbol *sym, int argc, token_data **argv,
-		 struct obstack *expansion)
+call_macro (symbol *sym, int argc, macro_arguments *argv,
+	    struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
     {
     case TOKEN_FUNC:
-      (*SYMBOL_FUNC (sym)) (expansion, argc, argv);
+      SYMBOL_FUNC (sym) (expansion, argc, argv);
       break;
 
     case TOKEN_TEXT:
@@ -319,8 +328,8 @@ expand_macro (symbol *sym)
 {
   struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
   unsigned argv_base;		/* Size of argv_stack on entry.  */
-  bool use_argc_stack = true;	/* Whether argc_stack is safe.  */
-  token_data **argv;
+  void *argc_start;		/* Start of argc_stack, else NULL if unsafe.  */
+  macro_arguments *argv;
   int argc;
   struct obstack *expansion;
   const char *expanded;
@@ -357,18 +366,17 @@ expand_macro (symbol *sym)
 	 outer invocation has an unfinished argument being
 	 collected.  */
       obstack_init (&arguments);
-      use_argc_stack = false;
+      argc_start = NULL;
     }
+  else
+    argc_start = obstack_finish (&argc_stack);
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  collect_arguments (sym, &argv_stack,
-		     use_argc_stack ? &argc_stack : &arguments);
-
-  argc = ((obstack_object_size (&argv_stack) - argv_base)
-	  / sizeof (token_data *));
-  argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
+  argv = collect_arguments (sym, &argv_stack, argv_base,
+			    argc_start ? &argc_stack : &arguments);
+  argc = argv->argc;
 
   loc_close_file = current_file;
   loc_close_line = current_line;
@@ -394,9 +402,10 @@ expand_macro (symbol *sym)
   if (SYMBOL_DELETED (sym))
     free_symbol (sym);
 
-  if (use_argc_stack)
-    obstack_free (&argc_stack, argv[0]);
+  /* TODO pay attention to argv->inuse, in case someone is depending on $@.  */
+  if (argc_start)
+    obstack_free (&argc_stack, argc_start);
   else
     obstack_free (&arguments, NULL);
-  obstack_blank (&argv_stack, -argc * sizeof (token_data *));
+  obstack_blank (&argv_stack, argv_base - obstack_object_size (&argv_stack));
 }

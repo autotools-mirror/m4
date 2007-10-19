@@ -89,7 +89,8 @@ typedef struct string STRING;
 
 /* Those must come first.  */
 typedef struct token_data token_data;
-typedef void builtin_func (struct obstack *, int, token_data **);
+typedef struct macro_arguments macro_arguments;
+typedef void builtin_func (struct obstack *, int, macro_arguments *);
 
 /* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
    debugging, use bool when we know it works, but use the more
@@ -103,14 +104,14 @@ typedef unsigned int bool_bitfield;
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#  define M4_GNUC_ATTRIBUTE(args)	__attribute__ (args)
 #else
 #  define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE ((__unused__))
 #define M4_GNUC_PRINTF(fmt, arg)			\
-  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
+  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
 
 /* File: m4.c  --- global definitions.  */
 
@@ -132,12 +133,13 @@ extern const char *user_word_regexp;	/* -W */
 extern int retcode;
 extern const char *program_name;
 
-void m4_error (int, int, const char *, const char *, ...) M4_GNUC_PRINTF(4, 5);
+void m4_error (int, int, const char *, const char *, ...)
+  M4_GNUC_PRINTF (4, 5);
 void m4_error_at_line (int, int, const char *, int, const char *,
-		       const char *, ...) M4_GNUC_PRINTF(6, 7);
-void m4_warn (int, const char *, const char *, ...) M4_GNUC_PRINTF(3, 4);
+		       const char *, ...) M4_GNUC_PRINTF (6, 7);
+void m4_warn (int, const char *, const char *, ...) M4_GNUC_PRINTF (3, 4);
 void m4_warn_at_line (int, const char *, int, const char *,
-		      const char *, ...) M4_GNUC_PRINTF(5, 6);
+		      const char *, ...) M4_GNUC_PRINTF (5, 6);
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,
@@ -235,10 +237,12 @@ bool debug_set_output (const char *, const char *);
 void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
-void trace_pre (const char *, int, int, token_data **);
-void trace_post (const char *, int, int, token_data **, const char *);
+void trace_pre (const char *, int, int, macro_arguments *);
+void trace_post (const char *, int, int, macro_arguments *, const char *);
 
 /* File: input.c  --- lexical definitions.  */
+
+typedef struct token_chain token_chain;
 
 /* Various different token types.  */
 enum token_type
@@ -256,9 +260,19 @@ enum token_type
 /* The data for a token, a macro argument, and a macro definition.  */
 enum token_data_type
 {
-  TOKEN_VOID,
-  TOKEN_TEXT,
-  TOKEN_FUNC
+  TOKEN_VOID, /* Token still being constructed, u is invalid.  */
+  TOKEN_TEXT, /* Straight text, u.u_t is valid.  */
+  TOKEN_FUNC, /* Builtin function definition, u.func is valid.  */
+  TOKEN_COMP  /* Composite argument, u.chain is valid.  */
+};
+
+/* Composite tokens are built of a linked list of chains.  */
+struct token_chain
+{
+  token_chain *next; /* Pointer to next link of chain.  */
+  char *str; /* NUL-terminated string if text, else NULL.  */
+  macro_arguments *argv; /* Reference to earlier $@.  */
+  unsigned int index; /* Index within argv to start reading from.  */
 };
 
 struct token_data
@@ -275,8 +289,29 @@ struct token_data
 	}
       u_t;
       builtin_func *func;
+
+      /* Composite text: a linked list of straight text and $@
+	 placeholders.  */
+      token_chain *chain;
     }
   u;
+};
+
+struct macro_arguments
+{
+  /* Number of arguments owned by this object, may be larger than
+     arraylen since the array can refer to multiple arguments via a
+     single $@ reference.  */
+  unsigned int argc;
+  /* False unless the macro expansion refers to $@, determines whether
+     this object can be freed at end of macro expansion or must wait
+     until next byte read from file.  */
+  bool inuse;
+  const char *argv0; /* The macro name being expanded.  */
+  size_t arraylen; /* True length of allocated elements in array.  */
+  /* Used as a variable-length array, storing information about each
+     argument.  */
+  token_data *array[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define TOKEN_DATA_TYPE(Td)		((Td)->type)
@@ -358,7 +393,7 @@ struct symbol
   int pending_expansions;
 
   char *name;
-  token_data data;
+  token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
 };
 
 #define SYMBOL_NEXT(S)		((S)->next)
@@ -391,7 +426,7 @@ void hack_all_symbols (hack_symbol *, void *);
 extern int expansion_level;
 
 void expand_input (void);
-void call_macro (symbol *, int, token_data **, struct obstack *);
+void call_macro (symbol *, int, macro_arguments *, struct obstack *);
 
 /* File: builtin.c  --- builtins.  */
 
@@ -427,8 +462,8 @@ void set_macro_sequence (const char *);
 void free_regex (void);
 void define_user_macro (const char *, const char *, symbol_lookup);
 void undivert_all (void);
-void expand_user_macro (struct obstack *, symbol *, int, token_data **);
-void m4_placeholder (struct obstack *, int, token_data **);
+void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
+void m4_placeholder (struct obstack *, int, macro_arguments *);
 void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
 const char *ntoa (int32_t, int);
 
@@ -448,7 +483,7 @@ bool evaluate (const char *, const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format (struct obstack *, int, token_data **);
+void format (struct obstack *, int, macro_arguments *);
 
 /* File: freeze.c --- frozen state files.  */
 
