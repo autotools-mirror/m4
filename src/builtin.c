@@ -30,9 +30,9 @@
 # include <sys/wait.h>
 #endif
 
-#define ARG(i)								\
-  ((i) == 0 ? argv->argv0						\
-   : argv->argc > (i) ? TOKEN_DATA_TEXT (argv->array[(i) - 1]) : "")
+/* Grab the text at argv index I.  Assumes a macro_argument *argv is
+   in scope.  */
+#define ARG(i) arg_text (argv, i)
 
 /* Initialization of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialization, and by the "builtin"
@@ -598,20 +598,22 @@ shipout_int (struct obstack *obs, int val)
   obstack_grow (obs, s, strlen (s));
 }
 
-/*----------------------------------------------------------------------.
-| Print ARGC arguments from the table ARGV to obstack OBS, separated by |
-| SEP, and quoted by the current quotes, if QUOTED is true.	        |
-`----------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Print arguments from the table ARGV to obstack OBS, starting with |
+| START, separated by SEP, and quoted by the current quotes if	    |
+| QUOTED is true.						    |
+`------------------------------------------------------------------*/
 
 static void
 dump_args (struct obstack *obs, int start, macro_arguments *argv,
 	   const char *sep, bool quoted)
 {
-  int i;
+  unsigned int i;
   bool dump_sep = false;
   size_t len = strlen (sep);
+  unsigned int argc = arg_argc (argv);
 
-  for (i = start; i < argv->argc; i++)
+  for (i = start; i < argc; i++)
     {
       if (dump_sep)
 	obstack_grow (obs, sep, len);
@@ -655,7 +657,7 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
   if (bad_argc (me, argc, 1, 2))
     return;
 
-  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
+  if (arg_type (argv, 1) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -667,14 +669,14 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
       return;
     }
 
-  switch (TOKEN_DATA_TYPE (argv->array[1]))
+  switch (arg_type (argv, 2))
     {
     case TOKEN_TEXT:
       define_user_macro (ARG (1), ARG (2), mode);
       break;
 
     case TOKEN_FUNC:
-      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv->array[1]));
+      bp = find_builtin_by_addr (arg_func (argv, 2));
       if (bp == NULL)
 	return;
       else
@@ -915,7 +917,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, -1))
     return;
-  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
+  if (arg_type (argv, 1) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -929,6 +931,8 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     {
       int i;
       /* TODO make use of $@ reference, instead of copying argv.  */
+      /* TODO make accessor in macro.c that performs this
+	 construction, so that argv can be opaque type.  */
       macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
 					   + ((argc - 2)
 					      * sizeof (token_data *)));
@@ -940,7 +944,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
 	      (argc - 2) * sizeof (token_data *));
       if (!bp->groks_macro_args)
 	for (i = 2; i < argc; i++)
-	  if (TOKEN_DATA_TYPE (new_argv->array[i - 2]) != TOKEN_TEXT)
+	  if (arg_type (argv, i) != TOKEN_TEXT)
 	    {
 	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";
@@ -966,7 +970,7 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, -1))
     return;
-  if (TOKEN_DATA_TYPE (argv->array[0]) != TOKEN_TEXT)
+  if (arg_type (argv, 1) != TOKEN_TEXT)
     {
       m4_warn (0, me, _("invalid macro name ignored"));
       return;
@@ -980,6 +984,8 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
     {
       int i;
       /* TODO make use of $@ reference, instead of copying argv.  */
+      /* TODO make accessor in macro.c that performs this
+	 construction, so that argv can be opaque type.  */
       macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
 					   + ((argc - 2)
 					      * sizeof (token_data *)));
@@ -991,7 +997,7 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
 	      (argc - 2) * sizeof (token_data *));
       if (!SYMBOL_MACRO_ARGS (s))
 	for (i = 2; i < argc; i++)
-	  if (TOKEN_DATA_TYPE (new_argv->array[i - 2]) != TOKEN_TEXT)
+	  if (arg_type (argv, i) != TOKEN_TEXT)
 	    {
 	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";

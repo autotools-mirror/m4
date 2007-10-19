@@ -1,3 +1,17 @@
+2007-11-27  Eric Blake  <ebb9@byu.net>
+
+	Stage 2: use accessors, not direct reference, into argv.
+	* src/m4.h (TOKEN_EOF): Alter value, to ease debugging.
+	(arg_argc, arg_type, arg_text, arg_len, arg_func): New
+	prototypes.
+	* src/macro.c (arg_argc, arg_type, arg_text, arg_len, arg_func):
+	New accessor functions.
+	* src/builtin.c (ARG, dump_args, define_macro, m4_builtin)
+	(m4_indir): Use new accessors.
+	* src/debug.c (trace_pre): Likewise.
+	* src/format.c (ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE):
+	Likewise.
+
 2007-11-24  Eric Blake  <ebb9@byu.net>
 
 	Stage 1: convert token_data** into new object.
