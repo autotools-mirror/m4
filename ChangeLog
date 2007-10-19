@@ -1,3 +1,24 @@
+2007-11-29  Eric Blake  <ebb9@byu.net>
+
+	Stage 3: cache length, rather than computing it.
+	* src/input.c (next_token): Grab length from obstack rather than
+	calling strlen.
+	* src/m4.h (token_data, macro_arguments): Add length field.
+	(TOKEN_DATA_LEN): New accessor.
+	(define_user_macro): Add parameter.
+	* src/builtin.c (define_user_macro, mkstemp_helper): Use
+	pre-computed length.
+	(builtin_init, define_macro, m4_maketemp, m4_mkstemp): Adjust
+	callers.
+	(dump_args, m4_ifdef, m4_ifelse, m4_builtin, m4_indir, m4_eval)
+	(m4_len, m4_substr, m4_translit, m4_regexp, m4_patsubst)
+	(expand_user_macro): Use cached lengths.
+	* src/freeze.c (reload_frozen_state): Adjust callers.
+	* src/m4.c (main): Likewise.
+	* src/macro.c (expand_token, expand_argument, collect_arguments)
+	(arg_len): Use cached length.
+	* doc/m4.texinfo (Mkstemp): Ensure mkstemp does not produce NUL.
+
 2007-11-27  Eric Blake  <ebb9@byu.net>
 
 	Stage 2: use accessors, not direct reference, into argv.

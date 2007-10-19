@@ -5880,8 +5880,8 @@ recommend that you use the new @code{mkstemp} macro, introduced in
 
 @example
 $ @kbd{m4}
-syscmd(`echo foo??????')dnl
-@result{}foo??????
+syscmd(`rm -f foo??????')sysval
+@result{}0
 define(`file1', maketemp(`fooXXXXXX'))dnl
 ifelse(esyscmd(`echo foo??????'), `foo??????', `no file', `created')
 @result{}created
@@ -5900,6 +5900,20 @@ syscmd(`rm 'file1 file2 file3)
 sysval
 @result{}0
 @end example
+
+@ignore
+@c Not worth documenting, but make sure we don't leave trailing NUL in
+@c the expansion.
+
+@example
+syscmd(`rm -f foo??????')sysval
+@result{}0
+len(mkstemp(`fooXXXXX'))
+@result{}9
+syscmd(`rm foo??????')sysval
+@result{}0
+@end example
+@end ignore
 
 @node Miscellaneous
 @chapter Miscellaneous builtin macros

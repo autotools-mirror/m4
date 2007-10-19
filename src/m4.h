@@ -284,6 +284,10 @@ struct token_data
     {
       struct
 	{
+	  /* We don't support NUL in text, yet.  So len is just a
+	     cache for now.  But it will be essential if we ever DO
+	     support NUL.  */
+	  size_t len;
 	  char *text;
 #ifdef ENABLE_CHANGEWORD
 	  char *original_text;
@@ -313,6 +317,7 @@ struct macro_arguments
      until next byte read from file.  */
   bool inuse;
   const char *argv0; /* The macro name being expanded.  */
+  size_t argv0_len; /* Length of argv0.  */
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -320,6 +325,7 @@ struct macro_arguments
 };
 
 #define TOKEN_DATA_TYPE(Td)		((Td)->type)
+#define TOKEN_DATA_LEN(Td)		((Td)->u.u_t.len)
 #define TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
 #ifdef ENABLE_CHANGEWORD
 # define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
@@ -472,7 +478,7 @@ void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
-void define_user_macro (const char *, const char *, symbol_lookup);
+void define_user_macro (const char *, size_t, const char *, symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
 void m4_placeholder (struct obstack *, int, macro_arguments *);

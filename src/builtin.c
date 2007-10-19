@@ -407,7 +407,8 @@ free_regex (void)
 `-------------------------------------------------------------------------*/
 
 void
-define_user_macro (const char *name, const char *text, symbol_lookup mode)
+define_user_macro (const char *name, size_t len, const char *text,
+		   symbol_lookup mode)
 {
   symbol *s;
   char *defn = xstrdup (text ? text : "");
@@ -423,7 +424,6 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
-      size_t len = strlen (defn);
 
       while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
 				  len - offset, &macro_sequence_regs)) >= 0)
@@ -479,12 +479,14 @@ builtin_init (void)
     if (no_gnu_extensions)
       {
 	if (pp->unix_name != NULL)
-	  define_user_macro (pp->unix_name, pp->func, SYMBOL_INSERT);
+	  define_user_macro (pp->unix_name, strlen (pp->unix_name),
+			     pp->func, SYMBOL_INSERT);
       }
     else
       {
 	if (pp->gnu_name != NULL)
-	  define_user_macro (pp->gnu_name, pp->func, SYMBOL_INSERT);
+	  define_user_macro (pp->gnu_name, strlen (pp->gnu_name),
+			     pp->func, SYMBOL_INSERT);
       }
 }
 
@@ -621,7 +623,7 @@ dump_args (struct obstack *obs, int start, macro_arguments *argv,
 	dump_sep = true;
       if (quoted)
 	obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, ARG (i), strlen (ARG (i)));
+      obstack_grow (obs, ARG (i), arg_len (argv, i));
       if (quoted)
 	obstack_grow (obs, rquote.string, rquote.length);
     }
@@ -665,14 +667,14 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 
   if (argc == 2)
     {
-      define_user_macro (ARG (1), "", mode);
+      define_user_macro (ARG (1), arg_len (argv, 1), "", mode);
       return;
     }
 
   switch (arg_type (argv, 2))
     {
     case TOKEN_TEXT:
-      define_user_macro (ARG (1), ARG (2), mode);
+      define_user_macro (ARG (1), arg_len (argv, 1), ARG (2), mode);
       break;
 
     case TOKEN_FUNC:
@@ -730,20 +732,27 @@ m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
   symbol *s;
   const char *result;
+  size_t len = 0;
 
   if (bad_argc (ARG (0), argc, 2, 3))
     return;
   s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
 
   if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
-    result = ARG (2);
+    {
+      result = ARG (2);
+      len = arg_len (argv, 2);
+    }
   else if (argc >= 4)
-    result = ARG (3);
+    {
+      result = ARG (3);
+      len = arg_len (argv, 3);
+    }
   else
     result = NULL;
 
   if (result != NULL)
-    obstack_grow (obs, result, strlen (result));
+    obstack_grow (obs, result, len);
 }
 
 static void
@@ -752,6 +761,7 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
   const char *result;
   const char *me;
   int index;
+  size_t len = 0;
 
   if (argc == 2)
     return;
@@ -769,8 +779,12 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
   result = NULL;
   while (result == NULL)
 
-    if (strcmp (ARG (index), ARG (index + 1)) == 0)
-      result = ARG (index + 2);
+    if (arg_len (argv, index) == arg_len (argv, index + 1)
+	&& strcmp (ARG (index), ARG (index + 1)) == 0)
+      {
+	result = ARG (index + 2);
+	len = arg_len (argv, index + 2);
+      }
 
     else
       switch (argc)
@@ -781,6 +795,7 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 	case 4:
 	case 5:
 	  result = ARG (index + 3);
+	  len = arg_len (argv, index + 3);
 	  break;
 
 	default:
@@ -788,7 +803,7 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 	  index += 3;
 	}
 
-  obstack_grow (obs, result, strlen (result));
+  obstack_grow (obs, result, len);
 }
 
 /*---------------------------------------------------------------------.
@@ -939,6 +954,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
       new_argv->argc = argc - 1;
       new_argv->inuse = false;
       new_argv->argv0 = name;
+      new_argv->argv0_len = arg_len (argv, 1);
       new_argv->arraylen = argc - 2;
       memcpy (&new_argv->array[0], &argv->array[1],
 	      (argc - 2) * sizeof (token_data *));
@@ -992,6 +1008,7 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
       new_argv->argc = argc - 1;
       new_argv->inuse = false;
       new_argv->argv0 = name;
+      new_argv->argv0_len = arg_len (argv, 1);
       new_argv->arraylen = argc - 2;
       memcpy (&new_argv->array[0], &argv->array[1],
 	      (argc - 2) * sizeof (token_data *));
@@ -1169,6 +1186,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   int radix = 10;
   int min = 1;
   const char *s;
+  size_t len;
 
   if (bad_argc (me, argc, 1, 3))
     return;
@@ -1176,7 +1194,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   if (*ARG (2) && !numeric_arg (me, ARG (2), &radix))
     return;
 
-  if (radix < 1 || radix > (int) strlen (digits))
+  if (radix < 1 || radix > 36)
     {
       m4_warn (0, me, _("radix %d out of range"), radix);
       return;
@@ -1218,10 +1236,11 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       obstack_1grow (obs, '-');
       s++;
     }
-  for (min -= strlen (s); --min >= 0;)
+  len = strlen (s);
+  for (min -= len; --min >= 0;)
     obstack_1grow (obs, '0');
 
-  obstack_grow (obs, s, strlen (s));
+  obstack_grow (obs, s, len);
 }
 
 static void
@@ -1466,18 +1485,18 @@ m4_sinclude (struct obstack *obs, int argc, macro_arguments *argv)
 | Use the first argument as a template for a temporary file name.  |
 `-----------------------------------------------------------------*/
 
-/* Add trailing 'X' to NAME if necessary, securely create the file,
-   and place the new file name on OBS.  Report errors on behalf of ME.  */
+/* Add trailing 'X' to NAME of length LEN as necessary, then securely
+   create the file, and place the new file name on OBS.  Report errors
+   on behalf of ME.  */
 static void
-mkstemp_helper (struct obstack *obs, const char *me, const char *name)
+mkstemp_helper (struct obstack *obs, const char *me, const char *name,
+		size_t len)
 {
   int fd;
-  int len;
   int i;
 
   /* Guarantee that there are six trailing 'X' characters, even if the
      user forgot to supply them.  */
-  len = strlen (name);
   obstack_grow (obs, name, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (name[--len] != 'X')
@@ -1494,7 +1513,13 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *name)
       obstack_free (obs, obstack_finish (obs));
     }
   else
-    close (fd);
+    {
+      close (fd);
+      /* Undo trailing NUL.  */
+      /* FIXME - should we be quoting this name, on the tiny chance
+	 that the random name generated matches a user's macro?  */
+      obstack_blank (obs, -1);
+    }
 }
 
 static void
@@ -1518,9 +1543,9 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = ARG (1);
-      int len = strlen (str);
-      int i;
-      int len2;
+      size_t len = arg_len (argv, 1);
+      size_t i;
+      size_t len2;
 
       m4_warn (0, me, _("recommend using mkstemp instead"));
       for (i = len; i > 1; i--)
@@ -1535,11 +1560,11 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	  while (i++ < len - len2)
 	    obstack_1grow (obs, '0');
-	  obstack_grow0 (obs, str, len2);
+	  obstack_grow (obs, str, len2);
 	}
     }
   else
-    mkstemp_helper (obs, me, ARG (1));
+    mkstemp_helper (obs, me, ARG (1), arg_len (argv, 1));
 }
 
 static void
@@ -1549,7 +1574,7 @@ m4_mkstemp (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, 1))
     return;
-  mkstemp_helper (obs, me, ARG (1));
+  mkstemp_helper (obs, me, ARG (1), arg_len (argv, 1));
 }
 
 /*----------------------------------------.
@@ -1641,7 +1666,7 @@ m4_m4wrap (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
   if (no_gnu_extensions)
-    obstack_grow (obs, ARG (1), strlen (ARG (1)));
+    obstack_grow (obs, ARG (1), arg_len (argv, 1));
   else
     dump_args (obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
@@ -1788,7 +1813,7 @@ m4_len (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, 1))
     return;
-  shipout_int (obs, strlen (ARG (1)));
+  shipout_int (obs, arg_len (argv, 1));
 }
 
 /*-------------------------------------------------------------------------.
@@ -1848,11 +1873,11 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`substr') is blank, but substr(`abc') is abc.  */
       if (argc == 2)
-	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+	obstack_grow (obs, ARG (1), arg_len (argv, 1));
       return;
     }
 
-  length = avail = strlen (ARG (1));
+  length = avail = arg_len (argv, 1);
   if (!numeric_arg (me, ARG (2), &start))
     return;
 
@@ -1934,7 +1959,7 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
       if (argc == 2)
-	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+	obstack_grow (obs, ARG (1), arg_len (argv, 1));
       return;
     }
 
@@ -2124,14 +2149,14 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 	      argc == 3 ? "" : "{", repl, argc == 3 ? "" : "}");
 #endif /* DEBUG_REGEX */
 
-  msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
+  msg = compile_pattern (regexp, arg_len (argv, 2), &buf, &regs);
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression: `%s': %s"), regexp, msg);
       return;
     }
 
-  length = strlen (victim);
+  length = arg_len (argv, 1);
   /* Avoid overhead of allocating regs if we won't use it.  */
   startpos = re_search (buf, victim, length, 0, length,
 			argc == 3 ? NULL : regs);
@@ -2171,7 +2196,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
       if (argc == 2)
-	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+	obstack_grow (obs, ARG (1), arg_len (argv, 1));
       return;
     }
 
@@ -2183,7 +2208,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
      replacement, we need not waste time with it.  */
   if (!*regexp && !*repl)
     {
-      obstack_grow (obs, victim, strlen (victim));
+      obstack_grow (obs, victim, arg_len (argv, 1));
       return;
     }
 
@@ -2192,14 +2217,14 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
     xfprintf (trace_file, "p:{%s}:{%s}\n", regexp, repl);
 #endif /* DEBUG_REGEX */
 
-  msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
+  msg = compile_pattern (regexp, arg_len (argv, 2), &buf, &regs);
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression `%s': %s"), regexp, msg);
       return;
     }
 
-  length = strlen (victim);
+  length = arg_len (argv, 1);
 
   offset = 0;
   matchpos = 0;
@@ -2302,7 +2327,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 		i = i * 10 + (*text - '0');
 	    }
 	  if (i < argc)
-	    obstack_grow (obs, ARG (i), strlen (ARG (i)));
+	    obstack_grow (obs, ARG (i), arg_len (argv, i));
 	  break;
 
 	case '#':		/* number of arguments */
