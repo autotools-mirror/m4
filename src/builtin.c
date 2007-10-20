@@ -758,16 +758,10 @@ m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *result;
-  const char *me;
+  const char *me = ARG (0);
   int index;
-  size_t len = 0;
 
-  if (argc == 2)
-    return;
-
-  me = ARG (0);
-  if (bad_argc (me, argc, 3, -1))
+  if (argc == 2 || bad_argc (me, argc, 3, -1))
     return;
   else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
@@ -776,17 +770,13 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
   index = 1;
   argc--;
 
-  result = NULL;
-  while (result == NULL)
-
-    if (arg_len (argv, index) == arg_len (argv, index + 1)
-	&& strcmp (ARG (index), ARG (index + 1)) == 0)
-      {
-	result = ARG (index + 2);
-	len = arg_len (argv, index + 2);
-      }
-
-    else
+  while (true)
+    {
+      if (arg_equal (argv, index, index + 1))
+	{
+	  obstack_grow (obs, ARG (index + 2), arg_len (argv, index + 2));
+	  return;
+	}
       switch (argc)
 	{
 	case 3:
@@ -794,16 +784,14 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 
 	case 4:
 	case 5:
-	  result = ARG (index + 3);
-	  len = arg_len (argv, index + 3);
-	  break;
+	  obstack_grow (obs, ARG (index + 3), arg_len (argv, index + 3));
+	  return;
 
 	default:
 	  argc -= 3;
 	  index += 3;
 	}
-
-  obstack_grow (obs, result, len);
+    }
 }
 
 /*---------------------------------------------------------------------.
@@ -944,29 +932,9 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     m4_warn (0, me, _("undefined builtin `%s'"), name);
   else
     {
-      int i;
-      /* TODO make use of $@ reference, instead of copying argv.  */
-      /* TODO make accessor in macro.c that performs this
-	 construction, so that argv can be opaque type.  */
-      macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
-					   + ((argc - 2)
-					      * sizeof (token_data *)));
-      new_argv->argc = argc - 1;
-      new_argv->inuse = false;
-      new_argv->argv0 = name;
-      new_argv->argv0_len = arg_len (argv, 1);
-      new_argv->arraylen = argc - 2;
-      memcpy (&new_argv->array[0], &argv->array[1],
-	      (argc - 2) * sizeof (token_data *));
-      if (!bp->groks_macro_args)
-	for (i = 2; i < argc; i++)
-	  if (arg_type (argv, i) != TOKEN_TEXT)
-	    {
-	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";
-	    }
+      macro_arguments *new_argv = make_argv_ref (argv, name, arg_len (argv, 1),
+						 true, !bp->groks_macro_args);
       bp->func (obs, argc - 1, new_argv);
-      free (new_argv);
     }
 }
 
@@ -998,29 +966,9 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
     m4_warn (0, me, _("undefined macro `%s'"), name);
   else
     {
-      int i;
-      /* TODO make use of $@ reference, instead of copying argv.  */
-      /* TODO make accessor in macro.c that performs this
-	 construction, so that argv can be opaque type.  */
-      macro_arguments *new_argv = xmalloc (offsetof (macro_arguments, array)
-					   + ((argc - 2)
-					      * sizeof (token_data *)));
-      new_argv->argc = argc - 1;
-      new_argv->inuse = false;
-      new_argv->argv0 = name;
-      new_argv->argv0_len = arg_len (argv, 1);
-      new_argv->arraylen = argc - 2;
-      memcpy (&new_argv->array[0], &argv->array[1],
-	      (argc - 2) * sizeof (token_data *));
-      if (!SYMBOL_MACRO_ARGS (s))
-	for (i = 2; i < argc; i++)
-	  if (arg_type (argv, i) != TOKEN_TEXT)
-	    {
-	      TOKEN_DATA_TYPE (new_argv->array[i - 2]) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (new_argv->array[i - 2]) = (char *) "";
-	    }
+      macro_arguments *new_argv = make_argv_ref (argv, name, arg_len (argv, 1),
+						 true, !SYMBOL_MACRO_ARGS (s));
       call_macro (s, argc - 1, new_argv, obs);
-      free (new_argv);
     }
 }
 
@@ -1191,7 +1139,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (me, argc, 1, 3))
     return;
 
-  if (*ARG (2) && !numeric_arg (me, ARG (2), &radix))
+  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), &radix))
     return;
 
   if (radix < 1 || radix > 36)
@@ -1208,7 +1156,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  if (!*ARG (1))
+  if (arg_empty (argv, 1))
     m4_warn (0, me, _("empty string treated as 0"));
   else if (evaluate (me, ARG (1), &value))
     return;

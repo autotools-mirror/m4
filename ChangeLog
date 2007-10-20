@@ -1,5 +1,23 @@
 2007-11-29  Eric Blake  <ebb9@byu.net>
 
+	Stage 4: route indir, builtin through ref; make argv opaque.
+	* src/m4.h (obstack_regrow): Borrow definition from head.
+	(struct token_chain): Add flatten and len members.
+	(arg_equal, arg_empty, make_argv_ref): New prototypes.
+	(struct macro_arguments): Move...
+	* src/macro.c (struct macro_arguments): ...here, making it
+	opaque.  Add has_ref member.
+	(empty_token): New placeholder, for optimizing comparison with
+	empty string.
+	(collect_arguments): Change signature, and populate new fields.
+	(expand_macro): Alter handling of obstacks.
+	(arg_token): New helper method.
+	(arg_equal, arg_empty, make_argv_ref): New methods.
+	(arg_type, arg_text, arg_len, arg_func): Use new methods.
+	* src/builtin.c (m4_ifelse, m4_builtin, m4_indir, m4_eval):
+	Likewise.
+	* src/format.c (format): Likewise.
+
 	Stage 3: cache length, rather than computing it.
 	* src/input.c (next_token): Grab length from obstack rather than
 	calling strlen.

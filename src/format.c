@@ -51,7 +51,7 @@
 void
 format (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *me = argv->argv0;
+  const char *me = arg_text (argv, 0);
   const char *f;			/* format control string */
   const char *fmt;			/* position within f */
   char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */

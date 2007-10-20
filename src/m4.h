@@ -87,7 +87,15 @@ typedef struct string STRING;
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	free
 
-/* Those must come first.  */
+/* glibc's obstack left out the ability to suspend and resume growth
+   of an object on the stack.  Reopen OBJECT (previously returned by
+   obstack_alloc or obstack_finish) with SIZE for additional growth,
+   freeing all objects that occur later in the stack.  */
+#define obstack_regrow(OBS, OBJECT, SIZE)                \
+  (obstack_free (OBS, (char *) (OBJECT) + (SIZE)),       \
+   (OBS)->object_base = (char *) (OBJECT))
+
+/* These must come first.  */
 typedef struct token_data token_data;
 typedef struct macro_arguments macro_arguments;
 typedef void builtin_func (struct obstack *, int, macro_arguments *);
@@ -272,8 +280,10 @@ struct token_chain
 {
   token_chain *next;	/* Pointer to next link of chain.  */
   char *str;		/* NUL-terminated string if text, else NULL.  */
+  size_t len;		/* Length of str, else 0.  */
   macro_arguments *argv;/* Reference to earlier $@.  */
   unsigned int index;	/* Argument index within argv.  */
+  bool flatten;		/* True to treat builtins as text.  */
 };
 
 /* The content of a token or macro argument.  */
@@ -301,27 +311,6 @@ struct token_data
       token_chain *chain;
     }
   u;
-};
-
-/* TODO - make this struct opaque, and move definition to macro.c.  */
-/* Opaque structure describing all arguments to a macro, including the
-   macro name at index 0.  */
-struct macro_arguments
-{
-  /* Number of arguments owned by this object, may be larger than
-     arraylen since the array can refer to multiple arguments via a
-     single $@ reference.  */
-  unsigned int argc;
-  /* False unless the macro expansion refers to $@, determines whether
-     this object can be freed at end of macro expansion or must wait
-     until next byte read from file.  */
-  bool inuse;
-  const char *argv0; /* The macro name being expanded.  */
-  size_t argv0_len; /* Length of argv0.  */
-  size_t arraylen; /* True length of allocated elements in array.  */
-  /* Used as a variable-length array, storing information about each
-     argument.  */
-  token_data *array[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define TOKEN_DATA_TYPE(Td)		((Td)->type)
@@ -442,8 +431,12 @@ void call_macro (symbol *, int, macro_arguments *, struct obstack *);
 unsigned int arg_argc (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int);
+bool arg_equal (macro_arguments *, unsigned int, unsigned int);
+bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
+macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
+				bool, bool);
 
 
 /* File: builtin.c  --- builtins.  */
