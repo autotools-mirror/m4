@@ -24,6 +24,29 @@
 
 #include "m4.h"
 
+/* Opaque structure describing all arguments to a macro, including the
+   macro name at index 0.  */
+struct macro_arguments
+{
+  /* Number of arguments owned by this object, may be larger than
+     arraylen since the array can refer to multiple arguments via a
+     single $@ reference.  */
+  unsigned int argc;
+  /* False unless the macro expansion refers to $@, determines whether
+     this object can be freed at end of macro expansion or must wait
+     until next byte read from file.  */
+  bool_bitfield inuse : 1;
+  /* False if all arguments are just text or func, true if this argv
+     refers to another one.  */
+  bool_bitfield has_ref : 1;
+  const char *argv0; /* The macro name being expanded.  */
+  size_t argv0_len; /* Length of argv0.  */
+  size_t arraylen; /* True length of allocated elements in array.  */
+  /* Used as a variable-length array, storing information about each
+     argument.  */
+  token_data *array[FLEXIBLE_ARRAY_MEMBER];
+};
+
 static void expand_macro (symbol *);
 static void expand_token (struct obstack *, token_type, token_data *, int);
 
@@ -35,24 +58,24 @@ static int macro_call_id = 0;
 
 /* The shared stack of collected arguments for macro calls; as each
    argument is collected, it is finished and its location stored in
-   argv_stack.  Normally, this stack can be used simultaneously by
-   multiple macro calls; the exception is when an outer macro has
-   generated some text, then calls a nested macro, in which case the
-   nested macro must use a local stack to leave the unfinished text
-   alone.  Too bad obstack.h does not provide an easy way to reopen a
-   finished object for further growth, but in practice this does not
-   hurt us too much.  */
+   argv_stack.  This stack can be used simultaneously by multiple
+   macro calls, using obstack_regrow to handle partial objects
+   embedded in the stack.  */
 static struct obstack arg_stack;
 
 /* The shared stack of pointers to collected arguments for macro
-   calls.  This object is never finished; we exploit the fact that
-   obstack_blank is documented to take a negative size to reduce the
-   size again.  */
+   calls.  This stack can be used simultaneously by multiple macro
+   calls, using obstack_regrow to handle partial objects embedded in
+   the stack.  */
 static struct obstack argv_stack;
 
-/*----------------------------------------------------------------------.
-| This function read all input, and expands each token, one at a time.  |
-`----------------------------------------------------------------------*/
+/* The empty string token.  */
+static token_data empty_token;
+
+/*----------------------------------------------------------------.
+| This function reads all input, and expands each token, one at a |
+| time.                                                           |
+`----------------------------------------------------------------*/
 
 void
 expand_input (void)
@@ -63,6 +86,13 @@ expand_input (void)
 
   obstack_init (&arg_stack);
   obstack_init (&argv_stack);
+
+  TOKEN_DATA_TYPE (&empty_token) = TOKEN_TEXT;
+  TOKEN_DATA_TEXT (&empty_token) = "";
+  TOKEN_DATA_LEN (&empty_token) = 0;
+#ifdef ENABLE_CHANGEWORD
+  TOKEN_DATA_ORIG_TEXT (&empty_token) = "";
+#endif
 
   while ((t = next_token (&td, &line, NULL)) != TOKEN_EOF)
     expand_token ((struct obstack *) NULL, t, &td, line);
@@ -237,12 +267,11 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 /*-------------------------------------------------------------------------.
 | Collect all the arguments to a call of the macro SYM.  The arguments are |
 | stored on the obstack ARGUMENTS and a table of pointers to the arguments |
-| on the obstack ARGPTR.						   |
+| on the obstack argv_stack.						   |
 `-------------------------------------------------------------------------*/
 
 static macro_arguments *
-collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
-		   struct obstack *arguments)
+collect_arguments (symbol *sym, struct obstack *arguments)
 {
   token_data td;
   token_data *tdp;
@@ -253,10 +282,11 @@ collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
 
   args.argc = 1;
   args.inuse = false;
+  args.has_ref = false;
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
   args.arraylen = 0;
-  obstack_grow (argptr, &args, offsetof (macro_arguments, array));
+  obstack_grow (&argv_stack, &args, offsetof (macro_arguments, array));
 
   if (peek_token () == TOKEN_OPEN)
     {
@@ -265,20 +295,18 @@ collect_arguments (symbol *sym, struct obstack *argptr, unsigned int argv_base,
 	{
 	  more_args = expand_argument (arguments, &td, SYMBOL_NAME (sym));
 
-	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
-	    {
-	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = (char *) "";
-	      TOKEN_DATA_LEN (&td) = 0;
-	    }
-	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
-	  obstack_ptr_grow (argptr, tdp);
+	  if ((TOKEN_DATA_TYPE (&td) == TOKEN_TEXT && !TOKEN_DATA_LEN (&td))
+	      || (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC))
+	    tdp = &empty_token;
+	  else
+	    tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+	  obstack_ptr_grow (&argv_stack, tdp);
 	  args.arraylen++;
 	  args.argc++;
 	}
       while (more_args);
     }
-  argv = (macro_arguments *) ((char *) obstack_base (argptr) + argv_base);
+  argv = (macro_arguments *) obstack_finish (&argv_stack);
   argv->argc = args.argc;
   argv->arraylen = args.arraylen;
   return argv;
@@ -327,9 +355,10 @@ call_macro (symbol *sym, int argc, macro_arguments *argv,
 static void
 expand_macro (symbol *sym)
 {
-  struct obstack arguments;	/* Alternate obstack if arg_stack is busy.  */
-  unsigned int argv_base;	/* Size of argv_stack on entry.  */
-  void *arg_start;		/* Start of arg_stack, else NULL if unsafe.  */
+  void *arg_base = NULL;	/* Base of arg_stack on entry.  */
+  void *argv_base = NULL;	/* Base of argv_stack on entry.  */
+  unsigned int arg_size;	/* Size of arg_stack on entry.  */
+  unsigned int argv_size;	/* Size of argv_stack on entry.  */
   macro_arguments *argv;
   int argc;
   struct obstack *expansion;
@@ -360,23 +389,16 @@ expand_macro (symbol *sym)
 
   traced = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
 
-  argv_base = obstack_object_size (&argv_stack);
-  if (obstack_object_size (&arg_stack) > 0)
-    {
-      /* We cannot use arg_stack if this is a nested invocation, and an
-	 outer invocation has an unfinished argument being
-	 collected.  */
-      obstack_init (&arguments);
-      arg_start = NULL;
-    }
-  else
-    arg_start = obstack_finish (&arg_stack);
+  arg_size = obstack_object_size (&arg_stack);
+  argv_size = obstack_object_size (&argv_stack);
+  arg_base = obstack_finish (&arg_stack);
+  if (0 < argv_size)
+    argv_base = obstack_finish (&argv_stack);
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  argv = collect_arguments (sym, &argv_stack, argv_base,
-			    arg_start ? &arg_stack : &arguments);
+  argv = collect_arguments (sym, &arg_stack);
   argc = argv->argc;
 
   loc_close_file = current_file;
@@ -404,11 +426,50 @@ expand_macro (symbol *sym)
     free_symbol (sym);
 
   // TODO pay attention to argv->inuse, in case someone is depending on $@
-  if (arg_start)
-    obstack_free (&arg_stack, arg_start);
+  if (0 < arg_size)
+    obstack_regrow (&arg_stack, arg_base, arg_size);
   else
-    obstack_free (&arguments, NULL);
-  obstack_blank (&argv_stack, argv_base - obstack_object_size (&argv_stack));
+    obstack_free (&arg_stack, arg_base);
+  if (0 < argv_size)
+    obstack_regrow (&argv_stack, argv_base, argv_size);
+  else
+    obstack_free (&argv_stack, argv);
+}
+
+/* Given ARGV, return the token_data that contains argument INDEX;
+   INDEX must be > 0, < argv->argc.  */
+static token_data *
+arg_token (macro_arguments *argv, unsigned int index)
+{
+  unsigned int i;
+  token_data *token;
+
+  assert (index && index < argv->argc);
+  if (!argv->has_ref)
+    return argv->array[index - 1];
+  /* Must cycle through all tokens, until we find index, since a ref
+     may occupy multiple indices.  */
+  for (i = 0; i < argv->arraylen; i++)
+    {
+      token = argv->array[i];
+      if (TOKEN_DATA_TYPE (token) == TOKEN_COMP)
+	{
+	  token_chain *chain = token->u.chain;
+	  // TODO for now we support only a single-length $@ chain...
+	  assert (!chain->next && !chain->str);
+	  if (index < chain->argv->argc - (chain->index - 1))
+	    {
+	      token = arg_token (chain->argv, chain->index - 1 + index);
+	      if (chain->flatten && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
+		token = &empty_token;
+	      break;
+	    }
+	  index -= chain->argv->argc - chain->index;
+	}
+      else if (--index == 0)
+	break;
+    }
+  return token;
 }
 
 
@@ -424,9 +485,15 @@ arg_argc (macro_arguments *argv)
 token_data_type
 arg_type (macro_arguments *argv, unsigned int index)
 {
+  token_data_type type;
+  token_data *token;
+
   if (index == 0 || index >= argv->argc)
     return TOKEN_TEXT;
-  return TOKEN_DATA_TYPE (argv->array[index - 1]);
+  token = arg_token (argv, index);
+  type = TOKEN_DATA_TYPE (token);
+  assert (type != TOKEN_COMP);
+  return type;
 }
 
 /* Given ARGV, return the text at argument INDEX, or NULL if the
@@ -435,13 +502,59 @@ arg_type (macro_arguments *argv, unsigned int index)
 const char *
 arg_text (macro_arguments *argv, unsigned int index)
 {
+  token_data *token;
+
   if (index == 0)
     return argv->argv0;
   if (index >= argv->argc)
     return "";
-  if (TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_TEXT)
-    return NULL;
-  return TOKEN_DATA_TEXT (argv->array[index - 1]);
+  token = arg_token (argv, index);
+  switch (TOKEN_DATA_TYPE (token))
+    {
+    case TOKEN_TEXT:
+      return TOKEN_DATA_TEXT (token);
+    case TOKEN_FUNC:
+      return NULL;
+    case TOKEN_COMP:
+      // TODO - how to concatenate multiple arguments?  For now, we expect
+      // only one element in the chain, and arg_token dereferences it...
+    default:
+      break;
+    }
+  assert (!"arg_text");
+  abort ();
+}
+
+/* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
+   Both indices must be non-zero and less than argc.  Return true if
+   the arguments contain the same contents; often more efficient than
+   strcmp (arg_text (argv, indexa), arg_text (argv, indexb)) == 0.  */
+bool
+arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
+{
+  token_data *ta = arg_token (argv, indexa);
+  token_data *tb = arg_token (argv, indexb);
+
+  if (ta == &empty_token || tb == &empty_token)
+    return ta == tb;
+  // TODO - allow builtin tokens in the comparison?
+  assert (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT
+	  && TOKEN_DATA_TYPE (tb) == TOKEN_TEXT);
+  return (TOKEN_DATA_LEN (ta) == TOKEN_DATA_LEN (tb)
+	  && strcmp (TOKEN_DATA_TEXT (ta), TOKEN_DATA_TEXT (tb)) == 0);
+}
+
+/* Given ARGV, return true if argument INDEX is the empty string.
+   This gives the same result as comparing arg_len against 0, but is
+   often faster.  */
+bool
+arg_empty (macro_arguments *argv, unsigned int index)
+{
+  if (index == 0)
+    return argv->argv0_len == 0;
+  if (index >= argv->argc)
+    return true;
+  return arg_token (argv, index) == &empty_token;
 }
 
 /* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
@@ -449,13 +562,28 @@ arg_text (macro_arguments *argv, unsigned int index)
 size_t
 arg_len (macro_arguments *argv, unsigned int index)
 {
+  token_data *token;
+
   if (index == 0)
     return argv->argv0_len;
   if (index >= argv->argc)
     return 0;
-  if (TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_TEXT)
-    return SIZE_MAX;
-  return TOKEN_DATA_LEN (argv->array[index - 1]);
+  token = arg_token (argv, index);
+  switch (TOKEN_DATA_TYPE (token))
+    {
+    case TOKEN_TEXT:
+      assert ((token == &empty_token) == (TOKEN_DATA_LEN (token) == 0));
+      return TOKEN_DATA_LEN (token);
+    case TOKEN_FUNC:
+      return SIZE_MAX;
+    case TOKEN_COMP:
+      // TODO - how to concatenate multiple arguments?  For now, we expect
+      // only one element in the chain, and arg_token dereferences it...
+    default:
+      break;
+    }
+  assert (!"arg_len");
+  abort ();
 }
 
 /* Given ARGV, return the builtin function referenced by argument
@@ -464,8 +592,86 @@ arg_len (macro_arguments *argv, unsigned int index)
 builtin_func *
 arg_func (macro_arguments *argv, unsigned int index)
 {
-  if (index == 0 || index >= argv->argc
-      || TOKEN_DATA_TYPE (argv->array[index - 1]) != TOKEN_FUNC)
+  token_data *token;
+
+  if (index == 0 || index >= argv->argc)
     return NULL;
-  return TOKEN_DATA_FUNC (argv->array[index - 1]);
+  token = arg_token (argv, index);
+  switch (TOKEN_DATA_TYPE (token))
+    {
+    case TOKEN_FUNC:
+      return TOKEN_DATA_FUNC (token);
+    case TOKEN_TEXT:
+      return NULL;
+    case TOKEN_COMP:
+      // TODO - how to concatenate multiple arguments?  For now, we expect
+      // only one element in the chain...
+    default:
+      break;
+    }
+  assert(!"arg_func");
+  abort ();
+}
+
+/* Create a new argument object using the same obstack as ARGV; thus,
+   the new object will automatically be freed when the original is
+   freed.  Explicitly set the macro name (argv[0]) from ARGV0 with
+   length ARGV0_LEN.  If SKIP, set argv[1] of the new object to
+   argv[2] of the old, otherwise the objects share all arguments.  If
+   FLATTEN, any non-text in ARGV is flattened to an empty string when
+   referenced through the new object.  */
+macro_arguments *
+make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
+	       bool skip, bool flatten)
+{
+  macro_arguments *new_argv;
+  token_data *token;
+  token_chain *chain;
+  unsigned int index = skip ? 2 : 1;
+
+  assert (obstack_object_size (&argv_stack) == 0);
+  /* When making a reference through a reference, point to the
+     original if possible.  */
+  if (argv->has_ref)
+    {
+      // TODO for now we support only a single-length $@ chain...
+      assert (argv->arraylen == 1
+	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
+      chain = argv->array[0]->u.chain;
+      assert (!chain->next && !chain->str);
+      argv = chain->argv;
+      index += chain->index - 1;
+    }
+  if (argv->argc <= index)
+    {
+      new_argv = (macro_arguments *)
+	obstack_alloc (&argv_stack, offsetof (macro_arguments, array));
+      new_argv->arraylen = 0;
+      new_argv->has_ref = false;
+    }
+  else
+    {
+      new_argv = (macro_arguments *)
+	obstack_alloc (&argv_stack,
+		       offsetof (macro_arguments, array) + sizeof token);
+      token = (token_data *) obstack_alloc (&argv_stack, sizeof *token);
+      chain = (token_chain *) obstack_alloc (&argv_stack, sizeof *chain);
+      new_argv->arraylen = 1;
+      new_argv->array[0] = token;
+      new_argv->has_ref = true;
+      TOKEN_DATA_TYPE (token) = TOKEN_COMP;
+      token->u.chain = chain;
+      chain->next = NULL;
+      chain->str = NULL;
+      chain->len = 0;
+      chain->argv = argv;
+      chain->index = index;
+      chain->flatten = flatten;
+    }
+  // TODO should argv->inuse be set?
+  new_argv->argc = argv->argc - (index - 1);
+  new_argv->inuse = false;
+  new_argv->argv0 = argv0;
+  new_argv->argv0_len = argv0_len;
+  return new_argv;
 }
