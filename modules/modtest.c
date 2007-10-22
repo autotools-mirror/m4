@@ -113,6 +113,6 @@ bool
 export_test (const char *foo)
 {
   if (foo)
-    fprintf (stderr, "%s\n", foo);
+    xfprintf (stderr, "%s\n", foo);
   return (bool) (foo != 0);
 }

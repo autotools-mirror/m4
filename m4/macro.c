@@ -46,7 +46,7 @@ static void    trace_post	 (m4 *, const char *, size_t, int,
 				  m4_symbol_value **, m4_input_block *, bool);
 
 static void    trace_format	 (m4 *, const char *, ...)
-  M4_GNUC_PRINTF(2, 3);
+  M4_GNUC_PRINTF (2, 3);
 static void    trace_header	 (m4 *, size_t);
 static void    trace_flush	 (m4 *);
 

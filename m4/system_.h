@@ -46,6 +46,7 @@
 @INCLUDE_STDBOOL_H@
 
 #include <gnu/xalloc.h>
+#include <gnu/xprintf.h>
 #include <gnu/xstrndup.h>
 
 /* glibc's obstack left out the ability to suspend and resume growth
@@ -137,18 +138,18 @@ BEGIN_C_DECLS
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-# define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+# define M4_GNUC_ATTRIBUTE(args)	__attribute__ (args)
 #else
 # define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
 #define M4_GNUC_PRINTF(fmt, arg)				\
-  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
+  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
 #define M4_GNUC_SCANF(fmt, arg)					\
-  M4_GNUC_ATTRIBUTE((__format__ (__scanf__, fmt, arg)))
-#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE((__noreturn__))
-#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE((__const__))
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
+  M4_GNUC_ATTRIBUTE ((__format__ (__scanf__, fmt, arg)))
+#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE ((__noreturn__))
+#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE ((__const__))
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE ((__unused__))
 
 
 
@@ -164,12 +165,12 @@ BEGIN_C_DECLS
    be expanded before being quoted.   */
 #ifndef STR
 # define _STR(arg)	#arg
-# define STR(arg)	_STR(arg)
+# define STR(arg)	_STR (arg)
 #endif
 
 #ifndef CONC
 # define _CONC(a, b)	a##b
-# define CONC(a, b)	_CONC(a, b)
+# define CONC(a, b)	_CONC (a, b)
 #endif
 
 END_C_DECLS

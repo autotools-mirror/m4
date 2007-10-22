@@ -1,3 +1,26 @@
+2007-10-22  Eric Blake  <ebb9@byu.net>
+
+	Never let printf failures go undetected.
+	* ltdl/m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	xprintf'.
+	* m4/system_.h: Include xprintf.h.
+	* m4/debug.c (m4_debug_message_prefix, m4_debug_message): Wrap all
+	use of printf, xprintf.
+	* m4/input.c [DEBUG_INPUT]: Likewise.
+	* m4/module.c [DEBUG_MODULES]: Likewise.
+	* m4/output.c (m4_shipout_text, m4_shipout_int)
+	(m4_freeze_diversions): Likewise.
+	* m4/path.c [DEBUG_INCL]: Likewise.
+	* m4/symtab.c [DEBUG_SYM]: Likewise.
+	* m4/syntax.c [DEBUG_SYNTAX]: Likewise.
+	* modules/modtest.c (export_test): Likewise.
+	* src/freeze.c (produce_resyntax_dump, produce_syntax_dump)
+	(produce_module_dump, dump_symbol_CB, produce_frozen_state):
+	Likewise.
+	* src/main.c (usage): Likewise.
+	* po/POTFILES.in: Adjust to new file.
+	* po/Makevars (XGETTEXT_OPTIONS): Likewise.
+
 2007-10-18  Eric Blake  <ebb9@byu.net>
 
 	Fix 'm4 -F file -t undefined'.

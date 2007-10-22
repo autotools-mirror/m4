@@ -66,11 +66,11 @@ static void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    fprintf (stderr, _("Try `%s --help' for more information.\n"),
-	     m4_get_program_name ());
+    xfprintf (stderr, _("Try `%s --help' for more information.\n"),
+	      m4_get_program_name ());
   else
     {
-      printf (_("Usage: %s [OPTION]... [FILE]...\n"), m4_get_program_name ());
+      xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), m4_get_program_name ());
       fputs (_("\
 Process macros in FILEs.\n\
 If no FILE or if FILE is `-', standard input is read.  If no FILE, and both\n\
@@ -104,7 +104,7 @@ SPEC is any one of:\n\
   GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n\
 "), stdout);
       puts ("");
-      printf (_("\
+      xprintf (_("\
 Dynamic loading features:\n\
   -M, --module-directory=DIR   add DIR to module search path before\n\
                                `%s'\n\
@@ -189,7 +189,7 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 	 saying "Report translation bugs to <...>\n" with the address
 	 for translation bugs (typically your translation team's web
 	 or email address).  */
-      printf (_("Report bugs to <%s>.\n"), PACKAGE_BUGREPORT);
+      xprintf (_("Report bugs to <%s>.\n"), PACKAGE_BUGREPORT);
     }
   exit (status);
 }

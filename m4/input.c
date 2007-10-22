@@ -1019,7 +1019,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
     if (ch == CHAR_EOF)			/* EOF */
       {
 #ifdef DEBUG_INPUT
-	fprintf (stderr, "next_token -> EOF\n");
+	xfprintf (stderr, "next_token -> EOF\n");
 #endif
 	next_char (context, true);
 	return M4_TOKEN_EOF;
@@ -1173,12 +1173,12 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 
 	if (m4_has_syntax (M4SYNTAX, ch,
 			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
-                            | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
+			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
 	  {
 	    consume_syntax (context, &token_stack,
 			    (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
-                             | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
-                             | M4_SYNTAX_RBRACE));
+			     | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
+			     | M4_SYNTAX_RBRACE));
 	    type = M4_TOKEN_STRING;
 	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
@@ -1199,7 +1199,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 
 	if (m4_has_syntax (M4SYNTAX, ch,
 			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
-                            | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
+			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
 	  type = M4_TOKEN_STRING;
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  type = M4_TOKEN_SPACE;
@@ -1249,43 +1249,43 @@ m4__next_token_is_open (m4 *context)
 int
 m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
 {
-  fprintf (stderr, "%s: ", s ? s : "m4input");
+  xfprintf (stderr, "%s: ", s ? s : "m4input");
   switch (type)
     {				/* TOKSW */
     case M4_TOKEN_EOF:
-      fprintf (stderr, "eof\n");
+      xfprintf (stderr, "eof\n");
       break;
     case M4_TOKEN_NONE:
-      fprintf (stderr, "none\n");
+      xfprintf (stderr, "none\n");
       break;
     case M4_TOKEN_STRING:
-      fprintf (stderr, "string\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "string\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_SPACE:
-      fprintf (stderr, "space\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "space\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_WORD:
-      fprintf (stderr, "word\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "word\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_OPEN:
-      fprintf (stderr, "open\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "open\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_COMMA:
-      fprintf (stderr, "comma\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "comma\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_CLOSE:
-      fprintf (stderr, "close\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "close\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_SIMPLE:
-      fprintf (stderr, "simple\t\"%s\"\n", m4_get_symbol_value_text (token));
+      xfprintf (stderr, "simple\t\"%s\"\n", m4_get_symbol_value_text (token));
       break;
     case M4_TOKEN_MACDEF:
       {
 	const m4_builtin *bp;
 	bp = m4_builtin_find_by_func (NULL, m4_get_symbol_value_func (token));
 	assert (bp);
-	fprintf (stderr, "builtin\t<%s>{%s}\n", bp->name,
-		 m4_get_module_name (VALUE_MODULE (token)));
+	xfprintf (stderr, "builtin\t<%s>{%s}\n", bp->name,
+		  m4_get_module_name (VALUE_MODULE (token)));
       }
       break;
     }

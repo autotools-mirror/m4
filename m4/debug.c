@@ -209,9 +209,9 @@ m4_debug_message_prefix (m4 *context)
   if (m4_get_current_line (context))
     {
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
-	fprintf (debug_file, "%s:", m4_get_current_file (context));
+	xfprintf (debug_file, "%s:", m4_get_current_file (context));
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
-	fprintf (debug_file, "%d:", m4_get_current_line (context));
+	xfprintf (debug_file, "%d:", m4_get_current_line (context));
     }
   putc (' ', debug_file);
 }
@@ -233,7 +233,7 @@ m4_debug_message (m4 *context, int mode, const char *format, ...)
 
       m4_debug_message_prefix (context);
       va_start (args, format);
-      vfprintf (m4_get_debug_file (context), format, args);
+      xvfprintf (m4_get_debug_file (context), format, args);
       va_end (args);
       putc ('\n', m4_get_debug_file (context));
     }

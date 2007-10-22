@@ -405,8 +405,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 #ifdef DEBUG_MODULES
       if (info->ref_count > 1)
 	{
-	  fprintf (stderr, "module %s: now has %d libtool references.",
-		   name, info->ref_count);
+	  xfprintf (stderr, "module %s: now has %d libtool references.",
+		    name, info->ref_count);
 	}
 #endif /* DEBUG_MODULES */
 
@@ -545,8 +545,8 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
 #ifdef DEBUG_MODULES
   if (info->ref_count > 1)
     {
-      fprintf (stderr, "module %s: now has %d libtool references.",
-	       name, info->ref_count - 1);
+      xfprintf (stderr, "module %s: now has %d libtool references.",
+		name, info->ref_count - 1);
     }
 #endif /* DEBUG_MODULES */
 

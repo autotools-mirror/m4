@@ -119,8 +119,8 @@ m4_add_include_directory (m4 *context, const char *dir, bool prepend)
   search_path_add (m4__get_search_path (context), dir, prepend);
 
 #ifdef DEBUG_INCL
-  fprintf (stderr, "add_include_directory (%s) %s;\n", dir,
-	   prepend ? "prepend" : "append");
+  xfprintf (stderr, "add_include_directory (%s) %s;\n", dir,
+	    prepend ? "prepend" : "append");
 #endif
 }
 
@@ -172,7 +172,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       name = file_name_concat (incl->dir, file, NULL);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
+      xfprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");
@@ -221,7 +221,7 @@ include_dump (m4 *context)
   fputs ("include_dump:\n", stderr);
   for (incl = m4__get_search_path (context)->list;
        incl != NULL; incl = incl->next)
-    fprintf (stderr, "\t%s\n", incl->dir);
+    xfprintf (stderr, "\t%s\n", incl->dir);
 }
 
 #endif /* DEBUG_INCL */

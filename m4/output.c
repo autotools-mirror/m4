@@ -24,8 +24,9 @@
 
 #include "binary-io.h"
 #include "clean-temp.h"
-#include "gl_avltree_oset.h"
 #include "exitfail.h"
+#include "gl_avltree_oset.h"
+#include "intprops.h"
 #include "xvasprintf.h"
 
 /* Define this to see runtime debug output.  Implied by DEBUG.  */
@@ -465,7 +466,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 		 const char *text, size_t length, int line)
 {
   static bool start_of_output_line = true;
-  char linebuf[20];
+  char linebuf[6 + INT_BUFSIZE_BOUND (unsigned long int)]; /* "#line nnnn" */
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -517,9 +518,9 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	  m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	  fprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
-		   (unsigned long int) m4_get_current_line (context),
-		   (unsigned long int) m4_get_output_line (context));
+	  xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+		    (unsigned long int) m4_get_current_line (context),
+		    (unsigned long int) m4_get_output_line (context));
 #endif
 
 	  /* Output a `#line NUM' synchronization directive if needed.
@@ -558,9 +559,9 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 	      m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	      fprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
-		       (unsigned long int) m4_get_current_line (context),
-		       (unsigned long int) m4_get_output_line (context));
+	      xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+			(unsigned long int) m4_get_current_line (context),
+			(unsigned long int) m4_get_output_line (context));
 #endif
 	    }
 	  OUTPUT_CHARACTER (*text);
@@ -576,7 +577,7 @@ m4_shipout_text (m4 *context, m4_obstack *obs,
 void
 m4_shipout_int (m4_obstack *obs, int val)
 {
-  char buf[128];
+  char buf[INT_BUFSIZE_BOUND (int)];
 
   sprintf(buf, "%d", val);
   obstack_grow (obs, buf, strlen (buf));
@@ -845,8 +846,8 @@ m4_freeze_diversions (m4 *context, FILE *file)
 	  if (diversion->size)
 	    {
 	      assert (diversion->used == (int) diversion->used);
-	      fprintf (file, "D%d,%d\n", diversion->divnum,
-		       (int) diversion->used);
+	      xfprintf (file, "D%d,%d\n", diversion->divnum,
+			(int) diversion->used);
 	    }
 	  else
 	    {
@@ -863,8 +864,8 @@ m4_freeze_diversions (m4 *context, FILE *file)
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno,
 			  _("diversion too large"));
-	      fprintf (file, "D%d,%lu\n", diversion->divnum,
-		       (unsigned long int) file_stat.st_size);
+	      xfprintf (file, "D%d,%lu\n", diversion->divnum,
+			(unsigned long int) file_stat.st_size);
 	    }
 
 	  insert_diversion_helper (context, diversion);
@@ -878,5 +879,5 @@ m4_freeze_diversions (m4 *context, FILE *file)
   /* Save the active diversion number, if not already.  */
 
   if (saved_number != last_inserted)
-    fprintf (file, "D%d,0\n\n", saved_number);
+    xfprintf (file, "D%d,0\n\n", saved_number);
 }

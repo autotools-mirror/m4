@@ -718,8 +718,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
   m4_module *      module	= value ? SYMBOL_MODULE (symbol) : NULL;
   const char *     module_name	= module ? m4_get_module_name (module) : "NONE";
 
-  fprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
-	   m4_get_symbol_traced (symbol) ? "!" : "", name);
+  xfprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
+	    m4_get_symbol_traced (symbol) ? "!" : "", name);
 
   if (!value)
     fputs ("<!UNDEFINED!>", stderr);
@@ -730,7 +730,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
       m4_obstack obs;
       obstack_init (&obs);
       m4_symbol_value_print (value, &obs, false, NULL, NULL, 0, true);
-      fprintf (stderr, "%s", (char *) obstack_finish (&obs));
+      xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }
   fputc ('\n', stderr);

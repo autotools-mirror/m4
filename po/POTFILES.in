@@ -7,6 +7,7 @@ gnu/quotearg.c
 gnu/regcomp.c
 gnu/verror.c
 gnu/xalloc-die.c
+gnu/xprintf.c
 m4/builtin.c
 m4/debug.c
 m4/input.c

@@ -220,9 +220,9 @@ add_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
     syntax->table[ch] = (syntax->table[ch] & M4_SYNTAX_MASKS) | code;
 
 #ifdef DEBUG_SYNTAX
-  fprintf(stderr, "Set syntax %o %c = %04X\n",
-	  ch, isprint(ch) ? ch : '-',
-	  syntax->table[ch]);
+  xfprintf(stderr, "Set syntax %o %c = %04X\n",
+	   ch, isprint(ch) ? ch : '-',
+	   syntax->table[ch]);
 #endif
 
   return syntax->table[ch];
@@ -235,9 +235,9 @@ remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
   syntax->table[ch] &= ~code;
 
 #ifdef DEBUG_SYNTAX
-  fprintf(stderr, "Unset syntax %o %c = %04X\n",
-	  ch, isprint(ch) ? ch : '-',
-	  syntax->table[ch]);
+  xfprintf(stderr, "Unset syntax %o %c = %04X\n",
+	   ch, isprint(ch) ? ch : '-',
+	   syntax->table[ch]);
 #endif
 
   return syntax->table[ch];

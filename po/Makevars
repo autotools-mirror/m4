@@ -35,6 +35,8 @@ XGETTEXT_OPTIONS = \
   --flag=verror:3:c-format --flag=verror_at_line:5:c-format \
   --flag=asprintf:2:c-format --flag=vasprintf:2:c-format \
   --flag=asnprintf:3:c-format --flag=vasnprintf:3:c-format \
+  --flag=xprintf:1:c-format --flag=xvprintf:1:c-format \
+  --flag=xfprintf:2:c-format --flag=xvfprintf:2:c-format \
   --flag=m4_error:4:c-format --flag=m4_error_at_line:6:c-format \
   --flag=m4_debug_message:3:c-format
 
