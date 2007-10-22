@@ -137,10 +137,10 @@ static void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    fprintf (stderr, "Try `%s --help' for more information.\n", program_name);
+    xfprintf (stderr, "Try `%s --help' for more information.\n", program_name);
   else
     {
-      printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
+      xprintf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
       fputs ("\
 Process macros in FILEs.  If no FILE or if FILE is `-', standard input\n\
 is read.\n\
@@ -154,7 +154,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
 ", stdout);
-      printf ("\
+      xprintf ("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
                                execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
@@ -223,7 +223,7 @@ of directories included after any specified by `-I'.\n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
-      printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
+      xprintf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
   exit (status);
 }

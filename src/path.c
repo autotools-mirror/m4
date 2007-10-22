@@ -101,7 +101,7 @@ add_include_directory (const char *dir)
   dir_list_end = incl;
 
 #ifdef DEBUG_INCL
-  fprintf (stderr, "add_include_directory (%s);\n", dir);
+  xfprintf (stderr, "add_include_directory (%s);\n", dir);
 #endif
 }
 
@@ -154,7 +154,7 @@ m4_path_search (const char *file, char **result)
       strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
+      xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");
@@ -185,9 +185,9 @@ include_dump (void)
 {
   includes *incl;
 
-  fprintf (stderr, "include_dump:\n");
+  xfprintf (stderr, "include_dump:\n");
   for (incl = dir_list; incl != NULL; incl = incl->next)
-    fprintf (stderr, "\t%s\n", incl->dir);
+    xfprintf (stderr, "\t%s\n", incl->dir);
 }
 
 #endif /* DEBUG_INCL */

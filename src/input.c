@@ -845,7 +845,7 @@ next_token (token_data *td, int *line)
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "next_token -> EOF\n");
+      xfprintf (stderr, "next_token -> EOF\n");
 #endif
       next_char ();
       return TOKEN_EOF;
@@ -855,8 +855,8 @@ next_token (token_data *td, int *line)
       init_macro_token (td);
       next_char ();
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "next_token -> MACDEF (%s)\n",
-	       find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
+      xfprintf (stderr, "next_token -> MACDEF (%s)\n",
+		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
 #endif
       return TOKEN_MACDEF;
     }
@@ -988,8 +988,8 @@ next_token (token_data *td, int *line)
   TOKEN_DATA_ORIG_TEXT (td) = orig_text;
 #endif
 #ifdef DEBUG_INPUT
-  fprintf (stderr, "next_token -> %s (%s)\n",
-	   token_type_string (type), TOKEN_DATA_TEXT (td));
+  xfprintf (stderr, "next_token -> %s (%s)\n",
+	    token_type_string (type), TOKEN_DATA_TEXT (td));
 #endif
   return type;
 }
@@ -1045,7 +1045,7 @@ peek_token (void)
       }
 
 #ifdef DEBUG_INPUT
-  fprintf (stderr, "peek_token -> %s\n", token_type_string (result));
+  xfprintf (stderr, "peek_token -> %s\n", token_type_string (result));
 #endif /* DEBUG_INPUT */
   return result;
 }
@@ -1082,33 +1082,33 @@ token_type_string (token_type t)
 static void
 print_token (const char *s, token_type t, token_data *td)
 {
-  fprintf (stderr, "%s: ", s);
+  xfprintf (stderr, "%s: ", s);
   switch (t)
     {				/* TOKSW */
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:
     case TOKEN_SIMPLE:
-      fprintf (stderr, "char:");
+      xfprintf (stderr, "char:");
       break;
 
     case TOKEN_WORD:
-      fprintf (stderr, "word:");
+      xfprintf (stderr, "word:");
       break;
 
     case TOKEN_STRING:
-      fprintf (stderr, "string:");
+      xfprintf (stderr, "string:");
       break;
 
     case TOKEN_MACDEF:
-      fprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
+      xfprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
       break;
 
     case TOKEN_EOF:
-      fprintf (stderr, "eof\n");
+      xfprintf (stderr, "eof\n");
       break;
     }
-  fprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
+  xfprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
 }
 
 static void M4_GNUC_UNUSED

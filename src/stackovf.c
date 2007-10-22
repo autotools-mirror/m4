@@ -154,8 +154,9 @@ process_sigsegv (int signo, const char *p)
   {
     char buf[140];
 
-    sprintf (buf, "process_sigsegv: p=%#lx stackend=%#lx diff=%ld bot=%#lx\n",
-	     (long) p, (long) stackend, (long) diff, (long) stackbot);
+    snprintf (buf, sizeof buf,
+              "process_sigsegv: p=%#lx stackend=%#lx diff=%ld bot=%#lx\n",
+              (long) p, (long) stackend, (long) diff, (long) stackbot);
     write (2, buf, strlen (buf));
   }
 #endif

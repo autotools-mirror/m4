@@ -231,13 +231,13 @@ debug_set_output (const char *name)
 void
 debug_message_prefix (void)
 {
-  fprintf (debug, "m4debug:");
+  xfprintf (debug, "m4debug:");
   if (current_line)
   {
     if (debug_level & DEBUG_TRACE_FILE)
-      fprintf (debug, "%s:", current_file);
+      xfprintf (debug, "%s:", current_file);
     if (debug_level & DEBUG_TRACE_LINE)
-      fprintf (debug, "%d:", current_line);
+      xfprintf (debug, "%d:", current_line);
   }
   putc (' ', debug);
 }
@@ -261,7 +261,6 @@ trace_format (const char *fmt, ...)
   char ch;
 
   int d;
-  char nbuf[32];
   const char *s;
   int slen;
   int maxlen;
@@ -297,8 +296,7 @@ trace_format (const char *fmt, ...)
 
 	case 'd':
 	  d = va_arg (args, int);
-	  sprintf (nbuf, "%d", d);
-	  s = nbuf;
+	  s = ntoa (d, 10);
 	  break;
 
 	default:

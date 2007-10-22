@@ -301,10 +301,14 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  abort();
 	}
 
-      /* NULL was returned on failure, such as invalid format string.  For
-	 now, just silently ignore that bad specifier.  */
+      /* NULL was returned on failure, such as invalid format string.
+	 Issue a warning, then proceed.  */
       if (str == NULL)
-	continue;
+	{
+	  M4ERROR ((warning_status, 0,
+		    "Warning: unable to format output for `%s'", f));
+	  continue;
+	}
 
       obstack_grow (obs, str, strlen (str));
       free (str);
