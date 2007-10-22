@@ -450,7 +450,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 /* Digits for number to ascii conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-static const char *
+const char *
 ntoa (int32_t value, int radix)
 {
   bool negative;
@@ -1438,7 +1438,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
   dump_args (obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   debug_flush_files ();
-  fprintf (stderr, "%s", (char *) obstack_finish (obs));
+  xfprintf (stderr, "%s", (char *) obstack_finish (obs));
   fflush (stderr);
 }
 

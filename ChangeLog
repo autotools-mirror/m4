@@ -1,3 +1,24 @@
+2007-10-22  Eric Blake  <ebb9@byu.net>
+
+	Never let printf failures go undetected.
+	* m4/gnulib-cache.m4: Import announce-gen, git-version-gen,
+	intprops, strtod, and xprintf modules.  Remove deprecated free
+	module.  Replace vasprintf-posix and xvasprintf with
+	xvasprintf-posix.
+	* src/m4.h: Include xprintf.h.
+	* src/builtin.c (ntoa): Export.
+	(m4_errprint): Adjust all *printf callers.
+	* src/debug.c (debug_message_prefix, trace_format): Likewise.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* src/input.c [DEBUG_INPUT]: Likewise.
+	* src/m4.c (usage): Likewise.
+	* src/m4.h (DEBUG_PRINT1, DEBUG_PRINT3, DEBUG_MESSAGE)
+	(DEBUG_MESSAGE1, DEBUG_MESSAGE2): Likewise.
+	* src/output.c (shipout_text, freeze_diversione): Likewise.
+	* src/path.c [DEBUG_INCL]: Likewise.
+	* src/stackovf.c (process_sigsegv) [DEBUG_STKOVF]: Likewise.
+	* src/symtab.c [DEBUG_SYM]: Likewise.
+
 2007-10-17  Eric Blake  <ebb9@byu.net>
 
 	Fix 'm4 -F file -t undefined'.

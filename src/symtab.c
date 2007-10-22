@@ -56,10 +56,10 @@ show_profile (void)
   int i;
   for (i = 0; i < 5; i++)
     {
-      fprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
-	      "%d misses, %lld bytes\n",
-	      i, profiles[i].entry, profiles[i].comparisons,
-	      profiles[i].misses, profiles[i].bytes);
+      xfprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
+	       "%d misses, %lld bytes\n",
+	       i, profiles[i].entry, profiles[i].comparisons,
+	       profiles[i].misses, profiles[i].bytes);
     }
 }
 
@@ -371,7 +371,7 @@ symtab_debug (void)
       s = lookup_symbol (text, SYMBOL_LOOKUP);
 
       if (s == NULL)
-	printf ("Name `%s' is unknown\n", text);
+	xprintf ("Name `%s' is unknown\n", text);
 
       if (delete)
 	(void) lookup_symbol (text, SYMBOL_DELETE);
@@ -387,17 +387,17 @@ symtab_print_list (int i)
   symbol *sym;
   size_t h;
 
-  printf ("Symbol dump #%d:\n", i);
+  xprintf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      printf ("\tname %s, bucket %lu, addr %p, next %p, "
-	      "flags%s%s%s, pending %d\n",
-	      SYMBOL_NAME (sym),
-	      (unsigned long int) h, sym, SYMBOL_NEXT (sym),
-	      SYMBOL_TRACED (sym) ? " traced" : "",
-	      SYMBOL_SHADOWED (sym) ? " shadowed" : "",
-	      SYMBOL_DELETED (sym) ? " deleted" : "",
-	      SYMBOL_PENDING_EXPANSIONS (sym));
+      xprintf ("\tname %s, bucket %lu, addr %p, next %p, "
+	       "flags%s%s%s, pending %d\n",
+	       SYMBOL_NAME (sym),
+	       (unsigned long int) h, sym, SYMBOL_NEXT (sym),
+	       SYMBOL_TRACED (sym) ? " traced" : "",
+	       SYMBOL_SHADOWED (sym) ? " shadowed" : "",
+	       SYMBOL_DELETED (sym) ? " deleted" : "",
+	       SYMBOL_PENDING_EXPANSIONS (sym));
 }
 
 #endif /* DEBUG_SYM */

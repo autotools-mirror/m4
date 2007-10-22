@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -45,6 +45,7 @@
 #include "unistd--.h"
 #include "verror.h"
 #include "xalloc.h"
+#include "xprintf.h"
 #include "xvasprintf.h"
 
 /* Canonicalize UNIX recognition macros.  */
@@ -128,14 +129,14 @@ extern const char *program_name;
 
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
 void m4_error_at_line (int, int, const char *, int,
-                       const char *, ...) M4_GNUC_PRINTF(5, 6);
+		       const char *, ...) M4_GNUC_PRINTF(5, 6);
 
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,
-                          void (*handler) (void));
+			  void (*handler) (void));
 #endif
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -174,7 +175,7 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	fprintf (debug, Fmt, Arg1);				\
+	xfprintf (debug, Fmt, Arg1);				\
     }								\
   while (0)
 
@@ -182,7 +183,7 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	fprintf (debug, Fmt, Arg1, Arg2, Arg3);			\
+	xfprintf (debug, Fmt, Arg1, Arg2, Arg3);                \
     }								\
   while (0)
 
@@ -192,7 +193,7 @@ extern FILE *debug;
       if (debug != NULL)					\
 	{							\
 	  debug_message_prefix ();				\
-	  fprintf (debug, Fmt);					\
+	  xfprintf (debug, Fmt);                                \
 	  putc ('\n', debug);					\
 	}							\
     }								\
@@ -204,7 +205,7 @@ extern FILE *debug;
       if (debug != NULL)					\
 	{							\
 	  debug_message_prefix ();				\
-	  fprintf (debug, Fmt, Arg1);				\
+	  xfprintf (debug, Fmt, Arg1);				\
 	  putc ('\n', debug);					\
 	}							\
     }								\
@@ -216,7 +217,7 @@ extern FILE *debug;
       if (debug != NULL)					\
 	{							\
 	  debug_message_prefix ();				\
-	  fprintf (debug, Fmt, Arg1, Arg2);			\
+	  xfprintf (debug, Fmt, Arg1, Arg2);			\
 	  putc ('\n', debug);					\
 	}							\
     }								\
@@ -422,6 +423,7 @@ void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, token_data **);
 void m4_placeholder (struct obstack *, int, token_data **);
 void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
+const char *ntoa (int32_t, int);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);

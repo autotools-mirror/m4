@@ -468,7 +468,6 @@ void
 shipout_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
-  char linebuf[20];
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -519,7 +518,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 	  start_of_output_line = false;
 	  output_current_line++;
 #ifdef DEBUG_OUTPUT
-	  fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+	  xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
 		   line, current_line, output_current_line);
 #endif
 
@@ -529,8 +528,13 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 
 	  if (output_current_line != line)
 	    {
-	      sprintf (linebuf, "#line %d", line);
-	      for (cursor = linebuf; *cursor; cursor++)
+	      OUTPUT_CHARACTER ('#');
+	      OUTPUT_CHARACTER ('l');
+	      OUTPUT_CHARACTER ('i');
+	      OUTPUT_CHARACTER ('n');
+	      OUTPUT_CHARACTER ('e');
+	      OUTPUT_CHARACTER (' ');
+	      for (cursor = ntoa (line, 10); *cursor; cursor++)
 		OUTPUT_CHARACTER (*cursor);
 	      if (output_current_line < 1 && current_file[0] != '\0')
 		{
@@ -553,7 +557,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 	      start_of_output_line = false;
 	      output_current_line++;
 #ifdef DEBUG_OUTPUT
-	      fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+	      xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
 		       line, current_line, output_current_line);
 #endif
 	    }
@@ -807,7 +811,7 @@ freeze_diversions (FILE *file)
       if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
-	    fprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
+	    xfprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
 	  else
 	    {
 	      struct stat file_stat;
@@ -817,8 +821,8 @@ freeze_diversions (FILE *file)
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
-	      fprintf (file, "D%d,%lu\n", diversion->divnum,
-		       (unsigned long int) file_stat.st_size);
+	      xfprintf (file, "D%d,%lu\n", diversion->divnum,
+			(unsigned long int) file_stat.st_size);
 	    }
 
 	  insert_diversion_helper (diversion);
@@ -832,5 +836,5 @@ freeze_diversions (FILE *file)
   /* Save the active diversion number, if not already.  */
 
   if (saved_number != last_inserted)
-    fprintf (file, "D%d,0\n\n", saved_number);
+    xfprintf (file, "D%d,0\n\n", saved_number);
 }
