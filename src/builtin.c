@@ -252,6 +252,10 @@ typedef struct m4_regex m4_regex;
 /* Storage for the cache of regular expressions.  */
 static m4_regex regex_cache[REGEX_CACHE_SIZE];
 
+#ifdef DEBUG_REGEX
+extern FILE *trace_file;
+#endif /* DEBUG_REGEX */
+
 /*------------------------------------------------------------------.
 | Compile STR, with length LEN, into a regex.  On success, set BUF  |
 | and REGS to the compiled regex.  Compilation is cached, so do not |
@@ -278,12 +282,20 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
 	*buf = regex_cache[i].buf;
 	*regs = &regex_cache[i].regs;
 	regex_cache[i].count++;
+#ifdef DEBUG_REGEX
+	if (trace_file)
+	  xfprintf (trace_file, "cached:{%s}\n", str);
+#endif /* DEBUG_REGEX */
 	return NULL;
       }
 
   /* Next, check if STR can be compiled.  */
   new_buf = xzalloc (sizeof *new_buf);
   msg = re_compile_pattern (str, len, new_buf);
+#ifdef DEBUG_REGEX
+  if (trace_file)
+    xfprintf (trace_file, "compile:{%s}\n", str);
+#endif /* DEBUG_REGEX */
   if (msg)
     {
       regfree (new_buf);
@@ -313,6 +325,10 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   victim->len = len;
   if (victim->str)
     {
+#ifdef DEBUG_REGEX
+      if (trace_file)
+	xfprintf (trace_file, "flush:{%s}\n", victim->str);
+#endif /* DEBUG_REGEX */
       free (victim->str);
       regfree (victim->buf);
       free (victim->buf);
@@ -1958,10 +1974,10 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
     }
 }
 
-/*----------------------------------------------------------------------.
-| Frontend for printf like formatting.  The function format () lives in |
-| the file format.c.						        |
-`----------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| Frontend for *printf like formatting.  The function format () |
+| lives in the file format.c.                                   |
+`--------------------------------------------------------------*/
 
 static void
 m4_format (struct obstack *obs, int argc, token_data **argv)
@@ -2097,6 +2113,12 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
+#ifdef DEBUG_REGEX
+  if (trace_file)
+    xfprintf (trace_file, "r:{%s}:%s%s%s\n", regexp,
+	      argc == 3 ? "" : "{", repl, argc == 3 ? "" : "}");
+#endif /* DEBUG_REGEX */
+
   msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
   if (msg != NULL)
     {
@@ -2160,6 +2182,11 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
       obstack_grow (obs, victim, strlen (victim));
       return;
     }
+
+#ifdef DEBUG_REGEX
+  if (trace_file)
+    xfprintf (trace_file, "p:{%s}:{%s}\n", regexp, repl);
+#endif /* DEBUG_REGEX */
 
   msg = compile_pattern (regexp, strlen (regexp), &buf, &regs);
   if (msg != NULL)

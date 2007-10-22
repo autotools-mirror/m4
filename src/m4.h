@@ -462,6 +462,7 @@ void reload_frozen_state (const char *);
 # define DEBUG_INPUT  1
 # define DEBUG_MACRO  1
 # define DEBUG_OUTPUT 1
+# define DEBUG_REGEX  1
 # define DEBUG_STKOVF 1
 # define DEBUG_SYM    1
 #endif

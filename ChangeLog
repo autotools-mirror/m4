@@ -1,5 +1,12 @@
 2007-10-22  Eric Blake  <ebb9@byu.net>
 
+	Add DEBUG_REGEX debugging information.
+	* src/m4.h (DEBUG_REGEX): New debug macro.
+	* src/m4.c (main) [DEBUG_REGEX]: Open regex trace file when
+	requested.
+	* src/builtin.c (m4_patsubst, m4_regexp, compile_pattern)
+	[DEBUG_REGEX]: Trace regex usage.
+
 	Never let printf failures go undetected.
 	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
 	xprintf'.

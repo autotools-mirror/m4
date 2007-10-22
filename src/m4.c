@@ -318,6 +318,10 @@ process_file (const char *name)
 #define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:d::eil:o:st:"
 #endif
 
+#ifdef DEBUG_REGEX
+FILE *trace_file;
+#endif /* DEBUG_REGEX */
+
 int
 main (int argc, char *const *argv, char *const *envp)
 {
@@ -337,6 +341,16 @@ main (int argc, char *const *argv, char *const *envp)
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
   atexit (close_stdin);
+
+#ifdef DEBUG_REGEX
+  {
+    const char *name = getenv ("M4_TRACE_FILE");
+    if (name)
+      trace_file = fopen (name, "a");
+    if (trace_file)
+      fputs ("m4:\n", trace_file);
+  }
+#endif /* DEBUG_REGEX */
 
   include_init ();
   debug_init ();
@@ -591,5 +605,9 @@ main (int argc, char *const *argv, char *const *envp)
     }
   output_exit ();
   free_regex ();
+#ifdef DEBUG_REGEX
+  if (trace_file)
+    fclose (trace_file);
+#endif /* DEBUG_REGEX */
   exit (retcode);
 }
