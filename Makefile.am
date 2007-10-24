@@ -315,6 +315,7 @@ EXTRA_DIST     += \
 
 dist_pkgdata_DATA = \
 		  examples/capitalize.m4 \
+		  examples/capitalize2.m4 \
 		  examples/comments.m4 \
 		  examples/ddivert.m4 \
 		  examples/debug.m4 \

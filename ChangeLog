@@ -1,3 +1,7 @@
+2007-10-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (dist_pkgdata_DATA): Add examples/capitalize2.m4.
+
 2007-10-22  Eric Blake  <ebb9@byu.net>
 
 	Never let printf failures go undetected.
