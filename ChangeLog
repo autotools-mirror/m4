@@ -1,3 +1,7 @@
+2007-10-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* examples/Makefile.am (EXTRA_DIST): Add capitalize2.m4.
+
 2007-10-24  Eric Blake  <ebb9@byu.net>
 
 	Reduce number of mingw testsuite failures.

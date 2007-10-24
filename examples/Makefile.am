@@ -21,6 +21,7 @@
 
 EXTRA_DIST =\
 capitalize.m4 \
+capitalize2.m4 \
 comments.m4 \
 ddivert.m4 \
 debug.m4 \
