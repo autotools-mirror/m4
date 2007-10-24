@@ -6035,6 +6035,9 @@ changed strings for quotes or comments.  And future releases of
 
 @comment options: -F /dev/null
 @example
+ifdef(`__unix__', ,
+      `errprint(` skipping: /dev/null not known to exist
+')m4exit(`77')')dnl
 traceon(`undefined')dnl
 @end example
 @end ignore
