@@ -23,12 +23,13 @@
 
 #include "m4.h"
 
-/* Unread input can be either files, that should be read (eg. included
-   files), strings, which should be rescanned (eg. macro expansion text),
-   or quoted macro definitions (as returned by the builtin "defn").
-   Unread input are organised in a stack, implemented with an obstack.
-   Each input source is described by a "struct input_block".  The obstack
-   is "current_input".  The top of the input stack is "isp".
+/* Unread input can be either files to be read (command line,
+   "include", "sinclude"), strings which should be rescanned (macro
+   expansion text), or quoted macro definitions (as returned by the
+   builtin "defn").  Unread input is organized in a stack, implemented
+   with an obstack.  Each input source is described by a "struct
+   input_block".  The obstack is "current_input".  The top of the
+   input stack is "isp".
 
    The macro "m4wrap" places the text to be saved on another input
    stack, on the obstack "wrapup_stack", whose top is "wsp".  When EOF
@@ -42,12 +43,13 @@
 
    Pushing new input on the input stack is done by push_file (),
    push_string (), push_wrapup () (for wrapup text), and push_macro ()
-   (for macro definitions).  Because macro expansion needs direct access
-   to the current input obstack (for optimisation), push_string () are
-   split in two functions, push_string_init (), which returns a pointer
-   to the current input stack, and push_string_finish (), which return a
-   pointer to the final text.  The input_block *next is used to manage
-   the coordination between the different push routines.
+   (for macro definitions).  Because macro expansion needs direct
+   access to the current input obstack (for optimization), push_string
+   () is split in two functions, push_string_init (), which returns a
+   pointer to the current input stack, and push_string_finish (),
+   which returns a pointer to the final text.  The input_block *next
+   is used to manage the coordination between the different push
+   routines.
 
    The current file and line number are stored in two global
    variables, for use by the error handling functions in m4.c.  Macro
@@ -62,6 +64,7 @@
 # include "regex.h"
 #endif /* ENABLE_CHANGEWORD */
 
+/* Type of an input block.  */
 enum input_type
 {
   INPUT_STRING,		/* String resulting from macro expansion.  */
@@ -71,28 +74,29 @@ enum input_type
 
 typedef enum input_type input_type;
 
+/* A block of input to be scanned.  */
 struct input_block
 {
-  struct input_block *prev;	/* previous input_block on the input stack */
-  input_type type;		/* see enum values */
-  const char *file;		/* file where this input is from */
-  int line;			/* line where this input is from */
+  struct input_block *prev;	/* Previous input_block on the input stack.  */
+  input_type type;		/* See enum values.  */
+  const char *file;		/* File where this input is from.  */
+  int line;			/* Line where this input is from.  */
   union
     {
       struct
 	{
-	  char *string;		/* remaining string value */
+	  char *string;		/* Remaining string value.  */
 	}
 	u_s;	/* INPUT_STRING */
       struct
 	{
-	  FILE *fp;		     /* input file handle */
-	  bool_bitfield end : 1;     /* true if peek has seen EOF */
-	  bool_bitfield close : 1;   /* true if we should close file on pop */
-	  bool_bitfield advance : 1; /* track previous start_of_input_line */
+	  FILE *fp;		     /* Input file handle.  */
+	  bool_bitfield end : 1;     /* True if peek has seen EOF.  */
+	  bool_bitfield close : 1;   /* True to close file on pop.  */
+	  bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
 	}
 	u_f;	/* INPUT_FILE */
-      builtin_func *func;	/* pointer to macro's function */
+      builtin_func *func;	/* Pointer to macro's function.  */
     }
   u;
 };
@@ -136,8 +140,8 @@ static bool start_of_input_line;
 /* Flag for next_char () to recognize change in input block.  */
 static bool input_change;
 
-#define CHAR_EOF	256	/* character return on EOF */
-#define CHAR_MACRO	257	/* character return for MACRO token */
+#define CHAR_EOF	256	/* Character return on EOF.  */
+#define CHAR_MACRO	257	/* Character return for MACRO token.  */
 
 /* Quote chars.  */
 STRING rquote;
@@ -151,16 +155,30 @@ STRING ecomm;
 
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
+/* Table of characters that can start a word.  */
 static char *word_start;
+
+/* Current regular expression for detecting words.  */
 static struct re_pattern_buffer word_regexp;
-static int default_word_regexp;
+
+/* True if changeword is not active.  */
+static bool default_word_regexp;
+
+/* Reused memory for detecting matches in word detection.  */
 static struct re_registers regs;
 
 #else /* !ENABLE_CHANGEWORD */
-# define default_word_regexp 1
+# define default_word_regexp true
 #endif /* !ENABLE_CHANGEWORD */
 
+/* Track the current quote age, determined by all significant
+   changequote, changecom, and changeword calls, since any one of
+   these can alter the rescan of a prior parameter in a quoted
+   context.  */
+static unsigned int current_quote_age;
+
 static bool pop_input (bool);
+static void set_quote_age (void);
 
 #ifdef DEBUG_INPUT
 static const char *token_type_string (token_type);
@@ -172,7 +190,8 @@ static const char *token_type_string (token_type);
 | current file name and line number.  If next is non-NULL, this push |
 | invalidates a call to push_string_init (), whose storage is        |
 | consequently released.  If CLOSE, then close FP after EOF is       |
-| detected.                                                          |
+| detected.  TITLE is used as the location for text parsed from the  |
+| file (not necessarily the file name).                              |
 `-------------------------------------------------------------------*/
 
 void
@@ -206,11 +225,11 @@ push_file (FILE *fp, const char *title, bool close)
   isp = i;
 }
 
-/*---------------------------------------------------------------.
-| push_macro () pushes a builtin macro's definition on the input |
-| stack.  If next is non-NULL, this push invalidates a call to   |
-| push_string_init (), whose storage is consequently released.   |
-`---------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| push_macro () pushes the builtin macro FUNC on the input stack.  |
+| If next is non-NULL, this push invalidates a call to             |
+| push_string_init (), whose storage is consequently released.     |
+`-----------------------------------------------------------------*/
 
 void
 push_macro (builtin_func *func)
@@ -235,10 +254,10 @@ push_macro (builtin_func *func)
   isp = i;
 }
 
-/*------------------------------------------------------------------.
-| First half of push_string ().  The pointer next points to the new |
-| input_block.							    |
-`------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| First half of push_string ().  The return value points to the |
+| obstack where expansion text should be placed.                |
+`--------------------------------------------------------------*/
 
 struct obstack *
 push_string_init (void)
@@ -257,14 +276,15 @@ push_string_init (void)
   return current_input;
 }
 
-/*------------------------------------------------------------------------.
-| Last half of push_string ().  If next is now NULL, a call to push_file  |
-| () has invalidated the previous call to push_string_init (), so we just |
-| give up.  If the new object is void, we do not push it.  The function	  |
-| push_string_finish () returns a pointer to the finished object.  This	  |
-| pointer is only for temporary use, since reading the next token might	  |
-| release the memory used for the object.				  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Last half of push_string ().  If next is now NULL, a call to       |
+| push_file () or push_macro () has invalidated the previous call to |
+| push_string_init (), so we just give up.  If the new object is     |
+| void, we do not push it.  The function push_string_finish ()       |
+| returns a pointer to the finished object.  This pointer is only    |
+| for temporary use, since reading the next token might release the  |
+| memory used for the object.                                        |
+`-------------------------------------------------------------------*/
 
 const char *
 push_string_finish (void)
@@ -413,7 +433,7 @@ pop_wrapup (void)
 
 /*-------------------------------------------------------------------.
 | When a MACRO token is seen, next_token () uses init_macro_token () |
-| to retrieve the value of the function pointer.                     |
+| to retrieve the value of the function pointer and store it in TD.  |
 `-------------------------------------------------------------------*/
 
 static void
@@ -425,12 +445,14 @@ init_macro_token (token_data *td)
 }
 
 
-/*------------------------------------------------------------------------.
-| Low level input is done a character at a time.  The function peek_input |
-| () is used to look at the next character in the input stream.  At any	  |
-| given time, it reads from the input_block on the top of the current	  |
-| input stack.								  |
-`------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Low level input is done a character at a time.  The function     |
+| peek_input () is used to look at the next character in the input |
+| stream.  At any given time, it reads from the input_block on the |
+| top of the current input stack.  The return value is an unsigned |
+| char, or CHAR_EOF if there is no more input, or CHAR_MACRO if a  |
+| builtin token occurs next.                                       |
+`-----------------------------------------------------------------*/
 
 static int
 peek_input (void)
@@ -556,7 +578,8 @@ next_char_1 (void)
 
 /*-------------------------------------------------------------------.
 | skip_line () simply discards all immediately following characters, |
-| up to the first newline.  It is only used from m4_dnl ().          |
+| up to the first newline.  It is only used from m4_dnl ().  Report  |
+| warnings on behalf of NAME.                                        |
 `-------------------------------------------------------------------*/
 
 void
@@ -585,7 +608,7 @@ skip_line (const char *name)
 
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
-| input stream.  If the string matches the input and consume is     |
+| input stream.  If the string S matches the input and CONSUME is   |
 | true, the input is discarded; otherwise any characters read are   |
 | pushed back again.  The function is used only when multicharacter |
 | quotes or comment delimiters are used.                            |
@@ -637,7 +660,7 @@ match_input (const char *s, bool consume)
 | will not hurt efficiency too much when single character quotes and  |
 | comment delimiters are used.  If CONSUME, then CH is the result of  |
 | next_char, and a successful match will discard the matched string.  |
-| Otherwise, CH is the result of peek_char, and the input stream is   |
+| Otherwise, CH is the result of peek_input, and the input stream is  |
 | effectively unchanged.                                              |
 `--------------------------------------------------------------------*/
 
@@ -648,7 +671,7 @@ match_input (const char *s, bool consume)
 
 
 /*----------------------------------------------------------.
-| Inititialise input stacks, and quote/comment characters.  |
+| Inititialize input stacks, and quote/comment characters.  |
 `----------------------------------------------------------*/
 
 void
@@ -689,21 +712,20 @@ input_init (void)
 #ifdef ENABLE_CHANGEWORD
   set_word_regexp (NULL, user_word_regexp);
 #endif /* ENABLE_CHANGEWORD */
+
+  set_quote_age ();
 }
 
 
-/*------------------------------------------------------------------.
-| Functions for setting quotes and comment delimiters.  Used by	    |
-| m4_changecom () and m4_changequote ().  Pass NULL if the argument |
-| was not present, to distinguish from an explicit empty string.    |
-`------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| Set the quote delimiters to LQ and RQ.  Used by m4_changequote ().  |
+| Pass NULL if the argument was not present, to distinguish from an   |
+| explicit empty string.                                              |
+`--------------------------------------------------------------------*/
 
 void
 set_quotes (const char *lq, const char *rq)
 {
-  free (lquote.string);
-  free (rquote.string);
-
   /* POSIX states that with 0 arguments, the default quotes are used.
      POSIX XCU ERN 112 states that behavior is implementation-defined
      if there was only one argument, or if there is an empty string in
@@ -719,18 +741,27 @@ set_quotes (const char *lq, const char *rq)
   else if (!rq || (*lq && !*rq))
     rq = DEF_RQUOTE;
 
+  if (strcmp (lquote.string, lq) == 0 && strcmp (rquote.string, rq) == 0)
+    return;
+
+  free (lquote.string);
+  free (rquote.string);
   lquote.string = xstrdup (lq);
   lquote.length = strlen (lquote.string);
   rquote.string = xstrdup (rq);
   rquote.length = strlen (rquote.string);
+  set_quote_age ();
 }
+
+/*--------------------------------------------------------------------.
+| Set the comment delimiters to BC and EC.  Used by m4_changecom ().  |
+| Pass NULL if the argument was not present, to distinguish from an   |
+| explicit empty string.                                              |
+`--------------------------------------------------------------------*/
 
 void
 set_comment (const char *bc, const char *ec)
 {
-  free (bcomm.string);
-  free (ecomm.string);
-
   /* POSIX requires no arguments to disable comments.  It requires
      empty arguments to be used as-is, but this is counter to
      traditional behavior, because a non-null begin and null end makes
@@ -743,13 +774,25 @@ set_comment (const char *bc, const char *ec)
   else if (!ec || (*bc && !*ec))
     ec = DEF_ECOMM;
 
+  if (strcmp (bcomm.string, bc) == 0 && strcmp (ecomm.string, ec) == 0)
+    return;
+
+  free (bcomm.string);
+  free (ecomm.string);
   bcomm.string = xstrdup (bc);
   bcomm.length = strlen (bcomm.string);
   ecomm.string = xstrdup (ec);
   ecomm.length = strlen (ecomm.string);
+  set_quote_age ();
 }
 
 #ifdef ENABLE_CHANGEWORD
+
+/*-------------------------------------------------------------------.
+| Set the regular expression for recognizing words to REGEXP, and    |
+| report errors on behalf of CALLER.  If REGEXP is NULL, revert back |
+| to the default parsing rules.                                      |
+`-------------------------------------------------------------------*/
 
 void
 set_word_regexp (const char *caller, const char *regexp)
@@ -762,6 +805,7 @@ set_word_regexp (const char *caller, const char *regexp)
   if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
       default_word_regexp = true;
+      set_quote_age ();
       return;
     }
 
@@ -772,7 +816,6 @@ set_word_regexp (const char *caller, const char *regexp)
 
   if (msg != NULL)
     {
-      /* FIXME - report on behalf of macro caller.  */
       m4_warn (0, caller, _("bad regular expression `%s': %s"), regexp, msg);
       return;
     }
@@ -785,6 +828,7 @@ set_word_regexp (const char *caller, const char *regexp)
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
 
   default_word_regexp = false;
+  set_quote_age ();
 
   if (word_start == NULL)
     word_start = (char *) xmalloc (256);
@@ -799,6 +843,82 @@ set_word_regexp (const char *caller, const char *regexp)
 }
 
 #endif /* ENABLE_CHANGEWORD */
+
+/* Call this when changing anything that might impact the quote age,
+   so that quote_age and safe_quotes will reflect the change.  */
+static void
+set_quote_age (void)
+{
+  /* Multi-character quotes are inherently unsafe, since concatenation
+     of individual characters can result in a quote delimiter,
+     consider:
+
+     define(echo,``$1'')define(a,A)changequote(<[,]>)echo(<[]]><[>a]>)
+     => A]> (not ]>a)
+
+   Also, unquoted close delimiters are unsafe, consider:
+
+     define(echo,``$1'')define(a,A)echo(`a''`a')
+     => aA' (not a'a)
+
+   Comment delimiters that overlap with quote delimiters or active
+   characters also present a problem, consider:
+
+     define(echo,$*)echo(a,a,a`'define(a,A)changecom(`,',`,'))
+     => A,a,A (not A,A,A)
+
+   And let's not even think about the impact of changeword, since it
+   will disappear for M4 2.0.
+
+   So rather than check every token for an unquoted delimiter, we
+   merely encode current_quote_age to 0 when things are unsafe, and
+   non-zero when safe (namely, to the 16-bit value composed of the
+   single-character start and end quote delimiters).  There may be
+   other situations which are safe even when this algorithm sets the
+   quote_age to zero, but at least a quote_age of zero always produces
+   correct results (although it may take more time in doing so).  */
+
+  /* Hueristic of characters that might impact rescan if they appear in
+     a quote delimiter.  */
+#define Letters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  static const char unsafe[] = Letters "_0123456789(,) \t\n\r\f\v";
+#undef Letters
+
+  if (lquote.length == 1 && rquote.length == 1
+      && strpbrk(lquote.string, unsafe) == NULL
+      && strpbrk(rquote.string, unsafe) == NULL
+      && default_word_regexp && *lquote.string != *rquote.string
+      && *bcomm.string != '(' && *bcomm.string != ','
+      && *bcomm.string != ')' && *bcomm.string != *lquote.string)
+    current_quote_age = (((*lquote.string & 0xff) << 8)
+			 | (*rquote.string & 0xff));
+  else
+    current_quote_age = 0;
+}
+
+/* Return the current quote age.  Each non-trivial changequote alters
+   this value; the idea is that if quoting hasn't changed, then we can
+   skip parsing a single argument, quoted or unquoted, within the
+   context of a quoted string, as well as skip parsing a series of
+   quoted arguments within the context of argument collection.  */
+unsigned int
+quote_age (void)
+{
+  /* This accessor is a function, so that the implementation can
+     change if needed.  See set_quote_age for the current
+     implementation.  */
+  return current_quote_age;
+}
+
+/* Return true if the current quote delimiters guarantee that
+   reparsing the current token in the context of a quoted string will
+   be safe.  This could always return false and behavior would still
+   be correct, just slower.  */
+bool
+safe_quotes (void)
+{
+  return current_quote_age != 0;
+}
 
 
 /*--------------------------------------------------------------------.
@@ -835,7 +955,7 @@ next_token (token_data *td, int *line, const char *caller)
   if (!line)
     line = &dummy;
 
- /* Can't consume character until after CHAR_MACRO is handled.  */
+  /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
@@ -868,7 +988,7 @@ next_token (token_data *td, int *line, const char *caller)
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
       else
-	/* current_file changed to "" if we see CHAR_EOF, use the
+	/* Current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
 	m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
 			  _("end of file in comment"));
@@ -951,7 +1071,7 @@ next_token (token_data *td, int *line, const char *caller)
 	{
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
-	    /* current_file changed to "" if we see CHAR_EOF, use
+	    /* Current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
 	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
 			      _("end of file in string"));
@@ -977,6 +1097,7 @@ next_token (token_data *td, int *line, const char *caller)
   TOKEN_DATA_LEN (td) = obstack_object_size (&token_stack);
   obstack_1grow (&token_stack, '\0');
   TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
+  TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
     TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);

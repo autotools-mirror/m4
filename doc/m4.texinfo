@@ -2635,6 +2635,47 @@ ifelse(`foo', `bar', `3', `gnu', `gnats', `6', `7', `8')
 @result{}7
 @end example
 
+@ignore
+@comment Stress tests, not worth documenting.
+@comment It would be nice to pass builtin tokens through ifelse, m4wrap,
+@comment user macros; hence the fixmes.
+@example
+define(`e', `$@@')define(`q', ``$@@'')define(`u', `$*')
+@result{}
+define(`cmp', `ifelse($1, $2, `yes', `no')')define(`d', defn(`defn'))
+@result{}
+cmp(`defn(`defn')', `defn(`d')')
+@result{}yes
+cmp(`defn(`defn')', ``<defn>'')
+@result{}no
+cmp(`q(defn(`defn'))', `q(defn(`d'))')
+@result{}yes
+cmp(`q(defn(`defn'))', `q(`<defn>')')
+@result{}no
+cmp(`q(defn(`defn'))', ``'')
+@result{}no
+cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', defn(`d'))')
+@result{}yes
+cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', `<defn>')')
+@result{}no
+cmp(`q(`1', `2', defn(`defn'))', ```1',`2',<defn>'')
+@result{}no
+cmp(`q(`1', `2', defn(`defn'))', ```1',`2',`''')-fixme
+@result{}yes-fixme
+define(`cat', `$1`'ifelse(`$#', `1', `', `$0(shift($@@))')')
+@result{}
+cat(`define(`foo',', defn(`divnum'), `)foo')-fixme
+@result{}-fixme
+cat(e(`define(`bar',', defn(`divnum'), `)bar'))-fixme
+@result{}-fixme
+m4wrap(`u('q(`cat(`define(`baz','', defn(`divnum'), ``)baz')')`)-fixme
+')
+@result{}
+^D
+@result{}-fixme
+@end example
+@end ignore
+
 Naturally, the normal case will be slightly more advanced than these
 examples.  A common use of @code{ifelse} is in macros implementing loops
 of various kinds.
@@ -3713,6 +3754,18 @@ changequote(`"', `"')
 "hi"hi"hi"
 @result{}hiHIhi
 @end example
+
+@ignore
+@comment And another stress test, not worth documenting in the manual.
+@example
+define(`aaaaaaaaaaaaaaaaaaaa', `A')define(`q', `"$@@"')
+@result{}
+changequote(`"', `"')
+@result{}
+q(q("aaaaaaaaaaaaaaaaaaaa", "a"))
+@result{}A,a
+@end example
+@end ignore
 
 It is an error if the end of file occurs within a quoted string.
 
@@ -6490,7 +6543,7 @@ of @samp{-} on the command line.
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
 (first-in, first-out) order, but @acronym{GNU} @code{m4} currently uses
 LIFO order.  Furthermore, @acronym{POSIX} states that only the first
-argument to @code{m4wrap} is saved for later evaluation, bug
+argument to @code{m4wrap} is saved for later evaluation, but
 @acronym{GNU} @code{m4} saves and processes all arguments, with output
 separated by spaces.
 

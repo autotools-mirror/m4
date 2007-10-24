@@ -299,6 +299,13 @@ struct token_data
 	     support NUL.  */
 	  size_t len;
 	  char *text;
+	  /* The value of quote_age when this token was scanned.  If
+	     this token is later encountered in the context of
+	     scanning a quoted string, and quote_age has not changed,
+	     then rescanning this string is provably unnecessary.  If
+	     zero, then this string potentially contains content that
+	     might change the parse on rescan.  Ignored for 0 len.  */
+	  unsigned int quote_age;
 #ifdef ENABLE_CHANGEWORD
 	  char *original_text;
 #endif
@@ -316,6 +323,7 @@ struct token_data
 #define TOKEN_DATA_TYPE(Td)		((Td)->type)
 #define TOKEN_DATA_LEN(Td)		((Td)->u.u_t.len)
 #define TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
+#define TOKEN_DATA_QUOTE_AGE(Td)	((Td)->u.u_t.quote_age)
 #ifdef ENABLE_CHANGEWORD
 # define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
 #endif
@@ -355,6 +363,8 @@ void set_comment (const char *, const char *);
 #ifdef ENABLE_CHANGEWORD
 void set_word_regexp (const char *, const char *);
 #endif
+unsigned int quote_age (void);
+bool safe_quotes (void);
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
