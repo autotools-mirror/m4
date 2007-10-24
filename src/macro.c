@@ -41,6 +41,10 @@ struct macro_arguments
   bool_bitfield has_ref : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
+  /* The value of quote_age used when parsing all arguments in this
+     object, or 0 if quote_age changed during parsing or if any of the
+     arguments might contain content that can affect rescan.  */
+  unsigned int quote_age;
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -48,7 +52,8 @@ struct macro_arguments
 };
 
 static void expand_macro (symbol *);
-static void expand_token (struct obstack *, token_type, token_data *, int);
+static bool expand_token (struct obstack *, token_type, token_data *, int,
+			  bool);
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -95,37 +100,64 @@ expand_input (void)
 #endif
 
   while ((t = next_token (&td, &line, NULL)) != TOKEN_EOF)
-    expand_token ((struct obstack *) NULL, t, &td, line);
+    expand_token ((struct obstack *) NULL, t, &td, line, true);
 
   obstack_free (&argc_stack, NULL);
   obstack_free (&argv_stack, NULL);
 }
 
 
-/*------------------------------------------------------------------------.
-| Expand one token, according to its type.  Potential macro names	  |
-| (TOKEN_WORD) are looked up in the symbol table, to see if they have a	  |
-| macro definition.  If they have, they are expanded as macros, otherwise |
-| the text are just copied to the output.				  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Expand one token TD onto the stack OBS, according to its type T,   |
+| which began parsing on the specified LINE.  If OBS is NULL, output |
+| the data.  If FIRST, there is no previous text in the current	     |
+| argument.  Potential macro names (TOKEN_WORD) are looked up in the |
+| symbol table, to see if they have a macro definition.  If they     |
+| have, they are expanded as macros, otherwise the text is just	     |
+| copied to the output.  Return true if the result is guaranteed to  |
+| give the same parse on rescan in a quoted context, provided	     |
+| quoting doesn't change.  Returning false is always safe, although  |
+| it may lead to slower performance.				     |
+`-------------------------------------------------------------------*/
 
-static void
-expand_token (struct obstack *obs, token_type t, token_data *td, int line)
+static bool
+expand_token (struct obstack *obs, token_type t, token_data *td, int line,
+	      bool first)
 {
   symbol *sym;
+  bool result;
+  int ch;
 
   switch (t)
     {				/* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
+      /* Always safe, since there is no text to rescan.  */
+      return true;
+
+    case TOKEN_STRING:
+      /* Tokens and comments are safe in isolation (since quote_age()
+	 detects any change in delimiters).  But if other text is
+	 already present, multi-character delimiters could be an
+	 issue, so use a conservative heuristic.  */
+      result = first || safe_quotes ();
       break;
 
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:
+      /* Conservative heuristic; thanks to multi-character delimiter
+	 concatenation.  */
+      result = safe_quotes ();
+      break;
+
     case TOKEN_SIMPLE:
-    case TOKEN_STRING:
-      shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+      /* Conservative heuristic; if these characters are whitespace or
+	 numeric, then behavior of safe_quotes is applicable.
+	 Otherwise, assume these characters have a high likelihood of
+	 use in quote delimiters.  */
+      ch = to_uchar (*TOKEN_DATA_TEXT (td));
+      result = (isspace (ch) || isdigit (ch)) && safe_quotes ();
       break;
 
     case TOKEN_WORD:
@@ -141,15 +173,22 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 #else
 	  shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
 #endif /* !ENABLE_CHANGEWORD */
+	  /* The word just appended is unquoted, but the heuristics of
+	     safe_quote are applicable.  */
+	  return safe_quotes();
 	}
-      else
-	expand_macro (sym);
-      break;
+      expand_macro (sym);
+      /* Expanding a macro creates new tokens to scan, and those new
+	 tokens may append unsafe text later; but we did not append
+	 any text now.  */
+      return true;
 
     default:
       assert (!"expand_token");
       abort ();
     }
+  shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+  return result;
 }
 
 
@@ -184,6 +223,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
   int paren_level;
   const char *file = current_file;
   int line = current_line;
+  unsigned int age = quote_age ();
+  bool first = true;
 
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
@@ -211,10 +252,11 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		    return t == TOKEN_COMMA;
 		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		}
+	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	      TOKEN_DATA_LEN (argp) = obstack_object_size (obs);
 	      obstack_1grow (obs, '\0');
-	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+	      TOKEN_DATA_QUOTE_AGE (argp) = age;
 	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -224,11 +266,12 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	    paren_level++;
 	  else if (t == TOKEN_CLOSE)
 	    paren_level--;
-	  expand_token (obs, t, &td, line);
+	  if (!expand_token (obs, t, &td, line, first))
+	    age = 0;
 	  break;
 
 	case TOKEN_EOF:
-	  /* current_file changed to "" if we see TOKEN_EOF, use the
+	  /* Current_file changed to "" if we see TOKEN_EOF, use the
 	     previous value we stored earlier.  */
 	  m4_error_at_line (EXIT_FAILURE, 0, file, line, caller,
 			    _("end of file in argument list"));
@@ -236,7 +279,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 
 	case TOKEN_WORD:
 	case TOKEN_STRING:
-	  expand_token (obs, t, &td, line);
+	  if (!expand_token (obs, t, &td, line, first))
+	    age = 0;
 	  break;
 
 	case TOKEN_MACDEF:
@@ -260,6 +304,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  abort ();
 	}
 
+      if (TOKEN_DATA_TYPE (argp) != TOKEN_VOID || obstack_object_size (obs))
+	first = false;
       t = next_token (&td, NULL, caller);
     }
 }
@@ -285,6 +331,7 @@ collect_arguments (symbol *sym, struct obstack *arguments)
   args.has_ref = false;
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
+  args.quote_age = quote_age ();
   args.arraylen = 0;
   obstack_grow (&argv_stack, &args, offsetof (macro_arguments, array));
 
@@ -303,24 +350,31 @@ collect_arguments (symbol *sym, struct obstack *arguments)
 	  obstack_ptr_grow (&argv_stack, tdp);
 	  args.arraylen++;
 	  args.argc++;
+	  /* Be conservative - any change in quoting while collecting
+	     arguments, or any argument that consists of unsafe text,
+	     will require a rescan if $@ is reused.  */
+	  if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
+	      && TOKEN_DATA_LEN (tdp) > 0
+	      && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
+	    args.quote_age = 0;
 	}
       while (more_args);
     }
   argv = (macro_arguments *) obstack_finish (&argv_stack);
   argv->argc = args.argc;
+  if (args.quote_age != quote_age ())
+    argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
 }
 
 
-/*------------------------------------------------------------------------.
-| The actual call of a macro is handled by call_macro ().  call_macro ()  |
-| is passed a symbol SYM, whose type is used to call either a builtin	  |
-| function, or the user macro expansion function expand_user_macro ()	  |
-| (lives in builtin.c).  There are ARGC arguments to the call, stored in  |
-| the ARGV table.  The expansion is left on the obstack EXPANSION.  Macro |
-| tracing is also handled here.						  |
-`------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Call the macro SYM, which is either a builtin function or a user |
+| macro (via the expansion function expand_user_macro () in        |
+| builtin.c).  There are ARGC arguments to the call, stored in the |
+| ARGV table.  The expansion is left on the obstack EXPANSION.     |
+`-----------------------------------------------------------------*/
 
 void
 call_macro (symbol *sym, int argc, macro_arguments *argv,
@@ -434,6 +488,7 @@ expand_macro (symbol *sym)
     obstack_free (&argv_stack, argv);
 }
 
+
 /* Given ARGV, return the token_data that contains argument INDEX;
    INDEX must be > 0, < argv->argc.  */
 static token_data *
@@ -470,7 +525,6 @@ arg_token (macro_arguments *argv, unsigned int index)
   return token;
 }
 
-
 /* Given ARGV, return how many arguments it refers to.  */
 unsigned int
 arg_argc (macro_arguments *argv)
@@ -494,7 +548,7 @@ arg_type (macro_arguments *argv, unsigned int index)
   return type;
 }
 
-/* Given ARGV, return the text at argument INDEX, or NULL if the
+/* Given ARGV, return the text at argument INDEX.  Abort if the
    argument is not text.  Index 0 is always text, and indices beyond
    argc return the empty string.  */
 const char *
@@ -511,8 +565,6 @@ arg_text (macro_arguments *argv, unsigned int index)
     {
     case TOKEN_TEXT:
       return TOKEN_DATA_TEXT (token);
-    case TOKEN_FUNC:
-      return NULL;
     case TOKEN_COMP:
       /* TODO - how to concatenate multiple arguments?  For now, we expect
 	 only one element in the chain, and arg_token dereferences it.  */
@@ -555,7 +607,7 @@ arg_empty (macro_arguments *argv, unsigned int index)
   return arg_token (argv, index) == &empty_token;
 }
 
-/* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
+/* Given ARGV, return the length of argument INDEX.  Abort if the
    argument is not text.  Indices beyond argc return 0.  */
 size_t
 arg_len (macro_arguments *argv, unsigned int index)
@@ -572,8 +624,6 @@ arg_len (macro_arguments *argv, unsigned int index)
     case TOKEN_TEXT:
       assert ((token == &empty_token) == (TOKEN_DATA_LEN (token) == 0));
       return TOKEN_DATA_LEN (token);
-    case TOKEN_FUNC:
-      return SIZE_MAX;
     case TOKEN_COMP:
       /* TODO - how to concatenate multiple arguments?  For now, we expect
 	 only one element in the chain, and arg_token dereferences it.  */
@@ -585,30 +635,15 @@ arg_len (macro_arguments *argv, unsigned int index)
 }
 
 /* Given ARGV, return the builtin function referenced by argument
-   INDEX, or NULL if it is not a builtin.  Index 0, and indices beyond
-   argc, return NULL.  */
+   INDEX.  Abort if it is not a builtin in isolation.  */
 builtin_func *
 arg_func (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
 
-  if (index == 0 || index >= argv->argc)
-    return NULL;
   token = arg_token (argv, index);
-  switch (TOKEN_DATA_TYPE (token))
-    {
-    case TOKEN_FUNC:
-      return TOKEN_DATA_FUNC (token);
-    case TOKEN_TEXT:
-      return NULL;
-    case TOKEN_COMP:
-      /* TODO - how to concatenate multiple arguments?  For now, we expect
-	 only one element in the chain.  */
-    default:
-      break;
-    }
-  assert(!"arg_func");
-  abort ();
+  assert (TOKEN_DATA_TYPE (token) == TOKEN_FUNC);
+  return TOKEN_DATA_FUNC (token);
 }
 
 /* Create a new argument object using the same obstack as ARGV; thus,
@@ -671,5 +706,6 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
+  new_argv->quote_age = argv->quote_age;
   return new_argv;
 }

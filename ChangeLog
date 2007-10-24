@@ -1,3 +1,25 @@
+2007-12-07  Eric Blake  <ebb9@byu.net>
+
+	Stage 5: add notion of quote age.
+	* src/input.c: Comment cleanups.
+	(current_quote_age): New global variable.
+	(set_quote_age): New helper function.
+	(input_init, set_word_regexp): Use it.
+	(set_quotes, set_comment): Likewise, and detect no-op changes.
+	(quote_age, safe_quotes): New functions.
+	(next_token): Track quote age.
+	* src/m4.h (struct token_data): Add quote_age member.
+	(TOKEN_DATA_QUOTE_AGE, quote_age, safe_quotes): New prototypes.
+	* src/macro.c (struct macro_arguments): Add quote_age member.
+	(expand_token): Alter signature and track quote age.
+	(expand_input, expand_argument): All callers changed.
+	(collect_arguments, make_argv_ref): Track quote age.
+	(arg_text, arg_len, arg_func): Detect type mismatch.
+	* doc/m4.texinfo (Ifelse, Changequote): Add more tests.
+	(Incompatibilities): Fix typo.
+	* examples/wraplifo.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+
 2007-12-04  Eric Blake  <ebb9@byu.net>
 
 	Fix builds with OpenBSD make.

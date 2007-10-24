@@ -58,4 +58,5 @@ translit.m4 \
 undivert.incl \
 undivert.m4 \
 wrap.m4 \
-wrapfifo.m4
+wrapfifo.m4 \
+wraplifo.m4
