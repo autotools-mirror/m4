@@ -21,7 +21,6 @@
 
 #include "m4.h"
 
-#include <limits.h>
 #include <sys/stat.h>
 
 #include "gl_avltree_oset.h"
