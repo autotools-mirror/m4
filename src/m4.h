@@ -284,7 +284,7 @@ enum token_data_type
 struct token_chain
 {
   token_chain *next;	/* Pointer to next link of chain.  */
-  char *str;		/* NUL-terminated string if text, else NULL.  */
+  const char *str;	/* NUL-terminated string if text, else NULL.  */
   size_t len;		/* Length of str, else 0.  */
   macro_arguments *argv;/* Reference to earlier $@.  */
   unsigned int index;	/* Argument index within argv.  */
@@ -303,7 +303,7 @@ struct token_data
 	     cache for now.  But it will be essential if we ever DO
 	     support NUL.  */
 	  size_t len;
-	  char *text;
+	  char *text; /* The contents of the token.  */
 	  /* The value of quote_age when this token was scanned.  If
 	     this token is later encountered in the context of
 	     scanning a quoted string, and quote_age has not changed,
@@ -312,7 +312,11 @@ struct token_data
 	     might change the parse on rescan.  Ignored for 0 len.  */
 	  unsigned int quote_age;
 #ifdef ENABLE_CHANGEWORD
-	  char *original_text;
+	  /* If changeword is in effect, and contains a () group, then
+	     this contains the entire token, while text contains the
+	     portion that matched the () group to form a macro name.
+	     Otherwise, this field is unused.  */
+	  const char *original_text;
 #endif
 	}
       u_t;
@@ -346,6 +350,7 @@ void skip_line (const char *);
 void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
+void push_token (token_data *, int);
 const input_block *push_string_finish (void);
 void push_wrapup (const char *);
 bool pop_wrapup (void);

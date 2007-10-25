@@ -69,7 +69,8 @@ enum input_type
 {
   INPUT_STRING,		/* String resulting from macro expansion.  */
   INPUT_FILE,		/* File from command line or include.  */
-  INPUT_MACRO		/* Builtin resulting from defn.  */
+  INPUT_MACRO,		/* Builtin resulting from defn.  */
+  INPUT_CHAIN		/* FIFO chain of separate strings and $@ refs.  */
 };
 
 typedef enum input_type input_type;
@@ -85,7 +86,8 @@ struct input_block
     {
       struct
 	{
-	  char *string;		/* Remaining string value.  */
+	  char *str;		/* Remaining string value.  */
+	  size_t len;		/* Remaining length.  */
 	}
 	u_s;	/* INPUT_STRING */
       struct
@@ -96,7 +98,13 @@ struct input_block
 	  bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
 	}
 	u_f;	/* INPUT_FILE */
-      builtin_func *func;	/* Pointer to macro's function.  */
+      builtin_func *func;	/* INPUT_MACRO */
+      struct
+	{
+	  token_chain *chain;	/* Current link in chain.  */
+	  token_chain *end;	/* Last link in chain.  */
+	}
+	u_c;	/* INPUT_CHAIN */
     }
   u;
 };
@@ -182,6 +190,36 @@ static void set_quote_age (void);
 static const char *token_type_string (token_type);
 #endif /* DEBUG_INPUT */
 
+
+/*-------------------------------------------------------------------.
+| Given an obstack OBS, capture any unfinished text as a link in the |
+| chain that starts at *START and ends at *END.  START may be NULL   |
+| if *END is non-NULL.                                               |
+`-------------------------------------------------------------------*/
+static void
+make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
+{
+  token_chain *chain;
+  size_t len = obstack_object_size (obs);
+
+  assert (end && (start || *end));
+  if (len)
+    {
+      char *str = (char *) obstack_finish (obs);
+      chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+      if (*end)
+	(*end)->next = chain;
+      else
+	*start = chain;
+      *end = chain;
+      chain->next = NULL;
+      chain->str = str;
+      chain->len = len;
+      chain->argv = NULL;
+      chain->index = 0;
+      chain->flatten = false;
+    }
+}
 
 /*-------------------------------------------------------------------.
 | push_file () pushes an input file on the input stack, saving the   |
@@ -272,6 +310,54 @@ push_string_init (void)
 }
 
 /*-------------------------------------------------------------------.
+| If TOKEN contains text, then convert the current string into a     |
+| chain if it is not one already, and add the contents of TOKEN as a |
+| new link in the chain.  LEVEL describes the current expansion      |
+| level, or -1 if the contents of TOKEN reside entirely on the       |
+| current_input stack and TOKEN lives in temporary storage.  Allows  |
+| gathering input from multiple locations, rather than copying       |
+| everything consecutively onto the input stack.  Must be called     |
+| between push_string_init and push_string_finish.                   |
+`-------------------------------------------------------------------*/
+void
+push_token (token_data *token, int level)
+{
+  token_chain *chain;
+
+  assert (next);
+  // TODO - also accept TOKEN_COMP chains
+  assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
+  if (TOKEN_DATA_LEN (token) == 0)
+    return;
+
+  if (next->type == INPUT_STRING)
+    {
+      next->type = INPUT_CHAIN;
+      next->u.u_c.chain = next->u.u_c.end = NULL;
+    }
+  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+  chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
+  if (next->u.u_c.end)
+    next->u.u_c.end->next = chain;
+  else
+    next->u.u_c.chain = chain;
+  next->u.u_c.end = chain;
+  chain->next = NULL;
+  if (level >= 0)
+    // TODO - use token as-is, rather than copying data.  This implies
+    // lengthening lifetime of $@ arguments until the rescan is complete,
+    // rather than the current approach of freeing them during expand_macro
+    chain->str = (char *) obstack_copy (current_input, TOKEN_DATA_TEXT (token),
+					TOKEN_DATA_LEN (token));
+  else
+    chain->str = TOKEN_DATA_TEXT (token);
+  chain->len = TOKEN_DATA_LEN (token);
+  chain->argv = NULL;
+  chain->index = 0;
+  chain->flatten = false;
+}
+
+/*-------------------------------------------------------------------.
 | Last half of push_string ().  If next is now NULL, a call to       |
 | push_file () or push_macro () has invalidated the previous call to |
 | push_string_init (), so we just give up.  If the new object is     |
@@ -294,10 +380,15 @@ push_string_finish (void)
       return NULL;
     }
 
-  if (len)
+  if (len || next->type == INPUT_CHAIN)
     {
-      obstack_1grow (current_input, '\0');
-      next->u.u_s.string = (char *) obstack_finish (current_input);
+      if (next->type == INPUT_STRING)
+	{
+	  next->u.u_s.str = (char *) obstack_finish (current_input);
+	  next->u.u_s.len = len;
+	}
+      else
+	make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
       next->prev = isp;
       isp = next;
       input_change = true;
@@ -327,7 +418,8 @@ push_wrapup (const char *s)
   i->type = INPUT_STRING;
   i->file = current_file;
   i->line = current_line;
-  i->u.u_s.string = (char *) obstack_copy0 (wrapup_stack, s, strlen (s));
+  i->u.u_s.len = strlen (s);
+  i->u.u_s.str = (char *) obstack_copy (wrapup_stack, s, i->u.u_s.len);
   wsp = i;
 }
 
@@ -345,18 +437,39 @@ static bool
 pop_input (bool cleanup)
 {
   input_block *tmp = isp->prev;
+  token_chain *chain;
 
   switch (isp->type)
     {
     case INPUT_STRING:
-      assert (!cleanup || !*isp->u.u_s.string);
-      if (*isp->u.u_s.string)
+      assert (!cleanup || !isp->u.u_s.len);
+      if (isp->u.u_s.len)
 	return false;
       break;
 
     case INPUT_MACRO:
       if (!cleanup)
 	return false;
+      break;
+
+    case INPUT_CHAIN:
+      chain = isp->u.u_c.chain;
+      assert (!chain || !cleanup);
+      while (chain)
+	{
+	  if (chain->str)
+	    {
+	      if (chain->len)
+		return false;
+	    }
+	  else
+	    {
+	      // TODO - peek into argv
+	      assert (!"implemented yet");
+	      abort ();
+	    }
+	  chain = chain->next;
+	}
       break;
 
     case INPUT_FILE:
@@ -451,12 +564,13 @@ void
 input_print (struct obstack *obs, const input_block *input)
 {
   int maxlen = max_debug_argument_length;
+  token_chain *chain;
 
   assert (input);
   switch (input->type)
     {
     case INPUT_STRING:
-      obstack_print (obs, input->u.u_s.string, SIZE_MAX, &maxlen);
+      obstack_print (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
       break;
     case INPUT_FILE:
       obstack_grow (obs, "<file: ", strlen ("<file: "));
@@ -471,6 +585,17 @@ input_print (struct obstack *obs, const input_block *input)
 	obstack_grow (obs, bp->name, strlen (bp->name));
 	obstack_1grow (obs, '>');
       }
+      break;
+    case INPUT_CHAIN:
+      chain = input->u.u_c.chain;
+      while (chain)
+	{
+	  // TODO support argv refs as well
+	  assert (chain->str);
+	  if (obstack_print (obs, chain->str, chain->len, &maxlen))
+	    return;
+	  chain = chain->next;
+	}
       break;
     default:
       assert (!"input_print");
@@ -493,6 +618,7 @@ peek_input (void)
 {
   int ch;
   input_block *block = isp;
+  token_chain *chain;
 
   while (1)
     {
@@ -502,10 +628,9 @@ peek_input (void)
       switch (block->type)
 	{
 	case INPUT_STRING:
-	  ch = to_uchar (block->u.u_s.string[0]);
-	  if (ch != '\0')
-	    return ch;
-	  break;
+	  if (!block->u.u_s.len)
+	    break;
+	  return to_uchar (block->u.u_s.str[0]);
 
 	case INPUT_FILE:
 	  ch = getc (block->u.u_f.fp);
@@ -519,6 +644,25 @@ peek_input (void)
 
 	case INPUT_MACRO:
 	  return CHAR_MACRO;
+
+	case INPUT_CHAIN:
+	  chain = block->u.u_c.chain;
+	  while (chain)
+	    {
+	      if (chain->str)
+		{
+		  if (chain->len)
+		    return to_uchar (chain->str[0]);
+		}
+	      else
+		{
+		  // TODO - peek into argv
+		  assert (!"implemented yet");
+		  abort ();
+		}
+	      chain = chain->next;
+	    }
+	  break;
 
 	default:
 	  assert (!"peek_input");
@@ -539,15 +683,15 @@ peek_input (void)
 `-------------------------------------------------------------------------*/
 
 #define next_char() \
-  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]	\
-   && !input_change						\
-   ? to_uchar (*isp->u.u_s.string++)				\
+  (isp && isp->type == INPUT_STRING && isp->u.u_s.len && !input_change	\
+   ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
    : next_char_1 ())
 
 static int
 next_char_1 (void)
 {
   int ch;
+  token_chain *chain;
 
   while (1)
     {
@@ -568,13 +712,10 @@ next_char_1 (void)
       switch (isp->type)
 	{
 	case INPUT_STRING:
-	  ch = to_uchar (*isp->u.u_s.string);
-	  if (ch != '\0')
-	    {
-	      isp->u.u_s.string++;
-	      return ch;
-	    }
-	  break;
+	  if (!isp->u.u_s.len)
+	    break;
+	  isp->u.u_s.len--;
+	  return to_uchar (*isp->u.u_s.str++);
 
 	case INPUT_FILE:
 	  if (start_of_input_line)
@@ -599,6 +740,28 @@ next_char_1 (void)
 	  /* INPUT_MACRO input sources has only one token */
 	  pop_input (true);
 	  return CHAR_MACRO;
+
+	case INPUT_CHAIN:
+	  chain = isp->u.u_c.chain;
+	  while (chain)
+	    {
+	      if (chain->str)
+		{
+		  if (chain->len)
+		    {
+		      chain->len--;
+		      return to_uchar (*chain->str++);
+		    }
+		}
+	      else
+		{
+		  // TODO - read from argv
+		  assert (!"implemented yet");
+		  abort ();
+		}
+	      isp->u.u_c.chain = chain = chain->next;
+	    }
+	  break;
 
 	default:
 	  assert (!"next_char_1");
