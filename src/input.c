@@ -77,7 +77,7 @@ typedef enum input_type input_type;
 /* A block of input to be scanned.  */
 struct input_block
 {
-  struct input_block *prev;	/* Previous input_block on the input stack.  */
+  input_block *prev;		/* Previous input_block on the input stack.  */
   input_type type;		/* See enum values.  */
   const char *file;		/* File where this input is from.  */
   int line;			/* Line where this input is from.  */
@@ -100,8 +100,6 @@ struct input_block
     }
   u;
 };
-
-typedef struct input_block input_block;
 
 
 /* Current input file name.  */
@@ -208,8 +206,7 @@ push_file (FILE *fp, const char *title, bool close)
   if (debug_level & DEBUG_TRACE_INPUT)
     DEBUG_MESSAGE1 ("input read from %s", title);
 
-  i = (input_block *) obstack_alloc (current_input,
-				     sizeof (struct input_block));
+  i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_FILE;
   i->file = (char *) obstack_copy0 (&file_names, title, strlen (title));
   i->line = 1;
@@ -242,8 +239,7 @@ push_macro (builtin_func *func)
       next = NULL;
     }
 
-  i = (input_block *) obstack_alloc (current_input,
-				     sizeof (struct input_block));
+  i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_MACRO;
   i->file = current_file;
   i->line = current_line;
@@ -267,8 +263,7 @@ push_string_init (void)
   while (isp && pop_input (false));
 
   /* Reserve the next location on the obstack.  */
-  next = (input_block *) obstack_alloc (current_input,
-					sizeof (struct input_block));
+  next = (input_block *) obstack_alloc (current_input, sizeof *next);
   next->type = INPUT_STRING;
   next->file = current_file;
   next->line = current_line;
@@ -281,30 +276,35 @@ push_string_init (void)
 | push_file () or push_macro () has invalidated the previous call to |
 | push_string_init (), so we just give up.  If the new object is     |
 | void, we do not push it.  The function push_string_finish ()       |
-| returns a pointer to the finished object.  This pointer is only    |
-| for temporary use, since reading the next token might release the  |
-| memory used for the object.                                        |
+| returns an opaque pointer to the finished object, which can then   |
+| be printed with input_print when tracing is enabled.  This pointer |
+| is only for temporary use, since reading the next token will       |
+| invalidate the object.                                             |
 `-------------------------------------------------------------------*/
 
-const char *
+const input_block *
 push_string_finish (void)
 {
-  const char *ret = NULL;
+  input_block *ret = NULL;
+  size_t len = obstack_object_size (current_input);
 
   if (next == NULL)
-    return NULL;
+    {
+      assert (!len);
+      return NULL;
+    }
 
-  if (obstack_object_size (current_input) > 0)
+  if (len)
     {
       obstack_1grow (current_input, '\0');
       next->u.u_s.string = (char *) obstack_finish (current_input);
       next->prev = isp;
       isp = next;
-      ret = isp->u.u_s.string;	/* for immediate use only */
       input_change = true;
+      ret = isp;
     }
   else
-    obstack_free (current_input, next); /* people might leave garbage on it. */
+    obstack_free (current_input, next);
   next = NULL;
   return ret;
 }
@@ -322,8 +322,7 @@ void
 push_wrapup (const char *s)
 {
   input_block *i;
-  i = (input_block *) obstack_alloc (wrapup_stack,
-				     sizeof (struct input_block));
+  i = (input_block *) obstack_alloc (wrapup_stack, sizeof *i);
   i->prev = wsp;
   i->type = INPUT_STRING;
   i->file = current_file;
@@ -421,7 +420,7 @@ pop_wrapup (void)
     }
 
   current_input = wrapup_stack;
-  wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
+  wrapup_stack = (struct obstack *) xmalloc (sizeof *wrapup_stack);
   obstack_init (wrapup_stack);
 
   isp = wsp;
@@ -442,6 +441,41 @@ init_macro_token (token_data *td)
   assert (isp->type == INPUT_MACRO);
   TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
   TOKEN_DATA_FUNC (td) = isp->u.func;
+}
+
+/*--------------------------------------------------------------.
+| Dump a representation of INPUT to the obstack OBS, for use in |
+| tracing.                                                      |
+`--------------------------------------------------------------*/
+void
+input_print (struct obstack *obs, const input_block *input)
+{
+  int maxlen = max_debug_argument_length;
+
+  assert (input);
+  switch (input->type)
+    {
+    case INPUT_STRING:
+      obstack_print (obs, input->u.u_s.string, SIZE_MAX, &maxlen);
+      break;
+    case INPUT_FILE:
+      obstack_grow (obs, "<file: ", strlen ("<file: "));
+      obstack_grow (obs, input->file, strlen (input->file));
+      obstack_1grow (obs, '>');
+      break;
+    case INPUT_MACRO:
+      {
+	const builtin *bp = find_builtin_by_addr (input->u.func);
+	assert (bp);
+	obstack_1grow (obs, '<');
+	obstack_grow (obs, bp->name, strlen (bp->name));
+	obstack_1grow (obs, '>');
+      }
+      break;
+    default:
+      assert (!"input_print");
+      abort ();
+    }
 }
 
 
@@ -680,9 +714,9 @@ input_init (void)
   current_file = "";
   current_line = 0;
 
-  current_input = (struct obstack *) xmalloc (sizeof (struct obstack));
+  current_input = (struct obstack *) xmalloc (sizeof *current_input);
   obstack_init (current_input);
-  wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
+  wrapup_stack = (struct obstack *) xmalloc (sizeof *wrapup_stack);
   obstack_init (wrapup_stack);
 
   obstack_init (&file_names);

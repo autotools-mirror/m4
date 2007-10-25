@@ -415,7 +415,7 @@ expand_macro (symbol *sym)
   unsigned int argv_size;	/* Size of argv_stack on entry.  */
   macro_arguments *argv;
   struct obstack *expansion;
-  const char *expanded;
+  const input_block *expanded;
   bool traced;
   int my_call_id;
 
@@ -459,14 +459,14 @@ expand_macro (symbol *sym)
   current_line = loc_open_line;
 
   if (traced)
-    trace_pre (SYMBOL_NAME (sym), my_call_id, argv->argc, argv);
+    trace_pre (SYMBOL_NAME (sym), my_call_id, argv);
 
   expansion = push_string_init ();
   call_macro (sym, argv->argc, argv, expansion);
   expanded = push_string_finish ();
 
   if (traced)
-    trace_post (SYMBOL_NAME (sym), my_call_id, argv->argc, argv, expanded);
+    trace_post (SYMBOL_NAME (sym), my_call_id, argv, expanded);
 
   current_file = loc_close_file;
   current_line = loc_close_line;
@@ -708,4 +708,54 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
   return new_argv;
+}
+
+/* Push argument INDEX from ARGV, which must be a text token, onto the
+   expansion stack OBS for rescanning.  */
+void
+push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
+{
+  token_data *token;
+
+  if (index == 0)
+    {
+      obstack_grow (obs, argv->argv0, argv->argv0_len);
+      return;
+    }
+  if (index >= argv->argc)
+    return;
+  token = arg_token (argv, index);
+  /* TODO handle func tokens?  */
+  assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
+  /* TODO push a reference, rather than copying data.  */
+  obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
+}
+
+/* Push series of comma-separated arguments from ARGV, which should
+   all be text, onto the expansion stack OBS for rescanning.  If SKIP,
+   then don't push the first argument.  If QUOTE, the rescan also
+   includes quoting around each arg.  */
+void
+push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
+{
+  token_data *token;
+  unsigned int i;
+  bool comma = false;
+
+  /* TODO push reference, rather than copying data.  */
+  for (i = skip ? 2 : 1; i < argv->argc; i++)
+    {
+      token = arg_token (argv, i);
+      if (comma)
+	obstack_1grow (obs, ',');
+      else
+	comma = true;
+      /* TODO handle func tokens?  */
+      assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
+      if (quote)
+	obstack_grow (obs, lquote.string, lquote.length);
+      obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
+      if (quote)
+	obstack_grow (obs, rquote.string, rquote.length);
+    }
 }

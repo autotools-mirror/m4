@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -96,6 +97,7 @@ typedef struct string STRING;
    (OBS)->object_base = (char *) (OBJECT))
 
 /* These must come first.  */
+typedef struct input_block input_block;
 typedef struct token_data token_data;
 typedef struct macro_arguments macro_arguments;
 typedef void builtin_func (struct obstack *, int, macro_arguments *);
@@ -245,8 +247,11 @@ bool debug_set_output (const char *, const char *);
 void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
-void trace_pre (const char *, int, int, macro_arguments *);
-void trace_post (const char *, int, int, macro_arguments *, const char *);
+void trace_pre (const char *, int, macro_arguments *);
+void trace_post (const char *, int, macro_arguments *,
+		 const input_block *);
+
+bool obstack_print (struct obstack *, const char *, size_t, int *);
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -341,9 +346,10 @@ void skip_line (const char *);
 void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
-const char *push_string_finish (void);
+const input_block *push_string_finish (void);
 void push_wrapup (const char *);
 bool pop_wrapup (void);
+void input_print (struct obstack *, const input_block *);
 
 /* current input file, and line */
 extern const char *current_file;
@@ -447,6 +453,8 @@ size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
+void push_arg (struct obstack *, macro_arguments *, unsigned int);
+void push_args (struct obstack *, macro_arguments *, bool, bool);
 
 
 /* File: builtin.c  --- builtins.  */

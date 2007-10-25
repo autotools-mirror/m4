@@ -1,3 +1,29 @@
+2007-12-10  Eric Blake  <ebb9@byu.net>
+
+	Stage 6: convert builtins to push arg at a time.
+	* src/m4.h (includes): Include <limits.h> here, instead of in
+	individual files.
+	(input_block): New typedef.
+	(trace_pre, trace_post, push_string_finish): Update prototypes.
+	(obstack_print, input_print, push_arg, push_args): New
+	prototypes.
+	* src/input.c (push_string_finish): Change return type.
+	(input_print): New function.
+	* src/debug.c (trace_format): Add %B specifier, and use new
+	function.
+	(trace_pre): Remove redundant argc parameter.
+	(trace_post): Likewise, and change signature.
+	(obstack_print): New function.
+	* src/macro.c (expand_macro): Update caller.
+	(push_arg, push_args): New functions.
+	* src/builtin.c (m4_ifdef, m4_ifelse, m4_shift, m4_substr)
+	(m4_patsubst, expand_user_macro): Use new functions.
+	(mkstemp_helper, m4_maketemp): Avoid extra trailing NULs.
+	* src/m4.c (max_debug_argument_length, main): Set to INT_MAX, not
+	0, for unlimited.
+	* src/output.c: Update includes.
+	* src/symtab.c: Likewise.
+
 2007-12-07  Eric Blake  <ebb9@byu.net>
 
 	Minor security fix: Quote output of mkstemp.
