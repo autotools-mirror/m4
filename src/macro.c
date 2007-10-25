@@ -727,8 +727,7 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
   token = arg_token (argv, index);
   /* TODO handle func tokens?  */
   assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
-  /* TODO push a reference, rather than copying data.  */
-  obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
+  push_token (token, expansion_level - 1);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -739,23 +738,49 @@ void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {
   token_data *token;
-  unsigned int i;
-  bool comma = false;
+  token_data sep;
+  unsigned int i = skip ? 2 : 1;
+  bool use_sep = false;
+  static char comma[2] = ",";
 
-  /* TODO push reference, rather than copying data.  */
-  for (i = skip ? 2 : 1; i < argv->argc; i++)
+  if (i >= argv->argc)
+    return;
+
+  TOKEN_DATA_TYPE (&sep) = TOKEN_TEXT;
+  TOKEN_DATA_QUOTE_AGE (&sep) = 0;
+  if (quote)
+    {
+      char *str;
+      obstack_grow (obs, lquote.string, lquote.length);
+      TOKEN_DATA_LEN (&sep) = obstack_object_size (obs);
+      obstack_1grow (obs, '\0');
+      str = (char *) obstack_finish (obs);
+      TOKEN_DATA_TEXT (&sep) = str;
+      push_token (&sep, -1);
+      obstack_grow (obs, rquote.string, rquote.length);
+      obstack_1grow (obs, ',');
+      obstack_grow0 (obs, lquote.string, lquote.length);
+      str = (char *) obstack_finish (obs);
+      TOKEN_DATA_TEXT (&sep) = str;
+      TOKEN_DATA_LEN (&sep) = rquote.length + 1 + lquote.length;
+    }
+  else
+    {
+      TOKEN_DATA_TEXT (&sep) = comma;
+      TOKEN_DATA_LEN (&sep) = 1;
+    }
+  /* TODO push entire $@ reference, rather than pushing each arg.  */
+  for ( ; i < argv->argc; i++)
     {
       token = arg_token (argv, i);
-      if (comma)
-	obstack_1grow (obs, ',');
+      if (use_sep)
+	push_token (&sep, -1);
       else
-	comma = true;
+	use_sep = true;
       /* TODO handle func tokens?  */
       assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
-      if (quote)
-	obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
-      if (quote)
-	obstack_grow (obs, rquote.string, rquote.length);
+      push_token (token, expansion_level - 1);
     }
+  if (quote)
+    obstack_grow (obs, rquote.string, rquote.length);
 }

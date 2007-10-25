@@ -1,3 +1,18 @@
+2007-12-11  Eric Blake  <ebb9@byu.net>
+
+	Stage 7: add chained token support to input parser.
+	* src/m4.h (struct token_chain): Add const safety.
+	(push_token): New prototype.
+	* src/input.c (INPUT_CHAIN): New enumerator.
+	(struct input_block): Add new input type u_c, and change u_s to
+	length-based processing.
+	(make_text_link): New helper function.
+	(push_token): New function.
+	(push_string_finish): Use it.
+	(pop_input, input_print, peek_input, next_char, next_char_1):
+	Adjust to handle new input type.
+	* src/macro.c (push_arg, push_args): Use new function.
+
 2007-12-10  Eric Blake  <ebb9@byu.net>
 
 	Stage 6: convert builtins to push arg at a time.
