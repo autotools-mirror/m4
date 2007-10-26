@@ -1,3 +1,33 @@
+2007-12-21  Eric Blake  <ebb9@byu.net>
+
+	Stage 9: share rather than copy single-arg refs.
+	* m4/gnulib-cache.m4: Import quote and memmem modules.
+	* src/m4.h (arg_scratch): New prototype.
+	* src/input.c (INPUT_INLINE_THRESHOLD): New define.
+	(push_token): Use it to inline short text, and save references to
+	longer text.
+	(input_init, next_token): Simplify obstack handling.
+	* src/macro.c (expand_argument): Likewise.
+	(expand_macro): Track scratch space.
+	(arg_scratch): New function.
+	(make_argv_ref): Use it.
+	(push_args): Likewise, and simplify comma handling, since most
+	separators are short enough to be inlined.
+	* src/builtin.c (builtin_init): Avoid cast.
+	(m4_errprint, m4_index): Transparently support NUL.
+	(m4_translit): Use scratch space, rather than leaking memory on
+	expansion stack.
+	* doc/m4.texinfo (Syntax): Add new test of embedded NUL.
+	* checks/get-them: Extract test that uses external files.
+	* checks/check-them: Run the new test.  Use unified diff if
+	possible, and force text mode when debugging NUL handling.
+	* examples/null.m4: New file.
+	* examples/null.out: Likewise.
+	* examples/null.err: Likewise.
+	* examples/Makefile.am (EXTRA_FILES): Distribute these files.
+	* .gitattributes: Treat new files as text, in spite of embedded
+	NUL.
+
 2007-12-18  Eric Blake  <ebb9@byu.net>
 
 	Stage 8: extend life of references into argv.

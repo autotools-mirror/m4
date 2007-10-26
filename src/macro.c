@@ -29,7 +29,10 @@
 #endif /* DEBUG_MACRO */
 
 /* Opaque structure describing all arguments to a macro, including the
-   macro name at index 0.  */
+   macro name at index 0.  The lifetime of argv0 is only guaranteed
+   within a call to expand_macro, whereas the lifetime of the array
+   members is guaranteed as long as the input engine can parse text
+   with a reference to $@.  */
 struct macro_arguments
 {
   /* Number of arguments owned by this object, may be larger than
@@ -368,16 +371,17 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	case TOKEN_CLOSE:
 	  if (paren_level == 0)
 	    {
+	      size_t len = obstack_object_size (obs);
 	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
 		{
-		  if (obstack_object_size (obs) == 0)
+		  if (!len)
 		    return t == TOKEN_COMMA;
 		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		}
-	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-	      TOKEN_DATA_LEN (argp) = obstack_object_size (obs);
 	      obstack_1grow (obs, '\0');
+	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+	      TOKEN_DATA_LEN (argp) = len;
 	      TOKEN_DATA_QUOTE_AGE (argp) = age;
 	      return t == TOKEN_COMMA;
 	    }
@@ -533,6 +537,7 @@ static void
 expand_macro (symbol *sym)
 {
   void *args_base;		/* Base of stacks[i].args on entry.  */
+  void *args_scratch;		/* Base of scratch space for call_macro.  */
   void *argv_base;		/* Base of stacks[i].argv on entry.  */
   macro_arguments *argv;	/* Arguments to the called macro.  */
   struct obstack *expansion;	/* Collects the macro's expansion.  */
@@ -594,6 +599,7 @@ expand_macro (symbol *sym)
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
   argv = collect_arguments (sym, stacks[level].args, stacks[level].argv);
+  args_scratch = obstack_finish (stacks[level].args);
 
   /* The actual macro call.  */
   loc_close_file = current_file;
@@ -633,6 +639,7 @@ expand_macro (symbol *sym)
     {
       if (argv->inuse)
 	{
+	  obstack_free (stacks[level].args, args_scratch);
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (debug, "m4debug: -%d- `%s' in use, level=%d, "
 		      "refcount=%zu, argcount=%zu\n", my_call_id, argv->argv0,
@@ -850,6 +857,16 @@ arg_func (macro_arguments *argv, unsigned int index)
   return TOKEN_DATA_FUNC (token);
 }
 
+/* Return an obstack useful for scratch calculations that will not
+   interfere with macro expansion.  The obstack will be reset when
+   expand_macro completes.  */
+struct obstack *
+arg_scratch (void)
+{
+  assert (obstack_object_size (stacks[expansion_level - 1].args) == 0);
+  return stacks[expansion_level - 1].args;
+}
+
 /* Create a new argument object using the same obstack as ARGV; thus,
    the new object will automatically be freed when the original is
    freed.  Explicitly set the macro name (argv[0]) from ARGV0 with
@@ -865,9 +882,8 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   token_data *token;
   token_chain *chain;
   unsigned int index = skip ? 2 : 1;
-  struct obstack *obs = stacks[expansion_level - 1].argv;
+  struct obstack *obs = arg_scratch ();
 
-  assert (obstack_object_size (obs) == 0);
   /* When making a reference through a reference, point to the
      original if possible.  */
   if (argv->has_ref)
@@ -924,6 +940,8 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
 
   if (index == 0)
     {
+      /* Always push copy of arg 0, since its lifetime is not
+	 guaranteed beyond expand_macro.  */
       obstack_grow (obs, argv->argv0, argv->argv0_len);
       return;
     }
@@ -944,44 +962,42 @@ void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {
   token_data *token;
-  token_data sep;
   unsigned int i = skip ? 2 : 1;
+  const char *sep = ",";
+  size_t sep_len = 1;
   bool use_sep = false;
   bool inuse = false;
-  static char comma[2] = ",";
+  struct obstack *scratch = arg_scratch ();
 
   if (i >= argv->argc)
     return;
 
-  TOKEN_DATA_TYPE (&sep) = TOKEN_TEXT;
-  TOKEN_DATA_QUOTE_AGE (&sep) = 0;
+  if (i + 1 == argv->argc)
+    {
+      if (quote)
+	obstack_grow (obs, lquote.string, lquote.length);
+      push_arg (obs, argv, i);
+      if (quote)
+	obstack_grow (obs, rquote.string, rquote.length);
+      return;
+    }
+
+  /* Compute the separator in the scratch space.  */
   if (quote)
     {
-      char *str;
       obstack_grow (obs, lquote.string, lquote.length);
-      TOKEN_DATA_LEN (&sep) = obstack_object_size (obs);
-      obstack_1grow (obs, '\0');
-      str = (char *) obstack_finish (obs);
-      TOKEN_DATA_TEXT (&sep) = str;
-      push_token (&sep, -1);
-      obstack_grow (obs, rquote.string, rquote.length);
-      obstack_1grow (obs, ',');
-      obstack_grow0 (obs, lquote.string, lquote.length);
-      str = (char *) obstack_finish (obs);
-      TOKEN_DATA_TEXT (&sep) = str;
-      TOKEN_DATA_LEN (&sep) = rquote.length + 1 + lquote.length;
-    }
-  else
-    {
-      TOKEN_DATA_TEXT (&sep) = comma;
-      TOKEN_DATA_LEN (&sep) = 1;
+      obstack_grow (scratch, rquote.string, rquote.length);
+      obstack_1grow (scratch, ',');
+      obstack_grow0 (scratch, lquote.string, lquote.length);
+      sep = (char *) obstack_finish (scratch);
+      sep_len += lquote.length + rquote.length;
     }
   /* TODO push entire $@ reference, rather than pushing each arg.  */
   for ( ; i < argv->argc; i++)
     {
       token = arg_token (argv, i);
       if (use_sep)
-	push_token (&sep, -1);
+	obstack_grow (obs, sep, sep_len);
       else
 	use_sep = true;
       /* TODO handle func tokens?  */

@@ -45,6 +45,9 @@ indir.m4 \
 loop.m4 \
 misc.m4 \
 multiquotes.m4 \
+null.err \
+null.m4 \
+null.out \
 patsubst.m4 \
 pushpop.m4 \
 quote.m4 \

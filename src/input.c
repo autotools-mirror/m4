@@ -64,6 +64,11 @@
 # include "regex.h"
 #endif /* ENABLE_CHANGEWORD */
 
+/* Number of bytes where it is more efficient to inline the reference
+   as a string than it is to track reference bookkeeping for those
+   bytes.  */
+#define INPUT_INLINE_THRESHOLD 16
+
 /* Type of an input block.  */
 enum input_type
 {
@@ -319,18 +324,29 @@ push_string_init (void)
 | gathering input from multiple locations, rather than copying       |
 | everything consecutively onto the input stack.  Must be called     |
 | between push_string_init and push_string_finish.  Return true only |
-| if LEVEL is non-negative, and a reference was created to TOKEN.    |
+| if LEVEL is non-negative, and a reference was created to TOKEN, in |
+| which case, the lifetime of TOKEN and its contents must last as    |
+| long as the input engine can parse references to it.               |
 `-------------------------------------------------------------------*/
 bool
 push_token (token_data *token, int level)
 {
   token_chain *chain;
+  bool result = false;
 
   assert (next);
   /* TODO - also accept TOKEN_COMP chains.  */
   assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
-  if (TOKEN_DATA_LEN (token) == 0)
-    return false;
+
+  /* Speed consideration - for short enough tokens, the speed and
+     memory overhead of parsing another INPUT_CHAIN link outweighs the
+     time to inline the token text.  */
+  if (TOKEN_DATA_LEN (token) <= INPUT_INLINE_THRESHOLD)
+    {
+      obstack_grow (current_input, TOKEN_DATA_TEXT (token),
+		    TOKEN_DATA_LEN (token));
+      return false;
+    }
 
   if (next->type == INPUT_STRING)
     {
@@ -345,21 +361,18 @@ push_token (token_data *token, int level)
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
-  if (level >= 0)
-    /* TODO - use token as-is, rather than copying data.  This implies
-       lengthening lifetime of $@ arguments until the rescan is
-       complete, rather than the current approach of freeing them
-       during expand_macro.  */
-    chain->str = (char *) obstack_copy (current_input, TOKEN_DATA_TEXT (token),
-					TOKEN_DATA_LEN (token));
-  else
-    chain->str = TOKEN_DATA_TEXT (token);
+  chain->str = TOKEN_DATA_TEXT (token);
   chain->len = TOKEN_DATA_LEN (token);
-  chain->level = -1;
+  chain->level = level;
   chain->argv = NULL;
   chain->index = 0;
   chain->flatten = false;
-  return false; /* No reference exists when text is copied.  */
+  if (level >= 0)
+    {
+      adjust_refcount (level, true);
+      result = true;
+    }
+  return result;
 }
 
 /*-------------------------------------------------------------------.
@@ -897,8 +910,7 @@ input_init (void)
      will always work even if the first token parsed spills to a new
      chunk.  */
   obstack_init (&token_stack);
-  obstack_alloc (&token_stack, 1);
-  token_bottom = obstack_base (&token_stack);
+  token_bottom = obstack_finish (&token_stack);
 
   isp = NULL;
   wsp = NULL;
@@ -1230,8 +1242,7 @@ next_token (token_data *td, int *line, const char *caller)
 	  if (startpos != 0 ||
 	      regs.end [0] != obstack_object_size (&token_stack))
 	    {
-	      *(((char *) obstack_base (&token_stack)
-		 + obstack_object_size (&token_stack)) - 1) = '\0';
+	      obstack_blank (&token_stack, -1);
 	      break;
 	    }
 	  next_char ();

@@ -27,6 +27,7 @@ xerr=$tmp/m4-xerr
 failed=
 skipped=
 strip_needed=false
+diffopts=-c
 
 # Find out how the executable prints argv[0]
 m4=`m4 --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
@@ -47,6 +48,14 @@ examples=.
 if test "x$1" = x-I ; then
   examples="$2"
   shift; shift
+fi
+
+# Find out if diff supports useful options.
+if diff -u /dev/null /dev/null 2>/dev/null ; then
+  diffopts="-u"
+fi
+if diff -a /dev/null /dev/null 2>/dev/null ; then
+  diffopts="$diffopts -a"
 fi
 
 # Run the tests.
@@ -77,9 +86,20 @@ do
       ;;
   esac
 
-  sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
-    "$file" > $xout
-  sed -e '/^dnl @error{}/!d' -e 's///' -e "s|^m4:|$m4:|" "$file" > $xerr
+  xoutfile=`sed -n 's/^dnl @ expected output: //p' "$file"`
+  if test -z "$xoutfile" ; then
+    sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
+      "$file" > $xout
+  else
+    cp "$examples/$xoutfile" $xout
+  fi
+
+  xerrfile=`sed -n 's/^dnl @ expected error: //p' "$file"`
+  if test -z "$xerrfile" ; then
+    sed -e '/^dnl @error{}/!d' -e 's///' -e "s|^m4:|$m4:|" "$file" > $xerr
+  else
+    cp "$examples/$xerrfile" $xerr
+  fi
 
   # For the benefit of mingw, normalize \r\n line endings
   if $strip_needed ; then
@@ -99,7 +119,7 @@ do
     failed="$failed $file:out"
     echo `sed -e 's/^dnl //' -e 1q $file`
     echo "$file: stdout mismatch"
-    diff $xout $out
+    diff $diffopts $xout $out
   fi
 
   if cmp -s $err $xerr; then
@@ -108,7 +128,7 @@ do
     failed="$failed $file:err"
     echo `sed -e 's/^dnl //' -e 1q $file`
     echo "$file: stderr mismatch"
-    diff $xerr $err
+    diff $diffopts $xerr $err
   fi
 
 done
