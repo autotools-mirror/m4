@@ -463,9 +463,10 @@ builtin_init (void)
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
       {
+	size_t len = strlen (bp->name);
 	if (prefix_all_builtins)
 	  {
-	    string = (char *) xmalloc (strlen (bp->name) + 4);
+	    string = xcharalloc (len + 4);
 	    strcpy (string, "m4_");
 	    strcat (string, bp->name);
 	    define_builtin (string, bp, SYMBOL_INSERT);
@@ -741,14 +742,10 @@ m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *me;
+  const char *me = ARG (0);
   int index;
 
-  if (argc == 2)
-    return;
-
-  me = ARG (0);
-  if (bad_argc (me, argc, 3, -1))
+  if (argc == 2 || bad_argc (me, argc, 3, -1))
     return;
   else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
@@ -1435,9 +1432,8 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
   obstack_grow (obs, lquote.string, lquote.length);
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
-    if (pattern[len - i - 1] != 'X')
+    if (pattern[--len] != 'X')
       break;
-  len += 6 - i;
   obstack_grow0 (obs, "XXXXXX", 6 - i);
   name = (char *) obstack_base (obs) + lquote.length;
 
@@ -1519,12 +1515,16 @@ m4_mkstemp (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  size_t len;
+
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
   dump_args (obs, 1, argv, " ", false);
-  obstack_1grow (obs, '\0');
   debug_flush_files ();
-  xfprintf (stderr, "%s", (char *) obstack_finish (obs));
+  len = obstack_object_size (obs);
+  /* The close_stdin module makes it safe to skip checking the return
+     value here.  */
+  fwrite (obstack_finish (obs), 1, len, stderr);
   fflush (stderr);
 }
 
@@ -1775,14 +1775,10 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
   haystack = ARG (1);
   needle = ARG (2);
 
-  /* Optimize searching for the empty string (always 0) and one byte
-     (strchr tends to be more efficient than strstr).  */
-  if (!needle[0])
-    retval = 0;
-  else if (!needle[1])
-    result = strchr (haystack, *needle);
-  else
-    result = strstr (haystack, needle);
+  /* Rely on the optimizations guaranteed by gnulib's memmem
+     module.  */
+  result = (char *) memmem (haystack, arg_len (argv, 1),
+			    needle, arg_len (argv, 2));
   if (result)
     retval = result - haystack;
 
@@ -1900,19 +1896,13 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
 
   from = ARG (2);
   if (strchr (from, '-') != NULL)
-    {
-      from = expand_ranges (from, obs);
-      if (from == NULL)
-	return;
-    }
+    from = expand_ranges (from, arg_scratch ());
 
   to = ARG (3);
   if (strchr (to, '-') != NULL)
-    {
-      to = expand_ranges (to, obs);
-      if (to == NULL)
-	return;
-    }
+    to = expand_ranges (to, arg_scratch ());
+
+  assert (from && to);
 
   /* Calling strchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a

@@ -449,6 +449,7 @@ bool arg_equal (macro_arguments *, unsigned int, unsigned int);
 bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
+struct obstack *arg_scratch (void);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
