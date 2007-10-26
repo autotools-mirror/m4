@@ -88,14 +88,6 @@ typedef struct string STRING;
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	free
 
-/* glibc's obstack left out the ability to suspend and resume growth
-   of an object on the stack.  Reopen OBJECT (previously returned by
-   obstack_alloc or obstack_finish) with SIZE for additional growth,
-   freeing all objects that occur later in the stack.  */
-#define obstack_regrow(OBS, OBJECT, SIZE)                \
-  (obstack_free (OBS, (char *) (OBJECT) + (SIZE)),       \
-   (OBS)->object_base = (char *) (OBJECT))
-
 /* These must come first.  */
 typedef struct input_block input_block;
 typedef struct token_data token_data;
@@ -286,6 +278,7 @@ struct token_chain
   token_chain *next;	/* Pointer to next link of chain.  */
   const char *str;	/* NUL-terminated string if text, else NULL.  */
   size_t len;		/* Length of str, else 0.  */
+  int level;		/* Expansion level of link content, or -1.  */
   macro_arguments *argv;/* Reference to earlier $@.  */
   unsigned int index;	/* Argument index within argv.  */
   bool flatten;		/* True to treat builtins as text.  */
@@ -350,7 +343,7 @@ void skip_line (const char *);
 void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
-void push_token (token_data *, int);
+bool push_token (token_data *, int);
 const input_block *push_string_finish (void);
 void push_wrapup (const char *);
 bool pop_wrapup (void);
@@ -460,6 +453,7 @@ macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
 void push_args (struct obstack *, macro_arguments *, bool, bool);
+size_t adjust_refcount (int, bool);
 
 
 /* File: builtin.c  --- builtins.  */

@@ -215,6 +215,7 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
       chain->next = NULL;
       chain->str = str;
       chain->len = len;
+      chain->level = -1;
       chain->argv = NULL;
       chain->index = 0;
       chain->flatten = false;
@@ -317,9 +318,10 @@ push_string_init (void)
 | current_input stack and TOKEN lives in temporary storage.  Allows  |
 | gathering input from multiple locations, rather than copying       |
 | everything consecutively onto the input stack.  Must be called     |
-| between push_string_init and push_string_finish.                   |
+| between push_string_init and push_string_finish.  Return true only |
+| if LEVEL is non-negative, and a reference was created to TOKEN.    |
 `-------------------------------------------------------------------*/
-void
+bool
 push_token (token_data *token, int level)
 {
   token_chain *chain;
@@ -328,7 +330,7 @@ push_token (token_data *token, int level)
   // TODO - also accept TOKEN_COMP chains
   assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
   if (TOKEN_DATA_LEN (token) == 0)
-    return;
+    return false;
 
   if (next->type == INPUT_STRING)
     {
@@ -352,9 +354,13 @@ push_token (token_data *token, int level)
   else
     chain->str = TOKEN_DATA_TEXT (token);
   chain->len = TOKEN_DATA_LEN (token);
+  chain->level = -1;
+  // chain->level = level;
   chain->argv = NULL;
   chain->index = 0;
   chain->flatten = false;
+  return false; // no reference exists when text is copied
+  // return true;
 }
 
 /*-------------------------------------------------------------------.
@@ -468,7 +474,9 @@ pop_input (bool cleanup)
 	      assert (!"implemented yet");
 	      abort ();
 	    }
-	  chain = chain->next;
+	  if (chain->level >= 0)
+	    adjust_refcount (chain->level, false);
+	  isp->u.u_c.chain = chain = chain->next;
 	}
       break;
 
@@ -759,6 +767,8 @@ next_char_1 (void)
 		  assert (!"implemented yet");
 		  abort ();
 		}
+	      if (chain->level >= 0)
+		adjust_refcount (chain->level, false);
 	      isp->u.u_c.chain = chain = chain->next;
 	    }
 	  break;
