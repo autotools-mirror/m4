@@ -5330,15 +5330,23 @@ see the C Library Manual, or the @acronym{POSIX} specification (for
 example, @samp{%a} is supported even on platforms that haven't yet
 implemented C99 hexadecimal floating point output natively).
 
-Unrecognized specifiers result in a warning.  It is anticipated that a
-future release of @acronym{GNU} @code{m4} will support more specifiers,
-and give better warnings when various problems such as overflow are
-encountered.  Likewise, escape sequences are not yet recognized.
+Warnings are issued for unrecognized specifiers, an improper number of
+arguments, or difficulty parsing an argument according to the format
+string (such as overflow or extra characters).  It is anticipated that a
+future release of @acronym{GNU} @code{m4} will support more specifiers.
+Likewise, escape sequences are not yet recognized.
 
 @example
 format(`%p', `0')
 @error{}m4:stdin:1: Warning: format: unrecognized specifier in `%p'
 @result{}
+format(`%*d', `')
+@error{}m4:stdin:2: Warning: format: empty string treated as 0
+@error{}m4:stdin:2: Warning: format: too few arguments: 2 < 3
+@result{}0
+format(`%.1f', `2a')
+@error{}m4:stdin:3: Warning: format: non-numeric argument `2a'
+@result{}2.0
 @end example
 
 @node Arithmetic

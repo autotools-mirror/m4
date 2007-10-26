@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008 Free
    Software Foundation, Inc.
 
    This file is part of GNU M4.
@@ -212,8 +212,8 @@ expand_input (void)
   TOKEN_DATA_ORIG_TEXT (&empty_token) = "";
 #endif
 
-  while ((t = next_token (&td, &line, NULL)) != TOKEN_EOF)
-    expand_token ((struct obstack *) NULL, t, &td, line, true);
+  while ((t = next_token (&td, &line, NULL, NULL)) != TOKEN_EOF)
+    expand_token (NULL, t, &td, line, true);
 
   for (i = 0; i < stacks_count; i++)
     {
@@ -264,8 +264,12 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
       /* Tokens and comments are safe in isolation (since quote_age()
 	 detects any change in delimiters).  But if other text is
 	 already present, multi-character delimiters could be an
-	 issue, so use a conservative heuristic.  */
+	 issue, so use a conservative heuristic.  If obstack is
+	 provided, the string was already expanded into it during
+	 next_token.  */
       result = first || safe_quotes ();
+      if (obs)
+	return result;
       break;
 
     case TOKEN_OPEN:
@@ -356,7 +360,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
   /* Skip leading white space.  */
   do
     {
-      t = next_token (&td, NULL, caller);
+      t = next_token (&td, NULL, obs, caller);
     }
   while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
 
@@ -432,7 +436,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 
       if (TOKEN_DATA_TYPE (argp) != TOKEN_VOID || obstack_object_size (obs))
 	first = false;
-      t = next_token (&td, NULL, caller);
+      t = next_token (&td, NULL, obs, caller);
     }
 }
 
@@ -464,16 +468,18 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 
   if (peek_token () == TOKEN_OPEN)
     {
-      next_token (&td, NULL, SYMBOL_NAME (sym)); /* gobble parenthesis */
+      next_token (&td, NULL, NULL, SYMBOL_NAME (sym)); /* gobble parenthesis */
       do
 	{
-	  more_args = expand_argument (arguments, &td, SYMBOL_NAME (sym));
+	  tdp = (token_data *) obstack_alloc (arguments, sizeof *tdp);
+	  more_args = expand_argument (arguments, tdp, SYMBOL_NAME (sym));
 
-	  if ((TOKEN_DATA_TYPE (&td) == TOKEN_TEXT && !TOKEN_DATA_LEN (&td))
-	      || (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC))
-	    tdp = &empty_token;
-	  else
-	    tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+	  if ((TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT && !TOKEN_DATA_LEN (tdp))
+	      || (!groks_macro_args && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
+	    {
+	      obstack_free (arguments, tdp);
+	      tdp = &empty_token;
+	    }
 	  obstack_ptr_grow (argv_stack, tdp);
 	  args.arraylen++;
 	  args.argc++;

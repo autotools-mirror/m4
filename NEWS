@@ -25,6 +25,8 @@ Version 1.4.11 - ?? ??? 2008, by ????  (git version 1.4.10a-*)
   systems with a brain-dead quadratic strstr(3).
 * Enhance the `regexp' and `patsubst' builtins to cache frequently used
   regular expressions, which speeds up typical Autoconf usage.
+* Enhance the `format' builtin to warn for more suspicious usages, such as
+  missing arguments or problems parsing according to the format string.
 * Memory usage is greatly reduced in recursive macros.
 * A number of portability improvements inherited from gnulib.
 

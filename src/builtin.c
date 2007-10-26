@@ -465,12 +465,9 @@ builtin_init (void)
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
       {
-	size_t len = strlen (bp->name);
 	if (prefix_all_builtins)
 	  {
-	    string = xcharalloc (len + 4);
-	    strcpy (string, "m4_");
-	    strcat (string, bp->name);
+	    string = xasprintf ("m4_%s", bp->name);
 	    define_builtin (string, bp, SYMBOL_INSERT);
 	    free (string);
 	  }
@@ -502,7 +499,7 @@ builtin_init (void)
 | Return true if there are not enough arguments.                    |
 `------------------------------------------------------------------*/
 
-static bool
+bool
 bad_argc (const char *name, int argc, unsigned int min, unsigned int max)
 {
   if (argc - 1 < min)
@@ -561,7 +558,8 @@ ntoa (int32_t value, int radix)
 {
   bool negative;
   uint32_t uvalue;
-  static char str[256];
+  /* Sized for radix 2, plus sign and trailing NUL.  */
+  static char str[sizeof (value) * CHAR_BIT + 2];
   char *s = &str[sizeof str];
 
   *--s = '\0';

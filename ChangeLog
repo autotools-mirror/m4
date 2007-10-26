@@ -1,3 +1,35 @@
+2008-01-17  Eric Blake  <ebb9@byu.net>
+
+	Stage 10: avoid extra copying of strings and comments.
+	When collecting tokens that are immune to further expansion, avoid
+	copying data from one obstack to another by outputting it into the
+	destination obstack to begin with.  Also reduce copying done in
+	format builtin.
+	Memory impact: slight improvement, due to better obstack usage.
+	Speed impact: noticeable improvement, due less data copying.
+	* m4/gnulib-cache.m4: Import the intprops and vasnprintf-posix
+	modules.
+	* src/m4.h (includes): Use new gnulib modules.
+	(next_token): Adjust prototype.
+	(bad_argc): New prototype.
+	* src/format.c (arg_int, arg_long, arg_double): New helper
+	functions.
+	(ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE): Track missing
+	arguments.
+	(format): Improve warnings, and avoid copying into obstack in the
+	common case.
+	* src/input.c (next_token): Add new parameter.
+	(lex_debug): Adjust caller.
+	* src/symtab.c (symtab_debug): Likewise.
+	* src/macro.c (expand_input, expand_token, expand_argument)
+	(collect_arguments): Likewise.
+	* src/output.c (m4_tmpname): Guarantee correct buffer size.
+	* src/builtin.c (builtin_init): Improve efficiency.
+	(bad_argc): Export.
+	(ntoa): Tighten buffer allocation.
+	* doc/m4.texinfo (Format): Test the improvements.
+	* NEWS: Document the improvement.
+
 2008-01-14  Eric Blake  <ebb9@byu.net>
 
 	Fix --warn-macro-sequence regression from 2007-11-29.

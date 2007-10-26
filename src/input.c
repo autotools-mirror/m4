@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -692,17 +692,17 @@ peek_input (void)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The function next_char () is used to read and advance the input to the   |
-| next character.  It also manages line numbers for error messages, so	   |
-| they do not get wrong, due to lookahead.  The token consisting of a	   |
-| newline alone is taken as belonging to the line it ends, and the current |
-| line number is not incremented until the next character is read.	   |
-| 99.9% of all calls will read from a string, so factor that out into a    |
-| macro for speed.                                                         |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The function next_char () is used to read and advance the input to |
+| the next character.  It also manages line numbers for error        |
+| messages, so they do not get wrong due to lookahead.  The token    |
+| consisting of a newline alone is taken as belonging to the line it |
+| ends, and the current line number is not incremented until the     |
+| next character is read.  99.9% of all calls will read from a       |
+| string, so factor that out into a macro for speed.                 |
+`-------------------------------------------------------------------*/
 
-#define next_char() \
+#define next_char()							\
   (isp && isp->type == INPUT_STRING && isp->u.u_s.len && !input_change	\
    ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
    : next_char_1 ())
@@ -883,9 +883,9 @@ match_input (const char *s, bool consume)
 | effectively unchanged.                                              |
 `--------------------------------------------------------------------*/
 
-#define MATCH(ch, s, consume)                                           \
-  (to_uchar ((s)[0]) == (ch)                                            \
-   && (ch) != '\0'                                                      \
+#define MATCH(ch, s, consume)						\
+  (to_uchar ((s)[0]) == (ch)						\
+   && (ch) != '\0'							\
    && ((s)[1] == '\0' || (match_input ((s) + (consume), consume))))
 
 
@@ -1142,22 +1142,24 @@ safe_quotes (void)
 /*--------------------------------------------------------------------.
 | Parse and return a single token from the input stream.  A token     |
 | can either be TOKEN_EOF, if the input_stack is empty; it can be     |
-| TOKEN_STRING for a quoted string; TOKEN_WORD for something that is  |
-| a potential macro name; and TOKEN_SIMPLE for any single character   |
-| that is not a part of any of the previous types.  If LINE is not    |
-| NULL, set *LINE to the line where the token starts.  Report errors  |
-| (unterminated comments or strings) on behalf of CALLER, if	      |
-| non-NULL.							      |
-|								      |
+| TOKEN_STRING for a quoted string or comment; TOKEN_WORD for         |
+| something that is a potential macro name; and TOKEN_SIMPLE for any  |
+| single character that is not a part of any of the previous types.   |
+| If LINE is not NULL, set *LINE to the line where the token starts.  |
+| If OBS is not NULL, expand TOKEN_STRING directly into OBS rather    |
+| than in token_stack temporary storage area.  Report errors          |
+| (unterminated comments or strings) on behalf of CALLER, if          |
+| non-NULL.                                                           |
+|                                                                     |
 | Next_token () returns the token type, and passes back a pointer to  |
-| the token data through TD.  The token text is collected on the      |
-| obstack token_stack, which never contains more than one token text  |
-| at a time.  The storage pointed to by the fields in TD is	      |
+| the token data through TD.  Non-string token text is collected on   |
+| the obstack token_stack, which never contains more than one token   |
+| text at a time.  The storage pointed to by the fields in TD is      |
 | therefore subject to change the next time next_token () is called.  |
 `--------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td, int *line, const char *caller)
+next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 {
   int ch;
   int quote_level;
@@ -1168,6 +1170,11 @@ next_token (token_data *td, int *line, const char *caller)
 #endif /* ENABLE_CHANGEWORD */
   const char *file;
   int dummy;
+  /* The obstack where token data is stored.  Generally token_stack,
+     for tokens where argument collection might not use the literal
+     token.  But for comments and strings, we can output directly into
+     the argument collection obstack obs, if one was provided.  */
+  struct obstack *obs_td = &token_stack;
 
   obstack_free (&token_stack, token_bottom);
   if (!line)
@@ -1199,12 +1206,14 @@ next_token (token_data *td, int *line, const char *caller)
   *line = current_line;
   if (MATCH (ch, bcomm.string, true))
     {
-      obstack_grow (&token_stack, bcomm.string, bcomm.length);
+      if (obs)
+	obs_td = obs;
+      obstack_grow (obs_td, bcomm.string, bcomm.length);
       while ((ch = next_char ()) != CHAR_EOF
 	     && !MATCH (ch, ecomm.string, true))
-	obstack_1grow (&token_stack, ch);
+	obstack_1grow (obs_td, ch);
       if (ch != CHAR_EOF)
-	obstack_grow (&token_stack, ecomm.string, ecomm.length);
+	obstack_grow (obs_td, ecomm.string, ecomm.length);
       else
 	/* Current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
@@ -1283,6 +1292,8 @@ next_token (token_data *td, int *line, const char *caller)
     }
   else
     {
+      if (obs)
+	obs_td = obs;
       quote_level = 1;
       while (1)
 	{
@@ -1297,23 +1308,28 @@ next_token (token_data *td, int *line, const char *caller)
 	    {
 	      if (--quote_level == 0)
 		break;
-	      obstack_grow (&token_stack, rquote.string, rquote.length);
+	      obstack_grow (obs_td, rquote.string, rquote.length);
 	    }
 	  else if (MATCH (ch, lquote.string, true))
 	    {
 	      quote_level++;
-	      obstack_grow (&token_stack, lquote.string, lquote.length);
+	      obstack_grow (obs_td, lquote.string, lquote.length);
 	    }
 	  else
-	    obstack_1grow (&token_stack, ch);
+	    obstack_1grow (obs_td, ch);
 	}
       type = TOKEN_STRING;
     }
 
   TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-  TOKEN_DATA_LEN (td) = obstack_object_size (&token_stack);
-  obstack_1grow (&token_stack, '\0');
-  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
+  TOKEN_DATA_LEN (td) = obstack_object_size (obs_td);
+  if (obs_td != obs)
+    {
+      obstack_1grow (obs_td, '\0');
+      TOKEN_DATA_TEXT (td) = (char *) obstack_finish (obs_td);
+    }
+  else
+    TOKEN_DATA_TEXT (td) = NULL;
   TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
@@ -1455,7 +1471,7 @@ lex_debug (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td, NULL, "<debug>")) != TOKEN_EOF)
+  while ((t = next_token (&td, NULL, NULL, "<debug>")) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif /* DEBUG_INPUT */

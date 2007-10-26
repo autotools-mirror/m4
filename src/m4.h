@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -41,10 +41,12 @@
 #include "closein.h"
 #include "error.h"
 #include "exitfail.h"
+#include "intprops.h"
 #include "obstack.h"
 #include "stdio--.h"
 #include "stdlib--.h"
 #include "unistd--.h"
+#include "vasnprintf.h"
 #include "verror.h"
 #include "xalloc.h"
 #include "xprintf.h"
@@ -336,7 +338,7 @@ typedef enum token_data_type token_data_type;
 
 void input_init (void);
 token_type peek_token (void);
-token_type next_token (token_data *, int *, const char *);
+token_type next_token (token_data *, int *, struct obstack *, const char *);
 void skip_line (const char *);
 
 /* push back input */
@@ -486,6 +488,7 @@ struct re_registers;
 #define DEFAULT_MACRO_SEQUENCE "\\$\\({[^}]*}\\|[0-9][0-9]+\\)"
 
 void builtin_init (void);
+bool bad_argc (const char *, int, unsigned int, unsigned int);
 void define_builtin (const char *, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
