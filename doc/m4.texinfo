@@ -535,6 +535,7 @@ below as taking effect after any files that occurred earlier in the
 command line.  The argument @option{--} is a marker to denote the end of
 options.
 
+@comment FIXME option -d+f only works on head right now...
 With short options, options that do not take arguments may be combined
 into a single command line argument with subsequent options, options
 with mandatory arguments may be provided either as a single command line
@@ -2640,6 +2641,46 @@ ifelse(`foo', `bar', `3', `gnu', `gnats', `6', `7', `8')
 
 @ignore
 @comment Stress tests, not worth documenting.
+
+@comment Ensure that references compared to strings work regardless of
+@comment similar prefixes.
+@example
+define(`e', `$@@')define(`long', `01234567890123456789')
+@result{}
+ifelse(long, `01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(`01234567890123456789', long, `yes', `no')
+@result{}yes
+ifelse(long, `01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`01234567890123456789-', long, `yes', `no')
+@result{}no
+ifelse(e(long), `01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(`01234567890123456789', e(long), `yes', `no')
+@result{}yes
+ifelse(e(long), `01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`01234567890123456789-', e(long), `yes', `no')
+@result{}no
+ifelse(-e(long), `-01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789', -e(long), `yes', `no')
+@result{}yes
+ifelse(-e(long), `-01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789-', -e(long), `yes', `no')
+@result{}no
+ifelse(-e(long)-, `-01234567890123456789-', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789-', -e(long)-, `yes', `no')
+@result{}yes
+ifelse(-e(long)-, `-01234567890123456789', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789', -e(long)-, `yes', `no')
+@result{}no
+@end example
+
 @comment It would be nice to pass builtin tokens through ifelse, m4wrap,
 @comment user macros; hence the fixmes.
 @example
@@ -3237,6 +3278,7 @@ option @option{--nesting-limit} (or @option{-L}, @pxref{Limits control,
 @option{-t}) can be used to invoke @code{traceon(@var{name})} before
 parsing input.
 
+@comment The explicit -dp neutralizes the testsuite default of -d.
 @comment options: -dp -L3 -tifelse
 @comment status: 1
 @example
@@ -3399,6 +3441,7 @@ are reset to the default of @samp{aeq}.
 The expansion of @code{debugmode} is void.
 @end deffn
 
+@comment The explicit -dp neutralizes the testsuite default of -d.
 @comment options: -dp
 @example
 $ @kbd{m4}
@@ -3447,7 +3490,7 @@ The expansion of @code{debugfile} is void.
 @end deffn
 
 @example
-$ @kbd{m4}
+$ @kbd{m4 -d}
 traceon(`divnum')
 @result{}
 divnum(`extra')
@@ -7070,7 +7113,7 @@ repeating the side effects of unquoted list elements will have any
 detrimental effects.
 
 @example
-$ @kbd{m4 -I examples}
+$ @kbd{m4 -d -I examples}
 include(`foreach2.m4')
 @result{}
 include(`foreachq2.m4')

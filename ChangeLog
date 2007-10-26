@@ -1,3 +1,28 @@
+2007-12-18  Eric Blake  <ebb9@byu.net>
+
+	Stage 8: extend life of references into argv.
+	* src/m4.h (obstack_regrow): Delete, now that it is unused.
+	(struct token_chain): Add level field.
+	(push_token): Adjust prototype.
+	(adjust_refcount): New prototype.
+	* src/macro.c [DEBUG_MACRO]: Add debugging hooks for $@ reference
+	counting.
+	(argc_stack, argv_stack): Delete, replaced by...
+	(struct macro_arg_stacks, stacks, stacks_count): ...these new
+	structure for tracking $@ references.
+	(expand_input): Initialize new structure.
+	(collect_arguments): Alter signature.
+	(expand_macro): Rework obstack handling, in order to keep $@
+	references alive until they have been rescanned.
+	(adjust_refcount, arg_mark): New functions.
+	(make_argv_ref): Use new field.
+	(push_arg, push_args): Update callers.
+	* src/input.c (make_text_link): Use new field.
+	(push_token): Change signature.
+	(pop_input, next_char_1): Call new function.
+	* doc/m4.texinfo: Clean up some examples of -d option usage.
+	(Ifelse): Add some stress tests.
+
 2007-12-13  Eric Blake  <ebb9@byu.net>
 
 	Yet more rewording.
