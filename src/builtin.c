@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -424,9 +424,11 @@ define_user_macro (const char *name, size_t len, const char *text,
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
+      len = strlen (defn);
 
-      while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
-				  len - offset, &macro_sequence_regs)) >= 0)
+      while (offset < len
+	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
+				     len - offset, &macro_sequence_regs)) >= 0)
 	{
 	  /* Skip empty matches.  */
 	  if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
@@ -463,12 +465,9 @@ builtin_init (void)
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
       {
-	size_t len = strlen (bp->name);
 	if (prefix_all_builtins)
 	  {
-	    string = xcharalloc (len + 4);
-	    strcpy (string, "m4_");
-	    strcat (string, bp->name);
+	    string = xasprintf ("m4_%s", bp->name);
 	    define_builtin (string, bp, SYMBOL_INSERT);
 	    free (string);
 	  }
@@ -500,7 +499,7 @@ builtin_init (void)
 | Return true if there are not enough arguments.                    |
 `------------------------------------------------------------------*/
 
-static bool
+bool
 bad_argc (const char *name, int argc, unsigned int min, unsigned int max)
 {
   if (argc - 1 < min)
@@ -559,7 +558,8 @@ ntoa (int32_t value, int radix)
 {
   bool negative;
   uint32_t uvalue;
-  static char str[256];
+  /* Sized for radix 2, plus sign and trailing NUL.  */
+  static char str[sizeof (value) * CHAR_BIT + 2];
   char *s = &str[sizeof str];
 
   *--s = '\0';
