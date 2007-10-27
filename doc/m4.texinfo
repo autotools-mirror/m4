@@ -3527,6 +3527,34 @@ echo(hi,hi)bye)
 @result{}1:HIhibye:
 @end example
 
+However, if you are not worried about portability, using @samp{(} and
+@samp{)} as quoting characters has an interesting property---you can use
+it to compute a quoted string containing the expansion of any quoted
+text, as long as the expansion results in both balanced quotes and
+balanced parentheses.  The trick is realizing @code{expand} uses
+@samp{$1} unquoted, to trigger its expansion using the normal quoting
+characters, but uses extra parentheses to group unquoted commas that
+occur in the expansion without consuming whitespace following those
+commas.  Then @code{_expand} uses @code{changequote} to convert the
+extra parentheses back into quoting characters.  Note that it takes two
+more @code{changequote} invocations to restore the original quotes.
+Contrast the behavior on whitespace when using @samp{$*}, via
+@code{quote}, to attempt the same task.
+
+@example
+changequote(`[', `]')dnl
+define([a], [1, (b)])dnl
+define([b], [2])dnl
+define([quote], [[$*]])dnl
+define([expand], [_$0(($1))])dnl
+define([_expand],
+  [changequote([(], [)])$1changequote`'changequote(`[', `]')])dnl
+expand([a, a, [a, a], [[a, a]]])
+@result{}1, (2), 1, (2), a, a, [a, a]
+quote(a, a, [a, a], [[a, a]])
+@result{}1,(2),1,(2),a, a,[a, a]
+@end example
+
 If @var{end} is a prefix of @var{start}, the end-quote will be
 recognized in preference to a nested begin-quote.  In particular,
 changing the quotes to have the same string for @var{start} and

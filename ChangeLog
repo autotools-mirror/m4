@@ -1,3 +1,9 @@
+2007-10-27  Eric Blake  <ebb9@byu.net>
+
+	Document one use of changequote(`(',`)').
+	* doc/m4.texinfo (Changequote): Add new test, based on recent
+	autoconf addition of m4_expand.
+
 2007-10-22  Eric Blake  <ebb9@byu.net>
 
 	Never let printf failures go undetected.
