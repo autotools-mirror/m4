@@ -271,19 +271,20 @@ enum token_data_type
   TOKEN_VOID,	/* Token still being constructed, u is invalid.  */
   TOKEN_TEXT,	/* Straight text, u.u_t is valid.  */
   TOKEN_FUNC,	/* Builtin function definition, u.func is valid.  */
-  TOKEN_COMP	/* Composite argument, u.chain is valid.  */
+  TOKEN_COMP	/* Composite argument, u.u_c is valid.  */
 };
 
 /* Composite tokens are built of a linked list of chains.  */
 struct token_chain
 {
-  token_chain *next;	/* Pointer to next link of chain.  */
-  const char *str;	/* NUL-terminated string if text, else NULL.  */
-  size_t len;		/* Length of str, else 0.  */
-  int level;		/* Expansion level of link content, or -1.  */
-  macro_arguments *argv;/* Reference to earlier $@.  */
-  unsigned int index;	/* Argument index within argv.  */
-  bool flatten;		/* True to treat builtins as text.  */
+  token_chain *next;		/* Pointer to next link of chain.  */
+  unsigned int quote_age;	/* Quote_age of this link of chain, or 0.  */
+  const char *str;		/* NUL-terminated string if text, or NULL.  */
+  size_t len;			/* Length of str, else 0.  */
+  int level;			/* Expansion level of link content, or -1.  */
+  macro_arguments *argv;	/* Reference to earlier $@.  */
+  unsigned int index;		/* Argument index within argv.  */
+  bool flatten;			/* True to treat builtins as text.  */
 };
 
 /* The content of a token or macro argument.  */
@@ -319,7 +320,12 @@ struct token_data
 
       /* Composite text: a linked list of straight text and $@
 	 placeholders.  */
-      token_chain *chain;
+      struct
+	{
+	  token_chain *chain;	/* First link of the chain.  */
+	  token_chain *end;	/* Last link of the chain.  */
+	}
+      u_c;
     }
   u;
 };
@@ -342,6 +348,7 @@ token_type next_token (token_data *, int *, struct obstack *, const char *);
 void skip_line (const char *);
 
 /* push back input */
+void make_text_link (struct obstack *, token_chain **, token_chain **);
 void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
