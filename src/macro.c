@@ -45,6 +45,9 @@ struct macro_arguments
   bool_bitfield inuse : 1;
   /* False if all arguments are just text or func, true if this argv
      refers to another one.  */
+  bool_bitfield wrapper : 1;
+  /* False if all arguments belong to this argv, true if some of them
+     include references to another.  */
   bool_bitfield has_ref : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
@@ -382,11 +385,16 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		    return t == TOKEN_COMMA;
 		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		}
-	      obstack_1grow (obs, '\0');
-	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
-	      TOKEN_DATA_LEN (argp) = len;
-	      TOKEN_DATA_QUOTE_AGE (argp) = age;
+	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
+		{
+		  obstack_1grow (obs, '\0');
+		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
+		  TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+		  TOKEN_DATA_LEN (argp) = len;
+		  TOKEN_DATA_QUOTE_AGE (argp) = age;
+		}
+	      else
+		make_text_link (obs, NULL, &argp->u.u_c.end);
 	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -411,6 +419,23 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	case TOKEN_STRING:
 	  if (!expand_token (obs, t, &td, line, first))
 	    age = 0;
+	  if (TOKEN_DATA_TYPE (&td) == TOKEN_COMP)
+	    {
+	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
+		{
+		  if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
+		    warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
+		  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
+		  argp->u.u_c.chain = td.u.u_c.chain;
+		  argp->u.u_c.end = td.u.u_c.end;
+		}
+	      else
+		{
+		  assert (argp->u.u_c.end);
+		  argp->u.u_c.end->next = td.u.u_c.chain;
+		  argp->u.u_c.end = td.u.u_c.end;
+		}
+	    }
 	  break;
 
 	case TOKEN_MACDEF:
@@ -459,6 +484,7 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 
   args.argc = 1;
   args.inuse = false;
+  args.wrapper = false;
   args.has_ref = false;
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
@@ -490,11 +516,14 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 	      && TOKEN_DATA_LEN (tdp) > 0
 	      && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
 	    args.quote_age = 0;
+	  else if (TOKEN_DATA_TYPE (tdp) == TOKEN_COMP)
+	    args.has_ref = true;
 	}
       while (more_args);
     }
   argv = (macro_arguments *) obstack_finish (argv_stack);
   argv->argc = args.argc;
+  argv->has_ref = args.has_ref;
   if (args.quote_age != quote_age ())
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
@@ -633,8 +662,23 @@ expand_macro (symbol *sym)
   if (SYMBOL_DELETED (sym))
     free_symbol (sym);
 
-  /* If argv contains references, those refcounts can be reduced now.  */
-  /* TODO - support references in argv.  */
+  /* If argv contains references, those refcounts must be reduced now.  */
+  if (argv->has_ref)
+    {
+      token_chain *chain;
+      size_t i;
+      for (i = 0; i < argv->arraylen; i++)
+	if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
+	  {
+	    chain = argv->array[i]->u.u_c.chain;
+	    while (chain)
+	      {
+		if (chain->level >= 0)
+		  adjust_refcount (chain->level, false);
+		chain = chain->next;
+	      }
+	  }
+    }
 
   /* We no longer need argv, so reduce the refcount.  Additionally, if
      no other references to argv were created, we can free our portion
@@ -698,7 +742,7 @@ arg_token (macro_arguments *argv, unsigned int index)
   token_data *token;
 
   assert (index && index < argv->argc);
-  if (!argv->has_ref)
+  if (!argv->wrapper)
     return argv->array[index - 1];
   /* Must cycle through all tokens, until we find index, since a ref
      may occupy multiple indices.  */
@@ -707,7 +751,7 @@ arg_token (macro_arguments *argv, unsigned int index)
       token = argv->array[i];
       if (TOKEN_DATA_TYPE (token) == TOKEN_COMP)
 	{
-	  token_chain *chain = token->u.chain;
+	  token_chain *chain = token->u.u_c.chain;
 	  /* TODO - for now we support only a single-length $@ chain.  */
 	  assert (!chain->next && !chain->str);
 	  if (index < chain->argv->argc - (chain->index - 1))
@@ -731,14 +775,14 @@ static void
 arg_mark (macro_arguments *argv)
 {
   argv->inuse = true;
-  if (argv->has_ref)
+  if (argv->wrapper)
     {
       /* TODO for now we support only a single-length $@ chain.  */
       assert (argv->arraylen == 1
 	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP
-	      && !argv->array[0]->u.chain->next
-	      && !argv->array[0]->u.chain->str);
-      argv->array[0]->u.chain->argv->inuse = true;
+	      && !argv->array[0]->u.u_c.chain->next
+	      && !argv->array[0]->u.u_c.chain->str);
+      argv->array[0]->u.u_c.chain->argv->inuse = true;
     }
 }
 
@@ -761,17 +805,22 @@ arg_type (macro_arguments *argv, unsigned int index)
     return TOKEN_TEXT;
   token = arg_token (argv, index);
   type = TOKEN_DATA_TYPE (token);
-  assert (type != TOKEN_COMP);
+  /* Composite tokens are currently sequences of text only.  */
+  if (type == TOKEN_COMP)
+    type = TOKEN_TEXT;
   return type;
 }
 
 /* Given ARGV, return the text at argument INDEX.  Abort if the
    argument is not text.  Index 0 is always text, and indices beyond
-   argc return the empty string.  */
+   argc return the empty string.  The result is always NUL-terminated,
+   even if it includes embedded NUL characters.  */
 const char *
 arg_text (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
+  token_chain *chain;
+  struct obstack *obs;
 
   if (index == 0)
     return argv->argv0;
@@ -783,8 +832,18 @@ arg_text (macro_arguments *argv, unsigned int index)
     case TOKEN_TEXT:
       return TOKEN_DATA_TEXT (token);
     case TOKEN_COMP:
-      /* TODO - how to concatenate multiple arguments?  For now, we expect
-	 only one element in the chain, and arg_token dereferences it.  */
+      /* TODO - concatenate multiple arguments?  For now, we assume
+	 all elements are text.  */
+      chain = token->u.u_c.chain;
+      obs = arg_scratch ();
+      while (chain)
+	{
+	  assert (chain->str);
+	  obstack_grow (obs, chain->str, chain->len);
+	  chain = chain->next;
+	}
+      obstack_1grow (obs, '\0');
+      return (char *) obstack_finish (obs);
     default:
       break;
     }
@@ -801,14 +860,84 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
   token_data *ta = arg_token (argv, indexa);
   token_data *tb = arg_token (argv, indexb);
+  token_chain tmpa;
+  token_chain tmpb;
+  token_chain *ca = &tmpa;
+  token_chain *cb = &tmpb;
 
+  /* Quick tests.  */
   if (ta == &empty_token || tb == &empty_token)
     return ta == tb;
+  if (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT
+      && TOKEN_DATA_TYPE (tb) == TOKEN_TEXT)
+    return (TOKEN_DATA_LEN (ta) == TOKEN_DATA_LEN (tb)
+	    && memcmp (TOKEN_DATA_TEXT (ta), TOKEN_DATA_TEXT (tb),
+		       TOKEN_DATA_LEN (ta)) == 0);
+
+  /* Convert both arguments to chains, if not one already.  */
   /* TODO - allow builtin tokens in the comparison?  */
-  assert (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT
-	  && TOKEN_DATA_TYPE (tb) == TOKEN_TEXT);
-  return (TOKEN_DATA_LEN (ta) == TOKEN_DATA_LEN (tb)
-	  && strcmp (TOKEN_DATA_TEXT (ta), TOKEN_DATA_TEXT (tb)) == 0);
+  if (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT)
+    {
+      tmpa.next = NULL;
+      tmpa.str = TOKEN_DATA_TEXT (ta);
+      tmpa.len = TOKEN_DATA_LEN (ta);
+    }
+  else
+    {
+      assert (TOKEN_DATA_TYPE (ta) == TOKEN_COMP);
+      ca = ta->u.u_c.chain;
+    }
+  if (TOKEN_DATA_TYPE (tb) == TOKEN_TEXT)
+    {
+      tmpb.next = NULL;
+      tmpb.str = TOKEN_DATA_TEXT (tb);
+      tmpb.len = TOKEN_DATA_LEN (tb);
+    }
+  else
+    {
+      assert (TOKEN_DATA_TYPE (tb) == TOKEN_COMP);
+      cb = tb->u.u_c.chain;
+    }
+
+  /* Compare each link of the chain.  */
+  while (ca && cb)
+    {
+      /* TODO support comparison against $@ refs.  */
+      assert (ca->str && cb->str);
+      if (ca->len == cb->len)
+	{
+	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	    return false;
+	  ca = ca->next;
+	  cb = cb->next;
+	}
+      else if (ca->len < cb->len)
+	{
+	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	    return false;
+	  tmpb.next = cb->next;
+	  tmpb.str = cb->str + ca->len;
+	  tmpb.len = cb->len - ca->len;
+	  ca = ca->next;
+	  cb = &tmpb;
+	}
+      else
+	{
+	  assert (ca->len > cb->len);
+	  if (memcmp (ca->str, cb->str, cb->len) != 0)
+	    return false;
+	  tmpa.next = ca->next;
+	  tmpa.str = ca->str + cb->len;
+	  tmpa.len = ca->len - cb->len;
+	  ca = &tmpa;
+	  cb = cb->next;
+	}
+    }
+
+  /* If we get this far, the two tokens are equal only if both chains
+     are exhausted.  */
+  assert (ca != cb || ca == NULL);
+  return ca == cb;
 }
 
 /* Given ARGV, return true if argument INDEX is the empty string.
@@ -830,6 +959,8 @@ size_t
 arg_len (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
+  token_chain *chain;
+  size_t len;
 
   if (index == 0)
     return argv->argv0_len;
@@ -842,8 +973,18 @@ arg_len (macro_arguments *argv, unsigned int index)
       assert ((token == &empty_token) == (TOKEN_DATA_LEN (token) == 0));
       return TOKEN_DATA_LEN (token);
     case TOKEN_COMP:
-      /* TODO - how to concatenate multiple arguments?  For now, we expect
-	 only one element in the chain, and arg_token dereferences it.  */
+      /* TODO - concatenate multiple arguments?  For now, we assume
+	 all elements are text.  */
+      chain = token->u.u_c.chain;
+      len = 0;
+      while (chain)
+	{
+	  assert (chain->str);
+	  len += chain->len;
+	  chain = chain->next;
+	}
+      assert (len);
+      return len;
     default:
       break;
     }
@@ -892,12 +1033,12 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
 
   /* When making a reference through a reference, point to the
      original if possible.  */
-  if (argv->has_ref)
+  if (argv->wrapper)
     {
       /* TODO - for now we support only a single-length $@ chain.  */
       assert (argv->arraylen == 1
 	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
-      chain = argv->array[0]->u.chain;
+      chain = argv->array[0]->u.u_c.chain;
       assert (!chain->next && !chain->str);
       argv = chain->argv;
       index += chain->index - 1;
@@ -907,6 +1048,7 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       new_argv = (macro_arguments *)
 	obstack_alloc (obs, offsetof (macro_arguments, array));
       new_argv->arraylen = 0;
+      new_argv->wrapper = false;
       new_argv->has_ref = false;
     }
   else
@@ -918,10 +1060,12 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
       new_argv->arraylen = 1;
       new_argv->array[0] = token;
+      new_argv->wrapper = true;
       new_argv->has_ref = true;
       TOKEN_DATA_TYPE (token) = TOKEN_COMP;
-      token->u.chain = chain;
+      token->u.u_c.chain = token->u.u_c.end = chain;
       chain->next = NULL;
+      chain->quote_age = argv->quote_age;
       chain->str = NULL;
       chain->len = 0;
       chain->level = expansion_level - 1;
@@ -955,9 +1099,23 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
     return;
   token = arg_token (argv, index);
   /* TODO handle func tokens?  */
-  assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
-  if (push_token (token, expansion_level - 1))
-    arg_mark (argv);
+  if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
+    {
+      if (push_token (token, expansion_level - 1))
+	arg_mark (argv);
+    }
+  else if (TOKEN_DATA_TYPE (token) == TOKEN_COMP)
+    {
+      /* TODO - concatenate multiple arguments?  For now, we assume
+	 all elements are text.  */
+      token_chain *chain = token->u.u_c.chain;
+      while (chain)
+	{
+	  assert (chain->str);
+	  obstack_grow (obs, chain->str, chain->len);
+	  chain = chain->next;
+	}
+    }
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -968,6 +1126,7 @@ void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {
   token_data *token;
+  token_chain *chain;
   unsigned int i = skip ? 2 : 1;
   const char *sep = ",";
   size_t sep_len = 1;
@@ -1007,8 +1166,20 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
       else
 	use_sep = true;
       /* TODO handle func tokens?  */
-      assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
-      inuse |= push_token (token, expansion_level - 1);
+      if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
+	inuse |= push_token (token, expansion_level - 1);
+      else
+	{
+	  /* TODO - handle composite text in push_token.  */
+	  assert (TOKEN_DATA_TYPE (token) == TOKEN_COMP);
+	  chain = token->u.u_c.chain;
+	  while (chain)
+	    {
+	      assert (chain->str);
+	      obstack_grow (obs, chain->str, chain->len);
+	      chain = chain->next;
+	    }
+	}
     }
   if (quote)
     obstack_grow (obs, rquote.string, rquote.length);

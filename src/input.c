@@ -153,6 +153,7 @@ static bool input_change;
 
 #define CHAR_EOF	256	/* Character return on EOF.  */
 #define CHAR_MACRO	257	/* Character return for MACRO token.  */
+#define CHAR_QUOTE	258	/* Character return for quoted string.  */
 
 /* Quote chars.  */
 STRING rquote;
@@ -167,7 +168,7 @@ STRING ecomm;
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
 /* Table of characters that can start a word.  */
-static char *word_start;
+static char word_start[256];
 
 /* Current regular expression for detecting words.  */
 static struct re_pattern_buffer word_regexp;
@@ -201,7 +202,7 @@ static const char *token_type_string (token_type);
 | chain that starts at *START and ends at *END.  START may be NULL   |
 | if *END is non-NULL.                                               |
 `-------------------------------------------------------------------*/
-static void
+void
 make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 {
   token_chain *chain;
@@ -218,6 +219,7 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 	*start = chain;
       *end = chain;
       chain->next = NULL;
+      chain->quote_age = 0;
       chain->str = str;
       chain->len = len;
       chain->level = -1;
@@ -361,6 +363,7 @@ push_token (token_data *token, int level)
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
+  chain->quote_age = TOKEN_DATA_QUOTE_AGE (token);
   chain->str = TOKEN_DATA_TEXT (token);
   chain->len = TOKEN_DATA_LEN (token);
   chain->level = level;
@@ -563,19 +566,6 @@ pop_wrapup (void)
   return true;
 }
 
-/*-------------------------------------------------------------------.
-| When a MACRO token is seen, next_token () uses init_macro_token () |
-| to retrieve the value of the function pointer and store it in TD.  |
-`-------------------------------------------------------------------*/
-
-static void
-init_macro_token (token_data *td)
-{
-  assert (isp->type == INPUT_MACRO);
-  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-  TOKEN_DATA_FUNC (td) = isp->u.func;
-}
-
 /*--------------------------------------------------------------.
 | Dump a representation of INPUT to the obstack OBS, for use in |
 | tracing.                                                      |
@@ -699,16 +689,19 @@ peek_input (void)
 | consisting of a newline alone is taken as belonging to the line it |
 | ends, and the current line number is not incremented until the     |
 | next character is read.  99.9% of all calls will read from a       |
-| string, so factor that out into a macro for speed.                 |
+| string, so factor that out into a macro for speed.  If             |
+| ALLOW_QUOTE, and the current input matches the current quote age,  |
+| return CHAR_QUOTE and leave consumption of data for                |
+| append_quote_token.                                                |
 `-------------------------------------------------------------------*/
 
-#define next_char()							\
+#define next_char(AQ)							\
   (isp && isp->type == INPUT_STRING && isp->u.u_s.len && !input_change	\
    ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
-   : next_char_1 ())
+   : next_char_1 (AQ))
 
 static int
-next_char_1 (void)
+next_char_1 (bool allow_quote)
 {
   int ch;
   token_chain *chain;
@@ -765,10 +758,14 @@ next_char_1 (void)
 	  chain = isp->u.u_c.chain;
 	  while (chain)
 	    {
+	      if (allow_quote && chain->quote_age == current_quote_age)
+		return CHAR_QUOTE;
 	      if (chain->str)
 		{
 		  if (chain->len)
 		    {
+		      /* Partial consumption invalidates quote age.  */
+		      chain->quote_age = 0;
 		      chain->len--;
 		      return to_uchar (*chain->str++);
 		    }
@@ -808,7 +805,7 @@ skip_line (const char *name)
   const char *file = current_file;
   int line = current_line;
 
-  while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
+  while ((ch = next_char (false)) != CHAR_EOF && ch != '\n')
     ;
   if (ch == CHAR_EOF)
     /* current_file changed to "" if we see CHAR_EOF, use the
@@ -824,6 +821,49 @@ skip_line (const char *name)
     input_change = true;
 }
 
+
+/*-------------------------------------------------------------------.
+| When a MACRO token is seen, next_token () uses init_macro_token () |
+| to retrieve the value of the function pointer and store it in TD.  |
+`-------------------------------------------------------------------*/
+
+static void
+init_macro_token (token_data *td)
+{
+  assert (isp->type == INPUT_MACRO);
+  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
+  TOKEN_DATA_FUNC (td) = isp->u.func;
+}
+
+/*-------------------------------------------------------------------.
+| When a QUOTE token is seen, convert TD to a composite (if it is    |
+| not one already), consisting of any unfinished text on OBS, as     |
+| well as the quoted token from the top of the input stack.  Use OBS |
+| for any additional allocations needed to store the token chain.    |
+`-------------------------------------------------------------------*/
+static void
+append_quote_token (struct obstack *obs, token_data *td)
+{
+  token_chain *src_chain = isp->u.u_c.chain;
+  token_chain *chain;
+  assert (isp->type == INPUT_CHAIN && obs && current_quote_age);
+
+  if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
+    {
+      TOKEN_DATA_TYPE (td) = TOKEN_COMP;
+      td->u.u_c.chain = td->u.u_c.end = NULL;
+    }
+  assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP);
+  make_text_link (obs, &td->u.u_c.chain, &td->u.u_c.end);
+  chain = (token_chain *) obstack_copy (obs, src_chain, sizeof *chain);
+  if (td->u.u_c.end)
+    td->u.u_c.end->next = chain;
+  else
+    td->u.u_c.chain = chain;
+  td->u.u_c.end = chain;
+  td->u.u_c.end->next = NULL;
+  isp->u.u_c.chain = src_chain->next;
+}
 
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
@@ -848,14 +888,14 @@ match_input (const char *s, bool consume)
   if (s[1] == '\0')
     {
       if (consume)
-	(void) next_char ();
+	next_char (false);
       return true;			/* short match */
     }
 
-  (void) next_char ();
+  next_char (false);
   for (n = 1, t = s++; (ch = peek_input ()) == to_uchar (*s++); )
     {
-      (void) next_char ();
+      next_char (false);
       n++;
       if (*s == '\0')		/* long match */
 	{
@@ -1016,7 +1056,6 @@ void
 set_word_regexp (const char *caller, const char *regexp)
 {
   int i;
-  char test[2];
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
@@ -1048,15 +1087,10 @@ set_word_regexp (const char *caller, const char *regexp)
   default_word_regexp = false;
   set_quote_age ();
 
-  if (word_start == NULL)
-    word_start = (char *) xmalloc (256);
-
-  word_start[0] = '\0';
-  test[1] = '\0';
   for (i = 1; i < 256; i++)
     {
-      test[0] = i;
-      word_start[i] = re_search (&word_regexp, test, 1, 0, 0, NULL) >= 0;
+      char test = i;
+      word_start[i] = re_match (&word_regexp, &test, 1, 0, NULL) > 0;
     }
 }
 
@@ -1140,16 +1174,17 @@ safe_quotes (void)
 
 
 /*--------------------------------------------------------------------.
-| Parse and return a single token from the input stream.  A token     |
-| can either be TOKEN_EOF, if the input_stack is empty; it can be     |
-| TOKEN_STRING for a quoted string or comment; TOKEN_WORD for         |
-| something that is a potential macro name; and TOKEN_SIMPLE for any  |
-| single character that is not a part of any of the previous types.   |
-| If LINE is not NULL, set *LINE to the line where the token starts.  |
-| If OBS is not NULL, expand TOKEN_STRING directly into OBS rather    |
-| than in token_stack temporary storage area.  Report errors          |
-| (unterminated comments or strings) on behalf of CALLER, if          |
-| non-NULL.                                                           |
+| Parse a single token from the input stream, set TD to its           |
+| contents, and return its type.  A token is TOKEN_EOF if the         |
+| input_stack is empty; TOKEN_STRING for a quoted string or comment;  |
+| TOKEN_WORD for something that is a potential macro name; and        |
+| TOKEN_SIMPLE for any single character that is not a part of any of  |
+| the previous types.  If LINE is not NULL, set *LINE to the line     |
+| where the token starts.  If OBS is not NULL, expand TOKEN_STRING    |
+| directly into OBS rather than in token_stack temporary storage      |
+| area, and TD could be a TOKEN_COMP instead of the usual             |
+| TOKEN_TEXT.  Report errors (unterminated comments or strings) on    |
+| behalf of CALLER, if non-NULL.                                      |
 |                                                                     |
 | Next_token () returns the token type, and passes back a pointer to  |
 | the token data through TD.  Non-string token text is collected on   |
@@ -1165,7 +1200,6 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
   int quote_level;
   token_type type;
 #ifdef ENABLE_CHANGEWORD
-  int startpos;
   char *orig_text = NULL;
 #endif /* ENABLE_CHANGEWORD */
   const char *file;
@@ -1181,19 +1215,20 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
     line = &dummy;
 
   /* Can't consume character until after CHAR_MACRO is handled.  */
+  TOKEN_DATA_TYPE (td) = TOKEN_VOID;
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> EOF\n");
 #endif /* DEBUG_INPUT */
-      next_char ();
+      next_char (false);
       return TOKEN_EOF;
     }
   if (ch == CHAR_MACRO)
     {
       init_macro_token (td);
-      next_char ();
+      next_char (false);
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> MACDEF (%s)\n",
 		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
@@ -1201,7 +1236,7 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
       return TOKEN_MACDEF;
     }
 
-  next_char (); /* Consume character we already peeked at.  */
+  next_char (false); /* Consume character we already peeked at.  */
   file = current_file;
   *line = current_line;
   if (MATCH (ch, bcomm.string, true))
@@ -1209,11 +1244,14 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
       if (obs)
 	obs_td = obs;
       obstack_grow (obs_td, bcomm.string, bcomm.length);
-      while ((ch = next_char ()) != CHAR_EOF
+      while ((ch = next_char (false)) < CHAR_EOF
 	     && !MATCH (ch, ecomm.string, true))
 	obstack_1grow (obs_td, ch);
       if (ch != CHAR_EOF)
-	obstack_grow (obs_td, ecomm.string, ecomm.length);
+	{
+	  assert (ch < CHAR_EOF);
+	  obstack_grow (obs_td, ecomm.string, ecomm.length);
+	}
       else
 	/* Current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
@@ -1225,10 +1263,10 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
       obstack_1grow (&token_stack, ch);
-      while ((ch = peek_input ()) != CHAR_EOF && (isalnum (ch) || ch == '_'))
+      while ((ch = peek_input ()) < CHAR_EOF && (isalnum (ch) || ch == '_'))
 	{
 	  obstack_1grow (&token_stack, ch);
-	  (void) next_char ();
+	  next_char (false);
 	}
       type = TOKEN_WORD;
     }
@@ -1241,20 +1279,17 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
       while (1)
 	{
 	  ch = peek_input ();
-	  if (ch == CHAR_EOF)
+	  if (ch >= CHAR_EOF)
 	    break;
 	  obstack_1grow (&token_stack, ch);
-	  startpos = re_search (&word_regexp,
-				(char *) obstack_base (&token_stack),
-				obstack_object_size (&token_stack), 0, 0,
-				&regs);
-	  if (startpos != 0 ||
-	      regs.end [0] != obstack_object_size (&token_stack))
+	  if (re_match (&word_regexp, (char *) obstack_base (&token_stack),
+			obstack_object_size (&token_stack), 0, &regs)
+	      != obstack_object_size (&token_stack))
 	    {
 	      obstack_blank (&token_stack, -1);
 	      break;
 	    }
-	  next_char ();
+	  next_char (false);
 	}
 
       obstack_1grow (&token_stack, '\0');
@@ -1297,14 +1332,16 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
       quote_level = 1;
       while (1)
 	{
-	  ch = next_char ();
+	  ch = next_char (obs != NULL && current_quote_age);
 	  if (ch == CHAR_EOF)
 	    /* Current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
 	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
 			      _("end of file in string"));
 
-	  if (MATCH (ch, rquote.string, true))
+	  if (ch == CHAR_QUOTE)
+	    append_quote_token (obs, td);
+	  else if (MATCH (ch, rquote.string, true))
 	    {
 	      if (--quote_level == 0)
 		break;
@@ -1316,35 +1353,49 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 	      obstack_grow (obs_td, lquote.string, lquote.length);
 	    }
 	  else
-	    obstack_1grow (obs_td, ch);
+	    {
+	      assert (ch < CHAR_EOF);
+	      obstack_1grow (obs_td, ch);
+	    }
 	}
       type = TOKEN_STRING;
     }
 
-  TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-  TOKEN_DATA_LEN (td) = obstack_object_size (obs_td);
-  if (obs_td != obs)
+  if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
     {
-      obstack_1grow (obs_td, '\0');
-      TOKEN_DATA_TEXT (td) = (char *) obstack_finish (obs_td);
-    }
-  else
-    TOKEN_DATA_TEXT (td) = NULL;
-  TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
+      TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
+      TOKEN_DATA_LEN (td) = obstack_object_size (obs_td);
+      if (obs_td != obs)
+	{
+	  obstack_1grow (obs_td, '\0');
+	  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (obs_td);
+	}
+      else
+	TOKEN_DATA_TEXT (td) = NULL;
+      TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
 #ifdef ENABLE_CHANGEWORD
-  if (orig_text == NULL)
-    TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
-  else
-    {
-      TOKEN_DATA_ORIG_TEXT (td) = orig_text;
-      TOKEN_DATA_LEN (td) = strlen (orig_text);
-    }
+      if (orig_text == NULL)
+	TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
+      else
+	{
+	  TOKEN_DATA_ORIG_TEXT (td) = orig_text;
+	  TOKEN_DATA_LEN (td) = strlen (orig_text);
+	}
 #endif /* ENABLE_CHANGEWORD */
 #ifdef DEBUG_INPUT
-  xfprintf (stderr, "next_token -> %s (%s), len %zu\n",
-	    token_type_string (type), TOKEN_DATA_TEXT (td),
-	    TOKEN_DATA_LEN (td));
+      xfprintf (stderr, "next_token -> %s (%s), len %zu\n",
+		token_type_string (type), TOKEN_DATA_TEXT (td),
+		TOKEN_DATA_LEN (td));
 #endif /* DEBUG_INPUT */
+    }
+  else
+    {
+      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP && type == TOKEN_STRING);
+#ifdef DEBUG_INPUT
+      xfprintf (stderr, "next_token -> %s <chain>\n",
+		token_type_string (type));
+#endif /* DEBUG_INPUT */
+    }
   return type;
 }
 

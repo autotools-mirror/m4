@@ -1,3 +1,32 @@
+2008-01-22  Eric Blake  <ebb9@byu.net>
+
+	Stage 11: full circle for single argument references.
+	Pass quoted strings through to argument collection in a single
+	action, so that an argument can be reused throughout macro
+	recursion if it remains unchanged.
+	Memory impact: noticeable improvement, due to more reuse in
+	argument collection stacks.
+	Speed impact: noticeable improvement, due to less copying.
+	* src/m4.h (struct token_chain): Add quote_age member.
+	(struct token_data): Add end member to chain alternate.
+	(make_text_link): New prototype.
+	* src/input.c (CHAR_QUOTE): New macro.
+	(word_start): Pre-allocate.
+	(set_word_regexp): Simplify.
+	(make_text_link): Export, and handle new fields.
+	(next_char, next_char_1): Add parameter.
+	(append_quote_token): New function.
+	(match_input, next_token): Adjust callers to handle quoted input
+	blocks.
+	* src/macro.c (struct macro_arguments): Add wrapper member.
+	(expand_argument): Accept composite blocks from input engine.
+	(expand_macro): Reduce refcounts of composite arguments.
+	(collect_arguments, arg_token, arg_mark, make_argv_ref): Update to
+	use new fields.
+	(arg_type, arg_text, arg_equal, arg_len): Treat composite
+	arguments as text.
+	(push_arg, push_args): Handle composites.
+
 2008-01-17  Eric Blake  <ebb9@byu.net>
 
 	Stage 10: avoid extra copying of strings and comments.
