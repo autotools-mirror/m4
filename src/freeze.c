@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU M4.
@@ -71,23 +71,16 @@ produce_frozen_state (const char *name)
 
   /* Dump quote delimiters.  */
 
-  if (strcmp (lquote.string, DEF_LQUOTE) || strcmp (rquote.string, DEF_RQUOTE))
-    {
-      xfprintf (file, "Q%d,%d\n", (int) lquote.length, (int) rquote.length);
-      fputs (lquote.string, file);
-      fputs (rquote.string, file);
-      fputc ('\n', file);
-    }
+  if (strcmp (curr_quote.str1, DEF_LQUOTE)
+      || strcmp (curr_quote.str2, DEF_RQUOTE))
+    xfprintf (file, "Q%d,%d\n%s%s\n", (int) curr_quote.len1,
+	      (int) curr_quote.len2, curr_quote.str1, curr_quote.str2);
 
   /* Dump comment delimiters.  */
 
-  if (strcmp (bcomm.string, DEF_BCOMM) || strcmp (ecomm.string, DEF_ECOMM))
-    {
-      xfprintf (file, "C%d,%d\n", (int) bcomm.length, (int) ecomm.length);
-      fputs (bcomm.string, file);
-      fputs (ecomm.string, file);
-      fputc ('\n', file);
-    }
+  if (strcmp (curr_comm.str1, DEF_BCOMM) || strcmp (curr_comm.str2, DEF_ECOMM))
+    xfprintf (file, "C%d,%d\n%s%s\n", (int) curr_comm.len1,
+	      (int) curr_comm.len2, curr_comm.str1, curr_comm.str2);
 
   /* Dump all symbols.  */
 

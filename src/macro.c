@@ -673,8 +673,9 @@ expand_macro (symbol *sym)
 	    chain = argv->array[i]->u.u_c.chain;
 	    while (chain)
 	      {
-		if (chain->level >= 0)
-		  adjust_refcount (chain->level, false);
+		assert (chain->type == CHAIN_STR);
+		if (chain->u.u_s.level >= 0)
+		  adjust_refcount (chain->u.u_s.level, false);
 		chain = chain->next;
 	      }
 	  }
@@ -753,15 +754,17 @@ arg_token (macro_arguments *argv, unsigned int index)
 	{
 	  token_chain *chain = token->u.u_c.chain;
 	  // TODO for now we support only a single-length $@ chain...
-	  assert (!chain->next && !chain->str);
-	  if (index < chain->argv->argc - (chain->index - 1))
+	  assert (!chain->next && chain->type == CHAIN_ARGV);
+	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
 	    {
-	      token = arg_token (chain->argv, chain->index - 1 + index);
-	      if (chain->flatten && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
+	      token = arg_token (chain->u.u_a.argv,
+				 chain->u.u_a.index - 1 + index);
+	      if (chain->u.u_a.flatten
+		  && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
 		token = &empty_token;
 	      break;
 	    }
-	  index -= chain->argv->argc - chain->index;
+	  index -= chain->u.u_a.argv->argc - chain->u.u_a.index;
 	}
       else if (--index == 0)
 	break;
@@ -781,8 +784,8 @@ arg_mark (macro_arguments *argv)
       assert (argv->arraylen == 1
 	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP
 	      && !argv->array[0]->u.u_c.chain->next
-	      && !argv->array[0]->u.u_c.chain->str);
-      argv->array[0]->u.u_c.chain->argv->inuse = true;
+	      && argv->array[0]->u.u_c.chain->type == CHAIN_ARGV);
+      argv->array[0]->u.u_c.chain->u.u_a.argv->inuse = true;
     }
 }
 
@@ -820,7 +823,7 @@ arg_text (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
   token_chain *chain;
-  struct obstack *obs;
+  struct obstack *obs; /* Scratch space; cleaned at end of macro_expand.  */
 
   if (index == 0)
     return argv->argv0;
@@ -838,9 +841,8 @@ arg_text (macro_arguments *argv, unsigned int index)
       obs = arg_scratch ();
       while (chain)
 	{
-	  // TODO - cache compiled chains?
-	  assert (chain->str);
-	  obstack_grow (obs, chain->str, chain->len);
+	  assert (chain->type == CHAIN_STR);
+	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  chain = chain->next;
 	}
       obstack_1grow (obs, '\0');
@@ -880,8 +882,9 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   if (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT)
     {
       tmpa.next = NULL;
-      tmpa.str = TOKEN_DATA_TEXT (ta);
-      tmpa.len = TOKEN_DATA_LEN (ta);
+      tmpa.type = CHAIN_STR;
+      tmpa.u.u_s.str = TOKEN_DATA_TEXT (ta);
+      tmpa.u.u_s.len = TOKEN_DATA_LEN (ta);
     }
   else
     {
@@ -891,8 +894,9 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   if (TOKEN_DATA_TYPE (tb) == TOKEN_TEXT)
     {
       tmpb.next = NULL;
-      tmpb.str = TOKEN_DATA_TEXT (tb);
-      tmpb.len = TOKEN_DATA_LEN (tb);
+      tmpb.type = CHAIN_STR;
+      tmpb.u.u_s.str = TOKEN_DATA_TEXT (tb);
+      tmpb.u.u_s.len = TOKEN_DATA_LEN (tb);
     }
   else
     {
@@ -904,32 +908,34 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   while (ca && cb)
     {
       // TODO support comparison against $@ refs.
-      assert (ca->str && cb->str);
-      if (ca->len == cb->len)
+      assert (ca->type == CHAIN_STR && cb->type == CHAIN_STR);
+      if (ca->u.u_s.len == cb->u.u_s.len)
 	{
-	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
 	    return false;
 	  ca = ca->next;
 	  cb = cb->next;
 	}
-      else if (ca->len < cb->len)
+      else if (ca->u.u_s.len < cb->u.u_s.len)
 	{
-	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
 	    return false;
 	  tmpb.next = cb->next;
-	  tmpb.str = cb->str + ca->len;
-	  tmpb.len = cb->len - ca->len;
+	  tmpb.type = CHAIN_STR;
+	  tmpb.u.u_s.str = cb->u.u_s.str + ca->u.u_s.len;
+	  tmpb.u.u_s.len = cb->u.u_s.len - ca->u.u_s.len;
 	  ca = ca->next;
 	  cb = &tmpb;
 	}
       else
 	{
-	  assert (ca->len > cb->len);
-	  if (memcmp (ca->str, cb->str, cb->len) != 0)
+	  assert (ca->u.u_s.len > cb->u.u_s.len);
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, cb->u.u_s.len) != 0)
 	    return false;
 	  tmpa.next = ca->next;
-	  tmpa.str = ca->str + cb->len;
-	  tmpa.len = ca->len - cb->len;
+	  tmpa.type = CHAIN_STR;
+	  tmpa.u.u_s.str = ca->u.u_s.str + cb->u.u_s.len;
+	  tmpa.u.u_s.len = ca->u.u_s.len - cb->u.u_s.len;
 	  ca = &tmpa;
 	  cb = cb->next;
 	}
@@ -980,8 +986,8 @@ arg_len (macro_arguments *argv, unsigned int index)
       len = 0;
       while (chain)
 	{
-	  assert (chain->str);
-	  len += chain->len;
+	  assert (chain->type == CHAIN_STR);
+	  len += chain->u.u_s.len;
 	  chain = chain->next;
 	}
       assert (len);
@@ -1040,9 +1046,9 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       assert (argv->arraylen == 1
 	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
       chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && !chain->str);
-      argv = chain->argv;
-      index += chain->index - 1;
+      assert (!chain->next && chain->type == CHAIN_ARGV);
+      argv = chain->u.u_a.argv;
+      index += chain->u.u_a.index - 1;
     }
   if (argv->argc <= index)
     {
@@ -1066,13 +1072,11 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       TOKEN_DATA_TYPE (token) = TOKEN_COMP;
       token->u.u_c.chain = token->u.u_c.end = chain;
       chain->next = NULL;
+      chain->type = CHAIN_ARGV;
       chain->quote_age = argv->quote_age;
-      chain->str = NULL;
-      chain->len = 0;
-      chain->level = expansion_level - 1;
-      chain->argv = argv;
-      chain->index = index;
-      chain->flatten = flatten;
+      chain->u.u_a.argv = argv;
+      chain->u.u_a.index = index;
+      chain->u.u_a.flatten = flatten;
     }
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
@@ -1112,8 +1116,8 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
       token_chain *chain = token->u.u_c.chain;
       while (chain)
 	{
-	  assert (chain->str);
-	  obstack_grow (obs, chain->str, chain->len);
+	  assert (chain->type == CHAIN_STR);
+	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  chain = chain->next;
 	}
     }
@@ -1141,22 +1145,22 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
   if (i + 1 == argv->argc)
     {
       if (quote)
-	obstack_grow (obs, lquote.string, lquote.length);
+	obstack_grow (obs, curr_quote.str1, curr_quote.len1);
       push_arg (obs, argv, i);
       if (quote)
-	obstack_grow (obs, rquote.string, rquote.length);
+	obstack_grow (obs, curr_quote.str2, curr_quote.len2);
       return;
     }
 
   /* Compute the separator in the scratch space.  */
   if (quote)
     {
-      obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (scratch, rquote.string, rquote.length);
+      obstack_grow (obs, curr_quote.str1, curr_quote.len1);
+      obstack_grow (scratch, curr_quote.str2, curr_quote.len2);
       obstack_1grow (scratch, ',');
-      obstack_grow0 (scratch, lquote.string, lquote.length);
+      obstack_grow0 (scratch, curr_quote.str1, curr_quote.len1);
       sep = (char *) obstack_finish (scratch);
-      sep_len += lquote.length + rquote.length;
+      sep_len += curr_quote.len1 + curr_quote.len2;
     }
   // TODO push entire $@ reference, rather than pushing each arg
   for ( ; i < argv->argc; i++)
@@ -1176,14 +1180,14 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 	  chain = token->u.u_c.chain;
 	  while (chain)
 	    {
-	      assert (chain->str);
-	      obstack_grow (obs, chain->str, chain->len);
+	      assert (chain->type == CHAIN_STR);
+	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	      chain = chain->next;
 	    }
 	}
     }
   if (quote)
-    obstack_grow (obs, rquote.string, rquote.length);
+    obstack_grow (obs, curr_quote.str2, curr_quote.len2);
   if (inuse)
     arg_mark (argv);
 }

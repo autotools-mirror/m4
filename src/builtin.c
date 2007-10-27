@@ -30,10 +30,6 @@
 # include <sys/wait.h>
 #endif
 
-/* Grab the text at argv index I.  Assumes a macro_argument *argv is
-   in scope.  */
-#define ARG(i) arg_text (argv, i)
-
 /* Initialization of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialization, and by the "builtin"
    builtin.  */
@@ -623,10 +619,10 @@ dump_args (struct obstack *obs, int start, macro_arguments *argv,
       else
 	dump_sep = true;
       if (quoted)
-	obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, ARG (i), arg_len (argv, i));
+	obstack_grow (obs, curr_quote.str1, curr_quote.len1);
+      obstack_grow (obs, ARG (i), ARG_LEN (i));
       if (quoted)
-	obstack_grow (obs, rquote.string, rquote.length);
+	obstack_grow (obs, curr_quote.str2, curr_quote.len2);
     }
 }
 
@@ -668,14 +664,14 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 
   if (argc == 2)
     {
-      define_user_macro (ARG (1), arg_len (argv, 1), "", mode);
+      define_user_macro (ARG (1), ARG_LEN (1), "", mode);
       return;
     }
 
   switch (arg_type (argv, 2))
     {
     case TOKEN_TEXT:
-      define_user_macro (ARG (1), arg_len (argv, 1), ARG (2), mode);
+      define_user_macro (ARG (1), ARG_LEN (1), ARG (2), mode);
       break;
 
     case TOKEN_FUNC:
@@ -865,7 +861,8 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	case TOKEN_TEXT:
 	  if (debug_level & DEBUG_TRACE_QUOTE)
 	    DEBUG_PRINT3 ("%s%s%s\n",
-			  lquote.string, SYMBOL_TEXT (data.base[0]), rquote.string);
+			  curr_quote.str1, SYMBOL_TEXT (data.base[0]),
+			  curr_quote.str2);
 	  else
 	    DEBUG_PRINT1 ("%s\n", SYMBOL_TEXT (data.base[0]));
 	  break;
@@ -916,7 +913,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     m4_warn (0, me, _("undefined builtin `%s'"), name);
   else
     {
-      macro_arguments *new_argv = make_argv_ref (argv, name, arg_len (argv, 1),
+      macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
 						 true, !bp->groks_macro_args);
       bp->func (obs, argc - 1, new_argv);
     }
@@ -950,7 +947,7 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
     m4_warn (0, me, _("undefined macro `%s'"), name);
   else
     {
-      macro_arguments *new_argv = make_argv_ref (argv, name, arg_len (argv, 1),
+      macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
 						 true, !SYMBOL_MACRO_ARGS (s));
       call_macro (s, argc - 1, new_argv, obs);
     }
@@ -982,9 +979,9 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
       switch (SYMBOL_TYPE (s))
 	{
 	case TOKEN_TEXT:
-	  obstack_grow (obs, lquote.string, lquote.length);
+	  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
 	  obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-	  obstack_grow (obs, rquote.string, rquote.length);
+	  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
 	  break;
 
 	case TOKEN_FUNC:
@@ -1429,13 +1426,13 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
   /* Guarantee that there are six trailing 'X' characters, even if the
      user forgot to supply them.  Output must be quoted if
      successful.  */
-  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (pattern[--len] != 'X')
       break;
   obstack_grow0 (obs, "XXXXXX", 6 - i);
-  name = (char *) obstack_base (obs) + lquote.length;
+  name = (char *) obstack_base (obs) + curr_quote.len1;
 
   errno = 0;
   fd = mkstemp (name);
@@ -1449,7 +1446,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
       close (fd);
       /* Remove NUL, then finish quote.  */
       obstack_blank (obs, -1);
-      obstack_grow (obs, rquote.string, rquote.length);
+      obstack_grow (obs, curr_quote.str2, curr_quote.len2);
     }
 }
 
@@ -1474,7 +1471,7 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = ARG (1);
-      size_t len = arg_len (argv, 1);
+      size_t len = ARG_LEN (1);
       size_t i;
       size_t len2;
 
@@ -1495,7 +1492,7 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 	}
     }
   else
-    mkstemp_helper (obs, me, ARG (1), arg_len (argv, 1));
+    mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));
 }
 
 static void
@@ -1505,7 +1502,7 @@ m4_mkstemp (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, 1))
     return;
-  mkstemp_helper (obs, me, ARG (1), arg_len (argv, 1));
+  mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));
 }
 
 /*----------------------------------------.
@@ -1532,9 +1529,9 @@ static void
 m4___file__ (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
-  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
   obstack_grow (obs, current_file, strlen (current_file));
-  obstack_grow (obs, rquote.string, rquote.length);
+  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
 }
 
 static void
@@ -1548,9 +1545,9 @@ static void
 m4___program__ (struct obstack *obs, int argc, macro_arguments *argv)
 {
   bad_argc (ARG (0), argc, 0, 0);
-  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
   obstack_grow (obs, program_name, strlen (program_name));
-  obstack_grow (obs, rquote.string, rquote.length);
+  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
 }
 
 /* This section contains various macros for exiting, saving input until
@@ -1601,7 +1598,7 @@ m4_m4wrap (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
   if (no_gnu_extensions)
-    obstack_grow (obs, ARG (1), arg_len (argv, 1));
+    obstack_grow (obs, ARG (1), ARG_LEN (1));
   else
     dump_args (obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
@@ -1748,7 +1745,7 @@ m4_len (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, 1))
     return;
-  shipout_int (obs, arg_len (argv, 1));
+  shipout_int (obs, ARG_LEN (1));
 }
 
 /*-------------------------------------------------------------------------.
@@ -1777,8 +1774,7 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
 
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
-  result = (char *) memmem (haystack, arg_len (argv, 1),
-			    needle, arg_len (argv, 2));
+  result = (char *) memmem (haystack, ARG_LEN (1), needle, ARG_LEN (2));
   if (result)
     retval = result - haystack;
 
@@ -1808,7 +1804,7 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  length = avail = arg_len (argv, 1);
+  length = avail = ARG_LEN (1);
   if (!numeric_arg (me, ARG (2), &start))
     return;
 
@@ -2074,14 +2070,14 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 	      argc == 3 ? "" : "{", repl, argc == 3 ? "" : "}");
 #endif /* DEBUG_REGEX */
 
-  msg = compile_pattern (regexp, arg_len (argv, 2), &buf, &regs);
+  msg = compile_pattern (regexp, ARG_LEN (2), &buf, &regs);
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression: `%s': %s"), regexp, msg);
       return;
     }
 
-  length = arg_len (argv, 1);
+  length = ARG_LEN (1);
   /* Avoid overhead of allocating regs if we won't use it.  */
   startpos = re_search (buf, victim, length, 0, length,
 			argc == 3 ? NULL : regs);
@@ -2142,14 +2138,14 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
     xfprintf (trace_file, "p:{%s}:{%s}\n", regexp, repl);
 #endif /* DEBUG_REGEX */
 
-  msg = compile_pattern (regexp, arg_len (argv, 2), &buf, &regs);
+  msg = compile_pattern (regexp, ARG_LEN (2), &buf, &regs);
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression `%s': %s"), regexp, msg);
       return;
     }
 
-  length = arg_len (argv, 1);
+  length = ARG_LEN (1);
 
   offset = 0;
   matchpos = 0;

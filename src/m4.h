@@ -79,12 +79,15 @@
 
 /* Various declarations.  */
 
-struct string
+/* Describes a pair of strings, such as begin and end quotes.  */
+struct string_pair
   {
-    char *string;		/* characters of the string */
-    size_t length;		/* length of the string */
+    char *str1;
+    size_t len1;
+    char *str2;
+    size_t len2;
   };
-typedef struct string STRING;
+typedef struct string_pair string_pair;
 
 /* Memory allocation.  */
 #define obstack_chunk_alloc	xmalloc
@@ -274,17 +277,40 @@ enum token_data_type
   TOKEN_COMP	/* Composite argument, u.u_c is valid.  */
 };
 
-/* Composite tokens are built of a linked list of chains.  */
+/* A link in a chain of token data.  */
+enum token_chain_type
+{
+  CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
+  // TODO add CHAIN_FUNC
+  CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
+};
+
+/* Composite tokens are built of a linked list of chains.  Each link
+   of the chain is either a single text reference (ie. $1), or an argv
+   reference (ie. $@).  */
 struct token_chain
 {
   token_chain *next;		/* Pointer to next link of chain.  */
+  enum token_chain_type type;	/* Type of this link.  */
   unsigned int quote_age;	/* Quote_age of this link of chain, or 0.  */
-  const char *str;		/* NUL-terminated string if text, or NULL.  */
-  size_t len;			/* Length of str, else 0.  */
-  int level;			/* Expansion level of link content, or -1.  */
-  macro_arguments *argv;	/* Reference to earlier $@.  */
-  unsigned int index;		/* Argument index within argv.  */
-  bool flatten;			/* True to treat builtins as text.  */
+  union
+    {
+      struct
+	{
+	  const char *str;	/* Pointer to text.  */
+	  size_t len;		/* Remaining length of str.  */
+	  int level;		/* Expansion level of link content, or -1.  */
+	}
+      u_s;
+      struct
+	{
+	  macro_arguments *argv;	/* Reference to earlier $@.  */
+	  unsigned int index;		/* Argument index within argv.  */
+	  bool flatten;			/* True to treat builtins as text.  */
+	}
+      u_a;
+    }
+  u;
 };
 
 /* The content of a token or macro argument.  */
@@ -363,8 +389,8 @@ extern const char *current_file;
 extern int current_line;
 
 /* left and right quote, begin and end comment */
-extern STRING bcomm, ecomm;
-extern STRING lquote, rquote;
+extern string_pair curr_comm;
+extern string_pair curr_quote;
 
 #define DEF_LQUOTE "`"
 #define DEF_RQUOTE "\'"
@@ -464,6 +490,14 @@ macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
 void push_args (struct obstack *, macro_arguments *, bool, bool);
 size_t adjust_refcount (int, bool);
+
+/* Grab the text at argv index I.  Assumes macro_argument *argv is in
+   scope, and aborts if the argument is not text.  */
+#define ARG(i) arg_text (argv, i)
+
+/* Grab the text length at argv index I.  Assumes macro_argument *argv
+   is in scope, and aborts if the argument is not text.  */
+#define ARG_LEN(i) arg_len (argv, i)
 
 
 /* File: builtin.c  --- builtins.  */
