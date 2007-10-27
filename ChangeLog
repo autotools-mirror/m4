@@ -1,3 +1,35 @@
+2008-01-26  Eric Blake  <ebb9@byu.net>
+
+	Stage 12: make token_chain a union, add string_pair.
+	Shrink size of symbol chains by using a union.  Make passing quote
+	delimiters around more efficient.  Other code cleanups.
+	Memory impact: slight improvement, due to smaller struct.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* src/m4.h (STRING): Delete typedef.
+	(struct string_pair, enum token_chain_type): New types.
+	(struct token_chain): Reduce size via a union.
+	(ARG_LEN): New macro.
+	(ARG): Move here...
+	* src/builtin.c (ARG): ...from here.
+	(dump_args, define_macro, m4_dumpdef, m4_builtin, m4_indir)
+	(m4_defn, mkstemp_helper, m4_maketemp, m4_mkstemp, m4___file__)
+	(m4___program__, m4_m4wrap, m4_len, m4_index, m4_substr)
+	(m4_regexp, m4_patsubst): Adjust callers.
+	* src/input.c (rquote, lquote, bcomm, ecomm): Delete...
+	(curr_quote, curr_comm): ...replaced by these.
+	(make_text_link, push_token, pop_input, input_print, peek_input)
+	(next_char_1, input_init, set_quotes, set_comment, set_quote_age)
+	(next_token, peek_token): Adjust callers.
+	* src/macro.c (expand_macro, arg_token, arg_mark, arg_text)
+	(arg_equal, arg_len, make_argv_ref, push_arg, push_args):
+	Likewise.
+	* src/format.c (ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE, format):
+	Likewise.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* src/debug.c (trace_format, trace_pre): Likewise.
+	(debug_decode): Don't lose partial traces prior to reducing
+	debugmode.
+
 2008-01-22  Eric Blake  <ebb9@byu.net>
 
 	Stage 11: full circle for single argument references.

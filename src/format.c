@@ -101,16 +101,16 @@ arg_double (const char *me, const char *str)
 }
 
 #define ARG_INT(i, argc, argv)						\
-  ((argc <= ++i) ? 0 : arg_int (me, arg_text (argv, i)))
+  ((argc <= ++i) ? 0 : arg_int (me, ARG (i)))
 
 #define ARG_LONG(i, argc, argv)						\
-  ((argc <= ++i) ? 0L : arg_long (me, arg_text (argv, i)))
+  ((argc <= ++i) ? 0L : arg_long (me, ARG (i)))
 
 #define ARG_STR(i, argc, argv)						\
-  ((argc <= ++i) ? "" : arg_text (argv, i))
+  ((argc <= ++i) ? "" : ARG (i))
 
 #define ARG_DOUBLE(i, argc, argv)					\
-  ((argc <= ++i) ? 0.0 : arg_double (me, arg_text (argv, i)))
+  ((argc <= ++i) ? 0.0 : arg_double (me, ARG (i)))
 
 
 /*------------------------------------------------------------------.
@@ -124,7 +124,7 @@ arg_double (const char *me, const char *str)
 void
 format (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *me = arg_text (argv, 0);
+  const char *me = ARG (0);		/* Macro name.  */
   const char *f;			/* Format control string.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */

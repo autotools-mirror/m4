@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007 Free Software
-   Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007, 2008 Free
+   Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -110,12 +110,6 @@ debug_decode (const char *opts)
 	    }
 	}
     }
-
-  /* This is to avoid screwing up the trace output due to changes in the
-     debug_level.  */
-
-  obstack_free (&trace, obstack_finish (&trace));
-
   return level;
 }
 
@@ -283,11 +277,11 @@ trace_format (const char *fmt, ...)
 	  break;
 
 	case 'l':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? lquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? curr_quote.str1 : "";
 	  break;
 
 	case 'r':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? rquote.string : "";
+	  s = (debug_level & DEBUG_TRACE_QUOTE) ? curr_quote.str2 : "";
 	  break;
 
 	case 'd':
@@ -309,6 +303,7 @@ trace_format (const char *fmt, ...)
 
 /*------------------------------------------------------------------.
 | Format the standard header attached to all tracing output lines.  |
+| ID is the current macro id.                                       |
 `------------------------------------------------------------------*/
 
 static void
@@ -342,10 +337,10 @@ trace_flush (void)
   obstack_free (&trace, line);
 }
 
-/*-------------------------------------------------------------.
-| Do pre-argument-collction tracing for macro NAME.  Used from |
-| expand_macro ().					       |
-`-------------------------------------------------------------*/
+/*----------------------------------------------------------------.
+| Do pre-argument-collection tracing for macro NAME, with a given |
+| ID.  Used from expand_macro ().                                 |
+`----------------------------------------------------------------*/
 
 void
 trace_prepre (const char *name, int id)
@@ -355,10 +350,11 @@ trace_prepre (const char *name, int id)
   trace_flush ();
 }
 
-/*-----------------------------------------------------------------------.
-| Format the parts of a trace line, that can be made before the macro is |
-| actually expanded.  Used from expand_macro ().			 |
-`-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Format the parts of a trace line that are known before the macro |
+| is actually expanded.  Called for the macro NAME with ID, and    |
+| arguments ARGV.  Used from expand_macro ().                      |
+`-----------------------------------------------------------------*/
 
 void
 trace_pre (const char *name, int id, macro_arguments *argv)
@@ -382,7 +378,7 @@ trace_pre (const char *name, int id, macro_arguments *argv)
 	  switch (arg_type (argv, i))
 	    {
 	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", arg_text (argv, i));
+	      trace_format ("%l%S%r", ARG (i));
 	      break;
 
 	    case TOKEN_FUNC:
@@ -412,8 +408,9 @@ trace_pre (const char *name, int id, macro_arguments *argv)
 }
 
 /*-------------------------------------------------------------------.
-| Format the final part of a trace line and print it all.  Used from |
-| expand_macro ().						     |
+| Format the final part of a trace line and print it all.  Print     |
+| details for macro NAME with ID, given arguemnts ARGV and expansion |
+| EXPANDED.  Used from expand_macro ().                              |
 `-------------------------------------------------------------------*/
 
 void

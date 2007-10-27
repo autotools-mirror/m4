@@ -156,12 +156,10 @@ static bool input_change;
 #define CHAR_QUOTE	258	/* Character return for quoted string.  */
 
 /* Quote chars.  */
-STRING rquote;
-STRING lquote;
+string_pair curr_quote;
 
 /* Comment chars.  */
-STRING bcomm;
-STRING ecomm;
+string_pair curr_comm;
 
 #ifdef ENABLE_CHANGEWORD
 
@@ -219,13 +217,11 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 	*start = chain;
       *end = chain;
       chain->next = NULL;
+      chain->type = CHAIN_STR;
       chain->quote_age = 0;
-      chain->str = str;
-      chain->len = len;
-      chain->level = -1;
-      chain->argv = NULL;
-      chain->index = 0;
-      chain->flatten = false;
+      chain->u.u_s.str = str;
+      chain->u.u_s.len = len;
+      chain->u.u_s.level = -1;
     }
 }
 
@@ -363,13 +359,11 @@ push_token (token_data *token, int level)
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
+  chain->type = CHAIN_STR;
   chain->quote_age = TOKEN_DATA_QUOTE_AGE (token);
-  chain->str = TOKEN_DATA_TEXT (token);
-  chain->len = TOKEN_DATA_LEN (token);
-  chain->level = level;
-  chain->argv = NULL;
-  chain->index = 0;
-  chain->flatten = false;
+  chain->u.u_s.str = TOKEN_DATA_TEXT (token);
+  chain->u.u_s.len = TOKEN_DATA_LEN (token);
+  chain->u.u_s.level = level;
   if (level >= 0)
     {
       adjust_refcount (level, true);
@@ -478,19 +472,20 @@ pop_input (bool cleanup)
       assert (!chain || !cleanup);
       while (chain)
 	{
-	  if (chain->str)
+	  switch (chain->type)
 	    {
-	      if (chain->len)
+	    case CHAIN_STR:
+	      if (chain->u.u_s.len)
 		return false;
-	    }
-	  else
-	    {
+	      if (chain->u.u_s.level >= 0)
+		adjust_refcount (chain->u.u_s.level, false);
+	      break;
+	    case CHAIN_ARGV:
 	      /* TODO - peek into argv.  */
-	      assert (!"implemented yet");
+	    default:
+	      assert (!"pop_input");
 	      abort ();
 	    }
-	  if (chain->level >= 0)
-	    adjust_refcount (chain->level, false);
 	  isp->u.u_c.chain = chain = chain->next;
 	}
       break;
@@ -601,8 +596,8 @@ input_print (struct obstack *obs, const input_block *input)
       while (chain)
 	{
 	  /* TODO support argv refs as well.  */
-	  assert (chain->str);
-	  if (obstack_print (obs, chain->str, chain->len, &maxlen))
+	  assert (chain->type == CHAIN_STR);
+	  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len, &maxlen))
 	    return;
 	  chain = chain->next;
 	}
@@ -659,15 +654,16 @@ peek_input (void)
 	  chain = block->u.u_c.chain;
 	  while (chain)
 	    {
-	      if (chain->str)
+	      switch (chain->type)
 		{
-		  if (chain->len)
-		    return to_uchar (chain->str[0]);
-		}
-	      else
-		{
+		case CHAIN_STR:
+		  if (chain->u.u_s.len)
+		    return to_uchar (*chain->u.u_s.str);
+		  break;
+		case CHAIN_ARGV:
 		  /* TODO - peek into argv.  */
-		  assert (!"implemented yet");
+		default:
+		  assert (!"peek_input");
 		  abort ();
 		}
 	      chain = chain->next;
@@ -760,24 +756,25 @@ next_char_1 (bool allow_quote)
 	    {
 	      if (allow_quote && chain->quote_age == current_quote_age)
 		return CHAR_QUOTE;
-	      if (chain->str)
+	      switch (chain->type)
 		{
-		  if (chain->len)
+		case CHAIN_STR:
+		  if (chain->u.u_s.len)
 		    {
 		      /* Partial consumption invalidates quote age.  */
 		      chain->quote_age = 0;
-		      chain->len--;
-		      return to_uchar (*chain->str++);
+		      chain->u.u_s.len--;
+		      return to_uchar (*chain->u.u_s.str++);
 		    }
-		}
-	      else
-		{
+		  if (chain->u.u_s.level >= 0)
+		    adjust_refcount (chain->u.u_s.level, false);
+		  break;
+		case CHAIN_ARGV:
 		  /* TODO - read from argv.  */
-		  assert (!"implemented yet");
+		default:
+		  assert (!"next_char_1");
 		  abort ();
 		}
-	      if (chain->level >= 0)
-		adjust_refcount (chain->level, false);
 	      isp->u.u_c.chain = chain = chain->next;
 	    }
 	  break;
@@ -958,14 +955,14 @@ input_init (void)
 
   start_of_input_line = false;
 
-  lquote.string = xstrdup (DEF_LQUOTE);
-  lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (DEF_RQUOTE);
-  rquote.length = strlen (rquote.string);
-  bcomm.string = xstrdup (DEF_BCOMM);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (DEF_ECOMM);
-  ecomm.length = strlen (ecomm.string);
+  curr_quote.str1 = xstrdup (DEF_LQUOTE);
+  curr_quote.len1 = strlen (curr_quote.str1);
+  curr_quote.str2 = xstrdup (DEF_RQUOTE);
+  curr_quote.len2 = strlen (curr_quote.str2);
+  curr_comm.str1 = xstrdup (DEF_BCOMM);
+  curr_comm.len1 = strlen (curr_comm.str1);
+  curr_comm.str2 = xstrdup (DEF_ECOMM);
+  curr_comm.len2 = strlen (curr_comm.str2);
 
 #ifdef ENABLE_CHANGEWORD
   set_word_regexp (NULL, user_word_regexp);
@@ -999,15 +996,15 @@ set_quotes (const char *lq, const char *rq)
   else if (!rq || (*lq && !*rq))
     rq = DEF_RQUOTE;
 
-  if (strcmp (lquote.string, lq) == 0 && strcmp (rquote.string, rq) == 0)
+  if (strcmp (curr_quote.str1, lq) == 0 && strcmp (curr_quote.str2, rq) == 0)
     return;
 
-  free (lquote.string);
-  free (rquote.string);
-  lquote.string = xstrdup (lq);
-  lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (rq);
-  rquote.length = strlen (rquote.string);
+  free (curr_quote.str1);
+  free (curr_quote.str2);
+  curr_quote.str1 = xstrdup (lq);
+  curr_quote.len1 = strlen (curr_quote.str1);
+  curr_quote.str2 = xstrdup (rq);
+  curr_quote.len2 = strlen (curr_quote.str2);
   set_quote_age ();
 }
 
@@ -1032,15 +1029,15 @@ set_comment (const char *bc, const char *ec)
   else if (!ec || (*bc && !*ec))
     ec = DEF_ECOMM;
 
-  if (strcmp (bcomm.string, bc) == 0 && strcmp (ecomm.string, ec) == 0)
+  if (strcmp (curr_comm.str1, bc) == 0 && strcmp (curr_comm.str2, ec) == 0)
     return;
 
-  free (bcomm.string);
-  free (ecomm.string);
-  bcomm.string = xstrdup (bc);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (ec);
-  ecomm.length = strlen (ecomm.string);
+  free (curr_comm.str1);
+  free (curr_comm.str2);
+  curr_comm.str1 = xstrdup (bc);
+  curr_comm.len1 = strlen (curr_comm.str1);
+  curr_comm.str2 = xstrdup (ec);
+  curr_comm.len2 = strlen (curr_comm.str2);
   set_quote_age ();
 }
 
@@ -1136,14 +1133,14 @@ set_quote_age (void)
   static const char unsafe[] = Letters "_0123456789(,) \t\n\r\f\v";
 #undef Letters
 
-  if (lquote.length == 1 && rquote.length == 1
-      && strpbrk(lquote.string, unsafe) == NULL
-      && strpbrk(rquote.string, unsafe) == NULL
-      && default_word_regexp && *lquote.string != *rquote.string
-      && *bcomm.string != '(' && *bcomm.string != ','
-      && *bcomm.string != ')' && *bcomm.string != *lquote.string)
-    current_quote_age = (((*lquote.string & 0xff) << 8)
-			 | (*rquote.string & 0xff));
+  if (curr_quote.len1 == 1 && curr_quote.len2 == 1
+      && strpbrk (curr_quote.str1, unsafe) == NULL
+      && strpbrk (curr_quote.str2, unsafe) == NULL
+      && default_word_regexp && *curr_quote.str1 != *curr_quote.str2
+      && *curr_comm.str1 != '(' && *curr_comm.str1 != ','
+      && *curr_comm.str1 != ')' && *curr_comm.str1 != *curr_quote.str1)
+    current_quote_age = (((*curr_quote.str1 & 0xff) << 8)
+			 | (*curr_quote.str2 & 0xff));
   else
     current_quote_age = 0;
 }
@@ -1239,18 +1236,18 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
   next_char (false); /* Consume character we already peeked at.  */
   file = current_file;
   *line = current_line;
-  if (MATCH (ch, bcomm.string, true))
+  if (MATCH (ch, curr_comm.str1, true))
     {
       if (obs)
 	obs_td = obs;
-      obstack_grow (obs_td, bcomm.string, bcomm.length);
+      obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
       while ((ch = next_char (false)) < CHAR_EOF
-	     && !MATCH (ch, ecomm.string, true))
+	     && !MATCH (ch, curr_comm.str2, true))
 	obstack_1grow (obs_td, ch);
       if (ch != CHAR_EOF)
 	{
 	  assert (ch < CHAR_EOF);
-	  obstack_grow (obs_td, ecomm.string, ecomm.length);
+	  obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
 	}
       else
 	/* Current_file changed to "" if we see CHAR_EOF, use the
@@ -1306,7 +1303,7 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 
 #endif /* ENABLE_CHANGEWORD */
 
-  else if (!MATCH (ch, lquote.string, true))
+  else if (!MATCH (ch, curr_quote.str1, true))
     {
       switch (ch)
 	{
@@ -1341,16 +1338,16 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 
 	  if (ch == CHAR_QUOTE)
 	    append_quote_token (obs, td);
-	  else if (MATCH (ch, rquote.string, true))
+	  else if (MATCH (ch, curr_quote.str2, true))
 	    {
 	      if (--quote_level == 0)
 		break;
-	      obstack_grow (obs_td, rquote.string, rquote.length);
+	      obstack_grow (obs_td, curr_quote.str2, curr_quote.len2);
 	    }
-	  else if (MATCH (ch, lquote.string, true))
+	  else if (MATCH (ch, curr_quote.str1, true))
 	    {
 	      quote_level++;
-	      obstack_grow (obs_td, lquote.string, lquote.length);
+	      obstack_grow (obs_td, curr_quote.str1, curr_quote.len1);
 	    }
 	  else
 	    {
@@ -1392,8 +1389,24 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
     {
       assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP && type == TOKEN_STRING);
 #ifdef DEBUG_INPUT
-      xfprintf (stderr, "next_token -> %s <chain>\n",
-		token_type_string (type));
+      {
+	token_chain *chain;
+	size_t len = 0;
+	int links = 0;
+	chain = td->u.u_c.chain;
+	xfprintf (stderr, "next_token -> %s <chain> (",
+		  token_type_string (type));
+	while (chain)
+	  {
+	    assert (chain->type == CHAIN_STR);
+	    xfprintf (stderr, "%s", chain->u.u_s.str);
+	    len += chain->u.u_s.len;
+	    links++;
+	    chain = chain->next;
+	  }
+	xfprintf (stderr, "), %d links, len %zu\n",
+		  links, len);
+      }
 #endif /* DEBUG_INPUT */
     }
   return type;
@@ -1417,7 +1430,7 @@ peek_token (void)
     {
       result = TOKEN_MACDEF;
     }
-  else if (MATCH (ch, bcomm.string, false))
+  else if (MATCH (ch, curr_comm.str1, false))
     {
       result = TOKEN_STRING;
     }
@@ -1429,7 +1442,7 @@ peek_token (void)
     {
       result = TOKEN_WORD;
     }
-  else if (MATCH (ch, lquote.string, false))
+  else if (MATCH (ch, curr_quote.str1, false))
     {
       result = TOKEN_STRING;
     }
