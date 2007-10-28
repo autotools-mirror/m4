@@ -76,8 +76,7 @@ src_m4_SOURCES	= \
 if GETOPT
 src_m4_SOURCES += \
 		  src/getopt.c \
-		  src/getopt1.c \
-		  src/getopt.h
+		  src/getopt1.c
 endif
 if STACKOVF
 src_m4_SOURCES += src/stackovf.c
@@ -101,13 +100,13 @@ clean-local-src:
 ##  (from: gnulib-tool --extract-automake-snippet getopt version-etc)   ##
 ##                                                                      ##
 BUILT_SOURCES  += src/$(GETOPT_H)
-EXTRA_DIST     += src/getopt_.h src/getopt_int.h
+EXTRA_DIST     += src/getopt.in.h src/getopt_int.h
 
 # We need the following in order to create an <getopt.h> when the
 # system doesn't have one that works with the given compiler.
 all-local: src/$(GETOPT_H)
-src/getopt.h: src/getopt_.h
-	cp $(srcdir)/src/getopt_.h $@-t
+src/getopt.h: src/getopt.in.h
+	cp $(srcdir)/src/getopt.in.h $@-t
 	mv $@-t $@
 MOSTLYCLEANFILES += src/getopt.h src/getopt.h-t
 ##                                                                      ##
