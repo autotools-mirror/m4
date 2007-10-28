@@ -1,3 +1,10 @@
+2007-10-28  Eric Blake  <ebb9@byu.net>
+
+	More test coverage for autoconf usage patterns.
+	* doc/m4.texinfo (Inhibiting Invocation, Pseudo Arguments)
+	(Builtin): Add new undocumented tests.
+	(Shift): Document cond macro, and add new test.
+
 2007-10-27  Eric Blake  <ebb9@byu.net>
 
 	Document one use of changequote(`(',`)').
