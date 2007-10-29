@@ -1508,16 +1508,16 @@ empty string.
 
 @cindex rescanning
 The output of macro evaluations is always rescanned.  The following
-example would yield the string @samp{de}, exactly as if @code{m4}
-has been given @w{@samp{substr(`abcde', `3', `2')}} as input:
+example would yield the string @samp{bcd}, exactly as if @code{m4}
+has been given @w{@samp{substr(`abcde', `1', `3')}} as input:
 
 @example
 define(`x', `substr(ab')
 @result{}
-define(`y', `cde, `3', `2')')
+define(`y', `cde, `1', `3')')
 @result{}
 x`'y
-@result{}de
+@result{}bcd
 @end example
 
 Unquoted strings on either side of a quoted string are subject to
@@ -2800,7 +2800,7 @@ as a multibranch, depending on the number of arguments supplied:
 @deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal}, @
   @ovar{not-equal})
 @deffnx {Builtin (m4)} ifelse (@var{string-1}, @var{string-2}, @var{equal-1}, @
-  @var{string-3}, @var{string-4}, @var{equal-2}, @dots{})
+  @var{string-3}, @var{string-4}, @var{equal-2}, @dots{}, @ovar{not-equal})
 Used with only one argument, the @code{ifelse} simply discards it and
 produces no output.
 
@@ -2944,8 +2944,65 @@ reverse(`foo', `bar', `gnats', `and gnus')
 
 While not a very interesting macro, it does show how simple loops can be
 made with @code{shift}, @code{ifelse} and recursion.  It also shows
-that @code{shift} is usually used with @samp{$@@}.  Sometimes, a
-recursive algorithm requires adding quotes to each element:
+that @code{shift} is usually used with @samp{$@@}.  Another example of
+this is an implementation of a short-circuiting conditional operator.
+
+@cindex short-circuiting conditional
+@cindex conditional, short-circuiting
+@deffn Composite cond (@var{test-1}, @var{string-1}, @var{equal-1}, @
+  @ovar{test-2}, @ovar{string-2}, @ovar{equal-2}, @dots{}, @ovar{not-equal})
+Similar to @code{ifelse}, where an equal comparison between the first
+two strings results in the third, otherwise the first three arguments
+are discarded and the process repeats.  The difference is that each
+@var{test-<n>} is expanded only when it is encountered.  This means that
+every third argument to @code{cond} is normally given one more level of
+quoting than the corresponding argument to @code{ifelse}.
+@end deffn
+
+Here is the implementation of @code{cond}, along with a demonstration of
+how it can short-circuit the side effects in @code{side}.  Notice how
+all the unquoted side effects happen regardless of how many comparisons
+are made with @code{ifelse}, compared with only the relevant effects
+with @code{cond}.
+
+@example
+define(`cond',
+`ifelse(`$#', `1', `$1',
+        `ifelse($1, `$2', `$3',
+                `$0(shift(shift(shift($@@))))')')')dnl
+define(`side', `define(`counter', incr(counter))$1')dnl
+define(`example1',
+`define(`counter', `0')dnl
+ifelse(side(`$1'), `yes', `one comparison: ',
+       side(`$1'), `no', `two comparisons: ',
+       side(`$1'), `maybe', `three comparisons: ',
+       `side(`default answer: ')')counter')dnl
+define(`example2',
+`define(`counter', `0')dnl
+cond(`side(`$1')', `yes', `one comparison: ',
+     `side(`$1')', `no', `two comparisons: ',
+     `side(`$1')', `maybe', `three comparisons: ',
+     `side(`default answer: ')')counter')dnl
+example1(`yes')
+@result{}one comparison: 3
+example1(`no')
+@result{}two comparisons: 3
+example1(`maybe')
+@result{}three comparisons: 3
+example1(`feeling rather indecisive today')
+@result{}default answer: 4
+example2(`yes')
+@result{}one comparison: 1
+example2(`no')
+@result{}two comparisons: 2
+example2(`maybe')
+@result{}three comparisons: 3
+example2(`feeling rather indecisive today')
+@result{}default answer: 4
+@end example
+
+Sometimes, a recursive algorithm requires adding quotes to each element,
+or treating multiple arguments as a single element:
 
 @deffn Composite quote (@dots{})
 @deffnx Composite dquote (@dots{})

@@ -1,3 +1,10 @@
+2007-10-28  Eric Blake  <ebb9@byu.net>
+
+	More test coverage for autoconf usage patterns.
+	* doc/m4.texinfo (Shift): Document cond macro, and add new test.
+	* tests/macros.at (Rescanning macros): New test.
+	* tests/builtins.at (include): Augment test.
+
 2007-10-28  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am: Adjust getopt handling to latest gnulib layout.

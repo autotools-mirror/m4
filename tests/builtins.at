@@ -424,6 +424,15 @@ m4:include.m4:6: include: cannot open `NOFILE': No such file or directory
 
 AT_CHECK_M4([include.m4], 1, expout, experr)
 
+dnl make sure files are handled correctly even via builtin
+AT_DATA([foo], [[bar
+]])
+AT_DATA([in], [[builtin(`include', `foo')dnl
+]])
+
+AT_CHECK_M4([in], [0], [[bar
+]])
+
 AT_CLEANUP
 
 

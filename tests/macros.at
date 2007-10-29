@@ -515,3 +515,32 @@ AT_CHECK_M4([in], [0], [[
 ]], [ignore])
 
 AT_CLEANUP
+
+
+## ----------------- ##
+## Rescanning macros ##
+## ----------------- ##
+
+AT_SETUP([Rescanning macros])
+
+dnl This is a series of tests that used to be included as undocumented tests
+dnl in the branch m4.texinfo.  They exercise rescanning issues not stressed
+dnl anywhere else in the suite, but which are used by autoconf.
+AT_DATA([in], [[define(`x1', `len(`$1'')dnl
+define(`y1', ``$1')')dnl
+x1(`01234567890123456789')y1(`98765432109876543210')
+]])
+
+AT_CHECK_M4([in], [0], [[40
+]])
+
+AT_DATA([in], [[define(`echo', `$@')dnl
+len((echo(`01234567890123456789',
+          `01234567890123456789')echo(`98765432109876543210',
+                                      `98765432109876543210')))
+]])
+
+AT_CHECK_M4([in], [0], [[84
+]])
+
+AT_CLEANUP
