@@ -313,37 +313,74 @@ push_string_init (void)
   return current_input;
 }
 
-/*-------------------------------------------------------------------.
-| If TOKEN contains text, then convert the current string into a     |
-| chain if it is not one already, and add the contents of TOKEN as a |
-| new link in the chain.  LEVEL describes the current expansion      |
-| level, or -1 if the contents of TOKEN reside entirely on the       |
-| current_input stack and TOKEN lives in temporary storage.  Allows  |
-| gathering input from multiple locations, rather than copying       |
-| everything consecutively onto the input stack.  Must be called     |
-| between push_string_init and push_string_finish.  Return true only |
-| if LEVEL is non-negative, and a reference was created to TOKEN, in |
-| which case, the lifetime of TOKEN and its contents must last as    |
-| long as the input engine can parse references to it.               |
-`-------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| This function allows gathering input from multiple locations,	      |
+| rather than copying everything consecutively onto the input stack.  |
+| Must be called between push_string_init and push_string_finish.     |
+|                                                                     |
+| If TOKEN contains text, then convert the current input block into   |
+| a chain if it is not one already, and add the contents of TOKEN as  |
+| a new link in the chain.  LEVEL describes the current expansion     |
+| level, or -1 if TOKEN is composite, its contents reside entirely    |
+| on the current_input stack, and TOKEN lives in temporary storage.   |
+| If TOKEN is a simple string, then it belongs to the current macro   |
+| expansion.  If TOKEN is composite, then each text link has a level  |
+| of -1 if it belongs to the current macro expansion, otherwise it    |
+| is a back-reference where level tracks which stack it came from.    |
+| The resulting input block chain contains links with a level of -1   |
+| if the text belongs to the input stack, otherwise the level where   |
+| the back-reference comes from.				      |
+|                                                                     |
+| Return true only if a reference was created to the contents of      |
+| TOKEN, in which case, LEVEL was non-negative and the lifetime of    |
+| TOKEN and its contents must last as long as the input engine can    |
+| parse references to it.  INUSE determines whether composite tokens  |
+| should favor creating back-references or copying text.	      |
+`--------------------------------------------------------------------*/
 bool
-push_token (token_data *token, int level)
+push_token (token_data *token, int level, bool inuse)
 {
+  token_chain *src_chain = NULL;
   token_chain *chain;
-  bool result = false;
 
   assert (next);
-  /* TODO - also accept TOKEN_COMP chains.  */
-  assert (TOKEN_DATA_TYPE (token) == TOKEN_TEXT);
+  /* TODO - also accept TOKEN_COMP chains containing $@ ref.  */
 
   /* Speed consideration - for short enough tokens, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
-     time to inline the token text.  */
-  if (TOKEN_DATA_LEN (token) <= INPUT_INLINE_THRESHOLD)
+     time to inline the token text.  But don't re-copy text if it
+     already lives on the obstack.  */
+  if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
     {
-      obstack_grow (current_input, TOKEN_DATA_TEXT (token),
-		    TOKEN_DATA_LEN (token));
-      return false;
+      assert (level >= 0);
+      if (TOKEN_DATA_LEN (token) <= INPUT_INLINE_THRESHOLD)
+	{
+	  obstack_grow (current_input, TOKEN_DATA_TEXT (token),
+			TOKEN_DATA_LEN (token));
+	  return false;
+	}
+    }
+  else
+    {
+      /* For composite tokens, if argv is already in use, creating
+	 additional references for long text segments is more
+	 efficient in time.  But if argv is not yet in use, and we
+	 have a composite token, then the token must already contain a
+	 back-reference, and memory usage is more efficient if we can
+	 avoid using the current expand_macro, even if it means larger
+	 copies.  */
+      assert (TOKEN_DATA_TYPE (token) == TOKEN_COMP);
+      src_chain = token->u.u_c.chain;
+      while (level >= 0 && src_chain && src_chain->type == CHAIN_STR
+	     && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+		 || (!inuse && src_chain->u.u_s.level == -1)))
+	{
+	  obstack_grow (current_input, src_chain->u.u_s.str,
+			src_chain->u.u_s.len);
+	  src_chain = src_chain->next;
+	}
+      if (!src_chain)
+	return false;
     }
 
   if (next->type == INPUT_STRING)
@@ -352,24 +389,71 @@ push_token (token_data *token, int level)
       next->u.u_c.chain = next->u.u_c.end = NULL;
     }
   make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
-  chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
-  if (next->u.u_c.end)
-    next->u.u_c.end->next = chain;
-  else
-    next->u.u_c.chain = chain;
-  next->u.u_c.end = chain;
-  chain->next = NULL;
-  chain->type = CHAIN_STR;
-  chain->quote_age = TOKEN_DATA_QUOTE_AGE (token);
-  chain->u.u_s.str = TOKEN_DATA_TEXT (token);
-  chain->u.u_s.len = TOKEN_DATA_LEN (token);
-  chain->u.u_s.level = level;
-  if (level >= 0)
+  if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
     {
+      chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      chain->next = NULL;
+      chain->type = CHAIN_STR;
+      chain->quote_age = TOKEN_DATA_QUOTE_AGE (token);
+      chain->u.u_s.str = TOKEN_DATA_TEXT (token);
+      chain->u.u_s.len = TOKEN_DATA_LEN (token);
+      chain->u.u_s.level = level;
       adjust_refcount (level, true);
-      result = true;
+      inuse = true;
     }
-  return result;
+  while (src_chain)
+    {
+      if (level == -1)
+	{
+	  /* Nothing to copy, since link already lives on obstack.  */
+	  assert (src_chain->type != CHAIN_STR
+		  || src_chain->u.u_s.level == -1);
+	  chain = src_chain;
+	}
+      else
+	{
+	  /* Allow inlining the final link with subsequent text.  */
+	  if (!src_chain->next && src_chain->type == CHAIN_STR
+	      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+		  || (!inuse && src_chain->u.u_s.level == -1)))
+	    {
+	      obstack_grow (current_input, src_chain->u.u_s.str,
+			    src_chain->u.u_s.len);
+	      break;
+	    }
+	  /* We must clone each link in the chain, since next_char
+	     destructively modifies the chain it is parsing.  */
+	  chain = (token_chain *) obstack_copy (current_input, src_chain,
+						sizeof *chain);
+	  if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
+	    {
+	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
+		chain->u.u_s.str = (char *) obstack_copy (current_input,
+							  chain->u.u_s.str,
+							  chain->u.u_s.len);
+	      else
+		{
+		  chain->u.u_s.level = level;
+		  inuse = true;
+		}
+	    }
+	}
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      assert (chain->type == CHAIN_STR);
+      if (chain->u.u_s.level >= 0)
+	adjust_refcount (chain->u.u_s.level, true);
+      src_chain = src_chain->next;
+    }
+  return inuse;
 }
 
 /*-------------------------------------------------------------------.
@@ -843,7 +927,20 @@ append_quote_token (struct obstack *obs, token_data *td)
 {
   token_chain *src_chain = isp->u.u_c.chain;
   token_chain *chain;
-  assert (isp->type == INPUT_CHAIN && obs && current_quote_age);
+
+  assert (isp->type == INPUT_CHAIN && obs && current_quote_age
+	  && src_chain->type == CHAIN_STR && src_chain->u.u_s.level >= 0);
+  isp->u.u_c.chain = src_chain->next;
+
+  /* Speed consideration - for short enough tokens, the speed and
+     memory overhead of parsing another INPUT_CHAIN link outweighs the
+     time to inline the token text.  */
+  if (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
+    {
+      obstack_grow (obs, src_chain->u.u_s.str, src_chain->u.u_s.len);
+      adjust_refcount (src_chain->u.u_s.level, false);
+      return;
+    }
 
   if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
     {
@@ -858,8 +955,7 @@ append_quote_token (struct obstack *obs, token_data *td)
   else
     td->u.u_c.chain = chain;
   td->u.u_c.end = chain;
-  td->u.u_c.end->next = NULL;
-  isp->u.u_c.chain = src_chain->next;
+  chain->next = NULL;
 }
 
 /*------------------------------------------------------------------.

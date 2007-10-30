@@ -378,7 +378,7 @@ void make_text_link (struct obstack *, token_chain **, token_chain **);
 void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
-bool push_token (token_data *, int);
+bool push_token (token_data *, int, bool);
 const input_block *push_string_finish (void);
 void push_wrapup (const char *);
 bool pop_wrapup (void);
