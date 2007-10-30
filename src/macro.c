@@ -808,7 +808,8 @@ arg_type (macro_arguments *argv, unsigned int index)
     return TOKEN_TEXT;
   token = arg_token (argv, index);
   type = TOKEN_DATA_TYPE (token);
-  /* Composite tokens are currently sequences of text only.  */
+  /* When accessed via the arg_* interface, composite tokens are
+     currently sequences of text only.  */
   if (type == TOKEN_COMP)
     type = TOKEN_TEXT;
   return type;
@@ -1104,23 +1105,8 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
     return;
   token = arg_token (argv, index);
   // TODO handle func tokens?
-  if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
-    {
-      if (push_token (token, expansion_level - 1))
-	arg_mark (argv);
-    }
-  else if (TOKEN_DATA_TYPE (token) == TOKEN_COMP)
-    {
-      // TODO - really handle composites; for now, just flatten the
-      // composite and push its text
-      token_chain *chain = token->u.u_c.chain;
-      while (chain)
-	{
-	  assert (chain->type == CHAIN_STR);
-	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	  chain = chain->next;
-	}
-    }
+  if (push_token (token, expansion_level - 1, argv->inuse))
+    arg_mark (argv);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -1131,7 +1117,6 @@ void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {
   token_data *token;
-  token_chain *chain;
   unsigned int i = skip ? 2 : 1;
   const char *sep = ",";
   size_t sep_len = 1;
@@ -1171,20 +1156,7 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
       else
 	use_sep = true;
       // TODO handle func tokens?
-      if (TOKEN_DATA_TYPE (token) == TOKEN_TEXT)
-	inuse |= push_token (token, expansion_level - 1);
-      else
-	{
-	  // TODO - handle composite text in push_token
-	  assert (TOKEN_DATA_TYPE (token) == TOKEN_COMP);
-	  chain = token->u.u_c.chain;
-	  while (chain)
-	    {
-	      assert (chain->type == CHAIN_STR);
-	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	      chain = chain->next;
-	    }
-	}
+      inuse |= push_token (token, expansion_level - 1, inuse);
     }
   if (quote)
     obstack_grow (obs, curr_quote.str2, curr_quote.len2);
