@@ -344,7 +344,6 @@ push_token (token_data *token, int level, bool inuse)
   token_chain *chain;
 
   assert (next);
-  // TODO - also accept TOKEN_COMP chains containing single $@ ref
 
   /* Speed consideration - for short enough tokens, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
@@ -448,8 +447,12 @@ push_token (token_data *token, int level, bool inuse)
       else
 	next->u.u_c.chain = chain;
       next->u.u_c.end = chain;
-      assert (chain->type == CHAIN_STR);
-      if (chain->u.u_s.level >= 0)
+      if (chain->type == CHAIN_ARGV)
+	{
+	  assert (!chain->u.u_a.comma);
+	  inuse |= arg_adjust_refcount (chain->u.u_a.argv, true);
+	}
+      else if (chain->type == CHAIN_STR && chain->u.u_s.level >= 0)
 	adjust_refcount (chain->u.u_s.level, true);
       src_chain = src_chain->next;
     }
@@ -565,9 +568,10 @@ pop_input (bool cleanup)
 		adjust_refcount (chain->u.u_s.level, false);
 	      break;
 	    case CHAIN_ARGV:
-	      // TODO - peek into argv
-	      assert (!"implemented yet");
-	      abort ();
+	      if (chain->u.u_a.index < arg_argc (chain->u.u_a.argv))
+		return false;
+	      arg_adjust_refcount (chain->u.u_a.argv, false);
+	      break;
 	    default:
 	      assert (!"pop_input");
 	      abort ();
@@ -681,10 +685,23 @@ input_print (struct obstack *obs, const input_block *input)
       chain = input->u.u_c.chain;
       while (chain)
 	{
-	  // TODO support argv refs as well
-	  assert (chain->type == CHAIN_STR);
-	  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len, &maxlen))
-	    return;
+	  switch (chain->type)
+	    {
+	    case CHAIN_STR:
+	      if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
+				 &maxlen))
+		return;
+	      break;
+	    case CHAIN_ARGV:
+	      assert (!chain->u.u_a.comma);
+	      if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+			     chain->u.u_a.quotes, &maxlen))
+		return;
+	      break;
+	    default:
+	      assert (!"input_print");
+	      abort ();
+	    }
 	  chain = chain->next;
 	}
       break;
@@ -747,9 +764,22 @@ peek_input (void)
 		    return to_uchar (*chain->u.u_s.str);
 		  break;
 		case CHAIN_ARGV:
-		  // TODO - peek into argv
-		  assert (!"implemented yet");
-		  abort ();
+		  // TODO - figure out how to pass multiple arguments to
+		  // macro.c at once
+		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
+		    break;
+		  if (chain->u.u_a.comma)
+		    return ',';
+		  /* Rather than directly parse argv here, we push
+		     another input block containing the next unparsed
+		     argument from argv.  */
+		  push_string_init ();
+		  push_arg_quote (current_input, chain->u.u_a.argv,
+				  chain->u.u_a.index, chain->u.u_a.quotes);
+		  chain->u.u_a.index++;
+		  chain->u.u_a.comma = true;
+		  push_string_finish ();
+		  return peek_input ();
 		default:
 		  assert (!"peek_input");
 		  abort ();
@@ -842,7 +872,9 @@ next_char_1 (bool allow_quote)
 	  chain = isp->u.u_c.chain;
 	  while (chain)
 	    {
-	      if (allow_quote && chain->quote_age == current_quote_age)
+	      // TODO also support returning $@ as CHAR_QUOTE
+	      if (allow_quote && chain->quote_age == current_quote_age
+		  && chain->type == CHAIN_STR)
 		return CHAR_QUOTE;
 	      switch (chain->type)
 		{
@@ -858,9 +890,28 @@ next_char_1 (bool allow_quote)
 		    adjust_refcount (chain->u.u_s.level, false);
 		  break;
 		case CHAIN_ARGV:
-		  // TODO - read from argv
-		  assert (!"implemented yet");
-		  abort ();
+		  // TODO - figure out how to pass multiple arguments to
+		  // macro.c at once
+		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
+		    {
+		      arg_adjust_refcount (chain->u.u_a.argv, false);
+		      break;
+		    }
+		  if (chain->u.u_a.comma)
+		    {
+		      chain->u.u_a.comma = false;
+		      return ',';
+		    }
+		  /* Rather than directly parse argv here, we push
+		     another input block containing the next unparsed
+		     argument from argv.  */
+		  push_string_init ();
+		  push_arg_quote (current_input, chain->u.u_a.argv,
+				  chain->u.u_a.index, chain->u.u_a.quotes);
+		  chain->u.u_a.index++;
+		  chain->u.u_a.comma = true;
+		  push_string_finish ();
+		  return next_char_1 (allow_quote);
 		default:
 		  assert (!"next_char_1");
 		  abort ();

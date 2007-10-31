@@ -306,7 +306,9 @@ struct token_chain
 	{
 	  macro_arguments *argv;	/* Reference to earlier $@.  */
 	  unsigned int index;		/* Argument index within argv.  */
-	  bool flatten;			/* True to treat builtins as text.  */
+	  bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
+	  bool_bitfield comma : 1;	/* True when `,' is next input.  */
+	  const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
 	}
       u_a;
     }
@@ -476,7 +478,9 @@ extern int expansion_level;
 
 void expand_input (void);
 void call_macro (symbol *, int, macro_arguments *, struct obstack *);
+size_t adjust_refcount (int, bool);
 
+bool arg_adjust_refcount (macro_arguments *, bool);
 unsigned int arg_argc (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int);
@@ -485,11 +489,14 @@ bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
+bool arg_print (struct obstack *, macro_arguments *, unsigned int,
+		const string_pair *, int *);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
+void push_arg_quote (struct obstack *, macro_arguments *, unsigned int,
+		     const string_pair *);
 void push_args (struct obstack *, macro_arguments *, bool, bool);
-size_t adjust_refcount (int, bool);
 
 /* Grab the text at argv index I.  Assumes macro_argument *argv is in
    scope, and aborts if the argument is not text.  */

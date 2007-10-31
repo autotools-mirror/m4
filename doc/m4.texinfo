@@ -2690,6 +2690,22 @@ ifelse(-e(long)-, `-01234567890123456789', `yes', `no')
 @result{}no
 ifelse(`-01234567890123456789', -e(long)-, `yes', `no')
 @result{}no
+ifelse(`-'e(long), `-01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789', `-'e(long), `yes', `no')
+@result{}yes
+ifelse(`-'e(long), `-01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789-', `-'e(long), `yes', `no')
+@result{}no
+ifelse(`-'e(long)`-', `-01234567890123456789-', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789-', `-'e(long)`-', `yes', `no')
+@result{}yes
+ifelse(`-'e(long)`-', `-01234567890123456789', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789', `-'e(long)`-', `yes', `no')
+@result{}no
 @end example
 
 @comment It would be nice to pass builtin tokens through ifelse, m4wrap,

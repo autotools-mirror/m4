@@ -55,7 +55,8 @@ struct macro_arguments
      object, or 0 if quote_age changed during parsing or if any of the
      arguments might contain content that can affect rescan.  */
   unsigned int quote_age;
-  size_t arraylen; /* True length of allocated elements in array.  */
+  int level; /* Which obstack owns this argv.  */
+  unsigned int arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
   token_data *array[FLEXIBLE_ARRAY_MEMBER];
@@ -489,6 +490,7 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
   args.quote_age = quote_age ();
+  args.level = expansion_level - 1;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (macro_arguments, array));
 
@@ -662,31 +664,13 @@ expand_macro (symbol *sym)
   if (SYMBOL_DELETED (sym))
     free_symbol (sym);
 
-  /* If argv contains references, those refcounts must be reduced now.  */
-  if (argv->has_ref)
-    {
-      token_chain *chain;
-      size_t i;
-      for (i = 0; i < argv->arraylen; i++)
-	if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
-	  {
-	    chain = argv->array[i]->u.u_c.chain;
-	    while (chain)
-	      {
-		assert (chain->type == CHAIN_STR);
-		if (chain->u.u_s.level >= 0)
-		  adjust_refcount (chain->u.u_s.level, false);
-		chain = chain->next;
-	      }
-	  }
-    }
-
   /* We no longer need argv, so reduce the refcount.  Additionally, if
      no other references to argv were created, we can free our portion
      of the obstack, although we must leave earlier content alone.  A
      refcount of 0 implies that adjust_refcount already freed the
      entire stack.  */
-  if (adjust_refcount (level, false))
+  arg_adjust_refcount (argv, false);
+  if (stacks[level].refcount)
     {
       if (argv->inuse)
 	{
@@ -733,18 +717,50 @@ adjust_refcount (int level, bool increase)
   return stacks[level].refcount;
 }
 
+/* Given ARGV, adjust the refcount of every reference it contains in
+   the direction decided by INCREASE.  Return true if increasing
+   references to ARGV implies the first use of ARGV.  */
+bool
+arg_adjust_refcount (macro_arguments *argv, bool increase)
+{
+  unsigned int i;
+  token_chain *chain;
+  bool result = !argv->inuse;
+
+  if (argv->has_ref)
+    for (i = 0; i < argv->arraylen; i++)
+      if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
+	{
+	  chain = argv->array[i]->u.u_c.chain;
+	  while (chain)
+	    {
+	      assert (chain->type == CHAIN_STR);
+	      if (chain->u.u_s.level >= 0)
+		adjust_refcount (chain->u.u_s.level, increase);
+	      chain = chain->next;
+	    }
+	}
+  adjust_refcount (argv->level, increase);
+  return result;
+}
+
 
 /* Given ARGV, return the token_data that contains argument INDEX;
-   INDEX must be > 0, < argv->argc.  */
+   INDEX must be > 0, < argv->argc.  If LEVEL is non-NULL, *LEVEL is
+   set to the obstack level that contains the token (which is not
+   necessarily the level of ARGV).  */
 static token_data *
-arg_token (macro_arguments *argv, unsigned int index)
+arg_token (macro_arguments *argv, unsigned int index, int *level)
 {
   unsigned int i;
   token_data *token;
 
   assert (index && index < argv->argc);
+  if (level)
+    *level = argv->level;
   if (!argv->wrapper)
     return argv->array[index - 1];
+
   /* Must cycle through all tokens, until we find index, since a ref
      may occupy multiple indices.  */
   for (i = 0; i < argv->arraylen; i++)
@@ -758,7 +774,7 @@ arg_token (macro_arguments *argv, unsigned int index)
 	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
 	    {
 	      token = arg_token (chain->u.u_a.argv,
-				 chain->u.u_a.index - 1 + index);
+				 chain->u.u_a.index - 1 + index, level);
 	      if (chain->u.u_a.flatten
 		  && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
 		token = &empty_token;
@@ -777,6 +793,8 @@ arg_token (macro_arguments *argv, unsigned int index)
 static void
 arg_mark (macro_arguments *argv)
 {
+  if (argv->inuse)
+    return;
   argv->inuse = true;
   if (argv->wrapper)
     {
@@ -806,7 +824,7 @@ arg_type (macro_arguments *argv, unsigned int index)
 
   if (index == 0 || index >= argv->argc)
     return TOKEN_TEXT;
-  token = arg_token (argv, index);
+  token = arg_token (argv, index, NULL);
   type = TOKEN_DATA_TYPE (token);
   /* When accessed via the arg_* interface, composite tokens are
      currently sequences of text only.  */
@@ -830,7 +848,7 @@ arg_text (macro_arguments *argv, unsigned int index)
     return argv->argv0;
   if (index >= argv->argc)
     return "";
-  token = arg_token (argv, index);
+  token = arg_token (argv, index, NULL);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -862,8 +880,8 @@ arg_text (macro_arguments *argv, unsigned int index)
 bool
 arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
-  token_data *ta = arg_token (argv, indexa);
-  token_data *tb = arg_token (argv, indexb);
+  token_data *ta = arg_token (argv, indexa, NULL);
+  token_data *tb = arg_token (argv, indexb, NULL);
   token_chain tmpa;
   token_chain tmpb;
   token_chain *ca = &tmpa;
@@ -958,7 +976,7 @@ arg_empty (macro_arguments *argv, unsigned int index)
     return argv->argv0_len == 0;
   if (index >= argv->argc)
     return true;
-  return arg_token (argv, index) == &empty_token;
+  return arg_token (argv, index, NULL) == &empty_token;
 }
 
 /* Given ARGV, return the length of argument INDEX.  Abort if the
@@ -974,7 +992,7 @@ arg_len (macro_arguments *argv, unsigned int index)
     return argv->argv0_len;
   if (index >= argv->argc)
     return 0;
-  token = arg_token (argv, index);
+  token = arg_token (argv, index, NULL);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1007,7 +1025,7 @@ arg_func (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
 
-  token = arg_token (argv, index);
+  token = arg_token (argv, index, NULL);
   assert (TOKEN_DATA_TYPE (token) == TOKEN_FUNC);
   return TOKEN_DATA_FUNC (token);
 }
@@ -1020,6 +1038,129 @@ arg_scratch (void)
 {
   assert (obstack_object_size (stacks[expansion_level - 1].args) == 0);
   return stacks[expansion_level - 1].args;
+}
+
+/* Dump a representation of ARGV to the obstack OBS, starting with
+   argument INDEX.  If QUOTES is non-NULL, each argument is displayed
+   with those quotes.  If MAX_LEN is non-NULL, truncate the output
+   after *MAX_LEN bytes are output and return true; otherwise, return
+   false, and reduce *MAX_LEN by the number of bytes output.  */
+bool
+arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
+	   const string_pair *quotes, int *max_len)
+{
+  int len = max_len ? *max_len : INT_MAX;
+  unsigned int i;
+  token_data *token;
+  token_chain *chain;
+  bool comma = false;
+
+  for (i = index; i < argv->argc; i++)
+    {
+      if (comma && obstack_print (obs, ",", 1, &len))
+	return true;
+      else
+	comma = true;
+      token = arg_token (argv, i, NULL);
+      if (quotes && obstack_print (obs, quotes->str1, quotes->len1, &len))
+	return true;
+      switch (TOKEN_DATA_TYPE (token))
+	{
+	case TOKEN_TEXT:
+	  if (obstack_print (obs, TOKEN_DATA_TEXT (token),
+			     TOKEN_DATA_LEN (token), &len))
+	    return true;
+	  break;
+	case TOKEN_COMP:
+	  chain = token->u.u_c.chain;
+	  while (chain)
+	    {
+	      switch (chain->type)
+		{
+		case CHAIN_STR:
+		  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
+				     &len))
+		    return true;
+		  break;
+		case CHAIN_ARGV:
+		  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+				 chain->u.u_a.quotes, &len))
+		    return true;
+		  break;
+		default:
+		  assert (!"arg_print");
+		  abort ();
+		}
+	      chain = chain->next;
+	    }
+	  break;
+	case TOKEN_FUNC:
+	  // TODO - support func?
+	default:
+	  assert (!"arg_print");
+	  abort ();
+	}
+      if (quotes && obstack_print (obs, quotes->str2, quotes->len2,
+				   &len))
+	return true;
+    }
+  if (max_len)
+    *max_len = len;
+  return false;
+}
+
+/* Populate the new TOKEN as a wrapper to ARGV, starting with argument
+   INDEX.  Allocate any data on OBS, owned by a given expansion LEVEL.
+   FLATTEN determines whether to allow builtins, and QUOTES determines
+   whether all arguments are quoted.  Return TOKEN when successful,
+   NULL when wrapping ARGV is trivially empty.  */
+static token_data *
+make_argv_ref_token (token_data *token, struct obstack *obs, int level,
+		     macro_arguments *argv, unsigned int index, bool flatten,
+		     const string_pair *quotes)
+{
+  token_chain *chain;
+
+  assert (obstack_object_size (obs) == 0);
+  if (argv->wrapper)
+    {
+      // TODO for now we support only a single-length $@ chain...
+      assert (argv->arraylen == 1
+	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
+      chain = argv->array[0]->u.u_c.chain;
+      assert (!chain->next && chain->type == CHAIN_ARGV);
+      argv = chain->u.u_a.argv;
+      index += chain->u.u_a.index - 1;
+    }
+  if (index >= argv->argc)
+    return NULL;
+
+  chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+  TOKEN_DATA_TYPE (token) = TOKEN_COMP;
+  token->u.u_c.chain = token->u.u_c.end = chain;
+  chain->next = NULL;
+  chain->type = CHAIN_ARGV;
+  chain->quote_age = argv->quote_age;
+  chain->u.u_a.argv = argv;
+  chain->u.u_a.index = index;
+  chain->u.u_a.flatten = flatten;
+  chain->u.u_a.comma = false;
+  if (quotes)
+    {
+      /* Clone the quotes into the obstack, since a subsequent
+	 changequote may take effect before the $@ ref is
+	 rescanned.  */
+      // TODO - optimize when quote_age is nonzero?  Cache in argv in case
+      // user macro expands to multiple refs?
+      string_pair *tmp = (string_pair *) obstack_copy (obs, quotes,
+						       sizeof *quotes);
+      tmp->str1 = (char *) obstack_copy0 (obs, quotes->str1, quotes->len1);
+      tmp->str2 = (char *) obstack_copy0 (obs, quotes->str2, quotes->len2);
+      chain->u.u_a.quotes = tmp;
+    }
+  else
+    chain->u.u_a.quotes = NULL;
+  return token;
 }
 
 /* Create a new argument object using the same obstack as ARGV; thus,
@@ -1035,24 +1176,16 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
 {
   macro_arguments *new_argv;
   token_data *token;
-  token_chain *chain;
+  token_data *new_token;
   unsigned int index = skip ? 2 : 1;
   struct obstack *obs = arg_scratch ();
 
-  /* When making a reference through a reference, point to the
-     original if possible.  */
-  if (argv->wrapper)
+  new_token = (token_data *) obstack_alloc (obs, sizeof *token);
+  token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv,
+			       index, flatten, NULL);
+  if (!token)
     {
-      // TODO for now we support only a single-length $@ chain...
-      assert (argv->arraylen == 1
-	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
-      chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == CHAIN_ARGV);
-      argv = chain->u.u_a.argv;
-      index += chain->u.u_a.index - 1;
-    }
-  if (argv->argc <= index)
-    {
+      obstack_free (obs, new_token);
       new_argv = (macro_arguments *)
 	obstack_alloc (obs, offsetof (macro_arguments, array));
       new_argv->arraylen = 0;
@@ -1062,28 +1195,18 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   else
     {
       new_argv = (macro_arguments *)
-	obstack_alloc (obs,
-		       offsetof (macro_arguments, array) + sizeof token);
-      token = (token_data *) obstack_alloc (obs, sizeof *token);
-      chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+	obstack_alloc (obs, offsetof (macro_arguments, array) + sizeof token);
       new_argv->arraylen = 1;
       new_argv->array[0] = token;
       new_argv->wrapper = true;
-      new_argv->has_ref = true;
-      TOKEN_DATA_TYPE (token) = TOKEN_COMP;
-      token->u.u_c.chain = token->u.u_c.end = chain;
-      chain->next = NULL;
-      chain->type = CHAIN_ARGV;
-      chain->quote_age = argv->quote_age;
-      chain->u.u_a.argv = argv;
-      chain->u.u_a.index = index;
-      chain->u.u_a.flatten = flatten;
+      new_argv->has_ref = argv->has_ref;
     }
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
+  new_argv->level = argv->level;
   return new_argv;
 }
 
@@ -1092,8 +1215,6 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
 void
 push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
 {
-  token_data *token;
-
   if (index == 0)
     {
       /* Always push copy of arg 0, since its lifetime is not
@@ -1103,10 +1224,27 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
     }
   if (index >= argv->argc)
     return;
-  token = arg_token (argv, index);
+  push_arg_quote (obs, argv, index, NULL);
+}
+
+/* Push argument INDEX from ARGV, which must be a text token, onto the
+   expansion stack OBS for rescanning.  INDEX must be > 0, < argc.
+   QUOTES determines any quote delimiters that were in effect when the
+   reference was created.  */
+void
+push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int index,
+		const string_pair *quotes)
+{
+  int level;
+  token_data *token = arg_token (argv, index, &level);
+
   // TODO handle func tokens?
-  if (push_token (token, expansion_level - 1, argv->inuse))
+  if (quotes)
+    obstack_grow (obs, quotes->str1, quotes->len1);
+  if (push_token (token, level, argv->inuse))
     arg_mark (argv);
+  if (quotes)
+    obstack_grow (obs, quotes->str2, quotes->len2);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -1116,50 +1254,44 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
 void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {
-  token_data *token;
   unsigned int i = skip ? 2 : 1;
-  const char *sep = ",";
-  size_t sep_len = 1;
-  bool use_sep = false;
-  bool inuse = false;
-  struct obstack *scratch = arg_scratch ();
+  token_data td;
+  token_data *token;
+  char *str = NULL;
+  size_t len = obstack_object_size (obs);
 
   if (i >= argv->argc)
     return;
 
   if (i + 1 == argv->argc)
     {
-      if (quote)
-	obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-      push_arg (obs, argv, i);
-      if (quote)
-	obstack_grow (obs, curr_quote.str2, curr_quote.len2);
+      push_arg_quote (obs, argv, i, quote ? &curr_quote : NULL);
       return;
     }
 
-  /* Compute the separator in the scratch space.  */
-  if (quote)
+  /* Since make_argv_ref_token puts data on obs, we must first close
+     any pending data.  The resulting token contents live entirely on
+     obs, so we call push_token with a level of -1.  */
+  if (len)
     {
-      obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-      obstack_grow (scratch, curr_quote.str2, curr_quote.len2);
-      obstack_1grow (scratch, ',');
-      obstack_grow0 (scratch, curr_quote.str1, curr_quote.len1);
-      sep = (char *) obstack_finish (scratch);
-      sep_len += curr_quote.len1 + curr_quote.len2;
+      obstack_1grow (obs, '\0');
+      str = (char *) obstack_finish (obs);
     }
-  // TODO push entire $@ reference, rather than pushing each arg
-  for ( ; i < argv->argc; i++)
+  // TODO allow shift, $@, to push builtins without flatten?
+  token = make_argv_ref_token (&td, obs, -1, argv, i, true,
+			       quote ? &curr_quote : NULL);
+  assert (token);
+  if (len)
     {
-      token = arg_token (argv, i);
-      if (use_sep)
-	obstack_grow (obs, sep, sep_len);
-      else
-	use_sep = true;
-      // TODO handle func tokens?
-      inuse |= push_token (token, expansion_level - 1, inuse);
+      token_chain *chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+      chain->next = token->u.u_c.chain;
+      token->u.u_c.chain = chain;
+      chain->type = CHAIN_STR;
+      chain->quote_age = 0;
+      chain->u.u_s.str = str;
+      chain->u.u_s.len = len;
+      chain->u.u_s.level = -1;
     }
-  if (quote)
-    obstack_grow (obs, curr_quote.str2, curr_quote.len2);
-  if (inuse)
+  if (push_token (token, -1, argv->inuse))
     arg_mark (argv);
 }
