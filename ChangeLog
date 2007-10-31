@@ -1,3 +1,13 @@
+2007-10-31  Eric Blake  <ebb9@byu.net>
+
+	Test more corner cases.
+	* tests/macros.at (Rescanning macros): Beef up test.
+	* doc/m4.texinfo (Changecom): Beef up test.
+	(Improved foreach): Document alternate foreachq style.
+	* examples/foreachq3.m4: New file.
+	* examples/loop.m4: New file.
+	* Makefile.am (dist_pkgdata_DATA): Distribute them.
+
 2007-10-28  Eric Blake  <ebb9@byu.net>
 
 	More test coverage for autoconf usage patterns.
