@@ -1,3 +1,29 @@
+2008-02-02  Eric Blake  <ebb9@byu.net>
+
+	Stage 14: allow pushing argv references.
+	Push a $@ reference to the input engine in one go, rather than
+	pushing each element.  For now, argument collection still gets one
+	argument of a $@ at a time; but the penalties of this patch make
+	it easier to manage $@ efficiently in future patches.
+	Memory impact: noticeable penalty, due to larger struct and O(n)
+	to O(n^2) on unboxed recursion
+	Speed impact: noticeable penalty, due to more bookkeeping.
+	* src/m4.h (struct token_chain): Add comma and quotes fields.
+	(arg_adjust_refcount, arg_print, push_arg_quote): New prototypes.
+	* src/input.c (push_token, pop_input, input_print, peek_input)
+	(next_char_1): Support $@ references.
+	* src/macro.c (struct macro_arguments): Add level field.  Match
+	type of arraylen to argc.
+	(collect_arguments): Populate new field.
+	(expand_macro, make_argv_ref, push_arg): Factor...
+	(arg_adjust_refcount, make_argv_ref_token, push_arg_quote):
+	...into these new methods.
+	(arg_token): Add new parameter.
+	(arg_print): New function.
+	(arg_mark, arg_type, arg_text, arg_equal, arg_empty, arg_len)
+	(arg_func, push_args): Adjust callers.
+	* doc/m4.texinfo (Ifelse): Augment test.
+
 2008-01-31  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* checks/Makefile.in: Use @SET_MAKE@, and use @SHELL@ rather
