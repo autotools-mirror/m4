@@ -1,3 +1,12 @@
+2007-10-31  Eric Blake  <ebb9@byu.net>
+
+	Test more corner cases.
+	* doc/m4.texinfo (Changecom, Pseudo Arguments): Beef up tests.
+	(Improved foreach): Document alternate foreachq style.
+	* examples/foreachq3.m4: New file.
+	* examples/loop.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute them.
+
 2007-10-28  Eric Blake  <ebb9@byu.net>
 
 	More test coverage for autoconf usage patterns.

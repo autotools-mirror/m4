@@ -33,6 +33,7 @@ foreach.m4 \
 foreach2.m4 \
 foreachq.m4 \
 foreachq2.m4 \
+foreachq3.m4 \
 forloop.m4 \
 forloop2.m4 \
 fstab.m4 \
@@ -41,6 +42,7 @@ incl-test.m4 \
 incl.m4 \
 include.m4 \
 indir.m4 \
+loop.m4 \
 misc.m4 \
 multiquotes.m4 \
 patsubst.m4 \
