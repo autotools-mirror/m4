@@ -357,7 +357,7 @@ symtab_debug (void)
   int delete;
   static int i;
 
-  while (next_token (&td) == TOKEN_WORD)
+  while (next_token (&td, NULL, "<debug>") == TOKEN_WORD)
     {
       text = TOKEN_DATA_TEXT (&td);
       if (*text == '_')

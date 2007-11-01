@@ -64,7 +64,7 @@ expand_input (void)
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
 
-  while ((t = next_token (&td, &line)) != TOKEN_EOF)
+  while ((t = next_token (&td, &line, NULL)) != TOKEN_EOF)
     expand_token ((struct obstack *) NULL, t, &td, line);
 
   obstack_free (&argc_stack, NULL);
@@ -126,18 +126,19 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 }
 
 
-/*-------------------------------------------------------------------------.
-| This function parses one argument to a macro call.  It expects the first |
-| left parenthesis, or the separating comma to have been read by the	   |
-| caller.  It skips leading whitespace, and reads and expands tokens,	   |
-| until it finds a comma or an right parenthesis at the same level of	   |
-| parentheses.  It returns a flag indicating whether the argument read are |
-| the last for the active macro call.  The argument are build on the	   |
-| obstack OBS, indirectly through expand_token ().			   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| This function parses one argument to a macro call.  It expects the |
+| first left parenthesis or the separating comma to have been read   |
+| by the caller.  It skips leading whitespace, then reads and	     |
+| expands tokens, until it finds a comma or right parenthesis at the |
+| same level of parentheses.  It returns a flag indicating whether   |
+| the argument read is the last for the active macro call.  The	     |
+| argument is built on the obstack OBS, indirectly through	     |
+| expand_token ().  Report errors on behalf of CALLER.		     |
+`-------------------------------------------------------------------*/
 
 static bool
-expand_argument (struct obstack *obs, token_data *argp)
+expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 {
   token_type t;
   token_data td;
@@ -151,7 +152,7 @@ expand_argument (struct obstack *obs, token_data *argp)
   /* Skip leading white space.  */
   do
     {
-      t = next_token (&td, NULL);
+      t = next_token (&td, NULL, caller);
     }
   while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
 
@@ -193,7 +194,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  /* current_file changed to "" if we see TOKEN_EOF, use the
 	     previous value we stored earlier.  */
 	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
-			    "ERROR: end of file in argument list"));
+			    "%s: end of file in argument list", caller));
 	  break;
 
 	case TOKEN_WORD:
@@ -215,7 +216,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  abort ();
 	}
 
-      t = next_token (&td, NULL);
+      t = next_token (&td, NULL, caller);
     }
 }
 
@@ -241,10 +242,10 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   if (peek_token () == TOKEN_OPEN)
     {
-      next_token (&td, NULL); /* gobble parenthesis */
+      next_token (&td, NULL, SYMBOL_NAME (sym)); /* gobble parenthesis */
       do
 	{
-	  more_args = expand_argument (arguments, &td);
+	  more_args = expand_argument (arguments, &td, SYMBOL_NAME (sym));
 
 	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
 	    {

@@ -93,7 +93,7 @@ typedef void builtin_func (struct obstack *, int, token_data **);
 typedef bool bool_bitfield;
 #else
 typedef unsigned int bool_bitfield;
-#endif /* ! __GNUC__ */
+#endif /* !__GNUC__ */
 
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
@@ -286,7 +286,7 @@ typedef enum token_data_type token_data_type;
 
 void input_init (void);
 token_type peek_token (void);
-token_type next_token (token_data *, int *);
+token_type next_token (token_data *, int *, const char *);
 void skip_line (void);
 
 /* push back input */

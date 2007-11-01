@@ -156,9 +156,9 @@ static struct re_pattern_buffer word_regexp;
 static int default_word_regexp;
 static struct re_registers regs;
 
-#else /* ! ENABLE_CHANGEWORD */
+#else /* !ENABLE_CHANGEWORD */
 # define default_word_regexp 1
-#endif /* ! ENABLE_CHANGEWORD */
+#endif /* !ENABLE_CHANGEWORD */
 
 #ifdef DEBUG_INPUT
 static const char *token_type_string (token_type);
@@ -814,17 +814,19 @@ set_word_regexp (const char *regexp)
 | TOKEN_STRING for a quoted string; TOKEN_WORD for something that is  |
 | a potential macro name; and TOKEN_SIMPLE for any single character   |
 | that is not a part of any of the previous types.  If LINE is not    |
-| NULL, set *LINE to the line where the token starts.                 |
-|                                                                     |
-| Next_token () return the token type, and passes back a pointer to   |
+| NULL, set *LINE to the line where the token starts.  Report errors  |
+| (unterminated comments or strings) on behalf of CALLER, if	      |
+| non-NULL.							      |
+|								      |
+| Next_token () returns the token type, and passes back a pointer to  |
 | the token data through TD.  The token text is collected on the      |
 | obstack token_stack, which never contains more than one token text  |
-| at a time.  The storage pointed to by the fields in TD is           |
+| at a time.  The storage pointed to by the fields in TD is	      |
 | therefore subject to change the next time next_token () is called.  |
 `--------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td, int *line)
+next_token (token_data *td, int *line, const char *caller)
 {
   int ch;
   int quote_level;
@@ -876,7 +878,8 @@ next_token (token_data *td, int *line)
 	/* current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
 	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-			  "ERROR: end of file in comment"));
+			  "%s%send of file in comment",
+			  caller ? caller : "", caller ? ": " : ""));
 
       type = TOKEN_STRING;
     }
@@ -959,7 +962,8 @@ next_token (token_data *td, int *line)
 	    /* current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
 	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-			      "ERROR: end of file in string"));
+			      "%s%send of file in string",
+			      caller ? caller : "", caller ? ": " : ""));
 
 	  if (MATCH (ch, rquote.string, true))
 	    {
@@ -1018,7 +1022,7 @@ peek_token (void)
     }
   else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (! default_word_regexp && word_start[ch])
+      || (!default_word_regexp && word_start[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {
@@ -1117,7 +1121,7 @@ lex_debug (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td)) != TOKEN_EOF)
+  while ((t = next_token (&td, NULL, "<debug>")) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif
