@@ -34,7 +34,8 @@ static void    collect_arguments (m4 *, const char *, m4_symbol *,
 static void    expand_macro      (m4 *, const char *, m4_symbol *);
 static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int);
-static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *);
+static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
+				  const char *);
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 				  m4_symbol_value **);
 
@@ -81,7 +82,8 @@ m4_macro_expand_input (m4 *context)
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
 
-  while ((type = m4__next_token (context, &token, &line)) != M4_TOKEN_EOF)
+  while ((type = m4__next_token (context, &token, &line, NULL))
+	 != M4_TOKEN_EOF)
     expand_token (context, (m4_obstack *) NULL, type, &token, line);
 
   obstack_free (&argc_stack, NULL);
@@ -144,15 +146,17 @@ expand_token (m4 *context, m4_obstack *obs,
 }
 
 
-/* This function parses one argument to a macro call.  It expects the first
-   left parenthesis, or the separating comma to have been read by the
-   caller.  It skips leading whitespace, and reads and expands tokens,
-   until it finds a comma or a right parenthesis at the same level of
-   parentheses.  It returns a flag indicating whether the argument read is
-   the last for the active macro call.  The arguments are built on the
-   obstack OBS, indirectly through expand_token ().  */
+/* This function parses one argument to a macro call.  It expects the
+   first left parenthesis or the separating comma to have been read by
+   the caller.  It skips leading whitespace, then reads and expands
+   tokens, until it finds a comma or a right parenthesis at the same
+   level of parentheses.  It returns a flag indicating whether the
+   argument read is the last for the active macro call.  The arguments
+   are built on the obstack OBS, indirectly through expand_token ().
+   Report errors on behalf of CALLER.  */
 static bool
-expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
+expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
+		 const char *caller)
 {
   m4__token_type type;
   m4_symbol_value token;
@@ -166,7 +170,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
   /* Skip leading white space.  */
   do
     {
-      type = m4__next_token (context, &token, NULL);
+      type = m4__next_token (context, &token, NULL, caller);
     }
   while (type == M4_TOKEN_SPACE);
 
@@ -202,7 +206,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 
 	case M4_TOKEN_EOF:
 	   m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
-			     _("end of file in argument list"));
+			     _("%s: end of file in argument list"), caller);
 	  break;
 
 	case M4_TOKEN_WORD:
@@ -221,7 +225,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp)
 	  abort ();
 	}
 
-      type = m4__next_token (context, &token, NULL);
+      type = m4__next_token (context, &token, NULL, caller);
     }
 }
 
@@ -350,14 +354,15 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
   tokenp = (m4_symbol_value *) obstack_alloc (arguments, sizeof *tokenp);
   m4_set_symbol_value_text (tokenp, (char *) obstack_copy0 (arguments, name,
 							    strlen (name)));
+  name = m4_get_symbol_value_text (tokenp);
   obstack_ptr_grow (argptr, tokenp);
 
   if (m4__next_token_is_open (context))
     {
-      m4__next_token (context, &token, NULL); /* gobble parenthesis */
+      m4__next_token (context, &token, NULL, name); /* gobble parenthesis */
       do
 	{
-	  more_args = expand_argument (context, arguments, &token);
+	  more_args = expand_argument (context, arguments, &token, name);
 
 	  if (!groks_macro_args && m4_is_symbol_value_func (&token))
 	    {

@@ -1,3 +1,16 @@
+2007-11-01  Eric Blake  <ebb9@byu.net>
+
+	Improve error message when early end of file occurs.
+	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom)
+	(M4wrap): Adjust to new messages.
+	(Improved capitalize): Enhance test.
+	* m4/m4private.h (m4__next_token): Adjust prototype.
+	* m4/input.c (m4__next_token): Add new parameter, and improve
+	error message.
+	* m4/macro.c (m4_macro_expand_input, collect_arguments): Adjust
+	callers.
+	(expand_argument): Likewise, and add parameter.
+
 2007-10-31  Eric Blake  <ebb9@byu.net>
 
 	Test more corner cases.

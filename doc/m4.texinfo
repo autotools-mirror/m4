@@ -1656,7 +1656,7 @@ hello world
 @result{}hello world
 define(
 ^D
-@error{}m4:stdin:2: end of file in argument list
+@error{}m4:stdin:2: define: end of file in argument list
 @end example
 
 @node Quoting Arguments
@@ -4198,6 +4198,13 @@ It is an error if the end of file occurs within a quoted string.
 @error{}m4:stdin:2: end of file in string
 @end example
 
+@comment status: 1
+@example
+ifelse(`dangling quote
+^D
+@error{}m4:stdin:1: ifelse: end of file in string
+@end example
+
 @node Changecom
 @section Changing the comment delimiters
 
@@ -4352,6 +4359,15 @@ changecom(`/*', `*/')
 /*dangling comment
 ^D
 @error{}m4:stdin:2: end of file in comment
+@end example
+
+@comment status: 1
+@example
+changecom(`/*', `*/')
+@result{}
+len(/*dangling comment
+^D
+@error{}m4:stdin:2: len: end of file in comment
 @end example
 
 @node Changeresyntax
@@ -4950,7 +4966,7 @@ file condition between two input files.
 m4wrap(`m4wrap(`)')len(abc')
 @result{}
 ^D
-@error{}m4:stdin:1: end of file in argument list
+@error{}m4:stdin:1: len: end of file in argument list
 @end example
 
 @node File Inclusion
@@ -8523,14 +8539,8 @@ define(`active', `act1, ive')dnl
 define(`Active', `Act2, Ive')dnl
 define(`ACTIVE', `ACT3, IVE')dnl
 define(`A', `OOPS')dnl
-capitalize(active)
-@result{}Act1,Ive
-capitalize(`active')
-@result{}Act2, Ive
-capitalize(``active'')
-@result{}Active
-capitalize(```actIVE''')
-@result{}`Active'
+capitalize(active; `active'; ``active''; ```actIVE''')
+@result{}Act1,Ive; Act2, Ive; Active; `Active'
 undivert(`capitalize2.m4')dnl
 @result{}divert(`-1')
 @result{}# upcase(text)

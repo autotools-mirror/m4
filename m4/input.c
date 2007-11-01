@@ -577,7 +577,7 @@ composite_read (m4_input_block *me, m4 *context, bool retry)
 
   /* See if current block has real character.  */
   ch = subblock->funcs->read_func (subblock, context, retry);
-  if (ch != CHAR_RETRY || ! retry)
+  if (ch != CHAR_RETRY || !retry)
     {
       me->line = subblock->line;
       return ch;
@@ -740,7 +740,7 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
   m4_input_block *block = isp;
   if (block->funcs == &composite_funcs)
     block = block->u.u_c.current;
-  assert (block->funcs->read_func == builtin_read && ! block->u.u_b.read);
+  assert (block->funcs->read_func == builtin_read && !block->u.u_b.read);
 
   m4_set_symbol_value_builtin (token, block->u.u_b.builtin);
   VALUE_MODULE (token)		= block->u.u_b.module;
@@ -777,7 +777,7 @@ next_char (m4 *context, bool retry)
 
       assert (isp->funcs->read_func);
       while ((ch = isp->funcs->read_func (isp, context, retry)) != CHAR_RETRY
-	     || ! retry)
+	     || !retry)
 	{
 	  /* if (!IS_IGNORE (ch)) */
 	  return ch;
@@ -992,6 +992,8 @@ m4_input_exit (void)
    that is a potential macro name; and M4_TOKEN_SIMPLE for any single
    character that is not a part of any of the previous types.  If LINE
    is not NULL, set *LINE to the line number where the token starts.
+   Report errors (unterminated comments or strings) on behalf of
+   CALLER, if non-NULL.
 
    M4__next_token () returns the token type, and passes back a pointer to
    the token data through TOKEN.  The token text is collected on the obstack
@@ -999,7 +1001,8 @@ m4_input_exit (void)
    The storage pointed to by the fields in TOKEN is therefore subject to
    change the next time m4__next_token () is called.  */
 m4__token_type
-m4__next_token (m4 *context, m4_symbol_value *token, int *line)
+m4__next_token (m4 *context, m4_symbol_value *token, int *line,
+		const char *caller)
 {
   int ch;
   int quote_level;
@@ -1069,6 +1072,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 	    ch = next_char (context, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
+				"%s%s%s", caller ? caller : "",
+				caller ? ": " : "",
 				_("end of file in string"));
 
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
@@ -1096,6 +1101,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 	    ch = next_char (context, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
+				"%s%s%s", caller ? caller : "",
+				caller ? ": " : "",
 				_("end of file in string"));
 	    if (MATCH (context, ch, context->syntax->rquote.string, true))
 	      {
@@ -1125,6 +1132,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 	  obstack_1grow (&token_stack, ch);
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
+			    "%s%s%s", caller ? caller : "",
+			    caller ? ": " : "",
 			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
@@ -1142,6 +1151,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line)
 			context->syntax->ecomm.length);
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
+			    "%s%s%s", caller ? caller : "",
+			    caller ? ": " : "",
 			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
