@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -98,18 +98,37 @@ m4_verror_at_line (bool warn, int status, int errnum, const char *file,
 		   va_list args)
 {
   char *full = NULL;
+  char *safe_macro = NULL;
+
+  /* Sanitize MACRO, since we are turning around and using it in a
+     format string.  The allocation is overly conservative, but
+     problematic macro names only occur via indir or changeword.  */
+  if (macro && strchr (macro, '%'))
+    {
+      char *p = safe_macro = xcharalloc (2 * strlen (macro) + 1);
+      do
+	{
+	  if (*macro == '%')
+	    *p++ = '%';
+	  *p++ = *macro++;
+	}
+      while (*macro);
+    }
   /* Prepend warning and the macro name, as needed.  But if that fails
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"), macro, format);
+    full = xasprintf (_("Warning: %s: %s"),
+		      quotearg (safe_macro ? safe_macro : macro), format);
   else if (warn)
     full = xasprintf (_("Warning: %s"), format);
   else if (macro)
-    full = xasprintf (_("%s: %s"), macro, format);
+    full = xasprintf (_("%s: %s"),
+		      quotearg (safe_macro ? safe_macro : macro), format);
   verror_at_line (status, errnum, line ? file : NULL, line,
 		  full ? full : format, args);
   free (full);
+  free (safe_macro);
   if ((!warn || fatal_warnings) && !retcode)
     retcode = EXIT_FAILURE;
 }
@@ -435,6 +454,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   include_init ();
   debug_init ();
+  set_quoting_style (NULL, escape_quoting_style);
+  set_char_quoting (NULL, ':', 1);
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
 #endif
@@ -687,6 +708,7 @@ main (int argc, char *const *argv, char *const *envp)
     }
   output_exit ();
   free_regex ();
+  quotearg_free ();
 #ifdef DEBUG_REGEX
   if (trace_file)
     fclose (trace_file);

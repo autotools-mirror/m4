@@ -216,7 +216,7 @@ expand_input (void)
   TOKEN_DATA_ORIG_TEXT (&empty_token) = "";
 #endif
 
-  while ((t = next_token (&td, &line, NULL, NULL)) != TOKEN_EOF)
+  while ((t = next_token (&td, &line, NULL, false, NULL)) != TOKEN_EOF)
     expand_token (NULL, t, &td, line, true);
 
   for (i = 0; i < stacks_count; i++)
@@ -364,7 +364,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
   /* Skip leading white space.  */
   do
     {
-      t = next_token (&td, NULL, obs, caller);
+      t = next_token (&td, NULL, obs, true, caller);
     }
   while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
 
@@ -455,6 +455,20 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	    }
 	  break;
 
+	case TOKEN_ARGV:
+	  assert (paren_level == 0 && TOKEN_DATA_TYPE (argp) == TOKEN_VOID
+		  && obstack_object_size (obs) == 0
+		  && td.u.u_c.chain == td.u.u_c.end
+		  && td.u.u_c.chain->type == CHAIN_ARGV);
+	  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
+	  argp->u.u_c.chain = argp->u.u_c.end = td.u.u_c.chain;
+	  t = next_token (&td, NULL, NULL, false, caller);
+	  if (argp->u.u_c.chain->u.u_a.skip_last)
+	    assert (t == TOKEN_COMMA);
+	  else
+	    assert (t == TOKEN_COMMA || t == TOKEN_CLOSE);
+	  return t == TOKEN_COMMA;
+
 	default:
 	  assert (!"expand_argument");
 	  abort ();
@@ -462,7 +476,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 
       if (TOKEN_DATA_TYPE (argp) != TOKEN_VOID || obstack_object_size (obs))
 	first = false;
-      t = next_token (&td, NULL, obs, caller);
+      t = next_token (&td, NULL, obs, first, caller);
     }
 }
 
@@ -496,7 +510,8 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 
   if (peek_token () == TOKEN_OPEN)
     {
-      next_token (&td, NULL, NULL, SYMBOL_NAME (sym)); /* gobble parenthesis */
+      /* gobble parenthesis */
+      next_token (&td, NULL, NULL, false, SYMBOL_NAME (sym));
       do
 	{
 	  tdp = (token_data *) obstack_alloc (arguments, sizeof *tdp);
@@ -519,12 +534,22 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 	      && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
 	    args.quote_age = 0;
 	  else if (TOKEN_DATA_TYPE (tdp) == TOKEN_COMP)
-	    args.has_ref = true;
+	    {
+	      args.has_ref = true;
+	      if (tdp->u.u_c.chain->type == CHAIN_ARGV)
+		{
+		  args.argc += (tdp->u.u_c.chain->u.u_a.argv->argc
+				- tdp->u.u_c.chain->u.u_a.index
+				- tdp->u.u_c.chain->u.u_a.skip_last - 1);
+		  args.wrapper = true;
+		}
+	    }
 	}
       while (more_args);
     }
   argv = (macro_arguments *) obstack_finish (argv_stack);
   argv->argc = args.argc;
+  argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   if (args.quote_age != quote_age ())
     argv->quote_age = 0;
@@ -734,9 +759,20 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
 	  chain = argv->array[i]->u.u_c.chain;
 	  while (chain)
 	    {
-	      assert (chain->type == CHAIN_STR);
-	      if (chain->u.u_s.level >= 0)
-		adjust_refcount (chain->u.u_s.level, increase);
+	      switch (chain->type)
+		{
+		case CHAIN_STR:
+		  if (chain->u.u_s.level >= 0)
+		    adjust_refcount (chain->u.u_s.level, increase);
+		  break;
+		case CHAIN_ARGV:
+		  assert (chain->u.u_a.argv->inuse);
+		  arg_adjust_refcount (chain->u.u_a.argv, increase);
+		  break;
+		default:
+		  assert (!"arg_adjust_refcount");
+		  abort ();
+		}
 	      chain = chain->next;
 	    }
 	}
@@ -766,12 +802,14 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
   for (i = 0; i < argv->arraylen; i++)
     {
       token = argv->array[i];
-      if (TOKEN_DATA_TYPE (token) == TOKEN_COMP)
+      if (TOKEN_DATA_TYPE (token) == TOKEN_COMP
+	  && token->u.u_c.chain->type == CHAIN_ARGV)
 	{
 	  token_chain *chain = token->u.u_c.chain;
 	  // TODO for now we support only a single-length $@ chain...
-	  assert (!chain->next && chain->type == CHAIN_ARGV);
-	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
+	  assert (!chain->next);
+	  if (index <= (chain->u.u_a.argv->argc - chain->u.u_a.index
+			- chain->u.u_a.skip_last))
 	    {
 	      token = arg_token (chain->u.u_a.argv,
 				 chain->u.u_a.index - 1 + index, level);
@@ -780,7 +818,8 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
 		token = &empty_token;
 	      break;
 	    }
-	  index -= chain->u.u_a.argv->argc - chain->u.u_a.index;
+	  index -= (chain->u.u_a.argv->argc - chain->u.u_a.index
+		    - chain->u.u_a.skip_last);
 	}
       else if (--index == 0)
 	break;
@@ -793,18 +832,24 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
 static void
 arg_mark (macro_arguments *argv)
 {
+  unsigned int i;
+  token_chain *chain;
+
   if (argv->inuse)
     return;
   argv->inuse = true;
   if (argv->wrapper)
-    {
-      // TODO for now we support only a single-length $@ chain...
-      assert (argv->arraylen == 1
-	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP
-	      && !argv->array[0]->u.u_c.chain->next
-	      && argv->array[0]->u.u_c.chain->type == CHAIN_ARGV);
-      argv->array[0]->u.u_c.chain->u.u_a.argv->inuse = true;
-    }
+    for (i = 0; i < argv->arraylen; i++)
+      if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
+	{
+	  chain = argv->array[i]->u.u_c.chain;
+	  while (chain)
+	    {
+	      if (chain->type == CHAIN_ARGV && !chain->u.u_a.argv->inuse)
+		arg_mark (chain->u.u_a.argv);
+	      chain = chain->next;
+	    }
+	}
 }
 
 /* Given ARGV, return how many arguments it refers to.  */
@@ -854,14 +899,24 @@ arg_text (macro_arguments *argv, unsigned int index)
     case TOKEN_TEXT:
       return TOKEN_DATA_TEXT (token);
     case TOKEN_COMP:
-      // TODO - concatenate argv refs, or even functions?  For now, we assume
-      // all chain elements are text.
+      // TODO - concatenate functions?
       chain = token->u.u_c.chain;
       obs = arg_scratch ();
       while (chain)
 	{
-	  assert (chain->type == CHAIN_STR);
-	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+	  switch (chain->type)
+	    {
+	    case CHAIN_STR:
+	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+	      break;
+	    case CHAIN_ARGV:
+	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+			 chain->u.u_a.quotes, NULL);
+	      break;
+	    default:
+	      assert (!"arg_text");
+	      abort ();
+	    }
 	  chain = chain->next;
 	}
       obstack_1grow (obs, '\0');
@@ -1122,13 +1177,13 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   token_chain *chain;
 
   assert (obstack_object_size (obs) == 0);
-  if (argv->wrapper)
+  if (argv->wrapper && argv->arraylen == 1)
     {
       // TODO for now we support only a single-length $@ chain...
-      assert (argv->arraylen == 1
-	      && TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
+      assert (TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
       chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == CHAIN_ARGV);
+      assert (!chain->next && chain->type == CHAIN_ARGV
+	      && !chain->u.u_a.skip_last);
       argv = chain->u.u_a.argv;
       index += chain->u.u_a.index - 1;
     }
@@ -1145,6 +1200,7 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   chain->u.u_a.index = index;
   chain->u.u_a.flatten = flatten;
   chain->u.u_a.comma = false;
+  chain->u.u_a.skip_last = false;
   if (quotes)
     {
       /* Clone the quotes into the obstack, since a subsequent

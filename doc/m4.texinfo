@@ -933,7 +933,13 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 @comment xout: null.out
 @comment xerr: null.err
 @example
-include(`null.m4')dnl
+define(`m4exit')include(`null.m4')dnl
+@end example
+
+@comment status: 2
+@example
+include(`null.m4')
+@result{}# This file tests m4 behavior on NUL bytes.
 @end example
 @end ignore
 
@@ -2406,6 +2412,20 @@ foo
 indir(`divert', defn(`foo'))
 @error{}m4:stdin:5: Warning: divert: empty string treated as 0
 @result{}
+@end example
+
+Warning messages issued on behalf of an indirect macro use an
+unambiguous representation of the macro name, using escape sequences
+similar to C strings, and with colons also quoted.
+
+@example
+define(`%%:\
+odd', defn(`divnum'))
+@result{}
+indir(`%%:\
+odd', `extra')
+@error{}m4:stdin:3: Warning: %%\:\\\nodd: extra arguments ignored: 1 > 0
+@result{}0
 @end example
 
 @node Builtin
