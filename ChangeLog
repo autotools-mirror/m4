@@ -1,3 +1,34 @@
+2008-02-16  Eric Blake  <ebb9@byu.net>
+
+	Stage 15: return argv refs back to collect_arguments.
+	Collect an entire $@ reference at once rather than one argument at
+	a time, outside of quotes (but inside quotes, $@ is still
+	flattened for now).  The skip_last field allows concatenation of
+	$@ with other text when collecting arguments.
+	Memory impact: noticeable improvement, due to better reuse of $@.
+	Speed impact: noticeable improvement, due to less parsing.
+	* src/m4.h (enum token_type): Add TOKEN_ARGV.
+	(struct token_chain): Add skip_last member to argv link.
+	(next_token): Update prototype.
+	* src/input.c (CHAR_ARGV): New placeholder input character.
+	(peek_input): Add parameter, to pass $@ at once.
+	(next_char_1, append_quote_token): Handle $@ inside quotes.
+	(init_argv_token): New function.
+	(push_token, match_input, next_token, peek_token, lex_debug):
+	Update callers.
+	* src/macro.c (expand_input, collect_arguments): Likewise.
+	(expand_argument): Handle incoming $@ token.
+	(arg_adjust_refcount, arg_token, arg_text, make_argv_ref_token):
+	Handle nested $@ refs.
+	* src/symtab.c (symtab_debug): Update caller.
+	* examples/null.m4: Document more tests that are needed.  Add
+	tests for NUL with divert, patsubst, and regexp.
+	* examples/null.out: Update for new tests.
+	* doc/m4.texinfo (Syntax): Add test for m4exit and NUL.
+	* checks/get-them (AWK): Give a default value.
+	* checks/check-them: Allow tests to invoke child processes with
+	same include path.  Perform message normalization on stderr.
+
 2008-02-15  Eric Blake  <ebb9@byu.net>
 
 	Use fastmaps for better regex performance.

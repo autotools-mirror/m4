@@ -933,7 +933,13 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 @comment xout: null.out
 @comment xerr: null.err
 @example
-include(`null.m4')dnl
+define(`m4exit')include(`null.m4')dnl
+@end example
+
+@comment status: 2
+@example
+include(`null.m4')
+@result{}# This file tests m4 behavior on NUL bytes.
 @end example
 @end ignore
 

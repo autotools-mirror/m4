@@ -154,6 +154,7 @@ static bool input_change;
 #define CHAR_EOF	256	/* Character return on EOF.  */
 #define CHAR_MACRO	257	/* Character return for MACRO token.  */
 #define CHAR_QUOTE	258	/* Character return for quoted string.  */
+#define CHAR_ARGV	259	/* Character return for $@ reference.  */
 
 /* Quote chars.  */
 string_pair curr_quote;
@@ -446,7 +447,7 @@ push_token (token_data *token, int level, bool inuse)
       next->u.u_c.end = chain;
       if (chain->type == CHAIN_ARGV)
 	{
-	  assert (!chain->u.u_a.comma);
+	  assert (!chain->u.u_a.comma && !chain->u.u_a.skip_last);
 	  inuse |= arg_adjust_refcount (chain->u.u_a.argv, true);
 	}
       else if (chain->type == CHAIN_STR && chain->u.u_s.level >= 0)
@@ -712,17 +713,18 @@ input_print (struct obstack *obs, const input_block *input)
 }
 
 
-/*-----------------------------------------------------------------.
-| Low level input is done a character at a time.  The function     |
-| peek_input () is used to look at the next character in the input |
-| stream.  At any given time, it reads from the input_block on the |
-| top of the current input stack.  The return value is an unsigned |
-| char, or CHAR_EOF if there is no more input, or CHAR_MACRO if a  |
-| builtin token occurs next.                                       |
-`-----------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Low level input is done a character at a time.  The function      |
+| peek_input () is used to look at the next character in the input  |
+| stream.  At any given time, it reads from the input_block on the  |
+| top of the current input stack.  The return value is an unsigned  |
+| char, CHAR_EOF if there is no more input, CHAR_MACRO if a builtin |
+| token occurs next, or CHAR_ARGV if ALLOW_ARGV and the input is    |
+| visiting an argv reference with the correct quoting.              |
+`------------------------------------------------------------------*/
 
 static int
-peek_input (void)
+peek_input (bool allow_argv)
 {
   int ch;
   input_block *block = isp;
@@ -757,6 +759,7 @@ peek_input (void)
 	  chain = block->u.u_c.chain;
 	  while (chain)
 	    {
+	      unsigned int argc;
 	      switch (chain->type)
 		{
 		case CHAIN_STR:
@@ -764,11 +767,17 @@ peek_input (void)
 		    return to_uchar (*chain->u.u_s.str);
 		  break;
 		case CHAIN_ARGV:
-		  /* TODO - pass multiple arguments to macro.c at once.  */
-		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
+		  argc = arg_argc (chain->u.u_a.argv);
+		  if (chain->u.u_a.index == argc)
 		    break;
 		  if (chain->u.u_a.comma)
 		    return ',';
+		  /* Only return a reference if the quoting is correct
+		     and the reference has more than one argument
+		     left.  */
+		  if (allow_argv && chain->quote_age == current_quote_age
+		      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
+		    return CHAR_ARGV;
 		  /* Rather than directly parse argv here, we push
 		     another input block containing the next unparsed
 		     argument from argv.  */
@@ -778,7 +787,7 @@ peek_input (void)
 		  chain->u.u_a.index++;
 		  chain->u.u_a.comma = true;
 		  push_string_finish ();
-		  return peek_input ();
+		  return peek_input (allow_argv);
 		default:
 		  assert (!"peek_input");
 		  abort ();
@@ -871,9 +880,7 @@ next_char_1 (bool allow_quote)
 	  chain = isp->u.u_c.chain;
 	  while (chain)
 	    {
-	      /* TODO also support returning $@ as CHAR_QUOTE.  */
-	      if (allow_quote && chain->quote_age == current_quote_age
-		  && chain->type == CHAIN_STR)
+	      if (allow_quote && chain->quote_age == current_quote_age)
 		return CHAR_QUOTE;
 	      switch (chain->type)
 		{
@@ -889,7 +896,6 @@ next_char_1 (bool allow_quote)
 		    adjust_refcount (chain->u.u_s.level, false);
 		  break;
 		case CHAIN_ARGV:
-		  /* TODO - pass multiple arguments to macro.c at once.  */
 		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
 		    {
 		      arg_adjust_refcount (chain->u.u_a.argv, false);
@@ -956,7 +962,6 @@ skip_line (const char *name)
   if (file != current_file || line != current_line)
     input_change = true;
 }
-
 
 /*-------------------------------------------------------------------.
 | When a MACRO token is seen, next_token () uses init_macro_token () |
@@ -983,17 +988,27 @@ append_quote_token (struct obstack *obs, token_data *td)
   token_chain *src_chain = isp->u.u_c.chain;
   token_chain *chain;
 
-  assert (isp->type == INPUT_CHAIN && obs && current_quote_age
-	  && src_chain->type == CHAIN_STR && src_chain->u.u_s.level >= 0);
+  assert (isp->type == INPUT_CHAIN && obs && current_quote_age);
   isp->u.u_c.chain = src_chain->next;
 
   /* Speed consideration - for short enough tokens, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
      time to inline the token text.  */
-  if (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
+  if (src_chain->type == CHAIN_STR
+      && src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
     {
+      assert (src_chain->u.u_s.level >= 0);
       obstack_grow (obs, src_chain->u.u_s.str, src_chain->u.u_s.len);
       adjust_refcount (src_chain->u.u_s.level, false);
+      return;
+    }
+
+  /* TODO preserve $@ through a quoted context.  */
+  if (src_chain->type == CHAIN_ARGV)
+    {
+      arg_print (obs, src_chain->u.u_a.argv, src_chain->u.u_a.index,
+		 src_chain->u.u_a.quotes, NULL);
+      arg_adjust_refcount (src_chain->u.u_a.argv, false);
       return;
     }
 
@@ -1013,6 +1028,65 @@ append_quote_token (struct obstack *obs, token_data *td)
   chain->next = NULL;
 }
 
+
+/*-------------------------------------------------------------------.
+| When an ARGV token is seen, convert TD to point to it via a	     |
+| composite token.  Use OBS for any additional allocations needed to |
+| store the token chain.					     |
+`-------------------------------------------------------------------*/
+static void
+init_argv_token (struct obstack *obs, token_data *td)
+{
+  token_chain *src_chain;
+  token_chain *chain;
+  int ch = next_char (true);
+
+  assert (ch == CHAR_QUOTE && TOKEN_DATA_TYPE (td) == TOKEN_VOID
+	  && isp->type == INPUT_CHAIN && isp->u.u_c.chain->type == CHAIN_ARGV
+	  && obs && obstack_object_size (obs) == 0);
+
+  src_chain = isp->u.u_c.chain;
+  isp->u.u_c.chain = src_chain->next;
+  TOKEN_DATA_TYPE (td) = TOKEN_COMP;
+  /* Clone the link, since the input will be discarded soon.  */
+  chain = (token_chain *) obstack_copy (obs, src_chain, sizeof *chain);
+  td->u.u_c.chain = td->u.u_c.end = chain;
+  chain->next = NULL;
+
+  /* If the next character is not ',' or ')', then unlink the last
+     argument from argv and schedule it for reparsing.  This way,
+     expand_argument never has to deal with concatenation of argv with
+     arbitrary text.  Note that the implementation of safe_quotes
+     ensures peek_input won't return CHAR_ARGV if the user is perverse
+     enough to mix comment delimiters with argument separators:
+
+       define(n,`$#')define(echo,$*)changecom(`,,',`)')n(echo(a,`,b`)'',c))
+       => 2 (not 3)
+
+     Therefore, we do not have to worry about calling MATCH, and thus
+     do not have to worry about pop_input being called and
+     invalidating the argv reference.
+
+     When the $@ ref is used unchanged, we completely bypass the
+     decrement of the argv refcount in next_char_1, since the ref is
+     still live via the current collect_arguments.  However, when the
+     last element of the $@ ref is reparsed, we must increase the argv
+     refcount here, to compensate for the fact that it will be
+     decreased once the final element is parsed.  */
+  assert (*curr_comm.str1 != ',' && *curr_comm.str1 != ')'
+	  && *curr_comm.str1 != *curr_quote.str1);
+  ch = peek_input (false);
+  if (ch != ',' && ch != ')')
+    {
+      isp->u.u_c.chain = src_chain;
+      src_chain->u.u_a.index = arg_argc (chain->u.u_a.argv) - 1;
+      src_chain->u.u_a.comma = true;
+      chain->u.u_a.skip_last = true;
+      arg_adjust_refcount (chain->u.u_a.argv, true);
+    }
+}
+
+
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
 | input stream.  If the string S matches the input and CONSUME is   |
@@ -1029,7 +1103,7 @@ match_input (const char *s, bool consume)
   const char *t;
   bool result = false;
 
-  ch = peek_input ();
+  ch = peek_input (false);
   if (ch != to_uchar (*s))
     return false;			/* fail */
 
@@ -1041,7 +1115,7 @@ match_input (const char *s, bool consume)
     }
 
   next_char (false);
-  for (n = 1, t = s++; (ch = peek_input ()) == to_uchar (*s++); )
+  for (n = 1, t = s++; (ch = peek_input (false)) == to_uchar (*s++); )
     {
       next_char (false);
       n++;
@@ -1320,18 +1394,20 @@ safe_quotes (void)
 
 
 /*--------------------------------------------------------------------.
-| Parse a single token from the input stream, set TD to its           |
-| contents, and return its type.  A token is TOKEN_EOF if the         |
+| Parse a single token from the input stream, set TD to its	      |
+| contents, and return its type.  A token is TOKEN_EOF if the	      |
 | input_stack is empty; TOKEN_STRING for a quoted string or comment;  |
-| TOKEN_WORD for something that is a potential macro name; and        |
+| TOKEN_WORD for something that is a potential macro name; and	      |
 | TOKEN_SIMPLE for any single character that is not a part of any of  |
 | the previous types.  If LINE is not NULL, set *LINE to the line     |
 | where the token starts.  If OBS is not NULL, expand TOKEN_STRING    |
 | directly into OBS rather than in token_stack temporary storage      |
-| area, and TD could be a TOKEN_COMP instead of the usual             |
-| TOKEN_TEXT.  Report errors (unterminated comments or strings) on    |
-| behalf of CALLER, if non-NULL.                                      |
-|                                                                     |
+| area, and TD could be a TOKEN_COMP instead of the usual	      |
+| TOKEN_TEXT.  If ALLOW_ARGV, OBS must be non-NULL, and an entire     |
+| series of arguments can be returned as TOKEN_ARGV when a $@	      |
+| reference is encountered.  Report errors (unterminated comments or  |
+| strings) on behalf of CALLER, if non-NULL.			      |
+|								      |
 | Next_token () returns the token type, and passes back a pointer to  |
 | the token data through TD.  Non-string token text is collected on   |
 | the obstack token_stack, which never contains more than one token   |
@@ -1340,7 +1416,8 @@ safe_quotes (void)
 `--------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
+next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
+	    const char *caller)
 {
   int ch;
   int quote_level;
@@ -1362,7 +1439,7 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 
   /* Can't consume character until after CHAR_MACRO is handled.  */
   TOKEN_DATA_TYPE (td) = TOKEN_VOID;
-  ch = peek_input ();
+  ch = peek_input (allow_argv && current_quote_age);
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
@@ -1380,6 +1457,17 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
 #endif /* DEBUG_INPUT */
       return TOKEN_MACDEF;
+    }
+  if (ch == CHAR_ARGV)
+    {
+      init_argv_token (obs, td);
+#ifdef DEBUG_INPUT
+      xfprintf (stderr, "next_token -> ARGV (%d args)\n",
+		(arg_argc (td->u.u_c.chain->u.u_a.argv)
+		 - td->u.u_c.chain->u.u_a.index
+		 - (td->u.u_c.chain->u.u_a.skip_last ? 1 : 0)));
+#endif
+      return TOKEN_ARGV;
     }
 
   next_char (false); /* Consume character we already peeked at.  */
@@ -1409,7 +1497,8 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
       obstack_1grow (&token_stack, ch);
-      while ((ch = peek_input ()) < CHAR_EOF && (isalnum (ch) || ch == '_'))
+      while ((ch = peek_input (false)) < CHAR_EOF
+	     && (isalnum (ch) || ch == '_'))
 	{
 	  obstack_1grow (&token_stack, ch);
 	  next_char (false);
@@ -1424,7 +1513,7 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
       obstack_1grow (&token_stack, ch);
       while (1)
 	{
-	  ch = peek_input ();
+	  ch = peek_input (false);
 	  if (ch >= CHAR_EOF)
 	    break;
 	  obstack_1grow (&token_stack, ch);
@@ -1547,9 +1636,19 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 		  token_type_string (type));
 	while (chain)
 	  {
-	    assert (chain->type == CHAIN_STR);
-	    xfprintf (stderr, "%s", chain->u.u_s.str);
-	    len += chain->u.u_s.len;
+	    switch (chain->type)
+	      {
+	      case CHAIN_STR:
+		xfprintf (stderr, "%s", chain->u.u_s.str);
+		len += chain->u.u_s.len;
+		break;
+	      case CHAIN_ARGV:
+		xfprintf (stderr, "{$@}");
+		break;
+	      default:
+		assert (!"next_token");
+		abort ();
+	      }
 	    links++;
 	    chain = chain->next;
 	  }
@@ -1569,7 +1668,7 @@ token_type
 peek_token (void)
 {
   token_type result;
-  int ch = peek_input ();
+  int ch = peek_input (false);
 
   if (ch == CHAR_EOF)
     {
@@ -1684,7 +1783,7 @@ lex_debug (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td, NULL, NULL, "<debug>")) != TOKEN_EOF)
+  while ((t = next_token (&td, NULL, NULL, false, "<debug>")) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif /* DEBUG_INPUT */

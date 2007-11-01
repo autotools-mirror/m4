@@ -266,7 +266,8 @@ enum token_type
   TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */
   TOKEN_CLOSE,	/* Active character `)', TOKEN_TEXT.  */
   TOKEN_SIMPLE,	/* Any other single character, TOKEN_TEXT.  */
-  TOKEN_MACDEF	/* A macro's definition (see "defn"), TOKEN_FUNC.  */
+  TOKEN_MACDEF,	/* A macro's definition (see "defn"), TOKEN_FUNC.  */
+  TOKEN_ARGV	/* A series of parameters, TOKEN_COMP.  */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
@@ -309,6 +310,7 @@ struct token_chain
 	  unsigned int index;		/* Argument index within argv.  */
 	  bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
 	  bool_bitfield comma : 1;	/* True when `,' is next input.  */
+	  bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
 	  const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
 	}
       u_a;
@@ -373,7 +375,8 @@ typedef enum token_data_type token_data_type;
 
 void input_init (void);
 token_type peek_token (void);
-token_type next_token (token_data *, int *, struct obstack *, const char *);
+token_type next_token (token_data *, int *, struct obstack *, bool,
+		       const char *);
 void skip_line (const char *);
 
 /* push back input */
