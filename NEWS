@@ -2,7 +2,7 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 
-Version 1.4.11 - ?? ??? 2007, by ????  (CVS version 1.4.10a)
+Version 1.4.11 - ?? ??? 2007, by ????  (git version 1.4.10a-*)
 
 * Fix core dump in 'm4 -F file -t undefined', present since -F was
   introduced in 1.3.

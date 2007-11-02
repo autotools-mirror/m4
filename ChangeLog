@@ -1,5 +1,12 @@
 2007-11-02  Eric Blake  <ebb9@byu.net>
 
+	Update some documentation about version control.
+	* NEWS: M4 is now stored in git.
+	* HACKING: Likewise.
+	* README: Likewise.
+	* bootstrap: Likewise.
+	* commit: Delete, now that CVS commits are no longer necessary.
+
 	Adjust to recent gnulib change.
 	* m4/gnulib-cache.m4: Drop vasprintf-posix and xvasprintf, and use
 	xvasprintf-posix instead.
