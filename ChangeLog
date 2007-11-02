@@ -1,3 +1,9 @@
+2007-11-02  Eric Blake  <ebb9@byu.net>
+
+	Adjust to recent gnulib change.
+	* m4/gnulib-cache.m4: Drop vasprintf-posix and xvasprintf, and use
+	xvasprintf-posix instead.
+
 2007-11-01  Eric Blake  <ebb9@byu.net>
 
 	Improve error message when early end of file occurs.
