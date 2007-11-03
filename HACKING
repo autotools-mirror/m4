@@ -50,18 +50,36 @@ and is not part of a release distribution.
 3. Bootstrapping
 ================
 
-* Before you can build from CVS, you need to bootstrap.  This requires a
+* The master M4 repository is stored in git.  You can obtain a read-only
+  copy with:
+    git clone git://git.sv.gnu.org/m4.git
+  or
+    cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/m4.git \
+      co -d m4 HEAD
+
+  If you are a member of the savannah group for M4, a read-write
+  copy can be obtained by:
+    git clone <savannah-user>@git.sv.gnu.org:/srv/git/m4.git
+
+* Before you can build from git, you need to bootstrap.  This requires a
   pre-installed version of GNU M4 1.4.5 or later, built from a package;
   Autoconf 2.60 or later; Automake 1.10a or later; CVS Head of Libtool
-  (will become Libtool 2.0); Gettext 0.16 or later; and a CVS checkout
+  (will become Libtool 2.0); Gettext 0.16 or later; and a git checkout
   of gnulib.  Gnulib can be obtained by:
-    cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/gnulib co gnulib
+    git clone git://git.sv.gnu.org/gnulib.git
+  or
+    cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/gnulib.git \
+      co -d gnulib HEAD
+
+  If you are a member of the savannah group for gnulib, a read-write
+  copy can be obtained by:
+    git clone <savannah-user>@git.sv.gnu.org:/srv/git/gnulib.git
 
 * Either add the gnulib directory to your PATH, or run
     GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap
 
 * When it is time for a release, it is a good idea to bootstrap with
-  official releases of the autotools, rather than CVS builds, to reduce
+  official releases of the autotools, rather than git builds, to reduce
   the pain of a user re-running bootstrap on the packaged M4.  However,
   files installed by Automake should be updated to the latest version
   from their respective upstream source, rather than the version that
@@ -200,8 +218,9 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Run ./commit from the source tree.
 
-* Run `make cvs-dist', which will build a release tarball (with `make
-  distcheck'), and tag the tree with release-$(VERSION).
+* TODO - adjust this step to account for git:
+  Run `make cvs-dist', which will build a release tarball (with `make
+  distcheck') and tag the tree with release-$(VERSION).
 
 * Run 'make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
   create both diff and xdelta files between the previous release tarball
@@ -295,12 +314,11 @@ This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
 
 This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
 
-Alternatively, you can fetch the unbootstrapped sourcecode from
-anonymous cvs by using the following commands:
+Alternatively, you can fetch the unbootstrapped sourcecode from git by
+using the following commands:
 
-  $ export CVS_RSH=ssh
-  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/m4 \
-  co -r @CVS_RELEASE_TAG@ m4
+  $ git clone git://git.sv.gnu.org/m4
+  $ git checkout -b branch @GIT_RELEASE_TAG@
 
 You will then need to have recent versions of Automake and Autoconf
 installed, and a recent checkout of gnulib, in order to bootstrap the
@@ -384,16 +402,16 @@ Here are the MD5 and SHA1 checksums:
 
 This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
 
-Alternatively, you can fetch the unbootstrapped sourcecode from
-anonymous cvs by using the following commands:
+Alternatively, you can fetch the unbootstrapped sourcecode from git by
+using the following commands:
 
-  $ export CVS_RSH=ssh
-  $ cvs -z3 -d :pserver:anonymous@cvs.sv.gnu.org:/sources/m4 \
-  co -r @CVS_RELEASE_TAG@ m4
+  $ git clone git://git.sv.gnu.org/m4
+  $ git checkout -b branch @GIT_RELEASE_TAG@
 
 You will then need to have the latest release versions of Automake
-(@AUTOMAKE_VERSION@) and Autoconf (@AUTOCONF_VERSION@) installed to
-bootstrap the checked out sources yourself.
+(@AUTOMAKE_VERSION@) and Autoconf (@AUTOCONF_VERSION@) installed, as
+well as a git checkout of gnulib, in order to bootstrap the checked out
+sources yourself.
 
 Please report bugs to <bug-m4@gnu.org>, along with the output of 'make
 check' and any other information that might be useful in resolving the

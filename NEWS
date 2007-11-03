@@ -2,7 +2,7 @@ GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
 Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007 Free Software
 Foundation, Inc.
 
-* Version beta 1.9b - ???, by ??? (CVS version 1.9a)
+* Version beta 1.9b - ???, by ??? (git version 1.9a-*)
 
 NOTE - there are still a number of FIXMEs to resolve before this can be
 promoted to 2.0.

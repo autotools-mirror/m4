@@ -1,5 +1,14 @@
 2007-11-02  Eric Blake  <ebb9@byu.net>
 
+	Update some documentation about version control.
+	* NEWS: M4 is now stored in git.
+	* HACKING: Likewise.
+	* README: Likewise.
+	* bootstrap: Likewise.
+	* commit: Delete, now that CVS commits are no longer necessary.
+	* ltdl/config/mailnotify: No longer necessary; git's patch
+	generation and mail capability is more powerful.
+
 	Update to recent gnulib changes.
 	* ltdl/m4/gnulib-cache.m4: Replace fprintf-posix, vasprintf-posix,
 	xprintf, and xvasprintf with xprintf-posix and xvasprintf-posix.

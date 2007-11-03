@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-09-24
+# bootstrap (GNU M4) version 2007-11-02
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -37,7 +37,7 @@
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly calling
 # out to parts of the GNU Build Platform.  Currently this requires GNU
 # Gettext 0.16 or better, Autoconf 2.60 or better, GNU M4 1.4.x or
-# better, a CVS snapshot of Automake 1.10a or better, a CVS snapshot
+# better, a git snapshot of Automake 1.10a or better, a CVS snapshot
 # of Libtool 2.1a or better, and the latest git or CVS checkout of Gnulib.
 # Libtool must be installed; either with the same --prefix as
 # automake, or made accessible to aclocal's search path via
@@ -86,8 +86,8 @@ progpath="$0"
 progname=`echo "$progpath" | $SED "$basename"`
 PROGRAM=bootstrap
 
-# Detect whether this is a CVS checkout or a tarball
-CVS_only_file=HACKING
+# Detect whether this is a version control system checkout or a tarball
+vcs_only_file=HACKING
 
 # func_echo arg...
 # Echo program name prefixed message.
@@ -209,10 +209,6 @@ func_update ()
     opt="$1"
     shift
     case $opt in
-      -f|--force)
-			CVS_only_file=
-			;;
-
       -p|--download-po)
 			test $# = 0 && func_missing_arg $opt && break
 			case $1 in
@@ -235,6 +231,7 @@ func_update ()
 			set -- "$opt" "$arg" ${1+"$@"}
 			;;
 
+      -f|--force)	vcs_only_file=					;;
       -\?|-h)		func_usage					;;
       --help)		func_help					;;
       --version)	func_version					;;
@@ -247,8 +244,9 @@ func_update ()
   # Bail if the options were screwed
   $exit_cmd $EXIT_FAILURE
 
-  if test -n "$CVS_only_file" && test ! -r "$CVS_only_file"; then
-    func_fatal_error "Bootstrapping from a non-git distribution is risky."
+  if test -n "$vcs_only_file" && test ! -r "$vcs_only_file"; then
+    func_fatal_error \
+      "Bootstrapping from a non-version-control distribution is risky."
   fi
 }
 
