@@ -20,7 +20,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-config_aux_dir	= ltdl/config
+config_aux_dir	= build-aux
 config_macro_dir= ltdl/m4
 
 SUBDIRS		= ltdl po gnu tests/gnu .

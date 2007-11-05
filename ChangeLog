@@ -1,3 +1,12 @@
+2007-11-05  Eric Blake  <ebb9@byu.net>
+
+	For consistency with other GNU projects, use build-aux directory.
+	* configure.ac (AC_CONFIG_AUX_DIR): Change ltdl/config to
+	build-aux.
+	* bootstrap (config_aux_dir): Likewise.
+	* Makefile.am (config_aux_dir): Likewise.
+	* ltdl/m4/gnulib-cache.m4: Use --aux-dir option.
+
 2007-11-02  Eric Blake  <ebb9@byu.net>
 
 	Update some documentation about version control.

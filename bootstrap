@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-11-02
+# bootstrap (GNU M4) version 2007-11-05
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -64,7 +64,7 @@ export LC_ALL
 
 package=m4
 ltdldir=ltdl
-config_aux_dir=$ltdldir/config
+config_aux_dir=build-aux
 config_macro_dir=$ltdldir/m4
 bailout_cb=:
 

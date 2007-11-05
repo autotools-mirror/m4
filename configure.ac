@@ -25,7 +25,7 @@ AC_PREREQ([2.60])
 AC_INIT([GNU M4], [1.9a], [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_AUX_DIR([ltdl/config])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([ltdl/m4])
 AC_CONFIG_LIBOBJ_DIR([gnu])
 AC_CONFIG_TESTDIR([tests])
