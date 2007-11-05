@@ -12,6 +12,7 @@ Makefile
 Makefile.in
 Makefile.in.in
 Makevars.template
+m4.html
 POTFILES
 quot.sed
 remove-potcdate.sed
