@@ -34,7 +34,7 @@ SUFFIXES = .1
 $(srcdir)/m4.1: $(top_srcdir)/configure.ac $(top_srcdir)/src/m4.c
 	@if test -x ../src/m4$(EXEEXT) ; then \
 	  echo "Updating man page m4.1" ; \
-	  $(SHELL) $(top_srcdir)/missing --run \
+	  $(SHELL) $(top_srcdir)/build-aux/missing --run \
 	    help2man --name="macro processor" --source=FSF \
 	      --info-page=m4 --output=$@ ../src/m4$(EXEEXT) ; \
 	else \

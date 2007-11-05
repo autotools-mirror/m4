@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-11-02
+# bootstrap (GNU M4) version 2007-11-05
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -276,13 +276,13 @@ $AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
 ## Gnulib is more up-to-date than automake. ##
 ## ---------------------------------------- ##
 
-func_update "$gnulibdir"/build-aux/config.guess config.guess
-func_update "$gnulibdir"/build-aux/config.sub config.sub
-func_update "$gnulibdir"/build-aux/depcomp depcomp
-func_update "$gnulibdir"/build-aux/install-sh install-sh
-func_update "$gnulibdir"/build-aux/mdate-sh doc/mdate-sh
-func_update "$gnulibdir"/build-aux/missing missing
-func_update "$gnulibdir"/build-aux/texinfo.tex doc/texinfo.tex
+func_update "$gnulibdir"/build-aux/config.guess build-aux/config.guess
+func_update "$gnulibdir"/build-aux/config.sub build-aux/config.sub
+func_update "$gnulibdir"/build-aux/depcomp build-aux/depcomp
+func_update "$gnulibdir"/build-aux/install-sh build-aux/install-sh
+func_update "$gnulibdir"/build-aux/mdate-sh build-aux/mdate-sh
+func_update "$gnulibdir"/build-aux/missing build-aux/missing
+func_update "$gnulibdir"/build-aux/texinfo.tex build-aux/texinfo.tex
 func_update "$gnulibdir"/doc/COPYINGv3 COPYING
 func_update "$gnulibdir"/doc/INSTALL INSTALL
 
