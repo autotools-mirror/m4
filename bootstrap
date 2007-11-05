@@ -1,9 +1,10 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-09-24
+# bootstrap (GNU M4) version 2008-03-25
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
-# Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation,
+# Inc.
 
 # This file is part of GNU M4.
 #
@@ -22,7 +23,7 @@
 
 # Usage: $progname [options]
 
-# -f      --force            bootstrap even when sources are not from CVS
+# -f      --force            bootstrap even when sources are not from git
 # -v      --version          print version information
 # -h,-?   --help             print short or long help message
 
@@ -32,7 +33,7 @@
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
-# requires GNU Autoconf 2.60, GNU Automake 1.9.6, and bleeding edge
+# requires GNU Autoconf 2.60, GNU Automake 1.10.1, and bleeding edge
 # git or CVS snapshots of GNU Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
@@ -62,8 +63,8 @@ progpath="$0"
 progname=`echo "$progpath" | $SED "$basename"`
 PROGRAM=bootstrap
 
-# Detect whether this is a CVS checkout or a tarball
-CVS_only_file=HACKING
+# Detect whether this is a version control system checkout or a tarball
+vcs_only_file=HACKING
 
 # func_echo arg...
 # Echo program name prefixed message.
@@ -187,7 +188,7 @@ func_update ()
     shift
     case $opt in
       # Separate optargs to short options:
-      -f|--force)	CVS_only_file=					;;
+      -f|--force)	vcs_only_file=					;;
       -\?|-h)		func_usage					;;
       --help)		func_help					;;
       --version)	func_version					;;
@@ -200,8 +201,9 @@ func_update ()
   # Bail if the options were screwed
   $exit_cmd $EXIT_FAILURE
 
-  if test -n "$CVS_only_file" && test ! -r "$CVS_only_file"; then
-    func_fatal_error "Bootstrapping from a non-CVS distribution is risky."
+  if test -n "$vcs_only_file" && test ! -r "$vcs_only_file"; then
+    func_fatal_error \
+      "Bootstrapping from a non-version-control distribution is risky."
   fi
 }
 
@@ -227,6 +229,19 @@ gnulib-comp.m4
 EOF
   func_echo "creating initial $config_macro_dir/.gitignore"
   cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
+fi
+
+# See if we can use gnulib's git-merge-changelog merge driver.
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if git config merge.merge-changelog.driver >/dev/null ; then
+    :
+  elif (git-merge-changelog --version) >/dev/null 2>/dev/null ; then
+    func_echo "initializing git-merge-changelog driver"
+    git config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
+    git config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
+  else
+    func_echo "consider installing git-merge-changelog from gnulib"
+  fi
 fi
 
 ## ---------------------------- ##
@@ -275,13 +290,13 @@ $AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
 ## Gnulib is more up-to-date than automake. ##
 ## ---------------------------------------- ##
 
-func_update "$gnulibdir"/build-aux/config.guess config.guess
-func_update "$gnulibdir"/build-aux/config.sub config.sub
-func_update "$gnulibdir"/build-aux/depcomp depcomp
-func_update "$gnulibdir"/build-aux/install-sh install-sh
-func_update "$gnulibdir"/build-aux/mdate-sh doc/mdate-sh
-func_update "$gnulibdir"/build-aux/missing missing
-func_update "$gnulibdir"/build-aux/texinfo.tex doc/texinfo.tex
+func_update "$gnulibdir"/build-aux/config.guess build-aux/config.guess
+func_update "$gnulibdir"/build-aux/config.sub build-aux/config.sub
+func_update "$gnulibdir"/build-aux/depcomp build-aux/depcomp
+func_update "$gnulibdir"/build-aux/install-sh build-aux/install-sh
+func_update "$gnulibdir"/build-aux/mdate-sh build-aux/mdate-sh
+func_update "$gnulibdir"/build-aux/missing build-aux/missing
+func_update "$gnulibdir"/build-aux/texinfo.tex build-aux/texinfo.tex
 func_update "$gnulibdir"/doc/COPYINGv3 COPYING
 func_update "$gnulibdir"/doc/INSTALL INSTALL
 

@@ -19,9 +19,9 @@
 
 AC_PREREQ([2.60])
 AC_INIT([GNU M4], [1.4.10a], [bug-m4@gnu.org])
+AC_CONFIG_AUX_DIR([build-aux])
+
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
-PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
-VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 
 m4_pattern_forbid([^M4_[A-Z]])
 

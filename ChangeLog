@@ -1,3 +1,16 @@
+2007-11-05  Eric Blake  <ebb9@byu.net>
+
+	Use build-aux directory.
+	* configure.ac (PACKAGE, VERSION): Delete, since Automake does
+	this now.
+	(AC_CONFIG_AUX_DIR): Add, with auxiliary files in build-aux
+	instead of the top level.
+	(AC_INIT_AUTOMAKE): Increase requirement, and add dist-lzma.
+	* Makefile.am (EXTRA_DIST): Gnulib now manages gendocs.sh.
+	* bootstrap: Adjust accordingly.
+	* m4/gnulib-cache.m4: Add --aux-dir option.
+	* doc/Makefile.am (m4.1): Rewrite rule to use build-aux/missing.
+
 2007-10-31  Eric Blake  <ebb9@byu.net>
 
 	Test more corner cases.
