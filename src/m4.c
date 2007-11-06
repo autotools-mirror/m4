@@ -568,7 +568,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	default:
-	  M4ERROR ((0, 0, "INTERNAL ERROR: bad code in deferred arguments"));
+	  assert (!"main");
 	  abort ();
 	}
 

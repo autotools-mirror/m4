@@ -241,13 +241,7 @@ push_macro (builtin_func *func)
 struct obstack *
 push_string_init (void)
 {
-  if (next != NULL)
-    {
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: recursive push_string!"));
-      abort ();
-    }
-
+  assert (next == NULL);
   next = (input_block *) obstack_alloc (current_input,
 					sizeof (struct input_block));
   next->type = INPUT_STRING;
@@ -357,8 +351,7 @@ pop_input (void)
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: input stack botch in pop_input ()"));
+      assert (!"pop_input");
       abort ();
     }
   obstack_free (current_input, isp);
@@ -411,13 +404,7 @@ pop_wrapup (void)
 static void
 init_macro_token (token_data *td)
 {
-  if (isp->type != INPUT_MACRO)
-    {
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad call to init_macro_token ()"));
-      abort ();
-    }
-
+  assert (isp->type == INPUT_MACRO);
   TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
   TOKEN_DATA_FUNC (td) = isp->u.func;
 }
@@ -463,8 +450,7 @@ peek_input (void)
 	  return CHAR_MACRO;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: input stack botch in peek_input ()"));
+	  assert (!"peek_input");
 	  abort ();
 	}
       block = block->prev;
@@ -541,8 +527,7 @@ next_char_1 (void)
 	  return CHAR_MACRO;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: input stack botch in next_char ()"));
+	  assert (!"next_char_1");
 	  abort ();
 	}
 
@@ -782,14 +767,8 @@ set_word_regexp (const char *regexp)
      Can't rely on struct assigns working, so redo the compilation.  */
   regfree (&word_regexp);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
-
-  if (msg != NULL)
-    {
-      M4ERROR ((EXIT_FAILURE, 0,
-		"INTERNAL ERROR: expression recompilation `%s': %s",
-		regexp, msg));
-    }
 
   default_word_regexp = false;
 
@@ -923,10 +902,10 @@ next_token (token_data *td, int *line, const char *caller)
       orig_text = (char *) obstack_finish (&token_stack);
 
       if (regs.start[1] != -1)
-	obstack_grow (&token_stack,orig_text + regs.start[1],
+	obstack_grow (&token_stack, orig_text + regs.start[1],
 		      regs.end[1] - regs.start[1]);
       else
-	obstack_grow (&token_stack, orig_text,regs.end[0]);
+	obstack_grow (&token_stack, orig_text, regs.end[0]);
 
       type = TOKEN_WORD;
     }

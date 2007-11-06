@@ -364,7 +364,7 @@ set_macro_sequence (const char *regexp)
 {
   const char *msg;
 
-  if (! regexp)
+  if (!regexp)
     regexp = DEFAULT_MACRO_SEQUENCE;
   else if (regexp[0] == '\0')
     {
@@ -697,8 +697,7 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad token data type in define_macro ()"));
+      assert (!"define_macro");
       abort ();
     }
 }
@@ -900,16 +899,14 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 	  bp = find_builtin_by_addr (SYMBOL_FUNC (data.base[0]));
 	  if (bp == NULL)
 	    {
-	      M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: builtin not found in builtin table"));
+	      assert (!"m4_dumpdef");
 	      abort ();
 	    }
 	  DEBUG_PRINT1 ("<%s>\n", bp->name);
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad token data type in m4_dumpdef ()"));
+	  assert (!"m4_dumpdef");
 	  abort ();
 	  break;
 	}
@@ -946,7 +943,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
   else
     {
       int i;
-      if (! bp->groks_macro_args)
+      if (!bp->groks_macro_args)
 	for (i = 2; i < argc; i++)
 	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
 	    {
@@ -987,7 +984,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   else
     {
       int i;
-      if (! SYMBOL_MACRO_ARGS (s))
+      if (!SYMBOL_MACRO_ARGS (s))
 	for (i = 2; i < argc; i++)
 	  if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
 	    {
@@ -1042,8 +1039,7 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad symbol type in m4_defn ()"));
+	  assert (!"m4_defn");
 	  abort ();
 	}
     }
@@ -1061,13 +1057,13 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 # define M4SYSVAL_TERMSIGBITS(status)                    \
    (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
-#else /* ! UNIX && ! defined WEXITSTATUS */
+#else /* !UNIX && !defined WEXITSTATUS */
 /* Platforms such as mingw do not support the notion of reporting
    which signal terminated a process.  Furthermore if WEXITSTATUS was
    not provided, then the exit value is in the low eight bits.  */
 # define M4SYSVAL_EXITBITS(status) status
 # define M4SYSVAL_TERMSIGBITS(status) 0
-#endif /* ! UNIX && ! defined WEXITSTATUS */
+#endif /* !UNIX && !defined WEXITSTATUS */
 
 /* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
 #ifndef WEXITSTATUS
@@ -1956,7 +1952,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      hence the found map.  */
   for ( ; (ch = *from) != '\0'; from++)
     {
-      if (! found[ch])
+      if (!found[ch])
 	{
 	  found[ch] = 1;
 	  map[ch] = *to;
@@ -1967,7 +1963,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 
   for (data = ARG (1); (ch = *data) != '\0'; data++)
     {
-      if (! found[ch])
+      if (!found[ch])
 	obstack_1grow (obs, ch);
       else if (map[ch])
 	obstack_1grow (obs, map[ch]);

@@ -115,8 +115,7 @@ produce_frozen_state (const char *name)
 	      bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: builtin not found in builtin table!"));
+		  assert (!"produce_frozen_state");
 		  abort ();
 		}
 	      xfprintf (file, "F%d,%d\n",
@@ -132,8 +131,7 @@ INTERNAL ERROR: builtin not found in builtin table!"));
 	      break;
 
 	    default:
-	      M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
+	      assert (!"produce_frozen_state");
 	      abort ();
 	      break;
 	    }

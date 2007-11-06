@@ -398,16 +398,14 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
 	      if (bp == NULL)
 		{
-		  M4ERROR ((warning_status, 0, "\
-INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
+		  assert (!"trace_pre");
 		  abort ();
 		}
 	      trace_format ("<%s>", bp->name);
 	      break;
 
 	    default:
-	      M4ERROR ((warning_status, 0,
-			"INTERNAL ERROR: bad token data type (trace_pre ())"));
+	      assert (!"trace_pre");
 	      abort ();
 	    }
 

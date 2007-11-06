@@ -119,8 +119,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad token type in expand_token ()"));
+      assert (!"expand_token");
       abort ();
     }
 }
@@ -211,8 +210,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad token type in expand_argument ()"));
+	  assert (!"expand_argument");
 	  abort ();
 	}
 
@@ -284,8 +282,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad symbol type in call_macro ()"));
+      assert (!"call_macro");
       abort ();
     }
 }

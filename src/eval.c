@@ -352,8 +352,7 @@ evaluate (const char *expr, int32_t *val)
       break;
 
     default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad error code in evaluate ()"));
+      assert (!"evaluate");
       abort ();
     }
 
@@ -584,8 +583,7 @@ cmp_term (eval_token et, int32_t *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad comparison operator in cmp_term ()"));
+	  assert (!"cmp_term");
 	  abort ();
 	}
     }
@@ -638,8 +636,7 @@ shift_term (eval_token et, int32_t *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad shift operator in shift_term ()"));
+	  assert (!"shift_term");
 	  abort ();
 	}
     }
@@ -735,8 +732,7 @@ mult_term (eval_token et, int32_t *v1)
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad operator in mult_term ()"));
+	  assert (!"mult_term");
 	  abort ();
 	}
     }

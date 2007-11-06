@@ -1,5 +1,20 @@
 2007-11-05  Eric Blake  <ebb9@byu.net>
 
+	Use assert, rather than INTERNAL ERROR.
+	* src/m4.h: Include <assert.h>.
+	* src/builtin.c (m4_dumpdef, define_macro, m4_defn): Use assert.
+	* src/debug.c (trace_pre): Likewise.
+	* src/eval.c (evaluate, cmp_term, shift_term, mult_term):
+	Likewise.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* src/input.c (push_string_init, pop_input, init_macro_token)
+	(peek_input, next_char_1, set_word_regexp): Likewise.
+	* src/m4.c (main): Likewise.
+	* src/macro.c (expand_token, expand_argument, call_macro):
+	Likewise.
+	* src/output.c (make_diversion): Likewise.
+	* src/symtab.c (symtab_init): Likewise.
+
 	Use build-aux directory.
 	* configure.ac (PACKAGE, VERSION): Delete, since Automake does
 	this now.
