@@ -394,8 +394,10 @@ $(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
 	$(AUTOTEST) -I '$(srcdir)/tests' -o $@.tmp $@.at
 	mv $@.tmp $@
 
+# The leading :; works around a bug in {}>f in some bash versions.
 $(srcdir)/tests/package.m4: configure.ac
-	{					\
+	:; \
+	{ \
 	  echo '# Signature of the current package.'; \
 	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
 	  echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \

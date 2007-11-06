@@ -1,3 +1,8 @@
+2007-11-06  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (tests/package.m4): Work around bash bug.
+	Reported by Ralf Wildenhues.
+
 2007-11-05  Eric Blake  <ebb9@byu.net>
 
 	For consistency with other GNU projects, use build-aux directory.
