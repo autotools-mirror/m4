@@ -1,5 +1,7 @@
 2007-11-06  Eric Blake  <ebb9@byu.net>
 
+	* build-aux/mkstamp: Rename from ltdl/config/mkstamp.
+
 	* Makefile.am (tests/package.m4): Work around bash bug.
 	Reported by Ralf Wildenhues.
 
