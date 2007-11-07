@@ -1,3 +1,7 @@
+2007-11-07  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Pseudo Arguments): Test more corner cases.
+
 2007-11-05  Eric Blake  <ebb9@byu.net>
 
 	Use build-aux directory.
