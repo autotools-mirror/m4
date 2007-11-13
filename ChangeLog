@@ -1,3 +1,10 @@
+2007-11-13  Eric Blake  <ebb9@byu.net>
+
+	Fix memory leak in tail recursion.
+	* m4/input.c (pop_input): Add flag parameter and return type.
+	(next_char): Adjust caller.
+	(m4_push_string_init): Let go of memory earlier.
+
 2007-11-07  Eric Blake  <ebb9@byu.net>
 
 	* tests/macros.at (Rescanning macros): Test more corner cases.

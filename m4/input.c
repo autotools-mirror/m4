@@ -109,7 +109,7 @@ static	void	init_builtin_token	(m4 *, m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
 static	int	next_char		(m4 *, bool);
 static	int	peek_char		(m4 *);
-static	void	pop_input		(m4 *);
+static	bool	pop_input		(m4 *, bool);
 static	void	unget_input		(int);
 static	bool	consume_syntax		(m4 *, m4_obstack *, unsigned int);
 
@@ -496,12 +496,11 @@ string_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 m4_obstack *
 m4_push_string_init (m4 *context)
 {
-  if (next != NULL)
-    {
-      assert (!"INTERNAL ERROR: recursive m4_push_string!");
-      abort ();
-    }
+  /* Free any memory occupied by completely parsed input.  */
+  assert (!next);
+  while (isp && pop_input (context, false));
 
+  /* Reserve the next location on the obstack.  */
   next = (m4_input_block *) obstack_alloc (current_input,
 					   sizeof (m4_input_block));
   next->funcs = &string_funcs;
@@ -673,15 +672,25 @@ m4_push_wrapup (m4 *context, const char *s)
 }
 
 
-/* The function pop_input () pops one level of input sources.  The
-   current_file and current_line are restored as needed.  */
-static void
-pop_input (m4 *context)
+/* The function pop_input () pops one level of input sources.  If
+   CLEANUP, the current_file and current_line are restored as needed.
+   The return value is false if cleanup is still required, or if the
+   current input source is not at the end.  */
+static bool
+pop_input (m4 *context, bool cleanup)
 {
   m4_input_block *tmp = isp->prev;
 
+  assert (isp);
+  if (isp->funcs->peek_func (isp) != CHAR_RETRY)
+    return false;
+
   if (isp->funcs->clean_func != NULL)
-    isp->funcs->clean_func (isp, context);
+    {
+      if (!cleanup)
+	return false;
+      isp->funcs->clean_func (isp, context);
+    }
 
   if (tmp != NULL)
     {
@@ -691,6 +700,7 @@ pop_input (m4 *context)
 
   isp = tmp;
   input_change = true;
+  return true;
 }
 
 /* To switch input over to the wrapup stack, main () calls pop_wrapup.
@@ -784,7 +794,7 @@ next_char (m4 *context, bool retry)
 	}
 
       /* End of input source --- pop one level.  */
-      pop_input (context);
+      pop_input (context, true);
     }
 }
 
