@@ -241,7 +241,37 @@ push_macro (builtin_func *func)
 struct obstack *
 push_string_init (void)
 {
+  /* Free any memory occupied by completely parsed strings.  */
+  bool pruning = true;
   assert (next == NULL);
+  while (isp && pruning)
+    {
+      switch (isp->type)
+	{
+	case INPUT_STRING:
+	  if (*isp->u.u_s.string)
+	    pruning = false;
+	  break;
+
+	case INPUT_FILE:
+	case INPUT_MACRO:
+	  pruning = false;
+	  break;
+
+	default:
+	  assert (!"push_string_init");
+	  abort ();
+	}
+      if (pruning)
+	{
+	  next = isp;
+	  isp = isp->prev;
+	}
+    }
+  if (next)
+    obstack_free (current_input, next);
+
+  /* Reserve the next location on the obstack.  */
   next = (input_block *) obstack_alloc (current_input,
 					sizeof (struct input_block));
   next->type = INPUT_STRING;
@@ -497,9 +527,12 @@ next_char_1 (void)
       switch (isp->type)
 	{
 	case INPUT_STRING:
-	  ch = to_uchar (*isp->u.u_s.string++);
+	  ch = to_uchar (*isp->u.u_s.string);
 	  if (ch != '\0')
-	    return ch;
+	    {
+	      *isp->u.u_s.string++;
+	      return ch;
+	    }
 	  break;
 
 	case INPUT_FILE:
@@ -536,10 +569,10 @@ next_char_1 (void)
     }
 }
 
-/*------------------------------------------------------------------------.
-| skip_line () simply discards all immediately following characters, upto |
-| the first newline.  It is only used from m4_dnl ().			  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| skip_line () simply discards all immediately following characters, |
+| up to the first newline.  It is only used from m4_dnl ().          |
+`-------------------------------------------------------------------*/
 
 void
 skip_line (void)
@@ -607,12 +640,8 @@ match_input (const char *s, bool consume)
     }
 
   /* Failed or shouldn't consume, push back input.  */
-  {
-    struct obstack *h = push_string_init ();
-
-    /* `obstack_grow' may be macro evaluating its arg 1 several times. */
-    obstack_grow (h, t, n);
-  }
+  push_string_init ();
+  obstack_grow (current_input, t, n);
   push_string_finish ();
   return result;
 }

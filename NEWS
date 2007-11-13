@@ -14,6 +14,7 @@ Version 1.4.11 - ?? ??? 2007, by ????  (git version 1.4.10a-*)
   possible to concatenate a builtin macro with anything else.
 * Several improvements in `index', `regexp', and `patsubst' builtins to
   speed up typical Autoconf usage.
+* Memory usage is greatly reduced in recursive macros.
 * A number of portability improvements inherited from gnulib.
 
 Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)

@@ -1,3 +1,11 @@
+2007-11-13  Eric Blake  <ebb9@byu.net>
+
+	Fix memory leak in tail recursion.
+	* src/input.c (push_string_init): Let go of memory earlier.
+	(next_char_1): Make end of string detection reliable.
+	(match_input): Simplify use of push_string_init.
+	* NEWS: Document this fix.
+
 2007-11-07  Eric Blake  <ebb9@byu.net>
 
 	* doc/m4.texinfo (Pseudo Arguments): Test more corner cases.
