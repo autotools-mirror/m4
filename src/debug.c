@@ -359,44 +359,16 @@ trace_prepre (const char *name, int id)
 void
 trace_pre (const char *name, int id, macro_arguments *argv)
 {
-  int i;
-  const builtin *bp;
-  int argc = arg_argc (argv);
-
   trace_header (id);
   trace_format ("%s", name);
 
-  if (argc > 1 && (debug_level & DEBUG_TRACE_ARGS))
+  if (arg_argc (argv) > 1 && (debug_level & DEBUG_TRACE_ARGS))
     {
+      int len = max_debug_argument_length;
       trace_format ("(");
-
-      for (i = 1; i < argc; i++)
-	{
-	  if (i != 1)
-	    trace_format (", ");
-
-	  switch (arg_type (argv, i))
-	    {
-	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", ARG (i));
-	      break;
-
-	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (arg_func (argv, i));
-	      if (bp == NULL)
-		{
-		  assert (!"trace_pre");
-		  abort ();
-		}
-	      trace_format ("<%s>", bp->name);
-	      break;
-
-	    default:
-	      assert (!"trace_pre");
-	      abort ();
-	    }
-
-	}
+      arg_print (&trace, argv, 1,
+		 (debug_level & DEBUG_TRACE_QUOTE) ? &curr_quote : NULL,
+		 false, ", ", &len, true);
       trace_format (")");
     }
 

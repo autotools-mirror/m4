@@ -386,7 +386,8 @@ void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
 bool push_token (token_data *, int, bool);
 const input_block *push_string_finish (void);
-void push_wrapup (const char *);
+struct obstack *push_wrapup_init (void);
+void push_wrapup_finish (void);
 bool pop_wrapup (void);
 void input_print (struct obstack *, const input_block *);
 
@@ -410,6 +411,8 @@ void set_word_regexp (const char *, const char *);
 #endif
 unsigned int quote_age (void);
 bool safe_quotes (void);
+const string_pair *quote_cache (struct obstack *, unsigned int,
+				const string_pair *);
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
@@ -494,7 +497,7 @@ size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
-		const string_pair *, int *);
+		const string_pair *, bool, const char *, int *, bool);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
@@ -553,6 +556,7 @@ const char *ntoa (int32_t, int);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);
+void func_print (struct obstack *, const builtin *, bool, const string_pair *);
 
 /* File: path.c  --- path search for include files.  */
 

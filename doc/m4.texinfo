@@ -2900,6 +2900,7 @@ An actual implementation of these three macros is distributed as
 @file{m4-@value{VERSION}/@/examples/@/quote.m4} in this package.  First,
 let's examine their usage:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`quote.m4')
@@ -2932,6 +2933,7 @@ other hand, results in a string no matter what, since it is still
 possible to tell whether it was invoked without arguments based on the
 resulting string.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`quote.m4')dnl
@@ -2993,6 +2995,7 @@ invocation is restored.
 
 It can, for example, be used for simple counting:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`forloop.m4')
@@ -3003,6 +3006,7 @@ forloop(`i', `1', `8', `i ')
 
 For-loops can be nested, like:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`forloop.m4')
@@ -3030,6 +3034,7 @@ not finished, it increments the iterator (using the predefined macro
 Here is an actual implementation of @code{forloop}, distributed as
 @file{m4-@value{VERSION}/@/examples/@/forloop.m4} in this package:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`forloop.m4')dnl
@@ -3076,6 +3081,7 @@ using an implementation of @code{foreach} distributed as
 @file{m4-@value{VERSION}/@/examples/@/foreach.m4}, and @code{foreachq}
 in @file{m4-@value{VERSION}/@/examples/@/foreachq.m4}.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreach.m4')
@@ -3098,6 +3104,7 @@ It is possible to be more complex; each element of the @var{paren-list}
 or @var{quote-list} can itself be a list, to pass as further arguments
 to a helper macro.  This example generates a shell case statement:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreach.m4')
@@ -3127,6 +3134,7 @@ needed to grab the first element of a list.  Second,
 through the original list.  Here is a simple implementation of
 @code{foreach}:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`foreach.m4')dnl
@@ -3153,6 +3161,7 @@ expecting the macro name on output after one layer of quotes is removed
 during list iteration and the final layer removed during the final
 rescan:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 define(`a', `1')define(`b', `2')define(`c', `3')
@@ -3177,6 +3186,7 @@ foreachq(`x', ```a'', ``(b'', ``c)''', `x
 
 Obviously, @code{foreachq} did a better job; here is its implementation:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`foreachq.m4')dnl
@@ -3422,7 +3432,8 @@ following:
 In trace output, show the actual arguments that were collected before
 invoking the macro.  This applies to all macro calls if the @samp{t}
 flag is used, otherwise only the macros covered by calls of
-@code{traceon}.
+@code{traceon}.  Arguments are subject to length truncation specified by
+the command line option @option{--arglength} (or @option{-l}).
 
 @item c
 In trace output, show several trace lines for each macro call.  A line
@@ -3433,7 +3444,9 @@ after the call has completed.
 @item e
 In trace output, show the expansion of each macro call, if it is not
 void.  This applies to all macro calls if the @samp{t} flag is used,
-otherwise only the macros covered by calls of @code{traceon}.
+otherwise only the macros covered by calls of @code{traceon}.  The
+expansion is subject to length truncation specified by the command line
+option @option{--arglength} (or @option{-l}).
 
 @item f
 In debug and trace output, include the name of the current input file in
@@ -3511,6 +3524,25 @@ debugmode(`+l')
 foo
 @error{}m4trace:8: -1- foo
 @result{}FOO
+@end example
+
+The following example demonstrates the behavior of length truncation,
+when specified on the command line.  Note that each argument and the
+final result are individually truncated.  Also, the special tokens for
+builtin functions are not truncated.
+
+@comment options: -l6
+@example
+$ @kbd{m4 -d -l 6}
+define(`echo', `$@@')debugmode(`+t')
+@result{}
+echo(`1', `long string')
+@error{}m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
+@result{}1,long string
+indir(`echo', defn(`changequote'))
+@error{}m4trace: -2- defn(`change...')
+@error{}m4trace: -1- indir(`echo', <changequote>) -> ``''
+@result{}
 @end example
 
 @node Debug Output
@@ -4417,6 +4449,7 @@ Normally file inclusion is used to insert the contents of a file
 into the input stream.  The contents of the file will be read by
 @code{m4} and macro calls in the file will be expanded:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 define(`foo', `FOO')
@@ -4433,6 +4466,7 @@ of the file can be used to define macros that operate on entire files.
 Here is an example, which defines @samp{bar} to expand to the contents
 of @file{incl.m4}:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 define(`bar', include(`incl.m4'))
@@ -5217,6 +5251,7 @@ word to upper case and the remaining characters to lower case.
 First, an example of their usage, using implementations distributed in
 @file{m4-@value{VERSION}/@/examples/@/capitalize.m4}.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`capitalize.m4')
@@ -5236,6 +5271,7 @@ merely parses out the words, and replaces them with an invocation of
 some subtle flaws.  You should try to see if you can find and correct
 them; or @pxref{Improved capitalize, , Answers}).
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`capitalize.m4')dnl
@@ -5327,6 +5363,7 @@ ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
 Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
 example shows how @code{format} can be used to produce tabular output.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`forloop.m4')
@@ -6186,6 +6223,7 @@ message output.
 This example reuses the file @file{incl.m4} mentioned earlier
 (@pxref{Include}):
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 define(`foo', ``$0' called at __file__:__line__')
@@ -6944,6 +6982,7 @@ shipped as @file{m4-@value{VERSION}/@/examples/@/forloop2.m4}; this
 version also optimizes based on the fact that the starting bound does
 not need to be passed to the helper @code{@w{_forloop}}.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 undivert(`forloop2.m4')dnl
@@ -6953,7 +6992,7 @@ undivert(`forloop2.m4')dnl
 @result{}#   performs sanity check that FROM is larger than TO
 @result{}#   allows complex numerical expressions in TO and FROM
 @result{}define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-@result{}  `pushdef(`$1', eval(`$2'))_forloop(`$1',
+@result{}  `pushdef(`$1', eval(`$2'))_$0(`$1',
 @result{}    eval(`$3'), `$4')popdef(`$1')')')
 @result{}define(`_forloop',
 @result{}  `$3`'ifelse(indir(`$1'), `$2', `',
@@ -6972,6 +7011,48 @@ forloop(`i', `a', `b', `non-numeric bounds')
 @result{}
 @end example
 
+One other change to notice is that the improved version used @samp{_$0}
+rather than @samp{_foreach} to invoke the helper routine.  In general,
+this is a good practice to follow, because then the set of macros can be
+uniformly transformed.  The following example shows a transformation
+that doubles the current quoting and appends a suffix @samp{2} to each
+transformed macro.  If @code{foreach} refers to the literal
+@samp{_foreach}, then @code{foreach2} invokes @code{_foreach} instead of
+the intended @code{_foreach2}, and the mixing of quoting paradigms leads
+to an infinite recursion loop in this example.
+
+@comment options: -L9
+@comment status: 1
+@comment examples
+@example
+$ @kbd{m4 -d -L 9 -I examples}
+define(`arg1', `$1')include(`forloop2.m4')include(`quote.m4')
+@result{}
+define(`double', `define(`$1'`2',
+  arg1(patsubst(dquote(defn(`$1')), `[`']', `\&\&')))')
+@result{}
+double(`forloop')double(`_forloop')defn(`forloop2')
+@result{}ifelse(eval(``($3) >= ($2)''), ``1'',
+@result{}  ``pushdef(``$1'', eval(``$2''))_$0(``$1'',
+@result{}    eval(``$3''), ``$4'')popdef(``$1'')'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+@result{}
+changequote(`[', `]')changequote([``], [''])
+@result{}
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+@result{}
+changequote`'include(`forloop.m4')
+@result{}
+double(`forloop')double(`_forloop')defn(`forloop2')
+@result{}pushdef(``$1'', ``$2'')_forloop($@@)popdef(``$1'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+@result{}
+changequote(`[', `]')changequote([``], [''])
+@result{}
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+@error{}m4:stdin:12: recursion limit of 9 exceeded, use -L<N> to change it
+@end example
+
 Of course, it is possible to make even more improvements, such as
 adding an optional step argument, or allowing iteration through
 descending sequences.  @acronym{GNU} Autoconf provides some of these
@@ -6984,6 +7065,7 @@ The @code{foreach} and @code{foreachq} macros (@pxref{Foreach}) as
 presented earlier each have flaws.  First, we will examine and fix the
 quadratic behavior of @code{foreachq}:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreachq.m4')
@@ -7025,6 +7107,7 @@ fewer macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of @code{foreachq} can
 be found in @file{m4-@value{VERSION}/@/examples/@/foreachq2.m4}:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreachq2.m4')
@@ -7034,7 +7117,7 @@ undivert(`foreachq2.m4')dnl
 @result{}divert(`-1')
 @result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
 @result{}#   quoted list, improved version
-@result{}define(`foreachq', `pushdef(`$1')_foreachq($@@)popdef(`$1')')
+@result{}define(`foreachq', `pushdef(`$1')_$0($@@)popdef(`$1')')
 @result{}define(`_arg1q', ``$1'')
 @result{}define(`_rest', `ifelse(`$#', `1', `', `dquote(shift($@@))')')
 @result{}define(`_foreachq', `ifelse(`$2', `', `',
@@ -7073,6 +7156,7 @@ instead of an arbitrary length list as the key to end recursion.  This
 alternative approach is available as
 @file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreachq3.m4')
@@ -7120,6 +7204,7 @@ overquotes the arguments to @code{@w{_foreach}} to begin with, using
 @code{@w{_arg1}} to remove the extra layer of quoting that was added up
 front:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`foreach2.m4')
@@ -7129,7 +7214,7 @@ undivert(`foreach2.m4')dnl
 @result{}divert(`-1')
 @result{}# foreach(x, (item_1, item_2, ..., item_n), stmt)
 @result{}#   parenthesized list, improved version
-@result{}define(`foreach', `pushdef(`$1')_foreach(`$1',
+@result{}define(`foreach', `pushdef(`$1')_$0(`$1',
 @result{}  (dquote(dquote_elt$2)), `$3')popdef(`$1')')
 @result{}define(`_arg1', `$1')
 @result{}define(`_foreach', `ifelse(`$2', `(`')', `',
@@ -7167,6 +7252,7 @@ deciding which list style to use, one must take into account whether
 repeating the side effects of unquoted list elements will have any
 detrimental effects.
 
+@comment examples
 @example
 $ @kbd{m4 -d -I examples}
 include(`foreach2.m4')
@@ -7279,6 +7365,7 @@ difference between calling @code{capitalize} with the expansion of a
 macro, expanding the result of a case change, and changing the case of a
 double-quoted string:
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`capitalize.m4')dnl
@@ -7355,6 +7442,7 @@ must be redefined as @code{_upcase_alt} and @code{_downcase_alt}, since
 they contain nested quotes but are invoked with the alternate quoting
 scheme in effect.
 
+@comment examples
 @example
 $ @kbd{m4 -I examples}
 include(`capitalize2.m4')dnl
