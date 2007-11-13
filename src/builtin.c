@@ -198,6 +198,28 @@ find_builtin_by_name (const char *name)
       return bp;
   return bp + 1;
 }
+
+/*------------------------------------------------------------------.
+| Print a representation of FUNC to OBS.  If FLATTEN, output QUOTES |
+| around an empty string instead.                                   |
+`------------------------------------------------------------------*/
+void
+func_print (struct obstack *obs, const builtin *func, bool flatten,
+	    const string_pair *quotes)
+{
+  assert (func);
+  if (flatten && quotes)
+    {
+      obstack_grow (obs, quotes->str1, quotes->len1);
+      obstack_grow (obs, quotes->str2, quotes->len2);
+    }
+  else if (!flatten)
+    {
+      obstack_1grow (obs, '<');
+      obstack_grow (obs, func->name, strlen (func->name));
+      obstack_1grow (obs, '>');
+    }
+}
 
 /*-------------------------------------------------------------------------.
 | Install a builtin macro with name NAME, bound to the C function given in |
@@ -398,14 +420,15 @@ free_regex (void)
       }
 }
 
-/*-------------------------------------------------------------------------.
-| Define a predefined or user-defined macro, with name NAME, and expansion |
-| TEXT.  MODE destinguishes between the "define" and the "pushdef" case.   |
-| It is also used from main ().						   |
-`-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Define a predefined or user-defined macro, with name NAME of     |
+| length NAME_LEN, and expansion TEXT.  MODE is SYMBOL_INSERT for  |
+| "define" or SYMBOL_PUSHDEF for "pushdef".  This function is also |
+| used from main ().                                               |
+`-----------------------------------------------------------------*/
 
 void
-define_user_macro (const char *name, size_t len, const char *text,
+define_user_macro (const char *name, size_t name_len, const char *text,
 		   symbol_lookup mode)
 {
   symbol *s;
@@ -422,24 +445,23 @@ define_user_macro (const char *name, size_t len, const char *text,
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
-      len = strlen (defn);
+      struct re_registers *regs = &macro_sequence_regs;
+      size_t len = strlen (defn);
 
       while (offset < len
 	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
-				     len - offset, &macro_sequence_regs)) >= 0)
+				     len - offset, regs)) >= 0)
 	{
 	  /* Skip empty matches.  */
-	  if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
+	  if (regs->start[0] == regs->end[0])
 	    offset++;
 	  else
 	    {
-	      char tmp;
-	      offset = macro_sequence_regs.end[0];
-	      tmp = defn[offset];
-	      defn[offset] = '\0';
-	      m4_warn (0, NULL, _("definition of `%s' contains sequence `%s'"),
-		       name, defn + macro_sequence_regs.start[0]);
-	      defn[offset] = tmp;
+	      offset = regs->end[0];
+	      m4_warn (0, NULL,
+		       _("definition of `%s' contains sequence `%.*s'"),
+		       name, regs->end[0] - regs->start[0],
+		       defn + regs->start[0]);
 	    }
 	}
       if (offset == -2)
@@ -599,34 +621,6 @@ shipout_int (struct obstack *obs, int val)
   obstack_grow (obs, s, strlen (s));
 }
 
-/*------------------------------------------------------------------.
-| Print arguments from the table ARGV to obstack OBS, starting with |
-| START, separated by SEP, and quoted by the current quotes if	    |
-| QUOTED is true.						    |
-`------------------------------------------------------------------*/
-
-static void
-dump_args (struct obstack *obs, int start, macro_arguments *argv,
-	   const char *sep, bool quoted)
-{
-  unsigned int i;
-  bool dump_sep = false;
-  size_t len = strlen (sep);
-  unsigned int argc = arg_argc (argv);
-
-  for (i = start; i < argc; i++)
-    {
-      if (dump_sep)
-	obstack_grow (obs, sep, len);
-      else
-	dump_sep = true;
-      if (quoted)
-	obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-      obstack_grow (obs, ARG (i), ARG_LEN (i));
-      if (quoted)
-	obstack_grow (obs, curr_quote.str2, curr_quote.len2);
-    }
-}
 
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
@@ -1518,7 +1512,7 @@ m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  dump_args (obs, 1, argv, " ", false);
+  arg_print (obs, argv, 1, NULL, true, " ", NULL, false);
   debug_flush_files ();
   len = obstack_object_size (obs);
   /* The close_stdin module makes it safe to skip checking the return
@@ -1599,12 +1593,13 @@ m4_m4wrap (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
+  obs = push_wrapup_init ();
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), ARG_LEN (1));
   else
-    dump_args (obs, 1, argv, " ", false);
-  obstack_1grow (obs, '\0');
-  push_wrapup ((char *) obstack_finish (obs));
+    /* TODO - allow builtins, rather than always flattening.  */
+    arg_print (obs, argv, 1, NULL, true, " ", NULL, false);
+  push_wrapup_finish ();
 }
 
 /* Enable tracing of all specified macros, or all, if none is specified.

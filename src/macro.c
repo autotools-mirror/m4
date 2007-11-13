@@ -911,7 +911,9 @@ arg_text (macro_arguments *argv, unsigned int index)
 	      break;
 	    case CHAIN_ARGV:
 	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			 chain->u.u_a.quotes, NULL);
+			 quote_cache (NULL, chain->quote_age,
+				      chain->u.u_a.quotes),
+			 chain->u.u_a.flatten, NULL, NULL, false);
 	      break;
 	    default:
 	      assert (!"arg_text");
@@ -1097,50 +1099,70 @@ arg_scratch (void)
 
 /* Dump a representation of ARGV to the obstack OBS, starting with
    argument INDEX.  If QUOTES is non-NULL, each argument is displayed
-   with those quotes.  If MAX_LEN is non-NULL, truncate the output
-   after *MAX_LEN bytes are output and return true; otherwise, return
-   false, and reduce *MAX_LEN by the number of bytes output.  */
+   with those quotes.  If FLATTEN, builtins are ignored.  Separate
+   arguments with SEP, which defaults to a comma.  If MAX_LEN is
+   non-NULL, truncate the output after *MAX_LEN bytes are output and
+   return true; otherwise, return false, and reduce *MAX_LEN by the
+   number of bytes output.  If QUOTE_EACH, the truncation length is
+   reset for each argument, quotes do not count against length, and
+   all arguments are printed; otherwise, quotes count against the
+   length and trailing arguments may be discarded.  */
 bool
 arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
-	   const string_pair *quotes, int *max_len)
+	   const string_pair *quotes, bool flatten, const char *sep,
+	   int *max_len, bool quote_each)
 {
   int len = max_len ? *max_len : INT_MAX;
   unsigned int i;
   token_data *token;
   token_chain *chain;
-  bool comma = false;
+  bool use_sep = false;
+  bool done;
+  size_t sep_len;
+  size_t *plen = quote_each ? NULL : &len;
 
+  if (!sep)
+    sep = ",";
+  sep_len = strlen (sep);
   for (i = index; i < argv->argc; i++)
     {
-      if (comma && obstack_print (obs, ",", 1, &len))
+      if (quote_each && max_len)
+	len = *max_len;
+      if (use_sep && obstack_print (obs, sep, sep_len, plen))
 	return true;
-      else
-	comma = true;
+      use_sep = true;
       token = arg_token (argv, i, NULL);
-      if (quotes && obstack_print (obs, quotes->str1, quotes->len1, &len))
-	return true;
       switch (TOKEN_DATA_TYPE (token))
 	{
 	case TOKEN_TEXT:
+	  if (quotes && obstack_print (obs, quotes->str1, quotes->len1, plen))
+	    return true;
 	  if (obstack_print (obs, TOKEN_DATA_TEXT (token),
-			     TOKEN_DATA_LEN (token), &len))
+			     TOKEN_DATA_LEN (token), &len) && !quote_each)
+	    return true;
+	  if (quotes && obstack_print (obs, quotes->str2, quotes->len2, plen))
 	    return true;
 	  break;
 	case TOKEN_COMP:
+	  if (quotes && obstack_print (obs, quotes->str1, quotes->len1, plen))
+	    return true;
 	  chain = token->u.u_c.chain;
-	  while (chain)
+	  done = false;
+	  while (chain && !done)
 	    {
 	      switch (chain->type)
 		{
 		case CHAIN_STR:
 		  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
 				     &len))
-		    return true;
+		    done = true;
 		  break;
 		case CHAIN_ARGV:
 		  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-				 chain->u.u_a.quotes, &len))
-		    return true;
+				 quote_cache (NULL, chain->quote_age,
+					      chain->u.u_a.quotes),
+				 flatten, NULL, &len, false))
+		    done = true;
 		  break;
 		default:
 		  assert (!"arg_print");
@@ -1148,16 +1170,19 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 		}
 	      chain = chain->next;
 	    }
+	  if (done && !quote_each)
+	    return true;
+	  if (quotes && obstack_print (obs, quotes->str2, quotes->len2, plen))
+	    return true;
 	  break;
 	case TOKEN_FUNC:
-	  /* TODO - support func.  */
+	  func_print (obs, find_builtin_by_addr (TOKEN_DATA_FUNC (token)),
+		      flatten, quotes);
+	  break;
 	default:
 	  assert (!"arg_print");
 	  abort ();
 	}
-      if (quotes && obstack_print (obs, quotes->str2, quotes->len2,
-				   &len))
-	return true;
     }
   if (max_len)
     *max_len = len;
@@ -1201,20 +1226,7 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   chain->u.u_a.flatten = flatten;
   chain->u.u_a.comma = false;
   chain->u.u_a.skip_last = false;
-  if (quotes)
-    {
-      /* Clone the quotes into the obstack, since a subsequent
-	 changequote may take effect before the $@ ref is
-	 rescanned.  */
-      /* TODO - optimize when quote_age is nonzero.  */
-      string_pair *tmp = (string_pair *) obstack_copy (obs, quotes,
-						       sizeof *quotes);
-      tmp->str1 = (char *) obstack_copy0 (obs, quotes->str1, quotes->len1);
-      tmp->str2 = (char *) obstack_copy0 (obs, quotes->str2, quotes->len2);
-      chain->u.u_a.quotes = tmp;
-    }
-  else
-    chain->u.u_a.quotes = NULL;
+  chain->u.u_a.quotes = quote_cache (obs, chain->quote_age, quotes);
   return token;
 }
 

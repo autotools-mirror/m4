@@ -1,5 +1,33 @@
 2008-02-21  Eric Blake  <ebb9@byu.net>
 
+	Stage 16: cache quotes and improve arg_print.
+	Cache rather than always copying quotes when pushing $@ refs; in
+	particular, reconstruct single-byte quotes on the fly.  Allow NUL
+	through m4wrap.  Improve sharing of code that prints arguments.
+	Memory impact: slight improvement, due to cached quotes.
+	Speed impact: slight improvement, due to less copying.
+	* src/m4.h (push_wrapup_init, push_wrapup_finish, quote_cache)
+	(func_print): New prototypes.
+	(arg_print): Adjust prototype.
+	* src/builtin.h (func_print): New function.
+	(define_user_macro): Slight cleanup.
+	(dump_args): Delete, no longer used.
+	(m4_errprint): Use arg_print.
+	(m4_m4wrap): Handle embedded NUL.
+	* src/debug.c (trace_pre): Use arg_print.
+	* src/input.c (cached_quote): New variable.
+	(push_wrapup): Split...
+	(push_wrapup_init, push_wrapup_finish): ...into these.
+	(input_print): Use arg_print.
+	(quote_cache): New function.
+	(pop_input, next_char_1, append_quote_token, set_quote_age):
+	Adjust users.
+	* src/macro.c (arg_text, make_argv_ref_token): Adjust users.
+	(arg_print): Add parameters.
+	* examples/null.m4: Test for NUL in m4wrap.
+	* examples/null.out: Update expected output.
+	* doc/m4.texinfo (Debug Levels): Test --arglength truncation.
+
 	Fix out-of-bounds read for sanitized macro names, from 2008-02-06.
 	* src/m4.c (m4_verror_at_line): Properly terminate the string.
 	Reported by Ralf Wildenhues.

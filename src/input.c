@@ -42,14 +42,14 @@
    loops (e.g. "define(`f',`m4wrap(`f')')f"), without memory leaks.
 
    Pushing new input on the input stack is done by push_file (),
-   push_string (), push_wrapup () (for wrapup text), and push_macro ()
-   (for macro definitions).  Because macro expansion needs direct
-   access to the current input obstack (for optimization), push_string
-   () is split in two functions, push_string_init (), which returns a
-   pointer to the current input stack, and push_string_finish (),
-   which returns a pointer to the final text.  The input_block *next
-   is used to manage the coordination between the different push
-   routines.
+   push_string (), push_wrapup_init/push_wrapup_finish () (for wrapup
+   text), and push_macro () (for macro definitions).  Because macro
+   expansion needs direct access to the current input obstack (for
+   optimization), push_string () is split in two functions,
+   push_string_init (), which returns a pointer to the current input
+   stack, and push_string_finish (), which returns a pointer to the
+   final text.  The input_block *next is used to manage the
+   coordination between the different push routines.
 
    The current file and line number are stored in two global
    variables, for use by the error handling functions in m4.c.  Macro
@@ -184,6 +184,9 @@ static struct re_registers regs;
    these can alter the rescan of a prior parameter in a quoted
    context.  */
 static unsigned int current_quote_age;
+
+/* Cache a quote pair.  See quote_cache.  */
+static string_pair *cached_quote;
 
 static bool pop_input (bool);
 static void set_quote_age (void);
@@ -500,17 +503,14 @@ push_string_finish (void)
   return ret;
 }
 
-/*------------------------------------------------------------------.
-| The function push_wrapup () pushes a string on the wrapup stack.  |
-| When the normal input stack gets empty, the wrapup stack will     |
-| become the input stack, and push_string () and push_file () will  |
-| operate on wrapup_stack.  Push_wrapup should be done as           |
-| push_string (), but this will suffice, as long as arguments to    |
-| m4_m4wrap () are moderate in size.                                |
-`------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| The function push_wrapup_init () returns an obstack ready for |
+| direct expansion of wrapup text, and should be followed by    |
+| push_wrapup_finish ().                                        |
+`--------------------------------------------------------------*/
 
-void
-push_wrapup (const char *s)
+struct obstack *
+push_wrapup_init (void)
 {
   input_block *i;
   i = (input_block *) obstack_alloc (wrapup_stack, sizeof *i);
@@ -518,9 +518,28 @@ push_wrapup (const char *s)
   i->type = INPUT_STRING;
   i->file = current_file;
   i->line = current_line;
-  i->u.u_s.len = strlen (s);
-  i->u.u_s.str = (char *) obstack_copy (wrapup_stack, s, i->u.u_s.len);
   wsp = i;
+  return wrapup_stack;
+}
+
+/*---------------------------------------------------------------.
+| After pushing wrapup text, push_wrapup_finish () completes the |
+| bookkeeping.                                                   |
+`---------------------------------------------------------------*/
+void
+push_wrapup_finish (void)
+{
+  input_block *i = wsp;
+  if (obstack_object_size (wrapup_stack) == 0)
+    {
+      wsp = i->prev;
+      obstack_free (wrapup_stack, i);
+    }
+  else
+    {
+      i->u.u_s.len = obstack_object_size (wrapup_stack);
+      i->u.u_s.str = (char *) obstack_finish (wrapup_stack);
+    }
 }
 
 
@@ -607,6 +626,7 @@ pop_input (bool cleanup)
       abort ();
     }
   obstack_free (current_input, isp);
+  cached_quote = NULL;
   next = NULL;			/* might be set in push_string_init () */
 
   isp = tmp;
@@ -674,13 +694,7 @@ input_print (struct obstack *obs, const input_block *input)
       obstack_1grow (obs, '>');
       break;
     case INPUT_MACRO:
-      {
-	const builtin *bp = find_builtin_by_addr (input->u.func);
-	assert (bp);
-	obstack_1grow (obs, '<');
-	obstack_grow (obs, bp->name, strlen (bp->name));
-	obstack_1grow (obs, '>');
-      }
+      func_print (obs, find_builtin_by_addr (input->u.func), false, NULL);
       break;
     case INPUT_CHAIN:
       chain = input->u.u_c.chain;
@@ -696,7 +710,9 @@ input_print (struct obstack *obs, const input_block *input)
 	    case CHAIN_ARGV:
 	      assert (!chain->u.u_a.comma);
 	      if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			     chain->u.u_a.quotes, &maxlen))
+			     quote_cache (NULL, chain->quote_age,
+					  chain->u.u_a.quotes),
+			     chain->u.u_a.flatten, NULL, &maxlen, false))
 		return;
 	      break;
 	    default:
@@ -783,7 +799,9 @@ peek_input (bool allow_argv)
 		     argument from argv.  */
 		  push_string_init ();
 		  push_arg_quote (current_input, chain->u.u_a.argv,
-				  chain->u.u_a.index, chain->u.u_a.quotes);
+				  chain->u.u_a.index,
+				  quote_cache (NULL, chain->quote_age,
+					       chain->u.u_a.quotes));
 		  chain->u.u_a.index++;
 		  chain->u.u_a.comma = true;
 		  push_string_finish ();
@@ -911,7 +929,9 @@ next_char_1 (bool allow_quote)
 		     argument from argv.  */
 		  push_string_init ();
 		  push_arg_quote (current_input, chain->u.u_a.argv,
-				  chain->u.u_a.index, chain->u.u_a.quotes);
+				  chain->u.u_a.index,
+				  quote_cache (NULL, chain->quote_age,
+					       chain->u.u_a.quotes));
 		  chain->u.u_a.index++;
 		  chain->u.u_a.comma = true;
 		  push_string_finish ();
@@ -1007,7 +1027,9 @@ append_quote_token (struct obstack *obs, token_data *td)
   if (src_chain->type == CHAIN_ARGV)
     {
       arg_print (obs, src_chain->u.u_a.argv, src_chain->u.u_a.index,
-		 src_chain->u.u_a.quotes, NULL);
+		 quote_cache (NULL, src_chain->quote_age,
+			      src_chain->u.u_a.quotes),
+		 src_chain->u.u_a.flatten, NULL, NULL, false);
       arg_adjust_refcount (src_chain->u.u_a.argv, false);
       return;
     }
@@ -1366,6 +1388,7 @@ set_quote_age (void)
 			 | (*curr_quote.str2 & 0xff));
   else
     current_quote_age = 0;
+  cached_quote = NULL;
 }
 
 /* Return the current quote age.  Each non-trivial changequote alters
@@ -1390,6 +1413,53 @@ bool
 safe_quotes (void)
 {
   return current_quote_age != 0;
+}
+
+/* Interface for caching frequently used quote pairs, using AGE for
+   optimization.  If QUOTES is NULL, don't use quoting.  If OBS is
+   non-NULL, AGE should be the current quote age, and QUOTES should be
+   &curr_quote; the return value will be a cached quote pair, where
+   the pointer is valid at least as long as OBS is not reset, but
+   whose contents are only guaranteed until the next changequote or
+   quote_cache.  Otherwise, OBS is NULL, AGE should be the same as
+   before, and QUOTES should be a previously returned cache value;
+   used to refresh the contents of the result.  */
+const string_pair *
+quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
+{
+  static char lquote[2];
+  static char rquote[2];
+  static string_pair simple = {lquote, 1, rquote, 1};
+
+  /* Implementation - if AGE is non-zero, then the implementation of
+     set_quote_age guarantees that we can recreate the return value on
+     the fly; so we use static storage, and the contents must be used
+     immediately.  If AGE is zero, then we must copy QUOTES onto OBS
+     (since changequote will invalidate the original), but we might as
+     well cache that copy (in case the current expansion contains more
+     than one instance of $@).  */
+  if (!quotes)
+    return NULL;
+  if (age)
+    {
+      *lquote = (age >> 8) & 0xff;
+      *rquote = age & 0xff;
+      return &simple;
+    }
+  if (!obs)
+    return quotes;
+  assert (next && quotes == &curr_quote);
+  if (!cached_quote)
+    {
+      assert (obs == current_input && obstack_object_size (obs) == 0);
+      cached_quote = (string_pair *) obstack_copy (obs, quotes,
+						   sizeof *quotes);
+      cached_quote->str1 = (char *) obstack_copy0 (obs, quotes->str1,
+						   quotes->len1);
+      cached_quote->str2 = (char *) obstack_copy0 (obs, quotes->str2,
+						   quotes->len2);
+    }
+  return cached_quote;
 }
 
 
