@@ -1,5 +1,9 @@
 2007-11-13  Eric Blake  <ebb9@byu.net>
 
+	Simplify previous patch.
+	* src/input.c (pop_input): Change signature.
+	(push_string_init, next_char_1): Adjust callers.
+
 	Fix memory leak in tail recursion.
 	* src/input.c (push_string_init): Let go of memory earlier.
 	(next_char_1): Make end of string detection reliable.

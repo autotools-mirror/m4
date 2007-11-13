@@ -160,6 +160,8 @@ static struct re_registers regs;
 # define default_word_regexp 1
 #endif /* !ENABLE_CHANGEWORD */
 
+static bool pop_input (bool);
+
 #ifdef DEBUG_INPUT
 static const char *token_type_string (token_type);
 #endif
@@ -242,34 +244,8 @@ struct obstack *
 push_string_init (void)
 {
   /* Free any memory occupied by completely parsed strings.  */
-  bool pruning = true;
   assert (next == NULL);
-  while (isp && pruning)
-    {
-      switch (isp->type)
-	{
-	case INPUT_STRING:
-	  if (*isp->u.u_s.string)
-	    pruning = false;
-	  break;
-
-	case INPUT_FILE:
-	case INPUT_MACRO:
-	  pruning = false;
-	  break;
-
-	default:
-	  assert (!"push_string_init");
-	  abort ();
-	}
-      if (pruning)
-	{
-	  next = isp;
-	  isp = isp->prev;
-	}
-    }
-  if (next)
-    obstack_free (current_input, next);
+  while (isp && pop_input (false));
 
   /* Reserve the next location on the obstack.  */
   next = (input_block *) obstack_alloc (current_input,
@@ -337,24 +313,36 @@ push_wrapup (const char *s)
 }
 
 
-/*-------------------------------------------------------------------------.
-| The function pop_input () pops one level of input sources.  If the	   |
-| popped input_block is a file, current_file and current_line are reset to |
-| the saved values before the memory for the input_block are released.	   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The function pop_input () pops one level of input sources.  If     |
+| CLEANUP, and the popped input_block is a file, current_file and    |
+| current_line are reset to the saved values before the memory for   |
+| the input_block is released.  The return value is false if cleanup |
+| is still required, or if the current input source is not           |
+| exhausted.                                                         |
+`-------------------------------------------------------------------*/
 
-static void
-pop_input (void)
+static bool
+pop_input (bool cleanup)
 {
   input_block *tmp = isp->prev;
 
   switch (isp->type)
     {
     case INPUT_STRING:
+      assert (!cleanup || !*isp->u.u_s.string);
+      if (*isp->u.u_s.string)
+	return false;
+      break;
+
     case INPUT_MACRO:
+      if (!cleanup)
+	return false;
       break;
 
     case INPUT_FILE:
+      if (!cleanup)
+	return false;
       if (debug_level & DEBUG_TRACE_INPUT)
 	{
 	  if (tmp)
@@ -389,6 +377,7 @@ pop_input (void)
 
   isp = tmp;
   input_change = true;
+  return true;
 }
 
 /*------------------------------------------------------------------------.
@@ -530,7 +519,7 @@ next_char_1 (void)
 	  ch = to_uchar (*isp->u.u_s.string);
 	  if (ch != '\0')
 	    {
-	      *isp->u.u_s.string++;
+	      isp->u.u_s.string++;
 	      return ch;
 	    }
 	  break;
@@ -555,8 +544,8 @@ next_char_1 (void)
 	  break;
 
 	case INPUT_MACRO:
-	  pop_input ();		/* INPUT_MACRO input sources has only one
-				   token */
+	  /* INPUT_MACRO input sources has only one token */
+	  pop_input (true);
 	  return CHAR_MACRO;
 
 	default:
@@ -565,7 +554,7 @@ next_char_1 (void)
 	}
 
       /* End of input source --- pop one level.  */
-      pop_input ();
+      pop_input (true);
     }
 }
 
