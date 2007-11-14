@@ -1,3 +1,11 @@
+2007-11-14  Eric Blake  <ebb9@byu.net>
+
+	Avoid builtin concatenation in macro arguments.
+	* doc/m4.texinfo (Defn): Add tests.
+	* src/macro.c (warn_builtin_concat): New function.
+	(expand_argument): Use it to warn on more corner cases.
+	* NEWS: Mention new warning.
+
 2007-11-13  Eric Blake  <ebb9@byu.net>
 
 	Simplify previous patch.

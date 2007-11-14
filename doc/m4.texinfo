@@ -2077,9 +2077,9 @@ and it is a builtin, the
 expansion is a special token, which points to the builtin's internal
 definition.  This token is only meaningful as the second argument to
 @code{define} (and @code{pushdef}), and is silently converted to an
-empty string in most other contexts.  Combining a builtin with anything
-else is not supported; a warning is issued and the builtin is omitted
-from the final expansion.
+empty string in most other contexts.  Using multiple @var{name} to
+combine a builtin with anything else is not supported; a warning is
+issued and the builtin is omitted from the final expansion.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2186,18 +2186,39 @@ define(defn(`divnum'), `cannot redefine a builtin token')
 @result{}
 divnum
 @result{}0
+define(`echo', `$@@')
+@result{}
+define(`mydivnum', echo(defn(`divnum')))
+@result{}
+mydivnum
+@result{}
 @end example
 
 Also note that @code{defn} with multiple arguments can only join text
-macros, not builtins, although a future version of @acronym{GNU} M4 may
-lift this restriction.
+macros, not builtins.  Likewise, when collecting macro arguments, a
+builtin token is preserved only when it occurs in isolation.  A future
+version of @acronym{GNU} M4 may lift these restrictions.
 
 @example
-define(`a', `A')
+define(`a', `A')define(`AA', `b')
 @result{}
-defn(`a', `defn', `a')
-@error{}m4:stdin:2: Warning: cannot concatenate builtin `defn'
+defn(`a', `divnum', `a')
+@error{}m4:stdin:2: Warning: cannot concatenate builtin `divnum'
 @result{}AA
+define(`mydivnum', defn(`divnum', `divnum'))mydivnum
+@error{}m4:stdin:3: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:3: Warning: cannot concatenate builtin `divnum'
+@result{}
+define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
+@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
+@result{}
+define(`mydivnum', defn(`divnum')`a')mydivnum
+@error{}m4:stdin:5: Warning: cannot concatenate builtin `divnum'
+@result{}A
+define(`mydivnum', `a'defn(`divnum'))mydivnum
+@error{}m4:stdin:6: Warning: cannot concatenate builtin `divnum'
+@result{}A
 @end example
 
 @node Pushdef

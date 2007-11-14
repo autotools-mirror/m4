@@ -125,15 +125,28 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 }
 
 
+/*---------------------------------------------------------------.
+| Helper function to print warning about concatenating FUNC with |
+| text.                                                          |
+`---------------------------------------------------------------*/
+static void
+warn_builtin_concat (builtin_func *func)
+{
+  const builtin *bp = find_builtin_by_addr (func);
+  assert (bp);
+  M4ERROR ((warning_status, 0, "Warning: cannot concatenate builtin `%s'",
+	    bp->name));
+}
+
 /*-------------------------------------------------------------------.
 | This function parses one argument to a macro call.  It expects the |
 | first left parenthesis or the separating comma to have been read   |
-| by the caller.  It skips leading whitespace, then reads and	     |
+| by the caller.  It skips leading whitespace, then reads and        |
 | expands tokens, until it finds a comma or right parenthesis at the |
 | same level of parentheses.  It returns a flag indicating whether   |
-| the argument read is the last for the active macro call.  The	     |
-| argument is built on the obstack OBS, indirectly through	     |
-| expand_token ().  Report errors on behalf of CALLER.		     |
+| the argument read is the last for the active macro call.  The      |
+| argument is built on the obstack OBS, indirectly through           |
+| expand_token ().  Report errors on behalf of CALLER.               |
 `-------------------------------------------------------------------*/
 
 static bool
@@ -141,7 +154,6 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 {
   token_type t;
   token_data td;
-  char *text;
   int paren_level;
   const char *file = current_file;
   int line = current_line;
@@ -166,25 +178,23 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	case TOKEN_CLOSE:
 	  if (paren_level == 0)
 	    {
-	      /* The argument MUST be finished, whether we want it or not.  */
-	      obstack_1grow (obs, '\0');
-	      text = (char *) obstack_finish (obs);
-
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
+	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
 		{
-		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  TOKEN_DATA_TEXT (argp) = text;
+		  if (obstack_object_size (obs) == 0)
+		    return t == TOKEN_COMMA;
+		  warn_builtin_concat (TOKEN_DATA_FUNC (argp));
 		}
+	      obstack_1grow (obs, '\0');
+	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
+	      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
 	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
 	case TOKEN_OPEN:
 	case TOKEN_SIMPLE:
-	  text = TOKEN_DATA_TEXT (&td);
-
-	  if (*text == '(')
+	  if (t == TOKEN_OPEN)
 	    paren_level++;
-	  else if (*text == ')')
+	  else if (t == TOKEN_CLOSE)
 	    paren_level--;
 	  expand_token (obs, t, &td, line);
 	  break;
@@ -202,10 +212,18 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  break;
 
 	case TOKEN_MACDEF:
-	  if (obstack_object_size (obs) == 0)
+	  if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID
+	      && obstack_object_size (obs) == 0)
 	    {
 	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
 	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
+	    }
+	  else
+	    {
+	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
+		warn_builtin_concat (TOKEN_DATA_FUNC (argp));
+	      warn_builtin_concat (TOKEN_DATA_FUNC (&td));
+	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	    }
 	  break;
 
