@@ -160,7 +160,6 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 {
   m4__token_type type;
   m4_symbol_value token;
-  const char *text;
   int paren_level = 0;
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
@@ -182,16 +181,16 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_CLOSE:
 	  if (paren_level == 0)
 	    {
-
-	      /* The argument MUST be finished, whether we want it or not.  */
+	      /* FIXME - For now, we match the behavior of the branch,
+		 except we don't issue warnings.  But in the future,
+		 we want to allow concatenation of builtins and
+		 text.  */
+	      if (argp->type == M4_SYMBOL_FUNC
+		  && obstack_object_size (obs) == 0)
+		return type == M4_TOKEN_COMMA;
 	      obstack_1grow (obs, '\0');
-	      text = obstack_finish (obs);
-
-	      if (argp->type == M4_SYMBOL_VOID)
-		{
-		  VALUE_MODULE (argp) = NULL;
-		  m4_set_symbol_value_text (argp, text);
-		}
+	      VALUE_MODULE (argp) = NULL;
+	      m4_set_symbol_value_text (argp, obstack_finish (obs));
 	      return type == M4_TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -216,8 +215,10 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	  break;
 
 	case M4_TOKEN_MACDEF:
-	  if (obstack_object_size (obs) == 0)
+	  if (argp->type == M4_SYMBOL_VOID && obstack_object_size (obs) == 0)
 	    m4_symbol_value_copy (argp, &token);
+	  else
+	    argp->type = M4_SYMBOL_TEXT;
 	  break;
 
 	default:

@@ -1,3 +1,12 @@
+2007-11-14  Eric Blake  <ebb9@byu.net>
+
+	Handle some defn corner cases differently.
+	* doc/m4.texinfo (Defn): Update documentation; although this still
+	doesn't match the branch, since it may be changed before 2.0.
+	* m4/macro.c (expand_argument): Consistently ignore builtins in
+	concatenation contexts.
+	* m4/m4private.h (m4__symbol_type): Fix C89 compliance bug.
+
 2007-11-13  Eric Blake  <ebb9@byu.net>
 
 	Fix memory leak in tail recursion.

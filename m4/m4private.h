@@ -33,7 +33,7 @@ typedef enum {
   M4_SYMBOL_VOID, /* Traced but undefined.  */
   M4_SYMBOL_TEXT, /* Plain text.  */
   M4_SYMBOL_FUNC, /* Builtin function.  */
-  M4_SYMBOL_PLACEHOLDER, /* Placeholder for unknown builtin during -R.  */
+  M4_SYMBOL_PLACEHOLDER /* Placeholder for unknown builtin during -R.  */
 } m4__symbol_type;
 
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))

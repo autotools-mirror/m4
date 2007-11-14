@@ -2277,6 +2277,12 @@ define(defn(`divnum'), `cannot redefine a builtin token')
 @result{}
 divnum
 @result{}0
+define(`echo', `$@@')
+@result{}
+define(`mydivnum', echo(defn(`divnum')))
+@result{}
+mydivnum
+@result{}
 @end example
 
 Since @code{defn} can take more than one argument, it can be used to
@@ -2289,11 +2295,13 @@ concatenate multiple macros into one.
 defn(`foo')
 @error{}m4:stdin:1: Warning: defn: undefined macro `foo'
 @result{}
+define(`echo', `$@@')
+@result{}
 define(`foo', `a')
 @result{}
 define(`bar', defn(`foo', `divnum'))
 @result{}
-define(`blah', defn(`divnum', `foo'))
+define(`blah', echo(defn(`divnum', `foo')))
 @result{}
 bar
 @result{}a0
