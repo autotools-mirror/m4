@@ -311,6 +311,7 @@ struct token_chain
 	  bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
 	  bool_bitfield comma : 1;	/* True when `,' is next input.  */
 	  bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
+	  bool_bitfield has_func : 1;	/* True if argv includes func.  */
 	  const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
 	}
       u_a;
@@ -353,8 +354,10 @@ struct token_data
 	 placeholders.  */
       struct
 	{
-	  token_chain *chain;	/* First link of the chain.  */
-	  token_chain *end;	/* Last link of the chain.  */
+	  token_chain *chain;		/* First link of the chain.  */
+	  token_chain *end;		/* Last link of the chain.  */
+	  bool_bitfield wrapper : 1;	/* True if this is a $@ ref.  */
+	  bool_bitfield has_func : 1;	/* True if chain includes func.  */
 	}
       u_c;
     }

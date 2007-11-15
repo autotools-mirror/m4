@@ -1,3 +1,28 @@
+2008-02-22  Eric Blake  <ebb9@byu.net>
+
+	Stage 17: pass argv through quoted strings.
+	Allow the concatenation of $@ references with other text input
+	inside quoted contexts, which requires distinguishing between a
+	wrapper around many arguments vs. a reference serving as part of a
+	single argument.  Also optimize based on whether argv contains
+	builtin tokens that might need flattening to the empty string.
+	Memory impact: noticeable improvement, due to O(n^2) to O(n)
+	reduction from total reuse of $@ references.
+	Speed impact: noticeable improvement, due to O(n^2) to O(n)
+	reduction in boxed recursion.
+	* src/input.c (append_quote_token): Allow an argv ref inside
+	quotes.
+	(init_argv_token): Populate new fields.
+	(push_macro): Ensure a macro is actually pushed.
+	* src/m4.h (struct token_chain): Add has_func member.
+	(struct token_data): Add wrapper and has_func members.
+	* src/macro.c (struct macro_arguments): Add flatten and has_func
+	members.
+	(expand_argument, collect_arguments, make_argv_ref_token)
+	(make_argv_ref): Populate new fields.
+	(arg_equal, arg_len) Handle embedded argv.
+	(arg_token, arg_mark, arg_type): Use new fields.
+
 2008-02-21  Eric Blake  <ebb9@byu.net>
 
 	Stage 16: cache quotes and improve arg_print.
