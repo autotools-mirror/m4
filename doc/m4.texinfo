@@ -1371,12 +1371,14 @@ example would yield the string @samp{bcd}, exactly as if @code{m4}
 has been given @w{@samp{substr(`abcde', `1', `3')}} as input:
 
 @example
+define(`cde', `CDE')
+@result{}
 define(`x', `substr(ab')
 @result{}
 define(`y', `cde, `1', `3')')
 @result{}
 x`'y
-@result{}bcd
+@result{}bCD
 @end example
 
 @ignore
@@ -1619,6 +1621,22 @@ foo
 @noindent
 will expand first to @samp{bar}, and when this is reread and
 expanded, into @samp{Hello}.
+
+@ignore
+@comment not worth documenting, but test that the command line can
+@comment define macros that take parameters
+
+@comment options: -Dfoo -Decho=$@
+@example
+$ @kbd{m4 -Dfoo -Decho='$@'}
+foo
+@result{}
+foo(`silently ignored')
+@result{}
+echo(`1', `2')
+@result{}1,2
+@end example
+@end ignore
 
 @node Definitions
 @chapter How to define new macros
@@ -3213,6 +3231,17 @@ Invoking m4}).  (It is possible to have robust iteration with linear
 behavior for either list style.  See if you can learn from the best
 elements of both of these implementations to create robust macros; or
 @pxref{Improved foreach, , Answers}).
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`foreach.m4')include(`foreachq.m4')
+@result{}
+foreach(`name', `(`a', `b')', ` defn(`name')')
+@result{} a b
+foreachq(`name', ``a', `b'', ` defn(`name')')
+@result{} _arg1(`a', `b') _arg1(shift(`a', `b'))
+@end example
 
 @node Debugging
 @chapter How to debug macros and input
@@ -5783,10 +5812,24 @@ use the @option{-G} option, @pxref{Limits control, , Invoking m4}),
 expand to the empty string.
 
 @example
+$ @kbd{m4}
 __gnu__
 @result{}
-ifdef(`__gnu__', `Extensions are active')
+__gnu__(`ignored')
+@result{}
+Extensions are ifdef(`__gnu__', `active', `inactive')
 @result{}Extensions are active
+@end example
+
+@comment options: -G
+@example
+$ @kbd{m4 -G}
+__gnu__
+@result{}__gnu__
+__gnu__(`ignored')
+@result{}__gnu__(ignored)
+Extensions are ifdef(`__gnu__', `active', `inactive')
+@result{}Extensions are inactive
 @end example
 
 On UNIX systems, @acronym{GNU} @code{m4} will define @code{@w{__unix__}}
@@ -7274,6 +7317,10 @@ foreach(`x', `(`,')', `<x>') / foreachq(`x', ``,'', `<x>')
 dnl 2-element list of unbalanced parentheses
 foreach(`x', `(`(', `)')', `<x>') / foreachq(`x', ``(', `)'', `<x>')
 @result{}<(><)> / <(><)>
+define(`ab', `oops')dnl using defn(`iterator')
+foreach(`x', `(`a', `b')', `defn(`x')') /dnl
+ foreachq(`x', ``a', `b'', `defn(`x')')
+@result{}ab / ab
 define(`active', `ACT, IVE')
 @result{}
 traceon(`active')

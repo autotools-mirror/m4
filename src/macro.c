@@ -49,6 +49,10 @@ struct macro_arguments
   /* False if all arguments belong to this argv, true if some of them
      include references to another.  */
   bool_bitfield has_ref : 1;
+  /* True to flatten builtins contained in references.  */
+  bool_bitfield flatten : 1;
+  /* True if any token contains builtins.  */
+  bool_bitfield has_func : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
   /* The value of quote_age used when parsing all arguments in this
@@ -388,9 +392,14 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		}
 	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
 		{
-		  obstack_1grow (obs, '\0');
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+		  if (len)
+		    {
+		      obstack_1grow (obs, '\0');
+		      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+		    }
+		  else
+		    TOKEN_DATA_TEXT (argp) = NULL;
 		  TOKEN_DATA_LEN (argp) = len;
 		  TOKEN_DATA_QUOTE_AGE (argp) = age;
 		}
@@ -428,14 +437,16 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		    warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
 		  argp->u.u_c.chain = td.u.u_c.chain;
-		  argp->u.u_c.end = td.u.u_c.end;
+		  argp->u.u_c.wrapper = argp->u.u_c.has_func = false;
 		}
 	      else
 		{
 		  assert (argp->u.u_c.end);
 		  argp->u.u_c.end->next = td.u.u_c.chain;
-		  argp->u.u_c.end = td.u.u_c.end;
 		}
+	      argp->u.u_c.end = td.u.u_c.end;
+	      if (td.u.u_c.has_func)
+		argp->u.u_c.has_func = true;
 	    }
 	  break;
 
@@ -462,6 +473,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		  && td.u.u_c.chain->type == CHAIN_ARGV);
 	  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
 	  argp->u.u_c.chain = argp->u.u_c.end = td.u.u_c.chain;
+	  argp->u.u_c.wrapper = true;
+	  argp->u.u_c.has_func = td.u.u_c.has_func;
 	  t = next_token (&td, NULL, NULL, false, caller);
 	  if (argp->u.u_c.chain->u.u_a.skip_last)
 	    assert (t == TOKEN_COMMA);
@@ -501,6 +514,8 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   args.inuse = false;
   args.wrapper = false;
   args.has_ref = false;
+  args.flatten = !groks_macro_args;
+  args.has_func = false;
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
   args.quote_age = quote_age ();
@@ -526,23 +541,37 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 	  obstack_ptr_grow (argv_stack, tdp);
 	  args.arraylen++;
 	  args.argc++;
-	  /* Be conservative - any change in quoting while collecting
-	     arguments, or any argument that consists of unsafe text,
-	     will require a rescan if $@ is reused.  */
-	  if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
-	      && TOKEN_DATA_LEN (tdp) > 0
-	      && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
-	    args.quote_age = 0;
-	  else if (TOKEN_DATA_TYPE (tdp) == TOKEN_COMP)
+	  switch (TOKEN_DATA_TYPE (tdp))
 	    {
+	    case TOKEN_TEXT:
+	      /* Be conservative - any change in quoting while
+		 collecting arguments, or any argument that consists
+		 of unsafe text, will require a rescan if $@ is
+		 reused.  */
+	      if (TOKEN_DATA_LEN (tdp) > 0
+		  && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
+		args.quote_age = 0;
+	      break;
+	    case TOKEN_FUNC:
+	      args.has_func = true;
+	      break;
+	    case TOKEN_COMP:
 	      args.has_ref = true;
-	      if (tdp->u.u_c.chain->type == CHAIN_ARGV)
+	      if (tdp->u.u_c.wrapper)
 		{
+		  assert (tdp->u.u_c.chain->type == CHAIN_ARGV
+			  && !tdp->u.u_c.chain->next);
 		  args.argc += (tdp->u.u_c.chain->u.u_a.argv->argc
 				- tdp->u.u_c.chain->u.u_a.index
 				- tdp->u.u_c.chain->u.u_a.skip_last - 1);
 		  args.wrapper = true;
 		}
+	      if (tdp->u.u_c.has_func)
+		args.has_func = true;
+	      break;
+	    default:
+	      assert (!"expand_argument");
+	      abort ();
 	    }
 	}
       while (more_args);
@@ -551,6 +580,7 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   argv->argc = args.argc;
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
+  argv->has_func = args.has_func;
   if (args.quote_age != quote_age ())
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
@@ -802,12 +832,10 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
   for (i = 0; i < argv->arraylen; i++)
     {
       token = argv->array[i];
-      if (TOKEN_DATA_TYPE (token) == TOKEN_COMP
-	  && token->u.u_c.chain->type == CHAIN_ARGV)
+      if (TOKEN_DATA_TYPE (token) == TOKEN_COMP && token->u.u_c.wrapper)
 	{
 	  token_chain *chain = token->u.u_c.chain;
-	  // TODO for now we support only a single-length $@ chain...
-	  assert (!chain->next);
+	  assert (!chain->next && chain->type == CHAIN_ARGV);
 	  if (index <= (chain->u.u_a.argv->argc - chain->u.u_a.index
 			- chain->u.u_a.skip_last))
 	    {
@@ -840,15 +868,13 @@ arg_mark (macro_arguments *argv)
   argv->inuse = true;
   if (argv->wrapper)
     for (i = 0; i < argv->arraylen; i++)
-      if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
+      if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+	  && argv->array[i]->u.u_c.wrapper)
 	{
 	  chain = argv->array[i]->u.u_c.chain;
-	  while (chain)
-	    {
-	      if (chain->type == CHAIN_ARGV && !chain->u.u_a.argv->inuse)
-		arg_mark (chain->u.u_a.argv);
-	      chain = chain->next;
-	    }
+	  assert (!chain->next && chain->type == CHAIN_ARGV);
+	  if (!chain->u.u_a.argv->inuse)
+	    arg_mark (chain->u.u_a.argv);
 	}
 }
 
@@ -867,14 +893,16 @@ arg_type (macro_arguments *argv, unsigned int index)
   token_data_type type;
   token_data *token;
 
-  if (index == 0 || index >= argv->argc)
+  if (argv->flatten || !argv->has_func || index == 0 || index >= argv->argc)
     return TOKEN_TEXT;
   token = arg_token (argv, index, NULL);
   type = TOKEN_DATA_TYPE (token);
-  /* When accessed via the arg_* interface, composite tokens are
-     currently sequences of text only.  */
-  if (type == TOKEN_COMP)
+  if (type == TOKEN_COMP && !token->u.u_c.has_func)
     type = TOKEN_TEXT;
+  if (type != TOKEN_TEXT)
+    assert (argv->has_func);
+  // TODO support TOKEN_COMP meaning concatenation of builtins
+  assert (type != TOKEN_COMP);
   return type;
 }
 
@@ -943,6 +971,7 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   token_chain tmpb;
   token_chain *ca = &tmpa;
   token_chain *cb = &tmpb;
+  struct obstack *obs = arg_scratch ();
 
   /* Quick tests.  */
   if (ta == &empty_token || tb == &empty_token)
@@ -983,7 +1012,34 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   /* Compare each link of the chain.  */
   while (ca && cb)
     {
-      // TODO support comparison against $@ refs.
+      if (ca->type == CHAIN_ARGV)
+	{
+	  tmpa.next = ca->next;
+	  tmpa.type = CHAIN_STR;
+	  // TODO support $@ with funcs
+	  assert (!ca->u.u_a.has_func || argv->flatten || ca->u.u_a.flatten);
+	  arg_print (obs, ca->u.u_a.argv, ca->u.u_a.index,
+		     quote_cache (NULL, ca->quote_age, ca->u.u_a.quotes),
+		     argv->flatten || ca->u.u_a.flatten, NULL, NULL, false);
+	  tmpa.u.u_s.len = obstack_object_size (obs);
+	  tmpa.u.u_s.str = (char *) obstack_finish (obs);
+	  ca = &tmpa;
+	  continue;
+	}
+      if (cb->type == CHAIN_ARGV)
+	{
+	  tmpb.next = cb->next;
+	  tmpb.type = CHAIN_STR;
+	  // TODO support $@ with funcs
+	  assert (!cb->u.u_a.has_func || argv->flatten || cb->u.u_a.flatten);
+	  arg_print (obs, cb->u.u_a.argv, cb->u.u_a.index,
+		     quote_cache (NULL, cb->quote_age, cb->u.u_a.quotes),
+		     argv->flatten || cb->u.u_a.flatten, NULL, NULL, false);
+	  tmpb.u.u_s.len = obstack_object_size (obs);
+	  tmpb.u.u_s.str = (char *) obstack_finish (obs);
+	  cb = &tmpb;
+	  continue;
+	}
       assert (ca->type == CHAIN_STR && cb->type == CHAIN_STR);
       if (ca->u.u_s.len == cb->u.u_s.len)
 	{
@@ -1056,14 +1112,42 @@ arg_len (macro_arguments *argv, unsigned int index)
       assert ((token == &empty_token) == (TOKEN_DATA_LEN (token) == 0));
       return TOKEN_DATA_LEN (token);
     case TOKEN_COMP:
-      // TODO - concatenate argv refs, or even functions?  For now, we assume
-      // all chain elements are text.
       chain = token->u.u_c.chain;
       len = 0;
       while (chain)
 	{
-	  assert (chain->type == CHAIN_STR);
-	  len += chain->u.u_s.len;
+	  unsigned int i;
+	  unsigned int limit;
+	  const string_pair *quotes;
+	  switch (chain->type)
+	    {
+	    case CHAIN_STR:
+	      len += chain->u.u_s.len;
+	      break;
+	    case CHAIN_ARGV:
+	      i = chain->u.u_a.index;
+	      limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
+	      quotes = quote_cache (NULL, chain->quote_age,
+				    chain->u.u_a.quotes);
+	      assert (limit);
+	      if (quotes)
+		len += (quotes->len1 + quotes->len2) * limit;
+	      len += limit - 1;
+	      while (limit--)
+		{
+		  // TODO handle builtin concatenation
+		  if (TOKEN_DATA_TYPE (arg_token (chain->u.u_a.argv, i,
+						  NULL)) == TOKEN_FUNC)
+		    assert (argv->flatten);
+		  else
+		    len += arg_len (chain->u.u_a.argv, i);
+		  i++;
+		}
+	      break;
+	    default:
+	      assert (!"arg_len");
+	      abort ();
+	    }
 	  chain = chain->next;
 	}
       assert (len);
@@ -1202,10 +1286,14 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   token_chain *chain;
 
   assert (obstack_object_size (obs) == 0);
+  // TODO for now we support unwrapping if all arguments are described
+  // by a single $@ reference.  It is possible to check if all
+  // arguments requested lie within a single token, even if argv is
+  // made of multiple tokens.
   if (argv->wrapper && argv->arraylen == 1)
     {
-      // TODO for now we support only a single-length $@ chain...
-      assert (TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP);
+      assert (TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP
+	      && argv->array[0]->u.u_c.wrapper);
       chain = argv->array[0]->u.u_c.chain;
       assert (!chain->next && chain->type == CHAIN_ARGV
 	      && !chain->u.u_a.skip_last);
@@ -1218,12 +1306,15 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
   TOKEN_DATA_TYPE (token) = TOKEN_COMP;
   token->u.u_c.chain = token->u.u_c.end = chain;
+  token->u.u_c.wrapper = true;
+  token->u.u_c.has_func = argv->has_func;
   chain->next = NULL;
   chain->type = CHAIN_ARGV;
   chain->quote_age = argv->quote_age;
   chain->u.u_a.argv = argv;
   chain->u.u_a.index = index;
   chain->u.u_a.flatten = flatten;
+  chain->u.u_a.has_func = argv->has_func;
   chain->u.u_a.comma = false;
   chain->u.u_a.skip_last = false;
   chain->u.u_a.quotes = quote_cache (obs, chain->quote_age, quotes);
@@ -1258,6 +1349,8 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       new_argv->arraylen = 0;
       new_argv->wrapper = false;
       new_argv->has_ref = false;
+      new_argv->flatten = false;
+      new_argv->has_func = false;
     }
   else
     {
@@ -1267,6 +1360,8 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       new_argv->array[0] = token;
       new_argv->wrapper = true;
       new_argv->has_ref = argv->has_ref;
+      new_argv->flatten = flatten;
+      new_argv->has_func = argv->has_func;
     }
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
@@ -1314,10 +1409,10 @@ push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int index,
     obstack_grow (obs, quotes->str2, quotes->len2);
 }
 
-/* Push series of comma-separated arguments from ARGV, which should
-   all be text, onto the expansion stack OBS for rescanning.  If SKIP,
-   then don't push the first argument.  If QUOTE, the rescan also
-   includes quoting around each arg.  */
+/* Push series of comma-separated arguments from ARGV, which can
+   include builtins, onto the expansion stack OBS for rescanning.  If
+   SKIP, then don't push the first argument.  If QUOTE, the rescan
+   also includes quoting around each arg.  */
 void
 push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 {

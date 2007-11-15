@@ -285,6 +285,7 @@ push_macro (builtin_func *func)
       next = NULL;
     }
 
+  assert (func);
   i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_MACRO;
   i->file = current_file;
@@ -1023,22 +1024,11 @@ append_quote_token (struct obstack *obs, token_data *td)
       return;
     }
 
-  // TODO preserve $@ through a quoted context, in case a later reference
-  // strips those quotes.
-  if (src_chain->type == CHAIN_ARGV)
-    {
-      arg_print (obs, src_chain->u.u_a.argv, src_chain->u.u_a.index,
-		 quote_cache (NULL, src_chain->quote_age,
-			      src_chain->u.u_a.quotes),
-		 src_chain->u.u_a.flatten, NULL, NULL, false);
-      arg_adjust_refcount (src_chain->u.u_a.argv, false);
-      return;
-    }
-
   if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
     {
       TOKEN_DATA_TYPE (td) = TOKEN_COMP;
       td->u.u_c.chain = td->u.u_c.end = NULL;
+      td->u.u_c.wrapper = td->u.u_c.has_func = false;
     }
   assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP);
   make_text_link (obs, &td->u.u_c.chain, &td->u.u_c.end);
@@ -1048,6 +1038,8 @@ append_quote_token (struct obstack *obs, token_data *td)
   else
     td->u.u_c.chain = chain;
   td->u.u_c.end = chain;
+  if (chain->type == CHAIN_ARGV && chain->u.u_a.has_func)
+    td->u.u_c.has_func = true;
   chain->next = NULL;
 }
 
@@ -1074,6 +1066,8 @@ init_argv_token (struct obstack *obs, token_data *td)
   /* Clone the link, since the input will be discarded soon.  */
   chain = (token_chain *) obstack_copy (obs, src_chain, sizeof *chain);
   td->u.u_c.chain = td->u.u_c.end = chain;
+  td->u.u_c.wrapper = true;
+  td->u.u_c.has_func = chain->u.u_a.has_func;
   chain->next = NULL;
 
   /* If the next character is not ',' or ')', then unlink the last
