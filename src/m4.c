@@ -27,7 +27,7 @@
 
 #include "version-etc.h"
 
-#define AUTHORS "Rene' Seindal"
+#define AUTHORS "Rene' Seindal", "Eric Blake"
 
 static void usage (int);
 
