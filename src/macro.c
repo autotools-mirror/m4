@@ -1285,24 +1285,55 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
 {
   token_chain *chain;
 
-  assert (obstack_object_size (obs) == 0);
-  /* TODO support $@ refs when argv array is larger than 1.  */
-  if (argv->wrapper && argv->arraylen == 1)
-    {
-      assert (TOKEN_DATA_TYPE (argv->array[0]) == TOKEN_COMP
-	      && argv->array[0]->u.u_c.wrapper);
-      chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == CHAIN_ARGV
-	      && !chain->u.u_a.skip_last);
-      argv = chain->u.u_a.argv;
-      index += chain->u.u_a.index - 1;
-    }
   if (index >= argv->argc)
     return NULL;
-
-  chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
   TOKEN_DATA_TYPE (token) = TOKEN_COMP;
-  token->u.u_c.chain = token->u.u_c.end = chain;
+  token->u.u_c.chain = token->u.u_c.end = NULL;
+
+  /* Cater to the common idiom of $0(`$1',shift(shift($@))), by
+     inlining the first few arguments and reusing the original $@ ref,
+     rather than creating another layer of wrappers.  */
+  while (argv->wrapper)
+    {
+      unsigned int i;
+      for (i = 0; i < argv->arraylen; i++)
+	{
+	  if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+	      && argv->array[i]->u.u_c.wrapper)
+	    break;
+	  if (index == 1)
+	    {
+	      push_arg_quote (obs, argv, i + 1, quotes);
+	      obstack_1grow (obs, ',');
+	    }
+	  else
+	    index--;
+	}
+      assert (i < argv->arraylen);
+      if (i + 1 == argv->arraylen)
+	{
+	  assert (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+		  && argv->array[i]->u.u_c.wrapper);
+	  chain = argv->array[i]->u.u_c.chain;
+	  assert (!chain->next && chain->type == CHAIN_ARGV
+		  && !chain->u.u_a.skip_last);
+	  argv = chain->u.u_a.argv;
+	  index += chain->u.u_a.index - 1;
+	}
+      else
+	{
+	  index += i;
+	  break;
+	}
+    }
+
+  make_text_link (obs, &token->u.u_c.chain, &token->u.u_c.end);
+  chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+  if (token->u.u_c.end)
+    token->u.u_c.end->next = chain;
+  else
+    token->u.u_c.chain = chain;
+  token->u.u_c.end = chain;
   token->u.u_c.wrapper = true;
   token->u.u_c.has_func = argv->has_func;
   chain->next = NULL;
@@ -1416,8 +1447,6 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
   unsigned int i = skip ? 2 : 1;
   token_data td;
   token_data *token;
-  char *str = NULL;
-  size_t len = obstack_object_size (obs);
 
   if (i >= argv->argc)
     return;
@@ -1428,29 +1457,10 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
       return;
     }
 
-  /* Since make_argv_ref_token puts data on obs, we must first close
-     any pending data.  The resulting token contents live entirely on
-     obs, so we call push_token with a level of -1.  */
-  if (len)
-    {
-      obstack_1grow (obs, '\0');
-      str = (char *) obstack_finish (obs);
-    }
   /* TODO allow shift, $@, to push builtins without flatten.  */
   token = make_argv_ref_token (&td, obs, -1, argv, i, true,
 			       quote ? &curr_quote : NULL);
   assert (token);
-  if (len)
-    {
-      token_chain *chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
-      chain->next = token->u.u_c.chain;
-      token->u.u_c.chain = chain;
-      chain->type = CHAIN_STR;
-      chain->quote_age = 0;
-      chain->u.u_s.str = str;
-      chain->u.u_s.len = len;
-      chain->u.u_s.level = -1;
-    }
   if (push_token (token, -1, argv->inuse))
     arg_mark (argv);
 }

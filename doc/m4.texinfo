@@ -7195,17 +7195,17 @@ helper method immediately, the @samp{defn(`@var{iterator}')} no longer
 contains unexpanded macros.
 
 The astute m4 programmer might notice that the solution above still uses
-more memory, and thus more time, than strictly necessary.  Note that
-@samp{$2}, which contains an arbitrarily long quoted list, is expanded
-and rescanned three times per iteration of @code{_foreachq}.
-Furthermore, every iteration of the algorithm effectively unboxes then
-reboxes the list, which costs a couple of macro invocations.  It is
-possible to rewrite the algorithm for a bit more speed by swapping the
-order of the arguments to @code{_foreachq} in order to operate on an
-unboxed list in the first place, and by using the fixed-length @samp{$#}
-instead of an arbitrary length list as the key to end recursion.  This
-alternative approach is available as
-@file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
+more macro invocations than strictly necessary.  Note that @samp{$2},
+which contains an arbitrarily long quoted list, is expanded and
+rescanned three times per iteration of @code{_foreachq}.  Furthermore,
+every iteration of the algorithm effectively unboxes then reboxes the
+list, which costs a couple of macro invocations.  It is possible to
+rewrite the algorithm by swapping the order of the arguments to
+@code{_foreachq} in order to operate on an unboxed list in the first
+place, and by using the fixed-length @samp{$#} instead of an arbitrary
+length list as the key to end recursion.  The result is eight macro
+invocations per loop, instead of nine.  This alternative approach is
+available as @file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
 
 @comment examples
 @example
@@ -7247,6 +7247,20 @@ foreachq(`x', ``1', `2', `3', `4'', `x
 @error{}m4trace: -2- shift(`3', `4')
 @result{}4
 @end example
+
+Prior to M4 1.4.11, every instance of @samp{$@@} was rescanned as it was
+encountered.  Thus, the @file{foreachq3.m4} alternative used much less
+memory than @file{foreachq2.m4}, and executed as much as 10% faster,
+since each iteration encountered fewer @samp{$@@}.  However, the
+implementation of rescanning every byte in @samp{$@@} was quadratic in
+the number of bytes scanned (for example, making the broken version in
+@file{foreachq.m4} cubic, rather than quadratic, in behavior).  Once the
+underlying M4 implementation was improved in 1.4.11 to reuse results of
+previous scans, both styles of @code{foreachq} become linear in the
+number of bytes scanned, and the difference in timing is no longer
+noticeable; in fact, after the change, the @file{foreachq2.m4} version
+uses slightly less memory since it tracks fewer arguments per macro
+invocation.
 
 For yet another approach, the improved version of @code{foreach},
 available in @file{m4-@value{VERSION}/@/examples/@/foreach2.m4}, simply
@@ -7375,6 +7389,66 @@ foreachq(`x', ```active'', ``active''', `<x>
 @result{}<active>
 @result{}<active>
 @end example
+
+@ignore
+@comment Not worth putting in the manual, but make sure that performance
+@comment on recursive algorithms is not quadratic.
+
+@comment boxed recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment examples
+@comment options: -Dlimit=2500
+@example
+$ @kbd {m4 -I examples -Dlimit=2500}
+include(`loop.m4')dnl
+@end example
+
+@comment examples
+@comment options: -Dlimit=10000
+@example
+$ @kbd {m4 -I examples -Dlimit=10000}
+define(`debug', `define(`popdef',`divert`'i')')
+@result{}
+include(`loop.m4')dnl
+@result{}10000
+@end example
+
+@comment unboxed recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose -Dalt
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment examples
+@comment options: -Dlimit=2500 -Dalt
+@example
+$ @kbd {m4 -I examples -Dlimit=2500 -Dalt}
+include(`loop.m4')dnl
+@end example
+
+@comment examples
+@comment options: -Dlimit=10000 -Dalt
+@example
+$ @kbd {m4 -I examples -Dlimit=10000 -Dalt}
+define(`debug', `define(`popdef',`divert`'i')')
+@result{}
+include(`loop.m4')dnl
+@result{}10000
+@end example
+
+@end ignore
 
 @node Improved cleardivert
 @section Solution for @code{cleardivert}
