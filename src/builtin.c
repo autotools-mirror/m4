@@ -106,17 +106,17 @@ builtin_tab[] =
   { "debugfile",	true,	false,	false,	m4_debugfile },
   { "decr",		false,	false,	true,	m4_decr },
   { "define",		false,	true,	true,	m4_define },
-  { "defn",		false,	false,	true,	m4_defn },
+  { "defn",		false,	true,	true,	m4_defn },
   { "divert",		false,	false,	false,	m4_divert },
   { "divnum",		false,	false,	false,	m4_divnum },
   { "dnl",		false,	false,	false,	m4_dnl },
-  { "dumpdef",		false,	false,	false,	m4_dumpdef },
+  { "dumpdef",		false,	true,	false,	m4_dumpdef },
   { "errprint",		false,	false,	true,	m4_errprint },
   { "esyscmd",		true,	false,	true,	m4_esyscmd },
   { "eval",		false,	false,	true,	m4_eval },
   { "format",		true,	false,	true,	m4_format },
-  { "ifdef",		false,	false,	true,	m4_ifdef },
-  { "ifelse",		false,	false,	true,	m4_ifelse },
+  { "ifdef",		false,	true,	true,	m4_ifdef },
+  { "ifelse",		false,	true,	true,	m4_ifelse },
   { "include",		false,	false,	true,	m4_include },
   { "incr",		false,	false,	true,	m4_incr },
   { "index",		false,	false,	true,	m4_index },
@@ -127,18 +127,18 @@ builtin_tab[] =
   { "maketemp",		false,	false,	true,	m4_maketemp },
   { "mkstemp",		false,	false,	true,	m4_mkstemp },
   { "patsubst",		true,	false,	true,	m4_patsubst },
-  { "popdef",		false,	false,	true,	m4_popdef },
+  { "popdef",		false,	true,	true,	m4_popdef },
   { "pushdef",		false,	true,	true,	m4_pushdef },
   { "regexp",		true,	false,	true,	m4_regexp },
-  { "shift",		false,	false,	true,	m4_shift },
+  { "shift",		false,	true,	true,	m4_shift },
   { "sinclude",		false,	false,	true,	m4_sinclude },
   { "substr",		false,	false,	true,	m4_substr },
   { "syscmd",		false,	false,	true,	m4_syscmd },
   { "sysval",		false,	false,	false,	m4_sysval },
-  { "traceoff",		false,	false,	false,	m4_traceoff },
-  { "traceon",		false,	false,	false,	m4_traceon },
+  { "traceoff",		false,	true,	false,	m4_traceoff },
+  { "traceon",		false,	true,	false,	m4_traceon },
   { "translit",		false,	false,	true,	m4_translit },
-  { "undefine",		false,	false,	true,	m4_undefine },
+  { "undefine",		false,	true,	true,	m4_undefine },
   { "undivert",		false,	false,	false,	m4_undivert },
 
   { 0,			false,	false,	false,	0 },
@@ -440,6 +440,7 @@ define_user_macro (const char *name, size_t name_len, const char *text,
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
+  SYMBOL_MACRO_ARGS (s) = true;
 
   /* Implement --warn-macro-sequence.  */
   if (macro_sequence_inuse && text)
@@ -693,11 +694,15 @@ m4_define (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_undefine (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  const char *me = ARG (0);
   int i;
-  if (bad_argc (ARG (0), argc, 1, -1))
+  if (bad_argc (me, argc, 1, -1))
     return;
   for (i = 1; i < argc; i++)
-    lookup_symbol (ARG (i), SYMBOL_DELETE);
+    if (arg_type (argv, i) != TOKEN_TEXT)
+      m4_warn (0, me, _("invalid macro name ignored"));
+    else
+      lookup_symbol (ARG (i), SYMBOL_DELETE);
 }
 
 static void
@@ -709,11 +714,15 @@ m4_pushdef (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_popdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  const char *me = ARG (0);
   int i;
-  if (bad_argc (ARG (0), argc, 1, -1))
+  if (bad_argc (me, argc, 1, -1))
     return;
   for (i = 1; i < argc; i++)
-    lookup_symbol (ARG (i), SYMBOL_POPDEF);
+    if (arg_type (argv, i) != TOKEN_TEXT)
+      m4_warn (0, me, _("invalid macro name ignored"));
+    else
+      lookup_symbol (ARG (i), SYMBOL_POPDEF);
 }
 
 /*---------------------.
@@ -723,10 +732,17 @@ m4_popdef (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  const char *me = ARG (0);
   symbol *s;
 
-  if (bad_argc (ARG (0), argc, 2, 3))
+  if (bad_argc (me, argc, 2, 3))
     return;
+  if (arg_type (argv, 1) != TOKEN_TEXT)
+    {
+      m4_warn (0, me, _("invalid macro name ignored"));
+      push_arg (obs, argv, 3);
+      return;
+    }
   s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
   push_arg (obs, argv, (s && SYMBOL_TYPE (s) != TOKEN_VOID) ? 2 : 3);
 }
@@ -834,6 +850,11 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
     {
       for (i = 1; i < argc; i++)
 	{
+	  if (arg_type (argv, i) != TOKEN_TEXT)
+	    {
+	      m4_warn (0, me, _("invalid macro name ignored"));
+	      continue;
+	    }
 	  s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
 	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
 	    dump_symbol (s, &data);
@@ -968,6 +989,11 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 
   for (i = 1; i < argc; i++)
     {
+      if (arg_type (argv, i) != TOKEN_TEXT)
+	{
+	  m4_warn (0, me, _("invalid macro name ignored"));
+	  continue;
+	}
       s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
       if (s == NULL)
 	continue;
@@ -1289,10 +1315,10 @@ m4_dnl (struct obstack *obs, int argc, macro_arguments *argv)
   skip_line (me);
 }
 
-/*-------------------------------------------------------------------------.
-| Shift all argument one to the left, discarding the first argument.  Each |
-| output argument is quoted with the current quotes.			   |
-`-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| Shift all arguments one to the left, discarding the first	      |
+| argument.  Each output argument is quoted with the current quotes.  |
+`--------------------------------------------------------------------*/
 
 static void
 m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
@@ -1624,6 +1650,7 @@ set_trace (symbol *sym, void *data)
 static void
 m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  const char *me = ARG (0);
   symbol *s;
   int i;
 
@@ -1632,6 +1659,11 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
   else
     for (i = 1; i < argc; i++)
       {
+	if (arg_type (argv, i) != TOKEN_TEXT)
+	  {
+	    m4_warn (0, me, _("invalid macro name ignored"));
+	    continue;
+	  }
 	s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
@@ -1644,6 +1676,7 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 static void
 m4_traceoff (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  const char *me = ARG (0);
   symbol *s;
   int i;
 
@@ -1652,6 +1685,11 @@ m4_traceoff (struct obstack *obs, int argc, macro_arguments *argv)
   else
     for (i = 1; i < argc; i++)
       {
+	if (arg_type (argv, i) != TOKEN_TEXT)
+	  {
+	    m4_warn (0, me, _("invalid macro name ignored"));
+	    continue;
+	  }
 	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
 	if (s != NULL)
 	  set_trace (s, NULL);

@@ -1,3 +1,36 @@
+2008-03-14  Eric Blake  <ebb9@byu.net>
+
+	Stage 19: allow builtin tokens in more macros.
+	Allow builtin tokens inside symbol chains, although for now, they
+	are not allowed inside comments or quotes.  Enable builtin token
+	handling in more macros, if only to consistently diagnose invalid
+	macro names.
+	Memory impact: none.
+	Speed impact: slight impact, due to more bookkeeping.
+	* src/m4.h (enum token_chain_type): Add CHAIN_FUNC.
+	(struct token_chain): Add func member.
+	* src/input.c (push_token, pop_input, input_print, peek_input)
+	(next_char_1, init_macro_token): Handle builtin tokens from
+	back-references.
+	(next_token): Flatten builtin tokens inside comments or quotes,
+	except when a builtin is the only thing inside quotes.
+	* src/macro.c (expand_argument): Strengthen assertion.
+	(collect_arguments): Handle builtin tokens.
+	(expand_macro): Fix harmless typo.
+	(arg_token): Add parameter.
+	(arg_type, arg_text, arg_equal, arg_empty, arg_len, arg_func)
+	(arg_print, push_arg_quote, push_args): Update callers to either
+	require flattened arguments or to handle builtins.
+	* src/builtin.c (m4_defn, m4_dumpdef, m4_ifdef, m4_ifelse)
+	(m4_popdef, m4_shift, m4_traceoff, m4_traceon, m4_undefine):
+	Handle builtin tokens, either by recognizing invalid macro names
+	or passing them through transparently.
+	(define_user_macro): Make all user macros handle builtin token
+	arguments transparently.
+	* doc/m4.texinfo (Defn, Ifdef, Ifelse, Debuglen): Document and
+	test the new behavior.
+	* NEWS: Document this change.
+
 2008-03-13  Eric Blake  <ebb9@byu.net>
 
 	Consistently cast malloc results, for C++ compilation.

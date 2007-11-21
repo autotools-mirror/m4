@@ -282,7 +282,7 @@ enum token_data_type
 enum token_chain_type
 {
   CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
-  /* TODO add CHAIN_FUNC.  */
+  CHAIN_FUNC,	/* Builtin function definition, u.func is valid.  */
   CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
 };
 
@@ -303,6 +303,7 @@ struct token_chain
 	  int level;		/* Expansion level of link content, or -1.  */
 	}
       u_s;
+      builtin_func *func;		/* Builtin token from defn.  */
       struct
 	{
 	  macro_arguments *argv;	/* Reference to earlier $@.  */
