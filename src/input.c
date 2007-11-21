@@ -564,7 +564,7 @@ next_char_1 (void)
 `-------------------------------------------------------------------*/
 
 void
-skip_line (void)
+skip_line (const char *name)
 {
   int ch;
   const char *file = current_file;
@@ -576,7 +576,7 @@ skip_line (void)
     /* current_file changed to "" if we see CHAR_EOF, use the
        previous value we stored earlier.  */
     M4ERROR_AT_LINE ((warning_status, 0, file, line,
-		      "Warning: end of file treated as newline"));
+		      "Warning: %s: end of file treated as newline", name));
   /* On the rare occasion that dnl crosses include file boundaries
      (either the input file did not end in a newline, or changeword
      was used), calling next_char can update current_file and

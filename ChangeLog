@@ -1,3 +1,14 @@
+2007-11-21  Eric Blake  <ebb9@byu.net>
+
+	Make dnl diagnostic print macro name.
+	* src/m4.h (skip_line): Adjust prototype.
+	* src/input.c (skip_line): Report error on behalf of caller.
+	* src/builtin.c (m4_dnl): Adjust caller.
+	(dump_args, m4_dumpdef, m4_changequote, m4_changecom)
+	(m4_changeword, m4_traceon, m4_traceoff, expand_user_macro): Use
+	ARG macro instead of open-coding.
+	* doc/m4.texinfo (Dnl): Adjust test.
+
 2007-11-20  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (EXTRA_DIST): gendocs.sh is gone here.

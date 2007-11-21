@@ -3491,7 +3491,7 @@ m4wrap(`m4wrap(`2 hi
 define(`hi', `HI')
 @result{}
 ^D
-@error{}m4:stdin:1: Warning: end of file treated as newline
+@error{}m4:stdin:1: Warning: dnl: end of file treated as newline
 @result{}0 HI 2 HI
 @end example
 

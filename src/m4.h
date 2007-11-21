@@ -288,7 +288,7 @@ typedef enum token_data_type token_data_type;
 void input_init (void);
 token_type peek_token (void);
 token_type next_token (token_data *, int *, const char *);
-void skip_line (void);
+void skip_line (const char *);
 
 /* push back input */
 void push_file (FILE *, const char *, bool);

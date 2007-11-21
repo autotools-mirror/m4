@@ -634,8 +634,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 	obstack_grow (obs, sep, len);
       if (quoted)
 	obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-		    strlen (TOKEN_DATA_TEXT (argv[i])));
+      obstack_grow (obs, ARG (i), strlen (ARG (i)));
       if (quoted)
 	obstack_grow (obs, rquote.string, rquote.length);
     }
@@ -866,12 +865,12 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
     {
       for (i = 1; i < argc; i++)
 	{
-	  s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+	  s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
 	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
 	    dump_symbol (s, &data);
 	  else
 	    M4ERROR ((warning_status, 0,
-		      "undefined macro `%s'", TOKEN_DATA_TEXT (argv[i])));
+		      "undefined macro `%s'", ARG (i)));
 	}
     }
 
@@ -1334,7 +1333,7 @@ m4_dnl (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 1))
     return;
 
-  skip_line ();
+  skip_line (ARG (0));
 }
 
 /*-------------------------------------------------------------------------.
@@ -1361,8 +1360,8 @@ m4_changequote (struct obstack *obs, int argc, token_data **argv)
     return;
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
-  set_quotes ((argc >= 2) ? TOKEN_DATA_TEXT (argv[1]) : NULL,
-	     (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
+  set_quotes ((argc >= 2) ? ARG (1) : NULL,
+	     (argc >= 3) ? ARG (2) : NULL);
 }
 
 /*--------------------------------------------------------------------.
@@ -1377,8 +1376,8 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
     return;
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
-  set_comment ((argc >= 2) ? TOKEN_DATA_TEXT (argv[1]) : NULL,
-	       (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
+  set_comment ((argc >= 2) ? ARG (1) : NULL,
+	       (argc >= 3) ? ARG (2) : NULL);
 }
 
 #ifdef ENABLE_CHANGEWORD
@@ -1394,7 +1393,7 @@ m4_changeword (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  set_word_regexp (TOKEN_DATA_TEXT (argv[1]));
+  set_word_regexp (ARG (1));
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -1670,7 +1669,7 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_INSERT);
+	s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
 }
@@ -1690,7 +1689,7 @@ m4_traceoff (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
 	if (s != NULL)
 	  set_trace (s, NULL);
       }
@@ -2295,8 +2294,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 		i = i*10 + (*text - '0');
 	    }
 	  if (i < argc)
-	    obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-			  strlen (TOKEN_DATA_TEXT (argv[i])));
+	    obstack_grow (obs, ARG (i), strlen (ARG (i)));
 	  break;
 
 	case '#':		/* number of arguments */
