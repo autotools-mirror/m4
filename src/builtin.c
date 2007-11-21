@@ -491,43 +491,39 @@ builtin_init (void)
       }
 }
 
-/*------------------------------------------------------------------------.
-| Give friendly warnings if a builtin macro is passed an inappropriate	  |
-| number of arguments.  NAME is macro name for messages, ARGC is actual	  |
-| number of arguments, MIN is the minimum number of acceptable arguments, |
-| negative if not applicable, MAX is the maximum number, negative if not  |
-| applicable.								  |
-`------------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Give friendly warnings if a builtin macro is passed an            |
+| inappropriate number of arguments.  NAME is macro name for        |
+| messages.  ARGC is one more than the number of arguments.  MIN is |
+| the 0-based minimum number of acceptable arguments.  MAX is the   |
+| 0-based maximum number of arguments, UINT_MAX if not applicable.  |
+| Return true if there are not enough arguments.                    |
+`------------------------------------------------------------------*/
 
 static bool
-bad_argc (token_data *name, int argc, int min, int max)
+bad_argc (const char *name, int argc, unsigned int min, unsigned int max)
 {
-  bool isbad = false;
-
-  if (min > 0 && argc < min)
+  if (argc - 1 < min)
     {
       if (!suppress_warnings)
 	M4ERROR ((warning_status, 0,
-		  "Warning: too few arguments to builtin `%s'",
-		  TOKEN_DATA_TEXT (name)));
-      isbad = true;
+		  "Warning: too few arguments to builtin `%s'", name));
+      return true;
     }
-  else if (max > 0 && argc > max && !suppress_warnings)
+  if (argc - 1 > max && !suppress_warnings)
     M4ERROR ((warning_status, 0,
-	      "Warning: excess arguments to builtin `%s' ignored",
-	      TOKEN_DATA_TEXT (name)));
-
-  return isbad;
+	      "Warning: excess arguments to builtin `%s' ignored", name));
+  return false;
 }
 
-/*--------------------------------------------------------------------------.
-| The function numeric_arg () converts ARG to an int pointed to by VALUEP.  |
-| If the conversion fails, print error message for macro MACRO.  Return	    |
-| true iff conversion succeeds.						    |
-`--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The function numeric_arg () converts ARG to an int pointed to by   |
+| VALUEP.  If the conversion fails, print error message on behalf of |
+| NAME.  Return true iff conversion succeeds.                        |
+`-------------------------------------------------------------------*/
 
 static bool
-numeric_arg (token_data *macro, const char *arg, int *valuep)
+numeric_arg (const char *name, const char *arg, int *valuep)
 {
   char *endp;
 
@@ -535,8 +531,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
     {
       *valuep = 0;
       M4ERROR ((warning_status, 0,
-		"empty string treated as 0 in builtin `%s'",
-		TOKEN_DATA_TEXT (macro)));
+		"empty string treated as 0 in builtin `%s'", name));
     }
   else
     {
@@ -545,18 +540,15 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
       if (*endp != '\0')
 	{
 	  M4ERROR ((warning_status, 0,
-		    "non-numeric argument to builtin `%s'",
-		    TOKEN_DATA_TEXT (macro)));
+		    "non-numeric argument to builtin `%s'", name));
 	  return false;
 	}
       if (isspace (to_uchar (*arg)))
 	M4ERROR ((warning_status, 0,
-		  "leading whitespace ignored in builtin `%s'",
-		  TOKEN_DATA_TEXT (macro)));
+		  "leading whitespace ignored in builtin `%s'", name));
       else if (errno == ERANGE)
 	M4ERROR ((warning_status, 0,
-		  "numeric overflow detected in builtin `%s'",
-		  TOKEN_DATA_TEXT (macro)));
+		  "numeric overflow detected in builtin `%s'", name));
     }
   return true;
 }
@@ -664,14 +656,15 @@ static void
 define_macro (int argc, token_data **argv, symbol_lookup mode)
 {
   const builtin *bp;
+  const char *me = ARG (0);
 
-  if (bad_argc (argv[0], argc, 2, 3))
+  if (bad_argc (me, argc, 1, 2))
     return;
 
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
     {
       M4ERROR ((warning_status, 0,
-		"Warning: %s: invalid macro name ignored", ARG (0)));
+		"Warning: %s: invalid macro name ignored", me));
       return;
     }
 
@@ -711,7 +704,7 @@ static void
 m4_undefine (struct obstack *obs, int argc, token_data **argv)
 {
   int i;
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   for (i = 1; i < argc; i++)
     lookup_symbol (ARG (i), SYMBOL_DELETE);
@@ -727,7 +720,7 @@ static void
 m4_popdef (struct obstack *obs, int argc, token_data **argv)
 {
   int i;
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   for (i = 1; i < argc; i++)
     lookup_symbol (ARG (i), SYMBOL_POPDEF);
@@ -743,7 +736,7 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
   symbol *s;
   const char *result;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (ARG (0), argc, 2, 3))
     return;
   s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
 
@@ -762,18 +755,18 @@ static void
 m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 {
   const char *result;
-  token_data *argv0;
+  const char *me;
 
   if (argc == 2)
     return;
 
-  if (bad_argc (argv[0], argc, 4, -1))
+  me = ARG (0);
+  if (bad_argc (me, argc, 3, -1))
     return;
-  else
+  else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    bad_argc (argv[0], (argc + 2) % 3, -1, 1);
+    bad_argc (me, argc, 0, argc - 2);
 
-  argv0 = argv[0];
   argv++;
   argc--;
 
@@ -922,15 +915,16 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_builtin (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   const builtin *bp;
   const char *name;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (me, argc, 1, -1))
     return;
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
     {
       M4ERROR ((warning_status, 0,
-		"Warning: %s: invalid macro name ignored", ARG (0)));
+		"Warning: %s: invalid macro name ignored", me));
       return;
     }
 
@@ -963,15 +957,16 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_indir (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   symbol *s;
   const char *name;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (me, argc, 1, -1))
     return;
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
     {
       M4ERROR ((warning_status, 0,
-		"Warning: %s: invalid macro name ignored", ARG (0)));
+		"Warning: %s: invalid macro name ignored", me));
       return;
     }
 
@@ -1007,7 +1002,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
   builtin_func *b;
   int i;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
 
   for (i = 1; i < argc; i++)
@@ -1084,7 +1079,7 @@ static int sysval;
 static void
 m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1111,7 +1106,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   FILE *pin;
   int ch;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1151,37 +1146,37 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int32_t value = 0;
   int radix = 10;
   int min = 1;
   const char *s;
 
-  if (bad_argc (argv[0], argc, 2, 4))
+  if (bad_argc (me, argc, 1, 3))
     return;
 
-  if (*ARG (2) && !numeric_arg (argv[0], ARG (2), &radix))
+  if (*ARG (2) && !numeric_arg (me, ARG (2), &radix))
     return;
 
   if (radix < 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
-		"radix %d in builtin `%s' out of range",
-		radix, ARG (0)));
+		"radix %d in builtin `%s' out of range", radix, me));
       return;
     }
 
-  if (argc >= 4 && !numeric_arg (argv[0], ARG (3), &min))
+  if (argc >= 4 && !numeric_arg (me, ARG (3), &min))
     return;
   if (min < 0)
     {
       M4ERROR ((warning_status, 0,
-		"negative width to builtin `%s'", ARG (0)));
+		"negative width to builtin `%s'", me));
       return;
     }
 
   if (!*ARG (1))
     M4ERROR ((warning_status, 0,
-	      "empty string treated as 0 in builtin `%s'", ARG (0)));
+	      "empty string treated as 0 in builtin `%s'", me));
   else if (evaluate (ARG (1), &value))
     return;
 
@@ -1217,12 +1212,13 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_incr (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int value;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (me, argc, 1, 1))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &value))
+  if (!numeric_arg (me, ARG (1), &value))
     return;
 
   shipout_int (obs, value + 1);
@@ -1231,12 +1227,13 @@ m4_incr (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_decr (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int value;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (me, argc, 1, 1))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &value))
+  if (!numeric_arg (me, ARG (1), &value))
     return;
 
   shipout_int (obs, value - 1);
@@ -1253,12 +1250,11 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_divert (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int i = 0;
 
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
-
-  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &i))
+  bad_argc (me, argc, 0, 1);
+  if (argc >= 2 && !numeric_arg (me, ARG (1), &i))
     return;
 
   make_diversion (i);
@@ -1271,8 +1267,7 @@ m4_divert (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_divnum (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
-    return;
+  bad_argc (ARG (0), argc, 0, 0);
   shipout_int (obs, current_diversion);
 }
 
@@ -1286,7 +1281,9 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_undivert (struct obstack *obs, int argc, token_data **argv)
 {
-  int i, file;
+  const char *me = ARG (0);
+  int i;
+  int file;
   FILE *fp;
   char *endp;
 
@@ -1300,7 +1297,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 	  insert_diversion (file);
 	else if (no_gnu_extensions)
 	  M4ERROR ((warning_status, 0,
-		    "non-numeric argument to builtin `%s'", ARG (0)));
+		    "non-numeric argument to builtin `%s'", me));
 	else
 	  {
 	    fp = m4_path_search (ARG (i), NULL);
@@ -1330,10 +1327,10 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_dnl (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
-    return;
+  const char *me = ARG (0);
 
-  skip_line (ARG (0));
+  bad_argc (me, argc, 0, 0);
+  skip_line (me);
 }
 
 /*-------------------------------------------------------------------------.
@@ -1344,7 +1341,7 @@ m4_dnl (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_shift (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   dump_args (obs, argc - 1, argv + 1, ",", true);
 }
@@ -1356,8 +1353,7 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_changequote (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 3))
-    return;
+  bad_argc (ARG (0), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_quotes ((argc >= 2) ? ARG (1) : NULL,
@@ -1372,8 +1368,7 @@ m4_changequote (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_changecom (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 3))
-    return;
+  bad_argc (ARG (0), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_comment ((argc >= 2) ? ARG (1) : NULL,
@@ -1390,7 +1385,7 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_changeword (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     return;
 
   set_word_regexp (ARG (1));
@@ -1413,7 +1408,7 @@ include (int argc, token_data **argv, bool silent)
   FILE *fp;
   char *name;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     return;
 
   fp = m4_path_search (ARG (1), &name);
@@ -1492,7 +1487,7 @@ mkstemp_helper (struct obstack *obs, const char *name)
 static void
 m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     return;
   if (no_gnu_extensions)
     {
@@ -1535,7 +1530,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     return;
   mkstemp_helper (obs, ARG (1));
 }
@@ -1547,7 +1542,7 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_errprint (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   dump_args (obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
@@ -1559,8 +1554,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
 static void
 m4___file__ (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
-    return;
+  bad_argc (ARG (0), argc, 0, 0);
   obstack_grow (obs, lquote.string, lquote.length);
   obstack_grow (obs, current_file, strlen (current_file));
   obstack_grow (obs, rquote.string, rquote.length);
@@ -1569,16 +1563,14 @@ m4___file__ (struct obstack *obs, int argc, token_data **argv)
 static void
 m4___line__ (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
-    return;
+  bad_argc (ARG (0), argc, 0, 0);
   shipout_int (obs, current_line);
 }
 
 static void
 m4___program__ (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 1))
-    return;
+  bad_argc (ARG (0), argc, 0, 0);
   obstack_grow (obs, lquote.string, lquote.length);
   obstack_grow (obs, program_name, strlen (program_name));
   obstack_grow (obs, rquote.string, rquote.length);
@@ -1596,11 +1588,12 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int exit_code = EXIT_SUCCESS;
 
   /* Warn on bad arguments, but still exit.  */
-  bad_argc (argv[0], argc, 1, 2);
-  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &exit_code))
+  bad_argc (me, argc, 0, 1);
+  if (argc >= 2 && !numeric_arg (me, ARG (1), &exit_code))
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
@@ -1629,7 +1622,7 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
@@ -1707,8 +1700,7 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
   int new_debug_level;
   int change_flag;
 
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
+  bad_argc (ARG (0), argc, 0, 1);
 
   if (argc == 1)
     debug_level = 0;
@@ -1756,8 +1748,7 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_debugfile (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
+  bad_argc (ARG (0), argc, 0, 1);
 
   if (argc == 1)
     debug_set_output (NULL);
@@ -1777,7 +1768,7 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_len (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (ARG (0), argc, 1, 1))
     return;
   shipout_int (obs, strlen (ARG (1)));
 }
@@ -1795,7 +1786,7 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
   const char *result = NULL;
   int retval = -1;
 
-  if (bad_argc (argv[0], argc, 3, 3))
+  if (bad_argc (ARG (0), argc, 2, 2))
     {
       /* builtin(`index') is blank, but index(`abc') is 0.  */
       if (argc == 2)
@@ -1830,10 +1821,12 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_substr (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = ARG (0);
   int start = 0;
-  int length, avail;
+  int length;
+  int avail;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (me, argc, 2, 3))
     {
       /* builtin(`substr') is blank, but substr(`abc') is abc.  */
       if (argc == 2)
@@ -1842,10 +1835,10 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
     }
 
   length = avail = strlen (ARG (1));
-  if (!numeric_arg (argv[0], ARG (2), &start))
+  if (!numeric_arg (me, ARG (2), &start))
     return;
 
-  if (argc >= 4 && !numeric_arg (argv[0], ARG (3), &length))
+  if (argc >= 4 && !numeric_arg (me, ARG (3), &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)
@@ -1919,7 +1912,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   char found[256] = {0};
   unsigned char ch;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (ARG (0), argc, 2, 3))
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
       if (argc == 2)
@@ -1977,7 +1970,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_format (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (ARG (0), argc, 1, -1))
     return;
   format (obs, argc - 1, argv + 1);
 }
@@ -2086,7 +2079,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   int startpos;			/* start position of match */
   int length;			/* length of first argument */
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (ARG (0), argc, 2, 3))
     {
       /* builtin(`regexp') is blank, but regexp(`abc') is 0.  */
       if (argc == 2)
@@ -2158,7 +2151,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   int offset;			/* current match offset */
   int length;			/* length of first argument */
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (ARG (0), argc, 2, 3))
     {
       /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
       if (argc == 2)

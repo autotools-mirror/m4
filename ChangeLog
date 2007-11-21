@@ -1,5 +1,10 @@
 2007-11-21  Eric Blake  <ebb9@byu.net>
 
+	Make argument checking a bit more sane.
+	* src/builtin.c (bad_argc): Adjust signature, and don't force
+	callers to add 1.  Adjust all callers.
+	(numeric_arg): Adjust signature.  Adjust all callers.
+
 	Make dnl diagnostic print macro name.
 	* src/m4.h (skip_line): Adjust prototype.
 	* src/input.c (skip_line): Report error on behalf of caller.
