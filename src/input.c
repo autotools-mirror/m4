@@ -364,7 +364,7 @@ push_token (token_data *token, int level, bool inuse)
 	  return false;
 	}
     }
-  else
+  else if (TOKEN_DATA_TYPE (token) != TOKEN_FUNC)
     {
       /* For composite tokens, if argv is already in use, creating
 	 additional references for long text segments is more
@@ -410,8 +410,23 @@ push_token (token_data *token, int level, bool inuse)
       adjust_refcount (level, true);
       inuse = true;
     }
+  else if (TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
+    {
+      chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      chain->next = NULL;
+      chain->type = CHAIN_FUNC;
+      chain->quote_age = 0;
+      chain->u.func = TOKEN_DATA_FUNC (token);
+    }
   while (src_chain)
     {
+      // TODO support func concatenation
+      assert (src_chain->type != CHAIN_FUNC);
       if (level == -1)
 	{
 	  /* Nothing to copy, since link already lives on obstack.  */
@@ -571,7 +586,8 @@ pop_input (bool cleanup)
       break;
 
     case INPUT_MACRO:
-      if (!cleanup)
+      assert (!isp->u.func || !cleanup);
+      if (isp->u.func)
 	return false;
       break;
 
@@ -588,6 +604,10 @@ pop_input (bool cleanup)
 	      if (chain->u.u_s.level >= 0)
 		adjust_refcount (chain->u.u_s.level, false);
 	      break;
+	    case CHAIN_FUNC:
+	       if (chain->u.func)
+		 return false;
+	       break;
 	    case CHAIN_ARGV:
 	      if (chain->u.u_a.index < arg_argc (chain->u.u_a.argv))
 		return false;
@@ -708,6 +728,10 @@ input_print (struct obstack *obs, const input_block *input)
 				 &maxlen))
 		return;
 	      break;
+	    case CHAIN_FUNC:
+	      func_print (obs, find_builtin_by_addr (chain->u.func), false,
+			  NULL);
+	      break;
 	    case CHAIN_ARGV:
 	      assert (!chain->u.u_a.comma);
 	      if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
@@ -770,7 +794,9 @@ peek_input (bool allow_argv)
 	  break;
 
 	case INPUT_MACRO:
-	  return CHAR_MACRO;
+	  if (block->u.func)
+	    return CHAR_MACRO;
+	  break;
 
 	case INPUT_CHAIN:
 	  chain = block->u.u_c.chain;
@@ -782,6 +808,10 @@ peek_input (bool allow_argv)
 		case CHAIN_STR:
 		  if (chain->u.u_s.len)
 		    return to_uchar (*chain->u.u_s.str);
+		  break;
+		case CHAIN_FUNC:
+		  if (chain->u.func)
+		    return CHAR_MACRO;
 		  break;
 		case CHAIN_ARGV:
 		  argc = arg_argc (chain->u.u_a.argv);
@@ -891,9 +921,9 @@ next_char_1 (bool allow_quote)
 	  break;
 
 	case INPUT_MACRO:
-	  /* INPUT_MACRO input sources has only one token */
-	  pop_input (true);
-	  return CHAR_MACRO;
+	  if (isp->u.func)
+	    return CHAR_MACRO;
+	  break;
 
 	case INPUT_CHAIN:
 	  chain = isp->u.u_c.chain;
@@ -913,6 +943,10 @@ next_char_1 (bool allow_quote)
 		    }
 		  if (chain->u.u_s.level >= 0)
 		    adjust_refcount (chain->u.u_s.level, false);
+		  break;
+		case CHAIN_FUNC:
+		  if (chain->u.func)
+		    return CHAR_MACRO;
 		  break;
 		case CHAIN_ARGV:
 		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
@@ -984,17 +1018,37 @@ skip_line (const char *name)
     input_change = true;
 }
 
-/*-------------------------------------------------------------------.
-| When a MACRO token is seen, next_token () uses init_macro_token () |
-| to retrieve the value of the function pointer and store it in TD.  |
-`-------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| When next_token() sees a builtin token with peek_input, this	    |
+| retrieves the value of the function pointer, stores it in TD, and |
+| consumes the input so the caller does not need to do next_char.   |
+| If TD is NULL, discard the token instead.			    |
+`------------------------------------------------------------------*/
 
 static void
 init_macro_token (token_data *td)
 {
-  assert (isp->type == INPUT_MACRO);
-  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-  TOKEN_DATA_FUNC (td) = isp->u.func;
+  int ch = next_char (false);
+  assert (ch == CHAR_MACRO);
+  if (td)
+    TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
+  if (isp->type == INPUT_MACRO)
+    {
+      assert (isp->u.func);
+      if (td)
+	TOKEN_DATA_FUNC (td) = isp->u.func;
+      isp->u.func = NULL;
+    }
+  else
+    {
+      token_chain *chain;
+      assert (isp->type == INPUT_CHAIN);
+      chain = isp->u.u_c.chain;
+      assert (!chain->quote_age && chain->type == CHAIN_FUNC && chain->u.func);
+      if (td)
+	TOKEN_DATA_FUNC (td) = chain->u.func;
+      chain->u.func = NULL;
+    }
 }
 
 /*-------------------------------------------------------------------.
@@ -1518,7 +1572,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
   if (ch == CHAR_MACRO)
     {
       init_macro_token (td);
-      next_char (false);
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> MACDEF (%s)\n",
 		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
@@ -1545,20 +1598,30 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       if (obs)
 	obs_td = obs;
       obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
-      while ((ch = next_char (false)) < CHAR_EOF
-	     && !MATCH (ch, curr_comm.str2, true))
-	obstack_1grow (obs_td, ch);
-      if (ch != CHAR_EOF)
+      while (1)
 	{
+	  ch = next_char (false);
+	  if (ch == CHAR_EOF)
+	    /* Current_file changed to "" if we see CHAR_EOF, use the
+	       previous value we stored earlier.  */
+	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
+			      _("end of file in comment"));
+	  if (ch == CHAR_MACRO)
+	    {
+	      // TODO support concatenation of builtins
+	      m4_warn_at_line (0, file, *line, caller,
+			       _("cannot comment builtin"));
+	      init_macro_token (NULL);
+	      continue;
+	    }
+	  if (MATCH (ch, curr_comm.str2, true))
+	    {
+	      obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
+	      break;
+	    }
 	  assert (ch < CHAR_EOF);
-	  obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
+	  obstack_1grow (obs_td, ch);
 	}
-      else
-	/* Current_file changed to "" if we see CHAR_EOF, use the
-	   previous value we stored earlier.  */
-	m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
-			  _("end of file in comment"));
-
       type = TOKEN_STRING;
     }
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
@@ -1610,6 +1673,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 
   else if (!MATCH (ch, curr_quote.str1, true))
     {
+      assert (ch < CHAR_EOF);
       switch (ch)
 	{
 	case '(':
@@ -1632,6 +1696,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       if (obs)
 	obs_td = obs;
       quote_level = 1;
+      type = TOKEN_STRING;
       while (1)
 	{
 	  ch = next_char (obs != NULL && current_quote_age);
@@ -1641,6 +1706,35 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
 			      _("end of file in string"));
 
+	  if (ch == CHAR_MACRO)
+	    {
+	      // TODO support concatenation of builtins
+	      if (obstack_object_size (obs_td) == 0
+		  && TOKEN_DATA_TYPE (td) == TOKEN_VOID)
+		{
+		  assert (quote_level == 1);
+		  init_macro_token (td);
+		  ch = peek_input (false);
+		  if (MATCH (ch, curr_quote.str2, false))
+		    {
+#ifdef DEBUG_INPUT
+		      const builtin *bp
+			= find_builtin_by_addr (TOKEN_DATA_FUNC (td));
+		      xfprintf (stderr, "next_token -> MACDEF (%s)\n",
+				bp->name);
+#endif
+		      ch = next_char (false);
+		      MATCH (ch, curr_quote.str2, true);
+		      return TOKEN_MACDEF;
+		    }
+		  TOKEN_DATA_TYPE (td) = TOKEN_VOID;
+		}
+	      else
+		init_macro_token (NULL);
+	      m4_warn_at_line (0, file, *line, caller,
+			       _("cannot quote builtin"));
+	      continue;
+	    }
 	  if (ch == CHAR_QUOTE)
 	    append_quote_token (obs, td);
 	  else if (MATCH (ch, curr_quote.str2, true))
@@ -1660,7 +1754,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	      obstack_1grow (obs_td, ch);
 	    }
 	}
-      type = TOKEN_STRING;
     }
 
   if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
@@ -1708,6 +1801,9 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	      case CHAIN_STR:
 		xfprintf (stderr, "%s", chain->u.u_s.str);
 		len += chain->u.u_s.len;
+		break;
+	      case CHAIN_FUNC:
+		xfprintf (stderr, "<func>");
 		break;
 	      case CHAIN_ARGV:
 		xfprintf (stderr, "{$@}");

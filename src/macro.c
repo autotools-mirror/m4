@@ -470,6 +470,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  assert (paren_level == 0 && TOKEN_DATA_TYPE (argp) == TOKEN_VOID
 		  && obstack_object_size (obs) == 0
 		  && td.u.u_c.chain == td.u.u_c.end
+		  && td.u.u_c.chain->quote_age == age
 		  && td.u.u_c.chain->type == CHAIN_ARGV);
 	  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
 	  argp->u.u_c.chain = argp->u.u_c.end = td.u.u_c.chain;
@@ -581,7 +582,8 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   argv->has_func = args.has_func;
-  if (args.quote_age != quote_age ())
+  // TODO allow funcs without crippling quote age
+  if (args.quote_age != quote_age () || args.has_func)
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
@@ -661,8 +663,10 @@ expand_macro (symbol *sym)
   if (!stacks[level].args)
     {
       assert (!stacks[level].refcount);
-      stacks[level].args = xmalloc (sizeof (struct obstack));
-      stacks[level].argv = xmalloc (sizeof (struct obstack));
+      stacks[level].args =
+	(struct obstack *) xmalloc (sizeof *stacks[level].args);
+      stacks[level].argv =
+	(struct obstack *) xmalloc (sizeof *stacks[level].argv);
       obstack_init (stacks[level].args);
       obstack_init (stacks[level].argv);
       stacks[level].args_base = obstack_finish (stacks[level].args);
@@ -814,9 +818,10 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
 /* Given ARGV, return the token_data that contains argument INDEX;
    INDEX must be > 0, < argv->argc.  If LEVEL is non-NULL, *LEVEL is
    set to the obstack level that contains the token (which is not
-   necessarily the level of ARGV).  */
+   necessarily the level of ARGV).  If FLATTEN, avoid returning a
+   builtin function.  */
 static token_data *
-arg_token (macro_arguments *argv, unsigned int index, int *level)
+arg_token (macro_arguments *argv, unsigned int index, int *level, bool flatten)
 {
   unsigned int i;
   token_data *token;
@@ -824,8 +829,14 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
   assert (index && index < argv->argc);
   if (level)
     *level = argv->level;
+  flatten |= argv->flatten;
   if (!argv->wrapper)
-    return argv->array[index - 1];
+    {
+      token = argv->array[index - 1];
+      if (flatten && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
+	token = &empty_token;
+      return token;
+    }
 
   /* Must cycle through all tokens, until we find index, since a ref
      may occupy multiple indices.  */
@@ -840,10 +851,8 @@ arg_token (macro_arguments *argv, unsigned int index, int *level)
 			- chain->u.u_a.skip_last))
 	    {
 	      token = arg_token (chain->u.u_a.argv,
-				 chain->u.u_a.index - 1 + index, level);
-	      if (chain->u.u_a.flatten
-		  && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
-		token = &empty_token;
+				 chain->u.u_a.index - 1 + index, level,
+				 flatten || chain->u.u_a.flatten);
 	      break;
 	    }
 	  index -= (chain->u.u_a.argv->argc - chain->u.u_a.index
@@ -895,7 +904,7 @@ arg_type (macro_arguments *argv, unsigned int index)
 
   if (argv->flatten || !argv->has_func || index == 0 || index >= argv->argc)
     return TOKEN_TEXT;
-  token = arg_token (argv, index, NULL);
+  token = arg_token (argv, index, NULL, false);
   type = TOKEN_DATA_TYPE (token);
   if (type == TOKEN_COMP && !token->u.u_c.has_func)
     type = TOKEN_TEXT;
@@ -921,7 +930,7 @@ arg_text (macro_arguments *argv, unsigned int index)
     return argv->argv0;
   if (index >= argv->argc)
     return "";
-  token = arg_token (argv, index, NULL);
+  token = arg_token (argv, index, NULL, false);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -937,11 +946,16 @@ arg_text (macro_arguments *argv, unsigned int index)
 	    case CHAIN_STR:
 	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	      break;
+	    case CHAIN_FUNC:
+	      // TODO concatenate builtins
+	      assert (!"implemented");
+	      abort ();
 	    case CHAIN_ARGV:
 	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 			 quote_cache (NULL, chain->quote_age,
 				      chain->u.u_a.quotes),
-			 chain->u.u_a.flatten, NULL, NULL, false);
+			 argv->flatten || chain->u.u_a.flatten, NULL, NULL,
+			 false);
 	      break;
 	    default:
 	      assert (!"arg_text");
@@ -951,6 +965,7 @@ arg_text (macro_arguments *argv, unsigned int index)
 	}
       obstack_1grow (obs, '\0');
       return (char *) obstack_finish (obs);
+    case TOKEN_FUNC:
     default:
       break;
     }
@@ -965,8 +980,8 @@ arg_text (macro_arguments *argv, unsigned int index)
 bool
 arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
-  token_data *ta = arg_token (argv, indexa, NULL);
-  token_data *tb = arg_token (argv, indexb, NULL);
+  token_data *ta = arg_token (argv, indexa, NULL, false);
+  token_data *tb = arg_token (argv, indexb, NULL, false);
   token_chain tmpa;
   token_chain tmpb;
   token_chain *ca = &tmpa;
@@ -983,30 +998,45 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 		       TOKEN_DATA_LEN (ta)) == 0);
 
   /* Convert both arguments to chains, if not one already.  */
-  // TODO - allow builtin tokens in the comparison?
-  if (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT)
+  switch (TOKEN_DATA_TYPE (ta))
     {
+    case TOKEN_TEXT:
       tmpa.next = NULL;
       tmpa.type = CHAIN_STR;
       tmpa.u.u_s.str = TOKEN_DATA_TEXT (ta);
       tmpa.u.u_s.len = TOKEN_DATA_LEN (ta);
-    }
-  else
-    {
-      assert (TOKEN_DATA_TYPE (ta) == TOKEN_COMP);
+      break;
+    case TOKEN_FUNC:
+      tmpa.next = NULL;
+      tmpa.type = CHAIN_FUNC;
+      tmpa.u.func = TOKEN_DATA_FUNC (ta);
+      break;
+    case TOKEN_COMP:
       ca = ta->u.u_c.chain;
+      break;
+    default:
+      assert (!"arg_equal");
+      abort ();
     }
-  if (TOKEN_DATA_TYPE (tb) == TOKEN_TEXT)
+  switch (TOKEN_DATA_TYPE (tb))
     {
+    case TOKEN_TEXT:
       tmpb.next = NULL;
       tmpb.type = CHAIN_STR;
       tmpb.u.u_s.str = TOKEN_DATA_TEXT (tb);
       tmpb.u.u_s.len = TOKEN_DATA_LEN (tb);
-    }
-  else
-    {
-      assert (TOKEN_DATA_TYPE (tb) == TOKEN_COMP);
+      break;
+    case TOKEN_FUNC:
+      tmpb.next = NULL;
+      tmpb.type = CHAIN_FUNC;
+      tmpb.u.func = TOKEN_DATA_FUNC (tb);
+      break;
+    case TOKEN_COMP:
       cb = tb->u.u_c.chain;
+      break;
+    default:
+      assert (!"arg_equal");
+      abort ();
     }
 
   /* Compare each link of the chain.  */
@@ -1038,6 +1068,14 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 	  tmpb.u.u_s.len = obstack_object_size (obs);
 	  tmpb.u.u_s.str = (char *) obstack_finish (obs);
 	  cb = &tmpb;
+	  continue;
+	}
+      if (ca->type == CHAIN_FUNC)
+	{
+	  if (cb->type != CHAIN_FUNC || ca->u.func != cb->u.func)
+	    return false;
+	  ca = ca->next;
+	  cb = cb->next;
 	  continue;
 	}
       assert (ca->type == CHAIN_STR && cb->type == CHAIN_STR);
@@ -1089,7 +1127,7 @@ arg_empty (macro_arguments *argv, unsigned int index)
     return argv->argv0_len == 0;
   if (index >= argv->argc)
     return true;
-  return arg_token (argv, index, NULL) == &empty_token;
+  return arg_token (argv, index, NULL, false) == &empty_token;
 }
 
 /* Given ARGV, return the length of argument INDEX.  Abort if the
@@ -1105,7 +1143,7 @@ arg_len (macro_arguments *argv, unsigned int index)
     return argv->argv0_len;
   if (index >= argv->argc)
     return 0;
-  token = arg_token (argv, index, NULL);
+  token = arg_token (argv, index, NULL, false);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1124,6 +1162,10 @@ arg_len (macro_arguments *argv, unsigned int index)
 	    case CHAIN_STR:
 	      len += chain->u.u_s.len;
 	      break;
+	    case CHAIN_FUNC:
+	      // TODO concatenate builtins
+	      assert (!"implemented");
+	      abort ();
 	    case CHAIN_ARGV:
 	      i = chain->u.u_a.index;
 	      limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
@@ -1136,8 +1178,8 @@ arg_len (macro_arguments *argv, unsigned int index)
 	      while (limit--)
 		{
 		  // TODO handle builtin concatenation
-		  if (TOKEN_DATA_TYPE (arg_token (chain->u.u_a.argv, i,
-						  NULL)) == TOKEN_FUNC)
+		  if (TOKEN_DATA_TYPE (arg_token (chain->u.u_a.argv, i, NULL,
+						  false)) == TOKEN_FUNC)
 		    assert (argv->flatten);
 		  else
 		    len += arg_len (chain->u.u_a.argv, i);
@@ -1152,6 +1194,7 @@ arg_len (macro_arguments *argv, unsigned int index)
 	}
       assert (len);
       return len;
+    case TOKEN_FUNC:
     default:
       break;
     }
@@ -1166,7 +1209,7 @@ arg_func (macro_arguments *argv, unsigned int index)
 {
   token_data *token;
 
-  token = arg_token (argv, index, NULL);
+  token = arg_token (argv, index, NULL, false);
   assert (TOKEN_DATA_TYPE (token) == TOKEN_FUNC);
   return TOKEN_DATA_FUNC (token);
 }
@@ -1215,7 +1258,7 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
       if (use_sep && obstack_print (obs, sep, sep_len, plen))
 	return true;
       use_sep = true;
-      token = arg_token (argv, i, NULL);
+      token = arg_token (argv, i, NULL, flatten);
       switch (TOKEN_DATA_TYPE (token))
 	{
 	case TOKEN_TEXT:
@@ -1240,6 +1283,10 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 		  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
 				     &len))
 		    done = true;
+		  break;
+		case CHAIN_FUNC:
+		  func_print (obs, find_builtin_by_addr (chain->u.func),
+			      flatten, quotes);
 		  break;
 		case CHAIN_ARGV:
 		  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
@@ -1298,8 +1345,9 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
       unsigned int i;
       for (i = 0; i < argv->arraylen; i++)
 	{
-	  if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-	      && argv->array[i]->u.u_c.wrapper)
+	  if ((TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+	       && argv->array[i]->u.u_c.wrapper)
+	      || level >= 0)
 	    break;
 	  if (index == 1)
 	    {
@@ -1400,8 +1448,8 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   return new_argv;
 }
 
-/* Push argument INDEX from ARGV, which must be a text token, onto the
-   expansion stack OBS for rescanning.  */
+/* Push argument INDEX from ARGV onto the expansion stack OBS for
+   rescanning.  */
 void
 push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
 {
@@ -1417,18 +1465,17 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
   push_arg_quote (obs, argv, index, NULL);
 }
 
-/* Push argument INDEX from ARGV, which must be a text token, onto the
-   expansion stack OBS for rescanning.  INDEX must be > 0, < argc.
-   QUOTES determines any quote delimiters that were in effect when the
-   reference was created.  */
+/* Push argument INDEX from ARGV onto the expansion stack OBS for
+   rescanning.  INDEX must be > 0, < argc.  QUOTES determines any
+   quote delimiters that were in effect when the reference was
+   created.  */
 void
 push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int index,
 		const string_pair *quotes)
 {
   int level;
-  token_data *token = arg_token (argv, index, &level);
+  token_data *token = arg_token (argv, index, &level, false);
 
-  // TODO handle func tokens?
   if (quotes)
     obstack_grow (obs, quotes->str1, quotes->len1);
   if (push_token (token, level, argv->inuse))
@@ -1457,8 +1504,7 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
       return;
     }
 
-  // TODO allow shift, $@, to push builtins without flatten?
-  token = make_argv_ref_token (&td, obs, -1, argv, i, true,
+  token = make_argv_ref_token (&td, obs, -1, argv, i, argv->flatten,
 			       quote ? &curr_quote : NULL);
   assert (token);
   if (push_token (token, -1, argv->inuse))

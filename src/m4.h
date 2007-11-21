@@ -161,30 +161,30 @@ extern FILE *debug;
 /* The value of debug_level is a bitmask of the following.  */
 
 /* a: show arglist in trace output */
-#define DEBUG_TRACE_ARGS 1
+#define DEBUG_TRACE_ARGS 0x001
 /* e: show expansion in trace output */
-#define DEBUG_TRACE_EXPANSION 2
+#define DEBUG_TRACE_EXPANSION 0x002
 /* q: quote args and expansion in trace output */
-#define DEBUG_TRACE_QUOTE 4
+#define DEBUG_TRACE_QUOTE 0x004
 /* t: trace all macros -- overrides trace{on,off} */
-#define DEBUG_TRACE_ALL 8
+#define DEBUG_TRACE_ALL 0x008
 /* l: add line numbers to trace output */
-#define DEBUG_TRACE_LINE 16
+#define DEBUG_TRACE_LINE 0x010
 /* f: add file name to trace output */
-#define DEBUG_TRACE_FILE 32
+#define DEBUG_TRACE_FILE 0x020
 /* p: trace path search of include files */
-#define DEBUG_TRACE_PATH 64
+#define DEBUG_TRACE_PATH 0x040
 /* c: show macro call before args collection */
-#define DEBUG_TRACE_CALL 128
+#define DEBUG_TRACE_CALL 0x080
 /* i: trace changes of input files */
-#define DEBUG_TRACE_INPUT 256
+#define DEBUG_TRACE_INPUT 0x100
 /* x: add call id to trace output */
-#define DEBUG_TRACE_CALLID 512
+#define DEBUG_TRACE_CALLID 0x200
 
 /* V: very verbose --  print everything */
-#define DEBUG_TRACE_VERBOSE 1023
+#define DEBUG_TRACE_VERBOSE 0x377
 /* default flags -- equiv: aeq */
-#define DEBUG_TRACE_DEFAULT 7
+#define DEBUG_TRACE_DEFAULT 0x007
 
 #define DEBUG_PRINT1(Fmt, Arg1)                                 \
   do								\
@@ -283,7 +283,7 @@ enum token_data_type
 enum token_chain_type
 {
   CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
-  // TODO add CHAIN_FUNC
+  CHAIN_FUNC,	/* Builtin function definition, u.func is valid.  */
   CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
 };
 
@@ -304,6 +304,7 @@ struct token_chain
 	  int level;		/* Expansion level of link content, or -1.  */
 	}
       u_s;
+      builtin_func *func;		/* Builtin token from defn.  */
       struct
 	{
 	  macro_arguments *argv;	/* Reference to earlier $@.  */
