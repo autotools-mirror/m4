@@ -1450,12 +1450,12 @@ defined macros, there is no check of the number of arguments given.
 @example
 $ @kbd{m4}
 index(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `index'
+@error{}m4:stdin:1: Warning: index: too few arguments: 1 < 2
 @result{}0
 index(`abc',)
 @result{}0
 index(`abc', `b', `ignored')
-@error{}m4:stdin:3: Warning: excess arguments to builtin `index' ignored
+@error{}m4:stdin:3: Warning: index: extra arguments ignored: 3 > 2
 @result{}1
 @end example
 
@@ -2203,21 +2203,21 @@ version of @acronym{GNU} M4 may lift these restrictions.
 define(`a', `A')define(`AA', `b')
 @result{}
 defn(`a', `divnum', `a')
-@error{}m4:stdin:2: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:2: Warning: defn: cannot concatenate builtin `divnum'
 @result{}AA
 define(`mydivnum', defn(`divnum', `divnum'))mydivnum
-@error{}m4:stdin:3: Warning: cannot concatenate builtin `divnum'
-@error{}m4:stdin:3: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:3: Warning: defn: cannot concatenate builtin `divnum'
+@error{}m4:stdin:3: Warning: defn: cannot concatenate builtin `divnum'
 @result{}
 define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
-@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
-@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:4: Warning: define: cannot concatenate builtin `divnum'
+@error{}m4:stdin:4: Warning: define: cannot concatenate builtin `divnum'
 @result{}
 define(`mydivnum', defn(`divnum')`a')mydivnum
-@error{}m4:stdin:5: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:5: Warning: define: cannot concatenate builtin `divnum'
 @result{}A
 define(`mydivnum', `a'defn(`divnum'))mydivnum
-@error{}m4:stdin:6: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:6: Warning: define: cannot concatenate builtin `divnum'
 @result{}A
 @end example
 
@@ -2367,7 +2367,7 @@ f(define(`f', `2'))
 indir(`f', define(`f', `3'))
 @result{}3
 indir(`f', undefine(`f'))
-@error{}m4:stdin:4: undefined macro `f'
+@error{}m4:stdin:4: indir: undefined macro `f'
 @result{}
 @end example
 
@@ -2389,7 +2389,7 @@ indir(`define', `foo', defn(`divnum'))
 foo
 @result{}0
 indir(`divert', defn(`foo'))
-@error{}m4:stdin:5: empty string treated as 0 in builtin `divert'
+@error{}m4:stdin:5: divert: empty string treated as 0
 @result{}
 @end example
 
@@ -2452,10 +2452,10 @@ $ @kbd{m4 -P}
 m4_builtin(`divnum')
 @result{}0
 m4_builtin(`m4_divnum')
-@error{}m4:stdin:2: undefined builtin `m4_divnum'
+@error{}m4:stdin:2: m4_builtin: undefined builtin `m4_divnum'
 @result{}
 m4_indir(`divnum')
-@error{}m4:stdin:3: undefined macro `divnum'
+@error{}m4:stdin:3: m4_indir: undefined macro `divnum'
 @result{}
 m4_indir(`m4_divnum')
 @result{}0
@@ -2469,13 +2469,13 @@ recognized; but it will provoke a warning, and result in a void expansion.
 builtin
 @result{}builtin
 builtin()
-@error{}m4:stdin:2: undefined builtin `'
+@error{}m4:stdin:2: builtin: undefined builtin `'
 @result{}
 builtin(`builtin')
-@error{}m4:stdin:3: Warning: too few arguments to builtin `builtin'
+@error{}m4:stdin:3: Warning: builtin: too few arguments: 0 < 1
 @result{}
 builtin(`builtin',)
-@error{}m4:stdin:4: undefined builtin `'
+@error{}m4:stdin:4: builtin: undefined builtin `'
 @result{}
 @end example
 
@@ -2531,7 +2531,7 @@ define(`foo', `')
 ifdef(`foo', ``foo' is defined', ``foo' is not defined')
 @result{}foo is defined
 ifdef(`no_such_macro', `yes', `no', `extra argument')
-@error{}m4:stdin:4: Warning: excess arguments to builtin `ifdef' ignored
+@error{}m4:stdin:4: Warning: ifdef: extra arguments ignored: 4 > 3
 @result{}no
 @end example
 
@@ -2575,7 +2575,7 @@ case, the warning about missing arguments is never triggered.
 ifelse(`some comments')
 @result{}
 ifelse(`foo', `bar')
-@error{}m4:stdin:2: Warning: too few arguments to builtin `ifelse'
+@error{}m4:stdin:2: Warning: ifelse: too few arguments: 2 < 3
 @result{}
 @end example
 
@@ -2624,14 +2624,14 @@ calls for an example:
 
 @example
 ifelse(`foo', `bar', `third', `gnu', `gnats')
-@error{}m4:stdin:1: Warning: excess arguments to builtin `ifelse' ignored
+@error{}m4:stdin:1: Warning: ifelse: extra arguments ignored: 5 > 4
 @result{}gnu
 ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth')
 @result{}
 ifelse(`foo', `bar', `third', `gnu', `gnats', `sixth', `seventh')
 @result{}seventh
 ifelse(`foo', `bar', `3', `gnu', `gnats', `6', `7', `8')
-@error{}m4:stdin:4: Warning: excess arguments to builtin `ifelse' ignored
+@error{}m4:stdin:4: Warning: ifelse: extra arguments ignored: 8 > 7
 @result{}7
 @end example
 
@@ -3133,7 +3133,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}m4:stdin:3: undefined macro `f'
+@error{}m4:stdin:3: dumpdef: undefined macro `f'
 @result{}f1
 @end example
 
@@ -3231,7 +3231,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:8: undefined macro `foo'
+@error{}m4:stdin:8: indir: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -3407,13 +3407,13 @@ $ @kbd{m4}
 traceon(`divnum')
 @result{}
 divnum(`extra')
-@error{}m4:stdin:2: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:2: Warning: divnum: extra arguments ignored: 1 > 0
 @error{}m4trace: -1- divnum(`extra') -> `0'
 @result{}0
 debugfile()
 @result{}
 divnum(`extra')
-@error{}m4:stdin:4: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:4: Warning: divnum: extra arguments ignored: 1 > 0
 @result{}0
 debugfile
 @result{}
@@ -3476,7 +3476,7 @@ next newline, on whatever line containing it, will still be discarded.
 @example
 dnl(`args are ignored, but side effects occur',
 define(`foo', `like this')) while this text is ignored: undefine(`foo')
-@error{}m4:stdin:1: Warning: excess arguments to builtin `dnl' ignored
+@error{}m4:stdin:1: Warning: dnl: extra arguments ignored: 2 > 0
 See how `foo' was defined, foo?
 @result{}See how foo was defined, like this?
 @end example
@@ -4240,13 +4240,13 @@ parameters.
 
 @comment status: 1
 @example
-include(`none')
-@error{}m4:stdin:1: cannot open `none': No such file or directory
+include(`n')
+@error{}m4:stdin:1: include: cannot open `n': No such file or directory
 @result{}
 include()
-@error{}m4:stdin:2: cannot open `': No such file or directory
+@error{}m4:stdin:2: include: cannot open `': No such file or directory
 @result{}
-sinclude(`none')
+sinclude(`n')
 @result{}
 sinclude()
 @result{}
@@ -4797,7 +4797,7 @@ contrast this with an empty @var{substring}.
 
 @example
 index(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `index'
+@error{}m4:stdin:1: Warning: index: too few arguments: 1 < 2
 @result{}0
 index(`abc', `')
 @result{}0
@@ -4865,13 +4865,13 @@ Here are some more examples on the handling of backslash:
 regexp(`abc', `\(b\)', `\\\10\a')
 @result{}\b0a
 regexp(`abc', `b', `\1\')
-@error{}m4:stdin:2: Warning: sub-expression 1 not present
-@error{}m4:stdin:2: Warning: trailing \ ignored in replacement
+@error{}m4:stdin:2: Warning: regexp: sub-expression 1 not present
+@error{}m4:stdin:2: Warning: regexp: trailing \ ignored in replacement
 @result{}
 regexp(`abc', `\(\(d\)?\)\(c\)', `\1\2\3\4\5\6')
-@error{}m4:stdin:3: Warning: sub-expression 4 not present
-@error{}m4:stdin:3: Warning: sub-expression 5 not present
-@error{}m4:stdin:3: Warning: sub-expression 6 not present
+@error{}m4:stdin:3: Warning: regexp: sub-expression 4 not present
+@error{}m4:stdin:3: Warning: regexp: sub-expression 5 not present
+@error{}m4:stdin:3: Warning: regexp: sub-expression 6 not present
 @result{}c
 @end example
 
@@ -4880,7 +4880,7 @@ contrast this with an empty @var{regexp} argument.
 
 @example
 regexp(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `regexp'
+@error{}m4:stdin:1: Warning: regexp: too few arguments: 1 < 2
 @result{}0
 regexp(`abc', `')
 @result{}0
@@ -4917,10 +4917,10 @@ Omitting @var{from} evokes a warning, but still produces output.
 
 @example
 substr(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `substr'
+@error{}m4:stdin:1: Warning: substr: too few arguments: 1 < 2
 @result{}abc
 substr(`abc',)
-@error{}m4:stdin:2: empty string treated as 0 in builtin `substr'
+@error{}m4:stdin:2: substr: empty string treated as 0
 @result{}abc
 @end example
 
@@ -4997,7 +4997,7 @@ Omitting @var{chars} evokes a warning, but still produces output.
 
 @example
 translit(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `translit'
+@error{}m4:stdin:1: Warning: translit: too few arguments: 1 < 2
 @result{}abc
 @end example
 
@@ -5051,7 +5051,7 @@ patsubst(`GNUs not Unix', `\w+', `(\&)')
 patsubst(`GNUs not Unix', `[A-Z][a-z]+')
 @result{}GN not@w{ }
 patsubst(`GNUs not Unix', `not', `NOT\')
-@error{}m4:stdin:6: Warning: trailing \ ignored in replacement
+@error{}m4:stdin:6: Warning: patsubst: trailing \ ignored in replacement
 @result{}GNUs NOT Unix
 @end example
 
@@ -5128,7 +5128,7 @@ contrast this with an empty @var{regexp} argument.
 
 @example
 patsubst(`abc')
-@error{}m4:stdin:1: Warning: too few arguments to builtin `patsubst'
+@error{}m4:stdin:1: Warning: patsubst: too few arguments: 1 < 2
 @result{}abc
 patsubst(`abc', `')
 @result{}abc
@@ -5224,7 +5224,7 @@ encountered.  Likewise, escape sequences are not yet recognized.
 
 @example
 format(`%p', `0')
-@error{}m4:stdin:1: Warning: unrecognized specifier in `%p'
+@error{}m4:stdin:1: Warning: format: unrecognized specifier in `%p'
 @result{}
 @end example
 
@@ -5266,10 +5266,10 @@ incr(`4')
 decr(`7')
 @result{}6
 incr()
-@error{}m4:stdin:3: empty string treated as 0 in builtin `incr'
+@error{}m4:stdin:3: incr: empty string treated as 0
 @result{}1
 decr()
-@error{}m4:stdin:4: empty string treated as 0 in builtin `decr'
+@error{}m4:stdin:4: decr: empty string treated as 0
 @result{}-1
 @end example
 
@@ -5339,13 +5339,13 @@ extension when @acronym{POSIX} mode is not requested, and that using
 @comment status: 1
 @example
 eval(`2 = 2')
-@error{}m4:stdin:1: Warning: recommend ==, not =, for equality operator
+@error{}m4:stdin:1: Warning: eval: recommend ==, not =, for equality
 @result{}1
 eval(`++0')
-@error{}m4:stdin:2: invalid operator in eval: ++0
+@error{}m4:stdin:2: eval: invalid operator: ++0
 @result{}
 eval(`0 |= 1')
-@error{}m4:stdin:3: invalid operator in eval: 0 |= 1
+@error{}m4:stdin:3: eval: invalid operator: 0 |= 1
 @result{}
 @end example
 
@@ -5388,12 +5388,12 @@ eval(`+ + - ~ ! ~ 0')
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:9: divide by zero in eval: 0 || 1 / 0
+@error{}m4:stdin:9: eval: divide by zero: 0 || 1 / 0
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:11: modulo by zero in eval: 2 && 1 % 0
+@error{}m4:stdin:11: eval: modulo by zero: 2 && 1 % 0
 @result{}
 @end example
 
@@ -5414,9 +5414,9 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: divide by zero in eval: 0 ** 0
+@error{}m4:stdin:5: eval: divide by zero: 0 ** 0
 eval(`4 ** -2')
-@error{}m4:stdin:6: negative exponent in eval: 4 ** -2
+@error{}m4:stdin:6: eval: negative exponent: 4 ** -2
 @result{}
 @end example
 
@@ -5461,7 +5461,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: bad expression in eval: foo / 6
+@error{}m4:stdin:11: eval: bad expression: foo / 6
 @result{}
 eval(foo / 6)
 @result{}111
@@ -5529,13 +5529,13 @@ eval(`10', `', `0')
 eval(`10', `16')
 @result{}a
 eval(`1', `37')
-@error{}m4:stdin:9: radix 37 in builtin `eval' out of range
+@error{}m4:stdin:9: eval: radix 37 out of range
 @result{}
 eval(`1', , `-1')
-@error{}m4:stdin:10: negative width to builtin `eval'
+@error{}m4:stdin:10: eval: negative width
 @result{}
 eval()
-@error{}m4:stdin:11: empty string treated as 0 in builtin `eval'
+@error{}m4:stdin:11: eval: empty string treated as 0
 @result{}0
 @end example
 
@@ -6769,7 +6769,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: bad expression in eval (bad input): (b) >= (a)
+@error{}m4:stdin:6: eval: bad expression (bad input): (b) >= (a)
 @result{}
 @end example
 
@@ -7211,7 +7211,7 @@ m4wrap(`divnum(`demo of internal message')
 fatal_error(`inside wrapped text')')
 @result{}
 ^D
-@error{}m4:stdin:6: Warning: excess arguments to builtin `divnum' ignored
+@error{}m4:stdin:6: Warning: divnum: extra arguments ignored: 1 > 0
 @result{}0
 @error{}m4:stdin:6: fatal error: inside wrapped text
 @end example

@@ -130,12 +130,12 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 | text.                                                          |
 `---------------------------------------------------------------*/
 static void
-warn_builtin_concat (builtin_func *func)
+warn_builtin_concat (const char *caller, builtin_func *func)
 {
   const builtin *bp = find_builtin_by_addr (func);
   assert (bp);
-  M4ERROR ((warning_status, 0, "Warning: cannot concatenate builtin `%s'",
-	    bp->name));
+  M4ERROR ((warning_status, 0, "Warning: %s: cannot concatenate builtin `%s'",
+	    caller, bp->name));
 }
 
 /*-------------------------------------------------------------------.
@@ -182,7 +182,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		{
 		  if (obstack_object_size (obs) == 0)
 		    return t == TOKEN_COMMA;
-		  warn_builtin_concat (TOKEN_DATA_FUNC (argp));
+		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		}
 	      obstack_1grow (obs, '\0');
 	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
@@ -221,8 +221,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  else
 	    {
 	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
-		warn_builtin_concat (TOKEN_DATA_FUNC (argp));
-	      warn_builtin_concat (TOKEN_DATA_FUNC (&td));
+		warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
+	      warn_builtin_concat (caller, TOKEN_DATA_FUNC (&td));
 	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	    }
 	  break;

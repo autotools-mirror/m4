@@ -62,19 +62,19 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term (eval_token, int32_t *);
-static eval_error logical_and_term (eval_token, int32_t *);
-static eval_error or_term (eval_token, int32_t *);
-static eval_error xor_term (eval_token, int32_t *);
-static eval_error and_term (eval_token, int32_t *);
-static eval_error equality_term (eval_token, int32_t *);
-static eval_error cmp_term (eval_token, int32_t *);
-static eval_error shift_term (eval_token, int32_t *);
-static eval_error add_term (eval_token, int32_t *);
-static eval_error mult_term (eval_token, int32_t *);
-static eval_error exp_term (eval_token, int32_t *);
-static eval_error unary_term (eval_token, int32_t *);
-static eval_error simple_term (eval_token, int32_t *);
+static eval_error logical_or_term (const char *, eval_token, int32_t *);
+static eval_error logical_and_term (const char *, eval_token, int32_t *);
+static eval_error or_term (const char *, eval_token, int32_t *);
+static eval_error xor_term (const char *, eval_token, int32_t *);
+static eval_error and_term (const char *, eval_token, int32_t *);
+static eval_error equality_term (const char *, eval_token, int32_t *);
+static eval_error cmp_term (const char *, eval_token, int32_t *);
+static eval_error shift_term (const char *, eval_token, int32_t *);
+static eval_error add_term (const char *, eval_token, int32_t *);
+static eval_error mult_term (const char *, eval_token, int32_t *);
+static eval_error exp_term (const char *, eval_token, int32_t *);
+static eval_error unary_term (const char *, eval_token, int32_t *);
+static eval_error simple_term (const char *, eval_token, int32_t *);
 
 /*--------------------.
 | Lexical functions.  |
@@ -287,14 +287,14 @@ eval_lex (int32_t *val)
 `---------------------------------------*/
 
 bool
-evaluate (const char *expr, int32_t *val)
+evaluate (const char *me, const char *expr, int32_t *val)
 {
   eval_token et;
   eval_error err;
 
   eval_init_lex (expr);
   et = eval_lex (val);
-  err = logical_or_term (et, val);
+  err = logical_or_term (me, et, val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     {
@@ -311,44 +311,44 @@ evaluate (const char *expr, int32_t *val)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-		"bad expression in eval (missing right parenthesis): %s",
-		expr));
+		"%s: bad expression (missing right parenthesis): %s",
+		me, expr));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-		"bad expression in eval: %s", expr));
+		"%s: bad expression: %s", me, expr));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-		"bad expression in eval (bad input): %s", expr));
+		"%s: bad expression (bad input): %s", me, expr));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-		"bad expression in eval (excess input): %s", expr));
+		"%s: bad expression (excess input): %s", me, expr));
       break;
 
     case INVALID_OPERATOR:
       M4ERROR ((warning_status, 0,
-		"invalid operator in eval: %s", expr));
+		"%s: invalid operator: %s", me, expr));
       retcode = EXIT_FAILURE;
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-		"divide by zero in eval: %s", expr));
+		"%s: divide by zero: %s", me, expr));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-		"modulo by zero in eval: %s", expr));
+		"%s: modulo by zero: %s", me, expr));
       break;
 
     case NEGATIVE_EXPONENT:
       M4ERROR ((warning_status, 0,
-		"negative exponent in eval: %s", expr));
+		"%s: negative exponent: %s", me, expr));
       break;
 
     default:
@@ -364,12 +364,12 @@ evaluate (const char *expr, int32_t *val)
 `---------------------------*/
 
 static eval_error
-logical_or_term (eval_token et, int32_t *v1)
+logical_or_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
 
-  if ((er = logical_and_term (et, v1)) != NO_ERROR)
+  if ((er = logical_and_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == LOR)
@@ -379,7 +379,7 @@ logical_or_term (eval_token et, int32_t *v1)
 	return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
-      er = logical_and_term (et, &v2);
+      er = logical_and_term (me, et, &v2);
       if (er == NO_ERROR)
 	*v1 = *v1 || v2;
       else if (*v1 != 0 && er < SYNTAX_ERROR)
@@ -395,12 +395,12 @@ logical_or_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-logical_and_term (eval_token et, int32_t *v1)
+logical_and_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
 
-  if ((er = or_term (et, v1)) != NO_ERROR)
+  if ((er = or_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == LAND)
@@ -410,7 +410,7 @@ logical_and_term (eval_token et, int32_t *v1)
 	return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
-      er = or_term (et, &v2);
+      er = or_term (me, et, &v2);
       if (er == NO_ERROR)
 	*v1 = *v1 && v2;
       else if (*v1 == 0 && er < SYNTAX_ERROR)
@@ -426,12 +426,12 @@ logical_and_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-or_term (eval_token et, int32_t *v1)
+or_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
 
-  if ((er = xor_term (et, v1)) != NO_ERROR)
+  if ((er = xor_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == OR)
@@ -440,7 +440,7 @@ or_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = xor_term (et, &v2)) != NO_ERROR)
+      if ((er = xor_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       *v1 |= v2;
@@ -453,12 +453,12 @@ or_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-xor_term (eval_token et, int32_t *v1)
+xor_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
 
-  if ((er = and_term (et, v1)) != NO_ERROR)
+  if ((er = and_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == XOR)
@@ -467,7 +467,7 @@ xor_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = and_term (et, &v2)) != NO_ERROR)
+      if ((er = and_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       *v1 ^= v2;
@@ -480,12 +480,12 @@ xor_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-and_term (eval_token et, int32_t *v1)
+and_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
 
-  if ((er = equality_term (et, v1)) != NO_ERROR)
+  if ((er = equality_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == AND)
@@ -494,7 +494,7 @@ and_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = equality_term (et, &v2)) != NO_ERROR)
+      if ((er = equality_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       *v1 &= v2;
@@ -507,13 +507,13 @@ and_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-equality_term (eval_token et, int32_t *v1)
+equality_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
   eval_error er;
 
-  if ((er = cmp_term (et, v1)) != NO_ERROR)
+  if ((er = cmp_term (me, et, v1)) != NO_ERROR)
     return er;
 
   /* In the 1.4.x series, we maintain the traditional behavior that
@@ -525,13 +525,13 @@ equality_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = cmp_term (et, &v2)) != NO_ERROR)
+      if ((er = cmp_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       if (op == ASSIGN)
       {
 	M4ERROR ((warning_status, 0, "\
-Warning: recommend ==, not =, for equality operator"));
+Warning: %s: recommend ==, not =, for equality", me));
 	op = EQ;
       }
       *v1 = (op == EQ) == (*v1 == v2);
@@ -544,13 +544,13 @@ Warning: recommend ==, not =, for equality operator"));
 }
 
 static eval_error
-cmp_term (eval_token et, int32_t *v1)
+cmp_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
   eval_error er;
 
-  if ((er = shift_term (et, v1)) != NO_ERROR)
+  if ((er = shift_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((op = eval_lex (&v2)) == GT || op == GTEQ
@@ -561,7 +561,7 @@ cmp_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = shift_term (et, &v2)) != NO_ERROR)
+      if ((er = shift_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       switch (op)
@@ -595,14 +595,14 @@ cmp_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-shift_term (eval_token et, int32_t *v1)
+shift_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
   uint32_t u1;
   eval_error er;
 
-  if ((er = add_term (et, v1)) != NO_ERROR)
+  if ((er = add_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((op = eval_lex (&v2)) == LSHIFT || op == RSHIFT)
@@ -612,7 +612,7 @@ shift_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = add_term (et, &v2)) != NO_ERROR)
+      if ((er = add_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       /* Minimize undefined C behavior (shifting by a negative number,
@@ -648,13 +648,13 @@ shift_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-add_term (eval_token et, int32_t *v1)
+add_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
   eval_error er;
 
-  if ((er = mult_term (et, v1)) != NO_ERROR)
+  if ((er = mult_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((op = eval_lex (&v2)) == PLUS || op == MINUS)
@@ -663,7 +663,7 @@ add_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = mult_term (et, &v2)) != NO_ERROR)
+      if ((er = mult_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
@@ -683,13 +683,13 @@ add_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-mult_term (eval_token et, int32_t *v1)
+mult_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
   eval_error er;
 
-  if ((er = exp_term (et, v1)) != NO_ERROR)
+  if ((er = exp_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((op = eval_lex (&v2)) == TIMES || op == DIVIDE || op == MODULO)
@@ -698,7 +698,7 @@ mult_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = exp_term (et, &v2)) != NO_ERROR)
+      if ((er = exp_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
@@ -744,13 +744,13 @@ mult_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-exp_term (eval_token et, int32_t *v1)
+exp_term (const char *me, eval_token et, int32_t *v1)
 {
   uint32_t result;
   int32_t v2;
   eval_error er;
 
-  if ((er = unary_term (et, v1)) != NO_ERROR)
+  if ((er = unary_term (me, et, v1)) != NO_ERROR)
     return er;
 
   while ((et = eval_lex (&v2)) == EXPONENT)
@@ -759,7 +759,7 @@ exp_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = exp_term (et, &v2)) != NO_ERROR)
+      if ((er = exp_term (me, et, &v2)) != NO_ERROR)
 	return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
@@ -783,7 +783,7 @@ exp_term (eval_token et, int32_t *v1)
 }
 
 static eval_error
-unary_term (eval_token et, int32_t *v1)
+unary_term (const char *me, eval_token et, int32_t *v1)
 {
   eval_token et2 = et;
   eval_error er;
@@ -794,7 +794,7 @@ unary_term (eval_token et, int32_t *v1)
       if (et2 == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = unary_term (et2, v1)) != NO_ERROR)
+      if ((er = unary_term (me, et2, v1)) != NO_ERROR)
 	return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
@@ -808,14 +808,14 @@ unary_term (eval_token et, int32_t *v1)
       else if (et == LNOT)
 	*v1 = *v1 == 0 ? 1 : 0;
     }
-  else if ((er = simple_term (et, v1)) != NO_ERROR)
+  else if ((er = simple_term (me, et, v1)) != NO_ERROR)
     return er;
 
   return NO_ERROR;
 }
 
 static eval_error
-simple_term (eval_token et, int32_t *v1)
+simple_term (const char *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -827,7 +827,7 @@ simple_term (eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = logical_or_term (et, v1)) != NO_ERROR)
+      if ((er = logical_or_term (me, et, v1)) != NO_ERROR)
 	return er;
 
       et = eval_lex (&v2);

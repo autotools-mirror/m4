@@ -55,6 +55,7 @@
 void
 format (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *me = TOKEN_DATA_TEXT (argv[0]);
   const char *f;			/* format control string */
   const char *fmt;			/* position within f */
   char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */
@@ -87,6 +88,8 @@ format (struct obstack *obs, int argc, token_data **argv)
   char *str;			/* malloc'd buffer of formatted text */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
+  argv++;
+  argc--;
   f = fmt = ARG_STR (argc, argv);
   memset (ok, 0, sizeof ok);
   for (;;)
@@ -231,7 +234,7 @@ format (struct obstack *obs, int argc, token_data **argv)
       if (c > sizeof ok || !ok[c])
 	{
 	  M4ERROR ((warning_status, 0,
-		    "Warning: unrecognized specifier in `%s'", f));
+		    "Warning: %s: unrecognized specifier in `%s'", me, f));
 	  if (c == '\0')
 	    fmt--;
 	  continue;
@@ -306,7 +309,7 @@ format (struct obstack *obs, int argc, token_data **argv)
       if (str == NULL)
 	{
 	  M4ERROR ((warning_status, 0,
-		    "Warning: unable to format output for `%s'", f));
+		    "Warning: %s: unable to format output for `%s'", me, f));
 	  continue;
 	}
 

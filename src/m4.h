@@ -438,7 +438,7 @@ FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-bool evaluate (const char *, int32_t *);
+bool evaluate (const char *, const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 

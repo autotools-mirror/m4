@@ -1,5 +1,28 @@
 2007-11-21  Eric Blake  <ebb9@byu.net>
 
+	Consistently report macro name first in messages.
+	* src/m4.h (evaluate): Adjust prototype.
+	* src/builtin.c (bad_argc, numeric_arg, m4_placeholder): Alter
+	wording to match head.
+	(mkstemp_helper, substitute): Adjust signature.  All callers
+	changed.
+	(m4_dumpdef, m4_builtin, m4_indir, m4_defn, m4_esyscmd, m4_eval)
+	(m4_undivert, m4_maketemp, m4_m4exit, m4_debugmode)
+	(m4_debugfile, m4_regexp, m4_patsubst): Mention macro name in
+	message.
+	(m4_format): Adjust call.
+	* src/format.c (format): No longer skip argv[0].
+	* src/eval.c (evaluate): Mention macro name in message.
+	(logical_or_term, logical_and_term, or_term, xor_term, and_term)
+	(equality_term, cmp_term, shift_term, add_term, mult_term)
+	(exp_term, unary_term, simple_term): Adjust signature.
+	* src/macro.c (warn_builtin_concat): Likewise.
+	(expand_argument): Adjust caller.
+	* doc/m4.texinfo (Macro Arguments, Ifdef, Ifelse, Debug Output)
+	(Dnl, Improved fatal_error, Defn, Builtin, Index macro, Regexp)
+	(Substr, Translit, Patsubst, Format, Eval, Dumpdef, Include)
+	(Improved forloop, Indir, Trace, Incr): Adjust tests to match.
+
 	Make argument checking a bit more sane.
 	* src/builtin.c (bad_argc): Adjust signature, and don't force
 	callers to add 1.  Adjust all callers.
