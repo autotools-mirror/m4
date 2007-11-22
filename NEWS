@@ -5,8 +5,9 @@ Foundation, Inc.
 * Noteworthy changes in Version 1.4.11 (2008-??-??) [stable]
   Released by Eric Blake, based on git version 1.4.10a
 
-** Fix core dump in 'm4 -F file -t undefined', present since -F was
-  introduced in 1.3.
+** Security fixes for the -F option, for bugs present since -F was
+   introduced in 1.3: Avoid core dump with 'm4 -F file -t undefined', and
+   avoid arbitrary code execution with certain file names.
 
 ** Fix regression introduced in 1.4.9b in the `divert' builtin when more
    than 512 kibibytes are saved in diversions on platforms like NetBSD
