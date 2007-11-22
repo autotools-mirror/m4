@@ -1,3 +1,10 @@
+2007-11-22  Eric Blake  <ebb9@byu.net>
+
+	Security fix: avoid arbitrary code execution with 'm4 -F'.
+	* src/freeze.c (produce_frozen_state): Never pass raw file name as
+	printf format.
+	* NEWS: Document this fix.
+
 2007-11-21  Eric Blake  <ebb9@byu.net>
 
 	Consistently report macro name first in messages.

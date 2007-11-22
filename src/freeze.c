@@ -58,7 +58,7 @@ produce_frozen_state (const char *name)
 
   if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
     {
-      M4ERROR ((warning_status, errno, name));
+      M4ERROR ((warning_status, errno, "%s", name));
       return;
     }
 
