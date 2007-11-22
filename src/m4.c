@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <limits.h>
 #include <signal.h>
+#include <stdarg.h>
 
 #include "version-etc.h"
 
@@ -83,34 +84,115 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/*-----------------------.
-| Wrapper around error.  |
-`-----------------------*/
+/*------------------------------------------------------------------.
+| Helper for all the error reporting, as a wrapper around	    |
+| error_at_line.  Report error message based on FORMAT and ARGS, on |
+| behalf of MACRO, at the location FILE and LINE (but with no	    |
+| location if LINE is 0).  If ERRNUM, decode the errno value that   |
+| caused the error.  If STATUS, exit immediately with that status.  |
+| If WARN, prepend 'Warning: '.					    |
+`------------------------------------------------------------------*/
 
-void
-m4_error (int status, int errnum, const char *format, ...)
+static void
+m4_verror_at_line (bool warn, int status, int errnum, const char *file,
+		   int line, const char *macro, const char *format,
+		   va_list args)
 {
-  va_list args;
-  va_start (args, format);
-  verror_at_line (status, errnum, current_line ? current_file : NULL,
-		  current_line, format, args);
-  if (fatal_warnings && ! retcode)
+  char *full = NULL;
+  /* Prepend warning and the macro name, as needed.  But if that fails
+     for non-memory reasons (unlikely), then still use the original
+     format.  */
+  if (warn && macro)
+    full = xasprintf (_("Warning: %s: %s"), macro, format);
+  else if (warn)
+    full = xasprintf (_("Warning: %s"), format);
+  else if (macro)
+    full = xasprintf (_("%s: %s"), macro, format);
+  verror_at_line (status, errnum, line ? file : NULL, line,
+		  full ? full : format, args);
+  free (full);
+  if ((!warn || fatal_warnings) && !retcode)
     retcode = EXIT_FAILURE;
 }
 
-/*-------------------------------.
-| Wrapper around error_at_line.  |
-`-------------------------------*/
+/*----------------------------------------------------------------.
+| Wrapper around error.  Report error message based on FORMAT and |
+| subsequent args, on behalf of MACRO, and the current input line |
+| (if any).  If ERRNUM, decode the errno value that caused the	  |
+| error.  If STATUS, exit immediately with that status.		  |
+`----------------------------------------------------------------*/
 
 void
-m4_error_at_line (int status, int errnum, const char *file, int line,
-		  const char *format, ...)
+m4_error (int status, int errnum, const char *macro, const char *format, ...)
 {
   va_list args;
   va_start (args, format);
-  verror_at_line (status, errnum, line ? file : NULL, line, format, args);
-  if (fatal_warnings && ! retcode)
-    retcode = EXIT_FAILURE;
+  if (status == EXIT_SUCCESS && warning_status)
+    status = EXIT_FAILURE;
+  m4_verror_at_line (false, status, errnum, current_file, current_line,
+		     macro, format, args);
+  va_end (args);
+}
+
+/*----------------------------------------------------------------.
+| Wrapper around error_at_line.  Report error message based on	  |
+| FORMAT and subsequent args, on behalf of MACRO, at the location |
+| FILE and LINE (but with no location if LINE is 0).  If ERRNUM,  |
+| decode the errno value that caused the error.  If STATUS, exit  |
+| immediately with that status.					  |
+`----------------------------------------------------------------*/
+
+void
+m4_error_at_line (int status, int errnum, const char *file, int line,
+		  const char *macro, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  if (status == EXIT_SUCCESS && warning_status)
+    status = EXIT_FAILURE;
+  m4_verror_at_line (false, status, errnum, file, line, macro, format, args);
+  va_end (args);
+}
+
+/*------------------------------------------------------------------.
+| Wrapper around error.  Report warning message based on FORMAT and |
+| subsequent args, on behalf of MACRO, and the current input line   |
+| (if any).  If ERRNUM, decode the errno value that caused the	    |
+| warning.							    |
+`------------------------------------------------------------------*/
+
+void
+m4_warn (int errnum, const char *macro, const char *format, ...)
+{
+  va_list args;
+  if (!suppress_warnings)
+    {
+      va_start (args, format);
+      m4_verror_at_line (true, warning_status, errnum, current_file,
+			 current_line, macro, format, args);
+      va_end (args);
+    }
+}
+
+/*----------------------------------------------------------------.
+| Wrapper around error_at_line.  Report warning message based on  |
+| FORMAT and subsequent args, on behalf of MACRO, at the location |
+| FILE and LINE (but with no location if LINE is 0).  If ERRNUM,  |
+| decode the errno value that caused the warning.		  |
+`----------------------------------------------------------------*/
+
+void
+m4_warn_at_line (int errnum, const char *file, int line, const char *macro,
+		 const char *format, ...)
+{
+  va_list args;
+  if (!suppress_warnings)
+    {
+      va_start (args, format);
+      m4_verror_at_line (true, warning_status, errnum, file, line, macro,
+			 format, args);
+      va_end (args);
+    }
 }
 
 #ifdef USE_STACKOVF
@@ -122,8 +204,8 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
 static void
 stackovf_handler (void)
 {
-  M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: stack overflow.  (Infinite define recursion?)"));
+  m4_error (EXIT_FAILURE, 0, NULL,
+	    _("ERROR: stack overflow.  (Infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOV */
@@ -406,7 +488,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	if (! fatal_warnings)
+	if (!fatal_warnings)
 	  fatal_warnings = true;
 	else
 	  warning_status = EXIT_FAILURE;
@@ -485,11 +567,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-         /* Don't call set_macro_sequence here, as it can exit.
-            --warn-macro-sequence sets optarg to NULL (which uses the
-            default regexp); --warn-macro-sequence= sets optarg to ""
-            (which disables these warnings).  */
-        macro_sequence = optarg;
+	 /* Don't call set_macro_sequence here, as it can exit.
+	    --warn-macro-sequence sets optarg to NULL (which uses the
+	    default regexp); --warn-macro-sequence= sets optarg to ""
+	    (which disables these warnings).  */
+	macro_sequence = optarg;
 	break;
 
       case VERSION_OPTION:
@@ -506,7 +588,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (debugfile))
-    M4ERROR ((0, errno, "cannot set debug file `%s'", debugfile));
+    m4_error (0, errno, NULL, _("cannot set debug file `%s'"), debugfile);
 
   input_init ();
   output_init ();
@@ -564,7 +646,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case '\1':
 	  seen_file = true;
-          process_file (defines->arg);
+	  process_file (defines->arg);
 	  break;
 
 	default:

@@ -2367,7 +2367,7 @@ f(define(`f', `2'))
 indir(`f', define(`f', `3'))
 @result{}3
 indir(`f', undefine(`f'))
-@error{}m4:stdin:4: indir: undefined macro `f'
+@error{}m4:stdin:4: Warning: indir: undefined macro `f'
 @result{}
 @end example
 
@@ -2389,7 +2389,7 @@ indir(`define', `foo', defn(`divnum'))
 foo
 @result{}0
 indir(`divert', defn(`foo'))
-@error{}m4:stdin:5: divert: empty string treated as 0
+@error{}m4:stdin:5: Warning: divert: empty string treated as 0
 @result{}
 @end example
 
@@ -2452,10 +2452,10 @@ $ @kbd{m4 -P}
 m4_builtin(`divnum')
 @result{}0
 m4_builtin(`m4_divnum')
-@error{}m4:stdin:2: m4_builtin: undefined builtin `m4_divnum'
+@error{}m4:stdin:2: Warning: m4_builtin: undefined builtin `m4_divnum'
 @result{}
 m4_indir(`divnum')
-@error{}m4:stdin:3: m4_indir: undefined macro `divnum'
+@error{}m4:stdin:3: Warning: m4_indir: undefined macro `divnum'
 @result{}
 m4_indir(`m4_divnum')
 @result{}0
@@ -2469,13 +2469,13 @@ recognized; but it will provoke a warning, and result in a void expansion.
 builtin
 @result{}builtin
 builtin()
-@error{}m4:stdin:2: builtin: undefined builtin `'
+@error{}m4:stdin:2: Warning: builtin: undefined builtin `'
 @result{}
 builtin(`builtin')
 @error{}m4:stdin:3: Warning: builtin: too few arguments: 0 < 1
 @result{}
 builtin(`builtin',)
-@error{}m4:stdin:4: builtin: undefined builtin `'
+@error{}m4:stdin:4: Warning: builtin: undefined builtin `'
 @result{}
 @end example
 
@@ -3133,7 +3133,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}m4:stdin:3: dumpdef: undefined macro `f'
+@error{}m4:stdin:3: Warning: dumpdef: undefined macro `f'
 @result{}f1
 @end example
 
@@ -3231,7 +3231,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:8: indir: undefined macro `foo'
+@error{}m4:stdin:8: Warning: indir: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -4920,7 +4920,7 @@ substr(`abc')
 @error{}m4:stdin:1: Warning: substr: too few arguments: 1 < 2
 @result{}abc
 substr(`abc',)
-@error{}m4:stdin:2: substr: empty string treated as 0
+@error{}m4:stdin:2: Warning: substr: empty string treated as 0
 @result{}abc
 @end example
 
@@ -5266,10 +5266,10 @@ incr(`4')
 decr(`7')
 @result{}6
 incr()
-@error{}m4:stdin:3: incr: empty string treated as 0
+@error{}m4:stdin:3: Warning: incr: empty string treated as 0
 @result{}1
 decr()
-@error{}m4:stdin:4: decr: empty string treated as 0
+@error{}m4:stdin:4: Warning: decr: empty string treated as 0
 @result{}-1
 @end example
 
@@ -5388,12 +5388,12 @@ eval(`+ + - ~ ! ~ 0')
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:9: eval: divide by zero: 0 || 1 / 0
+@error{}m4:stdin:9: Warning: eval: divide by zero: 0 || 1 / 0
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:11: eval: modulo by zero: 2 && 1 % 0
+@error{}m4:stdin:11: Warning: eval: modulo by zero: 2 && 1 % 0
 @result{}
 @end example
 
@@ -5414,9 +5414,9 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: eval: divide by zero: 0 ** 0
+@error{}m4:stdin:5: Warning: eval: divide by zero: 0 ** 0
 eval(`4 ** -2')
-@error{}m4:stdin:6: eval: negative exponent: 4 ** -2
+@error{}m4:stdin:6: Warning: eval: negative exponent: 4 ** -2
 @result{}
 @end example
 
@@ -5461,7 +5461,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: eval: bad expression: foo / 6
+@error{}m4:stdin:11: Warning: eval: bad expression: foo / 6
 @result{}
 eval(foo / 6)
 @result{}111
@@ -5529,13 +5529,13 @@ eval(`10', `', `0')
 eval(`10', `16')
 @result{}a
 eval(`1', `37')
-@error{}m4:stdin:9: eval: radix 37 out of range
+@error{}m4:stdin:9: Warning: eval: radix 37 out of range
 @result{}
 eval(`1', , `-1')
-@error{}m4:stdin:10: eval: negative width
+@error{}m4:stdin:10: Warning: eval: negative width
 @result{}
 eval()
-@error{}m4:stdin:11: eval: empty string treated as 0
+@error{}m4:stdin:11: Warning: eval: empty string treated as 0
 @result{}0
 @end example
 
@@ -6769,7 +6769,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: eval: bad expression (bad input): (b) >= (a)
+@error{}m4:stdin:6: Warning: eval: bad expression (bad input): (b) >= (a)
 @result{}
 @end example
 

@@ -1,5 +1,25 @@
 2007-11-22  Eric Blake  <ebb9@byu.net>
 
+	Refactor error messages to avoid macros.
+	* src/m4.h (_): Define, as a placeholder for now.
+	(M4ERROR, M4ERROR_AT_LINE): Delete.
+	(m4_error, m4_error_at_line): Change prototype.
+	(m4_warn, m4_warn_at_line): New prototypes.
+	* src/m4.c (m4_verror_at_line): New helper function.
+	(m4_error, m4_error_at_line): Use new function, and properly call
+	va_end.
+	(m4_warn, m4_warn_at_line): New functions.
+	(stackovf_handler, main): All callers changed.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/macro.c: Likewise.
+	* doc/m4.texinfo (Indir, Builtin, Dumpdef, Incr, Eval, Substr)
+	(Improved forloop): Adjust tests accordingly.
+
 	Security fix: avoid arbitrary code execution with 'm4 -F'.
 	* src/freeze.c (produce_frozen_state): Never pass raw file name as
 	printf format.

@@ -354,16 +354,12 @@ pop_input (bool cleanup)
 
       if (ferror (isp->u.u_f.fp))
 	{
-	  M4ERROR ((warning_status, 0, "read error"));
+	  m4_error (0, 0, NULL, _("read error"));
 	  if (isp->u.u_f.close)
 	    fclose (isp->u.u_f.fp);
-	  retcode = EXIT_FAILURE;
 	}
       else if (isp->u.u_f.close && fclose (isp->u.u_f.fp) == EOF)
-	{
-	  M4ERROR ((warning_status, errno, "error reading file"));
-	  retcode = EXIT_FAILURE;
-	}
+	m4_error (0, errno, NULL, _("error reading file"));
       start_of_input_line = isp->u.u_f.advance;
       output_current_line = -1;
       break;
@@ -575,8 +571,8 @@ skip_line (const char *name)
   if (ch == CHAR_EOF)
     /* current_file changed to "" if we see CHAR_EOF, use the
        previous value we stored earlier.  */
-    M4ERROR_AT_LINE ((warning_status, 0, file, line,
-		      "Warning: %s: end of file treated as newline", name));
+    m4_warn_at_line (0, file, line, name,
+		     _("end of file treated as newline"));
   /* On the rare occasion that dnl crosses include file boundaries
      (either the input file did not end in a newline, or changeword
      was used), calling next_char can update current_file and
@@ -776,8 +772,8 @@ set_word_regexp (const char *regexp)
 
   if (msg != NULL)
     {
-      M4ERROR ((warning_status, 0,
-		"bad regular expression `%s': %s", regexp, msg));
+      /* FIXME - report on behalf of macro caller.  */
+      m4_warn (0, NULL, _("bad regular expression `%s': %s"), regexp, msg);
       return;
     }
 
@@ -874,9 +870,8 @@ next_token (token_data *td, int *line, const char *caller)
       else
 	/* current_file changed to "" if we see CHAR_EOF, use the
 	   previous value we stored earlier.  */
-	M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-			  "%s%send of file in comment",
-			  caller ? caller : "", caller ? ": " : ""));
+	m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
+			  _("end of file in comment"));
 
       type = TOKEN_STRING;
     }
@@ -958,9 +953,8 @@ next_token (token_data *td, int *line, const char *caller)
 	  if (ch == CHAR_EOF)
 	    /* current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
-	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-			      "%s%send of file in string",
-			      caller ? caller : "", caller ? ": " : ""));
+	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
+			      _("end of file in string"));
 
 	  if (MATCH (ch, rquote.string, true))
 	    {

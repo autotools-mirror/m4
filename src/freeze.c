@@ -56,9 +56,10 @@ produce_frozen_state (const char *name)
   symbol *sym;
   const builtin *bp;
 
-  if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
+  file = fopen (name, O_BINARY ? "wb" : "w");
+  if (!file)
     {
-      M4ERROR ((warning_status, errno, "%s", name));
+      m4_error (0, errno, NULL, _("cannot open %s"), name);
       return;
     }
 
@@ -151,7 +152,7 @@ produce_frozen_state (const char *name)
 
   fputs ("# End of frozen state file\n", file);
   if (close_stream (file) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "unable to create frozen state"));
+    m4_error (EXIT_FAILURE, errno, NULL, _("unable to create frozen state"));
 }
 
 /*----------------------------------------------------------------------.
@@ -162,10 +163,10 @@ static void
 issue_expect_message (int expected)
 {
   if (expected == '\n')
-    M4ERROR ((EXIT_FAILURE, 0, "expecting line feed in frozen file"));
+    m4_error (EXIT_FAILURE, 0, NULL, _("expecting line feed in frozen file"));
   else
-    M4ERROR ((EXIT_FAILURE, 0, "expecting character `%c' in frozen file",
-	      expected));
+    m4_error (EXIT_FAILURE, 0, NULL,
+	      _("expecting character `%c' in frozen file"), expected);
 }
 
 /*-------------------------------------------------.
@@ -226,7 +227,7 @@ reload_frozen_state (const char *name)
 
   file = m4_path_search (name, NULL);
   if (file == NULL)
-    M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
+    m4_error (EXIT_FAILURE, errno, NULL, _("cannot open %s"), name);
 
   allocated[0] = 100;
   string[0] = xcharalloc ((size_t) allocated[0]);
@@ -239,12 +240,12 @@ reload_frozen_state (const char *name)
   GET_CHARACTER;
   GET_NUMBER (number[0]);
   if (number[0] > 1)
-    M4ERROR ((EXIT_MISMATCH, 0,
-	      "frozen file version %d greater than max supported of 1",
-	      number[0]));
+    m4_error (EXIT_MISMATCH, 0, NULL,
+	      _("frozen file version %d greater than max supported of 1"),
+	      number[0]);
   else if (number[0] < 1)
-    M4ERROR ((EXIT_FAILURE, 0,
-	      "ill-formed frozen file, version directive expected"));
+    m4_error (EXIT_FAILURE, 0, NULL,
+	      _("ill-formed frozen file, version directive expected"));
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
@@ -253,7 +254,7 @@ reload_frozen_state (const char *name)
       switch (character)
 	{
 	default:
-	  M4ERROR ((EXIT_FAILURE, 0, "ill-formed frozen file"));
+	  m4_error (EXIT_FAILURE, 0, NULL, _("ill-formed frozen file"));
 
 	case 'C':
 	case 'D':
@@ -292,7 +293,8 @@ reload_frozen_state (const char *name)
 
 	      if (number[0] > 0)
 		if (!fread (string[0], (size_t) number[0], 1, file))
-		  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
+		  m4_error (EXIT_FAILURE, 0, NULL,
+			    _("premature end of frozen file"));
 
 	      string[0][number[0]] = '\0';
 	    }
@@ -308,7 +310,8 @@ reload_frozen_state (const char *name)
 
 	  if (number[1] > 0)
 	    if (!fread (string[1], (size_t) number[1], 1, file))
-	      M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
+	      m4_error (EXIT_FAILURE, 0, NULL,
+			_("premature end of frozen file"));
 
 	  string[1][number[1]] = '\0';
 	  GET_CHARACTER;
@@ -372,7 +375,7 @@ reload_frozen_state (const char *name)
   free (string[1]);
   errno = 0;
   if (ferror (file) || fclose (file) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
+    m4_error (EXIT_FAILURE, errno, NULL, _("unable to read frozen state"));
 
 #undef GET_CHARACTER
 #undef GET_DIRECTIVE

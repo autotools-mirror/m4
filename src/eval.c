@@ -310,45 +310,36 @@ evaluate (const char *me, const char *expr, int32_t *val)
       break;
 
     case MISSING_RIGHT:
-      M4ERROR ((warning_status, 0,
-		"%s: bad expression (missing right parenthesis): %s",
-		me, expr));
+      m4_warn (0, me, _("bad expression (missing right parenthesis): %s"),
+	       expr);
       break;
 
     case SYNTAX_ERROR:
-      M4ERROR ((warning_status, 0,
-		"%s: bad expression: %s", me, expr));
+      m4_warn (0, me, _("bad expression: %s"), expr);
       break;
 
     case UNKNOWN_INPUT:
-      M4ERROR ((warning_status, 0,
-		"%s: bad expression (bad input): %s", me, expr));
+      m4_warn (0, me, _("bad expression (bad input): %s"), expr);
       break;
 
     case EXCESS_INPUT:
-      M4ERROR ((warning_status, 0,
-		"%s: bad expression (excess input): %s", me, expr));
+      m4_warn (0, me, _("bad expression (excess input): %s"), expr);
       break;
 
     case INVALID_OPERATOR:
-      M4ERROR ((warning_status, 0,
-		"%s: invalid operator: %s", me, expr));
-      retcode = EXIT_FAILURE;
+      m4_error (0, 0, me, _("invalid operator: %s"), expr);
       break;
 
     case DIVIDE_ZERO:
-      M4ERROR ((warning_status, 0,
-		"%s: divide by zero: %s", me, expr));
+      m4_warn (0, me, _("divide by zero: %s"), expr);
       break;
 
     case MODULO_ZERO:
-      M4ERROR ((warning_status, 0,
-		"%s: modulo by zero: %s", me, expr));
+      m4_warn (0, me, _("modulo by zero: %s"), expr);
       break;
 
     case NEGATIVE_EXPONENT:
-      M4ERROR ((warning_status, 0,
-		"%s: negative exponent: %s", me, expr));
+      m4_warn (0, me, _("negative exponent: %s"), expr);
       break;
 
     default:
@@ -530,8 +521,7 @@ equality_term (const char *me, eval_token et, int32_t *v1)
 
       if (op == ASSIGN)
       {
-	M4ERROR ((warning_status, 0, "\
-Warning: %s: recommend ==, not =, for equality", me));
+	m4_warn (0, me, _("recommend ==, not =, for equality"));
 	op = EQ;
       }
       *v1 = (op == EQ) == (*v1 == v2);

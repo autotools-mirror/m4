@@ -134,8 +134,7 @@ warn_builtin_concat (const char *caller, builtin_func *func)
 {
   const builtin *bp = find_builtin_by_addr (func);
   assert (bp);
-  M4ERROR ((warning_status, 0, "Warning: %s: cannot concatenate builtin `%s'",
-	    caller, bp->name));
+  m4_warn (0, caller, _("cannot concatenate builtin `%s'"), bp->name);
 }
 
 /*-------------------------------------------------------------------.
@@ -202,8 +201,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	case TOKEN_EOF:
 	  /* current_file changed to "" if we see TOKEN_EOF, use the
 	     previous value we stored earlier.  */
-	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
-			    "%s: end of file in argument list", caller));
+	  m4_error_at_line (EXIT_FAILURE, 0, file, line, caller,
+			    _("end of file in argument list"));
 	  break;
 
 	case TOKEN_WORD:
@@ -342,9 +341,9 @@ expand_macro (symbol *sym)
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
-    M4ERROR ((EXIT_FAILURE, 0,
-	      "recursion limit of %d exceeded, use -L<N> to change it",
-	      nesting_limit));
+    m4_error (EXIT_FAILURE, 0, NULL,
+	      _("recursion limit of %d exceeded, use -L<N> to change it"),
+	      nesting_limit);
 
   macro_call_id++;
   my_call_id = macro_call_id;

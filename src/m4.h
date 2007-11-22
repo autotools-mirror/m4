@@ -69,6 +69,10 @@
 
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
+
+/* M4 1.4.x is not yet internationalized.  But when it is, this can be
+   redefined as gettext().  */
+#define _(STRING) STRING
 
 /* Various declarations.  */
 
@@ -128,12 +132,12 @@ extern const char *user_word_regexp;	/* -W */
 extern int retcode;
 extern const char *program_name;
 
-void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
-void m4_error_at_line (int, int, const char *, int,
-		       const char *, ...) M4_GNUC_PRINTF(5, 6);
-
-#define M4ERROR(Arglist) (m4_error Arglist)
-#define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
+void m4_error (int, int, const char *, const char *, ...) M4_GNUC_PRINTF(4, 5);
+void m4_error_at_line (int, int, const char *, int, const char *,
+		       const char *, ...) M4_GNUC_PRINTF(6, 7);
+void m4_warn (int, const char *, const char *, ...) M4_GNUC_PRINTF(3, 4);
+void m4_warn_at_line (int, const char *, int, const char *,
+		      const char *, ...) M4_GNUC_PRINTF(5, 6);
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,

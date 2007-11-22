@@ -233,8 +233,7 @@ format (struct obstack *obs, int argc, token_data **argv)
       c = *fmt++;
       if (c > sizeof ok || !ok[c])
 	{
-	  M4ERROR ((warning_status, 0,
-		    "Warning: %s: unrecognized specifier in `%s'", me, f));
+	  m4_warn (0, me, _("unrecognized specifier in `%s'"), f);
 	  if (c == '\0')
 	    fmt--;
 	  continue;
@@ -308,8 +307,7 @@ format (struct obstack *obs, int argc, token_data **argv)
 	 Issue a warning, then proceed.  */
       if (str == NULL)
 	{
-	  M4ERROR ((warning_status, 0,
-		    "Warning: %s: unable to format output for `%s'", me, f));
+	  m4_warn (0, me, _("unable to format output for `%s'"), f);
 	  continue;
 	}
 

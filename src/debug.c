@@ -134,10 +134,8 @@ debug_set_file (FILE *fp)
 
   if (debug != NULL && debug != stderr && debug != stdout
       && close_stream (debug) != 0)
-    {
-      M4ERROR ((warning_status, errno, "error writing to debug stream"));
-      retcode = EXIT_FAILURE;
-    }
+    /* FIXME - report on behalf of macro caller.  */
+    m4_error (0, errno, NULL, _("error writing to debug stream"));
   debug = fp;
 
   if (debug != NULL && debug != stdout)
@@ -154,11 +152,8 @@ debug_set_file (FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug != stderr && close_stream (debug) != 0)
-	    {
-	      M4ERROR ((warning_status, errno,
-			"error writing to debug stream"));
-	      retcode = EXIT_FAILURE;
-	    }
+	    /* FIXME - report on behalf of macro caller.  */
+	    m4_error (0, errno, NULL, _("error writing to debug stream"));
 	  debug = stdout;
 	}
     }
@@ -217,8 +212,8 @@ debug_set_output (const char *name)
 	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	M4ERROR ((warning_status, errno,
-		  "Warning: cannot protect debug file across forks"));
+	/* FIXME - report on behalf of macro caller.  */
+	m4_warn (errno, NULL, _("cannot protect debug file across forks"));
       debug_set_file (fp);
     }
   return true;
