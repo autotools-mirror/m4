@@ -30,9 +30,7 @@ FILE *debug = NULL;
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
-extern int expansion_level;
-
-static void debug_set_file (FILE *);
+static void debug_set_file (const char *, FILE *);
 
 /*----------------------------------.
 | Initialise the debugging module.  |
@@ -41,7 +39,7 @@ static void debug_set_file (FILE *);
 void
 debug_init (void)
 {
-  debug_set_file (stderr);
+  debug_set_file (NULL, stderr);
   obstack_init (&trace);
 }
 
@@ -128,14 +126,13 @@ debug_decode (const char *opts)
 `------------------------------------------------------------------------*/
 
 static void
-debug_set_file (FILE *fp)
+debug_set_file (const char *caller, FILE *fp)
 {
   struct stat stdout_stat, debug_stat;
 
   if (debug != NULL && debug != stderr && debug != stdout
       && close_stream (debug) != 0)
-    /* FIXME - report on behalf of macro caller.  */
-    m4_error (0, errno, NULL, _("error writing to debug stream"));
+    m4_error (0, errno, caller, _("error writing to debug stream"));
   debug = fp;
 
   if (debug != NULL && debug != stdout)
@@ -152,8 +149,7 @@ debug_set_file (FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug != stderr && close_stream (debug) != 0)
-	    /* FIXME - report on behalf of macro caller.  */
-	    m4_error (0, errno, NULL, _("error writing to debug stream"));
+	    m4_error (0, errno, caller, _("error writing to debug stream"));
 	  debug = stdout;
 	}
     }
@@ -190,21 +186,22 @@ debug_flush_files (void)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Change the debug output to file NAME.  If NAME is NULL, debug output is  |
-| reverted to stderr, and if empty debug output is discarded.  Return true |
-| iff the output stream was changed.					   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Change the debug output to file NAME.  If NAME is NULL, debug	     |
+| output is reverted to stderr, and if empty, debug output is	     |
+| discarded.  Return true iff the output stream was changed.  Report |
+| errors on behalf of CALLER.					     |
+`-------------------------------------------------------------------*/
 
 bool
-debug_set_output (const char *name)
+debug_set_output (const char *caller, const char *name)
 {
   FILE *fp;
 
   if (name == NULL)
-    debug_set_file (stderr);
+    debug_set_file (caller, stderr);
   else if (*name == '\0')
-    debug_set_file (NULL);
+    debug_set_file (caller, NULL);
   else
     {
       fp = fopen (name, "a");
@@ -212,9 +209,8 @@ debug_set_output (const char *name)
 	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	/* FIXME - report on behalf of macro caller.  */
-	m4_warn (errno, NULL, _("cannot protect debug file across forks"));
-      debug_set_file (fp);
+	m4_warn (errno, caller, _("cannot protect debug file across forks"));
+      debug_set_file (caller, fp);
     }
   return true;
 }

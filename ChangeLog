@@ -1,5 +1,18 @@
 2007-11-22  Eric Blake  <ebb9@byu.net>
 
+	More error messages tied to macro names.
+	* src/input.c (set_word_regexp): Take additional parameter.
+	(input_init): Adjust caller.
+	* src/debug.c (debug_set_file, debug_set_output): Take additional
+	parameter.
+	(debug_init): Adjust caller.
+	(expansion_level): Move declaration...
+	* src/m4.h (expansion_level): ...here.
+	(debug_set_output, set_word_regexp): Adjust prototypes.
+	* src/builtin.c (m4_changeword, m4_m4exit, m4_debugfile): Adjust
+	callers.
+	* src/m4.c (main): Likewise.
+
 	Refactor error messages to avoid macros.
 	* src/m4.h (_): Define, as a placeholder for now.
 	(M4ERROR, M4ERROR_AT_LINE): Delete.

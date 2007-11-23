@@ -24,8 +24,6 @@
 
 #include "m4.h"
 
-extern FILE *popen ();
-
 #include "regex.h"
 
 #if HAVE_SYS_WAIT_H
@@ -1365,10 +1363,11 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_changeword (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (ARG (0), argc, 1, 1))
-    return;
+  const char *me = ARG (0);
 
-  set_word_regexp (ARG (1));
+  if (bad_argc (me, argc, 1, 1))
+    return;
+  set_word_regexp (me, ARG (1));
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -1584,7 +1583,7 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
     }
   /* Change debug stream back to stderr, to force flushing debug stream and
      detect any errors it might have encountered.  */
-  debug_set_output (NULL);
+  debug_set_output (me, NULL);
   debug_flush_files ();
   if (exit_code == EXIT_SUCCESS && retcode != EXIT_SUCCESS)
     exit_code = retcode;
@@ -1735,8 +1734,8 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
   bad_argc (me, argc, 0, 1);
 
   if (argc == 1)
-    debug_set_output (NULL);
-  else if (!debug_set_output (ARG (1)))
+    debug_set_output (me, NULL);
+  else if (!debug_set_output (me, ARG (1)))
     m4_warn (errno, me, _("cannot set error file: `%s'"), ARG (1));
 }
 

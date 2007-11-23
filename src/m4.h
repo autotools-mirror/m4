@@ -231,7 +231,7 @@ extern FILE *debug;
 void debug_init (void);
 int debug_decode (const char *);
 void debug_flush_files (void);
-bool debug_set_output (const char *);
+bool debug_set_output (const char *, const char *);
 void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
@@ -318,7 +318,7 @@ extern STRING lquote, rquote;
 void set_quotes (const char *, const char *);
 void set_comment (const char *, const char *);
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp (const char *);
+void set_word_regexp (const char *, const char *);
 #endif
 
 /* File: output.c --- output functions.  */
@@ -387,6 +387,8 @@ symbol *lookup_symbol (const char *, symbol_lookup);
 void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
+
+extern int expansion_level;
 
 void expand_input (void);
 void call_macro (symbol *, int, token_data **, struct obstack *);

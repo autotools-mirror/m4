@@ -587,7 +587,7 @@ main (int argc, char *const *argv, char *const *envp)
   defines = head;
 
   /* Do the basic initializations.  */
-  if (debugfile && !debug_set_output (debugfile))
+  if (debugfile && !debug_set_output (NULL, debugfile))
     m4_error (0, errno, NULL, _("cannot set debug file `%s'"), debugfile);
 
   input_init ();
@@ -676,7 +676,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Change debug stream back to stderr, to force flushing the debug
      stream and detect any errors it might have encountered.  The
      three standard streams are closed by close_stdin.  */
-  debug_set_output (NULL);
+  debug_set_output (NULL, NULL);
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);

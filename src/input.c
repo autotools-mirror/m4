@@ -687,7 +687,7 @@ input_init (void)
   ecomm.length = strlen (ecomm.string);
 
 #ifdef ENABLE_CHANGEWORD
-  set_word_regexp (user_word_regexp);
+  set_word_regexp (NULL, user_word_regexp);
 #endif
 }
 
@@ -752,7 +752,7 @@ set_comment (const char *bc, const char *ec)
 #ifdef ENABLE_CHANGEWORD
 
 void
-set_word_regexp (const char *regexp)
+set_word_regexp (const char *caller, const char *regexp)
 {
   int i;
   char test[2];
@@ -773,7 +773,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       /* FIXME - report on behalf of macro caller.  */
-      m4_warn (0, NULL, _("bad regular expression `%s': %s"), regexp, msg);
+      m4_warn (0, caller, _("bad regular expression `%s': %s"), regexp, msg);
       return;
     }
 
