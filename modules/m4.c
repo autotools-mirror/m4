@@ -821,6 +821,7 @@ M4BUILTIN_HANDLER (errprint)
    arguments are present.  */
 M4BUILTIN_HANDLER (m4exit)
 {
+  const char *me = M4ARG (0);
   int exit_code = EXIT_SUCCESS;
 
   /* Warn on bad arguments, but still exit.  */
@@ -828,8 +829,7 @@ M4BUILTIN_HANDLER (m4exit)
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
-      m4_warn (context, 0, M4ARG (0), _("exit status out of range: `%d'"),
-	       exit_code);
+      m4_warn (context, 0, me, _("exit status out of range: `%d'"), exit_code);
       exit_code = EXIT_FAILURE;
     }
 
@@ -842,7 +842,7 @@ M4BUILTIN_HANDLER (m4exit)
 
   /* Change debug stream back to stderr, to force flushing debug
      stream and detect any errors.  */
-  m4_debug_set_output (context, NULL);
+  m4_debug_set_output (context, me, NULL);
   m4_sysval_flush (context, true);
 
   /* Check for saved error.  */

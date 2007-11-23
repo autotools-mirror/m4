@@ -538,12 +538,14 @@ M4BUILTIN_HANDLER (changesyntax)
  **/
 M4BUILTIN_HANDLER (debugfile)
 {
+  const char *me = M4ARG (0);
+
   if (argc == 1)
-    m4_debug_set_output (context, NULL);
+    m4_debug_set_output (context, me, NULL);
   else if (m4_get_safer_opt (context) && *M4ARG (1))
-    m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
-  else if (!m4_debug_set_output (context, M4ARG (1)))
-    m4_error (context, 0, errno, M4ARG (0), _("cannot set debug file `%s'"),
+    m4_error (context, 0, 0, me, _("disabled by --safer"));
+  else if (!m4_debug_set_output (context, me, M4ARG (1)))
+    m4_error (context, 0, errno, me, _("cannot set debug file `%s'"),
 	      M4ARG (1));
 }
 

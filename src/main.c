@@ -613,7 +613,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 
   /* Do the basic initializations.  */
-  if (debugfile && !m4_debug_set_output (context, debugfile))
+  if (debugfile && !m4_debug_set_output (context, NULL, debugfile))
     m4_error (context, 0, errno, NULL, _("cannot set debug file `%s'"),
 	      debugfile);
   m4_input_init (context);
@@ -774,7 +774,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Change debug stream back to stderr, to force flushing the debug
      stream and detect any errors it might have encountered.  The
      three standard streams are closed by close_stdin.  */
-  m4_debug_set_output (context, NULL);
+  m4_debug_set_output (context, NULL, NULL);
 
   exit_status = m4_get_exit_status (context);
   m4_delete (context);

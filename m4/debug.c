@@ -26,7 +26,7 @@
 #include "m4private.h"
 #include "close-stream.h"
 
-static void set_debug_file (m4 *, FILE *);
+static void set_debug_file (m4 *, const char *, FILE *);
 
 
 
@@ -131,9 +131,9 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
 
 /* Change the debug output stream to FP.  If the underlying file is the
    same as stdout, use stdout instead so that debug messages appear in the
-   correct relative position.  */
+   correct relative position.  Report errors on behalf of MACRO.  */
 static void
-set_debug_file (m4 *context, FILE *fp)
+set_debug_file (m4 *context, const char *macro, FILE *fp)
 {
   FILE *debug_file;
   struct stat stdout_stat, debug_stat;
@@ -143,8 +143,7 @@ set_debug_file (m4 *context, FILE *fp)
   debug_file = m4_get_debug_file (context);
   if (debug_file != NULL && debug_file != stderr && debug_file != stdout
       && close_stream (debug_file) != 0)
-    /* FIXME - use macro name.  */
-    m4_error (context, 0, errno, NULL, _("error writing to debug stream"));
+    m4_error (context, 0, errno, macro, _("error writing to debug stream"));
 
   debug_file = fp;
   m4_set_debug_file (context, fp);
@@ -163,28 +162,28 @@ set_debug_file (m4 *context, FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug_file != stderr && close_stream (debug_file) != 0)
-	    /* FIXME - use macro name.  */
-	    m4_error (context, 0, errno, NULL,
+	    m4_error (context, 0, errno, macro,
 		      _("error writing to debug stream"));
 	  m4_set_debug_file (context, stdout);
 	}
     }
 }
 
-/* Change the debug output to file NAME.  If NAME is NULL, debug output is
-   reverted to stderr, and if empty debug output is discarded.  Return true
-   iff the output stream was changed.  */
+/* Change the debug output to file NAME.  If NAME is NULL, debug
+   output is reverted to stderr, and if empty debug output is
+   discarded.  Return true iff the output stream was changed.  Report
+   errors on behalf of MACRO.  */
 bool
-m4_debug_set_output (m4 *context, const char *name)
+m4_debug_set_output (m4 *context, const char *macro, const char *name)
 {
   FILE *fp;
 
   assert (context);
 
   if (name == NULL)
-    set_debug_file (context, stderr);
+    set_debug_file (context, macro, stderr);
   else if (*name == '\0')
-    set_debug_file (context, NULL);
+    set_debug_file (context, macro, NULL);
   else
     {
       fp = fopen (name, "a");
@@ -192,10 +191,9 @@ m4_debug_set_output (m4 *context, const char *name)
 	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	/* FIXME - use macro name.  */
-	m4_warn (context, errno, NULL,
+	m4_warn (context, errno, macro,
 		 _("cannot protect debug file across forks"));
-      set_debug_file (context, fp);
+      set_debug_file (context, macro, fp);
     }
   return true;
 }

@@ -1,5 +1,13 @@
 2007-11-23  Eric Blake  <ebb9@byu.net>
 
+	Add macro name to debugfile messages.
+	* m4/m4module.h (m4_debug_set_output): Add parameter.
+	* m4/debug.c (m4_debug_set_output, set_debug_file): Pass macro
+	name through.
+	* modules/gnu.c (debugfile): Adjust caller.
+	* modules/m4.c (m4exit): Likewise.
+	* src/main.c (main): Likewise.
+
 	Factor out handling of macro name in error messages.
 	* m4/m4module.h (m4_error, m4_error_at_line, m4_warn)
 	(m4_warn_at_line): Add new parameter.
