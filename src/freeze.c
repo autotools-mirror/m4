@@ -91,7 +91,7 @@ produce_resyntax_dump (m4 *context, FILE *file)
       const char *resyntax = m4_regexp_syntax_decode (code);
 
       if (!resyntax)
-	m4_error (context, EXIT_FAILURE, 0,
+	m4_error (context, EXIT_FAILURE, 0, NULL,
 		  _("invalid regexp syntax code `%d'"), code);
 
       /* No need to use produce_mem_dump, since we know all resyntax
@@ -216,7 +216,7 @@ produce_frozen_state (m4 *context, const char *name)
 
   if (!file)
     {
-      m4_error (context, 0, errno, _("cannot open `%s'"), name);
+      m4_error (context, 0, errno, NULL, _("cannot open `%s'"), name);
       return;
     }
 
@@ -283,10 +283,10 @@ static void
 issue_expect_message (m4 *context, int expected)
 {
   if (expected == '\n')
-    m4_error (context, EXIT_FAILURE, 0,
+    m4_error (context, EXIT_FAILURE, 0, NULL,
 	      _("expecting line feed in frozen file"));
   else
-    m4_error (context, EXIT_FAILURE, 0,
+    m4_error (context, EXIT_FAILURE, 0, NULL,
 	      _("expecting character `%c' in frozen file"), expected);
 }
 
@@ -411,7 +411,7 @@ reload_frozen_state (m4 *context, const char *name)
 	  int ch = (version > 1 ? decode_char (File)		\
 		    : getc (File));				\
 	  if (ch == EOF)					\
-	    m4_error (context, EXIT_FAILURE, 0,			\
+	    m4_error (context, EXIT_FAILURE, 0, NULL,		\
 		      _("premature end of frozen file"));	\
 	  *p++ = ch;						\
 	}							\
@@ -457,7 +457,7 @@ reload_frozen_state (m4 *context, const char *name)
 
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
-    m4_error (context, EXIT_FAILURE, errno, _("cannot open `%s'"), name);
+    m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open `%s'"), name);
 
   allocated[0] = 100;
   string[0] = xmalloc (allocated[0]);
@@ -488,11 +488,11 @@ reload_frozen_state (m4 *context, const char *name)
       break;
     default:
       if (version > 2)
-	m4_error (context, EXIT_MISMATCH, 0,
+	m4_error (context, EXIT_MISMATCH, 0, NULL,
 		  _("frozen file version %d greater than max supported of 2"),
 		  version);
       else
-	m4_error (context, EXIT_FAILURE, 0,
+	m4_error (context, EXIT_FAILURE, 0, NULL,
 		  _("ill-formed frozen file, version directive expected"));
     }
   VALIDATE ('\n');
@@ -503,7 +503,7 @@ reload_frozen_state (m4 *context, const char *name)
       switch (character)
 	{
 	default:
-	  m4_error (context, EXIT_FAILURE, 0,
+	  m4_error (context, EXIT_FAILURE, 0, NULL,
 		    _("ill-formed frozen file, unknown directive %c"),
 		    character);
 
@@ -529,7 +529,7 @@ reload_frozen_state (m4 *context, const char *name)
 	      else
 		/* 3 argument 'F' operations are invalid for format
 		   version 1.  */
-		m4_error (context, EXIT_FAILURE, 0, _("\
+		m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 	    }
 	  else
@@ -578,7 +578,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 	  if (version < 2)
 	    {
 	      /* 'M' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, _("\
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	    }
 
@@ -597,7 +597,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	  if (version < 2)
 	    {
 	      /* 'R' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, _("\
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	    }
 
@@ -611,7 +611,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 				    m4_regexp_syntax_encode (string[0]));
 	  if (m4_get_regexp_syntax_opt (context) < 0)
 	    {
-	      m4_error (context, EXIT_FAILURE, 0,
+	      m4_error (context, EXIT_FAILURE, 0, NULL,
 			_("unknown regexp syntax code `%s'"), string[0]);
 	    }
 
@@ -622,7 +622,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	  if (version < 2)
 	    {
 	      /* 'S' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, _("\
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	    }
 
@@ -640,7 +640,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 			       ? '=' : '+'), string[0]) < 0)
 	      && (syntax != '\0'))
 	    {
-	      m4_error (context, 0, 0,
+	      m4_error (context, 0, 0, NULL,
 			_("undefined syntax code %c"), syntax);
 	    }
 	  break;
@@ -732,7 +732,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 		{
 		  /* 3 argument 'T' operations are invalid for format
 		     version 1.  */
-		  m4_error (context, EXIT_FAILURE, 0, _("\
+		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 		}
 	    }

@@ -169,8 +169,8 @@ regexp_compile (m4 *context, const char *caller, const char *regexp,
 
   if (msg != NULL)
     {
-      m4_error (context, 0, 0, _("%s: bad regular expression `%s': %s"),
-		caller, regexp, msg);
+      m4_error (context, 0, 0, caller, _("bad regular expression `%s': %s"),
+		regexp, msg);
       regfree (pat);
       free (pat);
       return NULL;
@@ -258,16 +258,16 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
 	case '7': case '8': case '9':
 	  ch -= '0';
 	  if (!buf || buf->pat->re_nsub < ch)
-	    m4_warn (context, 0, _("%s: sub-expression %d not present"),
-		     caller, ch);
+	    m4_warn (context, 0, caller, _("sub-expression %d not present"),
+		     ch);
 	  else if (buf->regs.end[ch] > 0)
 	    obstack_grow (obs, victim + buf->regs.start[ch],
 			  buf->regs.end[ch] - buf->regs.start[ch]);
 	  break;
 
 	case '\0':
-	  m4_warn (context, 0, _("%s: trailing \\ ignored in replacement"),
-		   caller);
+	  m4_warn (context, 0, caller,
+		   _("trailing \\ ignored in replacement"));
 	  return;
 
 	default:
@@ -309,9 +309,8 @@ regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 	     copied verbatim.  */
 
 	  if (matchpos == -2)
-	    m4_error (context, 0, 0,
-		      _("%s: error matching regular expression `%s'"),
-		      caller, regexp);
+	    m4_error (context, 0, 0, caller,
+		      _("error matching regular expression `%s'"), regexp);
 	  else if (!ignore_duplicates && (offset < length))
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
@@ -412,36 +411,34 @@ M4BUILTIN_HANDLER (builtin)
   if (! m4_is_symbol_value_text (argv[1]))
     {
       if (m4_is_symbol_value_func (argv[1])
-	 && m4_get_symbol_value_func (argv[1]) == builtin_builtin)
-       {
-	 if (m4_bad_argc (context, argc, argv, 2, 2, false))
-	   return;
-	 if (! m4_is_symbol_value_text (argv[2]))
-	   {
-	     m4_warn (context, 0, _("%s: invalid macro name ignored"),
-		      M4ARG (0));
-	     return;
-	   }
-	 name = M4ARG (2);
-	 value = m4_builtin_find_by_name (NULL, name);
-	 if (value == NULL)
-	   m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0),
-		    name);
-	 else
-	   {
-	     m4_push_builtin (context, value);
-	     free (value);
-	   }
-       }
+	  && m4_get_symbol_value_func (argv[1]) == builtin_builtin)
+	{
+	  if (m4_bad_argc (context, argc, argv, 2, 2, false))
+	    return;
+	  if (! m4_is_symbol_value_text (argv[2]))
+	    {
+	      m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+	      return;
+	    }
+	  name = M4ARG (2);
+	  value = m4_builtin_find_by_name (NULL, name);
+	  if (value == NULL)
+	    m4_warn (context, 0, M4ARG (0), _("undefined builtin `%s'"), name);
+	  else
+	    {
+	      m4_push_builtin (context, value);
+	      free (value);
+	    }
+	}
       else
-       m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+	m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
     }
   else
     {
       name = M4ARG (1);
       value = m4_builtin_find_by_name (NULL, name);
       if (value == NULL)
-	m4_warn (context, 0, _("%s: undefined builtin `%s'"), M4ARG (0), name);
+	m4_warn (context, 0, M4ARG (0), _("undefined builtin `%s'"), name);
       else
 	{
 	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
@@ -471,7 +468,7 @@ m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
   int resyntax = m4_regexp_syntax_encode (spec);
 
   if (resyntax < 0)
-    m4_warn (context, 0, _("%s: bad syntax-spec: `%s'"), caller, spec);
+    m4_warn (context, 0, caller, _("bad syntax-spec: `%s'"), spec);
 
   return resyntax;
 }
@@ -524,8 +521,8 @@ M4BUILTIN_HANDLER (changesyntax)
 	    }
 	  if (m4_set_syntax (M4SYNTAX, key, action,
 			     key ? m4_expand_ranges (spec, obs) : "") < 0)
-	    m4_warn (context, 0, _("%s: undefined syntax code: `%c'"),
-		     M4ARG (0), key);
+	    m4_warn (context, 0, M4ARG (0), _("undefined syntax code: `%c'"),
+		     key);
 	}
     }
   else
@@ -544,10 +541,10 @@ M4BUILTIN_HANDLER (debugfile)
   if (argc == 1)
     m4_debug_set_output (context, NULL);
   else if (m4_get_safer_opt (context) && *M4ARG (1))
-    m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+    m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
   else if (!m4_debug_set_output (context, M4ARG (1)))
-    m4_error (context, 0, errno, _("%s: cannot set debug file `%s'"),
-	      M4ARG (0), M4ARG (1));
+    m4_error (context, 0, errno, M4ARG (0), _("cannot set debug file `%s'"),
+	      M4ARG (1));
 }
 
 
@@ -585,8 +582,8 @@ M4BUILTIN_HANDLER (debugmode)
     {
       new_debug_level = m4_debug_decode (context, debug_level, M4ARG (1));
       if (new_debug_level < 0)
-	m4_error (context, 0, 0, _("%s: bad debug flags: `%s'"),
-		  M4ARG (0), M4ARG (1));
+	m4_error (context, 0, 0, M4ARG (0), _("bad debug flags: `%s'"),
+		  M4ARG (1));
       else
 	m4_set_debug_level_opt (context, new_debug_level);
     }
@@ -612,7 +609,7 @@ M4BUILTIN_HANDLER (esyscmd)
 
       if (m4_get_safer_opt (context))
 	{
-	  m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+	  m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
 	  return;
 	}
 
@@ -628,9 +625,8 @@ M4BUILTIN_HANDLER (esyscmd)
       pin = popen (M4ARG (1), "r");
       if (pin == NULL)
 	{
-	  m4_error (context, 0, errno,
-		    _("%s: cannot open pipe to command `%s'"),
-		    M4ARG (0), M4ARG (1));
+	  m4_error (context, 0, errno, M4ARG (0),
+		    _("cannot open pipe to command `%s'"), M4ARG (1));
 	  m4_set_sysval (-1);
 	}
       else
@@ -669,14 +665,14 @@ M4BUILTIN_HANDLER (format)
 M4BUILTIN_HANDLER (indir)
 {
   if (! m4_is_symbol_value_text (argv[1]))
-    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
   else
     {
       const char *name = M4ARG (1);
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (symbol == NULL)
-	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
       else
 	{
 	  int i;
@@ -821,12 +817,13 @@ M4BUILTIN_HANDLER (regexp)
     return;
 
   length = strlen (M4ARG (1));
-  startpos = regexp_search (buf, M4ARG (1), length, 0, length, replace == NULL);
+  startpos = regexp_search (buf, M4ARG (1), length, 0, length,
+			    replace == NULL);
 
   if (startpos == -2)
     {
-      m4_error (context, 0, 0, _("%s: error matching regular expression `%s'"),
-		me, pattern);
+      m4_error (context, 0, 0, me, _("error matching regular expression `%s'"),
+		pattern);
       return;
     }
 

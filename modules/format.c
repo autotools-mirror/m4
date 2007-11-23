@@ -232,8 +232,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
       c = *fmt++;
       if (c > sizeof ok || !ok[c])
 	{
-	  m4_warn (context, 0, "%s: unrecognized specifier in `%s'",
-		   name, f);
+	  m4_warn (context, 0, name, _("unrecognized specifier in `%s'"), f);
 	  if (c == '\0')
 	    fmt--;
 	  continue;

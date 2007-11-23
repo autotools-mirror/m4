@@ -78,7 +78,7 @@ M4INIT_HANDLER (load)
 {
   const char *err = m4_module_makeresident (module);
   if (err)
-    m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
+    m4_error (context, 0, 0, NULL, _("cannot make module `%s' resident: %s"),
 	      m4_get_module_name (module), err);
 }
 

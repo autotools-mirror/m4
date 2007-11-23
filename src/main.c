@@ -309,7 +309,7 @@ process_file (m4 *context, const char *name)
       FILE *fp = m4_path_search (context, name, &full_name);
       if (fp == NULL)
 	{
-	  m4_error (context, 0, errno, _("cannot open file `%s'"), name);
+	  m4_error (context, 0, errno, NULL, _("cannot open file `%s'"), name);
 	  return;
 	}
       m4_push_file (context, fp, full_name, true);
@@ -490,11 +490,11 @@ main (int argc, char *const *argv, char *const *envp)
 	    {
 	      const char *dlerr = lt_dlerror ();
 	      if (dlerr == NULL)
-		m4_error (context, EXIT_FAILURE, 0,
+		m4_error (context, EXIT_FAILURE, 0, NULL,
 			  _("failed to add search directory `%s'"),
 			  optarg);
 	      else
-		m4_error (context, EXIT_FAILURE, 0,
+		m4_error (context, EXIT_FAILURE, 0, NULL,
 			  _("failed to add search directory `%s': %s"),
 			  optarg, dlerr);
 	    }
@@ -614,7 +614,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !m4_debug_set_output (context, debugfile))
-    m4_error (context, 0, errno, _("cannot set debug file `%s'"), debugfile);
+    m4_error (context, 0, errno, NULL, _("cannot set debug file `%s'"),
+	      debugfile);
   m4_input_init (context);
   m4_output_init (context);
   m4_include_env_init (context);
@@ -692,7 +693,7 @@ main (int argc, char *const *argv, char *const *envp)
 	case 'r':
 	  m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
 	  if (m4_get_regexp_syntax_opt (context) < 0)
-	    m4_error (context, EXIT_FAILURE, 0,
+	    m4_error (context, EXIT_FAILURE, 0, NULL,
 		      _("bad regexp syntax option: `%s'"), arg);
 	  break;
 

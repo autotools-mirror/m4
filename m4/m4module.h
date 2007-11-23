@@ -110,12 +110,16 @@ extern void	m4_dump_args	   (m4 *, m4_obstack *, int,
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 
 /* Error handling.  */
-extern void m4_error (m4 *, int, int, const char *, ...) M4_GNUC_PRINTF (4, 5);
+extern void m4_error (m4 *, int, int, const char *, const char *, ...)
+  M4_GNUC_PRINTF (5, 6);
 extern void m4_error_at_line (m4 *, int, int, const char *, int,
-			      const char *, ...)	 M4_GNUC_PRINTF (6, 7);
-extern void m4_warn  (m4 *, int, const char *, ...)	 M4_GNUC_PRINTF (3, 4);
-extern void m4_warn_at_line  (m4 *, int, const char *, int,
-			      const char *, ...)	 M4_GNUC_PRINTF (5, 6);
+			      const char *, const char *, ...)
+  M4_GNUC_PRINTF (7, 8);
+extern void m4_warn  (m4 *, int, const char *, const char *, ...)
+  M4_GNUC_PRINTF (4, 5);
+extern void m4_warn_at_line  (m4 *, int, const char *, int, const char *,
+			      const char *, ...)
+  M4_GNUC_PRINTF (6, 7);
 
 extern const char *	m4_get_program_name (void);
 extern void		m4_set_program_name (const char *);
@@ -202,7 +206,7 @@ typedef void *m4_symtab_apply_func (m4_symbol_table *, const char *,
 extern m4_symbol_table *m4_symtab_create  (size_t);
 extern void	  m4_symtab_delete  (m4_symbol_table*);
 extern void *	  m4_symtab_apply   (m4_symbol_table*, bool,
-                                     m4_symtab_apply_func*, void*);
+				     m4_symtab_apply_func*, void*);
 
 extern m4_symbol *m4_symbol_lookup  (m4_symbol_table*, const char *);
 extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*,

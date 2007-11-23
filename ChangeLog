@@ -1,3 +1,28 @@
+2007-11-23  Eric Blake  <ebb9@byu.net>
+
+	Factor out handling of macro name in error messages.
+	* m4/m4module.h (m4_error, m4_error_at_line, m4_warn)
+	(m4_warn_at_line): Add new parameter.
+	* m4/utility.c (m4_verror_at_line): New helper method.
+	(m4_error, m4_error_at_line, m4_warn, m4_warn_at_line): Add new
+	parameter.
+	(m4_bad_argc, m4_numeric_arg, m4_parse_truth_arg): All callers
+	changed.
+	* m4/debug.c: Likewise.
+	* m4/input.c: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/path.c: Likewise.
+	* modules/evalparse.c: Likewise.
+	* modules/format.c: Likewise.
+	* modules/gnu.c: Likewise.
+	* modules/load.c: Likewise.
+	* modules/m4.c: Likewise.
+	* modules/mpeval.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/main.c: Likewise.
+
 2007-11-14  Eric Blake  <ebb9@byu.net>
 
 	Handle some defn corner cases differently.

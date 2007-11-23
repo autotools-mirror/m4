@@ -124,7 +124,8 @@ m4_module_import (m4 *context, const char *module_name,
       symbol_address = lt_dlsym (module->handle, symbol_name);
 
       if (!symbol_address)
-	m4_error (context, 0, 0, _("cannot load symbol `%s' from module `%s'"),
+	m4_error (context, 0, 0, NULL,
+		  _("cannot load symbol `%s' from module `%s'"),
 		  symbol_name, module_name);
     }
 
@@ -252,7 +253,7 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 
   if (errors)
     {
-      m4_error (context, EXIT_FAILURE, 0,
+      m4_error (context, EXIT_FAILURE, 0, NULL,
 		_("cannot unload module `%s': %s"),
 		name ? name : MODULE_SELF_NAME, module_dlerror ());
     }
@@ -332,7 +333,8 @@ m4__module_init (m4 *context)
      module system has already been initialized.  */
   if (iface_id)
     {
-      m4_error (context, 0, 0, _("multiple module loader initializations"));
+      m4_error (context, 0, 0, NULL,
+		_("multiple module loader initializations"));
       return;
     }
 
@@ -372,9 +374,8 @@ m4__module_init (m4 *context)
 
   /* Couldn't initialize the module system; diagnose and exit.  */
   if (errors)
-    m4_error (context, EXIT_FAILURE, 0,
-	      _("failed to initialize module loader: %s"),
-	      module_dlerror ());
+    m4_error (context, EXIT_FAILURE, 0, NULL,
+	      _("failed to initialize module loader: %s"), module_dlerror ());
 
 #ifdef DEBUG_MODULES
   fputs ("Module loader initialized.\n", stderr);
@@ -433,7 +434,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  assert (!old);
 	  err = lt_dlerror ();
 	  if (err)
-	    m4_error (context, EXIT_FAILURE, 0,
+	    m4_error (context, EXIT_FAILURE, 0, NULL,
 		      _("unable to load module `%s': %s"), name, err);
 	}
 
@@ -452,7 +453,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	       && !lt_dlsym (handle, BUILTIN_SYMBOL)
 	       && !lt_dlsym (handle, MACRO_SYMBOL))
 	{
-	  m4_error (context, EXIT_FAILURE, 0,
+	  m4_error (context, EXIT_FAILURE, 0, NULL,
 		    _("module `%s' has no entry points"), name);
 	}
 
@@ -462,8 +463,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
   else
     {
       /* Couldn't open the module; diagnose and exit. */
-      m4_error (context, EXIT_FAILURE, 0, _("cannot open module `%s': %s"),
-		name, module_dlerror ());
+      m4_error (context, EXIT_FAILURE, 0, NULL,
+		_("cannot open module `%s': %s"), name, module_dlerror ());
     }
 
   return module;
@@ -496,8 +497,8 @@ m4__module_exit (m4 *context)
 
   if (errors)
     {
-      m4_error (context, EXIT_FAILURE, 0, _("cannot unload all modules: %s"),
-		module_dlerror ());
+      m4_error (context, EXIT_FAILURE, 0, NULL,
+		_("cannot unload all modules: %s"), module_dlerror ());
     }
 }
 
@@ -582,7 +583,7 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
 	 failure about not closing a resident module.  */
       void *old = lt_dlcaller_set_data (iface_id, handle, NULL);
       if (!old)
-	m4_error (context, EXIT_FAILURE, 0,
+	m4_error (context, EXIT_FAILURE, 0, NULL,
 		  _("unable to close module `%s': %s"), name,
 		  module_dlerror());
       assert (old == module);
@@ -604,8 +605,8 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
     }
 
   if (errors)
-    m4_error (context, EXIT_FAILURE, 0, _("cannot close module `%s': %s"),
-	      name, module_dlerror ());
+    m4_error (context, EXIT_FAILURE, 0, NULL,
+	      _("cannot close module `%s': %s"), name, module_dlerror ());
   if (last_reference)
     free (module);
 

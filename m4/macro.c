@@ -204,8 +204,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	  break;
 
 	case M4_TOKEN_EOF:
-	   m4_error_at_line (context, EXIT_FAILURE, 0, file, line,
-			     _("%s: end of file in argument list"), caller);
+	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line, caller,
+			    _("end of file in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:
@@ -282,7 +282,7 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   expansion_level++;
   if (m4_get_nesting_limit_opt (context) > 0
       && expansion_level > m4_get_nesting_limit_opt (context))
-    m4_error (context, EXIT_FAILURE, 0, _("\
+    m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
 
@@ -404,9 +404,9 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
     }
   else if (m4_is_symbol_value_placeholder (value))
     {
-      m4_warn (context, 0,
-	       _("%s: builtin `%s' requested by frozen file not found"),
-	       M4ARG (0), m4_get_symbol_value_placeholder (value));
+      m4_warn (context, 0, M4ARG (0),
+	       _("builtin `%s' requested by frozen file not found"),
+	       m4_get_symbol_value_placeholder (value));
     }
   else
     {
@@ -514,9 +514,9 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 		}
 	      else
 		{
-		  m4_error (context, 0, 0,
-			    _("%s: unterminated parameter reference: %s"),
-			    M4ARG (0), key);
+		  m4_error (context, 0, 0, M4ARG (0),
+			    _("unterminated parameter reference: %s"),
+			    key);
 		}
 
 	      text = *endp ? 1 + endp : endp;

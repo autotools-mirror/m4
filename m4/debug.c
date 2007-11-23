@@ -143,7 +143,8 @@ set_debug_file (m4 *context, FILE *fp)
   debug_file = m4_get_debug_file (context);
   if (debug_file != NULL && debug_file != stderr && debug_file != stdout
       && close_stream (debug_file) != 0)
-    m4_error (context, 0, errno, _("error writing to debug stream"));
+    /* FIXME - use macro name.  */
+    m4_error (context, 0, errno, NULL, _("error writing to debug stream"));
 
   debug_file = fp;
   m4_set_debug_file (context, fp);
@@ -162,7 +163,9 @@ set_debug_file (m4 *context, FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug_file != stderr && close_stream (debug_file) != 0)
-	    m4_error (context, 0, errno, _("error writing to debug stream"));
+	    /* FIXME - use macro name.  */
+	    m4_error (context, 0, errno, NULL,
+		      _("error writing to debug stream"));
 	  m4_set_debug_file (context, stdout);
 	}
     }
@@ -189,8 +192,9 @@ m4_debug_set_output (m4 *context, const char *name)
 	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	m4_error (context, 0, errno,
-		  _("cannot protect debug file across forks"));
+	/* FIXME - use macro name.  */
+	m4_warn (context, errno, NULL,
+		 _("cannot protect debug file across forks"));
       set_debug_file (context, fp);
     }
   return true;

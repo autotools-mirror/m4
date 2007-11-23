@@ -142,7 +142,7 @@ M4INIT_HANDLER (m4)
 {
   const char *err = m4_module_makeresident (module);
   if (err)
-    m4_error (context, 0, 0, _("cannot make module `%s' resident: %s"),
+    m4_error (context, 0, 0, NULL, _("cannot make module `%s' resident: %s"),
 	      m4_get_module_name (module), err);
 }
 
@@ -172,7 +172,7 @@ M4BUILTIN_HANDLER (define)
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
 }
 
 M4BUILTIN_HANDLER (undefine)
@@ -183,7 +183,7 @@ M4BUILTIN_HANDLER (undefine)
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
       else
 	m4_symbol_delete (M4SYMTAB, name);
     }
@@ -203,7 +203,7 @@ M4BUILTIN_HANDLER (pushdef)
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, _("%s: invalid macro name ignored"), M4ARG (0));
+    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
 }
 
 M4BUILTIN_HANDLER (popdef)
@@ -214,7 +214,7 @@ M4BUILTIN_HANDLER (popdef)
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
       else
 	m4_symbol_popdef (M4SYMTAB, name);
     }
@@ -344,8 +344,8 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
 	  if (symbol != NULL)
 	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	  else if (complain)
-	    m4_warn (context, 0, _("%s: undefined macro `%s'"),
-		     M4ARG (0), M4ARG (i));
+	    m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"),
+		     M4ARG (i));
 	}
     }
 
@@ -401,15 +401,15 @@ M4BUILTIN_HANDLER (defn)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (!symbol)
-	m4_warn (context, 0, _("%s: undefined macro `%s'"), M4ARG (0), name);
+	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (context, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	m4_warn (context, 0,
-		 _("%s: builtin `%s' requested by frozen file not found"),
-		 name, m4_get_symbol_placeholder (symbol));
+	m4_warn (context, 0, name,
+		 _("builtin `%s' requested by frozen file not found"),
+		 m4_get_symbol_placeholder (symbol));
       else
 	{
 	  assert (!"Bad token data type in m4_defn");
@@ -471,7 +471,7 @@ sysval_flush_helper (m4 *context, FILE *stream, bool report)
 {
   if (fflush (stream) == EOF && report)
     {
-      m4_error (context, 0, errno, _("write error"));
+      m4_error (context, 0, errno, NULL, _("write error"));
       clearerr (stream);
     }
 }
@@ -519,7 +519,7 @@ M4BUILTIN_HANDLER (syscmd)
 {
    if (m4_get_safer_opt (context))
    {
-     m4_error (context, 0, 0, _("%s: disabled by --safer"), M4ARG (0));
+     m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
      return;
    }
 
@@ -621,12 +621,11 @@ M4BUILTIN_HANDLER (undivert)
 	      {
 		m4_insert_file (context, fp);
 		if (fclose (fp) == EOF)
-		  m4_error (context, 0, errno, _("%s: error undiverting `%s'"),
-			    me, str);
+		  m4_error (context, 0, errno, me, _("error undiverting `%s'"),
+			    str);
 	      }
 	    else
-	      m4_error (context, 0, errno, _("%s: cannot undivert `%s'"),
-			me, str);
+	      m4_error (context, 0, errno, me, _("cannot undivert `%s'"), str);
 	  }
       }
 }
@@ -685,7 +684,7 @@ include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (context, 0, errno, _("%s: cannot open `%s'"), M4ARG (0),
+	m4_error (context, 0, errno, M4ARG (0), _("cannot open `%s'"),
 		  M4ARG (1));
       return;
     }
@@ -722,7 +721,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 
   if (m4_get_safer_opt (context))
     {
-      m4_error (context, 0, 0, _("%s: disabled by --safer"), macro);
+      m4_error (context, 0, 0, macro, _("disabled by --safer"));
       return;
     }
 
@@ -746,10 +745,10 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
       /* This use of _() will need to change if xgettext ever changes
 	 its undocumented behavior of parsing both string options.  */
 
-      m4_error (context, 0, errno,
-		_(dir ? "%s: cannot create directory from template `%s'"
-		  : "%s: cannot create file from template `%s'"),
-		macro, name);
+      m4_error (context, 0, errno, macro,
+		_(dir ? "cannot create directory from template `%s'"
+		  : "cannot create file from template `%s'"),
+		name);
       obstack_free (obs, obstack_finish (obs));
     }
   else if (! dir)
@@ -759,7 +758,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 /* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)
 {
-  m4_warn (context, 0, _("%s: recommend using mkstemp instead"), M4ARG (0));
+  m4_warn (context, 0, M4ARG (0), _("recommend using mkstemp instead"));
   if (m4_get_posixly_correct_opt (context))
     {
       /* POSIX states "any trailing 'X' characters [are] replaced with
@@ -829,8 +828,8 @@ M4BUILTIN_HANDLER (m4exit)
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
-      m4_warn (context, 0, _("%s: exit status out of range: `%d'"),
-	       M4ARG (0), exit_code);
+      m4_warn (context, 0, M4ARG (0), _("exit status out of range: `%d'"),
+	       exit_code);
       exit_code = EXIT_FAILURE;
     }
 

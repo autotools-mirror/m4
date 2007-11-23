@@ -289,12 +289,12 @@ file_clean (m4_input_block *me, m4 *context)
 
   if (ferror (me->u.u_f.fp))
     {
-      m4_error (context, 0, 0, _("error reading file `%s'"), me->file);
+      m4_error (context, 0, 0, NULL, _("error reading file `%s'"), me->file);
       if (me->u.u_f.close)
 	fclose (me->u.u_f.fp);
     }
   else if (me->u.u_f.close && fclose (me->u.u_f.fp) == EOF)
-    m4_error (context, 0, errno, _("error reading file `%s'"), me->file);
+    m4_error (context, 0, errno, NULL, _("error reading file `%s'"), me->file);
   start_of_input_line = me->u.u_f.advance_line;
   m4_set_output_line (context, -1);
 }
@@ -846,8 +846,8 @@ m4_skip_line (m4 *context, const char *name)
     ;
   if (ch == CHAR_EOF)
     /* current_file changed; use the previous value we cached.  */
-    m4_warn_at_line (context, 0, file, line,
-		     _("%s: end of file treated as newline"), name);
+    m4_warn_at_line (context, 0, file, line, name,
+		     _("end of file treated as newline"));
   /* On the rare occasion that dnl crosses include file boundaries
      (either the input file did not end in a newline, or changesyntax
      was used), calling next_char can update current_file and
@@ -1081,9 +1081,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  {
 	    ch = next_char (context, true);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
-				"%s%s%s", caller ? caller : "",
-				caller ? ": " : "",
+	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
 
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
@@ -1110,9 +1108,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  {
 	    ch = next_char (context, true);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
-				"%s%s%s", caller ? caller : "",
-				caller ? ": " : "",
+	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
 	    if (MATCH (context, ch, context->syntax->rquote.string, true))
 	      {
@@ -1141,9 +1137,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (ch != CHAR_EOF)
 	  obstack_1grow (&token_stack, ch);
 	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
-			    "%s%s%s", caller ? caller : "",
-			    caller ? ": " : "",
+	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
@@ -1160,9 +1154,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  obstack_grow (&token_stack, context->syntax->ecomm.string,
 			context->syntax->ecomm.length);
 	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line,
-			    "%s%s%s", caller ? caller : "",
-			    caller ? ": " : "",
+	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);

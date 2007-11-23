@@ -157,7 +157,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       if (fp != NULL)
 	{
 	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno,
+	    m4_error (context, 0, errno, NULL,
 		      _("cannot protect input file across forks"));
 	  if (expanded_name != NULL)
 	    *expanded_name = xstrdup (file);
@@ -182,7 +182,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
 			    _("path search for `%s' found `%s'"),
 			    file, name);
 	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno,
+	    m4_error (context, 0, errno, NULL,
 		      _("cannot protect input file across forks"));
 
 	  if (expanded_name != NULL)
