@@ -389,7 +389,7 @@ void
 m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
 	       int argc, m4_symbol_value **argv)
 {
-  if (m4_bad_argc (context, argc, argv,
+  if (m4_bad_argc (context, argc, m4_get_symbol_value_text (argv[0]),
 		   VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
 		   BIT_TEST (VALUE_FLAGS (value),
 			     VALUE_SIDE_EFFECT_ARGS_BIT)))

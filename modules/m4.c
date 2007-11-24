@@ -246,6 +246,7 @@ M4BUILTIN_HANDLER (ifdef)
 
 M4BUILTIN_HANDLER (ifelse)
 {
+  const char *me = M4ARG (0);
   const char *result;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
@@ -253,11 +254,11 @@ M4BUILTIN_HANDLER (ifelse)
   if (argc == 2)
     return;
 
-  if (m4_bad_argc (context, argc, argv, 3, -1, false))
+  if (m4_bad_argc (context, argc, me, 3, -1, false))
     return;
   else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    m4_bad_argc (context, argc, argv, 0, argc - 2, false);
+    m4_bad_argc (context, argc, me, 0, argc - 2, false);
 
   argv++;
   argc--;
@@ -549,7 +550,7 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &value))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -559,7 +560,7 @@ M4BUILTIN_HANDLER (decr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &value))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -576,7 +577,7 @@ M4BUILTIN_HANDLER (divert)
   int i = 0;
   const char *text;
 
-  if (argc >= 2 && !m4_numeric_arg (context, argc, argv, 1, &i))
+  if (argc >= 2 && !m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
 
   m4_make_diversion (context, i);
@@ -613,7 +614,7 @@ M4BUILTIN_HANDLER (undivert)
 	if (*endp == '\0' && !isspace ((unsigned char) *str))
 	  m4_insert_diversion (context, diversion);
 	else if (m4_get_posixly_correct_opt (context))
-	  m4_numeric_arg (context, argc, argv, i, &diversion);
+	  m4_numeric_arg (context, me, str, &diversion);
 	else
 	  {
 	    FILE *fp = m4_path_search (context, str, NULL);
@@ -825,7 +826,7 @@ M4BUILTIN_HANDLER (m4exit)
   int exit_code = EXIT_SUCCESS;
 
   /* Warn on bad arguments, but still exit.  */
-  if (argc >= 2 && !m4_numeric_arg (context, argc, argv, 1, &exit_code))
+  if (argc >= 2 && !m4_numeric_arg (context, me, M4ARG (1), &exit_code))
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
@@ -934,21 +935,23 @@ M4BUILTIN_HANDLER (index)
    substring extends to the end of the first argument.  */
 M4BUILTIN_HANDLER (substr)
 {
+  const char *me = M4ARG (0);
+  const char *str = M4ARG (1);
   int start = 0;
   int length;
   int avail;
 
   if (argc <= 2)
     {
-      obstack_grow (obs, M4ARG (1), strlen (M4ARG (1)));
+      obstack_grow (obs, str, strlen (str));
       return;
     }
 
-  length = avail = strlen (M4ARG (1));
-  if (!m4_numeric_arg (context, argc, argv, 2, &start))
+  length = avail = strlen (str);
+  if (!m4_numeric_arg (context, me, M4ARG (2), &start))
     return;
 
-  if (argc >= 4 && !m4_numeric_arg (context, argc, argv, 3, &length))
+  if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), &length))
     return;
 
   if (start < 0 || length <= 0 || start >= avail)
@@ -956,7 +959,7 @@ M4BUILTIN_HANDLER (substr)
 
   if (start + length > avail)
     length = avail - start;
-  obstack_grow (obs, M4ARG (1) + start, length);
+  obstack_grow (obs, str + start, length);
 }
 
 

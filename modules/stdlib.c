@@ -110,7 +110,7 @@ M4BUILTIN_HANDLER (setenv)
   int overwrite = 1;
 
   if (argc >= 4)
-    if (!m4_numeric_arg (context, argc, argv, 3, &overwrite))
+    if (!m4_numeric_arg (context, M4ARG (0), M4ARG (3), &overwrite))
       return;
 
 #if HAVE_SETENV
@@ -209,7 +209,7 @@ M4BUILTIN_HANDLER (getpwuid)
   struct passwd *pw;
   int uid;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &uid))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &uid))
     return;
 
   pw = getpwuid (uid);
@@ -264,7 +264,7 @@ M4BUILTIN_HANDLER (srand)
     seed = time (0L) * getpid ();
   else
     {
-      if (!m4_numeric_arg (context, argc, argv, 1, &seed))
+      if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &seed))
 	return;
     }
 

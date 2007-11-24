@@ -102,9 +102,9 @@ struct m4_macro
 
 #define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
 
-extern bool	m4_bad_argc	   (m4 *, int, m4_symbol_value **,
+extern bool	m4_bad_argc	   (m4 *, int, const char *,
 				    unsigned int, unsigned int, bool);
-extern bool	m4_numeric_arg	   (m4 *, int, m4_symbol_value **, int, int *);
+extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
 extern void	m4_dump_args	   (m4 *, m4_obstack *, int,
 				    m4_symbol_value **, const char *, bool);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);

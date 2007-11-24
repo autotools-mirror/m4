@@ -27,7 +27,7 @@
 #include "verror.h"
 #include "xvasprintf.h"
 
-static const char * skip_space (m4 *, const char *);
+static const char *skip_space (m4 *, const char *);
 
 
 
@@ -36,23 +36,23 @@ static const char * skip_space (m4 *, const char *);
    number of acceptable arguments, MAX is the 0-based maximum number
    or UINT_MAX if not applicable, and SIDE_EFFECT is true if the macro
    has side effects even if min is not satisfied.  ARGC is the 1-based
-   count of ARGV, where ARGV[0] is the name of the macro.  Return true
-   if the macro is guaranteed to expand to the empty string, false
-   otherwise.  */
+   count of supplied arguments, and CALLER is the name of the macro.
+   Return true if the macro is guaranteed to expand to the empty
+   string, false otherwise.  */
 bool
-m4_bad_argc (m4 *context, int argc, m4_symbol_value **argv,
-	     unsigned int min, unsigned int max, bool side_effect)
+m4_bad_argc (m4 *context, int argc, const char *caller, unsigned int min,
+	     unsigned int max, bool side_effect)
 {
   if (argc - 1 < min)
     {
-      m4_warn (context, 0, M4ARG (0), _("too few arguments: %d < %d"),
+      m4_warn (context, 0, caller, _("too few arguments: %d < %d"),
 	       argc - 1, min);
-      return ! side_effect;
+      return !side_effect;
     }
 
   if (argc - 1 > max)
     {
-      m4_warn (context, 0, M4ARG (0), _("extra arguments ignored: %d > %d"),
+      m4_warn (context, 0, caller, _("extra arguments ignored: %d > %d"),
 	       argc - 1, max);
     }
 
@@ -68,28 +68,26 @@ skip_space (m4 *context, const char *arg)
 }
 
 /* The function m4_numeric_arg () converts ARG to an int pointed to by
-   VALUEP. If the conversion fails, print error message for macro.
+   VALUEP. If the conversion fails, print error message for CALLER.
    Return true iff conversion succeeds.  */
 /* FIXME: Convert this to use gnulib's xstrtoimax, xstrtoumax.
    Otherwise, we are arbitrarily limiting integer values.  */
 bool
-m4_numeric_arg (m4 *context, int argc, m4_symbol_value **argv,
-		int arg, int *valuep)
+m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
 {
   char *endp;
 
-  if (*M4ARG (arg) == '\0')
+  if (*arg == '\0')
     {
       *valuep = 0;
-      m4_warn (context, 0, M4ARG (0), _("empty string treated as 0"));
+      m4_warn (context, 0, caller, _("empty string treated as 0"));
     }
   else
     {
-      *valuep = strtol (skip_space (context, M4ARG (arg)), &endp, 10);
+      *valuep = strtol (skip_space (context, arg), &endp, 10);
       if (*skip_space (context, endp) != 0)
 	{
-	  m4_warn (context, 0, M4ARG (0), _("non-numeric argument `%s'"),
-		   M4ARG (arg));
+	  m4_warn (context, 0, caller, _("non-numeric argument `%s'"), arg);
 	  return false;
 	}
     }
@@ -164,7 +162,7 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
 		  full ? full : format, args);
   free (full);
   if ((!warn || m4_get_fatal_warnings_opt (context))
-      && ! m4_get_exit_status (context))
+      && !m4_get_exit_status (context))
     m4_set_exit_status (context, EXIT_FAILURE);
 }
 
@@ -182,7 +180,7 @@ m4_error (m4 *context, int status, int errnum, const char *macro,
 {
   va_list args;
   int line = m4_get_current_line (context);
-  assert (m4_get_current_file (context) || ! line);
+  assert (m4_get_current_file (context) || !line);
   va_start (args, format);
   if (status == EXIT_SUCCESS && m4_get_warnings_exit_opt (context))
     status = EXIT_FAILURE;
@@ -228,7 +226,7 @@ m4_warn (m4 *context, int errnum, const char *macro, const char *format, ...)
       va_list args;
       int status = EXIT_SUCCESS;
       int line = m4_get_current_line (context);
-      assert (m4_get_current_file (context) || ! line);
+      assert (m4_get_current_file (context) || !line);
       va_start (args, format);
       if (m4_get_warnings_exit_opt (context))
 	status = EXIT_FAILURE;

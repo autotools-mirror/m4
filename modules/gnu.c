@@ -405,25 +405,26 @@ M4BUILTIN_HANDLER (__program__)
  **/
 M4BUILTIN_HANDLER (builtin)
 {
+  const char *me = M4ARG (0);
   const char *name;
   m4_symbol_value *value;
 
-  if (! m4_is_symbol_value_text (argv[1]))
+  if (!m4_is_symbol_value_text (argv[1]))
     {
       if (m4_is_symbol_value_func (argv[1])
 	  && m4_get_symbol_value_func (argv[1]) == builtin_builtin)
 	{
-	  if (m4_bad_argc (context, argc, argv, 2, 2, false))
+	  if (m4_bad_argc (context, argc, me, 2, 2, false))
 	    return;
-	  if (! m4_is_symbol_value_text (argv[2]))
+	  if (!m4_is_symbol_value_text (argv[2]))
 	    {
-	      m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+	      m4_warn (context, 0, me, _("invalid macro name ignored"));
 	      return;
 	    }
 	  name = M4ARG (2);
 	  value = m4_builtin_find_by_name (NULL, name);
 	  if (value == NULL)
-	    m4_warn (context, 0, M4ARG (0), _("undefined builtin `%s'"), name);
+	    m4_warn (context, 0, me, _("undefined builtin `%s'"), name);
 	  else
 	    {
 	      m4_push_builtin (context, value);
@@ -431,25 +432,25 @@ M4BUILTIN_HANDLER (builtin)
 	    }
 	}
       else
-	m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+	m4_warn (context, 0, me, _("invalid macro name ignored"));
     }
   else
     {
       name = M4ARG (1);
       value = m4_builtin_find_by_name (NULL, name);
       if (value == NULL)
-	m4_warn (context, 0, M4ARG (0), _("undefined builtin `%s'"), name);
+	m4_warn (context, 0, me, _("undefined builtin `%s'"), name);
       else
 	{
 	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-	  if (!m4_bad_argc (context, argc - 1, argv + 1,
+	  if (!m4_bad_argc (context, argc - 1, name,
 			    bp->min_args, bp->max_args,
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
 	    {
 	      int i;
 	      if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
 		for (i = 2; i < argc; i++)
-		  if (! m4_is_symbol_value_text (argv[i]))
+		  if (!m4_is_symbol_value_text (argv[i]))
 		    m4_set_symbol_value_text (argv[i], "");
 	      bp->func (context, obs, argc - 1, argv + 1);
 	    }
@@ -559,7 +560,7 @@ M4BUILTIN_HANDLER (debugfile)
 M4BUILTIN_HANDLER (debuglen)
 {
   int i;
-  if (!m4_numeric_arg (context, argc, argv, 1, &i))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
   /* FIXME - make m4_numeric_arg more powerful - we want to accept
      suffixes, and limit the result to size_t.  */
@@ -666,7 +667,7 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (indir)
 {
-  if (! m4_is_symbol_value_text (argv[1]))
+  if (!m4_is_symbol_value_text (argv[1]))
     m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
   else
     {
@@ -678,9 +679,9 @@ M4BUILTIN_HANDLER (indir)
       else
 	{
 	  int i;
-	  if (! m4_symbol_groks_macro (symbol))
+	  if (!m4_symbol_groks_macro (symbol))
 	    for (i = 2; i < argc; i++)
-	      if (! m4_is_symbol_value_text (argv[i]))
+	      if (!m4_is_symbol_value_text (argv[i]))
 		m4_set_symbol_value_text (argv[i], "");
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, argv + 1);
@@ -784,7 +785,7 @@ M4BUILTIN_HANDLER (regexp)
 
       /* The first case is the most difficult, because the empty string
 	 is a valid RESYNTAX, yet we want `regexp(aab, a*, )' to return
-	 an empty string as per M4 1.4.x!  */
+	 an empty string as per M4 1.4.x.  */
 
       if ((*replace == '\0') || (resyntax < 0))
 	/* regexp(VICTIM, REGEXP, REPLACEMENT) */

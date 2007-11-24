@@ -1,3 +1,18 @@
+2007-11-24  Eric Blake  <ebb9@byu.net>
+
+	Pass only macro name to utility functions.
+	* m4/m4module.h (m4_bad_argc, m4_numeric_arg): Adjust signature.
+	* m4/utility.c (m4_bad_argc, m4_numeric_arg): Adjust
+	implementation.
+	* m4/macro.c (m4_macro_call): Adjust callers.
+	* modules/gnu.c (builtin, debuglen): Likewise.
+	* modules/m4.c (ifelse, incr, decr, divert, undivert, m4exit)
+	(substr): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	* modules/stdlib.c (setenv, getpwuid, srand): Likewise.
+	* modules/time.c (ctime, gmtime, localtime, mktime, strftime):
+	Likewise.
+
 2007-11-23  Eric Blake  <ebb9@byu.net>
 
 	Add macro name to debugfile messages.

@@ -887,38 +887,40 @@ simple_term (m4 *context, eval_token et, number *v1)
 void
 m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 {
+  const char *	me	= M4ARG (0);
+  const char *	str	= M4ARG (1);
   int		radix	= 10;
   int		min	= 1;
   number	val;
   eval_token	et;
   eval_error	err	= NO_ERROR;
 
-  if (*M4ARG (2) && !m4_numeric_arg (context, argc, argv, 2, &radix))
+  if (*M4ARG (2) && !m4_numeric_arg (context, me, M4ARG (2), &radix))
     return;
 
   if (radix < 1 || radix > 36)
     {
-      m4_warn (context, 0, M4ARG (0), _("radix out of range: %d"), radix);
+      m4_warn (context, 0, me, _("radix out of range: %d"), radix);
       return;
     }
 
-  if (argc >= 4 && !m4_numeric_arg (context, argc, argv, 3, &min))
+  if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), &min))
     return;
 
   if (min < 0)
     {
-      m4_warn (context, 0, M4ARG (0), _("negative width: %d"), min);
+      m4_warn (context, 0, me, _("negative width: %d"), min);
       return;
     }
 
   numb_initialise ();
-  eval_init_lex (M4ARG (1));
+  eval_init_lex (str);
 
   numb_init (val);
   et = eval_lex (&val);
   if (et == EOTEXT)
     {
-      m4_warn (context, 0, M4ARG (0), _("empty string treated as zero"));
+      m4_warn (context, 0, me, _("empty string treated as zero"));
       numb_set (val, numb_ZERO);
     }
   else
@@ -939,42 +941,40 @@ m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
       break;
 
     case MISSING_RIGHT:
-      m4_warn (context, 0, M4ARG (0), _("missing right parenthesis: %s"),
-	       M4ARG (1));
+      m4_warn (context, 0, me, _("missing right parenthesis: %s"), str);
       break;
 
     case MISSING_COLON:
-      m4_warn (context, 0, M4ARG (0), _("missing colon: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("missing colon: %s"), str);
       break;
 
     case SYNTAX_ERROR:
-      m4_warn (context, 0, M4ARG (0), _("bad expression: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("bad expression: %s"), str);
       break;
 
     case UNKNOWN_INPUT:
-      m4_warn (context, 0, M4ARG (0), _("bad input: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("bad input: %s"), str);
       break;
 
     case EXCESS_INPUT:
-      m4_warn (context, 0, M4ARG (0), _("excess input: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("excess input: %s"), str);
       break;
 
     case INVALID_OPERATOR:
       /* POSIX requires an error here, unless XCU ERN 137 is approved.  */
-      m4_error (context, 0, 0, M4ARG (0), _("invalid operator: %s"),
-		M4ARG (1));
+      m4_error (context, 0, 0, me, _("invalid operator: %s"), str);
       break;
 
     case DIVIDE_ZERO:
-      m4_warn (context, 0, M4ARG (0), _("divide by zero: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("divide by zero: %s"), str);
       break;
 
     case MODULO_ZERO:
-      m4_warn (context, 0, M4ARG (0), _("modulo by zero: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("modulo by zero: %s"), str);
       break;
 
     case NEGATIVE_EXPONENT:
-      m4_warn (context, 0, M4ARG (0), _("negative exponent: %s"), M4ARG (1));
+      m4_warn (context, 0, me, _("negative exponent: %s"), str);
       break;
 
     default:

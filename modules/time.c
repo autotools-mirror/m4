@@ -107,7 +107,7 @@ M4BUILTIN_HANDLER (ctime)
 
   if (argc == 2)
     {
-      m4_numeric_arg (context, argc, argv, 1, &i);
+      m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i);
       t = i;
     }
   else
@@ -155,7 +155,7 @@ M4BUILTIN_HANDLER (gmtime)
   time_t t;
   int i;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &i))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
 
   t = i;
@@ -170,7 +170,7 @@ M4BUILTIN_HANDLER (localtime)
   time_t t;
   int i;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &i))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
 
   t = i;
@@ -183,22 +183,23 @@ M4BUILTIN_HANDLER (localtime)
  **/
 M4BUILTIN_HANDLER (mktime)
 {
+  const char *me = M4ARG (0);
   struct tm tm;
   time_t t;
 
-  if (!m4_numeric_arg (context, argc, argv, 1, &tm.tm_sec))
+  if (!m4_numeric_arg (context, me, M4ARG (1), &tm.tm_sec))
     return;
-  if (!m4_numeric_arg (context, argc, argv, 2, &tm.tm_min))
+  if (!m4_numeric_arg (context, me, M4ARG (2), &tm.tm_min))
     return;
-  if (!m4_numeric_arg (context, argc, argv, 3, &tm.tm_hour))
+  if (!m4_numeric_arg (context, me, M4ARG (3), &tm.tm_hour))
     return;
-  if (!m4_numeric_arg (context, argc, argv, 4, &tm.tm_mday))
+  if (!m4_numeric_arg (context, me, M4ARG (4), &tm.tm_mday))
     return;
-  if (!m4_numeric_arg (context, argc, argv, 5, &tm.tm_mon))
+  if (!m4_numeric_arg (context, me, M4ARG (5), &tm.tm_mon))
     return;
-  if (!m4_numeric_arg (context, argc, argv, 6, &tm.tm_year))
+  if (!m4_numeric_arg (context, me, M4ARG (6), &tm.tm_year))
     return;
-  if (M4ARG (7) && !m4_numeric_arg (context, argc, argv, 7, &tm.tm_isdst))
+  if (M4ARG (7) && !m4_numeric_arg (context, me, M4ARG (7), &tm.tm_isdst))
     return;
 
   t = mktime (&tm);
@@ -218,7 +219,7 @@ M4BUILTIN_HANDLER (strftime)
   char *buf;
   int l;
 
-  if (!m4_numeric_arg (context, argc, argv, 2, &l))
+  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (2), &l))
     return;
 
   t = l;
