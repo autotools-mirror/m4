@@ -1,5 +1,26 @@
 2007-11-24  Eric Blake  <ebb9@byu.net>
 
+	Stage 1: convert m4_symbol_value** into new object.
+	* ltdl/m4/gnulib-cache.m4: Import flexmember module.
+	* m4/m4module.h (m4_macro_args): New type, will be opaque to
+	modules later.
+	(m4_builtin_func, M4BUILTIN, M4BUILTIN_HANDLER, m4_dump_args)
+	(m4_macro_call): Alter signature to use m4_macro_args object.
+	(M4ARG): Redefine to access new struct.
+	* m4/m4private.h (M4_SYMBOL_COMP): New enumerator.
+	(struct m4_symbol_chain): New type.
+	(struct m4_symbol_value): Add chain alternative.
+	* m4/macro.c (collect_arguments): Build new struct.
+	(expand_macro, m4_macro_call, process_macro, trace_pre)
+	(trace_post): Adjust implementation to use it.
+	* m4/utility.c (m4_dump_args): Likewise.
+	* modules/gnu.c (builtin, indir): Likewise.
+	* modules/format.c (format): Likewise.
+	* modules/m4.h (m4_dump_symbols_func): Likewise.
+	* modules/m4.c (m4_dump_symbols, define, pushdef, defn, ifelse)
+	(shift, include, errprint, m4wrap): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+
 	Pass only macro name to utility functions.
 	* m4/m4module.h (m4_bad_argc, m4_numeric_arg): Adjust signature.
 	* m4/utility.c (m4_bad_argc, m4_numeric_arg): Adjust

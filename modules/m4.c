@@ -50,7 +50,7 @@
 extern void m4_set_sysval    (int value);
 extern void m4_sysval_flush  (m4 *context, bool report);
 extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
-			      m4_symbol_value **argv, bool complain);
+			      m4_macro_args *argv, bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 			      const char *name, bool dir);
@@ -102,7 +102,7 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 typedef intmax_t number;
 typedef uintmax_t unumber;
 
-static void	include		(m4 *context, int argc, m4_symbol_value **argv,
+static void	include		(m4 *context, int argc, m4_macro_args *argv,
 				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char *name,
@@ -113,7 +113,7 @@ static void	numb_obstack	(m4_obstack *obs, number value,
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros,  blind, side, min, max) M4BUILTIN(handler)
+#define BUILTIN(handler, macros,  blind, side, min, max) M4BUILTIN (handler)
   builtin_functions
 #undef BUILTIN
 
@@ -122,7 +122,7 @@ static void	numb_obstack	(m4_obstack *obs, number value,
 m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)	\
-  { CONC(builtin_, handler), STR(handler),		\
+  { CONC (builtin_, handler), STR (handler),		\
     ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
      | (blind ? M4_BUILTIN_BLIND : 0)			\
      | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
@@ -160,14 +160,14 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (m4_is_symbol_value_text (argv[1]))
+  if (m4_is_symbol_value_text (argv->array[1 - 1]))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	m4_symbol_value_copy (value, argv[2]);
+	m4_symbol_value_copy (value, argv->array[2 - 1]);
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
@@ -191,14 +191,14 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (m4_is_symbol_value_text (argv[1]))
+  if (m4_is_symbol_value_text (argv->array[1 - 1]))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	m4_symbol_value_copy (value, argv[2]);
+	m4_symbol_value_copy (value, argv->array[2 - 1]);
 
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
@@ -248,6 +248,7 @@ M4BUILTIN_HANDLER (ifelse)
 {
   const char *me = M4ARG (0);
   const char *result;
+  int index;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
      rely on the regular mechanisms.  */
@@ -260,14 +261,14 @@ M4BUILTIN_HANDLER (ifelse)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     m4_bad_argc (context, argc, me, 0, argc - 2, false);
 
-  argv++;
+  index = 1;
   argc--;
 
   result = NULL;
   while (result == NULL)
 
-    if (strcmp (M4ARG (0), M4ARG (1)) == 0)
-      result = M4ARG (2);
+    if (strcmp (M4ARG (index), M4ARG (index + 1)) == 0)
+      result = M4ARG (index + 2);
 
     else
       switch (argc)
@@ -277,12 +278,12 @@ M4BUILTIN_HANDLER (ifelse)
 
 	case 4:
 	case 5:
-	  result = M4ARG (3);
+	  result = M4ARG (index + 3);
 	  break;
 
 	default:
 	  argc -= 3;
-	  argv += 3;
+	  index += 3;
 	}
 
   obstack_grow (obs, result, strlen (result));
@@ -327,7 +328,7 @@ dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
    symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
-		 m4_symbol_value **argv, bool complain)
+		 m4_macro_args *argv, bool complain)
 {
   assert (obstack_object_size (data->obs) == 0);
   data->size = obstack_room (data->obs) / sizeof (const char *);
@@ -394,15 +395,16 @@ M4BUILTIN_HANDLER (dumpdef)
    macro-definition token on the input stack.  */
 M4BUILTIN_HANDLER (defn)
 {
+  const char *me = M4ARG (0);
   int i;
 
   for (i = 1; i < argc; i++)
     {
-      const char *name = m4_get_symbol_value_text (argv[i]);
+      const char *name = M4ARG (i);
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (!symbol)
-	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
+	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
       else if (m4_is_symbol_func (symbol))
@@ -647,7 +649,7 @@ M4BUILTIN_HANDLER (dnl)
    output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
-  m4_dump_args (context, obs, argc - 1, argv + 1, ",", true);
+  m4_dump_args (context, obs, 2, argv, ",", true);
 }
 
 /* Change the current quotes.  The function set_quotes () lives in
@@ -676,7 +678,7 @@ M4BUILTIN_HANDLER (changecom)
 /* Generic include function.  Include the file given by the first argument,
    if it exists.  Complain about inaccesible files iff SILENT is false.  */
 static void
-include (m4 *context, int argc, m4_symbol_value **argv, bool silent)
+include (m4 *context, int argc, m4_macro_args *argv, bool silent)
 {
   FILE *fp;
   char *name = NULL;
@@ -806,7 +808,7 @@ M4BUILTIN_HANDLER (mkstemp)
 M4BUILTIN_HANDLER (errprint)
 {
   assert (obstack_object_size (obs) == 0);
-  m4_dump_args (context, obs, argc, argv, " ", false);
+  m4_dump_args (context, obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
   m4_sysval_flush (context, false);
   fputs ((char *) obstack_finish (obs), stderr);
@@ -861,7 +863,7 @@ M4BUILTIN_HANDLER (m4wrap)
   if (m4_get_posixly_correct_opt (context))
     m4_shipout_string (context, obs, M4ARG (1), 0, false);
   else
-    m4_dump_args (context, obs, argc, argv, " ", false);
+    m4_dump_args (context, obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
   m4_push_wrapup (context, obstack_finish (obs));
 }

@@ -30,21 +30,17 @@
    TODO - use xstrtoimax, not atoi, to catch overflow, non-numeric
    arguments, etc.  */
 
-#define ARG_INT(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (M4ARG (-1))))
+#define ARG_INT(i, argc, argv)			\
+  ((argc <= i++) ? 0 : atoi (M4ARG (i - 1)))
 
-#define ARG_LONG(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (M4ARG (-1))))
+#define ARG_LONG(i, argc, argv)			\
+  ((argc <= i++) ? 0L : atol (M4ARG (i - 1)))
 
-#define ARG_STR(argc, argv) \
-	((argc == 0) ? "" : \
-	 (--argc, argv++, M4ARG (-1)))
+#define ARG_STR(i, argc, argv)			\
+  ((argc <= i++) ? "" : M4ARG (i - 1))
 
-#define ARG_DOUBLE(argc, argv) \
-	((argc == 0) ? 0 : \
-	 (--argc, argv++, atof (M4ARG (-1))))
+#define ARG_DOUBLE(i, argc, argv)		\
+  ((argc <= i++) ? 0.0 : atof (M4ARG (i - 1)))
 
 
 /* The main formatting function.  Output is placed on the obstack OBS,
@@ -54,14 +50,15 @@
    format.  */
 
 static void
-format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
+format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 {
-  const char *name = ARG_STR (argc, argv);	/* macro name */
-  const char *f;			/* format control string */
-  const char *fmt;			/* position within f */
-  char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */
-  char *p;				/* position within fstart */
-  unsigned char c;			/* a simple character */
+  const char *name = M4ARG (0);		/* Macro name.  */
+  const char *f;			/* Format control string.  */
+  const char *fmt;			/* Position within f.  */
+  char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */
+  char *p;				/* Position within fstart.  */
+  unsigned char c;			/* A simple character.  */
+  int index = 1;			/* Index within argc used so far.  */
 
   /* Flags.  */
   char flags;				/* flags to use in fstart */
@@ -89,7 +86,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
   char *str;			/* malloc'd buffer of formatted text */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  f = fmt = ARG_STR (argc, argv);
+  f = fmt = ARG_STR (index, argc, argv);
   memset (ok, 0, sizeof ok);
   for (;;)
     {
@@ -174,7 +171,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
       *p++ = '*';
       if (*fmt == '*')
 	{
-	  width = ARG_INT (argc, argv);
+	  width = ARG_INT (index, argc, argv);
 	  fmt++;
 	}
       else
@@ -194,7 +191,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
 	  ok['c'] = 0;
 	  if (*(++fmt) == '*')
 	    {
-	      prec = ARG_INT (argc, argv);
+	      prec = ARG_INT (index, argc, argv);
 	      ++fmt;
 	    }
 	  else
@@ -279,23 +276,24 @@ format (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
       switch (datatype)
 	{
 	case CHAR:
-	  str = xasprintf (fstart, width, ARG_INT (argc, argv));
+	  str = xasprintf (fstart, width, ARG_INT (index, argc, argv));
 	  break;
 
 	case INT:
-	  str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_INT (index, argc, argv));
 	  break;
 
 	case LONG:
-	  str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_LONG (index, argc, argv));
 	  break;
 
 	case DOUBLE:
-	  str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
+	  str = xasprintf (fstart, width, prec,
+			   ARG_DOUBLE (index, argc, argv));
 	  break;
 
 	case STR:
-	  str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
+	  str = xasprintf (fstart, width, prec, ARG_STR (index, argc, argv));
 	  break;
 
 	default:

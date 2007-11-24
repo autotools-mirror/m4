@@ -30,10 +30,11 @@
 typedef struct m4__search_path_info m4__search_path_info;
 
 typedef enum {
-  M4_SYMBOL_VOID, /* Traced but undefined.  */
-  M4_SYMBOL_TEXT, /* Plain text.  */
-  M4_SYMBOL_FUNC, /* Builtin function.  */
-  M4_SYMBOL_PLACEHOLDER /* Placeholder for unknown builtin during -R.  */
+  M4_SYMBOL_VOID,		/* Traced but undefined, u is invalid.  */
+  M4_SYMBOL_TEXT,		/* Plain text, u.u_t is valid.  */
+  M4_SYMBOL_FUNC,		/* Builtin function, u.func is valid.  */
+  M4_SYMBOL_PLACEHOLDER,	/* Placeholder for unknown builtin from -R.  */
+  M4_SYMBOL_COMP		/* Composite symbol, u.chain is valid.  */
 } m4__symbol_type;
 
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
@@ -171,13 +172,27 @@ extern m4_module *  m4__module_find (const char *name);
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
+typedef struct m4_symbol_chain m4_symbol_chain;
+
 struct m4_symbol
 {
   bool		traced;
   m4_symbol_value *	value;
 };
 
-struct m4_symbol_value {
+/* Composite symbols are built of a linked list of chain objects.  */
+struct m4_symbol_chain
+{
+  m4_symbol_chain *next;/* Pointer to next link of chain.  */
+  char *str;		/* NUL-terminated string if text, else NULL.  */
+  m4_macro_args *argv;	/* Reference to earlier $@.  */
+  unsigned int index;	/* Index within argv to start reading from.  */
+};
+
+/* A symbol value is used both for values associated with a macro
+   name, and for arguments to a macro invocation.  */
+struct m4_symbol_value
+{
   m4_symbol_value *	next;
   m4_module *		module;
   unsigned int		flags;
@@ -189,8 +204,9 @@ struct m4_symbol_value {
 
   m4__symbol_type	type;
   union {
-    const char *	text; /* Valid when type is TEXT, PLACEHOLDER.  */
-    const m4_builtin *	builtin; /* Valid when type is FUNC.  */
+    const char *	text;	/* Valid when type is TEXT, PLACEHOLDER.  */
+    const m4_builtin *	builtin;/* Valid when type is FUNC.  */
+    m4_symbol_chain *	chain;	/* Valid when type is COMP.  */
   } u;
 };
 

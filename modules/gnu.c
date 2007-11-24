@@ -409,14 +409,14 @@ M4BUILTIN_HANDLER (builtin)
   const char *name;
   m4_symbol_value *value;
 
-  if (!m4_is_symbol_value_text (argv[1]))
+  if (!m4_is_symbol_value_text (argv->array[1 - 1]))
     {
-      if (m4_is_symbol_value_func (argv[1])
-	  && m4_get_symbol_value_func (argv[1]) == builtin_builtin)
+      if (m4_is_symbol_value_func (argv->array[1 - 1])
+	  && m4_get_symbol_value_func (argv->array[1 - 1]) == builtin_builtin)
 	{
 	  if (m4_bad_argc (context, argc, me, 2, 2, false))
 	    return;
-	  if (!m4_is_symbol_value_text (argv[2]))
+	  if (!m4_is_symbol_value_text (argv->array[2 - 1]))
 	    {
 	      m4_warn (context, 0, me, _("invalid macro name ignored"));
 	      return;
@@ -448,11 +448,22 @@ M4BUILTIN_HANDLER (builtin)
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
 	    {
 	      int i;
+	      /* TODO - make use of $@ reference */
+	      m4_macro_args *new_argv;
+	      new_argv = xmalloc (offsetof (m4_macro_args, array)
+				  + ((argc - 2) * sizeof (m4_symbol_value *)));
+	      new_argv->argc = argc - 1;
+	      new_argv->inuse = false;
+	      new_argv->argv0 = name;
+	      new_argv->arraylen = argc - 2;
+	      memcpy (&new_argv->array[0], &argv->array[1],
+		      (argc - 2) * sizeof (m4_symbol_value *));
 	      if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
 		for (i = 2; i < argc; i++)
-		  if (!m4_is_symbol_value_text (argv[i]))
-		    m4_set_symbol_value_text (argv[i], "");
-	      bp->func (context, obs, argc - 1, argv + 1);
+		  if (!m4_is_symbol_value_text (argv->array[i - 1]))
+		    m4_set_symbol_value_text (new_argv->array[i - 2], "");
+	      bp->func (context, obs, argc - 1, new_argv);
+	      free (new_argv);
 	    }
 	  free (value);
 	}
@@ -667,24 +678,36 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (indir)
 {
-  if (!m4_is_symbol_value_text (argv[1]))
-    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+  const char *me = M4ARG (0);
+  if (!m4_is_symbol_value_text (argv->array[1 - 1]))
+    m4_warn (context, 0, me, _("invalid macro name ignored"));
   else
     {
       const char *name = M4ARG (1);
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
 
       if (symbol == NULL)
-	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
+	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else
 	{
 	  int i;
+	  /* TODO - make use of $@ reference */
+	  m4_macro_args *new_argv;
+	  new_argv = xmalloc (offsetof (m4_macro_args, array)
+			      + ((argc - 2) * sizeof (m4_symbol_value *)));
+	  new_argv->argc = argc - 1;
+	  new_argv->inuse = false;
+	  new_argv->argv0 = name;
+	  new_argv->arraylen = argc - 2;
+	  memcpy (&new_argv->array[0], &argv->array[1],
+		  (argc - 2) * sizeof (m4_symbol_value *));
 	  if (!m4_symbol_groks_macro (symbol))
 	    for (i = 2; i < argc; i++)
-	      if (!m4_is_symbol_value_text (argv[i]))
-		m4_set_symbol_value_text (argv[i], "");
+	      if (!m4_is_symbol_value_text (argv->array[i - 1]))
+		m4_set_symbol_value_text (new_argv->array[i - 2], "");
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
-			 argc - 1, argv + 1);
+			 argc - 1, new_argv);
+	  free (new_argv);
 	}
     }
 }

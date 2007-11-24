@@ -885,7 +885,7 @@ simple_term (m4 *context, eval_token et, number *v1)
 
 /* Main entry point, called from "eval" and "mpeval" builtins.  */
 void
-m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
+m4_evaluate (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 {
   const char *	me	= M4ARG (0);
   const char *	str	= M4ARG (1);

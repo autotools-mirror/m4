@@ -37,10 +37,11 @@ typedef struct m4_macro		m4_macro;
 typedef struct m4_symbol_value	m4_symbol_value;
 typedef struct m4_input_block	m4_input_block;
 typedef struct m4_module	m4_module;
+typedef struct m4_macro_args	m4_macro_args;
 
 typedef struct obstack		m4_obstack;
 
-typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_symbol_value **);
+typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_macro_args *);
 
 /* The value of m4_builtin flags is built from these:  */
 enum {
@@ -75,38 +76,58 @@ struct m4_macro
   const char *value;
 };
 
+/* FIXME - make this struct opaque.  */
+struct m4_macro_args
+{
+  /* One more than the highest actual argument.  May be larger than
+     arraylen since the array can refer to multiple arguments via a
+     single $@ reference.  */
+  unsigned int argc;
+  /* False unless the macro expansion refers to $@; determines whether
+     this object can be freed at end of macro expansion or must wait
+     until all references have been rescanned.  */
+  bool inuse;
+  const char *argv0; /* The macro name being expanded.  */
+  size_t arraylen; /* True length of allocated elements in array.  */
+  /* Used as a variable-length array, storing information about each
+     argument.  */
+  m4_symbol_value *array[FLEXIBLE_ARRAY_MEMBER];
+};
 
-#define M4BUILTIN(name)					\
-  static void CONC(builtin_, name)				\
-   (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv);
 
-#define M4BUILTIN_HANDLER(name)				\
-  static void CONC(builtin_, name)				\
-   (m4 *context, m4_obstack *obs, int argc, m4_symbol_value **argv)
+#define M4BUILTIN(name)							\
+  static void CONC (builtin_, name)					\
+   (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv);
 
-#define M4INIT_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_init_module))			\
-	(m4 *context, m4_module *module, m4_obstack *obs);	\
-  void CONC(name, CONC(_LTX_, m4_init_module))			\
+#define M4BUILTIN_HANDLER(name)						\
+  static void CONC (builtin_, name)					\
+   (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
+
+#define M4INIT_HANDLER(name)						\
+  void CONC (name, CONC (_LTX_, m4_init_module))			\
+       (m4 *context, m4_module *module, m4_obstack *obs);		\
+  void CONC (name, CONC (_LTX_, m4_init_module))			\
 	(m4 *context, m4_module *module, m4_obstack *obs)
 
-#define M4FINISH_HANDLER(name)					\
-  void CONC(name, CONC(_LTX_, m4_finish_module))		\
-	(m4 *context, m4_module *module, m4_obstack *obs);	\
-  void CONC(name, CONC(_LTX_, m4_finish_module))		\
+#define M4FINISH_HANDLER(name)						\
+  void CONC (name, CONC (_LTX_, m4_finish_module))			\
+       (m4 *context, m4_module *module, m4_obstack *obs);		\
+  void CONC (name, CONC (_LTX_, m4_finish_module))			\
 	(m4 *context, m4_module *module, m4_obstack *obs)
 
-#define M4_MODULE_IMPORT(M, S)					\
-  CONC(S, _func) *S = (CONC(S, _func) *)			\
-	m4_module_import (context, STR(M), STR(S), obs)
+#define M4_MODULE_IMPORT(M, S)						\
+  CONC (S, _func) *S = (CONC (S, _func) *)				\
+	m4_module_import (context, STR (M), STR (S), obs)
 
-#define M4ARG(i)	(argc > (i) ? m4_get_symbol_value_text (argv[i]) : "")
+#define M4ARG(i)							\
+  ((i) == 0 ? argv->argv0						\
+   : argv->argc > (i) ? m4_get_symbol_value_text (argv->array[(i) - 1]) : "")
 
 extern bool	m4_bad_argc	   (m4 *, int, const char *,
 				    unsigned int, unsigned int, bool);
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
 extern void	m4_dump_args	   (m4 *, m4_obstack *, int,
-				    m4_symbol_value **, const char *, bool);
+				    m4_macro_args *, const char *, bool);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 
 /* Error handling.  */
@@ -164,14 +185,14 @@ extern void		m4_delete	(m4 *);
 
 
 #define M4FIELD(type, base, field)					\
-	extern type CONC(m4_get_, base) (m4 *context);			\
-	extern type CONC(m4_set_, base) (m4 *context, type value);
+	extern type CONC (m4_get_, base) (m4 *context);			\
+	extern type CONC (m4_set_, base) (m4 *context, type value);
 m4_context_field_table
 #undef M4FIELD
 
 #define M4OPT_BIT(bit, base)						\
-	extern bool CONC(m4_get_, base) (m4 *context);		\
-	extern bool CONC(m4_set_, base) (m4 *context, bool value);
+  extern bool CONC (m4_get_, base) (m4 *context);			\
+  extern bool CONC (m4_set_, base) (m4 *context, bool value);
 m4_context_opt_bit_table
 #undef M4OPT_BIT
 
@@ -287,8 +308,7 @@ extern const m4_builtin	*m4_builtin_find_by_func (m4_module *,
 
 extern void	   m4_macro_expand_input (m4 *);
 extern void	   m4_macro_call	 (m4 *, m4_symbol_value *,
-					  m4_obstack *, int,
-					  m4_symbol_value **);
+					  m4_obstack *, int, m4_macro_args *);
 
 
 

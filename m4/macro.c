@@ -29,22 +29,23 @@
 
 #include "intprops.h"
 
-static void    collect_arguments (m4 *, const char *, m4_symbol *,
-				  m4_obstack *, m4_obstack *);
+static m4_macro_args *collect_arguments (m4 *, const char *, m4_symbol *,
+					 m4_obstack *, unsigned int,
+					 m4_obstack *);
 static void    expand_macro      (m4 *, const char *, m4_symbol *);
 static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int);
 static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
 				  const char *);
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
-				  m4_symbol_value **);
+				  m4_macro_args *);
 
 static void    trace_prepre	 (m4 *, const char *, size_t,
 				  m4_symbol_value *);
 static void    trace_pre	 (m4 *, const char *, size_t, int,
-				  m4_symbol_value **);
+				  m4_macro_args *);
 static void    trace_post	 (m4 *, const char *, size_t, int,
-				  m4_symbol_value **, m4_input_block *, bool);
+				  m4_macro_args *, m4_input_block *, bool);
 
 static void    trace_format	 (m4 *, const char *, ...)
   M4_GNUC_PRINTF (2, 3);
@@ -126,11 +127,11 @@ expand_token (m4 *context, m4_obstack *obs,
 	  ++textp;
 
 	symbol = m4_symbol_lookup (M4SYMTAB, textp);
-	assert (! symbol || ! m4_is_symbol_void (symbol));
+	assert (!symbol || !m4_is_symbol_void (symbol));
 	if (symbol == NULL
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
-		&& ! m4__next_token_is_open (context)))
+		&& !m4__next_token_is_open (context)))
 	  {
 	    m4_shipout_text (context, obs, text, strlen (text), line);
 	  }
@@ -248,7 +249,7 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   char *argc_base = NULL;	/* Base of argc_stack on entry.  */
   unsigned int argc_size;	/* Size of argc_stack on entry.  */
   unsigned int argv_size;	/* Size of argv_stack on entry.  */
-  m4_symbol_value **argv;
+  m4_macro_args *argv;
   int argc;
   m4_obstack *expansion;
   m4_input_block *expanded;
@@ -297,15 +298,12 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
     trace_prepre (context, name, my_call_id, value);
 
-  collect_arguments (context, name, symbol, &argv_stack, &argc_stack);
-
-  argc = ((obstack_object_size (&argv_stack) - argv_size)
-	  / sizeof (m4_symbol_value *));
-  argv = (m4_symbol_value **) ((char *) obstack_base (&argv_stack)
-			       + argv_size);
+  argv = collect_arguments (context, name, symbol, &argv_stack, argv_size,
+			    &argc_stack);
+  argc = argv->argc;
   /* Calling collect_arguments invalidated name, but we copied it as
      argv[0].  */
-  name = m4_get_symbol_value_text (argv[0]);
+  name = argv->argv0;
 
   loc_close_file = m4_get_current_file (context);
   loc_close_line = m4_get_current_line (context);
@@ -331,32 +329,39 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
 
+  /* TODO - pay attention to argv->inuse.  */
   if (0 < argc_size)
     obstack_regrow (&argc_stack, argc_base, argc_size);
   else
-    obstack_free (&argc_stack, argv[0]);
-  obstack_blank (&argv_stack, -argc * sizeof (m4_symbol_value *));
+    obstack_free (&argc_stack, (void *) name);
+  obstack_blank (&argv_stack, argv_size - obstack_object_size (&argv_stack));
 }
 
-/* Collect all the arguments to a call of the macro SYMBOL (called NAME).
-   The arguments are stored on the obstack ARGUMENTS and a table of pointers
-   to the arguments on the obstack ARGPTR.  */
-static void
+/* Collect all the arguments to a call of the macro SYMBOL (called
+   NAME).  The arguments are stored on the obstack ARGUMENTS and a
+   table of pointers to the arguments on the obstack ARGPTR.  ARGPTR
+   is an incomplete object, currently occupying ARGV_BASE bytes.
+   Return the object describing all of the macro arguments.  */
+static m4_macro_args *
 collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
-		   m4_obstack *argptr, m4_obstack *arguments)
+		   m4_obstack *argptr, unsigned argv_base,
+		   m4_obstack *arguments)
 {
   m4_symbol_value token;
   m4_symbol_value *tokenp;
   bool more_args;
   bool groks_macro_args;
+  m4_macro_args args;
+  m4_macro_args *argv;
 
   groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
-  tokenp = (m4_symbol_value *) obstack_alloc (arguments, sizeof *tokenp);
-  m4_set_symbol_value_text (tokenp, (char *) obstack_copy0 (arguments, name,
-							    strlen (name)));
-  name = m4_get_symbol_value_text (tokenp);
-  obstack_ptr_grow (argptr, tokenp);
+  args.argc = 1;
+  args.inuse = false;
+  args.argv0 = (char *) obstack_copy0 (arguments, name, strlen (name));
+  args.arraylen = 0;
+  obstack_grow (argptr, &args, offsetof (m4_macro_args, array));
+  name = args.argv0;
 
   if (m4__next_token_is_open (context))
     {
@@ -373,9 +378,15 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 	  tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
 						     sizeof token);
 	  obstack_ptr_grow (argptr, tokenp);
+	  args.arraylen++;
+	  args.argc++;
 	}
       while (more_args);
     }
+  argv = (m4_macro_args *) ((char *) obstack_base (argptr) + argv_base);
+  argv->argc = args.argc;
+  argv->arraylen = args.arraylen;
+  return argv;
 }
 
 
@@ -387,30 +398,24 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
    the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
-	       int argc, m4_symbol_value **argv)
+	       int argc, m4_macro_args *argv)
 {
-  if (m4_bad_argc (context, argc, m4_get_symbol_value_text (argv[0]),
+  if (m4_bad_argc (context, argc, argv->argv0,
 		   VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
 		   BIT_TEST (VALUE_FLAGS (value),
 			     VALUE_SIDE_EFFECT_ARGS_BIT)))
     return;
   if (m4_is_symbol_value_text (value))
-    {
-      process_macro (context, value, expansion, argc, argv);
-    }
+    process_macro (context, value, expansion, argc, argv);
   else if (m4_is_symbol_value_func (value))
-    {
-      (*m4_get_symbol_value_func (value)) (context, expansion, argc, argv);
-    }
+    m4_get_symbol_value_func (value) (context, expansion, argc, argv);
   else if (m4_is_symbol_value_placeholder (value))
-    {
-      m4_warn (context, 0, M4ARG (0),
-	       _("builtin `%s' requested by frozen file not found"),
-	       m4_get_symbol_value_placeholder (value));
-    }
+    m4_warn (context, 0, M4ARG (0),
+	     _("builtin `%s' requested by frozen file not found"),
+	     m4_get_symbol_value_placeholder (value));
   else
     {
-      assert (!"INTERNAL ERROR: bad symbol type in call_macro ()");
+      assert (!"INTERNAL ERROR: bad symbol type in m4_macro_call ()");
       abort ();
     }
 }
@@ -422,7 +427,7 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
    as usual.  */
 static void
 process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
-	       int argc, m4_symbol_value **argv)
+	       int argc, m4_macro_args *argv)
 {
   const char *text;
   int i;
@@ -467,7 +472,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 
 	case '*':		/* all arguments */
 	case '@':		/* ... same, but quoted */
-	  m4_dump_args (context, obs, argc, argv, ",", *text == '@');
+	  m4_dump_args (context, obs, 1, argv, ",", *text == '@');
 	  text++;
 	  break;
 
@@ -649,7 +654,7 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
    actually expanded.  Used from expand_macro ().  */
 static void
 trace_pre (m4 *context, const char *name, size_t id,
-	   int argc, m4_symbol_value **argv)
+	   int argc, m4_macro_args *argv)
 {
   int i;
 
@@ -670,7 +675,7 @@ trace_pre (m4 *context, const char *name, size_t id,
 	  if (i != 1)
 	    trace_format (context, ", ");
 
-	  m4_symbol_value_print (argv[i], &context->trace_messages,
+	  m4_symbol_value_print (argv->array[i - 1], &context->trace_messages,
 				 quote, lquote, rquote, arg_length, module);
 	}
       trace_format (context, ")");
@@ -681,7 +686,7 @@ trace_pre (m4 *context, const char *name, size_t id,
    expand_macro ().  */
 static void
 trace_post (m4 *context, const char *name, size_t id,
-	    int argc, m4_symbol_value **argv, m4_input_block *expanded,
+	    int argc, m4_macro_args *argv, m4_input_block *expanded,
 	    bool trace_expansion)
 {
   if (trace_expansion)
