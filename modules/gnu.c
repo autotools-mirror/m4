@@ -409,14 +409,14 @@ M4BUILTIN_HANDLER (builtin)
   const char *name;
   m4_symbol_value *value;
 
-  if (!m4_is_symbol_value_text (argv->array[1 - 1]))
+  if (!m4_is_arg_text (argv, 1))
     {
-      if (m4_is_symbol_value_func (argv->array[1 - 1])
-	  && m4_get_symbol_value_func (argv->array[1 - 1]) == builtin_builtin)
+      assert (m4_is_arg_func (argv, 1));
+      if (m4_arg_func (argv, 1) == builtin_builtin)
 	{
 	  if (m4_bad_argc (context, argc, me, 2, 2, false))
 	    return;
-	  if (!m4_is_symbol_value_text (argv->array[2 - 1]))
+	  if (!m4_is_arg_text (argv, 2))
 	    {
 	      m4_warn (context, 0, me, _("invalid macro name ignored"));
 	      return;
@@ -447,8 +447,9 @@ M4BUILTIN_HANDLER (builtin)
 			    bp->min_args, bp->max_args,
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
 	    {
-	      int i;
-	      /* TODO - make use of $@ reference */
+	      unsigned int i;
+	      /* TODO - make use of $@ reference.  */
+	      /* TODO - add accessor that performs this construction.  */
 	      m4_macro_args *new_argv;
 	      new_argv = xmalloc (offsetof (m4_macro_args, array)
 				  + ((argc - 2) * sizeof (m4_symbol_value *)));
@@ -460,8 +461,9 @@ M4BUILTIN_HANDLER (builtin)
 		      (argc - 2) * sizeof (m4_symbol_value *));
 	      if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
 		for (i = 2; i < argc; i++)
-		  if (!m4_is_symbol_value_text (argv->array[i - 1]))
-		    m4_set_symbol_value_text (new_argv->array[i - 2], "");
+		  if (!m4_is_arg_text (argv, i))
+		    m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1),
+					      "");
 	      bp->func (context, obs, argc - 1, new_argv);
 	      free (new_argv);
 	    }
@@ -512,7 +514,7 @@ M4BUILTIN_HANDLER (changesyntax)
 
   if (m4_expand_ranges)
     {
-      int i;
+      unsigned int i;
       for (i = 1; i < argc; i++)
 	{
 	  const char *spec = M4ARG (i);
@@ -679,7 +681,7 @@ M4BUILTIN_HANDLER (format)
 M4BUILTIN_HANDLER (indir)
 {
   const char *me = M4ARG (0);
-  if (!m4_is_symbol_value_text (argv->array[1 - 1]))
+  if (!m4_is_arg_text (argv, 1))
     m4_warn (context, 0, me, _("invalid macro name ignored"));
   else
     {
@@ -690,8 +692,9 @@ M4BUILTIN_HANDLER (indir)
 	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else
 	{
-	  int i;
-	  /* TODO - make use of $@ reference */
+	  unsigned int i;
+	  /* TODO - make use of $@ reference.  */
+	  /* TODO - add accessor that performs this construction.  */
 	  m4_macro_args *new_argv;
 	  new_argv = xmalloc (offsetof (m4_macro_args, array)
 			      + ((argc - 2) * sizeof (m4_symbol_value *)));
@@ -703,8 +706,8 @@ M4BUILTIN_HANDLER (indir)
 		  (argc - 2) * sizeof (m4_symbol_value *));
 	  if (!m4_symbol_groks_macro (symbol))
 	    for (i = 2; i < argc; i++)
-	      if (!m4_is_symbol_value_text (argv->array[i - 1]))
-		m4_set_symbol_value_text (new_argv->array[i - 2], "");
+	      if (!m4_is_arg_text (argv, i))
+		m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1), "");
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	  free (new_argv);

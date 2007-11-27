@@ -99,14 +99,15 @@ m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
    index START, separated by SEP, and quoted by the current quotes, if
    QUOTED is true.  */
 void
-m4_dump_args (m4 *context, m4_obstack *obs, int start,
+m4_dump_args (m4 *context, m4_obstack *obs, unsigned int start,
 	      m4_macro_args *argv, const char *sep, bool quoted)
 {
-  int i;
+  unsigned int i;
   size_t len = strlen (sep);
   bool need_sep = false;
+  unsigned int argc = m4_arg_argc (argv);
 
-  for (i = start; i < argv->argc; i++)
+  for (i = start; i < argc; i++)
     {
       if (need_sep)
 	obstack_grow (obs, sep, len);

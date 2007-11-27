@@ -346,24 +346,32 @@ struct m4_syntax_table {
 #endif
 
 
+/* --- MACRO MANAGEMENT --- */
+
 /* Various different token types.  */
 typedef enum {
-  M4_TOKEN_EOF,			/* end of file */
-  M4_TOKEN_NONE,		/* discardable token */
-  M4_TOKEN_STRING,		/* a quoted string */
-  M4_TOKEN_SPACE,		/* whitespace */
-  M4_TOKEN_WORD,		/* an identifier */
-  M4_TOKEN_OPEN,		/* argument list start */
-  M4_TOKEN_COMMA,		/* argument separator */
-  M4_TOKEN_CLOSE,		/* argument list end */
-  M4_TOKEN_SIMPLE,		/* a single character */
-  M4_TOKEN_MACDEF		/* a macro's definition (see "defn") */
+  M4_TOKEN_EOF,		/* End of file, M4_SYMBOL_VOID.  */
+  M4_TOKEN_NONE,	/* Discardable token, M4_SYMBOL_VOID.  */
+  M4_TOKEN_STRING,	/* Quoted string or comment, M4_SYMBOL_TEXT or
+			   M4_SYMBOL_COMP.  */
+  M4_TOKEN_SPACE,	/* Whitespace, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_WORD,	/* An identifier, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_OPEN,	/* Argument list start, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_COMMA,	/* Argument separator, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_CLOSE,	/* Argument list end, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_SIMPLE,	/* Single character, M4_SYMBOL_TEXT.  */
+  M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					const char *);
 extern	bool		m4__next_token_is_open (m4 *);
 
+/* Fast macro versions of macro argv accessor functions,
+   that also have an identically named function exported in m4module.h.  */
+#ifdef NDEBUG
+# define m4_arg_argc(A)		(A)->argc
+#endif /* NDEBUG */
 
 
 /* --- PATH MANAGEMENT --- */

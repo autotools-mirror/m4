@@ -41,14 +41,14 @@
   BUILTIN (perleval,	false,	false,	false,	0,	-1  )	\
 
 
-#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN (handler)
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)	\
-  { CONC(builtin_, handler), STR(handler),		\
+  { CONC (builtin_, handler), STR (handler),		\
     ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
      | (blind ? M4_BUILTIN_BLIND : 0)			\
      | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
@@ -114,15 +114,15 @@ M4FINISH_HANDLER (perl)
 M4BUILTIN_HANDLER (perleval)
 {
   SV *val;
-  int i;
+  unsigned int i;
 
   for (i = 1; i < argc; i++)
     {
       if (i > 1)
 	obstack_1grow (obs, ',');
 
-      val = perl_eval_pv(M4ARG(i), true);
+      val = perl_eval_pv (M4ARG (i), true);
 
-      m4_shipout_string(context, obs, SvPV(val,PL_na), 0, false);
+      m4_shipout_string (context, obs, SvPV (val, PL_na), 0, false);
     }
 }

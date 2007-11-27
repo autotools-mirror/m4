@@ -1,3 +1,28 @@
+2007-11-27  Eric Blake  <ebb9@byu.net>
+
+	Stage 2: use accessors, not direct reference, into argv.
+	* m4/m4private.h (m4_arg_argc): New fast accessor.
+	* m4/m4module.h (m4_arg_argc, m4_arg_symbol, m4_is_arg_text)
+	(m4_is_arg_func, m4_arg_text, m4_arg_len, m4_arg_func): New
+	prototypes.
+	(m4_builtin_func, M4BUILTIN, M4BUILTIN_HANDLER, m4_dump_args)
+	(m4_macro_call): Make argc unsigned.
+	(M4ARG): Use new accessors.
+	* modules/m4.c (define, pushdef): Likewise.
+	(undefine, popdef, ifelse, m4_dump_symbols, defn, undivert)
+	(traceon, traceoff): Make argc unsigned.
+	* modules/m4.h (m4_dump_symbols_func): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	* modules/gnu.c (builtin, indir): Use new accessors.
+	(changesyntax): Make argc unsigned.
+	* modules/perl.c (perleval): Likewise.
+	* m4/utility.c (m4_dump_args): Use new accessors.
+	* m4/macro.c (trace_pre): Likewise.
+	(m4_arg_symbol, m4_arg_argc, m4_is_arg_text, m4_is_arg_func)
+	(m4_arg_text, m4_arg_len, m4_arg_func): New functions.
+	(expand_macro, trace_pre, trace_post, m4_macro_call): Update argc
+	usage.
+
 2007-11-24  Eric Blake  <ebb9@byu.net>
 
 	Stage 1: convert m4_symbol_value** into new object.

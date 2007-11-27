@@ -49,8 +49,9 @@
 
 extern void m4_set_sysval    (int value);
 extern void m4_sysval_flush  (m4 *context, bool report);
-extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data, int argc,
-			      m4_macro_args *argv, bool complain);
+extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data,
+			      unsigned int argc, m4_macro_args *argv,
+			      bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 			      const char *name, bool dir);
@@ -160,14 +161,14 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
-  if (m4_is_symbol_value_text (argv->array[1 - 1]))
+  if (m4_is_arg_text (argv, 1))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	m4_symbol_value_copy (value, argv->array[2 - 1]);
+	m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
 
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
@@ -177,7 +178,7 @@ M4BUILTIN_HANDLER (define)
 
 M4BUILTIN_HANDLER (undefine)
 {
-  int i;
+  unsigned int i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
@@ -191,14 +192,14 @@ M4BUILTIN_HANDLER (undefine)
 
 M4BUILTIN_HANDLER (pushdef)
 {
-  if (m4_is_symbol_value_text (argv->array[1 - 1]))
+  if (m4_is_arg_text (argv, 1))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (argc == 2)
 	m4_set_symbol_value_text (value, xstrdup (""));
       else
-	m4_symbol_value_copy (value, argv->array[2 - 1]);
+	m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
 
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
@@ -208,7 +209,7 @@ M4BUILTIN_HANDLER (pushdef)
 
 M4BUILTIN_HANDLER (popdef)
 {
-  int i;
+  unsigned int i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
@@ -248,7 +249,7 @@ M4BUILTIN_HANDLER (ifelse)
 {
   const char *me = M4ARG (0);
   const char *result;
-  int index;
+  unsigned int index;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
      rely on the regular mechanisms.  */
@@ -327,7 +328,7 @@ dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
 /* If there are no arguments, build a sorted list of all defined
    symbols, otherwise, only the specified symbols.  */
 void
-m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
+m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
 		 m4_macro_args *argv, bool complain)
 {
   assert (obstack_object_size (data->obs) == 0);
@@ -337,7 +338,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, int argc,
     m4_symtab_apply (M4SYMTAB, false, dump_symbol_CB, data);
   else
     {
-      int i;
+      unsigned int i;
       m4_symbol *symbol;
 
       for (i = 1; i < argc; i++)
@@ -396,7 +397,7 @@ M4BUILTIN_HANDLER (dumpdef)
 M4BUILTIN_HANDLER (defn)
 {
   const char *me = M4ARG (0);
-  int i;
+  unsigned int i;
 
   for (i = 1; i < argc; i++)
     {
@@ -602,7 +603,7 @@ M4BUILTIN_HANDLER (divnum)
 
 M4BUILTIN_HANDLER (undivert)
 {
-  int i = 0;
+  unsigned int i = 0;
   const char *me = M4ARG (0);
 
   if (argc == 1)
@@ -874,7 +875,7 @@ M4BUILTIN_HANDLER (m4wrap)
 
 M4BUILTIN_HANDLER (traceon)
 {
-  int i;
+  unsigned int i;
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
@@ -887,7 +888,7 @@ M4BUILTIN_HANDLER (traceon)
 /* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
-  int i;
+  unsigned int i;
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)

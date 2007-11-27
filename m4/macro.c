@@ -42,9 +42,8 @@ static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 
 static void    trace_prepre	 (m4 *, const char *, size_t,
 				  m4_symbol_value *);
-static void    trace_pre	 (m4 *, const char *, size_t, int,
-				  m4_macro_args *);
-static void    trace_post	 (m4 *, const char *, size_t, int,
+static void    trace_pre	 (m4 *, const char *, size_t, m4_macro_args *);
+static void    trace_post	 (m4 *, const char *, size_t,
 				  m4_macro_args *, m4_input_block *, bool);
 
 static void    trace_format	 (m4 *, const char *, ...)
@@ -250,7 +249,6 @@ expand_macro (m4 *context, const char *name, m4_symbol *symbol)
   unsigned int argc_size;	/* Size of argc_stack on entry.  */
   unsigned int argv_size;	/* Size of argv_stack on entry.  */
   m4_macro_args *argv;
-  int argc;
   m4_obstack *expansion;
   m4_input_block *expanded;
   bool traced;
@@ -300,7 +298,6 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 
   argv = collect_arguments (context, name, symbol, &argv_stack, argv_size,
 			    &argc_stack);
-  argc = argv->argc;
   /* Calling collect_arguments invalidated name, but we copied it as
      argv[0].  */
   name = argv->argv0;
@@ -311,15 +308,14 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   m4_set_current_line (context, loc_open_line);
 
   if (traced)
-    trace_pre (context, name, my_call_id, argc, argv);
+    trace_pre (context, name, my_call_id, argv);
 
   expansion = m4_push_string_init (context);
-  m4_macro_call (context, value, expansion, argc, argv);
+  m4_macro_call (context, value, expansion, argv->argc, argv);
   expanded = m4_push_string_finish ();
 
   if (traced)
-    trace_post (context, name, my_call_id, argc, argv, expanded,
-		trace_expansion);
+    trace_post (context, name, my_call_id, argv, expanded, trace_expansion);
 
   m4_set_current_file (context, loc_close_file);
   m4_set_current_line (context, loc_close_line);
@@ -344,7 +340,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
    Return the object describing all of the macro arguments.  */
 static m4_macro_args *
 collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
-		   m4_obstack *argptr, unsigned argv_base,
+		   m4_obstack *argptr, unsigned int argv_base,
 		   m4_obstack *arguments)
 {
   m4_symbol_value token;
@@ -398,7 +394,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
    the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
-	       int argc, m4_macro_args *argv)
+	       unsigned int argc, m4_macro_args *argv)
 {
   if (m4_bad_argc (context, argc, argv->argv0,
 		   VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
@@ -653,15 +649,15 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 /* Format the parts of a trace line, that can be made before the macro is
    actually expanded.  Used from expand_macro ().  */
 static void
-trace_pre (m4 *context, const char *name, size_t id,
-	   int argc, m4_macro_args *argv)
+trace_pre (m4 *context, const char *name, size_t id, m4_macro_args *argv)
 {
-  int i;
+  unsigned int i;
+  unsigned int argc = m4_arg_argc (argv);
 
   trace_header (context, id);
   trace_format (context, "%s", name);
 
-  if ((argc > 1) && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
+  if (1 < argc && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
     {
       bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
       const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
@@ -675,8 +671,9 @@ trace_pre (m4 *context, const char *name, size_t id,
 	  if (i != 1)
 	    trace_format (context, ", ");
 
-	  m4_symbol_value_print (argv->array[i - 1], &context->trace_messages,
-				 quote, lquote, rquote, arg_length, module);
+	  m4_symbol_value_print (m4_arg_symbol (argv, i),
+				 &context->trace_messages, quote, lquote,
+				 rquote, arg_length, module);
 	}
       trace_format (context, ")");
     }
@@ -686,7 +683,7 @@ trace_pre (m4 *context, const char *name, size_t id,
    expand_macro ().  */
 static void
 trace_post (m4 *context, const char *name, size_t id,
-	    int argc, m4_macro_args *argv, m4_input_block *expanded,
+	    m4_macro_args *argv, m4_input_block *expanded,
 	    bool trace_expansion)
 {
   if (trace_expansion)
@@ -696,4 +693,90 @@ trace_post (m4 *context, const char *name, size_t id,
     }
 
   trace_flush (context);
+}
+
+
+/* Accessors into m4_macro_args.  */
+
+/* Given ARGV, return the symbol value at the specified INDEX, which
+   must be non-zero and less than argc.  */
+m4_symbol_value *
+m4_arg_symbol (m4_macro_args *argv, unsigned int index)
+{
+  assert (index && index < argv->argc);
+  return argv->array[index - 1];
+}
+
+/* Given ARGV, return true if argument INDEX is text.  Index 0 is
+   always text, as are indices beyond argc.  */
+bool
+m4_is_arg_text (m4_macro_args *argv, unsigned int index)
+{
+  if (index == 0 || argv->argc <= index)
+    return true;
+  return m4_is_symbol_value_text (m4_arg_symbol (argv, index));
+}
+
+/* Given ARGV, return true if argument INDEX is a builtin function.
+   Only non-zero indices less than argc can return true.  */
+bool
+m4_is_arg_func (m4_macro_args *argv, unsigned int index)
+{
+  if (index == 0 || argv->argc <= index)
+    return false;
+  return m4_is_symbol_value_func (m4_arg_symbol (argv, index));
+}
+
+/* Given ARGV, return the text at argument INDEX, or NULL if the
+   argument is not text.  Index 0 is always text, and indices beyond
+   argc return the empty string.  */
+const char *
+m4_arg_text (m4_macro_args *argv, unsigned int index)
+{
+  if (index == 0)
+    return argv->argv0;
+  if (argv->argc <= index)
+    return "";
+  if (!m4_is_symbol_value_text (argv->array[index - 1]))
+    return NULL;
+  return m4_get_symbol_value_text (argv->array[index - 1]);
+}
+
+/* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
+   argument is not text.  Indices beyond argc return 0.  */
+size_t
+m4_arg_len (m4_macro_args *argv, unsigned int index)
+{
+  /* TODO - update m4_macro_args to cache this.  */
+  if (index == 0)
+    return strlen (argv->argv0);
+  if (argv->argc <= index)
+    return 0;
+  if (!m4_is_symbol_value_text (argv->array[index - 1]))
+    return SIZE_MAX;
+  return strlen (m4_get_symbol_value_text (argv->array[index - 1]));
+}
+
+/* Given ARGV, return the builtin function referenced by argument
+   INDEX, or NULL if it is not a builtin.  Index 0, and indices beyond
+   argc, return NULL.  */
+m4_builtin_func *
+m4_arg_func (m4_macro_args *argv, unsigned int index)
+{
+  if (index == 0 || argv->argc <= index
+      || !m4_is_symbol_value_func (argv->array[index - 1]))
+    return NULL;
+  return m4_get_symbol_value_func (argv->array[index - 1]);
+}
+
+/* Define these last, so that earlier uses can benefit from the macros
+   in m4private.h.  */
+
+/* Given ARGV, return one greater than the number of arguments it
+   describes.  */
+#undef m4_arg_argc
+unsigned int
+m4_arg_argc (m4_macro_args *argv)
+{
+  return argv->argc;
 }

@@ -41,7 +41,8 @@ typedef struct m4_macro_args	m4_macro_args;
 
 typedef struct obstack		m4_obstack;
 
-typedef void   m4_builtin_func  (m4 *, m4_obstack *, int, m4_macro_args *);
+typedef void   m4_builtin_func  (m4 *, m4_obstack *, unsigned int,
+				 m4_macro_args *);
 
 /* The value of m4_builtin flags is built from these:  */
 enum {
@@ -97,11 +98,11 @@ struct m4_macro_args
 
 #define M4BUILTIN(name)							\
   static void CONC (builtin_, name)					\
-   (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv);
+   (m4 *context, m4_obstack *obs, unsigned int argc, m4_macro_args *argv);
 
 #define M4BUILTIN_HANDLER(name)						\
   static void CONC (builtin_, name)					\
-   (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
+   (m4 *context, m4_obstack *obs, unsigned int argc, m4_macro_args *argv)
 
 #define M4INIT_HANDLER(name)						\
   void CONC (name, CONC (_LTX_, m4_init_module))			\
@@ -119,14 +120,14 @@ struct m4_macro_args
   CONC (S, _func) *S = (CONC (S, _func) *)				\
 	m4_module_import (context, STR (M), STR (S), obs)
 
-#define M4ARG(i)							\
-  ((i) == 0 ? argv->argv0						\
-   : argv->argc > (i) ? m4_get_symbol_value_text (argv->array[(i) - 1]) : "")
+/* Grab the text contents of argument I, or abort if the argument is
+   not text.  Assumes that `m4_macro_args *argv' is in scope.  */
+#define M4ARG(i) m4_arg_text (argv, i)
 
 extern bool	m4_bad_argc	   (m4 *, int, const char *,
 				    unsigned int, unsigned int, bool);
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
-extern void	m4_dump_args	   (m4 *, m4_obstack *, int,
+extern void	m4_dump_args	   (m4 *, m4_obstack *, unsigned int,
 				    m4_macro_args *, const char *, bool);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 
@@ -306,10 +307,17 @@ extern const m4_builtin	*m4_builtin_find_by_func (m4_module *,
 
 /* --- MACRO MANAGEMENT --- */
 
-extern void	   m4_macro_expand_input (m4 *);
-extern void	   m4_macro_call	 (m4 *, m4_symbol_value *,
-					  m4_obstack *, int, m4_macro_args *);
-
+extern void	m4_macro_expand_input	(m4 *);
+extern void	m4_macro_call		(m4 *, m4_symbol_value *,
+					 m4_obstack *, unsigned int,
+					 m4_macro_args *);
+extern unsigned int m4_arg_argc		(m4_macro_args *);
+extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, unsigned int);
+extern bool	m4_is_arg_text		(m4_macro_args *, unsigned int);
+extern bool	m4_is_arg_func		(m4_macro_args *, unsigned int);
+extern const char *m4_arg_text		(m4_macro_args *, unsigned int);
+extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
+extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
 
 
 /* --- RUNTIME DEBUGGING --- */
