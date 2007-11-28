@@ -1,3 +1,31 @@
+2007-11-28  Eric Blake  <ebb9@byu.net>
+
+	Stage 3a: cache length, rather than computing it, in libm4.
+	* m4/m4module.h (struct m4_macro_args): Cache length.
+	(m4_get_symbol_len, m4_get_symbol_value_len): New accessors.
+	(m4_set_symbol_value_text): Change signature.
+	* m4/m4private.h (struct m4_symbol_value): Store string length.
+	(m4_get_symbol_value_text, m4_get_symbol_value_placeholder)
+	(m4_set_symbol_value_placeholder): Update accordingly.
+	(m4_set_symbol_value_text): Change signature.
+	(m4_get_symbol_value_len): New accessor.
+	* m4/input.c (struct m4_input_block, string_peek, string_read)
+	(string_unget, string_print, m4_push_string_finish)
+	(m4_push_wrapup): Track length of string input.
+	(m4__next_token): Adjust all users of symbol text to track length,
+	too.
+	* m4/macro.c (expand_argument, collect_arguments): Likewise.
+	* m4/module.c (install_macro_table): Likewise.
+	* modules/gnu.c (builtin, indir): Likewise.
+	* modules/m4.c (define, pushdef): Likewise.
+	* src/main.c (main): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* m4/symtab.c (m4_symbol_value_copy): Likewise.
+	(m4_get_symbol_value_len): New function.
+	(m4_get_symbol_value_text, m4_get_symbol_value_placeholder)
+	(m4_set_symbol_value_text, m4_set_symbol_value_placeholder):
+	Adjust implementation.
+
 2007-11-27  Eric Blake  <ebb9@byu.net>
 
 	Stage 2: use accessors, not direct reference, into argv.

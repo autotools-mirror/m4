@@ -148,8 +148,8 @@ struct m4_input_block
     {
       struct
 	{
-	  char *start;		/* string value */
-	  char *current;	/* current value */
+	  char *str;		/* string value */
+	  size_t len;		/* remaining length */
 	}
       u_s;
       struct
@@ -449,27 +449,25 @@ static struct input_funcs string_funcs = {
 static int
 string_peek (m4_input_block *me)
 {
-  int ch = to_uchar (*me->u.u_s.current);
-
-  return (ch == '\0') ? CHAR_RETRY : ch;
+  return me->u.u_s.len ? to_uchar (*me->u.u_s.str) : CHAR_RETRY;
 }
 
 static int
 string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 	     bool retry M4_GNUC_UNUSED)
 {
-  int ch = to_uchar (*me->u.u_s.current);
-  if (ch == '\0')
+  if (!me->u.u_s.len)
     return CHAR_RETRY;
-  me->u.u_s.current++;
-  return ch;
+  me->u.u_s.len--;
+  return to_uchar (*me->u.u_s.str++);
 }
 
 static void
 string_unget (m4_input_block *me, int ch)
 {
-  assert (me->u.u_s.current > me->u.u_s.start && ch < CHAR_EOF);
-  *--me->u.u_s.current = ch;
+  assert (ch < CHAR_EOF && to_uchar (me->u.u_s.str[-1]) == ch);
+  me->u.u_s.str--;
+  me->u.u_s.len++;
 }
 
 static void
@@ -479,13 +477,15 @@ string_print (m4_input_block *me, m4 *context, m4_obstack *obs)
   const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
   const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
-  const char *text = me->u.u_s.start;
-  size_t len = arg_length ? strnlen (text, arg_length) : strlen (text);
+  const char *text = me->u.u_s.str;
+  size_t len = me->u.u_s.len;
 
+  if (arg_length && arg_length < len)
+    len = arg_length;
   if (quote)
     obstack_grow (obs, lquote, strlen (lquote));
   obstack_grow (obs, text, len);
-  if (len == arg_length && text[len] != '\0')
+  if (len != me->u.u_s.len)
     obstack_grow (obs, "...", 3);
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
@@ -529,9 +529,9 @@ m4_push_string_finish (void)
 
   if (obstack_object_size (current_input) > 0)
     {
+      next->u.u_s.len = obstack_object_size (current_input);
       obstack_1grow (current_input, '\0');
-      next->u.u_s.start = obstack_finish (current_input);
-      next->u.u_s.current = next->u.u_s.start;
+      next->u.u_s.str = obstack_finish (current_input);
       next->prev = isp;
       ret = isp = next;
       input_change = true;
@@ -665,8 +665,8 @@ m4_push_wrapup (m4 *context, const char *s)
   i->file = m4_get_current_file (context);
   i->line = m4_get_current_line (context);
 
-  i->u.u_s.start = obstack_copy0 (wrapup_stack, s, strlen (s));
-  i->u.u_s.current = i->u.u_s.start;
+  i->u.u_s.len = strlen (s);
+  i->u.u_s.str = obstack_copy0 (wrapup_stack, s, i->u.u_s.len);
 
   wsp = i;
 }
@@ -1019,6 +1019,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   m4__token_type type;
   const char *file;
   int dummy;
+  size_t len;
 
   assert (next == NULL);
   if (!line)
@@ -1221,11 +1222,12 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
   } while (type == M4_TOKEN_NONE);
 
+  len = obstack_object_size (&token_stack);
   obstack_1grow (&token_stack, '\0');
 
   memset (token, '\0', sizeof (m4_symbol_value));
 
-  m4_set_symbol_value_text (token, obstack_finish (&token_stack));
+  m4_set_symbol_value_text (token, obstack_finish (&token_stack), len);
   VALUE_MAX_ARGS (token)	= -1;
 
 #ifdef DEBUG_INPUT

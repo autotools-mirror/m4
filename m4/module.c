@@ -193,8 +193,9 @@ install_macro_table (m4 *context, m4_module *module)
       for (; mp->name != NULL; mp++)
 	{
 	  m4_symbol_value *value = m4_symbol_value_create ();
+	  size_t len = strlen (mp->value);
 
-	  m4_set_symbol_value_text (value, xstrdup (mp->value));
+	  m4_set_symbol_value_text (value, xmemdup (mp->value, len + 1), len);
 	  VALUE_MODULE (value) = module;
 
 	  m4_symbol_pushdef (M4SYMTAB, mp->name, value);

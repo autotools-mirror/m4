@@ -89,6 +89,7 @@ struct m4_macro_args
      until all references have been rescanned.  */
   bool inuse;
   const char *argv0; /* The macro name being expanded.  */
+  size_t argv0_len; /* Length of argv0.  */
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -267,6 +268,8 @@ extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
 	(m4_is_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_text(symbol)					\
 	(m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
+#define m4_get_symbol_len(symbol)					\
+	(m4_get_symbol_value_len (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_func(symbol)					\
 	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_builtin(symbol)					\
@@ -284,12 +287,13 @@ extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
 extern bool		m4_is_symbol_value_void	  (m4_symbol_value *);
-extern const char      *m4_get_symbol_value_text  (m4_symbol_value *);
+extern const char *	m4_get_symbol_value_text  (m4_symbol_value *);
+extern size_t		m4_get_symbol_value_len   (m4_symbol_value *);
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
 extern const m4_builtin *m4_get_symbol_value_builtin	(m4_symbol_value *);
-extern const char      *m4_get_symbol_value_placeholder	(m4_symbol_value *);
+extern const char *	m4_get_symbol_value_placeholder	(m4_symbol_value *);
 extern void		m4_set_symbol_value_text  (m4_symbol_value *,
-						   const char *);
+						   const char *, size_t);
 extern void		m4_set_symbol_value_builtin	(m4_symbol_value *,
 							 const m4_builtin *);
 extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,

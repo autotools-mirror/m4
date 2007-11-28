@@ -463,7 +463,7 @@ M4BUILTIN_HANDLER (builtin)
 		for (i = 2; i < argc; i++)
 		  if (!m4_is_arg_text (argv, i))
 		    m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1),
-					      "");
+					      "", 0);
 	      bp->func (context, obs, argc - 1, new_argv);
 	      free (new_argv);
 	    }
@@ -707,7 +707,8 @@ M4BUILTIN_HANDLER (indir)
 	  if (!m4_symbol_groks_macro (symbol))
 	    for (i = 2; i < argc; i++)
 	      if (!m4_is_arg_text (argv, i))
-		m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1), "");
+		m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1),
+					  "", 0);
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	  free (new_argv);

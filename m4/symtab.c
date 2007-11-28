@@ -412,7 +412,12 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
   /* Caller is supposed to free text token strings, so we have to
      copy the string not just its address in that case.  */
   if (m4_is_symbol_value_text (src))
-    m4_set_symbol_value_text (dest, xstrdup (m4_get_symbol_value_text (src)));
+    {
+      size_t len = m4_get_symbol_value_len (src);
+      m4_set_symbol_value_text (dest,
+				xmemdup (m4_get_symbol_value_text (src),
+					 len + 1), len);
+    }
   else if (m4_is_symbol_value_placeholder (src))
     m4_set_symbol_value_placeholder (dest,
 				     xstrdup (m4_get_symbol_value_placeholder
@@ -638,7 +643,15 @@ const char *
 m4_get_symbol_value_text (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_TEXT);
-  return value->u.text;
+  return value->u.u_t.text;
+}
+
+#undef m4_get_symbol_value_len
+size_t
+m4_get_symbol_value_len (m4_symbol_value *value)
+{
+  assert (value && value->type == M4_SYMBOL_TEXT);
+  return value->u.u_t.len;
 }
 
 #undef m4_get_symbol_value_func
@@ -662,18 +675,23 @@ const char *
 m4_get_symbol_value_placeholder (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_PLACEHOLDER);
-  return value->u.text;
+  return value->u.u_t.text;
 }
 
 #undef m4_set_symbol_value_text
 void
-m4_set_symbol_value_text (m4_symbol_value *value, const char *text)
+m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len)
 {
-  assert (value);
-  assert (text);
+  assert (value && text);
+  /* TODO - this assertion requires NUL-terminated text.  Do we want
+     to optimize memory usage and use purely length-based
+     manipulation, for one less byte per string?  Perhaps only without
+     NDEBUG?  */
+  assert (strlen (text) <= len);
 
-  value->type   = M4_SYMBOL_TEXT;
-  value->u.text = text;
+  value->type = M4_SYMBOL_TEXT;
+  value->u.u_t.text = text;
+  value->u.u_t.len = len;
 }
 
 #undef m4_set_symbol_value_builtin
@@ -694,8 +712,9 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
   assert (value);
   assert (text);
 
-  value->type   = M4_SYMBOL_PLACEHOLDER;
-  value->u.text = text;
+  value->type = M4_SYMBOL_PLACEHOLDER;
+  value->u.u_t.text = text;
+  value->u.u_t.len = SIZE_MAX; /* len is not tracked for placeholders.  */
 }
 
 

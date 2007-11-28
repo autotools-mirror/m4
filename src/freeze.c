@@ -755,7 +755,9 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	    if (number[2] > 0)
 	      module = m4__module_find (string[2]);
 
-	    m4_set_symbol_value_text (token, xstrdup (string[1]));
+	    m4_set_symbol_value_text (token, xmemdup (string[1],
+						      number[1] + 1),
+				      number[1]);
 	    VALUE_MODULE (token) = module;
 	    VALUE_MAX_ARGS (token) = -1;
 

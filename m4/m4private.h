@@ -203,8 +203,13 @@ struct m4_symbol_value
   size_t		pending_expansions;
 
   m4__symbol_type	type;
-  union {
-    const char *	text;	/* Valid when type is TEXT, PLACEHOLDER.  */
+  union
+  {
+    struct
+    {
+      size_t		len;	/* Length of string.  */
+      const char *	text;	/* String contents.  */
+    } u_t;			/* Valid when type is TEXT, PLACEHOLDER.  */
     const m4_builtin *	builtin;/* Valid when type is FUNC.  */
     m4_symbol_chain *	chain;	/* Valid when type is COMP.  */
   } u;
@@ -241,20 +246,21 @@ struct m4_symbol_value
 #  define m4_is_symbol_value_void(V)	((V)->type == M4_SYMBOL_VOID)
 #  define m4_is_symbol_value_placeholder(V)				\
 					((V)->type == M4_SYMBOL_PLACEHOLDER)
-#  define m4_get_symbol_value_text(V)	((V)->u.text)
+#  define m4_get_symbol_value_text(V)	((V)->u.u_t.text)
+#  define m4_get_symbol_value_len(V)	((V)->u.u_t.len)
 #  define m4_get_symbol_value_func(V)	((V)->u.builtin->func)
 #  define m4_get_symbol_value_builtin(V) ((V)->u.builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
-					((V)->u.text)
+					((V)->u.u_t.text)
 #  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
 						    VALUE_MACRO_ARGS_BIT))
 
-#  define m4_set_symbol_value_text(V, T)				\
-	((V)->type = M4_SYMBOL_TEXT, (V)->u.text = (T))
+#  define m4_set_symbol_value_text(V, T, L)				\
+  ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T), (V)->u.u_t.len = (L))
 #  define m4_set_symbol_value_builtin(V, B)				\
-	((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B))
+  ((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B))
 #  define m4_set_symbol_value_placeholder(V, T)				\
-	((V)->type = M4_SYMBOL_PLACEHOLDER, (V)->u.text = (T))
+  ((V)->type = M4_SYMBOL_PLACEHOLDER, (V)->u.u_t.text = (T))
 #endif
 
 

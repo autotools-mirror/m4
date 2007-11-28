@@ -163,6 +163,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
   int paren_level = 0;
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
+  size_t len;
 
   argp->type = M4_SYMBOL_VOID;
 
@@ -188,9 +189,10 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	      if (argp->type == M4_SYMBOL_FUNC
 		  && obstack_object_size (obs) == 0)
 		return type == M4_TOKEN_COMMA;
+	      len = obstack_object_size (obs);
 	      obstack_1grow (obs, '\0');
 	      VALUE_MODULE (argp) = NULL;
-	      m4_set_symbol_value_text (argp, obstack_finish (obs));
+	      m4_set_symbol_value_text (argp, obstack_finish (obs), len);
 	      return type == M4_TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -369,7 +371,7 @@ collect_arguments (m4 *context, const char *name, m4_symbol *symbol,
 	  if (!groks_macro_args && m4_is_symbol_value_func (&token))
 	    {
 	      VALUE_MODULE (&token) = NULL;
-	      m4_set_symbol_value_text (&token, "");
+	      m4_set_symbol_value_text (&token, "", 0);
 	    }
 	  tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
 						     sizeof token);
