@@ -284,13 +284,14 @@ node_insert (m4_hash *hash, hash_node *node)
 /* Remove from HASH, the first node with key KEY; comparing keys with
    HASH's cmp_func.  Any nodes with the same KEY previously hidden by
    the removed node will become visible again.  The key field of the
-   removed node is returned, or the original KEY If there was no
-   match.  This is unsafe if multiple iterators are visiting HASH, or
-   when a lone iterator is visiting on a different key.  */
+   removed node is returned, or NULL if there was no match.  This is
+   unsafe if multiple iterators are visiting HASH, or when a lone
+   iterator is visiting on a different key.  */
 void *
 m4_hash_remove (m4_hash *hash, const void *key)
 {
   size_t n;
+  hash_node *node = NULL;
 
 #ifndef NDEBUG
   m4_hash_iterator *iter = HASH_ITER (hash);
@@ -304,36 +305,31 @@ m4_hash_remove (m4_hash *hash, const void *key)
 #endif
 
   n = BUCKET_COUNT (hash, key);
+  do
+    {
+      hash_node *next = node ? NODE_NEXT (node) : BUCKET_NTH (hash, n);
 
-  {
-    hash_node *node = NULL;
+      if (next && ((*HASH_CMP_FUNC (hash)) (NODE_KEY (next), key) == 0))
+	{
+	  if (node)
+	    NODE_NEXT (node) = NODE_NEXT (next);
+	  else
+	    BUCKET_NTH (hash, n) = NODE_NEXT (next);
 
-    do
-      {
-	hash_node *next = node ? NODE_NEXT (node) : BUCKET_NTH (hash, n);
-
-	if (next && ((*HASH_CMP_FUNC (hash)) (NODE_KEY (next), key) == 0))
-	  {
-	    if (node)
-	      NODE_NEXT (node)	    = NODE_NEXT (next);
-	    else
-	      BUCKET_NTH (hash, n)  = NODE_NEXT (next);
-
-	    key = NODE_KEY (next);
+	  key = NODE_KEY (next);
 #ifndef NDEBUG
-	    if (iter)
-	      assert (ITERATOR_PLACE (iter) == next);
-	    NODE_KEY (next) = NULL;
+	  if (iter)
+	    assert (ITERATOR_PLACE (iter) == next);
+	  NODE_KEY (next) = NULL;
 #endif
-	    node_delete (hash, next);
-	    break;
-	  }
-	node = next;
-      }
-    while (node);
-  }
+	  node_delete (hash, next);
+	  return (void *) key; /* Cast away const.  */
+	}
+      node = next;
+    }
+  while (node);
 
-  return (void *) key;
+  return NULL;
 }
 
 /* Return the address of the value field of the first node in HASH

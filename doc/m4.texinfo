@@ -2451,15 +2451,28 @@ The macro @code{renamesyms} is recognized only with parameters.
 This macro was added in M4 2.0.
 @end deffn
 
-Here is an example that performs the same renaming as the
+Here is an example that starts by performing a similar renaming to the
 @option{--prefix-builtins} option (or @option{-P}).  Where
 @option{--prefix-builtins} only renames M4 builtin macros,
 @code{renamesyms} will rename any macros that match when it runs,
-including text macros.
+including text macros.  The rest of the example demonstrates the
+behavior of unanchored regular expressions in symbol renaming.
 
 @example
+define(`foo', `bar')
+@result{}
 renamesyms(`^.*$', `m4_\&')
 @result{}
+foo
+@result{}foo
+m4_foo
+@result{}bar
+m4_defn(`m4_foo')
+@result{}bar
+m4_renamesyms(`f', `g')
+@result{}
+m4_igdeg(`m4_goo', `m4_goo')
+@result{}bar
 @end example
 
 If @var{resyntax} is given, @var{regexp} must be given according to
@@ -2474,6 +2487,11 @@ renamesyms(`^[^_]\w*$', `m4_\&')
 @result{}
 m4_renamesyms(`^m4_m4(\w*)$', `m4_\1', `POSIX_EXTENDED')
 @result{}
+m4_wrap(__line__
+)
+@result{}
+^D
+@result{}3
 @end example
 
 When a symbol has multiple definitions, thanks to @code{pushdef}, the
@@ -3413,7 +3431,7 @@ f(popdef(`f')dumpdef(`f'))
 @samp{q} flag is implied when the @option{--debug} option (@option{-d},
 @pxref{Debugging options, , Invoking m4}) is used in the command line
 without arguments. Also, @option{--debuglen} (@pxref{Debuglen}) can affect
-output, by truncating longer strings.
+output, by truncating longer strings (but not builtin and module names).
 
 @comment options: -ds -l3
 @example
@@ -3429,8 +3447,8 @@ debugmode(`+m')
 dumpdef(`foo', `dnl', `indir', `__gnu__')
 @error{}__gnu__:@tabchar{}@{gnu@}
 @error{}dnl:@tabchar{}<dnl>@{m4@}
-@error{}foo:@tabchar{}3, <div...>@{m4@}, 1 l...
-@error{}indir:@tabchar{}<ind...>@{gnu@}
+@error{}foo:@tabchar{}3, <divnum>@{m4@}, 1 l...
+@error{}indir:@tabchar{}<indir>@{gnu@}
 @result{}
 debugmode(`-m')
 @result{}
@@ -4793,6 +4811,8 @@ foo
 @result{}foo
 @@foo
 @result{}bar
+@@bar
+@result{}@@bar
 @@changesyntax(`@@\', `O@@')
 @result{}
 foo

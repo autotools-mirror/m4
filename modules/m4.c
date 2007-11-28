@@ -54,7 +54,7 @@ extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data,
 			      bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
-			      const char *name, bool dir);
+			      const char *name, size_t len, bool dir);
 
 /* stdlib--.h defines mkstemp to a safer replacement, but this
    interferes with our preprocessor table of builtin definitions.  */
@@ -229,26 +229,13 @@ M4BUILTIN_HANDLER (popdef)
 
 M4BUILTIN_HANDLER (ifdef)
 {
-  m4_symbol *symbol;
-  const char *result;
-
-  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (1));
-
-  if (symbol)
-    result = M4ARG (2);
-  else if (argc >= 4)
-    result = M4ARG (3);
-  else
-    result = NULL;
-
-  if (result)
-    obstack_grow (obs, result, strlen (result));
+  unsigned int index = m4_symbol_lookup (M4SYMTAB, M4ARG (1)) ? 2 : 3;
+  obstack_grow (obs, M4ARG (index), m4_arg_len (argv, index));
 }
 
 M4BUILTIN_HANDLER (ifelse)
 {
   const char *me = M4ARG (0);
-  const char *result;
   unsigned int index;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
@@ -265,13 +252,13 @@ M4BUILTIN_HANDLER (ifelse)
   index = 1;
   argc--;
 
-  result = NULL;
-  while (result == NULL)
-
-    if (strcmp (M4ARG (index), M4ARG (index + 1)) == 0)
-      result = M4ARG (index + 2);
-
-    else
+  while (1)
+    {
+      if (strcmp (M4ARG (index), M4ARG (index + 1)) == 0)
+	{
+	  obstack_grow (obs, M4ARG (index + 2), m4_arg_len (argv, index + 2));
+	  return;
+	}
       switch (argc)
 	{
 	case 3:
@@ -279,15 +266,14 @@ M4BUILTIN_HANDLER (ifelse)
 
 	case 4:
 	case 5:
-	  result = M4ARG (index + 3);
-	  break;
+	  obstack_grow (obs, M4ARG (index + 3), m4_arg_len (argv, index + 3));
+	  return;
 
 	default:
 	  argc -= 3;
 	  index += 3;
 	}
-
-  obstack_grow (obs, result, strlen (result));
+    }
 }
 
 
@@ -407,7 +393,8 @@ M4BUILTIN_HANDLER (defn)
       if (!symbol)
 	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else if (m4_is_symbol_text (symbol))
-	m4_shipout_string (context, obs, m4_get_symbol_text (symbol), 0, true);
+	m4_shipout_string (context, obs, m4_get_symbol_text (symbol),
+			   m4_get_symbol_len (symbol), true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (context, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
@@ -578,15 +565,11 @@ M4BUILTIN_HANDLER (decr)
 M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
-  const char *text;
 
   if (argc >= 2 && !m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
-
   m4_make_diversion (context, i);
-
-  text = M4ARG (2);
-  m4_shipout_text (context, NULL, text, strlen (text),
+  m4_shipout_text (context, NULL, M4ARG (2), m4_arg_len (argv, 2),
 		   m4_get_current_line (context));
 }
 
@@ -717,10 +700,9 @@ M4BUILTIN_HANDLER (sinclude)
    export this function as a helper to that?  */
 void
 m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
-	      const char *name, bool dir)
+	      const char *name, size_t len, bool dir)
 {
   int fd;
-  int len;
   int i;
 
   if (m4_get_safer_opt (context))
@@ -732,14 +714,11 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
   /* Guarantee that there are six trailing 'X' characters, even if the
      user forgot to supply them.  */
   assert (obstack_object_size (obs) == 0);
-  len = strlen (name);
   obstack_grow (obs, name, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (name[--len] != 'X')
       break;
-  for (; i < 6; i++)
-    obstack_1grow (obs, 'X');
-  obstack_1grow (obs, '\0');
+  obstack_grow0 (obs, "XXXXXX", 6 - i);
 
   /* Make the temporary object.  */
   errno = 0;
@@ -755,8 +734,16 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 		name);
       obstack_free (obs, obstack_finish (obs));
     }
-  else if (! dir)
-    close (fd);
+  else
+    {
+      if (! dir)
+	close (fd);
+      /* Undo the trailing NUL.  */
+      /* FIXME - shouldn't this return a quoted string, on the rather
+	 small chance that the user has a macro matching the random
+	 file name chosen?  */
+      obstack_blank (obs, -1);
+    }
 }
 
 /* Use the first argument as at template for a temporary file name.  */
@@ -776,7 +763,7 @@ M4BUILTIN_HANDLER (maketemp)
 	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = M4ARG (1);
-      int len = strlen (str);
+      size_t len = m4_arg_len (argv, 1);
       int i;
       int len2;
 
@@ -787,22 +774,24 @@ M4BUILTIN_HANDLER (maketemp)
       str = ntoa ((number) getpid (), 10);
       len2 = strlen (str);
       if (len2 > len - i)
-	obstack_grow0 (obs, str + len2 - (len - i), len - i);
+	obstack_grow (obs, str + len2 - (len - i), len - i);
       else
 	{
 	  while (i++ < len - len2)
 	    obstack_1grow (obs, '0');
-	  obstack_grow0 (obs, str, len2);
+	  obstack_grow (obs, str, len2);
 	}
     }
   else
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), false);
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
+		  false);
 }
 
 /* Use the first argument as a template for a temporary file name.  */
 M4BUILTIN_HANDLER (mkstemp)
 {
-  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), false);
+  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
+		false);
 }
 
 /* Print all arguments on standard error.  */
@@ -862,7 +851,7 @@ M4BUILTIN_HANDLER (m4wrap)
 {
   assert (obstack_object_size (obs) == 0);
   if (m4_get_posixly_correct_opt (context))
-    m4_shipout_string (context, obs, M4ARG (1), 0, false);
+    m4_shipout_string (context, obs, M4ARG (1), m4_arg_len (argv, 1), false);
   else
     m4_dump_args (context, obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
@@ -906,7 +895,7 @@ M4BUILTIN_HANDLER (traceoff)
 /* Expand to the length of the first argument.  */
 M4BUILTIN_HANDLER (len)
 {
-  m4_shipout_int (obs, strlen (M4ARG (1)));
+  m4_shipout_int (obs, m4_arg_len (argv, 1));
 }
 
 /* The macro expands to the first index of the second argument in the first
@@ -946,11 +935,11 @@ M4BUILTIN_HANDLER (substr)
 
   if (argc <= 2)
     {
-      obstack_grow (obs, str, strlen (str));
+      obstack_grow (obs, str, m4_arg_len (argv, 1));
       return;
     }
 
-  length = avail = strlen (str);
+  length = avail = m4_arg_len (argv, 1);
   if (!m4_numeric_arg (context, me, M4ARG (2), &start))
     return;
 
@@ -1174,6 +1163,8 @@ static void
 numb_obstack(m4_obstack *obs, number value, int radix, int min)
 {
   const char *s;
+  size_t len;
+
   if (radix == 1)
     {
       /* FIXME - this code currently depends on undefined behavior.  */
@@ -1186,7 +1177,6 @@ numb_obstack(m4_obstack *obs, number value, int radix, int min)
 	obstack_1grow (obs, '0');
       while (value-- != 0)
 	obstack_1grow (obs, '1');
-      obstack_1grow (obs, '\0');
       return;
     }
 
@@ -1197,10 +1187,11 @@ numb_obstack(m4_obstack *obs, number value, int radix, int min)
       obstack_1grow (obs, '-');
       s++;
     }
-  for (min -= strlen (s); --min >= 0;)
+  len = strlen (s);
+  for (min -= len; --min >= 0;)
     obstack_1grow (obs, '0');
 
-  obstack_grow (obs, s, strlen (s));
+  obstack_grow (obs, s, len);
 }
 
 

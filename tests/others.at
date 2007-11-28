@@ -260,6 +260,10 @@ AT_SETUP([iso8859])
 # is no use in trying to handle it here...  Well, until autom4te provides
 # us with means to.
 
+# However, since progress is being made to let M4 handle NUL, this test
+# is xfailed for now.
+AT_XFAIL_IF([:])
+
 AT_DATA([[expout]],
 [[# Testing quotes
 DEFINE			# eol

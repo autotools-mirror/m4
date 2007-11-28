@@ -100,7 +100,8 @@ M4BUILTIN_HANDLER (m4modules)
   if (module)
     do
       {
-	m4_shipout_string (context, obs, m4_get_module_name (module), 0, true);
+	m4_shipout_string (context, obs, m4_get_module_name (module), SIZE_MAX,
+			   true);
 
 	if ((module = m4__module_next (module)))
 	  obstack_1grow (obs, ',');

@@ -1,3 +1,34 @@
+2007-11-29  Eric Blake  <ebb9@byu.net>
+
+	Stage 3b: cache length, rather than computing it, in modules.
+	* m4/hash.c (m4_hash_remove): Avoid double free on remove
+	failure.
+	* m4/output.c (m4_shipout_string): Change semantics of len param.
+	(m4_shipout_int): Use cached length.
+	* m4/input.c (m4_push_string_finish): Likewise.
+	* modules/m4.h (m4_make_temp_func): Add parameter.
+	* m4/macro.c (expand_token, m4_arg_len): Use cached length.
+	(collect_arguments, expand_macro): Alter signature.
+	(trace_format): Don't use out-of-scope buffer.
+	(process_macro): All callers changed.
+	* m4/utility.c (m4_dump_args): Likewise.
+	* m4/symtab.c (m4_symbol_value_print): Likewise.
+	* modules/gnu.c (__file__, __program__, builtin, indir)
+	(m4symbols, mkdtemp, regexp_compile, regexp_substitute,
+	renamesyms, patsubst, regexp, regexp_compile): Likewise.
+	* modules/load.c (m4modules): Likewise.
+	* modules/m4.c (defn, m4wrap, maketemp, m4_make_temp)
+	(numb_obstack, ifdef, ifelse, divert, len, substr): Likewise.
+	* modules/perl.c (perleval): Likewise.
+	* modules/stdlib.c (getcwd, getenv, getlogin, getpwnam, getpwuid)
+	(hostname, uname, setenv): Likewise.
+	* modules/mpeval.c (numb_obstack): Likewise.
+	* src/freeze.c (dump_symbol_CB): Likewise.
+	* doc/m4.texinfo (Renamesyms, Dumpdef, Changesyntax): Adjust test.
+	* tests/builtins.at (mkstemp): Likewise.
+	* tests/others.at (iso8859): XFAIL this test, now that
+	length-based handling allows NUL through part but not all of M4.
+
 2007-11-28  Eric Blake  <ebb9@byu.net>
 
 	Stage 3a: cache length, rather than computing it, in libm4.

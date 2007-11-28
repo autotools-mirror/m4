@@ -168,7 +168,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
   if (m4_is_symbol_text (symbol))
     {
       const char *text = m4_get_symbol_text (symbol);
-      size_t text_len = strlen (text);
+      size_t text_len = m4_get_symbol_len (symbol);
       xfprintf (file, "T%zu,%zu", symbol_len, text_len);
       if (module)
 	xfprintf (file, ",%zu", module_len);

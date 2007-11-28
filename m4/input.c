@@ -523,13 +523,17 @@ m4_input_block *
 m4_push_string_finish (void)
 {
   m4_input_block *ret = NULL;
+  size_t len = obstack_object_size (current_input);
 
   if (next == NULL)
-    return isp;
-
-  if (obstack_object_size (current_input) > 0)
     {
-      next->u.u_s.len = obstack_object_size (current_input);
+      assert (!len);
+      return isp;
+    }
+
+  if (len)
+    {
+      next->u.u_s.len = len;
       obstack_1grow (current_input, '\0');
       next->u.u_s.str = obstack_finish (current_input);
       next->prev = isp;

@@ -579,20 +579,23 @@ void
 m4_shipout_int (m4_obstack *obs, int val)
 {
   char buf[INT_BUFSIZE_BOUND (int)];
-
-  sprintf(buf, "%d", val);
-  obstack_grow (obs, buf, strlen (buf));
+  int len = sprintf(buf, "%d", val);
+  obstack_grow (obs, buf, len);
 }
 
+/* Output the text S, of length LEN, to OBS.  If QUOTED, also output
+   current quote characters around S.  If LEN is SIZE_MAX, use the
+   string length of S instead.  */
 void
 m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
 		   bool quoted)
 {
+  assert (obs);
   if (s == NULL)
     s = "";
 
-  if (len == 0)
-    len = strlen(s);
+  if (len == SIZE_MAX)
+    len = strlen (s);
 
   if (quoted)
     obstack_grow (obs, context->syntax->lquote.string,

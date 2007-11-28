@@ -123,6 +123,6 @@ M4BUILTIN_HANDLER (perleval)
 
       val = perl_eval_pv (M4ARG (i), true);
 
-      m4_shipout_string (context, obs, SvPV (val, PL_na), 0, false);
+      m4_shipout_string (context, obs, SvPV (val, PL_na), SIZE_MAX, false);
     }
 }

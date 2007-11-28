@@ -114,7 +114,8 @@ m4_dump_args (m4 *context, m4_obstack *obs, unsigned int start,
       else
 	need_sep = true;
 
-      m4_shipout_string (context, obs, M4ARG (i), 0, quoted);
+      m4_shipout_string (context, obs, M4ARG (i), m4_arg_len (argv, i),
+                         quoted);
     }
 }
 

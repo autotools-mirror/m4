@@ -526,12 +526,20 @@ AT_CLEANUP
 
 AT_SETUP([mkstemp])
 
+AT_KEYWORDS([maketemp])
+
 dnl Check that on error, the expansion is void
 AT_DATA([[in]],
 [[mkstemp(`no_such_dir/m4-fooXXXXXX')
 ]])
 AT_CHECK_M4([in], [1], [[
 ]], [[m4:in:1: mkstemp: cannot create file from template `no_such_dir/m4-fooXXXXXX': No such file or directory
+]])
+
+dnl Check that extra X are appended, but not trailing NUL
+AT_DATA([[in]], [[len(mkstemp(`m4-fooXXXXX'))
+]])
+AT_CHECK_M4([in], [0], [[12
 ]])
 
 dnl Check that umask has an effect
@@ -546,7 +554,7 @@ AT_CHECK([umask 700; m4 < in], [0], [[----------
 dnl Check for Solaris compatibility of maketemp.  Hopefully the pid is
 dnl less than 20 decimal digits.  Also check that --safer does not affect
 dnl traditional behavior of maketemp, which is textual only.
-AT_DATA([[stdin]],
+AT_DATA([[in]],
 [[maketemp()
 maketemp(X)
 maketemp(XX)
@@ -555,7 +563,7 @@ maketemp(no_such_dir/XXXXXX)
 ]])
 dnl Abuse our knowledge of AT_CHECK_M4 so that we can get stderr filtering...
 AT_CHECK_M4([-G -Q --safer], [0], [stdout], [],
-[stdin& echo $! > pid; wait $!])
+[in& echo $! > pid; wait $!])
 pid=`cat pid`
 cat >expout <<EOF
 

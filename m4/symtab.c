@@ -485,15 +485,23 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
 {
   const char *text;
   size_t len;
+  bool truncated = false;
 
   if (m4_is_symbol_value_text (value))
     {
       text = m4_get_symbol_value_text (value);
+      len = m4_get_symbol_value_len (value);
+      if (arg_length && arg_length < len)
+	{
+	  len = arg_length;
+	  truncated = true;
+	}
     }
   else if (m4_is_symbol_value_func (value))
     {
       const m4_builtin *bp = m4_get_symbol_value_builtin (value);
       text = bp->name;
+      len = strlen (text);
       lquote = "<";
       rquote = ">";
       quote = true;
@@ -502,6 +510,7 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     {
       text = m4_get_symbol_value_placeholder (value);
       /* FIXME - is it worth translating "placeholder for "?  */
+      len = strlen (text);
       lquote = "<placeholder for ";
       rquote = ">";
       quote = true;
@@ -512,11 +521,10 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
       abort ();
     }
 
-  len = arg_length ? strnlen (text, arg_length) : strlen (text);
   if (quote)
     obstack_grow (obs, lquote, strlen (lquote));
   obstack_grow (obs, text, len);
-  if (len == arg_length && text[len] != '\0')
+  if (truncated)
     obstack_grow (obs, "...", 3);
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
@@ -683,11 +691,12 @@ void
 m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len)
 {
   assert (value && text);
-  /* TODO - this assertion requires NUL-terminated text.  Do we want
-     to optimize memory usage and use purely length-based
-     manipulation, for one less byte per string?  Perhaps only without
-     NDEBUG?  */
-  assert (strlen (text) <= len);
+  /* TODO - this assertion enforces NUL-terminated text with no
+     intermediate NULs.  Do we want to optimize memory usage and use
+     purely length-based manipulation, for one less byte per string?
+     Perhaps only without NDEBUG?  Also, do we want to support
+     embedded NUL?  */
+  assert (strlen (text) == len);
 
   value->type = M4_SYMBOL_TEXT;
   value->u.u_t.text = text;

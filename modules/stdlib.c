@@ -80,13 +80,14 @@ m4_builtin m4_builtin_table[] =
  **/
 M4BUILTIN_HANDLER (getcwd)
 {
+  /* FIXME - Use gnulib module for arbitrary-length cwd.  */
   char buf[1024];
   char *bp;
 
   bp = getcwd (buf, sizeof buf);
 
   if (bp != NULL)		/* in case of error return null string */
-    m4_shipout_string (context, obs, buf, 0, false);
+    m4_shipout_string (context, obs, buf, SIZE_MAX, false);
 }
 
 /**
@@ -99,7 +100,7 @@ M4BUILTIN_HANDLER (getenv)
   env = getenv (M4ARG (1));
 
   if (env != NULL)
-    m4_shipout_string (context, obs, env, 0, false);
+    m4_shipout_string (context, obs, env, SIZE_MAX, false);
 }
 
 /**
@@ -121,10 +122,9 @@ M4BUILTIN_HANDLER (setenv)
     return;
 
   assert (obstack_object_size (obs) == 0);
-  obstack_grow (obs, M4ARG (1), strlen (M4ARG (1)));
+  obstack_grow (obs, M4ARG (1), m4_arg_len (argv, 1));
   obstack_1grow (obs, '=');
-  obstack_grow (obs, M4ARG (2), strlen (M4ARG (2)));
-  obstack_1grow (obs, '\0');
+  obstack_grow0 (obs, M4ARG (2), m4_arg_len (argv, 2));
 
   {
     char *env = obstack_finish (obs);
@@ -155,7 +155,7 @@ M4BUILTIN_HANDLER (getlogin)
   login = getlogin ();
 
   if (login != NULL)
-    m4_shipout_string (context, obs, login, 0, false);
+    m4_shipout_string (context, obs, login, SIZE_MAX, false);
 }
 
 /**
@@ -185,19 +185,19 @@ M4BUILTIN_HANDLER (getpwnam)
 
   if (pw != NULL)
     {
-      m4_shipout_string (context, obs, pw->pw_name, 0, true);
+      m4_shipout_string (context, obs, pw->pw_name, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_passwd, 0, true);
+      m4_shipout_string (context, obs, pw->pw_passwd, SIZE_MAX, true);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_gecos, 0, true);
+      m4_shipout_string (context, obs, pw->pw_gecos, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_dir, 0, true);
+      m4_shipout_string (context, obs, pw->pw_dir, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_shell, 0, true);
+      m4_shipout_string (context, obs, pw->pw_shell, SIZE_MAX, true);
     }
 }
 
@@ -216,19 +216,19 @@ M4BUILTIN_HANDLER (getpwuid)
 
   if (pw != NULL)
     {
-      m4_shipout_string (context, obs, pw->pw_name, 0, true);
+      m4_shipout_string (context, obs, pw->pw_name, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_passwd, 0, true);
+      m4_shipout_string (context, obs, pw->pw_passwd, SIZE_MAX, true);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_uid);
       obstack_1grow (obs, ',');
       m4_shipout_int (obs, pw->pw_gid);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_gecos, 0, true);
+      m4_shipout_string (context, obs, pw->pw_gecos, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_dir, 0, true);
+      m4_shipout_string (context, obs, pw->pw_dir, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, pw->pw_shell, 0, true);
+      m4_shipout_string (context, obs, pw->pw_shell, SIZE_MAX, true);
     }
 }
 
@@ -242,7 +242,7 @@ M4BUILTIN_HANDLER (hostname)
   if (gethostname (buf, sizeof buf) < 0)
     return;
 
-  m4_shipout_string (context, obs, buf, 0, false);
+  m4_shipout_string (context, obs, buf, SIZE_MAX, false);
 }
 
 /**
@@ -280,15 +280,15 @@ M4BUILTIN_HANDLER (uname)
 
   if (uname (&ut) == 0)
     {
-      m4_shipout_string (context, obs, ut.sysname, 0, true);
+      m4_shipout_string (context, obs, ut.sysname, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.nodename, 0, true);
+      m4_shipout_string (context, obs, ut.nodename, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.release, 0, true);
+      m4_shipout_string (context, obs, ut.release, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.version, 0, true);
+      m4_shipout_string (context, obs, ut.version, SIZE_MAX, true);
       obstack_1grow (obs, ',');
-      m4_shipout_string (context, obs, ut.machine, 0, true);
+      m4_shipout_string (context, obs, ut.machine, SIZE_MAX, true);
     }
 }
 

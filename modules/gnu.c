@@ -127,13 +127,13 @@ typedef struct {
 /* Storage for the cache of regular expressions.  */
 static m4_pattern_buffer regex_cache[REGEX_CACHE_SIZE];
 
-/* Compile a REGEXP using the RESYNTAX flavor, and return the buffer.
-   On error, report the problem on behalf of CALLER, and return
-   NULL.  */
+/* Compile a REGEXP of length LEN using the RESYNTAX flavor, and
+   return the buffer.  On error, report the problem on behalf of
+   CALLER, and return NULL.  */
 
 static m4_pattern_buffer *
 regexp_compile (m4 *context, const char *caller, const char *regexp,
-		int resyntax)
+		size_t len, int resyntax)
 {
   /* regex_cache is guaranteed to start life 0-initialized, which
      works in the algorithm below.
@@ -150,7 +150,6 @@ regexp_compile (m4 *context, const char *caller, const char *regexp,
   m4_pattern_buffer *victim;	/* cache slot to replace */
   unsigned victim_count;	/* track which victim to replace */
   struct re_pattern_buffer *pat;/* newly compiled regex */
-  size_t len = strlen (regexp);	/* regex length */
 
   /* First, check if REGEXP is already cached with the given RESYNTAX.
      If so, increase its use count and return it.  */
@@ -214,7 +213,7 @@ regexp_compile (m4 *context, const char *caller, const char *regexp,
 /* Wrap up GNU Regex re_search call to work with an m4_pattern_buffer.
    If NO_SUB, then storing matches in buf->regs is not necessary.  */
 
-static int
+static regoff_t
 regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
 	       const int start, const int range, bool no_sub)
 {
@@ -282,23 +281,22 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
    by regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
    characters are copied verbatim, and the result copied to the
    obstack.  Errors are reported on behalf of CALLER.  Return true if
-   a substitution was made.  If IGNORE_DUPLICATES is set, don't worry
-   about completing the obstack when returning false.  */
+   a substitution was made.  If OPTIMIZE is set, don't worry about
+   copying the input if no changes are made.  */
 
 static bool
 regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
-		   const char *victim, const char *regexp,
+		   const char *victim, size_t len, const char *regexp,
 		   m4_pattern_buffer *buf, const char *replace,
-		   bool ignore_duplicates)
+		   bool optimize)
 {
-  int matchpos	= 0;		/* start position of match */
-  int offset	= 0;		/* current match offset */
-  int length	= strlen (victim);
-  bool subst	= false;	/* if a substitution has been made */
+  regoff_t matchpos = 0;	/* start position of match */
+  size_t offset = 0;		/* current match offset */
+  bool subst = !optimize;	/* if a substitution has been made */
 
-  while (offset <= length)
+  while (offset <= len)
     {
-      matchpos = regexp_search (buf, victim, length, offset, length - offset,
+      matchpos = regexp_search (buf, victim, len, offset, len - offset,
 				false);
 
       if (matchpos < 0)
@@ -311,8 +309,8 @@ regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
 	  if (matchpos == -2)
 	    m4_error (context, 0, 0, caller,
 		      _("error matching regular expression `%s'"), regexp);
-	  else if (!ignore_duplicates && (offset < length))
-	    obstack_grow (obs, victim + offset, length - offset);
+	  else if (offset < len && subst)
+	    obstack_grow (obs, victim + offset, len - offset);
 	  break;
 	}
 
@@ -333,13 +331,11 @@ regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
       offset = buf->regs.end[0];
       if (buf->regs.start[0] == buf->regs.end[0])
 	{
-	  obstack_1grow (obs, victim[offset]);
+	  if (offset < len)
+	    obstack_1grow (obs, victim[offset]);
 	  offset++;
 	}
     }
-
-  if (!ignore_duplicates || subst)
-    obstack_1grow (obs, '\0');
 
   return subst;
 }
@@ -370,7 +366,8 @@ M4FINISH_HANDLER(gnu)
  **/
 M4BUILTIN_HANDLER (__file__)
 {
-  m4_shipout_string (context, obs, m4_get_current_file (context), 0, true);
+  m4_shipout_string (context, obs, m4_get_current_file (context), SIZE_MAX,
+		     true);
 }
 
 
@@ -388,7 +385,7 @@ M4BUILTIN_HANDLER (__line__)
  **/
 M4BUILTIN_HANDLER (__program__)
 {
-  m4_shipout_string (context, obs, m4_get_program_name (), 0, true);
+  m4_shipout_string (context, obs, m4_get_program_name (), SIZE_MAX, true);
 }
 
 
@@ -456,6 +453,7 @@ M4BUILTIN_HANDLER (builtin)
 	      new_argv->argc = argc - 1;
 	      new_argv->inuse = false;
 	      new_argv->argv0 = name;
+	      new_argv->argv0_len = m4_arg_len (argv, 1);
 	      new_argv->arraylen = argc - 2;
 	      memcpy (&new_argv->array[0], &argv->array[1],
 		      (argc - 2) * sizeof (m4_symbol_value *));
@@ -701,6 +699,7 @@ M4BUILTIN_HANDLER (indir)
 	  new_argv->argc = argc - 1;
 	  new_argv->inuse = false;
 	  new_argv->argv0 = name;
+	  new_argv->argv0_len = m4_arg_len (argv, 1);
 	  new_argv->arraylen = argc - 2;
 	  memcpy (&new_argv->array[0], &argv->array[1],
 		  (argc - 2) * sizeof (m4_symbol_value *));
@@ -727,7 +726,8 @@ M4BUILTIN_HANDLER (mkdtemp)
   M4_MODULE_IMPORT (m4, m4_make_temp);
 
   if (m4_make_temp)
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), true);
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
+		  true);
   else
     assert (!"Unable to import from m4 module");
 }
@@ -767,17 +767,16 @@ M4BUILTIN_HANDLER (patsubst)
      replacement, we need not waste time with it.  */
   if (!*pattern && !*replace)
     {
-      const char *str = M4ARG (1);
-      obstack_grow (obs, str, strlen (str));
+      obstack_grow (obs, M4ARG (1), m4_arg_len (argv, 1));
       return;
     }
 
-  buf = regexp_compile (context, me, pattern, resyntax);
+  buf = regexp_compile (context, me, pattern, m4_arg_len (argv, 2), resyntax);
   if (!buf)
     return;
 
-  regexp_substitute (context, obs, me, M4ARG (1), pattern, buf,
-		     replace, false);
+  regexp_substitute (context, obs, me, M4ARG (1), m4_arg_len (argv, 1),
+		     pattern, buf, replace, false);
 }
 
 
@@ -797,8 +796,8 @@ M4BUILTIN_HANDLER (regexp)
   const char *pattern;		/* regular expression */
   const char *replace;		/* optional replacement string */
   m4_pattern_buffer *buf;	/* compiled regular expression */
-  int startpos;			/* start position of match */
-  int length;			/* length of first argument */
+  regoff_t startpos;		/* start position of match */
+  size_t len;			/* length of first argument */
   int resyntax;
 
   me = M4ARG (0);
@@ -842,13 +841,12 @@ M4BUILTIN_HANDLER (regexp)
       return;
     }
 
-  buf = regexp_compile (context, me, pattern, resyntax);
+  buf = regexp_compile (context, me, pattern, m4_arg_len (argv, 2), resyntax);
   if (!buf)
     return;
 
-  length = strlen (M4ARG (1));
-  startpos = regexp_search (buf, M4ARG (1), length, 0, length,
-			    replace == NULL);
+  len = m4_arg_len (argv, 1);
+  startpos = regexp_search (buf, M4ARG (1), len, 0, len, replace == NULL);
 
   if (startpos == -2)
     {
@@ -899,7 +897,8 @@ M4BUILTIN_HANDLER (renamesyms)
 	    return;
 	}
 
-      buf = regexp_compile (context, me, regexp, resyntax);
+      buf = regexp_compile (context, me, regexp, m4_arg_len (argv, 1),
+			    resyntax);
       if (!buf)
 	return;
 
@@ -912,12 +911,12 @@ M4BUILTIN_HANDLER (renamesyms)
 	{
 	  const char *name = data.base[0];
 
-	  if (regexp_substitute (context, &rename_obs, me, name, regexp,
-				 buf, replace, true))
+	  if (regexp_substitute (context, &rename_obs, me, name, strlen (name),
+				 regexp, buf, replace, true))
 	    {
-	      const char *renamed = obstack_finish (&rename_obs);
-
-	      m4_symbol_rename (M4SYMTAB, name, renamed);
+	      obstack_1grow (&rename_obs, '\0');
+	      m4_symbol_rename (M4SYMTAB, name,
+				(char *) obstack_finish (&rename_obs));
 	    }
 	}
 
@@ -949,7 +948,7 @@ M4BUILTIN_HANDLER (m4symbols)
 
       for (; data.size > 0; --data.size, data.base++)
 	{
-	  m4_shipout_string (context, obs, data.base[0], 0, true);
+	  m4_shipout_string (context, obs, data.base[0], SIZE_MAX, true);
 	  if (data.size > 1)
 	    obstack_1grow (obs, ',');
 	}

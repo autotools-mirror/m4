@@ -174,6 +174,7 @@ numb_obstack (m4_obstack *obs, const number value, const int radix,
 	      int min)
 {
   const char *s;
+  size_t len;
 
   mpz_t i;
   mpz_init (i);
@@ -186,10 +187,11 @@ numb_obstack (m4_obstack *obs, const number value, const int radix,
       obstack_1grow (obs, '-');
       s++;
     }
-  for (min -= strlen (s); --min >= 0;)
+  len = strlen (s);
+  for (min -= len; --min >= 0;)
     obstack_1grow (obs, '0');
 
-  obstack_grow (obs, s, strlen (s));
+  obstack_grow (obs, s, len);
 
   mpq_get_den (i, value);
   if (mpz_cmp_si (i, (long) 1) != 0)
