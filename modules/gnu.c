@@ -444,26 +444,11 @@ M4BUILTIN_HANDLER (builtin)
 			    bp->min_args, bp->max_args,
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
 	    {
-	      unsigned int i;
-	      /* TODO - make use of $@ reference.  */
-	      /* TODO - add accessor that performs this construction.  */
 	      m4_macro_args *new_argv;
-	      new_argv = xmalloc (offsetof (m4_macro_args, array)
-				  + ((argc - 2) * sizeof (m4_symbol_value *)));
-	      new_argv->argc = argc - 1;
-	      new_argv->inuse = false;
-	      new_argv->argv0 = name;
-	      new_argv->argv0_len = m4_arg_len (argv, 1);
-	      new_argv->arraylen = argc - 2;
-	      memcpy (&new_argv->array[0], &argv->array[1],
-		      (argc - 2) * sizeof (m4_symbol_value *));
-	      if ((bp->flags & M4_BUILTIN_GROKS_MACRO) == 0)
-		for (i = 2; i < argc; i++)
-		  if (!m4_is_arg_text (argv, i))
-		    m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1),
-					      "", 0);
+	      bool flatten = (bp->flags & M4_BUILTIN_GROKS_MACRO) == 0;
+	      new_argv = m4_make_argv_ref (argv, name, m4_arg_len (argv, 1),
+					   true, flatten);
 	      bp->func (context, obs, argc - 1, new_argv);
-	      free (new_argv);
 	    }
 	  free (value);
 	}
@@ -508,6 +493,7 @@ M4BUILTIN_HANDLER (changeresyntax)
  **/
 M4BUILTIN_HANDLER (changesyntax)
 {
+  const char *me = M4ARG (0);
   M4_MODULE_IMPORT (m4, m4_expand_ranges);
 
   if (m4_expand_ranges)
@@ -533,7 +519,7 @@ M4BUILTIN_HANDLER (changesyntax)
 	    }
 	  if (m4_set_syntax (M4SYNTAX, key, action,
 			     key ? m4_expand_ranges (spec, obs) : "") < 0)
-	    m4_warn (context, 0, M4ARG (0), _("undefined syntax code: `%c'"),
+	    m4_warn (context, 0, me, _("undefined syntax code: `%c'"),
 		     key);
 	}
     }
@@ -554,7 +540,7 @@ M4BUILTIN_HANDLER (debugfile)
 
   if (argc == 1)
     m4_debug_set_output (context, me, NULL);
-  else if (m4_get_safer_opt (context) && *M4ARG (1))
+  else if (m4_get_safer_opt (context) && !m4_arg_empty (argv, 1))
     m4_error (context, 0, 0, me, _("disabled by --safer"));
   else if (!m4_debug_set_output (context, me, M4ARG (1)))
     m4_error (context, 0, errno, me, _("cannot set debug file `%s'"),
@@ -613,6 +599,7 @@ M4BUILTIN_HANDLER (debugmode)
 
 M4BUILTIN_HANDLER (esyscmd)
 {
+  const char *me = M4ARG (0);
   M4_MODULE_IMPORT (m4, m4_set_sysval);
   M4_MODULE_IMPORT (m4, m4_sysval_flush);
 
@@ -623,12 +610,12 @@ M4BUILTIN_HANDLER (esyscmd)
 
       if (m4_get_safer_opt (context))
 	{
-	  m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
+	  m4_error (context, 0, 0, me, _("disabled by --safer"));
 	  return;
 	}
 
       /* Optimize the empty command.  */
-      if (*M4ARG (1) == '\0')
+      if (m4_arg_empty (argv, 1))
 	{
 	  m4_set_sysval (0);
 	  return;
@@ -639,14 +626,14 @@ M4BUILTIN_HANDLER (esyscmd)
       pin = popen (M4ARG (1), "r");
       if (pin == NULL)
 	{
-	  m4_error (context, 0, errno, M4ARG (0),
+	  m4_error (context, 0, errno, me,
 		    _("cannot open pipe to command `%s'"), M4ARG (1));
 	  m4_set_sysval (-1);
 	}
       else
 	{
 	  while ((ch = getc (pin)) != EOF)
-	    obstack_1grow (obs, (char) ch);
+	    obstack_1grow (obs, ch);
 	  m4_set_sysval (pclose (pin));
 	}
     }
@@ -690,27 +677,12 @@ M4BUILTIN_HANDLER (indir)
 	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else
 	{
-	  unsigned int i;
-	  /* TODO - make use of $@ reference.  */
-	  /* TODO - add accessor that performs this construction.  */
 	  m4_macro_args *new_argv;
-	  new_argv = xmalloc (offsetof (m4_macro_args, array)
-			      + ((argc - 2) * sizeof (m4_symbol_value *)));
-	  new_argv->argc = argc - 1;
-	  new_argv->inuse = false;
-	  new_argv->argv0 = name;
-	  new_argv->argv0_len = m4_arg_len (argv, 1);
-	  new_argv->arraylen = argc - 2;
-	  memcpy (&new_argv->array[0], &argv->array[1],
-		  (argc - 2) * sizeof (m4_symbol_value *));
-	  if (!m4_symbol_groks_macro (symbol))
-	    for (i = 2; i < argc; i++)
-	      if (!m4_is_arg_text (argv, i))
-		m4_set_symbol_value_text (m4_arg_symbol (new_argv, i - 1),
-					  "", 0);
+	  bool flatten = !m4_symbol_groks_macro (symbol);
+	  new_argv = m4_make_argv_ref (argv, name, m4_arg_len (argv, 1), true,
+				       flatten);
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
-	  free (new_argv);
 	}
     }
 }
@@ -793,6 +765,7 @@ M4BUILTIN_HANDLER (patsubst)
 M4BUILTIN_HANDLER (regexp)
 {
   const char *me;		/* name of this macro */
+  const char *victim;		/* string to search */
   const char *pattern;		/* regular expression */
   const char *replace;		/* optional replacement string */
   m4_pattern_buffer *buf;	/* compiled regular expression */
@@ -845,8 +818,9 @@ M4BUILTIN_HANDLER (regexp)
   if (!buf)
     return;
 
+  victim = M4ARG (1);
   len = m4_arg_len (argv, 1);
-  startpos = regexp_search (buf, M4ARG (1), len, 0, len, replace == NULL);
+  startpos = regexp_search (buf, victim, len, 0, len, replace == NULL);
 
   if (startpos == -2)
     {
@@ -858,7 +832,7 @@ M4BUILTIN_HANDLER (regexp)
   if (replace == NULL)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (context, obs, me, M4ARG (1), replace, buf);
+    substitute (context, obs, me, victim, replace, buf);
 }
 
 

@@ -77,26 +77,6 @@ struct m4_macro
   const char *value;
 };
 
-/* FIXME - make this struct opaque.  */
-struct m4_macro_args
-{
-  /* One more than the highest actual argument.  May be larger than
-     arraylen since the array can refer to multiple arguments via a
-     single $@ reference.  */
-  unsigned int argc;
-  /* False unless the macro expansion refers to $@; determines whether
-     this object can be freed at end of macro expansion or must wait
-     until all references have been rescanned.  */
-  bool inuse;
-  const char *argv0; /* The macro name being expanded.  */
-  size_t argv0_len; /* Length of argv0.  */
-  size_t arraylen; /* True length of allocated elements in array.  */
-  /* Used as a variable-length array, storing information about each
-     argument.  */
-  m4_symbol_value *array[FLEXIBLE_ARRAY_MEMBER];
-};
-
-
 #define M4BUILTIN(name)							\
   static void CONC (builtin_, name)					\
    (m4 *context, m4_obstack *obs, unsigned int argc, m4_macro_args *argv);
@@ -320,8 +300,13 @@ extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, unsigned int);
 extern bool	m4_is_arg_text		(m4_macro_args *, unsigned int);
 extern bool	m4_is_arg_func		(m4_macro_args *, unsigned int);
 extern const char *m4_arg_text		(m4_macro_args *, unsigned int);
+extern bool	m4_arg_equal		(m4_macro_args *, unsigned int,
+                                         unsigned int);
+extern bool	m4_arg_empty		(m4_macro_args *, unsigned int);
 extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
+extern m4_macro_args *m4_make_argv_ref	(m4_macro_args *, const char *, size_t,
+                                         bool, bool);
 
 
 /* --- RUNTIME DEBUGGING --- */

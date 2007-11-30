@@ -53,9 +53,9 @@
    of an object on the stack.  Reopen OBJECT (previously returned by
    obstack_alloc or obstack_finish) with SIZE for additional growth,
    freeing all objects that occur later in the stack.  */
-#define obstack_regrow(OBS, OBJECT, SIZE)               \
-  (obstack_free (OBS, (char *)(OBJECT) + SIZE),         \
-   (OBS)->object_base = (char *)(OBJECT))
+#define obstack_regrow(OBS, OBJECT, SIZE)		\
+  (obstack_free (OBS, (char *) (OBJECT) + (SIZE)),	\
+   (OBS)->object_base = (char *) (OBJECT))
 
 /* In addition to EXIT_SUCCESS and EXIT_FAILURE, m4 can fail with version
    mismatch when trying to load a frozen file produced by a newer m4 than

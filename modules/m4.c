@@ -178,13 +178,14 @@ M4BUILTIN_HANDLER (define)
 
 M4BUILTIN_HANDLER (undefine)
 {
+  const char *me = M4ARG (0);
   unsigned int i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
+	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else
 	m4_symbol_delete (M4SYMTAB, name);
     }
@@ -209,13 +210,14 @@ M4BUILTIN_HANDLER (pushdef)
 
 M4BUILTIN_HANDLER (popdef)
 {
+  const char *me = M4ARG (0);
   unsigned int i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
 
       if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"), name);
+	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
       else
 	m4_symbol_popdef (M4SYMTAB, name);
     }
@@ -240,10 +242,7 @@ M4BUILTIN_HANDLER (ifelse)
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
      rely on the regular mechanisms.  */
-  if (argc == 2)
-    return;
-
-  if (m4_bad_argc (context, argc, me, 3, -1, false))
+  if (argc == 2 || m4_bad_argc (context, argc, me, 3, -1, false))
     return;
   else if (argc % 3 == 0)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
@@ -254,7 +253,7 @@ M4BUILTIN_HANDLER (ifelse)
 
   while (1)
     {
-      if (strcmp (M4ARG (index), M4ARG (index + 1)) == 0)
+      if (m4_arg_equal (argv, index, index + 1))
 	{
 	  obstack_grow (obs, M4ARG (index + 2), m4_arg_len (argv, index + 2));
 	  return;
@@ -317,6 +316,7 @@ void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
 		 m4_macro_args *argv, bool complain)
 {
+  const char *me = M4ARG (0);
   assert (obstack_object_size (data->obs) == 0);
   data->size = obstack_room (data->obs) / sizeof (const char *);
 
@@ -329,12 +329,12 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_symbol_lookup (M4SYMTAB, M4ARG (i));
+	  const char *name = M4ARG (i);
+	  symbol = m4_symbol_lookup (M4SYMTAB, name);
 	  if (symbol != NULL)
-	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
+	    dump_symbol_CB (NULL, name, symbol, data);
 	  else if (complain)
-	    m4_warn (context, 0, M4ARG (0), _("undefined macro `%s'"),
-		     M4ARG (i));
+	    m4_warn (context, 0, me, _("undefined macro `%s'"), name);
 	}
     }
 
@@ -508,14 +508,14 @@ m4_sysval_flush (m4 *context, bool report)
 
 M4BUILTIN_HANDLER (syscmd)
 {
-   if (m4_get_safer_opt (context))
-   {
-     m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
-     return;
-   }
+  if (m4_get_safer_opt (context))
+    {
+      m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
+      return;
+    }
 
-   /* Optimize the empty command.  */
-  if (*M4ARG (1) == '\0')
+  /* Optimize the empty command.  */
+  if (m4_arg_empty (argv, 1))
     {
       m4_set_sysval (0);
       return;

@@ -896,7 +896,8 @@ m4_evaluate (m4 *context, m4_obstack *obs, unsigned int argc,
   eval_token	et;
   eval_error	err	= NO_ERROR;
 
-  if (*M4ARG (2) && !m4_numeric_arg (context, me, M4ARG (2), &radix))
+  if (!m4_arg_empty (argv, 2)
+      && !m4_numeric_arg (context, me, M4ARG (2), &radix))
     return;
 
   if (radix < 1 || radix > 36)

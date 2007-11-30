@@ -30,8 +30,7 @@
 #include "intprops.h"
 
 static m4_macro_args *collect_arguments (m4 *, const char *, size_t,
-					 m4_symbol *, m4_obstack *,
-					 unsigned int, m4_obstack *);
+					 m4_symbol *, m4_obstack *);
 static void    expand_macro      (m4 *, const char *, size_t, m4_symbol *);
 static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int);
@@ -42,9 +41,9 @@ static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 
 static void    trace_prepre	 (m4 *, const char *, size_t,
 				  m4_symbol_value *);
-static void    trace_pre	 (m4 *, const char *, size_t, m4_macro_args *);
-static void    trace_post	 (m4 *, const char *, size_t,
-				  m4_macro_args *, m4_input_block *, bool);
+static void    trace_pre	 (m4 *, size_t, m4_macro_args *);
+static void    trace_post	 (m4 *, size_t, m4_macro_args *,
+				  m4_input_block *, bool);
 
 static void    trace_format	 (m4 *, const char *, ...)
   M4_GNUC_PRINTF (2, 3);
@@ -63,13 +62,17 @@ static size_t macro_call_id = 0;
    argv_stack.  This stack can be used simultaneously by multiple
    macro calls, using obstack_regrow to handle partial objects
    embedded in the stack.  */
-static struct obstack argc_stack;
+static m4_obstack argc_stack;
 
 /* The shared stack of pointers to collected arguments for macro
    calls.  This object is never finished; we exploit the fact that
    obstack_blank is documented to take a negative size to reduce the
    size again.  */
-static struct obstack argv_stack;
+static m4_obstack argv_stack;
+
+/* A placeholder symbol value representing the empty string, used to
+   optimize checks for emptiness.  */
+static m4_symbol_value empty_symbol;
 
 /* This function reads all input, and expands each token, one at a time.  */
 void
@@ -81,6 +84,8 @@ m4_macro_expand_input (m4 *context)
 
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
+
+  m4_set_symbol_value_text (&empty_symbol, "", 0);
 
   while ((type = m4__next_token (context, &token, &line, NULL))
 	 != M4_TOKEN_EOF)
@@ -251,7 +256,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 static void
 expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 {
-  char *argc_base = NULL;	/* Base of argc_stack on entry.  */
+  void *argc_base = NULL;	/* Base of argc_stack on entry.  */
+  void *argv_base = NULL;	/* Base of argv_stack on entry.  */
   unsigned int argc_size;	/* Size of argc_stack on entry.  */
   unsigned int argv_size;	/* Size of argv_stack on entry.  */
   m4_macro_args *argv;
@@ -296,17 +302,14 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 
   argc_size = obstack_object_size (&argc_stack);
   argv_size = obstack_object_size (&argv_stack);
-  if (0 < argc_size)
-    argc_base = obstack_finish (&argc_stack);
+  argc_base = obstack_finish (&argc_stack);
+  if (0 < argv_size)
+    argv_base = obstack_finish (&argv_stack);
 
   if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
     trace_prepre (context, name, my_call_id, value);
 
-  argv = collect_arguments (context, name, len, symbol, &argv_stack,
-			    argv_size, &argc_stack);
-  /* Calling collect_arguments invalidated name, but we copied it as
-     argv[0].  */
-  name = argv->argv0;
+  argv = collect_arguments (context, name, len, symbol, &argc_stack);
 
   loc_close_file = m4_get_current_file (context);
   loc_close_line = m4_get_current_line (context);
@@ -314,14 +317,14 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   m4_set_current_line (context, loc_open_line);
 
   if (traced)
-    trace_pre (context, name, my_call_id, argv);
+    trace_pre (context, my_call_id, argv);
 
   expansion = m4_push_string_init (context);
   m4_macro_call (context, value, expansion, argv->argc, argv);
   expanded = m4_push_string_finish ();
 
   if (traced)
-    trace_post (context, name, my_call_id, argv, expanded, trace_expansion);
+    trace_post (context, my_call_id, argv, expanded, trace_expansion);
 
   m4_set_current_file (context, loc_close_file);
   m4_set_current_line (context, loc_close_line);
@@ -335,20 +338,21 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (0 < argc_size)
     obstack_regrow (&argc_stack, argc_base, argc_size);
   else
-    obstack_free (&argc_stack, (void *) name);
-  obstack_blank (&argv_stack, argv_size - obstack_object_size (&argv_stack));
+    obstack_free (&argc_stack, argc_base);
+  if (0 < argv_size)
+    obstack_regrow (&argv_stack, argv_base, argv_size);
+  else
+    obstack_free (&argv_stack, argv);
 }
 
 /* Collect all the arguments to a call of the macro SYMBOL (called
    NAME, with length LEN).  The arguments are stored on the obstack
    ARGUMENTS and a table of pointers to the arguments on the obstack
-   ARGPTR.  ARGPTR is an incomplete object, currently occupying
-   ARGV_BASE bytes.  Return the object describing all of the macro
+   argv_stack.  Return the object describing all of the macro
    arguments.  */
 static m4_macro_args *
 collect_arguments (m4 *context, const char *name, size_t len,
-		   m4_symbol *symbol, m4_obstack *argptr,
-		   unsigned int argv_base, m4_obstack *arguments)
+		   m4_symbol *symbol, m4_obstack *arguments)
 {
   m4_symbol_value token;
   m4_symbol_value *tokenp;
@@ -361,10 +365,13 @@ collect_arguments (m4 *context, const char *name, size_t len,
 
   args.argc = 1;
   args.inuse = false;
+  args.has_ref = false;
+  /* FIXME - add accessor to symtab that returns name from the hash
+     table, so we don't have to copy it here.  */
   args.argv0 = (char *) obstack_copy0 (arguments, name, len);
   args.argv0_len = len;
   args.arraylen = 0;
-  obstack_grow (argptr, &args, offsetof (m4_macro_args, array));
+  obstack_grow (&argv_stack, &args, offsetof (m4_macro_args, array));
   name = args.argv0;
 
   if (m4__next_token_is_open (context))
@@ -374,20 +381,20 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	{
 	  more_args = expand_argument (context, arguments, &token, name);
 
-	  if (!groks_macro_args && m4_is_symbol_value_func (&token))
-	    {
-	      VALUE_MODULE (&token) = NULL;
-	      m4_set_symbol_value_text (&token, "", 0);
-	    }
-	  tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
-						     sizeof token);
-	  obstack_ptr_grow (argptr, tokenp);
+	  if ((m4_is_symbol_value_text (&token)
+	       && !m4_get_symbol_value_len (&token))
+	      || (!groks_macro_args && m4_is_symbol_value_func (&token)))
+	    tokenp = &empty_symbol;
+	  else
+	    tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
+						       sizeof *tokenp);
+	  obstack_ptr_grow (&argv_stack, tokenp);
 	  args.arraylen++;
 	  args.argc++;
 	}
       while (more_args);
     }
-  argv = (m4_macro_args *) ((char *) obstack_base (argptr) + argv_base);
+  argv = (m4_macro_args *) obstack_finish (&argv_stack);
   argv->argc = args.argc;
   argv->arraylen = args.arraylen;
   return argv;
@@ -536,11 +543,11 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 
 
 
-/* The rest of this file contains the functions for macro tracing output.
-   All tracing output for a macro call is collected on an obstack TRACE,
-   and printed whenever the line is complete.  This prevents tracing
-   output from interfering with other debug messages generated by the
-   various builtins.  */
+/* The next portion of this file contains the functions for macro
+   tracing output.  All tracing output for a macro call is collected
+   on an obstack TRACE, and printed whenever the line is complete.
+   This prevents tracing output from interfering with other debug
+   messages generated by the various builtins.  */
 
 /* Tracing output is formatted here, by a simplified printf-to-obstack
    function trace_format ().  Understands only %s, %d, %zu (size_t
@@ -653,13 +660,13 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 /* Format the parts of a trace line, that can be made before the macro is
    actually expanded.  Used from expand_macro ().  */
 static void
-trace_pre (m4 *context, const char *name, size_t id, m4_macro_args *argv)
+trace_pre (m4 *context, size_t id, m4_macro_args *argv)
 {
   unsigned int i;
   unsigned int argc = m4_arg_argc (argv);
 
   trace_header (context, id);
-  trace_format (context, "%s", name);
+  trace_format (context, "%s", M4ARG (0));
 
   if (1 < argc && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
     {
@@ -686,9 +693,8 @@ trace_pre (m4 *context, const char *name, size_t id, m4_macro_args *argv)
 /* Format the final part of a trace line and print it all.  Used from
    expand_macro ().  */
 static void
-trace_post (m4 *context, const char *name, size_t id,
-	    m4_macro_args *argv, m4_input_block *expanded,
-	    bool trace_expansion)
+trace_post (m4 *context, size_t id, m4_macro_args *argv,
+	    m4_input_block *expanded, bool trace_expansion)
 {
   if (trace_expansion)
     {
@@ -703,12 +709,43 @@ trace_post (m4 *context, const char *name, size_t id,
 /* Accessors into m4_macro_args.  */
 
 /* Given ARGV, return the symbol value at the specified INDEX, which
-   must be non-zero and less than argc.  */
+   must be non-zero.  */
 m4_symbol_value *
 m4_arg_symbol (m4_macro_args *argv, unsigned int index)
 {
-  assert (index && index < argv->argc);
-  return argv->array[index - 1];
+  unsigned int i;
+  m4_symbol_value *value;
+
+  assert (index);
+  if (argv->argc <= index)
+    return &empty_symbol;
+
+  if (!argv->has_ref)
+    return argv->array[index - 1];
+  /* Must cycle through all array slots until we find index, since
+     wrappers can contain multiple arguments.  */
+  for (i = 0; i < argv->arraylen; i++)
+    {
+      value = argv->array[i];
+      if (value->type == M4_SYMBOL_COMP)
+	{
+	  m4_symbol_chain *chain = value->u.chain;
+	  /* TODO - for now we support only a single $@ chain.  */
+	  assert (!chain->next && !chain->str);
+	  if (index < chain->argv->argc - (chain->index - 1))
+	    {
+	      value = m4_arg_symbol (chain->argv, chain->index - 1 + index);
+	      if (chain->flatten && m4_is_symbol_value_func (value))
+		value = &empty_symbol;
+	      break;
+	    }
+	  index -= chain->argv->argc - chain->index;
+	}
+      else if (--index == 0)
+	break;
+    }
+  assert (value->type != M4_SYMBOL_COMP);
+  return value;
 }
 
 /* Given ARGV, return true if argument INDEX is text.  Index 0 is
@@ -737,13 +774,45 @@ m4_is_arg_func (m4_macro_args *argv, unsigned int index)
 const char *
 m4_arg_text (m4_macro_args *argv, unsigned int index)
 {
+  m4_symbol_value *value;
+
   if (index == 0)
     return argv->argv0;
   if (argv->argc <= index)
     return "";
-  if (!m4_is_symbol_value_text (argv->array[index - 1]))
+  value = m4_arg_symbol (argv, index);
+  if (!m4_is_symbol_value_text (value))
     return NULL;
-  return m4_get_symbol_value_text (argv->array[index - 1]);
+  return m4_get_symbol_value_text (value);
+}
+
+/* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
+   Both indices must be non-zero.  Return true if the arguments
+   contain the same contents; often more efficient than
+   !strcmp (m4_arg_text (argv, indexa), m4_arg_text (argv, indexb)).  */
+bool
+m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
+{
+  m4_symbol_value *sa = m4_arg_symbol (argv, indexa);
+  m4_symbol_value *sb = m4_arg_symbol (argv, indexb);
+
+  if (sa == &empty_symbol || sb == &empty_symbol)
+    return sa == sb;
+  /* TODO - allow builtin tokens in the comparison?  */
+  assert (m4_is_symbol_value_text (sa) && m4_is_symbol_value_text (sb));
+  return (m4_get_symbol_value_len (sa) == m4_get_symbol_value_len (sb)
+	  && strcmp (m4_get_symbol_value_text (sa),
+		     m4_get_symbol_value_text (sb)) == 0);
+}
+
+/* Given ARGV, return true if argument INDEX is the empty string.
+   This gives the same result as comparing m4_arg_len against 0, but
+   is often faster.  */
+bool
+m4_arg_empty (m4_macro_args *argv, unsigned int index)
+{
+  return (index ? m4_arg_symbol (argv, index) == &empty_symbol
+	  : !argv->argv0_len);
 }
 
 /* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
@@ -751,13 +820,16 @@ m4_arg_text (m4_macro_args *argv, unsigned int index)
 size_t
 m4_arg_len (m4_macro_args *argv, unsigned int index)
 {
+  m4_symbol_value *value;
+
   if (index == 0)
     return argv->argv0_len;
   if (argv->argc <= index)
     return 0;
-  if (!m4_is_symbol_value_text (argv->array[index - 1]))
+  value = m4_arg_symbol (argv, index);
+  if (!m4_is_symbol_value_text (value))
     return SIZE_MAX;
-  return m4_get_symbol_value_len (argv->array[index - 1]);
+  return m4_get_symbol_value_len (value);
 }
 
 /* Given ARGV, return the builtin function referenced by argument
@@ -766,10 +838,78 @@ m4_arg_len (m4_macro_args *argv, unsigned int index)
 m4_builtin_func *
 m4_arg_func (m4_macro_args *argv, unsigned int index)
 {
-  if (index == 0 || argv->argc <= index
-      || !m4_is_symbol_value_func (argv->array[index - 1]))
+  m4_symbol_value *value;
+
+  if (index == 0 || argv->argc <= index)
     return NULL;
-  return m4_get_symbol_value_func (argv->array[index - 1]);
+  value = m4_arg_symbol (argv, index);
+  if (!m4_is_symbol_value_func (value))
+    return NULL;
+  return m4_get_symbol_value_func (value);
+}
+
+/* Create a new argument object using the same obstack as ARGV; thus,
+   the new object will automatically be freed when the original is
+   freed.  Explicitly set the macro name (argv[0]) from ARGV0 with
+   length ARGV0_LEN.  If SKIP, set argv[1] of the new object to
+   argv[2] of the old, otherwise the objects share all arguments.  If
+   FLATTEN, any builtins in ARGV are flattened to an empty string when
+   referenced through the new object.  */
+m4_macro_args *
+m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
+		  bool skip, bool flatten)
+{
+  m4_macro_args *new_argv;
+  m4_symbol_value *value;
+  m4_symbol_chain *chain;
+  unsigned int index = skip ? 2 : 1;
+
+  assert (obstack_object_size (&argv_stack) == 0);
+  /* When making a reference through a reference, point to the
+     original if possible.  */
+  if (argv->has_ref)
+    {
+      /* TODO for now we support only a single-length $@ chain.  */
+      assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
+      chain = argv->array[0]->u.chain;
+      assert (!chain->next && !chain->str);
+      argv = chain->argv;
+      index += chain->index - 1;
+    }
+  if (argv->argc <= index)
+    {
+      new_argv = (m4_macro_args *) obstack_alloc (&argv_stack,
+						  offsetof (m4_macro_args,
+							    array));
+      new_argv->arraylen = 0;
+      new_argv->has_ref = false;
+    }
+  else
+    {
+      new_argv = (m4_macro_args *) obstack_alloc (&argv_stack,
+						  (offsetof (m4_macro_args,
+							     array)
+						   + sizeof value));
+      value = (m4_symbol_value *) obstack_alloc (&argv_stack, sizeof *value);
+      chain = (m4_symbol_chain *) obstack_alloc (&argv_stack, sizeof *chain);
+      new_argv->arraylen = 1;
+      new_argv->array[0] = value;
+      new_argv->has_ref = true;
+      value->type = M4_SYMBOL_COMP;
+      value->u.chain = chain;
+      chain->next = NULL;
+      chain->str = NULL;
+      chain->len = 0;
+      chain->argv = argv;
+      chain->index = index;
+      chain->flatten = flatten;
+    }
+  /* TODO - should argv->inuse be set?  */
+  new_argv->argc = argv->argc - (index - 1);
+  new_argv->inuse = false;
+  new_argv->argv0 = argv0;
+  new_argv->argv0_len = argv0_len;
+  return new_argv;
 }
 
 /* Define these last, so that earlier uses can benefit from the macros

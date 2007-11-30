@@ -41,6 +41,15 @@ typedef enum {
 #define BIT_SET(flags, bit)	((flags) |= (bit))
 #define BIT_RESET(flags, bit)	((flags) &= ~(bit))
 
+/* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
+   debugging, use bool when we know it works, but use the more
+   portable unsigned int elsewhere.  */
+#if __GNUC__ > 2
+typedef bool bool_bitfield;
+#else
+typedef unsigned int bool_bitfield;
+#endif /* !__GNUC__ */
+
 
 /* --- CONTEXT MANAGEMENT --- */
 
@@ -176,17 +185,19 @@ typedef struct m4_symbol_chain m4_symbol_chain;
 
 struct m4_symbol
 {
-  bool		traced;
-  m4_symbol_value *	value;
+  bool traced;			/* True if this symbol is traced.  */
+  m4_symbol_value *value;	/* Linked list of pushdef'd values.  */
 };
 
 /* Composite symbols are built of a linked list of chain objects.  */
 struct m4_symbol_chain
 {
   m4_symbol_chain *next;/* Pointer to next link of chain.  */
-  char *str;		/* NUL-terminated string if text, else NULL.  */
+  char *str;		/* NUL-terminated string if text, or NULL.  */
+  size_t len;		/* Length of str, or 0.  */
   m4_macro_args *argv;	/* Reference to earlier $@.  */
-  unsigned int index;	/* Index within argv to start reading from.  */
+  unsigned int index;	/* Argument index within argv.  */
+  bool flatten;		/* True to treat builtins as text.  */
 };
 
 /* A symbol value is used both for values associated with a macro
@@ -215,6 +226,29 @@ struct m4_symbol_value
   } u;
 };
 
+/* Structure describing all arguments to a macro, including the macro
+   name at index 0.  */
+struct m4_macro_args
+{
+  /* One more than the highest actual argument.  May be larger than
+     arraylen since the array can refer to multiple arguments via a
+     single $@ reference.  */
+  unsigned int argc;
+  /* False unless the macro expansion refers to $@; determines whether
+     this object can be freed at end of macro expansion or must wait
+     until all references have been rescanned.  */
+  bool_bitfield inuse : 1;
+  /* False if all arguments are just text or func, true if this argv
+     refers to another one.  */
+  bool_bitfield has_ref : 1;
+  const char *argv0; /* The macro name being expanded.  */
+  size_t argv0_len; /* Length of argv0.  */
+  size_t arraylen; /* True length of allocated elements in array.  */
+  /* Used as a variable-length array, storing information about each
+     argument.  */
+  m4_symbol_value *array[FLEXIBLE_ARRAY_MEMBER];
+};
+
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)
 #define VALUE_FLAGS(T)		((T)->flags)
@@ -223,13 +257,13 @@ struct m4_symbol_value
 #define VALUE_MAX_ARGS(T)	((T)->max_args)
 #define VALUE_PENDING(T)	((T)->pending_expansions)
 
-#define SYMBOL_NEXT(S)		(VALUE_NEXT	     ((S)->value))
-#define SYMBOL_MODULE(S)	(VALUE_MODULE	     ((S)->value))
-#define SYMBOL_FLAGS(S)		(VALUE_FLAGS	     ((S)->value))
-#define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE ((S)->value))
-#define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS      ((S)->value))
-#define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS      ((S)->value))
-#define SYMBOL_PENDING(S)	(VALUE_PENDING       ((S)->value))
+#define SYMBOL_NEXT(S)		(VALUE_NEXT		((S)->value))
+#define SYMBOL_MODULE(S)	(VALUE_MODULE		((S)->value))
+#define SYMBOL_FLAGS(S)		(VALUE_FLAGS		((S)->value))
+#define SYMBOL_ARG_SIGNATURE(S)	(VALUE_ARG_SIGNATURE	((S)->value))
+#define SYMBOL_MIN_ARGS(S)	(VALUE_MIN_ARGS		((S)->value))
+#define SYMBOL_MAX_ARGS(S)	(VALUE_MAX_ARGS		((S)->value))
+#define SYMBOL_PENDING(S)	(VALUE_PENDING		((S)->value))
 
 /* Fast macro versions of symbol table accessor functions,
    that also have an identically named function exported in m4module.h.  */

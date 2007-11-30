@@ -83,7 +83,7 @@ static m4_diversion div0;
 static m4_diversion *free_list;
 
 /* Obstack from which diversion storage is allocated.  */
-static struct obstack diversion_storage;
+static m4_obstack diversion_storage;
 
 /* Total size of all in-memory buffer sizes.  */
 static size_t total_buffer_size;

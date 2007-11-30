@@ -1,5 +1,31 @@
 2007-11-29  Eric Blake  <ebb9@byu.net>
 
+	Stage 4: route indir, builtin through ref; make argv opaque.
+	* m4/system_.h (obstack_regrow): Fix precedence.
+	* m4/m4module.h (m4_arg_equal, m4_arg_empty, m4_make_argv_ref):
+	New prototypes.
+	(struct m4_macro_args): Move...
+	* m4/m4private.h (struct m4_macro_args): ...here, making it opaque
+	to modules.  Add has_ref member.
+	(bool_bitfield): New helper typedef.
+	(struct m4_symbol_chain): Add flatten and len members.
+	* m4/macro.c (empty_symbol): New placeholder, for optimizing
+	comparison with empty string.
+	(m4_macro_expand_input): Initialize it.
+	(collect_arguments): Alter signature, and populate new fields.
+	(trace_pre, trace_post): Remove redundant parameter.
+	(expand_macro): Alter handling of obstacks.
+	(m4_arg_symbol): Account for wrapped argv.
+	(m4_arg_equal, m4_arg_empty, m4_make_argv_ref): New methods.
+	(m4_arg_text, m4_arg_len, m4_arg_func): Use new methods.
+	* modules/m4.c (ifelse, syscmd): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	(undefine, popdef, m4_dump_symbols): Optimize.
+	* modules/gnu.c (builtin, indir, esyscmd, debugfile): Use new
+	methods.
+	(changesyntax, regexp): Optimize.
+	* m4/output.c (diversion_storage): Use typedef.
+
 	Stage 3b: cache length, rather than computing it, in modules.
 	* m4/hash.c (m4_hash_remove): Avoid double free on remove
 	failure.
