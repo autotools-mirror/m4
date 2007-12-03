@@ -1,3 +1,31 @@
+2008-03-19  Eric Blake  <ebb9@byu.net>
+
+	Stage 20: make m4wrap obey POSIX fifo ordering.
+	Improve input engine to support location changes within symbol
+	chains, then convert m4wrap to always build symbol chain.  Also,
+	avoid wasted peek at start of next_token, for fewer ungetc calls.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer function calls.
+	* src/m4.h (enum token_chain_type): Add CHAIN_LOC.
+	(struct token_chain): Add u_l member.
+	(wrap_args): New prototype.
+	* src/input.c (push_wrapup_init, push_wrapup_finish): Rewrite to
+	guarantee a FIFO chain in the wrapup stack.
+	(pop_input, peek_input, next_char_1): Support location link.
+	(next_char): Add parameter.
+	(init_macro_token, init_argv_token): Require user to consume empty
+	input.
+	(skip_line, match_input): Adjust callers.
+	(next_token): Always consume first character.
+	* src/macro.c (arg_text): Tighten assertion.
+	(wrap_args): New method.
+	* src/builtin.c (m4_m4wrap): Use it.
+	(define_macro): Issue warning when ignoring builtin token during
+	macro definition.
+	* doc/m4.texinfo (M4wrap, Location, Incompatibilities)
+	(Improved m4wrap): Adjust examples to corrected behavior.
+	* NEWS: Document this fix.
+
 2008-03-17  Eric Blake  <ebb9@byu.net>
 
 	Update for fresh bootstrap.

@@ -283,7 +283,8 @@ enum token_chain_type
 {
   CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
   CHAIN_FUNC,	/* Builtin function definition, u.func is valid.  */
-  CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
+  CHAIN_ARGV,	/* Link contains a $@ reference, u.u_a is valid.  */
+  CHAIN_LOC	/* Link contains location of m4wrap, u.u_l is valid.  */
 };
 
 /* Composite tokens are built of a linked list of chains.  Each link
@@ -315,6 +316,12 @@ struct token_chain
 	  const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
 	}
       u_a;
+      struct
+	{
+	  const char *file;	/* File where subsequent links originate.  */
+	  int line;		/* Line where subsequent links originate.  */
+	}
+      u_l;
     }
   u;
 };
@@ -508,6 +515,7 @@ void push_arg (struct obstack *, macro_arguments *, unsigned int);
 void push_arg_quote (struct obstack *, macro_arguments *, unsigned int,
 		     const string_pair *);
 void push_args (struct obstack *, macro_arguments *, bool, bool);
+void wrap_args (macro_arguments *);
 
 /* Grab the text at argv index I.  Assumes macro_argument *argv is in
    scope, and aborts if the argument is not text.  */

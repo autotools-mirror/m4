@@ -4582,6 +4582,9 @@ Stores @var{string} in a safe place, to be reread when end of input is
 reached.  As a @acronym{GNU} extension, additional arguments are
 concatenated with a space to the @var{string}.
 
+Successive invocations of @code{m4wrap} accumulate saved text in
+first-in, first-out order, as required by @acronym{POSIX}.
+
 The expansion of @code{m4wrap} is void.
 The macro @code{m4wrap} is recognized only with parameters.
 @end deffn
@@ -4601,18 +4604,27 @@ This is the first and last normal input line.
 The saved input is only reread when the end of normal input is seen, and
 not if @code{m4exit} is used to exit @code{m4}.
 
-@comment FIXME: this contradicts POSIX, which requires that "If the
-@comment m4wrap macro is used multiple times, the arguments specified
-@comment shall be processed in the order in which the m4wrap macros were
-@comment processed."
-It is safe to call @code{m4wrap} from saved text, but then the order in
-which the saved text is reread is undefined.  If @code{m4wrap} is not used
-recursively, the saved pieces of text are reread in the opposite order
-in which they were saved (LIFO---last in, first out).  However, this
-behavior is likely to change in a future release, to match
-@acronym{POSIX}, so you should not depend on this order.
+It is safe to call @code{m4wrap} from wrapped text, where all the
+recursively wrapped text is deferred until the current wrapped text is
+exhausted.  As of M4 1.4.11, when @code{m4wrap} is not used recursively,
+the saved pieces of text are reread in the same order in which they were
+saved (FIFO---first in, first out), as required by @acronym{POSIX}.
 
-It is possible to emulate @acronym{POSIX} behavior even
+@example
+m4wrap(`1
+')
+@result{}
+m4wrap(`2', `3
+')
+@result{}
+^D
+@result{}1
+@result{}2 3
+@end example
+
+However, earlier versions had reverse ordering (LIFO---last in, first
+out), as this behavior is more like the semantics of the C function
+@code{atexit}.  It is possible to emulate @acronym{POSIX} behavior even
 with older versions of @acronym{GNU} M4 by including the file
 @file{m4-@value{VERSION}/@/examples/@/wrapfifo.m4} from the
 distribution:
@@ -4688,13 +4700,13 @@ Invocations of @code{m4wrap} at the same recursion level are
 concatenated and rescanned as usual:
 
 @example
-define(`aa', `AA
+define(`ab', `AB
 ')
 @result{}
-m4wrap(`a')m4wrap(`a')
+m4wrap(`a')m4wrap(`b')
 @result{}
 ^D
-@result{}AA
+@result{}AB
 @end example
 
 @noindent
@@ -6613,9 +6625,9 @@ m4wrap(`__line__
 ')
 @result{}
 ^D
+@result{}6
+@result{}6
 @result{}12
-@result{}6
-@result{}6
 @end example
 
 The @code{@w{__program__}} macro behaves like @samp{$0} in shell
@@ -7057,7 +7069,8 @@ of @samp{-} on the command line.
 
 @item
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
-(first-in, first-out) order, but @acronym{GNU} @code{m4} currently uses
+(first-in, first-out) order, and most other implementations obey this.
+However, versions of @acronym{GNU} @code{m4} earlier than 1.4.11 used
 LIFO order.  Furthermore, @acronym{POSIX} states that only the first
 argument to @code{m4wrap} is saved for later evaluation, but
 @acronym{GNU} @code{m4} saves and processes all arguments, with output
@@ -7745,8 +7758,8 @@ builtin(`m4wrap', ``'define(`bar', ``$0:'-$1-$*-$#-')bar(`a', `b')
 ')
 @result{}
 ^D
-@result{}bar:-a-a,b-2-
 @result{}m4wrap0:---0-
+@result{}bar:-a-a,b-2-
 @end example
 
 Additionally, the computation of @code{_m4wrap_level} and creation of

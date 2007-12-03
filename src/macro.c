@@ -946,11 +946,8 @@ arg_text (macro_arguments *argv, unsigned int index)
 	    case CHAIN_STR:
 	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	      break;
-	    case CHAIN_FUNC:
-	      /* TODO concatenate builtins.  */
-	      assert (!"implemented");
-	      abort ();
 	    case CHAIN_ARGV:
+	      assert (!chain->u.u_a.has_func || argv->flatten);
 	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 			 quote_cache (NULL, chain->quote_age,
 				      chain->u.u_a.quotes),
@@ -1514,4 +1511,67 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
   assert (token);
   if (push_token (token, -1, argv->inuse))
     arg_mark (argv);
+}
+
+/* Push arguments from ARGV, which can include builtins, onto the wrap
+   stack for later rescanning.  If GNU extensions are disabled, only
+   the first argument is pushed; otherwise, all arguments are pushed
+   and separated with a space.  */
+void
+wrap_args (macro_arguments *argv)
+{
+  int i;
+  struct obstack *obs;
+  token_data *token;
+  token_chain *chain;
+
+  if ((argv->argc == 2 || no_gnu_extensions) && arg_empty (argv, 1))
+    return;
+
+  obs = push_wrapup_init ();
+  for (i = 1; i < (no_gnu_extensions ? 2 : argv->argc); i++)
+    {
+      if (i != 1)
+	obstack_1grow (obs, ' ');
+      token = arg_token (argv, i, NULL, false);
+      switch (TOKEN_DATA_TYPE (token))
+	{
+	case TOKEN_TEXT:
+	  obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
+	  break;
+	case TOKEN_FUNC:
+	  /* TODO allow builtins through m4wrap.  */
+	  assert (false);
+	case TOKEN_COMP:
+	  chain = token->u.u_c.chain;
+	  while (chain)
+	    {
+	      switch (chain->type)
+		{
+		case CHAIN_STR:
+		  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+		  break;
+		case CHAIN_FUNC:
+		  /* TODO allow builtins through m4wrap.  */
+		  assert (false);
+		  break;
+		case CHAIN_ARGV:
+		  arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+			     quote_cache (NULL, chain->quote_age,
+					  chain->u.u_a.quotes),
+			     chain->u.u_a.flatten, NULL, NULL, false);
+		  break;
+		default:
+		  assert (!"wrap_args");
+		  abort ();
+		}
+	      chain = chain->next;
+	    }
+	  break;
+	default:
+	  assert (!"wrap_args");
+	  abort ();
+	}
+    }
+  push_wrapup_finish ();
 }
