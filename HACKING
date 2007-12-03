@@ -38,11 +38,28 @@ and is not part of a release distribution.
 3. Bootstrapping
 ================
 
-* Before you can build from CVS, you need to bootstrap.  This requires a
-  pre-installed version of GNU M4 built from a package, Autoconf 2.60 or
-  later, Automake 1.9.6 or later, and a CVS checkout of gnulib.  Gnulib
-  can be obtained by:
-    cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/gnulib co gnulib
+* The master M4 repository is stored in git.
+
+* Before you can build from git, you need to bootstrap.  This requires:
+  - A pre-installed version of GNU M4 built from a package
+  - Autoconf 2.60 or later
+  - Automake 1.9.6 or later
+  - Help2man 1.29 or later
+  - Texinfo 4.8 or later
+  - Any prerequisites of the above (such as perl, tex)
+  - A git checkout of gnulib.  A read-only copy of gnulib can be
+    obtained by:
+      git clone git://git.sv.gnu.org/gnulib.git
+    or
+      cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/gnulib.git \
+        co -d gnulib HEAD
+
+  If you are a member of the savannah group for gnulib, a read-write
+  copy can be obtained by:
+    git clone <savannah-user>@git.sv.gnu.org:/srv/git/gnulib.git
+
+  Note that none of these bootstrapping dependencies should be required
+  by a distributed release.
 
 * Either add the gnulib directory to your PATH, or run
     GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap

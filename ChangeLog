@@ -1,3 +1,11 @@
+2007-12-04  Eric Blake  <ebb9@byu.net>
+
+	Fix builds with OpenBSD make.
+	* doc/Makefile.am (HELP2MAN): New macro.
+	(man_MANS, m4.1): Fix rules for building m4.1 into srcdir.
+	* README: Update copyright.
+	* HACKING: Mention help2man and makeinfo dependencies.
+
 2007-11-22  Eric Blake  <ebb9@byu.net>
 
 	Security fix: avoid arbitrary code execution with 'm4 -F'.
