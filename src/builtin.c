@@ -667,7 +667,13 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 
   switch (arg_type (argv, 2))
     {
+    case TOKEN_COMP:
+      m4_warn (0, me, _("cannot concatenate builtins"));
+      // TODO fall through instead
+      break;
+
     case TOKEN_TEXT:
+      // TODO flatten TOKEN_COMP value, or support concatenation of builtins
       define_user_macro (ARG (1), ARG_LEN (1), ARG (2), mode);
       break;
 
@@ -1608,25 +1614,20 @@ m4_m4exit (struct obstack *obs, int argc, macro_arguments *argv)
   exit (exit_code);
 }
 
-/*-------------------------------------------------------------------------.
-| Save the argument text until EOF has been seen, allowing for user	   |
-| specified cleanup action.  GNU version saves all arguments, the standard |
-| version only the first.						   |
-`-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Save the argument text in FIFO order until EOF has been seen,    |
+| allowing for user specified cleanup action.  Extra arguments are |
+| saved when not in POSIX mode.                                    |
+`-----------------------------------------------------------------*/
 
 static void
 m4_m4wrap (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  obs = push_wrapup_init ();
-  if (no_gnu_extensions)
-    obstack_grow (obs, ARG (1), ARG_LEN (1));
-  else
-    // TODO - allow builtins, rather than always flattening
-    arg_print (obs, argv, 1, NULL, true, " ", NULL, false);
-  push_wrapup_finish ();
+  wrap_args (argv);
 }
+
 
 /* Enable tracing of all specified macros, or all, if none is specified.
    Tracing is disabled by default, when a macro is defined.  This can be
