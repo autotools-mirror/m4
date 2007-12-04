@@ -254,10 +254,11 @@ ltdl/libltdlc.la:
 
 info_TEXINFOS	= doc/m4.texinfo
 doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl.texi doc/gpl-3.0.texi
-dist_man_MANS	= doc/m4.1
+dist_man_MANS	= $(srcdir)/doc/m4.1
 EXTRA_DIST     += $(config_aux_dir)/gendocs.sh doc/gendocs_template
 MAINTAINERCLEANFILES += $(config_aux_dir)/gendocs.sh doc/gendocs_template \
 		  doc/fdl.texi
+HELP2MAN	= $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run help2man
 
 # Build the man page once in the srcdir, rather than in every VPATH build
 # dir, to match how automake builds info pages.  This is safe for 'make
@@ -265,8 +266,7 @@ MAINTAINERCLEANFILES += $(config_aux_dir)/gendocs.sh doc/gendocs_template \
 $(srcdir)/doc/m4.1: configure.ac src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
-	  $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run \
-	    help2man --name="macro processor" --source=FSF \
+	  $(HELP2MAN) --name="macro processor" --source=FSF \
 	    --info-page=m4 --output=$@ src/m4$(EXEEXT); \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \

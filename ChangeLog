@@ -1,3 +1,12 @@
+2007-12-04  Eric Blake  <ebb9@byu.net>
+
+	Fix builds with OpenBSD make.
+	* Makefile.am (HELP2MAN): New macro.
+	(dist_man_MANS, doc/m4.1): Fix rules for building m4.1 into
+	srcdir.
+	* README: Update copyright.
+	* HACKING: Mention help2man and makeinfo dependencies.
+
 2007-11-29  Eric Blake  <ebb9@byu.net>
 
 	Stage 4: route indir, builtin through ref; make argv opaque.
