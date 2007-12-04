@@ -1,5 +1,6 @@
 compile
 config.*
+config.rpath
 depcomp
 gendocs.sh
 gnupload
