@@ -582,8 +582,7 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   argv->has_func = args.has_func;
-  // TODO allow funcs without crippling quote age
-  if (args.quote_age != quote_age () || args.has_func)
+  if (args.quote_age != quote_age ())
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
@@ -910,8 +909,6 @@ arg_type (macro_arguments *argv, unsigned int index)
     type = TOKEN_TEXT;
   if (type != TOKEN_TEXT)
     assert (argv->has_func);
-  // TODO support TOKEN_COMP meaning concatenation of builtins
-  assert (type != TOKEN_COMP);
   return type;
 }
 
@@ -936,7 +933,6 @@ arg_text (macro_arguments *argv, unsigned int index)
     case TOKEN_TEXT:
       return TOKEN_DATA_TEXT (token);
     case TOKEN_COMP:
-      // TODO - concatenate functions?
       chain = token->u.u_c.chain;
       obs = arg_scratch ();
       while (chain)
@@ -952,7 +948,7 @@ arg_text (macro_arguments *argv, unsigned int index)
 			 quote_cache (NULL, chain->quote_age,
 				      chain->u.u_a.quotes),
 			 argv->flatten || chain->u.u_a.flatten, NULL, NULL,
-			 false);
+			 NULL, false);
 	      break;
 	    default:
 	      assert (!"arg_text");
@@ -983,6 +979,7 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   token_chain tmpb;
   token_chain *ca = &tmpa;
   token_chain *cb = &tmpb;
+  token_chain *chain;
   struct obstack *obs = arg_scratch ();
 
   /* Quick tests.  */
@@ -1041,30 +1038,34 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
     {
       if (ca->type == CHAIN_ARGV)
 	{
-	  tmpa.next = ca->next;
+	  tmpa.next = NULL;
 	  tmpa.type = CHAIN_STR;
-	  // TODO support $@ with funcs
-	  assert (!ca->u.u_a.has_func || argv->flatten || ca->u.u_a.flatten);
+	  tmpa.u.u_s.str = NULL;
+	  tmpa.u.u_s.len = 0;
+	  chain = &tmpa;
 	  arg_print (obs, ca->u.u_a.argv, ca->u.u_a.index,
 		     quote_cache (NULL, ca->quote_age, ca->u.u_a.quotes),
-		     argv->flatten || ca->u.u_a.flatten, NULL, NULL, false);
-	  tmpa.u.u_s.len = obstack_object_size (obs);
-	  tmpa.u.u_s.str = (char *) obstack_finish (obs);
-	  ca = &tmpa;
+		     argv->flatten || ca->u.u_a.flatten, &chain, NULL, NULL,
+		     false);
+	  assert (obstack_object_size (obs) == 0 && chain != &tmpa);
+	  chain->next = ca->next;
+	  ca = tmpa.next;
 	  continue;
 	}
       if (cb->type == CHAIN_ARGV)
 	{
-	  tmpb.next = cb->next;
+	  tmpb.next = NULL;
 	  tmpb.type = CHAIN_STR;
-	  // TODO support $@ with funcs
-	  assert (!cb->u.u_a.has_func || argv->flatten || cb->u.u_a.flatten);
+	  tmpb.u.u_s.str = NULL;
+	  tmpb.u.u_s.len = 0;
+	  chain = &tmpb;
 	  arg_print (obs, cb->u.u_a.argv, cb->u.u_a.index,
 		     quote_cache (NULL, cb->quote_age, cb->u.u_a.quotes),
-		     argv->flatten || cb->u.u_a.flatten, NULL, NULL, false);
-	  tmpb.u.u_s.len = obstack_object_size (obs);
-	  tmpb.u.u_s.str = (char *) obstack_finish (obs);
-	  cb = &tmpb;
+		     argv->flatten || cb->u.u_a.flatten, &chain, NULL, NULL,
+		     false);
+	  assert (obstack_object_size (obs) == 0 && chain != &tmpb);
+	  chain->next = cb->next;
+	  cb = tmpb.next;
 	  continue;
 	}
       if (ca->type == CHAIN_FUNC)
@@ -1223,18 +1224,21 @@ arg_scratch (void)
 
 /* Dump a representation of ARGV to the obstack OBS, starting with
    argument INDEX.  If QUOTES is non-NULL, each argument is displayed
-   with those quotes.  If FLATTEN, builtins are ignored.  Separate
-   arguments with SEP, which defaults to a comma.  If MAX_LEN is
-   non-NULL, truncate the output after *MAX_LEN bytes are output and
-   return true; otherwise, return false, and reduce *MAX_LEN by the
-   number of bytes output.  If QUOTE_EACH, the truncation length is
-   reset for each argument, quotes do not count against length, and
-   all arguments are printed; otherwise, quotes count against the
-   length and trailing arguments may be discarded.  */
+   with those quotes.  If FLATTEN, builtins are converted to empty
+   quotes; if CHAINP, *CHAINP is updated with macro tokens; otherwise,
+   builtins are represented by their name.  Separate arguments with
+   SEP, which defaults to a comma.  If MAX_LEN is non-NULL, truncate
+   the output after *MAX_LEN bytes are output and return true;
+   otherwise, return false, and reduce *MAX_LEN by the number of bytes
+   output.  If QUOTE_EACH, the truncation length is reset for each
+   argument, quotes do not count against length, and all arguments are
+   printed; otherwise, quotes count against the length and trailing
+   arguments may be discarded.  MAX_LEN and CHAINP may not both be
+   specified.  */
 bool
 arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
-	   const string_pair *quotes, bool flatten, const char *sep,
-	   int *max_len, bool quote_each)
+	   const string_pair *quotes, bool flatten, token_chain **chainp,
+	   const char *sep, int *max_len, bool quote_each)
 {
   int len = max_len ? *max_len : INT_MAX;
   unsigned int i;
@@ -1245,6 +1249,8 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
   size_t sep_len;
   size_t *plen = quote_each ? NULL : &len;
 
+  if (chainp)
+    assert (!max_len && *chainp);
   if (!sep)
     sep = ",";
   sep_len = strlen (sep);
@@ -1283,13 +1289,13 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 		  break;
 		case CHAIN_FUNC:
 		  func_print (obs, find_builtin_by_addr (chain->u.func),
-			      flatten, quotes);
+			      flatten, chainp, quotes);
 		  break;
 		case CHAIN_ARGV:
 		  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 				 quote_cache (NULL, chain->quote_age,
 					      chain->u.u_a.quotes),
-				 flatten, NULL, &len, false))
+				 flatten, chainp, NULL, &len, false))
 		    done = true;
 		  break;
 		default:
@@ -1305,7 +1311,7 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 	  break;
 	case TOKEN_FUNC:
 	  func_print (obs, find_builtin_by_addr (TOKEN_DATA_FUNC (token)),
-		      flatten, quotes);
+		      flatten, chainp, quotes);
 	  break;
 	default:
 	  assert (!"arg_print");
@@ -1314,6 +1320,8 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
     }
   if (max_len)
     *max_len = len;
+  else if (chainp)
+    make_text_link (obs, NULL, chainp);
   return false;
 }
 
@@ -1519,11 +1527,12 @@ wrap_args (macro_arguments *argv)
   struct obstack *obs;
   token_data *token;
   token_chain *chain;
+  token_chain **end;
 
   if ((argv->argc == 2 || no_gnu_extensions) && arg_empty (argv, 1))
     return;
 
-  obs = push_wrapup_init ();
+  obs = push_wrapup_init (&end);
   for (i = 1; i < (no_gnu_extensions ? 2 : argv->argc); i++)
     {
       if (i != 1)
@@ -1535,8 +1544,8 @@ wrap_args (macro_arguments *argv)
 	  obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
 	  break;
 	case TOKEN_FUNC:
-	  // TODO allow builtins through m4wrap
-	  assert (false);
+	  append_macro (obs, TOKEN_DATA_FUNC (token), NULL, end);
+	  break;
 	case TOKEN_COMP:
 	  chain = token->u.u_c.chain;
 	  while (chain)
@@ -1547,14 +1556,13 @@ wrap_args (macro_arguments *argv)
 		  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 		  break;
 		case CHAIN_FUNC:
-		  // TODO allow builtins through m4wrap
-		  assert (false);
+		  append_macro (obs, chain->u.func, NULL, end);
 		  break;
 		case CHAIN_ARGV:
 		  arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 			     quote_cache (NULL, chain->quote_age,
 					  chain->u.u_a.quotes),
-			     chain->u.u_a.flatten, NULL, NULL, false);
+			     chain->u.u_a.flatten, end, NULL, NULL, false);
 		  break;
 		default:
 		  assert (!"wrap_args");

@@ -123,7 +123,7 @@ builtin_tab[] =
   { "indir",		true,	true,	true,	m4_indir },
   { "len",		false,	false,	true,	m4_len },
   { "m4exit",		false,	false,	false,	m4_m4exit },
-  { "m4wrap",		false,	false,	true,	m4_m4wrap },
+  { "m4wrap",		false,	true,	true,	m4_m4wrap },
   { "maketemp",		false,	false,	true,	m4_maketemp },
   { "mkstemp",		false,	false,	true,	m4_mkstemp },
   { "patsubst",		true,	false,	true,	m4_patsubst },
@@ -201,19 +201,25 @@ find_builtin_by_name (const char *name)
 
 /*------------------------------------------------------------------.
 | Print a representation of FUNC to OBS.  If FLATTEN, output QUOTES |
-| around an empty string instead.                                   |
+| around an empty string instead; else if CHAIN, append the builtin |
+| to the chain; otherwise print the name of FUNC.                   |
 `------------------------------------------------------------------*/
 void
 func_print (struct obstack *obs, const builtin *func, bool flatten,
-	    const string_pair *quotes)
+	    token_chain **chain, const string_pair *quotes)
 {
   assert (func);
-  if (flatten && quotes)
+  if (flatten)
     {
-      obstack_grow (obs, quotes->str1, quotes->len1);
-      obstack_grow (obs, quotes->str2, quotes->len2);
+      if (quotes)
+	{
+	  obstack_grow (obs, quotes->str1, quotes->len1);
+	  obstack_grow (obs, quotes->str2, quotes->len2);
+	}
     }
-  else if (!flatten)
+  else if (chain)
+    append_macro (obs, func->func, NULL, chain);
+  else
     {
       obstack_1grow (obs, '<');
       obstack_grow (obs, func->name, strlen (func->name));
@@ -1018,10 +1024,8 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	    m4_warn (0, me,
 		     _("builtin `%s' requested by frozen file not found"),
 		     ARG (i));
-	  else if (argc != 2)
-	    m4_warn (0, me, _("cannot concatenate builtin `%s'"), ARG (i));
 	  else
-	    push_macro (b);
+	    push_macro (obs, b);
 	  break;
 
 	default:
@@ -1544,7 +1548,7 @@ m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  arg_print (obs, argv, 1, NULL, true, " ", NULL, false);
+  arg_print (obs, argv, 1, NULL, true, NULL, " ", NULL, false);
   debug_flush_files ();
   len = obstack_object_size (obs);
   /* The close_stdin module makes it safe to skip checking the return

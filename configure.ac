@@ -1,6 +1,6 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
-# Foundation, Inc.
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free
+# Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -18,23 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.10a], [bug-m4@gnu.org])
+AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
+  [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
+AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 dist-lzma gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 
-AC_CANONICAL_BUILD
-AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
-AC_SYS_LARGEFILE
-AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
+AC_CHECK_HEADERS_ONCE([siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
 #if HAVE_SIGINFO_H
@@ -52,7 +50,6 @@ AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
 ]])
 
 AC_TYPE_SIGNAL
-AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror])
 

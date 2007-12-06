@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
-## Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
+## Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -21,8 +21,8 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc tests checks
-EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.maint \
-	m4/gnulib-cache.m4
+EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
+	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
@@ -33,3 +33,12 @@ MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
+
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
+# Arrange so that .tarball-version appears only in the distribution
+# tarball, and never in a checked-out repository.
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version

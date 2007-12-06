@@ -393,11 +393,13 @@ void skip_line (const char *);
 /* push back input */
 void make_text_link (struct obstack *, token_chain **, token_chain **);
 void push_file (FILE *, const char *, bool);
-void push_macro (builtin_func *);
+void append_macro (struct obstack *, builtin_func *, token_chain **,
+		   token_chain **);
+void push_macro (struct obstack *, builtin_func *);
 struct obstack *push_string_init (void);
 bool push_token (token_data *, int, bool);
 const input_block *push_string_finish (void);
-struct obstack *push_wrapup_init (void);
+struct obstack *push_wrapup_init (token_chain ***);
 void push_wrapup_finish (void);
 bool pop_wrapup (void);
 void input_print (struct obstack *, const input_block *);
@@ -508,7 +510,8 @@ size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
-		const string_pair *, bool, const char *, int *, bool);
+		const string_pair *, bool, token_chain **, const char *,
+		int *, bool);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
@@ -568,7 +571,8 @@ const char *ntoa (int32_t, int);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);
-void func_print (struct obstack *, const builtin *, bool, const string_pair *);
+void func_print (struct obstack *, const builtin *, bool, token_chain **,
+		 const string_pair *);
 
 /* File: path.c  --- path search for include files.  */
 
