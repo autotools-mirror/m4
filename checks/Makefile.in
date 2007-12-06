@@ -1,6 +1,7 @@
 ## Makefile.in - template for building Makefile for M4 testsuite.
 ##
-## Copyright (C) 1992, 1993, 1994, 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 1992, 1993, 1994, 2006, 2007, 2008 Free Software
+## Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -17,10 +18,11 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+@SET_MAKE@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 bindir = @bindir@
 exec_prefix = @exec_prefix@
@@ -28,6 +30,7 @@ prefix = @prefix@
 srcdir = @srcdir@
 VPATH = @srcdir@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+program_transform_name = @program_transform_name@
 
 # Should be GNU awk, for the get-them script.
 AWK = @AWK@
@@ -57,7 +60,8 @@ check: $(srcdir)/stamp-checks
 
 installcheck: $(srcdir)/stamp-checks
 	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	$(srcdir)/check-them -I $(srcdir)/../examples $(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples \
+	-m "`echo m4 | sed '$(program_transform_name)'`" $(CHECKS)
 
 tags:
 

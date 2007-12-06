@@ -47,7 +47,7 @@ int no_gnu_extensions = 0;
 int prefix_all_builtins = 0;
 
 /* Max length of arguments in trace output (-lsize).  */
-int max_debug_argument_length = INT_MAX;
+size_t max_debug_argument_length = SIZE_MAX;
 
 /* Suppress warnings about missing arguments.  */
 int suppress_warnings = 0;
@@ -572,9 +572,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'l':
-	max_debug_argument_length = atoi (optarg);
-	if (max_debug_argument_length <= 0)
-	  max_debug_argument_length = INT_MAX;
+	{
+	  long tmp = strtol (optarg, NULL, 10);
+	  max_debug_argument_length = tmp <= 0 ? SIZE_MAX : (size_t) tmp;
+	}
 	break;
 
       case 'o':

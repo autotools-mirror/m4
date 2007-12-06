@@ -129,7 +129,7 @@ extern int debug_level;			/* -d */
 extern size_t hash_table_size;		/* -H */
 extern int no_gnu_extensions;		/* -G */
 extern int prefix_all_builtins;		/* -P */
-extern int max_debug_argument_length;	/* -l */
+extern size_t max_debug_argument_length;/* -l */
 extern int suppress_warnings;		/* -Q */
 extern int warning_status;		/* -E */
 extern int nesting_limit;		/* -L */
@@ -182,7 +182,7 @@ extern FILE *debug;
 #define DEBUG_TRACE_CALLID 0x200
 
 /* V: very verbose --  print everything */
-#define DEBUG_TRACE_VERBOSE 0x377
+#define DEBUG_TRACE_VERBOSE 0x3FF
 /* default flags -- equiv: aeq */
 #define DEBUG_TRACE_DEFAULT 0x007
 
@@ -249,7 +249,6 @@ void trace_pre (const char *, int, macro_arguments *);
 void trace_post (const char *, int, macro_arguments *,
 		 const input_block *);
 
-bool obstack_print (struct obstack *, const char *, size_t, int *);
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -266,7 +265,7 @@ enum token_type
   TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */
   TOKEN_CLOSE,	/* Active character `)', TOKEN_TEXT.  */
   TOKEN_SIMPLE,	/* Any other single character, TOKEN_TEXT.  */
-  TOKEN_MACDEF,	/* A macro's definition (see "defn"), TOKEN_FUNC.  */
+  TOKEN_MACDEF,	/* A builtin macro, TOKEN_FUNC or TOKEN_COMP.  */
   TOKEN_ARGV	/* A series of parameters, TOKEN_COMP.  */
 };
 
@@ -434,7 +433,8 @@ extern int output_current_line;
 void output_init (void);
 void output_exit (void);
 void output_text (const char *, int);
-void shipout_text (struct obstack *, const char *, int, int);
+void divert_text (struct obstack *, const char *, int, int);
+bool shipout_string_trunc (struct obstack *, const char *, size_t, size_t *);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);
@@ -503,7 +503,7 @@ size_t adjust_refcount (int, bool);
 bool arg_adjust_refcount (macro_arguments *, bool);
 unsigned int arg_argc (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
-const char *arg_text (macro_arguments *, unsigned int);
+const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);
 bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int);
@@ -511,7 +511,7 @@ builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
 		const string_pair *, bool, token_chain **, const char *,
-		int *, bool);
+		size_t *, bool);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
@@ -522,7 +522,7 @@ void wrap_args (macro_arguments *);
 
 /* Grab the text at argv index I.  Assumes macro_argument *argv is in
    scope, and aborts if the argument is not text.  */
-#define ARG(i) arg_text (argv, i)
+#define ARG(i) arg_text (argv, i, false)
 
 /* Grab the text length at argv index I.  Assumes macro_argument *argv
    is in scope, and aborts if the argument is not text.  */
@@ -587,7 +587,7 @@ bool evaluate (const char *, const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format (struct obstack *, int, macro_arguments *);
+void expand_format (struct obstack *, int, macro_arguments *);
 
 /* File: freeze.c --- frozen state files.  */
 

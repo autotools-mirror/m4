@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -27,4 +27,4 @@ macro.c output.c path.c symtab.c
 if STACKOVF
 m4_SOURCES += stackovf.c
 endif
-m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS)
+m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS) $(POW_LIB)

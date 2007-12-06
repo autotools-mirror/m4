@@ -675,12 +675,9 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
     {
     case TOKEN_COMP:
       m4_warn (0, me, _("cannot concatenate builtins"));
-      // TODO fall through instead
-      break;
-
+      /* fallthru */
     case TOKEN_TEXT:
-      // TODO flatten TOKEN_COMP value, or support concatenation of builtins
-      define_user_macro (ARG (1), ARG_LEN (1), ARG (2), mode);
+      define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true), mode);
       break;
 
     case TOKEN_FUNC:
@@ -763,7 +760,7 @@ static void
 m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
-  int index;
+  int i;
 
   if (argc == 2 || bad_argc (me, argc, 3, -1))
     return;
@@ -771,14 +768,14 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     bad_argc (me, argc, 0, argc - 2);
 
-  index = 1;
+  i = 1;
   argc--;
 
   while (true)
     {
-      if (arg_equal (argv, index, index + 1))
+      if (arg_equal (argv, i, i + 1))
 	{
-	  push_arg (obs, argv, index + 2);
+	  push_arg (obs, argv, i + 2);
 	  return;
 	}
       switch (argc)
@@ -788,12 +785,12 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 
 	case 4:
 	case 5:
-	  push_arg (obs, argv, index + 3);
+	  push_arg (obs, argv, i + 3);
 	  return;
 
 	default:
 	  argc -= 3;
-	  index += 3;
+	  i += 3;
 	}
     }
 }
@@ -1008,7 +1005,10 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	}
       s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
       if (s == NULL)
-	continue;
+	{
+	  m4_warn (0, me, _("undefined macro `%s'"), ARG (i));
+	  continue;
+	}
 
       switch (SYMBOL_TYPE (s))
 	{
@@ -1042,10 +1042,10 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 
 /* Helper macros for readability.  */
 #if UNIX || defined WEXITSTATUS
-# define M4SYSVAL_EXITBITS(status)                       \
-   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4SYSVAL_TERMSIGBITS(status)                    \
-   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
+# define M4SYSVAL_EXITBITS(status)			 \
+  (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
+# define M4SYSVAL_TERMSIGBITS(status)			 \
+  (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
 #else /* !UNIX && !defined WEXITSTATUS */
 /* Platforms such as mingw do not support the notion of reporting
@@ -1976,7 +1976,7 @@ m4_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  format (obs, argc, argv);
+  expand_format (obs, argc, argv);
 }
 
 /*-------------------------------------------------------------------------.

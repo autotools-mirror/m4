@@ -235,14 +235,14 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 /*-------------------------------------------------------------------.
 | push_file () pushes an input file on the input stack, saving the   |
 | current file name and line number.  If next is non-NULL, this push |
-| invalidates a call to push_string_init (), whose storage is        |
-| consequently released.  If CLOSE, then close FP after EOF is       |
-| detected.  TITLE is used as the location for text parsed from the  |
-| file (not necessarily the file name).                              |
+| invalidates a call to push_string_init (), whose storage is	     |
+| consequently released.  If CLOSE_WHEN_DONE, then close FP after    |
+| EOF is detected.  TITLE is used as the location for text parsed    |
+| from the file (not necessarily the file name).		     |
 `-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title, bool close)
+push_file (FILE *fp, const char *title, bool close_when_done)
 {
   input_block *i;
 
@@ -263,7 +263,7 @@ push_file (FILE *fp, const char *title, bool close)
 
   i->u.u_f.fp = fp;
   i->u.u_f.end = false;
-  i->u.u_f.close = close;
+  i->u.u_f.close = close_when_done;
   i->u.u_f.advance = start_of_input_line;
   output_current_line = -1;
 
@@ -343,18 +343,18 @@ push_string_init (void)
 | rather than copying everything consecutively onto the input stack.  |
 | Must be called between push_string_init and push_string_finish.     |
 |                                                                     |
-| If TOKEN contains text, then convert the current input block into   |
-| a chain if it is not one already, and add the contents of TOKEN as  |
-| a new link in the chain.  LEVEL describes the current expansion     |
-| level, or -1 if TOKEN is composite, its contents reside entirely    |
-| on the current_input stack, and TOKEN lives in temporary storage.   |
-| If TOKEN is a simple string, then it belongs to the current macro   |
-| expansion.  If TOKEN is composite, then each text link has a level  |
-| of -1 if it belongs to the current macro expansion, otherwise it    |
-| is a back-reference where level tracks which stack it came from.    |
-| The resulting input block chain contains links with a level of -1   |
-| if the text belongs to the input stack, otherwise the level where   |
-| the back-reference comes from.				      |
+| Convert the current input block into a chain if it is not one	      |
+| already, and add the contents of TOKEN as a new link in the chain.  |
+| LEVEL describes the current expansion level, or -1 if TOKEN is      |
+| composite, its contents reside entirely on the current_input	      |
+| stack, and TOKEN lives in temporary storage.  If TOKEN is a simple  |
+| string, then it belongs to the current macro expansion.  If TOKEN   |
+| is composite, then each text link has a level of -1 if it belongs   |
+| to the current macro expansion, otherwise it is a back-reference    |
+| where level tracks which stack it came from.  The resulting input   |
+| block chain contains links with a level of -1 if the text belongs   |
+| to the input stack, otherwise the level where the back-reference    |
+| comes from.							      |
 |                                                                     |
 | Return true only if a reference was created to the contents of      |
 | TOKEN, in which case, LEVEL was non-negative and the lifetime of    |
@@ -660,7 +660,7 @@ pop_input (bool cleanup)
 	return false;
       if (debug_level & DEBUG_TRACE_INPUT)
 	{
-	  if (tmp)
+	  if (tmp != &input_eof)
 	    DEBUG_MESSAGE2 ("input reverted to %s, line %d",
 			    tmp->file, tmp->line);
 	  else
@@ -737,14 +737,14 @@ pop_wrapup (void)
 void
 input_print (struct obstack *obs, const input_block *input)
 {
-  int maxlen = max_debug_argument_length;
+  size_t maxlen = max_debug_argument_length;
   token_chain *chain;
 
   assert (input);
   switch (input->type)
     {
     case INPUT_STRING:
-      obstack_print (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
+      shipout_string_trunc (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
       break;
     case INPUT_FILE:
       obstack_grow (obs, "<file: ", strlen ("<file: "));
@@ -758,8 +758,8 @@ input_print (struct obstack *obs, const input_block *input)
 	  switch (chain->type)
 	    {
 	    case CHAIN_STR:
-	      if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
-				 &maxlen))
+	      if (shipout_string_trunc (obs, chain->u.u_s.str,
+					chain->u.u_s.len, &maxlen))
 		return;
 	      break;
 	    case CHAIN_FUNC:
@@ -1062,19 +1062,35 @@ skip_line (const char *name)
 | When next_token() sees a builtin token with peek_input, this	    |
 | retrieves the value of the function pointer, stores it in TD, and |
 | consumes the input so the caller does not need to do next_char.   |
-| If TD is NULL, discard the token instead.			    |
+| If OBS, TD will be converted to a composite token using storage   |
+| from OBS as necessary; otherwise, if TD is NULL, the builtin is   |
+| discarded.                                                        |
 `------------------------------------------------------------------*/
 
 static void
-init_macro_token (token_data *td)
+init_macro_token (struct obstack *obs, token_data *td)
 {
   token_chain *chain;
 
   assert (isp->type == INPUT_CHAIN);
   chain = isp->u.u_c.chain;
   assert (!chain->quote_age && chain->type == CHAIN_FUNC && chain->u.func);
-  if (td)
+  if (obs)
     {
+      assert (td);
+      if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
+	{
+	  TOKEN_DATA_TYPE (td) = TOKEN_COMP;
+	  td->u.u_c.chain = td->u.u_c.end = NULL;
+	  td->u.u_c.wrapper = false;
+	  td->u.u_c.has_func = true;
+	}
+      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP);
+      append_macro (obs, chain->u.func, &td->u.u_c.chain, &td->u.u_c.end);
+    }
+  else if (td)
+    {
+      assert (TOKEN_DATA_TYPE (td) == TOKEN_VOID);
       TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
       TOKEN_DATA_FUNC (td) = chain->u.func;
     }
@@ -1599,7 +1615,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
     }
   if (ch == CHAR_MACRO)
     {
-      init_macro_token (td);
+      init_macro_token (obs, td);
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> MACDEF (%s)\n",
 		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
@@ -1635,10 +1651,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 			      _("end of file in comment"));
 	  if (ch == CHAR_MACRO)
 	    {
-	      // TODO support concatenation of builtins
-	      m4_warn_at_line (0, file, *line, caller,
-			       _("cannot comment builtin"));
-	      init_macro_token (NULL);
+	      init_macro_token (obs, obs ? td : NULL);
 	      continue;
 	    }
 	  if (MATCH (ch, curr_comm.str2, true))
@@ -1734,35 +1747,8 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 			      _("end of file in string"));
 
 	  if (ch == CHAR_MACRO)
-	    {
-	      // TODO support concatenation of builtins
-	      if (obstack_object_size (obs_td) == 0
-		  && TOKEN_DATA_TYPE (td) == TOKEN_VOID)
-		{
-		  assert (quote_level == 1);
-		  init_macro_token (td);
-		  ch = peek_input (false);
-		  if (MATCH (ch, curr_quote.str2, false))
-		    {
-#ifdef DEBUG_INPUT
-		      const builtin *bp
-			= find_builtin_by_addr (TOKEN_DATA_FUNC (td));
-		      xfprintf (stderr, "next_token -> MACDEF (%s)\n",
-				bp->name);
-#endif
-		      ch = next_char (false, false);
-		      MATCH (ch, curr_quote.str2, true);
-		      return TOKEN_MACDEF;
-		    }
-		  TOKEN_DATA_TYPE (td) = TOKEN_VOID;
-		}
-	      else
-		init_macro_token (NULL);
-	      m4_warn_at_line (0, file, *line, caller,
-			       _("cannot quote builtin"));
-	      continue;
-	    }
-	  if (ch == CHAR_QUOTE)
+	    init_macro_token (obs, obs ? td : NULL);
+	  else if (ch == CHAR_QUOTE)
 	    append_quote_token (obs, td);
 	  else if (MATCH (ch, curr_quote.str2, true))
 	    {

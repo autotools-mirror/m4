@@ -121,10 +121,10 @@ cmp_diversion_CB (const void *elt1, const void *elt2)
 static bool
 threshold_diversion_CB (const void *elt, const void *threshold)
 {
-  const m4_diversion *div = (const m4_diversion *) elt;
+  const m4_diversion *diversion = (const m4_diversion *) elt;
   /* No need to worry about overflow, since we don't create diversions
      with negative divnum.  */
-  return div->divnum >= *(const int *) threshold;
+  return diversion->divnum >= *(const int *) threshold;
 }
 
 void
@@ -198,7 +198,8 @@ m4_tmpname (int divnum)
       obstack_1grow (&diversion_storage, '4');
       obstack_1grow (&diversion_storage, '-');
       offset = obstack_object_size (&diversion_storage);
-      buffer = obstack_alloc (&diversion_storage, INT_BUFSIZE_BOUND (divnum));
+      buffer = (char *) obstack_alloc (&diversion_storage,
+				       INT_BUFSIZE_BOUND (divnum));
     }
   if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
     m4_error (EXIT_FAILURE, errno, NULL,
@@ -385,8 +386,8 @@ make_room_for (int length)
 	}
 
       /* The current buffer may be safely reallocated.  */
-      output_diversion->u.buffer
-	= xrealloc (output_diversion->u.buffer, (size_t) wanted_size);
+      output_diversion->u.buffer = xrealloc (output_diversion->u.buffer,
+					     (size_t) wanted_size);
 
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
@@ -469,7 +470,7 @@ output_text (const char *text, int length)
 `--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length, int line)
+divert_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
   const char *cursor;
@@ -570,6 +571,35 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 	    start_of_output_line = true;
 	}
     }
+}
+
+/* Dump the string STR of length LEN to the obstack OBS.  If LEN is
+   SIZE_MAX, use strlen (STR) instead.  If MAX_LEN is non-NULL,
+   truncate the dump at MAX_LEN bytes and return true if MAX_LEN was
+   reached; otherwise, return false and update MAX_LEN as
+   appropriate.  */
+bool
+shipout_string_trunc (struct obstack *obs, const char *str, size_t len,
+		      size_t *max_len)
+{
+  size_t max = max_len ? *max_len : INT_MAX;
+
+  if (len == SIZE_MAX)
+    len = strlen (str);
+  if (len < max)
+    {
+      obstack_grow (obs, str, len);
+      max -= len;
+    }
+  else
+    {
+      obstack_grow (obs, str, max);
+      obstack_grow (obs, "...", 3);
+      max = 0;
+    }
+  if (max_len)
+    *max_len = max;
+  return max == 0;
 }
 
 /* Functions for use by diversions.  */
