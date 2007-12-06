@@ -678,13 +678,9 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
     {
     case TOKEN_COMP:
       m4_warn (0, me, _("cannot concatenate builtins"));
-      /* TODO fall through instead.  */
-      break;
-
+      /* fallthru */
     case TOKEN_TEXT:
-      /* TODO flatten TOKEN_COMP value, or support concatenation of
-	 builtins in definitions.  */
-      define_user_macro (ARG (1), ARG_LEN (1), ARG (2), mode);
+      define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true), mode);
       break;
 
     case TOKEN_FUNC:
@@ -1012,7 +1008,10 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	}
       s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
       if (s == NULL)
-	continue;
+	{
+	  m4_warn (0, me, _("undefined macro `%s'"), ARG (i));
+	  continue;
+	}
 
       switch (SYMBOL_TYPE (s))
 	{
@@ -1046,10 +1045,10 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 
 /* Helper macros for readability.  */
 #if UNIX || defined WEXITSTATUS
-# define M4SYSVAL_EXITBITS(status)                       \
-   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4SYSVAL_TERMSIGBITS(status)                    \
-   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
+# define M4SYSVAL_EXITBITS(status)			 \
+  (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
+# define M4SYSVAL_TERMSIGBITS(status)			 \
+  (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
 #else /* !UNIX && !defined WEXITSTATUS */
 /* Platforms such as mingw do not support the notion of reporting

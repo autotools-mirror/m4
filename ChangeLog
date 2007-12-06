@@ -1,3 +1,28 @@
+2008-05-05  Eric Blake  <ebb9@byu.net>
+
+	Stage 22: allow builtin token concatenation outside $@.
+	Adjust the input and argument parsing engines to append builtins
+	alongside text.  Make define warn when builtins must be
+	flattened.
+	Memory impact: slight penalty, with fewer builtins flattened.
+	Speed impact: slight penalty, from more bookkeeping.
+	* src/m4.h (arg_text): Add parameter.
+	(ARG): Adjust callers.
+	* src/input.c (init_macro_token): Add parameter.
+	(next_token): Support concatenating builtins.
+	* src/macro.c (warn_builtin_concat): Delete warning.
+	(expand_argument, arg_adjust_refcount): Handle builtin tokens.
+	(arg_text): Add parameter.
+	(arg_print): Adjust caller.
+	* src/builtin.c (define_macro): Flatten builtins, rather than
+	doing nothing.
+	(defn): Warn on undefined macro name.
+	* src/m4.c (main): Avoid atoi.
+	* src/output.c: Whitespace fixes.
+	* doc/m4.texinfo (Defn): Document the new semantics.
+	(Ifelse, Debug Levels, M4wrap): Enhance tests.
+	* NEWS: Document this change.
+
 2008-05-03  Eric Blake  <ebb9@byu.net>
 
 	Document define_blind.

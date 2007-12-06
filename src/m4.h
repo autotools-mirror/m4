@@ -266,7 +266,7 @@ enum token_type
   TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */
   TOKEN_CLOSE,	/* Active character `)', TOKEN_TEXT.  */
   TOKEN_SIMPLE,	/* Any other single character, TOKEN_TEXT.  */
-  TOKEN_MACDEF,	/* A macro's definition (see "defn"), TOKEN_FUNC.  */
+  TOKEN_MACDEF,	/* A builtin macro, TOKEN_FUNC or TOKEN_COMP.  */
   TOKEN_ARGV	/* A series of parameters, TOKEN_COMP.  */
 };
 
@@ -504,7 +504,7 @@ size_t adjust_refcount (int, bool);
 bool arg_adjust_refcount (macro_arguments *, bool);
 unsigned int arg_argc (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
-const char *arg_text (macro_arguments *, unsigned int);
+const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);
 bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int);
@@ -523,7 +523,7 @@ void wrap_args (macro_arguments *);
 
 /* Grab the text at argv index I.  Assumes macro_argument *argv is in
    scope, and aborts if the argument is not text.  */
-#define ARG(i) arg_text (argv, i)
+#define ARG(i) arg_text (argv, i, false)
 
 /* Grab the text length at argv index I.  Assumes macro_argument *argv
    is in scope, and aborts if the argument is not text.  */

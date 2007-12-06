@@ -329,18 +329,6 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 }
 
 
-/*---------------------------------------------------------------.
-| Helper function to print warning about concatenating FUNC with |
-| text.                                                          |
-`---------------------------------------------------------------*/
-static void
-warn_builtin_concat (const char *caller, builtin_func *func)
-{
-  const builtin *bp = find_builtin_by_addr (func);
-  assert (bp);
-  m4_warn (0, caller, _("cannot concatenate builtin `%s'"), bp->name);
-}
-
 /*-------------------------------------------------------------------.
 | This function parses one argument to a macro call.  It expects the |
 | first left parenthesis or the separating comma to have been read   |
@@ -383,15 +371,10 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	case TOKEN_CLOSE:
 	  if (paren_level == 0)
 	    {
-	      size_t len = obstack_object_size (obs);
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
-		{
-		  if (!len)
-		    return t == TOKEN_COMMA;
-		  warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
-		}
+	      assert (TOKEN_DATA_TYPE (argp) != TOKEN_FUNC);
 	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
 		{
+		  size_t len = obstack_object_size (obs);
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 		  if (len)
 		    {
@@ -404,7 +387,16 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 		  TOKEN_DATA_QUOTE_AGE (argp) = age;
 		}
 	      else
-		make_text_link (obs, NULL, &argp->u.u_c.end);
+		{
+		  make_text_link (obs, NULL, &argp->u.u_c.end);
+		  if (argp->u.u_c.chain == argp->u.u_c.end
+		      && argp->u.u_c.chain->type == CHAIN_FUNC)
+		    {
+		      builtin_func *func = argp->u.u_c.chain->u.func;
+		      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
+		      TOKEN_DATA_FUNC (argp) = func;
+		    }
+		}
 	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -427,14 +419,13 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 
 	case TOKEN_WORD:
 	case TOKEN_STRING:
+	case TOKEN_MACDEF:
 	  if (!expand_token (obs, t, &td, line, first))
 	    age = 0;
 	  if (TOKEN_DATA_TYPE (&td) == TOKEN_COMP)
 	    {
 	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
 		{
-		  if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
-		    warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
 		  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
 		  argp->u.u_c.chain = td.u.u_c.chain;
 		  argp->u.u_c.wrapper = argp->u.u_c.has_func = false;
@@ -447,22 +438,6 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	      argp->u.u_c.end = td.u.u_c.end;
 	      if (td.u.u_c.has_func)
 		argp->u.u_c.has_func = true;
-	    }
-	  break;
-
-	case TOKEN_MACDEF:
-	  if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID
-	      && obstack_object_size (obs) == 0)
-	    {
-	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	    }
-	  else
-	    {
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC)
-		warn_builtin_concat (caller, TOKEN_DATA_FUNC (argp));
-	      warn_builtin_concat (caller, TOKEN_DATA_FUNC (&td));
-	      TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 	    }
 	  break;
 
@@ -798,6 +773,8 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
 		  if (chain->u.u_s.level >= 0)
 		    adjust_refcount (chain->u.u_s.level, increase);
 		  break;
+		case CHAIN_FUNC:
+		  break;
 		case CHAIN_ARGV:
 		  assert (chain->u.u_a.argv->inuse);
 		  arg_adjust_refcount (chain->u.u_a.argv, increase);
@@ -914,10 +891,11 @@ arg_type (macro_arguments *argv, unsigned int arg)
 
 /* Given ARGV, return the text at argument ARG.  Abort if the argument
    is not text.  Arg 0 is always text, and indices beyond argc return
-   the empty string.  The result is always NUL-terminated, even if it
-   includes embedded NUL characters.  */
+   the empty string.  If FLATTEN, builtins are ignored.  The result is
+   always NUL-terminated, even if it includes embedded NUL
+   characters.  */
 const char *
-arg_text (macro_arguments *argv, unsigned int arg)
+arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
   token_chain *chain;
@@ -927,7 +905,7 @@ arg_text (macro_arguments *argv, unsigned int arg)
     return argv->argv0;
   if (arg >= argv->argc)
     return "";
-  token = arg_token (argv, arg, NULL, false);
+  token = arg_token (argv, arg, NULL, flatten);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -942,13 +920,18 @@ arg_text (macro_arguments *argv, unsigned int arg)
 	    case CHAIN_STR:
 	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	      break;
+	    case CHAIN_FUNC:
+	      if (flatten)
+		break;
+	      assert (!"arg_text");
+	      abort ();
 	    case CHAIN_ARGV:
-	      assert (!chain->u.u_a.has_func || argv->flatten);
+	      assert (!chain->u.u_a.has_func || flatten || argv->flatten);
 	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 			 quote_cache (NULL, chain->quote_age,
 				      chain->u.u_a.quotes),
-			 argv->flatten || chain->u.u_a.flatten, NULL, NULL,
-			 NULL, false);
+			 flatten || argv->flatten || chain->u.u_a.flatten,
+			 NULL, NULL, NULL, false);
 	      break;
 	    default:
 	      assert (!"arg_text");
@@ -969,7 +952,7 @@ arg_text (macro_arguments *argv, unsigned int arg)
 /* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
    Both indices must be non-zero and less than argc.  Return true if
    the arguments contain the same contents; often more efficient than
-   strcmp (arg_text (argv, indexa), arg_text (argv, indexb)) == 0.  */
+   strcmp (arg_text (argv, a, 1), arg_text (argv, b, 1)) == 0.  */
 bool
 arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
@@ -1249,6 +1232,7 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int arg,
   size_t sep_len;
   size_t *plen = quote_each ? NULL : &len;
 
+  flatten |= argv->flatten;
   if (chainp)
     assert (!max_len && *chainp);
   if (!sep)

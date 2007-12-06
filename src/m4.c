@@ -573,7 +573,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'l':
 	{
-	  int tmp = atoi (optarg);
+	  long tmp = strtol (optarg, NULL, 10);
 	  max_debug_argument_length = tmp <= 0 ? SIZE_MAX : (size_t) tmp;
 	}
 	break;

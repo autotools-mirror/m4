@@ -2112,17 +2112,14 @@ the builtin @code{defn}:
 @deffn Builtin defn (@var{name}@dots{})
 Expands to the @emph{quoted definition} of each @var{name}.  If an
 argument is not a defined macro, the expansion for that argument is
-empty.
+empty and triggers a warning.
 
 If @var{name} is a user-defined macro, the quoted definition is simply
-the quoted expansion text.  If, instead, there is only one @var{name}
-and it is a builtin, the
+the quoted expansion text.  If, instead, @var{name} is a builtin, the
 expansion is a special token, which points to the builtin's internal
-definition.  This token is only meaningful as the second argument to
+definition.  This token meaningful primarily as the second argument to
 @code{define} (and @code{pushdef}), and is silently converted to an
-empty string in most other contexts.  Using multiple @var{name} to
-combine a builtin with anything else is not supported; a warning is
-issued and the builtin is omitted from the final expansion.
+empty string in many other contexts.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2281,14 +2278,18 @@ bar
 @result{}0
 @end example
 
-Also note that as of M4 1.6, @code{defn} with multiple arguments can
-join text with builtin tokens.  However, when collecting macro
-arguments, a builtin token is preserved only when it occurs in
-isolation.  A future version of @acronym{GNU} M4 may lift this
-restriction.
+A warning is issued if @var{name} is undefined.  Also note that as of M4
+1.6, @code{defn} with multiple arguments can join text with builtin
+tokens.  However, when defining a macro via @code{define} or
+@code{pushdef}, a warning is issued and the builtin token ignored if the
+builtin token does not occur in isolation.  A future version of
+@acronym{GNU} M4 may lift this restriction.
 
 @example
 $ @kbd{m4 -d}
+defn(`foo')
+@error{}m4:stdin:1: Warning: defn: undefined macro `foo'
+@result{}
 define(`a', `A')define(`AA', `b')
 @result{}
 traceon(`defn', `define')
@@ -2298,29 +2299,28 @@ defn(`a', `divnum', `a')
 @result{}AA
 define(`mydivnum', defn(`divnum', `divnum'))mydivnum
 @error{}m4trace: -2- defn(`divnum', `divnum') -> `<divnum><divnum>'
-@error{}m4:stdin:4: Warning: define: cannot concatenate builtin `divnum'
-@error{}m4:stdin:4: Warning: define: cannot concatenate builtin `divnum'
-@error{}m4trace: -1- define(`mydivnum', `')
+@error{}m4:stdin:5: Warning: define: cannot concatenate builtins
+@error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>')
 @result{}
-traceoff(`defn', `define')
+traceoff(`defn', `define')dumpdef(`mydivnum')
+@error{}mydivnum:@tabchar{}`'
 @result{}
 define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
-@error{}m4:stdin:6: Warning: define: cannot concatenate builtin `divnum'
-@error{}m4:stdin:6: Warning: define: cannot concatenate builtin `divnum'
+@error{}m4:stdin:7: Warning: define: cannot concatenate builtins
 @result{}
 define(`mydivnum', defn(`divnum')`a')mydivnum
-@error{}m4:stdin:7: Warning: define: cannot concatenate builtin `divnum'
+@error{}m4:stdin:8: Warning: define: cannot concatenate builtins
 @result{}A
 define(`mydivnum', `a'defn(`divnum'))mydivnum
-@error{}m4:stdin:8: Warning: define: cannot concatenate builtin `divnum'
+@error{}m4:stdin:9: Warning: define: cannot concatenate builtins
 @result{}A
 define(`q', ``$@@'')
 @result{}
 define(`foo', q(`a', defn(`divnum')))foo
-@error{}m4:stdin:10: Warning: define: cannot concatenate builtins
-@result{}foo
+@error{}m4:stdin:11: Warning: define: cannot concatenate builtins
+@result{}a,
 ifdef(`foo', `yes', `no')
-@result{}no
+@result{}yes
 @end example
 
 @node Pushdef
@@ -2853,6 +2853,8 @@ ifelse(defn(`defn'), defn(`divnum'), `yes', `no')
 @result{}no
 ifelse(defn(`defn'), defn(`defn'), `yes', `no')
 @result{}yes
+ifelse(defn(`defn', `divnum'), defn(`defn')defn(`divnum'), `yes', `no')
+@result{}yes
 define(`foo', ifelse(`', `', defn(`divnum')))
 @result{}
 foo
@@ -2917,8 +2919,6 @@ ifelse(`-01234567890123456789', `-'e(long)`-', `yes', `no')
 @result{}no
 @end example
 
-@comment It would be nice to allow concatenation of builtins without
-@comment using $@ handling.
 @example
 define(`e', `$@@')define(`q', ``$@@'')define(`u', `$*')
 @result{}
@@ -2928,16 +2928,12 @@ cmp(`defn(`defn')', `defn(`d')')
 @result{}yes
 cmp(`defn(`defn')', ``<defn>'')
 @result{}no
-cmp(`q(defn(`defn'))', `q(defn(`d'))')-fixme
-@error{}m4:stdin:5: Warning: ifelse: cannot quote builtin
-@error{}m4:stdin:5: Warning: ifelse: cannot quote builtin
-@result{}yes-fixme
-cmp(`q(defn(`defn'))', `q(`<defn>')')-fixme
-@error{}m4:stdin:6: Warning: ifelse: cannot quote builtin
-@result{}no-fixme
-cmp(`q(defn(`defn'))', ``'')-fixme
-@error{}m4:stdin:7: Warning: ifelse: cannot quote builtin
-@result{}no-fixme
+cmp(`q(defn(`defn'))', `q(defn(`d'))')
+@result{}yes
+cmp(`q(defn(`defn'))', `q(`<defn>')')
+@result{}no
+cmp(`q(defn(`defn'))', ``'')
+@result{}no
 cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', defn(`d'))')
 @result{}yes
 cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', `<defn>')')
@@ -3834,7 +3830,17 @@ debugmode()
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO
+debugmode(`V')
+@result{}
+foo(`ignored')
+@error{}m4trace:stdin:6: -1- id 6: foo ...
+@error{}m4trace:stdin:6: -1- id 6: foo(`ignored') -> ???
+@error{}m4trace:stdin:6: -1- id 6: foo(...) -> `FOO'
+@result{}FOO
 debugmode
+@error{}m4trace:stdin:7: -1- id 7: debugmode ...
+@error{}m4trace:stdin:7: -1- id 7: debugmode -> ???
+@error{}
 @result{}
 foo
 @error{}m4trace: -1- foo
@@ -3842,7 +3848,7 @@ foo
 debugmode(`+l')
 @result{}
 foo
-@error{}m4trace:8: -1- foo
+@error{}m4trace:10: -1- foo
 @result{}FOO
 @end example
 
@@ -4799,7 +4805,7 @@ than computing the builtin token up front, as is done for @code{bar}.
 m4wrap(`define(`foo', defn(`divnum'))foo
 ')
 @result{}
-m4wrap(`define(`bar', ')m4wrap(defn(`divnum'))m4wrap(`)bar
+m4wrap(`define(`bar', 'defn(`divnum')`)bar
 ')
 @result{}
 ^D

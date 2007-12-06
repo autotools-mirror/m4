@@ -199,7 +199,7 @@ m4_tmpname (int divnum)
       obstack_1grow (&diversion_storage, '-');
       offset = obstack_object_size (&diversion_storage);
       buffer = (char *) obstack_alloc (&diversion_storage,
-                                       INT_BUFSIZE_BOUND (divnum));
+				       INT_BUFSIZE_BOUND (divnum));
     }
   if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
     m4_error (EXIT_FAILURE, errno, NULL,
@@ -387,7 +387,7 @@ make_room_for (int length)
 
       /* The current buffer may be safely reallocated.  */
       output_diversion->u.buffer = xrealloc (output_diversion->u.buffer,
-                                             (size_t) wanted_size);
+					     (size_t) wanted_size);
 
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
