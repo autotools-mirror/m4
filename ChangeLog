@@ -1,3 +1,38 @@
+2008-04-14  Eric Blake  <ebb9@byu.net>
+
+	Stage 21: $@ concatenates builtins, m4wrap takes builtins.
+	Create a new input block type, which always fails with CHAR_EOF,
+	so that remaining input routines no longer have to check for NULL
+	input block.  Improve arg_print to handle builtin tokens when
+	printing to a known chain, rather than always flattening builtins,
+	allowing m4wrap and $@ references to handle embedded builtins.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer conditionals.
+	* src/m4.h (append_macro): New prototype.
+	(push_macro, push_wrapup_init, arg_print, func_print): Alter
+	prototypes.
+	* src/input.c (INPUT_MACRO): Delete, covered by INPUT_CHAIN.
+	(INPUT_EOF): New input block type, for efficiency.
+	(struct input_block): Remove u.func member.
+	(input_eof): New input sentinel.
+	(append_macro): New function.
+	(push_macro, push_wrapup_init): Add parameter.
+	(push_token): Support builtin tokens.
+	(init_macro_token): Always use chain for builtin tokens.
+	(push_string_init, pop_input, pop_wrapup, input_print)
+	(peek_input, next_char, next_char_1, input_init): Adjust callers.
+	* src/macro.c (arg_equal, wrap_args): Handle builtin tokens.
+	(arg_print): Add parameter.
+	(collect_arguments, arg_type, arg_text): Adjust callers.
+	* src/builtin.c (m4_m4wrap): Handle builtin tokens.
+	(func_print): Add parameter.
+	(m4_defn): Allow pushing builtin alongside other text.
+	(m4_errprint): Adjust caller.
+	* src/debug.c (trace_pre): Likewise.
+	* doc/m4.texinfo (Defn, Ifelse, Debug Levels): Update tests to new
+	behavior.
+	(M4wrap): New test.
+
 2008-04-11  Eric Blake  <ebb9@byu.net>
 
 	Ensure --program-prefix doesn't regress.

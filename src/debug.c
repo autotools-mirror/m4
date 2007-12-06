@@ -368,7 +368,7 @@ trace_pre (const char *name, int id, macro_arguments *argv)
       trace_format ("(");
       arg_print (&trace, argv, 1,
 		 (debug_level & DEBUG_TRACE_QUOTE) ? &curr_quote : NULL,
-		 false, ", ", &len, true);
+		 false, NULL, ", ", &len, true);
       trace_format (")");
     }
 

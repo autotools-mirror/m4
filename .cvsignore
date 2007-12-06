@@ -17,6 +17,7 @@ configure.lineno
 COPYING
 depcomp
 gendocs.sh
+GNUmakefile
 gnupload
 INSTALL
 install-sh
@@ -30,4 +31,3 @@ stamp-h
 stamp-h1
 stamp-h.in
 tests
-GNUmakefile

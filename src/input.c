@@ -72,10 +72,10 @@
 /* Type of an input block.  */
 enum input_type
 {
-  INPUT_STRING,		/* String resulting from macro expansion.  */
-  INPUT_FILE,		/* File from command line or include.  */
-  INPUT_MACRO,		/* Builtin resulting from defn.  */
-  INPUT_CHAIN		/* FIFO chain of separate strings and $@ refs.  */
+  INPUT_STRING,	/* String resulting from macro expansion.  */
+  INPUT_FILE,	/* File from command line or include.  */
+  INPUT_CHAIN,	/* FIFO chain of separate strings, builtins, and $@ refs.  */
+  INPUT_EOF	/* Placeholder at bottom of input stack.  */
 };
 
 typedef enum input_type input_type;
@@ -103,7 +103,6 @@ struct input_block
 	  bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
 	}
 	u_f;	/* INPUT_FILE */
-      builtin_func *func;	/* INPUT_MACRO */
       struct
 	{
 	  token_chain *chain;	/* Current link in chain.  */
@@ -136,14 +135,18 @@ static struct obstack *current_input;
 /* Bottom of token_stack, for obstack_free.  */
 static void *token_bottom;
 
-/* Pointer to top of current_input.  */
+/* Pointer to top of current_input, never NULL.  */
 static input_block *isp;
 
-/* Pointer to top of wrapup_stack.  */
+/* Pointer to top of wrapup_stack, never NULL.  */
 static input_block *wsp;
 
-/* Aux. for handling split push_string ().  */
+/* Auxiliary for handling split push_string (), NULL if not pushing
+   text for rescanning.  */
 static input_block *next;
+
+/* Marker at the end of the input stack.  */
+static input_block input_eof = { NULL, INPUT_EOF, "", 0 };
 
 /* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
@@ -265,33 +268,50 @@ push_file (FILE *fp, const char *title, bool close)
   isp = i;
 }
 
-/*-----------------------------------------------------------------.
-| push_macro () pushes the builtin macro FUNC on the input stack.  |
-| If next is non-NULL, this push invalidates a call to             |
-| push_string_init (), whose storage is consequently released.     |
-`-----------------------------------------------------------------*/
-
+/*------------------------------------------------------------------.
+| Given an obstack OBS, capture any unfinished text as a link, then |
+| append the builtin FUNC as the next link in the chain that starts |
+| at *START and ends at *END.  START may be NULL if *END is         |
+| non-NULL.                                                         |
+`------------------------------------------------------------------*/
 void
-push_macro (builtin_func *func)
+append_macro (struct obstack *obs, builtin_func *func, token_chain **start,
+	      token_chain **end)
 {
-  input_block *i;
-
-  if (next != NULL)
-    {
-      obstack_free (current_input, next);
-      next = NULL;
-    }
+  token_chain *chain;
 
   assert (func);
-  i = (input_block *) obstack_alloc (current_input, sizeof *i);
-  i->type = INPUT_MACRO;
-  i->file = current_file;
-  i->line = current_line;
-  input_change = true;
+  make_text_link (obs, start, end);
+  chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
+  if (*end)
+    (*end)->next = chain;
+  else
+    *start = chain;
+  *end = chain;
+  chain->next = NULL;
+  chain->type = CHAIN_FUNC;
+  chain->quote_age = 0;
+  chain->u.func = func;
+}
 
-  i->u.func = func;
-  i->prev = isp;
-  isp = i;
+/*------------------------------------------------------------------.
+| push_macro () pushes the builtin FUNC onto the obstack OBS, which |
+| is either the input or wrapup stack.                              |
+`------------------------------------------------------------------*/
+
+void
+push_macro (struct obstack *obs, builtin_func *func)
+{
+  input_block *block = (obs == current_input ? next : wsp);
+  assert (block);
+  if (block->type == INPUT_STRING)
+    {
+      block->type = INPUT_CHAIN;
+      block->u.u_c.chain = block->u.u_c.end = NULL;
+    }
+  else
+    assert (block->type == INPUT_CHAIN);
+  append_macro (obs, func, &block->u.u_c.chain, &block->u.u_c.end);
 }
 
 /*--------------------------------------------------------------.
@@ -304,7 +324,7 @@ push_string_init (void)
 {
   /* Free any memory occupied by completely parsed strings.  */
   assert (next == NULL);
-  while (isp && pop_input (false));
+  while (pop_input (false));
 
   /* Reserve the next location on the obstack.  */
   next = (input_block *) obstack_alloc (current_input, sizeof *next);
@@ -361,7 +381,18 @@ push_token (token_data *token, int level, bool inuse)
 	  return false;
 	}
     }
-  else if (TOKEN_DATA_TYPE (token) != TOKEN_FUNC)
+  else if (TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
+    {
+      if (next->type == INPUT_STRING)
+	{
+	  next->type = INPUT_CHAIN;
+	  next->u.u_c.chain = next->u.u_c.end = NULL;
+	}
+      append_macro (current_input, TOKEN_DATA_FUNC (token), &next->u.u_c.chain,
+		    &next->u.u_c.end);
+      return false;
+    }
+  else
     {
       /* For composite tokens, if argv is already in use, creating
 	 additional references for long text segments is more
@@ -407,23 +438,15 @@ push_token (token_data *token, int level, bool inuse)
       adjust_refcount (level, true);
       inuse = true;
     }
-  else if (TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
-    {
-      chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
-      if (next->u.u_c.end)
-	next->u.u_c.end->next = chain;
-      else
-	next->u.u_c.chain = chain;
-      next->u.u_c.end = chain;
-      chain->next = NULL;
-      chain->type = CHAIN_FUNC;
-      chain->quote_age = 0;
-      chain->u.func = TOKEN_DATA_FUNC (token);
-    }
   while (src_chain)
     {
-      /* TODO support func concatenation.  */
-      assert (src_chain->type != CHAIN_FUNC);
+      if (src_chain->type == CHAIN_FUNC)
+	{
+	  append_macro (current_input, src_chain->u.func, &next->u.u_c.chain,
+			&next->u.u_c.end);
+	  src_chain = src_chain->next;
+	  continue;
+	}
       if (level == -1)
 	{
 	  /* Nothing to copy, since link already lives on obstack.  */
@@ -526,13 +549,13 @@ push_string_finish (void)
 `--------------------------------------------------------------*/
 
 struct obstack *
-push_wrapup_init (void)
+push_wrapup_init (token_chain ***end)
 {
   input_block *i;
   token_chain *chain;
 
   assert (obstack_object_size (wrapup_stack) == 0);
-  if (wsp)
+  if (wsp != &input_eof)
     {
       i = wsp;
       assert (i->type == INPUT_CHAIN && i->u.u_c.end
@@ -559,6 +582,7 @@ push_wrapup_init (void)
   chain->quote_age = 0;
   chain->u.u_l.file = current_file;
   chain->u.u_l.line = current_line;
+  *end = &i->u.u_c.end;
   return wrapup_stack;
 }
 
@@ -593,12 +617,6 @@ pop_input (bool cleanup)
     case INPUT_STRING:
       assert (!cleanup || !isp->u.u_s.len);
       if (isp->u.u_s.len)
-	return false;
-      break;
-
-    case INPUT_MACRO:
-      assert (!isp->u.func || !cleanup);
-      if (isp->u.func)
 	return false;
       break;
 
@@ -658,6 +676,9 @@ pop_input (bool cleanup)
       output_current_line = -1;
       break;
 
+    case INPUT_EOF:
+      return false;
+
     default:
       assert (!"pop_input");
       abort ();
@@ -684,7 +705,7 @@ pop_wrapup (void)
   obstack_free (current_input, NULL);
   free (current_input);
 
-  if (wsp == NULL)
+  if (wsp == &input_eof)
     {
       /* End of the program.  Free all memory even though we are about
 	 to exit, since it makes leak detection easier.  */
@@ -703,7 +724,7 @@ pop_wrapup (void)
   obstack_init (wrapup_stack);
 
   isp = wsp;
-  wsp = NULL;
+  wsp = &input_eof;
   input_change = true;
 
   return true;
@@ -730,9 +751,6 @@ input_print (struct obstack *obs, const input_block *input)
       obstack_grow (obs, input->file, strlen (input->file));
       obstack_1grow (obs, '>');
       break;
-    case INPUT_MACRO:
-      func_print (obs, find_builtin_by_addr (input->u.func), false, NULL);
-      break;
     case INPUT_CHAIN:
       chain = input->u.u_c.chain;
       while (chain)
@@ -746,14 +764,14 @@ input_print (struct obstack *obs, const input_block *input)
 	      break;
 	    case CHAIN_FUNC:
 	      func_print (obs, find_builtin_by_addr (chain->u.func), false,
-			  NULL);
+			  NULL, NULL);
 	      break;
 	    case CHAIN_ARGV:
 	      assert (!chain->u.u_a.comma);
 	      if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
 			     quote_cache (NULL, chain->quote_age,
 					  chain->u.u_a.quotes),
-			     chain->u.u_a.flatten, NULL, &maxlen, false))
+			     chain->u.u_a.flatten, NULL, NULL, &maxlen, false))
 		return;
 	      break;
 	    default:
@@ -789,9 +807,7 @@ peek_input (bool allow_argv)
 
   while (1)
     {
-      if (block == NULL)
-	return CHAR_EOF;
-
+      assert (block);
       switch (block->type)
 	{
 	case INPUT_STRING:
@@ -807,11 +823,6 @@ peek_input (bool allow_argv)
 	      return ch;
 	    }
 	  block->u.u_f.end = true;
-	  break;
-
-	case INPUT_MACRO:
-	  if (block->u.func)
-	    return CHAR_MACRO;
 	  break;
 
 	case INPUT_CHAIN:
@@ -863,6 +874,9 @@ peek_input (bool allow_argv)
 	    }
 	  break;
 
+	case INPUT_EOF:
+	  return CHAR_EOF;
+
 	default:
 	  assert (!"peek_input");
 	  abort ();
@@ -887,7 +901,7 @@ peek_input (bool allow_argv)
 `-------------------------------------------------------------------*/
 
 #define next_char(AQ, AA)						\
-  (isp && isp->type == INPUT_STRING && isp->u.u_s.len && !input_change	\
+  (isp->type == INPUT_STRING && isp->u.u_s.len && !input_change		\
    ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
    : next_char_1 (AQ, AA))
 
@@ -899,13 +913,7 @@ next_char_1 (bool allow_quote, bool allow_argv)
 
   while (1)
     {
-      if (isp == NULL)
-	{
-	  current_file = "";
-	  current_line = 0;
-	  return CHAR_EOF;
-	}
-
+      assert (isp);
       if (input_change)
 	{
 	  current_file = isp->file;
@@ -938,11 +946,6 @@ next_char_1 (bool allow_quote, bool allow_argv)
 		start_of_input_line = true;
 	      return ch;
 	    }
-	  break;
-
-	case INPUT_MACRO:
-	  if (isp->u.func)
-	    return CHAR_MACRO;
 	  break;
 
 	case INPUT_CHAIN:
@@ -1013,6 +1016,9 @@ next_char_1 (bool allow_quote, bool allow_argv)
 	    }
 	  break;
 
+	case INPUT_EOF:
+	  return CHAR_EOF;
+
 	default:
 	  assert (!"next_char_1");
 	  abort ();
@@ -1064,28 +1070,15 @@ init_macro_token (token_data *td)
 {
   token_chain *chain;
 
-  if (isp->type == INPUT_MACRO)
+  assert (isp->type == INPUT_CHAIN);
+  chain = isp->u.u_c.chain;
+  assert (!chain->quote_age && chain->type == CHAIN_FUNC && chain->u.func);
+  if (td)
     {
-      assert (isp->u.func);
-      if (td)
-	{
-	  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-	  TOKEN_DATA_FUNC (td) = isp->u.func;
-	}
-      isp->u.func = NULL;
+      TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
+      TOKEN_DATA_FUNC (td) = chain->u.func;
     }
-  else
-    {
-      assert (isp->type == INPUT_CHAIN);
-      chain = isp->u.u_c.chain;
-      assert (!chain->quote_age && chain->type == CHAIN_FUNC && chain->u.func);
-      if (td)
-	{
-	  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-	  TOKEN_DATA_FUNC (td) = chain->u.func;
-	}
-      chain->u.func = NULL;
-    }
+  chain->u.func = NULL;
 }
 
 /*-------------------------------------------------------------------.
@@ -1282,8 +1275,8 @@ input_init (void)
   obstack_init (&token_stack);
   token_bottom = obstack_finish (&token_stack);
 
-  isp = NULL;
-  wsp = NULL;
+  isp = &input_eof;
+  wsp = &input_eof;
   next = NULL;
 
   start_of_input_line = false;
