@@ -13,6 +13,12 @@ Foundation, Inc.
    than 512 kibibytes are saved in diversions on platforms like NetBSD
    or darwin where fopen(name,"a+") seeks to the end of the file.
 
+** The output of the `maketemp' and `mkstemp' builtins is now quoted if a
+   file was created.  This is a minor security fix, because it was possible
+   (although rather unlikely) that an unquoted string could match an
+   existing macro name, such that use of the `mkstemp' output would trigger
+   inadvertent macro expansion and operate on the wrong file name.
+
 ** Enhance the `defn' builtin to support concatenation of multiple text
    arguments, as required by POSIX.  However, at this time, it is not
    possible to concatenate a builtin macro with anything else; a warning is

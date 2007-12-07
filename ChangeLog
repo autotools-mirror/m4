@@ -1,3 +1,10 @@
+2007-12-07  Eric Blake  <ebb9@byu.net>
+
+	Minor security fix: Quote output of mkstemp.
+	* src/builtin.c (mkstemp_helper): Produce quoted output.
+	* doc/m4.texinfo (Mkstemp): Update the documentation and tests.
+	* NEWS: Document this change.
+
 2007-12-04  Eric Blake  <ebb9@byu.net>
 
 	Fix builds with OpenBSD make.

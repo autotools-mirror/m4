@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -1344,35 +1344,42 @@ m4_sinclude (struct obstack *obs, int argc, token_data **argv)
 | Use the first argument as at template for a temporary file name.  |
 `------------------------------------------------------------------*/
 
-/* Add trailing 'X' to NAME if necessary, securely create the file,
-   and place the new file name on OBS.  */
+/* Add trailing 'X' to PATTERN of length LEN as necessary, then
+   securely create the file, and place the quoted new file name on
+   OBS.  Report errors on behalf of ME.  */
 static void
-mkstemp_helper (struct obstack *obs, const char *name)
+mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
+		size_t len)
 {
   int fd;
-  int len;
   int i;
+  char *name;
 
   /* Guarantee that there are six trailing 'X' characters, even if the
-     user forgot to supply them.  */
-  len = strlen (name);
-  obstack_grow (obs, name, len);
+     user forgot to supply them.  Output must be quoted if
+     successful.  */
+  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
-    if (name[--len] != 'X')
+    if (pattern[len - i - 1] != 'X')
       break;
-  for (; i < 6; i++)
-    obstack_1grow (obs, 'X');
-  obstack_1grow (obs, '\0');
+  obstack_grow0 (obs, "XXXXXX", 6 - i);
+  name = (char *) obstack_base (obs) + lquote.length;
 
   errno = 0;
-  fd = mkstemp ((char *) obstack_base (obs));
+  fd = mkstemp (name);
   if (fd < 0)
     {
-      M4ERROR ((0, errno, "cannot create tempfile `%s'", name));
+      M4ERROR ((0, errno, "cannot create tempfile `%s'", pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
-    close (fd);
+    {
+      close (fd);
+      /* Remove NUL, then finish quote.  */
+      obstack_blank (obs, -1);
+      obstack_grow (obs, rquote.string, rquote.length);
+    }
 }
 
 static void
@@ -1415,7 +1422,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 	}
     }
   else
-    mkstemp_helper (obs, ARG (1));
+    mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
 }
 
 static void
@@ -1423,7 +1430,7 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
-  mkstemp_helper (obs, ARG (1));
+  mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
 }
 
 /*----------------------------------------.

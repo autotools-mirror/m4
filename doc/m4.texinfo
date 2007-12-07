@@ -5786,7 +5786,7 @@ builtin macro, @code{mkstemp}, for making a temporary file:
 
 @deffn Builtin mkstemp (@var{template})
 @deffnx Builtin maketemp (@var{template})
-Expands to a name of a new, empty file, made from the string
+Expands to the quoted name of a new, empty file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
 @samp{X} characters are then replaced with random characters matching
 the regular expression @samp{[a-zA-Z0-9._-]}, in order to make the file
@@ -5798,7 +5798,8 @@ account, and at most only the current user can read and write the file.
 
 The traditional behavior, standardized by @acronym{POSIX}, is that
 @code{maketemp} merely replaces the trailing @samp{X} with the process
-id, without creating a file, and without ensuring that the resulting
+id, without creating a file or quoting the expansion, and without
+ensuring that the resulting
 string is a unique file name.  In part, this means that using the same
 @var{template} twice in the same input file will result in the same
 expansion.  This behavior is a security hole, as it is very easy for
@@ -5822,6 +5823,8 @@ chosen:
 @comment ignore
 @example
 $ @kbd{m4}
+define(`tmp', `oops')
+@result{}
 maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
 ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
@@ -5839,30 +5842,72 @@ Unless you use the @option{--traditional} command line option (or
 version of @code{maketemp} is secure.  This means that using the same
 template to multiple calls will generate multiple files.  However, we
 recommend that you use the new @code{mkstemp} macro, introduced in
-@acronym{GNU} M4 1.4.8, which is secure even in traditional mode.
+@acronym{GNU} M4 1.4.8, which is secure even in traditional mode.  Also,
+as of M4 1.4.11, the secure implementation quotes the resulting file
+name, so that you are guaranteed to know what file was created even if
+the random file name happens to match an existing macro.  Notice that
+this example is careful to use @code{defn} to avoid unintended expansion
+of @samp{foo}.
 
 @example
 $ @kbd{m4}
-syscmd(`echo foo??????')dnl
-@result{}foo??????
-define(`file1', maketemp(`fooXXXXXX'))dnl
-ifelse(esyscmd(`echo foo??????'), `foo??????', `no file', `created')
+define(`foo', `errprint(`oops')')
+@result{}
+syscmd(`rm -f foo-??????')sysval
+@result{}0
+define(`file1', maketemp(`foo-XXXXXX'))dnl
+ifelse(esyscmd(`echo \` foo-?????? \''), ` foo-?????? ',
+       `no file', `created')
 @result{}created
-define(`file2', maketemp(`fooXX'))dnl
-define(`file3', mkstemp(`fooXXXXXX'))dnl
-ifelse(len(file1), len(file2), `same length', `different')
+define(`file2', maketemp(`foo-XX'))dnl
+define(`file3', mkstemp(`foo-XXXXXX'))dnl
+ifelse(len(defn(`file1')), len(defn(`file2')),
+       `same length', `different')
 @result{}same length
-ifelse(file1, file2, `same', `different file')
+ifelse(defn(`file1'), defn(`file2'), `same', `different file')
 @result{}different file
-ifelse(file2, file3, `same', `different file')
+ifelse(defn(`file2'), defn(`file3'), `same', `different file')
 @result{}different file
-ifelse(file1, file3, `same', `different file')
+ifelse(defn(`file1'), defn(`file3'), `same', `different file')
 @result{}different file
-syscmd(`rm 'file1 file2 file3)
+syscmd(`rm 'defn(`file1') defn(`file2') defn(`file3'))
 @result{}
 sysval
 @result{}0
 @end example
+
+@ignore
+@c Not worth documenting, but make sure we don't leave trailing NUL in
+@c the expansion.
+
+@example
+syscmd(`rm -f foo??????')sysval
+@result{}0
+len(mkstemp(`fooXXXXX'))
+@result{}9
+syscmd(`rm foo??????')sysval
+@result{}0
+@end example
+
+@c Likewise, and ensure that traditional mode leaves the result unquoted
+@c without creating a file.
+
+@comment options: -G
+@example
+syscmd(`rm -f foo-*')sysval
+@result{}0
+len(maketemp(`foo-XXXXX'))
+@error{}m4:stdin:2: recommend using mkstemp instead
+@result{}9
+define(`abc', `def')
+@result{}
+maketemp(`foo-abc')
+@result{}foo-def
+@error{}m4:stdin:4: recommend using mkstemp instead
+syscmd(`test -f foo-*')sysval
+@result{}1
+@end example
+@end ignore
 
 @node Miscellaneous
 @chapter Miscellaneous builtin macros
