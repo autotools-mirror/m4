@@ -88,6 +88,26 @@ AT_CHECK_M4([in], [0], [expout])
 AT_CLEANUP
 
 
+## ----------- ##
+## changequote ##
+## ----------- ##
+
+AT_SETUP([changequote])
+
+AT_DATA([in.m4],
+[[define(`aaaaaaaaaaaaaaaaaaaa', `A')define(`q', `"$@"')
+changequote(`"', `"')
+q(q("aaaaaaaaaaaaaaaaaaaa", "a"))
+]])
+
+AT_CHECK_M4([in.m4], [0], [[
+
+A,a
+]])
+
+AT_CLEANUP
+
+
 ## ----- ##
 ## debug ##
 ## ----- ##
@@ -157,6 +177,57 @@ base value.
 
 AT_CLEANUP
 
+
+
+## ---- ##
+## defn ##
+## ---- ##
+
+AT_SETUP([defn])
+
+dnl This test is a reminder that defn needs to be fixed to handle
+dnl concatenation of builtin tokens with text, and user macros need
+dnl to handle builtin tokens without flattening.
+AT_XFAIL_IF([:])
+
+AT_DATA([[in.m4]],
+[[define(`e', `$@')define(`q', ``$@'')define(`u', `$*')
+define(`cmp', `ifelse($1, $2, `yes', `no')')define(`d', defn(`defn'))
+cmp(`defn(`defn')', `defn(`d')')
+cmp(`defn(`defn')', ``<defn>'')
+cmp(`q(defn(`defn'))', `q(defn(`d'))')
+cmp(`q(defn(`defn'))', `q(`<defn>')')
+cmp(`q(defn(`defn'))', ``'')
+cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', defn(`d'))')
+cmp(`q(`1', `2', defn(`defn'))', `q(`1', `2', `<defn>')')
+cmp(`q(`1', `2', defn(`defn'))', ```1',`2',<defn>'')
+cmp(`q(`1', `2', defn(`defn'))', ```1',`2',`''')
+define(`cat', `$1`'ifelse(`$@%:@', `1', `', `$0(shift($@))')')
+cat(`define(`foo',', defn(`divnum'), `)foo')
+cat(e(`define(`bar',', defn(`divnum'), `)bar'))
+m4wrap(`u('q(`cat(`define(`baz','', defn(`divnum'), ``)baz')')`)
+')
+]])
+
+AT_CHECK_M4([in.m4], [0], [[
+
+yes
+no
+yes
+no
+no
+yes
+no
+no
+no
+
+0
+0
+
+0
+]])
+
+AT_CLEANUP
 
 
 ## ------ ##

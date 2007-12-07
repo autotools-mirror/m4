@@ -220,6 +220,9 @@ struct m4_symbol_value
     {
       size_t		len;	/* Length of string.  */
       const char *	text;	/* String contents.  */
+      /* Quote age when this string was built, or zeroto force a
+	 rescan of the string.  Ignored for 0 len.  */
+      unsigned int	quote_age;
     } u_t;			/* Valid when type is TEXT, PLACEHOLDER.  */
     const m4_builtin *	builtin;/* Valid when type is FUNC.  */
     m4_symbol_chain *	chain;	/* Valid when type is COMP.  */
@@ -243,6 +246,10 @@ struct m4_macro_args
   bool_bitfield has_ref : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
+  /* The value of quote_age for all tokens, or 0 if quote_age changed
+     during parsing or any token is potentially unsafe and requires a
+     rescan.  */
+  unsigned int quote_age;
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -282,6 +289,7 @@ struct m4_macro_args
 					((V)->type == M4_SYMBOL_PLACEHOLDER)
 #  define m4_get_symbol_value_text(V)	((V)->u.u_t.text)
 #  define m4_get_symbol_value_len(V)	((V)->u.u_t.len)
+#  define m4_get_symbol_value_quote_age(V)	((V)->u.u_t.quote_age)
 #  define m4_get_symbol_value_func(V)	((V)->u.builtin->func)
 #  define m4_get_symbol_value_builtin(V) ((V)->u.builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
@@ -289,8 +297,9 @@ struct m4_macro_args
 #  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
 						    VALUE_MACRO_ARGS_BIT))
 
-#  define m4_set_symbol_value_text(V, T, L)				\
-  ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T), (V)->u.u_t.len = (L))
+#  define m4_set_symbol_value_text(V, T, L, A)				\
+  ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T),                   \
+   (V)->u.u_t.len = (L), (V)->u.u_t.quote_age = (A))
 #  define m4_set_symbol_value_builtin(V, B)				\
   ((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B))
 #  define m4_set_symbol_value_placeholder(V, T)				\
@@ -335,14 +344,14 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*,
 
 /* CHAR_RETRY must be last, because we size the syntax table to hold
    all other characters and sentinels. */
-#define CHAR_EOF	256	/* character return on EOF */
-#define CHAR_BUILTIN	257	/* character return for BUILTIN token */
-#define CHAR_RETRY	258	/* character return for end of input block */
+#define CHAR_EOF	256	/* Character return on EOF.  */
+#define CHAR_BUILTIN	257	/* Character return for BUILTIN token.  */
+#define CHAR_RETRY	258	/* Character return for end of input block.  */
 
-#define DEF_LQUOTE "`"
-#define DEF_RQUOTE "\'"
-#define DEF_BCOMM "#"
-#define DEF_ECOMM "\n"
+#define DEF_LQUOTE	"`"	/* Default left quote delimiter.  */
+#define DEF_RQUOTE	"\'"	/* Default right quote delimiter.  */
+#define DEF_BCOMM	"#"	/* Default begin comment delimiter.  */
+#define DEF_ECOMM	"\n"	/* Default end comment delimiter.  */
 
 typedef struct {
   char *string;		/* characters of the string */
@@ -362,14 +371,26 @@ struct m4_syntax_table {
 
   /* True iff strlen(lquote) == strlen(rquote) == 1 and lquote is not
      interfering with macro names.  */
-  bool is_single_quotes;
+  bool_bitfield is_single_quotes : 1;
 
   /* True iff strlen(bcomm) == strlen(ecomm) == 1 and bcomm is not
      interfering with macros or quotes.  */
-  bool is_single_comments;
+  bool_bitfield is_single_comments : 1;
 
   /* True iff some character has M4_SYNTAX_ESCAPE.  */
-  bool is_macro_escaped;
+  bool_bitfield is_macro_escaped : 1;
+
+  /* Track the number of changesyntax calls.  This saturates at
+     0xffff, so the idea is that most users won't be changing the
+     syntax that frequently; perhaps in the future we will cache
+     frequently used syntax schemes by index.  */
+  unsigned short syntax_age;
+
+  /* Track the current quote age, determined by all significant
+     changequote, changecom, and changesyntax calls, since any of
+     these can alter the rescan of a prior parameter in a quoted
+     context.  */
+  unsigned int quote_age;
 };
 
 /* Fast macro versions of syntax table accessor functions,
@@ -384,6 +405,14 @@ struct m4_syntax_table {
 #  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)
 #  define m4_is_syntax_macro_escaped(S)		((S)->is_macro_escaped)
 #endif
+
+/* Return the current quote age.  */
+#define m4__quote_age(S)		((S)->quote_age)
+
+/* Return true if the current quote age guarantees that parsing the
+   current token in the context of a quoted string of the same quote
+   age will give the same parse.  */
+#define m4__safe_quotes(S)		(((S)->quote_age & 0xffff) != 0)
 
 
 /* --- MACRO MANAGEMENT --- */

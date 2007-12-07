@@ -102,11 +102,12 @@
 
    M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM do not start tokens.  */
 
-static bool	check_is_single_quotes		(m4_syntax_table *);
-static bool	check_is_single_comments	(m4_syntax_table *);
-static bool	check_is_macro_escaped		(m4_syntax_table *);
-static int	add_syntax_attribute		(m4_syntax_table *, int, int);
-static int	remove_syntax_attribute		(m4_syntax_table *, int, int);
+static bool check_is_single_quotes	(m4_syntax_table *);
+static bool check_is_single_comments	(m4_syntax_table *);
+static bool check_is_macro_escaped	(m4_syntax_table *);
+static int add_syntax_attribute		(m4_syntax_table *, int, int);
+static int remove_syntax_attribute	(m4_syntax_table *, int, int);
+static void set_quote_age		(m4_syntax_table *, bool, bool);
 
 m4_syntax_table *
 m4_syntax_create (void)
@@ -392,6 +393,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       syntax->is_single_quotes		= true;
       syntax->is_single_comments	= true;
       syntax->is_macro_escaped		= false;
+      set_quote_age (syntax, true, false);
       return 0;
     }
 
@@ -417,6 +419,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
     default:
       assert (false);
     }
+  set_quote_age (syntax, false, true);
   return code;
 }
 
@@ -431,10 +434,8 @@ check_is_single_quotes (m4_syntax_table *syntax)
     return false;
   assert (syntax->lquote.length == 1 && syntax->rquote.length == 1);
 
-  if (m4_has_syntax (syntax, to_uchar (*syntax->lquote.string),
-		     M4_SYNTAX_LQUOTE)
-      && m4_has_syntax (syntax, to_uchar (*syntax->rquote.string),
-			M4_SYNTAX_RQUOTE))
+  if (m4_has_syntax (syntax, *syntax->lquote.string, M4_SYNTAX_LQUOTE)
+      && m4_has_syntax (syntax, *syntax->rquote.string, M4_SYNTAX_RQUOTE))
     return true;
 
   /* The most recent action invalidated our current lquote/rquote.  If
@@ -486,10 +487,8 @@ check_is_single_comments (m4_syntax_table *syntax)
     return false;
   assert (syntax->bcomm.length == 1 && syntax->ecomm.length == 1);
 
-  if (m4_has_syntax (syntax, to_uchar (*syntax->bcomm.string),
-		     M4_SYNTAX_BCOMM)
-      && m4_has_syntax (syntax, to_uchar (*syntax->ecomm.string),
-			M4_SYNTAX_ECOMM))
+  if (m4_has_syntax (syntax, *syntax->bcomm.string, M4_SYNTAX_BCOMM)
+      && m4_has_syntax (syntax, *syntax->ecomm.string, M4_SYNTAX_ECOMM))
     return true;
 
   /* The most recent action invalidated our current bcomm/ecomm.  If
@@ -558,9 +557,6 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 
   assert (syntax);
 
-  free (syntax->lquote.string);
-  free (syntax->rquote.string);
-
   /* POSIX states that with 0 arguments, the default quotes are used.
      POSIX XCU ERN 112 states that behavior is implementation-defined
      if there was only one argument, or if there is an empty string in
@@ -576,6 +572,12 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
   else if (!rq || (*lq && !*rq))
     rq = DEF_RQUOTE;
 
+  if (strcmp (syntax->lquote.string, lq) == 0
+      && strcmp (syntax->rquote.string, rq) == 0)
+    return;
+
+  free (syntax->lquote.string);
+  free (syntax->rquote.string);
   syntax->lquote.string = xstrdup (lq);
   syntax->lquote.length = strlen (syntax->lquote.string);
   syntax->rquote.string = xstrdup (rq);
@@ -587,7 +589,7 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 
   syntax->is_single_quotes
     = (syntax->lquote.length == 1 && syntax->rquote.length == 1
-       && !m4_has_syntax (syntax, to_uchar (*syntax->lquote.string),
+       && !m4_has_syntax (syntax, *syntax->lquote.string,
 			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM)));
 
@@ -608,9 +610,9 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
       add_syntax_attribute (syntax, to_uchar (syntax->rquote.string[0]),
 			    M4_SYNTAX_RQUOTE);
     }
-
   if (syntax->is_macro_escaped)
     check_is_macro_escaped (syntax);
+  set_quote_age (syntax, false, false);
 }
 
 void
@@ -619,9 +621,6 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
   int ch;
 
   assert (syntax);
-
-  free (syntax->bcomm.string);
-  free (syntax->ecomm.string);
 
   /* POSIX requires no arguments to disable comments, and that one
      argument use newline as the close-comment.  POSIX XCU ERN 131
@@ -635,6 +634,12 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
   else if (!ec || (*bc && !*ec))
     ec = DEF_ECOMM;
 
+  if (strcmp (syntax->bcomm.string, bc) == 0
+      && strcmp (syntax->ecomm.string, ec) == 0)
+    return;
+
+  free (syntax->bcomm.string);
+  free (syntax->ecomm.string);
   syntax->bcomm.string = xstrdup (bc);
   syntax->bcomm.length = strlen (syntax->bcomm.string);
   syntax->ecomm.string = xstrdup (ec);
@@ -646,7 +651,7 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
 
   syntax->is_single_comments
     = (syntax->bcomm.length == 1 && syntax->ecomm.length == 1
-       && !m4_has_syntax (syntax, to_uchar (*syntax->bcomm.string),
+       && !m4_has_syntax (syntax, *syntax->bcomm.string,
 			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM
 			   | M4_SYNTAX_LQUOTE)));
@@ -667,11 +672,82 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
       add_syntax_attribute (syntax, to_uchar (syntax->ecomm.string[0]),
 			    M4_SYNTAX_ECOMM);
     }
-
   if (syntax->is_macro_escaped)
     check_is_macro_escaped (syntax);
+  set_quote_age (syntax, false, false);
 }
 
+/* Call this when changing anything that might impact the quote age,
+   so that m4_quote_age and m4_safe_quotes will reflect the change.
+   If RESET, changesyntax was reset to its default stage; if CHANGE,
+   arbitrary syntax has changed; otherwise, just quotes or comment
+   delimiters have changed.  */
+static void
+set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
+{
+  /* Multi-character quotes are inherently unsafe, since concatenation
+     of individual characters can result in a quote delimiter,
+     consider:
+
+     define(echo,``$1'')define(a,A)changequote(<[,]>)echo(<[]]><[>a]>)
+     => A]> (not ]>a)
+
+   Also, unquoted close delimiters are unsafe, consider:
+
+     define(echo,``$1'')define(a,A)echo(`a''`a')
+     => aA' (not a'a)
+
+   Duplicated start and end quote delimiters, as well as comment
+   delimiters that overlap with quote delimiters or active characters,
+   also present a problem, consider:
+
+     define(echo,$*)echo(a,a,a`'define(a,A)changecom(`,',`,'))
+     => A,a,A (not A,A,A)
+
+   The impact of arbitrary changesyntax is difficult to characterize.
+   So if things are in their default state, we use 0 for the upper 16
+   bits of quote_age; otherwise we increment syntax_age for each
+   changesyntax, but saturate it at 0xffff rather than wrapping
+   around.  Perhaps a cache of other frequently used states is
+   warranted, if changesyntax becomes more popular
+
+   Rather than check every token for an unquoted delimiter, we merely
+   encode current_quote_age to 0 when things are unsafe, and non-zero
+   when safe (namely, the syntax_age in the upper 16 bits, coupled
+   with the 16-bit value composed of the single-character start and
+   end quote delimiters).  There may be other situations which are
+   safe even when this algorithm sets the quote_age to zero, but at
+   least a quote_age of zero always produces correct results (although
+   it may take more time in doing so).  */
+
+  unsigned short local_syntax_age;
+  if (reset)
+    local_syntax_age = 0;
+  else if (change && syntax->syntax_age < 0xffff)
+    local_syntax_age = ++syntax->syntax_age;
+  else
+    local_syntax_age = syntax->syntax_age;
+  if (local_syntax_age < 0xffff && syntax->is_single_quotes
+      && !m4_has_syntax (syntax, *syntax->lquote.string,
+			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
+			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
+			  | M4_SYNTAX_SPACE))
+      && !m4_has_syntax (syntax, *syntax->rquote.string,
+			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
+			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
+			  | M4_SYNTAX_SPACE))
+      && *syntax->lquote.string != *syntax->rquote.string
+      && *syntax->bcomm.string != *syntax->lquote.string
+      && !m4_has_syntax (syntax, *syntax->bcomm.string,
+			 M4_SYNTAX_OPEN | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE))
+    {
+      syntax->quote_age = ((local_syntax_age << 16)
+			   | ((*syntax->lquote.string & 0xff) << 8)
+			   | (*syntax->rquote.string & 0xff));
+    }
+  else
+    syntax->quote_age = 0;
+}
 
 
 /* Define these functions at the end, so that calls in the file use the

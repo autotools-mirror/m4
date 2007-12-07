@@ -1,3 +1,45 @@
+2007-12-07  Eric Blake  <ebb9@byu.net>
+
+	Stage 5: add notion of quote age.
+	* m4/m4module.h (m4_get_symbol_value_quote_age): New prototype.
+	(m4_set_symbol_value_text): Adjust prototype.
+	(m4_has_syntax): Factor out the unsigned char cast.
+	* m4/m4private.h (struct m4_syntax_table): Add syntax_age and
+	quote_age members.
+	(m4__quote_age, m4__safe_quotes): New accessor macros, no need for
+	functions at this point.
+	(struct m4_symbol_value, struct m4_macro_args): Add quote_age
+	member.
+	(m4_set_symbol_value_text): Adjust fast accessor.
+	(m4_get_symbol_value_quote_age): New fast accessor.
+	* m4/symtab.c (m4_set_symbol_value_text): Add parameter.
+	(m4_get_symbol_value_quote_age): New function.
+	(m4_symbol_value_copy): Adjust callers.
+	* m4/macro.c (expand_token): Add parameter, and track quote age.
+	(expand_argument, collect_arguments): Track quote age.
+	(m4_macro_expand_input, process_macro, m4_make_argv_ref)
+	(m4_macro_expand_input): Update callers.
+	(m4_arg_text, m4_arg_len, m4_arg_func): Abort on type mismatch.
+	* m4/input.c: Comment cleanups.
+	(struct m4_input_block): Reduce size.
+	(m4__next_token): Report quote age.
+	(m4_push_builtin, init_builtin_token): Update callers.
+	* m4/utility.c (skip_space): Adjust callers.
+	* m4/module.c (install_macro_table): Likewise.
+	* m4/syntax.c (m4_set_syntax): Initialize and update quote age.
+	(m4_set_quotes, m4_set_comment): Detect no-op changes, and update
+	quote age.
+	(set_quote_age): New helper function.
+	(check_is_single_quotes, check_is_single_comments): Adjust
+	callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/main.c (main): Likewise.
+	* modules/m4.c (define, pushdef): No need to set macro text.
+	* tests/builtins.at (changequote, defn): New tests.
+	* examples/wrapfifo.m4: New file.
+	* examples/wraplifo.m4: New file.
+	* Makefile.am (dist_pkgdata_DATA): Distribute new examples.
+
 2007-12-04  Eric Blake  <ebb9@byu.net>
 
 	Fix builds with OpenBSD make.

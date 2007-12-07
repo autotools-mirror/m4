@@ -267,13 +267,18 @@ extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
 extern bool		m4_is_symbol_value_void	  (m4_symbol_value *);
+
 extern const char *	m4_get_symbol_value_text  (m4_symbol_value *);
 extern size_t		m4_get_symbol_value_len   (m4_symbol_value *);
+extern unsigned int	m4_get_symbol_value_quote_age	(m4_symbol_value *);
+
 extern m4_builtin_func *m4_get_symbol_value_func  (m4_symbol_value *);
 extern const m4_builtin *m4_get_symbol_value_builtin	(m4_symbol_value *);
 extern const char *	m4_get_symbol_value_placeholder	(m4_symbol_value *);
+
 extern void		m4_set_symbol_value_text  (m4_symbol_value *,
-						   const char *, size_t);
+						   const char *, size_t,
+						   unsigned int);
 extern void		m4_set_symbol_value_builtin	(m4_symbol_value *,
 							 const m4_builtin *);
 extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
@@ -301,12 +306,12 @@ extern bool	m4_is_arg_text		(m4_macro_args *, unsigned int);
 extern bool	m4_is_arg_func		(m4_macro_args *, unsigned int);
 extern const char *m4_arg_text		(m4_macro_args *, unsigned int);
 extern bool	m4_arg_equal		(m4_macro_args *, unsigned int,
-                                         unsigned int);
+					 unsigned int);
 extern bool	m4_arg_empty		(m4_macro_args *, unsigned int);
 extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
 extern m4_macro_args *m4_make_argv_ref	(m4_macro_args *, const char *, size_t,
-                                         bool, bool);
+					 bool, bool);
 
 
 /* --- RUNTIME DEBUGGING --- */
@@ -410,7 +415,12 @@ enum {
 #define M4_SYNTAX_VALUE		(~(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM))
 
 #define m4_syntab(S, C)		((S)->table[(C)])
-#define m4_has_syntax(S, C, T)	((m4_syntab ((S), (C)) & (T)) > 0)
+/* Determine if character C matches any of the bitwise-or'd syntax
+   categories T for the given syntax table S.  C can be either an
+   unsigned int (including special values such as CHAR_BUILTIN) or a
+   char which will be interpreted as an unsigned char.  */
+#define m4_has_syntax(S, C, T)						\
+  ((m4_syntab ((S), sizeof (C) == 1 ? to_uchar (C) : (C)) & (T)) > 0)
 
 extern void	m4_set_quotes	(m4_syntax_table*, const char*, const char*);
 extern void	m4_set_comment	(m4_syntax_table*, const char*, const char*);

@@ -676,7 +676,7 @@ main (int argc, char *const *argv, char *const *envp)
 	      }
 	    m4_set_symbol_value_text (value, xstrdup (macro_value
 						      ? macro_value : ""),
-				      len);
+				      len, 0);
 
 	    if (defn->code == 'D')
 	      m4_symbol_define (M4SYMTAB, macro_name, value);

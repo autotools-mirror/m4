@@ -28,13 +28,13 @@
 /*#define DEBUG_INPUT */
 
 /*
-   Unread input can be either files that should be read (eg. included
-   files), strings which should be rescanned (eg. macro expansion
-   text), or quoted builtin definitions (as returned by the builtin
-   "defn").  Unread input is organized in a stack, implemented with an
-   obstack.  Each input source is described by a "struct
-   m4_input_block".  The obstack is "input_stack".  The top of the
-   input stack is "isp".
+   Unread input can be either files that should be read (from the
+   command line or by include/sinclude), strings which should be
+   rescanned (normal macro expansion text), or quoted builtin
+   definitions (as returned by the builtin "defn").  Unread input is
+   organized in a stack, implemented with an obstack.  Each input
+   source is described by a "struct m4_input_block".  The obstack is
+   "input_stack".  The top of the input stack is "isp".
 
    Each input_block has an associated struct input_funcs, which is a
    vtable that defines polymorphic functions for peeking, reading,
@@ -72,12 +72,12 @@
    manage the coordination between the different push routines.
 
    Normally, input sources behave in LIFO order, resembling a stack.
-   But thanks to the defn macro, when collecting the expansion of a
-   macro, it is possible that we must intermix multiple input blocks
-   in FIFO order.  This also applies to the POSIX requirements of
-   m4wrap.  Therefore, when collecting an expansion, a meta-input
-   block is formed which will visit its children in FIFO order,
-   without losing data when the obstack is cleared in LIFO order.
+   But thanks to the defn and m4wrap macros, when collecting the
+   expansion of a macro, it is possible that we must intermix multiple
+   input blocks in FIFO order.  Therefore, when collecting an
+   expansion, a meta-input block is formed which will visit its
+   children in FIFO order, without losing data when the obstack is
+   cleared in LIFO order.
 
    The current file and line number are stored in the context, for use
    by the error handling functions in utility.c.  When collecting a
@@ -117,16 +117,20 @@ static	bool	consume_syntax		(m4 *, m4_obstack *, unsigned int);
 static int m4_print_token (const char *, m4__token_type, m4_symbol_value *);
 #endif
 
+/* Vtable of callbacks for each input method.  */
 struct input_funcs
 {
-  /* Peek at input, return CHAR_RETRY if none available.  */
+  /* Peek at input, return an unsigned char, CHAR_BUILTIN if it is a
+     builtin, or CHAR_RETRY if none available.  */
   int	(*peek_func)	(m4_input_block *);
 
-  /* Read input, return CHAR_RETRY if none available.  If the flag is
-     false, then do not alter the current file or line.  */
+  /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
+     builtin, or CHAR_RETRY if none available.  If the flag is false,
+     then do not alter the current file or line.  */
   int	(*read_func)	(m4_input_block *, m4 *, bool);
 
-  /* Unread a single character, previously read by read_func.  */
+  /* Unread a single unsigned character or CHAR_BUILTIN, must be the
+     same character previously read by read_func.  */
   void	(*unget_func)	(m4_input_block *, int);
 
   /* Optional function to perform cleanup at end of input.  */
@@ -137,46 +141,45 @@ struct input_funcs
   void	(*print_func)	(m4_input_block *, m4 *, m4_obstack *);
 };
 
+/* A block of input to be scanned.  */
 struct m4_input_block
 {
-  m4_input_block *prev;		/* previous input_block on the input stack */
-  struct input_funcs *funcs;	/* functions on this input_block */
-  const char *file;		/* file where this input is from */
-  int line;			/* line where this input is from */
+  m4_input_block *prev;		/* Previous input_block on the input stack.  */
+  struct input_funcs *funcs;	/* Virtual functions of this input_block.  */
+  const char *file;		/* File where this input is from.  */
+  int line;			/* Line where this input is from.  */
 
   union
     {
       struct
 	{
-	  char *str;		/* string value */
-	  size_t len;		/* remaining length */
+	  char *str;		/* String value.  */
+	  size_t len;		/* Remaining length.  */
 	}
-      u_s;
+      u_s;	/* See string_funcs.  */
       struct
 	{
-	  FILE *fp;		/* input file handle */
-	  bool end;		/* true iff peek returned EOF */
-	  bool close;		/* true if file should be closed on EOF */
-	  bool advance_line;	/* start_of_input_line from next_char () */
+	  FILE *fp;			/* Input file handle.  */
+	  bool_bitfield end : 1;	/* True iff peek returned EOF.  */
+	  bool_bitfield close : 1;	/* True to close file on pop.  */
+	  bool_bitfield line_start : 1;	/* Saved start_of_input_line state.  */
 	}
-      u_f;
+      u_f;	/* See file_funcs.  */
       struct
 	{
-	  const m4_builtin *builtin;  /* pointer to builtin's function. */
-	  m4_module *module;	  /* originating module. */
-	  int flags;		  /* flags associated with the builtin. */
-	  m4_hash *arg_signature; /* argument signature for builtin.  */
-	  unsigned int min_args;  /* argv minima for the builtin. */
-	  unsigned int max_args;  /* argv maxima for the builtin. */
-	  bool read;		  /* true iff block has been read. */
+	  const m4_builtin *builtin;	/* Pointer to builtin's function.  */
+	  m4_module *module;		/* Originating module.  */
+	  bool_bitfield read : 1;	/* True iff block has been read.  */
+	  int flags : 24;		/* Flags tied to the builtin. */
+	  m4_hash *arg_signature;	/* Argument signature for builtin.  */
 	}
-      u_b;
+      u_b;	/* See builtin_funcs.  */
       struct
 	{
-	  m4_input_block *current; /* pointer to current sub-block. */
-	  m4_input_block *tail;	   /* pointer to last sub-block. */
+	  m4_input_block *current;	/* Pointer to current sub-block.  */
+	  m4_input_block *tail;		/* Pointer to last sub-block.  */
 	}
-      u_c;
+      u_c;	/* See composite_funcs.  */
     }
   u;
 };
@@ -199,7 +202,7 @@ static m4_obstack *wrapup_stack;
 static m4_obstack *current_input;
 
 /* Bottom of token_stack, for obstack_free.  */
-static char *token_bottom;
+static void *token_bottom;
 
 /* Pointer to top of current_input.  */
 static m4_input_block *isp;
@@ -295,7 +298,7 @@ file_clean (m4_input_block *me, m4 *context)
     }
   else if (me->u.u_f.close && fclose (me->u.u_f.fp) == EOF)
     m4_error (context, 0, errno, NULL, _("error reading file `%s'"), me->file);
-  start_of_input_line = me->u.u_f.advance_line;
+  start_of_input_line = me->u.u_f.line_start;
   m4_set_output_line (context, -1);
 }
 
@@ -332,8 +335,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
   m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
 		    _("input read from %s"), title);
 
-  i = (m4_input_block *) obstack_alloc (current_input,
-					sizeof (m4_input_block));
+  i = (m4_input_block *) obstack_alloc (current_input, sizeof *i);
   i->funcs = &file_funcs;
   /* Save title on a separate obstack, so that wrapped text can refer
      to it even after the file is popped.  */
@@ -343,7 +345,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
   i->u.u_f.fp = fp;
   i->u.u_f.end = false;
   i->u.u_f.close = close_file;
-  i->u.u_f.advance_line = start_of_input_line;
+  i->u.u_f.line_start = start_of_input_line;
 
   m4_set_output_line (context, -1);
 
@@ -421,8 +423,7 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
       next = NULL;
     }
 
-  i = (m4_input_block *) obstack_alloc (current_input,
-					sizeof (m4_input_block));
+  i = (m4_input_block *) obstack_alloc (current_input, sizeof *i);
   i->funcs = &builtin_funcs;
   i->file = m4_get_current_file (context);
   i->line = m4_get_current_line (context);
@@ -430,9 +431,11 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
   i->u.u_b.builtin	= m4_get_symbol_value_builtin (token);
   i->u.u_b.module	= VALUE_MODULE (token);
   i->u.u_b.arg_signature = VALUE_ARG_SIGNATURE (token);
-  i->u.u_b.min_args	= VALUE_MIN_ARGS (token);
-  i->u.u_b.max_args	= VALUE_MAX_ARGS (token);
   i->u.u_b.flags	= VALUE_FLAGS (token);
+  /* Check for bitfield truncation.  */
+  assert (i->u.u_b.flags == VALUE_FLAGS (token)
+	  && i->u.u_b.builtin->min_args == VALUE_MIN_ARGS (token)
+	  && i->u.u_b.builtin->max_args == VALUE_MAX_ARGS (token));
   i->u.u_b.read		= false;
 
   i->prev = isp;
@@ -501,8 +504,7 @@ m4_push_string_init (m4 *context)
   while (isp && pop_input (context, false));
 
   /* Reserve the next location on the obstack.  */
-  next = (m4_input_block *) obstack_alloc (current_input,
-					   sizeof (m4_input_block));
+  next = (m4_input_block *) obstack_alloc (current_input, sizeof *next);
   next->funcs = &string_funcs;
   next->file = m4_get_current_file (context);
   next->line = m4_get_current_line (context);
@@ -661,8 +663,7 @@ m4_push_wrapup (m4 *context, const char *s)
 {
   m4_input_block *i;
 
-  i = (m4_input_block *) obstack_alloc (wrapup_stack,
-					sizeof (m4_input_block));
+  i = (m4_input_block *) obstack_alloc (wrapup_stack, sizeof *i);
   i->prev = wsp;
 
   i->funcs = &string_funcs;
@@ -708,8 +709,8 @@ pop_input (m4 *context, bool cleanup)
 }
 
 /* To switch input over to the wrapup stack, main () calls pop_wrapup.
-   Since wrapup text can install new wrapup text, pop_wrapup () returns
-   false when there is no wrapup text on the stack, and true otherwise.  */
+   Since wrapup text can install new wrapup text, pop_wrapup ()
+   returns true if there is more wrapped text to parse.  */
 bool
 m4_pop_wrapup (m4 *context)
 {
@@ -736,7 +737,7 @@ m4_pop_wrapup (m4 *context)
 		    (unsigned long int) ++level);
 
   current_input = wrapup_stack;
-  wrapup_stack = (m4_obstack *) xmalloc (sizeof (m4_obstack));
+  wrapup_stack = (m4_obstack *) xmalloc (sizeof *wrapup_stack);
   obstack_init (wrapup_stack);
 
   isp = wsp;
@@ -760,8 +761,8 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
   VALUE_MODULE (token)		= block->u.u_b.module;
   VALUE_FLAGS (token)		= block->u.u_b.flags;
   VALUE_ARG_SIGNATURE (token)	= block->u.u_b.arg_signature;
-  VALUE_MIN_ARGS (token)	= block->u.u_b.min_args;
-  VALUE_MAX_ARGS (token)	= block->u.u_b.max_args;
+  VALUE_MIN_ARGS (token)	= block->u.u_b.builtin->min_args;
+  VALUE_MAX_ARGS (token)	= block->u.u_b.builtin->max_args;
 }
 
 
@@ -963,7 +964,7 @@ consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 }
 
 
-/* Inititialize input stacks, and quote/comment characters.  */
+/* Inititialize input stacks.  */
 void
 m4_input_init (m4 *context)
 {
@@ -971,16 +972,15 @@ m4_input_init (m4 *context)
   m4_set_current_file (context, NULL);
   m4_set_current_line (context, 0);
 
-  current_input = (m4_obstack *) xmalloc (sizeof (m4_obstack));
+  current_input = (m4_obstack *) xmalloc (sizeof *current_input);
   obstack_init (current_input);
-  wrapup_stack = (m4_obstack *) xmalloc (sizeof (m4_obstack));
+  wrapup_stack = (m4_obstack *) xmalloc (sizeof *wrapup_stack);
   obstack_init (wrapup_stack);
 
   /* Allocate an object in the current chunk, so that obstack_free
      will always work even if the first token parsed spills to a new
      chunk.  */
   obstack_init (&token_stack);
-  obstack_alloc (&token_stack, 1);
   token_bottom = obstack_finish (&token_stack);
 
   isp = NULL;
@@ -990,6 +990,7 @@ m4_input_init (m4 *context)
   start_of_input_line = false;
 }
 
+/* Free memory used by the input engine.  */
 void
 m4_input_exit (void)
 {
@@ -1000,20 +1001,17 @@ m4_input_exit (void)
 }
 
 
-/* Parse and return a single token from the input stream.  A token can
-   be M4_TOKEN_EOF, if the input_stack is empty; it can be
-   M4_TOKEN_STRING for a quoted string; M4_TOKEN_WORD for something
-   that is a potential macro name; and M4_TOKEN_SIMPLE for any single
-   character that is not a part of any of the previous types.  If LINE
-   is not NULL, set *LINE to the line number where the token starts.
-   Report errors (unterminated comments or strings) on behalf of
-   CALLER, if non-NULL.
+/* Parse and return a single token from the input stream, built in
+   TOKEN.  See m4__token_type for the valid return types, along with a
+   description of what TOKEN will contain.  If LINE is not NULL, set
+   *LINE to the line number where the token starts.  Report errors
+   (unterminated comments or strings) on behalf of CALLER, if
+   non-NULL.
 
-   M4__next_token () returns the token type, and passes back a pointer to
-   the token data through TOKEN.  The token text is collected on the obstack
-   token_stack, which never contains more than one token text at a time.
-   The storage pointed to by the fields in TOKEN is therefore subject to
-   change the next time m4__next_token () is called.  */
+   The token text is collected on the obstack token_stack, which never
+   contains more than one token text at a time.  The storage pointed
+   to by the fields in TOKEN is therefore subject to change the next
+   time m4__next_token () is called.  */
 m4__token_type
 m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		const char *caller)
@@ -1028,8 +1026,10 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   assert (next == NULL);
   if (!line)
     line = &dummy;
+  memset (token, '\0', sizeof *token);
   do {
     obstack_free (&token_stack, token_bottom);
+
 
     /* Must consume an input character, but not until CHAR_BUILTIN is
        handled.  */
@@ -1229,9 +1229,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   len = obstack_object_size (&token_stack);
   obstack_1grow (&token_stack, '\0');
 
-  memset (token, '\0', sizeof (m4_symbol_value));
-
-  m4_set_symbol_value_text (token, obstack_finish (&token_stack), len);
+  m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
+			    m4__quote_age (M4SYNTAX));
   VALUE_MAX_ARGS (token)	= -1;
 
 #ifdef DEBUG_INPUT

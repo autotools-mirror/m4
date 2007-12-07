@@ -165,11 +165,7 @@ M4BUILTIN_HANDLER (define)
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
-      if (argc == 2)
-	m4_set_symbol_value_text (value, xstrdup (""), 0);
-      else
-	m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
-
+      m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
   else
@@ -197,11 +193,7 @@ M4BUILTIN_HANDLER (pushdef)
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
-      if (argc == 2)
-	m4_set_symbol_value_text (value, xstrdup (""), 0);
-      else
-	m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
-
+      m4_symbol_value_copy (value, m4_arg_symbol (argv, 2));
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
   else

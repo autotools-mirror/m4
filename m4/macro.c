@@ -32,8 +32,8 @@
 static m4_macro_args *collect_arguments (m4 *, const char *, size_t,
 					 m4_symbol *, m4_obstack *);
 static void    expand_macro      (m4 *, const char *, size_t, m4_symbol *);
-static void    expand_token      (m4 *, m4_obstack *, m4__token_type,
-				  m4_symbol_value *, int);
+static bool    expand_token      (m4 *, m4_obstack *, m4__token_type,
+				  m4_symbol_value *, int, bool);
 static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
 				  const char *);
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
@@ -85,26 +85,35 @@ m4_macro_expand_input (m4 *context)
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
 
-  m4_set_symbol_value_text (&empty_symbol, "", 0);
+  m4_set_symbol_value_text (&empty_symbol, "", 0, 0);
+  VALUE_MAX_ARGS (&empty_symbol) = -1;
 
   while ((type = m4__next_token (context, &token, &line, NULL))
 	 != M4_TOKEN_EOF)
-    expand_token (context, (m4_obstack *) NULL, type, &token, line);
+    expand_token (context, (m4_obstack *) NULL, type, &token, line, true);
 
   obstack_free (&argc_stack, NULL);
   obstack_free (&argv_stack, NULL);
 }
 
 
-/* Expand one token, according to its type.  Potential macro names
-   (M4_TOKEN_WORD) are looked up in the symbol table, to see if they have a
-   macro definition.  If they have, they are expanded as macros, otherwise
-   the text are just copied to the output.  */
-static void
-expand_token (m4 *context, m4_obstack *obs,
-	      m4__token_type type, m4_symbol_value *token, int line)
+/* Expand one token onto OBS, according to its type.  If OBS is NULL,
+   output the expansion to the current diversion.  TYPE determines the
+   contents of TOKEN.  Potential macro names (a TYPE of M4_TOKEN_WORD)
+   are looked up in the symbol table, to see if they have a macro
+   definition.  If they have, they are expanded as macros, otherwise
+   the text are just copied to the output.  LINE determines where
+   TOKEN began.  FIRST is true if there is no prior content in the
+   current macro argument.  Return true if the result is guranteed to
+   give the same parse on rescan in a quoted context with the same
+   quote age.  Returning false is always safe, although it may lead to
+   slower performance.  */
+static bool
+expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
+	      m4_symbol_value *token, int line, bool first)
 {
   m4_symbol *symbol;
+  bool result;
   const char *text = (m4_is_symbol_value_text (token)
 		      ? m4_get_symbol_value_text (token) : NULL);
 
@@ -112,16 +121,31 @@ expand_token (m4 *context, m4_obstack *obs,
     {				/* TOKSW */
     case M4_TOKEN_EOF:
     case M4_TOKEN_MACDEF:
+      /* Always safe, since there is no text to rescan.  */
+      return true;
+
+    case M4_TOKEN_STRING:
+      /* Tokens and comments are safe in isolation (since quote_age
+	 detects any change in delimiters).  This is also returned for
+	 sequences of benign characters, such as digits.  But if other
+	 text is already present, multi-character delimiters could be
+	 formed by concatenation, so use a conservative heuristic.  */
+      result = first || m4__safe_quotes (M4SYNTAX);
       break;
 
     case M4_TOKEN_OPEN:
     case M4_TOKEN_COMMA:
     case M4_TOKEN_CLOSE:
-    case M4_TOKEN_SIMPLE:
-    case M4_TOKEN_STRING:
     case M4_TOKEN_SPACE:
-      m4_shipout_text (context, obs, text, m4_get_symbol_value_len (token),
-		       line);
+      /* Conservative heuristic, thanks to multi-character delimiter
+	 concatenation.  */
+      result = m4__safe_quotes (M4SYNTAX);
+      break;
+
+    case M4_TOKEN_SIMPLE:
+      /* No guarantees here.  */
+      assert (m4_get_symbol_value_len (token) == 1);
+      result = false;
       break;
 
     case M4_TOKEN_WORD:
@@ -130,7 +154,7 @@ expand_token (m4 *context, m4_obstack *obs,
 	size_t len = m4_get_symbol_value_len (token);
 	size_t len2 = len;
 
-	if (m4_has_syntax (M4SYNTAX, to_uchar (*textp), M4_SYNTAX_ESCAPE))
+	if (m4_has_syntax (M4SYNTAX, *textp, M4_SYNTAX_ESCAPE))
 	  {
 	    textp++;
 	    len2--;
@@ -142,16 +166,25 @@ expand_token (m4 *context, m4_obstack *obs,
 	    || (symbol->value->type == M4_SYMBOL_FUNC
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& !m4__next_token_is_open (context)))
-	  m4_shipout_text (context, obs, text, len, line);
-	else
-	  expand_macro (context, textp, len2, symbol);
+	  {
+	    m4_shipout_text (context, obs, text, len, line);
+	    /* The word just output is unquoted, but we can trust the
+	       heuristics of safe_quote.  */
+	    return m4__safe_quotes (M4SYNTAX);
+	  }
+	expand_macro (context, textp, len2, symbol);
+	/* Expanding a macro may create new tokens to scan, and those
+	   tokens may generate unsafe text, but we did not append any
+	   text now.  */
+	return true;
       }
-      break;
 
     default:
       assert (!"INTERNAL ERROR: bad token type in expand_token ()");
       abort ();
     }
+  m4_shipout_text (context, obs, text, m4_get_symbol_value_len (token), line);
+  return result;
 }
 
 
@@ -173,6 +206,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
   size_t len;
+  unsigned int age = m4__quote_age (M4SYNTAX);
+  bool first = true;
 
   argp->type = M4_SYMBOL_VOID;
 
@@ -201,7 +236,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	      len = obstack_object_size (obs);
 	      obstack_1grow (obs, '\0');
 	      VALUE_MODULE (argp) = NULL;
-	      m4_set_symbol_value_text (argp, obstack_finish (obs), len);
+	      m4_set_symbol_value_text (argp, obstack_finish (obs), len, age);
 	      return type == M4_TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -211,7 +246,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	    paren_level++;
 	  else if (type == M4_TOKEN_CLOSE)
 	    paren_level--;
-	  expand_token (context, obs, type, &token, line);
+	  if (!expand_token (context, obs, type, &token, line, first))
+	    age = 0;
 	  break;
 
 	case M4_TOKEN_EOF:
@@ -222,7 +258,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_WORD:
 	case M4_TOKEN_SPACE:
 	case M4_TOKEN_STRING:
-	  expand_token (context, obs, type, &token, line);
+	  if (!expand_token (context, obs, type, &token, line, first))
+	    age = 0;
 	  break;
 
 	case M4_TOKEN_MACDEF:
@@ -233,10 +270,12 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	  break;
 
 	default:
-	  assert (!"INTERNAL ERROR: bad token type in expand_argument ()");
+	  assert (!"expand_argument");
 	  abort ();
 	}
 
+      if (argp->type != M4_SYMBOL_VOID || obstack_object_size (obs))
+	first = false;
       type = m4__next_token (context, &token, NULL, caller);
     }
 }
@@ -370,6 +409,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
      table, so we don't have to copy it here.  */
   args.argv0 = (char *) obstack_copy0 (arguments, name, len);
   args.argv0_len = len;
+  args.quote_age = m4__quote_age (M4SYNTAX);
   args.arraylen = 0;
   obstack_grow (&argv_stack, &args, offsetof (m4_macro_args, array));
   name = args.argv0;
@@ -391,11 +431,20 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	  obstack_ptr_grow (&argv_stack, tokenp);
 	  args.arraylen++;
 	  args.argc++;
+	  /* Be conservative - any change in quoting while collecting
+	     arguments, or any unsafe argument, will require a rescan
+	     if $@ is reused.  */
+	  if (m4_is_symbol_value_text (tokenp)
+	      && m4_get_symbol_value_len (tokenp)
+	      && m4_get_symbol_value_quote_age (tokenp) != args.quote_age)
+	    args.quote_age = 0;
 	}
       while (more_args);
     }
   argv = (m4_macro_args *) obstack_finish (&argv_stack);
   argv->argc = args.argc;
+  if (args.quote_age != m4__quote_age (M4SYNTAX))
+    argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
 }
@@ -426,7 +475,7 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
 	     m4_get_symbol_value_placeholder (value));
   else
     {
-      assert (!"INTERNAL ERROR: bad symbol type in m4_macro_call ()");
+      assert (!"m4_macro_call");
       abort ();
     }
 }
@@ -447,7 +496,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
     {
       char ch;
 
-      if (!m4_has_syntax (M4SYNTAX, to_uchar (*text), M4_SYNTAX_DOLLAR))
+      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR))
 	{
 	  obstack_1grow (obs, *text);
 	  text++;
@@ -501,7 +550,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	      const char *key;
 
 	      for (endp = ++text;
-		   *endp && m4_has_syntax (M4SYNTAX, to_uchar (*endp),
+		   *endp && m4_has_syntax (M4SYNTAX, *endp,
 					   (M4_SYNTAX_OTHER | M4_SYNTAX_ALPHA
 					    | M4_SYNTAX_NUM));
 		   ++endp)
@@ -768,7 +817,7 @@ m4_is_arg_func (m4_macro_args *argv, unsigned int index)
   return m4_is_symbol_value_func (m4_arg_symbol (argv, index));
 }
 
-/* Given ARGV, return the text at argument INDEX, or NULL if the
+/* Given ARGV, return the text at argument INDEX.  Abort if the
    argument is not text.  Index 0 is always text, and indices beyond
    argc return the empty string.  */
 const char *
@@ -781,8 +830,6 @@ m4_arg_text (m4_macro_args *argv, unsigned int index)
   if (argv->argc <= index)
     return "";
   value = m4_arg_symbol (argv, index);
-  if (!m4_is_symbol_value_text (value))
-    return NULL;
   return m4_get_symbol_value_text (value);
 }
 
@@ -815,7 +862,7 @@ m4_arg_empty (m4_macro_args *argv, unsigned int index)
 	  : !argv->argv0_len);
 }
 
-/* Given ARGV, return the length of argument INDEX, or SIZE_MAX if the
+/* Given ARGV, return the length of argument INDEX.  Abort if the
    argument is not text.  Indices beyond argc return 0.  */
 size_t
 m4_arg_len (m4_macro_args *argv, unsigned int index)
@@ -827,25 +874,15 @@ m4_arg_len (m4_macro_args *argv, unsigned int index)
   if (argv->argc <= index)
     return 0;
   value = m4_arg_symbol (argv, index);
-  if (!m4_is_symbol_value_text (value))
-    return SIZE_MAX;
   return m4_get_symbol_value_len (value);
 }
 
 /* Given ARGV, return the builtin function referenced by argument
-   INDEX, or NULL if it is not a builtin.  Index 0, and indices beyond
-   argc, return NULL.  */
+   INDEX.  Abort if it is not a single builtin.  */
 m4_builtin_func *
 m4_arg_func (m4_macro_args *argv, unsigned int index)
 {
-  m4_symbol_value *value;
-
-  if (index == 0 || argv->argc <= index)
-    return NULL;
-  value = m4_arg_symbol (argv, index);
-  if (!m4_is_symbol_value_func (value))
-    return NULL;
-  return m4_get_symbol_value_func (value);
+  return m4_get_symbol_value_func (m4_arg_symbol (argv, index));
 }
 
 /* Create a new argument object using the same obstack as ARGV; thus,
@@ -909,6 +946,7 @@ m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
+  new_argv->quote_age = argv->quote_age;
   return new_argv;
 }
 

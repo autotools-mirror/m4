@@ -414,9 +414,10 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
   if (m4_is_symbol_value_text (src))
     {
       size_t len = m4_get_symbol_value_len (src);
+      unsigned int age = m4_get_symbol_value_quote_age (src);
       m4_set_symbol_value_text (dest,
 				xmemdup (m4_get_symbol_value_text (src),
-					 len + 1), len);
+					 len + 1), len, age);
     }
   else if (m4_is_symbol_value_placeholder (src))
     m4_set_symbol_value_placeholder (dest,
@@ -662,6 +663,14 @@ m4_get_symbol_value_len (m4_symbol_value *value)
   return value->u.u_t.len;
 }
 
+#undef m4_get_symbol_value_quote_age
+unsigned int
+m4_get_symbol_value_quote_age (m4_symbol_value *value)
+{
+  assert (value && value->type == M4_SYMBOL_TEXT);
+  return value->u.u_t.quote_age;
+}
+
 #undef m4_get_symbol_value_func
 m4_builtin_func *
 m4_get_symbol_value_func (m4_symbol_value *value)
@@ -688,7 +697,8 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
 
 #undef m4_set_symbol_value_text
 void
-m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len)
+m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
+                          unsigned int quote_age)
 {
   assert (value && text);
   /* TODO - this assertion enforces NUL-terminated text with no
@@ -701,6 +711,7 @@ m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len)
   value->type = M4_SYMBOL_TEXT;
   value->u.u_t.text = text;
   value->u.u_t.len = len;
+  value->u.u_t.quote_age = quote_age;
 }
 
 #undef m4_set_symbol_value_builtin
