@@ -418,13 +418,13 @@ static int  m4_sysval = 0;
 # define M4_SYSVAL_TERMSIGBITS(status)			\
    (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
-#else /* ! UNIX && ! defined WEXITSTATUS */
+#else /* !UNIX && !defined WEXITSTATUS */
 /* Platforms such as mingw do not support the notion of reporting
    which signal terminated a process.  Furthermore if WEXITSTATUS was
    not provided, then the exit value is in the low eight bits.  */
 # define M4_SYSVAL_EXITBITS(status) status
 # define M4_SYSVAL_TERMSIGBITS(status) 0
-#endif /* ! UNIX && ! defined WEXITSTATUS */
+#endif /* !UNIX && !defined WEXITSTATUS */
 
 /* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
 /* FIXME - this may fit better as a gnulib module.  */
@@ -687,15 +687,19 @@ M4BUILTIN_HANDLER (sinclude)
 
 /* More miscellaneous builtins -- "maketemp", "errprint".  */
 
-/* Use the first argument as at template for a temporary file name.
-   FIXME - should we add a mkdtemp builtin in the gnu module, then
-   export this function as a helper to that?  */
+/* Add trailing `X' to PATTERN of length LEN as necessary, then
+   securely create the temporary file system object.  If DIR, create a
+   directory instead of a file.  Report errors on behalf of MACRO.  If
+   successful, output the quoted resulting name on OBS.  */
 void
 m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
-	      const char *name, size_t len, bool dir)
+	      const char *pattern, size_t len, bool dir)
 {
   int fd;
   int i;
+  char *name;
+  const char *tmp;
+  size_t qlen;
 
   if (m4_get_safer_opt (context))
     {
@@ -704,17 +708,23 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
     }
 
   /* Guarantee that there are six trailing 'X' characters, even if the
-     user forgot to supply them.  */
+     user forgot to supply them.  Output must be quoted if
+     successful.  */
   assert (obstack_object_size (obs) == 0);
-  obstack_grow (obs, name, len);
+  tmp = m4_get_syntax_lquote (M4SYNTAX);
+  qlen = strlen (tmp);
+  obstack_grow (obs, tmp, qlen);
+  obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
-    if (name[--len] != 'X')
+    if (pattern[len - i - 1] != 'X')
       break;
+  len += 6 - i;
   obstack_grow0 (obs, "XXXXXX", 6 - i);
+  name = (char *) obstack_base (obs) + qlen;
 
   /* Make the temporary object.  */
   errno = 0;
-  fd = gen_tempname (obstack_base (obs), dir ? GT_DIR : GT_FILE);
+  fd = gen_tempname (name, dir ? GT_DIR : GT_FILE);
   if (fd < 0)
     {
       /* This use of _() will need to change if xgettext ever changes
@@ -723,18 +733,17 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
       m4_error (context, 0, errno, macro,
 		_(dir ? "cannot create directory from template `%s'"
 		  : "cannot create file from template `%s'"),
-		name);
+		pattern);
       obstack_free (obs, obstack_finish (obs));
     }
   else
     {
-      if (! dir)
+      if (!dir)
 	close (fd);
-      /* Undo the trailing NUL.  */
-      /* FIXME - shouldn't this return a quoted string, on the rather
-	 small chance that the user has a macro matching the random
-	 file name chosen?  */
+      /* Remove NUL, then finish quote.  */
       obstack_blank (obs, -1);
+      tmp = m4_get_syntax_rquote (M4SYNTAX);
+      obstack_grow (obs, tmp, strlen (tmp));
     }
 }
 
@@ -1025,7 +1034,7 @@ M4BUILTIN_HANDLER (translit)
      hence the found map.  */
   for ( ; (ch = *from) != '\0'; from++)
     {
-      if (! found[ch])
+      if (!found[ch])
 	{
 	  found[ch] = 1;
 	  map[ch] = *to;
@@ -1036,7 +1045,7 @@ M4BUILTIN_HANDLER (translit)
 
   for (data = M4ARG (1); (ch = *data) != '\0'; data++)
     {
-      if (! found[ch])
+      if (!found[ch])
 	obstack_1grow (obs, ch);
       else if (map[ch])
 	obstack_1grow (obs, map[ch]);
@@ -1071,7 +1080,7 @@ M4BUILTIN_HANDLER (translit)
 #define numb_gt(x, y) ((x) = ((x) >  (y)))
 #define numb_ge(x, y) ((x) = ((x) >= (y)))
 
-#define numb_lnot(x)    ((x) = (! (x)))
+#define numb_lnot(x)    ((x) = (!(x)))
 #define numb_lior(x, y) ((x) = ((x) || (y)))
 #define numb_land(x, y) ((x) = ((x) && (y)))
 
