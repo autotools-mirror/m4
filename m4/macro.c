@@ -167,7 +167,7 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
 		&& BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_BLIND_ARGS_BIT)
 		&& !m4__next_token_is_open (context)))
 	  {
-	    m4_shipout_text (context, obs, text, len, line);
+	    m4_divert_text (context, obs, text, len, line);
 	    /* The word just output is unquoted, but we can trust the
 	       heuristics of safe_quote.  */
 	    return m4__safe_quotes (M4SYNTAX);
@@ -183,7 +183,7 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
       assert (!"INTERNAL ERROR: bad token type in expand_token ()");
       abort ();
     }
-  m4_shipout_text (context, obs, text, m4_get_symbol_value_len (token), line);
+  m4_divert_text (context, obs, text, m4_get_symbol_value_len (token), line);
   return result;
 }
 
@@ -533,7 +533,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 
 	case '*':		/* all arguments */
 	case '@':		/* ... same, but quoted */
-	  m4_dump_args (context, obs, 1, argv, ",", *text == '@');
+	  m4_push_args (context, obs, argv, false, *text == '@');
 	  text++;
 	  break;
 
@@ -950,6 +950,57 @@ m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
   return new_argv;
 }
 
+/* Push argument INDEX from ARGV, which must be a text token, onto the
+   expansion stack OBS for rescanning.  */
+void
+m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
+	     unsigned int index)
+{
+  m4_symbol_value *value;
+
+  if (index == 0)
+    {
+      obstack_grow (obs, argv->argv0, argv->argv0_len);
+      return;
+    }
+  value = m4_arg_symbol (argv, index);
+  if (value == &empty_symbol)
+    return;
+  /* TODO handle builtin tokens?  */
+  assert (value->type == M4_SYMBOL_TEXT);
+  /* TODO push a reference, rather than copying data.  */
+  obstack_grow (obs, m4_get_symbol_value_text (value),
+		m4_get_symbol_value_len (value));
+}
+
+/* Push series of comma-separated arguments from ARGV, which should
+   all be text, onto the expansion stack OBS for rescanning.  If SKIP,
+   then don't push the first argument.  If QUOTE, also push quoting
+   around each arg.  */
+void
+m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
+	      bool quote)
+{
+  m4_symbol_value *value;
+  unsigned int i;
+  bool comma = false;
+
+  /* TODO push reference, rather than copying data.  */
+  for (i = skip ? 2 : 1; i < argv->argc; i++)
+    {
+      value = m4_arg_symbol (argv, i);
+      if (comma)
+	obstack_1grow (obs, ',');
+      else
+	comma = true;
+      /* TODO handle builtin tokens?  */
+      assert (value->type == M4_SYMBOL_TEXT);
+      m4_shipout_string (context, obs, m4_get_symbol_value_text (value),
+			 m4_get_symbol_value_len (value), quote);
+    }
+}
+
+
 /* Define these last, so that earlier uses can benefit from the macros
    in m4private.h.  */
 

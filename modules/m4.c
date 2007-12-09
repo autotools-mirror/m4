@@ -223,8 +223,8 @@ M4BUILTIN_HANDLER (popdef)
 
 M4BUILTIN_HANDLER (ifdef)
 {
-  unsigned int index = m4_symbol_lookup (M4SYMTAB, M4ARG (1)) ? 2 : 3;
-  obstack_grow (obs, M4ARG (index), m4_arg_len (argv, index));
+  m4_push_arg (context, obs, argv,
+	       m4_symbol_lookup (M4SYMTAB, M4ARG (1)) ? 2 : 3);
 }
 
 M4BUILTIN_HANDLER (ifelse)
@@ -243,11 +243,11 @@ M4BUILTIN_HANDLER (ifelse)
   index = 1;
   argc--;
 
-  while (1)
+  while (true)
     {
       if (m4_arg_equal (argv, index, index + 1))
 	{
-	  obstack_grow (obs, M4ARG (index + 2), m4_arg_len (argv, index + 2));
+	  m4_push_arg (context, obs, argv, index + 2);
 	  return;
 	}
       switch (argc)
@@ -257,7 +257,7 @@ M4BUILTIN_HANDLER (ifelse)
 
 	case 4:
 	case 5:
-	  obstack_grow (obs, M4ARG (index + 3), m4_arg_len (argv, index + 3));
+	  m4_push_arg (context, obs, argv, index + 3);
 	  return;
 
 	default:
@@ -561,8 +561,8 @@ M4BUILTIN_HANDLER (divert)
   if (argc >= 2 && !m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
   m4_make_diversion (context, i);
-  m4_shipout_text (context, NULL, M4ARG (2), m4_arg_len (argv, 2),
-		   m4_get_current_line (context));
+  m4_divert_text (context, NULL, M4ARG (2), m4_arg_len (argv, 2),
+		  m4_get_current_line (context));
 }
 
 /* Expand to the current diversion number.  */
@@ -625,7 +625,7 @@ M4BUILTIN_HANDLER (dnl)
    output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
-  m4_dump_args (context, obs, 2, argv, ",", true);
+  m4_push_args (context, obs, argv, true, true);
 }
 
 /* Change the current quotes.  The function set_quotes () lives in
@@ -716,9 +716,8 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
   obstack_grow (obs, tmp, qlen);
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
-    if (pattern[len - i - 1] != 'X')
+    if (pattern[--len] != 'X')
       break;
-  len += 6 - i;
   obstack_grow0 (obs, "XXXXXX", 6 - i);
   name = (char *) obstack_base (obs) + qlen;
 
@@ -936,7 +935,7 @@ M4BUILTIN_HANDLER (substr)
 
   if (argc <= 2)
     {
-      obstack_grow (obs, str, m4_arg_len (argv, 1));
+      m4_push_arg (context, obs, argv, 1);
       return;
     }
 
@@ -1011,6 +1010,12 @@ M4BUILTIN_HANDLER (translit)
   char map[256] = {0};
   char found[256] = {0};
   unsigned char ch;
+
+  if (argc <= 2)
+    {
+      m4_push_arg (context, obs, argv, 1);
+      return;
+    }
 
   from = M4ARG (2);
   if (strchr (from, '-') != NULL)

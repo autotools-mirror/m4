@@ -558,6 +558,8 @@ main (int argc, char *const *argv, char *const *envp)
 	  /* fall through */
 	case 'l':
 	  size = size_opt (optarg, oi, optchar);
+	  if (!size)
+	    size = SIZE_MAX;
 	  m4_set_max_debug_arg_length_opt (context, size);
 	  break;
 

@@ -312,6 +312,10 @@ extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
 extern m4_macro_args *m4_make_argv_ref	(m4_macro_args *, const char *, size_t,
 					 bool, bool);
+extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
+					 unsigned int);
+extern void	m4_push_args		(m4 *, m4_obstack *, m4_macro_args *,
+					 bool, bool);
 
 
 /* --- RUNTIME DEBUGGING --- */
@@ -448,14 +452,16 @@ extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 
 /* --- OUTPUT MANAGEMENT --- */
 
-extern void	m4_output_init	  (m4 *);
-extern void	m4_output_exit	  (void);
-extern void	m4_output_text	  (m4 *, const char *, size_t);
-extern void	m4_shipout_text	  (m4 *, m4_obstack *, const char *, size_t,
-				   int);
-extern void	m4_shipout_int    (m4_obstack *, int);
-extern void	m4_shipout_string (m4 *, m4_obstack *, const char *,
-				   size_t, bool);
+extern void	m4_output_init		(m4 *);
+extern void	m4_output_exit		(void);
+extern void	m4_output_text		(m4 *, const char *, size_t);
+extern void	m4_divert_text		(m4 *, m4_obstack *, const char *,
+					 size_t, int);
+extern void	m4_shipout_int		(m4_obstack *, int);
+extern void	m4_shipout_string	(m4 *, m4_obstack *, const char *,
+					 size_t, bool);
+extern bool	m4_shipout_string_trunc	(m4 *, m4_obstack *, const char *,
+					 size_t, bool, size_t *);
 
 extern void	m4_make_diversion    (m4 *, int);
 extern void	m4_insert_diversion  (m4 *, int);

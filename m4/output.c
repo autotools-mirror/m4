@@ -463,8 +463,8 @@ m4_output_text (m4 *context, const char *text, size_t length)
    generates several output lines, or when several input lines do not
    generate any output.  */
 void
-m4_shipout_text (m4 *context, m4_obstack *obs,
-		 const char *text, size_t length, int line)
+m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
+		int line)
 {
   static bool start_of_output_line = true;
   char linebuf[6 + INT_BUFSIZE_BOUND (unsigned long int)]; /* "#line nnnn" */
@@ -590,20 +590,43 @@ void
 m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
 		   bool quoted)
 {
-  assert (obs);
-  if (s == NULL)
-    s = "";
+  m4_shipout_string_trunc (context, obs, s, len, quoted, NULL);
+}
 
+/* Output the text S, of length LEN, to OBS.  If QUOTED, also output
+   current quote characters around S.  If LEN is SIZE_MAX, use the
+   string length of S instead.  If MAX_LEN, reduce *MAX_LEN by LEN.
+   If LEN is larger than *MAX_LEN, then truncate output and return
+   true; otherwise return false.  */
+bool
+m4_shipout_string_trunc (m4 *context, m4_obstack *obs, const char *s,
+			 size_t len, bool quoted, size_t *max_len)
+{
+  size_t max = max_len ? *max_len : SIZE_MAX;
+
+  assert (obs && s);
   if (len == SIZE_MAX)
     len = strlen (s);
-
   if (quoted)
     obstack_grow (obs, context->syntax->lquote.string,
 		  context->syntax->lquote.length);
-  obstack_grow (obs, s, len);
+  if (len < max)
+    {
+      obstack_grow (obs, s, len);
+      max -= len;
+    }
+  else
+    {
+      obstack_grow (obs, s, max);
+      obstack_grow (obs, "...", 3);
+      max = 0;
+    }
   if (quoted)
     obstack_grow (obs, context->syntax->rquote.string,
 		  context->syntax->rquote.length);
+  if (max_len)
+    *max_len = max;
+  return max == 0;
 }
 
 
@@ -864,7 +887,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
 			  _("cannot stat diversion"));
 	      /* FIXME - support 64-bit off_t with 32-bit long, and
 		 fix frozen file format to support 64-bit integers.
-		 This implies fixing shipout_text to take off_t.  */
+		 This implies fixing m4_divert_text to take off_t.  */
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		m4_error (context, EXIT_FAILURE, errno, NULL,

@@ -1,3 +1,25 @@
+2007-12-08  Eric Blake  <ebb9@byu.net>
+
+	Stage 6: convert builtins to push arg at a time.
+	* m4/m4module.h (m4_shipout_text): Rename...
+	(m4_divert_text): ...to this, to avoid confusion with m4_shipout_*
+	that does not worry about sync lines.
+	(m4_shipout_string_trunc): New prototype.
+	* m4/output.c (m4_shipout_text): Rename...
+	(m4_divert_text): ...to this.
+	(m4_shipout_string): Move guts...
+	(m4_shipout_string_trunc): ...to this new function.
+	* m4/macro.c (m4_push_arg, m4_push_args): New functions.
+	(expand_token, process_macro): Update callers.
+	* m4/input.c (string_print): Likewise.
+	* modules/m4.c (ifdef, ifelse, shift, substr, translit, divert):
+	Likewise.
+	* modules/gnu.c (patsubst): Likewise.
+	(debuglen): Use SIZE_MAX for unlimited debug length.
+	* src/main.c (main): Likewise.
+	* m4/m4.c (m4_create): Default max_debug_length to SIZE_MAX, not
+	zero.
+
 2007-12-07  Eric Blake  <ebb9@byu.net>
 
 	Minor security fix: Quote output of mkstemp.

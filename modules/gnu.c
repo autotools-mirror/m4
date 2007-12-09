@@ -557,11 +557,13 @@ M4BUILTIN_HANDLER (debugfile)
 M4BUILTIN_HANDLER (debuglen)
 {
   int i;
+  size_t s;
   if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
   /* FIXME - make m4_numeric_arg more powerful - we want to accept
      suffixes, and limit the result to size_t.  */
-  m4_set_max_debug_arg_length_opt (context, i);
+  s = i <= 0 ? SIZE_MAX : i;
+  m4_set_max_debug_arg_length_opt (context, s);
 }
 
 /* On-the-fly control of the format of the tracing output.  It takes one
@@ -739,7 +741,7 @@ M4BUILTIN_HANDLER (patsubst)
      replacement, we need not waste time with it.  */
   if (!*pattern && !*replace)
     {
-      obstack_grow (obs, M4ARG (1), m4_arg_len (argv, 1));
+      m4_push_arg (context, obs, argv, 1);
       return;
     }
 

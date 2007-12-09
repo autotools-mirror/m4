@@ -37,6 +37,7 @@ m4_create (void)
   obstack_init (&context->trace_messages);
 
   context->nesting_limit = DEFAULT_NESTING_LIMIT;
+  context->max_debug_arg_length = SIZE_MAX;
 
   context->search_path	 = xzalloc (sizeof *context->search_path);
   m4__include_init (context);

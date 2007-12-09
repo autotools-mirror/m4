@@ -477,21 +477,10 @@ static void
 string_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
   bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
-  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
-  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
-  const char *text = me->u.u_s.str;
-  size_t len = me->u.u_s.len;
 
-  if (arg_length && arg_length < len)
-    len = arg_length;
-  if (quote)
-    obstack_grow (obs, lquote, strlen (lquote));
-  obstack_grow (obs, text, len);
-  if (len != me->u.u_s.len)
-    obstack_grow (obs, "...", 3);
-  if (quote)
-    obstack_grow (obs, rquote, strlen (rquote));
+  m4_shipout_string_trunc (context, obs, me->u.u_s.str, me->u.u_s.len,
+			   quote, &arg_length);
 }
 
 /* First half of m4_push_string ().  The pointer next points to the new
@@ -543,7 +532,7 @@ m4_push_string_finish (void)
       input_change = true;
     }
   else
-    obstack_free (current_input, next); /* people might leave garbage on it. */
+    obstack_free (current_input, next);
   next = NULL;
   return ret;
 }
