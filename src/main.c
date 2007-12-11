@@ -482,6 +482,8 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case 'L':
 	  size = size_opt (optarg, oi, optchar);
+	  if (!size)
+	    size = SIZE_MAX;
 	  m4_set_nesting_limit_opt (context, size);
 	  break;
 

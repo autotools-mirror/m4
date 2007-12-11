@@ -476,13 +476,13 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 }
 
 /* Grow OBS with a text representation of VALUE.  If QUOTE, then
-   surround a text definition by LQUOTE and RQUOTE.  If ARG_LENGTH is
-   non-zero, then truncate text definitions to that length.  If
+   surround a text definition by LQUOTE and RQUOTE.  If MAXLEN is less
+   than SIZE_MAX, then truncate text definitions to that length.  If
    MODULE, then include which module defined a builtin.  */
 void
 m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
-		       const char *lquote, const char *rquote,
-		       size_t arg_length, bool module)
+		       const char *lquote, const char *rquote, size_t maxlen,
+		       bool module)
 {
   const char *text;
   size_t len;
@@ -492,9 +492,9 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     {
       text = m4_get_symbol_value_text (value);
       len = m4_get_symbol_value_len (value);
-      if (arg_length && arg_length < len)
+      if (maxlen < len)
 	{
-	  len = arg_length;
+	  len = maxlen;
 	  truncated = true;
 	}
     }
@@ -541,8 +541,8 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
 /* Grow OBS with a text representation of SYMBOL.  If QUOTE, then
    surround each text definition by LQUOTE and RQUOTE.  If STACK, then
    append all pushdef'd values, rather than just the top.  If
-   ARG_LENGTH is non-zero, then truncate text definitions to that
-   length.  If MODULE, then include which module defined a
+   ARG_LENGTH is less than SIZE_MAX, then truncate text definitions to
+   that length.  If MODULE, then include which module defined a
    builtin.  */
 void
 m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
@@ -698,7 +698,7 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
 #undef m4_set_symbol_value_text
 void
 m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
-                          unsigned int quote_age)
+			  unsigned int quote_age)
 {
   assert (value && text);
   /* TODO - this assertion enforces NUL-terminated text with no
@@ -768,7 +768,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
     {
       m4_obstack obs;
       obstack_init (&obs);
-      m4_symbol_value_print (value, &obs, false, NULL, NULL, 0, true);
+      m4_symbol_value_print (value, &obs, false, NULL, NULL, SIZE_MAX, true);
       xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }

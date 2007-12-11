@@ -105,6 +105,8 @@ static	int	composite_read		(m4_input_block *, m4 *, bool);
 static	void	composite_unget		(m4_input_block *, int);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
+static	void	make_text_link		(m4_obstack *, m4_symbol_chain **,
+					 m4_symbol_chain **);
 static	void	init_builtin_token	(m4 *, m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
 static	int	next_char		(m4 *, bool);
@@ -125,9 +127,9 @@ struct input_funcs
   int	(*peek_func)	(m4_input_block *);
 
   /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
-     builtin, or CHAR_RETRY if none available.  If the flag is false,
-     then do not alter the current file or line.  */
-  int	(*read_func)	(m4_input_block *, m4 *, bool);
+     builtin, or CHAR_RETRY if none available.  If SAFE, then do not
+     alter the current file or line.  */
+  int	(*read_func)	(m4_input_block *, m4 *, bool safe);
 
   /* Unread a single unsigned character or CHAR_BUILTIN, must be the
      same character previously read by read_func.  */
@@ -176,8 +178,8 @@ struct m4_input_block
       u_b;	/* See builtin_funcs.  */
       struct
 	{
-	  m4_input_block *current;	/* Pointer to current sub-block.  */
-	  m4_input_block *tail;		/* Pointer to last sub-block.  */
+	  m4_symbol_chain *chain;	/* Current link in chain.  */
+	  m4_symbol_chain *end;		/* Last link in chain.  */
 	}
       u_c;	/* See composite_funcs.  */
     }
@@ -219,12 +221,28 @@ static bool start_of_input_line;
 /* Flag for next_char () to recognize change in input block.  */
 static bool input_change;
 
-
-/* Input files, from command line or [s]include.  */
+/* Vtable for handling input from files.  */
 static struct input_funcs file_funcs = {
   file_peek, file_read, file_unget, file_clean, file_print
 };
 
+/* Vtable for handling input from builtin functions.  */
+static struct input_funcs builtin_funcs = {
+  builtin_peek, builtin_read, builtin_unget, NULL, builtin_print
+};
+
+/* Vtable for handling input from strings.  */
+static struct input_funcs string_funcs = {
+  string_peek, string_read, string_unget, NULL, string_print
+};
+
+/* Vtable for handling input from composite chains.  */
+static struct input_funcs composite_funcs = {
+  composite_peek, composite_read, composite_unget, NULL, composite_print
+};
+
+
+/* Input files, from command line or [s]include.  */
 static int
 file_peek (m4_input_block *me)
 {
@@ -242,7 +260,7 @@ file_peek (m4_input_block *me)
 }
 
 static int
-file_read (m4_input_block *me, m4 *context, bool retry M4_GNUC_UNUSED)
+file_read (m4_input_block *me, m4 *context, bool safe M4_GNUC_UNUSED)
 {
   int ch;
 
@@ -356,10 +374,6 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
 
 
 /* Handle a builtin macro token.  */
-static struct input_funcs builtin_funcs = {
-  builtin_peek, builtin_read, builtin_unget, NULL, builtin_print
-};
-
 static int
 builtin_peek (m4_input_block *me)
 {
@@ -371,7 +385,7 @@ builtin_peek (m4_input_block *me)
 
 static int
 builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	      bool retry M4_GNUC_UNUSED)
+	      bool safe M4_GNUC_UNUSED)
 {
   if (me->u.u_b.read)
     return CHAR_RETRY;
@@ -445,10 +459,6 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
 
 
 /* Handle string expansion text.  */
-static struct input_funcs string_funcs = {
-  string_peek, string_read, string_unget, NULL, string_print
-};
-
 static int
 string_peek (m4_input_block *me)
 {
@@ -457,7 +467,7 @@ string_peek (m4_input_block *me)
 
 static int
 string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	     bool retry M4_GNUC_UNUSED)
+	     bool safe M4_GNUC_UNUSED)
 {
   if (!me->u.u_s.len)
     return CHAR_RETRY;
@@ -483,8 +493,9 @@ string_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 			   quote, &arg_length);
 }
 
-/* First half of m4_push_string ().  The pointer next points to the new
-   input_block.  */
+/* First half of m4_push_string ().  The pointer next points to the
+   new input_block.  Return the obstack that will collect the
+   expansion text.  */
 m4_obstack *
 m4_push_string_init (m4 *context)
 {
@@ -499,6 +510,54 @@ m4_push_string_init (m4 *context)
   next->line = m4_get_current_line (context);
 
   return current_input;
+}
+
+/* If VALUE contains text, then convert the current string into a
+   chain if it is not one already, and add the contents of VALUE as a
+   new link in the chain.  LEVEL describes the current expansion
+   level, or SIZE_MAX if the contents of VALUE reside entirely on the
+   current_input stack and VALUE lives in temporary storage.  Allows
+   gathering input from multiple locations, rather than copying
+   everything consecutively onto the input stack.  Must be called
+   between push_string_init and push_string_finish.  */
+void
+m4__push_symbol (m4_symbol_value *value, size_t level)
+{
+  m4_symbol_chain *chain;
+
+  assert (next);
+  /* TODO - also accept TOKEN_COMP chains.  */
+  assert (m4_is_symbol_value_text (value));
+  if (m4_get_symbol_value_len (value) == 0)
+    return;
+
+  if (next->funcs == &string_funcs)
+    {
+      next->funcs = &composite_funcs;
+      next->u.u_c.chain = next->u.u_c.end = NULL;
+    }
+  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+  chain = (m4_symbol_chain *) obstack_alloc (current_input, sizeof *chain);
+  if (next->u.u_c.end)
+    next->u.u_c.end->next = chain;
+  else
+    next->u.u_c.chain = chain;
+  next->u.u_c.end = chain;
+  chain->next = NULL;
+  if (level != SIZE_MAX)
+    /* TODO - use token as-is, rather than copying data.  This implies
+       lengthening lifetime of $@ arguments until the rescan is
+       complete, rather than the current approach of freeing them
+       during expand_macro.  */
+    chain->str = (char *) obstack_copy (current_input,
+					m4_get_symbol_value_text (value),
+					m4_get_symbol_value_len (value));
+  else
+    chain->str = m4_get_symbol_value_text (value);
+  chain->len = m4_get_symbol_value_len (value);
+  chain->argv = NULL;
+  chain->index = 0;
+  chain->flatten = false;
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to
@@ -522,11 +581,15 @@ m4_push_string_finish (void)
       return isp;
     }
 
-  if (len)
+  if (len || next->funcs == &composite_funcs)
     {
-      next->u.u_s.len = len;
-      obstack_1grow (current_input, '\0');
-      next->u.u_s.str = obstack_finish (current_input);
+      if (next->funcs == &string_funcs)
+	{
+	  next->u.u_s.str = (char *) obstack_finish (current_input);
+	  next->u.u_s.len = len;
+	}
+      else
+	make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
       next->prev = isp;
       ret = isp = next;
       input_change = true;
@@ -541,78 +604,126 @@ m4_push_string_finish (void)
 /* A composite block contains multiple sub-blocks which are processed
    in FIFO order, even though the obstack allocates memory in LIFO
    order.  */
-static struct input_funcs composite_funcs = {
-  composite_peek, composite_read, composite_unget, NULL, composite_print
-};
-
 static int
 composite_peek (m4_input_block *me)
 {
-  int ch = CHAR_RETRY;
-  m4_input_block *subblock = me->u.u_c.current;
-  while (ch == CHAR_RETRY && subblock != NULL)
+  m4_symbol_chain *chain = me->u.u_c.chain;
+  while (chain)
     {
-      ch = subblock->funcs->peek_func (subblock);
-      subblock = subblock->prev;
+      if (chain->str)
+	{
+	  if (chain->len)
+	    return to_uchar (chain->str[0]);
+	}
+      else
+	{
+	  /* TODO - peek into argv.  */
+	  assert (!"implemented yet");
+	  abort ();
+	}
+      chain = chain->next;
     }
-  return ch;
+  return CHAR_RETRY;
 }
 
 static int
-composite_read (m4_input_block *me, m4 *context, bool retry)
+composite_read (m4_input_block *me, m4 *context, bool safe)
 {
-  int ch;
-  m4_input_block *subblock;
-
-  /* Check if input exhausted.  */
-  subblock = me->u.u_c.current;
-  if (subblock == NULL)
-    return CHAR_RETRY;
-
-  /* See if current block has real character.  */
-  ch = subblock->funcs->read_func (subblock, context, retry);
-  if (ch != CHAR_RETRY || !retry)
+  m4_symbol_chain *chain = me->u.u_c.chain;
+  while (chain)
     {
-      me->line = subblock->line;
-      return ch;
+      if (chain->str)
+	{
+	  if (chain->len)
+	    {
+	      chain->len--;
+	      return to_uchar (*chain->str++);
+	    }
+	}
+      else
+	{
+	  /* TODO - peek into argv.  */
+	  assert (!"implemented yet");
+	  abort ();
+	}
+      if (safe)
+	return CHAR_RETRY;
+      me->u.u_c.chain = chain = chain->next;
     }
-
-  /* Pop blocks until we get real character.  */
-  while (ch == CHAR_RETRY && subblock != NULL)
-    {
-      if (subblock->funcs->clean_func)
-	subblock->funcs->clean_func (subblock, context);
-      subblock = me->u.u_c.current->prev;
-      me->u.u_c.current = subblock;
-      input_change = true;
-      if (subblock)
-	ch = subblock->funcs->read_func (subblock, context, retry);
-    }
-  me->file = subblock->file;
-  me->line = subblock->line;
-  return ch;
+  return CHAR_RETRY;
 }
 
 static void
 composite_unget (m4_input_block *me, int ch)
 {
-  assert (me->u.u_c.current);
-  me->u.u_c.current->funcs->unget_func (me->u.u_c.current, ch);
+  m4_symbol_chain *chain = me->u.u_c.chain;
+  if (chain->str)
+    {
+      assert (ch < CHAR_EOF && to_uchar (chain->str[-1]) == ch);
+      chain->str--;
+      chain->len++;
+    }
+  else
+    {
+      /* TODO support argv ref.  */
+      assert (!"implemented yet");
+      abort ();
+    }
 }
 
 static void
 composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  m4_input_block *subblock = me->u.u_c.current;
-  while (subblock)
+  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  size_t maxlen = m4_get_max_debug_arg_length_opt (context);
+  m4_symbol_chain *chain = me->u.u_c.chain;
+  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+
+  if (quote)
+    m4_shipout_string (context, obs, lquote, SIZE_MAX, false);
+  while (chain)
     {
-      subblock->funcs->print_func (subblock, context, obs);
-      subblock = subblock->prev;
+      /* TODO support argv refs as well.  */
+      assert (chain->str);
+      if (m4_shipout_string_trunc (context, obs, chain->str, chain->len, false,
+				   &maxlen))
+	break;
+      chain = chain->next;
+    }
+  if (quote)
+    m4_shipout_string (context, obs, rquote, SIZE_MAX, false);
+}
+
+/* Given an obstack OBS, capture any unfinished text as a link in the
+   chain that starts at *START and ends at *END.  START may be NULL if
+   *END is non-NULL.  */
+static void
+make_text_link (m4_obstack *obs, m4_symbol_chain **start,
+		m4_symbol_chain **end)
+{
+  m4_symbol_chain *chain;
+  size_t len = obstack_object_size (obs);
+
+  assert (end && (start || *end));
+  if (len)
+    {
+      char *str = (char *) obstack_finish (obs);
+      chain = (m4_symbol_chain *) obstack_alloc (obs, sizeof *chain);
+      if (*end)
+	(*end)->next = chain;
+      else
+	*start = chain;
+      *end = chain;
+      chain->next = NULL;
+      chain->str = str;
+      chain->len = len;
+      chain->argv = NULL;
+      chain->index = 0;
+      chain->flatten = false;
     }
 }
 
-/*TODO FIXME - in m4_push_file/m4_push_builtin, if next is not NULL,
-  call create_composite. */
 
 
 /* When tracing, print a summary of the contents of the input block
@@ -660,7 +771,7 @@ m4_push_wrapup (m4 *context, const char *s)
   i->line = m4_get_current_line (context);
 
   i->u.u_s.len = strlen (s);
-  i->u.u_s.str = obstack_copy0 (wrapup_stack, s, i->u.u_s.len);
+  i->u.u_s.str = obstack_copy (wrapup_stack, s, i->u.u_s.len);
 
   wsp = i;
 }
@@ -742,8 +853,6 @@ static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
   m4_input_block *block = isp;
-  if (block->funcs == &composite_funcs)
-    block = block->u.u_c.current;
   assert (block->funcs->read_func == builtin_read && !block->u.u_b.read);
 
   m4_set_symbol_value_builtin (token, block->u.u_b.builtin);
@@ -780,7 +889,7 @@ next_char (m4 *context, bool retry)
 	}
 
       assert (isp->funcs->read_func);
-      while ((ch = isp->funcs->read_func (isp, context, retry)) != CHAR_RETRY
+      while ((ch = isp->funcs->read_func (isp, context, !retry)) != CHAR_RETRY
 	     || !retry)
 	{
 	  /* if (!IS_IGNORE (ch)) */

@@ -1,3 +1,22 @@
+2007-12-11  Eric Blake  <ebb9@byu.net>
+
+	Stage 7: use chained input support in input parser.
+	* m4/m4private.h (m4__push_symbol): New prototype.
+	(struct m4_symbol_chain): Add const-safety.
+	* m4/symtab.c (m4_symbol_value_print): Simplify.
+	(dump_symbol_CB): Update caller.
+	* m4/input.c (struct m4_input_block): Alter u_c member, first
+	introduced 2006-10-25, but unused until now.
+	(composite_peek, composite_read, composite_unget)
+	(composite_print, init_builtin_token): Rewrite accordingly.
+	(m4_push_wrapup): No longer need trailing NUL.
+	(m4__push_symbol, make_text_link): New functions.
+	(m4_push_string_finish): Use them.
+	* m4/macro.c (m4_push_arg, m4_push_args): Likewise.
+	(expand_macro): Simplify logic of nesting_limit.
+	* src/main.c (main): Likewise.
+	* doc/m4.texinfo (Dumpdef): Augment test.
+
 2007-12-08  Eric Blake  <ebb9@byu.net>
 
 	Stage 6: convert builtins to push arg at a time.

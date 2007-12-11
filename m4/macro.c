@@ -329,9 +329,7 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 
   /* Prepare for macro expansion.  */
   VALUE_PENDING (value)++;
-  expansion_level++;
-  if (m4_get_nesting_limit_opt (context) > 0
-      && expansion_level > m4_get_nesting_limit_opt (context))
+  if (m4_get_nesting_limit_opt (context) < ++expansion_level)
     m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
@@ -968,9 +966,7 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
     return;
   /* TODO handle builtin tokens?  */
   assert (value->type == M4_SYMBOL_TEXT);
-  /* TODO push a reference, rather than copying data.  */
-  obstack_grow (obs, m4_get_symbol_value_text (value),
-		m4_get_symbol_value_len (value));
+  m4__push_symbol (value, expansion_level - 1);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -982,22 +978,49 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
   m4_symbol_value *value;
-  unsigned int i;
-  bool comma = false;
+  m4_symbol_value sep;
+  unsigned int i = skip ? 2 : 1;
+  bool use_sep = false;
+  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
+  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
 
-  /* TODO push reference, rather than copying data.  */
-  for (i = skip ? 2 : 1; i < argv->argc; i++)
+  if (argv->argc <= i)
+    return;
+
+  if (quote)
+    {
+      const char *str;
+      size_t len;
+      obstack_grow (obs, lquote, strlen (lquote));
+      len = obstack_object_size (obs);
+      obstack_1grow (obs, '\0');
+      str = (char *) obstack_finish (obs);
+      m4_set_symbol_value_text (&sep, str, len, 0);
+      m4__push_symbol (&sep, SIZE_MAX);
+      obstack_grow (obs, rquote, strlen (rquote));
+      obstack_1grow (obs, ',');
+      obstack_grow0 (obs, lquote, strlen (lquote));
+      str = (char *) obstack_finish (obs);
+      m4_set_symbol_value_text (&sep, str,
+				strlen (rquote) + 1 + strlen (lquote), 0);
+    }
+  else
+    m4_set_symbol_value_text (&sep, ",", 1, 0);
+
+  /* TODO push entire $@ ref, rather than each arg.  */
+  for ( ; i < argv->argc; i++)
     {
       value = m4_arg_symbol (argv, i);
-      if (comma)
-	obstack_1grow (obs, ',');
+      if (use_sep)
+	m4__push_symbol (&sep, SIZE_MAX);
       else
-	comma = true;
+	use_sep = true;
       /* TODO handle builtin tokens?  */
       assert (value->type == M4_SYMBOL_TEXT);
-      m4_shipout_string (context, obs, m4_get_symbol_value_text (value),
-			 m4_get_symbol_value_len (value), quote);
+      m4__push_symbol (value, expansion_level - 1);
     }
+  if (quote)
+    obstack_grow (obs, rquote, strlen (rquote));
 }
 
 

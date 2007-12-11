@@ -193,7 +193,7 @@ struct m4_symbol
 struct m4_symbol_chain
 {
   m4_symbol_chain *next;/* Pointer to next link of chain.  */
-  char *str;		/* NUL-terminated string if text, or NULL.  */
+  const char *str;	/* NUL-terminated string if text, or NULL.  */
   size_t len;		/* Length of str, or 0.  */
   m4_macro_args *argv;	/* Reference to earlier $@.  */
   unsigned int index;	/* Argument index within argv.  */
@@ -432,6 +432,7 @@ typedef enum {
   M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
+extern	void		m4__push_symbol (m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					const char *);
 extern	bool		m4__next_token_is_open (m4 *);

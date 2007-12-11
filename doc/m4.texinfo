@@ -3450,7 +3450,10 @@ dumpdef(`foo', `dnl', `indir', `__gnu__')
 @error{}foo:@tabchar{}3, <divnum>@{m4@}, 1 l...
 @error{}indir:@tabchar{}<indir>@{gnu@}
 @result{}
-debugmode(`-m')
+debugmode(`-ms')debugmode(`+q')
+@result{}
+dumpdef(`foo')
+@error{}foo:@tabchar{}`3'
 @result{}
 @end example
 
