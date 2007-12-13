@@ -1,3 +1,8 @@
+2007-12-13  Paolo Bonzini  <bonzini@gnu.org> (tiny change)
+
+	* doc/m4.texinfo: Fix quoting of a quoting example.
+	Reported by Giovanni Toffetti.
+
 2007-12-11  Eric Blake  <ebb9@byu.net>
 
 	Stage 7: use chained input support in input parser.
