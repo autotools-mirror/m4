@@ -1,3 +1,10 @@
+2007-12-13  Paolo Bonzini  <bonzini@gnu.org>  (tiny change)
+
+	* doc/m4.texinfo (Inhibiting Invocation): Fix quoting of a quoting
+	example.
+	* THANKS: Update.
+	Reported by Giovanni Toffetti.
+
 2007-12-07  Eric Blake  <ebb9@byu.net>
 
 	Minor security fix: Quote output of mkstemp.
