@@ -59,6 +59,9 @@ struct macro_arguments
      object, or 0 if quote_age changed during parsing or if any of the
      arguments might contain content that can affect rescan.  */
   unsigned int quote_age;
+  /* The context of this macro call during expansion, and NULL in a
+     back-reference.  */
+  call_info *info;
   int level; /* Which obstack owns this argv.  */
   unsigned int arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
@@ -176,7 +179,7 @@ static size_t stacks_count;
 int expansion_level = 0;
 
 /* The number of the current call of expand_macro ().  */
-static int macro_call_id = 0;
+static int macro_call_id;
 
 /* The empty string token.  */
 static token_data empty_token;
@@ -476,7 +479,7 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 `-------------------------------------------------------------------------*/
 
 static macro_arguments *
-collect_arguments (symbol *sym, struct obstack *arguments,
+collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
 		   struct obstack *argv_stack)
 {
   token_data td;
@@ -495,6 +498,7 @@ collect_arguments (symbol *sym, struct obstack *arguments,
   args.argv0 = SYMBOL_NAME (sym);
   args.argv0_len = strlen (args.argv0);
   args.quote_age = quote_age ();
+  args.info = info;
   args.level = expansion_level - 1;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (macro_arguments, array));
@@ -564,31 +568,37 @@ collect_arguments (symbol *sym, struct obstack *arguments,
 }
 
 
-/*-----------------------------------------------------------------.
-| Call the macro SYM, which is either a builtin function or a user |
-| macro (via the expansion function expand_user_macro () in        |
-| builtin.c).  There are ARGC arguments to the call, stored in the |
-| ARGV table.  The expansion is left on the obstack EXPANSION.     |
-`-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Call the macro SYM, which is either a builtin function or a user   |
+| macro (via the expansion function expand_user_macro () in          |
+| builtin.c).  The arguments are provided by ARGV.  The expansion is |
+| left on the obstack EXPANSION.  Macro tracing is also handled      |
+| here.                                                              |
+`-------------------------------------------------------------------*/
 
 void
-call_macro (symbol *sym, int argc, macro_arguments *argv,
-	    struct obstack *expansion)
+call_macro (symbol *sym, macro_arguments *argv, struct obstack *expansion)
 {
+  unsigned int trace_start = 0;
+
+  if (argv->info->trace)
+    trace_start = trace_pre (argv);
   switch (SYMBOL_TYPE (sym))
     {
     case TOKEN_FUNC:
-      SYMBOL_FUNC (sym) (expansion, argc, argv);
+      SYMBOL_FUNC (sym) (expansion, argv->argc, argv);
       break;
 
     case TOKEN_TEXT:
-      expand_user_macro (expansion, sym, argc, argv);
+      expand_user_macro (expansion, sym, argv->argc, argv);
       break;
 
     default:
       assert (!"call_macro");
       abort ();
     }
+  if (argv->info->trace)
+    trace_post (trace_start, argv->info);
 }
 
 /*-------------------------------------------------------------------------.
@@ -609,19 +619,10 @@ expand_macro (symbol *sym)
   void *argv_base;		/* Base of stacks[i].argv on entry.  */
   macro_arguments *argv;	/* Arguments to the called macro.  */
   struct obstack *expansion;	/* Collects the macro's expansion.  */
-  const input_block *expanded;	/* The resulting expansion, for tracing.  */
-  bool traced;			/* True if this macro is traced.  */
-  int my_call_id;		/* Sequence id for this macro.  */
   int level = expansion_level;	/* Expansion level of this macro.  */
+  call_info my_call_info;	/* Context of this macro.  */
 
-  /* Report errors at the location where the open parenthesis (if any)
-     was found, but after expansion, restore global state back to the
-     location of the close parenthesis.  This is safe since we
-     guarantee that macro expansion does not alter the state of
-     current_file/current_line (dnl, include, and sinclude are special
-     cased in the input engine to ensure this fact).  */
-  const char *loc_open_file = current_file;
-  int loc_open_line = current_line;
+  // TODO - make m4_warn use optional call_info, so we don't need these.
   const char *loc_close_file;
   int loc_close_line;
 
@@ -661,35 +662,37 @@ expand_macro (symbol *sym)
 	      _("recursion limit of %d exceeded, use -L<N> to change it"),
 	      nesting_limit);
 
-  macro_call_id++;
-  my_call_id = macro_call_id;
+  /* Collect context in effect at start of macro, even if global state
+     changes in the meantime.  */
+  my_call_info.file = current_file;
+  my_call_info.line = current_line;
+  my_call_info.call_id = ++macro_call_id;
+  my_call_info.trace = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
+  my_call_info.debug_level = debug_level;
+  my_call_info.name = SYMBOL_NAME (sym);
+  trace_prepre (&my_call_info);
 
-  traced = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
-  if (traced && (debug_level & DEBUG_TRACE_CALL))
-    trace_prepre (SYMBOL_NAME (sym), my_call_id);
-
-  argv = collect_arguments (sym, stacks[level].args, stacks[level].argv);
+  /* Collect the arguments.  */
+  argv = collect_arguments (sym, &my_call_info, stacks[level].args,
+			    stacks[level].argv);
   args_scratch = obstack_finish (stacks[level].args);
 
-  /* The actual macro call.  */
+  /*  Temporarily reset the location so that error messages are
+      tracked to the macro name.  */
   loc_close_file = current_file;
   loc_close_line = current_line;
-  current_file = loc_open_file;
-  current_line = loc_open_line;
+  current_file = my_call_info.file;
+  current_line = my_call_info.line;
 
-  if (traced)
-    trace_pre (SYMBOL_NAME (sym), my_call_id, argv);
-
+  /* The actual macro call.  */
   expansion = push_string_init ();
-  call_macro (sym, argv->argc, argv, expansion);
-  expanded = push_string_finish ();
-
-  if (traced)
-    trace_post (SYMBOL_NAME (sym), my_call_id, argv, expanded);
+  call_macro (sym, argv, expansion);
+  push_string_finish ();
 
   /* Cleanup.  */
   current_file = loc_close_file;
   current_line = loc_close_line;
+  argv->info = NULL;
 
   --expansion_level;
   --SYMBOL_PENDING_EXPANSIONS (sym);
@@ -710,8 +713,9 @@ expand_macro (symbol *sym)
 	  obstack_free (stacks[level].args, args_scratch);
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (debug, "m4debug: -%d- `%s' in use, level=%d, "
-		      "refcount=%zu, argcount=%zu\n", my_call_id, argv->argv0,
-		      level, stacks[level].refcount, stacks[level].argcount);
+		      "refcount=%zu, argcount=%zu\n", my_call_info.call_id,
+		      argv->argv0, level, stacks[level].refcount,
+		      stacks[level].argcount);
 	}
       else
 	{
@@ -868,6 +872,16 @@ unsigned int
 arg_argc (macro_arguments *argv)
 {
   return argv->argc;
+}
+
+/* Given ARGV, return the call context in effect when argument
+   collection began.  Only safe to call while the macro is being
+   expanded.  */
+const call_info *
+arg_info (macro_arguments *argv)
+{
+  assert (argv->info);
+  return argv->info;
 }
 
 /* Given ARGV, return the type of argument ARG.  Arg 0 is always text,
@@ -1394,22 +1408,23 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
 /* Create a new argument object using the same obstack as ARGV; thus,
    the new object will automatically be freed when the original is
    freed.  Explicitly set the macro name (argv[0]) from ARGV0 with
-   length ARGV0_LEN.  If SKIP, set argv[1] of the new object to
-   argv[2] of the old, otherwise the objects share all arguments.  If
+   length ARGV0_LEN, and discard argv[1] of the wrapped ARGV.  If
    FLATTEN, any non-text in ARGV is flattened to an empty string when
-   referenced through the new object.  */
+   referenced through the new object.  If TRACE, then trace the macro,
+   regardless of global trace state.  */
 macro_arguments *
 make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
-	       bool skip, bool flatten)
+	       bool flatten, bool trace)
 {
   macro_arguments *new_argv;
   token_data *token;
   token_data *new_token;
-  unsigned int i = skip ? 2 : 1;
   struct obstack *obs = arg_scratch ();
+  call_info *info;
 
+  info = (call_info *) obstack_copy (obs, argv->info, sizeof *info);
   new_token = (token_data *) obstack_alloc (obs, sizeof *token);
-  token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv, i,
+  token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv, 2,
 			       flatten, NULL);
   if (!token)
     {
@@ -1433,11 +1448,14 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       new_argv->flatten = flatten;
       new_argv->has_func = argv->has_func;
     }
-  new_argv->argc = argv->argc - (i - 1);
+  new_argv->argc = argv->argc - 1;
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
+  new_argv->info = info;
+  info->trace = (argv->info->debug_level & DEBUG_TRACE_ALL) || trace;
+  info->name = argv0;
   new_argv->level = argv->level;
   return new_argv;
 }

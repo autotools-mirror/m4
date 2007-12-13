@@ -95,7 +95,6 @@ typedef struct string_pair string_pair;
 #define obstack_chunk_free	free
 
 /* These must come first.  */
-typedef struct input_block input_block;
 typedef struct token_data token_data;
 typedef struct macro_arguments macro_arguments;
 typedef void builtin_func (struct obstack *, int, macro_arguments *);
@@ -138,6 +137,21 @@ extern const char *user_word_regexp;	/* -W */
 #endif
 
 /* Error handling.  */
+
+/* A structure containing context that was valid when a macro call
+   started collecting arguments; used for tracing and error messages
+   even when the global context changes in the meantime.  */
+struct call_info
+{
+  const char *file;	/* The file containing the macro invocation.  */
+  int line;		/* The line the macro was called on.  */
+  int call_id;		/* The unique sequence call id of the macro.  */
+  int trace : 1;	/* True to trace this macro.  */
+  int debug_level : 31;	/* The debug level for tracing the macro call.  */
+  const char *name;	/* The macro name.  */
+};
+typedef struct call_info call_info;
+
 extern int retcode;
 extern const char *program_name;
 
@@ -244,10 +258,9 @@ void debug_flush_files (void);
 bool debug_set_output (const char *, const char *);
 void debug_message_prefix (void);
 
-void trace_prepre (const char *, int);
-void trace_pre (const char *, int, macro_arguments *);
-void trace_post (const char *, int, macro_arguments *,
-		 const input_block *);
+void trace_prepre (const call_info *);
+unsigned int trace_pre (macro_arguments *);
+void trace_post (unsigned int, const call_info *);
 
 
 /* File: input.c  --- lexical definitions.  */
@@ -397,11 +410,11 @@ void append_macro (struct obstack *, builtin_func *, token_chain **,
 void push_macro (struct obstack *, builtin_func *);
 struct obstack *push_string_init (void);
 bool push_token (token_data *, int, bool);
-const input_block *push_string_finish (void);
+void push_string_finish (void);
 struct obstack *push_wrapup_init (token_chain ***);
 void push_wrapup_finish (void);
 bool pop_wrapup (void);
-void input_print (struct obstack *, const input_block *);
+void input_print (struct obstack *);
 
 /* current input file, and line */
 extern const char *current_file;
@@ -497,11 +510,12 @@ void hack_all_symbols (hack_symbol *, void *);
 extern int expansion_level;
 
 void expand_input (void);
-void call_macro (symbol *, int, macro_arguments *, struct obstack *);
+void call_macro (symbol *, macro_arguments *, struct obstack *);
 size_t adjust_refcount (int, bool);
 
 bool arg_adjust_refcount (macro_arguments *, bool);
 unsigned int arg_argc (macro_arguments *);
+const call_info *arg_info (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);

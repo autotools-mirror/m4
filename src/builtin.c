@@ -467,7 +467,7 @@ define_user_macro (const char *name, size_t name_len, const char *text,
 	      offset = regs->end[0];
 	      m4_warn (0, NULL,
 		       _("definition of `%s' contains sequence `%.*s'"),
-		       name, regs->end[0] - regs->start[0],
+		       name, (int) (regs->end[0] - regs->start[0]),
 		       defn + regs->start[0]);
 	    }
 	}
@@ -940,7 +940,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-						 true, !bp->groks_macro_args);
+						 !bp->groks_macro_args, false);
       bp->func (obs, argc - 1, new_argv);
     }
 }
@@ -974,8 +974,10 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-						 true, !SYMBOL_MACRO_ARGS (s));
-      call_macro (s, argc - 1, new_argv, obs);
+						 !SYMBOL_MACRO_ARGS (s),
+						 SYMBOL_TRACED (s));
+      trace_prepre (arg_info (new_argv));
+      call_macro (s, new_argv, obs);
     }
 }
 
@@ -1669,7 +1671,9 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 	    m4_warn (0, me, _("invalid macro name ignored"));
 	    continue;
 	  }
-	s = lookup_symbol (ARG (i), SYMBOL_INSERT);
+	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+	if (!s)
+	  s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
 }

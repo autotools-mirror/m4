@@ -2299,7 +2299,7 @@ defn(`a', `divnum', `a')
 define(`mydivnum', defn(`divnum', `divnum'))mydivnum
 @error{}m4trace: -2- defn(`divnum', `divnum') -> `<divnum><divnum>'
 @error{}m4:stdin:5: Warning: define: cannot concatenate builtins
-@error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>')
+@error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>') -> `'
 @result{}
 traceoff(`defn', `define')dumpdef(`mydivnum')
 @error{}mydivnum:@tabchar{}`'
@@ -3703,6 +3703,16 @@ does not transfer tracing status.
 
 @example
 $ @kbd{m4 -d}
+traceon(`traceon')
+@result{}
+traceon(`traceoff')
+@error{}m4trace: -1- traceon(`traceoff') -> `'
+@result{}
+traceoff(`traceoff')
+@error{}m4trace: -1- traceoff(`traceoff') -> `'
+@result{}
+traceoff(`traceon')
+@result{}
 traceon(`eval', `m4_divnum')
 @result{}
 define(`m4_eval', defn(`eval'))
@@ -3718,7 +3728,56 @@ m4_eval(m4_divnum)
 @end example
 
 @xref{Debug Levels}, for information on controlling the details of the
-display.
+display.  The format of the trace output is not specified by
+@acronym{POSIX}, and varies between implementations of @code{m4}.
+
+Starting with M4 1.6, tracing also works via @code{indir}
+(@pxref{Indir}).  However, since tracing is an attribute tracked by
+macro names, and @code{builtin} bypasses macro names (@pxref{Builtin}),
+it is not possible for @code{builtin} to trace which subsidiary builtin
+it invokes.  If you are worried about tracking all invocations of a
+given builtin, you should also trace @code{builtin}, or enable global
+tracing (the @samp{t} debug level, @pxref{Debug Levels}).
+
+@example
+$ @kbd{m4 -d}
+define(`my_defn', defn(`defn'))undefine(`defn')
+@result{}
+define(`foo', `bar')traceon(`foo', `defn', `my_defn')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+indir(`foo')
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+my_defn(`foo')
+@error{}m4trace: -1- my_defn(`foo') -> ``bar''
+@result{}bar
+indir(`my_defn', `foo')
+@error{}m4trace: -1- my_defn(`foo') -> ``bar''
+@result{}bar
+builtin(`defn', `foo')
+@result{}bar
+debugmode(`+cxt')
+@result{}
+builtin(`defn', builtin(`shift', `', `foo'))
+@error{}m4trace: -1- id 12: builtin ...
+@error{}m4trace: -2- id 13: builtin ...
+@error{}m4trace: -2- id 13: builtin(`shift', `', `foo') -> ``foo''
+@error{}m4trace: -1- id 12: builtin(`defn', `foo') -> ``bar''
+@result{}bar
+indir(`my_defn', indir(`shift', `', `foo'))
+@error{}m4trace: -1- id 14: indir ...
+@error{}m4trace: -2- id 15: indir ...
+@error{}m4trace: -2- id 15: shift ...
+@error{}m4trace: -2- id 15: shift(`', `foo') -> ``foo''
+@error{}m4trace: -2- id 15: indir(`shift', `', `foo') -> ``foo''
+@error{}m4trace: -1- id 14: my_defn ...
+@error{}m4trace: -1- id 14: my_defn(`foo') -> ``bar''
+@error{}m4trace: -1- id 14: indir(`my_defn', `foo') -> ``bar''
+@result{}bar
+@end example
 
 @node Debug Levels
 @section Controlling debugging output
@@ -3746,11 +3805,14 @@ flag is used, otherwise only the macros covered by calls of
 @code{traceon}.  Arguments are subject to length truncation specified by
 the command line option @option{--arglength} (or @option{-l}).
 
+@comment FIXME - is it worth adding @item b, which turns on backslash
+@comment escaping of all trace output, to guarantee single-line traces?
+
 @item c
-In trace output, show several trace lines for each macro call.  A line
-is shown when the macro is seen, but before the arguments are collected;
-a second line when the arguments have been collected and a third line
-after the call has completed.
+In trace output, show an additional trace line for each macro call, when
+the macro is seen, but before the arguments are collected.  By default,
+only one line is printed, after all arguments are collected and the
+expansion determined.  This is often used with the @samp{x} flag.
 
 @item e
 In trace output, show the expansion of each macro call, if it is not
@@ -3787,7 +3849,11 @@ In trace output, trace all macro calls made in this invocation of
 
 @item x
 In trace output, add a unique `macro call id' to each line of the trace
-output.  This is useful in connection with the @samp{c} flag above.
+output.  This is useful in connection with the @samp{c} flag above, to
+match where a macro is first recognized with where it is finally
+expanded, in spite of intermediate expansions that occur while
+collecting arguments.  It can also be used in isolation to determine how
+many macros have been expanded.
 
 @item V
 A shorthand for all of the above flags.
@@ -3825,17 +3891,18 @@ debugmode()
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO
-debugmode(`V')
+debugmode(`V')debugmode(`-q')
+@error{}m4trace:stdin:5: -1- id 6: debugmode ...
+@error{}m4trace:stdin:5: -1- id 6: debugmode(`-q') -> `'
 @result{}
-foo(`ignored')
-@error{}m4trace:stdin:6: -1- id 6: foo ...
-@error{}m4trace:stdin:6: -1- id 6: foo(`ignored') -> ???
-@error{}m4trace:stdin:6: -1- id 6: foo(...) -> `FOO'
+foo(
+`ignored')
+@error{}m4trace:stdin:6: -1- id 7: foo ...
+@error{}m4trace:stdin:6: -1- id 7: foo(ignored) -> FOO
 @result{}FOO
 debugmode
-@error{}m4trace:stdin:7: -1- id 7: debugmode ...
-@error{}m4trace:stdin:7: -1- id 7: debugmode -> ???
-@error{}
+@error{}m4trace:stdin:8: -1- id 8: debugmode ...
+@error{}m4trace:stdin:8: -1- id 8: debugmode ->@w{ }
 @result{}
 foo
 @error{}m4trace: -1- foo
@@ -3843,7 +3910,7 @@ foo
 debugmode(`+l')
 @result{}
 foo
-@error{}m4trace:10: -1- foo
+@error{}m4trace:11: -1- foo
 @result{}FOO
 @end example
 
@@ -3852,17 +3919,17 @@ when specified on the command line.  Note that each argument and the
 final result are individually truncated.  Also, the special tokens for
 builtin functions are not truncated.
 
-@comment options: -l6
+@comment options: -l6 -tdefn -techo
 @example
-$ @kbd{m4 -d -l 6}
-define(`echo', `$@@')debugmode(`+t')
+$ @kbd{m4 -d -l 6 -t defn -t echo}
+define(`echo', `$@@')
 @result{}
 echo(`1', `long string')
 @error{}m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
 @result{}1,long string
 indir(`echo', defn(`changequote'))
 @error{}m4trace: -2- defn(`change...') -> `<changequote>'
-@error{}m4trace: -1- indir(`echo', <changequote>) -> ``<changequote>''
+@error{}m4trace: -1- echo(<changequote>) -> ``<changequote>''
 @result{}
 @end example
 
@@ -7260,6 +7327,13 @@ turns tracing off for all definitions regardless of whether they were
 also traced by name; and tracing by name, such as with @option{-tfoo} at
 the command line or @code{traceon(`foo')} in the input, is an attribute
 that is preserved even if the macro is currently undefined.
+
+Additionally, while @acronym{POSIX} requires trace output, it makes no
+demands on the formatting of that output.  Parsing trace output is not
+guaranteed to be reliable, even between different releases of
+@acronym{GNU} M4; however, the intent is that any future changes in
+trace output will only occur under the direction of additional
+@code{debugmode} flags (@pxref{Debug Levels}).
 
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all

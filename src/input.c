@@ -80,6 +80,8 @@ enum input_type
 
 typedef enum input_type input_type;
 
+typedef struct input_block input_block;
+
 /* A block of input to be scanned.  */
 struct input_block
 {
@@ -334,6 +336,7 @@ push_string_init (void)
   next->type = INPUT_STRING;
   next->file = current_file;
   next->line = current_line;
+  next->u.u_s.len = 0;
 
   return current_input;
 }
@@ -503,26 +506,20 @@ push_token (token_data *token, int level, bool inuse)
 }
 
 /*-------------------------------------------------------------------.
-| Last half of push_string ().  If next is now NULL, a call to       |
-| push_file () or push_macro () has invalidated the previous call to |
-| push_string_init (), so we just give up.  If the new object is     |
-| void, we do not push it.  The function push_string_finish ()       |
-| returns an opaque pointer to the finished object, which can then   |
-| be printed with input_print when tracing is enabled.  This pointer |
-| is only for temporary use, since reading the next token will       |
-| invalidate the object.                                             |
+| Last half of push_string ().  All remaining unfinished text on the |
+| obstack returned from push_string_init is collected into the input |
+| stack.                                                             |
 `-------------------------------------------------------------------*/
 
-const input_block *
+void
 push_string_finish (void)
 {
-  input_block *ret = NULL;
   size_t len = obstack_object_size (current_input);
 
   if (next == NULL)
     {
       assert (!len);
-      return NULL;
+      return;
     }
 
   if (len || next->type == INPUT_CHAIN)
@@ -537,12 +534,10 @@ push_string_finish (void)
       next->prev = isp;
       isp = next;
       input_change = true;
-      ret = isp;
     }
   else
     obstack_free (current_input, next);
   next = NULL;
-  return ret;
 }
 
 /*--------------------------------------------------------------.
@@ -735,24 +730,30 @@ pop_wrapup (void)
 | tracing.                                                      |
 `--------------------------------------------------------------*/
 void
-input_print (struct obstack *obs, const input_block *input)
+input_print (struct obstack *obs)
 {
+  size_t len = obstack_object_size (current_input);
   size_t maxlen = max_debug_argument_length;
   token_chain *chain;
 
-  assert (input);
-  switch (input->type)
+  if (!next)
+    {
+      assert (!len);
+      return;
+    }
+  switch (next->type)
     {
     case INPUT_STRING:
-      shipout_string_trunc (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
+      assert (!next->u.u_s.len);
       break;
     case INPUT_FILE:
+      assert (!len);
       obstack_grow (obs, "<file: ", strlen ("<file: "));
-      obstack_grow (obs, input->file, strlen (input->file));
+      obstack_grow (obs, next->file, strlen (next->file));
       obstack_1grow (obs, '>');
       break;
     case INPUT_CHAIN:
-      chain = input->u.u_c.chain;
+      chain = next->u.u_c.chain;
       while (chain)
 	{
 	  switch (chain->type)
@@ -785,6 +786,9 @@ input_print (struct obstack *obs, const input_block *input)
       assert (!"input_print");
       abort ();
     }
+  if (len)
+    shipout_string_trunc (obs, (char *) obstack_base (current_input), len,
+			  &maxlen);
 }
 
 
