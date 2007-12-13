@@ -1,10 +1,15 @@
 2007-12-13  Eric Blake  <ebb9@byu.net>
 
+	Yet more rewording.
+	* doc/m4.texinfo (Inhibiting Invocation): Missed one instance in
+	the previous patch.
+
 	* THANKS: Update.
 
-2007-12-13  Paolo Bonzini  <bonzini@gnu.org> (tiny change)
+2007-12-13  Paolo Bonzini  <bonzini@gnu.org>  (tiny change)
 
-	* doc/m4.texinfo: Fix quoting of a quoting example.
+	* doc/m4.texinfo (Inhibiting Invocation): Fix quoting of a quoting
+	example.
 	Reported by Giovanni Toffetti.
 
 2007-12-11  Eric Blake  <ebb9@byu.net>
