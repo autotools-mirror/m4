@@ -1345,8 +1345,9 @@ the @code{divert} builtin macro will be called, which expands to the
 empty string.
 
 @cindex rescanning
-The output of macro evaluations is always rescanned.  The following
-example would yield the string @samp{bcd}, exactly as if @code{m4}
+The output of macro evaluations is always rescanned.  In the following
+example, the input @samp{x`'y} yields the string @samp{bCD}, exactly as
+if @code{m4}
 has been given @w{@samp{substr(ab`'cde, `1', `3')}} as input:
 
 @example
