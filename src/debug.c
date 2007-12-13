@@ -33,7 +33,7 @@ static struct obstack trace;
 static void debug_set_file (const char *, FILE *);
 
 /*----------------------------------.
-| Initialise the debugging module.  |
+| Initialize the debugging module.  |
 `----------------------------------*/
 
 void
@@ -113,11 +113,12 @@ debug_decode (const char *opts)
   return level;
 }
 
-/*------------------------------------------------------------------------.
-| Change the debug output stream to FP.  If the underlying file is the	  |
-| same as stdout, use stdout instead so that debug messages appear in the |
-| correct relative position.						  |
-`------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Change the debug output stream to FP.  If the underlying file is |
+| the same as stdout, use stdout instead so that debug messages    |
+| appear in the correct relative position.  Report any failure on  |
+| behalf of CALLER.                                                |
+`-----------------------------------------------------------------*/
 
 static void
 debug_set_file (const char *caller, FILE *fp)
@@ -210,7 +211,7 @@ debug_set_output (const char *caller, const char *name)
 }
 
 /*-----------------------------------------------------------------------.
-| Print the header of a one-line debug message, starting by "m4 debug".	 |
+| Print the header of a one-line debug message, starting by "m4debug:".	 |
 `-----------------------------------------------------------------------*/
 
 void
@@ -235,10 +236,8 @@ debug_message_prefix (void)
 
 /*-------------------------------------------------------------------.
 | Tracing output to the obstack is formatted here, by a simplified   |
-| printf-like function trace_format ().  Understands only %B (1 arg: |
-| input block), %S (1 arg: length-limited text), %s (1 arg: text),   |
-| %d (1 arg: integer), %l (0 args: optional left quote) and %r (0    |
-| args: optional right quote).                                       |
+| printf-like function trace_format ().  Understands only %s (1 arg: |
+| text), %d (1 arg: integer).                                        |
 `-------------------------------------------------------------------*/
 
 static void
@@ -263,25 +262,8 @@ trace_format (const char *fmt, ...)
       maxlen = SIZE_MAX;
       switch (*fmt++)
 	{
-	case 'B':
-	  s = "";
-	  input_print (&trace, va_arg (args, input_block *));
-	  break;
-
-	case 'S':
-	  maxlen = max_debug_argument_length;
-	  /* fall through */
-
 	case 's':
 	  s = va_arg (args, const char *);
-	  break;
-
-	case 'l':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? curr_quote.str1 : "";
-	  break;
-
-	case 'r':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? curr_quote.str2 : "";
 	  break;
 
 	case 'd':
@@ -302,102 +284,106 @@ trace_format (const char *fmt, ...)
 }
 
 /*------------------------------------------------------------------.
-| Format the standard header attached to all tracing output lines.  |
-| ID is the current macro id.                                       |
+| Format the standard header attached to all tracing output lines,  |
+| using the context in INFO as appropriate.  Return the offset into |
+| the trace obstack where this particular trace begins.             |
 `------------------------------------------------------------------*/
 
-static void
-trace_header (int id)
+static unsigned int
+trace_header (const call_info *info)
 {
+  int trace_level = info->debug_level;
+  unsigned int result = obstack_object_size (&trace);
   trace_format ("m4trace:");
-  if (current_line)
-    {
-      if (debug_level & DEBUG_TRACE_FILE)
-	trace_format ("%s:", current_file);
-      if (debug_level & DEBUG_TRACE_LINE)
-	trace_format ("%d:", current_line);
-    }
+  if (trace_level & DEBUG_TRACE_FILE)
+    trace_format ("%s:", info->file);
+  if (trace_level & DEBUG_TRACE_LINE)
+    trace_format ("%d:", info->line);
   trace_format (" -%d- ", expansion_level);
-  if (debug_level & DEBUG_TRACE_CALLID)
-    trace_format ("id %d: ", id);
+  if (trace_level & DEBUG_TRACE_CALLID)
+    trace_format ("id %d: ", info->call_id);
+  return result;
 }
 
-/*----------------------------------------------------.
-| Print current tracing line, and clear the obstack.  |
-`----------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Print current tracing line starting at offset START, as returned |
+| from an earlier trace_header(), then clear the obstack.          |
+`-----------------------------------------------------------------*/
 
 static void
-trace_flush (void)
+trace_flush (unsigned int start)
 {
   char *line;
 
   obstack_1grow (&trace, '\0');
-  line = (char *) obstack_finish (&trace);
-  DEBUG_PRINT1 ("%s\n", line);
-  obstack_free (&trace, line);
-}
-
-/*----------------------------------------------------------------.
-| Do pre-argument-collection tracing for macro NAME, with a given |
-| ID.  Used from expand_macro ().                                 |
-`----------------------------------------------------------------*/
-
-void
-trace_prepre (const char *name, int id)
-{
-  trace_header (id);
-  trace_format ("%s ...", name);
-  trace_flush ();
-}
-
-/*-----------------------------------------------------------------.
-| Format the parts of a trace line that are known before the macro |
-| is actually expanded.  Called for the macro NAME with ID, and    |
-| arguments ARGV.  Used from expand_macro ().                      |
-`-----------------------------------------------------------------*/
-
-void
-trace_pre (const char *name, int id, macro_arguments *argv)
-{
-  trace_header (id);
-  trace_format ("%s", name);
-
-  if (arg_argc (argv) > 1 && (debug_level & DEBUG_TRACE_ARGS))
-    {
-      size_t len = max_debug_argument_length;
-      trace_format ("(");
-      arg_print (&trace, argv, 1,
-		 (debug_level & DEBUG_TRACE_QUOTE) ? &curr_quote : NULL,
-		 false, NULL, ", ", &len, true);
-      trace_format (")");
-    }
-
-  if (debug_level & DEBUG_TRACE_CALL)
-    {
-      trace_format (" -> ???");
-      trace_flush ();
-    }
+  line = (char *) obstack_base (&trace);
+  DEBUG_PRINT1 ("%s\n", &line[start]);
+  start -= obstack_object_size (&trace);
+  obstack_blank (&trace, start);
 }
 
 /*-------------------------------------------------------------------.
-| Format the final part of a trace line and print it all.  Print     |
-| details for macro NAME with ID, given arguemnts ARGV and expansion |
-| EXPANDED.  Used from expand_macro ().                              |
+| Do pre-argument-collection tracing for the macro call described in |
+| INFO.  Used from expand_macro ().                                  |
 `-------------------------------------------------------------------*/
 
 void
-trace_post (const char *name, int id, macro_arguments *argv,
-	    const input_block *expanded)
+trace_prepre (const call_info *info)
 {
-  int argc = arg_argc (argv);
-
-  if (debug_level & DEBUG_TRACE_CALL)
+  if (info->trace && (info->debug_level & DEBUG_TRACE_CALL))
     {
-      trace_header (id);
-      trace_format ("%s%s", name, (argc > 1) ? "(...)" : "");
+      unsigned int start = trace_header (info);
+      trace_format ("%s ...", info->name);
+      trace_flush (start);
     }
+}
 
-  if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
-    trace_format (" -> %l%B%r", expanded);
-  trace_flush ();
+/*------------------------------------------------------------------.
+| Format the parts of a trace line that are known via ARGV before   |
+| the macro is actually expanded.  Used from call_macro ().  Return |
+| the start of the current trace, in case other traces are printed  |
+| before this trace completes trace_post.                           |
+`------------------------------------------------------------------*/
+
+unsigned int
+trace_pre (macro_arguments *argv)
+{
+  const call_info *info = arg_info (argv);
+  int trace_level = info->debug_level;
+  unsigned int start = trace_header (info);
+
+  assert (info->trace);
+  trace_format ("%s", info->name);
+  if (1 < arg_argc (argv) && (trace_level & DEBUG_TRACE_ARGS))
+    {
+      size_t len = max_debug_argument_length;
+      obstack_1grow (&trace, '(');
+      arg_print (&trace, argv, 1,
+		 (trace_level & DEBUG_TRACE_QUOTE) ? &curr_quote : NULL,
+		 false, NULL, ", ", &len, true);
+      obstack_1grow (&trace, ')');
+    }
+  return start;
+}
+
+/*------------------------------------------------------------------.
+| If requested by the trace state in INFO, format the final part of |
+| a trace line.  Then print all collected information from START,   |
+| returned from a prior trace_pre().  Used from call_macro ().      |
+`------------------------------------------------------------------*/
+
+void
+trace_post (unsigned int start, const call_info *info)
+{
+  assert (info->trace);
+  if (info->debug_level & DEBUG_TRACE_EXPANSION)
+    {
+      obstack_grow (&trace, " -> ", 4);
+      if (info->debug_level & DEBUG_TRACE_QUOTE)
+	obstack_grow (&trace, curr_quote.str1, curr_quote.len1);
+      input_print (&trace);
+      if (info->debug_level & DEBUG_TRACE_QUOTE)
+	obstack_grow (&trace, curr_quote.str2, curr_quote.len2);
+    }
+  trace_flush (start);
 }

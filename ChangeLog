@@ -1,3 +1,40 @@
+2008-05-09  Eric Blake  <ebb9@byu.net>
+
+	Stage 23: allow tracing of indirect macro calls.
+	Track all trace information as part of the argv struct, rather
+	than temporarily resetting global state.  Teach indir to trace
+	macros that it invokes.
+	Memory impact: slight penalty, due to larger argv struct.
+	Speed impact: none noticed.
+	* src/m4.h (struct call_info): New struct.
+	(trace_prepre, trace_pre, trace_post, push_string_finish)
+	(input_print, call_macro): Alter signatures.
+	(arg_info): New prototype.
+	(input_block): Delete...
+	* src/input.c (input_block): ...and make typedef local again.
+	(push_string_init): Initialize length.
+	(push_string_finish, input_print): Change signature, so that
+	printing can be done before finalization.
+	* src/macro.c (struct macro_arguments): Add info member.
+	(collect_arguments, make_argv_ref): Manage new field.
+	(expand_macro): Change call context management.  Move tracing...
+	(call_macro): ...here, and remove redundant parameter.
+	(arg_info): New function.
+	* src/debug.c (trace_format): Delete unused modifiers.
+	(trace_header, trace_flush, trace_prepre, trace_pre, trace_post):
+	Change signatures for stacked trace messages, and for using call
+	context.
+	* src/builtin.c (m4_builtin, m4_indir): Update callers.
+	* src/m4.c (usage): Update debugmode flag summary.
+	* doc/m4.texinfo (Defn): Update examples to match new behavior.
+	(Trace): Mention new capability of indir.
+	(Debug Levels): Enhance text for 'c' and 'x', update examples.
+	(Incompatibilities): Mention risk of parsing trace output.
+	* examples/null.m4: Enhance test.
+	* examples/null.err: Update expected output.
+	* NEWS: Mention these changes.
+	Reported by Akim Demaille in the autoconf TODO file in 2000.
+
 2008-05-07  Eric Blake  <ebb9@byu.net>
 
 	Fix traceon regression introduced 2006-06-06.

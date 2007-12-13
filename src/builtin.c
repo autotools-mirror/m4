@@ -943,7 +943,7 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-						 true, !bp->groks_macro_args);
+						 !bp->groks_macro_args, false);
       bp->func (obs, argc - 1, new_argv);
     }
 }
@@ -977,8 +977,10 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-						 true, !SYMBOL_MACRO_ARGS (s));
-      call_macro (s, argc - 1, new_argv, obs);
+						 !SYMBOL_MACRO_ARGS (s),
+						 SYMBOL_TRACED (s));
+      trace_prepre (arg_info (new_argv));
+      call_macro (s, new_argv, obs);
     }
 }
 
