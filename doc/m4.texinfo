@@ -8401,7 +8401,7 @@ detrimental effects.
 
 @comment examples
 @example
-$ @kbd{m4 -I examples}
+$ @kbd{m4 -d -I examples}
 include(`foreach2.m4')
 @result{}
 include(`foreachq2.m4')

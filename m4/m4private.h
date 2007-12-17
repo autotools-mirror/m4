@@ -28,6 +28,7 @@
 #include "cloexec.h"
 
 typedef struct m4__search_path_info m4__search_path_info;
+typedef struct m4__macro_arg_stacks m4__macro_arg_stacks;
 
 typedef enum {
   M4_SYMBOL_VOID,		/* Traced but undefined, u is invalid.  */
@@ -75,6 +76,8 @@ struct m4 {
 
   /* __PRIVATE__: */
   m4__search_path_info	*search_path;	/* The list of path directories. */
+  m4__macro_arg_stacks	*arg_stacks;	/* Array of current argv refs.  */
+  size_t		stacks_count;	/* Size of arg_stacks.  */
 };
 
 #define M4_OPT_PREFIX_BUILTINS_BIT	(1 << 0) /* -P */
@@ -195,6 +198,7 @@ struct m4_symbol_chain
   m4_symbol_chain *next;/* Pointer to next link of chain.  */
   const char *str;	/* NUL-terminated string if text, or NULL.  */
   size_t len;		/* Length of str, or 0.  */
+  size_t level;		/* Expansion level of content, or SIZE_MAX.  */
   m4_macro_args *argv;	/* Reference to earlier $@.  */
   unsigned int index;	/* Argument index within argv.  */
   bool flatten;		/* True to treat builtins as text.  */
@@ -255,6 +259,20 @@ struct m4_macro_args
      argument.  */
   m4_symbol_value *array[FLEXIBLE_ARRAY_MEMBER];
 };
+
+/* Internal structure for managing multiple argv references.  See
+   macro.c for a much more detailed comment on usage.  */
+struct m4__macro_arg_stacks
+{
+  size_t refcount;	/* Number of active $@ references at this level.  */
+  size_t argcount;	/* Number of argv at this level.  */
+  m4_obstack *args;	/* Content of arguments.  */
+  m4_obstack *argv;	/* Argv pointers into args.  */
+  void *args_base;	/* Location for clearing the args obstack.  */
+  void *argv_base;	/* Location for clearing the argv obstack.  */
+};
+
+extern size_t m4__adjust_refcount (m4 *, size_t, bool);
 
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)
@@ -432,7 +450,7 @@ typedef enum {
   M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
-extern	void		m4__push_symbol (m4_symbol_value *, size_t);
+extern	bool		m4__push_symbol (m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					const char *);
 extern	bool		m4__next_token_is_open (m4 *);
@@ -477,13 +495,14 @@ extern void m4__include_init (m4 *);
 
 
 #if DEBUG
-# define DEBUG_INCL
-# define DEBUG_INPUT
-# define DEBUG_MODULES
-# define DEBUG_OUTPUT
-# define DEBUG_STKOVF
-# define DEBUG_SYM
-# define DEBUG_SYNTAX
+# define DEBUG_INCL	1
+# define DEBUG_INPUT	1
+# define DEBUG_MACRO	1
+# define DEBUG_MODULES	1
+# define DEBUG_OUTPUT	1
+# define DEBUG_STKOVF	1
+# define DEBUG_SYM	1
+# define DEBUG_SYNTAX	1
 #endif
 
 #endif /* m4private.h */

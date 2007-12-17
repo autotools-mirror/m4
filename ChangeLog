@@ -1,3 +1,38 @@
+2007-12-17  Eric Blake  <ebb9@byu.net>
+
+	Stage 8: extend life of references into argv.
+	* m4/system_.h (obstack_regrow): Delete.
+	* m4/m4private.h (struct m4_symbol_chain): Add level field.
+	(m4__push_symbol): Adjust prototype.
+	(m4__adjust_refcount): New prototype.
+	(DEBUG_MACRO) [DEBUG]: New debug control.
+	(struct m4__macro_arg_stacks): New structure.
+	(struct m4): Add arg_stacks, stacks_count fields.
+	* m4/m4module.h (m4_make_argv_ref): Add parameter.
+	* m4/macro.c (argc_stack, argv_stack): Delete, replaced by
+	context->arg_stacks.
+	(m4_macro_expand_input) [DEBUG_MACRO]: Add debug hooks,
+	conditional on M4_DEBUG_MACRO envvar.
+	(collect_arguments): Adjust signature.
+	(expand_macro): Rework obstack handling.
+	(m4__adjust_refcount, arg_mark): New functions.
+	(m4_make_argv_ref): Populate new field.
+	(m4_push_arg, m4_push_args): Track inuse.
+	(process_macro): One less cast.
+	* m4/m4.c (m4_delete): Clean up arg_stacks.
+	* m4/input.c (make_text_link): Use new field.
+	(m4__push_symbol, file_clean): Update signature.
+	(composite_read): Bump refcount when done with reference.
+	(composite_clean): New function.
+	(pop_input): Adjust caller.
+	* m4/debug.c (m4_debug_message): Make assertion match comment.
+	* modules/gnu.c (builtin, indir): Adjust callers.
+	* tests/builtins.at (ifelse): New test.
+	(exp): Move and rename...
+	* tests/others.at (countdown): ...to this.
+	* doc/m4.texinfo (Improved foreach): Fix tracing usage in
+	example.
+
 2007-12-13  Eric Blake  <ebb9@byu.net>
 
 	Yet more rewording.

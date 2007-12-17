@@ -426,32 +426,47 @@ AT_CHECK_M4([in.m4 3>&-], [0], [[hello world
 AT_CLEANUP
 
 
-## --- ##
-## exp ##
-## --- ##
+## ------ ##
+## ifelse ##
+## ------ ##
 
-AT_SETUP([exp])
-
-AT_DATA([[exp.m4]],
-[[define(`countdown', `$1
-ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Done')')dnl
-countdown(7)
+AT_TEST_M4([ifelse],
+dnl ensure that comparisons work regardless of reference chains in the middle
+[[define(`e', `$@')define(`long', `01234567890123456789')
+ifelse(long, `01234567890123456789', `yes', `no')
+ifelse(`01234567890123456789', long, `yes', `no')
+ifelse(long, `01234567890123456789-', `yes', `no')
+ifelse(`01234567890123456789-', long, `yes', `no')
+ifelse(e(long), `01234567890123456789', `yes', `no')
+ifelse(`01234567890123456789', e(long), `yes', `no')
+ifelse(e(long), `01234567890123456789-', `yes', `no')
+ifelse(`01234567890123456789-', e(long), `yes', `no')
+ifelse(-e(long), `-01234567890123456789', `yes', `no')
+ifelse(-`01234567890123456789', -e(long), `yes', `no')
+ifelse(-e(long), `-01234567890123456789-', `yes', `no')
+ifelse(`-01234567890123456789-', -e(long), `yes', `no')
+ifelse(-e(long)-, `-01234567890123456789-', `yes', `no')
+ifelse(-`01234567890123456789-', -e(long)-, `yes', `no')
+ifelse(-e(long)-, `-01234567890123456789', `yes', `no')
+ifelse(`-01234567890123456789', -e(long)-, `yes', `no')
+]], [[
+yes
+yes
+no
+no
+yes
+yes
+no
+no
+yes
+yes
+no
+no
+yes
+yes
+no
+no
 ]])
-
-AT_CHECK_M4([exp.m4], 0,
-[[7
-6
-5
-4
-3
-2
-1
-0
-Done
-]])
-
-AT_CLEANUP
-
 
 
 ## ------- ##

@@ -90,7 +90,7 @@
 static	int	file_peek		(m4_input_block *);
 static	int	file_read		(m4_input_block *, m4 *, bool);
 static	void	file_unget		(m4_input_block *, int);
-static	void	file_clean		(m4_input_block *, m4 *);
+static	bool	file_clean		(m4_input_block *, m4 *, bool);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	builtin_peek		(m4_input_block *);
 static	int	builtin_read		(m4_input_block *, m4 *, bool);
@@ -103,6 +103,7 @@ static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	composite_peek		(m4_input_block *);
 static	int	composite_read		(m4_input_block *, m4 *, bool);
 static	void	composite_unget		(m4_input_block *, int);
+static	bool	composite_clean		(m4_input_block *, m4 *, bool);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
 static	void	make_text_link		(m4_obstack *, m4_symbol_chain **,
@@ -135,8 +136,10 @@ struct input_funcs
      same character previously read by read_func.  */
   void	(*unget_func)	(m4_input_block *, int);
 
-  /* Optional function to perform cleanup at end of input.  */
-  void	(*clean_func)	(m4_input_block *, m4 *);
+  /* Optional function to perform cleanup at end of input.  If
+     CLEANUP, it is safe to perform non-recoverable cleanup actions.
+     Return true only if no cleanup remains to be done.  */
+  bool	(*clean_func)	(m4_input_block *, m4 *, bool cleanup);
 
   /* Add a representation of the input block to the obstack, for use
      in trace expansion output.  */
@@ -238,7 +241,8 @@ static struct input_funcs string_funcs = {
 
 /* Vtable for handling input from composite chains.  */
 static struct input_funcs composite_funcs = {
-  composite_peek, composite_read, composite_unget, NULL, composite_print
+  composite_peek, composite_read, composite_unget, composite_clean,
+  composite_print
 };
 
 
@@ -298,9 +302,11 @@ file_unget (m4_input_block *me, int ch)
     start_of_input_line = false;
 }
 
-static void
-file_clean (m4_input_block *me, m4 *context)
+static bool
+file_clean (m4_input_block *me, m4 *context, bool cleanup)
 {
+  if (!cleanup)
+    return false;
   if (me->prev)
     m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
 		      _("input reverted to %s, line %d"),
@@ -318,6 +324,7 @@ file_clean (m4_input_block *me, m4 *context)
     m4_error (context, 0, errno, NULL, _("error reading file `%s'"), me->file);
   start_of_input_line = me->u.u_f.line_start;
   m4_set_output_line (context, -1);
+  return true;
 }
 
 static void
@@ -519,8 +526,10 @@ m4_push_string_init (m4 *context)
    current_input stack and VALUE lives in temporary storage.  Allows
    gathering input from multiple locations, rather than copying
    everything consecutively onto the input stack.  Must be called
-   between push_string_init and push_string_finish.  */
-void
+   between push_string_init and push_string_finish.  Return true only
+   if LEVEL is less than SIZE_MAX and a reference was created to
+   VALUE.  */
+bool
 m4__push_symbol (m4_symbol_value *value, size_t level)
 {
   m4_symbol_chain *chain;
@@ -529,7 +538,7 @@ m4__push_symbol (m4_symbol_value *value, size_t level)
   /* TODO - also accept TOKEN_COMP chains.  */
   assert (m4_is_symbol_value_text (value));
   if (m4_get_symbol_value_len (value) == 0)
-    return;
+    return false;
 
   if (next->funcs == &string_funcs)
     {
@@ -555,9 +564,11 @@ m4__push_symbol (m4_symbol_value *value, size_t level)
   else
     chain->str = m4_get_symbol_value_text (value);
   chain->len = m4_get_symbol_value_len (value);
+  chain->level = SIZE_MAX;
   chain->argv = NULL;
   chain->index = 0;
   chain->flatten = false;
+  return false; /* Only return true when data is reused, not copied.  */
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to
@@ -648,6 +659,8 @@ composite_read (m4_input_block *me, m4 *context, bool safe)
 	}
       if (safe)
 	return CHAR_RETRY;
+      if (chain->level < SIZE_MAX)
+	m4__adjust_refcount (context, chain->level, false);
       me->u.u_c.chain = chain = chain->next;
     }
   return CHAR_RETRY;
@@ -669,6 +682,28 @@ composite_unget (m4_input_block *me, int ch)
       assert (!"implemented yet");
       abort ();
     }
+}
+
+static bool
+composite_clean (m4_input_block *me, m4 *context, bool cleanup)
+{
+  m4_symbol_chain *chain = me->u.u_c.chain;
+  assert (!chain || !cleanup);
+  while (chain)
+    {
+      if (chain->str)
+	assert (!chain->len);
+      else
+	{
+	  /* TODO - peek into argv.  */
+	  assert (!"implemented yet");
+	  abort ();
+	}
+      if (chain->level < SIZE_MAX)
+	m4__adjust_refcount (context, chain->level, false);
+      me->u.u_c.chain = chain = chain->next;
+    }
+  return true;
 }
 
 static void
@@ -718,6 +753,7 @@ make_text_link (m4_obstack *obs, m4_symbol_chain **start,
       chain->next = NULL;
       chain->str = str;
       chain->len = len;
+      chain->level = SIZE_MAX;
       chain->argv = NULL;
       chain->index = 0;
       chain->flatten = false;
@@ -787,15 +823,10 @@ pop_input (m4 *context, bool cleanup)
   m4_input_block *tmp = isp->prev;
 
   assert (isp);
-  if (isp->funcs->peek_func (isp) != CHAR_RETRY)
+  if (isp->funcs->peek_func (isp) != CHAR_RETRY
+      || (isp->funcs->clean_func
+	  && !isp->funcs->clean_func (isp, context, cleanup)))
     return false;
-
-  if (isp->funcs->clean_func != NULL)
-    {
-      if (!cleanup)
-	return false;
-      isp->funcs->clean_func (isp, context);
-    }
 
   if (tmp != NULL)
     {

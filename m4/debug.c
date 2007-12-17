@@ -225,7 +225,7 @@ void
 m4_debug_message (m4 *context, int mode, const char *format, ...)
 {
   /* Check that mode has exactly one bit set.  */
-  assert ((mode & (mode - 1)) == 0);
+  assert (mode && (mode & (mode - 1)) == 0);
   assert (format);
 
   if (m4_get_debug_file (context) != NULL

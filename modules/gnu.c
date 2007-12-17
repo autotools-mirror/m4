@@ -446,8 +446,9 @@ M4BUILTIN_HANDLER (builtin)
 	    {
 	      m4_macro_args *new_argv;
 	      bool flatten = (bp->flags & M4_BUILTIN_GROKS_MACRO) == 0;
-	      new_argv = m4_make_argv_ref (argv, name, m4_arg_len (argv, 1),
-					   true, flatten);
+	      new_argv = m4_make_argv_ref (context, argv, name,
+                                           m4_arg_len (argv, 1),
+                                           true, flatten);
 	      bp->func (context, obs, argc - 1, new_argv);
 	    }
 	  free (value);
@@ -681,8 +682,8 @@ M4BUILTIN_HANDLER (indir)
 	{
 	  m4_macro_args *new_argv;
 	  bool flatten = !m4_symbol_groks_macro (symbol);
-	  new_argv = m4_make_argv_ref (argv, name, m4_arg_len (argv, 1), true,
-				       flatten);
+	  new_argv = m4_make_argv_ref (context, argv, name,
+                                       m4_arg_len (argv, 1), true, flatten);
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	}

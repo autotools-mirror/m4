@@ -48,6 +48,7 @@ m4_create (void)
 void
 m4_delete (m4 *context)
 {
+  size_t i;
   assert (context);
 
   if (context->symtab)
@@ -76,6 +77,20 @@ m4_delete (m4 *context)
 	}
       free (context->search_path);
     }
+
+  for (i = 0; i < context->stacks_count; i++)
+    {
+      assert (context->arg_stacks[i].refcount == 0
+	      && context->arg_stacks[i].argcount == 0);
+      if (context->arg_stacks[i].args)
+	{
+	  obstack_free (context->arg_stacks[i].args, NULL);
+	  free (context->arg_stacks[i].args);
+	  obstack_free (context->arg_stacks[i].argv, NULL);
+	  free (context->arg_stacks[i].argv);
+	}
+    }
+  free (context->arg_stacks);
 
   free (context);
 }

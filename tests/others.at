@@ -71,6 +71,32 @@ Macro foo expansion
 ]])
 
 
+## --------- ##
+## countdown ##
+## --------- ##
+
+AT_SETUP([countdown])
+
+AT_DATA([[exp.m4]],
+[[define(`countdown', `$1
+ifelse(eval($1 > 0), 1, `countdown(decr($1))', `Done')')dnl
+countdown(7)
+]])
+
+AT_CHECK_M4([exp.m4], 0,
+[[7
+6
+5
+4
+3
+2
+1
+0
+Done
+]])
+
+AT_CLEANUP
+
 
 ## ------- ##
 ## foreach ##

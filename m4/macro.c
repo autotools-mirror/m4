@@ -29,8 +29,102 @@
 
 #include "intprops.h"
 
+/* Define this to 1 see runtime debug info.  Implied by DEBUG.  */
+/*#define DEBUG_INPUT 1 */
+#ifndef DEBUG_MACRO
+# define DEBUG_MACRO 0
+#endif /* DEBUG_MACRO */
+
+/* A note on argument memory lifetimes: We use an internal struct
+   (m4__macro_args_stacks) to maintain list of argument obstacks.
+   Within a recursion level, consecutive macros can share a stack, but
+   distinct recursion levels need different stacks since the nested
+   macro is interrupting the argument collection of the outer level.
+   Note that a reference can live as long as the expansion containing
+   the reference can participate as an argument in a future macro
+   call.
+
+   Therefore, we implement a reference counter for each expansion
+   level, tracking how many references exist into the obstack, as well
+   as associate a level with each reference.  Of course, expand_macro
+   is actively using argv, so it increments the refcount on entry and
+   decrements it on exit.  Additionally, any time the input engine is
+   handed a reference that it does not inline, it increases the
+   refcount in push_token, then decreases it in pop_input once the
+   reference has been rescanned.  Finally, when the input engine hands
+   a reference back to expand_argument, the refcount increases, which
+   is then cleaned up at the end of expand_macro.
+
+   For a running example, consider this input:
+
+     define(a,A)define(b,`a(`$1')')define(c,$*)dnl
+     define(x,`a(1)`'c($@')define(y,`$@)')dnl
+     x(a(`b')``a'')y(`b')(`a')
+     => AAaA
+
+   Assuming all arguments are large enough to exceed the inlining
+   thresholds of the input engine, the interesting sequence of events
+   is as follows:
+
+				     stacks[0]             refs stacks[1] refs
+     after second dnl ends:          `'                    0    `'        0
+     expand_macro for x, level 0:    `'                    1    `'        0
+     expand_macro for a, level 1:    `'                    1    `'        1
+     after collect_arguments for a:  `'                    1    `b'       1
+     push `A' to input stack:        `'                    1    `b'       1
+     exit expand_macro for a:        `'                    1    `'        0
+     after collect_arguments for x:  `A`a''                1    `'        0
+     push `a(1)`'c(' to input stack: `A`a''                1    `'        0
+     push_token saves $@(x) ref:     `A`a''                2    `'        0
+     exit expand_macro for x:        `A`a''                1    `'        0
+     expand_macro for a, level 0:    `A`a''                2    `'        0
+     after collect_arguments for a:  `A`a''`1'             2    `'        0
+     push `A' to input stack:        `A`a''`1'             2    `'        0
+     exit expand_macro for a:        `A`a''                1    `'        0
+     output `A':                     `A`a''                1    `'        0
+     expand_macro for c, level 0:    `A`a''                2    `'        0
+     expand_argument gets $@(x) ref: `A`a''`$@(x)'         3    `'        0
+     pop_input ends $@(x) ref:       `A`a''`$@(x)'         2    `'        0
+     expand_macro for y, level 1:    `A`a''`$@(x)'         2    `'        1
+     after collect_arguments for y:  `A`a''`$@(x)'         2    `b'       1
+     push_token saves $@(y) ref:     `A`a''`$@(x)'         2    `b'       2
+     push `)' to input stack:        `A`a''`$@(x)'         2    `b'       2
+     exit expand_macro for y:        `A`a''`$@(x)'         2    `b'       1
+     expand_argument gets $@(y) ref: `A`a''`$@(x)$@(y)'    2    `b'       2
+     pop_input ends $@(y) ref:       `A`a''`$@(x)$@(y)'    2    `b'       1
+     after collect_arguments for c:  `A`a''`$@(x)$@(y)'    2    `b'       1
+     push_token saves $*(c) ref:     `A`a''`$@(x)$@(y)'    3    `b'       2
+     expand_macro frees $@(x) ref:   `A`a''`$@(x)$@(y)'    2    `b'       2
+     expand_macro frees $@(y) ref:   `A`a''`$@(x)$@(y)'    2    `b'       1
+     exit expand_macro for c:        `A`a''`$@(x)$@(y)'    1    `b'       1
+     output `Aa':                    `A`a''`$@(x)$@(y)'    0    `b'       1
+     pop_input ends $*(c)$@(x) ref:  `'                    0    `b'       1
+     expand_macro for b, level 0:    `'                    1    `b'       1
+     pop_input ends $*(c)$@(y) ref:  `'                    1    `'        0
+     after collect_arguments for b:  `a'                   1    `'        0
+     push `a(`' to input stack:      `a'                   1    `'        0
+     push_token saves $1(b) ref:     `a'                   2    `'        0
+     push `')' to input stack:       `a'                   2    `'        0
+     exit expand_macro for b:        `a'                   1    `'        0
+     expand_macro for a, level 0 :   `a'                   2    `'        0
+     expand_argument gets $1(b) ref: `a'`$1(b)'            3    `'        0
+     pop_input ends $1(b) ref:       `a'`$1(b)'            2    `'        0
+     after collect_arguments for a:  `a'`$1(b)'            2    `'        0
+     push `A' to input stack:        `a'`$1(b)'            2    `'        0
+     expand_macro frees $1(b) ref:   `a'`$1(b)'            1    `'        0
+     exit expand_macro for a:        `'                    0    `'        0
+     output `A':                     `'                    0    `'        0
+
+   An obstack is only completely cleared when its refcount reaches
+   zero.  However, as an optimization, expand_macro also frees
+   anything that it added to the obstack if no additional references
+   were added at the current expansion level, to reduce the amount of
+   memory left on the obstack while waiting for refcounts to drop.
+*/
+
 static m4_macro_args *collect_arguments (m4 *, const char *, size_t,
-					 m4_symbol *, m4_obstack *);
+					 m4_symbol *, m4_obstack *,
+					 m4_obstack *);
 static void    expand_macro      (m4 *, const char *, size_t, m4_symbol *);
 static bool    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int, bool);
@@ -57,23 +151,24 @@ static size_t expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static size_t macro_call_id = 0;
 
-/* The shared stack of collected arguments for macro calls; as each
-   argument is collected, it is finished and its location stored in
-   argv_stack.  This stack can be used simultaneously by multiple
-   macro calls, using obstack_regrow to handle partial objects
-   embedded in the stack.  */
-static m4_obstack argc_stack;
-
-/* The shared stack of pointers to collected arguments for macro
-   calls.  This object is never finished; we exploit the fact that
-   obstack_blank is documented to take a negative size to reduce the
-   size again.  */
-static m4_obstack argv_stack;
-
 /* A placeholder symbol value representing the empty string, used to
    optimize checks for emptiness.  */
 static m4_symbol_value empty_symbol;
 
+#if DEBUG_MACRO
+/* True if significant changes to stacks should be printed to the
+   trace stream.  Primarily useful for debugging $@ ref memory leaks,
+   and controlled by M4_DEBUG_MACRO environment variable.  */
+static int debug_macro_level;
+#else
+# define debug_macro_level 0
+#endif /* !DEBUG_MACRO */
+#define PRINT_ARGCOUNT_CHANGES	1	/* Any change to argcount > 1.  */
+#define PRINT_REFCOUNT_INCREASE	2	/* Any increase to refcount.  */
+#define PRINT_REFCOUNT_DECREASE	4	/* Any decrease to refcount.  */
+
+
+
 /* This function reads all input, and expands each token, one at a time.  */
 void
 m4_macro_expand_input (m4 *context)
@@ -82,8 +177,11 @@ m4_macro_expand_input (m4 *context)
   m4_symbol_value token;
   int line;
 
-  obstack_init (&argc_stack);
-  obstack_init (&argv_stack);
+#if DEBUG_MACRO
+  const char *s = getenv ("M4_DEBUG_MACRO");
+  if (s)
+    debug_macro_level = strtol (s, NULL, 0);
+#endif /* DEBUG_MACRO */
 
   m4_set_symbol_value_text (&empty_symbol, "", 0, 0);
   VALUE_MAX_ARGS (&empty_symbol) = -1;
@@ -91,9 +189,6 @@ m4_macro_expand_input (m4 *context)
   while ((type = m4__next_token (context, &token, &line, NULL))
 	 != M4_TOKEN_EOF)
     expand_token (context, (m4_obstack *) NULL, type, &token, line, true);
-
-  obstack_free (&argc_stack, NULL);
-  obstack_free (&argv_stack, NULL);
 }
 
 
@@ -295,17 +390,17 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 static void
 expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 {
-  void *argc_base = NULL;	/* Base of argc_stack on entry.  */
-  void *argv_base = NULL;	/* Base of argv_stack on entry.  */
-  unsigned int argc_size;	/* Size of argc_stack on entry.  */
-  unsigned int argv_size;	/* Size of argv_stack on entry.  */
-  m4_macro_args *argv;
-  m4_obstack *expansion;
-  m4_input_block *expanded;
-  bool traced;
-  bool trace_expansion = false;
-  size_t my_call_id;
-  m4_symbol_value *value;
+  void *args_base;		/* Base of stack->args on entry.  */
+  void *argv_base;		/* Base of stack->argv on entry.  */
+  m4_macro_args *argv;		/* Arguments to the called macro.  */
+  m4_obstack *expansion;	/* Collects the macro's expansion.  */
+  m4_input_block *expanded;	/* The resulting expansion, for tracing.  */
+  bool traced;			/* True if this macro is traced.  */
+  bool trace_expansion = false;	/* True if trace and debugmode(`e').  */
+  size_t my_call_id;		/* Sequence id for this macro.  */
+  m4_symbol_value *value;	/* Original value of this macro.  */
+  size_t level = expansion_level; /* Expansion level of this macro.  */
+  m4__macro_arg_stacks *stack;	/* Storage for this macro.  */
 
   /* Report errors at the location where the open parenthesis (if any)
      was found, but after expansion, restore global state back to the
@@ -317,6 +412,35 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   int loc_open_line = m4_get_current_line (context);
   const char *loc_close_file;
   int loc_close_line;
+
+  /* Obstack preparation.  */
+  if (context->stacks_count <= level)
+    {
+      size_t count = context->stacks_count;
+      context->arg_stacks
+	= (m4__macro_arg_stacks *) x2nrealloc (context->arg_stacks,
+					       &context->stacks_count,
+					       sizeof *context->arg_stacks);
+      memset (&context->arg_stacks[count], 0,
+	      sizeof *context->arg_stacks * (context->stacks_count - count));
+    }
+  stack = &context->arg_stacks[level];
+  if (!stack->args)
+    {
+      assert (!stack->refcount);
+      stack->args = xmalloc (sizeof *stack->args);
+      stack->argv = xmalloc (sizeof *stack->argv);
+      obstack_init (stack->args);
+      obstack_init (stack->argv);
+      stack->args_base = obstack_finish (stack->args);
+      stack->argv_base = obstack_finish (stack->argv);
+    }
+  assert (obstack_object_size (stack->args) == 0
+	  && obstack_object_size (stack->argv) == 0);
+  args_base = obstack_finish (stack->args);
+  argv_base = obstack_finish (stack->argv);
+  m4__adjust_refcount (context, level, true);
+  stack->argcount++;
 
   /* Grab the current value of this macro, because it may change while
      collecting arguments.  Likewise, grab any state needed during
@@ -333,21 +457,15 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
     m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
-
-  macro_call_id++;
-  my_call_id = macro_call_id;
-
-  argc_size = obstack_object_size (&argc_stack);
-  argv_size = obstack_object_size (&argv_stack);
-  argc_base = obstack_finish (&argc_stack);
-  if (0 < argv_size)
-    argv_base = obstack_finish (&argv_stack);
+  my_call_id = ++macro_call_id;
 
   if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
     trace_prepre (context, name, my_call_id, value);
 
-  argv = collect_arguments (context, name, len, symbol, &argc_stack);
+  argv = collect_arguments (context, name, len, symbol, stack->args,
+			    stack->argv);
 
+  /* The actual macro call.  */
   loc_close_file = m4_get_current_file (context);
   loc_close_line = m4_get_current_line (context);
   m4_set_current_file (context, loc_open_file);
@@ -363,6 +481,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (traced)
     trace_post (context, my_call_id, argv, expanded, trace_expansion);
 
+  /* Cleanup.  */
   m4_set_current_file (context, loc_close_file);
   m4_set_current_line (context, loc_close_line);
 
@@ -371,15 +490,30 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
 
-  /* TODO - pay attention to argv->inuse.  */
-  if (0 < argc_size)
-    obstack_regrow (&argc_stack, argc_base, argc_size);
-  else
-    obstack_free (&argc_stack, argc_base);
-  if (0 < argv_size)
-    obstack_regrow (&argv_stack, argv_base, argv_size);
-  else
-    obstack_free (&argv_stack, argv);
+  /* If argv contains references, those refcounts can be reduced now.  */
+  /* TODO - support references in argv.  */
+
+  /* We no longer need argv, so reduce the refcount.  Additionally, if
+     no other references to argv were created, we can free our portion
+     of the obstack, although we must leave earlier content alone.  A
+     refcount of 0 implies that adjust_refcount already freed the
+     entire stack.  */
+  if (m4__adjust_refcount (context, level, false))
+    {
+      if (argv->inuse)
+	{
+	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
+	    xfprintf (stderr, "m4debug: -%d- `%s' in use, level=%d, "
+		      "refcount=%zu, argcount=%zu\n", my_call_id, argv->argv0,
+		      level, stack->refcount, stack->argcount);
+	}
+      else
+	{
+	  obstack_free (stack->args, args_base);
+	  obstack_free (stack->argv, argv_base);
+	  stack->argcount--;
+	}
+    }
 }
 
 /* Collect all the arguments to a call of the macro SYMBOL (called
@@ -389,7 +523,8 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
    arguments.  */
 static m4_macro_args *
 collect_arguments (m4 *context, const char *name, size_t len,
-		   m4_symbol *symbol, m4_obstack *arguments)
+		   m4_symbol *symbol, m4_obstack *arguments,
+		   m4_obstack *argv_stack)
 {
   m4_symbol_value token;
   m4_symbol_value *tokenp;
@@ -403,13 +538,13 @@ collect_arguments (m4 *context, const char *name, size_t len,
   args.argc = 1;
   args.inuse = false;
   args.has_ref = false;
-  /* FIXME - add accessor to symtab that returns name from the hash
-     table, so we don't have to copy it here.  */
+  /* Must copy here, since we are consuming tokens, and since symbol
+     table can be changed during argument collection.  */
   args.argv0 = (char *) obstack_copy0 (arguments, name, len);
   args.argv0_len = len;
   args.quote_age = m4__quote_age (M4SYNTAX);
   args.arraylen = 0;
-  obstack_grow (&argv_stack, &args, offsetof (m4_macro_args, array));
+  obstack_grow (argv_stack, &args, offsetof (m4_macro_args, array));
   name = args.argv0;
 
   if (m4__next_token_is_open (context))
@@ -426,7 +561,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	  else
 	    tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
 						       sizeof *tokenp);
-	  obstack_ptr_grow (&argv_stack, tokenp);
+	  obstack_ptr_grow (argv_stack, tokenp);
 	  args.arraylen++;
 	  args.argc++;
 	  /* Be conservative - any change in quoting while collecting
@@ -439,7 +574,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	}
       while (more_args);
     }
-  argv = (m4_macro_args *) obstack_finish (&argv_stack);
+  argv = (m4_macro_args *) obstack_finish (argv_stack);
   argv->argc = args.argc;
   if (args.quote_age != m4__quote_age (M4SYNTAX))
     argv->quote_age = 0;
@@ -545,7 +680,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	    {
 	      size_t len  = 0;
 	      const char *endp;
-	      const char *key;
+	      char *key;
 
 	      for (endp = ++text;
 		   *endp && m4_has_syntax (M4SYNTAX, *endp,
@@ -580,7 +715,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 
 	      text = *endp ? 1 + endp : endp;
 
-	      free ((char *) key);
+	      free (key);
 	      break;
 	    }
 	  break;
@@ -755,6 +890,51 @@ trace_post (m4 *context, size_t id, m4_macro_args *argv,
 
 /* Accessors into m4_macro_args.  */
 
+/* Adjust the refcount of argument stack LEVEL.  If INCREASE, then
+   increase the count, otherwise decrease the count and clear the
+   entire stack if the new count is zero.  Return the new
+   refcount.  */
+size_t
+m4__adjust_refcount (m4 *context, size_t level, bool increase)
+{
+  m4__macro_arg_stacks *stack = &context->arg_stacks[level];
+  assert (level < context->stacks_count && stack->args
+	  && (increase || stack->refcount));
+  if (increase)
+    stack->refcount++;
+  else if (--stack->refcount == 0)
+    {
+      obstack_free (stack->args, stack->args_base);
+      obstack_free (stack->argv, stack->argv_base);
+      if ((debug_macro_level & PRINT_ARGCOUNT_CHANGES) && 1 < stack->argcount)
+	xfprintf (stderr, "m4debug: -%d- freeing %zu args, level=%d\n",
+		  macro_call_id, stack->argcount, level);
+      stack->argcount = 0;
+    }
+  if (debug_macro_level
+      & (increase ? PRINT_REFCOUNT_INCREASE : PRINT_REFCOUNT_DECREASE))
+    xfprintf (stderr, "m4debug: level %d refcount=%d\n", level,
+	      stack->refcount);
+  return stack->refcount;
+}
+
+/* Mark ARGV as being in use, along with any $@ references that it
+   wraps.  */
+static void
+arg_mark (m4_macro_args *argv)
+{
+  argv->inuse = true;
+  if (argv->has_ref)
+    {
+      /* TODO for now we support only a single-length $@ chain.  */
+      assert (argv->arraylen == 1
+	      && argv->array[0]->type == M4_SYMBOL_COMP
+	      && !argv->array[0]->u.chain->next
+	      && !argv->array[0]->u.chain->str);
+      argv->array[0]->u.chain->argv->inuse = true;
+    }
+}
+
 /* Given ARGV, return the symbol value at the specified INDEX, which
    must be non-zero.  */
 m4_symbol_value *
@@ -891,15 +1071,16 @@ m4_arg_func (m4_macro_args *argv, unsigned int index)
    FLATTEN, any builtins in ARGV are flattened to an empty string when
    referenced through the new object.  */
 m4_macro_args *
-m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
-		  bool skip, bool flatten)
+m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
+		  size_t argv0_len, bool skip, bool flatten)
 {
   m4_macro_args *new_argv;
   m4_symbol_value *value;
   m4_symbol_chain *chain;
   unsigned int index = skip ? 2 : 1;
+  m4_obstack *obs = context->arg_stacks[expansion_level - 1].argv;
 
-  assert (obstack_object_size (&argv_stack) == 0);
+  assert (obstack_object_size (obs) == 0);
   /* When making a reference through a reference, point to the
      original if possible.  */
   if (argv->has_ref)
@@ -913,20 +1094,18 @@ m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
     }
   if (argv->argc <= index)
     {
-      new_argv = (m4_macro_args *) obstack_alloc (&argv_stack,
-						  offsetof (m4_macro_args,
-							    array));
+      new_argv = (m4_macro_args *) obstack_alloc (obs, offsetof (m4_macro_args,
+								 array));
       new_argv->arraylen = 0;
       new_argv->has_ref = false;
     }
   else
     {
-      new_argv = (m4_macro_args *) obstack_alloc (&argv_stack,
-						  (offsetof (m4_macro_args,
-							     array)
-						   + sizeof value));
-      value = (m4_symbol_value *) obstack_alloc (&argv_stack, sizeof *value);
-      chain = (m4_symbol_chain *) obstack_alloc (&argv_stack, sizeof *chain);
+      new_argv = (m4_macro_args *) obstack_alloc (obs, (offsetof (m4_macro_args,
+								  array)
+							+ sizeof value));
+      value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
+      chain = (m4_symbol_chain *) obstack_alloc (obs, sizeof *chain);
       new_argv->arraylen = 1;
       new_argv->array[0] = value;
       new_argv->has_ref = true;
@@ -935,11 +1114,11 @@ m4_make_argv_ref (m4_macro_args *argv, const char *argv0, size_t argv0_len,
       chain->next = NULL;
       chain->str = NULL;
       chain->len = 0;
+      chain->level = expansion_level - 1;
       chain->argv = argv;
       chain->index = index;
       chain->flatten = flatten;
     }
-  /* TODO - should argv->inuse be set?  */
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
@@ -966,7 +1145,8 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
     return;
   /* TODO handle builtin tokens?  */
   assert (value->type == M4_SYMBOL_TEXT);
-  m4__push_symbol (value, expansion_level - 1);
+  if (m4__push_symbol (value, expansion_level - 1))
+    arg_mark (argv);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -981,6 +1161,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
   m4_symbol_value sep;
   unsigned int i = skip ? 2 : 1;
   bool use_sep = false;
+  bool inuse = false;
   const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
   const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
 
@@ -1017,10 +1198,12 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	use_sep = true;
       /* TODO handle builtin tokens?  */
       assert (value->type == M4_SYMBOL_TEXT);
-      m4__push_symbol (value, expansion_level - 1);
+      inuse |= m4__push_symbol (value, expansion_level - 1);
     }
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
+  if (inuse)
+    arg_mark (argv);
 }
 
 
