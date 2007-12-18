@@ -86,46 +86,53 @@ typedef struct macro_definition macro_definition;
 /*------------------------------------------------------------------.
 | Helper for all the error reporting, as a wrapper around	    |
 | error_at_line.  Report error message based on FORMAT and ARGS, on |
-| behalf of MACRO, at the location FILE and LINE (but with no	    |
-| location if LINE is 0).  If ERRNUM, decode the errno value that   |
-| caused the error.  If STATUS, exit immediately with that status.  |
-| If WARN, prepend 'Warning: '.					    |
+| behalf of CALLER (if any), otherwise at the global current	    |
+| location.  If ERRNUM, decode the errno value that caused the      |
+| error.  If STATUS, exit immediately with that status.  If WARN,   |
+| prepend 'Warning: '.						    |
 `------------------------------------------------------------------*/
 
 static void
-m4_verror_at_line (bool warn, int status, int errnum, const char *file,
-		   int line, const char *macro, const char *format,
-		   va_list args)
+m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
+		   const char *format, va_list args)
 {
   char *full = NULL;
   char *safe_macro = NULL;
+  const char *macro = caller ? caller->name : NULL;
+  size_t len = caller ? caller->name_len : 0;
+  const char *file = caller ? caller->file : current_file;
+  int line = caller ? caller->line : current_line;
 
   /* Sanitize MACRO, since we are turning around and using it in a
      format string.  The allocation is overly conservative, but
      problematic macro names only occur via indir or changeword.  */
-  if (macro && strchr (macro, '%'))
+  if (macro && memchr (macro, '%', len))
     {
-      char *p = safe_macro = xcharalloc (2 * strlen (macro) + 1);
-      do
+      char *p = safe_macro = xcharalloc (2 * len);
+      const char *end = macro + len;
+      while (macro != end)
 	{
 	  if (*macro == '%')
-	    *p++ = '%';
+	    {
+	      *p++ = '%';
+	      len++;
+	    }
 	  *p++ = *macro++;
 	}
-      while (*macro);
-      *p = '\0';
     }
+  if (macro)
+    /* Use slot 1, so that the rest of the code can use the simpler
+       quotearg interface in slot 0.  */
+    macro = quotearg_n_mem (1, safe_macro ? safe_macro : macro, len);
   /* Prepend warning and the macro name, as needed.  But if that fails
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"),
-		      quotearg (safe_macro ? safe_macro : macro), format);
+    full = xasprintf (_("Warning: %s: %s"), macro, format);
   else if (warn)
     full = xasprintf (_("Warning: %s"), format);
   else if (macro)
-    full = xasprintf (_("%s: %s"),
-		      quotearg (safe_macro ? safe_macro : macro), format);
+    full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
 		  full ? full : format, args);
   free (full);
@@ -134,82 +141,40 @@ m4_verror_at_line (bool warn, int status, int errnum, const char *file,
     retcode = EXIT_FAILURE;
 }
 
-/*----------------------------------------------------------------.
-| Wrapper around error.  Report error message based on FORMAT and |
-| subsequent args, on behalf of MACRO, and the current input line |
-| (if any).  If ERRNUM, decode the errno value that caused the	  |
-| error.  If STATUS, exit immediately with that status.		  |
-`----------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Wrapper around error.  Report error message based on FORMAT and   |
+| subsequent args, on behalf of CALLER (if any), and the current    |
+| input line (if any).  If ERRNUM, decode the errno value that      |
+| caused the error.  If STATUS, exit immediately with that status.  |
+`------------------------------------------------------------------*/
 
 void
-m4_error (int status, int errnum, const char *macro, const char *format, ...)
+m4_error (int status, int errnum, const call_info *caller,
+	  const char *format, ...)
 {
   va_list args;
   va_start (args, format);
   if (status == EXIT_SUCCESS && warning_status)
     status = EXIT_FAILURE;
-  m4_verror_at_line (false, status, errnum, current_file, current_line,
-		     macro, format, args);
-  va_end (args);
-}
-
-/*----------------------------------------------------------------.
-| Wrapper around error_at_line.  Report error message based on	  |
-| FORMAT and subsequent args, on behalf of MACRO, at the location |
-| FILE and LINE (but with no location if LINE is 0).  If ERRNUM,  |
-| decode the errno value that caused the error.  If STATUS, exit  |
-| immediately with that status.					  |
-`----------------------------------------------------------------*/
-
-void
-m4_error_at_line (int status, int errnum, const char *file, int line,
-		  const char *macro, const char *format, ...)
-{
-  va_list args;
-  va_start (args, format);
-  if (status == EXIT_SUCCESS && warning_status)
-    status = EXIT_FAILURE;
-  m4_verror_at_line (false, status, errnum, file, line, macro, format, args);
+  m4_verror_at_line (false, status, errnum, caller, format, args);
   va_end (args);
 }
 
 /*------------------------------------------------------------------.
 | Wrapper around error.  Report warning message based on FORMAT and |
-| subsequent args, on behalf of MACRO, and the current input line   |
-| (if any).  If ERRNUM, decode the errno value that caused the	    |
-| warning.							    |
+| subsequent args, on behalf of CALLER (if any), and the current    |
+| input line (if any).  If ERRNUM, decode the errno value that      |
+| caused the warning.						    |
 `------------------------------------------------------------------*/
 
 void
-m4_warn (int errnum, const char *macro, const char *format, ...)
+m4_warn (int errnum, const call_info *caller, const char *format, ...)
 {
   va_list args;
   if (!suppress_warnings)
     {
       va_start (args, format);
-      m4_verror_at_line (true, warning_status, errnum, current_file,
-			 current_line, macro, format, args);
-      va_end (args);
-    }
-}
-
-/*----------------------------------------------------------------.
-| Wrapper around error_at_line.  Report warning message based on  |
-| FORMAT and subsequent args, on behalf of MACRO, at the location |
-| FILE and LINE (but with no location if LINE is 0).  If ERRNUM,  |
-| decode the errno value that caused the warning.		  |
-`----------------------------------------------------------------*/
-
-void
-m4_warn_at_line (int errnum, const char *file, int line, const char *macro,
-		 const char *format, ...)
-{
-  va_list args;
-  if (!suppress_warnings)
-    {
-      va_start (args, format);
-      m4_verror_at_line (true, warning_status, errnum, file, line, macro,
-			 format, args);
+      m4_verror_at_line (true, warning_status, errnum, caller, format, args);
       va_end (args);
     }
 }
@@ -239,7 +204,7 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     xfprintf (stderr, _("Try `%s --help' for more information.\n"),
-              program_name);
+	      program_name);
   else
     {
       xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
@@ -652,23 +617,20 @@ main (int argc, char *const *argv, char *const *envp)
 	{
 	case 'D':
 	  {
-	    /* defines->arg is read-only, so we need a copy.  */
-	    char *macro_name = xstrdup (defines->arg);
-	    char *macro_value = strchr (macro_name, '=');
-	    if (macro_value)
-	      *macro_value++ = '\0';
-	    define_user_macro (macro_name, strlen (macro_name),
-			       macro_value, SYMBOL_INSERT);
-	    free (macro_name);
+	    const char *value = strchr (defines->arg, '=');
+	    size_t len = value ? value - defines->arg : strlen (defines->arg);
+	    define_user_macro (defines->arg, len, value ? value + 1 : "",
+			       SYMBOL_INSERT);
 	  }
 	  break;
 
 	case 'U':
-	  lookup_symbol (defines->arg, SYMBOL_DELETE);
+	  lookup_symbol (defines->arg, strlen (defines->arg), SYMBOL_DELETE);
 	  break;
 
 	case 't':
-	  sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
+	  sym = lookup_symbol (defines->arg, strlen (defines->arg),
+			       SYMBOL_INSERT);
 	  SYMBOL_TRACED (sym) = true;
 	  break;
 

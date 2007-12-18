@@ -29,7 +29,7 @@
 
 /* Parse STR as an integer, reporting warnings on behalf of ME.  */
 static int
-arg_int (const char *me, const char *str)
+arg_int (const call_info *me, const char *str)
 {
   char *endp;
   long value;
@@ -54,7 +54,7 @@ arg_int (const char *me, const char *str)
 
 /* Parse STR as a long, reporting warnings on behalf of ME.  */
 static long
-arg_long (const char *me, const char *str)
+arg_long (const call_info *me, const char *str)
 {
   char *endp;
   long value;
@@ -79,7 +79,7 @@ arg_long (const char *me, const char *str)
 
 /* Parse STR as a double, reporting warnings on behalf of ME.  */
 static double
-arg_double (const char *me, const char *str)
+arg_double (const call_info *me, const char *str)
 {
   char *endp;
   double value;
@@ -124,7 +124,7 @@ arg_double (const char *me, const char *str)
 void
 expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const char *me = ARG (0);		/* Macro name.  */
+  const call_info *me = arg_info (argv);/* Macro name.  */
   const char *f;			/* Format control string.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */

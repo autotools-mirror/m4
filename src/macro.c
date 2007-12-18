@@ -29,7 +29,7 @@
 #endif /* DEBUG_MACRO */
 
 /* Opaque structure describing all arguments to a macro, including the
-   macro name at index 0.  The lifetime of argv0 is only guaranteed
+   macro name at index 0.  The lifetime of info is only guaranteed
    within a call to expand_macro, whereas the lifetime of the array
    members is guaranteed as long as the input engine can parse text
    with a reference to $@.  */
@@ -53,8 +53,6 @@ struct macro_arguments
   bool_bitfield flatten : 1;
   /* True if any token contains builtins.  */
   bool_bitfield has_func : 1;
-  const char *argv0; /* The macro name being expanded.  */
-  size_t argv0_len; /* Length of argv0.  */
   /* The value of quote_age used when parsing all arguments in this
      object, or 0 if quote_age changed during parsing or if any of the
      arguments might contain content that can affect rescan.  */
@@ -221,6 +219,7 @@ expand_input (void)
   TOKEN_DATA_LEN (&empty_token) = 0;
 #ifdef ENABLE_CHANGEWORD
   TOKEN_DATA_ORIG_TEXT (&empty_token) = "";
+  TOKEN_DATA_ORIG_LEN (&empty_token) = 0;
 #endif
 
   while ((t = next_token (&td, &line, NULL, false, NULL)) != TOKEN_EOF)
@@ -301,7 +300,8 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
       break;
 
     case TOKEN_WORD:
-      sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
+      sym = lookup_symbol (TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td),
+			   SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
 	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
 	      && SYMBOL_BLIND_NO_ARGS (sym)
@@ -309,7 +309,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	{
 #ifdef ENABLE_CHANGEWORD
 	  divert_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-		       TOKEN_DATA_LEN (td), line);
+		       TOKEN_DATA_ORIG_LEN (td), line);
 #else
 	  divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
 #endif /* !ENABLE_CHANGEWORD */
@@ -344,12 +344,12 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 `-------------------------------------------------------------------*/
 
 static bool
-expand_argument (struct obstack *obs, token_data *argp, const char *caller)
+expand_argument (struct obstack *obs, token_data *argp,
+		 const call_info *caller)
 {
   token_type t;
   token_data td;
   int paren_level;
-  const char *file = current_file;
   int line = current_line;
   unsigned int age = quote_age ();
   bool first = true;
@@ -414,10 +414,8 @@ expand_argument (struct obstack *obs, token_data *argp, const char *caller)
 	  break;
 
 	case TOKEN_EOF:
-	  /* Current_file changed to "" if we see TOKEN_EOF, use the
-	     previous value we stored earlier.  */
-	  m4_error_at_line (EXIT_FAILURE, 0, file, line, caller,
-			    _("end of file in argument list"));
+	  m4_error (EXIT_FAILURE, 0, caller,
+		    _("end of file in argument list"));
 	  break;
 
 	case TOKEN_WORD:
@@ -495,8 +493,6 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   args.has_ref = false;
   args.flatten = !groks_macro_args;
   args.has_func = false;
-  args.argv0 = SYMBOL_NAME (sym);
-  args.argv0_len = strlen (args.argv0);
   args.quote_age = quote_age ();
   args.info = info;
   args.level = expansion_level - 1;
@@ -506,11 +502,11 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   if (peek_token () == TOKEN_OPEN)
     {
       /* gobble parenthesis */
-      next_token (&td, NULL, NULL, false, SYMBOL_NAME (sym));
+      next_token (&td, NULL, NULL, false, info);
       do
 	{
 	  tdp = (token_data *) obstack_alloc (arguments, sizeof *tdp);
-	  more_args = expand_argument (arguments, tdp, SYMBOL_NAME (sym));
+	  more_args = expand_argument (arguments, tdp, info);
 
 	  if ((TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT && !TOKEN_DATA_LEN (tdp))
 	      || (!groks_macro_args && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
@@ -622,10 +618,6 @@ expand_macro (symbol *sym)
   int level = expansion_level;	/* Expansion level of this macro.  */
   call_info my_call_info;	/* Context of this macro.  */
 
-  // TODO - make m4_warn use optional call_info, so we don't need these.
-  const char *loc_close_file;
-  int loc_close_line;
-
   /* Obstack preparation.  */
   if (level >= stacks_count)
     {
@@ -670,6 +662,7 @@ expand_macro (symbol *sym)
   my_call_info.trace = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
   my_call_info.debug_level = debug_level;
   my_call_info.name = SYMBOL_NAME (sym);
+  my_call_info.name_len = SYMBOL_NAME_LEN (sym);
   trace_prepre (&my_call_info);
 
   /* Collect the arguments.  */
@@ -677,23 +670,13 @@ expand_macro (symbol *sym)
 			    stacks[level].argv);
   args_scratch = obstack_finish (stacks[level].args);
 
-  /*  Temporarily reset the location so that error messages are
-      tracked to the macro name.  */
-  loc_close_file = current_file;
-  loc_close_line = current_line;
-  current_file = my_call_info.file;
-  current_line = my_call_info.line;
-
   /* The actual macro call.  */
-  expansion = push_string_init ();
+  expansion = push_string_init (my_call_info.file, my_call_info.line);
   call_macro (sym, argv, expansion);
   push_string_finish ();
 
   /* Cleanup.  */
-  current_file = loc_close_file;
-  current_line = loc_close_line;
   argv->info = NULL;
-
   --expansion_level;
   --SYMBOL_PENDING_EXPANSIONS (sym);
 
@@ -714,7 +697,7 @@ expand_macro (symbol *sym)
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (debug, "m4debug: -%d- `%s' in use, level=%d, "
 		      "refcount=%zu, argcount=%zu\n", my_call_info.call_id,
-		      argv->argv0, level, stacks[level].refcount,
+		      my_call_info.name, level, stacks[level].refcount,
 		      stacks[level].argcount);
 	}
       else
@@ -916,7 +899,10 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
   struct obstack *obs; /* Scratch space; cleaned at end of macro_expand.  */
 
   if (arg == 0)
-    return argv->argv0;
+    {
+      assert (argv->info);
+      return argv->info->name;
+    }
   if (arg >= argv->argc)
     return "";
   token = arg_token (argv, arg, NULL, flatten);
@@ -1119,7 +1105,10 @@ bool
 arg_empty (macro_arguments *argv, unsigned int arg)
 {
   if (arg == 0)
-    return argv->argv0_len == 0;
+    {
+      assert (argv->info);
+      return argv->info->name_len == 0;
+    }
   if (arg >= argv->argc)
     return true;
   return arg_token (argv, arg, NULL, false) == &empty_token;
@@ -1135,7 +1124,10 @@ arg_len (macro_arguments *argv, unsigned int arg)
   size_t len;
 
   if (arg == 0)
-    return argv->argv0_len;
+    {
+      assert (argv->info);
+      return argv->info->name_len;
+    }
   if (arg >= argv->argc)
     return 0;
   token = arg_token (argv, arg, NULL, false);
@@ -1450,12 +1442,11 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
     }
   new_argv->argc = argv->argc - 1;
   new_argv->inuse = false;
-  new_argv->argv0 = argv0;
-  new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
   new_argv->info = info;
   info->trace = (argv->info->debug_level & DEBUG_TRACE_ALL) || trace;
   info->name = argv0;
+  info->name_len = argv0_len;
   new_argv->level = argv->level;
   return new_argv;
 }
@@ -1469,7 +1460,8 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int arg)
     {
       /* Always push copy of arg 0, since its lifetime is not
 	 guaranteed beyond expand_macro.  */
-      obstack_grow (obs, argv->argv0, argv->argv0_len);
+      assert (argv->info);
+      obstack_grow (obs, argv->info->name, argv->info->name_len);
       return;
     }
   if (arg >= argv->argc)
@@ -1538,7 +1530,7 @@ wrap_args (macro_arguments *argv)
   if ((argv->argc == 2 || no_gnu_extensions) && arg_empty (argv, 1))
     return;
 
-  obs = push_wrapup_init (&end);
+  obs = push_wrapup_init (argv->info, &end);
   for (i = 1; i < (no_gnu_extensions ? 2 : argv->argc); i++)
     {
       if (i != 1)

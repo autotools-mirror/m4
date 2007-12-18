@@ -50,6 +50,7 @@
 #include "vasnprintf.h"
 #include "verror.h"
 #include "xalloc.h"
+#include "xmemdup0.h"
 #include "xprintf.h"
 #include "xvasprintf.h"
 
@@ -149,19 +150,16 @@ struct call_info
   int trace : 1;	/* True to trace this macro.  */
   int debug_level : 31;	/* The debug level for tracing the macro call.  */
   const char *name;	/* The macro name.  */
+  size_t name_len;	/* The length of name.  */
 };
 typedef struct call_info call_info;
 
 extern int retcode;
 extern const char *program_name;
 
-void m4_error (int, int, const char *, const char *, ...)
+void m4_error (int, int, const call_info *, const char *, ...)
   M4_GNUC_PRINTF (4, 5);
-void m4_error_at_line (int, int, const char *, int, const char *,
-		       const char *, ...) M4_GNUC_PRINTF (6, 7);
-void m4_warn (int, const char *, const char *, ...) M4_GNUC_PRINTF (3, 4);
-void m4_warn_at_line (int, const char *, int, const char *,
-		      const char *, ...) M4_GNUC_PRINTF (5, 6);
+void m4_warn (int, const call_info *, const char *, ...) M4_GNUC_PRINTF (3, 4);
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,
@@ -255,7 +253,7 @@ extern FILE *debug;
 void debug_init (void);
 int debug_decode (const char *);
 void debug_flush_files (void);
-bool debug_set_output (const char *, const char *);
+bool debug_set_output (const call_info *, const char *);
 void debug_message_prefix (void);
 
 void trace_prepre (const call_info *);
@@ -365,6 +363,7 @@ struct token_data
 	     portion that matched the () group to form a macro name.
 	     Otherwise, this field is unused.  */
 	  const char *original_text;
+	  size_t original_len; /* Length of original_text.  */
 #endif
 	}
       u_t;
@@ -390,6 +389,7 @@ struct token_data
 #define TOKEN_DATA_QUOTE_AGE(Td)	((Td)->u.u_t.quote_age)
 #ifdef ENABLE_CHANGEWORD
 # define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
+# define TOKEN_DATA_ORIG_LEN(Td)	((Td)->u.u_t.original_len)
 #endif
 #define TOKEN_DATA_FUNC(Td)		((Td)->u.func)
 
@@ -399,8 +399,8 @@ typedef enum token_data_type token_data_type;
 void input_init (void);
 token_type peek_token (void);
 token_type next_token (token_data *, int *, struct obstack *, bool,
-		       const char *);
-void skip_line (const char *);
+		       const call_info *);
+void skip_line (const call_info *);
 
 /* push back input */
 void make_text_link (struct obstack *, token_chain **, token_chain **);
@@ -408,10 +408,10 @@ void push_file (FILE *, const char *, bool);
 void append_macro (struct obstack *, builtin_func *, token_chain **,
 		   token_chain **);
 void push_macro (struct obstack *, builtin_func *);
-struct obstack *push_string_init (void);
+struct obstack *push_string_init (const char *, int);
 bool push_token (token_data *, int, bool);
 void push_string_finish (void);
-struct obstack *push_wrapup_init (token_chain ***);
+struct obstack *push_wrapup_init (const call_info *, token_chain ***);
 void push_wrapup_finish (void);
 bool pop_wrapup (void);
 void input_print (struct obstack *);
@@ -432,7 +432,7 @@ extern string_pair curr_quote;
 void set_quotes (const char *, const char *);
 void set_comment (const char *, const char *);
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp (const char *, const char *);
+void set_word_regexp (const call_info *, const char *);
 #endif
 unsigned int quote_age (void);
 bool safe_quotes (void);
@@ -477,6 +477,7 @@ struct symbol
   int pending_expansions;
 
   char *name;
+  size_t len;
   token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
 };
 
@@ -488,6 +489,7 @@ struct symbol
 #define SYMBOL_DELETED(S)	((S)->deleted)
 #define SYMBOL_PENDING_EXPANSIONS(S) ((S)->pending_expansions)
 #define SYMBOL_NAME(S)		((S)->name)
+#define SYMBOL_NAME_LEN(S)	((S)->len)
 #define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_FUNC(S)		(TOKEN_DATA_FUNC (&(S)->data))
@@ -502,7 +504,7 @@ extern symbol **symtab;
 
 void free_symbol (symbol *sym);
 void symtab_init (void);
-symbol *lookup_symbol (const char *, symbol_lookup);
+symbol *lookup_symbol (const char *, size_t, symbol_lookup);
 void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
@@ -572,8 +574,8 @@ struct re_registers;
 #define DEFAULT_MACRO_SEQUENCE "\\$\\({[^}]*}\\|[0-9][0-9]+\\)"
 
 void builtin_init (void);
-bool bad_argc (const char *, int, unsigned int, unsigned int);
-void define_builtin (const char *, const builtin *, symbol_lookup);
+bool bad_argc (const call_info *, int, unsigned int, unsigned int);
+void define_builtin (const char *, size_t, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
 void define_user_macro (const char *, size_t, const char *, symbol_lookup);
@@ -597,7 +599,7 @@ FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-bool evaluate (const char *, const char *, int32_t *);
+bool evaluate (const call_info *, const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 

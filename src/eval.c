@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU M4.
@@ -62,19 +62,19 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error logical_or_term (const char *, eval_token, int32_t *);
-static eval_error logical_and_term (const char *, eval_token, int32_t *);
-static eval_error or_term (const char *, eval_token, int32_t *);
-static eval_error xor_term (const char *, eval_token, int32_t *);
-static eval_error and_term (const char *, eval_token, int32_t *);
-static eval_error equality_term (const char *, eval_token, int32_t *);
-static eval_error cmp_term (const char *, eval_token, int32_t *);
-static eval_error shift_term (const char *, eval_token, int32_t *);
-static eval_error add_term (const char *, eval_token, int32_t *);
-static eval_error mult_term (const char *, eval_token, int32_t *);
-static eval_error exp_term (const char *, eval_token, int32_t *);
-static eval_error unary_term (const char *, eval_token, int32_t *);
-static eval_error simple_term (const char *, eval_token, int32_t *);
+static eval_error logical_or_term (const call_info *, eval_token, int32_t *);
+static eval_error logical_and_term (const call_info *, eval_token, int32_t *);
+static eval_error or_term (const call_info *, eval_token, int32_t *);
+static eval_error xor_term (const call_info *, eval_token, int32_t *);
+static eval_error and_term (const call_info *, eval_token, int32_t *);
+static eval_error equality_term (const call_info *, eval_token, int32_t *);
+static eval_error cmp_term (const call_info *, eval_token, int32_t *);
+static eval_error shift_term (const call_info *, eval_token, int32_t *);
+static eval_error add_term (const call_info *, eval_token, int32_t *);
+static eval_error mult_term (const call_info *, eval_token, int32_t *);
+static eval_error exp_term (const call_info *, eval_token, int32_t *);
+static eval_error unary_term (const call_info *, eval_token, int32_t *);
+static eval_error simple_term (const call_info *, eval_token, int32_t *);
 
 /*--------------------.
 | Lexical functions.  |
@@ -287,7 +287,7 @@ eval_lex (int32_t *val)
 `---------------------------------------*/
 
 bool
-evaluate (const char *me, const char *expr, int32_t *val)
+evaluate (const call_info *me, const char *expr, int32_t *val)
 {
   eval_token et;
   eval_error err;
@@ -355,7 +355,7 @@ evaluate (const char *me, const char *expr, int32_t *val)
 `---------------------------*/
 
 static eval_error
-logical_or_term (const char *me, eval_token et, int32_t *v1)
+logical_or_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -386,7 +386,7 @@ logical_or_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-logical_and_term (const char *me, eval_token et, int32_t *v1)
+logical_and_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -417,7 +417,7 @@ logical_and_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-or_term (const char *me, eval_token et, int32_t *v1)
+or_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -444,7 +444,7 @@ or_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-xor_term (const char *me, eval_token et, int32_t *v1)
+xor_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -471,7 +471,7 @@ xor_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-and_term (const char *me, eval_token et, int32_t *v1)
+and_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;
@@ -498,7 +498,7 @@ and_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-equality_term (const char *me, eval_token et, int32_t *v1)
+equality_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
@@ -534,7 +534,7 @@ equality_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-cmp_term (const char *me, eval_token et, int32_t *v1)
+cmp_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
@@ -585,7 +585,7 @@ cmp_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-shift_term (const char *me, eval_token et, int32_t *v1)
+shift_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
@@ -638,7 +638,7 @@ shift_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-add_term (const char *me, eval_token et, int32_t *v1)
+add_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
@@ -673,7 +673,7 @@ add_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-mult_term (const char *me, eval_token et, int32_t *v1)
+mult_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token op;
   int32_t v2;
@@ -734,7 +734,7 @@ mult_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-exp_term (const char *me, eval_token et, int32_t *v1)
+exp_term (const call_info *me, eval_token et, int32_t *v1)
 {
   uint32_t result;
   int32_t v2;
@@ -773,7 +773,7 @@ exp_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-unary_term (const char *me, eval_token et, int32_t *v1)
+unary_term (const call_info *me, eval_token et, int32_t *v1)
 {
   eval_token et2 = et;
   eval_error er;
@@ -805,7 +805,7 @@ unary_term (const char *me, eval_token et, int32_t *v1)
 }
 
 static eval_error
-simple_term (const char *me, eval_token et, int32_t *v1)
+simple_term (const call_info *me, eval_token et, int32_t *v1)
 {
   int32_t v2;
   eval_error er;

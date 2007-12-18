@@ -98,9 +98,9 @@ produce_frozen_state (const char *name)
 	    {
 	    case TOKEN_TEXT:
 	      xfprintf (file, "T%d,%d\n",
-			(int) strlen (SYMBOL_NAME (sym)),
+			(int) SYMBOL_NAME_LEN (sym),
 			(int) strlen (SYMBOL_TEXT (sym)));
-	      fputs (SYMBOL_NAME (sym), file);
+	      fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
 	      fputs (SYMBOL_TEXT (sym), file);
 	      fputc ('\n', file);
 	      break;
@@ -113,9 +113,9 @@ produce_frozen_state (const char *name)
 		  abort ();
 		}
 	      xfprintf (file, "F%d,%d\n",
-			(int) strlen (SYMBOL_NAME (sym)),
+			(int) SYMBOL_NAME_LEN (sym),
 			(int) strlen (bp->name));
-	      fputs (SYMBOL_NAME (sym), file);
+	      fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
 	      fputs (bp->name, file);
 	      fputc ('\n', file);
 	      break;
@@ -335,7 +335,7 @@ reload_frozen_state (const char *name)
 	      /* Enter a macro having a builtin function as a definition.  */
 
 	      bp = find_builtin_by_name (string[1]);
-	      define_builtin (string[0], bp, SYMBOL_PUSHDEF);
+	      define_builtin (string[0], number[0], bp, SYMBOL_PUSHDEF);
 	      break;
 
 	    case 'T':
