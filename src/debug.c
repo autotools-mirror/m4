@@ -30,7 +30,7 @@ FILE *debug = NULL;
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
-static void debug_set_file (const char *, FILE *);
+static void debug_set_file (const call_info *, FILE *);
 
 /*----------------------------------.
 | Initialize the debugging module.  |
@@ -121,7 +121,7 @@ debug_decode (const char *opts)
 `-----------------------------------------------------------------*/
 
 static void
-debug_set_file (const char *caller, FILE *fp)
+debug_set_file (const call_info *caller, FILE *fp)
 {
   struct stat stdout_stat, debug_stat;
 
@@ -189,7 +189,7 @@ debug_flush_files (void)
 `-------------------------------------------------------------------*/
 
 bool
-debug_set_output (const char *caller, const char *name)
+debug_set_output (const call_info *caller, const char *name)
 {
   FILE *fp;
 
@@ -313,13 +313,16 @@ trace_header (const call_info *info)
 static void
 trace_flush (unsigned int start)
 {
-  char *line;
+  char *base = (char *) obstack_base (&trace);
+  size_t len = obstack_object_size (&trace);
 
-  obstack_1grow (&trace, '\0');
-  line = (char *) obstack_base (&trace);
-  DEBUG_PRINT1 ("%s\n", &line[start]);
-  start -= obstack_object_size (&trace);
-  obstack_blank (&trace, start);
+  if (debug)
+    {
+      /* TODO - quote nonprintable characters if debug is tty?  */
+      fwrite (&base[start], 1, len - start, debug);
+      fputc ('\n', debug);
+    }
+  obstack_blank (&trace, start - len);
 }
 
 /*-------------------------------------------------------------------.
@@ -333,7 +336,8 @@ trace_prepre (const call_info *info)
   if (info->trace && (info->debug_level & DEBUG_TRACE_CALL))
     {
       unsigned int start = trace_header (info);
-      trace_format ("%s ...", info->name);
+      obstack_grow (&trace, info->name, info->name_len);
+      obstack_grow (&trace, " ...", 4);
       trace_flush (start);
     }
 }
@@ -353,7 +357,7 @@ trace_pre (macro_arguments *argv)
   unsigned int start = trace_header (info);
 
   assert (info->trace);
-  trace_format ("%s", info->name);
+  obstack_grow (&trace, ARG (0), ARG_LEN (0));
   if (1 < arg_argc (argv) && (trace_level & DEBUG_TRACE_ARGS))
     {
       size_t len = max_debug_argument_length;

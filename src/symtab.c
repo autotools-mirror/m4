@@ -62,19 +62,20 @@ show_profile (void)
     }
 }
 
-/* Like strcmp (S1, S2), but also track profiling statistics.  */
+/* Like memcmp (S1, S2, L), but also track profiling statistics.  */
 static int
-profile_strcmp (const char *s1, const char *s2)
+profile_memcmp (const char *s1, const char *s2, size_t l)
 {
-  int i = 1;
+  int i = 0;
   int result;
-  while (*s1 && *s1 == *s2)
+  while (l && *s1 == *s2)
     {
       s1++;
       s2++;
       i++;
+      l--;
     }
-  result = (unsigned char) *s1 - (unsigned char) *s2;
+  result = l ? (unsigned char) *s1 - (unsigned char) *s2 : 0;
   profiles[current_mode].comparisons++;
   if (result != 0)
     profiles[current_mode].misses++;
@@ -82,7 +83,7 @@ profile_strcmp (const char *s1, const char *s2)
   return result;
 }
 
-# define strcmp profile_strcmp
+# define memcmp profile_memcmp
 #endif /* DEBUG_SYM */
 
 
@@ -111,19 +112,18 @@ symtab_init (void)
 }
 
 /*--------------------------------------------------.
-| Return a hashvalue for a string, from GNU-emacs.  |
+| Return a hashvalue for a string S of length LEN.  |
 `--------------------------------------------------*/
 
 static size_t
-hash (const char *s)
+hash (const char *s, size_t len)
 {
-  register size_t val = 0;
+  size_t val = len;
 
-  register const char *ptr = s;
-  register char ch;
-
-  while ((ch = *ptr++) != '\0')
-    val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
+  /* This algorithm was originally borrowed from GNU Emacs, but has
+     been modified to allow embedded NUL.  */
+  while (len--)
+    val = (val << 7) + (val >> (sizeof val * CHAR_BIT - 7)) + to_uchar (*s++);
   return val;
 }
 
@@ -146,20 +146,20 @@ free_symbol (symbol *sym)
 }
 
 /*-------------------------------------------------------------------.
-| Search in, and manipulation of the symbol table, are all done by   |
-| lookup_symbol ().  It basically hashes NAME to a list in the	     |
-| symbol table, and searches this list for the first occurrence of a |
-| symbol with the name.						     |
-|								     |
+| Searches and manipulation of the symbol table are all done by      |
+| lookup_symbol ().  It basically hashes NAME, of length LEN, to a   |
+| list in the symbol table, and searches this list for the first     |
+| occurrence of a symbol with the name.                              |
+|                                                                    |
 | The MODE parameter determines what lookup_symbol () will do.  It   |
-| can either just do a lookup, do a lookup and insert if not	     |
+| can either just do a lookup, do a lookup and insert if not         |
 | present, do an insertion even if the name is already in the list,  |
 | delete the first occurrence of the name on the list, or delete all |
-| occurrences of the name on the list.				     |
+| occurrences of the name on the list.                               |
 `-------------------------------------------------------------------*/
 
 symbol *
-lookup_symbol (const char *name, symbol_lookup mode)
+lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 {
   size_t h;
   int cmp = 1;
@@ -171,12 +171,13 @@ lookup_symbol (const char *name, symbol_lookup mode)
   profiles[mode].entry++;
 #endif /* DEBUG_SYM */
 
-  h = hash (name);
+  h = hash (name, len);
   sym = symtab[h % hash_table_size];
 
   for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
     {
-      cmp = strcmp (SYMBOL_NAME (sym), name);
+      cmp = (len < SYMBOL_NAME_LEN (sym) ? -1 : len > SYMBOL_NAME_LEN (sym) ? 1
+	     : memcmp (SYMBOL_NAME (sym), name, len));
       if (cmp >= 0)
 	break;
     }
@@ -210,7 +211,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
 	      sym = (symbol *) xmalloc (sizeof (symbol));
 	      SYMBOL_TYPE (sym) = TOKEN_VOID;
 	      SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
-	      SYMBOL_NAME (sym) = xstrdup (name);
+	      SYMBOL_NAME (sym) = xmemdup0 (name, len);
+	      SYMBOL_NAME_LEN (sym) = len;
 	      SYMBOL_SHADOWED (sym) = false;
 	      SYMBOL_MACRO_ARGS (sym) = false;
 	      SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -234,7 +236,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
-      SYMBOL_NAME (sym) = xstrdup (name);
+      SYMBOL_NAME (sym) = xmemdup0 (name, len);
+      SYMBOL_NAME_LEN (sym) = len;
       SYMBOL_SHADOWED (sym) = false;
       SYMBOL_MACRO_ARGS (sym) = false;
       SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -287,7 +290,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
 	    sym = (symbol *) xmalloc (sizeof (symbol));
 	    SYMBOL_TYPE (sym) = TOKEN_VOID;
 	    SYMBOL_TRACED (sym) = true;
-	    SYMBOL_NAME (sym) = xstrdup (name);
+	    SYMBOL_NAME (sym) = xmemdup0 (name, len);
+	    SYMBOL_NAME_LEN (sym) = len;
 	    SYMBOL_SHADOWED (sym) = false;
 	    SYMBOL_MACRO_ARGS (sym) = false;
 	    SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -348,28 +352,32 @@ symtab_debug (void)
   const char *text;
   symbol *s;
   int delete;
+  size_t len;
+  int line;
   static int i;
 
-  while (next_token (&td, NULL, NULL, false, "<debug>") == TOKEN_WORD)
+  while (next_token (&td, &line, NULL, false, NULL) == TOKEN_WORD)
     {
       text = TOKEN_DATA_TEXT (&td);
+      len = TOKEN_DATA_LEN (&td);
       if (*text == '_')
 	{
 	  delete = 1;
 	  text++;
+	  len--;
 	}
       else
 	delete = 0;
 
-      s = lookup_symbol (text, SYMBOL_LOOKUP);
+      s = lookup_symbol (text, len, SYMBOL_LOOKUP);
 
       if (s == NULL)
 	xprintf ("Name `%s' is unknown\n", text);
 
       if (delete)
-	(void) lookup_symbol (text, SYMBOL_DELETE);
+	lookup_symbol (text, len, SYMBOL_DELETE);
       else
-	(void) lookup_symbol (text, SYMBOL_INSERT);
+	lookup_symbol (text, len, SYMBOL_INSERT);
     }
   symtab_print_list (i++);
 }
@@ -383,9 +391,9 @@ symtab_print_list (int i)
   xprintf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      xprintf ("\tname %s, bucket %lu, addr %p, next %p, "
+      xprintf ("\tname %s, len %zu, bucket %lu, addr %p, next %p, "
 	       "flags%s%s%s, pending %d\n",
-	       SYMBOL_NAME (sym),
+	       SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
 	       (unsigned long int) h, sym, SYMBOL_NEXT (sym),
 	       SYMBOL_TRACED (sym) ? " traced" : "",
 	       SYMBOL_SHADOWED (sym) ? " shadowed" : "",

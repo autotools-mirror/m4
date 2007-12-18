@@ -322,7 +322,7 @@ push_macro (struct obstack *obs, builtin_func *func)
 `--------------------------------------------------------------*/
 
 struct obstack *
-push_string_init (void)
+push_string_init (const char *file, int line)
 {
   /* Free any memory occupied by completely parsed strings.  */
   assert (next == NULL);
@@ -331,8 +331,8 @@ push_string_init (void)
   /* Reserve the next location on the obstack.  */
   next = (input_block *) obstack_alloc (current_input, sizeof *next);
   next->type = INPUT_STRING;
-  next->file = current_file;
-  next->line = current_line;
+  next->file = file;
+  next->line = line;
   next->u.u_s.len = 0;
 
   return current_input;
@@ -544,7 +544,7 @@ push_string_finish (void)
 `--------------------------------------------------------------*/
 
 struct obstack *
-push_wrapup_init (token_chain ***end)
+push_wrapup_init (const call_info *caller, token_chain ***end)
 {
   input_block *i;
   token_chain *chain;
@@ -560,8 +560,8 @@ push_wrapup_init (token_chain ***end)
     {
       i = (input_block *) obstack_alloc (wrapup_stack, sizeof *i);
       i->prev = wsp;
-      i->file = current_file;
-      i->line = current_line;
+      i->file = caller->file;
+      i->line = caller->line;
       i->type = INPUT_CHAIN;
       i->u.u_c.chain = i->u.u_c.end = NULL;
       wsp = i;
@@ -575,8 +575,8 @@ push_wrapup_init (token_chain ***end)
   chain->next = NULL;
   chain->type = CHAIN_LOC;
   chain->quote_age = 0;
-  chain->u.u_l.file = current_file;
-  chain->u.u_l.line = current_line;
+  chain->u.u_l.file = caller->file;
+  chain->u.u_l.line = caller->line;
   *end = &i->u.u_c.end;
   return wrapup_stack;
 }
@@ -859,7 +859,7 @@ peek_input (bool allow_argv)
 		  /* Rather than directly parse argv here, we push
 		     another input block containing the next unparsed
 		     argument from argv.  */
-		  push_string_init ();
+		  push_string_init (block->file, block->line);
 		  push_arg_quote (current_input, chain->u.u_a.argv,
 				  chain->u.u_a.index,
 				  quote_cache (NULL, chain->quote_age,
@@ -997,7 +997,7 @@ next_char_1 (bool allow_quote, bool allow_argv)
 		  /* Rather than directly parse argv here, we push
 		     another input block containing the next unparsed
 		     argument from argv.  */
-		  push_string_init ();
+		  push_string_init (isp->file, isp->line);
 		  push_arg_quote (current_input, chain->u.u_a.argv,
 				  chain->u.u_a.index,
 				  quote_cache (NULL, chain->quote_age,
@@ -1040,26 +1040,14 @@ next_char_1 (bool allow_quote, bool allow_argv)
 `-------------------------------------------------------------------*/
 
 void
-skip_line (const char *name)
+skip_line (const call_info *name)
 {
   int ch;
-  const char *file = current_file;
-  int line = current_line;
 
   while ((ch = next_char (false, false)) != CHAR_EOF && ch != '\n')
     ;
   if (ch == CHAR_EOF)
-    /* current_file changed to "" if we see CHAR_EOF, use the
-       previous value we stored earlier.  */
-    m4_warn_at_line (0, file, line, name,
-		     _("end of file treated as newline"));
-  /* On the rare occasion that dnl crosses include file boundaries
-     (either the input file did not end in a newline, or changeword
-     was used), calling next_char can update current_file and
-     current_line, and that update will be undone as we return to
-     expand_macro.  This informs next_char to fix things again.  */
-  if (file != current_file || line != current_line)
-    input_change = true;
+    m4_warn (0, name, _("end of file treated as newline"));
 }
 
 /*------------------------------------------------------------------.
@@ -1250,7 +1238,7 @@ match_input (const char *s, bool consume)
     }
 
   /* Failed or shouldn't consume, push back input.  */
-  push_string_init ();
+  push_string_init (current_file, current_line);
   obstack_grow (current_input, t, n);
   push_string_finish ();
   return result;
@@ -1396,7 +1384,7 @@ set_comment (const char *bc, const char *ec)
 `-------------------------------------------------------------------*/
 
 void
-set_word_regexp (const char *caller, const char *regexp)
+set_word_regexp (const call_info *caller, const char *regexp)
 {
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
@@ -1586,7 +1574,7 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
 
 token_type
 next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
-	    const char *caller)
+	    const call_info *caller)
 {
   int ch;
   int quote_level;
@@ -1594,20 +1582,21 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 #ifdef ENABLE_CHANGEWORD
   char *orig_text = NULL;
 #endif /* ENABLE_CHANGEWORD */
-  const char *file;
-  int dummy;
+  const char *file = NULL;
   /* The obstack where token data is stored.  Generally token_stack,
      for tokens where argument collection might not use the literal
      token.  But for comments and strings, we can output directly into
      the argument collection obstack obs, if one was provided.  */
   struct obstack *obs_td = &token_stack;
-
   obstack_free (&token_stack, token_bottom);
-  if (!line)
-    line = &dummy;
 
   TOKEN_DATA_TYPE (td) = TOKEN_VOID;
   ch = next_char (false, allow_argv && current_quote_age);
+  if (line)
+    {
+      *line = current_line;
+      file = current_file;
+    }
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
@@ -1636,8 +1625,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       return TOKEN_ARGV;
     }
 
-  file = current_file;
-  *line = current_line;
   if (MATCH (ch, curr_comm.str1, true))
     {
       if (obs)
@@ -1647,10 +1634,17 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	{
 	  ch = next_char (false, false);
 	  if (ch == CHAR_EOF)
-	    /* Current_file changed to "" if we see CHAR_EOF, use the
-	       previous value we stored earlier.  */
-	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
-			      _("end of file in comment"));
+	    {
+	      /* Current_file changed to "" if we see CHAR_EOF, use
+		 the previous value we stored earlier.  */
+	      if (!caller)
+		{
+		  assert (line);
+		  current_line = *line;
+		  current_file = file;
+		}
+	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in comment"));
+	    }
 	  if (ch == CHAR_MACRO)
 	    {
 	      init_macro_token (obs, obs ? td : NULL);
@@ -1699,8 +1693,10 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	  next_char (false, false);
 	}
 
+      TOKEN_DATA_ORIG_LEN (td) = obstack_object_size (&token_stack);
       obstack_1grow (&token_stack, '\0');
       orig_text = (char *) obstack_finish (&token_stack);
+      TOKEN_DATA_ORIG_TEXT (td) = orig_text;
 
       if (regs.start[1] != -1)
 	obstack_grow (&token_stack, orig_text + regs.start[1],
@@ -1743,11 +1739,17 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	{
 	  ch = next_char (obs != NULL && current_quote_age, false);
 	  if (ch == CHAR_EOF)
-	    /* Current_file changed to "" if we see CHAR_EOF, use
-	       the previous value we stored earlier.  */
-	    m4_error_at_line (EXIT_FAILURE, 0, file, *line, caller,
-			      _("end of file in string"));
-
+	    {
+	      /* Current_file changed to "" if we see CHAR_EOF, use
+		 the previous value we stored earlier.  */
+	      if (!caller)
+		{
+		  assert (line);
+		  current_line = *line;
+		  current_file = file;
+		}
+	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in string"));
+	    }
 	  if (ch == CHAR_MACRO)
 	    init_macro_token (obs, obs ? td : NULL);
 	  else if (ch == CHAR_QUOTE)
@@ -1784,12 +1786,10 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	TOKEN_DATA_TEXT (td) = NULL;
       TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
 #ifdef ENABLE_CHANGEWORD
-      if (orig_text == NULL)
-	TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
-      else
+      if (!orig_text)
 	{
-	  TOKEN_DATA_ORIG_TEXT (td) = orig_text;
-	  TOKEN_DATA_LEN (td) = strlen (orig_text);
+	  TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
+	  TOKEN_DATA_ORIG_LEN (td) = TOKEN_DATA_LEN (td);
 	}
 #endif /* ENABLE_CHANGEWORD */
 #ifdef DEBUG_INPUT
@@ -1948,6 +1948,10 @@ print_token (const char *s, token_type t, token_data *td)
       xfprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
       break;
 
+    case TOKEN_ARGV:
+      xfprintf (stderr, "argv:");
+      break;
+
     case TOKEN_EOF:
       xfprintf (stderr, "eof\n");
       break;
@@ -1960,8 +1964,9 @@ lex_debug (void)
 {
   token_type t;
   token_data td;
+  int line;
 
-  while ((t = next_token (&td, NULL, NULL, false, "<debug>")) != TOKEN_EOF)
+  while ((t = next_token (&td, &line, NULL, false, NULL)) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif /* DEBUG_INPUT */

@@ -1,5 +1,66 @@
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
+	Stage 24: Allow embedded NUL in macro names.
+	Replace const char *macro_name with const m4_call_info *call.  Use
+	length rather than NUL-termination when tracking macro names,
+	including in diagnostics.  Quote instances of problematic
+	characters in macro names when presented to user.
+	Memory impact: none.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* m4/gnulib-cache.m4: Import xmemdup0 module.
+	* src/m4.h (define_builtin, push_string_init, push_wrapup_init)
+	(lookup_symbol): Add parameters.
+	(struct call_info): Add name_len member.
+	(struct token_data) [ENABLE_CHANGEWORD]: Add original_len member.
+	(struct symbol): Add len member.
+	(TOKEN_DATA_ORIG_LEN, SYMBOL_NAME_LEN): New accessors.
+	(m4_error_at_line, m4_warn_at_line): Delete.
+	(m4_error, m4_warn, debug_set_output, skip_line, set_word_regexp)
+	(bad_argc, evaluate): Adjust parameter type.
+	* src/m4.c (m4_error_at_line, m4_warn_at_line): Delete.
+	(m4_verror_at_line, m4_error, m4_warn): Adjust parameter type.
+	(main): Adjust caller.
+	* src/symtab.c (profile_strcmp) [DEBUG_SYMTAB]: Rename...
+	(profile_memcmp): ...and accomodate NUL.
+	(hash, lookup_symbol): Add parameter to track length.
+	(symtab_debug, symtab_print_list): Adjust callers.
+	* src/input.c (push_string_init, push_wrapup_init): Take location
+	as parameter rather than using global state.
+	(skip_line, set_word_regexp, next_token): Adjust parameter type.
+	(peek_input, next_char_1, match_input, lex_debug): Adjust
+	callers.
+	* src/macro.c (struct macro_arguments): Delete argv0 and argv0_len
+	members, now covered by info.
+	(expand_input, expand_token, expand_argument, collect_arguments)
+	(expand_macro, arg_text, arg_empty, arg_len, make_argv_ref)
+	(push_arg, wrap_args): Adjust callers.
+	* src/builtin.c (define_builtin): Add parameter.
+	(bad_argc, numeric_arg, mkstemp_helper, substitute): Adjust
+	parameter type.
+	(define_user_macro, builtin_init, define_macro, m4_undefine)
+	(m4_popdef, m4_ifdef, m4_ifelse, dumpdef_cmp, m4_dumpdef)
+	(m4_builtin, m4_indir, m4_defn, m4_syscmd, m4_esyscmd, m4_eval)
+	(m4_incr, m4_decr, m4_divert, m4_divnum, m4_undivert, m4_shift)
+	(m4_changequote, m4_changecom, m4_changeword, include)
+	(m4_maketemp, m4_mkstemp, m4_errprint, m4___file__, m4___line__)
+	(m4___program__, m4_m4exit, m4_m4wrap, m4_traceon, m4_traceoff)
+	(m4_debugmode, m4_debugfile, m4_len, m4_index, m4_substr)
+	(m4_translit, m4_format, m4_regexp, m4_patsubst): Adjust all
+	callers.
+	* src/debug.c (debug_set_file, debug_set_output): Adjust parameter
+	type.
+	(trace_flush, trace_prepre, trace_pre): Adjust all callers.
+	* src/eval.c (logical_or_term, logical_and_term, or_term)
+	(xor_term, and_term, equality_term, cmp_term, shift_term)
+	(add_term, mult_term, exp_term, unary_term, simple_term)
+	(evaluate): Adjust parameter type.
+	* src/format.c (arg_int, arg_long, arg_double): Likewise.
+	(expand_format): Adjust caller.
+	* doc/m4.texinfo (Using frozen files): Test this.
+	* examples/null.m4: Likewise.
+	* examples/null.err: Adjust expected output.
+	* examples/null.out: Likewise.
+
 	Allow autobuild usage.
 	* m4/gnulib.cache: Import autobuild module.
 
