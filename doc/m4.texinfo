@@ -7006,12 +7006,13 @@ ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
-syscmd([printf 'define(-\0-,hi)dnl
+syscmd([printf 'define(-\0-,hi)changequote([,\0])changecom(--\0)dnl
 divert(1)undivert(null.out)' | ]__program__[ -F in.m4f \
-     && printf 'errprint(indir(-\0-))' | ]__program__[ -R in.m4f \
+     && printf 'errprint([divnum\0] #-- indir(-\0-))' \
+       | ]__program__[ -R in.m4f \
      && rm in.m4f])errprint([ ]sysval[
 ])dnl
-@error{}hi 0
+@error{}divnum #-- hi 0
 @end example
 @end ignore
 

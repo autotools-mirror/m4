@@ -71,16 +71,27 @@ produce_frozen_state (const char *name)
 
   /* Dump quote delimiters.  */
 
-  if (strcmp (curr_quote.str1, DEF_LQUOTE)
-      || strcmp (curr_quote.str2, DEF_RQUOTE))
-    xfprintf (file, "Q%d,%d\n%s%s\n", (int) curr_quote.len1,
-	      (int) curr_quote.len2, curr_quote.str1, curr_quote.str2);
+  if (curr_quote.len1 != 1 || curr_quote.len2 != 1
+      || *curr_quote.str1 != *DEF_LQUOTE || *curr_quote.str2 != *DEF_RQUOTE)
+    {
+      xfprintf (file, "Q%d,%d\n", (int) curr_quote.len1,
+		(int) curr_quote.len2);
+      fwrite (curr_quote.str1, 1, curr_quote.len1, file);
+      fwrite (curr_quote.str2, 1, curr_quote.len2, file);
+      fputc ('\n', file);
+    }
 
   /* Dump comment delimiters.  */
 
-  if (strcmp (curr_comm.str1, DEF_BCOMM) || strcmp (curr_comm.str2, DEF_ECOMM))
-    xfprintf (file, "C%d,%d\n%s%s\n", (int) curr_comm.len1,
-	      (int) curr_comm.len2, curr_comm.str1, curr_comm.str2);
+  if (curr_comm.len1 != 1 || curr_comm.len2 != 1
+      || *curr_comm.str1 != *DEF_BCOMM || *curr_comm.str2 != *DEF_ECOMM)
+    {
+      xfprintf (file, "C%d,%d\n", (int) curr_comm.len1,
+		(int) curr_comm.len2);
+      fwrite (curr_comm.str1, 1, curr_comm.len1, file);
+      fwrite (curr_comm.str2, 1, curr_comm.len2, file);
+      fputc ('\n', file);
+    }
 
   /* Dump all symbols.  */
 
@@ -318,7 +329,7 @@ reload_frozen_state (const char *name)
 
 	      /* Change comment strings.  */
 
-	      set_comment (string[0], string[1]);
+	      set_comment (string[0], number[0], string[1], number[1]);
 	      break;
 
 	    case 'D':
@@ -350,7 +361,7 @@ reload_frozen_state (const char *name)
 
 	      /* Change quote strings.  */
 
-	      set_quotes (string[0], string[1]);
+	      set_quotes (string[0], number[0], string[1], number[1]);
 	      break;
 
 	    default:
