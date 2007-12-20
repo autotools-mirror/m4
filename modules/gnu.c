@@ -447,8 +447,8 @@ M4BUILTIN_HANDLER (builtin)
 	      m4_macro_args *new_argv;
 	      bool flatten = (bp->flags & M4_BUILTIN_GROKS_MACRO) == 0;
 	      new_argv = m4_make_argv_ref (context, argv, name,
-                                           m4_arg_len (argv, 1),
-                                           true, flatten);
+					   m4_arg_len (argv, 1),
+					   true, flatten);
 	      bp->func (context, obs, argc - 1, new_argv);
 	    }
 	  free (value);
@@ -683,7 +683,7 @@ M4BUILTIN_HANDLER (indir)
 	  m4_macro_args *new_argv;
 	  bool flatten = !m4_symbol_groks_macro (symbol);
 	  new_argv = m4_make_argv_ref (context, argv, name,
-                                       m4_arg_len (argv, 1), true, flatten);
+				       m4_arg_len (argv, 1), true, flatten);
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	}
@@ -858,7 +858,6 @@ M4BUILTIN_HANDLER (renamesyms)
       m4_pattern_buffer *buf;	/* compiled regular expression */
 
       m4_dump_symbol_data	data;
-      m4_obstack		rename_obs;
 
       int resyntax;
 
@@ -879,25 +878,21 @@ M4BUILTIN_HANDLER (renamesyms)
       if (!buf)
 	return;
 
-      obstack_init (&rename_obs);
-      data.obs = obs;
-
+      data.obs = m4_arg_scratch (context);
       m4_dump_symbols (context, &data, 1, argv, false);
 
       for (; data.size > 0; --data.size, data.base++)
 	{
 	  const char *name = data.base[0];
 
-	  if (regexp_substitute (context, &rename_obs, me, name, strlen (name),
+	  if (regexp_substitute (context, data.obs, me, name, strlen (name),
 				 regexp, buf, replace, true))
 	    {
-	      obstack_1grow (&rename_obs, '\0');
+	      obstack_1grow (data.obs, '\0');
 	      m4_symbol_rename (M4SYMTAB, name,
-				(char *) obstack_finish (&rename_obs));
+				(char *) obstack_finish (data.obs));
 	    }
 	}
-
-      obstack_free (&rename_obs, NULL);
     }
   else
     assert (!"Unable to import from m4 module");
@@ -917,10 +912,8 @@ M4BUILTIN_HANDLER (m4symbols)
   if (m4_dump_symbols)
     {
       m4_dump_symbol_data data;
-      m4_obstack data_obs;
 
-      obstack_init (&data_obs);
-      data.obs = &data_obs;
+      data.obs = m4_arg_scratch (context);
       m4_dump_symbols (context, &data, argc, argv, false);
 
       for (; data.size > 0; --data.size, data.base++)
@@ -929,7 +922,6 @@ M4BUILTIN_HANDLER (m4symbols)
 	  if (data.size > 1)
 	    obstack_1grow (obs, ',');
 	}
-      obstack_free (&data_obs, NULL);
     }
   else
     assert (!"Unable to import from m4 module");

@@ -145,9 +145,6 @@ static void    trace_header	 (m4 *, size_t);
 static void    trace_flush	 (m4 *);
 
 
-/* Current recursion level in expand_macro ().  */
-static size_t expansion_level = 0;
-
 /* The number of the current call of expand_macro ().  */
 static size_t macro_call_id = 0;
 
@@ -325,10 +322,9 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 		 except we don't issue warnings.  But in the future,
 		 we want to allow concatenation of builtins and
 		 text.  */
-	      if (argp->type == M4_SYMBOL_FUNC
-		  && obstack_object_size (obs) == 0)
-		return type == M4_TOKEN_COMMA;
 	      len = obstack_object_size (obs);
+	      if (argp->type == M4_SYMBOL_FUNC && !len)
+		return type == M4_TOKEN_COMMA;
 	      obstack_1grow (obs, '\0');
 	      VALUE_MODULE (argp) = NULL;
 	      m4_set_symbol_value_text (argp, obstack_finish (obs), len, age);
@@ -379,7 +375,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 /* The macro expansion is handled by expand_macro ().  It parses the
    arguments, using collect_arguments (), and builds a table of pointers to
    the arguments.  The arguments themselves are stored on a local obstack.
-   Expand_macro () uses call_macro () to do the call of the macro.
+   Expand_macro () uses m4_macro_call () to do the call of the macro.
 
    Expand_macro () is potentially recursive, since it calls expand_argument
    (), which might call expand_token (), which might call expand_macro ().
@@ -391,6 +387,7 @@ static void
 expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 {
   void *args_base;		/* Base of stack->args on entry.  */
+  void *args_scratch;		/* Base of scratch space for m4_macro_call.  */
   void *argv_base;		/* Base of stack->argv on entry.  */
   m4_macro_args *argv;		/* Arguments to the called macro.  */
   m4_obstack *expansion;	/* Collects the macro's expansion.  */
@@ -399,7 +396,7 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   bool trace_expansion = false;	/* True if trace and debugmode(`e').  */
   size_t my_call_id;		/* Sequence id for this macro.  */
   m4_symbol_value *value;	/* Original value of this macro.  */
-  size_t level = expansion_level; /* Expansion level of this macro.  */
+  size_t level;			/* Expansion level of this macro.  */
   m4__macro_arg_stacks *stack;	/* Storage for this macro.  */
 
   /* Report errors at the location where the open parenthesis (if any)
@@ -414,6 +411,7 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   int loc_close_line;
 
   /* Obstack preparation.  */
+  level = context->expansion_level;
   if (context->stacks_count <= level)
     {
       size_t count = context->stacks_count;
@@ -453,7 +451,7 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 
   /* Prepare for macro expansion.  */
   VALUE_PENDING (value)++;
-  if (m4_get_nesting_limit_opt (context) < ++expansion_level)
+  if (m4_get_nesting_limit_opt (context) < ++context->expansion_level)
     m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
@@ -464,6 +462,11 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 
   argv = collect_arguments (context, name, len, symbol, stack->args,
 			    stack->argv);
+  /* Since collect_arguments can invalidate stack by reallocating
+     context->arg_stacks during a recursive expand_macro call, we must
+     reset it here.  */
+  stack = &context->arg_stacks[level];
+  args_scratch = obstack_finish (stack->args);
 
   /* The actual macro call.  */
   loc_close_file = m4_get_current_file (context);
@@ -485,7 +488,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   m4_set_current_file (context, loc_close_file);
   m4_set_current_line (context, loc_close_line);
 
-  --expansion_level;
+  --context->expansion_level;
   --VALUE_PENDING (value);
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
@@ -502,6 +505,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
     {
       if (argv->inuse)
 	{
+	  obstack_free (stack->args, args_scratch);
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (stderr, "m4debug: -%d- `%s' in use, level=%d, "
 		      "refcount=%zu, argcount=%zu\n", my_call_id, argv->argv0,
@@ -622,14 +626,15 @@ static void
 process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	       int argc, m4_macro_args *argv)
 {
-  const char *text;
+  const char *text = m4_get_symbol_value_text (value);
+  size_t len = m4_get_symbol_value_len (value);
   int i;
 
-  for (text = m4_get_symbol_value_text (value); *text != '\0';)
+  while (len--)
     {
       char ch;
 
-      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR))
+      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR) || !len)
 	{
 	  obstack_1grow (obs, *text);
 	  text++;
@@ -647,11 +652,13 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	  if (m4_get_posixly_correct_opt (context) || !isdigit(text[1]))
 	    {
 	      i = *text++ - '0';
+	      len--;
 	    }
 	  else
 	    {
 	      char *endp;
 	      i = (int) strtol (text, &endp, 10);
+	      len -= endp - text;
 	      text = endp;
 	    }
 	  if (i < argc)
@@ -662,12 +669,14 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	case '#':		/* number of arguments */
 	  m4_shipout_int (obs, argc - 1);
 	  text++;
+	  len--;
 	  break;
 
 	case '*':		/* all arguments */
 	case '@':		/* ... same, but quoted */
 	  m4_push_args (context, obs, argv, false, *text == '@');
 	  text++;
+	  len--;
 	  break;
 
 	default:
@@ -678,19 +687,20 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	    }
 	  else
 	    {
-	      size_t len  = 0;
+	      size_t len1 = 0;
 	      const char *endp;
 	      char *key;
 
 	      for (endp = ++text;
-		   *endp && m4_has_syntax (M4SYNTAX, *endp,
-					   (M4_SYNTAX_OTHER | M4_SYNTAX_ALPHA
-					    | M4_SYNTAX_NUM));
+		   len1 < len && m4_has_syntax (M4SYNTAX, *endp,
+						(M4_SYNTAX_OTHER
+						 | M4_SYNTAX_ALPHA
+						 | M4_SYNTAX_NUM));
 		   ++endp)
 		{
-		  ++len;
+		  ++len1;
 		}
-	      key = xstrndup (text, len);
+	      key = xstrndup (text, len1);
 
 	      if (*endp)
 		{
@@ -713,7 +723,8 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 			    key);
 		}
 
-	      text = *endp ? 1 + endp : endp;
+	      len -= endp - text;
+	      text = endp;
 
 	      free (key);
 	      break;
@@ -802,7 +813,7 @@ trace_header (m4 *context, size_t id)
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
 	trace_format (context, "%d:", m4_get_current_line (context));
     }
-  trace_format (context, " -%zu- ", expansion_level);
+  trace_format (context, " -%zu- ", context->expansion_level);
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALLID))
     trace_format (context, "id %zu: ", id);
 }
@@ -1078,9 +1089,8 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
   m4_symbol_value *value;
   m4_symbol_chain *chain;
   unsigned int index = skip ? 2 : 1;
-  m4_obstack *obs = context->arg_stacks[expansion_level - 1].argv;
+  m4_obstack *obs = m4_arg_scratch (context);
 
-  assert (obstack_object_size (obs) == 0);
   /* When making a reference through a reference, point to the
      original if possible.  */
   if (argv->has_ref)
@@ -1114,7 +1124,7 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       chain->next = NULL;
       chain->str = NULL;
       chain->len = 0;
-      chain->level = expansion_level - 1;
+      chain->level = context->expansion_level - 1;
       chain->argv = argv;
       chain->index = index;
       chain->flatten = flatten;
@@ -1134,18 +1144,22 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
 	     unsigned int index)
 {
   m4_symbol_value *value;
+  m4_symbol_value temp;
 
   if (index == 0)
     {
-      obstack_grow (obs, argv->argv0, argv->argv0_len);
-      return;
+      value = &temp;
+      m4_set_symbol_value_text (value, argv->argv0, argv->argv0_len, 0);
     }
-  value = m4_arg_symbol (argv, index);
-  if (value == &empty_symbol)
-    return;
+  else
+    {
+      value = m4_arg_symbol (argv, index);
+      if (value == &empty_symbol)
+	return;
+    }
   /* TODO handle builtin tokens?  */
   assert (value->type == M4_SYMBOL_TEXT);
-  if (m4__push_symbol (value, expansion_level - 1))
+  if (m4__push_symbol (context, value, context->expansion_level - 1))
     arg_mark (argv);
 }
 
@@ -1158,47 +1172,50 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
   m4_symbol_value *value;
-  m4_symbol_value sep;
   unsigned int i = skip ? 2 : 1;
+  const char *sep = ",";
+  size_t sep_len = 1;
   bool use_sep = false;
   bool inuse = false;
   const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
   const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  m4_obstack *scratch = m4_arg_scratch (context);
 
   if (argv->argc <= i)
     return;
 
+  if (argv->argc == i + 1)
+    {
+      if (quote)
+	obstack_grow (obs, lquote, strlen (lquote));
+      m4_push_arg (context, obs, argv, i);
+      if (quote)
+	obstack_grow (obs, rquote, strlen (rquote));
+      return;
+    }
+
+  /* Compute the separator in the scratch space.  */
   if (quote)
     {
-      const char *str;
-      size_t len;
       obstack_grow (obs, lquote, strlen (lquote));
-      len = obstack_object_size (obs);
-      obstack_1grow (obs, '\0');
-      str = (char *) obstack_finish (obs);
-      m4_set_symbol_value_text (&sep, str, len, 0);
-      m4__push_symbol (&sep, SIZE_MAX);
-      obstack_grow (obs, rquote, strlen (rquote));
-      obstack_1grow (obs, ',');
-      obstack_grow0 (obs, lquote, strlen (lquote));
-      str = (char *) obstack_finish (obs);
-      m4_set_symbol_value_text (&sep, str,
-				strlen (rquote) + 1 + strlen (lquote), 0);
+      obstack_grow (scratch, rquote, strlen (rquote));
+      obstack_1grow (scratch, ',');
+      obstack_grow0 (scratch, lquote, strlen (lquote));
+      sep = (char *) obstack_finish (scratch);
+      sep_len += strlen (lquote) + strlen (rquote);
     }
-  else
-    m4_set_symbol_value_text (&sep, ",", 1, 0);
 
   /* TODO push entire $@ ref, rather than each arg.  */
   for ( ; i < argv->argc; i++)
     {
       value = m4_arg_symbol (argv, i);
       if (use_sep)
-	m4__push_symbol (&sep, SIZE_MAX);
+	obstack_grow (obs, sep, sep_len);
       else
 	use_sep = true;
       /* TODO handle builtin tokens?  */
       assert (value->type == M4_SYMBOL_TEXT);
-      inuse |= m4__push_symbol (value, expansion_level - 1);
+      inuse |= m4__push_symbol (context, value, context->expansion_level - 1);
     }
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));
@@ -1217,4 +1234,17 @@ unsigned int
 m4_arg_argc (m4_macro_args *argv)
 {
   return argv->argc;
+}
+
+/* Return an obstack useful for scratch calculations, and which will
+   not interfere with macro expansion.  The obstack will be reset when
+   expand_macro completes.  */
+#undef m4_arg_scratch
+m4_obstack *
+m4_arg_scratch (m4 *context)
+{
+  m4__macro_arg_stacks *stack
+    = &context->arg_stacks[context->expansion_level - 1];
+  assert (obstack_object_size (stack->args) == 0);
+  return stack->args;
 }

@@ -1,3 +1,37 @@
+2007-12-20  Eric Blake  <ebb9@byu.net>
+
+	Stage 9: share rather than copy single-arg refs.
+	* ltdl/m4/gnulib-cache.m4: Import memmem and quote modules.
+	* m4/m4module.h (m4_arg_scratch): New prototype.
+	* m4/m4private.h (m4__push_symbol): Add parameter.
+	(m4_arg_scratch): Add fast accessor.
+	(struct m4): Add expansion_level member, taken...
+	* m4/macro.c (expansion_level): ...from here.  Adjust all users.
+	(expand_argument): Minor cleanup.
+	(expand_macro): Track scratch space per macro call.
+	(m4_arg_scratch): New function.
+	(m4_make_argv_ref): Call new function.
+	(m4_push_arg): Push reference to $0.
+	(m4_push_args): Rework separator usage, since separators will
+	usually be inlined.
+	(process_macro): Allow embedded NUL.
+	* m4/input.c (INPUT_INLINE_THRESHOLD): New define.
+	(m4__push_symbol): Add parameter.  Inline short strings, and save
+	references through rescanning.
+	* m4/symtab.c (m4_set_symbol_value_text): Weaken assertion.
+	* modules/m4.c (errprint, index): Handle NUL transparently.
+	(dumpdef, translit): Use scratch space, rather than expansion
+	stack.
+	* modules/gnu.c (renamesyms, m4symbols): Likewise.
+	* tests/others.at (nul character): New test.
+	(iso8859): Quote absolute file name, remove XFAIL.
+	* tests/iso8859.m4: Avoid raw NUL in output.
+	* tests/null.m4: New file.
+	* tests/null.out: Likewise.
+	* tests/null.err: Likewise.
+	* Makefile.am (OTHER_FILES): Distribute new files.
+	* .gitattributes: Treat new files as text.
+
 2007-12-17  Eric Blake  <ebb9@byu.net>
 
 	Stage 8: extend life of references into argv.

@@ -281,14 +281,9 @@ AT_CLEANUP
 AT_SETUP([iso8859])
 
 # Eh eh eh...
-# We can't embed iso8859.m4 in here since precisly this file demonstrates
-# an M4 ``bug'': its inability to handle the NUL character.  So there
-# is no use in trying to handle it here...  Well, until autom4te provides
-# us with means to.
-
-# However, since progress is being made to let M4 handle NUL, this test
-# is xfailed for now.
-AT_XFAIL_IF([:])
+# We can't embed iso8859.m4 in here since it includes a NUL character,
+# and we can't yet rely on autom4te being NUL-clean (even though this
+# test shows that M4 is trying to be NUL-clean).
 
 AT_DATA([[expout]],
 [[# Testing quotes
@@ -306,11 +301,27 @@ CHANGEQUOTE(«««,»»»)	# eol
 # Test use of all iso8859 characters except ^Z (win32 EOF) and NUL  ` '
 Length of string is: 254
 Comparing strings: MATCH
-# NUL does not pass through
-This will be seen.
+# NUL passes through now!
+42
 ]])
 
-AT_CHECK_M4([$abs_srcdir/iso8859.m4], 0, expout)
+AT_CHECK_M4(["$abs_srcdir/iso8859.m4"], 0, expout)
+
+AT_CLEANUP
+
+
+## ------------- ##
+## nul character ##
+## ------------- ##
+
+AT_SETUP([nul character])
+
+# We don't embed null.* in here, since it is harder to guarantee the
+# behavior of NUL through autom4te.
+cp "$abs_srcdir/null.out" expout
+cp "$abs_srcdir/null.err" experr
+
+AT_CHECK_M4(["$abs_srcdir/null.m4"], [0], [expout], [experr])
 
 AT_CLEANUP
 

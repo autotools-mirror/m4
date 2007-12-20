@@ -435,7 +435,8 @@ clean-local-tests:
 	test ! -f '$(abs_srcdir)/tests/testsuite' || \
 	  $(SHELL) '$(abs_srcdir)/tests/testsuite' --clean
 
-OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test
+OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test \
+		tests/null.m4 tests/null.out tests/null.err
 
 DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
 MAINTAINERCLEANFILES += tests/generated.at '$(TESTSUITE)'

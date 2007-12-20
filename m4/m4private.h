@@ -78,6 +78,7 @@ struct m4 {
   m4__search_path_info	*search_path;	/* The list of path directories. */
   m4__macro_arg_stacks	*arg_stacks;	/* Array of current argv refs.  */
   size_t		stacks_count;	/* Size of arg_stacks.  */
+  size_t		expansion_level;/* Macro call nesting level.  */
 };
 
 #define M4_OPT_PREFIX_BUILTINS_BIT	(1 << 0) /* -P */
@@ -450,7 +451,7 @@ typedef enum {
   M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
-extern	bool		m4__push_symbol (m4_symbol_value *, size_t);
+extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					const char *);
 extern	bool		m4__next_token_is_open (m4 *);
@@ -459,6 +460,8 @@ extern	bool		m4__next_token_is_open (m4 *);
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 # define m4_arg_argc(A)		(A)->argc
+# define m4_arg_scratch(C)				\
+  ((C)->arg_stacks[(C)->expansion_level - 1].argv)
 #endif /* NDEBUG */
 
 

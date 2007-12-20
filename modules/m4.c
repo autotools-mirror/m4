@@ -348,7 +348,7 @@ M4BUILTIN_HANDLER (dumpdef)
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
   bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
 
-  data.obs = obs;
+  data.obs = m4_arg_scratch (context);
   m4_dump_symbols (context, &data, argc, argv, true);
 
   for (; data.size > 0; --data.size, data.base++)
@@ -797,11 +797,15 @@ M4BUILTIN_HANDLER (mkstemp)
 /* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
+  size_t len;
+
   assert (obstack_object_size (obs) == 0);
   m4_dump_args (context, obs, 1, argv, " ", false);
-  obstack_1grow (obs, '\0');
   m4_sysval_flush (context, false);
-  fputs ((char *) obstack_finish (obs), stderr);
+  len = obstack_object_size (obs);
+  /* The close_stdin module makes it safe to skip checking the return
+     value here.  */
+  fwrite (obstack_finish (obs), 1, len, stderr);
   fflush (stderr);
 }
 
@@ -907,14 +911,10 @@ M4BUILTIN_HANDLER (index)
   const char *result = NULL;
   int retval = -1;
 
-  /* Optimize searching for the empty string (always 0) and one byte
-     (strchr tends to be more efficient than strstr).  */
-  if (!needle[0])
-    retval = 0;
-  else if (!needle[1])
-    result = strchr (haystack, *needle);
-  else
-    result = strstr (haystack, needle);
+  /* Rely on the optimizations guaranteed by gnulib's memmem
+     module.  */
+  result = (char *) memmem (haystack, m4_arg_len (argv, 1),
+			    needle, m4_arg_len (argv, 2));
   if (result)
     retval = result - haystack;
 
@@ -997,11 +997,11 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
   return obstack_finish (obs);
 }
 
-/* The macro "translit" translates all characters in the first argument,
-   which are present in the second argument, into the corresponding
-   character from the third argument.  If the third argument is shorter
-   than the second, the extra characters in the second argument, are
-   deleted from the first (pueh)  */
+/* The macro "translit" translates all characters in the first
+   argument, which are present in the second argument, into the
+   corresponding character from the third argument.  If the third
+   argument is shorter than the second, the extra characters in the
+   second argument are deleted from the first.  */
 M4BUILTIN_HANDLER (translit)
 {
   const char *data;
@@ -1020,14 +1020,14 @@ M4BUILTIN_HANDLER (translit)
   from = M4ARG (2);
   if (strchr (from, '-') != NULL)
     {
-      from = m4_expand_ranges (from, obs);
+      from = m4_expand_ranges (from, m4_arg_scratch (context));
       assert (from);
     }
 
   to = M4ARG (3);
   if (strchr (to, '-') != NULL)
     {
-      to = m4_expand_ranges (to, obs);
+      to = m4_expand_ranges (to, m4_arg_scratch (context));
       assert (to);
     }
 

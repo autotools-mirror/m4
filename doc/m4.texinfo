@@ -1060,6 +1060,10 @@ use non-@sc{ascii} characters in quoted strings (@pxref{Changequote}),
 comments (@pxref{Changecom}), and macro names (@pxref{Indir}), with the
 exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 
+@comment FIXME - each builtin needs to document how it handles NUL, then
+@comment update the above paragraph to mention that NUL is now handled
+@comment transparently.
+
 @menu
 * Names::                       Macro names
 * Quoted strings::              Quoting input to @code{m4}

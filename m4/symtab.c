@@ -701,12 +701,9 @@ m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
 			  unsigned int quote_age)
 {
   assert (value && text);
-  /* TODO - this assertion enforces NUL-terminated text with no
-     intermediate NULs.  Do we want to optimize memory usage and use
-     purely length-based manipulation, for one less byte per string?
-     Perhaps only without NDEBUG?  Also, do we want to support
-     embedded NUL?  */
-  assert (strlen (text) == len);
+  /* In practice, it is easier to debug when we guarantee a
+     terminating NUL, even when there are embedded NULs.  */
+  assert (!text[len]);
 
   value->type = M4_SYMBOL_TEXT;
   value->u.u_t.text = text;

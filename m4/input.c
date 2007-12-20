@@ -27,6 +27,11 @@
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INPUT */
 
+/* Maximum number of bytes where it is more efficient to inline the
+   reference as a string than it is to track reference bookkeeping for
+   those bytes.  */
+#define INPUT_INLINE_THRESHOLD 16
+
 /*
    Unread input can be either files that should be read (from the
    command line or by include/sinclude), strings which should be
@@ -528,17 +533,27 @@ m4_push_string_init (m4 *context)
    everything consecutively onto the input stack.  Must be called
    between push_string_init and push_string_finish.  Return true only
    if LEVEL is less than SIZE_MAX and a reference was created to
-   VALUE.  */
+   VALUE, in which case, the lifetime of the contents of VALUE must
+   last as long as the input engine can parse references from it.  */
 bool
-m4__push_symbol (m4_symbol_value *value, size_t level)
+m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
 {
   m4_symbol_chain *chain;
+  bool result = false;
 
   assert (next);
   /* TODO - also accept TOKEN_COMP chains.  */
   assert (m4_is_symbol_value_text (value));
-  if (m4_get_symbol_value_len (value) == 0)
-    return false;
+
+  /* Speed consideration - for short enough symbols, the speed and
+     memory overhead of parsing another INPUT_CHAIN link outweighs the
+     time to inline the symbol text.  */
+  if (m4_get_symbol_value_len (value) <= INPUT_INLINE_THRESHOLD)
+    {
+      obstack_grow (current_input, m4_get_symbol_value_text (value),
+		    m4_get_symbol_value_len (value));
+      return false;
+    }
 
   if (next->funcs == &string_funcs)
     {
@@ -553,22 +568,18 @@ m4__push_symbol (m4_symbol_value *value, size_t level)
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
-  if (level != SIZE_MAX)
-    /* TODO - use token as-is, rather than copying data.  This implies
-       lengthening lifetime of $@ arguments until the rescan is
-       complete, rather than the current approach of freeing them
-       during expand_macro.  */
-    chain->str = (char *) obstack_copy (current_input,
-					m4_get_symbol_value_text (value),
-					m4_get_symbol_value_len (value));
-  else
-    chain->str = m4_get_symbol_value_text (value);
+  chain->str = m4_get_symbol_value_text (value);
   chain->len = m4_get_symbol_value_len (value);
-  chain->level = SIZE_MAX;
+  chain->level = level;
   chain->argv = NULL;
   chain->index = 0;
   chain->flatten = false;
-  return false; /* Only return true when data is reused, not copied.  */
+  if (level < SIZE_MAX)
+    {
+      m4__adjust_refcount (context, level, true);
+      result = true;
+    }
+  return result;
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to

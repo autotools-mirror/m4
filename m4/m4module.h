@@ -310,6 +310,7 @@ extern bool	m4_arg_equal		(m4_macro_args *, unsigned int,
 extern bool	m4_arg_empty		(m4_macro_args *, unsigned int);
 extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
+extern m4_obstack *m4_arg_scratch	(m4 *);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
                                          size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
