@@ -587,7 +587,7 @@ numeric_arg (const call_info *name, const char *arg, int *valuep)
 /* Digits for number to ascii conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-const char *
+static const char *
 ntoa (int32_t value, int radix)
 {
   bool negative;
@@ -629,10 +629,7 @@ ntoa (int32_t value, int radix)
 static void
 shipout_int (struct obstack *obs, int val)
 {
-  const char *s;
-
-  s = ntoa ((int32_t) val, 10);
-  obstack_grow (obs, s, strlen (s));
+  obstack_printf (obs, "%d", val);
 }
 
 
@@ -908,11 +905,10 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	case TOKEN_TEXT:
 	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    DEBUG_PRINT3 ("%s%s%s\n",
-			  curr_quote.str1, SYMBOL_TEXT (data.base[0]),
-			  curr_quote.str2);
-	  else
-	    DEBUG_PRINT1 ("%s\n", SYMBOL_TEXT (data.base[0]));
+	    fwrite (curr_quote.str1, 1, curr_quote.len1, debug);
+	  fputs (SYMBOL_TEXT (data.base[0]), debug);
+	  if (debug_level & DEBUG_TRACE_QUOTE)
+	    fwrite (curr_quote.str2, 1, curr_quote.len2, debug);
 	  break;
 
 	case TOKEN_FUNC:
@@ -922,7 +918,7 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	      assert (!"m4_dumpdef");
 	      abort ();
 	    }
-	  DEBUG_PRINT1 ("<%s>\n", bp->name);
+	  xfprintf (debug, "<%s>", bp->name);
 	  break;
 
 	default:
@@ -930,6 +926,7 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	  abort ();
 	  break;
 	}
+      fputc ('\n', debug);
     }
 }
 
@@ -1211,11 +1208,14 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
 	  obstack_1grow (obs, '-');
 	  value = -value;
 	}
-      /* This assumes 2's-complement for correctly handling INT_MIN.  */
-      while (min-- - value > 0)
-	obstack_1grow (obs, '0');
-      while (value-- != 0)
-	obstack_1grow (obs, '1');
+      if ((uint32_t) value < min)
+	{
+	  obstack_blank (obs, min - value);
+	  memset ((char *) obstack_next_free (obs) - (min - value), '0',
+		  min - value);
+	}
+      obstack_blank (obs, value);
+      memset ((char *) obstack_next_free (obs) - value, '1', value);
       return;
     }
 
@@ -1227,10 +1227,9 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       s++;
     }
   len = strlen (s);
-  for (min -= len; --min >= 0;)
-    obstack_1grow (obs, '0');
-
-  obstack_grow (obs, s, len);
+  if (min < len)
+    min = len;
+  obstack_printf (obs, "%.*d%s", min - len, 0, s);
 }
 
 static void
@@ -1378,8 +1377,8 @@ m4_changequote (struct obstack *obs, int argc, macro_arguments *argv)
   bad_argc (arg_info (argv), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
-  set_quotes ((argc >= 2) ? ARG (1) : NULL,
-	      (argc >= 3) ? ARG (2) : NULL);
+  set_quotes ((argc >= 2) ? ARG (1) : NULL, ARG_LEN (1),
+	      (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
 
 /*--------------------------------------------------------------------.
@@ -1393,8 +1392,8 @@ m4_changecom (struct obstack *obs, int argc, macro_arguments *argv)
   bad_argc (arg_info (argv), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
-  set_comment ((argc >= 2) ? ARG (1) : NULL,
-	       (argc >= 3) ? ARG (2) : NULL);
+  set_comment ((argc >= 2) ? ARG (1) : NULL, ARG_LEN (1),
+	       (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
 
 #ifdef ENABLE_CHANGEWORD
@@ -1535,23 +1534,20 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
       const char *str = ARG (1);
       size_t len = ARG_LEN (1);
       size_t i;
-      size_t len2;
+      struct obstack *scratch = arg_scratch ();
+      size_t pid_len = obstack_printf (scratch, "%lu",
+				       (unsigned long) getpid ());
+      char *pid = (char *) obstack_copy0 (scratch, "", 0);
 
       m4_warn (0, me, _("recommend using mkstemp instead"));
       for (i = len; i > 1; i--)
 	if (str[i - 1] != 'X')
 	  break;
       obstack_grow (obs, str, i);
-      str = ntoa ((int32_t) getpid (), 10);
-      len2 = strlen (str);
-      if (len2 > len - i)
-	obstack_grow (obs, str + len2 - (len - i), len - i);
+      if (len - i < pid_len)
+	obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-	{
-	  while (i++ < len - len2)
-	    obstack_1grow (obs, '0');
-	  obstack_grow (obs, str, len2);
-	}
+	obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
     }
   else
     mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));

@@ -191,12 +191,7 @@ m4_tmpname (int divnum)
   static size_t offset;
   if (buffer == NULL)
     {
-      obstack_grow (&diversion_storage, output_temp_dir->dir_name,
-		    strlen (output_temp_dir->dir_name));
-      obstack_1grow (&diversion_storage, '/');
-      obstack_1grow (&diversion_storage, 'm');
-      obstack_1grow (&diversion_storage, '4');
-      obstack_1grow (&diversion_storage, '-');
+      obstack_printf (&diversion_storage, "%s/m4-", output_temp_dir->dir_name);
       offset = obstack_object_size (&diversion_storage);
       buffer = (char *) obstack_alloc (&diversion_storage,
 				       INT_BUFSIZE_BOUND (divnum));
@@ -473,7 +468,6 @@ void
 divert_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
-  const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
 
@@ -533,20 +527,15 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
 
 	  if (output_current_line != line)
 	    {
-	      OUTPUT_CHARACTER ('#');
-	      OUTPUT_CHARACTER ('l');
-	      OUTPUT_CHARACTER ('i');
-	      OUTPUT_CHARACTER ('n');
-	      OUTPUT_CHARACTER ('e');
-	      OUTPUT_CHARACTER (' ');
-	      for (cursor = ntoa (line, 10); *cursor; cursor++)
-		OUTPUT_CHARACTER (*cursor);
+	      static char line_buf[sizeof "#line " + INT_BUFSIZE_BOUND (line)];
+	      sprintf (line_buf, "#line %d", line);
+	      output_text (line_buf, strlen (line_buf));
+	      assert (strlen (line_buf) < sizeof line_buf);
 	      if (output_current_line < 1 && current_file[0] != '\0')
 		{
 		  OUTPUT_CHARACTER (' ');
 		  OUTPUT_CHARACTER ('"');
-		  for (cursor = current_file; *cursor; cursor++)
-		    OUTPUT_CHARACTER (*cursor);
+		  output_text (current_file, strlen (current_file));
 		  OUTPUT_CHARACTER ('"');
 		}
 	      OUTPUT_CHARACTER ('\n');

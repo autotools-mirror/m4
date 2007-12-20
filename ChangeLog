@@ -1,3 +1,42 @@
+2008-06-18  Eric Blake  <ebb9@byu.net>
+
+	Stage 25: Handle embedded NUL in changequote and changecom.
+	Track quote and comment delimiters by length, to allow embedded
+	NUL.  Convert macro tracing and other locations to use
+	obstack_printf rather than hand-rolled equivalents.  Ensure that
+	embedded NUL in trace output does not truncate the trace string.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/gnulib-cache.m4: Import obstack-printf-posix module.
+	* src/m4.h (ntoa): Remove declaration.
+	(DEBUG_PRINT1, DEBUG_PRINT3, MESSAGE, DEBUG_MESSAGE1)
+	(DEBUG_MESSAGE2): Delete, now that these macros are unused.
+	(debug_message_prefix): Rename...
+	(debug_message): ...and add parameters.
+	(set_quotes, set_comment): Add parameters.
+	* src/debug.c (debug_message_prefix): Rename...
+	(debug_message): ...and use obstack_printf.
+	(trace_format): Delete.
+	(trace_header): Adjust caller.
+	* src/input.c (init_argv_token, input_init): Handle embedded NUL
+	in comments and quotes.
+	(match_input, MATCH, set_quotes, set_comment): Add parameter.
+	(set_quote_age): Adjust heuristic for safe quote.
+	(push_file, pop_input, next_token, peek_token): Adjust callers.
+	* src/freeze.c (produce_frozen_state, reload_frozen_state): Handle
+	embedded NUL in quotes and comments.
+	* src/builtin.h (ntoa): Make static.
+	(shipout_int, m4_eval, m4_maketemp): Use obstack_printf.
+	(m4_dumpdef): Avoid truncating output on embedded NUL.
+	(m4_changequote, m4_changecom): Handle embedded NUL.
+	* src/format.c (expand_format): Use obstack_printf.
+	* src/output.c (m4_tmpname, divert_text): Likewise.
+	* src/path.c (m4_path_search): Adjust caller.
+	* doc/m4.texinfo (Using frozen files): Enhance test.
+	* examples/null.m4: Likewise.
+	* examples/null.out: Update expected output.
+	* examples/null.err: Likewise.
+
 2008-06-16  Eric Blake  <ebb9@byu.net>
 
 	Add missing const qualifications.

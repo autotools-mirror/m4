@@ -252,7 +252,7 @@ push_file (FILE *fp, const char *title, bool close_when_done)
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
-    DEBUG_MESSAGE1 ("input read from %s", title);
+    debug_message ("input read from %s", title);
 
   i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_FILE;
@@ -653,10 +653,10 @@ pop_input (bool cleanup)
       if (debug_level & DEBUG_TRACE_INPUT)
 	{
 	  if (tmp != &input_eof)
-	    DEBUG_MESSAGE2 ("input reverted to %s, line %d",
-			    tmp->file, tmp->line);
+	    debug_message ("input reverted to %s, line %d",
+			   tmp->file, tmp->line);
 	  else
-	    DEBUG_MESSAGE ("input exhausted");
+	    debug_message ("input exhausted");
 	}
 
       if (ferror (isp->u.u_f.fp))
@@ -1182,8 +1182,8 @@ init_argv_token (struct obstack *obs, token_data *td)
      last element of the $@ ref is reparsed, we must increase the argv
      refcount here, to compensate for the fact that it will be
      decreased once the final element is parsed.  */
-  assert (*curr_comm.str1 != ',' && *curr_comm.str1 != ')'
-	  && *curr_comm.str1 != *curr_quote.str1);
+  assert (!curr_comm.len1 || (*curr_comm.str1 != ',' && *curr_comm.str1 != ')'
+			      && *curr_comm.str1 != *curr_quote.str1));
   ch = peek_input (true);
   if (ch != ',' && ch != ')')
     {
@@ -1198,25 +1198,26 @@ init_argv_token (struct obstack *obs, token_data *td)
 
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
-| input stream.  If the string S matches the input and CONSUME is   |
-| true, the input is discarded; otherwise any characters read are   |
-| pushed back again.  The function is used only when multicharacter |
-| quotes or comment delimiters are used.                            |
+| input stream.  If the string S of length SLEN matches the input   |
+| and CONSUME is true, the input is discarded; otherwise any        |
+| characters read are pushed back again.  The function is used only |
+| when multicharacter quotes or comment delimiters are used.        |
 `------------------------------------------------------------------*/
 
 static bool
-match_input (const char *s, bool consume)
+match_input (const char *s, size_t slen, bool consume)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
   const char *t;
   bool result = false;
 
+  assert (slen);
   ch = peek_input (false);
   if (ch != to_uchar (*s))
     return false;			/* fail */
 
-  if (s[1] == '\0')
+  if (slen == 1)
     {
       if (consume)
 	next_char (false, false);
@@ -1228,7 +1229,7 @@ match_input (const char *s, bool consume)
     {
       next_char (false, false);
       n++;
-      if (*s == '\0')		/* long match */
+      if (--slen == 1)		/* long match */
 	{
 	  if (consume)
 	    return true;
@@ -1244,20 +1245,21 @@ match_input (const char *s, bool consume)
   return result;
 }
 
-/*--------------------------------------------------------------------.
-| The macro MATCH() is used to match a string S against the input.    |
-| The first character is handled inline, for speed.  Hopefully, this  |
-| will not hurt efficiency too much when single character quotes and  |
-| comment delimiters are used.  If CONSUME, then CH is the result of  |
-| next_char, and a successful match will discard the matched string.  |
-| Otherwise, CH is the result of peek_input, and the input stream is  |
-| effectively unchanged.                                              |
-`--------------------------------------------------------------------*/
+/*---------------------------------------------------------------.
+| The macro MATCH() is used to match a string S of length SLEN   |
+| against the input.  The first character is handled inline, for |
+| speed.  Hopefully, this will not hurt efficiency too much when |
+| single character quotes and comment delimiters are used.  If   |
+| CONSUME, then CH is the result of next_char, and a successful  |
+| match will discard the matched string.  Otherwise, CH is the   |
+| result of peek_input, and the input stream is effectively      |
+| unchanged.                                                     |
+`---------------------------------------------------------------*/
 
-#define MATCH(ch, s, consume)						\
-  (to_uchar ((s)[0]) == (ch)						\
-   && (ch) != '\0'							\
-   && ((s)[1] == '\0' || (match_input ((s) + (consume), consume))))
+#define MATCH(ch, s, slen, consume)					\
+  ((slen) && to_uchar ((s)[0]) == (ch)					\
+   && ((slen) == 1							\
+       || (match_input ((s) + (consume), (slen) - (consume), consume))))
 
 
 /*----------------------------------------------------------.
@@ -1289,14 +1291,14 @@ input_init (void)
 
   start_of_input_line = false;
 
-  curr_quote.str1 = xstrdup (DEF_LQUOTE);
-  curr_quote.len1 = strlen (curr_quote.str1);
-  curr_quote.str2 = xstrdup (DEF_RQUOTE);
-  curr_quote.len2 = strlen (curr_quote.str2);
-  curr_comm.str1 = xstrdup (DEF_BCOMM);
-  curr_comm.len1 = strlen (curr_comm.str1);
-  curr_comm.str2 = xstrdup (DEF_ECOMM);
-  curr_comm.len2 = strlen (curr_comm.str2);
+  curr_quote.str1 = xmemdup (DEF_LQUOTE, 1);
+  curr_quote.len1 = 1;
+  curr_quote.str2 = xmemdup (DEF_RQUOTE, 1);
+  curr_quote.len2 = 1;
+  curr_comm.str1 = xmemdup (DEF_BCOMM, 1);
+  curr_comm.len1 = 1;
+  curr_comm.str2 = xmemdup (DEF_ECOMM, 1);
+  curr_comm.len2 = 1;
 
 #ifdef ENABLE_CHANGEWORD
   set_word_regexp (NULL, user_word_regexp);
@@ -1306,14 +1308,15 @@ input_init (void)
 }
 
 
-/*--------------------------------------------------------------------.
-| Set the quote delimiters to LQ and RQ.  Used by m4_changequote ().  |
-| Pass NULL if the argument was not present, to distinguish from an   |
-| explicit empty string.                                              |
-`--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Set the quote delimiters to LQ and RQ, with respective lengths   |
+| LQ_LEN and RQ_LEN.  Used by m4_changequote ().  Pass NULL if the |
+| argument was not present, to distinguish from an explicit empty  |
+| string.                                                          |
+`-----------------------------------------------------------------*/
 
 void
-set_quotes (const char *lq, const char *rq)
+set_quotes (const char *lq, size_t lq_len, const char *rq, size_t rq_len)
 {
   /* POSIX states that with 0 arguments, the default quotes are used.
      POSIX XCU ERN 112 states that behavior is implementation-defined
@@ -1325,31 +1328,39 @@ set_quotes (const char *lq, const char *rq)
   if (!lq)
     {
       lq = DEF_LQUOTE;
+      lq_len = 1;
       rq = DEF_RQUOTE;
+      rq_len = 1;
     }
-  else if (!rq || (*lq && !*rq))
-    rq = DEF_RQUOTE;
+  else if (!rq || (lq_len && !rq_len))
+    {
+      rq = DEF_RQUOTE;
+      rq_len = 1;
+    }
 
-  if (strcmp (curr_quote.str1, lq) == 0 && strcmp (curr_quote.str2, rq) == 0)
+  if (curr_quote.len1 == lq_len && curr_quote.len2 == rq_len
+      && memcmp (curr_quote.str1, lq, lq_len) == 0
+      && memcmp (curr_quote.str2, rq, rq_len) == 0)
     return;
 
   free (curr_quote.str1);
   free (curr_quote.str2);
-  curr_quote.str1 = xstrdup (lq);
-  curr_quote.len1 = strlen (curr_quote.str1);
-  curr_quote.str2 = xstrdup (rq);
-  curr_quote.len2 = strlen (curr_quote.str2);
+  curr_quote.str1 = xmemdup (lq, lq_len);
+  curr_quote.len1 = lq_len;
+  curr_quote.str2 = xmemdup (rq, rq_len);
+  curr_quote.len2 = rq_len;
   set_quote_age ();
 }
 
-/*--------------------------------------------------------------------.
-| Set the comment delimiters to BC and EC.  Used by m4_changecom ().  |
-| Pass NULL if the argument was not present, to distinguish from an   |
-| explicit empty string.                                              |
-`--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Set the comment delimiters to BC and EC, with respective lengths |
+| BC_LEN and EC_LEN.  Used by m4_changecom ().  Pass NULL if the   |
+| argument was not present, to distinguish from an explicit empty  |
+| string.                                                          |
+`-----------------------------------------------------------------*/
 
 void
-set_comment (const char *bc, const char *ec)
+set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 {
   /* POSIX requires no arguments to disable comments.  It requires
      empty arguments to be used as-is, but this is counter to
@@ -1359,19 +1370,27 @@ set_comment (const char *bc, const char *ec)
      This implementation assumes the aardvark will be approved.  See
      the texinfo for what some other implementations do.  */
   if (!bc)
-    bc = ec = "";
-  else if (!ec || (*bc && !*ec))
-    ec = DEF_ECOMM;
+    {
+      bc = ec = "";
+      bc_len = ec_len = 0;
+    }
+  else if (!ec || (bc_len && !ec_len))
+    {
+      ec = DEF_ECOMM;
+      ec_len = 1;
+    }
 
-  if (strcmp (curr_comm.str1, bc) == 0 && strcmp (curr_comm.str2, ec) == 0)
+  if (curr_comm.len1 == bc_len && curr_comm.len2 == ec_len
+      && memcmp (curr_comm.str1, bc, bc_len) == 0
+      && memcmp (curr_comm.str2, ec, ec_len) == 0)
     return;
 
   free (curr_comm.str1);
   free (curr_comm.str2);
-  curr_comm.str1 = xstrdup (bc);
-  curr_comm.len1 = strlen (curr_comm.str1);
-  curr_comm.str2 = xstrdup (ec);
-  curr_comm.len2 = strlen (curr_comm.str2);
+  curr_comm.str1 = xmemdup (bc, bc_len);
+  curr_comm.len1 = bc_len;
+  curr_comm.str2 = xmemdup (ec, ec_len);
+  curr_comm.len2 = ec_len;
   set_quote_age ();
 }
 
@@ -1459,18 +1478,26 @@ set_quote_age (void)
    quote_age to zero, but at least a quote_age of zero always produces
    correct results (although it may take more time in doing so).  */
 
-  /* Hueristic of characters that might impact rescan if they appear in
-     a quote delimiter.  */
+  /* Hueristic of characters that might impact rescan if they appear
+     in a quote delimiter.  Using a single NUL as one of the two quote
+     delimiters is safe, but strchr matches it, so we must special
+     case the strchr below.  If we were willing to guarantee a
+     trailing NUL, we could use strpbrk(quote, unsafe) rather than
+     strchr(unsafe, *quote) and avoid the special case; on the other
+     hand, many strpbrk implementations are not as efficient as
+     strchr, and we save memory by avoiding the trailing NUL.  */
 #define Letters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   static const char unsafe[] = Letters "_0123456789(,) \t\n\r\f\v";
 #undef Letters
 
   if (curr_quote.len1 == 1 && curr_quote.len2 == 1
-      && strpbrk (curr_quote.str1, unsafe) == NULL
-      && strpbrk (curr_quote.str2, unsafe) == NULL
+      && (!*curr_quote.str1 || strchr (unsafe, *curr_quote.str1) == NULL)
+      && (!*curr_quote.str2 || strchr (unsafe, *curr_quote.str2) == NULL)
       && default_word_regexp && *curr_quote.str1 != *curr_quote.str2
-      && *curr_comm.str1 != '(' && *curr_comm.str1 != ','
-      && *curr_comm.str1 != ')' && *curr_comm.str1 != *curr_quote.str1)
+      && (!curr_comm.len1
+	  || (*curr_comm.str1 != '(' && *curr_comm.str1 != ','
+	      && *curr_comm.str1 != ')'
+	      && *curr_comm.str1 != *curr_quote.str1)))
     current_quote_age = (((*curr_quote.str1 & 0xff) << 8)
 			 | (*curr_quote.str2 & 0xff));
   else
@@ -1625,7 +1652,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       return TOKEN_ARGV;
     }
 
-  if (MATCH (ch, curr_comm.str1, true))
+  if (MATCH (ch, curr_comm.str1, curr_comm.len1, true))
     {
       if (obs)
 	obs_td = obs;
@@ -1650,7 +1677,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	      init_macro_token (obs, obs ? td : NULL);
 	      continue;
 	    }
-	  if (MATCH (ch, curr_comm.str2, true))
+	  if (MATCH (ch, curr_comm.str2, curr_comm.len2, true))
 	    {
 	      obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
 	      break;
@@ -1709,7 +1736,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 
 #endif /* ENABLE_CHANGEWORD */
 
-  else if (!MATCH (ch, curr_quote.str1, true))
+  else if (!MATCH (ch, curr_quote.str1, curr_quote.len1, true))
     {
       assert (ch < CHAR_EOF);
       switch (ch)
@@ -1754,13 +1781,13 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	    init_macro_token (obs, obs ? td : NULL);
 	  else if (ch == CHAR_QUOTE)
 	    append_quote_token (obs, td);
-	  else if (MATCH (ch, curr_quote.str2, true))
+	  else if (MATCH (ch, curr_quote.str2, curr_quote.len2, true))
 	    {
 	      if (--quote_level == 0)
 		break;
 	      obstack_grow (obs_td, curr_quote.str2, curr_quote.len2);
 	    }
-	  else if (MATCH (ch, curr_quote.str1, true))
+	  else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
 	    {
 	      quote_level++;
 	      obstack_grow (obs_td, curr_quote.str1, curr_quote.len1);
@@ -1856,7 +1883,7 @@ peek_token (void)
     {
       result = TOKEN_MACDEF;
     }
-  else if (MATCH (ch, curr_comm.str1, false))
+  else if (MATCH (ch, curr_comm.str1, curr_comm.len1, false))
     {
       result = TOKEN_STRING;
     }
@@ -1868,7 +1895,7 @@ peek_token (void)
     {
       result = TOKEN_WORD;
     }
-  else if (MATCH (ch, curr_quote.str1, false))
+  else if (MATCH (ch, curr_quote.str1, curr_quote.len1, false))
     {
       result = TOKEN_STRING;
     }

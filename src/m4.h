@@ -199,63 +199,11 @@ extern FILE *debug;
 /* default flags -- equiv: aeq */
 #define DEBUG_TRACE_DEFAULT 0x007
 
-#define DEBUG_PRINT1(Fmt, Arg1)					\
-  do								\
-    {								\
-      if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1);				\
-    }								\
-  while (0)
-
-#define DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3)			\
-  do								\
-    {								\
-      if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1, Arg2, Arg3);		\
-    }								\
-  while (0)
-
-#define DEBUG_MESSAGE(Fmt)					\
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt);				\
-	  putc ('\n', debug);					\
-	}							\
-    }								\
-  while (0)
-
-#define DEBUG_MESSAGE1(Fmt, Arg1)				\
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1);				\
-	  putc ('\n', debug);					\
-	}							\
-    }								\
-  while (0)
-
-#define DEBUG_MESSAGE2(Fmt, Arg1, Arg2)				\
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1, Arg2);			\
-	  putc ('\n', debug);					\
-	}							\
-    }								\
-  while (0)
-
 void debug_init (void);
 int debug_decode (const char *);
 void debug_flush_files (void);
 bool debug_set_output (const call_info *, const char *);
-void debug_message_prefix (void);
+void debug_message (const char *, ...) M4_GNUC_PRINTF (1, 2);
 
 void trace_prepre (const call_info *);
 unsigned int trace_pre (macro_arguments *);
@@ -430,8 +378,8 @@ extern string_pair curr_quote;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-void set_quotes (const char *, const char *);
-void set_comment (const char *, const char *);
+void set_quotes (const char *, size_t, const char *, size_t);
+void set_comment (const char *, size_t, const char *, size_t);
 #ifdef ENABLE_CHANGEWORD
 void set_word_regexp (const call_info *, const char *);
 #endif
@@ -584,7 +532,6 @@ void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
 void m4_placeholder (struct obstack *, int, macro_arguments *);
 void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
-const char *ntoa (int32_t, int);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);
