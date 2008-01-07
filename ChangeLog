@@ -7,6 +7,13 @@
 2007-12-21  Eric Blake  <ebb9@byu.net>
 
 	Stage 9: share rather than copy single-arg refs.
+	Use hooks of previous patch to create back-references to arguments
+	in the input engine, and inline short text rather than always
+	creating a FIFO link.  Also start testing embedded NUL behavior.
+	Until the argument collection engine also shares references, the
+	memory usage increases.
+	Memory impact: noticeable penalty, due to longer life of argv.
+	Speed impact: slight improvement, due less data copying.
 	* m4/gnulib-cache.m4: Import quote and memmem modules.
 	* src/m4.h (arg_scratch): New prototype.
 	* src/input.c (INPUT_INLINE_THRESHOLD): New define.
@@ -37,6 +44,12 @@
 2007-12-18  Eric Blake  <ebb9@byu.net>
 
 	Stage 8: extend life of references into argv.
+	Add hooks to lengthen the lifetime of arguments reused in a macro
+	expansion, rather than always discarding arguments at the end of
+	expand_macro.  Rework the expand_macro obstacks to handle longer
+	lifetimes.  For now, the hooks remain unused.
+	Memory impact: slight penalty, due to larger structs.
+	Speed impact: slight penalty, due to more bookkeeping.
 	* src/m4.h (obstack_regrow): Delete, now that it is unused.
 	(struct token_chain): Add level field.
 	(push_token): Adjust prototype.
@@ -76,6 +89,11 @@
 2007-12-11  Eric Blake  <ebb9@byu.net>
 
 	Stage 7: add chained token support to input parser.
+	Allow the LIFO input engine to rescan a macro expansion composed
+	of smaller chunks of FIFO data, rather than the old approach of a
+	monolithic string.  For now, all chunks are still copied.
+	Memory impact: slight penalty, due to FIFO chain overhead.
+	Speed impact: noticeable penalty, due to extra bookkeeping.
 	* src/m4.h (struct token_chain): Add const safety.
 	(push_token): New prototype.
 	* src/input.c (INPUT_CHAIN): New enumerator.
@@ -91,6 +109,12 @@
 2007-12-10  Eric Blake  <ebb9@byu.net>
 
 	Stage 6: convert builtins to push arg at a time.
+	Add new methods to factor all builtins whose expansion includes an
+	argument, making back-reference creation easier in future patches.
+	Factor out length-limited printing to obstacks, and use -1 rather
+	than 0 for unlimited length.
+	Memory impact: none.
+	Speed impact: slight improvement, due to better code sharing.
 	* src/m4.h (includes): Include <limits.h> here, instead of in
 	individual files.
 	(input_block): New typedef.
@@ -122,6 +146,12 @@
 	* NEWS: Document this change.
 
 	Stage 5: add notion of quote age.
+	Cache the quoting rules that were in effect when a string was
+	parsed, to avoid reparsing that string if no changequote or other
+	quote age change took place in the meantime.  A quote_age of 0 is
+	always safe, but does not benefit from caching.
+	Memory impact: slight penalty, due to larger struct.
+	Speed impact: slight penalty, due to more bookkeeping.
 	* src/input.c: Comment cleanups.
 	(current_quote_age): New global variable.
 	(set_quote_age): New helper function.
@@ -152,6 +182,12 @@
 2007-11-29  Eric Blake  <ebb9@byu.net>
 
 	Stage 4: route indir, builtin through ref; make argv opaque.
+	Finish making struct opaque to all but the input engine, by
+	reworking obstack usage in expand_macro to better support creation
+	of a $@ reference.  Canonicalize the empty argument, to allow
+	pointer comparison optimizations.
+	Memory impact: slight penalty, due to larger struct.
+	Speed impact: slight improvement, due to fewer function calls.
 	* src/m4.h (obstack_regrow): Borrow definition from head.
 	(struct token_chain): Add flatten and len members.
 	(arg_equal, arg_empty, make_argv_ref): New prototypes.
@@ -170,6 +206,12 @@
 	* src/format.c (format): Likewise.
 
 	Stage 3: cache length, rather than computing it.
+	Cache the length of a token, to avoid repeating lots of strlen
+	calls.  Additionally, by using obstack length rather than strlen,
+	the input engine can now support embedded NUL.
+	Memory impact: slight penalty, due to larger struct.
+	Speed impact: noticeable improvement, due to fewer function
+	calls.
 	* src/input.c (next_token): Grab length from obstack rather than
 	calling strlen.
 	* src/m4.h (token_data, macro_arguments): Add length field.
@@ -191,6 +233,10 @@
 2007-11-27  Eric Blake  <ebb9@byu.net>
 
 	Stage 2: use accessors, not direct reference, into argv.
+	Outside of macro.c, use accessor methods rather than direct access
+	into the argv struct.
+	Memory impact: none.
+	Speed impact: slight penalty, due to increased function calls.
 	* src/m4.h (TOKEN_EOF): Alter value, to ease debugging.
 	(arg_argc, arg_type, arg_text, arg_len, arg_func): New
 	prototypes.
@@ -205,6 +251,11 @@
 2007-11-24  Eric Blake  <ebb9@byu.net>
 
 	Stage 1: convert token_data** into new object.
+	Pass a variable-size wrapper structure instead of an array to
+	builtins, so that subsequent optimizations in the structure need
+	not impact every builtin client.
+	Memory impact: slight penalty, since struct is larger than array.
+	Speed impact: slight penalty, due to increased bookkeeping.
 	* m4/gnulib-cache.m4: Import flexmember module.
 	* src/m4.h (struct macro_arguments, struct token_chain): New
 	structs.
@@ -316,7 +367,18 @@
 	* src/input.c (pop_input): Change signature.
 	(push_string_init, next_char_1): Adjust callers.
 
-	Fix memory leak in tail recursion.
+	Note: Patches titled Stage 0 through N form a series of patches
+	which decreases the algorithmic complexity of tail recursion in
+	macro expansions from O(n^2) to O(n) in both time and memory, then
+	performs cleanups, such as handling of embedded NUL, made easier
+	by the code refactoring.
+
+	Stage 0: Fix memory leak in tail recursion.
+	Free expansion text in the input engine as soon as it is parsed,
+	rather than when the recursive expansion completes.
+	Memory impact: noticeable improvement, due to reduction from
+	O(n^2) to O(n) on recursion.
+	Speed impact: minor improvement, due to better memory usage.
 	* src/input.c (push_string_init): Let go of memory earlier.
 	(next_char_1): Make end of string detection reliable.
 	(match_input): Simplify use of push_string_init.
