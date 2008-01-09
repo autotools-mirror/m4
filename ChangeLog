@@ -1,6 +1,13 @@
 2007-12-20  Eric Blake  <ebb9@byu.net>
 
 	Stage 9: share rather than copy single-arg refs.
+	Use hooks of previous patch to create back-references to arguments
+	in the input engine, and inline short text rather than always
+	creating a FIFO link.  Also start testing embedded NUL behavior.
+	Until the argument collection engine also shares references, the
+	memory usage increases.
+	Memory impact: noticeable penalty, due to longer life of argv.
+	Speed impact: slight improvement, due less data copying.
 	* ltdl/m4/gnulib-cache.m4: Import memmem and quote modules.
 	* m4/m4module.h (m4_arg_scratch): New prototype.
 	* m4/m4private.h (m4__push_symbol): Add parameter.
@@ -35,6 +42,12 @@
 2007-12-17  Eric Blake  <ebb9@byu.net>
 
 	Stage 8: extend life of references into argv.
+	Add hooks to lengthen the lifetime of arguments reused in a macro
+	expansion, rather than always discarding arguments at the end of
+	expand_macro.  Rework the expand_macro obstacks to handle longer
+	lifetimes.  For now, the hooks remain unused.
+	Memory impact: slight penalty, due to larger structs.
+	Speed impact: slight penalty, due to more bookkeeping.
 	* m4/system_.h (obstack_regrow): Delete.
 	* m4/m4private.h (struct m4_symbol_chain): Add level field.
 	(m4__push_symbol): Adjust prototype.
@@ -84,6 +97,11 @@
 2007-12-11  Eric Blake  <ebb9@byu.net>
 
 	Stage 7: use chained input support in input parser.
+	Allow the LIFO input engine to rescan a macro expansion composed
+	of smaller chunks of FIFO data, rather than the old approach of a
+	monolithic string.  For now, all chunks are still copied.
+	Memory impact: slight penalty, due to FIFO chain overhead.
+	Speed impact: slight penalty, due to extra bookkeeping.
 	* m4/m4private.h (m4__push_symbol): New prototype.
 	(struct m4_symbol_chain): Add const-safety.
 	* m4/symtab.c (m4_symbol_value_print): Simplify.
@@ -103,6 +121,12 @@
 2007-12-08  Eric Blake  <ebb9@byu.net>
 
 	Stage 6: convert builtins to push arg at a time.
+	Add new methods to factor all builtins whose expansion includes an
+	argument, making back-reference creation easier in future patches.
+	Factor out length-limited printing to obstacks, and use -1 rather
+	than 0 for unlimited length.
+	Memory impact: none.
+	Speed impact: slight improvement, due to better code sharing.
 	* m4/m4module.h (m4_shipout_text): Rename...
 	(m4_divert_text): ...to this, to avoid confusion with m4_shipout_*
 	that does not worry about sync lines.
@@ -130,6 +154,13 @@
 	tests.
 
 	Stage 5: add notion of quote age.
+	Cache the quoting rules that were in effect when a string was
+	parsed, to avoid reparsing that string if no changequote or other
+	quote age change took place in the meantime.  A quote_age of 0 is
+	always safe, but does not benefit from caching.
+	Memory impact: slight improvement, due to smaller struct in input
+	engine.
+	Speed impact: slight penalty, due to more bookkeeping.
 	* m4/m4module.h (m4_get_symbol_value_quote_age): New prototype.
 	(m4_set_symbol_value_text): Adjust prototype.
 	(m4_has_syntax): Factor out the unsigned char cast.
@@ -181,6 +212,12 @@
 2007-11-29  Eric Blake  <ebb9@byu.net>
 
 	Stage 4: route indir, builtin through ref; make argv opaque.
+	Finish making struct opaque to all but the input engine, by
+	reworking obstack usage in expand_macro to better support creation
+	of a $@ reference.  Canonicalize the empty argument, to allow
+	pointer comparison optimizations.
+	Memory impact: slight penalty, due to larger struct.
+	Speed impact: slight improvement, due to fewer function calls.
 	* m4/system_.h (obstack_regrow): Fix precedence.
 	* m4/m4module.h (m4_arg_equal, m4_arg_empty, m4_make_argv_ref):
 	New prototypes.
@@ -207,6 +244,9 @@
 	* m4/output.c (diversion_storage): Use typedef.
 
 	Stage 3b: cache length, rather than computing it, in modules.
+	Use cached token length in builtins and output engine.
+	Memory impact: none.
+	Speed impact: noticeable improvement, due to fewer function calls.
 	* m4/hash.c (m4_hash_remove): Avoid double free on remove
 	failure.
 	* m4/output.c (m4_shipout_string): Change semantics of len param.
@@ -238,6 +278,12 @@
 2007-11-28  Eric Blake  <ebb9@byu.net>
 
 	Stage 3a: cache length, rather than computing it, in libm4.
+	Cache the length of a token in the input engine and symbol table,
+	to avoid repeating lots of strlen calls.  Additionally, by using
+	obstack length rather than strlen, the input engine can now
+	support embedded NUL.
+	Memory impact: slight penalty, due to larger struct.
+	Speed impact: slight improvement, due to fewer function calls.
 	* m4/m4module.h (struct m4_macro_args): Cache length.
 	(m4_get_symbol_len, m4_get_symbol_value_len): New accessors.
 	(m4_set_symbol_value_text): Change signature.
@@ -266,6 +312,10 @@
 2007-11-27  Eric Blake  <ebb9@byu.net>
 
 	Stage 2: use accessors, not direct reference, into argv.
+	Outside of macro.c, use accessor methods rather than direct access
+	into the argv struct.
+	Memory impact: none.
+	Speed impact: slight penalty, due to increased function calls.
 	* m4/m4private.h (m4_arg_argc): New fast accessor.
 	* m4/m4module.h (m4_arg_argc, m4_arg_symbol, m4_is_arg_text)
 	(m4_is_arg_func, m4_arg_text, m4_arg_len, m4_arg_func): New
@@ -291,6 +341,11 @@
 2007-11-24  Eric Blake  <ebb9@byu.net>
 
 	Stage 1: convert m4_symbol_value** into new object.
+	Pass a variable-size wrapper structure instead of an array to
+	builtins, so that subsequent optimizations in the structure need
+	not impact every builtin client.
+	Memory impact: slight penalty, since struct is larger than array.
+	Speed impact: slight penalty, due to increased bookkeeping.
 	* ltdl/m4/gnulib-cache.m4: Import flexmember module.
 	* m4/m4module.h (m4_macro_args): New type, will be opaque to
 	modules later.
@@ -368,7 +423,18 @@
 
 2007-11-13  Eric Blake  <ebb9@byu.net>
 
-	Fix memory leak in tail recursion.
+	Note: Patches titled Stage 0 through N form a series of patches
+	which decreases the algorithmic complexity of tail recursion in
+	macro expansions from O(n^2) to O(n) in both time and memory, then
+	performs cleanups, such as handling of embedded NUL, made easier
+	by the code refactoring.
+
+	Stage 0: Fix memory leak in tail recursion.
+	Free expansion text in the input engine as soon as it is parsed,
+	rather than when the recursive expansion completes.
+	Memory impact: noticeable improvement, due to reduction from
+	O(n^2) to O(n) on recursion.
+	Speed impact: minor improvement, due to better memory usage.
 	* m4/input.c (pop_input): Add flag parameter and return type.
 	(next_char): Adjust caller.
 	(m4_push_string_init): Let go of memory earlier.
@@ -9796,7 +9862,7 @@
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice
