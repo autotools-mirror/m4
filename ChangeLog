@@ -1,3 +1,11 @@
+2008-01-14  Eric Blake  <ebb9@byu.net>
+
+	Fix --warn-macro-sequence regression from 2007-11-29.
+	* src/builtin.c (define_user_macro): Use correct length.
+	* doc/m4.texinfo (Arguments): Test the fix.
+	(History): Reword to account for new year and eventual result of
+	the argv_ref branch.
+
 2008-01-08  Eric Blake  <ebb9@byu.net>
 
 	Bump copyright year.

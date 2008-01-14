@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -424,9 +424,11 @@ define_user_macro (const char *name, size_t len, const char *text,
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
+      len = strlen (defn);
 
-      while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
-				  len - offset, &macro_sequence_regs)) >= 0)
+      while (offset < len
+	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
+				     len - offset, &macro_sequence_regs)) >= 0)
 	{
 	  /* Skip empty matches.  */
 	  if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
