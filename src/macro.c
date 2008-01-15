@@ -1128,9 +1128,10 @@ arg_empty (macro_arguments *argv, unsigned int arg)
 }
 
 /* Given ARGV, return the length of argument ARG.  Abort if the
-   argument is not text.  Indices beyond argc return 0.  */
+   argument is not text.  Indices beyond argc return 0.  If FLATTEN,
+   builtins are ignored.  */
 size_t
-arg_len (macro_arguments *argv, unsigned int arg)
+arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
   token_chain *chain;
@@ -1143,7 +1144,7 @@ arg_len (macro_arguments *argv, unsigned int arg)
     }
   if (arg >= argv->argc)
     return 0;
-  token = arg_token (argv, arg, NULL, false);
+  token = arg_token (argv, arg, NULL, flatten);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1163,9 +1164,8 @@ arg_len (macro_arguments *argv, unsigned int arg)
 	      len += chain->u.u_s.len;
 	      break;
 	    case CHAIN_FUNC:
-	      /* TODO concatenate builtins.  */
-	      assert (!"implemented");
-	      abort ();
+	      assert (flatten);
+	      break;
 	    case CHAIN_ARGV:
 	      i = chain->u.u_a.index;
 	      limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
@@ -1176,15 +1176,8 @@ arg_len (macro_arguments *argv, unsigned int arg)
 		len += (quotes->len1 + quotes->len2) * limit;
 	      len += limit - 1;
 	      while (limit--)
-		{
-		  /* TODO handle builtin concatenation.  */
-		  if (TOKEN_DATA_TYPE (arg_token (chain->u.u_a.argv, i, NULL,
-						  false)) == TOKEN_FUNC)
-		    assert (argv->flatten);
-		  else
-		    len += arg_len (chain->u.u_a.argv, i);
-		  i++;
-		}
+		len += arg_len (chain->u.u_a.argv, i++,
+				flatten || chain->u.u_a.flatten);
 	      break;
 	    default:
 	      assert (!"arg_len");
@@ -1192,7 +1185,7 @@ arg_len (macro_arguments *argv, unsigned int arg)
 	    }
 	  chain = chain->next;
 	}
-      assert (len);
+      assert (len || flatten);
       return len;
     case TOKEN_FUNC:
     default:

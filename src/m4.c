@@ -623,7 +623,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    const char *value = strchr (defines->arg, '=');
 	    size_t len = value ? value - defines->arg : strlen (defines->arg);
 	    define_user_macro (defines->arg, len, value ? value + 1 : "",
-			       SYMBOL_INSERT);
+			       value ? SIZE_MAX : 0, SYMBOL_INSERT);
 	  }
 	  break;
 

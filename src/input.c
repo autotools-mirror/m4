@@ -1309,7 +1309,7 @@ input_init (void)
   curr_comm.len2 = 1;
 
 #ifdef ENABLE_CHANGEWORD
-  set_word_regexp (NULL, user_word_regexp);
+  set_word_regexp (NULL, user_word_regexp, SIZE_MAX);
 #endif /* ENABLE_CHANGEWORD */
 
   set_quote_age ();
@@ -1406,19 +1406,24 @@ set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 
 #ifdef ENABLE_CHANGEWORD
 
-/*-------------------------------------------------------------------.
-| Set the regular expression for recognizing words to REGEXP, and    |
-| report errors on behalf of CALLER.  If REGEXP is NULL, revert back |
-| to the default parsing rules.                                      |
-`-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Set the regular expression for recognizing words to REGEXP of    |
+| length LEN, and report errors on behalf of CALLER.  If REGEXP is |
+| NULL, revert back to the default parsing rules.  If LEN is       |
+| SIZE_MAX, use strlen(REGEXP) instead.                            |
+`-----------------------------------------------------------------*/
 
 void
-set_word_regexp (const call_info *caller, const char *regexp)
+set_word_regexp (const call_info *caller, const char *regexp, size_t len)
 {
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
-  if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
+  if (len == SIZE_MAX)
+    len = strlen (regexp);
+  if (len == 0
+      || (len == strlen (DEFAULT_WORD_REGEXP)
+	  && !memcmp (regexp, DEFAULT_WORD_REGEXP, len)))
     {
       default_word_regexp = true;
       set_quote_age ();
@@ -1427,12 +1432,13 @@ set_word_regexp (const call_info *caller, const char *regexp)
 
   /* Dry run to see whether the new expression is compilable.  */
   init_pattern_buffer (&new_word_regexp, NULL);
-  msg = re_compile_pattern (regexp, strlen (regexp), &new_word_regexp);
+  msg = re_compile_pattern (regexp, len, &new_word_regexp);
   regfree (&new_word_regexp);
 
   if (msg != NULL)
     {
-      m4_warn (0, caller, _("bad regular expression `%s': %s"), regexp, msg);
+      m4_warn (0, caller, _("bad regular expression %s: %s"),
+	       quotearg_style_mem (locale_quoting_style, regexp, len), msg);
       return;
     }
 
@@ -1442,7 +1448,7 @@ set_word_regexp (const call_info *caller, const char *regexp)
      by the final regfree.  */
   if (!word_regexp.fastmap)
     word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
-  msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  msg = re_compile_pattern (regexp, len, &word_regexp);
   assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
   if (re_compile_fastmap (&word_regexp))

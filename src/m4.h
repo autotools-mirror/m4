@@ -381,7 +381,7 @@ extern string_pair curr_quote;
 void set_quotes (const char *, size_t, const char *, size_t);
 void set_comment (const char *, size_t, const char *, size_t);
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp (const call_info *, const char *);
+void set_word_regexp (const call_info *, const char *, size_t);
 #endif
 unsigned int quote_age (void);
 bool safe_quotes (void);
@@ -438,6 +438,7 @@ struct symbol
 #define SYMBOL_NAME_LEN(S)	((S)->len)
 #define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
+#define SYMBOL_TEXT_LEN(S)	(TOKEN_DATA_LEN (&(S)->data))
 #define SYMBOL_FUNC(S)		(TOKEN_DATA_FUNC (&(S)->data))
 
 typedef enum symbol_lookup symbol_lookup;
@@ -467,7 +468,7 @@ token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);
 bool arg_empty (macro_arguments *, unsigned int);
-size_t arg_len (macro_arguments *, unsigned int);
+size_t arg_len (macro_arguments *, unsigned int, bool);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
@@ -487,7 +488,7 @@ void wrap_args (macro_arguments *);
 
 /* Grab the text length at argv index I.  Assumes macro_argument *argv
    is in scope, and aborts if the argument is not text.  */
-#define ARG_LEN(i) arg_len (argv, i)
+#define ARG_LEN(i) arg_len (argv, i, false)
 
 
 /* File: builtin.c  --- builtins.  */
@@ -523,7 +524,8 @@ bool bad_argc (const call_info *, int, unsigned int, unsigned int);
 void define_builtin (const char *, size_t, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
-void define_user_macro (const char *, size_t, const char *, symbol_lookup);
+void define_user_macro (const char *, size_t, const char *, size_t,
+			symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
 void m4_placeholder (struct obstack *, int, macro_arguments *);

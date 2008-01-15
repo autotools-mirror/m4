@@ -1,5 +1,31 @@
 2008-08-03  Eric Blake  <ebb9@byu.net>
 
+	Stage 26: Allow embedded NUL in macro definitions.
+	Track macro definitions by length, to allow embedded NUL.  Make
+	arg_len callers aware of the issue of flattening builtins when
+	determining length.  Optimize loops that scan a definition.
+	Memory impact: none.
+	Speed impact: slight improvement, due to faster scans.
+	* src/m4.h (set_word_regexp, arg_len, define_user_macro): Add
+	parameters.
+	(SYMBOL_TEXT_LEN): New macro.
+	(ARG_LEN): Adjust callers.
+	* src/builtin.c (define_user_macro): Add a parameter.
+	(builtin_init, define_macro): Adjust callers.
+	(m4_dumpdef, m4_defn, m4_changeword): Handle embedded NULs.
+	(expand_user_macro): Handle embedded NUL, and speed up search for
+	embedded $.
+	* src/macro.c (arg_len): Add parameter.
+	* src/input.c (set_word_regexp): Add parameter.
+	(input_init): Adjust caller.
+	* src/m4.c (main): Likewise.
+	* src/freeze.c (dump_symbol_CB): Preserve NUL on freeze.
+	(reload_frozen_state): Retrieve NUL on load.
+	* doc/m4.texinfo (Builtin, Using frozen files): Enhance tests.
+	* examples/null.m4: Likewise.
+	* examples/null.out: Update expected output.
+	* examples/null.err: Likewise.
+
 	Fix regression in commenting unbalanced quotes, from 2008-02-16.
 	* src/m4.h (enum token_type): Add TOKEN_COMMENT.
 	* src/input.c (next_token, peek_token, token_type_string)
