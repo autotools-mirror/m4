@@ -1,12 +1,18 @@
 GNU m4 TODO - Tasks that need implementing.		-*- outline -*-
-Copyright (C) 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
+Copyright (C) 2000, 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 Tell the maintainers at <bug-m4@gnu.org> if you feel like volunteering
 for any of these ideas or if you have others to add.
 
 * KNOWN BUGS
 
-  + m4wrap.1.test fail on Solaris 2.6 using egcs 1.1a compiler (Erick B).
+  + The following patch needs to be ported from the branch:
+    http://lists.gnu.org/archive/html/m4-patches/2007-03/msg00005.html
+    May be a couple of issues in that thread.
+
+  + The format builtin needs more power to be like printf(1):
+    http://lists.gnu.org/archive/html/m4-discuss/2007-05/msg00015.html
+    But be aware of compatibility issues in making too many changes.
 
   + The test case `other-tests/stackovf.test' does not work.
 
@@ -51,7 +57,8 @@ for any of these ideas or if you have others to add.
       patsubst(qindir(`include', f), `b', x)
       z'x
 
-  + Use the TOS input quoting for qindir to fix this bug:
+  + Use the TOS input quoting for qindir to fix this undesirable POSIX
+    behavior:
 
       define(`x', -'-)
       define(y, defn(`x'))
@@ -74,7 +81,7 @@ for any of these ideas or if you have others to add.
   + Have NULs go really undisturbed through GNU m4
 	GNU m4 is lousy regarding NULs in streams (this would require
 	maintaining the string lengths, and avoiding strlen, strcpy,
-	etc.).
+	etc.).  (Almost there, once argv_ref is ported).
 
   + The argument count limits are handled for all tokens passed around by
     the internals:  we should enable attaching these values to text macros
@@ -100,6 +107,10 @@ for any of these ideas or if you have others to add.
     asked to load a frozen file that requires versions of modules with
     interface versions unsupported by the current release.
 
+  + The module API should probably use functions, not data exports:
+    http://lists.gnu.org/archive/html/m4-patches/2007-09/msg00012.html
+    Actually, there are several good ideas for module in that thread.
+
   + Setting of the module search path within m4 scripts:
 
 	append(__modulepath__, `/some/modules/live/here')
@@ -115,9 +126,17 @@ for any of these ideas or if you have others to add.
     structures.
 
   + The perl module should only be built if a suitable perl interpreter
-    is found on the build machine.
+    is found on the build machine.  For that matter, it has been a
+    while since the perl module has even been built, and perl has had
+    new releases in the meantime.
 
 * OTHER TOOLS
 
-  + Automake 1.5 doesn't seem to like pkglibexec_LTLIBRARIES +=
-    See modules/Makefile.am.
+  + Automake 1.11 will allow some Makefile.am cleanups:
+    http://lists.gnu.org/archive/html/m4-patches/2007-08/msg00008.html
+
+  + Copy coreutils' idea of using rsync, not wget, for grabbing .po
+    files efficiently.
+
+  + Use gnulib's build-aux/git-version-gen for reliable version
+    numbers, now that CVS timestamps are no longer available.

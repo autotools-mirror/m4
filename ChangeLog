@@ -1,5 +1,7 @@
 2008-01-15  Eric Blake  <ebb9@byu.net>
 
+	* TODO: Update with some newer URLs.
+
 	Verify linear `index'.
 	* tests/builtins.at (index): New test.
 	(translit): Make test take longer, to make quadratic algorithms
