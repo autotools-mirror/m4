@@ -1,3 +1,10 @@
+2008-01-15  Eric Blake  <ebb9@byu.net>
+
+	Verify linear `index'.
+	* tests/builtins.at (index): New test.
+	(translit): Make test take longer, to make quadratic algorithms
+	more apparent.
+
 2007-12-20  Eric Blake  <ebb9@byu.net>
 
 	Stage 9: share rather than copy single-arg refs.

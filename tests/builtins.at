@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -517,6 +517,36 @@ AT_DATA([in], [[builtin(`include', `foo')dnl
 ]])
 
 AT_CHECK_M4([in], [0], [[bar
+]])
+
+AT_CLEANUP
+
+
+
+## ----- ##
+## index ##
+## ----- ##
+
+AT_SETUP([index])
+
+dnl This used to be quadratic, taking millions of comparisons,
+dnl but should now operate in linear time with only several thousand checks.
+AT_DATA([in], [M4_ONE_MEG_DEFN[dnl
+index(substr(f, `0', `500000')-, substr(f, `0', `100000')-)
+]])
+AT_CHECK_M4([in], [0], [[400000
+]])
+
+dnl This validates that index is 8-bit safe.
+AT_DATA([in], [[index(`1«2', `»')
+index(`1«2', `«')
+index(`1«2', `«1')
+index(`1«2', `«2')
+]])
+AT_CHECK_M4([in], [0], [[-1
+1
+-1
+1
 ]])
 
 AT_CLEANUP
@@ -1071,15 +1101,20 @@ z
 tmfs not fnix
 ]])
 
-dnl This used to be quadratic, taking more than 25 million comparisons,
+dnl This used to be quadratic, taking millions of comparisons,
 dnl but should now operate in linear time with only several thousand checks.
-AT_DATA([[in]],
-[[translit(`a]m4_for([i],[1],[5000],[],[[b]])[',
- `]m4_for([i],[1],[5000],[],[[a]])[b',
- `c]m4_for([i],[1],[5000],[],[[d]])[')
+AT_DATA([in], [M4_ONE_MEG_DEFN[dnl
+define(`a_', translit(substr(f, `0', `50000'), `
+', `a'))dnl
+define(`b_', translit(substr(f, `0', `50000'), `
+', `b'))dnl
+define(`d_', translit(substr(f, `0', `50000'), `
+', `d'))dnl
+define(`c'd_, `pass')dnl
+translit(`a'b_, a_`b', `c'd_)
 ]])
-AT_CHECK_M4([in], [0], [[c]m4_for([i],[1],[5000],[],[[d]])
-])
+AT_CHECK_M4([in], [0], [[pass
+]])
 
 dnl This validates that ranges are built using unsigned chars.
 AT_DATA([in], [[translit(`«abc~', `~-»')
