@@ -260,8 +260,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	      bool first)
 {
   symbol *sym;
-  bool result;
-  int ch;
+  bool result = false;
 
   switch (t)
     {				/* TOKSW */
@@ -278,6 +277,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	 provided, the string was already expanded into it during
 	 next_token.  */
       result = first || safe_quotes ();
+    case TOKEN_COMMENT:
       if (obs)
 	return result;
       break;
@@ -295,8 +295,9 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	 numeric, then behavior of safe_quotes is applicable.
 	 Otherwise, assume these characters have a high likelihood of
 	 use in quote delimiters.  */
-      ch = to_uchar (*TOKEN_DATA_TEXT (td));
-      result = (isspace (ch) || isdigit (ch)) && safe_quotes ();
+      result = *TOKEN_DATA_TEXT (td) != *curr_quote.str2 && safe_quotes ();
+      if (result)
+	assert (*TOKEN_DATA_TEXT (td) != *curr_quote.str1);
       break;
 
     case TOKEN_WORD:
@@ -420,6 +421,7 @@ expand_argument (struct obstack *obs, token_data *argp,
 
 	case TOKEN_WORD:
 	case TOKEN_STRING:
+	case TOKEN_COMMENT:
 	case TOKEN_MACDEF:
 	  if (!expand_token (obs, t, &td, line, first))
 	    age = 0;
@@ -1115,9 +1117,10 @@ arg_empty (macro_arguments *argv, unsigned int arg)
 }
 
 /* Given ARGV, return the length of argument ARG.  Abort if the
-   argument is not text.  Indices beyond argc return 0.  */
+   argument is not text.  Indices beyond argc return 0.  If FLATTEN,
+   builtins are ignored.  */
 size_t
-arg_len (macro_arguments *argv, unsigned int arg)
+arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
   token_chain *chain;
@@ -1130,7 +1133,7 @@ arg_len (macro_arguments *argv, unsigned int arg)
     }
   if (arg >= argv->argc)
     return 0;
-  token = arg_token (argv, arg, NULL, false);
+  token = arg_token (argv, arg, NULL, flatten);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1150,9 +1153,8 @@ arg_len (macro_arguments *argv, unsigned int arg)
 	      len += chain->u.u_s.len;
 	      break;
 	    case CHAIN_FUNC:
-	      // TODO concatenate builtins
-	      assert (!"implemented");
-	      abort ();
+	      assert (flatten);
+	      break;
 	    case CHAIN_ARGV:
 	      i = chain->u.u_a.index;
 	      limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
@@ -1163,15 +1165,8 @@ arg_len (macro_arguments *argv, unsigned int arg)
 		len += (quotes->len1 + quotes->len2) * limit;
 	      len += limit - 1;
 	      while (limit--)
-		{
-		  // TODO handle builtin concatenation
-		  if (TOKEN_DATA_TYPE (arg_token (chain->u.u_a.argv, i, NULL,
-						  false)) == TOKEN_FUNC)
-		    assert (argv->flatten);
-		  else
-		    len += arg_len (chain->u.u_a.argv, i);
-		  i++;
-		}
+		len += arg_len (chain->u.u_a.argv, i++,
+				flatten || chain->u.u_a.flatten);
 	      break;
 	    default:
 	      assert (!"arg_len");
@@ -1179,7 +1174,7 @@ arg_len (macro_arguments *argv, unsigned int arg)
 	    }
 	  chain = chain->next;
 	}
-      assert (len);
+      assert (len || flatten);
       return len;
     case TOKEN_FUNC:
     default:

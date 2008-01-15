@@ -427,26 +427,32 @@ free_regex (void)
       }
 }
 
-/*-----------------------------------------------------------------.
-| Define a predefined or user-defined macro, with name NAME of     |
-| length NAME_LEN, and expansion TEXT.  MODE is SYMBOL_INSERT for  |
-| "define" or SYMBOL_PUSHDEF for "pushdef".  This function is also |
-| used from main ().                                               |
-`-----------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Define a predefined or user-defined macro, with name NAME of      |
+| length NAME_LEN, and expansion TEXT of length LEN.  LEN may be    |
+| SIZE_MAX, to use the string length of TEXT instead.  MODE is      |
+| SYMBOL_INSERT for "define" or SYMBOL_PUSHDEF for "pushdef".  This |
+| function is also used from main ().                               |
+`------------------------------------------------------------------*/
 
 void
 define_user_macro (const char *name, size_t name_len, const char *text,
-		   symbol_lookup mode)
+		   size_t len, symbol_lookup mode)
 {
   symbol *s;
-  char *defn = xstrdup (text ? text : "");
+  char *defn;
 
+  assert (text);
+  if (len == SIZE_MAX)
+    len = strlen (text);
+  defn = xmemdup (text, len);
   s = lookup_symbol (name, name_len, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
+  SYMBOL_TEXT_LEN (s) = len;
   SYMBOL_MACRO_ARGS (s) = true;
 
   /* Implement --warn-macro-sequence.  */
@@ -454,7 +460,6 @@ define_user_macro (const char *name, size_t name_len, const char *text,
     {
       regoff_t offset = 0;
       struct re_registers *regs = &macro_sequence_regs;
-      size_t len = strlen (defn);
 
       while (offset < len
 	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
@@ -513,13 +518,13 @@ builtin_init (void)
       {
 	if (pp->unix_name != NULL)
 	  define_user_macro (pp->unix_name, strlen (pp->unix_name),
-			     pp->func, SYMBOL_INSERT);
+			     pp->func, SIZE_MAX, SYMBOL_INSERT);
       }
     else
       {
 	if (pp->gnu_name != NULL)
 	  define_user_macro (pp->gnu_name, strlen (pp->gnu_name),
-			     pp->func, SYMBOL_INSERT);
+			     pp->func, SIZE_MAX, SYMBOL_INSERT);
       }
 }
 
@@ -628,7 +633,10 @@ ntoa (int32_t value, int radix)
 static void
 shipout_int (struct obstack *obs, int val)
 {
-  obstack_printf (obs, "%d", val);
+  const char *s;
+
+  s = ntoa ((int32_t) val, 10);
+  obstack_grow (obs, s, strlen (s));
 }
 
 
@@ -670,7 +678,7 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 
   if (argc == 2)
     {
-      define_user_macro (ARG (1), ARG_LEN (1), "", mode);
+      define_user_macro (ARG (1), ARG_LEN (1), "", 0, mode);
       return;
     }
 
@@ -680,7 +688,8 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
       m4_warn (0, me, _("cannot concatenate builtins"));
       /* fallthru */
     case TOKEN_TEXT:
-      define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true), mode);
+      define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true),
+			 arg_len (argv, 2, true), mode);
       break;
 
     case TOKEN_FUNC:
@@ -905,7 +914,8 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	case TOKEN_TEXT:
 	  if (debug_level & DEBUG_TRACE_QUOTE)
 	    fwrite (curr_quote.str1, 1, curr_quote.len1, debug);
-	  fputs (SYMBOL_TEXT (data.base[0]), debug);
+	  fwrite (SYMBOL_TEXT (data.base[0]), 1,
+		  SYMBOL_TEXT_LEN (data.base[0]), debug);
 	  if (debug_level & DEBUG_TRACE_QUOTE)
 	    fwrite (curr_quote.str2, 1, curr_quote.len2, debug);
 	  break;
@@ -1040,7 +1050,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	case TOKEN_TEXT:
 	  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-	  obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
+	  obstack_grow (obs, SYMBOL_TEXT (s), SYMBOL_TEXT_LEN (s));
 	  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
 	  break;
 
@@ -1226,9 +1236,13 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       s++;
     }
   len = strlen (s);
-  if (min < len)
-    min = len;
-  obstack_printf (obs, "%.*d%s", min - len, 0, s);
+  if (len < min)
+    {
+      min -= len;
+      obstack_blank (obs, min);
+      memset ((char *) obstack_next_free (obs) - min, '0', min);
+    }
+  obstack_grow (obs, s, len);
 }
 
 static void
@@ -1409,7 +1423,7 @@ m4_changeword (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, 1))
     return;
-  set_word_regexp (me, ARG (1));
+  set_word_regexp (me, ARG (1), ARG_LEN (1));
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -2292,29 +2306,31 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, macro_arguments *argv)
 {
-  const char *text;
+  const char *text = SYMBOL_TEXT (sym);
+  size_t len = SYMBOL_TEXT_LEN (sym);
   int i;
+  const char *dollar = memchr (text, '$', len);
 
-  for (text = SYMBOL_TEXT (sym); *text != '\0';)
+  while (dollar)
     {
-      if (*text != '$')
-	{
-	  obstack_1grow (obs, *text);
-	  text++;
-	  continue;
-	}
-      text++;
-      switch (*text)
+      obstack_grow (obs, text, dollar - text);
+      len -= dollar - text;
+      text = dollar;
+      if (len == 1)
+	break;
+      len--;
+      switch (*++text)
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 	  if (no_gnu_extensions)
 	    {
 	      i = *text++ - '0';
+	      len--;
 	    }
 	  else
 	    {
-	      for (i = 0; isdigit (to_uchar (*text)); text++)
+	      for (i = 0; len && isdigit (to_uchar (*text)); text++, len--)
 		i = i * 10 + (*text - '0');
 	    }
 	  push_arg (obs, argv, i);
@@ -2323,17 +2339,21 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	case '#':		/* number of arguments */
 	  shipout_int (obs, argc - 1);
 	  text++;
+	  len--;
 	  break;
 
 	case '*':		/* all arguments */
 	case '@':		/* ... same, but quoted */
 	  push_args (obs, argv, false, *text == '@');
 	  text++;
+	  len--;
 	  break;
 
 	default:
 	  obstack_1grow (obs, '$');
 	  break;
 	}
+      dollar = memchr (text, '$', len);
     }
+  obstack_grow (obs, text, len);
 }

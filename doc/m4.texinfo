@@ -1021,6 +1021,27 @@ The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
 
+@ignore
+@comment Detect regression in 1.4.10b in regards to reparsing comments.
+@comment Not worth including in the manual.
+@example
+define(`e', `$@@')define(`q', ``$@@'')define(`foo', `bar')
+@result{}
+q(e(`one
+',#two ' foo
+))
+@result{}`one
+@result{}',`#two  bar
+@result{}''
+changecom(`<', `>')define(`n', `$#')
+@result{}
+n(e(<`>, <'>))
+@result{}1
+len(e(<`>, ,<'>))
+@result{}12
+@end example
+@end ignore
+
 @node Other tokens
 @section Other kinds of input tokens
 
@@ -2578,7 +2599,8 @@ m4_indir(`m4_divnum')
 
 Note that @code{indir} and @code{builtin} can be used to invoke builtins
 without arguments, even when they normally require parameters to be
-recognized; but it will provoke a warning, and result in a void expansion.
+recognized; but it will provoke a warning, and the expansion will behave
+as though empty strings had been passed as the required arguments.
 
 @example
 builtin
@@ -2591,6 +2613,13 @@ builtin(`builtin')
 @result{}
 builtin(`builtin',)
 @error{}m4:stdin:4: Warning: builtin: undefined builtin `'
+@result{}
+builtin(`builtin', ``'
+')
+@error{}m4:stdin:5: Warning: builtin: undefined builtin ``\'\n'
+@result{}
+indir(`index')
+@error{}m4:stdin:7: Warning: index: too few arguments: 0 < 2
 @result{}
 @end example
 
@@ -3778,6 +3807,22 @@ indir(`my_defn', indir(`shift', `', `foo'))
 @error{}m4trace: -1- id 14: indir(`my_defn', `foo') -> ``bar''
 @result{}bar
 @end example
+
+@ignore
+@comment not worth including in the manual, but this tests a trace code
+@comment path that was temporarily broken
+@comment options: -de --trace ifelse
+@example
+$ @kbd{m4 -de --trace ifelse}
+define(`e', `ifelse(`$1', `$2', `ifelse(`$1', `$2', `e(shift($@@))')')')
+@result{}
+e(`1', `1')
+@error{}m4trace: -1- ifelse -> ifelse(`1', `1', `e(shift(`1',`1'))')
+@error{}m4trace: -1- ifelse -> e(shift(`1',`1'))
+@error{}m4trace: -1- ifelse ->@w{ }
+@result{}
+@end example
+@end ignore
 
 @node Debug Levels
 @section Controlling debugging output
@@ -6990,6 +7035,22 @@ traceon(`undefined')dnl
 
 @c Make sure freezing is successful.
 
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
+       | ]__program__[ -F in.m4f \
+     && echo 'divnum popdef([divnum])divnum' \
+       | ]__program__[ -R in.m4f \
+     && rm in.m4f])status sysval
+@result{}hi 0
+@result{}status 0
+@end example
+
+@c Detect inability to freeze.
+
 @comment options: -F /none/such
 @comment status: 1
 @example
@@ -7006,13 +7067,13 @@ ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
-syscmd([printf 'define(-\0-,hi)changequote([,\0])changecom(--\0)dnl
+syscmd([printf 'define(-\0-,\0-\0)changequote([,\0])changecom(--\0)dnl
 divert(1)undivert(null.out)' | ]__program__[ -F in.m4f \
-     && printf 'errprint([divnum\0] #-- indir(-\0-))' \
+     && printf 'errprint([divnum\0] #-- len(indir(-\0-)))' \
        | ]__program__[ -R in.m4f \
      && rm in.m4f])errprint([ ]sysval[
 ])dnl
-@error{}divnum #-- hi 0
+@error{}divnum #-- 3 0
 @end example
 @end ignore
 
@@ -7935,6 +7996,34 @@ define(`debug', `define(`popdef',`divert`'i')')
 @result{}
 include(`loop.m4')dnl
 @result{}10000
+@end example
+
+@comment foreach via forloop recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt=4}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment examples
+@comment options: -Dlimit=2500 -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=2500 -Dalt=4}
+include(`loop.m4')dnl
+@end example
+
+@comment examples
+@comment options: -Dlimit=10000 -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=10000 -Dalt=4}
+define(`foo', `divert`'len(popdef(`_foreachq')_foreachq($@@))')dnl
+define(`debug', `pushdef(`_foreachq', defn(`foo'))')
+@result{}
+include(`loop.m4')dnl
+@result{}48894
 @end example
 
 @end ignore

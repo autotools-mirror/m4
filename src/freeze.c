@@ -110,9 +110,9 @@ produce_frozen_state (const char *name)
 	    case TOKEN_TEXT:
 	      xfprintf (file, "T%d,%d\n",
 			(int) SYMBOL_NAME_LEN (sym),
-			(int) strlen (SYMBOL_TEXT (sym)));
+			(int) SYMBOL_TEXT_LEN (sym));
 	      fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
-	      fputs (SYMBOL_TEXT (sym), file);
+	      fwrite (SYMBOL_TEXT (sym), 1, SYMBOL_TEXT_LEN (sym), file);
 	      fputc ('\n', file);
 	      break;
 
@@ -353,7 +353,7 @@ reload_frozen_state (const char *name)
 
 	      /* Enter a macro having an expansion text as a definition.  */
 
-	      define_user_macro (string[0], number[0], string[1],
+	      define_user_macro (string[0], number[0], string[1], number[1],
 				 SYMBOL_PUSHDEF);
 	      break;
 

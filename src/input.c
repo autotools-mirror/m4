@@ -171,9 +171,6 @@ string_pair curr_comm;
 
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
-/* Table of characters that can start a word.  */
-static char word_start[256];
-
 /* Current regular expression for detecting words.  */
 static struct re_pattern_buffer word_regexp;
 
@@ -475,6 +472,7 @@ push_token (token_data *token, int level, bool inuse)
 	     destructively modifies the chain it is parsing.  */
 	  chain = (token_chain *) obstack_copy (current_input, src_chain,
 						sizeof *chain);
+	  chain->next = NULL;
 	  if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
 	    {
 	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
@@ -711,6 +709,9 @@ pop_wrapup (void)
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
+#ifdef ENABLE_CHANGEWORD
+      regfree (&word_regexp);
+#endif /* ENABLE_CHANGEWORD */
       return false;
     }
 
@@ -1197,11 +1198,12 @@ init_argv_token (struct obstack *obs, token_data *td)
 
 
 /*------------------------------------------------------------------.
-| This function is for matching a string against a prefix of the    |
-| input stream.  If the string S of length SLEN matches the input   |
-| and CONSUME is true, the input is discarded; otherwise any        |
-| characters read are pushed back again.  The function is used only |
-| when multicharacter quotes or comment delimiters are used.        |
+| If the string S of length SLEN matches the next characters of the |
+| input stream, return true.  If CONSUME, the first character has   |
+| already been matched.  If a match is found and CONSUME is true,   |
+| the input is discarded; otherwise any characters read are pushed  |
+| back again.  The function is used only when multicharacter quotes |
+| or comment delimiters are used.                                   |
 `------------------------------------------------------------------*/
 
 static bool
@@ -1212,6 +1214,11 @@ match_input (const char *s, size_t slen, bool consume)
   const char *t;
   bool result = false;
 
+  if (consume)
+    {
+      s++;
+      slen--;
+    }
   assert (slen);
   ch = peek_input (false);
   if (ch != to_uchar (*s))
@@ -1245,21 +1252,22 @@ match_input (const char *s, size_t slen, bool consume)
   return result;
 }
 
-/*---------------------------------------------------------------.
-| The macro MATCH() is used to match a string S of length SLEN   |
-| against the input.  The first character is handled inline, for |
-| speed.  Hopefully, this will not hurt efficiency too much when |
-| single character quotes and comment delimiters are used.  If   |
-| CONSUME, then CH is the result of next_char, and a successful  |
-| match will discard the matched string.  Otherwise, CH is the   |
-| result of peek_input, and the input stream is effectively      |
-| unchanged.                                                     |
-`---------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| The macro MATCH() is used to match a string S of length SLEN        |
+| against the input.  The first character is handled inline for       |
+| speed, and S[SLEN] must be safe to dereference (it is faster to do  |
+| character comparison prior to length checks).  This improves        |
+| efficiency for the common case of single character quotes and       |
+| comment delimiters, while being safe for disabled delimiters as     |
+| well as longer delimiters.  If CONSUME, then CH is the result of    |
+| next_char, and a successful match will discard the matched string.  |
+| Otherwise, CH is the result of peek_input, and the input stream is  |
+| effectively unchanged.                                              |
+`--------------------------------------------------------------------*/
 
 #define MATCH(ch, s, slen, consume)					\
-  ((slen) && to_uchar ((s)[0]) == (ch)					\
-   && ((slen) == 1							\
-       || (match_input ((s) + (consume), (slen) - (consume), consume))))
+  (to_uchar ((s)[0]) == (ch)						\
+   && ((slen) >> 1 ? match_input (s, slen, consume) : (slen)))
 
 
 /*----------------------------------------------------------.
@@ -1291,17 +1299,17 @@ input_init (void)
 
   start_of_input_line = false;
 
-  curr_quote.str1 = xmemdup (DEF_LQUOTE, 1);
+  curr_quote.str1 = xmemdup0 (DEF_LQUOTE, 1);
   curr_quote.len1 = 1;
-  curr_quote.str2 = xmemdup (DEF_RQUOTE, 1);
+  curr_quote.str2 = xmemdup0 (DEF_RQUOTE, 1);
   curr_quote.len2 = 1;
-  curr_comm.str1 = xmemdup (DEF_BCOMM, 1);
+  curr_comm.str1 = xmemdup0 (DEF_BCOMM, 1);
   curr_comm.len1 = 1;
-  curr_comm.str2 = xmemdup (DEF_ECOMM, 1);
+  curr_comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   curr_comm.len2 = 1;
 
 #ifdef ENABLE_CHANGEWORD
-  set_word_regexp (NULL, user_word_regexp);
+  set_word_regexp (NULL, user_word_regexp, SIZE_MAX);
 #endif /* ENABLE_CHANGEWORD */
 
   set_quote_age ();
@@ -1345,9 +1353,10 @@ set_quotes (const char *lq, size_t lq_len, const char *rq, size_t rq_len)
 
   free (curr_quote.str1);
   free (curr_quote.str2);
-  curr_quote.str1 = xmemdup (lq, lq_len);
+  /* The use of xmemdup0 is essential for MATCH() to work.  */
+  curr_quote.str1 = xmemdup0 (lq, lq_len);
   curr_quote.len1 = lq_len;
-  curr_quote.str2 = xmemdup (rq, rq_len);
+  curr_quote.str2 = xmemdup0 (rq, rq_len);
   curr_quote.len2 = rq_len;
   set_quote_age ();
 }
@@ -1387,29 +1396,34 @@ set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 
   free (curr_comm.str1);
   free (curr_comm.str2);
-  curr_comm.str1 = xmemdup (bc, bc_len);
+  /* The use of xmemdup0 is essential for MATCH() to work.  */
+  curr_comm.str1 = xmemdup0 (bc, bc_len);
   curr_comm.len1 = bc_len;
-  curr_comm.str2 = xmemdup (ec, ec_len);
+  curr_comm.str2 = xmemdup0 (ec, ec_len);
   curr_comm.len2 = ec_len;
   set_quote_age ();
 }
 
 #ifdef ENABLE_CHANGEWORD
 
-/*-------------------------------------------------------------------.
-| Set the regular expression for recognizing words to REGEXP, and    |
-| report errors on behalf of CALLER.  If REGEXP is NULL, revert back |
-| to the default parsing rules.                                      |
-`-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Set the regular expression for recognizing words to REGEXP of    |
+| length LEN, and report errors on behalf of CALLER.  If REGEXP is |
+| NULL, revert back to the default parsing rules.  If LEN is       |
+| SIZE_MAX, use strlen(REGEXP) instead.                            |
+`-----------------------------------------------------------------*/
 
 void
-set_word_regexp (const call_info *caller, const char *regexp)
+set_word_regexp (const call_info *caller, const char *regexp, size_t len)
 {
-  int i;
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
-  if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
+  if (len == SIZE_MAX)
+    len = strlen (regexp);
+  if (len == 0
+      || (len == strlen (DEFAULT_WORD_REGEXP)
+	  && !memcmp (regexp, DEFAULT_WORD_REGEXP, len)))
     {
       default_word_regexp = true;
       set_quote_age ();
@@ -1418,30 +1432,30 @@ set_word_regexp (const call_info *caller, const char *regexp)
 
   /* Dry run to see whether the new expression is compilable.  */
   init_pattern_buffer (&new_word_regexp, NULL);
-  msg = re_compile_pattern (regexp, strlen (regexp), &new_word_regexp);
+  msg = re_compile_pattern (regexp, len, &new_word_regexp);
   regfree (&new_word_regexp);
 
   if (msg != NULL)
     {
-      m4_warn (0, caller, _("bad regular expression `%s': %s"), regexp, msg);
+      m4_warn (0, caller, _("bad regular expression %s: %s"),
+	       quotearg_style_mem (locale_quoting_style, regexp, len), msg);
       return;
     }
 
-  /* If compilation worked, retry using the word_regexp struct.
-     Can't rely on struct assigns working, so redo the compilation.  */
-  regfree (&word_regexp);
-  msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  /* If compilation worked, retry using the word_regexp struct.  We
+     can't rely on struct assigns working, so redo the compilation.
+     The fastmap can be reused between compilations, and will be freed
+     by the final regfree.  */
+  if (!word_regexp.fastmap)
+    word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
+  msg = re_compile_pattern (regexp, len, &word_regexp);
   assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
+  if (re_compile_fastmap (&word_regexp))
+    assert (false);
 
   default_word_regexp = false;
   set_quote_age ();
-
-  for (i = 1; i < 256; i++)
-    {
-      char test = i;
-      word_start[i] = re_match (&word_regexp, &test, 1, 0, NULL) > 0;
-    }
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -1687,7 +1701,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	  assert (ch < CHAR_EOF);
 	  obstack_1grow (obs_td, ch);
 	}
-      type = TOKEN_STRING;
+      type = TOKEN_COMMENT;
     }
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
@@ -1703,7 +1717,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && word_start[ch])
+  else if (!default_word_regexp && word_regexp.fastmap[ch])
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1829,7 +1843,8 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
     }
   else
     {
-      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP && type == TOKEN_STRING);
+      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP
+	      && (type == TOKEN_STRING || type == TOKEN_COMMENT));
 #ifdef DEBUG_INPUT
       {
 	token_chain *chain;
@@ -1887,11 +1902,11 @@ peek_token (void)
     }
   else if (MATCH (ch, curr_comm.str1, curr_comm.len1, false))
     {
-      result = TOKEN_STRING;
+      result = TOKEN_COMMENT;
     }
   else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (!default_word_regexp && word_start[ch])
+      || (!default_word_regexp && word_regexp.fastmap[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {
@@ -1935,6 +1950,8 @@ token_type_string (token_type t)
       return "EOF";
     case TOKEN_STRING:
       return "STRING";
+    case TOKEN_COMMENT:
+      return "COMMENT";
     case TOKEN_WORD:
       return "WORD";
     case TOKEN_OPEN:
@@ -1971,6 +1988,10 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_STRING:
       xfprintf (stderr, "string:");
+      break;
+
+    case TOKEN_COMMENT:
+      xfprintf (stderr, "comment:");
       break;
 
     case TOKEN_MACDEF:

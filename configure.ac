@@ -32,6 +32,9 @@ AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 AC_PROG_CC
 M4_EARLY
 
+# M4 is single-threaded; so we can optimize gnulib code by using this:
+gl_DISABLE_THREADS
+
 AC_CHECK_HEADERS_ONCE([siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
