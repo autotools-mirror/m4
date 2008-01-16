@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 2002, 2004, 2006,
-   2007 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 2002, 2004,
+   2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -190,15 +190,20 @@ static const char *
 m4_tmpname (int divnum)
 {
   static char *buffer;
-  static char *tail;
+  static size_t offset;
   if (buffer == NULL)
     {
-      tail = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, INT_MAX);
-      buffer = obstack_copy0 (&diversion_storage, tail, strlen (tail));
-      free (tail);
-      tail = strrchr (buffer, '-') + 1;
+      obstack_grow (&diversion_storage, output_temp_dir->dir_name,
+		    strlen (output_temp_dir->dir_name));
+      obstack_1grow (&diversion_storage, '/');
+      obstack_1grow (&diversion_storage, 'm');
+      obstack_1grow (&diversion_storage, '4');
+      obstack_1grow (&diversion_storage, '-');
+      offset = obstack_object_size (&diversion_storage);
+      buffer = obstack_alloc (&diversion_storage, INT_BUFSIZE_BOUND (divnum));
     }
-  sprintf (tail, "%d", divnum);
+  if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
+    abort ();
   return buffer;
 }
 

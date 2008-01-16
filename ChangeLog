@@ -1,3 +1,29 @@
+2008-01-16  Eric Blake  <ebb9@byu.net>
+
+	Stage 10: avoid extra copying of strings and comments.
+	When collecting tokens that are immune to further expansion, avoid
+	copying data from one obstack to another by outputting it into the
+	destination obstack to begin with.  Also reduce copying done in
+	format builtin.
+	Memory impact: slight improvement, due to better obstack usage.
+	Speed impact: noticeable improvement, due less data copying.
+	* ltdl/m4/gnulib-cache.m4: Import intprops and vasnprintf-posix
+	modules.
+	* m4/m4private.h (m4__token_type): Adjust prototype.
+	* m4/input.c (m4__next_token): Support new parameter.
+	* m4/macro.c (m4_macro_expand_input, expand_token)
+	(expand_argument, collect_arguments): Adjust callers.
+	* modules/m4.c (ntoa): Tighten buffer size.
+	* m4/output.c (m4_tmpname): Guarantee no buffer overflow.
+	* modules/format.c (arg_int, arg_long, arg_double): New helper
+	functions, to detect overflow or unparsed characters.
+	(ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE): Adjust to check for
+	missing or excess arguments.
+	(format): Likewise, and also output directly into obstack if there
+	is room.
+	* doc/m4.texinfo (History): Update for new year.
+	(Format): Test for new warnings.
+
 2008-01-15  Eric Blake  <ebb9@byu.net>
 
 	* TODO: Update with some newer URLs.

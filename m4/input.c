@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free Software
-   Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
+   Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -1144,17 +1144,19 @@ m4_input_exit (void)
 /* Parse and return a single token from the input stream, built in
    TOKEN.  See m4__token_type for the valid return types, along with a
    description of what TOKEN will contain.  If LINE is not NULL, set
-   *LINE to the line number where the token starts.  Report errors
-   (unterminated comments or strings) on behalf of CALLER, if
-   non-NULL.
+   *LINE to the line number where the token starts.  If OBS, expand
+   safe tokens (strings and comments) directly into OBS rather than in
+   a temporary staging area.  Report errors (unterminated comments or
+   strings) on behalf of CALLER, if non-NULL.
 
-   The token text is collected on the obstack token_stack, which never
-   contains more than one token text at a time.  The storage pointed
-   to by the fields in TOKEN is therefore subject to change the next
-   time m4__next_token () is called.  */
+   If OBS is NULL or the token expansion is unknown, the token text is
+   collected on the obstack token_stack, which never contains more
+   than one token text at a time.  The storage pointed to by the
+   fields in TOKEN is therefore subject to change the next time
+   m4__next_token () is called.  */
 m4__token_type
 m4__next_token (m4 *context, m4_symbol_value *token, int *line,
-		const char *caller)
+		m4_obstack *obs, const char *caller)
 {
   int ch;
   int quote_level;
@@ -1162,6 +1164,11 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   const char *file;
   int dummy;
   size_t len;
+  /* The obstack where token data is stored.  Generally token_stack,
+     for tokens where argument collection might not use the literal
+     token.  But for comments and strings, we can output directly into
+     the argument collection obstack OBS, if provided.  */
+  m4_obstack *obs_safe = &token_stack;
 
   assert (next == NULL);
   if (!line)
@@ -1213,14 +1220,17 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
       {
-	obstack_1grow (&token_stack, ch);
-	consume_syntax (context, &token_stack,
-			M4_SYNTAX_ALPHA | M4_SYNTAX_NUM);
 	type = (m4_is_syntax_macro_escaped (M4SYNTAX)
 		? M4_TOKEN_STRING : M4_TOKEN_WORD);
+	if (type == M4_TOKEN_STRING && obs)
+	  obs_safe = obs;
+	obstack_1grow (obs_safe, ch);
+	consume_syntax (context, obs_safe, M4_SYNTAX_ALPHA | M4_SYNTAX_NUM);
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
       {					/* QUOTED STRING, SINGLE QUOTES */
+	if (obs)
+	  obs_safe = obs;
 	quote_level = 1;
 	while (1)
 	  {
@@ -1233,21 +1243,23 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      {
 		if (--quote_level == 0)
 		  break;
-		obstack_1grow (&token_stack, ch);
+		obstack_1grow (obs_safe, ch);
 	      }
 	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
 	      {
 		quote_level++;
-		obstack_1grow (&token_stack, ch);
+		obstack_1grow (obs_safe, ch);
 	      }
 	    else
-	      obstack_1grow (&token_stack, ch);
+	      obstack_1grow (obs_safe, ch);
 	  }
 	type = M4_TOKEN_STRING;
       }
     else if (!m4_is_syntax_single_quotes (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->lquote.string, true))
       {					/* QUOTED STRING, LONGER QUOTES */
+	if (obs)
+	  obs_safe = obs;
 	quote_level = 1;
 	while (1)
 	  {
@@ -1259,28 +1271,30 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      {
 		if (--quote_level == 0)
 		  break;
-		obstack_grow (&token_stack, context->syntax->rquote.string,
+		obstack_grow (obs_safe, context->syntax->rquote.string,
 			      context->syntax->rquote.length);
 	      }
 	    else if (MATCH (context, ch, context->syntax->lquote.string, true))
 	      {
 		quote_level++;
-		obstack_grow (&token_stack, context->syntax->lquote.string,
+		obstack_grow (obs_safe, context->syntax->lquote.string,
 			      context->syntax->lquote.length);
 	      }
 	    else
-	      obstack_1grow (&token_stack, ch);
+	      obstack_1grow (obs_safe, ch);
 	  }
 	type = M4_TOKEN_STRING;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
       {					/* COMMENT, SHORT DELIM */
-	obstack_1grow (&token_stack, ch);
+	if (obs && !m4_get_discard_comments_opt (context))
+	  obs_safe = obs;
+	obstack_1grow (obs_safe, ch);
 	while ((ch = next_char (context, true)) != CHAR_EOF
 	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
-	  obstack_1grow (&token_stack, ch);
+	  obstack_1grow (obs_safe, ch);
 	if (ch != CHAR_EOF)
-	  obstack_1grow (&token_stack, ch);
+	  obstack_1grow (obs_safe, ch);
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 			    _("end of file in comment"));
@@ -1290,13 +1304,15 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     else if (!m4_is_syntax_single_comments (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->bcomm.string, true))
       {					/* COMMENT, LONGER DELIM */
-	obstack_grow (&token_stack, context->syntax->bcomm.string,
+	if (obs && !m4_get_discard_comments_opt (context))
+	  obs_safe = obs;
+	obstack_grow (obs_safe, context->syntax->bcomm.string,
 		      context->syntax->bcomm.length);
 	while ((ch = next_char (context, true)) != CHAR_EOF
 	       && !MATCH (context, ch, context->syntax->ecomm.string, true))
-	  obstack_1grow (&token_stack, ch);
+	  obstack_1grow (obs_safe, ch);
 	if (ch != CHAR_EOF)
-	  obstack_grow (&token_stack, context->syntax->ecomm.string,
+	  obstack_grow (obs_safe, context->syntax->ecomm.string,
 			context->syntax->ecomm.length);
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
@@ -1333,7 +1349,12 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
 			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
 	  {
-	    consume_syntax (context, &token_stack,
+	    if (obs)
+	      {
+		obs_safe = obs;
+		obstack_1grow (obs, ch);
+	      }
+	    consume_syntax (context, obs_safe,
 			    (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
 			     | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
 			     | M4_SYNTAX_RBRACE));
@@ -1358,7 +1379,14 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (m4_has_syntax (M4SYNTAX, ch,
 			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
 			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
-	  type = M4_TOKEN_STRING;
+	  {
+	    if (obs)
+	      {
+		obs_safe = obs;
+		obstack_1grow (obs, ch);
+	      }
+	    type = M4_TOKEN_STRING;
+	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
 	  type = M4_TOKEN_SPACE;
 	else
@@ -1366,12 +1394,17 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
   } while (type == M4_TOKEN_NONE);
 
-  len = obstack_object_size (&token_stack);
-  obstack_1grow (&token_stack, '\0');
+  if (obs_safe != obs)
+    {
+      len = obstack_object_size (&token_stack);
+      obstack_1grow (&token_stack, '\0');
 
-  m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
-			    m4__quote_age (M4SYNTAX));
-  VALUE_MAX_ARGS (token)	= -1;
+      m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
+				m4__quote_age (M4SYNTAX));
+    }
+  else
+    assert (type == M4_TOKEN_STRING);
+  VALUE_MAX_ARGS (token) = -1;
 
 #ifdef DEBUG_INPUT
   m4_print_token ("next_token", type, token);

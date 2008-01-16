@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -20,27 +20,96 @@
 
 /* printf like formatting for m4.  */
 
-#include "xvasprintf.h"
+#include "vasnprintf.h"
 
 /* Simple varargs substitute.  We assume int and unsigned int are the
-   same size; likewise for long and unsigned long.
+   same size; likewise for long and unsigned long.  We do not yet
+   handle long double or long long.  */
 
-   TODO - warn if we use these because too many % specifiers were used in
-   relation to number of arguments passed.
-   TODO - use xstrtoimax, not atoi, to catch overflow, non-numeric
-   arguments, etc.  */
+/* Parse STR as an integer, reporting warnings on behalf of ME.  */
+static int
+arg_int (struct m4 *context, const char *me, const char *str)
+{
+  char *endp;
+  long value;
 
-#define ARG_INT(i, argc, argv)			\
-  ((argc <= i++) ? 0 : atoi (M4ARG (i - 1)))
+  /* TODO - also allow parsing `'a' or `"a' which results in the
+     numeric value of 'a', as in printf(1).  */
+  if (*str == '\0')
+    {
+      m4_warn (context, 0, me, _("empty string treated as 0"));
+      return 0;
+    }
+  errno = 0;
+  value = strtol (str, &endp, 10);
+  if (*endp != '\0')
+    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  else if (isspace (to_uchar (*str)))
+    m4_warn (context, 0, me, _("leading whitespace ignored"));
+  else if (errno == ERANGE || (int) value != value)
+    m4_warn (context, 0, me, _("numeric overflow detected"));
+  return value;
+}
 
-#define ARG_LONG(i, argc, argv)			\
-  ((argc <= i++) ? 0L : atol (M4ARG (i - 1)))
+/* Parse STR as a long, reporting warnings on behalf of ME.  */
+static long
+arg_long (struct m4 *context, const char *me, const char *str)
+{
+  char *endp;
+  long value;
 
-#define ARG_STR(i, argc, argv)			\
-  ((argc <= i++) ? "" : M4ARG (i - 1))
+  /* TODO - also allow parsing `'a' or `"a' which results in the
+     numeric value of 'a', as in printf(1).  */
+  if (*str == '\0')
+    {
+      m4_warn (context, 0, me, _("empty string treated as 0"));
+      return 0L;
+    }
+  errno = 0;
+  value = strtol (str, &endp, 10);
+  if (*endp != '\0')
+    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  else if (isspace (to_uchar (*str)))
+    m4_warn (context, 0, me, _("leading whitespace ignored"));
+  else if (errno == ERANGE)
+    m4_warn (context, 0, me, _("numeric overflow detected"));
+  return value;
+}
 
-#define ARG_DOUBLE(i, argc, argv)		\
-  ((argc <= i++) ? 0.0 : atof (M4ARG (i - 1)))
+/* Parse STR as a double, reporting warnings on behalf of ME.  */
+static double
+arg_double (struct m4 *context, const char *me, const char *str)
+{
+  char *endp;
+  double value;
+
+  if (*str == '\0')
+    {
+      m4_warn (context, 0, me, _("empty string treated as 0"));
+      return 0.0;
+    }
+  errno = 0;
+  value = strtod (str, &endp);
+  if (*endp != '\0')
+    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  else if (isspace (to_uchar (*str)))
+    m4_warn (context, 0, me, _("leading whitespace ignored"));
+  else if (errno == ERANGE)
+    m4_warn (context, 0, me, _("numeric overflow detected"));
+  return value;
+}
+
+#define ARG_INT(i, argc, argv)					\
+  ((argc <= ++i) ? 0 : arg_int (context, me, M4ARG (i)))
+
+#define ARG_LONG(i, argc, argv)					\
+  ((argc <= ++i) ? 0L : arg_long (context, me, M4ARG (i)))
+
+#define ARG_STR(i, argc, argv)					\
+  ((argc <= ++i) ? "" : M4ARG (i))
+
+#define ARG_DOUBLE(i, argc, argv)				\
+  ((argc <= ++i) ? 0.0 : arg_double (context, me, M4ARG (i)))
 
 
 /* The main formatting function.  Output is placed on the obstack OBS,
@@ -52,30 +121,31 @@
 static void
 format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 {
-  const char *name = M4ARG (0);		/* Macro name.  */
+  const char *me = M4ARG (0);		/* Macro name.  */
   const char *f;			/* Format control string.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */
   char *p;				/* Position within fstart.  */
   unsigned char c;			/* A simple character.  */
-  int index = 1;			/* Index within argc used so far.  */
+  int index = 0;			/* Index within argc used so far.  */
+  bool valid_format = true;		/* True if entire format string ok.  */
 
   /* Flags.  */
-  char flags;				/* flags to use in fstart */
+  char flags;				/* Flags to use in fstart.  */
   enum {
-    THOUSANDS	= 0x01, /* ' */
-    PLUS	= 0x02, /* + */
-    MINUS	= 0x04, /* - */
-    SPACE	= 0x08, /*   */
-    ZERO	= 0x10, /* 0 */
-    ALT		= 0x20, /* # */
-    DONE	= 0x40  /* no more flags */
+    THOUSANDS	= 0x01, /* '\''.  */
+    PLUS	= 0x02, /* '+'.  */
+    MINUS	= 0x04, /* '-'.  */
+    SPACE	= 0x08, /* ' '.  */
+    ZERO	= 0x10, /* '0'.  */
+    ALT		= 0x20, /* '#'.  */
+    DONE	= 0x40  /* No more flags.  */
   };
 
   /* Precision specifiers.  */
-  int width;			/* minimum field width */
-  int prec;			/* precision */
-  char lflag;			/* long flag */
+  int width;			/* Minimum field width.  */
+  int prec;			/* Precision.  */
+  char lflag;			/* Long flag.  */
 
   /* Specifiers we are willing to accept.  ok['x'] implies %x is ok.
      Various modifiers reduce the set, in order to avoid undefined
@@ -83,17 +153,23 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
   char ok[128];
 
   /* Buffer and stuff.  */
-  char *str;			/* malloc'd buffer of formatted text */
+  char *base;			/* Current position in obs.  */
+  size_t len;			/* Length of formatted text.  */
+  char *str;			/* Malloc'd buffer of formatted text.  */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
   f = fmt = ARG_STR (index, argc, argv);
   memset (ok, 0, sizeof ok);
-  for (;;)
+  while (true)
     {
       while ((c = *fmt++) != '%')
 	{
 	  if (c == '\0')
-	    return;
+	    {
+	      if (valid_format)
+		m4_bad_argc (context, argc, me, index, index, true);
+	      return;
+	    }
 	  obstack_1grow (obs, c);
 	}
 
@@ -229,7 +305,8 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
       c = *fmt++;
       if (c > sizeof ok || !ok[c])
 	{
-	  m4_warn (context, 0, name, _("unrecognized specifier in `%s'"), f);
+	  m4_warn (context, 0, me, _("unrecognized specifier in `%s'"), f);
+	  valid_format = false;
 	  if (c == '\0')
 	    fmt--;
 	  continue;
@@ -272,40 +349,56 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	}
       *p++ = c;
       *p = '\0';
+      base = obstack_next_free (obs);
+      len = obstack_room (obs);
 
       switch (datatype)
 	{
 	case CHAR:
-	  str = xasprintf (fstart, width, ARG_INT (index, argc, argv));
+	  str = asnprintf (base, &len, fstart, width,
+			   ARG_INT (index, argc, argv));
 	  break;
 
 	case INT:
-	  str = xasprintf (fstart, width, prec, ARG_INT (index, argc, argv));
+	  str = asnprintf (base, &len, fstart, width, prec,
+			   ARG_INT (index, argc, argv));
 	  break;
 
 	case LONG:
-	  str = xasprintf (fstart, width, prec, ARG_LONG (index, argc, argv));
+	  str = asnprintf (base, &len, fstart, width, prec,
+			   ARG_LONG (index, argc, argv));
 	  break;
 
 	case DOUBLE:
-	  str = xasprintf (fstart, width, prec,
+	  str = asnprintf (base, &len, fstart, width, prec,
 			   ARG_DOUBLE (index, argc, argv));
 	  break;
 
 	case STR:
-	  str = xasprintf (fstart, width, prec, ARG_STR (index, argc, argv));
+	  str = asnprintf (base, &len, fstart, width, prec,
+			   ARG_STR (index, argc, argv));
 	  break;
 
 	default:
 	  abort ();
 	}
 
-      /* NULL was returned on failure, such as invalid format string.  For
-	 now, just silently ignore that bad specifier.  */
       if (str == NULL)
-	continue;
-
-      obstack_grow (obs, str, strlen (str));
-      free (str);
+	/* NULL is unexpected (EILSEQ and EINVAL are not possible
+	   based on our construction of fstart, leaving only ENOMEM,
+	   which should always be fatal).  */
+	m4_error (context, EXIT_FAILURE, errno, me,
+		  _("unable to format output for `%s'"), f);
+      else if (str == base)
+	/* The output was already computed in place, but we need to
+	   account for its size.  */
+	obstack_blank_fast (obs, len);
+      else
+	{
+	  /* The output exceeded available obstack space, copy the
+	     allocated string.  */
+	  obstack_grow (obs, str, len);
+	  free (str);
+	}
     }
 }

@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -453,7 +453,7 @@ typedef enum {
 
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
-					const char *);
+					m4_obstack *, const char *);
 extern	bool		m4__next_token_is_open (m4 *);
 
 /* Fast macro versions of macro argv accessor functions,

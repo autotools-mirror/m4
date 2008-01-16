@@ -45,7 +45,7 @@ This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
-2000, 2001, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+2000, 2001, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -410,9 +410,11 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 2005, Gary V. Vaughan collected together the many patches to
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including releases 1.4.9,
-1.4.10, and 1.4.11 in 2007.
+prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
+More bug fixes were incorporated in 2007, with the releases of 1.4.9 and
+1.4.10.  In 2008, Eric additionally rewrote the scanning engine to
+reduce recursive evaluation from quadratic to linear complexity for
+1.4.11.  The 1.4.x branch remains open for bug fixes.
 
 Meanwhile, development was underway for new features for @code{m4},
 such as dynamic module loading and additional builtins, practically
@@ -6359,15 +6361,23 @@ example, @samp{%a} is supported even on platforms that haven't yet
 implemented C99 hexadecimal floating point output natively).
 
 @c FIXME - format still needs some improvements.
-Unrecognized specifiers result in a warning.  It is anticipated that a
-future release of @acronym{GNU} @code{m4} will support more specifiers,
-and give better warnings when various problems such as overflow are
-encountered.  Likewise, escape sequences are not yet recognized.
+Warnings are issued for unrecognized specifiers, an improper number of
+arguments, or difficulty parsing an argument according to the format
+string (such as overflow or extra characters).  It is anticipated that a
+future release of @acronym{GNU} @code{m4} will support more specifiers.
+Likewise, escape sequences are not yet recognized.
 
 @example
 format(`%p', `0')
 @error{}m4:stdin:1: Warning: format: unrecognized specifier in `%p'
 @result{}
+format(`%*d', `')
+@error{}m4:stdin:2: Warning: format: empty string treated as 0
+@error{}m4:stdin:2: Warning: format: too few arguments: 2 < 3
+@result{}0
+format(`%.1f', `2a')
+@error{}m4:stdin:3: Warning: format: non-numeric argument `2a'
+@result{}2.0
 @end example
 
 @node Arithmetic

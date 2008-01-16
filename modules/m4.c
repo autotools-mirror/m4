@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007 Free Software
+   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007, 2008 Free Software
    Foundation, Inc.
 
    This file is part of GNU M4.
@@ -1128,7 +1128,7 @@ M4BUILTIN_HANDLER (translit)
 
 
 /* The function ntoa () converts VALUE to a signed ascii representation in
-   radix RADIX.  */
+   radix RADIX.  Radix must be between 2 and 36, inclusive.  */
 static const char *
 ntoa (number value, int radix)
 {
@@ -1137,7 +1137,8 @@ ntoa (number value, int radix)
 
   bool negative;
   unumber uvalue;
-  static char str[256];
+  /* Sized for radix 2, plus sign and trailing NUL.  */
+  static char str[sizeof value * CHAR_BIT + 2];
   char *s = &str[sizeof str];
 
   *--s = '\0';
@@ -1166,7 +1167,7 @@ ntoa (number value, int radix)
 }
 
 static void
-numb_obstack(m4_obstack *obs, number value, int radix, int min)
+numb_obstack (m4_obstack *obs, number value, int radix, int min)
 {
   const char *s;
   size_t len;

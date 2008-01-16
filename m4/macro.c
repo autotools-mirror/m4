@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -183,9 +183,9 @@ m4_macro_expand_input (m4 *context)
   m4_set_symbol_value_text (&empty_symbol, "", 0, 0);
   VALUE_MAX_ARGS (&empty_symbol) = -1;
 
-  while ((type = m4__next_token (context, &token, &line, NULL))
+  while ((type = m4__next_token (context, &token, &line, NULL, NULL))
 	 != M4_TOKEN_EOF)
-    expand_token (context, (m4_obstack *) NULL, type, &token, line, true);
+    expand_token (context, NULL, type, &token, line, true);
 }
 
 
@@ -221,8 +221,12 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
 	 detects any change in delimiters).  This is also returned for
 	 sequences of benign characters, such as digits.  But if other
 	 text is already present, multi-character delimiters could be
-	 formed by concatenation, so use a conservative heuristic.  */
+	 formed by concatenation, so use a conservative heuristic.  If
+	 obstack was provided, the string was already expanded into it
+	 during m4__next_token.  */
       result = first || m4__safe_quotes (M4SYNTAX);
+      if (obs)
+	return result;
       break;
 
     case M4_TOKEN_OPEN:
@@ -301,17 +305,22 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
   unsigned int age = m4__quote_age (M4SYNTAX);
   bool first = true;
 
-  argp->type = M4_SYMBOL_VOID;
+  memset (argp, '\0', sizeof *argp);
+  VALUE_MAX_ARGS (argp) = -1;
 
   /* Skip leading white space.  */
   do
     {
-      type = m4__next_token (context, &token, NULL, caller);
+      type = m4__next_token (context, &token, NULL, obs, caller);
     }
   while (type == M4_TOKEN_SPACE);
 
   while (1)
     {
+      if (VALUE_MIN_ARGS (argp) < VALUE_MIN_ARGS (&token))
+	VALUE_MIN_ARGS (argp) = VALUE_MIN_ARGS (&token);
+      if (VALUE_MAX_ARGS (&token) < VALUE_MAX_ARGS (argp))
+	VALUE_MAX_ARGS (argp) = VALUE_MAX_ARGS (&token);
       switch (type)
 	{			/* TOKSW */
 	case M4_TOKEN_COMMA:
@@ -367,7 +376,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 
       if (argp->type != M4_SYMBOL_VOID || obstack_object_size (obs))
 	first = false;
-      type = m4__next_token (context, &token, NULL, caller);
+      type = m4__next_token (context, &token, NULL, obs, caller);
     }
 }
 
@@ -553,18 +562,21 @@ collect_arguments (m4 *context, const char *name, size_t len,
 
   if (m4__next_token_is_open (context))
     {
-      m4__next_token (context, &token, NULL, name); /* gobble parenthesis */
+      /* Gobble parenthesis, then collect arguments.  */
+      m4__next_token (context, &token, NULL, NULL, name);
       do
 	{
-	  more_args = expand_argument (context, arguments, &token, name);
+	  tokenp = (m4_symbol_value *) obstack_alloc (arguments,
+						      sizeof *tokenp);
+	  more_args = expand_argument (context, arguments, tokenp, name);
 
-	  if ((m4_is_symbol_value_text (&token)
-	       && !m4_get_symbol_value_len (&token))
-	      || (!groks_macro_args && m4_is_symbol_value_func (&token)))
-	    tokenp = &empty_symbol;
-	  else
-	    tokenp = (m4_symbol_value *) obstack_copy (arguments, &token,
-						       sizeof *tokenp);
+	  if ((m4_is_symbol_value_text (tokenp)
+	       && !m4_get_symbol_value_len (tokenp))
+	      || (!groks_macro_args && m4_is_symbol_value_func (tokenp)))
+	    {
+	      obstack_free (arguments, tokenp);
+	      tokenp = &empty_symbol;
+	    }
 	  obstack_ptr_grow (argv_stack, tokenp);
 	  args.arraylen++;
 	  args.argc++;
