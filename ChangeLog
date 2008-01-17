@@ -1,3 +1,29 @@
+2008-12-03  Eric Blake  <ebb9@byu.net>
+
+	Stage 27: Allow embedded NUL in text processing macros.
+	Pass NUL through regular expressions, format, and translit, and
+	diagnose it in eval.  Improve warning capabilities of format.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* src/m4.h (evaluate): Add parameter.
+	* src/builtin.c (compile_pattern) [DEBUG_REGEX]: Support NUL in
+	output messages.
+	(set_macro_sequence): Likewise.
+	(m4_eval): Normalize messages, and adjust caller.
+	(expand_ranges, substitute): Support NUL in macro expansion.
+	(m4_translit, m4_regexp, m4_patsubst): Adjust callers, to manage
+	NUL bytes.
+	* src/format.c (expand_format): Manage NUL bytes.
+	* src/eval.c (eval_error): Add EMPTY_ARGUMENT.
+	(end_text): New variable.
+	(eval_init_lex): Add parameter.
+	(eval_lex, evaluate): Detect NUL in macro expansion.
+	* doc/m4.texinfo (Format): Update to cover new behavior.
+	(Eval): Mention that result is unquoted.
+	* examples/null.m4: Enhance test.
+	* examples/null.err: Update expected output.
+	* examples/null.out: Likewise.
+
 2008-11-28  Eric Blake  <ebb9@byu.net>
 
 	Add extension to divert builtin.

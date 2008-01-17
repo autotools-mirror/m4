@@ -58,7 +58,8 @@ typedef enum eval_error
     MISSING_RIGHT,
     UNKNOWN_INPUT,
     EXCESS_INPUT,
-    INVALID_OPERATOR
+    INVALID_OPERATOR,
+    EMPTY_ARGUMENT
   }
 eval_error;
 
@@ -87,10 +88,15 @@ static const char *eval_text;
    can back up, if we have read too much.  */
 static const char *last_text;
 
+/* Detect when to end parsing.  */
+static const char *end_text;
+
+/* Prime the lexer at the start of TEXT, with length LEN.  */
 static void
-eval_init_lex (const char *text)
+eval_init_lex (const char *text, size_t len)
 {
   eval_text = text;
+  end_text = text + len;
   last_text = NULL;
 }
 
@@ -105,12 +111,12 @@ eval_undo (void)
 static eval_token
 eval_lex (int32_t *val)
 {
-  while (isspace (to_uchar (*eval_text)))
+  while (eval_text != end_text && isspace (to_uchar (*eval_text)))
     eval_text++;
 
   last_text = eval_text;
 
-  if (*eval_text == '\0')
+  if (eval_text == end_text)
     return EOTEXT;
 
   if (isdigit (to_uchar (*eval_text)))
@@ -287,14 +293,17 @@ eval_lex (int32_t *val)
 `---------------------------------------*/
 
 bool
-evaluate (const call_info *me, const char *expr, int32_t *val)
+evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 {
   eval_token et;
   eval_error err;
 
-  eval_init_lex (expr);
+  eval_init_lex (expr, len);
   et = eval_lex (val);
-  err = logical_or_term (me, et, val);
+  if (et == EOTEXT)
+    err = EMPTY_ARGUMENT;
+  else
+    err = logical_or_term (me, et, val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     {
@@ -306,9 +315,15 @@ evaluate (const call_info *me, const char *expr, int32_t *val)
 
   switch (err)
     {
+      /* Cases where result is printed.  */
     case NO_ERROR:
-      break;
+      return false;
 
+    case EMPTY_ARGUMENT:
+      m4_warn (0, me, _("empty string treated as 0"));
+      return false;
+
+      /* Cases where error makes result meaningless.  */
     case MISSING_RIGHT:
       m4_warn (0, me, _("bad expression (missing right parenthesis): %s"),
 	       expr);
@@ -347,7 +362,7 @@ evaluate (const call_info *me, const char *expr, int32_t *val)
       abort ();
     }
 
-  return err != NO_ERROR;
+  return true;
 }
 
 /*---------------------------.
