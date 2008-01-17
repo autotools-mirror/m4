@@ -309,7 +309,11 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
 	regex_cache[i].count++;
 #ifdef DEBUG_REGEX
 	if (trace_file)
-	  xfprintf (trace_file, "cached:{%s}\n", str);
+	  {
+	    fputs ("cached:{", trace_file);
+	    fwrite (str, 1, len, trace_file);
+	    fputs ("}\n", trace_file);
+	  }
 #endif /* DEBUG_REGEX */
 	return NULL;
       }
@@ -319,7 +323,11 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   msg = re_compile_pattern (str, len, new_buf);
 #ifdef DEBUG_REGEX
   if (trace_file)
-    xfprintf (trace_file, "compile:{%s}\n", str);
+    {
+      fputs ("compile:{", trace_file);
+      fwrite (str, 1, len, trace_file);
+      fputs ("}\n", trace_file);
+    }
 #endif /* DEBUG_REGEX */
   if (msg)
     {
@@ -354,7 +362,11 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
     {
 #ifdef DEBUG_REGEX
       if (trace_file)
-	xfprintf (trace_file, "flush:{%s}\n", victim->str);
+	{
+	  fputs ("flush:{", trace_file);
+	  fwrite (victim->str, 1, victim->len, trace_file);
+	  fputs ("}\n", trace_file);
+	}
 #endif /* DEBUG_REGEX */
       free (victim->str);
       regfree (victim->buf);
@@ -402,8 +414,8 @@ set_macro_sequence (const char *regexp)
   msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
   if (msg != NULL)
     m4_error (EXIT_FAILURE, 0, NULL,
-	      _("--warn-macro-sequence: bad regular expression `%s': %s"),
-	      regexp, msg);
+	      _("--warn-macro-sequence: bad regular expression %s: %s"),
+	      quotearg_style (locale_quoting_style, regexp), msg);
   re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
 		    macro_sequence_regs.num_regs,
 		    macro_sequence_regs.start, macro_sequence_regs.end);
@@ -1205,9 +1217,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  if (arg_empty (argv, 1))
-    m4_warn (0, me, _("empty string treated as 0"));
-  else if (evaluate (me, ARG (1), &value))
+  if (evaluate (me, ARG (1), ARG_LEN (1), &value))
     return;
 
   if (radix == 1)
@@ -1900,34 +1910,42 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
   obstack_grow (obs, ARG (1) + start, length);
 }
 
-/*------------------------------------------------------------------------.
-| For "translit", ranges are allowed in the second and third argument.	  |
-| They are expanded in the following function, and the expanded strings,  |
-| without any ranges left, are used to translate the characters of the	  |
-| first argument.  A single - (dash) can be included in the strings by	  |
-| being the first or the last character in the string.  If the first	  |
-| character in a range is after the first in the character set, the range |
-| is made backwards, thus 9-0 is the string 9876543210.			  |
-`------------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| For "translit", ranges are allowed in the second and third        |
+| argument.  They are expanded in the following function, and the   |
+| expanded strings, without any ranges left, are used to translate  |
+| the characters of the first argument.  A single - (dash) can be   |
+| included in the strings by being the first or the last character  |
+| in the string.  If the first character in a range is after the    |
+| first in the character set, the range is made backwards, thus 9-0 |
+| is the string 9876543210.  This function expands S of length *LEN |
+| using OBS for the expansion, sets *LEN to the new length, and     |
+| returns the expansion.                                            |
+`------------------------------------------------------------------*/
 
 static const char *
-expand_ranges (const char *s, struct obstack *obs)
+expand_ranges (const char *s, size_t *len, struct obstack *obs)
 {
   unsigned char from;
   unsigned char to;
+  const char *end = s + *len;
 
-  for (from = '\0'; *s != '\0'; from = to_uchar (*s++))
+  assert (s != end);
+  from = *s++;
+  obstack_1grow (obs, from);
+
+  for ( ; s != end; from = *s++)
     {
-      if (*s == '-' && from != '\0')
+      if (*s == '-')
 	{
-	  to = to_uchar (*++s);
-	  if (to == '\0')
+	  if (++s == end)
 	    {
 	      /* trailing dash */
 	      obstack_1grow (obs, '-');
 	      break;
 	    }
-	  else if (from <= to)
+	  to = *s;
+	  if (from <= to)
 	    {
 	      while (from++ < to)
 		obstack_1grow (obs, from);
@@ -1941,7 +1959,7 @@ expand_ranges (const char *s, struct obstack *obs)
       else
 	obstack_1grow (obs, *s);
     }
-  obstack_1grow (obs, '\0');
+  *len = obstack_object_size (obs);
   return (char *) obstack_finish (obs);
 }
 
@@ -1959,25 +1977,32 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
   const char *data;
   const char *from;
   const char *to;
+  size_t from_len;
+  size_t to_len;
   char map[256] = {0};
   char found[256] = {0};
   unsigned char ch;
 
-  if (bad_argc (arg_info (argv), argc, 2, 3))
+  enum { ASIS, REPLACE, DELETE };
+
+  if (bad_argc (arg_info (argv), argc, 2, 3) || arg_empty (argv, 1)
+      || arg_empty (argv, 2))
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
-      if (argc == 2)
+      if (argc >= 2)
 	push_arg (obs, argv, 1);
       return;
     }
 
   from = ARG (2);
-  if (strchr (from, '-') != NULL)
-    from = expand_ranges (from, arg_scratch ());
+  from_len = ARG_LEN (2);
+  if (memchr (from, '-', from_len) != NULL)
+    from = expand_ranges (from, &from_len, arg_scratch ());
 
   to = ARG (3);
-  if (strchr (to, '-') != NULL)
-    to = expand_ranges (to, arg_scratch ());
+  to_len = ARG_LEN (3);
+  if (memchr (to, '-', to_len) != NULL)
+    to = expand_ranges (to, &to_len, arg_scratch ());
 
   assert (from && to);
 
@@ -1987,23 +2012,45 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
-  for ( ; (ch = *from) != '\0'; from++)
+  while (from_len--)
     {
-      if (!found[ch])
+      ch = *from++;
+      if (found[ch] == ASIS)
 	{
-	  found[ch] = 1;
-	  map[ch] = *to;
+	  if (to_len)
+	    {
+	      found[ch] = REPLACE;
+	      map[ch] = *to;
+	    }
+	  else
+	    found[ch] = DELETE;
 	}
-      if (*to != '\0')
-	to++;
+      if (to_len)
+	{
+	  to++;
+	  to_len--;
+	}
     }
 
-  for (data = ARG (1); (ch = *data) != '\0'; data++)
+  data = ARG (1);
+  from_len = ARG_LEN (1);
+  while (from_len--)
     {
-      if (!found[ch])
-	obstack_1grow (obs, ch);
-      else if (map[ch])
-	obstack_1grow (obs, map[ch]);
+      ch = *data++;
+      switch (found[ch])
+	{
+	case ASIS:
+	  obstack_1grow (obs, ch);
+	  break;
+	case REPLACE:
+	  obstack_1grow (obs, map[ch]);
+	  break;
+	case DELETE:
+	  break;
+	default:
+	  assert (!"m4_translit");
+	  abort ();
+	}
     }
 }
 
@@ -2033,20 +2080,27 @@ static int substitute_warned = 0;
 
 static void
 substitute (struct obstack *obs, const call_info *me, const char *victim,
-	    const char *repl, struct re_registers *regs)
+	    const char *repl, size_t repl_len, struct re_registers *regs)
 {
   int ch;
 
-  for (;;)
+  while (repl_len--)
     {
-      while ((ch = *repl++) != '\\')
+      ch = *repl++;
+      if (ch != '\\')
 	{
-	  if (ch == '\0')
-	    return;
 	  obstack_1grow (obs, ch);
+	  continue;
+	}
+      if (!repl_len)
+	{
+	  m4_warn (0, me, _("trailing \\ ignored in replacement"));
+	  return;
 	}
 
-      switch ((ch = *repl++))
+      ch = *repl++;
+      repl_len--;
+      switch (ch)
 	{
 	case '0':
 	  if (!substitute_warned)
@@ -2072,10 +2126,6 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
 	  break;
-
-	case '\0':
-	  m4_warn (0, me, _("trailing \\ ignored in replacement"));
-	  return;
 
 	default:
 	  obstack_1grow (obs, ch);
@@ -2135,26 +2185,36 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
   regexp = ARG (2);
   repl = ARG (3);
 
-  if (!*regexp)
+  if (arg_empty (argv, 2))
     {
       /* The empty regex matches everything!  */
       if (argc == 3)
 	shipout_int (obs, 0);
       else
-	substitute (obs, me, victim, repl, NULL);
+	substitute (obs, me, victim, repl, ARG_LEN (3), NULL);
       return;
     }
 
 #ifdef DEBUG_REGEX
   if (trace_file)
-    xfprintf (trace_file, "r:{%s}:%s%s%s\n", regexp,
-	      argc == 3 ? "" : "{", repl, argc == 3 ? "" : "}");
+    {
+      fputs ("r:{", trace_file);
+      fwrite (regexp, 1, ARG_LEN (2), trace_file);
+      if (argc > 3)
+	{
+	  fputs ("}:{", trace_file);
+	  fwrite (repl, 1, ARG_LEN (3), trace_file);
+	}
+      fputs ("}\n", trace_file);
+    }
 #endif /* DEBUG_REGEX */
 
   msg = compile_pattern (regexp, ARG_LEN (2), &buf, &regs);
   if (msg != NULL)
     {
-      m4_warn (0, me, _("bad regular expression: `%s': %s"), regexp, msg);
+      m4_warn (0, me, _("bad regular expression %s: %s"),
+	       quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
+	       msg);
       return;
     }
 
@@ -2164,11 +2224,12 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 			argc == 3 ? NULL : regs);
 
   if (startpos == -2)
-    m4_warn (0, me, _("problem matching regular expression `%s'"), regexp);
+    m4_warn (0, me, _("problem matching regular expression %s"),
+	     quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)));
   else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (obs, me, victim, repl, regs);
+    substitute (obs, me, victim, repl, ARG_LEN (3), regs);
 }
 
 /*------------------------------------------------------------------.
@@ -2183,16 +2244,17 @@ static void
 m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
-  const char *victim;		/* first argument */
-  const char *regexp;		/* regular expression */
-  const char *repl;
+  const char *victim;		/* First argument.  */
+  const char *regexp;		/* Regular expression.  */
+  const char *repl;		/* Replacement text.  */
 
-  struct re_pattern_buffer *buf;/* compiled regular expression */
-  struct re_registers *regs;	/* for subexpression matches */
-  const char *msg;		/* error message from re_compile_pattern */
-  int matchpos;			/* start position of match */
-  int offset;			/* current match offset */
-  int length;			/* length of first argument */
+  struct re_pattern_buffer *buf;/* Compiled regular expression.  */
+  struct re_registers *regs;	/* For subexpression matches.  */
+  const char *msg;		/* Error message from re_compile_pattern.  */
+  int matchpos;			/* Start position of match.  */
+  int offset;			/* Current match offset.  */
+  int length;			/* Length of first argument.  */
+  size_t repl_len;		/* Length of replacement.  */
 
   if (bad_argc (me, argc, 2, 3))
     {
@@ -2202,27 +2264,36 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  victim = ARG (1);
-  regexp = ARG (2);
-  repl = ARG (3);
-
   /* The empty regex matches everywhere, but if there is no
      replacement, we need not waste time with it.  */
-  if (!*regexp && !*repl)
+  if (arg_empty (argv, 2) && arg_empty (argv, 3))
     {
       push_arg (obs, argv, 1);
       return;
     }
 
+  victim = ARG (1);
+  regexp = ARG (2);
+  repl = ARG (3);
+  repl_len = ARG_LEN (3);
+
 #ifdef DEBUG_REGEX
   if (trace_file)
-    xfprintf (trace_file, "p:{%s}:{%s}\n", regexp, repl);
+    {
+      fputs ("p:{", trace_file);
+      fwrite (regexp, 1, ARG_LEN (2), trace_file);
+      fputs ("}:{", trace_file);
+      fwrite (repl, 1, repl_len, trace_file);
+      fputs ("}\n", trace_file);
+    }
 #endif /* DEBUG_REGEX */
 
   msg = compile_pattern (regexp, ARG_LEN (2), &buf, &regs);
   if (msg != NULL)
     {
-      m4_warn (0, me, _("bad regular expression `%s': %s"), regexp, msg);
+      m4_warn (0, me, _("bad regular expression %s: %s"),
+	       quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
+	       msg);
       return;
     }
 
@@ -2242,8 +2313,9 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 	     copied verbatim.  */
 
 	  if (matchpos == -2)
-	    m4_warn (0, me, _("problem matching regular expression `%s'"),
-		     regexp);
+	    m4_warn (0, me, _("problem matching regular expression %s"),
+		     quotearg_style_mem (locale_quoting_style, regexp,
+					 ARG_LEN (2)));
 	  else if (offset < length)
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
@@ -2256,7 +2328,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (obs, me, victim, repl, regs);
+      substitute (obs, me, victim, repl, repl_len, regs);
 
       /* Update the offset to the end of the match.  If the regexp
 	 matched a null string, advance offset one more, to avoid

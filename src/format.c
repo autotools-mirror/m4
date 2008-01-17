@@ -126,11 +126,12 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);/* Macro name.  */
   const char *f;			/* Format control string.  */
+  size_t f_len;				/* Length of f.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */
   char *p;				/* Position within fstart.  */
   unsigned char c;			/* A simple character.  */
-  int i = 0;				/* Index within argc used so far.  */
+  int i = 1;				/* Index within argc used so far.  */
   bool valid_format = true;		/* True if entire format string ok.  */
 
   /* Flags.  */
@@ -159,25 +160,24 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
   int result = 0;
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  f = fmt = ARG_STR (i, argc, argv);
+  f = fmt = ARG (1);
+  f_len = ARG_LEN (1);
+  assert (!f[f_len]); /* Requiring a terminating NUL makes parsing simpler.  */
   memset (ok, 0, sizeof ok);
-  while (true)
+  while (f_len--)
     {
-      while ((c = *fmt++) != '%')
+      c = *fmt++;
+      if (c != '%')
 	{
-	  if (c == '\0')
-	    {
-	      if (valid_format)
-		bad_argc (me, argc, i, i);
-	      return;
-	    }
 	  obstack_1grow (obs, c);
+	  continue;
 	}
 
       if (*fmt == '%')
 	{
 	  obstack_1grow (obs, '%');
 	  fmt++;
+	  f_len--;
 	  continue;
 	}
 
@@ -228,7 +228,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 	      break;
 	    }
 	}
-      while (!(flags & DONE) && fmt++);
+      while (!(flags & DONE) && (f_len--, fmt++));
       if (flags & THOUSANDS)
 	*p++ = '\'';
       if (flags & PLUS)
@@ -250,12 +250,14 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	  width = ARG_INT (i, argc, argv);
 	  fmt++;
+	  f_len--;
 	}
       else
 	while (isdigit (to_uchar (*fmt)))
 	  {
 	    width = 10 * width + *fmt - '0';
 	    fmt++;
+	    f_len--;
 	  }
 
       /* Maximum precision; an explicit negative precision is the same
@@ -266,10 +268,12 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
       if (*fmt == '.')
 	{
 	  ok['c'] = 0;
+	  f_len--;
 	  if (*(++fmt) == '*')
 	    {
 	      prec = ARG_INT (i, argc, argv);
 	      ++fmt;
+	      f_len--;
 	    }
 	  else
 	    {
@@ -278,6 +282,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 		{
 		  prec = 10 * prec + *fmt - '0';
 		  fmt++;
+		  f_len--;
 		}
 	    }
 	}
@@ -288,30 +293,34 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 	  *p++ = 'l';
 	  lflag = 1;
 	  fmt++;
+	  f_len--;
 	  ok['c'] = ok['s'] = 0;
 	}
       else if (*fmt == 'h')
 	{
 	  *p++ = 'h';
 	  fmt++;
+	  f_len--;
 	  if (*fmt == 'h')
 	    {
 	      *p++ = 'h';
 	      fmt++;
+	      f_len--;
 	    }
 	  ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
 	    = ok['g'] = ok['G'] = ok['s'] = 0;
 	}
 
-      c = *fmt++;
-      if (c > sizeof ok || !ok[c])
+      c = *fmt;
+      if (c > sizeof ok || !ok[c] || !f_len)
 	{
-	  m4_warn (0, me, _("unrecognized specifier in `%s'"), f);
+	  m4_warn (0, me, _("unrecognized specifier in %s"),
+		   quotearg_style_mem (locale_quoting_style, f, ARG_LEN (1)));
 	  valid_format = false;
-	  if (c == '\0')
-	    fmt--;
 	  continue;
 	}
+      fmt++;
+      f_len--;
 
       /* Specifiers.  We don't yet recognize C, S, n, or p.  */
       switch (c)
@@ -385,4 +394,6 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 	 we constructed fstart, the result should not be negative.  */
       assert (0 <= result);
     }
+  if (valid_format)
+    bad_argc (me, argc, i, i);
 }

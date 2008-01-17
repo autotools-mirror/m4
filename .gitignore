@@ -17,7 +17,6 @@ config.sub
 config-h.in
 configure
 configure.lineno
-COPYING
 CVS
 depcomp
 gendocs.sh
