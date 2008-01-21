@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -532,6 +532,24 @@ x1(`01234567890123456789')y1(`98765432109876543210')
 ]])
 
 AT_CHECK_M4([in], [0], [[40
+]])
+
+AT_DATA([in], [[define(`echo', `$@')dnl
+define(`foo', echo(`01234567890123456789')echo(`98765432109876543210'))dnl
+foo
+]])
+
+AT_CHECK_M4([in], [0], [[0123456789012345678998765432109876543210
+]])
+
+AT_DATA([in], [[define(`a', `A')define(`echo', `$@')define(`join', `$1$2')dnl
+define(`abcdefghijklmnopqrstuvwxyz', `Z')dnl
+join(`a', `bcdefghijklmnopqrstuvwxyz')
+join(`a', echo(`bcdefghijklmnopqrstuvwxyz'))
+]])
+
+AT_CHECK_M4([in], [0], [[Z
+Z
 ]])
 
 AT_DATA([in], [[define(`echo', `$@')dnl

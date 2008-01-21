@@ -35,7 +35,7 @@ typedef enum {
   M4_SYMBOL_TEXT,		/* Plain text, u.u_t is valid.  */
   M4_SYMBOL_FUNC,		/* Builtin function, u.func is valid.  */
   M4_SYMBOL_PLACEHOLDER,	/* Placeholder for unknown builtin from -R.  */
-  M4_SYMBOL_COMP		/* Composite symbol, u.chain is valid.  */
+  M4_SYMBOL_COMP		/* Composite symbol, u.u_c.c is valid.  */
 } m4__symbol_type;
 
 #define BIT_TEST(flags, bit)	(((flags) & (bit)) == (bit))
@@ -197,6 +197,7 @@ struct m4_symbol
 struct m4_symbol_chain
 {
   m4_symbol_chain *next;/* Pointer to next link of chain.  */
+  unsigned int quote_age; /* Quote_age of this link of chain, or 0.  */
   const char *str;	/* NUL-terminated string if text, or NULL.  */
   size_t len;		/* Length of str, or 0.  */
   size_t level;		/* Expansion level of content, or SIZE_MAX.  */
@@ -230,7 +231,11 @@ struct m4_symbol_value
       unsigned int	quote_age;
     } u_t;			/* Valid when type is TEXT, PLACEHOLDER.  */
     const m4_builtin *	builtin;/* Valid when type is FUNC.  */
-    m4_symbol_chain *	chain;	/* Valid when type is COMP.  */
+    struct
+    {
+      m4_symbol_chain *	chain;	/* First link of the chain.  */
+      m4_symbol_chain *	end;	/* Last link of the chain.  */
+    } u_c;			/* Valid when type is COMP.  */
   } u;
 };
 
@@ -248,6 +253,9 @@ struct m4_macro_args
   bool_bitfield inuse : 1;
   /* False if all arguments are just text or func, true if this argv
      refers to another one.  */
+  bool_bitfield wrapper : 1;
+  /* False if all arguments belong to this argv, true if some of them
+     include references to another.  */
   bool_bitfield has_ref : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
@@ -365,7 +373,8 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*,
    all other characters and sentinels. */
 #define CHAR_EOF	256	/* Character return on EOF.  */
 #define CHAR_BUILTIN	257	/* Character return for BUILTIN token.  */
-#define CHAR_RETRY	258	/* Character return for end of input block.  */
+#define CHAR_QUOTE	258	/* Character return for quoted string.  */
+#define CHAR_RETRY	259	/* Character return for end of input block.  */
 
 #define DEF_LQUOTE	"`"	/* Default left quote delimiter.  */
 #define DEF_RQUOTE	"\'"	/* Default right quote delimiter.  */
@@ -451,6 +460,8 @@ typedef enum {
   M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
+extern	void		m4__make_text_link (m4_obstack *, m4_symbol_chain **,
+					    m4_symbol_chain **);
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					m4_obstack *, const char *);

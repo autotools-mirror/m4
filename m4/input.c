@@ -93,29 +93,28 @@
    between input blocks must update the context accordingly.  */
 
 static	int	file_peek		(m4_input_block *);
-static	int	file_read		(m4_input_block *, m4 *, bool);
+static	int	file_read		(m4_input_block *, m4 *, bool, bool);
 static	void	file_unget		(m4_input_block *, int);
 static	bool	file_clean		(m4_input_block *, m4 *, bool);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	builtin_peek		(m4_input_block *);
-static	int	builtin_read		(m4_input_block *, m4 *, bool);
+static	int	builtin_read		(m4_input_block *, m4 *, bool, bool);
 static	void	builtin_unget		(m4_input_block *, int);
 static	void	builtin_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	string_peek		(m4_input_block *);
-static	int	string_read		(m4_input_block *, m4 *, bool);
+static	int	string_read		(m4_input_block *, m4 *, bool, bool);
 static	void	string_unget		(m4_input_block *, int);
 static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	composite_peek		(m4_input_block *);
-static	int	composite_read		(m4_input_block *, m4 *, bool);
+static	int	composite_read		(m4_input_block *, m4 *, bool, bool);
 static	void	composite_unget		(m4_input_block *, int);
 static	bool	composite_clean		(m4_input_block *, m4 *, bool);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
-static	void	make_text_link		(m4_obstack *, m4_symbol_chain **,
-					 m4_symbol_chain **);
 static	void	init_builtin_token	(m4 *, m4_symbol_value *);
+static	void	append_quote_token	(m4_obstack *, m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
-static	int	next_char		(m4 *, bool);
+static	int	next_char		(m4 *, bool, bool);
 static	int	peek_char		(m4 *);
 static	bool	pop_input		(m4 *, bool);
 static	void	unget_input		(int);
@@ -133,9 +132,10 @@ struct input_funcs
   int	(*peek_func)	(m4_input_block *);
 
   /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
-     builtin, or CHAR_RETRY if none available.  If SAFE, then do not
-     alter the current file or line.  */
-  int	(*read_func)	(m4_input_block *, m4 *, bool safe);
+     builtin, or CHAR_RETRY if none available.  If ALLOW_QUOTE, then
+     CHAR_QUOTE may be returned.  If SAFE, then do not alter the
+     current file or line.  */
+  int	(*read_func)	(m4_input_block *, m4 *, bool allow_quote, bool safe);
 
   /* Unread a single unsigned character or CHAR_BUILTIN, must be the
      same character previously read by read_func.  */
@@ -269,7 +269,8 @@ file_peek (m4_input_block *me)
 }
 
 static int
-file_read (m4_input_block *me, m4 *context, bool safe M4_GNUC_UNUSED)
+file_read (m4_input_block *me, m4 *context, bool allow_quote M4_GNUC_UNUSED,
+	   bool safe M4_GNUC_UNUSED)
 {
   int ch;
 
@@ -397,7 +398,7 @@ builtin_peek (m4_input_block *me)
 
 static int
 builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	      bool safe M4_GNUC_UNUSED)
+	      bool allow_quote M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
 {
   if (me->u.u_b.read)
     return CHAR_RETRY;
@@ -479,7 +480,7 @@ string_peek (m4_input_block *me)
 
 static int
 string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	     bool safe M4_GNUC_UNUSED)
+	     bool allow_quote M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
 {
   if (!me->u.u_s.len)
     return CHAR_RETRY;
@@ -560,7 +561,7 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
       next->funcs = &composite_funcs;
       next->u.u_c.chain = next->u.u_c.end = NULL;
     }
-  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+  m4__make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
   chain = (m4_symbol_chain *) obstack_alloc (current_input, sizeof *chain);
   if (next->u.u_c.end)
     next->u.u_c.end->next = chain;
@@ -568,6 +569,7 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
+  chain->quote_age = m4_get_symbol_value_quote_age (value);
   chain->str = m4_get_symbol_value_text (value);
   chain->len = m4_get_symbol_value_len (value);
   chain->level = level;
@@ -611,7 +613,8 @@ m4_push_string_finish (void)
 	  next->u.u_s.len = len;
 	}
       else
-	make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+	m4__make_text_link (current_input, &next->u.u_c.chain,
+			    &next->u.u_c.end);
       next->prev = isp;
       ret = isp = next;
       input_change = true;
@@ -649,15 +652,19 @@ composite_peek (m4_input_block *me)
 }
 
 static int
-composite_read (m4_input_block *me, m4 *context, bool safe)
+composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 {
   m4_symbol_chain *chain = me->u.u_c.chain;
   while (chain)
     {
+      if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX))
+	return CHAR_QUOTE;
       if (chain->str)
 	{
 	  if (chain->len)
 	    {
+	      /* Partial consumption invalidates quote age.  */
+	      chain->quote_age = 0;
 	      chain->len--;
 	      return to_uchar (*chain->str++);
 	    }
@@ -668,8 +675,6 @@ composite_read (m4_input_block *me, m4 *context, bool safe)
 	  assert (!"implemented yet");
 	  abort ();
 	}
-      if (safe)
-	return CHAR_RETRY;
       if (chain->level < SIZE_MAX)
 	m4__adjust_refcount (context, chain->level, false);
       me->u.u_c.chain = chain = chain->next;
@@ -744,9 +749,9 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 /* Given an obstack OBS, capture any unfinished text as a link in the
    chain that starts at *START and ends at *END.  START may be NULL if
    *END is non-NULL.  */
-static void
-make_text_link (m4_obstack *obs, m4_symbol_chain **start,
-		m4_symbol_chain **end)
+void
+m4__make_text_link (m4_obstack *obs, m4_symbol_chain **start,
+		    m4_symbol_chain **end)
 {
   m4_symbol_chain *chain;
   size_t len = obstack_object_size (obs);
@@ -762,6 +767,7 @@ make_text_link (m4_obstack *obs, m4_symbol_chain **start,
 	*start = chain;
       *end = chain;
       chain->next = NULL;
+      chain->quote_age = 0;
       chain->str = str;
       chain->len = len;
       chain->level = SIZE_MAX;
@@ -905,13 +911,43 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
   VALUE_MAX_ARGS (token)	= block->u.u_b.builtin->max_args;
 }
 
+/* When a QUOTE token is seen, convert VALUE to a composite (if it is
+   not one already), consisting of any unfinished text on OBS, as well
+   as the quoted token from the top of the input stack.  Use OBS for
+   any additional allocations needed to store the token chain.  */
+static void
+append_quote_token (m4_obstack *obs, m4_symbol_value *value)
+{
+  m4_symbol_chain *src_chain = isp->u.u_c.chain;
+  m4_symbol_chain *chain;
+  assert (isp->funcs == &composite_funcs && obs);
+
+  if (value->type == M4_SYMBOL_VOID)
+    {
+      value->type = M4_SYMBOL_COMP;
+      value->u.u_c.chain = value->u.u_c.end = NULL;
+    }
+  assert (value->type == M4_SYMBOL_COMP);
+  m4__make_text_link (obs, &value->u.u_c.chain, &value->u.u_c.end);
+  chain = (m4_symbol_chain *) obstack_copy (obs, src_chain, sizeof *chain);
+  if (value->u.u_c.end)
+    value->u.u_c.end->next = chain;
+  else
+    value->u.u_c.chain = chain;
+  value->u.u_c.end = chain;
+  value->u.u_c.end->next = NULL;
+  isp->u.u_c.chain = src_chain->next;
+}
+
 
 /* Low level input is done a character at a time.  The function
    next_char () is used to read and advance the input to the next
-   character.  If RETRY, then avoid returning CHAR_RETRY by popping
-   input.  */
+   character.  If ALLOW_QUOTE, and the current input matches the
+   current quote age, return CHAR_QUOTE and leave consumption of data
+   for append_quote_token.  If RETRY, then avoid returning CHAR_RETRY
+   by popping input.  */
 static int
-next_char (m4 *context, bool retry)
+next_char (m4 *context, bool allow_quote, bool retry)
 {
   int ch;
 
@@ -931,7 +967,8 @@ next_char (m4 *context, bool retry)
 	}
 
       assert (isp->funcs->read_func);
-      while ((ch = isp->funcs->read_func (isp, context, !retry)) != CHAR_RETRY
+      while (((ch = isp->funcs->read_func (isp, context, allow_quote, !retry))
+	      != CHAR_RETRY)
 	     || !retry)
 	{
 	  /* if (!IS_IGNORE (ch)) */
@@ -960,7 +997,9 @@ peek_char (m4 *context)
       assert (block->funcs->peek_func);
       if ((ch = block->funcs->peek_func (block)) != CHAR_RETRY)
 	{
-	  return /* (IS_IGNORE (ch)) ? next_char (context, true) : */ ch;
+/*	  if (IS_IGNORE (ch)) */
+/*	    return next_char (context, false, true); */
+	  return ch;
 	}
 
       block = block->prev;
@@ -969,7 +1008,7 @@ peek_char (m4 *context)
 
 /* The function unget_input () puts back a character on the input
    stack, using an existing input_block if possible.  This is not safe
-   to call except immediately after next_char(context, false).  */
+   to call except immediately after next_char(context, allow, false).  */
 static void
 unget_input (int ch)
 {
@@ -987,7 +1026,7 @@ m4_skip_line (m4 *context, const char *name)
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
 
-  while ((ch = next_char (context, true)) != CHAR_EOF && ch != '\n')
+  while ((ch = next_char (context, false, true)) != CHAR_EOF && ch != '\n')
     ;
   if (ch == CHAR_EOF)
     /* current_file changed; use the previous value we cached.  */
@@ -1032,14 +1071,14 @@ match_input (m4 *context, const char *s, bool consume)
   if (s[1] == '\0')
     {
       if (consume)
-	next_char (context, true);
+	next_char (context, false, true);
       return true;			/* short match */
     }
 
-  next_char (context, true);
+  next_char (context, false, true);
   for (n = 1, t = s++; (ch = peek_char (context)) == to_uchar (*s++); )
     {
-      next_char (context, true);
+      next_char (context, false, true);
       n++;
       if (*s == '\0')		/* long match */
 	{
@@ -1071,29 +1110,35 @@ match_input (m4 *context, const char *s, bool consume)
 
 /* While the current input character has the given SYNTAX, append it
    to OBS.  Take care not to pop input source unless the next source
-   would continue the chain.  Return true unless the chain ended with
+   would continue the chain.  Return true if the chain ended with
    CHAR_EOF.  */
 static bool
 consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 {
   int ch;
+  bool allow_quote = m4__safe_quotes (M4SYNTAX);
   assert (syntax);
   while (1)
     {
       /* It is safe to call next_char without first checking
 	 peek_char, except at input source boundaries, which we detect
-	 by CHAR_RETRY.  We exploit the fact that CHAR_EOF and
-	 CHAR_MACRO do not satisfy any syntax categories.  */
-      while ((ch = next_char (context, false)) != CHAR_RETRY
+	 by CHAR_RETRY.  We exploit the fact that CHAR_EOF,
+	 CHAR_BUILTIN, and CHAR_QUOTE do not satisfy any syntax
+	 categories.  */
+      while ((ch = next_char (context, allow_quote, false)) != CHAR_RETRY
 	     && m4_has_syntax (M4SYNTAX, ch, syntax))
-	obstack_1grow (obs, ch);
-      if (ch == CHAR_RETRY)
+	{
+	  assert (ch < CHAR_EOF);
+	  obstack_1grow (obs, ch);
+	}
+      if (ch == CHAR_RETRY || ch == CHAR_QUOTE)
 	{
 	  ch = peek_char (context);
 	  if (m4_has_syntax (M4SYNTAX, ch, syntax))
 	    {
+	      assert (ch < CHAR_EOF);
 	      obstack_1grow (obs, ch);
-	      next_char (context, true);
+	      next_char (context, false, true);
 	      continue;
 	    }
 	  return ch == CHAR_EOF;
@@ -1141,13 +1186,13 @@ m4_input_exit (void)
 }
 
 
-/* Parse and return a single token from the input stream, built in
-   TOKEN.  See m4__token_type for the valid return types, along with a
-   description of what TOKEN will contain.  If LINE is not NULL, set
-   *LINE to the line number where the token starts.  If OBS, expand
-   safe tokens (strings and comments) directly into OBS rather than in
-   a temporary staging area.  Report errors (unterminated comments or
-   strings) on behalf of CALLER, if non-NULL.
+/* Parse and return a single token from the input stream, constructed
+   into TOKEN.  See m4__token_type for the valid return types, along
+   with a description of what TOKEN will contain.  If LINE is not
+   NULL, set *LINE to the line number where the token starts.  If OBS,
+   expand safe tokens (strings and comments) directly into OBS rather
+   than in a temporary staging area.  Report errors (unterminated
+   comments or strings) on behalf of CALLER, if non-NULL.
 
    If OBS is NULL or the token expansion is unknown, the token text is
    collected on the obstack token_stack, which never contains more
@@ -1177,7 +1222,6 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   do {
     obstack_free (&token_stack, token_bottom);
 
-
     /* Must consume an input character, but not until CHAR_BUILTIN is
        handled.  */
     ch = peek_char (context);
@@ -1186,28 +1230,29 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 #ifdef DEBUG_INPUT
 	xfprintf (stderr, "next_token -> EOF\n");
 #endif
-	next_char (context, true);
+	next_char (context, false, true);
 	return M4_TOKEN_EOF;
       }
 
     if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
       {
 	init_builtin_token (context, token);
-	next_char (context, true);
+	next_char (context, false, true);
 #ifdef DEBUG_INPUT
 	m4_print_token ("next_token", M4_TOKEN_MACDEF, token);
 #endif
 	return M4_TOKEN_MACDEF;
       }
 
-    next_char (context, true); /* Consume character we already peeked at.  */
+    /* Consume character we already peeked at.  */
+    next_char (context, false, true);
     file = m4_get_current_file (context);
     *line = m4_get_current_line (context);
 
     if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
       {					/* ESCAPED WORD */
 	obstack_1grow (&token_stack, ch);
-	if ((ch = next_char (context, true)) != CHAR_EOF)
+	if ((ch = next_char (context, false, true)) < CHAR_EOF)
 	  {
 	    obstack_1grow (&token_stack, ch);
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
@@ -1234,12 +1279,13 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	quote_level = 1;
 	while (1)
 	  {
-	    ch = next_char (context, true);
+	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
-
-	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
+	    if (ch == CHAR_QUOTE)
+	      append_quote_token (obs, token);
+	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 	      {
 		if (--quote_level == 0)
 		  break;
@@ -1261,9 +1307,10 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (obs)
 	  obs_safe = obs;
 	quote_level = 1;
+	assert (!m4__quote_age (M4SYNTAX));
 	while (1)
 	  {
-	    ch = next_char (context, true);
+	    ch = next_char (context, false, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
@@ -1290,11 +1337,14 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (obs && !m4_get_discard_comments_opt (context))
 	  obs_safe = obs;
 	obstack_1grow (obs_safe, ch);
-	while ((ch = next_char (context, true)) != CHAR_EOF
+	while ((ch = next_char (context, false, true)) < CHAR_EOF
 	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
 	  obstack_1grow (obs_safe, ch);
 	if (ch != CHAR_EOF)
-	  obstack_1grow (obs_safe, ch);
+	  {
+	    assert (ch < CHAR_EOF);
+	    obstack_1grow (obs_safe, ch);
+	  }
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 			    _("end of file in comment"));
@@ -1308,12 +1358,15 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  obs_safe = obs;
 	obstack_grow (obs_safe, context->syntax->bcomm.string,
 		      context->syntax->bcomm.length);
-	while ((ch = next_char (context, true)) != CHAR_EOF
+	while ((ch = next_char (context, false, true)) < CHAR_EOF
 	       && !MATCH (context, ch, context->syntax->ecomm.string, true))
 	  obstack_1grow (obs_safe, ch);
 	if (ch != CHAR_EOF)
-	  obstack_grow (obs_safe, context->syntax->ecomm.string,
-			context->syntax->ecomm.length);
+	  {
+	    assert (ch < CHAR_EOF);
+	    obstack_grow (obs_safe, context->syntax->ecomm.string,
+			  context->syntax->ecomm.length);
+	  }
 	else
 	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 			    _("end of file in comment"));
@@ -1343,6 +1396,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     else if (m4_is_syntax_single_quotes (M4SYNTAX)
 	     && m4_is_syntax_single_comments (M4SYNTAX))
       {			/* EVERYTHING ELSE (SHORT QUOTES AND COMMENTS) */
+	assert (ch < CHAR_EOF);
 	obstack_1grow (&token_stack, ch);
 
 	if (m4_has_syntax (M4SYNTAX, ch,
@@ -1374,6 +1428,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
     else		/* EVERYTHING ELSE (LONG QUOTES OR COMMENTS) */
       {
+	assert (ch < CHAR_EOF);
 	obstack_1grow (&token_stack, ch);
 
 	if (m4_has_syntax (M4SYNTAX, ch,
@@ -1394,16 +1449,21 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
   } while (type == M4_TOKEN_NONE);
 
-  if (obs_safe != obs)
+  if (token->type == M4_SYMBOL_VOID)
     {
-      len = obstack_object_size (&token_stack);
-      obstack_1grow (&token_stack, '\0');
+      if (obs_safe != obs)
+	{
+	  len = obstack_object_size (&token_stack);
+	  obstack_1grow (&token_stack, '\0');
 
-      m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
-				m4__quote_age (M4SYNTAX));
+	  m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
+				    m4__quote_age (M4SYNTAX));
+	}
+      else
+	assert (type == M4_TOKEN_STRING);
     }
   else
-    assert (type == M4_TOKEN_STRING);
+    assert (token->type == M4_SYMBOL_COMP && type == M4_TOKEN_STRING);
   VALUE_MAX_ARGS (token) = -1;
 
 #ifdef DEBUG_INPUT
@@ -1440,46 +1500,58 @@ m4__next_token_is_open (m4 *context)
 int
 m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
 {
-  xfprintf (stderr, "%s: ", s ? s : "m4input");
+  m4_obstack obs;
+  size_t len;
+
+  obstack_init (&obs);
+  if (!s)
+    s = "m4input";
+  obstack_grow (&obs, s, strlen (s));
+  obstack_1grow (&obs, ':');
+  obstack_1grow (&obs, ' ');
   switch (type)
     {				/* TOKSW */
     case M4_TOKEN_EOF:
-      xfprintf (stderr, "eof\n");
+      obstack_grow (&obs, "eof", strlen ("eof"));
+      token = NULL;
       break;
     case M4_TOKEN_NONE:
-      xfprintf (stderr, "none\n");
+      obstack_grow (&obs, "none", strlen ("none"));
+      token = NULL;
       break;
     case M4_TOKEN_STRING:
-      xfprintf (stderr, "string\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "string\t", strlen ("string\t"));
       break;
     case M4_TOKEN_SPACE:
-      xfprintf (stderr, "space\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "space\t", strlen ("space\t"));
       break;
     case M4_TOKEN_WORD:
-      xfprintf (stderr, "word\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "word\t", strlen ("word\t"));
       break;
     case M4_TOKEN_OPEN:
-      xfprintf (stderr, "open\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "open\t", strlen ("open\t"));
       break;
     case M4_TOKEN_COMMA:
-      xfprintf (stderr, "comma\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "comma\t", strlen ("comma\t"));
       break;
     case M4_TOKEN_CLOSE:
-      xfprintf (stderr, "close\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "close\t", strlen ("close\t"));
       break;
     case M4_TOKEN_SIMPLE:
-      xfprintf (stderr, "simple\t\"%s\"\n", m4_get_symbol_value_text (token));
+      obstack_grow (&obs, "simple\t", strlen ("simple\t"));
       break;
     case M4_TOKEN_MACDEF:
-      {
-	const m4_builtin *bp;
-	bp = m4_builtin_find_by_func (NULL, m4_get_symbol_value_func (token));
-	assert (bp);
-	xfprintf (stderr, "builtin\t<%s>{%s}\n", bp->name,
-		  m4_get_module_name (VALUE_MODULE (token)));
-      }
+      obstack_grow (&obs, "builtin\t", strlen ("builtin\t"));
       break;
+    default:
+      abort ();
     }
+  if (token)
+    m4_symbol_value_print (token, &obs, true, "\"", "\"", SIZE_MAX, NULL);
+  obstack_1grow (&obs, '\n');
+  len = obstack_object_size (&obs);
+  fwrite (obstack_finish (&obs), 1, len, stderr);
+  obstack_free (&obs, NULL);
   return 0;
 }
 #endif /* DEBUG_INPUT */

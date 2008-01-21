@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -326,10 +326,21 @@ m4_symbol_value_delete (m4_symbol_value *value)
 	  m4_hash_apply (VALUE_ARG_SIGNATURE (value), arg_destroy_CB, NULL);
 	  m4_hash_delete (VALUE_ARG_SIGNATURE (value));
 	}
-      if (m4_is_symbol_value_text (value))
-	free ((char *) m4_get_symbol_value_text (value));
-      else if (m4_is_symbol_value_placeholder (value))
-	free ((char *) m4_get_symbol_value_placeholder (value));
+      switch (value->type)
+	{
+	case M4_SYMBOL_TEXT:
+	  free ((char *) m4_get_symbol_value_text (value));
+	  break;
+	case M4_SYMBOL_PLACEHOLDER:
+	  free ((char *) m4_get_symbol_value_placeholder (value));
+	  break;
+	case M4_SYMBOL_VOID:
+	case M4_SYMBOL_FUNC:
+	  break;
+	default:
+	  assert (!"m4_symbol_value_delete");
+	  abort ();
+	}
       free (value);
     }
 }
@@ -392,10 +403,21 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
   assert (dest);
   assert (src);
 
-  if (m4_is_symbol_value_text (dest))
-    free ((char *) m4_get_symbol_value_text (dest));
-  else if (m4_is_symbol_value_placeholder (dest))
-    free ((char *) m4_get_symbol_value_placeholder (dest));
+  switch (dest->type)
+    {
+    case M4_SYMBOL_TEXT:
+      free ((char *) m4_get_symbol_value_text (dest));
+      break;
+    case M4_SYMBOL_PLACEHOLDER:
+      free ((char *) m4_get_symbol_value_placeholder (dest));
+      break;
+    case M4_SYMBOL_VOID:
+    case M4_SYMBOL_FUNC:
+      break;
+    default:
+      assert (!"m4_symbol_value_delete");
+      abort ();
+    }
 
   if (VALUE_ARG_SIGNATURE (dest))
     {
@@ -411,19 +433,54 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
 
   /* Caller is supposed to free text token strings, so we have to
      copy the string not just its address in that case.  */
-  if (m4_is_symbol_value_text (src))
+  switch (src->type)
     {
-      size_t len = m4_get_symbol_value_len (src);
-      unsigned int age = m4_get_symbol_value_quote_age (src);
-      m4_set_symbol_value_text (dest,
-				xmemdup (m4_get_symbol_value_text (src),
-					 len + 1), len, age);
+    case M4_SYMBOL_TEXT:
+      {
+	size_t len = m4_get_symbol_value_len (src);
+	unsigned int age = m4_get_symbol_value_quote_age (src);
+	m4_set_symbol_value_text (dest,
+				  xmemdup (m4_get_symbol_value_text (src),
+					   len + 1), len, age);
+      }
+      break;
+    case M4_SYMBOL_FUNC:
+      /* Nothing further to do.  */
+      break;
+    case M4_SYMBOL_PLACEHOLDER:
+      m4_set_symbol_value_placeholder (dest,
+				       xstrdup (m4_get_symbol_value_placeholder
+						(src)));
+      break;
+    case M4_SYMBOL_COMP:
+      {
+	m4_symbol_chain *chain = src->u.u_c.chain;
+	size_t len = 0;
+	char *str;
+	char *p;
+	while (chain)
+	  {
+	    /* TODO for now, only text links are supported.  */
+	    assert (chain->str);
+	    len += chain->len;
+	    chain = chain->next;
+	  }
+	p = str = xcharalloc (len + 1);
+	chain = src->u.u_c.chain;
+	while (chain)
+	  {
+	    memcpy (p, chain->str, chain->len);
+	    p += chain->len;
+	    chain = chain->next;
+	  }
+	*p = '\0';
+	m4_set_symbol_value_text (dest, str, len, 0);
+      }
+      break;
+    default:
+      assert (!"m4_symbol_value_copy");
+      abort ();
     }
-  else if (m4_is_symbol_value_placeholder (src))
-    m4_set_symbol_value_placeholder (dest,
-				     xstrdup (m4_get_symbol_value_placeholder
-					      (src)));
-
   if (VALUE_ARG_SIGNATURE (src))
     VALUE_ARG_SIGNATURE (dest) = m4_hash_dup (VALUE_ARG_SIGNATURE (src),
 					      arg_copy_CB);
@@ -488,8 +545,9 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
   size_t len;
   bool truncated = false;
 
-  if (m4_is_symbol_value_text (value))
+  switch (value->type)
     {
+    case M4_SYMBOL_TEXT:
       text = m4_get_symbol_value_text (value);
       len = m4_get_symbol_value_len (value);
       if (maxlen < len)
@@ -497,27 +555,45 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
 	  len = maxlen;
 	  truncated = true;
 	}
-    }
-  else if (m4_is_symbol_value_func (value))
-    {
-      const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-      text = bp->name;
-      len = strlen (text);
-      lquote = "<";
-      rquote = ">";
-      quote = true;
-    }
-  else if (m4_is_symbol_value_placeholder (value))
-    {
+      break;
+    case M4_SYMBOL_FUNC:
+      {
+	const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+	text = bp->name;
+	len = strlen (text);
+	lquote = "<";
+	rquote = ">";
+	quote = true;
+      }
+      break;
+    case M4_SYMBOL_PLACEHOLDER:
       text = m4_get_symbol_value_placeholder (value);
       /* FIXME - is it worth translating "placeholder for "?  */
       len = strlen (text);
       lquote = "<placeholder for ";
       rquote = ">";
       quote = true;
-    }
-  else
-    {
+      break;
+    case M4_SYMBOL_COMP:
+      {
+	m4_symbol_chain *chain = value->u.u_c.chain;
+	if (quote)
+	  obstack_grow (obs, lquote, strlen (lquote));
+	while (chain)
+	  {
+	    /* TODO for now, assume all links are text.  */
+	    assert (chain->str);
+	    if (m4_shipout_string_trunc (NULL, obs, chain->str, chain->len,
+					 false, &maxlen))
+	      break;
+	    chain = chain->next;
+	  }
+	if (quote)
+	  obstack_grow (obs, rquote, strlen (rquote));
+	assert (!module);
+	return;
+      }
+    default:
       assert (!"invalid token in symbol_value_print");
       abort ();
     }

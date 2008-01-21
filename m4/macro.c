@@ -334,9 +334,15 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	      len = obstack_object_size (obs);
 	      if (argp->type == M4_SYMBOL_FUNC && !len)
 		return type == M4_TOKEN_COMMA;
-	      obstack_1grow (obs, '\0');
-	      VALUE_MODULE (argp) = NULL;
-	      m4_set_symbol_value_text (argp, obstack_finish (obs), len, age);
+	      if (argp->type != M4_SYMBOL_COMP)
+		{
+		  obstack_1grow (obs, '\0');
+		  VALUE_MODULE (argp) = NULL;
+		  m4_set_symbol_value_text (argp, obstack_finish (obs), len,
+					    age);
+		}
+	      else
+		m4__make_text_link (obs, NULL, &argp->u.u_c.end);
 	      return type == M4_TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -360,6 +366,20 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_STRING:
 	  if (!expand_token (context, obs, type, &token, line, first))
 	    age = 0;
+	  if (token.type == M4_SYMBOL_COMP)
+	    {
+	      if (argp->type != M4_SYMBOL_COMP)
+		{
+		  argp->type = M4_SYMBOL_COMP;
+		  argp->u.u_c.chain = token.u.u_c.chain;
+		}
+	      else
+		{
+		  assert (argp->u.u_c.end);
+		  argp->u.u_c.end->next = token.u.u_c.chain;
+		}
+	      argp->u.u_c.end = token.u.u_c.end;
+	    }
 	  break;
 
 	case M4_TOKEN_MACDEF:
@@ -502,8 +522,23 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
 
-  /* If argv contains references, those refcounts can be reduced now.  */
-  /* TODO - support references in argv.  */
+  /* If argv contains references, those refcounts must be reduced now.  */
+  if (argv->has_ref)
+    {
+      m4_symbol_chain *chain;
+      size_t i;
+      for (i = 0; i < argv->arraylen; i++)
+	if (argv->array[i]->type == M4_SYMBOL_COMP)
+	  {
+	    chain = argv->array[i]->u.u_c.chain;
+	    while (chain)
+	      {
+		if (chain->level < SIZE_MAX)
+		  m4__adjust_refcount (context, chain->level, false);
+		chain = chain->next;
+	      }
+	  }
+    }
 
   /* We no longer need argv, so reduce the refcount.  Additionally, if
      no other references to argv were created, we can free our portion
@@ -550,6 +585,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
 
   args.argc = 1;
   args.inuse = false;
+  args.wrapper = false;
   args.has_ref = false;
   /* Must copy here, since we are consuming tokens, and since symbol
      table can be changed during argument collection.  */
@@ -587,11 +623,14 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	      && m4_get_symbol_value_len (tokenp)
 	      && m4_get_symbol_value_quote_age (tokenp) != args.quote_age)
 	    args.quote_age = 0;
+	  else if (tokenp->type == M4_SYMBOL_COMP)
+	    args.has_ref = true;
 	}
       while (more_args);
     }
   argv = (m4_macro_args *) obstack_finish (argv_stack);
   argv->argc = args.argc;
+  argv->has_ref = args.has_ref;
   if (args.quote_age != m4__quote_age (M4SYNTAX))
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
@@ -674,8 +713,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	      text = endp;
 	    }
 	  if (i < argc)
-	    m4_shipout_string (context, obs, M4ARG (i), m4_arg_len (argv, i),
-			       false);
+	    m4_push_arg (context, obs, argv, i);
 	  break;
 
 	case '#':		/* number of arguments */
@@ -947,14 +985,14 @@ static void
 arg_mark (m4_macro_args *argv)
 {
   argv->inuse = true;
-  if (argv->has_ref)
+  if (argv->wrapper)
     {
       /* TODO for now we support only a single-length $@ chain.  */
       assert (argv->arraylen == 1
 	      && argv->array[0]->type == M4_SYMBOL_COMP
-	      && !argv->array[0]->u.chain->next
-	      && !argv->array[0]->u.chain->str);
-      argv->array[0]->u.chain->argv->inuse = true;
+	      && !argv->array[0]->u.u_c.chain->next
+	      && !argv->array[0]->u.u_c.chain->str);
+      argv->array[0]->u.u_c.chain->argv->inuse = true;
     }
 }
 
@@ -970,7 +1008,7 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
   if (argv->argc <= index)
     return &empty_symbol;
 
-  if (!argv->has_ref)
+  if (!argv->wrapper)
     return argv->array[index - 1];
   /* Must cycle through all array slots until we find index, since
      wrappers can contain multiple arguments.  */
@@ -979,7 +1017,7 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
       value = argv->array[i];
       if (value->type == M4_SYMBOL_COMP)
 	{
-	  m4_symbol_chain *chain = value->u.chain;
+	  m4_symbol_chain *chain = value->u.u_c.chain;
 	  /* TODO - for now we support only a single $@ chain.  */
 	  assert (!chain->next && !chain->str);
 	  if (index < chain->argv->argc - (chain->index - 1))
@@ -994,7 +1032,6 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
       else if (--index == 0)
 	break;
     }
-  assert (value->type != M4_SYMBOL_COMP);
   return value;
 }
 
@@ -1003,9 +1040,14 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
 bool
 m4_is_arg_text (m4_macro_args *argv, unsigned int index)
 {
+  m4_symbol_value *value;
   if (index == 0 || argv->argc <= index)
     return true;
-  return m4_is_symbol_value_text (m4_arg_symbol (argv, index));
+  value = m4_arg_symbol (argv, index);
+  /* Composite tokens are currently sequences of text only.  */
+  if (m4_is_symbol_value_text (value) || value->type == M4_SYMBOL_COMP)
+    return true;
+  return false;
 }
 
 /* Given ARGV, return true if argument INDEX is a builtin function.
@@ -1020,37 +1062,125 @@ m4_is_arg_func (m4_macro_args *argv, unsigned int index)
 
 /* Given ARGV, return the text at argument INDEX.  Abort if the
    argument is not text.  Index 0 is always text, and indices beyond
-   argc return the empty string.  */
+   argc return the empty string.  The result is always NUL-terminated,
+   even if it includes embedded NUL characters.  */
 const char *
-m4_arg_text (m4_macro_args *argv, unsigned int index)
+m4_arg_text (m4 *context, m4_macro_args *argv, unsigned int index)
 {
   m4_symbol_value *value;
+  m4_symbol_chain *chain;
+  m4_obstack *obs;
 
   if (index == 0)
     return argv->argv0;
   if (argv->argc <= index)
     return "";
   value = m4_arg_symbol (argv, index);
-  return m4_get_symbol_value_text (value);
+  if (m4_is_symbol_value_text (value))
+    return m4_get_symbol_value_text (value);
+  /* TODO - concatenate argv refs and functions?  For now, we assume
+     all chain elements are text.  */
+  assert (value->type == M4_SYMBOL_COMP);
+  chain = value->u.u_c.chain;
+  obs = m4_arg_scratch (context);
+  while (chain)
+    {
+      assert (chain->str);
+      obstack_grow (obs, chain->str, chain->len);
+      chain = chain->next;
+    }
+  obstack_1grow (obs, '\0');
+  return (char *) obstack_finish (obs);
 }
 
 /* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
    Both indices must be non-zero.  Return true if the arguments
    contain the same contents; often more efficient than
-   !strcmp (m4_arg_text (argv, indexa), m4_arg_text (argv, indexb)).  */
+   !strcmp (m4_arg_text (context, argv, indexa),
+	    m4_arg_text (context, argv, indexb)).  */
 bool
 m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
 {
   m4_symbol_value *sa = m4_arg_symbol (argv, indexa);
   m4_symbol_value *sb = m4_arg_symbol (argv, indexb);
+  m4_symbol_chain tmpa;
+  m4_symbol_chain tmpb;
+  m4_symbol_chain *ca = &tmpa;
+  m4_symbol_chain *cb = &tmpb;
 
+  /* Quick tests.  */
   if (sa == &empty_symbol || sb == &empty_symbol)
     return sa == sb;
+  if (m4_is_symbol_value_text (sa) && m4_is_symbol_value_text (sb))
+    return (m4_get_symbol_value_len (sa) == m4_get_symbol_value_len (sb)
+	    && memcmp (m4_get_symbol_value_text (sa),
+		       m4_get_symbol_value_text (sb),
+		       m4_get_symbol_value_len (sa)) == 0);
+
+  /* Convert both arguments to chains, if not one already.  */
   /* TODO - allow builtin tokens in the comparison?  */
-  assert (m4_is_symbol_value_text (sa) && m4_is_symbol_value_text (sb));
-  return (m4_get_symbol_value_len (sa) == m4_get_symbol_value_len (sb)
-	  && strcmp (m4_get_symbol_value_text (sa),
-		     m4_get_symbol_value_text (sb)) == 0);
+  if (m4_is_symbol_value_text (sa))
+    {
+      tmpa.next = NULL;
+      tmpa.str = m4_get_symbol_value_text (sa);
+      tmpa.len = m4_get_symbol_value_len (sa);
+    }
+  else
+    {
+      assert (sa->type == M4_SYMBOL_COMP);
+      ca = sa->u.u_c.chain;
+    }
+  if (m4_is_symbol_value_text (sb))
+    {
+      tmpb.next = NULL;
+      tmpb.str = m4_get_symbol_value_text (sb);
+      tmpb.len = m4_get_symbol_value_len (sb);
+    }
+  else
+    {
+      assert (sb->type == M4_SYMBOL_COMP);
+      cb = sb->u.u_c.chain;
+    }
+
+  /* Compare each link of the chain.  */
+  while (ca && cb)
+    {
+      /* TODO support comparison against $@ refs.  */
+      assert (ca->str && cb->str);
+      if (ca->len == cb->len)
+	{
+	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	    return false;
+	  ca = ca->next;
+	  cb = cb->next;
+	}
+      else if (ca->len < cb->len)
+	{
+	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	    return false;
+	  tmpb.next = cb->next;
+	  tmpb.str = cb->str + ca->len;
+	  tmpb.len = cb->len - ca->len;
+	  ca = ca->next;
+	  cb = &tmpb;
+	}
+      else
+	{
+	  assert (cb->len < ca->len);
+	  if (memcmp (ca->str, cb->str, cb->len) != 0)
+	    return false;
+	  tmpa.next = ca->next;
+	  tmpa.str = ca->str + cb->len;
+	  tmpa.len = ca->len - cb->len;
+	  ca = &tmpa;
+	  cb = cb->next;
+	}
+    }
+
+  /* If we get this far, the two arguments are equal only if both
+     chains are exhausted.  */
+  assert (ca != cb || !ca);
+  return ca == cb;
 }
 
 /* Given ARGV, return true if argument INDEX is the empty string.
@@ -1069,13 +1199,28 @@ size_t
 m4_arg_len (m4_macro_args *argv, unsigned int index)
 {
   m4_symbol_value *value;
+  m4_symbol_chain *chain;
+  size_t len;
 
   if (index == 0)
     return argv->argv0_len;
   if (argv->argc <= index)
     return 0;
   value = m4_arg_symbol (argv, index);
-  return m4_get_symbol_value_len (value);
+  if (m4_is_symbol_value_text (value))
+    return m4_get_symbol_value_len (value);
+  /* TODO - for now, we assume all chain links are text.  */
+  assert (value->type == M4_SYMBOL_COMP);
+  chain = value->u.u_c.chain;
+  len = 0;
+  while (chain)
+    {
+      assert (chain->str);
+      len += chain->len;
+      chain = chain->next;
+    }
+  assert (len);
+  return len;
 }
 
 /* Given ARGV, return the builtin function referenced by argument
@@ -1105,11 +1250,11 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
 
   /* When making a reference through a reference, point to the
      original if possible.  */
-  if (argv->has_ref)
+  if (argv->wrapper)
     {
       /* TODO for now we support only a single-length $@ chain.  */
       assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
-      chain = argv->array[0]->u.chain;
+      chain = argv->array[0]->u.u_c.chain;
       assert (!chain->next && !chain->str);
       argv = chain->argv;
       index += chain->index - 1;
@@ -1130,10 +1275,12 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       chain = (m4_symbol_chain *) obstack_alloc (obs, sizeof *chain);
       new_argv->arraylen = 1;
       new_argv->array[0] = value;
+      new_argv->wrapper = true;
       new_argv->has_ref = true;
       value->type = M4_SYMBOL_COMP;
-      value->u.chain = chain;
+      value->u.u_c.chain = value->u.u_c.end = chain;
       chain->next = NULL;
+      chain->quote_age = argv->quote_age;
       chain->str = NULL;
       chain->len = 0;
       chain->level = context->expansion_level - 1;
@@ -1170,9 +1317,23 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
 	return;
     }
   /* TODO handle builtin tokens?  */
-  assert (value->type == M4_SYMBOL_TEXT);
-  if (m4__push_symbol (context, value, context->expansion_level - 1))
-    arg_mark (argv);
+  if (value->type == M4_SYMBOL_TEXT)
+    {
+      if (m4__push_symbol (context, value, context->expansion_level - 1))
+	arg_mark (argv);
+    }
+  else if (value->type == M4_SYMBOL_COMP)
+    {
+      /* TODO - really handle composites; for now, just flatten the
+	 composite and push its text.  */
+      m4_symbol_chain *chain = value->u.u_c.chain;
+      while (chain)
+	{
+	  assert (chain->str);
+	  obstack_grow (obs, chain->str, chain->len);
+	  chain = chain->next;
+	}
+    }
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -1184,6 +1345,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
   m4_symbol_value *value;
+  m4_symbol_chain *chain;
   unsigned int i = skip ? 2 : 1;
   const char *sep = ",";
   size_t sep_len = 1;
@@ -1226,8 +1388,21 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
       else
 	use_sep = true;
       /* TODO handle builtin tokens?  */
-      assert (value->type == M4_SYMBOL_TEXT);
-      inuse |= m4__push_symbol (context, value, context->expansion_level - 1);
+      if (value->type == M4_SYMBOL_TEXT)
+	inuse |= m4__push_symbol (context, value,
+				  context->expansion_level - 1);
+      else
+	{
+	  /* TODO handle composite text.  */
+	  assert (value->type == M4_SYMBOL_COMP);
+	  chain = value->u.u_c.chain;
+	  while (chain)
+	    {
+	      assert (chain->str);
+	      obstack_grow (obs, chain->str, chain->len);
+	      chain = chain->next;
+	    }
+	}
     }
   if (quote)
     obstack_grow (obs, rquote, strlen (rquote));

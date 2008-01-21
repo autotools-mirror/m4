@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -102,8 +102,9 @@ struct m4_macro
 	m4_module_import (context, STR (M), STR (S), obs)
 
 /* Grab the text contents of argument I, or abort if the argument is
-   not text.  Assumes that `m4_macro_args *argv' is in scope.  */
-#define M4ARG(i) m4_arg_text (argv, i)
+   not text.  Assumes that `m4 *context' and `m4_macro_args *argv' are
+   in scope.  */
+#define M4ARG(i) m4_arg_text (context, argv, i)
 
 extern bool	m4_bad_argc	   (m4 *, int, const char *,
 				    unsigned int, unsigned int, bool);
@@ -304,7 +305,7 @@ extern unsigned int m4_arg_argc		(m4_macro_args *);
 extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, unsigned int);
 extern bool	m4_is_arg_text		(m4_macro_args *, unsigned int);
 extern bool	m4_is_arg_func		(m4_macro_args *, unsigned int);
-extern const char *m4_arg_text		(m4_macro_args *, unsigned int);
+extern const char *m4_arg_text		(m4 *, m4_macro_args *, unsigned int);
 extern bool	m4_arg_equal		(m4_macro_args *, unsigned int,
 					 unsigned int);
 extern bool	m4_arg_empty		(m4_macro_args *, unsigned int);

@@ -1,3 +1,46 @@
+2008-01-21  Eric Blake  <ebb9@byu.net>
+
+	Stage 11: full circle for single argument references.
+	Pass quoted strings through to argument collection in a single
+	action, so that an argument can be reused throughout macro
+	recursion if it remains unchanged.
+	Memory impact: noticeable improvement, due to more reuse in
+	argument collection stacks.
+	Speed impact: noticeable improvement, due to less copying.
+	* m4/m4module.h (m4_arg_text): Add parameter.
+	(M4ARG): Adjust.
+	* m4/m4private.h (CHAR_QUOTE): New input engine sentinel.
+	(m4__make_text_link): New prototype.
+	(struct m4_symbol_chain): Add quote_age member.
+	(struct m4_symbol_value): Add end member to chained symbol.
+	(struct m4_macro_args): Add wrapper member.
+	* m4/symtab.c (m4_symbol_value_print): Print composite tokens.
+	(m4_symbol_value_copy, m4_symbol_value_delete): Recognize
+	composite tokens.
+	* m4/input.c (make_text_link): Rename...
+	(m4__make_text_link): ...to this, and export.
+	(m4_push_string_finish): Adjust caller.
+	(make_text_link, m4__push_symbol): Update new field.
+	(file_read, builtin_read, string_read, composite_read, next_char):
+	Add parameter.
+	(m4_skip_line, match_input, consume_syntax): Adjust callers.
+	(append_quote_token): New function.
+	(m4__next_token): Pass quoted strings onto argument collection.
+	(m4_print_token) [DEBUG_INPUT]: Update.
+	* m4/macro.c (expand_argument): Collect composite arguments.
+	(collect_arguments): Update new field.
+	(expand_macro): Reduce ref-count of back-references after use.
+	(arg_mark, m4_arg_symbol, m4_make_argv_ref): Adjust to new member
+	names.
+	(m4_is_arg_text): Also recognize composite symbols as text.
+	(m4_arg_text, m4_arg_len): Merge composite symbols as needed.
+	(m4_arg_equal): Compare composite symbols.
+	(m4_push_arg, m4_push_args): Handle composite symbols.
+	(m4_arg_symbol): Relax assertion.
+	(process_macro): Use single-argument references.
+	* m4/output.c (m4_shipout_string_trunc): Update comment.
+	* tests/macros.at (Rescanning macros): Augment test.
+
 2008-01-16  Eric Blake  <ebb9@byu.net>
 
 	Stage 10: avoid extra copying of strings and comments.
