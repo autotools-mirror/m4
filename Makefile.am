@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
-## Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
+## Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -85,13 +85,6 @@ src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
 src_m4_LDADD	= m4/libm4.la
 src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
-
-## Since we do not build a libtool library in src, Automake fails to infer
-## that there may be a libs directory there.  FIXME - revisit this if
-## automake 1.10 fixes the bug.
-clean-local-src:
-	-rm -rf src/.libs src/_libs
-
 
 ##                                                                      ##
 ##                 --- PASTED MANUALLY FROM GNULIB ---                  ##
@@ -441,7 +434,7 @@ OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test \
 DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
 MAINTAINERCLEANFILES += tests/generated.at '$(TESTSUITE)'
 
-clean-local: clean-local-src clean-local-tests
+clean-local: clean-local-tests
 
 ##                                                                      ##
 ##                   --- RULES FOR THE MAINTAINER ---                   ##

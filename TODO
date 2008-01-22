@@ -132,9 +132,6 @@ for any of these ideas or if you have others to add.
 
 * OTHER TOOLS
 
-  + Automake 1.11 will allow some Makefile.am cleanups:
-    http://lists.gnu.org/archive/html/m4-patches/2007-08/msg00008.html
-
   + Copy coreutils' idea of using rsync, not wget, for grabbing .po
     files efficiently.
 

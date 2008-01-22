@@ -1,9 +1,12 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-11-05
-# Written by Gary V. Vaughan  <gary@gnu.org>
+# bootstrap (GNU M4) version 2008-01-22
+# Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
 
-# Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# Written by Gary V. Vaughan  <gary@gnu.org>
 
 # This file is part of GNU M4.
 #
@@ -37,7 +40,7 @@
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly calling
 # out to parts of the GNU Build Platform.  Currently this requires GNU
 # Gettext 0.16 or better, Autoconf 2.60 or better, GNU M4 1.4.x or
-# better, a git snapshot of Automake 1.10a or better, a CVS snapshot
+# better, a git snapshot of Automake 1.10.1 or better, a CVS snapshot
 # of Libtool 2.1a or better, and the latest git or CVS checkout of Gnulib.
 # Libtool must be installed; either with the same --prefix as
 # automake, or made accessible to aclocal's search path via
@@ -175,8 +178,8 @@ func_help ()
 # Echo version message to standard output and exit.
 func_version ()
 {
-    $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-	s/^# //; s/^# *$//;
+    $SED '/^# '$PROGRAM' (GNU /,/# Written by / {
+	s/^# //;
 	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
 	p;
      }; d' < "$progpath"

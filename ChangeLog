@@ -1,3 +1,17 @@
+2008-01-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+	and Eric Blake  <ebb9@byu.net>
+
+	Rely on newer automake.
+	* configure.ac (AM_INIT_AUTOMAKE): Require 1.10.1, and add lzma
+	distribution.
+	* bootstrap: Update automake requirement.
+	(func_version): Fix --version output, broken since 2007-08-06.
+	* HACKING: Likewise.  Add lzma requirement.
+	* Makefile.am (clean-local-src): Not needed any more with newest
+	Automake.
+	(clean-local): Adjust.
+	* TODO: Remove completed item.
+
 2008-01-22  Eric Blake  <ebb9@byu.net>
 
 	Doc tweak.

@@ -65,10 +65,11 @@ and is not part of a release distribution.
   - A pre-installed version of GNU M4 1.4.5 or later, built from a
   package
   - Autoconf 2.60 or later
-  - Automake 1.10a or later
+  - Automake 1.10.1 or later
   - CVS Head of Libtool (will become Libtool 2.0)
   - Gettext 0.16 or later
   - Help2man 1.29 or later
+  - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)
   - Texinfo 4.8 or later
   - Any prerequisites of the above (such as perl, tex)
   - A git checkout of gnulib.  A read-only copy of gnulib can be
@@ -234,7 +235,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Run 'make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
   create both diff and xdelta files between the previous release tarball
-  and the new.
+  and the new.  TODO - is xdelta still worth using?
 
 * Run '[../]./gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
@@ -429,7 +430,7 @@ issue.
 
 
 -- 
-Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 The canonical source of this file is maintained with the
 GNU M4 package.  Report bugs to bug-m4@gnu.org.
