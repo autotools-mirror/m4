@@ -1,3 +1,9 @@
+2008-01-22  Eric Blake  <ebb9@byu.net>
+
+	Doc tweak.
+	* doc/m4.texinfo (Renamesyms): Avoid underfull hbox, and improve
+	example.
+
 2008-01-21  Eric Blake  <ebb9@byu.net>
 
 	Stage 11: full circle for single argument references.

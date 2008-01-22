@@ -2460,14 +2460,27 @@ The macro @code{renamesyms} is recognized only with parameters.
 This macro was added in M4 2.0.
 @end deffn
 
-Here is an example that starts by performing a similar renaming to the
-@option{--prefix-builtins} option (or @option{-P}).  Where
-@option{--prefix-builtins} only renames M4 builtin macros,
+The following example starts with a rename similar to the
+@option{--prefix-builtins} option (or @option{-P}), prefixing every
+macro with @code{m4_}.  However, note that @option{-P} only renames M4
+builtin macros, even if other macros were defined previously, while
 @code{renamesyms} will rename any macros that match when it runs,
 including text macros.  The rest of the example demonstrates the
 behavior of unanchored regular expressions in symbol renaming.
 
+@comment options: -Dfoo=bar -P
 @example
+$ @kbd{m4 -Dfoo=bar -P}
+foo
+@result{}bar
+m4_foo
+@result{}m4_foo
+m4_defn(`foo')
+@result{}bar
+@end example
+
+@example
+$ @kbd{m4}
 define(`foo', `bar')
 @result{}
 renamesyms(`^.*$', `m4_\&')
