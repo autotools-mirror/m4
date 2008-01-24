@@ -86,10 +86,10 @@ M4_CHECK_DEBUGGING
 ## ----------------------- ##
 ## Libtool initialization. ##
 ## ----------------------- ##
-LT_PREREQ([2.0])
+LT_PREREQ([2.1a])
 LT_CONFIG_LTDL_DIR([ltdl])
 LT_INIT([shared dlopen win32-dll])
-LT_WITH_LTDL([ltdl])
+LTDL_INIT
 
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
