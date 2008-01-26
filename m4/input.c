@@ -186,8 +186,8 @@ struct m4_input_block
       u_b;	/* See builtin_funcs.  */
       struct
 	{
-	  m4_symbol_chain *chain;	/* Current link in chain.  */
-	  m4_symbol_chain *end;		/* Last link in chain.  */
+	  m4__symbol_chain *chain;	/* Current link in chain.  */
+	  m4__symbol_chain *end;	/* Last link in chain.  */
 	}
       u_c;	/* See composite_funcs.  */
     }
@@ -539,7 +539,7 @@ m4_push_string_init (m4 *context)
 bool
 m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
 {
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   bool result = false;
 
   assert (next);
@@ -562,20 +562,18 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
       next->u.u_c.chain = next->u.u_c.end = NULL;
     }
   m4__make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
-  chain = (m4_symbol_chain *) obstack_alloc (current_input, sizeof *chain);
+  chain = (m4__symbol_chain *) obstack_alloc (current_input, sizeof *chain);
   if (next->u.u_c.end)
     next->u.u_c.end->next = chain;
   else
     next->u.u_c.chain = chain;
   next->u.u_c.end = chain;
   chain->next = NULL;
+  chain->type = M4__CHAIN_STR;
   chain->quote_age = m4_get_symbol_value_quote_age (value);
-  chain->str = m4_get_symbol_value_text (value);
-  chain->len = m4_get_symbol_value_len (value);
-  chain->level = level;
-  chain->argv = NULL;
-  chain->index = 0;
-  chain->flatten = false;
+  chain->u.u_s.str = m4_get_symbol_value_text (value);
+  chain->u.u_s.len = m4_get_symbol_value_len (value);
+  chain->u.u_s.level = level;
   if (level < SIZE_MAX)
     {
       m4__adjust_refcount (context, level, true);
@@ -632,18 +630,19 @@ m4_push_string_finish (void)
 static int
 composite_peek (m4_input_block *me)
 {
-  m4_symbol_chain *chain = me->u.u_c.chain;
+  m4__symbol_chain *chain = me->u.u_c.chain;
   while (chain)
     {
-      if (chain->str)
+      switch (chain->type)
 	{
-	  if (chain->len)
-	    return to_uchar (chain->str[0]);
-	}
-      else
-	{
+	case M4__CHAIN_STR:
+	  if (chain->u.u_s.len)
+	    return to_uchar (chain->u.u_s.str[0]);
+	  break;
+	case M4__CHAIN_ARGV:
 	  /* TODO - peek into argv.  */
-	  assert (!"implemented yet");
+	default:
+	  assert (!"composite_peek");
 	  abort ();
 	}
       chain = chain->next;
@@ -654,29 +653,30 @@ composite_peek (m4_input_block *me)
 static int
 composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 {
-  m4_symbol_chain *chain = me->u.u_c.chain;
+  m4__symbol_chain *chain = me->u.u_c.chain;
   while (chain)
     {
       if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX))
 	return CHAR_QUOTE;
-      if (chain->str)
+      switch (chain->type)
 	{
-	  if (chain->len)
+	case M4__CHAIN_STR:
+	  if (chain->u.u_s.len)
 	    {
 	      /* Partial consumption invalidates quote age.  */
 	      chain->quote_age = 0;
-	      chain->len--;
-	      return to_uchar (*chain->str++);
+	      chain->u.u_s.len--;
+	      return to_uchar (*chain->u.u_s.str++);
 	    }
-	}
-      else
-	{
+	  if (chain->u.u_s.level < SIZE_MAX)
+	    m4__adjust_refcount (context, chain->u.u_s.level, false);
+	  break;
+	case M4__CHAIN_ARGV:
 	  /* TODO - peek into argv.  */
-	  assert (!"implemented yet");
+	default:
+	  assert (!"composite_read");
 	  abort ();
 	}
-      if (chain->level < SIZE_MAX)
-	m4__adjust_refcount (context, chain->level, false);
       me->u.u_c.chain = chain = chain->next;
     }
   return CHAR_RETRY;
@@ -685,17 +685,18 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 static void
 composite_unget (m4_input_block *me, int ch)
 {
-  m4_symbol_chain *chain = me->u.u_c.chain;
-  if (chain->str)
+  m4__symbol_chain *chain = me->u.u_c.chain;
+  switch (chain->type)
     {
-      assert (ch < CHAR_EOF && to_uchar (chain->str[-1]) == ch);
-      chain->str--;
-      chain->len++;
-    }
-  else
-    {
+    case M4__CHAIN_STR:
+      assert (ch < CHAR_EOF && to_uchar (chain->u.u_s.str[-1]) == ch);
+      chain->u.u_s.str--;
+      chain->u.u_s.len++;
+      break;
+    case M4__CHAIN_ARGV:
       /* TODO support argv ref.  */
-      assert (!"implemented yet");
+    default:
+      assert (!"composite_unget");
       abort ();
     }
 }
@@ -703,20 +704,23 @@ composite_unget (m4_input_block *me, int ch)
 static bool
 composite_clean (m4_input_block *me, m4 *context, bool cleanup)
 {
-  m4_symbol_chain *chain = me->u.u_c.chain;
+  m4__symbol_chain *chain = me->u.u_c.chain;
   assert (!chain || !cleanup);
   while (chain)
     {
-      if (chain->str)
-	assert (!chain->len);
-      else
+      switch (chain->type)
 	{
+	case M4__CHAIN_STR:
+	  assert (!chain->u.u_s.len);
+	  if (chain->u.u_s.level < SIZE_MAX)
+	    m4__adjust_refcount (context, chain->u.u_s.level, false);
+	  break;
+	case M4__CHAIN_ARGV:
 	  /* TODO - peek into argv.  */
-	  assert (!"implemented yet");
+	default:
+	  assert (!"composite_clean");
 	  abort ();
 	}
-      if (chain->level < SIZE_MAX)
-	m4__adjust_refcount (context, chain->level, false);
       me->u.u_c.chain = chain = chain->next;
     }
   return true;
@@ -727,7 +731,7 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
   bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
   size_t maxlen = m4_get_max_debug_arg_length_opt (context);
-  m4_symbol_chain *chain = me->u.u_c.chain;
+  m4__symbol_chain *chain = me->u.u_c.chain;
   const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
   const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
 
@@ -736,9 +740,9 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
   while (chain)
     {
       /* TODO support argv refs as well.  */
-      assert (chain->str);
-      if (m4_shipout_string_trunc (context, obs, chain->str, chain->len, false,
-				   &maxlen))
+      assert (chain->type == M4__CHAIN_STR);
+      if (m4_shipout_string_trunc (context, obs, chain->u.u_s.str,
+				   chain->u.u_s.len, false, &maxlen))
 	break;
       chain = chain->next;
     }
@@ -750,30 +754,28 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
    chain that starts at *START and ends at *END.  START may be NULL if
    *END is non-NULL.  */
 void
-m4__make_text_link (m4_obstack *obs, m4_symbol_chain **start,
-		    m4_symbol_chain **end)
+m4__make_text_link (m4_obstack *obs, m4__symbol_chain **start,
+		    m4__symbol_chain **end)
 {
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   size_t len = obstack_object_size (obs);
 
   assert (end && (start || *end));
   if (len)
     {
       char *str = (char *) obstack_finish (obs);
-      chain = (m4_symbol_chain *) obstack_alloc (obs, sizeof *chain);
+      chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
       if (*end)
 	(*end)->next = chain;
       else
 	*start = chain;
       *end = chain;
       chain->next = NULL;
+      chain->type = M4__CHAIN_STR;
       chain->quote_age = 0;
-      chain->str = str;
-      chain->len = len;
-      chain->level = SIZE_MAX;
-      chain->argv = NULL;
-      chain->index = 0;
-      chain->flatten = false;
+      chain->u.u_s.str = str;
+      chain->u.u_s.len = len;
+      chain->u.u_s.level = SIZE_MAX;
     }
 }
 
@@ -918,8 +920,8 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
 static void
 append_quote_token (m4_obstack *obs, m4_symbol_value *value)
 {
-  m4_symbol_chain *src_chain = isp->u.u_c.chain;
-  m4_symbol_chain *chain;
+  m4__symbol_chain *src_chain = isp->u.u_c.chain;
+  m4__symbol_chain *chain;
   assert (isp->funcs == &composite_funcs && obs);
 
   if (value->type == M4_SYMBOL_VOID)
@@ -929,7 +931,7 @@ append_quote_token (m4_obstack *obs, m4_symbol_value *value)
     }
   assert (value->type == M4_SYMBOL_COMP);
   m4__make_text_link (obs, &value->u.u_c.chain, &value->u.u_c.end);
-  chain = (m4_symbol_chain *) obstack_copy (obs, src_chain, sizeof *chain);
+  chain = (m4__symbol_chain *) obstack_copy (obs, src_chain, sizeof *chain);
   if (value->u.u_c.end)
     value->u.u_c.end->next = chain;
   else

@@ -454,23 +454,23 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
       break;
     case M4_SYMBOL_COMP:
       {
-	m4_symbol_chain *chain = src->u.u_c.chain;
+	m4__symbol_chain *chain = src->u.u_c.chain;
 	size_t len = 0;
 	char *str;
 	char *p;
 	while (chain)
 	  {
 	    /* TODO for now, only text links are supported.  */
-	    assert (chain->str);
-	    len += chain->len;
+	    assert (chain->type == M4__CHAIN_STR);
+	    len += chain->u.u_s.len;
 	    chain = chain->next;
 	  }
 	p = str = xcharalloc (len + 1);
 	chain = src->u.u_c.chain;
 	while (chain)
 	  {
-	    memcpy (p, chain->str, chain->len);
-	    p += chain->len;
+	    memcpy (p, chain->u.u_s.str, chain->u.u_s.len);
+	    p += chain->u.u_s.len;
 	    chain = chain->next;
 	  }
 	*p = '\0';
@@ -576,15 +576,15 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
       break;
     case M4_SYMBOL_COMP:
       {
-	m4_symbol_chain *chain = value->u.u_c.chain;
+	m4__symbol_chain *chain = value->u.u_c.chain;
 	if (quote)
 	  obstack_grow (obs, lquote, strlen (lquote));
 	while (chain)
 	  {
 	    /* TODO for now, assume all links are text.  */
-	    assert (chain->str);
-	    if (m4_shipout_string_trunc (NULL, obs, chain->str, chain->len,
-					 false, &maxlen))
+	    assert (chain->type == M4__CHAIN_STR);
+	    if (m4_shipout_string_trunc (NULL, obs, chain->u.u_s.str,
+					 chain->u.u_s.len, NULL, &maxlen))
 	      break;
 	    chain = chain->next;
 	  }

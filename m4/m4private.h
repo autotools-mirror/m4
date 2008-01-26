@@ -185,7 +185,7 @@ extern m4_module *  m4__module_find (const char *name);
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
-typedef struct m4_symbol_chain m4_symbol_chain;
+typedef struct m4__symbol_chain m4__symbol_chain;
 
 struct m4_symbol
 {
@@ -193,17 +193,35 @@ struct m4_symbol
   m4_symbol_value *value;	/* Linked list of pushdef'd values.  */
 };
 
-/* Composite symbols are built of a linked list of chain objects.  */
-struct m4_symbol_chain
+/* Type of a link in a symbol chain.  */
+enum m4__symbol_chain_type
 {
-  m4_symbol_chain *next;/* Pointer to next link of chain.  */
-  unsigned int quote_age; /* Quote_age of this link of chain, or 0.  */
-  const char *str;	/* NUL-terminated string if text, or NULL.  */
-  size_t len;		/* Length of str, or 0.  */
-  size_t level;		/* Expansion level of content, or SIZE_MAX.  */
-  m4_macro_args *argv;	/* Reference to earlier $@.  */
-  unsigned int index;	/* Argument index within argv.  */
-  bool flatten;		/* True to treat builtins as text.  */
+  M4__CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
+  /* TODO Add M4__CHAIN_FUNC.  */
+  M4__CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
+};
+
+/* Composite symbols are built of a linked list of chain objects.  */
+struct m4__symbol_chain
+{
+  m4__symbol_chain *next;		/* Pointer to next link of chain.  */
+  enum m4__symbol_chain_type type;	/* Type of this link.  */
+  unsigned int quote_age;		/* Quote_age of this link, or 0.  */
+  union
+  {
+    struct
+    {
+      const char *str;		/* Pointer to text.  */
+      size_t len;		/* Remaining length of str.  */
+      size_t level;		/* Expansion level of content, or SIZE_MAX.  */
+    } u_s;			/* M4__CHAIN_STR.  */
+    struct
+    {
+      m4_macro_args *argv;	/* Reference to earlier $@.  */
+      unsigned int index;	/* Argument index within argv.  */
+      bool flatten;		/* True to treat builtins as text.  */
+    } u_a;			/* M4__CHAIN_ARGV.  */
+  } u;
 };
 
 /* A symbol value is used both for values associated with a macro
@@ -233,8 +251,8 @@ struct m4_symbol_value
     const m4_builtin *	builtin;/* Valid when type is FUNC.  */
     struct
     {
-      m4_symbol_chain *	chain;	/* First link of the chain.  */
-      m4_symbol_chain *	end;	/* Last link of the chain.  */
+      m4__symbol_chain *chain;	/* First link of the chain.  */
+      m4__symbol_chain *end;	/* Last link of the chain.  */
     } u_c;			/* Valid when type is COMP.  */
   } u;
 };
@@ -460,8 +478,8 @@ typedef enum {
   M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
 } m4__token_type;
 
-extern	void		m4__make_text_link (m4_obstack *, m4_symbol_chain **,
-					    m4_symbol_chain **);
+extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
+					    m4__symbol_chain **);
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					m4_obstack *, const char *);

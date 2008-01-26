@@ -525,7 +525,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   /* If argv contains references, those refcounts must be reduced now.  */
   if (argv->has_ref)
     {
-      m4_symbol_chain *chain;
+      m4__symbol_chain *chain;
       size_t i;
       for (i = 0; i < argv->arraylen; i++)
 	if (argv->array[i]->type == M4_SYMBOL_COMP)
@@ -533,8 +533,9 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 	    chain = argv->array[i]->u.u_c.chain;
 	    while (chain)
 	      {
-		if (chain->level < SIZE_MAX)
-		  m4__adjust_refcount (context, chain->level, false);
+		assert (chain->type == M4__CHAIN_STR);
+		if (chain->u.u_s.level < SIZE_MAX)
+		  m4__adjust_refcount (context, chain->u.u_s.level, false);
 		chain = chain->next;
 	      }
 	  }
@@ -991,8 +992,8 @@ arg_mark (m4_macro_args *argv)
       assert (argv->arraylen == 1
 	      && argv->array[0]->type == M4_SYMBOL_COMP
 	      && !argv->array[0]->u.u_c.chain->next
-	      && !argv->array[0]->u.u_c.chain->str);
-      argv->array[0]->u.u_c.chain->argv->inuse = true;
+	      && argv->array[0]->u.u_c.chain->type == M4__CHAIN_ARGV);
+      argv->array[0]->u.u_c.chain->u.u_a.argv->inuse = true;
     }
 }
 
@@ -1017,17 +1018,18 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
       value = argv->array[i];
       if (value->type == M4_SYMBOL_COMP)
 	{
-	  m4_symbol_chain *chain = value->u.u_c.chain;
+	  m4__symbol_chain *chain = value->u.u_c.chain;
 	  /* TODO - for now we support only a single $@ chain.  */
-	  assert (!chain->next && !chain->str);
-	  if (index < chain->argv->argc - (chain->index - 1))
+	  assert (!chain->next && chain->type == M4__CHAIN_ARGV);
+	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
 	    {
-	      value = m4_arg_symbol (chain->argv, chain->index - 1 + index);
-	      if (chain->flatten && m4_is_symbol_value_func (value))
+	      value = m4_arg_symbol (chain->u.u_a.argv,
+				     chain->u.u_a.index - 1 + index);
+	      if (chain->u.u_a.flatten && m4_is_symbol_value_func (value))
 		value = &empty_symbol;
 	      break;
 	    }
-	  index -= chain->argv->argc - chain->index;
+	  index -= chain->u.u_a.argv->argc - chain->u.u_a.index;
 	}
       else if (--index == 0)
 	break;
@@ -1068,7 +1070,7 @@ const char *
 m4_arg_text (m4 *context, m4_macro_args *argv, unsigned int index)
 {
   m4_symbol_value *value;
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   m4_obstack *obs;
 
   if (index == 0)
@@ -1085,8 +1087,8 @@ m4_arg_text (m4 *context, m4_macro_args *argv, unsigned int index)
   obs = m4_arg_scratch (context);
   while (chain)
     {
-      assert (chain->str);
-      obstack_grow (obs, chain->str, chain->len);
+      assert (chain->type == M4__CHAIN_STR);
+      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
       chain = chain->next;
     }
   obstack_1grow (obs, '\0');
@@ -1103,10 +1105,10 @@ m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
 {
   m4_symbol_value *sa = m4_arg_symbol (argv, indexa);
   m4_symbol_value *sb = m4_arg_symbol (argv, indexb);
-  m4_symbol_chain tmpa;
-  m4_symbol_chain tmpb;
-  m4_symbol_chain *ca = &tmpa;
-  m4_symbol_chain *cb = &tmpb;
+  m4__symbol_chain tmpa;
+  m4__symbol_chain tmpb;
+  m4__symbol_chain *ca = &tmpa;
+  m4__symbol_chain *cb = &tmpb;
 
   /* Quick tests.  */
   if (sa == &empty_symbol || sb == &empty_symbol)
@@ -1122,8 +1124,9 @@ m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
   if (m4_is_symbol_value_text (sa))
     {
       tmpa.next = NULL;
-      tmpa.str = m4_get_symbol_value_text (sa);
-      tmpa.len = m4_get_symbol_value_len (sa);
+      tmpa.type = M4__CHAIN_STR;
+      tmpa.u.u_s.str = m4_get_symbol_value_text (sa);
+      tmpa.u.u_s.len = m4_get_symbol_value_len (sa);
     }
   else
     {
@@ -1133,8 +1136,9 @@ m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
   if (m4_is_symbol_value_text (sb))
     {
       tmpb.next = NULL;
-      tmpb.str = m4_get_symbol_value_text (sb);
-      tmpb.len = m4_get_symbol_value_len (sb);
+      tmpb.type = M4__CHAIN_STR;
+      tmpb.u.u_s.str = m4_get_symbol_value_text (sb);
+      tmpb.u.u_s.len = m4_get_symbol_value_len (sb);
     }
   else
     {
@@ -1146,32 +1150,32 @@ m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
   while (ca && cb)
     {
       /* TODO support comparison against $@ refs.  */
-      assert (ca->str && cb->str);
-      if (ca->len == cb->len)
+      assert (ca->type == M4__CHAIN_STR && cb->type == M4__CHAIN_STR);
+      if (ca->u.u_s.len == cb->u.u_s.len)
 	{
-	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
 	    return false;
 	  ca = ca->next;
 	  cb = cb->next;
 	}
-      else if (ca->len < cb->len)
+      else if (ca->u.u_s.len < cb->u.u_s.len)
 	{
-	  if (memcmp (ca->str, cb->str, ca->len) != 0)
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
 	    return false;
 	  tmpb.next = cb->next;
-	  tmpb.str = cb->str + ca->len;
-	  tmpb.len = cb->len - ca->len;
+	  tmpb.u.u_s.str = cb->u.u_s.str + ca->u.u_s.len;
+	  tmpb.u.u_s.len = cb->u.u_s.len - ca->u.u_s.len;
 	  ca = ca->next;
 	  cb = &tmpb;
 	}
       else
 	{
-	  assert (cb->len < ca->len);
-	  if (memcmp (ca->str, cb->str, cb->len) != 0)
+	  assert (cb->u.u_s.len < ca->u.u_s.len);
+	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, cb->u.u_s.len) != 0)
 	    return false;
 	  tmpa.next = ca->next;
-	  tmpa.str = ca->str + cb->len;
-	  tmpa.len = ca->len - cb->len;
+	  tmpa.u.u_s.str = ca->u.u_s.str + cb->u.u_s.len;
+	  tmpa.u.u_s.len = ca->u.u_s.len - cb->u.u_s.len;
 	  ca = &tmpa;
 	  cb = cb->next;
 	}
@@ -1199,7 +1203,7 @@ size_t
 m4_arg_len (m4_macro_args *argv, unsigned int index)
 {
   m4_symbol_value *value;
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   size_t len;
 
   if (index == 0)
@@ -1215,8 +1219,8 @@ m4_arg_len (m4_macro_args *argv, unsigned int index)
   len = 0;
   while (chain)
     {
-      assert (chain->str);
-      len += chain->len;
+      assert (chain->type == M4__CHAIN_STR);
+      len += chain->u.u_s.len;
       chain = chain->next;
     }
   assert (len);
@@ -1244,7 +1248,7 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
 {
   m4_macro_args *new_argv;
   m4_symbol_value *value;
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   unsigned int index = skip ? 2 : 1;
   m4_obstack *obs = m4_arg_scratch (context);
 
@@ -1255,9 +1259,9 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       /* TODO for now we support only a single-length $@ chain.  */
       assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
       chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && !chain->str);
-      argv = chain->argv;
-      index += chain->index - 1;
+      assert (!chain->next && chain->type == M4__CHAIN_ARGV);
+      argv = chain->u.u_a.argv;
+      index += chain->u.u_a.index - 1;
     }
   if (argv->argc <= index)
     {
@@ -1272,7 +1276,7 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
 								  array)
 							+ sizeof value));
       value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
-      chain = (m4_symbol_chain *) obstack_alloc (obs, sizeof *chain);
+      chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
       new_argv->arraylen = 1;
       new_argv->array[0] = value;
       new_argv->wrapper = true;
@@ -1280,13 +1284,11 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       value->type = M4_SYMBOL_COMP;
       value->u.u_c.chain = value->u.u_c.end = chain;
       chain->next = NULL;
+      chain->type = M4__CHAIN_ARGV;
       chain->quote_age = argv->quote_age;
-      chain->str = NULL;
-      chain->len = 0;
-      chain->level = context->expansion_level - 1;
-      chain->argv = argv;
-      chain->index = index;
-      chain->flatten = flatten;
+      chain->u.u_a.argv = argv;
+      chain->u.u_a.index = index;
+      chain->u.u_a.flatten = flatten;
     }
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
@@ -1326,11 +1328,11 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
     {
       /* TODO - really handle composites; for now, just flatten the
 	 composite and push its text.  */
-      m4_symbol_chain *chain = value->u.u_c.chain;
+      m4__symbol_chain *chain = value->u.u_c.chain;
       while (chain)
 	{
-	  assert (chain->str);
-	  obstack_grow (obs, chain->str, chain->len);
+	  assert (chain->type == M4__CHAIN_STR);
+	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  chain = chain->next;
 	}
     }
@@ -1345,7 +1347,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
   m4_symbol_value *value;
-  m4_symbol_chain *chain;
+  m4__symbol_chain *chain;
   unsigned int i = skip ? 2 : 1;
   const char *sep = ",";
   size_t sep_len = 1;
@@ -1398,8 +1400,8 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	  chain = value->u.u_c.chain;
 	  while (chain)
 	    {
-	      assert (chain->str);
-	      obstack_grow (obs, chain->str, chain->len);
+	      assert (chain->type == M4__CHAIN_STR);
+	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	      chain = chain->next;
 	    }
 	}
