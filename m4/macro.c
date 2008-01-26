@@ -888,16 +888,16 @@ trace_flush (m4 *context)
 static void
 trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 {
-  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
-  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
-  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  const m4_string_pair *quotes = NULL;
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
   bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
 
+  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
+    quotes = m4_get_syntax_quotes (M4SYNTAX);
   trace_header (context, id);
   trace_format (context, "%s ... = ", name);
-  m4_symbol_value_print (value, &context->trace_messages,
-			 quote, lquote, rquote, arg_length, module);
+  m4_symbol_value_print (value, &context->trace_messages, quotes, arg_length,
+			 module);
   trace_flush (context);
 }
 
@@ -914,12 +914,12 @@ trace_pre (m4 *context, size_t id, m4_macro_args *argv)
 
   if (1 < argc && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
     {
-      bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
-      const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
-      const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+      const m4_string_pair *quotes = NULL;
       size_t arg_length = m4_get_max_debug_arg_length_opt (context);
       bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
 
+      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
+	quotes = m4_get_syntax_quotes (M4SYNTAX);
       trace_format (context, "(");
       for (i = 1; i < argc; i++)
 	{
@@ -927,8 +927,8 @@ trace_pre (m4 *context, size_t id, m4_macro_args *argv)
 	    trace_format (context, ", ");
 
 	  m4_symbol_value_print (m4_arg_symbol (argv, i),
-				 &context->trace_messages, quote, lquote,
-				 rquote, arg_length, module);
+				 &context->trace_messages, quotes, arg_length,
+				 module);
 	}
       trace_format (context, ")");
     }
@@ -1353,8 +1353,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
   size_t sep_len = 1;
   bool use_sep = false;
   bool inuse = false;
-  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
-  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
   m4_obstack *scratch = m4_arg_scratch (context);
 
   if (argv->argc <= i)
@@ -1363,22 +1362,22 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
   if (argv->argc == i + 1)
     {
       if (quote)
-	obstack_grow (obs, lquote, strlen (lquote));
+	obstack_grow (obs, quotes->str1, quotes->len1);
       m4_push_arg (context, obs, argv, i);
       if (quote)
-	obstack_grow (obs, rquote, strlen (rquote));
+	obstack_grow (obs, quotes->str2, quotes->len2);
       return;
     }
 
   /* Compute the separator in the scratch space.  */
   if (quote)
     {
-      obstack_grow (obs, lquote, strlen (lquote));
-      obstack_grow (scratch, rquote, strlen (rquote));
+      obstack_grow (obs, quotes->str1, quotes->len1);
+      obstack_grow (scratch, quotes->str2, quotes->len2);
       obstack_1grow (scratch, ',');
-      obstack_grow0 (scratch, lquote, strlen (lquote));
+      obstack_grow0 (scratch, quotes->str1, quotes->len1);
       sep = (char *) obstack_finish (scratch);
-      sep_len += strlen (lquote) + strlen (rquote);
+      sep_len += quotes->len1 + quotes->len2;
     }
 
   /* TODO push entire $@ ref, rather than each arg.  */
@@ -1407,7 +1406,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	}
     }
   if (quote)
-    obstack_grow (obs, rquote, strlen (rquote));
+    obstack_grow (obs, quotes->str2, quotes->len2);
   if (inuse)
     arg_mark (argv);
 }

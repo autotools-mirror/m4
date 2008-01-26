@@ -341,13 +341,13 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
 M4BUILTIN_HANDLER (dumpdef)
 {
   m4_dump_symbol_data data;
-  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
-  const char *lquote = m4_get_syntax_lquote (M4SYNTAX);
-  const char *rquote = m4_get_syntax_rquote (M4SYNTAX);
+  const m4_string_pair *quotes = NULL;
   bool stack = m4_is_debug_bit (context, M4_DEBUG_TRACE_STACK);
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
   bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
 
+  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
+    quotes = m4_get_syntax_quotes (M4SYNTAX);
   data.obs = m4_arg_scratch (context);
   m4_dump_symbols (context, &data, argc, argv, true);
 
@@ -359,8 +359,7 @@ M4BUILTIN_HANDLER (dumpdef)
       obstack_grow (obs, data.base[0], strlen (data.base[0]));
       obstack_1grow (obs, ':');
       obstack_1grow (obs, '\t');
-      m4_symbol_print (symbol, obs, quote, lquote, rquote, stack, arg_length,
-		       module);
+      m4_symbol_print (symbol, obs, quotes, stack, arg_length, module);
       obstack_1grow (obs, '\n');
     }
 
@@ -698,8 +697,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
   int fd;
   int i;
   char *name;
-  const char *tmp;
-  size_t qlen;
+  const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
 
   if (m4_get_safer_opt (context))
     {
@@ -711,15 +709,13 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
      user forgot to supply them.  Output must be quoted if
      successful.  */
   assert (obstack_object_size (obs) == 0);
-  tmp = m4_get_syntax_lquote (M4SYNTAX);
-  qlen = strlen (tmp);
-  obstack_grow (obs, tmp, qlen);
+  obstack_grow (obs, quotes->str1, quotes->len1);
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (pattern[--len] != 'X')
       break;
   obstack_grow0 (obs, "XXXXXX", 6 - i);
-  name = (char *) obstack_base (obs) + qlen;
+  name = (char *) obstack_base (obs) + quotes->len1;
 
   /* Make the temporary object.  */
   errno = 0;
@@ -741,8 +737,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 	close (fd);
       /* Remove NUL, then finish quote.  */
       obstack_blank (obs, -1);
-      tmp = m4_get_syntax_rquote (M4SYNTAX);
-      obstack_grow (obs, tmp, strlen (tmp));
+      obstack_grow (obs, quotes->str2, quotes->len2);
     }
 }
 

@@ -38,6 +38,7 @@ typedef struct m4_symbol_value	m4_symbol_value;
 typedef struct m4_input_block	m4_input_block;
 typedef struct m4_module	m4_module;
 typedef struct m4_macro_args	m4_macro_args;
+typedef struct m4_string_pair	m4_string_pair;
 
 typedef struct obstack		m4_obstack;
 
@@ -75,6 +76,15 @@ struct m4_macro
 {
   const char *name;
   const char *value;
+};
+
+/* Describe a pair of strings, such as begin and end quotes.  */
+struct m4_string_pair
+{
+  char *str1;		/* First string.  */
+  size_t len1;		/* First length.  */
+  char *str2;		/* Second string.  */
+  size_t len2;		/* Second length.  */
 };
 
 #define M4BUILTIN(name)							\
@@ -231,12 +241,11 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
-extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *, bool,
-					 const char *, const char *, size_t,
+extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *,
+					 const m4_string_pair *, size_t, bool);
+extern void	m4_symbol_print		(m4_symbol *, m4_obstack *,
+					 const m4_string_pair *, bool, size_t,
 					 bool);
-extern void	m4_symbol_print		(m4_symbol *, m4_obstack *, bool,
-					 const char *, const char *, bool,
-					 size_t, bool);
 extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
 
 #define m4_is_symbol_void(symbol)					\
@@ -313,7 +322,7 @@ extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
 extern m4_obstack *m4_arg_scratch	(m4 *);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
-                                         size_t, bool, bool);
+					 size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
 					 unsigned int);
 extern void	m4_push_args		(m4 *, m4_obstack *, m4_macro_args *,
@@ -384,6 +393,8 @@ extern	const char *	 m4_get_syntax_lquote	(m4_syntax_table *syntax);
 extern	const char *	 m4_get_syntax_rquote	(m4_syntax_table *syntax);
 extern	const char *	 m4_get_syntax_bcomm	(m4_syntax_table *syntax);
 extern	const char *	 m4_get_syntax_ecomm	(m4_syntax_table *syntax);
+extern	const m4_string_pair *m4_get_syntax_quotes	(m4_syntax_table *);
+extern	const m4_string_pair *m4_get_syntax_comments	(m4_syntax_table *);
 
 extern	bool		 m4_is_syntax_single_quotes	(m4_syntax_table *);
 extern	bool		 m4_is_syntax_single_comments	(m4_syntax_table *);
@@ -462,8 +473,8 @@ extern void	m4_divert_text		(m4 *, m4_obstack *, const char *,
 extern void	m4_shipout_int		(m4_obstack *, int);
 extern void	m4_shipout_string	(m4 *, m4_obstack *, const char *,
 					 size_t, bool);
-extern bool	m4_shipout_string_trunc	(m4 *, m4_obstack *, const char *,
-					 size_t, bool, size_t *);
+extern bool	m4_shipout_string_trunc	(m4_obstack *, const char *, size_t,
+					 const m4_string_pair *, size_t *);
 
 extern void	m4_make_diversion    (m4 *, int);
 extern void	m4_insert_diversion  (m4 *, int);

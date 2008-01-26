@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -168,10 +168,10 @@ m4_syntax_delete (m4_syntax_table *syntax)
 {
   assert (syntax);
 
-  free (syntax->lquote.string);
-  free (syntax->rquote.string);
-  free (syntax->bcomm.string);
-  free (syntax->ecomm.string);
+  free (syntax->quote.str1);
+  free (syntax->quote.str2);
+  free (syntax->comm.str1);
+  free (syntax->comm.str2);
   free (syntax);
 }
 
@@ -371,23 +371,23 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
 	 properties.  */
       memcpy (syntax->table, syntax->orig, sizeof syntax->orig);
 
-      free (syntax->lquote.string);
-      free (syntax->rquote.string);
-      free (syntax->bcomm.string);
-      free (syntax->ecomm.string);
+      free (syntax->quote.str1);
+      free (syntax->quote.str2);
+      free (syntax->comm.str1);
+      free (syntax->comm.str2);
 
-      syntax->lquote.string	= xstrdup (DEF_LQUOTE);
-      syntax->lquote.length	= strlen (syntax->lquote.string);
-      syntax->rquote.string	= xstrdup (DEF_RQUOTE);
-      syntax->rquote.length	= strlen (syntax->rquote.string);
-      syntax->bcomm.string	= xstrdup (DEF_BCOMM);
-      syntax->bcomm.length	= strlen (syntax->bcomm.string);
-      syntax->ecomm.string	= xstrdup (DEF_ECOMM);
-      syntax->ecomm.length	= strlen (syntax->ecomm.string);
+      syntax->quote.str1	= xstrdup (DEF_LQUOTE);
+      syntax->quote.len1	= 1;
+      syntax->quote.str2	= xstrdup (DEF_RQUOTE);
+      syntax->quote.len2	= 1;
+      syntax->comm.str1		= xstrdup (DEF_BCOMM);
+      syntax->comm.len1		= 1;
+      syntax->comm.str2		= xstrdup (DEF_ECOMM);
+      syntax->comm.len2		= 1;
 
-      add_syntax_attribute (syntax, to_uchar (syntax->rquote.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
 			    M4_SYNTAX_RQUOTE);
-      add_syntax_attribute (syntax, to_uchar (syntax->ecomm.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
 			    M4_SYNTAX_ECOMM);
 
       syntax->is_single_quotes		= true;
@@ -432,10 +432,10 @@ check_is_single_quotes (m4_syntax_table *syntax)
 
   if (! syntax->is_single_quotes)
     return false;
-  assert (syntax->lquote.length == 1 && syntax->rquote.length == 1);
+  assert (syntax->quote.len1 == 1 && syntax->quote.len2 == 1);
 
-  if (m4_has_syntax (syntax, *syntax->lquote.string, M4_SYNTAX_LQUOTE)
-      && m4_has_syntax (syntax, *syntax->rquote.string, M4_SYNTAX_RQUOTE))
+  if (m4_has_syntax (syntax, *syntax->quote.str1, M4_SYNTAX_LQUOTE)
+      && m4_has_syntax (syntax, *syntax->quote.str2, M4_SYNTAX_RQUOTE))
     return true;
 
   /* The most recent action invalidated our current lquote/rquote.  If
@@ -470,8 +470,8 @@ check_is_single_quotes (m4_syntax_table *syntax)
     syntax->is_single_quotes = false;
   else if (syntax->is_single_quotes)
     {
-      *syntax->lquote.string = lquote;
-      *syntax->rquote.string = rquote;
+      *syntax->quote.str1 = lquote;
+      *syntax->quote.str2 = rquote;
     }
   return syntax->is_single_quotes;
 }
@@ -485,10 +485,10 @@ check_is_single_comments (m4_syntax_table *syntax)
 
   if (! syntax->is_single_comments)
     return false;
-  assert (syntax->bcomm.length == 1 && syntax->ecomm.length == 1);
+  assert (syntax->comm.len1 == 1 && syntax->comm.len2 == 1);
 
-  if (m4_has_syntax (syntax, *syntax->bcomm.string, M4_SYNTAX_BCOMM)
-      && m4_has_syntax (syntax, *syntax->ecomm.string, M4_SYNTAX_ECOMM))
+  if (m4_has_syntax (syntax, *syntax->comm.str1, M4_SYNTAX_BCOMM)
+      && m4_has_syntax (syntax, *syntax->comm.str2, M4_SYNTAX_ECOMM))
     return true;
 
   /* The most recent action invalidated our current bcomm/ecomm.  If
@@ -523,8 +523,8 @@ check_is_single_comments (m4_syntax_table *syntax)
     syntax->is_single_comments = false;
   else if (syntax->is_single_comments)
     {
-      *syntax->bcomm.string = bcomm;
-      *syntax->ecomm.string = ecomm;
+      *syntax->comm.str1 = bcomm;
+      *syntax->comm.str2 = ecomm;
     }
   return syntax->is_single_comments;
 }
@@ -572,24 +572,24 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
   else if (!rq || (*lq && !*rq))
     rq = DEF_RQUOTE;
 
-  if (strcmp (syntax->lquote.string, lq) == 0
-      && strcmp (syntax->rquote.string, rq) == 0)
+  if (strcmp (syntax->quote.str1, lq) == 0
+      && strcmp (syntax->quote.str2, rq) == 0)
     return;
 
-  free (syntax->lquote.string);
-  free (syntax->rquote.string);
-  syntax->lquote.string = xstrdup (lq);
-  syntax->lquote.length = strlen (syntax->lquote.string);
-  syntax->rquote.string = xstrdup (rq);
-  syntax->rquote.length = strlen (syntax->rquote.string);
+  free (syntax->quote.str1);
+  free (syntax->quote.str2);
+  syntax->quote.str1 = xstrdup (lq);
+  syntax->quote.len1 = strlen (lq);
+  syntax->quote.str2 = xstrdup (rq);
+  syntax->quote.len2 = strlen (rq);
 
   /* changequote overrides syntax_table, but be careful when it is
      used to select a start-quote sequence that is effectively
      disabled.  */
 
   syntax->is_single_quotes
-    = (syntax->lquote.length == 1 && syntax->rquote.length == 1
-       && !m4_has_syntax (syntax, *syntax->lquote.string,
+    = (syntax->quote.len1 == 1 && syntax->quote.len2 == 1
+       && !m4_has_syntax (syntax, *syntax->quote.str1,
 			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM)));
 
@@ -605,9 +605,9 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 
   if (syntax->is_single_quotes)
     {
-      add_syntax_attribute (syntax, to_uchar (syntax->lquote.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->quote.str1[0]),
 			    M4_SYNTAX_LQUOTE);
-      add_syntax_attribute (syntax, to_uchar (syntax->rquote.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
 			    M4_SYNTAX_RQUOTE);
     }
   if (syntax->is_macro_escaped)
@@ -634,24 +634,24 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
   else if (!ec || (*bc && !*ec))
     ec = DEF_ECOMM;
 
-  if (strcmp (syntax->bcomm.string, bc) == 0
-      && strcmp (syntax->ecomm.string, ec) == 0)
+  if (strcmp (syntax->comm.str1, bc) == 0
+      && strcmp (syntax->comm.str2, ec) == 0)
     return;
 
-  free (syntax->bcomm.string);
-  free (syntax->ecomm.string);
-  syntax->bcomm.string = xstrdup (bc);
-  syntax->bcomm.length = strlen (syntax->bcomm.string);
-  syntax->ecomm.string = xstrdup (ec);
-  syntax->ecomm.length = strlen (syntax->ecomm.string);
+  free (syntax->comm.str1);
+  free (syntax->comm.str2);
+  syntax->comm.str1 = xstrdup (bc);
+  syntax->comm.len1 = strlen (bc);
+  syntax->comm.str2 = xstrdup (ec);
+  syntax->comm.len2 = strlen (ec);
 
   /* changecom overrides syntax_table, but be careful when it is used
      to select a start-comment sequence that is effectively
      disabled.  */
 
   syntax->is_single_comments
-    = (syntax->bcomm.length == 1 && syntax->ecomm.length == 1
-       && !m4_has_syntax (syntax, *syntax->bcomm.string,
+    = (syntax->comm.len1 == 1 && syntax->comm.len2 == 1
+       && !m4_has_syntax (syntax, *syntax->comm.str1,
 			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM
 			   | M4_SYNTAX_LQUOTE)));
@@ -667,9 +667,9 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
     }
   if (syntax->is_single_comments)
     {
-      add_syntax_attribute (syntax, to_uchar (syntax->bcomm.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->comm.str1[0]),
 			    M4_SYNTAX_BCOMM);
-      add_syntax_attribute (syntax, to_uchar (syntax->ecomm.string[0]),
+      add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
 			    M4_SYNTAX_ECOMM);
     }
   if (syntax->is_macro_escaped)
@@ -728,22 +728,22 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
   else
     local_syntax_age = syntax->syntax_age;
   if (local_syntax_age < 0xffff && syntax->is_single_quotes
-      && !m4_has_syntax (syntax, *syntax->lquote.string,
+      && !m4_has_syntax (syntax, *syntax->quote.str1,
 			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
 			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
 			  | M4_SYNTAX_SPACE))
-      && !m4_has_syntax (syntax, *syntax->rquote.string,
+      && !m4_has_syntax (syntax, *syntax->quote.str2,
 			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
 			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
 			  | M4_SYNTAX_SPACE))
-      && *syntax->lquote.string != *syntax->rquote.string
-      && *syntax->bcomm.string != *syntax->lquote.string
-      && !m4_has_syntax (syntax, *syntax->bcomm.string,
+      && *syntax->quote.str1 != *syntax->quote.str2
+      && *syntax->comm.str1 != *syntax->quote.str2
+      && !m4_has_syntax (syntax, *syntax->comm.str1,
 			 M4_SYNTAX_OPEN | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE))
     {
       syntax->quote_age = ((local_syntax_age << 16)
-			   | ((*syntax->lquote.string & 0xff) << 8)
-			   | (*syntax->rquote.string & 0xff));
+			   | ((*syntax->quote.str1 & 0xff) << 8)
+			   | (*syntax->quote.str2 & 0xff));
     }
   else
     syntax->quote_age = 0;
@@ -757,7 +757,7 @@ const char *
 m4_get_syntax_lquote (m4_syntax_table *syntax)
 {
   assert (syntax);
-  return syntax->lquote.string;
+  return syntax->quote.str1;
 }
 
 #undef m4_get_syntax_rquote
@@ -765,7 +765,15 @@ const char *
 m4_get_syntax_rquote (m4_syntax_table *syntax)
 {
   assert (syntax);
-  return syntax->rquote.string;
+  return syntax->quote.str2;
+}
+
+#undef m4_get_syntax_quotes
+const m4_string_pair *
+m4_get_syntax_quotes (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return &syntax->quote;
 }
 
 #undef m4_is_syntax_single_quotes
@@ -781,7 +789,7 @@ const char *
 m4_get_syntax_bcomm (m4_syntax_table *syntax)
 {
   assert (syntax);
-  return syntax->bcomm.string;
+  return syntax->comm.str1;
 }
 
 #undef m4_get_syntax_ecomm
@@ -789,7 +797,15 @@ const char *
 m4_get_syntax_ecomm (m4_syntax_table *syntax)
 {
   assert (syntax);
-  return syntax->ecomm.string;
+  return syntax->comm.str2;
+}
+
+#undef m4_get_syntax_comments
+const m4_string_pair *
+m4_get_syntax_comments (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return &syntax->comm;
 }
 
 #undef m4_is_syntax_single_comments

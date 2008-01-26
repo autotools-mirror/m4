@@ -595,27 +595,27 @@ void
 m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
 		   bool quoted)
 {
-  m4_shipout_string_trunc (context, obs, s, len, quoted, NULL);
+  m4_shipout_string_trunc (obs, s, len,
+			   quoted ? m4_get_syntax_quotes (M4SYNTAX) : NULL,
+			   NULL);
 }
 
-/* Output the text S, of length LEN, to OBS.  If QUOTED, also output
-   current quote characters around S.  If LEN is SIZE_MAX, use the
-   string length of S instead.  If MAX_LEN, reduce *MAX_LEN by LEN.
-   If LEN is larger than *MAX_LEN, then truncate output and return
-   true; otherwise return false.  CONTEXT may be NULL if QUOTED is
-   false.  */
+/* Output the text S, of length LEN, to OBS.  If QUOTES, also output
+   quote characters around S.  If LEN is SIZE_MAX, use the string
+   length of S instead.  If MAX_LEN, reduce *MAX_LEN by LEN.  If LEN
+   is larger than *MAX_LEN, then truncate output and return true;
+   otherwise return false.  */
 bool
-m4_shipout_string_trunc (m4 *context, m4_obstack *obs, const char *s,
-			 size_t len, bool quoted, size_t *max_len)
+m4_shipout_string_trunc (m4_obstack *obs, const char *s, size_t len,
+			 const m4_string_pair *quotes, size_t *max_len)
 {
   size_t max = max_len ? *max_len : SIZE_MAX;
 
   assert (obs && s);
   if (len == SIZE_MAX)
     len = strlen (s);
-  if (quoted)
-    obstack_grow (obs, context->syntax->lquote.string,
-		  context->syntax->lquote.length);
+  if (quotes)
+    obstack_grow (obs, quotes->str1, quotes->len1);
   if (len < max)
     {
       obstack_grow (obs, s, len);
@@ -627,9 +627,8 @@ m4_shipout_string_trunc (m4 *context, m4_obstack *obs, const char *s,
       obstack_grow (obs, "...", 3);
       max = 0;
     }
-  if (quoted)
-    obstack_grow (obs, context->syntax->rquote.string,
-		  context->syntax->rquote.length);
+  if (quotes)
+    obstack_grow (obs, quotes->str2, quotes->len2);
   if (max_len)
     *max_len = max;
   return max == 0;

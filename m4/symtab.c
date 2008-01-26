@@ -532,13 +532,13 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
   return result;
 }
 
-/* Grow OBS with a text representation of VALUE.  If QUOTE, then
-   surround a text definition by LQUOTE and RQUOTE.  If MAXLEN is less
-   than SIZE_MAX, then truncate text definitions to that length.  If
-   MODULE, then include which module defined a builtin.  */
+/* Grow OBS with a text representation of VALUE.  If QUOTES, then use
+   it to surround a text definition.  If MAXLEN is less than SIZE_MAX,
+   then truncate text definitions to that length.  If MODULE, then
+   include which module defined a builtin.  */
 void
-m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
-		       const char *lquote, const char *rquote, size_t maxlen,
+m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
+		       const m4_string_pair *quotes, size_t maxlen,
 		       bool module)
 {
   const char *text;
@@ -559,37 +559,34 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     case M4_SYMBOL_FUNC:
       {
 	const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+	static const m4_string_pair q1 = { "<", 1, ">", 1 };
 	text = bp->name;
 	len = strlen (text);
-	lquote = "<";
-	rquote = ">";
-	quote = true;
+	quotes = &q1;
       }
       break;
     case M4_SYMBOL_PLACEHOLDER:
       text = m4_get_symbol_value_placeholder (value);
-      /* FIXME - is it worth translating "placeholder for "?  */
+      static const m4_string_pair q2 = { "<<", 2, ">>", 2 };
       len = strlen (text);
-      lquote = "<placeholder for ";
-      rquote = ">";
-      quote = true;
+      quotes = &q2;
       break;
     case M4_SYMBOL_COMP:
       {
 	m4__symbol_chain *chain = value->u.u_c.chain;
-	if (quote)
-	  obstack_grow (obs, lquote, strlen (lquote));
+	if (quotes)
+	  obstack_grow (obs, quotes->str1, quotes->len1);
 	while (chain)
 	  {
 	    /* TODO for now, assume all links are text.  */
 	    assert (chain->type == M4__CHAIN_STR);
-	    if (m4_shipout_string_trunc (NULL, obs, chain->u.u_s.str,
+	    if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
 					 chain->u.u_s.len, NULL, &maxlen))
 	      break;
 	    chain = chain->next;
 	  }
-	if (quote)
-	  obstack_grow (obs, rquote, strlen (rquote));
+	if (quotes)
+	  obstack_grow (obs, quotes->str2, quotes->len2);
 	assert (!module);
 	return;
       }
@@ -598,13 +595,13 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
       abort ();
     }
 
-  if (quote)
-    obstack_grow (obs, lquote, strlen (lquote));
+  if (quotes)
+    obstack_grow (obs, quotes->str1, quotes->len1);
   obstack_grow (obs, text, len);
   if (truncated)
     obstack_grow (obs, "...", 3);
-  if (quote)
-    obstack_grow (obs, rquote, strlen (rquote));
+  if (quotes)
+    obstack_grow (obs, quotes->str2, quotes->len2);
   if (module && VALUE_MODULE (value))
     {
       obstack_1grow (obs, '{');
@@ -614,16 +611,15 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs, bool quote,
     }
 }
 
-/* Grow OBS with a text representation of SYMBOL.  If QUOTE, then
-   surround each text definition by LQUOTE and RQUOTE.  If STACK, then
-   append all pushdef'd values, rather than just the top.  If
-   ARG_LENGTH is less than SIZE_MAX, then truncate text definitions to
-   that length.  If MODULE, then include which module defined a
-   builtin.  */
+/* Grow OBS with a text representation of SYMBOL.  If QUOTES, then use
+   it to surround each text definition.  If STACK, then append all
+   pushdef'd values, rather than just the top.  If ARG_LENGTH is less
+   than SIZE_MAX, then truncate text definitions to that length.  If
+   MODULE, then include which module defined a builtin.  */
 void
-m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
-		 const char *lquote, const char *rquote, bool stack,
-		 size_t arg_length, bool module)
+m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
+		 const m4_string_pair *quotes, bool stack, size_t arg_length,
+		 bool module)
 {
   m4_symbol_value *value;
 
@@ -631,8 +627,7 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  m4_symbol_value_print (value, obs, quote, lquote, rquote, arg_length,
-			 module);
+  m4_symbol_value_print (value, obs, quotes, arg_length, module);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -640,8 +635,7 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs, bool quote,
 	{
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
-	  m4_symbol_value_print (value, obs, quote, lquote, rquote,
-				 arg_length, module);
+	  m4_symbol_value_print (value, obs, quotes, arg_length, module);
 	  value = VALUE_NEXT (value);
 	}
     }

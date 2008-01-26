@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -213,6 +213,7 @@ produce_frozen_state (m4 *context, const char *name)
 {
   FILE *file = fopen (name, O_BINARY ? "wb" : "w");
   const char *str;
+  const m4_string_pair *pair;
 
   if (!file)
     {
@@ -227,28 +228,22 @@ produce_frozen_state (m4 *context, const char *name)
   fputs ("V2\n", file);
 
   /* Dump quote delimiters.  */
-
-  if (strcmp (m4_get_syntax_lquote (M4SYNTAX), DEF_LQUOTE)
-      || strcmp (m4_get_syntax_rquote (M4SYNTAX), DEF_RQUOTE))
+  pair = m4_get_syntax_quotes (M4SYNTAX);
+  if (strcmp (pair->str1, DEF_LQUOTE) || strcmp (pair->str2, DEF_RQUOTE))
     {
-      xfprintf (file, "Q%zu,%zu\n", M4SYNTAX->lquote.length,
-	       M4SYNTAX->rquote.length);
-      produce_mem_dump (file, M4SYNTAX->lquote.string,
-			M4SYNTAX->lquote.length);
-      produce_mem_dump (file, M4SYNTAX->rquote.string,
-			M4SYNTAX->rquote.length);
+      xfprintf (file, "Q%zu,%zu\n", pair->len1, pair->len2);
+      produce_mem_dump (file, pair->str1, pair->len1);
+      produce_mem_dump (file, pair->str2, pair->len2);
       fputc ('\n', file);
     }
 
   /* Dump comment delimiters.  */
-
-  if (strcmp (m4_get_syntax_bcomm (M4SYNTAX), DEF_BCOMM)
-      || strcmp (m4_get_syntax_ecomm (M4SYNTAX), DEF_ECOMM))
+  pair = m4_get_syntax_comments (M4SYNTAX);
+  if (strcmp (pair->str1, DEF_BCOMM) || strcmp (pair->str2, DEF_ECOMM))
     {
-      xfprintf (file, "C%zu,%zu\n", M4SYNTAX->bcomm.length,
-		M4SYNTAX->ecomm.length);
-      produce_mem_dump (file, M4SYNTAX->bcomm.string, M4SYNTAX->bcomm.length);
-      produce_mem_dump (file, M4SYNTAX->ecomm.string, M4SYNTAX->ecomm.length);
+      xfprintf (file, "C%zu,%zu\n", pair->len1, pair->len2);
+      produce_mem_dump (file, pair->str1, pair->len1);
+      produce_mem_dump (file, pair->str2, pair->len2);
       fputc ('\n', file);
     }
 

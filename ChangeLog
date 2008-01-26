@@ -1,21 +1,52 @@
 2008-01-26  Eric Blake  <ebb9@byu.net>
 
-	Stage 12a: make m4_symbol_chain a union.
-	Shrink size of symbol chains by using a union.
-	Memory impact: slight improvement, due to smaller struct.
-	Speed impact: slight improvement, due to less bookkeeping.
-	* m4/m4private.h (enum m4__symbol_chain_type): New enum.
-	(struct m4_symbol_chain): Rename...
-	(struct m4__symbol_chain): ...to this, since it is internal.
-	* m4/symtab.c (m4_symbol_value_copy, m4_symbol_value_print): All
-	callers updated.
-	* m4/input.c (struct m4_input_block, m4__push_symbol)
-	(composite_peek, composite_read, composite_unget)
-	(composite_clean, composite_print, m4__make_text_link)
-	(append_quote_token): Likewise.
-	* m4/macro.c (expand_macro, arg_mark, m4_arg_symbol, m4_arg_text)
-	(m4_arg_equal, m4_arg_len, m4_make_argv_ref, m4_push_arg)
-	(m4_push_args): Likewise.
+	Stage 12b: add m4_string_pair.
+	Make passing quote delimiters around more efficient.
+	Memory impact: none.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* m4/m4module.h (m4_string_pair): New type.
+	(m4_get_syntax_quotes, m4_get_syntax_comments): New prototypes.
+	(m4_symbol_value_print, m4_symbol_print, m4_shipout_string_trunc):
+	Alter signature.
+	* m4/m4private.h (struct m4_string): Delete.
+	(struct m4_syntax_table): Combine quote and comment members.
+	(m4_get_syntax_lquote, m4_get_syntax_rquote, m4_get_syntax_bcomm)
+	(m4_get_syntax_ecomm): Adjust accessors.
+	(m4_get_syntax_quotes, m4_get_syntax_comments): New fast
+	accessors.
+	* m4/symtab.c (m4_symbol_value_print, m4_symbol_print):
+	Alter signatures.
+	* m4/input.c (string_print, composite_print, m4_input_print):
+	All callers updated.
+	* m4/syntax.c (m4_syntax_delete, m4_set_syntax)
+	(check_is_single_quotes, m4_set_quotes, set_quote_age)
+	(m4_get_syntax_lquote, m4_get_syntax_rquote)
+	(m4_get_syntax_quotes, check_is_single_comments, m4_set_comment)
+	(m4_get_syntax_bcomm, m4_get_syntax_ecomm)
+	(m4_get_syntax_comments): Likewise.
+	* m4/macro.c (trace_prepre, trace_pre, m4_push_args): Likewise.
+	* m4/output.c (m4_shipout_string, m4_shipout_string_trunc):
+	Likewise.
+	* modules/m4.c (dumpdef, m4_make_temp): Likewise.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* tests/freeze.at (reloading unknown builtin): Update test.
+
+        Stage 12a: make m4_symbol_chain a union.
+        Shrink size of symbol chains by using a union.
+        Memory impact: slight improvement, due to smaller struct.
+        Speed impact: slight improvement, due to less bookkeeping.
+        * m4/m4private.h (enum m4__symbol_chain_type): New enum.
+        (struct m4_symbol_chain): Rename...
+        (struct m4__symbol_chain): ...to this, since it is internal.
+        * m4/symtab.c (m4_symbol_value_copy, m4_symbol_value_print): All
+        callers updated.
+        * m4/input.c (struct m4_input_block, m4__push_symbol)
+        (composite_peek, composite_read, composite_unget)
+        (composite_clean, composite_print, m4__make_text_link)
+        (append_quote_token): Likewise.
+        * m4/macro.c (expand_macro, arg_mark, m4_arg_symbol, m4_arg_text)
+        (m4_arg_equal, m4_arg_len, m4_make_argv_ref, m4_push_arg)
+        (m4_push_args): Likewise.
 
 2008-01-23  Eric Blake  <ebb9@byu.net>
 

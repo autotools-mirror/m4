@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -360,7 +360,7 @@ a
 [[m4:input.m4:4: Warning: a: builtin `b' requested by frozen file not found
 m4:input.m4:6: Warning: a: builtin `b' requested by frozen file not found
 m4:input.m4:8: Warning: a: builtin `b' requested by frozen file not found
-a:	<placeholder for b>
+a:	<<b>>
 c:	`'
 ]])
 

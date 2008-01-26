@@ -399,21 +399,14 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*,
 #define DEF_BCOMM	"#"	/* Default begin comment delimiter.  */
 #define DEF_ECOMM	"\n"	/* Default end comment delimiter.  */
 
-typedef struct {
-  char *string;		/* characters of the string */
-  size_t length;	/* length of the string */
-} m4_string;
-
 struct m4_syntax_table {
   /* Please read the comment at the top of input.c for details.  table
      holds the current syntax, and orig holds the default syntax.  */
   unsigned short table[CHAR_RETRY];
   unsigned short orig[CHAR_RETRY];
 
-  m4_string lquote;
-  m4_string rquote;
-  m4_string bcomm;
-  m4_string ecomm;
+  m4_string_pair quote;	/* Quote delimiters.  */
+  m4_string_pair comm;	/* Comment delimiters.  */
 
   /* True iff strlen(lquote) == strlen(rquote) == 1 and lquote is not
      interfering with macro names.  */
@@ -442,10 +435,12 @@ struct m4_syntax_table {
 /* Fast macro versions of syntax table accessor functions,
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
-#  define m4_get_syntax_lquote(S)		((S)->lquote.string)
-#  define m4_get_syntax_rquote(S)		((S)->rquote.string)
-#  define m4_get_syntax_bcomm(S)		((S)->bcomm.string)
-#  define m4_get_syntax_ecomm(S)		((S)->ecomm.string)
+#  define m4_get_syntax_lquote(S)		((S)->quote.str1)
+#  define m4_get_syntax_rquote(S)		((S)->quote.str2)
+#  define m4_get_syntax_bcomm(S)		((S)->comm.str1)
+#  define m4_get_syntax_ecomm(S)		((S)->comm.str2)
+#  define m4_get_syntax_quotes(S)		(&(S)->quote)
+#  define m4_get_syntax_comments(S)		(&(S)->comm)
 
 #  define m4_is_syntax_single_quotes(S)		((S)->is_single_quotes)
 #  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)
