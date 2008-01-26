@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2006, 2007, 2008 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -122,12 +123,12 @@ M4BUILTIN_HANDLER (setenv)
     return;
 
   assert (obstack_object_size (obs) == 0);
-  obstack_grow (obs, M4ARG (1), m4_arg_len (argv, 1));
+  obstack_grow (obs, M4ARG (1), M4ARGLEN (1));
   obstack_1grow (obs, '=');
-  obstack_grow0 (obs, M4ARG (2), m4_arg_len (argv, 2));
+  obstack_grow0 (obs, M4ARG (2), M4ARGLEN (2));
 
   {
-    char *env = obstack_finish (obs);
+    char *env = (char *) obstack_finish (obs);
     putenv (env);
   }
 #endif /* HAVE_PUTENV */

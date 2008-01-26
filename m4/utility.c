@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2003,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -114,8 +114,7 @@ m4_dump_args (m4 *context, m4_obstack *obs, unsigned int start,
       else
 	need_sep = true;
 
-      m4_shipout_string (context, obs, M4ARG (i), m4_arg_len (argv, i),
-                         quoted);
+      m4_shipout_string (context, obs, M4ARG (i), M4ARGLEN (i), quoted);
     }
 }
 

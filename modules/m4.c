@@ -560,7 +560,7 @@ M4BUILTIN_HANDLER (divert)
   if (argc >= 2 && !m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
     return;
   m4_make_diversion (context, i);
-  m4_divert_text (context, NULL, M4ARG (2), m4_arg_len (argv, 2),
+  m4_divert_text (context, NULL, M4ARG (2), M4ARGLEN (2),
 		  m4_get_current_line (context));
 }
 
@@ -758,9 +758,9 @@ M4BUILTIN_HANDLER (maketemp)
 	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = M4ARG (1);
-      size_t len = m4_arg_len (argv, 1);
-      int i;
-      int len2;
+      size_t len = M4ARGLEN (1);
+      size_t i;
+      size_t len2;
 
       for (i = len; i > 1; i--)
 	if (str[i - 1] != 'X')
@@ -778,15 +778,13 @@ M4BUILTIN_HANDLER (maketemp)
 	}
     }
   else
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
-		  false);
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), false);
 }
 
 /* Use the first argument as a template for a temporary file name.  */
 M4BUILTIN_HANDLER (mkstemp)
 {
-  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
-		false);
+  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), false);
 }
 
 /* Print all arguments on standard error.  */
@@ -850,7 +848,7 @@ M4BUILTIN_HANDLER (m4wrap)
 {
   assert (obstack_object_size (obs) == 0);
   if (m4_get_posixly_correct_opt (context))
-    m4_shipout_string (context, obs, M4ARG (1), m4_arg_len (argv, 1), false);
+    m4_shipout_string (context, obs, M4ARG (1), M4ARGLEN (1), false);
   else
     m4_dump_args (context, obs, 1, argv, " ", false);
   obstack_1grow (obs, '\0');
@@ -894,7 +892,7 @@ M4BUILTIN_HANDLER (traceoff)
 /* Expand to the length of the first argument.  */
 M4BUILTIN_HANDLER (len)
 {
-  m4_shipout_int (obs, m4_arg_len (argv, 1));
+  m4_shipout_int (obs, M4ARGLEN (1));
 }
 
 /* The macro expands to the first index of the second argument in the first
@@ -908,8 +906,7 @@ M4BUILTIN_HANDLER (index)
 
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
-  result = (char *) memmem (haystack, m4_arg_len (argv, 1),
-			    needle, m4_arg_len (argv, 2));
+  result = (char *) memmem (haystack, M4ARGLEN (1), needle, M4ARGLEN (2));
   if (result)
     retval = result - haystack;
 
@@ -934,7 +931,7 @@ M4BUILTIN_HANDLER (substr)
       return;
     }
 
-  length = avail = m4_arg_len (argv, 1);
+  length = avail = M4ARGLEN (1);
   if (!m4_numeric_arg (context, me, M4ARG (2), &start))
     return;
 

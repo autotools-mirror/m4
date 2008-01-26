@@ -763,8 +763,8 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 		    {
 		      i = SYMBOL_ARG_INDEX (*arg);
 		      assert (i < argc);
-		      m4_shipout_string (context, obs, M4ARG (i),
-					 m4_arg_len (argv, i), false);
+		      m4_shipout_string (context, obs, M4ARG (i), M4ARGLEN (i),
+					 false);
 		    }
 		}
 	      else

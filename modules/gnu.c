@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2004, 2005, 2006, 2007, 2008 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -446,8 +447,7 @@ M4BUILTIN_HANDLER (builtin)
 	    {
 	      m4_macro_args *new_argv;
 	      bool flatten = (bp->flags & M4_BUILTIN_GROKS_MACRO) == 0;
-	      new_argv = m4_make_argv_ref (context, argv, name,
-					   m4_arg_len (argv, 1),
+	      new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
 					   true, flatten);
 	      bp->func (context, obs, argc - 1, new_argv);
 	    }
@@ -682,8 +682,8 @@ M4BUILTIN_HANDLER (indir)
 	{
 	  m4_macro_args *new_argv;
 	  bool flatten = !m4_symbol_groks_macro (symbol);
-	  new_argv = m4_make_argv_ref (context, argv, name,
-				       m4_arg_len (argv, 1), true, flatten);
+	  new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
+				       true, flatten);
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	}
@@ -701,8 +701,7 @@ M4BUILTIN_HANDLER (mkdtemp)
   M4_MODULE_IMPORT (m4, m4_make_temp);
 
   if (m4_make_temp)
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), m4_arg_len (argv, 1),
-		  true);
+    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), true);
   else
     assert (!"Unable to import from m4 module");
 }
@@ -746,11 +745,11 @@ M4BUILTIN_HANDLER (patsubst)
       return;
     }
 
-  buf = regexp_compile (context, me, pattern, m4_arg_len (argv, 2), resyntax);
+  buf = regexp_compile (context, me, pattern, M4ARGLEN (2), resyntax);
   if (!buf)
     return;
 
-  regexp_substitute (context, obs, me, M4ARG (1), m4_arg_len (argv, 1),
+  regexp_substitute (context, obs, me, M4ARG (1), M4ARGLEN (1),
 		     pattern, buf, replace, false);
 }
 
@@ -817,12 +816,12 @@ M4BUILTIN_HANDLER (regexp)
       return;
     }
 
-  buf = regexp_compile (context, me, pattern, m4_arg_len (argv, 2), resyntax);
+  buf = regexp_compile (context, me, pattern, M4ARGLEN (2), resyntax);
   if (!buf)
     return;
 
   victim = M4ARG (1);
-  len = m4_arg_len (argv, 1);
+  len = M4ARGLEN (1);
   startpos = regexp_search (buf, victim, len, 0, len, replace == NULL);
 
   if (startpos == -2)
@@ -873,8 +872,7 @@ M4BUILTIN_HANDLER (renamesyms)
 	    return;
 	}
 
-      buf = regexp_compile (context, me, regexp, m4_arg_len (argv, 1),
-			    resyntax);
+      buf = regexp_compile (context, me, regexp, M4ARGLEN (1), resyntax);
       if (!buf)
 	return;
 

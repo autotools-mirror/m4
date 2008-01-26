@@ -116,6 +116,11 @@ struct m4_string_pair
    in scope.  */
 #define M4ARG(i) m4_arg_text (context, argv, i)
 
+/* Grab the length of the text contents of argument I, or abort if the
+   argument is not text.  Assumes that `m4_macro_args *argv' is in
+   scope.  */
+#define M4ARGLEN(i) m4_arg_len (argv, i)
+
 extern bool	m4_bad_argc	   (m4 *, int, const char *,
 				    unsigned int, unsigned int, bool);
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
