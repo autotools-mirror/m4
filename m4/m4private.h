@@ -475,7 +475,8 @@ typedef enum {
 
 extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
 					    m4__symbol_chain **);
-extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t);
+extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
+					 bool);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					m4_obstack *, const char *);
 extern	bool		m4__next_token_is_open (m4 *);

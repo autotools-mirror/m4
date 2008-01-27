@@ -1,3 +1,20 @@
+2008-01-27  Eric Blake  <ebb9@byu.net>
+
+	Stage 13: push composite text tokens.
+	Support pushing composite tokens, allowing back-references to be
+	reused through multiple macro expansions.  Add hueristic that
+	avoids creating new reference when pushing existing references.
+	Memory impact: noticeable improvement due to better reference
+	reuse, except for boxed recursion doing more copying.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* m4/m4private.h (m4__push_symbol): Adjust prototype.
+	* m4/input.c (m4__push_symbol): Add parameter, and support
+	composite tokens.
+	(append_quote_token): Add parameter, and support inlining of short
+	text.
+	(m4__next_token): Adjust caller.
+	* m4/macro.c (m4_push_arg, m4_push_args): Likewise.
+
 2008-01-26  Eric Blake  <ebb9@byu.net>
 
 	Stage 12c: add macro for m4_arg_len.

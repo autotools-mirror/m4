@@ -1319,23 +1319,9 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
 	return;
     }
   /* TODO handle builtin tokens?  */
-  if (value->type == M4_SYMBOL_TEXT)
-    {
-      if (m4__push_symbol (context, value, context->expansion_level - 1))
-	arg_mark (argv);
-    }
-  else if (value->type == M4_SYMBOL_COMP)
-    {
-      /* TODO - really handle composites; for now, just flatten the
-	 composite and push its text.  */
-      m4__symbol_chain *chain = value->u.u_c.chain;
-      while (chain)
-	{
-	  assert (chain->type == M4__CHAIN_STR);
-	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	  chain = chain->next;
-	}
-    }
+  if (m4__push_symbol (context, value, context->expansion_level - 1,
+		       argv->inuse))
+    arg_mark (argv);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -1347,7 +1333,6 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
   m4_symbol_value *value;
-  m4__symbol_chain *chain;
   unsigned int i = skip ? 2 : 1;
   const char *sep = ",";
   size_t sep_len = 1;
@@ -1389,21 +1374,8 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
       else
 	use_sep = true;
       /* TODO handle builtin tokens?  */
-      if (value->type == M4_SYMBOL_TEXT)
-	inuse |= m4__push_symbol (context, value,
-				  context->expansion_level - 1);
-      else
-	{
-	  /* TODO handle composite text.  */
-	  assert (value->type == M4_SYMBOL_COMP);
-	  chain = value->u.u_c.chain;
-	  while (chain)
-	    {
-	      assert (chain->type == M4__CHAIN_STR);
-	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	      chain = chain->next;
-	    }
-	}
+      inuse |= m4__push_symbol (context, value,
+				context->expansion_level - 1, inuse);
     }
   if (quote)
     obstack_grow (obs, quotes->str2, quotes->len2);

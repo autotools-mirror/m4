@@ -112,7 +112,8 @@ static	bool	composite_clean		(m4_input_block *, m4 *, bool);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
 
 static	void	init_builtin_token	(m4 *, m4_symbol_value *);
-static	void	append_quote_token	(m4_obstack *, m4_symbol_value *);
+static	void	append_quote_token	(m4 *, m4_obstack *,
+					 m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
 static	int	next_char		(m4 *, bool, bool);
 static	int	peek_char		(m4 *);
@@ -526,35 +527,72 @@ m4_push_string_init (m4 *context)
   return current_input;
 }
 
-/* If VALUE contains text, then convert the current string into a
+/* This function allows gathering input from multiple locations,
+   rather than copying everything consecutively onto the input stack.
+   Must be called between push_string_init and push_string_finish.
+
+   If VALUE contains text, then convert the current input block into a
    chain if it is not one already, and add the contents of VALUE as a
    new link in the chain.  LEVEL describes the current expansion
-   level, or SIZE_MAX if the contents of VALUE reside entirely on the
-   current_input stack and VALUE lives in temporary storage.  Allows
-   gathering input from multiple locations, rather than copying
-   everything consecutively onto the input stack.  Must be called
-   between push_string_init and push_string_finish.  Return true only
-   if LEVEL is less than SIZE_MAX and a reference was created to
-   VALUE, in which case, the lifetime of the contents of VALUE must
-   last as long as the input engine can parse references from it.  */
+   level, or SIZE_MAX if VALUE is composite, its contents reside
+   entirely on the current_input stack, and VALUE lives in temporary
+   storage.  If VALUE is a simple string, then it belongs to the
+   current macro expansion.  If VALUE is composit, then each text link
+   has a level of SIZE_MAX if it belongs to the current macro
+   expansion, otherwise it is a back-reference where level tracks
+   which stack it came from.  The resulting input block chain contains
+   links with a level of SIZE_MAX if the text belongs to the input
+   stack, otherwise the level where the back-reference comes from.
+
+   Return true only if a reference was created to the contents of
+   VALUE, in which case, LEVEL is less than SIZE_MAX and the lifetime
+   of VALUE and its contents must last as long as the input engine can
+   parse references from it.  INUSE determines whether composite
+   symbols should favor creating back-references or copying text.  */
 bool
-m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
+m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 {
+  m4__symbol_chain *src_chain = NULL;
   m4__symbol_chain *chain;
-  bool result = false;
 
   assert (next);
-  /* TODO - also accept TOKEN_COMP chains.  */
-  assert (m4_is_symbol_value_text (value));
+  /* TODO - also accept composite chains with $@ refs.  */
 
   /* Speed consideration - for short enough symbols, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
-     time to inline the symbol text.  */
-  if (m4_get_symbol_value_len (value) <= INPUT_INLINE_THRESHOLD)
+     time to inline the symbol text.  But don't copy text if it
+     already lives on the obstack.  */
+  if (m4_is_symbol_value_text (value))
     {
-      obstack_grow (current_input, m4_get_symbol_value_text (value),
-		    m4_get_symbol_value_len (value));
-      return false;
+      assert (level < SIZE_MAX);
+      if (m4_get_symbol_value_len (value) <= INPUT_INLINE_THRESHOLD)
+	{
+	  obstack_grow (current_input, m4_get_symbol_value_text (value),
+			m4_get_symbol_value_len (value));
+	  return false;
+	}
+    }
+  else
+    {
+      /* For composite values, if argv is already in use, creating
+	 additional references for long text segments is more
+	 efficient in time.  But if argv is not yet in use, and we
+	 have a composite value, then the value must already contain a
+	 back-reference, and memory usage is more efficient if we can
+	 avoid using the current expand_macro, even if it means larger
+	 copies.  */
+      assert (value->type == M4_SYMBOL_COMP);
+      src_chain = value->u.u_c.chain;
+      while (level < SIZE_MAX && src_chain && src_chain->type == M4__CHAIN_STR
+	     && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+		 || (!inuse && src_chain->u.u_s.level == SIZE_MAX)))
+	{
+	  obstack_grow (current_input, src_chain->u.u_s.str,
+			src_chain->u.u_s.len);
+	  src_chain = src_chain->next;
+	}
+      if (!src_chain)
+	return false;
     }
 
   if (next->funcs == &string_funcs)
@@ -563,24 +601,72 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level)
       next->u.u_c.chain = next->u.u_c.end = NULL;
     }
   m4__make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
-  chain = (m4__symbol_chain *) obstack_alloc (current_input, sizeof *chain);
-  if (next->u.u_c.end)
-    next->u.u_c.end->next = chain;
-  else
-    next->u.u_c.chain = chain;
-  next->u.u_c.end = chain;
-  chain->next = NULL;
-  chain->type = M4__CHAIN_STR;
-  chain->quote_age = m4_get_symbol_value_quote_age (value);
-  chain->u.u_s.str = m4_get_symbol_value_text (value);
-  chain->u.u_s.len = m4_get_symbol_value_len (value);
-  chain->u.u_s.level = level;
-  if (level < SIZE_MAX)
+  if (m4_is_symbol_value_text (value))
     {
+      chain = (m4__symbol_chain *) obstack_alloc (current_input,
+						  sizeof *chain);
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      chain->next = NULL;
+      chain->type = M4__CHAIN_STR;
+      chain->quote_age = m4_get_symbol_value_quote_age (value);
+      chain->u.u_s.str = m4_get_symbol_value_text (value);
+      chain->u.u_s.len = m4_get_symbol_value_len (value);
+      chain->u.u_s.level = level;
       m4__adjust_refcount (context, level, true);
-      result = true;
+      inuse = true;
     }
-  return result;
+  while (src_chain)
+    {
+      if (level == SIZE_MAX)
+	{
+	  /* Nothing to copy, since link already lives on obstack.  */
+	  assert (src_chain->type != M4__CHAIN_STR
+		  || src_chain->u.u_s.level == SIZE_MAX);
+	  chain = src_chain;
+	}
+      else
+	{
+	  /* Allow inlining the final link with subsequent text.  */
+	  if (!src_chain->next && src_chain->type == M4__CHAIN_STR
+	      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+		  || (!inuse && src_chain->u.u_s.level == SIZE_MAX)))
+	    {
+	      obstack_grow (current_input, src_chain->u.u_s.str,
+			    src_chain->u.u_s.len);
+	      break;
+	    }
+	  /* We must clone each link in the chain, since next_char
+	     destructively modifies the chain it is parsing.  */
+	  chain = (m4__symbol_chain *) obstack_copy (current_input, src_chain,
+						     sizeof *chain);
+	  if (chain->type == M4__CHAIN_STR && chain->u.u_s.level == SIZE_MAX)
+	    {
+	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
+		chain->u.u_s.str = (char *) obstack_copy (current_input,
+							  chain->u.u_s.str,
+							  chain->u.u_s.len);
+	      else
+		{
+		  chain->u.u_s.level = level;
+		  inuse = true;
+		}
+	    }
+	}
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      assert (chain->type == M4__CHAIN_STR);
+      if (chain->u.u_s.level < SIZE_MAX)
+	m4__adjust_refcount (context, chain->u.u_s.level, true);
+      src_chain = src_chain->next;
+    }
+  return inuse;
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to
@@ -925,11 +1011,23 @@ init_builtin_token (m4 *context, m4_symbol_value *token)
    as the quoted token from the top of the input stack.  Use OBS for
    any additional allocations needed to store the token chain.  */
 static void
-append_quote_token (m4_obstack *obs, m4_symbol_value *value)
+append_quote_token (m4 *context, m4_obstack *obs, m4_symbol_value *value)
 {
   m4__symbol_chain *src_chain = isp->u.u_c.chain;
   m4__symbol_chain *chain;
-  assert (isp->funcs == &composite_funcs && obs);
+  assert (isp->funcs == &composite_funcs && obs && m4__quote_age (M4SYNTAX)
+	  && src_chain->type == M4__CHAIN_STR
+	  && src_chain->u.u_s.level <= SIZE_MAX);
+  isp->u.u_c.chain = src_chain->next;
+
+  /* Speed consideration - for short enough symbols, the speed and
+     memory overhead of parsing another INPUT_CHAIN link outweighs the
+     time to inline the symbol text.  */
+  if (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
+    {
+      obstack_grow (obs, src_chain->u.u_s.str, src_chain->u.u_s.len);
+      m4__adjust_refcount (context, src_chain->u.u_s.level, false);
+    }
 
   if (value->type == M4_SYMBOL_VOID)
     {
@@ -944,8 +1042,7 @@ append_quote_token (m4_obstack *obs, m4_symbol_value *value)
   else
     value->u.u_c.chain = chain;
   value->u.u_c.end = chain;
-  value->u.u_c.end->next = NULL;
-  isp->u.u_c.chain = src_chain->next;
+  chain->next = NULL;
 }
 
 
@@ -1293,7 +1390,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
 	    if (ch == CHAR_QUOTE)
-	      append_quote_token (obs, token);
+	      append_quote_token (context, obs, token);
 	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 	      {
 		if (--quote_level == 0)
