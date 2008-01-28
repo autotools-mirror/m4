@@ -64,7 +64,7 @@ and is not part of a release distribution.
 * Before you can build from git, you need to bootstrap.  This requires:
   - A pre-installed version of GNU M4 1.4.5 or later, built from a
   package
-  - Autoconf 2.60 or later
+  - A git checkout of Autoconf (will become Autoconf 2.62)
   - Automake 1.10.1 or later
   - CVS Head of Libtool (will become Libtool 2.0)
   - Gettext 0.16 or later

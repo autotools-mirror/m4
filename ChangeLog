@@ -1,3 +1,13 @@
+2008-01-28  Eric Blake  <ebb9@byu.net>
+
+	Depend on newer autoconf, for testsuite -C dir.
+	* Makefile.am (CD_TESTDIR): Delete, no longer required.
+	(check-local, installcheck-local, clean-local-tests): Use new -C
+	option from autotest.
+	* configure.ac (AC_PREREQ): Bump to 2.61a.347.
+	* bootstrap: Mention new dependency.
+	* HACKING: Likewise.
+
 2008-01-27  Eric Blake  <ebb9@byu.net>
 
 	Stage 13: push composite text tokens.

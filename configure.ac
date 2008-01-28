@@ -17,7 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.60])
+dnl We depend on autotest's ./testsuite -C.
+AC_PREREQ([2.61a.347])
 
 ## ------------------------ ##
 ## Autoconf initialization. ##

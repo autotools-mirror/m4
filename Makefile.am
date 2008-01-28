@@ -403,30 +403,20 @@ tests/atconfig: config.status
 	$(SHELL) ./config.status tests/atconfig
 DISTCLEANFILES += tests/atconfig
 
-# FIXME - After 2.60, autoconf might add an option to testsuite to specify
-# which directory it should output testsuite.log.  Until then, we want it
-# to drop in tests, so we have to do a cd inside the targets that invoke
-# testsuite.  As a result, we need an absolute path since the relative
-# $(srcdir) inside $(TESTSUITE) does not work after cd.
-CD_TESTDIR	= cd ./tests
-
 # Hook the test suite into the check rule
 check-local: tests/atconfig tests/m4 $(TESTSUITE) $(check_LTLIBRARIES)
-	$(CD_TESTDIR); \
-	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
-	  $(TESTSUITEFLAGS)
+	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
+	  $(TESTS_ENVIRONMENT) $(TESTSUITEFLAGS)
 
 # Run the test suite on the *installed* tree.
 installcheck-local: tests/atconfig $(TESTSUITE) $(check_LTLIBRARIES)
-	$(CD_TESTDIR); \
-	$(SHELL) '$(abs_srcdir)/tests/testsuite' $(TESTS_ENVIRONMENT) \
-	  AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
+	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
+	  $(TESTS_ENVIRONMENT) AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
 
 # We need to remove any file droppings left behind by testsuite.
 clean-local-tests:
-	$(CD_TESTDIR); \
-	test ! -f '$(abs_srcdir)/tests/testsuite' || \
-	  $(SHELL) '$(abs_srcdir)/tests/testsuite' --clean
+	test ! -f '$(srcdir)/tests/testsuite' || \
+	  $(SHELL) '$(srcdir)/tests/testsuite' -C tests --clean
 
 OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test \
 		tests/null.m4 tests/null.out tests/null.err
