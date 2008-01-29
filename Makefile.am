@@ -226,7 +226,7 @@ m4_libm4_la_SOURCES	= \
 		  m4/utility.c
 m4_libm4_la_LIBADD = gnu/libgnu.la \
 		  $(LIBLTDL) $(LTLIBINTL) $(LIBADD_DL)
-m4_libm4_la_DEPENDENCIES = $(LIBLTDL) gnu/libgnu.la
+m4_libm4_la_DEPENDENCIES = $(LTDLDEPS) gnu/libgnu.la
 
 # This file needs to be regenerated at configure time.
 dist-hook:

@@ -1,3 +1,8 @@
+2008-01-28  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Fix build failure if installed libltdl is used.
+	* Makefile.am (m4_libm4_la_DEPENDENCIES): Use $(LTDLDEPS).
+
 2008-01-28  Eric Blake  <ebb9@byu.net>
 
 	Depend on newer autoconf, for testsuite -C dir.
