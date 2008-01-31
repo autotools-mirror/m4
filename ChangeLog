@@ -1,3 +1,10 @@
+2008-01-31  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* checks/Makefile.in: Use @SET_MAKE@, and use @SHELL@ rather
+	than hard-coding /bin/sh.
+	* THANKS: Update.
+	Reported by Lawson Chan.
+
 2007-12-13  Paolo Bonzini  <bonzini@gnu.org>  (tiny change)
 
 	* doc/m4.texinfo (Inhibiting Invocation): Fix quoting of a quoting
