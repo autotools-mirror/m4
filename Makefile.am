@@ -23,33 +23,43 @@
 config_aux_dir	= build-aux
 config_macro_dir= ltdl/m4
 
-SUBDIRS		= ltdl po gnu tests/gnu .
+SUBDIRS		= po gnu tests/gnu .
 
 ACLOCAL_AMFLAGS = -I ltdl/m4
 AUTOMAKE_OPTIONS = nostdinc
-AM_CPPFLAGS	= -I. -I$(srcdir) \
-		  -Ignu -I$(srcdir)/gnu \
-		  -Im4 -I$(srcdir)/m4 \
-		  $(LTDLINCL)
+
+# Prime the variables that will be augmented by libtool.
 # FIXME - the -export-symbols-regex ".*" is a hack to work around the
 # fact that on cygwin, the convenience library libltdl exports symbols,
 # which effectively disables the auto-exporting of all other symbols.
 # Revisit this if libtool on cygwin improves.
 # See http://lists.gnu.org/archive/html/libtool-patches/2007-02/msg00062.html
-AM_LDFLAGS	= -no-undefined -export-dynamic -export-symbols-regex ".*"
-
-EXTRA_DIST	= bootstrap \
-		  $(config_aux_dir)/mkstamp \
-		  $(config_macro_dir)/gnulib-cache.m4
+AM_CPPFLAGS	=
+AM_LDFLAGS	= -export-dynamic -export-symbols-regex ".*"
+EXTRA_DIST	=
+BUILT_SOURCES	=
 CLEANFILES	=
 DISTCLEANFILES	=
 MOSTLYCLEANFILES=
+
+include_HEADERS	=
+noinst_LTLIBRARIES=
+lib_LTLIBRARIES	=
+EXTRA_LTLIBRARIES=
+
+# Include Libtool's rules.
+include ltdl/Makefile.inc
+
+# Additional configuration.
+AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
+		  -Im4 -I$(srcdir)/m4
+EXTRA_DIST     += bootstrap \
+		  $(config_aux_dir)/mkstamp \
+		  $(config_macro_dir)/gnulib-cache.m4
 MAINTAINERCLEANFILES = \
 		  ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 		  config-h.in configure stamp-h.in \
 		  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
-
-BUILT_SOURCES	=
 
 MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
 
@@ -202,7 +212,7 @@ EXTRA_DIST     += \
 ## libm4 ##
 ## ----- ##
 
-lib_LTLIBRARIES	= m4/libm4.la
+lib_LTLIBRARIES	+= m4/libm4.la
 
 nobase_include_HEADERS = \
 		  m4/m4module.h
@@ -233,13 +243,6 @@ dist-hook:
 	rm -f $(distdir)/m4/system.h
 EXTRA_DIST     += m4/system_.h
 
-
-## ------- ##
-## libltdl ##
-## ------- ##
-
-ltdl/libltdlc.la:
-	cd ltdl && $(MAKE) $(MAKEFLAGS) libltdlc.la
 
 ## -------------- ##
 ## Documentation. ##

@@ -1,3 +1,24 @@
+2008-01-31  Gary V. Vaughan  <gary@gnu.org>
+	and Eric Blake  <ebb9@byu.net>
+
+	Depend on new libtool to use non-recursive build.
+	* configure.ac (LT_PREREQ): Bump to alpha release version.
+	(LTDL_INIT): Choose nonrecursive mode.  Perform sanity check that
+	installed libtool has correct symbols.
+	* Makefile.am (SUBDIRS): Drop ltdl, now that it is built from the
+	top level.
+	(AM_CPPFLAGS): Drop directories covered by libtool.
+	(AM_LDFLAGS): Drop -no-undefined, covered by libtool.
+	(include_HEADERS, noinst_LTLIBRARIES, EXTRA_LTLIBRARIES): New
+	macros, used by libtool.
+	(lib_LTLIBRARIES): Also used by libtool.
+	(ltdl/libltdlc.la): Delete, now that libtool does this.
+	* bootstrap: Mention new requirements.
+	(LIBTOOLIZE): Provide default program, and run libtoolize prior to
+	autoreconf.
+	(autoreconf): Also neutralize libtoolize, since it is run early.
+	* HACKING: Mention updated prerequisites.
+
 2008-01-28  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	Fix build failure if installed libltdl is used.

@@ -21,6 +21,7 @@ lt*.c
 lt*.h
 Makefile.am
 Makefile.in
+Makefile.inc
 Makefile
 README
 slist.c

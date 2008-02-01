@@ -87,10 +87,24 @@ M4_CHECK_DEBUGGING
 ## ----------------------- ##
 ## Libtool initialization. ##
 ## ----------------------- ##
-LT_PREREQ([2.1a])
+LT_PREREQ([2.1b])
 LT_CONFIG_LTDL_DIR([ltdl])
 LT_INIT([shared dlopen win32-dll])
-LTDL_INIT
+LTDL_INIT([nonrecursive])
+
+# The lt_dlhandle_iterate symbol was added with libtool-2.2
+if test "x$with_included_ltdl" != "xyes"; then
+  save_CFLAGS="$CFLAGS"
+  save_LDFLAGS="$LDFLAGS"
+  CFLAGS="$CFLAGS $LTDLINCL"
+  LDFLAGS="$LDFLAGS $LIBLTDL"
+  AC_CHECK_LIB([ltdl], [lt_dlhandle_iterate],
+	     [],
+     [AC_MSG_ERROR([installed libltdl is too old])])
+  LDFLAGS="$save_LDFLAGS"
+  CFLAGS="$save_CFLAGS"
+fi
+
 
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in

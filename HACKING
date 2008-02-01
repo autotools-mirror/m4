@@ -66,7 +66,7 @@ and is not part of a release distribution.
   package
   - A git checkout of Autoconf (will become Autoconf 2.62)
   - Automake 1.10.1 or later
-  - CVS Head of Libtool (will become Libtool 2.0)
+  - Libtool 2.1b or later
   - Gettext 0.16 or later
   - Help2man 1.29 or later
   - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)
