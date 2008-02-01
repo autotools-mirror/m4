@@ -12,7 +12,7 @@
 	reused through multiple macro expansions.  Add hueristic that
 	avoids creating new reference when pushing existing references.
 	Memory impact: noticeable improvement due to better reference
-	reuse, except for boxed recursion doing more copying.
+	reuse, except for O(n) to O(n^2) copying in boxed recursion.
 	Speed impact: slight penalty, due to more bookkeeping.
 	* src/m4.h (push_token): Adjust prototype.
 	* src/input.c (push_token): Add parameter, and handle composite
@@ -59,7 +59,7 @@
 	action, so that an argument can be reused throughout macro
 	recursion if it remains unchanged.
 	Memory impact: noticeable improvement, due to more reuse in
-	argument collection stacks.
+	argument collection stacks; O(n^2) to O(n) on boxed recursion.
 	Speed impact: noticeable improvement, due to less copying.
 	* src/m4.h (struct token_chain): Add quote_age member.
 	(struct token_data): Add end member to chain alternate.
@@ -135,7 +135,8 @@
 	creating a FIFO link.  Also start testing embedded NUL behavior.
 	Until the argument collection engine also shares references, the
 	memory usage increases.
-	Memory impact: noticeable penalty, due to longer life of argv.
+	Memory impact: noticeable penalty, due to longer life of argv
+	changing O(n) to O(n^2) on boxed recursion.
 	Speed impact: slight improvement, due less data copying.
 	* m4/gnulib-cache.m4: Import quote and memmem modules.
 	* src/m4.h (arg_scratch): New prototype.
