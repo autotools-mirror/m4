@@ -4937,8 +4937,24 @@ Note how it is possible to have both long and short quotes, if
 The syntax table is initialized to be backwards compatible, so if you
 never call @code{changesyntax}, nothing will have changed.
 
-Debugging output continue to use @kbd{(}, @kbd{,} and @kbd{)} to show
-macro calls.
+For now, debugging output continues to use @kbd{(}, @kbd{,} and @kbd{)}
+to show macro calls; and macro expansions that result in a list of
+arguments (such as @samp{$@@} or @code{shift}) use @samp{,}, regardless
+of the current syntax settings.  However, this is likely to change in a
+future release, so it should not be relied on, particularly since it is
+next to impossible to write recursive macros if the argument separator
+doesn't match between expansion and rescanning.
+
+@c FIXME - changing syntax of , should not break iterative macros.
+@example
+$ @kbd{m4 -d}
+changesyntax(`,=|')traceon(`foo')define(`foo'|`$#:$@')
+@result{}
+foo(foo(1|2|3))
+@error{}m4trace: -2- foo(`1', `2', `3') -> `3:`1',`2',`3''
+@error{}m4trace: -1- foo(`3:1,2,3') -> `1:`3:1,2,3''
+@result{}1:3:1,2,3
+@end example
 
 @node M4wrap
 @section Saving text until end of input

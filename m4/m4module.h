@@ -246,8 +246,9 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
-extern void	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *,
-					 const m4_string_pair *, size_t, bool);
+extern bool	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *,
+					 const m4_string_pair *, size_t *,
+					 bool);
 extern void	m4_symbol_print		(m4_symbol *, m4_obstack *,
 					 const m4_string_pair *, bool, size_t,
 					 bool);
@@ -326,6 +327,9 @@ extern bool	m4_arg_empty		(m4_macro_args *, unsigned int);
 extern size_t	m4_arg_len		(m4_macro_args *, unsigned int);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, unsigned int);
 extern m4_obstack *m4_arg_scratch	(m4 *);
+extern bool	m4_arg_print		(m4_obstack *, m4_macro_args *,
+					 unsigned int, const m4_string_pair *,
+					 size_t *, bool);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
 					 size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,

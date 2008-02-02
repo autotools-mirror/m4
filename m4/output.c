@@ -604,7 +604,7 @@ m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
    quote characters around S.  If LEN is SIZE_MAX, use the string
    length of S instead.  If MAX_LEN, reduce *MAX_LEN by LEN.  If LEN
    is larger than *MAX_LEN, then truncate output and return true;
-   otherwise return false.  */
+   otherwise return false.  Quotes do not count against MAX_LEN.  */
 bool
 m4_shipout_string_trunc (m4_obstack *obs, const char *s, size_t len,
 			 const m4_string_pair *quotes, size_t *max_len)

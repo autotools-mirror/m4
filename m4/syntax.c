@@ -709,7 +709,13 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
    bits of quote_age; otherwise we increment syntax_age for each
    changesyntax, but saturate it at 0xffff rather than wrapping
    around.  Perhaps a cache of other frequently used states is
-   warranted, if changesyntax becomes more popular
+   warranted, if changesyntax becomes more popular.
+
+   Perhaps someday we will fix $@ expansion to use the current
+   settings of the comma category, or even allow multi-character
+   argument separators via changesyntax.  Until then, we use a literal
+   `,' in $@ expansion, therefore we must insist that `,' be an
+   argument separator for quote_age to be non-zero.
 
    Rather than check every token for an unquoted delimiter, we merely
    encode current_quote_age to 0 when things are unsafe, and non-zero
@@ -739,7 +745,8 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
       && *syntax->quote.str1 != *syntax->quote.str2
       && *syntax->comm.str1 != *syntax->quote.str2
       && !m4_has_syntax (syntax, *syntax->comm.str1,
-			 M4_SYNTAX_OPEN | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE))
+			 M4_SYNTAX_OPEN | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE)
+      && m4_has_syntax (syntax, ',', M4_SYNTAX_COMMA))
     {
       syntax->quote_age = ((local_syntax_age << 16)
 			   | ((*syntax->quote.str1 & 0xff) << 8)

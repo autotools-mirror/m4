@@ -1,3 +1,27 @@
+2008-02-02  Eric Blake  <ebb9@byu.net>
+
+	Stage 14a: allow printing argv references.
+	Refactor symbol-value printing code for better sharing, and to
+	allow printing a contiguous text representation of a $@ ref.
+	Memory impact: none.
+	Speed impact: none.
+	* m4/m4module.h (m4_arg_print): New prototype.
+	(m4_symbol_value_print): Alter prototype.
+	* m4/input.c (struct input_funcs): Add parameter to peek_func.
+	(file_peek, builtin_peek, string_peek): Ignore new parameter.
+	(composite_peek): Ignore new parameter, for now.
+	(composite_clean, pop_input): Rework to minimize indirection, and
+	to avoid infinite recursion in next patch.
+	* m4/macro.c (trace_prepre, trace_pre): Adjust callers.
+	(m4_arg_print): New function.
+	* m4/symtab.c (m4_symbol_value_print): Update signature.
+	(m4_symbol_print): Update caller.
+	* m4/output.c (m4_shipout_string_trunc): Update comments.
+	* m4/syntax.c (set_quote_age): Require comma as argument separator
+	when dealing with $@ as a unit.
+	* tests/builtins.at (ifelse): Augment test.
+	* doc/m4.texinfo (Changesyntax): Document changesyntax deficiency.
+
 2008-01-31  Eric Blake  <ebb9@byu.net>
 
 	Kill hack for M4 1.4.4.
@@ -47,7 +71,7 @@
 	reused through multiple macro expansions.  Add hueristic that
 	avoids creating new reference when pushing existing references.
 	Memory impact: noticeable improvement due to better reference
-	reuse, except for boxed recursion doing more copying.
+	reuse, except for O(n) to O(n^2) copying in boxed recursion.
 	Speed impact: slight penalty, due to more bookkeeping.
 	* m4/m4private.h (m4__push_symbol): Adjust prototype.
 	* m4/input.c (m4__push_symbol): Add parameter, and support
@@ -154,7 +178,7 @@
 	action, so that an argument can be reused throughout macro
 	recursion if it remains unchanged.
 	Memory impact: noticeable improvement, due to more reuse in
-	argument collection stacks.
+	argument collection stacks; O(n^2) to O(n) on boxed recursion.
 	Speed impact: noticeable improvement, due to less copying.
 	* m4/m4module.h (m4_arg_text): Add parameter.
 	(M4ARG): Adjust.
@@ -233,7 +257,8 @@
 	creating a FIFO link.  Also start testing embedded NUL behavior.
 	Until the argument collection engine also shares references, the
 	memory usage increases.
-	Memory impact: noticeable penalty, due to longer life of argv.
+	Memory impact: noticeable penalty, due to longer life of argv
+	changing O(n) to O(n^2) on boxed recursion.
 	Speed impact: slight improvement, due less data copying.
 	* ltdl/m4/gnulib-cache.m4: Import memmem and quote modules.
 	* m4/m4module.h (m4_arg_scratch): New prototype.

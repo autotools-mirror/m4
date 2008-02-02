@@ -896,7 +896,7 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
     quotes = m4_get_syntax_quotes (M4SYNTAX);
   trace_header (context, id);
   trace_format (context, "%s ... = ", name);
-  m4_symbol_value_print (value, &context->trace_messages, quotes, arg_length,
+  m4_symbol_value_print (value, &context->trace_messages, quotes, &arg_length,
 			 module);
   trace_flush (context);
 }
@@ -923,11 +923,12 @@ trace_pre (m4 *context, size_t id, m4_macro_args *argv)
       trace_format (context, "(");
       for (i = 1; i < argc; i++)
 	{
+	  size_t len = arg_length;
 	  if (i != 1)
 	    trace_format (context, ", ");
 
 	  m4_symbol_value_print (m4_arg_symbol (argv, i),
-				 &context->trace_messages, quotes, arg_length,
+				 &context->trace_messages, quotes, &len,
 				 module);
 	}
       trace_format (context, ")");
@@ -1233,6 +1234,41 @@ m4_builtin_func *
 m4_arg_func (m4_macro_args *argv, unsigned int index)
 {
   return m4_get_symbol_value_func (m4_arg_symbol (argv, index));
+}
+
+/* Dump a representation of ARGV to the obstack OBS, starting with
+   argument INDEX.  If QUOTES is non-NULL, each argument is displayed
+   with those quotes.  If MAX_LEN is non-NULL, truncate the output
+   after *MAX_LEN bytes are output and return true; otherwise, return
+   false, and reduce *MAX_LEN by the number of bytes output.  If
+   MODULE, print any details about originating modules.  QUOTES count
+   against the truncation length, but not module names.  */
+bool
+m4_arg_print (m4_obstack *obs, m4_macro_args *argv, unsigned int index,
+	      const m4_string_pair *quotes, size_t *max_len, bool module)
+{
+  size_t len = max_len ? *max_len : SIZE_MAX;
+  unsigned int i;
+  bool comma = false;
+
+  for (i = index; i < argv->argc; i++)
+    {
+      if (comma && m4_shipout_string_trunc (obs, ",", 1, NULL, &len))
+	return true;
+      comma = true;
+      if (quotes && m4_shipout_string_trunc (obs, quotes->str1, quotes->len1,
+					     NULL, &len))
+	return true;
+      if (m4_symbol_value_print (m4_arg_symbol (argv, i), obs, NULL, &len,
+				 module))
+	return true;
+      if (quotes && m4_shipout_string_trunc (obs, quotes->str2, quotes->len2,
+					     NULL, &len))
+	return true;
+    }
+  if (max_len)
+    *max_len = len;
+  return false;
 }
 
 /* Create a new argument object using the same obstack as ARGV; thus,

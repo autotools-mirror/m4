@@ -533,75 +533,77 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 }
 
 /* Grow OBS with a text representation of VALUE.  If QUOTES, then use
-   it to surround a text definition.  If MAXLEN is less than SIZE_MAX,
-   then truncate text definitions to that length.  If MODULE, then
-   include which module defined a builtin.  */
-void
+   it to surround a text definition.  If MAXLEN, then truncate text
+   definitions to *MAXLEN, and adjust by how many characters are
+   printed.  If MODULE, then include which module defined a builtin.
+   Return true if the output was truncated.  QUOTES and MODULE do not
+   count against the truncation length.  */
+bool
 m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
-		       const m4_string_pair *quotes, size_t maxlen,
+		       const m4_string_pair *quotes, size_t *maxlen,
 		       bool module)
 {
   const char *text;
-  size_t len;
-  bool truncated = false;
+  const m4_builtin *bp;
+  m4__symbol_chain *chain;
+  size_t len = maxlen ? *maxlen : SIZE_MAX;
+  bool result = false;
 
   switch (value->type)
     {
     case M4_SYMBOL_TEXT:
-      text = m4_get_symbol_value_text (value);
-      len = m4_get_symbol_value_len (value);
-      if (maxlen < len)
-	{
-	  len = maxlen;
-	  truncated = true;
-	}
+      if (m4_shipout_string_trunc (obs, m4_get_symbol_value_text (value),
+				   m4_get_symbol_value_len (value), quotes,
+				   &len))
+	result = true;
       break;
     case M4_SYMBOL_FUNC:
-      {
-	const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-	static const m4_string_pair q1 = { "<", 1, ">", 1 };
-	text = bp->name;
-	len = strlen (text);
-	quotes = &q1;
-      }
+      bp = m4_get_symbol_value_builtin (value);
+      obstack_1grow (obs, '<');
+      obstack_grow (obs, bp->name, strlen (bp->name));
+      obstack_1grow (obs, '>');
       break;
     case M4_SYMBOL_PLACEHOLDER:
       text = m4_get_symbol_value_placeholder (value);
-      static const m4_string_pair q2 = { "<<", 2, ">>", 2 };
-      len = strlen (text);
-      quotes = &q2;
+      obstack_1grow (obs, '<');
+      obstack_1grow (obs, '<');
+      obstack_grow (obs, text, strlen (text));
+      obstack_1grow (obs, '>');
+      obstack_1grow (obs, '>');
       break;
     case M4_SYMBOL_COMP:
-      {
-	m4__symbol_chain *chain = value->u.u_c.chain;
-	if (quotes)
-	  obstack_grow (obs, quotes->str1, quotes->len1);
-	while (chain)
-	  {
-	    /* TODO for now, assume all links are text.  */
-	    assert (chain->type == M4__CHAIN_STR);
-	    if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
-					 chain->u.u_s.len, NULL, &maxlen))
+      chain = value->u.u_c.chain;
+      if (quotes)
+	obstack_grow (obs, quotes->str1, quotes->len1);
+      while (chain && !result)
+	{
+	  switch (chain->type)
+	    {
+	    case M4__CHAIN_STR:
+	      if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
+					   chain->u.u_s.len, NULL, &len))
+		result = true;
 	      break;
+	    case M4__CHAIN_ARGV:
+	      if (m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+				NULL, &len, module))
+		result = true;
+	      break;
+	    default:
+	      assert (!"m4_symbol_value_print");
+	      abort ();
+	    }
 	    chain = chain->next;
 	  }
-	if (quotes)
-	  obstack_grow (obs, quotes->str2, quotes->len2);
-	assert (!module);
-	return;
-      }
+      if (quotes)
+	obstack_grow (obs, quotes->str2, quotes->len2);
+      assert (!module);
+      break;
     default:
-      assert (!"invalid token in symbol_value_print");
+      assert (!"m4_symbol_value_print");
       abort ();
     }
 
-  if (quotes)
-    obstack_grow (obs, quotes->str1, quotes->len1);
-  obstack_grow (obs, text, len);
-  if (truncated)
-    obstack_grow (obs, "...", 3);
-  if (quotes)
-    obstack_grow (obs, quotes->str2, quotes->len2);
   if (module && VALUE_MODULE (value))
     {
       obstack_1grow (obs, '{');
@@ -609,25 +611,30 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
       obstack_grow (obs, text, strlen (text));
       obstack_1grow (obs, '}');
     }
+  if (maxlen)
+    *maxlen = len;
+  return result;
 }
 
 /* Grow OBS with a text representation of SYMBOL.  If QUOTES, then use
    it to surround each text definition.  If STACK, then append all
    pushdef'd values, rather than just the top.  If ARG_LENGTH is less
    than SIZE_MAX, then truncate text definitions to that length.  If
-   MODULE, then include which module defined a builtin.  */
+   MODULE, then include which module defined a builtin.  QUOTES and
+   MODULE do not count toward truncation.  */
 void
 m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
 		 const m4_string_pair *quotes, bool stack, size_t arg_length,
 		 bool module)
 {
   m4_symbol_value *value;
+  size_t len = arg_length;
 
   assert (symbol);
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  m4_symbol_value_print (value, obs, quotes, arg_length, module);
+  m4_symbol_value_print (value, obs, quotes, &len, module);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -635,7 +642,8 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
 	{
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
-	  m4_symbol_value_print (value, obs, quotes, arg_length, module);
+	  len = arg_length;
+	  m4_symbol_value_print (value, obs, quotes, &len, module);
 	  value = VALUE_NEXT (value);
 	}
     }

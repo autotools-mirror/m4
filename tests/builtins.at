@@ -433,14 +433,17 @@ AT_CLEANUP
 AT_TEST_M4([ifelse],
 dnl ensure that comparisons work regardless of reference chains in the middle
 [[define(`e', `$@')define(`long', `01234567890123456789')
+dnl in isolation
 ifelse(long, `01234567890123456789', `yes', `no')
 ifelse(`01234567890123456789', long, `yes', `no')
 ifelse(long, `01234567890123456789-', `yes', `no')
 ifelse(`01234567890123456789-', long, `yes', `no')
+dnl through macro expansion
 ifelse(e(long), `01234567890123456789', `yes', `no')
 ifelse(`01234567890123456789', e(long), `yes', `no')
 ifelse(e(long), `01234567890123456789-', `yes', `no')
 ifelse(`01234567890123456789-', e(long), `yes', `no')
+dnl concatenate macro expansion with unquoted characters
 ifelse(-e(long), `-01234567890123456789', `yes', `no')
 ifelse(-`01234567890123456789', -e(long), `yes', `no')
 ifelse(-e(long), `-01234567890123456789-', `yes', `no')
@@ -449,7 +452,24 @@ ifelse(-e(long)-, `-01234567890123456789-', `yes', `no')
 ifelse(-`01234567890123456789-', -e(long)-, `yes', `no')
 ifelse(-e(long)-, `-01234567890123456789', `yes', `no')
 ifelse(`-01234567890123456789', -e(long)-, `yes', `no')
+dnl concatenate macro expansion with quoted characters
+ifelse(`-'e(long), `-01234567890123456789', `yes', `no')
+ifelse(-`01234567890123456789', `-'e(long), `yes', `no')
+ifelse(`-'e(long), `-01234567890123456789-', `yes', `no')
+ifelse(`-01234567890123456789-', `-'e(long), `yes', `no')
+ifelse(`-'e(long)`-', `-01234567890123456789-', `yes', `no')
+ifelse(-`01234567890123456789-', `-'e(long)`-', `yes', `no')
+ifelse(`-'e(long)`-', `-01234567890123456789', `yes', `no')
+ifelse(`-01234567890123456789', `-'e(long)`-', `yes', `no')
 ]], [[
+yes
+yes
+no
+no
+yes
+yes
+no
+no
 yes
 yes
 no

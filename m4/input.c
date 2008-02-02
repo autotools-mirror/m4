@@ -92,20 +92,20 @@
    maintains its own notion of the current file and line, so swapping
    between input blocks must update the context accordingly.  */
 
-static	int	file_peek		(m4_input_block *);
+static	int	file_peek		(m4_input_block *, m4 *);
 static	int	file_read		(m4_input_block *, m4 *, bool, bool);
 static	void	file_unget		(m4_input_block *, int);
 static	bool	file_clean		(m4_input_block *, m4 *, bool);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
-static	int	builtin_peek		(m4_input_block *);
+static	int	builtin_peek		(m4_input_block *, m4 *);
 static	int	builtin_read		(m4_input_block *, m4 *, bool, bool);
 static	void	builtin_unget		(m4_input_block *, int);
 static	void	builtin_print		(m4_input_block *, m4 *, m4_obstack *);
-static	int	string_peek		(m4_input_block *);
+static	int	string_peek		(m4_input_block *, m4 *);
 static	int	string_read		(m4_input_block *, m4 *, bool, bool);
 static	void	string_unget		(m4_input_block *, int);
 static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
-static	int	composite_peek		(m4_input_block *);
+static	int	composite_peek		(m4_input_block *, m4 *);
 static	int	composite_read		(m4_input_block *, m4 *, bool, bool);
 static	void	composite_unget		(m4_input_block *, int);
 static	bool	composite_clean		(m4_input_block *, m4 *, bool);
@@ -130,7 +130,7 @@ struct input_funcs
 {
   /* Peek at input, return an unsigned char, CHAR_BUILTIN if it is a
      builtin, or CHAR_RETRY if none available.  */
-  int	(*peek_func)	(m4_input_block *);
+  int	(*peek_func)	(m4_input_block *, m4 *);
 
   /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
      builtin, or CHAR_RETRY if none available.  If ALLOW_QUOTE, then
@@ -254,7 +254,7 @@ static struct input_funcs composite_funcs = {
 
 /* Input files, from command line or [s]include.  */
 static int
-file_peek (m4_input_block *me)
+file_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED)
 {
   int ch;
 
@@ -389,7 +389,7 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
 
 /* Handle a builtin macro token.  */
 static int
-builtin_peek (m4_input_block *me)
+builtin_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED)
 {
   if (me->u.u_b.read)
     return CHAR_RETRY;
@@ -474,7 +474,7 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
 
 /* Handle string expansion text.  */
 static int
-string_peek (m4_input_block *me)
+string_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED)
 {
   return me->u.u_s.len ? to_uchar (*me->u.u_s.str) : CHAR_RETRY;
 }
@@ -537,8 +537,8 @@ m4_push_string_init (m4 *context)
    level, or SIZE_MAX if VALUE is composite, its contents reside
    entirely on the current_input stack, and VALUE lives in temporary
    storage.  If VALUE is a simple string, then it belongs to the
-   current macro expansion.  If VALUE is composit, then each text link
-   has a level of SIZE_MAX if it belongs to the current macro
+   current macro expansion.  If VALUE is composite, then each text
+   link has a level of SIZE_MAX if it belongs to the current macro
    expansion, otherwise it is a back-reference where level tracks
    which stack it came from.  The resulting input block chain contains
    links with a level of SIZE_MAX if the text belongs to the input
@@ -715,7 +715,7 @@ m4_push_string_finish (void)
    in FIFO order, even though the obstack allocates memory in LIFO
    order.  */
 static int
-composite_peek (m4_input_block *me)
+composite_peek (m4_input_block *me, m4 *context)
 {
   m4__symbol_chain *chain = me->u.u_c.chain;
   while (chain)
@@ -798,7 +798,11 @@ composite_clean (m4_input_block *me, m4 *context, bool cleanup)
       switch (chain->type)
 	{
 	case M4__CHAIN_STR:
-	  assert (!chain->u.u_s.len);
+	  if (chain->u.u_s.len)
+	    {
+	      assert (!cleanup);
+	      return false;
+	    }
 	  if (chain->u.u_s.level < SIZE_MAX)
 	    m4__adjust_refcount (context, chain->u.u_s.level, false);
 	  break;
@@ -935,9 +939,9 @@ pop_input (m4 *context, bool cleanup)
   m4_input_block *tmp = isp->prev;
 
   assert (isp);
-  if (isp->funcs->peek_func (isp) != CHAR_RETRY
-      || (isp->funcs->clean_func
-	  && !isp->funcs->clean_func (isp, context, cleanup)))
+  if (isp->funcs->clean_func
+      ? !isp->funcs->clean_func (isp, context, cleanup)
+      : (isp->funcs->peek_func (isp, context) != CHAR_RETRY))
     return false;
 
   if (tmp != NULL)
@@ -1101,7 +1105,7 @@ peek_char (m4 *context)
 	return CHAR_EOF;
 
       assert (block->funcs->peek_func);
-      if ((ch = block->funcs->peek_func (block)) != CHAR_RETRY)
+      if ((ch = block->funcs->peek_func (block, context)) != CHAR_RETRY)
 	{
 /*	  if (IS_IGNORE (ch)) */
 /*	    return next_char (context, false, true); */
