@@ -556,7 +556,6 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
   m4__symbol_chain *chain;
 
   assert (next);
-  /* TODO - also accept composite chains with $@ refs.  */
 
   /* Speed consideration - for short enough symbols, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
@@ -661,8 +660,12 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
       else
 	next->u.u_c.chain = chain;
       next->u.u_c.end = chain;
-      assert (chain->type == M4__CHAIN_STR);
-      if (chain->u.u_s.level < SIZE_MAX)
+      if (chain->type == M4__CHAIN_ARGV)
+	{
+	  assert (!chain->u.u_a.comma);
+	  inuse |= m4__arg_adjust_refcount (context, chain->u.u_a.argv, true);
+	}
+      else if (chain->type == M4__CHAIN_STR && chain->u.u_s.level < SIZE_MAX)
 	m4__adjust_refcount (context, chain->u.u_s.level, true);
       src_chain = src_chain->next;
     }
@@ -727,7 +730,22 @@ composite_peek (m4_input_block *me, m4 *context)
 	    return to_uchar (chain->u.u_s.str[0]);
 	  break;
 	case M4__CHAIN_ARGV:
-	  /* TODO - peek into argv.  */
+	  /* TODO - figure out how to pass multiple arguments to
+	     macro.c at once.  */
+	  if (chain->u.u_a.index == m4_arg_argc (chain->u.u_a.argv))
+	    break;
+	  if (chain->u.u_a.comma)
+	    return ','; /* FIXME - support M4_SYNTAX_COMMA.  */
+	  /* Rather than directly parse argv here, we push another
+	     input block containing the next unparsed argument from
+	     argv.  */
+	  m4_push_string_init (context);
+	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
+			      chain->u.u_a.index, chain->u.u_a.quotes);
+	  chain->u.u_a.index++;
+	  chain->u.u_a.comma = true;
+	  m4_push_string_finish ();
+	  return peek_char (context);
 	default:
 	  assert (!"composite_peek");
 	  abort ();
@@ -743,7 +761,9 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
   m4__symbol_chain *chain = me->u.u_c.chain;
   while (chain)
     {
-      if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX))
+      /* TODO also support returning $@ as CHAR_QUOTE.  */
+      if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX)
+	  && chain->type == M4__CHAIN_STR)
 	return CHAR_QUOTE;
       switch (chain->type)
 	{
@@ -759,7 +779,28 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	    m4__adjust_refcount (context, chain->u.u_s.level, false);
 	  break;
 	case M4__CHAIN_ARGV:
-	  /* TODO - peek into argv.  */
+	  /* TODO - figure out how to pass multiple arguments to
+	     macro.c at once.  */
+	  if (chain->u.u_a.index == m4_arg_argc (chain->u.u_a.argv))
+	    {
+	      m4__arg_adjust_refcount (context, chain->u.u_a.argv, false);
+	      break;
+	    }
+	  if (chain->u.u_a.comma)
+	    {
+	      chain->u.u_a.comma = false;
+	      return ','; /* FIXME - support M4_SYNTAX_COMMA.  */
+	    }
+	  /* Rather than directly parse argv here, we push another
+	     input block containing the next unparsed argument from
+	     argv.  */
+	  m4_push_string_init (context);
+	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
+			      chain->u.u_a.index, chain->u.u_a.quotes);
+	  chain->u.u_a.index++;
+	  chain->u.u_a.comma = true;
+	  m4_push_string_finish ();
+	  return next_char (context, allow_quote, !safe);
 	default:
 	  assert (!"composite_read");
 	  abort ();
@@ -781,7 +822,10 @@ composite_unget (m4_input_block *me, int ch)
       chain->u.u_s.len++;
       break;
     case M4__CHAIN_ARGV:
-      /* TODO support argv ref.  */
+      /* FIXME - support M4_SYNTAX_COMMA.  */
+      assert (ch == ',' && !chain->u.u_a.comma);
+      chain->u.u_a.comma = true;
+      break;
     default:
       assert (!"composite_unget");
       abort ();
@@ -807,7 +851,13 @@ composite_clean (m4_input_block *me, m4 *context, bool cleanup)
 	    m4__adjust_refcount (context, chain->u.u_s.level, false);
 	  break;
 	case M4__CHAIN_ARGV:
-	  /* TODO - peek into argv.  */
+	  if (chain->u.u_a.index < m4_arg_argc (chain->u.u_a.argv))
+	    {
+	      assert (!cleanup);
+	      return false;
+	    }
+	  m4__arg_adjust_refcount (context, chain->u.u_a.argv, false);
+	  break;
 	default:
 	  assert (!"composite_clean");
 	  abort ();
@@ -824,6 +874,7 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
   size_t maxlen = m4_get_max_debug_arg_length_opt (context);
   m4__symbol_chain *chain = me->u.u_c.chain;
   const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
+  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
   bool done = false;
 
   if (quote)
@@ -838,7 +889,11 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 	    done = true;
 	  break;
 	case M4__CHAIN_ARGV:
-	  /* TODO support argv refs as well.  */
+	  assert (!chain->u.u_a.comma);
+	  if (m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+			    chain->u.u_a.quotes, &maxlen, module))
+	    done = true;
+	  break;
 	default:
 	  assert (!"composite_print");
 	  abort ();

@@ -522,31 +522,13 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   if (BIT_TEST (VALUE_FLAGS (value), VALUE_DELETED_BIT))
     m4_symbol_value_delete (value);
 
-  /* If argv contains references, those refcounts must be reduced now.  */
-  if (argv->has_ref)
-    {
-      m4__symbol_chain *chain;
-      size_t i;
-      for (i = 0; i < argv->arraylen; i++)
-	if (argv->array[i]->type == M4_SYMBOL_COMP)
-	  {
-	    chain = argv->array[i]->u.u_c.chain;
-	    while (chain)
-	      {
-		assert (chain->type == M4__CHAIN_STR);
-		if (chain->u.u_s.level < SIZE_MAX)
-		  m4__adjust_refcount (context, chain->u.u_s.level, false);
-		chain = chain->next;
-	      }
-	  }
-    }
-
   /* We no longer need argv, so reduce the refcount.  Additionally, if
      no other references to argv were created, we can free our portion
      of the obstack, although we must leave earlier content alone.  A
      refcount of 0 implies that adjust_refcount already freed the
      entire stack.  */
-  if (m4__adjust_refcount (context, level, false))
+  m4__arg_adjust_refcount (context, argv, false);
+  if (stack->refcount)
     {
       if (argv->inuse)
 	{
@@ -593,6 +575,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
   args.argv0 = (char *) obstack_copy0 (arguments, name, len);
   args.argv0_len = len;
   args.quote_age = m4__quote_age (M4SYNTAX);
+  args.level = context->expansion_level - 1;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (m4_macro_args, array));
   name = args.argv0;
@@ -981,6 +964,33 @@ m4__adjust_refcount (m4 *context, size_t level, bool increase)
   return stack->refcount;
 }
 
+/* Given ARGV, adjust the refcount of every reference it contains in
+   the direction decided by INCREASE.  Return true if increasing
+   references to ARGV implies the first use of ARGV.  */
+bool
+m4__arg_adjust_refcount (m4 *context, m4_macro_args *argv, bool increase)
+{
+  size_t i;
+  m4__symbol_chain *chain;
+  bool result = !argv->inuse;
+
+  if (argv->has_ref)
+    for (i = 0; i < argv->arraylen; i++)
+      if (argv->array[i]->type == M4_SYMBOL_COMP)
+	{
+	  chain = argv->array[i]->u.u_c.chain;
+	  while (chain)
+	    {
+	      assert (chain->type == M4__CHAIN_STR);
+	      if (chain->u.u_s.level < SIZE_MAX)
+		m4__adjust_refcount (context, chain->u.u_s.level, increase);
+	      chain = chain->next;
+	    }
+	}
+  m4__adjust_refcount (context, argv->level, increase);
+  return result;
+}
+
 /* Mark ARGV as being in use, along with any $@ references that it
    wraps.  */
 static void
@@ -998,20 +1008,74 @@ arg_mark (m4_macro_args *argv)
     }
 }
 
+/* Populate the newly-allocated VALUE as a wrapper around ARGV,
+   starting with argument INDEX.  Allocate any data on OBS, owned by a
+   given expansion LEVEL.  FLATTEN determines whether to allow
+   builtins, and QUOTES determines whether all arguments are quoted.
+   Return TOKEN when successful, NULL when wrapping ARGV is trivially
+   empty.  */
+static m4_symbol_value *
+make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
+	       m4_macro_args *argv, unsigned int index, bool flatten,
+	       const m4_string_pair *quotes)
+{
+  m4__symbol_chain *chain;
+
+  assert (obstack_object_size (obs) == 0);
+  if (argv->wrapper)
+    {
+      /* TODO support concatenation with $@ refs.  */
+      assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
+      chain= argv->array[0]->u.u_c.chain;
+      assert (!chain->next && chain->type == M4__CHAIN_ARGV);
+      argv = chain->u.u_a.argv;
+      index += chain->u.u_a.index - 1;
+    }
+  if (argv->argc <= index)
+    return NULL;
+
+  chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
+  value->type = M4_SYMBOL_COMP;
+  value->u.u_c.chain = value->u.u_c.end = chain;
+  chain->next = NULL;
+  chain->type = M4__CHAIN_ARGV;
+  chain->quote_age = argv->quote_age;
+  chain->u.u_a.argv = argv;
+  chain->u.u_a.index = index;
+  chain->u.u_a.flatten = flatten;
+  chain->u.u_a.comma = false;
+  if (quotes)
+    {
+      /* Clone the quotes into the obstack, since changequote can
+	 occur before this $@ is rescanned.  */
+      /* TODO - optimize when quote_age is nonzero?  */
+      m4_string_pair *tmp = (m4_string_pair *) obstack_copy (obs, quotes,
+							     sizeof *quotes);
+      tmp->str1 = (char *) obstack_copy0 (obs, quotes->str1, quotes->len1);
+      tmp->str2 = (char *) obstack_copy0 (obs, quotes->str2, quotes->len2);
+      chain->u.u_a.quotes = tmp;
+    }
+  else
+    chain->u.u_a.quotes = NULL;
+  return value;
+}
+
 /* Given ARGV, return the symbol value at the specified INDEX, which
-   must be non-zero.  */
-m4_symbol_value *
-m4_arg_symbol (m4_macro_args *argv, unsigned int index)
+   must be non-zero.  *LEVEL is set to the obstack level that contains
+   the symbol (which is not necessarily the level of ARGV).  */
+static m4_symbol_value *
+arg_symbol (m4_macro_args *argv, unsigned int index, size_t *level)
 {
   unsigned int i;
   m4_symbol_value *value;
 
   assert (index);
+  *level = argv->level;
   if (argv->argc <= index)
     return &empty_symbol;
-
   if (!argv->wrapper)
     return argv->array[index - 1];
+
   /* Must cycle through all array slots until we find index, since
      wrappers can contain multiple arguments.  */
   for (i = 0; i < argv->arraylen; i++)
@@ -1024,8 +1088,8 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
 	  assert (!chain->next && chain->type == M4__CHAIN_ARGV);
 	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
 	    {
-	      value = m4_arg_symbol (chain->u.u_a.argv,
-				     chain->u.u_a.index - 1 + index);
+	      value = arg_symbol (chain->u.u_a.argv,
+				  chain->u.u_a.index - 1 + index, level);
 	      if (chain->u.u_a.flatten && m4_is_symbol_value_func (value))
 		value = &empty_symbol;
 	      break;
@@ -1036,6 +1100,15 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
 	break;
     }
   return value;
+}
+
+/* Given ARGV, return the symbol value at the specified INDEX, which
+   must be non-zero.  */
+m4_symbol_value *
+m4_arg_symbol (m4_macro_args *argv, unsigned int index)
+{
+  size_t dummy;
+  return arg_symbol (argv, index, &dummy);
 }
 
 /* Given ARGV, return true if argument INDEX is text.  Index 0 is
@@ -1284,23 +1357,16 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
 {
   m4_macro_args *new_argv;
   m4_symbol_value *value;
-  m4__symbol_chain *chain;
+  m4_symbol_value *new_value;
   unsigned int index = skip ? 2 : 1;
   m4_obstack *obs = m4_arg_scratch (context);
 
-  /* When making a reference through a reference, point to the
-     original if possible.  */
-  if (argv->wrapper)
+  new_value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
+  value = make_argv_ref (new_value, obs, context->expansion_level - 1, argv,
+			 index, flatten, NULL);
+  if (!value)
     {
-      /* TODO for now we support only a single-length $@ chain.  */
-      assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
-      chain = argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == M4__CHAIN_ARGV);
-      argv = chain->u.u_a.argv;
-      index += chain->u.u_a.index - 1;
-    }
-  if (argv->argc <= index)
-    {
+      obstack_free (obs, new_value);
       new_argv = (m4_macro_args *) obstack_alloc (obs, offsetof (m4_macro_args,
 								 array));
       new_argv->arraylen = 0;
@@ -1311,26 +1377,17 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       new_argv = (m4_macro_args *) obstack_alloc (obs, (offsetof (m4_macro_args,
 								  array)
 							+ sizeof value));
-      value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
-      chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
       new_argv->arraylen = 1;
       new_argv->array[0] = value;
       new_argv->wrapper = true;
-      new_argv->has_ref = true;
-      value->type = M4_SYMBOL_COMP;
-      value->u.u_c.chain = value->u.u_c.end = chain;
-      chain->next = NULL;
-      chain->type = M4__CHAIN_ARGV;
-      chain->quote_age = argv->quote_age;
-      chain->u.u_a.argv = argv;
-      chain->u.u_a.index = index;
-      chain->u.u_a.flatten = flatten;
+      new_argv->has_ref = argv->has_ref;
     }
   new_argv->argc = argv->argc - (index - 1);
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
+  new_argv->level = argv->level;
   return new_argv;
 }
 
@@ -1340,24 +1397,38 @@ void
 m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
 	     unsigned int index)
 {
-  m4_symbol_value *value;
-  m4_symbol_value temp;
+  m4_symbol_value value;
 
   if (index == 0)
     {
-      value = &temp;
-      m4_set_symbol_value_text (value, argv->argv0, argv->argv0_len, 0);
+      m4_set_symbol_value_text (&value, argv->argv0, argv->argv0_len, 0);
+      if (m4__push_symbol (context, &value, context->expansion_level - 1,
+			   argv->inuse))
+	arg_mark (argv);
     }
   else
-    {
-      value = m4_arg_symbol (argv, index);
-      if (value == &empty_symbol)
-	return;
-    }
+    m4__push_arg_quote (context, obs, argv, index, NULL);
+}
+
+/* Push argument INDEX from ARGV, which must be a text token, onto the
+   expansion stack OBS for rescanning.  INDEX must be non-zero.
+   QUOTES determines any quote delimiters that were in effect when the
+   reference was created.  */
+void
+m4__push_arg_quote (m4 *context, m4_obstack *obs, m4_macro_args *argv,
+		    unsigned int index, const m4_string_pair *quotes)
+{
+  size_t level;
+  m4_symbol_value *value = arg_symbol (argv, index, &level);
+
   /* TODO handle builtin tokens?  */
-  if (m4__push_symbol (context, value, context->expansion_level - 1,
-		       argv->inuse))
+  if (quotes)
+    obstack_grow (obs, quotes->str1, quotes->len1);
+  if (value != &empty_symbol
+      && m4__push_symbol (context, value, level, argv->inuse))
     arg_mark (argv);
+  if (quotes)
+    obstack_grow (obs, quotes->str2, quotes->len2);
 }
 
 /* Push series of comma-separated arguments from ARGV, which should
@@ -1368,54 +1439,47 @@ void
 m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 	      bool quote)
 {
+  m4_symbol_value tmp;
   m4_symbol_value *value;
+  m4__symbol_chain *chain;
   unsigned int i = skip ? 2 : 1;
-  const char *sep = ",";
-  size_t sep_len = 1;
-  bool use_sep = false;
-  bool inuse = false;
   const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
-  m4_obstack *scratch = m4_arg_scratch (context);
+  char *str = NULL;
+  size_t len = obstack_object_size (obs);
 
   if (argv->argc <= i)
     return;
 
   if (argv->argc == i + 1)
     {
-      if (quote)
-	obstack_grow (obs, quotes->str1, quotes->len1);
-      m4_push_arg (context, obs, argv, i);
-      if (quote)
-	obstack_grow (obs, quotes->str2, quotes->len2);
+      m4__push_arg_quote (context, obs, argv, i, quote ? quotes : NULL);
       return;
     }
 
-  /* Compute the separator in the scratch space.  */
-  if (quote)
+  /* Since make_argv_ref puts data on obs, we must first close any
+     pending data.  The resulting symbol contents live entirely on
+     obs, so we call push_symbol with a level of -1.  */
+  if (len)
     {
-      obstack_grow (obs, quotes->str1, quotes->len1);
-      obstack_grow (scratch, quotes->str2, quotes->len2);
-      obstack_1grow (scratch, ',');
-      obstack_grow0 (scratch, quotes->str1, quotes->len1);
-      sep = (char *) obstack_finish (scratch);
-      sep_len += quotes->len1 + quotes->len2;
+      obstack_1grow (obs, '\0');
+      str = (char *) obstack_finish (obs);
     }
 
-  /* TODO push entire $@ ref, rather than each arg.  */
-  for ( ; i < argv->argc; i++)
+  /* TODO allow shift, $@, to push builtins without flatten.  */
+  value = make_argv_ref (&tmp, obs, -1, argv, i, true, quote ? quotes : NULL);
+  assert (value == &tmp);
+  if (len)
     {
-      value = m4_arg_symbol (argv, i);
-      if (use_sep)
-	obstack_grow (obs, sep, sep_len);
-      else
-	use_sep = true;
-      /* TODO handle builtin tokens?  */
-      inuse |= m4__push_symbol (context, value,
-				context->expansion_level - 1, inuse);
+      chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
+      chain->next = value->u.u_c.chain;
+      value->u.u_c.chain = chain;
+      chain->type = M4__CHAIN_STR;
+      chain->quote_age = 0;
+      chain->u.u_s.str = str;
+      chain->u.u_s.len = len;
+      chain->u.u_s.level = SIZE_MAX;
     }
-  if (quote)
-    obstack_grow (obs, quotes->str2, quotes->len2);
-  if (inuse)
+  if (m4__push_symbol (context, value, -1, argv->inuse))
     arg_mark (argv);
 }
 

@@ -586,7 +586,7 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
 	      break;
 	    case M4__CHAIN_ARGV:
 	      if (m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-				NULL, &len, module))
+				chain->u.u_a.quotes, &len, module))
 		result = true;
 	      break;
 	    default:

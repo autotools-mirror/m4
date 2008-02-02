@@ -217,9 +217,11 @@ struct m4__symbol_chain
     } u_s;			/* M4__CHAIN_STR.  */
     struct
     {
-      m4_macro_args *argv;	/* Reference to earlier $@.  */
-      unsigned int index;	/* Argument index within argv.  */
-      bool flatten;		/* True to treat builtins as text.  */
+      m4_macro_args *argv;		/* Reference to earlier $@.  */
+      unsigned int index;		/* Argument index within argv.  */
+      bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
+      bool_bitfield comma : 1;		/* True when `,' is next input.  */
+      const m4_string_pair *quotes;	/* NULL for $*, quotes for $@.  */
     } u_a;			/* M4__CHAIN_ARGV.  */
   } u;
 };
@@ -281,6 +283,7 @@ struct m4_macro_args
      during parsing or any token is potentially unsafe and requires a
      rescan.  */
   unsigned int quote_age;
+  size_t level; /* Which obstack owns this argv.  */
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -299,7 +302,10 @@ struct m4__macro_arg_stacks
   void *argv_base;	/* Location for clearing the argv obstack.  */
 };
 
-extern size_t m4__adjust_refcount (m4 *, size_t, bool);
+extern size_t	m4__adjust_refcount	(m4 *, size_t, bool);
+extern bool	m4__arg_adjust_refcount	(m4 *, m4_macro_args *, bool);
+extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
+					 unsigned int, const m4_string_pair *);
 
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)

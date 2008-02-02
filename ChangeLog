@@ -1,5 +1,29 @@
 2008-02-02  Eric Blake  <ebb9@byu.net>
 
+	Stage 14b: allow pushing argv references.
+	Push a $@ reference to the input engine in one go, rather than
+	pushing each element.  For now, argument collection still gets one
+	argument of a $@ at a time; but the penalties of this patch make
+	it easier to manage $@ efficiently in future patches.
+	Memory impact: noticeable penalty, due to larger struct and O(n)
+	to O(n^2) on unboxed recursion
+	Speed impact: noticeable penalty, due to more bookkeeping.
+	* m4/m4private.h (struct m4__symbol_chain): Add comma and quotes
+	fields.
+	(struct m4_macro_args): Add level field.
+	(m4__arg_adjust_refcount, m4__push_arg_quote): New prototypes.
+	* m4/input.c (m4__push_symbol, composite_peek, composite_read)
+	(composite_unget, composite_clean, composite_print): Support $@
+	refs.
+	* m4/macro.c (collect_arguments): Populate new field.
+	(expand_macro): Move argv cleanup...
+	(m4__arg_adjust_refcount): ...to this new function.
+	(m4_arg_symbol, m4_make_argv_ref, m4_push_arg): Factor...
+	(arg_symbol, make_argv_ref, m4__push_arg_quote): ...to these new
+	helper functions, to add parameters.
+	(m4_push_args): Adjust caller.
+	* m4/symtab.c (m4_symbol_value_print): Likewise.
+
 	Stage 14a: allow printing argv references.
 	Refactor symbol-value printing code for better sharing, and to
 	allow printing a contiguous text representation of a $@ ref.
