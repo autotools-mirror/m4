@@ -40,8 +40,8 @@ static const char *skip_space (m4 *, const char *);
    Return true if the macro is guaranteed to expand to the empty
    string, false otherwise.  */
 bool
-m4_bad_argc (m4 *context, int argc, const char *caller, unsigned int min,
-	     unsigned int max, bool side_effect)
+m4_bad_argc (m4 *context, int argc, const char *caller, size_t min, size_t max,
+	     bool side_effect)
 {
   if (argc - 1 < min)
     {
@@ -99,13 +99,13 @@ m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
    index START, separated by SEP, and quoted by the current quotes, if
    QUOTED is true.  */
 void
-m4_dump_args (m4 *context, m4_obstack *obs, unsigned int start,
-	      m4_macro_args *argv, const char *sep, bool quoted)
+m4_dump_args (m4 *context, m4_obstack *obs, size_t start, m4_macro_args *argv,
+	      const char *sep, bool quoted)
 {
-  unsigned int i;
+  size_t i;
   size_t len = strlen (sep);
   bool need_sep = false;
-  unsigned int argc = m4_arg_argc (argv);
+  size_t argc = m4_arg_argc (argv);
 
   for (i = start; i < argc; i++)
     {

@@ -50,8 +50,7 @@
 extern void m4_set_sysval    (int value);
 extern void m4_sysval_flush  (m4 *context, bool report);
 extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data,
-			      unsigned int argc, m4_macro_args *argv,
-			      bool complain);
+			      size_t argc, m4_macro_args *argv, bool complain);
 extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 			      const char *name, size_t len, bool dir);
@@ -175,7 +174,7 @@ M4BUILTIN_HANDLER (define)
 M4BUILTIN_HANDLER (undefine)
 {
   const char *me = M4ARG (0);
-  unsigned int i;
+  size_t i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
@@ -203,7 +202,7 @@ M4BUILTIN_HANDLER (pushdef)
 M4BUILTIN_HANDLER (popdef)
 {
   const char *me = M4ARG (0);
-  unsigned int i;
+  size_t i;
   for (i = 1; i < argc; i++)
     {
       const char *name = M4ARG (i);
@@ -230,7 +229,7 @@ M4BUILTIN_HANDLER (ifdef)
 M4BUILTIN_HANDLER (ifelse)
 {
   const char *me = M4ARG (0);
-  unsigned int index;
+  size_t index;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
      rely on the regular mechanisms.  */
@@ -305,7 +304,7 @@ dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
 /* If there are no arguments, build a sorted list of all defined
    symbols, otherwise, only the specified symbols.  */
 void
-m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
+m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 		 m4_macro_args *argv, bool complain)
 {
   const char *me = M4ARG (0);
@@ -316,7 +315,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, unsigned int argc,
     m4_symtab_apply (M4SYMTAB, false, dump_symbol_CB, data);
   else
     {
-      unsigned int i;
+      size_t i;
       m4_symbol *symbol;
 
       for (i = 1; i < argc; i++)
@@ -374,7 +373,7 @@ M4BUILTIN_HANDLER (dumpdef)
 M4BUILTIN_HANDLER (defn)
 {
   const char *me = M4ARG (0);
-  unsigned int i;
+  size_t i;
 
   for (i = 1; i < argc; i++)
     {
@@ -577,7 +576,7 @@ M4BUILTIN_HANDLER (divnum)
 
 M4BUILTIN_HANDLER (undivert)
 {
-  unsigned int i = 0;
+  size_t i = 0;
   const char *me = M4ARG (0);
 
   if (argc == 1)
@@ -861,7 +860,7 @@ M4BUILTIN_HANDLER (m4wrap)
 
 M4BUILTIN_HANDLER (traceon)
 {
-  unsigned int i;
+  size_t i;
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
@@ -874,7 +873,7 @@ M4BUILTIN_HANDLER (traceon)
 /* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
-  unsigned int i;
+  size_t i;
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)

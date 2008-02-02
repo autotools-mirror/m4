@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2006, 2007, 2008 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -114,7 +115,7 @@ M4FINISH_HANDLER (perl)
 M4BUILTIN_HANDLER (perleval)
 {
   SV *val;
-  unsigned int i;
+  size_t i;
 
   for (i = 1; i < argc; i++)
     {

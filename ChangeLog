@@ -1,5 +1,30 @@
 2008-02-02  Eric Blake  <ebb9@byu.net>
 
+	Consistently use size_t for number of arguments.
+	* m4/m4module.h (m4_builtin_func): Alter prototype.
+	(struct m4_builtin): Adjust type of min_args, max_args.
+	(M4BUILTIN, M4BUILTIN_HANDLER): Adjust all builtins.
+	(m4_bad_argc, m4_dump_args, m4_macro_call, m4_arg_argc)
+	(m4_arg_symbol, m4_is_arg_text, m4_is_arg_func, m4_arg_text)
+	(m4_arg_equal, m4_arg_empty, m4_arg_len, m4_arg_func)
+	(m4_arg_print, m4_push_arg): Adjust all clients.
+	* m4/m4private.h (struct m4__symbol_chain, m4_symbol_value)
+	(m4_macro_args): Adjust type of various fields.
+	(m4__push_arg_quote): Adjust all clients.
+	* m4/input.c (m4_pop_wrapup): Likewise.
+	* m4/macro.c (m4_macro_call, trace_pre, make_argv_ref)
+	(arg_symbol, m4_arg_symbol, m4_is_arg_text, m4_is_arg_func)
+	(m4_arg_text, m4_arg_equal, m4_arg_empty, m4_arg_len)
+	(m4_arg_func, m4_arg_print, m4_make_argv_ref, m4_push_arg)
+	(m4__push_arg_quote, m4_push_args, m4_arg_argc): Likewise.
+	* m4/utility.c (m4_bad_argc, m4_dump_args): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	* modules/gnu.c (changesyntax): Likewise.
+	* modules/m4.c (m4_dump_symbols, undefine, popdef, ifelse, defn)
+	(undivert, traceon, traceoff): Likewise.
+	* modules/m4.h (m4_dump_symbols_func): Likewise.
+	* modules/perl.c (perleval): Likewise.
+
 	Stage 14b: allow pushing argv references.
 	Push a $@ reference to the input engine in one go, rather than
 	pushing each element.  For now, argument collection still gets one

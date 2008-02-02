@@ -218,7 +218,7 @@ struct m4__symbol_chain
     struct
     {
       m4_macro_args *argv;		/* Reference to earlier $@.  */
-      unsigned int index;		/* Argument index within argv.  */
+      size_t index;			/* Argument index within argv.  */
       bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
       bool_bitfield comma : 1;		/* True when `,' is next input.  */
       const m4_string_pair *quotes;	/* NULL for $*, quotes for $@.  */
@@ -235,8 +235,8 @@ struct m4_symbol_value
   unsigned int		flags;
 
   m4_hash *		arg_signature;
-  unsigned int		min_args;
-  unsigned int		max_args;
+  size_t		min_args;
+  size_t		max_args;
   size_t		pending_expansions;
 
   m4__symbol_type	type;
@@ -266,7 +266,7 @@ struct m4_macro_args
   /* One more than the highest actual argument.  May be larger than
      arraylen since the array can refer to multiple arguments via a
      single $@ reference.  */
-  unsigned int argc;
+  size_t argc;
   /* False unless the macro expansion refers to $@; determines whether
      this object can be freed at end of macro expansion or must wait
      until all references have been rescanned.  */
@@ -305,7 +305,7 @@ struct m4__macro_arg_stacks
 extern size_t	m4__adjust_refcount	(m4 *, size_t, bool);
 extern bool	m4__arg_adjust_refcount	(m4 *, m4_macro_args *, bool);
 extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
-					 unsigned int, const m4_string_pair *);
+					 size_t, const m4_string_pair *);
 
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)

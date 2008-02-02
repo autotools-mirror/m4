@@ -630,7 +630,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
    the obstack EXPANSION.  Macro tracing is also handled here.  */
 void
 m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
-	       unsigned int argc, m4_macro_args *argv)
+	       size_t argc, m4_macro_args *argv)
 {
   if (m4_bad_argc (context, argc, argv->argv0,
 		   VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
@@ -889,8 +889,8 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 static void
 trace_pre (m4 *context, size_t id, m4_macro_args *argv)
 {
-  unsigned int i;
-  unsigned int argc = m4_arg_argc (argv);
+  size_t i;
+  size_t argc = m4_arg_argc (argv);
 
   trace_header (context, id);
   trace_format (context, "%s", M4ARG (0));
@@ -1016,7 +1016,7 @@ arg_mark (m4_macro_args *argv)
    empty.  */
 static m4_symbol_value *
 make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
-	       m4_macro_args *argv, unsigned int index, bool flatten,
+	       m4_macro_args *argv, size_t index, bool flatten,
 	       const m4_string_pair *quotes)
 {
   m4__symbol_chain *chain;
@@ -1064,9 +1064,9 @@ make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
    must be non-zero.  *LEVEL is set to the obstack level that contains
    the symbol (which is not necessarily the level of ARGV).  */
 static m4_symbol_value *
-arg_symbol (m4_macro_args *argv, unsigned int index, size_t *level)
+arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
 {
-  unsigned int i;
+  size_t i;
   m4_symbol_value *value;
 
   assert (index);
@@ -1105,7 +1105,7 @@ arg_symbol (m4_macro_args *argv, unsigned int index, size_t *level)
 /* Given ARGV, return the symbol value at the specified INDEX, which
    must be non-zero.  */
 m4_symbol_value *
-m4_arg_symbol (m4_macro_args *argv, unsigned int index)
+m4_arg_symbol (m4_macro_args *argv, size_t index)
 {
   size_t dummy;
   return arg_symbol (argv, index, &dummy);
@@ -1114,7 +1114,7 @@ m4_arg_symbol (m4_macro_args *argv, unsigned int index)
 /* Given ARGV, return true if argument INDEX is text.  Index 0 is
    always text, as are indices beyond argc.  */
 bool
-m4_is_arg_text (m4_macro_args *argv, unsigned int index)
+m4_is_arg_text (m4_macro_args *argv, size_t index)
 {
   m4_symbol_value *value;
   if (index == 0 || argv->argc <= index)
@@ -1129,7 +1129,7 @@ m4_is_arg_text (m4_macro_args *argv, unsigned int index)
 /* Given ARGV, return true if argument INDEX is a builtin function.
    Only non-zero indices less than argc can return true.  */
 bool
-m4_is_arg_func (m4_macro_args *argv, unsigned int index)
+m4_is_arg_func (m4_macro_args *argv, size_t index)
 {
   if (index == 0 || argv->argc <= index)
     return false;
@@ -1141,7 +1141,7 @@ m4_is_arg_func (m4_macro_args *argv, unsigned int index)
    argc return the empty string.  The result is always NUL-terminated,
    even if it includes embedded NUL characters.  */
 const char *
-m4_arg_text (m4 *context, m4_macro_args *argv, unsigned int index)
+m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
 {
   m4_symbol_value *value;
   m4__symbol_chain *chain;
@@ -1175,7 +1175,7 @@ m4_arg_text (m4 *context, m4_macro_args *argv, unsigned int index)
    !strcmp (m4_arg_text (context, argv, indexa),
 	    m4_arg_text (context, argv, indexb)).  */
 bool
-m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
+m4_arg_equal (m4_macro_args *argv, size_t indexa, size_t indexb)
 {
   m4_symbol_value *sa = m4_arg_symbol (argv, indexa);
   m4_symbol_value *sb = m4_arg_symbol (argv, indexb);
@@ -1265,7 +1265,7 @@ m4_arg_equal (m4_macro_args *argv, unsigned int indexa, unsigned int indexb)
    This gives the same result as comparing m4_arg_len against 0, but
    is often faster.  */
 bool
-m4_arg_empty (m4_macro_args *argv, unsigned int index)
+m4_arg_empty (m4_macro_args *argv, size_t index)
 {
   return (index ? m4_arg_symbol (argv, index) == &empty_symbol
 	  : !argv->argv0_len);
@@ -1274,7 +1274,7 @@ m4_arg_empty (m4_macro_args *argv, unsigned int index)
 /* Given ARGV, return the length of argument INDEX.  Abort if the
    argument is not text.  Indices beyond argc return 0.  */
 size_t
-m4_arg_len (m4_macro_args *argv, unsigned int index)
+m4_arg_len (m4_macro_args *argv, size_t index)
 {
   m4_symbol_value *value;
   m4__symbol_chain *chain;
@@ -1304,7 +1304,7 @@ m4_arg_len (m4_macro_args *argv, unsigned int index)
 /* Given ARGV, return the builtin function referenced by argument
    INDEX.  Abort if it is not a single builtin.  */
 m4_builtin_func *
-m4_arg_func (m4_macro_args *argv, unsigned int index)
+m4_arg_func (m4_macro_args *argv, size_t index)
 {
   return m4_get_symbol_value_func (m4_arg_symbol (argv, index));
 }
@@ -1317,11 +1317,11 @@ m4_arg_func (m4_macro_args *argv, unsigned int index)
    MODULE, print any details about originating modules.  QUOTES count
    against the truncation length, but not module names.  */
 bool
-m4_arg_print (m4_obstack *obs, m4_macro_args *argv, unsigned int index,
+m4_arg_print (m4_obstack *obs, m4_macro_args *argv, size_t index,
 	      const m4_string_pair *quotes, size_t *max_len, bool module)
 {
   size_t len = max_len ? *max_len : SIZE_MAX;
-  unsigned int i;
+  size_t i;
   bool comma = false;
 
   for (i = index; i < argv->argc; i++)
@@ -1358,7 +1358,7 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
   m4_macro_args *new_argv;
   m4_symbol_value *value;
   m4_symbol_value *new_value;
-  unsigned int index = skip ? 2 : 1;
+  size_t index = skip ? 2 : 1;
   m4_obstack *obs = m4_arg_scratch (context);
 
   new_value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
@@ -1394,8 +1394,7 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
 /* Push argument INDEX from ARGV, which must be a text token, onto the
    expansion stack OBS for rescanning.  */
 void
-m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
-	     unsigned int index)
+m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index)
 {
   m4_symbol_value value;
 
@@ -1416,7 +1415,7 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv,
    reference was created.  */
 void
 m4__push_arg_quote (m4 *context, m4_obstack *obs, m4_macro_args *argv,
-		    unsigned int index, const m4_string_pair *quotes)
+		    size_t index, const m4_string_pair *quotes)
 {
   size_t level;
   m4_symbol_value *value = arg_symbol (argv, index, &level);
@@ -1442,7 +1441,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
   m4_symbol_value tmp;
   m4_symbol_value *value;
   m4__symbol_chain *chain;
-  unsigned int i = skip ? 2 : 1;
+  size_t i = skip ? 2 : 1;
   const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
   char *str = NULL;
   size_t len = obstack_object_size (obs);
@@ -1490,7 +1489,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 /* Given ARGV, return one greater than the number of arguments it
    describes.  */
 #undef m4_arg_argc
-unsigned int
+size_t
 m4_arg_argc (m4_macro_args *argv)
 {
   return argv->argc;

@@ -499,7 +499,7 @@ M4BUILTIN_HANDLER (changesyntax)
 
   if (m4_expand_ranges)
     {
-      unsigned int i;
+      size_t i;
       for (i = 1; i < argc; i++)
 	{
 	  const char *spec = M4ARG (i);

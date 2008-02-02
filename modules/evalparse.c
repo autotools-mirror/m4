@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -885,8 +885,7 @@ simple_term (m4 *context, eval_token et, number *v1)
 
 /* Main entry point, called from "eval" and "mpeval" builtins.  */
 void
-m4_evaluate (m4 *context, m4_obstack *obs, unsigned int argc,
-             m4_macro_args *argv)
+m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 {
   const char *	me	= M4ARG (0);
   const char *	str	= M4ARG (1);

@@ -1035,8 +1035,7 @@ m4_pop_wrapup (m4 *context)
     }
 
   m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
-		    _("input from m4wrap recursion level %lu"),
-		    (unsigned long int) ++level);
+		    _("input from m4wrap recursion level %zu"), ++level);
 
   current_input = wrapup_stack;
   wrapup_stack = (m4_obstack *) xmalloc (sizeof *wrapup_stack);
