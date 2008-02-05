@@ -564,18 +564,18 @@ bad_argc (const call_info *name, int argc, unsigned int min, unsigned int max)
   return false;
 }
 
-/*-------------------------------------------------------------------.
-| The function numeric_arg () converts ARG to an int pointed to by   |
-| VALUEP.  If the conversion fails, print error message on behalf of |
-| NAME.  Return true iff conversion succeeds.                        |
-`-------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| The function numeric_arg () converts ARG of length LEN to an int  |
+| pointed to by VALUEP.  If the conversion fails, print error       |
+| message on behalf of NAME.  Return true iff conversion succeeds.  |
+`------------------------------------------------------------------*/
 
 static bool
-numeric_arg (const call_info *name, const char *arg, int *valuep)
+numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
 {
   char *endp;
 
-  if (*arg == '\0')
+  if (!len)
     {
       *valuep = 0;
       m4_warn (0, name, _("empty string treated as 0"));
@@ -584,9 +584,10 @@ numeric_arg (const call_info *name, const char *arg, int *valuep)
     {
       errno = 0;
       *valuep = strtol (arg, &endp, 10);
-      if (*endp != '\0')
+      if (endp - arg != len)
 	{
-	  m4_warn (0, name, _("non-numeric argument `%s'"), arg);
+	  m4_warn (0, name, _("non-numeric argument %s"),
+		   quotearg_style_mem (locale_quoting_style, arg, len));
 	  return false;
 	}
       if (isspace (to_uchar (*arg)))
@@ -1087,8 +1088,9 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	  b = SYMBOL_FUNC (s);
 	  if (b == m4_placeholder)
 	    m4_warn (0, me,
-		     _("builtin `%s' requested by frozen file not found"),
-		     ARG (i));
+		     _("builtin %s requested by frozen file not found"),
+		     quotearg_style_mem (locale_quoting_style, ARG (i),
+					 ARG_LEN (i)));
 	  else
 	    push_macro (obs, b);
 	  break;
@@ -1140,7 +1142,14 @@ static int sysval;
 static void
 m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  if (bad_argc (arg_info (argv), argc, 1, 1))
+  const call_info *me = arg_info (argv);
+  const char *cmd = ARG (1);
+  size_t len = ARG_LEN (1);
+
+  if (strlen (cmd) != len)
+    m4_warn (0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, cmd, len));
+  if (bad_argc (me, argc, 1, 1) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1148,7 +1157,7 @@ m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
     }
 
   debug_flush_files ();
-  sysval = system (ARG (1));
+  sysval = system (cmd);
 #if FUNC_SYSTEM_BROKEN
   /* OS/2 has a buggy system() that returns exit status in the lowest eight
      bits, although pclose() and WEXITSTATUS are defined to return exit
@@ -1165,10 +1174,15 @@ static void
 m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
+  const char *cmd = ARG (1);
+  size_t len = ARG_LEN (1);
   FILE *pin;
   int ch;
 
-  if (bad_argc (me, argc, 1, 1))
+  if (strlen (cmd) != len)
+    m4_warn (0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, cmd, len));
+  if (bad_argc (me, argc, 1, 1) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1177,10 +1191,11 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 
   debug_flush_files ();
   errno = 0;
-  pin = popen (ARG (1), "r");
+  pin = popen (cmd, "r");
   if (pin == NULL)
     {
-      m4_warn (errno, me, _("cannot open pipe to command `%s'"), ARG (1));
+      m4_warn (errno, me, _("cannot open pipe to command %s"),
+	       quotearg_style (locale_quoting_style, cmd));
       sysval = -1;
     }
   else
@@ -1217,7 +1232,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (me, argc, 1, 3))
     return;
 
-  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), &radix))
+  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), ARG_LEN (2), &radix))
     return;
 
   if (radix < 1 || radix > 36)
@@ -1226,7 +1241,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  if (argc >= 4 && !numeric_arg (me, ARG (3), &min))
+  if (argc >= 4 && !numeric_arg (me, ARG (3), ARG_LEN (3), &min))
     return;
   if (min < 0)
     {
@@ -1281,7 +1296,7 @@ m4_incr (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (me, argc, 1, 1))
     return;
 
-  if (!numeric_arg (me, ARG (1), &value))
+  if (!numeric_arg (me, ARG (1), ARG_LEN (1), &value))
     return;
 
   shipout_int (obs, value + 1);
@@ -1296,7 +1311,7 @@ m4_decr (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (me, argc, 1, 1))
     return;
 
-  if (!numeric_arg (me, ARG (1), &value))
+  if (!numeric_arg (me, ARG (1), ARG_LEN (1), &value))
     return;
 
   shipout_int (obs, value - 1);
@@ -1317,7 +1332,7 @@ m4_divert (struct obstack *obs, int argc, macro_arguments *argv)
   int i = 0;
 
   bad_argc (me, argc, 0, 2);
-  if (argc >= 2 && !numeric_arg (me, ARG (1), &i))
+  if (argc >= 2 && !numeric_arg (me, ARG (1), ARG_LEN (1), &i))
     return;
 
   make_diversion (i);
@@ -1357,11 +1372,16 @@ m4_undivert (struct obstack *obs, int argc, macro_arguments *argv)
     for (i = 1; i < argc; i++)
       {
 	const char *str = ARG (i);
+	size_t len = ARG_LEN (i);
 	file = strtol (str, &endp, 10);
-	if (*endp == '\0' && !isspace (to_uchar (*str)))
+	if (endp - str == len && !isspace (to_uchar (*str)))
 	  insert_diversion (file);
 	else if (no_gnu_extensions)
-	  m4_warn (0, me, _("non-numeric argument `%s'"), str);
+	  m4_warn (0, me, _("non-numeric argument %s"),
+		   quotearg_style_mem (locale_quoting_style, str, len));
+	else if (strlen (str) != len)
+	  m4_warn (0, me, _("invalid file name %s"),
+		   quotearg_style_mem (locale_quoting_style, str, len));
 	else
 	  {
 	    fp = m4_path_search (str, NULL);
@@ -1473,16 +1493,23 @@ include (int argc, macro_arguments *argv, bool silent)
   const call_info *me = arg_info (argv);
   FILE *fp;
   char *name;
+  const char *arg;
+  size_t len;
 
   if (bad_argc (me, argc, 1, 1))
     return;
 
-  fp = m4_path_search (ARG (1), &name);
+  arg = ARG (1);
+  len = ARG_LEN (1);
+  if (strlen (arg) != len)
+    m4_warn (0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, arg, len));
+  fp = m4_path_search (arg, &name);
   if (fp == NULL)
     {
       if (!silent)
 	m4_error (0, errno, me, _("cannot open %s"),
-		  quotearg_style (locale_quoting_style, ARG (1)));
+		  quotearg_style (locale_quoting_style, arg));
       return;
     }
 
@@ -1532,6 +1559,12 @@ mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
      user forgot to supply them.  Output must be quoted if
      successful.  */
   obstack_grow (obs, curr_quote.str1, curr_quote.len1);
+  if (strlen (pattern) < len)
+    {
+      m4_warn (0, me, _("argument %s truncated"),
+	       quotearg_style_mem (locale_quoting_style, pattern, len));
+      len = strlen (pattern);
+    }
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (pattern[--len] != 'X')
@@ -1543,7 +1576,8 @@ mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
   fd = mkstemp (name);
   if (fd < 0)
     {
-      m4_warn (errno, me, _("cannot create tempfile `%s'"), pattern);
+      m4_warn (errno, me, _("cannot create file from template %s"),
+	       quotearg_style (locale_quoting_style, pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
@@ -1562,6 +1596,7 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (bad_argc (me, argc, 1, 1))
     return;
+  m4_warn (0, me, _("recommend using mkstemp instead"));
   if (no_gnu_extensions)
     {
       /* POSIX states "any trailing 'X' characters [are] replaced with
@@ -1583,7 +1618,6 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
 				       (unsigned long) getpid ());
       char *pid = (char *) obstack_copy0 (scratch, "", 0);
 
-      m4_warn (0, me, _("recommend using mkstemp instead"));
       for (i = len; i > 1; i--)
 	if (str[i - 1] != 'X')
 	  break;
@@ -1669,7 +1703,7 @@ m4_m4exit (struct obstack *obs, int argc, macro_arguments *argv)
 
   /* Warn on bad arguments, but still exit.  */
   bad_argc (me, argc, 0, 1);
-  if (argc >= 2 && !numeric_arg (me, ARG (1), &exit_code))
+  if (argc >= 2 && !numeric_arg (me, ARG (1), ARG_LEN (1), &exit_code))
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
@@ -1784,13 +1818,15 @@ m4_debugmode (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   const char *str = ARG (1);
+  size_t len = ARG_LEN (1);
 
   bad_argc (me, argc, 0, 1);
 
   if (argc == 1)
     debug_level = 0;
-  else if (debug_decode (str) < 0)
-    m4_warn (0, me, _("bad debug flags: `%s'"), str);
+  else if (debug_decode (str, len) < 0)
+    m4_warn (0, me, _("bad debug flags: %s"),
+	     quotearg_style_mem (locale_quoting_style, str, len));
 }
 
 /*-------------------------------------------------------------------------.
@@ -1807,9 +1843,17 @@ m4_debugfile (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (argc == 1)
     debug_set_output (me, NULL);
-  else if (!debug_set_output (me, ARG (1)))
-    m4_warn (errno, me, _("cannot set debug file %s"),
-	     quotearg_style (locale_quoting_style, ARG (1)));
+  else
+    {
+      const char *str = ARG (1);
+      size_t len = ARG_LEN (1);
+      if (strlen (str) < len)
+	m4_warn (0, me, _("argument %s truncated"),
+		 quotearg_style_mem (locale_quoting_style, str, len));
+      if (!debug_set_output (me, str))
+	m4_warn (errno, me, _("cannot set debug file %s"),
+		 quotearg_style (locale_quoting_style, str));
+    }
 }
 
 /* This section contains text processing macros: "len", "index",
@@ -1855,7 +1899,8 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
   haystack = ARG (1);
   haystack_len = ARG_LEN (1);
   needle = ARG (2);
-  if (!arg_empty (argv, 3) && !numeric_arg (arg_info (argv), ARG (3), &offset))
+  if (!arg_empty (argv, 3)
+      && !numeric_arg (arg_info (argv), ARG (3), ARG_LEN (3), &offset))
     return;
   if (offset < 0)
     {
@@ -1907,7 +1952,7 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
     }
 
   length = ARG_LEN (1);
-  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), &start))
+  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), ARG_LEN (2), &start))
     return;
   if (start < 0)
     start += length;
@@ -1916,7 +1961,7 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
     end = length;
   else
     {
-      if (!numeric_arg (me, ARG (3), &end))
+      if (!numeric_arg (me, ARG (3), ARG_LEN (3), &end))
 	return;
       if (end < 0)
 	end += length;
@@ -2406,8 +2451,8 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 void
 m4_placeholder (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  m4_warn (0, NULL, _("builtin `%s' requested by frozen file not found"),
-	   ARG (0));
+  m4_warn (0, NULL, _("builtin %s requested by frozen file not found"),
+	   quotearg_style_mem (locale_quoting_style, ARG (0), ARG_LEN (0)));
 }
 
 /*-------------------------------------------------------------------------.

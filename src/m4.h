@@ -205,7 +205,7 @@ extern FILE *debug;
 #define DEBUG_TRACE_DEFAULT 0x407
 
 void debug_init (void);
-int debug_decode (const char *);
+int debug_decode (const char *, size_t);
 void debug_flush_files (void);
 bool debug_set_output (const call_info *, const char *);
 void debug_message (const char *, ...) M4_GNUC_PRINTF (1, 2);

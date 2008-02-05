@@ -1,5 +1,33 @@
 2009-02-11  Eric Blake  <ebb9@byu.net>
 
+	Stage 28: Allow embedded NUL in warning messages.
+	Issue graceful error messages for a variety of places where
+	embedded NUL is otherwise unhandled.  For example, numeric parsing
+	rejects embedded NUL, while file-related commands warn about
+	truncation at NUL, and frozen files detect unexpected NUL.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* src/m4.h (debug_decode): Add argument.
+	* src/m4.c (main): Adjust caller.
+	* src/format.c (arg_int, arg_long, arg_double): Likewise.
+	(arg_string): New function.
+	(ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE): Support embedded NUL.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/debug.c (debug_decode): Likewise.
+	* src/builtin.c (numeric_arg): Add argument.
+	(m4_syscmd, m4_esyscmd, m4_eval, m4_incr, m4_decr, m4_divert)
+	(m4_undivert, include, mkstemp_helper, m4_m4exit, m4_debugmode)
+	(m4_debugfile, m4_index, m4_substr): Detect embedded NUL.
+	(m4_defn, m4_maketemp, m4_placeholder): Improve warning message.
+	* src/path.c (m4_path_search): Likewise.
+	* doc/m4.texinfo (Syntax, Mkstemp, Using frozen files): Adjust
+	tests.
+	* examples/null.m4: Likewise.
+	* examples/null.out: Likewise.
+	* examples/null.err: Likewise.
+
+2009-02-11  Eric Blake  <ebb9@byu.net>
+
 	Warn when popping traced but undefined macro.
 	* src/symtab.c (lookup_symbol): Recognize traced placeholder when
 	delete is requested.  Bug introduced 2008-07-18.

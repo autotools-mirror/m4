@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008,
+   2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -371,8 +371,13 @@ reload_frozen_state (const char *name)
 
 	    case 'F':
 
-	      /* Enter a macro having a builtin function as a definition.  */
-
+	      /* Enter a macro having a builtin function as a
+		 definition.  No builtin contains NUL in the name.  */
+	      if (strlen (string[1]) < number[1])
+		m4_error (EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, invalid builtin %s encountered"),
+			  quotearg_style_mem (locale_quoting_style, string[1],
+					      number[1]));
 	      bp = find_builtin_by_name (string[1]);
 	      define_builtin (string[0], number[0], bp, SYMBOL_PUSHDEF);
 	      break;

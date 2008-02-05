@@ -480,7 +480,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	debug_decode ("-d");
+	debug_decode ("-d", SIZE_MAX);
 	if (!fatal_warnings)
 	  fatal_warnings = true;
 	else
@@ -530,8 +530,9 @@ main (int argc, char *const *argv, char *const *envp)
       case 'd':
 	if (seen_file)
 	  goto defer;
-	if (debug_decode (optarg) < 0)
-	  error (0, 0, "bad debug flags: `%s'", optarg);
+	if (debug_decode (optarg, SIZE_MAX) < 0)
+	  error (0, 0, "bad debug flags: %s",
+		 quotearg_style (locale_quoting_style, optarg));
 	break;
 
       case 'e':
@@ -603,7 +604,7 @@ main (int argc, char *const *argv, char *const *envp)
   if (interactive)
     {
       signal (SIGINT, SIG_IGN);
-      setbuf (stdout, (char *) NULL);
+      setbuf (stdout, NULL);
     }
 
   /* Handle deferred command line macro definitions.  Must come after
@@ -631,8 +632,9 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'd':
-	  if (debug_decode (arg) < 0)
-	    error (0, 0, "bad debug flags: `%s'", arg);
+	  if (debug_decode (arg, SIZE_MAX) < 0)
+	    error (0, 0, "bad debug flags: %s",
+		   quotearg_style (locale_quoting_style, optarg));
 	  break;
 
 	case 't':

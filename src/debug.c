@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007, 2008 Free
-   Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007, 2008, 2009
+   Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -43,25 +43,33 @@ debug_init (void)
   obstack_init (&trace);
 }
 
-/*------------------------------------------------------------------.
-| Function to decode the debugging flags OPTS.  Used by main while  |
-| processing option -d, and by the builtin debugmode ().  Return -1 |
-| if the parse failed, otherwise change the debug level.	    |
-`------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Function to decode the debugging flags OPTS of length LEN.  If LEN |
+| is SIZE_MAX, use strlen (OPTS) instead.  Used by main while	     |
+| processing option -d, and by the builtin debugmode.  Return -1 if  |
+| the parse failed, otherwise change the debug level.		     |
+`-------------------------------------------------------------------*/
 
 int
-debug_decode (const char *opts)
+debug_decode (const char *opts, size_t len)
 {
   int level;
   char mode = '\0';
 
-  if (opts == NULL || *opts == '\0')
+  if (!opts)
+    opts = "";
+  if (len == SIZE_MAX)
+    len = strlen (opts);
+  if (!len)
     level = DEBUG_TRACE_DEFAULT | debug_level;
   else
     {
       if (*opts == '-' || *opts == '+')
-	mode = *opts++;
-      for (level = 0; *opts; opts++)
+	{
+	  len--;
+	  mode = *opts++;
+	}
+      for (level = 0; len--; opts++)
 	{
 	  switch (*opts)
 	    {

@@ -1081,14 +1081,16 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 
 @comment xout: null.out
 @comment xerr: null.err
+@comment status: 1
 @example
 define(`m4exit')include(`null.m4')dnl
 @end example
 
-@comment status: 2
+@comment status: 1
 @example
 include(`null.m4')
 @result{}# This file tests m4 behavior on NUL bytes.
+@error{}m4:examples/null.m4:5: Warning: m4exit: non-numeric argument `2\0002'
 @end example
 @end ignore
 
@@ -7485,10 +7487,12 @@ define(`foo', `errprint(`oops')')
 syscmd(`rm -f foo-??????')sysval
 @result{}0
 define(`file1', maketemp(`foo-XXXXXX'))dnl
+@error{}m4:stdin:3: Warning: maketemp: recommend using mkstemp instead
 ifelse(esyscmd(`echo \` foo-?????? \''), ` foo-?????? ',
        `no file', `created')
 @result{}created
 define(`file2', maketemp(`foo-XX'))dnl
+@error{}m4:stdin:6: Warning: maketemp: recommend using mkstemp instead
 define(`file3', mkstemp(`foo-XXXXXX'))dnl
 ifelse(len(defn(`file1')), len(defn(`file2')),
        `same length', `different')
@@ -7904,6 +7908,20 @@ divert(1)undivert(null.out)' | ]__program__[ -F in.m4f \
      && rm in.m4f])errprint([ ]sysval[
 ])dnl
 @error{}divnum #-- 3 0
+@end example
+
+@c Do we reject unexpected NUL bytes?
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([printf '#bogus\nV1\nF3,4\nlenlen\0\n' > in.m4f \
+     && ]__program__[ -R in.m4f \
+     && rm in.m4f])sysval
+@error{}m4:in.m4f:4: ill-formed frozen file, invalid builtin `len\0' encountered
+@result{}1
 @end example
 @end ignore
 
