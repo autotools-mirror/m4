@@ -313,6 +313,8 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 	err = EXCESS_INPUT;
     }
 
+  if (err != NO_ERROR)
+    expr = quotearg_style_mem (locale_quoting_style, expr, len);
   switch (err)
     {
       /* Cases where result is printed.  */
@@ -325,8 +327,7 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 
       /* Cases where error makes result meaningless.  */
     case MISSING_RIGHT:
-      m4_warn (0, me, _("bad expression (missing right parenthesis): %s"),
-	       expr);
+      m4_warn (0, me, _("missing right parenthesis: %s"), expr);
       break;
 
     case SYNTAX_ERROR:
@@ -334,11 +335,11 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
       break;
 
     case UNKNOWN_INPUT:
-      m4_warn (0, me, _("bad expression (bad input): %s"), expr);
+      m4_warn (0, me, _("bad input in expression: %s"), expr);
       break;
 
     case EXCESS_INPUT:
-      m4_warn (0, me, _("bad expression (excess input): %s"), expr);
+      m4_warn (0, me, _("excess input in expression: %s"), expr);
       break;
 
     case INVALID_OPERATOR:

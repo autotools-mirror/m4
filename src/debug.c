@@ -43,21 +43,26 @@ debug_init (void)
   obstack_init (&trace);
 }
 
-/*-----------------------------------------------------------------.
-| Function to decode the debugging flags OPTS.  Used by main while |
-| processing option -d, and by the builtin debugmode ().	   |
-`-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Function to decode the debugging flags OPTS of length LEN.  If LEN |
+| is SIZE_MAX, use strlen (OPTS) instead.  Used by main while        |
+| processing option -d, and by the builtin debugmode.                |
+`-------------------------------------------------------------------*/
 
 int
-debug_decode (const char *opts)
+debug_decode (const char *opts, size_t len)
 {
   int level;
 
-  if (opts == NULL || *opts == '\0')
+  if (!opts)
+    opts = "";
+  if (len == SIZE_MAX)
+    len = strlen (opts);
+  if (!len)
     level = DEBUG_TRACE_DEFAULT;
   else
     {
-      for (level = 0; *opts; opts++)
+      for (level = 0; len--; opts++)
 	{
 	  switch (*opts)
 	    {

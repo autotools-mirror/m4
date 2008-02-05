@@ -160,7 +160,9 @@ m4_path_search (const char *file, char **result)
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
-	    debug_message ("path search for `%s' found `%s'", file, name);
+	    debug_message ("path search for %s found %s",
+			   quotearg_style (locale_quoting_style, file),
+			   quotearg_n_style (1, locale_quoting_style, name));
 	  if (set_cloexec_flag (fileno (fp), true) != 0)
 	    m4_warn (errno, NULL, _("cannot protect input file across forks"));
 	  if (result)

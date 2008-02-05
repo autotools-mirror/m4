@@ -43,7 +43,7 @@ This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
 a package containing an implementation of the m4 macro language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -935,14 +935,16 @@ exception of the @sc{nul} character (the zero byte @samp{'\0'}).
 
 @comment xout: null.out
 @comment xerr: null.err
+@comment status: 1
 @example
 define(`m4exit')include(`null.m4')dnl
 @end example
 
-@comment status: 2
+@comment status: 1
 @example
 include(`null.m4')
 @result{}# This file tests m4 behavior on NUL bytes.
+@error{}m4:examples/null.m4:5: Warning: m4exit: non-numeric argument `2\0002'
 @end example
 @end ignore
 
@@ -6087,10 +6089,10 @@ eval(`2 = 2')
 @error{}m4:stdin:1: Warning: eval: recommend ==, not =, for equality
 @result{}1
 eval(`++0')
-@error{}m4:stdin:2: eval: invalid operator: ++0
+@error{}m4:stdin:2: eval: invalid operator: `++0'
 @result{}
 eval(`0 |= 1')
-@error{}m4:stdin:3: eval: invalid operator: 0 |= 1
+@error{}m4:stdin:3: eval: invalid operator: `0 |= 1'
 @result{}
 @end example
 
@@ -6133,12 +6135,12 @@ eval(`+ + - ~ ! ~ 0')
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:9: Warning: eval: divide by zero: 0 || 1 / 0
+@error{}m4:stdin:9: Warning: eval: divide by zero: `0 || 1 / 0'
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:11: Warning: eval: modulo by zero: 2 && 1 % 0
+@error{}m4:stdin:11: Warning: eval: modulo by zero: `2 && 1 % 0'
 @result{}
 @end example
 
@@ -6159,9 +6161,9 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: Warning: eval: divide by zero: 0 ** 0
+@error{}m4:stdin:5: Warning: eval: divide by zero: `0 ** 0'
 eval(`4 ** -2')
-@error{}m4:stdin:6: Warning: eval: negative exponent: 4 ** -2
+@error{}m4:stdin:6: Warning: eval: negative exponent: `4 ** -2'
 @result{}
 @end example
 
@@ -6206,7 +6208,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: Warning: eval: bad expression: foo / 6
+@error{}m4:stdin:11: Warning: eval: bad expression: `foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111
@@ -6659,10 +6661,12 @@ define(`foo', `errprint(`oops')')
 syscmd(`rm -f foo-??????')sysval
 @result{}0
 define(`file1', maketemp(`foo-XXXXXX'))dnl
+@error{}m4:stdin:3: Warning: maketemp: recommend using mkstemp instead
 ifelse(esyscmd(`echo \` foo-?????? \''), ` foo-?????? ',
        `no file', `created')
 @result{}created
 define(`file2', maketemp(`foo-XX'))dnl
+@error{}m4:stdin:6: Warning: maketemp: recommend using mkstemp instead
 define(`file3', mkstemp(`foo-XXXXXX'))dnl
 ifelse(len(defn(`file1')), len(defn(`file2')),
        `same length', `different')
@@ -7081,6 +7085,20 @@ divert(1)undivert(null.out)' | ]__program__[ -F in.m4f \
      && rm in.m4f])errprint([ ]sysval[
 ])dnl
 @error{}divnum #-- 3 0
+@end example
+
+@c Do we reject unexpected NUL bytes?
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([printf '#bogus\nV1\nF3,4\nlenlen\0\n' > in.m4f \
+     && ]__program__[ -R in.m4f \
+     && rm in.m4f])sysval
+@error{}m4: ill-formed frozen file, invalid builtin `len\0' encountered
+@result{}1
 @end example
 @end ignore
 
@@ -7615,7 +7633,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: Warning: eval: bad expression (bad input): (b) >= (a)
+@error{}m4:stdin:6: Warning: eval: bad input in expression: `(b) >= (a)'
 @result{}
 @end example
 

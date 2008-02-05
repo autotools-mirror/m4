@@ -370,7 +370,8 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
 	{
-	  error (0, errno, "%s", name);
+	  error (0, errno, "cannot open %s",
+		 quotearg_style (locale_quoting_style, name));
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;
@@ -530,10 +531,11 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
       case 'd':
-	debug_level = debug_decode (optarg);
+	debug_level = debug_decode (optarg, SIZE_MAX);
 	if (debug_level < 0)
 	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
+	    error (0, 0, "bad debug flags: %s",
+		   quotearg_style (locale_quoting_style, optarg));
 	    debug_level = 0;
 	  }
 	break;
@@ -584,7 +586,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (NULL, debugfile))
-    m4_error (0, errno, NULL, _("cannot set debug file `%s'"), debugfile);
+    m4_error (0, errno, NULL, _("cannot set debug file %s"),
+	      quotearg_style (locale_quoting_style, debugfile));
 
   input_init ();
   output_init ();
@@ -602,7 +605,7 @@ main (int argc, char *const *argv, char *const *envp)
   if (interactive)
     {
       signal (SIGINT, SIG_IGN);
-      setbuf (stdout, (char *) NULL);
+      setbuf (stdout, NULL);
     }
 
   /* Handle deferred command line macro definitions.  Must come after
