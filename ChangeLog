@@ -1,3 +1,7 @@
+2008-02-05  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Import the strtod module.
+
 2008-02-02  Eric Blake  <ebb9@byu.net>
 
 	Stage 14: allow pushing argv references.
