@@ -43,6 +43,7 @@
 #include "exitfail.h"
 #include "intprops.h"
 #include "obstack.h"
+#include "quotearg.h"
 #include "stdio--.h"
 #include "stdlib--.h"
 #include "unistd--.h"

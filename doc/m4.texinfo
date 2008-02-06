@@ -2411,6 +2411,20 @@ indir(`divert', defn(`foo'))
 @result{}
 @end example
 
+Warning messages issued on behalf of an indirect macro use an
+unambiguous representation of the macro name, using escape sequences
+similar to C strings, and with colons also quoted.
+
+@example
+define(`%%:\
+odd', defn(`divnum'))
+@result{}
+indir(`%%:\
+odd', `extra')
+@error{}m4:stdin:3: Warning: %%\:\\\nodd: extra arguments ignored: 1 > 0
+@result{}0
+@end example
+
 @node Builtin
 @section Indirect call of builtins
 

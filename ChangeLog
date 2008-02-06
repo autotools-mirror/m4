@@ -1,3 +1,11 @@
+2008-02-06  Eric Blake  <ebb9@byu.net>
+
+	Fix security hole introduced 2007-11-22.
+	* src/m4.h (includes): Add quotearg.h.
+	* src/m4.c (m4_verror_at_line): Properly escape macro names.
+	(main): Manage quoteargs defaults.
+	* doc/m4.texinfo (Indir): Document and test this.
+
 2008-02-05  Eric Blake  <ebb9@byu.net>
 
 	* m4/gnulib-cache.m4: Import the strtod module.
