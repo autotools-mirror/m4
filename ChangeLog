@@ -1,5 +1,10 @@
 2008-02-06  Eric Blake  <ebb9@byu.net>
 
+	Fix security hole introduced 2007-11-23.
+	* m4/utility.c (m4_verror_at_line): Properly escape macro names.
+	* src/main.c (main): Manage quoteargs defaults.
+	* doc/m4.texinfo (Indir): Document and test this.
+
 	Using raw strtod is not portable.
 	* ltdl/m4/gnulib-cache.m4: Import the strtod module.
 

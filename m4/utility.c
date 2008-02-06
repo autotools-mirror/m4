@@ -24,6 +24,7 @@
 
 #include "exitfail.h"
 #include "progname.h"
+#include "quotearg.h"
 #include "verror.h"
 #include "xvasprintf.h"
 
@@ -154,18 +155,37 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
 		   const char *format, va_list args)
 {
   char *full = NULL;
+  char *safe_macro = NULL;
+
+  /* Sanitize MACRO, sinze we are turning around and using it in a
+     format string.  The allocation is overly conservative, but
+     problematic macro names only occur via indir or changesyntax.  */
+  if (macro && strchr (macro, '%'))
+    {
+      char *p = safe_macro = xcharalloc (2 * strlen (macro) + 1);
+      do
+	{
+	  if (*macro == '%')
+	    *p++ = '%';
+	  *p++ = *macro++;
+	}
+      while (*macro);
+    }
   /* Prepend warning and the macro name, as needed.  But if that fails
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"), macro, format);
+    full = xasprintf (_("Warning: %s: %s"),
+		      quotearg (safe_macro ? safe_macro : macro), format);
   else if (warn)
     full = xasprintf (_("Warning: %s"), format);
   else if (macro)
-    full = xasprintf (_("%s: %s"), macro, format);
+    full = xasprintf (_("%s: %s"),
+		      quotearg (safe_macro ? safe_macro : macro), format);
   verror_at_line (status, errnum, line ? file : NULL, line,
 		  full ? full : format, args);
   free (full);
+  free (safe_macro);
   if ((!warn || m4_get_fatal_warnings_opt (context))
       && !m4_get_exit_status (context))
     m4_set_exit_status (context, EXIT_FAILURE);

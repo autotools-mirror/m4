@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -29,6 +29,7 @@
 #include "closein.h"
 #include "configmake.h"
 #include "getopt.h"
+#include "quotearg.h"
 #include "version-etc.h"
 #include "xstrtol.h"
 
@@ -363,6 +364,8 @@ main (int argc, char *const *argv, char *const *envp)
       m4_set_posixly_correct_opt (context, true);
       m4_set_suppress_warnings_opt (context, true);
     }
+  set_quoting_style (NULL, escape_quoting_style);
+  set_char_quoting (NULL, ':', 1);
 
   /* First, we decode the arguments, to size up tables and stuff.
      Avoid lasting side effects; for example 'm4 --debugfile=oops
@@ -789,6 +792,7 @@ main (int argc, char *const *argv, char *const *envp)
   m4_delete (context);
 
   m4_hash_exit ();
+  quotearg_free ();
 
 #ifdef USE_STACKOVF
   stackovf_exit ();
