@@ -1,3 +1,8 @@
+2008-02-06  Eric Blake  <ebb9@byu.net>
+
+	Using raw strtod is not portable.
+	* ltdl/m4/gnulib-cache.m4: Import the strtod module.
+
 2008-02-02  Eric Blake  <ebb9@byu.net>
 
 	Consistently use size_t for number of arguments.
