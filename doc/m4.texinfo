@@ -1602,6 +1602,22 @@ foo
 will expand first to @samp{bar}, and when this is reread and
 expanded, into @samp{Hello}.
 
+@ignore
+@comment not worth documenting, but test that the command line can
+@comment define macros that take parameters
+
+@comment options: -Dfoo -Decho=$@
+@example
+$ @kbd{m4 -Dfoo -Decho='$@'}
+foo
+@result{}
+foo(`silently ignored')
+@result{}
+echo(`1', `2')
+@result{}1,2
+@end example
+@end ignore
+
 @node Definitions
 @chapter How to define new macros
 
@@ -5549,7 +5565,8 @@ their existence will confirm platform details.
 @deffnx {Optional builtin} windows
 Each of these macros is conditionally defined as needed to describe the
 environment of @code{m4}.  If defined, each macro expands to the empty
-string.
+string.  For now, these macros silently ignore all arguments, but in a
+future release of M4, they might warn if arguments are present.
 @end deffn
 
 When @acronym{GNU} extensions are in effect (that is, when you did not
@@ -5558,10 +5575,24 @@ use the @option{-G} option, @pxref{Limits control, , Invoking m4}),
 expand to the empty string.
 
 @example
+$ @kbd{m4}
 __gnu__
 @result{}
-ifdef(`__gnu__', `Extensions are active')
+__gnu__(`ignored')
+@result{}
+Extensions are ifdef(`__gnu__', `active', `inactive')
 @result{}Extensions are active
+@end example
+
+@comment options: -G
+@example
+$ @kbd{m4 -G}
+__gnu__
+@result{}__gnu__
+__gnu__(`ignored')
+@result{}__gnu__(ignored)
+Extensions are ifdef(`__gnu__', `active', `inactive')
+@result{}Extensions are inactive
 @end example
 
 On UNIX systems, @acronym{GNU} @code{m4} will define @code{@w{__unix__}}
