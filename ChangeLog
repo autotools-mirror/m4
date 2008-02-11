@@ -1,5 +1,9 @@
 2008-02-11  Eric Blake  <ebb9@byu.net>
 
+	Document behavior of __gnu__().
+	* doc/m4.texinfo (Platform macros): Enhance test.
+	(Macro expansion): New test.
+
 	Use gnulib's git-merge-changelog driver when available.
 	* .gitattributes: New file.
 	* bootstrap: Install driver, if not already present.
