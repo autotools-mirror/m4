@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2008-01-31
+# bootstrap (GNU M4) version 2008-02-11
 # Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
@@ -392,6 +392,19 @@ EOF
   cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
 fi
 
+# See if we can use gnulib's git-merge-changelog merge driver.
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if git config merge.merge-changelog.driver >/dev/null ; then
+    :
+  elif (git-merge-changelog --version) >/dev/null 2>/dev/null ; then
+    func_echo "initializing git-merge-changelog driver"
+    git config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
+    git config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
+  else
+    func_echo "consider installing git-merge-changelog from gnulib"
+  fi
+fi
+
 ## ---------- ##
 ## Autopoint. ##
 ## ---------- ##
@@ -410,7 +423,6 @@ $AUTOPOINT --force
 # (or worse out-of-date) macro directory.
 func_echo "running: $LIBTOOLIZE --force --copy --install"
 ${LIBTOOLIZE} --force --copy --install
-
 
 ## ---------------------------- ##
 ## Find the gnulib module tree. ##

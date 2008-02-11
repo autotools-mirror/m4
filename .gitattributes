@@ -1,2 +1,3 @@
 null.* diff merge
 iso8859.m4 diff merge
+ChangeLog merge=merge-changelog
