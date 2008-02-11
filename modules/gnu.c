@@ -85,20 +85,20 @@ m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
-  /* name		text */
+  /* name		text	min	max */
 #if UNIX
-  { "__unix__",		"" },
+  { "__unix__",		"",	0,	0 },
 #elif W32_NATIVE
-  { "__windows__",	"" },
+  { "__windows__",	"",	0,	0 },
 #elif OS2
-  { "__os2__",		"" },
+  { "__os2__",		"",	0,	0 },
 #else
 # warning Platform macro not provided
 #endif
-  { "__gnu__",		"" },
-  { "__m4_version__",	VERSION/**/TIMESTAMP },
+  { "__gnu__",		"",	0,	0 },
+  { "__m4_version__",	VERSION/**/TIMESTAMP, 0, 0 },
 
-  { NULL, NULL },
+  { NULL,		NULL,	0,	0 },
 };
 
 

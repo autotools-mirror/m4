@@ -75,6 +75,9 @@ struct m4_macro
 {
   const char *name;
   const char *value;
+  size_t      min_args; /* 0-based minimum number of arguments */
+  /* max arguments, SIZE_MAX if unlimited; must be >= min_args */
+  size_t      max_args;
 };
 
 /* Describe a pair of strings, such as begin and end quotes.  */

@@ -5804,7 +5804,9 @@ refcount(`NoSuchModule')
 @acronym{GNU} @code{m4} ships with several bundled modules as standard.
 By convention, these modules define a text macro that can be tested
 with @code{ifdef} when they are loaded; only the @code{m4} module lacks
-this feature test macro.
+this feature test macro, since it is not permitted by @acronym{POSIX}.
+Each of the feature test macros are intended to be used without
+arguments.
 
 @table @code
 @item m4
@@ -5823,8 +5825,8 @@ module is loaded.
 @end deffn
 
 @deffn {Macro (gnu)} __m4_version__
-Expands to a quoted string containing the release version number of the
-running @acronym{GNU} @code{m4} executable.
+Expands to an unquoted string containing the release version number of
+the running @acronym{GNU} @code{m4} executable.
 @end deffn
 
 This module is always loaded, unless the @option{-G} command line
@@ -5871,6 +5873,9 @@ __gnu__-__traditional__
 @result{}-__traditional__
 ifdef(`__gnu__', `Extensions are active', `Minimal features')
 @result{}Extensions are active
+__gnu__(`ignored')
+@error{}m4:stdin:3: Warning: __gnu__: extra arguments ignored: 1 > 0
+@result{}
 @end example
 
 @comment options: -G
@@ -5880,6 +5885,19 @@ __gnu__-__traditional__
 @result{}__gnu__-
 ifdef(`__gnu__', `Extensions are active', `Minimal features')
 @result{}Minimal features
+@end example
+
+Since the version string is unquoted and can potentially contain macro
+names (consider the beta release @samp{1.9b}, or the use of
+@code{changesyntax}), the @code{__m4_version__} macro should generally
+be used via @code{defn} rather than directly invoked.
+
+@comment This test is excluded from the testsuite since it depends on a
+@comment texinfo macro; but builtin.at covers the same thing.
+@comment ignore
+@example
+defn(`__m4_version__')
+@result{}@value{VERSION}
 @end example
 
 @node Text handling

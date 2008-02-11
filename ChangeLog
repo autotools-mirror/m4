@@ -1,5 +1,22 @@
 2008-02-11  Eric Blake  <ebb9@byu.net>
 
+	Allow builtin text macros to specify number of arguments.
+	* m4/m4module.h (struct m4_macro): Add argument limits to builtin
+	text macros.
+	* m4/module.c (install_macro_table): Allow text macros to warn on
+	extra arguments.
+	* modules/gnu.c (m4_macro_table): Update all clients.
+	* modules/load.c (m4_macro_table): Likewise.
+	* modules/mpeval.c (m4_macro_table): Likewise.
+	* modules/perl.c (m4_macro_table): Likewise.
+	* modules/shadow.c (m4_macro_table): Likewise.
+	* modules/traditional.c (m4_macro_table): Likewise.
+	* modules/modtest.c (m4_macro_table): Likewise.  Also add text
+	macros, for testing this.
+	* doc/m4.texinfo (Standard Modules): Update text, and enhance
+	test.
+	* tests/modules.at (modules: text): New test.
+
 	Fix regression in command line -D option, from 2006-08-25.
 	* m4/m4private.h (m4_symbol_value_create): Delete fast accessor.
 	* m4/m4module.h: Fix typo.

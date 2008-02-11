@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -33,16 +33,16 @@
 /* A table for mapping m4 symbol names to simple expansion text. */
 m4_macro m4_macro_table[] =
 {
-  /* name		text */
+  /* name		text	min	max */
 #if UNIX
-  { "unix",		"" },
+  { "unix",		"",	0,	0 },
 #elif W32_NATIVE
-  { "windows",		"" },
+  { "windows",		"",	0,	0 },
 #elif OS2
-  { "os2",		"" },
+  { "os2",		"",	0,	0 },
 #else
 # warning Platform macro not provided
 #endif
-  { "__traditional__",	"" },
-  { NULL,		NULL },
+  { "__traditional__",	"",	0,	0 },
+  { NULL,		NULL,	0,	0 },
 };

@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -195,9 +195,14 @@ install_macro_table (m4 *context, m4_module *module)
 	  m4_symbol_value *value = m4_symbol_value_create ();
 	  size_t len = strlen (mp->value);
 
+	  /* Sanity check that builtins meet the required interface.  */
+	  assert (mp->min_args <= mp->max_args);
+
 	  m4_set_symbol_value_text (value, xmemdup (mp->value, len + 1),
                                     len, 0);
 	  VALUE_MODULE (value) = module;
+	  VALUE_MIN_ARGS (value) = mp->min_args;
+	  VALUE_MAX_ARGS (value) = mp->max_args;
 
 	  m4_symbol_pushdef (M4SYMTAB, mp->name, value);
 	}

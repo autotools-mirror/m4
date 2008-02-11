@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -420,6 +420,48 @@ AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
 
 AT_CLEANUP
 
+
+
+## ------------------- ##
+## text module symbols ##
+## ------------------- ##
+
+# Support text macros with requested numbers of parameters.
+
+AT_SETUP([modules: text])
+AT_CHECK_DYNAMIC_MODULE
+
+AT_DATA([input.m4],
+[[__test__
+__test__(1)
+__test__(1,2)
+onearg
+onearg(1)
+onearg(1,2)
+manyargs
+manyargs(1)
+manyargs(1,2)
+]])
+
+AT_CHECK_M4([-M "$abs_builddir" -m modtest input.m4], [0],
+[[modtest
+modtest
+modtest
+
+1
+1
+
+1
+1,2
+]], [[Test module loaded.
+m4:input.m4:2: Warning: __test__: extra arguments ignored: 1 > 0
+m4:input.m4:3: Warning: __test__: extra arguments ignored: 2 > 0
+m4:input.m4:4: Warning: onearg: too few arguments: 0 < 1
+m4:input.m4:6: Warning: onearg: extra arguments ignored: 2 > 1
+Test module unloaded.
+]])
+
+AT_CLEANUP
 
 
 ## -------------------- ##

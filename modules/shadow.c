@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2006, 2007, 2008 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -58,9 +59,9 @@ m4_builtin m4_builtin_table[] =
 
 m4_macro m4_macro_table[] =
 {
-  /* name		text */
-  { "__test__",		"`shadow'" },
-  { NULL, NULL },
+  /* name		text		min	max */
+  { "__test__",		"`shadow'",	0,	0 },
+  { NULL,		NULL,		0,	0 },
 };
 
 
