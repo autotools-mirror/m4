@@ -140,6 +140,15 @@ AT_CHECK_M4([-Ufoo in -Dfoo=bar in], [0], [[foo
 bar
 ]])
 
+dnl Test macro arguments defined via -D
+AT_DATA([in], [[-foo-foo(1)-foo(1,2)-
+-bar-bar(1)-bar(1,2)-
+]])
+AT_CHECK_M4([-Dfoo -Dbar='$@' in], [0],
+[[----
+--1-1,2-
+]])
+
 AT_CLEANUP
 
 

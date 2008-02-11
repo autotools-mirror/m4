@@ -1,5 +1,15 @@
 2008-02-11  Eric Blake  <ebb9@byu.net>
 
+	Fix regression in command line -D option, from 2006-08-25.
+	* m4/m4private.h (m4_symbol_value_create): Delete fast accessor.
+	* m4/m4module.h: Fix typo.
+	* m4/symtab.c (m4_symbol_value_create): Prime the maximum number
+	of arguments.
+	* tests/macros.at (Command line define): Enhance test.
+	* tests/others.at (nul character): Enhance test.
+	* tests/null.m4: Likewise.
+	* tests/null.out: Likewise.
+
 	Use gnulib's git-merge-changelog driver when available.
 	* .gitattributes: Add merge attributes for ChangeLog.
 	* bootstrap: Install driver, if not already present.

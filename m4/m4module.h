@@ -67,7 +67,7 @@ struct m4_builtin
   const char *	    name;	/* name found by builtin, printed by dumpdef */
   int		    flags;	/* bitwise OR of M4_BUILTIN_* bits */
   size_t	    min_args;	/* 0-based minimum number of arguments */
-  /* max arguments, UINT_MAX if unlimited; must be >= min_args */
+  /* max arguments, SIZE_MAX if unlimited; must be >= min_args */
   size_t	    max_args;
 };
 

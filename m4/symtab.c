@@ -674,7 +674,9 @@ m4_get_symbol_traced (m4_symbol *symbol)
 m4_symbol_value *
 m4_symbol_value_create (void)
 {
-  return xzalloc (sizeof (m4_symbol_value));
+  m4_symbol_value *value = xzalloc (sizeof (m4_symbol_value));
+  VALUE_MAX_ARGS (value) = SIZE_MAX;
+  return value;
 }
 
 #undef m4_symbol_value_groks_macro

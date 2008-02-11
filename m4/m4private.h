@@ -330,8 +330,7 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 #  define m4_get_symbol_value(S)	((S)->value)
 #  define m4_set_symbol_value(S, V)	((S)->value = (V))
 
-#  define m4_symbol_value_create()	xzalloc (sizeof (m4_symbol_value))
-/* m4_symbol_value_delete is too complex for a simple macro.  */
+/* m4_symbol_value_{create,delete} are too complex for a simple macro.  */
 
 #  define m4_is_symbol_value_text(V)	((V)->type == M4_SYMBOL_TEXT)
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
