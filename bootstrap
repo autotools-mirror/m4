@@ -1,9 +1,9 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-11-05
+# bootstrap (GNU M4) version 2008-02-11
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
-# Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -228,6 +228,19 @@ gnulib-comp.m4
 EOF
   func_echo "creating initial $config_macro_dir/.gitignore"
   cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
+fi
+
+# See if we can use gnulib's git-merge-changelog merge driver.
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if git config merge.merge-changelog.driver >/dev/null ; then
+    :
+  elif (git-merge-changelog --version) >/dev/null 2>/dev/null ; then
+    func_echo "initializing git-merge-changelog driver"
+    git config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
+    git config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
+  else
+    func_echo "consider installing git-merge-changelog from gnulib"
+  fi
 fi
 
 ## ---------------------------- ##

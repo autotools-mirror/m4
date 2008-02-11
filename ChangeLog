@@ -1,3 +1,9 @@
+2008-02-11  Eric Blake  <ebb9@byu.net>
+
+	Use gnulib's git-merge-changelog driver when available.
+	* .gitattributes: New file.
+	* bootstrap: Install driver, if not already present.
+
 2008-02-06  Eric Blake  <ebb9@byu.net>
 
 	Fix security hole introduced 2007-11-22.
@@ -18,7 +24,7 @@
 	argument of a $@ at a time; but the penalties of this patch make
 	it easier to manage $@ efficiently in future patches.
 	Memory impact: noticeable penalty, due to larger struct and O(n)
-	to O(n^2) on unboxed recursion
+	to O(n^2) on unboxed recursion.
 	Speed impact: noticeable penalty, due to more bookkeeping.
 	* src/m4.h (struct token_chain): Add comma and quotes fields.
 	(arg_adjust_refcount, arg_print, push_arg_quote): New prototypes.
