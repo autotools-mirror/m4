@@ -346,11 +346,11 @@ debugging their @code{m4} scripts than doing real work.  Beware that
 @cindex @acronym{GNU} M4, history of
 @code{GPM} was an important ancestor of @code{m4}.  See
 C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
-8,3 (1965), pp. 225 ff.  @code{GPM} is also succinctly described into
+8,3 (1965), pp.@: 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
 The classic B. Kernighan and P.J. Plauger: ``Software Tools'',
-Addison-Wesley, Inc. (1976) describes and implements a Unix
+Addison-Wesley, Inc.@: (1976) describes and implements a Unix
 macro-processor language, which inspired Dennis Ritchie to write
 @code{m3}, a macro processor for the AP-3 minicomputer.
 
@@ -6132,7 +6132,7 @@ fatal_error(`this is a BAD one, buster')
 
 After this macro call, @code{m4} will exit with exit status 1.  This macro
 is only intended for error exits, since the normal exit procedures are
-not followed, e.g., diverted text is not undiverted, and saved text
+not followed, i.e., diverted text is not undiverted, and saved text
 (@pxref{M4wrap}) is not reread.  (This macro could be made more robust
 to earlier versions of @code{m4}.  You should try to see if you can find
 weaknesses and correct them; or @pxref{Improved fatal_error, , Answers}).
@@ -6499,7 +6499,7 @@ multiple arguments names a builtin.  System V @code{m4} and some other
 implementations allow mixing builtins and text macros into a single
 macro.  @acronym{GNU} @code{m4} only supports joining multiple text
 arguments, although a future implementation may lift this restriction to
-behave more like System V.  The only portable way to join text macros
+behave more like System V@.  The only portable way to join text macros
 with builtins is via helper macros and implicit concatenation of macro
 results.
 
@@ -6630,7 +6630,7 @@ that is preserved even if the macro is currently undefined.
 
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all
-operators with the same precedence as C.  However, earlier versions of
+operators with the same precedence as C@.  However, earlier versions of
 @acronym{GNU} @code{m4} followed the traditional behavior of other
 @code{m4} implementations, where bitwise and logical negation (@samp{~}
 and @samp{!}) have lower precedence than equality operators; and where

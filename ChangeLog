@@ -1,3 +1,10 @@
+2008-02-13  Eric Blake  <ebb9@byu.net>
+
+	Fix texinfo grammar.
+	* doc/m4.texinfo (Incompatibilities): Use @. after capital.
+	(History): Use @: after abbreviations.
+	(M4exit): Use correct Latin abbreviation.
+
 2008-02-11  Eric Blake  <ebb9@byu.net>
 
 	Document behavior of __gnu__().
