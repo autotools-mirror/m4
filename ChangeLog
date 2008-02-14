@@ -1,3 +1,12 @@
+2008-02-13  Eric Blake  <ebb9@byu.net>
+
+	Fix texinfo grammar.
+	* doc/m4.texinfo (Eval, Incompatibilities): Use @. after capital.
+	(History): Use @: after abbreviations.
+	(M4exit): Use correct Latin abbreviation.
+	(Dumpdef, Debugmode, Frozen file format 2): Use correct spacing
+	between sentences.
+
 2008-02-11  Eric Blake  <ebb9@byu.net>
 
 	Allow builtin text macros to specify number of arguments.
