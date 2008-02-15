@@ -175,6 +175,8 @@ regexp_compile (m4 *context, const char *caller, const char *regexp,
       free (pat);
       return NULL;
     }
+  /* Use a fastmap for speed; it is freed by regfree.  */
+  pat->fastmap = xcharalloc (256);
 
   /* Now, find a victim slot.  Decrease the count of all entries, then
      prime the count of the victim slot at REGEX_CACHE_SIZE.  This
