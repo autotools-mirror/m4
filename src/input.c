@@ -165,9 +165,6 @@ string_pair curr_comm;
 
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
-/* Table of characters that can start a word.  */
-static char word_start[256];
-
 /* Current regular expression for detecting words.  */
 static struct re_pattern_buffer word_regexp;
 
@@ -637,6 +634,9 @@ pop_wrapup (void)
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
+#ifdef ENABLE_CHANGEWORD
+      regfree (&word_regexp);
+#endif /* ENABLE_CHANGEWORD */
       return false;
     }
 
@@ -1203,7 +1203,6 @@ set_comment (const char *bc, const char *ec)
 void
 set_word_regexp (const char *caller, const char *regexp)
 {
-  int i;
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
@@ -1225,21 +1224,20 @@ set_word_regexp (const char *caller, const char *regexp)
       return;
     }
 
-  /* If compilation worked, retry using the word_regexp struct.
-     Can't rely on struct assigns working, so redo the compilation.  */
-  regfree (&word_regexp);
+  /* If compilation worked, retry using the word_regexp struct.  We
+     can't rely on struct assigns working, so redo the compilation.
+     The fastmap can be reused between compilations, and will be freed
+     by the final regfree.  */
+  if (!word_regexp.fastmap)
+    word_regexp.fastmap = xcharalloc (256);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
   assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
+  if (re_compile_fastmap (&word_regexp))
+    assert (false);
 
   default_word_regexp = false;
   set_quote_age ();
-
-  for (i = 1; i < 256; i++)
-    {
-      char test = i;
-      word_start[i] = re_match (&word_regexp, &test, 1, 0, NULL) > 0;
-    }
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -1421,7 +1419,7 @@ next_token (token_data *td, int *line, struct obstack *obs, const char *caller)
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && word_start[ch])
+  else if (!default_word_regexp && word_regexp.fastmap[ch])
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1587,7 +1585,7 @@ peek_token (void)
     }
   else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (!default_word_regexp && word_start[ch])
+      || (!default_word_regexp && word_regexp.fastmap[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {

@@ -1,3 +1,12 @@
+2008-02-15  Eric Blake  <ebb9@byu.net>
+
+	Use fastmaps for better regex performance.
+	* src/builtin.c (compile_pattern): Allocate a fastmap.
+	* src/input.c (word_start): Delete.
+	(set_word_regexp): Compile a fastmap instead.
+	(peek_token, next_token): Use fastmap.
+	(pop_wrapup): Free memory on exit.
+
 2008-02-13  Eric Blake  <ebb9@byu.net>
 
 	Fix texinfo grammar.

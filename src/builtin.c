@@ -298,6 +298,8 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
       free (new_buf);
       return msg;
     }
+  /* Use a fastmap for speed; it is freed by regfree.  */
+  new_buf->fastmap = xcharalloc (256);
 
   /* Now, find a victim slot.  Decrease the count of all entries, then
      prime the count of the victim slot at REGEX_CACHE_SIZE.  This
