@@ -8256,7 +8256,7 @@ undivert(`forloop2.m4')dnl
 @result{}#   performs sanity check that FROM is larger than TO
 @result{}#   allows complex numerical expressions in TO and FROM
 @result{}define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-@result{}  `pushdef(`$1', eval(`$2'))_forloop(`$1',
+@result{}  `pushdef(`$1', eval(`$2'))_$0(`$1',
 @result{}    eval(`$3'), `$4')popdef(`$1')')')
 @result{}define(`_forloop',
 @result{}  `$3`'ifelse(indir(`$1'), `$2', `',
@@ -8273,6 +8273,48 @@ forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 forloop(`i', `a', `b', `non-numeric bounds')
 @error{}m4:stdin:6: Warning: eval: bad input: (b) >= (a)
 @result{}
+@end example
+
+One other change to notice is that the improved version used @samp{_$0}
+rather than @samp{_foreach} to invoke the helper routine.  In general,
+this is a good practice to follow, because then the set of macros can be
+uniformly transformed.  The following example shows a transformation
+that doubles the current quoting and appends a suffix @samp{2} to each
+transformed macro.  If @code{foreach} refers to the literal
+@samp{_foreach}, then @code{foreach2} invokes @code{_foreach} instead of
+the intended @code{_foreach2}, and the mixing of quoting paradigms leads
+to an infinite recursion loop in this example.
+
+@comment options: -L9
+@comment status: 1
+@comment examples
+@example
+$ @kbd{m4 -d -L 9 -I examples}
+define(`arg1', `$1')include(`forloop2.m4')include(`quote.m4')
+@result{}
+define(`double', `define(`$1'`2',
+  arg1(patsubst(dquote(defn(`$1')), `[`']', `\&\&')))')
+@result{}
+double(`forloop')double(`_forloop')defn(`forloop2')
+@result{}ifelse(eval(``($3) >= ($2)''), ``1'',
+@result{}  ``pushdef(``$1'', eval(``$2''))_$0(``$1'',
+@result{}    eval(``$3''), ``$4'')popdef(``$1'')'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+@result{}
+changequote(`[', `]')changequote([``], [''])
+@result{}
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+@result{}
+changequote`'include(`forloop.m4')
+@result{}
+double(`forloop')double(`_forloop')defn(`forloop2')
+@result{}pushdef(``$1'', ``$2'')_forloop($@@)popdef(``$1'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+@result{}
+changequote(`[', `]')changequote([``], [''])
+@result{}
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+@error{}m4:stdin:12: recursion limit of 9 exceeded, use -L<N> to change it
 @end example
 
 Of course, it is possible to make even more improvements, such as
@@ -8339,7 +8381,7 @@ undivert(`foreachq2.m4')dnl
 @result{}divert(`-1')
 @result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
 @result{}#   quoted list, improved version
-@result{}define(`foreachq', `pushdef(`$1')_foreachq($@@)popdef(`$1')')
+@result{}define(`foreachq', `pushdef(`$1')_$0($@@)popdef(`$1')')
 @result{}define(`_arg1q', ``$1'')
 @result{}define(`_rest', `ifelse(`$#', `1', `', `dquote(shift($@@))')')
 @result{}define(`_foreachq', `ifelse(`$2', `', `',
@@ -8436,7 +8478,7 @@ undivert(`foreach2.m4')dnl
 @result{}divert(`-1')
 @result{}# foreach(x, (item_1, item_2, ..., item_n), stmt)
 @result{}#   parenthesized list, improved version
-@result{}define(`foreach', `pushdef(`$1')_foreach(`$1',
+@result{}define(`foreach', `pushdef(`$1')_$0(`$1',
 @result{}  (dquote(dquote_elt$2)), `$3')popdef(`$1')')
 @result{}define(`_arg1', `$1')
 @result{}define(`_foreach', `ifelse(`$2', `(`')', `',
