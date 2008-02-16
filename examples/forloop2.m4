@@ -4,7 +4,7 @@ divert(`-1')
 #   performs sanity check that FROM is larger than TO
 #   allows complex numerical expressions in TO and FROM
 define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-  `pushdef(`$1', eval(`$2'))_forloop(`$1',
+  `pushdef(`$1', eval(`$2'))_$0(`$1',
     eval(`$3'), `$4')popdef(`$1')')')
 define(`_forloop',
   `$3`'ifelse(indir(`$1'), `$2', `',

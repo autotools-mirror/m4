@@ -1,5 +1,14 @@
 2008-02-16  Eric Blake  <ebb9@byu.net>
 
+	Add regression test for multi-character quote recursion.
+	* examples/foreach2.m4: Use $0 rather than spelling out name.
+	* examples/foreachq2.m4: Likewise.
+	* examples/forloop2.m4: Likewise.
+	* examples/hanoi.m4: Likewise.
+	* examples/trace.m4: Likewise.
+	* doc/m4.texinfo (Improved forloop): Document advantage of $0.
+	(Improved foreach): Adjust dump from file.
+
 	Stage 15: return argv refs back to collect_arguments.
 	Collect an entire $@ reference at once rather than one argument at
 	a time, outside of quotes (but inside quotes, $@ is still
