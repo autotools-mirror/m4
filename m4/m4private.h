@@ -221,6 +221,7 @@ struct m4__symbol_chain
       size_t index;			/* Argument index within argv.  */
       bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
       bool_bitfield comma : 1;		/* True when `,' is next input.  */
+      bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
       const m4_string_pair *quotes;	/* NULL for $*, quotes for $@.  */
     } u_a;			/* M4__CHAIN_ARGV.  */
   } u;
@@ -397,7 +398,8 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*,
 #define CHAR_EOF	256	/* Character return on EOF.  */
 #define CHAR_BUILTIN	257	/* Character return for BUILTIN token.  */
 #define CHAR_QUOTE	258	/* Character return for quoted string.  */
-#define CHAR_RETRY	259	/* Character return for end of input block.  */
+#define CHAR_ARGV	259	/* Character return for $@ reference.  */
+#define CHAR_RETRY	260	/* Character return for end of input block.  */
 
 #define DEF_LQUOTE	"`"	/* Default left quote delimiter.  */
 #define DEF_RQUOTE	"\'"	/* Default right quote delimiter.  */
@@ -475,7 +477,8 @@ typedef enum {
   M4_TOKEN_COMMA,	/* Argument separator, M4_SYMBOL_TEXT.  */
   M4_TOKEN_CLOSE,	/* Argument list end, M4_SYMBOL_TEXT.  */
   M4_TOKEN_SIMPLE,	/* Single character, M4_SYMBOL_TEXT.  */
-  M4_TOKEN_MACDEF	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
+  M4_TOKEN_MACDEF,	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
+  M4_TOKEN_ARGV		/* A series of parameters, M4_SYMBOL_COMP.  */
 } m4__token_type;
 
 extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
@@ -483,7 +486,7 @@ extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
 					 bool);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
-					m4_obstack *, const char *);
+					m4_obstack *, bool, const char *);
 extern	bool		m4__next_token_is_open (m4 *);
 
 /* Fast macro versions of macro argv accessor functions,

@@ -845,7 +845,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
     {
       m4_obstack obs;
       obstack_init (&obs);
-      m4_symbol_value_print (value, &obs, false, NULL, NULL, SIZE_MAX, true);
+      m4_symbol_value_print (value, &obs, NULL, NULL, true);
       xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }

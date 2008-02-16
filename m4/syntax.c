@@ -743,9 +743,11 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
 			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
 			  | M4_SYNTAX_SPACE))
       && *syntax->quote.str1 != *syntax->quote.str2
-      && *syntax->comm.str1 != *syntax->quote.str2
-      && !m4_has_syntax (syntax, *syntax->comm.str1,
-			 M4_SYNTAX_OPEN | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE)
+      && (!syntax->comm.len1
+          || (*syntax->comm.str1 != *syntax->quote.str2
+              && !m4_has_syntax (syntax, *syntax->comm.str1,
+                                 (M4_SYNTAX_OPEN | M4_SYNTAX_COMMA
+                                  | M4_SYNTAX_CLOSE))))
       && m4_has_syntax (syntax, ',', M4_SYNTAX_COMMA))
     {
       syntax->quote_age = ((local_syntax_age << 16)

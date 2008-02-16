@@ -183,7 +183,7 @@ m4_macro_expand_input (m4 *context)
   m4_set_symbol_value_text (&empty_symbol, "", 0, 0);
   VALUE_MAX_ARGS (&empty_symbol) = -1;
 
-  while ((type = m4__next_token (context, &token, &line, NULL, NULL))
+  while ((type = m4__next_token (context, &token, &line, NULL, false, NULL))
 	 != M4_TOKEN_EOF)
     expand_token (context, NULL, type, &token, line, true);
 }
@@ -311,7 +311,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
   /* Skip leading white space.  */
   do
     {
-      type = m4__next_token (context, &token, NULL, obs, caller);
+      type = m4__next_token (context, &token, NULL, obs, true, caller);
     }
   while (type == M4_TOKEN_SPACE);
 
@@ -389,6 +389,20 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	    argp->type = M4_SYMBOL_TEXT;
 	  break;
 
+	case M4_TOKEN_ARGV:
+	  assert (paren_level == 0 && argp->type == M4_SYMBOL_VOID
+		  && obstack_object_size (obs) == 0
+		  && token.u.u_c.chain == token.u.u_c.end
+		  && token.u.u_c.chain->type == M4__CHAIN_ARGV);
+	  argp->type = M4_SYMBOL_COMP;
+	  argp->u.u_c.chain = argp->u.u_c.end = token.u.u_c.chain;
+	  type = m4__next_token (context, &token, NULL, NULL, false, caller);
+	  if (argp->u.u_c.chain->u.u_a.skip_last)
+	    assert (type == M4_TOKEN_COMMA);
+	  else
+	    assert (type == M4_TOKEN_COMMA || type == M4_TOKEN_CLOSE);
+	  return type == M4_TOKEN_COMMA;
+
 	default:
 	  assert (!"expand_argument");
 	  abort ();
@@ -396,7 +410,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 
       if (argp->type != M4_SYMBOL_VOID || obstack_object_size (obs))
 	first = false;
-      type = m4__next_token (context, &token, NULL, obs, caller);
+      type = m4__next_token (context, &token, NULL, obs, first, caller);
     }
 }
 
@@ -583,7 +597,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
   if (m4__next_token_is_open (context))
     {
       /* Gobble parenthesis, then collect arguments.  */
-      m4__next_token (context, &token, NULL, NULL, name);
+      m4__next_token (context, &token, NULL, NULL, false, name);
       do
 	{
 	  tokenp = (m4_symbol_value *) obstack_alloc (arguments,
@@ -608,12 +622,22 @@ collect_arguments (m4 *context, const char *name, size_t len,
 	      && m4_get_symbol_value_quote_age (tokenp) != args.quote_age)
 	    args.quote_age = 0;
 	  else if (tokenp->type == M4_SYMBOL_COMP)
-	    args.has_ref = true;
+	    {
+	      args.has_ref = true;
+	      if (tokenp->u.u_c.chain->type == M4__CHAIN_ARGV)
+		{
+		  args.argc += (tokenp->u.u_c.chain->u.u_a.argv->argc
+				- tokenp->u.u_c.chain->u.u_a.index
+				- tokenp->u.u_c.chain->u.u_a.skip_last - 1);
+		  args.wrapper = true;
+		}
+	    }
 	}
       while (more_args);
     }
   argv = (m4_macro_args *) obstack_finish (argv_stack);
   argv->argc = args.argc;
+  argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   if (args.quote_age != m4__quote_age (M4SYNTAX))
     argv->quote_age = 0;
@@ -981,9 +1005,22 @@ m4__arg_adjust_refcount (m4 *context, m4_macro_args *argv, bool increase)
 	  chain = argv->array[i]->u.u_c.chain;
 	  while (chain)
 	    {
-	      assert (chain->type == M4__CHAIN_STR);
-	      if (chain->u.u_s.level < SIZE_MAX)
-		m4__adjust_refcount (context, chain->u.u_s.level, increase);
+	      switch (chain->type)
+		{
+		case M4__CHAIN_STR:
+		  if (chain->u.u_s.level < SIZE_MAX)
+		    m4__adjust_refcount (context, chain->u.u_s.level,
+					 increase);
+		  break;
+		case M4__CHAIN_ARGV:
+		  assert (chain->u.u_a.argv->inuse);
+		  m4__arg_adjust_refcount (context, chain->u.u_a.argv,
+					   increase);
+		  break;
+		default:
+		  assert (!"m4__arg_adjust_refcount");
+		  abort ();
+		}
 	      chain = chain->next;
 	    }
 	}
@@ -996,15 +1033,25 @@ m4__arg_adjust_refcount (m4 *context, m4_macro_args *argv, bool increase)
 static void
 arg_mark (m4_macro_args *argv)
 {
+  size_t i;
+  m4__symbol_chain *chain;
+
+  if (argv->inuse)
+    return;
   argv->inuse = true;
   if (argv->wrapper)
     {
-      /* TODO for now we support only a single-length $@ chain.  */
-      assert (argv->arraylen == 1
-	      && argv->array[0]->type == M4_SYMBOL_COMP
-	      && !argv->array[0]->u.u_c.chain->next
-	      && argv->array[0]->u.u_c.chain->type == M4__CHAIN_ARGV);
-      argv->array[0]->u.u_c.chain->u.u_a.argv->inuse = true;
+      for (i = 0; i < argv->arraylen; i++)
+	if (argv->array[i]->type == M4_SYMBOL_COMP)
+	  {
+	    chain = argv->array[i]->u.u_c.chain;
+	    while (chain)
+	      {
+		if (chain->type == M4__CHAIN_ARGV && !chain->u.u_a.argv->inuse)
+		  arg_mark (chain->u.u_a.argv);
+		chain = chain->next;
+	      }
+	  }
     }
 }
 
@@ -1022,12 +1069,13 @@ make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
   m4__symbol_chain *chain;
 
   assert (obstack_object_size (obs) == 0);
-  if (argv->wrapper)
+  if (argv->wrapper && argv->arraylen == 1)
     {
-      /* TODO support concatenation with $@ refs.  */
-      assert (argv->arraylen == 1 && argv->array[0]->type == M4_SYMBOL_COMP);
+      /* TODO support $@ ref alongside other arguments.  */
+      assert (argv->array[0]->type == M4_SYMBOL_COMP);
       chain= argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == M4__CHAIN_ARGV);
+      assert (!chain->next && chain->type == M4__CHAIN_ARGV
+	      && !chain->u.u_a.skip_last);
       argv = chain->u.u_a.argv;
       index += chain->u.u_a.index - 1;
     }
@@ -1044,6 +1092,7 @@ make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
   chain->u.u_a.index = index;
   chain->u.u_a.flatten = flatten;
   chain->u.u_a.comma = false;
+  chain->u.u_a.skip_last = false;
   if (quotes)
     {
       /* Clone the quotes into the obstack, since changequote can
@@ -1081,12 +1130,14 @@ arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
   for (i = 0; i < argv->arraylen; i++)
     {
       value = argv->array[i];
-      if (value->type == M4_SYMBOL_COMP)
+      if (value->type == M4_SYMBOL_COMP
+	  && value->u.u_c.chain->type == M4__CHAIN_ARGV)
 	{
 	  m4__symbol_chain *chain = value->u.u_c.chain;
 	  /* TODO - for now we support only a single $@ chain.  */
-	  assert (!chain->next && chain->type == M4__CHAIN_ARGV);
-	  if (index < chain->u.u_a.argv->argc - (chain->u.u_a.index - 1))
+	  assert (!chain->next);
+	  if (index <= (chain->u.u_a.argv->argc - chain->u.u_a.index
+			- chain->u.u_a.skip_last))
 	    {
 	      value = arg_symbol (chain->u.u_a.argv,
 				  chain->u.u_a.index - 1 + index, level);
@@ -1094,7 +1145,8 @@ arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
 		value = &empty_symbol;
 	      break;
 	    }
-	  index -= chain->u.u_a.argv->argc - chain->u.u_a.index;
+	  index -= (chain->u.u_a.argv->argc - chain->u.u_a.index
+		    - chain->u.u_a.skip_last);
 	}
       else if (--index == 0)
 	break;
@@ -1154,15 +1206,25 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
   value = m4_arg_symbol (argv, index);
   if (m4_is_symbol_value_text (value))
     return m4_get_symbol_value_text (value);
-  /* TODO - concatenate argv refs and functions?  For now, we assume
-     all chain elements are text.  */
+  /* TODO - concatenate functions.  */
   assert (value->type == M4_SYMBOL_COMP);
   chain = value->u.u_c.chain;
   obs = m4_arg_scratch (context);
   while (chain)
     {
-      assert (chain->type == M4__CHAIN_STR);
-      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+      switch (chain->type)
+	{
+	case M4__CHAIN_STR:
+	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+	  break;
+	case M4__CHAIN_ARGV:
+	  m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+			chain->u.u_a.quotes, NULL, false);
+	  break;
+	default:
+	  assert (!"m4_arg_text");
+	  abort ();
+	}
       chain = chain->next;
     }
   obstack_1grow (obs, '\0');

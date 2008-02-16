@@ -1,3 +1,29 @@
+2008-02-16  Eric Blake  <ebb9@byu.net>
+
+	Stage 15: return argv refs back to collect_arguments.
+	Collect an entire $@ reference at once rather than one argument at
+	a time, outside of quotes (but inside quotes, $@ is still
+	flattened for now).  The skip_last field allows concatenation of
+	$@ with other text when collecting arguments.
+	Memory impact: noticeable improvement, due to better reuse of $@.
+	Speed impact: noticeable improvement, due to less parsing.
+	* m4/m4private.h (CHAR_ARGV): New input engine sentinel.
+	(enum m4__token_type): Add M4_TOKEN_ARGV.
+	(struct m4__symbol_chain): Add skip_last member to argv link.
+	(m4__next_token): Add parameter.
+	* m4/input.c (peek_char, file_peek, builtin_peek, string_peek)
+	(composite_peek, m4__next_token): Add new parameter.
+	(composite_read, append_quote_token): Support argv in quotes.
+	(init_argv_symbol): New function.
+	(m4__push_symbol, match_input, consume_syntax)
+	(m4__next_token_is_open, m4_print_token): Adjust callers.
+	* m4/macro.c (m4_macro_expand_input, m4__arg_adjust_refcount)
+	(arg_mark, m4_arg_text, make_argv_ref): Likewise.
+	(expand_argument, collect_arguments): Handle new token.
+	(arg_symbol): Drill through $@ reference.
+	* m4/syntax.c (set_quote_age): Detect disabled comments.
+	* m4/symtab.c (dump_symbol_CB) [DEBUG_SYM]: Fix debug code.
+
 2008-02-15  Eric Blake  <ebb9@byu.net>
 
 	* modules/gnu.c (regexp_compile): Use a fastmap for regex speed.
