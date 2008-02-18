@@ -299,7 +299,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
       return msg;
     }
   /* Use a fastmap for speed; it is freed by regfree.  */
-  new_buf->fastmap = xcharalloc (256);
+  new_buf->fastmap = xcharalloc (UCHAR_MAX + 1);
 
   /* Now, find a victim slot.  Decrease the count of all entries, then
      prime the count of the victim slot at REGEX_CACHE_SIZE.  This
@@ -1880,8 +1880,8 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
   const char *data;
   const char *from;
   const char *to;
-  char map[256] = {0};
-  char found[256] = {0};
+  char map[UCHAR_MAX + 1] = {0};
+  char found[UCHAR_MAX + 1] = {0};
   unsigned char ch;
 
   if (bad_argc (ARG (0), argc, 2, 3))

@@ -1,3 +1,18 @@
+2008-02-18  Eric Blake  <ebb9@byu.net>
+
+	Avoid some magic numbers.
+	* src/m4.h (DEBUG_TRACE_ARGS, DEBUG_TRACE_EXPANSION)
+	(DEBUG_TRACE_QUOTE, DEBUT_TRACE_ALL, DEBUG_TRACE_LINE)
+	(DEBUG_TRACE_FILE, DEBUG_TRACE_PATH, DEBUG_TRACE_CALL)
+	(DEBUG_TRACE_INPUT, DEBUG_TRACE_CALLID, DEBUG_TRACE_VERBOSE)
+	(DEBUG_TRACE_DEFAULT): Use hex constants, to make it obvious these
+	are bit fields.
+	* src/input.c (CHAR_EOF, CHAR_MACRO, CHAR_QUOTE, CHAR_ARGV):
+	Define in terms of UCHAR_MAX.
+	(set_word_regexp): Likewise.
+	* src/builtin.c (compile_pattern, m4_translit): Likewise.
+	Reported by Ralf Wildenhues.
+
 2008-02-16  Eric Blake  <ebb9@byu.net>
 
 	Add regression test for multi-character quote recursion.

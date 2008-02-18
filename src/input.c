@@ -151,10 +151,10 @@ static bool start_of_input_line;
 /* Flag for next_char () to recognize change in input block.  */
 static bool input_change;
 
-#define CHAR_EOF	256	/* Character return on EOF.  */
-#define CHAR_MACRO	257	/* Character return for MACRO token.  */
-#define CHAR_QUOTE	258	/* Character return for quoted string.  */
-#define CHAR_ARGV	259	/* Character return for $@ reference.  */
+#define CHAR_EOF	(UCHAR_MAX + 1)	/* Return on EOF.  */
+#define CHAR_MACRO	(UCHAR_MAX + 2)	/* Return for MACRO token.  */
+#define CHAR_QUOTE	(UCHAR_MAX + 3)	/* Return for quoted string.  */
+#define CHAR_ARGV	(UCHAR_MAX + 4)	/* Return for $@ reference.  */
 
 /* Quote chars.  */
 string_pair curr_quote;
@@ -1303,7 +1303,7 @@ set_word_regexp (const char *caller, const char *regexp)
      The fastmap can be reused between compilations, and will be freed
      by the final regfree.  */
   if (!word_regexp.fastmap)
-    word_regexp.fastmap = xcharalloc (256);
+    word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
   assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
