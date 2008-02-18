@@ -1,3 +1,17 @@
+2008-02-18  Eric Blake  <ebb9@byu.net>
+
+	Avoid some magic numbers.
+	* m4/m4private.h (CHAR_EOF, CHAR_BUILTIN, CHAR_QUOTE, CHAR_ARGV)
+	(CHAR_RETRY): Define in terms of UCHAR_MAX.
+	* m4/syntax.c (m4_syntax_create, set_syntax_set)
+	(reset_syntax_set, check_is_single_quotes)
+	(check_is_single_comments, check_is_macro_escaped)
+	(m4_set_quotes, m4_set_comment): Likewise.
+	* modules/gnu.c (regexp_compile): Likewise.
+	* modules/m4.c (translit): Likewise.
+	* src/freeze.c (produce_syntax_dump): Likewise.
+	Reported by Ralf Wildenhues.
+
 2008-02-16  Eric Blake  <ebb9@byu.net>
 
 	Add regression test for multi-character quote recursion.

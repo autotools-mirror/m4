@@ -349,7 +349,7 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 						    VALUE_MACRO_ARGS_BIT))
 
 #  define m4_set_symbol_value_text(V, T, L, A)				\
-  ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T),                   \
+  ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T),			\
    (V)->u.u_t.len = (L), (V)->u.u_t.quote_age = (A))
 #  define m4_set_symbol_value_builtin(V, B)				\
   ((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B))
@@ -395,11 +395,11 @@ extern void m4__symtab_remove_module_references (m4_symbol_table*,
 
 /* CHAR_RETRY must be last, because we size the syntax table to hold
    all other characters and sentinels. */
-#define CHAR_EOF	256	/* Character return on EOF.  */
-#define CHAR_BUILTIN	257	/* Character return for BUILTIN token.  */
-#define CHAR_QUOTE	258	/* Character return for quoted string.  */
-#define CHAR_ARGV	259	/* Character return for $@ reference.  */
-#define CHAR_RETRY	260	/* Character return for end of input block.  */
+#define CHAR_EOF	(UCHAR_MAX + 1)	/* Return on EOF.  */
+#define CHAR_BUILTIN	(UCHAR_MAX + 2)	/* Return for BUILTIN token.  */
+#define CHAR_QUOTE	(UCHAR_MAX + 3)	/* Return for quoted string.  */
+#define CHAR_ARGV	(UCHAR_MAX + 4)	/* Return for $@ reference.  */
+#define CHAR_RETRY	(UCHAR_MAX + 5)	/* Return for end of input block.  */
 
 #define DEF_LQUOTE	"`"	/* Default left quote delimiter.  */
 #define DEF_RQUOTE	"\'"	/* Default right quote delimiter.  */

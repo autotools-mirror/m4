@@ -103,12 +103,12 @@ produce_resyntax_dump (m4 *context, FILE *file)
 static void
 produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
 {
-  char buf[256];
+  char buf[UCHAR_MAX + 1];
   int code = m4_syntax_code (ch);
   int count = 0;
   int i;
 
-  for (i = 0; i < 256; ++i)
+  for (i = 0; i < UCHAR_MAX + 1; ++i)
     if (m4_has_syntax (syntax, i, code) && code != syntax->orig[i])
       buf[count++] = i;
 

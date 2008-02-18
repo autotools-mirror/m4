@@ -998,8 +998,8 @@ M4BUILTIN_HANDLER (translit)
   const char *data;
   const char *from;
   const char *to;
-  char map[256] = {0};
-  char found[256] = {0};
+  char map[UCHAR_MAX + 1] = {0};
+  char found[UCHAR_MAX + 1] = {0};
   unsigned char ch;
 
   if (argc <= 2)

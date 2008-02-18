@@ -116,7 +116,7 @@ m4_syntax_create (void)
   int ch;
 
   /* Set up default table.  This table never changes during operation.  */
-  for (ch = 256; --ch >= 0;)
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     switch (ch)
       {
       case '(':
@@ -309,7 +309,7 @@ set_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
   /* Explicit set of characters to install with this category; all
      other characters that used to have the category get reset to
      OTHER.  */
-  for (ch = 256; --ch >= 0; )
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (code == M4_SYNTAX_RQUOTE || code == M4_SYNTAX_ECOMM)
 	remove_syntax_attribute (syntax, ch, code);
@@ -329,7 +329,7 @@ static void
 reset_syntax_set (m4_syntax_table *syntax, int code)
 {
   int ch;
-  for (ch = 256; --ch >= 0; )
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       /* Reset the category back to its default state.  All other
 	 characters that used to have this category get reset to
@@ -443,7 +443,7 @@ check_is_single_quotes (m4_syntax_table *syntax)
      on the syntax table, then update lquote/rquote accordingly.
      Otherwise, keep lquote/rquote, but we no longer have single
      quotes.  */
-  for (ch = 256; --ch >= 0; )
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
 	{
@@ -496,7 +496,7 @@ check_is_single_comments (m4_syntax_table *syntax)
      on the syntax table, then update bcomm/ecomm accordingly.
      Otherwise, keep bcomm/ecomm, but we no longer have single
      comments.  */
-  for (ch = 256; --ch >= 0; )
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
 	{
@@ -535,7 +535,7 @@ check_is_macro_escaped (m4_syntax_table *syntax)
   int ch;
 
   syntax->is_macro_escaped = false;
-  for (ch = 256; --ch >= 0; )
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
       {
 	syntax->is_macro_escaped = true;
@@ -593,7 +593,7 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
 			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM)));
 
-  for (ch = 256; --ch >= 0;)
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
 	add_syntax_attribute (syntax, ch,
@@ -656,7 +656,7 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
 			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM
 			   | M4_SYNTAX_LQUOTE)));
 
-  for (ch = 256; --ch >= 0;)
+  for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
 	add_syntax_attribute (syntax, ch,
@@ -744,10 +744,10 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
 			  | M4_SYNTAX_SPACE))
       && *syntax->quote.str1 != *syntax->quote.str2
       && (!syntax->comm.len1
-          || (*syntax->comm.str1 != *syntax->quote.str2
-              && !m4_has_syntax (syntax, *syntax->comm.str1,
-                                 (M4_SYNTAX_OPEN | M4_SYNTAX_COMMA
-                                  | M4_SYNTAX_CLOSE))))
+	  || (*syntax->comm.str1 != *syntax->quote.str2
+	      && !m4_has_syntax (syntax, *syntax->comm.str1,
+				 (M4_SYNTAX_OPEN | M4_SYNTAX_COMMA
+				  | M4_SYNTAX_CLOSE))))
       && m4_has_syntax (syntax, ',', M4_SYNTAX_COMMA))
     {
       syntax->quote_age = ((local_syntax_age << 16)
