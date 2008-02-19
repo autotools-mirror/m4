@@ -1,3 +1,9 @@
+2008-02-19  Eric Blake  <ebb9@byu.net>
+
+	Clean up foreach example.
+	* doc/m4.texinfo (Foreach, Improved foreach): Document another
+	shortcoming in foreach.m4.
+
 2008-02-16  Eric Blake  <ebb9@byu.net>
 
 	Add regression test for multi-character quote recursion.
