@@ -3362,37 +3362,25 @@ has its own severe flaw.  Whereas the @code{foreach} implementation was
 linear, this macro is quadratic in the number of list elements, and is
 much more likely to trip up the limit set by the command line option
 @option{--nesting-limit} (or @option{-L}, @pxref{Limits control, ,
-Invoking m4}).  (It is possible to have robust iteration with linear
-behavior for either list style.  See if you can learn from the best
-elements of both of these implementations to create robust macros; or
-@pxref{Improved foreach, , Answers}).
-
-With a robust @code{foreach} implementation, it is possible to create a
-filter on a list of defined symbols.  This next example will find all
-symbols that contain @samp{if}.  Notice the use of @code{dquote} and
-@code{dquote_elt} to ensure that the list of macro names is properly
-quoted; without these, the iteration would be invoking various macros
-with catastrophic effects.  This example also shows a trick for
-generating the correct number of commas in the resulting output.
+Invoking m4}).  Additionally, this implementation does not expand
+@samp{defn(`@var{iterator}')} very well, when compared with
+@code{foreach}.
 
 @comment examples
 @example
 $ @kbd{m4 -I examples}
-include(`quote.m4')include(`foreachq.m4')
+include(`foreach.m4')include(`foreachq.m4')
 @result{}
-pushdef(`sep', ``, '')
-@result{}
-pushdef(`cleanup', `popdef(`sep', `cleanup')')
-@result{}
-pushdef(`sep', `define(`cleanup',
-  `popdef(`cleanup')')popdef(`sep')')
-@result{}
-foreachq(`macro', dquote(dquote_elt(m4symbols)),
-  `regexp(macro, `.*if.*', `sep`\&'')')
-@result{}ifdef, ifelse, shift
-cleanup
-@result{}
+foreach(`name', `(`a', `b')', ` defn(`name')')
+@result{} a b
+foreachq(`name', ``a', `b'', ` defn(`name')')
+@result{} _arg1(`a', `b') _arg1(shift(`a', `b'))
 @end example
+
+It is possible to have robust iteration with linear behavior and sane
+@var{iterator} contents for either list style.  See if you can learn
+from the best elements of both of these implementations to create robust
+macros (or @pxref{Improved foreach, , Answers}).
 
 @node Debugging
 @chapter How to debug macros and input
@@ -8405,7 +8393,9 @@ Note that the fixed version calls unquoted helper macros in
 in turn must re-supply the layer of quotes lost in the macro invocation.
 Contrast the use of @code{@w{_arg1q}}, which quotes the first list
 element, with @code{@w{_arg1}} of the earlier implementation that
-returned the first list element directly.
+returned the first list element directly.  Additionally, by calling the
+helper method immediately, the @samp{defn(`@var{iterator}')} no longer
+contains unexpanded macros.
 
 The astute m4 programmer might notice that the solution above still uses
 more memory, and thus more time, than strictly necessary.  Note that
@@ -8501,10 +8491,43 @@ foreach(`x', `(`1', `2', `3', `4')', `x
 @error{}m4trace: -3- shift(``4'')
 @end example
 
+@cindex filtering defined symbols
+@cindex subset of defined symbols
+@cindex defined symbols, filtering
+With a robust @code{foreachq} implementation, it is possible to create a
+filter on a list of defined symbols.  This next example will find all
+symbols that contain @samp{if} or @samp{def}, via two different
+approaches.  In the first approach, @code{dquote_elt} is used to
+overquote each list element, then @code{dquote} forms the list; that
+way, the iterator @code{macro} can be expanded in place because its
+contents are already quoted.  This approach also uses a self-modifying
+macro @code{sep} to provide the correct number of commas.  In the second
+approach, the iterator @code{macro} contains live text, so it must be
+used with @code{defn} to avoid unintentional expansion.  The correct
+number of commas is achieved by using @code{shift} to ignore the first
+one, although a leading space still remains.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`quote.m4')include(`foreachq2.m4')
+@result{}
+pushdef(`sep', `define(`sep', ``, '')')
+@result{}
+foreachq(`macro', dquote(dquote_elt(m4symbols)),
+  `regexp(macro, `.*if.*', `sep`\&'')')
+@result{}ifdef, ifelse, shift
+popdef(`sep')
+@result{}
+shift(foreachq(`macro', dquote(m4symbols),
+  `regexp(defn(`macro'), `def', `,` ''dquote(defn(`macro')))'))
+@result{} define, defn, dumpdef, ifdef, popdef, pushdef, undefine
+@end example
+
 In summary, recursion over list elements is trickier than it appeared at
 first glance, but provides a powerful idiom within @code{m4} processing.
 As a final demonstration, both list styles are now able to handle
-several scenarios that would wreak havoc on the original
+several scenarios that would wreak havoc on one or both of the original
 implementations.  This points out one other difference between the
 list styles.  @code{foreach} evaluates unquoted list elements only once,
 in preparation for calling @code{@w{_foreach}}, similary for
@@ -8538,6 +8561,10 @@ foreach(`x', `(`,')', `<x>') / foreachq(`x', ``,'', `<x>')
 dnl 2-element list of unbalanced parentheses
 foreach(`x', `(`(', `)')', `<x>') / foreachq(`x', ``(', `)'', `<x>')
 @result{}<(><)> / <(><)>
+define(`ab', `oops')dnl using defn(`iterator')
+foreach(`x', `(`a', `b')', `defn(`x')') /dnl
+ foreachq(`x', ``a', `b'', `defn(`x')')
+@result{}ab / ab
 define(`active', `ACT, IVE')
 @result{}
 traceon(`active')
