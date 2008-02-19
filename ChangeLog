@@ -1,3 +1,7 @@
+2008-02-19  Eric Blake  <ebb9@byu.net>
+
+	* src/main.c (usage): Fix typo.
+
 2008-02-18  Eric Blake  <ebb9@byu.net>
 
 	Avoid some magic numbers.

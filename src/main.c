@@ -75,7 +75,7 @@ usage (int status)
       fputs (_("\
 Process macros in FILEs.\n\
 If no FILE or if FILE is `-', standard input is read.  If no FILE, and both\n\
-standard input and standard output are terminals, -i is implied.\n\
+standard input and standard error are terminals, -i is implied.\n\
 "), stdout);
       puts ("");
       fputs (_("\
