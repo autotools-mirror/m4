@@ -15,7 +15,7 @@
 @c @tabchar{}
 @c ----------
 @c The testsuite expects literal tab output in some examples, but
-@c literal tabs in texinfo lead to formatting issues.
+@c literal tabs in texinfo leads to formatting issues.
 @macro tabchar
 @	@c
 @end macro
@@ -3866,7 +3866,7 @@ $ @kbd{m4 -d -l 4 -t echo}
 debuglen(`oops')
 @error{}m4:stdin:1: Warning: debuglen: non-numeric argument `oops'
 @result{}
-define(`echo', `$@')
+define(`echo', `$@@')
 @result{}
 echo(`long string')
 @error{}m4trace: -1- echo(`long...') -> ``lon...'
@@ -4950,7 +4950,7 @@ doesn't match between expansion and rescanning.
 @c FIXME - changing syntax of , should not break iterative macros.
 @example
 $ @kbd{m4 -d}
-changesyntax(`,=|')traceon(`foo')define(`foo'|`$#:$@')
+changesyntax(`,=|')traceon(`foo')define(`foo'|`$#:$@@')
 @result{}
 foo(foo(1|2|3))
 @error{}m4trace: -2- foo(`1', `2', `3') -> `3:`1',`2',`3''

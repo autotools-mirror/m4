@@ -1,3 +1,7 @@
+2008-02-20  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Debuglen, Changesyntax): Fix typos.
+
 2008-02-19  Eric Blake  <ebb9@byu.net>
 
 	Clean up example on filtering defined symbols.
