@@ -1,5 +1,9 @@
 2008-02-20  Eric Blake  <ebb9@byu.net>
 
+	Fix out-of-bounds read for sanitized macro names, from 2008-02-06.
+	* m4/utility.c (m4_verror_at_line): Properly terminate the string.
+	Reported by Ralf Wildenhues.
+
 	* doc/m4.texinfo (Debuglen, Changesyntax): Fix typos.
 
 2008-02-19  Eric Blake  <ebb9@byu.net>

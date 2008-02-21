@@ -64,7 +64,8 @@ MAINTAINERCLEANFILES = \
 MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
 
 # Make sure config.status is regenerated when the version timestamp changes
-CONFIG_STATUS_DEPENDENCIES = ChangeLog
+#ebb
+#CONFIG_STATUS_DEPENDENCIES = ChangeLog
 
 
 ## ------- ##
