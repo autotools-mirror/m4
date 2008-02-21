@@ -437,6 +437,14 @@ struct m4_syntax_table {
      these can alter the rescan of a prior parameter in a quoted
      context.  */
   unsigned int quote_age;
+
+  /* Track a cached quote pair on the input obstack.  */
+  m4_string_pair *cached_quote;
+
+  /* Storage for a simple cached quote that can be recreated on the fly.  */
+  char cached_lquote[2];
+  char cached_rquote[2];
+  m4_string_pair cached_simple;
 };
 
 /* Fast macro versions of syntax table accessor functions,
@@ -461,6 +469,14 @@ struct m4_syntax_table {
    current token in the context of a quoted string of the same quote
    age will give the same parse.  */
 #define m4__safe_quotes(S)		(((S)->quote_age & 0xffff) != 0)
+
+/* Set or refresh the cached quote.  */
+extern const m4_string_pair *m4__quote_cache (m4_syntax_table *,
+					      m4_obstack *obs, unsigned int,
+					      const m4_string_pair *);
+
+/* Clear the cached quote.  */
+#define m4__quote_uncache(S)		((S)->cached_quote = NULL)
 
 
 /* --- MACRO MANAGEMENT --- */

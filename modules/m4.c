@@ -358,7 +358,8 @@ M4BUILTIN_HANDLER (dumpdef)
       obstack_grow (obs, data.base[0], strlen (data.base[0]));
       obstack_1grow (obs, ':');
       obstack_1grow (obs, '\t');
-      m4_symbol_print (symbol, obs, quotes, stack, arg_length, module);
+      m4_symbol_print (context, symbol, obs, quotes, stack, arg_length,
+		       module);
       obstack_1grow (obs, '\n');
     }
 
@@ -792,7 +793,7 @@ M4BUILTIN_HANDLER (errprint)
   size_t len;
 
   assert (obstack_object_size (obs) == 0);
-  m4_dump_args (context, obs, 1, argv, " ", false);
+  m4_arg_print (context, obs, argv, 1, NULL, true, " ", NULL, false, false);
   m4_sysval_flush (context, false);
   len = obstack_object_size (obs);
   /* The close_stdin module makes it safe to skip checking the return
@@ -845,13 +846,13 @@ M4BUILTIN_HANDLER (m4exit)
    version only the first.  */
 M4BUILTIN_HANDLER (m4wrap)
 {
-  assert (obstack_object_size (obs) == 0);
+  obs = m4_push_wrapup_init (context);
   if (m4_get_posixly_correct_opt (context))
-    m4_shipout_string (context, obs, M4ARG (1), M4ARGLEN (1), false);
+    obstack_grow (obs, M4ARG (1), M4ARGLEN (1));
   else
-    m4_dump_args (context, obs, 1, argv, " ", false);
-  obstack_1grow (obs, '\0');
-  m4_push_wrapup (context, obstack_finish (obs));
+    /* TODO allow pushing builtins.  */
+    m4_arg_print (context, obs, argv, 1, NULL, true, " ", NULL, false, false);
+  m4_push_wrapup_finish ();
 }
 
 /* Enable tracing of all specified macros, or all, if none is specified.

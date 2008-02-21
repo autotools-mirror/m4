@@ -126,8 +126,6 @@ struct m4_string_pair
 extern bool	m4_bad_argc	   (m4 *, int, const char *, size_t, size_t,
 				    bool);
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
-extern void	m4_dump_args	   (m4 *, m4_obstack *, size_t,
-				    m4_macro_args *, const char *, bool);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 
 /* Error handling.  */
@@ -248,10 +246,10 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
-extern bool	m4_symbol_value_print	(m4_symbol_value *, m4_obstack *,
-					 const m4_string_pair *, size_t *,
-					 bool);
-extern void	m4_symbol_print		(m4_symbol *, m4_obstack *,
+extern bool	m4_symbol_value_print	(m4 *, m4_symbol_value *, m4_obstack *,
+					 const m4_string_pair *, bool,
+					 size_t *, bool);
+extern void	m4_symbol_print		(m4 *, m4_symbol *, m4_obstack *,
 					 const m4_string_pair *, bool, size_t,
 					 bool);
 extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
@@ -327,9 +325,9 @@ extern bool	m4_arg_empty		(m4_macro_args *, size_t);
 extern size_t	m4_arg_len		(m4_macro_args *, size_t);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, size_t);
 extern m4_obstack *m4_arg_scratch	(m4 *);
-extern bool	m4_arg_print		(m4_obstack *, m4_macro_args *,
-					 size_t, const m4_string_pair *,
-					 size_t *, bool);
+extern bool	m4_arg_print		(m4 *, m4_obstack *, m4_macro_args *,
+					 size_t, const m4_string_pair *, bool,
+					 const char *, size_t *, bool, bool);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
 					 size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
@@ -466,7 +464,8 @@ extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
 extern	void	m4_push_builtin	(m4 *, m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
 extern	m4_input_block	*m4_push_string_finish	(void);
-extern	void	m4_push_wrapup	(m4 *, const char *);
+extern	m4_obstack	*m4_push_wrapup_init	(m4 *);
+extern	void	m4_push_wrapup_finish		(void);
 extern	bool	m4_pop_wrapup	(m4 *);
 extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 

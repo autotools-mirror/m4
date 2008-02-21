@@ -160,6 +160,10 @@ m4_syntax_create (void)
 
   /* Set up current table to match default.  */
   m4_set_syntax (syntax, '\0', '\0', NULL);
+  syntax->cached_simple.str1 = syntax->cached_lquote;
+  syntax->cached_simple.len1 = 1;
+  syntax->cached_simple.str2 = syntax->cached_rquote;
+  syntax->cached_simple.len2 = 1;
   return syntax;
 }
 
@@ -420,6 +424,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       assert (false);
     }
   set_quote_age (syntax, false, true);
+  m4__quote_uncache (syntax);
   return code;
 }
 
@@ -756,6 +761,50 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
     }
   else
     syntax->quote_age = 0;
+}
+
+/* Interface for caching frequently used quote pairs, independently of
+   the current quote delimiters (for example, consider a text macro
+   expansion that includes several copies of $@), and using AGE for
+   optimization.  If QUOTES is NULL, don't use quoting.  If OBS is
+   non-NULL, AGE should be the current quote age, and QUOTES should be
+   m4_get_syntax_quotes; the return value will be a cached quote pair,
+   where the pointer is valid at least as long as OBS is not reset,
+   but whose contents are only guaranteed until the next changequote
+   or quote_cache.  Otherwise, OBS is NULL, AGE should be the same as
+   before, and QUOTES should be a previously returned cache value;
+   used to refresh the contents of the result.  */
+const m4_string_pair *
+m4__quote_cache (m4_syntax_table *syntax, m4_obstack *obs, unsigned int age,
+		 const m4_string_pair *quotes)
+{
+  /* Implementation - if AGE is non-zero, then the implementation of
+     set_quote_age guarantees that we can recreate the return value on
+     the fly; so we use static storage, and the contents must be used
+     immediately.  If AGE is zero, then we must copy QUOTES onto OBS,
+     but we might as well cache that copy.  */
+  if (!quotes)
+    return NULL;
+  if (age)
+    {
+      *syntax->cached_lquote = (age >> 8) & 0xff;
+      *syntax->cached_rquote = age & 0xff;
+      return &syntax->cached_simple;
+    }
+  if (!obs)
+    return quotes;
+  assert (quotes == &syntax->quote);
+  if (!syntax->cached_quote)
+    {
+      assert (obstack_object_size (obs) == 0);
+      syntax->cached_quote = (m4_string_pair *) obstack_copy (obs, quotes,
+							      sizeof *quotes);
+      syntax->cached_quote->str1 = (char *) obstack_copy0 (obs, quotes->str1,
+							   quotes->len1);
+      syntax->cached_quote->str2 = (char *) obstack_copy0 (obs, quotes->str2,
+							   quotes->len2);
+    }
+  return syntax->cached_quote;
 }
 
 

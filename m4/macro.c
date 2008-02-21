@@ -903,8 +903,8 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
     quotes = m4_get_syntax_quotes (M4SYNTAX);
   trace_header (context, id);
   trace_format (context, "%s ... = ", name);
-  m4_symbol_value_print (value, &context->trace_messages, quotes, &arg_length,
-			 module);
+  m4_symbol_value_print (context, value, &context->trace_messages, quotes,
+			 false, &arg_length, module);
   trace_flush (context);
 }
 
@@ -913,13 +913,10 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
 static void
 trace_pre (m4 *context, size_t id, m4_macro_args *argv)
 {
-  size_t i;
-  size_t argc = m4_arg_argc (argv);
-
   trace_header (context, id);
   trace_format (context, "%s", M4ARG (0));
 
-  if (1 < argc && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
+  if (1 < m4_arg_argc (argv) && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
     {
       const m4_string_pair *quotes = NULL;
       size_t arg_length = m4_get_max_debug_arg_length_opt (context);
@@ -928,16 +925,8 @@ trace_pre (m4 *context, size_t id, m4_macro_args *argv)
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
 	quotes = m4_get_syntax_quotes (M4SYNTAX);
       trace_format (context, "(");
-      for (i = 1; i < argc; i++)
-	{
-	  size_t len = arg_length;
-	  if (i != 1)
-	    trace_format (context, ", ");
-
-	  m4_symbol_value_print (m4_arg_symbol (argv, i),
-				 &context->trace_messages, quotes, &len,
-				 module);
-	}
+      m4_arg_print (context, &context->trace_messages, argv, 1, quotes, false,
+		    ", ", &arg_length, true, module);
       trace_format (context, ")");
     }
 }
@@ -1062,8 +1051,8 @@ arg_mark (m4_macro_args *argv)
    Return TOKEN when successful, NULL when wrapping ARGV is trivially
    empty.  */
 static m4_symbol_value *
-make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
-	       m4_macro_args *argv, size_t index, bool flatten,
+make_argv_ref (m4 *context, m4_symbol_value *value, m4_obstack *obs,
+	       size_t level, m4_macro_args *argv, size_t index, bool flatten,
 	       const m4_string_pair *quotes)
 {
   m4__symbol_chain *chain;
@@ -1093,19 +1082,8 @@ make_argv_ref (m4_symbol_value *value, m4_obstack *obs, size_t level,
   chain->u.u_a.flatten = flatten;
   chain->u.u_a.comma = false;
   chain->u.u_a.skip_last = false;
-  if (quotes)
-    {
-      /* Clone the quotes into the obstack, since changequote can
-	 occur before this $@ is rescanned.  */
-      /* TODO - optimize when quote_age is nonzero?  */
-      m4_string_pair *tmp = (m4_string_pair *) obstack_copy (obs, quotes,
-							     sizeof *quotes);
-      tmp->str1 = (char *) obstack_copy0 (obs, quotes->str1, quotes->len1);
-      tmp->str2 = (char *) obstack_copy0 (obs, quotes->str2, quotes->len2);
-      chain->u.u_a.quotes = tmp;
-    }
-  else
-    chain->u.u_a.quotes = NULL;
+  chain->u.u_a.quotes = m4__quote_cache (M4SYNTAX, obs, chain->quote_age,
+					 quotes);
   return value;
 }
 
@@ -1218,8 +1196,10 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
 	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  break;
 	case M4__CHAIN_ARGV:
-	  m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			chain->u.u_a.quotes, NULL, false);
+	  m4_arg_print (context, obs, chain->u.u_a.argv, chain->u.u_a.index,
+			m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+					 chain->u.u_a.quotes),
+			chain->u.u_a.flatten, NULL, NULL, false, false);
 	  break;
 	default:
 	  assert (!"m4_arg_text");
@@ -1373,32 +1353,48 @@ m4_arg_func (m4_macro_args *argv, size_t index)
 
 /* Dump a representation of ARGV to the obstack OBS, starting with
    argument INDEX.  If QUOTES is non-NULL, each argument is displayed
-   with those quotes.  If MAX_LEN is non-NULL, truncate the output
-   after *MAX_LEN bytes are output and return true; otherwise, return
-   false, and reduce *MAX_LEN by the number of bytes output.  If
-   MODULE, print any details about originating modules.  QUOTES count
-   against the truncation length, but not module names.  */
+   with those quotes.  If FLATTEN, builtins are ignored.  Separate
+   arguments with SEP, which defaults to a comma.  If MAX_LEN is
+   non-NULL, truncate the output after *MAX_LEN bytes are output and
+   return true; otherwise, return false, and reduce *MAX_LEN by the
+   number of bytes output.  If QUOTE_EACH, the truncation length is
+   reset for each argument, quotes do not count against length, and
+   all arguments are printed; otherwise, quotes count against the
+   length and trailing arguments may be discarded.  If MODULE, print
+   any details about originating modules; modules do not count against
+   truncation length.  */
 bool
-m4_arg_print (m4_obstack *obs, m4_macro_args *argv, size_t index,
-	      const m4_string_pair *quotes, size_t *max_len, bool module)
+m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
+	      const m4_string_pair *quotes, bool flatten, const char *sep,
+	      size_t *max_len, bool quote_each, bool module)
 {
   size_t len = max_len ? *max_len : SIZE_MAX;
   size_t i;
-  bool comma = false;
+  bool use_sep = false;
+  size_t sep_len;
+  size_t *plen = quote_each ? NULL : &len;
 
+  if (!sep)
+    sep = ",";
+  sep_len = strlen (sep);
   for (i = index; i < argv->argc; i++)
     {
-      if (comma && m4_shipout_string_trunc (obs, ",", 1, NULL, &len))
+      if (quote_each && max_len)
+	len = *max_len;
+      if (use_sep && m4_shipout_string_trunc (obs, sep, sep_len, NULL, plen))
 	return true;
-      comma = true;
-      if (quotes && m4_shipout_string_trunc (obs, quotes->str1, quotes->len1,
-					     NULL, &len))
+      use_sep = true;
+      if (quotes && !quote_each
+	  && m4_shipout_string_trunc (obs, quotes->str1, quotes->len1, NULL,
+				      plen))
 	return true;
-      if (m4_symbol_value_print (m4_arg_symbol (argv, i), obs, NULL, &len,
+      if (m4_symbol_value_print (context, m4_arg_symbol (argv, i), obs,
+				 quote_each ? quotes : NULL, flatten, &len,
 				 module))
 	return true;
-      if (quotes && m4_shipout_string_trunc (obs, quotes->str2, quotes->len2,
-					     NULL, &len))
+      if (quotes && !quote_each
+	  && m4_shipout_string_trunc (obs, quotes->str2, quotes->len2, NULL,
+				      plen))
 	return true;
     }
   if (max_len)
@@ -1424,8 +1420,8 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
   m4_obstack *obs = m4_arg_scratch (context);
 
   new_value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
-  value = make_argv_ref (new_value, obs, context->expansion_level - 1, argv,
-			 index, flatten, NULL);
+  value = make_argv_ref (context, new_value, obs, context->expansion_level - 1,
+			 argv, index, flatten, NULL);
   if (!value)
     {
       obstack_free (obs, new_value);
@@ -1527,7 +1523,8 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
     }
 
   /* TODO allow shift, $@, to push builtins without flatten.  */
-  value = make_argv_ref (&tmp, obs, -1, argv, i, true, quote ? quotes : NULL);
+  value = make_argv_ref (context, &tmp, obs, -1, argv, i, true,
+			 quote ? quotes : NULL);
   assert (value == &tmp);
   if (len)
     {

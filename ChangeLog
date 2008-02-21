@@ -1,5 +1,42 @@
 2008-02-20  Eric Blake  <ebb9@byu.net>
 
+	Stage 16: cache quotes and improve m4_arg_print.
+	Cache rather than always copying quotes when pushing $@ refs; in
+	particular, reconstruct single-byte quotes on the fly.  Allow NUL
+	through m4wrap.  Improve sharing of code that prints arguments.
+	Memory impact: slight improvement, due to cached quotes.
+	Speed impact: slight improvement, due to less copying.
+	* m4/m4module.h (m4_symbol_value_print, m4_symbol_print)
+	(m4_arg_print): Adjust prototypes.
+	(m4_dump_args): Delete.
+	(m4_push_wrapup): Split...
+	(m4_push_wrapup_init, m4_push_wrapup_finish): ...into these
+	prototypes.
+	* m4/m4private.h (struct m4_syntax_table): Add cached_quote
+	member.
+	(m4__quote_cache, m4__quote_uncache): New prototypes.
+	* m4/syntax.c (m4_syntax_create): Initialize the cache.
+	(m4__quote_cache): New function.
+	(m4_set_syntax): Update caller.
+	* m4/symtab.c (m4_symbol_value_print): Add parameter.
+	(m4_symbol_print, dump_symbol_CB): Adjust all callers.
+	* m4/utility.c (m4_dump_args): Delete; callers should use
+	m4_arg_print instead.
+	* m4/input.c (m4_push_wrapup_init, m4_push_wrapup_finish): Split
+	implementation, and allow embedded NUL.
+	(m4_print_token, pop_input, composite_print, composite_peek):
+	(composite_read, append_quote_token): Adjust all callers.
+	* m4/macro.c (trace_prepre, m4_arg_text, make_argv_ref):
+	Likewise.
+	(m4_arg_print): Add parameters.
+	(trace_pre): Rewrite in terms of m4_arg_print.
+	* modules/m4.c (errprint): Likewise.
+	(m4wrap): Rewrite to allow embedded NUL.
+	(dumpdef): Adjust caller.
+	* doc/m4.texinfo (Debuglen): Enhance debuglen test.
+	* tests/null.m4: Test for NUL in m4wrap.
+	* tests/null.out: Update expected output.
+
 	Fix out-of-bounds read for sanitized macro names, from 2008-02-06.
 	* m4/utility.c (m4_verror_at_line): Properly terminate the string.
 	Reported by Ralf Wildenhues.

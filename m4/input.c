@@ -60,7 +60,7 @@
    "wrapup_stack" to "current_input" can continue indefinitely, even
    generating infinite loops (e.g. "define(`f',`m4wrap(`f')')f"),
    without memory leaks.  Adding wrapped data is done through
-   m4_push_wrapup().
+   m4_push_wrapup_init/m4_push_wrapup_finish().
 
    Pushing new input on the input stack is done by m4_push_file(), the
    conceptual m4_push_string(), and m4_push_builtin() (for builtin
@@ -124,7 +124,8 @@ static	bool	consume_syntax		(m4 *, m4_obstack *, unsigned int);
 #ifdef DEBUG_INPUT
 # include "quotearg.h"
 
-static int m4_print_token (const char *, m4__token_type, m4_symbol_value *);
+static int m4_print_token (m4 *, const char *, m4__token_type,
+			   m4_symbol_value *);
 #endif
 
 /* Vtable of callbacks for each input method.  */
@@ -753,7 +754,10 @@ composite_peek (m4_input_block *me, m4 *context, bool allow_argv)
 	     argv.  */
 	  m4_push_string_init (context);
 	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
-			      chain->u.u_a.index, chain->u.u_a.quotes);
+			      chain->u.u_a.index,
+			      m4__quote_cache (M4SYNTAX, NULL,
+					       chain->quote_age,
+					       chain->u.u_a.quotes));
 	  chain->u.u_a.index++;
 	  chain->u.u_a.comma = true;
 	  m4_push_string_finish ();
@@ -804,7 +808,10 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	     argv.  */
 	  m4_push_string_init (context);
 	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
-			      chain->u.u_a.index, chain->u.u_a.quotes);
+			      chain->u.u_a.index,
+			      m4__quote_cache (M4SYNTAX, NULL,
+					       chain->quote_age,
+					       chain->u.u_a.quotes));
 	  chain->u.u_a.index++;
 	  chain->u.u_a.comma = true;
 	  m4_push_string_finish ();
@@ -898,8 +905,12 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 	  break;
 	case M4__CHAIN_ARGV:
 	  assert (!chain->u.u_a.comma);
-	  if (m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			    chain->u.u_a.quotes, &maxlen, module))
+	  if (m4_arg_print (context, obs, chain->u.u_a.argv,
+			    chain->u.u_a.index,
+			    m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+					     chain->u.u_a.quotes),
+			    chain->u.u_a.flatten, NULL, &maxlen, false,
+			    module))
 	    done = true;
 	  break;
 	default:
@@ -965,16 +976,13 @@ m4_input_print (m4 *context, m4_obstack *obs, m4_input_block *input)
     }
 }
 
-/* The function m4_push_wrapup () pushes a string on the wrapup stack.
-   When the normal input stack gets empty, the wrapup stack will become
-   the input stack, and m4_push_string () and m4_push_file () will
-   operate on wrapup_stack.  M4_push_wrapup should be done as
-   m4_push_string (), but this will suffice, as long as arguments to
-   m4_m4wrap () are moderate in size.
+/* The function m4_push_wrapup_init () returns an obstack ready for
+   direct expansion of wrapup text, and should be followed by
+   m4_push_wrapup_finish ().
 
    FIXME - we should allow pushing builtins as well as text.  */
-void
-m4_push_wrapup (m4 *context, const char *s)
+m4_obstack *
+m4_push_wrapup_init (m4 *context)
 {
   m4_input_block *i;
 
@@ -984,11 +992,25 @@ m4_push_wrapup (m4 *context, const char *s)
   i->funcs = &string_funcs;
   i->file = m4_get_current_file (context);
   i->line = m4_get_current_line (context);
-
-  i->u.u_s.len = strlen (s);
-  i->u.u_s.str = obstack_copy (wrapup_stack, s, i->u.u_s.len);
-
   wsp = i;
+  return wrapup_stack;
+}
+
+/* After pushing wrapup text, this completes the bookkeeping.  */
+void
+m4_push_wrapup_finish (void)
+{
+  m4_input_block *i = wsp;
+  if (obstack_object_size (wrapup_stack) == 0)
+    {
+      wsp = i->prev;
+      obstack_free (wrapup_stack, i);
+    }
+  else
+    {
+      i->u.u_s.len = obstack_object_size (wrapup_stack);
+      i->u.u_s.str = (char *) obstack_finish (wrapup_stack);
+    }
 }
 
 
@@ -1010,6 +1032,7 @@ pop_input (m4 *context, bool cleanup)
   if (tmp != NULL)
     {
       obstack_free (current_input, isp);
+      m4__quote_uncache (M4SYNTAX);
       next = NULL;	/* might be set in m4_push_string_init () */
     }
 
@@ -1099,8 +1122,11 @@ append_quote_token (m4 *context, m4_obstack *obs, m4_symbol_value *value)
   /* TODO preserve $@ through quotes.  */
   if (src_chain->type == M4__CHAIN_ARGV)
     {
-      m4_arg_print (obs, src_chain->u.u_a.argv, src_chain->u.u_a.index,
-		    src_chain->u.u_a.quotes, NULL, false);
+      m4_arg_print (context, obs, src_chain->u.u_a.argv,
+		    src_chain->u.u_a.index,
+		    m4__quote_cache (M4SYNTAX, NULL, src_chain->quote_age,
+				     src_chain->u.u_a.quotes),
+		    src_chain->u.u_a.flatten, NULL, NULL, false, false);
       m4__arg_adjust_refcount (context, src_chain->u.u_a.argv, false);
       return;
     }
@@ -1484,7 +1510,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	init_builtin_token (context, token);
 	next_char (context, false, true);
 #ifdef DEBUG_INPUT
-	m4_print_token ("next_token", M4_TOKEN_MACDEF, token);
+	m4_print_token (context, "next_token", M4_TOKEN_MACDEF, token);
 #endif
 	return M4_TOKEN_MACDEF;
       }
@@ -1492,7 +1518,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       {
 	init_argv_symbol (context, obs, token);
 #ifdef DEBUG_INPUT
-	m4_print_token ("next_token", M4_TOKEN_ARGV, token);
+	m4_print_token (context, "next_token", M4_TOKEN_ARGV, token);
 #endif
 	return M4_TOKEN_ARGV;
       }
@@ -1720,7 +1746,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   VALUE_MAX_ARGS (token) = -1;
 
 #ifdef DEBUG_INPUT
-  m4_print_token ("next_token", type, token);
+  m4_print_token (context, "next_token", type, token);
 #endif
 
   return type;
@@ -1751,7 +1777,8 @@ m4__next_token_is_open (m4 *context)
 #ifdef DEBUG_INPUT
 
 int
-m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
+m4_print_token (m4 *context, const char *s, m4__token_type type,
+		m4_symbol_value *token)
 {
   m4_obstack obs;
   size_t len;
@@ -1802,7 +1829,7 @@ m4_print_token (const char *s, m4__token_type type, m4_symbol_value *token)
   if (token)
     {
       obstack_init (&obs);
-      m4_symbol_value_print (token, &obs, NULL, NULL, true);
+      m4_symbol_value_print (context, token, &obs, NULL, false, NULL, true);
       len = obstack_object_size (&obs);
       xfprintf (stderr, "%s\n", quotearg_style_mem (c_maybe_quoting_style,
 						    obstack_finish (&obs),

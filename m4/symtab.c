@@ -533,15 +533,16 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 }
 
 /* Grow OBS with a text representation of VALUE.  If QUOTES, then use
-   it to surround a text definition.  If MAXLEN, then truncate text
+   it to surround a text definition.  If FLATTEN, then flatten builtin
+   macros to the empty string.  If MAXLEN, then truncate text
    definitions to *MAXLEN, and adjust by how many characters are
    printed.  If MODULE, then include which module defined a builtin.
    Return true if the output was truncated.  QUOTES and MODULE do not
    count against the truncation length.  */
 bool
-m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
-		       const m4_string_pair *quotes, size_t *maxlen,
-		       bool module)
+m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
+		       const m4_string_pair *quotes, bool flatten,
+		       size_t *maxlen, bool module)
 {
   const char *text;
   const m4_builtin *bp;
@@ -558,18 +559,42 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
 	result = true;
       break;
     case M4_SYMBOL_FUNC:
-      bp = m4_get_symbol_value_builtin (value);
-      obstack_1grow (obs, '<');
-      obstack_grow (obs, bp->name, strlen (bp->name));
-      obstack_1grow (obs, '>');
+      if (flatten)
+	{
+	  if (quotes)
+	    {
+	      obstack_grow (obs, quotes->str1, quotes->len1);
+	      obstack_grow (obs, quotes->str2, quotes->len2);
+	    }
+	  module = false;
+	}
+      else
+	{
+	  bp = m4_get_symbol_value_builtin (value);
+	  obstack_1grow (obs, '<');
+	  obstack_grow (obs, bp->name, strlen (bp->name));
+	  obstack_1grow (obs, '>');
+	}
       break;
     case M4_SYMBOL_PLACEHOLDER:
-      text = m4_get_symbol_value_placeholder (value);
-      obstack_1grow (obs, '<');
-      obstack_1grow (obs, '<');
-      obstack_grow (obs, text, strlen (text));
-      obstack_1grow (obs, '>');
-      obstack_1grow (obs, '>');
+      if (flatten)
+	{
+	  if (quotes)
+	    {
+	      obstack_grow (obs, quotes->str1, quotes->len1);
+	      obstack_grow (obs, quotes->str2, quotes->len2);
+	    }
+	  module = false;
+	}
+      else
+	{
+	  text = m4_get_symbol_value_placeholder (value);
+	  obstack_1grow (obs, '<');
+	  obstack_1grow (obs, '<');
+	  obstack_grow (obs, text, strlen (text));
+	  obstack_1grow (obs, '>');
+	  obstack_1grow (obs, '>');
+	}
       break;
     case M4_SYMBOL_COMP:
       chain = value->u.u_c.chain;
@@ -585,8 +610,13 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
 		result = true;
 	      break;
 	    case M4__CHAIN_ARGV:
-	      if (m4_arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-				chain->u.u_a.quotes, &len, module))
+	      if (m4_arg_print (context, obs, chain->u.u_a.argv,
+				chain->u.u_a.index,
+				m4__quote_cache (M4SYNTAX, NULL,
+						 chain->quote_age,
+						 chain->u.u_a.quotes),
+				chain->u.u_a.flatten, NULL, &len, false,
+				module))
 		result = true;
 	      break;
 	    default:
@@ -623,7 +653,7 @@ m4_symbol_value_print (m4_symbol_value *value, m4_obstack *obs,
    MODULE, then include which module defined a builtin.  QUOTES and
    MODULE do not count toward truncation.  */
 void
-m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
+m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 		 const m4_string_pair *quotes, bool stack, size_t arg_length,
 		 bool module)
 {
@@ -634,7 +664,7 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  m4_symbol_value_print (value, obs, quotes, &len, module);
+  m4_symbol_value_print (context, value, obs, quotes, false, &len, module);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -643,7 +673,8 @@ m4_symbol_print (m4_symbol *symbol, m4_obstack *obs,
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
 	  len = arg_length;
-	  m4_symbol_value_print (value, obs, quotes, &len, module);
+	  m4_symbol_value_print (context, value, obs, quotes, false, &len,
+				 module);
 	  value = VALUE_NEXT (value);
 	}
     }
@@ -820,15 +851,16 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
 static void *dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
 				 m4_symbol *symbol, void *userdata);
 static M4_GNUC_UNUSED void *
-symtab_dump (m4_symbol_table *symtab)
+symtab_dump (m4 *context, m4_symbol_table *symtab)
 {
-  return m4_symtab_apply (symtab, true, dump_symbol_CB, NULL);
+  return m4_symtab_apply (symtab, true, dump_symbol_CB, context);
 }
 
 static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *name,
-		m4_symbol *symbol, void *ignored)
+		m4_symbol *symbol, void *ptr)
 {
+  m4 *		   context	= (m4 *) ptr;
   m4_symbol_value *value	= m4_get_symbol_value (symbol);
   int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
   m4_module *      module	= value ? SYMBOL_MODULE (symbol) : NULL;
@@ -845,7 +877,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
     {
       m4_obstack obs;
       obstack_init (&obs);
-      m4_symbol_value_print (value, &obs, NULL, NULL, true);
+      m4_symbol_value_print (context, value, &obs, NULL, false, NULL, true);
       xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }

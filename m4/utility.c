@@ -95,31 +95,6 @@ m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
   return true;
 }
 
-
-/* Print arguments from the table ARGV to obstack OBS, starting at
-   index START, separated by SEP, and quoted by the current quotes, if
-   QUOTED is true.  */
-void
-m4_dump_args (m4 *context, m4_obstack *obs, size_t start, m4_macro_args *argv,
-	      const char *sep, bool quoted)
-{
-  size_t i;
-  size_t len = strlen (sep);
-  bool need_sep = false;
-  size_t argc = m4_arg_argc (argv);
-
-  for (i = start; i < argc; i++)
-    {
-      if (need_sep)
-	obstack_grow (obs, sep, len);
-      else
-	need_sep = true;
-
-      m4_shipout_string (context, obs, M4ARG (i), M4ARGLEN (i), quoted);
-    }
-}
-
-
 /* Parse ARG as a truth value.  If unrecognized, issue a warning on
    behalf of ME and return PREVIOUS; otherwise return the parsed
    value.  */
