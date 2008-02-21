@@ -1,3 +1,9 @@
+2008-02-21  Eric Blake  <ebb9@byu.net>
+
+	Fix out-of-bounds read for sanitized macro names, from 2008-02-06.
+	* src/m4.c (m4_verror_at_line): Properly terminate the string.
+	Reported by Ralf Wildenhues.
+
 2008-02-19  Eric Blake  <ebb9@byu.net>
 
 	Clean up foreach example.

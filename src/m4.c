@@ -113,6 +113,7 @@ m4_verror_at_line (bool warn, int status, int errnum, const char *file,
 	  *p++ = *macro++;
 	}
       while (*macro);
+      *p = '\0';
     }
   /* Prepend warning and the macro name, as needed.  But if that fails
      for non-memory reasons (unlikely), then still use the original
