@@ -1746,6 +1746,15 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   VALUE_MAX_ARGS (token) = -1;
 
 #ifdef DEBUG_INPUT
+  if (token->type == M4_SYMBOL_VOID)
+    {
+      len = obstack_object_size (&token_stack);
+      obstack_1grow (&token_stack, '\0');
+
+      m4_set_symbol_value_text (token, obstack_finish (&token_stack), len,
+				m4__quote_age (M4SYNTAX));
+    }
+
   m4_print_token (context, "next_token", type, token);
 #endif
 

@@ -1,3 +1,11 @@
+2008-02-22  Gary V. Vaughan  <gary@gnu.org>
+
+	Fix regression in argument collection, from 2008-01-21.
+	* m4/input.c (m4__next_token): When DEBUG_INPUT is defined,
+	undo argument collection optimisation for strings, so that
+	m4_print_token doesn't abort when it otherwise receives an
+	unprintable M4_SYMBOL_VOID type token.
+
 2008-02-20  Eric Blake  <ebb9@byu.net>
 
 	Stage 16: cache quotes and improve m4_arg_print.
