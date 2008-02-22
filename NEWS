@@ -1,6 +1,6 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
-Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007 Free Software
-Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007, 2008 Free
+Software Foundation, Inc.
 
 * Version beta 1.9b - ???, by ??? (git version 1.9a-*)
 
@@ -134,6 +134,9 @@ promoted to 2.0.
 
 ** Changed behavior of builtins
 
+*** The module identifier builtins, such as `__gnu__', `__m4_version__',
+    and `__unix__', now warn if given arguments.
+
 *** The `builtin' builtin now has a special form, where if the first
     argument is exactly the special token representing defn(`builtin'), the
     expansion is the special token representing the builtin named in the
@@ -203,6 +206,10 @@ promoted to 2.0.
     released, any further changes would introduce format 3.
 
 *** Improvements made in the 1.4.x stable series have been incorporated.
+
+* Version 1.4.11 - ?? ??? 2008, by Eric Blake  (git version 1.4.10a)
+
+** FIXME: import NEWS from branch once 1.4.11 is released.
 
 * Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)
 

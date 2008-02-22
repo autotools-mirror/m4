@@ -1,5 +1,8 @@
 2008-02-22  Eric Blake  <ebb9@byu.net>
 
+	Update NEWS.
+	* NEWS: Document change to __gnu__ on 2008-02-11.
+
 	Stage 17: pass argv through quoted strings.
 	Allow the concatenation of $@ references with other text input
 	inside quoted contexts, which requires distinguishing between a
