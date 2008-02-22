@@ -1,3 +1,31 @@
+2008-02-22  Eric Blake  <ebb9@byu.net>
+
+	Stage 17: pass argv through quoted strings.
+	Allow the concatenation of $@ references with other text input
+	inside quoted contexts, which requires distinguishing between a
+	wrapper around many arguments vs. a reference serving as part of a
+	single argument.  Also optimize based on whether argv contains
+	builtin tokens that might need flattening to the empty string.
+	Memory impact: noticeable improvement, due to O(n^2) to O(n)
+	reduction from total reuse of $@ references.
+	Speed impact: noticeable improvement, due to O(n^2) to O(n)
+	reduction in boxed recursion.
+	* m4/m4module.h (m4_arg_equal, m4_arg_len): Add parameter.
+	(M4ARGLEN): Adjust definition.
+	* m4/m4private.h (struct m4__symbol_chain): Add has_func member.
+	(struct m4_symbol_value): Add wrapper and has_func members.
+	(struct m4_macro_args): Add flatten and has_func members.
+	* m4/input.c (append_quote_token): Return argv refs inside quoted
+	strings.
+	(init_argv_symbol): Populate new fields.
+	* m4/macro.c (expand_argument, collect_arguments, make_argv_ref)
+	(m4_make_argv_ref): Likewise.
+	(arg_symbol, arg_mark, m4_is_arg_text, m4_is_arg_func): Use new
+	fields.
+	(m4_arg_equal, m4_arg_len): Handle quoted argv references, and add
+	new parameter.
+	* modules/m4.c (ifelse): Adjust caller.
+
 2008-02-22  Gary V. Vaughan  <gary@gnu.org>
 
 	Fix regression in argument collection, from 2008-01-21.

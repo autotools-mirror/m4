@@ -1119,22 +1119,11 @@ append_quote_token (m4 *context, m4_obstack *obs, m4_symbol_value *value)
       return;
     }
 
-  /* TODO preserve $@ through quotes.  */
-  if (src_chain->type == M4__CHAIN_ARGV)
-    {
-      m4_arg_print (context, obs, src_chain->u.u_a.argv,
-		    src_chain->u.u_a.index,
-		    m4__quote_cache (M4SYNTAX, NULL, src_chain->quote_age,
-				     src_chain->u.u_a.quotes),
-		    src_chain->u.u_a.flatten, NULL, NULL, false, false);
-      m4__arg_adjust_refcount (context, src_chain->u.u_a.argv, false);
-      return;
-    }
-
   if (value->type == M4_SYMBOL_VOID)
     {
       value->type = M4_SYMBOL_COMP;
       value->u.u_c.chain = value->u.u_c.end = NULL;
+      value->u.u_c.wrapper = value->u.u_c.has_func = false;
     }
   assert (value->type == M4_SYMBOL_COMP);
   m4__make_text_link (obs, &value->u.u_c.chain, &value->u.u_c.end);
@@ -1144,6 +1133,8 @@ append_quote_token (m4 *context, m4_obstack *obs, m4_symbol_value *value)
   else
     value->u.u_c.chain = chain;
   value->u.u_c.end = chain;
+  if (chain->type == M4__CHAIN_ARGV && chain->u.u_a.has_func)
+    value->u.u_c.has_func = true;
   chain->next = NULL;
 }
 
@@ -1169,6 +1160,8 @@ init_argv_symbol (m4 *context, m4_obstack *obs, m4_symbol_value *value)
   /* Clone the link, since the input will be discarded soon.  */
   chain = (m4__symbol_chain *) obstack_copy (obs, src_chain, sizeof *chain);
   value->u.u_c.chain = value->u.u_c.end = chain;
+  value->u.u_c.wrapper = true;
+  value->u.u_c.has_func = chain->u.u_a.has_func;
   chain->next = NULL;
 
   /* If the next character is not ',' or ')', then unlink the last

@@ -244,7 +244,7 @@ M4BUILTIN_HANDLER (ifelse)
 
   while (true)
     {
-      if (m4_arg_equal (argv, index, index + 1))
+      if (m4_arg_equal (context, argv, index, index + 1))
 	{
 	  m4_push_arg (context, obs, argv, index + 2);
 	  return;

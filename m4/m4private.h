@@ -222,6 +222,7 @@ struct m4__symbol_chain
       bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
       bool_bitfield comma : 1;		/* True when `,' is next input.  */
       bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
+      bool_bitfield has_func : 1;	/* True if argv includes func.  */
       const m4_string_pair *quotes;	/* NULL for $*, quotes for $@.  */
     } u_a;			/* M4__CHAIN_ARGV.  */
   } u;
@@ -254,8 +255,10 @@ struct m4_symbol_value
     const m4_builtin *	builtin;/* Valid when type is FUNC.  */
     struct
     {
-      m4__symbol_chain *chain;	/* First link of the chain.  */
-      m4__symbol_chain *end;	/* Last link of the chain.  */
+      m4__symbol_chain *chain;		/* First link of the chain.  */
+      m4__symbol_chain *end;		/* Last link of the chain.  */
+      bool_bitfield wrapper : 1;	/* True if this is a $@ ref.  */
+      bool_bitfield has_func : 1;	/* True if chain includes func.  */
     } u_c;			/* Valid when type is COMP.  */
   } u;
 };
@@ -278,6 +281,10 @@ struct m4_macro_args
   /* False if all arguments belong to this argv, true if some of them
      include references to another.  */
   bool_bitfield has_ref : 1;
+  /* True to flatten builtins contained in references.  */
+  bool_bitfield flatten : 1;
+  /* True if any token contains builtins.  */
+  bool_bitfield has_func : 1;
   const char *argv0; /* The macro name being expanded.  */
   size_t argv0_len; /* Length of argv0.  */
   /* The value of quote_age for all tokens, or 0 if quote_age changed
