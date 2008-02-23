@@ -1,6 +1,6 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
-# Foundation, Inc.
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free
+# Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -21,7 +21,7 @@ AC_PREREQ([2.60])
 AC_INIT([GNU M4], [1.4.10a], [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
+AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 dist-lzma gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 

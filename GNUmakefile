@@ -4,7 +4,8 @@
 # It is necessary if you want to build targets usually of interest
 # only to the maintainer.
 
-# Copyright (C) 2001, 2003, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2006, 2007, 2008 Free Software Foundation,
+# Inc.
 #
 # This file is part of GNU M4.
 #
@@ -41,6 +42,7 @@ ifeq ($(have-Makefile),yes)
 export TAR_OPTIONS = --owner=0 --group=0 --numeric-owner
 
 include Makefile
+include $(srcdir)/Makefile.cfg
 include $(srcdir)/Makefile.maint
 
 else

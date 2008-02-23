@@ -1,3 +1,22 @@
+2008-02-25  Eric Blake  <ebb9@byu.net>
+
+	Improve release process.
+	* configure.ac (AM_INIT_AUTOMAKE): Increase requirement, and add
+	dist-lzma.
+	* HACKING: Update for git release procedures.
+	* Makefile.cfg: New file.
+	* GNUmakefile: Use it.
+	* Makefile.maint (gzip_rsyncable, GZIP_ENV, GIT, VC, VC-tag)
+	(VERSION_REGEXP, this-vc-tag, my_distdir, null_AM_MAKEFLAGS)
+	(TMPDIR, gnulib-version): New macros, borrowed from coreutils.
+	(makefile-check, news-date-check, changelog-check, m4-check)
+	(vc-diff-check, maintainer-distcheck, vc-dist, my-distcheck)
+	(announcement, alpha, beta, major): New rules, borrowed from
+	coreutils.
+	(TEXI2HTML, cvs-release, update-timestamps, cvs-news, cvs-commit)
+	(cvs-dist): Delete.
+	* Makefile.am (EXTRA_DIST): Distribute new file.
+
 2008-02-19  Eric Blake  <ebb9@byu.net>
 
 	Clean up foreach example.
@@ -250,7 +269,7 @@
 
 2007-07-09  Eric Blake  <ebb9@byu.net>
 
-	Release 1.4.10:
+	Release Version 1.4.10.
 	* doc/Makefile.am (m4_TEXINFOS): Distribute gpl-3.0.texi.
 	* Makefile.am (EXTRA_DIST): Distribute gnulib diffs.
 	* configure.ac (AC_INIT): Bump version number.
@@ -328,7 +347,7 @@
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Start changes since 1.4.9b, and fix typo.
 
-	Beta Release 1.4.9b:
+	Beta Release Version 1.4.9b.
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.9.
 
