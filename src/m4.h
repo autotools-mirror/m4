@@ -129,7 +129,7 @@ extern int debug_level;			/* -d */
 extern size_t hash_table_size;		/* -H */
 extern int no_gnu_extensions;		/* -G */
 extern int prefix_all_builtins;		/* -P */
-extern int max_debug_argument_length;	/* -l */
+extern size_t max_debug_argument_length;/* -l */
 extern int suppress_warnings;		/* -Q */
 extern int warning_status;		/* -E */
 extern int nesting_limit;		/* -L */
@@ -424,7 +424,7 @@ void output_init (void);
 void output_exit (void);
 void output_text (const char *, int);
 void divert_text (struct obstack *, const char *, int, int);
-bool shipout_string_trunc (struct obstack *, const char *, size_t, int *);
+bool shipout_string_trunc (struct obstack *, const char *, size_t, size_t *);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);
@@ -500,7 +500,7 @@ size_t arg_len (macro_arguments *, unsigned int);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
-		const string_pair *, bool, const char *, int *, bool);
+		const string_pair *, bool, const char *, size_t *, bool);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
 				bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);

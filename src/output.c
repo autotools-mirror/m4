@@ -579,9 +579,9 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
    appropriate.  */
 bool
 shipout_string_trunc (struct obstack *obs, const char *str, size_t len,
-		      int *max_len)
+		      size_t *max_len)
 {
-  int max = max_len ? *max_len : INT_MAX;
+  size_t max = max_len ? *max_len : INT_MAX;
 
   if (len == SIZE_MAX)
     len = strlen (str);

@@ -248,7 +248,7 @@ trace_format (const char *fmt, ...)
   char ch;
   int d;
   const char *s;
-  int maxlen;
+  size_t maxlen;
 
   va_start (args, fmt);
 
@@ -260,7 +260,7 @@ trace_format (const char *fmt, ...)
       if (ch == '\0')
 	break;
 
-      maxlen = INT_MAX;
+      maxlen = SIZE_MAX;
       switch (*fmt++)
 	{
 	case 'B':
@@ -364,7 +364,7 @@ trace_pre (const char *name, int id, macro_arguments *argv)
 
   if (arg_argc (argv) > 1 && (debug_level & DEBUG_TRACE_ARGS))
     {
-      int len = max_debug_argument_length;
+      size_t len = max_debug_argument_length;
       trace_format ("(");
       arg_print (&trace, argv, 1,
 		 (debug_level & DEBUG_TRACE_QUOTE) ? &curr_quote : NULL,

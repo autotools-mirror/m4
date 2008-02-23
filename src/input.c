@@ -680,7 +680,7 @@ pop_wrapup (void)
 void
 input_print (struct obstack *obs, const input_block *input)
 {
-  int maxlen = max_debug_argument_length;
+  size_t maxlen = max_debug_argument_length;
   token_chain *chain;
 
   assert (input);

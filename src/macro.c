@@ -1194,9 +1194,9 @@ arg_scratch (void)
 bool
 arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 	   const string_pair *quotes, bool flatten, const char *sep,
-	   int *max_len, bool quote_each)
+	   size_t *max_len, bool quote_each)
 {
-  int len = max_len ? *max_len : INT_MAX;
+  size_t len = max_len ? *max_len : INT_MAX;
   unsigned int i;
   token_data *token;
   token_chain *chain;

@@ -1,5 +1,15 @@
 2008-02-23  Eric Blake  <ebb9@byu.net>
 
+	Use size_t consistently for string length truncation.
+	* src/m4.h (max_debug_argument_length): Change type to size_t.
+	(shipout_string_trunc, arg_print): Change parameter type.
+	* src/debug.c (trace_format, trace_pre): Adjust all callers.
+	* src/input.c (input_print): Likewise.
+	* src/m4.c (max_debug_argument_length, main): Likewise.
+	* src/macro.c (arg_print): Likewise.
+	* src/output.c (shipout_string_trunc): Likewise.
+	Reported by Ralf Wildenhues.
+
 	s/obstack_print/shipout_string_trunc/.
 	* src/m4.h (obstack_print): Rename...
 	(shipout_string_trunc): ...to this, to leave obstack_ prefix for
