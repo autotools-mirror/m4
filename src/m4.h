@@ -249,7 +249,6 @@ void trace_pre (const char *, int, macro_arguments *);
 void trace_post (const char *, int, macro_arguments *,
 		 const input_block *);
 
-bool obstack_print (struct obstack *, const char *, size_t, int *);
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -425,6 +424,7 @@ void output_init (void);
 void output_exit (void);
 void output_text (const char *, int);
 void divert_text (struct obstack *, const char *, int, int);
+bool shipout_string_trunc (struct obstack *, const char *, size_t, int *);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);

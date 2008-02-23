@@ -1,5 +1,16 @@
 2008-02-23  Eric Blake  <ebb9@byu.net>
 
+	s/obstack_print/shipout_string_trunc/.
+	* src/m4.h (obstack_print): Rename...
+	(shipout_string_trunc): ...to this, to leave obstack_ prefix for
+	actual obstack API.
+	* src/debug.c (trace_format): Adjust caller.
+	(obstack_print): Move...
+	* src/output.c (shipout_string_trunc): ...here, including rename.
+	* src/input.c (input_print): Adjust caller.
+	* src/macro.c (arg_print): Likewise.
+	Reported by Ralf Wildenhues.
+
 	s/shipout_text/divert_text/.
 	* src/m4.h (shipout_text): Rename...
 	(divert_text): ...to this, so that shipout_ prefix can be used for

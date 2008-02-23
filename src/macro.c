@@ -1212,23 +1212,27 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
     {
       if (quote_each && max_len)
 	len = *max_len;
-      if (use_sep && obstack_print (obs, sep, sep_len, plen))
+      if (use_sep && shipout_string_trunc (obs, sep, sep_len, plen))
 	return true;
       use_sep = true;
       token = arg_token (argv, i, NULL);
       switch (TOKEN_DATA_TYPE (token))
 	{
 	case TOKEN_TEXT:
-	  if (quotes && obstack_print (obs, quotes->str1, quotes->len1, plen))
+	  if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
+					      plen))
 	    return true;
-	  if (obstack_print (obs, TOKEN_DATA_TEXT (token),
-			     TOKEN_DATA_LEN (token), &len) && !quote_each)
+	  if (shipout_string_trunc (obs, TOKEN_DATA_TEXT (token),
+				    TOKEN_DATA_LEN (token), &len)
+	      && !quote_each)
 	    return true;
-	  if (quotes && obstack_print (obs, quotes->str2, quotes->len2, plen))
+	  if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
+					      plen))
 	    return true;
 	  break;
 	case TOKEN_COMP:
-	  if (quotes && obstack_print (obs, quotes->str1, quotes->len1, plen))
+	  if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
+					      plen))
 	    return true;
 	  chain = token->u.u_c.chain;
 	  done = false;
@@ -1237,8 +1241,8 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 	      switch (chain->type)
 		{
 		case CHAIN_STR:
-		  if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
-				     &len))
+		  if (shipout_string_trunc (obs, chain->u.u_s.str,
+					    chain->u.u_s.len, &len))
 		    done = true;
 		  break;
 		case CHAIN_ARGV:
@@ -1256,7 +1260,8 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 	    }
 	  if (done && !quote_each)
 	    return true;
-	  if (quotes && obstack_print (obs, quotes->str2, quotes->len2, plen))
+	  if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
+					      plen))
 	    return true;
 	  break;
 	case TOKEN_FUNC:

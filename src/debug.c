@@ -294,7 +294,7 @@ trace_format (const char *fmt, ...)
 	  break;
 	}
 
-      if (obstack_print (&trace, s, SIZE_MAX, &maxlen))
+      if (shipout_string_trunc (&trace, s, SIZE_MAX, &maxlen))
 	break;
     }
 
@@ -400,32 +400,4 @@ trace_post (const char *name, int id, macro_arguments *argv,
   if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
     trace_format (" -> %l%B%r", expanded);
   trace_flush ();
-}
-
-/* Dump the string STR of length LEN to the obstack OBS.  If LEN is
-   SIZE_MAX, use strlen (STR) instead.  If MAX_LEN is non-NULL,
-   truncate the dump at MAX_LEN bytes and return true if MAX_LEN was
-   reached; otherwise, return false and update MAX_LEN as
-   appropriate.  */
-bool
-obstack_print (struct obstack *obs, const char *str, size_t len, int *max_len)
-{
-  int max = max_len ? *max_len : INT_MAX;
-
-  if (len == SIZE_MAX)
-    len = strlen (str);
-  if (len < max)
-    {
-      obstack_grow (obs, str, len);
-      max -= len;
-    }
-  else
-    {
-      obstack_grow (obs, str, max);
-      obstack_grow (obs, "...", 3);
-      max = 0;
-    }
-  if (max_len)
-    *max_len = max;
-  return max == 0;
 }

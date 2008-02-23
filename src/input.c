@@ -687,7 +687,7 @@ input_print (struct obstack *obs, const input_block *input)
   switch (input->type)
     {
     case INPUT_STRING:
-      obstack_print (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
+      shipout_string_trunc (obs, input->u.u_s.str, input->u.u_s.len, &maxlen);
       break;
     case INPUT_FILE:
       obstack_grow (obs, "<file: ", strlen ("<file: "));
@@ -704,8 +704,8 @@ input_print (struct obstack *obs, const input_block *input)
 	  switch (chain->type)
 	    {
 	    case CHAIN_STR:
-	      if (obstack_print (obs, chain->u.u_s.str, chain->u.u_s.len,
-				 &maxlen))
+	      if (shipout_string_trunc (obs, chain->u.u_s.str,
+					chain->u.u_s.len, &maxlen))
 		return;
 	      break;
 	    case CHAIN_ARGV:
