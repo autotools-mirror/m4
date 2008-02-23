@@ -424,7 +424,7 @@ extern int output_current_line;
 void output_init (void);
 void output_exit (void);
 void output_text (const char *, int);
-void shipout_text (struct obstack *, const char *, int, int);
+void divert_text (struct obstack *, const char *, int, int);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);

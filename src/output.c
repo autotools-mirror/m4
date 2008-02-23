@@ -469,7 +469,7 @@ output_text (const char *text, int length)
 `--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length, int line)
+divert_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
   const char *cursor;

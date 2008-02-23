@@ -305,10 +305,10 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	      && peek_token () != TOKEN_OPEN))
 	{
 #ifdef ENABLE_CHANGEWORD
-	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			TOKEN_DATA_LEN (td), line);
+	  divert_text (obs, TOKEN_DATA_ORIG_TEXT (td),
+		       TOKEN_DATA_LEN (td), line);
 #else
-	  shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+	  divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
 #endif /* !ENABLE_CHANGEWORD */
 	  /* The word just appended is unquoted, but the heuristics of
 	     safe_quote are applicable.  */
@@ -324,7 +324,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
       assert (!"expand_token");
       abort ();
     }
-  shipout_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+  divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
   return result;
 }
 

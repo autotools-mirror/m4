@@ -1,5 +1,12 @@
 2008-02-23  Eric Blake  <ebb9@byu.net>
 
+	s/shipout_text/divert_text/.
+	* src/m4.h (shipout_text): Rename...
+	(divert_text): ...to this, so that shipout_ prefix can be used for
+	functions that do not do #line tracking.
+	* src/output.c (divert_text): Rename.
+	* src/macro.c (expand_token): Adjust all callers.
+
 	Stage 18: try harder to reuse argv in recursion.
 	When pushing arguments that contain an existing $@ ref, reuse the
 	ref rather than creating another layer of wrappers.
