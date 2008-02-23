@@ -1081,24 +1081,56 @@ make_argv_ref (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 {
   m4__symbol_chain *chain;
 
-  assert (obstack_object_size (obs) == 0);
-  /* TODO reuse $@ even if argv has multiple array slots.  */
-  if (argv->wrapper && argv->arraylen == 1)
-    {
-      assert (argv->array[0]->type == M4_SYMBOL_COMP
-	      && argv->array[0]->u.u_c.wrapper);
-      chain= argv->array[0]->u.u_c.chain;
-      assert (!chain->next && chain->type == M4__CHAIN_ARGV
-	      && !chain->u.u_a.skip_last);
-      argv = chain->u.u_a.argv;
-      index += chain->u.u_a.index - 1;
-    }
   if (argv->argc <= index)
     return NULL;
-
-  chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
   value->type = M4_SYMBOL_COMP;
-  value->u.u_c.chain = value->u.u_c.end = chain;
+  value->u.u_c.chain = value->u.u_c.end = NULL;
+
+  /* Cater to the common idiom of $0(`$1',shift(shift($@))), by
+     inlining the first few arguments and reusing the original $@ ref,
+     rather than creating another layer of wrappers.  */
+  while (argv->wrapper)
+    {
+      size_t i;
+      for (i = 0; i < argv->arraylen; i++)
+	{
+	  if (argv->array[i]->type == M4_SYMBOL_COMP
+	      && argv->array[i]->u.u_c.wrapper)
+	    break;
+	  if (index == 1)
+	    {
+	      m4__push_arg_quote (context, obs, argv, i + 1, quotes);
+	      /* TODO support M4_SYNTAX_COMMA.  */
+	      obstack_1grow (obs, ',');
+	    }
+	  else
+	    index--;
+	}
+      assert (i < argv->arraylen);
+      if (i + 1 == argv->arraylen)
+	{
+	  assert (argv->array[i]->type == M4_SYMBOL_COMP
+		  && argv->array[i]->u.u_c.wrapper);
+	  chain = argv->array[i]->u.u_c.chain;
+	  assert (!chain->next && chain->type == M4__CHAIN_ARGV
+		  && !chain->u.u_a.skip_last);
+	  argv = chain->u.u_a.argv;
+	  index += chain->u.u_a.index - 1;
+	}
+      else
+	{
+	  index += i;
+	  break;
+	}
+    }
+
+  m4__make_text_link (obs, &value->u.u_c.chain, &value->u.u_c.end);
+  chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
+  if (value->u.u_c.end)
+    value->u.u_c.end->next = chain;
+  else
+    value->u.u_c.chain = chain;
+  value->u.u_c.end = chain;
   value->u.u_c.wrapper = true;
   value->u.u_c.has_func = argv->has_func;
   chain->next = NULL;
@@ -1591,11 +1623,8 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
 {
   m4_symbol_value tmp;
   m4_symbol_value *value;
-  m4__symbol_chain *chain;
   size_t i = skip ? 2 : 1;
   const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
-  char *str = NULL;
-  size_t len = obstack_object_size (obs);
 
   if (argv->argc <= i)
     return;
@@ -1606,30 +1635,10 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
       return;
     }
 
-  /* Since make_argv_ref puts data on obs, we must first close any
-     pending data.  The resulting symbol contents live entirely on
-     obs, so we call push_symbol with a level of -1.  */
-  if (len)
-    {
-      obstack_1grow (obs, '\0');
-      str = (char *) obstack_finish (obs);
-    }
-
   /* TODO allow shift, $@, to push builtins without flatten.  */
   value = make_argv_ref (context, &tmp, obs, -1, argv, i, true,
 			 quote ? quotes : NULL);
   assert (value == &tmp);
-  if (len)
-    {
-      chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
-      chain->next = value->u.u_c.chain;
-      value->u.u_c.chain = chain;
-      chain->type = M4__CHAIN_STR;
-      chain->quote_age = 0;
-      chain->u.u_s.str = str;
-      chain->u.u_s.len = len;
-      chain->u.u_s.level = SIZE_MAX;
-    }
   if (m4__push_symbol (context, value, -1, argv->inuse))
     arg_mark (argv);
 }

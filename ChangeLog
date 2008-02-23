@@ -1,3 +1,18 @@
+2008-02-23  Eric Blake  <ebb9@byu.net>
+
+	Stage 18: try harder to reuse argv in recursion.
+	When pushing arguments that contain an existing $@ ref, reuse the
+	ref rather than creating another layer of wrappers.
+	Memory impact: noticeable improvement, due to better $@ reuse.
+	Speed impact: noticeable improvement, due to O(n^2) to O(n)
+	reduction in unboxed recursion.
+	* m4/macro.c (make_argv_ref): Avoid wrapping $@ when possible.
+	(m4_push_args): Let make_argv_ref take care of pending data.
+	* doc/m4.texinfo (Improved foreach): Tweak wording to match new
+	performance capability.
+	* tests/others.at (recursion): Add tests to avoid performance
+	regression.
+
 2008-02-22  Eric Blake  <ebb9@byu.net>
 
 	Update NEWS.

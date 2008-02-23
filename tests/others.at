@@ -332,6 +332,38 @@ AT_CHECK_M4(["$abs_srcdir/null.m4"], [2],
 AT_CLEANUP
 
 
+## --------- ##
+## recursion ##
+## --------- ##
+
+AT_SETUP([recursion])
+
+dnl This input exploits contents of loop.m4 to print out the final value
+dnl of the recursion.
+AT_DATA([in.m4],
+[[define(`debug', `define(`popdef', `divert`'i')')dnl
+include(`loop.m4')dnl
+]])
+
+dnl boxed recursion
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10 -Dverbose loop.m4], [0],
+[[ 1 2 3 4 5 6 7 8 9 10
+]])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=2500 loop.m4], [0])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 in.m4], [0], [[10000
+]])
+
+dnl unboxed recursion
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10 -Dverbose -Dalt loop.m4], [0],
+[[ 1 2 3 4 5 6 7 8 9 10
+]])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=2500 -Dalt loop.m4], [0])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 -Dalt in.m4], [0], [[10000
+]])
+
+AT_CLEANUP
+
+
 ## ------- ##
 ## reverse ##
 ## ------- ##
