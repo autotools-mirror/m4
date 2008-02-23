@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
-## Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
+## Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -21,7 +21,7 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc tests checks
-EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.maint \
+EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.cfg Makefile.maint \
 	m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can

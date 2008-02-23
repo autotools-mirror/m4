@@ -6,7 +6,7 @@ running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 `m4' for generating `configure' scripts, but not for running them.
 
 GNU `m4' was originally written by Rene' Seindal, from Denmark.
-This release is considered stable.
+This is a beta release on the stable branch.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
 should be fully installed *prior to* configuring `autoconf' itself.

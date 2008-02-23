@@ -1,6 +1,6 @@
 ## Makefile.maint -- Makefile rules for m4 maintainers -*-Makefile-*-
 ##
-## Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
+## Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation
 ##
 ## This file is part of GNU M4.
 ##
@@ -17,19 +17,137 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-TEXI2HTML = texi2html
+# Do not save the original name or timestamp in the .tar.gz file.
+# Use --rsyncable if available.
+gzip_rsyncable := \
+  $(shell gzip --help 2>/dev/null|grep rsyncable >/dev/null && echo --rsyncable)
+GZIP_ENV = '--no-name --best $(gzip_rsyncable)'
 
-.PHONY: cvs-release
-cvs-release: version-check prev-tarball cvs-news cvs-commit cvs-dist deltas web-manual
-	@tarname="$(PACKAGE)-$(VERSION).tar.gz"; \
-	diffname="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).diff.gz"; \
-	xdeltaname="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).xdelta"; \
-	echo " *** Upload $$tarname, $$tarname.sig,";\
-	echo " *** $$tarname.directive.asc, $$diffname,"; \
-	echo " *** $$diffname.sig, $$diffname.directive.asc,"; \
-	echo " *** $$xdeltaname, $$xdeltaname.sig and";\
-	echo " *** $$xdeltaname.directive.asc to either"
-	echo " *** /incoming/alpha or /incoming/ftp on ftp-upload.gnu.org."
+CVS = cvs
+GIT = git
+VC = $(GIT)
+VC-tag = git-tag -s -m '$(VERSION)'
+
+VERSION_REGEXP = $(subst .,\.,$(VERSION))
+ifeq ($(VC),$(GIT))
+this-vc-tag = v$(VERSION)
+else
+tag-package = $(shell echo "$(PACKAGE)" | tr '[:lower:]' '[:upper:]')
+tag-this-version = $(subst .,_,$(VERSION))
+this-vc-tag = $(tag-package)-$(tag-this-version)
+endif
+my_distdir = $(PACKAGE)-$(VERSION)
+
+# Ensure that we use only the standard $(VAR) notation,
+# not @...@ in Makefile.am, now that we can rely on automake
+# to emit a definition for each substituted variable.
+makefile-check:
+	grep -nE '@[A-Z_0-9]+@' `find . -name Makefile.am` \
+	  && { echo 'Makefile.maint: use $$(...), not @...@' 1>&2; exit 1; } || :
+
+news-date-check: NEWS version-check
+	today=`date +%Y-%m-%d`;						\
+	if head NEWS | grep '^\*.* $(VERSION_REGEXP) ('$$today')'	\
+	    >/dev/null; then						\
+	  :;								\
+	else								\
+	  echo "version or today's date is not in NEWS" 1>&2;		\
+	  exit 1;							\
+	fi
+
+changelog-check:
+	if head ChangeLog | grep 'Version $(VERSION_REGEXP)\.$$'	\
+	    >/dev/null; then						\
+	  :;								\
+	else								\
+	  echo "$(VERSION) not in ChangeLog" 1>&2;			\
+	  exit 1;							\
+	fi
+
+m4-check:
+	@grep -n 'AC_DEFUN([^[]' m4/*.m4 \
+	  && { echo 'Makefile.maint: quote the first arg to AC_DEFUN' 1>&2; \
+	       exit 1; } || :
+
+vc-diff-check:
+	$(VC) diff > vc-diffs || :
+	if test -s vc-diffs; then				\
+	  cat vc-diffs;						\
+	  echo "Some files are locally modified:" 1>&2;		\
+	  exit 1;						\
+	else							\
+	  rm vc-diffs;						\
+	fi
+
+maintainer-distcheck:
+	$(MAKE) distcheck
+	$(MAKE) my-distcheck
+
+# Don't make a distribution if checks fail.
+# Also, make sure the NEWS file is up-to-date.
+vc-dist: $(local-check) vc-diff-check maintainer-distcheck
+	$(MAKE) dist
+
+# Use this to make sure we don't run these programs when building
+# from a virgin tgz file, below.
+null_AM_MAKEFLAGS = \
+  ACLOCAL=false \
+  AUTOCONF=false \
+  AUTOMAKE=false \
+  AUTOHEADER=false \
+  MAKEINFO=false
+
+# Use -Wformat -Werror to detect format-string/arg-list mismatches.
+# Also, check for shadowing problems with -Wshadow, and for pointer
+# arithmetic problems with -Wpointer-arith.
+# These CFLAGS are pretty strict.  If you build this target, you probably
+# have to have a recent version of gcc and glibc headers.
+TMPDIR ?= /tmp
+t=$(TMPDIR)/$(PACKAGE)/test
+my-distcheck: $(local-check) check
+	-rm -rf $(t)
+	mkdir -p $(t)
+	GZIP=$(GZIP_ENV) $(AMTAR) -C $(t) -zxf $(distdir).tar.gz
+	cd $(t)/$(distdir)				\
+	  && ./configure				\
+	  && $(MAKE) CFLAGS='$(warn_cflags)'		\
+	      AM_MAKEFLAGS='$(null_AM_MAKEFLAGS)'	\
+	  && $(MAKE) dvi				\
+	  && $(MAKE) check				\
+	  && $(MAKE) distclean
+	(cd $(t) && mv $(distdir) $(distdir).old	\
+	  && $(AMTAR) -zxf - ) < $(distdir).tar.gz
+	diff -ur $(t)/$(distdir).old $(t)/$(distdir)
+	-rm -rf $(t)
+	@echo "========================"; \
+	echo "$(distdir).tar.gz is ready for distribution"; \
+	echo "========================"
+
+gnulib-version = $$(cd $(gnulib_dir) && git describe)
+
+announcement: NEWS ChangeLog $(rel-files)
+	@./build-aux/announce-gen					\
+	    --release-type=$(RELEASE_TYPE)				\
+	    --package=$(PACKAGE)					\
+	    --prev=$(PREV_VERSION)					\
+	    --curr=$(VERSION)						\
+	    --gpg-key-id=$(gpg_key_ID)					\
+	    --news=NEWS							\
+	    --bootstrap-tools=autoconf,automake,gnulib			\
+	    --gnulib-version=$(gnulib-version)				\
+	    $(addprefix --url-dir=, $(url_dir_list))
+
+.PHONY: alpha beta major
+alpha beta major: $(local-check)
+	test $@ = major						\
+	  && { echo $(VERSION) | grep -E '^[0-9]+(\.[0-9]+)+$$'	\
+	       || { echo "invalid version string: $(VERSION)" 1>&2; exit 1;};}\
+	  || :
+	$(MAKE) vc-dist
+	$(MAKE) news-date-check changelog-check
+	$(MAKE) deltas
+	$(MAKE) -s announcement RELEASE_TYPE=$@ > /tmp/announce-$(my_distdir)
+	$(VC-tag) $(this-vc-tag)
 
 .PHONY: version-check
 version-check:
@@ -44,46 +162,11 @@ version-check:
 .PHONY: prev-tarball
 prev-tarball:
 ## Make sure we have the previous release tarball in the tree.
-	@if test -z "$(LASTRELEASE)"; \
-		then echo "LASTRELEASE is not set"; exit 1; fi
-	@ofile="$(PACKAGE)-$(LASTRELEASE).tar.gz"; \
+	@if test -z "$(PREV_VERSION)"; \
+		then echo "PREV_VERSION is not set"; exit 1; fi
+	@ofile="$(PACKAGE)-$(PREV_VERSION).tar.gz"; \
 	if test -f $$ofile; then :; \
 	else echo "Cannot make deltas without $$ofile"; exit 1; fi
-
-# TSDEPS will be defined to TSDEPS_DIST at `make dist' time
-TSDEPS =
-TSDEPS_DIST = ChangeLog
-CVS = cvs # set it to `:' to avoid CVS operations
-
-.PHONY: timestamps update-timestamps
-timestamps: update-timestamps
-update-timestamps:
-	@if (cd $(srcdir) && test -d CVS && \
-	    $(CVS) -n update $(TSDEPS_DIST) | grep '^M'); then \
-		echo "Cannot make cvs-dist before commit"; exit 1; else :; fi
-
-
-.PHONY: cvs-news
-cvs-news:
-## Make sure the NEWS file is up-to-date:
-	@if sed '1,4d;5q' $(srcdir)/NEWS | grep -e "$(VERSION)" >/dev/null; \
-	then :; \
-	else \
-	  echo "NEWS not updated; not releasing" 1>&2; \
-	  exit 1; \
-	fi
-
-.PHONY: cvs-commit
-cvs-commit: cvs-news
-	cd $(srcdir) && $(SHELL) ./commit
-
-.PHONY: cvs-dist
-cvs-dist: cvs-news timestamps
-## Build the distribution:
-	$(MAKE) dist
-## Finally, if everything was successful, tag the release
-	cd $(srcdir) \
-	  && $(CVS) -q tag `echo "release-$(VERSION)" | sed 's/\./_/g'`
 
 .PHONY: new-tarball
 new-tarball:
@@ -114,12 +197,12 @@ delta-diff: prev-tarball new-tarball
 	rm -rf delta-diff
 	mkdir delta-diff
 
-	ofile="../$(PACKAGE)-$(LASTRELEASE)-$(VERSION).diff.gz"; \
+	ofile="../$(PACKAGE)-$(PREV_VERSION)-$(VERSION).diff.gz"; \
 	cd delta-diff \
-	&& tar xzf "../$(PACKAGE)-$(LASTRELEASE).tar.gz" \
+	&& tar xzf "../$(PACKAGE)-$(PREV_VERSION).tar.gz" \
 	&& tar xzf "../$(PACKAGE)-$(VERSION).tar.gz" \
 	&& $(DIFF) $(DIFF_OPTIONS) \
-		$(PACKAGE)-$(LASTRELEASE) $(PACKAGE)-$(VERSION) \
+		$(PACKAGE)-$(PREV_VERSION) $(PACKAGE)-$(VERSION) \
 		| GZIP=$(GZIP_ENV) gzip -c > $$ofile
 
 	rm -rf delta-diff
@@ -132,9 +215,9 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 ## Generate the delta file (xdelta has weird exit statuses, so we need to
 ## add some shell code to keep make happy), and then generate the signatures
 ## for FSF ftp-upload:
-	ofile="$(PACKAGE)-$(LASTRELEASE)-$(VERSION).xdelta"; \
+	ofile="$(PACKAGE)-$(PREV_VERSION)-$(VERSION).xdelta"; \
 	( test -z `$(XDELTA) delta $(XDELTA_OPTIONS) \
-	    $(PACKAGE)-$(LASTRELEASE).tar.gz $(PACKAGE)-$(VERSION).tar.gz \
+	    $(PACKAGE)-$(PREV_VERSION).tar.gz $(PACKAGE)-$(VERSION).tar.gz \
 	    $$ofile 2>&1` \
 	  && : )
 
