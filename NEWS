@@ -3,7 +3,7 @@ Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free Software
 Foundation, Inc.
 
 * Noteworthy changes in Version 1.4.11 (????-??-??) [stable]
-  Released by ????, based on git version 1.4.10c-*
+  Released by ????, based on git version 1.4.10b.x-*
 
 ** No user visible changes, yet.
 
@@ -31,7 +31,7 @@ Foundation, Inc.
    lift this restriction to match other implementations.
 
 ** Enhance the `index' builtin to guarantee linear behavior and often
-   acheive sublinear results, in spite of the surprisingly large number of
+   achieve sublinear results, in spite of the surprisingly large number of
    systems with a brain-dead quadratic strstr(3).
 
 ** Enhance the `regexp' and `patsubst' builtins to cache frequently used
@@ -109,7 +109,7 @@ Foundation, Inc.
 ** The `-E'/`--fatal-warnings' command-line option now has two levels.  When
    specified only once, warnings affect exit status, but execution
    continues, so that you can see all warnings instead of fixing them one
-   at a time.  To acheive 1.4.8 behavior, where the first warning
+   at a time.  To achieve 1.4.8 behavior, where the first warning
    immediately exits, specify -E twice on the command line.
 
 ** A new `--warn-macro-sequence' command-line option allows detection of

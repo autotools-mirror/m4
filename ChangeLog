@@ -1,3 +1,8 @@
+2008-02-26  Eric Blake  <ebb9@byu.net>
+
+	* NEWS: Fix typos.
+	Reported by Ralf Wildenhues.
+
 2008-02-25  Eric Blake  <ebb9@byu.net>
 
 	Make intra-release version numbers more intelligent.
