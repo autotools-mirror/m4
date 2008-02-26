@@ -1,5 +1,7 @@
 2008-02-25  Eric Blake  <ebb9@byu.net>
 
+	* Makefile.cfg (url_dir_list): Fix location.
+
 	Minor tweaks, learned from the release.
 	* Makefile.maint (VC-tag): Avoid dashed git commands, and use
 	signing key from Makefile.cfg.
