@@ -1,5 +1,7 @@
 *.tar.bz2
 *.tar.gz
+.tarball-version
+.version
 aclocal.m4
 autom4te.cache
 build-aux

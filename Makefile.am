@@ -22,7 +22,7 @@
 
 SUBDIRS = . examples lib src doc tests checks
 EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.cfg Makefile.maint \
-	m4/gnulib-cache.m4
+	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
@@ -33,3 +33,12 @@ MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
+
+BUILT_SOURCES = .version
+.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
+# Arrange so that .tarball-version appears only in the distribution
+# tarball, and never in a checked-out repository.
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version

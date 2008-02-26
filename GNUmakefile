@@ -42,6 +42,30 @@ ifeq ($(have-Makefile),yes)
 export TAR_OPTIONS = --owner=0 --group=0 --numeric-owner
 
 include Makefile
+_curr-ver := $(VERSION)
+
+# Ensure that $(VERSION) is up to date for dist-related targets, but not
+# for others: running autoreconf and recompiling everything isn't cheap.
+ifeq (0,$(MAKELEVEL))
+  _is-dist-target = $(filter dist% alpha beta major,$(MAKECMDGOALS))
+  ifneq (,$(_is-dist-target))
+    _curr-ver := $(shell build-aux/git-version-gen .tarball-version)
+    ifneq ($(_curr-ver),$(VERSION))
+      $(info INFO: running autoreconf for new version string: $(_curr-ver))
+      dummy := $(shell rm -rf autom4te.cache; autoreconf)
+      _created_version_file = 1
+    endif
+  endif
+endif
+
+ifneq ($(_curr-ver),$(VERSION))
+  dummy := $(shell echo $(_curr-ver) > .version)
+endif
+
+ifneq ($(_created_version_file),1)
+  dummy := $(shell test -f .version || echo $(VERSION) > .version)
+endif
+
 include $(srcdir)/Makefile.cfg
 include $(srcdir)/Makefile.maint
 
