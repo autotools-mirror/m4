@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.10b], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.4.10c], [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 dist-lzma gnu])

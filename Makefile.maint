@@ -26,7 +26,7 @@ GZIP_ENV = '--no-name --best $(gzip_rsyncable)'
 CVS = cvs
 GIT = git
 VC = $(GIT)
-VC-tag = git-tag -s -m '$(VERSION)'
+VC-tag = git tag -s -m '$(VERSION)' -u $(gpg_key_ID)
 
 VERSION_REGEXP = $(subst .,\.,$(VERSION))
 ifeq ($(VC),$(GIT))
@@ -196,7 +196,6 @@ delta-diff: prev-tarball new-tarball
 ## Unpack the tarballs somewhere to diff them
 	rm -rf delta-diff
 	mkdir delta-diff
-
 	ofile="../$(PACKAGE)-$(PREV_VERSION)-$(VERSION).diff.gz"; \
 	cd delta-diff \
 	&& tar xzf "../$(PACKAGE)-$(PREV_VERSION).tar.gz" \
@@ -204,7 +203,6 @@ delta-diff: prev-tarball new-tarball
 	&& $(DIFF) $(DIFF_OPTIONS) \
 		$(PACKAGE)-$(PREV_VERSION) $(PACKAGE)-$(VERSION) \
 		| GZIP=$(GZIP_ENV) gzip -c > $$ofile
-
 	rm -rf delta-diff
 
 XDELTA = xdelta

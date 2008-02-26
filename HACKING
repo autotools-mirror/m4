@@ -223,7 +223,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   additional checks, tag the tree with release-$(VERSION), and create
   diff and xdelta files from the previous version.
 
-* Run './gnupload --to [dest].gnu.org:m4 [files]' to create
+* Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
   the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha, and
@@ -244,7 +244,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Update NEWS, configure.ac, ChangeLog.
 
-* Run `git commit' and `git push <version>' to push the release tag.
+* Run `git commit' and `git push origin refs/tags<version>' to push the
+  release tag.
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
   the new one (generate with `make web-manual').

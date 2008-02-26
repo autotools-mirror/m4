@@ -1,5 +1,13 @@
 2008-02-25  Eric Blake  <ebb9@byu.net>
 
+	Minor tweaks, learned from the release.
+	* Makefile.maint (VC-tag): Avoid dashed git commands, and use
+	signing key from Makefile.cfg.
+	(delta-diff): Avoid blank lines mid-macro.
+	* HACKING: Tweak instructions.
+	* NEWS: Bump version.
+	* configure.ac (AC_INIT): Likewise.
+
 	Beta Release Version 1.4.10b.
 	* configure.ac (AC_INIT): Bump version.
 	(AM_INIT_AUTOMAKE): Increase requirement, and add dist-lzma.

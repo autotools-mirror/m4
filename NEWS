@@ -2,6 +2,11 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free Software
 Foundation, Inc.
 
+* Noteworthy changes in Version 1.4.11 (????-??-??) [stable]
+  Released by ????, based on git version 1.4.10c-*
+
+** No user visible changes, yet.
+
 * Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
   Released by Eric Blake, based on git version 1.4.10a
 
