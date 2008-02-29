@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -22,6 +22,10 @@
 /* Handling of different input sources, and lexical analysis.  */
 
 #include "m4.h"
+
+#include "freadptr.h"
+#include "freadseek.h"
+#include "memchr2.h"
 
 /* Unread input can be either files to be read (command line,
    "include", "sinclude"), strings which should be rescanned (macro
@@ -794,6 +798,165 @@ input_print (struct obstack *obs)
 }
 
 
+/*-------------------------------------------------------------------.
+| Return a pointer to the available bytes of the current input       |
+| block, and set *LEN to the length of the result.  If ALLOW_QUOTE,  |
+| do not return a buffer for a quoted string.  If the result of      |
+| next_char() would not fit in an unsigned char (for example,        |
+| CHAR_EOF or CHAR_QUOTE), or if the input block does not have an    |
+| available buffer at the moment (for example, when hitting a buffer |
+| block boundary of a file), return NULL, and the caller must fall   |
+| back on using next_char().  The buffer is only valid until the     |
+| next consume_buffer() or next_char().  When searching for a        |
+| particular byte, it is more efficient to search a buffer at a time |
+| than it is to repeatedly call next_char.                           |
+`-------------------------------------------------------------------*/
+
+static const char *
+next_buffer (size_t *len, bool allow_quote)
+{
+  token_chain *chain;
+
+  while (1)
+    {
+      assert (isp);
+      if (input_change)
+	{
+	  current_file = isp->file;
+	  current_line = isp->line;
+	  input_change = false;
+	}
+
+      switch (isp->type)
+	{
+	case INPUT_STRING:
+	  if (isp->u.u_s.len)
+	    {
+	      *len = isp->u.u_s.len;
+	      return isp->u.u_s.str;
+	    }
+	  break;
+
+	case INPUT_FILE:
+	  if (start_of_input_line)
+	    {
+	      start_of_input_line = false;
+	      current_line = ++isp->line;
+	    }
+	  if (isp->u.u_f.end)
+	    break;
+	  return freadptr (isp->u.u_f.fp, len);
+
+	case INPUT_CHAIN:
+	  chain = isp->u.u_c.chain;
+	  while (chain)
+	    {
+	      if (allow_quote && chain->quote_age == current_quote_age)
+		return NULL; /* CHAR_QUOTE doesn't fit in buffer.  */
+	      switch (chain->type)
+		{
+		case CHAIN_STR:
+		  if (chain->u.u_s.len)
+		    {
+		      *len = chain->u.u_s.len;
+		      return chain->u.u_s.str;
+		    }
+		  if (chain->u.u_s.level >= 0)
+		    adjust_refcount (chain->u.u_s.level, false);
+		  break;
+		case CHAIN_FUNC:
+		  if (chain->u.func)
+		    return NULL; /* CHAR_MACRO doesn't fit in buffer.  */
+		  break;
+		case CHAIN_ARGV:
+		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
+		    {
+		      arg_adjust_refcount (chain->u.u_a.argv, false);
+		      break;
+		    }
+		  return NULL; /* No buffer to provide.  */
+		case CHAIN_LOC:
+		  isp->file = chain->u.u_l.file;
+		  isp->line = chain->u.u_l.line;
+		  input_change = true;
+		  isp->u.u_c.chain = chain->next;
+		  return next_buffer (len, allow_quote);
+		default:
+		  assert (!"next_buffer");
+		  abort ();
+		}
+	      isp->u.u_c.chain = chain = chain->next;
+	    }
+	  break;
+
+	case INPUT_EOF:
+	  return NULL; /* CHAR_EOF doesn't fit in buffer.  */
+
+	default:
+	  assert (!"next_buffer");
+	  abort ();
+	}
+
+      /* End of input source --- pop one level.  */
+      pop_input (true);
+    }
+}
+
+/*-----------------------------------------------------------------.
+| Consume LEN bytes from the current input block, as though by LEN |
+| calls to next_char().  LEN must be less than or equal to the     |
+| previous length returned by a successful call to next_buffer().  |
+`-----------------------------------------------------------------*/
+
+static void
+consume_buffer (size_t len)
+{
+  token_chain *chain;
+  const char *buf;
+  const char *p;
+  size_t buf_len;
+
+  assert (isp && !input_change && len);
+  switch (isp->type)
+    {
+    case INPUT_STRING:
+      assert (len <= isp->u.u_s.len);
+      isp->u.u_s.len -= len;
+      isp->u.u_s.str += len;
+      break;
+
+    case INPUT_FILE:
+      assert (!start_of_input_line);
+      buf = freadptr (isp->u.u_f.fp, &buf_len);
+      assert (buf && len <= buf_len);
+      buf_len = 0;
+      while ((p = memchr (buf + buf_len, '\n', len - buf_len)))
+	{
+	  if (p == buf + len - 1)
+	    start_of_input_line = true;
+	  else
+	    current_line = ++isp->line;
+	  buf_len = p - buf + 1;
+	}
+      if (freadseek (isp->u.u_f.fp, len) != 0)
+	assert (false);
+      break;
+
+    case INPUT_CHAIN:
+      chain = isp->u.u_c.chain;
+      assert (chain && chain->type == CHAIN_STR && len <= chain->u.u_s.len);
+      /* Partial consumption invalidates quote age.  */
+      chain->quote_age = 0;
+      chain->u.u_s.len -= len;
+      chain->u.u_s.str += len;
+      break;
+
+    default:
+      assert (!"consume_buffer");
+      abort ();
+    }
+}
+
 /*------------------------------------------------------------------.
 | Low level input is done a character at a time.  The function      |
 | peek_input () is used to look at the next character in the input  |
@@ -1046,8 +1209,28 @@ skip_line (const call_info *name)
 {
   int ch;
 
-  while ((ch = next_char (false, false)) != CHAR_EOF && ch != '\n')
-    ;
+  while (1)
+    {
+      size_t len;
+      const char *buffer = next_buffer (&len, false);
+      if (buffer)
+	{
+	  const char *p = (char *) memchr (buffer, '\n', len);
+	  if (p)
+	    {
+	      consume_buffer (p - buffer + 1);
+	      ch = '\n';
+	      break;
+	    }
+	  consume_buffer (len);
+	}
+      else
+	{
+	  ch = next_char (false, false);
+	  if (ch == CHAR_EOF || ch == '\n')
+	    break;
+	}
+    }
   if (ch == CHAR_EOF)
     m4_warn (0, name, _("end of file treated as newline"));
 }
@@ -1214,16 +1397,27 @@ match_input (const char *s, size_t slen, bool consume)
   int ch;			/* input character */
   const char *t;
   bool result = false;
+  size_t len;
 
   if (consume)
     {
       s++;
       slen--;
     }
+  /* Try a buffer match first.  */
   assert (slen);
+  t = next_buffer (&len, false);
+  if (t && slen <= len && memcmp (s, t, slen) == 0)
+    {
+      if (consume)
+	consume_buffer (slen);
+      return true;
+    }
+
+  /* Fall back on byte matching.  */
   ch = peek_input (false);
   if (ch != to_uchar (*s))
-    return false;			/* fail */
+    return false;
 
   if (slen == 1)
     {
@@ -1677,7 +1871,29 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
       while (1)
 	{
-	  ch = next_char (false, false);
+	  /* Start with buffer search for potential end delimiter.  */
+	  size_t len;
+	  const char *buffer = next_buffer (&len, false);
+	  if (buffer)
+	    {
+	      const char *p = (char *) memchr (buffer, *curr_comm.str2, len);
+	      if (p)
+		{
+		  obstack_grow (obs_td, buffer, p - buffer);
+		  ch = to_uchar (*p);
+		  consume_buffer (p - buffer + 1);
+		}
+	      else
+		{
+		  obstack_grow (obs_td, buffer, len);
+		  consume_buffer (len);
+		  continue;
+		}
+	    }
+
+	  /* Fall back to byte-wise search.  */
+	  else
+	    ch = next_char (false, false);
 	  if (ch == CHAR_EOF)
 	    {
 	      /* Current_file changed to "" if we see CHAR_EOF, use
@@ -1708,11 +1924,37 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
       obstack_1grow (&token_stack, ch);
-      while ((ch = peek_input (false)) < CHAR_EOF
-	     && (isalnum (ch) || ch == '_'))
+      while (1)
 	{
-	  obstack_1grow (&token_stack, ch);
-	  next_char (false, false);
+	  size_t len;
+	  const char *buffer = next_buffer (&len, false);
+	  if (buffer)
+	    {
+	      const char *p = buffer;
+	      while (len && (isalnum (to_uchar (*p)) || *p == '_'))
+		{
+		  p++;
+		  len--;
+		}
+	      if (p != buffer)
+		{
+		  obstack_grow (&token_stack, buffer, p - buffer);
+		  consume_buffer (p - buffer);
+		}
+	      if (len)
+		break;
+	    }
+	  else
+	    {
+	      ch = peek_input (false);
+	      if (ch < CHAR_EOF && (isalnum (ch) || ch == '_'))
+		{
+		  obstack_1grow (&token_stack, ch);
+		  next_char (false, false);
+		}
+	      else
+		break;
+	    }
 	}
       type = TOKEN_WORD;
     }
@@ -1782,7 +2024,44 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       type = TOKEN_STRING;
       while (1)
 	{
-	  ch = next_char (obs != NULL && current_quote_age, false);
+	  /* Start with buffer search for either potential delimiter.  */
+	  size_t len;
+	  const char *buffer = next_buffer (&len, obs && current_quote_age);
+	  if (buffer)
+	    {
+	      const char *p = buffer;
+	      do
+		{
+		  p = (char *) memchr2 (p, *curr_quote.str1, *curr_quote.str2,
+					buffer + len - p);
+		}
+	      while (p && current_quote_age
+		     && (*p++ == *curr_quote.str2
+			 ? --quote_level : ++quote_level));
+	      if (p)
+		{
+		  if (current_quote_age)
+		    {
+		      assert (!quote_level);
+		      obstack_grow (obs_td, buffer, p - buffer - 1);
+		      consume_buffer (p - buffer);
+		      break;
+		    }
+		  obstack_grow (obs_td, buffer, p - buffer);
+		  ch = to_uchar (*p);
+		  consume_buffer (p - buffer + 1);
+		}
+	      else
+		{
+		  obstack_grow (obs_td, buffer, len);
+		  consume_buffer (len);
+		  continue;
+		}
+	    }
+
+	  /* Fall back to byte-wise search.  */
+	  else
+	    ch = next_char (obs && current_quote_age, false);
 	  if (ch == CHAR_EOF)
 	    {
 	      /* Current_file changed to "" if we see CHAR_EOF, use

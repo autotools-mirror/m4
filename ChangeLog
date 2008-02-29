@@ -1,5 +1,21 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Stage 29: Process input by buffer, not bytes.
+	Enhance input engine to provide lookahead buffer, rather than
+	forcing clients to call next_char for every byte.  Utilize this
+	new interface in all clients.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer function calls.
+	* m4/gnulib-cache.m4: Import freadptr, freadseek, and memchr2
+	modules.
+	* src/input.c (next_buffer, consume_buffer): New functions.
+	(skip_line, match_input, next_token): Use them to scan a buffer at
+	a time.
+	* NEWS: Document this.
+	Suggested by Bruno Haible:
+	http://lists.gnu.org/archive/html/m4-discuss/2008-02/msg00010.html
+	http://lists.gnu.org/archive/html/m4-discuss/2008-02/msg00012.html
+
 	Avoid test failure due to different errno.
 	* doc/m4.texinfo (Using frozen files): Ignore stderr, since
 	hardened systems can prevent attempts to read /.

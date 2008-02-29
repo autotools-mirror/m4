@@ -28,6 +28,8 @@ Software Foundation, Inc.
    be silenced by applying this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=714eeee87
 
+** Improve the speed of the input engine.
+
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.  NOTE: this change exposes a bug
