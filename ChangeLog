@@ -1,3 +1,8 @@
+2008-02-29  Eric Blake  <ebb9@byu.net>
+
+	Import news from 1.4.10b.
+	* NEWS: Update from branch.
+
 2008-02-23  Eric Blake  <ebb9@byu.net>
 
 	Stage 18: try harder to reuse argv in recursion.

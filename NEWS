@@ -2,7 +2,8 @@ GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
 Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007, 2008 Free
 Software Foundation, Inc.
 
-* Version beta 1.9b - ???, by ??? (git version 1.9a-*)
+* Noteworthy changes in Version 1.9b (200x-??-??) [beta]
+  Released by ????, based on git version 1.9a-*
 
 NOTE - there are still a number of FIXMEs to resolve before this can be
 promoted to 2.0.
@@ -116,6 +117,7 @@ promoted to 2.0.
 
 *** New `refcount' builtin allows tracking how many times a module has
     been loaded.
+  - FIXME: consider making m4modules smarter for this purpose
 
 *** New `renamesyms' builtin allows programmatic renaming of all symbols
     according to a regular expression.
@@ -175,9 +177,6 @@ promoted to 2.0.
 *** The `eval' and `mpeval' builtins now support the following new
     operators: `>>>', `\', `?:', and  `,'.
 
-*** The `format' builtin now supports the C99 specifiers of %a and %A, even
-    on platforms that don't yet support C99.
-
 *** The `maketemp' builtin now always warns that it is obsolete, even in GNU
     mode where it uses the same secure algorithm as `mkstemp', because of
     the recommendation of POSIX to obsolete `maketemp' as inherently
@@ -207,11 +206,53 @@ promoted to 2.0.
 
 *** Improvements made in the 1.4.x stable series have been incorporated.
 
-* Version 1.4.11 - ?? ??? 2008, by Eric Blake  (git version 1.4.10a)
+
+* Noteworthy changes in Version 1.4.11 (????-??-??) [stable]
+  Released by ????, based on git version 1.4.10b.x-*
 
-** FIXME: import NEWS from branch once 1.4.11 is released.
+** No user visible changes, yet.
 
-* Version 1.4.10 - 09 Jul 2007, by Eric Blake  (CVS version 1.4.9c)
+* Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
+  Released by Eric Blake, based on git version 1.4.10a
+
+** Security fixes for the -F option, for bugs present since -F was
+   introduced in 1.3: Avoid core dump with 'm4 -F file -t undefined', and
+   avoid arbitrary code execution with certain file names.
+
+** Fix regression introduced in 1.4.9b in the `divert' builtin when more
+   than 512 kibibytes are saved in diversions on platforms like NetBSD
+   where fopen(name,"a+") seeks to the end of the file.
+
+** The output of the `maketemp' and `mkstemp' builtins is now quoted if a
+   file was created.  This is a minor security fix, because it was possible
+   (although rather unlikely) that an unquoted string could match an
+   existing macro name, such that use of the `mkstemp' output would trigger
+   inadvertent macro expansion and operate on the wrong file name.
+
+** Enhance the `defn' builtin to support concatenation of multiple text
+   arguments, as required by POSIX.  However, at this time, it is not
+   possible to concatenate a builtin macro with anything else; a warning is
+   now issued if this is attempted, although a future version of M4 may
+   lift this restriction to match other implementations.
+
+** Enhance the `index' builtin to guarantee linear behavior and often
+   achieve sublinear results, in spite of the surprisingly large number of
+   systems with a brain-dead quadratic strstr(3).
+
+** Enhance the `regexp' and `patsubst' builtins to cache frequently used
+   regular expressions, which speeds up typical Autoconf usage.
+
+** Enhance the `format' builtin to warn for more suspicious usages, such as
+   missing arguments or problems parsing according to the format string.
+
+** Enhance the `ifelse' and `shift' builtins so that tail-recursive
+   algorithms based on `$@' operate in linear, rather than quadratic, time
+   and memory.
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in Version 1.4.10 (2007-07-09) [stable]
+  Released by Eric Blake, based on CVS version 1.4.9c
 
 ** Upgrade from GPL version 2 to GPL version 3 or later.
 
@@ -222,7 +263,8 @@ promoted to 2.0.
    and currently does not match the POSIX behavior of printf(1), so it may
    have further changes in the next version.
 
-* Version 1.4.9b - 29 May 2007, by Eric Blake  (CVS version 1.4.9a)
+* Noteworthy changes in Version 1.4.9b (2007-05-29) [beta]
+  Released by Eric Blake, based on CVS version 1.4.9a
 
 ** Fix regression introduced in 1.4.9 in the `eval' builtin when performing
    division.
@@ -246,11 +288,13 @@ promoted to 2.0.
 ** The testsuite is improved to also run gnulib portability tests for the
    features that M4 imports from gnulib.
 
-* Version 1.4.9 - 23 Mar 2007, by Eric Blake  (CVS version 1.4.8c)
+* Noteworthy changes in Version 1.4.9 (2007-03-23) [stable]
+  Released by Eric Blake, based on CVS version 1.4.8c
 
 ** Minor documentation and portability cleanups.
 
-* Version 1.4.8b - 24 Feb 2007, by Eric Blake  (CVS version 1.4.8a)
+* Noteworthy changes in Version 1.4.8b (2007-02-24) [beta]
+  Released by Eric Blake, based on CVS version 1.4.8a
 
 ** Fix a regression introduced in 1.4.8 that made m4 unable to process
    files larger than 2GiB on some platforms.
@@ -288,7 +332,8 @@ promoted to 2.0.
 
 ** Improved portability to platforms such as BSD/OS and AIX.
 
-* Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)
+* Noteworthy changes in Version 1.4.8 (2006-11-20) [stable]
+  Released by Eric Blake, based on CVS version 1.4.7a
 
 ** The `divert' macro and `-H'/`--hashsize' command line option no longer
    cause a core dump when handed extra large values.  Also, `divert' now
@@ -350,7 +395,8 @@ promoted to 2.0.
    after any files encountered earlier on the command line, rather than up
    front, as is done in traditional implementations and required by POSIX.
 
-* Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
+* Noteworthy changes in Version 1.4.7 (2006-09-25) [stable]
+  Released by Eric Blake, based on CVS version 1.4.6a
 
 ** Fix regression from 1.4.5 in handling a file that ends in a macro
    expansion without arguments instead of a newline.
@@ -388,7 +434,8 @@ promoted to 2.0.
    are still silently accepted, but no longer documented in --help, and may
    be assigned new meanings in future releases.
 
-* Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
+* Noteworthy changes in Version 1.4.6 (2006-08-25) [stable]
+  Released by Eric Blake, based on CVS version 1.4.5a
 
 ** Fix buffer overruns in regexp and patsubst macros when handed a trailing
    backslash in the replacement text, or when handling \n substitutions
@@ -440,7 +487,8 @@ promoted to 2.0.
 ** The patsubst macro now reliably finds zero-length matches at the end
    of a string.
 
-* Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
+* Noteworthy changes in Version 1.4.5 (2006-07-15) [stable]
+  Released by Eric Blake, based on CVS version 1.4.4c
 
 ** Fix sysval on BeOS, OS/2, and other systems that store exit status
    in the low-order byte.  Additionally, on Unix platforms, if syscmd was
@@ -506,7 +554,8 @@ promoted to 2.0.
    the replacement, and warn on \n for n larger than the number of
    sub-expressions in the regexp.
 
-* Version 1.4.4b - 17 June 2006, by Eric Blake  (CVS version 1.4.4a)
+* Noteworthy changes in Version 1.4.4b (2006-06-17) [beta]
+  Released by Eric Blake, based on CVS version 1.4.4a
 
 ** Fix a recursive push_string crashing bug, which affected changequote of
    three or more characters on some compilers.
@@ -536,13 +585,15 @@ promoted to 2.0.
 
 ** Fix a potential crash on machines where char is signed.
 
-* Version 1.4.4 - October 2005, by Gary V. Vaughan
+* Noteworthy changes in Version 1.4.4 (Oct 2005) [stable]
+  Released by Gary V. Vaughan
 
 ** ./configure --infodir=/usr/share/info now works correctly.
 
 ** When any file named on the command line is missing exit with status 1.
 
-* Version 1.4.3 - March 2005, by Gary V. Vaughan
+* Noteworthy changes in Version 1.4.3 (Mar 2005) [stable]
+  Released by Gary V. Vaughan
 
 ** DESTDIR installs now work correctly.
 
@@ -556,11 +607,13 @@ promoted to 2.0.
 
 ** Supported on QNX 6.3.
 
-* Version 1.4.2 - August 2004, by Paul Eggert
+* Noteworthy changes in Version 1.4.2 (Aug 2004) [stable]
+  Released by Paul Eggert
 
 ** No user visible changes; portability bug fixes only.
 
-* Version 1.4.1 - June 2004, by Paul Eggert
+* Noteworthy changes in Version 1.4.1 (Jun 2004) [stable]
+  Released by Paul Eggert
 
 ** The 1.4.x series is intended to be stable; features added in 1.4[a-q]
    were not backported to 1.4.x unless specifically mentioned above.
@@ -568,6 +621,7 @@ promoted to 2.0.
 ** maketemp now creates an empty file with the given name, instead of merely
    returning the name of a nonexistent file.  This closes a security hole.
 
+
 * Version beta 1.4q - August 2001, by Gary V. Vaughan
 
 ** Support for the experimental `changeword' has been dropped.
