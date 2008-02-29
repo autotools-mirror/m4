@@ -8,6 +8,11 @@ Foundation, Inc.
 ** Fix regression introduced in 1.4.10b where using `builtin' or `indir'
    to perform nested `shift' calls triggered an assertion failure.
 
+** Improve the speed of the input engine.
+
+** Support the transparent handling of NUL bytes in the input, in macro
+   names and definitions, and in the string manipulation builtins.
+
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.
