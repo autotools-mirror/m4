@@ -42,12 +42,12 @@ my_distdir = $(PACKAGE)-$(VERSION)
 # not @...@ in Makefile.am, now that we can rely on automake
 # to emit a definition for each substituted variable.
 makefile-check:
-	grep -nE '@[A-Z_0-9]+@' `find . -name Makefile.am` \
+	grep -nE '@[A-Z_0-9]+@' `find $(srcdir) -name Makefile.am` \
 	  && { echo 'Makefile.maint: use $$(...), not @...@' 1>&2; exit 1; } || :
 
 news-date-check: NEWS version-check
 	today=`date +%Y-%m-%d`;						\
-	if head NEWS | grep '^\*.* $(VERSION_REGEXP) ('$$today')'	\
+	if head $(srcdir)/NEWS | grep '^\*.* $(VERSION_REGEXP) ('$$today')'	\
 	    >/dev/null; then						\
 	  :;								\
 	else								\
@@ -56,7 +56,7 @@ news-date-check: NEWS version-check
 	fi
 
 changelog-check:
-	if head ChangeLog | grep 'Version $(VERSION_REGEXP)\.$$'	\
+	if head $(srcdir)/ChangeLog | grep 'Version $(VERSION_REGEXP)\.$$'	\
 	    >/dev/null; then						\
 	  :;								\
 	else								\
@@ -65,12 +65,12 @@ changelog-check:
 	fi
 
 m4-check:
-	@grep -n 'AC_DEFUN([^[]' m4/*.m4 \
+	@grep -n 'AC_DEFUN([^[]' $(srcdir)/m4/*.m4 \
 	  && { echo 'Makefile.maint: quote the first arg to AC_DEFUN' 1>&2; \
 	       exit 1; } || :
 
 vc-diff-check:
-	$(VC) diff > vc-diffs || :
+	$(VC) diff -- $(srcdir) > vc-diffs || :
 	if test -s vc-diffs; then				\
 	  cat vc-diffs;						\
 	  echo "Some files are locally modified:" 1>&2;		\
@@ -222,6 +222,6 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 .PHONY: web-manual
 web-manual:
 	@cd ./doc ; \
-	  $(SHELL) ../gendocs.sh $(PACKAGE) \
+	  $(SHELL) $(srcdir)/build-aux/gendocs.sh $(PACKAGE) \
 	    "GNU $(PACKAGE)- GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."

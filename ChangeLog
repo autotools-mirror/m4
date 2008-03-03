@@ -1,3 +1,19 @@
+2008-03-03  Eric Blake  <ebb9@byu.net>
+
+	More maintainer build adjustments.
+	* configure.ac (AC_CONFIG_LINKS): Link GNUMakefile into VPATH
+	build tree, but only if autoconf is new enough.
+	* GNUmakefile (_have-Makefile, _dummy): Don't pollute Makefile.am
+	namespace.
+	(_is-dist-target): Support out-of-tree VPATH build.
+	(check, install, dist, distcheck) [!_have-Makefile]: Forward
+	common build targets on to all to get nicer error messages.
+	* Makefile.maint (makefile-check, news-date-check)
+	(changelog-check, m4-check, vc-diff-check, web-manual): Work in
+	VPATH builds.
+	* m4/gnulib-cache.m4: Remove obsolete free module.  Import memchr2
+	for later use.
+
 2008-02-26  Eric Blake  <ebb9@byu.net>
 
 	* NEWS: Fix typos.

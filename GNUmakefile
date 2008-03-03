@@ -32,16 +32,17 @@ else
 SHELL = sh
 endif
 
-have-Makefile := $(shell test -f Makefile && echo yes)
+_have-Makefile := $(shell test -f Makefile && echo yes)
 
 # If the user runs GNU make but has not yet run ./configure,
 # give them a diagnostic.
-ifeq ($(have-Makefile),yes)
+ifeq ($(_have-Makefile),yes)
 
 # Make tar archive easier to reproduce.
 export TAR_OPTIONS = --owner=0 --group=0 --numeric-owner
 
 include Makefile
+
 _curr-ver := $(VERSION)
 
 # Ensure that $(VERSION) is up to date for dist-related targets, but not
@@ -49,21 +50,22 @@ _curr-ver := $(VERSION)
 ifeq (0,$(MAKELEVEL))
   _is-dist-target = $(filter dist% alpha beta major,$(MAKECMDGOALS))
   ifneq (,$(_is-dist-target))
-    _curr-ver := $(shell build-aux/git-version-gen .tarball-version)
+    _curr-ver := $(shell cd $(srcdir) && build-aux/git-version-gen \
+		   $(srcdir)/.tarball-version)
     ifneq ($(_curr-ver),$(VERSION))
       $(info INFO: running autoreconf for new version string: $(_curr-ver))
-      dummy := $(shell rm -rf autom4te.cache; autoreconf)
+      _dummy := $(shell rm -rf autom4te.cache; (cd $(srcdir) && autoreconf))
       _created_version_file = 1
     endif
   endif
 endif
 
 ifneq ($(_curr-ver),$(VERSION))
-  dummy := $(shell echo $(_curr-ver) > .version)
+  _dummy := $(shell echo $(_curr-ver) > .version)
 endif
 
 ifneq ($(_created_version_file),1)
-  dummy := $(shell test -f .version || echo $(VERSION) > .version)
+  _dummy := $(shell test -f .version || echo $(VERSION) > .version)
 endif
 
 include $(srcdir)/Makefile.cfg
@@ -75,6 +77,11 @@ all:
 	@echo There seems to be no Makefile in this directory.   1>&2
 	@echo "You must run ./configure before running \`make'." 1>&2
 	@exit 1
+
+check: all
+install: all
+dist: all
+distcheck: all
 
 endif
 
