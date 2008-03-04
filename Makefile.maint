@@ -70,7 +70,7 @@ m4-check:
 	       exit 1; } || :
 
 vc-diff-check:
-	$(VC) diff -- $(srcdir) > vc-diffs || :
+	(CDPATH=; cd $(srcdir) && $(VC) diff) > vc-diffs || :
 	if test -s vc-diffs; then				\
 	  cat vc-diffs;						\
 	  echo "Some files are locally modified:" 1>&2;		\

@@ -1,3 +1,16 @@
+2008-03-04  Eric Blake  <ebb9@byu.net>
+
+	Make GNUmakefile work with in-place builds.
+	* configure.ac (AC_CONFIG_LINKS): Use m4_PACKAGE_VERSION to work
+	with older autoconf.  Use shell variable to bypass older automake
+	distclean rules.
+	* Makefile.am (distclean-local): Remove GNUmakefile link in VPATH
+	builds, since we bypassed automake.
+	* GNUmakefile: Collapse redundant lines.
+	(_is-dist-target): 'distclean' is not a dist target.
+	* Makefile.maint (vc-diff-check): Support out-of-tree VPATH build.
+	Reported by Ralf Wildenhues.
+
 2008-03-03  Eric Blake  <ebb9@byu.net>
 
 	More maintainer build adjustments.

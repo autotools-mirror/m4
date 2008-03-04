@@ -48,13 +48,14 @@ _curr-ver := $(VERSION)
 # Ensure that $(VERSION) is up to date for dist-related targets, but not
 # for others: running autoreconf and recompiling everything isn't cheap.
 ifeq (0,$(MAKELEVEL))
-  _is-dist-target = $(filter dist% alpha beta major,$(MAKECMDGOALS))
+  _is-dist-target = $(filter-out %clean, \
+    $(filter dist% alpha beta major,$(MAKECMDGOALS)))
   ifneq (,$(_is-dist-target))
     _curr-ver := $(shell cd $(srcdir) && build-aux/git-version-gen \
 		   $(srcdir)/.tarball-version)
     ifneq ($(_curr-ver),$(VERSION))
       $(info INFO: running autoreconf for new version string: $(_curr-ver))
-      _dummy := $(shell rm -rf autom4te.cache; (cd $(srcdir) && autoreconf))
+      _dummy := $(shell (cd $(srcdir) && rm -rf autom4te.cache && autoreconf))
       _created_version_file = 1
     endif
   endif
@@ -78,10 +79,7 @@ all:
 	@echo "You must run ./configure before running \`make'." 1>&2
 	@exit 1
 
-check: all
-install: all
-dist: all
-distcheck: all
+check dist distcheck install: all
 
 endif
 
