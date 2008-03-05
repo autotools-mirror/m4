@@ -1,3 +1,8 @@
+2008-03-04  Eric Blake  <ebb9@byu.net>
+
+	The gnulib module free was deprecated.
+	* ltdl/m4/gnulib-cache.m4: Remove free module.
+
 2008-02-29  Eric Blake  <ebb9@byu.net>
 
 	Import news from 1.4.10b.
