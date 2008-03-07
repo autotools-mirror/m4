@@ -1094,8 +1094,9 @@ make_argv_ref (m4 *context, m4_symbol_value *value, m4_obstack *obs,
       size_t i;
       for (i = 0; i < argv->arraylen; i++)
 	{
-	  if (argv->array[i]->type == M4_SYMBOL_COMP
-	      && argv->array[i]->u.u_c.wrapper)
+	  if ((argv->array[i]->type == M4_SYMBOL_COMP
+	       && argv->array[i]->u.u_c.wrapper)
+	      || level < SIZE_MAX)
 	    break;
 	  if (index == 1)
 	    {

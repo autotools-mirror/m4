@@ -1,3 +1,12 @@
+2008-03-06  Eric Blake  <ebb9@byu.net>
+
+	Fix nested builtin(`shift',$@) regression from 2008-02-23.
+	* m4/macro.c (make_argv_ref): Don't output expansion text when
+	making wrapper for builtin or indir.
+	* tests/builtins.at (builtin): New test.
+	* NEWS: Document the fix.
+	Reported by Andreas Schwab.
+
 2008-03-04  Eric Blake  <ebb9@byu.net>
 
 	The gnulib module free was deprecated.

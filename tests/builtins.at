@@ -88,6 +88,33 @@ AT_CHECK_M4([in], [0], [expout])
 AT_CLEANUP
 
 
+## ------- ##
+## builtin ##
+## ------- ##
+
+AT_SETUP([builtin])
+
+dnl This was a regression in 1.4.10b.
+AT_DATA([in.m4],
+[[define(`s', `builtin(`shift', $@)')dnl
+define(`loop', `ifelse(`$2', `', `-', `$1$2: $0(`$1', s(s($@)))')')dnl
+loop(`1')
+loop(`1', `2')
+loop(`1', `2', `3')
+loop(`1', `2', `3', `4')
+loop(`1', `2', `3', `4', `5')
+]])
+AT_CHECK_M4([in.m4], [0],
+[[-
+12: -
+12: 13: -
+12: 13: 14: -
+12: 13: 14: 15: -
+]])
+
+AT_CLEANUP
+
+
 ## ----------- ##
 ## changequote ##
 ## ----------- ##
