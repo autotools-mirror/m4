@@ -1,3 +1,12 @@
+2008-03-06  Eric Blake  <ebb9@byu.net>
+
+	Fix nested builtin(`shift',$@) regression from 2008-02-22.
+	* src/macro.c (make_argv_ref_token): Don't output expansion text
+	when making wrapper for builtin or indir.
+	* doc/m4.texinfo (Builtin): Test it.
+	* NEWS: Document the fix.
+	Reported by Andreas Schwab.
+
 2008-03-04  Eric Blake  <ebb9@byu.net>
 
 	Make GNUmakefile work with in-place builds.

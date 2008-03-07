@@ -5,7 +5,8 @@ Foundation, Inc.
 * Noteworthy changes in Version 1.4.11 (????-??-??) [stable]
   Released by ????, based on git version 1.4.10b.x-*
 
-** No user visible changes, yet.
+** Fix regression introduced in 1.4.10b where using `builtin' or `indir'
+   to perform nested `shift' calls triggered an assertion failure.
 
 * Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
   Released by Eric Blake, based on git version 1.4.10a

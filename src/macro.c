@@ -1303,8 +1303,9 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
       unsigned int i;
       for (i = 0; i < argv->arraylen; i++)
 	{
-	  if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-	      && argv->array[i]->u.u_c.wrapper)
+	  if ((TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+	       && argv->array[i]->u.u_c.wrapper)
+	      || level >= 0)
 	    break;
 	  if (index == 1)
 	    {

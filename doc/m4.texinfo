@@ -2542,6 +2542,23 @@ builtin(`builtin',)
 builtin(`include', `foo')dnl
 @result{}bar
 @end example
+
+@comment And this example triggers a regression present in 1.4.10b.
+
+@example
+define(`s', `builtin(`shift', $@@)')dnl
+define(`loop', `ifelse(`$2', `', `-', `$1$2: $0(`$1', s(s($@@)))')')dnl
+loop(`1')
+@result{}-
+loop(`1', `2')
+@result{}12: -
+loop(`1', `2', `3')
+@result{}12: 13: -
+loop(`1', `2', `3', `4')
+@result{}12: 13: 14: -
+loop(`1', `2', `3', `4', `5')
+@result{}12: 13: 14: 15: -
+@end example
 @end ignore
 
 @node Conditionals
