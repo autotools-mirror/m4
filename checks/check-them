@@ -2,9 +2,6 @@
 # Check GNU m4 against examples from the manual source.
 # Copyright (C) 1992, 2006, 2007, 2008 Free Software Foundation, Inc.
 
-# Sanity check what we are testing
-m4 --version
-
 # Clean up temp files on exit
 pwd=`pwd`
 tmp=m4-tmp.$$
@@ -29,25 +26,32 @@ skipped=
 strip_needed=false
 diffopts=-c
 
-# Find out how the executable prints argv[0]
-m4=`m4 --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
-    -e 's/\\\\/\\\\\\\\/g' -e 1q`
-
-# Find out if we should strip \r in the output
-m4 --version > $out
-m4 --version | tr -d '\015' > $xout
-if cmp -s $out $xout; then
-  :
-else
-  echo "Ignoring carriage returns"
-  strip_needed=:
-fi
-
 # Find out where the examples live.
 examples=.
 if test "x$1" = x-I ; then
   examples="$2"
   shift; shift
+fi
+
+# Find out how to run m4.
+m4=m4
+if test "x$1" = x-m ; then
+  m4="$2"
+  shift; shift
+fi
+
+# Find out how the executable prints argv[0]
+m4name=`"$m4" --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
+  -e 's/\\\\/\\\\\\\\/g' -e 1q`
+
+# Find out if we should strip \r in the output
+"$m4" --version | tee $out
+"$m4" --version | tr -d '\015' > $xout
+if cmp -s $out $xout; then
+  :
+else
+  echo "Ignoring carriage returns"
+  strip_needed=:
 fi
 
 # Find out if diff supports useful options.
@@ -68,7 +72,7 @@ do
   echo "Checking $file"
   options=`sed -ne '3s/^dnl @ extra options: //p;3q' "$file"`
   sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
-    | LC_MESSAGES=C M4PATH=$examples m4 -d $options - >$out 2>$err
+    | LC_MESSAGES=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
   stat=$?
 
   xstat=`sed -ne '2s/^dnl @ expected status: //p;2q' "$file"`
@@ -96,10 +100,11 @@ do
 
   xerrfile=`sed -n 's/^dnl @ expected error: //p' "$file"`
   if test -z "$xerrfile" ; then
-    sed '/^dnl @error{}/!d; s///; '"s|^m4:|$m4:|; s|\.\./examples|$examples|" \
+    sed '/^dnl @error{}/!d
+         s///; '"s|^m4:|$m4name:|; s|\.\./examples|$examples|" \
       "$file" > $xerr
   else
-    sed "s|^m4:|$m4:|; s|\.\./examples|$examples|" \
+    sed "s|^m4:|$m4name:|; s|\.\./examples|$examples|" \
       "$examples/$xerrfile" > $xerr
   fi
 

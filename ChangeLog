@@ -1,5 +1,11 @@
 2008-03-10  Eric Blake  <ebb9@byu.net>
 
+	Allow 'make installcheck' with './configure --program-prefix'.
+	* checks/Makefile.in (program_transform_name): New macro.
+	(installcheck): Use it to transform name of m4 before testing.
+	* checks/check-them (m4): Add -m option, to allow testing m4 by a
+	different name.
+
 	More maintainer fixes.
 	* GNUmakefile (_created_version_file): Delete, now that VPATH
 	builds include GNUmakefile.

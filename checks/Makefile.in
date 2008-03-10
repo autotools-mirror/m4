@@ -30,6 +30,7 @@ prefix = @prefix@
 srcdir = @srcdir@
 VPATH = @srcdir@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+program_transform_name = @program_transform_name@
 
 # Should be GNU awk, for the get-them script.
 AWK = @AWK@
@@ -59,7 +60,8 @@ check: $(srcdir)/stamp-checks
 
 installcheck: $(srcdir)/stamp-checks
 	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
-	$(srcdir)/check-them -I $(srcdir)/../examples $(CHECKS)
+	$(srcdir)/check-them -I $(srcdir)/../examples \
+	-m "`echo m4 | sed '$(program_transform_name)'`" $(CHECKS)
 
 tags:
 
