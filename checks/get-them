@@ -1,11 +1,13 @@
 #!/bin/sh
 # -*- AWK -*-
 # Extract all examples from the manual source.
-# Copyright (C) 1992, 2005, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2005, 2006, 2007, 2008 Free Software Foundation,
+# Inc.
 
 # This script is for use with GNU awk.
 
 FILE=${1-/dev/null}
+: ${AWK=awk}
 
 $AWK '
 
@@ -16,6 +18,8 @@ BEGIN {
   file = "NONE";
   status = 0;
   options = "";
+  xout = "";
+  xerr = "";
 }
 
 /^@node / {
@@ -39,6 +43,8 @@ BEGIN {
   getline;
   status = 0;
   options = "";
+  xout = "";
+  xout = "";
   next;
 }
 
@@ -49,6 +55,16 @@ BEGIN {
 /^@comment options: / {
   options = $0;
   gsub ("@comment options:", "", options);
+}
+
+/^@comment xout: / {
+  xout = $0;
+  gsub ("@comment xout: ", "", xout);
+}
+
+/^@comment xerr: / {
+  xerr = $0;
+  gsub ("@comment xerr: ", "", xerr);
 }
 
 /^@example$/, /^@end example$/ {
@@ -68,8 +84,14 @@ BEGIN {
 	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
 	   "dnl @ with or without modifications, as long as this notice\n"\
 	   "dnl @ is preserved.\n", FILENAME, NR, status, options) > file;
+    if (xout)
+	printf("dnl @ expected output: %s\n", xout) > file;
+    if (xerr)
+	printf("dnl @ expected error: %s\n", xerr) > file;
     status = 0;
     options = "";
+    xout = "";
+    xerr = "";
     next;
   }
   if ($0 ~ /^@end example$/) {
