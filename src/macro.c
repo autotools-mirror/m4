@@ -661,8 +661,10 @@ expand_macro (symbol *sym)
   if (!stacks[level].args)
     {
       assert (!stacks[level].refcount);
-      stacks[level].args = xmalloc (sizeof (struct obstack));
-      stacks[level].argv = xmalloc (sizeof (struct obstack));
+      stacks[level].args =
+	(struct obstack *) xmalloc (sizeof *stacks[level].args);
+      stacks[level].argv =
+	(struct obstack *) xmalloc (sizeof *stacks[level].args);
       obstack_init (stacks[level].args);
       obstack_init (stacks[level].argv);
       stacks[level].args_base = obstack_finish (stacks[level].args);

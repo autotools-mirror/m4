@@ -1,3 +1,11 @@
+2008-03-13  Eric Blake  <ebb9@byu.net>
+
+	Consistently cast malloc results, for C++ compilation.
+	* src/builtin.c (compile_pattern): Add cast.
+	* src/macro.c (expand_macro): Likewise.
+	* src/output.c (m4_tmpname): Likewise.
+	* src/stackovf.c (setup_stackovf_trap): Use correct type.
+
 2008-03-10  Eric Blake  <ebb9@byu.net>
 
 	Allow 'make installcheck' with './configure --program-prefix'.

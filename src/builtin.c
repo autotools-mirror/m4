@@ -308,7 +308,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
       }
 
   /* Next, check if STR can be compiled.  */
-  new_buf = xzalloc (sizeof *new_buf);
+  new_buf = (struct re_pattern_buffer *) xzalloc (sizeof *new_buf);
   msg = re_compile_pattern (str, len, new_buf);
 #ifdef DEBUG_REGEX
   if (trace_file)
