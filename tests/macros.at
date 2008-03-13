@@ -82,7 +82,7 @@ AT_DATA([[input.m4]],
 [[defun
 defun(`foo')
 defun(`foo', `bar')
-defun(`foo', `bar', baz')
+defun(`foo', `bar', `baz')
 ]])
 
 AT_DATA([[expout]],

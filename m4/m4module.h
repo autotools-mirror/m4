@@ -295,8 +295,6 @@ extern const char *	m4_get_symbol_value_placeholder	(m4_symbol_value *);
 extern void		m4_set_symbol_value_text  (m4_symbol_value *,
 						   const char *, size_t,
 						   unsigned int);
-extern void		m4_set_symbol_value_builtin	(m4_symbol_value *,
-							 const m4_builtin *);
 extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 							 const char *);
 
@@ -305,7 +303,7 @@ extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 /* --- BUILTIN MANAGEMENT --- */
 
 extern m4_symbol_value	*m4_builtin_find_by_name (m4_module *, const char *);
-extern const m4_builtin	*m4_builtin_find_by_func (m4_module *,
+extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
 						  m4_builtin_func *);
 
 

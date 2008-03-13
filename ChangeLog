@@ -1,5 +1,41 @@
 2008-03-13  Eric Blake  <ebb9@byu.net>
 
+	Stage 19a: sort and cache builtins loaded by a module.
+	Rather than repeatedly using dlsym to browse the builtin table,
+	copy off the table at module load time.  Then, the input engine
+	merely refers to the copy instead of duplicating information.
+	Memory impact: slight penalty, due to more memory per module, but
+	offset by less memory in input engine.
+	Speed impact: slight improvement, due to faster builtin	lookups.
+	* m4/m4module.h (m4_set_symbol_value_builtin): Delete.  Use
+	m4_builtin_find_by_* instead.
+	(m4_builtin_find_by_func): Change return type.
+	* m4/m4private.h (m4__builtin): New struct.
+	(m4_module): Add sorted list of loaded builtins.
+	(struct m4_symbol_value): Change type of builtin value.
+	(m4__set_symbol_value_builtin): New prototype and fast accessor.
+	(m4_get_symbol_value_func, m4_get_symbol_value_builtin): Adjust to
+	new field type.
+	* m4/symtab.c (m4_set_symbol_value_builtin): Rename...
+	(m4__set_symbol_value_builtin): ...and populate additional fields,
+	based on new type.
+	(m4_get_symbol_value_func, m4_get_symbol_value_builtin): Adjust to
+	new field type.
+	* m4/module.c (install_builtin_table): Use cached table.
+	(compare_builtin_CB): New helper function.
+	(m4__module_open): Populate table.
+	(module_remove): Free table.
+	* m4/builtin.c (compare_builtin_name_CB): New helper function.
+	(m4_builtin_find_by_name): Rewrite to use sorted table.
+	(m4_builtin_find_by_func): Change return type.
+	* m4/input.c (struct m4_input_block): Simplify u_b, since most
+	fields can be determined from builtin.
+	(builtin_peek, builtin_read, builtin_unget, init_builtin_token)
+	(m4__next_token): Alter parsing so that only init_builtin_token
+	consumes a builtin.
+	(builtin_print, m4_push_builtin): Adjust all users.
+	* tests/macros.at (Arity, defn, and freeze): Fix typo.
+
 	Consistently cast malloc results, for C++ compilation.
 	* m4/builtin.c (m4_builtin_find_by_name): Add cast.
 	* m4/hash.c (m4_hash_new, m4_get_hash_iterator_next, node_new)

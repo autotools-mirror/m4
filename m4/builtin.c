@@ -25,6 +25,15 @@
 
 #include "m4private.h"
 
+/* Comparison function, for use in bsearch, which compares NAME
+   against the name of BUILTIN.  */
+static int
+compare_builtin_name_CB (const void *name, const void *b)
+{
+  const m4__builtin *builtin = (const m4__builtin *) b;
+  return strcmp ((const char *) name, builtin->builtin.name);
+}
+
 /* Find the builtin which has NAME.  If MODULE is not NULL, then
    search only in MODULE's builtin table.  The result is a malloc'd
    symbol value, suitable for use in the symbol table or for an
@@ -33,26 +42,17 @@ m4_symbol_value *
 m4_builtin_find_by_name (m4_module *module, const char *name)
 {
   m4_module *cur = module ? module : m4__module_next (NULL);
+  m4__builtin *bp;
 
   do
     {
-      const m4_builtin *builtin =
-	(m4_builtin *) lt_dlsym (cur->handle, BUILTIN_SYMBOL);
-
-      if (builtin)
+      bp = (m4__builtin *) bsearch (name, cur->builtins, cur->builtins_len,
+				    sizeof *bp, compare_builtin_name_CB);
+      if (bp)
 	{
-	  for (; builtin->name != NULL; builtin++)
-	    if (!strcmp (builtin->name, name))
-	      {
-		m4_symbol_value *token;
-		token = (m4_symbol_value *) xzalloc (sizeof *token);
-		m4_set_symbol_value_builtin (token, builtin);
-		VALUE_MODULE (token) = cur;
-		VALUE_FLAGS (token) = builtin->flags;
-		VALUE_MIN_ARGS (token) = builtin->min_args;
-		VALUE_MAX_ARGS (token) = builtin->max_args;
-		return token;
-	      }
+	  m4_symbol_value *token = (m4_symbol_value *) xzalloc (sizeof *token);
+	  m4__set_symbol_value_builtin (token, bp);
+	  return token;
 	}
     }
   while (!module && (cur = m4__module_next (cur)));
@@ -61,23 +61,25 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
 }
 
 /* Find the builtin which has FUNC.  If MODULE argument is supplied
-   then search only in MODULE's builtin table.  */
-const m4_builtin *
+   then search only in MODULE's builtin table.  The result is a
+   malloc'd symbol value, suitable for use in the symbol table or for
+   an argument to m4_push_builtin.  */
+m4_symbol_value *
 m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
 {
   m4_module *cur = module ? module : m4__module_next (NULL);
+  size_t i;
 
   do
     {
-      const m4_builtin *builtin =
-	(const m4_builtin *) lt_dlsym (cur->handle, BUILTIN_SYMBOL);
-
-      if (builtin)
-	{
-	  for (; builtin->name != NULL; builtin++)
-	    if (builtin->func == func)
-	      return builtin;
-	}
+      for (i = 0; i < cur->builtins_len; i++)
+	if (cur->builtins[i].builtin.func == func)
+	  {
+	    m4_symbol_value *token =
+	      (m4_symbol_value *) xzalloc (sizeof *token);
+	    m4__set_symbol_value_builtin (token, &cur->builtins[i]);
+	    return token;
+	  }
     }
   while (!module && (cur = m4__module_next (cur)));
 

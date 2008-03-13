@@ -180,15 +180,7 @@ struct m4_input_block
 	  bool_bitfield line_start : 1;	/* Saved start_of_input_line state.  */
 	}
       u_f;	/* See file_funcs.  */
-      struct
-	{
-	  const m4_builtin *builtin;	/* Pointer to builtin's function.  */
-	  m4_module *module;		/* Originating module.  */
-	  bool_bitfield read : 1;	/* True iff block has been read.  */
-	  int flags : 24;		/* Flags tied to the builtin. */
-	  m4_hash *arg_signature;	/* Argument signature for builtin.  */
-	}
-      u_b;	/* See builtin_funcs.  */
+      const m4__builtin *builtin;	/* A builtin, see builtin_funcs.  */
       struct
 	{
 	  m4__symbol_chain *chain;	/* Current link in chain.  */
@@ -397,42 +389,36 @@ static int
 builtin_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 	      bool allow_argv M4_GNUC_UNUSED)
 {
-  if (me->u.u_b.read)
-    return CHAR_RETRY;
-
-  return CHAR_BUILTIN;
+  return me->u.builtin ? CHAR_BUILTIN : CHAR_RETRY;
 }
 
 static int
 builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 	      bool allow_quote M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
 {
-  if (me->u.u_b.read)
-    return CHAR_RETRY;
-
-  me->u.u_b.read = true;
-  return CHAR_BUILTIN;
+  /* Not consumed here - wait until init_builtin_token.  */
+  return me->u.builtin ? CHAR_BUILTIN : CHAR_RETRY;
 }
 
 static void
 builtin_unget (m4_input_block *me, int ch)
 {
-  assert (ch == CHAR_BUILTIN && me->u.u_b.read);
-  me->u.u_b.read = false;
+  assert (ch == CHAR_BUILTIN && me->u.builtin);
 }
 
 static void
 builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  const m4_builtin *bp = me->u.u_b.builtin;
-  const char *text = bp->name;
+  const m4__builtin *bp = me->u.builtin;
+  const char *text = bp->builtin.name;
 
+  assert (bp);
   obstack_1grow (obs, '<');
   obstack_grow (obs, text, strlen (text));
   obstack_1grow (obs, '>');
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE))
     {
-      text = m4_get_module_name (me->u.u_b.module);
+      text = m4_get_module_name (bp->module);
       obstack_1grow (obs, '{');
       obstack_grow (obs, text, strlen (text));
       obstack_1grow (obs, '}');
@@ -461,17 +447,7 @@ m4_push_builtin (m4 *context, m4_symbol_value *token)
   i->funcs = &builtin_funcs;
   i->file = m4_get_current_file (context);
   i->line = m4_get_current_line (context);
-
-  i->u.u_b.builtin	= m4_get_symbol_value_builtin (token);
-  i->u.u_b.module	= VALUE_MODULE (token);
-  i->u.u_b.arg_signature = VALUE_ARG_SIGNATURE (token);
-  i->u.u_b.flags	= VALUE_FLAGS (token);
-  /* Check for bitfield truncation.  */
-  assert (i->u.u_b.flags == VALUE_FLAGS (token)
-	  && i->u.u_b.builtin->min_args == VALUE_MIN_ARGS (token)
-	  && i->u.u_b.builtin->max_args == VALUE_MAX_ARGS (token));
-  i->u.u_b.read		= false;
-
+  i->u.builtin = token->u.builtin;
   i->prev = isp;
   isp = i;
   input_change = true;
@@ -1079,20 +1055,18 @@ m4_pop_wrapup (m4 *context)
   return true;
 }
 
-/* When a BUILTIN token is seen, m4__next_token () uses init_builtin_token
-   to retrieve the value of the function pointer.  */
+/* Populate TOKEN with the builtin token at the top of the input
+   stack, then consume the input.  */
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
+  int ch = next_char (context, false, true);
   m4_input_block *block = isp;
-  assert (block->funcs->read_func == builtin_read && !block->u.u_b.read);
+  assert (ch == CHAR_BUILTIN && block->funcs->read_func == builtin_read
+	  && block->u.builtin);
 
-  m4_set_symbol_value_builtin (token, block->u.u_b.builtin);
-  VALUE_MODULE (token)		= block->u.u_b.module;
-  VALUE_FLAGS (token)		= block->u.u_b.flags;
-  VALUE_ARG_SIGNATURE (token)	= block->u.u_b.arg_signature;
-  VALUE_MIN_ARGS (token)	= block->u.u_b.builtin->min_args;
-  VALUE_MAX_ARGS (token)	= block->u.u_b.builtin->max_args;
+  m4__set_symbol_value_builtin (token, block->u.builtin);
+  block->u.builtin = NULL;
 }
 
 /* When a QUOTE token is seen, convert VALUE to a composite (if it is
@@ -1501,7 +1475,6 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
       {
 	init_builtin_token (context, token);
-	next_char (context, false, true);
 #ifdef DEBUG_INPUT
 	m4_print_token (context, "next_token", M4_TOKEN_MACDEF, token);
 #endif

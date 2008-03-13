@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2002,
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -135,47 +135,28 @@ m4_module_import (m4 *context, const char *module_name,
 static void
 install_builtin_table (m4 *context, m4_module *module)
 {
-  const m4_builtin *bp;
+  size_t i;
 
   assert (context);
   assert (module);
-
-  bp = (m4_builtin *) lt_dlsym (module->handle, BUILTIN_SYMBOL);
-  if (bp)
+  for (i = 0; i < module->builtins_len; i++)
     {
-      for (; bp->name != NULL; bp++)
-	{
-	  m4_symbol_value *value = m4_symbol_value_create ();
-	  const char *	   name;
+      m4_symbol_value *value = m4_symbol_value_create ();
+      const char *name = module->builtins[i].builtin.name;
 
-	  /* Sanity check that builtins meet the required interface.  */
-	  assert (bp->min_args <= bp->max_args);
-	  assert (bp->min_args > 0
-		  || (bp->flags & (M4_BUILTIN_BLIND
-				   | M4_BUILTIN_SIDE_EFFECT)) == 0);
-	  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
+      m4__set_symbol_value_builtin (value, &module->builtins[i]);
+      if (m4_get_prefix_builtins_opt (context))
+	name = xasprintf ("m4_%s", name);
 
-	  m4_set_symbol_value_builtin (value, bp);
-	  VALUE_MODULE   (value)	= module;
-	  VALUE_FLAGS    (value)	= bp->flags;
-	  VALUE_MIN_ARGS (value)	= bp->min_args;
-	  VALUE_MAX_ARGS (value)	= bp->max_args;
+      m4_symbol_pushdef (M4SYMTAB, name, value);
 
-	  if (m4_get_prefix_builtins_opt (context))
-	    name = xasprintf ("m4_%s", bp->name);
-	  else
-	    name = bp->name;
-
-	  m4_symbol_pushdef (M4SYMTAB, name, value);
-
-	  if (m4_get_prefix_builtins_opt (context))
-	    free ((char *) name);
-	}
-
-      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: builtins loaded"),
-			m4_get_module_name (module));
+      if (m4_get_prefix_builtins_opt (context))
+	free ((char *) name);
     }
+  if (i)
+    m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+		      _("module %s: builtins loaded"),
+		      m4_get_module_name (module));
 }
 
 static void
@@ -199,7 +180,7 @@ install_macro_table (m4 *context, m4_module *module)
 	  assert (mp->min_args <= mp->max_args);
 
 	  m4_set_symbol_value_text (value, xmemdup (mp->value, len + 1),
-                                    len, 0);
+				    len, 0);
 	  VALUE_MODULE (value) = module;
 	  VALUE_MIN_ARGS (value) = mp->min_args;
 	  VALUE_MAX_ARGS (value) = mp->max_args;
@@ -390,6 +371,19 @@ m4__module_init (m4 *context)
 }
 
 
+/* Compare two builtins A and B for sorting, as in qsort.  */
+static int
+compare_builtin_CB (const void *a, const void *b)
+{
+  const m4__builtin *builtin_a = (const m4__builtin *) a;
+  const m4__builtin *builtin_b = (const m4__builtin *) b;
+  int result = strcmp (builtin_a->builtin.name, builtin_b->builtin.name);
+  /* A builtin module should never provide two builtins with the same
+     name.  */
+  assert (result || a == b);
+  return result;
+}
+
 /* Load a module.  NAME can be a absolute file name or, if relative,
    it is searched for in the module path.  The module is unloaded in
    case of error.  */
@@ -429,9 +423,43 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	{
 	  void *old;
 	  const char *err;
+	  const m4_builtin *bp;
 
 	  module = (m4_module *) xzalloc (sizeof *module);
 	  module->handle = handle;
+
+	  /* TODO - change module interface to return function pointer
+	     that supplies both table and length of table, rather than
+	     returning data pointer that must have a sentinel
+	     entry?  */
+	  bp = (m4_builtin *) lt_dlsym (module->handle, BUILTIN_SYMBOL);
+	  if (bp)
+	    {
+	      const m4_builtin *tmp;
+	      m4__builtin *builtin;
+	      for (tmp = bp; tmp->name; tmp++)
+		module->builtins_len++;
+	      module->builtins =
+		(m4__builtin *) xnmalloc (module->builtins_len,
+					  sizeof *module->builtins);
+	      for (builtin = module->builtins; bp->name != NULL;
+		   bp++, builtin++)
+		{
+		  /* Sanity check that builtins meet the required
+		     interface.  */
+		  assert (bp->min_args <= bp->max_args);
+		  assert (bp->min_args > 0
+			  || (bp->flags & (M4_BUILTIN_BLIND
+					   | M4_BUILTIN_SIDE_EFFECT)) == 0);
+		  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
+
+		  memcpy (&builtin->builtin, bp, sizeof *bp);
+		  builtin->builtin.name = xstrdup (bp->name);
+		  builtin->module = module;
+		}
+	    }
+	  qsort (module->builtins, module->builtins_len,
+		 sizeof *module->builtins, compare_builtin_CB);
 
 	  /* clear out any stale errors, since we have to use
 	     lt_dlerror to distinguish between success and
@@ -615,7 +643,13 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
     m4_error (context, EXIT_FAILURE, 0, NULL,
 	      _("cannot close module `%s': %s"), name, module_dlerror ());
   if (last_reference)
-    free (module);
+    {
+      size_t i;
+      for (i = 0; i < module->builtins_len; i++)
+	free ((char *) module->builtins[i].builtin.name);
+      free (module->builtins);
+      free (module);
+    }
 
   DELETE (name);
 

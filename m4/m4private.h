@@ -148,6 +148,22 @@ struct m4 {
    exported in m4module.h.  */
 #define m4__get_search_path(C)			((C)->search_path)
 
+
+/* --- BUILTIN MANAGEMENT --- */
+
+/* Internal representation of loaded builtins.  */
+struct m4__builtin
+{
+  /* Copied from module's BUILTIN_SYMBOL table, although builtin.flags
+     can be used for additional bits beyond what is allowed for
+     modules.  */
+  m4_builtin builtin;
+  m4_module *module;		/* Module that owns this builtin.  */
+};
+typedef struct m4__builtin m4__builtin;
+
+extern void m4__set_symbol_value_builtin (m4_symbol_value *,
+					  const m4__builtin *);
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -158,15 +174,13 @@ struct m4 {
 #define INIT_SYMBOL		"m4_init_module"
 #define FINISH_SYMBOL		"m4_finish_module"
 
+/* Representation of a loaded m4 module.  */
 struct m4_module
 {
-  lt_dlhandle	handle;		/* ltdl module information.  */
-  int		refcount;	/* count of loads not matched by unload.  */
-  /* TODO: add struct members, such as copy of builtins (so that we
-     can store additional information about builtins, and so that the
-     list isn't changed by the module behind our backs once we have
-     initialized it) or cached pointers (to reduce the number of calls
-     needed to lt_dlsym).  */
+  lt_dlhandle handle;		/* All ltdl module information.  */
+  int refcount;			/* Count of loads not matched by unload.  */
+  m4__builtin *builtins;	/* Sorted array of builtins.  */
+  size_t builtins_len;		/* Number of builtins.  */
 };
 
 extern void	    m4__module_init (m4 *context);
@@ -248,11 +262,11 @@ struct m4_symbol_value
     {
       size_t		len;	/* Length of string.  */
       const char *	text;	/* String contents.  */
-      /* Quote age when this string was built, or zeroto force a
+      /* Quote age when this string was built, or zero to force a
 	 rescan of the string.  Ignored for 0 len.  */
       unsigned int	quote_age;
     } u_t;			/* Valid when type is TEXT, PLACEHOLDER.  */
-    const m4_builtin *	builtin;/* Valid when type is FUNC.  */
+    const m4__builtin *	builtin;/* Valid when type is FUNC.  */
     struct
     {
       m4__symbol_chain *chain;		/* First link of the chain.  */
@@ -348,8 +362,8 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 #  define m4_get_symbol_value_text(V)	((V)->u.u_t.text)
 #  define m4_get_symbol_value_len(V)	((V)->u.u_t.len)
 #  define m4_get_symbol_value_quote_age(V)	((V)->u.u_t.quote_age)
-#  define m4_get_symbol_value_func(V)	((V)->u.builtin->func)
-#  define m4_get_symbol_value_builtin(V) ((V)->u.builtin)
+#  define m4_get_symbol_value_func(V)	((V)->u.builtin->builtin.func)
+#  define m4_get_symbol_value_builtin(V) (&(V)->u.builtin->builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
 					((V)->u.u_t.text)
 #  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
@@ -358,10 +372,14 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 #  define m4_set_symbol_value_text(V, T, L, A)				\
   ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T),			\
    (V)->u.u_t.len = (L), (V)->u.u_t.quote_age = (A))
-#  define m4_set_symbol_value_builtin(V, B)				\
-  ((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B))
 #  define m4_set_symbol_value_placeholder(V, T)				\
   ((V)->type = M4_SYMBOL_PLACEHOLDER, (V)->u.u_t.text = (T))
+#  define m4__set_symbol_value_builtin(V, B)				\
+  ((V)->type = M4_SYMBOL_FUNC, (V)->u.builtin = (B),			\
+   VALUE_MODULE (V) = (B)->module,					\
+   VALUE_FLAGS (V) = (B)->builtin.flags,				\
+   VALUE_MIN_ARGS (V) = (B)->builtin.min_args,				\
+   VALUE_MAX_ARGS (V) = (B)->builtin.max_args)
 #endif
 
 

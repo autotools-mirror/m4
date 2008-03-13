@@ -788,7 +788,7 @@ m4_builtin_func *
 m4_get_symbol_value_func (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_FUNC);
-  return value->u.builtin->func;
+  return value->u.builtin->builtin.func;
 }
 
 #undef m4_get_symbol_value_builtin
@@ -796,7 +796,7 @@ const m4_builtin *
 m4_get_symbol_value_builtin (m4_symbol_value *value)
 {
   assert (value && value->type == M4_SYMBOL_FUNC);
-  return value->u.builtin;
+  return &value->u.builtin->builtin;
 }
 
 #undef m4_get_symbol_value_placeholder
@@ -823,15 +823,19 @@ m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
   value->u.u_t.quote_age = quote_age;
 }
 
-#undef m4_set_symbol_value_builtin
+#undef m4__set_symbol_value_builtin
 void
-m4_set_symbol_value_builtin (m4_symbol_value *value, const m4_builtin *builtin)
+m4__set_symbol_value_builtin (m4_symbol_value *value,
+			      const m4__builtin *builtin)
 {
-  assert (value);
-  assert (builtin);
+  assert (value && builtin);
 
-  value->type   = M4_SYMBOL_FUNC;
+  value->type = M4_SYMBOL_FUNC;
   value->u.builtin = builtin;
+  VALUE_MODULE (value) = builtin->module;
+  VALUE_FLAGS (value) = builtin->builtin.flags;
+  VALUE_MIN_ARGS (value) = builtin->builtin.min_args;
+  VALUE_MAX_ARGS (value) = builtin->builtin.max_args;
 }
 
 #undef m4_set_symbol_value_placeholder
