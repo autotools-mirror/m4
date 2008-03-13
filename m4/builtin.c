@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2005,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -44,8 +44,8 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
 	  for (; builtin->name != NULL; builtin++)
 	    if (!strcmp (builtin->name, name))
 	      {
-		m4_symbol_value *token = xzalloc (sizeof *token);
-
+		m4_symbol_value *token;
+		token = (m4_symbol_value *) xzalloc (sizeof *token);
 		m4_set_symbol_value_builtin (token, builtin);
 		VALUE_MODULE (token) = cur;
 		VALUE_FLAGS (token) = builtin->flags;

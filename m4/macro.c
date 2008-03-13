@@ -479,8 +479,8 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   if (!stack->args)
     {
       assert (!stack->refcount);
-      stack->args = xmalloc (sizeof *stack->args);
-      stack->argv = xmalloc (sizeof *stack->argv);
+      stack->args = (m4_obstack *) xmalloc (sizeof *stack->args);
+      stack->argv = (m4_obstack *) xmalloc (sizeof *stack->argv);
       obstack_init (stack->args);
       obstack_init (stack->argv);
       stack->args_base = obstack_finish (stack->args);

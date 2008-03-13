@@ -1,3 +1,20 @@
+2008-03-13  Eric Blake  <ebb9@byu.net>
+
+	Consistently cast malloc results, for C++ compilation.
+	* m4/builtin.c (m4_builtin_find_by_name): Add cast.
+	* m4/hash.c (m4_hash_new, m4_get_hash_iterator_next, node_new)
+	(m4_hash_resize, maybe_grow): Likewise.
+	* m4/m4.c (m4_create): Likewise.
+	* m4/macro.c (expand_macro): Likewise.
+	* m4/output.c (m4_tmpname): Likewise.
+	* m4/path.c (search_path_add): Likewise.
+	* m4/symtab.c (m4_symtab_create, m4_symbol_value_create)
+	(symtab_fetch): Likewise.
+	* m4/syntax.c (m4_syntax_create): Likewise.
+	* modules/gnu.c (regexp_compile): Likewise.
+	* src/main.c (main): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+
 2008-03-06  Eric Blake  <ebb9@byu.net>
 
 	Fix nested builtin(`shift',$@) regression from 2008-02-23.

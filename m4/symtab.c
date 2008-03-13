@@ -69,7 +69,7 @@ static void *	  arg_copy_CB		(m4_hash *src, const void *name,
 m4_symbol_table *
 m4_symtab_create (size_t size)
 {
-  m4_symbol_table *symtab = xmalloc (sizeof *symtab);
+  m4_symbol_table *symtab = (m4_symbol_table *) xmalloc (sizeof *symtab);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
 			       m4_hash_string_hash, m4_hash_string_cmp);
@@ -138,7 +138,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name)
     }
   else
     {
-      symbol = xzalloc (sizeof *symbol);
+      symbol = (m4_symbol *) xzalloc (sizeof *symbol);
       m4_hash_insert (symtab->table, xstrdup (name), symbol);
     }
 
@@ -310,6 +310,16 @@ symbol_popval (m4_symbol *symbol)
       symbol->value = VALUE_NEXT (stale);
       m4_symbol_value_delete (stale);
     }
+}
+
+/* Create a new symbol value, with fields populated for default
+   behavior.  */
+m4_symbol_value *
+m4_symbol_value_create (void)
+{
+  m4_symbol_value *value = (m4_symbol_value *) xzalloc (sizeof *value);
+  VALUE_MAX_ARGS (value) = SIZE_MAX;
+  return value;
 }
 
 /* Remove VALUE from the symbol table, and mark it as deleted.  If no
@@ -699,15 +709,6 @@ m4_get_symbol_traced (m4_symbol *symbol)
 {
   assert (symbol);
   return symbol->traced;
-}
-
-#undef m4_symbol_value_create
-m4_symbol_value *
-m4_symbol_value_create (void)
-{
-  m4_symbol_value *value = xzalloc (sizeof (m4_symbol_value));
-  VALUE_MAX_ARGS (value) = SIZE_MAX;
-  return value;
 }
 
 #undef m4_symbol_value_groks_macro

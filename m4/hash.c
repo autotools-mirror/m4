@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This file is part of GNU M4.
@@ -127,10 +127,11 @@ m4_hash_new (size_t size, m4_hash_hash_func *hash_func,
   if (size == 0)
     size = M4_HASH_DEFAULT_SIZE;
 
-  hash			= xmalloc (sizeof *hash);
+  hash			= (m4_hash *) xmalloc (sizeof *hash);
   HASH_SIZE (hash)	= size;
   HASH_LENGTH (hash)	= 0;
-  HASH_BUCKETS (hash)	= xcalloc (size, sizeof *HASH_BUCKETS (hash));
+  HASH_BUCKETS (hash)	= (hash_node **) xcalloc (size,
+						  sizeof *HASH_BUCKETS (hash));
   HASH_HASH_FUNC (hash)	= hash_func;
   HASH_CMP_FUNC (hash)	= cmp_func;
 #ifndef NDEBUG
@@ -215,9 +216,7 @@ node_new (const void *key, void *value)
       free_list = NODE_NEXT (free_list);
     }
   else
-    {
-      node	= xmalloc (sizeof *node);
-    }
+    node = (hash_node *) xmalloc (sizeof *node);
 
   assert (node);
 
@@ -399,7 +398,8 @@ m4_hash_resize (m4_hash *hash, size_t size)
   original_buckets	= HASH_BUCKETS (hash);
 
   HASH_SIZE (hash)	= size;
-  HASH_BUCKETS (hash)   = xcalloc (size, sizeof *HASH_BUCKETS (hash));
+  HASH_BUCKETS (hash)   = (hash_node **) xcalloc (size,
+						  sizeof *HASH_BUCKETS (hash));
 
   {
     size_t i;
@@ -430,8 +430,8 @@ maybe_grow (m4_hash *hash)
 
       /* HASH sizes are always 1 less than a power of 2.  */
       HASH_SIZE (hash)    = (2 * (1 + original_size)) -1;
-      HASH_BUCKETS (hash) = xcalloc (HASH_SIZE (hash),
-				     sizeof *HASH_BUCKETS (hash));
+      HASH_BUCKETS (hash) =
+	(hash_node **) xcalloc (HASH_SIZE (hash), sizeof *HASH_BUCKETS (hash));
 
       {
 	size_t i;
@@ -499,7 +499,7 @@ m4_get_hash_iterator_next (const m4_hash *hash, m4_hash_iterator *place)
   /* On the first iteration, allocate an iterator.  */
   if (!place)
     {
-      place = xzalloc (sizeof *place);
+      place = (m4_hash_iterator *) xzalloc (sizeof *place);
       ITERATOR_HASH (place) = hash;
 #ifndef NDEBUG
       ITER_CHAIN (place) = HASH_ITER (hash);

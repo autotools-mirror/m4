@@ -430,7 +430,7 @@ main (int argc, char *const *argv, char *const *envp)
 	case UNLOAD_MODULE_OPTION:
 	  /* Arguments that cannot be handled until later are accumulated.  */
 
-	  defn = xmalloc (sizeof *defn);
+	  defn = (deferred *) xmalloc (sizeof *defn);
 	  defn->code = optchar;
 	  defn->value = optarg;
 	  defn->next = NULL;
@@ -648,7 +648,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       for (env = envp; *env != NULL; env++)
 	{
-	  defn = xmalloc (sizeof *defn);
+	  defn = (deferred *) xmalloc (sizeof *defn);
 	  defn->code = 'D';
 	  defn->value = *env;
 	  defn->next = head;

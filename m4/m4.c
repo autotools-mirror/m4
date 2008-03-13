@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2004, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -28,7 +28,7 @@
 m4 *
 m4_create (void)
 {
-  m4 *context = xzalloc (sizeof *context);
+  m4 *context = (m4 *) xzalloc (sizeof *context);
 
   context->symtab = m4_symtab_create (0);
   context->syntax = m4_syntax_create ();
@@ -39,7 +39,8 @@ m4_create (void)
   context->nesting_limit = DEFAULT_NESTING_LIMIT;
   context->max_debug_arg_length = SIZE_MAX;
 
-  context->search_path	 = xzalloc (sizeof *context->search_path);
+  context->search_path =
+    (m4__search_path_info *) xzalloc (sizeof *context->search_path);
   m4__include_init (context);
 
   return context;

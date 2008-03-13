@@ -163,7 +163,7 @@ regexp_compile (m4 *context, const char *caller, const char *regexp,
       }
 
   /* Next, check if REGEXP can be compiled.  */
-  pat = xzalloc (sizeof *pat);
+  pat = (struct re_pattern_buffer *) xzalloc (sizeof *pat);
   re_set_syntax (resyntax);
   msg = re_compile_pattern (regexp, len, pat);
 

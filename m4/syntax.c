@@ -112,7 +112,7 @@ static void set_quote_age		(m4_syntax_table *, bool, bool);
 m4_syntax_table *
 m4_syntax_create (void)
 {
-  m4_syntax_table *syntax = xzalloc (sizeof *syntax);
+  m4_syntax_table *syntax = (m4_syntax_table *) xzalloc (sizeof *syntax);
   int ch;
 
   /* Set up default table.  This table never changes during operation.  */

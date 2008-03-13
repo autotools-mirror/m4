@@ -429,7 +429,7 @@ reload_frozen_state (m4 *context, const char *name)
 	{							\
 	  free (Where);						\
 	  (Allocated) = (Needed) + 1;				\
-	  (Where) = xmalloc (Allocated);			\
+	  (Where) = xcharalloc (Allocated);			\
 	}							\
     }								\
   while (0)
@@ -455,11 +455,11 @@ reload_frozen_state (m4 *context, const char *name)
     m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open `%s'"), name);
 
   allocated[0] = 100;
-  string[0] = xmalloc (allocated[0]);
+  string[0] = xcharalloc (allocated[0]);
   allocated[1] = 100;
-  string[1] = xmalloc (allocated[1]);
+  string[1] = xcharalloc (allocated[1]);
   allocated[2] = 100;
-  string[2] = xmalloc (allocated[2]);
+  string[2] = xcharalloc (allocated[2]);
 
   /* Validate format version.  Accept both `1' (m4 1.3 and 1.4.x) and
      `2' (m4 2.0).  */
@@ -553,7 +553,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	    if (token == NULL)
 	      {
-		token = xzalloc (sizeof *token);
+		token = (m4_symbol_value *) xzalloc (sizeof *token);
 		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
 		VALUE_MODULE (token) = module;
 		VALUE_MIN_ARGS (token) = 0;
@@ -744,9 +744,10 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 
 	  /* Enter a macro having an expansion text as a definition.  */
 	  {
-	    m4_symbol_value *token = xzalloc (sizeof *token);
+	    m4_symbol_value *token;
 	    m4_module *module = NULL;
 
+	    token = (m4_symbol_value *) xzalloc (sizeof *token);
 	    if (number[2] > 0)
 	      module = m4__module_find (string[2]);
 

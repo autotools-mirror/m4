@@ -200,7 +200,8 @@ m4_tmpname (int divnum)
       obstack_1grow (&diversion_storage, '4');
       obstack_1grow (&diversion_storage, '-');
       offset = obstack_object_size (&diversion_storage);
-      buffer = obstack_alloc (&diversion_storage, INT_BUFSIZE_BOUND (divnum));
+      buffer = (char *) obstack_alloc (&diversion_storage,
+				       INT_BUFSIZE_BOUND (divnum));
     }
   if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
     abort ();

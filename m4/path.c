@@ -1,7 +1,6 @@
 /* GNU m4 -- A simple macro processor
-
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -45,7 +44,7 @@ static void search_path_env_init (m4__search_path_info *, char *, bool);
 static void
 search_path_add (m4__search_path_info *info, const char *dir, bool prepend)
 {
-  m4__search_path *path = xmalloc (sizeof *path);
+  m4__search_path *path = (m4__search_path *) xmalloc (sizeof *path);
 
   path->len = strlen (dir);
   path->dir = xstrdup (dir);
