@@ -451,6 +451,8 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 		  assert (bp->min_args > 0
 			  || (bp->flags & (M4_BUILTIN_BLIND
 					   | M4_BUILTIN_SIDE_EFFECT)) == 0);
+		  assert (bp->max_args
+			  || (bp->flags & M4_BUILTIN_FLATTEN_ARGS) == 0);
 		  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
 
 		  memcpy (&builtin->builtin, bp, sizeof *bp);

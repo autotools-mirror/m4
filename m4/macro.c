@@ -584,17 +584,14 @@ collect_arguments (m4 *context, const char *name, size_t len,
   m4_symbol_value token;
   m4_symbol_value *tokenp;
   bool more_args;
-  bool groks_macro_args;
   m4_macro_args args;
   m4_macro_args *argv;
-
-  groks_macro_args = BIT_TEST (SYMBOL_FLAGS (symbol), VALUE_MACRO_ARGS_BIT);
 
   args.argc = 1;
   args.inuse = false;
   args.wrapper = false;
   args.has_ref = false;
-  args.flatten = !groks_macro_args;
+  args.flatten = m4_symbol_flatten_args (symbol);
   args.has_func = false;
   /* Must copy here, since we are consuming tokens, and since symbol
      table can be changed during argument collection.  */
@@ -618,7 +615,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
 
 	  if ((m4_is_symbol_value_text (tokenp)
 	       && !m4_get_symbol_value_len (tokenp))
-	      || (!groks_macro_args && m4_is_symbol_value_func (tokenp)))
+	      || (args.flatten && m4_is_symbol_value_func (tokenp)))
 	    {
 	      obstack_free (arguments, tokenp);
 	      tokenp = &empty_symbol;

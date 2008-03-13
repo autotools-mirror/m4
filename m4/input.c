@@ -554,6 +554,10 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 	  return false;
 	}
     }
+  else if (m4_is_symbol_value_func (value))
+    {
+      /* TODO - use the builtin, rather than flattening it.  */
+    }
   else
     {
       /* For composite values, if argv is already in use, creating

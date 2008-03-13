@@ -2176,10 +2176,13 @@ empty string in most other contexts.
 @comment FIXME - Other implementations, such as Solaris, can pass a
 @comment builtin token around to other macros, flattening it only on output:
 @comment  define(foo, a`'defn(`divnum')b)
-@comment  len(foo) => 3
-@comment  index(foo, defn(`divnum') => 1
-@comment  foo => ab
-@comment It may be worth making some changes to support this behavior.
+@comment  defn(`foo') => ab
+@comment  dumpdef(`foo') => foo: a<divnum>b
+@comment  len(defn(`foo')) => 3
+@comment  index(defn(`foo'), defn(`divnum')) => 1
+@comment  foo => a0b
+@comment It may be worth making some changes to support this behavior,
+@comment or something similar to it.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2279,12 +2282,15 @@ of expected contexts can sometimes trigger warnings.  But most of the
 time, such tokens are silently converted to the empty string.
 
 @example
+$ @kbd{m4 -d}
 defn(`defn')
 @result{}
 define(defn(`divnum'), `cannot redefine a builtin token')
 @error{}m4:stdin:2: Warning: define: invalid macro name ignored
 @result{}
 divnum
+@result{}0
+len(defn(`divnum'))
 @result{}0
 define(`echo', `$@@')
 @result{}
@@ -2294,10 +2300,10 @@ mydivnum
 @result{}
 @end example
 
-Since @code{defn} can take more than one argument, it can be used to
-concatenate multiple macros into one.
-@comment FIXME - we don't yet handle mixing text and builtins.  This
-@comment example passes under Solaris (minus the warning).
+A warning is issued if @var{name} is undefined.  Also, at present,
+concatenating a builtin token with anything else is not supported as a
+macro definition, and a warning is issued.
+@comment FIXME - handle defining macros with mixed text and builtins.
 
 @comment xfail
 @example
@@ -3877,7 +3883,7 @@ echo(`1', `long string')
 @result{}1,long string
 echo(defn(`changequote'))
 @error{}m4trace: -2- defn(`change...') -> <changequote>
-@error{}m4trace: -1- echo(`') -> ``''
+@error{}m4trace: -1- echo(<changequote>) -> ``''
 @result{}
 debuglen
 @result{}debuglen

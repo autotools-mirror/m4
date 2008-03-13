@@ -711,12 +711,12 @@ m4_get_symbol_traced (m4_symbol *symbol)
   return symbol->traced;
 }
 
-#undef m4_symbol_value_groks_macro
+#undef m4_symbol_value_flatten_args
 bool
-m4_symbol_value_groks_macro (m4_symbol_value *value)
+m4_symbol_value_flatten_args (m4_symbol_value *value)
 {
   assert (value);
-  return BIT_TEST (value->flags, VALUE_MACRO_ARGS_BIT);
+  return BIT_TEST (value->flags, VALUE_FLATTEN_ARGS_BIT);
 }
 
 #undef m4_get_symbol_value

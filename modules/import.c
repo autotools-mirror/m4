@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2003, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -36,18 +36,14 @@
   BUILTIN (symbol_fail,	false,	false,	false,	0,	1)	\
   BUILTIN (module_fail,	false,	false,	false,	0,	1)	\
 
-#define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN (handler)
   builtin_functions
 #undef BUILTIN
 
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)	\
-  { CONC(builtin_, handler), STR(handler),		\
-    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
-     | (blind ? M4_BUILTIN_BLIND : 0)			\
-     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
-    min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)			\
+  M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
 #undef BUILTIN

@@ -1,5 +1,42 @@
 2008-03-13  Eric Blake  <ebb9@byu.net>
 
+	Stage 19b: invert sense of bit for handling builtin tokens.
+	Pass builtin tokens by default, rather than as the exception, so
+	that the logic can consistently refer to flattening arguments.
+	Memory impact: none.
+	Speed impact: none.
+	* m4/m4module.h (M4BUILTIN_ENTRY): New convenience macro.
+	(M4_BUILTIN_GROKS_MACRO): Rename...
+	(M4_BUILTIN_FLATTEN_ARGS): ...and invert sense.
+	(m4_symbol_value_groks_macro, m4_symbol_groks_macro): Likewise...
+	(m4_symbol_value_flatten_args, m4_symbol_flatten_args): ...to
+	this.
+	* m4/m4private.h (VALUE_MACRO_ARGS_BIT)
+	(m4_symbol_value_groks_macro): Likewise...
+	(VALUE_FLATTEN_ARGS_BIT, m4_symbol_value_flatten_args): ...to
+	this.
+	* m4/symtab.c (m4_symbol_value_groks_macro): Likewise...
+	(m4_symbol_value_flatten_args): ...to this.
+	* m4/macro.c (collect_arguments): Accomodate changed sense.
+	* m4/module.c (m4__module_open): Require arguments if flattening
+	is requested.
+	* m4/input.c (m4_push_string_finish): For now, flatten all
+	builtins pushed as back-references.
+	* modules/gnu.c (m4_builtin_table, builtin): Adjust all clients.
+	* modules/import.c (m4_builtin_table): Likewise.
+	* modules/load.c (m4_builtin_table): Likewise.
+	* modules/modtest.c (m4_builtin_table): Likewise.
+	* modules/mpeval.c (m4_builtin_table): Likewise.
+	* modules/perl.c (m4_builtin_table): Likewise.
+	* modules/shadow.c (m4_builtin_table): Likewise.
+	* modules/stdlib.c (m4_builtin_table): Likewise.
+	* modules/time.c (m4_builtin_table): Likewise.
+	* modules/m4.c (m4_builtin_table): Likewise.
+	(mkstemp): Undo #undef hack from 2006-10-23, now that macro names
+	are stringized without preprocessor expansion.
+	* doc/m4.texinfo (Defn): Update comments to match reality.
+	(Debuglen): Update test now that user macros pass builtin tokens.
+
 	Stage 19a: sort and cache builtins loaded by a module.
 	Rather than repeatedly using dlsym to browse the builtin table,
 	copy off the table at module load time.  Then, the input engine

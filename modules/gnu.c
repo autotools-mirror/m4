@@ -61,7 +61,7 @@
 
 
 /* Generate prototypes for each builtin handler function. */
-#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN(handler)
+#define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN (handler)
   builtin_functions
 #undef BUILTIN
 
@@ -69,12 +69,9 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)	\
-  { CONC(builtin_, handler), STR(handler),		\
-    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
-     | (blind ? M4_BUILTIN_BLIND : 0)			\
-     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
-    min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)			\
+  M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
+
   builtin_functions
 #undef BUILTIN
 
@@ -448,7 +445,7 @@ M4BUILTIN_HANDLER (builtin)
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
 	    {
 	      m4_macro_args *new_argv;
-	      bool flatten = (bp->flags & M4_BUILTIN_GROKS_MACRO) == 0;
+	      bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
 	      new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
 					   true, flatten);
 	      bp->func (context, obs, argc - 1, new_argv);
@@ -683,9 +680,8 @@ M4BUILTIN_HANDLER (indir)
       else
 	{
 	  m4_macro_args *new_argv;
-	  bool flatten = !m4_symbol_groks_macro (symbol);
 	  new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
-				       true, flatten);
+				       true, m4_symbol_flatten_args (symbol));
 	  m4_macro_call (context, m4_get_symbol_value (symbol), obs,
 			 argc - 1, new_argv);
 	}

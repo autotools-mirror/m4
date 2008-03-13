@@ -46,10 +46,11 @@ typedef void   m4_builtin_func  (m4 *, m4_obstack *, size_t, m4_macro_args *);
 
 /* The value of m4_builtin flags is built from these:  */
 enum {
-  /* Set if macro can handle non-text tokens, such as builtin macro
-     tokens; if clear, non-text tokens are flattened to the empty
-     string before invoking the builtin.  */
-  M4_BUILTIN_GROKS_MACRO	= (1 << 0),
+  /* Set if macro flattens non-text tokens, such as builtin macro
+     tokens, to the empty string prior to invoking the builtin; if
+     clear, non-text tokens must be transparently handled by the
+     builtin.  May only be set if max_args is nonzero.  */
+  M4_BUILTIN_FLATTEN_ARGS	= (1 << 0),
   /* Set if macro should only be recognized with arguments; may only
      be set if min_args is nonzero.  */
   M4_BUILTIN_BLIND		= (1 << 1),
@@ -89,29 +90,65 @@ struct m4_string_pair
   size_t len2;		/* Second length.  */
 };
 
+/* Declare a prototype for the function "builtin_<NAME>".  Note that
+   the function name includes any macro expansion of NAME.  */
 #define M4BUILTIN(name)							\
   static void CONC (builtin_, name)					\
-   (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv);
+    (m4 *, m4_obstack *, size_t, m4_macro_args *);
 
+/* Begin the implementation of the function "builtin_<NAME>",
+   declaring parameter names that can be used by other helper macros
+   in this file.  Note that the function name includes any macro
+   expansion of NAME.  */
 #define M4BUILTIN_HANDLER(name)						\
   static void CONC (builtin_, name)					\
-   (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
+    (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 
+/* Declare a prototype, then begin the implementation of the function
+   "<NAME>_LTX_m4_init_module", which will automatically be registered
+   as the initialization function for module NAME.  Note that NAME is
+   intentionally used literally, rather than subjected to macro
+   expansion.  */
 #define M4INIT_HANDLER(name)						\
-  void CONC (name, CONC (_LTX_, m4_init_module))			\
-       (m4 *context, m4_module *module, m4_obstack *obs);		\
-  void CONC (name, CONC (_LTX_, m4_init_module))			\
-	(m4 *context, m4_module *module, m4_obstack *obs)
+  void name ## _LTX_m4_init_module					\
+    (m4 *, m4_module *, m4_obstack *);					\
+  void name ## _LTX_m4_init_module					\
+    (m4 *context, m4_module *module, m4_obstack *obs)
 
+/* Declare a prototype, then begin the implementation of the function
+   "<NAME>_LTX_m4_init_module", which will automatically be registered
+   as the cleanup function for module NAME.  Note that NAME is
+   intentionally used literally, rather than subjected to macro
+   expansion.  */
 #define M4FINISH_HANDLER(name)						\
-  void CONC (name, CONC (_LTX_, m4_finish_module))			\
-       (m4 *context, m4_module *module, m4_obstack *obs);		\
-  void CONC (name, CONC (_LTX_, m4_finish_module))			\
-	(m4 *context, m4_module *module, m4_obstack *obs)
+  void name ## _LTX_m4_finish_module					\
+    (m4 *, m4_module *, m4_obstack *);					\
+  void name ## _LTX_m4_finish_module					\
+    (m4 *context, m4_module *module, m4_obstack *obs)
 
+/* Declare a variable S of type "<S>_func" to be a pointer to the
+   function named S imported from the module M, or NULL if the import
+   fails.  Note that M and S are intentionally used literally rather
+   than subjected to macro expansion, in all but the variable name.  */
 #define M4_MODULE_IMPORT(M, S)						\
-  CONC (S, _func) *S = (CONC (S, _func) *)				\
-	m4_module_import (context, STR (M), STR (S), obs)
+  S ## _func *S = (S ## _func *) m4_module_import (context, #M, #S, obs)
+
+/* Build an entry in a builtin table, for the builtin N implemented by
+   the function "builtin_<N>" with name NAME.  Build the flags from
+   the appropriate combination of M4_BUILTIN_FLAG_* based on M if the
+   builtin transparently supports macro tokens, B if it is blind, and
+   S if it has side effects.  Specify that the builtin takes MIN and
+   MAX arguments.  Note that N is subject to macro expansion, and that
+   NAME is generally used as #N to avoid clashes with builtins named
+   after a standard function that is defined as a macro.  */
+#define M4BUILTIN_ENTRY(N, NAME, M, B, S, MIN, MAX)	\
+  {							\
+    CONC (builtin_, N), NAME,				\
+    (((!(M) && (MAX)) ? M4_BUILTIN_FLATTEN_ARGS : 0)	\
+     | (((B) && (MIN)) ? M4_BUILTIN_BLIND : 0)		\
+     | (((S) && (MIN)) ? M4_BUILTIN_SIDE_EFFECT : 0)),	\
+    MIN, MAX						\
+  },
 
 /* Grab the text contents of argument I, or abort if the argument is
    not text.  Assumes that `m4 *context' and `m4_macro_args *argv' are
@@ -252,7 +289,7 @@ extern bool	m4_symbol_value_print	(m4 *, m4_symbol_value *, m4_obstack *,
 extern void	m4_symbol_print		(m4 *, m4_symbol *, m4_obstack *,
 					 const m4_string_pair *, bool, size_t,
 					 bool);
-extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
+extern bool	m4_symbol_value_flatten_args (m4_symbol_value *);
 
 #define m4_is_symbol_void(symbol)					\
 	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
@@ -272,8 +309,8 @@ extern bool	m4_symbol_value_groks_macro	(m4_symbol_value *);
 	(m4_get_symbol_value_builtin (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_placeholder(symbol)				\
 	(m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
-#define m4_symbol_groks_macro(symbol)					\
-	(m4_symbol_value_groks_macro (m4_get_symbol_value (symbol)))
+#define m4_symbol_flatten_args(symbol)					\
+	(m4_symbol_value_flatten_args (m4_get_symbol_value (symbol)))
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);

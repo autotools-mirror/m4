@@ -55,10 +55,6 @@ extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
 extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 			      const char *name, size_t len, bool dir);
 
-/* stdlib--.h defines mkstemp to a safer replacement, but this
-   interferes with our preprocessor table of builtin definitions.  */
-#undef mkstemp
-
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
@@ -121,12 +117,9 @@ static void	numb_obstack	(m4_obstack *obs, number value,
 /* Generate a table for mapping m4 symbol names to handler functions. */
 m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)	\
-  { CONC (builtin_, handler), STR (handler),		\
-    ((macros ? M4_BUILTIN_GROKS_MACRO : 0)		\
-     | (blind ? M4_BUILTIN_BLIND : 0)			\
-     | (side ? M4_BUILTIN_SIDE_EFFECT : 0)),		\
-    min, max },
+#define BUILTIN(handler, macros, blind, side, min, max)			\
+  M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
+
   builtin_functions
 #undef BUILTIN
 

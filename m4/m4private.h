@@ -366,8 +366,8 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 #  define m4_get_symbol_value_builtin(V) (&(V)->u.builtin->builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
 					((V)->u.u_t.text)
-#  define m4_symbol_value_groks_macro(V) (BIT_TEST ((V)->flags,		\
-						    VALUE_MACRO_ARGS_BIT))
+#  define m4_symbol_value_flatten_args(V)				\
+  (BIT_TEST ((V)->flags, VALUE_FLATTEN_ARGS_BIT))
 
 #  define m4_set_symbol_value_text(V, T, L, A)				\
   ((V)->type = M4_SYMBOL_TEXT, (V)->u.u_t.text = (T),			\
@@ -389,7 +389,7 @@ extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
    m4_builtin.flags to m4_symbol_arg.flags.  We can use additional
    bits for private use.  */
 
-#define VALUE_MACRO_ARGS_BIT		(1 << 0)
+#define VALUE_FLATTEN_ARGS_BIT		(1 << 0)
 #define VALUE_BLIND_ARGS_BIT		(1 << 1)
 #define VALUE_SIDE_EFFECT_ARGS_BIT	(1 << 2)
 #define VALUE_DELETED_BIT		(1 << 3)
