@@ -409,20 +409,9 @@ builtin_unget (m4_input_block *me, int ch)
 static void
 builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 {
-  const m4__builtin *bp = me->u.builtin;
-  const char *text = bp->builtin.name;
-
-  assert (bp);
-  obstack_1grow (obs, '<');
-  obstack_grow (obs, text, strlen (text));
-  obstack_1grow (obs, '>');
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE))
-    {
-      text = m4_get_module_name (bp->module);
-      obstack_1grow (obs, '{');
-      obstack_grow (obs, text, strlen (text));
-      obstack_1grow (obs, '}');
-    }
+  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+  m4_builtin_print (obs, &me->u.builtin->builtin, false, NULL,
+		    module ? me->u.builtin->module : NULL);
 }
 
 /* m4_push_builtin () pushes TOKEN, which contains a builtin's
@@ -554,11 +543,7 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 	  return false;
 	}
     }
-  else if (m4_is_symbol_value_func (value))
-    {
-      /* TODO - use the builtin, rather than flattening it.  */
-    }
-  else
+  else if (!m4_is_symbol_value_func (value))
     {
       /* For composite values, if argv is already in use, creating
 	 additional references for long text segments is more
@@ -605,8 +590,24 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
       m4__adjust_refcount (context, level, true);
       inuse = true;
     }
+  else if (m4_is_symbol_value_func (value))
+    {
+      chain = (m4__symbol_chain *) obstack_alloc (current_input,
+						  sizeof *chain);
+      if (next->u.u_c.end)
+	next->u.u_c.end->next = chain;
+      else
+	next->u.u_c.chain = chain;
+      next->u.u_c.end = chain;
+      chain->next = NULL;
+      chain->type = M4__CHAIN_FUNC;
+      chain->quote_age = 0;
+      chain->u.builtin = value->u.builtin;
+    }
   while (src_chain)
     {
+      /* TODO - support func concatenation.  */
+      assert (src_chain->type != M4__CHAIN_FUNC);
       if (level == SIZE_MAX)
 	{
 	  /* Nothing to copy, since link already lives on obstack.  */
@@ -718,6 +719,10 @@ composite_peek (m4_input_block *me, m4 *context, bool allow_argv)
 	  if (chain->u.u_s.len)
 	    return to_uchar (chain->u.u_s.str[0]);
 	  break;
+	case M4__CHAIN_FUNC:
+	  if (chain->u.builtin)
+	    return CHAR_BUILTIN;
+	  break;
 	case M4__CHAIN_ARGV:
 	  argc = m4_arg_argc (chain->u.u_a.argv);
 	  if (chain->u.u_a.index == argc)
@@ -772,6 +777,10 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	  if (chain->u.u_s.level < SIZE_MAX)
 	    m4__adjust_refcount (context, chain->u.u_s.level, false);
 	  break;
+	case M4__CHAIN_FUNC:
+	  if (chain->u.builtin)
+	    return CHAR_BUILTIN;
+	  break;
 	case M4__CHAIN_ARGV:
 	  if (chain->u.u_a.index == m4_arg_argc (chain->u.u_a.argv))
 	    {
@@ -816,6 +825,9 @@ composite_unget (m4_input_block *me, int ch)
       chain->u.u_s.str--;
       chain->u.u_s.len++;
       break;
+    case M4__CHAIN_FUNC:
+      assert (ch == CHAR_BUILTIN && chain->u.builtin);
+      break;
     case M4__CHAIN_ARGV:
       /* FIXME - support M4_SYNTAX_COMMA.  */
       assert (ch == ',' && !chain->u.u_a.comma);
@@ -844,6 +856,10 @@ composite_clean (m4_input_block *me, m4 *context, bool cleanup)
 	    }
 	  if (chain->u.u_s.level < SIZE_MAX)
 	    m4__adjust_refcount (context, chain->u.u_s.level, false);
+	  break;
+	case M4__CHAIN_FUNC:
+	  if (chain->u.builtin)
+	    return false;
 	  break;
 	case M4__CHAIN_ARGV:
 	  if (chain->u.u_a.index < m4_arg_argc (chain->u.u_a.argv))
@@ -882,6 +898,10 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 	  if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
 				       chain->u.u_s.len, NULL, &maxlen))
 	    done = true;
+	  break;
+	case M4__CHAIN_FUNC:
+	  m4_builtin_print (obs, &chain->u.builtin->builtin, false, NULL,
+			    module ? chain->u.builtin->module : NULL);
 	  break;
 	case M4__CHAIN_ARGV:
 	  assert (!chain->u.u_a.comma);
@@ -1060,17 +1080,32 @@ m4_pop_wrapup (m4 *context)
 }
 
 /* Populate TOKEN with the builtin token at the top of the input
-   stack, then consume the input.  */
+   stack, then consume the input.  If TOKEN is NULL, discard the
+   builtin token instead.  */
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
   int ch = next_char (context, false, true);
-  m4_input_block *block = isp;
-  assert (ch == CHAR_BUILTIN && block->funcs->read_func == builtin_read
-	  && block->u.builtin);
+  assert (ch == CHAR_BUILTIN);
 
-  m4__set_symbol_value_builtin (token, block->u.builtin);
-  block->u.builtin = NULL;
+  if (isp->funcs == &builtin_funcs)
+    {
+      assert (isp->u.builtin);
+      if (token)
+	m4__set_symbol_value_builtin (token, isp->u.builtin);
+      isp->u.builtin = NULL;
+    }
+  else
+    {
+      m4__symbol_chain *chain;
+      assert (isp->funcs == &composite_funcs);
+      chain = isp->u.u_c.chain;
+      assert (!chain->quote_age && chain->type == M4__CHAIN_FUNC
+	      && chain->u.builtin);
+      if (token)
+	m4__set_symbol_value_builtin (token, chain->u.builtin);
+      chain->u.builtin = NULL;
+    }
 }
 
 /* When a QUOTE token is seen, convert VALUE to a composite (if it is
@@ -1526,12 +1561,41 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (obs)
 	  obs_safe = obs;
 	quote_level = 1;
+	type = M4_TOKEN_STRING;
 	while (1)
 	  {
 	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
+	    if (ch == CHAR_BUILTIN)
+	      {
+		/* TODO support concatenation of builtins.  */
+		if (obstack_object_size (obs_safe) == 0
+		    && token->type == M4_SYMBOL_VOID)
+		  {
+		    /* Strip quotes if they surround a lone builtin
+		       token.  */
+		    assert (quote_level == 1);
+		    init_builtin_token (context, token);
+		    ch = peek_char (context, false);
+		    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
+		      {
+			ch = next_char (context, false, true);
+#ifdef DEBUG_INPUT
+			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
+					token);
+#endif
+			return M4_TOKEN_MACDEF;
+		      }
+		    token->type = M4_SYMBOL_VOID;
+		  }
+		else
+		  init_builtin_token (context, NULL);
+		m4_warn_at_line (context, 0, file, *line, caller,
+				 _("cannot quote builtin"));
+		continue;
+	      }
 	    if (ch == CHAR_QUOTE)
 	      append_quote_token (context, obs, token);
 	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
@@ -1548,7 +1612,6 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    else
 	      obstack_1grow (obs_safe, ch);
 	  }
-	type = M4_TOKEN_STRING;
       }
     else if (!m4_is_syntax_single_quotes (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->quote.str1, true))
@@ -1556,6 +1619,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	if (obs)
 	  obs_safe = obs;
 	quote_level = 1;
+	type = M4_TOKEN_STRING;
 	assert (!m4__quote_age (M4SYNTAX));
 	while (1)
 	  {
@@ -1563,6 +1627,36 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
+	    if (ch == CHAR_BUILTIN)
+	      {
+		/* TODO support concatenation of builtins.  */
+		if (obstack_object_size (obs_safe) == 0
+		    && token->type == M4_SYMBOL_VOID)
+		  {
+		    /* Strip quotes if they surround a lone builtin
+		       token.  */
+		    assert (quote_level == 1);
+		    init_builtin_token (context, token);
+		    ch = peek_char (context, false);
+		    if (MATCH (context, ch, context->syntax->quote.str2,
+			       false))
+		      {
+			ch = next_char (context, false, true);
+			MATCH (context, ch, context->syntax->quote.str2, true);
+#ifdef DEBUG_INPUT
+			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
+					token);
+#endif
+			return M4_TOKEN_MACDEF;
+		      }
+		    token->type = M4_SYMBOL_VOID;
+		  }
+		else
+		  init_builtin_token (context, NULL);
+		m4_warn_at_line (context, 0, file, *line, caller,
+				 _("cannot quote builtin"));
+		continue;
+	      }
 	    if (MATCH (context, ch, context->syntax->quote.str2, true))
 	      {
 		if (--quote_level == 0)
@@ -1579,24 +1673,34 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    else
 	      obstack_1grow (obs_safe, ch);
 	  }
-	type = M4_TOKEN_STRING;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
       {					/* COMMENT, SHORT DELIM */
 	if (obs && !m4_get_discard_comments_opt (context))
 	  obs_safe = obs;
 	obstack_1grow (obs_safe, ch);
-	while ((ch = next_char (context, false, true)) < CHAR_EOF
-	       && !m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
-	  obstack_1grow (obs_safe, ch);
-	if (ch != CHAR_EOF)
+	while (1)
 	  {
+	    ch = next_char (context, false, true);
+	    if (ch == CHAR_EOF)
+	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
+				_("end of file in comment"));
+	    if (ch == CHAR_BUILTIN)
+	      {
+		/* TODO support concatenation of builtins.  */
+		m4_warn_at_line (context, 0, file, *line, caller,
+				 _("cannot comment builtin"));
+		init_builtin_token (context, NULL);
+		continue;
+	      }
+	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
+	      {
+		obstack_1grow (obs_safe, ch);
+		break;
+	      }
 	    assert (ch < CHAR_EOF);
 	    obstack_1grow (obs_safe, ch);
 	  }
-	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
       }
@@ -1607,18 +1711,29 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  obs_safe = obs;
 	obstack_grow (obs_safe, context->syntax->comm.str1,
 		      context->syntax->comm.len1);
-	while ((ch = next_char (context, false, true)) < CHAR_EOF
-	       && !MATCH (context, ch, context->syntax->comm.str2, true))
-	  obstack_1grow (obs_safe, ch);
-	if (ch != CHAR_EOF)
+	while (1)
 	  {
+	    ch = next_char (context, false, true);
+	    if (ch == CHAR_EOF)
+	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
+				_("end of file in comment"));
+	    if (ch == CHAR_BUILTIN)
+	      {
+		/* TODO support concatenation of builtins.  */
+		m4_warn_at_line (context, 0, file, *line, caller,
+				 _("cannot comment builtin"));
+		init_builtin_token (context, NULL);
+		continue;
+	      }
+	    if (MATCH (context, ch, context->syntax->comm.str2, true))
+	      {
+		obstack_grow (obs_safe, context->syntax->comm.str2,
+			      context->syntax->comm.len2);
+		break;
+	      }
 	    assert (ch < CHAR_EOF);
-	    obstack_grow (obs_safe, context->syntax->comm.str2,
-			  context->syntax->comm.len2);
+	    obstack_1grow (obs_safe, ch);
 	  }
-	else
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-			    _("end of file in comment"));
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
       }

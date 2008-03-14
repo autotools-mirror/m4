@@ -401,6 +401,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	  assert (paren_level == 0 && argp->type == M4_SYMBOL_VOID
 		  && obstack_object_size (obs) == 0
 		  && token.u.u_c.chain == token.u.u_c.end
+		  && token.u.u_c.chain->quote_age == age
 		  && token.u.u_c.chain->type == M4__CHAIN_ARGV);
 	  argp->type = M4_SYMBOL_COMP;
 	  argp->u.u_c.chain = argp->u.u_c.end = token.u.u_c.chain;
@@ -662,7 +663,8 @@ collect_arguments (m4 *context, const char *name, size_t len,
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   argv->has_func = args.has_func;
-  if (args.quote_age != m4__quote_age (M4SYNTAX))
+  /* TODO allow funcs without crippling quote age.  */
+  if (args.quote_age != m4__quote_age (M4SYNTAX) || args.has_func)
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
@@ -1147,19 +1149,27 @@ make_argv_ref (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 
 /* Given ARGV, return the symbol value at the specified INDEX, which
    must be non-zero.  *LEVEL is set to the obstack level that contains
-   the symbol (which is not necessarily the level of ARGV).  */
+   the symbol (which is not necessarily the level of ARGV).  If
+   FLATTEN, avoid returning a builtin token.  */
 static m4_symbol_value *
-arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
+arg_symbol (m4_macro_args *argv, size_t index, size_t *level, bool flatten)
 {
   size_t i;
   m4_symbol_value *value;
 
   assert (index);
-  *level = argv->level;
+  if (level)
+    *level = argv->level;
+  flatten |= argv->flatten;
   if (argv->argc <= index)
     return &empty_symbol;
   if (!argv->wrapper)
-    return argv->array[index - 1];
+    {
+      value = argv->array[index - 1];
+      if (flatten && m4_is_symbol_value_func (value))
+	value = &empty_symbol;
+      return value;
+    }
 
   /* Must cycle through all array slots until we find index, since
      wrappers can contain multiple arguments.  */
@@ -1174,9 +1184,8 @@ arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
 			- chain->u.u_a.skip_last))
 	    {
 	      value = arg_symbol (chain->u.u_a.argv,
-				  chain->u.u_a.index - 1 + index, level);
-	      if (chain->u.u_a.flatten && m4_is_symbol_value_func (value))
-		value = &empty_symbol;
+				  chain->u.u_a.index - 1 + index, level,
+				  flatten || chain->u.u_a.flatten);
 	      break;
 	    }
 	  index -= (chain->u.u_a.argv->argc - chain->u.u_a.index
@@ -1193,8 +1202,7 @@ arg_symbol (m4_macro_args *argv, size_t index, size_t *level)
 m4_symbol_value *
 m4_arg_symbol (m4_macro_args *argv, size_t index)
 {
-  size_t dummy;
-  return arg_symbol (argv, index, &dummy);
+  return arg_symbol (argv, index, NULL, false);
 }
 
 /* Given ARGV, return true if argument INDEX is text.  Index 0 is
@@ -1257,7 +1265,8 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
 	  m4_arg_print (context, obs, chain->u.u_a.argv, chain->u.u_a.index,
 			m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
 					 chain->u.u_a.quotes),
-			chain->u.u_a.flatten, NULL, NULL, false, false);
+			argv->flatten || chain->u.u_a.flatten, NULL, NULL,
+			false, false);
 	  break;
 	default:
 	  assert (!"m4_arg_text");
@@ -1295,30 +1304,45 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
 		       m4_get_symbol_value_len (sa)) == 0);
 
   /* Convert both arguments to chains, if not one already.  */
-  /* TODO - allow builtin tokens in the comparison?  */
-  if (m4_is_symbol_value_text (sa))
+  switch (sa->type)
     {
+    case M4_SYMBOL_TEXT:
       tmpa.next = NULL;
       tmpa.type = M4__CHAIN_STR;
       tmpa.u.u_s.str = m4_get_symbol_value_text (sa);
       tmpa.u.u_s.len = m4_get_symbol_value_len (sa);
-    }
-  else
-    {
-      assert (sa->type == M4_SYMBOL_COMP);
+      break;
+    case M4_SYMBOL_FUNC:
+      tmpa.next = NULL;
+      tmpa.type = M4__CHAIN_FUNC;
+      tmpa.u.builtin = sa->u.builtin;
+      break;
+    case M4_SYMBOL_COMP:
       ca = sa->u.u_c.chain;
+      break;
+    default:
+      assert (!"m4_arg_equal");
+      abort ();
     }
-  if (m4_is_symbol_value_text (sb))
+  switch (sb->type)
     {
+    case M4_SYMBOL_TEXT:
       tmpb.next = NULL;
       tmpb.type = M4__CHAIN_STR;
       tmpb.u.u_s.str = m4_get_symbol_value_text (sb);
       tmpb.u.u_s.len = m4_get_symbol_value_len (sb);
-    }
-  else
-    {
-      assert (sb->type == M4_SYMBOL_COMP);
+      break;
+    case M4_SYMBOL_FUNC:
+      tmpb.next = NULL;
+      tmpb.type = M4__CHAIN_FUNC;
+      tmpb.u.builtin = sb->u.builtin;
+      break;
+    case M4_SYMBOL_COMP:
       cb = sb->u.u_c.chain;
+      break;
+    default:
+      assert (!"m4_arg_equal");
+      abort ();
     }
 
   /* Compare each link of the chain.  */
@@ -1354,6 +1378,14 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
 	  tmpb.u.u_s.len = obstack_object_size (obs);
 	  tmpb.u.u_s.str = (char *) obstack_finish (obs);
 	  cb = &tmpb;
+	  continue;
+	}
+      if (ca->type == M4__CHAIN_FUNC)
+	{
+	  if (cb->type != M4__CHAIN_FUNC || ca->u.builtin != cb->u.builtin)
+	    return false;
+	  ca = ca->next;
+	  cb = cb->next;
 	  continue;
 	}
       assert (ca->type == M4__CHAIN_STR && cb->type == M4__CHAIN_STR);
@@ -1507,9 +1539,9 @@ m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
 	  && m4_shipout_string_trunc (obs, quotes->str1, quotes->len1, NULL,
 				      plen))
 	return true;
-      if (m4_symbol_value_print (context, m4_arg_symbol (argv, i), obs,
-				 quote_each ? quotes : NULL, flatten, &len,
-				 module))
+      if (m4_symbol_value_print (context, arg_symbol (argv, i, NULL, flatten),
+				 obs, quote_each ? quotes : NULL, flatten,
+				 &len, module))
 	return true;
       if (quotes && !quote_each
 	  && m4_shipout_string_trunc (obs, quotes->str2, quotes->len2, NULL,
@@ -1591,18 +1623,16 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index)
     m4__push_arg_quote (context, obs, argv, index, NULL);
 }
 
-/* Push argument INDEX from ARGV, which must be a text token, onto the
-   expansion stack OBS for rescanning.  INDEX must be non-zero.
-   QUOTES determines any quote delimiters that were in effect when the
-   reference was created.  */
+/* Push argument INDEX from ARGV onto the expansion stack OBS for
+   rescanning.  INDEX must be non-zero.  QUOTES determines any quote
+   delimiters that were in effect when the reference was created.  */
 void
 m4__push_arg_quote (m4 *context, m4_obstack *obs, m4_macro_args *argv,
 		    size_t index, const m4_string_pair *quotes)
 {
   size_t level;
-  m4_symbol_value *value = arg_symbol (argv, index, &level);
+  m4_symbol_value *value = arg_symbol (argv, index, &level, false);
 
-  /* TODO handle builtin tokens?  */
   if (quotes)
     obstack_grow (obs, quotes->str1, quotes->len1);
   if (value != &empty_symbol
@@ -1633,8 +1663,7 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
       return;
     }
 
-  /* TODO allow shift, $@, to push builtins without flatten.  */
-  value = make_argv_ref (context, &tmp, obs, -1, argv, i, true,
+  value = make_argv_ref (context, &tmp, obs, -1, argv, i, argv->flatten,
 			 quote ? quotes : NULL);
   assert (value == &tmp);
   if (m4__push_symbol (context, value, -1, argv->inuse))

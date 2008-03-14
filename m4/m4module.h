@@ -34,6 +34,7 @@ BEGIN_C_DECLS
 typedef struct m4		m4;
 typedef struct m4_builtin	m4_builtin;
 typedef struct m4_macro		m4_macro;
+typedef struct m4_symbol	m4_symbol;
 typedef struct m4_symbol_value	m4_symbol_value;
 typedef struct m4_input_block	m4_input_block;
 typedef struct m4_module	m4_module;
@@ -164,6 +165,8 @@ extern bool	m4_bad_argc	   (m4 *, int, const char *, size_t, size_t,
 				    bool);
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
+extern m4_symbol *m4_symbol_value_lookup (m4 *, const char *,
+					  m4_symbol_value *, bool);
 
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const char *, const char *, ...)
@@ -186,7 +189,6 @@ extern void		m4_set_exit_failure (int);
 
 typedef struct m4_syntax_table	m4_syntax_table;
 typedef struct m4_symbol_table	m4_symbol_table;
-typedef struct m4_symbol	m4_symbol;
 
 extern m4 *		m4_create	(void);
 extern void		m4_delete	(m4 *);
@@ -342,6 +344,8 @@ extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 extern m4_symbol_value	*m4_builtin_find_by_name (m4_module *, const char *);
 extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
 						  m4_builtin_func *);
+extern void m4_builtin_print (m4_obstack *, const m4_builtin *, bool,
+			      const m4_string_pair *, m4_module *);
 
 
 

@@ -56,7 +56,7 @@
   BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
   BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
   BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
-  BUILTIN (m4symbols,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (m4symbols,	true,	false,	false,	0,	-1 )	\
   BUILTIN (syncoutput,	false,  true,	false,	1,	1  )	\
 
 

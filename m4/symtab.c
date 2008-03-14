@@ -555,7 +555,6 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 		       size_t *maxlen, bool module)
 {
   const char *text;
-  const m4_builtin *bp;
   m4__symbol_chain *chain;
   size_t len = maxlen ? *maxlen : SIZE_MAX;
   bool result = false;
@@ -569,22 +568,9 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	result = true;
       break;
     case M4_SYMBOL_FUNC:
-      if (flatten)
-	{
-	  if (quotes)
-	    {
-	      obstack_grow (obs, quotes->str1, quotes->len1);
-	      obstack_grow (obs, quotes->str2, quotes->len2);
-	    }
-	  module = false;
-	}
-      else
-	{
-	  bp = m4_get_symbol_value_builtin (value);
-	  obstack_1grow (obs, '<');
-	  obstack_grow (obs, bp->name, strlen (bp->name));
-	  obstack_1grow (obs, '>');
-	}
+      m4_builtin_print (obs, m4_get_symbol_value_builtin (value), flatten,
+			quotes, module ? VALUE_MODULE (value) : NULL);
+      module = false;
       break;
     case M4_SYMBOL_PLACEHOLDER:
       if (flatten)
@@ -608,6 +594,7 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
       break;
     case M4_SYMBOL_COMP:
       chain = value->u.u_c.chain;
+      assert (!module);
       if (quotes)
 	obstack_grow (obs, quotes->str1, quotes->len1);
       while (chain && !result)
@@ -618,6 +605,11 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	      if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
 					   chain->u.u_s.len, NULL, &len))
 		result = true;
+	      break;
+	    case M4__CHAIN_FUNC:
+	      m4_builtin_print (obs, &chain->u.builtin->builtin, flatten,
+				quotes,
+				module ? chain->u.builtin->module : NULL);
 	      break;
 	    case M4__CHAIN_ARGV:
 	      if (m4_arg_print (context, obs, chain->u.u_a.argv,
@@ -637,7 +629,6 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	  }
       if (quotes)
 	obstack_grow (obs, quotes->str2, quotes->len2);
-      assert (!module);
       break;
     default:
       assert (!"m4_symbol_value_print");

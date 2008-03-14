@@ -64,15 +64,15 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
   BUILTIN (changequote,	false,	false,	false,	0,	2  )	\
   BUILTIN (decr,	false,	true,	true,	1,	1  )	\
   BUILTIN (define,	true,	true,	false,	1,	2  )	\
-  BUILTIN (defn,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (defn,	true,	true,	false,	1,	-1 )	\
   BUILTIN (divert,	false,	false,	false,	0,	2  )	\
   BUILTIN (divnum,	false,	false,	false,	0,	0  )	\
   BUILTIN (dnl,		false,	false,	false,	0,	0  )	\
-  BUILTIN (dumpdef,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (dumpdef,	true,	false,	false,	0,	-1 )	\
   BUILTIN (errprint,	false,	true,	false,	1,	-1 )	\
   BUILTIN (eval,	false,	true,	true,	1,	3  )	\
-  BUILTIN (ifdef,	false,	true,	false,	2,	3  )	\
-  BUILTIN (ifelse,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (ifdef,	true,	true,	false,	2,	3  )	\
+  BUILTIN (ifelse,	true,	true,	false,	1,	-1 )	\
   BUILTIN (include,	false,	true,	false,	1,	1  )	\
   BUILTIN (incr,	false,	true,	true,	1,	1  )	\
   BUILTIN (index,	false,	true,	true,	2,	2  )	\
@@ -81,17 +81,17 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
   BUILTIN (m4wrap,	false,	true,	false,	1,	-1 )	\
   BUILTIN (maketemp,	false,	true,	false,	1,	1  )	\
   BUILTIN (mkstemp,	false,	true,	false,	1,	1  )	\
-  BUILTIN (popdef,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (popdef,	true,	true,	false,	1,	-1 )	\
   BUILTIN (pushdef,	true,	true,	false,	1,	2  )	\
-  BUILTIN (shift,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (shift,	true,	true,	false,	1,	-1 )	\
   BUILTIN (sinclude,	false,	true,	false,	1,	1  )	\
   BUILTIN (substr,	false,	true,	true,	2,	3  )	\
   BUILTIN (syscmd,	false,	true,	true,	1,	1  )	\
   BUILTIN (sysval,	false,	false,	false,	0,	0  )	\
-  BUILTIN (traceoff,	false,	false,	false,	0,	-1 )	\
-  BUILTIN (traceon,	false,	false,	false,	0,	-1 )	\
+  BUILTIN (traceoff,	true,	false,	false,	0,	-1 )	\
+  BUILTIN (traceon,	true,	false,	false,	0,	-1 )	\
   BUILTIN (translit,	false,	true,	true,	2,	3  )	\
-  BUILTIN (undefine,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (undefine,	true,	true,	false,	1,	-1 )	\
   BUILTIN (undivert,	false,	false,	false,	0,	-1 )	\
 
 
@@ -170,12 +170,9 @@ M4BUILTIN_HANDLER (undefine)
   size_t i;
   for (i = 1; i < argc; i++)
     {
-      const char *name = M4ARG (i);
-
-      if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
-      else
-	m4_symbol_delete (M4SYMTAB, name);
+      m4_symbol_value *value = m4_arg_symbol (argv, i);
+      if (m4_symbol_value_lookup (context, me, value, true))
+	m4_symbol_delete (M4SYMTAB, m4_get_symbol_value_text (value));
     }
 }
 
@@ -198,15 +195,11 @@ M4BUILTIN_HANDLER (popdef)
   size_t i;
   for (i = 1; i < argc; i++)
     {
-      const char *name = M4ARG (i);
-
-      if (!m4_symbol_lookup (M4SYMTAB, name))
-	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
-      else
-	m4_symbol_popdef (M4SYMTAB, name);
+      m4_symbol_value *value = m4_arg_symbol (argv, i);
+      if (m4_symbol_value_lookup (context, me, value, true))
+	m4_symbol_popdef (M4SYMTAB, m4_get_symbol_value_text (value));
     }
 }
-
 
 
 
@@ -216,7 +209,9 @@ M4BUILTIN_HANDLER (popdef)
 M4BUILTIN_HANDLER (ifdef)
 {
   m4_push_arg (context, obs, argv,
-	       m4_symbol_lookup (M4SYMTAB, M4ARG (1)) ? 2 : 3);
+	       (m4_symbol_value_lookup (context, M4ARG (0),
+					m4_arg_symbol (argv, 1), false)
+		? 2 : 3));
 }
 
 M4BUILTIN_HANDLER (ifelse)
@@ -313,12 +308,11 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  const char *name = M4ARG (i);
-	  symbol = m4_symbol_lookup (M4SYMTAB, name);
-	  if (symbol != NULL)
-	    dump_symbol_CB (NULL, name, symbol, data);
-	  else if (complain)
-	    m4_warn (context, 0, me, _("undefined macro `%s'"), name);
+	  m4_symbol_value *value = m4_arg_symbol (argv, i);
+	  symbol = m4_symbol_value_lookup (context, me, value, complain);
+	  if (symbol)
+	    dump_symbol_CB (NULL, m4_get_symbol_value_text (value), symbol,
+			    data);
 	}
     }
 
@@ -371,18 +365,18 @@ M4BUILTIN_HANDLER (defn)
 
   for (i = 1; i < argc; i++)
     {
-      const char *name = M4ARG (i);
-      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
+      m4_symbol_value *value = m4_arg_symbol (argv, i);
+      m4_symbol *symbol = m4_symbol_value_lookup (context, me, value, true);
 
       if (!symbol)
-	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
+	;
       else if (m4_is_symbol_text (symbol))
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol),
 			   m4_get_symbol_len (symbol), true);
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (context, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	m4_warn (context, 0, name,
+	m4_warn (context, 0, M4ARG (i),
 		 _("builtin `%s' requested by frozen file not found"),
 		 m4_get_symbol_placeholder (symbol));
       else
@@ -613,8 +607,8 @@ M4BUILTIN_HANDLER (dnl)
   m4_skip_line (context, M4ARG (0));
 }
 
-/* Shift all argument one to the left, discarding the first argument.  Each
-   output argument is quoted with the current quotes.  */
+/* Shift all arguments one to the left, discarding the first argument.
+   Each output argument is quoted with the current quotes.  */
 M4BUILTIN_HANDLER (shift)
 {
   m4_push_args (context, obs, argv, true, true);
@@ -854,6 +848,7 @@ M4BUILTIN_HANDLER (m4wrap)
 
 M4BUILTIN_HANDLER (traceon)
 {
+  const char *me = M4ARG (0);
   size_t i;
 
   if (argc == 1)
@@ -861,12 +856,16 @@ M4BUILTIN_HANDLER (traceon)
 				      | M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
-      m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), true);
+      if (m4_is_arg_text (argv, i))
+	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), true);
+      else
+	m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 /* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
+  const char *me = M4ARG (0);
   size_t i;
 
   if (argc == 1)
@@ -874,7 +873,10 @@ M4BUILTIN_HANDLER (traceoff)
 				      & ~M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
-      m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), false);
+      if (m4_is_arg_text (argv, i))
+	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), false);
+      else
+	m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 

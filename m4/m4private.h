@@ -211,7 +211,7 @@ struct m4_symbol
 enum m4__symbol_chain_type
 {
   M4__CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
-  /* TODO Add M4__CHAIN_FUNC.  */
+  M4__CHAIN_FUNC,	/* Link contains builtin token, u.builtin is valid.  */
   M4__CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
 };
 
@@ -229,6 +229,7 @@ struct m4__symbol_chain
       size_t len;		/* Remaining length of str.  */
       size_t level;		/* Expansion level of content, or SIZE_MAX.  */
     } u_s;			/* M4__CHAIN_STR.  */
+    const m4__builtin *builtin;	/* M4__CHAIN_FUNC.  */
     struct
     {
       m4_macro_args *argv;		/* Reference to earlier $@.  */

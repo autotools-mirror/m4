@@ -1,5 +1,41 @@
 2008-03-13  Eric Blake  <ebb9@byu.net>
 
+	Stage 19c: allow builtin tokens in more macros.
+	Allow builtin tokens inside symbol chains, although for now, they
+	are not allowed inside comments or quotes.  Enable builtin token
+	handling in more macros, if only to consistently diagnose invalid
+	macro names.
+	Memory impact: none.
+	Speed impact: slight impact, due to more bookkeeping.
+	* m4/m4module.h (m4_symbol_value_lookup, m4_builtin_print): New
+	prototypes.
+	* m4/m4private.h (enum m4__symbol_chain_type): Add
+	M4__CHAIN_FUNC.
+	(struct m4__symbol_chain): Add builtin member.
+	* m4/utility.c (m4_symbol_value_lookup): New method.
+	* m4/builtin.c (m4_builtin_print): New function.
+	* m4/symtab.c (m4_symbol_value_print): Use it.
+	* m4/input.c (builtin_print): Likewise.
+	(m4__push_symbol): Allow pushing builtin tokens.
+	(composite_peek, composite_read, composite_unget, composite_clean)
+	(composite_print): Handle builtin tokens.
+	(init_builtin_token): Allow builtin tokens from composite input.
+	(m4__next_token): Flatten builtins inside comment or string.
+	* m4/macro.c (expand_argument): Strengthen assertion.
+	(collect_arguments, m4_arg_equal, m4_arg_print, m4_push_args):
+	Handle builtin tokens.
+	(arg_symbol): Add parameter, and allow NULL level.
+	(m4_arg_symbol, m4__push_arg_quote): Adjust callers.
+	(m4_arg_text): Ensure all builtins have been flattened.
+	* modules/m4.c (defn, dumpdef, popdef, traceoff, traceon)
+	(undefine, m4_dump_symbols): Warn on invalid macro names.
+	(ifdef, ifelse, shift): Handle builtin tokens.
+	* modules/gnu.c (m4symbols): Likewise.
+	* doc/m4.texinfo (Defn, Ifdef, Ifelse): Document and test the new
+	behavior.
+	(Debuglen): Likewise, and remove xfail.
+	* NEWS: Mention the change.
+
 	Stage 19b: invert sense of bit for handling builtin tokens.
 	Pass builtin tokens by default, rather than as the exception, so
 	that the logic can consistently refer to flattening arguments.

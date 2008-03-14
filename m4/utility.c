@@ -119,6 +119,27 @@ m4_parse_truth_arg (m4 *context, const char *arg, const char *me,
   return previous;
 }
 
+/* Helper method to look up a symbol table entry given an argument.
+   Warn on behalf of CALLER if VALUE is not a text argument, or if
+   MUST_EXIST and no macro exists by the name in VALUE.  Return the
+   result of the lookup, or NULL.  */
+m4_symbol *
+m4_symbol_value_lookup (m4 *context, const char *caller,
+			m4_symbol_value *value, bool must_exist)
+{
+  m4_symbol *result = NULL;
+  if (m4_is_symbol_value_text (value))
+    {
+      const char *name = m4_get_symbol_value_text (value);
+      result = m4_symbol_lookup (M4SYMTAB, name);
+      if (must_exist && !result)
+	m4_warn (context, 0, caller, _("undefined macro `%s'"), name);
+    }
+  else
+    m4_warn (context, 0, caller, _("invalid macro name ignored"));
+  return result;
+}
+
 /* Helper for all error reporting.  Report message based on FORMAT and
    ARGS, on behalf of MACRO, at the optional location FILE and LINE.
    If ERRNUM, decode the errno value as part of the message.  If
