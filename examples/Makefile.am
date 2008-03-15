@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -42,6 +42,7 @@ incl-test.m4 \
 incl.m4 \
 include.m4 \
 indir.m4 \
+join.m4 \
 loop.m4 \
 misc.m4 \
 multiquotes.m4 \
@@ -62,4 +63,5 @@ undivert.incl \
 undivert.m4 \
 wrap.m4 \
 wrapfifo.m4 \
-wraplifo.m4
+wraplifo.m4 \
+wraplifo2.m4
