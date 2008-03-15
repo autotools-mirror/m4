@@ -269,6 +269,7 @@ Correct version of some examples
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
 * Improved fatal_error::        Solution for @code{fatal_error}
@@ -2212,11 +2213,23 @@ macros, not builtins, although a future version of @acronym{GNU} M4 may
 lift this restriction.
 
 @example
-define(`a', `A')
+$ @kbd{m4 -d}
+define(`a', `A')define(`AA', `b')
 @result{}
-defn(`a', `defn', `a')
-@error{}m4:stdin:2: Warning: cannot concatenate builtin `defn'
+traceon(`defn', `define')
+@result{}
+defn(`a', `divnum', `a')
+@error{}m4:stdin:3: Warning: cannot concatenate builtin `divnum'
+@error{}m4trace: -1- defn(`a', `divnum', `a') -> ``A'`A''
 @result{}AA
+define(`mydivnum', defn(`divnum', `divnum'))mydivnum
+@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
+@error{}m4:stdin:4: Warning: cannot concatenate builtin `divnum'
+@error{}m4trace: -2- defn(`divnum', `divnum')
+@error{}m4trace: -1- define(`mydivnum', `')
+@result{}
+traceoff(`defn', `define')
+@result{}
 @end example
 
 @node Pushdef
@@ -2671,6 +2684,8 @@ shift(`foo', `bar', `baz')
 
 An example of the use of @code{shift} is this macro:
 
+@cindex reversing arguments
+@cindex arguments, reversing
 @deffn Composite reverse (@dots{})
 Takes any number of arguments, and reverses their order.
 @end deffn
@@ -2748,6 +2763,113 @@ example2(`feeling rather indecisive today')
 @result{}default answer: 4
 @end example
 
+@cindex joining arguments
+@cindex arguments, joining
+@cindex concatenating arguments
+Another common task that requires iteration is joining a list of
+arguments into a single string.
+
+@deffn Composite join (@ovar{separator}, @ovar{args@dots{}})
+@deffnx Composite joinall (@ovar{separator}, @ovar{args@dots{}})
+Generate a single-quoted string, consisting of each @var{arg} separated
+by @var{separator}.  While @code{joinall} always outputs a
+@var{separator} between arguments, @code{join} avoids the
+@var{separator} for an empty @var{arg}.
+@end deffn
+
+Here are some examples of its usage, based on the implementation
+@file{m4-@value{VERSION}/@/examples/@/join.m4} distributed in this
+package:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`join.m4')
+@result{}
+join,join(`-'),join(`-', `'),join(`-', `', `')
+@result{},,,
+joinall,joinall(`-'),joinall(`-', `'),joinall(`-', `', `')
+@result{},,,-
+join(`-', `1')
+@result{}1
+join(`-', `1', `2', `3')
+@result{}1-2-3
+join(`', `1', `2', `3')
+@result{}123
+join(`-', `', `1', `', `', `2', `')
+@result{}1-2
+joinall(`-', `', `1', `', `', `2', `')
+@result{}-1---2-
+join(`,', `1', `2', `3')
+@result{}1,2,3
+define(`nargs', `$#')dnl
+nargs(join(`,', `1', `2', `3'))
+@result{}1
+@end example
+
+Examining the implementation shows some interesting points about several
+m4 programming idioms.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`join.m4')dnl
+@result{}divert(`-1')
+@result{}# join(sep, args) - join each non-empty ARG into a single
+@result{}# string, with each element separated by SEP
+@result{}define(`join',
+@result{}`ifelse(`$#', `2', ``$2'',
+@result{}  `ifelse(`$2', `', `', ``$2'_')$0(`$1', shift(shift($@@)))')')
+@result{}define(`_join',
+@result{}`ifelse(`$#$2', `2', `',
+@result{}  `ifelse(`$2', `', `', ``$1$2'')$0(`$1', shift(shift($@@)))')')
+@result{}# joinall(sep, args) - join each ARG, including empty ones,
+@result{}# into a single string, with each element separated by SEP
+@result{}define(`joinall', ``$2'_$0(`$1', shift($@@))')
+@result{}define(`_joinall',
+@result{}`ifelse(`$#', `2', `', ``$1$3'$0(`$1', shift(shift($@@)))')')
+@result{}divert`'dnl
+@end example
+
+First, notice that this implementation creates helper macros
+@code{_join} and @code{_joinall}.  This division of labor makes it
+easier to output the correct number of @var{separator} instances:
+@code{join} and @code{joinall} are responsible for the first argument,
+without a separator, while @code{_join} and @code{_joinall} are
+responsible for all remaining arguments, always outputting a separator
+when outputting an argument.
+
+Next, observe how @code{join} decides to iterate to itself, because the
+first @var{arg} was empty, or to output the argument and swap over to
+@code{_join}.  If the argument is non-empty, then the nested
+@code{ifelse} results in an unquoted @samp{_}, which is concatenated
+with the @samp{$0} to form the next macro name to invoke.  The
+@code{joinall} implementation is simpler since it does not have to
+suppress empty @var{arg}; it always executes once then defers to
+@code{_joinall}.
+
+Another important idiom is the idea that @var{separator} is reused for
+each iteration.  Each iteration has one less argument, but rather than
+discarding @samp{$1} by iterating with @code{$0(shift($@@))}, the macro
+discards @samp{$2} by using @code{$0(`$1', shift(shift($@@)))}.
+
+Next, notice that it is possible to compare more than one condition in a
+single @code{ifelse} test.  The test of @samp{$#$2} against @samp{2}
+allows @code{_join} to iterate for two separate reasons---either there
+are still more than two arguments, or there are exactly two arguments
+but the last argument is not empty.
+
+Finally, notice that these macros require exactly two arguments to
+terminate recursion, but that they still correctly result in empty
+output when given no @var{args} (i.e., zero or one macro argument).  On
+the first pass when there are too few arguments, the @code{shift}
+results in no output, but leaves an empty string to serve as the
+required second argument for the second pass.  Put another way,
+@samp{`$1', shift($@@)} is not the same as @samp{$@@}, since only the
+former guarantees at least two arguments.
+
+@cindex quote manipulation
+@cindex manipulating quotes
 Sometimes, a recursive algorithm requires adding quotes to each element,
 or treating multiple arguments as a single element:
 
@@ -2813,6 +2935,9 @@ undivert(`quote.m4')dnl
 @result{}                             ```$1'',$0(shift($@@))')')
 @result{}divert`'dnl
 @end example
+
+It is worth pointing out that @samp{quote(@var{args})} is more efficient
+than @samp{joinall(`,', @var{args})} for producing the same output.
 
 @cindex nine arguments, more than
 @cindex more than nine arguments
@@ -4171,6 +4296,64 @@ recursively, the saved pieces of text are reread in the opposite order
 in which they were saved (LIFO---last in, first out).  However, this
 behavior is likely to change in a future release, to match
 @acronym{POSIX}, so you should not depend on this order.
+
+It is possible to emulate @acronym{POSIX} behavior even
+with older versions of @acronym{GNU} M4 by including the file
+@file{m4-@value{VERSION}/@/examples/@/wrapfifo.m4} from the
+distribution:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`wrapfifo.m4')dnl
+@result{}dnl Redefine m4wrap to have FIFO semantics.
+@result{}define(`_m4wrap_level', `0')dnl
+@result{}define(`m4wrap',
+@result{}`ifdef(`m4wrap'_m4wrap_level,
+@result{}       `define(`m4wrap'_m4wrap_level,
+@result{}               defn(`m4wrap'_m4wrap_level)`$1')',
+@result{}       `builtin(`m4wrap', `define(`_m4wrap_level',
+@result{}                                  incr(_m4wrap_level))dnl
+@result{}m4wrap'_m4wrap_level)dnl
+@result{}define(`m4wrap'_m4wrap_level, `$1')')')dnl
+include(`wrapfifo.m4')
+@result{}
+m4wrap(`a`'m4wrap(`c
+', `d')')m4wrap(`b')
+@result{}
+^D
+@result{}abc
+@end example
+
+It is likewise possible to emulate LIFO behavior without resorting to
+the @acronym{GNU} M4 extension of @code{builtin}, by including the file
+@file{m4-@value{VERSION}/@/examples/@/wraplifo.m4} from the
+distribution.  (Unfortunately, both examples shown here share some
+subtle bugs.  See if you can find and correct them; or @pxref{Improved
+m4wrap, , Answers}).
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`wraplifo.m4')dnl
+@result{}dnl Redefine m4wrap to have LIFO semantics.
+@result{}define(`_m4wrap_level', `0')dnl
+@result{}define(`_m4wrap', defn(`m4wrap'))dnl
+@result{}define(`m4wrap',
+@result{}`ifdef(`m4wrap'_m4wrap_level,
+@result{}       `define(`m4wrap'_m4wrap_level,
+@result{}               `$1'defn(`m4wrap'_m4wrap_level))',
+@result{}       `_m4wrap(`define(`_m4wrap_level', incr(_m4wrap_level))dnl
+@result{}m4wrap'_m4wrap_level)dnl
+@result{}define(`m4wrap'_m4wrap_level, `$1')')')dnl
+include(`wraplifo.m4')
+@result{}
+m4wrap(`a`'m4wrap(`c
+', `d')')m4wrap(`b')
+@result{}
+^D
+@result{}bac
+@end example
 
 Here is an example of implementing a factorial function using
 @code{m4wrap}:
@@ -6103,7 +6286,11 @@ __line__
 @result{}8
 __line__
 @result{}11
+m4wrap(`__line__
+')
+@result{}
 ^D
+@result{}12
 @result{}6
 @result{}6
 @end example
@@ -6553,31 +6740,6 @@ argument to @code{m4wrap} is saved for later evaluation, bug
 @acronym{GNU} @code{m4} saves and processes all arguments, with output
 separated by spaces.
 
-However, it is possible to emulate @acronym{POSIX} behavior by
-including the file @file{m4-@value{VERSION}/@/examples/@/wrapfifo.m4}
-from the distribution:
-
-@example
-undivert(`wrapfifo.m4')dnl
-@result{}dnl Redefine m4wrap to have FIFO semantics.
-@result{}define(`_m4wrap_level', `0')dnl
-@result{}define(`m4wrap',
-@result{}`ifdef(`m4wrap'_m4wrap_level,
-@result{}       `define(`m4wrap'_m4wrap_level,
-@result{}               defn(`m4wrap'_m4wrap_level)`$1')',
-@result{}       `builtin(`m4wrap', `define(`_m4wrap_level',
-@result{}                                  incr(_m4wrap_level))dnl
-@result{}m4wrap'_m4wrap_level)dnl
-@result{}define(`m4wrap'_m4wrap_level, `$1')')')dnl
-include(`wrapfifo.m4')
-@result{}
-m4wrap(`a`'m4wrap(`c
-', `d')')m4wrap(`b')
-@result{}
-^D
-@result{}abc
-@end example
-
 @item
 @acronym{POSIX} states that builtins that require arguments, but are
 called without arguments, have undefined behavior.  Traditional
@@ -6784,6 +6946,7 @@ presented here.
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
 * Improved fatal_error::        Solution for @code{fatal_error}
@@ -7161,6 +7324,77 @@ foreachq(`x', ```active'', ``active''', `<x>
 ')dnl
 @result{}<active>
 @result{}<active>
+@end example
+
+@node Improved m4wrap
+@section Solution for @code{m4wrap}
+
+The replacement @code{m4wrap} versions presented above, designed to
+guarantee FIFO or LIFO order regardless of the underlying M4
+implementation, share a bug when dealing with wrapped text that looks
+like parameter expansion.  Note how the invocation of
+@code{m4wrap@var{n}} interprets these parameters, while using the
+builtin preserves them for their intended use.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`wraplifo.m4')
+@result{}
+m4wrap(`define(`foo', ``$0:'-$1-$*-$#-')foo(`a', `b')
+')
+@result{}
+builtin(`m4wrap', ``'define(`bar', ``$0:'-$1-$*-$#-')bar(`a', `b')
+')
+@result{}
+^D
+@result{}bar:-a-a,b-2-
+@result{}m4wrap0:---0-
+@end example
+
+Additionally, the computation of @code{_m4wrap_level} and creation of
+multiple @code{m4wrap@var{n}} placeholders in the original examples is
+more expensive in time and memory than strictly necessary.  Notice how
+the improved version grabs the wrapped text via @code{defn} to avoid
+parameter expansion, then undefines @code{_m4wrap_text}, before
+stripping a level of quotes with @code{_arg1} to expand the text.  That
+way, each level of wrapping reuses the single placeholder, which starts
+each nesting level in an undefined state.
+
+Finally, it is worth emulating the @acronym{GNU} M4 extension of saving
+all arguments to @code{m4wrap}, separated by a space, rather than saving
+just the first argument.  This is done with the @code{join} macro
+documented previously (@pxref{Shift}).  The improved LIFO example is
+shipped as @file{m4-@value{VERSION}/@/examples/@/wraplifo2.m4}, and can
+easily be converted to a FIFO solution by swapping the adjacent
+invocations of @code{joinall} and @code{defn}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`wraplifo2.m4')
+@result{}
+undivert(`wraplifo2.m4')dnl
+@result{}dnl Redefine m4wrap to have LIFO semantics, improved example.
+@result{}include(`join.m4')dnl
+@result{}define(`_m4wrap', defn(`m4wrap'))dnl
+@result{}define(`_arg1', `$1')dnl
+@result{}define(`m4wrap',
+@result{}`ifdef(`_$0_text',
+@result{}       `define(`_$0_text', joinall(` ', $@@)defn(`_$0_text'))',
+@result{}       `_$0(`_arg1(defn(`_$0_text')undefine(`_$0_text'))')dnl
+@result{}define(`_$0_text', joinall(` ', $@@))')')dnl
+m4wrap(`define(`foo', ``$0:'-$1-$*-$#-')foo(`a', `b')
+')
+@result{}
+m4wrap(`lifo text
+m4wrap(`nested', `', `$@@
+')')
+@result{}
+^D
+@result{}lifo text
+@result{}foo:-a-a,b-2-
+@result{}nested  $@@
 @end example
 
 @node Improved cleardivert
