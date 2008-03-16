@@ -1,3 +1,15 @@
+2008-03-15  Eric Blake  <ebb9@byu.net>
+
+	Document join, in order to fix bug in m4wrap example.
+	* examples/join.m4: New file.
+	* examples/wraplifo2.m4: Likewise.
+	* Makefile.am (EXTRA_DIST): Add new files.
+	* doc/m4.texinfo (Improved m4wrap): New node.
+	(Defn, Location): Enhance tests.
+	(Shift): Document the composit macro join.
+	(Incompatibilities): Move documentation of LIFO vs. FIFO...
+	(M4wrap): ...here, to match improved example.
+
 2008-03-13  Eric Blake  <ebb9@byu.net>
 
 	Stage 19c: allow builtin tokens in more macros.

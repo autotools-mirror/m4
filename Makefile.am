@@ -329,6 +329,7 @@ dist_pkgdata_DATA = \
 		  examples/incl.m4 \
 		  examples/include.m4 \
 		  examples/indir.m4 \
+		  examples/join.m4 \
 		  examples/loop.m4 \
 		  examples/misc.m4 \
 		  examples/multiquotes.m4 \
@@ -342,7 +343,10 @@ dist_pkgdata_DATA = \
 		  examples/translit.m4 \
 		  examples/undivert.incl \
 		  examples/undivert.m4 \
-		  examples/wrap.m4
+		  examples/wrap.m4 \
+		  examples/wrapfifo.m4 \
+		  examples/wraplifo.m4 \
+		  examples/wraplifo2.m4
 
 ## ----------- ##
 ## Test suite. ##
