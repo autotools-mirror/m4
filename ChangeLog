@@ -1,5 +1,20 @@
 2008-03-17  Eric Blake  <ebb9@byu.net>
 
+	Stage 20a: reduce unget's in input engine.
+	Now that out-of-range input placeholders like CHAR_BUILTIN are
+	consumed outside of next_char, next_token should always consume
+	rather than peek at the first character.  Fewer peeks results in
+	less ungetc overhead.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer function calls.
+	* m4/input.c (struct input_funcs): Alter read_func prototype.
+	(next_char, file_read, buildin_read, string_read, composite_read):
+	Add allow_argv parameter.
+	(init_builtin_token, init_argv_symbol): Require all prior input to
+	be consumed.
+	(m4_skip_line, match_input, consume_syntax): Adjust callers.
+	(m4__next_token): Consume first byte without peek.
+
 	Update for fresh bootstrap.
 	* ltdl/m4/gnulib-cache.m4: Updated copyright from upstream.
 

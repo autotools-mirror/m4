@@ -93,20 +93,24 @@
    between input blocks must update the context accordingly.  */
 
 static	int	file_peek		(m4_input_block *, m4 *, bool);
-static	int	file_read		(m4_input_block *, m4 *, bool, bool);
+static	int	file_read		(m4_input_block *, m4 *, bool, bool,
+					 bool);
 static	void	file_unget		(m4_input_block *, int);
 static	bool	file_clean		(m4_input_block *, m4 *, bool);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	builtin_peek		(m4_input_block *, m4 *, bool);
-static	int	builtin_read		(m4_input_block *, m4 *, bool, bool);
+static	int	builtin_read		(m4_input_block *, m4 *, bool, bool,
+					 bool);
 static	void	builtin_unget		(m4_input_block *, int);
 static	void	builtin_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	string_peek		(m4_input_block *, m4 *, bool);
-static	int	string_read		(m4_input_block *, m4 *, bool, bool);
+static	int	string_read		(m4_input_block *, m4 *, bool, bool,
+					 bool);
 static	void	string_unget		(m4_input_block *, int);
 static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	composite_peek		(m4_input_block *, m4 *, bool);
-static	int	composite_read		(m4_input_block *, m4 *, bool, bool);
+static	int	composite_read		(m4_input_block *, m4 *, bool, bool,
+					 bool);
 static	void	composite_unget		(m4_input_block *, int);
 static	bool	composite_clean		(m4_input_block *, m4 *, bool);
 static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
@@ -115,7 +119,7 @@ static	void	init_builtin_token	(m4 *, m4_symbol_value *);
 static	void	append_quote_token	(m4 *, m4_obstack *,
 					 m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
-static	int	next_char		(m4 *, bool, bool);
+static	int	next_char		(m4 *, bool, bool, bool);
 static	int	peek_char		(m4 *, bool);
 static	bool	pop_input		(m4 *, bool);
 static	void	unget_input		(int);
@@ -138,9 +142,11 @@ struct input_funcs
 
   /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
      builtin, or CHAR_RETRY if none available.  If ALLOW_QUOTE, then
-     CHAR_QUOTE may be returned.  If SAFE, then do not alter the
-     current file or line.  */
-  int	(*read_func)	(m4_input_block *, m4 *, bool allow_quote, bool safe);
+     CHAR_QUOTE may be returned.  If ALLOW_ARGV, then CHAR_ARGV may be
+     returned.  If SAFE, then do not alter the current file or
+     line.  */
+  int	(*read_func)	(m4_input_block *, m4 *, bool allow_quote,
+			 bool allow_argv, bool safe);
 
   /* Unread a single unsigned character or CHAR_BUILTIN, must be the
      same character previously read by read_func.  */
@@ -268,7 +274,7 @@ file_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 
 static int
 file_read (m4_input_block *me, m4 *context, bool allow_quote M4_GNUC_UNUSED,
-	   bool safe M4_GNUC_UNUSED)
+	   bool allow_argv M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
 {
   int ch;
 
@@ -394,7 +400,8 @@ builtin_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 
 static int
 builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	      bool allow_quote M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
+	      bool allow_quote M4_GNUC_UNUSED, bool allow_argv M4_GNUC_UNUSED,
+	      bool safe M4_GNUC_UNUSED)
 {
   /* Not consumed here - wait until init_builtin_token.  */
   return me->u.builtin ? CHAR_BUILTIN : CHAR_RETRY;
@@ -453,7 +460,8 @@ string_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
 
 static int
 string_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	     bool allow_quote M4_GNUC_UNUSED, bool safe M4_GNUC_UNUSED)
+	     bool allow_quote M4_GNUC_UNUSED, bool allow_argv M4_GNUC_UNUSED,
+	     bool safe M4_GNUC_UNUSED)
 {
   if (!me->u.u_s.len)
     return CHAR_RETRY;
@@ -757,9 +765,11 @@ composite_peek (m4_input_block *me, m4 *context, bool allow_argv)
 }
 
 static int
-composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
+composite_read (m4_input_block *me, m4 *context, bool allow_quote,
+		bool allow_argv, bool safe)
 {
   m4__symbol_chain *chain = me->u.u_c.chain;
+  size_t argc;
   while (chain)
     {
       if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX))
@@ -782,7 +792,8 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	    return CHAR_BUILTIN;
 	  break;
 	case M4__CHAIN_ARGV:
-	  if (chain->u.u_a.index == m4_arg_argc (chain->u.u_a.argv))
+	  argc = m4_arg_argc (chain->u.u_a.argv);
+	  if (chain->u.u_a.index == argc)
 	    {
 	      m4__arg_adjust_refcount (context, chain->u.u_a.argv, false);
 	      break;
@@ -792,6 +803,11 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	      chain->u.u_a.comma = false;
 	      return ','; /* FIXME - support M4_SYNTAX_COMMA.  */
 	    }
+	  /* Only return a reference in the quoting is correct and the
+	     reference has more than one argument left.  */
+	  if (allow_argv && chain->quote_age == m4__quote_age (M4SYNTAX)
+	      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
+	    return CHAR_ARGV;
 	  /* Rather than directly parse argv here, we push another
 	     input block containing the next unparsed argument from
 	     argv.  */
@@ -804,7 +820,7 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote, bool safe)
 	  chain->u.u_a.index++;
 	  chain->u.u_a.comma = true;
 	  m4_push_string_finish ();
-	  return next_char (context, allow_quote, !safe);
+	  return next_char (context, allow_quote, allow_argv, !safe);
 	default:
 	  assert (!"composite_read");
 	  abort ();
@@ -1085,9 +1101,6 @@ m4_pop_wrapup (m4 *context)
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
-  int ch = next_char (context, false, true);
-  assert (ch == CHAR_BUILTIN);
-
   if (isp->funcs == &builtin_funcs)
     {
       assert (isp->u.builtin);
@@ -1159,11 +1172,10 @@ init_argv_symbol (m4 *context, m4_obstack *obs, m4_symbol_value *value)
 {
   m4__symbol_chain *src_chain;
   m4__symbol_chain *chain;
-  int ch = next_char (context, true, true);
+  int ch;
   const m4_string_pair *comments = m4_get_syntax_comments (M4SYNTAX);
 
-  assert (ch == CHAR_QUOTE && value->type == M4_SYMBOL_VOID
-	  && isp->funcs == &composite_funcs
+  assert (value->type == M4_SYMBOL_VOID && isp->funcs == &composite_funcs
 	  && isp->u.u_c.chain->type == M4__CHAIN_ARGV
 	  && obs && obstack_object_size (obs) == 0);
 
@@ -1201,7 +1213,7 @@ init_argv_symbol (m4 *context, m4_obstack *obs, m4_symbol_value *value)
 	  || (!m4_has_syntax (M4SYNTAX, *comments->str1,
 			      M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE)
 	      && *comments->str1 != *src_chain->u.u_a.quotes->str1));
-  ch = peek_char (context, false);
+  ch = peek_char (context, true);
   if (!m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE))
     {
       isp->u.u_c.chain = src_chain;
@@ -1217,10 +1229,12 @@ init_argv_symbol (m4 *context, m4_obstack *obs, m4_symbol_value *value)
    next_char () is used to read and advance the input to the next
    character.  If ALLOW_QUOTE, and the current input matches the
    current quote age, return CHAR_QUOTE and leave consumption of data
-   for append_quote_token.  If RETRY, then avoid returning CHAR_RETRY
-   by popping input.  */
+   for append_quote_token; otherwise, if ALLOW_ARGV, and the current
+   input matches an argv reference with the correct quoting, return
+   CHAR_ARGV and leave consumption of data for init_argv_symbol.  If
+   RETRY, then avoid returning CHAR_RETRY by popping input.  */
 static int
-next_char (m4 *context, bool allow_quote, bool retry)
+next_char (m4 *context, bool allow_quote, bool allow_argv, bool retry)
 {
   int ch;
 
@@ -1240,7 +1254,8 @@ next_char (m4 *context, bool allow_quote, bool retry)
 	}
 
       assert (isp->funcs->read_func);
-      while (((ch = isp->funcs->read_func (isp, context, allow_quote, !retry))
+      while (((ch = isp->funcs->read_func (isp, context, allow_quote,
+					   allow_argv, !retry))
 	      != CHAR_RETRY)
 	     || !retry)
 	{
@@ -1273,7 +1288,7 @@ peek_char (m4 *context, bool allow_argv)
       if (ch != CHAR_RETRY)
 	{
 /*	  if (IS_IGNORE (ch)) */
-/*	    return next_char (context, false, true); */
+/*	    return next_char (context, false, true, true); */
 	  return ch;
 	}
 
@@ -1283,7 +1298,7 @@ peek_char (m4 *context, bool allow_argv)
 
 /* The function unget_input () puts back a character on the input
    stack, using an existing input_block if possible.  This is not safe
-   to call except immediately after next_char(context, allow, false).  */
+   to call except immediately after next_char(context, aq, aa, false).  */
 static void
 unget_input (int ch)
 {
@@ -1301,7 +1316,8 @@ m4_skip_line (m4 *context, const char *name)
   const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
 
-  while ((ch = next_char (context, false, true)) != CHAR_EOF && ch != '\n')
+  while ((ch = next_char (context, false, false, true)) != CHAR_EOF
+	 && ch != '\n')
     ;
   if (ch == CHAR_EOF)
     /* current_file changed; use the previous value we cached.  */
@@ -1346,14 +1362,14 @@ match_input (m4 *context, const char *s, bool consume)
   if (s[1] == '\0')
     {
       if (consume)
-	next_char (context, false, true);
+	next_char (context, false, false, true);
       return true;			/* short match */
     }
 
-  next_char (context, false, true);
+  next_char (context, false, false, true);
   for (n = 1, t = s++; (ch = peek_char (context, false)) == to_uchar (*s++); )
     {
-      next_char (context, false, true);
+      next_char (context, false, false, true);
       n++;
       if (*s == '\0')		/* long match */
 	{
@@ -1391,29 +1407,29 @@ static bool
 consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 {
   int ch;
-  bool allow_quote = m4__safe_quotes (M4SYNTAX);
+  bool allow = m4__safe_quotes (M4SYNTAX);
   assert (syntax);
   while (1)
     {
       /* It is safe to call next_char without first checking
 	 peek_char, except at input source boundaries, which we detect
 	 by CHAR_RETRY.  We exploit the fact that CHAR_EOF,
-	 CHAR_BUILTIN, and CHAR_QUOTE do not satisfy any syntax
-	 categories.  */
-      while ((ch = next_char (context, allow_quote, false)) != CHAR_RETRY
+	 CHAR_BUILTIN, CHAR_QUOTE, and CHAR_ARGV do not satisfy any
+	 syntax categories.  */
+      while ((ch = next_char (context, allow, allow, false)) != CHAR_RETRY
 	     && m4_has_syntax (M4SYNTAX, ch, syntax))
 	{
 	  assert (ch < CHAR_EOF);
 	  obstack_1grow (obs, ch);
 	}
-      if (ch == CHAR_RETRY || ch == CHAR_QUOTE)
+      if (ch == CHAR_RETRY || ch == CHAR_QUOTE || ch == CHAR_ARGV)
 	{
 	  ch = peek_char (context, false);
 	  if (m4_has_syntax (M4SYNTAX, ch, syntax))
 	    {
 	      assert (ch < CHAR_EOF);
 	      obstack_1grow (obs, ch);
-	      next_char (context, false, true);
+	      next_char (context, false, false, true);
 	      continue;
 	    }
 	  return ch == CHAR_EOF;
@@ -1499,15 +1515,14 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   do {
     obstack_free (&token_stack, token_bottom);
 
-    /* Must consume an input character, but not until CHAR_BUILTIN is
-       handled.  */
-    ch = peek_char (context, allow_argv && m4__quote_age (M4SYNTAX));
+    /* Must consume an input character.  */
+    ch = next_char (context, false, allow_argv && m4__quote_age (M4SYNTAX),
+		    true);
     if (ch == CHAR_EOF)			/* EOF */
       {
 #ifdef DEBUG_INPUT
 	xfprintf (stderr, "next_token -> EOF\n");
 #endif
-	next_char (context, false, true);
 	return M4_TOKEN_EOF;
       }
 
@@ -1528,15 +1543,13 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	return M4_TOKEN_ARGV;
       }
 
-    /* Consume character we already peeked at.  */
-    next_char (context, false, true);
     file = m4_get_current_file (context);
     *line = m4_get_current_line (context);
 
     if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
       {					/* ESCAPED WORD */
 	obstack_1grow (&token_stack, ch);
-	if ((ch = next_char (context, false, true)) < CHAR_EOF)
+	if ((ch = next_char (context, false, false, true)) < CHAR_EOF)
 	  {
 	    obstack_1grow (&token_stack, ch);
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
@@ -1564,7 +1577,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	type = M4_TOKEN_STRING;
 	while (1)
 	  {
-	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), true);
+	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), false,
+			    true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
@@ -1581,7 +1595,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		    ch = peek_char (context, false);
 		    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 		      {
-			ch = next_char (context, false, true);
+			ch = next_char (context, false, false, true);
 #ifdef DEBUG_INPUT
 			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
 					token);
@@ -1623,7 +1637,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	assert (!m4__quote_age (M4SYNTAX));
 	while (1)
 	  {
-	    ch = next_char (context, false, true);
+	    ch = next_char (context, false, false, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
@@ -1641,7 +1655,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		    if (MATCH (context, ch, context->syntax->quote.str2,
 			       false))
 		      {
-			ch = next_char (context, false, true);
+			ch = next_char (context, false, false, true);
 			MATCH (context, ch, context->syntax->quote.str2, true);
 #ifdef DEBUG_INPUT
 			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
@@ -1681,7 +1695,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	obstack_1grow (obs_safe, ch);
 	while (1)
 	  {
-	    ch = next_char (context, false, true);
+	    ch = next_char (context, false, false, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in comment"));
@@ -1713,7 +1727,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		      context->syntax->comm.len1);
 	while (1)
 	  {
-	    ch = next_char (context, false, true);
+	    ch = next_char (context, false, false, true);
 	    if (ch == CHAR_EOF)
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in comment"));
