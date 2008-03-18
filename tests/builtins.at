@@ -1227,8 +1227,8 @@ No. 33: The End.
 AT_CHECK_M4([wrap.m4], 0,
 [[
 No. 33: The End.
-Wrapper no. 2
 Wrapper no. 1
+Wrapper no. 2
 Wrapper no. 3
 Wrapper no. 4
 ]])

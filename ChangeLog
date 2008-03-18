@@ -1,3 +1,25 @@
+2008-03-18  Eric Blake  <ebb9@byu.net>
+
+	Stage 20b: make m4wrap obey POSIX fifo ordering.
+	Improve input engine to support location changes within symbol
+	chains, then convert m4wrap to always build symbol chain.
+	Memory impact: none.
+	Speed impact: slight penalty, from more m4wrap bookkeeping.
+	* m4/m4module.h (m4_wrap_args): Add prototype.
+	* m4/m4private.h (enum m4__symbol_chain_type): Add M4__CHAIN_LOC.
+	(struct m4__symbol_chain): Add struct u_l.
+	* m4/input.c (m4_push_wrapup_init, m4_push_wrapup_finish): Use
+	new link type.
+	(composite_peek, composite_read, composite_clean): Handle location
+	link.
+	* m4/macro.c (m4_wrap_args): New function.
+	* modules/m4.c (m4wrap): Use it.
+	* doc/m4.texinfo (M4wrap): Sync with branch and POSIX.
+	(Extensions): Document extension of multiple arguments.
+	(Location, Improved m4wrap): Adjust example to match FIFO order.
+	* tests/builtins.at (wrap): Likewise.
+	* NEWS: Document this change.
+
 2008-03-17  Eric Blake  <ebb9@byu.net>
 
 	Stage 20a: reduce unget's in input engine.

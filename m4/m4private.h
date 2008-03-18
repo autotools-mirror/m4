@@ -1,7 +1,6 @@
 /* GNU m4 -- A simple macro processor
-
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004, 2005,
-   2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004,
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -212,7 +211,8 @@ enum m4__symbol_chain_type
 {
   M4__CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
   M4__CHAIN_FUNC,	/* Link contains builtin token, u.builtin is valid.  */
-  M4__CHAIN_ARGV	/* Link contains a $@ reference, u.u_a is valid.  */
+  M4__CHAIN_ARGV,	/* Link contains a $@ reference, u.u_a is valid.  */
+  M4__CHAIN_LOC		/* Link contains m4wrap location, u.u_l is valid.  */
 };
 
 /* Composite symbols are built of a linked list of chain objects.  */
@@ -240,6 +240,11 @@ struct m4__symbol_chain
       bool_bitfield has_func : 1;	/* True if argv includes func.  */
       const m4_string_pair *quotes;	/* NULL for $*, quotes for $@.  */
     } u_a;			/* M4__CHAIN_ARGV.  */
+    struct
+    {
+      const char *file;	/* File where subsequent links originate.  */
+      int line;		/* Line where subsequent links originate.  */
+    } u_l;			/* M4__CHAIN_LOC.  */
   } u;
 };
 

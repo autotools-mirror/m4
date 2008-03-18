@@ -204,11 +204,7 @@ static m4_obstack token_stack;
 /* Obstack for storing input file names.  */
 static m4_obstack file_names;
 
-/* Wrapup input stack.
-
-   FIXME - m4wrap should be FIFO, which implies a queue, not a stack.
-   While fixing this, m4wrap should also remember what the current
-   file and line are for each chunk of wrapped text.  */
+/* Wrapup input stack.  */
 static m4_obstack *wrapup_stack;
 
 /* Current stack, from input or wrapup.  */
@@ -755,6 +751,8 @@ composite_peek (m4_input_block *me, m4 *context, bool allow_argv)
 	  chain->u.u_a.comma = true;
 	  m4_push_string_finish ();
 	  return peek_char (context, allow_argv);
+	case M4__CHAIN_LOC:
+	  break;
 	default:
 	  assert (!"composite_peek");
 	  abort ();
@@ -821,6 +819,12 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote,
 	  chain->u.u_a.comma = true;
 	  m4_push_string_finish ();
 	  return next_char (context, allow_quote, allow_argv, !safe);
+	case M4__CHAIN_LOC:
+	  me->file = chain->u.u_l.file;
+	  me->line = chain->u.u_l.line;
+	  input_change = true;
+	  me->u.u_c.chain = chain->next;
+	  return next_char (context, allow_quote, allow_argv, !safe);
 	default:
 	  assert (!"composite_read");
 	  abort ();
@@ -885,6 +889,8 @@ composite_clean (m4_input_block *me, m4 *context, bool cleanup)
 	    }
 	  m4__arg_adjust_refcount (context, chain->u.u_a.argv, false);
 	  break;
+	case M4__CHAIN_LOC:
+	  return false;
 	default:
 	  assert (!"composite_clean");
 	  abort ();
@@ -1001,14 +1007,36 @@ m4_obstack *
 m4_push_wrapup_init (m4 *context)
 {
   m4_input_block *i;
+  m4__symbol_chain *chain;
 
-  i = (m4_input_block *) obstack_alloc (wrapup_stack, sizeof *i);
-  i->prev = wsp;
-
-  i->funcs = &string_funcs;
-  i->file = m4_get_current_file (context);
-  i->line = m4_get_current_line (context);
-  wsp = i;
+  assert (obstack_object_size (wrapup_stack) == 0);
+  if (wsp)
+    {
+      i = wsp;
+      assert (i->funcs == &composite_funcs && i->u.u_c.end
+	      && i->u.u_c.end->type != M4__CHAIN_LOC);
+    }
+  else
+    {
+      i = (m4_input_block *) obstack_alloc (wrapup_stack, sizeof *i);
+      i->prev = wsp;
+      i->funcs = &composite_funcs;
+      i->file = m4_get_current_file (context);
+      i->line = m4_get_current_line (context);
+      i->u.u_c.chain = i->u.u_c.end = NULL;
+      wsp = i;
+    }
+  chain = (m4__symbol_chain *) obstack_alloc (wrapup_stack, sizeof *chain);
+  if (i->u.u_c.end)
+    i->u.u_c.end->next = chain;
+  else
+    i->u.u_c.chain = chain;
+  i->u.u_c.end = chain;
+  chain->next = NULL;
+  chain->type = M4__CHAIN_LOC;
+  chain->quote_age = 0;
+  chain->u.u_l.file = m4_get_current_file (context);
+  chain->u.u_l.line = m4_get_current_line (context);
   return wrapup_stack;
 }
 
@@ -1016,17 +1044,8 @@ m4_push_wrapup_init (m4 *context)
 void
 m4_push_wrapup_finish (void)
 {
-  m4_input_block *i = wsp;
-  if (obstack_object_size (wrapup_stack) == 0)
-    {
-      wsp = i->prev;
-      obstack_free (wrapup_stack, i);
-    }
-  else
-    {
-      i->u.u_s.len = obstack_object_size (wrapup_stack);
-      i->u.u_s.str = (char *) obstack_finish (wrapup_stack);
-    }
+  m4__make_text_link (wrapup_stack, &wsp->u.u_c.chain, &wsp->u.u_c.end);
+  assert (wsp->u.u_c.end->type != M4__CHAIN_LOC);
 }
 
 

@@ -1,5 +1,4 @@
 /* GNU m4 -- A simple macro processor
-
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
    2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -374,6 +373,7 @@ extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
 					 size_t);
 extern void	m4_push_args		(m4 *, m4_obstack *, m4_macro_args *,
 					 bool, bool);
+extern void	m4_wrap_args		(m4 *, m4_macro_args *);
 
 
 /* --- RUNTIME DEBUGGING --- */

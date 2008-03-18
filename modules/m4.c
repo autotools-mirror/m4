@@ -833,13 +833,7 @@ M4BUILTIN_HANDLER (m4exit)
    version only the first.  */
 M4BUILTIN_HANDLER (m4wrap)
 {
-  obs = m4_push_wrapup_init (context);
-  if (m4_get_posixly_correct_opt (context))
-    obstack_grow (obs, M4ARG (1), M4ARGLEN (1));
-  else
-    /* TODO allow pushing builtins.  */
-    m4_arg_print (context, obs, argv, 1, NULL, true, " ", NULL, false, false);
-  m4_push_wrapup_finish ();
+  m4_wrap_args (context, argv);
 }
 
 /* Enable tracing of all specified macros, or all, if none is specified.

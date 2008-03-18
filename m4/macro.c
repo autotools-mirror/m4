@@ -1670,6 +1670,74 @@ m4_push_args (m4 *context, m4_obstack *obs, m4_macro_args *argv, bool skip,
     arg_mark (argv);
 }
 
+/* Push arguments from ARGV onto the wrap stack for later rescanning.
+   If GNU extensions are disabled, only the first argument is pushed;
+   otherwise, all arguments are pushed and separated with a space.  */
+void
+m4_wrap_args (m4 *context, m4_macro_args *argv)
+{
+  size_t i;
+  m4_obstack *obs;
+  m4_symbol_value *value;
+  m4__symbol_chain *chain;
+  size_t limit = m4_get_posixly_correct_opt (context) ? 2 : argv->argc;
+
+  if (limit == 2 && m4_arg_empty (argv, 1))
+    return;
+
+  obs = m4_push_wrapup_init (context);
+  for (i = 1; i < limit; i++)
+    {
+      if (i != 1)
+	obstack_1grow (obs, ' ');
+      value = m4_arg_symbol (argv, i);
+      switch (value->type)
+	{
+	case M4_SYMBOL_TEXT:
+	  obstack_grow (obs, m4_get_symbol_value_text (value),
+			m4_get_symbol_value_len (value));
+	  break;
+	case M4_SYMBOL_FUNC:
+	  /* TODO allow builtins.  */
+	  assert (false);
+	  break;
+	case M4_SYMBOL_COMP:
+	  chain = value->u.u_c.chain;
+	  while (chain)
+	    {
+	      switch (chain->type)
+		{
+		case M4__CHAIN_STR:
+		  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+		  break;
+		case M4__CHAIN_FUNC:
+		  /* TODO allow builtins.  */
+		  assert (false);
+		  break;
+		case M4__CHAIN_ARGV:
+		  m4_arg_print (context, obs, chain->u.u_a.argv,
+				chain->u.u_a.index,
+				m4__quote_cache (M4SYNTAX, NULL,
+						 chain->quote_age,
+						 chain->u.u_a.quotes),
+				chain->u.u_a.flatten, NULL, NULL, false,
+				false);
+		  break;
+		default:
+		  assert (!"m4_wrap_args");
+		  abort ();
+		}
+	      chain = chain->next;
+	    }
+	  break;
+	default:
+	  assert (!"m4_wrap_args");
+	  abort ();
+	}
+    }
+  m4_push_wrapup_finish ();
+}
+
 
 /* Define these last, so that earlier uses can benefit from the macros
    in m4private.h.  */
