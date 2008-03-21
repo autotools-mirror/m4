@@ -1,4 +1,4 @@
-## Makefile.maint -- Makefile rules for m4 maintainers -*-Makefile-*-
+## maint.mk -- Makefile rules for m4 maintainers -*-Makefile-*-
 ##
 ## Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation
 ##
@@ -16,6 +16,10 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This is reported not to work with make-3.79.1
+# ME := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+ME := maint.mk
 
 # Do not save the original name or timestamp in the .tar.gz file.
 # Use --rsyncable if available.
@@ -43,7 +47,7 @@ my_distdir = $(PACKAGE)-$(VERSION)
 # to emit a definition for each substituted variable.
 makefile-check:
 	grep -nE '@[A-Z_0-9]+@' `find $(srcdir) -name Makefile.am` \
-	  && { echo 'Makefile.maint: use $$(...), not @...@' 1>&2; exit 1; } || :
+	  && { echo '$(ME): use $$(...), not @...@' 1>&2; exit 1; } || :
 
 news-date-check: NEWS version-check
 	today=`date +%Y-%m-%d`;						\
@@ -66,11 +70,11 @@ changelog-check:
 
 m4-check:
 	@grep -n 'AC_DEFUN([^[]' $(srcdir)/m4/*.m4 \
-	  && { echo 'Makefile.maint: quote the first arg to AC_DEFUN' 1>&2; \
+	  && { echo '$(ME): quote the first arg to AC_DEFUN' 1>&2; \
 	       exit 1; } || :
 
 vc-diff-check:
-	$(VC) diff -- $(srcdir) > vc-diffs || :
+	(CDPATH=; cd $(srcdir) && $(VC) diff) > vc-diffs || :
 	if test -s vc-diffs; then				\
 	  cat vc-diffs;						\
 	  echo "Some files are locally modified:" 1>&2;		\

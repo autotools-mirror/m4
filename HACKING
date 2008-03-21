@@ -66,7 +66,7 @@ and is not part of a release distribution.
     GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap
 
 * When it is time for a release, it is a good idea to bootstrap with
-  official releases of the autotools, rather than CVS builds, to reduce
+  official releases of the autotools, rather than git builds, to reduce
   the pain of a user re-running bootstrap on the packaged M4.  However,
   files installed by Automake should be updated to the latest version
   from their respective upstream source, rather than the version that
@@ -203,10 +203,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Run ./bootstrap.
 
-* Run ./configure (a VPATH build is not recommended, since several
-  targets in GNUMakefile and Makefile.maint assume an in-tree build for
-  distribution purposes.  Normal builds do not suffer from this
-  restriction, and make distcheck ensures VPATH still works).
+* Run ./configure (a VPATH build should work, but is less tested).
 
 * Run `make'.  The file doc/m4.1 needs to exist for a distribution, and
   be up-to-date with m4 --help output, but `make dist' intentionally
@@ -244,7 +241,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Update NEWS, configure.ac, ChangeLog.
 
-* Run `git commit' and `git push refs/tags/<version>' to push the
+* Run `git commit' and `git push origin refs/tags/<version>' to push the
   release tag.
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
