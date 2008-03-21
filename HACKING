@@ -203,10 +203,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Run ./bootstrap.
 
-* Run ./configure (a VPATH build is not recommended, since several
-  targets in GNUMakefile and Makefile.maint assume an in-tree build for
-  distribution purposes.  Normal builds do not suffer from this
-  restriction, and make distcheck ensures VPATH still works).
+* Run ./configure (a VPATH build should work, but is less tested).
 
 * Run `make'.  The file doc/m4.1 needs to exist for a distribution, and
   be up-to-date with m4 --help output, but `make dist' intentionally

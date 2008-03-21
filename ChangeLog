@@ -1,3 +1,21 @@
+2008-03-24  Eric Blake  <ebb9@byu.net>
+
+	Pull GNUmakefile from gnulib.
+	* m4/gnulib-cache.m4: Import gnumakefile module.
+	* GNUmakefile: Remove from version control; supplied by gnulib
+	instead.
+	* configure.ac (AC_CONFIG_LINKS): Let gnulib do this now.
+	* Makefile.am (distclean-local): Likewise.
+	(EXTRA_DIST): Likewise.  Also handle renamed files.
+	* Makefile.cfg: Rename...
+	* cfg.mk: ...to this.
+	* Makefile.maint: Rename...
+	* maint.mk: ...to this.
+	(ME, makefile-check, m4-check): Use new macro instead of
+	hard-coded name.
+	* HACKING: Mention that maintainer rules should now work in VPATH
+	builds.
+
 2008-03-19  Eric Blake  <ebb9@byu.net>
 
 	Stage 20: make m4wrap obey POSIX fifo ordering.

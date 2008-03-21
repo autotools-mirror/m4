@@ -21,7 +21,7 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc tests checks
-EXTRA_DIST = bootstrap c-boxes.el GNUmakefile Makefile.cfg Makefile.maint \
+EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
 	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
@@ -42,8 +42,3 @@ BUILT_SOURCES = .version
 # tarball, and never in a checked-out repository.
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
-
-# Arrange to remove the symlink to GNUmakefile in VPATH builds.
-# TODO remove this once automake vs. AC_CONFIG_LINKS issue is fixed.
-distclean-local:
-	if test x"$(VPATH)" != x ; then rm -f GNUmakefile ; fi
