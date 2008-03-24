@@ -1,5 +1,11 @@
 2008-03-24  Eric Blake  <ebb9@byu.net>
 
+	Mention FIFO m4wrap more prominently in NEWS.
+	* NEWS: Describe effect on autoconf 2.59 and earlier.
+	* doc/m4.texinfo (History): The next version will be 1.6, not
+	1.4.11.
+	Reported by Ralf Wildenhues.
+
 	Pull GNUmakefile from gnulib.
 	* m4/gnulib-cache.m4: Import gnumakefile module.
 	* GNUmakefile: Remove from version control; supplied by gnulib
