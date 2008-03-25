@@ -3,8 +3,11 @@
 *.rej
 *.tar.bz2
 *.tar.gz
+.tarball-version
+.version
 aclocal.m4
 autom4te.cache
+build-aux
 config.cache
 config.guess
 config.h
@@ -31,3 +34,4 @@ stamp-h
 stamp-h1
 stamp-h.in
 tests
+GNUmakefile
