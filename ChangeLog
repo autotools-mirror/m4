@@ -1,3 +1,8 @@
+2008-03-27  Eric Blake  <ebb9@byu.net>
+
+	Add test for divert bug on 2007-05-28, patched 2007-07-21.
+	* doc/m4.texinfo (Diversions): Add test.
+
 2008-03-24  Eric Blake  <ebb9@byu.net>
 
 	Mention FIFO m4wrap more prominently in NEWS.
