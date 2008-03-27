@@ -1834,7 +1834,7 @@ default, because it triggers a number of warnings in Autoconf 2.61 (and
 Autoconf uses @option{-E} to treat warnings as errors), and because it
 will still be possible to restore older behavior in M4 2.0.
 
-@comment ignore
+@comment options: --warn-macro-sequence
 @example
 $ @kbd{m4 --warn-macro-sequence}
 define(`foo', `$001 $@{1@} $1')
@@ -2199,12 +2199,15 @@ of expected contexts can sometimes trigger warnings.  But most of the
 time, such tokens are silently converted to the empty string.
 
 @example
+$ @kbd{m4 -d}
 defn(`defn')
 @result{}
 define(defn(`divnum'), `cannot redefine a builtin token')
 @error{}m4:stdin:2: Warning: define: invalid macro name ignored
 @result{}
 divnum
+@result{}0
+len(defn(`divnum'))
 @result{}0
 @end example
 
@@ -2499,6 +2502,23 @@ builtin(`builtin',)
 builtin(`include', `foo')dnl
 @result{}bar
 @end example
+
+@comment And this example triggers a regression present in 1.4.10b.
+
+@example
+define(`s', `builtin(`shift', $@@)')dnl
+define(`loop', `ifelse(`$2', `', `-', `$1$2: $0(`$1', s(s($@@)))')')dnl
+loop(`1')
+@result{}-
+loop(`1', `2')
+@result{}12: -
+loop(`1', `2', `3')
+@result{}12: 13: -
+loop(`1', `2', `3', `4')
+@result{}12: 13: 14: -
+loop(`1', `2', `3', `4', `5')
+@result{}12: 13: 14: 15: -
+@end example
 @end ignore
 
 @node Conditionals
@@ -2645,6 +2665,65 @@ ifelse(`foo', `bar', `3', `gnu', `gnats', `6', `7', `8')
 @error{}m4:stdin:4: Warning: excess arguments to builtin `ifelse' ignored
 @result{}7
 @end example
+
+@ignore
+@comment Stress tests, not worth documenting.
+
+@comment Ensure that references compared to strings work regardless of
+@comment similar prefixes.
+@example
+define(`e', `$@@')define(`long', `01234567890123456789')
+@result{}
+ifelse(long, `01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(`01234567890123456789', long, `yes', `no')
+@result{}yes
+ifelse(long, `01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`01234567890123456789-', long, `yes', `no')
+@result{}no
+ifelse(e(long), `01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(`01234567890123456789', e(long), `yes', `no')
+@result{}yes
+ifelse(e(long), `01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`01234567890123456789-', e(long), `yes', `no')
+@result{}no
+ifelse(-e(long), `-01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789', -e(long), `yes', `no')
+@result{}yes
+ifelse(-e(long), `-01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789-', -e(long), `yes', `no')
+@result{}no
+ifelse(-e(long)-, `-01234567890123456789-', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789-', -e(long)-, `yes', `no')
+@result{}yes
+ifelse(-e(long)-, `-01234567890123456789', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789', -e(long)-, `yes', `no')
+@result{}no
+ifelse(`-'e(long), `-01234567890123456789', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789', `-'e(long), `yes', `no')
+@result{}yes
+ifelse(`-'e(long), `-01234567890123456789-', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789-', `-'e(long), `yes', `no')
+@result{}no
+ifelse(`-'e(long)`-', `-01234567890123456789-', `yes', `no')
+@result{}yes
+ifelse(-`01234567890123456789-', `-'e(long)`-', `yes', `no')
+@result{}yes
+ifelse(`-'e(long)`-', `-01234567890123456789', `yes', `no')
+@result{}no
+ifelse(`-01234567890123456789', `-'e(long)`-', `yes', `no')
+@result{}no
+@end example
+@end ignore
 
 Naturally, the normal case will be slightly more advanced than these
 examples.  A common use of @code{ifelse} is in macros implementing loops
@@ -3341,6 +3420,7 @@ option @option{--nesting-limit} (or @option{-L}, @pxref{Limits control,
 @option{-t}) can be used to invoke @code{traceon(@var{name})} before
 parsing input.
 
+@comment The explicit -dp neutralizes the testsuite default of -d.
 @comment options: -dp -L3 -tifelse
 @comment status: 1
 @example
@@ -3503,6 +3583,7 @@ are reset to the default of @samp{aeq}.
 The expansion of @code{debugmode} is void.
 @end deffn
 
+@comment The explicit -dp neutralizes the testsuite default of -d.
 @comment options: -dp
 @example
 $ @kbd{m4}
@@ -3551,7 +3632,7 @@ The expansion of @code{debugfile} is void.
 @end deffn
 
 @example
-$ @kbd{m4}
+$ @kbd{m4 -d}
 traceon(`divnum')
 @result{}
 divnum(`extra')
@@ -3861,6 +3942,18 @@ changequote(`"', `"')
 "hi"hi"hi"
 @result{}hiHIhi
 @end example
+
+@ignore
+@comment And another stress test, not worth documenting in the manual.
+@example
+define(`aaaaaaaaaaaaaaaaaaaa', `A')define(`q', `"$@@"')
+@result{}
+changequote(`"', `"')
+@result{}
+q(q("aaaaaaaaaaaaaaaaaaaa", "a"))
+@result{}A,a
+@end example
+@end ignore
 
 It is an error if the end of file occurs within a quoted string.
 
