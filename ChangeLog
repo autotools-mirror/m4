@@ -1,3 +1,10 @@
+2008-03-28  Eric Blake  <ebb9@byu.net>
+
+	Use GNUmakefile module.
+	* ltdl/m4/gnulib-cache.m4: Import gnumakefile module.
+	* Makefile.am: Split off maintainer rules...
+	* maint.mk: ...into this new file.
+
 2008-03-18  Eric Blake  <ebb9@byu.net>
 
 	Stage 20b: make m4wrap obey POSIX fifo ordering.

@@ -17,6 +17,7 @@ COPYING
 cscope.*
 CVS
 gnu
+GNUmakefile
 INSTALL
 intl
 libtool

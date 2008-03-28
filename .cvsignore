@@ -13,6 +13,7 @@ configure
 COPYING
 cscope.*
 gnu
+GNUmakefile
 INSTALL
 intl
 libtool
