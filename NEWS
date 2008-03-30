@@ -25,6 +25,10 @@ Foundation, Inc.
    now issued if this is attempted, although a future version of M4 may
    lift this restriction to match other implementations.
 
+** Enhance the `format' builtin to parse all C99 floating point numbers,
+   even on platforms where strtod is lacking.  This fixes testsuite
+   failures introduced in 1.4.9b.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.10 (2007-07-09) [stable]

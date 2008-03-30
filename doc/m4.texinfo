@@ -5477,6 +5477,8 @@ ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
        format(`%.1A', `1.999'), `0X2.0P+0', `success',
        format(`%.1A', `1.999'))
 @result{}success
+format(`%g', `0xa.P+1')
+@result{}20
 @end example
 
 Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this

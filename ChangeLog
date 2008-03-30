@@ -1,3 +1,11 @@
+2008-03-29  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite on mingw, OpenBSD.
+	* src/format.c (ARG_DOUBLE): Use strtod, not atof.
+	* src/Makefile.am (m4_LDADD): Use POW_LIB when needed.
+	* doc/m4.texinfo (Format): Add hex-float support.
+	* NEWS: Document this.
+
 2008-03-27  Eric Blake  <ebb9@byu.net>
 
 	Pull other useful doc fixes from branch-1.6.
