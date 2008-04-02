@@ -34,8 +34,8 @@ MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
 
-BUILT_SOURCES = .version
-.version:
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
 	echo $(VERSION) > $@-t && mv $@-t $@
 
 # Arrange so that .tarball-version appears only in the distribution
