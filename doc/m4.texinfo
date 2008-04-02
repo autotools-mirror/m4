@@ -394,9 +394,11 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
-1.4.10.  In 2008, Eric additionally rewrote the scanning engine to
-reduce recursive evaluation from quadratic to linear complexity for
-M4 1.6.  The 1.x branch remains open for bug fixes.
+1.4.10, closing the series with 1.4.11 in 2008.
+
+Additionally, in 2008, Eric rewrote the scanning engine to reduce
+recursive evaluation from quadratic to linear complexity, released as M4
+1.6.  The 1.x branch series remains open for bug fixes.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -5711,6 +5713,8 @@ ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
        format(`%.1A', `1.999'), `0X2.0P+0', `success',
        format(`%.1A', `1.999'))
 @result{}success
+format(`%g', `0xa.P+1')
+@result{}20
 @end example
 
 Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
@@ -6439,7 +6443,7 @@ version of @code{maketemp} is secure.  This means that using the same
 template to multiple calls will generate multiple files.  However, we
 recommend that you use the new @code{mkstemp} macro, introduced in
 @acronym{GNU} M4 1.4.8, which is secure even in traditional mode.  Also,
-as of M4 1.6, the secure implementation quotes the resulting file
+as of M4 1.4.11, the secure implementation quotes the resulting file
 name, so that you are guaranteed to know what file was created even if
 the random file name happens to match an existing macro.  Notice that
 this example is careful to use @code{defn} to avoid unintended expansion
@@ -6821,7 +6825,7 @@ changed strings for quotes or comments.  And future releases of
 
 @ignore
 @c This example is not worth putting in the manual, but caused core
-@c dumps in all versions prior to 1.6.
+@c dumps in all versions prior to 1.4.11.
 
 @comment options: -F /dev/null
 @example

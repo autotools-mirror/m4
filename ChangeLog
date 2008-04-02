@@ -1,5 +1,11 @@
 2008-04-02  Eric Blake  <ebb9@byu.net>
 
+	Mention 1.4.11 release.
+	* NEWS: Update to match release on branch-1.4.
+	* doc/m4.texinfo (History): Update release history.
+	(Format): Test for C99 hex-float parsing.
+	* src/Makefile.am (m4_LDADD): Use POW_LIB when needed.
+
 	Improve release process.
 	* maint.mk (alpha): Check for PREV_VERSION setting sooner, and
 	remove tag operation.

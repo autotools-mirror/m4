@@ -5,8 +5,9 @@ Foundation, Inc.
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
   Released by ????, based on git version 1.4.10b.x-*
 
-** Fix regression introduced in 1.4.10b where using `builtin' or `indir'
-   to perform nested `shift' calls triggered an assertion failure.
+** Fix regression introduced in 1.4.10b (but not present in 1.4.11) where
+   using `builtin' or `indir' to perform nested `shift' calls triggered an
+   assertion failure.
 
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
@@ -36,7 +37,29 @@ Foundation, Inc.
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
 
+** A number of portability improvements inherited from gnulib.
+
 * Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
+  Released by Eric Blake, based on git version 1.4.10a
+
+Note that M4 1.4.10b was released prior to 1.4.11, and includes all the
+features of 1.4.11 except for C99 parsing in the `format' builtin.  It also
+contains the following beta features that were deemed worth deferring until
+1.6:
+
+** Further enhance the `index' builtin to often achieve sublinear results.
+
+** Enhance the `regexp' and `patsubst' builtins to cache frequently used
+   regular expressions, which speeds up typical Autoconf usage.
+
+** Enhance the `format' builtin to warn for more suspicious usages, such as
+   missing arguments or problems parsing according to the format string.
+
+** Enhance the `ifelse' and `shift' builtins so that tail-recursive
+   algorithms based on `$@' operate in linear, rather than quadratic, time
+   and memory.
+
+* Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]
   Released by Eric Blake, based on git version 1.4.10a
 
 ** Security fixes for the -F option, for bugs present since -F was
@@ -59,19 +82,15 @@ Foundation, Inc.
    now issued if this is attempted, although a future version of M4 may
    lift this restriction to match other implementations.
 
-** Enhance the `index' builtin to guarantee linear behavior and often
-   achieve sublinear results, in spite of the surprisingly large number of
-   systems with a brain-dead quadratic strstr(3).
+** Enhance the `format' builtin to parse all C99 floating point numbers,
+   even on platforms where strtod(3) is buggy, although the replacement
+   function does have the known issue of rounding errors when parsing
+   some decimal floating point values.  This fixes testsuite failures
+   introduced in 1.4.9b.
 
-** Enhance the `regexp' and `patsubst' builtins to cache frequently used
-   regular expressions, which speeds up typical Autoconf usage.
-
-** Enhance the `format' builtin to warn for more suspicious usages, such as
-   missing arguments or problems parsing according to the format string.
-
-** Enhance the `ifelse' and `shift' builtins so that tail-recursive
-   algorithms based on `$@' operate in linear, rather than quadratic, time
-   and memory.
+** Enhance the `index' builtin to guarantee linear behavior, in spite of
+   the surprisingly large number of systems with a brain-dead quadratic
+   strstr(3).
 
 ** A number of portability improvements inherited from gnulib.
 
