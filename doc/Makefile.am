@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -27,15 +27,15 @@ MAINTAINERCLEANFILES = $(man_MANS) gendocs_template
 SUFFIXES = .1
 HELP2MAN = $(SHELL) $(top_srcdir)/build-aux/missing --run help2man
 
-# Depend on configure.ac for version, m4.c for usage text.  Do not depend on
+# Depend on ../.version for version, m4.c for usage text.  Do not depend on
 # built m4 executable, since not everyone has help2man or perl.
 # Build the man page once in the srcdir, rather than in every VPATH build
 # dir, to match how automake builds info pages.  This is safe for 'make
 # distcheck' since it is distributed pre-built.
-$(srcdir)/m4.1: $(top_srcdir)/configure.ac $(top_srcdir)/src/m4.c
+$(srcdir)/m4.1: $(top_srcdir)/.version $(top_srcdir)/src/m4.c
 	@if test -x ../src/m4$(EXEEXT) ; then \
 	  echo "Updating man page m4.1" ; \
-	  $(HELP2MAN) --name="macro processor" --source=FSF \
+	  $(HELP2MAN) --name="macro processor" --source='$(PACKAGE_STRING)' \
 	    --info-page=m4 --output=$@ ../src/m4$(EXEEXT) ; \
 	else \
 	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \

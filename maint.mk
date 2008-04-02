@@ -27,19 +27,11 @@ gzip_rsyncable := \
   $(shell gzip --help 2>/dev/null|grep rsyncable >/dev/null && echo --rsyncable)
 GZIP_ENV = '--no-name --best $(gzip_rsyncable)'
 
-CVS = cvs
 GIT = git
 VC = $(GIT)
 VC-tag = git tag -s -m '$(VERSION)' -u $(gpg_key_ID)
 
 VERSION_REGEXP = $(subst .,\.,$(VERSION))
-ifeq ($(VC),$(GIT))
-this-vc-tag = v$(VERSION)
-else
-tag-package = $(shell echo "$(PACKAGE)" | tr '[:lower:]' '[:upper:]')
-tag-this-version = $(subst .,_,$(VERSION))
-this-vc-tag = $(tag-package)-$(tag-this-version)
-endif
 my_distdir = $(PACKAGE)-$(VERSION)
 
 # Ensure that we use only the standard $(VAR) notation,
@@ -130,19 +122,19 @@ my-distcheck: $(local-check) check
 gnulib-version = $$(cd $(gnulib_dir) && git describe)
 
 announcement: NEWS ChangeLog $(rel-files)
-	@./build-aux/announce-gen					\
+	@$(srcdir)/build-aux/announce-gen				\
 	    --release-type=$(RELEASE_TYPE)				\
 	    --package=$(PACKAGE)					\
 	    --prev=$(PREV_VERSION)					\
 	    --curr=$(VERSION)						\
 	    --gpg-key-id=$(gpg_key_ID)					\
-	    --news=NEWS							\
+	    --news=$(srcdir)/NEWS					\
 	    --bootstrap-tools=autoconf,automake,gnulib			\
 	    --gnulib-version=$(gnulib-version)				\
 	    $(addprefix --url-dir=, $(url_dir_list))
 
 .PHONY: alpha beta major
-alpha beta major: $(local-check)
+alpha beta major: $(local-check) version-check
 	test $@ = major						\
 	  && { echo $(VERSION) | grep -E '^[0-9]+(\.[0-9]+)+$$'	\
 	       || { echo "invalid version string: $(VERSION)" 1>&2; exit 1;};}\
@@ -151,7 +143,6 @@ alpha beta major: $(local-check)
 	$(MAKE) news-date-check changelog-check
 	$(MAKE) deltas
 	$(MAKE) -s announcement RELEASE_TYPE=$@ > /tmp/announce-$(my_distdir)
-	$(VC-tag) $(this-vc-tag)
 
 .PHONY: version-check
 version-check:
@@ -162,12 +153,12 @@ version-check:
 	  exit 1; \
 	  ;; \
 	esac
-
-.PHONY: prev-tarball
-prev-tarball:
-## Make sure we have the previous release tarball in the tree.
 	@if test -z "$(PREV_VERSION)"; \
 		then echo "PREV_VERSION is not set"; exit 1; fi
+
+.PHONY: prev-tarball
+prev-tarball: version-check
+## Make sure we have the previous release tarball in the tree.
 	@ofile="$(PACKAGE)-$(PREV_VERSION).tar.gz"; \
 	if test -f $$ofile; then :; \
 	else echo "Cannot make deltas without $$ofile"; exit 1; fi
@@ -226,6 +217,6 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 .PHONY: web-manual
 web-manual:
 	@cd ./doc ; \
-	  $(SHELL) $(srcdir)/build-aux/gendocs.sh $(PACKAGE) \
+	  $(SHELL) $(abs_srcdir)/build-aux/gendocs.sh $(PACKAGE) \
 	    "GNU $(PACKAGE)- GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."

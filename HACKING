@@ -41,7 +41,7 @@ and is not part of a release distribution.
 * The master M4 repository is stored in git.
 
 * Before you can build from git, you need to bootstrap.  This requires:
-  - A pre-installed version of GNU M4 1.4 or later, built from a package
+  - A pre-installed version of GNU M4 1.4.5 or later, built from a package
   - Autoconf 2.60 or later
   - Automake 1.10.1 or later
   - Help2man 1.29 or later
@@ -81,7 +81,7 @@ and is not part of a release distribution.
   liberally, on as many platforms as you can.  Use as many compilers and
   linkers you can.
 
-* For branch-1_4, the testsuite is generated from the documentation.
+* For branch-1.6, the testsuite is generated from the documentation.
   All instances of @example in doc/m4.texinfo that are not preceeded by
   "@comment ignore" are turned into tests in the checks directory.
 
@@ -195,11 +195,12 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
-* Update the version number in configure.ac.
-  See http://www.gnu.org/software/libtool/contribute.html for details of
-  the numbering scheme (m4 uses the same scheme as libtool).
-
-* Update NEWS, configure.ac, README, ChangeLog.
+* Update the version number in NEWS and ChangeLog, and mention in README
+  whether the release is stable.  See
+  http://www.gnu.org/software/libtool/contribute.html for details of the
+  numbering scheme (M4 uses a similar scheme to libtool, although
+  intra-release versions carry more information thanks to
+  git-version-gen).
 
 * Run ./bootstrap.
 
@@ -209,43 +210,51 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   be up-to-date with m4 --help output, but `make dist' intentionally
   does not depend on running a built binary.
 
-* Run `make maintainer-distcheck'.  If there are any problems, fix them
-  and start again.
-
 * Run `git commit' from the source tree if there are any changes from
   the previous steps.
 
+* Run `git tag -s -m <version> -u <gpg_key> v<version>' with the desired
+  version number.  Do not push anything upstream at this point.
+
+* Run `make maintainer-distcheck'.  If there are any problems, fix them,
+  run `git tag -d v<version>' and start again from the `git commit' step.
+
 * Run `make <target> PREV_VERSION=maj.min[.mic[alpha]]', with target set
   to `major', `alpha', or `beta' as appropriate.  This will run various
-  additional checks, tag the tree with release-$(VERSION), and create
-  diff and xdelta files from the previous version.
+  additional checks and create diff and xdelta files from the previous
+  version.
 
 * Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
   the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha, and
   the xdelta file is not strictly necessary.  For a full release,
-  gnupload will place files in ftp.gnu.org, in /incoming/ftp.
+  gnupload will place files in ftp.gnu.org, in /incoming/ftp.  Verify
+  that the files uploaded successfully before sending an announcement.
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
   as well.  Use /tmp/announce-m4-<version>, created during the above
-  make run, as a starting point.  Contact a list administrator for
-  m4-announce in advance to ensure your post will make it through (the
-  list is normally set to silently discard all posts, even from
-  subscribers).
+  `make <target>' run, as a starting point.  Contact a list
+  administrator for m4-announce in advance to ensure your post will make
+  it through (the list is normally set to silently discard all posts,
+  even from subscribers).
 
 * Update version number in configure.ac to next alpha number.
   See http://www.gnu.org/software/libtool/contribute.html for details of
   the numbering scheme.
 
-* Update NEWS, configure.ac, ChangeLog.
+* Update NEWS, README, and ChangeLog to start the intra-release changes,
+  and run `git commit'.  Then run `git push origin refs/tags/v<version>'
+  to push the release tag and complete the release.
 
-* Run `git commit' and `git push origin refs/tags<version>' to push the
-  release tag.
+* For non-alpha releases, update the webpages.  Run `make web-manual',
+  then copy the contents of doc/manual into a CVS checkout of the M4
+  manual repository.  Also edit m4.html before doing a CVS checkin.
+    export CVS_RSH=ssh
+    cvs -z3 -d:ext:<user>@cvs.savannah.gnu.org:/web/m4 co m4
 
-* For non-alpha releases, update the webpages.  Replace manual.html with
-  the new one (generate with `make web-manual').
+* Post a news blurb on https://savannah.gnu.org/projects/m4.
 
 -- 
 Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.

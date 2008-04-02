@@ -34,4 +34,4 @@ local-checks-to-skip = changelog-check
 
 # The local directory containing the checked-out copy of gnulib used in this
 # release.  Used solely to get gnulib's SHA1 for the "announcement" target.
-gnulib_dir = ../gnulib
+gnulib_dir = $(srcdir)/../gnulib

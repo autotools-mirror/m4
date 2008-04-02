@@ -1,3 +1,19 @@
+2008-04-02  Eric Blake  <ebb9@byu.net>
+
+	Improve release process.
+	* maint.mk (alpha): Check for PREV_VERSION setting sooner, and
+	remove tag operation.
+	(version-check): Enhance this check.
+	(prev-tarball): Depend on version-check.
+	(web-manual): Fix VPATH usage.
+	(this-vc-tag): Delete, and mention need to run tag...
+	* HACKING: ...here, prior to make maintainer-distcheck.
+	Update the instructions to match this particular release process.
+	* Makefile.am (.version, announcement): Allow for VPATH build.
+	* cfg.mk (gnulib_dir): Likewise.
+	* doc/Makefile.am ($(srcdir)/m4.1): Include release number in man
+	page.
+
 2008-03-27  Eric Blake  <ebb9@byu.net>
 
 	Add test for divert bug on 2007-05-28, patched 2007-07-21.
