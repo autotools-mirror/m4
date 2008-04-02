@@ -26,8 +26,14 @@ Foundation, Inc.
    lift this restriction to match other implementations.
 
 ** Enhance the `format' builtin to parse all C99 floating point numbers,
-   even on platforms where strtod is lacking.  This fixes testsuite
-   failures introduced in 1.4.9b.
+   even on platforms where strtod(3) is buggy, although the replacement
+   function does have the known issue of rounding errors when parsing
+   some decimal floating point values.  This fixes testsuite failures
+   introduced in 1.4.9b.
+
+** Enhance the `index' builtin to guarantee linear behavior, in spite of
+   the surprisingly large number of systems with a brain-dead quadratic
+   strstr(3).
 
 ** A number of portability improvements inherited from gnulib.
 

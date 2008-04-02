@@ -1,3 +1,9 @@
+2008-04-01  Eric Blake  <ebb9@byu.net>
+
+	Speed up index builtin.
+	* m4/gnulib-cache: Import strstr module.
+	* NEWS: Mention the speedup.
+
 2008-03-29  Eric Blake  <ebb9@byu.net>
 
 	Fix testsuite on mingw, OpenBSD.
