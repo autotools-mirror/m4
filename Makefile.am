@@ -23,7 +23,7 @@
 config_aux_dir	= build-aux
 config_macro_dir= ltdl/m4
 
-SUBDIRS		= po gnu tests/gnu .
+SUBDIRS		= po gnu . tests/gnu
 
 ACLOCAL_AMFLAGS = -I ltdl/m4
 AUTOMAKE_OPTIONS = nostdinc
