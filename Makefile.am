@@ -20,7 +20,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS = . examples lib src doc tests checks
+SUBDIRS = . examples lib src doc checks tests
 EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
 	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
