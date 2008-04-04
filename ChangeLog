@@ -1,3 +1,8 @@
+2008-08-07  Bruno Haible  <bruno@clisp.org>  (tiny change)
+
+	Run m4 tests prior to gnulib unit tests.
+	* Makefile.am (SUBDIRS): Swap order of directories.
+
 2008-08-04  Eric Blake  <ebb9@byu.net>
 
 	Update copyright notice in generated testsuite files.
