@@ -23,7 +23,9 @@ AC_PREREQ([2.61a.347])
 ## ------------------------ ##
 ## Autoconf initialization. ##
 ## ------------------------ ##
-AC_INIT([GNU M4], [1.9a], [bug-m4@gnu.org])
+m4_define([version], m4_esyscmd([build-aux/git-version-gen .tarball-version]))
+m4_bmatch(m4_defn([version]), [^[0-9]], [], [m4_define([version], [1.9a])])
+AC_INIT([GNU M4], m4_defn([version]), [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -33,21 +35,6 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
-
-## ---------------------------------------- ##
-## Display a configure time version banner. ##
-## ---------------------------------------- ##
-TIMESTAMP=
-case AC_PACKAGE_VERSION in
-  *[[acegikmoqsuwy]])
-    TIMESTAMP=`$CONFIG_SHELL $ac_aux_dir/mkstamp < $srcdir/ChangeLog`
-    test -z "$TIMESTAMP" || TIMESTAMP=" Build:$TIMESTAMP"
-    AS_BOX([Configuring AC_PACKAGE_TARNAME][$TIMESTAMP AC_PACKAGE_VERSION])
-    echo
-    ;;
-esac
-AC_DEFINE_UNQUOTED([TIMESTAMP], ["$TIMESTAMP"],
-    [Defined to a CVS timestamp for alpha releases of M4])
 AB_INIT()
 
 
@@ -67,7 +54,8 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 ## ------------------------ ##
 ## Automake Initialization. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.10.1 subdir-objects dist-bzip2 dist-lzma gnits])
+AM_INIT_AUTOMAKE([1.10.1 subdir-objects dist-bzip2 dist-lzma]
+m4_bmatch(m4_defn([version]), [-], [gnu], [gnits]))
 
 
 

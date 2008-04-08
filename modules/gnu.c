@@ -93,7 +93,7 @@ m4_macro m4_macro_table[] =
 # warning Platform macro not provided
 #endif
   { "__gnu__",		"",	0,	0 },
-  { "__m4_version__",	VERSION/**/TIMESTAMP, 0, 0 },
+  { "__m4_version__",	VERSION,0,	0 },
 
   { NULL,		NULL,	0,	0 },
 };

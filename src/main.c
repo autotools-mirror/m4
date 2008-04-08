@@ -592,8 +592,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case VERSION_OPTION:
-	  version_etc (stdout, PACKAGE, PACKAGE_NAME TIMESTAMP,
-		       VERSION, AUTHORS, NULL);
+	  version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
 	  exit (EXIT_SUCCESS);
 	  break;
 

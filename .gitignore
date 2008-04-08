@@ -3,10 +3,13 @@
 .patch_number
 *.orig
 *.rej
+.tarball-version
+.version
 ABOUT-NLS
 aclocal.m4
 aclocal.m4t
 autom4te.cache
+build-aux
 config.cache
 config.h
 config-h.in

@@ -50,21 +50,22 @@ EXTRA_LTLIBRARIES=
 # Include Libtool's rules.
 include ltdl/Makefile.inc
 
-# Additional configuration.
+# Additional configuration.  Version management comes from suggestions
+# given in build-aux/git-version-gen.
 AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4
-EXTRA_DIST     += bootstrap \
-		  $(config_aux_dir)/mkstamp \
+EXTRA_DIST     += bootstrap .version \
 		  $(config_macro_dir)/gnulib-cache.m4
+BUILT_SOURCES  += .version
+.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+dist-hook: dist-tarball-version
+dist-tarball-version:
+	echo $(VERSION) > $(distdir)/.tarball-version
 MAINTAINERCLEANFILES = \
 		  ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
 		  config-h.in configure stamp-h.in \
 		  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
-
-MKSTAMP = $(SHELL) $(srcdir)/$(config_aux_dir)/mkstamp
-
-# Make sure config.status is regenerated when the version timestamp changes
-CONFIG_STATUS_DEPENDENCIES = ChangeLog
 
 
 ## ------- ##
@@ -259,7 +260,7 @@ HELP2MAN	= $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run help2man
 # Build the man page once in the srcdir, rather than in every VPATH build
 # dir, to match how automake builds info pages.  This is safe for 'make
 # distcheck' since it is distributed pre-built.
-$(srcdir)/doc/m4.1: configure.ac src/main.c
+$(srcdir)/doc/m4.1: .version src/main.c
 	@if test -f src/m4$(EXEEXT); then \
 	  echo "Updating the \`man' page \`$@'"; \
 	  $(HELP2MAN) --name="macro processor" --source=FSF \
@@ -395,7 +396,7 @@ $(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
 	mv $@.tmp $@
 
 # The leading :; works around a bug in {}>f in some bash versions.
-$(srcdir)/tests/package.m4: configure.ac
+$(srcdir)/tests/package.m4: .version
 	:; \
 	{ \
 	  echo '# Signature of the current package.'; \

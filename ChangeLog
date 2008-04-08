@@ -1,3 +1,23 @@
+2008-04-08  Eric Blake  <ebb9@byu.net>
+
+	Overhaul inter-version releases to work with git.
+	* configure.ac (version): New variable, which has nicer version
+	contents when using git 1.5.5+, hardcoded to 1.9a otherwise.
+	(TIMESTAMP): Delete, since CVS id expansion died with transition
+	to git.
+	(AM_INIT_AUTOMAKE): Use version to decide gnu vs. gnits.
+	* build-aux/mkstamp: Delete, no longer used.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Kill, to speed up
+	rebuilds when timestamps don't matter.
+	(MKSTAMP): Delete, no longer used.
+	(EXTRA_DIST): No longer worry about mkstamp.
+	(.version): New rule and distributed file.
+	(doc/m4.1, tests/package.m4): Depend on .version, not
+	configure.ac, for timestamp.
+	* ltdl/m4/gnulib-cache.m4: Import git-version-gen module.
+	* modules/gnu.c (__m4_version__): TIMESTAMP no longer exists.
+	* src/main.c (main): Likewise.
+
 2008-03-28  Eric Blake  <ebb9@byu.net>
 
 	Use GNUmakefile module.
@@ -10574,8 +10594,6 @@
 
 
 	-----
-
-	$Revision$ $Date$
 
 	Local Variables:
 	coding: utf-8
