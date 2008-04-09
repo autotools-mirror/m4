@@ -1,3 +1,12 @@
+2008-04-09  Eric Blake  <ebb9@byu.net>
+
+	Mention 1.4.11 release.
+	* doc/m4.texinfo (History, Defn, Ifdef, Ifelse, M4wrap)
+	(Extensions, Improved foreach): Distinguish 1.4.11 and 1.6.
+	(Format): Add test of C99 hex-float parsing.
+	* NEWS: Mention 1.4.11 release.
+	* tests/builtins.at (divert): Add additional test.
+
 2008-04-08  Eric Blake  <ebb9@byu.net>
 
 	Overhaul inter-version releases to work with git.
