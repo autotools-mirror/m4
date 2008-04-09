@@ -29,13 +29,10 @@ m4_pattern_forbid([^M4_[A-Z]])
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 
-AC_CANONICAL_BUILD
-AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
-AC_SYS_LARGEFILE
-AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
+AC_CHECK_HEADERS_ONCE([siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
 #if HAVE_SIGINFO_H
@@ -53,7 +50,6 @@ AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
 ]])
 
 AC_TYPE_SIGNAL
-AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror])
 
