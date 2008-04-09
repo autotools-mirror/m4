@@ -256,6 +256,11 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Post a news blurb on https://savannah.gnu.org/projects/m4.
 
+* Update the Free Software Directory.  Checkout the CVS sources:
+    cvs -d :pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
+      co directory/m4.txt
+  After making edits, mail the diff to <bug-directory@gnu.org>.
+
 -- 
 Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
