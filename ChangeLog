@@ -1,3 +1,9 @@
+2008-04-10  Eric Blake  <ebb9@byu.net>
+
+	Be namespace clean for M4 version; fixes 2008-04-08 regression.
+	* configure.ac (version): Rename...
+	(M4_VERSION): ...to this, since using 'version' broke po.m4.
+
 2008-04-09  Eric Blake  <ebb9@byu.net>
 
 	Mention 1.4.11 release.

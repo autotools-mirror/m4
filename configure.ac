@@ -23,9 +23,11 @@ AC_PREREQ([2.61a.347])
 ## ------------------------ ##
 ## Autoconf initialization. ##
 ## ------------------------ ##
-m4_define([version], m4_esyscmd([build-aux/git-version-gen .tarball-version]))
-m4_bmatch(m4_defn([version]), [^[0-9]], [], [m4_define([version], [1.9a])])
-AC_INIT([GNU M4], m4_defn([version]), [bug-m4@gnu.org])
+m4_define([M4_VERSION],
+	  m4_esyscmd([build-aux/git-version-gen .tarball-version]))
+m4_bmatch(m4_defn([M4_VERSION]), [^[0-9]], [],
+	  [m4_define([M4_VERSION], [1.9a])])
+AC_INIT([GNU M4], m4_defn([M4_VERSION]), [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -55,7 +57,7 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 ## Automake Initialization. ##
 ## ------------------------ ##
 AM_INIT_AUTOMAKE([1.10.1 subdir-objects dist-bzip2 dist-lzma]
-m4_bmatch(m4_defn([version]), [-], [gnu], [gnits]))
+m4_bmatch(m4_defn([M4_VERSION]), [-], [gnu], [gnits]))
 
 
 
