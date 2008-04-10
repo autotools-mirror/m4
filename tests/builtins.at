@@ -77,13 +77,21 @@ AT_CLEANUP
 
 AT_SETUP([__m4_@&t@version__])
 
-AT_DATA([in], [[__m4_version__
+AT_DATA([in], [[defn(`__m4_version__')
 ]])
 AT_CHECK_M4([--version], [0], [stdout])
 AT_CHECK([[sed -e 's/.*(GNU M4\(.*\)) \([^ ]*\).*/\2\1/;q' < stdout]],
 [0], [stdout])
 mv stdout expout
 AT_CHECK_M4([in], [0], [expout])
+
+dnl Prove that __m4_version__ is unquoted, by making '.' an active character.
+AT_DATA([in], [[changesyntax(`A.')define(`.', `errprint(`hi
+')undefine(`.').')dnl
+__m4_version__
+]])
+AT_CHECK_M4([in], [0], [expout], [[hi
+]])
 
 AT_CLEANUP
 

@@ -1,5 +1,8 @@
 2008-04-14  Eric Blake  <ebb9@byu.net>
 
+	Ensure __m4_version__ is unquoted.
+	* tests/builtins.at (__m4_@&t@version__): Augment test.
+
 	Avoid GNU make failure on tarball.
 	* Makefile.am (EXTRA_DIST): Distribute cfg.mk and maint.mk.
 
