@@ -169,11 +169,8 @@ M4BUILTIN_HANDLER (undefine)
   const char *me = M4ARG (0);
   size_t i;
   for (i = 1; i < argc; i++)
-    {
-      m4_symbol_value *value = m4_arg_symbol (argv, i);
-      if (m4_symbol_value_lookup (context, me, value, true))
-	m4_symbol_delete (M4SYMTAB, m4_get_symbol_value_text (value));
-    }
+    if (m4_symbol_value_lookup (context, me, argv, i, true))
+      m4_symbol_delete (M4SYMTAB, M4ARG (i));
 }
 
 M4BUILTIN_HANDLER (pushdef)
@@ -194,11 +191,8 @@ M4BUILTIN_HANDLER (popdef)
   const char *me = M4ARG (0);
   size_t i;
   for (i = 1; i < argc; i++)
-    {
-      m4_symbol_value *value = m4_arg_symbol (argv, i);
-      if (m4_symbol_value_lookup (context, me, value, true))
-	m4_symbol_popdef (M4SYMTAB, m4_get_symbol_value_text (value));
-    }
+    if (m4_symbol_value_lookup (context, me, argv, i, true))
+      m4_symbol_popdef (M4SYMTAB, M4ARG (i));
 }
 
 
@@ -209,8 +203,7 @@ M4BUILTIN_HANDLER (popdef)
 M4BUILTIN_HANDLER (ifdef)
 {
   m4_push_arg (context, obs, argv,
-	       (m4_symbol_value_lookup (context, M4ARG (0),
-					m4_arg_symbol (argv, 1), false)
+	       (m4_symbol_value_lookup (context, M4ARG (0), argv, 1, false)
 		? 2 : 3));
 }
 
@@ -308,11 +301,9 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  m4_symbol_value *value = m4_arg_symbol (argv, i);
-	  symbol = m4_symbol_value_lookup (context, me, value, complain);
+	  symbol = m4_symbol_value_lookup (context, me, argv, i, complain);
 	  if (symbol)
-	    dump_symbol_CB (NULL, m4_get_symbol_value_text (value), symbol,
-			    data);
+	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	}
     }
 
@@ -365,8 +356,7 @@ M4BUILTIN_HANDLER (defn)
 
   for (i = 1; i < argc; i++)
     {
-      m4_symbol_value *value = m4_arg_symbol (argv, i);
-      m4_symbol *symbol = m4_symbol_value_lookup (context, me, value, true);
+      m4_symbol *symbol = m4_symbol_value_lookup (context, me, argv, i, true);
 
       if (!symbol)
 	;

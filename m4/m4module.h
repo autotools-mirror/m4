@@ -165,7 +165,7 @@ extern bool	m4_bad_argc	   (m4 *, int, const char *, size_t, size_t,
 extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
 extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
 extern m4_symbol *m4_symbol_value_lookup (m4 *, const char *,
-					  m4_symbol_value *, bool);
+					  m4_macro_args *, size_t, bool);
 
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const char *, const char *, ...)

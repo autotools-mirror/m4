@@ -1,5 +1,12 @@
 2008-04-10  Eric Blake  <ebb9@byu.net>
 
+	Allow back-referenced macro names; fixes 2008-03-13 regression.
+	* m4/m4module.h (m4_symbol_value_lookup): Change prototype.
+	* m4/utility.c (m4_symbol_value_lookup): Change signature.
+	* modules/m4.c (undefine, popdef, ifdef, m4_dump_symbols, defn):
+	Adjust all callers.
+	* tests/others.at (ifndef): New test.
+
 	Be namespace clean for M4 version; fixes 2008-04-08 regression.
 	* configure.ac (version): Rename...
 	(M4_VERSION): ...to this, since using 'version' broke po.m4.

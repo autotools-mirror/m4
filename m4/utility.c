@@ -125,12 +125,12 @@ m4_parse_truth_arg (m4 *context, const char *arg, const char *me,
    result of the lookup, or NULL.  */
 m4_symbol *
 m4_symbol_value_lookup (m4 *context, const char *caller,
-			m4_symbol_value *value, bool must_exist)
+			m4_macro_args *argv, size_t i, bool must_exist)
 {
   m4_symbol *result = NULL;
-  if (m4_is_symbol_value_text (value))
+  if (m4_is_arg_text (argv, i))
     {
-      const char *name = m4_get_symbol_value_text (value);
+      const char *name = M4ARG (i);
       result = m4_symbol_lookup (M4SYMTAB, name);
       if (must_exist && !result)
 	m4_warn (context, 0, caller, _("undefined macro `%s'"), name);
@@ -153,7 +153,7 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
   char *full = NULL;
   char *safe_macro = NULL;
 
-  /* Sanitize MACRO, sinze we are turning around and using it in a
+  /* Sanitize MACRO, since we are turning around and using it in a
      format string.  The allocation is overly conservative, but
      problematic macro names only occur via indir or changesyntax.  */
   if (macro && strchr (macro, '%'))
