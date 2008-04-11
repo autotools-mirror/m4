@@ -59,6 +59,8 @@ contains the following beta features that were deemed worth deferring until
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
 
+** A number of portability improvements inherited from gnulib.
+
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]
   Released by Eric Blake, based on git version 1.4.10a
 

@@ -1,3 +1,9 @@
+2008-04-11  Eric Blake  <ebb9@byu.net>
+
+	Fix mingw build.
+	* src/builtin.c (define_user_macro): Avoid compiler warning.
+	* NEWS: Tweak 1.4.10b entry.
+
 2008-04-09  Eric Blake  <ebb9@byu.net>
 
 	Remove redundant configure macros.

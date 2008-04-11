@@ -461,7 +461,7 @@ define_user_macro (const char *name, size_t name_len, const char *text,
 	      offset = regs->end[0];
 	      m4_warn (0, NULL,
 		       _("definition of `%s' contains sequence `%.*s'"),
-		       name, regs->end[0] - regs->start[0],
+		       name, (int) (regs->end[0] - regs->start[0]),
 		       defn + regs->start[0]);
 	    }
 	}
