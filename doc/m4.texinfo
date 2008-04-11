@@ -6237,11 +6237,13 @@ sysval
 @c the expansion.
 
 @example
-syscmd(`rm -f foo??????')sysval
+syscmd(`rm -rf foodir')sysval
 @result{}0
-len(mkstemp(`fooXXXXX'))
-@result{}9
-syscmd(`rm foo??????')sysval
+syscmd(`mkdir foodir')sysval
+@result{}0
+len(mkstemp(`foodir/fooXXXXX'))
+@result{}16
+syscmd(`rm -r foodir')sysval
 @result{}0
 @end example
 
