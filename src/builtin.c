@@ -154,11 +154,14 @@ predefined_tab[] =
 {
 #if UNIX
   { "unix",	"__unix__",	"" },
-#elif W32_NATIVE
+#endif
+#if W32_NATIVE
   { "windows",	"__windows__",	"" },
-#elif OS2
+#endif
+#if OS2
   { "os2",	"__os2__",	"" },
-#else
+#endif
+#if !UNIX && !W32_NATIVE && !OS2
 # warning Platform macro not provided
 #endif
   { NULL,	"__gnu__",	"" },

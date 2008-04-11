@@ -69,6 +69,7 @@
 /* Canonicalize OS/2 recognition macro.  */
 #ifdef __EMX__
 # define OS2 1
+# undef UNIX
 #endif
 
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */

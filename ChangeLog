@@ -1,5 +1,19 @@
 2008-04-11  Eric Blake  <ebb9@byu.net>
 
+	Improve OS/2+emx build.
+	* src/m4.h [__EMX__]: OS/2 does not have a Unix-compatible
+	system(3), no matter what other macros it pre-defined.
+	* doc/m4.texinfo (Mkstemp): Rework test to avoid globbing failure
+	on OS/2.
+	* src/builtin.c (predefined_tab): Ensure all possible system
+	identifiers are defined, not just the first; the testsuite will
+	catch if multiple identifiers mistakenly made it through.
+	* examples/null.m4 (esyscmd): Don't rely on printf to generate NUL
+	byte.
+	* examples/null.out (esyscmd): Check for esyscmd success.
+	* THANKS: Update.
+	Reported by Elbert Pol.
+
 	Fix mingw build.
 	* src/builtin.c (define_user_macro): Avoid compiler warning.
 	* NEWS: Tweak 1.4.10b entry.
