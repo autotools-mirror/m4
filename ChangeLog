@@ -1,5 +1,9 @@
 2008-04-11  Eric Blake  <ebb9@byu.net>
 
+	Ensure --program-prefix doesn't regress.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Enforce change from
+	2008-03-10 by testing it at 'make distcheck' time.
+
 	Improve OS/2+emx build.
 	* src/m4.h [__EMX__]: OS/2 does not have a Unix-compatible
 	system(3), no matter what other macros it pre-defined.
