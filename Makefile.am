@@ -54,7 +54,7 @@ include ltdl/Makefile.inc
 # given in build-aux/git-version-gen.
 AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4
-EXTRA_DIST     += bootstrap .version \
+EXTRA_DIST     += bootstrap cfg.mk maint.mk .version \
 		  $(config_macro_dir)/gnulib-cache.m4
 BUILT_SOURCES  += .version
 .version:

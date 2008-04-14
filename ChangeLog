@@ -1,3 +1,8 @@
+2008-04-14  Eric Blake  <ebb9@byu.net>
+
+	Avoid GNU make failure on tarball.
+	* Makefile.am (EXTRA_DIST): Distribute cfg.mk and maint.mk.
+
 2008-04-10  Eric Blake  <ebb9@byu.net>
 
 	Allow back-referenced macro names; fixes 2008-03-13 regression.
