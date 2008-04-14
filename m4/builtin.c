@@ -88,10 +88,12 @@ m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
 
 /* Print a representation of FUNC to OBS, optionally including the
    MODULE it came from.  If FLATTEN, output QUOTES around an empty
-   string instead.  */
+   string; if CHAIN, append the builtin to the chain; otherwise print
+   the name of FUNC.  */
 void
-m4_builtin_print (m4_obstack *obs, const m4_builtin *func, bool flatten,
-		  const m4_string_pair *quotes, m4_module *module)
+m4__builtin_print (m4_obstack *obs, const m4__builtin *func, bool flatten,
+		   m4__symbol_chain **chain, const m4_string_pair *quotes,
+		   bool module)
 {
   assert (func);
   if (flatten)
@@ -101,17 +103,19 @@ m4_builtin_print (m4_obstack *obs, const m4_builtin *func, bool flatten,
 	  obstack_grow (obs, quotes->str1, quotes->len1);
 	  obstack_grow (obs, quotes->str2, quotes->len2);
 	}
-      module = NULL;
+      module = false;
     }
+  else if (chain)
+    m4__append_builtin (obs, func, NULL, chain);
   else
     {
       obstack_1grow (obs, '<');
-      obstack_grow (obs, func->name, strlen (func->name));
+      obstack_grow (obs, func->builtin.name, strlen (func->builtin.name));
       obstack_1grow (obs, '>');
     }
   if (module)
     {
-      const char *text = m4_get_module_name (module);
+      const char *text = m4_get_module_name (func->module);
       obstack_1grow (obs, '{');
       obstack_grow (obs, text, strlen (text));
       obstack_1grow (obs, '}');

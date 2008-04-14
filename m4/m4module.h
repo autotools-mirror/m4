@@ -284,9 +284,6 @@ extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
 						   const char *, bool);
-extern bool	m4_symbol_value_print	(m4 *, m4_symbol_value *, m4_obstack *,
-					 const m4_string_pair *, bool,
-					 size_t *, bool);
 extern void	m4_symbol_print		(m4 *, m4_symbol *, m4_obstack *,
 					 const m4_string_pair *, bool, size_t,
 					 bool);
@@ -343,8 +340,6 @@ extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 extern m4_symbol_value	*m4_builtin_find_by_name (m4_module *, const char *);
 extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
 						  m4_builtin_func *);
-extern void m4_builtin_print (m4_obstack *, const m4_builtin *, bool,
-			      const m4_string_pair *, m4_module *);
 
 
 
@@ -364,9 +359,6 @@ extern bool	m4_arg_empty		(m4_macro_args *, size_t);
 extern size_t	m4_arg_len		(m4 *, m4_macro_args *, size_t);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, size_t);
 extern m4_obstack *m4_arg_scratch	(m4 *);
-extern bool	m4_arg_print		(m4 *, m4_obstack *, m4_macro_args *,
-					 size_t, const m4_string_pair *, bool,
-					 const char *, size_t *, bool, bool);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
 					 size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
@@ -501,11 +493,9 @@ extern	void	m4_skip_line	(m4 *context, const char *);
 /* push back input */
 
 extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
-extern	void	m4_push_builtin	(m4 *, m4_symbol_value *);
+extern	void	m4_push_builtin	(m4 *, m4_obstack *, m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
 extern	m4_input_block	*m4_push_string_finish	(void);
-extern	m4_obstack	*m4_push_wrapup_init	(m4 *);
-extern	void	m4_push_wrapup_finish		(void);
 extern	bool	m4_pop_wrapup	(m4 *);
 extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
 

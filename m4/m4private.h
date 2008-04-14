@@ -28,6 +28,7 @@
 
 typedef struct m4__search_path_info m4__search_path_info;
 typedef struct m4__macro_arg_stacks m4__macro_arg_stacks;
+typedef struct m4__symbol_chain m4__symbol_chain;
 
 typedef enum {
   M4_SYMBOL_VOID,		/* Traced but undefined, u is invalid.  */
@@ -163,6 +164,9 @@ typedef struct m4__builtin m4__builtin;
 
 extern void m4__set_symbol_value_builtin (m4_symbol_value *,
 					  const m4__builtin *);
+extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
+			       m4__symbol_chain **, const m4_string_pair *,
+			       bool);
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -197,8 +201,6 @@ extern m4_module *  m4__module_find (const char *name);
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */
-
-typedef struct m4__symbol_chain m4__symbol_chain;
 
 struct m4_symbol
 {
@@ -334,6 +336,10 @@ extern size_t	m4__adjust_refcount	(m4 *, size_t, bool);
 extern bool	m4__arg_adjust_refcount	(m4 *, m4_macro_args *, bool);
 extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
 					 size_t, const m4_string_pair *);
+extern bool	m4__arg_print		(m4 *, m4_obstack *, m4_macro_args *,
+					 size_t, const m4_string_pair *, bool,
+					 m4__symbol_chain **, const char *,
+					 size_t *, bool, bool);
 
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)
@@ -418,7 +424,9 @@ struct m4_symbol_arg {
 
 extern void m4__symtab_remove_module_references (m4_symbol_table*,
 						 m4_module *);
-
+extern bool m4__symbol_value_print (m4 *, m4_symbol_value *, m4_obstack *,
+				    const m4_string_pair *, bool,
+				    m4__symbol_chain **, size_t *, bool);
 
 
 
@@ -530,8 +538,13 @@ typedef enum {
 
 extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
 					    m4__symbol_chain **);
+extern	void		m4__append_builtin (m4_obstack *, const m4__builtin *,
+					    m4__symbol_chain **,
+					    m4__symbol_chain **);
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
 					 bool);
+extern	m4_obstack	*m4__push_wrapup_init (m4 *, m4__symbol_chain ***);
+extern	void		m4__push_wrapup_finish (void);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					m4_obstack *, bool, const char *);
 extern	bool		m4__next_token_is_open (m4 *);

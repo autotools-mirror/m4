@@ -78,7 +78,7 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
   BUILTIN (index,	false,	true,	true,	2,	2  )	\
   BUILTIN (len,		false,	true,	true,	1,	1  )	\
   BUILTIN (m4exit,	false,	false,	false,	0,	1  )	\
-  BUILTIN (m4wrap,	false,	true,	false,	1,	-1 )	\
+  BUILTIN (m4wrap,	true,	true,	false,	1,	-1 )	\
   BUILTIN (maketemp,	false,	true,	false,	1,	1  )	\
   BUILTIN (mkstemp,	false,	true,	false,	1,	1  )	\
   BUILTIN (popdef,	true,	true,	false,	1,	-1 )	\
@@ -364,7 +364,7 @@ M4BUILTIN_HANDLER (defn)
 	m4_shipout_string (context, obs, m4_get_symbol_text (symbol),
 			   m4_get_symbol_len (symbol), true);
       else if (m4_is_symbol_func (symbol))
-	m4_push_builtin (context, m4_get_symbol_value (symbol));
+	m4_push_builtin (context, obs, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
 	m4_warn (context, 0, M4ARG (i),
 		 _("builtin `%s' requested by frozen file not found"),
@@ -767,15 +767,17 @@ M4BUILTIN_HANDLER (mkstemp)
 /* Print all arguments on standard error.  */
 M4BUILTIN_HANDLER (errprint)
 {
-  size_t len;
+  size_t i;
 
-  assert (obstack_object_size (obs) == 0);
-  m4_arg_print (context, obs, argv, 1, NULL, true, " ", NULL, false, false);
   m4_sysval_flush (context, false);
-  len = obstack_object_size (obs);
   /* The close_stdin module makes it safe to skip checking the return
-     value here.  */
-  fwrite (obstack_finish (obs), 1, len, stderr);
+     values here.  */
+  fwrite (M4ARG (1), 1, M4ARGLEN (1), stderr);
+  for (i = 2; i < m4_arg_argc (argv); i++)
+    {
+      fputc (' ', stderr);
+      fwrite (M4ARG (i), 1, M4ARGLEN (i), stderr);
+    }
   fflush (stderr);
 }
 

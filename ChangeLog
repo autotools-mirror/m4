@@ -1,5 +1,43 @@
 2008-04-14  Eric Blake  <ebb9@byu.net>
 
+	Stage 21b: $@ concatenates builtins, m4wrap takes builtins.
+	Improve arg_print to handle builtin tokens when printing to a
+	known chain, rather than always flattening builtins.  This allows
+	m4wrap and $@ back-references to handle embedded builtin tokens.
+	Memory impact: none.
+	Speed impact: slight penalty, from more bookkeeping.
+	* m4/m4module.h (m4_push_builtin): Add parameter.
+	(m4_builtin_print, m4_push_wrapup_init, m4_push_wrapup_finish)
+	(m4_arg_print, m4_symbol_value_print): Rename and reduce scope...
+	* m4/m4private.h (m4__builtin_print, m4__push_wrapup_init)
+	(m4__push_wrapup_finish, m4__arg_print, m4__symbol_value_print):
+	...to these, in some cases adding a parameter.
+	(m4__append_builtin): New prototype.
+	* m4/builtin.c (m4_builtin_print): Alter signature to print
+	builtin to a growing symbol chain.
+	* m4/symtab.c (m4__symbol_value_print): Alter signature.
+	(m4_symbol_print, dump_symbol_CB): Adjust callers.
+	* m4/input.c (builtin_peek, builtin_read, builtin_unget)
+	(builtin_print, builtin_funcs): Delete, handled via composite
+	blocks now.
+	(struct m4_input_block): Delete u.builtin member.
+	(init_builtin_token): Only use composite block.
+	(m4__append_builtin): New function.
+	(m4_push_builtin, m4__push_wrapup_init): Alter signature.
+	(m4__push_symbol): Allow builtin tokens.
+	(m4__push_wrapup_finish): Rename.
+	(composite_print, m4_print_token): Adjust callers.
+	* m4/macro.c (m4_wrap_args, collect_arguments): Allow builtin
+	tokens.
+	(m4__arg_print): Alter signature.
+	(trace_prepre, trace_pre, m4_arg_text, m4_arg_equal): Adjust
+	callers.
+	* modules/m4.c (m4wrap): Allow builtin tokens.
+	(defn, errprint): Adjust callers.
+	* modules/gnu.c (builtin): Likewise.
+	* doc/m4.texinfo (M4wrap): New test.
+	(Debuglen): Adjust expected output.
+
 	Stage 21a: Optimize checks for end of input.
 	Create a new polymorphic input block type, which always fails with
 	CHAR_EOF, so that remaining input routines no longer have to check

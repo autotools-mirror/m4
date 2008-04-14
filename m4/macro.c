@@ -663,8 +663,7 @@ collect_arguments (m4 *context, const char *name, size_t len,
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   argv->has_func = args.has_func;
-  /* TODO allow funcs without crippling quote age.  */
-  if (args.quote_age != m4__quote_age (M4SYNTAX) || args.has_func)
+  if (args.quote_age != m4__quote_age (M4SYNTAX))
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;
@@ -928,8 +927,8 @@ trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
     quotes = m4_get_syntax_quotes (M4SYNTAX);
   trace_header (context, id);
   trace_format (context, "%s ... = ", name);
-  m4_symbol_value_print (context, value, &context->trace_messages, quotes,
-			 false, &arg_length, module);
+  m4__symbol_value_print (context, value, &context->trace_messages, quotes,
+			  false, NULL, &arg_length, module);
   trace_flush (context);
 }
 
@@ -950,8 +949,8 @@ trace_pre (m4 *context, size_t id, m4_macro_args *argv)
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
 	quotes = m4_get_syntax_quotes (M4SYNTAX);
       trace_format (context, "(");
-      m4_arg_print (context, &context->trace_messages, argv, 1, quotes, false,
-		    ", ", &arg_length, true, module);
+      m4__arg_print (context, &context->trace_messages, argv, 1, quotes, false,
+		     NULL, ", ", &arg_length, true, module);
       trace_format (context, ")");
     }
 }
@@ -1250,7 +1249,6 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
   value = m4_arg_symbol (argv, index);
   if (m4_is_symbol_value_text (value))
     return m4_get_symbol_value_text (value);
-  /* TODO - concatenate functions.  */
   assert (value->type == M4_SYMBOL_COMP);
   chain = value->u.u_c.chain;
   obs = m4_arg_scratch (context);
@@ -1262,11 +1260,11 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t index)
 	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  break;
 	case M4__CHAIN_ARGV:
-	  m4_arg_print (context, obs, chain->u.u_a.argv, chain->u.u_a.index,
-			m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
-					 chain->u.u_a.quotes),
-			argv->flatten || chain->u.u_a.flatten, NULL, NULL,
-			false, false);
+	  m4__arg_print (context, obs, chain->u.u_a.argv, chain->u.u_a.index,
+			 m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+					  chain->u.u_a.quotes),
+			 argv->flatten || chain->u.u_a.flatten, NULL, NULL,
+			 NULL, false, false);
 	  break;
 	default:
 	  assert (!"m4_arg_text");
@@ -1292,6 +1290,7 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
   m4__symbol_chain tmpb;
   m4__symbol_chain *ca = &tmpa;
   m4__symbol_chain *cb = &tmpb;
+  m4__symbol_chain *chain;
   m4_obstack *obs = m4_arg_scratch (context);
 
   /* Quick tests.  */
@@ -1350,34 +1349,33 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
     {
       if (ca->type == M4__CHAIN_ARGV)
 	{
-	  tmpa.next = ca->next;
+	  tmpa.next = NULL;
 	  tmpa.type = M4__CHAIN_STR;
-	  /* TODO support funcs in $@.  */
-	  assert (!ca->u.u_a.has_func || argv->flatten || ca->u.u_a.flatten);
-	  m4_arg_print (context, obs, ca->u.u_a.argv, ca->u.u_a.index,
-			m4__quote_cache (M4SYNTAX, NULL, ca->quote_age,
-					 ca->u.u_a.quotes),
-			argv->flatten || ca->u.u_a.flatten, NULL, NULL, false,
-			false);
-	  tmpa.u.u_s.len = obstack_object_size (obs);
-	  tmpa.u.u_s.str = (char *) obstack_finish (obs);
-	  ca = &tmpa;
+	  tmpa.u.u_s.str = NULL;
+	  tmpa.u.u_s.len = 0;
+	  chain = &tmpa;
+	  m4__arg_print (context, obs, ca->u.u_a.argv, ca->u.u_a.index,
+			 m4__quote_cache (M4SYNTAX, NULL, ca->quote_age,
+					  ca->u.u_a.quotes),
+			 argv->flatten || ca->u.u_a.flatten, &chain, NULL,
+			 NULL, false, false);
+	  assert (obstack_object_size (obs) == 0 && chain != &tmpa);
+	  chain->next = ca->next;
+	  ca = tmpa.next;
 	  continue;
 	}
       if (cb->type == M4__CHAIN_ARGV)
 	{
-	  tmpb.next = cb->next;
+	  tmpb.next = NULL;
 	  tmpb.type = M4__CHAIN_STR;
-	  /* TODO support funcs in $@.  */
-	  assert (!cb->u.u_a.has_func || argv->flatten || cb->u.u_a.flatten);
-	  m4_arg_print (context, obs, cb->u.u_a.argv, cb->u.u_a.index,
-			m4__quote_cache (M4SYNTAX, NULL, cb->quote_age,
-					 cb->u.u_a.quotes),
-			argv->flatten || cb->u.u_a.flatten, NULL, NULL, false,
-			false);
-	  tmpb.u.u_s.len = obstack_object_size (obs);
-	  tmpb.u.u_s.str = (char *) obstack_finish (obs);
-	  cb = &tmpb;
+	  m4__arg_print (context, obs, cb->u.u_a.argv, cb->u.u_a.index,
+			 m4__quote_cache (M4SYNTAX, NULL, cb->quote_age,
+					  cb->u.u_a.quotes),
+			 argv->flatten || cb->u.u_a.flatten, &chain, NULL,
+			 NULL, false, false);
+	  assert (obstack_object_size (obs) == 0 && chain != &tmpb);
+	  chain->next = cb->next;
+	  cb = tmpb.next;
 	  continue;
 	}
       if (ca->type == M4__CHAIN_FUNC)
@@ -1504,20 +1502,23 @@ m4_arg_func (m4_macro_args *argv, size_t index)
 
 /* Dump a representation of ARGV to the obstack OBS, starting with
    argument INDEX.  If QUOTES is non-NULL, each argument is displayed
-   with those quotes.  If FLATTEN, builtins are ignored.  Separate
-   arguments with SEP, which defaults to a comma.  If MAX_LEN is
-   non-NULL, truncate the output after *MAX_LEN bytes are output and
-   return true; otherwise, return false, and reduce *MAX_LEN by the
-   number of bytes output.  If QUOTE_EACH, the truncation length is
-   reset for each argument, quotes do not count against length, and
-   all arguments are printed; otherwise, quotes count against the
-   length and trailing arguments may be discarded.  If MODULE, print
-   any details about originating modules; modules do not count against
-   truncation length.  */
+   with those quotes.  If FLATTEN, builtins are converted to empty
+   quotes; if CHAINP, *CHAINP is updated with macro tokens; otherwise,
+   builtins are represented by their name.  Separate arguments with
+   SEP, which defaults to a comma.  If MAX_LEN is non-NULL, truncate
+   the output after *MAX_LEN bytes are output and return true;
+   otherwise, return false, and reduce *MAX_LEN by the number of bytes
+   output.  If QUOTE_EACH, the truncation length is reset for each
+   argument, quotes do not count against length, and all arguments are
+   printed; otherwise, quotes count against the length and trailing
+   arguments may be discarded.  If MODULE, print any details about
+   originating modules; modules do not count against truncation
+   length.  MAX_LEN and CHAINP may not both be specified.  */
 bool
-m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
-	      const m4_string_pair *quotes, bool flatten, const char *sep,
-	      size_t *max_len, bool quote_each, bool module)
+m4__arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
+	       const m4_string_pair *quotes, bool flatten,
+	       m4__symbol_chain **chainp, const char *sep, size_t *max_len,
+	       bool quote_each, bool module)
 {
   size_t len = max_len ? *max_len : SIZE_MAX;
   size_t i;
@@ -1525,6 +1526,8 @@ m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
   size_t sep_len;
   size_t *plen = quote_each ? NULL : &len;
 
+  if (chainp)
+    assert (!max_len && *chainp);
   if (!sep)
     sep = ",";
   sep_len = strlen (sep);
@@ -1539,9 +1542,9 @@ m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
 	  && m4_shipout_string_trunc (obs, quotes->str1, quotes->len1, NULL,
 				      plen))
 	return true;
-      if (m4_symbol_value_print (context, arg_symbol (argv, i, NULL, flatten),
-				 obs, quote_each ? quotes : NULL, flatten,
-				 &len, module))
+      if (m4__symbol_value_print (context, arg_symbol (argv, i, NULL, flatten),
+				  obs, quote_each ? quotes : NULL, flatten,
+				  chainp, &len, module))
 	return true;
       if (quotes && !quote_each
 	  && m4_shipout_string_trunc (obs, quotes->str2, quotes->len2, NULL,
@@ -1550,6 +1553,8 @@ m4_arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t index,
     }
   if (max_len)
     *max_len = len;
+  else if (chainp)
+    m4__make_text_link (obs, NULL, chainp);
   return false;
 }
 
@@ -1680,12 +1685,13 @@ m4_wrap_args (m4 *context, m4_macro_args *argv)
   m4_obstack *obs;
   m4_symbol_value *value;
   m4__symbol_chain *chain;
+  m4__symbol_chain **end;
   size_t limit = m4_get_posixly_correct_opt (context) ? 2 : argv->argc;
 
   if (limit == 2 && m4_arg_empty (argv, 1))
     return;
 
-  obs = m4_push_wrapup_init (context);
+  obs = m4__push_wrapup_init (context, &end);
   for (i = 1; i < limit; i++)
     {
       if (i != 1)
@@ -1698,8 +1704,7 @@ m4_wrap_args (m4 *context, m4_macro_args *argv)
 			m4_get_symbol_value_len (value));
 	  break;
 	case M4_SYMBOL_FUNC:
-	  /* TODO allow builtins.  */
-	  assert (false);
+	  m4__append_builtin (obs, value->u.builtin, NULL, end);
 	  break;
 	case M4_SYMBOL_COMP:
 	  chain = value->u.u_c.chain;
@@ -1711,17 +1716,16 @@ m4_wrap_args (m4 *context, m4_macro_args *argv)
 		  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 		  break;
 		case M4__CHAIN_FUNC:
-		  /* TODO allow builtins.  */
-		  assert (false);
+		  m4__append_builtin (obs, chain->u.builtin, NULL, end);
 		  break;
 		case M4__CHAIN_ARGV:
-		  m4_arg_print (context, obs, chain->u.u_a.argv,
-				chain->u.u_a.index,
-				m4__quote_cache (M4SYNTAX, NULL,
-						 chain->quote_age,
-						 chain->u.u_a.quotes),
-				chain->u.u_a.flatten, NULL, NULL, false,
-				false);
+		  m4__arg_print (context, obs, chain->u.u_a.argv,
+				 chain->u.u_a.index,
+				 m4__quote_cache (M4SYNTAX, NULL,
+						  chain->quote_age,
+						  chain->u.u_a.quotes),
+				 chain->u.u_a.flatten, end, NULL, NULL, false,
+				 false);
 		  break;
 		default:
 		  assert (!"m4_wrap_args");
@@ -1735,7 +1739,7 @@ m4_wrap_args (m4 *context, m4_macro_args *argv)
 	  abort ();
 	}
     }
-  m4_push_wrapup_finish ();
+  m4__push_wrapup_finish ();
 }
 
 

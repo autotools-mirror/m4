@@ -543,16 +543,17 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
 }
 
 /* Grow OBS with a text representation of VALUE.  If QUOTES, then use
-   it to surround a text definition.  If FLATTEN, then flatten builtin
-   macros to the empty string.  If MAXLEN, then truncate text
-   definitions to *MAXLEN, and adjust by how many characters are
-   printed.  If MODULE, then include which module defined a builtin.
-   Return true if the output was truncated.  QUOTES and MODULE do not
-   count against the truncation length.  */
+   it to surround a text definition.  If FLATTEN, builtins are
+   converted to empty quotes; if CHAINP, *CHAINP is updated with macro
+   tokens; otherwise, builtins are represented by their name.  If
+   MAXLEN, then truncate text definitions to *MAXLEN, and adjust by
+   how many characters are printed.  If MODULE, then include which
+   module defined a builtin.  Return true if the output was truncated.
+   QUOTES and MODULE do not count against the truncation length.  */
 bool
-m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
-		       const m4_string_pair *quotes, bool flatten,
-		       size_t *maxlen, bool module)
+m4__symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
+			const m4_string_pair *quotes, bool flatten,
+			m4__symbol_chain **chainp, size_t *maxlen, bool module)
 {
   const char *text;
   m4__symbol_chain *chain;
@@ -568,8 +569,8 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	result = true;
       break;
     case M4_SYMBOL_FUNC:
-      m4_builtin_print (obs, m4_get_symbol_value_builtin (value), flatten,
-			quotes, module ? VALUE_MODULE (value) : NULL);
+      m4__builtin_print (obs, value->u.builtin, flatten, chainp, quotes,
+			 module);
       module = false;
       break;
     case M4_SYMBOL_PLACEHOLDER:
@@ -607,22 +608,21 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 		result = true;
 	      break;
 	    case M4__CHAIN_FUNC:
-	      m4_builtin_print (obs, &chain->u.builtin->builtin, flatten,
-				quotes,
-				module ? chain->u.builtin->module : NULL);
+	      m4__builtin_print (obs, chain->u.builtin, flatten, chainp,
+				 quotes, module);
 	      break;
 	    case M4__CHAIN_ARGV:
-	      if (m4_arg_print (context, obs, chain->u.u_a.argv,
-				chain->u.u_a.index,
-				m4__quote_cache (M4SYNTAX, NULL,
-						 chain->quote_age,
-						 chain->u.u_a.quotes),
-				chain->u.u_a.flatten, NULL, &len, false,
-				module))
+	      if (m4__arg_print (context, obs, chain->u.u_a.argv,
+				 chain->u.u_a.index,
+				 m4__quote_cache (M4SYNTAX, NULL,
+						  chain->quote_age,
+						  chain->u.u_a.quotes),
+				 chain->u.u_a.flatten, chainp, NULL, &len,
+				 false, module))
 		result = true;
 	      break;
 	    default:
-	      assert (!"m4_symbol_value_print");
+	      assert (!"m4__symbol_value_print");
 	      abort ();
 	    }
 	    chain = chain->next;
@@ -631,7 +631,7 @@ m4_symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	obstack_grow (obs, quotes->str2, quotes->len2);
       break;
     default:
-      assert (!"m4_symbol_value_print");
+      assert (!"m4__symbol_value_print");
       abort ();
     }
 
@@ -665,7 +665,8 @@ m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
   assert (obs);
 
   value = m4_get_symbol_value (symbol);
-  m4_symbol_value_print (context, value, obs, quotes, false, &len, module);
+  m4__symbol_value_print (context, value, obs, quotes, false, NULL, &len,
+			  module);
   if (stack)
     {
       value = VALUE_NEXT (value);
@@ -674,8 +675,8 @@ m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 	  obstack_1grow (obs, ',');
 	  obstack_1grow (obs, ' ');
 	  len = arg_length;
-	  m4_symbol_value_print (context, value, obs, quotes, false, &len,
-				 module);
+	  m4__symbol_value_print (context, value, obs, quotes, false, NULL,
+				  &len, module);
 	  value = VALUE_NEXT (value);
 	}
     }
@@ -873,7 +874,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
     {
       m4_obstack obs;
       obstack_init (&obs);
-      m4_symbol_value_print (context, value, &obs, NULL, false, NULL, true);
+      m4__symbol_value_print (context, value, &obs, NULL, false, NULL, NULL,
+			      true);
       xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }

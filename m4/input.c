@@ -60,7 +60,7 @@
    "wrapup_stack" to "current_input" can continue indefinitely, even
    generating infinite loops (e.g. "define(`f',`m4wrap(`f')')f"),
    without memory leaks.  Adding wrapped data is done through
-   m4_push_wrapup_init/m4_push_wrapup_finish().
+   m4__push_wrapup_init/m4__push_wrapup_finish().
 
    Pushing new input on the input stack is done by m4_push_file(), the
    conceptual m4_push_string(), and m4_push_builtin() (for builtin
@@ -98,11 +98,6 @@ static	int	file_read		(m4_input_block *, m4 *, bool, bool,
 static	void	file_unget		(m4_input_block *, int);
 static	bool	file_clean		(m4_input_block *, m4 *, bool);
 static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
-static	int	builtin_peek		(m4_input_block *, m4 *, bool);
-static	int	builtin_read		(m4_input_block *, m4 *, bool, bool,
-					 bool);
-static	void	builtin_unget		(m4_input_block *, int);
-static	void	builtin_print		(m4_input_block *, m4 *, m4_obstack *);
 static	int	string_peek		(m4_input_block *, m4 *, bool);
 static	int	string_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
@@ -190,7 +185,6 @@ struct m4_input_block
 	  bool_bitfield line_start : 1;	/* Saved start_of_input_line state.  */
 	}
       u_f;	/* See file_funcs.  */
-      const m4__builtin *builtin;	/* A builtin, see builtin_funcs.  */
       struct
 	{
 	  m4__symbol_chain *chain;	/* Current link in chain.  */
@@ -236,11 +230,6 @@ static bool input_change;
 /* Vtable for handling input from files.  */
 static struct input_funcs file_funcs = {
   file_peek, file_read, file_unget, file_clean, file_print
-};
-
-/* Vtable for handling input from builtin functions.  */
-static struct input_funcs builtin_funcs = {
-  builtin_peek, builtin_read, builtin_unget, NULL, builtin_print
 };
 
 /* Vtable for handling input from strings.  */
@@ -399,66 +388,6 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
 }
 
 
-/* Handle a builtin macro token.  */
-static int
-builtin_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	      bool allow_argv M4_GNUC_UNUSED)
-{
-  return me->u.builtin ? CHAR_BUILTIN : CHAR_RETRY;
-}
-
-static int
-builtin_read (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
-	      bool allow_quote M4_GNUC_UNUSED, bool allow_argv M4_GNUC_UNUSED,
-	      bool allow_unget M4_GNUC_UNUSED)
-{
-  /* Not consumed here - wait until init_builtin_token.  */
-  return me->u.builtin ? CHAR_BUILTIN : CHAR_RETRY;
-}
-
-static void
-builtin_unget (m4_input_block *me, int ch)
-{
-  assert (ch == CHAR_BUILTIN && me->u.builtin);
-}
-
-static void
-builtin_print (m4_input_block *me, m4 *context, m4_obstack *obs)
-{
-  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
-  m4_builtin_print (obs, &me->u.builtin->builtin, false, NULL,
-		    module ? me->u.builtin->module : NULL);
-}
-
-/* m4_push_builtin () pushes TOKEN, which contains a builtin's
-   definition, on the input stack.  If next is non-NULL, this push
-   invalidates a call to m4_push_string_init (), whose storage is
-   consequently released.  */
-void
-m4_push_builtin (m4 *context, m4_symbol_value *token)
-{
-  m4_input_block *i;
-
-  /* Make sure we were passed a builtin function type token.  */
-  assert (m4_is_symbol_value_func (token));
-
-  if (next != NULL)
-    {
-      obstack_free (current_input, next);
-      next = NULL;
-    }
-
-  i = (m4_input_block *) obstack_alloc (current_input, sizeof *i);
-  i->funcs = &builtin_funcs;
-  i->file = m4_get_current_file (context);
-  i->line = m4_get_current_line (context);
-  i->u.builtin = token->u.builtin;
-  i->prev = isp;
-  isp = i;
-  input_change = true;
-}
-
-
 /* Handle string expansion text.  */
 static int
 string_peek (m4_input_block *me, m4 *context M4_GNUC_UNUSED,
@@ -560,7 +489,18 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 	  return false;
 	}
     }
-  else if (!m4_is_symbol_value_func (value))
+  else if (m4_is_symbol_value_func (value))
+    {
+      if (next->funcs == &string_funcs)
+	{
+	  next->funcs = &composite_funcs;
+	  next->u.u_c.chain = next->u.u_c.end = NULL;
+	}
+      m4__append_builtin (current_input, value->u.builtin, &next->u.u_c.chain,
+			  &next->u.u_c.end);
+      return false;
+    }
+  else
     {
       /* For composite values, if argv is already in use, creating
 	 additional references for long text segments is more
@@ -607,24 +547,15 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
       m4__adjust_refcount (context, level, true);
       inuse = true;
     }
-  else if (m4_is_symbol_value_func (value))
-    {
-      chain = (m4__symbol_chain *) obstack_alloc (current_input,
-						  sizeof *chain);
-      if (next->u.u_c.end)
-	next->u.u_c.end->next = chain;
-      else
-	next->u.u_c.chain = chain;
-      next->u.u_c.end = chain;
-      chain->next = NULL;
-      chain->type = M4__CHAIN_FUNC;
-      chain->quote_age = 0;
-      chain->u.builtin = value->u.builtin;
-    }
   while (src_chain)
     {
-      /* TODO - support func concatenation.  */
-      assert (src_chain->type != M4__CHAIN_FUNC);
+      if (src_chain->type == M4__CHAIN_FUNC)
+	{
+	  m4__append_builtin (current_input, src_chain->u.builtin,
+			      &next->u.u_c.chain, &next->u.u_c.end);
+	  src_chain = src_chain->next;
+	  continue;
+	}
       if (level == SIZE_MAX)
 	{
 	  /* Nothing to copy, since link already lives on obstack.  */
@@ -935,17 +866,16 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 	    done = true;
 	  break;
 	case M4__CHAIN_FUNC:
-	  m4_builtin_print (obs, &chain->u.builtin->builtin, false, NULL,
-			    module ? chain->u.builtin->module : NULL);
+	  m4__builtin_print (obs, chain->u.builtin, false, NULL, NULL, module);
 	  break;
 	case M4__CHAIN_ARGV:
 	  assert (!chain->u.u_a.comma);
-	  if (m4_arg_print (context, obs, chain->u.u_a.argv,
-			    chain->u.u_a.index,
-			    m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
-					     chain->u.u_a.quotes),
-			    chain->u.u_a.flatten, NULL, &maxlen, false,
-			    module))
+	  if (m4__arg_print (context, obs, chain->u.u_a.argv,
+			     chain->u.u_a.index,
+			     m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+					      chain->u.u_a.quotes),
+			     chain->u.u_a.flatten, NULL, NULL, &maxlen, false,
+			     module))
 	    done = true;
 	  break;
 	default:
@@ -987,6 +917,46 @@ m4__make_text_link (m4_obstack *obs, m4__symbol_chain **start,
     }
 }
 
+/* Given an obstack OBS, capture any unfinished text as a link, then
+   append the builtin FUNC as the next link in the chain that starts
+   at *START and ends at *END.  START may be NULL if *END is
+   non-NULL.  */
+void
+m4__append_builtin (m4_obstack *obs, const m4__builtin *func,
+		    m4__symbol_chain **start, m4__symbol_chain **end)
+{
+  m4__symbol_chain *chain;
+
+  assert (func);
+  m4__make_text_link (obs, start, end);
+  chain = (m4__symbol_chain *) obstack_alloc (obs, sizeof *chain);
+  if (*end)
+    (*end)->next = chain;
+  else
+    *start = chain;
+  *end = chain;
+  chain->next = NULL;
+  chain->type = M4__CHAIN_FUNC;
+  chain->quote_age = 0;
+  chain->u.builtin = func;
+}
+
+/* Push TOKEN, which contains a builtin's definition, onto the obstack
+   OBS, which is either input stack or the wrapup stack.  */
+void
+m4_push_builtin (m4 *context, m4_obstack *obs, m4_symbol_value *token)
+{
+  m4_input_block *i = (obs == current_input ? next : wsp);
+  assert (i);
+  if (i->funcs == &string_funcs)
+    {
+      i->funcs = &composite_funcs;
+      i->u.u_c.chain = i->u.u_c.end = NULL;
+    }
+  else
+    assert (i->funcs == &composite_funcs);
+  m4__append_builtin (obs, token->u.builtin, &i->u.u_c.chain, &i->u.u_c.end);
+}
 
 
 /* End of input optimization.  By providing these dummy callback
@@ -1038,13 +1008,12 @@ m4_input_print (m4 *context, m4_obstack *obs, m4_input_block *input)
     }
 }
 
-/* The function m4_push_wrapup_init () returns an obstack ready for
-   direct expansion of wrapup text, and should be followed by
-   m4_push_wrapup_finish ().
-
-   FIXME - we should allow pushing builtins as well as text.  */
+/* Return an obstack ready for direct expansion of wrapup text, and
+   set *END to the location that should be updated if any builtin
+   tokens are wrapped.  This should be followed by
+   m4__push_wrapup_finish ().  */
 m4_obstack *
-m4_push_wrapup_init (m4 *context)
+m4__push_wrapup_init (m4 *context, m4__symbol_chain ***end)
 {
   m4_input_block *i;
   m4__symbol_chain *chain;
@@ -1077,12 +1046,13 @@ m4_push_wrapup_init (m4 *context)
   chain->quote_age = 0;
   chain->u.u_l.file = m4_get_current_file (context);
   chain->u.u_l.line = m4_get_current_line (context);
+  *end = &i->u.u_c.end;
   return wrapup_stack;
 }
 
 /* After pushing wrapup text, this completes the bookkeeping.  */
 void
-m4_push_wrapup_finish (void)
+m4__push_wrapup_finish (void)
 {
   m4__make_text_link (wrapup_stack, &wsp->u.u_c.chain, &wsp->u.u_c.end);
   assert (wsp->u.u_c.end->type != M4__CHAIN_LOC);
@@ -1157,24 +1127,14 @@ m4_pop_wrapup (m4 *context)
 static void
 init_builtin_token (m4 *context, m4_symbol_value *token)
 {
-  if (isp->funcs == &builtin_funcs)
-    {
-      assert (isp->u.builtin);
-      if (token)
-	m4__set_symbol_value_builtin (token, isp->u.builtin);
-      isp->u.builtin = NULL;
-    }
-  else
-    {
-      m4__symbol_chain *chain;
-      assert (isp->funcs == &composite_funcs);
-      chain = isp->u.u_c.chain;
-      assert (!chain->quote_age && chain->type == M4__CHAIN_FUNC
-	      && chain->u.builtin);
-      if (token)
-	m4__set_symbol_value_builtin (token, chain->u.builtin);
-      chain->u.builtin = NULL;
-    }
+  m4__symbol_chain *chain;
+  assert (isp->funcs == &composite_funcs);
+  chain = isp->u.u_c.chain;
+  assert (!chain->quote_age && chain->type == M4__CHAIN_FUNC
+	  && chain->u.builtin);
+  if (token)
+    m4__set_symbol_value_builtin (token, chain->u.builtin);
+  chain->u.builtin = NULL;
 }
 
 /* When a QUOTE token is seen, convert VALUE to a composite (if it is
@@ -1984,7 +1944,8 @@ m4_print_token (m4 *context, const char *s, m4__token_type type,
   if (token)
     {
       obstack_init (&obs);
-      m4_symbol_value_print (context, token, &obs, NULL, false, NULL, true);
+      m4__symbol_value_print (context, token, &obs, NULL, false, NULL, NULL,
+			      true);
       len = obstack_object_size (&obs);
       xfprintf (stderr, "%s\n", quotearg_style_mem (c_maybe_quoting_style,
 						    obstack_finish (&obs),

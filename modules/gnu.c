@@ -424,7 +424,7 @@ M4BUILTIN_HANDLER (builtin)
 	    m4_warn (context, 0, me, _("undefined builtin `%s'"), name);
 	  else
 	    {
-	      m4_push_builtin (context, value);
+	      m4_push_builtin (context, obs, value);
 	      free (value);
 	    }
 	}
