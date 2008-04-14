@@ -1,5 +1,20 @@
 2008-04-14  Eric Blake  <ebb9@byu.net>
 
+	Stage 21a: Optimize checks for end of input.
+	Create a new polymorphic input block type, which always fails with
+	CHAR_EOF, so that remaining input routines no longer have to check
+	for NULL input block.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer conditionals.
+	* m4/input.c (eof_funcs, input_eof): New objects.
+	(eof_peek, eof_read, eof_unget): New functions.
+	(file_clean, m4_push_string_init, pop_input, m4_push_wrapup_init)
+	(m4_pop_wrapup, next_char, peek_char, unget_input, m4_input_init)
+	(m4_input_exit): Use placeholder to guarantee non-NULL isp and
+	wsp.
+	(next_char): Rename retry to allow_unget, and change sense for
+	easier manipulation.  All callers changed.
+
 	Improve OS/2 detection.
 	* modules/gnu.c (m4_macro_table): Ensure all possible identifiers
 	are defined, not just the first.  The testsuite ensures that
