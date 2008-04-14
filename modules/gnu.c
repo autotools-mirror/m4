@@ -85,12 +85,12 @@ m4_macro m4_macro_table[] =
   /* name		text	min	max */
 #if UNIX
   { "__unix__",		"",	0,	0 },
-#elif W32_NATIVE
+#endif
+#if W32_NATIVE
   { "__windows__",	"",	0,	0 },
-#elif OS2
+#endif
+#if OS2
   { "__os2__",		"",	0,	0 },
-#else
-# warning Platform macro not provided
 #endif
   { "__gnu__",		"",	0,	0 },
   { "__m4_version__",	VERSION,0,	0 },

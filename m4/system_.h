@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2001, 2003, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2003, 2006, 2007, 2008 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -104,6 +105,7 @@ BEGIN_C_DECLS
 /* Canonicalize OS/2 recognition macro.  */
 #ifdef __EMX__
 # define OS2 1
+# undef UNIX
 #endif
 
 

@@ -1,5 +1,14 @@
 2008-04-14  Eric Blake  <ebb9@byu.net>
 
+	Improve OS/2 detection.
+	* modules/gnu.c (m4_macro_table): Ensure all possible identifiers
+	are defined, not just the first.  The testsuite ensures that
+	exactly one gets defined.
+	* m4/system_.h [__EMX__]: OS/2 is not Unix-compatible, no matter
+	what other pre-defined macros it has.
+	* THANKS: Update.
+	Reported by Elbert Pol.
+
 	Ensure __m4_version__ is unquoted.
 	* tests/builtins.at (__m4_@&t@version__): Augment test.
 
