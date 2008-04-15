@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl We depend on autotest's ./testsuite -C.
-AC_PREREQ([2.61a.347])
+AC_PREREQ([2.62])
 
 ## ------------------------ ##
 ## Autoconf initialization. ##
@@ -77,7 +77,7 @@ M4_CHECK_DEBUGGING
 ## ----------------------- ##
 ## Libtool initialization. ##
 ## ----------------------- ##
-LT_PREREQ([2.1b])
+LT_PREREQ([2.2])
 LT_CONFIG_LTDL_DIR([ltdl])
 LT_INIT([shared dlopen win32-dll])
 LTDL_INIT([nonrecursive])

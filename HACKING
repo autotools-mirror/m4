@@ -63,10 +63,10 @@ and is not part of a release distribution.
 
 * Before you can build from git, you need to bootstrap.  This requires:
   - A pre-installed version of GNU M4 1.4.5 or later, built from a
-  package
-  - A git checkout of Autoconf (will become Autoconf 2.62)
+    package (recommend 1.4.11 or later)
+  - Autoconf 2.62 or later
   - Automake 1.10.1 or later
-  - Libtool 2.1b or later
+  - Libtool 2.2 or later
   - Gettext 0.16 or later
   - Help2man 1.29 or later
   - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)

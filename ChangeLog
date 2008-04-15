@@ -1,5 +1,11 @@
 2008-04-15  Eric Blake  <ebb9@byu.net>
 
+	Update prerequisite tools to match recent releases.
+	* configure.ac (AC_PREREQ): Rely on released autoconf.
+	(LT_PREREQ): Rely on released libtool.
+	* tests/testsuite.at (m4_version_prereq): Update dependence.
+	* bootstrap: Mention prerequisites.
+
 	Work around OS/2 limitation of printf(1).
 	* tests/null.m4: Use m4, not printf, to generate NUL byte.
 	* tests/null.out: Check for esyscmd failure.
