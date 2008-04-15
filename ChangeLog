@@ -1,3 +1,9 @@
+2008-04-15  Eric Blake  <ebb9@byu.net>
+
+	Another 'make installcheck' fix.
+	* doc/m4.texinfo (Diversions): s/m4/__program__/ in case
+	--program-prefix was active.
+
 2008-04-11  Eric Blake  <ebb9@byu.net>
 
 	Ensure --program-prefix doesn't regress.
