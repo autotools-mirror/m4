@@ -1,3 +1,10 @@
+2008-04-15  Eric Blake  <ebb9@byu.net>
+
+	Work around OS/2 limitation of printf(1).
+	* tests/null.m4: Use m4, not printf, to generate NUL byte.
+	* tests/null.out: Check for esyscmd failure.
+	Reported by Elbert Pol.
+
 2008-04-14  Eric Blake  <ebb9@byu.net>
 
 	Stage 21b: $@ concatenates builtins, m4wrap takes builtins.
