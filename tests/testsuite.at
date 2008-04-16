@@ -21,6 +21,26 @@
 # We need a recent Autotest.
 m4_version_prereq([2.62])
 
+# Default to testing "m4 -b", but allow overrides.
+dnl This uses knowledge of undocumented autotest internals; hopefully
+dnl it isn't too much of a problem.  FIXME: Help autoconf document
+dnl proper usage of HELP_OTHER, at_write_fail, and at_tested (or better
+dnl yet, add AT_FOO macros that wrap these internal details).
+m4_divert_text([HELP_OTHER],
+[cat <<\_ATEOF || at_write_fail=1
+
+The environment variable `M4' controls which binary is tested, default `m4 -b'.
+_ATEOF])
+m4_divert_text([PREPARE_TESTS],
+[[if test "${M4+set}" = set; then
+  case $M4 in
+    *[\\/]* ) at_tested= ;;
+    * ) at_tested=`set x $M4; echo $2` ;;
+  esac
+else
+  M4='m4 -b'
+fi]])
+
 # AT_CHECK_M4(ARGS, [EXIT-STATUS = 0], [STDOUT = `'], [STDERR = `'],
 #             [STDIN = `/dev/null'])
 # ------------------------------------------------------------------
@@ -47,8 +67,8 @@ m4_version_prereq([2.62])
 # or m4:input.m4:7: cannot open module `no_such': can't open the module
 # to m4:input.m4:7: cannot open module `no_such'
 m4_define([AT_CHECK_M4],
-[AT_CHECK([m4 -b -d $1 ]m4_if([$5], [-], [<&-],
-			      [< m4_default([$5], [/dev/null])]),
+[AT_CHECK([$M4 -d $1 ]m4_if([$5], [-], [<&-],
+			    [< m4_default([$5], [/dev/null])]),
           [$2], [$3], m4_case([$4], [], [], [ignore], [ignore], [stderr]))
 m4_case([$4], [], [], [ignore], [],
 [AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/

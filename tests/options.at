@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -290,7 +290,7 @@ AT_CHECK_M4([--debugfile= -tfoo -Dfoo=bar in], [0],
 dnl check that all tracing gets diverted to the trace file.  Don't use
 dnl AT_CHECK_M4 on the first run, because sanitizing stderr breaks the
 dnl comparison with the raw data in the trace file of the second run.
-AT_CHECK([m4 -b -dV in], [0], [[foo
+AT_CHECK([$M4 -dV in], [0], [[foo
 ]], [stderr])
 mv stderr expout
 AT_CHECK_M4([--debugfile=trace4 -dV in], [0], [[foo

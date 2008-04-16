@@ -209,7 +209,7 @@ AT_CLEANUP
 AT_SETUP([fstab])
 
 AT_DATA([[fstab.m4]],
-[[define(`concat', `translit(``$*'', ` 	')')
+[[define(`concat', `translit(``$*'', `	 ')')
 define(`fsent', `format(`%-25s %-16s nfs    %-16s 0 0', `$1:$2', `$3', concat$4)')
 
 fsent(freja, /home/gevn, /home/gevn, (rw, soft, bg, grpid))
@@ -582,7 +582,7 @@ dnl Check external follow-on process, after m4exit.
 AT_DATA([in.m4], [[m4exit(
 0)trailing data
 ]])
-AT_CHECK([(m4; cat) < in.m4], [0], [[trailing data
+AT_CHECK([($M4; cat) < in.m4], [0], [[trailing data
 ]])
 
 dnl Check external follow-on process, after fatal error.
@@ -590,7 +590,7 @@ dnl We can't use AT_CHECK_M4, so we must post-process stderr ourselves.
 AT_DATA([in.m4], [[dnl(
 0)trailing data
 ]])
-AT_CHECK([(m4 -EE; cat) < in.m4], [0], [[trailing data
+AT_CHECK([($M4 -EE; cat) < in.m4], [0], [[trailing data
 ]], [stderr])
 AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
 [[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0

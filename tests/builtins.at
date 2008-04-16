@@ -296,7 +296,7 @@ hello world
 
 dnl Test large diversions, which were broken in m4 1.4.8-1.4.10.
 AT_CHECK([echo 'divert(1)hi
-format(%1000000d, 1)' | m4 | sed 1q], [0], [[hi
+format(%1000000d, 1)' | $M4 | sed 1q], [0], [[hi
 ]])
 
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`2')f`'dnl
@@ -687,9 +687,9 @@ AT_DATA([[in]],
 [[translit(substr(esyscmd(`ls -ld 'mkdtemp(`m4-fooXXXXXX')), `0', `10'),
            `SsT', `-x-')
 ]])
-AT_CHECK([m4 < in], [0], [[drwx------
+AT_CHECK([$M4 < in], [0], [[drwx------
 ]])
-AT_CHECK([umask 700; m4 < in], [0], [[d---------
+AT_CHECK([umask 700; $M4 < in], [0], [[d---------
 ]])
 
 AT_CLEANUP
@@ -721,9 +721,9 @@ dnl Check that umask has an effect
 AT_DATA([[in]],
 [[substr(esyscmd(`ls -ld 'mkstemp(`m4-fooXXXXXX')), `0', `10')
 ]])
-AT_CHECK([m4 < in], [0], [[-rw-------
+AT_CHECK([$M4 < in], [0], [[-rw-------
 ]])
-AT_CHECK([umask 700; m4 < in], [0], [[----------
+AT_CHECK([umask 700; $M4 < in], [0], [[----------
 ]])
 
 dnl Check for Solaris compatibility of maketemp.  Hopefully the pid is
@@ -970,7 +970,7 @@ patsubst(`GNUs not Unix.', `\<\w', `\&=')
 patsubst(`GNUs not Unix.', `\w*', `(\&)')
 patsubst(`GNUs not Unix.', `\w+', `(\&)')
 patsubst(`GNUs not Unix.', `\w+')
-patsubst(`GNUs	 not  	 Unix.', `[ 	]+', ` ')
+patsubst(`GNUs	 not  '`	 Unix.', `[	 ]+', ` ')
 ]])
 
 AT_DATA([[expout]],

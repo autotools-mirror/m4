@@ -1,5 +1,19 @@
 2008-04-15  Eric Blake  <ebb9@byu.net>
 
+	Fix 'make installcheck' after './configure --prefix-progname'.
+	* tests/testsuite.at (AT_CHECK_M4): Allow overriding the m4
+	program name.
+	(HELP_OTHER, PREPARE_TESTS): Document and use $M4.
+	* tests/builtins.at (patsubst): Avoid space-tab.
+	(divert, mkdtemp, mkstemp): Adjust tests to use $M4.
+	* tests/options.at (--debugfile): Likewise.
+	* tests/others.at (stdin seekable): Likewise.
+	(fstab): Avoid space-tab.
+	* Makefile.am (installcheck-local): Accomodate transformed name.
+	(DISTCHECK_CONFIGURE_FLAGS): Ensure no regressions, by using gm4
+	during 'make distcheck'.
+	* cfg.mk: New file, borrowed from branch.
+
 	Update prerequisite tools to match recent releases.
 	* configure.ac (AC_PREREQ): Rely on released autoconf.
 	(LT_PREREQ): Rely on released libtool.

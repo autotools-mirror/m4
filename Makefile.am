@@ -416,10 +416,16 @@ check-local: tests/atconfig tests/m4 $(TESTSUITE) $(check_LTLIBRARIES)
 	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
 	  $(TESTS_ENVIRONMENT) $(TESTSUITEFLAGS)
 
-# Run the test suite on the *installed* tree.
+# Run the test suite on the *installed* tree, including any renames
+# the user requested.
 installcheck-local: tests/atconfig $(TESTSUITE) $(check_LTLIBRARIES)
 	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
-	  $(TESTS_ENVIRONMENT) AUTOTEST_PATH="$(bindir)" $(TESTSUITEFLAGS)
+	  $(TESTS_ENVIRONMENT) AUTOTEST_PATH="$(bindir)" \
+	  M4="`echo m4 | sed '$(program_transform_name)'`" $(TESTSUITEFLAGS)
+
+# Enough users install GNU M4 as gm4 that we make sure 'make installcheck'
+# will handle that, as part of making a release.
+DISTCHECK_CONFIGURE_FLAGS = --disable-assert --program-prefix=g
 
 # We need to remove any file droppings left behind by testsuite.
 clean-local-tests:
