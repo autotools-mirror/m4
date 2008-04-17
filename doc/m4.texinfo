@@ -4960,7 +4960,7 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'divert(1)hi
-format(%1000000d, 1)' | ]__program__[ | sed 1q])dnl
+format(%1000000d, 1)' | ]__program__[ | sed -n 1p])dnl
 @result{}hi
 sysval
 @result{}0
