@@ -1,3 +1,14 @@
+2008-04-17  Eric Blake  <ebb9@byu.net>
+
+	Avoid gcc shadowing warnings.
+	* src/builtin.c (m4_format): s/format/expand_format, so local
+	variables can be named format.
+	* src/format.c (format): Rename...
+	(expand_format): ...to this, and avoid the name index.
+	* src/input.c (push_file): Avoid the name close.
+	* src/m4.h (expand_format): Adjust prototype.
+	* src/output.c (threshold_diversion_CB): Avoid the name div.
+
 2008-04-15  Eric Blake  <ebb9@byu.net>
 
 	Another 'make installcheck' fix.

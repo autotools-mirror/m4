@@ -53,7 +53,7 @@
 `------------------------------------------------------------------*/
 
 void
-format (struct obstack *obs, int argc, token_data **argv)
+expand_format (struct obstack *obs, int argc, token_data **argv)
 {
   const char *f;			/* format control string */
   const char *fmt;			/* position within f */

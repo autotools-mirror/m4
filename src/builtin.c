@@ -1864,7 +1864,7 @@ m4_format (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  format (obs, argc - 1, argv + 1);
+  expand_format (obs, argc - 1, argv + 1);
 }
 
 /*-------------------------------------------------------------------------.

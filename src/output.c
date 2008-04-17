@@ -122,10 +122,10 @@ cmp_diversion_CB (const void *elt1, const void *elt2)
 static bool
 threshold_diversion_CB (const void *elt, const void *threshold)
 {
-  const m4_diversion *div = (const m4_diversion *) elt;
+  const m4_diversion *diversion = (const m4_diversion *) elt;
   /* No need to worry about overflow, since we don't create diversions
      with negative divnum.  */
-  return div->divnum >= *(const int *) threshold;
+  return diversion->divnum >= *(const int *) threshold;
 }
 
 void

@@ -442,7 +442,7 @@ bool evaluate (const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format (struct obstack *, int, token_data **);
+void expand_format (struct obstack *, int, token_data **);
 
 /* File: freeze.c --- frozen state files.  */
 
