@@ -1,5 +1,13 @@
 2008-04-17  Eric Blake  <ebb9@byu.net>
 
+	Fix buildbot failure.
+	* doc/m4.texinfo (Diversions): Consume all of m4's output, in case
+	SIGPIPE is ignored.
+	* THANKS: Update.
+	Detected by Bob Proulx's buildbot.
+
+2008-04-17  Eric Blake  <ebb9@byu.net>
+
 	Avoid gcc shadowing warnings.
 	* src/builtin.c (m4_format): s/format/expand_format, so local
 	variables can be named format.
