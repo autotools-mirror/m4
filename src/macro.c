@@ -814,30 +814,30 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
 }
 
 
-/* Given ARGV, return the token_data that contains argument INDEX;
-   INDEX must be > 0, < argv->argc.  If LEVEL is non-NULL, *LEVEL is
-   set to the obstack level that contains the token (which is not
-   necessarily the level of ARGV).  If FLATTEN, avoid returning a
-   builtin function.  */
+/* Given ARGV, return the token_data that contains argument ARG; ARG
+   must be > 0, < argv->argc.  If LEVEL is non-NULL, *LEVEL is set to
+   the obstack level that contains the token (which is not necessarily
+   the level of ARGV).  If FLATTEN, avoid returning a builtin
+   function.  */
 static token_data *
-arg_token (macro_arguments *argv, unsigned int index, int *level, bool flatten)
+arg_token (macro_arguments *argv, unsigned int arg, int *level, bool flatten)
 {
   unsigned int i;
-  token_data *token;
+  token_data *token = NULL;
 
-  assert (index && index < argv->argc);
+  assert (arg && arg < argv->argc);
   if (level)
     *level = argv->level;
   flatten |= argv->flatten;
   if (!argv->wrapper)
     {
-      token = argv->array[index - 1];
+      token = argv->array[arg - 1];
       if (flatten && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
 	token = &empty_token;
       return token;
     }
 
-  /* Must cycle through all tokens, until we find index, since a ref
+  /* Must cycle through all tokens, until we find arg, since a ref
      may occupy multiple indices.  */
   for (i = 0; i < argv->arraylen; i++)
     {
@@ -846,18 +846,18 @@ arg_token (macro_arguments *argv, unsigned int index, int *level, bool flatten)
 	{
 	  token_chain *chain = token->u.u_c.chain;
 	  assert (!chain->next && chain->type == CHAIN_ARGV);
-	  if (index <= (chain->u.u_a.argv->argc - chain->u.u_a.index
-			- chain->u.u_a.skip_last))
+	  if (arg <= (chain->u.u_a.argv->argc - chain->u.u_a.index
+		      - chain->u.u_a.skip_last))
 	    {
 	      token = arg_token (chain->u.u_a.argv,
-				 chain->u.u_a.index - 1 + index, level,
+				 chain->u.u_a.index - 1 + arg, level,
 				 flatten || chain->u.u_a.flatten);
 	      break;
 	    }
-	  index -= (chain->u.u_a.argv->argc - chain->u.u_a.index
-		    - chain->u.u_a.skip_last);
+	  arg -= (chain->u.u_a.argv->argc - chain->u.u_a.index
+		  - chain->u.u_a.skip_last);
 	}
-      else if (--index == 0)
+      else if (--arg == 0)
 	break;
     }
   return token;
@@ -893,17 +893,17 @@ arg_argc (macro_arguments *argv)
   return argv->argc;
 }
 
-/* Given ARGV, return the type of argument INDEX.  Index 0 is always
-   text, and indices beyond argc are likewise treated as text.  */
+/* Given ARGV, return the type of argument ARG.  Arg 0 is always text,
+   and indices beyond argc are likewise treated as text.  */
 token_data_type
-arg_type (macro_arguments *argv, unsigned int index)
+arg_type (macro_arguments *argv, unsigned int arg)
 {
   token_data_type type;
   token_data *token;
 
-  if (argv->flatten || !argv->has_func || index == 0 || index >= argv->argc)
+  if (argv->flatten || !argv->has_func || arg == 0 || arg >= argv->argc)
     return TOKEN_TEXT;
-  token = arg_token (argv, index, NULL, false);
+  token = arg_token (argv, arg, NULL, false);
   type = TOKEN_DATA_TYPE (token);
   if (type == TOKEN_COMP && !token->u.u_c.has_func)
     type = TOKEN_TEXT;
@@ -912,22 +912,22 @@ arg_type (macro_arguments *argv, unsigned int index)
   return type;
 }
 
-/* Given ARGV, return the text at argument INDEX.  Abort if the
-   argument is not text.  Index 0 is always text, and indices beyond
-   argc return the empty string.  The result is always NUL-terminated,
-   even if it includes embedded NUL characters.  */
+/* Given ARGV, return the text at argument ARG.  Abort if the argument
+   is not text.  Arg 0 is always text, and indices beyond argc return
+   the empty string.  The result is always NUL-terminated, even if it
+   includes embedded NUL characters.  */
 const char *
-arg_text (macro_arguments *argv, unsigned int index)
+arg_text (macro_arguments *argv, unsigned int arg)
 {
   token_data *token;
   token_chain *chain;
   struct obstack *obs; /* Scratch space; cleaned at end of macro_expand.  */
 
-  if (index == 0)
+  if (arg == 0)
     return argv->argv0;
-  if (index >= argv->argc)
+  if (arg >= argv->argc)
     return "";
-  token = arg_token (argv, index, NULL, false);
+  token = arg_token (argv, arg, NULL, false);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1115,33 +1115,33 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   return ca == cb;
 }
 
-/* Given ARGV, return true if argument INDEX is the empty string.
-   This gives the same result as comparing arg_len against 0, but is
-   often faster.  */
+/* Given ARGV, return true if argument ARG is the empty string.  This
+   gives the same result as comparing arg_len against 0, but is often
+   faster.  */
 bool
-arg_empty (macro_arguments *argv, unsigned int index)
+arg_empty (macro_arguments *argv, unsigned int arg)
 {
-  if (index == 0)
+  if (arg == 0)
     return argv->argv0_len == 0;
-  if (index >= argv->argc)
+  if (arg >= argv->argc)
     return true;
-  return arg_token (argv, index, NULL, false) == &empty_token;
+  return arg_token (argv, arg, NULL, false) == &empty_token;
 }
 
-/* Given ARGV, return the length of argument INDEX.  Abort if the
+/* Given ARGV, return the length of argument ARG.  Abort if the
    argument is not text.  Indices beyond argc return 0.  */
 size_t
-arg_len (macro_arguments *argv, unsigned int index)
+arg_len (macro_arguments *argv, unsigned int arg)
 {
   token_data *token;
   token_chain *chain;
   size_t len;
 
-  if (index == 0)
+  if (arg == 0)
     return argv->argv0_len;
-  if (index >= argv->argc)
+  if (arg >= argv->argc)
     return 0;
-  token = arg_token (argv, index, NULL, false);
+  token = arg_token (argv, arg, NULL, false);
   switch (TOKEN_DATA_TYPE (token))
     {
     case TOKEN_TEXT:
@@ -1200,14 +1200,14 @@ arg_len (macro_arguments *argv, unsigned int index)
   abort ();
 }
 
-/* Given ARGV, return the builtin function referenced by argument
-   INDEX.  Abort if it is not a builtin in isolation.  */
+/* Given ARGV, return the builtin function referenced by argument ARG.
+   Abort if it is not a builtin in isolation.  */
 builtin_func *
-arg_func (macro_arguments *argv, unsigned int index)
+arg_func (macro_arguments *argv, unsigned int arg)
 {
   token_data *token;
 
-  token = arg_token (argv, index, NULL, false);
+  token = arg_token (argv, arg, NULL, false);
   assert (TOKEN_DATA_TYPE (token) == TOKEN_FUNC);
   return TOKEN_DATA_FUNC (token);
 }
@@ -1223,7 +1223,7 @@ arg_scratch (void)
 }
 
 /* Dump a representation of ARGV to the obstack OBS, starting with
-   argument INDEX.  If QUOTES is non-NULL, each argument is displayed
+   argument ARG.  If QUOTES is non-NULL, each argument is displayed
    with those quotes.  If FLATTEN, builtins are converted to empty
    quotes; if CHAINP, *CHAINP is updated with macro tokens; otherwise,
    builtins are represented by their name.  Separate arguments with
@@ -1236,7 +1236,7 @@ arg_scratch (void)
    arguments may be discarded.  MAX_LEN and CHAINP may not both be
    specified.  */
 bool
-arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
+arg_print (struct obstack *obs, macro_arguments *argv, unsigned int arg,
 	   const string_pair *quotes, bool flatten, token_chain **chainp,
 	   const char *sep, size_t *max_len, bool quote_each)
 {
@@ -1254,7 +1254,7 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
   if (!sep)
     sep = ",";
   sep_len = strlen (sep);
-  for (i = index; i < argv->argc; i++)
+  for (i = arg; i < argv->argc; i++)
     {
       if (quote_each && max_len)
 	len = *max_len;
@@ -1331,18 +1331,18 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int index,
 }
 
 /* Populate the new TOKEN as a wrapper to ARGV, starting with argument
-   INDEX.  Allocate any data on OBS, owned by a given expansion LEVEL.
+   ARG.  Allocate any data on OBS, owned by a given expansion LEVEL.
    FLATTEN determines whether to allow builtins, and QUOTES determines
    whether all arguments are quoted.  Return TOKEN when successful,
    NULL when wrapping ARGV is trivially empty.  */
 static token_data *
 make_argv_ref_token (token_data *token, struct obstack *obs, int level,
-		     macro_arguments *argv, unsigned int index, bool flatten,
+		     macro_arguments *argv, unsigned int arg, bool flatten,
 		     const string_pair *quotes)
 {
   token_chain *chain;
 
-  if (index >= argv->argc)
+  if (arg >= argv->argc)
     return NULL;
   TOKEN_DATA_TYPE (token) = TOKEN_COMP;
   token->u.u_c.chain = token->u.u_c.end = NULL;
@@ -1359,13 +1359,13 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
 	       && argv->array[i]->u.u_c.wrapper)
 	      || level >= 0)
 	    break;
-	  if (index == 1)
+	  if (arg == 1)
 	    {
 	      push_arg_quote (obs, argv, i + 1, quotes);
 	      obstack_1grow (obs, ',');
 	    }
 	  else
-	    index--;
+	    arg--;
 	}
       assert (i < argv->arraylen);
       if (i + 1 == argv->arraylen)
@@ -1376,11 +1376,11 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
 	  assert (!chain->next && chain->type == CHAIN_ARGV
 		  && !chain->u.u_a.skip_last);
 	  argv = chain->u.u_a.argv;
-	  index += chain->u.u_a.index - 1;
+	  arg += chain->u.u_a.index - 1;
 	}
       else
 	{
-	  index += i;
+	  arg += i;
 	  break;
 	}
     }
@@ -1398,7 +1398,7 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
   chain->type = CHAIN_ARGV;
   chain->quote_age = argv->quote_age;
   chain->u.u_a.argv = argv;
-  chain->u.u_a.index = index;
+  chain->u.u_a.index = arg;
   chain->u.u_a.flatten = flatten;
   chain->u.u_a.has_func = argv->has_func;
   chain->u.u_a.comma = false;
@@ -1421,12 +1421,12 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   macro_arguments *new_argv;
   token_data *token;
   token_data *new_token;
-  unsigned int index = skip ? 2 : 1;
+  unsigned int i = skip ? 2 : 1;
   struct obstack *obs = arg_scratch ();
 
   new_token = (token_data *) obstack_alloc (obs, sizeof *token);
-  token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv,
-			       index, flatten, NULL);
+  token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv, i,
+			       flatten, NULL);
   if (!token)
     {
       obstack_free (obs, new_token);
@@ -1449,7 +1449,7 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
       new_argv->flatten = flatten;
       new_argv->has_func = argv->has_func;
     }
-  new_argv->argc = argv->argc - (index - 1);
+  new_argv->argc = argv->argc - (i - 1);
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
@@ -1458,33 +1458,32 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   return new_argv;
 }
 
-/* Push argument INDEX from ARGV onto the expansion stack OBS for
+/* Push argument ARG from ARGV onto the expansion stack OBS for
    rescanning.  */
 void
-push_arg (struct obstack *obs, macro_arguments *argv, unsigned int index)
+push_arg (struct obstack *obs, macro_arguments *argv, unsigned int arg)
 {
-  if (index == 0)
+  if (arg == 0)
     {
       /* Always push copy of arg 0, since its lifetime is not
 	 guaranteed beyond expand_macro.  */
       obstack_grow (obs, argv->argv0, argv->argv0_len);
       return;
     }
-  if (index >= argv->argc)
+  if (arg >= argv->argc)
     return;
-  push_arg_quote (obs, argv, index, NULL);
+  push_arg_quote (obs, argv, arg, NULL);
 }
 
-/* Push argument INDEX from ARGV onto the expansion stack OBS for
-   rescanning.  INDEX must be > 0, < argc.  QUOTES determines any
-   quote delimiters that were in effect when the reference was
-   created.  */
+/* Push argument ARG from ARGV onto the expansion stack OBS for
+   rescanning.  ARG must be > 0, < argc.  QUOTES determines any quote
+   delimiters that were in effect when the reference was created.  */
 void
-push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int index,
+push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int arg,
 		const string_pair *quotes)
 {
   int level;
-  token_data *token = arg_token (argv, index, &level, false);
+  token_data *token = arg_token (argv, arg, &level, false);
 
   if (quotes)
     obstack_grow (obs, quotes->str1, quotes->len1);

@@ -232,14 +232,14 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 /*-------------------------------------------------------------------.
 | push_file () pushes an input file on the input stack, saving the   |
 | current file name and line number.  If next is non-NULL, this push |
-| invalidates a call to push_string_init (), whose storage is        |
-| consequently released.  If CLOSE, then close FP after EOF is       |
-| detected.  TITLE is used as the location for text parsed from the  |
-| file (not necessarily the file name).                              |
+| invalidates a call to push_string_init (), whose storage is	     |
+| consequently released.  If CLOSE_WHEN_DONE, then close FP after    |
+| EOF is detected.  TITLE is used as the location for text parsed    |
+| from the file (not necessarily the file name).		     |
 `-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title, bool close)
+push_file (FILE *fp, const char *title, bool close_when_done)
 {
   input_block *i;
 
@@ -260,7 +260,7 @@ push_file (FILE *fp, const char *title, bool close)
 
   i->u.u_f.fp = fp;
   i->u.u_f.end = false;
-  i->u.u_f.close = close;
+  i->u.u_f.close = close_when_done;
   i->u.u_f.advance = start_of_input_line;
   output_current_line = -1;
 

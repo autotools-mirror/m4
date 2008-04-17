@@ -588,7 +588,7 @@ bool evaluate (const char *, const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format (struct obstack *, int, macro_arguments *);
+void expand_format (struct obstack *, int, macro_arguments *);
 
 /* File: freeze.c --- frozen state files.  */
 

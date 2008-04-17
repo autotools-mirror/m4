@@ -767,7 +767,7 @@ static void
 m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *me = ARG (0);
-  int index;
+  int i;
 
   if (argc == 2 || bad_argc (me, argc, 3, -1))
     return;
@@ -775,14 +775,14 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     bad_argc (me, argc, 0, argc - 2);
 
-  index = 1;
+  i = 1;
   argc--;
 
   while (true)
     {
-      if (arg_equal (argv, index, index + 1))
+      if (arg_equal (argv, i, i + 1))
 	{
-	  push_arg (obs, argv, index + 2);
+	  push_arg (obs, argv, i + 2);
 	  return;
 	}
       switch (argc)
@@ -792,12 +792,12 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 
 	case 4:
 	case 5:
-	  push_arg (obs, argv, index + 3);
+	  push_arg (obs, argv, i + 3);
 	  return;
 
 	default:
 	  argc -= 3;
-	  index += 3;
+	  i += 3;
 	}
     }
 }
@@ -1980,7 +1980,7 @@ m4_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
   if (bad_argc (ARG (0), argc, 1, -1))
     return;
-  format (obs, argc, argv);
+  expand_format (obs, argc, argv);
 }
 
 /*-------------------------------------------------------------------------.
