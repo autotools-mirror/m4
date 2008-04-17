@@ -618,7 +618,8 @@ performing any other actions.
 @item -b
 @itemx --batch
 Makes this invocation of @code{m4} non-interactive.  This means that
-output will be buffered, and interrupts will halt execution.  If neither
+output will be buffered, and an interrupt or pipe write error will halt
+execution.  If neither
 @option{-b} nor @option{-i} are specified, this is activated by default
 when any input files are specified, or when either standard input or
 standard error is not a terminal.  Note that this means that @kbd{m4}
@@ -647,7 +648,8 @@ a warning is issued.  The introduction of behavior levels is new to M4
 @itemx --interactive
 @itemx -e
 Makes this invocation of @code{m4} interactive.  This means that all
-output will be unbuffered, and interrupts will be ignored.  If neither
+output will be unbuffered, interrupts will be ignored, and behavior on
+pipe write errors is inherited from the parent process.  If neither
 @option{-b} nor @option{-i} are specified, this is activated by default
 when no input files are specified, and when both standard input and
 standard error are terminals (similar to the way that /bin/sh determines

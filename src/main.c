@@ -616,6 +616,8 @@ main (int argc, char *const *argv, char *const *envp)
       signal (SIGINT, SIG_IGN);
       setbuf (stdout, NULL);
     }
+  else
+    signal (SIGPIPE, SIG_DFL);
 
 
   /* Do the basic initializations.  */

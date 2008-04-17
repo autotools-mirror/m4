@@ -1,3 +1,14 @@
+2008-04-17  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite bug when SIGPIPE is ignored.
+	* tests/builtins.at (divert): Consume all of m4's output, to avoid
+	spurious write failure.
+	* src/main.c (main): In batch mode, restore default handling of
+	SIGPIPE.
+	* doc/m4.texinfo (Operation modes): Document SIGPIPE behavior.
+	* THANKS: Update.
+	Reported by Bob Proulx, via his autobuilder.
+
 2008-04-15  Eric Blake  <ebb9@byu.net>
 
 	Fix 'make installcheck' after './configure --prefix-progname'.

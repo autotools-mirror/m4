@@ -296,7 +296,7 @@ hello world
 
 dnl Test large diversions, which were broken in m4 1.4.8-1.4.10.
 AT_CHECK([echo 'divert(1)hi
-format(%1000000d, 1)' | $M4 | sed 1q], [0], [[hi
+format(%1000000d, 1)' | $M4 | sed -n 1p], [0], [[hi
 ]])
 
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`2')f`'dnl
