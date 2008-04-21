@@ -1,3 +1,10 @@
+2008-04-21  Eric Blake  <ebb9@byu.net>
+
+	Fix spelling of attribution to Christopher Strachey.
+	* doc/m4.texinfo (History, Inhibiting Invocation): Fix typo.
+	* THANKS: Update.
+	Reported by Fernando Carrijo.
+
 2008-04-17  Eric Blake  <ebb9@byu.net>
 
 	Fix testsuite bug when SIGPIPE is ignored.

@@ -365,7 +365,7 @@ debugging their @code{m4} scripts than doing real work.  Beware that
 @cindex history of @code{m4}
 @cindex @acronym{GNU} M4, history of
 @code{GPM} was an important ancestor of @code{m4}.  See
-C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
+C. Strachey: ``A General Purpose Macro generator'', Computer Journal
 8,3 (1965), pp.@: 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
@@ -1425,7 +1425,7 @@ with no arguments.
 @section Preventing macro invocation
 
 An innovation of the @code{m4} language, compared to some of its
-predecessors (like Stratchey's @code{GPM}, for example), is the ability
+predecessors (like Strachey's @code{GPM}, for example), is the ability
 to recognize macro calls without resorting to any special, prefixed
 invocation character.  While generally useful, this feature might
 sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
