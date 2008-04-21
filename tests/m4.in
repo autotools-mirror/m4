@@ -2,7 +2,7 @@
 # @configure_input@
 # Wrapper around a non installed m4 to make it work as an installed one.
 #
-# Copyright (C) 2001, 2002, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -33,7 +33,12 @@ else
   case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
 fi
 
-exec "@abs_top_builddir@/src/m4" \
-      --module-directory="@abs_top_builddir@/modules" \
-      ${1+"$@"}
+if test "${M4MODPATH+set}" = set ; then
+  M4MODPATH="@abs_top_builddir@/modules:$M4MODPATH"
+else
+  M4MODPATH="@abs_top_builddir@/modules"
+fi
+export M4MODPATH
+
+exec "@abs_top_builddir@/src/m4" ${1+"$@"}
 exit 1

@@ -1,5 +1,9 @@
 2008-04-21  Eric Blake  <ebb9@byu.net>
 
+	Fix --disable-shared testsuite regression from previous patch.
+	* tests/m4.in: Export M4MODPATH, so that recursive m4 invocations
+	will also work.
+
 	Fix spelling of attribution to Christopher Strachey.
 	* doc/m4.texinfo (History, Inhibiting Invocation): Fix typo.
 	* THANKS: Update.
