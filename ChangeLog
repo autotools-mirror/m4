@@ -1,5 +1,9 @@
 2008-04-21  Eric Blake  <ebb9@byu.net>
 
+	Simplify previous patch.
+	* tests/m4.in: Compress assignment.
+	Suggested by Gary V. Vaughan.
+
 	Fix --disable-shared testsuite regression from previous patch.
 	* tests/m4.in: Export M4MODPATH, so that recursive m4 invocations
 	will also work.

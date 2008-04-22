@@ -33,11 +33,7 @@ else
   case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
 fi
 
-if test "${M4MODPATH+set}" = set ; then
-  M4MODPATH="@abs_top_builddir@/modules:$M4MODPATH"
-else
-  M4MODPATH="@abs_top_builddir@/modules"
-fi
+M4MODPATH="@abs_top_builddir@/modules${M4MODPATH+:$M4MODPATH}"
 export M4MODPATH
 
 exec "@abs_top_builddir@/src/m4" ${1+"$@"}
