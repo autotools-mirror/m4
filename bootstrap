@@ -1,9 +1,10 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2007-11-05
+# bootstrap (GNU M4) version 2009-03-23
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
-# Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
+# Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -28,18 +29,18 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTORECONF, GNULIB_TOOL, M4, RM, SED
+#   AUTORECONF, CONFIG_SHELL, GNULIB_SRCDIR, M4, RM, SED
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
-# requires GNU Autoconf 2.60, GNU Automake 1.9.6, and bleeding edge
+# requires GNU Autoconf 2.60, GNU Automake 1.10.1, and bleeding edge
 # git or CVS snapshots of GNU Gnulib.
 
 # Report bugs to <bug-m4@gnu.org>
 
 : ${AUTORECONF=autoreconf}
-: ${GNULIB_TOOL=gnulib-tool}
-: ${RM=rm -f}
+: ${CONFIG_SHELL=/bin/sh}
+: ${RM='rm -f'}
 : ${SED=sed}
 
 # Ensure file names are sorted consistently across platforms.
@@ -230,61 +231,68 @@ EOF
   cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
 fi
 
-## ---------------------------- ##
-## Find the gnulib module tree. ##
-## ---------------------------- ##
+# See if we can use gnulib's git-merge-changelog merge driver.
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if git config merge.merge-changelog.driver >/dev/null ; then
+    :
+  elif (git-merge-changelog --version) >/dev/null 2>/dev/null ; then
+    func_echo "initializing git-merge-changelog driver"
+    git config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
+    git config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
+  else
+    func_echo "consider installing git-merge-changelog from gnulib"
+  fi
+  if git config diff.texinfo.funcname >/dev/null ; then
+    :
+  else
+    func_echo "initializing git texinfo diff driver"
+    git config diff.texinfo.funcname '^@node[	 ][	 ]*\\([^,][^,]*\\)'
+  fi
+fi
 
-case $GNULIB_TOOL in
-    /*  )  gnulibdir=$GNULIB_TOOL ;;		# absolute
-    */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
-    *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
-esac
+## ------------------------------ ##
+## Update the gnulib module tree. ##
+## ------------------------------ ##
 
-# Follow symlinks
-while test -h "$gnulibdir"; do
-
-    # Resolve symbolic link.
-    sedexpr1='s, -> ,#%%#,'
-    sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
-    linkval=`ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
-    test -n "$linkval" || break
-
-    case "$linkval" in
-	/* ) gnulibdir="$linkval" ;;
-	* )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
-    esac
-
-done
-
-gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if test -f gnulib/gnulib-tool ; then
+    func_echo "updating gnulib submodule"
+    git submodule update \
+      || func_fatal_error "Unable to update gnulib"
+  else
+    # A fresh checkout creates an empty subdirectory gnulib.  However,
+    # older git didn't know how to clone into an empty subdir.  If the
+    # user provided GNULIB_SRCDIR, then make the initial clone refer
+    # to the existing checkout, to save network traffic.
+    func_echo "importing gnulib submodule"
+    if test -d "$GNULIB_SRCDIR" ; then
+      rmdir gnulib 2>/dev/null
+      git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
+	&& git submodule init && git submodule update \
+	|| func_fatal_error "Unable to update gnulib"
+    else
+      git submodule update --init \
+	|| func_fatal_error "Unable to update gnulib"
+    fi
+  fi
+else
+  func_echo "git not detected.  If needed, update gnulib subdirectory manually"
+fi
 
 ## ---------------------- ##
 ## Import Gnulib modules. ##
 ## ---------------------- ##
 
-func_echo "running: $GNULIB_TOOL --update"
-$GNULIB_TOOL --update || func_fatal_error "gnulib-tool failed"
+func_echo "running: $CONFIG_SHELL gnulib/gnulib-tool --update"
+$CONFIG_SHELL gnulib/gnulib-tool --update \
+  || func_fatal_error "gnulib-tool failed"
 
 ## ----------- ##
 ## Autoreconf. ##
 ## ----------- ##
 
-func_echo "running: $AUTORECONF --force --verbose --install"
-$AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
-
-## ---------------------------------------- ##
-## Gnulib is more up-to-date than automake. ##
-## ---------------------------------------- ##
-
-func_update "$gnulibdir"/build-aux/config.guess build-aux/config.guess
-func_update "$gnulibdir"/build-aux/config.sub build-aux/config.sub
-func_update "$gnulibdir"/build-aux/depcomp build-aux/depcomp
-func_update "$gnulibdir"/build-aux/install-sh build-aux/install-sh
-func_update "$gnulibdir"/build-aux/mdate-sh build-aux/mdate-sh
-func_update "$gnulibdir"/build-aux/missing build-aux/missing
-func_update "$gnulibdir"/build-aux/texinfo.tex build-aux/texinfo.tex
-func_update "$gnulibdir"/doc/COPYINGv3 COPYING
-func_update "$gnulibdir"/doc/INSTALL INSTALL
+func_echo "running: $AUTORECONF --verbose --install"
+$AUTORECONF --verbose --install || func_fatal_error "autoreconf failed"
 
 exit 0
 

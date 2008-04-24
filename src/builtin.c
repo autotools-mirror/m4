@@ -73,6 +73,7 @@ DECLARE (m4_mkstemp);
 DECLARE (m4_patsubst);
 DECLARE (m4_popdef);
 DECLARE (m4_pushdef);
+DECLARE (m4_qindir);
 DECLARE (m4_regexp);
 DECLARE (m4_shift);
 DECLARE (m4_sinclude);
@@ -129,6 +130,7 @@ builtin_tab[] =
   { "patsubst",		true,	false,	true,	m4_patsubst },
   { "popdef",		false,	true,	true,	m4_popdef },
   { "pushdef",		false,	true,	true,	m4_pushdef },
+  { "qindir",		true,	true,	true,	m4_qindir },
   { "regexp",		true,	false,	true,	m4_regexp },
   { "shift",		false,	true,	true,	m4_shift },
   { "sinclude",		false,	false,	true,	m4_sinclude },
@@ -987,15 +989,11 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*------------------------------------------------------------------------.
-| The builtin "indir" allows indirect calls to macros, even if their name |
-| is not a proper macro name.  It is thus possible to define macros with  |
-| ill-formed names for internal use in larger macro packages.  This macro |
-| is not available in compatibility mode.				  |
-`------------------------------------------------------------------------*/
 
+/* Common code for indir and qindir.  Surround the output in the
+   current quotes if QUOTE is true, being careful of changequote.  */
 static void
-m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
+indir (struct obstack *obs, int argc, macro_arguments *argv, bool quote)
 {
   const call_info *me = arg_info (argv);
   symbol *s;
@@ -1023,8 +1021,38 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
 						 SYMBOL_TRACED (s));
       trace_prepre (arg_info (new_argv));
       call_macro (s, new_argv, obs);
+      if (quote)
+	push_quote_wrapper ();
     }
 }
+
+
+/*------------------------------------------------------------------------.
+| The builtin "indir" allows indirect calls to macros, even if their name |
+| is not a proper macro name.  It is thus possible to define macros with  |
+| ill-formed names for internal use in larger macro packages.  This macro |
+| is not available in compatibility mode.				  |
+`------------------------------------------------------------------------*/
+
+static void
+m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
+{
+  indir (obs, argc, argv, false);
+}
+
+/*----------------------------------------------------------------.
+| The builtin "qindir" is like "indir", except that the output is |
+| surrounded by the current quotes.  This allows wrapping other   |
+| macros to provide quoted output where their output is normally  |
+| rescanned.                                                      |
+`----------------------------------------------------------------*/
+
+static void
+m4_qindir (struct obstack *obs, int argc, macro_arguments *argv)
+{
+  indir (obs, argc, argv, true);
+}
+
 
 /*-------------------------------------------------------------------------.
 | The macro "defn" returns the quoted definition of the macro named by the |

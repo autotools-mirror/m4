@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -359,6 +359,7 @@ void append_macro (struct obstack *, builtin_func *, token_chain **,
 void push_macro (struct obstack *, builtin_func *);
 struct obstack *push_string_init (const char *, int);
 bool push_token (token_data *, int, bool);
+void push_quote_wrapper (void);
 void push_string_finish (void);
 struct obstack *push_wrapup_init (const call_info *, token_chain ***);
 void push_wrapup_finish (void);

@@ -78,6 +78,7 @@ enum input_type
 {
   INPUT_STRING,	/* String resulting from macro expansion.  */
   INPUT_FILE,	/* File from command line or include.  */
+  INPUT_FILE_Q,	/* Quotation around a file, via qindir.  */
   INPUT_CHAIN,	/* FIFO chain of separate strings, builtins, and $@ refs.  */
   INPUT_EOF	/* Placeholder at bottom of input stack.  */
 };
@@ -109,6 +110,12 @@ struct input_block
 	  bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
 	}
 	u_f;	/* INPUT_FILE */
+      struct
+	{
+	  string_pair *quotes;	/* Quotes to use when wrapping.  */
+	  size_t count;		/* Count of quotes to wrap.  */
+	}
+	u_q;	/* INPUT_FILE_Q */
       struct
 	{
 	  token_chain *chain;	/* Current link in chain.  */
@@ -251,14 +258,20 @@ push_file (FILE *fp, const char *title, bool close_when_done)
 
   if (next != NULL)
     {
-      obstack_free (current_input, next);
-      next = NULL;
+      assert (obstack_object_size (current_input) == 0
+	      && next->type == INPUT_STRING);
+      i = next;
+    }
+  else
+    {
+      i = (input_block *) obstack_alloc (current_input, sizeof *i);
+      i->prev = isp;
+      isp = i;
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
     debug_message ("input read from %s", title);
 
-  i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_FILE;
   i->file = (char *) obstack_copy0 (&file_names, title, strlen (title));
   i->line = 1;
@@ -269,9 +282,6 @@ push_file (FILE *fp, const char *title, bool close_when_done)
   i->u.u_f.close = close_when_done;
   i->u.u_f.advance = start_of_input_line;
   output_current_line = -1;
-
-  i->prev = isp;
-  isp = i;
 }
 
 /*------------------------------------------------------------------.
@@ -334,6 +344,7 @@ push_string_init (const char *file, int line)
 
   /* Reserve the next location on the obstack.  */
   next = (input_block *) obstack_alloc (current_input, sizeof *next);
+  next->prev = isp;
   next->type = INPUT_STRING;
   next->file = file;
   next->line = line;
@@ -507,6 +518,70 @@ push_token (token_data *token, int level, bool inuse)
   return inuse;
 }
 
+
+/*----------------------------------------------------------------.
+| Wrap the current pending expansion in another level of quotes.  |
+`----------------------------------------------------------------*/
+void
+push_quote_wrapper (void)
+{
+  token_chain *chain;
+  size_t len = obstack_object_size (current_input);
+
+  assert (next);
+  if (next->type == INPUT_FILE)
+    {
+      input_block *block;
+      string_pair *quotes;
+      assert (!len);
+      block = (input_block *) obstack_alloc (current_input, sizeof *block);
+      quotes = (string_pair *) obstack_alloc (current_input, sizeof *quotes);
+      quotes->str1 = (char *) obstack_copy (current_input, curr_quote.str1,
+					    curr_quote.len1);
+      quotes->len1 = curr_quote.len1;
+      obstack_grow (current_input, curr_quote.str2, curr_quote.len2);
+      block->type = INPUT_FILE_Q;
+      block->file = current_file;
+      block->line = current_line;
+      block->prev = next;
+      block->u.u_q.quotes = quotes;
+      block->u.u_q.count = 1;
+      next = block;
+    }
+  else if (next->type == INPUT_FILE_Q)
+    {
+      assert (len == curr_quote.len2 * next->u.u_q.count);
+      next->u.u_q.count++;
+      obstack_grow (current_input, curr_quote.str2, curr_quote.len2);
+    }
+  else if (!len && next->type == INPUT_STRING)
+    {
+      obstack_grow (current_input, curr_quote.str1, curr_quote.len1);
+      obstack_grow (current_input, curr_quote.str2, curr_quote.len2);
+    }
+  else
+    {
+      obstack_grow (current_input, curr_quote.str2, curr_quote.len2);
+      if (next->type == INPUT_STRING)
+	{
+	  next->type = INPUT_CHAIN;
+	  next->u.u_c.chain = next->u.u_c.end = NULL;
+	}
+      assert (next->type == INPUT_CHAIN);
+      make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+      assert (obstack_object_size (current_input) == 0 && next->u.u_c.chain);
+      chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
+      chain->next = next->u.u_c.chain;
+      next->u.u_c.chain = chain;
+      chain->type = CHAIN_STR;
+      chain->quote_age = 0;
+      chain->u.u_s.str = (char *) obstack_copy (current_input, curr_quote.str1,
+						curr_quote.len1);
+      chain->u.u_s.len = curr_quote.len1;
+      chain->u.u_s.level = -1;
+    }
+}
+
 /*-------------------------------------------------------------------.
 | Last half of push_string ().  All remaining unfinished text on the |
 | obstack returned from push_string_init is collected into the input |
@@ -518,13 +593,20 @@ push_string_finish (void)
 {
   size_t len = obstack_object_size (current_input);
 
-  if (next == NULL)
+  assert (next);
+  if (next->type == INPUT_FILE)
     {
       assert (!len);
-      return;
+      isp = next;
     }
-
-  if (len || next->type == INPUT_CHAIN)
+  else if (next->type == INPUT_FILE_Q)
+    {
+      assert (len == next->u.u_q.count * curr_quote.len2);
+      next->u.u_q.quotes->str2 = (char *) obstack_finish (current_input);
+      next->u.u_q.quotes->len2 = len;
+      isp = next;
+    }
+  else if (len || next->type == INPUT_CHAIN)
     {
       if (next->type == INPUT_STRING)
 	{
@@ -533,7 +615,6 @@ push_string_finish (void)
 	}
       else
 	make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
-      next->prev = isp;
       isp = next;
       input_change = true;
     }
@@ -652,6 +733,8 @@ pop_input (bool cleanup)
 	}
       break;
 
+    case INPUT_FILE_Q:
+      return false;
     case INPUT_FILE:
       if (!cleanup)
 	return false;
@@ -683,9 +766,15 @@ pop_input (bool cleanup)
       assert (!"pop_input");
       abort ();
     }
+  if (next)
+    {
+      /* Only possible after dnl.  */
+      assert (obstack_object_size (current_input) == 0
+	      && next->type == INPUT_STRING);
+      next = NULL;
+    }
   obstack_free (current_input, isp);
   cached_quote = NULL;
-  next = NULL;			/* might be set in push_string_init () */
 
   isp = tmp;
   input_change = true;
@@ -701,7 +790,7 @@ pop_input (bool cleanup)
 bool
 pop_wrapup (void)
 {
-  next = NULL;
+  assert (!next);
   obstack_free (current_input, NULL);
   free (current_input);
 
@@ -740,25 +829,33 @@ input_print (struct obstack *obs)
   size_t len = obstack_object_size (current_input);
   size_t maxlen = max_debug_argument_length;
   token_chain *chain;
+  input_block *block = next ? next : isp;
+  size_t count;
 
-  if (!next)
-    {
-      assert (!len);
-      return;
-    }
-  switch (next->type)
+  switch (block->type)
     {
     case INPUT_STRING:
-      assert (!next->u.u_s.len);
+      assert (next && !block->u.u_s.len);
+      break;
+    case INPUT_FILE_Q:
+      assert (next && len);
+      count = block->u.u_q.count;
+      while (count--)
+	if (shipout_string_trunc (obs, block->u.u_q.quotes->str1,
+				  block->u.u_q.quotes->len1, &maxlen))
+	  return;
+      obstack_grow (obs, "<file: ", strlen ("<file: "));
+      obstack_grow (obs, block->prev->file, strlen (block->prev->file));
+      obstack_1grow (obs, '>');
       break;
     case INPUT_FILE:
       assert (!len);
       obstack_grow (obs, "<file: ", strlen ("<file: "));
-      obstack_grow (obs, next->file, strlen (next->file));
+      obstack_grow (obs, block->file, strlen (block->file));
       obstack_1grow (obs, '>');
       break;
     case INPUT_CHAIN:
-      chain = next->u.u_c.chain;
+      chain = block->u.u_c.chain;
       while (chain)
 	{
 	  switch (chain->type)
@@ -815,39 +912,63 @@ static const char *
 next_buffer (size_t *len, bool allow_quote)
 {
   token_chain *chain;
+  input_block *block = isp;
 
   while (1)
     {
-      assert (isp);
+      assert (block);
       if (input_change)
 	{
-	  current_file = isp->file;
-	  current_line = isp->line;
+	  current_file = block->file;
+	  current_line = block->line;
 	  input_change = false;
 	}
 
-      switch (isp->type)
+      switch (block->type)
 	{
 	case INPUT_STRING:
-	  if (isp->u.u_s.len)
+	  if (block->u.u_s.len)
 	    {
-	      *len = isp->u.u_s.len;
-	      return isp->u.u_s.str;
+	      *len = block->u.u_s.len;
+	      return block->u.u_s.str;
 	    }
 	  break;
 
+	case INPUT_FILE_Q:
+	  if (block->u.u_q.count)
+	    {
+	      push_string_init (block->file, block->line);
+	      while (block->u.u_q.count)
+		{
+		  obstack_grow (current_input, block->u.u_q.quotes->str1,
+				block->u.u_q.quotes->len1);
+		  block->u.u_q.count--;
+		}
+	      push_string_finish ();
+	      return next_buffer (len, allow_quote);
+	    }
+	  if (block->prev->u.u_f.end)
+	    {
+	      string_pair *pair = block->u.u_q.quotes;
+	      block->type = INPUT_STRING;
+	      block->u.u_s.str = pair->str2;
+	      block->u.u_s.len = pair->len2;
+	      return next_buffer (len, allow_quote);
+	    }
+	  block = block->prev;
+	  /* fall through */
 	case INPUT_FILE:
 	  if (start_of_input_line)
 	    {
 	      start_of_input_line = false;
-	      current_line = ++isp->line;
+	      current_line = ++block->line;
 	    }
-	  if (isp->u.u_f.end)
+	  if (block->u.u_f.end)
 	    break;
-	  return freadptr (isp->u.u_f.fp, len);
+	  return freadptr (block->u.u_f.fp, len);
 
 	case INPUT_CHAIN:
-	  chain = isp->u.u_c.chain;
+	  chain = block->u.u_c.chain;
 	  while (chain)
 	    {
 	      if (allow_quote && chain->quote_age == current_quote_age)
@@ -875,16 +996,16 @@ next_buffer (size_t *len, bool allow_quote)
 		    }
 		  return NULL; /* No buffer to provide.  */
 		case CHAIN_LOC:
-		  isp->file = chain->u.u_l.file;
-		  isp->line = chain->u.u_l.line;
+		  block->file = chain->u.u_l.file;
+		  block->line = chain->u.u_l.line;
 		  input_change = true;
-		  isp->u.u_c.chain = chain->next;
+		  block->u.u_c.chain = chain->next;
 		  return next_buffer (len, allow_quote);
 		default:
 		  assert (!"next_buffer");
 		  abort ();
 		}
-	      isp->u.u_c.chain = chain = chain->next;
+	      block->u.u_c.chain = chain = chain->next;
 	    }
 	  break;
 
@@ -898,6 +1019,7 @@ next_buffer (size_t *len, bool allow_quote)
 
       /* End of input source --- pop one level.  */
       pop_input (true);
+      block = isp;
     }
 }
 
@@ -914,19 +1036,24 @@ consume_buffer (size_t len)
   const char *buf;
   const char *p;
   size_t buf_len;
+  input_block *block = isp;
 
-  assert (isp && !input_change && len);
-  switch (isp->type)
+  assert (block && !input_change && len);
+  switch (block->type)
     {
     case INPUT_STRING:
-      assert (len <= isp->u.u_s.len);
-      isp->u.u_s.len -= len;
-      isp->u.u_s.str += len;
+      assert (len <= block->u.u_s.len);
+      block->u.u_s.len -= len;
+      block->u.u_s.str += len;
       break;
 
+    case INPUT_FILE_Q:
+      assert (!block->u.u_q.count);
+      block = block->prev;
+      /* fall through */
     case INPUT_FILE:
-      assert (!start_of_input_line);
-      buf = freadptr (isp->u.u_f.fp, &buf_len);
+      assert (!start_of_input_line && !block->u.u_f.end);
+      buf = freadptr (block->u.u_f.fp, &buf_len);
       assert (buf && len <= buf_len);
       buf_len = 0;
       while ((p = memchr (buf + buf_len, '\n', len - buf_len)))
@@ -934,15 +1061,15 @@ consume_buffer (size_t len)
 	  if (p == buf + len - 1)
 	    start_of_input_line = true;
 	  else
-	    current_line = ++isp->line;
+	    current_line = ++block->line;
 	  buf_len = p - buf + 1;
 	}
-      if (freadseek (isp->u.u_f.fp, len) != 0)
+      if (freadseek (block->u.u_f.fp, len) != 0)
 	assert (false);
       break;
 
     case INPUT_CHAIN:
-      chain = isp->u.u_c.chain;
+      chain = block->u.u_c.chain;
       assert (chain && chain->type == CHAIN_STR && len <= chain->u.u_s.len);
       /* Partial consumption invalidates quote age.  */
       chain->quote_age = 0;
@@ -983,6 +1110,29 @@ peek_input (bool allow_argv)
 	    break;
 	  return to_uchar (block->u.u_s.str[0]);
 
+	case INPUT_FILE_Q:
+	  if (block->u.u_q.count)
+	    {
+	      push_string_init (block->file, block->line);
+	      while (block->u.u_q.count)
+		{
+		  obstack_grow (current_input, block->u.u_q.quotes->str1,
+				block->u.u_q.quotes->len1);
+		  block->u.u_q.count--;
+		}
+	      push_string_finish ();
+	      return peek_input (allow_argv);
+	    }
+	  if (block->prev->u.u_f.end)
+	    {
+	      string_pair *pair = block->u.u_q.quotes;
+	      block->type = INPUT_STRING;
+	      block->u.u_s.str = pair->str2;
+	      block->u.u_s.len = pair->len2;
+	      return peek_input (allow_argv);
+	    }
+	  block = block->prev;
+	  /* fall through */
 	case INPUT_FILE:
 	  ch = getc (block->u.u_f.fp);
 	  if (ch != EOF)
@@ -1078,46 +1228,71 @@ next_char_1 (bool allow_quote, bool allow_argv)
 {
   int ch;
   token_chain *chain;
+  input_block *block = isp;
 
   while (1)
     {
-      assert (isp);
+      assert (block);
       if (input_change)
 	{
-	  current_file = isp->file;
-	  current_line = isp->line;
+	  current_file = block->file;
+	  current_line = block->line;
 	  input_change = false;
 	}
 
-      switch (isp->type)
+      switch (block->type)
 	{
 	case INPUT_STRING:
-	  if (!isp->u.u_s.len)
+	  if (!block->u.u_s.len)
 	    break;
-	  isp->u.u_s.len--;
-	  return to_uchar (*isp->u.u_s.str++);
+	  block->u.u_s.len--;
+	  return to_uchar (*block->u.u_s.str++);
 
+	case INPUT_FILE_Q:
+	  if (block->u.u_q.count)
+	    {
+	      push_string_init (block->file, block->line);
+	      while (block->u.u_q.count)
+		{
+		  obstack_grow (current_input, block->u.u_q.quotes->str1,
+				block->u.u_q.quotes->len1);
+		  block->u.u_q.count--;
+		}
+	      push_string_finish ();
+	      return next_char_1 (allow_quote, allow_argv);
+	    }
+	  if (block->prev->u.u_f.end)
+	    {
+	      string_pair *pair = block->u.u_q.quotes;
+	      block->type = INPUT_STRING;
+	      block->u.u_s.str = pair->str2;
+	      block->u.u_s.len = pair->len2;
+	      return next_char_1 (allow_quote, allow_argv);
+	    }
+	  block = block->prev;
+	  /* fall through */
 	case INPUT_FILE:
 	  if (start_of_input_line)
 	    {
 	      start_of_input_line = false;
-	      current_line = ++isp->line;
+	      current_line = ++block->line;
 	    }
 
 	  /* If stdin is a terminal, calling getc after peek_input
 	     already called it would make the user have to hit ^D
 	     twice to quit.  */
-	  ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.fp);
+	  ch = block->u.u_f.end ? EOF : getc (block->u.u_f.fp);
 	  if (ch != EOF)
 	    {
 	      if (ch == '\n')
 		start_of_input_line = true;
 	      return ch;
 	    }
+	  block->u.u_f.end = true;
 	  break;
 
 	case INPUT_CHAIN:
-	  chain = isp->u.u_c.chain;
+	  chain = block->u.u_c.chain;
 	  while (chain)
 	    {
 	      unsigned int argc;
@@ -1161,7 +1336,7 @@ next_char_1 (bool allow_quote, bool allow_argv)
 		  /* Rather than directly parse argv here, we push
 		     another input block containing the next unparsed
 		     argument from argv.  */
-		  push_string_init (isp->file, isp->line);
+		  push_string_init (block->file, block->line);
 		  push_arg_quote (current_input, chain->u.u_a.argv,
 				  chain->u.u_a.index,
 				  quote_cache (NULL, chain->quote_age,
@@ -1171,16 +1346,16 @@ next_char_1 (bool allow_quote, bool allow_argv)
 		  push_string_finish ();
 		  return next_char_1 (allow_quote, allow_argv);
 		case CHAIN_LOC:
-		  isp->file = chain->u.u_l.file;
-		  isp->line = chain->u.u_l.line;
+		  block->file = chain->u.u_l.file;
+		  block->line = chain->u.u_l.line;
 		  input_change = true;
-		  isp->u.u_c.chain = chain->next;
+		  block->u.u_c.chain = chain->next;
 		  return next_char_1 (allow_quote, allow_argv);
 		default:
 		  assert (!"next_char_1");
 		  abort ();
 		}
-	      isp->u.u_c.chain = chain = chain->next;
+	      block->u.u_c.chain = chain = chain->next;
 	    }
 	  break;
 
@@ -1194,6 +1369,7 @@ next_char_1 (bool allow_quote, bool allow_argv)
 
       /* End of input source --- pop one level.  */
       pop_input (true);
+      block = isp;
     }
 }
 
@@ -1232,6 +1408,9 @@ skip_line (const call_info *name)
     }
   if (ch == CHAR_EOF)
     m4_warn (0, name, _("end of file treated as newline"));
+  if (!next)
+    /* Possible if dnl popped input looking for newline.  */
+    push_string_init (current_file, current_line);
 }
 
 /*------------------------------------------------------------------.
