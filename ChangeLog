@@ -1,5 +1,13 @@
 2008-04-24  Eric Blake  <ebb9@byu.net>
 
+	Fix debugmode regression from 2008-04-14.
+	* src/input.c (pop_input): Fix -di output on end of input.
+	* doc/m4.texinfo (Debug Levels): Test this behavior.
+	(Changeword, Location): Correct examples.
+	* checks/check-them (examples): Update to account for recommended
+	location for running tests.
+	* doc/m4.texinfo (Debug Levels): Test this behavior.
+
 	Fix debugmode regression from 2008-02-18.
 	* src/m4.h (DEBUG_TRACE_VERBOSE): Make -dV verbose again.
 	* NEWS: Document this fix.

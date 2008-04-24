@@ -657,7 +657,7 @@ pop_input (bool cleanup)
 	return false;
       if (debug_level & DEBUG_TRACE_INPUT)
 	{
-	  if (tmp)
+	  if (tmp != &input_eof)
 	    DEBUG_MESSAGE2 ("input reverted to %s, line %d",
 			    tmp->file, tmp->line);
 	  else
