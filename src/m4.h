@@ -183,7 +183,7 @@ extern FILE *debug;
 #define DEBUG_TRACE_CALLID 0x200
 
 /* V: very verbose --  print everything */
-#define DEBUG_TRACE_VERBOSE 0x377
+#define DEBUG_TRACE_VERBOSE 0x3FF
 /* default flags -- equiv: aeq */
 #define DEBUG_TRACE_DEFAULT 0x007
 

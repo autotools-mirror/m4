@@ -9,6 +9,10 @@ Foundation, Inc.
    using `builtin' or `indir' to perform nested `shift' calls triggered an
    assertion failure.
 
+** Fix regression introduced in 1.4.10b (but not present in 1.4.11) where
+   the command-line option -dV, as well as the builtin `debugmode(V)',
+   failed to enable `t' and `c' debug options.
+
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.  NOTE: this change exposes a bug
