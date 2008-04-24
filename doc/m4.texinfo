@@ -3608,6 +3608,42 @@ foo
 @result{}FOO
 @end example
 
+The following example demonstrates the behavior of length truncation,
+when specified on the command line.  Note that each argument and the
+final result are individually truncated.  Also, the special tokens for
+builtin functions are not truncated.
+
+@comment options: -l6
+@example
+$ @kbd{m4 -d -l 6}
+define(`echo', `$@@')debugmode(`+t')
+@result{}
+echo(`1', `long string')
+@error{}m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
+@result{}1,long string
+indir(`echo', defn(`changequote'))
+@error{}m4trace: -2- defn(`change...')
+@error{}m4trace: -1- indir(`echo', <changequote>) -> ``''
+@result{}
+@end example
+
+This example shows the effects of the debug flags that are not related
+to macro tracing.
+
+@comment examples
+@comment options: -dip
+@example
+$ @kbd{m4 -dip -I examples}
+@error{}m4debug: input read from stdin
+include(`foo')dnl
+@error{}m4debug: path search for `foo' found `examples/foo'
+@error{}m4debug: input read from examples/foo
+@result{}bar
+@error{}m4debug: input reverted to stdin, line 1
+^D
+@error{}m4debug: input exhausted
+@end example
+
 @node Debug Output
 @section Saving debugging output
 
@@ -4259,7 +4295,7 @@ define(`bar
 ', defn(`__file__'))
 @result{}
 include(`foo')
-@result{}../examples/foo
+@result{}examples/foo
 define(`bar
 ', defn(`__line__'))
 @result{}
@@ -6362,7 +6398,7 @@ foo
 @result{}foo called at stdin:2
 include(`incl.m4')
 @result{}Include file start
-@result{}foo called at ../examples/incl.m4:2
+@result{}foo called at examples/incl.m4:2
 @result{}Include file end
 @result{}
 @end example

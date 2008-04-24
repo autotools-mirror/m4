@@ -92,7 +92,7 @@ do
 
   xoutfile=`sed -n 's/^dnl @ expected output: //p' "$file"`
   if test -z "$xoutfile" ; then
-    sed -e '/^dnl @result{}/!d' -e 's///' -e "s|\.\./examples|$examples|" \
+    sed -e '/^dnl @result{}/!d' -e 's///' -e "s|examples/|$examples/|" \
       "$file" > $xout
   else
     cp "$examples/$xoutfile" $xout
@@ -101,10 +101,10 @@ do
   xerrfile=`sed -n 's/^dnl @ expected error: //p' "$file"`
   if test -z "$xerrfile" ; then
     sed '/^dnl @error{}/!d
-         s///; '"s|^m4:|$m4name:|; s|\.\./examples|$examples|" \
+	 s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
       "$file" > $xerr
   else
-    sed "s|^m4:|$m4name:|; s|\.\./examples|$examples|" \
+    sed "s|^m4:|$m4name:|; s|examples/|$examples/|" \
       "$examples/$xerrfile" > $xerr
   fi
 

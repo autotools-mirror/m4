@@ -1,3 +1,12 @@
+2008-04-24  Eric Blake  <ebb9@byu.net>
+
+	Add debugmode test.
+	* doc/m4.texinfo (Debug Levels): Test -di behavior.
+	(Changeword, Location): Correct examples.
+	* checks/check-them (examples): Update to account for recommended
+	location for running tests.
+	* doc/m4.texinfo (Debug Levels): Test this behavior.
+
 2008-04-21  Eric Blake  <ebb9@byu.net>
 
 	Fix spelling of attribution to Christopher Strachey.
