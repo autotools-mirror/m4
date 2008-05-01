@@ -312,7 +312,7 @@ extern bool	m4_symbol_value_flatten_args (m4_symbol_value *);
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);
-extern void		m4_symbol_value_copy	  (m4_symbol_value *,
+extern void		m4_symbol_value_copy	  (m4 *, m4_symbol_value *,
 						   m4_symbol_value *);
 extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);

@@ -210,6 +210,16 @@ base value.
 ]], [[m4:define.m4:1: Warning: undefine: undefined macro `macro'
 ]])
 
+dnl check regression present 2008-02-22 to 2008-04-30.
+AT_DATA([in.m4], [[define(`qq', ``$*;$@'')dnl
+define(`foo', qq(`a', `b'))dnl
+foo
+defn(`foo')
+]])
+AT_CHECK_M4([in.m4], [0], [[a,b;a,b
+a,b;`a',`b'
+]])
+
 AT_CLEANUP
 
 

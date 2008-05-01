@@ -392,7 +392,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 
 	case M4_TOKEN_MACDEF:
 	  if (argp->type == M4_SYMBOL_VOID && obstack_object_size (obs) == 0)
-	    m4_symbol_value_copy (argp, &token);
+	    m4_symbol_value_copy (context, argp, &token);
 	  else
 	    argp->type = M4_SYMBOL_TEXT;
 	  break;

@@ -406,7 +406,7 @@ arg_destroy_CB (m4_hash *hash, const void *name, void *arg, void *ignored)
 }
 
 void
-m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
+m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
 {
   m4_symbol_value *next;
 
@@ -465,26 +465,35 @@ m4_symbol_value_copy (m4_symbol_value *dest, m4_symbol_value *src)
     case M4_SYMBOL_COMP:
       {
 	m4__symbol_chain *chain = src->u.u_c.chain;
-	size_t len = 0;
+	size_t len;
 	char *str;
-	char *p;
+	const m4_string_pair *quotes;
+	m4_obstack *obs = m4_arg_scratch (context);
 	while (chain)
 	  {
-	    /* TODO for now, only text links are supported.  */
-	    assert (chain->type == M4__CHAIN_STR);
-	    len += chain->u.u_s.len;
+	    switch (chain->type)
+	      {
+	      case M4__CHAIN_STR:
+		obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+		break;
+	      case M4__CHAIN_ARGV:
+		quotes = m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+					  chain->u.u_a.quotes);
+		m4__arg_print (context, obs, chain->u.u_a.argv,
+			       chain->u.u_a.index, quotes, true, NULL, NULL,
+			       NULL, false, false);
+		break;
+	      default:
+		assert (!"m4_symbol_value_copy");
+		abort ();
+	      }
 	    chain = chain->next;
 	  }
-	p = str = xcharalloc (len + 1);
-	chain = src->u.u_c.chain;
-	while (chain)
-	  {
-	    memcpy (p, chain->u.u_s.str, chain->u.u_s.len);
-	    p += chain->u.u_s.len;
-	    chain = chain->next;
-	  }
-	*p = '\0';
-	m4_set_symbol_value_text (dest, str, len, 0);
+	obstack_1grow (obs, '\0');
+	len = obstack_object_size (obs);
+	str = xcharalloc (len);
+	memcpy (str, obstack_finish (obs), len);
+	m4_set_symbol_value_text (dest, str, len - 1, 0);
       }
       break;
     default:
