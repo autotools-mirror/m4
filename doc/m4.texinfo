@@ -4040,7 +4040,15 @@ debugmode()
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO
+debugmode(`V')
+@result{}
+foo(`BAR')
+@error{}m4trace:stdin:6: -1- id 6: foo ... = `FOO$1'
+@error{}m4trace:stdin:6: -1- id 6: foo(`BAR') -> `FOOBAR'
+@result{}FOOBAR
 debugmode
+@error{}m4trace:stdin:7: -1- id 7: debugmode ... = <debugmode>@{gnu@}
+@error{}m4trace:stdin:7: -1- id 7: debugmode ->@w{ }
 @result{}
 foo
 @error{}m4trace: -1- foo
@@ -4048,13 +4056,37 @@ foo
 debugmode(`+clmx')
 @result{}
 foo(divnum)
-@error{}m4trace:8: -1- id 8: foo ... = FOO$1
-@error{}m4trace:8: -2- id 9: divnum ... = <divnum>@{m4@}
-@error{}m4trace:8: -2- id 9: divnum
-@error{}m4trace:8: -1- id 8: foo
+@error{}m4trace:10: -1- id 10: foo ... = FOO$1
+@error{}m4trace:10: -2- id 11: divnum ... = <divnum>@{m4@}
+@error{}m4trace:10: -2- id 11: divnum
+@error{}m4trace:10: -1- id 10: foo
 @result{}FOO0
 debugmode(`-m')
 @result{}
+@end example
+
+This example shows the effects of the debug flags that are not related
+to macro tracing.
+
+@comment examples
+@comment options: -dip
+@example
+$ @kbd{m4 -dip -I examples}
+@error{}m4debug: input read from stdin
+define(`foo', `m4wrap(`wrapped text
+')dnl')
+@result{}
+include(`incl.m4')dnl
+@error{}m4debug: path search for `incl.m4' found `examples/incl.m4'
+@error{}m4debug: input read from examples/incl.m4
+@result{}Include file start
+@result{}Include file end
+@error{}m4debug: input reverted to stdin, line 3
+^D
+@error{}m4debug: input exhausted
+@error{}m4debug: input from m4wrap recursion level 1
+@result{}wrapped text
+@error{}m4debug: input from m4wrap exhausted
 @end example
 
 @node Debuglen

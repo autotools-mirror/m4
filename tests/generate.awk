@@ -1,6 +1,7 @@
 # Extract all examples from the manual source.            -*- AWK -*-
 
-# Copyright (C) 1992, 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2000, 2001, 2006, 2007, 2008 Free Software
+# Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -141,7 +142,6 @@ function normalize(contents,    i, lines, n, line, res) {
       gsub ("@tabchar{}", "\t", line);
       gsub ("@w{ }", " @\\&t@", line);
       gsub ("m4_", "m@\\&t@4_", line);
-      gsub ("stdin", "input.m4", line);
 
       # Some of the examples have improperly balanced square brackets.
       gsub ("[[]", "@<:@", line);
@@ -181,23 +181,31 @@ function new_test(input, status, output, error, options, xfail, examples) {
       printf ("AT_DATA([expout1],\n[[%s]])\n", output);
       printf ("sed -e \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
       printf ("  < expout1 > expout\n\n");
+      if (error)
+	{
+	  printf ("AT_DATA([experr1],\n[[%s]])\n", error);
+	  printf ("sed \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
+	  printf ("  < experr1 > experr\n\n");
+	}
       options = options " -I\"$abs_top_srcdir/examples\"";
     }
 
   printf ("AT_DATA([[input.m4]],\n[[%s]])\n\n", input);
   # Some of these tests `include' files from tests/.
-  printf ("AT_CHECK_M4([[%s input.m4]], %s,", options, status);
+  printf ("AT_CHECK_M4([[%s]], %s,", options, status);
   if (examples == 1)
     printf ("\n[expout]");
   else if (output)
     printf ("\n[[%s]]", output);
   else
     printf (" []");
-  if (error)
-    printf (",\n[[%s]])", error);
+  if (examples == 1 && error)
+    printf (",\n[experr]");
+  else if (error)
+    printf (",\n[[%s]]", error);
   else
-    printf (")");
-  printf ("\n\n");
+    printf (", []");
+  printf (", [[input.m4]])\n\n");
 }
 
 function fatal(msg) {
