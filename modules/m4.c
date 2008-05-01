@@ -210,7 +210,7 @@ M4BUILTIN_HANDLER (ifdef)
 M4BUILTIN_HANDLER (ifelse)
 {
   const char *me = M4ARG (0);
-  size_t index;
+  size_t i;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
      rely on the regular mechanisms.  */
@@ -220,14 +220,14 @@ M4BUILTIN_HANDLER (ifelse)
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
     m4_bad_argc (context, argc, me, 0, argc - 2, false);
 
-  index = 1;
+  i = 1;
   argc--;
 
   while (true)
     {
-      if (m4_arg_equal (context, argv, index, index + 1))
+      if (m4_arg_equal (context, argv, i, i + 1))
 	{
-	  m4_push_arg (context, obs, argv, index + 2);
+	  m4_push_arg (context, obs, argv, i + 2);
 	  return;
 	}
       switch (argc)
@@ -237,12 +237,12 @@ M4BUILTIN_HANDLER (ifelse)
 
 	case 4:
 	case 5:
-	  m4_push_arg (context, obs, argv, index + 3);
+	  m4_push_arg (context, obs, argv, i + 3);
 	  return;
 
 	default:
 	  argc -= 3;
-	  index += 3;
+	  i += 3;
 	}
     }
 }

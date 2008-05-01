@@ -127,7 +127,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */
   char *p;				/* Position within fstart.  */
   unsigned char c;			/* A simple character.  */
-  int index = 0;			/* Index within argc used so far.  */
+  int i = 0;				/* Index within argc used so far.  */
   bool valid_format = true;		/* True if entire format string ok.  */
 
   /* Flags.  */
@@ -158,7 +158,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
   char *str;			/* Malloc'd buffer of formatted text.  */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  f = fmt = ARG_STR (index, argc, argv);
+  f = fmt = ARG_STR (i, argc, argv);
   memset (ok, 0, sizeof ok);
   while (true)
     {
@@ -167,7 +167,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	  if (c == '\0')
 	    {
 	      if (valid_format)
-		m4_bad_argc (context, argc, me, index, index, true);
+		m4_bad_argc (context, argc, me, i, i, true);
 	      return;
 	    }
 	  obstack_1grow (obs, c);
@@ -247,7 +247,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
       *p++ = '*';
       if (*fmt == '*')
 	{
-	  width = ARG_INT (index, argc, argv);
+	  width = ARG_INT (i, argc, argv);
 	  fmt++;
 	}
       else
@@ -267,7 +267,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	  ok['c'] = 0;
 	  if (*(++fmt) == '*')
 	    {
-	      prec = ARG_INT (index, argc, argv);
+	      prec = ARG_INT (i, argc, argv);
 	      ++fmt;
 	    }
 	  else
@@ -356,27 +356,27 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	{
 	case CHAR:
 	  str = asnprintf (base, &len, fstart, width,
-			   ARG_INT (index, argc, argv));
+			   ARG_INT (i, argc, argv));
 	  break;
 
 	case INT:
 	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_INT (index, argc, argv));
+			   ARG_INT (i, argc, argv));
 	  break;
 
 	case LONG:
 	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_LONG (index, argc, argv));
+			   ARG_LONG (i, argc, argv));
 	  break;
 
 	case DOUBLE:
 	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_DOUBLE (index, argc, argv));
+			   ARG_DOUBLE (i, argc, argv));
 	  break;
 
 	case STR:
 	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_STR (index, argc, argv));
+			   ARG_STR (i, argc, argv));
 	  break;
 
 	default:

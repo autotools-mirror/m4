@@ -1,5 +1,14 @@
 2008-05-01  Eric Blake  <ebb9@byu.net>
 
+	Avoid -Wshadow compiler warnings.
+	* m4/output.c (threshold_diversion_CB): s/div/diversion/.
+	* m4/macro.c (make_argv_ref, arg_symbol, m4_arg_symbol)
+	(m4_is_arg_text, m4_is_arg_func, m4_arg_text, m4_arg_empty)
+	(m4_arg_len, m4_arg_func, m4__arg_print, m4_make_argv_ref)
+	(m4_push_arg, m4__push_arg_quote): s/index/arg/.
+	* modules/format.c (format): Likewise.
+	* modules/m4.c (ifelse): Likewise.
+
 	Improve debugmode testing, based on recent branch-1.6 regressions.
 	* doc/m4.texinfo (Debugmode): Enhance tests.
 	* tests/generate.awk: Run tests from stdin, not input.m4.  Support
