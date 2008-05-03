@@ -2643,6 +2643,63 @@ foo(`a', `b', `c')
 @result{}arguments:3
 @end example
 
+Since m4 is a macro language, it is even possible to write a macro that
+makes defining blind macros easier:
+
+@deffn Composite define_blind (@var{name}, @ovar{value})
+Defines @var{name} as a blind macro, such that @var{name} will expand to
+@var{value} only when given explicit arguments.  @var{value} should not
+be the result of @code{defn} (@pxref{Defn}).  This macro is only
+recognized with parameters, and results in an empty string.
+@end deffn
+
+Defining a macro to define another macro can be a bit tricky.  We want
+to use a literal @samp{$#} in the argument to the nested @code{define}.
+However, if @samp{$} and @samp{#} are adjacent in the definition of
+@code{define_blind}, then it would be expanded as the number of
+arguments to @code{define_blind} rather than the intended number of
+arguments to @var{name}.  The solution is to pass the difficult
+characters through extra arguments to a helper macro
+@code{_define_blind}.
+
+As for the limitation against using @code{defn}, there are two reasons.
+If a macro was previously defined with @code{define_blind}, then it can
+safely be renamed to a new blind macro using plain @code{define}; using
+@code{define_blind} to rename it just adds another layer of
+@code{ifelse}, occupying memory and slowing down execution.  And if a
+macro is a builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+With that explanation, here's the definition, and some sample usage.
+Notice that @code{define_blind} is itself a blind macro.
+
+@example
+$ @kbd{m4 -d}
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
+@result{}
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
+@result{}
+define_blind
+@result{}define_blind
+define_blind(`foo', `arguments were $*')
+@result{}
+foo
+@result{}foo
+foo(`bar')
+@result{}arguments were bar
+define(`blah', defn(`foo'))
+@result{}
+blah
+@result{}blah
+blah(`a', `b')
+@result{}arguments were a,b
+defn(`blah')
+@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
+@end example
+
 @cindex multibranches
 @cindex switch statement
 @cindex case statement
