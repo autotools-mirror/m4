@@ -153,7 +153,7 @@ struct m4_string_pair
 /* Grab the text contents of argument I, or abort if the argument is
    not text.  Assumes that `m4 *context' and `m4_macro_args *argv' are
    in scope.  */
-#define M4ARG(i) m4_arg_text (context, argv, i)
+#define M4ARG(i) m4_arg_text (context, argv, i, false)
 
 /* Grab the length of the text contents of argument I, or abort if the
    argument is not text.  Assumes that `m4 *context' and
@@ -312,7 +312,7 @@ extern bool	m4_symbol_value_flatten_args (m4_symbol_value *);
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);
-extern void		m4_symbol_value_copy	  (m4 *, m4_symbol_value *,
+extern bool		m4_symbol_value_copy	  (m4 *, m4_symbol_value *,
 						   m4_symbol_value *);
 extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
@@ -352,7 +352,8 @@ extern size_t	m4_arg_argc		(m4_macro_args *);
 extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, size_t);
 extern bool	m4_is_arg_text		(m4_macro_args *, size_t);
 extern bool	m4_is_arg_func		(m4_macro_args *, size_t);
-extern const char *m4_arg_text		(m4 *, m4_macro_args *, size_t);
+extern bool	m4_is_arg_composite	(m4_macro_args *, size_t);
+extern const char *m4_arg_text		(m4 *, m4_macro_args *, size_t, bool);
 extern bool	m4_arg_equal		(m4 *, m4_macro_args *, size_t,
 					 size_t);
 extern bool	m4_arg_empty		(m4_macro_args *, size_t);

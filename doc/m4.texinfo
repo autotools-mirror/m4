@@ -1798,6 +1798,23 @@ Defines @var{name} to expand to @var{expansion}.  If
 The expansion of @code{define} is void.
 The macro @code{define} is recognized only with parameters.
 @end deffn
+@comment Other implementations, such as Solaris, can define a macro
+@comment with a builtin token attached to text:
+@comment  define(foo, a`'defn(`divnum')b)
+@comment  defn(`foo') => ab
+@comment  dumpdef(`foo') => foo: a<divnum>b
+@comment  len(defn(`foo')) => 3
+@comment  index(defn(`foo'), defn(`divnum')) => 1
+@comment  foo => a0b
+@comment It may be worth making some changes to support this behavior,
+@comment or something similar to it.
+@comment
+@comment But be sure it has sane semantics, with potentially deferred
+@comment expansion of builtins.  For example, this should not warn
+@comment about trying to access the definition of an undefined macro:
+@comment  define(`foo', `ifdef(`$1', 'defn(`defn')`)')foo(`oops')
+@comment Also, think how to handle conflicting argument counts:
+@comment  define(`bar', defn(`dnl', `len'))
 
 The following example defines the macro @var{foo} to expand to the text
 @samp{Hello World.}.
@@ -1834,13 +1851,6 @@ definition of a macro if it has several definitions from @code{pushdef}
 (@pxref{Pushdef}).  Some other implementations of @code{m4} replace all
 definitions of a macro with @code{define}.  @xref{Incompatibilities},
 for more details.
-@comment FIXME - See Austin group XCU ERN 118; this is considered
-@comment ambiguous in the current version of POSIX.  The best thing to
-@comment do here would probably be keep GNU semantics of popdef/pushdef
-@comment in the m4 module unconditionally, then have a shadow builtin in
-@comment the traditional module that does the undefine/pushdef
-@comment semantics, rather than our current keying off of
-@comment POSIXLY_CORRECT within the m4 module.
 
 As a @acronym{GNU} extension, the first argument to @code{define} does
 not have to be a simple word.
@@ -2175,19 +2185,9 @@ empty and triggers a warning.
 If @var{name} is a user-defined macro, the quoted definition is simply
 the quoted expansion text.  If, instead, @var{name} is a builtin, the
 expansion is a special token, which points to the builtin's internal
-definition.  This token is only meaningful as the second argument to
+definition.  This token meaningful primarily as the second argument to
 @code{define} (and @code{pushdef}), and is silently converted to an
-empty string in most other contexts.
-@comment FIXME - Other implementations, such as Solaris, can pass a
-@comment builtin token around to other macros, flattening it only on output:
-@comment  define(foo, a`'defn(`divnum')b)
-@comment  defn(`foo') => ab
-@comment  dumpdef(`foo') => foo: a<divnum>b
-@comment  len(defn(`foo')) => 3
-@comment  index(defn(`foo'), defn(`divnum')) => 1
-@comment  foo => a0b
-@comment It may be worth making some changes to support this behavior,
-@comment or something similar to it.
+empty string in many other contexts.
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2349,28 +2349,49 @@ bar
 @result{}0
 @end example
 
-A warning is issued if @var{name} is undefined.  Also, at present,
-concatenating a builtin token with anything else is not supported as a
-macro definition, and a warning is issued.
-@comment FIXME - handle defining macros with mixed text and builtins.
+A warning is issued if @var{name} is undefined.  Also note that as of M4
+1.6, @code{defn} with multiple arguments can join text with builtin
+tokens.  However, when defining a macro via @code{define} or
+@code{pushdef}, a warning is issued and the builtin token ignored if the
+builtin token does not occur in isolation.  A future version of
+@acronym{GNU} M4 may lift this restriction.
 
-@comment xfail
 @example
+$ @kbd{m4 -d}
 defn(`foo')
 @error{}m4:stdin:1: Warning: defn: undefined macro `foo'
 @result{}
-define(`echo', `$@@')
+define(`a', `A')define(`AA', `b')
 @result{}
-define(`foo', `a')
+traceon(`defn', `define')
 @result{}
-define(`bar', defn(`foo', `divnum'))
+defn(`a', `divnum', `a')
+@error{}m4trace: -1- defn(`a', `divnum', `a') -> ``A'<divnum>`A''
+@result{}AA
+define(`mydivnum', defn(`divnum', `divnum'))mydivnum
+@error{}m4trace: -2- defn(`divnum', `divnum') -> `<divnum><divnum>'
+@error{}m4:stdin:5: Warning: define: cannot concatenate builtins
+@error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>') -> `'
 @result{}
-define(`blah', echo(defn(`divnum', `foo')))
+traceoff(`defn', `define')dumpdef(`mydivnum')
+@error{}mydivnum:@tabchar{}`'
 @result{}
-bar
-@result{}a0
-blah
-@result{}0a
+define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
+@error{}m4:stdin:7: Warning: define: cannot concatenate builtins
+@result{}
+define(`mydivnum', defn(`divnum')`a')mydivnum
+@error{}m4:stdin:8: Warning: define: cannot concatenate builtins
+@result{}A
+define(`mydivnum', `a'defn(`divnum'))mydivnum
+@error{}m4:stdin:9: Warning: define: cannot concatenate builtins
+@result{}A
+define(`q', ``$@@'')
+@result{}
+define(`foo', q(`a', defn(`divnum')))foo
+@error{}m4:stdin:11: Warning: define: cannot concatenate builtins
+@result{}a,
+ifdef(`foo', `yes', `no')
+@result{}yes
 @end example
 
 @node Pushdef

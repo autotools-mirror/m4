@@ -230,11 +230,6 @@ AT_CLEANUP
 
 AT_SETUP([defn])
 
-dnl This test is a reminder that defn needs to be fixed to handle
-dnl concatenation of builtin tokens with text, and user macros need
-dnl to handle builtin tokens without flattening.
-AT_XFAIL_IF([:])
-
 AT_DATA([[in.m4]],
 [[define(`e', `$@')define(`q', ``$@'')define(`u', `$*')
 define(`cmp', `ifelse($1, $2, `yes', `no')')define(`d', defn(`defn'))

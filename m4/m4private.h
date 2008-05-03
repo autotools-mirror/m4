@@ -532,7 +532,7 @@ typedef enum {
   M4_TOKEN_COMMA,	/* Argument separator, M4_SYMBOL_TEXT.  */
   M4_TOKEN_CLOSE,	/* Argument list end, M4_SYMBOL_TEXT.  */
   M4_TOKEN_SIMPLE,	/* Single character, M4_SYMBOL_TEXT.  */
-  M4_TOKEN_MACDEF,	/* Macro's definition (see "defn"), M4_SYMBOL_FUNC.  */
+  M4_TOKEN_MACDEF,	/* Builtin token, M4_SYMBOL_FUNC or M4_SYMBOL_COMP.  */
   M4_TOKEN_ARGV		/* A series of parameters, M4_SYMBOL_COMP.  */
 } m4__token_type;
 

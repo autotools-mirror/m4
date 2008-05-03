@@ -1,3 +1,32 @@
+2008-05-05  Eric Blake  <ebb9@byu.net>
+
+	Stage 22: allow builtin token concatenation outside $@.
+	Adjust the input and argument parsing engines to append builtins
+	alongside text.  Make define warn when builtins must be
+	flattened.
+	Memory impact: slight penalty, with fewer builtins flattened.
+	Speed impact: slight penalty, from more bookkeeping.
+	* m4/m4module.h (m4_is_arg_composite): New prototype.
+	(m4_symbol_value_copy): Change return type.
+	(m4_arg_text): Add parameter.
+	(M4ARG): Adjust callers.
+	* m4/m4private.h: Adjust comments.
+	* m4/symtab.c (m4_symbol_value_copy): Detect when builtins are
+	flattened.
+	* m4/input.c (init_builtin_token): Add parameter, and allow
+	concatenating builtins.
+	(m4__next_token): Adjust caller.
+	* m4/macro.c (m4_is_arg_composite): New function.
+	(expand_argument): Allow builtin concatenation.
+	(m4_arg_text): Add parameter.
+	(m4__arg_adjust_refcount, m4__arg_print): Adjust callers.
+	(m4_arg_equal): Fix comparison of builtin tokens.
+	* modules/m4.c (define, pushdef): Warn when flattening builtins.
+	* doc/m4.texinfo (Define): Remove dead comment.
+	(Defn): Update to reflect code changes.
+	* tests/builtins.at (defn): Remove xfail.
+	* NEWS: Document this change.
+
 2008-05-03  Eric Blake  <ebb9@byu.net>
 
 	Document define_blind.

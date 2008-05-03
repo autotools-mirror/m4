@@ -405,10 +405,13 @@ arg_destroy_CB (m4_hash *hash, const void *name, void *arg, void *ignored)
   return NULL;
 }
 
-void
+/* Copy the symbol SRC into DEST.  Return true if builtin tokens were
+   flattened.  */
+bool
 m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
 {
   m4_symbol_value *next;
+  bool result = false;
 
   assert (dest);
   assert (src);
@@ -455,7 +458,7 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
       }
       break;
     case M4_SYMBOL_FUNC:
-      /* Nothing further to do.  */
+      m4__set_symbol_value_builtin (dest, src->u.builtin);
       break;
     case M4_SYMBOL_PLACEHOLDER:
       m4_set_symbol_value_placeholder (dest,
@@ -476,9 +479,14 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
 	      case M4__CHAIN_STR:
 		obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 		break;
+	      case M4__CHAIN_FUNC:
+		result = true;
+		break;
 	      case M4__CHAIN_ARGV:
 		quotes = m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
 					  chain->u.u_a.quotes);
+		if (chain->u.u_a.has_func && !chain->u.u_a.flatten)
+		  result = true;
 		m4__arg_print (context, obs, chain->u.u_a.argv,
 			       chain->u.u_a.index, quotes, true, NULL, NULL,
 			       NULL, false, false);
@@ -503,6 +511,7 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
   if (VALUE_ARG_SIGNATURE (src))
     VALUE_ARG_SIGNATURE (dest) = m4_hash_dup (VALUE_ARG_SIGNATURE (src),
 					      arg_copy_CB);
+  return result;
 }
 
 static void *

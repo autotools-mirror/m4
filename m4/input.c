@@ -114,7 +114,8 @@ static	int	eof_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
 static	void	eof_unget		(m4_input_block *, int);
 
-static	void	init_builtin_token	(m4 *, m4_symbol_value *);
+static	void	init_builtin_token	(m4 *, m4_obstack *,
+					 m4_symbol_value *);
 static	void	append_quote_token	(m4 *, m4_obstack *,
 					 m4_symbol_value *);
 static	bool	match_input		(m4 *, const char *, bool);
@@ -449,18 +450,18 @@ m4_push_string_init (m4 *context)
    rather than copying everything consecutively onto the input stack.
    Must be called between push_string_init and push_string_finish.
 
-   If VALUE contains text, then convert the current input block into a
-   chain if it is not one already, and add the contents of VALUE as a
-   new link in the chain.  LEVEL describes the current expansion
-   level, or SIZE_MAX if VALUE is composite, its contents reside
-   entirely on the current_input stack, and VALUE lives in temporary
-   storage.  If VALUE is a simple string, then it belongs to the
-   current macro expansion.  If VALUE is composite, then each text
-   link has a level of SIZE_MAX if it belongs to the current macro
-   expansion, otherwise it is a back-reference where level tracks
-   which stack it came from.  The resulting input block chain contains
-   links with a level of SIZE_MAX if the text belongs to the input
-   stack, otherwise the level where the back-reference comes from.
+   Convert the current input block into a chain if it is not one
+   already, and add the contents of VALUE as a new link in the chain.
+   LEVEL describes the current expansion level, or SIZE_MAX if VALUE
+   is composite, its contents reside entirely on the current_input
+   stack, and VALUE lives in temporary storage.  If VALUE is a simple
+   string, then it belongs to the current macro expansion.  If VALUE
+   is composite, then each text link has a level of SIZE_MAX if it
+   belongs to the current macro expansion, otherwise it is a
+   back-reference where level tracks which stack it came from.  The
+   resulting input block chain contains links with a level of SIZE_MAX
+   if the text belongs to the input stack, otherwise the level where
+   the back-reference comes from.
 
    Return true only if a reference was created to the contents of
    VALUE, in which case, LEVEL is less than SIZE_MAX and the lifetime
@@ -1122,18 +1123,36 @@ m4_pop_wrapup (m4 *context)
 }
 
 /* Populate TOKEN with the builtin token at the top of the input
-   stack, then consume the input.  If TOKEN is NULL, discard the
-   builtin token instead.  */
+   stack, then consume the input.  If OBS, TOKEN will be converted to
+   a composite token using storage from OBS as necessary; otherwise,
+   if TOKEN is NULL, the builtin token is discarded.  */
 static void
-init_builtin_token (m4 *context, m4_symbol_value *token)
+init_builtin_token (m4 *context, m4_obstack *obs, m4_symbol_value *token)
 {
   m4__symbol_chain *chain;
   assert (isp->funcs == &composite_funcs);
   chain = isp->u.u_c.chain;
   assert (!chain->quote_age && chain->type == M4__CHAIN_FUNC
 	  && chain->u.builtin);
-  if (token)
-    m4__set_symbol_value_builtin (token, chain->u.builtin);
+  if (obs)
+    {
+      assert (token);
+      if (token->type == M4_SYMBOL_VOID)
+	{
+	  token->type = M4_SYMBOL_COMP;
+	  token->u.u_c.chain = token->u.u_c.end = NULL;
+	  token->u.u_c.wrapper = false;
+	  token->u.u_c.has_func = false;
+	}
+      assert (token->type == M4_SYMBOL_COMP);
+      m4__append_builtin (obs, chain->u.builtin, &token->u.u_c.chain,
+			  &token->u.u_c.end);
+    }
+  else if (token)
+    {
+      assert (token->type == M4_SYMBOL_VOID);
+      m4__set_symbol_value_builtin (token, chain->u.builtin);
+    }
   chain->u.builtin = NULL;
 }
 
@@ -1535,7 +1554,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 
     if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
       {
-	init_builtin_token (context, token);
+	init_builtin_token (context, obs, token);
 #ifdef DEBUG_INPUT
 	m4_print_token (context, "next_token", M4_TOKEN_MACDEF, token);
 #endif
@@ -1590,34 +1609,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
 	    if (ch == CHAR_BUILTIN)
-	      {
-		/* TODO support concatenation of builtins.  */
-		if (obstack_object_size (obs_safe) == 0
-		    && token->type == M4_SYMBOL_VOID)
-		  {
-		    /* Strip quotes if they surround a lone builtin
-		       token.  */
-		    assert (quote_level == 1);
-		    init_builtin_token (context, token);
-		    ch = peek_char (context, false);
-		    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
-		      {
-			ch = next_char (context, false, false, false);
-#ifdef DEBUG_INPUT
-			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
-					token);
-#endif
-			return M4_TOKEN_MACDEF;
-		      }
-		    token->type = M4_SYMBOL_VOID;
-		  }
-		else
-		  init_builtin_token (context, NULL);
-		m4_warn_at_line (context, 0, file, *line, caller,
-				 _("cannot quote builtin"));
-		continue;
-	      }
-	    if (ch == CHAR_QUOTE)
+	      init_builtin_token (context, obs, obs ? token : NULL);
+	    else if (ch == CHAR_QUOTE)
 	      append_quote_token (context, obs, token);
 	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
 	      {
@@ -1649,36 +1642,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
 				_("end of file in string"));
 	    if (ch == CHAR_BUILTIN)
-	      {
-		/* TODO support concatenation of builtins.  */
-		if (obstack_object_size (obs_safe) == 0
-		    && token->type == M4_SYMBOL_VOID)
-		  {
-		    /* Strip quotes if they surround a lone builtin
-		       token.  */
-		    assert (quote_level == 1);
-		    init_builtin_token (context, token);
-		    ch = peek_char (context, false);
-		    if (MATCH (context, ch, context->syntax->quote.str2,
-			       false))
-		      {
-			ch = next_char (context, false, false, false);
-			MATCH (context, ch, context->syntax->quote.str2, true);
-#ifdef DEBUG_INPUT
-			m4_print_token (context, "next_token", M4_TOKEN_MACDEF,
-					token);
-#endif
-			return M4_TOKEN_MACDEF;
-		      }
-		    token->type = M4_SYMBOL_VOID;
-		  }
-		else
-		  init_builtin_token (context, NULL);
-		m4_warn_at_line (context, 0, file, *line, caller,
-				 _("cannot quote builtin"));
-		continue;
-	      }
-	    if (MATCH (context, ch, context->syntax->quote.str2, true))
+	      init_builtin_token (context, obs, obs ? token : NULL);
+	    else if (MATCH (context, ch, context->syntax->quote.str2, true))
 	      {
 		if (--quote_level == 0)
 		  break;
@@ -1708,10 +1673,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 				_("end of file in comment"));
 	    if (ch == CHAR_BUILTIN)
 	      {
-		/* TODO support concatenation of builtins.  */
-		m4_warn_at_line (context, 0, file, *line, caller,
-				 _("cannot comment builtin"));
-		init_builtin_token (context, NULL);
+		init_builtin_token (context, NULL, NULL);
 		continue;
 	      }
 	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
@@ -1740,10 +1702,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 				_("end of file in comment"));
 	    if (ch == CHAR_BUILTIN)
 	      {
-		/* TODO support concatenation of builtins.  */
-		m4_warn_at_line (context, 0, file, *line, caller,
-				 _("cannot comment builtin"));
-		init_builtin_token (context, NULL);
+		init_builtin_token (context, NULL, NULL);
 		continue;
 	      }
 	    if (MATCH (context, ch, context->syntax->comm.str2, true))

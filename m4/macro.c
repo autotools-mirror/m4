@@ -327,15 +327,10 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_CLOSE:
 	  if (paren_level == 0)
 	    {
-	      /* FIXME - For now, we match the behavior of the branch,
-		 except we don't issue warnings.  But in the future,
-		 we want to allow concatenation of builtins and
-		 text.  */
-	      len = obstack_object_size (obs);
-	      if (argp->type == M4_SYMBOL_FUNC && !len)
-		return type == M4_TOKEN_COMMA;
+	      assert (argp->type != M4_SYMBOL_FUNC);
 	      if (argp->type != M4_SYMBOL_COMP)
 		{
+		  len = obstack_object_size (obs);
 		  VALUE_MODULE (argp) = NULL;
 		  if (len)
 		    {
@@ -347,7 +342,16 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 		    m4_set_symbol_value_text (argp, "", len, 0);
 		}
 	      else
-		m4__make_text_link (obs, NULL, &argp->u.u_c.end);
+		{
+		  m4__make_text_link (obs, NULL, &argp->u.u_c.end);
+		  if (argp->u.u_c.chain == argp->u.u_c.end
+		      && argp->u.u_c.chain->type == M4__CHAIN_FUNC)
+		    {
+		      const m4__builtin *func = argp->u.u_c.chain->u.builtin;
+		      argp->type = M4_SYMBOL_FUNC;
+		      argp->u.builtin = func;
+		    }
+		}
 	      return type == M4_TOKEN_COMMA;
 	    }
 	  /* fallthru */
@@ -369,6 +373,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_WORD:
 	case M4_TOKEN_SPACE:
 	case M4_TOKEN_STRING:
+	case M4_TOKEN_MACDEF:
 	  if (!expand_token (context, obs, type, &token, line, first))
 	    age = 0;
 	  if (token.type == M4_SYMBOL_COMP)
@@ -388,13 +393,6 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	      if (token.u.u_c.has_func)
 		argp->u.u_c.has_func = true;
 	    }
-	  break;
-
-	case M4_TOKEN_MACDEF:
-	  if (argp->type == M4_SYMBOL_VOID && obstack_object_size (obs) == 0)
-	    m4_symbol_value_copy (context, argp, &token);
-	  else
-	    argp->type = M4_SYMBOL_TEXT;
 	  break;
 
 	case M4_TOKEN_ARGV:
@@ -1025,6 +1023,8 @@ m4__arg_adjust_refcount (m4 *context, m4_macro_args *argv, bool increase)
 		    m4__adjust_refcount (context, chain->u.u_s.level,
 					 increase);
 		  break;
+		case M4__CHAIN_FUNC:
+		  break;
 		case M4__CHAIN_ARGV:
 		  assert (chain->u.u_a.argv->inuse);
 		  m4__arg_adjust_refcount (context, chain->u.u_a.argv,
@@ -1219,7 +1219,6 @@ m4_is_arg_text (m4_macro_args *argv, size_t arg)
   return false;
 }
 
-/* TODO - add m4_is_arg_comp to distinguish concatenation of builtins.  */
 /* Given ARGV, return true if argument ARG is a single builtin
    function.  Only non-zero indices less than argc can return
    true.  */
@@ -1231,12 +1230,28 @@ m4_is_arg_func (m4_macro_args *argv, size_t arg)
   return m4_is_symbol_value_func (m4_arg_symbol (argv, arg));
 }
 
+/* Given ARGV, return true if argument ARG contains a builtin token
+   concatenated with anything else.  Only non-zero indices less than
+   argc can return true.  */
+bool
+m4_is_arg_composite (m4_macro_args *argv, size_t arg)
+{
+  m4_symbol_value *value;
+  if (arg == 0 || argv->argc <= arg || argv->flatten || !argv->has_func)
+    return false;
+  value = m4_arg_symbol (argv, arg);
+  if (value->type == M4_SYMBOL_COMP && value->u.u_c.has_func)
+    return true;
+  return false;
+}
+
 /* Given ARGV, return the text at argument ARG.  Abort if the argument
    is not text.  Arg 0 is always text, and indices beyond argc return
-   the empty string.  The result is always NUL-terminated, even if it
-   includes embedded NUL characters.  */
+   the empty string.  If FLATTEN, builtins are ignored.  The result is
+   always NUL-terminated, even if it includes embedded NUL
+   characters.  */
 const char *
-m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg)
+m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg, bool flatten)
 {
   m4_symbol_value *value;
   m4__symbol_chain *chain;
@@ -1246,7 +1261,7 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg)
     return argv->argv0;
   if (argv->argc <= arg)
     return "";
-  value = m4_arg_symbol (argv, arg);
+  value = arg_symbol (argv, arg, NULL, flatten);
   if (m4_is_symbol_value_text (value))
     return m4_get_symbol_value_text (value);
   assert (value->type == M4_SYMBOL_COMP);
@@ -1259,12 +1274,18 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg)
 	case M4__CHAIN_STR:
 	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
 	  break;
+	case M4__CHAIN_FUNC:
+	  if (flatten)
+	    break;
+	  assert (!"m4_arg_text");
+	  abort ();
 	case M4__CHAIN_ARGV:
+	  assert (!chain->u.u_a.has_func || flatten || argv->flatten);
 	  m4__arg_print (context, obs, chain->u.u_a.argv, chain->u.u_a.index,
 			 m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
 					  chain->u.u_a.quotes),
-			 argv->flatten || chain->u.u_a.flatten, NULL, NULL,
-			 NULL, false, false);
+			 flatten || argv->flatten || chain->u.u_a.flatten,
+			 NULL, NULL, NULL, false, false);
 	  break;
 	default:
 	  assert (!"m4_arg_text");
@@ -1368,6 +1389,9 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
 	{
 	  tmpb.next = NULL;
 	  tmpb.type = M4__CHAIN_STR;
+	  tmpb.u.u_s.str = NULL;
+	  tmpb.u.u_s.len = 0;
+	  chain = &tmpb;
 	  m4__arg_print (context, obs, cb->u.u_a.argv, cb->u.u_a.index,
 			 m4__quote_cache (M4SYNTAX, NULL, cb->quote_age,
 					  cb->u.u_a.quotes),
@@ -1526,6 +1550,7 @@ m4__arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t arg,
   size_t sep_len;
   size_t *plen = quote_each ? NULL : &len;
 
+  flatten |= argv->flatten;
   if (chainp)
     assert (!max_len && *chainp);
   if (!sep)
