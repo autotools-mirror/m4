@@ -76,12 +76,17 @@ promoted to 2.0.
     `--trace', allow more control over macro tracing from the command line
     between input files.
 
-*** New `--unload-module' command-line option allows more control over
-    dynamic modules from the command line.  Also, `-m'/`--load-module' now
-    acts between input files.
-
 *** New `--warnings' command-line option re-enables warnings, overriding
     `-Q'/`--quiet'/`--silent', allowing warnings even when POSIXLY_CORRECT.
+
+*** When GNU extensions are enabled, any command line arguments that wauld
+    have been interpreted as input file names with previous releases are
+    still searched for as before, but will first attempt to be loaded as
+    compiled modules before falling back on loading as m4 input.  In
+    POSIXLY_CORRECT mode, only m4 input files in the current directory can
+    be loaded.
+
+*** Any command line arguments that previously had to name input files
 
 ** POSIX conformance
 
@@ -95,6 +100,9 @@ promoted to 2.0.
 
 *** The experimental `epatsubst' and `eregexp' builtins have been removed
     in favor of a new `changeresyntax' builtin.
+
+*** The `load' builtin, introduced in previous betas has been removed in
+    lieu of richer `include' and `sinclude' functionality.
 
 ** New builtins
 
@@ -174,6 +182,12 @@ promoted to 2.0.
 
 *** The `eval' and `mpeval' builtins now support the following new
     operators: `>>>', `\', `?:', and  `,'.
+
+*** When GNU extensions are enabled, the `include' and `sinclude' builtins
+    continue to search directories one at a time, but will first attempt to
+    load arguments as compiled modules and then as m4 input before moving
+    to the next directory in the search path.  In POSIXLY_CORRECT mode,
+    only m4 input in the current directory can be loaded.
 
 *** The `maketemp' builtin now always warns that it is obsolete, even in GNU
     mode where it uses the same secure algorithm as `mkstemp', because of

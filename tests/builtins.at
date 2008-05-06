@@ -568,8 +568,8 @@ very late
 ]])
 
 AT_DATA([[experr]],
-[[m4:include.m4:2: include: cannot open `NOFILE': No such file or directory
-m4:include.m4:6: include: cannot open `NOFILE': No such file or directory
+[[m4:include.m4:2: include: cannot open file `NOFILE': No such file or directory
+m4:include.m4:6: include: cannot open file `NOFILE': No such file or directory
 ]])
 
 AT_CHECK_M4([include.m4], 1, expout, experr)
@@ -883,7 +883,7 @@ AT_DATA([[expout]],
 
 ]])
 
-AT_CHECK_M4([-m mpeval in], 0, expout)
+AT_CHECK_M4([mpeval in], 0, expout)
 
 AT_CLEANUP
 

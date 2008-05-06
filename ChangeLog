@@ -1,3 +1,45 @@
+2008-05-05  Gary V. Vaughan  <gary@gnu.org>
+
+	Factor load functionality into include builtin.
+	* m4/module.c (m4__module_open): Instead of calling lt_dlopenext
+	right away, use the preload hint first incase path searching has
+	been disabled by POSIXLY_CORRECT.  Otherwise fallback to a
+	manual path search to override libltdl's algorithm.
+	* m4/m4module.h: Adjust.
+	* m4/path.c (FILE_SUFFIXES): Order to try suffixes in our path
+	search algorithm.
+	(NO_SUFFIXES): Alternatively, how to to search a path without
+	adding file suffixes.
+	(m4_path_search): Add a new suffixes parameter defaulting to
+	NO_SUFFIXES.  Adjust all callers.
+	(m4_load_filename): New generic load function that tries to
+	open a matched file first as a module, and if that fails fall
+	back to as (possibly frozen) m4 input.
+	(m4_fopen): New function with close on exec functionality.
+	* modules/m4.c (include, sinclude): Use m4_load_filename to
+	overload these builtins to work with modules too.
+	* modules/load.c (load): Removed this builtin.
+	* src/main.c: Remove Dynamic loading features section, and
+	M4MODPATH support.
+	(long_options): Remove "load-module", "unload-module" and
+	"module-directory" options.
+	(OPTSTRING): Remove 'M' and 'm' options.
+	(process_file): Use m4_load_filename to support module names
+	on the command line.
+	* Makefile.am (TESTS_ENVIRONMENT): No need for abs_top_builddir
+	any more.
+	* doc/m4.texinfo: Update examples.
+	(Dynamic loading features, Load): Removed.
+	(Command line files): Describe how non-option arguments are
+	treated to try to find a matching macro file or dso.
+	(Include): Describe additional dso loading features if a
+	suitable text file cannot be found.
+	(Modules): Updated.
+	* tests/builtins.at, tests/m4.in, tests/modules.at,
+	tests/options.at: Adjust test cases and calling conventions
+	to new semantics.
+	* NEWS: Updated.
+
 2008-05-05  Eric Blake  <ebb9@byu.net>
 
 	Stage 22: allow builtin token concatenation outside $@.

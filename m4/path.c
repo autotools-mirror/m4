@@ -33,6 +33,17 @@
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INCL */
 
+static const char *FILE_SUFFIXES[] = {
+  "",
+  ".m4f",
+  ".m4",
+  ".la",
+  LT_MODULE_EXT,
+  NULL
+};
+
+static const char *NO_SUFFIXES[] = { "", NULL };
+
 static void search_path_add (m4__search_path_info *, const char *, bool);
 static void search_path_env_init (m4__search_path_info *, char *, bool);
 
@@ -123,82 +134,182 @@ m4_add_include_directory (m4 *context, const char *dir, bool prepend)
 #endif
 }
 
+
 /* Search for FILE according to -B options, `.', -I options, then
-   M4PATH environment.  If successful, return the open file, and if
-   RESULT is not NULL, set *RESULT to a malloc'd string that
-   represents the file found with respect to the current working
-   directory.  Otherwise, return NULL, and errno reflects the failure
-   from searching `.' (regardless of what else was searched).  */
+   M4PATH environment.  If any SUFFIXES are given, then in each
+   searched directory, if an exact match is not found then try
+   appending each suffix and rematching before moving on to the
+   next directory.
 
-FILE *
-m4_path_search (m4 *context, const char *file, char **expanded_name)
+   The full path of the first matching file discovered is
+   returned in a freshly malloced string.  Otherwise, return NULL,
+   and if no file was found errno will represent the failure from
+   searching `.' (regardless of what else was searched).  */
+char *
+m4_path_search (m4 *context, const char *filename, const char **suffixes)
 {
-  FILE *fp;
   m4__search_path *incl;
-  char *name;			/* buffer for constructed name */
-  int e = 0;
-
-  if (expanded_name != NULL)
-    *expanded_name = NULL;
+  char *filepath;		/* buffer for constructed name */
+  size_t max_suffix_len = 0;
+  int i, e = 0;
 
   /* Reject empty file.  */
-  if (*file == '\0')
+  if (*filename == '\0')
     {
       errno = ENOENT;
       return NULL;
     }
 
+  /* Use no suffixes by default.  */
+  if (suffixes == NULL)
+    suffixes = NO_SUFFIXES;
+
+  /* Find the longest suffix, so that we will always allocate enough
+     memory for a filename with suffix.  */
+  for (i = 0; suffixes && suffixes[i]; ++i)
+    {
+      size_t len = strlen (suffixes[i]);
+      if (len > max_suffix_len)
+        max_suffix_len = len;
+    }
+
   /* If file is absolute, or if we are not searching a path, a single
      lookup will do the trick.  */
-  if (IS_ABSOLUTE_FILE_NAME (file) || m4_get_posixly_correct_opt (context))
+  if (IS_ABSOLUTE_FILE_NAME (filename))
     {
-      fp = fopen (file, "r");
-      if (fp != NULL)
-	{
-	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot protect input file across forks"));
-	  if (expanded_name != NULL)
-	    *expanded_name = xstrdup (file);
-	  return fp;
-	}
+      size_t mem = strlen (filename);
+
+      /* Try appending each of the suffixes we were given.  */
+      filepath = strncpy (xmalloc (mem + max_suffix_len +1), filename, mem);
+      for (i = 0; suffixes && suffixes[i]; ++i)
+        {
+          strcpy (filepath + mem, suffixes[i]);
+	  if (access (filepath, R_OK) == 0)
+	    return filepath;
+
+          /* If search fails, we'll use the error we got from the first
+	     access (usually with no suffix).  */
+	  if (i == 0)
+	    e = errno;
+        }
+      free (filepath);
+
+      /* No such file.  */
+      errno = e;
       return NULL;
     }
 
   for (incl = m4__get_search_path (context)->list;
        incl != NULL; incl = incl->next)
     {
-      name = file_name_concat (incl->dir, file, NULL);
+      char *name = file_name_concat (incl->dir, filename, NULL);
+      size_t mem = strlen (name);
 
 #ifdef DEBUG_INCL
-      xfprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
+      xfprintf (stderr, "path_search (%s) -- trying %s\n", filename, name);
 #endif
 
-      fp = fopen (name, "r");
-      if (fp != NULL)
+      if (access (name, R_OK) == 0)
 	{
 	  m4_debug_message (context, M4_DEBUG_TRACE_PATH,
 			    _("path search for `%s' found `%s'"),
-			    file, name);
-	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot protect input file across forks"));
-
-	  if (expanded_name != NULL)
-	    *expanded_name = name;
-	  else
-	    free (name);
-	  return fp;
+			    filename, name);
+	  return name;
 	}
       else if (!incl->len)
 	/* Capture errno only when searching `.'.  */
 	e = errno;
+
+      filepath = strncpy (xmalloc (mem + max_suffix_len +1), name, mem);
       free (name);
+
+      for (i = 0; suffixes && suffixes[i]; ++i)
+        {
+          strcpy (filepath + mem, suffixes[i]);
+          if (access (filepath, R_OK) == 0)
+            return filepath;
+        }
+      free (filepath);
     }
 
   errno = e;
   return NULL;
 }
+
+
+FILE *
+m4_fopen (m4 *context, const char *filepath)
+{
+  FILE *fp = NULL;
+
+  if (filepath)
+    {
+      fp  = fopen (filepath, "r");
+
+      if (fp != NULL)
+        {
+          if (set_cloexec_flag (fileno (fp), true) != 0)
+            m4_error (context, 0, errno, NULL,
+                      _("cannot protect input file across forks"));
+        }
+    }
+
+  return fp;
+}
+
+
+/* Generic load function.  Push the input file or load the module named
+   FILENAME, if it can be found in the search path.  Complain
+   about inaccesible files iff SILENT is false.  */
+bool
+m4_load_filename (m4 *context, const char *macro, const char *filename,
+		  m4_obstack *obs, bool silent)
+{
+  char *filepath = NULL;
+  char *suffix   = NULL;
+  bool new_input = false;
+
+  if (m4_get_posixly_correct_opt (context))
+    {
+      if (access (filename, R_OK) == 0)
+        filepath = xstrdup (filename);
+    }
+  else
+    filepath = m4_path_search (context, filename, FILE_SUFFIXES);
+
+  if (filepath)
+    suffix = strrchr (filepath, '.');
+
+  if (!m4_get_posixly_correct_opt (context)
+      && suffix
+      && (!strcmp (suffix, LT_MODULE_EXT) || !strcmp (suffix, ".la")))
+    {
+      m4_module_load (context, filepath, obs);
+    }
+  else
+    {
+      FILE *fp = NULL;
+
+      if (filepath)
+        fp = m4_fopen (context, filepath);
+
+      if (fp == NULL)
+        {
+          if (!silent)
+	    m4_error (context, 0, errno, macro, _("cannot open file `%s'"),
+		      filename);
+          free (filepath);
+          return;
+        }
+
+      m4_push_file (context, fp, filepath, true);
+      new_input = true;
+    }
+  free (filepath);
+
+  return new_input;
+}
+
 
 void
 m4__include_init (m4 *context)

@@ -105,14 +105,6 @@ SPEC is any one of:\n\
   GREP, POSIX_AWK, POSIX_EGREP, MINIMAL, MINIMAL_BASIC, SED.\n\
 "), stdout);
       puts ("");
-      xprintf (_("\
-Dynamic loading features:\n\
-  -M, --module-directory=DIR   add DIR to module search path before\n\
-                               `%s'\n\
-  -m, --load-module=MODULE     load dynamic MODULE\n\
-      --unload-module=MODULE   unload dynamic MODULE\n\
-"), PKGLIBEXECDIR);
-      puts ("");
       fputs (_("\
 Preprocessor features:\n\
   -B, --prepend-include=DIR    add DIR to include path before `.'\n\
@@ -174,10 +166,9 @@ FLAGS is any of:\n\
       puts ("");
       fputs (_("\
 If defined, the environment variable `M4PATH' is a colon-separated list\n\
-of directories included after any specified by `-I', and the variable\n\
-`M4MODPATH' is a colon-separated list of directories searched before any\n\
-specified by `-M'.  The environment variable `POSIXLY_CORRECT' implies\n\
--G -Q; otherwise GNU extensions are enabled by default.\n\
+of directories included after any specified by `-I' or `-B'.  The\n\
+environment variable `POSIXLY_CORRECT' implies -G -Q; otherwise GNU\n\
+extensions are enabled by default.\n\
 "), stdout);
       puts ("");
       fputs (_("\
@@ -210,7 +201,6 @@ enum
   SAFER_OPTION,				/* -S still has old no-op semantics */
   SYNCOUTPUT_OPTION,			/* not quite -s, because of opt arg */
   TRACEOFF_OPTION,			/* no short opt */
-  UNLOAD_MODULE_OPTION,			/* no short opt */
   WORD_REGEXP_OPTION,			/* deprecated, used to be -W */
 
   HELP_OPTION,				/* no short opt */
@@ -231,8 +221,6 @@ static const struct option long_options[] =
   {"gnu", no_argument, NULL, 'g'},
   {"include", required_argument, NULL, 'I'},
   {"interactive", no_argument, NULL, 'i'},
-  {"load-module", required_argument, NULL, 'm'},
-  {"module-directory", required_argument, NULL, 'M'},
   {"nesting-limit", required_argument, NULL, 'L'},
   {"posix", no_argument, NULL, 'G'},
   {"prefix-builtins", no_argument, NULL, 'P'},
@@ -259,7 +247,6 @@ static const struct option long_options[] =
   {"safer", no_argument, NULL, SAFER_OPTION},
   {"syncoutput", optional_argument, NULL, SYNCOUTPUT_OPTION},
   {"traceoff", required_argument, NULL, TRACEOFF_OPTION},
-  {"unload-module", required_argument, NULL, UNLOAD_MODULE_OPTION},
   {"word-regexp", required_argument, NULL, WORD_REGEXP_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
@@ -273,7 +260,7 @@ static const struct option long_options[] =
    behavior also handles -s between files.  Starting OPTSTRING with
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
-#define OPTSTRING "-B:D:EF:GH:I:L:M:N:PQR:S:T:U:Wbcd::egil:m:o:p:r::st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:Wbcd::egil:o:p:r::st:"
 
 /* For determining whether to be interactive.  */
 enum interactive_choice
@@ -297,26 +284,21 @@ size_opt (char const *opt, int oi, int optchar)
   return size;
 }
 
-/* Process a command line file NAME, and return true only if it was
-   stdin.  */
-static void
+/* Process a command line file NAME.  */
+static bool
 process_file (m4 *context, const char *name)
 {
+  bool new_input = true;
+
   if (strcmp (name, "-") == 0)
     m4_push_file (context, stdin, "stdin", false);
   else
-    {
-      char *full_name;
-      FILE *fp = m4_path_search (context, name, &full_name);
-      if (fp == NULL)
-	{
-	  m4_error (context, 0, errno, NULL, _("cannot open file `%s'"), name);
-	  return;
-	}
-      m4_push_file (context, fp, full_name, true);
-      free (full_name);
-    }
-  m4_macro_expand_input (context);
+    new_input = m4_load_filename (context, NULL, name, NULL, false);
+
+  if (new_input)
+    m4_macro_expand_input (context);
+
+  return new_input;
 }
 
 
@@ -419,7 +401,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  /* fall through */
 	case 'D':
 	case 'U':
-	case 'm':
 	case 'p':
 	case 'r':
 	case 't':
@@ -427,7 +408,6 @@ main (int argc, char *const *argv, char *const *envp)
 	case POPDEF_OPTION:
 	case SYNCOUTPUT_OPTION:
 	case TRACEOFF_OPTION:
-	case UNLOAD_MODULE_OPTION:
 	  /* Arguments that cannot be handled until later are accumulated.  */
 
 	  defn = (deferred *) xmalloc (sizeof *defn);
@@ -440,9 +420,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  else
 	    tail->next = defn;
 	  tail = defn;
-
-	  if (optchar == '\1')
-	    seen_file = true;
 
 	  break;
 
@@ -488,21 +465,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  if (!size)
 	    size = SIZE_MAX;
 	  m4_set_nesting_limit_opt (context, size);
-	  break;
-
-	case 'M':
-	  if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
-	    {
-	      const char *dlerr = lt_dlerror ();
-	      if (dlerr == NULL)
-		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory `%s'"),
-			  optarg);
-	      else
-		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory `%s': %s"),
-			  optarg, dlerr);
-	    }
 	  break;
 
 	case 'P':
@@ -602,24 +564,6 @@ main (int argc, char *const *argv, char *const *envp)
 	}
     }
 
-  /* Interactive if specified, or if no input files and stdin and
-     stderr are terminals, to match sh behavior.  Interactive mode
-     means unbuffered output, and interrupts ignored.  */
-
-  m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
-				    || (interactive == INTERACTIVE_UNKNOWN
-					&& optind == argc && !seen_file
-					&& isatty (STDIN_FILENO)
-					&& isatty (STDERR_FILENO))));
-  if (m4_get_interactive_opt (context))
-    {
-      signal (SIGINT, SIG_IGN);
-      setbuf (stdout, NULL);
-    }
-  else
-    signal (SIGPIPE, SIG_DFL);
-
-
   /* Do the basic initializations.  */
   if (debugfile && !m4_debug_set_output (context, NULL, debugfile))
     m4_error (context, 0, errno, NULL, _("cannot set debug file `%s'"),
@@ -698,11 +642,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_symbol_delete (M4SYMTAB, arg);
 	  break;
 
-	case 'm':
-	  /* FIXME - should loading a module result in output?  */
-	  m4_module_load (context, arg, NULL);
-	  break;
-
 	case 'r':
 	  m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
 	  if (m4_get_regexp_syntax_opt (context) < 0)
@@ -715,7 +654,8 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case '\1':
-	  process_file (context, arg);
+	  if (process_file (context, arg))
+	    seen_file = true;
 	  break;
 
 	case POPDEF_OPTION:
@@ -737,11 +677,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_set_symbol_name_traced (M4SYMTAB, arg, false);
 	  break;
 
-	case UNLOAD_MODULE_OPTION:
-	  /* FIXME - should unloading a module result in output?  */
-	  m4_module_unload (context, arg, NULL);
-	  break;
-
 	default:
 	  assert (!"INTERNAL ERROR: bad code in deferred arguments");
 	  abort ();
@@ -751,6 +686,25 @@ main (int argc, char *const *argv, char *const *envp)
       free (defn);
       defn = next;
     }
+
+
+  /* Interactive if specified, or if no input files and stdin and
+     stderr are terminals, to match sh behavior.  Interactive mode
+     means unbuffered output, and interrupts ignored.  */
+
+  m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
+				    || (interactive == INTERACTIVE_UNKNOWN
+					&& optind == argc && !seen_file
+					&& isatty (STDIN_FILENO)
+					&& isatty (STDERR_FILENO))));
+  if (m4_get_interactive_opt (context))
+    {
+      signal (SIGINT, SIG_IGN);
+      setbuf (stdout, NULL);
+    }
+  else
+    signal (SIGPIPE, SIG_DFL);
+
 
   /* Handle remaining input files.  Each file is pushed on the input,
      and the input read.  */

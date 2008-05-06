@@ -662,7 +662,7 @@ AT_CHECK_M4([-I post -B pre in], [1],
 [[in pre/foo
 in ./bar
 in post/blah
-]], [[m4:in:3: include: cannot open `bad': No such file or directory
+]], [[m4:in:3: include: cannot open file `bad': No such file or directory
 ]])
 
 AT_CLEANUP

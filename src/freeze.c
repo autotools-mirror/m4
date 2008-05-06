@@ -370,7 +370,8 @@ decode_char (FILE *in)
 void
 reload_frozen_state (m4 *context, const char *name)
 {
-  FILE *file;
+  FILE *file = NULL;
+  char *filepath;
   int version;
   int character;
   int operation;
@@ -450,7 +451,8 @@ reload_frozen_state (m4 *context, const char *name)
     }								\
   while (character == '\n')
 
-  file = m4_path_search (context, name, (char **)NULL);
+  filepath = m4_path_search (context, name, NULL);
+  file = m4_fopen (context, filepath);
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open `%s'"), name);
 

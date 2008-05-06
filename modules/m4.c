@@ -98,8 +98,6 @@ extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
 typedef intmax_t number;
 typedef uintmax_t unumber;
 
-static void	include		(m4 *context, int argc, m4_macro_args *argv,
-				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char *name,
 				 m4_symbol *symbol, void *userdata);
@@ -573,7 +571,10 @@ M4BUILTIN_HANDLER (undivert)
 	  m4_numeric_arg (context, me, str, &diversion);
 	else
 	  {
-	    FILE *fp = m4_path_search (context, str, NULL);
+	    char *filepath = m4_path_search (context, str, NULL);
+	    FILE *fp = m4_fopen (context, filepath);
+
+	    free (filepath);
 	    if (fp != NULL)
 	      {
 		m4_insert_file (context, fp);
@@ -629,37 +630,16 @@ M4BUILTIN_HANDLER (changecom)
    and "sinclude".  This differs from bringing back diversions, in that
    the input is scanned before being copied to the output.  */
 
-/* Generic include function.  Include the file given by the first argument,
-   if it exists.  Complain about inaccesible files iff SILENT is false.  */
-static void
-include (m4 *context, int argc, m4_macro_args *argv, bool silent)
-{
-  FILE *fp;
-  char *name = NULL;
-
-  fp = m4_path_search (context, M4ARG (1), &name);
-  if (fp == NULL)
-    {
-      if (!silent)
-	m4_error (context, 0, errno, M4ARG (0), _("cannot open `%s'"),
-		  M4ARG (1));
-      return;
-    }
-
-  m4_push_file (context, fp, name, true);
-  free (name);
-}
-
 /* Include a file, complaining in case of errors.  */
 M4BUILTIN_HANDLER (include)
 {
-  include (context, argc, argv, false);
+  m4_load_filename (context, M4ARG (0), M4ARG (1), obs, false);
 }
 
 /* Include a file, ignoring errors.  */
 M4BUILTIN_HANDLER (sinclude)
 {
-  include (context, argc, argv, true);
+  m4_load_filename (context, M4ARG (0), M4ARG (1), obs, true);
 }
 
 
