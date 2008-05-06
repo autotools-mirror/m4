@@ -99,7 +99,7 @@ dnl Check that all files are processed even after missing file
 AT_DATA([in], [[hello world
 ]])
 AT_CHECK_M4([oops in], [1], [[hello world
-]], [[m4: cannot open 'oops': No such file or directory
+]], [[m4: cannot open file 'oops': No such file or directory
 ]])
 
 dnl Check that '-' means stdin, even if ./- exists.
@@ -705,7 +705,7 @@ AT_CHECK_M4([-I post -B pre in], [1],
 [[in pre/foo
 in ./bar
 in post/blah
-]], [[m4:in:3: include: cannot open 'bad': No such file or directory
+]], [[m4:in:3: include: cannot open file 'bad': No such file or directory
 ]])
 
 AT_CLEANUP
@@ -730,7 +730,7 @@ AT_CHECK_M4([--regexp-syntax= in], [0], [[0
 ]])
 
 AT_CHECK_M4([-rEXTENDED in], [0], [[
-]], [[m4:in:1: warning: regexp: bad regular expression `(': Unmatched ( or \(
+]], [[m4:in:1: warning: regexp: bad regular expression '(': Unmatched ( or \(
 ]])
 
 AT_CHECK_M4([-rgnu-m4 in], [0], [[0
@@ -742,7 +742,7 @@ AT_CHECK_M4([-r"gnu M4" in], [0], [[0
 dnl Test behavior of -r intermixed with files
 AT_CHECK_M4([-rEXTENDED in --regexp-syntax in], [0], [[
 0
-]], [[m4:in:1: warning: regexp: bad regular expression `(': Unmatched ( or \(
+]], [[m4:in:1: warning: regexp: bad regular expression '(': Unmatched ( or \(
 ]])
 
 AT_CLEANUP

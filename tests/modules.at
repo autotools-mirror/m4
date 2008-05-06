@@ -34,10 +34,10 @@ AT_DATA([[frozen.m4]],
 define(`test', `local::`test'')dnl
 define(`test1', defn(`test'))dnl
 ->test
-load(`modtest')
+include(`modtest')
 define(`test2', defn(`test'))dnl
 ->test
-load(`shadow')
+include(`shadow')
 define(`test3', defn(`test'))dnl
 ->test
 ]])
@@ -51,18 +51,18 @@ test3
 
 # First generate the `expout' ouput by running over the sources before
 # freezing.
-AT_CHECK_M4([-M "$abs_builddir" -m load frozen.m4 unfrozen.m4],
+AT_CHECK_M4([-I "$abs_builddir" load frozen.m4 unfrozen.m4],
             [0], [stdout], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
-AT_CHECK_M4([-M "$abs_builddir" -m load -F frozen.m4f frozen.m4],
+AT_CHECK_M4([-I "$abs_builddir" load -F frozen.m4f frozen.m4],
             [0], [], [ignore])
 
 # Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-M "$abs_builddir" -R frozen.m4f unfrozen.m4],
+AT_CHECK_M4([-I "$abs_builddir" -R frozen.m4f unfrozen.m4],
             [0], [expout], [experr])
 
 AT_CLEANUP([frozen.m4f])
@@ -76,7 +76,7 @@ AT_SETUP([module test macros])
 AT_CHECK_DYNAMIC_MODULE
 AT_CHECK_GMP
 
-AT_DATA([in], [[load(`mpeval')
+AT_DATA([in], [[include(`mpeval')
 -__load__-__mpeval__-
 unload(`mpeval')
 -__load__-__mpeval__-
@@ -84,7 +84,7 @@ unload(`load')
 -__load__-__mpeval__-
 ]])
 
-AT_CHECK_M4([-m load in], [0], [[
+AT_CHECK_M4([load in], [0], [[
 ---
 
 --__mpeval__-
@@ -108,7 +108,7 @@ m4_define([AT_CHECK_M4_MODTEST],
 AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([input.m4],
-[[load(`modtest')
+[[include(`modtest')
 test
 Dumpdef: dumpdef(`test').
 unload(`modtest')
@@ -122,7 +122,7 @@ dnl carry over to the next AT_SETUP.
 m4_ifval([$2], [$2
 export m4_substr([$2], [0], m4_index([$2], [=]))])
 
-AT_CHECK_M4([-m load $3 input.m4], [0],
+AT_CHECK_M4([load $3 input.m4], [0],
 [[
 Test module called.
 Dumpdef: .
@@ -141,24 +141,17 @@ AT_CLEANUP
 
 
 
-AT_CHECK_M4_MODTEST([--module-directory: absolute path],
-                    [], [-M "$abs_builddir"])
+AT_CHECK_M4_MODTEST([--include: absolute path],
+                    [], [-I "$abs_builddir"])
 
-AT_CHECK_M4_MODTEST([--module-directory: relative path],
-                    [], [-M "$top_build_prefix/tests"])
+AT_CHECK_M4_MODTEST([--include: relative path],
+                    [], [-I "$top_build_prefix/tests"])
 
-AT_CHECK_M4_MODTEST([M4MODPATH: absolute path],
-                    [M4MODPATH="$abs_builddir"], [])
+AT_CHECK_M4_MODTEST([M4PATH: absolute path],
+                    [M4PATH="$abs_builddir:"], [])
 
-AT_CHECK_M4_MODTEST([M4MODPATH: relative path],
-                    [M4MODPATH="$top_build_prefix/tests"], [])
-
-AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: absolute path],
-                    [LTDL_LIBRARY_PATH="$abs_builddir"], [])
-
-AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: relative path],
-                    [LTDL_LIBRARY_PATH="$top_build_prefix/tests"], [])
-
+AT_CHECK_M4_MODTEST([M4PATH: relative path],
+                    [M4PATH="$top_build_prefix/tests:"], [])
 
 
 
@@ -181,7 +174,7 @@ test
 shadow
 
 # module Shadow defines `shadow' and `test' macros
-load(`shadow')
+include(`shadow')
 dumpdef(`test')
 dumpdef(`shadow')
 test
@@ -191,14 +184,14 @@ shadow
 define(`Shadow::test', defn(`test'))
 
 # module Modtest also defines a `test' macro
-load(`modtest')
+include(`modtest')
 dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
 
 # Reloading Shadow shouldn't affect anything
-load(`shadow')
+include(`shadow')
 dumpdef(`test')
 dumpdef(`shadow')
 test
@@ -296,7 +289,7 @@ test:	<test>
 shadow:	<shadow>
 ]])
 
-AT_CHECK_M4([-M "$abs_builddir" -m load input.m4], [0],
+AT_CHECK_M4([-I "$abs_builddir" load input.m4], [0],
             [expout], [experr])
 
 AT_CLEANUP
@@ -313,16 +306,16 @@ AT_CHECK_DYNAMIC_MODULE
 AT_DATA([[input.m4]],
 [[test
 __test__
-load(`modtest')
+include(`modtest')
 test
 __test__
-load(`shadow')
+include(`shadow')
 test
 __test__
 unload(`modtest')
 test
 __test__
-load(`modtest')
+include(`modtest')
 test
 __test__
 unload(`modtest')
@@ -364,7 +357,7 @@ Test module unloaded.
 ]])
 
 
-AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
+AT_CHECK_M4([-I "$abs_builddir" load input.m4],
             [0], [expout], [experr])
 
 AT_CLEANUP
@@ -387,7 +380,7 @@ AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[import
-load(`import')
+include(`import')
 import
 unload(`modtest')
 import
@@ -416,7 +409,9 @@ m4:input.m4:6: cannot load symbol `no_such' from module `modtest'
 m4:input.m4:7: cannot open module `no_such'
 ]])
 
-AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
+ls "$abs_builddir"
+
+AT_CHECK_M4([-I "$abs_builddir" load input.m4],
             [1], [expout], [experr])
 
 AT_CLEANUP
@@ -444,7 +439,7 @@ manyargs(1)
 manyargs(1,2)
 ]])
 
-AT_CHECK_M4([-M "$abs_builddir" -m modtest input.m4], [0],
+AT_CHECK_M4([-I "$abs_builddir" modtest input.m4], [0],
 [[modtest
 modtest
 modtest
@@ -477,11 +472,11 @@ AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[test
-load(`shadow')
+include(`shadow')
 test
 unload(`shadow')
 test
-load(`shadow')
+include(`shadow')
 test
 ]])
 
@@ -501,7 +496,7 @@ m4trace: -1- test -> `Shadow::`test' called.'
 ]])
 
 
-AT_CHECK_M4([-M "$abs_builddir" -m load -t test input.m4],
+AT_CHECK_M4([-I "$abs_builddir" load -t test input.m4],
             [0], [expout], [experr])
 
 AT_CLEANUP
@@ -524,10 +519,10 @@ define(`forloop',
 define(`_forloop',
   `$4`'ifelse($1, `$3', `',
     `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
-forloop(`i', `1', `5000', `unload(`gnu')load(`gnu')regexp(`123', `\(4\)?2')')
+forloop(`i', `1', `5000', `unload(`gnu')include(`gnu')regexp(`123', `\(4\)?2')')
 ]])
 
-AT_CHECK_M4([-m load input.m4], [0])
+AT_CHECK_M4([load input.m4], [0])
 
 AT_CLEANUP
 
@@ -550,7 +545,7 @@ __load__ 3
 ]])
 
 AT_DATA([in2.m4], [[__load__ 4
-load(`load') 5
+include(`load') 5
 __load__ 6
 unload(`load') 7
 __load__ 8
@@ -558,7 +553,7 @@ unload(`load') 9
 __load__ 10
 ]])
 
-AT_CHECK_M4([-m load in1.m4 -m load in2.m4], [0],
+AT_CHECK_M4([load in1.m4 load in2.m4], [0],
 [[ 1
  2
 __load__ 3

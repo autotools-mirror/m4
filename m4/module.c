@@ -390,12 +390,32 @@ compare_builtin_CB (const void *a, const void *b)
 m4_module *
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
-  lt_dlhandle           handle          = lt_dlopenext (name);
-  m4_module *           module          = NULL;
-  m4_module_init_func * init_func       = NULL;
+  static const char *	suffixes[]	= { "", ".la", LT_MODULE_EXT, NULL };
+  char *		filepath	= NULL;
+  lt_dlhandle		handle		= NULL;
+  lt_dladvise		advise		= NULL;
+  m4_module *		module		= NULL;
+  m4_module_init_func *	init_func	= NULL;
 
   assert (context);
   assert (iface_id);            /* need to have called m4__module_init */
+
+  /* Try opening as a preloaded module initially incase path searching
+     has been disabled by POSIXLY_CORRECT... */
+  if (!lt_dladvise_init (&advise) && !lt_dladvise_preload (&advise))
+    handle = lt_dlopenadvise (name, advise);
+  lt_dladvise_destroy (&advise);
+
+  /* ...otherwise resort to a path search anyway.  */
+  if (!handle)
+    {
+      filepath = m4_path_search (context, name, suffixes);
+      if (filepath)
+        {
+          handle = lt_dlopenext (filepath);
+          free (filepath);
+        }
+    }
 
   if (handle)
     {

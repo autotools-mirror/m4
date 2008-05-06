@@ -237,12 +237,6 @@ tests_time_la_LDFLAGS		= $(module_ldflags) $(module_check)
 tests_time_la_LIBADD		= $(module_libadd)
 tests_time_la_SOURCES		= modules/time.c
 
-EXTRA_DIST     += \
-		  modules/modtest.m4 \
-		  modules/shadow.m4 \
-		  modules/time.m4 \
-		  modules/time2.m4 \
-		  modules/stdlib.m4
 
 ## ----- ##
 ## libm4 ##
@@ -355,6 +349,13 @@ dist_pkgdata_DATA = \
 		  examples/wrapfifo.m4 \
 		  examples/wraplifo.m4 \
 		  examples/wraplifo2.m4
+
+EXTRA_DIST     += \
+		  examples/modtest.m4 \
+		  examples/shadow.m4 \
+		  examples/time.m4 \
+		  examples/time2.m4 \
+		  examples/stdlib.m4
 
 ## ----------- ##
 ## Test suite. ##

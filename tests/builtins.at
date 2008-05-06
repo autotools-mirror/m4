@@ -243,7 +243,7 @@ AT_DATA([in.m4], [[include(`forloop3.m4')dnl
 forloop(`i', `1', `10000', `define(`m'i, i)')m10000
 forloop(`i', `1', `10000', `undefine(`m'i)')m10000
 ]])
-AT_CHECK_M4([-I "$top_srcdir/examples" in.m4], [0], [[10000
+AT_CHECK_M4([-I "$abs_top_srcdir/examples" in.m4], [0], [[10000
 m10000
 ]])
 
@@ -379,7 +379,7 @@ forloop(`i', `9001', `10000',
 divert(`-1')undivert
 ]])
 
-AT_CHECK_M4([-I "$top_srcdir/examples" in.m4])
+AT_CHECK_M4([-I "$abs_top_srcdir/examples" in.m4])
 
 AT_CLEANUP
 
@@ -612,8 +612,8 @@ very late
 ]])
 
 AT_DATA([[experr]],
-[[m4:include.m4:2: include: cannot open 'NOFILE': No such file or directory
-m4:include.m4:6: include: cannot open 'NOFILE': No such file or directory
+[[m4:include.m4:2: include: cannot open file 'NOFILE': No such file or directory
+m4:include.m4:6: include: cannot open file 'NOFILE': No such file or directory
 ]])
 
 AT_CHECK_M4([include.m4], 1, expout, experr)
@@ -927,7 +927,7 @@ AT_DATA([[expout]],
 
 ]])
 
-AT_CHECK_M4([-m mpeval in], 0, expout)
+AT_CHECK_M4([mpeval in], 0, expout)
 
 AT_CLEANUP
 

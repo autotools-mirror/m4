@@ -158,7 +158,6 @@ Introduction and preliminaries
 Invoking @code{m4}
 
 * Operation modes::             Command line options for operation modes
-* Dynamic loading features::    Command line options for dynamic loading
 * Preprocessor features::       Command line options for preprocessor features
 * Limits control::              Command line options for limits control
 * Frozen state::                Command line options for frozen state
@@ -238,7 +237,6 @@ Diverting and undiverting output
 Extending M4 with dynamic runtime modules
 
 * M4modules::                   Listing loaded modules
-* Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
 * Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
@@ -598,7 +596,6 @@ version of @code{m4} introduces an option named @option{--default}).
 
 @menu
 * Operation modes::             Command line options for operation modes
-* Dynamic loading features::    Command line options for dynamic loading
 * Preprocessor features::       Command line options for preprocessor features
 * Limits control::              Command line options for limits control
 * Frozen state::                Command line options for frozen state
@@ -761,36 +758,6 @@ Enable warnings.  Warnings are on by default unless
 allow overriding @option{--silent}.
 @comment FIXME should we accept -Wall, -Wnone, -Wcategory,
 @comment -Wno-category...?
-@end table
-
-@node Dynamic loading features
-@section Command line options for dynamic loading
-
-On platforms that support dynamic libraries, there are some options
-that affect dynamic loading.
-
-@table @code
-@item -M @var{directory}
-@itemx --module-directory=@var{directory}
-Specify an alternate @var{directory} to search for modules.  This option
-can be used multiple times to add several different directories to the
-module search path.  @xref{Modules}, for more details.
-
-@item -m @var{module}
-@itemx --load-module=@var{module}
-Load @var{module} before parsing more input files.  @var{module} is
-searched for in each directory of the module search path, until the
-first match is found or the list is exhausted.  @xref{Modules}, for more
-details.  By default, the modules @samp{m4}, @samp{traditional}, and
-@samp{gnu} are preloaded, although this can be controlled during
-configuration with the @option{--with-modules} option to
-@file{m4-@value{VERSION}/@/configure}.  This option may be given more
-than once, and order with respect to file names is significant.
-
-@item --unload-module=@var{module}
-Unload @var{module} before parsing more input files.  @xref{Modules},
-for more details.  This option may be given more than once, and order
-with respect to file names is significant.
 @end table
 
 @node Preprocessor features
@@ -1081,16 +1048,19 @@ respect to file names.  @xref{Trace}, for more details.
 @cindex command line, file names on the
 @cindex file names, on the command line
 The remaining arguments on the command line are taken to be input file
-names.  If no names are present, standard input is read.  A file
-name of @file{-} is taken to mean standard input.  It is
-conventional, but not required, for input files to end in @samp{.m4}.
+names or module names (@pxref{Modules}).  Whether or not any modules
+are loaded from command line arguments, when no actual input file names
+are given, then standard input is read.  A file name of @file{-} can be
+used to denote standard input.  It is conventional, but not required,
+for input file names to end in @samp{.m4} and for module names to end
+in @samp{.la}.  The input files and modules are attended to in the
+sequence given.
 
-The input files are read in the sequence given.  Standard input can be
-read more than once, so the file name @file{-} may appear multiple times
-on the command line; this makes a difference when input is from a
-terminal or other special file type.  It is an error if an input file
-ends in the middle of argument collection, a comment, or a quoted
-string.
+Standard input can be read more than once, so the file name @file{-}
+may appear multiple times on the command line; this makes a difference
+when input is from a terminal or other special file type.  It is an
+error if an input file ends in the middle of argument collection, a
+comment, or a quoted string.
 @comment FIXME - it would be nicer if we let these three things
 @comment continue across file boundaries, provided that we warn in
 @comment interactive use when switching to stdin in a non-default parse
@@ -1098,10 +1068,9 @@ string.
 
 Various options, such as @option{--define} (@option{-D}), @option{--undefine}
 (@option{-U}), @option{--synclines} (@option{-s}), @option{--trace}
-(@option{-t}), @option{--regexp-syntax} (@option{-r}), and
-@option{--load-module} (@option{-m}), only take effect after processing
-input from any file names that occur earlier on the command line.  For
-example, assume the file @file{foo} contains:
+(@option{-t}), and @option{--regexp-syntax} (@option{-r}), only take
+effect after processing input from any file names that occur earlier
+on the command line.  For example, assume the file @file{foo} contains:
 
 @comment file: foo
 @example
@@ -1118,6 +1087,14 @@ $ @kbd{m4 -Dbar=hello foo -Dbar=world foo}
 @result{}hello
 @result{}world
 @end example
+
+@cindex command line, module names on the
+@cindex module names, on the command line
+The use of loadable runtime modules in any sense is a @acronym{GNU} M4
+extension, so if @option{-G} is also passed or if the @env{POSIXLY_CORRECT}
+environment variable is set, even otherwise valid module names will be
+treated as though they were input file names (and no doubt cause havoc as
+M4 tries to scan and expand the contents as if it were written in @code{m4}).
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
@@ -5980,12 +5957,12 @@ m4wrap(`define(`bar', ')m4wrap(defn(`divnum'))m4wrap(`)bar
 @code{m4} allows you to include named files at any point in the input.
 
 @menu
-* Include::                     Including named files
+* Include::                     Including named files and modules
 * Search Path::                 Searching for include files
 @end menu
 
 @node Include
-@section Including named files
+@section Including named files and modules
 
 There are two builtin macros in @code{m4} for including files:
 
@@ -6010,10 +5987,10 @@ parameters.
 @comment status: 1
 @example
 include(`n')
-@error{}m4:stdin:1: include: cannot open 'n': No such file or directory
+@error{}m4:stdin:1: include: cannot open file 'n': No such file or directory
 @result{}
 include()
-@error{}m4:stdin:2: include: cannot open '': No such file or directory
+@error{}m4:stdin:2: include: cannot open file '': No such file or directory
 @result{}
 sinclude(`n')
 @result{}
@@ -6071,14 +6048,31 @@ This is `bar':  >>bar<<
 
 This use of @code{include} is not trivial, though, as files can contain
 quotes, commas, and parentheses, which can interfere with the way the
-@code{m4} parser works.  @acronym{GNU} @code{m4} seamlessly concatenates
+@code{m4} parser works.  @acronym{GNU} M4 seamlessly concatenates
 the file contents with the next character, even if the included file
 ended in the middle of a comment, string, or macro call.  These
 conditions are only treated as end of file errors if specified as input
 files on the command line.
 
-In @acronym{GNU} @code{m4}, an alternative method of reading files is
+In @acronym{GNU} M4, an alternative method of reading files is
 using @code{undivert} (@pxref{Undivert}) on a named file.
+
+In addition, as a @acronym{GNU} M4 extension, if the included file can
+not be found exactly as given, various standard suffixes are appended.
+If the included file name is absolute (a full path from the root directory
+is given) then additional search directories are not examined, although
+suffixes will be tried if the file is not found exactly as given.
+For each directory that is searched (according to the absolute directory
+give in the file name, or else by directories listed in @env{M4PATH} and
+given with the @option{-I} and @option{-B} options), first the unchanged
+file name is tried, and then again with the suffixes @samp{.m4f} and
+@samp{.m4}.
+
+Furthermore, if no matching file has yet been found, before moving on to
+the next directory, @samp{.la} and the usual binary module suffix for
+the host platform (usually @samp{.so}) are also tried.  Matching with one
+of those suffixes will attempt to load the matched file as a dynamic
+module. @xref{Modules}, for more details.
 
 @node Search Path
 @section Searching for include files
@@ -6511,10 +6505,11 @@ Starting with release 2.0, M4 uses Libtool's @code{libltdl} facilities
 to move all of M4's builtins out to pluggable modules.  Unless compile
 time options are set to change the default build, the installed M4 2.0
 binary is virtually identical to 1.4.x, supporting the same builtins.
-However, an optional module can be loaded into the running M4 interpreter
-to provide a new @code{load} builtin.  This facilitates runtime
-extension of the M4 builtin macro list using compiled C code linked
-against a new shared library, typically named @file{libm4.so}.
+However, additional modules can be loaded into the running M4 interpreter
+as it is started up at the command line, or during normal expansion of
+macros.  This facilitates runtime extension of the M4 builtin macro
+list using compiled C code linked against a new shared library,
+typically named @file{libm4.so}.
 
 For example, you might want to add a @code{setenv} builtin to M4, to
 use before invoking @code{esyscmd}.  We might write a @file{setenv.c}
@@ -6554,7 +6549,7 @@ M4 code:
 
 @comment ignore
 @example
-$ @kbd{M4MODPATH=`pwd` m4 --load-module=setenv}
+$ @kbd{m4 setenv}
 setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
 @result{}
 esyscmd(`ifconfig -a')dnl
@@ -6562,12 +6557,12 @@ esyscmd(`ifconfig -a')dnl
 @end example
 
 Or instead of loading the module from the M4 invocation, you can use
-the new @code{load} builtin:
+the @code{include} builtin:
 
 @comment ignore
 @example
-$ @kbd{M4MODPATH=`pwd` m4 --load-module=load}
-load(`setenv')
+$ @kbd{m4}
+include(`setenv')
 @result{}
 setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
 @result{}
@@ -6576,7 +6571,7 @@ setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
 Also, at build time, you can choose which modules to build into
 the core (so that they will be available without dynamic loading).
 SUSv3 M4 functionality is contained in the module @samp{m4}, @acronym{GNU}
-extensions in the module @samp{gnu}, the @code{load} builtin in the
+extensions in the module @samp{gnu}, additional module builtins in the
 module @samp{load} and so on.
 
 We hinted earlier that the @code{m4} and @code{gnu} modules are
@@ -6584,10 +6579,10 @@ preloaded into the installed M4 binary, but it is possible to install
 a @emph{thinner} binary; for example, omitting the @acronym{GNU}
 extensions by configuring the distribution with @kbd{./configure
 --with-modules=m4}.  For a binary built with that option to understand
-code that uses @acronym{GNU} extensions, you must then run @kbd{m4
---load-module=gnu}.  It is also possible to build a @emph{fatter}
-binary with additional modules preloaded: adding, say, the @code{load}
-builtin using @kbd{./configure --with-modules="m4 gnu load"}.
+code that uses @acronym{GNU} extensions, you must then run @kbd{m4 gnu}.
+It is also possible to build a @emph{fatter} binary with additional
+modules preloaded: adding, say, the @code{load} module usingr
+ @kbd{./configure --with-modules="m4 gnu load"}.
 
 @acronym{GNU} M4 now has a facility for defining additional builtins without
 recompiling the sources.  In actual fact, all of the builtins provided
@@ -6603,7 +6598,6 @@ two modes of startup.
 
 @menu
 * M4modules::                   Listing loaded modules
-* Load::                        Loading additional modules
 * Unload::                      Removing loaded modules
 * Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
@@ -6620,43 +6614,13 @@ position depends on when the module was @emph{first} loaded.
 @end deffn
 
 For example, if @acronym{GNU} @code{m4} is started with the
-@option{-m load} option to load the module @samp{load} and make this
-builtin available, @code{m4modules} will yield the following:
+@option{load} module, @code{m4modules} will yield the following:
 
-@comment options: -m load
+@comment options: load -
 @example
-$ @kbd{m4 -m load}
+$ @kbd{m4 load -}
 m4modules
 @result{}load,gnu,m4
-@end example
-
-@node Load
-@section Loading additional modules
-
-@deffn {Builtin (load)} load (@var{module-name})
-@var{module-name} will be searched for along the module search path
-(@pxref{Standard Modules}) and loaded if found.  Loading a module
-consists of running its initialization function (if any) and then adding
-any macros it provides to the internal table.
-
-The macro @code{load} is recognized only with parameters.
-@end deffn
-
-Once the @code{load} module has successfully loaded, use of the
-@samp{load} macro is entirely equivalent to the @option{-m} command line
-option.
-
-@c The -mmpeval/--unload=mpeval pair allows the testsuite to skip this
-@c test if mpeval was not configured for usage.
-@comment options: -m load -m mpeval --unload-module=mpeval
-@example
-$ @kbd{m4 -m load}
-m4modules
-@result{}load,gnu,m4
-load(`mpeval')
-@result{}
-m4modules
-@result{}mpeval,load,gnu,m4
 @end example
 
 @node Unload
@@ -6672,9 +6636,9 @@ running the module's finalization method (if any).
 The macro @code{unload} is recognized only with parameters.
 @end deffn
 
-@comment options: -m mpeval -m load
+@comment options: mpeval load -
 @example
-$ @kbd{m4 -m mpeval -m load}
+$ @kbd{m4 mpeval load -}
 m4modules
 @result{}load,mpeval,gnu,m4
 unload(`mpeval')
@@ -6697,16 +6661,16 @@ The macro @code{refcount} is recognized only with parameters.
 This example demonstrates tracking the reference count of the gnu
 module.
 
-@comment options: -m load
+@comment options: load -
 @example
-$ @kbd{m4 -m load}
+$ @kbd{m4 load -}
 m4modules
 @result{}load,gnu,m4
 refcount(`gnu')
 @result{}1
 m4modules
 @result{}load,gnu,m4
-load(`gnu')
+include(`gnu')
 @result{}
 refcount(`gnu')
 @result{}2
@@ -6771,7 +6735,7 @@ Expands to the empty string, as an indication that the
 @end deffn
 
 @item load
-This module supplies the builtins required to use modules from within a
+This module supplies the builtins for advanced use of modules from within a
 @acronym{GNU} @code{m4} program.  @xref{Modules}, for more details.  The
 module also defines the following macro:
 
@@ -7923,9 +7887,9 @@ The macro @code{mpeval} is recognized only with parameters.
 
 For the most part, using @code{mpeval} is similar to using @code{eval}:
 
-@comment options: -m mpeval
+@comment options: mpeval -
 @example
-$ @kbd{m4 -m mpeval}
+$ @kbd{m4 mpeval -}
 mpeval(`(1 << 70) + 2 ** 68 * 3', `16')
 @result{}700000000000000000
 `0r24:'mpeval(`0r36:zYx', `24', `5')
@@ -7950,9 +7914,9 @@ value of the argument that ended evaluation, rather than collapsing to
 even in @acronym{POSIX} mode, since @code{mpeval} does not have to
 conform to the @acronym{POSIX} rules for @code{eval}.
 
-@comment options: -m mpeval
+@comment options: mpeval -
 @example
-$ @kbd{m4 -m mpeval}
+$ @kbd{m4 mpeval -}
 mpeval(`2 / 4')
 @result{}0
 mpeval(`2 \ 4')

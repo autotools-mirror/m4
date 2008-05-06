@@ -35,7 +35,6 @@
 
            function     macros  blind   side    minargs maxargs */
 #define builtin_functions                                       \
-  BUILTIN (load,        false,  true,   false,  1,      1  )    \
   BUILTIN (m4modules,   false,  false,  false,  0,      0  )    \
   BUILTIN (refcount,    false,  true,   false,  1,      1  )    \
   BUILTIN (unload,      false,  true,   false,  1,      1  )    \
@@ -114,16 +113,6 @@ M4BUILTIN_HANDLER (refcount)
 {
   m4_module *module = m4__module_find (M4ARG (1));
   m4_shipout_int (obs, module ? m4_module_refcount (module) : 0);
-}
-
-/**
- * load(MODULE-NAME)
- **/
-M4BUILTIN_HANDLER (load)
-{
-  /* Load the named module and install the builtins and macros
-     exported by that module.  */
-  m4_module_load (context, M4ARG(1), obs);
 }
 
 /**

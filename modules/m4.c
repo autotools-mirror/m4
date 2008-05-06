@@ -98,8 +98,8 @@ extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
 typedef intmax_t number;
 typedef uintmax_t unumber;
 
-static void     include         (m4 *context, int argc, m4_macro_args *argv,
-                                 bool silent);
+static void	include		(m4 *context, m4_obstack *obs, size_t argc,
+				 m4_macro_args *argv, bool silent);
 static int      dumpdef_cmp_CB  (const void *s1, const void *s2);
 static void *   dump_symbol_CB  (m4_symbol_table *, const char *, size_t,
                                  m4_symbol *symbol, void *userdata);
@@ -603,7 +603,10 @@ M4BUILTIN_HANDLER (undivert)
                    quotearg_style_mem (locale_quoting_style, str, len));
         else
           {
-            FILE *fp = m4_path_search (context, str, NULL);
+	    char *filepath = m4_path_search (context, str, NULL);
+	    FILE *fp = m4_fopen (context, filepath, "r");
+
+	    free (filepath);
             if (fp != NULL)
               {
                 m4_insert_file (context, fp);
@@ -660,14 +663,9 @@ M4BUILTIN_HANDLER (changecom)
    and "sinclude".  This differs from bringing back diversions, in that
    the input is scanned before being copied to the output.  */
 
-/* Generic include function.  Include the file given by the first
-   argument, if it exists.  Complain about inaccessible files iff
-   SILENT is false.  */
 static void
-include (m4 *context, int argc, m4_macro_args *argv, bool silent)
+include (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv, bool silent)
 {
-  FILE *fp;
-  char *name = NULL;
   const m4_call_info *me = m4_arg_info (argv);
   const char *arg = M4ARG (1);
   size_t len = M4ARGLEN (1);
@@ -675,29 +673,19 @@ include (m4 *context, int argc, m4_macro_args *argv, bool silent)
   if (strlen (arg) != len)
     m4_warn (context, 0, me, _("argument %s truncated"),
              quotearg_style_mem (locale_quoting_style, arg, len));
-  fp = m4_path_search (context, arg, &name);
-  if (fp == NULL)
-    {
-      if (!silent)
-        m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open %s"),
-                  quotearg_style (locale_quoting_style, arg));
-      return;
-    }
-
-  m4_push_file (context, fp, name, true);
-  free (name);
+  m4_load_filename (context, me, arg, obs, silent);
 }
 
 /* Include a file, complaining in case of errors.  */
 M4BUILTIN_HANDLER (include)
 {
-  include (context, argc, argv, false);
+  include (context, obs, argc, argv, false);
 }
 
 /* Include a file, ignoring errors.  */
 M4BUILTIN_HANDLER (sinclude)
 {
-  include (context, argc, argv, true);
+  include (context, obs, argc, argv, true);
 }
 
 
