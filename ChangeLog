@@ -1,3 +1,9 @@
+2008-05-07  Eric Blake  <ebb9@byu.net>
+
+	Test for traceon regression just fixed in branch-1.6.
+	* doc/m4.texinfo (Trace): Enhance test.
+	* NEWS: Port news item from branch.
+
 2008-05-05  Eric Blake  <ebb9@byu.net>
 
 	Stage 22: allow builtin token concatenation outside $@.
