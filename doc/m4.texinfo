@@ -3708,6 +3708,16 @@ does not transfer tracing status.
 
 @example
 $ @kbd{m4 -d}
+traceon(`traceon')
+@result{}
+traceon(`traceoff')
+@error{}m4trace: -1- traceon(`traceoff')
+@result{}
+traceoff(`traceoff')
+@error{}m4trace: -1- traceoff(`traceoff')
+@result{}
+traceoff(`traceon')
+@result{}
 traceon(`eval', `m4_divnum')
 @result{}
 define(`m4_eval', defn(`eval'))

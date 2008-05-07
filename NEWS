@@ -5,6 +5,10 @@ Foundation, Inc.
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
   Released by ????, based on git version 1.4.10b.x-*
 
+** Fix regression introduced in 1.4.4b where using `traceon' could delete
+   a macro.  This was most noticeable with `traceon(`traceon')', but
+   would also happen in cases such as `foo(traceon(`foo'))'.
+
 ** Fix regression introduced in 1.4.10b (but not present in 1.4.11) where
    using `builtin' or `indir' to perform nested `shift' calls triggered an
    assertion failure.

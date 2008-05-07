@@ -1,3 +1,11 @@
+2008-05-07  Eric Blake  <ebb9@byu.net>
+
+	Fix traceon regression introduced 2006-06-06.
+	* src/builtin.m4 (traceon): Only perform insertion if lookup
+	fails.
+	* doc/m4.texinfo (Trace): Test for the bug.
+	* NEWS: Document it.
+
 2008-05-05  Eric Blake  <ebb9@byu.net>
 
 	Stage 22: allow builtin token concatenation outside $@.

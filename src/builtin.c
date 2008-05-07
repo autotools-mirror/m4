@@ -1672,7 +1672,9 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 	    m4_warn (0, me, _("invalid macro name ignored"));
 	    continue;
 	  }
-	s = lookup_symbol (ARG (i), SYMBOL_INSERT);
+	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+	if (!s)
+	  s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
 }
