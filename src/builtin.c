@@ -1565,7 +1565,9 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_INSERT);
+	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+	if (!s)
+	  s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
 }

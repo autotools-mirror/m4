@@ -2,6 +2,15 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free Software
 Foundation, Inc.
 
+* Noteworthy changes in Version 1.4.12 (2008-??-??) [stable]
+  Released by Eric Blake, based on git version 1.4.11.*
+
+** Fix regression introduced in 1.4.4b where using `traceon' could delete
+   a macro.  This was most noticeable with `traceon(`traceon')', but
+   would also happen in cases such as `foo(traceon(`foo'))'.
+
+** A number of portability improvements inherited from gnulib.
+
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]
   Released by Eric Blake, based on git version 1.4.10a
 
