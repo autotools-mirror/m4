@@ -1,5 +1,10 @@
 2008-05-09  Eric Blake  <ebb9@byu.net>
 
+	Detect integer overflow when loading frozen file.
+	* src/freeze.c (reload_frozen_state) [GET_NUMBER]: Rewrite to fail
+	immediately on overflow.
+	Reported by Jim Meyering.
+
 	Stage 23: allow tracing of indirect macro calls.
 	Track all trace information as part of the argv struct, rather
 	than temporarily resetting global state.  Teach indir to trace
