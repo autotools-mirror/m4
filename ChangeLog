@@ -1,3 +1,48 @@
+2008-05-08  Eric Blake  <ebb9@byu.net>
+
+	Stage 23: allow tracing of indirect macro calls.
+	Track all trace information as part of the argv struct, rather
+	than temporarily resetting global state.  Teach indir to trace
+	macros that it invokes.
+	Memory impact: slight penalty, due to larger argv struct.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_input_block): Remove.
+	(m4_call_info): New opaque type.
+	(m4_trace_prepare, m4_arg_info): New prototypes.
+	(m4_macro_call, m4_push_string_finish, m4_input_print): Change
+	prototypes.
+	* m4/m4private.h (struct m4_macro_args): Add info field.
+	(struct m4_call_info): New structure.
+	(m4_arg_info): New accessor.
+	* m4/input.c (m4_input_block): Make typedef local.
+	(m4_push_string_init): Initialize length.
+	(m4_push_string_finish, m4_input_print): Change signature, so that
+	printing can be done before finalization.
+	(struct input_funcs): Add parameter to print_func.
+	(file_print, string_print, composite_print): Adjust accordingly.
+	* m4/macro.c (trace_header, trace_flush, trace_pre, trace_post):
+	Change signatures for stacked trace messages, and for using call
+	context.
+	(trace_prepre): Export and rename...
+	(m4_trace_prepare): ...to this, for use by indir.  Alter signature
+	to use call context.
+	(collect_arguments): Alter signature, to manage new field.
+	(expand_macro): Change call context management.  Move tracing...
+	(m4_macro_call): ...here.  Remove redundant parameter.
+	(m4_arg_argc): New function.
+	(m4_make_argv_ref): Replace unused skip parameter with new trace
+	parameter; manage new field.
+	* modules/gnu.c (builtin, indir): Adjust callers.
+	* src/main.c (usage): Update debugmode flag summary.
+	* tests/null.m4: Enhance test.
+	* tests/null.err: Update expected output.
+	* tests/macros.at (Tracing Hanoi Towers): Likewise.
+	* doc/m4.texinfo (Trace): Mention more about trace formatting.
+	(Debugmode): Enhance description of 'c' and 'x'.  Enhance test to
+	cover line numbering details in traces.
+	(Debuglen): Enhance test to cover indir tracing.
+	* NEWS: Mention these changes.
+
 2008-05-07  Eric Blake  <ebb9@byu.net>
 
 	Test for traceon regression just fixed in branch-1.6.

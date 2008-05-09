@@ -32,15 +32,14 @@ BEGIN_C_DECLS
 
 typedef struct m4		m4;
 typedef struct m4_builtin	m4_builtin;
+typedef struct m4_call_info	m4_call_info;
 typedef struct m4_macro		m4_macro;
+typedef struct m4_macro_args	m4_macro_args;
+typedef struct m4_module	m4_module;
+typedef struct obstack		m4_obstack;
+typedef struct m4_string_pair	m4_string_pair;
 typedef struct m4_symbol	m4_symbol;
 typedef struct m4_symbol_value	m4_symbol_value;
-typedef struct m4_input_block	m4_input_block;
-typedef struct m4_module	m4_module;
-typedef struct m4_macro_args	m4_macro_args;
-typedef struct m4_string_pair	m4_string_pair;
-
-typedef struct obstack		m4_obstack;
 
 typedef void   m4_builtin_func  (m4 *, m4_obstack *, size_t, m4_macro_args *);
 
@@ -347,8 +346,9 @@ extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
 
 extern void	m4_macro_expand_input	(m4 *);
 extern void	m4_macro_call		(m4 *, m4_symbol_value *, m4_obstack *,
-					 size_t, m4_macro_args *);
+					 m4_macro_args *);
 extern size_t	m4_arg_argc		(m4_macro_args *);
+extern const m4_call_info *m4_arg_info	(m4_macro_args *);
 extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, size_t);
 extern bool	m4_is_arg_text		(m4_macro_args *, size_t);
 extern bool	m4_is_arg_func		(m4_macro_args *, size_t);
@@ -414,6 +414,8 @@ extern void	m4_debug_message_prefix (m4 *);
 extern void	m4_debug_message	(m4 *, int, const char *, ...)
   M4_GNUC_PRINTF (3, 4);
 
+extern void	m4_trace_prepare	(m4 *, const m4_call_info *,
+					 m4_symbol_value *);
 
 
 /* --- REGEXP SYNTAX --- */
@@ -496,9 +498,9 @@ extern	void	m4_skip_line	(m4 *context, const char *);
 extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
 extern	void	m4_push_builtin	(m4 *, m4_obstack *, m4_symbol_value *);
 extern	m4_obstack	*m4_push_string_init	(m4 *);
-extern	m4_input_block	*m4_push_string_finish	(void);
+extern	void	m4_push_string_finish	(void);
 extern	bool	m4_pop_wrapup	(m4 *);
-extern	void	m4_input_print	(m4 *, m4_obstack *, m4_input_block *);
+extern	void	m4_input_print	(m4 *, m4_obstack *, int);
 
 
 

@@ -156,7 +156,7 @@ Debugging:\n\
       fputs (_("\
 FLAGS is any of:\n\
   a   show actual arguments in trace\n\
-  c   show definition line in trace\n\
+  c   show collection line in trace\n\
   e   show expansion in trace\n\
   f   include current input file name in trace and debug\n\
   i   show changes in input files in debug\n\
@@ -165,9 +165,9 @@ FLAGS is any of:\n\
       fputs (_("\
   m   show module information in trace, debug, and dumpdef\n\
   p   show results of path searches in debug\n\
-  q   quote values as necessary in dumpdef and trace, useful with a or e\n\
+  q   quote values in dumpdef and trace, useful with a or e\n\
   s   show full stack of pushdef values in dumpdef\n\
-  t   trace all macro calls, regardless of named traceon state\n\
+  t   trace all macro calls, regardless of per-macro traceon state\n\
   x   include unique macro call id in trace, useful with c\n\
   V   shorthand for all of the above flags\n\
 "), stdout);

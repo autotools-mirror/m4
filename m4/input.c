@@ -92,23 +92,28 @@
    maintains its own notion of the current file and line, so swapping
    between input blocks must update the context accordingly.  */
 
+typedef struct m4_input_block m4_input_block;
+
 static	int	file_peek		(m4_input_block *, m4 *, bool);
 static	int	file_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
 static	void	file_unget		(m4_input_block *, int);
 static	bool	file_clean		(m4_input_block *, m4 *, bool);
-static	void	file_print		(m4_input_block *, m4 *, m4_obstack *);
+static	void	file_print		(m4_input_block *, m4 *, m4_obstack *,
+					 int);
 static	int	string_peek		(m4_input_block *, m4 *, bool);
 static	int	string_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
 static	void	string_unget		(m4_input_block *, int);
-static	void	string_print		(m4_input_block *, m4 *, m4_obstack *);
+static	void	string_print		(m4_input_block *, m4 *, m4_obstack *,
+					 int);
 static	int	composite_peek		(m4_input_block *, m4 *, bool);
 static	int	composite_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
 static	void	composite_unget		(m4_input_block *, int);
 static	bool	composite_clean		(m4_input_block *, m4 *, bool);
-static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *);
+static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *,
+					 int);
 static	int	eof_peek		(m4_input_block *, m4 *, bool);
 static	int	eof_read		(m4_input_block *, m4 *, bool, bool,
 					 bool);
@@ -159,7 +164,7 @@ struct input_funcs
 
   /* Add a representation of the input block to the obstack, for use
      in trace expansion output.  */
-  void	(*print_func)	(m4_input_block *, m4 *, m4_obstack *);
+  void	(*print_func)	(m4_input_block *, m4 *, m4_obstack *, int);
 };
 
 /* A block of input to be scanned.  */
@@ -337,9 +342,11 @@ file_clean (m4_input_block *me, m4 *context, bool cleanup)
 }
 
 static void
-file_print (m4_input_block *me, m4 *context, m4_obstack *obs)
+file_print (m4_input_block *me, m4 *context M4_GNUC_UNUSED, m4_obstack *obs,
+	    int debug_level M4_GNUC_UNUSED)
 {
   const char *text = me->file;
+  assert (obstack_object_size (current_input) == 0);
   obstack_grow (obs, "<file: ", strlen ("<file: "));
   obstack_grow (obs, text, strlen (text));
   obstack_1grow (obs, '>');
@@ -417,12 +424,15 @@ string_unget (m4_input_block *me, int ch)
 }
 
 static void
-string_print (m4_input_block *me, m4 *context, m4_obstack *obs)
+string_print (m4_input_block *me, m4 *context, m4_obstack *obs,
+	      int debug_level)
 {
-  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  bool quote = (debug_level & M4_DEBUG_TRACE_QUOTE) != 0;
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
 
-  m4_shipout_string_trunc (obs, me->u.u_s.str, me->u.u_s.len,
+  assert (!me->u.u_s.len);
+  m4_shipout_string_trunc (obs, (char *) obstack_base (current_input),
+			   obstack_object_size (current_input),
 			   quote ? m4_get_syntax_quotes (M4SYNTAX) : NULL,
 			   &arg_length);
 }
@@ -442,6 +452,7 @@ m4_push_string_init (m4 *context)
   next->funcs = &string_funcs;
   next->file = m4_get_current_file (context);
   next->line = m4_get_current_line (context);
+  next->u.u_s.len = 0;
 
   return current_input;
 }
@@ -610,24 +621,19 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 }
 
 /* Last half of m4_push_string ().  If next is now NULL, a call to
-   m4_push_file () or m4_push_builtin () has pushed a different input
-   block to the top of the stack.  If the new object is void, we do
-   not push it.  The function m4_push_string_finish () returns the
-   opaque finished object, whether that is still a string or has been
-   replaced by a file or builtin; this object can then be used in
-   m4_input_print () during tracing.  This pointer is only for
-   temporary use, since reading the next token might release the
-   memory used for the object.  */
-m4_input_block *
+   m4_push_file () has pushed a different input block to the top of
+   the stack.  Otherwise, all unfinished text on the obstack returned
+   from push_string_init is collected into the input stack.  If the
+   new object is empty, we do not push it.  */
+void
 m4_push_string_finish (void)
 {
-  m4_input_block *ret = NULL;
   size_t len = obstack_object_size (current_input);
 
   if (next == NULL)
     {
       assert (!len);
-      return isp;
+      return;
     }
 
   if (len || next->funcs == &composite_funcs)
@@ -641,13 +647,12 @@ m4_push_string_finish (void)
 	m4__make_text_link (current_input, &next->u.u_c.chain,
 			    &next->u.u_c.end);
       next->prev = isp;
-      ret = isp = next;
+      isp = next;
       input_change = true;
     }
   else
     obstack_free (current_input, next);
   next = NULL;
-  return ret;
 }
 
 
@@ -846,14 +851,16 @@ composite_clean (m4_input_block *me, m4 *context, bool cleanup)
 }
 
 static void
-composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
+composite_print (m4_input_block *me, m4 *context, m4_obstack *obs,
+		 int debug_level)
 {
-  bool quote = m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE);
+  bool quote = (debug_level & M4_DEBUG_TRACE_QUOTE) != 0;
   size_t maxlen = m4_get_max_debug_arg_length_opt (context);
   m4__symbol_chain *chain = me->u.u_c.chain;
   const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
-  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+  bool module = (debug_level & M4_DEBUG_TRACE_MODULE) != 0;
   bool done = false;
+  size_t len = obstack_object_size (current_input);
 
   if (quote)
     m4_shipout_string (context, obs, quotes->str1, quotes->len1, false);
@@ -885,6 +892,9 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs)
 	}
       chain = chain->next;
     }
+  if (len)
+    m4_shipout_string_trunc (obs, (char *) obstack_base (current_input), len,
+			     NULL, &maxlen);
   if (quote)
     m4_shipout_string (context, obs, quotes->str2, quotes->len2, false);
 }
@@ -988,25 +998,16 @@ eof_unget (m4_input_block *me M4_GNUC_UNUSED, int ch)
 
 
 /* When tracing, print a summary of the contents of the input block
-   created by push_string_init/push_string_finish to OBS.  */
+   created by push_string_init/push_string_finish to OBS.  Use
+   DEBUG_LEVEL to determine whether to add quotes or module
+   designations.  */
 void
-m4_input_print (m4 *context, m4_obstack *obs, m4_input_block *input)
+m4_input_print (m4 *context, m4_obstack *obs, int debug_level)
 {
-  assert (context && obs);
-  if (input == NULL)
-    {
-      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
-	{
-	  const m4_string_pair *quotes = m4_get_syntax_quotes (M4SYNTAX);
-	  obstack_grow (obs, quotes->str1, quotes->len1);
-	  obstack_grow (obs, quotes->str2, quotes->len2);
-	}
-    }
-  else
-    {
-      assert (input->funcs->print_func);
-      input->funcs->print_func (input, context, obs);
-    }
+  m4_input_block *block = next ? next : isp;
+  assert (context && obs && (debug_level & M4_DEBUG_TRACE_EXPANSION));
+  assert (block->funcs->print_func);
+  block->funcs->print_func (block, context, obs, debug_level);
 }
 
 /* Return an obstack ready for direct expansion of wrapup text, and

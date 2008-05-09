@@ -122,9 +122,8 @@
    memory left on the obstack while waiting for refcounts to drop.
 */
 
-static m4_macro_args *collect_arguments (m4 *, const char *, size_t,
-					 m4_symbol *, m4_obstack *,
-					 m4_obstack *);
+static m4_macro_args *collect_arguments (m4 *, m4_call_info *, m4_symbol *,
+					 m4_obstack *, m4_obstack *);
 static void    expand_macro      (m4 *, const char *, size_t, m4_symbol *);
 static bool    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int, bool);
@@ -133,16 +132,13 @@ static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 				  m4_macro_args *);
 
-static void    trace_prepre	 (m4 *, const char *, size_t,
-				  m4_symbol_value *);
-static void    trace_pre	 (m4 *, size_t, m4_macro_args *);
-static void    trace_post	 (m4 *, size_t, m4_macro_args *,
-				  m4_input_block *, bool);
+static unsigned int trace_pre	 (m4 *, m4_macro_args *);
+static void    trace_post	 (m4 *, unsigned int, const m4_call_info *);
 
 static void    trace_format	 (m4 *, const char *, ...)
   M4_GNUC_PRINTF (2, 3);
-static void    trace_header	 (m4 *, size_t);
-static void    trace_flush	 (m4 *);
+static unsigned int trace_header (m4 *, const m4_call_info *);
+static void    trace_flush	 (m4 *, unsigned int);
 
 
 /* The number of the current call of expand_macro ().  */
@@ -443,22 +439,12 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   void *argv_base;		/* Base of stack->argv on entry.  */
   m4_macro_args *argv;		/* Arguments to the called macro.  */
   m4_obstack *expansion;	/* Collects the macro's expansion.  */
-  m4_input_block *expanded;	/* The resulting expansion, for tracing.  */
-  bool traced;			/* True if this macro is traced.  */
-  bool trace_expansion = false;	/* True if trace and debugmode(`e').  */
-  size_t my_call_id;		/* Sequence id for this macro.  */
   m4_symbol_value *value;	/* Original value of this macro.  */
   size_t level;			/* Expansion level of this macro.  */
   m4__macro_arg_stacks *stack;	/* Storage for this macro.  */
+  m4_call_info info;		/* Context of this macro call.  */
 
-  /* Report errors at the location where the open parenthesis (if any)
-     was found, but after expansion, restore global state back to the
-     location of the close parenthesis.  This is safe since we
-     guarantee that macro expansion does not alter the state of
-     current_file/current_line (dnl, include, and sinclude are special
-     cased in the input engine to ensure this fact).  */
-  const char *loc_open_file = m4_get_current_file (context);
-  int loc_open_line = m4_get_current_line (context);
+  /* TODO - use m4_call_info to avoid temporary munging of global state.  */
   const char *loc_close_file;
   int loc_close_line;
 
@@ -496,10 +482,14 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
      collecting arguments.  Likewise, grab any state needed during
      tracing.  */
   value = m4_get_symbol_value (symbol);
-  traced = (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
-	    || m4_get_symbol_traced (symbol));
-  if (traced)
-    trace_expansion = m4_is_debug_bit (context, M4_DEBUG_TRACE_EXPANSION);
+  info.file = m4_get_current_file (context);
+  info.line = m4_get_current_line (context);
+  info.call_id = ++macro_call_id;
+  info.trace = (m4_is_debug_bit (context, M4_DEBUG_TRACE_ALL)
+		|| m4_get_symbol_traced (symbol));
+  info.debug_level = m4_get_debug_level_opt (context);
+  info.name = name;
+  info.name_len = len;
 
   /* Prepare for macro expansion.  */
   VALUE_PENDING (value)++;
@@ -507,13 +497,9 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
     m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 recursion limit of %zu exceeded, use -L<N> to change it"),
 	      m4_get_nesting_limit_opt (context));
-  my_call_id = ++macro_call_id;
 
-  if (traced && m4_is_debug_bit (context, M4_DEBUG_TRACE_CALL))
-    trace_prepre (context, name, my_call_id, value);
-
-  argv = collect_arguments (context, name, len, symbol, stack->args,
-			    stack->argv);
+  m4_trace_prepare (context, &info, value);
+  argv = collect_arguments (context, &info, symbol, stack->args, stack->argv);
   /* Since collect_arguments can invalidate stack by reallocating
      context->arg_stacks during a recursive expand_macro call, we must
      reset it here.  */
@@ -523,22 +509,16 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   /* The actual macro call.  */
   loc_close_file = m4_get_current_file (context);
   loc_close_line = m4_get_current_line (context);
-  m4_set_current_file (context, loc_open_file);
-  m4_set_current_line (context, loc_open_line);
-
-  if (traced)
-    trace_pre (context, my_call_id, argv);
-
+  m4_set_current_file (context, info.file);
+  m4_set_current_line (context, info.line);
   expansion = m4_push_string_init (context);
-  m4_macro_call (context, value, expansion, argv->argc, argv);
-  expanded = m4_push_string_finish ();
-
-  if (traced)
-    trace_post (context, my_call_id, argv, expanded, trace_expansion);
+  m4_macro_call (context, value, expansion, argv);
+  m4_push_string_finish ();
 
   /* Cleanup.  */
   m4_set_current_file (context, loc_close_file);
   m4_set_current_line (context, loc_close_line);
+  argv->info = NULL;
 
   --context->expansion_level;
   --VALUE_PENDING (value);
@@ -558,8 +538,8 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 	  obstack_free (stack->args, args_scratch);
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (stderr, "m4debug: -%d- `%s' in use, level=%d, "
-		      "refcount=%zu, argcount=%zu\n", my_call_id, argv->argv0,
-		      level, stack->refcount, stack->argcount);
+		      "refcount=%zu, argcount=%zu\n", info.call_id,
+		      argv->argv0, level, stack->refcount, stack->argcount);
 	}
       else
 	{
@@ -570,15 +550,13 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
     }
 }
 
-/* Collect all the arguments to a call of the macro SYMBOL (called
-   NAME, with length LEN).  The arguments are stored on the obstack
-   ARGUMENTS and a table of pointers to the arguments on the obstack
-   argv_stack.  Return the object describing all of the macro
-   arguments.  */
+/* Collect all the arguments to a call of the macro SYMBOL, with call
+   context INFO.  The arguments are stored on the obstack ARGUMENTS
+   and a table of pointers to the arguments on ARGV_STACK.  Return the
+   object describing all of the macro arguments.  */
 static m4_macro_args *
-collect_arguments (m4 *context, const char *name, size_t len,
-		   m4_symbol *symbol, m4_obstack *arguments,
-		   m4_obstack *argv_stack)
+collect_arguments (m4 *context, m4_call_info *info, m4_symbol *symbol,
+		   m4_obstack *arguments, m4_obstack *argv_stack)
 {
   m4_symbol_value token;
   m4_symbol_value *tokenp;
@@ -594,23 +572,24 @@ collect_arguments (m4 *context, const char *name, size_t len,
   args.has_func = false;
   /* Must copy here, since we are consuming tokens, and since symbol
      table can be changed during argument collection.  */
-  args.argv0 = (char *) obstack_copy0 (arguments, name, len);
-  args.argv0_len = len;
+  args.argv0 = (char *) obstack_copy0 (arguments, info->name, info->name_len);
+  args.argv0_len = info->name_len;
   args.quote_age = m4__quote_age (M4SYNTAX);
+  args.info = info;
   args.level = context->expansion_level - 1;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (m4_macro_args, array));
-  name = args.argv0;
+  info->name = args.argv0;
 
   if (m4__next_token_is_open (context))
     {
       /* Gobble parenthesis, then collect arguments.  */
-      m4__next_token (context, &token, NULL, NULL, false, name);
+      m4__next_token (context, &token, NULL, NULL, false, info->name);
       do
 	{
 	  tokenp = (m4_symbol_value *) obstack_alloc (arguments,
 						      sizeof *tokenp);
-	  more_args = expand_argument (context, arguments, tokenp, name);
+	  more_args = expand_argument (context, arguments, tokenp, info->name);
 
 	  if ((m4_is_symbol_value_text (tokenp)
 	       && !m4_get_symbol_value_len (tokenp))
@@ -669,33 +648,41 @@ collect_arguments (m4 *context, const char *name, size_t len,
 
 
 /* The actual call of a macro is handled by m4_macro_call ().
-   m4_macro_call () is passed a SYMBOL, whose type is used to
+   m4_macro_call () is passed a symbol VALUE, whose type is used to
    call either a builtin function, or the user macro expansion
-   function process_macro ().  There are ARGC arguments to
-   the call, stored in the ARGV table.  The expansion is left on
-   the obstack EXPANSION.  Macro tracing is also handled here.  */
+   function process_macro ().  The arguments are provided by the ARGV
+   table.  The expansion is left on the obstack EXPANSION.  Macro
+   tracing is also handled here.  */
 void
 m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
-	       size_t argc, m4_macro_args *argv)
+	       m4_macro_args *argv)
 {
-  if (m4_bad_argc (context, argc, argv->argv0,
-		   VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
-		   BIT_TEST (VALUE_FLAGS (value),
-			     VALUE_SIDE_EFFECT_ARGS_BIT)))
-    return;
-  if (m4_is_symbol_value_text (value))
-    process_macro (context, value, expansion, argc, argv);
-  else if (m4_is_symbol_value_func (value))
-    m4_get_symbol_value_func (value) (context, expansion, argc, argv);
-  else if (m4_is_symbol_value_placeholder (value))
-    m4_warn (context, 0, M4ARG (0),
-	     _("builtin `%s' requested by frozen file not found"),
-	     m4_get_symbol_value_placeholder (value));
-  else
+  unsigned int trace_start = 0;
+
+  if (argv->info->trace)
+    trace_start = trace_pre (context, argv);
+  if (!m4_bad_argc (context, argv->argc, argv->argv0,
+		    VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
+		    BIT_TEST (VALUE_FLAGS (value),
+			      VALUE_SIDE_EFFECT_ARGS_BIT)))
     {
-      assert (!"m4_macro_call");
-      abort ();
+      if (m4_is_symbol_value_text (value))
+	process_macro (context, value, expansion, argv->argc, argv);
+      else if (m4_is_symbol_value_func (value))
+	m4_get_symbol_value_func (value) (context, expansion, argv->argc,
+					  argv);
+      else if (m4_is_symbol_value_placeholder (value))
+	m4_warn (context, 0, M4ARG (0),
+		 _("builtin `%s' requested by frozen file not found"),
+		 m4_get_symbol_value_placeholder (value));
+      else
+	{
+	  assert (!"m4_macro_call");
+	  abort ();
+	}
     }
+  if (argv->info->trace)
+    trace_post (context, trace_start, argv->info);
 }
 
 /* This function handles all expansion of user defined and predefined
@@ -881,91 +868,106 @@ trace_format (m4 *context, const char *fmt, ...)
   va_end (args);
 }
 
-/* Format the standard header attached to all tracing output lines.  */
-static void
-trace_header (m4 *context, size_t id)
+/* Format the standard header attached to all tracing output lines,
+   using the context in INFO as appropriate.  Return the offset into
+   the trace obstack where this particular trace begins.  */
+static unsigned int
+trace_header (m4 *context, const m4_call_info *info)
 {
+  unsigned int result = obstack_object_size (&context->trace_messages);
   trace_format (context, "m4trace:");
-  if (m4_get_current_line (context))
-    {
-      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
-	trace_format (context, "%s:", m4_get_current_file (context));
-      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
-	trace_format (context, "%d:", m4_get_current_line (context));
-    }
+  if (info->debug_level & M4_DEBUG_TRACE_FILE)
+    trace_format (context, "%s:", info->file);
+  if (info->debug_level & M4_DEBUG_TRACE_LINE)
+    trace_format (context, "%d:", info->line);
   trace_format (context, " -%zu- ", context->expansion_level);
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_CALLID))
-    trace_format (context, "id %zu: ", id);
+  if (info->debug_level & M4_DEBUG_TRACE_CALLID)
+    trace_format (context, "id %zu: ", info->call_id);
+  return result;
 }
 
-/* Print current tracing line, and clear the obstack.  */
+/* Print current tracing line starting at offset START, as returned
+   from an earlier trace_header(), then clear the obstack.  */
 static void
-trace_flush (m4 *context)
+trace_flush (m4 *context, unsigned int start)
 {
-  char *line;
+  char *str;
+  FILE *file = m4_get_debug_file (context);
 
-  obstack_1grow (&context->trace_messages, '\n');
-  obstack_1grow (&context->trace_messages, '\0');
-  line = obstack_finish (&context->trace_messages);
-  if (m4_get_debug_file (context))
-    fputs (line, m4_get_debug_file (context));
-  obstack_free (&context->trace_messages, line);
+  if (file)
+    {
+      obstack_1grow (&context->trace_messages, '\0');
+      str = (char *) obstack_base (&context->trace_messages);
+      fprintf (file, "%s\n", &str[start]);
+    }
+  start -= obstack_object_size (&context->trace_messages);
+  obstack_blank (&context->trace_messages, start);
 }
 
-/* Do pre-argument-collection tracing for macro NAME.  Used from
-   expand_macro ().  */
-static void
-trace_prepre (m4 *context, const char *name, size_t id, m4_symbol_value *value)
+/* Do pre-argument-collection tracing for the macro described in INFO.
+   Should be called prior to m4_macro_call().  */
+void
+m4_trace_prepare (m4 *context, const m4_call_info *info,
+		  m4_symbol_value *value)
 {
   const m4_string_pair *quotes = NULL;
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
-  bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+  bool module = (info->debug_level & M4_DEBUG_TRACE_MODULE) != 0;
 
-  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
+  if (info->debug_level & M4_DEBUG_TRACE_QUOTE)
     quotes = m4_get_syntax_quotes (M4SYNTAX);
-  trace_header (context, id);
-  trace_format (context, "%s ... = ", name);
-  m4__symbol_value_print (context, value, &context->trace_messages, quotes,
-			  false, NULL, &arg_length, module);
-  trace_flush (context);
+  if (info->trace && (info->debug_level & M4_DEBUG_TRACE_CALL))
+    {
+      unsigned int start = trace_header (context, info);
+      trace_format (context, "%s ... = ", info->name);
+      m4__symbol_value_print (context, value, &context->trace_messages, quotes,
+			      false, NULL, &arg_length, module);
+      trace_flush (context, start);
+    }
 }
 
-/* Format the parts of a trace line, that can be made before the macro is
-   actually expanded.  Used from expand_macro ().  */
-static void
-trace_pre (m4 *context, size_t id, m4_macro_args *argv)
+/* Format the parts of a trace line that are known via ARGV before the
+   macro is actually expanded.  Used from m4_macro_call().  Return the
+   start of the current trace, in case other traces are printed before
+   this trace completes trace_post.  */
+static unsigned int
+trace_pre (m4 *context, m4_macro_args *argv)
 {
-  trace_header (context, id);
+  int trace_level = argv->info->debug_level;
+  unsigned int start = trace_header (context, argv->info);
+
+  assert (argv->info->trace);
   trace_format (context, "%s", M4ARG (0));
 
-  if (1 < m4_arg_argc (argv) && m4_is_debug_bit (context, M4_DEBUG_TRACE_ARGS))
+  if (1 < m4_arg_argc (argv) && (trace_level & M4_DEBUG_TRACE_ARGS))
     {
       const m4_string_pair *quotes = NULL;
       size_t arg_length = m4_get_max_debug_arg_length_opt (context);
-      bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+      bool module = (trace_level & M4_DEBUG_TRACE_MODULE) != 0;
 
-      if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
+      if (trace_level & M4_DEBUG_TRACE_QUOTE)
 	quotes = m4_get_syntax_quotes (M4SYNTAX);
       trace_format (context, "(");
       m4__arg_print (context, &context->trace_messages, argv, 1, quotes, false,
 		     NULL, ", ", &arg_length, true, module);
       trace_format (context, ")");
     }
+  return start;
 }
 
-/* Format the final part of a trace line and print it all.  Used from
-   expand_macro ().  */
+/* If requested by the trace state in INFO, format the final part of a
+   trace line.  Then print all collected information from START,
+   returned from a prior trace_pre().  Used from m4_macro_call ().  */
 static void
-trace_post (m4 *context, size_t id, m4_macro_args *argv,
-	    m4_input_block *expanded, bool trace_expansion)
+trace_post (m4 *context, unsigned int start, const m4_call_info *info)
 {
-  if (trace_expansion)
+  assert (info->trace);
+  if (info->debug_level & M4_DEBUG_TRACE_EXPANSION)
     {
       trace_format (context, " -> ");
-      m4_input_print (context, &context->trace_messages, expanded);
+      m4_input_print (context, &context->trace_messages, info->debug_level);
     }
-
-  trace_flush (context);
+  trace_flush (context, start);
 }
 
 
@@ -1586,23 +1588,24 @@ m4__arg_print (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t arg,
 /* Create a new argument object using the same obstack as ARGV; thus,
    the new object will automatically be freed when the original is
    freed.  Explicitly set the macro name (argv[0]) from ARGV0 with
-   length ARGV0_LEN.  If SKIP, set argv[1] of the new object to
-   argv[2] of the old, otherwise the objects share all arguments.  If
+   length ARGV0_LEN, and discard argv[1] of the wrapped ARGV.  If
    FLATTEN, any builtins in ARGV are flattened to an empty string when
-   referenced through the new object.  */
+   referenced through the new object.  If TRACE, then trace the macro
+   regardless of global trace state.  */
 m4_macro_args *
 m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
-		  size_t argv0_len, bool skip, bool flatten)
+		  size_t argv0_len, bool flatten, bool trace)
 {
   m4_macro_args *new_argv;
   m4_symbol_value *value;
   m4_symbol_value *new_value;
-  size_t arg = skip ? 2 : 1;
   m4_obstack *obs = m4_arg_scratch (context);
+  m4_call_info *info;
 
+  info = (m4_call_info *) obstack_copy (obs, argv->info, sizeof *info);
   new_value = (m4_symbol_value *) obstack_alloc (obs, sizeof *value);
   value = make_argv_ref (context, new_value, obs, context->expansion_level - 1,
-			 argv, arg, flatten, NULL);
+			 argv, 2, flatten, NULL);
   if (!value)
     {
       obstack_free (obs, new_value);
@@ -1626,11 +1629,15 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
       new_argv->flatten = flatten;
       new_argv->has_func = argv->has_func;
     }
-  new_argv->argc = argv->argc - (arg - 1);
+  new_argv->argc = argv->argc - 1;
   new_argv->inuse = false;
   new_argv->argv0 = argv0;
   new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
+  new_argv->info = info;
+  info->trace = (argv->info->debug_level & M4_DEBUG_TRACE_ALL) || trace;
+  info->name = argv0;
+  info->name_len = argv0_len;
   new_argv->level = argv->level;
   return new_argv;
 }
@@ -1778,6 +1785,17 @@ size_t
 m4_arg_argc (m4_macro_args *argv)
 {
   return argv->argc;
+}
+
+/* Given ARGV, return the call context in effect when argument
+   collection began.  Only safe to call while the macro is being
+   expanded.  */
+#undef m4_arg_info
+const m4_call_info *
+m4_arg_info (m4_macro_args *argv)
+{
+  assert (argv->info);
+  return argv->info;
 }
 
 /* Return an obstack useful for scratch calculations, and which will

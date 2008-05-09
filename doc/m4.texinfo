@@ -3958,7 +3958,7 @@ foo # untraced
 @result{}bar # untraced
 @end example
 
-However, @acronym{GNU} M4 1.4.7 and earlier had slightly different
+However, @acronym{GNU} M4 prior to 2.0 had slightly different
 semantics, where @code{traceon} without arguments only affected symbols
 that were defined at that moment, and @code{traceoff} without arguments
 stopped all tracing, even when tracing was requested by macro name.  The
@@ -4006,7 +4006,56 @@ a b
 @end example
 
 @xref{Debugmode}, for information on controlling the details of the
-display.
+display.  The format of the trace output is not specified by
+@acronym{POSIX}, and varies between implementations of @code{m4}.
+
+Starting with M4 1.6, tracing also works via @code{indir}
+(@pxref{Indir}).  However, since tracing is an attribute tracked by
+macro names, and @code{builtin} bypasses macro names (@pxref{Builtin}),
+it is not possible for @code{builtin} to trace which subsidiary builtin
+it invokes.  If you are worried about tracking all invocations of a
+given builtin, you should also trace @code{builtin}, or enable global
+tracing (the @samp{t} debug level, @pxref{Debugmode}).
+
+@example
+$ @kbd{m4 -d}
+define(`my_defn', defn(`defn'))undefine(`defn')
+@result{}
+define(`foo', `bar')traceon(`foo', `defn', `my_defn')
+@result{}
+foo
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+indir(`foo')
+@error{}m4trace: -1- foo -> `bar'
+@result{}bar
+my_defn(`foo')
+@error{}m4trace: -1- my_defn(`foo') -> ``bar''
+@result{}bar
+indir(`my_defn', `foo')
+@error{}m4trace: -1- my_defn(`foo') -> ``bar''
+@result{}bar
+builtin(`defn', `foo')
+@result{}bar
+debugmode(`+cxt')
+@result{}
+builtin(`defn', builtin(`shift', `', `foo'))
+@error{}m4trace: -1- id 12: builtin ... = <builtin>
+@error{}m4trace: -2- id 13: builtin ... = <builtin>
+@error{}m4trace: -2- id 13: builtin(`shift', `', `foo') -> ``foo''
+@error{}m4trace: -1- id 12: builtin(`defn', `foo') -> ``bar''
+@result{}bar
+indir(`my_defn', indir(`shift', `', `foo'))
+@error{}m4trace: -1- id 14: indir ... = <indir>
+@error{}m4trace: -2- id 15: indir ... = <indir>
+@error{}m4trace: -2- id 15: shift ... = <shift>
+@error{}m4trace: -2- id 15: shift(`', `foo') -> ``foo''
+@error{}m4trace: -2- id 15: indir(`shift', `', `foo') -> ``foo''
+@error{}m4trace: -1- id 14: my_defn ... = <defn>
+@error{}m4trace: -1- id 14: my_defn(`foo') -> ``bar''
+@error{}m4trace: -1- id 14: indir(`my_defn', `foo') -> ``bar''
+@result{}bar
+@end example
 
 @node Debugmode
 @section Controlling debugging options
@@ -4033,10 +4082,13 @@ invoking the macro.  Arguments are subject to length truncation
 specified by @code{debuglen} (@pxref{Debuglen}).
 
 @item c
-In trace output, show an additional line for each macro call, prior to
-the arguments being collected, that shows the definition of the macro
-that will be used for the expansion.  The definition is subject to
-length truncation specified by @code{debuglen} (@pxref{Debuglen}).
+In trace output, show an additional line for each macro call, when the
+macro is seen, but before the arguments are collected, and show the
+definition of the macro that will be used for the expansion.  By
+default, only one line is printed, after all arguments are collected and
+the expansion determined.  The definition is subject to length
+truncation specified by @code{debuglen} (@pxref{Debuglen}).  This is
+often used with the @samp{x} flag.
 
 @item e
 In trace output, show the expansion of each macro call.  The expansion
@@ -4082,7 +4134,11 @@ arguments.
 
 @item x
 In trace output, add a unique `macro call id' to each line of the trace
-output.  This is useful in connection with the @samp{c} flag above.
+output.  This is useful in connection with the @samp{c} flag above, to
+match where a macro is first recognized with where it is finally
+expanded, in spite of intermediate expansions that occur while
+collecting arguments.  It can also be used in isolation to determine how
+many macros have been expanded.
 
 @item V
 A shorthand for all of the above flags.
@@ -4128,15 +4184,18 @@ debugmode()
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO
-debugmode(`V')
+debugmode(`V')debugmode(`-q')
+@error{}m4trace:stdin:5: -1- id 6: debugmode ... = <debugmode>@{gnu@}
+@error{}m4trace:stdin:5: -1- id 6: debugmode(`-q') -> `'
 @result{}
-foo(`BAR')
-@error{}m4trace:stdin:6: -1- id 6: foo ... = `FOO$1'
-@error{}m4trace:stdin:6: -1- id 6: foo(`BAR') -> `FOOBAR'
+foo(
+`BAR')
+@error{}m4trace:stdin:6: -1- id 7: foo ... = FOO$1
+@error{}m4trace:stdin:6: -1- id 7: foo(BAR) -> FOOBAR
 @result{}FOOBAR
 debugmode
-@error{}m4trace:stdin:7: -1- id 7: debugmode ... = <debugmode>@{gnu@}
-@error{}m4trace:stdin:7: -1- id 7: debugmode ->@w{ }
+@error{}m4trace:stdin:8: -1- id 8: debugmode ... = <debugmode>@{gnu@}
+@error{}m4trace:stdin:8: -1- id 8: debugmode ->@w{ }
 @result{}
 foo
 @error{}m4trace: -1- foo
@@ -4144,10 +4203,10 @@ foo
 debugmode(`+clmx')
 @result{}
 foo(divnum)
-@error{}m4trace:10: -1- id 10: foo ... = FOO$1
-@error{}m4trace:10: -2- id 11: divnum ... = <divnum>@{m4@}
-@error{}m4trace:10: -2- id 11: divnum
-@error{}m4trace:10: -1- id 10: foo
+@error{}m4trace:11: -1- id 11: foo ... = FOO$1
+@error{}m4trace:11: -2- id 12: divnum ... = <divnum>@{m4@}
+@error{}m4trace:11: -2- id 12: divnum
+@error{}m4trace:11: -1- id 11: foo
 @result{}FOO0
 debugmode(`-m')
 @result{}
@@ -4224,7 +4283,7 @@ define(`echo', `$@@')
 echo(`1', `long string')
 @error{}m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
 @result{}1,long string
-echo(defn(`changequote'))
+indir(`echo', defn(`changequote'))
 @error{}m4trace: -2- defn(`change...') -> `<changequote>'
 @error{}m4trace: -1- echo(<changequote>) -> ``<changequote>''
 @result{}

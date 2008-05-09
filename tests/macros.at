@@ -356,7 +356,7 @@ m4trace: -2- eval(`1<=1') -> `1'
 m4trace: -1- ifelse(`1', `1', `move(auxilliary, destination)', `_hanoi(decr(1), auxilliary, source, destination)move(auxilliary, destination)_hanoi(decr(1), source, destination, auxilliary)') -> `move(auxilliary, destination)'
 m4trace: -1- move(`auxilliary', `destination') -> `Move one disk from `auxilliary' to `destination'.
 '
-m4trace: -1- debugmode -> @&t@
+m4trace: -1- debugmode -> `'
 m4trace: -1- _hanoi(2, source, destination, auxilliary) -> ifelse(eval(`2'<=1), 1, `move(source, destination)',
 `_hanoi(decr(2), source, auxilliary, destination)move(source, destination)_hanoi(decr(2), auxilliary, destination, source)')
 m4trace: -1- _hanoi(1, source, auxilliary, destination) -> ifelse(eval(`1'<=1), 1, `move(source, auxilliary)',

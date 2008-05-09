@@ -313,6 +313,9 @@ struct m4_macro_args
      during parsing or any token is potentially unsafe and requires a
      rescan.  */
   unsigned int quote_age;
+  /* The context of the macro call during expansion, and NULL in a
+     back-reference.  */
+  m4_call_info *info;
   size_t level; /* Which obstack owns this argv.  */
   size_t arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
@@ -330,6 +333,21 @@ struct m4__macro_arg_stacks
   m4_obstack *argv;	/* Argv pointers into args.  */
   void *args_base;	/* Location for clearing the args obstack.  */
   void *argv_base;	/* Location for clearing the argv obstack.  */
+};
+
+/* Opaque structure for managing call context information.  Contains
+   the context used in tracing and error messages that was valid at
+   the start of the macro expansion, even if argument collection
+   changes global context in the meantime.  */
+struct m4_call_info
+{
+  const char *file;	/* The file containing the macro invocation.  */
+  int line;		/* The line the macro was called on.  */
+  int call_id;		/* The unique sequence call id of the macro.  */
+  int trace : 1;	/* True to trace this macro.  */
+  int debug_level : 31;	/* The debug level for tracing the macro call.  */
+  const char *name;	/* The macro name.  */
+  size_t name_len;	/* The length of name.  */
 };
 
 extern size_t	m4__adjust_refcount	(m4 *, size_t, bool);
@@ -553,6 +571,7 @@ extern	bool		m4__next_token_is_open (m4 *);
    that also have an identically named function exported in m4module.h.  */
 #ifdef NDEBUG
 # define m4_arg_argc(A)		(A)->argc
+# define m4_arg_info(A)		(A)->info
 # define m4_arg_scratch(C)				\
   ((C)->arg_stacks[(C)->expansion_level - 1].argv)
 #endif /* NDEBUG */
