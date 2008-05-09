@@ -1,5 +1,11 @@
 2008-05-09  Eric Blake  <ebb9@byu.net>
 
+	Improve error message when frozen file is invalid.
+	* src/freeze.c (reload_frozen_state): Track current line.
+	[GET_STRING]: New helper macro.
+
+2008-05-09  Eric Blake  <ebb9@byu.net>
+
 	Detect integer overflow when loading frozen file.
 	* src/m4.h (includes): Add limits.h.
 	(_): Define as a no-op placeholder for now.

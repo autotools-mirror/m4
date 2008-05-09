@@ -186,9 +186,21 @@ reload_frozen_state (const char *name)
   int allocated[2];
   int number[2];
   const builtin *bp;
+  bool advance_line = true;
 
 #define GET_CHARACTER						\
-  (character = getc (file))
+  do								\
+    {								\
+      if (advance_line)						\
+	{							\
+	  current_line++;					\
+	  advance_line = false;					\
+	}							\
+      (character = getc (file));				\
+      if (character == '\n')					\
+	advance_line = true;					\
+    }								\
+  while (0)
 
 #define GET_NUMBER(Number, AllowNeg)				\
   do								\
@@ -231,9 +243,35 @@ reload_frozen_state (const char *name)
     }								\
   while (character == '\n')
 
+#define GET_STRING(i)							\
+  do									\
+    {									\
+      void *tmp;							\
+      char *p;								\
+      if (number[(i)] + 1 > allocated[(i)])				\
+	{								\
+	  free (string[(i)]);						\
+	  allocated[(i)] = number[(i)] + 1;				\
+	  string[(i)] = xcharalloc ((size_t) allocated[(i)]);		\
+	}								\
+      if (number[(i)] > 0						\
+	  && !fread (string[(i)], (size_t) number[(i)], 1, file))	\
+	m4_error (EXIT_FAILURE, 0,					\
+		  _("premature end of frozen file"));			\
+      string[(i)][number[(i)]] = '\0';					\
+      p = string[(i)];							\
+      while ((tmp = memchr(p, '\n', number[(i)] - (p - string[(i)]))))	\
+	{								\
+	  current_line++;						\
+	  p = (char *) tmp + 1;						\
+	}								\
+    }									\
+  while (0)
+
   file = m4_path_search (name, NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
+  current_file = name;
 
   allocated[0] = 100;
   string[0] = xcharalloc ((size_t) allocated[0]);
@@ -286,38 +324,8 @@ reload_frozen_state (const char *name)
 	  VALIDATE ('\n');
 
 	  if (operation != 'D')
-	    {
-
-	      /* Get first string contents.  */
-
-	      if (number[0] + 1 > allocated[0])
-		{
-		  free (string[0]);
-		  allocated[0] = number[0] + 1;
-		  string[0] = xcharalloc ((size_t) allocated[0]);
-		}
-
-	      if (number[0] > 0)
-		if (!fread (string[0], (size_t) number[0], 1, file))
-		  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
-
-	      string[0][number[0]] = '\0';
-	    }
-
-	  /* Get second string contents.  */
-
-	  if (number[1] + 1 > allocated[1])
-	    {
-	      free (string[1]);
-	      allocated[1] = number[1] + 1;
-	      string[1] = xcharalloc ((size_t) allocated[1]);
-	    }
-
-	  if (number[1] > 0)
-	    if (!fread (string[1], (size_t) number[1], 1, file))
-	      M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
-
-	  string[1][number[1]] = '\0';
+	    GET_STRING (0);
+	  GET_STRING (1);
 	  GET_CHARACTER;
 	  VALIDATE ('\n');
 
@@ -380,9 +388,12 @@ reload_frozen_state (const char *name)
   errno = 0;
   if (ferror (file) || fclose (file) != 0)
     M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
+  current_file = NULL;
+  current_line = 0;
 
 #undef GET_CHARACTER
 #undef GET_DIRECTIVE
 #undef GET_NUMBER
 #undef VALIDATE
+#undef GET_STRING
 }
