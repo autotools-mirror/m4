@@ -42,6 +42,7 @@
 	cover line numbering details in traces.
 	(Debuglen): Enhance test to cover indir tracing.
 	* NEWS: Mention these changes.
+	Reported by Akim Demaille in the autoconf TODO file in 2000.
 
 2008-05-07  Eric Blake  <ebb9@byu.net>
 
