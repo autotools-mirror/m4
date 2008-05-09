@@ -1,3 +1,12 @@
+2008-05-09  Eric Blake  <ebb9@byu.net>
+
+	Detect integer overflow when loading frozen file.
+	* src/m4.h (includes): Add limits.h.
+	(_): Define as a no-op placeholder for now.
+	* src/freeze.c (reload_frozen_state) [GET_NUMBER]: Rewrite to fail
+	immediately on overflow.
+	Reported by Jim Meyering.
+
 2008-05-07  Eric Blake  <ebb9@byu.net>
 
 	Fix traceon regression introduced 2006-06-06.

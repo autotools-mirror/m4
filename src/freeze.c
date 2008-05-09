@@ -187,33 +187,38 @@ reload_frozen_state (const char *name)
   int number[2];
   const builtin *bp;
 
-#define GET_CHARACTER \
+#define GET_CHARACTER						\
   (character = getc (file))
 
-#define GET_NUMBER(Number) \
+#define GET_NUMBER(Number, AllowNeg)				\
   do								\
     {								\
-      (Number) = 0;						\
-      while (isdigit (character))				\
+      unsigned int n = 0;					\
+      while (isdigit (character) && n <= INT_MAX / 10)		\
 	{							\
-	  (Number) = 10 * (Number) + character - '0';		\
+	  n = 10 * n + character - '0';				\
 	  GET_CHARACTER;					\
 	}							\
+      if (((AllowNeg) ? INT_MIN : INT_MAX) < n			\
+	  || isdigit (character))				\
+	m4_error (EXIT_FAILURE, 0,				\
+		  _("integer overflow in frozen file"));	\
+      (Number) = n;						\
     }								\
   while (0)
 
-#define VALIDATE(Expected) \
+#define VALIDATE(Expected)					\
   do								\
     {								\
       if (character != (Expected))				\
-	issue_expect_message ((Expected));			\
+	issue_expect_message (Expected);			\
     }								\
   while (0)
 
   /* Skip comments (`#' at beginning of line) and blank lines, setting
      character to the next directive or to EOF.  */
 
-#define GET_DIRECTIVE \
+#define GET_DIRECTIVE						\
   do								\
     {								\
       GET_CHARACTER;						\
@@ -239,7 +244,7 @@ reload_frozen_state (const char *name)
   GET_DIRECTIVE;
   VALIDATE ('V');
   GET_CHARACTER;
-  GET_NUMBER (number[0]);
+  GET_NUMBER (number[0], false);
   if (number[0] > 1)
     M4ERROR ((EXIT_MISMATCH, 0,
 	      "frozen file version %d greater than max supported of 1",
@@ -270,14 +275,14 @@ reload_frozen_state (const char *name)
 	  if (operation == 'D' && character == '-')
 	    {
 	      GET_CHARACTER;
-	      GET_NUMBER (number[0]);
+	      GET_NUMBER (number[0], true);
 	      number[0] = -number[0];
 	    }
 	  else
-	    GET_NUMBER (number[0]);
+	    GET_NUMBER (number[0], false);
 	  VALIDATE (',');
 	  GET_CHARACTER;
-	  GET_NUMBER (number[1]);
+	  GET_NUMBER (number[1], false);
 	  VALIDATE ('\n');
 
 	  if (operation != 'D')

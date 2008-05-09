@@ -27,6 +27,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -69,6 +70,9 @@
 
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
+
+/* No-op, for future gettext compatibility.  */
+#define _(ARG) ARG
 
 /* Various declarations.  */
 
