@@ -382,15 +382,20 @@ reload_frozen_state (m4 *context, const char *name)
 #define GET_CHARACTER						\
   (character = getc (file))
 
-#define GET_NUMBER(Number)					\
+#define GET_NUMBER(Number, AllowNeg)				\
   do								\
     {								\
-      (Number) = 0;						\
-      while (isdigit (character))				\
+      unsigned int n = 0;					\
+      while (isdigit (character) && n <= INT_MAX / 10)		\
 	{							\
-	  (Number) = 10 * (Number) + character - '0';		\
+	  n = 10 * n + character - '0';				\
 	  GET_CHARACTER;					\
 	}							\
+      if (((AllowNeg) ? INT_MIN: INT_MAX) < n			\
+	  || isdigit (character))				\
+	m4_error (context, EXIT_FAILURE, 0, NULL,		\
+		  _("integer overflow in frozen file"));	\
+      (Number) = n;						\
     }								\
   while (0)
 
@@ -466,7 +471,7 @@ reload_frozen_state (m4 *context, const char *name)
   GET_DIRECTIVE;
   VALIDATE ('V');
   GET_CHARACTER;
-  GET_NUMBER (version);
+  GET_NUMBER (version, false);
   switch (version)
     {
     case 2:
@@ -507,10 +512,10 @@ reload_frozen_state (m4 *context, const char *name)
 
 	  /* Get string lengths. */
 
-	  GET_NUMBER (number[0]);
+	  GET_NUMBER (number[0], false);
 	  VALIDATE (',');
 	  GET_CHARACTER;
-	  GET_NUMBER (number[1]);
+	  GET_NUMBER (number[1], false);
 
 	  if (character == ',')
 	    {
@@ -519,7 +524,7 @@ reload_frozen_state (m4 *context, const char *name)
 		  /* 'F' operator accepts an optional third argument for
 		     format versions 2 or later.  */
 		  GET_CHARACTER;
-		  GET_NUMBER (number[2]);
+		  GET_NUMBER (number[2], false);
 		}
 	      else
 		/* 3 argument 'F' operations are invalid for format
@@ -578,7 +583,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	    }
 
 	  GET_CHARACTER;
-	  GET_NUMBER (number[0]);
+	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
 	  GET_STRING (file, string[0], allocated[0], number[0]);
 	  VALIDATE ('\n');
@@ -597,7 +602,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	    }
 
 	  GET_CHARACTER;
-	  GET_NUMBER (number[0]);
+	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
 	  GET_STRING (file, string[0], allocated[0], number[0]);
 	  VALIDATE ('\n');
@@ -624,7 +629,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	  GET_CHARACTER;
 	  syntax = character;
 	  GET_CHARACTER;
-	  GET_NUMBER (number[0]);
+	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
 	  GET_STRING (file, string[0], allocated[0], number[0]);
 
@@ -652,14 +657,14 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	    {
 	      /* Accept a negative diversion number.  */
 	      GET_CHARACTER;
-	      GET_NUMBER (number[0]);
+	      GET_NUMBER (number[0], true);
 	      number[0] = -number[0];
 	    }
 	  else
-	    GET_NUMBER (number[0]);
+	    GET_NUMBER (number[0], false);
 	  VALIDATE (',');
 	  GET_CHARACTER;
-	  GET_NUMBER (number[1]);
+	  GET_NUMBER (number[1], false);
 	  VALIDATE ('\n');
 
 	  /* Get string contents.  */
@@ -709,10 +714,10 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 
 	  /* Get string lengths. */
 
-	  GET_NUMBER (number[0]);
+	  GET_NUMBER (number[0], false);
 	  VALIDATE (',');
 	  GET_CHARACTER;
-	  GET_NUMBER (number[1]);
+	  GET_NUMBER (number[1], false);
 
 	  if (character == ',')
 	    {
@@ -721,7 +726,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 		  /* 'T' operator accepts an optional third argument for
 		     format versions 2 or later.  */
 		  GET_CHARACTER;
-		  GET_NUMBER (number[2]);
+		  GET_NUMBER (number[2], false);
 		}
 	      else
 		{

@@ -167,7 +167,8 @@ builtinbuiltingnu
 # introduced 2007-05-28 and fixed 2007-05-31.
 D-1,5
 12345
-D0,0
+# Zero can be implied
+D,
 
 # Testing escape sequences
 T4,5
@@ -200,6 +201,48 @@ AT_DATA([bogus.m4f], [[V3
 AT_CHECK_M4([-R bogus.m4f], [63], [],
 [[m4: frozen file version 3 greater than max supported of 2
 ]])
+
+dnl Check that V appears.
+AT_DATA([bogus.m4f], [[# not really a frozen file
+oops
+]])
+AT_CHECK_M4([-R bogus.m4f], [1], [],
+[[m4: expecting character `V' in frozen file
+]])
+
+dnl M4_DIVNUM_TEST(number, [out-of-bounds])
+dnl Check for diversion number corner case handling.  Simulate freezing with
+dnl number as the active diversion, then reload and check that number.  If
+dnl OUT-OF-BOUNDS, expect reloading to reject the frozen file.
+m4_define([M4_DIVNUM_TEST], [
+AT_DATA([frozen.m4f], [[V2
+M2
+m4
+M3
+gnu
+F6,6,2
+divnumdivnumm4
+F6,6,2
+divertdivertm4
+F6,6,2
+definedefinem4
+D]$1[,3
+hi
+
+]])
+AT_CHECK_M4([-R frozen.m4f in.m4], m4_ifval([$2], [1], [0]),
+m4_ifval([$2], [], [[$1
+]m4_if(m4_substr([$1], [0], [1]), [-], [], [[hi
+]])]), m4_ifval([$2], [[m4: integer overflow in frozen file
+]]))
+])
+
+AT_DATA([in.m4], [[define(d,divnum)divert(0)d
+]])
+M4_DIVNUM_TEST([2147483647])
+M4_DIVNUM_TEST([2147483648], [:])
+M4_DIVNUM_TEST([-2147483648])
+M4_DIVNUM_TEST([-2147483649], [:])
 
 AT_CLEANUP
 
