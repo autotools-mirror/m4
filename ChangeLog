@@ -7,7 +7,6 @@
 	(m4_insert_diversion, m4_undivert_all, m4_freeze_diversions):
 	Update callers.
 	* src/freeze.c (produce_mem_dump): Simplify.
-	(produce_syntax_dump, produce_module_dump): Add parameter.
 	* tests/freeze.at (large diversion): Test for this.
 
 	Improve error message when frozen file is invalid.
