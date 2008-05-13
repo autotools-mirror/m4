@@ -138,6 +138,15 @@ bar${1}
 [[m4:input.m4:5: Warning: popdef: undefined macro `my_define'
 ]])
 
+dnl Test rejection of v2 features in a v1 frozen file
+AT_DATA([bogus.m4f], [[V1
+M2
+m4
+]])
+AT_CHECK_M4([-R bogus.m4f], [1], [],
+[[m4:bogus.m4f:2: ill-formed frozen file, version 2 directive `M' encountered
+]])
+
 AT_CLEANUP
 
 
@@ -167,6 +176,10 @@ builtinbuiltingnu
 # introduced 2007-05-28 and fixed 2007-05-31.
 D-1,5
 12345
+# Check line continuations.
+D1,3
+a\n\
+b
 # Zero can be implied
 D,
 
@@ -193,13 +206,15 @@ AT_CHECK_M4([-R frozen.m4f input.m4], [0],
 
 bar
 	'7 \
-]])
+a
+b]])
 
 dnl We don't support anything larger than format 2; make sure of that...
-AT_DATA([bogus.m4f], [[V3
+AT_DATA([bogus.m4f], [[# comments aren't continued\
+V3
 ]])
 AT_CHECK_M4([-R bogus.m4f], [63], [],
-[[m4: frozen file version 3 greater than max supported of 2
+[[m4:bogus.m4f:2: frozen file version 3 greater than max supported of 2
 ]])
 
 dnl Check that V appears.
@@ -207,7 +222,7 @@ AT_DATA([bogus.m4f], [[# not really a frozen file
 oops
 ]])
 AT_CHECK_M4([-R bogus.m4f], [1], [],
-[[m4: expecting character `V' in frozen file
+[[m4:bogus.m4f:2: expecting character `V' in frozen file
 ]])
 
 dnl M4_DIVNUM_TEST(number, [out-of-bounds])
@@ -220,8 +235,12 @@ M2
 m4
 M3
 gnu
+T1,5
+a\n\n\n\n\n
 F6,6,2
-divnumdivnumm4
+divnum\
+divnumm4\
+
 F6,6,2
 divertdivertm4
 F6,6,2
@@ -231,16 +250,16 @@ hi
 
 ]])
 AT_CHECK_M4([-R frozen.m4f in.m4], m4_ifval([$2], [1], [0]),
-m4_ifval([$2], [], [[$1
-]m4_if(m4_substr([$1], [0], [1]), [-], [], [[hi
-]])]), m4_ifval([$2], [[m4: integer overflow in frozen file
+m4_ifval([$2], [], [m4_bpatsubst([$1], [^0*])
+m4_if(m4_substr([$1], [0], [1]), [-], [], [[hi
+]])]), m4_ifval([$2], [[m4:frozen.m4f:16: integer overflow in frozen file
 ]]))
 ])
 
 AT_DATA([in.m4], [[define(d,divnum)divert(0)d
 ]])
-M4_DIVNUM_TEST([2147483647])
-M4_DIVNUM_TEST([2147483648], [:])
+M4_DIVNUM_TEST([02147483647])
+M4_DIVNUM_TEST([02147483648], [:])
 M4_DIVNUM_TEST([-2147483648])
 M4_DIVNUM_TEST([-2147483649], [:])
 

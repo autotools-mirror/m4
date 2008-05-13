@@ -34,7 +34,7 @@ static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
 static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
 					 m4_symbol *, void *);
 static	void  issue_expect_message	(m4 *, int);
-static	int   decode_char		(FILE *);
+static	int   decode_char		(m4 *, FILE *, bool *);
 
 
 /* Dump an ASCII-encoded representation of LEN bytes at MEM to FILE.
@@ -294,13 +294,19 @@ issue_expect_message (m4 *context, int expected)
    unrecognized escape sequence.  */
 
 static int
-decode_char (FILE *in)
+decode_char (m4 *context, FILE *in, bool *advance_line)
 {
   int ch = getc (in);
   int next;
   int value = 0;
 
-  if (ch == '\\')
+  if (*advance_line)
+    {
+      m4_set_current_line (context, m4_get_current_line (context) + 1);
+      *advance_line = false;
+    }
+
+  while (ch == '\\')
     {
       ch = getc (in);
       switch (ch)
@@ -313,6 +319,11 @@ decode_char (FILE *in)
 	case 't': return '\t';
 	case 'v': return '\v';
 	case '\\': return '\\';
+
+	case '\n':
+	  ch = getc (in);
+	  m4_set_current_line (context, m4_get_current_line (context) + 1);
+	  continue;
 
 	case 'x': case 'X':
 	  next = getc (in);
@@ -360,6 +371,8 @@ decode_char (FILE *in)
 	}
     }
 
+  if (ch == '\n')
+    *advance_line = true;
   return ch;
 }
 
@@ -378,9 +391,22 @@ reload_frozen_state (m4 *context, const char *name)
   char *string[3];
   size_t allocated[3];
   int number[3] = {0};
+  bool advance_line = true;
 
-#define GET_CHARACTER						\
-  (character = getc (file))
+#define GET_CHARACTER							\
+  do									\
+    {									\
+      if (advance_line)							\
+	{								\
+	  m4_set_current_line (context,					\
+			       m4_get_current_line (context) + 1);	\
+	  advance_line = false;						\
+	}								\
+      character = getc (file);						\
+      if (character == '\n')						\
+	advance_line = true;						\
+    }									\
+  while (0)
 
 #define GET_NUMBER(Number, AllowNeg)				\
   do								\
@@ -404,12 +430,14 @@ reload_frozen_state (m4 *context, const char *name)
     {								\
       size_t len = (StrLen);					\
       char *p;							\
+      int ch;							\
       CHECK_ALLOCATION ((Buf), (BufSize), len);			\
       p = (Buf);						\
       while (len-- > 0)						\
 	{							\
-	  int ch = (version > 1 ? decode_char (File)		\
-		    : getc (File));				\
+	  ch = (version > 1					\
+		? decode_char (context, File, &advance_line)	\
+		: getc (File));					\
 	  if (ch == EOF)					\
 	    m4_error (context, EXIT_FAILURE, 0, NULL,		\
 		      _("premature end of frozen file"));	\
@@ -452,12 +480,19 @@ reload_frozen_state (m4 *context, const char *name)
 	    GET_CHARACTER;					\
 	  VALIDATE ('\n');					\
 	}							\
+      else if (character == '\\')				\
+	{							\
+	  GET_CHARACTER;					\
+	  VALIDATE ('\n');					\
+	  continue;						\
+	}							\
     }								\
   while (character == '\n')
 
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open `%s'"), name);
+  m4_set_current_file (context, name);
 
   allocated[0] = 100;
   string[0] = xcharalloc (allocated[0]);
@@ -773,7 +808,11 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
   free (string[0]);
   free (string[1]);
   free (string[2]);
-  fclose (file);
+  if (ferror (file) || fclose (file) != 0)
+    m4_error (context, EXIT_FAILURE, errno, NULL,
+	      _("unable to read frozen state"));
+  m4_set_current_file (context, NULL);
+  m4_set_current_line (context, 0);
 
 #undef GET_STRING
 #undef GET_CHARACTER

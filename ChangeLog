@@ -1,3 +1,12 @@
+2008-05-13  Eric Blake  <ebb9@byu.net>
+
+	Improve error message when frozen file is invalid.
+	* src/freeze.c (decode_char): Add parameter.  Allow \<newline>
+	line continuations.
+	(reload_frozen_state): Track current line.
+	* tests/freeze.at (loading format 1, loading format 2): Update to
+	test this.
+
 2008-05-10  Eric Blake  <ebb9@byu.net>
 
 	Detect integer overflow when loading frozen file.
