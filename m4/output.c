@@ -27,6 +27,7 @@
 #include "exitfail.h"
 #include "gl_avltree_oset.h"
 #include "intprops.h"
+#include "quotearg.h"
 #include "xvasprintf.h"
 
 /* Define this to see runtime debug output.  Implied by DEBUG.  */
@@ -740,19 +741,16 @@ m4_make_diversion (m4 *context, int divnum)
 }
 
 /* Insert a FILE into the current output file, in the same manner
-   diversions are handled.  This allows files to be included, without
-   having them rescanned by m4.  */
-void
-m4_insert_file (m4 *context, FILE *file)
+   diversions are handled.  If ESCAPED, ensure the output is all
+   ASCII.  */
+static void
+insert_file (m4 *context, FILE *file, bool escaped)
 {
   char buffer[COPY_BUFFER_SIZE];
   size_t length;
+  char *str = buffer;
 
-  /* Optimize out inserting into a sink.  */
-
-  if (!output_diversion)
-    return;
-
+  assert (output_diversion);
   /* Insert output by big chunks.  */
   for (;;)
     {
@@ -762,16 +760,29 @@ m4_insert_file (m4 *context, FILE *file)
 		  _("reading inserted file"));
       if (length == 0)
 	break;
-      m4_output_text (context, buffer, length);
+      if (escaped)
+	str = quotearg_style_mem (escape_quoting_style, buffer, length);
+      m4_output_text (context, str, escaped ? strlen (str) : length);
     }
+}
+
+/* Insert a FILE into the current output file, in the same manner
+   diversions are handled.  This allows files to be included, without
+   having them rescanned by m4.  */
+void
+m4_insert_file (m4 *context, FILE *file)
+{
+  /* Optimize out inserting into a sink.  */
+  if (output_diversion)
+    insert_file (context, file, false);
 }
 
 /* Insert DIVERSION living at NODE into the current output file.  The
    diversion is NOT placed on the expansion obstack, because it must
-   not be rescanned.  When the file is closed, it is deleted by the
-   system.  */
+   not be rescanned.  If ESCAPED, ensure the output is ASCII.  When
+   the file is closed, it is deleted by the system.  */
 static void
-insert_diversion_helper (m4 *context, m4_diversion *diversion)
+insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 {
   assert (diversion->divnum > 0
 	  && diversion->divnum != m4_get_current_diversion (context));
@@ -779,7 +790,13 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion)
   if (output_diversion)
     {
       if (diversion->size)
-	m4_output_text (context, diversion->u.buffer, diversion->used);
+	{
+	  char *str = diversion->u.buffer;
+	  size_t len = diversion->used;
+	  if (escaped)
+	    str = quotearg_style_mem (escape_quoting_style, str, len);
+	  m4_output_text (context, str, escaped ? strlen (str) : len);
+	}
       else
 	{
 	  assert (diversion->used);
@@ -836,7 +853,7 @@ m4_insert_diversion (m4 *context, int divnum)
     {
       m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->divnum == divnum)
-	insert_diversion_helper (context, diversion);
+	insert_diversion_helper (context, diversion, false);
     }
 }
 
@@ -852,7 +869,7 @@ m4_undivert_all (m4 *context)
     {
       m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->divnum != divnum)
-	insert_diversion_helper (context, diversion);
+	insert_diversion_helper (context, diversion, false);
     }
   gl_oset_iterator_free (&iter);
 }
@@ -902,7 +919,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
 			(unsigned long int) file_stat.st_size);
 	    }
 
-	  insert_diversion_helper (context, diversion);
+	  insert_diversion_helper (context, diversion, true);
 	  putc ('\n', file);
 
 	  last_inserted = diversion->divnum;

@@ -25,6 +25,7 @@
 #include "m4.h"
 
 #include "binary-io.h"
+#include "quotearg.h"
 
 static	void  produce_mem_dump		(FILE *, const char *, size_t);
 static	void  produce_resyntax_dump	(m4 *, FILE *);
@@ -42,34 +43,9 @@ static	int   decode_char		(m4 *, FILE *, bool *);
 static void
 produce_mem_dump (FILE *file, const char *mem, size_t len)
 {
-  while (len--)
-    {
-      int ch = to_uchar (*mem++);
-      switch (ch)
-	{
-	case '\a': putc ('\\', file); putc ('a', file); break;
-	case '\b': putc ('\\', file); putc ('b', file); break;
-	case '\f': putc ('\\', file); putc ('f', file); break;
-	case '\n': putc ('\\', file); putc ('n', file); break;
-	case '\r': putc ('\\', file); putc ('r', file); break;
-	case '\t': putc ('\\', file); putc ('t', file); break;
-	case '\v': putc ('\\', file); putc ('v', file); break;
-	case '\\': putc ('\\', file); putc ('\\', file); break;
-	default:
-	  if (ch >= 0x7f || ch < 0x20)
-	    {
-	      int digit = ch / 16;
-	      ch %= 16;
-	      digit += digit > 9 ? 'a' - 10 : '0';
-	      ch += ch > 9 ? 'a' - 10 : '0';
-	      putc ('\\', file);
-	      putc ('x', file);
-	      putc (digit, file);
-	    }
-	  putc (ch, file);
-	  break;
-	}
-    }
+  char *quoted = quotearg_style_mem (escape_quoting_style, mem, len);
+  /* Any errors will be detected by ferror later.  */
+  fwrite (quoted, strlen (quoted), 1, file);
 }
 
 

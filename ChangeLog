@@ -1,5 +1,15 @@
 2008-05-13  Eric Blake  <ebb9@byu.net>
 
+	Fix frozen file regression in diversions from 2007-01-21.
+	* m4/output.c (insert_diversion_helper): Add parameter.
+	(m4_insert_file): Move contents...
+	(insert_file): ...to this new helper, with added parameter.
+	(m4_insert_diversion, m4_undivert_all, m4_freeze_diversions):
+	Update callers.
+	* src/freeze.c (produce_mem_dump): Simplify.
+	(produce_syntax_dump, produce_module_dump): Add parameter.
+	* tests/freeze.at (large diversion): Test for this.
+
 	Improve error message when frozen file is invalid.
 	* src/freeze.c (decode_char): Add parameter.  Allow \<newline>
 	line continuations.

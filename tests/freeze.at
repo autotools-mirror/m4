@@ -27,9 +27,10 @@ AT_SETUP([large diversion])
 AT_KEYWORDS([frozen])
 
 # Check that large diversions are handled across freeze boundaries.
-
+# Also check for escape character handling.
 AT_DATA([[frozen.m4]], [M4_ONE_MEG_DEFN[divert(2)f
 divert(1)hi
+a\nb
 ]])
 
 AT_DATA([[unfrozen.m4]],
