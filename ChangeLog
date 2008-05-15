@@ -1,3 +1,13 @@
+2008-05-15  Eric Blake  <ebb9@byu.net>
+
+	Fix frozen file regression in pushdef stacks from 2001-09-01.
+	* src/freeze.c (dump_symbol_CB): Push all values on the stack, not
+	just the current definition.
+	(reverse_symbol_value_stack): New helper method.
+	* tests/freeze.at (AT_TEST_FREEZE): New helper macro.
+	(reloading pushdef stack): New test.
+	(reloading unknown builtin): Enhance test.
+
 2008-05-13  Eric Blake  <ebb9@byu.net>
 
 	Fix frozen file regression in diversions from 2007-01-21.

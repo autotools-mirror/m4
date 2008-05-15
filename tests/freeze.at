@@ -16,6 +16,38 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# AT_TEST_FREEZE([title], [text1], [text2])
+# -----------------------------------------
+# Create a test TITLE, which checks that freezing TEXT1, then reloading
+# it with TEXT2, produces the same results as running TEXT1 and TEXT2 in
+# a single run.
+m4_define([AT_TEST_FREEZE],
+[AT_SETUP([$1])
+AT_KEYWORDS([frozen])
+
+AT_DATA([frozen.m4], [$2])
+AT_DATA([unfrozen.m4], [$3])
+
+# First generate the `expout' output by running over the sources before
+# freezing.
+AT_CHECK_M4([frozen.m4 unfrozen.m4], [0], [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK_M4([-F frozen.m4f frozen.m4], [0], [stdout])
+
+mv stdout out1
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr])
+
+AT_CHECK([cat out1 stdout], [0], [expout])
+
+AT_CLEANUP
+])
+
 
 AT_BANNER([Freezing state.])
 
@@ -23,37 +55,15 @@ AT_BANNER([Freezing state.])
 ## large diversion ##
 ## --------------- ##
 
-AT_SETUP([large diversion])
-AT_KEYWORDS([frozen])
-
 # Check that large diversions are handled across freeze boundaries.
 # Also check for escape character handling.
-AT_DATA([[frozen.m4]], [M4_ONE_MEG_DEFN[divert(2)f
+AT_TEST_FREEZE([large diversion],
+[M4_ONE_MEG_DEFN[divert(2)f
 divert(1)hi
 a\nb
-]])
-
-AT_DATA([[unfrozen.m4]],
+]],
 [[divert(3)bye
 ]])
-
-# First generate the `expout' output by running over the sources before
-# freezing.
-AT_CHECK_M4([frozen.m4 unfrozen.m4], [0],
-	    [stdout], [stderr])
-
-mv stdout expout
-mv stderr experr
-
-# Now freeze the first source file.
-AT_CHECK_M4([-F frozen.m4f frozen.m4], [0])
-
-# Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0],
-	    [expout], [experr])
-
-AT_CLEANUP
-
 
 ## ---------------- ##
 ## loading format 1 ##
@@ -271,110 +281,53 @@ AT_CLEANUP
 ## changecom ##
 ## --------- ##
 
-AT_SETUP([reloading changecom])
-AT_KEYWORDS([frozen])
-
-# Check that changesyntax is maintained across freeze boundaries.
-
-AT_DATA([[frozen.m4]],
+# Check that changecom/changequote are maintained across freeze boundaries.
+AT_TEST_FREEZE([reloading changecom],
 [[changecom`'changequote(<,>)dnl
-]])
-
-AT_DATA([[unfrozen.m4]],
+]],
 [[define(<foo>, <bar>)
 foo # foo
 ]])
-
-# First generate the `expout' output by running over the sources before
-# freezing.
-AT_CHECK_M4([frozen.m4 unfrozen.m4], [0],
-	    [stdout], [stderr])
-
-mv stdout expout
-mv stderr experr
-
-# Now freeze the first source file.
-AT_CHECK_M4([-F frozen.m4f frozen.m4], [0])
-
-# Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0],
-	    [expout], [experr])
-
-AT_CLEANUP
-
 
 ## ------------ ##
 ## changesyntax ##
 ## ------------ ##
 
-AT_SETUP([reloading changesyntax])
-AT_KEYWORDS([frozen])
-
 # Check that changesyntax is maintained across freeze boundaries.
-
-AT_DATA([[frozen.m4]],
+AT_TEST_FREEZE([reloading changesyntax],
 [[changesyntax(`W+.', `({', `)}')dnl
 define{`a.b', `hello $1'}dnl
-]])
-
-AT_DATA([[unfrozen.m4]],
+]],
 [[a.b{world}
 ]])
-
-# First generate the `expout' output by running over the sources before
-# freezing.
-AT_CHECK_M4([frozen.m4 unfrozen.m4], [0],
-	    [stdout], [stderr])
-
-mv stdout expout
-mv stderr experr
-
-# Now freeze the first source file.
-AT_CHECK_M4([-F frozen.m4f frozen.m4], [0])
-
-# Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0],
-	    [expout], [experr])
-
-AT_CLEANUP
-
 
 ## ------------- ##
 ## regexp syntax ##
 ## ------------- ##
 
-AT_SETUP([reloading regexp syntax])
-AT_KEYWORDS([frozen])
-
 # Check that regular expression syntax is maintained across freeze boundaries.
-
-AT_DATA([[frozen.m4]],
+AT_TEST_FREEZE([reloading regexp syntax],
 [[changeresyntax(`POSIX_EXTENDED')dnl
-]])
-
-AT_DATA([[unfrozen.m4]],
+]],
 [[regexp(`GNUs not Unix', `\w(\w*)$')
 regexp(`GNUs not Unix', `\w\(\w*\)$', `GNU_M4')
 ]])
 
-# First generate the `expout' output by running over the sources before
-# freezing.
-AT_CHECK_M4([frozen.m4 unfrozen.m4], [0],
-	    [stdout], [stderr])
+## ------- ##
+## pushdef ##
+## ------- ##
 
-mv stdout expout
-mv stderr experr
-
-# Now freeze the first source file.
-AT_CHECK_M4([-F frozen.m4f frozen.m4], [0],
-	    [ignore], [ignore])
-
-# Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0],
-	    [expout], [experr])
-
-AT_CLEANUP
-
+# Check for pushdef stacks; broken 2001-09-01, fixed 2008-05-15.
+AT_TEST_FREEZE([reloading pushdef stack],
+[[pushdef(`foo', `1')
+pushdef(`foo', defn(`len'))
+pushdef(`foo', `3')
+]],
+[[foo(`abc')popdef(`foo')
+foo(`ab')popdef(`foo')
+foo(`a')popdef(`foo')
+foo
+]])
 
 ## ---------------- ##
 ## unknown builtins ##
@@ -401,6 +354,8 @@ dnl Invoking the macro directly must warn
 a
 dnl Invoking it indirectly must warn
 indir(`a')
+dnl Since it is a placeholder, builtin must reject it
+builtin(`b')
 dnl The copy is a text string, not a placeholder
 c
 dnl Since it is defined, it must have a definition
@@ -418,11 +373,13 @@ AT_CHECK_M4([-R frozen.m4f input.m4], 0,
 
 
 
+
 a
 ]],
 [[m4:input.m4:4: Warning: a: builtin `b' requested by frozen file not found
 m4:input.m4:6: Warning: a: builtin `b' requested by frozen file not found
 m4:input.m4:8: Warning: a: builtin `b' requested by frozen file not found
+m4:input.m4:10: Warning: builtin: undefined builtin `b'
 a:	<<b>>
 c:	`'
 ]])

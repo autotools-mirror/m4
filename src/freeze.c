@@ -131,55 +131,85 @@ produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
     assert (false);
 }
 
+/* Given a stack of symbol values starting with VALUE, destructively
+   reverse the stack and return the pointer to what was previously the
+   last value in the stack.  VALUE may be NULL.  The symbol table that
+   owns the value stack should not be modified or consulted until this
+   is called again to undo the effect.  */
+static m4_symbol_value *
+reverse_symbol_value_stack (m4_symbol_value *value)
+{
+  m4_symbol_value *result = NULL;
+  m4_symbol_value *next;
+  while (value)
+    {
+      next = VALUE_NEXT (value);
+      VALUE_NEXT (value) = result;
+      result = value;
+      value = next;
+    }
+  return result;
+}
+
+/* Dump the stack of values for SYMBOL, with name SYMBOL_NAME, located
+   in SYMTAB.  USERDATA is interpreted as the FILE* to dump to.  */
 static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 		m4_symbol *symbol, void *userdata)
 {
-  m4_module *   module		= SYMBOL_MODULE (symbol);
-  const char   *module_name	= module ? m4_get_module_name (module) : NULL;
-  FILE *	file		= (FILE *) userdata;
-  size_t	symbol_len	= strlen (symbol_name);
-  size_t	module_len	= module_name ? strlen (module_name) : 0;
+  FILE *file = (FILE *) userdata;
+  size_t symbol_len = strlen (symbol_name);
+  m4_symbol_value *value;
+  m4_symbol_value *last;
 
-  if (m4_is_symbol_text (symbol))
+  last = value = reverse_symbol_value_stack (m4_get_symbol_value (symbol));
+  while (value)
     {
-      const char *text = m4_get_symbol_text (symbol);
-      size_t text_len = m4_get_symbol_len (symbol);
-      xfprintf (file, "T%zu,%zu", symbol_len, text_len);
-      if (module)
-	xfprintf (file, ",%zu", module_len);
-      fputc ('\n', file);
+      m4_module *module = VALUE_MODULE (value);
+      const char *module_name = module ? m4_get_module_name (module) : NULL;
+      size_t module_len = module_name ? strlen (module_name) : 0;
 
-      produce_mem_dump (file, symbol_name, symbol_len);
-      produce_mem_dump (file, text, text_len);
-      if (module)
-	produce_mem_dump (file, module_name, module_len);
-      fputc ('\n', file);
+      if (m4_is_symbol_value_text (value))
+	{
+	  const char *text = m4_get_symbol_value_text (value);
+	  size_t text_len = m4_get_symbol_value_len (value);
+	  xfprintf (file, "T%zu,%zu", symbol_len, text_len);
+	  if (module)
+	    xfprintf (file, ",%zu", module_len);
+	  fputc ('\n', file);
+
+	  produce_mem_dump (file, symbol_name, symbol_len);
+	  produce_mem_dump (file, text, text_len);
+	  if (module)
+	    produce_mem_dump (file, module_name, module_len);
+	  fputc ('\n', file);
+	}
+      else if (m4_is_symbol_value_func (value))
+	{
+	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+	  size_t bp_len;
+	  if (bp == NULL)
+	    assert (!"INTERNAL ERROR: builtin not found in builtin table!");
+	  bp_len = strlen (bp->name);
+
+	  xfprintf (file, "F%zu,%zu", symbol_len, bp_len);
+	  if (module)
+	    xfprintf (file, ",%zu", module_len);
+	  fputc ('\n', file);
+
+	  produce_mem_dump (file, symbol_name, symbol_len);
+	  produce_mem_dump (file, bp->name, bp_len);
+	  if (module)
+	    produce_mem_dump (file, module_name, module_len);
+	  fputc ('\n', file);
+	}
+      else if (m4_is_symbol_value_placeholder (value))
+	; /* Nothing to do for a builtin we couldn't reload earlier.  */
+      else
+	assert (!"dump_symbol_CB");
+      value = VALUE_NEXT (value);
     }
-  else if (m4_is_symbol_func (symbol))
-    {
-      const m4_builtin *bp = m4_get_symbol_builtin (symbol);
-      size_t bp_len;
-      if (bp == NULL)
-	assert (!"INTERNAL ERROR: builtin not found in builtin table!");
-      bp_len = strlen (bp->name);
-
-      xfprintf (file, "F%zu,%zu", symbol_len, bp_len);
-      if (module)
-	xfprintf (file, ",%zu", module_len);
-      fputc ('\n', file);
-
-      produce_mem_dump (file, symbol_name, symbol_len);
-      produce_mem_dump (file, bp->name, bp_len);
-      if (module)
-	produce_mem_dump (file, module_name, module_len);
-      fputc ('\n', file);
-    }
-  else if (m4_is_symbol_placeholder (symbol))
-    ; /* Nothing to do for a builtin we couldn't reload earlier.  */
-  else
-    assert (!"INTERNAL ERROR: bad token data type in produce_symbol_dump ()");
-
+  reverse_symbol_value_stack (last);
   return NULL;
 }
 
