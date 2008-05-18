@@ -301,18 +301,6 @@ define{`a.b', `hello $1'}dnl
 [[a.b{world}
 ]])
 
-## ------------- ##
-## regexp syntax ##
-## ------------- ##
-
-# Check that regular expression syntax is maintained across freeze boundaries.
-AT_TEST_FREEZE([reloading regexp syntax],
-[[changeresyntax(`POSIX_EXTENDED')dnl
-]],
-[[regexp(`GNUs not Unix', `\w(\w*)$')
-regexp(`GNUs not Unix', `\w\(\w*\)$', `GNU_M4')
-]])
-
 ## ------- ##
 ## pushdef ##
 ## ------- ##
@@ -327,6 +315,38 @@ pushdef(`foo', `3')
 foo(`ab')popdef(`foo')
 foo(`a')popdef(`foo')
 foo
+]])
+
+## ------------- ##
+## regexp syntax ##
+## ------------- ##
+
+# Check that regular expression syntax is maintained across freeze boundaries.
+AT_TEST_FREEZE([reloading regexp syntax],
+[[changeresyntax(`POSIX_EXTENDED')dnl
+]],
+[[regexp(`GNUs not Unix', `\w(\w*)$')
+regexp(`GNUs not Unix', `\w\(\w*\)$', `GNU_M4')
+]])
+
+## ----- ##
+## trace ##
+## ----- ##
+
+# Check for macro tracing, both single and global.
+AT_TEST_FREEZE([reloading traced macros],
+[[define(`text', `hello world')dnl
+define(`foo', `bar')dnl
+traceon(`blah', `divnum', `text')dnl
+traceon
+]],
+[[foo
+traceoff
+foo
+text
+divnum
+ifdef(`blah', `', `define(`blah', `finally')')dnl
+blah
 ]])
 
 ## ---------------- ##

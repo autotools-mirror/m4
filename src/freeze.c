@@ -103,6 +103,43 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
     }
 }
 
+/* Store the debug mode in textual format.  */
+static void
+produce_debugmode_state (FILE *file, int flags)
+{
+  /* This code tracks the number of bits in M4_DEBUG_TRACE_VERBOSE.  */
+  char str[13];
+  int offset = 0;
+  assert ((1 << (sizeof str - 1)) - 1 == M4_DEBUG_TRACE_VERBOSE);
+  if (flags & M4_DEBUG_TRACE_ARGS)
+    str[offset++] = 'a';
+  if (flags & M4_DEBUG_TRACE_EXPANSION)
+    str[offset++] = 'e';
+  if (flags & M4_DEBUG_TRACE_QUOTE)
+    str[offset++] = 'q';
+  if (flags & M4_DEBUG_TRACE_ALL)
+    str[offset++] = 't';
+  if (flags & M4_DEBUG_TRACE_LINE)
+    str[offset++] = 'l';
+  if (flags & M4_DEBUG_TRACE_FILE)
+    str[offset++] = 'f';
+  if (flags & M4_DEBUG_TRACE_PATH)
+    str[offset++] = 'p';
+  if (flags & M4_DEBUG_TRACE_CALL)
+    str[offset++] = 'c';
+  if (flags & M4_DEBUG_TRACE_INPUT)
+    str[offset++] = 'i';
+  if (flags & M4_DEBUG_TRACE_CALLID)
+    str[offset++] = 'x';
+  if (flags & M4_DEBUG_TRACE_MODULE)
+    str[offset++] = 'm';
+  if (flags & M4_DEBUG_TRACE_STACK)
+    str[offset++] = 's';
+  str[offset] = '\0';
+  if (offset)
+    xfprintf (file, "d%d\n%s\n", offset, str);
+}
+
 /* The modules must be dumped in the order in which they will be
    reloaded from the frozen file.  libltdl stores handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
@@ -127,7 +164,7 @@ produce_module_dump (FILE *file, m4_module *module)
 static void
 produce_symbol_dump (m4 *context, FILE *file, m4_symbol_table *symtab)
 {
-  if (m4_symtab_apply (symtab, false, dump_symbol_CB, file))
+  if (m4_symtab_apply (symtab, true, dump_symbol_CB, file))
     assert (false);
 }
 
@@ -210,6 +247,8 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
       value = VALUE_NEXT (value);
     }
   reverse_symbol_value_stack (last);
+  if (m4_get_symbol_traced (symbol))
+    xfprintf (file, "t%zu\n%s\n", symbol_len, symbol_name);
   return NULL;
 }
 
@@ -254,14 +293,15 @@ produce_frozen_state (m4 *context, const char *name)
     }
 
   /* Dump regular expression syntax.  */
-
   produce_resyntax_dump (context, file);
 
   /* Dump syntax table.  */
-
   str = "I@WLBOD${}SA(),RE";
   while (*str)
     produce_syntax_dump (file, M4SYNTAX, *str++);
+
+  /* Dump debugmode state.  */
+  produce_debugmode_state (file, m4_get_debug_level_opt (context));
 
   /* Dump all loaded modules.  */
   produce_module_dump (file, m4__module_next (NULL));
@@ -548,6 +588,26 @@ reload_frozen_state (m4 *context, const char *name)
 		    _("ill-formed frozen file, unknown directive %c"),
 		    character);
 
+	case 'd':
+	  /* Set debugmode flags.  */
+	  if (version < 2)
+	    {
+	      /* 'd' operator is not supported in format version 1. */
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
+	    }
+
+	  GET_CHARACTER;
+	  GET_NUMBER (number[0], false);
+	  VALIDATE ('\n');
+	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  VALIDATE ('\n');
+
+	  m4_set_debug_level_opt (context, m4_debug_decode (context, 0,
+							    string[0]));
+
+	  break;
+
 	case 'F':
 	  GET_CHARACTER;
 
@@ -684,6 +744,25 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	      m4_error (context, 0, 0, NULL,
 			_("undefined syntax code %c"), syntax);
 	    }
+	  break;
+
+	case 't':
+	  /* Trace a macro name.  */
+	  if (version < 2)
+	    {
+	      /* 't' operator is not supported in format version 1. */
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, version 2 directive `%c' encountered"), 't');
+	    }
+
+	  GET_CHARACTER;
+	  GET_NUMBER (number[0], false);
+	  VALIDATE ('\n');
+	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  VALIDATE ('\n');
+
+	  m4_set_symbol_name_traced (M4SYMTAB, string[0], true);
+
 	  break;
 
 	case 'C':

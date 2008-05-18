@@ -1,3 +1,16 @@
+2008-05-18  Eric Blake  <ebb9@byu.net>
+
+	Allow freezing the trace status of macros.
+	* src/freeze.c (produce_symbol_dump): Let undefined traced macros
+	through.
+	(dump_symbol_CB): Also freeze trace state.
+	* tests/freeze.at (reloading traced macros): New test.
+	* doc/m4.texinfo (Using frozen files): Update documentation to
+	mention new state.
+	(Frozen file format 1): Improve synchronization with branch.
+	(Frozen file format 2): Reorder directives, and add `d', `t'.
+	* NEWS: Document this change.
+
 2008-05-15  Eric Blake  <ebb9@byu.net>
 
 	Fix frozen file regression in pushdef stacks from 2001-09-01.

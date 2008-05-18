@@ -8265,15 +8265,14 @@ $ @kbd{m4 -R file2.m4f -F file3.m4f file3.m4}
 $ @kbd{m4 -R file3.m4f file4.m4}
 @end example
 
-@comment FIXME - merge the rest of this section.
-Some care is necessary because not every effort has been made for
-this to work in all cases.  In particular, the trace attribute of
-macros is not handled.
-Also, interactions for some options of @code{m4} being used in one call
-and not for the next, have not been fully analyzed yet.  On the other
-end, you may be confident that stacks of @code{pushdef}'ed definitions
-are handled correctly, so are @code{undefine}'d or renamed builtins,
-changed strings for quotes or comments.
+Some care is necessary because the frozen file does not save all state
+information.  Stacks of macro definitions via @code{pushdef} are
+accurately stored, along with all renamed or undefined builtins, as are
+the current syntax rules such as from @code{changequote}.  However, the
+value of @code{sysval} and text saved in @code{m4wrap} are not currently
+preserved.  Also, changing command line options between runs may cause
+unexpected behavior.  A future release of @acronym{GNU} M4 may improve
+on the quality of frozen files.
 
 When an @code{m4} run is to be frozen, the automatic undiversion
 which takes place at end of execution is inhibited.  Instead, all
@@ -8284,14 +8283,83 @@ A frozen file to be reloaded need not reside in the current directory.
 It is looked up the same way as an @code{include} file (@pxref{Search
 Path}).
 
+If the frozen file was generated with a newer version of @code{m4}, and
+contains directives that an older @code{m4} cannot parse, attempting to
+load the frozen file with option @option{-R} will cause @code{m4} to
+exit with status 63 to indicate version mismatch.
+
 @node Frozen file format 1
 @section Frozen file format 1
 
 @cindex frozen file format 1
 @cindex file format, frozen file version 1
-Wow - thanks for really reading the manual.  Report this as a bug if
-this text is not removed before a release.
-FIXME - split out the two formats into separate nodes.
+Frozen files are sharable across architectures.  It is safe to write
+a frozen file on one machine and read it on another, given that the
+second machine uses the same or newer version of @acronym{GNU} @code{m4}.
+It is conventional, but not required, to give a frozen file the suffix
+of @code{.m4f}.
+
+Older versions of @acronym{GNU} @code{m4} create frozen files with
+syntax version 1.  These files can be read by the current version, but
+are no longer produced.  Version 1 files are mostly text files, although
+any macros or diversions that contained nonprintable characters or long
+lines cause the resulting frozen file to do likewise, since there are no
+escape sequences.  The file can be edited to change the state that
+@code{m4} will start with.  It is composed of several directives, each
+starting with a single letter and ending with a newline (@key{NL}).
+Wherever a directive is expected, the character @samp{#} can be used
+instead to introduce a comment line; empty lines are also ignored if
+they are not part of an embedded string.
+
+In the following descriptions, each @var{len} refers to the length of a
+corresponding subsequent @var{str}.  Numbers are always expressed in
+decimal, and an omitted number defaults to 0.  The valid directives in
+version 1 are:
+
+@table @code
+@item V @var{number} @key{NL}
+Confirms the format of the file.  Version 1 is recognized when
+@var{number} is 1.  This directive must be the first non-comment in the
+file, and may not appear more than once.
+
+@item C @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the begin-comment and
+end-comment strings.  If omitted, then @samp{#} and @key{NL} are the
+comment delimiters.
+
+@item D @var{number}, @var{len} @key{NL} @var{str} @key{NL}
+Selects diversion @var{number}, making it current, then copy @var{str}
+in the current diversion.  @var{number} may be a negative number for a
+diversion that discards text.  To merely specify an active selection,
+use this command with an empty @var{str}.  With 0 as the diversion
+@var{number}, @var{str} will be issued on standard output at reload
+time.  @acronym{GNU} @code{m4} will not produce the @samp{D} directive
+with non-zero length for diversion 0, but this can be done with manual
+edits.  This directive may appear more than once for the same diversion,
+in which case the diversion is the concatenation of the various uses.
+If omitted, then diversion 0 is current.
+
+@item F @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Defines, through @code{pushdef}, a definition for @var{str1} expanding
+to the function whose builtin name is @var{str2}.  If the builtin does
+not exist (for example, if the frozen file was produced by a copy of
+@code{m4} compiled with the now-abandoned @code{changeword} support),
+the reload is silent, but any subsequent use of the definition of
+@var{str1} will result in a warning.  This directive may appear more
+than once for the same name, and its order, along with @samp{T}, is
+important.  If omitted, you will have no access to any builtins.
+
+@item Q @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the begin-quote and end-quote
+strings.  If omitted, then @samp{`} and @samp{'} are the quote
+delimiters.
+
+@item T @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Defines, though @code{pushdef}, a definition for @var{str1}
+expanding to the text given by @var{str2}.  This directive may appear
+more than once for the same name, and its order, along with @samp{F}, is
+important.
+@end table
 
 When loading format 1, the syntax categories @samp{@{} and @samp{@}} are
 disabled (reverting braces to be treated like plain characters).  This
@@ -8305,75 +8373,105 @@ because a newer version of M4 reloaded the file.
 
 @cindex frozen file format 2
 @cindex file format, frozen file version 2
-Frozen files are sharable across architectures.  It is safe to write
-a frozen file on one machine and read it on another, given that the
-second machine uses the same, or a newer version of GNU @code{m4}.
-These are simple (editable) text files, made up of directives,
-each starting with a capital letter and ending with a newline
-(@key{NL}).  Wherever a directive is expected, the character
-@samp{#} introduces a comment line, empty lines are also ignored.
-In the following descriptions, @var{length}s always refer to
-corresponding @var{string}s.  Numbers are always expressed in decimal.
-The directives are:
+The syntax of version 1 has some drawbacks; if any macro or diversion
+contained non-printable characters or long lines, the resulting frozen
+file would not qualify as a text file, making it harder to edit with
+some vendor tools.  The concatenation of multiple strings on a single
+line, such as for the @samp{T} directive, makes distinguishing the two
+strings a bit more difficult.  Finally, the format lacks support for
+several items of @code{m4} state, such that a reloaded file did not
+always behave the same as the original file.
+
+These shortcomings have been addressed in version 2 of the frozen file
+syntax.  New directives have been added, and existing directives have
+additional, and sometimes optional, parameters.
+@c FIXME - change implementation to match this:
+@c  All @var{str} instances
+@c in the grammar are now followed by @key{NL}, which makes the split
+@c between consecutive strings easier to recognize.
+Strings may now
+contain escape sequences modeled after C, such as @samp{\n} for newline
+or @samp{\0} for @sc{nul}, so that the frozen file can be pure
+@sc{ascii} (although when hand-editing a frozen file, it is still
+acceptable to use the original byte rather than an escape sequence for
+all bytes except @samp{\}).  Also in the context of a @var{str}, the
+escape sequence @samp{\@key{NL}} is discarded, allowing a user to split
+lines that are too long for some platform tools.
 
 @table @code
 @item V @var{number} @key{NL}
-Confirms the format of the file.  For the version documented here,
-@var{number} should be 2.  It is backwards compatible with the previous
-version though, so version 1 frozen files can be loaded too if necessary.
+Confirms the format of the file.  @code{m4} @value{VERSION} only creates
+frozen files where @var{number} is 2.  This directive must be the first
+non-comment in the file, and may not appear more than once.
 
-@item C @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Uses @var{string1} and @var{string2} as the beginning comment and
-end comment strings.
+@c    C @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
+@item C @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the begin-comment and
+end-comment strings.  If omitted, then @samp{#} and @key{NL} are the
+comment delimiters.
 
-@item Q @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Uses @var{string1} and @var{string2} as the beginning quote and end quote
-strings.
+@item d @var{len} @key{NL} @var{str} @key{NL}
+Sets the debug flags, using @var{str} as the argument to
+@code{debugmode}.  If omitted, then the debug flags start in their
+default state.
 
-@item R @var{length} @key{NL} @var{string} @key{NL}
-Sets the default regexp syntax, where @var{string} encodes one of the
+@item D @var{number} , @var{len} @key{NL} @var{str} @key{NL}
+Selects diversion @var{number}, making it current, then copy @var{str}
+in the current diversion.  @var{number} may be a negative number for a
+diversion that discards text.  To merely specify an active selection,
+use this command with an empty @var{string}.  With 0 as the diversion
+@var{number}, @var{str} will be issued on standard output at reload
+time.  @acronym{GNU} @code{m4} will not produce the @samp{D} directive
+with non-zero length for diversion 0, but this can be done with manual
+edits.  This directive may appear more than once for the same diversion,
+in which case the diversion is the concatenation of the various uses.
+If omitted, then diversion 0 is current.
+
+@comment FIXME - the first usage, with only one string, is not supported
+@comment in the current code
+@item F @var{len1} @key{NL} @var{str1} @key{NL}
+@itemx F @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+@itemx F @var{len1} , @var{len2} , @var{len3} @key{NL} @var{str1} @var{str2} @var{str3} @key{NL}
+Defines, through @code{pushdef}, a definition for @var{str1} expanding
+to the function whose builtin name is given by @var{str2} (defaulting to
+@var{str1} if not present).  With two arguments, the builtin name is
+searched for among the intrinsic builtin functions only; with three
+arguments, the builtin name is searched for amongst the builtin
+functions defined by the module named by @var{str3}.
+
+@item M @var{len} @key{NL} @var{str} @key{NL}
+Names a module which will be searched for according to the module search
+path and loaded.  Modules loaded from a frozen file don't add their
+builtin entries to the symbol table.  Modules must be loaded prior to
+specifying module-specific builtins via the three-argument @code{F} or
+@code{T}.
+
+@item Q @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Uses @var{str1} and @var{str2} as the begin-quote and end-quote strings.
+If omitted, then @samp{`} and @samp{'} are the quote delimiters.
+
+@item R @var{len} @key{NL} @var{str} @key{NL}
+Sets the default regexp syntax, where @var{str} encodes one of the
 regular expression syntaxes supported by @acronym{GNU} M4.
 @xref{Changeresyntax}, for more details.
 
-@item M @var{length} @key{NL} @var{string} @key{NL}
-Names a module which will be searched for according to the module search path
-and loaded.  Modules loaded from a frozen file don't add their builtin entries
-to the symbol table.
-
-@item F @var{length} @key{NL} @var{string} @key{NL}
-Defines, through @code{pushdef}, a definition for @var{string}
-expanding to the function whose builtin name is also @var{string}.  The builtin
-name is searched for among the intrinsic builtin functions only.
-
-@item F @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Defines, through @code{pushdef}, a definition for @var{string1}
-expanding to the function whose builtin name is @var{string2}.  With two
-arguments, the builtin name is searched for among the intrinsic builtin
-functions only.
-
-@item F @var{length1} , @var{length2} , @var{length3} @key{NL} @var{string1} @var{string2} @var{string3} @key{NL}
-Defines, through @code{pushdef}, a definition for @var{string1}
-expanding to the function whose builtin name is @var{string2}.  With three
-arguments, the builtin name is searched for amongst the builtin functions
-defined by the module named by @var{string3}.
-
-@item S @var{syntax-code} @var{length} @key{NL} @var{string} @key{NL}
+@item S @var{syntax-code} @var{len} @key{NL} @var{str} @key{NL}
 Defines, through @code{changesyntax}, a syntax category for each of the
-characters in @var{string}.  The @var{syntax-code} must be one of the
+characters in @var{str}.  The @var{syntax-code} must be one of the
 characters described in @ref{Changesyntax}.
 
-@item T @var{length1} , @var{length2} @key{NL} @var{string1} @var{string2} @key{NL}
-Defines, though @code{pushdef}, a definition for @var{string1}
-expanding to the text given by @var{string2}.
+@item t @var{len} @key{NL} @var{str} @key{NL}
+Enables tracing for any macro named @var{str}, similar to using the
+@code{traceon} builtin.  This option may occur more than once for
+multiple macros; if omitted, no macro starts out as traced.
 
-@item D @var{number}, @var{length} @key{NL} @var{string} @key{NL}
-Selects diversion @var{number}, making it current, then copy
-@var{string} in the current diversion.  @var{number} may be a negative
-number for a non-existing diversion.  To merely specify an active
-selection, use this command with an empty @var{string}.  With 0 as the
-diversion @var{number}, @var{string} will be issued on standard output
-at reload time, however this may not be produced from within @code{m4}.
-
+@comment FIXME - what about a module's text macros, like __gnu__?
+@item T @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+Defines, though @code{pushdef}, a definition for @var{str1} expanding to
+the text given by @var{str2}.  With two arguments, the builtin name is
+searched for among the intrinsic builtin functions only; with three
+arguments, the builtin name is searched for amongst the builtin
+functions defined by the module named by @var{str3}.
 @end table
 
 @node Compatibility
