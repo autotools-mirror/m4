@@ -1,5 +1,9 @@
 2008-05-19  Eric Blake  <ebb9@byu.net>
 
+	Fix xgettext options.
+	* po/Makevars (XGETTEXT_OPTIONS): The " must be passed to
+	xgettext.
+
 	Fix spelling of René Seindal's name in --version output.
 	* ltdl/m4/gnulib-cache.m4: Import propername module.
 	* src/main.c (AUTHORS): Rewrite in terms of proper_name.
