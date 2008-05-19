@@ -1,3 +1,11 @@
+2008-05-19  Eric Blake  <ebb9@byu.net>
+
+	Fix spelling of René Seindal's name in --version output.
+	* ltdl/m4/gnulib-cache.m4: Import propername module.
+	* src/main.c (AUTHORS): Rewrite in terms of proper_name.
+	* po/Makevars (XGETTEXT_OPTIONS): Detect new functions.
+	* HACKING: Mention new prerequisite of gperf.
+
 2008-05-18  Eric Blake  <ebb9@byu.net>
 
 	Allow freezing the trace status of macros.

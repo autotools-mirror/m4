@@ -68,6 +68,7 @@ and is not part of a release distribution.
   - Automake 1.10.1 or later
   - Libtool 2.2 or later
   - Gettext 0.16 or later
+  - Gperf 3.0 or later
   - Help2man 1.29 or later
   - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)
   - Texinfo 4.8 or later

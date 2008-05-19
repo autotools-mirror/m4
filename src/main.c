@@ -29,11 +29,15 @@
 #include "closein.h"
 #include "configmake.h"
 #include "getopt.h"
+#include "propername.h"
 #include "quotearg.h"
 #include "version-etc.h"
 #include "xstrtol.h"
 
-#define AUTHORS _("Rene' Seindal"), "Gary V. Vaughan", "Eric Blake"
+#define AUTHORS							\
+  proper_name_utf8 ("Rene' Seindal", "Ren\xc3\xa9 Seindal"),	\
+  proper_name ("Gary V. Vaughan"),				\
+  proper_name ("Eric Blake")
 
 typedef struct deferred
 {
