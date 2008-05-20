@@ -8384,12 +8384,9 @@ always behave the same as the original file.
 
 These shortcomings have been addressed in version 2 of the frozen file
 syntax.  New directives have been added, and existing directives have
-additional, and sometimes optional, parameters.
-@c FIXME - change implementation to match this:
-@c  All @var{str} instances
-@c in the grammar are now followed by @key{NL}, which makes the split
-@c between consecutive strings easier to recognize.
-Strings may now
+additional, and sometimes optional, parameters.  All @var{str} instances
+in the grammar are now followed by @key{NL}, which makes the split
+between consecutive strings easier to recognize.  Strings may now
 contain escape sequences modeled after C, such as @samp{\n} for newline
 or @samp{\0} for @sc{nul}, so that the frozen file can be pure
 @sc{ascii} (although when hand-editing a frozen file, it is still
@@ -8404,8 +8401,7 @@ Confirms the format of the file.  @code{m4} @value{VERSION} only creates
 frozen files where @var{number} is 2.  This directive must be the first
 non-comment in the file, and may not appear more than once.
 
-@c    C @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
-@item C @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+@item C @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
 Uses @var{str1} and @var{str2} as the begin-comment and
 end-comment strings.  If omitted, then @samp{#} and @key{NL} are the
 comment delimiters.
@@ -8429,9 +8425,9 @@ If omitted, then diversion 0 is current.
 
 @comment FIXME - the first usage, with only one string, is not supported
 @comment in the current code
-@item F @var{len1} @key{NL} @var{str1} @key{NL}
-@itemx F @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
-@itemx F @var{len1} , @var{len2} , @var{len3} @key{NL} @var{str1} @var{str2} @var{str3} @key{NL}
+@c @item F @var{len1} @key{NL} @var{str1} @key{NL}
+@item F @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
+@itemx F @var{len1} , @var{len2} , @var{len3} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL} @var{str3} @key{NL}
 Defines, through @code{pushdef}, a definition for @var{str1} expanding
 to the function whose builtin name is given by @var{str2} (defaulting to
 @var{str1} if not present).  With two arguments, the builtin name is
@@ -8446,7 +8442,7 @@ builtin entries to the symbol table.  Modules must be loaded prior to
 specifying module-specific builtins via the three-argument @code{F} or
 @code{T}.
 
-@item Q @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+@item Q @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
 Uses @var{str1} and @var{str2} as the begin-quote and end-quote strings.
 If omitted, then @samp{`} and @samp{'} are the quote delimiters.
 
@@ -8465,13 +8461,13 @@ Enables tracing for any macro named @var{str}, similar to using the
 @code{traceon} builtin.  This option may occur more than once for
 multiple macros; if omitted, no macro starts out as traced.
 
-@comment FIXME - what about a module's text macros, like __gnu__?
-@item T @var{len1} , @var{len2} @key{NL} @var{str1} @var{str2} @key{NL}
+@item T @var{len1} , @var{len2} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL}
+@itemx T @var{len1} , @var{len2} , @var{len3} @key{NL} @var{str1} @key{NL} @var{str2} @key{NL} @var{str3} @key{NL}
 Defines, though @code{pushdef}, a definition for @var{str1} expanding to
-the text given by @var{str2}.  With two arguments, the builtin name is
-searched for among the intrinsic builtin functions only; with three
-arguments, the builtin name is searched for amongst the builtin
-functions defined by the module named by @var{str3}.
+the text given by @var{str2}.  This directive may appear more than once
+for the same name, and its order, along with @samp{F}, is important.  If
+present, the optional third argument associates the macro with a module
+named by @var{str3}.
 @end table
 
 @node Compatibility

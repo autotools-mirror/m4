@@ -196,11 +196,13 @@ promoted to 2.0.
 *** The syntax of frozen files format V2 has been improved to save
     additional state.  This includes the `R' directive for default regular
     expression syntax, the `t' directive for traced macros, and the `d'
-    directive for debug mode.  Also, a V2 file can now be represented
-    completely in ASCII, thanks to escape sequences.  Unfortunately, files
-    frozen by M4 1.4q cannot be read by 1.9b, but since 1.4q was not widely
-    distributed, this is not expected to be much of an issue, and comes
-    with the territory of using a beta release.
+    directive for debug mode.  Existing directives with consecutive strings
+    now require an intermediate newline, for faster parsing.  Also, a V2
+    file can now be represented completely in ASCII, thanks to escape
+    sequences.  Unfortunately, files frozen by M4 1.4q cannot be read by
+    1.9b, but since 1.4q was not widely distributed, this is not expected
+    to be much of an issue, and comes with the territory of using a beta
+    release.
   - FIXME: format 2 still needs to catch more missing state; once 2.0 is
     released, any further changes would introduce format 3.
 

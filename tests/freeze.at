@@ -84,7 +84,8 @@ $ m4 --version | head -n1
 GNU M4 1.4.5
 $ cat frozen.m4
 divert(`-1')
-define(`foo', `\FOO')
+define(`foo', `\n\
+FOO')
 pushdef(`foo', `bar${1}')
 define(`my_define', defn(`define'))
 define(`my_changeword', defn(`changeword'))
@@ -116,8 +117,9 @@ T9,6
 my_definedefine
 F9,6
 my_definedefine
-T3,4
-foo\FOO
+T3,7
+foo\n\
+FOO
 T3,7
 foobar${1}
 F3,3
@@ -139,7 +141,8 @@ my_define([bar], [4])[]popdef([my_define]) bar
 ]])
 
 AT_CHECK_M4([-R frozen.m4f input.m4], [0],
-[[bar${1} /* foo */ \FOO
+[[bar${1} /* foo */ \n\
+FOO
  1
 define 1
  3
@@ -174,15 +177,19 @@ V2
 # missing close quote should be supplied
 Q1,0
 >
+
 # missing close comment should be supplied
 C1,0
 <
+
 M2
 m4
 M3
 gnu
 F7,7,3
-builtinbuiltingnu
+builtin
+builtin
+gnu
 # Text to negative diversion must not crash.  Catches a regression
 # introduced 2007-05-28 and fixed 2007-05-31.
 D-1,5
@@ -196,11 +203,13 @@ D,
 
 # Testing escape sequences
 T4,5
-blah\t\477\040\X5C
+blah
+\t\477\040\X5C
 # Long macro definition.  Catches a regression introduced on 2007-01-20
 # and patched 2007-02-25.
 T4,122
-long01234567890123456789012345678901234567890123456789
+long
+01234567890123456789012345678901234567890123456789
 01234567890123456789012345678901234567890123456789
 01234567890123456789
 ]])
@@ -247,15 +256,23 @@ m4
 M3
 gnu
 T1,5
-a\n\n\n\n\n
+a
+\n\n\n\n\n
 F6,6,2
 divnum\
-divnumm4\
+
+divnum
+\
+m4\
 
 F6,6,2
-divertdivertm4
+divert
+divert
+m4
 F6,6,2
-definedefinem4
+define
+define
+m4
 D]$1[,3
 hi
 
@@ -263,7 +280,7 @@ hi
 AT_CHECK_M4([-R frozen.m4f in.m4], m4_ifval([$2], [1], [0]),
 m4_ifval([$2], [], [m4_bpatsubst([$1], [^0*])
 m4_if(m4_substr([$1], [0], [1]), [-], [], [[hi
-]])]), m4_ifval([$2], [[m4:frozen.m4f:16: integer overflow in frozen file
+]])]), m4_ifval([$2], [[m4:frozen.m4f:24: integer overflow in frozen file
 ]]))
 ])
 
@@ -363,7 +380,8 @@ AT_CHECK_M4([-F frozen.m4f -t undefined empty.m4])
 
 # Add an unknown builtin.
 echo 'F1,1' >> frozen.m4f
-echo 'ab' >> frozen.m4f
+echo 'a' >> frozen.m4f
+echo 'b' >> frozen.m4f
 
 AT_DATA([[input.m4]],
 [[dnl The macro is defined; checking this is safe

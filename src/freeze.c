@@ -216,10 +216,14 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	  fputc ('\n', file);
 
 	  produce_mem_dump (file, symbol_name, symbol_len);
-	  produce_mem_dump (file, text, text_len);
-	  if (module)
-	    produce_mem_dump (file, module_name, module_len);
 	  fputc ('\n', file);
+	  produce_mem_dump (file, text, text_len);
+	  fputc ('\n', file);
+	  if (module)
+	    {
+	      produce_mem_dump (file, module_name, module_len);
+	      fputc ('\n', file);
+	    }
 	}
       else if (m4_is_symbol_value_func (value))
 	{
@@ -235,10 +239,14 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	  fputc ('\n', file);
 
 	  produce_mem_dump (file, symbol_name, symbol_len);
-	  produce_mem_dump (file, bp->name, bp_len);
-	  if (module)
-	    produce_mem_dump (file, module_name, module_len);
 	  fputc ('\n', file);
+	  produce_mem_dump (file, bp->name, bp_len);
+	  fputc ('\n', file);
+	  if (module)
+	    {
+	      produce_mem_dump (file, module_name, module_len);
+	      fputc ('\n', file);
+	    }
 	}
       else if (m4_is_symbol_value_placeholder (value))
 	; /* Nothing to do for a builtin we couldn't reload earlier.  */
@@ -278,6 +286,7 @@ produce_frozen_state (m4 *context, const char *name)
     {
       xfprintf (file, "Q%zu,%zu\n", pair->len1, pair->len2);
       produce_mem_dump (file, pair->str1, pair->len1);
+      fputc ('\n', file);
       produce_mem_dump (file, pair->str2, pair->len2);
       fputc ('\n', file);
     }
@@ -288,6 +297,7 @@ produce_frozen_state (m4 *context, const char *name)
     {
       xfprintf (file, "C%zu,%zu\n", pair->len1, pair->len2);
       produce_mem_dump (file, pair->str1, pair->len1);
+      fputc ('\n', file);
       produce_mem_dump (file, pair->str2, pair->len2);
       fputc ('\n', file);
     }
@@ -471,12 +481,21 @@ reload_frozen_state (m4 *context, const char *name)
     }								\
   while (0)
 
-#define GET_STRING(File, Buf, BufSize, StrLen)			\
+#define GET_STRING(File, Buf, BufSize, StrLen, UseChar)		\
   do								\
     {								\
       size_t len = (StrLen);					\
       char *p;							\
       int ch;							\
+      if (UseChar)						\
+	{							\
+	  ungetc (character, File);				\
+	  if (advance_line)					\
+	    {							\
+	      assert (character == '\n');			\
+	      advance_line = false;				\
+	    }							\
+	}							\
       CHECK_ALLOCATION ((Buf), (BufSize), len);			\
       p = (Buf);						\
       while (len-- > 0)						\
@@ -490,6 +509,13 @@ reload_frozen_state (m4 *context, const char *name)
 	  *p++ = ch;						\
 	}							\
       *p = '\0';						\
+      GET_CHARACTER;						\
+      while (version > 1 && character == '\\')			\
+	{							\
+	  GET_CHARACTER;					\
+	  VALIDATE ('\n');					\
+	  GET_CHARACTER;					\
+	}							\
     }								\
   while (0)
 
@@ -525,12 +551,6 @@ reload_frozen_state (m4 *context, const char *name)
 	  while (character != EOF && character != '\n')		\
 	    GET_CHARACTER;					\
 	  VALIDATE ('\n');					\
-	}							\
-      else if (character == '\\')				\
-	{							\
-	  GET_CHARACTER;					\
-	  VALIDATE ('\n');					\
-	  continue;						\
 	}							\
     }								\
   while (character == '\n')
@@ -600,7 +620,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
 	  m4_set_debug_level_opt (context, m4_debug_decode (context, 0,
@@ -643,9 +663,19 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 
 	  /* Get string contents.  */
 
-	  GET_STRING (file, string[0], allocated[0], number[0]);
-	  GET_STRING (file, string[1], allocated[1], number[1]);
-	  GET_STRING (file, string[2], allocated[2], number[2]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
+	  if (version > 1)
+	    {
+	      VALIDATE ('\n');
+	      GET_CHARACTER;
+	    }
+	  GET_STRING (file, string[1], allocated[1], number[1], true);
+	  if (version > 1 && number[2])
+	    {
+	      VALIDATE ('\n');
+	      GET_CHARACTER;
+	    }
+	  GET_STRING (file, string[2], allocated[2], number[2], true);
 	  VALIDATE ('\n');
 
 	  /* Enter a macro having a builtin function as a definition.  */
@@ -686,7 +716,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
 	  m4__module_open (context, string[0], NULL);
@@ -705,7 +735,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
 	  m4_set_regexp_syntax_opt (context,
@@ -732,7 +762,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
 
 	  /* Syntax under M4_SYNTAX_MASKS is handled specially; all
 	     other characters are additive.  */
@@ -758,7 +788,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 't');
 	  GET_CHARACTER;
 	  GET_NUMBER (number[0], false);
 	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
 	  m4_set_symbol_name_traced (M4SYMTAB, string[0], true);
@@ -789,9 +819,17 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 't');
 
 	  /* Get string contents.  */
 	  if (operation != 'D')
-	    GET_STRING (file, string[0], allocated[0], number[0]);
-	  GET_STRING (file, string[1], allocated[1], number[1]);
-	  GET_CHARACTER;
+	    {
+	      GET_STRING (file, string[0], allocated[0], number[0], false);
+	      if (version > 1)
+		{
+		  VALIDATE ('\n');
+		  GET_CHARACTER;
+		}
+	    }
+	  else
+	    GET_CHARACTER;
+	  GET_STRING (file, string[1], allocated[1], number[1], true);
 	  VALIDATE ('\n');
 
 	  /* Act according to operation letter.  */
@@ -862,9 +900,19 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	  VALIDATE ('\n');
 
 	  /* Get string contents.  */
-	  GET_STRING (file, string[0], allocated[0], number[0]);
-	  GET_STRING (file, string[1], allocated[1], number[1]);
-	  GET_STRING (file, string[2], allocated[2], number[2]);
+	  GET_STRING (file, string[0], allocated[0], number[0], false);
+	  if (version > 1)
+	    {
+	      VALIDATE ('\n');
+	      GET_CHARACTER;
+	    }
+	  GET_STRING (file, string[1], allocated[1], number[1], true);
+	  if (version > 1 && number[2])
+	    {
+	      VALIDATE ('\n');
+	      GET_CHARACTER;
+	    }
+	  GET_STRING (file, string[2], allocated[2], number[2], true);
 	  VALIDATE ('\n');
 
 	  /* Enter a macro having an expansion text as a definition.  */

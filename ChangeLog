@@ -1,5 +1,17 @@
 2008-05-19  Eric Blake  <ebb9@byu.net>
 
+	In frozen file, split consecutive strings with newline.
+	* src/freeze.c (dump_symbol_CB): Add newline to 'T', 'F'.
+	(produce_frozen_state): Likewise for 'Q', 'C'.
+	(reload_frozen_state): Parse the new layout.
+	[GET_DIRECTIVE]: Fix format 1 regression from 2008-05-13.
+	* tests/freeze.at (loading format 2): Rewrite to new format.
+	(reloading unknown builtin): Likewise.
+	(loading format 1): Make sure backslash-newline is not
+	interpreted.
+	* doc/m4.texinfo (Frozen file format 2): Document the format.
+	* NEWS: Document this change.
+
 	Fix xgettext options.
 	* po/Makevars (XGETTEXT_OPTIONS): The " must be passed to
 	xgettext.
