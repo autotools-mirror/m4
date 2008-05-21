@@ -47,13 +47,13 @@
 #define m4_expand_ranges	m4_LTX_m4_expand_ranges
 #define m4_make_temp		m4_LTX_m4_make_temp
 
-extern void m4_set_sysval    (int value);
-extern void m4_sysval_flush  (m4 *context, bool report);
-extern void m4_dump_symbols  (m4 *context, m4_dump_symbol_data *data,
-			      size_t argc, m4_macro_args *argv, bool complain);
-extern const char *m4_expand_ranges (const char *s, m4_obstack *obs);
-extern void m4_make_temp     (m4 *context, m4_obstack *obs, const char *macro,
-			      const char *name, size_t len, bool dir);
+extern void m4_set_sysval    (int);
+extern void m4_sysval_flush  (m4 *, bool);
+extern void m4_dump_symbols  (m4 *, m4_dump_symbol_data *, size_t,
+			      m4_macro_args *, bool);
+extern const char *m4_expand_ranges (const char *, m4_obstack *);
+extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
+			      const char *, size_t, bool);
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
@@ -153,47 +153,49 @@ M4INIT_HANDLER (m4)
 
 M4BUILTIN_HANDLER (define)
 {
+  const m4_call_info *me = m4_arg_info (argv);
+
   if (m4_is_arg_text (argv, 1))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
-	m4_warn (context, 0, M4ARG (0), _("cannot concatenate builtins"));
+	m4_warn (context, 0, me, _("cannot concatenate builtins"));
       m4_symbol_define (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+    m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 M4BUILTIN_HANDLER (undefine)
 {
-  const char *me = M4ARG (0);
   size_t i;
   for (i = 1; i < argc; i++)
-    if (m4_symbol_value_lookup (context, me, argv, i, true))
+    if (m4_symbol_value_lookup (context, argv, i, true))
       m4_symbol_delete (M4SYMTAB, M4ARG (i));
 }
 
 M4BUILTIN_HANDLER (pushdef)
 {
+  const m4_call_info *me = m4_arg_info (argv);
+
   if (m4_is_arg_text (argv, 1))
     {
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
-	m4_warn (context, 0, M4ARG (0), _("cannot concatenate builtins"));
+	m4_warn (context, 0, me, _("cannot concatenate builtins"));
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
     }
   else
-    m4_warn (context, 0, M4ARG (0), _("invalid macro name ignored"));
+    m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 M4BUILTIN_HANDLER (popdef)
 {
-  const char *me = M4ARG (0);
   size_t i;
   for (i = 1; i < argc; i++)
-    if (m4_symbol_value_lookup (context, me, argv, i, true))
+    if (m4_symbol_value_lookup (context, argv, i, true))
       m4_symbol_popdef (M4SYMTAB, M4ARG (i));
 }
 
@@ -205,13 +207,12 @@ M4BUILTIN_HANDLER (popdef)
 M4BUILTIN_HANDLER (ifdef)
 {
   m4_push_arg (context, obs, argv,
-	       (m4_symbol_value_lookup (context, M4ARG (0), argv, 1, false)
-		? 2 : 3));
+	       m4_symbol_value_lookup (context, argv, 1, false) ? 2 : 3);
 }
 
 M4BUILTIN_HANDLER (ifelse)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   size_t i;
 
   /* The valid ranges of argc for ifelse is discontinuous, we cannot
@@ -290,7 +291,6 @@ void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 		 m4_macro_args *argv, bool complain)
 {
-  const char *me = M4ARG (0);
   assert (obstack_object_size (data->obs) == 0);
   data->size = obstack_room (data->obs) / sizeof (const char *);
 
@@ -303,7 +303,7 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 
       for (i = 1; i < argc; i++)
 	{
-	  symbol = m4_symbol_value_lookup (context, me, argv, i, complain);
+	  symbol = m4_symbol_value_lookup (context, argv, i, complain);
 	  if (symbol)
 	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
 	}
@@ -353,12 +353,12 @@ M4BUILTIN_HANDLER (dumpdef)
    macro-definition token on the input stack.  */
 M4BUILTIN_HANDLER (defn)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   size_t i;
 
   for (i = 1; i < argc; i++)
     {
-      m4_symbol *symbol = m4_symbol_value_lookup (context, me, argv, i, true);
+      m4_symbol *symbol = m4_symbol_value_lookup (context, argv, i, true);
 
       if (!symbol)
 	;
@@ -368,9 +368,9 @@ M4BUILTIN_HANDLER (defn)
       else if (m4_is_symbol_func (symbol))
 	m4_push_builtin (context, obs, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	m4_warn (context, 0, M4ARG (i),
-		 _("builtin `%s' requested by frozen file not found"),
-		 m4_get_symbol_placeholder (symbol));
+	m4_warn (context, 0, me,
+		 _("%s: builtin `%s' requested by frozen file not found"),
+		 M4ARG (i), m4_get_symbol_placeholder (symbol));
       else
 	{
 	  assert (!"Bad token data type in m4_defn");
@@ -480,7 +480,7 @@ M4BUILTIN_HANDLER (syscmd)
 {
   if (m4_get_safer_opt (context))
     {
-      m4_error (context, 0, 0, M4ARG (0), _("disabled by --safer"));
+      m4_error (context, 0, 0, m4_arg_info (argv), _("disabled by --safer"));
       return;
     }
 
@@ -510,7 +510,7 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &value))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -520,7 +520,7 @@ M4BUILTIN_HANDLER (decr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &value))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -536,7 +536,8 @@ M4BUILTIN_HANDLER (divert)
 {
   int i = 0;
 
-  if (argc >= 2 && !m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
+  if (argc >= 2 && !m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1),
+				    &i))
     return;
   m4_make_diversion (context, i);
   m4_divert_text (context, NULL, M4ARG (2), M4ARGLEN (2),
@@ -557,7 +558,7 @@ M4BUILTIN_HANDLER (divnum)
 M4BUILTIN_HANDLER (undivert)
 {
   size_t i = 0;
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
 
   if (argc == 1)
     m4_undivert_all (context);
@@ -596,7 +597,7 @@ M4BUILTIN_HANDLER (undivert)
    lives in input.c.  */
 M4BUILTIN_HANDLER (dnl)
 {
-  m4_skip_line (context, M4ARG (0));
+  m4_skip_line (context, m4_arg_info (argv));
 }
 
 /* Shift all arguments one to the left, discarding the first argument.
@@ -641,7 +642,7 @@ include (m4 *context, int argc, m4_macro_args *argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (context, 0, errno, M4ARG (0), _("cannot open `%s'"),
+	m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open `%s'"),
 		  M4ARG (1));
       return;
     }
@@ -667,10 +668,10 @@ M4BUILTIN_HANDLER (sinclude)
 
 /* Add trailing `X' to PATTERN of length LEN as necessary, then
    securely create the temporary file system object.  If DIR, create a
-   directory instead of a file.  Report errors on behalf of MACRO.  If
+   directory instead of a file.  Report errors on behalf of CALLER.  If
    successful, output the quoted resulting name on OBS.  */
 void
-m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
+m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 	      const char *pattern, size_t len, bool dir)
 {
   int fd;
@@ -680,7 +681,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 
   if (m4_get_safer_opt (context))
     {
-      m4_error (context, 0, 0, macro, _("disabled by --safer"));
+      m4_error (context, 0, 0, caller, _("disabled by --safer"));
       return;
     }
 
@@ -704,7 +705,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
       /* This use of _() will need to change if xgettext ever changes
 	 its undocumented behavior of parsing both string options.  */
 
-      m4_error (context, 0, errno, macro,
+      m4_error (context, 0, errno, caller,
 		_(dir ? "cannot create directory from template `%s'"
 		  : "cannot create file from template `%s'"),
 		pattern);
@@ -723,7 +724,8 @@ m4_make_temp (m4 *context, m4_obstack *obs, const char *macro,
 /* Use the first argument as at template for a temporary file name.  */
 M4BUILTIN_HANDLER (maketemp)
 {
-  m4_warn (context, 0, M4ARG (0), _("recommend using mkstemp instead"));
+  const m4_call_info *me = m4_arg_info (argv);
+  m4_warn (context, 0, me, _("recommend using mkstemp instead"));
   if (m4_get_posixly_correct_opt (context))
     {
       /* POSIX states "any trailing 'X' characters [are] replaced with
@@ -757,13 +759,14 @@ M4BUILTIN_HANDLER (maketemp)
 	}
     }
   else
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), false);
+    m4_make_temp (context, obs, me, M4ARG (1), M4ARGLEN (1), false);
 }
 
 /* Use the first argument as a template for a temporary file name.  */
 M4BUILTIN_HANDLER (mkstemp)
 {
-  m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), false);
+  m4_make_temp (context, obs, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		false);
 }
 
 /* Print all arguments on standard error.  */
@@ -792,7 +795,7 @@ M4BUILTIN_HANDLER (errprint)
    arguments are present.  */
 M4BUILTIN_HANDLER (m4exit)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   int exit_code = EXIT_SUCCESS;
 
   /* Warn on bad arguments, but still exit.  */
@@ -836,7 +839,7 @@ M4BUILTIN_HANDLER (m4wrap)
 
 M4BUILTIN_HANDLER (traceon)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   size_t i;
 
   if (argc == 1)
@@ -853,7 +856,7 @@ M4BUILTIN_HANDLER (traceon)
 /* Disable tracing of all specified macros, or all, if none is specified.  */
 M4BUILTIN_HANDLER (traceoff)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   size_t i;
 
   if (argc == 1)
@@ -902,7 +905,7 @@ M4BUILTIN_HANDLER (index)
    substring extends to the end of the first argument.  */
 M4BUILTIN_HANDLER (substr)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   const char *str = M4ARG (1);
   int start = 0;
   int length;

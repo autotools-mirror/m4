@@ -887,7 +887,7 @@ simple_term (m4 *context, eval_token et, number *v1)
 void
 m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 {
-  const char *	me	= M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   const char *	str	= M4ARG (1);
   int		radix	= 10;
   int		min	= 1;

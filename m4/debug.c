@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1991, 1992, 1993, 1994, 2006, 2007 Free Software
-   Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2006, 2007, 2008 Free
+   Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -26,7 +26,7 @@
 #include "m4private.h"
 #include "close-stream.h"
 
-static void set_debug_file (m4 *, const char *, FILE *);
+static void set_debug_file (m4 *, const m4_call_info *, FILE *);
 
 
 
@@ -131,9 +131,9 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
 
 /* Change the debug output stream to FP.  If the underlying file is the
    same as stdout, use stdout instead so that debug messages appear in the
-   correct relative position.  Report errors on behalf of MACRO.  */
+   correct relative position.  Report errors on behalf of CALLER.  */
 static void
-set_debug_file (m4 *context, const char *macro, FILE *fp)
+set_debug_file (m4 *context, const m4_call_info *caller, FILE *fp)
 {
   FILE *debug_file;
   struct stat stdout_stat, debug_stat;
@@ -143,7 +143,7 @@ set_debug_file (m4 *context, const char *macro, FILE *fp)
   debug_file = m4_get_debug_file (context);
   if (debug_file != NULL && debug_file != stderr && debug_file != stdout
       && close_stream (debug_file) != 0)
-    m4_error (context, 0, errno, macro, _("error writing to debug stream"));
+    m4_error (context, 0, errno, caller, _("error writing to debug stream"));
 
   debug_file = fp;
   m4_set_debug_file (context, fp);
@@ -162,7 +162,7 @@ set_debug_file (m4 *context, const char *macro, FILE *fp)
 	  && stdout_stat.st_ino != 0)
 	{
 	  if (debug_file != stderr && close_stream (debug_file) != 0)
-	    m4_error (context, 0, errno, macro,
+	    m4_error (context, 0, errno, caller,
 		      _("error writing to debug stream"));
 	  m4_set_debug_file (context, stdout);
 	}
@@ -172,18 +172,18 @@ set_debug_file (m4 *context, const char *macro, FILE *fp)
 /* Change the debug output to file NAME.  If NAME is NULL, debug
    output is reverted to stderr, and if empty debug output is
    discarded.  Return true iff the output stream was changed.  Report
-   errors on behalf of MACRO.  */
+   errors on behalf of CALLER.  */
 bool
-m4_debug_set_output (m4 *context, const char *macro, const char *name)
+m4_debug_set_output (m4 *context, const m4_call_info *caller, const char *name)
 {
   FILE *fp;
 
   assert (context);
 
   if (name == NULL)
-    set_debug_file (context, macro, stderr);
+    set_debug_file (context, caller, stderr);
   else if (*name == '\0')
-    set_debug_file (context, macro, NULL);
+    set_debug_file (context, caller, NULL);
   else
     {
       fp = fopen (name, "a");
@@ -191,9 +191,9 @@ m4_debug_set_output (m4 *context, const char *macro, const char *name)
 	return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	m4_warn (context, errno, macro,
+	m4_warn (context, errno, caller,
 		 _("cannot protect debug file across forks"));
-      set_debug_file (context, macro, fp);
+      set_debug_file (context, caller, fp);
     }
   return true;
 }

@@ -28,7 +28,7 @@
 
 /* Parse STR as an integer, reporting warnings on behalf of ME.  */
 static int
-arg_int (struct m4 *context, const char *me, const char *str)
+arg_int (struct m4 *context, const m4_call_info *me, const char *str)
 {
   char *endp;
   long value;
@@ -53,7 +53,7 @@ arg_int (struct m4 *context, const char *me, const char *str)
 
 /* Parse STR as a long, reporting warnings on behalf of ME.  */
 static long
-arg_long (struct m4 *context, const char *me, const char *str)
+arg_long (struct m4 *context, const m4_call_info *me, const char *str)
 {
   char *endp;
   long value;
@@ -78,7 +78,7 @@ arg_long (struct m4 *context, const char *me, const char *str)
 
 /* Parse STR as a double, reporting warnings on behalf of ME.  */
 static double
-arg_double (struct m4 *context, const char *me, const char *str)
+arg_double (struct m4 *context, const m4_call_info *me, const char *str)
 {
   char *endp;
   double value;
@@ -121,7 +121,7 @@ arg_double (struct m4 *context, const char *me, const char *str)
 static void
 format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 {
-  const char *me = M4ARG (0);		/* Macro name.  */
+  const m4_call_info *me = m4_arg_info (argv);
   const char *f;			/* Format control string.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */

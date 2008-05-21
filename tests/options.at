@@ -248,6 +248,20 @@ AT_CHECK_M4([in -Q], [0], [[__line__
 
 AT_CLEANUP
 
+## -------------- ##
+## unknown option ##
+## -------------- ##
+
+AT_SETUP([unknown option])
+
+AT_CHECK_M4([--unknown], [1], [], [stderr])
+AT_CHECK([sed 's/Try.*help/Try `m4 --help/' stderr], [0],
+[[m4: unrecognized option `--unknown'
+Try `m4 --help' for more information.
+]])
+
+AT_CLEANUP
+
 
 ## --------- ##
 ## debugfile ##
@@ -787,6 +801,16 @@ AT_CHECK_M4([in --syncoutput=1 in --syncoutput in], [0],
 hi
 hi
 ]])
+
+dnl test parse error
+AT_CHECK_M4([--syncoutput=huh in], [0],
+[[hi
+]], [[m4: Warning: --syncoutput: unknown directive `huh'
+]])
+
+AT_CLEANUP
+
+AT_SETUP([--syncoutput and diversions])
 
 dnl synclines should always start at the beginning of a line.
 dnl this does not (yet) happen reliably when diversions do not

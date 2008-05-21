@@ -1,5 +1,48 @@
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
+	Stage 24a: Use full call context in error reporting.
+	Replace const char *macro_name with const m4_call_info *call, so
+	that the next patch can pass the length of macro_name with
+	embedded NUL.  Simplifies handling of global state.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_error, m4_warn): Change parameter type.
+	(m4_error_at_line, m4_warn_at_line): Delete.
+	(m4_debug_set_output, m4_skip_line, m4_bad_argc, m4_numeric_arg)
+	(m4_parse_truth_arg, m4_symbol_value_lookup): Adjust all clients.
+	* m4/m4private.h (m4__next_token): Likewise.
+	* m4/utility.c (m4_verror_at_line): Alter parameter, and use
+	caller's location if caller is provided.
+	(m4_error, m4_warn): Change parameter type.
+	(m4_error_at_line, m4_warn_at_line): Delete.
+	(m4_bad_argc, m4_numeric_arg, m4_parse_truth_arg)
+	(m4_symbol_value_lookup): Adjust all callers.
+	* m4/debug.c (set_debug_file, m4_debug_set_output): Likewise.
+	* m4/input.c (m4_skip_line, m4__next_token): Likewise.
+	* m4/macro.c (expand_argument, collect_arguments, m4_macro_call)
+	(process_macro): Likewise.
+	* modules/m4.h (m4_make_temp_func): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	* modules/format.c (arg_int, arg_long, arg_double, format):
+	Likewise.
+	* modules/gnu.c (builtin, changeresyntax, changesyntax, debugfile)
+	(debuglen, debugmode, esyscmd, indir, mkdtemp, patsubst, regexp)
+	(renamesyms, syncoutput, regexp_compile, substitute)
+	(regexp_substitute, m4_resyntax_encode_safe): Likewise.
+	* modules/m4.c (define, undefine, pushdef, popdef, ifdef, ifelse)
+	(m4_dump_symbols, defn, syscmd, incr, decr, divert, undivert, dnl)
+	(include, maketemp, mkstemp, m4exit, traceon, traceoff, substr):
+	Likewise.
+	* modules/stdlib.c (setenv, getpwuid, srand): Likewise.
+	* modules/time.c (ctime, gmtime, localtime, mktime, strftime):
+	Likewise.
+	* tests/options.at (--syncoutput): Add test for invalid
+	command-line argument.  Split xfailed portion...
+	(--syncoutput and diversions): ...into new test.
+	(unknown option): New test.
+	* tests/freeze.at (reloading unknown builtin): Update expected
+	output.
+
 	Adjust to recent gnulib change.
 	* configure.ac (AB_INIT): Delete, now that gnulib does this.
 

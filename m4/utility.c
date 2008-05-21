@@ -41,8 +41,8 @@ static const char *skip_space (m4 *, const char *);
    Return true if the macro is guaranteed to expand to the empty
    string, false otherwise.  */
 bool
-m4_bad_argc (m4 *context, int argc, const char *caller, size_t min, size_t max,
-	     bool side_effect)
+m4_bad_argc (m4 *context, int argc, const m4_call_info *caller, size_t min,
+	     size_t max, bool side_effect)
 {
   if (argc - 1 < min)
     {
@@ -74,7 +74,8 @@ skip_space (m4 *context, const char *arg)
 /* FIXME: Convert this to use gnulib's xstrtoimax, xstrtoumax.
    Otherwise, we are arbitrarily limiting integer values.  */
 bool
-m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
+m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
+		int *valuep)
 {
   char *endp;
 
@@ -96,10 +97,10 @@ m4_numeric_arg (m4 *context, const char *caller, const char *arg, int *valuep)
 }
 
 /* Parse ARG as a truth value.  If unrecognized, issue a warning on
-   behalf of ME and return PREVIOUS; otherwise return the parsed
+   behalf of CALLER and return PREVIOUS; otherwise return the parsed
    value.  */
 bool
-m4_parse_truth_arg (m4 *context, const char *arg, const char *me,
+m4_parse_truth_arg (m4 *context, const m4_call_info *caller, const char *arg,
 		    bool previous)
 {
   /* 0, no, off, blank... */
@@ -115,17 +116,17 @@ m4_parse_truth_arg (m4 *context, const char *arg, const char *me,
       || ((arg[0] == 'o' || arg[0] == 'O')
 	  && (arg[1] == 'n' || arg[1] == 'N')))
     return true;
-  m4_warn (context, 0, me, _("unknown directive `%s'"), arg);
+  m4_warn (context, 0, caller, _("unknown directive `%s'"), arg);
   return previous;
 }
 
 /* Helper method to look up a symbol table entry given an argument.
-   Warn on behalf of CALLER if VALUE is not a text argument, or if
+   Warn on behalf of ARGV if VALUE is not a text argument, or if
    MUST_EXIST and no macro exists by the name in VALUE.  Return the
    result of the lookup, or NULL.  */
 m4_symbol *
-m4_symbol_value_lookup (m4 *context, const char *caller,
-			m4_macro_args *argv, size_t i, bool must_exist)
+m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
+			bool must_exist)
 {
   m4_symbol *result = NULL;
   if (m4_is_arg_text (argv, i))
@@ -133,26 +134,30 @@ m4_symbol_value_lookup (m4 *context, const char *caller,
       const char *name = M4ARG (i);
       result = m4_symbol_lookup (M4SYMTAB, name);
       if (must_exist && !result)
-	m4_warn (context, 0, caller, _("undefined macro `%s'"), name);
+	m4_warn (context, 0, argv->info, _("undefined macro `%s'"), name);
     }
   else
-    m4_warn (context, 0, caller, _("invalid macro name ignored"));
+    m4_warn (context, 0, argv->info, _("invalid macro name ignored"));
   return result;
 }
 
 /* Helper for all error reporting.  Report message based on FORMAT and
-   ARGS, on behalf of MACRO, at the optional location FILE and LINE.
-   If ERRNUM, decode the errno value as part of the message.  If
-   STATUS, exit immediately with that status.  If WARN, prepend
-   'Warning: '.  */
+   ARGS, on behalf of CALLER (if any), otherwise at the global
+   position in CONTEXT.  If ERRNUM, decode the errno value as part of
+   the message.  If STATUS, exit immediately with that status.  If
+   WARN, prepend 'Warning: '.  */
 static void
 m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
-		   const char *file, int line, const char *macro,
-		   const char *format, va_list args)
+		   const m4_call_info *caller, const char *format,
+		   va_list args)
 {
   char *full = NULL;
   char *safe_macro = NULL;
+  const char *macro = caller ? caller->name : NULL;
+  const char *file = caller ? caller->file : m4_get_current_file (context);
+  int line = caller ? caller->line : m4_get_current_line (context);
 
+  assert (file || !line);
   /* Sanitize MACRO, since we are turning around and using it in a
      format string.  The allocation is overly conservative, but
      problematic macro names only occur via indir or changesyntax.  */
@@ -192,43 +197,19 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
    any other arguments, and the program name and location (if we are
    currently parsing an input file) are automatically prepended.  If
    ERRNUM is non-zero, include strerror output in the message.  If
-   MACRO, prepend the message with the macro where the message
+   CALLER, prepend the message with the macro where the message
    occurred.  If STATUS is non-zero, or if errors are fatal, call exit
    immediately; otherwise, remember that an error occurred so that m4
    cannot exit with success later on.*/
 void
-m4_error (m4 *context, int status, int errnum, const char *macro,
+m4_error (m4 *context, int status, int errnum, const m4_call_info *caller,
 	  const char *format, ...)
 {
   va_list args;
-  int line = m4_get_current_line (context);
-  assert (m4_get_current_file (context) || !line);
   va_start (args, format);
   if (status == EXIT_SUCCESS && m4_get_warnings_exit_opt (context))
     status = EXIT_FAILURE;
-  m4_verror_at_line (context, false, status, errnum,
-		     m4_get_current_file (context), line, macro, format, args);
-  va_end (args);
-}
-
-/* Issue an error.  The message is printf-style, based on FORMAT and
-   any other arguments, and the program name and location (from FILE
-   and LINE) are automatically prepended.  If ERRNUM is non-zero,
-   include strerror output in the message.  If STATUS is non-zero, or
-   if errors are fatal, call exit immediately; otherwise, remember
-   that an error occurred so that m4 cannot exit with success later
-   on.  If MACRO, prepend the message with the macro where the message
-   occurred.  */
-void
-m4_error_at_line (m4 *context, int status, int errnum, const char *file,
-		  int line, const char *macro, const char *format, ...)
-{
-  va_list args;
-  va_start (args, format);
-  if (status == EXIT_SUCCESS && m4_get_warnings_exit_opt (context))
-    status = EXIT_FAILURE;
-  m4_verror_at_line (context, false, status, errnum, file, line, macro,
-		     format, args);
+  m4_verror_at_line (context, false, status, errnum, caller, format, args);
   va_end (args);
 }
 
@@ -236,39 +217,13 @@ m4_error_at_line (m4 *context, int status, int errnum, const char *file,
    printf-style, based on FORMAT and any other arguments, and the
    program name, location (if we are currently parsing an input file),
    and "Warning:" are automatically prepended.  If ERRNUM is non-zero,
-   include strerror output in the message.  If MACRO, prepend the
+   include strerror output in the message.  If CALLER, prepend the
    message with the macro where the message occurred.  If warnings are
    fatal, call exit immediately, otherwise exit status is
    unchanged.  */
 void
-m4_warn (m4 *context, int errnum, const char *macro, const char *format, ...)
-{
-  if (!m4_get_suppress_warnings_opt (context))
-    {
-      va_list args;
-      int status = EXIT_SUCCESS;
-      int line = m4_get_current_line (context);
-      assert (m4_get_current_file (context) || !line);
-      va_start (args, format);
-      if (m4_get_warnings_exit_opt (context))
-	status = EXIT_FAILURE;
-      m4_verror_at_line (context, true, status, errnum,
-			 m4_get_current_file (context), line, macro, format,
-			 args);
-      va_end (args);
-    }
-}
-
-/* Issue a warning, if they are not being suppressed.  The message is
-   printf-style, based on FORMAT and any other arguments, and the
-   program name, location (from FILE and LINE), and "Warning:" are
-   automatically prepended.  If ERRNUM is non-zero, include strerror
-   output in the message.  If MACRO, prepend the message with the
-   macro where the message occurred.  If warnings are fatal, call exit
-   immediately, otherwise exit status is unchanged.  */
-void
-m4_warn_at_line (m4 *context, int errnum, const char *file, int line,
-		 const char *macro, const char *format, ...)
+m4_warn (m4 *context, int errnum, const m4_call_info *caller,
+	 const char *format, ...)
 {
   if (!m4_get_suppress_warnings_opt (context))
     {
@@ -277,12 +232,10 @@ m4_warn_at_line (m4 *context, int errnum, const char *file, int line,
       va_start (args, format);
       if (m4_get_warnings_exit_opt (context))
 	status = EXIT_FAILURE;
-      m4_verror_at_line (context, true, status, errnum, file, line, macro,
-			 format, args);
+      m4_verror_at_line (context, true, status, errnum, caller, format, args);
       va_end (args);
     }
 }
-
 
 /* Wrap the gnulib progname module, to avoid exporting a global
    variable from a library.  Retrieve the program name for use in

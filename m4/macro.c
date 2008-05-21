@@ -128,7 +128,7 @@ static void    expand_macro      (m4 *, const char *, size_t, m4_symbol *);
 static bool    expand_token      (m4 *, m4_obstack *, m4__token_type,
 				  m4_symbol_value *, int, bool);
 static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
-				  const char *);
+				  const m4_call_info *);
 static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
 				  m4_macro_args *);
 
@@ -290,12 +290,11 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
    Report errors on behalf of CALLER.  */
 static bool
 expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
-		 const char *caller)
+		 const m4_call_info *caller)
 {
   m4__token_type type;
   m4_symbol_value token;
   int paren_level = 0;
-  const char *file = m4_get_current_file (context);
   int line = m4_get_current_line (context);
   size_t len;
   unsigned int age = m4__quote_age (M4SYNTAX);
@@ -362,8 +361,8 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	  break;
 
 	case M4_TOKEN_EOF:
-	  m4_error_at_line (context, EXIT_FAILURE, 0, file, line, caller,
-			    _("end of file in argument list"));
+	  m4_error (context, EXIT_FAILURE, 0, caller,
+		    _("end of file in argument list"));
 	  break;
 
 	case M4_TOKEN_WORD:
@@ -584,12 +583,12 @@ collect_arguments (m4 *context, m4_call_info *info, m4_symbol *symbol,
   if (m4__next_token_is_open (context))
     {
       /* Gobble parenthesis, then collect arguments.  */
-      m4__next_token (context, &token, NULL, NULL, false, info->name);
+      m4__next_token (context, &token, NULL, NULL, false, info);
       do
 	{
 	  tokenp = (m4_symbol_value *) obstack_alloc (arguments,
 						      sizeof *tokenp);
-	  more_args = expand_argument (context, arguments, tokenp, info->name);
+	  more_args = expand_argument (context, arguments, tokenp, info);
 
 	  if ((m4_is_symbol_value_text (tokenp)
 	       && !m4_get_symbol_value_len (tokenp))
@@ -661,7 +660,7 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
 
   if (argv->info->trace)
     trace_start = trace_pre (context, argv);
-  if (!m4_bad_argc (context, argv->argc, argv->argv0,
+  if (!m4_bad_argc (context, argv->argc, argv->info,
 		    VALUE_MIN_ARGS (value), VALUE_MAX_ARGS (value),
 		    BIT_TEST (VALUE_FLAGS (value),
 			      VALUE_SIDE_EFFECT_ARGS_BIT)))
@@ -672,7 +671,7 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
 	m4_get_symbol_value_func (value) (context, expansion, argv->argc,
 					  argv);
       else if (m4_is_symbol_value_placeholder (value))
-	m4_warn (context, 0, M4ARG (0),
+	m4_warn (context, 0, argv->info,
 		 _("builtin `%s' requested by frozen file not found"),
 		 m4_get_symbol_value_placeholder (value));
       else
@@ -785,9 +784,8 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 		}
 	      else
 		{
-		  m4_error (context, 0, 0, M4ARG (0),
-			    _("unterminated parameter reference: %s"),
-			    key);
+		  m4_error (context, 0, 0, argv->info,
+			    _("unterminated parameter reference: %s"), key);
 		}
 
 	      len -= endp - text;

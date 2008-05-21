@@ -1334,30 +1334,18 @@ unget_input (int ch)
 }
 
 /* skip_line () simply discards all immediately following characters,
-   up to the first newline.  It is only used from m4_dnl ().  NAME is
-   the spelling of argv[0], for use in any warning message.  */
+   up to the first newline.  It is only used from m4_dnl ().  Report
+   errors on behalf of CALLER.  */
 void
-m4_skip_line (m4 *context, const char *name)
+m4_skip_line (m4 *context, const m4_call_info *caller)
 {
   int ch;
-  const char *file = m4_get_current_file (context);
-  int line = m4_get_current_line (context);
 
   while ((ch = next_char (context, false, false, false)) != CHAR_EOF
 	 && ch != '\n')
     ;
   if (ch == CHAR_EOF)
-    /* current_file changed; use the previous value we cached.  */
-    m4_warn_at_line (context, 0, file, line, name,
-		     _("end of file treated as newline"));
-  /* On the rare occasion that dnl crosses include file boundaries
-     (either the input file did not end in a newline, or changesyntax
-     was used), calling next_char can update current_file and
-     current_line, and that update will be undone as we return to
-     expand_macro.  This tells next_char () to restore the location.  */
-  if (file != m4_get_current_file (context)
-      || line != m4_get_current_line (context))
-    input_change = true;
+    m4_warn (context, 0, caller, _("end of file treated as newline"));
 }
 
 
@@ -1521,13 +1509,12 @@ m4_input_exit (void)
    m4__next_token () is called.  */
 m4__token_type
 m4__next_token (m4 *context, m4_symbol_value *token, int *line,
-		m4_obstack *obs, bool allow_argv, const char *caller)
+		m4_obstack *obs, bool allow_argv, const m4_call_info *caller)
 {
   int ch;
   int quote_level;
   m4__token_type type;
-  const char *file;
-  int dummy;
+  const char *file = NULL;
   size_t len;
   /* The obstack where token data is stored.  Generally token_stack,
      for tokens where argument collection might not use the literal
@@ -1536,8 +1523,6 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
   m4_obstack *obs_safe = &token_stack;
 
   assert (next == NULL);
-  if (!line)
-    line = &dummy;
   memset (token, '\0', sizeof *token);
   do {
     obstack_free (&token_stack, token_bottom);
@@ -1545,6 +1530,11 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     /* Must consume an input character.  */
     ch = next_char (context, false, allow_argv && m4__quote_age (M4SYNTAX),
 		    false);
+    if (line)
+      {
+	*line = m4_get_current_line (context);
+	file = m4_get_current_file (context);
+      }
     if (ch == CHAR_EOF)			/* EOF */
       {
 #ifdef DEBUG_INPUT
@@ -1569,9 +1559,6 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 #endif
 	return M4_TOKEN_ARGV;
       }
-
-    file = m4_get_current_file (context);
-    *line = m4_get_current_line (context);
 
     if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
       {					/* ESCAPED WORD */
@@ -1607,8 +1594,16 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), false,
 			    false);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-				_("end of file in string"));
+	      {
+		if (!caller)
+		  {
+		    assert (line);
+		    m4_set_current_file (context, file);
+		    m4_set_current_line (context, *line);
+		  }
+		m4_error (context, EXIT_FAILURE, 0, caller,
+			  _("end of file in string"));
+	      }
 	    if (ch == CHAR_BUILTIN)
 	      init_builtin_token (context, obs, obs ? token : NULL);
 	    else if (ch == CHAR_QUOTE)
@@ -1640,8 +1635,16 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  {
 	    ch = next_char (context, false, false, false);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-				_("end of file in string"));
+	      {
+		if (!caller)
+		  {
+		    assert (line);
+		    m4_set_current_file (context, file);
+		    m4_set_current_line (context, *line);
+		  }
+		m4_error (context, EXIT_FAILURE, 0, caller,
+			  _("end of file in string"));
+	      }
 	    if (ch == CHAR_BUILTIN)
 	      init_builtin_token (context, obs, obs ? token : NULL);
 	    else if (MATCH (context, ch, context->syntax->quote.str2, true))
@@ -1670,8 +1673,16 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  {
 	    ch = next_char (context, false, false, false);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-				_("end of file in comment"));
+	      {
+		if (!caller)
+		  {
+		    assert (line);
+		    m4_set_current_file (context, file);
+		    m4_set_current_line (context, *line);
+		  }
+		m4_error (context, EXIT_FAILURE, 0, caller,
+			  _("end of file in comment"));
+	      }
 	    if (ch == CHAR_BUILTIN)
 	      {
 		init_builtin_token (context, NULL, NULL);
@@ -1699,8 +1710,16 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  {
 	    ch = next_char (context, false, false, false);
 	    if (ch == CHAR_EOF)
-	      m4_error_at_line (context, EXIT_FAILURE, 0, file, *line, caller,
-				_("end of file in comment"));
+	      {
+		if (!caller)
+		  {
+		    assert (line);
+		    m4_set_current_file (context, file);
+		    m4_set_current_line (context, *line);
+		  }
+		m4_error (context, EXIT_FAILURE, 0, caller,
+			  _("end of file in comment"));
+	      }
 	    if (ch == CHAR_BUILTIN)
 	      {
 		init_builtin_token (context, NULL, NULL);

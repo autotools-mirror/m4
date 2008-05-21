@@ -159,24 +159,19 @@ struct m4_string_pair
    `m4_macro_args *argv' are in scope.  */
 #define M4ARGLEN(i) m4_arg_len (context, argv, i)
 
-extern bool	m4_bad_argc	   (m4 *, int, const char *, size_t, size_t,
+extern bool	m4_bad_argc	   (m4 *, int, const m4_call_info *, size_t,
+				    size_t, bool);
+extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
+				    int *);
+extern bool	m4_parse_truth_arg (m4 *, const m4_call_info *, const char *,
 				    bool);
-extern bool	m4_numeric_arg	   (m4 *, const char *, const char *, int *);
-extern bool	m4_parse_truth_arg (m4 *, const char *, const char *, bool);
-extern m4_symbol *m4_symbol_value_lookup (m4 *, const char *,
-					  m4_macro_args *, size_t, bool);
+extern m4_symbol *m4_symbol_value_lookup (m4 *, m4_macro_args *, size_t, bool);
 
 /* Error handling.  */
-extern void m4_error (m4 *, int, int, const char *, const char *, ...)
+extern void m4_error (m4 *, int, int, const m4_call_info *, const char *, ...)
   M4_GNUC_PRINTF (5, 6);
-extern void m4_error_at_line (m4 *, int, int, const char *, int,
-			      const char *, const char *, ...)
-  M4_GNUC_PRINTF (7, 8);
-extern void m4_warn  (m4 *, int, const char *, const char *, ...)
+extern void m4_warn  (m4 *, int, const m4_call_info *, const char *, ...)
   M4_GNUC_PRINTF (4, 5);
-extern void m4_warn_at_line  (m4 *, int, const char *, int, const char *,
-			      const char *, ...)
-  M4_GNUC_PRINTF (6, 7);
 
 extern const char *	m4_get_program_name (void);
 extern void		m4_set_program_name (const char *);
@@ -409,7 +404,8 @@ enum {
 #define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 
 extern int	m4_debug_decode		(m4 *, int, const char *);
-extern bool	m4_debug_set_output	(m4 *, const char *, const char *);
+extern bool	m4_debug_set_output	(m4 *, const m4_call_info *,
+					 const char *);
 extern void	m4_debug_message_prefix (m4 *);
 extern void	m4_debug_message	(m4 *, int, const char *, ...)
   M4_GNUC_PRINTF (3, 4);
@@ -491,7 +487,7 @@ extern int	m4_set_syntax	(m4_syntax_table*, char, char, const char*);
 
 extern	void	m4_input_init	(m4 *context);
 extern	void	m4_input_exit	(void);
-extern	void	m4_skip_line	(m4 *context, const char *);
+extern	void	m4_skip_line	(m4 *context, const m4_call_info *);
 
 /* push back input */
 

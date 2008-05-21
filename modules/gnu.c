@@ -130,7 +130,7 @@ static m4_pattern_buffer regex_cache[REGEX_CACHE_SIZE];
    CALLER, and return NULL.  */
 
 static m4_pattern_buffer *
-regexp_compile (m4 *context, const char *caller, const char *regexp,
+regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
 		size_t len, int resyntax)
 {
   /* regex_cache is guaranteed to start life 0-initialized, which
@@ -231,7 +231,7 @@ regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
    on behalf of CALLER.  BUF may be NULL for the empty regex.  */
 
 static void
-substitute (m4 *context, m4_obstack *obs, const char *caller,
+substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 	    const char *victim, const char *repl, m4_pattern_buffer *buf)
 {
   int ch;
@@ -285,7 +285,7 @@ substitute (m4 *context, m4_obstack *obs, const char *caller,
    copying the input if no changes are made.  */
 
 static bool
-regexp_substitute (m4 *context, m4_obstack *obs, const char *caller,
+regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 		   const char *victim, size_t len, const char *regexp,
 		   m4_pattern_buffer *buf, const char *replace,
 		   bool optimize)
@@ -402,7 +402,7 @@ M4BUILTIN_HANDLER (__program__)
  **/
 M4BUILTIN_HANDLER (builtin)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   const char *name;
   m4_symbol_value *value;
 
@@ -440,27 +440,27 @@ M4BUILTIN_HANDLER (builtin)
       else
 	{
 	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-	  if (!m4_bad_argc (context, argc - 1, name,
+	  m4_macro_args *new_argv;
+	  bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
+	  new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
+				       flatten, false);
+	  if (!m4_bad_argc (context, argc - 1, m4_arg_info (new_argv),
 			    bp->min_args, bp->max_args,
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
-	    {
-	      m4_macro_args *new_argv;
-	      bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
-	      new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
-					   flatten, false);
-	      bp->func (context, obs, argc - 1, new_argv);
-	    }
+	    bp->func (context, obs, argc - 1, new_argv);
 	  free (value);
 	}
     }
 }
 
 
-/* Change the current regexp syntax.  Currently this affects the
-   builtins: `patsubst', `regexp' and `renamesyms'.  */
+/* Change the current regexp syntax to SPEC, or report failure on
+   behalf of CALLER.  Currently this affects the builtins: `patsubst',
+   `regexp' and `renamesyms'.  */
 
 static int
-m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
+m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
+			 const char *spec)
 {
   int resyntax = m4_regexp_syntax_encode (spec);
 
@@ -476,7 +476,8 @@ m4_resyntax_encode_safe (m4 *context, const char *caller, const char *spec)
  **/
 M4BUILTIN_HANDLER (changeresyntax)
 {
-  int resyntax = m4_resyntax_encode_safe (context, M4ARG (0), M4ARG (1));
+  int resyntax = m4_resyntax_encode_safe (context, m4_arg_info (argv),
+					  M4ARG (1));
 
   if (resyntax >= 0)
     m4_set_regexp_syntax_opt (context, resyntax);
@@ -493,7 +494,7 @@ M4BUILTIN_HANDLER (changeresyntax)
  **/
 M4BUILTIN_HANDLER (changesyntax)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   M4_MODULE_IMPORT (m4, m4_expand_ranges);
 
   if (m4_expand_ranges)
@@ -536,7 +537,7 @@ M4BUILTIN_HANDLER (changesyntax)
  **/
 M4BUILTIN_HANDLER (debugfile)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
 
   if (argc == 1)
     m4_debug_set_output (context, me, NULL);
@@ -558,7 +559,7 @@ M4BUILTIN_HANDLER (debuglen)
 {
   int i;
   size_t s;
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &i))
     return;
   /* FIXME - make m4_numeric_arg more powerful - we want to accept
      suffixes, and limit the result to size_t.  */
@@ -584,8 +585,8 @@ M4BUILTIN_HANDLER (debugmode)
     {
       new_debug_level = m4_debug_decode (context, debug_level, M4ARG (1));
       if (new_debug_level < 0)
-	m4_error (context, 0, 0, M4ARG (0), _("bad debug flags: `%s'"),
-		  M4ARG (1));
+	m4_error (context, 0, 0, m4_arg_info (argv),
+		  _("bad debug flags: `%s'"), M4ARG (1));
       else
 	m4_set_debug_level_opt (context, new_debug_level);
     }
@@ -601,7 +602,7 @@ M4BUILTIN_HANDLER (debugmode)
 
 M4BUILTIN_HANDLER (esyscmd)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   M4_MODULE_IMPORT (m4, m4_set_sysval);
   M4_MODULE_IMPORT (m4, m4_sysval_flush);
 
@@ -667,7 +668,7 @@ M4BUILTIN_HANDLER (format)
  **/
 M4BUILTIN_HANDLER (indir)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   if (!m4_is_arg_text (argv, 1))
     m4_warn (context, 0, me, _("invalid macro name ignored"));
   else
@@ -701,7 +702,8 @@ M4BUILTIN_HANDLER (mkdtemp)
   M4_MODULE_IMPORT (m4, m4_make_temp);
 
   if (m4_make_temp)
-    m4_make_temp (context, obs, M4ARG (0), M4ARG (1), M4ARGLEN (1), true);
+    m4_make_temp (context, obs, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		  true);
   else
     assert (!"Unable to import from m4 module");
 }
@@ -719,13 +721,12 @@ M4BUILTIN_HANDLER (mkdtemp)
  **/
 M4BUILTIN_HANDLER (patsubst)
 {
-  const char *me;		/* name of this macro */
+  const m4_call_info *me = m4_arg_info (argv);
   const char *pattern;		/* regular expression */
   const char *replace;		/* replacement */
   m4_pattern_buffer *buf;	/* compiled regular expression */
   int resyntax;
 
-  me = M4ARG (0);
   pattern = M4ARG (2);
   replace = M4ARG (3);
 
@@ -766,7 +767,7 @@ M4BUILTIN_HANDLER (patsubst)
  **/
 M4BUILTIN_HANDLER (regexp)
 {
-  const char *me;		/* name of this macro */
+  const m4_call_info *me = m4_arg_info (argv);
   const char *victim;		/* string to search */
   const char *pattern;		/* regular expression */
   const char *replace;		/* optional replacement string */
@@ -775,7 +776,6 @@ M4BUILTIN_HANDLER (regexp)
   size_t len;			/* length of first argument */
   int resyntax;
 
-  me = M4ARG (0);
   pattern = M4ARG (2);
   replace = M4ARG (3);
   resyntax = m4_get_regexp_syntax_opt (context);
@@ -850,7 +850,7 @@ M4BUILTIN_HANDLER (renamesyms)
 
   if (m4_dump_symbols)
     {
-      const char *me;		/* name of this macro */
+      const m4_call_info *me = m4_arg_info (argv);
       const char *regexp;	/* regular expression string */
       const char *replace;	/* replacement expression string */
 
@@ -860,7 +860,6 @@ M4BUILTIN_HANDLER (renamesyms)
 
       int resyntax;
 
-      me      = M4ARG (0);
       regexp  = M4ARG (1);
       replace = M4ARG (2);
 
@@ -937,6 +936,6 @@ M4BUILTIN_HANDLER (m4symbols)
 M4BUILTIN_HANDLER (syncoutput)
 {
   bool value = m4_get_syncoutput_opt (context);
-  value = m4_parse_truth_arg (context, M4ARG (1), M4ARG (0), value);
+  value = m4_parse_truth_arg (context, m4_arg_info (argv), M4ARG (1), value);
   m4_set_syncoutput_opt (context, value);
 }

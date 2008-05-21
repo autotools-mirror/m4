@@ -564,7 +564,8 @@ extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
 extern	m4_obstack	*m4__push_wrapup_init (m4 *, m4__symbol_chain ***);
 extern	void		m4__push_wrapup_finish (void);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
-					m4_obstack *, bool, const char *);
+					m4_obstack *, bool,
+					const m4_call_info *);
 extern	bool		m4__next_token_is_open (m4 *);
 
 /* Fast macro versions of macro argv accessor functions,

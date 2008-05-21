@@ -104,7 +104,7 @@ M4BUILTIN_HANDLER (ctime)
 
   if (argc == 2)
     {
-      m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i);
+      m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &i);
       t = i;
     }
   else
@@ -152,7 +152,7 @@ M4BUILTIN_HANDLER (gmtime)
   time_t t;
   int i;
 
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &i))
     return;
 
   t = i;
@@ -167,7 +167,7 @@ M4BUILTIN_HANDLER (localtime)
   time_t t;
   int i;
 
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (1), &i))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &i))
     return;
 
   t = i;
@@ -180,7 +180,7 @@ M4BUILTIN_HANDLER (localtime)
  **/
 M4BUILTIN_HANDLER (mktime)
 {
-  const char *me = M4ARG (0);
+  const m4_call_info *me = m4_arg_info (argv);
   struct tm tm;
   time_t t;
 
@@ -216,7 +216,7 @@ M4BUILTIN_HANDLER (strftime)
   char *buf;
   int l;
 
-  if (!m4_numeric_arg (context, M4ARG (0), M4ARG (2), &l))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (2), &l))
     return;
 
   t = l;

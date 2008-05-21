@@ -748,9 +748,11 @@ main (int argc, char *const *argv, char *const *envp)
 	case SYNCOUTPUT_OPTION:
 	  {
 	    bool previous = m4_get_syncoutput_opt (context);
+	    m4_call_info info = {0};
+	    info.name = "--syncoutput";
+	    info.name_len = strlen (info.name);
 	    m4_set_syncoutput_opt (context,
-				   m4_parse_truth_arg (context, arg,
-						       "--syncoutput",
+				   m4_parse_truth_arg (context, &info, arg,
 						       previous));
 	  }
 	  break;
