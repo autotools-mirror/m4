@@ -56,9 +56,10 @@ produce_frozen_state (const char *name)
   symbol *sym;
   const builtin *bp;
 
-  if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
+  file = fopen (name, O_BINARY ? "wb" : "w");
+  if (!file)
     {
-      M4ERROR ((warning_status, errno, "%s", name));
+      M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
       return;
     }
 
