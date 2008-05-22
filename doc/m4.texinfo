@@ -6993,6 +6993,16 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 traceon(`undefined')dnl
 @end example
+
+@c Make sure freezing is successful.
+
+@comment options: -F /none/such
+@comment status: 1
+@example
+$ @kbd{m4 -F /none/such}
+^D
+@error{}m4: cannot open /none/such: No such file or directory
+@end example
 @end ignore
 
 When an @code{m4} run is to be frozen, the automatic undiversion

@@ -1,3 +1,11 @@
+2008-05-22  Eric Blake  <ebb9@byu.net>
+
+	Don't allow failure to freeze give exit status of 0.
+	* doc/m4.texinfo (Using frozen files): Test the fix from
+	2007-11-22.
+	* THANKS: Update.
+	Reported by Jean-Charles Longuet.
+
 2008-05-09  Eric Blake  <ebb9@byu.net>
 
 	Improve error message when frozen file is invalid.
