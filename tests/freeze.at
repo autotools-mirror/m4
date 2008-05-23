@@ -51,6 +51,25 @@ AT_CLEANUP
 
 AT_BANNER([Freezing state.])
 
+## ---------------- ##
+## freezing failure ##
+## ---------------- ##
+
+AT_SETUP([freezing failure])
+AT_KEYWORDS([frozen])
+
+AT_CHECK_M4([-F /none/such], [1], [],
+[[m4: cannot open `/none/such': No such file or directory
+]])
+
+if test -w /dev/full && test -c /dev/full ; then
+  AT_CHECK_M4([-F /dev/full], [1], [],
+[[m4: unable to create frozen state: No space left on device
+]])
+fi
+AT_CLEANUP
+
+
 ## --------------- ##
 ## large diversion ##
 ## --------------- ##

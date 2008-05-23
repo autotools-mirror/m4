@@ -1,3 +1,12 @@
+2008-05-23  Eric Blake  <ebb9@byu.net>
+
+	Improve handling of frozen file errors.
+	* src/freeze.c (produce_frozen_state): Detect write failures.
+	(reload_frozen_state): Use close_stream.
+	* tests/freeze.at (freezing failure): New test.
+	* THANKS: Update.
+	Reported by Jean-Charles Longuet.
+
 2008-05-19  Eric Blake  <ebb9@byu.net>
 
 	In frozen file, split consecutive strings with newline.

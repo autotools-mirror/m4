@@ -25,6 +25,7 @@
 #include "m4.h"
 
 #include "binary-io.h"
+#include "close-stream.h"
 #include "quotearg.h"
 
 static	void  produce_mem_dump		(FILE *, const char *, size_t);
@@ -326,7 +327,9 @@ produce_frozen_state (m4 *context, const char *name)
   /* All done.  */
 
   fputs ("# End of frozen state file\n", file);
-  fclose (file);
+  if (close_stream (file) != 0)
+    m4_error (context, EXIT_FAILURE, errno, NULL,
+	      _("unable to create frozen state"));
 }
 
 /* Issue a message saying that some character is an EXPECTED character. */
@@ -941,7 +944,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
   free (string[0]);
   free (string[1]);
   free (string[2]);
-  if (ferror (file) || fclose (file) != 0)
+  if (close_stream (file) != 0)
     m4_error (context, EXIT_FAILURE, errno, NULL,
 	      _("unable to read frozen state"));
   m4_set_current_file (context, NULL);
