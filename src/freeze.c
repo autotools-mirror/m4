@@ -386,9 +386,8 @@ reload_frozen_state (const char *name)
 
   free (string[0]);
   free (string[1]);
-  errno = 0;
-  if (ferror (file) || fclose (file) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
+  if (close_stream (file) != 0)
+    m4_error (EXIT_FAILURE, errno, _("unable to read frozen state"));
   current_file = NULL;
   current_line = 0;
 

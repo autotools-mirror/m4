@@ -1,3 +1,9 @@
+2008-05-23  Eric Blake  <ebb9@byu.net>
+
+	Make closing files be consistent.
+	* src/freeze.c (reload_frozen_state): Use close_stream.
+	Reported by Jean-Charles Longuet.
+
 2008-05-22  Eric Blake  <ebb9@byu.net>
 
 	Don't allow failure to freeze give exit status of 0.
