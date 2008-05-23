@@ -41,7 +41,7 @@ AT_CHECK_M4([-F frozen.m4f frozen.m4], [0], [stdout])
 mv stdout out1
 
 # Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr])
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr], [], [ ])
 
 AT_CHECK([cat out1 stdout], [0], [expout])
 
@@ -337,6 +337,40 @@ define{`a.b', `hello $1'}dnl
 [[a.b{world}
 ]])
 
+## --------- ##
+## nul bytes ##
+## --------- ##
+
+# Check that NUL can be transparently preserved over freezing.
+AT_SETUP([reloading nul])
+AT_KEYWORDS([frozen])
+
+dnl AT_DATA can't generate NUL bytes (at least, not in all shells)
+AT_CHECK([printf 'divert(1)undivert(null.out)' || exit 77],
+ [0], [stdout], [ignore])
+mv stdout frozen.m4
+echo 'divert(0)hi' > unfrozen.m4
+
+# First generate the `expout' output by running over the sources before
+# freezing.
+AT_CHECK_M4([-I "$abs_srcdir" frozen.m4 unfrozen.m4], [0], [stdout], [stderr])
+
+mv stdout expout
+mv stderr experr
+
+# Now freeze the first source file.
+AT_CHECK_M4([-F frozen.m4f -I "$abs_srcdir" frozen.m4], [0], [stdout])
+
+mv stdout out1
+
+# Now rerun the original sequence, but using the frozen file.
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr], [], [ ])
+
+AT_CHECK([cat out1 stdout], [0], [expout])
+
+AT_CLEANUP
+])
+
 ## ------- ##
 ## pushdef ##
 ## ------- ##
@@ -439,6 +473,6 @@ m4:input.m4:8: Warning: a: builtin `b' requested by frozen file not found
 m4:input.m4:10: Warning: builtin: undefined builtin `b'
 a:	<<b>>
 c:	`'
-]])
+]], [], [ ])
 
 AT_CLEANUP

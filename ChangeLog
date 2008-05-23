@@ -1,3 +1,11 @@
+2008-05-24  Eric Blake  <ebb9@byu.net>
+
+	Test NUL in frozen files.
+	* tests/testsuite.at (AT_CHECK_M4): Add parameter.
+	* tests/freeze.at (reloading nul): New test.
+	(AT_TEST_FREEZE): Inhibit -d when reloading frozen file.
+	(reloading unknown builtin): Likewise.
+
 2008-05-23  Eric Blake  <ebb9@byu.net>
 
 	Improve handling of frozen file errors.
