@@ -1,5 +1,9 @@
 2008-05-27  Eric Blake  <ebb9@byu.net>
 
+	Fix configure message nesting, broken since 2001-09-20.
+	* ltdl/m4/gmp.m4 (M4_LIB_GMP): Don't cache result; the test is
+	not expensive, and AC_MSG_WARN doesn't work in AC_CACHE_CHECK.
+
 	Support 'make dist' with BSD make.
 	* Makefile.am (TESTSUITE_AT, MAINTAINERCLEANFILES): Qualify uses
 	of the generated file tests/generated.at.

@@ -1,5 +1,6 @@
 ## -*- Autoconf -*-
-## Copyright (C) 2000, 2001, 2003, 2006, 2007 Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2006, 2007, 2008 Free Software
+## Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -16,7 +17,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# serial 9
+# serial 10
 
 m4_define([_M4_LIB_GMP],
 [AC_ARG_WITH([gmp],
@@ -64,9 +65,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#if HAVE_GMP_H
 LIBS=$M4_gmp_save_LIBS
 AC_SUBST([LIBADD_GMP])
 
-AC_CACHE_CHECK([if using GNU multiple precision arithmetic library],
-	       [M4_cv_using_lib_gmp],
-	       [_M4_LIB_GMP])
+_M4_LIB_GMP
 
 # Don't try to link in libgmp if we are not using it after the last call
 if test "$M4_cv_using_lib_gmp" = yes; then
