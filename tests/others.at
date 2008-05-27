@@ -704,7 +704,7 @@ AT_DATA([in.m4], [[syscmd(`cat <&1 >&2')dnl
 dnl this line should not be read by cat
 ]])
 AT_CHECK_M4([in.m4 >&-], [0], [], [stderr])
-AT_CHECK([sed -e 's/.*\(Bad file descriptor\)$/\1/' stderr], [0],
+AT_CHECK([[sed -e 's/.*[Bb]\(ad file descriptor\)$/B\1/' stderr]], [0],
 [[Bad file descriptor
 ]])
 

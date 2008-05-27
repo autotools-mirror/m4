@@ -359,7 +359,7 @@ TESTSUITE = $(srcdir)/tests/testsuite
 TESTSUITE_AT	= \
 		  tests/builtins.at \
 		  tests/freeze.at \
-		  tests/generated.at \
+		  $(srcdir)/tests/generated.at \
 		  tests/macros.at \
 		  tests/modules.at \
 		  tests/options.at \
@@ -369,7 +369,7 @@ TESTSUITE_AT	= \
 EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/atlocal.in \
 		  tests/generate.awk \
-		  tests/package.m4
+		  $(srcdir)/tests/package.m4
 
 # Be sure to reexport important environment variables:
 TESTS_ENVIRONMENT = MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
@@ -391,7 +391,7 @@ $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
 
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): tests/package.m4 $(TESTSUITE_AT)
+$(TESTSUITE): $(srcdir)/tests/package.m4 $(TESTSUITE_AT)
 	$(AUTOTEST) -I '$(srcdir)/tests' -o $@.tmp $@.at
 	mv $@.tmp $@
 
@@ -436,6 +436,6 @@ OTHER_FILES	= tests/iso8859.m4 tests/stackovf.test \
 		tests/null.m4 tests/null.out tests/null.err
 
 DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
-MAINTAINERCLEANFILES += tests/generated.at '$(TESTSUITE)'
+MAINTAINERCLEANFILES += $(srcdir)/tests/generated.at '$(TESTSUITE)'
 
 clean-local: clean-local-tests

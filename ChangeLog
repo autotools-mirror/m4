@@ -1,3 +1,11 @@
+2008-05-27  Eric Blake  <ebb9@byu.net>
+
+	Support 'make dist' with BSD make.
+	* Makefile.am (TESTSUITE_AT, MAINTAINERCLEANFILES): Qualify uses
+	of the generated file tests/generated.at.
+	(EXTRA_DIST, $(TESTSUITE)): Likewise for tests/package.m4.
+	* tests/others.at (stdout closed): Accomodate OpenBSD /bin/sh.
+
 2008-05-24  Eric Blake  <ebb9@byu.net>
 
 	Test NUL in frozen files.
