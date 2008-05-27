@@ -488,6 +488,11 @@ goodbye
 ]])
 
 dnl command line input file must not collide with closed stderr
+AT_DATA([in.m4], [[syscmd(`echo <&2')ifelse(sysval,
+`0', `skipping: sh cannot detect closed fds
+m4exit(`77')')
+]])
+AT_CHECK_M4([2>&-], [0], [ignore], [ignore], [in.m4])
 AT_DATA([in.m4], [[syscmd(`cat <&2')sysval
 dnl this line should not be read by cat
 ]])
@@ -514,6 +519,17 @@ AT_DATA([in.m4], [[hello world
 AT_CHECK_M4([in.m4], [0], [[hello world
 ]], [], [-])
 
+dnl Some systems reopen closed stdin to /dev/null, particularly when using
+dnl the shell script tests/m4 instead of a binary src/m4.
+AT_CHECK([cat <&- && { echo "skipping: can't detect closed stdin"; exit 77; }],
+[1], [], [stderr])
+mv stderr experr
+AT_DATA([in.m4], [[syscmd(`cat')ifelse(sysval,
+`0', `skipping: unable to start with closed stdin
+m4exit(`77')')
+]])
+AT_CHECK_M4([in.m4], [0], [ignore], [ignore], [-])
+
 dnl error when stdin must be read
 AT_CHECK_M4([], [1], [],
 [[m4:stdin:1: error reading file `stdin'
@@ -527,6 +543,8 @@ m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl error once per command-line attempt to read stdin
+AT_DATA([in.m4], [[hello world
+]])
 AT_CHECK_M4([- in.m4 -], [1], [[hello world
 ]], [[m4:stdin:1: error reading file `stdin'
 m4:stdin:1: error reading file `stdin'
@@ -534,9 +552,6 @@ m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl command line and trace file must not collide with stdin
-AT_CHECK([cat <&- && { echo "skipping: can't detect closed stdin"; exit 77; }],
-[1], [], [stderr])
-mv stderr experr
 AT_DATA([in.m4], [[syscmd(`cat')dnl
 ]])
 AT_CHECK_M4([--debugfile=trace -tdnl in.m4], [0], [], [experr], [-])
@@ -687,7 +702,7 @@ AT_DATA([hi], [[hi
 ]])
 AT_CHECK([cat hi >&- && { echo "skipping: can't detect closed stdout"; exit 77; }],
 [1], [], [stderr])
-mv stderr experr
+AT_CHECK([sed 's/Bad file number/Bad file descriptor/' < stderr > experr])
 AT_DATA([in.m4], [[syscmd(`cat hi')dnl
 ]])
 AT_CHECK_M4([>&-], [0], [], [experr], [in.m4])
@@ -700,6 +715,11 @@ divert(`-1')undivert
 AT_CHECK_M4([>&-], [0], [], [experr], [in.m4])
 
 dnl command line input file must not collide with closed stdout
+AT_DATA([in.m4], [[syscmd(`echo <&2')ifelse(sysval,
+`0', `skipping: sh cannot detect closed fds
+m4exit(`77')')
+]])
+AT_CHECK_M4([2>&-], [0], [ignore], [ignore], [in.m4])
 AT_DATA([in.m4], [[syscmd(`cat <&1 >&2')dnl
 dnl this line should not be read by cat
 ]])
@@ -717,7 +737,7 @@ AT_CLEANUP
 
 AT_SETUP([stdout full])
 AT_CHECK([test -w /dev/full && test -c /dev/full || {
-  echo "Skipping: no /dev/full support";
+  echo "skipping: no /dev/full support";
   exit 77
 }])
 

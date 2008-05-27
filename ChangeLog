@@ -1,5 +1,14 @@
 2008-05-27  Eric Blake  <ebb9@byu.net>
 
+	Fix some testsuite failures on Solaris 8.
+	* tests/builtins.at (esyscmd, syscmd): Skip tests if system(2) is
+	broken.
+	* tests/others.at (stderr closed): Likewise.  Also support Solaris
+	wording for EBADF.
+	(stdin closed): Skip test if closed stdin gets reopened.
+	(stdout closed): Support Solaris wording for EBADF.
+	* tests/testsuite.at (AT_CHECK_M4): Likewise.
+
 	Fix configure message nesting, broken since 2001-09-20.
 	* ltdl/m4/gmp.m4 (M4_LIB_GMP): Don't cache result; the test is
 	not expensive, and AC_MSG_WARN doesn't work in AC_CACHE_CHECK.

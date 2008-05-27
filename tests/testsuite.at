@@ -57,6 +57,10 @@ fi]])
 # or m4.exe:file:line: message
 # to m4:file:line
 #
+# When testing closed file descriptors, the message is platform-dependent:
+#    m4: error closing file: Bad file number
+# to m4: error closing file: Bad file descriptor
+#
 # When tracing modules, the module name is platform-dependent:
 #    m4debug: module gnu: opening file `gnu.so'
 # or m4debug: module gnu: opening file `gnu.a'
@@ -74,6 +78,7 @@ m4_case([$4], [], [], [ignore], [],
 [AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/
 	/^m4debug: module/s/opening file.*/opening file/
 	s/\(cannot open module [^:]*\):.*/\1/
+	s/Bad file number/Bad file descriptor/
     ' stderr >&2]], [0], [], [$4])])
 ])
 
