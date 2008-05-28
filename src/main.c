@@ -681,30 +681,21 @@ main (int argc, char *const *argv, char *const *envp)
 	  {
 	    m4_symbol_value *value = m4_symbol_value_create ();
 
-	    /* defn->value is read-only, so we need a copy.  */
-	    char *macro_name = xstrdup (arg);
-	    char *macro_value = strchr (macro_name, '=');
-	    size_t len = 0;
+	    const char *str = strchr (arg, '=');
+	    size_t len = str ? str - arg : strlen (arg);
 
-	    if (macro_value != NULL)
-	      {
-		*macro_value++ = '\0';
-		len = strlen (macro_value);
-	      }
-	    m4_set_symbol_value_text (value, xstrdup (macro_value
-						      ? macro_value : ""),
-				      len, 0);
+	    m4_set_symbol_value_text (value, xstrdup (str ? str + 1 : ""),
+				      str ? strlen (str + 1) : 0, 0);
 
 	    if (defn->code == 'D')
-	      m4_symbol_define (M4SYMTAB, macro_name, value);
+	      m4_symbol_define (M4SYMTAB, arg, len, value);
 	    else
-	      m4_symbol_pushdef (M4SYMTAB, macro_name, value);
-	    free (macro_name);
+	      m4_symbol_pushdef (M4SYMTAB, arg, len, value);
 	  }
 	  break;
 
 	case 'U':
-	  m4_symbol_delete (M4SYMTAB, arg);
+	  m4_symbol_delete (M4SYMTAB, arg, strlen (arg));
 	  break;
 
 	case 'd':
@@ -733,7 +724,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 't':
-	  m4_set_symbol_name_traced (M4SYMTAB, arg, true);
+	  m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), true);
 	  break;
 
 	case '\1':
@@ -741,8 +732,11 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case POPDEF_OPTION:
-	  if (m4_symbol_lookup (M4SYMTAB, arg))
-	    m4_symbol_popdef (M4SYMTAB, arg);
+	  {
+	    size_t len = strlen (arg);
+	    if (m4_symbol_lookup (M4SYMTAB, arg, len))
+	      m4_symbol_popdef (M4SYMTAB, arg, len);
+	  }
 	  break;
 
 	case SYNCOUTPUT_OPTION:
@@ -758,7 +752,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case TRACEOFF_OPTION:
-	  m4_set_symbol_name_traced (M4SYMTAB, arg, false);
+	  m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), false);
 	  break;
 
 	case UNLOAD_MODULE_OPTION:

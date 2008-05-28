@@ -101,7 +101,7 @@ typedef uintmax_t unumber;
 static void	include		(m4 *context, int argc, m4_macro_args *argv,
 				 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
-static void *	dump_symbol_CB  (m4_symbol_table *ignored, const char *name,
+static void *	dump_symbol_CB  (m4_symbol_table *, const char *, size_t,
 				 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(m4_obstack *obs, number value,
@@ -161,7 +161,7 @@ M4BUILTIN_HANDLER (define)
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
 	m4_warn (context, 0, me, _("cannot concatenate builtins"));
-      m4_symbol_define (M4SYMTAB, M4ARG (1), value);
+      m4_symbol_define (M4SYMTAB, M4ARG (1), M4ARGLEN (1), value);
     }
   else
     m4_warn (context, 0, me, _("invalid macro name ignored"));
@@ -172,7 +172,7 @@ M4BUILTIN_HANDLER (undefine)
   size_t i;
   for (i = 1; i < argc; i++)
     if (m4_symbol_value_lookup (context, argv, i, true))
-      m4_symbol_delete (M4SYMTAB, M4ARG (i));
+      m4_symbol_delete (M4SYMTAB, M4ARG (i), M4ARGLEN (i));
 }
 
 M4BUILTIN_HANDLER (pushdef)
@@ -185,7 +185,7 @@ M4BUILTIN_HANDLER (pushdef)
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
 	m4_warn (context, 0, me, _("cannot concatenate builtins"));
-      m4_symbol_pushdef (M4SYMTAB, M4ARG (1), value);
+      m4_symbol_pushdef (M4SYMTAB, M4ARG (1), M4ARGLEN (1), value);
     }
   else
     m4_warn (context, 0, me, _("invalid macro name ignored"));
@@ -196,7 +196,7 @@ M4BUILTIN_HANDLER (popdef)
   size_t i;
   for (i = 1; i < argc; i++)
     if (m4_symbol_value_lookup (context, argv, i, true))
-      m4_symbol_popdef (M4SYMTAB, M4ARG (i));
+      m4_symbol_popdef (M4SYMTAB, M4ARG (i), M4ARGLEN (i));
 }
 
 
@@ -255,16 +255,22 @@ M4BUILTIN_HANDLER (ifelse)
 static int
 dumpdef_cmp_CB (const void *s1, const void *s2)
 {
-  return strcmp (*(const char **) s1, *(const char **) s2);
+  const m4_string *a = (const m4_string *) s1;
+  const m4_string *b = (const m4_string *) s2;
+  int result = memcmp (a->str, b->str, a->len < b->len ? a->len : b->len);
+  if (!result)
+    result = a->len < b->len ? -1 : b->len < a->len;
+  return result;
 }
 
 /* The function m4_dump_symbols () is for use by "dumpdef".  It builds up a
    table of all defined symbol names.  */
 static void *
-dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
-		void *userdata)
+dump_symbol_CB (m4_symbol_table *ignored M4_GNUC_UNUSED, const char *name,
+		size_t len, m4_symbol *symbol, void *userdata)
 {
   m4_dump_symbol_data *symbol_data = (m4_dump_symbol_data *) userdata;
+  m4_string *key;
 
   assert (name);
   assert (symbol);
@@ -272,16 +278,23 @@ dump_symbol_CB (m4_symbol_table *ignored, const char *name, m4_symbol *symbol,
 
   if (symbol_data->size == 0)
     {
-      obstack_ptr_grow (symbol_data->obs, name);
+      size_t offset = obstack_object_size (symbol_data->obs);
+      obstack_blank (symbol_data->obs, sizeof *symbol_data->base);
       symbol_data->size = (obstack_room (symbol_data->obs)
-			   / sizeof (const char *));
+			   / sizeof *symbol_data->base);
+      symbol_data->base = (m4_string *) (obstack_base (symbol_data->obs)
+					 + offset);
     }
   else
     {
-      obstack_ptr_grow_fast (symbol_data->obs, name);
+      obstack_blank_fast (symbol_data->obs, sizeof *symbol_data->base);
       symbol_data->size--;
     }
 
+  /* Safe to cast away const, since m4_dump_symbols adds it back.  */
+  key = (m4_string *) symbol_data->base++;
+  key->str = (char *) name;
+  key->len = len;
   return NULL;
 }
 
@@ -292,7 +305,8 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 		 m4_macro_args *argv, bool complain)
 {
   assert (obstack_object_size (data->obs) == 0);
-  data->size = obstack_room (data->obs) / sizeof (const char *);
+  data->size = obstack_room (data->obs) / sizeof *data->base;
+  data->base = (m4_string *) obstack_base (data->obs);
 
   if (argc == 1)
     m4_symtab_apply (M4SYMTAB, false, dump_symbol_CB, data);
@@ -305,13 +319,15 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
 	{
 	  symbol = m4_symbol_value_lookup (context, argv, i, complain);
 	  if (symbol)
-	    dump_symbol_CB (NULL, M4ARG (i), symbol, data);
+	    dump_symbol_CB (NULL, M4ARG (i), M4ARGLEN (i), symbol, data);
 	}
     }
 
-  data->size = obstack_object_size (data->obs) / sizeof (const char *);
-  data->base = (const char **) obstack_finish (data->obs);
-  qsort (data->base, data->size, sizeof (const char *), dumpdef_cmp_CB);
+  data->size = obstack_object_size (data->obs) / sizeof *data->base;
+  data->base = (m4_string *) obstack_finish (data->obs);
+  /* Safe to cast away const, since we don't modify entries.  */
+  qsort ((m4_string *) data->base, data->size, sizeof *data->base,
+	 dumpdef_cmp_CB);
 }
 
 
@@ -329,23 +345,27 @@ M4BUILTIN_HANDLER (dumpdef)
     quotes = m4_get_syntax_quotes (M4SYNTAX);
   data.obs = m4_arg_scratch (context);
   m4_dump_symbols (context, &data, argc, argv, true);
+  m4_sysval_flush (context, false);
 
   for (; data.size > 0; --data.size, data.base++)
     {
-      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base[0]);
+      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base->str,
+					    data.base->len);
+      char *value;
       assert (symbol);
 
-      obstack_grow (obs, data.base[0], strlen (data.base[0]));
-      obstack_1grow (obs, ':');
-      obstack_1grow (obs, '\t');
+      /* TODO - add debugmode(b) option to control quoting style.  */
+      fwrite (data.base->str, 1, data.base->len, stderr);
+      fputc (':', stderr);
+      fputc ('\t', stderr);
       m4_symbol_print (context, symbol, obs, quotes, stack, arg_length,
 		       module);
       obstack_1grow (obs, '\n');
+      obstack_1grow (obs, '\0');
+      value = (char *) obstack_finish (obs);
+      fputs (value, stderr);
+      obstack_free (obs, value);
     }
-
-  obstack_1grow (obs, '\0');
-  m4_sysval_flush (context, false);
-  fputs ((char *) obstack_finish (obs), stderr);
 }
 
 /* The macro "defn" returns the quoted definition of the macro named by
@@ -848,7 +868,7 @@ M4BUILTIN_HANDLER (traceon)
   else
     for (i = 1; i < argc; i++)
       if (m4_is_arg_text (argv, i))
-	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), true);
+	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), true);
       else
 	m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
@@ -865,7 +885,7 @@ M4BUILTIN_HANDLER (traceoff)
   else
     for (i = 1; i < argc; i++)
       if (m4_is_arg_text (argv, i))
-	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), false);
+	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), false);
       else
 	m4_warn (context, 0, me, _("invalid macro name ignored"));
 }

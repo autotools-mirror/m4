@@ -252,7 +252,7 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
 	    len2--;
 	  }
 
-	symbol = m4_symbol_lookup (M4SYMTAB, textp);
+	symbol = m4_symbol_lookup (M4SYMTAB, textp, len2);
 	assert (!symbol || !m4_is_symbol_void (symbol));
 	if (symbol == NULL
 	    || (symbol->value->type == M4_SYMBOL_FUNC

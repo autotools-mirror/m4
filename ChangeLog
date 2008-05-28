@@ -1,5 +1,37 @@
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
+	Stage 24b: Allow embedded NUL in macro names.
+	Use length rather than NUL-termination when tracking macro names.
+	All APIs dealing with symbol table changed.
+	Memory impact: none.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* m4/m4module.h (m4_symtab_apply_func, m4_symbol_lookup)
+	(m4_symbol_pushdef, m4_symbol_define, m4_symbol_popdef)
+	(m4_symbol_rename, m4_symbol_delete): Add length parameter.
+	(m4_string): New type.
+	* ltdl/m4/gnulib-cache.m4: Import xmemdup0 module.
+	* m4/hash.c (m4_hash_string_hash, m4_hash_string_cmp): Account for
+	length.
+	* m4/symtab.c (m4_symtab_delete, m4_symtab_apply, symtab_fetch)
+	(m4__symtab_remove_module_references, symbol_destroy_CB)
+	(m4_symbol_lookup, m4_symbol_pushdef, m4_symbol_define)
+	(m4_symbol_popdef, m4_symbol_rename, m4_set_symbol_name_traced)
+	(m4_symbol_delete): Likewise.
+	* modules/m4.h (struct m4_dump_symbol_data): Adjust type to allow
+	passing length.
+	* m4/macro.c (expand_token): Adjust all callers.
+	* m4/module.c (install_builtin_table, install_macro_table):
+	Likewise.
+	* m4/utility.c (m4_symbol_value_lookup): Likewise.
+	* modules/gnu.c (indir, renamesyms, m4symbols): Likewise.
+	* modules/m4.c (define, undefine, pushdef, popdef)
+	(dumpdef_cmp_CB, dump_symbol_CB, m4_dump_symbols, dumpdef)
+	(traceon, traceoff): Likewise.
+	* src/main.c (main): Likewise.
+	* src/freeze.c (dump_symbol_CB, reload_frozen_state): Likewise.
+	* tests/freeze.at (reloading nul): Augment test.
+	* tests/null.out: Adjust expected output.
+
 	Stage 24a: Use full call context in error reporting.
 	Replace const char *macro_name with const m4_call_info *call, so
 	that the next patch can pass the length of macro_name with

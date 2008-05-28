@@ -37,6 +37,7 @@ typedef struct m4_macro		m4_macro;
 typedef struct m4_macro_args	m4_macro_args;
 typedef struct m4_module	m4_module;
 typedef struct obstack		m4_obstack;
+typedef struct m4_string	m4_string;
 typedef struct m4_string_pair	m4_string_pair;
 typedef struct m4_symbol	m4_symbol;
 typedef struct m4_symbol_value	m4_symbol_value;
@@ -78,6 +79,13 @@ struct m4_macro
   size_t      min_args; /* 0-based minimum number of arguments */
   /* max arguments, SIZE_MAX if unlimited; must be >= min_args */
   size_t      max_args;
+};
+
+/* Describe a single string, such as a macro name.  */
+struct m4_string
+{
+  char *str;		/* Array of characters, possibly including NUL.  */
+  size_t len;		/* Length of string.  */
 };
 
 /* Describe a pair of strings, such as begin and end quotes.  */
@@ -251,7 +259,7 @@ extern void	    m4__module_exit    (m4 *);
 /* --- SYMBOL TABLE MANAGEMENT --- */
 
 
-typedef void *m4_symtab_apply_func (m4_symbol_table *, const char *,
+typedef void *m4_symtab_apply_func (m4_symbol_table *, const char *, size_t,
 				    m4_symbol *, void *);
 
 extern m4_symbol_table *m4_symtab_create  (size_t);
@@ -259,25 +267,27 @@ extern void	  m4_symtab_delete  (m4_symbol_table*);
 extern void *	  m4_symtab_apply   (m4_symbol_table*, bool,
 				     m4_symtab_apply_func*, void*);
 
-extern m4_symbol *m4_symbol_lookup  (m4_symbol_table*, const char *);
-extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*,
-				     const char *, m4_symbol_value *);
-extern m4_symbol *m4_symbol_define  (m4_symbol_table*,
-				     const char *, m4_symbol_value *);
-extern void       m4_symbol_popdef  (m4_symbol_table*, const char *);
-extern m4_symbol *m4_symbol_rename  (m4_symbol_table*, const char *,
-				     const char *);
+extern m4_symbol *m4_symbol_lookup  (m4_symbol_table*, const char *, size_t);
+extern m4_symbol *m4_symbol_pushdef (m4_symbol_table*, const char *, size_t,
+				     m4_symbol_value *);
+extern m4_symbol *m4_symbol_define  (m4_symbol_table*, const char *, size_t,
+				     m4_symbol_value *);
+extern void       m4_symbol_popdef  (m4_symbol_table*, const char *, size_t);
+extern m4_symbol *m4_symbol_rename  (m4_symbol_table*, const char *, size_t,
+				     const char *, size_t);
 
-extern void       m4_symbol_delete  (m4_symbol_table*, const char *);
+extern void       m4_symbol_delete  (m4_symbol_table*, const char *, size_t);
 
-#define m4_symbol_delete(symtab, name)			M4_STMT_START {	\
-	while (m4_symbol_lookup ((symtab), (name)))			\
-	    m4_symbol_popdef ((symtab), (name));	} M4_STMT_END
+#define m4_symbol_delete(symtab, name, len)		M4_STMT_START	\
+  {									\
+    while (m4_symbol_lookup (symtab, name, len))			\
+      m4_symbol_popdef (symtab, name, len);				\
+  } M4_STMT_END
 
 extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol*);
 extern bool		m4_get_symbol_traced	  (m4_symbol*);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table*,
-						   const char *, bool);
+						   const char *, size_t, bool);
 extern void	m4_symbol_print		(m4 *, m4_symbol *, m4_obstack *,
 					 const m4_string_pair *, bool, size_t,
 					 bool);

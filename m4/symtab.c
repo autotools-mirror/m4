@@ -21,6 +21,7 @@
 #include <config.h>
 
 #include "m4private.h"
+#include "xmemdup0.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYM */
@@ -51,15 +52,15 @@ struct m4_symbol_table {
   m4_hash *table;
 };
 
-static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *);
-static void	  symbol_popval		(m4_symbol *symbol);
-static void *	  symbol_destroy_CB	(m4_symbol_table *symtab,
-					 const char *name,
-					 m4_symbol *symbol, void *ignored);
-static void *	  arg_destroy_CB	(m4_hash *hash, const void *name,
-					 void *arg, void *ignored);
-static void *	  arg_copy_CB		(m4_hash *src, const void *name,
-					 void *arg, m4_hash *dest);
+static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *,
+					 size_t);
+static void	  symbol_popval		(m4_symbol *);
+static void *	  symbol_destroy_CB	(m4_symbol_table *, const char *,
+					 size_t, m4_symbol *, void *);
+static void *	  arg_destroy_CB	(m4_hash *, const void *, void *,
+					 void *);
+static void *	  arg_copy_CB		(m4_hash *, const void *, void *,
+					 m4_hash *);
 
 
 /* -- SYMBOL TABLE MANAGEMENT --
@@ -108,9 +109,11 @@ m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
     {
       m4_symbol *symbol = m4_get_hash_iterator_value (place);
       if (symbol->value || include_trace)
-	result = func (symtab, (const char *) m4_get_hash_iterator_key (place),
-		       symbol, userdata);
-
+	{
+	  const m4_string *key
+	    = (const m4_string *) m4_get_hash_iterator_key (place);
+	  result = func (symtab, key->str, key->len, symbol, userdata);
+	}
       if (result != NULL)
 	{
 	  m4_free_hash_iterator (symtab->table, place);
@@ -121,25 +124,36 @@ m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
   return result;
 }
 
-/* Ensure that NAME exists in the table, creating an entry if needed.  */
+/* Ensure that NAME of length LEN exists in the table, creating an
+   entry if needed.  */
 static m4_symbol *
-symtab_fetch (m4_symbol_table *symtab, const char *name)
+symtab_fetch (m4_symbol_table *symtab, const char *name, size_t len)
 {
   m4_symbol **psymbol;
   m4_symbol *symbol;
+  m4_string key;
 
   assert (symtab);
   assert (name);
 
-  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
+  /* Safe to cast away const, since m4_hash_lookup doesn't modify
+     key.  */
+  key.str = (char *) name;
+  key.len = len;
+  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
   if (psymbol)
     {
       symbol = *psymbol;
     }
   else
     {
+      /* Use xmemdup0 rather than memdup so that debugging the symbol
+	 table is easier.  */
+      m4_string *new_key = (m4_string *) xmalloc (sizeof *new_key);
+      new_key->str = xmemdup0 (name, len);
+      new_key->len = len;
       symbol = (m4_symbol *) xzalloc (sizeof *symbol);
-      m4_hash_insert (symtab->table, xstrdup (name), symbol);
+      m4_hash_insert (symtab->table, new_key, symbol);
     }
 
   return symbol;
@@ -182,7 +196,11 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
 
 	  /* Purge the live reference if necessary.  */
 	  if (SYMBOL_MODULE (symbol) == module)
-	    m4_symbol_popdef (symtab, m4_get_hash_iterator_key (place));
+	    {
+	      const m4_string *key
+		= (const m4_string *) m4_get_hash_iterator_key (place);
+	      m4_symbol_popdef (symtab, key->str, key->len);
+	    }
 	}
     }
 }
@@ -193,17 +211,19 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
    on every symbol so that m4_symbol_popdef() doesn't try to preserve
    the table entry.  */
 static void *
-symbol_destroy_CB (m4_symbol_table *symtab, const char *name,
-		   m4_symbol *symbol, void *ignored)
+symbol_destroy_CB (m4_symbol_table *symtab, const char *name, size_t len,
+		   m4_symbol *symbol, void *ignored M4_GNUC_UNUSED)
 {
-  char *key = xstrdup ((char *) name);
+  m4_string key;
+  key.str = xmemdup0 (name, len);
+  key.len = len;
 
   symbol->traced = false;
 
-  while (key && m4_hash_lookup (symtab->table, key))
-    m4_symbol_popdef (symtab, key);
+  while (m4_hash_lookup (symtab->table, &key))
+    m4_symbol_popdef (symtab, key.str, key.len);
 
-  free (key);
+  free (key.str);
 
   return NULL;
 }
@@ -215,11 +235,19 @@ symbol_destroy_CB (m4_symbol_table *symtab, const char *name,
    The following functions manipulate individual symbols within
    an existing table.  */
 
-/* Return the symbol associated to NAME, or else NULL.  */
+/* Return the symbol associated to NAME of length LEN, or else
+   NULL.  */
 m4_symbol *
-m4_symbol_lookup (m4_symbol_table *symtab, const char *name)
+m4_symbol_lookup (m4_symbol_table *symtab, const char *name, size_t len)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
+  m4_string key;
+  m4_symbol **psymbol;
+
+  /* Safe to cast away const, since m4_hash_lookup doesn't modify
+     key.  */
+  key.str = (char *) name;
+  key.len = len;
+  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
 
   /* If just searching, return status of search -- if only an empty
      struct is returned, that is treated as a failed lookup.  */
@@ -227,11 +255,12 @@ m4_symbol_lookup (m4_symbol_table *symtab, const char *name)
 }
 
 
-/* Insert NAME into the symbol table.  If there is already a symbol
-   associated with NAME, push the new VALUE on top of the value stack
-   for this symbol.  Otherwise create a new association.  */
+/* Insert NAME of length LEN into the symbol table.  If there is
+   already a symbol associated with NAME, push the new VALUE on top of
+   the value stack for this symbol.  Otherwise create a new
+   association.  */
 m4_symbol *
-m4_symbol_pushdef (m4_symbol_table *symtab, const char *name,
+m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, size_t len,
 		   m4_symbol_value *value)
 {
   m4_symbol *symbol;
@@ -240,7 +269,7 @@ m4_symbol_pushdef (m4_symbol_table *symtab, const char *name,
   assert (name);
   assert (value);
 
-  symbol		= symtab_fetch (symtab, name);
+  symbol		= symtab_fetch (symtab, name, len);
   VALUE_NEXT (value)	= m4_get_symbol_value (symbol);
   symbol->value		= value;
 
@@ -249,11 +278,12 @@ m4_symbol_pushdef (m4_symbol_table *symtab, const char *name,
   return symbol;
 }
 
-/* Return the symbol associated with NAME in the symbol table, creating
-   a new symbol if necessary.  In either case set the symbol's VALUE.  */
+/* Return the symbol associated with NAME of length LEN in the symbol
+   table, creating a new symbol if necessary.  In either case set the
+   symbol's VALUE.  */
 m4_symbol *
-m4_symbol_define (m4_symbol_table *symtab,
-		  const char *name, m4_symbol_value *value)
+m4_symbol_define (m4_symbol_table *symtab, const char *name, size_t len,
+		  m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -261,7 +291,7 @@ m4_symbol_define (m4_symbol_table *symtab,
   assert (name);
   assert (value);
 
-  symbol = symtab_fetch (symtab, name);
+  symbol = symtab_fetch (symtab, name, len);
   if (m4_get_symbol_value (symbol))
     symbol_popval (symbol);
 
@@ -274,12 +304,19 @@ m4_symbol_define (m4_symbol_table *symtab,
 }
 
 /* Pop the topmost value stack entry from the symbol associated with
-   NAME, deleting it from the table entirely if that was the last
-   remaining value in the stack.  */
+   NAME of length LEN, deleting it from the table entirely if that was
+   the last remaining value in the stack.  */
 void
-m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
+m4_symbol_popdef (m4_symbol_table *symtab, const char *name, size_t len)
 {
-  m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
+  m4_string key;
+  m4_symbol **psymbol;
+
+  /* Safe to cast away const, since m4_hash_lookup doesn't modify
+     key.  */
+  key.str = (char *) name;
+  key.len = len;
+  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
 
   assert (psymbol);
   assert (*psymbol);
@@ -290,8 +327,11 @@ m4_symbol_popdef (m4_symbol_table *symtab, const char *name)
      symbol value stack was successfully removed.  */
   if (!m4_get_symbol_value (*psymbol) && !m4_get_symbol_traced (*psymbol))
     {
+      m4_string *old_key;
       DELETE (*psymbol);
-      free (m4_hash_remove (symtab->table, name));
+      old_key = (m4_string *) m4_hash_remove (symtab->table, &key);
+      free (old_key->str);
+      free (old_key);
     }
 }
 
@@ -355,30 +395,41 @@ m4_symbol_value_delete (m4_symbol_value *value)
     }
 }
 
+/* Rename the entire stack of values associated with NAME and LEN1 to
+   NEWNAME and LEN2.  */
 m4_symbol *
-m4_symbol_rename (m4_symbol_table *symtab, const char *name,
-		  const char *newname)
+m4_symbol_rename (m4_symbol_table *symtab, const char *name, size_t len1,
+		  const char *newname, size_t len2)
 {
   m4_symbol *symbol	= NULL;
   m4_symbol **psymbol;
+  m4_string key;
+  m4_string *pkey;
 
   assert (symtab);
   assert (name);
   assert (newname);
 
+  /* Safe to cast away const, since m4_hash_lookup doesn't modify
+     key.  */
+  key.str = (char *) name;
+  key.len = len1;
   /* Use a low level hash fetch, so we can save the symbol value when
      removing the symbol name from the symbol table.  */
-  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, name);
+  psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
 
   if (psymbol)
     {
       symbol = *psymbol;
 
       /* Remove the old name from the symbol table.  */
-      free (m4_hash_remove (symtab->table, name));
-      assert (!m4_hash_lookup (symtab->table, name));
+      pkey = (m4_string *) m4_hash_remove (symtab->table, &key);
+      assert (pkey && !m4_hash_lookup (symtab->table, &key));
+      free (pkey->str);
 
-      m4_hash_insert (symtab->table, xstrdup (newname), *psymbol);
+      pkey->str = xmemdup0 (newname, len2);
+      pkey->len = len2;
+      m4_hash_insert (symtab->table, pkey, *psymbol);
     }
   /* else
        NAME does not name a symbol in symtab->table!  */
@@ -521,14 +572,14 @@ arg_copy_CB (m4_hash *src, const void *name, void *arg, m4_hash *dest)
   return NULL;
 }
 
-/* Set the tracing status of the symbol NAME to TRACED.  This takes a
-   name, rather than a symbol, since we hide macros that are traced
-   but otherwise undefined from normal lookups, but still can affect
-   their tracing status.  Return true iff the macro was previously
-   traced.  */
+/* Set the tracing status of the symbol NAME of length LEN to TRACED.
+   This takes a name, rather than a symbol, since we hide macros that
+   are traced but otherwise undefined from normal lookups, but still
+   can affect their tracing status.  Return true iff the macro was
+   previously traced.  */
 bool
 m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
-			   bool traced)
+			   size_t len, bool traced)
 {
   m4_symbol *symbol;
   bool result;
@@ -537,11 +588,17 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
   assert (name);
 
   if (traced)
-    symbol = symtab_fetch (symtab, name);
+    symbol = symtab_fetch (symtab, name, len);
   else
     {
-      m4_symbol **psymbol = (m4_symbol **) m4_hash_lookup (symtab->table,
-							   name);
+      m4_string key;
+      m4_symbol **psymbol;
+
+      /* Safe to cast away const, since m4_hash_lookup doesn't modify
+	 key.  */
+      key.str = (char *) name;
+      key.len = len;
+      psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
       if (!psymbol)
 	return false;
       symbol = *psymbol;
@@ -552,9 +609,18 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
   if (!traced && !m4_get_symbol_value (symbol))
     {
       /* Free an undefined entry once it is no longer traced.  */
+      m4_string key;
+      m4_string *old_key;
       assert (result);
       free (symbol);
-      free (m4_hash_remove (symtab->table, name));
+
+      /* Safe to cast away const, since m4_hash_lookup doesn't modify
+	 key.  */
+      key.str = (char *) name;
+      key.len = len;
+      old_key = (m4_string *) m4_hash_remove (symtab->table, &key);
+      free (old_key->str);
+      free (old_key);
     }
 
   return result;
@@ -707,10 +773,10 @@ m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 /* Pop all values from the symbol associated with NAME.  */
 #undef m4_symbol_delete
 void
-m4_symbol_delete (m4_symbol_table *symtab, const char *name)
+m4_symbol_delete (m4_symbol_table *symtab, const char *name, size_t len)
 {
-  while (m4_symbol_lookup (symtab, name))
-    m4_symbol_popdef (symtab, name);
+  while (m4_symbol_lookup (symtab, name, len))
+    m4_symbol_popdef (symtab, name, len);
 }
 
 #undef m4_get_symbol_traced

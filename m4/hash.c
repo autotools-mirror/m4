@@ -635,20 +635,22 @@ m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *userdata)
 }
 
 
-/* Using a string as the hash key is common enough that we provide
-   implementations here for use in client hash table routines.  */
+/* Using a string (char * and size_t pair) as the hash key is common
+   enough that we provide implementations here for use in client hash
+   table routines.  */
 
-/* Return a hash value for a string, consistent with gnulib's hash
-   module.  */
+/* Return a hash value for a string, similar to gnulib's hash module,
+   but with length factored in.  */
 size_t
-m4_hash_string_hash (const void *key)
+m4_hash_string_hash (const void *ptr)
 {
-  size_t val = 0;
-  const char *ptr = (const char *) key;
-  char ch;
+  const m4_string *key = (const m4_string *) ptr;
+  const char *s = key->str;
+  size_t len = key->len;
+  size_t val = len;
 
-  while ((ch = *ptr++) != '\0')
-    val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
+  while (len--)
+    val = (val << 7) + (val >> (sizeof val * CHAR_BIT - 7)) + to_uchar (*s++);
   return val;
 }
 
@@ -657,5 +659,11 @@ m4_hash_string_hash (const void *key)
 int
 m4_hash_string_cmp (const void *key, const void *try)
 {
-  return (strcmp ((const char *) key, (const char *) try));
+  const m4_string *a = (const m4_string *) key;
+  const m4_string *b = (const m4_string *) try;
+  if (a->len < b->len)
+    return -1;
+  if (b->len < a->len)
+    return 1;
+  return memcmp (a->str, b->str, a->len);
 }

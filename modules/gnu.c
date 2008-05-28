@@ -674,7 +674,8 @@ M4BUILTIN_HANDLER (indir)
   else
     {
       const char *name = M4ARG (1);
-      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name);
+      size_t len = M4ARGLEN (1);
+      m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name, len);
 
       if (symbol == NULL)
 	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
@@ -682,7 +683,7 @@ M4BUILTIN_HANDLER (indir)
 	{
 	  m4_macro_args *new_argv;
 	  m4_symbol_value *value = m4_get_symbol_value (symbol);
-	  new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
+	  new_argv = m4_make_argv_ref (context, argv, name, len,
 				       m4_symbol_flatten_args (symbol),
 				       m4_get_symbol_traced (symbol));
 	  m4_trace_prepare (context, m4_arg_info (new_argv), value);
@@ -880,14 +881,14 @@ M4BUILTIN_HANDLER (renamesyms)
 
       for (; data.size > 0; --data.size, data.base++)
 	{
-	  const char *name = data.base[0];
+	  const m4_string *key = &data.base[0];
 
-	  if (regexp_substitute (context, data.obs, me, name, strlen (name),
+	  if (regexp_substitute (context, data.obs, me, key->str, key->len,
 				 regexp, buf, replace, true))
 	    {
-	      obstack_1grow (data.obs, '\0');
-	      m4_symbol_rename (M4SYMTAB, name,
-				(char *) obstack_finish (data.obs));
+	      size_t newlen = obstack_object_size (data.obs);
+	      m4_symbol_rename (M4SYMTAB, key->str, key->len,
+				(char *) obstack_finish (data.obs), newlen);
 	    }
 	}
     }
@@ -915,7 +916,8 @@ M4BUILTIN_HANDLER (m4symbols)
 
       for (; data.size > 0; --data.size, data.base++)
 	{
-	  m4_shipout_string (context, obs, data.base[0], SIZE_MAX, true);
+	  m4_shipout_string (context, obs, data.base->str, data.base->len,
+			     true);
 	  if (data.size > 1)
 	    obstack_1grow (obs, ',');
 	}

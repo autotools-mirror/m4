@@ -148,7 +148,7 @@ install_builtin_table (m4 *context, m4_module *module)
       if (m4_get_prefix_builtins_opt (context))
 	name = xasprintf ("m4_%s", name);
 
-      m4_symbol_pushdef (M4SYMTAB, name, value);
+      m4_symbol_pushdef (M4SYMTAB, name, strlen (name), value);
 
       if (m4_get_prefix_builtins_opt (context))
 	free ((char *) name);
@@ -185,7 +185,7 @@ install_macro_table (m4 *context, m4_module *module)
 	  VALUE_MIN_ARGS (value) = mp->min_args;
 	  VALUE_MAX_ARGS (value) = mp->max_args;
 
-	  m4_symbol_pushdef (M4SYMTAB, mp->name, value);
+	  m4_symbol_pushdef (M4SYMTAB, mp->name, strlen (mp->name), value);
 	}
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,

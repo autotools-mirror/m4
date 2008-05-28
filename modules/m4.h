@@ -29,7 +29,7 @@ BEGIN_C_DECLS
 typedef struct
 {
   m4_obstack *obs;		/* obstack for table */
-  const char **base;		/* base of table */
+  const m4_string *base;	/* base of table */
   int size;			/* size of table */
 } m4_dump_symbol_data;
 

@@ -132,7 +132,7 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
   if (m4_is_arg_text (argv, i))
     {
       const char *name = M4ARG (i);
-      result = m4_symbol_lookup (M4SYMTAB, name);
+      result = m4_symbol_lookup (M4SYMTAB, name, M4ARGLEN (i));
       if (must_exist && !result)
 	m4_warn (context, 0, argv->info, _("undefined macro `%s'"), name);
     }

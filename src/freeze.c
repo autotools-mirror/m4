@@ -34,7 +34,7 @@ static	void  produce_syntax_dump	(FILE *, m4_syntax_table *, char);
 static	void  produce_module_dump	(FILE *, m4_module *);
 static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
 static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
-					 m4_symbol *, void *);
+					 size_t, m4_symbol *, void *);
 static	void  issue_expect_message	(m4 *, int);
 static	int   decode_char		(m4 *, FILE *, bool *);
 
@@ -189,14 +189,14 @@ reverse_symbol_value_stack (m4_symbol_value *value)
   return result;
 }
 
-/* Dump the stack of values for SYMBOL, with name SYMBOL_NAME, located
-   in SYMTAB.  USERDATA is interpreted as the FILE* to dump to.  */
+/* Dump the stack of values for SYMBOL, with name SYMBOL_NAME and
+   length LEN, located in SYMTAB.  USERDATA is interpreted as the
+   FILE* to dump to.  */
 static void *
-dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
+dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, size_t len,
 		m4_symbol *symbol, void *userdata)
 {
   FILE *file = (FILE *) userdata;
-  size_t symbol_len = strlen (symbol_name);
   m4_symbol_value *value;
   m4_symbol_value *last;
 
@@ -211,12 +211,12 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	{
 	  const char *text = m4_get_symbol_value_text (value);
 	  size_t text_len = m4_get_symbol_value_len (value);
-	  xfprintf (file, "T%zu,%zu", symbol_len, text_len);
+	  xfprintf (file, "T%zu,%zu", len, text_len);
 	  if (module)
 	    xfprintf (file, ",%zu", module_len);
 	  fputc ('\n', file);
 
-	  produce_mem_dump (file, symbol_name, symbol_len);
+	  produce_mem_dump (file, symbol_name, len);
 	  fputc ('\n', file);
 	  produce_mem_dump (file, text, text_len);
 	  fputc ('\n', file);
@@ -234,12 +234,12 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
 	    assert (!"INTERNAL ERROR: builtin not found in builtin table!");
 	  bp_len = strlen (bp->name);
 
-	  xfprintf (file, "F%zu,%zu", symbol_len, bp_len);
+	  xfprintf (file, "F%zu,%zu", len, bp_len);
 	  if (module)
 	    xfprintf (file, ",%zu", module_len);
 	  fputc ('\n', file);
 
-	  produce_mem_dump (file, symbol_name, symbol_len);
+	  produce_mem_dump (file, symbol_name, len);
 	  fputc ('\n', file);
 	  produce_mem_dump (file, bp->name, bp_len);
 	  fputc ('\n', file);
@@ -257,7 +257,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name,
     }
   reverse_symbol_value_stack (last);
   if (m4_get_symbol_traced (symbol))
-    xfprintf (file, "t%zu\n%s\n", symbol_len, symbol_name);
+    xfprintf (file, "t%zu\n%s\n", len, symbol_name);
   return NULL;
 }
 
@@ -698,7 +698,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 		VALUE_MIN_ARGS (token) = 0;
 		VALUE_MAX_ARGS (token) = -1;
 	      }
-	    m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	    m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
 	  }
 	  break;
 
@@ -794,7 +794,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 't');
 	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
-	  m4_set_symbol_name_traced (M4SYMTAB, string[0], true);
+	  m4_set_symbol_name_traced (M4SYMTAB, string[0], number[0], true);
 
 	  break;
 
@@ -933,7 +933,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	    VALUE_MODULE (token) = module;
 	    VALUE_MAX_ARGS (token) = -1;
 
-	    m4_symbol_pushdef (M4SYMTAB, string[0], token);
+	    m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
 	  }
 	  break;
 
