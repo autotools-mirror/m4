@@ -443,10 +443,6 @@ expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
   m4__macro_arg_stacks *stack;	/* Storage for this macro.  */
   m4_call_info info;		/* Context of this macro call.  */
 
-  /* TODO - use m4_call_info to avoid temporary munging of global state.  */
-  const char *loc_close_file;
-  int loc_close_line;
-
   /* Obstack preparation.  */
   level = context->expansion_level;
   if (context->stacks_count <= level)
@@ -506,17 +502,11 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
   args_scratch = obstack_finish (stack->args);
 
   /* The actual macro call.  */
-  loc_close_file = m4_get_current_file (context);
-  loc_close_line = m4_get_current_line (context);
-  m4_set_current_file (context, info.file);
-  m4_set_current_line (context, info.line);
-  expansion = m4_push_string_init (context);
+  expansion = m4_push_string_init (context, info.file, info.line);
   m4_macro_call (context, value, expansion, argv);
   m4_push_string_finish ();
 
   /* Cleanup.  */
-  m4_set_current_file (context, loc_close_file);
-  m4_set_current_line (context, loc_close_line);
   argv->info = NULL;
 
   --context->expansion_level;
@@ -538,7 +528,8 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
 	    xfprintf (stderr, "m4debug: -%d- `%s' in use, level=%d, "
 		      "refcount=%zu, argcount=%zu\n", info.call_id,
-		      argv->argv0, level, stack->refcount, stack->argcount);
+		      argv->info->name, level, stack->refcount,
+		      stack->argcount);
 	}
       else
 	{
@@ -571,14 +562,12 @@ collect_arguments (m4 *context, m4_call_info *info, m4_symbol *symbol,
   args.has_func = false;
   /* Must copy here, since we are consuming tokens, and since symbol
      table can be changed during argument collection.  */
-  args.argv0 = (char *) obstack_copy0 (arguments, info->name, info->name_len);
-  args.argv0_len = info->name_len;
+  info->name = (char *) obstack_copy0 (arguments, info->name, info->name_len);
   args.quote_age = m4__quote_age (M4SYNTAX);
   args.info = info;
   args.level = context->expansion_level - 1;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (m4_macro_args, array));
-  info->name = args.argv0;
 
   if (m4__next_token_is_open (context))
     {
@@ -890,16 +879,17 @@ static void
 trace_flush (m4 *context, unsigned int start)
 {
   char *str;
+  size_t len = obstack_object_size (&context->trace_messages);
   FILE *file = m4_get_debug_file (context);
 
   if (file)
     {
-      obstack_1grow (&context->trace_messages, '\0');
+      /* TODO - quote nonprintable characters if debug is tty?  */
       str = (char *) obstack_base (&context->trace_messages);
-      fprintf (file, "%s\n", &str[start]);
+      fwrite (&str[start], 1, len - start, file);
+      fputc ('\n', file);
     }
-  start -= obstack_object_size (&context->trace_messages);
-  obstack_blank (&context->trace_messages, start);
+  obstack_blank (&context->trace_messages, start - len);
 }
 
 /* Do pre-argument-collection tracing for the macro described in INFO.
@@ -917,7 +907,8 @@ m4_trace_prepare (m4 *context, const m4_call_info *info,
   if (info->trace && (info->debug_level & M4_DEBUG_TRACE_CALL))
     {
       unsigned int start = trace_header (context, info);
-      trace_format (context, "%s ... = ", info->name);
+      obstack_grow (&context->trace_messages, info->name, info->name_len);
+      obstack_grow (&context->trace_messages, " ... = ", 7);
       m4__symbol_value_print (context, value, &context->trace_messages, quotes,
 			      false, NULL, &arg_length, module);
       trace_flush (context, start);
@@ -935,7 +926,8 @@ trace_pre (m4 *context, m4_macro_args *argv)
   unsigned int start = trace_header (context, argv->info);
 
   assert (argv->info->trace);
-  trace_format (context, "%s", M4ARG (0));
+  obstack_grow (&context->trace_messages, argv->info->name,
+		argv->info->name_len);
 
   if (1 < m4_arg_argc (argv) && (trace_level & M4_DEBUG_TRACE_ARGS))
     {
@@ -1258,7 +1250,10 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg, bool flatten)
   m4_obstack *obs;
 
   if (arg == 0)
-    return argv->argv0;
+    {
+      assert (argv->info);
+      return argv->info->name;
+    }
   if (argv->argc <= arg)
     return "";
   value = arg_symbol (argv, arg, NULL, flatten);
@@ -1453,8 +1448,12 @@ m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
 bool
 m4_arg_empty (m4_macro_args *argv, size_t arg)
 {
-  return (arg ? m4_arg_symbol (argv, arg) == &empty_symbol
-	  : !argv->argv0_len);
+  if (!arg)
+    {
+      assert (argv->info);
+      return !argv->info->name_len;
+    }
+  return m4_arg_symbol (argv, arg) == &empty_symbol;
 }
 
 /* Given ARGV, return the length of argument ARG.  Abort if the
@@ -1467,7 +1466,10 @@ m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
   size_t len;
 
   if (arg == 0)
-    return argv->argv0_len;
+    {
+      assert (argv->info);
+      return argv->info->name_len;
+    }
   if (argv->argc <= arg)
     return 0;
   value = m4_arg_symbol (argv, arg);
@@ -1629,8 +1631,6 @@ m4_make_argv_ref (m4 *context, m4_macro_args *argv, const char *argv0,
     }
   new_argv->argc = argv->argc - 1;
   new_argv->inuse = false;
-  new_argv->argv0 = argv0;
-  new_argv->argv0_len = argv0_len;
   new_argv->quote_age = argv->quote_age;
   new_argv->info = info;
   info->trace = (argv->info->debug_level & M4_DEBUG_TRACE_ALL) || trace;
@@ -1649,7 +1649,9 @@ m4_push_arg (m4 *context, m4_obstack *obs, m4_macro_args *argv, size_t arg)
 
   if (arg == 0)
     {
-      m4_set_symbol_value_text (&value, argv->argv0, argv->argv0_len, 0);
+      assert (argv->info);
+      m4_set_symbol_value_text (&value, argv->info->name, argv->info->name_len,
+				0);
       if (m4__push_symbol (context, &value, context->expansion_level - 1,
 			   argv->inuse))
 	arg_mark (argv);
@@ -1721,7 +1723,7 @@ m4_wrap_args (m4 *context, m4_macro_args *argv)
   if (limit == 2 && m4_arg_empty (argv, 1))
     return;
 
-  obs = m4__push_wrapup_init (context, &end);
+  obs = m4__push_wrapup_init (context, argv->info, &end);
   for (i = 1; i < limit; i++)
     {
       if (i != 1)

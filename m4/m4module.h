@@ -503,7 +503,7 @@ extern	void	m4_skip_line	(m4 *context, const m4_call_info *);
 
 extern	void	m4_push_file	(m4 *, FILE *, const char *, bool);
 extern	void	m4_push_builtin	(m4 *, m4_obstack *, m4_symbol_value *);
-extern	m4_obstack	*m4_push_string_init	(m4 *);
+extern	m4_obstack	*m4_push_string_init	(m4 *, const char *, int);
 extern	void	m4_push_string_finish	(void);
 extern	bool	m4_pop_wrapup	(m4 *);
 extern	void	m4_input_print	(m4 *, m4_obstack *, int);

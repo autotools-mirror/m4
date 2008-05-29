@@ -29,6 +29,7 @@
 #endif
 
 #include "modules/m4.h"
+#include "quotearg.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table
@@ -404,7 +405,8 @@ M4BUILTIN_HANDLER (builtin)
 {
   const m4_call_info *me = m4_arg_info (argv);
   const char *name;
-  m4_symbol_value *value;
+  size_t len;
+  m4_symbol_value *value = NULL;
 
   if (!m4_is_arg_text (argv, 1))
     {
@@ -419,9 +421,12 @@ M4BUILTIN_HANDLER (builtin)
 	      return;
 	    }
 	  name = M4ARG (2);
-	  value = m4_builtin_find_by_name (NULL, name);
+	  len = M4ARGLEN (2);
+	  if (len == strlen (name))
+	    value = m4_builtin_find_by_name (NULL, name);
 	  if (value == NULL)
-	    m4_warn (context, 0, me, _("undefined builtin `%s'"), name);
+	    m4_warn (context, 0, me, _("undefined builtin %s"),
+		     quotearg_style_mem (locale_quoting_style, name, len));
 	  else
 	    {
 	      m4_push_builtin (context, obs, value);
@@ -434,16 +439,19 @@ M4BUILTIN_HANDLER (builtin)
   else
     {
       name = M4ARG (1);
-      value = m4_builtin_find_by_name (NULL, name);
+      len = M4ARGLEN (1);
+      if (len == strlen (name))
+	value = m4_builtin_find_by_name (NULL, name);
       if (value == NULL)
-	m4_warn (context, 0, me, _("undefined builtin `%s'"), name);
+	m4_warn (context, 0, me, _("undefined builtin %s"),
+		 quotearg_style_mem (locale_quoting_style, name, len));
       else
 	{
 	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
 	  m4_macro_args *new_argv;
 	  bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
-	  new_argv = m4_make_argv_ref (context, argv, name, M4ARGLEN (1),
-				       flatten, false);
+	  new_argv = m4_make_argv_ref (context, argv, name, len, flatten,
+				       false);
 	  if (!m4_bad_argc (context, argc - 1, m4_arg_info (new_argv),
 			    bp->min_args, bp->max_args,
 			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
@@ -678,7 +686,8 @@ M4BUILTIN_HANDLER (indir)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name, len);
 
       if (symbol == NULL)
-	m4_warn (context, 0, me, _("undefined macro `%s'"), name);
+	m4_warn (context, 0, me, _("undefined macro %s"),
+		 quotearg_style_mem (locale_quoting_style, name, len));
       else
 	{
 	  m4_macro_args *new_argv;

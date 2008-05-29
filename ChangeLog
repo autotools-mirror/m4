@@ -1,5 +1,30 @@
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
+	Stage 24c: Improve display of macro names with embedded NUL.
+	Quote instances of problematic characters in macro names when
+	presented to user.  Track location via call_info rather than
+	munging context for every expansion.
+	Memory impact: none.
+	Speed impact: slight penalty, due to more bookkeeping.
+	* m4/m4module.h (m4_push_string_init): Add parameters.
+	* m4/m4private.h (struct m4_macro_args): Remove argv0 and
+	argv0_len, now redundant with info.
+	(m4__push_wrapup_init): Add parameter.
+	* m4/input.c (m4_push_string_init, m4__push_wrapup_init): Track
+	location from caller, rather than context.
+	(composite_peek, composite_read, match_input): Adjust callers.
+	* m4/utility.c (m4_symbol_value_lookup): Quote macro name.
+	(m4_verror_at_line): Allow NUL in macro name.
+	* m4/macro.c (trace_flush, m4_trace_prepare, trace_pre): Allow NUL
+	in trace.
+	(expand_macro): No longer munge context location.
+	(collect_arguments, m4_arg_text, m4_arg_empty, m4_arg_len)
+	(m4_make_argv_ref, m4_push_arg, m4_wrap_args): Adjust callers.
+	* modules/gnu.c (builtin, indir): Likewise.
+	* tests/null.m4: Enhance test.
+	* tests/null.err: Adjust expected output.
+	* tests/null.out: Likewise.
+
 	Stage 24b: Allow embedded NUL in macro names.
 	Use length rather than NUL-termination when tracking macro names.
 	All APIs dealing with symbol table changed.

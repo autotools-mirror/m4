@@ -132,9 +132,11 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
   if (m4_is_arg_text (argv, i))
     {
       const char *name = M4ARG (i);
-      result = m4_symbol_lookup (M4SYMTAB, name, M4ARGLEN (i));
+      size_t len = M4ARGLEN (i);
+      result = m4_symbol_lookup (M4SYMTAB, name, len);
       if (must_exist && !result)
-	m4_warn (context, 0, argv->info, _("undefined macro `%s'"), name);
+	m4_warn (context, 0, argv->info, _("undefined macro %s"),
+		 quotearg_style_mem (locale_quoting_style, name, len));
     }
   else
     m4_warn (context, 0, argv->info, _("invalid macro name ignored"));
@@ -154,6 +156,7 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
   char *full = NULL;
   char *safe_macro = NULL;
   const char *macro = caller ? caller->name : NULL;
+  size_t len = caller ? caller->name_len : 0;
   const char *file = caller ? caller->file : m4_get_current_file (context);
   int line = caller ? caller->line : m4_get_current_line (context);
 
@@ -161,29 +164,33 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
   /* Sanitize MACRO, since we are turning around and using it in a
      format string.  The allocation is overly conservative, but
      problematic macro names only occur via indir or changesyntax.  */
-  if (macro && strchr (macro, '%'))
+  if (macro && memchr (macro, '%', len))
     {
-      char *p = safe_macro = xcharalloc (2 * strlen (macro) + 1);
-      do
+      char *p = safe_macro = xcharalloc (2 * len);
+      const char *end = macro + len;
+      while (macro != end)
 	{
 	  if (*macro == '%')
-	    *p++ = '%';
+	    {
+	      *p++ = '%';
+	      len++;
+	    }
 	  *p++ = *macro++;
 	}
-      while (*macro);
-      *p = '\0';
     }
+  if (macro)
+    /* Use slot 1, so that the rest of the code can use the simpler
+       quotearg interface in slot 0.  */
+    macro = quotearg_n_mem (1, safe_macro ? safe_macro : macro, len);
   /* Prepend warning and the macro name, as needed.  But if that fails
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"),
-		      quotearg (safe_macro ? safe_macro : macro), format);
+    full = xasprintf (_("Warning: %s: %s"), macro, format);
   else if (warn)
     full = xasprintf (_("Warning: %s"), format);
   else if (macro)
-    full = xasprintf (_("%s: %s"),
-		      quotearg (safe_macro ? safe_macro : macro), format);
+    full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
 		  full ? full : format, args);
   free (full);

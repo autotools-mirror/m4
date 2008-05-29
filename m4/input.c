@@ -438,10 +438,12 @@ string_print (m4_input_block *me, m4 *context, m4_obstack *obs,
 }
 
 /* First half of m4_push_string ().  The pointer next points to the
-   new input_block.  Return the obstack that will collect the
-   expansion text.  */
+   new input_block.  FILE and LINE describe the location where the
+   macro starts that is generating the expansion (even if the location
+   has advanced in the meantime).  Return the obstack that will
+   collect the expansion text.  */
 m4_obstack *
-m4_push_string_init (m4 *context)
+m4_push_string_init (m4 *context, const char *file, int line)
 {
   /* Free any memory occupied by completely parsed input.  */
   assert (!next);
@@ -450,8 +452,8 @@ m4_push_string_init (m4 *context)
   /* Reserve the next location on the obstack.  */
   next = (m4_input_block *) obstack_alloc (current_input, sizeof *next);
   next->funcs = &string_funcs;
-  next->file = m4_get_current_file (context);
-  next->line = m4_get_current_line (context);
+  next->file = file;
+  next->line = line;
   next->u.u_s.len = 0;
 
   return current_input;
@@ -691,7 +693,7 @@ composite_peek (m4_input_block *me, m4 *context, bool allow_argv)
 	  /* Rather than directly parse argv here, we push another
 	     input block containing the next unparsed argument from
 	     argv.  */
-	  m4_push_string_init (context);
+	  m4_push_string_init (context, me->file, me->line);
 	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
 			      chain->u.u_a.index,
 			      m4__quote_cache (M4SYNTAX, NULL,
@@ -759,7 +761,7 @@ composite_read (m4_input_block *me, m4 *context, bool allow_quote,
 	  /* Rather than directly parse argv here, we push another
 	     input block containing the next unparsed argument from
 	     argv.  */
-	  m4_push_string_init (context);
+	  m4_push_string_init (context, me->file, me->line);
 	  m4__push_arg_quote (context, current_input, chain->u.u_a.argv,
 			      chain->u.u_a.index,
 			      m4__quote_cache (M4SYNTAX, NULL,
@@ -1012,10 +1014,11 @@ m4_input_print (m4 *context, m4_obstack *obs, int debug_level)
 
 /* Return an obstack ready for direct expansion of wrapup text, and
    set *END to the location that should be updated if any builtin
-   tokens are wrapped.  This should be followed by
-   m4__push_wrapup_finish ().  */
+   tokens are wrapped.  Store the location of CALLER with the wrapped
+   text.  This should be followed by m4__push_wrapup_finish ().  */
 m4_obstack *
-m4__push_wrapup_init (m4 *context, m4__symbol_chain ***end)
+m4__push_wrapup_init (m4 *context, const m4_call_info *caller,
+		      m4__symbol_chain ***end)
 {
   m4_input_block *i;
   m4__symbol_chain *chain;
@@ -1032,8 +1035,8 @@ m4__push_wrapup_init (m4 *context, m4__symbol_chain ***end)
       i = (m4_input_block *) obstack_alloc (wrapup_stack, sizeof *i);
       i->prev = wsp;
       i->funcs = &composite_funcs;
-      i->file = m4_get_current_file (context);
-      i->line = m4_get_current_line (context);
+      i->file = caller->file;
+      i->line = caller->line;
       i->u.u_c.chain = i->u.u_c.end = NULL;
       wsp = i;
     }
@@ -1046,8 +1049,8 @@ m4__push_wrapup_init (m4 *context, m4__symbol_chain ***end)
   chain->next = NULL;
   chain->type = M4__CHAIN_LOC;
   chain->quote_age = 0;
-  chain->u.u_l.file = m4_get_current_file (context);
-  chain->u.u_l.line = m4_get_current_line (context);
+  chain->u.u_l.file = caller->file;
+  chain->u.u_l.line = caller->line;
   *end = &i->u.u_c.end;
   return wrapup_stack;
 }
@@ -1396,7 +1399,8 @@ match_input (m4 *context, const char *s, bool consume)
     }
 
   /* Failed or shouldn't consume, push back input.  */
-  st = m4_push_string_init (context);
+  st = m4_push_string_init (context, m4_get_current_file (context),
+			    m4_get_current_line (context));
   obstack_grow (st, t, n);
   m4_push_string_finish ();
   return result;

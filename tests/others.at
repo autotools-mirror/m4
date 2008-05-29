@@ -351,11 +351,11 @@ AT_SETUP([nul character])
 
 # We don't embed null.* in here, since it is harder to guarantee the
 # behavior of NUL through autom4te.
-cp "$abs_srcdir/null.out" expout
-cp "$abs_srcdir/null.err" experr
+sed "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.out" > expout
+sed "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.err" > experr
 
 dnl all but m4exit
-AT_CHECK_M4([-Dm4exit "$abs_srcdir/null.m4"], [0], [expout], [experr])
+AT_CHECK_M4([-Dm4exit -I "$abs_srcdir" null.m4], [0], [expout], [experr])
 
 dnl just m4exit
 AT_CHECK_M4(["$abs_srcdir/null.m4"], [2],

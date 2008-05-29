@@ -307,8 +307,6 @@ struct m4_macro_args
   bool_bitfield flatten : 1;
   /* True if any token contains builtins.  */
   bool_bitfield has_func : 1;
-  const char *argv0; /* The macro name being expanded.  */
-  size_t argv0_len; /* Length of argv0.  */
   /* The value of quote_age for all tokens, or 0 if quote_age changed
      during parsing or any token is potentially unsafe and requires a
      rescan.  */
@@ -561,7 +559,8 @@ extern	void		m4__append_builtin (m4_obstack *, const m4__builtin *,
 					    m4__symbol_chain **);
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
 					 bool);
-extern	m4_obstack	*m4__push_wrapup_init (m4 *, m4__symbol_chain ***);
+extern	m4_obstack	*m4__push_wrapup_init (m4 *, const m4_call_info *,
+					       m4__symbol_chain ***);
 extern	void		m4__push_wrapup_finish (void);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
 					m4_obstack *, bool,
