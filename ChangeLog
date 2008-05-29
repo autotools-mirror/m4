@@ -1,3 +1,14 @@
+2008-05-28  Eric Blake  <ebb9@byu.net>
+
+	Improve frozen debugmode behavior.
+	* m4/debug.c (m4_debug_decode): Make empty debugmode additive.
+	* src/main.c (main): Interleave -d with files.
+	* tests/options.at (--debugmode): Update test.
+	* tests/freeze.at (reloading debugmode): New test.
+	* doc/m4.texinfo (Debugging options, Debugmode): Document the
+	change.
+	* NEWS: Likewise.
+
 2008-05-27  Eric Blake  <ebb9@byu.net>
 
 	Fix some testsuite failures on Solaris 8.

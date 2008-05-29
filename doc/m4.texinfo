@@ -946,13 +946,16 @@ Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
 meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
-@samp{aeq}.  When the option is presented multiple times, if later
+@samp{+aeq}.  When the option is presented multiple times, if later
 @var{FLAGS} starts with @samp{-} or @samp{+}, they are cumulative,
-otherwise the later flags override all earlier occurrences.  The
+otherwise the later flags override all earlier occurrences.  Therefore,
+to disable all previously set flags, specify an explicit @var{FLAGS} of
+@samp{-V}.  The
 spelling @option{--debug} is recognized as an unambiguous option for
 compatibility with earlier versions of @acronym{GNU} M4, but for
 consistency with the builtin name, you can also use the spelling
-@option{--debugmode}.
+@option{--debugmode}.  Order is significant with respect to
+file names.
 
 @item --debugfile=@var{FILE}
 @itemx -o @var{FILE}
@@ -4155,7 +4158,7 @@ the previous setting.
 @comment currently enabled?
 
 If no flags are specified with the @option{--debug} option, the default is
-@samp{aeq}.  Many examples in this manual show their output using
+@samp{+aeq}.  Many examples in this manual show their output using
 default flags.
 
 @cindex @acronym{GNU} extensions
@@ -4164,10 +4167,10 @@ the debugging output format:
 
 @deffn {Builtin (gnu)} debugmode (@ovar{flags})
 The argument @var{flags} should be a subset of the letters listed above.
-If no argument is present, all debugging flags are cleared
-(as if no @option{--debug} was given), and with an empty argument the flags
-are reset to the default of @samp{aeq}.  If an unknown flag is
-encountered, an error is issued.
+If no argument is present, all debugging flags are cleared (as if
+@var{flags} were an explicit @samp{-V}).  With an empty argument, the
+most common flags are enabled (as if @var{flags} were an explicit
+@samp{+aeq}).  If an unknown flag is encountered, an error is issued.
 
 The expansion of @code{debugmode} is void.
 @end deffn
@@ -4179,34 +4182,32 @@ define(`foo', `FOO$1')
 @result{}
 traceon(`foo', `divnum')
 @result{}
-debugmode()
-@result{}
+debugmode()dnl same as debugmode(`+aeq')
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO
 debugmode(`V')debugmode(`-q')
-@error{}m4trace:stdin:5: -1- id 6: debugmode ... = <debugmode>@{gnu@}
-@error{}m4trace:stdin:5: -1- id 6: debugmode(`-q') -> `'
+@error{}m4trace:stdin:5: -1- id 7: debugmode ... = <debugmode>@{gnu@}
+@error{}m4trace:stdin:5: -1- id 7: debugmode(`-q') -> `'
 @result{}
 foo(
 `BAR')
-@error{}m4trace:stdin:6: -1- id 7: foo ... = FOO$1
-@error{}m4trace:stdin:6: -1- id 7: foo(BAR) -> FOOBAR
+@error{}m4trace:stdin:6: -1- id 8: foo ... = FOO$1
+@error{}m4trace:stdin:6: -1- id 8: foo(BAR) -> FOOBAR
 @result{}FOOBAR
-debugmode
-@error{}m4trace:stdin:8: -1- id 8: debugmode ... = <debugmode>@{gnu@}
-@error{}m4trace:stdin:8: -1- id 8: debugmode ->@w{ }
-@result{}
+debugmode`'dnl same as debugmode(`-V')
+@error{}m4trace:stdin:8: -1- id 9: debugmode ... = <debugmode>@{gnu@}
+@error{}m4trace:stdin:8: -1- id 9: debugmode ->@w{ }
 foo
 @error{}m4trace: -1- foo
 @result{}FOO
 debugmode(`+clmx')
 @result{}
 foo(divnum)
-@error{}m4trace:11: -1- id 11: foo ... = FOO$1
-@error{}m4trace:11: -2- id 12: divnum ... = <divnum>@{m4@}
-@error{}m4trace:11: -2- id 12: divnum
-@error{}m4trace:11: -1- id 11: foo
+@error{}m4trace:11: -1- id 13: foo ... = FOO$1
+@error{}m4trace:11: -2- id 14: divnum ... = <divnum>@{m4@}
+@error{}m4trace:11: -2- id 14: divnum
+@error{}m4trace:11: -1- id 13: foo
 @result{}FOO0
 debugmode(`-m')
 @result{}
@@ -8409,7 +8410,7 @@ comment delimiters.
 @item d @var{len} @key{NL} @var{str} @key{NL}
 Sets the debug flags, using @var{str} as the argument to
 @code{debugmode}.  If omitted, then the debug flags start in their
-default state.
+default disabled state.
 
 @item D @var{number} , @var{len} @key{NL} @var{str} @key{NL}
 Selects diversion @var{number}, making it current, then copy @var{str}

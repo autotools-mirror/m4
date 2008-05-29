@@ -338,6 +338,45 @@ define{`a.b', `hello $1'}dnl
 ]])
 
 ## --------- ##
+## debugmode ##
+## --------- ##
+
+# Check that debugmode can be preserved, and how it interacts with -d
+AT_SETUP([reloading debugmode])
+AT_KEYWORDS([frozen])
+
+AT_DATA([frozen.m4],
+[[debugmode(`fl')dnl
+]])
+AT_DATA([unfrozen.m4],
+[[traceon(`len')len(`a')
+]])
+
+AT_CHECK_M4([-F frozen.m4f -d-V frozen.m4], [0])
+
+dnl With no -d option, use the frozen file
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [[1
+]], [[m4trace:unfrozen.m4:1: -1- len
+]], [], [ ])
+
+dnl With plain -d before -R, use the frozen file
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [[1
+]], [[m4trace:unfrozen.m4:1: -1- len
+]])
+
+dnl With plain -d after -R, add +aeq to the frozen file
+AT_CHECK_M4([-R frozen.m4f -d unfrozen.m4], [0], [[1
+]], [[m4trace:unfrozen.m4:1: -1- len(`a') -> `1'
+]], [], [ ])
+
+dnl With explicit -d option, override frozen file
+AT_CHECK_M4([-R frozen.m4f -de unfrozen.m4], [0], [[1
+]], [[m4trace: -1- len -> 1
+]])
+
+AT_CLEANUP
+
+## --------- ##
 ## nul bytes ##
 ## --------- ##
 

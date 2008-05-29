@@ -371,10 +371,23 @@ AT_DATA([[nested]],
 ')dnl
 ]])
 
-dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -daeq.
+dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -d+aeq.
 AT_CHECK_M4([-tlen in], [0], [[3
 0
 ]], [[m4trace: -1- len(`abc') -> `3'
+]])
+
+AT_CHECK_M4([-tlen -dfl -d in], [0], [[3
+0
+]], [[m4trace:in:2: -1- len(`abc') -> `3'
+]])
+
+dnl -d after file is deferred (but this is still useful for some flags).
+AT_CHECK_M4([-tlen in -dfli], [0], [[3
+0
+]], [[m4trace: -1- len(`abc') -> `3'
+m4debug: input from m4wrap recursion level 1
+m4debug: input from m4wrap exhausted
 ]])
 
 dnl Test all flags.

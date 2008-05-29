@@ -427,11 +427,11 @@ main (int argc, char *const *argv, char *const *envp)
 	case 'p':
 	case 'r':
 	case 't':
-	case '\1':
 	case POPDEF_OPTION:
 	case SYNCOUTPUT_OPTION:
 	case TRACEOFF_OPTION:
 	case UNLOAD_MODULE_OPTION:
+	defer:
 	  /* Arguments that cannot be handled until later are accumulated.  */
 
 	  defn = (deferred *) xmalloc (sizeof *defn);
@@ -444,11 +444,11 @@ main (int argc, char *const *argv, char *const *envp)
 	  else
 	    tail->next = defn;
 	  tail = defn;
-
-	  if (optchar == '\1')
-	    seen_file = true;
-
 	  break;
+
+	case '\1':
+	  seen_file = true;
+	  goto defer;
 
 	case 'B':
 	  /* In 1.4.x, -B<num> was a no-op option for compatibility with
@@ -537,6 +537,11 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'd':
+          /* Staggered handling of 'd', since -dm is useful prior to
+             first file and prior to reloading, but other -d must also
+             have effect between files.  */
+	  if (seen_file || frozen_file_to_read)
+	    goto defer;
 	  {
 	    int old = m4_get_debug_level_opt (context);
 	    m4_set_debug_level_opt (context, m4_debug_decode (context, old,
@@ -700,6 +705,19 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case 'U':
 	  m4_symbol_delete (M4SYMTAB, arg);
+	  break;
+
+	case 'd':
+	  {
+	    int old = m4_get_debug_level_opt (context);
+	    m4_set_debug_level_opt (context, m4_debug_decode (context, old,
+							      arg));
+	  }
+	  if (m4_get_debug_level_opt (context) < 0)
+	    {
+	      error (0, 0, _("bad debug flags: `%s'"), arg);
+	      m4_set_debug_level_opt (context, 0);
+	    }
 	  break;
 
 	case 'm':

@@ -30,8 +30,13 @@ promoted to 2.0.
     the include path, rather than always searching `.' first.
 
 *** The `-d'/`--debug' command-line option now understands `-' and `+'
-     modifiers, the way `debugmode' has always done.  The option
-    `--debugmode' is added as an alias for `-d'.
+    modifiers, the way the builtin `debugmode' has always done; this allows
+    `-d-V' to disable prior debug settings from the command line, similar
+    to using the builtin `debugmode' without arguments.  The option
+    `--debugmode' is added as an alias for `-d'.  When given the empty
+    string, the mode is treated as `+aeq' instead of `aeq'.  Also, the
+    position of `-d' with respect to files on the command line is now
+    significant.
 
 *** New `--debuglen' command-line option matches the spelling of a new
     macro, and the old spelling `--arglength' now issues a warning that it

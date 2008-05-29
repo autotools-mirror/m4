@@ -39,7 +39,7 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
   char mode = '\0';
 
   if (opts == NULL || *opts == '\0')
-    level = M4_DEBUG_TRACE_DEFAULT;
+    level = M4_DEBUG_TRACE_DEFAULT | previous;
   else
     {
       if (*opts == '-' || *opts == '+')
