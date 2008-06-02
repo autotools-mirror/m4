@@ -1,3 +1,8 @@
+2008-06-02  Eric Blake  <ebb9@byu.net>
+
+	Adjust to recent gnulib change.
+	* configure.ac (AB_INIT): Delete, now that gnulib does this.
+
 2008-05-28  Eric Blake  <ebb9@byu.net>
 
 	Improve frozen debugmode behavior.

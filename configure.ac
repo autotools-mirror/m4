@@ -37,9 +37,6 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
-AB_INIT()
-
-
 ## -------------------------- ##
 ## M4 specific configuration. ##
 ## -------------------------- ##
