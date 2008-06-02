@@ -1,3 +1,8 @@
+2008-06-02  Eric Blake  <ebb9@byu.net>
+
+	Allow autobuild usage.
+	* m4/gnulib.cache: Import autobuild module.
+
 2008-05-23  Eric Blake  <ebb9@byu.net>
 
 	Make closing files be consistent.
