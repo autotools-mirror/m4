@@ -5,6 +5,7 @@
 *.po
 *.pot
 *.sin
+.reference
 boldquot.sed
 cat-id-tbl.c
 LINGUAS

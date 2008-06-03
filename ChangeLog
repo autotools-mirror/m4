@@ -1,5 +1,14 @@
 2008-06-03  Eric Blake  <ebb9@byu.net>
 
+	Borrow bootstrap ideas from gnulib.
+	* bootstrap (options, DOWNLOAD_PO): Remove --download-po; the
+	advertized subset of languages didn't work.  Use --skip-po
+	instead, for consistency with gnulib bootstrap.
+	(func_get_translations): Use rsync, not wget.
+	(func_update_po): Use a reference directory, to avoid changing
+	timestamps on unchanged .po files.
+	* TODO: Update accordingly.
+
 	Fix fallout from previous patch.
 	* doc/m4.texinfo (Builtin): Adjust expected output.
 

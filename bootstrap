@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2008-04-15
+# bootstrap (GNU M4) version 2008-06-03
 # Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
@@ -26,16 +26,13 @@
 # Usage: $progname [options]
 
 # -f      --force            bootstrap even when sources are not from git
-# -p ARG  --download-po=ARG  whether to download pofiles [yes]
+#         --skip-po          skip downloading pofiles
 # -v      --version          print version information
 # -h,-?   --help             print short or long help message
 
-# For --download-po, ARG can also be `no' to skip pofile downloads,
-# `only' to just update pofiles, or a set of locales to add or update.
-
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTOPOINT, AUTORECONF, AWK, GNULIB_TOOL, LIBTOOLIZE, M4, RM, SED, WGET
+#   AUTOPOINT, AUTORECONF, AWK, GNULIB_TOOL, LIBTOOLIZE, M4, RM, SED
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly calling
 # out to parts of the GNU Build Platform.  Currently this requires GNU
@@ -56,13 +53,9 @@
 : ${M4=m4}
 : ${RM=rm -f}
 : ${SED=sed}
-: ${WGET=wget}
-export WGET
-
-: ${DOWNLOAD_PO=yes}
 
 # Ensure file names are sorted consistently across platforms.
-# Also, ensure diagnostics are in English, e.g., "wget --help" below.
+# Also, ensure diagnostics are in English.
 LC_ALL=C
 export LC_ALL
 
@@ -213,29 +206,8 @@ func_update ()
     opt="$1"
     shift
     case $opt in
-      -p|--download-po)
-			test $# = 0 && func_missing_arg $opt && break
-			case $1 in
-			  0|[Nn]*|[Ff]*) DOWNLOAD_PO=no ;;
-			  [Oo]*)	 DOWNLOAD_PO=only ;;
-			esac
-			;;
-
-      # Separate optargs to long options:
-      --download-po=*)
-			arg=`echo "$opt" | $SED "$my_sed_long_arg"`
-			opt=`echo "$opt" | $SED "$my_sed_long_opt"`
-			set -- "$opt" "$arg" ${1+"$@"}
-			;;
-
-      # Separate optargs to short options:
-      -p*)
-			arg=`echo "$opt" |$SED "$my_sed_single_rest"`
-			opt=`echo "$opt" |$SED "$my_sed_single_opt"`
-			set -- "$opt" "$arg" ${1+"$@"}
-			;;
-
       -f|--force)	vcs_only_file=					;;
+      --skip-po)	SKIP_PO=t					;;
       -\?|-h)		func_usage					;;
       --help)		func_help					;;
       --version)	func_version					;;
@@ -254,76 +226,68 @@ func_update ()
   fi
 }
 
-## ------------------------------ ##
-## Fetch translations.            ##
-## (taken from GNU tar bootstrap) ##
-## ------------------------------ ##
+## --------------------------------------- ##
+## Fetch translations.                     ##
+## (taken from gnulib build-aux/bootstrap) ##
+## --------------------------------------- ##
+
+# The command to download all .po files for a specified domain into
+# a specified directory.  Fill in the first %s with the domain name,
+# the second with the destination directory.  Use rsync's -L and -r
+# options because the latest/%s directory and the .po files within
+# are all symlinks.
+po_download_command_format=\
+"rsync -Lrtvz 'translationproject.org::tp/latest/%s/' '%s'"
 
 func_get_translations()
 {
   subdir=$1
   domain=$2
-  po_file=$3
-
-  url=http://translationproject.org/domain/$2.html
-  baseurl=`expr "$url" : '\(.*\)/.*'`
 
   func_echo "getting translations into $subdir for $domain..."
-
-  case $po_file in
-    '') (cd $subdir && rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'`);;
-  esac &&
-
-  $WGET -nv --cache=off -O "$subdir/$domain.html" "$url" &&
-
-  sed -n 's|.*href="\(.*\)/\([^/][^/]*\)/'"$domain"'-\([^/"]*\)\.[^."]*\.po".*|\2:\3:\1|p' <"$subdir/$domain.html" |
-  sort -t: -k 1,1 -k 2,2n -k2,2 -k3,3n -k3,3 -k4,4n -k4,4 -k5,5n -k5.5 |
-  $AWK -F: '
-    { if (lang && $1 != lang) print lang, ver, subdir }
-    { lang = $1; ver = $2; subdir = $3 }
-    END { if (lang) print lang, ver, subdir }
-  ' | $AWK -v domain="$domain" -v po_file="$po_file" -v baseurl="$baseurl" -v subdir="$subdir" '
-    {
-      lang = $1
-      if (po_file == (lang ".po")) next
-
-      ver = $2
-      urlfmt = ""
-      printf "$WGET -nv --cache=off -O %s/%s.po %s/%s/%s/%s-%s.%s.po &&\n", subdir, lang, baseurl, $3, lang, domain, ver, lang
-    }
-    END { print ":" }
-  ' |
-  sh &&
-  ls "$subdir"/*.po | sed 's|.*/||; s|\.po$||' >"$subdir/LINGUAS" &&
-  rm "$subdir/$domain.html"
+  cmd=`printf "$po_download_command_format" "$domain" "$subdir"`
+  eval "$cmd"
 }
 
-## ------------------------------ ##
-## Update translations.           ##
-## (taken from GNU tar bootstrap) ##
-## ------------------------------ ##
+## --------------------------------------- ##
+## Update translations.                    ##
+## (taken from gnulib build-aux/bootstrap) ##
+## --------------------------------------- ##
 
 func_update_po ()
 {
-    if test $# = 1; then
-      case $1 in
-	*.po)  POFILE=$1    ;;
-	*)     POFILE=$1.po ;;
-      esac
-      func_get_translations ./po $package "$POFILE" &&
-      LANG=`expr $POFILE : '\(.*\)\.po'` &&
-      { grep -q $LANG po/LINGUAS ||
-	(echo $LANG; cat po/LINGUAS) | sort -o po/LINGUAS; }
-    else
-      func_get_translations ./po $package
+  # Directory containing primary .po files.
+  # Overwrite them only when we're sure a .po file is new.
+  po_dir=po
+  domain=$package
+
+  # Download *.po files into this dir.
+  # Usually contains *.s1 checksum files.
+  ref_po_dir="$po_dir/.reference"
+
+  test -d $ref_po_dir || mkdir $ref_po_dir || return
+
+  func_get_translations $ref_po_dir $domain \
+    && ls "$ref_po_dir"/*.po 2>/dev/null \
+       | sed 's|.*/||; s|\.po$||' > "$po_dir/LINGUAS"
+  langs=`cd $ref_po_dir && echo *.po | sed 's/\.po//g'`
+
+  test "$langs" = '*' && langs=x
+  for po in $langs; do
+    case $po in x) continue;; esac
+    new_po="$ref_po_dir/$po.po"
+    cksum_file="$ref_po_dir/$po.s1"
+    if ! test -f "$cksum_file" ||
+	! test -f "$po_dir/$po.po" ||
+	! sha1sum -c --status "$cksum_file" < "$new_po" > /dev/null; then
+      echo "updated $po_dir/$po.po..."
+      cp "$new_po" "$po_dir/$po.po" && sha1sum < "$new_po" > "$cksum_file"
     fi
+  done
 }
 
-case $DOWNLOAD_PO in
-  no)   ;;
-  only) func_update_po; exit 0 ;;
-  yes)  func_update_po ;;
-  *)    func_update_po $DOWNLOAD_PO ;;
+case $SKIP_PO in
+  '')  func_update_po ;;
 esac
 
 ## ---------------- ##

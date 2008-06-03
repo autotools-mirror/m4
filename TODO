@@ -31,6 +31,8 @@ for any of these ideas or if you have others to add.
     Marc Espie
     espie@schutzenberger.liafa.jussieu.fr
 
+    Perhaps the gnulib c-stack module or libsigsegv would be useful:
+    http://lists.gnu.org/archive/html/bug-gnu-utils/2008-01/msg00042.html
 
 * FEATURES OR PROBLEMS
 
@@ -129,11 +131,3 @@ for any of these ideas or if you have others to add.
     is found on the build machine.  For that matter, it has been a
     while since the perl module has even been built, and perl has had
     new releases in the meantime.
-
-* OTHER TOOLS
-
-  + Copy coreutils' idea of using rsync, not wget, for grabbing .po
-    files efficiently.
-
-  + Use gnulib's build-aux/git-version-gen for reliable version
-    numbers, now that CVS timestamps are no longer available.

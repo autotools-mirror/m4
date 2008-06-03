@@ -207,7 +207,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   (esp. bug-m4) for outstanding bug reports also in the list of
   pending moderation requests.  This step is not strictly necessary.
 
-* Make sure you have wget installed.
+* Make sure you have rsync installed.
 
 * Make sure you have a copy of xdelta installed, and a copy of the previous
   release tarball in the build directory.
