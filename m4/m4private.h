@@ -341,7 +341,7 @@ struct m4_call_info
 {
   const char *file;	/* The file containing the macro invocation.  */
   int line;		/* The line the macro was called on.  */
-  int call_id;		/* The unique sequence call id of the macro.  */
+  size_t call_id;	/* The unique sequence call id of the macro.  */
   int trace : 1;	/* True to trace this macro.  */
   int debug_level : 31;	/* The debug level for tracing the macro call.  */
   const char *name;	/* The macro name.  */

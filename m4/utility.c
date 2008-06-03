@@ -41,19 +41,19 @@ static const char *skip_space (m4 *, const char *);
    Return true if the macro is guaranteed to expand to the empty
    string, false otherwise.  */
 bool
-m4_bad_argc (m4 *context, int argc, const m4_call_info *caller, size_t min,
+m4_bad_argc (m4 *context, size_t argc, const m4_call_info *caller, size_t min,
 	     size_t max, bool side_effect)
 {
   if (argc - 1 < min)
     {
-      m4_warn (context, 0, caller, _("too few arguments: %d < %d"),
+      m4_warn (context, 0, caller, _("too few arguments: %zu < %zu"),
 	       argc - 1, min);
       return !side_effect;
     }
 
   if (argc - 1 > max)
     {
-      m4_warn (context, 0, caller, _("extra arguments ignored: %d > %d"),
+      m4_warn (context, 0, caller, _("extra arguments ignored: %zu > %zu"),
 	       argc - 1, max);
     }
 

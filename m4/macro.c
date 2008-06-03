@@ -526,7 +526,7 @@ recursion limit of %zu exceeded, use -L<N> to change it"),
 	{
 	  obstack_free (stack->args, args_scratch);
 	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
-	    xfprintf (stderr, "m4debug: -%d- `%s' in use, level=%d, "
+	    xfprintf (stderr, "m4debug: -%zu- `%s' in use, level=%zu, "
 		      "refcount=%zu, argcount=%zu\n", info.call_id,
 		      argv->info->name, level, stack->refcount,
 		      stack->argcount);
@@ -980,13 +980,13 @@ m4__adjust_refcount (m4 *context, size_t level, bool increase)
       obstack_free (stack->args, stack->args_base);
       obstack_free (stack->argv, stack->argv_base);
       if ((debug_macro_level & PRINT_ARGCOUNT_CHANGES) && 1 < stack->argcount)
-	xfprintf (stderr, "m4debug: -%d- freeing %zu args, level=%d\n",
+	xfprintf (stderr, "m4debug: -%zu- freeing %zu args, level=%zu\n",
 		  macro_call_id, stack->argcount, level);
       stack->argcount = 0;
     }
   if (debug_macro_level
       & (increase ? PRINT_REFCOUNT_INCREASE : PRINT_REFCOUNT_DECREASE))
-    xfprintf (stderr, "m4debug: level %d refcount=%d\n", level,
+    xfprintf (stderr, "m4debug: level %zu refcount=%zu\n", level,
 	      stack->refcount);
   return stack->refcount;
 }

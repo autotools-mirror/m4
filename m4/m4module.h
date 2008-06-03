@@ -167,7 +167,7 @@ struct m4_string_pair
    `m4_macro_args *argv' are in scope.  */
 #define M4ARGLEN(i) m4_arg_len (context, argv, i)
 
-extern bool	m4_bad_argc	   (m4 *, int, const m4_call_info *, size_t,
+extern bool	m4_bad_argc	   (m4 *, size_t, const m4_call_info *, size_t,
 				    size_t, bool);
 extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
 				    int *);

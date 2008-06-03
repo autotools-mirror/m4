@@ -1,5 +1,12 @@
 2008-06-03  Eric Blake  <ebb9@byu.net>
 
+	Fix printf type mismatches.
+	* m4/m4module.h (m4_bad_argc): Alter parameter type.
+	* m4/m4private.h (struct m4_call_info): Alter call_id type.
+	* m4/macro.c (expand_macro, m4__adjust_refcount): Use correct
+	specifiers.
+	* m4/utility.c (m4_bad_argc): Likewise.
+
 	Borrow bootstrap ideas from gnulib.
 	* bootstrap (options, DOWNLOAD_PO): Remove --download-po; the
 	advertized subset of languages didn't work.  Use --skip-po
