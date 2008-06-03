@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <signal.h>
 
+#include "progname.h"
 #include "version-etc.h"
 
 #define AUTHORS "Rene' Seindal"
@@ -65,9 +66,6 @@ int nesting_limit = 1024;
 /* User provided regexp for describing m4 words.  */
 const char *user_word_regexp = "";
 #endif
-
-/* The name this program was run with. */
-const char *program_name;
 
 /* Global catchall for any errors that should affect final error status, but
    where we try to continue execution in the meantime.  */
@@ -334,7 +332,7 @@ main (int argc, char *const *argv, char *const *envp)
   const char *frozen_file_to_write = NULL;
   const char *macro_sequence = "";
 
-  program_name = argv[0];
+  set_program_name (argv[0]);
   retcode = EXIT_SUCCESS;
   atexit (close_stdin);
 
