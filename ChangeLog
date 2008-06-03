@@ -1,3 +1,10 @@
+2008-06-03  Eric Blake  <ebb9@byu.net>
+
+	Use progname module rather than rolling our own program_name.
+	* m4/gnulib-cache.m4: Import progname module.
+	* src/m4.c (program_name): Replace...
+	(main): ...with a call to set_program_name.
+
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
 	Stage 24: Allow embedded NUL in macro names.
