@@ -1,3 +1,8 @@
+2008-06-03  Eric Blake  <ebb9@byu.net>
+
+	Fix fallout from previous patch.
+	* doc/m4.texinfo (Builtin): Adjust expected output.
+
 2008-06-02  Eric Blake  <ebb9@byu.net>
 
 	Stage 24c: Improve display of macro names with embedded NUL.

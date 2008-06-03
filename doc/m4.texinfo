@@ -2792,8 +2792,12 @@ builtin(`builtin')
 builtin(`builtin',)
 @error{}m4:stdin:4: Warning: builtin: undefined builtin `'
 @result{}
+builtin(`builtin', ``'
+')
+@error{}m4:stdin:5: Warning: builtin: undefined builtin ``\'\n'
+@result{}
 indir(`index')
-@error{}m4:stdin:5: Warning: index: too few arguments: 0 < 2
+@error{}m4:stdin:7: Warning: index: too few arguments: 0 < 2
 @result{}0
 @end example
 
@@ -2850,10 +2854,19 @@ traceoff
 changequote(`[', `]')
 @result{}
 defn1([foo])
-@error{}m4:stdin:11: Warning: builtin: undefined builtin ``defn''
+@error{}m4:stdin:11: Warning: builtin: undefined builtin ``defn\''
 @result{}
 defn2([foo])
 @result{}bar
+define([defn1], [builtin([defn], $@@)])
+@result{}
+defn1([foo])
+@result{}bar
+changequote
+@result{}
+defn1(`foo')
+@error{}m4:stdin:16: Warning: builtin: undefined builtin `[defn]'
+@result{}
 @end example
 
 @node M4symbols
