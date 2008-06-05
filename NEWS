@@ -9,6 +9,9 @@ Foundation, Inc.
    a macro.  This was most noticeable with `traceon(`traceon')', but
    would also happen in cases such as `foo(traceon(`foo'))'.
 
+** The `-L'/`--nesting-limit' command-line option now defaults to 0 for
+   unlimited on platforms that can detect and deal with stack overflow.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]

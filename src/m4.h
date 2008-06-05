@@ -139,10 +139,6 @@ void m4_error_at_line (int, int, const char *, int,
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
 
-#ifdef USE_STACKOVF
-void setup_stackovf_trap (char *const *, char *const *,
-			  void (*handler) (void));
-#endif
 
 /* File: debug.c  --- debugging and tracing function.  */
 

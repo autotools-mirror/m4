@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <signal.h>
 
+#include "c-stack.h"
 #include "progname.h"
 #include "version-etc.h"
 
@@ -110,21 +111,6 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
 }
-
-#ifdef USE_STACKOVF
-
-/*---------------------------------------.
-| Tell user stack overflowed and abort.	 |
-`---------------------------------------*/
-
-static void
-stackovf_handler (void)
-{
-  M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: stack overflow.  (Infinite define recursion?)"));
-}
-
-#endif /* USE_STACKOV */
 
 
 /*---------------------------------------------.
@@ -175,15 +161,15 @@ Preprocessor features:\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
 ", stdout);
-      fputs ("\
-\n\
+      puts ("");
+      xprintf (_("\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
-", stdout);
+  -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%d]\n\
+"), nesting_limit);
+      puts ("");
       fputs ("\
-\n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
   -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
@@ -338,9 +324,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   include_init ();
   debug_init ();
-#ifdef USE_STACKOVF
-  setup_stackovf_trap (argv, envp, stackovf_handler);
-#endif
+  if (c_stack_action (NULL) == 0)
+    nesting_limit = 0;
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 
