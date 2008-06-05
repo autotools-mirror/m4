@@ -34,25 +34,6 @@ AC_PROG_CC
 AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
 
-AC_CHECK_HEADERS_ONCE([siginfo.h])
-AC_CHECK_TYPES([siginfo_t], [], [],
-[[#include <signal.h>
-#if HAVE_SIGINFO_H
-# include <siginfo.h>
-#endif
-]])
-AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
-[[#include <signal.h>
-]])
-AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
-[[#include <signal.h>
-#if HAVE_SIGINFO_H
-# include <siginfo.h>
-#endif
-]])
-
-AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror])
-
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--enable-gcc-warnings],
                   [turn on lots of GCC warnings (for developers)])],
@@ -115,45 +96,6 @@ then
 fi
 
 M4_INIT
-
-# Code from Jim Avera <jima@netcom.com>.
-# stackovf.c requires:
-#  1. Either sigaction with SA_ONSTACK, or sigvec with SV_ONSTACK
-#  2. Either sigaltstack or sigstack
-#  3. getrlimit, including support for RLIMIT_STACK
-AC_CACHE_CHECK([if stack overflow is detectable], [M4_cv_use_stackovf],
-[M4_cv_use_stackovf=no
-if test "$ac_cv_func_sigaction" = yes || test "$ac_cv_func_sigvec" = yes; then
-  if test "$ac_cv_func_sigaltstack" = yes || test "$ac_cv_func_sigstack" = yes; then
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
-]], [[struct rlimit r; getrlimit (RLIMIT_STACK, &r);
-#if (!defined HAVE_SIGACTION || !defined SA_ONSTACK) \
-    && (!defined HAVE_SIGVEC || !defined SV_ONSTACK)
-choke me /* SA_ONSTACK and/or SV_ONSTACK are not defined */
-#endif
-]])], [M4_cv_use_stackovf=yes])
-  fi
-fi])
-AM_CONDITIONAL([STACKOVF], [test "$M4_cv_use_stackovf" = yes])
-if test "$M4_cv_use_stackovf" = yes; then
-  AC_DEFINE([USE_STACKOVF], [1],
-    [Define to 1 if using stack overflow detection])
-  AC_CHECK_TYPES([rlim_t], [],
-    [AC_DEFINE([rlim_t], [int],
-      [Define to int if rlim_t is not defined in sys/resource.h])],
-    [[#include <sys/resource.h>
-  ]])
-  AC_CHECK_TYPES([stack_t], [],
-    [AC_DEFINE([stack_t], [struct sigaltstack],
-      [Define to struct sigaltstack if stack_t is not in signal.h])],
-    [[#include <signal.h>
-  ]])
-  AC_CHECK_TYPES([sigcontext], [], [], [[#include <signal.h>
-  ]])
-fi
 
 AC_CACHE_CHECK([whether an open file can be renamed],
   [M4_cv_func_rename_open_file_works],
