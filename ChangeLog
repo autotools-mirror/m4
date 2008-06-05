@@ -1,3 +1,25 @@
+2008-06-06  Eric Blake  <ebb9@byu.net>
+
+	Replace stackovf with gnulib c-stack.
+	* m4/gnulib.cache.m4: Import c-stack module.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove check for
+	siginfo.h, sys/wait.h.
+	(AC_CHECK_TYPES): Likewise for siginfo_t.
+	(AC_CHECK_MEMBERS): Likewise for sa_sigaction, ss_sp.
+	(AC_CHECK_FUNCS_ONCE): Likewise for sigaction, sigaltstack,
+	sigstack, sigvec, strerror.
+	(M4_cv_use_stackovf): Likewise for stack overflow detection.
+	* src/Makefile.am (m4_SOURCES): Don't build stackovf.c.
+	* src/stackovf.c: Delete.
+	* src/m4.h (setup_stackovf_trap): Delete.
+	* src/m4.c (stackovf_handler): Delete.
+	(main): Use c_stack_action instead of setup_stackovf_trap.  If
+	stack overflow is detectable, don't limit -L artificially.
+	(usage): Document unlimited default on supported systems.
+	* doc/m4.texinfo (Limits control): Document new default nesting
+	limit.
+	* NEWS: Document this change.
+
 2008-06-03  Eric Blake  <ebb9@byu.net>
 
 	Use progname module rather than rolling our own program_name.

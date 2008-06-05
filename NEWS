@@ -37,6 +37,9 @@ Foundation, Inc.
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
 
+** The `-L'/`--nesting-limit' command-line option now defaults to 0 for
+   unlimited on platforms that can detect and deal with stack overflow.
+
 ** The `defn' builtin now warns when operating on an undefined macro name.
    To simulate 1.4.x behavior, use:
      pushdef(`defn', `ifdef(`$1', `builtin(`defn', `$1')')')

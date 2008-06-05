@@ -25,6 +25,7 @@
 #include <signal.h>
 #include <stdarg.h>
 
+#include "c-stack.h"
 #include "progname.h"
 #include "version-etc.h"
 
@@ -176,21 +177,6 @@ m4_warn (int errnum, const call_info *caller, const char *format, ...)
       va_end (args);
     }
 }
-
-#ifdef USE_STACKOVF
-
-/*---------------------------------------.
-| Tell user stack overflowed and abort.	 |
-`---------------------------------------*/
-
-static void
-stackovf_handler (void)
-{
-  m4_error (EXIT_FAILURE, 0, NULL,
-	    _("ERROR: stack overflow.  (Infinite define recursion?)"));
-}
-
-#endif /* USE_STACKOV */
 
 
 /*---------------------------------------------.
@@ -243,12 +229,12 @@ Preprocessor features:\n\
   -U, --undefine=NAME          undefine NAME\n\
 "), stdout);
       puts ("");
-      fputs (_("\
+      xprintf (_("\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
-"), stdout);
+  -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%d]\n\
+"), nesting_limit);
       puts ("");
       fputs (_("\
 Frozen state files:\n\
@@ -429,9 +415,8 @@ main (int argc, char *const *argv, char *const *envp)
   debug_init ();
   set_quoting_style (NULL, escape_quoting_style);
   set_char_quoting (NULL, ':', 1);
-#ifdef USE_STACKOVF
-  setup_stackovf_trap (argv, envp, stackovf_handler);
-#endif
+  if (c_stack_action (NULL) == 0)
+    nesting_limit = 0;
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 

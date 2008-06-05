@@ -162,10 +162,6 @@ void m4_error (int, int, const call_info *, const char *, ...)
   M4_GNUC_PRINTF (4, 5);
 void m4_warn (int, const call_info *, const char *, ...) M4_GNUC_PRINTF (3, 4);
 
-#ifdef USE_STACKOVF
-void setup_stackovf_trap (char *const *, char *const *,
-			  void (*handler) (void));
-#endif
 
 /* File: debug.c  --- debugging and tracing function.  */
 
