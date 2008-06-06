@@ -68,6 +68,9 @@
 # undef UNIX
 #endif
 
+/* Used if any programmer error is detected (not possible, right?)  */
+#define EXIT_INTERNAL_ERROR 2
+
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
 

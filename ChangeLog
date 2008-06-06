@@ -1,5 +1,15 @@
 2008-06-06  Eric Blake  <ebb9@byu.net>
 
+	Inform users what to do in case of programmer error.
+	* src/m4.h (EXIT_INTERNAL_ERROR): New macro.
+	* configure.ac (AC_TYPE_SIGNAL): Delete, now that we assume C89.
+	* src/m4.c (fault_handler): New method.
+	(program_error_message): New variable, for async-safety.
+	(main): Print bug reporting address rather than dump core on any
+	failed assertions or detected non-stack-overflow faults.
+
+2008-06-06  Eric Blake  <ebb9@byu.net>
+
 	Replace stackovf with gnulib c-stack.
 	* m4/gnulib.cache.m4: Import c-stack module.
 	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove check for
