@@ -177,6 +177,28 @@ m4_warn (int errnum, const call_info *caller, const char *format, ...)
       va_end (args);
     }
 }
+
+/* Translated message for program errors.  Do not translate it in the
+   signal handler, since gettext is not async-signal-safe.  */
+static const char * volatile program_error_message;
+
+/* Print a nicer message about any programmer errors, then exit.  This
+   must be aysnc-signal safe, since it is executed as a signal
+   handler.  If SIGNO is zero, this represents a stack overflow; in
+   that case, we return to allow c_stack_action to handle things.  */
+static void
+fault_handler (int signo)
+{
+  if (signo)
+    {
+      write (STDERR_FILENO, program_name, strlen (program_name));
+      write (STDERR_FILENO, ": ", 2);
+      write (STDERR_FILENO, program_error_message,
+             strlen (program_error_message));
+      write (STDERR_FILENO, "\n", 1);
+      _exit (EXIT_INTERNAL_ERROR);
+    }
+}
 
 
 /*---------------------------------------------.
@@ -415,8 +437,15 @@ main (int argc, char *const *argv, char *const *envp)
   debug_init ();
   set_quoting_style (NULL, escape_quoting_style);
   set_char_quoting (NULL, ':', 1);
-  if (c_stack_action (NULL) == 0)
+
+  /* Stack overflow and program error handling.  */
+  if (c_stack_action (fault_handler) == 0)
     nesting_limit = 0;
+  program_error_message
+    = xasprintf (_("internal error detected; please report this bug to <%s>"),
+                 PACKAGE_BUGREPORT);
+  /* FIXME - use sigaction.  */
+  signal (SIGABRT, fault_handler);
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 

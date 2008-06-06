@@ -32,8 +32,6 @@ AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 AC_PROG_CC
 M4_EARLY
 
-AC_TYPE_SIGNAL
-
 # Tandem/NSK is broken - it has 'long long int' but not
 # 'unsigned long long int', which confuses assumptions made by gnulib.
 # Simply pretend that neither type exists if both do not work.
