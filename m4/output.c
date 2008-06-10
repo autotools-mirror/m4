@@ -749,6 +749,7 @@ insert_file (m4 *context, FILE *file, bool escaped)
   char buffer[COPY_BUFFER_SIZE];
   size_t length;
   char *str = buffer;
+  bool first = true;
 
   assert (output_diversion);
   /* Insert output by big chunks.  */
@@ -761,7 +762,13 @@ insert_file (m4 *context, FILE *file, bool escaped)
       if (length == 0)
 	break;
       if (escaped)
-	str = quotearg_style_mem (escape_quoting_style, buffer, length);
+	{
+	  if (first)
+	    first = false;
+	  else
+	    m4_output_text (context, "\\\n", 2);
+	  str = quotearg_style_mem (escape_quoting_style, buffer, length);
+	}
       m4_output_text (context, str, escaped ? strlen (str) : length);
     }
 }

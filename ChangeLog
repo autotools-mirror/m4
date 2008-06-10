@@ -1,3 +1,9 @@
+2008-06-10  Eric Blake  <ebb9@byu.net>
+
+	Avoid corrupted frozen file if NUL appears on block boundary.
+	* m4/output.c (insert_file): Separate consecutive quotearg blocks
+	with \<newline>, in case last byte of first block was NUL.
+
 2008-06-03  Eric Blake  <ebb9@byu.net>
 
 	Fix printf type mismatches.
