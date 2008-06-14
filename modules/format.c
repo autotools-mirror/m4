@@ -152,10 +152,8 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
      behavior in printf.  */
   char ok[128];
 
-  /* Buffer and stuff.  */
-  char *base;			/* Current position in obs.  */
-  size_t len;			/* Length of formatted text.  */
-  char *str;			/* Malloc'd buffer of formatted text.  */
+  /* Check that formatted text succeeded with correct type.  */
+  int result = 0;
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
   f = fmt = ARG_STR (i, argc, argv);
@@ -349,56 +347,39 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	}
       *p++ = c;
       *p = '\0';
-      base = obstack_next_free (obs);
-      len = obstack_room (obs);
 
       switch (datatype)
 	{
 	case CHAR:
-	  str = asnprintf (base, &len, fstart, width,
-			   ARG_INT (i, argc, argv));
+	  result = obstack_printf (obs, fstart, width,
+				   ARG_INT (i, argc, argv));
 	  break;
 
 	case INT:
-	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_INT (i, argc, argv));
+	  result = obstack_printf (obs, fstart, width, prec,
+				   ARG_INT (i, argc, argv));
 	  break;
 
 	case LONG:
-	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_LONG (i, argc, argv));
+	  result = obstack_printf (obs, fstart, width, prec,
+				   ARG_LONG (i, argc, argv));
 	  break;
 
 	case DOUBLE:
-	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_DOUBLE (i, argc, argv));
+	  result = obstack_printf (obs, fstart, width, prec,
+				   ARG_DOUBLE (i, argc, argv));
 	  break;
 
 	case STR:
-	  str = asnprintf (base, &len, fstart, width, prec,
-			   ARG_STR (i, argc, argv));
+	  result = obstack_printf (obs, fstart, width, prec,
+				   ARG_STR (i, argc, argv));
 	  break;
 
 	default:
 	  abort ();
 	}
-
-      if (str == NULL)
-	/* NULL is unexpected (EILSEQ and EINVAL are not possible
-	   based on our construction of fstart, leaving only ENOMEM,
-	   which should always be fatal).  */
-	m4_error (context, EXIT_FAILURE, errno, me,
-		  _("unable to format output for `%s'"), f);
-      else if (str == base)
-	/* The output was already computed in place, but we need to
-	   account for its size.  */
-	obstack_blank_fast (obs, len);
-      else
-	{
-	  /* The output exceeded available obstack space, copy the
-	     allocated string.  */
-	  obstack_grow (obs, str, len);
-	  free (str);
-	}
+      /* Since obstack_printf can only fail with EILSEQ or EINVAL, but
+	 we constructed fstart, the result should not be negative.  */
+      assert (0 <= result);
     }
 }

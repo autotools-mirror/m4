@@ -352,18 +352,19 @@ M4BUILTIN_HANDLER (dumpdef)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base->str,
 					    data.base->len);
       char *value;
+      size_t len;
       assert (symbol);
 
       /* TODO - add debugmode(b) option to control quoting style.  */
-      fwrite (data.base->str, 1, data.base->len, stderr);
-      fputc (':', stderr);
-      fputc ('\t', stderr);
+      obstack_grow (obs, data.base->str, data.base->len);
+      obstack_1grow (obs, ':');
+      obstack_1grow (obs, '\t');
       m4_symbol_print (context, symbol, obs, quotes, stack, arg_length,
 		       module);
       obstack_1grow (obs, '\n');
-      obstack_1grow (obs, '\0');
+      len = obstack_object_size (obs);
       value = (char *) obstack_finish (obs);
-      fputs (value, stderr);
+      fwrite (value, 1, len, stderr);
       obstack_free (obs, value);
     }
 }
@@ -761,22 +762,19 @@ M4BUILTIN_HANDLER (maketemp)
       const char *str = M4ARG (1);
       size_t len = M4ARGLEN (1);
       size_t i;
-      size_t len2;
+      m4_obstack *scratch = m4_arg_scratch (context);
+      size_t pid_len = obstack_printf (scratch, "%lu",
+				       (unsigned long) getpid ());
+      char *pid = (char *) obstack_copy0 (scratch, "", 0);
 
       for (i = len; i > 1; i--)
 	if (str[i - 1] != 'X')
 	  break;
       obstack_grow (obs, str, i);
-      str = ntoa ((number) getpid (), 10);
-      len2 = strlen (str);
-      if (len2 > len - i)
-	obstack_grow (obs, str + len2 - (len - i), len - i);
+      if (len - i < pid_len)
+	obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-	{
-	  while (i++ < len - len2)
-	    obstack_1grow (obs, '0');
-	  obstack_grow (obs, str, len2);
-	}
+	obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
     }
   else
     m4_make_temp (context, obs, me, M4ARG (1), M4ARGLEN (1), false);
@@ -1169,19 +1167,25 @@ numb_obstack (m4_obstack *obs, number value, int radix, int min)
 {
   const char *s;
   size_t len;
+  unumber uvalue;
 
   if (radix == 1)
     {
-      /* FIXME - this code currently depends on undefined behavior.  */
       if (value < 0)
 	{
 	  obstack_1grow (obs, '-');
-	  value = -value;
+	  uvalue = -value;
 	}
-      while (min-- - value > 0)
-	obstack_1grow (obs, '0');
-      while (value-- != 0)
-	obstack_1grow (obs, '1');
+      else
+	uvalue = value;
+      if (uvalue < min)
+	{
+	  obstack_blank (obs, min - uvalue);
+	  memset ((char *) obstack_next_free (obs) - (min - uvalue), '0',
+		  min - uvalue);
+	}
+      obstack_blank (obs, uvalue);
+      memset ((char *) obstack_next_free (obs) - uvalue, '1', uvalue);
       return;
     }
 
@@ -1193,10 +1197,9 @@ numb_obstack (m4_obstack *obs, number value, int radix, int min)
       s++;
     }
   len = strlen (s);
-  for (min -= len; --min >= 0;)
-    obstack_1grow (obs, '0');
-
-  obstack_grow (obs, s, len);
+  if (min < len)
+    min = len;
+  obstack_printf (obs, "%.*d%s", min - len, 0, s);
 }
 
 

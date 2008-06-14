@@ -1,5 +1,21 @@
 2008-06-16  Eric Blake  <ebb9@byu.net>
 
+	Stage 25a: Use obstack_printf for easier output.
+	Convert macro tracing and other locations to use obstack_printf
+	rather than hand-rolled equivalents.  Ensure that embedded NUL in
+	trace output does not truncate the trace string.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* ltdl/m4/gnulib-cache.m4: Import obstack-printf-posix module.
+	* m4/macro.c (trace_format): Delete; use obstack_printf instead.
+	(trace_header, trace_pre, trace_post): All callers updated.
+	* m4/output.c (m4_shipout_int, m4_tmpname): Use obstack_printf.
+	(m4_divert_text): Speed up syncline output.
+	* modules/m4.c (dumpdef): Handle embedded NUL.
+	(numb_obstack): Speed up eval output.
+	(maketemp): Use obstack_printf.
+	* modules/format.c (format): Likewise.
+
 	Add missing const qualifications.
 	* m4/resyntax.c (m4_resyntax_map): Declare array elements as
 	const.

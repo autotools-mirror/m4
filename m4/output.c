@@ -194,12 +194,7 @@ m4_tmpname (int divnum)
   static size_t offset;
   if (buffer == NULL)
     {
-      obstack_grow (&diversion_storage, output_temp_dir->dir_name,
-		    strlen (output_temp_dir->dir_name));
-      obstack_1grow (&diversion_storage, '/');
-      obstack_1grow (&diversion_storage, 'm');
-      obstack_1grow (&diversion_storage, '4');
-      obstack_1grow (&diversion_storage, '-');
+      obstack_printf (&diversion_storage, "%s/m4-", output_temp_dir->dir_name);
       offset = obstack_object_size (&diversion_storage);
       buffer = (char *) obstack_alloc (&diversion_storage,
 				       INT_BUFSIZE_BOUND (divnum));
@@ -474,8 +469,6 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
 		int line)
 {
   static bool start_of_output_line = true;
-  char linebuf[6 + INT_BUFSIZE_BOUND (unsigned long int)]; /* "#line nnnn" */
-  const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
 
@@ -537,20 +530,17 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
 
 	  if (m4_get_output_line (context) != line)
 	    {
+	      char linebuf[sizeof "#line " + INT_BUFSIZE_BOUND (line)];
 	      sprintf (linebuf, "#line %lu",
 		       (unsigned long int) m4_get_current_line (context));
-	      for (cursor = linebuf; *cursor; cursor++)
-		OUTPUT_CHARACTER (*cursor);
+	      m4_output_text (context, linebuf, strlen (linebuf));
 	      if (m4_get_output_line (context) < 1
 		  && m4_get_current_file (context)[0] != '\0')
 		{
+		  const char *file = m4_get_current_file (context);
 		  OUTPUT_CHARACTER (' ');
 		  OUTPUT_CHARACTER ('"');
-		  for (cursor = m4_get_current_file (context);
-		       *cursor; cursor++)
-		    {
-		      OUTPUT_CHARACTER (*cursor);
-		    }
+		  m4_output_text (context, file, strlen (file));
 		  OUTPUT_CHARACTER ('"');
 		}
 	      OUTPUT_CHARACTER ('\n');
@@ -585,9 +575,7 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
 void
 m4_shipout_int (m4_obstack *obs, int val)
 {
-  char buf[INT_BUFSIZE_BOUND (int)];
-  int len = sprintf(buf, "%d", val);
-  obstack_grow (obs, buf, len);
+  obstack_printf (obs, "%d", val);
 }
 
 /* Output the text S, of length LEN, to OBS.  If QUOTED, also output
