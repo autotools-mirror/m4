@@ -87,8 +87,7 @@ DECLARE (m4_undivert);
 
 #undef DECLARE
 
-static builtin
-builtin_tab[] =
+static builtin const builtin_tab[] =
 {
 
   /* name		GNUext	macros	blind	function */
@@ -149,8 +148,7 @@ builtin_tab[] =
   { "placeholder",	true,	false,	false,	m4_placeholder },
 };
 
-static predefined const
-predefined_tab[] =
+static predefined const predefined_tab[] =
 {
 #if UNIX
   { "unix",	"__unix__",	"" },

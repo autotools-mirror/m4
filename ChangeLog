@@ -1,3 +1,8 @@
+2008-06-16  Eric Blake  <ebb9@byu.net>
+
+	Add missing const qualifications.
+	* src/builtin.c (builtin_tab): Declare array elements as const.
+
 2008-06-03  Eric Blake  <ebb9@byu.net>
 
 	Use progname module rather than rolling our own program_name.
