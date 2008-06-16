@@ -31,7 +31,7 @@
 #define m4_macro_table		traditional_LTX_m4_macro_table
 
 /* A table for mapping m4 symbol names to simple expansion text. */
-m4_macro m4_macro_table[] =
+const m4_macro m4_macro_table[] =
 {
   /* name		text	min	max */
 #if UNIX

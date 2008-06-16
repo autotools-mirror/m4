@@ -48,7 +48,7 @@
 
 
 /* Generate a table for mapping m4 symbol names to handler functions. */
-m4_builtin m4_builtin_table[] =
+const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)			\
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -61,7 +61,7 @@ m4_builtin m4_builtin_table[] =
 
 
 /* A table for mapping m4 symbol names to simple expansion text. */
-m4_macro m4_macro_table[] =
+const m4_macro m4_macro_table[] =
 {
   /* name		text	min	max */
   { "__load__",		"",	0,	0 },

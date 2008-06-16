@@ -61,7 +61,7 @@
 # endif
 #undef BUILTIN
 
-m4_builtin m4_builtin_table[] =
+const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)			\
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)

@@ -115,7 +115,7 @@ static void	numb_obstack	(m4_obstack *obs, number value,
 
 
 /* Generate a table for mapping m4 symbol names to handler functions. */
-m4_builtin m4_builtin_table[] =
+const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)			\
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)

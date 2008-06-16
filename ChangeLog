@@ -1,3 +1,20 @@
+2008-06-16  Eric Blake  <ebb9@byu.net>
+
+	Add missing const qualifications.
+	* m4/resyntax.c (m4_resyntax_map): Declare array elements as
+	const.
+	* modules/gnu.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/import.c (m4_builtin_table): Likewise.
+	* modules/load.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/m4.c (m4_builtin_table): Likewise.
+	* modules/modtest.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/mpeval.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/perl.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/shadow.c (m4_builtin_table, m4_macro_table): Likewise.
+	* modules/stdlib.c (m4_builtin_table): Likewise.
+	* modules/time.c (m4_builtin_table): Likewise.
+	* modules/traditional.c (m4_macro_table): Likewise.
+
 2008-06-10  Eric Blake  <ebb9@byu.net>
 
 	Avoid corrupted frozen file if NUL appears on block boundary.

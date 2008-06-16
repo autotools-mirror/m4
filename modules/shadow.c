@@ -42,7 +42,7 @@
   builtin_functions
 #undef BUILTIN
 
-m4_builtin m4_builtin_table[] =
+const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)			\
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -53,7 +53,7 @@ m4_builtin m4_builtin_table[] =
   { NULL, NULL, 0, 0, 0 },
 };
 
-m4_macro m4_macro_table[] =
+const m4_macro m4_macro_table[] =
 {
   /* name		text		min	max */
   { "__test__",		"`shadow'",	0,	0 },

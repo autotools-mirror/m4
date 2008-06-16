@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -33,7 +33,7 @@ typedef struct {
    the mappings will break programs that load a frozen file made before
    such a change...  */
 
-static m4_resyntax m4_resyntax_map[] =
+static m4_resyntax const m4_resyntax_map[] =
 {
   /* First, the canonical definitions for reverse lookups:  */
 
