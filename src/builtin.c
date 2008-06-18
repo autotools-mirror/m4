@@ -629,7 +629,10 @@ ntoa (int32_t value, int radix)
 static void
 shipout_int (struct obstack *obs, int val)
 {
-  obstack_printf (obs, "%d", val);
+  const char *s;
+
+  s = ntoa ((int32_t) val, 10);
+  obstack_grow (obs, s, strlen (s));
 }
 
 
@@ -1227,9 +1230,13 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       s++;
     }
   len = strlen (s);
-  if (min < len)
-    min = len;
-  obstack_printf (obs, "%.*d%s", min - len, 0, s);
+  if (len < min)
+    {
+      min -= len;
+      obstack_blank (obs, min);
+      memset (obstack_next_free (obs) - min, '0', min);
+    }
+  obstack_grow (obs, s, len);
 }
 
 static void

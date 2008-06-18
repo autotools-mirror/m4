@@ -1,12 +1,21 @@
 2008-06-18  Eric Blake  <ebb9@byu.net>
 
+	Revert speed regression from previous patch.
+	* src/builtin.c (shipout_int, m4_eval): Avoid obstack_printf in
+	hot paths.
+	* src/input.c (MATCH): Use fewer conditionals, and factor
+	adjustment of S...
+	(match_input): ...here for smaller code size.
+	(input_init, set_quotes, set_comment): Supply trailing NUL to
+	delimiters, to meet contract of faster MATCH.
+
 	Stage 25: Handle embedded NUL in changequote and changecom.
 	Track quote and comment delimiters by length, to allow embedded
 	NUL.  Convert macro tracing and other locations to use
 	obstack_printf rather than hand-rolled equivalents.  Ensure that
 	embedded NUL in trace output does not truncate the trace string.
 	Memory impact: none.
-	Speed impact: none noticed.
+	Speed impact: noticeable penalty, from obstack_printf overhead.
 	* m4/gnulib-cache.m4: Import obstack-printf-posix module.
 	* src/m4.h (ntoa): Remove declaration.
 	(DEBUG_PRINT1, DEBUG_PRINT3, MESSAGE, DEBUG_MESSAGE1)

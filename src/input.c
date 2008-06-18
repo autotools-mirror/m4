@@ -1197,11 +1197,12 @@ init_argv_token (struct obstack *obs, token_data *td)
 
 
 /*------------------------------------------------------------------.
-| This function is for matching a string against a prefix of the    |
-| input stream.  If the string S of length SLEN matches the input   |
-| and CONSUME is true, the input is discarded; otherwise any        |
-| characters read are pushed back again.  The function is used only |
-| when multicharacter quotes or comment delimiters are used.        |
+| If the string S of length SLEN matches the next characters of the |
+| input stream, return true.  If CONSUME, the first character has   |
+| already been matched.  If a match is found and CONSUME is true,   |
+| the input is discarded; otherwise any characters read are pushed  |
+| back again.  The function is used only when multicharacter quotes |
+| or comment delimiters are used.                                   |
 `------------------------------------------------------------------*/
 
 static bool
@@ -1212,6 +1213,11 @@ match_input (const char *s, size_t slen, bool consume)
   const char *t;
   bool result = false;
 
+  if (consume)
+    {
+      s++;
+      slen--;
+    }
   assert (slen);
   ch = peek_input (false);
   if (ch != to_uchar (*s))
@@ -1245,21 +1251,22 @@ match_input (const char *s, size_t slen, bool consume)
   return result;
 }
 
-/*---------------------------------------------------------------.
-| The macro MATCH() is used to match a string S of length SLEN   |
-| against the input.  The first character is handled inline, for |
-| speed.  Hopefully, this will not hurt efficiency too much when |
-| single character quotes and comment delimiters are used.  If   |
-| CONSUME, then CH is the result of next_char, and a successful  |
-| match will discard the matched string.  Otherwise, CH is the   |
-| result of peek_input, and the input stream is effectively      |
-| unchanged.                                                     |
-`---------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| The macro MATCH() is used to match a string S of length SLEN        |
+| against the input.  The first character is handled inline for       |
+| speed, and S[SLEN] must be safe to dereference (it is faster to do  |
+| character comparison prior to length checks).  This improves        |
+| efficiency for the common case of single character quotes and       |
+| comment delimiters, while being safe for disabled delimiters as     |
+| well as longer delimiters.  If CONSUME, then CH is the result of    |
+| next_char, and a successful match will discard the matched string.  |
+| Otherwise, CH is the result of peek_input, and the input stream is  |
+| effectively unchanged.                                              |
+`--------------------------------------------------------------------*/
 
 #define MATCH(ch, s, slen, consume)					\
-  ((slen) && to_uchar ((s)[0]) == (ch)					\
-   && ((slen) == 1							\
-       || (match_input ((s) + (consume), (slen) - (consume), consume))))
+  (to_uchar ((s)[0]) == (ch)						\
+   && ((slen) >> 1 ? match_input (s, slen, consume) : (slen)))
 
 
 /*----------------------------------------------------------.
@@ -1291,13 +1298,13 @@ input_init (void)
 
   start_of_input_line = false;
 
-  curr_quote.str1 = xmemdup (DEF_LQUOTE, 1);
+  curr_quote.str1 = xmemdup0 (DEF_LQUOTE, 1);
   curr_quote.len1 = 1;
-  curr_quote.str2 = xmemdup (DEF_RQUOTE, 1);
+  curr_quote.str2 = xmemdup0 (DEF_RQUOTE, 1);
   curr_quote.len2 = 1;
-  curr_comm.str1 = xmemdup (DEF_BCOMM, 1);
+  curr_comm.str1 = xmemdup0 (DEF_BCOMM, 1);
   curr_comm.len1 = 1;
-  curr_comm.str2 = xmemdup (DEF_ECOMM, 1);
+  curr_comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   curr_comm.len2 = 1;
 
 #ifdef ENABLE_CHANGEWORD
@@ -1345,9 +1352,10 @@ set_quotes (const char *lq, size_t lq_len, const char *rq, size_t rq_len)
 
   free (curr_quote.str1);
   free (curr_quote.str2);
-  curr_quote.str1 = xmemdup (lq, lq_len);
+  /* The use of xmemdup0 is essential for MATCH() to work.  */
+  curr_quote.str1 = xmemdup0 (lq, lq_len);
   curr_quote.len1 = lq_len;
-  curr_quote.str2 = xmemdup (rq, rq_len);
+  curr_quote.str2 = xmemdup0 (rq, rq_len);
   curr_quote.len2 = rq_len;
   set_quote_age ();
 }
@@ -1387,9 +1395,10 @@ set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 
   free (curr_comm.str1);
   free (curr_comm.str2);
-  curr_comm.str1 = xmemdup (bc, bc_len);
+  /* The use of xmemdup0 is essential for MATCH() to work.  */
+  curr_comm.str1 = xmemdup0 (bc, bc_len);
   curr_comm.len1 = bc_len;
-  curr_comm.str2 = xmemdup (ec, ec_len);
+  curr_comm.str2 = xmemdup0 (ec, ec_len);
   curr_comm.len2 = ec_len;
   set_quote_age ();
 }
