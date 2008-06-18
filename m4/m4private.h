@@ -438,7 +438,7 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_REST_BIT	(1 << 0)
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
-extern void m4__symtab_remove_module_references (m4_symbol_table*,
+extern void m4__symtab_remove_module_references (m4_symbol_table *,
 						 m4_module *);
 extern bool m4__symbol_value_print (m4 *, m4_symbol_value *, m4_obstack *,
 				    const m4_string_pair *, bool,

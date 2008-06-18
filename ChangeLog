@@ -1,5 +1,9 @@
 2008-06-18  Eric Blake  <ebb9@byu.net>
 
+	Whitespace cleanup.
+	* m4/m4module.h: Use consistent spacing for pointer parameters.
+	* m4/m4private.h: Likewise.
+
 	Stage 25b: Handle embedded NUL in changesyntax and friends.
 	Track quote and comment delimiters by length, to allow embedded
 	NUL.  Improve changesyntax to support assigning syntax to NUL.
