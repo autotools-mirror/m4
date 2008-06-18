@@ -510,26 +510,41 @@ M4BUILTIN_HANDLER (changesyntax)
       size_t i;
       for (i = 1; i < argc; i++)
 	{
-	  const char *spec = M4ARG (i);
-	  char key = *spec++;
-	  char action = key ? *spec : '\0';
+	  size_t len = M4ARGLEN (i);
+	  const char *spec;
+	  char key;
+	  char action;
+
+	  if (!len)
+	    {
+	      m4_reset_syntax (M4SYNTAX);
+	      continue;
+	    }
+	  spec = M4ARG (i);
+	  key = *spec++;
+	  len--;
+	  action = len ? *spec : '\0';
 	  switch (action)
 	    {
 	    case '-':
 	    case '+':
 	    case '=':
 	      spec++;
+	      len--;
 	      break;
 	    case '\0':
-	      break;
+	      if (!len)
+		break;
+	      /* fall through */
 	    default:
 	      action = '=';
 	      break;
 	    }
-	  if (m4_set_syntax (M4SYNTAX, key, action,
-			     key ? m4_expand_ranges (spec, obs) : "") < 0)
-	    m4_warn (context, 0, me, _("undefined syntax code: `%c'"),
-		     key);
+	  if (len)
+	    spec = m4_expand_ranges (spec, &len, m4_arg_scratch (context));
+	  if (m4_set_syntax (M4SYNTAX, key, action, spec, len) < 0)
+	    m4_warn (context, 0, me, _("undefined syntax code: %s"),
+		     quotearg_style_mem (locale_quoting_style, &key, 1));
 	}
     }
   else

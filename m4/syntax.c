@@ -159,7 +159,7 @@ m4_syntax_create (void)
       }
 
   /* Set up current table to match default.  */
-  m4_set_syntax (syntax, '\0', '\0', NULL);
+  m4_reset_syntax (syntax);
   syntax->cached_simple.str1 = syntax->cached_lquote;
   syntax->cached_simple.len1 = 1;
   syntax->cached_simple.str2 = syntax->cached_rquote;
@@ -248,12 +248,15 @@ remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
   return syntax->table[ch];
 }
 
+/* Add the set CHARS of length LEN to syntax category CODE, removing
+   them from whatever category they used to be in.  */
 static void
-add_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
+add_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
+		int code)
 {
   int ch;
 
-  if (*chars == '\0')
+  if (!len)
     return;
 
   if (code == M4_SYNTAX_ESCAPE)
@@ -261,20 +264,27 @@ add_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
 
   /* Adding doesn't affect single-quote or single-comment.  */
 
-  while ((ch = to_uchar (*chars++)))
-    add_syntax_attribute (syntax, ch, code);
+  while (len--)
+    {
+      ch = to_uchar (*chars++);
+      add_syntax_attribute (syntax, ch, code);
+    }
 }
 
+/* Remove the set CHARS of length LEN from syntax category CODE,
+   adding them to category M4_SYNTAX_OTHER instead.  */
 static void
-subtract_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
+subtract_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
+		     int code)
 {
   int ch;
 
-  if (*chars == '\0')
+  if (!len)
     return;
 
-  while ((ch = to_uchar (*chars++)))
+  while (len--)
     {
+      ch = to_uchar (*chars++);
       if ((code & M4_SYNTAX_MASKS) != 0)
 	remove_syntax_attribute (syntax, ch, code);
       else if (m4_has_syntax (syntax, ch, code))
@@ -306,8 +316,13 @@ subtract_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
     }
 }
 
+/* Make the set CHARS of length LEN become syntax category CODE,
+   removing CHARS from any other categories, and sending all bytes in
+   the category but not in CHARS to category M4_SYNTAX_OTHER
+   instead.  */
 static void
-set_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
+set_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
+		int code)
 {
   int ch;
   /* Explicit set of characters to install with this category; all
@@ -320,8 +335,11 @@ set_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
       else if (m4_has_syntax (syntax, ch, code))
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
     }
-  while ((ch = to_uchar (*chars++)))
-    add_syntax_attribute (syntax, ch, code);
+  while (len--)
+    {
+      ch = to_uchar (*chars++);
+      add_syntax_attribute (syntax, ch, code);
+    }
 
   /* Check for any cleanup needed.  */
   check_is_macro_escaped (syntax);
@@ -329,6 +347,8 @@ set_syntax_set (m4_syntax_table *syntax, const char *chars, int code)
   check_is_single_comments (syntax);
 }
 
+/* Reset syntax category CODE to its default state, sending all other
+   characters in the category back to their default state.  */
 static void
 reset_syntax_set (m4_syntax_table *syntax, int code)
 {
@@ -360,47 +380,51 @@ reset_syntax_set (m4_syntax_table *syntax, int code)
   check_is_single_comments (syntax);
 }
 
+/* Reset the syntax table to its default state.  */
+void
+m4_reset_syntax (m4_syntax_table *syntax)
+{
+  /* Restore the default syntax, which has known quote and comment
+     properties.  */
+  memcpy (syntax->table, syntax->orig, sizeof syntax->orig);
+
+  free (syntax->quote.str1);
+  free (syntax->quote.str2);
+  free (syntax->comm.str1);
+  free (syntax->comm.str2);
+
+  syntax->quote.str1 = xmemdup (DEF_LQUOTE, 1);
+  syntax->quote.len1 = 1;
+  syntax->quote.str2 = xmemdup (DEF_RQUOTE, 1);
+  syntax->quote.len2 = 1;
+  syntax->comm.str1 = xmemdup (DEF_BCOMM, 1);
+  syntax->comm.len1 = 1;
+  syntax->comm.str2 = xmemdup (DEF_ECOMM, 1);
+  syntax->comm.len2 = 1;
+
+  add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
+			M4_SYNTAX_RQUOTE);
+  add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
+			M4_SYNTAX_ECOMM);
+
+  syntax->is_single_quotes = true;
+  syntax->is_single_comments = true;
+  syntax->is_macro_escaped = false;
+  set_quote_age (syntax, true, false);
+}
+
+/* Alter the syntax for category KEY, according to ACTION: '+' to add,
+   '-' to subtract, '=' to set, or '\0' to reset.  The array CHARS of
+   length LEN describes the characters to modify; it is ignored if
+   ACTION is '\0'.  Return -1 if KEY is invalid, otherwise return the
+   syntax category matching KEY.  */
 int
 m4_set_syntax (m4_syntax_table *syntax, char key, char action,
-	       const char *chars)
+	       const char *chars, size_t len)
 {
   int code;
 
-  assert (syntax);
-  assert (chars || key == '\0');
-
-  if (key == '\0')
-    {
-      /* Restore the default syntax, which has known quote and comment
-	 properties.  */
-      memcpy (syntax->table, syntax->orig, sizeof syntax->orig);
-
-      free (syntax->quote.str1);
-      free (syntax->quote.str2);
-      free (syntax->comm.str1);
-      free (syntax->comm.str2);
-
-      syntax->quote.str1	= xstrdup (DEF_LQUOTE);
-      syntax->quote.len1	= 1;
-      syntax->quote.str2	= xstrdup (DEF_RQUOTE);
-      syntax->quote.len2	= 1;
-      syntax->comm.str1		= xstrdup (DEF_BCOMM);
-      syntax->comm.len1		= 1;
-      syntax->comm.str2		= xstrdup (DEF_ECOMM);
-      syntax->comm.len2		= 1;
-
-      add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
-			    M4_SYNTAX_RQUOTE);
-      add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
-			    M4_SYNTAX_ECOMM);
-
-      syntax->is_single_quotes		= true;
-      syntax->is_single_comments	= true;
-      syntax->is_macro_escaped		= false;
-      set_quote_age (syntax, true, false);
-      return 0;
-    }
-
+  assert (syntax && chars);
   code = m4_syntax_code (key);
   if (code < 0)
     {
@@ -409,15 +433,16 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
   switch (action)
     {
     case '+':
-      add_syntax_set (syntax, chars, code);
+      add_syntax_set (syntax, chars, len, code);
       break;
     case '-':
-      subtract_syntax_set (syntax, chars, code);
+      subtract_syntax_set (syntax, chars, len, code);
       break;
     case '=':
-      set_syntax_set (syntax, chars, code);
+      set_syntax_set (syntax, chars, len, code);
       break;
     case '\0':
+      assert (!len);
       reset_syntax_set (syntax, code);
       break;
     default:
@@ -555,8 +580,13 @@ check_is_macro_escaped (m4_syntax_table *syntax)
 /* Functions for setting quotes and comment delimiters.  Used by
    m4_changecom () and m4_changequote ().  Both functions override the
    syntax table to maintain compatibility.  */
+
+/* Set the quote delimiters to LQ and RQ, with respective lengths
+   LQ_LEN and RQ_LEN.  Pass NULL if the argument was not present, to
+   distinguish from an explicit empty string.  */
 void
-m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
+m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
+	       const char *rq, size_t rq_len)
 {
   int ch;
 
@@ -572,21 +602,27 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
   if (!lq)
     {
       lq = DEF_LQUOTE;
+      lq_len = 1;
       rq = DEF_RQUOTE;
+      rq_len = 1;
     }
-  else if (!rq || (*lq && !*rq))
-    rq = DEF_RQUOTE;
+  else if (!rq || (lq_len && !rq_len))
+    {
+      rq = DEF_RQUOTE;
+      rq_len = 1;
+    }
 
-  if (strcmp (syntax->quote.str1, lq) == 0
-      && strcmp (syntax->quote.str2, rq) == 0)
+  if (syntax->quote.len1 == lq_len && syntax->quote.len2 == rq_len
+      && memcmp (syntax->quote.str1, lq, lq_len) == 0
+      && memcmp (syntax->quote.str2, rq, rq_len) == 0)
     return;
 
   free (syntax->quote.str1);
   free (syntax->quote.str2);
-  syntax->quote.str1 = xstrdup (lq);
-  syntax->quote.len1 = strlen (lq);
-  syntax->quote.str2 = xstrdup (rq);
-  syntax->quote.len2 = strlen (rq);
+  syntax->quote.str1 = xmemdup (lq, lq_len);
+  syntax->quote.len1 = lq_len;
+  syntax->quote.str2 = xmemdup (rq, rq_len);
+  syntax->quote.len2 = rq_len;
 
   /* changequote overrides syntax_table, but be careful when it is
      used to select a start-quote sequence that is effectively
@@ -620,8 +656,12 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, const char *rq)
   set_quote_age (syntax, false, false);
 }
 
+/* Set the comment delimiters to BC and EC, with respective lengths
+   BC_LEN and EC_LEN.  Pass NULL if the argument was not present, to
+   distinguish from an explicit empty string.  */
 void
-m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
+m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
+		const char *ec, size_t ec_len)
 {
   int ch;
 
@@ -635,20 +675,27 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, const char *ec)
      comment.  See the texinfo for what some other implementations
      do.  */
   if (!bc)
-    bc = ec = "";
-  else if (!ec || (*bc && !*ec))
-    ec = DEF_ECOMM;
+    {
+      bc = ec = "";
+      bc_len = ec_len = 0;
+    }
+  else if (!ec || (bc_len && !ec_len))
+    {
+      ec = DEF_ECOMM;
+      ec_len = 1;
+    }
 
-  if (strcmp (syntax->comm.str1, bc) == 0
-      && strcmp (syntax->comm.str2, ec) == 0)
+  if (syntax->comm.len1 == bc_len && syntax->comm.len2 == ec_len
+      && memcmp (syntax->comm.str1, bc, bc_len) == 0
+      && memcmp (syntax->comm.str2, ec, ec_len) == 0)
     return;
 
   free (syntax->comm.str1);
   free (syntax->comm.str2);
-  syntax->comm.str1 = xstrdup (bc);
-  syntax->comm.len1 = strlen (bc);
-  syntax->comm.str2 = xstrdup (ec);
-  syntax->comm.len2 = strlen (ec);
+  syntax->comm.str1 = xmemdup (bc, bc_len);
+  syntax->comm.len1 = bc_len;
+  syntax->comm.str2 = xmemdup (ec, ec_len);
+  syntax->comm.len2 = ec_len;
 
   /* changecom overrides syntax_table, but be careful when it is used
      to select a start-comment sequence that is effectively

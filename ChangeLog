@@ -1,3 +1,32 @@
+2008-06-18  Eric Blake  <ebb9@byu.net>
+
+	Stage 25b: Handle embedded NUL in changesyntax and friends.
+	Track quote and comment delimiters by length, to allow embedded
+	NUL.  Improve changesyntax to support assigning syntax to NUL.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_set_quotes, m4_set_comment, m4_set_syntax):
+	Add parameter.
+	(m4_reset_syntax): New prototype.
+	* m4/syntax.c (add_syntax_set, subtract_syntax_set)
+	(set_syntax_set, m4_set_quotes, m4_set_comment): Add parameter, to
+	handle embedded NUL.
+	(m4_set_syntax): Likewise.  Also, split code to reset the table...
+	(m4_reset_syntax): ...into a new function.
+	(m4_syntax_create): Adjust callers.
+	* m4/input.c (match_input, MATCH): Add parameter.
+	(m4__next_token, m4__next_token_is_open): Adjust callers.
+	* modules/m4.h (m4_expand_ranges_func): Add parameter.
+	* modules/m4.c (dumpdef): Handle NUL in dumped quotes.
+	(changequote, changecom, translit, m4_expand_ranges): Track
+	delimiter length.
+	* modules/gnu.c (changesyntax): Handle embedded NUL.
+	* src/freeze.c (reload_frozen_state): Adjust callers.
+	* tests/freeze.at (reloading nul): Enhance test.
+	* tests/null.m4: Likewise.
+	* tests/null.out: Update expected output.
+	* tests/null.err: Likewise.
+
 2008-06-16  Eric Blake  <ebb9@byu.net>
 
 	Stage 25a: Use obstack_printf for easier output.

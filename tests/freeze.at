@@ -384,12 +384,13 @@ AT_CLEANUP
 AT_SETUP([reloading nul])
 AT_KEYWORDS([frozen])
 
-dnl AT_DATA can't generate NUL bytes (at least, not in all shells)
-AT_CHECK([printf 'define(-\0-,hi)dnl
+dnl AT_DATA can't generate NUL bytes (at least, not in all shells).
+# Skip the test if printf(1) is insufficient.
+AT_CHECK([printf 'define(-\0-,hi)changequote([,\0])changecom(--\0)dnl
 divert(1)undivert(null.out)' || exit 77],
  [0], [stdout], [ignore])
 mv stdout frozen.m4
-printf 'divert(0)indir(-\0-)\n' > unfrozen.m4
+printf 'divert(0)[divnum\0] @%:@-- indir(-\0-)\n' > unfrozen.m4
 
 # First generate the `expout' output by running over the sources before
 # freezing.

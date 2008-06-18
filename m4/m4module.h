@@ -487,9 +487,13 @@ enum {
 #define m4_has_syntax(S, C, T)						\
   ((m4_syntab ((S), sizeof (C) == 1 ? to_uchar (C) : (C)) & (T)) > 0)
 
-extern void	m4_set_quotes	(m4_syntax_table*, const char*, const char*);
-extern void	m4_set_comment	(m4_syntax_table*, const char*, const char*);
-extern int	m4_set_syntax	(m4_syntax_table*, char, char, const char*);
+extern void	m4_set_quotes	(m4_syntax_table *, const char *, size_t,
+				 const char *, size_t);
+extern void	m4_set_comment	(m4_syntax_table *, const char *, size_t,
+				 const char *, size_t);
+extern int	m4_set_syntax	(m4_syntax_table *, char, char, const char *,
+				 size_t);
+extern void	m4_reset_syntax (m4_syntax_table *);
 
 
 

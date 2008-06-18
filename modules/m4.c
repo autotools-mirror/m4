@@ -51,7 +51,7 @@ extern void m4_set_sysval    (int);
 extern void m4_sysval_flush  (m4 *, bool);
 extern void m4_dump_symbols  (m4 *, m4_dump_symbol_data *, size_t,
 			      m4_macro_args *, bool);
-extern const char *m4_expand_ranges (const char *, m4_obstack *);
+extern const char *m4_expand_ranges (const char *, size_t *, m4_obstack *);
 extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
 			      const char *, size_t, bool);
 
@@ -633,8 +633,8 @@ M4BUILTIN_HANDLER (shift)
 M4BUILTIN_HANDLER (changequote)
 {
   m4_set_quotes (M4SYNTAX,
-		 (argc >= 2) ? M4ARG (1) : NULL,
-		 (argc >= 3) ? M4ARG (2) : NULL);
+		 (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
+		 (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
 }
 
 /* Change the current comment delimiters.  The function set_comment ()
@@ -642,8 +642,8 @@ M4BUILTIN_HANDLER (changequote)
 M4BUILTIN_HANDLER (changecom)
 {
   m4_set_comment (M4SYNTAX,
-		  (argc >= 2) ? M4ARG (1) : NULL,
-		  (argc >= 3) ? M4ARG (2) : NULL);
+		  (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
+		  (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
 }
 
 
@@ -951,31 +951,36 @@ M4BUILTIN_HANDLER (substr)
 }
 
 
-/* Ranges are expanded by the following function, and the expanded strings,
-   without any ranges left, are used to translate the characters of the
-   first argument.  A single - (dash) can be included in the strings by
-   being the first or the last character in the string.  If the first
-   character in a range is after the first in the character set, the range
-   is made backwards, thus 9-0 is the string 9876543210.  */
+/* Any ranges in string S of length *LEN are expanded, using OBS for
+   scratch space, and the expansion returned.  *LEN is set to the
+   expanded length.  A single - (dash) can be included in the strings
+   by being the first or the last character in the string.  If the
+   first character in a range is after the first in the character set,
+   the range is made backwards, thus 9-0 is the string 9876543210.  */
 const char *
-m4_expand_ranges (const char *s, m4_obstack *obs)
+m4_expand_ranges (const char *s, size_t *len, m4_obstack *obs)
 {
   unsigned char from;
   unsigned char to;
+  const char *end = s + *len;
 
   assert (obstack_object_size (obs) == 0);
-  for (from = '\0'; *s != '\0'; from = *s++)
+  assert (s != end);
+  from = *s++;
+  obstack_1grow (obs, from);
+
+  for ( ; s != end; from = *s++)
     {
-      if (*s == '-' && from != '\0')
+      if (*s == '-')
 	{
-	  to = *++s;
-	  if (to == '\0')
+	  if (++s == end)
 	    {
 	      /* trailing dash */
 	      obstack_1grow (obs, '-');
 	      break;
 	    }
-	  else if (from <= to)
+	  to = *s;
+	  if (from <= to)
 	    {
 	      while (from++ < to)
 		obstack_1grow (obs, from);
@@ -989,8 +994,9 @@ m4_expand_ranges (const char *s, m4_obstack *obs)
       else
 	obstack_1grow (obs, *s);
     }
-  obstack_1grow (obs, '\0');
-  return obstack_finish (obs);
+  *len = obstack_object_size (obs);
+  /* FIXME - use obstack_finish once translit is updated.  */
+  return (char *) obstack_copy0 (obs, "", 0);
 }
 
 /* The macro "translit" translates all characters in the first
@@ -1003,6 +1009,8 @@ M4BUILTIN_HANDLER (translit)
   const char *data;
   const char *from;
   const char *to;
+  size_t from_len;
+  size_t to_len;
   char map[UCHAR_MAX + 1] = {0};
   char found[UCHAR_MAX + 1] = {0};
   unsigned char ch;
@@ -1014,16 +1022,18 @@ M4BUILTIN_HANDLER (translit)
     }
 
   from = M4ARG (2);
+  from_len = M4ARGLEN (2);
   if (strchr (from, '-') != NULL)
     {
-      from = m4_expand_ranges (from, m4_arg_scratch (context));
+      from = m4_expand_ranges (from, &from_len, m4_arg_scratch (context));
       assert (from);
     }
 
   to = M4ARG (3);
+  to_len = M4ARGLEN (3);
   if (strchr (to, '-') != NULL)
     {
-      to = m4_expand_ranges (to, m4_arg_scratch (context));
+      to = m4_expand_ranges (to, &to_len, m4_arg_scratch (context));
       assert (to);
     }
 

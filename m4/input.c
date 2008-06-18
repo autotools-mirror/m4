@@ -123,7 +123,7 @@ static	void	init_builtin_token	(m4 *, m4_obstack *,
 					 m4_symbol_value *);
 static	void	append_quote_token	(m4 *, m4_obstack *,
 					 m4_symbol_value *);
-static	bool	match_input		(m4 *, const char *, bool);
+static	bool	match_input		(m4 *, const char *, size_t, bool);
 static	int	next_char		(m4 *, bool, bool, bool);
 static	int	peek_char		(m4 *, bool);
 static	bool	pop_input		(m4 *, bool);
@@ -1352,9 +1352,9 @@ m4_skip_line (m4 *context, const m4_call_info *caller)
 }
 
 
-/* This function is for matching a string against a prefix of the
-   input stream.  If the string S matches the input and CONSUME is
-   true, the input is discarded; otherwise any characters read are
+/* If the string S of length LEN matches the next characters of the
+   input stream, return true.  If CONSUME is true and a match is
+   found, the input is discarded; otherwise any characters read are
    pushed back again.  The function is used only when multicharacter
    quotes or comment delimiters are used.
 
@@ -1365,7 +1365,7 @@ m4_skip_line (m4 *context, const m4_call_info *caller)
    not properly restore the current input file and line when we
    restore unconsumed characters.  */
 static bool
-match_input (m4 *context, const char *s, bool consume)
+match_input (m4 *context, const char *s, size_t len, bool consume)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
@@ -1373,11 +1373,12 @@ match_input (m4 *context, const char *s, bool consume)
   m4_obstack *st;
   bool result = false;
 
+  assert (len);
   ch = peek_char (context, false);
   if (ch != to_uchar (*s))
     return false;			/* fail */
 
-  if (s[1] == '\0')
+  if (len == 1)
     {
       if (consume)
 	next_char (context, false, false, false);
@@ -1389,7 +1390,7 @@ match_input (m4 *context, const char *s, bool consume)
     {
       next_char (context, false, false, false);
       n++;
-      if (*s == '\0')		/* long match */
+      if (--len == 1)		/* long match */
 	{
 	  if (consume)
 	    return true;
@@ -1406,17 +1407,17 @@ match_input (m4 *context, const char *s, bool consume)
   return result;
 }
 
-/* The macro MATCH() is used to match an unsigned char string S
-  against the input.  The first character is handled inline, for
-  speed.  Hopefully, this will not hurt efficiency too much when
-  single character quotes and comment delimiters are used.  If
-  CONSUME, then CH is the result of next_char, and a successful match
-  will discard the matched string.  Otherwise, CH is the result of
-  peek_char, and the input stream is effectively unchanged.  */
-#define MATCH(C, ch, s, consume)					\
-  (to_uchar ((s)[0]) == (ch)						\
-   && (ch) != '\0'							\
-   && ((s)[1] == '\0' || (match_input (C, (s) + (consume), consume))))
+/* The macro MATCH() is used to match an unsigned char string S of
+  length LEN against the input.  The first character is handled
+  inline, for speed.  Hopefully, this will not hurt efficiency too
+  much when single character quotes and comment delimiters are used.
+  If CONSUME, then CH is the result of next_char, and a successful
+  match will discard the matched string.  Otherwise, CH is the result
+  of peek_char, and the input stream is effectively unchanged.  */
+#define MATCH(C, ch, s, len, consume)					\
+  ((len) && to_uchar ((s)[0]) == (ch)					\
+   && ((len) == 1							\
+       || match_input (C, (s) + (consume), (len) - (consume), consume)))
 
 /* While the current input character has the given SYNTAX, append it
    to OBS.  Take care not to pop input source unless the next source
@@ -1628,7 +1629,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  }
       }
     else if (!m4_is_syntax_single_quotes (M4SYNTAX)
-	     && MATCH (context, ch, context->syntax->quote.str1, true))
+	     && MATCH (context, ch, context->syntax->quote.str1,
+		       context->syntax->quote.len1, true))
       {					/* QUOTED STRING, LONGER QUOTES */
 	if (obs)
 	  obs_safe = obs;
@@ -1651,14 +1653,16 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      }
 	    if (ch == CHAR_BUILTIN)
 	      init_builtin_token (context, obs, obs ? token : NULL);
-	    else if (MATCH (context, ch, context->syntax->quote.str2, true))
+	    else if (MATCH (context, ch, context->syntax->quote.str2,
+			    context->syntax->quote.len2, true))
 	      {
 		if (--quote_level == 0)
 		  break;
 		obstack_grow (obs_safe, context->syntax->quote.str2,
 			      context->syntax->quote.len2);
 	      }
-	    else if (MATCH (context, ch, context->syntax->quote.str1, true))
+	    else if (MATCH (context, ch, context->syntax->quote.str1,
+			    context->syntax->quote.len1, true))
 	      {
 		quote_level++;
 		obstack_grow (obs_safe, context->syntax->quote.str1,
@@ -1704,7 +1708,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		? M4_TOKEN_NONE : M4_TOKEN_STRING);
       }
     else if (!m4_is_syntax_single_comments (M4SYNTAX)
-	     && MATCH (context, ch, context->syntax->comm.str1, true))
+	     && MATCH (context, ch, context->syntax->comm.str1,
+		       context->syntax->comm.len1, true))
       {					/* COMMENT, LONGER DELIM */
 	if (obs && !m4_get_discard_comments_opt (context))
 	  obs_safe = obs;
@@ -1729,7 +1734,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		init_builtin_token (context, NULL, NULL);
 		continue;
 	      }
-	    if (MATCH (context, ch, context->syntax->comm.str2, true))
+	    if (MATCH (context, ch, context->syntax->comm.str2,
+		       context->syntax->comm.len2, true))
 	      {
 		obstack_grow (obs_safe, context->syntax->comm.str2,
 			      context->syntax->comm.len2);
@@ -1864,9 +1870,11 @@ m4__next_token_is_open (m4 *context)
 				       | M4_SYNTAX_ALPHA | M4_SYNTAX_LQUOTE
 				       | M4_SYNTAX_ACTIVE))
       || (!m4_is_syntax_single_comments (M4SYNTAX)
-	  && MATCH (context, ch, context->syntax->comm.str1, false))
+	  && MATCH (context, ch, context->syntax->comm.str1,
+		    context->syntax->comm.len1, false))
       || (!m4_is_syntax_single_quotes (M4SYNTAX)
-	  && MATCH (context, ch, context->syntax->quote.str1, false)))
+	  && MATCH (context, ch, context->syntax->quote.str1,
+		    context->syntax->quote.len1, false)))
     return false;
   return m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN);
 }

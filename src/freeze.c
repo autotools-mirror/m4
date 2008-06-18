@@ -588,7 +588,7 @@ reload_frozen_state (m4 *context, const char *name)
 	m4__module_open (context, "gnu", NULL);
       /* Disable { and } categories, since ${11} was not supported in
 	 1.4.x.  */
-      m4_set_syntax (M4SYNTAX, 'O', '+', "{}");
+      m4_set_syntax (M4SYNTAX, 'O', '+', "{}", 2);
       break;
     default:
       if (version > 2)
@@ -771,7 +771,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
 	     other characters are additive.  */
 	  if ((m4_set_syntax (M4SYNTAX, syntax,
 			      (m4_syntax_code (syntax) & M4_SYNTAX_MASKS
-			       ? '=' : '+'), string[0]) < 0)
+			       ? '=' : '+'), string[0], number[0]) < 0)
 	      && (syntax != '\0'))
 	    {
 	      m4_error (context, 0, 0, NULL,
@@ -843,7 +843,8 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 't');
 
 	      /* Change comment strings.  */
 
-	      m4_set_comment (M4SYNTAX, string[0], string[1]);
+	      m4_set_comment (M4SYNTAX, string[0], number[0], string[1],
+			      number[1]);
 	      break;
 
 	    case 'D':
@@ -859,7 +860,8 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 't');
 
 	      /* Change quote strings.  */
 
-	      m4_set_quotes (M4SYNTAX, string[0], string[1]);
+	      m4_set_quotes (M4SYNTAX, string[0], number[0], string[1],
+			     number[1]);
 	      break;
 
 	    default:
