@@ -95,6 +95,7 @@
 #  stdbool \
 #  stdint \
 #  stdlib-safer \
+#  strsignal \
 #  strtod \
 #  strtol \
 #  unlocked-io \
@@ -166,6 +167,7 @@ gl_MODULES([
   stdbool
   stdint
   stdlib-safer
+  strsignal
   strtod
   strtol
   unlocked-io

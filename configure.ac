@@ -34,6 +34,9 @@ AC_PROG_CC
 AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
 
+# M4 is single-threaded; so we can optimize gnulib code by using this:
+gl_DISABLE_THREADS
+
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--enable-gcc-warnings],
                   [turn on lots of GCC warnings (for developers)])],
