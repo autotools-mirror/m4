@@ -1,3 +1,15 @@
+2008-06-18  Eric Blake  <ebb9@byu.net>
+
+	Also trap SIGILL, SIGFPE, SIGBUS.
+	* m4/gnulib-cache.m4: Import strsignal module.
+	* src/m4.c (main): Register more handlers, and prefer sigaction
+	when available.
+	(SIGBUS, NSIG): Provide fallback when lacking.
+	(signal_message): New variable, to keep async-safety.
+	(fault_handler): Display faulting signal description.
+	* configure.ac (gl_DISABLE_THREADS): Request gnulib modules to
+	optimize for single-threaded operation.
+
 2008-06-06  Eric Blake  <ebb9@byu.net>
 
 	Inform users what to do in case of programmer error.

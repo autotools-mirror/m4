@@ -112,9 +112,23 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
     retcode = EXIT_FAILURE;
 }
 
-/* Translated message for program errors.  Do not translate it in the
-   signal handler, since gettext is not async-signal-safe.  */
+#ifndef SIGBUS
+# define SIGBUS SIGILL
+#endif
+
+#ifndef NSIG
+# ifndef MAX
+#  define MAX(a,b) ((a) < (b) ? (b) : (a))
+# endif
+# define NSIG (MAX (SIGABRT, MAX (SIGILL, MAX (SIGFPE,  \
+                                               MAX (SIGSEGV, SIGBUS)))) + 1)
+#endif
+
+/* Pre-translated messages for program errors.  Do not translate in
+   the signal handler, since gettext and strsignal are not
+   async-signal-safe.  */
 static const char * volatile program_error_message;
+static const char * volatile signal_message[NSIG];
 
 /* Print a nicer message about any programmer errors, then exit.  This
    must be aysnc-signal safe, since it is executed as a signal
@@ -125,10 +139,21 @@ fault_handler (int signo)
 {
   if (signo)
     {
+      /* POSIX states that reading static memory is, in general, not
+         async-safe.  However, the static variables that we read are
+         never modified once this handler is installed, so this
+         particular usage is safe.  And it seems an oversight that
+         POSIX claims strlen is not async-safe.  */
       write (STDERR_FILENO, program_name, strlen (program_name));
       write (STDERR_FILENO, ": ", 2);
       write (STDERR_FILENO, program_error_message,
              strlen (program_error_message));
+      if (signal_message[signo])
+        {
+          write (STDERR_FILENO, ": ", 2);
+          write (STDERR_FILENO, signal_message[signo],
+                 strlen (signal_message[signo]));
+        }
       write (STDERR_FILENO, "\n", 1);
       _exit (EXIT_INTERNAL_ERROR);
     }
@@ -347,14 +372,39 @@ main (int argc, char *const *argv, char *const *envp)
   include_init ();
   debug_init ();
 
-  /* Stack overflow and program error handling.  */
+  /* Stack overflow and program error handling.  Ignore failure to
+     install a handler, since this is merely for improved output on
+     crash, and we should never crash ;).  */
   if (c_stack_action (fault_handler) == 0)
     nesting_limit = 0;
   program_error_message
     = xasprintf (_("internal error detected; please report this bug to <%s>"),
                  PACKAGE_BUGREPORT);
-  /* FIXME - use sigaction.  */
+  signal_message[SIGSEGV] = xstrdup (strsignal (SIGSEGV));
+  signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
+  signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
+  signal_message[SIGFPE] = xstrdup (strsignal (SIGFPE));
+  if (SIGBUS != SIGILL)
+    signal_message[SIGBUS] = xstrdup (strsignal (SIGBUS));
+#ifdef HAVE_SIGACTION
+  {
+    struct sigaction act;
+    sigemptyset (&act.sa_mask);
+    /* One-shot - if we fault while handling a fault, we want to
+       revert to default signal behavior.  */
+    act.sa_flags = SA_NODEFER | SA_RESETHAND;
+    act.sa_handler = fault_handler;
+    sigaction (SIGABRT, &act, NULL);
+    sigaction (SIGILL, &act, NULL);
+    sigaction (SIGFPE, &act, NULL);
+    sigaction (SIGBUS, &act, NULL);
+  }
+#else /* !HAVE_SIGACTION */
   signal (SIGABRT, fault_handler);
+  signal (SIGILL, fault_handler);
+  signal (SIGFPE, fault_handler);
+  signal (SIGBUS, fault_handler);
+#endif /* !HAVE_SIGACTION */
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 

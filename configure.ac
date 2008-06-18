@@ -32,6 +32,9 @@ AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 AC_PROG_CC
 M4_EARLY
 
+# M4 is single-threaded; so we can optimize gnulib code by using this:
+gl_DISABLE_THREADS
+
 # Tandem/NSK is broken - it has 'long long int' but not
 # 'unsigned long long int', which confuses assumptions made by gnulib.
 # Simply pretend that neither type exists if both do not work.
