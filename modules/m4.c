@@ -1207,9 +1207,13 @@ numb_obstack (m4_obstack *obs, number value, int radix, int min)
       s++;
     }
   len = strlen (s);
-  if (min < len)
-    min = len;
-  obstack_printf (obs, "%.*d%s", min - len, 0, s);
+  if (len < min)
+    {
+      min -= len;
+      obstack_blank (obs, min);
+      memset ((char *) obstack_next_free (obs) - min, '0', min);
+    }
+  obstack_grow (obs, s, len);
 }
 
 

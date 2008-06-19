@@ -575,7 +575,23 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
 void
 m4_shipout_int (m4_obstack *obs, int val)
 {
-  obstack_printf (obs, "%d", val);
+  /* Using obstack_printf (obs, "%d", val) has too much overhead.  */
+  unsigned int uval;
+  char buf[INT_BUFSIZE_BOUND (unsigned int)];
+  char *p = buf + INT_STRLEN_BOUND (unsigned int);
+
+  if (val < 0)
+    {
+      obstack_1grow (obs, '-');
+      uval = -(unsigned int) val;
+    }
+  else
+    uval = val;
+  *p = '\0';
+  do
+    *--p = '0' + uval % 10;
+  while (uval /= 10);
+  obstack_grow (obs, p, strlen (p));
 }
 
 /* Output the text S, of length LEN, to OBS.  If QUOTED, also output

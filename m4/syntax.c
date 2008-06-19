@@ -21,6 +21,7 @@
 #include <config.h>
 
 #include "m4private.h"
+#include "xmemdup0.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYNTAX */
@@ -393,13 +394,14 @@ m4_reset_syntax (m4_syntax_table *syntax)
   free (syntax->comm.str1);
   free (syntax->comm.str2);
 
-  syntax->quote.str1 = xmemdup (DEF_LQUOTE, 1);
+  /* The use of xmemdup0 is exploited by input.c.  */
+  syntax->quote.str1 = xmemdup0 (DEF_LQUOTE, 1);
   syntax->quote.len1 = 1;
-  syntax->quote.str2 = xmemdup (DEF_RQUOTE, 1);
+  syntax->quote.str2 = xmemdup0 (DEF_RQUOTE, 1);
   syntax->quote.len2 = 1;
-  syntax->comm.str1 = xmemdup (DEF_BCOMM, 1);
+  syntax->comm.str1 = xmemdup0 (DEF_BCOMM, 1);
   syntax->comm.len1 = 1;
-  syntax->comm.str2 = xmemdup (DEF_ECOMM, 1);
+  syntax->comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   syntax->comm.len2 = 1;
 
   add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
@@ -619,9 +621,10 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
 
   free (syntax->quote.str1);
   free (syntax->quote.str2);
-  syntax->quote.str1 = xmemdup (lq, lq_len);
+  /* The use of xmemdup0 is exploited by input.c.  */
+  syntax->quote.str1 = xmemdup0 (lq, lq_len);
   syntax->quote.len1 = lq_len;
-  syntax->quote.str2 = xmemdup (rq, rq_len);
+  syntax->quote.str2 = xmemdup0 (rq, rq_len);
   syntax->quote.len2 = rq_len;
 
   /* changequote overrides syntax_table, but be careful when it is
@@ -692,9 +695,10 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
 
   free (syntax->comm.str1);
   free (syntax->comm.str2);
-  syntax->comm.str1 = xmemdup (bc, bc_len);
+  /* The use of xmemdup0 is exploited by input.c.  */
+  syntax->comm.str1 = xmemdup0 (bc, bc_len);
   syntax->comm.len1 = bc_len;
-  syntax->comm.str2 = xmemdup (ec, ec_len);
+  syntax->comm.str2 = xmemdup0 (ec, ec_len);
   syntax->comm.len2 = ec_len;
 
   /* changecom overrides syntax_table, but be careful when it is used

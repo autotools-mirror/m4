@@ -1,3 +1,15 @@
+2008-06-19  Eric Blake  <ebb9@byu.net>
+
+	Revert speed regression from 2008-06-16.
+	* m4/output.c (m4_shipout_int): Avoid obstack_printf in hot path.
+	* modules/m4.c (numb_obstack): Likewise.
+	* m4/input.c (MATCH): Use fewer conditionals, and factor
+	adjustment of S...
+	(match_input): ...here for smaller code size.
+	* m4/syntax.c (m4_reset_syntax, m4_set_quotes, m4_set_comment):
+	Supply trailing NUL to delimiters, to meet contract of faster
+	MATCH.
+
 2008-06-18  Eric Blake  <ebb9@byu.net>
 
 	Whitespace cleanup.
@@ -38,7 +50,7 @@
 	rather than hand-rolled equivalents.  Ensure that embedded NUL in
 	trace output does not truncate the trace string.
 	Memory impact: none.
-	Speed impact: none noticed.
+	Speed impact: noticeable penalty, from obstack_printf overhead.
 	* ltdl/m4/gnulib-cache.m4: Import obstack-printf-posix module.
 	* m4/macro.c (trace_format): Delete; use obstack_printf instead.
 	(trace_header, trace_pre, trace_post): All callers updated.

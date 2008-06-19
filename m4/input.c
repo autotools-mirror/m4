@@ -1353,10 +1353,11 @@ m4_skip_line (m4 *context, const m4_call_info *caller)
 
 
 /* If the string S of length LEN matches the next characters of the
-   input stream, return true.  If CONSUME is true and a match is
-   found, the input is discarded; otherwise any characters read are
-   pushed back again.  The function is used only when multicharacter
-   quotes or comment delimiters are used.
+   input stream, return true.  If CONSUME, the first byte has already
+   been matched.  If a match is found and CONSUME is true, the input
+   is discarded; otherwise any characters read are pushed back again.
+   The function is used only when multicharacter quotes or comment
+   delimiters are used.
 
    All strings herein should be unsigned.  Otherwise sign-extension
    of individual chars might break quotes with 8-bit chars in it.
@@ -1373,6 +1374,11 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
   m4_obstack *st;
   bool result = false;
 
+  if (consume)
+    {
+      s++;
+      len--;
+    }
   assert (len);
   ch = peek_char (context, false);
   if (ch != to_uchar (*s))
@@ -1407,17 +1413,19 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
   return result;
 }
 
-/* The macro MATCH() is used to match an unsigned char string S of
-  length LEN against the input.  The first character is handled
-  inline, for speed.  Hopefully, this will not hurt efficiency too
-  much when single character quotes and comment delimiters are used.
-  If CONSUME, then CH is the result of next_char, and a successful
-  match will discard the matched string.  Otherwise, CH is the result
-  of peek_char, and the input stream is effectively unchanged.  */
+/* The macro MATCH() is used to match a string S of length LEN against
+  the input.  The first character is handled inline for speed, and
+  S[LEN] must be safe to dereference (it is faster to do character
+  comparison prior to length checks).  This improves efficiency for
+  the common case of single character quotes and comment delimiters,
+  while being safe for disabled delimiters as well as longer
+  delimiters.  If CONSUME, then CH is the result of next_char, and a
+  successful match will discard the matched string.  Otherwise, CH is
+  the result of peek_char, and the input stream is effectively
+  unchanged.  */
 #define MATCH(C, ch, s, len, consume)					\
-  ((len) && to_uchar ((s)[0]) == (ch)					\
-   && ((len) == 1							\
-       || match_input (C, (s) + (consume), (len) - (consume), consume)))
+  (to_uchar ((s)[0]) == (ch)						\
+   && ((len) >> 1 ? match_input (C, s, len, consume) : (len)))
 
 /* While the current input character has the given SYNTAX, append it
    to OBS.  Take care not to pop input source unless the next source
