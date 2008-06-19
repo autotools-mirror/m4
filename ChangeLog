@@ -1,3 +1,8 @@
+2008-06-19  Eric Blake  <ebb9@byu.net>
+
+	Avoid gcc extension.
+	* src/builtin.c (m4_eval): Don't perform arithmetic on void*.
+
 2008-06-18  Eric Blake  <ebb9@byu.net>
 
 	Revert speed regression from previous patch.

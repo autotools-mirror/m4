@@ -1234,7 +1234,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
     {
       min -= len;
       obstack_blank (obs, min);
-      memset (obstack_next_free (obs) - min, '0', min);
+      memset ((char *) obstack_next_free (obs) - min, '0', min);
     }
   obstack_grow (obs, s, len);
 }
