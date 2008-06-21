@@ -90,6 +90,7 @@
 #  quote \
 #  regex \
 #  rename \
+#  sigaction \
 #  snprintf-posix \
 #  spawn-pipe \
 #  stdbool \
@@ -162,6 +163,7 @@ gl_MODULES([
   quote
   regex
   rename
+  sigaction
   snprintf-posix
   spawn-pipe
   stdbool
