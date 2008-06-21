@@ -431,6 +431,7 @@ FILE *trace_file;
 int
 main (int argc, char *const *argv, char *const *envp)
 {
+  struct sigaction act;
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
@@ -477,28 +478,17 @@ main (int argc, char *const *argv, char *const *envp)
   signal_message[SIGFPE] = xstrdup (strsignal (SIGFPE));
   if (SIGBUS != SIGILL)
     signal_message[SIGBUS] = xstrdup (strsignal (SIGBUS));
-#ifdef HAVE_SIGACTION
-  {
-    struct sigaction act;
-    sigemptyset (&act.sa_mask);
-    /* One-shot - if we fault while handling a fault, we want to
-       revert to default signal behavior.  */
-    act.sa_flags = SA_NODEFER | SA_RESETHAND;
-    act.sa_handler = fault_handler;
-    sigaction (SIGABRT, &act, NULL);
-    sigaction (SIGILL, &act, NULL);
-    sigaction (SIGFPE, &act, NULL);
-    sigaction (SIGBUS, &act, NULL);
-  }
-#else /* !HAVE_SIGACTION */
-  signal (SIGABRT, fault_handler);
-  signal (SIGILL, fault_handler);
-  signal (SIGFPE, fault_handler);
-  signal (SIGBUS, fault_handler);
-#endif /* !HAVE_SIGACTION */
+  sigemptyset (&act.sa_mask);
+  /* One-shot - if we fault while handling a fault, we want to revert
+     to default signal behavior.  */
+  act.sa_flags = SA_NODEFER | SA_RESETHAND;
+  act.sa_handler = fault_handler;
+  sigaction (SIGABRT, &act, NULL);
+  sigaction (SIGILL, &act, NULL);
+  sigaction (SIGFPE, &act, NULL);
+  sigaction (SIGBUS, &act, NULL);
 
   /* First, we decode the arguments, to size up tables and stuff.  */
-
   head = tail = NULL;
 
   while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
