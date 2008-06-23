@@ -1,5 +1,8 @@
 2008-06-23  Eric Blake  <ebb9@byu.net>
 
+	Adjust to new gnulib-tool layout.
+	* ltdl/m4/gnulib-cache.m4: Reformat.
+
 	Fix bootstrap comment.
 	* bootstrap: DOWNLOAD_PO was previously removed.
 
