@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2008-06-03
+# bootstrap (GNU M4) version 2008-06-23
 # Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
@@ -486,9 +486,9 @@ func_update "$gnulibdir"/doc/INSTALL INSTALL
 ## Wrapup. ##
 ## ------- ##
 
-if test x"$DOWNLOAD_PO" != xno; then
+if test x"$SKIP_PO" = x; then
   func_echo "If your pofiles are up-to-date, you can rerun bootstrap"
-  func_echo "as \`DOWNLOAD_PO=no $progname' to avoid redownloading."
+  func_echo "as \`$progname --skip-po' to avoid redownloading."
 fi
 
 exit 0

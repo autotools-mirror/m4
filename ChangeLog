@@ -1,3 +1,8 @@
+2008-06-23  Eric Blake  <ebb9@byu.net>
+
+	Fix bootstrap comment.
+	* bootstrap: DOWNLOAD_PO was previously removed.
+
 2008-06-19  Eric Blake  <ebb9@byu.net>
 
 	Revert speed regression from 2008-06-16.
