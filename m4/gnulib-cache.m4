@@ -19,7 +19,55 @@
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([local])
-gl_MODULES([announce-gen assert autobuild avltree-oset binary-io c-stack clean-temp cloexec close-stream closein config-h error fdl fflush flexmember fopen-safer fseeko gendocs getopt git-version-gen gnumakefile gnupload gpl-3.0 intprops memchr2 memmem mkstemp obstack progname quote regex sigaction stdbool stdint stdlib-safer strsignal strtod strtol unlocked-io vasnprintf-posix verror version-etc version-etc-fsf xalloc xmemdup0 xprintf xvasprintf-posix])
+gl_MODULES([
+  announce-gen
+  assert
+  autobuild
+  avltree-oset
+  binary-io
+  c-stack
+  clean-temp
+  cloexec
+  close-stream
+  closein
+  config-h
+  error
+  fdl
+  fflush
+  flexmember
+  fopen-safer
+  fseeko
+  gendocs
+  getopt
+  git-version-gen
+  gnumakefile
+  gnupload
+  gpl-3.0
+  intprops
+  memchr2
+  memmem
+  mkstemp
+  obstack
+  progname
+  quote
+  regex
+  sigaction
+  stdbool
+  stdint
+  stdlib-safer
+  strsignal
+  strtod
+  strtol
+  unlocked-io
+  vasnprintf-posix
+  verror
+  version-etc
+  version-etc-fsf
+  xalloc
+  xmemdup0
+  xprintf
+  xvasprintf-posix
+])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
