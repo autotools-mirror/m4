@@ -1,3 +1,8 @@
+2008-06-23  Eric Blake  <ebb9@byu.net>
+
+	Adjust to new gnulib-tool layout.
+	* m4/gnulib-cache.m4: Reformat.
+
 2008-06-19  Eric Blake  <ebb9@byu.net>
 
 	Avoid gcc extension.
