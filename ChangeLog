@@ -1,3 +1,9 @@
+2008-07-11  Eric Blake  <ebb9@byu.net>
+
+	Avoid bogus whitespace in @ovar, @dvar.
+	* doc/m4.texinfo (ovar, dvar): Add @c.
+	Based on patch by Ralf Wildenhues to Autoconf manual.
+
 2008-06-16  Eric Blake  <ebb9@byu.net>
 
 	Add missing const qualifications.
