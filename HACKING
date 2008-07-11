@@ -65,7 +65,7 @@ and is not part of a release distribution.
   - A pre-installed version of GNU M4 1.4.5 or later, built from a
     package (recommend 1.4.11 or later)
   - Autoconf 2.62 or later
-  - Automake 1.10.1 or later
+  - Automake 1.10a or later
   - Libtool 2.2 or later
   - Gettext 0.16 or later
   - Gperf 3.0 or later

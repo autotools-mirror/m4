@@ -1,5 +1,13 @@
 2008-07-11  Eric Blake  <ebb9@byu.net>
 
+	Bump required automake to 1.10a; regression introduced 2008-01-22.
+	* configure.ac (AM_INIT_AUTOMAKE): Undo requirement downgrade to
+	1.10.1, since we also rely on pkglibexecdir.
+	* HACKING: Fix minimum requirement.
+	* bootstrap: Likewise.
+	* THANKS: Update.
+	Reported by Joel E. Denny.
+
 	Avoid bogus whitespace in @ovar, @dvar.
 	* doc/m4.texinfo (ovar, dvar): Add @c.
 	Based on patch by Ralf Wildenhues to Autoconf manual.

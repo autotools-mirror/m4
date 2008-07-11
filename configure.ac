@@ -53,7 +53,7 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 ## ------------------------ ##
 ## Automake Initialization. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.10.1 subdir-objects dist-bzip2 dist-lzma]
+AM_INIT_AUTOMAKE([1.10a subdir-objects dist-bzip2 dist-lzma]
 m4_bmatch(m4_defn([M4_VERSION]), [-], [gnu], [gnits]))
 
 
