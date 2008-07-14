@@ -1,3 +1,15 @@
+2008-07-13  Eric Blake  <ebb9@byu.net>
+
+	Add -g/--gnu command line argument.
+	* src/m4.c (usage): Mention the new option.
+	(long_options, OPTSTRING): Add new option.
+	(main): Use it.
+	* NEWS: Document this addition.
+	* doc/m4.texinfo (Limits control): Likewise.
+	(Incompatibilities): Mention future use of POSIXLY_CORRECT.
+	* THANKS: Update.
+	Reported by Joel E. Denny.
+
 2008-07-11  Eric Blake  <ebb9@byu.net>
 
 	Avoid bogus whitespace in @ovar, @dvar.

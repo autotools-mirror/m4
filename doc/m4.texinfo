@@ -744,6 +744,23 @@ only by your hardware and operating system constraints) in @acronym{GNU}
 @code{m4}.
 
 @table @code
+@item -g
+@itemx --gnu
+Enable all the extensions in this implementation.  In this release of
+M4, this option is always on by default; it is currently only useful
+when overriding a prior use of @option{--traditional}.  However, having
+@acronym{GNU} behavior as default makes it impossible to write a
+strictly @acronym{POSIX}-compliant client that avoids all incompatible
+@acronym{GNU} M4 extensions, since such a client would have to use the
+non-@acronym{POSIX} command-line option to force full @acronym{POSIX}
+behavior.  Thus, a future version of M4 will be changed to implicitly
+use the option @option{--traditional} if the environment variable
+@env{POSIXLY_CORRECT} is set.  Projects that intentionally use
+@acronym{GNU} extensions should consider using @option{--gnu} to state
+their intentions, so that the project will not mysteriously break if the
+user upgrades to a newer M4 and has @env{POSIXLY_CORRECT} set in their
+environment.
+
 @item -G
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
@@ -7403,6 +7420,22 @@ However, this appears to be a bug in @acronym{POSIX}, since most
 traditional implementations also ignore all whitespace (formfeed,
 carriage return, and vertical tab).  @acronym{GNU} @code{m4} follows
 tradition and ignores all leading unquoted whitespace.
+
+@item
+@cindex @env{POSIXLY_CORRECT}
+A strictly-compliant @acronym{POSIX} client is not allowed to use
+command-line arguments not specified by @acronym{POSIX}.  However, since
+this version of M4 ignores @env{POSIXLY_CORRECT} and enables the option
+@code{--gnu} by default (@pxref{Limits control, , Invoking m4}), a
+client desiring to be strictly compliant has no way to disable
+@acronym{GNU} extensions that conflict with @acronym{POSIX} when
+directly invoking the compiled @code{m4}.  A future version of
+@code{GNU} M4 will honor the environment variable @env{POSIXLY_CORRECT},
+implicitly enabling @option{--traditional} if it is set, in order to
+allow a strictly-compliant client.  In the meantime, a client needing
+strict @acronym{POSIX} compliance can use the workaround of invoking a
+shell script wrapper, where the wrapper then adds @option{--traditional}
+to the arguments passed to the compiled @code{m4}.
 @end itemize
 
 @node Other Incompatibilities
