@@ -2346,6 +2346,23 @@ ifdef(`foo', `yes', `no')
 @result{}yes
 @end example
 
+@ignore
+@comment Stress test of defn, not worth putting in the manual.
+
+@example
+define(`s', `0')define(`l', `0123456789012346789')define(`e', `$@@')
+@result{}
+e(defn(`s'), defn(`s', `s')defn(`s'))
+@result{}0,000
+e(defn(`l'), `
+'defn(`l', `l')defn(`l'))
+@result{}0123456789012346789,
+@result{}012345678901234678901234567890123467890123456789012346789
+e(defn(`l', `s'), defn(`s', `l'))
+@result{}01234567890123467890,00123456789012346789
+@end example
+@end ignore
+
 @node Pushdef
 @section Temporarily redefining macros
 

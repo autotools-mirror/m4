@@ -680,6 +680,7 @@ expand_macro (symbol *sym)
   /* Cleanup.  */
   argv->info = NULL;
   --expansion_level;
+  assert (SYMBOL_PENDING_EXPANSIONS (sym));
   --SYMBOL_PENDING_EXPANSIONS (sym);
 
   if (SYMBOL_DELETED (sym))
@@ -760,7 +761,23 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
 		{
 		case CHAIN_STR:
 		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, increase);
+		    {
+		      assert (!chain->u.u_s.sym);
+		      adjust_refcount (chain->u.u_s.level, increase);
+		    }
+		  else if (chain->u.u_s.sym)
+		    {
+		      symbol *sym = chain->u.u_s.sym;
+		      if (increase)
+			SYMBOL_PENDING_EXPANSIONS (sym)++;
+		      else
+			{
+			  assert (SYMBOL_PENDING_EXPANSIONS (sym));
+			  --SYMBOL_PENDING_EXPANSIONS (sym);
+			  if (SYMBOL_DELETED (sym))
+			    free_symbol (sym);
+			}
+		    }
 		  break;
 		case CHAIN_FUNC:
 		  break;

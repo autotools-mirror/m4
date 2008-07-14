@@ -263,6 +263,7 @@ struct token_chain
 	  const char *str;	/* Pointer to text.  */
 	  size_t len;		/* Remaining length of str.  */
 	  int level;		/* Expansion level of link content, or -1.  */
+	  symbol *sym;		/* Symbol that owns str, or NULL.  */
 	}
       u_s;
       builtin_func *func;		/* Builtin token from defn.  */

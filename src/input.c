@@ -239,6 +239,7 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
       chain->u.u_s.str = str;
       chain->u.u_s.len = len;
       chain->u.u_s.level = -1;
+      chain->u.u_s.sym = NULL;
     }
 }
 
@@ -359,6 +360,7 @@ push_string_init (const char *file, int line)
 void
 push_defn (symbol *sym)
 {
+  token_chain *chain;
   size_t len = SYMBOL_TEXT_LEN (sym);
 
   assert (next && SYMBOL_TYPE (sym) == TOKEN_TEXT);
@@ -379,11 +381,20 @@ push_defn (symbol *sym)
     }
   make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
 
-  /* TODO - optimize this to increment the symbol's reference counter,
-     then decrement it again upon rescan, rather than copying.  */
-  obstack_grow (current_input, SYMBOL_TEXT (sym), len);
-  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
-  next->u.u_c.end->quote_age = SYMBOL_TEXT_QUOTE_AGE (sym);
+  chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
+  if (next->u.u_c.end)
+    next->u.u_c.end->next = chain;
+  else
+    next->u.u_c.chain = chain;
+  next->u.u_c.end = chain;
+  chain->next = NULL;
+  chain->type = CHAIN_STR;
+  chain->quote_age = SYMBOL_TEXT_QUOTE_AGE (sym);
+  chain->u.u_s.str = SYMBOL_TEXT (sym);
+  chain->u.u_s.len = len;
+  chain->u.u_s.level = -1;
+  chain->u.u_s.sym = sym;
+  SYMBOL_PENDING_EXPANSIONS (sym)++;
 }
 
 /*--------------------------------------------------------------------.
@@ -486,6 +497,7 @@ push_token (token_data *token, int level, bool inuse)
       chain->u.u_s.str = TOKEN_DATA_TEXT (token);
       chain->u.u_s.len = TOKEN_DATA_LEN (token);
       chain->u.u_s.level = level;
+      chain->u.u_s.sym = NULL;
       adjust_refcount (level, true);
       inuse = true;
     }
@@ -498,7 +510,8 @@ push_token (token_data *token, int level, bool inuse)
 	  src_chain = src_chain->next;
 	  continue;
 	}
-      if (level == -1)
+      if (level == -1
+	  && (src_chain->type != CHAIN_STR || !src_chain->u.u_s.sym))
 	{
 	  /* Nothing to copy, since link already lives on obstack.  */
 	  assert (src_chain->type != CHAIN_STR
@@ -510,7 +523,8 @@ push_token (token_data *token, int level, bool inuse)
 	  /* Allow inlining the final link with subsequent text.  */
 	  if (!src_chain->next && src_chain->type == CHAIN_STR
 	      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
-		  || (!inuse && src_chain->u.u_s.level == -1)))
+		  || (!inuse && src_chain->u.u_s.level == -1
+		      && !src_chain->u.u_s.sym)))
 	    {
 	      obstack_grow (current_input, src_chain->u.u_s.str,
 			    src_chain->u.u_s.len);
@@ -523,11 +537,12 @@ push_token (token_data *token, int level, bool inuse)
 	  chain->next = NULL;
 	  if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
 	    {
-	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
+	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+		  || (!inuse && !chain->u.u_s.sym))
 		chain->u.u_s.str = (char *) obstack_copy (current_input,
 							  chain->u.u_s.str,
 							  chain->u.u_s.len);
-	      else
+	      else if (!chain->u.u_s.sym)
 		{
 		  chain->u.u_s.level = level;
 		  inuse = true;
@@ -544,8 +559,16 @@ push_token (token_data *token, int level, bool inuse)
 	  assert (!chain->u.u_a.comma && !chain->u.u_a.skip_last);
 	  inuse |= arg_adjust_refcount (chain->u.u_a.argv, true);
 	}
-      else if (chain->type == CHAIN_STR && chain->u.u_s.level >= 0)
-	adjust_refcount (chain->u.u_s.level, true);
+      else if (chain->type == CHAIN_STR)
+	{
+	  if (chain->u.u_s.level >= 0)
+	    {
+	      assert (!chain->u.u_s.sym);
+	      adjust_refcount (chain->u.u_s.level, true);
+	    }
+	  else if (chain->u.u_s.sym)
+	    SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym)++;
+	}
       src_chain = src_chain->next;
     }
   return inuse;
@@ -612,6 +635,7 @@ push_quote_wrapper (void)
 						curr_quote.len1);
       chain->u.u_s.len = curr_quote.len1;
       chain->u.u_s.level = -1;
+      chain->u.u_s.sym = NULL;
     }
 }
 
@@ -745,7 +769,17 @@ pop_input (bool cleanup)
 	      if (chain->u.u_s.len)
 		return false;
 	      if (chain->u.u_s.level >= 0)
-		adjust_refcount (chain->u.u_s.level, false);
+		{
+		  assert (!chain->u.u_s.sym);
+		  adjust_refcount (chain->u.u_s.level, false);
+		}
+	      else if (chain->u.u_s.sym)
+		{
+		  assert (SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym));
+		  --SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym);
+		  if (SYMBOL_DELETED (chain->u.u_s.sym))
+		    free_symbol (chain->u.u_s.sym);
+		}
 	      break;
 	    case CHAIN_FUNC:
 	       if (chain->u.func)
@@ -1015,7 +1049,17 @@ next_buffer (size_t *len, bool allow_quote)
 		      return chain->u.u_s.str;
 		    }
 		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, false);
+		    {
+		      assert (!chain->u.u_s.sym);
+		      adjust_refcount (chain->u.u_s.level, false);
+		    }
+		  else if (chain->u.u_s.sym)
+		    {
+		      assert (SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym));
+		      --SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym);
+		      if (SYMBOL_DELETED (chain->u.u_s.sym))
+			free_symbol (chain->u.u_s.sym);
+		    }
 		  break;
 		case CHAIN_FUNC:
 		  if (chain->u.func)
@@ -1342,7 +1386,17 @@ next_char_1 (bool allow_quote, bool allow_argv)
 		      return to_uchar (*chain->u.u_s.str++);
 		    }
 		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, false);
+		    {
+		      assert (!chain->u.u_s.sym);
+		      adjust_refcount (chain->u.u_s.level, false);
+		    }
+		  else if (chain->u.u_s.sym)
+		    {
+		      assert (SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym));
+		      --SYMBOL_PENDING_EXPANSIONS (chain->u.u_s.sym);
+		      if (SYMBOL_DELETED (chain->u.u_s.sym))
+			free_symbol (chain->u.u_s.sym);
+		    }
 		  break;
 		case CHAIN_FUNC:
 		  if (chain->u.func)
@@ -1505,12 +1559,21 @@ append_quote_token (struct obstack *obs, token_data *td)
      time to inline the token text.  Also, if the quoted string does
      not live in a back-reference, it must be copied.  */
   if (src_chain->type == CHAIN_STR
-      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
-	  || src_chain->u.u_s.level < 0))
+      && src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
     {
       obstack_grow (obs, src_chain->u.u_s.str, src_chain->u.u_s.len);
       if (src_chain->u.u_s.level >= 0)
-	adjust_refcount (src_chain->u.u_s.level, false);
+	{
+	  assert (!src_chain->u.u_s.sym);
+	  adjust_refcount (src_chain->u.u_s.level, false);
+	}
+      else if (src_chain->u.u_s.sym)
+	{
+	  assert (SYMBOL_PENDING_EXPANSIONS (src_chain->u.u_s.sym));
+	  --SYMBOL_PENDING_EXPANSIONS (src_chain->u.u_s.sym);
+	  if (SYMBOL_DELETED (src_chain->u.u_s.sym))
+	    free_symbol (src_chain->u.u_s.sym);
+	}
       return;
     }
 
