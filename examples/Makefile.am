@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -20,6 +20,7 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 EXTRA_DIST =\
+append.m4 \
 capitalize.m4 \
 capitalize2.m4 \
 comments.m4 \

@@ -359,7 +359,7 @@ ill-formed frozen file, invalid builtin %s encountered"),
 	      /* Enter a macro having an expansion text as a definition.  */
 
 	      define_user_macro (string[0], number[0], string[1], number[1],
-				 SYMBOL_PUSHDEF);
+				 SYMBOL_PUSHDEF, 0);
 	      break;
 
 	    case 'Q':

@@ -441,17 +441,19 @@ free_regex (void)
       }
 }
 
-/*------------------------------------------------------------------.
-| Define a predefined or user-defined macro, with name NAME of      |
-| length NAME_LEN, and expansion TEXT of length LEN.  LEN may be    |
-| SIZE_MAX, to use the string length of TEXT instead.  MODE is      |
-| SYMBOL_INSERT for "define" or SYMBOL_PUSHDEF for "pushdef".  This |
-| function is also used from main ().                               |
-`------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Define a predefined or user-defined macro, with name NAME of     |
+| length NAME_LEN, and expansion TEXT of length LEN.  LEN may be   |
+| SIZE_MAX, to use the string length of TEXT instead.  QUOTE_AGE   |
+| describes the quoting used by TEXT, or zero to force rescanning  |
+| when defn is later used to retrieve TEXT.  MODE is SYMBOL_INSERT |
+| for "define" or SYMBOL_PUSHDEF for "pushdef".  This function is  |
+| also used from main ().                                          |
+`-----------------------------------------------------------------*/
 
 void
 define_user_macro (const char *name, size_t name_len, const char *text,
-		   size_t len, symbol_lookup mode)
+		   size_t len, symbol_lookup mode, unsigned int quote_age)
 {
   symbol *s;
   char *defn;
@@ -467,6 +469,7 @@ define_user_macro (const char *name, size_t name_len, const char *text,
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
   SYMBOL_TEXT_LEN (s) = len;
+  SYMBOL_TEXT_QUOTE_AGE (s) = quote_age;
   SYMBOL_MACRO_ARGS (s) = true;
 
   /* Implement --warn-macro-sequence.  */
@@ -532,13 +535,13 @@ builtin_init (void)
       {
 	if (pp->unix_name != NULL)
 	  define_user_macro (pp->unix_name, strlen (pp->unix_name),
-			     pp->func, SIZE_MAX, SYMBOL_INSERT);
+			     pp->func, SIZE_MAX, SYMBOL_INSERT, 0);
       }
     else
       {
 	if (pp->gnu_name != NULL)
 	  define_user_macro (pp->gnu_name, strlen (pp->gnu_name),
-			     pp->func, SIZE_MAX, SYMBOL_INSERT);
+			     pp->func, SIZE_MAX, SYMBOL_INSERT, 0);
       }
 }
 
@@ -693,7 +696,7 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 
   if (argc == 2)
     {
-      define_user_macro (ARG (1), ARG_LEN (1), "", 0, mode);
+      define_user_macro (ARG (1), ARG_LEN (1), "", 0, mode, 0);
       return;
     }
 
@@ -704,7 +707,7 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
       /* fallthru */
     case TOKEN_TEXT:
       define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true),
-			 arg_len (argv, 2, true), mode);
+			 arg_len (argv, 2, true), mode, arg_quote_age (argv));
       break;
 
     case TOKEN_FUNC:
@@ -1091,7 +1094,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	case TOKEN_TEXT:
 	  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-	  obstack_grow (obs, SYMBOL_TEXT (s), SYMBOL_TEXT_LEN (s));
+	  push_defn (s);
 	  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
 	  break;
 
@@ -2458,6 +2461,12 @@ expand_user_macro (struct obstack *obs, symbol *sym,
   size_t len = SYMBOL_TEXT_LEN (sym);
   int i;
   const char *dollar = memchr (text, '$', len);
+
+  if (!dollar)
+    {
+      push_defn (sym);
+      return;
+    }
 
   while (dollar)
     {

@@ -98,6 +98,7 @@ typedef struct string_pair string_pair;
 /* These must come first.  */
 typedef struct token_data token_data;
 typedef struct macro_arguments macro_arguments;
+typedef struct symbol symbol;
 typedef void builtin_func (struct obstack *, int, macro_arguments *);
 
 /* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
@@ -358,6 +359,7 @@ void append_macro (struct obstack *, builtin_func *, token_chain **,
 		   token_chain **);
 void push_macro (struct obstack *, builtin_func *);
 struct obstack *push_string_init (const char *, int);
+void push_defn (symbol *);
 bool push_token (token_data *, int, bool);
 void push_quote_wrapper (void);
 void push_string_finish (void);
@@ -441,12 +443,16 @@ struct symbol
 #define SYMBOL_NAME(S)		((S)->name)
 #define SYMBOL_NAME_LEN(S)	((S)->len)
 #define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
-#define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
-#define SYMBOL_TEXT_LEN(S)	(TOKEN_DATA_LEN (&(S)->data))
+
+/* Only safe when SYMBOL_TYPE(S) == TOKEN_TEXT:  */
+#define SYMBOL_TEXT(S)			(TOKEN_DATA_TEXT (&(S)->data))
+#define SYMBOL_TEXT_LEN(S)		(TOKEN_DATA_LEN (&(S)->data))
+#define SYMBOL_TEXT_QUOTE_AGE(S)	(TOKEN_DATA_QUOTE_AGE (&(S)->data))
+
+/* Only safe when SYMBOL_TYPE(S) == TOKEN_FUNC:  */
 #define SYMBOL_FUNC(S)		(TOKEN_DATA_FUNC (&(S)->data))
 
 typedef enum symbol_lookup symbol_lookup;
-typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
 #define HASHMAX 509		/* default, overridden by -Hsize */
@@ -469,6 +475,7 @@ size_t adjust_refcount (int, bool);
 bool arg_adjust_refcount (macro_arguments *, bool);
 unsigned int arg_argc (macro_arguments *);
 const call_info *arg_info (macro_arguments *);
+unsigned int arg_quote_age (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);
@@ -530,7 +537,7 @@ void define_builtin (const char *, size_t, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
 void define_user_macro (const char *, size_t, const char *, size_t,
-			symbol_lookup);
+			symbol_lookup, unsigned int);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
 void m4_placeholder (struct obstack *, int, macro_arguments *);

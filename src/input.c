@@ -353,6 +353,39 @@ push_string_init (const char *file, int line)
   return current_input;
 }
 
+/*-------------------------------------------------------------.
+| Push the text macro definition in SYM onto the input stack.  |
+`-------------------------------------------------------------*/
+void
+push_defn (symbol *sym)
+{
+  size_t len = SYMBOL_TEXT_LEN (sym);
+
+  assert (next && SYMBOL_TYPE (sym) == TOKEN_TEXT);
+
+  /* Speed consideration - for short enough tokens, the speed and
+     memory overhead of parsing another INPUT_CHAIN link outweighs the
+     time to inline the token text.  */
+  if (len <= INPUT_INLINE_THRESHOLD)
+    {
+      obstack_grow (current_input, SYMBOL_TEXT (sym), len);
+      return;
+    }
+
+  if (next->type == INPUT_STRING)
+    {
+      next->type = INPUT_CHAIN;
+      next->u.u_c.chain = next->u.u_c.end = NULL;
+    }
+  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+
+  /* TODO - optimize this to increment the symbol's reference counter,
+     then decrement it again upon rescan, rather than copying.  */
+  obstack_grow (current_input, SYMBOL_TEXT (sym), len);
+  make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+  next->u.u_c.end->quote_age = SYMBOL_TEXT_QUOTE_AGE (sym);
+}
+
 /*--------------------------------------------------------------------.
 | This function allows gathering input from multiple locations,	      |
 | rather than copying everything consecutively onto the input stack.  |
@@ -1469,13 +1502,15 @@ append_quote_token (struct obstack *obs, token_data *td)
 
   /* Speed consideration - for short enough tokens, the speed and
      memory overhead of parsing another INPUT_CHAIN link outweighs the
-     time to inline the token text.  */
+     time to inline the token text.  Also, if the quoted string does
+     not live in a back-reference, it must be copied.  */
   if (src_chain->type == CHAIN_STR
-      && src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD)
+      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+	  || src_chain->u.u_s.level < 0))
     {
-      assert (src_chain->u.u_s.level >= 0);
       obstack_grow (obs, src_chain->u.u_s.str, src_chain->u.u_s.len);
-      adjust_refcount (src_chain->u.u_s.level, false);
+      if (src_chain->u.u_s.level >= 0)
+	adjust_refcount (src_chain->u.u_s.level, false);
       return;
     }
 

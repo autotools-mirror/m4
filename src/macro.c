@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008,
+   2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -867,6 +867,15 @@ arg_info (macro_arguments *argv)
 {
   assert (argv->info);
   return argv->info;
+}
+
+/* Given ARGV, return the quote age in effect when argument collection
+   completed, or zero if all arguments do not have the same quote
+   age.  */
+unsigned int
+arg_quote_age (macro_arguments *argv)
+{
+  return argv->quote_age;
 }
 
 /* Given ARGV, return the type of argument ARG.  Arg 0 is always text,
