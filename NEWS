@@ -9,6 +9,18 @@ Foundation, Inc.
    a macro.  This was most noticeable with `traceon(`traceon')', but
    would also happen in cases such as `foo(traceon(`foo'))'.
 
+** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
+   For now, the environment variable POSIXLY_CORRECT has no effect on M4
+   behavior; but a future release of M4 will behave as though --traditional
+   is implied if POSIXLY_CORRECT is set (this future change is necessary,
+   because in the current release, there is no way to disable GNU
+   extensions that conflict with POSIX without the use of a non-POSIX
+   command-line argument).  Clients of M4 that want to use GNU extensions,
+   even when POSIXLY_CORRECT is set, should start using the -g command-line
+   argument, even though it is currently a no-op if -G did not appear
+   earlier in the command line, so that the client will not break in the
+   face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]
