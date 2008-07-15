@@ -8239,6 +8239,18 @@ include(`loop.m4')dnl
 @result{}48894
 @end example
 
+@comment appending to macro definition
+
+@comment examples
+@comment options: -Dlimit=50000
+@example
+$ @kbd {m4 -I examples -Dlimit=50000}
+define(`next', `.')define(`debug', `divert`'len(var)')
+@result{}
+include(`append.m4')dnl
+@result{}50000
+@end example
+
 @end ignore
 
 @node Improved m4wrap

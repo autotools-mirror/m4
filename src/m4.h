@@ -432,6 +432,12 @@ struct symbol
   char *name;
   size_t len;
   token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
+  /* In order to make appending an amortized O(n) rather than O(n^2),
+     we must geometrically over-allocate and modify only the suffix
+     when possible, rather than reallocating on every insertion.  This
+     is only valid for TOKEN_TEXT, and is at least as large as
+     SYMBOL_TEXT_LEN.  */
+  size_t allocated;
 };
 
 #define SYMBOL_NEXT(S)		((S)->next)
@@ -448,6 +454,7 @@ struct symbol
 /* Only safe when SYMBOL_TYPE(S) == TOKEN_TEXT:  */
 #define SYMBOL_TEXT(S)			(TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_TEXT_LEN(S)		(TOKEN_DATA_LEN (&(S)->data))
+#define SYMBOL_TEXT_ALLOCATED(S)	((S)->allocated)
 #define SYMBOL_TEXT_QUOTE_AGE(S)	(TOKEN_DATA_QUOTE_AGE (&(S)->data))
 
 /* Only safe when SYMBOL_TYPE(S) == TOKEN_FUNC:  */
@@ -480,6 +487,8 @@ unsigned int arg_quote_age (macro_arguments *);
 token_data_type arg_type (macro_arguments *, unsigned int);
 const char *arg_text (macro_arguments *, unsigned int, bool);
 bool arg_equal (macro_arguments *, unsigned int, unsigned int);
+const char *arg_has_prefix (macro_arguments *, unsigned int, const char *,
+			    size_t);
 bool arg_empty (macro_arguments *, unsigned int);
 size_t arg_len (macro_arguments *, unsigned int, bool);
 builtin_func *arg_func (macro_arguments *, unsigned int);

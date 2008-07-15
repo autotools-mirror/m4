@@ -914,6 +914,37 @@ arg_type (macro_arguments *argv, unsigned int arg)
   return type;
 }
 
+/* Given a CHAIN, convert its links into text on OBS.  If FLATTEN,
+   builtins are ignored.  */
+static void
+collect_chain (struct obstack *obs, token_chain *chain, bool flatten)
+{
+  while (chain)
+    {
+      switch (chain->type)
+	{
+	case CHAIN_STR:
+	  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+	  break;
+	case CHAIN_FUNC:
+	  if (flatten)
+	    break;
+	  assert (!"flatten_chain");
+	  abort ();
+	case CHAIN_ARGV:
+	  assert (!chain->u.u_a.has_func || flatten);
+	  arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+		     quote_cache (NULL, chain->quote_age, chain->u.u_a.quotes),
+		     flatten || chain->u.u_a.flatten, NULL, NULL, NULL, false);
+	  break;
+	default:
+	  assert (!"flatten_chain");
+	  abort ();
+	}
+      chain = chain->next;
+    }
+}
+
 /* Given ARGV, return the text at argument ARG.  Abort if the argument
    is not text.  Arg 0 is always text, and indices beyond argc return
    the empty string.  If FLATTEN, builtins are ignored.  The result is
@@ -941,32 +972,7 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
     case TOKEN_COMP:
       chain = token->u.u_c.chain;
       obs = arg_scratch ();
-      while (chain)
-	{
-	  switch (chain->type)
-	    {
-	    case CHAIN_STR:
-	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	      break;
-	    case CHAIN_FUNC:
-	      if (flatten)
-		break;
-	      assert (!"arg_text");
-	      abort ();
-	    case CHAIN_ARGV:
-	      assert (!chain->u.u_a.has_func || flatten || argv->flatten);
-	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			 quote_cache (NULL, chain->quote_age,
-				      chain->u.u_a.quotes),
-			 flatten || argv->flatten || chain->u.u_a.flatten,
-			 NULL, NULL, NULL, false);
-	      break;
-	    default:
-	      assert (!"arg_text");
-	      abort ();
-	    }
-	  chain = chain->next;
-	}
+      collect_chain (obs, chain, flatten || argv->flatten);
       obstack_1grow (obs, '\0');
       return (char *) obstack_finish (obs);
     case TOKEN_FUNC:
@@ -1124,6 +1130,37 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
      are exhausted.  */
   assert (ca != cb || ca == NULL);
   return ca == cb;
+}
+
+/* Given index ARG within ARGV, if the argument is determined to be
+   appending text onto the existing definition DEFN of length LEN,
+   then return only the text occurring after LEN.  Otherwise, return
+   NULL.  This is useful for optimizing the builtin define, making
+   appending O(n) rather than O(n^2).  */
+const char *
+arg_has_prefix (macro_arguments *argv, unsigned int arg, const char *defn,
+		size_t len)
+{
+  token_data *token;
+  token_chain *chain;
+  struct obstack *obs; /* Scratch space; cleaned at end of macro_expand.  */
+
+  if (arg == 0 || arg >= argv->argc)
+    return NULL;
+  token = arg_token (argv, arg, NULL, false);
+  if (TOKEN_DATA_TYPE (token) != TOKEN_COMP
+      || (!argv->flatten && token->u.u_c.has_func))
+    return NULL;
+  chain = token->u.u_c.chain;
+  assert (chain);
+  if (chain->type == CHAIN_STR && chain->u.u_s.str == defn
+      && chain->u.u_s.len == len)
+    {
+      obs = arg_scratch ();
+      collect_chain (obs, chain->next, argv->flatten);
+      return (char *) obstack_finish (obs);
+    }
+  return NULL;
 }
 
 /* Given ARGV, return true if argument ARG is the empty string.  This

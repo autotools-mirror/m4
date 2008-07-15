@@ -424,6 +424,47 @@ set_macro_sequence (const char *regexp)
   macro_sequence_inuse = true;
 }
 
+/*----------------------------------------------------------------.
+| Check the contents DEFN of length LEN, of the new definition of |
+| macro NAME of length NAME_LEN, for any match of                 |
+| --warn-macro-sequence.                                          |
+`----------------------------------------------------------------*/
+static void
+check_macro_sequence (const char *name, size_t name_len, const char *defn,
+		      size_t len)
+{
+  if (macro_sequence_inuse && len)
+    {
+      regoff_t offset = 0;
+      struct re_registers *regs = &macro_sequence_regs;
+
+      while (offset < len
+	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
+				     len - offset, regs)) >= 0)
+	{
+	  /* Skip empty matches.  */
+	  if (regs->start[0] == regs->end[0])
+	    offset++;
+	  else
+	    {
+	      offset = regs->end[0];
+	      /* Safe to use slot 1 since we don't pass a macro name
+		 to m4_warn.  */
+	      m4_warn (0, NULL, _("definition of %s contains sequence %s"),
+		       quotearg_style_mem (locale_quoting_style, name,
+					   name_len),
+		       quotearg_n_style_mem (1, locale_quoting_style,
+					     defn + regs->start[0],
+					     regs->end[0] - regs->start[0]));
+	    }
+	}
+      if (offset == -2)
+	m4_warn (0, NULL,
+		 _("problem checking --warn-macro-sequence for macro %s"),
+		 quotearg_style_mem (locale_quoting_style, name, name_len));
+    }
+}
+
 /*------------------------------------------------------.
 | Free dynamic memory utilized by regular expressions.  |
 `------------------------------------------------------*/
@@ -469,40 +510,10 @@ define_user_macro (const char *name, size_t name_len, const char *text,
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
   SYMBOL_TEXT_LEN (s) = len;
+  SYMBOL_TEXT_ALLOCATED (s) = len;
   SYMBOL_TEXT_QUOTE_AGE (s) = quote_age;
   SYMBOL_MACRO_ARGS (s) = true;
-
-  /* Implement --warn-macro-sequence.  */
-  if (macro_sequence_inuse && text)
-    {
-      regoff_t offset = 0;
-      struct re_registers *regs = &macro_sequence_regs;
-
-      while (offset < len
-	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
-				     len - offset, regs)) >= 0)
-	{
-	  /* Skip empty matches.  */
-	  if (regs->start[0] == regs->end[0])
-	    offset++;
-	  else
-	    {
-	      offset = regs->end[0];
-	      /* Safe to use slot 1 since we don't pass a macro name
-		 to m4_warn.  */
-	      m4_warn (0, NULL, _("definition of %s contains sequence %s"),
-		       quotearg_style_mem (locale_quoting_style, name,
-					   name_len),
-		       quotearg_n_style_mem (1, locale_quoting_style,
-					     defn + regs->start[0],
-					     regs->end[0] - regs->start[0]));
-	    }
-	}
-      if (offset == -2)
-	m4_warn (0, NULL,
-		 _("problem checking --warn-macro-sequence for macro %s"),
-		 quotearg_style_mem (locale_quoting_style, name, name_len));
-    }
+  check_macro_sequence (name, name_len, defn, len);
 }
 
 /*-----------------------------------------------.
@@ -727,6 +738,51 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 static void
 m4_define (struct obstack *obs, int argc, macro_arguments *argv)
 {
+  /* Special case if we detect that the user is appending to an
+     existing text macro: try to copy only the suffix into the
+     over-allocated slop, to avoid quadratic behavior of always
+     copying the prefix on each append.
+
+     Pending expansions of the existing macro must be exactly 1 (the
+     macro's existing definition is in use as the prefix of the
+     argument); if pending expansions is zero, we are not appending to
+     the current macro, and if it is larger than 1, then either the
+     macro's existing definition is in use elsewhere and must not be
+     invalidated, or we are at least doubling the size of the macro's
+     defintion which means the suffix wouldn't fit in the
+     pre-allocated slop anyway.  */
+  if (argc > 2 && arg_type (argv, 1) == TOKEN_TEXT
+      && arg_type (argv, 2) == TOKEN_TEXT)
+    {
+      const char *name = ARG (1);
+      size_t name_len = ARG_LEN (1);
+      symbol *s = lookup_symbol (name, name_len, SYMBOL_LOOKUP);
+      const char *tail;
+      if (s && SYMBOL_TYPE (s) == TOKEN_TEXT
+	  && SYMBOL_PENDING_EXPANSIONS (s) == 1
+	  && (tail = arg_has_prefix (argv, 2, SYMBOL_TEXT (s),
+				     SYMBOL_TEXT_LEN (s))))
+	{
+	  size_t len = ARG_LEN (2);
+	  if (SYMBOL_TEXT_ALLOCATED (s) < len)
+	    {
+	      size_t new_len = len * 2;
+	      char *old_defn = SYMBOL_TEXT (s);
+	      if (new_len < len)
+		new_len = len;
+	      SYMBOL_TEXT (s) = xcharalloc (new_len);
+	      memcpy (SYMBOL_TEXT (s), old_defn, SYMBOL_TEXT_LEN (s));
+	      free (old_defn);
+	      SYMBOL_TEXT_ALLOCATED (s) = new_len;
+	    }
+	  memcpy (SYMBOL_TEXT (s) + SYMBOL_TEXT_LEN (s), tail,
+		  len - SYMBOL_TEXT_LEN (s));
+	  SYMBOL_TEXT_LEN (s) = len;
+	  SYMBOL_TEXT_QUOTE_AGE (s) = arg_quote_age (argv);
+	  check_macro_sequence (name, name_len, SYMBOL_TEXT (s), len);
+	  return;
+	}
+    }
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
