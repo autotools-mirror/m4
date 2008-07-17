@@ -488,6 +488,22 @@ main (int argc, char *const *argv, char *const *envp)
   sigaction (SIGFPE, &act, NULL);
   sigaction (SIGBUS, &act, NULL);
 
+#ifdef DEBUG_STKOVF
+  /* Make it easier to test our fault handlers.  Exporting M4_CRASH=0
+     attempts a SIGSEGV, exporting it as 1 attempts an assertion
+     failure with a fallback to abort.  */
+  {
+    char *crash = getenv ("M4_CRASH");
+    if (crash)
+      {
+        if (!atoi (crash))
+          ++*(int *) 8;
+        assert (false);
+        abort ();
+      }
+  }
+#endif /* DEBUG_STKOVF */
+
   /* First, we decode the arguments, to size up tables and stuff.  */
   head = tail = NULL;
 

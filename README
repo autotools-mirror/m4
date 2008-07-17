@@ -19,6 +19,15 @@ ahead and start with `./configure'.  If you are trying to build `m4'
 from git or CVS, more information can be found in the file HACKING,
 only found in a version control checkout.
 
+M4 has an optional dependency on the libsigsegv library:
+  http://www.gnu.org/software/libsigsegv/
+If the library has not been installed in the standard location, you
+can use `./configure --with-libsigsegv-prefix=/path/to/dir', to make
+the build of `m4' use /path/to/dir/include/sigsegv.h as appropriate.
+The use of this library is optional; the only difference in having it
+available is that it increases the number of platforms where `m4' can
+correctly distinguish stack overflow from an internal bug.
+
 In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to
 use m4 seriously, you might find useful material down there.
