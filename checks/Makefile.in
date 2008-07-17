@@ -36,14 +36,16 @@ program_transform_name = @program_transform_name@
 AWK = @AWK@
 
 # Vern says that the first star is required around an Alpha make bug.
-CHECKS = $(srcdir)/*[0-9][0-9][0-9].*
+DOC_CHECKS = $(srcdir)/*[0-9][0-9][0-9].*
+CHECKS = $(DOC_CHECKS) $(srcdir)/stackovf.test
 # Makefile.in is automatically distributed by automake.
-DISTFILES = $(srcdir)/get-them $(srcdir)/check-them $(srcdir)/stamp-checks
+DISTFILES = $(srcdir)/get-them $(srcdir)/check-them $(srcdir)/stamp-checks \
+	$(srcdir)/stackovf.test
 
 all: $(srcdir)/stamp-checks
 
 $(srcdir)/stamp-checks: $(srcdir)/get-them $(srcdir)/../doc/m4.texinfo
-	rm -f $(CHECKS)
+	rm -f $(DOC_CHECKS)
 	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texinfo
 	touch $(srcdir)/stamp-checks
 
@@ -73,13 +75,13 @@ distclean: clean
 	rm -f Makefile
 
 maintainer-clean realclean: distclean
-	rm -f $(CHECKS) $(srcdir)/stamp-checks
+	rm -f $(DOC_CHECKS) $(srcdir)/stamp-checks
 
 distdir: dist
 
 dist: $(DISTFILES)
 	@echo "Copying distribution files"
-	@for file in $(DISTFILES) $(CHECKS); do \
+	@for file in $(DISTFILES) $(DOC_CHECKS); do \
 	  ln $$file ../$(PACKAGE)-$(VERSION)/checks 2> /dev/null \
 	    || cp -p $$file ../$(PACKAGE)-$(VERSION)/checks; \
 	done

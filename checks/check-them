@@ -70,6 +70,18 @@ do
     continue
   }
   echo "Checking $file"
+
+  case $file in
+    *stackovf.test)
+      "$file" "$m4"
+      case $? in
+	77) skipped="$skipped $file";;
+	0) ;;
+	*) failed="$failed $file"
+      esac
+      continue ;;
+  esac
+
   options=`sed -ne '3s/^dnl @ extra options: //p;3q' "$file"`
   sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
     | LC_MESSAGES=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
