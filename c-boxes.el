@@ -1,7 +1,22 @@
 ;;; Boxed comments for C mode.
-;;; Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+;;; Copyright (C) 1991, 1992, 1993, 1994, 2008 Free Software Foundation, Inc.
 ;;; Francois Pinard <pinard@iro.umontreal.ca>, April 1991.
 ;;;
+;;; This file is part of GNU M4.
+;;;
+;;; GNU M4 is free software: you can redistribute it and/or modify
+;;; it under the terms of the GNU General Public License as published by
+;;; the Free Software Foundation, either version 3 of the License, or
+;;; (at your option) any later version.
+;;;
+;;; GNU M4 is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; GNU General Public License for more details.
+;;;
+;;; You should have received a copy of the GNU General Public License
+;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; I often refill paragraphs inside C comments, while stretching or
 ;;; shrinking the surrounding box as needed.  This is a real pain to
 ;;; do by hand.  Here is the code I made to ease my life on this,
