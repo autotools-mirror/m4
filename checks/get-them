@@ -3,6 +3,21 @@
 # Extract all examples from the manual source.
 # Copyright (C) 1992, 2005, 2006, 2007, 2008 Free Software Foundation,
 # Inc.
+#
+# This file is part of GNU M4.
+#
+# GNU M4 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# GNU M4 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This script is for use with GNU awk.
 
@@ -79,7 +94,8 @@ BEGIN {
     printf("dnl @ %s:%d: Origin of test\n"\
 	   "dnl @ expected status: %d\n"\
 	   "dnl @ extra options: %s\n"\
-	   "dnl @ Copyright (C) 2006, 2007 Free Software Foundation\n"\
+	   "dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,\n"\
+	   "dnl @ Inc.\n"\
 	   "dnl @ This file is free software; the Free Software Foundation\n"\
 	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
 	   "dnl @ with or without modifications, as long as this notice\n"\

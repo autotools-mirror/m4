@@ -1,3 +1,11 @@
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
+	Fix missing copyright notices.
+	* acinclude.m4: Add copyright license details.
+	* c-boxes.el: Likewise.
+	* checks/get-them: Likewise.
+	* checks/check-them: Likewise.
+
 2008-07-13  Eric Blake  <ebb9@byu.net>
 
 	Add -g/--gnu command line argument.
