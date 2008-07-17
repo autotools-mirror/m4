@@ -1,5 +1,12 @@
 2008-07-17  Eric Blake  <ebb9@byu.net>
 
+	Remove redundant examples/stackovf.sh.
+	* examples/stackovf.sh: Delete, now that checks has better
+	version.
+	* examples/Makefile.am (EXTRA_DIST): Don't distribute it.
+
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
 	Adjust to c-stack changes in gnulib.
 	* src/Makefile.am (m4_LDADD): Use libsigsegv when available and
 	necessary, via LIBCSTACK.

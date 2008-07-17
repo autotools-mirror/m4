@@ -51,7 +51,6 @@ pushpop.m4 \
 quote.m4 \
 regexp.m4 \
 reverse.m4 \
-stackovf.sh \
 sync-lines.m4 \
 sysv-args.m4 \
 trace.m4 \
