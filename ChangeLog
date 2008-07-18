@@ -1,3 +1,12 @@
+2008-07-18  Eric Blake  <ebb9@byu.net>
+
+	Warn on popping undefined macro.
+	* src/builtin.c (m4_undefine, m4_popdef): Add warning.
+	* src/symtab.c (lookup_symbol): Distinguish when deletion occurred.
+	* doc/m4.texinfo (Undefine, Pushdef): Document the warning.
+	* NEWS: Document this change, along with a 1.4.x compatibility
+	definition.
+
 2008-07-17  Eric Blake  <ebb9@byu.net>
 
 	Fix missing copyright notices.

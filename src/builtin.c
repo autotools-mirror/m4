@@ -717,8 +717,10 @@ m4_undefine (struct obstack *obs, int argc, macro_arguments *argv)
   for (i = 1; i < argc; i++)
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
-    else
-      lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_DELETE);
+    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_DELETE))
+      m4_warn (0, me, _("undefined macro %s"),
+	       quotearg_style_mem (locale_quoting_style, ARG (i),
+				   ARG_LEN (i)));
 }
 
 static void
@@ -737,8 +739,10 @@ m4_popdef (struct obstack *obs, int argc, macro_arguments *argv)
   for (i = 1; i < argc; i++)
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
-    else
-      lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_POPDEF);
+    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_POPDEF))
+      m4_warn (0, me, _("undefined macro %s"),
+	       quotearg_style_mem (locale_quoting_style, ARG (i),
+				   ARG_LEN (i)));
 }
 
 /*---------------------.

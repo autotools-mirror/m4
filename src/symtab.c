@@ -155,7 +155,9 @@ free_symbol (symbol *sym)
 | can either just do a lookup, do a lookup and insert if not         |
 | present, do an insertion even if the name is already in the list,  |
 | delete the first occurrence of the name on the list, or delete all |
-| occurrences of the name on the list.                               |
+| occurrences of the name on the list.  The return value when        |
+| requesting deletion is non-NULL if deletion occurred, but must not |
+| be dereferenced.                                                   |
 `-------------------------------------------------------------------*/
 
 symbol *
@@ -268,6 +270,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	return NULL;
       {
 	bool traced = false;
+        symbol *result = sym;
 	if (SYMBOL_NEXT (sym) != NULL
 	    && SYMBOL_SHADOWED (SYMBOL_NEXT (sym))
 	    && mode == SYMBOL_POPDEF)
@@ -301,8 +304,8 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	    SYMBOL_NEXT (sym) = *spp;
 	    (*spp) = sym;
 	  }
+        return result;
       }
-      return NULL;
 
     default:
       assert (!"symbol_lookup");
