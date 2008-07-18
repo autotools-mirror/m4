@@ -163,6 +163,7 @@ static predefined const predefined_tab[] =
 # warning Platform macro not provided
 #endif
   { NULL,	"__gnu__",	"" },
+  { NULL,	"__m4_version__", VERSION },
 
   { NULL,	NULL,		NULL },
 };

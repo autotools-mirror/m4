@@ -49,6 +49,12 @@ Foundation, Inc.
    earlier in the command line, so that the client will not break in the
    face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
 
+** A new predefined text macro, `__m4_version__', expands to the unquoted
+   version number of M4, if GNU extensions are enabled.  While you should
+   generally favor feature tests over version number checks, this macro can
+   be used, via `defn', to determine whether the version of m4 processing
+   your file is adequate.
+
 ** The `defn', `popdef', and `undefine' builtins now warn when operating
    on an undefined macro name, similar to what was already done in the
    `indir' and `dumpdef' builtins.  To simulate 1.4.x behavior, use:

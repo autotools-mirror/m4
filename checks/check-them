@@ -69,6 +69,9 @@ else
   strip_needed=:
 fi
 
+# Find out what version the executable claims to be
+m4version=`sed -n 's/.* //p;q' $out`
+
 # Find out if diff supports useful options.
 if diff -u /dev/null /dev/null 2>/dev/null ; then
   diffopts="-u"
@@ -108,7 +111,7 @@ do
   xoutfile=`sed -n 's/^dnl @ expected output: //p' "$file"`
   if test -z "$xoutfile" ; then
     sed -e '/^dnl @result{}/!d' -e 's///' -e "s|examples/|$examples/|" \
-      "$file" > $xout
+      -e "s|@value{VERSION}|$m4version|" "$file" > $xout
   else
     cp "$examples/$xoutfile" $xout
   fi

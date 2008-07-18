@@ -1,5 +1,11 @@
 2008-07-18  Eric Blake  <ebb9@byu.net>
 
+	Add __m4_version__.
+	* src/builtin.c (predefined_tab): Add new macro to table.
+	* doc/m4.texinfo (Platform macros): Document it.
+	* NEWS: Likewise.
+	* checks/check-them (examples): Support @value{VERSION} in test.
+
 	Warn on popping undefined macro.
 	* src/builtin.c (m4_undefine, m4_popdef): Add warning.
 	* src/symtab.c (lookup_symbol): Distinguish when deletion occurred.

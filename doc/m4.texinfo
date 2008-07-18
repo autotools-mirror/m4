@@ -6347,7 +6347,8 @@ exit value if this is not the case.
 Sometimes it is desirable for an input file to know which platform
 @code{m4} is running on.  @acronym{GNU} @code{m4} provides several
 macros that are predefined to expand to the empty string; checking for
-their existence will confirm platform details.
+their existence will confirm platform details.  It also provides a macro
+for learning about @code{m4} itself.
 
 @deffn {Optional builtin} __gnu__
 @deffnx {Optional builtin} __os2__
@@ -6362,10 +6363,15 @@ string.  For now, these macros silently ignore all arguments, but in a
 future release of M4, they might warn if arguments are present.
 @end deffn
 
+@deffn builtin __m4_version__
+Expands to an unquoted string containing the release version number of
+the running @acronym{GNU} @code{m4} executable.
+@end deffn
+
 When @acronym{GNU} extensions are in effect (that is, when you did not
 use the @option{-G} option, @pxref{Limits control, , Invoking m4}),
 @acronym{GNU} @code{m4} will define the macro @code{@w{__gnu__}} to
-expand to the empty string.
+expand to the empty string, and provide @code{@w{__m4_version__}}.
 
 @example
 $ @kbd{m4}
@@ -6386,6 +6392,18 @@ __gnu__(`ignored')
 @result{}__gnu__(ignored)
 Extensions are ifdef(`__gnu__', `active', `inactive')
 @result{}Extensions are inactive
+@end example
+
+Since the version string is unquoted and can potentially contain macro
+names (for example, a beta release could be numbered @samp{1.9b}), the
+@code{__m4_version__} macro should generally be used via @code{defn}
+rather than directly invoked (@pxref{Defn}).  In general, feature tests
+are more reliable than version number checks, so exercise caution when
+using this macro.
+
+@example
+defn(`__m4_version__')
+@result{}@value{VERSION}
 @end example
 
 On UNIX systems, @acronym{GNU} @code{m4} will define @code{@w{__unix__}}
