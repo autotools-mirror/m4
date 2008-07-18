@@ -2132,7 +2132,8 @@ A macro definition can be removed with @code{undefine}:
 
 @deffn {Builtin (m4)} undefine (@var{name}@dots{})
 For each argument, remove the macro @var{name}.  The macro names must
-necessarily be quoted, since they will be expanded otherwise.
+necessarily be quoted, since they will be expanded otherwise.  If an
+argument is not a defined macro, a warning is issued.
 
 The expansion of @code{undefine} is void.
 The macro @code{undefine} is recognized only with parameters.
@@ -2167,8 +2168,32 @@ f(`bye')
 @result{}f(bye)
 @end example
 
-It is not an error for @var{name} to have no macro definition.  In that
-case, @code{undefine} does nothing.
+As of M4 1.6, @code{undefine} will warn if @var{name} is not a macro.
+The following example shows how to recover earlier behavior that
+silently ignores undefined names, using concepts that will be explained
+later in the manual.  Or, you could use the command line option
+@option{-Q} (@option{--quiet}, @pxref{Operation modes, , Invoking m4}).
+
+@example
+define(`a', `1')
+@result{}
+undefine
+@result{}undefine
+undefine(`a', `a')
+@error{}m4:stdin:3: Warning: undefine: undefined macro `a'
+@result{}
+define(`a', `1')
+@result{}
+pushdef(`undefine', `ifelse(`$#', `0', ``undefine'', `_$0($@@)')')
+@result{}
+define(`_undefine', `ifdef(`$1', `builtin(`undefine',
+  `$1')')ifelse(`$#', `1', `', `$0(shift($@@))')')
+@result{}
+undefine
+@result{}undefine
+undefine(`a', `a')
+@result{}
+@end example
 
 @node Defn
 @section Renaming macros
@@ -2421,7 +2446,8 @@ exactly like @code{define}.
 
 If a macro has several definitions (of which only one is accessible),
 the topmost definition can be removed with @code{popdef}.  If there is
-no previous definition, @code{popdef} behaves like @code{undefine}.
+no previous definition, @code{popdef} behaves like @code{undefine}, and
+if there is no definition at all, @code{popdef} issues a warning.
 
 The expansion of both @code{pushdef} and @code{popdef} is void.
 The macros @code{pushdef} and @code{popdef} are recognized only with
@@ -2493,6 +2519,33 @@ revealing the former definition.
 
 It is possible to temporarily redefine a builtin with @code{pushdef}
 and @code{defn}.
+
+As of M4 1.6, @code{popdef} will warn if @var{name} is not a macro.
+The following example shows how to recover earlier behavior that
+silently ignores undefined names, using concepts that will be explained
+later in the manual.  Or, you could use the command line option
+@option{-Q} (@option{--quiet}, @pxref{Operation modes, , Invoking m4}).
+
+@example
+define(`a', `1')
+@result{}
+popdef
+@result{}popdef
+popdef(`a', `a')
+@error{}m4:stdin:3: Warning: popdef: undefined macro `a'
+@result{}
+define(`a', `1')
+@result{}
+pushdef(`popdef', `ifelse(`$#', `0', ``popdef'', `_$0($@@)')')
+@result{}
+define(`_popdef', `ifdef(`$1', `builtin(`popdef',
+  `$1')')ifelse(`$#', `1', `', `$0(shift($@@))')')
+@result{}
+popdef
+@result{}popdef
+popdef(`a', `a')
+@result{}
+@end example
 
 @node Renamesyms
 @section Renaming macros with regular expressions
@@ -6401,9 +6454,12 @@ ifdef(`__gnu__', `Extensions are active', `Minimal features')
 @end example
 
 Since the version string is unquoted and can potentially contain macro
-names (consider the beta release @samp{1.9b}, or the use of
-@code{changesyntax}), the @code{__m4_version__} macro should generally
-be used via @code{defn} rather than directly invoked.
+names (for example, a beta release could be numbered @samp{1.9b}), or be
+impacted by the use of @code{changesyntax}), the
+@code{__m4_version__} macro should generally be used via @code{defn}
+rather than directly invoked (@pxref{Defn}).  In general, feature tests
+are more reliable than version number checks, so exercise caution when
+using this macro.
 
 @comment This test is excluded from the testsuite since it depends on a
 @comment texinfo macro; but builtins.at covers the same thing.

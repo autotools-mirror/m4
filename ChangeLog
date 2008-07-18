@@ -1,3 +1,10 @@
+2008-07-19  Eric Blake  <ebb9@byu.net>
+
+	Resynchronize docs from branch.
+	* doc/m4.texinfo (Undefine, Pushdef): Mention warning on undefined
+	name, particularly since the old documentation didn't match code.
+	(Standard Modules): Add caveat about using __m4_version__.
+
 2008-07-11  Eric Blake  <ebb9@byu.net>
 
 	Bump required automake to 1.10a; regression introduced 2008-01-22.
