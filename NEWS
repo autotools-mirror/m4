@@ -67,6 +67,10 @@ Foundation, Inc.
      define(`_undefine', `ifdef(`$1', `builtin(`undefine', `$1')')ifelse(`$#',
                 `1', `', `$0(shift($@))')')
 
+   Additionally, if you want to install Autoconf 2.62 or earlier, then
+   apply this patch:
+     http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=c4a32a009
+
 ** Enhance the `indir' builtin to trace indirect macros, where the trace
    is requested via `traceon' or the command-line option `-t'.  Previously,
    it was impossible to trace macro names such as `foo-bar' which could

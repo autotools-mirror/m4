@@ -1,3 +1,8 @@
+2008-07-22  Eric Blake  <ebb9@byu.net>
+
+	Mention patch to make earlier autoconf happy.
+	* NEWS: Give URL to autoconf patch to avoid undefined popdef.
+
 2008-07-18  Eric Blake  <ebb9@byu.net>
 
 	Add __m4_version__.
