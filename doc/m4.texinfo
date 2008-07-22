@@ -7084,6 +7084,22 @@ traceon(`undefined')dnl
 
 @c Make sure freezing is successful.
 
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
+       | ]__program__[ -F in.m4f \
+     && echo 'divnum popdef([divnum])divnum' \
+       | ]__program__[ -R in.m4f \
+     && rm in.m4f])status sysval
+@result{}hi 0
+@result{}status 0
+@end example
+
+@c Detect inability to freeze.
+
 @comment options: -F /none/such
 @comment status: 1
 @example

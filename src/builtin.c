@@ -826,7 +826,7 @@ static void
 dump_symbol (symbol *sym, void *arg)
 {
   struct dump_symbol_data *data = (struct dump_symbol_data *) arg;
-  if (!SYMBOL_SHADOWED (sym) && SYMBOL_TYPE (sym) != TOKEN_VOID)
+  if (SYMBOL_TYPE (sym) != TOKEN_VOID)
     {
       obstack_blank (data->obs, sizeof (symbol *));
       data->base = (symbol **) obstack_base (data->obs);

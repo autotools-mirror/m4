@@ -215,7 +215,6 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	      SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
 	      SYMBOL_NAME (sym) = xmemdup0 (name, len);
 	      SYMBOL_NAME_LEN (sym) = len;
-	      SYMBOL_SHADOWED (sym) = false;
 	      SYMBOL_MACRO_ARGS (sym) = false;
 	      SYMBOL_BLIND_NO_ARGS (sym) = false;
 	      SYMBOL_DELETED (sym) = false;
@@ -223,7 +222,9 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 
 	      SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
 	      SYMBOL_NEXT (old) = NULL;
-	      (*spp) = sym;
+	      sym->stack = old->stack;
+	      old->stack = NULL;
+	      *spp = sym;
 	    }
 	  return sym;
 	}
@@ -240,19 +241,21 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
       SYMBOL_TRACED (sym) = false;
       SYMBOL_NAME (sym) = xmemdup0 (name, len);
       SYMBOL_NAME_LEN (sym) = len;
-      SYMBOL_SHADOWED (sym) = false;
       SYMBOL_MACRO_ARGS (sym) = false;
       SYMBOL_BLIND_NO_ARGS (sym) = false;
       SYMBOL_DELETED (sym) = false;
       SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
       SYMBOL_NEXT (sym) = *spp;
-      (*spp) = sym;
+      sym->stack = NULL;
+      *spp = sym;
 
       if (mode == SYMBOL_PUSHDEF && cmp == 0)
 	{
-	  SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = true;
-	  SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
+	  sym->stack = sym->next;
+	  sym->next = sym->stack->next;
+	  sym->stack->next = NULL;
+	  SYMBOL_TRACED (sym) = SYMBOL_TRACED (sym->stack);
 	}
       return sym;
 
@@ -270,24 +273,30 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	return NULL;
       {
 	bool traced = false;
-        symbol *result = sym;
-	if (SYMBOL_NEXT (sym) != NULL
-	    && SYMBOL_SHADOWED (SYMBOL_NEXT (sym))
-	    && mode == SYMBOL_POPDEF)
+	symbol *result = sym;
+	if (sym->stack && mode == SYMBOL_POPDEF)
 	  {
-	    SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = false;
-	    SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
+	    SYMBOL_TRACED (sym->stack) = SYMBOL_TRACED (sym);
+	    sym->stack->next = sym->next;
+	    *spp = sym->stack;
+	    sym->next = NULL;
+	    sym->stack = NULL;
+	    free_symbol (sym);
 	  }
 	else
-	  traced = SYMBOL_TRACED (sym);
-	do
 	  {
-	    *spp = SYMBOL_NEXT (sym);
-	    free_symbol (sym);
-	    sym = *spp;
+	    traced = SYMBOL_TRACED (sym);
+	    *spp = sym->next;
+	    do
+	      {
+		symbol *old = sym;
+		sym = sym->stack;
+		old->next = NULL;
+		old->stack = NULL;
+		free_symbol (old);
+	      }
+	    while (sym);
 	  }
-	while (*spp != NULL && SYMBOL_SHADOWED (*spp)
-	       && mode == SYMBOL_DELETE);
 	if (traced)
 	  {
 	    sym = (symbol *) xmalloc (sizeof (symbol));
@@ -295,16 +304,16 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	    SYMBOL_TRACED (sym) = true;
 	    SYMBOL_NAME (sym) = xmemdup0 (name, len);
 	    SYMBOL_NAME_LEN (sym) = len;
-	    SYMBOL_SHADOWED (sym) = false;
 	    SYMBOL_MACRO_ARGS (sym) = false;
 	    SYMBOL_BLIND_NO_ARGS (sym) = false;
 	    SYMBOL_DELETED (sym) = false;
 	    SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
 	    SYMBOL_NEXT (sym) = *spp;
-	    (*spp) = sym;
+	    sym->stack = NULL;
+	    *spp = sym;
 	  }
-        return result;
+	return result;
       }
 
     default:
@@ -389,19 +398,27 @@ static void
 symtab_print_list (int i)
 {
   symbol *sym;
+  symbol *stack;
   size_t h;
 
   xprintf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      xprintf ("\tname %s, len %zu, bucket %lu, addr %p, next %p, "
-	       "flags%s%s%s, pending %d\n",
-	       SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
-	       (unsigned long int) h, sym, SYMBOL_NEXT (sym),
-	       SYMBOL_TRACED (sym) ? " traced" : "",
-	       SYMBOL_SHADOWED (sym) ? " shadowed" : "",
-	       SYMBOL_DELETED (sym) ? " deleted" : "",
-	       SYMBOL_PENDING_EXPANSIONS (sym));
+      {
+	stack = sym;
+	do
+	  {
+	    xprintf ("\tname %s, len %zu, bucket %lu, addr %p, next %p, "
+		     "stack %p, flags%s%s, pending %d\n",
+		     SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack),
+		     (unsigned long int) h, stack, SYMBOL_NEXT (stack),
+		     stack->stack, SYMBOL_TRACED (stack) ? " traced" : "",
+		     SYMBOL_DELETED (stack) ? " deleted" : "",
+		     SYMBOL_PENDING_EXPANSIONS (stack));
+	    stack = stack->stack;
+	  }
+	while (stack);
+      }
 }
 
 #endif /* DEBUG_SYM */

@@ -36,8 +36,8 @@ reverse_symbol_list (symbol *sym)
   result = NULL;
   while (sym)
     {
-      next = SYMBOL_NEXT (sym);
-      SYMBOL_NEXT (sym) = result;
+      next = sym->stack;
+      sym->stack = result;
       result = sym;
       sym = next;
     }
@@ -53,6 +53,7 @@ produce_frozen_state (const char *name)
 {
   FILE *file;
   int h;
+  symbol *stack;
   symbol *sym;
   const builtin *bp;
 
@@ -95,15 +96,16 @@ produce_frozen_state (const char *name)
 
   /* Dump all symbols.  */
 
-  for (h = 0; h < hash_table_size; h++)
+  for (stack = symtab[h = 0]; h < hash_table_size;
+       stack = (stack ? SYMBOL_NEXT (stack) : symtab[h++]))
     {
-
-      /* Process all entries in one bucket, from the last to the first.
+      if (!stack)
+	continue;
+      /* Process all entries in each stack from the last to the first.
 	 This order ensures that, at reload time, pushdef's will be
 	 executed with the oldest definitions first.  */
-
-      symtab[h] = reverse_symbol_list (symtab[h]);
-      for (sym = symtab[h]; sym; sym = SYMBOL_NEXT (sym))
+      sym = stack = reverse_symbol_list (stack);
+      while (sym)
 	{
 	  switch (SYMBOL_TYPE (sym))
 	    {
@@ -140,11 +142,10 @@ produce_frozen_state (const char *name)
 	      abort ();
 	      break;
 	    }
+	  sym = sym->stack;
 	}
-
-      /* Reverse the bucket once more, putting it back as it was.  */
-
-      symtab[h] = reverse_symbol_list (symtab[h]);
+      /* Reverse the stack once more, putting it back as it was.  */
+      stack = reverse_symbol_list (stack);
     }
 
   /* Let diversions be issued from output.c module, its cleaner to have this

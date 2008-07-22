@@ -1,5 +1,17 @@
 2008-07-22  Eric Blake  <ebb9@byu.net>
 
+	Backport faster hash lookups of pushdef stack collisions.
+	* src/m4.h (struct symbol): Replace shadowed bit by stack field.
+	(SYMBOL_SHADOWED): Delete.
+	* src/symtab.c (lookup_symbol): Manage pushdef stacks
+	independently from hash buckets, so that collisions with large
+	pushdef stacks can be quickly skipped over.
+	(symtab_print_list): Adjust caller.
+	* src/builtin.c (dump_symbol): Likewise.
+	* src/freeze.c (reverse_symbol_list, produce_frozen_state):
+	Likewise.
+	* doc/m4.texinfo (Using frozen files): Test the change.
+
 	Mention patch to make earlier autoconf happy.
 	* NEWS: Give URL to autoconf patch to avoid undefined popdef.
 

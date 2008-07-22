@@ -417,9 +417,9 @@ enum symbol_lookup
 /* Symbol table entry.  */
 struct symbol
 {
-  struct symbol *next;
+  struct symbol *next; /* Next symbol with the same hash.  */
+  struct symbol *stack; /* Stack of shadowed symbols of the same name.  */
   bool_bitfield traced : 1;
-  bool_bitfield shadowed : 1;
   bool_bitfield macro_args : 1;
   bool_bitfield blind_no_args : 1;
   bool_bitfield deleted : 1;
@@ -432,7 +432,6 @@ struct symbol
 
 #define SYMBOL_NEXT(S)		((S)->next)
 #define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_SHADOWED(S)	((S)->shadowed)
 #define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
 #define SYMBOL_DELETED(S)	((S)->deleted)
