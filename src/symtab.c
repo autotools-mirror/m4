@@ -93,18 +93,17 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
 `----------------------------------------------------------------------*/
 
 /* Pointer to symbol table.  */
-symbol **symtab;
+static symbol **symtab;
+
+/* Number of buckets in symbol table.  */
+static size_t hash_table_size;
 
 void
-symtab_init (void)
+symtab_init (size_t size)
 {
-  size_t i;
-  symbol **s;
-
-  s = symtab = (symbol **) xnmalloc (hash_table_size, sizeof (symbol *));
-
-  for (i = 0; i < hash_table_size; i++)
-    s[i] = NULL;
+  hash_table_size = size;
+  symtab = (symbol **) xnmalloc (hash_table_size, sizeof *symtab);
+  memset (symtab, 0, hash_table_size * sizeof *symtab);
 
 #ifdef DEBUG_SYM
   atexit (show_profile); /* Ignore failure, since this is debug code.  */

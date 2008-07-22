@@ -1,5 +1,18 @@
 2008-07-22  Eric Blake  <ebb9@byu.net>
 
+	Make symbol table opaque.
+	* src/m4.h (symtab, hash_table_size): No longer export.
+	(symtab_init): Add parameter.
+	* src/symtab.c (symtab): Make static, so we can later change
+	implementations.
+	(hash_table_size): New private size variable.
+	(symtab_init): Take size hint, rather than reading a global.
+	* src/m4.c (hash_table_size): Delete.
+	(main): Track -H as local variable instead.
+	* src/freeze.c (dump_symbol_CB): New function, extracted from...
+	(produce_frozen_state): ...here, to use hack_all_symbols rather
+	than raw traversal.
+
 	Backport faster hash lookups of pushdef stack collisions.
 	* src/m4.h (struct symbol): Replace shadowed bit by stack field.
 	(SYMBOL_SHADOWED): Delete.

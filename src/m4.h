@@ -127,7 +127,6 @@ typedef unsigned int bool_bitfield;
 /* Option flags.  */
 extern int sync_output;			/* -s */
 extern int debug_level;			/* -d */
-extern size_t hash_table_size;		/* -H */
 extern int no_gnu_extensions;		/* -G */
 extern int prefix_all_builtins;		/* -P */
 extern size_t max_debug_argument_length;/* -l */
@@ -448,10 +447,8 @@ typedef void hack_symbol (symbol *, void *);
 
 #define HASHMAX 509		/* default, overridden by -Hsize */
 
-extern symbol **symtab;
-
-void free_symbol (symbol *sym);
-void symtab_init (void);
+void free_symbol (symbol *);
+void symtab_init (size_t);
 symbol *lookup_symbol (const char *, size_t, symbol_lookup);
 void hack_all_symbols (hack_symbol *, void *);
 

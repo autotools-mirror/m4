@@ -38,9 +38,6 @@ int sync_output = 0;
 /* Debug (-d[flags]).  */
 int debug_level = 0;
 
-/* Hash table size (should be a prime) (-Hsize).  */
-size_t hash_table_size = HASHMAX;
-
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
 
@@ -412,6 +409,8 @@ main (int argc, char *const *argv, char *const *envp)
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
   const char *macro_sequence = "";
+  /* Hash table size (should be a prime) (-Hsize).  */
+  size_t hash_table_size = HASHMAX;
 
   set_program_name (argv[0]);
   retcode = EXIT_SUCCESS;
@@ -592,7 +591,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   input_init ();
   output_init ();
-  symtab_init ();
+  symtab_init (hash_table_size);
   set_macro_sequence (macro_sequence);
   include_env_init ();
 

@@ -44,6 +44,65 @@ reverse_symbol_list (symbol *sym)
   return result;
 }
 
+/*-------------------------------------------------------------------.
+| Dump a stack of pushdef references to the stream F.  Designed as a |
+| callback for hack_all_symbols.                                     |
+`-------------------------------------------------------------------*/
+
+static void
+dump_symbol_CB (symbol *sym, void *f)
+{
+  FILE *file = (FILE *) f;
+  symbol *stack;
+  const builtin *bp;
+
+  /* Process all entries in each stack from the last to the first.
+     This order ensures that, at reload time, pushdef's will be
+     executed with the oldest definitions first.  */
+  sym = stack = reverse_symbol_list (sym);
+  while (sym)
+    {
+      switch (SYMBOL_TYPE (sym))
+	{
+	case TOKEN_TEXT:
+	  xfprintf (file, "T%d,%d\n",
+		    (int) SYMBOL_NAME_LEN (sym),
+		    (int) strlen (SYMBOL_TEXT (sym)));
+	  fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
+	  fputs (SYMBOL_TEXT (sym), file);
+	  fputc ('\n', file);
+	  break;
+
+	case TOKEN_FUNC:
+	  bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
+	  if (bp == NULL)
+	    {
+	      assert (!"dump_symbol_CB");
+	      abort ();
+	    }
+	  xfprintf (file, "F%d,%d\n",
+		    (int) SYMBOL_NAME_LEN (sym),
+		    (int) strlen (bp->name));
+	  fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
+	  fputs (bp->name, file);
+	  fputc ('\n', file);
+	  break;
+
+	case TOKEN_VOID:
+	  /* Ignore placeholder tokens that exist due to traceon.  */
+	  break;
+
+	default:
+	  assert (!"dump_symbol_CB");
+	  abort ();
+	  break;
+	}
+      sym = sym->stack;
+    }
+  /* Reverse the stack once more, putting it back as it was.  */
+  reverse_symbol_list (stack);
+}
+
 /*------------------------------------------------.
 | Produce a frozen state to the given file NAME.  |
 `------------------------------------------------*/
@@ -52,10 +111,6 @@ void
 produce_frozen_state (const char *name)
 {
   FILE *file;
-  int h;
-  symbol *stack;
-  symbol *sym;
-  const builtin *bp;
 
   file = fopen (name, O_BINARY ? "wb" : "w");
   if (!file)
@@ -96,57 +151,7 @@ produce_frozen_state (const char *name)
 
   /* Dump all symbols.  */
 
-  for (stack = symtab[h = 0]; h < hash_table_size;
-       stack = (stack ? SYMBOL_NEXT (stack) : symtab[h++]))
-    {
-      if (!stack)
-	continue;
-      /* Process all entries in each stack from the last to the first.
-	 This order ensures that, at reload time, pushdef's will be
-	 executed with the oldest definitions first.  */
-      sym = stack = reverse_symbol_list (stack);
-      while (sym)
-	{
-	  switch (SYMBOL_TYPE (sym))
-	    {
-	    case TOKEN_TEXT:
-	      xfprintf (file, "T%d,%d\n",
-			(int) SYMBOL_NAME_LEN (sym),
-			(int) strlen (SYMBOL_TEXT (sym)));
-	      fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
-	      fputs (SYMBOL_TEXT (sym), file);
-	      fputc ('\n', file);
-	      break;
-
-	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
-	      if (bp == NULL)
-		{
-		  assert (!"produce_frozen_state");
-		  abort ();
-		}
-	      xfprintf (file, "F%d,%d\n",
-			(int) SYMBOL_NAME_LEN (sym),
-			(int) strlen (bp->name));
-	      fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
-	      fputs (bp->name, file);
-	      fputc ('\n', file);
-	      break;
-
-	    case TOKEN_VOID:
-	      /* Ignore placeholder tokens that exist due to traceon.  */
-	      break;
-
-	    default:
-	      assert (!"produce_frozen_state");
-	      abort ();
-	      break;
-	    }
-	  sym = sym->stack;
-	}
-      /* Reverse the stack once more, putting it back as it was.  */
-      stack = reverse_symbol_list (stack);
-    }
+  hack_all_symbols (dump_symbol_CB, file);
 
   /* Let diversions be issued from output.c module, its cleaner to have this
      piece of code there.  */
