@@ -1,5 +1,11 @@
 2008-07-26  Eric Blake  <ebb9@byu.net>
 
+	Give example for O(n) foreach on m4 1.4.x.
+	* examples/foreachq4.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+	* doc/m4.texinfo (Improved foreach): Document linear foreach with
+	m4 1.4.5 and greater.
+
 	Use hash module for self-growing symbol table.
 	* m4/gnulib-cache.m4: Import hash module.
 	* src/m4.h (struct symbol): Remove next member, change stack to be
