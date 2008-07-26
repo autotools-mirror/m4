@@ -374,7 +374,8 @@ AT_SETUP([recursion])
 dnl This input exploits contents of loop.m4 to print out the final value
 dnl of the recursion.
 AT_DATA([in.m4],
-[[define(`debug', `define(`popdef', `divert`'i')')dnl
+[[define(`foo', `divert`'len(popdef(`_foreachq')_foreachq($@))')dnl
+define(`debug', `pushdef(`_foreachq', defn(`foo'))')dnl
 include(`loop.m4')dnl
 ]])
 
@@ -383,7 +384,7 @@ AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10 -Dverbose loop.m4], [0],
 [[ 1 2 3 4 5 6 7 8 9 10
 ]])
 AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=2500 loop.m4], [0])
-AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 in.m4], [0], [[10000
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 in.m4], [0], [[48894
 ]])
 
 dnl unboxed recursion
@@ -391,7 +392,17 @@ AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10 -Dverbose -Dalt loop.m4], [0],
 [[ 1 2 3 4 5 6 7 8 9 10
 ]])
 AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=2500 -Dalt loop.m4], [0])
-AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 -Dalt in.m4], [0], [[10000
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 -Dalt in.m4], [0],
+[[48894
+]])
+
+dnl foreach via forloop recursion
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10 -Dverbose -Dalt=4 loop.m4],
+[0], [[ 1 2 3 4 5 6 7 8 9 10
+]])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=2500 -Dalt=4 loop.m4], [0])
+AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 -Dalt=4 in.m4], [0],
+[[48894
 ]])
 
 AT_CLEANUP

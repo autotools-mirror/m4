@@ -322,6 +322,7 @@ dist_pkgdata_DATA = \
 		  examples/foreachq.m4 \
 		  examples/foreachq2.m4 \
 		  examples/foreachq3.m4 \
+		  examples/foreachq4.m4 \
 		  examples/forloop.m4 \
 		  examples/forloop2.m4 \
 		  examples/fstab.m4 \

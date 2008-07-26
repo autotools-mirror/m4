@@ -9155,6 +9155,61 @@ noticeable; in fact, after the change, the @file{foreachq2.m4} version
 uses slightly less memory since it tracks fewer arguments per macro
 invocation.
 
+@cindex nine arguments, more than
+@cindex more than nine arguments
+@cindex arguments, more than nine
+So far, all of the implementations of @code{foreachq} presented have
+been quadratic with M4 1.4.x.  But @code{forloop} is linear, because
+each iteration parses a constant amount of arguments.  So, it is
+possible to design a variant that uses @code{forloop} to do the
+iteration, then uses @samp{$@@} only once at the end, giving a linear
+result even with older M4 implementations.  This implementation relies
+on the @acronym{GNU} extension that @samp{$10} expands to the tenth
+argument rather than the first argument concatenated with @samp{0}.  The
+trick is to define an intermediate macro that repeats the text
+@code{m4_define(`$1', `$n')$2`'}, with @samp{n} set to successive
+integers corresponding to each argument.  The helper macro
+@code{_foreachq_} is needed in order to generate the literal sequences
+such as @samp{$1} into the intermediate macro, rather than expanding
+them as the arguments of @code{_foreachq}.  With this approach, no
+@code{shift} calls are even needed!  However, when linear recursion is
+available in new enough M4, the time and memory cost of using
+@code{forloop} to build an intermediate macro outweigh the costs of any
+of the previous implementations.  Additionally, this approach will need
+adjustment when a future version of M4 follows @acronym{POSIX} by no
+longer treating @samp{$10} as the tenth argument; the anticipation is
+that @samp{$@{10@}} can be used instead, although that alternative
+syntax is not yet supported.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`foreachq4.m4')
+@result{}
+undivert(`foreachq4.m4')dnl
+@result{}include(`forloop2.m4')dnl
+@result{}divert(`-1')
+@result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+@result{}#   quoted list, version based on forloop
+@result{}define(`foreachq',
+@result{}`ifelse(`$2', `', `', `_$0(`$1', `$3', $2)')')
+@result{}define(`_foreachq',
+@result{}`pushdef(`$1', forloop(`$1', `3', `$#',
+@result{}  `$0_(`1', `2', indir(`$1'))')`popdef(
+@result{}    `$1')')indir(`$1', $@@)')
+@result{}define(`_foreachq_',
+@result{}``define(`$$1', `$$3')$$2`''')
+@result{}divert`'dnl
+traceon(`shift')debugmode(`aq')
+@result{}
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+@result{}1
+@result{}2
+@result{}3
+@result{}4
+@end example
+
 For yet another approach, the improved version of @code{foreach},
 available in @file{m4-@value{VERSION}/@/examples/@/foreach2.m4}, simply
 overquotes the arguments to @code{@w{_foreach}} to begin with, using

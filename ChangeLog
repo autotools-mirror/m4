@@ -1,3 +1,12 @@
+2008-07-26  Eric Blake  <ebb9@byu.net>
+
+	Give example for O(n) foreach on m4 1.4.x.
+	* examples/foreachq4.m4: New file.
+	* Makefile.am (dist_pkgdata_DATA): Distribute it.
+	* tests/others.at (recursion): Test it.
+	* doc/m4.texinfo (Improved foreach): Document linear foreach with
+	m4 1.4.5 and greater.
+
 2008-07-19  Eric Blake  <ebb9@byu.net>
 
 	Resynchronize docs from branch.
