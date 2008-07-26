@@ -34,6 +34,7 @@ foreach2.m4 \
 foreachq.m4 \
 foreachq2.m4 \
 foreachq3.m4 \
+foreachq4.m4 \
 forloop.m4 \
 forloop2.m4 \
 fstab.m4 \
