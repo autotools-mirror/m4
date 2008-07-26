@@ -33,6 +33,8 @@
 
 #include "m4.h"
 
+#include "hash.h"
+
 #ifdef DEBUG_SYM
 /* When evaluating hash table performance, this profiling code shows
    how many collisions were encountered.  */
@@ -47,19 +49,28 @@ struct profile
 
 static struct profile profiles[5];
 static symbol_lookup current_mode;
+static unsigned long long hash_entry;
+static unsigned long long comparator_entry;
+static size_t current_size;
+static unsigned int resizes;
 
 /* On exit, show a profile of symbol table performance.  */
 static void
 show_profile (void)
 {
   int i;
+  FILE *f = fopen ("/dev/tty", "w");
   for (i = 0; i < 5; i++)
     {
-      xfprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
+      xfprintf(f, "m4: lookup mode %d called %d times, %d compares, "
 	       "%d misses, %lld bytes\n",
 	       i, profiles[i].entry, profiles[i].comparisons,
 	       profiles[i].misses, profiles[i].bytes);
     }
+  xfprintf(f, "m4: %llu hash callbacks, %llu compare callbacks, "
+	   "%zu buckets, %u resizes\n",
+	   hash_entry, comparator_entry, current_size, resizes - 1);
+  fclose (f);
 }
 
 /* Like memcmp (S1, S2, L), but also track profiling statistics.  */
@@ -87,33 +98,12 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
 #endif /* DEBUG_SYM */
 
 
-/*----------------------------------------------------------------------.
-| Initialise the symbol table, by allocating the necessary storage, and |
-| zeroing all the entries.					        |
-`----------------------------------------------------------------------*/
-
 /* Pointer to symbol table.  */
-static symbol **symtab;
-
-/* Number of buckets in symbol table.  */
-static size_t hash_table_size;
-
-void
-symtab_init (size_t size)
-{
-  hash_table_size = size;
-  symtab = (symbol **) xnmalloc (hash_table_size, sizeof *symtab);
-  memset (symtab, 0, hash_table_size * sizeof *symtab);
-
-#ifdef DEBUG_SYM
-  atexit (show_profile); /* Ignore failure, since this is debug code.  */
-#endif /* DEBUG_SYM */
-}
+static Hash_table *symtab;
 
 /*--------------------------------------------------.
 | Return a hashvalue for a string S of length LEN.  |
 `--------------------------------------------------*/
-
 static size_t
 hash (const char *s, size_t len)
 {
@@ -124,6 +114,82 @@ hash (const char *s, size_t len)
   while (len--)
     val = (val << 7) + (val >> (sizeof val * CHAR_BIT - 7)) + to_uchar (*s++);
   return val;
+}
+
+/*----------------------------------------------------.
+| Wrap our hash inside signature expected by hash.h.  |
+`----------------------------------------------------*/
+static size_t
+symtab_hasher (const void *entry, size_t buckets)
+{
+#ifdef DEBUG_SYM
+  hash_entry++;
+  if (buckets != current_size)
+    {
+      resizes++;
+      current_size = buckets;
+    }
+#endif /* DEBUG_SYM */
+  const symbol *sym = (const symbol *) entry;
+  return hash (SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym)) % buckets;
+}
+
+/*----------------------------------------------.
+| Compare two hash table entries for equality.  |
+`----------------------------------------------*/
+static bool
+symtab_comparator (const void *entry_a, const void *entry_b)
+{
+#ifdef DEBUG_SYM
+  comparator_entry++;
+#endif /* DEBUG_SYM */
+  const symbol *sym_a = (const symbol *) entry_a;
+  const symbol *sym_b = (const symbol *) entry_b;
+  return (SYMBOL_NAME_LEN (sym_a) == SYMBOL_NAME_LEN (sym_b)
+	  && memcmp (SYMBOL_NAME (sym_a), SYMBOL_NAME (sym_b),
+		     SYMBOL_NAME_LEN (sym_a)) == 0);
+}
+
+/*---------------------------.
+| Reclaim an entry on exit.  |
+`---------------------------*/
+static void
+symtab_free_entry (void *entry)
+{
+  symbol *sym = (symbol *) entry;
+  while (sym->stack != sym)
+    {
+      symbol *old = sym->stack;
+      sym->stack = old->stack;
+      assert (!SYMBOL_PENDING_EXPANSIONS (old));
+      free_symbol (old);
+    }
+  assert (!SYMBOL_PENDING_EXPANSIONS (sym));
+  free_symbol (sym);
+}
+
+/*--------------------------------------------------------------.
+| Initialize the symbol table, with SIZE as a hint for expected |
+| number of entries.					        |
+`--------------------------------------------------------------*/
+void
+symtab_init (size_t size)
+{
+  symtab = hash_initialize (size, NULL, symtab_hasher, symtab_comparator,
+			    symtab_free_entry);
+
+#ifdef DEBUG_SYM
+  atexit (show_profile); /* Ignore failure, since this is debug code.  */
+#endif /* DEBUG_SYM */
+}
+
+/*------------------------.
+| Clean up entire table.  |
+`------------------------*/
+void
+symtab_free (void)
+{
+  hash_free (symtab);
 }
 
 /*--------------------------------------------.
@@ -162,38 +228,23 @@ free_symbol (symbol *sym)
 symbol *
 lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 {
-  size_t h;
-  int cmp = 1;
-  symbol *sym, *prev;
-  symbol **spp;
+  symbol *sym;
+  symbol *entry;
+  symbol tmp;
 
 #if DEBUG_SYM
   current_mode = mode;
   profiles[mode].entry++;
 #endif /* DEBUG_SYM */
 
-  h = hash (name, len);
-  sym = symtab[h % hash_table_size];
-
-  for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
-    {
-      cmp = (len < SYMBOL_NAME_LEN (sym) ? -1 : len > SYMBOL_NAME_LEN (sym) ? 1
-	     : memcmp (SYMBOL_NAME (sym), name, len));
-      if (cmp >= 0)
-	break;
-    }
-
-  /* If just searching, return status of search.  */
-
-  if (mode == SYMBOL_LOOKUP)
-    return cmp == 0 ? sym : NULL;
-
-  /* Symbol not found.  */
-
-  spp = (prev != NULL) ?  &prev->next : &symtab[h % hash_table_size];
+  tmp.name = (char *) name;
+  tmp.len = len;
+  entry = (symbol *) hash_lookup (symtab, &tmp);
 
   switch (mode)
     {
+    case SYMBOL_LOOKUP:
+      return entry ? entry->stack : NULL;
 
     case SYMBOL_INSERT:
 
@@ -202,14 +253,15 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	 a new one; if not, just return the symbol.  If not found, just
 	 insert the name, and return the new symbol.  */
 
-      if (cmp == 0 && sym != NULL)
+      if (entry)
 	{
+	  sym = entry->stack;
 	  if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
 	    {
 	      symbol *old = sym;
 	      SYMBOL_DELETED (old) = true;
 
-	      sym = (symbol *) xmalloc (sizeof (symbol));
+	      sym = (symbol *) xmalloc (sizeof *sym);
 	      SYMBOL_TYPE (sym) = TOKEN_VOID;
 	      SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
 	      SYMBOL_NAME (sym) = xmemdup0 (name, len);
@@ -219,11 +271,20 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	      SYMBOL_DELETED (sym) = false;
 	      SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
-	      SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
-	      SYMBOL_NEXT (old) = NULL;
-	      sym->stack = old->stack;
+	      if (old == entry)
+		{
+		  old = (symbol *) hash_delete (symtab, entry);
+		  assert (entry == old);
+		  sym->stack = sym;
+		  entry = (symbol *) hash_insert (symtab, sym);
+		  assert (sym == entry);
+		}
+	      else
+		{
+		  entry->stack = sym;
+		  sym->stack = old->stack;
+		}
 	      old->stack = NULL;
-	      *spp = sym;
 	    }
 	  return sym;
 	}
@@ -231,11 +292,13 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 
     case SYMBOL_PUSHDEF:
 
-      /* Insert a name in the symbol table.  If there is already a symbol
-	 with the name, insert this in front of it, and mark the old
-	 symbol as "shadowed".  */
-
-      sym = (symbol *) xmalloc (sizeof (symbol));
+      /* Insert a name in the symbol table.  If there is already a
+	 symbol with the name, add it to the pushdef stack.  Since the
+	 hash table does not allow the insertion of duplicates, the
+	 pushdef stack is a circular chain; the hash entry is the
+	 oldest entry, which points to the newest entry; all other
+	 entries point to the next older entry.  */
+      sym = (symbol *) xmalloc (sizeof *sym);
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
       SYMBOL_NAME (sym) = xmemdup0 (name, len);
@@ -245,16 +308,18 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
       SYMBOL_DELETED (sym) = false;
       SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
-      SYMBOL_NEXT (sym) = *spp;
-      sym->stack = NULL;
-      *spp = sym;
-
-      if (mode == SYMBOL_PUSHDEF && cmp == 0)
+      if (entry)
 	{
-	  sym->stack = sym->next;
-	  sym->next = sym->stack->next;
-	  sym->stack->next = NULL;
+	  assert (mode == SYMBOL_PUSHDEF);
+	  sym->stack = entry->stack;
+	  entry->stack = sym;
 	  SYMBOL_TRACED (sym) = SYMBOL_TRACED (sym->stack);
+	}
+      else
+	{
+	  sym->stack = sym;
+	  entry = (symbol *) hash_insert (symtab, sym);
+	  assert (sym == entry);
 	}
       return sym;
 
@@ -268,37 +333,36 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	 definition is still in use, let the caller free the memory
 	 after it is done with the symbol.  */
 
-      if (cmp != 0 || sym == NULL)
+      if (!entry)
 	return NULL;
       {
 	bool traced = false;
-	symbol *result = sym;
-	if (sym->stack && mode == SYMBOL_POPDEF)
+	symbol *result = sym = entry->stack;
+	if (sym != entry && mode == SYMBOL_POPDEF)
 	  {
 	    SYMBOL_TRACED (sym->stack) = SYMBOL_TRACED (sym);
-	    sym->stack->next = sym->next;
-	    *spp = sym->stack;
-	    sym->next = NULL;
+	    entry->stack = sym->stack;
 	    sym->stack = NULL;
 	    free_symbol (sym);
 	  }
 	else
 	  {
 	    traced = SYMBOL_TRACED (sym);
-	    *spp = sym->next;
-	    do
+	    while (sym != entry)
 	      {
 		symbol *old = sym;
 		sym = sym->stack;
-		old->next = NULL;
 		old->stack = NULL;
 		free_symbol (old);
 	      }
-	    while (sym);
+	    sym = (symbol *) hash_delete (symtab, entry);
+	    assert (sym == entry);
+	    sym->stack = NULL;
+	    free_symbol (sym);
 	  }
 	if (traced)
 	  {
-	    sym = (symbol *) xmalloc (sizeof (symbol));
+	    sym = (symbol *) xmalloc (sizeof *sym);
 	    SYMBOL_TYPE (sym) = TOKEN_VOID;
 	    SYMBOL_TRACED (sym) = true;
 	    SYMBOL_NAME (sym) = xmemdup0 (name, len);
@@ -308,9 +372,9 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	    SYMBOL_DELETED (sym) = false;
 	    SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
-	    SYMBOL_NEXT (sym) = *spp;
-	    sym->stack = NULL;
-	    *spp = sym;
+	    sym->stack = sym;
+	    entry = (symbol *) hash_insert (symtab, sym);
+	    assert (sym == entry);
 	  }
 	return result;
       }
@@ -335,20 +399,17 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 void
 hack_all_symbols (hack_symbol *func, void *data)
 {
-  size_t h;
-  symbol *sym;
+  symbol *sym = (symbol *) hash_get_first (symtab);
   symbol *next;
 
-  for (h = 0; h < hash_table_size; h++)
+  while (sym)
     {
       /* We allow func to call SYMBOL_POPDEF, which can invalidate
 	 sym, so we must grab the next element to traverse before
 	 calling func.  */
-      for (sym = symtab[h]; sym != NULL; sym = next)
-	{
-	  next = SYMBOL_NEXT (sym);
-	  func (sym, data);
-	}
+      next = (symbol *) hash_get_next (symtab, sym);
+      func (sym->stack, data);
+      sym = next;
     }
 }
 
@@ -396,28 +457,26 @@ symtab_debug (void)
 static void
 symtab_print_list (int i)
 {
-  symbol *sym;
+  symbol *sym = (symbol *) hash_get_first (symtab);
   symbol *stack;
-  size_t h;
 
   xprintf ("Symbol dump #%d:\n", i);
-  for (h = 0; h < hash_table_size; h++)
-    for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      {
-	stack = sym;
-	do
-	  {
-	    xprintf ("\tname %s, len %zu, bucket %lu, addr %p, next %p, "
-		     "stack %p, flags%s%s, pending %d\n",
-		     SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack),
-		     (unsigned long int) h, stack, SYMBOL_NEXT (stack),
-		     stack->stack, SYMBOL_TRACED (stack) ? " traced" : "",
-		     SYMBOL_DELETED (stack) ? " deleted" : "",
-		     SYMBOL_PENDING_EXPANSIONS (stack));
-	    stack = stack->stack;
-	  }
-	while (stack);
-      }
+  while (sym)
+    {
+      stack = sym->stack;
+      do
+	{
+	  xprintf ("\tname %s, len %zu, addr %p, "
+		   "stack %p, flags%s%s, pending %d\n",
+		   SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack),
+		   stack, stack->stack, SYMBOL_TRACED (stack) ? " traced" : "",
+		   SYMBOL_DELETED (stack) ? " deleted" : "",
+		   SYMBOL_PENDING_EXPANSIONS (stack));
+	  stack = stack->stack;
+	}
+      while (stack != sym);
+      sym = (symbol *) hash_get_next (symtab, sym);
+    }
 }
 
 #endif /* DEBUG_SYM */

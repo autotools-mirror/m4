@@ -416,8 +416,7 @@ enum symbol_lookup
 /* Symbol table entry.  */
 struct symbol
 {
-  struct symbol *next; /* Next symbol with the same hash.  */
-  struct symbol *stack; /* Stack of shadowed symbols of the same name.  */
+  struct symbol *stack; /* Circular list for pushdef stack of symbol.  */
   bool_bitfield traced : 1;
   bool_bitfield macro_args : 1;
   bool_bitfield blind_no_args : 1;
@@ -429,7 +428,6 @@ struct symbol
   token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
 };
 
-#define SYMBOL_NEXT(S)		((S)->next)
 #define SYMBOL_TRACED(S)	((S)->traced)
 #define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
@@ -449,6 +447,7 @@ typedef void hack_symbol (symbol *, void *);
 
 void free_symbol (symbol *);
 void symtab_init (size_t);
+void symtab_free (void);
 symbol *lookup_symbol (const char *, size_t, symbol_lookup);
 void hack_all_symbols (hack_symbol *, void *);
 

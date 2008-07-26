@@ -1,3 +1,25 @@
+2008-07-26  Eric Blake  <ebb9@byu.net>
+
+	Use hash module for self-growing symbol table.
+	* m4/gnulib-cache.m4: Import hash module.
+	* src/m4.h (struct symbol): Remove next member, change stack to be
+	circular.
+	(SYMBOL_NEXT): Delete.
+	(symtab_free): New prototype.
+	* src/symtab.c (show_profile) [DEBUG_SYM]: Track more hash
+	statistics, and dump to /dev/tty rather than stderr.
+	(symtab): Change type.
+	(hash_table_size): Delete.
+	(symtab_hasher, symtab_comparator, symtab_free_entry): New
+	functions.
+	(symtab_init, lookup_symbol, hack_all_symbols): Rewrite to wrap
+	external hash table.
+	(symtab_free): New function.
+	(symtab_debug) [DEBUG_SYM]: Adjust client.
+	* src/m4.c (main): Call symbol table cleanup.
+	* src/freeze.c (dump_symbol_CB, reverse_symbol_list): Deal with
+	fact that pushdef stack is now circular.
+
 2008-07-22  Eric Blake  <ebb9@byu.net>
 
 	Make symbol table opaque.

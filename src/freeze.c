@@ -30,17 +30,24 @@
 static symbol *
 reverse_symbol_list (symbol *sym)
 {
-  symbol *result;
+  symbol *first = sym;
   symbol *next;
+  symbol *prev = sym;
+  symbol *result;
 
-  result = NULL;
-  while (sym)
+  assert (sym);
+  if (sym->stack == sym)
+    return sym;
+  next = sym->stack;
+  do
     {
-      next = sym->stack;
-      sym->stack = result;
-      result = sym;
+      result = prev;
       sym = next;
+      next = sym->stack;
+      sym->stack = prev;
+      prev = sym;
     }
+  while (prev != first);
   return result;
 }
 
@@ -59,8 +66,9 @@ dump_symbol_CB (symbol *sym, void *f)
   /* Process all entries in each stack from the last to the first.
      This order ensures that, at reload time, pushdef's will be
      executed with the oldest definitions first.  */
-  sym = stack = reverse_symbol_list (sym);
-  while (sym)
+  stack = sym;
+  sym = reverse_symbol_list (sym);
+  do
     {
       switch (SYMBOL_TYPE (sym))
 	{
@@ -99,6 +107,7 @@ dump_symbol_CB (symbol *sym, void *f)
 	}
       sym = sym->stack;
     }
+  while (sym != stack->stack);
   /* Reverse the stack once more, putting it back as it was.  */
   reverse_symbol_list (stack);
 }

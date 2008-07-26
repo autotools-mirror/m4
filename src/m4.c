@@ -683,8 +683,13 @@ main (int argc, char *const *argv, char *const *envp)
       undivert_all ();
     }
   output_exit ();
+#ifndef NDEBUG
+  /* Only spend time freeing memory to help isolate leaks; if
+     assertions are disabled, save the time and exit now.  */
   free_regex ();
   quotearg_free ();
+  symtab_free ();
+#endif /* NDEBUG */
 #ifdef DEBUG_REGEX
   if (trace_file)
     fclose (trace_file);
