@@ -1,3 +1,13 @@
+2008-07-28  Eric Blake  <ebb9@byu.net>
+
+	Optimize iteration examples.
+	* examples/forloop2.m4: Avoid excess indir, by passing current
+	counter value as parameter.
+	* examples/foreachq3.m4: Avoid unneeded ifelse, by injecting an
+	ignored argument.
+	* doc/m4.texinfo (Improved forloop, Improved foreach): Update the
+	documentation to match.
+
 2008-07-26  Eric Blake  <ebb9@byu.net>
 
 	Give example for O(n) foreach on m4 1.4.x.
