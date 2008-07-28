@@ -8922,8 +8922,9 @@ into an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
 shipped as @file{m4-@value{VERSION}/@/examples/@/forloop2.m4}; this
-version also optimizes based on the fact that the starting bound does
-not need to be passed to the helper @code{@w{_forloop}}.
+version also optimizes overhead by calling four macros instead of six
+per iteration (excluding those in @var{text}), by not dereferencing the
+@var{iterator} in the helper @code{@w{_forloop}}.
 
 @comment examples
 @example
@@ -8934,12 +8935,12 @@ undivert(`forloop2.m4')dnl
 @result{}#   works even if VAR is not a strict macro name
 @result{}#   performs sanity check that FROM is larger than TO
 @result{}#   allows complex numerical expressions in TO and FROM
-@result{}define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-@result{}  `pushdef(`$1', eval(`$2'))_$0(`$1',
+@result{}define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+@result{}  `pushdef(`$1')_$0(`$1', eval(`$2'),
 @result{}    eval(`$3'), `$4')popdef(`$1')')')
 @result{}define(`_forloop',
-@result{}  `$3`'ifelse(indir(`$1'), `$2', `',
-@result{}    `define(`$1', incr(indir(`$1')))$0($@@)')')
+@result{}  `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
+@result{}    `$0(`$1', incr(`$2'), `$3', `$4')')')
 @result{}divert`'dnl
 include(`forloop2.m4')
 @result{}
@@ -8950,7 +8951,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: Warning: eval: bad input: (b) >= (a)
+@error{}m4:stdin:6: Warning: eval: bad input: (a) <= (b)
 @result{}
 @end example
 
@@ -8975,8 +8976,8 @@ define(`double', `define(`$1'`2',
   arg1(patsubst(dquote(defn(`$1')), `[`']', `\&\&')))')
 @result{}
 double(`forloop')double(`_forloop')defn(`forloop2')
-@result{}ifelse(eval(``($3) >= ($2)''), ``1'',
-@result{}  ``pushdef(``$1'', eval(``$2''))_$0(``$1'',
+@result{}ifelse(eval(``($2) <= ($3)''), ``1'',
+@result{}  ``pushdef(``$1'')_$0(``$1'', eval(``$2''),
 @result{}    eval(``$3''), ``$4'')popdef(``$1'')'')
 forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
 @result{}
@@ -9097,8 +9098,10 @@ list, which costs a couple of macro invocations.  It is possible to
 rewrite the algorithm by swapping the order of the arguments to
 @code{_foreachq} in order to operate on an unboxed list in the first
 place, and by using the fixed-length @samp{$#} instead of an arbitrary
-length list as the key to end recursion.  This alternative approach is
-available as @file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
+length list as the key to end recursion.  The result is an overhead of
+six macro invocations per loop (excluding any macros in @var{text}),
+instead of eight.  This alternative approach is available as
+@file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
 
 @comment examples
 @example
@@ -9109,12 +9112,11 @@ undivert(`foreachq3.m4')dnl
 @result{}divert(`-1')
 @result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
 @result{}#   quoted list, alternate improved version
-@result{}define(`foreachq',
-@result{}`pushdef(`$1')_$0(`$1', `$3'ifelse(`$2', `', `',
-@result{}  `, $2'))popdef(`$1')')
-@result{}define(`_foreachq', `ifelse(`$#', `2', `',
-@result{}  `define(`$1', `$3')$2`'$0(`$1', `$2'ifelse(`$#', `3', `',
-@result{}    `, shift(shift(shift($@@)))'))')')
+@result{}define(`foreachq', `ifelse(`$2', `', `',
+@result{}  `pushdef(`$1')_$0(`$1', `$3', `', $2)popdef(`$1')')')
+@result{}define(`_foreachq', `ifelse(`$#', `3', `',
+@result{}  `define(`$1', `$4')$2`'$0(`$1', `$2',
+@result{}    shift(shift(shift($@@))))')')
 @result{}divert`'dnl
 traceon(`shift')debugmode(`aq')
 @result{}
@@ -9122,23 +9124,28 @@ foreachq(`x', ``1', `2', `3', `4'', `x
 ')dnl
 @result{}1
 @error{}m4trace: -4- shift(`x', `x
+@error{}', `', `1', `2', `3', `4')
+@error{}m4trace: -3- shift(`x
+@error{}', `', `1', `2', `3', `4')
+@error{}m4trace: -2- shift(`', `1', `2', `3', `4')
+@result{}2
+@error{}m4trace: -4- shift(`x', `x
 @error{}', `1', `2', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `1', `2', `3', `4')
 @error{}m4trace: -2- shift(`1', `2', `3', `4')
-@result{}2
+@result{}3
 @error{}m4trace: -4- shift(`x', `x
 @error{}', `2', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `2', `3', `4')
 @error{}m4trace: -2- shift(`2', `3', `4')
-@result{}3
+@result{}4
 @error{}m4trace: -4- shift(`x', `x
 @error{}', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `3', `4')
 @error{}m4trace: -2- shift(`3', `4')
-@result{}4
 @end example
 
 Prior to M4 1.6, every instance of @samp{$@@} was rescanned as it was
@@ -9150,10 +9157,14 @@ the number of bytes scanned (for example, making the broken version in
 @file{foreachq.m4} cubic, rather than quadratic, in behavior).  Once the
 underlying M4 implementation was improved in 1.6 to reuse results of
 previous scans, both styles of @code{foreachq} become linear in the
-number of bytes scanned, and the difference in timing is no longer
-noticeable; in fact, after the change, the @file{foreachq2.m4} version
-uses slightly less memory since it tracks fewer arguments per macro
-invocation.
+number of bytes scanned, but the @file{foreachq3.m4} version remains
+noticeably faster because of fewer macro invocations.  Notice how the
+implementation injects an empty argument prior to expanding @samp{$2}
+within @code{foreachq}; the helper macro @code{_foreachq} then ignores
+the third argument altogether, and ends recursion when there are three
+arguments left because there was nothing left to pass through
+@code{shift}.  Thus, each iteration only needs one @code{ifelse}, rather
+than the two conditionals used in the version from @file{foreachq2.m4}.
 
 @cindex nine arguments, more than
 @cindex more than nine arguments
@@ -9167,7 +9178,7 @@ result even with older M4 implementations.  This implementation relies
 on the @acronym{GNU} extension that @samp{$10} expands to the tenth
 argument rather than the first argument concatenated with @samp{0}.  The
 trick is to define an intermediate macro that repeats the text
-@code{m4_define(`$1', `$n')$2`'}, with @samp{n} set to successive
+@code{m4_define(`$1', `$@var{n}')$2`'}, with @samp{n} set to successive
 integers corresponding to each argument.  The helper macro
 @code{_foreachq_} is needed in order to generate the literal sequences
 such as @samp{$1} into the intermediate macro, rather than expanding
@@ -9175,11 +9186,14 @@ them as the arguments of @code{_foreachq}.  With this approach, no
 @code{shift} calls are even needed!  However, when linear recursion is
 available in new enough M4, the time and memory cost of using
 @code{forloop} to build an intermediate macro outweigh the costs of any
-of the previous implementations.  Additionally, this approach will need
-adjustment when a future version of M4 follows @acronym{POSIX} by no
-longer treating @samp{$10} as the tenth argument; the anticipation is
-that @samp{$@{10@}} can be used instead, although that alternative
-syntax is not yet supported.
+of the previous implementations (there are seven macros of overhead per
+iteration instead of six in @file{foreachq3.m4}, and the entire
+intermediate macro must be built in memory before any iteration is
+expanded).  Additionally, this approach will need adjustment when a
+future version of M4 follows @acronym{POSIX} by no longer treating
+@samp{$10} as the tenth argument; the anticipation is that
+@samp{$@{10@}} can be used instead, although that alternative syntax is
+not yet supported.
 
 @comment examples
 @example
@@ -9250,6 +9264,11 @@ foreach(`x', `(`1', `2', `3', `4')', `x
 @error{}m4trace: -3- shift(``4'')
 @end example
 
+It is likewise possible to write a variant of @code{foreach} that
+performs in linear time on M4 1.4.x; the easiest method is probably
+writing a version of @code{foreach} that unboxes its list, then invokes
+@code{_foreachq} as previously defined in @file{foreachq4.m4}.
+
 @cindex filtering defined symbols
 @cindex subset of defined symbols
 @cindex defined symbols, filtering
@@ -9290,7 +9309,8 @@ several scenarios that would wreak havoc on one or both of the original
 implementations.  This points out one other difference between the
 list styles.  @code{foreach} evaluates unquoted list elements only once,
 in preparation for calling @code{@w{_foreach}}, similary for
-@code{foreachq} as provided by @file{foreachq3.m4}.  But
+@code{foreachq} as provided by @file{foreachq3.m4} or
+@file{foreachq4.m4}.  But
 @code{foreachq}, as provided by @file{foreachq2.m4},
 evaluates unquoted list elements twice while visiting the first list
 element, once in @code{@w{_arg1q}} and once in @code{@w{_rest}}.  When
