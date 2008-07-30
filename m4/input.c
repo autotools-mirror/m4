@@ -592,6 +592,7 @@ m4__push_symbol (m4 *context, m4_symbol_value *value, size_t level, bool inuse)
 	     destructively modifies the chain it is parsing.  */
 	  chain = (m4__symbol_chain *) obstack_copy (current_input, src_chain,
 						     sizeof *chain);
+	  chain->next = NULL;
 	  if (chain->type == M4__CHAIN_STR && chain->u.u_s.level == SIZE_MAX)
 	    {
 	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)

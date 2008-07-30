@@ -1,3 +1,11 @@
+2008-07-30  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in trace output, introduced 2008-05-08.
+	* m4/input.c (m4__push_symbol): When cloning chains, break pointer
+	back to original chain; latent bug from 2008-02-02 that did not
+	cause misbehavior until trace output read unfinished chain.
+	* tests/builtins.at (debug): Add test for this.
+
 2008-07-28  Eric Blake  <ebb9@byu.net>
 
 	Optimize iteration examples.
