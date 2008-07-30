@@ -472,6 +472,7 @@ push_token (token_data *token, int level, bool inuse)
 	     destructively modifies the chain it is parsing.  */
 	  chain = (token_chain *) obstack_copy (current_input, src_chain,
 						sizeof *chain);
+	  chain->next = NULL;
 	  if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
 	    {
 	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)

@@ -3854,6 +3854,22 @@ indir(`my_defn', indir(`shift', `', `foo'))
 @result{}bar
 @end example
 
+@ignore
+@comment not worth including in the manual, but this tests a trace code
+@comment path that was temporarily broken
+@comment options: -de --trace ifelse
+@example
+$ @kbd{m4 -de --trace ifelse}
+define(`e', `ifelse(`$1', `$2', `ifelse(`$1', `$2', `e(shift($@@))')')')
+@result{}
+e(`1', `1')
+@error{}m4trace: -1- ifelse -> ifelse(`1', `1', `e(shift(`1',`1'))')
+@error{}m4trace: -1- ifelse -> e(shift(`1',`1'))
+@error{}m4trace: -1- ifelse ->@w{ }
+@result{}
+@end example
+@end ignore
+
 @node Debug Levels
 @section Controlling debugging output
 

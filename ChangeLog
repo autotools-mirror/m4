@@ -1,3 +1,11 @@
+2008-07-30  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in trace output, introduced 2008-05-09.
+	* src/input.c (push_token): When cloning chains, break pointer
+	back to original chain; latent bug from 2008-02-02 that did not
+	cause misbehavior until trace output read unfinished chain.
+	* doc/m4.texinfo (Trace): Add test for this.
+
 2008-07-28  Eric Blake  <ebb9@byu.net>
 
 	Optimize iteration examples.
