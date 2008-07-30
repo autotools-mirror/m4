@@ -1,3 +1,9 @@
+2008-07-30  Eric Blake  <ebb9@byu.net>
+
+	Avoid regressions in trace and comment output.
+	* doc/m4.texinfo (Trace): Add test.
+	(Comments): Likewise.
+
 2008-07-28  Eric Blake  <ebb9@byu.net>
 
 	Optimize iteration examples.
