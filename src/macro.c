@@ -260,8 +260,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 	      bool first)
 {
   symbol *sym;
-  bool result;
-  int ch;
+  bool result = false;
 
   switch (t)
     {				/* TOKSW */
@@ -271,13 +270,19 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
       return true;
 
     case TOKEN_STRING:
-      /* Tokens and comments are safe in isolation (since quote_age()
-	 detects any change in delimiters).  But if other text is
-	 already present, multi-character delimiters could be an
-	 issue, so use a conservative heuristic.  If obstack is
-	 provided, the string was already expanded into it during
-	 next_token.  */
+      /* Strings are safe in isolation (since quote_age() detects any
+	 change in delimiters), or when safe_quotes is true.  When
+	 safe_quotes is false, we could technically return true if we
+	 can prove that the concatenation of this string to prior text
+	 does not form a multi-byte quote delimiter, but that is a lot
+	 of overhead, so we give the conservative answer of false.  */
       result = first || safe_quotes ();
+      /* fallthru */
+    case TOKEN_COMMENT:
+      /* Comments can contain unbalanced quote delimiters.  Rather
+	 than search for one, we return the conservative answer of
+	 false.  If obstack is provided, the string or comment was
+	 already expanded into it during next_token.  */
       if (obs)
 	return result;
       break;
@@ -285,18 +290,23 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:
-      /* Conservative heuristic; thanks to multi-character delimiter
-	 concatenation.  */
+      /* If safe_quotes is true, then these do not form a quote
+	 delimiter.  If it is false, we give the conservative answer
+	 of false rather than taking time to prove that no multi-byte
+	 quote delimiter is formed.  */
       result = safe_quotes ();
       break;
 
     case TOKEN_SIMPLE:
-      /* Conservative heuristic; if these characters are whitespace or
-	 numeric, then behavior of safe_quotes is applicable.
-	 Otherwise, assume these characters have a high likelihood of
-	 use in quote delimiters.  */
-      ch = to_uchar (*TOKEN_DATA_TEXT (td));
-      result = (isspace (ch) || isdigit (ch)) && safe_quotes ();
+      /* If safe_quotes is true, then all but the single-byte end
+	 quote delimiter is safe in a quoted context; a single-byte
+	 start delimiter will trigger a TOKEN_STRING instead.  If
+	 safe_quotes is false, we give the conservative answer of
+	 false rather than taking time to prove that no multi-byte
+	 quote delimiter is formed.  */
+      result = *TOKEN_DATA_TEXT (td) != *curr_quote.str2 && safe_quotes ();
+      if (result)
+	assert (*TOKEN_DATA_TEXT (td) != *curr_quote.str1);
       break;
 
     case TOKEN_WORD:
@@ -313,8 +323,10 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 #else
 	  divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
 #endif /* !ENABLE_CHANGEWORD */
-	  /* The word just appended is unquoted, but the heuristics of
-	     safe_quote are applicable.  */
+	  /* If safe_quotes is true, then words do not overlap with
+	     quote delimiters.  If it is false, we give the
+	     conservative answer of false rather than prove that no
+	     multi-byte delimiters are formed.  */
 	  return safe_quotes();
 	}
       expand_macro (sym);
@@ -420,6 +432,7 @@ expand_argument (struct obstack *obs, token_data *argp,
 
 	case TOKEN_WORD:
 	case TOKEN_STRING:
+	case TOKEN_COMMENT:
 	case TOKEN_MACDEF:
 	  if (!expand_token (obs, t, &td, line, first))
 	    age = 0;

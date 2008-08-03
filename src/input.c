@@ -1590,17 +1590,18 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
 /*--------------------------------------------------------------------.
 | Parse a single token from the input stream, set TD to its	      |
 | contents, and return its type.  A token is TOKEN_EOF if the	      |
-| input_stack is empty; TOKEN_STRING for a quoted string or comment;  |
-| TOKEN_WORD for something that is a potential macro name; and	      |
-| TOKEN_SIMPLE for any single character that is not a part of any of  |
-| the previous types.  If LINE is not NULL, set *LINE to the line     |
-| where the token starts.  If OBS is not NULL, expand TOKEN_STRING    |
-| directly into OBS rather than in token_stack temporary storage      |
-| area, and TD could be a TOKEN_COMP instead of the usual	      |
-| TOKEN_TEXT.  If ALLOW_ARGV, OBS must be non-NULL, and an entire     |
-| series of arguments can be returned as TOKEN_ARGV when a $@	      |
-| reference is encountered.  Report errors (unterminated comments or  |
-| strings) on behalf of CALLER, if non-NULL.			      |
+| input_stack is empty; TOKEN_STRING for a quoted string;	      |
+| TOKEN_COMMENT for a comment; TOKEN_WORD for something that is a     |
+| potential macro name; and TOKEN_SIMPLE for any single character     |
+| that is not a part of any of the previous types.  If LINE is not    |
+| NULL, set *LINE to the line where the token starts.  If OBS is not  |
+| NULL, expand TOKEN_STRING and TOKEN_COMMENT directly into OBS	      |
+| rather than in token_stack temporary storage area, and TD could be  |
+| a TOKEN_COMP instead of the usual TOKEN_TEXT.  If ALLOW_ARGV, OBS   |
+| must be non-NULL, and an entire series of arguments can be	      |
+| returned as TOKEN_ARGV when a $@ reference is encountered.  Report  |
+| errors (unterminated comments or strings) on behalf of CALLER, if   |
+| non-NULL.							      |
 |								      |
 | Next_token () returns the token type, and passes back a pointer to  |
 | the token data through TD.  Non-string token text is collected on   |
@@ -1695,7 +1696,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	  assert (ch < CHAR_EOF);
 	  obstack_1grow (obs_td, ch);
 	}
-      type = TOKEN_STRING;
+      type = TOKEN_COMMENT;
     }
   else if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
@@ -1837,7 +1838,8 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
     }
   else
     {
-      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP && type == TOKEN_STRING);
+      assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP
+	      && (type == TOKEN_STRING || type == TOKEN_COMMENT));
 #ifdef DEBUG_INPUT
       {
 	token_chain *chain;
@@ -1895,7 +1897,7 @@ peek_token (void)
     }
   else if (MATCH (ch, curr_comm.str1, curr_comm.len1, false))
     {
-      result = TOKEN_STRING;
+      result = TOKEN_COMMENT;
     }
   else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
@@ -1943,6 +1945,8 @@ token_type_string (token_type t)
       return "EOF";
     case TOKEN_STRING:
       return "STRING";
+    case TOKEN_COMMENT:
+      return "COMMENT";
     case TOKEN_WORD:
       return "WORD";
     case TOKEN_OPEN:
@@ -1979,6 +1983,10 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_STRING:
       xfprintf (stderr, "string:");
+      break;
+
+    case TOKEN_COMMENT:
+      xfprintf (stderr, "comment:");
       break;
 
     case TOKEN_MACDEF:

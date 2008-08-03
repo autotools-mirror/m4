@@ -218,7 +218,8 @@ typedef struct token_chain token_chain;
 enum token_type
 {
   TOKEN_EOF = 4,/* End of file, TOKEN_VOID.  */
-  TOKEN_STRING,	/* Quoted string or comment, TOKEN_TEXT or TOKEN_COMP.  */
+  TOKEN_STRING,	/* Quoted string, TOKEN_TEXT or TOKEN_COMP.  */
+  TOKEN_COMMENT,/* Comment, TOKEN_TEXT or TOKEN_COMP.  */
   TOKEN_WORD,	/* An identifier, TOKEN_TEXT.  */
   TOKEN_OPEN,	/* Active character `(', TOKEN_TEXT.  */
   TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */

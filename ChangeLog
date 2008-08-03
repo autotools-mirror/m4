@@ -1,3 +1,17 @@
+2008-08-03  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in commenting unbalanced quotes, from 2008-02-16.
+	* src/m4.h (enum token_type): Add TOKEN_COMMENT.
+	* src/input.c (next_token, peek_token, token_type_string)
+	(print_token): Supply new token type for comments.
+	* src/macro.c (expand_token): Remove penalty for unquoted `-'
+	bytes.  Penalize comments, as they can contain unbalanced quotes;
+	latent bug since 2007-12-07, exposed by passing $@ references
+	built from comments.
+	(expand_argument): Adjust caller.
+	* doc/m4.texinfo (Comments): Test the fix.
+	* NEWS: Mention the fix.
+
 2008-07-30  Eric Blake  <ebb9@byu.net>
 
 	Fix regression in trace output, introduced 2008-05-09.

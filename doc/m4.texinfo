@@ -1038,6 +1038,27 @@ The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
 
+@ignore
+@comment Detect regression in 1.4.10b in regards to reparsing comments.
+@comment Not worth including in the manual.
+@example
+define(`e', `$@@')define(`q', ``$@@'')define(`foo', `bar')
+@result{}
+q(e(`one
+',#two ' foo
+))
+@result{}`one
+@result{}',`#two  bar
+@result{}''
+changecom(`<', `>')define(`n', `$#')
+@result{}
+n(e(<`>, <'>))
+@result{}1
+len(e(<`>, ,<'>))
+@result{}12
+@end example
+@end ignore
+
 @node Other tokens
 @section Other kinds of input tokens
 
