@@ -1714,7 +1714,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    obstack_1grow (obs_safe, ch);
 	  }
 	type = (m4_get_discard_comments_opt (context)
-		? M4_TOKEN_NONE : M4_TOKEN_STRING);
+		? M4_TOKEN_NONE : M4_TOKEN_COMMENT);
       }
     else if (!m4_is_syntax_single_comments (M4SYNTAX)
 	     && MATCH (context, ch, context->syntax->comm.str1,
@@ -1754,7 +1754,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    obstack_1grow (obs_safe, ch);
 	  }
 	type = (m4_get_discard_comments_opt (context)
-		? M4_TOKEN_NONE : M4_TOKEN_STRING);
+		? M4_TOKEN_NONE : M4_TOKEN_COMMENT);
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ACTIVE))
       {					/* ACTIVE CHARACTER */
@@ -1843,10 +1843,11 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 				    m4__quote_age (M4SYNTAX));
 	}
       else
-	assert (type == M4_TOKEN_STRING);
+	assert (type == M4_TOKEN_STRING || type == M4_TOKEN_COMMENT);
     }
   else
-    assert (token->type == M4_SYMBOL_COMP && type == M4_TOKEN_STRING);
+    assert (token->type == M4_SYMBOL_COMP
+	    && (type == M4_TOKEN_STRING || type == M4_TOKEN_COMMENT));
   VALUE_MAX_ARGS (token) = -1;
 
 #ifdef DEBUG_INPUT
@@ -1913,6 +1914,9 @@ m4_print_token (m4 *context, const char *s, m4__token_type type,
       break;
     case M4_TOKEN_STRING:
       fputs ("string\t", stderr);
+      break;
+    case M4_TOKEN_COMMENT:
+      fputs ("comment\t", stderr);
       break;
     case M4_TOKEN_SPACE:
       fputs ("space\t", stderr);

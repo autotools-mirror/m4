@@ -540,8 +540,8 @@ extern const m4_string_pair *m4__quote_cache (m4_syntax_table *,
 typedef enum {
   M4_TOKEN_EOF,		/* End of file, M4_SYMBOL_VOID.  */
   M4_TOKEN_NONE,	/* Discardable token, M4_SYMBOL_VOID.  */
-  M4_TOKEN_STRING,	/* Quoted string or comment, M4_SYMBOL_TEXT or
-			   M4_SYMBOL_COMP.  */
+  M4_TOKEN_STRING,	/* Quoted string, M4_SYMBOL_TEXT or M4_SYMBOL_COMP.  */
+  M4_TOKEN_COMMENT,	/* Comment, M4_SYMBOL_TEXT or M4_SYMBOL_COMP.  */
   M4_TOKEN_SPACE,	/* Whitespace, M4_SYMBOL_TEXT.  */
   M4_TOKEN_WORD,	/* An identifier, M4_SYMBOL_TEXT.  */
   M4_TOKEN_OPEN,	/* Argument list start, M4_SYMBOL_TEXT.  */

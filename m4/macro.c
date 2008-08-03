@@ -196,7 +196,7 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
 	      m4_symbol_value *token, int line, bool first)
 {
   m4_symbol *symbol;
-  bool result;
+  bool result = false;
   const char *text = (m4_is_symbol_value_text (token)
 		      ? m4_get_symbol_value_text (token) : NULL);
 
@@ -208,14 +208,21 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
       return true;
 
     case M4_TOKEN_STRING:
-      /* Tokens and comments are safe in isolation (since quote_age
-	 detects any change in delimiters).  This is also returned for
-	 sequences of benign characters, such as digits.  But if other
-	 text is already present, multi-character delimiters could be
-	 formed by concatenation, so use a conservative heuristic.  If
-	 obstack was provided, the string was already expanded into it
-	 during m4__next_token.  */
+      /* Strings are safe in isolation (since quote_age detects any
+	 change in delimiters), or when safe_quotes is true.  This is
+	 also returned for sequences of benign characters, such as
+	 digits.  When safe_quotes is false, we could technically
+	 return true if we can prove that the concatenation of this
+	 string to prior text does not form a multi-byte quote
+	 delimiter, but that is a lot of overhead, so we give the
+	 conservative answer of false.  */
       result = first || m4__safe_quotes (M4SYNTAX);
+      /* fallthru */
+    case M4_TOKEN_COMMENT:
+      /* Comments can contain unbalanced quote delimiters.  Rather
+	 than search for one, we return the conservative answer of
+	 false.  If obstack is provided, the string or comment was
+	 already expanded into it during next_token.  */
       if (obs)
 	return result;
       break;
@@ -224,15 +231,24 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
     case M4_TOKEN_COMMA:
     case M4_TOKEN_CLOSE:
     case M4_TOKEN_SPACE:
-      /* Conservative heuristic, thanks to multi-character delimiter
-	 concatenation.  */
+      /* If safe_quotes is true, then these do not form a quote
+	 delimiter.  If it is false, we give the conservative answer
+	 of false rather than taking time to prove that no multi-byte
+	 quote delimiter is formed.  */
       result = m4__safe_quotes (M4SYNTAX);
       break;
 
     case M4_TOKEN_SIMPLE:
-      /* No guarantees here.  */
-      assert (m4_get_symbol_value_len (token) == 1);
-      result = false;
+      /* If safe_quotes is true, then all but the single-byte end
+	 quote delimiter is safe in a quoted context; a single-byte
+	 start delimiter will trigger M4_TOKEN_STRING instead.  If
+	 safe_quotes is false, we give the conservative answer of
+	 false rather than taking time to prove that no multi-byte
+	 quote delimiter is formed.  */
+      result = (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_RQUOTE)
+		&& m4__safe_quotes (M4SYNTAX));
+      if (result)
+	assert (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_LQUOTE));
       break;
 
     case M4_TOKEN_WORD:
@@ -255,8 +271,10 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
 		&& !m4__next_token_is_open (context)))
 	  {
 	    m4_divert_text (context, obs, text, len, line);
-	    /* The word just output is unquoted, but we can trust the
-	       heuristics of safe_quote.  */
+	    /* If safe_quotes is true, then words do not overlap with
+	       quote delimiters.  If it is false, we give the
+	       conservative answer of false rather than prove that no
+	       multi-byte delimiters are formed.  */
 	    return m4__safe_quotes (M4SYNTAX);
 	  }
 	expand_macro (context, textp, len2, symbol);
@@ -363,6 +381,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 	case M4_TOKEN_WORD:
 	case M4_TOKEN_SPACE:
 	case M4_TOKEN_STRING:
+	case M4_TOKEN_COMMENT:
 	case M4_TOKEN_MACDEF:
 	  if (!expand_token (context, obs, type, &token, line, first))
 	    age = 0;

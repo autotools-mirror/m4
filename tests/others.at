@@ -51,7 +51,9 @@ This Sentence Should Be Capitalized
 ## comments ##
 ## -------- ##
 
-AT_TEST_M4([Comments],
+AT_SETUP([Comments])
+
+AT_DATA([input.m4],
 [[# An ordinary comment
 define(`foo', # A comment in a macro
 `Macro `foo' expansion')
@@ -59,7 +61,9 @@ foo
 define(`comment', `*** Macro `comment' expansion ***')
 changecom(`@', `@')
 foo
-]],
+]])
+
+AT_CHECK_M4([input.m4], [0],
 [[# An ordinary comment
 
 # A comment in a macro
@@ -70,6 +74,28 @@ Macro foo expansion
 Macro foo expansion
 ]])
 
+dnl Detect regression in 1.4.10b in regards to reparsing comments.
+AT_DATA([input.m4],
+[[define(`e', `$@')define(`q', ``$@'')define(`foo', `bar')
+q(e(`one
+',#two ' foo
+))
+changecom(`<', `>')define(`n', `$#')
+n(e(<`>, <'>))
+len(e(<`>, ,<'>))
+]])
+
+AT_CHECK_M4([input.m4], [0],
+[[
+`one
+',`#two  bar
+''
+
+1
+12
+]])
+
+AT_CLEANUP
 
 ## --------- ##
 ## countdown ##
