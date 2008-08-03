@@ -1,3 +1,9 @@
+2008-08-03  Eric Blake  <ebb9@byu.net>
+
+	Increase ulimit stack value to be larger than SIGSTKSZ.
+	* checks/stackovf.test (tmpfile): Use 300K rather than 50K, since
+	at least OpenBSD's sh died early from an undersized stack limit.
+
 2008-07-17  Eric Blake  <ebb9@byu.net>
 
 	Fix missing copyright notices.
