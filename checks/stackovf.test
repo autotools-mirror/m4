@@ -62,9 +62,9 @@ trap '(exit $?); exit $?' 1 2 3 15
 tmpfile="$tmpdir"/m4.out
 
 # Limit the stack size if the shell we are running permits it
-if (exec 2>/dev/null; ulimit -Ss 50)
+if (exec 2>/dev/null; ulimit -Ss 300)
 then
-  ulimit -Ss 50
+  ulimit -Ss 300
   echo "Stack soft limit set to `ulimit -s`K";
 else
   echo "Can't reset stack limit - this may take a while..."
