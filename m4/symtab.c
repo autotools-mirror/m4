@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include "m4private.h"
-#include "xmemdup0.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYM */
@@ -504,8 +503,8 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
 	size_t len = m4_get_symbol_value_len (src);
 	unsigned int age = m4_get_symbol_value_quote_age (src);
 	m4_set_symbol_value_text (dest,
-				  xmemdup (m4_get_symbol_value_text (src),
-					   len + 1), len, age);
+				  xmemdup0 (m4_get_symbol_value_text (src),
+					    len), len, age);
       }
       break;
     case M4_SYMBOL_FUNC:

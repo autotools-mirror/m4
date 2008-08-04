@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include "m4private.h"
-#include "xmemdup0.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_SYNTAX */

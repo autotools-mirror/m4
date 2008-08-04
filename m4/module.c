@@ -179,8 +179,7 @@ install_macro_table (m4 *context, m4_module *module)
 	  /* Sanity check that builtins meet the required interface.  */
 	  assert (mp->min_args <= mp->max_args);
 
-	  m4_set_symbol_value_text (value, xmemdup (mp->value, len + 1),
-				    len, 0);
+	  m4_set_symbol_value_text (value, xmemdup0 (mp->value, len), len, 0);
 	  VALUE_MODULE (value) = module;
 	  VALUE_MIN_ARGS (value) = mp->min_args;
 	  VALUE_MAX_ARGS (value) = mp->max_args;

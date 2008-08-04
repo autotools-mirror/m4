@@ -27,6 +27,7 @@
 #include "binary-io.h"
 #include "close-stream.h"
 #include "quotearg.h"
+#include "xmemdup0.h"
 
 static	void  produce_mem_dump		(FILE *, const char *, size_t);
 static	void  produce_resyntax_dump	(m4 *, FILE *);
@@ -929,8 +930,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 	    if (number[2] > 0)
 	      module = m4__module_find (string[2]);
 
-	    m4_set_symbol_value_text (token, xmemdup (string[1],
-						      number[1] + 1),
+	    m4_set_symbol_value_text (token, xmemdup0 (string[1], number[1]),
 				      number[1], 0);
 	    VALUE_MODULE (token) = module;
 	    VALUE_MAX_ARGS (token) = -1;

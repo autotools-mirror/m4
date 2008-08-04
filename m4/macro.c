@@ -1413,9 +1413,10 @@ m4_arg_empty (m4_macro_args *argv, size_t arg)
 }
 
 /* Given ARGV, return the length of argument ARG.  Abort if the
-   argument is not text.  Indices beyond argc return 0.  */
+   argument is not text and FLATTEN is not true.  Indices beyond argc
+   return 0.  */
 size_t
-m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
+m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg, bool flatten)
 {
   m4_symbol_value *value;
   m4__symbol_chain *chain;
@@ -1428,7 +1429,7 @@ m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
     }
   if (argv->argc <= arg)
     return 0;
-  value = m4_arg_symbol (argv, arg);
+  value = arg_symbol (argv, arg, NULL, flatten);
   if (m4_is_symbol_value_text (value))
     return m4_get_symbol_value_len (value);
   assert (value->type == M4_SYMBOL_COMP);
@@ -1444,6 +1445,9 @@ m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
 	case M4__CHAIN_STR:
 	  len += chain->u.u_s.len;
 	  break;
+	case M4__CHAIN_FUNC:
+	  assert (flatten);
+	  break;
 	case M4__CHAIN_ARGV:
 	  i = chain->u.u_a.index;
 	  limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
@@ -1454,15 +1458,8 @@ m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
 	    len += (quotes->len1 + quotes->len2) * limit;
 	  len += limit - 1;
 	  while (limit--)
-	    {
-	      /* TODO handle concatenation of builtins.  */
-	      if (m4_is_symbol_value_func (m4_arg_symbol (chain->u.u_a.argv,
-							  i)))
-		assert (argv->flatten);
-	      else
-		len += m4_arg_len (context, chain->u.u_a.argv, i);
-	      i++;
-	    }
+	    len += m4_arg_len (context, chain->u.u_a.argv, i++,
+			       flatten || chain->u.u_a.flatten);
 	  break;
 	default:
 	  assert (!"m4_arg_len");
@@ -1470,7 +1467,7 @@ m4_arg_len (m4 *context, m4_macro_args *argv, size_t arg)
 	}
       chain = chain->next;
     }
-  assert (len);
+  assert (len || flatten);
   return len;
 }
 

@@ -1,5 +1,26 @@
 2008-08-03  Eric Blake  <ebb9@byu.net>
 
+	Stage 26: Allow embedded NUL in macro definitions.
+	Clean up final few locations that did not track macro definitions
+	by length, to allow embedded NUL.  Make m4_arg_len callers aware
+	of issue of flattening builtins when determining length.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_arg_len): Add parameter.
+	(M4ARGLEN): Provide default for the parameter.
+	* m4/m4private.h (includes): Share xmemdup0.h among all libm4
+	files.
+	* m4/macro.c (m4_arg_len): Fail if builtins are not flattened.
+	* m4/syntax.c (includes): Rely on m4private.h for xmemdup0.
+	* m4/symtab.c (includes): Likewise.
+	(m4_symbol_value_copy): Use xmemdup0.
+	* m4/module.c (install_macro_table): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* tests/freeze.at (reloading nul): Enhance test.
+	* tests/null.m4: Likewise.
+	* tests/null.err: Update expected output.
+	* tests/null.out: Likewise.
+
 	Fix regression in commenting unbalanced quotes, from 2008-02-16.
 	* m4/m4private.h (m4__token_type): Add M4_TOKEN_COMMENT.
 	* m4/input.c (m4__next_token, m4_print_token): Supply new token

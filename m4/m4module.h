@@ -165,7 +165,7 @@ struct m4_string_pair
 /* Grab the length of the text contents of argument I, or abort if the
    argument is not text.  Assumes that `m4 *context' and
    `m4_macro_args *argv' are in scope.  */
-#define M4ARGLEN(i) m4_arg_len (context, argv, i)
+#define M4ARGLEN(i) m4_arg_len (context, argv, i, false)
 
 extern bool	m4_bad_argc	   (m4 *, size_t, const m4_call_info *, size_t,
 				    size_t, bool);
@@ -362,7 +362,7 @@ extern const char *m4_arg_text		(m4 *, m4_macro_args *, size_t, bool);
 extern bool	m4_arg_equal		(m4 *, m4_macro_args *, size_t,
 					 size_t);
 extern bool	m4_arg_empty		(m4_macro_args *, size_t);
-extern size_t	m4_arg_len		(m4 *, m4_macro_args *, size_t);
+extern size_t	m4_arg_len		(m4 *, m4_macro_args *, size_t, bool);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, size_t);
 extern m4_obstack *m4_arg_scratch	(m4 *);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,

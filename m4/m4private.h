@@ -25,6 +25,7 @@
 #include <ltdl.h>
 
 #include "cloexec.h"
+#include "xmemdup0.h"
 
 typedef struct m4__search_path_info m4__search_path_info;
 typedef struct m4__macro_arg_stacks m4__macro_arg_stacks;
