@@ -1,3 +1,8 @@
+2008-08-04  Eric Blake  <ebb9@byu.net>
+
+	Update copyright notice in generated testsuite files.
+	* checks/get-them: Fix generated copyright line.
+
 2008-08-03  Eric Blake  <ebb9@byu.net>
 
 	Stage 26: Allow embedded NUL in macro definitions.

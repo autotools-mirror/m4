@@ -94,7 +94,8 @@ BEGIN {
     printf("dnl @ %s:%d: Origin of test\n"\
 	   "dnl @ expected status: %d\n"\
 	   "dnl @ extra options: %s\n"\
-	   "dnl @ Copyright (C) 2006, 2007 Free Software Foundation\n"\
+	   "dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,\n"\
+	   "dnl @ Inc.\n"\
 	   "dnl @ This file is free software; the Free Software Foundation\n"\
 	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
 	   "dnl @ with or without modifications, as long as this notice\n"\
