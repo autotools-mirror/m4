@@ -21,6 +21,14 @@ Foundation, Inc.
    earlier in the command line, so that the client will not break in the
    face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
 
+** The `-L'/`--nesting-limit' command-line option now defaults to 0 for
+   unlimited on platforms that can detect and deal with stack overflow.  On
+   systems that lack alternate stack support, such as Cygwin, and on
+   systems that do not obey the POSIX semantics for distinguishing stack
+   overflow from other exceptions, such as Linux, you can optionally
+   install the libsigsegv library to enhance m4's ability to accurately
+   report stack overflow: http://www.gnu.org/software/libsigsegv/
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]

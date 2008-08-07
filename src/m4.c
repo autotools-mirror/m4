@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <signal.h>
 
+#include "c-stack.h"
 #include "progname.h"
 #include "version-etc.h"
 
@@ -111,20 +112,52 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
     retcode = EXIT_FAILURE;
 }
 
-#ifdef USE_STACKOVF
+#ifndef SIGBUS
+# define SIGBUS SIGILL
+#endif
 
-/*---------------------------------------.
-| Tell user stack overflowed and abort.	 |
-`---------------------------------------*/
+#ifndef NSIG
+# ifndef MAX
+#  define MAX(a,b) ((a) < (b) ? (b) : (a))
+# endif
+# define NSIG (MAX (SIGABRT, MAX (SIGILL, MAX (SIGFPE,  \
+                                               MAX (SIGSEGV, SIGBUS)))) + 1)
+#endif
 
+/* Pre-translated messages for program errors.  Do not translate in
+   the signal handler, since gettext and strsignal are not
+   async-signal-safe.  */
+static const char * volatile program_error_message;
+static const char * volatile signal_message[NSIG];
+
+/* Print a nicer message about any programmer errors, then exit.  This
+   must be aysnc-signal safe, since it is executed as a signal
+   handler.  If SIGNO is zero, this represents a stack overflow; in
+   that case, we return to allow c_stack_action to handle things.  */
 static void
-stackovf_handler (void)
+fault_handler (int signo)
 {
-  M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: stack overflow.  (Infinite define recursion?)"));
+  if (signo)
+    {
+      /* POSIX states that reading static memory is, in general, not
+         async-safe.  However, the static variables that we read are
+         never modified once this handler is installed, so this
+         particular usage is safe.  And it seems an oversight that
+         POSIX claims strlen is not async-safe.  */
+      write (STDERR_FILENO, program_name, strlen (program_name));
+      write (STDERR_FILENO, ": ", 2);
+      write (STDERR_FILENO, program_error_message,
+             strlen (program_error_message));
+      if (signal_message[signo])
+        {
+          write (STDERR_FILENO, ": ", 2);
+          write (STDERR_FILENO, signal_message[signo],
+                 strlen (signal_message[signo]));
+        }
+      write (STDERR_FILENO, "\n", 1);
+      _exit (EXIT_INTERNAL_ERROR);
+    }
 }
-
-#endif /* USE_STACKOV */
 
 
 /*---------------------------------------------.
@@ -175,16 +208,16 @@ Preprocessor features:\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
 ", stdout);
-      fputs ("\
-\n\
+      puts ("");
+      xprintf (_("\
 Limits control:\n\
   -g, --gnu                    override -G to re-enable GNU extensions\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
-", stdout);
+  -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%d]\n\
+"), nesting_limit);
+      puts ("");
       fputs ("\
-\n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
   -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
@@ -321,6 +354,7 @@ process_file (const char *name)
 int
 main (int argc, char *const *argv, char *const *envp)
 {
+  struct sigaction act;
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
@@ -340,12 +374,48 @@ main (int argc, char *const *argv, char *const *envp)
 
   include_init ();
   debug_init ();
-#ifdef USE_STACKOVF
-  setup_stackovf_trap (argv, envp, stackovf_handler);
-#endif
+
+  /* Stack overflow and program error handling.  Ignore failure to
+     install a handler, since this is merely for improved output on
+     crash, and we should never crash ;).  */
+  if (c_stack_action (fault_handler) == 0)
+    nesting_limit = 0;
+  program_error_message
+    = xasprintf (_("internal error detected; please report this bug to <%s>"),
+                 PACKAGE_BUGREPORT);
+  signal_message[SIGSEGV] = xstrdup (strsignal (SIGSEGV));
+  signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
+  signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
+  signal_message[SIGFPE] = xstrdup (strsignal (SIGFPE));
+  if (SIGBUS != SIGILL)
+    signal_message[SIGBUS] = xstrdup (strsignal (SIGBUS));
+  sigemptyset (&act.sa_mask);
+  /* One-shot - if we fault while handling a fault, we want to revert
+     to default signal behavior.  */
+  act.sa_flags = SA_NODEFER | SA_RESETHAND;
+  act.sa_handler = fault_handler;
+  sigaction (SIGABRT, &act, NULL);
+  sigaction (SIGILL, &act, NULL);
+  sigaction (SIGFPE, &act, NULL);
+  sigaction (SIGBUS, &act, NULL);
+
+#ifdef DEBUG_STKOVF
+  /* Make it easier to test our fault handlers.  Exporting M4_CRASH=0
+     attempts a SIGSEGV, exporting it as 1 attempts an assertion
+     failure with a fallback to abort.  */
+  {
+    char *crash = getenv ("M4_CRASH");
+    if (crash)
+      {
+        if (!atoi (crash))
+          ++*(int *) 8;
+        assert (false);
+        abort ();
+      }
+  }
+#endif /* DEBUG_STKOVF */
 
   /* First, we decode the arguments, to size up tables and stuff.  */
-
   head = tail = NULL;
 
   while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,

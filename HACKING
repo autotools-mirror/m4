@@ -62,6 +62,13 @@ and is not part of a release distribution.
   Note that none of these bootstrapping dependencies should be required
   by a distributed release.
 
+* M4 has an optional build dependency.  In order to ensure that the
+  dependency remains optional, you can avoid the library by using
+  `./configure --without-libsigsegv-prefix'.  In order to ensure that
+  the dependency is still viable with the current code base, you should
+  install:
+  - Libsigsegv 2.5 or later
+
 * Either add the gnulib directory to your PATH, or run
     GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap
 
