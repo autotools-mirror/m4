@@ -6420,7 +6420,7 @@ define(`abc', `def')
 maketemp(`foo-abc')
 @result{}foo-def
 @error{}m4:stdin:4: recommend using mkstemp instead
-syscmd(`test -f foo-*')sysval
+syscmd(`test -f foo-*')ifelse(sysval, `0', `0', `1')
 @result{}1
 @end example
 @end ignore

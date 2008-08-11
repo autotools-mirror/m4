@@ -1,3 +1,9 @@
+2008-08-11  Eric Blake  <ebb9@byu.net>
+
+	Avoid triggering OS/2 bug in testsuite.
+	* doc/m4.texinfo (Mkstemp): Don't assume test(1) status is 1.
+	Reported by Elbert Pol.
+
 2008-08-03  Eric Blake  <ebb9@byu.net>
 
 	Increase ulimit stack value to be larger than SIGSTKSZ.
