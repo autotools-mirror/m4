@@ -1,3 +1,9 @@
+2008-08-15  Eric Blake  <ebb9@byu.net>
+
+	Avoid triggering OS/2 bug in testsuite.
+	* doc/m4.texinfo (Mkstemp): Don't assume test(1) status is 1.
+	Reported by Elbert Pol.
+
 2008-08-07  Bruno Haible  <bruno@clisp.org>  (tiny change)
 
 	Run m4 tests prior to gnulib unit tests.
