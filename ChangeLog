@@ -1,5 +1,10 @@
 2008-08-15  Eric Blake  <ebb9@byu.net>
 
+	Improve 'git diff' of manual source.
+	* .gitattributes (*.texi*): Add diff attribute.
+	* bootstrap: Tell git how to use it.
+	Inspired by Jim Meyering's similar patch for coreutils.
+
 	Avoid triggering OS/2 bug in testsuite.
 	* doc/m4.texinfo (Mkstemp): Don't assume test(1) status is 1.
 	Reported by Elbert Pol.
