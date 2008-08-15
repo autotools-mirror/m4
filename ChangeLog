@@ -1,5 +1,12 @@
 2008-08-15  Eric Blake  <ebb9@byu.net>
 
+	Documentation updates.
+	* doc/m4.texinfo (History): Mention 1.4.12.
+	(Builtin): Enhance regression tests.
+	(Debug Levels): Mention effect of -l.  Enhance regression tests.
+	(Incompatibilities): Fix typo, and mention trace output.
+	(Improved capitalize): Simplify example.
+
 	Avoid compiler warning.
 	* src/builtin.c (m4_ifelse): Avoid unused variable.
 	* THANKS: Update.
