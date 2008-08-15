@@ -1,5 +1,10 @@
 2008-08-15  Eric Blake  <ebb9@byu.net>
 
+	Avoid compiler warning.
+	* src/builtin.c (m4_ifelse): Avoid unused variable.
+	* THANKS: Update.
+	Reported by Tom G. Christensen.
+
 	Improve 'git diff' of manual source.
 	* .gitattributes (*.texi*): Add diff attribute.
 	* bootstrap: Tell git how to use it.

@@ -646,18 +646,17 @@ static void
 m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 {
   const char *result;
-  token_data *argv0;
+  token_data *me = argv[0];
 
   if (argc == 2)
     return;
 
-  if (bad_argc (argv[0], argc, 4, -1))
+  if (bad_argc (me, argc, 4, -1))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    bad_argc (argv[0], (argc + 2) % 3, -1, 1);
+    bad_argc (me, (argc + 2) % 3, -1, 1);
 
-  argv0 = argv[0];
   argv++;
   argc--;
 
