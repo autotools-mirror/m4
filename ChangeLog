@@ -1,3 +1,10 @@
+2008-08-15  Eric Blake  <ebb9@byu.net>
+
+	Improve 'git diff' of manual source.
+	* .gitattributes (*.texi*): Add diff attribute.
+	* bootstrap: Tell git how to use it.
+	Inspired by Jim Meyering's similar patch for coreutils.
+
 2008-08-11  Eric Blake  <ebb9@byu.net>
 
 	Avoid triggering OS/2 bug in testsuite.

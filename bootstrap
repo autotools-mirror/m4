@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2008-03-25
+# bootstrap (GNU M4) version 2008-08-15
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation,
@@ -241,6 +241,12 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
     git config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
   else
     func_echo "consider installing git-merge-changelog from gnulib"
+  fi
+  if git config diff.texinfo.funcname >/dev/null ; then
+    :
+  else
+    func_echo "initializing git texinfo diff driver"
+    git config diff.texinfo.funcname '^@node[ \t][ \t]*\\([^,][^,]*\\)'
   fi
 fi
 
