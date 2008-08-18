@@ -308,7 +308,6 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
-  DIVERSIONS_OPTION,			/* not quite -N, because of message */
   WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
 
   HELP_OPTION,				/* no short opt */
@@ -339,7 +338,6 @@ static const struct option long_options[] =
   {"word-regexp", required_argument, NULL, 'W'},
 
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
-  {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
@@ -385,9 +383,9 @@ process_file (const char *name)
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::egil:o:st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:W:d::egil:o:st:"
 #else
-#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:d::egil:o:st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:d::egil:o:st:"
 #endif
 
 #ifdef DEBUG_REGEX
@@ -454,12 +452,6 @@ main (int argc, char *const *argv, char *const *envp)
 	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
 	       optchar);
 	break;
-
-      case 'N':
-      case DIVERSIONS_OPTION:
-	/* -N became an obsolete no-op in 1.4.x.  */
-	error (0, 0, "Warning: `m4 %s' is deprecated",
-	       optchar == 'N' ? "-N" : "--diversions");
 
       case 'D':
       case 'U':

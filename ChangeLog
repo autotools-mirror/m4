@@ -1,3 +1,12 @@
+2008-08-18  Eric Blake  <ebb9@byu.net>
+
+	Remove deprecated -N option; fixes a regression from 2006-09-14.
+	* src/m4.c (DIVERSIONS_OPTION): Delete.
+	(long_options, OPTSTRING): Remove -N/--diversions option.
+	(main): Remove code that caused assertion failure.
+	* doc/m4.texinfo (Limits control): Remove it from the manual.
+	* NEWS: Mention that it is gone.
+
 2008-08-15  Eric Blake  <ebb9@byu.net>
 
 	Improve 'git diff' of manual source.

@@ -807,14 +807,6 @@ problem in general, if not undecidable!
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.  They may disappear in future
 releases, and issue a warning to that effect.
-
-@item -N @var{NUM}
-@itemx --diversions=@var{NUM}
-These options are present only for compatibility with previous
-versions of @acronym{GNU} @code{m4}, and were controlling the number of
-possible diversions which could be used at the same time.  They do nothing,
-because there is no fixed limit anymore.  They may disappear in future
-releases, and issue a warning to that effect.
 @end table
 
 @node Frozen state
