@@ -627,9 +627,11 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
 	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
-	  m4_set_debug_level_opt (context, m4_debug_decode (context, 0,
-							    string[0]));
-
+	  if (m4_debug_decode (context, string[0]) < 0)
+	    m4_error (context, EXIT_FAILURE, 0, NULL,
+		      _("unknown debug mode `%s'"),
+		      quotearg_style_mem (locale_quoting_style, string[0],
+					  number[0]));
 	  break;
 
 	case 'F':
@@ -747,7 +749,9 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 	  if (m4_get_regexp_syntax_opt (context) < 0)
 	    {
 	      m4_error (context, EXIT_FAILURE, 0, NULL,
-			_("unknown regexp syntax code `%s'"), string[0]);
+			_("unknown regexp syntax code `%s'"),
+			quotearg_style_mem (locale_quoting_style, string[0],
+					    number[0]));
 	    }
 
 	  break;

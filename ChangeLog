@@ -1,3 +1,15 @@
+2008-08-22  Eric Blake  <ebb9@byu.net>
+
+	Improve --debugmode behavior.
+	* m4/m4module.h (m4_debug_decode): Simplify interface.
+	* m4/debug.c (m4_debug_decode): Remove parameter, and handle
+	setting the new value.
+	* modules/gnu.c (debugmode): Adjust caller.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/main.c (main): Likewise.
+	(usage): Fix default for --debug.
+	* doc/m4.texinfo (Debugging options): Add an example.
+
 2008-08-21  Eric Blake  <ebb9@byu.net>
 
 	Avoid regression in defn(undef).

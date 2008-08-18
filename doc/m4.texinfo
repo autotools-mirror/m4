@@ -937,23 +937,34 @@ Finally, there are several options for aiding in debugging @code{m4}
 scripts.
 
 @table @code
-@item -d@r{[}@var{FLAGS}@r{]}
-@itemx --debug@r{[}=@var{FLAGS}@r{]}
-@itemx --debugmode@r{[}=@var{FLAGS}@r{]}
+@item -d@r{[}@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
+@itemx --debug@r{[}=@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
+@itemx --debugmode@r{[}=@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
 Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
 meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
-@samp{+aeq}.  When the option is presented multiple times, if later
-@var{FLAGS} starts with @samp{-} or @samp{+}, they are cumulative,
-otherwise the later flags override all earlier occurrences.  Therefore,
-to disable all previously set flags, specify an explicit @var{FLAGS} of
-@samp{-V}.  The
+@samp{+aeq}.  If the option occurs multiple times, @var{FLAGS} starting
+with @samp{-} or @samp{+} are cumulative, while @var{FLAGS} starting
+with a letter override all earlier settings.  Therefore, to disable all
+previously set flags, specify an explicit @var{FLAGS} of @samp{-V}.  The
 spelling @option{--debug} is recognized as an unambiguous option for
 compatibility with earlier versions of @acronym{GNU} M4, but for
 consistency with the builtin name, you can also use the spelling
-@option{--debugmode}.  Order is significant with respect to
-file names.
+@option{--debugmode}.  Order is significant with respect to file names.
+
+The cumulative effect of the various options in this example is
+equivalent to a single invocation of @code{debugmode(alqx)}:
+
+@comment options: -d-V -d+lx --debug --debugmode=-e
+@example
+$ @kbd{m4 -d+lx --debug --debugmode=-e}
+traceon(`len')
+@result{}
+len(`123')
+@error{}m4trace:2: -1- id 2: len(`123')
+@result{}3
+@end example
 
 @item --debugfile=@var{FILE}
 @itemx -o @var{FILE}

@@ -599,20 +599,11 @@ M4BUILTIN_HANDLER (debuglen)
  **/
 M4BUILTIN_HANDLER (debugmode)
 {
-  int debug_level = m4_get_debug_level_opt (context);
-  int new_debug_level;
-
   if (argc == 1)
     m4_set_debug_level_opt (context, 0);
-  else
-    {
-      new_debug_level = m4_debug_decode (context, debug_level, M4ARG (1));
-      if (new_debug_level < 0)
-	m4_error (context, 0, 0, m4_arg_info (argv),
-		  _("bad debug flags: `%s'"), M4ARG (1));
-      else
-	m4_set_debug_level_opt (context, new_debug_level);
-    }
+  else if (m4_debug_decode (context, M4ARG (1)) < 0)
+    m4_error (context, 0, 0, m4_arg_info (argv),
+	      _("bad debug flags: `%s'"), M4ARG (1));
 }
 
 

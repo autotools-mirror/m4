@@ -413,7 +413,7 @@ enum {
 
 #define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 
-extern int	m4_debug_decode		(m4 *, int, const char *);
+extern int	m4_debug_decode		(m4 *, const char *);
 extern bool	m4_debug_set_output	(m4 *, const m4_call_info *,
 					 const char *);
 extern void	m4_debug_message_prefix (m4 *);

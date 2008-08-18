@@ -148,8 +148,8 @@ Frozen state files:\n\
       puts ("");
       fputs (_("\
 Debugging:\n\
-  -d, --debug[=FLAGS], --debugmode[=FLAGS]\n\
-                               set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
+                               set debug level (no FLAGS implies `+aeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
   -l, --debuglen=NUM           restrict macro tracing size\n\
   -t, --trace=NAME, --traceon=NAME\n\
@@ -532,16 +532,8 @@ main (int argc, char *const *argv, char *const *envp)
              have effect between files.  */
 	  if (seen_file || frozen_file_to_read)
 	    goto defer;
-	  {
-	    int old = m4_get_debug_level_opt (context);
-	    m4_set_debug_level_opt (context, m4_debug_decode (context, old,
-							      optarg));
-	  }
-	  if (m4_get_debug_level_opt (context) < 0)
-	    {
-	      error (0, 0, _("bad debug flags: `%s'"), optarg);
-	      m4_set_debug_level_opt (context, 0);
-	    }
+	  if (m4_debug_decode (context, optarg) < 0)
+	    error (0, 0, _("bad debug flags: `%s'"), optarg);
 	  break;
 
 	case 'e':
@@ -689,16 +681,8 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'd':
-	  {
-	    int old = m4_get_debug_level_opt (context);
-	    m4_set_debug_level_opt (context, m4_debug_decode (context, old,
-							      arg));
-	  }
-	  if (m4_get_debug_level_opt (context) < 0)
-	    {
-	      error (0, 0, _("bad debug flags: `%s'"), arg);
-	      m4_set_debug_level_opt (context, 0);
-	    }
+	  if (m4_debug_decode (context, arg) < 0)
+	    error (0, 0, _("bad debug flags: `%s'"), arg);
 	  break;
 
 	case 'm':

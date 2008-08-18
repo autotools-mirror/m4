@@ -33,8 +33,9 @@ static void set_debug_file (m4 *, const m4_call_info *, FILE *);
 /* Function to decode the debugging flags OPTS.  Used by main while
    processing option -d, and by the builtin debugmode ().  */
 int
-m4_debug_decode (m4 *context, int previous, const char *opts)
+m4_debug_decode (m4 *context, const char *opts)
 {
+  int previous = context->debug_level;
   int level;
   char mode = '\0';
 
@@ -123,9 +124,9 @@ m4_debug_decode (m4 *context, int previous, const char *opts)
       break;
 
     default:
-      assert (!"INTERNAL ERROR: impossible mode from flags");
+      assert (!"m4_debug_decode");
     }
-
+  context->debug_level = level;
   return level;
 }
 
