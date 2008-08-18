@@ -256,7 +256,8 @@ Frozen state files:\n\
       puts ("");
       fputs (_("\
 Debugging:\n\
-  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
+                               set debug level (no FLAGS implies `+aeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
@@ -318,6 +319,7 @@ static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
+  {"debugmode", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
   {"error-output", required_argument, NULL, 'o'}, /* FIXME: deprecate in 2.0 */
   {"fatal-warnings", no_argument, NULL, 'E'},
@@ -521,12 +523,8 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
       case 'd':
-	debug_level = debug_decode (optarg);
-	if (debug_level < 0)
-	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
-	    debug_level = 0;
-	  }
+	if (debug_decode (optarg) < 0)
+	  error (0, 0, "bad debug flags: `%s'", optarg);
 	break;
 
       case 'e':

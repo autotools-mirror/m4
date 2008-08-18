@@ -1,3 +1,15 @@
+2008-08-22  Eric Blake  <ebb9@byu.net>
+
+	Allow + and - in --debug, and add --debugmode.
+	* src/builtin.c (m4_debugmode): Move +- handling...
+	* src/debug.c (debug_decode): ...here.
+	* src/m4.c (main): Adjust caller.
+	(long_options): Add alternate spelling for --debug.
+	(usage): Mention it.
+	* doc/m4.texinfo (Debugging options): Document additional
+	semantics.
+	* NEWS: Likewise.
+
 2008-08-21  Eric Blake  <ebb9@byu.net>
 
 	Fix crash with traced defn(undef), regression from 2007-08-09.

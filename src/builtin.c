@@ -1759,46 +1759,13 @@ m4_debugmode (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   const char *str = ARG (1);
-  int new_debug_level;
-  int change_flag;
 
   bad_argc (me, argc, 0, 1);
 
   if (argc == 1)
     debug_level = 0;
-  else
-    {
-      if (*str == '+' || *str == '-')
-	{
-	  change_flag = *str;
-	  new_debug_level = debug_decode (str + 1);
-	}
-      else
-	{
-	  change_flag = 0;
-	  new_debug_level = debug_decode (str);
-	}
-
-      if (new_debug_level < 0)
-	m4_warn (0, me, _("bad debug flags: `%s'"), str);
-      else
-	{
-	  switch (change_flag)
-	    {
-	    case 0:
-	      debug_level = new_debug_level;
-	      break;
-
-	    case '+':
-	      debug_level |= new_debug_level;
-	      break;
-
-	    case '-':
-	      debug_level &= ~new_debug_level;
-	      break;
-	    }
-	}
-    }
+  else if (debug_decode (str) < 0)
+    m4_warn (0, me, _("bad debug flags: `%s'"), str);
 }
 
 /*-------------------------------------------------------------------------.

@@ -43,20 +43,24 @@ debug_init (void)
   obstack_init (&trace);
 }
 
-/*-----------------------------------------------------------------.
-| Function to decode the debugging flags OPTS.  Used by main while |
-| processing option -d, and by the builtin debugmode ().	   |
-`-----------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Function to decode the debugging flags OPTS.  Used by main while  |
+| processing option -d, and by the builtin debugmode ().  Return -1 |
+| if the parse failed, otherwise change the debug level.	    |
+`------------------------------------------------------------------*/
 
 int
 debug_decode (const char *opts)
 {
   int level;
+  char mode = '\0';
 
   if (opts == NULL || *opts == '\0')
-    level = DEBUG_TRACE_DEFAULT;
+    level = DEBUG_TRACE_DEFAULT | debug_level;
   else
     {
+      if (*opts == '-' || *opts == '+')
+	mode = *opts++;
       for (level = 0; *opts; opts++)
 	{
 	  switch (*opts)
@@ -110,6 +114,27 @@ debug_decode (const char *opts)
 	    }
 	}
     }
+  switch (mode)
+    {
+    case '\0':
+      /* Replace old level.  */
+      break;
+
+    case '-':
+      /* Subtract flags.  */
+      level = debug_level & ~level;
+      break;
+
+    case '+':
+      /* Add flags.  */
+      level |= debug_level;
+      break;
+
+    default:
+      assert (!"debug_decode");
+      abort ();
+    }
+  debug_level = level;
   return level;
 }
 

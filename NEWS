@@ -42,6 +42,13 @@ Foundation, Inc.
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
 
+** The `-d'/`--debug' command-line option now understands `-' and `+'
+   modifiers, the way the builtin `debugmode' has always done; this allows
+   `-d-V' to disable prior debug settings from the command line, similar to
+   using the builtin `debugmode' without arguments.  The option
+   `--debugmode' is added as an alias for `-d'.  When given the empty
+   string, the mode is treated as `+aeq' instead of `aeq'.
+
 ** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
    For now, the environment variable POSIXLY_CORRECT has no effect on M4
    behavior; but a future release of M4 will behave as though --traditional
