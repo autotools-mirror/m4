@@ -893,15 +893,13 @@ problem in general, if not undecidable!
 
 @item -H @var{NUM}
 @itemx --hashsize=@var{NUM}
-@itemx -N @var{NUM}
-@itemx --diversions=@var{NUM}
 @itemx --word-regexp=@var{REGEXP}
 These options are present only for compatibility with previous versions
 of GNU @code{m4}.  They do nothing except issue a warning, because the
-symbol table size and number of diversions are not fixed anymore, and
-because the new @code{changesyntax} feature is more efficient than the
-withdrawn experimental @code{changeword}.  These options will eventually
-disappear in future releases.
+symbol table size is not fixed anymore, and because the new
+@code{changesyntax} feature is more efficient than the withdrawn
+experimental @code{changeword}.  These options will eventually disappear
+in future releases.
 
 @item -S @var{NUM}
 @itemx -T @var{NUM}

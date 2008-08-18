@@ -1,5 +1,12 @@
 2008-08-18  Eric Blake  <ebb9@byu.net>
 
+	Remove deprecated -N option; fixes a regression from 2006-09-14.
+	* src/main.c (DIVERSIONS_OPTION): Delete.
+	(long_options, OPTSTRING, main): Remove -N/--diversions option.
+	* doc/m4.texinfo (Limits control): Remove it from the manual.
+	* NEWS: Mention that it is gone.
+	* tests/options.at (deprecated options): Update test.
+
 	Improve 'git diff' of manual source.
 	* .gitattributes (*.texi*): Add diff attribute.
 	* bootstrap: Tell git how to use it.

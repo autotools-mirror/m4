@@ -25,10 +25,11 @@ AT_BANNER([Options.])
 
 AT_SETUP([deprecated options])
 
-dnl -N/--diversions are no-ops since 1.4.x
-AT_CHECK_M4([-N1 --diversions=1], [0], [],
-[[m4: Warning: `-N' is deprecated
-m4: Warning: `--diversions' is deprecated
+dnl -N/--diversions was removed after 1.4.x
+AT_CHECK_M4([--diversions=1], [1], [], [stderr])
+AT_CHECK([sed 's/Try.*help/Try `m4 --help/' stderr], [0],
+[[m4: unrecognized option `--diversions=1'
+Try `m4 --help' for more information.
 ]])
 
 dnl -H/--hashsize are no-ops since 2.0

@@ -230,6 +230,9 @@ promoted to 2.0.
 *** Comments that contain unbalanced quotes were not rescanned correctly
     when passed through $@.
 
+** Remove the undocumented command-line option '-N', as no one complained
+   about the assertion failure regression that it introduced in 1.4.7.
+
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.  NOTE: this change exposes a bug

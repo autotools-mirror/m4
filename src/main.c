@@ -205,7 +205,6 @@ enum
 {
   ARGLENGTH_OPTION = CHAR_MAX + 1,	/* not quite -l, because of message */
   DEBUGFILE_OPTION,			/* no short opt */
-  DIVERSIONS_OPTION,			/* not quite -N, because of message */
   ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
   HASHSIZE_OPTION,			/* not quite -H, because of message */
   IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
@@ -254,7 +253,6 @@ static const struct option long_options[] =
 
   {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
-  {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
   {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
@@ -277,7 +275,7 @@ static const struct option long_options[] =
    behavior also handles -s between files.  Starting OPTSTRING with
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
-#define OPTSTRING "-B:D:EF:GH:I:L:M:N:PQR:S:T:U:Wbcd::egil:m:o:p:r::st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:M:PQR:S:T:U:Wbcd::egil:m:o:p:r::st:"
 
 /* For determining whether to be interactive.  */
 enum interactive_choice
@@ -393,14 +391,6 @@ main (int argc, char *const *argv, char *const *envp)
 	     remove support for -H after 2.0.  */
 	  error (0, 0, _("Warning: `%s' is deprecated"),
 		 optchar == 'H' ? "-H" : "--hashsize");
-	  break;
-
-	case 'N':
-	case DIVERSIONS_OPTION:
-	  /* -N became an obsolete no-op in 1.4.x.  FIXME - remove
-	     support for -N after 2.0.	*/
-	  error (0, 0, _("Warning: `%s' is deprecated"),
-		 optchar == 'N' ? "-N" : "--diversions");
 	  break;
 
 	case 'S':
