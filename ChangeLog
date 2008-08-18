@@ -1,5 +1,11 @@
 2008-08-22  Eric Blake  <ebb9@byu.net>
 
+	Interleave -d handling with files.
+	* src/m4.c (main): Defer -d handling when appropriate.
+	* doc/m4.texinfo (Debugging options): Mention it.
+	(Command line files): Test it.
+	* NEWS: Mention it.
+
 	Allow + and - in --debug, and add --debugmode.
 	* src/builtin.c (m4_debugmode): Move +- handling...
 	* src/debug.c (debug_decode): ...here.

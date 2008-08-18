@@ -47,7 +47,9 @@ Foundation, Inc.
    `-d-V' to disable prior debug settings from the command line, similar to
    using the builtin `debugmode' without arguments.  The option
    `--debugmode' is added as an alias for `-d'.  When given the empty
-   string, the mode is treated as `+aeq' instead of `aeq'.
+   string, the mode is treated as `+aeq' instead of `aeq'.  Also, the
+   position of `-d' with respect to files on the command line is now
+   significant.
 
 ** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
    For now, the environment variable POSIXLY_CORRECT has no effect on M4

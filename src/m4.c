@@ -455,11 +455,14 @@ main (int argc, char *const *argv, char *const *envp)
 	       optchar);
 	break;
 
+      case '\1':
+	seen_file = true;
+	/* fall through */
       case 'D':
       case 'U':
       case 's':
       case 't':
-      case '\1':
+      defer:
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	defn = (macro_definition *) xmalloc (sizeof (macro_definition));
@@ -523,6 +526,8 @@ main (int argc, char *const *argv, char *const *envp)
 #endif
 
       case 'd':
+	if (seen_file)
+	  goto defer;
 	if (debug_decode (optarg) < 0)
 	  error (0, 0, "bad debug flags: `%s'", optarg);
 	break;
@@ -621,6 +626,11 @@ main (int argc, char *const *argv, char *const *envp)
 	  lookup_symbol (defines->arg, strlen (defines->arg), SYMBOL_DELETE);
 	  break;
 
+	case 'd':
+	  if (debug_decode (defines->arg) < 0)
+	    error (0, 0, "bad debug flags: `%s'", defines->arg);
+	  break;
+
 	case 't':
 	  sym = lookup_symbol (defines->arg, strlen (defines->arg),
 			       SYMBOL_INSERT);
@@ -632,7 +642,6 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case '\1':
-	  seen_file = true;
 	  process_file (defines->arg);
 	  break;
 

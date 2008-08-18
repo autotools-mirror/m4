@@ -852,7 +852,7 @@ previously set flags, specify an explicit @var{FLAGS} of @samp{-V}.  The
 spelling @option{--debug} is recognized as an unambiguous option for
 compatibility with earlier versions of @acronym{GNU} M4, but for
 consistency with the builtin name, you can also use the spelling
-@option{--debugmode}.
+@option{--debugmode}.  Order is significant with respect to file names.
 
 The cumulative effect of the various options in this example is
 equivalent to a single invocation of @code{debugmode(`alqx')}:
@@ -926,12 +926,28 @@ bar
 The text @samp{bar} can then be redefined over multiple uses of
 @file{foo}:
 
+@comment examples
 @comment options: -Dbar=hello foo -Dbar=world foo
 @example
 $ @kbd{m4 -Dbar=hello foo -Dbar=world foo}
 @result{}hello
 @result{}world
 @end example
+
+@ignore
+@comment Not worth putting the manual, but worth testing.
+
+@comment examples
+@comment options: -Dbar=hello -d foo -t bar foo -d-V foo
+@example
+$ @kbd{m4 -Dbar=hello -d foo -t bar foo -d-V foo
+@result{}hello
+@error{}m4trace: -1- bar -> `hello'
+@result{}hello
+@error{}m4trace: -1- bar
+@result{}hello
+@end example
+@end ignore
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
