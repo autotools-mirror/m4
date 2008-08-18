@@ -1,3 +1,6 @@
+# See ./bootstrap for some helpful ~/.gitconfig or .git/config settings
+# needed for using these attributes effectively.
+ChangeLog merge=merge-changelog
+*.texi* diff=texinfo
 null.* diff merge
 iso8859.m4 diff merge
-ChangeLog merge=merge-changelog
