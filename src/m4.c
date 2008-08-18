@@ -440,6 +440,7 @@ main (int argc, char *const *argv, char *const *envp)
 	/* -N became an obsolete no-op in 1.4.x.  */
 	error (0, 0, "Warning: `m4 %s' is deprecated",
 	       optchar == 'N' ? "-N" : "--diversions");
+	break;
 
       case 'D':
       case 'U':
