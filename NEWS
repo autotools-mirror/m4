@@ -9,13 +9,15 @@ Foundation, Inc.
    a macro.  This was most noticeable with `traceon(`traceon')', but
    would also happen in cases such as `foo(traceon(`foo'))'.
 
-** Fix regressions introduced in 1.4.10b but not present in 1.4.11:
+** Fix regressions introduced in 1.4.10b:
 *** Using `builtin' or `indir' to perform nested `shift' calls triggered
-    an assertion failure.
+    an assertion failure (not present in 1.4.11).
 *** The command-line option -dV, as well as the builtin `debugmode(V)',
-    failed to enable `t' and `c' debug options.
+    failed to enable `t' and `c' debug options (not present in 1.4.11).
 *** Comments that contain unbalanced quotes were not rescanned correctly
-    when passed through $@.
+    when passed through $@ (not present in 1.4.11).
+*** Using `defn' on a traced but undefined macro triggered an assertion
+    failure (also present in 1.4.11, but not 1.4.12).
 
 ** Remove the undocumented command-line option '-N', as no one complained
    about the assertion failure regression that it introduced in 1.4.7.

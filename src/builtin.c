@@ -1044,7 +1044,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 	  continue;
 	}
       s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
-      if (s == NULL)
+      if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
 	{
 	  m4_warn (0, me, _("undefined macro %s"),
 		   quotearg_style_mem (locale_quoting_style, ARG (i),

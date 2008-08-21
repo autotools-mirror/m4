@@ -1,3 +1,10 @@
+2008-08-21  Eric Blake  <ebb9@byu.net>
+
+	Fix crash with traced defn(undef), regression from 2007-08-09.
+	* src/builtin.c (m4_defn): Handle traced but undefined macros.
+	* doc/m4.texinfo (Trace): Test it.
+	* NEWS: Document it.
+
 2008-08-18  Eric Blake  <ebb9@byu.net>
 
 	Remove deprecated -N option; fixes a regression from 2006-09-14.
