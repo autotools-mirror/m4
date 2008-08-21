@@ -3939,6 +3939,9 @@ traceon(`foo')
 @result{}
 foo
 @result{}foo
+defn(`foo')
+@error{}m4:stdin:4: Warning: defn: undefined macro `foo'
+@result{}
 define(`foo', `bar')
 @result{}
 foo
@@ -3949,7 +3952,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:8: Warning: indir: undefined macro `foo'
+@error{}m4:stdin:9: Warning: indir: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}

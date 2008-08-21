@@ -1,3 +1,9 @@
+2008-08-21  Eric Blake  <ebb9@byu.net>
+
+	Avoid regression in defn(undef).
+	* doc/m4.texinfo (Trace): Enhance test, to cover regression
+	recently fixed on the branch.
+
 2008-08-18  Eric Blake  <ebb9@byu.net>
 
 	Remove deprecated -N option; fixes a regression from 2006-09-14.
