@@ -922,6 +922,10 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 	    push_macro (b);
 	  break;
 
+	case TOKEN_VOID:
+	  /* Nothing to do for traced but undefined macro.  */
+	  break;
+
 	default:
 	  M4ERROR ((warning_status, 0,
 		    "INTERNAL ERROR: bad symbol type in m4_defn ()"));
