@@ -12,6 +12,9 @@ Foundation, Inc.
 ** Fix regression introduced in 1.4.7 where `m4 -N9' died with an assertion
    failure.
 
+** Fix regression introduced in 1.4.11 where `defn' died with an assertion
+   failure on a traced but undefined macro.
+
 ** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
    For now, the environment variable POSIXLY_CORRECT has no effect on M4
    behavior; but a future release of M4 will behave as though --traditional
