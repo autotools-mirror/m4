@@ -46,10 +46,12 @@ Foundation, Inc.
    modifiers, the way the builtin `debugmode' has always done; this allows
    `-d-V' to disable prior debug settings from the command line, similar to
    using the builtin `debugmode' without arguments.  The option
-   `--debugmode' is added as an alias for `-d'.  When given the empty
-   string, the mode is treated as `+aeq' instead of `aeq'.  Also, the
-   position of `-d' with respect to files on the command line is now
-   significant.
+   `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
+   to control whether dereferncing an undefined macro causes a warning;
+   this flag is enabled by default if neither `-d' nor `-E' are specified.
+   When given the empty string, the mode is treated as `+adeq' instead of
+   `aeq'.  Also, the position of `-d' with respect to files on the command
+   line is now significant.
 
 ** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
    For now, the environment variable POSIXLY_CORRECT has no effect on M4
@@ -69,21 +71,13 @@ Foundation, Inc.
    be used, via `defn', to determine whether the version of m4 processing
    your file is adequate.
 
-** The `defn', `popdef', and `undefine' builtins now warn when operating
-   on an undefined macro name, similar to what was already done in the
-   `indir' and `dumpdef' builtins.  To simulate 1.4.x behavior, use:
-     pushdef(`defn', `ifelse(`$#', `0', ``defn'',
-                             `ifdef(`$1', `builtin(`defn', `$1')')')')
-     pushdef(`popdef', `ifelse(`$#', `0', ``popdef'', `_$0($@)')')
-     define(`_popdef', `ifdef(`$1', `builtin(`popdef', `$1')')ifelse(`$#',
-                `1', `', `$0(shift($@))')')
-     pushdef(`undefine', `ifelse(`$#', `0', ``undefine'', `_$0($@)')')
-     define(`_undefine', `ifdef(`$1', `builtin(`undefine', `$1')')ifelse(`$#',
-                `1', `', `$0(shift($@))')')
-
-   Additionally, if you want to install Autoconf 2.62 or earlier, then
-   apply this patch:
-     http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=c4a32a009
+** The `defn', `popdef', and `undefine' builtins gained a new warning when
+   operating on an undefined macro name, to match the warning already
+   present in `builtin', `indir', and `dumpdef'.  For backwards
+   compatibility, the warning can be disabled by using `debugmode(`-d')'
+   (or the command line option `--debug=-d').  The flag is also cleared by
+   the command line option `-E'/`--fatal-warnings', so that scripts written
+   for 1.4.x do not cause the script to fail because of new warnings.
 
 ** Enhance the `indir' builtin to trace indirect macros, where the trace
    is requested via `traceon' or the command-line option `-t'.  Previously,

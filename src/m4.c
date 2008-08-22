@@ -36,7 +36,7 @@ static void usage (int);
 int sync_output = 0;
 
 /* Debug (-d[flags]).  */
-int debug_level = 0;
+int debug_level = DEBUG_TRACE_DEREF;
 
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
@@ -257,7 +257,7 @@ Frozen state files:\n\
       fputs (_("\
 Debugging:\n\
   -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
-                               set debug level (no FLAGS implies `+aeq')\n\
+                               set debug level (no FLAGS implies `+adeq')\n\
       --debugfile=FILE         redirect debug and trace output\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
@@ -267,6 +267,7 @@ Debugging:\n\
 FLAGS is any of:\n\
   a   show actual arguments in trace\n\
   c   show collection line in trace\n\
+  d   warn when dereferencing undefined macros (default on unless -E)\n\
   e   show expansion in trace\n\
   f   include current input file name in trace and debug\n\
   i   show changes in input files in debug\n\
@@ -479,6 +480,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
+	debug_decode ("-d");
 	if (!fatal_warnings)
 	  fatal_warnings = true;
 	else

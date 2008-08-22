@@ -1,3 +1,25 @@
+2008-08-23  Eric Blake  <ebb9@byu.net>
+
+	Allow debugmode control over whether defn(undef) warns.
+	* src/m4.h (DEBUG_TRACE_DEREF): New define.
+	(DEBUG_TRACE_VERBOSE, DEBUG_TRACE_DEFAULT): Adjust.
+	* src/m4.c (debug_level): Start with debugmode = d.
+	(usage): Mention this.
+	(main): Let -E impact debug mode.
+	* src/builtin.c (m4_undefine, m4_popdef, m4_dumpdef, m4_builtin)
+	(m4_indir, m4_defn): Squelch undefined warning if debug flag is
+	clear.
+	* src/debug.c (debug_decode): Parse new mode.
+	* doc/m4.texinfo (Debugging options): Mention change in the
+	default behavior.
+	(Debug Levels): Mention new flag d.
+	(Operation modes): Mention interaction with -E.
+	(Undefine, Defn, Pushdef, Indir, Builtin, Dumpdef): Document and
+	test its effect.
+	* NEWS: Document this.
+	Reported by Ralf Wildenhues; without this patch, M4 1.6 would be
+	incompatible with Autoconf 2.62.
+
 2008-08-22  Eric Blake  <ebb9@byu.net>
 
 	Interleave -d handling with files.

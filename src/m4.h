@@ -192,11 +192,13 @@ extern FILE *debug;
 #define DEBUG_TRACE_INPUT 0x100
 /* x: add call id to trace output */
 #define DEBUG_TRACE_CALLID 0x200
+/* d: warn if dereferencing undefined macro */
+#define DEBUG_TRACE_DEREF 0x400
 
 /* V: very verbose --  print everything */
-#define DEBUG_TRACE_VERBOSE 0x3FF
-/* default flags -- equiv: aeq */
-#define DEBUG_TRACE_DEFAULT 0x007
+#define DEBUG_TRACE_VERBOSE 0x7FF
+/* default flags -- equiv: adeq */
+#define DEBUG_TRACE_DEFAULT 0x407
 
 void debug_init (void);
 int debug_decode (const char *);

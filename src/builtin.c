@@ -724,7 +724,8 @@ m4_undefine (struct obstack *obs, int argc, macro_arguments *argv)
   for (i = 1; i < argc; i++)
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
-    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_DELETE))
+    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_DELETE)
+	     && (debug_level & DEBUG_TRACE_DEREF))
       m4_warn (0, me, _("undefined macro %s"),
 	       quotearg_style_mem (locale_quoting_style, ARG (i),
 				   ARG_LEN (i)));
@@ -746,7 +747,8 @@ m4_popdef (struct obstack *obs, int argc, macro_arguments *argv)
   for (i = 1; i < argc; i++)
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
-    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_POPDEF))
+    else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_POPDEF)
+	     && (debug_level & DEBUG_TRACE_DEREF))
       m4_warn (0, me, _("undefined macro %s"),
 	       quotearg_style_mem (locale_quoting_style, ARG (i),
 				   ARG_LEN (i)));
@@ -896,7 +898,7 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	  s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
 	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
 	    dump_symbol (s, &data);
-	  else
+	  else if (debug_level & DEBUG_TRACE_DEREF)
 	    m4_warn (0, me, _("undefined macro %s"),
 		     quotearg_style_mem (locale_quoting_style, ARG (i),
 					 ARG_LEN (i)));
@@ -970,8 +972,11 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
   name = ARG (1);
   bp = find_builtin_by_name (name);
   if (bp->func == m4_placeholder)
-    m4_warn (0, me, _("undefined builtin %s"),
-	     quotearg_style_mem (locale_quoting_style, name, ARG_LEN (1)));
+    {
+      if (debug_level & DEBUG_TRACE_DEREF)
+	m4_warn (0, me, _("undefined builtin %s"),
+		 quotearg_style_mem (locale_quoting_style, name, ARG_LEN (1)));
+    }
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
@@ -1007,8 +1012,11 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
   len = ARG_LEN (1);
   s = lookup_symbol (name, len, SYMBOL_LOOKUP);
   if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
-    m4_warn (0, me, _("undefined macro %s"),
-	     quotearg_style_mem (locale_quoting_style, name, len));
+    {
+      if (debug_level & DEBUG_TRACE_DEREF)
+	m4_warn (0, me, _("undefined macro %s"),
+		 quotearg_style_mem (locale_quoting_style, name, len));
+    }
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, len,
@@ -1046,9 +1054,10 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
       s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
       if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
 	{
-	  m4_warn (0, me, _("undefined macro %s"),
-		   quotearg_style_mem (locale_quoting_style, ARG (i),
-				       ARG_LEN (i)));
+	  if (debug_level & DEBUG_TRACE_DEREF)
+	    m4_warn (0, me, _("undefined macro %s"),
+		     quotearg_style_mem (locale_quoting_style, ARG (i),
+					 ARG_LEN (i)));
 	  continue;
 	}
 

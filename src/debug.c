@@ -105,6 +105,10 @@ debug_decode (const char *opts)
 	      level |= DEBUG_TRACE_CALLID;
 	      break;
 
+	    case 'd':
+	      level |= DEBUG_TRACE_DEREF;
+	      break;
+
 	    case 'V':
 	      level |= DEBUG_TRACE_VERBOSE;
 	      break;
