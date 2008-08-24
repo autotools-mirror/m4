@@ -424,14 +424,14 @@ M4BUILTIN_HANDLER (builtin)
 	  len = M4ARGLEN (2);
 	  if (len == strlen (name))
 	    value = m4_builtin_find_by_name (NULL, name);
-	  if (value == NULL)
-	    m4_warn (context, 0, me, _("undefined builtin %s"),
-		     quotearg_style_mem (locale_quoting_style, name, len));
-	  else
+	  if (value)
 	    {
 	      m4_push_builtin (context, obs, value);
 	      free (value);
 	    }
+	  else if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+	    m4_warn (context, 0, me, _("undefined builtin %s"),
+		     quotearg_style_mem (locale_quoting_style, name, len));
 	}
       else
 	m4_warn (context, 0, me, _("invalid macro name ignored"));
@@ -443,8 +443,11 @@ M4BUILTIN_HANDLER (builtin)
       if (len == strlen (name))
 	value = m4_builtin_find_by_name (NULL, name);
       if (value == NULL)
-	m4_warn (context, 0, me, _("undefined builtin %s"),
-		 quotearg_style_mem (locale_quoting_style, name, len));
+	{
+	  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+	    m4_warn (context, 0, me, _("undefined builtin %s"),
+		     quotearg_style_mem (locale_quoting_style, name, len));
+	}
       else
 	{
 	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
@@ -692,8 +695,11 @@ M4BUILTIN_HANDLER (indir)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name, len);
 
       if (symbol == NULL)
-	m4_warn (context, 0, me, _("undefined macro %s"),
-		 quotearg_style_mem (locale_quoting_style, name, len));
+	{
+	  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+	    m4_warn (context, 0, me, _("undefined macro %s"),
+		     quotearg_style_mem (locale_quoting_style, name, len));
+	}
       else
 	{
 	  m4_macro_args *new_argv;

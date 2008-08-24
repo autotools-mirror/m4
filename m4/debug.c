@@ -97,6 +97,10 @@ m4_debug_decode (m4 *context, const char *opts)
 	      level |= M4_DEBUG_TRACE_STACK;
 	      break;
 
+	    case 'd':
+	      level |= M4_DEBUG_TRACE_DEREF;
+	      break;
+
 	    case 'V':
 	      level |= M4_DEBUG_TRACE_VERBOSE;
 	      break;

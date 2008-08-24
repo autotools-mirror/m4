@@ -29,21 +29,12 @@ promoted to 2.0.
 *** New `-B'/`--prepend-include' command-line option allows prepending to
     the include path, rather than always searching `.' first.
 
-*** The `-d'/`--debug' command-line option now understands `-' and `+'
-    modifiers, the way the builtin `debugmode' has always done; this allows
-    `-d-V' to disable prior debug settings from the command line, similar
-    to using the builtin `debugmode' without arguments.  The option
-    `--debugmode' is added as an alias for `-d'.  When given the empty
-    string, the mode is treated as `+aeq' instead of `aeq'.  Also, the
-    position of `-d' with respect to files on the command line is now
-    significant.
-
 *** New `--debuglen' command-line option matches the spelling of a new
     macro, and the old spelling `--arglength' now issues a warning that it
     might be withdrawn in the future.
 
-*** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional',
-    allowing the GNU module to be selected even when POSIXLY_CORRECT.
+*** The `-g'/`--gnu' command-line option is now required to allow all GNU
+    extensions when POSIXLY_CORRECT is set.
 
 *** The `-H'/`--hashsize' command-line options, which were made no-ops in
     a previous beta, now issue a deprecation warning.
@@ -253,9 +244,42 @@ promoted to 2.0.
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
 
-** The `defn' builtin now warns when operating on an undefined macro name.
-   To simulate 1.4.x behavior, use:
-     pushdef(`defn', `ifdef(`$1', `builtin(`defn', `$1')')')
+** The `-d'/`--debug' command-line option now understands `-' and `+'
+   modifiers, the way the builtin `debugmode' has always done; this allows
+   `-d-V' to disable prior debug settings from the command line, similar to
+   using the builtin `debugmode' without arguments.  The option
+   `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
+   to control whether dereferncing an undefined macro causes a warning;
+   this flag is enabled by default if neither `-d' nor `-E' are specified.
+   When given the empty string, the mode is treated as `+adeq' instead of
+   `aeq'.  Also, the position of `-d' with respect to files on the command
+   line is now significant.
+
+** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
+   For now, the environment variable POSIXLY_CORRECT has no effect on M4
+   behavior; but a future release of M4 will behave as though --traditional
+   is implied if POSIXLY_CORRECT is set (this future change is necessary,
+   because in the current release, there is no way to disable GNU
+   extensions that conflict with POSIX without the use of a non-POSIX
+   command-line argument).  Clients of M4 that want to use GNU extensions,
+   even when POSIXLY_CORRECT is set, should start using the -g command-line
+   argument, even though it is currently a no-op if -G did not appear
+   earlier in the command line, so that the client will not break in the
+   face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
+
+** A new predefined text macro, `__m4_version__', expands to the unquoted
+   version number of M4, if GNU extensions are enabled.  While you should
+   generally favor feature tests over version number checks, this macro can
+   be used, via `defn', to determine whether the version of m4 processing
+   your file is adequate.
+
+** The `defn', `popdef', and `undefine' builtins gained a new warning when
+   operating on an undefined macro name, to match the warning already
+   present in `builtin', `indir', and `dumpdef'.  For backwards
+   compatibility, the warning can be disabled by using `debugmode(`-d')'
+   (or the command line option `--debug=-d').  The flag is also cleared by
+   the command line option `-E'/`--fatal-warnings', so that scripts written
+   for 1.4.x do not cause the script to fail because of new warnings.
 
 ** Enhance the `indir' builtin to trace indirect macros, where the trace
    is requested via `traceon' or the command-line option `-t'.  Previously,

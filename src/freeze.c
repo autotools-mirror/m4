@@ -27,6 +27,7 @@
 #include "binary-io.h"
 #include "close-stream.h"
 #include "quotearg.h"
+#include "verify.h"
 #include "xmemdup0.h"
 
 static	void  produce_mem_dump		(FILE *, const char *, size_t);
@@ -110,9 +111,9 @@ static void
 produce_debugmode_state (FILE *file, int flags)
 {
   /* This code tracks the number of bits in M4_DEBUG_TRACE_VERBOSE.  */
-  char str[13];
+  char str[14];
   int offset = 0;
-  assert ((1 << (sizeof str - 1)) - 1 == M4_DEBUG_TRACE_VERBOSE);
+  verify ((1 << (sizeof str - 1)) - 1 == M4_DEBUG_TRACE_VERBOSE);
   if (flags & M4_DEBUG_TRACE_ARGS)
     str[offset++] = 'a';
   if (flags & M4_DEBUG_TRACE_EXPANSION)
@@ -137,6 +138,8 @@ produce_debugmode_state (FILE *file, int flags)
     str[offset++] = 'm';
   if (flags & M4_DEBUG_TRACE_STACK)
     str[offset++] = 's';
+  if (flags & M4_DEBUG_TRACE_DEREF)
+    str[offset++] = 'd';
   str[offset] = '\0';
   if (offset)
     xfprintf (file, "d%d\n%s\n", offset, str);

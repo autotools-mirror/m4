@@ -402,14 +402,20 @@ enum {
   M4_DEBUG_TRACE_MODULE		= (1 << 10),
   /* s: trace pushdef stacks */
   M4_DEBUG_TRACE_STACK		= (1 << 11),
+  /* d: warn if dereferencing undefined macro */
+  M4_DEBUG_TRACE_DEREF		= (1 << 12),
 
   /* V: very verbose --  print everything */
-  M4_DEBUG_TRACE_VERBOSE	= ((1 << 12) - 1)
+  M4_DEBUG_TRACE_VERBOSE	= ((1 << 13) - 1)
 };
 
-/* default flags -- equiv: aeq */
-#define M4_DEBUG_TRACE_DEFAULT		\
-	(M4_DEBUG_TRACE_ARGS | M4_DEBUG_TRACE_EXPANSION | M4_DEBUG_TRACE_QUOTE)
+/* initial flags, used if no -d or -E -- equiv: d */
+#define M4_DEBUG_TRACE_INITIAL M4_DEBUG_TRACE_DEREF
+
+/* default flags, used by debugmode() -- equiv: +adeq */
+#define M4_DEBUG_TRACE_DEFAULT				\
+	(M4_DEBUG_TRACE_ARGS | M4_DEBUG_TRACE_EXPANSION \
+	 | M4_DEBUG_TRACE_QUOTE | M4_DEBUG_TRACE_DEREF)
 
 #define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 

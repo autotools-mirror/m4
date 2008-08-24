@@ -364,7 +364,7 @@ AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [[1
 ]], [[m4trace:unfrozen.m4:1: -1- len
 ]])
 
-dnl With plain -d after -R, add +aeq to the frozen file
+dnl With plain -d after -R, add +adeq to the frozen file
 AT_CHECK_M4([-R frozen.m4f -d unfrozen.m4], [0], [[1
 ]], [[m4trace:unfrozen.m4:1: -1- len(`a') -> `1'
 ]], [], [ ])

@@ -386,7 +386,7 @@ AT_DATA([[nested]],
 ')dnl
 ]])
 
-dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -d+aeq.
+dnl AT_CHECK_M4 starts life with -d.  Make sure it looks like -d+adeq.
 AT_CHECK_M4([-tlen in], [0], [[3
 0
 ]], [[m4trace: -1- len(`abc') -> `3'

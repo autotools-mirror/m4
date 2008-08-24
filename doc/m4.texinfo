@@ -644,6 +644,57 @@ a warning is issued.  The introduction of behavior levels is new to M4
 1.4.9; for behavior consistent with earlier versions, you should specify
 @option{-E} twice.
 
+
+For backwards compatibility reasons, using @option{-E} behaves as if an
+implicit @option{--debug=-d} option is also present.  This is so that
+scripts written for older M4 versions will not fail if they used
+constructs that were previously silently allowed, but would now trigger
+a warning.
+
+@example
+$ @kbd{m4}
+defn(`oops')
+@error{}m4:stdin:1: Warning: defn: undefined macro `oops'
+@result{}
+^D
+@end example
+
+@comment ignore
+@example
+$ @kbd{echo $?}
+@result{}0
+@end example
+
+@comment options: -E
+@example
+$ @kbd{m4 -E}
+defn(`oops')
+@result{}
+^D
+@end example
+
+@comment ignore
+@example
+$ @kbd{echo $?}
+@result{}0
+@end example
+
+@comment options: -E -d
+@comment status: 1
+@example
+$ @kbd{m4 -E -d}
+defn(`oops')
+@error{}m4:stdin:1: Warning: defn: undefined macro `oops'
+@result{}
+^D
+@end example
+
+@comment ignore
+@example
+$ @kbd{echo $?}
+@result{}1
+@end example
+
 @item -i
 @itemx --interactive
 @itemx -e
@@ -944,17 +995,20 @@ Set the debug-level according to the flags @var{FLAGS}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
 meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
-@samp{+aeq}.  If the option occurs multiple times, @var{FLAGS} starting
+@samp{+adeq}.  If the option occurs multiple times, @var{FLAGS} starting
 with @samp{-} or @samp{+} are cumulative, while @var{FLAGS} starting
-with a letter override all earlier settings.  Therefore, to disable all
-previously set flags, specify an explicit @var{FLAGS} of @samp{-V}.  The
-spelling @option{--debug} is recognized as an unambiguous option for
+with a letter override all earlier settings.  The debug-level starts
+with @samp{d} enabled and all other flags disabled.  To disable all
+previously set flags, specify an explicit @var{FLAGS} of @samp{-V}.  For
+backward compatibility reasons, the option @option{--fatal-warnings}
+implies @samp{--debug=-d} as part of its effects.  The spelling
+@option{--debug} is recognized as an unambiguous option for
 compatibility with earlier versions of @acronym{GNU} M4, but for
 consistency with the builtin name, you can also use the spelling
 @option{--debugmode}.  Order is significant with respect to file names.
 
 The cumulative effect of the various options in this example is
-equivalent to a single invocation of @code{debugmode(alqx)}:
+equivalent to a single invocation of @code{debugmode(`adlqx')}:
 
 @comment options: -d-V -d+lx --debug --debugmode=-e
 @example
@@ -2142,7 +2196,8 @@ A macro definition can be removed with @code{undefine}:
 @deffn {Builtin (m4)} undefine (@var{name}@dots{})
 For each argument, remove the macro @var{name}.  The macro names must
 necessarily be quoted, since they will be expanded otherwise.  If an
-argument is not a defined macro, a warning is issued.
+argument is not a defined macro, then the @samp{d} debug level controls
+whether a warning is issued (@pxref{Debugmode}).
 
 The expansion of @code{undefine} is void.
 The macro @code{undefine} is recognized only with parameters.
@@ -2177,30 +2232,19 @@ f(`bye')
 @result{}f(bye)
 @end example
 
-As of M4 1.6, @code{undefine} will warn if @var{name} is not a macro.
-The following example shows how to recover earlier behavior that
-silently ignores undefined names, using concepts that will be explained
-later in the manual.  Or, you could use the command line option
-@option{-Q} (@option{--quiet}, @pxref{Operation modes, , Invoking m4}).
+As of M4 1.6, @code{undefine} can warn if @var{name} is not a macro, by
+using @code{debugmode} (@pxref{Debugmode}) or the command line option
+@option{-d} (@option{--debugmode}, @pxref{Debugging options, , Invoking
+m4}).
 
 @example
-define(`a', `1')
+$ @kbd{m4}
+undefine(`a')
+@error{}m4:stdin:1: Warning: undefine: undefined macro `a'
 @result{}
-undefine
-@result{}undefine
-undefine(`a', `a')
-@error{}m4:stdin:3: Warning: undefine: undefined macro `a'
+debugmode(`-d')
 @result{}
-define(`a', `1')
-@result{}
-pushdef(`undefine', `ifelse(`$#', `0', ``undefine'', `_$0($@@)')')
-@result{}
-define(`_undefine', `ifdef(`$1', `builtin(`undefine',
-  `$1')')ifelse(`$#', `1', `', `$0(shift($@@))')')
-@result{}
-undefine
-@result{}undefine
-undefine(`a', `a')
+undefine(`a')
 @result{}
 @end example
 
@@ -2217,7 +2261,8 @@ the builtin @code{defn}:
 @deffn {Builtin (m4)} defn (@var{name}@dots{})
 Expands to the @emph{quoted definition} of each @var{name}.  If an
 argument is not a defined macro, the expansion for that argument is
-empty and triggers a warning.
+empty, and the @samp{d} debug level controls whether a warning is issued
+(@pxref{Debugmode}).
 
 If @var{name} is a user-defined macro, the quoted definition is simply
 the quoted expansion text.  If, instead, @var{name} is a builtin, the
@@ -2386,9 +2431,11 @@ bar
 @result{}0
 @end example
 
-A warning is issued if @var{name} is undefined.  Also note that as of M4
-1.6, @code{defn} with multiple arguments can join text with builtin
-tokens.  However, when defining a macro via @code{define} or
+As of M4 1.6, @code{defn} can warn if @var{name} is not a macro, by
+using @code{debugmode} (@pxref{Debugmode}) or the command line option
+@option{-d} (@option{--debugmode}, @pxref{Debugging options, , Invoking
+m4}).  Also, @code{defn} with multiple arguments can join text with
+builtin tokens.  However, when defining a macro via @code{define} or
 @code{pushdef}, a warning is issued and the builtin token ignored if the
 builtin token does not occur in isolation.  A future version of
 @acronym{GNU} M4 may lift this restriction.
@@ -2397,6 +2444,10 @@ builtin token does not occur in isolation.  A future version of
 $ @kbd{m4 -d}
 defn(`foo')
 @error{}m4:stdin:1: Warning: defn: undefined macro `foo'
+@result{}
+debugmode(`-d')
+@result{}
+defn(`foo')
 @result{}
 define(`a', `A')define(`AA', `b')
 @result{}
@@ -2407,25 +2458,25 @@ defn(`a', `divnum', `a')
 @result{}AA
 define(`mydivnum', defn(`divnum', `divnum'))mydivnum
 @error{}m4trace: -2- defn(`divnum', `divnum') -> `<divnum><divnum>'
-@error{}m4:stdin:5: Warning: define: cannot concatenate builtins
+@error{}m4:stdin:7: Warning: define: cannot concatenate builtins
 @error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>') -> `'
 @result{}
 traceoff(`defn', `define')dumpdef(`mydivnum')
 @error{}mydivnum:@tabchar{}`'
 @result{}
 define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
-@error{}m4:stdin:7: Warning: define: cannot concatenate builtins
+@error{}m4:stdin:9: Warning: define: cannot concatenate builtins
 @result{}
 define(`mydivnum', defn(`divnum')`a')mydivnum
-@error{}m4:stdin:8: Warning: define: cannot concatenate builtins
+@error{}m4:stdin:10: Warning: define: cannot concatenate builtins
 @result{}A
 define(`mydivnum', `a'defn(`divnum'))mydivnum
-@error{}m4:stdin:9: Warning: define: cannot concatenate builtins
+@error{}m4:stdin:11: Warning: define: cannot concatenate builtins
 @result{}A
 define(`q', ``$@@'')
 @result{}
 define(`foo', q(`a', defn(`divnum')))foo
-@error{}m4:stdin:11: Warning: define: cannot concatenate builtins
+@error{}m4:stdin:13: Warning: define: cannot concatenate builtins
 @result{}a,
 ifdef(`foo', `yes', `no')
 @result{}yes
@@ -2456,7 +2507,8 @@ exactly like @code{define}.
 If a macro has several definitions (of which only one is accessible),
 the topmost definition can be removed with @code{popdef}.  If there is
 no previous definition, @code{popdef} behaves like @code{undefine}, and
-if there is no definition at all, @code{popdef} issues a warning.
+if there is no definition at all, the @samp{d} debug level controls
+whether a warning is issued (@pxref{Debugmode}).
 
 The expansion of both @code{pushdef} and @code{popdef} is void.
 The macros @code{pushdef} and @code{popdef} are recognized only with
@@ -2529,11 +2581,10 @@ revealing the former definition.
 It is possible to temporarily redefine a builtin with @code{pushdef}
 and @code{defn}.
 
-As of M4 1.6, @code{popdef} will warn if @var{name} is not a macro.
-The following example shows how to recover earlier behavior that
-silently ignores undefined names, using concepts that will be explained
-later in the manual.  Or, you could use the command line option
-@option{-Q} (@option{--quiet}, @pxref{Operation modes, , Invoking m4}).
+As of M4 1.6, @code{popdef} can warn if @var{name} is not a macro, by
+using @code{debugmode} (@pxref{Debugmode}) or the command line option
+@option{-d} (@option{--debugmode}, @pxref{Debugging options, , Invoking
+m4}).
 
 @example
 define(`a', `1')
@@ -2543,16 +2594,9 @@ popdef
 popdef(`a', `a')
 @error{}m4:stdin:3: Warning: popdef: undefined macro `a'
 @result{}
-define(`a', `1')
+debugmode(`-d')
 @result{}
-pushdef(`popdef', `ifelse(`$#', `0', ``popdef'', `_$0($@@)')')
-@result{}
-define(`_popdef', `ifdef(`$1', `builtin(`popdef',
-  `$1')')ifelse(`$#', `1', `', `$0(shift($@@))')')
-@result{}
-popdef
-@result{}popdef
-popdef(`a', `a')
+popdef(`a')
 @result{}
 @end example
 
@@ -2683,9 +2727,10 @@ popdef(`bar')bar
 Any macro can be called indirectly with @code{indir}:
 
 @deffn {Builtin (gnu)} indir (@var{name}, @ovar{args@dots{}})
-Results in a call to the macro @var{name}, which is passed the
-rest of the arguments @var{args}.  If @var{name} is not defined, an
-error message is printed, and the expansion is void.
+Results in a call to the macro @var{name}, which is passed the rest of
+the arguments @var{args}.  If @var{name} is not defined, the expansion
+is void, and the @samp{d} debug level controls whether a warning is
+issued (@pxref{Debugmode}).
 
 The macro @code{indir} is recognized only with parameters.
 @end deffn
@@ -2723,6 +2768,10 @@ indir(`f', define(`f', `3'))
 @result{}3
 indir(`f', undefine(`f'))
 @error{}m4:stdin:4: Warning: indir: undefined macro `f'
+@result{}
+debugmode(`-d')
+@result{}
+indir(`f')
 @result{}
 @end example
 
@@ -2775,7 +2824,8 @@ Builtin macros can be called indirectly with @code{builtin}:
 @deffnx {Builtin (gnu)} builtin (@code{defn(`builtin')}, @var{name1})
 Results in a call to the builtin @var{name}, which is passed the
 rest of the arguments @var{args}.  If @var{name} does not name a
-builtin, a warning message is printed, and the expansion is void.
+builtin, the expansion is void, and the @samp{d} debug level controls
+whether a warning is issued (@pxref{Debugmode}).
 
 As a special case, if @var{name} is exactly the special token
 representing the @code{builtin} macro, as obtained by @code{defn}
@@ -2835,6 +2885,10 @@ m4_indir(`divnum')
 @result{}
 m4_indir(`m4_divnum')
 @result{}0
+m4_debugmode(`-d')
+@result{}
+m4_builtin(`m4_divnum')
+@result{}
 @end example
 
 Note that @code{indir} and @code{builtin} can be used to invoke builtins
@@ -3794,14 +3848,15 @@ Fortunately, there is support for macro debugging in @code{m4}.
 If you want to see what a name expands into, you can use the builtin
 @code{dumpdef}:
 
-@deffn {Builtin (m4)} dumpdef (@ovar{names@dots{}})
+@deffn {Builtin (m4)} dumpdef (@ovar{name@dots{}})
 Accepts any number of arguments.  If called without any arguments,
 it displays the definitions of all known names, otherwise it displays
-the definitions of the @var{names} given.  The output is printed
+the definitions of each @var{name} given.  The output is printed
 directly to standard error, independently of the @option{--debugfile}
 option (@pxref{Debugging options, , Invoking m4}), or @code{debugfile} macro.
-The output is sorted by name.  If an unknown name is encountered, a
-warning is printed.
+The output is sorted by name.  If a @var{name} is undefined, the
+@samp{d} debug level controls whether a warning is issued
+(@pxref{Debugmode}).
 
 The expansion of @code{dumpdef} is void.
 @end deffn
@@ -3833,6 +3888,10 @@ f(popdef(`f')dumpdef(`f'))
 f(popdef(`f')dumpdef(`f'))
 @error{}m4:stdin:3: Warning: dumpdef: undefined macro `f'
 @result{}f1
+debugmode(`-d')
+@result{}
+dumpdef(`-f')
+@result{}
 @end example
 
 @xref{Debugmode}, for information on how the @samp{m}, @samp{q}, and
@@ -4171,6 +4230,19 @@ the expansion determined.  The definition is subject to length
 truncation specified by @code{debuglen} (@pxref{Debuglen}).  This is
 often used with the @samp{x} flag.
 
+@item d
+Output a warning on any attempt to dereference an undefined macro via
+@code{builtin}, @code{defn}, @code{dumpdef}, @code{indir},
+@code{popdef}, or @code{undefine}.  Note that @code{indef},
+@code{m4symbols},
+@code{traceon}, and @code{traceoff} do not dereference undefined macros.
+Like any other warning, the warnings enabled by this flag go to standard
+error regardless of the current @code{debugfile} setting, and will
+change exit status if the command line option @option{--fatal-warnings}
+was specified.  This flag is useful in diagnosing spelling mistakes in
+macro names.  It is enabled by default when neither @option{--debug} nor
+@option{--fatal-warnings} are specified on the command line.
+
 @item e
 In trace output, show the expansion of each macro call.  The expansion
 is subject to length truncation specified by @code{debuglen}
@@ -4236,7 +4308,7 @@ the previous setting.
 @comment currently enabled?
 
 If no flags are specified with the @option{--debug} option, the default is
-@samp{+aeq}.  Many examples in this manual show their output using
+@samp{+adeq}.  Many examples in this manual show their output using
 default flags.
 
 @cindex @acronym{GNU} extensions
@@ -4248,7 +4320,7 @@ The argument @var{flags} should be a subset of the letters listed above.
 If no argument is present, all debugging flags are cleared (as if
 @var{flags} were an explicit @samp{-V}).  With an empty argument, the
 most common flags are enabled (as if @var{flags} were an explicit
-@samp{+aeq}).  If an unknown flag is encountered, an error is issued.
+@samp{+adeq}).  If an unknown flag is encountered, an error is issued.
 
 The expansion of @code{debugmode} is void.
 @end deffn
@@ -4260,7 +4332,7 @@ define(`foo', `FOO$1')
 @result{}
 traceon(`foo', `divnum')
 @result{}
-debugmode()dnl same as debugmode(`+aeq')
+debugmode()dnl same as debugmode(`+adeq')
 foo
 @error{}m4trace: -1- foo -> `FOO'
 @result{}FOO

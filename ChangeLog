@@ -1,3 +1,30 @@
+2008-08-23  Eric Blake  <ebb9@byu.net>
+
+	Allow debugmode control over whether defn(undef) warns.
+	* ltdl/m4/gnulib-cache.m4: Import verify module.
+	* m4/m4module.h (M4_DEBUG_TRACE_DEREF, M4_DEBUG_TRACE_INITIAL):
+	New values.
+	(M4_DEBUG_TRACE_VERBOSE, M4_DEBUG_TRACE_DEFAULT): Adjust.
+	* m4/m4.c (m4_create): Start with debugmode = d.
+	* src/main.c (usage): Mention this.
+	(main): Let -E impact debug mode.
+	* m4/utility.c (m4_symbol_value_lookup): Squelch undefined warning
+	if flag is clear.
+	* modules/gnu.c (builtin, inder): Likewise.
+	* m4/debug.c (m4_debug_decode): Parse new mode.
+	* src/freeze.c (produce_debugmode_state): Accomodate new mode.
+	* doc/m4.texinfo (Debugging options): Mention change in the
+	default behavior.
+	(Debugmode): Mention new flag d.
+	(Operation modes): Mention interaction with -E.
+	(Undefine, Defn, Pushdef, Indir, Builtin, Dumpdef): Document and
+	test its effect.
+	* tests/options.at (--debugmode): Update tests.
+	* tests/freeze.at (reloading debugmode): Likewise.
+	* NEWS: Document this.
+	Reported by Ralf Wildenhues; without this patch, M4 1.6+ would be
+	incompatible with Autoconf 2.62.
+
 2008-08-22  Eric Blake  <ebb9@byu.net>
 
 	Improve --debugmode behavior.

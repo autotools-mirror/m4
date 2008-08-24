@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=local --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=build-aux --with-tests --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h configmake dirname error exit fdl fflush filenamecat flexmember fopen-safer fseeko gendocs gettext git-version-gen gnumakefile gnupload gpl-3.0 intprops memmem mkstemp obstack obstack-printf-posix progname propername quote regex regexprops-generic sprintf-posix stdbool stdlib-safer strnlen strtod strtol tempname unlocked-io vasnprintf-posix verror xalloc xalloc-die xmemdup0 xprintf-posix xstrndup xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=local --lib=libgnu --source-base=gnu --m4-base=ltdl/m4 --doc-base=doc --aux-dir=build-aux --with-tests --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h configmake dirname error exit fdl fflush filenamecat flexmember fopen-safer fseeko gendocs gettext git-version-gen gnumakefile gnupload gpl-3.0 intprops memmem mkstemp obstack obstack-printf-posix progname propername quote regex regexprops-generic sprintf-posix stdbool stdlib-safer strnlen strtod strtol tempname unlocked-io vasnprintf-posix verify verror xalloc xalloc-die xmemdup0 xprintf-posix xstrndup xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([local])
@@ -64,6 +64,7 @@ gl_MODULES([
   tempname
   unlocked-io
   vasnprintf-posix
+  verify
   verror
   xalloc
   xalloc-die

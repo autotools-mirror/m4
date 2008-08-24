@@ -134,7 +134,8 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
       const char *name = M4ARG (i);
       size_t len = M4ARGLEN (i);
       result = m4_symbol_lookup (M4SYMTAB, name, len);
-      if (must_exist && !result)
+      if (must_exist && !result
+	  && m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
 	m4_warn (context, 0, argv->info, _("undefined macro %s"),
 		 quotearg_style_mem (locale_quoting_style, name, len));
     }
