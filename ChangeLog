@@ -1,3 +1,9 @@
+2008-08-25  Eric Blake  <ebb9@byu.net>
+
+	Update recommendation now that libsigsegv 2.6 is released.
+	* NEWS: Recommend libsigsegv 2.6+.
+	* README: Likewise.
+
 2008-08-03  Eric Blake  <ebb9@byu.net>
 
 	Increase ulimit stack value to be larger than SIGSTKSZ.
