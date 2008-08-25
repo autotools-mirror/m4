@@ -97,7 +97,7 @@ and is not part of a release distribution.
   `./configure --without-libsigsegv-prefix'.  In order to ensure that
   the dependency is still viable with the current code base, you should
   install:
-  - Libsigsegv 2.5 or later
+  - Libsigsegv 2.6 or later
 
 * When it is time for a release, it is a good idea to bootstrap with
   official releases of the autotools, rather than git builds, to reduce
