@@ -1,3 +1,12 @@
+2008-08-27  Eric Blake  <ebb9@byu.net>
+
+	Node renaming in the manual.
+	* doc/m4.texinfo (Debug Levels): Rename...
+	(Debugmode): ...to this.  All references changed.
+	(Debug Output): Rename...
+	(Debugfile): ...to this.  All references changed.
+	(Invoking m4): Fix example, now that order of -d matters.
+
 2008-08-23  Eric Blake  <ebb9@byu.net>
 
 	Allow debugmode control over whether defn(undef) warns.
