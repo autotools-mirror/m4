@@ -1,3 +1,9 @@
+2008-08-27  Eric Blake  <ebb9@byu.net>
+
+	Fix typo.
+	* doc/m4.texinfo (Invoking m4): 'm4 -d+f' is not supported in this
+	branch.
+
 2008-08-25  Eric Blake  <ebb9@byu.net>
 
 	Update recommendation now that libsigsegv 2.6 is released.
