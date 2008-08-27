@@ -1,3 +1,10 @@
+2008-08-27  Eric Blake  <ebb9@byu.net>
+
+	Tweak -d examples.
+	* doc/m4.texinfo (Invoking m4): Fix example, since order of -d
+	matters.
+	(Dumpdef): Fix typo.
+
 2008-08-23  Eric Blake  <ebb9@byu.net>
 
 	Allow debugmode control over whether defn(undef) warns.

@@ -576,7 +576,7 @@ with mandatory arguments may be provided either as a single command line
 argument or as two arguments, and options with optional arguments must
 be provided as a single argument.  In other words,
 @kbd{m4 -QPDfoo -d a -d+f} is equivalent to
-@kbd{m4 -Q -P -D foo -d -d+f -- ./a}, although the latter form is
+@kbd{m4 -Q -P -D foo -d ./a -d+f}, although the latter form is
 considered canonical.
 
 With long options, options with mandatory arguments may be provided with
@@ -3890,7 +3890,7 @@ f(popdef(`f')dumpdef(`f'))
 @result{}f1
 debugmode(`-d')
 @result{}
-dumpdef(`-f')
+dumpdef(`f')
 @result{}
 @end example
 
