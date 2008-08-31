@@ -187,7 +187,7 @@ stackovf_handler (void)
 	    _("ERROR: stack overflow.  (Infinite define recursion?)"));
 }
 
-#endif /* USE_STACKOV */
+#endif /* USE_STACKOVF */
 
 
 /*---------------------------------------------.

@@ -586,11 +586,11 @@ numeric_arg (const call_info *name, const char *arg, int *valuep)
 }
 
 /*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ascii representation in |
+| The function ntoa () converts VALUE to a signed ASCII representation in |
 | radix RADIX.								  |
 `------------------------------------------------------------------------*/
 
-/* Digits for number to ascii conversions.  */
+/* Digits for number to ASCII conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 static const char *
@@ -1099,7 +1099,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
 
 #else /* !UNIX && !defined WEXITSTATUS */
-/* Platforms such as mingw do not support the notion of reporting
+/* Platforms such as MinGW do not support the notion of reporting
    which signal terminated a process.  Furthermore if WEXITSTATUS was
    not provided, then the exit value is in the low eight bits.  */
 # define M4SYSVAL_EXITBITS(status) status
@@ -1449,7 +1449,7 @@ m4_changeword (struct obstack *obs, int argc, macro_arguments *argv)
 
 /*-------------------------------------------------------------------------.
 | Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccesible files iff SILENT is false.	   |
+| if it exists.  Complain about inaccessible files iff SILENT is false.    |
 `-------------------------------------------------------------------------*/
 
 static void

@@ -1,3 +1,10 @@
+2008-08-31  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Typos in source code comments.
+	* src/builtin.c: Fix typos in comments.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+
 2008-08-29  Eric Blake  <ebb9@byu.net>
 
 	Fix manual date information.

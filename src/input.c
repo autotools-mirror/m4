@@ -902,7 +902,7 @@ peek_input (bool allow_argv)
 | return CHAR_QUOTE and leave consumption of data for                |
 | append_quote_token; otherwise, if ALLOW_ARGV and the current input |
 | matches an argv reference with the correct quoting, return         |
-| CHAR_ARGV and leave consuption of data for init_argv_token.        |
+| CHAR_ARGV and leave consumption of data for init_argv_token.       |
 `-------------------------------------------------------------------*/
 
 #define next_char(AQ, AA)						\
@@ -1270,9 +1270,9 @@ match_input (const char *s, size_t slen, bool consume)
    && ((slen) >> 1 ? match_input (s, slen, consume) : (slen)))
 
 
-/*----------------------------------------------------------.
-| Inititialize input stacks, and quote/comment characters.  |
-`----------------------------------------------------------*/
+/*--------------------------------------------------------.
+| Initialize input stacks, and quote/comment characters.  |
+`--------------------------------------------------------*/
 
 void
 input_init (void)
@@ -1494,7 +1494,7 @@ set_quote_age (void)
    quote_age to zero, but at least a quote_age of zero always produces
    correct results (although it may take more time in doing so).  */
 
-  /* Hueristic of characters that might impact rescan if they appear
+  /* Heuristic of characters that might impact rescan if they appear
      in a quote delimiter.  Using a single NUL as one of the two quote
      delimiters is safe, but strchr matches it, so we must special
      case the strchr below.  If we were willing to guarantee a
