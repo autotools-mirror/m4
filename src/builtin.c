@@ -444,11 +444,11 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 }
 
 /*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ascii representation in |
+| The function ntoa () converts VALUE to a signed ASCII representation in |
 | radix RADIX.								  |
 `------------------------------------------------------------------------*/
 
-/* Digits for number to ascii conversions.  */
+/* Digits for number to ASCII conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 const char *
@@ -1294,7 +1294,7 @@ m4_changeword (struct obstack *obs, int argc, token_data **argv)
 
 /*-------------------------------------------------------------------------.
 | Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccesible files iff SILENT is false.	   |
+| if it exists.  Complain about inaccessible files iff SILENT is false.	   |
 `-------------------------------------------------------------------------*/
 
 static void

@@ -648,9 +648,9 @@ match_input (const char *s, bool consume)
    && ((s)[1] == '\0' || (match_input ((s) + (consume), consume))))
 
 
-/*----------------------------------------------------------.
-| Inititialise input stacks, and quote/comment characters.  |
-`----------------------------------------------------------*/
+/*--------------------------------------------------------.
+| Initialize input stacks, and quote/comment characters.  |
+`--------------------------------------------------------*/
 
 void
 input_init (void)
