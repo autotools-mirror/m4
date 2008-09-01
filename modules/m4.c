@@ -651,8 +651,9 @@ M4BUILTIN_HANDLER (changecom)
    and "sinclude".  This differs from bringing back diversions, in that
    the input is scanned before being copied to the output.  */
 
-/* Generic include function.  Include the file given by the first argument,
-   if it exists.  Complain about inaccesible files iff SILENT is false.  */
+/* Generic include function.  Include the file given by the first
+   argument, if it exists.  Complain about inaccessible files iff
+   SILENT is false.  */
 static void
 include (m4 *context, int argc, m4_macro_args *argv, bool silent)
 {
@@ -1133,12 +1134,12 @@ M4BUILTIN_HANDLER (translit)
   (*(x) = (number) ((unumber) *(x) >> (*(y) & shift_mask)))
 
 
-/* The function ntoa () converts VALUE to a signed ascii representation in
+/* The function ntoa () converts VALUE to a signed ASCII representation in
    radix RADIX.  Radix must be between 2 and 36, inclusive.  */
 static const char *
 ntoa (number value, int radix)
 {
-  /* Digits for number to ascii conversions.  */
+  /* Digits for number to ASCII conversions.  */
   static char const ntoa_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
   bool negative;

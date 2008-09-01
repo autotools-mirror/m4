@@ -62,7 +62,7 @@ stackovf_handler (void)
   error (EXIT_FAILURE, 0, _("stack overflow (infinite define recursion?)"));
 }
 
-#endif /* USE_STACKOV */
+#endif /* USE_STACKOVF */
 
 
 

@@ -1469,7 +1469,7 @@ consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
 }
 
 
-/* Inititialize input stacks.  */
+/* Initialize input stacks.  */
 void
 m4_input_init (m4 *context)
 {

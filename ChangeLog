@@ -1,3 +1,10 @@
+2008-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Typos in source code comments.
+	* modules/m4.c: Fix typos in comments.
+	* m4/input.c: Likewise.
+	* src/main.c: Likewise.
+
 2008-08-29  Eric Blake  <ebb9@byu.net>
 
 	Fix manual date information.
