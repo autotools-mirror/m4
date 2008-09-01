@@ -1,3 +1,11 @@
+2008-09-01  Eric Blake  <ebb9@byu.net>
+
+	Fix building with -DDEBUG=1.
+	* src/input.c (lex_debug) [DEBUG_INPUT]: Fix compilation failure.
+	* src/symtab.c (symtab_debug) [DEBUG_SYM]: Likewise.
+	* src/m4.c (includes) [DEBUG_STKOVF]: Likewise.
+	Reported by Tom G. Christensen.
+
 2008-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	Typos in source code comments.

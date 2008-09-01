@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2003, 2006, 2007 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2003, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -357,7 +357,7 @@ symtab_debug (void)
   int delete;
   static int i;
 
-  while (next_token (&td) == TOKEN_WORD)
+  while (next_token (&td, NULL) == TOKEN_WORD)
     {
       text = TOKEN_DATA_TEXT (&td);
       if (*text == '_')

@@ -1117,7 +1117,7 @@ lex_debug (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td)) != TOKEN_EOF)
+  while ((t = next_token (&td, NULL)) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
-#endif
+#endif /* DEBUG_INPUT */

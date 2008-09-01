@@ -29,6 +29,10 @@
 #include "progname.h"
 #include "version-etc.h"
 
+#ifdef DEBUG_STKOVF
+# include "assert.h"
+#endif
+
 #define AUTHORS "Rene' Seindal"
 
 static void usage (int);
