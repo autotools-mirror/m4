@@ -1,3 +1,8 @@
+2008-09-16  Eric Blake  <ebb9@byu.net>
+
+	Fix bootstrap for Solaris /bin/sh.
+	* bootstrap: Avoid shell quoting pitfall.
+
 2008-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	Typos in source code comments.
