@@ -140,17 +140,13 @@ m4_path_search (const char *file, char **result)
     }
 
   /* If file not found, and filename absolute, fail.  */
-  if (*file == '/' || no_gnu_extensions)
+  if (IS_ABSOLUTE_FILE_NAME (file) || no_gnu_extensions)
     return NULL;
   e = errno;
 
-  name = (char *) xmalloc (dir_max_length + 1 + strlen (file) + 1);
-
   for (incl = dir_list; incl != NULL; incl = incl->next)
     {
-      strncpy (name, incl->dir, incl->len);
-      name[incl->len] = '/';
-      strcpy (name + incl->len + 1, file);
+      name = file_name_concat (incl->dir, file, NULL);
 
 #ifdef DEBUG_INCL
       xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
@@ -170,8 +166,8 @@ m4_path_search (const char *file, char **result)
 	  errno = e;
 	  return fp;
 	}
+      free (name);
     }
-  free (name);
   errno = e;
   return fp;
 }
