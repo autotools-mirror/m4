@@ -1,3 +1,11 @@
+2008-09-22  Eric Blake  <ebb9@byu.net>
+
+	Support alternate path separator.
+	* m4/gnulib-cache.m4: Import dirname and filenamecat modules.
+	* src/m4.h (includes): Add headers.
+	* src/path.c (m4_path_search): Avoid literal use of '/' as path
+	separator and when detecting absolute paths.
+
 2008-09-16  Eric Blake  <ebb9@byu.net>
 
 	Fix bootstrap for Solaris /bin/sh.
