@@ -117,14 +117,17 @@ do
   fi
 
   xerrfile=`sed -n 's/^dnl @ expected error: //p' "$file"`
-  if test -z "$xerrfile" ; then
-    sed '/^dnl @error{}/!d
-	 s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
-      "$file" > $xerr
-  else
-    sed "s|^m4:|$m4name:|; s|examples/|$examples/|" \
-      "$examples/$xerrfile" > $xerr
-  fi
+  case $xerrfile in
+    ignore)
+      cp $err $xerr ;;
+    '')
+      sed '/^dnl @error{}/!d
+	   s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
+        "$file" > $xerr ;;
+    *)
+      sed "s|^m4:|$m4name:|; s|examples/|$examples/|" \
+        "$examples/$xerrfile" > $xerr ;;
+  esac
 
   # For the benefit of mingw, normalize \r\n line endings
   if $strip_needed ; then
