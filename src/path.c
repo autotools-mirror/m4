@@ -105,6 +105,29 @@ add_include_directory (const char *dir)
 #endif
 }
 
+/* Attempt to open FILE; if it opens, verify that it is not a
+   directory, and ensure it does not leak across execs.  */
+static FILE *
+m4_fopen (const char *file, const char *mode)
+{
+  FILE *fp = fopen (file, "r");
+  if (fp)
+    {
+      struct stat st;
+      int fd = fileno (fp);
+      if (fstat (fd, &st) == 0 && S_ISDIR (st.st_mode))
+	{
+	  fclose (fp);
+	  errno = EISDIR;
+	  return NULL;
+	}
+      if (set_cloexec_flag (fd, true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect input file across forks"));
+    }
+  return fp;
+}
+
 /* Search for FILE, first in `.', then according to -I options.  If
    successful, return the open file, and if RESULT is not NULL, set
    *RESULT to a malloc'd string that represents the file found with
@@ -129,12 +152,9 @@ m4_path_search (const char *file, char **result)
     }
 
   /* Look in current working directory first.  */
-  fp = fopen (file, "r");
+  fp = m4_fopen (file, "r");
   if (fp != NULL)
     {
-      if (set_cloexec_flag (fileno (fp), true) != 0)
-	M4ERROR ((warning_status, errno,
-		  "Warning: cannot protect input file across forks"));
       if (result)
 	*result = xstrdup (file);
       return fp;
@@ -153,19 +173,15 @@ m4_path_search (const char *file, char **result)
       xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
-      fp = fopen (name, "r");
+      fp = m4_fopen (name, "r");
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
 	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
-	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    M4ERROR ((warning_status, errno,
-		      "Warning: cannot protect input file across forks"));
 	  if (result)
 	    *result = name;
 	  else
 	    free (name);
-	  errno = e;
 	  return fp;
 	}
       free (name);
