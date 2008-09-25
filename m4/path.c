@@ -123,6 +123,29 @@ m4_add_include_directory (m4 *context, const char *dir, bool prepend)
 #endif
 }
 
+/* Attempt to open FILE; if it opens, verify that it is not a
+   directory, and ensure it does not leak across execs.  */
+static FILE *
+m4_fopen (m4 *context, const char *file, const char *mode)
+{
+  FILE *fp = fopen (file, "r");
+  if (fp)
+    {
+      struct stat st;
+      int fd = fileno (fp);
+      if (fstat (fd, &st) == 0 && S_ISDIR (st.st_mode))
+	{
+	  fclose (fp);
+	  errno = EISDIR;
+	  return NULL;
+	}
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	m4_error (context, 0, errno, NULL,
+		  _("cannot protect input file across forks"));
+    }
+  return fp;
+}
+
 /* Search for FILE according to -B options, `.', -I options, then
    M4PATH environment.  If successful, return the open file, and if
    RESULT is not NULL, set *RESULT to a malloc'd string that
@@ -152,12 +175,9 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
      lookup will do the trick.  */
   if (IS_ABSOLUTE_FILE_NAME (file) || m4_get_posixly_correct_opt (context))
     {
-      fp = fopen (file, "r");
+      fp = m4_fopen (context, file, "r");
       if (fp != NULL)
 	{
-	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot protect input file across forks"));
 	  if (expanded_name != NULL)
 	    *expanded_name = xstrdup (file);
 	  return fp;
@@ -174,16 +194,12 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       xfprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
 #endif
 
-      fp = fopen (name, "r");
+      fp = m4_fopen (context, name, "r");
       if (fp != NULL)
 	{
 	  m4_debug_message (context, M4_DEBUG_TRACE_PATH,
 			    _("path search for `%s' found `%s'"),
 			    file, name);
-	  if (set_cloexec_flag (fileno (fp), true) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot protect input file across forks"));
-
 	  if (expanded_name != NULL)
 	    *expanded_name = name;
 	  else

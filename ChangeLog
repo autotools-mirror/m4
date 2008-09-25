@@ -1,5 +1,12 @@
 2008-09-25  Eric Blake  <ebb9@byu.net>
 
+	Unify error handling for reading directories.
+	* m4/path.c (m4_path_search): Factor open attempts...
+	(m4_fopen): ...into new function, to reject directories.
+	* tests/others.at (directory): Enhance test.
+	* doc/m4.texinfo (Include): Document that directories cannot be
+	input files.
+
 	Avoid bugs on platforms that mishandle trailing /.
 	* ltdl/m4/gnulib-cache.m4: Import fopen module.
 	* tests/others.at (directory): New test.

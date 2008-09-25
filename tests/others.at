@@ -135,6 +135,10 @@ AT_DATA([in1.m4],
 ]])
 AT_DATA([in2.m4],
 [[sinclude(`in2.m4/')
+sinclude(`.')
+]])
+AT_DATA([in3.m4],
+[[include(`.')
 ]])
 
 AT_CHECK_M4([in1.m4/], [1], [], [stderr])
@@ -151,6 +155,14 @@ AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
 ]])
 
 AT_CHECK_M4([in2.m4], [0], [[
+
+]])
+
+AT_CHECK_M4([in3.m4], [1], [[
+]], [stderr])
+dnl mingw fails with EACCES rather than the expected EISDIR
+AT_CHECK([sed 's/Permission denied/Is a directory/' stderr], [0],
+[[m4:in3.m4:1: include: cannot open `.': Is a directory
 ]])
 
 AT_CLEANUP

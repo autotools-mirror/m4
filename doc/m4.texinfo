@@ -5729,7 +5729,8 @@ the previous input file.
 The expansion of @code{include} and @code{sinclude} is therefore the
 contents of @var{file}.
 
-If @var{file} does not exist (or cannot be read), the expansion is void,
+If @var{file} does not exist, is a directory, or cannot otherwise be
+read, the expansion is void,
 and @code{include} will fail with an error while @code{sinclude} is
 silent.  The empty string counts as a file that does not exist.
 
