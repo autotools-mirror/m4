@@ -124,6 +124,38 @@ Done
 AT_CLEANUP
 
 
+## --------- ##
+## directory ##
+## --------- ##
+
+AT_SETUP([directory])
+
+AT_DATA([in1.m4],
+[[include(`in2.m4/')
+]])
+AT_DATA([in2.m4],
+[[sinclude(`in2.m4/')
+]])
+
+AT_CHECK_M4([in1.m4/], [1], [], [stderr])
+dnl mingw fails with EINVAL rather than the expected ENOTDIR
+AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
+[[m4: cannot open file `in1.m4/': Not a directory
+]])
+
+AT_CHECK_M4([in1.m4], [1], [[
+]], [stderr])
+dnl mingw fails with EINVAL rather than the expected ENOTDIR
+AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
+[[m4:in1.m4:1: include: cannot open `in2.m4/': Not a directory
+]])
+
+AT_CHECK_M4([in2.m4], [0], [[
+]])
+
+AT_CLEANUP
+
+
 ## ------- ##
 ## foreach ##
 ## ------- ##
