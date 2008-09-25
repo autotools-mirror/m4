@@ -332,7 +332,7 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
 	{
-	  error (0, errno, "%s", name);
+	  error (0, errno, "cannot open `%s'", name);
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;

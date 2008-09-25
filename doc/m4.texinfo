@@ -934,7 +934,7 @@ options.
 @comment xerr: ignore
 @comment options: Makefile/
 @example
-@error{}m4: Makefile/: Not a directory
+@error{}m4: cannot open `Makefile/': Not a directory
 @end example
 @end ignore
 
@@ -6843,7 +6843,7 @@ syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
 @example
 $ @kbd{m4 -F /none/such}
 ^D
-@error{}m4: cannot open /none/such: No such file or directory
+@error{}m4: cannot open `/none/such': No such file or directory
 @end example
 @end ignore
 

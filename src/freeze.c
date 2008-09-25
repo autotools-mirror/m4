@@ -59,7 +59,7 @@ produce_frozen_state (const char *name)
   file = fopen (name, O_BINARY ? "wb" : "w");
   if (!file)
     {
-      M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
+      M4ERROR ((EXIT_FAILURE, errno, "cannot open `%s'", name));
       return;
     }
 
