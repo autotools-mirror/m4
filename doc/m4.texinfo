@@ -925,6 +925,18 @@ If you need to read a file whose name starts with a @file{-}, you can
 specify it as @samp{./-file}, or use @option{--} to mark the end of
 options.
 
+@ignore
+@comment Test that 'm4 file/' detects that file is not a directory; we
+@comment can assume that the current directory contains a Makefile.
+
+@comment status: 1
+@comment xerr: ignore
+@comment options: Makefile/
+@example
+@error{}m4: Makefile/: Not a directory
+@end example
+@end ignore
+
 @node Syntax
 @chapter Lexical and syntactic conventions
 
@@ -4774,6 +4786,27 @@ files on the command line.
 In @acronym{GNU} @code{m4}, an alternative method of reading files is
 using @code{undivert} (@pxref{Undivert}) on a named file.
 
+@ignore
+@comment Test that include(`file/') detects that file is not a
+@comment directory; we can assume that the current directory contains a
+@comment Makefile.
+
+@comment status: 1
+@comment xerr: ignore
+@example
+include(`Makefile/')
+@error{}m4:stdin:1: cannot open `Makefile/': Not a directory
+@result{}
+@end example
+
+@comment Meanwhile, ignore errors with sinclude.
+
+@example
+sinclude(`Makefile/')
+@result{}
+@end example
+@end ignore
+
 @node Search Path
 @section Searching for include files
 
@@ -6767,9 +6800,6 @@ changed strings for quotes or comments.  And future releases of
 
 @comment options: -F /dev/null
 @example
-ifdef(`__unix__', ,
-      `errprint(` skipping: /dev/null not known to exist
-')m4exit(`77')')dnl
 traceon(`undefined')dnl
 @end example
 
