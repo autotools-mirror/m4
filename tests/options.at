@@ -98,7 +98,7 @@ dnl Check that all files are processed even after missing file
 AT_DATA([in], [[hello world
 ]])
 AT_CHECK_M4([oops in], [1], [[hello world
-]], [[m4: cannot open file `oops': No such file or directory
+]], [[m4: cannot open `oops': No such file or directory
 ]])
 
 dnl Check that '-' means stdin, even if ./- exists.
@@ -417,10 +417,10 @@ m4debug: module gnu: opened
 m4debug: module gnu: builtins loaded
 m4debug: module gnu: macros loaded
 m4debug: path search for `in' found `in'
-m4debug: input read from in
+m4debug: input read from `in'
 m4trace:in:1: -1- id 1: include ... = <include>{m4}
 m4debug:in:1: path search for `nested' found `nested'
-m4debug:in:1: input read from nested
+m4debug:in:1: input read from `nested'
 m4trace:in:1: -1- id 1: include(`nested') -> <file: nested>
 m4trace:nested:1: -1- id 2: m4wrap ... = <m4wrap>{m4}
 m4trace:nested:1: -1- id 2: m4wrap(`divnum

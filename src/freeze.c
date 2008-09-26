@@ -275,7 +275,8 @@ produce_frozen_state (m4 *context, const char *name)
 
   if (!file)
     {
-      m4_error (context, 0, errno, NULL, _("cannot open `%s'"), name);
+      m4_error (context, 0, errno, NULL, _("cannot open %s"),
+		quotearg_style (locale_quoting_style, name));
       return;
     }
 
@@ -564,7 +565,8 @@ reload_frozen_state (m4 *context, const char *name)
 
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
-    m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open `%s'"), name);
+    m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open %s"),
+	      quotearg_style (locale_quoting_style, name));
   m4_set_current_file (context, name);
 
   allocated[0] = 100;

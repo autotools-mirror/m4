@@ -330,12 +330,14 @@ file_clean (m4_input_block *me, m4 *context, bool cleanup)
 
   if (ferror (me->u.u_f.fp))
     {
-      m4_error (context, 0, 0, NULL, _("error reading file `%s'"), me->file);
+      m4_error (context, 0, 0, NULL, _("error reading %s"),
+		quotearg_style (locale_quoting_style, me->file));
       if (me->u.u_f.close)
 	fclose (me->u.u_f.fp);
     }
   else if (me->u.u_f.close && fclose (me->u.u_f.fp) == EOF)
-    m4_error (context, 0, errno, NULL, _("error reading file `%s'"), me->file);
+    m4_error (context, 0, errno, NULL, _("error reading %s"),
+	      quotearg_style (locale_quoting_style, me->file));
   start_of_input_line = me->u.u_f.line_start;
   m4_set_output_line (context, -1);
   return true;
@@ -373,8 +375,8 @@ m4_push_file (m4 *context, FILE *fp, const char *title, bool close_file)
       next = NULL;
     }
 
-  m4_debug_message (context, M4_DEBUG_TRACE_INPUT,
-		    _("input read from %s"), title);
+  m4_debug_message (context, M4_DEBUG_TRACE_INPUT, _("input read from %s"),
+		    quotearg_style (locale_quoting_style, title));
 
   i = (m4_input_block *) obstack_alloc (current_input, sizeof *i);
   i->funcs = &file_funcs;

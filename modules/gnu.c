@@ -570,8 +570,8 @@ M4BUILTIN_HANDLER (debugfile)
   else if (m4_get_safer_opt (context) && !m4_arg_empty (argv, 1))
     m4_error (context, 0, 0, me, _("disabled by --safer"));
   else if (!m4_debug_set_output (context, me, M4ARG (1)))
-    m4_error (context, 0, errno, me, _("cannot set debug file `%s'"),
-	      M4ARG (1));
+    m4_error (context, 0, errno, me, _("cannot set debug file %s"),
+	      quotearg_style (locale_quoting_style, M4ARG (1)));
 }
 
 

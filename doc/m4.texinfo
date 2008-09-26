@@ -4371,13 +4371,13 @@ to macro tracing.
 @comment options: -dip
 @example
 $ @kbd{m4 -dip -I examples}
-@error{}m4debug: input read from stdin
+@error{}m4debug: input read from `stdin'
 define(`foo', `m4wrap(`wrapped text
 ')dnl')
 @result{}
 include(`incl.m4')dnl
 @error{}m4debug: path search for `incl.m4' found `examples/incl.m4'
-@error{}m4debug: input read from examples/incl.m4
+@error{}m4debug: input read from `examples/incl.m4'
 @result{}Include file start
 @result{}Include file end
 @error{}m4debug: input reverted to stdin, line 3

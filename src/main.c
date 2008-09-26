@@ -306,14 +306,17 @@ static void
 process_file (m4 *context, const char *name)
 {
   if (strcmp (name, "-") == 0)
-    m4_push_file (context, stdin, "stdin", false);
+    /* TRANSLATORS: This is a short name for `standard input', used
+       when a command line file was given as `-'.  */
+    m4_push_file (context, stdin, _("stdin"), false);
   else
     {
       char *full_name;
       FILE *fp = m4_path_search (context, name, &full_name);
       if (fp == NULL)
 	{
-	  m4_error (context, 0, errno, NULL, _("cannot open file `%s'"), name);
+	  m4_error (context, 0, errno, NULL, _("cannot open %s"),
+		    quotearg_style (locale_quoting_style, name));
 	  return;
 	}
       m4_push_file (context, fp, full_name, true);
@@ -529,9 +532,9 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'd':
-          /* Staggered handling of 'd', since -dm is useful prior to
-             first file and prior to reloading, but other -d must also
-             have effect between files.  */
+	  /* Staggered handling of 'd', since -dm is useful prior to
+	     first file and prior to reloading, but other -d must also
+	     have effect between files.	 */
 	  if (seen_file || frozen_file_to_read)
 	    goto defer;
 	  if (m4_debug_decode (context, optarg) < 0)
@@ -615,8 +618,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !m4_debug_set_output (context, NULL, debugfile))
-    m4_error (context, 0, errno, NULL, _("cannot set debug file `%s'"),
-	      debugfile);
+    m4_error (context, 0, errno, NULL, _("cannot set debug file %s"),
+	      quotearg_style (locale_quoting_style, debugfile));
   m4_input_init (context);
   m4_output_init (context);
   m4_include_env_init (context);

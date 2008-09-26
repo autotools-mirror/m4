@@ -1,5 +1,19 @@
 2008-09-25  Eric Blake  <ebb9@byu.net>
 
+	Tweak error message on command line failure.
+	* m4/m4private.h (includes): Use "quotearg.h".
+	* src/main.c (process_file, main): Use nicer quotes for file name
+	in error messages.
+	* m4/input.c (file_clean, m4_push_file): Likewise.
+	* m4/module.c (m4__module_open): Likewise.
+	* src/freeze.c (produce_frozen_state, reload_frozen_state):
+	Likewise.
+	* modules/gnu.c (debugfile): Likewise.
+	* modules/m4.c (undivert, include): Likewise.
+	* tests/others.at (directory, stdin closed): Update tests.
+	* tests/options.at (file names, --debugmode): Likewise.
+	* doc/m4.texinfo (Debugmode): Likewise.
+
 	Unify error handling for reading directories.
 	* m4/path.c (m4_path_search): Factor open attempts...
 	(m4_fopen): ...into new function, to reject directories.

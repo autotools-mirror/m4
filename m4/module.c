@@ -412,8 +412,9 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 #endif /* DEBUG_MODULES */
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: opening file `%s'"),
-			name ? name : MODULE_SELF_NAME, info->filename);
+			_("module %s: opening file %s"),
+			name ? name : MODULE_SELF_NAME,
+			quotearg_style (locale_quoting_style, info->filename));
 
       /* Provide the m4_module corresponding to the lt_dlhandle, if
 	 not yet created.  */

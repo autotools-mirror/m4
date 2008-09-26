@@ -144,7 +144,7 @@ AT_DATA([in3.m4],
 AT_CHECK_M4([in1.m4/], [1], [], [stderr])
 dnl mingw fails with EINVAL rather than the expected ENOTDIR
 AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
-[[m4: cannot open file `in1.m4/': Not a directory
+[[m4: cannot open `in1.m4/': Not a directory
 ]])
 
 AT_CHECK_M4([in1.m4], [1], [[
@@ -613,13 +613,13 @@ AT_CHECK_M4([in.m4], [0], [ignore], [ignore], [-])
 
 dnl error when stdin must be read
 AT_CHECK_M4([], [1], [],
-[[m4:stdin:1: error reading file `stdin'
+[[m4:stdin:1: error reading `stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl error when stdin must be read
 AT_CHECK_M4([-], [1], [],
-[[m4:stdin:1: error reading file `stdin'
+[[m4:stdin:1: error reading `stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
@@ -627,8 +627,8 @@ dnl error once per command-line attempt to read stdin
 AT_DATA([in.m4], [[hello world
 ]])
 AT_CHECK_M4([- in.m4 -], [1], [[hello world
-]], [[m4:stdin:1: error reading file `stdin'
-m4:stdin:1: error reading file `stdin'
+]], [[m4:stdin:1: error reading `stdin'
+m4:stdin:1: error reading `stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
@@ -653,7 +653,7 @@ AT_DATA([in2.m4], [[divert(`-1')undivert
 divert`'world
 ]])
 AT_CHECK_M4([in.m4 - in2.m4], [1], [[hello world
-]], [[m4:stdin:1: error reading file `stdin'
+]], [[m4:stdin:1: error reading `stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 

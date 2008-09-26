@@ -28,6 +28,7 @@
 #  include "m4private.h"
 #endif
 
+#include "quotearg.h"
 #include "stdlib--.h"
 #include "tempname.h"
 #include "unistd--.h"
@@ -600,11 +601,12 @@ M4BUILTIN_HANDLER (undivert)
 	      {
 		m4_insert_file (context, fp);
 		if (fclose (fp) == EOF)
-		  m4_error (context, 0, errno, me, _("error undiverting `%s'"),
-			    str);
+		  m4_error (context, 0, errno, me, _("error undiverting %s"),
+			    quotearg_style (locale_quoting_style, str));
 	      }
 	    else
-	      m4_error (context, 0, errno, me, _("cannot undivert `%s'"), str);
+	      m4_error (context, 0, errno, me, _("cannot undivert `%s'"),
+			quotearg_style (locale_quoting_style, str));
 	  }
       }
 }
@@ -664,8 +666,8 @@ include (m4 *context, int argc, m4_macro_args *argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open `%s'"),
-		  M4ARG (1));
+	m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open %s"),
+		  quotearg_style (locale_quoting_style, M4ARG (1)));
       return;
     }
 
