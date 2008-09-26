@@ -124,7 +124,8 @@ produce_frozen_state (const char *name)
   file = fopen (name, O_BINARY ? "wb" : "w");
   if (!file)
     {
-      m4_error (0, errno, NULL, _("cannot open %s"), name);
+       m4_error (0, errno, NULL, _("cannot open %s"),
+		 quotearg_style (locale_quoting_style, name));
       return;
     }
 
@@ -288,7 +289,8 @@ reload_frozen_state (const char *name)
 
   file = m4_path_search (name, NULL);
   if (file == NULL)
-    m4_error (EXIT_FAILURE, errno, NULL, _("cannot open %s"), name);
+    m4_error (EXIT_FAILURE, errno, NULL, _("cannot open %s"),
+	      quotearg_style (locale_quoting_style, name));
   current_file = name;
 
   allocated[0] = 100;

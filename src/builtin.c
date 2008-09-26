@@ -1356,10 +1356,12 @@ m4_undivert (struct obstack *obs, int argc, macro_arguments *argv)
 	      {
 		insert_file (fp);
 		if (fclose (fp) == EOF)
-		  m4_warn (errno, me, _("error undiverting `%s'"), str);
+		  m4_warn (errno, me, _("error undiverting %s"),
+			   quotearg_style (locale_quoting_style, str));
 	      }
 	    else
-	      m4_warn (errno, me, _("cannot undivert `%s'"), str);
+	      m4_warn (errno, me, _("cannot undivert %s"),
+		       quotearg_style (locale_quoting_style, str));
 	  }
       }
 }
@@ -1466,7 +1468,8 @@ include (int argc, macro_arguments *argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (0, errno, me, _("cannot open `%s'"), ARG (1));
+	m4_error (0, errno, me, _("cannot open %s"),
+		  quotearg_style (locale_quoting_style, ARG (1)));
       return;
     }
 
@@ -1792,7 +1795,8 @@ m4_debugfile (struct obstack *obs, int argc, macro_arguments *argv)
   if (argc == 1)
     debug_set_output (me, NULL);
   else if (!debug_set_output (me, ARG (1)))
-    m4_warn (errno, me, _("cannot set error file: `%s'"), ARG (1));
+    m4_warn (errno, me, _("cannot set error file: %s"),
+	     quotearg_style (locale_quoting_style, ARG (1)));
 }
 
 /* This section contains text processing macros: "len", "index",

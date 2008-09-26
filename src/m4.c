@@ -360,7 +360,9 @@ process_file (const char *name)
 	 to read input from stdin twice, like GNU cat.  Besides,
 	 there is no point closing stdin before wrapped text, to
 	 minimize bugs in syscmd called from wrapped text.  */
-      push_file (stdin, "stdin", false);
+      /* TRANSLATORS: This is a short name for `standard input', used
+	 when a command line file was given as `-'.  */
+      push_file (stdin, _("stdin"), false);
     }
   else
     {
@@ -368,7 +370,8 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
 	{
-	  error (0, errno, "%s", name);
+	  error (0, errno, "cannot open %s",
+		 quotearg_style (locale_quoting_style, name));
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;
@@ -584,7 +587,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (NULL, debugfile))
-    m4_error (0, errno, NULL, _("cannot set debug file `%s'"), debugfile);
+    m4_error (0, errno, NULL, _("cannot set debug file %s"),
+              quotearg_style (locale_quoting_style, debugfile));
 
   input_init ();
   output_init ();

@@ -1020,7 +1020,7 @@ options.
 @comment xerr: ignore
 @comment options: Makefile/
 @example
-@error{}m4: Makefile/: Not a directory
+@error{}m4: cannot open `Makefile/': Not a directory
 @end example
 @end ignore
 
@@ -4174,10 +4174,10 @@ to macro tracing.
 @comment options: -dip
 @example
 $ @kbd{m4 -dip -I examples}
-@error{}m4debug: input read from stdin
+@error{}m4debug: input read from `stdin'
 include(`foo')dnl
 @error{}m4debug: path search for `foo' found `examples/foo'
-@error{}m4debug: input read from examples/foo
+@error{}m4debug: input read from `examples/foo'
 @result{}bar
 @error{}m4debug: input reverted to stdin, line 1
 ^D
@@ -7298,7 +7298,7 @@ syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
 @example
 $ @kbd{m4 -F /none/such}
 ^D
-@error{}m4: cannot open /none/such: No such file or directory
+@error{}m4: cannot open `/none/such': No such file or directory
 @end example
 
 @c Another test - can we properly freeze embedded NUL?

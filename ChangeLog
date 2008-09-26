@@ -1,3 +1,16 @@
+2008-09-25  Eric Blake  <ebb9@byu.net>
+
+	Tweak error message on command line failure.
+	* src/m4.c (main, process_file): Match wording of include
+	builtin.
+	* src/freeze.c (produce_frozen_state, reload_frozen_state):
+	Likewise.
+	* src/input.c (push_file): Likewise.
+	* src/builtin.c (m4_undivert, include, m4_debugfile): Likewise.
+	* m4/gnulib-cache.m4: Regenerate.
+	* doc/m4.texinfo (Command line files, Debugmode)
+	(Using frozen files): Update tests accordingly.
+
 2008-09-24  Eric Blake  <ebb9@byu.net>
 
 	Unify error handling for reading directories.

@@ -252,7 +252,8 @@ push_file (FILE *fp, const char *title, bool close_when_done)
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
-    debug_message ("input read from %s", title);
+    debug_message ("input read from %s",
+		   quotearg_style (locale_quoting_style, title));
 
   i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_FILE;
