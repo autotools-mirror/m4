@@ -41,6 +41,9 @@ skipped=
 strip_needed=false
 diffopts=-c
 
+# Allow user to select sed
+: ${SED=sed}
+
 # Find out where the examples live.
 examples=.
 if test "x$1" = x-I ; then
@@ -56,7 +59,7 @@ if test "x$1" = x-m ; then
 fi
 
 # Find out how the executable prints argv[0]
-m4name=`"$m4" --help | sed -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
+m4name=`"$m4" --help | ${SED} -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
   -e 's/\\\\/\\\\\\\\/g' -e 1q`
 
 # Find out if we should strip \r in the output
@@ -97,12 +100,12 @@ do
       continue ;;
   esac
 
-  options=`sed -ne '3s/^dnl @ extra options: //p;3q' "$file"`
-  sed -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
+  options=`${SED} -ne '3s/^dnl @ extra options: //p;3q' "$file"`
+  ${SED} -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
     | LC_MESSAGES=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
   stat=$?
 
-  xstat=`sed -ne '2s/^dnl @ expected status: //p;2q' "$file"`
+  xstat=`${SED} -ne '2s/^dnl @ expected status: //p;2q' "$file"`
   case $stat in
     77)
       skipped="$skipped $file"
@@ -112,30 +115,30 @@ do
     $xstat) ;;
     *)
       failed="$failed $file:status"
-      echo `sed -e 's/^dnl //' -e 1q $file`
+      echo `${SED} -e 's/^dnl //' -e 1q $file`
       echo "$file: status was $stat, expected $xstat"
       ;;
   esac
 
-  xoutfile=`sed -n 's/^dnl @ expected output: //p' "$file"`
+  xoutfile=`${SED} -n 's/^dnl @ expected output: //p' "$file"`
   if test -z "$xoutfile" ; then
-    sed -e '/^dnl @result{}/!d' -e 's///' -e "s|examples/|$examples/|" \
+    ${SED} -e '/^dnl @result{}/!d' -e 's///' -e "s|examples/|$examples/|" \
       "$file" > $xout
   else
     cp "$examples/$xoutfile" $xout
   fi
 
-  xerrfile=`sed -n 's/^dnl @ expected error: //p' "$file"`
+  xerrfile=`${SED} -n 's/^dnl @ expected error: //p' "$file"`
   case $xerrfile in
     ignore)
       cp $err $xerr ;;
     '')
-      sed '/^dnl @error{}/!d
+      ${SED} '/^dnl @error{}/!d
 	   s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
-        "$file" > $xerr ;;
+	"$file" > $xerr ;;
     *)
-      sed "s|^m4:|$m4name:|; s|examples/|$examples/|" \
-        "$examples/$xerrfile" > $xerr ;;
+      ${SED} "s|^m4:|$m4name:|; s|examples/|$examples/|" \
+	"$examples/$xerrfile" > $xerr ;;
   esac
 
   # For the benefit of mingw, normalize \r\n line endings
@@ -154,7 +157,7 @@ do
     :
   else
     failed="$failed $file:out"
-    echo `sed -e 's/^dnl //' -e 1q $file`
+    echo `${SED} -e 's/^dnl //' -e 1q $file`
     echo "$file: stdout mismatch"
     diff $diffopts $xout $out
   fi
@@ -163,7 +166,7 @@ do
     :
   else
     failed="$failed $file:err"
-    echo `sed -e 's/^dnl //' -e 1q $file`
+    echo `${SED} -e 's/^dnl //' -e 1q $file`
     echo "$file: stderr mismatch"
     diff $diffopts $xerr $err
   fi
