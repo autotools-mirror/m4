@@ -372,16 +372,6 @@ EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/generate.awk \
 		  $(srcdir)/tests/package.m4
 
-# Be sure to reexport important environment variables:
-TESTS_ENVIRONMENT = MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
-	CPP="$(CPP)" CPPFLAGS="$(CPPFLAGS)" LD="$(LD)" LDFLAGS="$(LDFLAGS)" \
-	LIBS="$(LIBS)" LN_S="$(LN_S)" NM="$(NM)" RANLIB="$(RANLIB)" \
-	OBJEXT="$(OBJEXT)" EXEEXT="$(EXEEXT)" CONFIG_SHELL="$(SHELL)" \
-	abs_top_builddir="$(abs_top_builddir)" \
-	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" CXXCPP="$(CXXCPP)" \
-	F77="$(F77)" FFLAGS="$(FFLAGS)" \
-	GCJ="$(GCJ)" GCJFLAGS="$(GCJFLAGS)"
-
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
 m4_texinfo  = $(srcdir)/doc/m4.texinfo
@@ -413,15 +403,16 @@ tests/atconfig: config.status
 DISTCLEANFILES += tests/atconfig
 
 # Hook the test suite into the check rule
-check-local: tests/atconfig tests/m4 $(TESTSUITE) $(check_LTLIBRARIES)
-	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
-	  $(TESTS_ENVIRONMENT) $(TESTSUITEFLAGS)
+check-local: tests/atconfig tests/atlocal tests/m4 $(TESTSUITE) \
+		$(check_LTLIBRARIES)
+	$(SHELL) '$(srcdir)/tests/testsuite' -C tests $(TESTSUITEFLAGS)
 
 # Run the test suite on the *installed* tree, including any renames
 # the user requested.
-installcheck-local: tests/atconfig $(TESTSUITE) $(check_LTLIBRARIES)
+installcheck-local: tests/atconfig tests/atlocal $(TESTSUITE) \
+		$(check_LTLIBRARIES)
 	$(SHELL) '$(srcdir)/tests/testsuite' -C tests \
-	  $(TESTS_ENVIRONMENT) AUTOTEST_PATH="$(bindir)" \
+	  AUTOTEST_PATH="$(bindir)" \
 	  M4="`echo m4 | sed '$(program_transform_name)'`" $(TESTSUITEFLAGS)
 
 # Enough users install GNU M4 as gm4 that we make sure 'make installcheck'

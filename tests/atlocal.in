@@ -1,7 +1,22 @@
 # -*- shell-script -*-
 # @configure_input@
 # Configurable variable values for M4 test suite.
-# Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2006, 2008 Free Software Foundation, Inc.
+
+# This file is part of GNU M4.
+#
+# GNU M4 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# GNU M4 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Some tests cannot be performed with all the configurations.
 USE_GMP=@USE_GMP@
