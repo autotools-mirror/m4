@@ -1,5 +1,18 @@
 2008-10-09  Eric Blake  <ebb9@byu.net>
 
+	Allow user to choose which sed to use in testsuite.
+	* tests/atlocal.in (SED): Inherit from configure results.
+	* tests/builtins.at (__m4_@&t@version__, divert, esyscmd)
+	(mkstemp, syscmd): Use $SED.
+	* tests/generate.awk (new_test): Likewise.
+	* tests/options.at (deprecated options, unknown option)
+	(--debugmode, --help and --version): Likewise.
+	* tests/testsuite.at (AT_CHECK_M4): Likewise.
+	* tests/others.at (directory, stderr closed, stdin seekable)
+	(stdout closed): Likewise.
+	(nul character): Likewise.  Also, skip test if sed can't handle
+	NUL bytes.
+
 	Clean up testsuite invocation.
 	* tests/atlocal.in: Fix copyright notice.
 	* Makefile.am (TESTS_ENVIRONMENT): Delete; it wasn't being used.

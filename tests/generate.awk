@@ -179,12 +179,12 @@ function new_test(input, status, output, error, options, xfail, examples) {
   if (examples == 1)
     {
       printf ("AT_DATA([expout1],\n[[%s]])\n", output);
-      printf ("sed -e \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
+      printf ("$SED -e \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
       printf ("  < expout1 > expout\n\n");
       if (error)
 	{
 	  printf ("AT_DATA([experr1],\n[[%s]])\n", error);
-	  printf ("sed \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
+	  printf ("$SED \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
 	  printf ("  < experr1 > experr\n\n");
 	}
       options = options " -I\"$abs_top_srcdir/examples\"";

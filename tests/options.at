@@ -27,7 +27,7 @@ AT_SETUP([deprecated options])
 
 dnl -N/--diversions was removed after 1.4.x
 AT_CHECK_M4([--diversions=1], [1], [], [stderr])
-AT_CHECK([sed 's/Try.*help/Try `m4 --help/' stderr], [0],
+AT_CHECK([$SED 's/Try.*help/Try `m4 --help/' stderr], [0],
 [[m4: unrecognized option `--diversions=1'
 Try `m4 --help' for more information.
 ]])
@@ -256,7 +256,7 @@ AT_CLEANUP
 AT_SETUP([unknown option])
 
 AT_CHECK_M4([--unknown], [1], [], [stderr])
-AT_CHECK([sed 's/Try.*help/Try `m4 --help/' stderr], [0],
+AT_CHECK([$SED 's/Try.*help/Try `m4 --help/' stderr], [0],
 [[m4: unrecognized option `--unknown'
 Try `m4 --help' for more information.
 ]])
@@ -458,7 +458,7 @@ m4trace: -1- id 6: divnum
 
 dnl Test that shorter prefix is ambiguous.
 AT_CHECK_M4([--debu], [1], [], [stderr])
-AT_CHECK([sed -e 's/Try.*--help/Try `m4 --help/' stderr], [0],
+AT_CHECK([$SED -e 's/Try.*--help/Try `m4 --help/' stderr], [0],
 [[m4: option `--debu' is ambiguous
 Try `m4 --help' for more information.
 ]])
@@ -543,23 +543,23 @@ AT_CLEANUP
 AT_SETUP([--help and --version])
 
 AT_CHECK_M4([--help], [0], [stdout])
-AT_CHECK([[sed -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
+AT_CHECK([[$SED -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
 [0], [success
 ])
 
 AT_CHECK_M4([--version], [0], [stdout])
-AT_CHECK([[sed -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
+AT_CHECK([[$SED -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
 [0], [success
 ])
 
 dnl make sure option specified first takes precedence
 AT_CHECK_M4([--help --version], [0], [stdout])
-AT_CHECK([[sed -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
+AT_CHECK([[$SED -n -e 's|Usage:.*\[OPTION\]... \[FILE\]...|success|p' stdout]],
 [0], [success
 ])
 
 AT_CHECK_M4([--version --help], [0], [stdout])
-AT_CHECK([[sed -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
+AT_CHECK([[$SED -n -e 's|There is NO WARRANTY.*|success|p' stdout]],
 [0], [success
 ])
 

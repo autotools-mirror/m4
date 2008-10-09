@@ -80,7 +80,7 @@ AT_SETUP([__m4_@&t@version__])
 AT_DATA([in], [[defn(`__m4_version__')
 ]])
 AT_CHECK_M4([--version], [0], [stdout])
-AT_CHECK([[sed -e 's/.*(GNU M4\(.*\)) \([^ ]*\).*/\2\1/;q' < stdout]],
+AT_CHECK([[$SED -e 's/.*(GNU M4\(.*\)) \([^ ]*\).*/\2\1/;q' < stdout]],
 [0], [stdout])
 mv stdout expout
 AT_CHECK_M4([in], [0], [expout])
@@ -313,8 +313,9 @@ hello world
 ]])
 
 dnl Test large diversions, which were broken in m4 1.4.8-1.4.10.
+dnl Hopefully $SED doesn't choke on the over-long second line.
 AT_CHECK([echo 'divert(1)hi
-format(%1000000d, 1)' | $M4 | sed -n 1p], [0], [[hi
+format(%1000000d, 1)' | $M4 | $SED -n 1p], [0], [[hi
 ]])
 
 AT_DATA([in.m4], [M4_ONE_MEG_DEFN[divert(`2')f`'dnl
@@ -467,7 +468,7 @@ esyscmd(`echo hi >&3')divert
 hello
 ]])
 AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
-AT_CHECK([sed -ne '/./p' stdout], [0], [[hello
+AT_CHECK([$SED -ne '/./p' stdout], [0], [[hello
 world
 ]])
 
@@ -763,9 +764,9 @@ pid=`cat pid`
 cat >expout <<EOF
 
 X
-X`sed -e 's/.*\(.\)$/\1/' pid`
-X`echo "$pid" | sed -e "s/.*/00000000000000000000&/" -e 's/.*\(.\{20\}$\)/\1/'`
-no_such_dir/`echo "$pid" | sed -e "s/.*/000000&/" -e 's/.*\(.\{6\}$\)/\1/'`
+X`$SED -e 's/.*\(.\)$/\1/' pid`
+X`echo "$pid" | $SED -e "s/.*/00000000000000000000&/" -e 's/.*\(.\{20\}$\)/\1/'`
+no_such_dir/`echo "$pid" | $SED -e "s/.*/000000&/" -e 's/.*\(.\{6\}$\)/\1/'`
 EOF
 AT_CHECK([cat stdout], [0], [expout])
 
@@ -1136,7 +1137,7 @@ syscmd(`echo hi >&3')divert
 hello
 ]])
 AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
-AT_CHECK([sed -ne '/./p' stdout], [0], [[hello
+AT_CHECK([$SED -ne '/./p' stdout], [0], [[hello
 world
 ]])
 

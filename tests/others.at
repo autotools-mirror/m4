@@ -143,14 +143,14 @@ AT_DATA([in3.m4],
 
 AT_CHECK_M4([in1.m4/], [1], [], [stderr])
 dnl mingw fails with EINVAL rather than the expected ENOTDIR
-AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
+AT_CHECK([$SED 's/Invalid argument/Not a directory/' stderr], [0],
 [[m4: cannot open `in1.m4/': Not a directory
 ]])
 
 AT_CHECK_M4([in1.m4], [1], [[
 ]], [stderr])
 dnl mingw fails with EINVAL rather than the expected ENOTDIR
-AT_CHECK([sed 's/Invalid argument/Not a directory/' stderr], [0],
+AT_CHECK([$SED 's/Invalid argument/Not a directory/' stderr], [0],
 [[m4:in1.m4:1: include: cannot open `in2.m4/': Not a directory
 ]])
 
@@ -161,7 +161,7 @@ AT_CHECK_M4([in2.m4], [0], [[
 AT_CHECK_M4([in3.m4], [1], [[
 ]], [stderr])
 dnl mingw fails with EACCES rather than the expected EISDIR
-AT_CHECK([sed 's/Permission denied/Is a directory/' stderr], [0],
+AT_CHECK([$SED 's/Permission denied/Is a directory/' stderr], [0],
 [[m4:in3.m4:1: include: cannot open `.': Is a directory
 ]])
 
@@ -419,10 +419,14 @@ AT_CLEANUP
 
 AT_SETUP([nul character])
 
+# Operating on a binary file is a GNU sed extension.
+AT_CHECK([test `printf 'a\0b\n' | $SED s/a.b/abc/ | wc -c` = 4 dnl
+|| { echo "skipping: $SED can't handle NUL"; exit 77; }])
+
 # We don't embed null.* in here, since it is harder to guarantee the
 # behavior of NUL through autom4te.
-sed "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.out" > expout
-sed "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.err" > experr
+$SED "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.out" > expout
+$SED "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.err" > experr
 
 dnl all but m4exit
 AT_CHECK_M4([-Dm4exit -I "$abs_srcdir" null.m4], [0], [expout], [experr])
@@ -562,7 +566,7 @@ undivert
 goodbye
 ]])
 AT_CHECK_M4([2>&-], [1], [stdout], [], [in.m4])
-AT_CHECK([sed -ne '/./p' stdout], [0],
+AT_CHECK([$SED -ne '/./p' stdout], [0],
 [[hello
 and
 goodbye
@@ -688,19 +692,19 @@ AT_DATA([in.m4], [[dnl(
 ]])
 AT_CHECK([($M4 -EE; cat) < in.m4], [0], [[trailing data
 ]], [stderr])
-AT_CHECK([[sed 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
+AT_CHECK([[$SED 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
 [[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl Not all sed and libc combinations get the remaining tests right (for
 dnl example, sed 4.1.4 on glibc, or cygwin 1.5.22 and earlier).
-AT_CHECK([(sed -ne 1q; cat) < in.m4], [0], [stdout])
+AT_CHECK([($SED -ne 1q; cat) < in.m4], [0], [stdout])
 AT_CHECK([test "x`cat stdout`" = "x0)trailing data" || \
-  { echo "skipping: sed is too greedy on seekable stdin"; exit 77; }])
+  { echo "skipping: $SED is too greedy on seekable stdin"; exit 77; }])
 
 dnl Ensure that esyscmd resumes parsing where the child process left off.
 AT_DATA([in.m4], [[define(`foo', `FOO')m4 foo
-esyscmd(`sed -e "s/foo/bar/;q"')sed foo
+esyscmd(`$SED -e "s/foo/bar/;q"')sed foo
 m4 foo
 ]])
 AT_CHECK_M4([], [0], [[m4 FOO
@@ -710,7 +714,7 @@ m4 FOO
 
 dnl Ensure that syscmd resumes parsing where the child process left off.
 AT_DATA([in.m4], [[define(`foo', `FOO')m4 foo
-syscmd(`sed -e "s/foo/bar/;q"')sed foo
+syscmd(`$SED -e "s/foo/bar/;q"')sed foo
 m4 foo
 ]])
 AT_CHECK_M4([], [0], [[m4 FOO
@@ -783,7 +787,7 @@ AT_DATA([hi], [[hi
 ]])
 AT_CHECK([cat hi >&- && { echo "skipping: can't detect closed stdout"; exit 77; }],
 [1], [], [stderr])
-AT_CHECK([sed 's/Bad file number/Bad file descriptor/' < stderr > experr])
+AT_CHECK([$SED 's/Bad file number/Bad file descriptor/' < stderr > experr])
 AT_DATA([in.m4], [[syscmd(`cat hi')dnl
 ]])
 AT_CHECK_M4([>&-], [0], [], [experr], [in.m4])
@@ -805,7 +809,7 @@ AT_DATA([in.m4], [[syscmd(`cat <&1 >&2')dnl
 dnl this line should not be read by cat
 ]])
 AT_CHECK_M4([in.m4 >&-], [0], [], [stderr])
-AT_CHECK([[sed -e 's/.*[Bb]\(ad file descriptor\)$/B\1/' stderr]], [0],
+AT_CHECK([[$SED -e 's/.*[Bb]\(ad file descriptor\)$/B\1/' stderr]], [0],
 [[Bad file descriptor
 ]])
 
