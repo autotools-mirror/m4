@@ -1,3 +1,10 @@
+2008-10-11  Eric Blake  <ebb9@byu.net>
+
+	Mention release of 1.4.12.
+	* NEWS: Update to match release on branch-1.4.
+	* doc/m4.texinfo (History): Update release history.
+	* maint.mk (web-manual): Output correct package name.
+
 2008-10-02  Eric Blake  <ebb9@byu.net>
 
 	Work around Solaris' sed inability to process NUL.

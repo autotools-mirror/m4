@@ -218,5 +218,5 @@ delta-xdelta: prev-tarball new-tarball got-xdelta
 web-manual:
 	@cd ./doc ; \
 	  $(SHELL) $(abs_srcdir)/build-aux/gendocs.sh $(PACKAGE) \
-	    "GNU $(PACKAGE)- GNU macro processor"
+	    "$(PACKAGE_NAME)- GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."

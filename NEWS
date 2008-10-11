@@ -3,7 +3,7 @@ Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free Software
 Foundation, Inc.
 
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
-  Released by ????, based on git version 1.4.10b.x-*
+  Released by ????, based on git versions 1.4.10b.x-* and 1.5.*
 
 ** Fix regression introduced in 1.4.4b where using `traceon' could delete
    a macro.  This was most noticeable with `traceon(`traceon')', but
@@ -127,6 +127,42 @@ contains the following beta features that were deemed worth deferring until
 ** Enhance the `ifelse' and `shift' builtins so that tail-recursive
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]
+  Released by Eric Blake, based on git version 1.4.11.*
+
+** Fix regression introduced in 1.4.4b where using `traceon' could delete
+   a macro.  This was most noticeable with `traceon(`traceon')', but
+   would also happen in cases such as `foo(traceon(`foo'))'.
+
+** Fix regression introduced in 1.4.7 where `m4 -N9' died with an assertion
+   failure.
+
+** Fix regression introduced in 1.4.11 where `defn' died with an assertion
+   failure on a traced but undefined macro.
+
+** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
+   For now, the environment variable POSIXLY_CORRECT has no effect on M4
+   behavior; but a future release of M4 will behave as though --traditional
+   is implied if POSIXLY_CORRECT is set (this future change is necessary,
+   because in the current release, there is no way to disable GNU
+   extensions that conflict with POSIX without the use of a non-POSIX
+   command-line argument).  Clients of M4 that want to use GNU extensions,
+   even when POSIXLY_CORRECT is set, should start using the -g command-line
+   argument, even though it is currently a no-op if -G did not appear
+   earlier in the command line, so that the client will not break in the
+   face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
+
+** The `-L'/`--nesting-limit' command-line option now defaults to 0 for
+   unlimited on platforms that can detect and deal with stack overflow.  On
+   systems that lack alternate stack support, such as Cygwin, and on
+   systems that do not obey the POSIX semantics for distinguishing stack
+   overflow from other exceptions, such as Linux, you can optionally
+   install the libsigsegv library (version 2.6 or newer recommended) to
+   enhance m4's ability to accurately report stack overflow:
+   http://www.gnu.org/software/libsigsegv/
 
 ** A number of portability improvements inherited from gnulib.
 
