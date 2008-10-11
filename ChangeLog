@@ -1,3 +1,8 @@
+2008-10-10  Eric Blake  <ebb9@byu.net>
+
+	Release Version 1.4.12.
+	* NEWS: Mention the release.
+
 2008-10-06  Eric Blake  <ebb9@byu.net>
 
 	Work around Solaris' sed inability to process NUL.
