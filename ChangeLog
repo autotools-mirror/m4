@@ -1,3 +1,8 @@
+2008-10-22  Eric Blake  <ebb9@byu.net>
+
+	Give nicer error if user modifies testsuite but lacks autoconf.
+	* Makefile.am (AUTOM4TE): Use missing in the definition.
+
 2008-10-09  Eric Blake  <ebb9@byu.net>
 
 	Allow user to choose which sed to use in testsuite.
