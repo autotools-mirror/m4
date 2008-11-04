@@ -38,6 +38,7 @@ foreachq3.m4 \
 foreachq4.m4 \
 forloop.m4 \
 forloop2.m4 \
+forloop3.m4 \
 fstab.m4 \
 hanoi.m4 \
 incl-test.m4 \
