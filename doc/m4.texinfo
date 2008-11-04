@@ -9769,7 +9769,7 @@ permissive license is in effect when copying just the examples.
 @cindex FDL, GNU Free Documentation License
 @cindex GNU Free Documentation License
 @cindex Free Documentation License (FDL), GNU
-@include fdl.texi
+@include fdl-1.3.texi
 
 @node Indices
 @appendix Indices of concepts and macros
