@@ -1,5 +1,11 @@
 2008-12-18  Eric Blake  <ebb9@byu.net>
 
+	Document optimized forloop.
+	* doc/m4.texinfo (Improved forloop): Mention alternate style that
+	avoids define overhead.
+	* examples/forloop3.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+
 	Deal with M4 1.4.x limitation on builtin tokens.
 	* doc/m4.texinfo (Composition): Mention limitation on curry.
 	(Improved copy): New node.

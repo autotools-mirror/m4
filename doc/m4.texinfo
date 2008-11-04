@@ -7680,6 +7680,58 @@ forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
 @error{}m4:stdin:12: recursion limit of 9 exceeded, use -L<N> to change it
 @end example
 
+One more optimization is still possible.  Instead of repeatedly
+assigning a variable then invoking or dereferencing it, it is possible
+to pass the current iterator value as a single argument.  Coupled with
+@code{curry} if other arguments are needed (@pxref{Composition}), or
+with helper macros if the argument is needed in more than one place in
+the expansion, the output can be generated with three, rather than four,
+macros of overhead per iteration.  Notice how the file
+@file{m4-@value{VERSION}/@/examples/@/forloop3.m4} rearranges the
+arguments of the helper @code{_forloop} to take two arguments that are
+placed around the current value.  By splitting a balanced set of
+parantheses across multiple arguments, the helper macro can now be
+shared by @code{forloop} and the new @code{forloop_arg}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`forloop3.m4')
+@result{}
+undivert(`forloop3.m4')dnl
+@result{}divert(`-1')
+@result{}# forloop_arg(from, to, macro) - invoke MACRO(value) for
+@result{}#   each value between FROM and TO, without define overhead
+@result{}define(`forloop_arg', `ifelse(eval(`($1) <= ($2)'), `1',
+@result{}  `_forloop(`$1', eval(`$2'), `$3(', `)')')')
+@result{}# forloop(var, from, to, stmt) - refactored to share code
+@result{}define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+@result{}  `pushdef(`$1')_forloop(eval(`$2'), eval(`$3'),
+@result{}    `define(`$1',', `)$4')popdef(`$1')')')
+@result{}define(`_forloop',
+@result{}  `$3`$1'$4`'ifelse(`$1', `$2', `',
+@result{}    `$0(incr(`$1'), `$2', `$3', `$4')')')
+@result{}divert`'dnl
+forloop(`i', `1', `3', ` i')
+@result{} 1 2 3
+define(`echo', `$@@')
+@result{}
+forloop_arg(`1', `3', ` echo')
+@result{} 1 2 3
+include(`curry.m4')
+@result{}
+forloop_arg(`1', `3', `curry(`pushdef', `a')')
+@result{}
+a
+@result{}3
+popdef(`a')a
+@result{}2
+popdef(`a')a
+@result{}1
+popdef(`a')a
+@result{}a
+@end example
+
 Of course, it is possible to make even more improvements, such as
 adding an optional step argument, or allowing iteration through
 descending sequences.  @acronym{GNU} Autoconf provides some of these
