@@ -20,7 +20,7 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 info_TEXINFOS = m4.texinfo
-m4_TEXINFOS = fdl.texi gpl-3.0.texi
+m4_TEXINFOS = fdl-1.3.texi gpl-3.0.texi
 man_MANS = $(srcdir)/m4.1
 EXTRA_DIST = $(man_MANS) gendocs_template
 MAINTAINERCLEANFILES = $(man_MANS) gendocs_template
