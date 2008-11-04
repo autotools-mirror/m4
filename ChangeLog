@@ -1,3 +1,15 @@
+2008-11-26  Eric Blake  <ebb9@byu.net>
+
+	Document copy composite using stack_foreach and curry.
+	* doc/m4.texinfo (Stacks): New node, to document pushdef stack
+	manipulation.
+	(Ifelse): Move define_blind...
+	(Composition): ...to this new node.  Document currying, then use
+	it to implement copy and rename.
+	* examples/curry.m4: New file.
+	* examples/stack.m4: Likewise.
+	* examples/Makefile.am (EXTRA_DIST): Distribute them.
+
 2008-11-04  Eric Blake  <ebb9@byu.net>
 
 	Upgrade to FDL 1.3.

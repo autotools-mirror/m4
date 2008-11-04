@@ -197,6 +197,8 @@ Conditionals, loops, and recursion
 * Shift::                       Recursion in @code{m4}
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 
 How to debug macros and input
 
@@ -2486,6 +2488,7 @@ ifdef(`foo', `yes', `no')
 @cindex temporary redefinition of macros
 @cindex redefinition of macros, temporary
 @cindex definition stack
+@cindex pushdef stack
 @cindex stack, macro definition
 It is possible to redefine a macro temporarily, reverting to the
 previous definition at a later time.  This is done with the builtins
@@ -2833,6 +2836,8 @@ something a number of times, or while some condition is true.
 * Shift::                       Recursion in @code{m4}
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 @end menu
 
 @node Ifdef
@@ -2956,67 +2961,13 @@ foo(`a', `b', `c')
 @result{}arguments:3
 @end example
 
-Since m4 is a macro language, it is even possible to write a macro that
-makes defining blind macros easier:
-
-@deffn Composite define_blind (@var{name}, @ovar{value})
-Defines @var{name} as a blind macro, such that @var{name} will expand to
-@var{value} only when given explicit arguments.  @var{value} should not
-be the result of @code{defn} (@pxref{Defn}).  This macro is only
-recognized with parameters, and results in an empty string.
-@end deffn
-
-Defining a macro to define another macro can be a bit tricky.  We want
-to use a literal @samp{$#} in the argument to the nested @code{define}.
-However, if @samp{$} and @samp{#} are adjacent in the definition of
-@code{define_blind}, then it would be expanded as the number of
-arguments to @code{define_blind} rather than the intended number of
-arguments to @var{name}.  The solution is to pass the difficult
-characters through extra arguments to a helper macro
-@code{_define_blind}.
-
-As for the limitation against using @code{defn}, there are two reasons.
-If a macro was previously defined with @code{define_blind}, then it can
-safely be renamed to a new blind macro using plain @code{define}; using
-@code{define_blind} to rename it just adds another layer of
-@code{ifelse}, occupying memory and slowing down execution.  And if a
-macro is a builtin, then it would result in an attempt to define a macro
-consisting of both text and a builtin token; this is not supported, and
-the builtin token is flattened to an empty string.
-
-With that explanation, here's the definition, and some sample usage.
-Notice that @code{define_blind} is itself a blind macro.
-
-@example
-$ @kbd{m4 -d}
-define(`define_blind', `ifelse(`$#', `0', ``$0'',
-`_$0(`$1', `$2', `$'`#', `$'`0')')')
-@result{}
-define(`_define_blind', `define(`$1',
-`ifelse(`$3', `0', ``$4'', `$2')')')
-@result{}
-define_blind
-@result{}define_blind
-define_blind(`foo', `arguments were $*')
-@result{}
-foo
-@result{}foo
-foo(`bar')
-@result{}arguments were bar
-define(`blah', defn(`foo'))
-@result{}
-blah
-@result{}blah
-blah(`a', `b')
-@result{}arguments were a,b
-defn(`blah')
-@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
-@end example
+For an example of a way to make defining blind macros easier, see
+@ref{Composition}.
 
 @cindex multibranches
 @cindex switch statement
 @cindex case statement
-However, @code{ifelse} can take more than four arguments.  If given more
+The macro @code{ifelse} can take more than four arguments.  If given more
 than four arguments, @code{ifelse} works like a @code{case} or @code{switch}
 statement in traditional programming languages.  If @var{string-1} and
 @var{string-2} are equal, @code{ifelse} expands into @var{equal-1}, otherwise
@@ -3724,6 +3675,255 @@ It is possible to have robust iteration with linear behavior and sane
 @var{iterator} contents for either list style.  See if you can learn
 from the best elements of both of these implementations to create robust
 macros (or @pxref{Improved foreach, , Answers}).
+
+@node Stacks
+@section Working with definition stacks
+
+@cindex definition stack
+@cindex pushdef stack
+@cindex stack, macro definition
+Thanks to @code{pushdef}, manipulation of a stack is an intrinsic
+operation in @code{m4}.  Normally, only the topmost definition in a
+stack is important, but sometimes, it is desirable to manipulate the
+entire definition stack.
+
+@deffn Composite stack_foreach (@var{macro}, @var{action})
+@deffnx Composite stack_foreach_lifo (@var{macro}, @var{action})
+For each of the @code{pushdef} definitions associated with @var{macro},
+invoke the macro @var{action} with a single argument of that definition.
+@code{stack_foreach} visits the oldest definition first, while
+@code{stack_foreach_lifo} visits the current definition first.
+@var{action} should not modify or dereference @var{macro}.  There are a
+few special macros, such as @code{defn}, which cannot be used as the
+@var{macro} parameter.
+@end deffn
+
+A sample implementation of these macros is distributed in the file
+@file{m4-@value{VERSION}/@/examples/@/stack.m4}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`stack.m4')
+@result{}
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+@result{}
+define(`show', ``$1'
+')
+@result{}
+stack_foreach(`a', `show')dnl
+@result{}1
+@result{}2
+@result{}3
+stack_foreach_lifo(`a', `show')dnl
+@result{}3
+@result{}2
+@result{}1
+@end example
+
+Now for the implementation.  Note the definition of a helper macro,
+@code{_stack_reverse}, which destructively swaps the contents of one
+stack of definitions into the reverse order in the temporary macro
+@samp{tmp-$1}.  By calling the helper twice, the original order is
+restored back into the macro @samp{$1}; since the operation is
+destructive, this explains why @samp{$1} must not be modified or
+dereferenced during the traversal.  The caller can then inject
+additional code to pass the definition currently being visited to
+@samp{$2}.  The choice of helper names is intentional; since @samp{-} is
+not valid as part of a macro name, there is no risk of conflict with a
+valid macro name, and the code is guaranteed to use @code{defn} where
+necessary.  Finally, note that any macro used in the traversal of a
+@code{pushdef} stack, such as @code{pushdef} or @code{defn}, cannot be
+handled by @code{stack_foreach}, since the macro would temporarily be
+undefined during the algorithm.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`stack.m4')dnl
+@result{}divert(`-1')
+@result{}# stack_foreach(action, macro)
+@result{}# Invoke ACTION with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the oldest.
+@result{}define(`stack_foreach',
+@result{}`_stack_reverse(`$1', `tmp-$1')'dnl
+@result{}`_stack_reverse(`tmp-$1', `$1', `$2(defn(`$1'))')')
+@result{}# stack_foreach_lifo(action, macro)
+@result{}# Invoke ACTION with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the newest.
+@result{}define(`stack_foreach_lifo',
+@result{}`_stack_reverse(`$1', `tmp-$1', `$2(defn(`$1'))')'dnl
+@result{}`_stack_reverse(`tmp-$1', `$1')')
+@result{}define(`_stack_reverse',
+@result{}`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0($@@)')')
+@result{}divert`'dnl
+@end example
+
+@node Composition
+@section Building macros with macros
+
+@cindex macro composition
+@cindex composing macros
+Since m4 is a macro language, it is possible to write macros that
+can build other macros.  First on the list is a way to automate the
+creation of blind macros.
+
+@cindex macro, blind
+@cindex blind macro
+@deffn Composite define_blind (@var{name}, @ovar{value})
+Defines @var{name} as a blind macro, such that @var{name} will expand to
+@var{value} only when given explicit arguments.  @var{value} should not
+be the result of @code{defn} (@pxref{Defn}).  This macro is only
+recognized with parameters, and results in an empty string.
+@end deffn
+
+Defining a macro to define another macro can be a bit tricky.  We want
+to use a literal @samp{$#} in the argument to the nested @code{define}.
+However, if @samp{$} and @samp{#} are adjacent in the definition of
+@code{define_blind}, then it would be expanded as the number of
+arguments to @code{define_blind} rather than the intended number of
+arguments to @var{name}.  The solution is to pass the difficult
+characters through extra arguments to a helper macro
+@code{_define_blind}.  When composing macros, it is a common idiom to
+need a helper macro to concatenate text that forms parameters in the
+composed macro, rather than interpreting the text as a parameter of the
+composing macro.
+
+As for the limitation against using @code{defn}, there are two reasons.
+If a macro was previously defined with @code{define_blind}, then it can
+safely be renamed to a new blind macro using plain @code{define}; using
+@code{define_blind} to rename it just adds another layer of
+@code{ifelse}, occupying memory and slowing down execution.  And if a
+macro is a builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+With that explanation, here's the definition, and some sample usage.
+Notice that @code{define_blind} is itself a blind macro.
+
+@example
+$ @kbd{m4 -d}
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
+@result{}
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
+@result{}
+define_blind
+@result{}define_blind
+define_blind(`foo', `arguments were $*')
+@result{}
+foo
+@result{}foo
+foo(`bar')
+@result{}arguments were bar
+define(`blah', defn(`foo'))
+@result{}
+blah
+@result{}blah
+blah(`a', `b')
+@result{}arguments were a,b
+defn(`blah')
+@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
+@end example
+
+@cindex currying arguments
+@cindex argument currying
+Another interesting composition tactic is argument @dfn{currying}, or
+factoring a macro that takes multiple arguments for use in a context
+that provides exactly one argument.
+
+@deffn Composite curry (@var{macro}, @dots{})
+Expand to a macro call that takes exactly one argument, then appends
+that argument to the original arguments and invokes @var{macro} with the
+resulting list of arguments.
+@end deffn
+
+A demonstration of currying makes the intent of this macro a little more
+obvious.  The macro @code{stack_foreach} mentioned earlier is an example
+of a context that provides exactly one argument to a macro name.  But
+coupled with currying, we can invoke @code{reverse} with two arguments
+for each definition of a macro stack.  This example uses the file
+@file{m4-@value{VERSION}/@/examples/@/curry.m4} included in the
+distribution.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`curry.m4')include(`stack.m4')
+@result{}
+define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
+                          `reverse(shift($@@)), `$1'')')
+@result{}
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+@result{}
+stack_foreach(`a', `:curry(`reverse', `4')')
+@result{}:1, 4:2, 4:3, 4
+curry(`curry', `reverse', `1')(`2')(`3')
+@result{}3, 2, 1
+@end example
+
+Now for the implementation.  Notice how @code{curry} leaves off with a
+macro name but no open parenthesis, while still in the middle of
+collecting arguments for @samp{$1}.  The macro @code{_curry} is the
+helper macro that takes one argument, then adds it to the list and
+finally supplies the closing parenthesis.  The use of a comma inside the
+@code{shift} call allows currying to also work for a macro that takes
+one argument, although it often makes more sense to invoke that macro
+directly rather than going through @code{curry}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`curry.m4')dnl
+@result{}divert(`-1')
+@result{}# curry(macro, args)
+@result{}# Expand to a macro call that takes one argument, then invoke
+@result{}# macro(args, extra).
+@result{}define(`curry', `$1(shift($@@,)_$0')
+@result{}define(`_curry', ``$1')')
+@result{}divert`'dnl
+@end example
+
+@cindex renaming macros
+@cindex copying macros
+@cindex macros, copying
+Putting the last few concepts together, it is possible to copy or rename
+an entire stack of macro definitions.
+
+@deffn Composite copy (@var{source}, @var{dest})
+@deffnx Composite rename (@var{source}, @var{dest})
+Ensure that @var{dest} is undefined, then define it to the same stack of
+definitions currently in @var{source}.  @code{copy} leaves @var{source}
+unchanged, while @code{rename} undefines @var{source}.  There are only a
+few macros, such as @code{copy} or @code{defn}, which cannot be copied
+via this macro.
+@end deffn
+
+The implementation is relatively straightforward:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`curry.m4')include(`stack.m4')
+@result{}
+define(`rename', `copy($@@)undefine(`$1')')dnl
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach(`$1', `curry(`pushdef', `$2')')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))pushdef(`a', `2')
+@result{}
+copy(`a', `b')
+@result{}
+rename(`b', `c')
+@result{}
+a b c
+@result{}2 b 2
+popdef(`a', `c')a c
+@result{}0 0
+popdef(`a', `c')a c
+@result{}1 1
+@end example
 
 @node Debugging
 @chapter How to debug macros and input

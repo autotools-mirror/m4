@@ -23,6 +23,7 @@ EXTRA_DIST =\
 capitalize.m4 \
 capitalize2.m4 \
 comments.m4 \
+curry.m4 \
 ddivert.m4 \
 debug.m4 \
 esyscmd.m4 \
@@ -55,6 +56,7 @@ pushpop.m4 \
 quote.m4 \
 regexp.m4 \
 reverse.m4 \
+stack.m4 \
 stackovf.sh \
 sync-lines.m4 \
 sysv-args.m4 \
