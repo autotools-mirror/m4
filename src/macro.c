@@ -61,6 +61,8 @@ struct macro_arguments
      back-reference.  */
   call_info *info;
   int level; /* Which obstack owns this argv.  */
+  /* How many times arg_adjust_refcount has been called.  */
+  unsigned int refcount;
   unsigned int arraylen; /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
@@ -498,6 +500,7 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   args.quote_age = quote_age ();
   args.info = info;
   args.level = expansion_level - 1;
+  args.refcount = 0;
   args.arraylen = 0;
   obstack_grow (argv_stack, &args, offsetof (macro_arguments, array));
 
@@ -705,6 +708,7 @@ expand_macro (symbol *sym)
 	}
       else
 	{
+	  assert (!argv->refcount);
 	  obstack_free (stacks[level].args, args_base);
 	  obstack_free (stacks[level].argv, argv_base);
 	  stacks[level].argcount--;
@@ -749,8 +753,13 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
   unsigned int i;
   token_chain *chain;
   bool result = !argv->inuse;
+  bool recurse = !argv->refcount;
 
-  if (argv->has_ref)
+  if (increase)
+    argv->refcount++;
+  else if (argv->refcount)
+    recurse = !--argv->refcount;
+  if (argv->has_ref && recurse)
     for (i = 0; i < argv->arraylen; i++)
       if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
 	{
@@ -1506,6 +1515,7 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   info->name = argv0;
   info->name_len = argv0_len;
   new_argv->level = argv->level;
+  new_argv->refcount = 0;
   return new_argv;
 }
 
