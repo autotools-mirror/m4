@@ -313,6 +313,7 @@ dist_pkgdata_DATA = \
 		  examples/capitalize.m4 \
 		  examples/capitalize2.m4 \
 		  examples/comments.m4 \
+		  examples/curry.m4 \
 		  examples/ddivert.m4 \
 		  examples/debug.m4 \
 		  examples/esyscmd.m4 \
@@ -340,6 +341,7 @@ dist_pkgdata_DATA = \
 		  examples/quote.m4 \
 		  examples/regexp.m4 \
 		  examples/reverse.m4 \
+		  examples/stack.m4 \
 		  examples/sysv-args.m4 \
 		  examples/trace.m4 \
 		  examples/translit.m4 \
