@@ -326,6 +326,7 @@ dist_pkgdata_DATA = \
 		  examples/foreachq4.m4 \
 		  examples/forloop.m4 \
 		  examples/forloop2.m4 \
+		  examples/forloop3.m4 \
 		  examples/fstab.m4 \
 		  examples/hanoi.m4 \
 		  examples/incl-test.m4 \
