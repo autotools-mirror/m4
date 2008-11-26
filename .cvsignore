@@ -13,7 +13,6 @@ config-h.in
 config.log
 config.status
 configure
-COPYING
 cscope.*
 gnu
 GNUmakefile

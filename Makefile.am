@@ -63,7 +63,7 @@ dist-hook: dist-tarball-version
 dist-tarball-version:
 	echo $(VERSION) > $(distdir)/.tarball-version
 MAINTAINERCLEANFILES = \
-		  ABOUT-NLS COPYING INSTALL Makefile.in aclocal.m4 \
+		  ABOUT-NLS INSTALL Makefile.in aclocal.m4 \
 		  config-h.in configure stamp-h.in \
 		  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
 

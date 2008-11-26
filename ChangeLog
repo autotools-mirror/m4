@@ -1,5 +1,14 @@
 2008-11-26  Eric Blake  <ebb9@byu.net>
 
+	Keep COPYING in repository.
+	* Makefile.am (MAINTAINERCLEANFILES): Don't remove COPYING.
+	* .cvsignore: Don't ignore it.
+	* .gitignore: Likewise.
+	* COPYING: Store in repository, per automake 1.10.2
+	recommendation.
+
+2008-11-26  Eric Blake  <ebb9@byu.net>
+
 	Document optimized forloop.
 	* doc/m4.texinfo (Improved forloop): Mention alternate style that
 	avoids define overhead.
