@@ -157,11 +157,6 @@ promoted to 2.0.
     `dumpdef'.  The `c' flag has been updated to add information to the
     first line to show the definition of the macro being expanded.
 
-*** The `divert' builtin now accepts an optional second argument of text
-    that is immediately placed on the new diversion, regardless of whether
-    the current expansion is nested within argument collection of another
-    macro.
-
 *** The `dumpdef' builtin now always outputs to standard error, rather than
     the debug file specified by the `--debugfile' option or `debugfile'
     macro.
@@ -207,19 +202,21 @@ promoted to 2.0.
 
 
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
-  Released by ????, based on git version 1.4.10b.x-*
+  Released by ????, based on git versions 1.4.10b.x-* and 1.5.*
 
 ** Fix regression introduced in 1.4.4b where using `traceon' could delete
    a macro.  This was most noticeable with `traceon(`traceon')', but
    would also happen in cases such as `foo(traceon(`foo'))'.
 
-** Fix regressions introduced in 1.4.10b but not present in 1.4.11:
+** Fix regressions introduced in 1.4.10b:
 *** Using `builtin' or `indir' to perform nested `shift' calls triggered
-    an assertion failure.
+    an assertion failure (not present in 1.4.11).
 *** The command-line option -dV, as well as the builtin `debugmode(V)',
-    failed to enable `t' and `c' debug options.
+    failed to enable `t' and `c' debug options (not present in 1.4.11).
 *** Comments that contain unbalanced quotes were not rescanned correctly
-    when passed through $@.
+    when passed through $@ (not present in 1.4.11).
+*** Using `defn' on a traced but undefined macro triggered an assertion
+    failure (also present in 1.4.11, but not 1.4.12).
 
 ** Remove the undocumented command-line option '-N', as no one complained
    about the assertion failure regression that it introduced in 1.4.7.
@@ -243,6 +240,11 @@ promoted to 2.0.
    On the other hand, if you want to install Autoconf 2.59 or earlier,
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
+
+** The `divert' builtin now accepts an optional second argument of text
+   that is immediately placed in the new diversion, regardless of whether
+   the current expansion is nested within argument collection of another
+   macro.
 
 ** The `-d'/`--debug' command-line option now understands `-' and `+'
    modifiers, the way the builtin `debugmode' has always done; this allows
@@ -329,6 +331,42 @@ contains the following beta features that were deemed worth deferring until
 ** Enhance the `ifelse' and `shift' builtins so that tail-recursive
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]
+  Released by Eric Blake, based on git version 1.4.11.*
+
+** Fix regression introduced in 1.4.4b where using `traceon' could delete
+   a macro.  This was most noticeable with `traceon(`traceon')', but
+   would also happen in cases such as `foo(traceon(`foo'))'.
+
+** Fix regression introduced in 1.4.7 where `m4 -N9' died with an assertion
+   failure.
+
+** Fix regression introduced in 1.4.11 where `defn' died with an assertion
+   failure on a traced but undefined macro.
+
+** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
+   For now, the environment variable POSIXLY_CORRECT has no effect on M4
+   behavior; but a future release of M4 will behave as though --traditional
+   is implied if POSIXLY_CORRECT is set (this future change is necessary,
+   because in the current release, there is no way to disable GNU
+   extensions that conflict with POSIX without the use of a non-POSIX
+   command-line argument).  Clients of M4 that want to use GNU extensions,
+   even when POSIXLY_CORRECT is set, should start using the -g command-line
+   argument, even though it is currently a no-op if -G did not appear
+   earlier in the command line, so that the client will not break in the
+   face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
+
+** The `-L'/`--nesting-limit' command-line option now defaults to 0 for
+   unlimited on platforms that can detect and deal with stack overflow.  On
+   systems that lack alternate stack support, such as Cygwin, and on
+   systems that do not obey the POSIX semantics for distinguishing stack
+   overflow from other exceptions, such as Linux, you can optionally
+   install the libsigsegv library (version 2.6 or newer recommended) to
+   enhance m4's ability to accurately report stack overflow:
+   http://www.gnu.org/software/libsigsegv/
 
 ** A number of portability improvements inherited from gnulib.
 

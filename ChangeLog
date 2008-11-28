@@ -1,3 +1,8 @@
+2008-11-28  Eric Blake  <ebb9@byu.net>
+
+	Resync NEWS with branches.
+	* NEWS: Mention 1.4.12, update state of 1.6.
+
 2008-11-26  Eric Blake  <ebb9@byu.net>
 
 	Keep COPYING in repository.
@@ -2555,7 +2560,8 @@
 	regression.  Also check out-of-range version.
 	* tests/builtins.at (divert): Expand test to check corner cases
 	of extension.
-	* NEWS: Document the extension.
+	* doc/m4.texinfo (Divert): Document the extension.
+	* NEWS: Likewise.
 	Reported by Daniel Richard G.
 
 2007-05-30  Eric Blake  <ebb9@byu.net>
