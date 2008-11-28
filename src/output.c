@@ -479,7 +479,7 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
 
   /* Do nothing if TEXT should be discarded.  */
 
-  if (output_diversion == NULL)
+  if (output_diversion == NULL || !length)
     return;
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */

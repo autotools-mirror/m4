@@ -1304,11 +1304,12 @@ m4_divert (struct obstack *obs, int argc, macro_arguments *argv)
   const call_info *me = arg_info (argv);
   int i = 0;
 
-  bad_argc (me, argc, 0, 1);
+  bad_argc (me, argc, 0, 2);
   if (argc >= 2 && !numeric_arg (me, ARG (1), &i))
     return;
 
   make_diversion (i);
+  divert_text (NULL, ARG (2), ARG_LEN (2), current_line);
 }
 
 /*-----------------------------------------------------.

@@ -42,6 +42,11 @@ Foundation, Inc.
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
 
+** The `divert' builtin now accepts an optional second argument of text
+   that is immediately placed in the new diversion, regardless of whether
+   the current expansion is nested within argument collection of another
+   macro.
+
 ** The `-d'/`--debug' command-line option now understands `-' and `+'
    modifiers, the way the builtin `debugmode' has always done; this allows
    `-d-V' to disable prior debug settings from the command line, similar to

@@ -1,3 +1,13 @@
+2008-11-28  Eric Blake  <ebb9@byu.net>
+
+	Add extension to divert builtin.
+	* src/builtin.c (m4_divert): Support optional second parameter.
+	* src/output.c (divert_text): Optimize empty output.
+	* doc/m4.texinfo (Divert): Document the extension.
+	* NEWS: Likewise.
+	* THANKS: Update.
+	Reported by Daniel Richard G.
+
 2008-11-26  Eric Blake  <ebb9@byu.net>
 
 	Keep COPYING in repository.
