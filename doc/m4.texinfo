@@ -7288,7 +7288,7 @@ Likewise, escape sequences are not yet recognized.
 @example
 format(`%p', `0')
 @error{}m4:stdin:1: Warning: format: unrecognized specifier in `%p'
-@result{}
+@result{}p
 format(`%*d', `')
 @error{}m4:stdin:2: Warning: format: empty string treated as 0
 @error{}m4:stdin:2: Warning: format: too few arguments: 2 < 3
@@ -7605,7 +7605,9 @@ expansion.  The default radix is 10; this is also the case if
 @var{radix} is the empty string.  A warning results if the radix is
 outside the range of 1 through 36, inclusive.  The result of @code{eval}
 is always taken to be signed.  No radix prefix is output, and for
-radices greater than 10, the digits are lower case.  The @var{width}
+radices greater than 10, the digits are lower case (although some
+other implementations use upper case).  The output is unquoted, and
+subject to further macro expansion.  The @var{width}
 argument specifies the minimum output width, excluding any negative
 sign.  The result is zero-padded to extend the expansion to the
 requested width.  A warning results if the width is negative.  If
@@ -7636,8 +7638,13 @@ eval(`1', , `-1')
 @error{}m4:stdin:10: Warning: eval: negative width: -1
 @result{}
 eval()
-@error{}m4:stdin:11: Warning: eval: empty string treated as zero
+@error{}m4:stdin:11: Warning: eval: empty string treated as 0
 @result{}0
+eval(` ')
+@error{}m4:stdin:12: Warning: eval: empty string treated as 0
+@result{}0
+define(`a', `hi')eval(` 10 ', `16')
+@result{}hi
 @end example
 
 @node Mpeval

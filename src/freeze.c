@@ -634,7 +634,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
 
 	  if (m4_debug_decode (context, string[0]) < 0)
 	    m4_error (context, EXIT_FAILURE, 0, NULL,
-		      _("unknown debug mode `%s'"),
+		      _("unknown debug mode %s"),
 		      quotearg_style_mem (locale_quoting_style, string[0],
 					  number[0]));
 	  break;
@@ -751,10 +751,11 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
 
 	  m4_set_regexp_syntax_opt (context,
 				    m4_regexp_syntax_encode (string[0]));
-	  if (m4_get_regexp_syntax_opt (context) < 0)
+	  if (m4_get_regexp_syntax_opt (context) < 0
+	      || strlen (string[0]) < number[0])
 	    {
 	      m4_error (context, EXIT_FAILURE, 0, NULL,
-			_("unknown regexp syntax code `%s'"),
+			_("bad syntax-spec %s"),
 			quotearg_style_mem (locale_quoting_style, string[0],
 					    number[0]));
 	    }

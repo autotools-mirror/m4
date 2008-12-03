@@ -167,8 +167,8 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
 
   if (msg != NULL)
     {
-      m4_error (context, 0, 0, caller, _("bad regular expression `%s': %s"),
-		regexp, msg);
+      m4_warn (context, 0, caller, _("bad regular expression %s: %s"),
+	       quotearg_style_mem (locale_quoting_style, regexp, len), msg);
       regfree (pat);
       free (pat);
       return NULL;
@@ -225,28 +225,38 @@ regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
 
 /* Function to perform substitution by regular expressions.  Used by
    the builtins regexp, patsubst and renamesyms.  The changed text is
-   placed on the obstack OBS.  The substitution is REPL, with \&
-   substituted by this part of VICTIM matched by the last whole
-   regular expression, and \N substituted by the text matched by the
-   Nth parenthesized sub-expression in BUF.  Any warnings are issued
-   on behalf of CALLER.  BUF may be NULL for the empty regex.  */
+   placed on the obstack OBS.  The substitution is REPL of length
+   REPL_LEN, with \& substituted by this part of VICTIM matched by the
+   last whole regular expression, and \N substituted by the text
+   matched by the Nth parenthesized sub-expression in BUF.  Any
+   warnings are issued on behalf of CALLER.  BUF may be NULL for the
+   empty regex.  */
 
 static void
 substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
-	    const char *victim, const char *repl, m4_pattern_buffer *buf)
+	    const char *victim, const char *repl, size_t repl_len,
+	    m4_pattern_buffer *buf)
 {
   int ch;
 
-  for (;;)
+  while (repl_len--)
     {
-      while ((ch = *repl++) != '\\')
+      ch = *repl++;
+      if (ch != '\\')
 	{
-	  if (ch == '\0')
-	    return;
 	  obstack_1grow (obs, ch);
+	  continue;
+	}
+      if (!repl_len)
+	{
+	  m4_warn (context, 0, caller,
+		   _("trailing \\ ignored in replacement"));
+	  return;
 	}
 
-      switch ((ch = *repl++))
+      ch = *repl++;
+      repl_len--;
+      switch (ch)
 	{
 	case '&':
 	  if (buf)
@@ -265,11 +275,6 @@ substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 			  buf->regs.end[ch] - buf->regs.start[ch]);
 	  break;
 
-	case '\0':
-	  m4_warn (context, 0, caller,
-		   _("trailing \\ ignored in replacement"));
-	  return;
-
 	default:
 	  obstack_1grow (obs, ch);
 	  break;
@@ -278,18 +283,19 @@ substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 }
 
 
-/* For each match against compiled REGEXP (held in BUF -- as returned
-   by regexp_compile) in VICTIM, substitute REPLACE.  Non-matching
-   characters are copied verbatim, and the result copied to the
-   obstack.  Errors are reported on behalf of CALLER.  Return true if
-   a substitution was made.  If OPTIMIZE is set, don't worry about
-   copying the input if no changes are made.  */
+/* For each match against REGEXP of length REGEXP_LEN (precompiled in
+   BUF as returned by regexp_compile) in VICTIM of length LEN,
+   substitute REPLACE of length REPL_LEN.  Non-matching characters are
+   copied verbatim, and the result copied to the obstack.  Errors are
+   reported on behalf of CALLER.  Return true if a substitution was
+   made.  If OPTIMIZE is set, don't worry about copying the input if
+   no changes are made.  */
 
 static bool
 regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 		   const char *victim, size_t len, const char *regexp,
-		   m4_pattern_buffer *buf, const char *replace,
-		   bool optimize)
+		   size_t regexp_len, m4_pattern_buffer *buf,
+		   const char *replace, size_t repl_len, bool optimize)
 {
   regoff_t matchpos = 0;	/* start position of match */
   size_t offset = 0;		/* current match offset */
@@ -309,7 +315,9 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 
 	  if (matchpos == -2)
 	    m4_error (context, 0, 0, caller,
-		      _("error matching regular expression `%s'"), regexp);
+		      _("problem matching regular expression %s"),
+		      quotearg_style_mem (locale_quoting_style, regexp,
+					  regexp_len));
 	  else if (offset < len && subst)
 	    obstack_grow (obs, victim + offset, len - offset);
 	  break;
@@ -322,7 +330,7 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 
       /* Handle the part of the string that was covered by the match.  */
 
-      substitute (context, obs, caller, victim, replace, buf);
+      substitute (context, obs, caller, victim, replace, repl_len, buf);
       subst = true;
 
       /* Update the offset to the end of the match.  If the regexp
@@ -465,18 +473,24 @@ M4BUILTIN_HANDLER (builtin)
 }
 
 
-/* Change the current regexp syntax to SPEC, or report failure on
-   behalf of CALLER.  Currently this affects the builtins: `patsubst',
-   `regexp' and `renamesyms'.  */
+/* Change the current regexp syntax to SPEC of length LEN, or report
+   failure on behalf of CALLER.  Currently this affects the builtins:
+   `patsubst', `regexp' and `renamesyms'.  */
 
 static int
 m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
-			 const char *spec)
+			 const char *spec, size_t len)
 {
-  int resyntax = m4_regexp_syntax_encode (spec);
+  int resyntax;
+
+  if (strlen (spec) < len)
+    resyntax = -1;
+  else
+    resyntax = m4_regexp_syntax_encode (spec);
 
   if (resyntax < 0)
-    m4_warn (context, 0, caller, _("bad syntax-spec: `%s'"), spec);
+    m4_warn (context, 0, caller, _("bad syntax-spec: %s"),
+	     quotearg_style_mem (locale_quoting_style, spec, len));
 
   return resyntax;
 }
@@ -488,7 +502,7 @@ m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
 M4BUILTIN_HANDLER (changeresyntax)
 {
   int resyntax = m4_resyntax_encode_safe (context, m4_arg_info (argv),
-					  M4ARG (1));
+					  M4ARG (1), M4ARGLEN (1));
 
   if (resyntax >= 0)
     m4_set_regexp_syntax_opt (context, resyntax);
@@ -749,31 +763,32 @@ M4BUILTIN_HANDLER (patsubst)
   m4_pattern_buffer *buf;	/* compiled regular expression */
   int resyntax;
 
-  pattern = M4ARG (2);
-  replace = M4ARG (3);
-
   resyntax = m4_get_regexp_syntax_opt (context);
   if (argc >= 5)		/* additional args ignored */
     {
-      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4));
+      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4),
+					  M4ARGLEN (4));
       if (resyntax < 0)
 	return;
     }
 
   /* The empty regex matches everywhere, but if there is no
      replacement, we need not waste time with it.  */
-  if (!*pattern && !*replace)
+  if (m4_arg_empty (argv, 2) && m4_arg_empty (argv, 3))
     {
       m4_push_arg (context, obs, argv, 1);
       return;
     }
 
+  pattern = M4ARG (2);
+  replace = M4ARG (3);
+
   buf = regexp_compile (context, me, pattern, M4ARGLEN (2), resyntax);
   if (!buf)
     return;
 
-  regexp_substitute (context, obs, me, M4ARG (1), M4ARGLEN (1),
-		     pattern, buf, replace, false);
+  regexp_substitute (context, obs, me, M4ARG (1), M4ARGLEN (1), pattern,
+		     M4ARGLEN (2), buf, replace, M4ARGLEN (3), false);
 }
 
 
@@ -810,7 +825,7 @@ M4BUILTIN_HANDLER (regexp)
 	 is a valid RESYNTAX, yet we want `regexp(aab, a*, )' to return
 	 an empty string as per M4 1.4.x.  */
 
-      if ((*replace == '\0') || (resyntax < 0))
+      if (m4_arg_empty (argv, 3) || (resyntax < 0))
 	/* regexp(VICTIM, REGEXP, REPLACEMENT) */
 	resyntax = m4_get_regexp_syntax_opt (context);
       else
@@ -820,7 +835,8 @@ M4BUILTIN_HANDLER (regexp)
   else if (argc >= 5)
     {
       /* regexp(VICTIM, REGEXP, REPLACEMENT, RESYNTAX) */
-      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4));
+      resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4),
+					  M4ARGLEN (4));
       if (resyntax < 0)
 	return;
     }
@@ -828,11 +844,11 @@ M4BUILTIN_HANDLER (regexp)
     /* regexp(VICTIM, REGEXP)  */
     replace = NULL;
 
-  if (!*pattern)
+  if (m4_arg_empty (argv, 2))
     {
       /* The empty regex matches everything.  */
       if (replace)
-	substitute (context, obs, me, M4ARG (1), replace, NULL);
+	substitute (context, obs, me, M4ARG (1), replace, M4ARGLEN (3), NULL);
       else
 	m4_shipout_int (obs, 0);
       return;
@@ -848,15 +864,16 @@ M4BUILTIN_HANDLER (regexp)
 
   if (startpos == -2)
     {
-      m4_error (context, 0, 0, me, _("error matching regular expression `%s'"),
-		pattern);
+      m4_error (context, 0, 0, me, _("problem matching regular expression %s"),
+		quotearg_style_mem (locale_quoting_style, pattern,
+				    M4ARGLEN (2)));
       return;
     }
 
   if (replace == NULL)
     m4_shipout_int (obs, startpos);
   else if (startpos >= 0)
-    substitute (context, obs, me, victim, replace, buf);
+    substitute (context, obs, me, victim, replace, M4ARGLEN (3), buf);
 }
 
 
@@ -874,7 +891,9 @@ M4BUILTIN_HANDLER (renamesyms)
     {
       const m4_call_info *me = m4_arg_info (argv);
       const char *regexp;	/* regular expression string */
+      size_t regexp_len;
       const char *replace;	/* replacement expression string */
+      size_t replace_len;
 
       m4_pattern_buffer *buf;	/* compiled regular expression */
 
@@ -883,17 +902,20 @@ M4BUILTIN_HANDLER (renamesyms)
       int resyntax;
 
       regexp  = M4ARG (1);
+      regexp_len = M4ARGLEN (1);
       replace = M4ARG (2);
+      replace_len = M4ARGLEN (2);
 
       resyntax = m4_get_regexp_syntax_opt (context);
       if (argc >= 4)
 	{
-	  resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3));
+	  resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3),
+					      M4ARGLEN (3));
 	  if (resyntax < 0)
 	    return;
 	}
 
-      buf = regexp_compile (context, me, regexp, M4ARGLEN (1), resyntax);
+      buf = regexp_compile (context, me, regexp, regexp_len, resyntax);
       if (!buf)
 	return;
 
@@ -905,7 +927,8 @@ M4BUILTIN_HANDLER (renamesyms)
 	  const m4_string *key = &data.base[0];
 
 	  if (regexp_substitute (context, data.obs, me, key->str, key->len,
-				 regexp, buf, replace, true))
+				 regexp, regexp_len, buf, replace, replace_len,
+				 true))
 	    {
 	      size_t newlen = obstack_object_size (data.obs);
 	      m4_symbol_rename (M4SYMTAB, key->str, key->len,

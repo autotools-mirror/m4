@@ -123,11 +123,12 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 {
   const m4_call_info *me = m4_arg_info (argv);
   const char *f;			/* Format control string.  */
+  size_t f_len;				/* Length of f.  */
   const char *fmt;			/* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";	/* Current format spec.  */
   char *p;				/* Position within fstart.  */
   unsigned char c;			/* A simple character.  */
-  int i = 0;				/* Index within argc used so far.  */
+  int i = 1;				/* Index within argc used so far.  */
   bool valid_format = true;		/* True if entire format string ok.  */
 
   /* Flags.  */
@@ -156,25 +157,24 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
   int result = 0;
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
-  f = fmt = ARG_STR (i, argc, argv);
+  f = fmt = M4ARG (1);
+  f_len = M4ARGLEN (1);
+  assert (!f[f_len]); /* Requiring a terminating NUL makes parsing simpler.  */
   memset (ok, 0, sizeof ok);
-  while (true)
+  while (f_len--)
     {
-      while ((c = *fmt++) != '%')
+      c = *fmt++;
+      if (c != '%')
 	{
-	  if (c == '\0')
-	    {
-	      if (valid_format)
-		m4_bad_argc (context, argc, me, i, i, true);
-	      return;
-	    }
 	  obstack_1grow (obs, c);
+	  continue;
 	}
 
       if (*fmt == '%')
 	{
 	  obstack_1grow (obs, '%');
 	  fmt++;
+	  f_len--;
 	  continue;
 	}
 
@@ -225,7 +225,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	      break;
 	    }
 	}
-      while (!(flags & DONE) && fmt++);
+      while (!(flags & DONE) && (f_len--, fmt++));
       if (flags & THOUSANDS)
 	*p++ = '\'';
       if (flags & PLUS)
@@ -247,12 +247,14 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	{
 	  width = ARG_INT (i, argc, argv);
 	  fmt++;
+	  f_len--;
 	}
       else
 	while (isdigit ((unsigned char) *fmt))
 	  {
 	    width = 10 * width + *fmt - '0';
 	    fmt++;
+	    f_len--;
 	  }
 
       /* Maximum precision; an explicit negative precision is the same
@@ -263,10 +265,12 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
       if (*fmt == '.')
 	{
 	  ok['c'] = 0;
+	  f_len--;
 	  if (*(++fmt) == '*')
 	    {
 	      prec = ARG_INT (i, argc, argv);
 	      ++fmt;
+	      f_len--;
 	    }
 	  else
 	    {
@@ -275,6 +279,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 		{
 		  prec = 10 * prec + *fmt - '0';
 		  fmt++;
+		  f_len--;
 		}
 	    }
 	}
@@ -285,30 +290,34 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	  *p++ = 'l';
 	  lflag = 1;
 	  fmt++;
+	  f_len--;
 	  ok['c'] = ok['s'] = 0;
 	}
       else if (*fmt == 'h')
 	{
 	  *p++ = 'h';
 	  fmt++;
+	  f_len--;
 	  if (*fmt == 'h')
 	    {
 	      *p++ = 'h';
 	      fmt++;
+	      f_len--;
 	    }
 	  ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
 	    = ok['g'] = ok['G'] = ok['s'] = 0;
 	}
 
-      c = *fmt++;
-      if (c > sizeof ok || !ok[c])
+      c = *fmt;
+      if (c > sizeof ok || !ok[c] || !f_len)
 	{
-	  m4_warn (context, 0, me, _("unrecognized specifier in `%s'"), f);
+	  m4_warn (context, 0, me, _("unrecognized specifier in %s"),
+		   quotearg_style_mem (locale_quoting_style, f, M4ARGLEN (1)));
 	  valid_format = false;
-	  if (c == '\0')
-	    fmt--;
 	  continue;
 	}
+      fmt++;
+      f_len--;
 
       /* Specifiers.  We don't yet recognize C, S, n, or p.  */
       switch (c)
@@ -382,4 +391,6 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
 	 we constructed fstart, the result should not be negative.  */
       assert (0 <= result);
     }
+  if (valid_format)
+    m4_bad_argc (context, argc, me, i, i, true);
 }

@@ -998,8 +998,7 @@ m4_expand_ranges (const char *s, size_t *len, m4_obstack *obs)
 	obstack_1grow (obs, *s);
     }
   *len = obstack_object_size (obs);
-  /* FIXME - use obstack_finish once translit is updated.  */
-  return (char *) obstack_copy0 (obs, "", 0);
+  return (char *) obstack_finish (obs);
 }
 
 /* The macro "translit" translates all characters in the first
@@ -1018,7 +1017,9 @@ M4BUILTIN_HANDLER (translit)
   char found[UCHAR_MAX + 1] = {0};
   unsigned char ch;
 
-  if (argc <= 2)
+  enum { ASIS, REPLACE, DELETE };
+
+  if (m4_arg_empty (argv, 1) || m4_arg_empty (argv, 2))
     {
       m4_push_arg (context, obs, argv, 1);
       return;
@@ -1026,7 +1027,7 @@ M4BUILTIN_HANDLER (translit)
 
   from = M4ARG (2);
   from_len = M4ARGLEN (2);
-  if (strchr (from, '-') != NULL)
+  if (memchr (from, '-', from_len) != NULL)
     {
       from = m4_expand_ranges (from, &from_len, m4_arg_scratch (context));
       assert (from);
@@ -1034,35 +1035,57 @@ M4BUILTIN_HANDLER (translit)
 
   to = M4ARG (3);
   to_len = M4ARGLEN (3);
-  if (strchr (to, '-') != NULL)
+  if (memchr (to, '-', to_len) != NULL)
     {
       to = m4_expand_ranges (to, &to_len, m4_arg_scratch (context));
       assert (to);
     }
 
-  /* Calling strchr(from) for each character in data is quadratic,
+  /* Calling memchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a
      from-to mapping in one pass of from, then use that map in one
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
-  for ( ; (ch = *from) != '\0'; from++)
+  while (from_len--)
     {
-      if (!found[ch])
+      ch = *from++;
+      if (found[ch] == ASIS)
 	{
-	  found[ch] = 1;
-	  map[ch] = *to;
+	  if (to_len)
+	    {
+	      found[ch] = REPLACE;
+	      map[ch] = *to;
+	    }
+	  else
+	    found[ch] = DELETE;
 	}
-      if (*to != '\0')
-	to++;
+      if (to_len)
+	{
+	  to++;
+	  to_len--;
+	}
     }
 
-  for (data = M4ARG (1); (ch = *data) != '\0'; data++)
+  data = M4ARG (1);
+  from_len = M4ARGLEN (1);
+  while (from_len--)
     {
-      if (!found[ch])
-	obstack_1grow (obs, ch);
-      else if (map[ch])
-	obstack_1grow (obs, map[ch]);
+      ch = *data++;
+      switch (found[ch])
+	{
+	case ASIS:
+	  obstack_1grow (obs, ch);
+	  break;
+	case REPLACE:
+	  obstack_1grow (obs, map[ch]);
+	  break;
+	case DELETE:
+	  break;
+	default:
+	  assert (!"translit");
+	  abort ();
+	}
     }
 }
 

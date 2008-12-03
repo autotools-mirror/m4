@@ -409,6 +409,12 @@ AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr], [], [ ])
 
 AT_CHECK([cat out1 stdout], [0], [expout])
 
+dnl Check that unexpected embedded NULs are recognized.
+printf '# bogus frozen file\nV2\nR4\ngnu\0\n' > bogus.m4f
+AT_CHECK_M4([-R bogus.m4f], [1], [],
+[[m4:bogus.m4f:4: bad syntax-spec `gnu\0'
+]])
+
 AT_CLEANUP
 ])
 

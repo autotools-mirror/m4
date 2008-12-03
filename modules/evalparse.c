@@ -99,10 +99,15 @@ static const char *eval_text;
    can back up, if we have read too much.  */
 static const char *last_text;
 
+/* Detect when to end parsing.  */
+static const char *end_text;
+
+/* Prime the lexer at the start of TEXT, with length LEN.  */
 static void
-eval_init_lex (const char *text)
+eval_init_lex (const char *text, size_t len)
 {
   eval_text = text;
+  end_text = text + len;
   last_text = NULL;
 }
 
@@ -119,12 +124,12 @@ eval_undo (void)
 static eval_token
 eval_lex (number *val)
 {
-  while (isspace (to_uchar (*eval_text)))
+  while (eval_text != end_text && isspace (to_uchar (*eval_text)))
     eval_text++;
 
   last_text = eval_text;
 
-  if (*eval_text == '\0')
+  if (eval_text == end_text)
     return EOTEXT;
 
   if (isdigit (to_uchar (*eval_text)))
@@ -915,13 +920,13 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
     }
 
   numb_initialise ();
-  eval_init_lex (str);
+  eval_init_lex (str, M4ARGLEN (1));
 
   numb_init (val);
   et = eval_lex (&val);
   if (et == EOTEXT)
     {
-      m4_warn (context, 0, me, _("empty string treated as zero"));
+      m4_warn (context, 0, me, _("empty string treated as 0"));
       numb_set (val, numb_ZERO);
     }
   else

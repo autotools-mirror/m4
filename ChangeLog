@@ -1,3 +1,31 @@
+2008-12-02  Eric Blake  <ebb9@byu.net>
+
+	Stage 27: Allow embedded NUL in text processing macros.
+	Pass NUL through regular expressions, format, and translit, and
+	diagnose it in eval and changeresyntax.  Improve warning
+	capabilities of format.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* modules/m4.c (m4_expand_ranges): Don't append extra bytes.
+	(translit): Manage NUL bytes.
+	* modules/format.c (format): Likewise.
+	* modules/gnu.c (substitute, regexp_substitute): Likewise.
+	(m4_resyntax_encode_safe): Add parameter.
+	(regexp, patsubst, renamesyms): Update callers.
+	(regexp_compile): Adjust error message.
+	* modules/evalparse.c (m4_evaluate): Use consistent message.
+	(end_text): New variable.
+	(eval_init_lex): Add parameter.
+	(eval_lex): Detect embedded NUL.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* doc/m4.texinfo (Format): Update to cover new behavior.
+	(Eval): Mention that result is unquoted.
+	* tests/freeze.at (reloading nul): Enhance test.
+	* tests/null.m4: Likewise.
+	* tests/null.err: Update expected output.
+	* tests/null.out: Likewise.
+	* tests/options.at (--regexp-syntax): Likewise.
+
 2008-11-28  Eric Blake  <ebb9@byu.net>
 
 	Resync NEWS with branches.
