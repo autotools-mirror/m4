@@ -466,9 +466,10 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Stack overflow and program error handling.  Ignore failure to
      install a handler, since this is merely for improved output on
-     crash, and we should never crash ;).  */
-  if (c_stack_action (fault_handler) == 0)
-    nesting_limit = 0;
+     crash, and we should never crash ;).  We install SIGBUS and
+     SIGSEGV handlers prior to using the c-stack module; depending on
+     the platform, c-stack will then override none, SIGSEGV, or both
+     handlers.  */
   program_error_message
     = xasprintf (_("internal error detected; please report this bug to <%s>"),
                  PACKAGE_BUGREPORT);
@@ -483,10 +484,13 @@ main (int argc, char *const *argv, char *const *envp)
      to default signal behavior.  */
   act.sa_flags = SA_NODEFER | SA_RESETHAND;
   act.sa_handler = fault_handler;
+  sigaction (SIGSEGV, &act, NULL);
   sigaction (SIGABRT, &act, NULL);
   sigaction (SIGILL, &act, NULL);
   sigaction (SIGFPE, &act, NULL);
   sigaction (SIGBUS, &act, NULL);
+  if (c_stack_action (fault_handler) == 0)
+    nesting_limit = 0;
 
 #ifdef DEBUG_STKOVF
   /* Make it easier to test our fault handlers.  Exporting M4_CRASH=0
