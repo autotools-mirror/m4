@@ -1,3 +1,11 @@
+2008-12-17  Eric Blake  <ebb9@byu.net>
+
+	Don't override signal handlers installed by c-stack.
+	* src/m4.c (main): Reorder installation of signal handlers, so we
+	don't trash a SIGBUS handler installed by c-stack.  Also provide a
+	SIGSEGV fallback, for platforms where c-stack combined with
+	libsigsegv uses something lower level than SIGSEGV.
+
 2008-12-12  Eric Blake  <ebb9@byu.net>
 
 	Double size of temp file cache.
