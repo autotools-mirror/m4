@@ -1,3 +1,16 @@
+2008-12-06  Eric Blake  <ebb9@byu.net>
+
+	Upgrade to FDL 1.3, keep COPYING in repository.
+	* Makefile.am (MAINTAINERCLEANFILES): Don't remove COPYING.
+	* .cvsignore: Don't ignore it.
+	* .gitignore: Likewise.
+	* COPYING: Store in repository, per automake 1.10.2
+	recommendation.
+	* m4/gnulib-cache.m4: Replace fdl module with fdl-1.3.
+	* doc/m4.texinfo (GNU Free Documentation License): Upgrade
+	license.
+	* doc/Makefile.am (m4_TEXINFOS): Likewise.
+
 2008-08-25  Eric Blake  <ebb9@byu.net>
 
 	Update recommendation now that libsigsegv 2.6 is released.
