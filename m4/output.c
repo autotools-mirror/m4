@@ -65,13 +65,13 @@ struct m4_diversion
   {
     union
       {
-	FILE *file;		/* diversion file on disk */
-	char *buffer;		/* in-memory diversion buffer */
-	m4_diversion *next;	/* free-list pointer */
+	FILE *file;		/* Diversion file on disk.  */
+	char *buffer;		/* Malloc'd diversion buffer.  */
+	m4_diversion *next;	/* Free-list pointer */
       } u;
-    int divnum;			/* which diversion this represents */
-    size_t size;		/* usable size before reallocation */
-    size_t used;		/* used length in characters */
+    int divnum;			/* Which diversion this represents.  */
+    size_t size;		/* Usable size before reallocation.  */
+    size_t used;		/* Used buffer length, or tmp file exists.  */
   };
 
 /* Sorted set of diversions 1 through INT_MAX.  */
@@ -89,20 +89,32 @@ static m4_obstack diversion_storage;
 /* Total size of all in-memory buffer sizes.  */
 static size_t total_buffer_size;
 
-/* Current output diversion, NULL if output is being currently discarded.  */
+/* Current output diversion, NULL if output is being currently
+   discarded.  output_diversion->u is guaranteed non-NULL except when
+   the diversion has never been used; use size to determine if it is a
+   malloc'd buffer or a FILE.  output_diversion->used is 0 if u.file
+   is stdout, and non-zero if this is a malloc'd buffer or a temporary
+   diversion file.  */
 static m4_diversion *output_diversion;
 
-/* Values of some output_diversion fields, cached out for speed.  */
-static FILE *output_file;	/* current value of (file) */
-static char *output_cursor;	/* current value of (buffer + used) */
-static size_t output_unused;	/* current value of (size - used) */
+/* Cache of output_diversion->u.file, only valid when
+   output_diversion->size is 0.  */
+static FILE *output_file;
+
+/* Cache of output_diversion->u.buffer + output_diversion->used, only
+   valid when output_diversion->size is non-zero.  */
+static char *output_cursor;
+
+/* Cache of output_diversion->size - output_diversion->used, only
+   valid when output_diversion->size is non-zero.  */
+static size_t output_unused;
 
 /* Temporary directory holding all spilled diversion files.  */
 static m4_temp_dir *output_temp_dir;
 
 
 
-/* --- OUTPUT INITIALIZATION --- */
+/* Internal routines.  */
 
 /* Callback for comparing list elements ELT1 and ELT2 for order in
    diversion_table.  */
@@ -124,32 +136,6 @@ threshold_diversion_CB (const void *elt, const void *threshold)
   /* No need to worry about overflow, since we don't create diversions
      with negative divnum.  */
   return diversion->divnum >= *(const int *) threshold;
-}
-
-/* Initialize the output engine.  */
-void
-m4_output_init (m4 *context)
-{
-  diversion_table = gl_oset_create_empty (GL_AVLTREE_OSET, cmp_diversion_CB,
-					  NULL);
-  div0.u.file = stdout;
-  m4_set_current_diversion (context, 0);
-  output_diversion = &div0;
-  output_file = stdout;
-  obstack_init (&diversion_storage);
-}
-
-/* Clean up memory allocated during use.  */
-void
-m4_output_exit (void)
-{
-  /* Order is important, since we may have registered cleanup_tmpfile
-     as an atexit handler, and it must not traverse stale memory.  */
-  gl_oset_t table = diversion_table;
-  assert (gl_oset_size (diversion_table) == 0);
-  diversion_table = NULL;
-  gl_oset_free (table);
-  obstack_free (&diversion_storage, NULL);
 }
 
 /* Clean up any temporary directory.  Designed for use as an atexit
@@ -199,6 +185,7 @@ m4_tmpname (int divnum)
       buffer = (char *) obstack_alloc (&diversion_storage,
 				       INT_BUFSIZE_BOUND (divnum));
     }
+  assert (0 < divnum);
   if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
     abort ();
   return buffer;
@@ -207,9 +194,10 @@ m4_tmpname (int divnum)
 /* Create a temporary file for diversion DIVNUM open for reading and
    writing in a secure temp directory.  The file will be automatically
    closed and deleted on a fatal signal.  The file can be closed and
-   reopened with m4_tmpclose and m4_tmpopen; when finally done with
-   the file, close it and use m4_tmpremove.  Exits on failure, so the
-   return value is always an open file.  */
+   reopened with m4_tmpclose and m4_tmpopen, or moved with
+   m4_tmprename; when finally done with the file, close it with
+   m4_tmpremove.  Exits on failure, so the return value is always an
+   open file.  */
 static FILE *
 m4_tmpfile (m4 *context, int divnum)
 {
@@ -273,6 +261,53 @@ static int
 m4_tmpremove (int divnum)
 {
   return cleanup_temp_file (output_temp_dir, m4_tmpname (divnum));
+}
+
+/* Transfer the temporary file for diversion OLDNUM to the previously
+   unused diversion NEWNUM.  Return an open stream visiting the new
+   temporary file, exiting on failure.  */
+static FILE*
+m4_tmprename (m4 *context, int oldnum, int newnum)
+{
+  /* m4_tmpname reuses its return buffer.  */
+  char *oldname = xstrdup (m4_tmpname (oldnum));
+  const char *newname = m4_tmpname (newnum);
+  register_temp_file (output_temp_dir, newname);
+  if (rename (oldname, newname))
+    m4_error (context, EXIT_FAILURE, errno, NULL,
+	      _("cannot create temporary file for diversion"));
+  unregister_temp_file (output_temp_dir, oldname);
+  free (oldname);
+  return m4_tmpopen (context, newnum);
+}
+
+
+/* --- OUTPUT INITIALIZATION --- */
+
+/* Initialize the output engine.  */
+void
+m4_output_init (m4 *context)
+{
+  diversion_table = gl_oset_create_empty (GL_AVLTREE_OSET, cmp_diversion_CB,
+					  NULL);
+  div0.u.file = stdout;
+  m4_set_current_diversion (context, 0);
+  output_diversion = &div0;
+  output_file = stdout;
+  obstack_init (&diversion_storage);
+}
+
+/* Clean up memory allocated during use.  */
+void
+m4_output_exit (void)
+{
+  /* Order is important, since we may have registered cleanup_tmpfile
+     as an atexit handler, and it must not traverse stale memory.  */
+  gl_oset_t table = diversion_table;
+  assert (gl_oset_size (diversion_table) == 0);
+  diversion_table = NULL;
+  gl_oset_free (table);
+  obstack_free (&diversion_storage, NULL);
 }
 
 /* Reorganize in-memory diversion buffers so the current diversion can
@@ -385,11 +420,14 @@ make_room_for (m4 *context, size_t length)
 		      _("cannot close temporary file for diversion"));
 	}
 
-      /* The buffer may be safely reallocated.  */
-
+      /* The current buffer may be safely reallocated.  */
       assert (wanted_size >= length);
-      output_diversion->u.buffer = xrealloc (output_diversion->u.buffer,
-					     wanted_size);
+      {
+	char *buffer = output_diversion->u.buffer;
+	output_diversion->u.buffer = xcharalloc ((size_t) wanted_size);
+	memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
+	free (buffer);
+      }
 
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
@@ -664,10 +702,10 @@ m4_make_diversion (m4 *context, int divnum)
       assert (output_diversion->divnum != divnum);
       if (!output_diversion->size && !output_diversion->u.file)
 	{
+	  assert (!output_diversion->used);
 	  if (!gl_oset_remove (diversion_table, output_diversion))
 	    assert (false);
 	  output_diversion->u.next = free_list;
-	  output_diversion->used = 0;
 	  free_list = output_diversion;
 	}
       else if (output_diversion->size)
@@ -802,18 +840,46 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
     {
       if (diversion->size)
 	{
-	  char *str = diversion->u.buffer;
-	  size_t len = diversion->used;
-	  if (escaped)
-	    str = quotearg_style_mem (escape_quoting_style, str, len);
-	  m4_output_text (context, str, escaped ? strlen (str) : len);
+	  if (!output_diversion->u.file)
+	    {
+	      /* Transferring diversion metadata is faster than
+		 copying contents.  */
+	      assert (!output_diversion->used && output_diversion != &div0
+		      && !output_file);
+	      output_diversion->u.buffer = diversion->u.buffer;
+	      output_diversion->size = diversion->size;
+	      output_cursor = diversion->u.buffer + diversion->used;
+	      output_unused = diversion->size - diversion->used;
+	      diversion->u.buffer = NULL;
+	    }
+	  else
+	    {
+	      char *str = diversion->u.buffer;
+	      size_t len = diversion->used;
+	      if (escaped)
+		str = quotearg_style_mem (escape_quoting_style, str, len);
+	      m4_output_text (context, str, escaped ? strlen (str) : len);
+	    }
+	}
+      else if (!output_diversion->u.file)
+	{
+	  /* Transferring diversion metadata is faster than copying
+	     contents.  */
+	  assert (!output_diversion->used && output_diversion != &div0
+		  && !output_file);
+	  output_diversion->u.file = m4_tmprename (context, diversion->divnum,
+						   output_diversion->divnum);
+	  output_diversion->used = 1;
+	  output_file = output_diversion->u.file;
+	  diversion->u.file = NULL;
+	  diversion->size = 1;
 	}
       else
 	{
 	  assert (diversion->used);
 	  if (!diversion->u.file)
 	    diversion->u.file = m4_tmpopen (context, diversion->divnum);
-	  m4_insert_file (context, diversion->u.file);
+	  insert_file (context, diversion->u.file, escaped);
 	}
 
       m4_set_output_line (context, -1);

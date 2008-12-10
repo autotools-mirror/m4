@@ -1,3 +1,17 @@
+2008-12-15  Eric Blake  <ebb9@byu.net>
+
+	Avoid quadratic behavior for some cases of divert/undivert.
+	* m4/output.c (struct m4_diversion): Improve comments.
+	(m4_tmpname, m4_make_diversion): Strengthen preconditions.
+	(m4_tmprename): New function.
+	(m4_output_init, m4_output_exit): Move after internal functions.
+	(make_room_for): Don't bother copying uninitialized bytes.
+	(insert_diversion_helper): Transfer metadata, rather than copying
+	contents, when undiverting into a previously unused diversion.
+	* tests/builtins.at (divert): Add a check to the test.
+	* doc/m4.texinfo (Undivert): Enhance test.
+	* NEWS: Document the speedup.
+
 2008-12-02  Eric Blake  <ebb9@byu.net>
 
 	Stage 27: Allow embedded NUL in text processing macros.

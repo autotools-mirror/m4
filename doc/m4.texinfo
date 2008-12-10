@@ -6267,6 +6267,14 @@ undivert(`0')
 undivert
 @result{}diverted text
 @result{}
+divert(`1')more
+divert(`2')undivert(`1')diverted text`'divert
+@result{}
+undivert(`1')
+@result{}
+undivert(`2')
+@result{}more
+@result{}diverted text
 @end example
 
 When a diversion has been undiverted, the diverted text is discarded,

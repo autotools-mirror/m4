@@ -353,6 +353,20 @@ rm expout2
 
 AT_CHECK_M4([in.m4], [0], [expout])
 
+dnl Avoid quadratic copying time when transferring diversions; test
+dnl both in-memory and diversions spilled to a file.
+AT_DATA([in.m4], [[include(`forloop2.m4')dnl
+divert(`1')format(`%10000s', `')dnl
+forloop(`i', `1', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`9001')format(`%1000000s', `')dnl
+forloop(`i', `9001', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`-1')undivert
+]])
+
+AT_CHECK_M4([-I "$top_srcdir/examples" in.m4])
+
 AT_CLEANUP
 
 
