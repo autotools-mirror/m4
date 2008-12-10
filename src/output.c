@@ -786,6 +786,10 @@ insert_diversion_helper (m4_diversion *diversion)
 	    }
 	  else
 	    {
+	      /* Avoid double-charging the total in-memory size when
+		 transferring from one in-memory diversion to
+		 another.  */
+	      total_buffer_size -= diversion->size;
 	      output_text (diversion->u.buffer, diversion->used);
 	    }
 	}
@@ -815,6 +819,8 @@ insert_diversion_helper (m4_diversion *diversion)
   /* Return all space used by the diversion.  */
   if (diversion->size)
     {
+      if (!output_diversion)
+	total_buffer_size -= diversion->size;
       free (diversion->u.buffer);
       diversion->size = 0;
       diversion->used = 0;
