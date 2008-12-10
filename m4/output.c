@@ -112,11 +112,16 @@ static size_t output_unused;
 /* Temporary directory holding all spilled diversion files.  */
 static m4_temp_dir *output_temp_dir;
 
-/* Cache of most recently used spilled diversion file.  */
-static FILE *tmp_file;
+/* Cache of most recently used spilled diversion files.  */
+static FILE *tmp_file1;
+static FILE *tmp_file2;
 
-/* Diversion that owns tmp_file, or 0.  */
-static int tmp_file_owner;
+/* Diversions that own tmp_file, or 0.  */
+static int tmp_file1_owner;
+static int tmp_file2_owner;
+
+/* True if tmp_file2 is more recently used.  */
+static bool tmp_file2_recent;
 
 
 /* Internal routines.  */
@@ -242,12 +247,21 @@ m4_tmpopen (m4 *context, int divnum, bool reread)
   const char *name;
   FILE *file;
 
-  if (tmp_file_owner == divnum)
+  if (tmp_file1_owner == divnum)
     {
-      if (reread && fseeko (tmp_file, 0, SEEK_SET) != 0)
+      if (reread && fseeko (tmp_file1, 0, SEEK_SET) != 0)
+	m4_error (context, EXIT_FAILURE, errno, NULL,
+		  _("cannot seek within diversion"));
+      tmp_file2_recent = false;
+      return tmp_file1;
+    }
+  else if (tmp_file2_owner == divnum)
+    {
+      if (reread && fseeko (tmp_file2, 0, SEEK_SET) != 0)
 	m4_error (context, EXIT_FAILURE, errno, NULL,
 		  _("cannot seek to beginning of diversion"));
-      return tmp_file;
+      tmp_file2_recent = true;
+      return tmp_file2;
     }
   name = m4_tmpname (divnum);
   /* We need update mode, to avoid truncation.  */
@@ -274,12 +288,22 @@ static int
 m4_tmpclose (FILE *file, int divnum)
 {
   int result = 0;
-  if (divnum != tmp_file_owner)
+  if (divnum != tmp_file1_owner && divnum != tmp_file2_owner)
     {
-      if (tmp_file_owner)
-	result = close_stream_temp (tmp_file);
-      tmp_file = file;
-      tmp_file_owner = divnum;
+      if (tmp_file2_recent)
+	{
+	  if (tmp_file1_owner)
+	    result = close_stream_temp (tmp_file1);
+	  tmp_file1 = file;
+	  tmp_file1_owner = divnum;
+	}
+      else
+	{
+	  if (tmp_file2_owner)
+	    result = close_stream_temp (tmp_file2);
+	  tmp_file2 = file;
+	  tmp_file2_owner = divnum;
+	}
     }
   return result;
 }
@@ -288,12 +312,19 @@ m4_tmpclose (FILE *file, int divnum)
 static int
 m4_tmpremove (int divnum)
 {
-  if (divnum == tmp_file_owner)
+  if (divnum == tmp_file1_owner)
     {
-      int result = close_stream_temp (tmp_file);
+      int result = close_stream_temp (tmp_file1);
       if (result)
 	return result;
-      tmp_file_owner = 0;
+      tmp_file1_owner = 0;
+    }
+  else if (divnum == tmp_file2_owner)
+    {
+      int result = close_stream_temp (tmp_file2);
+      if (result)
+	return result;
+      tmp_file2_owner = 0;
     }
   return cleanup_temp_file (output_temp_dir, m4_tmpname (divnum));
 }
@@ -308,17 +339,30 @@ m4_tmprename (m4 *context, int oldnum, int newnum)
   char *oldname = xstrdup (m4_tmpname (oldnum));
   const char *newname = m4_tmpname (newnum);
   register_temp_file (output_temp_dir, newname);
-  if (oldnum == tmp_file_owner)
+  if (oldnum == tmp_file1_owner)
     {
       /* Be careful of mingw, which can't rename an open file.  */
       if (RENAME_OPEN_FILE_WORKS)
-	tmp_file_owner = newnum;
+	tmp_file1_owner = newnum;
       else
 	{
-	  if (close_stream_temp (tmp_file))
+	  if (close_stream_temp (tmp_file1))
 	    m4_error (context, EXIT_FAILURE, errno, NULL,
 		      _("cannot close temporary file for diversion"));
-	  tmp_file_owner = 0;
+	  tmp_file1_owner = 0;
+	}
+    }
+  else if (oldnum == tmp_file2_owner)
+    {
+      /* Be careful of mingw, which can't rename an open file.  */
+      if (RENAME_OPEN_FILE_WORKS)
+	tmp_file2_owner = newnum;
+      else
+	{
+	  if (close_stream_temp (tmp_file2))
+	    m4_error (context, EXIT_FAILURE, errno, NULL,
+		      _("cannot close temporary file for diversion"));
+	  tmp_file2_owner = 0;
 	}
     }
   /* Either it is safe to rename an open file, or no one should have
@@ -355,8 +399,10 @@ m4_output_exit (void)
      as an atexit handler, and it must not traverse stale memory.  */
   gl_oset_t table = diversion_table;
   assert (gl_oset_size (diversion_table) == 0);
-  if (tmp_file_owner)
-    m4_tmpremove (tmp_file_owner);
+  if (tmp_file1_owner)
+    m4_tmpremove (tmp_file1_owner);
+  if (tmp_file2_owner)
+    m4_tmpremove (tmp_file2_owner);
   diversion_table = NULL;
   gl_oset_free (table);
   obstack_free (&diversion_storage, NULL);
