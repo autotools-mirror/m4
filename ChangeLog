@@ -1,5 +1,11 @@
 2008-12-15  Eric Blake  <ebb9@byu.net>
 
+	Use fewer seeks on cached files.
+	* m4/output.c (m4_tmpfile): Use write, not append mode.
+	(m4_tmpopen): Add parameter to decide when to skip seeks.
+	(m4_tmprename, m4_make_diversion, insert_diversion_helper)
+	(m4_freeze_diversions): Adjust callers.
+
 	Cache most recently spilled diversion.
 	* m4/output.c (tmp_file, tmp_file_owner): New variables, for
 	1-deep cache of spilled diversions.

@@ -219,7 +219,7 @@ m4_tmpfile (m4 *context, int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  file = fopen_temp (name, O_BINARY ? "ab+" : "a+");
+  file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
   if (file == NULL)
     {
       unregister_temp_file (output_temp_dir, name);
@@ -232,33 +232,36 @@ m4_tmpfile (m4 *context, int divnum)
 }
 
 /* Reopen a temporary file for diversion DIVNUM for reading and
-   writing in a secure temp directory.  Exits on failure, so the
-   return value is always an open file.  */
+   writing in a secure temp directory.  If REREAD, the file is
+   positioned at offset 0, otherwise the file is positioned at the
+   end.  Exits on failure, so the return value is always an open
+   file.  */
 static FILE *
-m4_tmpopen (m4 *context, int divnum)
+m4_tmpopen (m4 *context, int divnum, bool reread)
 {
   const char *name;
   FILE *file;
 
   if (tmp_file_owner == divnum)
     {
-      if (fseeko (tmp_file, 0, SEEK_SET) != 0)
+      if (reread && fseeko (tmp_file, 0, SEEK_SET) != 0)
 	m4_error (context, EXIT_FAILURE, errno, NULL,
 		  _("cannot seek to beginning of diversion"));
       return tmp_file;
     }
   name = m4_tmpname (divnum);
-  file = fopen_temp (name, O_BINARY ? "ab+" : "a+");
+  /* We need update mode, to avoid truncation.  */
+  file = fopen_temp (name, O_BINARY ? "rb+" : "r+");
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno, NULL,
 	      _("cannot create temporary file for diversion"));
   else if (set_cloexec_flag (fileno (file), true) != 0)
     m4_warn (context, errno, NULL, _("cannot protect diversion across forks"));
-  /* POSIX states that it is undefined whether an append stream starts
-     at offset 0 or at the end.  We want the beginning.  */
-  else if (fseeko (file, 0, SEEK_SET) != 0)
+  /* Update mode starts at the beginning of the stream, but sometimes
+     we want the end.  */
+  else if (!reread && fseeko (file, 0, SEEK_END) != 0)
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("cannot seek to beginning of diversion"));
+	      _("cannot seek within diversion"));
   return file;
 }
 
@@ -297,7 +300,7 @@ m4_tmpremove (int divnum)
 
 /* Transfer the temporary file for diversion OLDNUM to the previously
    unused diversion NEWNUM.  Return an open stream visiting the new
-   temporary file, exiting on failure.  */
+   temporary file, positioned at the end, or exit on failure.  */
 static FILE*
 m4_tmprename (m4 *context, int oldnum, int newnum)
 {
@@ -325,7 +328,7 @@ m4_tmprename (m4 *context, int oldnum, int newnum)
 	      _("cannot create temporary file for diversion"));
   unregister_temp_file (output_temp_dir, oldname);
   free (oldname);
-  return m4_tmpopen (context, newnum);
+  return m4_tmpopen (context, newnum, false);
 }
 
 
@@ -824,7 +827,8 @@ m4_make_diversion (m4 *context, int divnum)
     {
       if (!output_diversion->u.file && output_diversion->used)
 	output_diversion->u.file = m4_tmpopen (context,
-					       output_diversion->divnum);
+					       output_diversion->divnum,
+					       false);
       output_file = output_diversion->u.file;
     }
 
@@ -931,7 +935,7 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 	{
 	  assert (diversion->used);
 	  if (!diversion->u.file)
-	    diversion->u.file = m4_tmpopen (context, diversion->divnum);
+	    diversion->u.file = m4_tmpopen (context, diversion->divnum, true);
 	  insert_file (context, diversion->u.file, escaped);
 	}
 
@@ -945,7 +949,6 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 	total_buffer_size -= diversion->size;
       free (diversion->u.buffer);
       diversion->size = 0;
-      diversion->used = 0;
     }
   else
     {
@@ -953,7 +956,6 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 	{
 	  FILE *file = diversion->u.file;
 	  diversion->u.file = NULL;
-	  diversion->used = 0;
 	  if (m4_tmpclose (file, diversion->divnum) != 0)
 	    m4_error (context, 0, errno, NULL,
 		      _("cannot clean temporary file for diversion"));
@@ -962,6 +964,7 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 	m4_error (context, 0, errno, NULL,
 		  _("cannot clean temporary file for diversion"));
     }
+  diversion->used = 0;
   if (!gl_oset_remove (diversion_table, diversion))
     assert (false);
   diversion->u.next = free_list;
@@ -1036,7 +1039,8 @@ m4_freeze_diversions (m4 *context, FILE *file)
 	    {
 	      struct stat file_stat;
 	      assert (!diversion->u.file);
-	      diversion->u.file = m4_tmpopen (context, diversion->divnum);
+	      diversion->u.file = m4_tmpopen (context, diversion->divnum,
+					      true);
 	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		m4_error (context, EXIT_FAILURE, errno, NULL,
 			  _("cannot stat diversion"));
