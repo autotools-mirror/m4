@@ -4901,7 +4901,12 @@ len(f)
 @result{}1048576
 divert(`1')
 f
+divert(`2')
+f
 divert(`-1')undivert
+divert(`1')bye
+^D
+@result{}bye
 @end example
 
 @comment Another test of spilled diversions.
@@ -4948,6 +4953,22 @@ format(%1000000d, 1)' | ]__program__[ | sed -n 1p])dnl
 @result{}hi
 sysval
 @result{}0
+@end example
+
+@comment Avoid quadratic copying time when transferring diversions;
+@comment test both in-memory and spilled to file.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`forloop2.m4')dnl
+divert(`1')format(`%10000s', `')dnl
+forloop(`i', `1', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`9001')format(`%1000000s', `')dnl
+forloop(`i', `9001', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`-1')undivert
 @end example
 @end ignore
 
@@ -5117,6 +5138,14 @@ undivert(`0')
 undivert
 @result{}diverted text
 @result{}
+divert(`1')more
+divert(`2')undivert(`1')diverted text`'divert
+@result{}
+undivert(`1')
+@result{}
+undivert(`2')
+@result{}more
+@result{}diverted text
 @end example
 
 When a diversion has been undiverted, the diverted text is discarded,

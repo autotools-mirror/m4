@@ -7,6 +7,9 @@ Foundation, Inc.
 
 ** The manual is now distributed under the terms of FDL 1.3.
 
+** The `divert' and `undivert' builtins have been made more efficient
+   when using temporary files for large diversions.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]
