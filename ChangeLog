@@ -1,5 +1,13 @@
 2008-12-10  Eric Blake  <ebb9@byu.net>
 
+	Double size of temp file cache.
+	* src/output.c (tmp_file, tmp_file_owner): Split...
+	(tmp_file1, tmp_file2, tmp_file1_owner, tmp_file2_owner): ...into
+	two variables.
+	(tmp_file2_recent): New variable.
+	(m4_tmpopen, m4_tmpclose, m4_tmpremove, m4_tmprename)
+	(output_exit): Adjust callers.
+
 	Use fewer seeks on cached files.
 	* src/output.c (m4_tmpfile): Use write, not append mode.
 	(m4_tmpopen): Add parameter to decide when to skip seeks.
