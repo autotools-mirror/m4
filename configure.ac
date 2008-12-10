@@ -81,6 +81,24 @@ if test "$M4_cv_func_system_consistent" = no ; then
     [Define to 1 if the return value of system() disagrees with pclose().])
 fi
 
+AC_CACHE_CHECK([whether an open file can be renamed],
+  [M4_cv_func_rename_open_file_works],
+  [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+      [FILE *f = fopen ("conftest.1", "w+");
+       int result = rename ("conftest.1", "conftest.2");
+       fclose (f); remove ("conftest.1"); remove ("conftest.2");
+       return result;])],
+    [M4_cv_func_rename_open_file_works=yes],
+    [M4_cv_func_rename_open_file_works=no],
+    [M4_cv_func_rename_open_file_works='guessing no'])])
+if test "$M4_cv_func_rename_open_file_works" = yes ; then
+  M4_rename_open_works=1
+else
+  M4_rename_open_works=0
+fi
+AC_DEFINE_UNQUOTED([RENAME_OPEN_FILE_WORKS], [$M4_rename_open_works],
+  [Define to 1 if a file can be renamed while open, or to 0 if not.])
+
 dnl Don't let changeword get in our way, if bootstrapping with a version of
 dnl m4 that already turned the feature on.
 m4_ifdef([changeword], [m4_undefine([changeword])])dnl

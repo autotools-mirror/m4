@@ -1,5 +1,19 @@
 2008-12-12  Eric Blake  <ebb9@byu.net>
 
+	Cache most recently spilled diversion.
+	* src/output.c (tmp_file, tmp_file_owner): New variables, for
+	1-deep cache of spilled diversions.
+	(m4_tmpfile): Open in append mode, since we might revisit
+	diversion without closing it now.
+	(m4_tmpopen): Check cache first.
+	(m4_tmpclose): Update cache, rather than closing.  Add parameter.
+	(m4_tmpremove): Close cache before removing.
+	(m4_tmprename): Deal with open files when renaming.
+	(output_exit): Close cache before exiting.
+	(make_room_for, make_diversion, insert_diversion_helper): Adjust
+	callers.
+	* configure.ac (RENAME_OPEN_FILE_WORKS): New configure test.
+
 	Correctly track size of in-memory diversions.
 	* src/output.c (insert_diversion_helper): Correctly track total
 	in-memory diversion size after undivert.
