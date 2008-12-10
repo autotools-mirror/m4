@@ -856,6 +856,10 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 	    {
 	      char *str = diversion->u.buffer;
 	      size_t len = diversion->used;
+	      /* Avoid double-charging the total in-memory size when
+		 transferring from one in-memory diversion to
+		 another.  */
+	      total_buffer_size -= diversion->size;
 	      if (escaped)
 		str = quotearg_style_mem (escape_quoting_style, str, len);
 	      m4_output_text (context, str, escaped ? strlen (str) : len);
@@ -888,6 +892,8 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
   /* Return all space used by the diversion.  */
   if (diversion->size)
     {
+      if (!output_diversion)
+	total_buffer_size -= diversion->size;
       free (diversion->u.buffer);
       diversion->size = 0;
       diversion->used = 0;

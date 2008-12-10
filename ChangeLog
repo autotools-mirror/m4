@@ -1,5 +1,9 @@
 2008-12-15  Eric Blake  <ebb9@byu.net>
 
+	Correctly track size of in-memory diversions.
+	* m4/output.c (insert_diversion_helper): Correctly track total
+	in-memory diversion size after undivert.
+
 	Avoid quadratic behavior for some cases of divert/undivert.
 	* m4/output.c (struct m4_diversion): Improve comments.
 	(m4_tmpname, m4_make_diversion): Strengthen preconditions.
