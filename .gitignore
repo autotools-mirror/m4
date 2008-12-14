@@ -24,7 +24,7 @@ INSTALL
 intl
 libtool
 *.log
-m4-*
+/m4-*
 Makefile
 Makefile.in
 patches

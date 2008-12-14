@@ -162,6 +162,7 @@ M4_ERROR
 M4_GETOPT
 M4_OBSTACK
 M4_REGEX
+M4_RENAME
 
 
 ## ------------------------ ##
