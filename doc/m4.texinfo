@@ -272,6 +272,7 @@ Correct version of some examples
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved copy::               Solution for @code{copy}
 * Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
@@ -3577,6 +3578,11 @@ undivert(`curry.m4')dnl
 @result{}divert`'dnl
 @end example
 
+Unfortunately, with M4 1.4.x, @code{curry} is unable to handle builtin
+tokens, which are silently flattened to the empty string when passed
+through another text macro.  This limitation will be lifted in a future
+release of M4.
+
 @cindex renaming macros
 @cindex copying macros
 @cindex macros, copying
@@ -3592,7 +3598,11 @@ few macros, such as @code{copy} or @code{defn}, which cannot be copied
 via this macro.
 @end deffn
 
-The implementation is relatively straightforward:
+The implementation is relatively straightforward (although since it uses
+@code{curry}, it is unable to copy builtin macros, such as the second
+definition of @code{a} as a synonym for @code{divnum}.  See if you can
+design a version that works around this limitation, or @pxref{Improved
+copy, , Answers}).
 
 @comment examples
 @example
@@ -7562,6 +7572,7 @@ presented here.
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved copy::               Solution for @code{copy}
 * Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
@@ -8080,6 +8091,91 @@ include(`loop.m4')dnl
 @end example
 
 @end ignore
+
+@node Improved copy
+@section Solution for @code{copy}
+
+The macro @code{copy} presented above
+is unable to handle builtin tokens with M4 1.4.x, because it tries to
+pass the builtin token through the macro @code{curry}, where it is
+silently flattened to an empty string (@pxref{Composition}).  Rather
+than using the problematic @code{curry} to work around the limitation
+that @code{stack_foreach} expects to invoke a macro that takes exactly
+one argument, we can write a new macro that lets us form the exact
+two-argument @code{pushdef} call sequence needed, so that we are no
+longer passing a builtin token through a text macro.
+
+@deffn Composite stack_foreach_sep (@var{macro}, @var{pre}, @var{post}, @
+  @var{sep})
+@deffnx Composite stack_foreach_sep_lifo (@var{macro}, @var{pre}, @
+  @var{post}, @var{sep})
+For each of the @code{pushdef} definitions associated with @var{macro},
+expand the sequence @samp{@var{pre}`'definition`'@var{post}}.
+Additionally, expand @var{sep} between definitions.
+@code{stack_foreach_sep} visits the oldest definition first, while
+@code{stack_foreach_sep_lifo} visits the current definition first.  The
+expansion may dereference @var{macro}, but should not modify it.  There
+are a few special macros, such as @code{defn}, which cannot be used as
+the @var{macro} parameter.
+@end deffn
+
+Note that @code{stack_foreach(`@var{macro}', `@var{action}')} is
+equivalent to @code{stack_foreach_sep(`@var{macro}', `@var{action}(',
+`)')}.  By supplying explicit parentheses, split among the @var{pre} and
+@var{post} arguments to @code{stack_foreach_sep}, it is now possible to
+construct macro calls with more than one argument, without passing
+builtin tokens through a macro call.  It is likewise possible to
+directly reference the stack definitions without a macro call, by
+leaving @var{pre} and @var{post} empty.  The new macro also adds a
+separator that is only output after the first iteration of the helper
+@var{_stack_reverse_sep}, implemented by prepending the original
+@var{sep} to @var{pre} and omitting a @var{sep} argument in subsequent
+iterations.  As an added bonus, using @code{stack_foreach_sep} to
+implement @code{copy} performs fewer macro invocations.  The improved
+stack walking macros are available in
+@file{m4-@value{VERSION}/@/examples/@/stack_sep.m4}:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`stack_sep.m4')
+@result{}
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach_sep(`$1', `pushdef(`$2',', `)')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))
+@result{}
+copy(`a', `b')
+@result{}
+b
+@result{}0
+popdef(`b')
+@result{}
+b
+@result{}1
+pushdef(`c', `1')pushdef(`c', `2')
+@result{}
+stack_foreach_sep_lifo(`c', `', `', `, ')
+@result{}2, 1
+undivert(`stack_sep.m4')dnl
+@result{}divert(`-1')
+@result{}# stack_foreach_sep(macro, pre, post, sep)
+@result{}# Invoke PRE`'defn`'POST with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the oldest, and
+@result{}# separated by SEP between definitions.
+@result{}define(`stack_foreach_sep',
+@result{}`_stack_reverse_sep(`$1', `tmp-$1')'dnl
+@result{}`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4')')
+@result{}# stack_foreach_sep_lifo(macro, pre, post, sep)
+@result{}# Like stack_foreach_sep, but starting with the newest definition.
+@result{}define(`stack_foreach_sep_lifo',
+@result{}`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4')'dnl
+@result{}`_stack_reverse_sep(`tmp-$1', `$1')')
+@result{}define(`_stack_reverse_sep',
+@result{}`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0(
+@result{}  `$1', `$2', `$4`'$3')')')
+@result{}divert`'dnl
+@end example
 
 @node Improved m4wrap
 @section Solution for @code{m4wrap}
