@@ -343,6 +343,7 @@ dist_pkgdata_DATA = \
 		  examples/regexp.m4 \
 		  examples/reverse.m4 \
 		  examples/stack.m4 \
+		  examples/stack_sep.m4 \
 		  examples/sysv-args.m4 \
 		  examples/trace.m4 \
 		  examples/translit.m4 \

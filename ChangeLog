@@ -1,3 +1,13 @@
+2008-12-18  Eric Blake  <ebb9@byu.net>
+
+	Deal with M4 1.4.x limitation on builtin tokens.
+	* doc/m4.texinfo (Composition): Mention limitation on curry.
+	(Improved copy): New node.
+	(Stacks): Fix typo.
+	* examples/stack.m4: Likewise.
+	* examples/stack_sep.m4: New file.
+	* Makefile.am (dist_pkgdata_DATA): Distribute it.
+
 2008-12-15  Eric Blake  <ebb9@byu.net>
 
 	Double size of temp file cache.
