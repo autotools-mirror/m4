@@ -58,6 +58,7 @@ quote.m4 \
 regexp.m4 \
 reverse.m4 \
 stack.m4 \
+stack_sep.m4 \
 stackovf.sh \
 sync-lines.m4 \
 sysv-args.m4 \
