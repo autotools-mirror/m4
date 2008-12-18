@@ -1,3 +1,15 @@
+2008-12-18  Eric Blake  <ebb9@byu.net>
+
+	Document copy composite using stack_foreach and curry.
+	* doc/m4.texinfo (Stacks): New node, to document pushdef stack
+	manipulation.
+	(Ifelse): Move define_blind...
+	(Composition): ...to this new node.  Document currying, then use
+	it to implement copy and rename.
+	* examples/curry.m4: New file.
+	* examples/stack.m4: Likewise.
+	* examples/Makefile.am (EXTRA_DIST): Distribute them.
+
 2008-12-17  Eric Blake  <ebb9@byu.net>
 
 	Don't override signal handlers installed by c-stack.
