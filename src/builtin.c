@@ -1662,7 +1662,7 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
     debug_set_output (NULL);
   else if (!debug_set_output (ARG (1)))
     M4ERROR ((warning_status, errno,
-	      "cannot set error file: `%s'", ARG (1)));
+	      "cannot set debug file `%s'", ARG (1)));
 }
 
 /* This section contains text processing macros: "len", "index",

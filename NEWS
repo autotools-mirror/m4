@@ -10,6 +10,13 @@ Foundation, Inc.
 ** The `divert' and `undivert' builtins have been made more efficient
    when using temporary files for large diversions.
 
+** The command line option `--debugfile', introduced in 1.4.7, now
+   treats its argument as optional, in order to allow setting the debug
+   output back to stderr when used without an argument; and order is now
+   significant with respect to command line files.  You must therefore use
+   `m4 --debugfile=trace file', not `m4 file --debugfile trace'.  This
+   change does not affect the deprecated `-o'/`--error-output' option.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]

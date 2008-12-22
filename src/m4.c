@@ -79,7 +79,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U, s, t, or '\1' */
+  int code;			/* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -125,7 +125,7 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
 #  define MAX(a,b) ((a) < (b) ? (b) : (a))
 # endif
 # define NSIG (MAX (SIGABRT, MAX (SIGILL, MAX (SIGFPE,  \
-                                               MAX (SIGSEGV, SIGBUS)))) + 1)
+					       MAX (SIGSEGV, SIGBUS)))) + 1)
 #endif
 
 /* Pre-translated messages for program errors.  Do not translate in
@@ -144,20 +144,20 @@ fault_handler (int signo)
   if (signo)
     {
       /* POSIX states that reading static memory is, in general, not
-         async-safe.  However, the static variables that we read are
-         never modified once this handler is installed, so this
-         particular usage is safe.  And it seems an oversight that
-         POSIX claims strlen is not async-safe.  */
+	 async-safe.  However, the static variables that we read are
+	 never modified once this handler is installed, so this
+	 particular usage is safe.  And it seems an oversight that
+	 POSIX claims strlen is not async-safe.	 */
       write (STDERR_FILENO, program_name, strlen (program_name));
       write (STDERR_FILENO, ": ", 2);
       write (STDERR_FILENO, program_error_message,
-             strlen (program_error_message));
+	     strlen (program_error_message));
       if (signal_message[signo])
-        {
-          write (STDERR_FILENO, ": ", 2);
-          write (STDERR_FILENO, signal_message[signo],
-                 strlen (signal_message[signo]));
-        }
+	{
+	  write (STDERR_FILENO, ": ", 2);
+	  write (STDERR_FILENO, signal_message[signo],
+		 strlen (signal_message[signo]));
+	}
       write (STDERR_FILENO, "\n", 1);
       _exit (EXIT_INTERNAL_ERROR);
     }
@@ -191,13 +191,13 @@ Operation modes:\n\
 ", stdout);
       xprintf ("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
-                               execution at first error\n\
+                                 execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
       --warn-macro-sequence[=REGEXP]\n\
                                warn if macro definition matches REGEXP,\n\
-                               default %s\n\
+                                 default %s\n\
 ", DEFAULT_MACRO_SEQUENCE);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
@@ -230,7 +230,8 @@ Frozen state files:\n\
 \n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
-      --debugfile=FILE         redirect debug and trace output\n\
+      --debugfile[=FILE]       redirect debug and trace output to FILE\n\
+                                 (default stderr, discard if empty string)\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
 ", stdout);
@@ -303,7 +304,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
-  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
+  {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
   {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
 
@@ -387,7 +388,7 @@ main (int argc, char *const *argv, char *const *envp)
      handlers.  */
   program_error_message
     = xasprintf (_("internal error detected; please report this bug to <%s>"),
-                 PACKAGE_BUGREPORT);
+		 PACKAGE_BUGREPORT);
   signal_message[SIGSEGV] = xstrdup (strsignal (SIGSEGV));
   signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
   signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
@@ -415,10 +416,10 @@ main (int argc, char *const *argv, char *const *envp)
     char *crash = getenv ("M4_CRASH");
     if (crash)
       {
-        if (!atoi (crash))
-          ++*(int *) 8;
-        assert (false);
-        abort ();
+	if (!atoi (crash))
+	  ++*(int *) 8;
+	assert (false);
+	abort ();
       }
   }
 #endif /* DEBUG_STKOVF */
@@ -455,6 +456,7 @@ main (int argc, char *const *argv, char *const *envp)
       case 's':
       case 't':
       case '\1':
+      case DEBUGFILE_OPTION:
 	/* Arguments that cannot be handled until later are accumulated.  */
 
 	defn = (macro_definition *) xmalloc (sizeof (macro_definition));
@@ -548,17 +550,16 @@ main (int argc, char *const *argv, char *const *envp)
 	   but don't issue a deprecation warning until autoconf 2.61
 	   or later is more widely established, as such a warning
 	   would interfere with all earlier versions of autoconf.  */
-      case DEBUGFILE_OPTION:
 	/* Don't call debug_set_output here, as it has side effects.  */
 	debugfile = optarg;
 	break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-         /* Don't call set_macro_sequence here, as it can exit.
-            --warn-macro-sequence sets optarg to NULL (which uses the
-            default regexp); --warn-macro-sequence= sets optarg to ""
-            (which disables these warnings).  */
-        macro_sequence = optarg;
+	 /* Don't call set_macro_sequence here, as it can exit.
+	    --warn-macro-sequence sets optarg to NULL (which uses the
+	    default regexp); --warn-macro-sequence= sets optarg to ""
+	    (which disables these warnings).  */
+	macro_sequence = optarg;
 	break;
 
       case VERSION_OPTION:
@@ -575,7 +576,7 @@ main (int argc, char *const *argv, char *const *envp)
 
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (debugfile))
-    M4ERROR ((0, errno, "cannot set debug file `%s'", debugfile));
+    M4ERROR ((warning_status, errno, "cannot set debug file `%s'", debugfile));
 
   input_init ();
   output_init ();
@@ -633,7 +634,13 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case '\1':
 	  seen_file = true;
-          process_file (defines->arg);
+	  process_file (defines->arg);
+	  break;
+
+	case DEBUGFILE_OPTION:
+	  if (!debug_set_output (defines->arg))
+	    M4ERROR ((warning_status, errno, "cannot set debug file `%s'",
+		      debugfile ? debugfile : _("stderr")));
 	  break;
 
 	default:
