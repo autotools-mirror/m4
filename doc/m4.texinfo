@@ -732,13 +732,13 @@ you encounter a situation where the message output did not match your
 expectations, please report that as a bug.  This option is implied if
 @env{POSIXLY_CORRECT} is set in the environment.
 
-@item -r@r{[}@var{RESYNTAX-SPEC}@r{]}
-@itemx --regexp-syntax@r{[}=@var{RESYNTAX-SPEC}@r{]}
-Set the regular expression syntax according to @var{RESYNTAX-SPEC}.
-When this option is not given, or @var{RESYNTAX-SPEC} is omitted,
+@item -r@r{[}@var{resyntax-spec}@r{]}
+@itemx --regexp-syntax@r{[}=@var{resyntax-spec}@r{]}
+Set the regular expression syntax according to @var{resyntax-spec}.
+When this option is not given, or @var{resyntax-spec} is omitted,
 @acronym{GNU} M4 uses the flavor @code{GNU_M4}, which provides
 emacs-compatible regular expressions.  @xref{Changeresyntax}, for more
-details on the format and meaning of @var{RESYNTAX-SPEC}.  This option
+details on the format and meaning of @var{resyntax-spec}.  This option
 may be given more than once, and order with respect to file names is
 significant.
 
@@ -767,15 +767,15 @@ On platforms that support dynamic libraries, there are some options
 that affect dynamic loading.
 
 @table @code
-@item -M @var{DIRECTORY}
-@itemx --module-directory=@var{DIRECTORY}
-Specify an alternate @var{DIRECTORY} to search for modules.  This option
+@item -M @var{directory}
+@itemx --module-directory=@var{directory}
+Specify an alternate @var{directory} to search for modules.  This option
 can be used multiple times to add several different directories to the
 module search path.  @xref{Modules}, for more details.
 
-@item -m @var{MODULE}
-@itemx --load-module=@var{MODULE}
-Load @var{MODULE} before parsing more input files.  @var{MODULE} is
+@item -m @var{module}
+@itemx --load-module=@var{module}
+Load @var{module} before parsing more input files.  @var{module} is
 searched for in each directory of the module search path, until the
 first match is found or the list is exhausted.  @xref{Modules}, for more
 details.  By default, the modules @samp{m4}, @samp{traditional}, and
@@ -784,8 +784,8 @@ configuration with the @option{--with-modules} option to
 @file{m4-@value{VERSION}/@/configure}.  This option may be given more
 than once, and order with respect to file names is significant.
 
-@item --unload-module=@var{MODULE}
-Unload @var{MODULE} before parsing more input files.  @xref{Modules},
+@item --unload-module=@var{module}
+Unload @var{module} before parsing more input files.  @xref{Modules},
 for more details.  This option may be given more than once, and order
 with respect to file names is significant.
 @end table
@@ -802,9 +802,9 @@ search path can be altered, and the output file can track where the
 input came from.  These features occur with the following options:
 
 @table @code
-@item -B @var{DIRECTORY}
-@itemx --prepend-include=@var{DIRECTORY}
-Make @code{m4} search @var{DIRECTORY} for included files, prior to
+@item -B @var{directory}
+@itemx --prepend-include=@var{directory}
+Make @code{m4} search @var{directory} for included files, prior to
 searching the current working directory.  @xref{Search Path}, for more
 details.  This option may be given more than once.  Some other
 implementations of @code{m4} use @option{-B @var{number}} to change their
@@ -815,41 +815,41 @@ numeric, @acronym{GNU} @code{m4} will warn you about this potential
 compatibility issue; you can avoid the warning by using the long
 spelling, or by using @samp{./@var{number}} if you really meant it.
 
-@item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
-@itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
-missing, the value is taken to be the empty string.  The @var{VALUE} can
+@item -D @var{name}@r{[}=@var{value}@r{]}
+@itemx --define=@var{name}@r{[}=@var{value}@r{]}
+This enters @var{name} into the symbol table.  If @samp{=@var{value}} is
+missing, the value is taken to be the empty string.  The @var{value} can
 be any string, and the macro can be defined to take arguments, just as
 if it was defined from within the input.  This option may be given more
 than once; order with respect to file names is significant, and
-redefining the same @var{NAME} loses the previous value.
+redefining the same @var{name} loses the previous value.
 
 @item --import-environment
 Imports every variable in the environment as a macro.  This is done
 before @option{-D} and @option{-U}, so they can override the
 environment.
 
-@item -I @var{DIRECTORY}
-@itemx --include=@var{DIRECTORY}
-Make @code{m4} search @var{DIRECTORY} for included files that are not
+@item -I @var{directory}
+@itemx --include=@var{directory}
+Make @code{m4} search @var{directory} for included files that are not
 found in the current working directory.  @xref{Search Path}, for more
 details.  This option may be given more than once.
 
-@item --popdef=@var{NAME}
-This deletes the top-most meaning @var{NAME} might have.  Obviously,
+@item --popdef=@var{name}
+This deletes the top-most meaning @var{name} might have.  Obviously,
 only predefined macros can be deleted in this way.  This option may be
-given more than once; popping a @var{NAME} that does not have a
+given more than once; popping a @var{name} that does not have a
 definition is silently ignored.  Order is significant with respect to
 file names.
 
-@item -p @var{NAME}@r{[}=@var{VALUE}@r{]}
-@itemx --pushdef=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
-missing, the value is taken to be the empty string.  The @var{VALUE} can
+@item -p @var{name}@r{[}=@var{value}@r{]}
+@itemx --pushdef=@var{name}@r{[}=@var{value}@r{]}
+This enters @var{name} into the symbol table.  If @samp{=@var{value}} is
+missing, the value is taken to be the empty string.  The @var{value} can
 be any string, and the macro can be defined to take arguments, just as
 if it was defined from within the input.  This option may be given more
 than once; order with respect to file names is significant, and
-redefining the same @var{NAME} adds another definition to its stack.
+redefining the same @var{name} adds another definition to its stack.
 
 @item -s
 @itemx --synclines
@@ -876,16 +876,16 @@ Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
 until the next newline that does not occur in the middle of a quoted
-string or comment.  @xref{Syncoutput}, for runtime control.  @var{TRUTH}
+string or comment.  @xref{Syncoutput}, for runtime control.  @var{state}
 is interpreted the same as the argument to @code{syncoutput}; if
-@var{TRUTH} is omitted, or @option{--syncoutput} is not used,
+@var{state} is omitted, or @option{--syncoutput} is not used,
 synchronization lines are disabled.
 
-@item -U @var{NAME}
-@itemx --undefine=@var{NAME}
-This deletes any predefined meaning @var{NAME} might have.  Obviously,
+@item -U @var{name}
+@itemx --undefine=@var{name}
+This deletes any predefined meaning @var{name} might have.  Obviously,
 only predefined macros can be deleted in this way.  This option may be
-given more than once; undefining a @var{NAME} that does not have a
+given more than once; undefining a @var{name} that does not have a
 definition is silently ignored.  Order is significant with respect to
 file names.
 @end table
@@ -914,15 +914,15 @@ System V version.  @xref{Compatibility}, for a list of these.  This
 loads the @samp{traditional} module in place of the @samp{gnu} module.
 It is implied if @env{POSIXLY_CORRECT} is set in the environment.
 
-@item -L @var{NUM}
-@itemx --nesting-limit=@var{NUM}
+@item -L @var{num}
+@itemx --nesting-limit=@var{num}
 @cindex nesting limit
 @cindex limit, nesting
-Artificially limit the nesting of macro calls to @var{NUM} levels,
+Artificially limit the nesting of macro calls to @var{num} levels,
 stopping program execution if this limit is ever exceeded.  When not
 specified, nesting is limited to 1024 levels.  A value of zero means
 unlimited; but then heavily nested code could potentially cause a stack
-overflow.  @var{NUM} can have an optional scaling suffix.
+overflow.  @var{num} can have an optional scaling suffix.
 @comment FIXME - need a node on what scaling suffixes are supported (see
 @comment [info coreutils 'block size'] for ideas), and need to consider
 @comment whether builtins should also understand scaling suffixes:
@@ -946,9 +946,9 @@ only the simplest example (but @pxref{Compatibility}).  Expecting @acronym{GNU}
 system to detect and diagnose endless loops: it is a quite @emph{hard}
 problem in general, if not undecidable!
 
-@item -H @var{NUM}
-@itemx --hashsize=@var{NUM}
-@itemx --word-regexp=@var{REGEXP}
+@item -H @var{num}
+@itemx --hashsize=@var{num}
+@itemx --word-regexp=@var{regexp}
 These options are present only for compatibility with previous versions
 of GNU @code{m4}.  They do nothing except issue a warning, because the
 symbol table size is not fixed anymore, and because the new
@@ -956,8 +956,8 @@ symbol table size is not fixed anymore, and because the new
 experimental @code{changeword}.  These options will eventually disappear
 in future releases.
 
-@item -S @var{NUM}
-@itemx -T @var{NUM}
+@item -S @var{num}
+@itemx -T @var{num}
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.  They may disappear in future
 releases, and issue a warning to that effect.
@@ -971,16 +971,16 @@ releases, and issue a warning to that effect.
 execution when reusing a common initialization script.
 
 @table @code
-@item -F @var{FILE}
-@itemx --freeze-state=@var{FILE}
+@item -F @var{file}
+@itemx --freeze-state=@var{file}
 Once execution is finished, write out the frozen state on the specified
-@var{FILE}.  It is conventional, but not required, for @var{FILE} to end
+@var{file}.  It is conventional, but not required, for @var{file} to end
 in @samp{.m4f}.
 
-@item -R @var{FILE}
-@itemx --reload-state=@var{FILE}
+@item -R @var{file}
+@itemx --reload-state=@var{file}
 Before execution starts, recover the internal state from the specified
-frozen @var{FILE}.  The options @option{-D}, @option{-U}, @option{-t},
+frozen @var{file}.  The options @option{-D}, @option{-U}, @option{-t},
 @option{-m}, @option{-r}, and @option{--import-environment} take effect
 after state is reloaded, but before the input files are read.
 @end table
@@ -992,18 +992,18 @@ Finally, there are several options for aiding in debugging @code{m4}
 scripts.
 
 @table @code
-@item -d@r{[}@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
-@itemx --debug@r{[}=@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
-@itemx --debugmode@r{[}=@r{[}-@r{|}+@r{]}@var{FLAGS}@r{]}
-Set the debug-level according to the flags @var{FLAGS}.  The debug-level
+@item -d@r{[}@r{[}-@r{|}+@r{]}@var{flags}@r{]}
+@itemx --debug@r{[}=@r{[}-@r{|}+@r{]}@var{flags}@r{]}
+@itemx --debugmode@r{[}=@r{[}-@r{|}+@r{]}@var{flags}@r{]}
+Set the debug-level according to the flags @var{flags}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
-meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to
-@samp{+adeq}.  If the option occurs multiple times, @var{FLAGS} starting
-with @samp{-} or @samp{+} are cumulative, while @var{FLAGS} starting
+meaning of @var{flags}.  If omitted, @var{flags} defaults to
+@samp{+adeq}.  If the option occurs multiple times, @var{flags} starting
+with @samp{-} or @samp{+} are cumulative, while @var{flags} starting
 with a letter override all earlier settings.  The debug-level starts
 with @samp{d} enabled and all other flags disabled.  To disable all
-previously set flags, specify an explicit @var{FLAGS} of @samp{-V}.  For
+previously set flags, specify an explicit @var{flags} of @samp{-V}.  For
 backward compatibility reasons, the option @option{--fatal-warnings}
 implies @samp{--debug=-d} as part of its effects.  The spelling
 @option{--debug} is recognized as an unambiguous option for
@@ -1024,26 +1024,26 @@ len(`123')
 @result{}3
 @end example
 
-@item --debugfile=@var{FILE}
-@itemx -o @var{FILE}
-@itemx --error-output=@var{FILE}
-Redirect debug and trace output to the named @var{FILE}.  Warnings,
+@item --debugfile=@var{file}
+@itemx -o @var{file}
+@itemx --error-output=@var{file}
+Redirect debug and trace output to the named @var{file}.  Warnings,
 error messages, and the output of @code{errprint} and @code{dumpdef},
 are still printed to standard error.  If this option is not given, debug
-output goes to standard error; if @var{FILE} is the empty string, debug
+output goes to standard error; if @var{file} is the empty string, debug
 output is discarded.  @xref{Debugfile}, for more details.  The
 spellings @option{-o} and @option{--error-output} are misleading and
 inconsistent with other @acronym{GNU} tools; using those spellings will
 evoke a warning, and they may be withdrawn or change semantics in a
 future release.
 
-@item -l @var{NUM}
-@itemx --debuglen=@var{NUM}
-@itemx --arglength=@var{NUM}
+@item -l @var{num}
+@itemx --debuglen=@var{num}
+@itemx --arglength=@var{num}
 Restrict the size of the output generated by macro tracing or by
-@code{dumpdef} to @var{NUM} characters per string.  If unspecified or
+@code{dumpdef} to @var{num} characters per string.  If unspecified or
 zero, output is unlimited.  @xref{Debuglen}, for more details.
-@var{NUM} can have an optional scaling suffix.  The spelling
+@var{num} can have an optional scaling suffix.  The spelling
 @option{--arglength} is deprecated, since it does not match the
 @code{debuglen} macro; using it will evoke a warning, and it may be
 withdrawn in a future release.
@@ -1052,17 +1052,17 @@ withdrawn in a future release.
 @comment truly one line per macro?
 @comment FIXME - see comment on --nesting-limit about NUM.
 
-@item -t @var{NAME}
-@itemx --trace=@var{NAME}
-@itemx --traceon=@var{NAME}
-This enables tracing for the macro @var{NAME}, at any point where it is
-defined.  @var{NAME} need not be defined when this option is given.
+@item -t @var{name}
+@itemx --trace=@var{name}
+@itemx --traceon=@var{name}
+This enables tracing for the macro @var{name}, at any point where it is
+defined.  @var{name} need not be defined when this option is given.
 This option may be given more than once, and order is significant with
 respect to file names.  @xref{Trace}, for more details.
 
-@item --traceoff=@var{NAME}
-This disables tracing for the macro @var{NAME}, at any point where it is
-defined.  @var{NAME} need not be defined when this option is given.
+@item --traceoff=@var{name}
+This disables tracing for the macro @var{name}, at any point where it is
+defined.  @var{name} need not be defined when this option is given.
 This option may be given more than once, and order is significant with
 respect to file names.  @xref{Trace}, for more details.
 @end table
@@ -9802,7 +9802,7 @@ builtin tokens through a macro call.  It is likewise possible to
 directly reference the stack definitions without a macro call, by
 leaving @var{pre} and @var{post} empty.  The new macro also adds a
 separator that is only output after the first iteration of the helper
-@var{_stack_reverse_sep}, implemented by prepending the original
+@code{_stack_reverse_sep}, implemented by prepending the original
 @var{sep} to @var{pre} and omitting a @var{sep} argument in subsequent
 iterations.  As an added bonus, using @code{stack_foreach_sep} to
 implement @code{copy} performs fewer macro invocations.  The improved
