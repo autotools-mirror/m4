@@ -1,3 +1,11 @@
+2008-12-22  Eric Blake  <ebb9@byu.net>
+
+	Use @var correctly.
+	* doc/m4.texinfo (Operation modes, Preprocessor features)
+	(Limits control, Frozen state, Debugging options): Use lower case
+	names in @var.
+	(Improved copy): Use @code, not @var, as appropriate.
+
 2008-12-18  Eric Blake  <ebb9@byu.net>
 
 	Deal with M4 1.4.x limitation on builtin tokens.
