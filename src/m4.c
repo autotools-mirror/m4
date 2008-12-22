@@ -71,7 +71,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U, s, t, or '\1' */
+  int code;			/* See label `defer'.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -218,13 +218,13 @@ Operation modes:\n\
 "), stdout);
       xprintf (_("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
-                               execution at first error\n\
+                                 execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
       --warn-macro-sequence[=REGEXP]\n\
                                warn if macro definition matches REGEXP,\n\
-                               default %s\n\
+                                 default %s\n\
 "), DEFAULT_MACRO_SEQUENCE);
 #ifdef ENABLE_CHANGEWORD
       fputs (_("\
@@ -258,7 +258,8 @@ Frozen state files:\n\
 Debugging:\n\
   -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
                                set debug level (no FLAGS implies `+adeq')\n\
-      --debugfile=FILE         redirect debug and trace output\n\
+      --debugfile[=FILE]       redirect debug and trace output to FILE\n\
+                                 (default stderr, discard if empty string)\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -t, --trace=NAME             trace NAME when it is defined\n\
 "), stdout);
@@ -340,7 +341,7 @@ static const struct option long_options[] =
   {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
-  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
+  {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
@@ -466,6 +467,7 @@ main (int argc, char *const *argv, char *const *envp)
       case 'U':
       case 's':
       case 't':
+      case DEBUGFILE_OPTION:
       defer:
 	/* Arguments that cannot be handled until later are accumulated.  */
 
@@ -560,7 +562,6 @@ main (int argc, char *const *argv, char *const *envp)
 	   but don't issue a deprecation warning until autoconf 2.61
 	   or later is more widely established, as such a warning
 	   would interfere with all earlier versions of autoconf.  */
-      case DEBUGFILE_OPTION:
 	/* Don't call debug_set_output here, as it has side effects.  */
 	debugfile = optarg;
 	break;
@@ -588,7 +589,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (NULL, debugfile))
     m4_error (0, errno, NULL, _("cannot set debug file %s"),
-              quotearg_style (locale_quoting_style, debugfile));
+	      quotearg_style (locale_quoting_style, debugfile));
 
   input_init ();
   output_init ();
@@ -616,30 +617,30 @@ main (int argc, char *const *argv, char *const *envp)
     {
       macro_definition *next;
       symbol *sym;
+      const char *arg = defines->arg;
 
       switch (defines->code)
 	{
 	case 'D':
 	  {
-	    const char *value = strchr (defines->arg, '=');
-	    size_t len = value ? value - defines->arg : strlen (defines->arg);
-	    define_user_macro (defines->arg, len, value ? value + 1 : "",
+	    const char *value = strchr (arg, '=');
+	    size_t len = value ? value - arg : strlen (arg);
+	    define_user_macro (arg, len, value ? value + 1 : "",
 			       value ? SIZE_MAX : 0, SYMBOL_INSERT);
 	  }
 	  break;
 
 	case 'U':
-	  lookup_symbol (defines->arg, strlen (defines->arg), SYMBOL_DELETE);
+	  lookup_symbol (arg, strlen (arg), SYMBOL_DELETE);
 	  break;
 
 	case 'd':
-	  if (debug_decode (defines->arg) < 0)
-	    error (0, 0, "bad debug flags: `%s'", defines->arg);
+	  if (debug_decode (arg) < 0)
+	    error (0, 0, "bad debug flags: `%s'", arg);
 	  break;
 
 	case 't':
-	  sym = lookup_symbol (defines->arg, strlen (defines->arg),
-			       SYMBOL_INSERT);
+	  sym = lookup_symbol (arg, strlen (arg), SYMBOL_INSERT);
 	  SYMBOL_TRACED (sym) = true;
 	  break;
 
@@ -648,7 +649,14 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case '\1':
-	  process_file (defines->arg);
+	  process_file (arg);
+	  break;
+
+	case DEBUGFILE_OPTION:
+	  if (!debug_set_output (NULL, arg))
+	     m4_error (0, errno, NULL, _("cannot set debug file %s"),
+		       quotearg_style (locale_quoting_style,
+				       arg ? arg : _("stderr")));
 	  break;
 
 	default:

@@ -1806,7 +1806,7 @@ m4_debugfile (struct obstack *obs, int argc, macro_arguments *argv)
   if (argc == 1)
     debug_set_output (me, NULL);
   else if (!debug_set_output (me, ARG (1)))
-    m4_warn (errno, me, _("cannot set error file: %s"),
+    m4_warn (errno, me, _("cannot set debug file %s"),
 	     quotearg_style (locale_quoting_style, ARG (1)));
 }
 

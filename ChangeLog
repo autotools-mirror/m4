@@ -1,3 +1,14 @@
+2008-12-23  Eric Blake  <ebb9@byu.net>
+
+	Make --debugfile argument optional.
+	* src/builtin.c (m4_debugfile): Make error message consistent.
+	* src/m4.c (long_options): Make the argument optional, to allow
+	setting debug file back to stderr.
+	(main): Make --debugfile order-dependent.
+	(usage): Document this.
+	* doc/m4.texinfo (Debugging options): Likewise.
+	* NEWS: Likewise.
+
 2008-12-22  Eric Blake  <ebb9@byu.net>
 
 	Use @var correctly.
