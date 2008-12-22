@@ -926,9 +926,11 @@ len(`123')
 @item --debugfile@r{[}=@var{file}@r{]}
 @itemx -o @var{file}
 @itemx --error-output=@var{file}
-Redirect @code{dumpdef} output, debug messages, and trace output to the
+Redirect debug messages and trace output to the
 named @var{file}.  Warnings, error messages, and @code{errprint} output
-are still printed to standard error.  If these options are not used, or
+are still printed to standard error.  Output from @code{dumpdef} goes to
+this file when the debug level @code{o} is not set (@pxref{Debugmode}).
+If these options are not used, or
 if @var{file} is unspecified (only possible for @option{--debugfile}),
 debug output goes to standard error; if @var{file} is the empty string,
 debug output is discarded.  @xref{Debugfile}, for more details.  The
@@ -938,6 +940,7 @@ significant with respect to file names.  The spellings @option{-o} and
 @acronym{GNU} tools; for now they are silently accepted as synonyms of
 @option{--debugfile} and only recognized once, but in a future version
 of M4, using them will cause a warning to be issued.
+@comment FIXME make them warn in m4 1.6
 
 @ignore
 @comment not worth including in the manual, but provides a good test
@@ -3993,12 +3996,13 @@ If you want to see what a name expands into, you can use the builtin
 @code{dumpdef}:
 
 @deffn Builtin dumpdef (@ovar{name@dots{}})
-Accepts any number of arguments.  If called without any arguments,
-it displays the definitions of all known names, otherwise it displays
-the definitions of each @var{name} given.  The output is printed to the
-current debug file (usually standard error), and is sorted by name.  If
-a @var{name} is undefined, the @samp{d} debug level controls whether a
-warning is issued (@pxref{Debugmode}).
+Accepts any number of arguments.  If called without any arguments, it
+displays the definitions of all known names, otherwise it displays the
+definitions of each @var{name} given, sorted by name.  If a @var{name}
+is undefined, the @samp{d} debug level controls whether a warning is
+issued (@pxref{Debugmode}).  Likewise, the @samp{o} debug level controls
+whether the output is issued to standard error or the current debug
+file (@pxref{Debugfile}).
 
 The expansion of @code{dumpdef} is void.
 @end deffn
@@ -4309,6 +4313,11 @@ changed.
 In debug and trace output, include the current input line number in the
 output line.
 
+@item o
+Output @code{dumpdef} data to standard error instead of the current
+debug file.  This can be useful when post-processing trace output, where
+interleaving dumpdef and trace output can cause ambiguities.
+
 @item p
 In debug output, print a message when a named file is found through the
 path search mechanism (@pxref{Search Path}), giving the actual file name
@@ -4440,7 +4449,9 @@ Invoking m4}), or with the builtin macro @code{debugfile}:
 Sends all further debug and trace output to @var{file}, opened in append
 mode.  If @var{file} is the empty string, debug and trace output are
 discarded.  If @code{debugfile} is called without any arguments, debug
-and trace output are sent to standard error.  This does not affect
+and trace output are sent to standard error.  Output from @code{dumpdef}
+is sent to this file if the debug level @code{o} is not set
+(@pxref{Debugmode}).  This does not affect
 warnings, error messages, or @code{errprint} output, which are
 always sent to standard error.  If @var{file} cannot be opened, the
 current debug file is unchanged, and an error is issued.
@@ -4466,6 +4477,38 @@ debugfile
 divnum
 @error{}m4trace: -1- divnum -> `0'
 @result{}0
+@end example
+
+Sometimes it is useful to post-process trace output, even though there
+is no standardized format for trace output.  In this situation, forcing
+@code{dumpdef} to output to standard error instead of the default of the
+current debug file will avoid any ambiguities between the two types of
+output; it also allows debugging via @code{dumpdef} when debug output is
+discarded.
+
+@example
+$ @kbd{m4 -d}
+traceon(`divnum')
+@result{}
+divnum
+@error{}m4trace: -1- divnum -> `0'
+@result{}0
+dumpdef(`divnum')
+@error{}divnum:@tabchar{}<divnum>
+@result{}
+debugfile(`')
+@result{}
+divnum
+@result{}0
+dumpdef(`divnum')
+@result{}
+debugmode(`+o')
+@result{}
+divnum
+@result{}0
+dumpdef(`divnum')
+@error{}divnum:@tabchar{}<divnum>
+@result{}
 @end example
 
 @node Input Control

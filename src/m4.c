@@ -275,6 +275,7 @@ FLAGS is any of:\n\
   l   include current input line number in trace and debug\n\
 "), stdout);
       fputs (_("\
+  o   output dumpdef to stderr rather than debug file\n\
   p   show results of path searches in debug\n\
   q   quote values in dumpdef and trace, useful with a or e\n\
   t   trace all macro calls, regardless of per-macro traceon state\n\

@@ -196,9 +196,11 @@ extern FILE *debug;
 #define DEBUG_TRACE_CALLID 0x200
 /* d: warn if dereferencing undefined macro */
 #define DEBUG_TRACE_DEREF 0x400
+/* o: output dumpdef to stderr, not debug file */
+#define DEBUG_TRACE_OUTPUT_DUMPDEF 0x800
 
 /* V: very verbose --  print everything */
-#define DEBUG_TRACE_VERBOSE 0x7FF
+#define DEBUG_TRACE_VERBOSE 0xFFF
 /* default flags -- equiv: adeq */
 #define DEBUG_TRACE_DEFAULT 0x407
 

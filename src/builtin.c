@@ -885,9 +885,11 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
   int i;
   struct dump_symbol_data data;
   const builtin *bp;
+  FILE *output = (debug_level & DEBUG_TRACE_OUTPUT_DUMPDEF) ? stderr : debug;
+
 
   /* If there's no debug stream to dump to, skip all of this work.  */
-  if (!debug)
+  if (!output)
     return;
 
   data.obs = obs;
@@ -925,19 +927,19 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* TODO - add debugmode(b) option to control quoting style?  */
       fwrite (SYMBOL_NAME (data.base[0]), 1, SYMBOL_NAME_LEN (data.base[0]),
-	      debug);
-      fputc (':', debug);
-      fputc ('\t', debug);
+	      output);
+      fputc (':', output);
+      fputc ('\t', output);
 
       switch (SYMBOL_TYPE (data.base[0]))
 	{
 	case TOKEN_TEXT:
 	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    fwrite (curr_quote.str1, 1, curr_quote.len1, debug);
+	    fwrite (curr_quote.str1, 1, curr_quote.len1, output);
 	  fwrite (SYMBOL_TEXT (data.base[0]), 1,
-		  SYMBOL_TEXT_LEN (data.base[0]), debug);
+		  SYMBOL_TEXT_LEN (data.base[0]), output);
 	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    fwrite (curr_quote.str2, 1, curr_quote.len2, debug);
+	    fwrite (curr_quote.str2, 1, curr_quote.len2, output);
 	  break;
 
 	case TOKEN_FUNC:
@@ -947,7 +949,7 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	      assert (!"m4_dumpdef");
 	      abort ();
 	    }
-	  xfprintf (debug, "<%s>", bp->name);
+	  xfprintf (output, "<%s>", bp->name);
 	  break;
 
 	default:
@@ -955,7 +957,7 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	  abort ();
 	  break;
 	}
-      fputc ('\n', debug);
+      fputc ('\n', output);
     }
 }
 
