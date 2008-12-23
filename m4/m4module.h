@@ -404,9 +404,11 @@ enum {
   M4_DEBUG_TRACE_STACK		= (1 << 11),
   /* d: warn if dereferencing undefined macro */
   M4_DEBUG_TRACE_DEREF		= (1 << 12),
+  /* o: output dumpdef to stderr, not debug file */
+  M4_DEBUG_TRACE_OUTPUT_DUMPDEF	= (1 << 13),
 
   /* V: very verbose --  print everything */
-  M4_DEBUG_TRACE_VERBOSE	= ((1 << 13) - 1)
+  M4_DEBUG_TRACE_VERBOSE	= ((1 << 14) - 1)
 };
 
 /* initial flags, used if no -d or -E -- equiv: d */

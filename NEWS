@@ -157,10 +157,6 @@ promoted to 2.0.
     `dumpdef'.  The `c' flag has been updated to add information to the
     first line to show the definition of the macro being expanded.
 
-*** The `dumpdef' builtin now always outputs to standard error, rather than
-    the debug file specified by the `--debugfile' option or `debugfile'
-    macro.
-
 *** The `eval' and `mpeval' builtins now support the following new
     operators: `>>>', `\', `?:', and  `,'.
 
@@ -253,9 +249,11 @@ promoted to 2.0.
    `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
    to control whether dereferencing an undefined macro causes a warning;
    this flag is enabled by default if neither `-d' nor `-E' are specified.
-   When given the empty string, the mode is treated as `+adeq' instead of
-   `aeq'.  Also, the position of `-d' with respect to files on the command
-   line is now significant.
+   The new flag `o' is added to control whether `dumpdef' outputs to stderr
+   or the current `debugfile' location.  When the command line option is
+   given the empty string, the mode is treated as `+adeq' instead of `aeq'.
+   Also, the position of `-d' with respect to files on the command line is
+   now significant.
 
 ** A new predefined text macro, `__m4_version__', expands to the unquoted
    version number of M4, if GNU extensions are enabled.  While you should

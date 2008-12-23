@@ -1,5 +1,18 @@
 2008-12-23  Eric Blake  <ebb9@byu.net>
 
+	Add debugmode(o) to control dumpdef output location.
+	* m4/m4module.h (M4_DEBUG_TRACE_OUTPUT_DUMPDEF): New enumerator.
+	(M4_DEBUG_TRACE_VERBOSE): Update.
+	* m4/debug.c (m4_debug_decode): Support new debug option.
+	* src/freeze.c (produce_debugmode_state): Likewise.
+	* modules/m4.c (dumpdef): When set, force dumpdef to stderr rather
+	than the debug file.
+	* src/main.c (usage): Document it.
+	* doc/m4.texinfo (Debugmode, Dumpdef, Debugging options)
+	(Debugfile): Likewise.
+	* NEWS: Likewise.
+	Based on an autoconf bug report by Paolo Bonzini.
+
 	Make --debugfile argument optional.
 	* src/main.c (long_options): Make the argument optional, to allow
 	setting debug file back to stderr.

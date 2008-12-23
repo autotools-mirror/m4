@@ -111,7 +111,7 @@ static void
 produce_debugmode_state (FILE *file, int flags)
 {
   /* This code tracks the number of bits in M4_DEBUG_TRACE_VERBOSE.  */
-  char str[14];
+  char str[15];
   int offset = 0;
   verify ((1 << (sizeof str - 1)) - 1 == M4_DEBUG_TRACE_VERBOSE);
   if (flags & M4_DEBUG_TRACE_ARGS)
@@ -140,6 +140,8 @@ produce_debugmode_state (FILE *file, int flags)
     str[offset++] = 's';
   if (flags & M4_DEBUG_TRACE_DEREF)
     str[offset++] = 'd';
+  if (flags & M4_DEBUG_TRACE_OUTPUT_DUMPDEF)
+    str[offset++] = 'o';
   str[offset] = '\0';
   if (offset)
     xfprintf (file, "d%d\n%s\n", offset, str);

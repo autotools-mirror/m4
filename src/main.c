@@ -170,6 +170,7 @@ FLAGS is any of:\n\
 "), stdout);
       fputs (_("\
   m   show module information in trace, debug, and dumpdef\n\
+  o   output dumpdef to stderr rather than debug file\n\
   p   show results of path searches in debug\n\
   q   quote values in dumpdef and trace, useful with a or e\n\
   s   show full stack of pushdef values in dumpdef\n\

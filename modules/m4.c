@@ -341,7 +341,11 @@ M4BUILTIN_HANDLER (dumpdef)
   bool stack = m4_is_debug_bit (context, M4_DEBUG_TRACE_STACK);
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
   bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
+  FILE *output = (m4_is_debug_bit (context, M4_DEBUG_TRACE_OUTPUT_DUMPDEF)
+		  ? stderr : m4_get_debug_file (context));
 
+  if (!output)
+    return;
   if (m4_is_debug_bit (context, M4_DEBUG_TRACE_QUOTE))
     quotes = m4_get_syntax_quotes (M4SYNTAX);
   data.obs = m4_arg_scratch (context);
@@ -365,7 +369,7 @@ M4BUILTIN_HANDLER (dumpdef)
       obstack_1grow (obs, '\n');
       len = obstack_object_size (obs);
       value = (char *) obstack_finish (obs);
-      fwrite (value, 1, len, stderr);
+      fwrite (value, 1, len, output);
       obstack_free (obs, value);
     }
 }
