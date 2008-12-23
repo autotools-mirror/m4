@@ -94,7 +94,7 @@ Operation modes:\n\
   -b, --batch                  buffer output, process interrupts\n\
   -c, --discard-comments       do not copy comments to the output\n\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
-                               execution at first error\n\
+                                 execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
@@ -112,10 +112,10 @@ SPEC is any one of:\n\
       xprintf (_("\
 Dynamic loading features:\n\
   -M, --module-directory=DIR   add DIR to module search path before\n\
-                               `%s'\n\
+                                 %s\n\
   -m, --load-module=MODULE     load dynamic MODULE\n\
       --unload-module=MODULE   unload dynamic MODULE\n\
-"), PKGLIBEXECDIR);
+"), quotearg_style (locale_quoting_style, PKGLIBEXECDIR));
       puts ("");
       fputs (_("\
 Preprocessor features:\n\
@@ -129,7 +129,7 @@ Preprocessor features:\n\
   -p, --pushdef=NAME[=VALUE]   pushdef NAME as having VALUE, or empty\n\
   -s, --synclines              short for --syncoutput=1\n\
       --syncoutput[=STATE]     set generation of `#line NUM \"FILE\"' lines\n\
-                               to STATE (0=off, 1=on, default 0 if omitted)\n\
+                                 to STATE (0=off, 1=on, default 0)\n\
   -U, --undefine=NAME          undefine NAME\n\
 "), stdout);
       puts ("");
@@ -150,7 +150,8 @@ Frozen state files:\n\
 Debugging:\n\
   -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
                                set debug level (no FLAGS implies `+adeq')\n\
-      --debugfile=FILE         redirect debug and trace output\n\
+      --debugfile[=FILE]       redirect debug and trace output to FILE\n\
+                                 (default stderr, discard if empty string)\n\
   -l, --debuglen=NUM           restrict macro tracing size\n\
   -t, --trace=NAME, --traceon=NAME\n\
                                trace NAME when it is defined\n\
@@ -253,7 +254,7 @@ static const struct option long_options[] =
   {"warnings", no_argument, NULL, 'W'},
 
   {"arglength", required_argument, NULL, ARGLENGTH_OPTION},
-  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
+  {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"hashsize", required_argument, NULL, HASHSIZE_OPTION},
   {"error-output", required_argument, NULL, ERROR_OUTPUT_OPTION},
   {"import-environment", no_argument, NULL, IMPORT_ENVIRONMENT_OPTION},
@@ -564,6 +565,15 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_set_max_debug_arg_length_opt (context, size);
 	  break;
 
+	case DEBUGFILE_OPTION:
+	  /* Staggered handling of '--debugfile', since it is useful
+	     prior to first file and prior to reloading, but other
+	     uses must also have effect between files.  */
+	  if (seen_file || frozen_file_to_read)
+	    goto defer;
+	  debugfile = optarg;
+	  break;
+
 	case 'o':
 	case ERROR_OUTPUT_OPTION:
 	  /* FIXME: -o is inconsistent with other tools' use of
@@ -573,8 +583,6 @@ main (int argc, char *const *argv, char *const *envp)
 	     after 2.1.	 */
 	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
 		 optchar == 'o' ? "-o" : "--error-output", "--debugfile");
-	  /* fall through */
-	case DEBUGFILE_OPTION:
 	  /* Don't call m4_debug_set_output here, as it has side effects.  */
 	  debugfile = optarg;
 	  break;
@@ -708,6 +716,13 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case '\1':
 	  process_file (context, arg);
+	  break;
+
+	case DEBUGFILE_OPTION:
+	  if (!m4_debug_set_output (context, NULL, arg))
+	    m4_error (context, 0, errno, NULL, _("cannot set debug file %s"),
+		      quotearg_style (locale_quoting_style,
+				      arg ? arg : _("stderr")));
 	  break;
 
 	case POPDEF_OPTION:

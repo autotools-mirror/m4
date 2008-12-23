@@ -1,3 +1,15 @@
+2008-12-23  Eric Blake  <ebb9@byu.net>
+
+	Make --debugfile argument optional.
+	* src/main.c (long_options): Make the argument optional, to allow
+	setting debug file back to stderr.
+	(main): Make --debugfile order-dependent.
+	(usage): Document this.
+	* doc/m4.texinfo (Debugging options): Likewise.
+	* NEWS: Likewise.
+	* tests/options.at (--debugfile): Enhance test.
+	(--safer): Adjust to new semantics.
+
 2008-12-22  Eric Blake  <ebb9@byu.net>
 
 	Use @var correctly.

@@ -312,6 +312,20 @@ AT_CHECK_M4([--debugfile=trace4 -dV in], [0], [[foo
 ]])
 AT_CHECK([cat trace4], [0], [expout])
 
+dnl check that order matters
+AT_DATA([in1], [[bar
+]])
+AT_DATA([in2], [[errprint(`hi
+')dnl
+bar
+]])
+AT_CHECK_M4([-Dbar=hello -tbar --debugfile= in1 --debugfile in2], [0],
+[[hello
+hello
+]], [[hi
+m4trace: -1- bar -> `hello'
+]])
+
 AT_CLEANUP
 
 
@@ -746,7 +760,7 @@ debugfile(`trace2')
 define(`foo', `2')foo
 ]])
 
-AT_CHECK_M4([--safer --debugfile trace1 -t foo in], [1],
+AT_CHECK_M4([--safer --debugfile=trace1 -t foo in], [1],
 [[1
 
 2

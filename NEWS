@@ -251,23 +251,11 @@ promoted to 2.0.
    `-d-V' to disable prior debug settings from the command line, similar to
    using the builtin `debugmode' without arguments.  The option
    `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
-   to control whether dereferncing an undefined macro causes a warning;
+   to control whether dereferencing an undefined macro causes a warning;
    this flag is enabled by default if neither `-d' nor `-E' are specified.
    When given the empty string, the mode is treated as `+adeq' instead of
    `aeq'.  Also, the position of `-d' with respect to files on the command
    line is now significant.
-
-** New `-g'/`--gnu' command-line option overrides `-G'/`--traditional'.
-   For now, the environment variable POSIXLY_CORRECT has no effect on M4
-   behavior; but a future release of M4 will behave as though --traditional
-   is implied if POSIXLY_CORRECT is set (this future change is necessary,
-   because in the current release, there is no way to disable GNU
-   extensions that conflict with POSIX without the use of a non-POSIX
-   command-line argument).  Clients of M4 that want to use GNU extensions,
-   even when POSIXLY_CORRECT is set, should start using the -g command-line
-   argument, even though it is currently a no-op if -G did not appear
-   earlier in the command line, so that the client will not break in the
-   face of an upgraded m4 and a POSIXLY_CORRECT execution environment.
 
 ** A new predefined text macro, `__m4_version__', expands to the unquoted
    version number of M4, if GNU extensions are enabled.  While you should
@@ -331,6 +319,23 @@ contains the following beta features that were deemed worth deferring until
 ** Enhance the `ifelse' and `shift' builtins so that tail-recursive
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in Version 1.4.13 (2008-12-??) [stable]
+  Released by Eric Blake, based on git version 1.4.12.*
+
+** The manual is now distributed under the terms of FDL 1.3.
+
+** The `divert' and `undivert' builtins have been made more efficient
+   when using temporary files for large diversions.
+
+** The command line option `--debugfile', introduced in 1.4.7, now
+   treats its argument as optional, in order to allow setting the debug
+   output back to stderr when used without an argument; and order is now
+   significant with respect to command line files.  You must therefore use
+   `m4 --debugfile=trace file', not `m4 file --debugfile trace'.  This
+   change does not affect the deprecated `-o'/`--error-output' option.
 
 ** A number of portability improvements inherited from gnulib.
 

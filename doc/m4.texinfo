@@ -856,7 +856,7 @@ redefining the same @var{name} adds another definition to its stack.
 Short for @option{--syncoutput=1}, turning on synchronization lines
 (sometimes called @dfn{synclines}).
 
-@item --syncoutput@r{[}=STATE@r{]}
+@item --syncoutput@r{[}=@var{state}@r{]}
 @cindex synchronization lines
 @cindex location, input
 @cindex input location
@@ -1024,15 +1024,18 @@ len(`123')
 @result{}3
 @end example
 
-@item --debugfile=@var{file}
+@item --debugfile@r{[}=@var{file}@r{]}
 @itemx -o @var{file}
 @itemx --error-output=@var{file}
 Redirect debug and trace output to the named @var{file}.  Warnings,
 error messages, and the output of @code{errprint} and @code{dumpdef},
-are still printed to standard error.  If this option is not given, debug
-output goes to standard error; if @var{file} is the empty string, debug
-output is discarded.  @xref{Debugfile}, for more details.  The
-spellings @option{-o} and @option{--error-output} are misleading and
+are still printed to standard error.  If these options are not used, or
+if @var{file} is unspecified (only possible for @option{--debugfile}),
+debug output goes to standard error; if @var{file} is the empty string,
+debug output is discarded.  @xref{Debugfile}, for more details.  The
+option @option{--debugfile} may be given more than once, and order is
+significant with respect to file names.  The spellings @option{-o} and
+@option{--error-output} are misleading and
 inconsistent with other @acronym{GNU} tools; using those spellings will
 evoke a warning, and they may be withdrawn or change semantics in a
 future release.
