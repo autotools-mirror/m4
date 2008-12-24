@@ -1,3 +1,8 @@
+2008-12-24  Eric Blake  <ebb9@byu.net>
+
+	Prepare for eventual release.
+	* doc/m4.texinfo (History): Mention 1.4.13.
+
 2008-12-22  Eric Blake  <ebb9@byu.net>
 
 	Make --debugfile argument optional.
