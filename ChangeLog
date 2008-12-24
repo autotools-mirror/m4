@@ -1,3 +1,12 @@
+2008-12-24  Eric Blake  <ebb9@byu.net>
+
+	Relax eval as allowed by POSIX 2008.
+	* modules/evalparse.c (m4_evaluate): Warn, not error, on invalid
+	operator.  Quote expression in warning.
+	* modules/mpeval.c (includes): Add quotearg.h.
+	* doc/m4.texinfo (Eval, Improved forloop): Update tests.
+	* NEWS: Update to reflect 1.6 support for `?:'.
+
 2008-12-23  Eric Blake  <ebb9@byu.net>
 
 	Add debugmode(o) to control dumpdef output location.

@@ -7506,7 +7506,6 @@ precedence rules, but where older versions and some other
 implementations of @code{m4} require explicit parentheses to get the
 correct result:
 
-@comment status: 1
 @example
 eval(`1 == 2 > 0')
 @result{}1
@@ -7523,23 +7522,23 @@ eval(`(1 | 1) ^ 1')
 eval(`+ + - ~ ! ~ 0')
 @result{}1
 eval(`++0')
-@error{}m4:stdin:8: eval: invalid operator: ++0
+@error{}m4:stdin:8: Warning: eval: invalid operator: `++0'
 @result{}
 eval(`1 = 1')
-@error{}m4:stdin:9: eval: invalid operator: 1 = 1
+@error{}m4:stdin:9: Warning: eval: invalid operator: `1 = 1'
 @result{}
 eval(`0 |= 1')
-@error{}m4:stdin:10: eval: invalid operator: 0 |= 1
+@error{}m4:stdin:10: Warning: eval: invalid operator: `0 |= 1'
 @result{}
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:12: Warning: eval: divide by zero: 0 || 1 / 0
+@error{}m4:stdin:12: Warning: eval: divide by zero: `0 || 1 / 0'
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:14: Warning: eval: modulo by zero: 2 && 1 % 0
+@error{}m4:stdin:14: Warning: eval: modulo by zero: `2 && 1 % 0'
 @result{}
 @end example
 
@@ -7567,9 +7566,9 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: Warning: eval: divide by zero: 0 ** 0
+@error{}m4:stdin:5: Warning: eval: divide by zero: `0 ** 0'
 eval(`4 ** -2')
-@error{}m4:stdin:6: Warning: eval: negative exponent: 4 ** -2
+@error{}m4:stdin:6: Warning: eval: negative exponent: `4 ** -2'
 @result{}
 eval(`2 || 4 ** -2')
 @result{}1
@@ -7632,7 +7631,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: Warning: eval: bad expression: foo / 6
+@error{}m4:stdin:11: Warning: eval: bad expression: `foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111
@@ -9317,7 +9316,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: Warning: eval: bad input: (a) <= (b)
+@error{}m4:stdin:6: Warning: eval: bad input: `(a) <= (b)'
 @result{}
 @end example
 

@@ -940,6 +940,8 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 	err = EXCESS_INPUT;
     }
 
+  if (err != NO_ERROR)
+    str = quotearg_style_mem (locale_quoting_style, str, M4ARGLEN (1));
   switch (err)
     {
     case NO_ERROR:
@@ -967,8 +969,7 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
       break;
 
     case INVALID_OPERATOR:
-      /* POSIX requires an error here, unless XCU ERN 137 is approved.  */
-      m4_error (context, 0, 0, me, _("invalid operator: %s"), str);
+      m4_warn (context, 0, me, _("invalid operator: %s"), str);
       break;
 
     case DIVIDE_ZERO:

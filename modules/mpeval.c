@@ -32,6 +32,8 @@
 #  include <gmp.h>
 #endif
 
+#include "quotearg.h"
+
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	mpeval_LTX_m4_builtin_table
 #define m4_macro_table		mpeval_LTX_m4_macro_table

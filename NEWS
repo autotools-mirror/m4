@@ -158,7 +158,7 @@ promoted to 2.0.
     first line to show the definition of the macro being expanded.
 
 *** The `eval' and `mpeval' builtins now support the following new
-    operators: `>>>', `\', `?:', and  `,'.
+    operators: `>>>', `\', and  `,'.
 
 *** The `maketemp' builtin now always warns that it is obsolete, even in GNU
     mode where it uses the same secure algorithm as `mkstemp', because of
@@ -295,6 +295,10 @@ promoted to 2.0.
    and `undefine' macros to warn when encountering a builtin token in the
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
+
+** Enhance the `eval' builtin to understand the `?:' operator, and
+   downgrade a failed parse due to an unknown operator from an error to a
+   warning.
 
 ** A number of portability improvements inherited from gnulib.
 
