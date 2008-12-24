@@ -936,11 +936,10 @@ debug output goes to standard error; if @var{file} is the empty string,
 debug output is discarded.  @xref{Debugfile}, for more details.  The
 option @option{--debugfile} may be given more than once, and order is
 significant with respect to file names.  The spellings @option{-o} and
-@option{--error-output} are misleading and inconsistent with other
-@acronym{GNU} tools; for now they are silently accepted as synonyms of
-@option{--debugfile} and only recognized once, but in a future version
-of M4, using them will cause a warning to be issued.
-@comment FIXME make them warn in m4 1.6
+@option{--error-output} are misleading and
+inconsistent with other @acronym{GNU} tools; using those spellings will
+evoke a warning, and they may be withdrawn or change semantics in a
+future release.
 
 @ignore
 @comment not worth including in the manual, but provides a good test
@@ -956,6 +955,14 @@ errprint(`hi
 bar
 @error{}m4trace: -1- bar -> `hello'
 @result{}hello
+@end example
+
+@comment options: -o /dev/null
+@example
+$ @kbd{m4 -o /dev/null
+@error{}m4: Warning: `-o' is deprecated, use `--debugfile' instead
+dumpdef(`divnum')
+@result{}
 @end example
 @end ignore
 

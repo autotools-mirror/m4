@@ -22,6 +22,12 @@ Foundation, Inc.
 ** Remove the undocumented command-line option '-N', as no one complained
    about the assertion failure regression that it introduced in 1.4.7.
 
+** The `-o'/`--error-output' command-line options, which were replaced by
+   `--debugfile' in 1.4.7, now issue a deprecation warning.  This warning
+   harmlessly triggers with versions of Autoconf 2.60 and earlier, but can
+   be silenced by applying this patch:
+     http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=714eeee87
+
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.  NOTE: this change exposes a bug

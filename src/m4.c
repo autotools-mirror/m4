@@ -541,7 +541,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
+	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+		       "-e", "-i");
 	/* fall through */
       case 'i':
 	interactive = true;
@@ -560,10 +561,10 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'o':
 	/* -o/--error-output are deprecated synonyms of --debugfile,
-	   but don't issue a deprecation warning until autoconf 2.61
-	   or later is more widely established, as such a warning
-	   would interfere with all earlier versions of autoconf.  */
-	/* Don't call debug_set_output here, as it has side effects.  */
+	   so issue a warning.  Don't call debug_set_output here, as
+	   it has side effects.	 */
+	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
 	debugfile = optarg;
 	break;
 

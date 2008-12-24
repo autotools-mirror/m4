@@ -1,5 +1,10 @@
 2008-12-23  Eric Blake  <ebb9@byu.net>
 
+	Issue deprecation warning for -o/--error-output.
+	* src/m4.c (main): Add warning for deprecated option.
+	* doc/m4.texinfo (Debugging options): Document the change.
+	* NEWS: Likewise.
+
 	Add debugmode(o) to control dumpdef output location.
 	* src/m4.h (DEBUG_TRACE_OUTPUT_DUMPDEF): New macro.
 	(DEBUG_TRACE_VERBOSE): Update.
