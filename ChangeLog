@@ -1,3 +1,15 @@
+2008-12-24  Eric Blake  <ebb9@byu.net>
+
+	Enhance eval, as allowed by POSIX 2008.
+	* src/eval.c (enum eval_token): Add QUESTION and COLON.
+	(enum eval_error): Add MISSING_COLON.
+	(condition_term): New function.
+	(eval_lex, simple_term): Support new operator.
+	(evaluate): Likewise.  Warn, not error, on invalid operator.
+	* doc/m4.texinfo (Eval): Update documentation.
+	(Improved forloop): Adjust test.
+	* NEWS: Document the change.
+
 2008-12-23  Eric Blake  <ebb9@byu.net>
 
 	Issue deprecation warning for -o/--error-output.

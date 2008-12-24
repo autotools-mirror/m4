@@ -39,6 +39,7 @@ typedef enum eval_token
     LNOT, LAND, LOR,
     NOT, AND, OR, XOR,
     LEFTP, RIGHTP,
+    QUESTION, COLON,
     NUMBER, EOTEXT
   }
 eval_token;
@@ -56,6 +57,7 @@ typedef enum eval_error
        about a syntax error.  */
     SYNTAX_ERROR,
     MISSING_RIGHT,
+    MISSING_COLON,
     UNKNOWN_INPUT,
     EXCESS_INPUT,
     INVALID_OPERATOR,
@@ -63,6 +65,7 @@ typedef enum eval_error
   }
 eval_error;
 
+static eval_error condition_term (const call_info *, eval_token, int32_t *);
 static eval_error logical_or_term (const call_info *, eval_token, int32_t *);
 static eval_error logical_and_term (const call_info *, eval_token, int32_t *);
 static eval_error or_term (const call_info *, eval_token, int32_t *);
@@ -283,6 +286,10 @@ eval_lex (int32_t *val)
       return LEFTP;
     case ')':
       return RIGHTP;
+    case '?':
+      return QUESTION;
+    case ':':
+      return COLON;
     default:
       return ERROR;
     }
@@ -303,7 +310,7 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
   if (et == EOTEXT)
     err = EMPTY_ARGUMENT;
   else
-    err = logical_or_term (me, et, val);
+    err = condition_term (me, et, val);
 
   if (err == NO_ERROR && *eval_text != '\0')
     {
@@ -313,6 +320,8 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 	err = EXCESS_INPUT;
     }
 
+  if (err != NO_ERROR)
+    expr = quotearg_style_mem (locale_quoting_style, expr, len);
   switch (err)
     {
       /* Cases where result is printed.  */
@@ -325,8 +334,11 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 
       /* Cases where error makes result meaningless.  */
     case MISSING_RIGHT:
-      m4_warn (0, me, _("bad expression (missing right parenthesis): %s"),
-	       expr);
+      m4_warn (0, me, _("missing right parenthesis: %s"), expr);
+      break;
+
+    case MISSING_COLON:
+      m4_warn (0, me, _("missing colon: %s"), expr);
       break;
 
     case SYNTAX_ERROR:
@@ -334,15 +346,15 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
       break;
 
     case UNKNOWN_INPUT:
-      m4_warn (0, me, _("bad expression (bad input): %s"), expr);
+      m4_warn (0, me, _("bad input: %s"), expr);
       break;
 
     case EXCESS_INPUT:
-      m4_warn (0, me, _("bad expression (excess input): %s"), expr);
+      m4_warn (0, me, _("excess input: %s"), expr);
       break;
 
     case INVALID_OPERATOR:
-      m4_error (0, 0, me, _("invalid operator: %s"), expr);
+      m4_warn (0, me, _("invalid operator: %s"), expr);
       break;
 
     case DIVIDE_ZERO:
@@ -368,6 +380,55 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 /*---------------------------.
 | Recursive descent parser.  |
 `---------------------------*/
+
+static eval_error
+condition_term (const call_info *me, eval_token et, int32_t *v1)
+{
+  int32_t v2;
+  int32_t v3;
+  eval_error er;
+
+  if ((er = logical_or_term (me, et, v1)) != NO_ERROR)
+    return er;
+
+  if ((et = eval_lex (&v2)) == QUESTION)
+    {
+      et = eval_lex (&v2);
+      if (et == ERROR)
+	return UNKNOWN_INPUT;
+
+      /* Implement short-circuiting of valid syntax.  */
+      /* C requires 'logical_or_term ? expression : condition_term';
+	 if we ever introduce assignment_term or comma_term, then
+	 condition_term and expression are no longer synonymous.  */
+      er = condition_term (me, et, &v2);
+      if (er != NO_ERROR
+	  && !(*v1 == 0 && er < SYNTAX_ERROR))
+	return er;
+
+      et = eval_lex (&v3);
+      if (et == ERROR)
+	return UNKNOWN_INPUT;
+      if (et != COLON)
+	return MISSING_COLON;
+
+      et = eval_lex (&v3);
+      if (et == ERROR)
+	return UNKNOWN_INPUT;
+
+      er = condition_term (me, et, &v3);
+      if (er != NO_ERROR
+	  && !(*v1 != 0 && er < SYNTAX_ERROR))
+	return er;
+
+      *v1 = *v1 ? v2 : v3;
+    }
+  if (et == ERROR)
+    return UNKNOWN_INPUT;
+
+  eval_undo ();
+  return NO_ERROR;
+}
 
 static eval_error
 logical_or_term (const call_info *me, eval_token et, int32_t *v1)
@@ -832,7 +893,7 @@ simple_term (const call_info *me, eval_token et, int32_t *v1)
       if (et == ERROR)
 	return UNKNOWN_INPUT;
 
-      if ((er = logical_or_term (me, et, v1)) != NO_ERROR)
+      if ((er = condition_term (me, et, v1)) != NO_ERROR)
 	return er;
 
       et = eval_lex (&v2);

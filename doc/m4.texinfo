@@ -6670,6 +6670,8 @@ Bitwise or
 Logical and
 @item ||
 Logical or
+@item ?:
+Conditional ternary
 @end table
 
 The macro @code{eval} is recognized only with parameters.
@@ -6678,7 +6680,7 @@ The macro @code{eval} is recognized only with parameters.
 All binary operators, except exponentiation, are left associative.  C
 operators that perform variable assignment, such as @samp{+=} or
 @samp{--}, are not implemented, since @code{eval} only operates on
-constants, not variables.  Attempting to use them results in an error.
+constants, not variables.  Attempting to use them results in a warning.
 However, since traditional implementations treated @samp{=} as an
 undocumented alias for @samp{==} as opposed to an assignment operator,
 this usage is supported as a special case.  Be aware that a future
@@ -6686,16 +6688,15 @@ version of @acronym{GNU} M4 may support assignment semantics as an
 extension when @acronym{POSIX} mode is not requested, and that using
 @samp{=} to check equality is not portable.
 
-@comment status: 1
 @example
 eval(`2 = 2')
 @error{}m4:stdin:1: Warning: eval: recommend ==, not =, for equality
 @result{}1
 eval(`++0')
-@error{}m4:stdin:2: eval: invalid operator: ++0
+@error{}m4:stdin:2: Warning: eval: invalid operator: `++0'
 @result{}
 eval(`0 |= 1')
-@error{}m4:stdin:3: eval: invalid operator: 0 |= 1
+@error{}m4:stdin:3: Warning: eval: invalid operator: `0 |= 1'
 @result{}
 @end example
 
@@ -6738,12 +6739,12 @@ eval(`+ + - ~ ! ~ 0')
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:9: Warning: eval: divide by zero: 0 || 1 / 0
+@error{}m4:stdin:9: Warning: eval: divide by zero: `0 || 1 / 0'
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:11: Warning: eval: modulo by zero: 2 && 1 % 0
+@error{}m4:stdin:11: Warning: eval: modulo by zero: `2 && 1 % 0'
 @result{}
 @end example
 
@@ -6751,7 +6752,8 @@ eval(`2 && 1 % 0')
 As a @acronym{GNU} extension, the operator @samp{**} performs integral
 exponentiation.  The operator is right-associative, and if evaluated,
 the exponent must be non-negative, and at least one of the arguments
-must be non-zero, or a warning is issued.
+must be non-zero, or a warning is issued.  Also, the C operator
+@samp{?:} is supported.
 
 @example
 eval(`2 ** 3 ** 2')
@@ -6764,10 +6766,16 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: Warning: eval: divide by zero: 0 ** 0
+@error{}m4:stdin:5: Warning: eval: divide by zero: `0 ** 0'
 eval(`4 ** -2')
-@error{}m4:stdin:6: Warning: eval: negative exponent: 4 ** -2
+@error{}m4:stdin:6: Warning: eval: negative exponent: `4 ** -2'
 @result{}
+eval(`0 ? 2 : 3')
+@result{}3
+eval(`1 ? 2 : 1/0')
+@result{}2
+eval(`0 ? 1/0 : 3')
+@result{}3
 @end example
 
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers
@@ -6811,7 +6819,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: Warning: eval: bad expression: foo / 6
+@error{}m4:stdin:11: Warning: eval: bad expression: `foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111
@@ -8254,7 +8262,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: Warning: eval: bad expression (bad input): (a) <= (b)
+@error{}m4:stdin:6: Warning: eval: bad input: `(a) <= (b)'
 @result{}
 @end example
 

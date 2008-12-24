@@ -107,6 +107,10 @@ Foundation, Inc.
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
 
+** Enhance the `eval' builtin to understand the `?:' operator, and
+   downgrade a failed parse due to an unknown operator from an error to a
+   warning.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
