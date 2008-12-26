@@ -6232,7 +6232,8 @@ regexp(`abc', `', `\\def')
 @cindex substrings, extracting
 Substrings are extracted with @code{substr}:
 
-@deffn Builtin substr (@var{string}, @var{from}, @ovar{length})
+@deffn Builtin substr (@var{string}, @var{from}, @ovar{length}, @
+  @ovar{replace})
 Performs a substring operation on @var{string}.  If @var{from} is
 positive, it represents the 0-based index where the substring begins.
 If @var{length} is omitted, the substring ends at the end of
@@ -6251,9 +6252,13 @@ of @var{string} that overlap the selected indices.  If the end point
 lies before the beginning point, the substring chosen is the empty
 string located at the starting index.
 
-The expansion is the selected substring, which may be empty.  The
+If @var{replace} is omitted, then the expansion is only the selected
+substring, which may be empty.  As a @acronym{GNU} extension,if
+@var{replace} is provided, then the expansion is the original
+@var{string} with the selected substring replaced by @var{replace}.  The
 expansion is empty and a warning issued if @var{from} or @var{length}
-cannot be parsed.
+cannot be parsed, or if @var{replace} is provided but the selected
+indices do not overlap with @var{string}.
 
 The macro @code{substr} is recognized only with parameters.
 @end deffn
@@ -6310,6 +6315,29 @@ substr(`abcde', `4', `-3')
 @result{}
 substr(`abcdefghij', `-09', `08')
 @result{}bcdefghi
+@end example
+
+Another useful @acronym{GNU} extension, also added in M4 1.6, is the
+ability to replace a substring within the original @var{string}.  An
+empty length substring at the beginning or end of @var{string} is valid,
+but selecting a substring that does not overlap @var{string} causes a
+warning.
+
+@example
+substr(`abcde', `1', `3', `t')
+@result{}ate
+substr(`abcde', `5', `', `f')
+@result{}abcdef
+substr(`abcde', `-3', `-4', `f')
+@result{}abfcde
+substr(`abcde', `-6', `1', `f')
+@result{}fabcde
+substr(`abcde', `-7', `1', `f')
+@error{}m4:stdin:5: Warning: substr: substring out of range
+@result{}
+substr(`abcde', `6', `', `f')
+@error{}m4:stdin:6: Warning: substr: substring out of range
+@result{}
 @end example
 
 If backwards compabitility to M4 1.4.x behavior is necessary, the

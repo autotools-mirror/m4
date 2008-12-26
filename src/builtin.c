@@ -1867,7 +1867,9 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
 | for a length given by the third argument.  If the third argument   |
 | is missing or empty, the substring extends to the end of the first |
 | argument.  As an extension, negative arguments are treated as	     |
-| indices relative to the string length.			     |
+| indices relative to the string length.  Also, if a fourth argument |
+| is supplied, the original string is output with the selected	     |
+| substring replaced by the argument.				     |
 `-------------------------------------------------------------------*/
 
 static void
@@ -1878,7 +1880,7 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
   int end;
   int length;
 
-  if (bad_argc (me, argc, 2, 3))
+  if (bad_argc (me, argc, 2, 4))
     {
       /* builtin(`substr') is blank, but substr(`abc') is abc.  */
       if (argc == 2)
@@ -1902,6 +1904,26 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
 	end += length;
       else
 	end += start;
+    }
+
+  if (argc >= 5)
+    {
+      /* Replacement text provided.  */
+      if (end < start)
+	end = start;
+      if (end < 0 || length < start)
+	{
+	  m4_warn (0, me, _("substring out of range"));
+	  return;
+	}
+      if (start < 0)
+	start = 0;
+      if (length < end)
+	end = length;
+      obstack_grow (obs, ARG (1), start);
+      push_arg (obs, argv, 4);
+      obstack_grow (obs, ARG (1) + end, length - end);
+      return;
     }
 
   if (start < 0)

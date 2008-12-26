@@ -54,7 +54,8 @@ Software Foundation, Inc.
    macro.  It has also been optimized for faster performance.
 
 ** The `substr' builtin now treats negative arguments as indices relative
-   to the end of the string.  The manual gives an
+   to the end of the string, and accepts an optional fourth argument of
+   text to supply in place of the selected substring.  The manual gives an
    example of how to recover M4 1.4.x behavior, as well as an example of
    simulating the new negative argument semantics with older M4.
 
