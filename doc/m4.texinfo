@@ -44,7 +44,7 @@ This manual (@value{UPDATED}) is for @acronym{GNU} M4 (version
 language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -6233,12 +6233,27 @@ regexp(`abc', `', `\\def')
 Substrings are extracted with @code{substr}:
 
 @deffn Builtin substr (@var{string}, @var{from}, @ovar{length})
-Expands to the substring of @var{string}, which starts at index
-@var{from}, and extends for @var{length} characters, or to the end of
-@var{string}, if @var{length} is omitted.  The starting index of a string
-is always 0.  The expansion is empty if there is an error parsing
-@var{from} or @var{length}, if @var{from} is beyond the end of
-@var{string}, or if @var{length} is negative.
+Performs a substring operation on @var{string}.  If @var{from} is
+positive, it represents the 0-based index where the substring begins.
+If @var{length} is omitted, the substring ends at the end of
+@var{string}; if it is positive, @var{length} is added to the starting
+index to determine the ending index.
+
+@cindex @acronym{GNU} extensions
+As a @acronym{GNU} extension, if @var{from} is negative, it is added to
+the length of @var{string} to determine the starting index; if it is
+empty, the start of the string is used.  Likewise, if @var{length} is
+negative, it is added to the length of @var{string} to determine the
+ending index, and an emtpy @var{length} behaves like an omitted
+@var{length}.  It is not an error if either of the resulting indices lie
+outside the string, but the selected substring only contains the bytes
+of @var{string} that overlap the selected indices.  If the end point
+lies before the beginning point, the substring chosen is the empty
+string located at the starting index.
+
+The expansion is the selected substring, which may be empty.  The
+expansion is empty and a warning issued if @var{from} or @var{length}
+cannot be parsed.
 
 The macro @code{substr} is recognized only with parameters.
 @end deffn
@@ -6250,15 +6265,137 @@ substr(`gnus, gnats, and armadillos', `6', `5')
 @result{}gnats
 @end example
 
-Omitting @var{from} evokes a warning, but still produces output.
+Omitting @var{from} evokes a warning, but still produces output.  On the
+other hand, selecting a @var{from} or @var{length} that lies beyond
+@var{string} is not a problem.
 
 @example
 substr(`abc')
 @error{}m4:stdin:1: Warning: substr: too few arguments: 1 < 2
 @result{}abc
-substr(`abc',)
-@error{}m4:stdin:2: Warning: substr: empty string treated as 0
+substr(`abc', `')
 @result{}abc
+substr(`abc', `4')
+@result{}
+substr(`abc', `1', `4')
+@result{}bc
+@end example
+
+Using negative values for @var{from} or @var{length} are @acronym{GNU}
+extensions, useful for accessing a fixed size tail of an
+arbitrary-length string.  Prior to M4 1.6, using these values would
+silently result in the empty string.  Some other implementations crash
+on negative values, and many treat an explicitly empty @var{length} as
+0, which is different from the omitted @var{length} implying the rest of
+the original @var{string}.
+
+@example
+substr(`abcde', `2', `')
+@result{}cde
+substr(`abcde', `-3')
+@result{}cde
+substr(`abcde', `', `-3')
+@result{}ab
+substr(`abcde', `-6')
+@result{}abcde
+substr(`abcde', `-6', `5')
+@result{}abcd
+substr(`abcde', `-7', `1')
+@result{}
+substr(`abcde', `1', `-2')
+@result{}bc
+substr(`abcde', `-4', `-1')
+@result{}bcd
+substr(`abcde', `4', `-3')
+@result{}
+substr(`abcdefghij', `-09', `08')
+@result{}bcdefghi
+@end example
+
+If backwards compabitility to M4 1.4.x behavior is necessary, the
+following macro is sufficient to do the job (mimicking warnings about
+empty @var{from} or @var{length} or an ignored fourth argument is left
+as an exercise to the reader).
+
+@example
+define(`substr', `ifelse(`$#', `0', ``$0'',
+  eval(`2 < $#')`$3', `1', `',
+  index(`$2$3', `-'), `-1', `builtin(`$0', `$1', `$2', `$3')')')
+@result{}
+substr(`abcde', `3')
+@result{}de
+substr(`abcde', `3', `')
+@result{}
+substr(`abcde', `-1')
+@result{}
+substr(`abcde', `1', `-1')
+@result{}
+substr(`abcde', `2', `1', `C')
+@result{}c
+@end example
+
+On the other hand, it is possible to portably emulate the @acronym{GNU}
+extension of negative @var{from} and @var{length} arguments across all
+@code{m4} implementations, albeit with a lot more overhead.  This
+example uses @code{incr} and @code{decr} to normalize @samp{-08} to
+something that a later @code{eval} will treat as a decimal value, rather
+than looking like an invalid octal number, while avoiding using these
+macros on an empty string.  The helper macro @code{_substr_normalize} is
+recursive, since it is easier to fix @var{length} after @var{from} has
+been normalized, with the final iteration supplying two non-negative
+arguments to the original builtin, now named @code{_substr}.
+
+@comment options: -daq -t_substr
+@example
+$ @kbd{m4 -daq -t _substr}
+define(`_substr', defn(`substr'))dnl
+define(`substr', `ifelse(`$#', `0', ``$0'',
+  `_$0(`$1', _$0_normalize(len(`$1'),
+    ifelse(`$2', `', `0', `incr(decr(`$2'))'),
+    ifelse(`$3', `', `', `incr(decr(`$3'))')))')')dnl
+define(`_substr_normalize', `ifelse(
+  eval(`$2 < 0 && $1 + $2 >= 0'), `1',
+    `$0(`$1', eval(`$1 + $2'), `$3')',
+  eval(`$2 < 0')`$3', `1', ``0', `$1'',
+  eval(`$2 < 0 && $3 - 0 >= 0 && $1 + $2 + $3 - 0 >= 0'), `1',
+    `$0(`$1', `0', eval(`$1 + $2 + $3 - 0'))',
+  eval(`$2 < 0 && $3 - 0 >= 0'), `1', ``0', `0'',
+  eval(`$2 < 0'), `1', `$0(`$1', `0', `$3')',
+  `$3', `', ``$2', `$1'',
+  eval(`$3 - 0 < 0 && $1 - $2 + $3 - 0 >= 0'), `1',
+    ``$2', eval(`$1 - $2 + $3')',
+  eval(`$3 - 0 < 0'), `1', ``$2', `0'',
+  ``$2', `$3'')')dnl
+substr(`abcde', `2', `')
+@error{}m4trace: -1- _substr(`abcde', `2', `5')
+@result{}cde
+substr(`abcde', `-3')
+@error{}m4trace: -1- _substr(`abcde', `2', `5')
+@result{}cde
+substr(`abcde', `', `-3')
+@error{}m4trace: -1- _substr(`abcde', `0', `2')
+@result{}ab
+substr(`abcde', `-6')
+@error{}m4trace: -1- _substr(`abcde', `0', `5')
+@result{}abcde
+substr(`abcde', `-6', `5')
+@error{}m4trace: -1- _substr(`abcde', `0', `4')
+@result{}abcd
+substr(`abcde', `-7', `1')
+@error{}m4trace: -1- _substr(`abcde', `0', `0')
+@result{}
+substr(`abcde', `1', `-2')
+@error{}m4trace: -1- _substr(`abcde', `1', `2')
+@result{}bc
+substr(`abcde', `-4', `-1')
+@error{}m4trace: -1- _substr(`abcde', `1', `3')
+@result{}bcd
+substr(`abcde', `4', `-3')
+@error{}m4trace: -1- _substr(`abcde', `4', `0')
+@result{}
+substr(`abcdefghij', `-09', `08')
+@error{}m4trace: -1- _substr(`abcdefghij', `1', `8')
+@result{}bcdefghi
 @end example
 
 @node Translit

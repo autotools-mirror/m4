@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -1861,20 +1861,22 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
   shipout_int (obs, retval);
 }
 
-/*-------------------------------------------------------------------------.
-| The macro "substr" extracts substrings from the first argument, starting |
-| from the index given by the second argument, extending for a length	   |
-| given by the third argument.  If the third argument is missing, the	   |
-| substring extends to the end of the first argument.			   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The macro "substr" extracts substrings from the first argument,    |
+| starting from the index given by the second argument, extending    |
+| for a length given by the third argument.  If the third argument   |
+| is missing or empty, the substring extends to the end of the first |
+| argument.  As an extension, negative arguments are treated as	     |
+| indices relative to the string length.			     |
+`-------------------------------------------------------------------*/
 
 static void
 m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int start = 0;
+  int end;
   int length;
-  int avail;
 
   if (bad_argc (me, argc, 2, 3))
     {
@@ -1884,19 +1886,32 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  length = avail = ARG_LEN (1);
-  if (!numeric_arg (me, ARG (2), &start))
+  length = ARG_LEN (1);
+  if (!arg_empty (argv, 2) && !numeric_arg (me, ARG (2), &start))
+    return;
+  if (start < 0)
+    start += length;
+
+  if (arg_empty (argv, 3))
+    end = length;
+  else
+    {
+      if (!numeric_arg (me, ARG (3), &end))
+	return;
+      if (end < 0)
+	end += length;
+      else
+	end += start;
+    }
+
+  if (start < 0)
+    start = 0;
+  if (length < end)
+    end = length;
+  if (end <= start)
     return;
 
-  if (argc >= 4 && !numeric_arg (me, ARG (3), &length))
-    return;
-
-  if (start < 0 || length <= 0 || start >= avail)
-    return;
-
-  if (start + length > avail)
-    length = avail - start;
-  obstack_grow (obs, ARG (1) + start, length);
+  obstack_grow (obs, ARG (1) + start, end - start);
 }
 
 /*------------------------------------------------------------------.
