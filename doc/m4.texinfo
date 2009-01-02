@@ -44,7 +44,7 @@ This manual (@value{UPDATED}) is for @acronym{GNU} M4 (version
 language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -398,7 +398,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
-1.4.10, closing the series with 1.4.11, 1.4.12, and 1.4.13 in 2008.
+1.4.10.  Eric continued with some portability fixes for 1.4.11 and
+1.4.12 in 2008, and 1.4.13 in 2009.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
