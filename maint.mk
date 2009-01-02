@@ -194,6 +194,7 @@ delta-diff: prev-tarball new-tarball
 .PHONY: web-manual
 web-manual:
 	@cd ./doc ; \
-	  $(SHELL) $(srcdir)/build-aux/gendocs.sh $(PACKAGE) \
-	    "GNU $(PACKAGE)- GNU macro processor"
+	  $(SHELL) $(abs_srcdir)/build-aux/gendocs.sh \
+	    --email $(PACKAGE_BUGREPORT) $(PACKAGE) \
+	    "$(PACKAGE_NAME) - GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."

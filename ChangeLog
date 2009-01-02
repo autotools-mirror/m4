@@ -1,5 +1,8 @@
 2009-01-02  Eric Blake  <ebb9@byu.net>
 
+	Use nicer email address in web manual.
+	* maint.mk (web-manual): Use new option in gendocs.sh.
+
 	Nuke xdelta diffs at release time; no one reported using them.
 	* maint.mk (got-xdelta, delta-xdelta): Delete.
 	* HACKING: Likewise.
