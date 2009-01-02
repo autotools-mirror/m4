@@ -1,6 +1,7 @@
 ## maint.mk -- Makefile rules for m4 maintainers -*-Makefile-*-
 ##
-## Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation
+## Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
+## Foundation
 ##
 ## This file is part of GNU M4.
 ##
@@ -170,18 +171,8 @@ new-tarball:
 	if test -f $$ofile; then :; \
 	else echo "Cannot make deltas without $$ofile"; exit 1; fi
 
-.PHONY: got-xdelta
-got-xdelta:
-## Make sure xdelta exists;
-	@if ($(XDELTA) --version 2>&1 | grep version)>/dev/null 2>/dev/null; \
-	then :;\
-	else \
-	  echo "Get xdelta from http://sourceforge.net/projects/xdelta."; \
-	  exit 1; \
-	fi
-
 .PHONY: deltas
-deltas: delta-diff delta-xdelta
+deltas: delta-diff
 
 DIFF = diff
 DIFF_OPTIONS = -ruNp
@@ -199,20 +190,6 @@ delta-diff: prev-tarball new-tarball
 		$(PACKAGE)-$(PREV_VERSION) $(PACKAGE)-$(VERSION) \
 		| GZIP=$(GZIP_ENV) gzip -c > $$ofile
 	rm -rf delta-diff
-
-XDELTA = xdelta
-XDELTA_OPTIONS = -9
-
-.PHONY: delta-xdelta
-delta-xdelta: prev-tarball new-tarball got-xdelta
-## Generate the delta file (xdelta has weird exit statuses, so we need to
-## add some shell code to keep make happy), and then generate the signatures
-## for FSF ftp-upload:
-	ofile="$(PACKAGE)-$(PREV_VERSION)-$(VERSION).xdelta"; \
-	( test -z `$(XDELTA) delta $(XDELTA_OPTIONS) \
-	    $(PACKAGE)-$(PREV_VERSION).tar.gz $(PACKAGE)-$(VERSION).tar.gz \
-	    $$ofile 2>&1` \
-	  && : )
 
 .PHONY: web-manual
 web-manual:

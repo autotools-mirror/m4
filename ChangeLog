@@ -1,3 +1,9 @@
+2009-01-02  Eric Blake  <ebb9@byu.net>
+
+	Nuke xdelta diffs at release time; no one reported using them.
+	* maint.mk (got-xdelta, delta-xdelta): Delete.
+	* HACKING: Likewise.
+
 2009-01-01  Eric Blake  <ebb9@byu.net>
 
 	Update copyright year.
