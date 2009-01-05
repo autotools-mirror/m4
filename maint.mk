@@ -1,7 +1,7 @@
 ## maint.mk - maintainer rules for managing m4 distributions
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
-## Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+## Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -48,7 +48,9 @@ cvs-diff:
 
 .PHONY: web-manual
 web-manual:
-	@cd $(srcdir)/doc; \
-	  $(SHELL) "$(abs_srcdir)/$(config_aux_dir)/gendocs.sh" $(PACKAGE) \
-	    "GNU $(PACKAGE)- GNU macro processor"
+	@cd '$(srcdir)/doc'; \
+	  $(SHELL) ../$(config_aux_dir)/gendocs.sh \
+	    -o '$(abs_builddir)/doc/manual' \
+	    --email $(PACKAGE_BUGREPORT) $(PACKAGE) \
+	    "$(PACKAGE_NAME) - GNU macro processor"
 	@echo " *** Upload the doc/manual directory to web-cvs."

@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
-## Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+## Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -252,9 +252,8 @@ EXTRA_DIST     += m4/system_.h
 info_TEXINFOS	= doc/m4.texinfo
 doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl-1.3.texi doc/gpl-3.0.texi
 dist_man_MANS	= $(srcdir)/doc/m4.1
-EXTRA_DIST     += $(config_aux_dir)/gendocs.sh doc/gendocs_template
-MAINTAINERCLEANFILES += $(config_aux_dir)/gendocs.sh doc/gendocs_template \
-		  doc/fdl-1.3.texi
+EXTRA_DIST	+= doc/gendocs_template
+MAINTAINERCLEANFILES += doc/gendocs_template
 HELP2MAN	= $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run help2man
 
 # Build the man page once in the srcdir, rather than in every VPATH build

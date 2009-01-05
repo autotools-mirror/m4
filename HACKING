@@ -209,8 +209,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Make sure you have rsync installed.
 
-* Make sure you have a copy of xdelta installed, and a copy of the previous
-  release tarball in the build directory.
+* Make sure you have a copy of the previous release tarball in the build
+  directory.
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
@@ -235,19 +235,23 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   distcheck') and tag the tree with release-$(VERSION).
 
 * Run 'make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
-  create both diff and xdelta files between the previous release tarball
-  and the new.  TODO - is xdelta still worth using?
+  create diff files between the previous release tarball and the new.
 
 * Run '[../]./gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
   the combination to the correct location.  For an alpha release,
-  gnupload will place files in alpha.gnu.org, in /incoming/alpha, and
-  the xdelta file is not strictly necessary.  For a full release,
-  gnupload will place files in ftp.gnu.org, in /incoming/ftp.
+  gnupload will place files in alpha.gnu.org, in /incoming/alpha; for a
+  full release, gnupload will place files in ftp.gnu.org, in
+  /incoming/ftp.  Verify that the files uploaded successfully before
+  sending an announcement.
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
-  as well.
+  as well.  Use gnulib/build-aux/announce-gen to form an initial
+  template for the announcement (you may also need to install the perl
+  module Digest::SHA1).  Contact a list administrator for m4-announce in
+  advance to ensure your post will make it through (the list is normally
+  set to silently discard all posts, even from subscribers).
 
 * Update version number in configure.ac to next alpha number.
   See http://www.gnu.org/software/libtool/contribute.html for details of
@@ -260,178 +264,14 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * For non-alpha releases, update the webpages.  Replace manual.html with
   the new one (generate with `make web-manual').
 
-* Update the M4 entry in the GNU Software directory, located at
-  http://directory.fsf.org/GNU/gnum4.html.  To do this, check out the
-  directory template:
-    cvs -z3 -d:pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
-       co directory/gnum4.txt
-  then mail the patch to bug-directory@gnu.org.
-
-
-7. Alpha release note template
-==============================
-
-To: m4-announce@gnu.org, m4-discuss@gnu.org, autotools-announce@gnu.org
-Subject: GNU M4 @VERSION@ released (alpha release).
-
-The GNU M4 Team is pleased to announce alpha release @VERSION@ of GNU
-M4.
-
-GNU `m4' is an implementation of the traditional Unix macro processor.
-It is mostly SVR4 compatible, although it has some extensions (for
-example, handling more than 9 positional parameters to macros).  `m4'
-also has built-in functions for including files, running shell commands,
-doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
-`configure' scripts, but not for running them.
-
-Here are the compressed sources:
-
-  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.gz    [@SIZE@]
-  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2   [@SIZE@]
-
-Here are the xdeltas and diffs against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@:
-
-  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz   [@SIZE@]
-  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta    [@SIZE@]
-
-Here are the gpg detached signatures:
-
-  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.gz.sig
-  ftp://alpha.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2.sig
-  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz.sig
-  ftp://alpha.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta.sig
-
-You should download the signature named after any tarball you download,
-and then verify its integrity with, for example:
-
-  gpg --verify m4-@VERSION@.tar.gz.sig
-
-If that command fails because you don't have the required public key,
-then run this command to import it:
-
-  gpg --keyserver wwwkeys.pgp.net --recv-keys @KEY@
-
-Here are the MD5 and SHA1 checksums:
-
-  @MD5SUM@ m4-@VERSION@.tar.gz
-  @MD5SUM@ m4-@VERSION@.tar.bz2
-  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
-  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
-  @SHA1SUM@ m4-@VERSION@.tar.gz
-  @SHA1SUM@ m4-@VERSION@.tar.bz2
-  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
-  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
-
-This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
-
-This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
-
-Alternatively, you can fetch the unbootstrapped sourcecode from git by
-using the following commands:
-
-  $ git clone git://git.sv.gnu.org/m4
-  $ git checkout -b branch @GIT_RELEASE_TAG@
-
-You will then need to have recent versions of Automake and Autoconf
-installed, and a recent checkout of gnulib, in order to bootstrap the
-checked out sources yourself.
-
-New in @VERSION@: @RELEASE_DATE@
-
-  @EXCERPT_FROM_NEWS_FILE@
-
-Please report bugs to <bug-m4@gnu.org>, along with the output of 'make
-check' and any other information that might be useful in resolving the
-issue.
-
-
-8. Full release note template
-=============================
-
-To: info-gnu@gnu.org
-To: m4-announce@gnu.org, m4-discuss@gnu.org, autotools-announce@gnu.org
-Subject: GNU M4 @VERSION@ released.
-
-The GNU M4 Team is pleased to announce the release of GNU M4 @VERSION@.
-
-GNU `m4' is an implementation of the traditional Unix macro processor.
-It is mostly SVR4 compatible, although it has some extensions (for
-example, handling more than 9 positional parameters to macros).  `m4'
-also has built-in functions for including files, running shell commands,
-doing arithmetic, etc.  Autoconf needs GNU `m4' for generating
-`configure' scripts, but not for running them.
-
-This release has @SUMMARY_OF_IMPROVEMENTS_SINCE_LAST_RELEASE_ON_THIS_BRANCH@.
-
-New in @VERSION@: @RELEASE_DATE@
-
-  @EXCERPT_FROM_NEWS_FILE@
-
-m4-@VERSION@ is available now from ftp.gnu.org, along with diffs and
-xdeltas against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@ that are also
-available from ftp.gnu.org.  Please use a mirror to reduce stress on the
-main gnu machine:
-
-  http://www.gnu.org/order/ftp.html
-
-Here are the compressed sources:
-
-  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.gz    [@SIZE@]
-  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2   [@SIZE@]
-
-Here are the xdeltas and diffs against m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@:
-
-  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz   [@SIZE@]
-  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta    [@SIZE@]
-
-Here are the gpg detached signatures:
-
-  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.gz.sig
-  ftp://ftp.gnu.org/gnu/m4/m4-@VERSION@.tar.bz2.sig
-  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz.sig
-  ftp://ftp.gnu.org/gnu/m4/m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta.sig
-
-You should download the signature named after any tarball you download,
-and then verify its integrity with, for example:
-
-  gpg --verify m4-@VERSION@.tar.gz.sig
-
-If that command fails because you don't have the required public key,
-then run this command to import it:
-
-  gpg --keyserver wwwkeys.pgp.net --recv-keys @KEY@
-
-Here are the MD5 and SHA1 checksums:
-
-  @MD5SUM@ m4-@VERSION@.tar.gz
-  @MD5SUM@ m4-@VERSION@.tar.bz2
-  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
-  @MD5SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
-  @SHA1SUM@ m4-@VERSION@.tar.gz
-  @SHA1SUM@ m4-@VERSION@.tar.bz2
-  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.diff.gz
-  @SHA1SUM@ m4-@PREV_RELEASE_VERSION_ON_THIS_BRANCH@-@VERSION@.xdelta
-
-This release was bootstrapped with @BOOTSTRAP_TOOLS_WITH_VERSIONS@.
-
-Alternatively, you can fetch the unbootstrapped sourcecode from git by
-using the following commands:
-
-  $ git clone git://git.sv.gnu.org/m4
-  $ git checkout -b branch @GIT_RELEASE_TAG@
-
-You will then need to have the latest release versions of Automake
-(@AUTOMAKE_VERSION@) and Autoconf (@AUTOCONF_VERSION@) installed, as
-well as a git checkout of gnulib, in order to bootstrap the checked out
-sources yourself.
-
-Please report bugs to <bug-m4@gnu.org>, along with the output of 'make
-check' and any other information that might be useful in resolving the
-issue.
-
+* Update the Free Software Directory.  Browse to:
+    http://directory.fsf.org/project/m4/
+  and send an email to <bug-directory@gnu.org> mentioning any
+  content that needs to be updated.
 
 -- 
-Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
+Foundation, Inc.
 
 The canonical source of this file is maintained with the
 GNU M4 package.  Report bugs to bug-m4@gnu.org.
