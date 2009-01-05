@@ -1,3 +1,9 @@
+2009-01-05  Eric Blake  <ebb9@byu.net>
+
+	Nuke xdelta diffs at release time; no one reported using them.
+	* maint.mk (got-xdelta, delta-xdelta): Delete.
+	* HACKING: Likewise.
+
 2008-12-24  Eric Blake  <ebb9@byu.net>
 
 	Enhance eval, as allowed by POSIX 2008.
@@ -5856,7 +5862,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice
