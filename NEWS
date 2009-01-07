@@ -1,6 +1,6 @@
 GNU m4 NEWS - History of user-visible changes.		-*- outline -*-
-Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007, 2008 Free
-Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1998, 2000, 2001, 2006, 2007, 2008, 2009
+Free Software Foundation, Inc.
 
 * Noteworthy changes in Version 1.9b (200x-??-??) [beta]
   Released by ????, based on git version 1.9a-*
@@ -241,6 +241,11 @@ promoted to 2.0.
    that is immediately placed in the new diversion, regardless of whether
    the current expansion is nested within argument collection of another
    macro.  It has also been optimized for faster performance.
+
+** The `substr' builtin now treats negative arguments as indices relative
+   to the end of the string.  The manual gives an
+   example of how to recover M4 1.4.x behavior, as well as an example of
+   simulating the new negative argument semantics with older M4.
 
 ** The `-d'/`--debug' command-line option now understands `-' and `+'
    modifiers, the way the builtin `debugmode' has always done; this allows

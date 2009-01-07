@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007, 2008 Free Software
-   Foundation, Inc.
+   Copyright (C) 2000, 2002, 2003, 2004, 2006, 2007, 2008, 2009 Free
+   Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -924,17 +924,19 @@ M4BUILTIN_HANDLER (index)
   m4_shipout_int (obs, retval);
 }
 
-/* The macro "substr" extracts substrings from the first argument, starting
-   from the index given by the second argument, extending for a length
-   given by the third argument.  If the third argument is missing, the
-   substring extends to the end of the first argument.  */
+/* The macro "substr" extracts substrings from the first argument,
+   starting from the index given by the second argument, extending for
+   a length given by the third argument.  If the third argument is
+   missing or empty, the substring extends to the end of the first
+   argument.  As an extension, negative arguments are treated as
+   indices relative to the string length.  */
 M4BUILTIN_HANDLER (substr)
 {
   const m4_call_info *me = m4_arg_info (argv);
   const char *str = M4ARG (1);
   int start = 0;
+  int end;
   int length;
-  int avail;
 
   if (argc <= 2)
     {
@@ -942,19 +944,33 @@ M4BUILTIN_HANDLER (substr)
       return;
     }
 
-  length = avail = M4ARGLEN (1);
-  if (!m4_numeric_arg (context, me, M4ARG (2), &start))
+  length = M4ARGLEN (1);
+  if (!m4_arg_empty (argv, 2)
+      && !m4_numeric_arg (context, me, M4ARG (2), &start))
+    return;
+  if (start < 0)
+    start += length;
+
+  if (m4_arg_empty (argv, 3))
+    end = length;
+  else
+    {
+      if (!m4_numeric_arg (context, me, M4ARG (3), &end))
+	return;
+      if (end < 0)
+	end += length;
+      else
+	end += start;
+    }
+
+  if (start < 0)
+    start = 0;
+  if (length < end)
+    end = length;
+  if (end <= start)
     return;
 
-  if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), &length))
-    return;
-
-  if (start < 0 || length <= 0 || start >= avail)
-    return;
-
-  if (start + length > avail)
-    length = avail - start;
-  obstack_grow (obs, str + start, length);
+  obstack_grow (obs, str + start, end - start);
 }
 
 
