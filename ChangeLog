@@ -1,5 +1,10 @@
 2009-01-07  Eric Blake  <ebb9@byu.net>
 
+	Enhance substr to support replacement text.
+	* doc/m4.texinfo (Substr): Document new semantics.
+	* modules/m4.c (substr): Support optional fourth argument.
+	* NEWS: Document this.
+
 	Enhance substr to support negative values.
 	* doc/m4.texinfo (Substr): Document new semantics, and how to
 	simulate old.

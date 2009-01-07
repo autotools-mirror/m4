@@ -86,7 +86,7 @@ extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
   BUILTIN (pushdef,	true,	true,	false,	1,	2  )	\
   BUILTIN (shift,	true,	true,	false,	1,	-1 )	\
   BUILTIN (sinclude,	false,	true,	false,	1,	1  )	\
-  BUILTIN (substr,	false,	true,	true,	2,	3  )	\
+  BUILTIN (substr,	false,	true,	true,	2,	4  )	\
   BUILTIN (syscmd,	false,	true,	true,	1,	1  )	\
   BUILTIN (sysval,	false,	false,	false,	0,	0  )	\
   BUILTIN (traceoff,	true,	false,	false,	0,	-1 )	\
@@ -929,7 +929,9 @@ M4BUILTIN_HANDLER (index)
    a length given by the third argument.  If the third argument is
    missing or empty, the substring extends to the end of the first
    argument.  As an extension, negative arguments are treated as
-   indices relative to the string length.  */
+   indices relative to the string length.  Also, if a fourth argument
+   is supplied, the original string is output with the selected
+   substring replaced by the argument.  */
 M4BUILTIN_HANDLER (substr)
 {
   const m4_call_info *me = m4_arg_info (argv);
@@ -961,6 +963,26 @@ M4BUILTIN_HANDLER (substr)
 	end += length;
       else
 	end += start;
+    }
+
+  if (5 <= argc)
+    {
+      /* Replacement text provided.  */
+      if (end < start)
+	end = start;
+      if (end < 0 || length < start)
+	{
+	  m4_warn (context, 0, me, _("substring out of range"));
+	  return;
+	}
+      if (start < 0)
+	start = 0;
+      if (length < end)
+	end = length;
+      obstack_grow (obs, str, start);
+      m4_push_arg (context, obs, argv, 4);
+      obstack_grow (obs, str + end, length - end);
+      return;
     }
 
   if (start < 0)
