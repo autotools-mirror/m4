@@ -1,3 +1,8 @@
+2009-01-24  Eric Blake  <ebb9@byu.net>
+
+	Add URLs to --help output.
+	* src/m4.c (usage): Use enhanced version-etc features.
+
 2009-01-02  Eric Blake  <ebb9@byu.net>
 
 	Use nicer email address in web manual.
