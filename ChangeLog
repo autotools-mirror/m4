@@ -1,3 +1,8 @@
+2009-01-24  Eric Blake  <ebb9@byu.net>
+
+	Add URLs to --help output.
+	* src/m4.c (usage): Use enhanced version-etc features.
+
 2009-01-06  Eric Blake  <ebb9@byu.net>
 
 	Enhance substr to support replacement text.
