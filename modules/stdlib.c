@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1999, 2000, 2001, 2006, 2007, 2008 Free Software
-   Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2006, 2007, 2008, 2009 Free
+   Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -108,7 +108,8 @@ M4BUILTIN_HANDLER (setenv)
   int overwrite = 1;
 
   if (argc >= 4)
-    if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (3), &overwrite))
+    if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (3), M4ARGLEN (3),
+			 &overwrite))
       return;
 
 #if HAVE_SETENV
@@ -206,7 +207,8 @@ M4BUILTIN_HANDLER (getpwuid)
   struct passwd *pw;
   int uid;
 
-  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &uid))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		       &uid))
     return;
 
   pw = getpwuid (uid);
@@ -261,7 +263,8 @@ M4BUILTIN_HANDLER (srand)
     seed = time (0L) * getpid ();
   else
     {
-      if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &seed))
+      if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1),
+			   M4ARGLEN (1), &seed))
 	return;
     }
 

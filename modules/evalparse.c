@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -901,7 +901,7 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
   eval_error	err	= NO_ERROR;
 
   if (!m4_arg_empty (argv, 2)
-      && !m4_numeric_arg (context, me, M4ARG (2), &radix))
+      && !m4_numeric_arg (context, me, M4ARG (2), M4ARGLEN (2), &radix))
     return;
 
   if (radix < 1 || radix > 36)
@@ -910,7 +910,8 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
       return;
     }
 
-  if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), &min))
+  if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), M4ARGLEN (3),
+				    &min))
     return;
 
   if (min < 0)

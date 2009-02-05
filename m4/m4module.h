@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2003,
-   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -170,7 +170,7 @@ struct m4_string_pair
 extern bool	m4_bad_argc	   (m4 *, size_t, const m4_call_info *, size_t,
 				    size_t, bool);
 extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
-				    int *);
+				    size_t, int *);
 extern bool	m4_parse_truth_arg (m4 *, const m4_call_info *, const char *,
 				    bool);
 extern m4_symbol *m4_symbol_value_lookup (m4 *, m4_macro_args *, size_t, bool);

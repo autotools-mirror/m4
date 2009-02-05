@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2000, 2004, 2005, 2006, 2007, 2008 Free Software
-   Foundation, Inc.
+   Copyright (C) 2000, 2004, 2005, 2006, 2007, 2008, 2009 Free
+   Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -599,7 +599,8 @@ M4BUILTIN_HANDLER (debuglen)
 {
   int i;
   size_t s;
-  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &i))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		       &i))
     return;
   /* FIXME - make m4_numeric_arg more powerful - we want to accept
      suffixes, and limit the result to size_t.  */

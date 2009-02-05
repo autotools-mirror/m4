@@ -1,5 +1,6 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software Foundation,
+# Inc.
 
 # This file is part of GNU M4.
 #
@@ -432,8 +433,11 @@ dnl all but m4exit
 AT_CHECK_M4([-Dm4exit -I "$abs_srcdir" null.m4], [0], [expout], [experr])
 
 dnl just m4exit
-AT_CHECK_M4(["$abs_srcdir/null.m4"], [2],
+AT_CHECK_M4(["$abs_srcdir/null.m4"], [1],
 [[# This file tests m4 behavior on NUL bytes.
+]], [stderr])
+AT_CHECK([sed "s|$abs_srcdir/||" stderr], [0],
+[[m4:null.m4:5: Warning: m4exit: non-numeric argument `2\0002'
 ]])
 
 AT_CLEANUP

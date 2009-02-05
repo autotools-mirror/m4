@@ -5751,7 +5751,7 @@ parenthesis will match any close parenthesis, etc.
 @example
 changesyntax(`(@{<', `)@}>', `,;:', `O(,)')
 @result{}
-eval@{2**4-1; 2 : 8>
+eval@{2**4-1; 2: 8>
 @result{}00001111
 @end example
 

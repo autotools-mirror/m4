@@ -1,5 +1,27 @@
 2009-02-11  Eric Blake  <ebb9@byu.net>
 
+	Stage 28a: Warn on embedded NUL in numeric arguments.
+	Quote warning messages related to numeric parsing in order to
+	handle embedded NUL.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_numeric_arg): Adjust prototype.
+	* m4/utility.c (m4_numeric_arg): Add parameter.
+	* modules/gnu.c (debuglen): Adjust callers.
+	* modules/m4.c (incr, decr, divert, undivert, m4exit, substr)
+	(index): Likewise.
+	* modules/evalparse.c (m4_evaluate): Likewise.
+	* modules/stdlib.c (setenv, getpwuid, srand): Likewise.
+	* modules/time.c (ctime, gmtime, localtime, mktime, strftime):
+	Likewise.
+	* doc/m4.texinfo (Changesyntax): Fix typo.
+	* tests/others.at (nul character): Adjust test.
+	* tests/null.m4: Likewise.
+	* tests/null.out: Likewise.
+	* tests/null.err: Likewise.
+
+2009-02-11  Eric Blake  <ebb9@byu.net>
+
 	Avoid regression in popdef(undef).
 	* doc/m4.texinfo (Trace): Enhance test, to cover regression
 	recently fixed on the branch.

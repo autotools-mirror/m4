@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2003,
-   2006, 2007, 2008 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -68,30 +68,36 @@ skip_space (m4 *context, const char *arg)
   return arg;
 }
 
-/* The function m4_numeric_arg () converts ARG to an int pointed to by
-   VALUEP. If the conversion fails, print error message for CALLER.
-   Return true iff conversion succeeds.  */
+/* The function m4_numeric_arg () converts ARG of length LEN to an int
+   pointed to by VALUEP. If the conversion fails, print error message
+   for CALLER.  Return true iff conversion succeeds.  */
 /* FIXME: Convert this to use gnulib's xstrtoimax, xstrtoumax.
    Otherwise, we are arbitrarily limiting integer values.  */
 bool
 m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
-		int *valuep)
+		size_t len, int *valuep)
 {
   char *endp;
 
-  if (*arg == '\0')
+  if (!len)
     {
       *valuep = 0;
       m4_warn (context, 0, caller, _("empty string treated as 0"));
     }
   else
     {
-      *valuep = strtol (skip_space (context, arg), &endp, 10);
-      if (*skip_space (context, endp) != 0)
+      const char *str = skip_space (context, arg);
+      *valuep = strtol (str, &endp, 10);
+      if (endp - arg != len)
 	{
-	  m4_warn (context, 0, caller, _("non-numeric argument `%s'"), arg);
+	  m4_warn (context, 0, caller, _("non-numeric argument %s"),
+		   quotearg_style_mem (locale_quoting_style, arg, len));
 	  return false;
 	}
+      if (str != arg)
+	m4_warn (context, 0, caller, _("leading whitespace ignored"));
+      else if (errno == ERANGE)
+	m4_warn (context, 0, caller, _("numeric overflow detected"));
     }
   return true;
 }

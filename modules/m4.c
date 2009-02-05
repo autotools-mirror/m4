@@ -536,7 +536,8 @@ M4BUILTIN_HANDLER (incr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &value))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		       &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -546,7 +547,8 @@ M4BUILTIN_HANDLER (decr)
 {
   int value;
 
-  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), &value))
+  if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
+		       &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -563,7 +565,7 @@ M4BUILTIN_HANDLER (divert)
   int i = 0;
 
   if (argc >= 2 && !m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1),
-				    &i))
+				    M4ARGLEN (1), &i))
     return;
   m4_make_diversion (context, i);
   m4_divert_text (context, NULL, M4ARG (2), M4ARGLEN (2),
@@ -592,12 +594,17 @@ M4BUILTIN_HANDLER (undivert)
     for (i = 1; i < argc; i++)
       {
 	const char *str = M4ARG (i);
+	size_t len = M4ARGLEN (i);
 	char *endp;
 	int diversion = strtol (str, &endp, 10);
-	if (*endp == '\0' && !isspace ((unsigned char) *str))
+	if (endp - str == len && !isspace ((unsigned char) *str))
 	  m4_insert_diversion (context, diversion);
 	else if (m4_get_posixly_correct_opt (context))
-	  m4_numeric_arg (context, me, str, &diversion);
+	  m4_warn (context, 0, me, _("non-numeric argument %s"),
+		   quotearg_style_mem (locale_quoting_style, str, len));
+	else if (strlen (str) != len)
+	  m4_warn (context, 0, me, _("invalid file name %s"),
+		   quotearg_style_mem (locale_quoting_style, str, len));
 	else
 	  {
 	    FILE *fp = m4_path_search (context, str, NULL);
@@ -609,7 +616,7 @@ M4BUILTIN_HANDLER (undivert)
 			    quotearg_style (locale_quoting_style, str));
 	      }
 	    else
-	      m4_error (context, 0, errno, me, _("cannot undivert `%s'"),
+	      m4_error (context, 0, errno, me, _("cannot undivert %s"),
 			quotearg_style (locale_quoting_style, str));
 	  }
       }
@@ -824,7 +831,8 @@ M4BUILTIN_HANDLER (m4exit)
   int exit_code = EXIT_SUCCESS;
 
   /* Warn on bad arguments, but still exit.  */
-  if (argc >= 2 && !m4_numeric_arg (context, me, M4ARG (1), &exit_code))
+  if (argc >= 2 && !m4_numeric_arg (context, me, M4ARG (1), M4ARGLEN (1),
+				    &exit_code))
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
@@ -919,7 +927,8 @@ M4BUILTIN_HANDLER (index)
   int retval = -1;
 
   if (!m4_arg_empty (argv, 3) && !m4_numeric_arg (context, m4_arg_info (argv),
-						  M4ARG (3), &offset))
+						  M4ARG (3), M4ARGLEN (3),
+                                                  &offset))
     return;
   if (offset < 0)
     {
@@ -967,7 +976,7 @@ M4BUILTIN_HANDLER (substr)
 
   length = M4ARGLEN (1);
   if (!m4_arg_empty (argv, 2)
-      && !m4_numeric_arg (context, me, M4ARG (2), &start))
+      && !m4_numeric_arg (context, me, M4ARG (2), M4ARGLEN (2), &start))
     return;
   if (start < 0)
     start += length;
@@ -976,7 +985,7 @@ M4BUILTIN_HANDLER (substr)
     end = length;
   else
     {
-      if (!m4_numeric_arg (context, me, M4ARG (3), &end))
+      if (!m4_numeric_arg (context, me, M4ARG (3), M4ARGLEN (3), &end))
 	return;
       if (end < 0)
 	end += length;
