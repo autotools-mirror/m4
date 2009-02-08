@@ -583,9 +583,17 @@ M4BUILTIN_HANDLER (debugfile)
     m4_debug_set_output (context, me, NULL);
   else if (m4_get_safer_opt (context) && !m4_arg_empty (argv, 1))
     m4_error (context, 0, 0, me, _("disabled by --safer"));
-  else if (!m4_debug_set_output (context, me, M4ARG (1)))
-    m4_error (context, 0, errno, me, _("cannot set debug file %s"),
-	      quotearg_style (locale_quoting_style, M4ARG (1)));
+  else
+    {
+      const char *str = M4ARG (1);
+      size_t len = M4ARGLEN (1);
+      if (strlen (str) < len)
+	m4_warn (context, 0, me, _("argument %s truncated"),
+		 quotearg_style_mem (locale_quoting_style, str, len));
+      if (!m4_debug_set_output (context, me, str))
+	m4_warn (context, errno, me, _("cannot set debug file %s"),
+	      quotearg_style (locale_quoting_style, str));
+    }
 }
 
 
@@ -635,6 +643,8 @@ M4BUILTIN_HANDLER (debugmode)
 M4BUILTIN_HANDLER (esyscmd)
 {
   const m4_call_info *me = m4_arg_info (argv);
+  const char *cmd = M4ARG (1);
+  size_t len = M4ARGLEN (1);
   M4_MODULE_IMPORT (m4, m4_set_sysval);
   M4_MODULE_IMPORT (m4, m4_sysval_flush);
 
@@ -648,9 +658,12 @@ M4BUILTIN_HANDLER (esyscmd)
 	  m4_error (context, 0, 0, me, _("disabled by --safer"));
 	  return;
 	}
+      if (strlen (cmd) != len)
+	m4_warn (context, 0, me, _("argument %s truncated"),
+		 quotearg_style_mem (locale_quoting_style, cmd, len));
 
       /* Optimize the empty command.  */
-      if (m4_arg_empty (argv, 1))
+      if (!*cmd)
 	{
 	  m4_set_sysval (0);
 	  return;
@@ -658,11 +671,12 @@ M4BUILTIN_HANDLER (esyscmd)
 
       m4_sysval_flush (context, false);
       errno = 0;
-      pin = popen (M4ARG (1), "r");
+      pin = popen (cmd, "r");
       if (pin == NULL)
 	{
 	  m4_error (context, 0, errno, me,
-		    _("cannot open pipe to command `%s'"), M4ARG (1));
+		    _("cannot open pipe to command %s"),
+		    quotearg_style (locale_quoting_style, cmd));
 	  m4_set_sysval (-1);
 	}
       else

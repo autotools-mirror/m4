@@ -1,5 +1,20 @@
 2009-02-11  Eric Blake  <ebb9@byu.net>
 
+	Stage 28b: Warn on embedded NUL in file arguments.
+	Quote warning messages related to file and other NUL-terminated
+	system commands.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/path.c (m4_path_search): Quote file names in message.
+	* modules/m4.c (syscmd, include, m4_make_temp): Handle embedded
+	NUL.
+	* modules/gnu.c (debugfile, esyscmd): Likewise.
+	* tests/others.at (nul character): Adjust test.
+	* tests/builtins.at (mkdtemp, mkstemp): Likewise.
+	* tests/null.m4: Likewise.
+	* tests/null.out: Likewise.
+	* tests/null.err: Likewise.
+
 	Stage 28a: Warn on embedded NUL in numeric arguments.
 	Quote warning messages related to numeric parsing in order to
 	handle embedded NUL.

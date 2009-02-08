@@ -504,20 +504,27 @@ m4_sysval_flush (m4 *context, bool report)
 
 M4BUILTIN_HANDLER (syscmd)
 {
+  const m4_call_info *me = m4_arg_info (argv);
+  const char *cmd = M4ARG (1);
+  size_t len = M4ARGLEN (1);
+
   if (m4_get_safer_opt (context))
     {
       m4_error (context, 0, 0, m4_arg_info (argv), _("disabled by --safer"));
       return;
     }
+  if (strlen (cmd) != len)
+    m4_warn (context, 0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, cmd, len));
 
   /* Optimize the empty command.  */
-  if (m4_arg_empty (argv, 1))
+  if (!*cmd)
     {
       m4_set_sysval (0);
       return;
     }
   m4_sysval_flush (context, false);
-  m4_sysval = system (M4ARG (1));
+  m4_sysval = system (cmd);
   /* FIXME - determine if libtool works for OS/2, in which case the
      FUNC_SYSTEM_BROKEN section on the branch must be ported to work
      around the bug in their EMX libc system().  */
@@ -672,13 +679,19 @@ include (m4 *context, int argc, m4_macro_args *argv, bool silent)
 {
   FILE *fp;
   char *name = NULL;
+  const m4_call_info *me = m4_arg_info (argv);
+  const char *arg = M4ARG (1);
+  size_t len = M4ARGLEN (1);
 
-  fp = m4_path_search (context, M4ARG (1), &name);
+  if (strlen (arg) != len)
+    m4_warn (context, 0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, arg, len));
+  fp = m4_path_search (context, arg, &name);
   if (fp == NULL)
     {
       if (!silent)
 	m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open %s"),
-		  quotearg_style (locale_quoting_style, M4ARG (1)));
+		  quotearg_style (locale_quoting_style, arg));
       return;
     }
 
@@ -725,6 +738,12 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
      successful.  */
   assert (obstack_object_size (obs) == 0);
   obstack_grow (obs, quotes->str1, quotes->len1);
+  if (strlen (pattern) < len)
+    {
+      m4_warn (context, 0, caller, _("argument %s truncated"),
+	       quotearg_style_mem (locale_quoting_style, pattern, len));
+      len = strlen (pattern);
+    }
   obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
     if (pattern[--len] != 'X')
@@ -740,10 +759,10 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
       /* This use of _() will need to change if xgettext ever changes
 	 its undocumented behavior of parsing both string options.  */
 
-      m4_error (context, 0, errno, caller,
-		_(dir ? "cannot create directory from template `%s'"
-		  : "cannot create file from template `%s'"),
-		pattern);
+      m4_warn (context, errno, caller,
+	       _(dir ? "cannot create directory from template %s"
+		 : "cannot create file from template %s"),
+	       quotearg_style (locale_quoting_style, pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else

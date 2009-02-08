@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998, 2004, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -198,8 +198,9 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
       if (fp != NULL)
 	{
 	  m4_debug_message (context, M4_DEBUG_TRACE_PATH,
-			    _("path search for `%s' found `%s'"),
-			    file, name);
+			    _("path search for %s found %s"),
+			    quotearg_style (locale_quoting_style, file),
+			    quotearg_n_style (1, locale_quoting_style, name));
 	  if (expanded_name != NULL)
 	    *expanded_name = name;
 	  else

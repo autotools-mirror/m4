@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -713,8 +713,8 @@ dnl Check that on error, the expansion is void
 AT_DATA([[in]],
 [[mkdtemp(`no_such_dir/m4-fooXXXXXX')
 ]])
-AT_CHECK_M4([in], [1], [[
-]], [[m4:in:1: mkdtemp: cannot create directory from template `no_such_dir/m4-fooXXXXXX': No such file or directory
+AT_CHECK_M4([in], [0], [[
+]], [[m4:in:1: Warning: mkdtemp: cannot create directory from template `no_such_dir/m4-fooXXXXXX': No such file or directory
 ]])
 
 dnl Check that umask has an effect.  drws--S--T is okay.
@@ -742,8 +742,8 @@ dnl Check that on error, the expansion is void
 AT_DATA([[in]],
 [[mkstemp(`no_such_dir/m4-fooXXXXXX')
 ]])
-AT_CHECK_M4([in], [1], [[
-]], [[m4:in:1: mkstemp: cannot create file from template `no_such_dir/m4-fooXXXXXX': No such file or directory
+AT_CHECK_M4([in], [0], [[
+]], [[m4:in:1: Warning: mkstemp: cannot create file from template `no_such_dir/m4-fooXXXXXX': No such file or directory
 ]])
 
 dnl Check that extra X are appended, but not trailing NUL

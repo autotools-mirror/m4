@@ -430,7 +430,7 @@ $SED "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.out" > expout
 $SED "s|null.m4|$abs_srcdir/null.m4|" < "$abs_srcdir/null.err" > experr
 
 dnl all but m4exit
-AT_CHECK_M4([-Dm4exit -I "$abs_srcdir" null.m4], [0], [expout], [experr])
+AT_CHECK_M4([-Dm4exit -I "$abs_srcdir" null.m4], [1], [expout], [experr])
 
 dnl just m4exit
 AT_CHECK_M4(["$abs_srcdir/null.m4"], [1],
