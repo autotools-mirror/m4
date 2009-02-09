@@ -76,7 +76,7 @@ extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
   BUILTIN (ifelse,	true,	true,	false,	1,	-1 )	\
   BUILTIN (include,	false,	true,	false,	1,	1  )	\
   BUILTIN (incr,	false,	true,	true,	1,	1  )	\
-  BUILTIN (index,	false,	true,	true,	2,	2  )	\
+  BUILTIN (index,	false,	true,	true,	2,	3  )	\
   BUILTIN (len,		false,	true,	true,	1,	1  )	\
   BUILTIN (m4exit,	false,	false,	false,	0,	1  )	\
   BUILTIN (m4wrap,	true,	true,	false,	1,	-1 )	\
@@ -906,18 +906,37 @@ M4BUILTIN_HANDLER (len)
   m4_shipout_int (obs, M4ARGLEN (1));
 }
 
-/* The macro expands to the first index of the second argument in the first
-   argument.  */
+/* The macro expands to the first index of the second argument in the
+   first argument.  As an extension, start the search at the index
+   indicated by the third argument.  */
 M4BUILTIN_HANDLER (index)
 {
   const char *haystack = M4ARG (1);
+  size_t haystack_len = M4ARGLEN (1);
   const char *needle = M4ARG (2);
   const char *result = NULL;
+  int offset = 0;
   int retval = -1;
+
+  if (!m4_arg_empty (argv, 3) && !m4_numeric_arg (context, m4_arg_info (argv),
+						  M4ARG (3), &offset))
+    return;
+  if (offset < 0)
+    {
+      offset += haystack_len;
+      if (offset < 0)
+	offset = 0;
+    }
+  else if (haystack_len < offset)
+    {
+      m4_shipout_int (obs, -1);
+      return;
+    }
 
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
-  result = (char *) memmem (haystack, M4ARGLEN (1), needle, M4ARGLEN (2));
+  result = (char *) memmem (haystack + offset, haystack_len - offset, needle,
+			    M4ARGLEN (2));
   if (result)
     retval = result - haystack;
 

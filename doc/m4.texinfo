@@ -1692,8 +1692,8 @@ index(`abc')
 @result{}0
 index(`abc',)
 @result{}0
-index(`abc', `b', `ignored')
-@error{}m4:stdin:3: Warning: index: extra arguments ignored: 3 > 2
+index(`abc', `b', `0', `ignored')
+@error{}m4:stdin:3: Warning: index: extra arguments ignored: 4 > 3
 @result{}1
 @end example
 
@@ -1704,7 +1704,7 @@ index(`abc')
 @result{}0
 index(`abc',)
 @result{}0
-index(`abc', `b', `ignored')
+index(`abc', `b', `', `ignored')
 @result{}1
 @end example
 
@@ -6869,11 +6869,13 @@ len(`abcdef')
 @cindex substrings, locating
 Searching for substrings is done with @code{index}:
 
-@deffn {Builtin (m4)} index (@var{string}, @var{substring})
+@deffn {Builtin (m4)} index (@var{string}, @var{substring}, @ovar{offset})
 Expands to the index of the first occurrence of @var{substring} in
 @var{string}.  The first character in @var{string} has index 0.  If
 @var{substring} does not occur in @var{string}, @code{index} expands to
-@samp{-1}.
+@samp{-1}.  If @var{offset} is provided, it determines the index at
+which the search starts; a negative @var{offset} specifies the offset
+relative to the end of @var{string}.
 
 The macro @code{index} is recognized only with parameters.
 @end deffn
@@ -6895,6 +6897,23 @@ index(`abc')
 index(`abc', `')
 @result{}0
 index(`abc', `b')
+@result{}1
+@end example
+
+@cindex @acronym{GNU} extensions
+As an extension, an @var{offset} can be provided to limit the search to
+the tail of the @var{string}.  A negative offset is interpreted relative
+to the end of @var{string}, and it is not an error if @var{offset}
+exceeds the bounds of @var{string}.
+
+@example
+index(`aba', `a', `1')
+@result{}2
+index(`ababa', `ba', `-3')
+@result{}3
+index(`abc', `ab', `4')
+@result{}-1
+index(`abc', `bc', `-4')
 @result{}1
 @end example
 
