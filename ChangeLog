@@ -1,3 +1,11 @@
+2009-02-09  Eric Blake  <ebb9@byu.net>
+
+	Enhance index to support starting offset.
+	* src/builtin.c (m4_index): Add optional third argument.
+	* NEWS: Document this.
+	* doc/m4.texinfo (Index macro): Likewise.
+	(Macro Arguments): Adjust tests.
+
 2009-01-24  Eric Blake  <ebb9@byu.net>
 
 	Add URLs to --help output.

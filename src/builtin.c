@@ -1828,20 +1828,23 @@ m4_len (struct obstack *obs, int argc, macro_arguments *argv)
   shipout_int (obs, ARG_LEN (1));
 }
 
-/*-------------------------------------------------------------------------.
-| The macro expands to the first index of the second argument in the first |
-| argument.								   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The macro expands to the first index of the second argument in the |
+| first argument.  As an extension, start the search at the index    |
+| indicated by the third argument.				     |
+`-------------------------------------------------------------------*/
 
 static void
 m4_index (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const char *haystack;
+  size_t haystack_len;
   const char *needle;
   const char *result = NULL;
+  int offset = 0;
   int retval = -1;
 
-  if (bad_argc (arg_info (argv), argc, 2, 2))
+  if (bad_argc (arg_info (argv), argc, 2, 3))
     {
       /* builtin(`index') is blank, but index(`abc') is 0.  */
       if (argc == 2)
@@ -1850,11 +1853,26 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
     }
 
   haystack = ARG (1);
+  haystack_len = ARG_LEN (1);
   needle = ARG (2);
+  if (!arg_empty (argv, 3) && !numeric_arg (arg_info (argv), ARG (3), &offset))
+    return;
+  if (offset < 0)
+    {
+      offset += haystack_len;
+      if (offset < 0)
+	offset = 0;
+    }
+  else if (haystack_len < offset)
+    {
+      shipout_int (obs, -1);
+      return;
+    }
 
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
-  result = (char *) memmem (haystack, ARG_LEN (1), needle, ARG_LEN (2));
+  result = (char *) memmem (haystack + offset, haystack_len - offset, needle,
+			    ARG_LEN (2));
   if (result)
     retval = result - haystack;
 

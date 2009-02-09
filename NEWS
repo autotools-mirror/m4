@@ -59,6 +59,10 @@ Software Foundation, Inc.
    example of how to recover M4 1.4.x behavior, as well as an example of
    simulating the new negative argument semantics with older M4.
 
+** The `index' builtin now takes an optional third argument as the index
+   to begin searching from, with a negative argument relative to the end of
+   the string.
+
 ** The `-d'/`--debug' command-line option now understands `-' and `+'
    modifiers, the way the builtin `debugmode' has always done; this allows
    `-d-V' to disable prior debug settings from the command line, similar to
