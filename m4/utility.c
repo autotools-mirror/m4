@@ -102,15 +102,17 @@ m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
   return true;
 }
 
-/* Parse ARG as a truth value.  If unrecognized, issue a warning on
-   behalf of CALLER and return PREVIOUS; otherwise return the parsed
-   value.  */
+/* Parse ARG of length LEN as a truth value.  If ARG is NUL, use ""
+   instead; otherwise, ARG must have a NUL-terminator (even if it also
+   has embedded NUL).  If LEN is SIZE_MAX, use the string length of
+   ARG.  If unrecognized, issue a warning on behalf of CALLER and
+   return PREVIOUS; otherwise return the parsed value.  */
 bool
 m4_parse_truth_arg (m4 *context, const m4_call_info *caller, const char *arg,
-		    bool previous)
+		    size_t len, bool previous)
 {
   /* 0, no, off, blank... */
-  if (!arg || arg[0] == '\0'
+  if (!arg || len == 0
       || arg[0] == '0'
       || arg[0] == 'n' || arg[0] == 'N'
       || ((arg[0] == 'o' || arg[0] == 'O')
@@ -122,7 +124,8 @@ m4_parse_truth_arg (m4 *context, const m4_call_info *caller, const char *arg,
       || ((arg[0] == 'o' || arg[0] == 'O')
 	  && (arg[1] == 'n' || arg[1] == 'N')))
     return true;
-  m4_warn (context, 0, caller, _("unknown directive `%s'"), arg);
+  m4_warn (context, 0, caller, _("unknown directive %s"),
+	   quotearg_style_mem (locale_quoting_style, arg, len));
   return previous;
 }
 

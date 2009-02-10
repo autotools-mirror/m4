@@ -172,7 +172,7 @@ extern bool	m4_bad_argc	   (m4 *, size_t, const m4_call_info *, size_t,
 extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
 				    size_t, int *);
 extern bool	m4_parse_truth_arg (m4 *, const m4_call_info *, const char *,
-				    bool);
+				    size_t, bool);
 extern m4_symbol *m4_symbol_value_lookup (m4 *, m4_macro_args *, size_t, bool);
 
 /* Error handling.  */
@@ -421,7 +421,7 @@ enum {
 
 #define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 
-extern int	m4_debug_decode		(m4 *, const char *);
+extern int	m4_debug_decode		(m4 *, const char *, size_t);
 extern bool	m4_debug_set_output	(m4 *, const m4_call_info *,
 					 const char *);
 extern void	m4_debug_message_prefix (m4 *);

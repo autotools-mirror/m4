@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -634,7 +634,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
 	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
-	  if (m4_debug_decode (context, string[0]) < 0)
+	  if (m4_debug_decode (context, string[0], number[0]) < 0)
 	    m4_error (context, EXIT_FAILURE, 0, NULL,
 		      _("unknown debug mode %s"),
 		      quotearg_style_mem (locale_quoting_style, string[0],
@@ -696,8 +696,21 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
 	    m4_module *module = NULL;
 	    m4_symbol_value *token;
 
+	    // Builtins cannot contain a NUL byte.
+	    if (strlen (string[1]) < number[1])
+	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, invalid builtin %s encountered"),
+			quotearg_style_mem (locale_quoting_style, string[1],
+					    number[1]));
 	    if (number[2] > 0)
-	      module = m4__module_find (string[2]);
+	      {
+		if (strlen (string[2]) < number[2])
+		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, invalid module %s encountered"),
+			    quotearg_style_mem (locale_quoting_style,
+						string[2], number[2]));
+		module = m4__module_find (string[2]);
+	      }
 	    token = m4_builtin_find_by_name (module, string[1]);
 
 	    if (token == NULL)
@@ -732,6 +745,11 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
 	  GET_STRING (file, string[0], allocated[0], number[0], false);
 	  VALIDATE ('\n');
 
+	  if (strlen (string[0]) < number[0])
+	    m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, invalid module %s encountered"),
+		      quotearg_style_mem (locale_quoting_style,
+					  string[0], number[0]));
 	  m4__module_open (context, string[0], NULL);
 
 	  break;
@@ -940,7 +958,14 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 
 	    token = (m4_symbol_value *) xzalloc (sizeof *token);
 	    if (number[2] > 0)
-	      module = m4__module_find (string[2]);
+	      {
+		if (strlen (string[2]) < number[2])
+		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+ill-formed frozen file, invalid module %s encountered"),
+			    quotearg_style_mem (locale_quoting_style,
+						string[2], number[2]));
+		module = m4__module_find (string[2]);
+	      }
 
 	    m4_set_symbol_value_text (token, xmemdup0 (string[1], number[1]),
 				      number[1], 0);

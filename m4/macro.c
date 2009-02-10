@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -675,8 +675,9 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
 					  argv);
       else if (m4_is_symbol_value_placeholder (value))
 	m4_warn (context, 0, argv->info,
-		 _("builtin `%s' requested by frozen file not found"),
-		 m4_get_symbol_value_placeholder (value));
+		 _("builtin %s requested by frozen file not found"),
+		 quotearg_style (locale_quoting_style,
+				 m4_get_symbol_value_placeholder (value)));
       else
 	{
 	  assert (!"m4_macro_call");

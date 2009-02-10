@@ -459,7 +459,7 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'E':
-	  m4_debug_decode (context, "-d");
+	  m4_debug_decode (context, "-d", SIZE_MAX);
 	  if (m4_get_fatal_warnings_opt (context))
 	    m4_set_warnings_exit_opt (context, true);
 	  else
@@ -491,12 +491,13 @@ main (int argc, char *const *argv, char *const *envp)
 	      const char *dlerr = lt_dlerror ();
 	      if (dlerr == NULL)
 		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory `%s'"),
-			  optarg);
+			  _("failed to add search directory %s"),
+			  quotearg_style (locale_quoting_style, optarg));
 	      else
 		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory `%s': %s"),
-			  optarg, dlerr);
+			  _("failed to add search directory %s: %s"),
+			  quotearg_style (locale_quoting_style, optarg),
+			  dlerr);
 	    }
 	  break;
 
@@ -533,8 +534,9 @@ main (int argc, char *const *argv, char *const *envp)
 	     have effect between files.	 */
 	  if (seen_file || frozen_file_to_read)
 	    goto defer;
-	  if (m4_debug_decode (context, optarg) < 0)
-	    error (0, 0, _("bad debug flags: `%s'"), optarg);
+	  if (m4_debug_decode (context, optarg, SIZE_MAX) < 0)
+	    error (0, 0, _("bad debug flags: %s"),
+		   quotearg_style (locale_quoting_style, optarg));
 	  break;
 
 	case 'e':
@@ -689,8 +691,9 @@ main (int argc, char *const *argv, char *const *envp)
 	  break;
 
 	case 'd':
-	  if (m4_debug_decode (context, arg) < 0)
-	    error (0, 0, _("bad debug flags: `%s'"), arg);
+	  if (m4_debug_decode (context, arg, SIZE_MAX) < 0)
+	    error (0, 0, _("bad debug flags: %s"),
+		   quotearg_style (locale_quoting_style, arg));
 	  break;
 
 	case 'm':
@@ -702,7 +705,8 @@ main (int argc, char *const *argv, char *const *envp)
 	  m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
 	  if (m4_get_regexp_syntax_opt (context) < 0)
 	    m4_error (context, EXIT_FAILURE, 0, NULL,
-		      _("bad regexp syntax option: `%s'"), arg);
+		      _("bad syntax-spec: %s"),
+		      quotearg_style (locale_quoting_style, arg));
 	  break;
 
 	case 't':
@@ -736,7 +740,7 @@ main (int argc, char *const *argv, char *const *envp)
 	    info.name_len = strlen (info.name);
 	    m4_set_syncoutput_opt (context,
 				   m4_parse_truth_arg (context, &info, arg,
-						       previous));
+						       SIZE_MAX, previous));
 	  }
 	  break;
 

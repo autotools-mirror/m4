@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -413,6 +413,18 @@ dnl Check that unexpected embedded NULs are recognized.
 printf '# bogus frozen file\nV2\nR4\ngnu\0\n' > bogus.m4f
 AT_CHECK_M4([-R bogus.m4f], [1], [],
 [[m4:bogus.m4f:4: bad syntax-spec `gnu\0'
+]])
+
+dnl Reject escape sequences that expand to unexpected NUL
+AT_DATA([bogus.m4f],
+[[# bogus frozen file
+V2
+F3,4
+len
+len\0
+]])
+AT_CHECK_M4([-R bogus.m4f], [1], [],
+[[m4:bogus.m4f:5: ill-formed frozen file, invalid builtin `len\0' encountered
 ]])
 
 AT_CLEANUP

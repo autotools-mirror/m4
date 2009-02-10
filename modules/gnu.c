@@ -625,11 +625,14 @@ M4BUILTIN_HANDLER (debuglen)
  **/
 M4BUILTIN_HANDLER (debugmode)
 {
+  const char* mode = M4ARG (1);
+  size_t len = M4ARGLEN (1);
   if (argc == 1)
     m4_set_debug_level_opt (context, 0);
-  else if (m4_debug_decode (context, M4ARG (1)) < 0)
-    m4_error (context, 0, 0, m4_arg_info (argv),
-	      _("bad debug flags: `%s'"), M4ARG (1));
+  else if (m4_debug_decode (context, mode, len) < 0)
+    m4_warn (context, 0, m4_arg_info (argv),
+	     _("bad debug flags: %s"),
+	     quotearg_style_mem (locale_quoting_style, mode, len));
 }
 
 
@@ -997,6 +1000,7 @@ M4BUILTIN_HANDLER (m4symbols)
 M4BUILTIN_HANDLER (syncoutput)
 {
   bool value = m4_get_syncoutput_opt (context);
-  value = m4_parse_truth_arg (context, m4_arg_info (argv), M4ARG (1), value);
+  value = m4_parse_truth_arg (context, m4_arg_info (argv), M4ARG (1),
+			      M4ARGLEN (1), value);
   m4_set_syncoutput_opt (context, value);
 }

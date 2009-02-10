@@ -1,5 +1,27 @@
 2009-02-11  Eric Blake  <ebb9@byu.net>
 
+	Stage 28c: Warn on embedded NUL in remaining cases.
+	Ensure all remaining warnings can handle embedded NUL.
+	Memory impact: none.
+	Speed impact: none noticed.
+	* m4/m4module.h (m4_debug_decode, m4_parse_truth_arg): Add
+	parameter.
+	* m4/macro.c (m4_macro_call): Improve diagnostic.
+	* modules/m4.c (defn): Likewise.
+	* m4/debug.c (m4_debug_decode): Handle embedded NUL.
+	* m4/utility.c (m4_parse_truth_arg): Likewise.
+	* modules/format.c (arg_int, arg_long, arg_double): Likewise.
+	(arg_string): New function.
+	(ARG_INT, ARG_LONG, ARG_STR, ARG_DOUBLE): Update callers.
+	* src/main.c (main): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* modules/gnu.c (debugmode, syncoutput): Likewise.
+	* tests/options.at (--regexp-syntax): Adjust test.
+	* tests/freeze.at (reloading nul): Likewise.
+	* tests/null.m4: Likewise.
+	* tests/null.out: Likewise.
+	* tests/null.err: Likewise.
+
 	Stage 28b: Warn on embedded NUL in file arguments.
 	Quote warning messages related to file and other NUL-terminated
 	system commands.

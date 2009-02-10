@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1991, 1992, 1993, 1994, 2006, 2007, 2008 Free
+   Copyright (C) 1991, 1992, 1993, 1994, 2006, 2007, 2008, 2009 Free
    Software Foundation, Inc.
 
    This file is part of GNU M4.
@@ -30,22 +30,31 @@ static void set_debug_file (m4 *, const m4_call_info *, FILE *);
 
 
 
-/* Function to decode the debugging flags OPTS.  Used by main while
-   processing option -d, and by the builtin debugmode ().  */
+/* Function to decode the debugging flags OPTS of length LEN; or
+   SIZE_MAX if OPTS is NUL-terminated.  If OPTS is NULL, use the
+   default flags.  Used by main while processing option -d, and by the
+   builtin debugmode ().  */
 int
-m4_debug_decode (m4 *context, const char *opts)
+m4_debug_decode (m4 *context, const char *opts, size_t len)
 {
   int previous = context->debug_level;
   int level;
   char mode = '\0';
 
-  if (opts == NULL || *opts == '\0')
+  if (!opts)
+    opts = "";
+  if (len == SIZE_MAX)
+    len = strlen (opts);
+  if (!len)
     level = M4_DEBUG_TRACE_DEFAULT | previous;
   else
     {
       if (*opts == '-' || *opts == '+')
-	mode = *opts++;
-      for (level = 0; *opts; opts++)
+	{
+	  len--;
+	  mode = *opts++;
+	}
+      for (level = 0; len--; opts++)
 	{
 	  switch (*opts)
 	    {
@@ -101,9 +110,9 @@ m4_debug_decode (m4 *context, const char *opts)
 	      level |= M4_DEBUG_TRACE_DEREF;
 	      break;
 
-            case 'o':
-               level |= M4_DEBUG_TRACE_OUTPUT_DUMPDEF;
-               break;
+	    case 'o':
+	       level |= M4_DEBUG_TRACE_OUTPUT_DUMPDEF;
+	       break;
 
 	    case 'V':
 	      level |= M4_DEBUG_TRACE_VERBOSE;

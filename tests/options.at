@@ -1,5 +1,6 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software Foundation,
+# Inc.
 
 # This file is part of GNU M4.
 #
@@ -722,7 +723,7 @@ AT_DATA([[in]], [[regexp(`(', `(')
 ]])
 
 AT_CHECK_M4([--regexp-syntax=unknown in], [1], [],
-[[m4: bad regexp syntax option: `unknown'
+[[m4: bad syntax-spec: `unknown'
 ]])
 
 AT_CHECK_M4([--regexp-syntax= in], [0], [[0

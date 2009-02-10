@@ -395,8 +395,10 @@ M4BUILTIN_HANDLER (defn)
 	m4_push_builtin (context, obs, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
 	m4_warn (context, 0, me,
-		 _("%s: builtin `%s' requested by frozen file not found"),
-		 M4ARG (i), m4_get_symbol_placeholder (symbol));
+		 _("%s: builtin %s requested by frozen file not found"),
+		 quotearg_n_mem (2, M4ARG (i), M4ARGLEN (i)),
+		 quotearg_style (locale_quoting_style,
+				 m4_get_symbol_placeholder (symbol)));
       else
 	{
 	  assert (!"Bad token data type in m4_defn");
@@ -947,7 +949,7 @@ M4BUILTIN_HANDLER (index)
 
   if (!m4_arg_empty (argv, 3) && !m4_numeric_arg (context, m4_arg_info (argv),
 						  M4ARG (3), M4ARGLEN (3),
-                                                  &offset))
+						  &offset))
     return;
   if (offset < 0)
     {

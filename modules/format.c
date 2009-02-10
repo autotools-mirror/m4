@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2001, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -26,24 +26,27 @@
    same size; likewise for long and unsigned long.  We do not yet
    handle long double or long long.  */
 
-/* Parse STR as an integer, reporting warnings on behalf of ME.  */
+/* Parse STR of length LEN as an integer, reporting warnings on behalf
+   of ME.  */
 static int
-arg_int (struct m4 *context, const m4_call_info *me, const char *str)
+arg_int (struct m4 *context, const m4_call_info *me, const char *str,
+	 size_t len)
 {
   char *endp;
   long value;
 
   /* TODO - also allow parsing `'a' or `"a' which results in the
      numeric value of 'a', as in printf(1).  */
-  if (*str == '\0')
+  if (!len)
     {
       m4_warn (context, 0, me, _("empty string treated as 0"));
       return 0;
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (*endp != '\0')
-    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  if (endp - str != len)
+    m4_warn (context, 0, me, _("non-numeric argument %s"),
+	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE || (int) value != value)
@@ -51,24 +54,27 @@ arg_int (struct m4 *context, const m4_call_info *me, const char *str)
   return value;
 }
 
-/* Parse STR as a long, reporting warnings on behalf of ME.  */
+/* Parse STR of length LEN as a long, reporting warnings on behalf of
+   ME.  */
 static long
-arg_long (struct m4 *context, const m4_call_info *me, const char *str)
+arg_long (struct m4 *context, const m4_call_info *me, const char *str,
+	  size_t len)
 {
   char *endp;
   long value;
 
   /* TODO - also allow parsing `'a' or `"a' which results in the
      numeric value of 'a', as in printf(1).  */
-  if (*str == '\0')
+  if (!len)
     {
       m4_warn (context, 0, me, _("empty string treated as 0"));
       return 0L;
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (*endp != '\0')
-    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  if (endp - str != len)
+    m4_warn (context, 0, me, _("non-numeric argument %s"),
+	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
@@ -76,22 +82,37 @@ arg_long (struct m4 *context, const m4_call_info *me, const char *str)
   return value;
 }
 
-/* Parse STR as a double, reporting warnings on behalf of ME.  */
+/* Check STR of length LEN for embedded NUL, reporting warnings on
+   behalf of ME.  */
+static const char *
+arg_string (struct m4 *context, const m4_call_info *me, const char *str,
+	    size_t len)
+{
+  if (strlen (str) < len)
+    m4_warn (context, 0, me, _("argument %s truncated"),
+	     quotearg_style_mem (locale_quoting_style, str, len));
+  return str;
+}
+
+/* Parse STR of length LEN as a double, reporting warnings on behalf
+   of ME.  */
 static double
-arg_double (struct m4 *context, const m4_call_info *me, const char *str)
+arg_double (struct m4 *context, const m4_call_info *me, const char *str,
+	    size_t len)
 {
   char *endp;
   double value;
 
-  if (*str == '\0')
+  if (!len)
     {
       m4_warn (context, 0, me, _("empty string treated as 0"));
       return 0.0;
     }
   errno = 0;
   value = strtod (str, &endp);
-  if (*endp != '\0')
-    m4_warn (context, 0, me, _("non-numeric argument `%s'"), str);
+  if (endp - str != len)
+    m4_warn (context, 0, me, _("non-numeric argument %s"),
+	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
@@ -100,16 +121,16 @@ arg_double (struct m4 *context, const m4_call_info *me, const char *str)
 }
 
 #define ARG_INT(i, argc, argv)					\
-  ((argc <= ++i) ? 0 : arg_int (context, me, M4ARG (i)))
+  ((argc <= ++i) ? 0 : arg_int (context, me, M4ARG (i), M4ARGLEN (i)))
 
 #define ARG_LONG(i, argc, argv)					\
-  ((argc <= ++i) ? 0L : arg_long (context, me, M4ARG (i)))
+  ((argc <= ++i) ? 0L : arg_long (context, me, M4ARG (i), M4ARGLEN (i)))
 
 #define ARG_STR(i, argc, argv)					\
-  ((argc <= ++i) ? "" : M4ARG (i))
+  ((argc <= ++i) ? "" : arg_string (context, me, M4ARG (i), M4ARGLEN (i)))
 
 #define ARG_DOUBLE(i, argc, argv)				\
-  ((argc <= ++i) ? 0.0 : arg_double (context, me, M4ARG (i)))
+  ((argc <= ++i) ? 0.0 : arg_double (context, me, M4ARG (i), M4ARGLEN (i)))
 
 
 /* The main formatting function.  Output is placed on the obstack OBS,
