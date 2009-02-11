@@ -1,3 +1,10 @@
+2009-02-11  Eric Blake  <ebb9@byu.net>
+
+	Warn when popping traced but undefined macro.
+	* src/symtab.c (lookup_symbol): Recognize traced placeholder when
+	delete is requested.  Bug introduced 2008-07-18.
+	* doc/m4.texinfo (Trace): Test it.
+
 2009-02-09  Eric Blake  <ebb9@byu.net>
 
 	Enhance index to support starting offset.

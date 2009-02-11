@@ -4134,6 +4134,16 @@ foo
 defn(`foo')
 @error{}m4:stdin:4: Warning: defn: undefined macro `foo'
 @result{}
+undefine(`foo')
+@error{}m4:stdin:5: Warning: undefine: undefined macro `foo'
+@result{}
+pushdef(`foo')
+@result{}
+popdef(`foo')
+@result{}
+popdef(`foo')
+@error{}m4:stdin:8: Warning: popdef: undefined macro `foo'
+@result{}
 define(`foo', `bar')
 @result{}
 foo
@@ -4144,7 +4154,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:9: Warning: indir: undefined macro `foo'
+@error{}m4:stdin:13: Warning: indir: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
