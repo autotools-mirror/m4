@@ -1,3 +1,11 @@
+2009-02-12  Eric Blake  <ebb9@byu.net>
+
+	Avoid quadratic code when walking definition stack.
+	* examples/stack_sep.m4: Use linear, not quadratic
+	implementation.
+	* doc/m4.texinfo (Improved copy): Fix documentation and add test,
+	based on recent autoconf bug fix.
+
 2009-02-11  Eric Blake  <ebb9@byu.net>
 
 	Stage 28: Allow embedded NUL in warning messages.
