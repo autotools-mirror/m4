@@ -10036,13 +10036,21 @@ equivalent to @code{stack_foreach_sep(`@var{macro}', `@var{action}(',
 construct macro calls with more than one argument, without passing
 builtin tokens through a macro call.  It is likewise possible to
 directly reference the stack definitions without a macro call, by
-leaving @var{pre} and @var{post} empty.  The new macro also adds a
-separator that is only output after the first iteration of the helper
-@code{_stack_reverse_sep}, implemented by prepending the original
-@var{sep} to @var{pre} and omitting a @var{sep} argument in subsequent
-iterations.  As an added bonus, using @code{stack_foreach_sep} to
-implement @code{copy} performs fewer macro invocations.  The improved
-stack walking macros are available in
+leaving @var{pre} and @var{post} empty.  Thus, in addition to fixing
+@code{copy} on builtin tokens, it also executes with fewer macro
+invocations.
+
+The new macro also adds a separator that is only output after the first
+iteration of the helper @code{_stack_reverse_sep}, implemented by
+prepending the original @var{sep} to @var{pre} and omitting a @var{sep}
+argument in subsequent iterations.  Note that the empty string that
+separates @var{sep} from @var{pre} is provided as part of the fourth
+argument when originally calling @code{_stack_reverse_sep}, and not by
+writing @code{$4`'$3} as the third argument in the recursive call; while
+the other approach would give the same output, it does so at the expense
+of increasing the argument size on each iteration of
+@code{_stack_reverse_sep}, which results in quadratic instead of linear
+execution time.  The improved stack walking macros are available in
 @file{m4-@value{VERSION}/@/examples/@/stack_sep.m4}:
 
 @comment examples
@@ -10075,15 +10083,15 @@ undivert(`stack_sep.m4')dnl
 @result{}# separated by SEP between definitions.
 @result{}define(`stack_foreach_sep',
 @result{}`_stack_reverse_sep(`$1', `tmp-$1')'dnl
-@result{}`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4')')
+@result{}`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4`'')')
 @result{}# stack_foreach_sep_lifo(macro, pre, post, sep)
 @result{}# Like stack_foreach_sep, but starting with the newest definition.
 @result{}define(`stack_foreach_sep_lifo',
-@result{}`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4')'dnl
+@result{}`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4`'')'dnl
 @result{}`_stack_reverse_sep(`tmp-$1', `$1')')
 @result{}define(`_stack_reverse_sep',
 @result{}`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0(
-@result{}  `$1', `$2', `$4`'$3')')')
+@result{}  `$1', `$2', `$4$3')')')
 @result{}divert`'dnl
 @end example
 

@@ -483,6 +483,15 @@ AT_CHECK_M4([-I "$top_srcdir/examples" -Dlimit=10000 -Dalt=4 in.m4], [0],
 [[48894
 ]])
 
+dnl foreach via definition stack
+AT_DATA([in.m4], [[include(`forloop3.m4')include(`stack_sep.m4')dnl
+forloop(`i', `1', `10000', `pushdef(`s', i)')dnl
+define(`colon', `:')define(`dash', `-')dnl
+len(stack_foreach_sep(`s', `dash', `', `colon'))
+]])
+AT_CHECK_M4([-I "$top_srcdir/examples" in.m4], [0], [[58893
+]])
+
 AT_CLEANUP
 
 
