@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008,
+   2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -1287,6 +1287,7 @@ next_char (m4 *context, bool allow_quote, bool allow_argv, bool allow_unget)
 	{
 	  m4_set_current_file (context, isp->file);
 	  m4_set_current_line (context, isp->line);
+	  input_change = false;
 	}
 
       assert (isp->funcs->read_func);
