@@ -24,6 +24,9 @@
 
 #include "m4private.h"
 
+#include "freadptr.h"
+#include "freadseek.h"
+
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INPUT */
 
@@ -43,9 +46,11 @@
 
    Each input_block has an associated struct input_funcs, which is a
    vtable that defines polymorphic functions for peeking, reading,
-   unget, cleanup, and printing in trace output.  All input is done
-   through the function pointers of the input_funcs on the given
-   input_block, and all characters are unsigned, to distinguish
+   unget, cleanup, and printing in trace output.  Getting a single
+   character at a time is inefficient, so there are also functions for
+   accessing the readahead buffer and consuming bulk input.  All input
+   is done through the function pointers of the input_funcs on the
+   given input_block, and all characters are unsigned, to distinguish
    between stdio EOF and between special sentinel characters.  When a
    input_block is exhausted, its reader returns CHAR_RETRY which
    causes the input_block to be popped from the input_stack.
@@ -94,30 +99,41 @@
 
 typedef struct m4_input_block m4_input_block;
 
-static	int	file_peek		(m4_input_block *, m4 *, bool);
-static	int	file_read		(m4_input_block *, m4 *, bool, bool,
+static	int		file_peek	(m4_input_block *, m4 *, bool);
+static	int		file_read	(m4_input_block *, m4 *, bool, bool,
 					 bool);
-static	void	file_unget		(m4_input_block *, int);
-static	bool	file_clean		(m4_input_block *, m4 *, bool);
-static	void	file_print		(m4_input_block *, m4 *, m4_obstack *,
+static	void		file_unget	(m4_input_block *, int);
+static	bool		file_clean	(m4_input_block *, m4 *, bool);
+static	void		file_print	(m4_input_block *, m4 *, m4_obstack *,
 					 int);
-static	int	string_peek		(m4_input_block *, m4 *, bool);
-static	int	string_read		(m4_input_block *, m4 *, bool, bool,
+static	const char *	file_buffer	(m4_input_block *, m4 *, size_t *,
 					 bool);
-static	void	string_unget		(m4_input_block *, int);
-static	void	string_print		(m4_input_block *, m4 *, m4_obstack *,
+static	void		file_consume	(m4_input_block *, m4 *, size_t);
+static	int		string_peek	(m4_input_block *, m4 *, bool);
+static	int		string_read	(m4_input_block *, m4 *, bool, bool,
+					 bool);
+static	void		string_unget	(m4_input_block *, int);
+static	void		string_print	(m4_input_block *, m4 *, m4_obstack *,
 					 int);
-static	int	composite_peek		(m4_input_block *, m4 *, bool);
-static	int	composite_read		(m4_input_block *, m4 *, bool, bool,
+static	const char *	string_buffer	(m4_input_block *, m4 *, size_t *,
 					 bool);
-static	void	composite_unget		(m4_input_block *, int);
-static	bool	composite_clean		(m4_input_block *, m4 *, bool);
-static	void	composite_print		(m4_input_block *, m4 *, m4_obstack *,
+static	void		string_consume	(m4_input_block *, m4 *, size_t);
+static	int		composite_peek	(m4_input_block *, m4 *, bool);
+static	int		composite_read	(m4_input_block *, m4 *, bool, bool,
+					 bool);
+static	void		composite_unget	(m4_input_block *, int);
+static	bool		composite_clean	(m4_input_block *, m4 *, bool);
+static	void		composite_print	(m4_input_block *, m4 *, m4_obstack *,
 					 int);
-static	int	eof_peek		(m4_input_block *, m4 *, bool);
-static	int	eof_read		(m4_input_block *, m4 *, bool, bool,
+static	const char *	composite_buffer (m4_input_block *, m4 *, size_t *,
+					  bool);
+static	void		composite_consume (m4_input_block *, m4 *, size_t);
+static	int		eof_peek	(m4_input_block *, m4 *, bool);
+static	int		eof_read	(m4_input_block *, m4 *, bool, bool,
 					 bool);
-static	void	eof_unget		(m4_input_block *, int);
+static	void		eof_unget	(m4_input_block *, int);
+static	const char *	eof_buffer	(m4_input_block *, m4 *, size_t *,
+					 bool);
 
 static	void	init_builtin_token	(m4 *, m4_obstack *,
 					 m4_symbol_value *);
@@ -128,6 +144,8 @@ static	int	next_char		(m4 *, bool, bool, bool);
 static	int	peek_char		(m4 *, bool);
 static	bool	pop_input		(m4 *, bool);
 static	void	unget_input		(int);
+static	const char * next_buffer	(m4 *, size_t *, bool);
+static	void	consume_buffer		(m4 *, size_t);
 static	bool	consume_syntax		(m4 *, m4_obstack *, unsigned int);
 
 #ifdef DEBUG_INPUT
@@ -165,6 +183,20 @@ struct input_funcs
   /* Add a representation of the input block to the obstack, for use
      in trace expansion output.  */
   void	(*print_func)	(m4_input_block *, m4 *, m4_obstack *, int);
+
+  /* Return a pointer to the current readahead buffer, and set LEN to
+     the length of the result.  If ALLOW_QUOTE, do not return a buffer
+     for a quoted string.  If there is data, but the result of
+     next_char() would not fit in a char (for example, CHAR_EOF or
+     CHAR_QUOTE) or there is no readahead data available, return NULL,
+     and the caller must use next_char().  If there is no more data,
+     return buffer_retry.  The buffer is only valid until the next
+     consume_buffer() or next_char().  */
+  const char *(*buffer_func) (m4_input_block *, m4 *, size_t *, bool);
+
+  /* Optional function to consume data from a readahead buffer
+     previously obtained through buffer_func.  */
+  void (*consume_func) (m4_input_block *, m4 *, size_t);
 };
 
 /* A block of input to be scanned.  */
@@ -235,27 +267,32 @@ static bool input_change;
 
 /* Vtable for handling input from files.  */
 static struct input_funcs file_funcs = {
-  file_peek, file_read, file_unget, file_clean, file_print
+  file_peek, file_read, file_unget, file_clean, file_print, file_buffer,
+  file_consume
 };
 
 /* Vtable for handling input from strings.  */
 static struct input_funcs string_funcs = {
-  string_peek, string_read, string_unget, NULL, string_print
+  string_peek, string_read, string_unget, NULL, string_print, string_buffer,
+  string_consume
 };
 
 /* Vtable for handling input from composite chains.  */
 static struct input_funcs composite_funcs = {
   composite_peek, composite_read, composite_unget, composite_clean,
-  composite_print
+  composite_print, composite_buffer, composite_consume
 };
 
 /* Vtable for recognizing end of input.  */
 static struct input_funcs eof_funcs = {
-  eof_peek, eof_read, eof_unget, NULL, NULL
+  eof_peek, eof_read, eof_unget, NULL, NULL, eof_buffer, NULL
 };
 
 /* Marker at end of an input stack.  */
 static m4_input_block input_eof = { NULL, &eof_funcs, "", 0 };
+
+/* Marker for buffer_func when current block has no more data.  */
+static const char buffer_retry[1];
 
 
 /* Input files, from command line or [s]include.  */
@@ -354,6 +391,42 @@ file_print (m4_input_block *me, m4 *context M4_GNUC_UNUSED, m4_obstack *obs,
   obstack_1grow (obs, '>');
 }
 
+static const char *
+file_buffer (m4_input_block *me, m4 *context M4_GNUC_UNUSED, size_t *len,
+	     bool allow_quote M4_GNUC_UNUSED)
+{
+  if (start_of_input_line)
+    {
+      start_of_input_line = false;
+      m4_set_current_line (context, ++me->line);
+    }
+  if (me->u.u_f.end)
+    return buffer_retry;
+  return freadptr (isp->u.u_f.fp, len);
+}
+
+static void
+file_consume (m4_input_block *me, m4 *context, size_t len)
+{
+  const char *buf;
+  const char *p;
+  size_t buf_len;
+  assert (!start_of_input_line);
+  buf = freadptr (me->u.u_f.fp, &buf_len);
+  assert (buf && len <= buf_len);
+  buf_len = 0;
+  while ((p = memchr (buf + buf_len, '\n', len - buf_len)))
+    {
+      if (p == buf + len - 1)
+	start_of_input_line = true;
+      else
+	m4_set_current_line (context, ++me->line);
+      buf_len = p - buf + 1;
+    }
+  if (freadseek (isp->u.u_f.fp, len) != 0)
+    assert (false);
+}
+
 /* m4_push_file () pushes an input file FP with name TITLE on the
   input stack, saving the current file name and line number.  If next
   is non-NULL, this push invalidates a call to m4_push_string_init (),
@@ -437,6 +510,24 @@ string_print (m4_input_block *me, m4 *context, m4_obstack *obs,
 			   obstack_object_size (current_input),
 			   quote ? m4_get_syntax_quotes (M4SYNTAX) : NULL,
 			   &arg_length);
+}
+
+static const char *
+string_buffer (m4_input_block *me, m4 *context M4_GNUC_UNUSED, size_t *len,
+	       bool allow_quote M4_GNUC_UNUSED)
+{
+  if (!me->u.u_s.len)
+    return buffer_retry;
+  *len = me->u.u_s.len;
+  return me->u.u_s.str;
+}
+
+static void
+string_consume (m4_input_block *me, m4 *context M4_GNUC_UNUSED, size_t len)
+{
+  assert (len <= me->u.u_s.len);
+  me->u.u_s.len -= len;
+  me->u.u_s.str += len;
 }
 
 /* First half of m4_push_string ().  The pointer next points to the
@@ -904,6 +995,63 @@ composite_print (m4_input_block *me, m4 *context, m4_obstack *obs,
     m4_shipout_string (context, obs, quotes->str2, quotes->len2, false);
 }
 
+static const char *
+composite_buffer (m4_input_block *me, m4 *context, size_t *len,
+		  bool allow_quote)
+{
+  m4__symbol_chain *chain = me->u.u_c.chain;
+  while (chain)
+    {
+      if (allow_quote && chain->quote_age == m4__quote_age (M4SYNTAX))
+	return NULL; /* CHAR_QUOTE doesn't fit in buffer.  */
+      switch (chain->type)
+	{
+	case M4__CHAIN_STR:
+	  if (chain->u.u_s.len)
+	    {
+	      *len = chain->u.u_s.len;
+	      return chain->u.u_s.str;
+	    }
+	  if (chain->u.u_s.level < SIZE_MAX)
+	    m4__adjust_refcount (context, chain->u.u_s.level, false);
+	  break;
+	case M4__CHAIN_FUNC:
+	  if (chain->u.builtin)
+	    return NULL; /* CHAR_BUILTIN doesn't fit in buffer.  */
+	  break;
+	case M4__CHAIN_ARGV:
+	  if (chain->u.u_a.index == m4_arg_argc (chain->u.u_a.argv))
+	    {
+	      m4__arg_adjust_refcount (context, chain->u.u_a.argv, false);
+	      break;
+	    }
+	  return NULL; /* No buffer to provide.  */
+	case M4__CHAIN_LOC:
+	  me->file = chain->u.u_l.file;
+	  me->line = chain->u.u_l.line;
+	  input_change = true;
+	  me->u.u_c.chain = chain->next;
+	  return next_buffer (context, len, allow_quote);
+	default:
+	  assert (!"composite_buffer");
+	  abort ();
+	}
+      me->u.u_c.chain = chain = chain->next;
+    }
+  return buffer_retry;
+}
+
+static void
+composite_consume (m4_input_block *me, m4 *context M4_GNUC_UNUSED, size_t len)
+{
+  m4__symbol_chain *chain = me->u.u_c.chain;
+  assert (chain && chain->type == M4__CHAIN_STR && len <= chain->u.u_s.len);
+  /* Partial consumption invalidates quote age.  */
+  chain->quote_age = 0;
+  chain->u.u_s.len -= len;
+  chain->u.u_s.str += len;
+}
+
 /* Given an obstack OBS, capture any unfinished text as a link in the
    chain that starts at *START and ends at *END.  START may be NULL if
    *END is non-NULL.  */
@@ -999,6 +1147,13 @@ static void
 eof_unget (m4_input_block *me M4_GNUC_UNUSED, int ch)
 {
   assert (ch == CHAR_EOF);
+}
+
+static const char *
+eof_buffer (m4_input_block *me M4_GNUC_UNUSED, m4 *context M4_GNUC_UNUSED,
+	    size_t *len M4_GNUC_UNUSED, bool allow_unget M4_GNUC_UNUSED)
+{
+  return NULL;
 }
 
 
@@ -1340,6 +1495,50 @@ unget_input (int ch)
   isp->funcs->unget_func (isp, ch);
 }
 
+/* Return a pointer to the available bytes of the current input block,
+   and set *LEN to the length of the result.  If ALLOW_QUOTE, do not
+   return a buffer for a quoted string.  If the result does not fit in
+   a char (for example, CHAR_EOF or CHAR_QUOTE), or if there is no
+   readahead data available, return NULL, and the caller must fall
+   back to next_char().  The buffer is only valid until the next
+   consume_buffer() or next_char().  */
+static const char *
+next_buffer (m4 *context, size_t *len, bool allow_quote)
+{
+  const char *buf;
+  while (1)
+    {
+      assert (isp);
+      if (input_change)
+	{
+	  m4_set_current_file (context, isp->file);
+	  m4_set_current_line (context, isp->line);
+	  input_change = false;
+	}
+
+      assert (isp->funcs->buffer_func);
+      buf = isp->funcs->buffer_func (isp, context, len, allow_quote);
+      if (buf != buffer_retry)
+	return buf;
+      /* End of input source --- pop one level.  */
+      pop_input (context, true);
+    }
+}
+
+/* Consume LEN bytes from the current input block, as though by LEN
+   calls to next_char().  LEN must be less than or equal to the
+   previous length returned by a successful call to next_buffer().  */
+static void
+consume_buffer (m4 *context, size_t len)
+{
+  assert (isp && !input_change);
+  if (len)
+    {
+      assert (isp->funcs->consume_func);
+      isp->funcs->consume_func (isp, context, len);
+    }
+}
+
 /* skip_line () simply discards all immediately following characters,
    up to the first newline.  It is only used from m4_dnl ().  Report
    errors on behalf of CALLER.  */
@@ -1348,9 +1547,28 @@ m4_skip_line (m4 *context, const m4_call_info *caller)
 {
   int ch;
 
-  while ((ch = next_char (context, false, false, false)) != CHAR_EOF
-	 && ch != '\n')
-    ;
+  while (1)
+    {
+      size_t len;
+      const char *buffer = next_buffer (context, &len, false);
+      if (buffer)
+	{
+	  const char *p = (char *) memchr (buffer, '\n', len);
+	  if (p)
+	    {
+	      consume_buffer (context, p - buffer + 1);
+	      ch = '\n';
+	      break;
+	    }
+	  consume_buffer (context, len);
+	}
+      else
+	{
+	  ch = next_char (context, false, false, false);
+	  if (ch == CHAR_EOF || ch == '\n')
+	    break;
+	}
+    }
   if (ch == CHAR_EOF)
     m4_warn (context, 0, caller, _("end of file treated as newline"));
 }
@@ -1377,16 +1595,26 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
   const char *t;
   m4_obstack *st;
   bool result = false;
+  size_t buf_len;
 
   if (consume)
     {
       s++;
       len--;
     }
+  /* Try a buffer match first.  */
   assert (len);
+  t = next_buffer (context, &buf_len, false);
+  if (t && len <= buf_len && memcmp (s, t, len) == 0)
+    {
+      if (consume)
+	consume_buffer (context, len);
+      return true;
+    }
+  /* Fall back on byte matching.  */
   ch = peek_char (context, false);
   if (ch != to_uchar (*s))
-    return false;			/* fail */
+    return false;
 
   if (len == 1)
     {
@@ -1445,20 +1673,37 @@ consume_syntax (m4 *context, m4_obstack *obs, unsigned int syntax)
   assert (syntax);
   while (1)
     {
-      /* It is safe to call next_char without first checking
-	 peek_char, except at input source boundaries, which we detect
-	 by CHAR_RETRY.  We exploit the fact that CHAR_EOF,
-	 CHAR_BUILTIN, CHAR_QUOTE, and CHAR_ARGV do not satisfy any
-	 syntax categories.  */
-      while ((ch = next_char (context, allow, allow, true)) != CHAR_RETRY
-	     && m4_has_syntax (M4SYNTAX, ch, syntax))
+      /* Start with a buffer search.  */
+      size_t len;
+      const char *buffer = next_buffer (context, &len, allow);
+      if (buffer)
 	{
-	  assert (ch < CHAR_EOF);
+	  const char *p = buffer;
+	  while (len && m4_has_syntax (M4SYNTAX, *p, syntax))
+	    {
+	      len--;
+	      p++;
+	    }
+	  obstack_grow (obs, buffer, p - buffer);
+	  consume_buffer (context, p - buffer);
+	  if (len)
+	    return false;
+	}
+      /* Fall back to byte-wise search.  It is safe to call next_char
+	 without first checking peek_char, except at input source
+	 boundaries, which we detect by CHAR_RETRY.  */
+      ch = next_char (context, allow, allow, true);
+      if (ch < CHAR_EOF && m4_has_syntax (M4SYNTAX, ch, syntax))
+	{
 	  obstack_1grow (obs, ch);
+	  continue;
 	}
       if (ch == CHAR_RETRY || ch == CHAR_QUOTE || ch == CHAR_ARGV)
 	{
 	  ch = peek_char (context, false);
+	  /* We exploit the fact that CHAR_EOF, CHAR_BUILTIN,
+	     CHAR_QUOTE, and CHAR_ARGV do not satisfy any syntax
+	     categories.  */
 	  if (m4_has_syntax (M4SYNTAX, ch, syntax))
 	    {
 	      assert (ch < CHAR_EOF);

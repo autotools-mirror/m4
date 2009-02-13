@@ -1,5 +1,25 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Stage 29a: Process dnl and macro names by buffer, not bytes.
+	Enhance input engine to provide lookahead buffer, rather than
+	forcing clients to call next_char for every byte.  Utilize this
+	for the simplest clients.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer function calls.
+	* ltdl/m4/gnulib-cache.m4: Import freadptr and freadseek modules.
+	* m4/input.c (struct input_funcs): Add virtual functions
+	buffer_func and consume_func.
+	(file_buffer, file_consume, string_buffer, string_consume)
+	(composite_buffer, composite_consume, eof_buffer): Implement
+	them.
+	(file_funcs, string_funcs, composite_funcs, eof_funcs): Update
+	vtables accordingly.
+	(buffer_retry): New sentinel.
+	(next_buffer, consume_buffer): New functions.
+	(m4_skip_line, match_input, consume_syntax): Use them for faster
+	parsing.
+	Suggested by Bruno Haible.
+
 	Unify single and multi-character delimiter handling.
 	* m4/input.c (MATCH): Add a parameter.
 	(m4__next_token): Simplify logic and reduce redundancy.
