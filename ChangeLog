@@ -1,5 +1,9 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Improve changesyntax documentation.
+	* doc/m4.texinfo (Changesyntax): Merge two tables into one
+	multitable.
+
 	Fix regression in multicharacter quotes, from 2008-01-26.
 	* m4/input.c (m4__next_token): Fix typo.
 	* tests/builtins.at (changequote): Enhance test.

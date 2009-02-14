@@ -5401,108 +5401,9 @@ Each token is parsed according to certain rules.  For example, a macro
 name starts with a letter or @samp{_} and consists of the longest
 possible string of letters, @samp{_} and digits.  But who is to decide
 what characters are letters, digits, quotes, white space?  Earlier the
-operating system decided, now you do.
-
-Input characters belong to different categories:
-
-@table @dfn
-@item Letters
-Characters that start a macro name.  Defaults to the letters as defined
-by the locale, and the character @samp{_}.
-
-@item Digits
-Characters that, together with the letters, form the remainder of a
-macro name.  Defaults to the ten digits @samp{0}@dots{}@samp{9}, and any
-other digits defined by the locale.
-
-@item White space
-Characters that should be trimmed from the beginning of each argument to
-a macro call.  The defaults are space, tab, newline, carriage return,
-form feed, and vertical tab, and any others as defined by the locale.
-
-@item Open parenthesis
-Characters that open the argument list of a macro call.  The default is
-the single character @samp{(}.
-
-@item Close parenthesis
-Characters that close the argument list of a macro call.  The default
-is the single character @samp{)}.
-
-@item Argument separator
-Characters that separate the arguments of a macro call.  The default is
-the single character @samp{,}.
-
-@item Dollar
-Characters that can introduce an argument reference in the body of a
-macro.  The default is the single character @samp{$}.
-
-@item Left brace
-Characters that introduce an extended argument reference in the body of
-a macro immediately after a character in the Dollar category.  The
-default is the single character @samp{@{}.
-
-@item Right brace
-Characters that conclude an extended argument reference in the body of a
-macro.  The default is the single character @samp{@}}.
-
-@item Left quote
-The set of characters that can start a single-character quoted string.
-The default is the single character @samp{`}.  For multiple-character
-quote delimiters, use @code{changequote} (@pxref{Changequote}).
-
-@item Begin comment
-The set of characters that can start a single-character comment.  The
-default is the single character @samp{#}.  For multiple-character
-comment delimiters, use @code{changecom} (@pxref{Changecom}).
-
-@item Other
-Characters that have no special syntactical meaning to @code{m4}.
-Defaults to all characters except those in the categories above.
-
-@item Active
-Characters that themselves, alone, form macro names.  This is a
-@acronym{GNU} extension, and active characters have lower precedence
-than comments.  By default, no characters are active.
-
-@item Escape
-Characters that must precede macro names for them to be recognized.
-This is a @acronym{GNU} extension.  When an escape character is defined,
-then macros are not recognized unless the escape character is present;
-however, the macro name, visible by @samp{$0} in macro definitions, does
-not include the escape character.  By default, no characters are
-escapes.
-
-@comment FIXME - we should also consider supporting:
-@comment @item Ignore - characters that are ignored if they appear in
-@comment the input; perhaps defaulting to '\0', category 'I'.
-@end table
-
-@noindent
-Each character can, besides the basic syntax category, have some syntax
-attributes.  One reason these are attributes rather than categories is
-that end delimiters are never recognized except when searching for the
-end of a token triggered by a start delimiter; the end delimiter can
-have syntax properties of its own when it appears in isolation.  These
-attributes are:
-
-@table @dfn
-@item Right quote
-The set of characters that can end a single-character quoted string.
-The default is the single character @samp{'}.  For multiple-character
-quote delimiters, use @code{changequote} (@pxref{Changequote}).  Note
-that @samp{'} also defaults to the syntax category `Other', when it
-appears in isolation.
-
-@item End comment
-The set of characters that can end a single-character comment.  The
-default is the single character @kbd{newline}.  For multiple-character
-comment delimiters, use @code{changecom} (@pxref{Changecom}).  Note that
-newline also defaults to the syntax category `White space', when it
-appears in isolation.
-@end table
-
-The builtin macro @code{changesyntax} is used to change the way
-@code{m4} parses the input stream into tokens.
+operating system decided, now you do.  The builtin macro
+@code{changesyntax} is used to change the way @code{m4} parses the input
+stream into tokens.
 
 @deffn {Builtin (gnu)} changesyntax (@var{syntax-spec}, @dots{})
 Each @var{syntax-spec} is a two-part string.  The first part is a
@@ -5513,45 +5414,7 @@ remove the listed characters from that category and reassign them to the
 and reassign all other characters previously in that category to
 `Other', or @samp{+} to add the listed characters to the category
 without affecting other characters.  If an action is not specified, but
-additional characters are present, then @samp{=} is assumed.  The
-case-insensitive characters for the syntax categories are:
-
-@table @kbd
-@item W
-Letters
-@item D
-Digits
-@item S
-White space
-@item (
-Open parenthesis
-@item )
-Close parenthesis
-@item ,
-Argument separator
-@item $
-Dollar
-@item @{
-Left brace
-@item @}
-Right brace
-@item O
-Other
-@item @@
-Escape
-@item A
-Active
-@item L
-Left quote
-@item R
-Right quote
-@item B
-Begin comment
-@item E
-End comment
-@comment @item I
-@comment Ignore
-@end table
+additional characters are present, then @samp{=} is assumed.
 
 The remaining characters of each @var{syntax-spec} form the set of
 characters to perform the action on for that syntax category.  Character
@@ -5565,6 +5428,110 @@ default state.  A warning is issued if the category character is not
 valid.  If @var{syntax-spec} is the empty string, then all categories
 are reset to their default state.
 
+Syntax categories are divided into basic and context.  Every input
+byte belongs to exactly one basic syntax category.  Additionally, any
+byte can be assigned to a context category regardless of its current
+basic category.  Context categories exist because a character can
+behave differently when parsed in isolation than when it occurs in
+context to close out a token started by another basic category (for
+example, @kbd{newline} defaults to the basic category `Whitespace' as
+well as the context category `End comment').
+
+The following table describes the case-insensitive designation for each
+syntax category (the first byte in @var{syntax-spec}), and a description
+of what each category controls.
+
+@multitable @columnfractions .06 .20 .13 .55
+@headitem Code @tab Category @tab Type @tab Description
+
+@item @kbd{W} @tab @dfn{Words} @tab Basic
+@tab Characters that can start a macro name.  Defaults to the letters as
+defined by the locale, and the character @samp{_}.
+
+@item @kbd{D} @tab @dfn{Digits} @tab Basic
+@tab Characters that, together with the letters, form the remainder of a
+macro name.  Defaults to the ten digits @samp{0}@dots{}@samp{9}, and any
+other digits defined by the locale.
+
+@item @kbd{S} @tab @dfn{White space} @tab Basic
+@tab Characters that should be trimmed from the beginning of each argument to
+a macro call.  The defaults are space, tab, newline, carriage return,
+form feed, and vertical tab, and any others as defined by the locale.
+
+@item @kbd{(} @tab @dfn{Open parenthesis} @tab Basic
+@tab Characters that open the argument list of a macro call.  The default is
+the single character @samp{(}.
+
+@item @kbd{)} @tab @dfn{Close parenthesis} @tab Basic
+@tab Characters that close the argument list of a macro call.  The default
+is the single character @samp{)}.
+
+@item @kbd{,} @tab @dfn{Argument separator} @tab Basic
+@tab Characters that separate the arguments of a macro call.  The default is
+the single character @samp{,}.
+
+@item @kbd{L} @tab @dfn{Left quote} @tab Basic
+@tab The set of characters that can start a single-character quoted string.
+The default is the single character @samp{`}.  For multiple-character
+quote delimiters, use @code{changequote} (@pxref{Changequote}).
+
+@item @kbd{R} @tab @dfn{Right quote} @tab Context
+@tab The set of characters that can end a single-character quoted string.
+The default is the single character @samp{'}.  For multiple-character
+quote delimiters, use @code{changequote} (@pxref{Changequote}).  Note
+that @samp{'} also defaults to the syntax category `Other', when it
+appears in isolation.
+
+@item @kbd{B} @tab @dfn{Begin comment} @tab Basic
+@tab The set of characters that can start a single-character comment.  The
+default is the single character @samp{#}.  For multiple-character
+comment delimiters, use @code{changecom} (@pxref{Changecom}).
+
+@item @kbd{E} @tab @dfn{End comment} @tab Context
+@tab The set of characters that can end a single-character comment.  The
+default is the single character @kbd{newline}.  For multiple-character
+comment delimiters, use @code{changecom} (@pxref{Changecom}).  Note that
+newline also defaults to the syntax category `White space', when it
+appears in isolation.
+
+@comment FIXME - make ${} context, not basic
+@item @kbd{$} @tab @dfn{Dollar} @tab Basic
+@tab Characters that can introduce an argument reference in the body of a
+macro.  The default is the single character @samp{$}.
+
+@comment FIXME - implement ${10} argument parsing.
+@item @kbd{@{} @tab @dfn{Left brace} @tab Basic
+@tab Characters that introduce an extended argument reference in the body of
+a macro immediately after a character in the Dollar category.  The
+default is the single character @samp{@{}.
+
+@item @kbd{@}} @tab @dfn{Right brace} @tab Basic
+@tab Characters that conclude an extended argument reference in the body of a
+macro.  The default is the single character @samp{@}}.
+
+@item @kbd{O} @tab @dfn{Other} @tab Basic
+@tab Characters that have no special syntactical meaning to @code{m4}.
+Defaults to all characters except those in the categories above.
+
+@item @kbd{A} @tab @dfn{Active} @tab Basic
+@tab Characters that themselves, alone, form macro names.  This is a
+@acronym{GNU} extension, and active characters have lower precedence
+than comments.  By default, no characters are active.
+
+@item @kbd{@@} @tab @dfn{Escape} @tab Basic
+@tab Characters that must precede macro names for them to be recognized.
+This is a @acronym{GNU} extension.  When an escape character is defined,
+then macros are not recognized unless the escape character is present;
+however, the macro name, visible by @samp{$0} in macro definitions, does
+not include the escape character.  By default, no characters are
+escapes.
+
+@comment FIXME - we should also consider supporting:
+@comment @item @kbd{I} @tab @dfn{Ignore} @tab Basic
+@comment @tab Characters that are ignored if they appear in
+@comment the input; perhaps defaulting to '\0'.
+@end multitable
+
 The expansion of @code{changesyntax} is void.
 The macro @code{changesyntax} is recognized only with parameters.  Use
 this macro with caution, as it is possible to change the syntax in such
@@ -5572,7 +5539,9 @@ a way that no further macros can be recognized by @code{m4}.
 This macro was added in M4 2.0.
 @end deffn
 
-With @code{changesyntax} we can modify what characters form a word.
+With @code{changesyntax} we can modify what characters form a word.  For
+example, we can make @samp{.} a valid character in a macro name, or even
+start a macro name with a number.
 
 @example
 define(`test.1', `TEST ONE')
@@ -5583,18 +5552,21 @@ __file__
 @result{}stdin
 test.1
 @result{}test.1
+dnl Add `.' and remove `_'.
 changesyntax(`W+.', `W-_')
 @result{}
 __file__
 @result{}__file__
 test.1
 @result{}TEST ONE
+dnl Set words to include numbers.
 changesyntax(`W=a-zA-Z0-9_')
 @result{}
 __file__
 @result{}stdin
 test.1
 @result{}test.one
+dnl Reset words to default (a-zA-Z_).
 changesyntax(`W')
 @result{}
 __file__
@@ -5610,6 +5582,7 @@ define(`test', `$#')
 @result{}
 test(a, b, c)
 @result{}3
+dnl Change macro syntax.
 changesyntax(`(<', `,|', `)>')
 @result{}
 test(a, b, c)
@@ -5627,10 +5600,14 @@ define(`test', `$1$2$3')
 @result{}
 test(`a', `b', `c')
 @result{}abc
-changesyntax(`O 'format(`%c', `9'))
+dnl Don't ignore whitespace.
+changesyntax(`O 'format(``%c'', `9')`
+')
 @result{}
-test(a, b, c)
-@result{}a b c
+test(a, b,
+c)
+@result{}a b
+@result{}c
 @end example
 
 It is possible to redefine the @samp{$} used to indicate macro arguments
@@ -5641,6 +5618,7 @@ define(`argref', `Dollar: $#, Question: ?#')
 @result{}
 argref(1, 2, 3)
 @result{}Dollar: 3, Question: ?#
+dnl Change argument identifier.
 changesyntax(`$?', `O$')
 @result{}
 argref(1,2,3)
@@ -5654,6 +5632,7 @@ valid expansion.
 @example
 define(`escape', `$?`'1$?1?')
 @result{}
+dnl Change argument identifier.
 changesyntax(`$?')
 @result{}
 escape(foo)
@@ -5674,6 +5653,7 @@ They and the escape character are simply output.
 @example
 define(`foo', `bar')
 @result{}
+dnl Require @@ escape before any macro.
 changesyntax(`@@@@')
 @result{}
 foo
@@ -5682,6 +5662,7 @@ foo
 @result{}bar
 @@bar
 @result{}@@bar
+@@dnl Change escape character.
 @@changesyntax(`@@\', `O@@')
 @result{}
 foo
@@ -5705,14 +5686,24 @@ definition, the macro will be called.
 @example
 define(`@@', `TEST')
 @result{}
+define(`a@@a', `hello')
+@result{}
+define(`a', `A')
+@result{}
 @@
 @result{}@@
+a@@a
+@result{}A@@A
+dnl Make @@ active.
 changesyntax(`A@@')
 @result{}
 @@
 @result{}TEST
+a@@a
+@result{}ATESTa
 @end example
 
+@comment FIXME - improve this wording
 There is obviously an overlap with @code{changecom} and
 @code{changequote}.  Comment delimiters and quotes can now be defined in
 two different ways.  To avoid incompatibilities, if the quotes are set
@@ -5720,12 +5711,13 @@ with @code{changequote}, all other characters marked in the syntax table
 as quotes will revert to their normal syntax categories, leaving only
 one set of defined quotes as before.  If the quotes are set with
 @code{changesyntax}, it is possible to result in multiple sets of
-quotes.  This applies to comment delimiters as well, @emph{mutatis
+quotes.  This applies to comment delimiters as well, @i{mutatis
 mutandis}.
 
 @example
 define(`test', `TEST')
 @result{}
+dnl Add additional single-byte delimiters.
 changesyntax(`L+<', `R+>')
 @result{}
 <test>
@@ -5749,6 +5741,7 @@ character tokens, all such characters are treated as equal.  Any open
 parenthesis will match any close parenthesis, etc.
 
 @example
+dnl Go crazy with symbols.
 changesyntax(`(@{<', `)@}>', `,;:', `O(,)')
 @result{}
 eval@{2**4-1; 2: 8>
