@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2004,
-   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -472,16 +472,18 @@ struct m4_syntax_table {
   m4_string_pair quote;	/* Quote delimiters.  */
   m4_string_pair comm;	/* Comment delimiters.  */
 
-  /* True iff strlen(lquote) == strlen(rquote) == 1 and lquote is not
-     interfering with macro names.  */
+  /* True iff only one start and end quote delimiter exist.  */
   bool_bitfield is_single_quotes : 1;
 
-  /* True iff strlen(bcomm) == strlen(ecomm) == 1 and bcomm is not
-     interfering with macros or quotes.  */
+  /* True iff only one start and end comment delimiter exist.  */
   bool_bitfield is_single_comments : 1;
 
   /* True iff some character has M4_SYNTAX_ESCAPE.  */
   bool_bitfield is_macro_escaped : 1;
+
+  /* True iff a changesyntax call has impacted something that requires
+     cleanup at the end.  */
+  bool_bitfield suspect : 1;
 
   /* Track the number of changesyntax calls.  This saturates at
      0xffff, so the idea is that most users won't be changing the

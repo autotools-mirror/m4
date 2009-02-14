@@ -5703,16 +5703,24 @@ a@@a
 @result{}ATESTa
 @end example
 
-@comment FIXME - improve this wording
-There is obviously an overlap with @code{changecom} and
-@code{changequote}.  Comment delimiters and quotes can now be defined in
-two different ways.  To avoid incompatibilities, if the quotes are set
-with @code{changequote}, all other characters marked in the syntax table
-as quotes will revert to their normal syntax categories, leaving only
-one set of defined quotes as before.  If the quotes are set with
-@code{changesyntax}, it is possible to result in multiple sets of
-quotes.  This applies to comment delimiters as well, @i{mutatis
-mutandis}.
+There is obviously an overlap between @code{changesyntax} and
+@code{changequote}, since there are now two ways to modify quote
+delimiters.  To avoid incompatibilities, if the quotes are modified by
+@code{changequote}, any characters previously set to either quote
+delimiter by @code{changesyntax} are first demoted to the other category
+(@samp{O}), so the result is only a single set of quotes.  In the other
+direction, if quotes were already disabled, or if both the start and end
+delimiter set by @code{changequote} are single bytes, then
+@code{changesyntax} preserves those settings.  But if either delimiter
+occupies multiple bytes, @code{changesyntax} first disables both
+delimiters.  Quotes can be disabled via @code{changesyntax} by emptying
+the left quote basic category (@samp{L}).  Meanwhile, the right quote
+context category (@samp{R}) will never be empty; if a
+@code{changesyntax} action would otherwise leave that category empty,
+then the default end delimiter from @code{changequote} (@samp{'}) is
+used; thus, it is never possible to get @code{m4} in a state where a
+quoted string cannot be terminated.  These interactions apply to comment
+delimiters as well, @i{mutatis mutandis} with @code{changecom}.
 
 @example
 define(`test', `TEST')
@@ -5720,20 +5728,33 @@ define(`test', `TEST')
 dnl Add additional single-byte delimiters.
 changesyntax(`L+<', `R+>')
 @result{}
-<test>
-@result{}test
-`test'
-@result{}test
-[test]
-@result{}[TEST]
+<test> `test' [test] <<test>>
+@result{}test test [TEST] <test>
+dnl Use standard interface, overriding changesyntax settings.
 changequote(<[>, `]')
 @result{}
-<test>
-@result{}<TEST>
-`test'
-@result{}`TEST'
-[test]
-@result{}test
+<test> `test' [test] <<test>>
+@result{}<TEST> `TEST' test <<TEST>>
+dnl Introduce multi-byte delimiters.
+changequote([<<], [>>])
+@result{}
+<test> `test' [test] <<test>>
+@result{}<TEST> `TEST' [TEST] test
+dnl Change end quote, effectively disabling quotes.
+changesyntax(<<R]>>)
+@result{}
+<test> `test' [test] <<test>>
+@result{}<TEST> `TEST' [TEST] <<TEST>>
+dnl Change beginning quote, make ] normal, thus making ' end quote.
+changesyntax(L`, R-])
+@result{}
+<test> `test' [test] <<test>>
+@result{}<TEST> test [TEST] <<TEST>>
+dnl Set multi-byte quote; unrelated changes don't impact it.
+changequote(`<<', `>>')changesyntax(<<@@\>>)
+@result{}
+<\test> `\test' [\test] <<\test>>
+@result{}<TEST> `TEST' [TEST] \test
 @end example
 
 If several characters are assigned to a category that forms single
@@ -5747,29 +5768,6 @@ changesyntax(`(@{<', `)@}>', `,;:', `O(,)')
 eval@{2**4-1; 2: 8>
 @result{}00001111
 @end example
-
-On the other hand, a multi-character start-quote sequence, which can
-only be created by @code{changequote}, will only be matched by the
-corresponding end-quote sequence.  The same goes for comment delimiters.
-
-@example
-define(`test', `==$1==')
-@result{}
-changequote(`<<', `>>')
-@result{}
-changesyntax(<<L[>>, <<R]>>)
-@result{}
-test(<<testing]>>)
-@result{}==testing]==
-test([testing>>])
-@result{}==testing>>==
-test([<<testing>>])
-@result{}==testing==
-@end example
-
-@noindent
-Note how it is possible to have both long and short quotes, if
-@code{changequote} is used before @code{changesyntax}.
 
 The syntax table is initialized to be backwards compatible, so if you
 never call @code{changesyntax}, nothing will have changed.

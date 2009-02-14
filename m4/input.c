@@ -1640,9 +1640,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      obstack_1grow (obs_safe, ch);
 	  }
       }
-    else if (!m4_is_syntax_single_quotes (M4SYNTAX)
-	     && MATCH (context, ch, context->syntax->quote.str1,
-		       context->syntax->quote.len1, true))
+    else if (MATCH (context, ch, context->syntax->quote.str1,
+		    context->syntax->quote.len1, true))
       {					/* QUOTED STRING, LONGER QUOTES */
 	if (obs)
 	  obs_safe = obs;
@@ -1719,9 +1718,8 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	type = (m4_get_discard_comments_opt (context)
 		? M4_TOKEN_NONE : M4_TOKEN_COMMENT);
       }
-    else if (!m4_is_syntax_single_comments (M4SYNTAX)
-	     && MATCH (context, ch, context->syntax->comm.str1,
-		       context->syntax->comm.len1, true))
+    else if (MATCH (context, ch, context->syntax->comm.str1,
+		    context->syntax->comm.len1, true))
       {					/* COMMENT, LONGER DELIM */
 	if (obs && !m4_get_discard_comments_opt (context))
 	  obs_safe = obs;
@@ -1779,8 +1777,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	obstack_1grow (&token_stack, ch);
 	type = M4_TOKEN_CLOSE;
       }
-    else if (m4_is_syntax_single_quotes (M4SYNTAX)
-	     && m4_is_syntax_single_comments (M4SYNTAX))
+    else if (m4__safe_quotes (M4SYNTAX))
       {			/* EVERYTHING ELSE (SHORT QUOTES AND COMMENTS) */
 	assert (ch < CHAR_EOF);
 	obstack_1grow (&token_stack, ch);
@@ -1882,12 +1879,10 @@ m4__next_token_is_open (m4 *context)
       || m4_has_syntax (M4SYNTAX, ch, (M4_SYNTAX_BCOMM | M4_SYNTAX_ESCAPE
 				       | M4_SYNTAX_ALPHA | M4_SYNTAX_LQUOTE
 				       | M4_SYNTAX_ACTIVE))
-      || (!m4_is_syntax_single_comments (M4SYNTAX)
-	  && MATCH (context, ch, context->syntax->comm.str1,
-		    context->syntax->comm.len1, false))
-      || (!m4_is_syntax_single_quotes (M4SYNTAX)
-	  && MATCH (context, ch, context->syntax->quote.str1,
-		    context->syntax->quote.len1, false)))
+      || (MATCH (context, ch, context->syntax->comm.str1,
+		 context->syntax->comm.len1, false))
+      || (MATCH (context, ch, context->syntax->quote.str1,
+		 context->syntax->quote.len1, false)))
     return false;
   return m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN);
 }

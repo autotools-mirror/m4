@@ -1,5 +1,28 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Revamp changesyntax vs. changequote interactions.
+	* m4/m4module.h (M4_SYNTAX_VALUE): Delete unused macro.
+	(M4_SYNTAX_SUSPECT): New macro.
+	* m4/m4private.h (struct m4_syntax_table): Add suspect field.
+	* m4/syntax.c (check_is_single_quotes, check_is_single_comments)
+	(check_is_macro_escaped): Delete, by inlining body...
+	(m4_set_syntax): ...into here.  Improves handling between
+	changesyntax and changequote/changecom.
+	(add_syntax_set, subtract_syntax_set, set_syntax_set): Simplify,
+	and let suspect field track needed cleanup.
+	(m4_set_quotes, m4_set_comment): Adjust meaning of
+	is_single_quotes and is_single_comment flags to always be true if
+	only one delimiter exists, regardless of its length.  Ensure that
+	the syntax categories M4_SYNTAX_LQUOTE and M4_SYNTAX_BCOMM are
+	only used on 1-byte delimiters.
+	(add_syntax_attribute, remove_syntax_attribute): Change signature
+	to allow the use of fewer casts.  Adjust the suspect field when
+	necessary.
+	(m4_reset_syntax, set_quote_age): Adjust callers.
+	* m4/input.c (m4__next_token, m4__next_token_is_open): Simplify
+	callers.
+	* doc/m4.texinfo (Changesyntax): Update documentation and tests.
+
 	Improve changesyntax documentation.
 	* doc/m4.texinfo (Changesyntax): Merge two tables into one
 	multitable.

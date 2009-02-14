@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2002, 2004, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -31,6 +31,7 @@
    according to a syntax table.  The character groups are (definitions
    are all in m4.h, those marked with a * are not yet in use):
 
+   Basic (all characters fall in one of these mutually exclusive bins)
    M4_SYNTAX_IGNORE	*Character to be deleted from input as if not present
    M4_SYNTAX_OTHER	Any character with no special meaning to m4
    M4_SYNTAX_SPACE	Whitespace (ignored when leading macro arguments)
@@ -46,12 +47,12 @@
    M4_SYNTAX_ALPHA	Alphabetic characters (can start macro names)
    M4_SYNTAX_NUM	Numeric characters (can form macro names)
 
-   M4_SYNTAX_LQUOTE	A single characters left quote
-   M4_SYNTAX_BCOMM	A single characters begin comment delimiter
+   M4_SYNTAX_LQUOTE	A single character left quote
+   M4_SYNTAX_BCOMM	A single character begin comment delimiter
 
-   (These are bit masks)
-   M4_SYNTAX_RQUOTE	A single characters right quote
-   M4_SYNTAX_ECOMM	A single characters end comment delimiter
+   Attribute (these are context sensitive, and exist in addition to basic)
+   M4_SYNTAX_RQUOTE	A single character right quote
+   M4_SYNTAX_ECOMM	A single character end comment delimiter
 
    Besides adding new facilities, the use of a syntax table will reduce
    the number of calls to next_token ().  Now groups of OTHER, NUM and
@@ -65,15 +66,10 @@
    "changesyntax" allows the the user to change the category of any
    character.
 
-   Default '\n' is both ECOMM and SPACE, depending on the context.  To
-   solve the problem of quotes and comments that have diffent syntax
-   code based on the context, the RQUOTE and ECOMM codes are bit
-   masks to add to an ordinary code.  If a character is made a quote it
-   will be recognised if the basis code does not have precedence.
-
-   When changing quotes and comment delimiters only the bits are
-   removed, and the characters are therefore reverted to its old
-   category code.
+   By default, '\n' is both ECOMM and SPACE, depending on the context.
+   Hence we have basic categories (mutually exclusive, can introduce a
+   context, and can be empty sets), and attribute categories
+   (additive, only recognized in context, and will never be empty).
 
    The precedence as implemented by next_token () is:
 
@@ -100,13 +96,27 @@
    a string is parsed equally whether there is a $ or not.  These characters
    are instead used during user macro expansion.
 
-   M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM do not start tokens.  */
 
-static bool check_is_single_quotes	(m4_syntax_table *);
-static bool check_is_single_comments	(m4_syntax_table *);
-static bool check_is_macro_escaped	(m4_syntax_table *);
-static int add_syntax_attribute		(m4_syntax_table *, int, int);
-static int remove_syntax_attribute	(m4_syntax_table *, int, int);
+   M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM do not start tokens.
+
+   There are several optimizations that can be performed depending on
+   known states of the syntax table.  For example, when searching for
+   quotes, if there is only a single start quote and end quote
+   delimiter, we can use memchr2 and search a word at a time, instead
+   of performing a table lookup a byte at a time.  The is_single_*
+   flags track whether quotes and comments have a single delimiter
+   (always the case if changequote/changecom were used, and
+   potentially the case after changesyntax).  Since we frequently need
+   to access quotes, we store the oldest valid quote outside the
+   lookup table; the suspect flag tracks whether a cleanup pass is
+   needed to restore our invariants.  On the other hand, coalescing
+   multiple M4_SYNTAX_OTHER bytes could form a delimiter, so many
+   optimizations must be disabled if a multi-byte delimiter exists;
+   this is handled by m4__safe_quotes.  Meanwhile, quotes and comments
+   can be disabled if the leading delimiter is length 0.  */
+
+static int add_syntax_attribute		(m4_syntax_table *, char, int);
+static int remove_syntax_attribute	(m4_syntax_table *, char, int);
 static void set_quote_age		(m4_syntax_table *, bool, bool);
 
 m4_syntax_table *
@@ -217,35 +227,44 @@ m4_syntax_code (char ch)
 
 /* Functions to manipulate the syntax table.  */
 static int
-add_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
+add_syntax_attribute (m4_syntax_table *syntax, char ch, int code)
 {
+  int c = to_uchar (ch);
   if (code & M4_SYNTAX_MASKS)
-    syntax->table[ch] |= code;
+    {
+      syntax->table[c] |= code;
+      syntax->suspect = true;
+    }
   else
-    syntax->table[ch] = (syntax->table[ch] & M4_SYNTAX_MASKS) | code;
+    {
+      if ((code & (M4_SYNTAX_SUSPECT)) != 0
+	  || m4_has_syntax (syntax, c, M4_SYNTAX_SUSPECT))
+	syntax->suspect = true;
+      syntax->table[c] = ((syntax->table[c] & M4_SYNTAX_MASKS) | code);
+    }
 
 #ifdef DEBUG_SYNTAX
-  xfprintf(stderr, "Set syntax %o %c = %04X\n",
-	   ch, isprint(ch) ? ch : '-',
-	   syntax->table[ch]);
+  xfprintf(stderr, "Set syntax %o %c = %04X\n", c, isprint(c) ? c : '-',
+	   syntax->table[c]);
 #endif
 
-  return syntax->table[ch];
+  return syntax->table[c];
 }
 
 static int
-remove_syntax_attribute (m4_syntax_table *syntax, int ch, int code)
+remove_syntax_attribute (m4_syntax_table *syntax, char ch, int code)
 {
+  int c = to_uchar (ch);
   assert (code & M4_SYNTAX_MASKS);
-  syntax->table[ch] &= ~code;
+  syntax->table[c] &= ~code;
+  syntax->suspect = true;
 
 #ifdef DEBUG_SYNTAX
-  xfprintf(stderr, "Unset syntax %o %c = %04X\n",
-	   ch, isprint(ch) ? ch : '-',
-	   syntax->table[ch]);
+  xfprintf(stderr, "Unset syntax %o %c = %04X\n", c, isprint(c) ? c : '-',
+	   syntax->table[c]);
 #endif
 
-  return syntax->table[ch];
+  return syntax->table[c];
 }
 
 /* Add the set CHARS of length LEN to syntax category CODE, removing
@@ -254,21 +273,8 @@ static void
 add_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
 		int code)
 {
-  int ch;
-
-  if (!len)
-    return;
-
-  if (code == M4_SYNTAX_ESCAPE)
-    syntax->is_macro_escaped = true;
-
-  /* Adding doesn't affect single-quote or single-comment.  */
-
   while (len--)
-    {
-      ch = to_uchar (*chars++);
-      add_syntax_attribute (syntax, ch, code);
-    }
+    add_syntax_attribute (syntax, *chars++, code);
 }
 
 /* Remove the set CHARS of length LEN from syntax category CODE,
@@ -277,42 +283,13 @@ static void
 subtract_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
 		     int code)
 {
-  int ch;
-
-  if (!len)
-    return;
-
   while (len--)
     {
-      ch = to_uchar (*chars++);
+      char ch = *chars++;
       if ((code & M4_SYNTAX_MASKS) != 0)
 	remove_syntax_attribute (syntax, ch, code);
       else if (m4_has_syntax (syntax, ch, code))
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
-    }
-
-  /* Check for any cleanup needed.  */
-  switch (code)
-    {
-    case M4_SYNTAX_ESCAPE:
-      if (syntax->is_macro_escaped)
-	check_is_macro_escaped (syntax);
-      break;
-
-    case M4_SYNTAX_LQUOTE:
-    case M4_SYNTAX_RQUOTE:
-      if (syntax->is_single_quotes)
-	check_is_single_quotes (syntax);
-      break;
-
-    case M4_SYNTAX_BCOMM:
-    case M4_SYNTAX_ECOMM:
-      if (syntax->is_single_comments)
-	check_is_single_comments (syntax);
-      break;
-
-    default:
-      break;
     }
 }
 
@@ -330,21 +307,16 @@ set_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
      OTHER.  */
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
-      if (code == M4_SYNTAX_RQUOTE || code == M4_SYNTAX_ECOMM)
+      if ((code & M4_SYNTAX_MASKS) != 0)
 	remove_syntax_attribute (syntax, ch, code);
       else if (m4_has_syntax (syntax, ch, code))
 	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
     }
   while (len--)
     {
-      ch = to_uchar (*chars++);
+      ch = *chars++;
       add_syntax_attribute (syntax, ch, code);
     }
-
-  /* Check for any cleanup needed.  */
-  check_is_macro_escaped (syntax);
-  check_is_single_quotes (syntax);
-  check_is_single_comments (syntax);
 }
 
 /* Reset syntax category CODE to its default state, sending all other
@@ -375,9 +347,6 @@ reset_syntax_set (m4_syntax_table *syntax, int code)
       else if (syntax->orig[ch] == code || m4_has_syntax (syntax, ch, code))
 	add_syntax_attribute (syntax, ch, syntax->orig[ch]);
     }
-  check_is_macro_escaped (syntax);
-  check_is_single_quotes (syntax);
-  check_is_single_comments (syntax);
 }
 
 /* Reset the syntax table to its default state.  */
@@ -403,10 +372,8 @@ m4_reset_syntax (m4_syntax_table *syntax)
   syntax->comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   syntax->comm.len2 = 1;
 
-  add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
-			M4_SYNTAX_RQUOTE);
-  add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
-			M4_SYNTAX_ECOMM);
+  add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
+  add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
 
   syntax->is_single_quotes = true;
   syntax->is_single_comments = true;
@@ -431,6 +398,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
     {
       return -1;
     }
+  syntax->suspect = false;
   switch (action)
     {
     case '+':
@@ -449,133 +417,158 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
     default:
       assert (false);
     }
+
+  /* Check for any cleanup needed.  */
+  if (syntax->suspect)
+    {
+      int ch;
+      int lquote = -1;
+      int rquote = -1;
+      int bcomm = -1;
+      int ecomm = -1;
+      if (m4_has_syntax (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE))
+	{
+	  assert (syntax->quote.len1 == 1);
+	  lquote = to_uchar (syntax->quote.str1[0]);
+	}
+      if (m4_has_syntax (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE))
+	{
+	  assert (syntax->quote.len2 == 1);
+	  rquote = to_uchar (syntax->quote.str2[0]);
+	}
+      if (m4_has_syntax (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM))
+	{
+	  assert (syntax->comm.len1 == 1);
+	  bcomm = to_uchar (syntax->comm.str1[0]);
+	}
+      if (m4_has_syntax (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM))
+	{
+	  assert (syntax->comm.len2 == 1);
+	  ecomm = to_uchar (syntax->comm.str2[0]);
+	}
+      syntax->is_macro_escaped = false;
+      /* Find candidates for each category.  */
+      for (ch = UCHAR_MAX + 1; --ch >= 0; )
+	{
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
+	    {
+	      if (lquote == -1)
+		lquote = ch;
+	      else if (lquote != ch)
+		syntax->is_single_quotes = false;
+	    }
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
+	    {
+	      if (rquote == -1)
+		rquote = ch;
+	      else if (rquote != ch)
+		syntax->is_single_quotes = false;
+	    }
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
+	    {
+	      if (bcomm == -1)
+		bcomm = ch;
+	      else if (bcomm != ch)
+		syntax->is_single_comments = false;
+	    }
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
+	    {
+	      if (ecomm == -1)
+		ecomm = ch;
+	      else if (ecomm != ch)
+		syntax->is_single_comments = false;
+	    }
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
+	    syntax->is_macro_escaped = true;
+	}
+      /* Disable multi-character delimiters if we discovered
+	 delimiters.  */
+      if ((1 < syntax->quote.len1 || 1 < syntax->quote.len2)
+	  && (!syntax->is_single_quotes || lquote != -1 || rquote != -1))
+	{
+	  if (syntax->quote.len1)
+	    {
+	      syntax->quote.len1 = lquote == to_uchar (syntax->quote.str1[0]);
+	      syntax->quote.str1[syntax->quote.len1] = '\0';
+	    }
+	  if (syntax->quote.len2)
+	    {
+	      syntax->quote.len2 = rquote == to_uchar (syntax->quote.str2[0]);
+	      syntax->quote.str2[syntax->quote.len2] = '\0';
+	    }
+	}
+      if ((1 < syntax->comm.len1 || 1 < syntax->comm.len2)
+	  && (!syntax->is_single_comments || bcomm != -1 || ecomm != -1))
+	{
+	  if (syntax->comm.len1)
+	    {
+	      syntax->comm.len1 = bcomm == to_uchar (syntax->comm.str1[0]);
+	      syntax->comm.str1[syntax->comm.len1] = '\0';
+	    }
+	  if (syntax->comm.len2)
+	    {
+	      syntax->comm.len2 = ecomm == to_uchar (syntax->comm.str2[0]);
+	      syntax->comm.str2[syntax->comm.len2] = '\0';
+	    }
+	}
+      /* Update the strings.  */
+      if (lquote != -1)
+	{
+	  if (syntax->quote.len1)
+	    assert (syntax->quote.len1 == 1);
+	  else
+	    {
+	      free (syntax->quote.str1);
+	      syntax->quote.str1 = xcharalloc (2);
+	      syntax->quote.str1[1] = '\0';
+	      syntax->quote.len1 = 1;
+	    }
+	  syntax->quote.str1[0] = lquote;
+	  if (rquote == -1)
+	    {
+	      rquote = '\'';
+	      add_syntax_attribute (syntax, rquote, M4_SYNTAX_RQUOTE);
+	    }
+	  if (!syntax->quote.len2)
+	    {
+	      free (syntax->quote.str2);
+	      syntax->quote.str2 = xcharalloc (2);
+	    }
+	  syntax->quote.str2[0] = rquote;
+	  syntax->quote.str2[1] = '\0';
+	  syntax->quote.len2 = 1;
+	}
+      if (bcomm != -1)
+	{
+	  if (syntax->comm.len1)
+	    assert (syntax->comm.len1 == 1);
+	  else
+	    {
+	      free (syntax->comm.str1);
+	      syntax->comm.str1 = xcharalloc (2);
+	      syntax->comm.str1[1] = '\0';
+	      syntax->comm.len1 = 1;
+	    }
+	  syntax->comm.str1[0] = bcomm;
+	  if (ecomm == -1)
+	    {
+	      ecomm = '\n';
+	      add_syntax_attribute (syntax, ecomm, M4_SYNTAX_ECOMM);
+	    }
+	  if (!syntax->comm.len2)
+	    {
+	      free (syntax->comm.str2);
+	      syntax->comm.str2 = xcharalloc (2);
+	    }
+	  syntax->comm.str2[0] = ecomm;
+	  syntax->comm.str2[1] = '\0';
+	  syntax->comm.len2 = 1;
+	}
+    }
   set_quote_age (syntax, false, true);
   m4__quote_uncache (syntax);
   return code;
 }
-
-static bool
-check_is_single_quotes (m4_syntax_table *syntax)
-{
-  int ch;
-  int lquote = -1;
-  int rquote = -1;
-
-  if (! syntax->is_single_quotes)
-    return false;
-  assert (syntax->quote.len1 == 1 && syntax->quote.len2 == 1);
-
-  if (m4_has_syntax (syntax, *syntax->quote.str1, M4_SYNTAX_LQUOTE)
-      && m4_has_syntax (syntax, *syntax->quote.str2, M4_SYNTAX_RQUOTE))
-    return true;
-
-  /* The most recent action invalidated our current lquote/rquote.  If
-     we still have exactly one character performing those roles based
-     on the syntax table, then update lquote/rquote accordingly.
-     Otherwise, keep lquote/rquote, but we no longer have single
-     quotes.  */
-  for (ch = UCHAR_MAX + 1; --ch >= 0; )
-    {
-      if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
-	{
-	  if (lquote == -1)
-	    lquote = ch;
-	  else
-	    {
-	      syntax->is_single_quotes = false;
-	      break;
-	    }
-	}
-      if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
-	{
-	  if (rquote == -1)
-	    rquote = ch;
-	  else
-	    {
-	      syntax->is_single_quotes = false;
-	      break;
-	    }
-	}
-    }
-  if (lquote == -1 || rquote == -1)
-    syntax->is_single_quotes = false;
-  else if (syntax->is_single_quotes)
-    {
-      *syntax->quote.str1 = lquote;
-      *syntax->quote.str2 = rquote;
-    }
-  return syntax->is_single_quotes;
-}
-
-static bool
-check_is_single_comments (m4_syntax_table *syntax)
-{
-  int ch;
-  int bcomm = -1;
-  int ecomm = -1;
-
-  if (! syntax->is_single_comments)
-    return false;
-  assert (syntax->comm.len1 == 1 && syntax->comm.len2 == 1);
-
-  if (m4_has_syntax (syntax, *syntax->comm.str1, M4_SYNTAX_BCOMM)
-      && m4_has_syntax (syntax, *syntax->comm.str2, M4_SYNTAX_ECOMM))
-    return true;
-
-  /* The most recent action invalidated our current bcomm/ecomm.  If
-     we still have exactly one character performing those roles based
-     on the syntax table, then update bcomm/ecomm accordingly.
-     Otherwise, keep bcomm/ecomm, but we no longer have single
-     comments.  */
-  for (ch = UCHAR_MAX + 1; --ch >= 0; )
-    {
-      if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
-	{
-	  if (bcomm == -1)
-	    bcomm = ch;
-	  else
-	    {
-	      syntax->is_single_comments = false;
-	      break;
-	    }
-	}
-      if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
-	{
-	  if (ecomm == -1)
-	    ecomm = ch;
-	  else
-	    {
-	      syntax->is_single_comments = false;
-	      break;
-	    }
-	}
-    }
-  if (bcomm == -1 || ecomm == -1)
-    syntax->is_single_comments = false;
-  else if (syntax->is_single_comments)
-    {
-      *syntax->comm.str1 = bcomm;
-      *syntax->comm.str2 = ecomm;
-    }
-  return syntax->is_single_comments;
-}
-
-static bool
-check_is_macro_escaped (m4_syntax_table *syntax)
-{
-  int ch;
-
-  syntax->is_macro_escaped = false;
-  for (ch = UCHAR_MAX + 1; --ch >= 0; )
-    if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
-      {
-	syntax->is_macro_escaped = true;
-	break;
-      }
-
-  return syntax->is_macro_escaped;
-}
-
 
 
 /* Functions for setting quotes and comment delimiters.  Used by
@@ -629,13 +622,11 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
   /* changequote overrides syntax_table, but be careful when it is
      used to select a start-quote sequence that is effectively
      disabled.  */
-
-  syntax->is_single_quotes
-    = (syntax->quote.len1 == 1 && syntax->quote.len2 == 1
-       && !m4_has_syntax (syntax, *syntax->quote.str1,
-			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
-			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM)));
-
+  syntax->is_single_quotes = !m4_has_syntax (syntax, *syntax->quote.str1,
+					     (M4_SYNTAX_IGNORE
+					      | M4_SYNTAX_ESCAPE
+					      | M4_SYNTAX_ALPHA
+					      | M4_SYNTAX_NUM));
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
@@ -646,15 +637,12 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
 	remove_syntax_attribute (syntax, ch, M4_SYNTAX_RQUOTE);
     }
 
-  if (syntax->is_single_quotes)
+  if (syntax->is_single_quotes
+      && syntax->quote.len1 == 1 && syntax->quote.len2 == 1)
     {
-      add_syntax_attribute (syntax, to_uchar (syntax->quote.str1[0]),
-			    M4_SYNTAX_LQUOTE);
-      add_syntax_attribute (syntax, to_uchar (syntax->quote.str2[0]),
-			    M4_SYNTAX_RQUOTE);
+      add_syntax_attribute (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE);
+      add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
     }
-  if (syntax->is_macro_escaped)
-    check_is_macro_escaped (syntax);
   set_quote_age (syntax, false, false);
 }
 
@@ -703,14 +691,12 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
   /* changecom overrides syntax_table, but be careful when it is used
      to select a start-comment sequence that is effectively
      disabled.  */
-
-  syntax->is_single_comments
-    = (syntax->comm.len1 == 1 && syntax->comm.len2 == 1
-       && !m4_has_syntax (syntax, *syntax->comm.str1,
-			  (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE
-			   | M4_SYNTAX_ALPHA | M4_SYNTAX_NUM
-			   | M4_SYNTAX_LQUOTE)));
-
+  syntax->is_single_comments = !m4_has_syntax (syntax, *syntax->comm.str1,
+					       (M4_SYNTAX_IGNORE
+						| M4_SYNTAX_ESCAPE
+						| M4_SYNTAX_ALPHA
+						| M4_SYNTAX_NUM
+						| M4_SYNTAX_LQUOTE));
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
@@ -720,20 +706,17 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
 	remove_syntax_attribute (syntax, ch, M4_SYNTAX_ECOMM);
     }
-  if (syntax->is_single_comments)
+  if (syntax->is_single_comments
+      && syntax->comm.len1 == 1 && syntax->comm.len2 == 1)
     {
-      add_syntax_attribute (syntax, to_uchar (syntax->comm.str1[0]),
-			    M4_SYNTAX_BCOMM);
-      add_syntax_attribute (syntax, to_uchar (syntax->comm.str2[0]),
-			    M4_SYNTAX_ECOMM);
+      add_syntax_attribute (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM);
+      add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
     }
-  if (syntax->is_macro_escaped)
-    check_is_macro_escaped (syntax);
   set_quote_age (syntax, false, false);
 }
 
 /* Call this when changing anything that might impact the quote age,
-   so that m4_quote_age and m4_safe_quotes will reflect the change.
+   so that m4__quote_age and m4__safe_quotes will reflect the change.
    If RESET, changesyntax was reset to its default stage; if CHANGE,
    arbitrary syntax has changed; otherwise, just quotes or comment
    delimiters have changed.  */
@@ -789,6 +772,7 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
   else
     local_syntax_age = syntax->syntax_age;
   if (local_syntax_age < 0xffff && syntax->is_single_quotes
+      && syntax->quote.len1 == 1 && syntax->quote.len2 == 1
       && !m4_has_syntax (syntax, *syntax->quote.str1,
 			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
 			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE

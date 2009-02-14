@@ -484,8 +484,12 @@ enum {
   M4_SYNTAX_ECOMM		= 1 << 15
 };
 
+/* Mask of attribute syntax categories.  */
 #define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM)
-#define M4_SYNTAX_VALUE		(~(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM))
+/* Mask of basic syntax categories where any change requires a
+   recomputation of the overall syntax characteristics.  */
+#define M4_SYNTAX_SUSPECT	(M4_SYNTAX_LQUOTE | M4_SYNTAX_BCOMM	\
+				 | M4_SYNTAX_ESCAPE)
 
 #define m4_syntab(S, C)		((S)->table[(C)])
 /* Determine if character C matches any of the bitwise-or'd syntax
