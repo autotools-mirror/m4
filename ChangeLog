@@ -1,3 +1,9 @@
+2009-02-16  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in multicharacter quotes, from 2008-01-26.
+	* m4/input.c (m4__next_token): Fix typo.
+	* tests/builtins.at (changequote): Enhance test.
+
 2009-02-13  Eric Blake  <ebb9@byu.net>
 
 	Speed up parsing when detecting input file change.

@@ -133,11 +133,15 @@ AT_DATA([in.m4],
 [[define(`aaaaaaaaaaaaaaaaaaaa', `A')define(`q', `"$@"')
 changequote(`"', `"')
 q(q("aaaaaaaaaaaaaaaaaaaa", "a"))
+changequote`'define(`echo', `$@')dnl
+changequote(`<<<', `>>')dnl
+echo(<<<a<<<b>>>>)
 ]])
 
 AT_CHECK_M4([in.m4], [0], [[
 
 A,a
+a<<<b>>
 ]])
 
 AT_CLEANUP

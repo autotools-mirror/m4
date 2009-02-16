@@ -1418,15 +1418,15 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
 }
 
 /* The macro MATCH() is used to match a string S of length LEN against
-  the input.  The first character is handled inline for speed, and
-  S[LEN] must be safe to dereference (it is faster to do character
-  comparison prior to length checks).  This improves efficiency for
-  the common case of single character quotes and comment delimiters,
-  while being safe for disabled delimiters as well as longer
-  delimiters.  If CONSUME, then CH is the result of next_char, and a
-  successful match will discard the matched string.  Otherwise, CH is
-  the result of peek_char, and the input stream is effectively
-  unchanged.  */
+   the input.  The first character is handled inline for speed, and
+   S[LEN] must be safe to dereference (it is faster to do character
+   comparison prior to length checks).  This improves efficiency for
+   the common case of single character quotes and comment delimiters,
+   while being safe for disabled delimiters as well as longer
+   delimiters.  If CONSUME, then CH is the result of next_char, and a
+   successful match will discard the matched string.  Otherwise, CH is
+   the result of peek_char, and the input stream is effectively
+   unchanged.  */
 #define MATCH(C, ch, s, len, consume)					\
   (to_uchar ((s)[0]) == (ch)						\
    && ((len) >> 1 ? match_input (C, s, len, consume) : (len)))
@@ -1678,7 +1678,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      {
 		quote_level++;
 		obstack_grow (obs_safe, context->syntax->quote.str1,
-			      context->syntax->quote.len2);
+			      context->syntax->quote.len1);
 	      }
 	    else
 	      obstack_1grow (obs_safe, ch);
