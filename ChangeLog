@@ -1,3 +1,14 @@
+2009-02-17  Eric Blake  <ebb9@byu.net>
+
+	Stage 29b: Process quotes and comments by buffer, not bytes.
+	Search for quote and comment delimiters by buffer when possible.
+	Memory impact: none.
+	Speed impact: noticeable improvement, from fewer function calls.
+	* ltdl/m4/gnulib-cache.m4: Import memchr2 module.
+	* m4/input.c (m4__next_token): Add buffer reads to quote and
+	comment parsing.
+	* NEWS: Document this.
+
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
 	Stage 29a: Process dnl and macro names by buffer, not bytes.

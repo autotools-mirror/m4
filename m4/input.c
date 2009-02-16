@@ -26,6 +26,7 @@
 
 #include "freadptr.h"
 #include "freadseek.h"
+#include "memchr2.h"
 
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INPUT */
@@ -1857,8 +1858,64 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	type = M4_TOKEN_STRING;
 	while (1)
 	  {
-	    ch = next_char (context, obs && m4__quote_age (M4SYNTAX), false,
-			    false);
+	    /* Start with buffer search for either potential delimiter.  */
+	    size_t len;
+	    const char *buffer = next_buffer (context, &len,
+					      obs && m4__quote_age (M4SYNTAX));
+	    if (buffer)
+	      {
+		const char *p = buffer;
+		if (m4_is_syntax_single_quotes (M4SYNTAX))
+		  do
+		    {
+		      p = (char *) memchr2 (p, *context->syntax->quote.str1,
+					    *context->syntax->quote.str2,
+					    buffer + len - p);
+		    }
+		  while (p && m4__quote_age (M4SYNTAX)
+			 && (*p++ == *context->syntax->quote.str2
+			     ? --quote_level : ++quote_level));
+		else
+		  {
+		    size_t remaining = len;
+		    assert (context->syntax->quote.len1 == 1
+			    && context->syntax->quote.len2 == 1);
+		    while (remaining && !m4_has_syntax (M4SYNTAX, *p,
+							(M4_SYNTAX_LQUOTE
+							 | M4_SYNTAX_RQUOTE)))
+		      {
+			p++;
+			remaining--;
+		      }
+		    if (!remaining)
+		      p = NULL;
+		  }
+		if (p)
+		  {
+		    if (m4__quote_age (M4SYNTAX))
+		      {
+			assert (!quote_level
+				&& context->syntax->quote.len1 == 1
+				&& context->syntax->quote.len2 == 1);
+			obstack_grow (obs_safe, buffer, p - buffer - 1);
+			consume_buffer (context, p - buffer);
+			break;
+		      }
+		    obstack_grow (obs_safe, buffer, p - buffer);
+		    ch = to_uchar (*p);
+		    consume_buffer (context, p - buffer + 1);
+		  }
+		else
+		  {
+		    obstack_grow (obs_safe, buffer, len);
+		    consume_buffer (context, len);
+		    continue;
+		  }
+	      }
+	    /* Fall back to byte-wise search.  */
+	    else
+	      ch = next_char (context, obs && m4__quote_age (M4SYNTAX), false,
+			      false);
 	    if (ch == CHAR_EOF)
 	      {
 		if (!caller)
@@ -1914,7 +1971,45 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	  obstack_1grow (obs_safe, ch);
 	while (1)
 	  {
-	    ch = next_char (context, false, false, false);
+	    /* Start with buffer search for potential end delimiter.  */
+	    size_t len;
+	    const char *buffer = next_buffer (context, &len, false);
+	    if (buffer)
+	      {
+		const char *p;
+		if (m4_is_syntax_single_comments (M4SYNTAX))
+		  p = (char *) memchr (buffer, *context->syntax->comm.str2,
+				       len);
+		else
+		  {
+		    size_t remaining = len;
+		    assert (context->syntax->comm.len2 == 1);
+		    p = buffer;
+		    while (remaining
+			   && !m4_has_syntax (M4SYNTAX, *p, M4_SYNTAX_ECOMM))
+		      {
+			p++;
+			remaining--;
+		      }
+		    if (!remaining)
+		      p = NULL;
+		  }
+		if (p)
+		  {
+		    obstack_grow (obs_safe, buffer, p - buffer);
+		    ch = to_uchar (*p);
+		    consume_buffer (context, p - buffer + 1);
+		  }
+		else
+		  {
+		    obstack_grow (obs_safe, buffer, len);
+		    consume_buffer (context, len);
+		    continue;
+		  }
+	      }
+	    /* Fall back to byte-wise search.  */
+	    else
+	      ch = next_char (context, false, false, false);
 	    if (ch == CHAR_EOF)
 	      {
 		if (!caller)

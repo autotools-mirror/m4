@@ -42,11 +42,6 @@ promoted to 2.0.
 *** The `-L'/`--nesting-limit' command-line option now performs argument
     validation and accepts an optional multiplier suffix.
 
-*** The `-o'/`--error-output' command-line options, which were replaced by
-    `--debugfile' in M4 1.4.7, now issue a deprecation warning.  This
-    warning interferes with all versions of Autoconf prior to 2.61, so plan
-    on installing an updated Autoconf when installing M4 2.0.
-
 *** New `-p'/`--pushdef' and `--popdef' command-line options allow more
     control over macro definitions from the command line between input
     files.
@@ -216,6 +211,14 @@ promoted to 2.0.
 
 ** Remove the undocumented command-line option '-N', as no one complained
    about the assertion failure regression that it introduced in 1.4.7.
+
+** The `-o'/`--error-output' command-line options, which were replaced by
+   `--debugfile' in 1.4.7, now issue a deprecation warning.  This warning
+   harmlessly triggers with versions of Autoconf 2.60 and earlier, but can
+   be silenced by applying this patch:
+     http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=714eeee87
+
+** Improve the speed of the input engine.
 
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
