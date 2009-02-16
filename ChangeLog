@@ -1,5 +1,11 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Avoid test failure due to different errno.
+	* doc/m4.texinfo (Using frozen files): Ignore stdout, since
+	hardened systems can prevent attempts to read /.
+	* THANKS: Update.
+	Reported by Ronny Peine, in Gentoo bug 259184.
+
 	Avoid tests that make no sense, because m4 is single-threaded.
 	* m4/gnulib-cache.m4: Avoid lock-tests and tls-tests.
 
