@@ -2,6 +2,7 @@
 
 	Fix bogus testsuite failure from 2009-02-11.
 	* examples/null.err: Fix typo.
+	* examples/null.m4: Likewise.
 
 2009-02-12  Eric Blake  <ebb9@byu.net>
 
