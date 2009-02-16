@@ -7884,8 +7884,10 @@ syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
 @end example
 
 @c Detect inability to freeze.
+@c Some systems harden /, and fail with EACCES rather than ENOENT.
 
 @comment options: -F /none/such
+@comment xerr: ignore
 @comment status: 1
 @example
 $ @kbd{m4 -F /none/such}
