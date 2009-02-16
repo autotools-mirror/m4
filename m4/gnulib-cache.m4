@@ -42,6 +42,8 @@
 #  --no-conditional-dependencies \
 #  --no-libtool \
 #  --macro-prefix=M4 \
+#  --avoid=lock-tests \
+#  --avoid=tls-tests \
 #  announce-gen \
 #  assert \
 #  autobuild \
@@ -186,7 +188,7 @@ gl_MODULES([
   xvasprintf-posix
 ])
 gl_WITH_CXX_TESTS
-gl_AVOID([])
+gl_AVOID([lock-tests tls-tests])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
 gl_PO_BASE([])
