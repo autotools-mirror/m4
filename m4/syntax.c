@@ -426,6 +426,8 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       int rquote = -1;
       int bcomm = -1;
       int ecomm = -1;
+      bool single_quote_possible = true;
+      bool single_comm_possible = true;
       if (m4_has_syntax (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE))
 	{
 	  assert (syntax->quote.len1 == 1);
@@ -455,34 +457,38 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
 	      if (lquote == -1)
 		lquote = ch;
 	      else if (lquote != ch)
-		syntax->is_single_quotes = false;
+		single_quote_possible = false;
 	    }
 	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
 	    {
 	      if (rquote == -1)
 		rquote = ch;
 	      else if (rquote != ch)
-		syntax->is_single_quotes = false;
+		single_quote_possible = false;
 	    }
 	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
 	    {
 	      if (bcomm == -1)
 		bcomm = ch;
 	      else if (bcomm != ch)
-		syntax->is_single_comments = false;
+		single_comm_possible = false;
 	    }
 	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
 	    {
 	      if (ecomm == -1)
 		ecomm = ch;
 	      else if (ecomm != ch)
-		syntax->is_single_comments = false;
+		single_comm_possible = false;
 	    }
 	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
 	    syntax->is_macro_escaped = true;
 	}
       /* Disable multi-character delimiters if we discovered
 	 delimiters.  */
+      if (!single_quote_possible)
+	syntax->is_single_quotes = false;
+      if (!single_comm_possible)
+	syntax->is_single_comments = false;
       if ((1 < syntax->quote.len1 || 1 < syntax->quote.len2)
 	  && (!syntax->is_single_quotes || lquote != -1 || rquote != -1))
 	{
@@ -514,6 +520,8 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       /* Update the strings.  */
       if (lquote != -1)
 	{
+	  if (single_quote_possible)
+	    syntax->is_single_quotes = true;
 	  if (syntax->quote.len1)
 	    assert (syntax->quote.len1 == 1);
 	  else
@@ -540,6 +548,8 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
 	}
       if (bcomm != -1)
 	{
+	  if (single_comm_possible)
+	    syntax->is_single_comments = true;
 	  if (syntax->comm.len1)
 	    assert (syntax->comm.len1 == 1);
 	  else
@@ -622,11 +632,7 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
   /* changequote overrides syntax_table, but be careful when it is
      used to select a start-quote sequence that is effectively
      disabled.  */
-  syntax->is_single_quotes = !m4_has_syntax (syntax, *syntax->quote.str1,
-					     (M4_SYNTAX_IGNORE
-					      | M4_SYNTAX_ESCAPE
-					      | M4_SYNTAX_ALPHA
-					      | M4_SYNTAX_NUM));
+  syntax->is_single_quotes = true;
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
@@ -637,11 +643,14 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
 	remove_syntax_attribute (syntax, ch, M4_SYNTAX_RQUOTE);
     }
 
-  if (syntax->is_single_quotes
-      && syntax->quote.len1 == 1 && syntax->quote.len2 == 1)
+  if (!m4_has_syntax (syntax, *syntax->quote.str1,
+		      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
+		       | M4_SYNTAX_NUM)))
     {
-      add_syntax_attribute (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE);
-      add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
+      if (syntax->quote.len1 == 1)
+	add_syntax_attribute (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE);
+      if (syntax->quote.len2 == 1)
+	add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
     }
   set_quote_age (syntax, false, false);
 }
@@ -691,12 +700,7 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
   /* changecom overrides syntax_table, but be careful when it is used
      to select a start-comment sequence that is effectively
      disabled.  */
-  syntax->is_single_comments = !m4_has_syntax (syntax, *syntax->comm.str1,
-					       (M4_SYNTAX_IGNORE
-						| M4_SYNTAX_ESCAPE
-						| M4_SYNTAX_ALPHA
-						| M4_SYNTAX_NUM
-						| M4_SYNTAX_LQUOTE));
+  syntax->is_single_comments = true;
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
@@ -706,11 +710,14 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
 	remove_syntax_attribute (syntax, ch, M4_SYNTAX_ECOMM);
     }
-  if (syntax->is_single_comments
-      && syntax->comm.len1 == 1 && syntax->comm.len2 == 1)
+  if (!m4_has_syntax (syntax, *syntax->comm.str1,
+		      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
+		       | M4_SYNTAX_NUM | M4_SYNTAX_LQUOTE)))
     {
-      add_syntax_attribute (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM);
-      add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
+      if (syntax->comm.len1 == 1)
+	add_syntax_attribute (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM);
+      if (syntax->comm.len2 == 1)
+	add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
     }
   set_quote_age (syntax, false, false);
 }

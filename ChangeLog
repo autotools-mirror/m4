@@ -1,5 +1,13 @@
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
+	Unify single and multi-character delimiter handling.
+	* m4/input.c (MATCH): Add a parameter.
+	(m4__next_token): Simplify logic and reduce redundancy.
+	(m4__next_token_is_open): Adjust caller.
+	* m4/syntax.c (m4_set_comment, m4_set_quotes): Handle delimiters
+	of differing lengths.
+	(m4_set_syntax): Recognize restoration of single delimiters.
+
 	Revamp changesyntax vs. changequote interactions.
 	* m4/m4module.h (M4_SYNTAX_VALUE): Delete unused macro.
 	(M4_SYNTAX_SUSPECT): New macro.

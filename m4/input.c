@@ -1417,9 +1417,10 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
   return result;
 }
 
-/* The macro MATCH() is used to match a string S of length LEN against
-   the input.  The first character is handled inline for speed, and
-   S[LEN] must be safe to dereference (it is faster to do character
+/* Check whether the current input matches a delimiter, which either
+   belongs to syntax category CAT or matches the string S of length
+   LEN.  The first character is handled inline for speed, and S[LEN]
+   must be safe to dereference (it is faster to do character
    comparison prior to length checks).  This improves efficiency for
    the common case of single character quotes and comment delimiters,
    while being safe for disabled delimiters as well as longer
@@ -1427,9 +1428,10 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
    successful match will discard the matched string.  Otherwise, CH is
    the result of peek_char, and the input stream is effectively
    unchanged.  */
-#define MATCH(C, ch, s, len, consume)					\
-  (to_uchar ((s)[0]) == (ch)						\
-   && ((len) >> 1 ? match_input (C, s, len, consume) : (len)))
+#define MATCH(C, ch, cat, s, len, consume)				\
+  (m4_has_syntax (m4_get_syntax_table (C), ch, cat)			\
+   || (to_uchar ((s)[0]) == (ch)					\
+       && ((len) >> 1 ? match_input (C, s, len, consume) : (len))))
 
 /* While the current input character has the given SYNTAX, append it
    to OBS.  Take care not to pop input source unless the next source
@@ -1600,8 +1602,10 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	obstack_1grow (obs_safe, ch);
 	consume_syntax (context, obs_safe, M4_SYNTAX_ALPHA | M4_SYNTAX_NUM);
       }
-    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
-      {					/* QUOTED STRING, SINGLE QUOTES */
+    else if (MATCH (context, ch, M4_SYNTAX_LQUOTE,
+		    context->syntax->quote.str1,
+		    context->syntax->quote.len1, true))
+      {					/* QUOTED STRING */
 	if (obs)
 	  obs_safe = obs;
 	quote_level = 1;
@@ -1625,106 +1629,44 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      init_builtin_token (context, obs, obs ? token : NULL);
 	    else if (ch == CHAR_QUOTE)
 	      append_quote_token (context, obs, token);
-	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_RQUOTE))
-	      {
-		if (--quote_level == 0)
-		  break;
-		obstack_1grow (obs_safe, ch);
-	      }
-	    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_LQUOTE))
-	      {
-		quote_level++;
-		obstack_1grow (obs_safe, ch);
-	      }
-	    else
-	      obstack_1grow (obs_safe, ch);
-	  }
-      }
-    else if (MATCH (context, ch, context->syntax->quote.str1,
-		    context->syntax->quote.len1, true))
-      {					/* QUOTED STRING, LONGER QUOTES */
-	if (obs)
-	  obs_safe = obs;
-	quote_level = 1;
-	type = M4_TOKEN_STRING;
-	assert (!m4__quote_age (M4SYNTAX));
-	while (1)
-	  {
-	    ch = next_char (context, false, false, false);
-	    if (ch == CHAR_EOF)
-	      {
-		if (!caller)
-		  {
-		    assert (line);
-		    m4_set_current_file (context, file);
-		    m4_set_current_line (context, *line);
-		  }
-		m4_error (context, EXIT_FAILURE, 0, caller,
-			  _("end of file in string"));
-	      }
-	    if (ch == CHAR_BUILTIN)
-	      init_builtin_token (context, obs, obs ? token : NULL);
-	    else if (MATCH (context, ch, context->syntax->quote.str2,
+	    else if (MATCH (context, ch, M4_SYNTAX_RQUOTE,
+			    context->syntax->quote.str2,
 			    context->syntax->quote.len2, true))
 	      {
 		if (--quote_level == 0)
 		  break;
-		obstack_grow (obs_safe, context->syntax->quote.str2,
-			      context->syntax->quote.len2);
+		if (1 < context->syntax->quote.len2)
+		  obstack_grow (obs_safe, context->syntax->quote.str2,
+				context->syntax->quote.len2);
+		else
+		  obstack_1grow (obs_safe, ch);
 	      }
-	    else if (MATCH (context, ch, context->syntax->quote.str1,
+	    else if (MATCH (context, ch, M4_SYNTAX_LQUOTE,
+			    context->syntax->quote.str1,
 			    context->syntax->quote.len1, true))
 	      {
 		quote_level++;
-		obstack_grow (obs_safe, context->syntax->quote.str1,
-			      context->syntax->quote.len1);
+		if (1 < context->syntax->quote.len1)
+		  obstack_grow (obs_safe, context->syntax->quote.str1,
+				context->syntax->quote.len1);
+		else
+		  obstack_1grow (obs_safe, ch);
 	      }
 	    else
 	      obstack_1grow (obs_safe, ch);
 	  }
       }
-    else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_BCOMM))
-      {					/* COMMENT, SHORT DELIM */
-	if (obs && !m4_get_discard_comments_opt (context))
-	  obs_safe = obs;
-	obstack_1grow (obs_safe, ch);
-	while (1)
-	  {
-	    ch = next_char (context, false, false, false);
-	    if (ch == CHAR_EOF)
-	      {
-		if (!caller)
-		  {
-		    assert (line);
-		    m4_set_current_file (context, file);
-		    m4_set_current_line (context, *line);
-		  }
-		m4_error (context, EXIT_FAILURE, 0, caller,
-			  _("end of file in comment"));
-	      }
-	    if (ch == CHAR_BUILTIN)
-	      {
-		init_builtin_token (context, NULL, NULL);
-		continue;
-	      }
-	    if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ECOMM))
-	      {
-		obstack_1grow (obs_safe, ch);
-		break;
-	      }
-	    assert (ch < CHAR_EOF);
-	    obstack_1grow (obs_safe, ch);
-	  }
-	type = (m4_get_discard_comments_opt (context)
-		? M4_TOKEN_NONE : M4_TOKEN_COMMENT);
-      }
-    else if (MATCH (context, ch, context->syntax->comm.str1,
+    else if (MATCH (context, ch, M4_SYNTAX_BCOMM,
+		    context->syntax->comm.str1,
 		    context->syntax->comm.len1, true))
-      {					/* COMMENT, LONGER DELIM */
+      {					/* COMMENT */
 	if (obs && !m4_get_discard_comments_opt (context))
 	  obs_safe = obs;
-	obstack_grow (obs_safe, context->syntax->comm.str1,
-		      context->syntax->comm.len1);
+	if (1 < context->syntax->comm.len1)
+	  obstack_grow (obs_safe, context->syntax->comm.str1,
+			context->syntax->comm.len1);
+	else
+	  obstack_1grow (obs_safe, ch);
 	while (1)
 	  {
 	    ch = next_char (context, false, false, false);
@@ -1744,11 +1686,15 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		init_builtin_token (context, NULL, NULL);
 		continue;
 	      }
-	    if (MATCH (context, ch, context->syntax->comm.str2,
+	    if (MATCH (context, ch, M4_SYNTAX_ECOMM,
+		       context->syntax->comm.str2,
 		       context->syntax->comm.len2, true))
 	      {
-		obstack_grow (obs_safe, context->syntax->comm.str2,
-			      context->syntax->comm.len2);
+		if (1 < context->syntax->comm.len2)
+		  obstack_grow (obs_safe, context->syntax->comm.str2,
+				context->syntax->comm.len2);
+		else
+		  obstack_1grow (obs_safe, ch);
 		break;
 	      }
 	    assert (ch < CHAR_EOF);
@@ -1777,11 +1723,10 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	obstack_1grow (&token_stack, ch);
 	type = M4_TOKEN_CLOSE;
       }
-    else if (m4__safe_quotes (M4SYNTAX))
-      {			/* EVERYTHING ELSE (SHORT QUOTES AND COMMENTS) */
+    else
+      {					/* EVERYTHING ELSE */
 	assert (ch < CHAR_EOF);
 	obstack_1grow (&token_stack, ch);
-
 	if (m4_has_syntax (M4SYNTAX, ch,
 			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
 			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
@@ -1791,10 +1736,11 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 		obs_safe = obs;
 		obstack_1grow (obs, ch);
 	      }
-	    consume_syntax (context, obs_safe,
-			    (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
-			     | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
-			     | M4_SYNTAX_RBRACE));
+	    if (m4__safe_quotes (M4SYNTAX))
+	      consume_syntax (context, obs_safe,
+			      (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
+			       | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
+			       | M4_SYNTAX_RBRACE));
 	    type = M4_TOKEN_STRING;
 	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
@@ -1802,31 +1748,11 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	    /* Coalescing newlines when interactive or when synclines
 	       are enabled is wrong.  */
 	    if (!m4_get_interactive_opt (context)
-		&& !m4_get_syncoutput_opt (context))
+		&& !m4_get_syncoutput_opt (context)
+		&& m4__safe_quotes (M4SYNTAX))
 	      consume_syntax (context, &token_stack, M4_SYNTAX_SPACE);
 	    type = M4_TOKEN_SPACE;
 	  }
-	else
-	  type = M4_TOKEN_SIMPLE;
-      }
-    else		/* EVERYTHING ELSE (LONG QUOTES OR COMMENTS) */
-      {
-	assert (ch < CHAR_EOF);
-	obstack_1grow (&token_stack, ch);
-
-	if (m4_has_syntax (M4SYNTAX, ch,
-			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
-			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
-	  {
-	    if (obs)
-	      {
-		obs_safe = obs;
-		obstack_1grow (obs, ch);
-	      }
-	    type = M4_TOKEN_STRING;
-	  }
-	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))
-	  type = M4_TOKEN_SPACE;
 	else
 	  type = M4_TOKEN_SIMPLE;
       }
@@ -1879,9 +1805,9 @@ m4__next_token_is_open (m4 *context)
       || m4_has_syntax (M4SYNTAX, ch, (M4_SYNTAX_BCOMM | M4_SYNTAX_ESCAPE
 				       | M4_SYNTAX_ALPHA | M4_SYNTAX_LQUOTE
 				       | M4_SYNTAX_ACTIVE))
-      || (MATCH (context, ch, context->syntax->comm.str1,
+      || (MATCH (context, ch, M4_SYNTAX_BCOMM, context->syntax->comm.str1,
 		 context->syntax->comm.len1, false))
-      || (MATCH (context, ch, context->syntax->quote.str1,
+      || (MATCH (context, ch, M4_SYNTAX_LQUOTE, context->syntax->quote.str1,
 		 context->syntax->quote.len1, false)))
     return false;
   return m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN);
