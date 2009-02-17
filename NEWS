@@ -135,10 +135,6 @@ promoted to 2.0.
     efficient mapping directly to a builtin function, rather than through
     textual indirection through further expansions of `builtin'.
 
-*** The `changecom' builtin semantics now match traditional
-    implementations; if the start-comment string resembles a macro name or
-    the start-quote string, comments are effectively disabled.
-
 *** The `changesyntax' builtin has been improved, to make it easier to add
     and remove characters from a syntax class without having to specify the
     entire set of characters in that class.  It also supports new syntax
@@ -239,6 +235,10 @@ promoted to 2.0.
    On the other hand, if you want to install Autoconf 2.59 or earlier,
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
+
+** The `changecom' builtin semantics now match traditional
+   implementations; if the start-comment string resembles a macro name or
+   the start-quote string, comments are effectively disabled.
 
 ** The `divert' builtin now accepts an optional second argument of text
    that is immediately placed in the new diversion, regardless of whether

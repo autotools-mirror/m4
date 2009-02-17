@@ -5135,7 +5135,7 @@ But: /* this is a comment now */ while this is not a comment
 @cindex comments, copied to output
 Note how comments are copied to the output, much as if they were quoted
 strings.  If you want the text inside a comment expanded, quote the
-start comment delimiter.
+begin-comment delimiter.
 
 Calling @code{changecom} without any arguments, or with @var{start} as
 the empty string, will effectively disable the commenting mechanism.  To
@@ -5164,14 +5164,15 @@ If no single character is appropriate, @var{start} and @var{end} can be
 of any length.  Other implementations cap the delimiter length to five
 characters, but @acronym{GNU} has no inherent limit.
 
-Macros and quotes are recognized in preference to comments, so if a
-prefix of @var{start} can be recognized as part of a potential macro
-name, or confused with a quoted string, the comment mechanism is
-effectively disabled.  Unless you use @code{changesyntax}
-(@pxref{Changesyntax}), this means that @var{start} should not begin
-with a letter, digit, or @samp{_} (underscore), and that neither the
-start-quote nor the start-comment string should be a prefix of the
-other.
+As of M4 1.6, macros and quotes are recognized in preference to
+comments, so if a prefix of @var{start} can be recognized as part of a
+potential macro name, or confused with a quoted string, the comment
+mechanism is effectively disabled (earlier versions of @acronym{GNU} M4
+favored comments, but this was inconsistent with other implementations).
+Unless you use @code{changesyntax} (@pxref{Changesyntax}), this means
+that @var{start} should not begin with a letter, digit, or @samp{_}
+(underscore), and that neither the start-quote nor the start-comment
+string should be a prefix of the other.
 
 @example
 define(`hi', `HI')
