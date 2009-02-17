@@ -50,6 +50,10 @@ Software Foundation, Inc.
    then apply this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=56d42fa71
 
+** The `changecom' builtin semantics now match traditional
+   implementations; if the start-comment string resembles a macro name or
+   the start-quote string, comments are effectively disabled.
+
 ** The `divert' builtin now accepts an optional second argument of text
    that is immediately placed in the new diversion, regardless of whether
    the current expansion is nested within argument collection of another

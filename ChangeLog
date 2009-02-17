@@ -1,3 +1,11 @@
+2009-02-17  Eric Blake  <ebb9@byu.net>
+
+	Reorder token recognition to match other implementations.
+	* src/input.c (next_token): Recognize comments after quotes, but
+	before macro arguments.
+	* doc/m4.texinfo (Changecom): Document this.
+	* NEWS: Likewise.
+
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
 	Stage 29: Process input by buffer, not bytes.

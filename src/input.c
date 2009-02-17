@@ -1864,64 +1864,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       return TOKEN_ARGV;
     }
 
-  if (MATCH (ch, curr_comm.str1, curr_comm.len1, true))
-    {
-      if (obs)
-	obs_td = obs;
-      obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
-      while (1)
-	{
-	  /* Start with buffer search for potential end delimiter.  */
-	  size_t len;
-	  const char *buffer = next_buffer (&len, false);
-	  if (buffer)
-	    {
-	      const char *p = (char *) memchr (buffer, *curr_comm.str2, len);
-	      if (p)
-		{
-		  obstack_grow (obs_td, buffer, p - buffer);
-		  ch = to_uchar (*p);
-		  consume_buffer (p - buffer + 1);
-		}
-	      else
-		{
-		  obstack_grow (obs_td, buffer, len);
-		  consume_buffer (len);
-		  continue;
-		}
-	    }
-
-	  /* Fall back to byte-wise search.  */
-	  else
-	    ch = next_char (false, false);
-	  if (ch == CHAR_EOF)
-	    {
-	      /* Current_file changed to "" if we see CHAR_EOF, use
-		 the previous value we stored earlier.  */
-	      if (!caller)
-		{
-		  assert (line);
-		  current_line = *line;
-		  current_file = file;
-		}
-	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in comment"));
-	    }
-	  if (ch == CHAR_MACRO)
-	    {
-	      init_macro_token (obs, obs ? td : NULL);
-	      continue;
-	    }
-	  if (MATCH (ch, curr_comm.str2, curr_comm.len2, true))
-	    {
-	      obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
-	      break;
-	    }
-	  assert (ch < CHAR_EOF);
-	  obstack_1grow (obs_td, ch);
-	}
-      type = TOKEN_COMMENT;
-    }
-  else if (default_word_regexp && (isalpha (ch) || ch == '_'))
+  if (default_word_regexp && (isalpha (ch) || ch == '_'))
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1996,27 +1939,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 
 #endif /* ENABLE_CHANGEWORD */
 
-  else if (!MATCH (ch, curr_quote.str1, curr_quote.len1, true))
-    {
-      assert (ch < CHAR_EOF);
-      switch (ch)
-	{
-	case '(':
-	  type = TOKEN_OPEN;
-	  break;
-	case ',':
-	  type = TOKEN_COMMA;
-	  break;
-	case ')':
-	  type = TOKEN_CLOSE;
-	  break;
-	default:
-	  type = TOKEN_SIMPLE;
-	  break;
-	}
-      obstack_1grow (&token_stack, ch);
-    }
-  else
+  else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
     {
       if (obs)
 	obs_td = obs;
@@ -2095,6 +2018,83 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	      obstack_1grow (obs_td, ch);
 	    }
 	}
+    }
+  else if (MATCH (ch, curr_comm.str1, curr_comm.len1, true))
+    {
+      if (obs)
+	obs_td = obs;
+      obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
+      while (1)
+	{
+	  /* Start with buffer search for potential end delimiter.  */
+	  size_t len;
+	  const char *buffer = next_buffer (&len, false);
+	  if (buffer)
+	    {
+	      const char *p = (char *) memchr (buffer, *curr_comm.str2, len);
+	      if (p)
+		{
+		  obstack_grow (obs_td, buffer, p - buffer);
+		  ch = to_uchar (*p);
+		  consume_buffer (p - buffer + 1);
+		}
+	      else
+		{
+		  obstack_grow (obs_td, buffer, len);
+		  consume_buffer (len);
+		  continue;
+		}
+	    }
+
+	  /* Fall back to byte-wise search.  */
+	  else
+	    ch = next_char (false, false);
+	  if (ch == CHAR_EOF)
+	    {
+	      /* Current_file changed to "" if we see CHAR_EOF, use
+		 the previous value we stored earlier.  */
+	      if (!caller)
+		{
+		  assert (line);
+		  current_line = *line;
+		  current_file = file;
+		}
+	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in comment"));
+	    }
+	  if (ch == CHAR_MACRO)
+	    {
+	      init_macro_token (obs, obs ? td : NULL);
+	      continue;
+	    }
+	  if (MATCH (ch, curr_comm.str2, curr_comm.len2, true))
+	    {
+	      obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
+	      break;
+	    }
+	  assert (ch < CHAR_EOF);
+	  obstack_1grow (obs_td, ch);
+	}
+      type = TOKEN_COMMENT;
+    }
+  else
+    {
+      assert (ch < CHAR_EOF);
+      switch (ch)
+	{
+	case '(':
+	  type = TOKEN_OPEN;
+	  break;
+	case ',':
+	  type = TOKEN_COMMA;
+	  break;
+	case ')':
+	  type = TOKEN_CLOSE;
+	  break;
+	default:
+	  type = TOKEN_SIMPLE;
+	  break;
+	}
+      obstack_1grow (&token_stack, ch);
     }
 
   if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)

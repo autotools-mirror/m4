@@ -4932,13 +4932,15 @@ If no single character is appropriate, @var{start} and @var{end} can be
 of any length.  Other implementations cap the delimiter length to five
 characters, but @acronym{GNU} has no inherent limit.
 
-Comments are recognized in preference to macros.  However, this is not
-compatible with other implementations, where macros and even quoting
-takes precedence over comments, so it may change in a future release.
-For portability, this means that @var{start} should not begin with a
-letter, digit, or @samp{_} (underscore), and that neither the
-start-quote nor the start-comment string should be a prefix of the
-other.
+As of M4 1.6, macros and quotes are recognized in preference to
+comments, so if a prefix of @var{start} can be recognized as part of a
+potential macro name, or confused with a quoted string, the comment
+mechanism is effectively disabled (earlier versions of @acronym{GNU} M4
+favored comments, but this was inconsistent with other implementations).
+Unless you use @code{changeword} (@pxref{Changeword}), this means
+that @var{start} should not begin with a letter, digit, or @samp{_}
+(underscore), and that neither the start-quote nor the start-comment
+string should be a prefix of the other.
 
 @example
 define(`hi', `HI')
@@ -4948,13 +4950,33 @@ define(`hi1hi2', `hello')
 changecom(`q', `Q')
 @result{}
 q hi Q hi
-@result{}q hi Q HI
+@result{}q HI Q HI
 changecom(`1', `2')
 @result{}
 hi1hi2
 @result{}hello
 hi 1hi2
 @result{}HI 1hi2
+changecom(`[[', `]]')
+@result{}
+changequote(`[[[', `]]]')
+@result{}
+[hi]
+@result{}[HI]
+[[hi]]
+@result{}[[hi]]
+[[[hi]]]
+@result{}hi
+changequote
+@result{}
+changecom(`[[[', `]]]')
+@result{}
+changequote(`[[', `]]')
+@result{}
+[[hi]]
+@result{}hi
+[[[hi]]]
+@result{}[hi]
 @end example
 
 Comments are recognized in preference to argument collection.  In
