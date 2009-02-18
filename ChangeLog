@@ -1,5 +1,9 @@
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
+	Avoid risk of stack overflow.
+	* m4/output.c (insert_file): Avoid stack allocation of large
+	buffer.
+
 	Synchronize THANKS with branch.
 	* THANKS: Import more names.
 

@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 2002, 2004,
-   2006, 2007, 2008 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -887,16 +887,16 @@ m4_make_diversion (m4 *context, int divnum)
 static void
 insert_file (m4 *context, FILE *file, bool escaped)
 {
-  char buffer[COPY_BUFFER_SIZE];
+  static char buffer[COPY_BUFFER_SIZE];
   size_t length;
   char *str = buffer;
   bool first = true;
 
   assert (output_diversion);
   /* Insert output by big chunks.  */
-  for (;;)
+  while (1)
     {
-      length = fread (buffer, 1, COPY_BUFFER_SIZE, file);
+      length = fread (buffer, 1, sizeof buffer, file);
       if (ferror (file))
 	m4_error (context, EXIT_FAILURE, errno, NULL,
 		  _("reading inserted file"));
