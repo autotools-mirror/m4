@@ -654,7 +654,6 @@ M4BUILTIN_HANDLER (esyscmd)
   if (m4_set_sysval && m4_sysval_flush)
     {
       FILE *pin;
-      int ch;
 
       if (m4_get_safer_opt (context))
 	{
@@ -684,8 +683,27 @@ M4BUILTIN_HANDLER (esyscmd)
 	}
       else
 	{
-	  while ((ch = getc (pin)) != EOF)
-	    obstack_1grow (obs, ch);
+	  while (1)
+	    {
+	      size_t avail = obstack_room (obs);
+	      if (!avail)
+		{
+		  int ch = getc (pin);
+		  if (ch == EOF)
+		    break;
+		  obstack_1grow (obs, ch);
+		}
+	      else
+		{
+		  size_t len = fread (obstack_next_free (obs), 1, avail, pin);
+		  if (len <= 0)
+		    break;
+		  obstack_blank_fast (obs, len);
+		}
+	    }
+	  if (ferror (pin))
+	    m4_warn (context, errno, me, _("cannot read pipe to command %s"),
+		     quotearg_style (locale_quoting_style, cmd));
 	  m4_set_sysval (pclose (pin));
 	}
     }
