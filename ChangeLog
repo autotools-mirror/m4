@@ -1,3 +1,10 @@
+2009-02-18  Eric Blake  <ebb9@byu.net>
+
+	Update copyright years.
+	* src/format.c: Add 2009 to copyright.
+	* src/m4.h: Likewise.
+	* THANKS: Likewise.  Add name from branch.
+
 2009-02-17  Eric Blake  <ebb9@byu.net>
 
 	Reorder token recognition to match other implementations.
