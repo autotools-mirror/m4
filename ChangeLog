@@ -1,5 +1,8 @@
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
+	Synchronize THANKS with branch.
+	* THANKS: Import more names.
+
 	Improve handling of $ in syntax table.
 	* m4/m4module.h (m4_is_syntax_single_dollar): New function.
 	(M4_SYNTAX_DOLLAR, M4_SYNTAX_LBRACE, M4_SYNTAX_RBRACE): Change to

@@ -124,6 +124,7 @@ Robert Bihlmeyer	robbe@orcus.priv.at
 Roderick Koehle		Roderick.Koehle@infineon.com
 Roland H. Pesch		roland@wrs.com
 Roland McGrath		roland@gnu.org
+Ronny Peine		RonnyPeine@gmx.de
 Sami Liedes		sliedes@cc.hut.fi
 Santiago Vila		sanvila@debian.org
 Scott Bartram		deneb!scottb
@@ -138,6 +139,7 @@ Terry Jones		terry@cliffs.ucsd.edu
 Thomas Klausner		tk@giga.or.at
 Thomas Tanner		tanner@ffii.org
 Thorsten Ohl		ohl@physics.harvard.edu
+Tom G. Christensen	tgc@jupiterrise.com
 Tom McConnell		tmcconne@sedona.intel.com
 Tom Quinn		trq@dionysos.thphys.ox.ac.uk
 Tom Tromey		tromey@cns.caltech.edu
@@ -155,7 +157,8 @@ Local Variables:
 coding: utf-8
 End:
 
-Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
+Copyright (C) 2000, 2006, 2007, 2008, 2009 Free Software Foundation,
+Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
