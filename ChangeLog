@@ -1,3 +1,10 @@
+2009-02-18  Eric Blake  <ebb9@byu.net>
+
+	Avoid risk of stack overflow.
+	* src/output.c (insert_file): Avoid stack allocation of large
+	buffer.
+	(freeze_diversions): Avoid spurious semicolon.
+
 2009-02-16  Eric Blake  <ebb9@byu.net>
 
 	Avoid test failure due to different errno.
