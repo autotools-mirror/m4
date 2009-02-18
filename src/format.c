@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2008,
+   2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -89,14 +89,16 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 
   f = fmt = ARG_STR (argc, argv);
   memset (ok, 0, sizeof ok);
-  for (;;)
+  while (1)
     {
-      while ((c = *fmt++) != '%')
+      const char *percent = strchr (fmt, '%');
+      if (!percent)
 	{
-	  if (c == '\0')
-	    return;
-	  obstack_1grow (obs, c);
+	  obstack_grow (obs, fmt, strlen (fmt));
+	  return;
 	}
+      obstack_grow (obs, fmt, percent - fmt);
+      fmt = percent + 1;
 
       if (*fmt == '%')
 	{

@@ -1902,17 +1902,18 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	    struct re_registers *regs)
 {
   int ch;
-
-  for (;;)
+  while (1)
     {
-      while ((ch = *repl++) != '\\')
+      const char *backslash = strchr (repl, '\\');
+      if (!backslash)
 	{
-	  if (ch == '\0')
-	    return;
-	  obstack_1grow (obs, ch);
+	  obstack_grow (obs, repl, strlen (repl));
+	  return;
 	}
-
-      switch ((ch = *repl++))
+      obstack_grow (obs, repl, backslash - repl);
+      repl = backslash;
+      ch = *++repl;
+      switch (ch)
 	{
 	case '0':
 	  if (!substitute_warned)
@@ -1926,6 +1927,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '&':
 	  obstack_grow (obs, victim + regs->start[0],
 			regs->end[0] - regs->start[0]);
+	  repl++;
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
@@ -1937,6 +1939,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	  else if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
+	  repl++;
 	  break;
 
 	case '\0':
@@ -1946,6 +1949,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 
 	default:
 	  obstack_1grow (obs, ch);
+	  repl++;
 	  break;
 	}
     }
@@ -2151,19 +2155,19 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, token_data **argv)
 {
-  const char *text;
+  const char *text = SYMBOL_TEXT (sym);
   int i;
-
-  for (text = SYMBOL_TEXT (sym); *text != '\0';)
+  while (1)
     {
-      if (*text != '$')
+      const char *dollar = strchr (text, '$');
+      if (!dollar)
 	{
-	  obstack_1grow (obs, *text);
-	  text++;
-	  continue;
+	  obstack_grow (obs, text, strlen (text));
+	  return;
 	}
-      text++;
-      switch (*text)
+      obstack_grow (obs, text, dollar - text);
+      text = dollar;
+      switch (*++text)
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':

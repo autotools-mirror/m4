@@ -1,5 +1,9 @@
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
+	Prefer buffer over byte operations.
+	* src/format.c (expand_format): Use strchr for speed.
+	* src/builtin.c (substitute, expand_user_macro): Likewise.
+
 	Speed up esyscmd with buffer reads.
 	* src/builtin.c (m4_esyscmd): Read blocks directly into obstack,
 	rather than repeatedly reading bytes.  Detect read errors.
