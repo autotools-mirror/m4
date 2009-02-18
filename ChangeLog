@@ -1,5 +1,8 @@
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
+	Update copyright year.
+	* THANKS: Mention 2009 in copyright year.
+
 	Prefer buffer over byte operations.
 	* src/format.c (expand_format): Use strchr for speed.
 	* src/builtin.c (substitute, expand_user_macro): Likewise.
