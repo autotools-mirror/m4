@@ -930,7 +930,7 @@ consume_buffer (size_t len)
       buf = freadptr (isp->u.u_f.fp, &buf_len);
       assert (buf && len <= buf_len);
       buf_len = 0;
-      while ((p = memchr (buf + buf_len, '\n', len - buf_len)))
+      while ((p = (char *) memchr (buf + buf_len, '\n', len - buf_len)))
 	{
 	  if (p == buf + len - 1)
 	    start_of_input_line = true;

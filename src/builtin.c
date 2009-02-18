@@ -2190,23 +2190,24 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
 	    const char *repl, size_t repl_len, struct re_registers *regs)
 {
   int ch;
-
-  while (repl_len--)
+  while (1)
     {
-      ch = *repl++;
-      if (ch != '\\')
+      const char *backslash = (char *) memchr (repl, '\\', repl_len);
+      if (!backslash)
 	{
-	  obstack_1grow (obs, ch);
-	  continue;
+	  obstack_grow (obs, repl, repl_len);
+	  return;
 	}
+      obstack_grow (obs, repl, backslash - repl);
+      repl_len -= backslash - repl + 1;
       if (!repl_len)
 	{
 	  m4_warn (0, me, _("trailing \\ ignored in replacement"));
 	  return;
 	}
-
-      ch = *repl++;
+      repl = backslash + 1;
       repl_len--;
+      ch = *repl++;
       switch (ch)
 	{
 	case '0':
@@ -2488,15 +2489,22 @@ expand_user_macro (struct obstack *obs, symbol *sym,
   const char *text = SYMBOL_TEXT (sym);
   size_t len = SYMBOL_TEXT_LEN (sym);
   int i;
-  const char *dollar = memchr (text, '$', len);
-
-  while (dollar)
+  while (1)
     {
+      const char *dollar = (char *) memchr (text, '$', len);
+      if (!dollar)
+	{
+	  obstack_grow (obs, text, len);
+	  return;
+	}
       obstack_grow (obs, text, dollar - text);
       len -= dollar - text;
       text = dollar;
       if (len == 1)
-	break;
+	{
+	  obstack_1grow (obs, '$');
+	  return;
+	}
       len--;
       switch (*++text)
 	{
@@ -2532,7 +2540,5 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 	  obstack_1grow (obs, '$');
 	  break;
 	}
-      dollar = memchr (text, '$', len);
     }
-  obstack_grow (obs, text, len);
 }

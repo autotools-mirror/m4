@@ -181,14 +181,17 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
   f_len = ARG_LEN (1);
   assert (!f[f_len]); /* Requiring a terminating NUL makes parsing simpler.  */
   memset (ok, 0, sizeof ok);
-  while (f_len--)
+  while (1)
     {
-      c = *fmt++;
-      if (c != '%')
+      const char *percent = (char *) memchr (fmt, '%', f_len);
+      if (!percent)
 	{
-	  obstack_1grow (obs, c);
-	  continue;
+	  obstack_grow (obs, fmt, f_len);
+	  break;
 	}
+      obstack_grow (obs, fmt, percent - fmt);
+      f_len -= percent - fmt + 1;
+      fmt = percent + 1;
 
       if (*fmt == '%')
 	{
