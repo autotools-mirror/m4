@@ -238,22 +238,23 @@ substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 	    m4_pattern_buffer *buf)
 {
   int ch;
-
-  while (repl_len--)
+  while (1)
     {
-      ch = *repl++;
-      if (ch != '\\')
+      const char *backslash = (char *) memchr (repl, '\\', repl_len);
+      if (!backslash)
 	{
-	  obstack_1grow (obs, ch);
-	  continue;
+	  obstack_grow (obs, repl, repl_len);
+	  return;
 	}
+      obstack_grow (obs, repl, backslash - repl);
+      repl_len -= backslash - repl + 1;
       if (!repl_len)
 	{
 	  m4_warn (context, 0, caller,
 		   _("trailing \\ ignored in replacement"));
 	  return;
 	}
-
+      repl = backslash + 1;
       ch = *repl++;
       repl_len--;
       switch (ch)

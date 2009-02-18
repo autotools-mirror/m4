@@ -1,5 +1,13 @@
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
+	Prefer buffer over byte operations.
+	* modules/format.c (format): Use memchr for speed.
+	* modules/gnu.c (substitute): Likewise.
+	* m4/macro.c (locate_dollar): Inline into only caller...
+	(process_macro): ...and rearrange for readability.
+	* m4/input.c (consume_buffer): Allow C++ compilation.
+	* doc/m4.texinfo (Changesyntax): Enhance test.
+
 	Speed up esyscmd with buffer reads.
 	* modules/gnu.c (esyscmd): Read blocks directly into obstack,
 	rather than repeatedly reading bytes.  Detect read errors.

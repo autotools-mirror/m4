@@ -688,22 +688,6 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
     trace_post (context, trace_start, argv->info);
 }
 
-/* Locate the next byte with dollar syntax in string STR of length
-   LEN, or return NULL.  */
-static const char *
-locate_dollar (m4 *context, const char *str, size_t len)
-{
-  if (m4_is_syntax_single_dollar (M4SYNTAX))
-    return (char *) memchr (str, M4SYNTAX->dollar, len);
-  while (len--)
-    {
-      if (m4_has_syntax (M4SYNTAX, *str, M4_SYNTAX_DOLLAR))
-	return str;
-      str++;
-    }
-  return NULL;
-}
-
 /* This function handles all expansion of user defined and predefined
    macros.  It is called with an obstack OBS, where the macros expansion
    will be placed, as an unfinished object.  SYMBOL points to the macro
@@ -715,16 +699,38 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 {
   const char *text = m4_get_symbol_value_text (value);
   size_t len = m4_get_symbol_value_len (value);
+  const char *end = text + len;
   int i;
-  const char *dollar = locate_dollar (context, text, len);
-
-  while (dollar)
+  while (1)
     {
+      const char *dollar;
+      if (m4_is_syntax_single_dollar (M4SYNTAX))
+	dollar = (char *) memchr (text, M4SYNTAX->dollar, len);
+      else
+	{
+	  dollar = text;
+	  while (dollar != end)
+	    {
+	      if (m4_has_syntax (M4SYNTAX, *dollar, M4_SYNTAX_DOLLAR))
+		break;
+	      dollar++;
+	    }
+	  if (dollar == end)
+	    dollar = NULL;
+	}
+      if (!dollar)
+	{
+	  obstack_grow (obs, text, len);
+	  return;
+	}
       obstack_grow (obs, text, dollar - text);
       len -= dollar - text;
       text = dollar;
       if (len == 1)
-	break;
+	{
+	  obstack_1grow (obs, *dollar);
+	  return;
+	}
       len--;
       switch (*++text)
 	{
@@ -813,9 +819,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	    }
 	  break;
 	}
-      dollar = locate_dollar (context, text, len);
     }
-  obstack_grow (obs, text, len);
 }
 
 

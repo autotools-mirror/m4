@@ -5628,6 +5628,11 @@ define(`escape', `$?`'1$?1?')
 @result{}
 escape(foo)
 @result{}$?1$foo?
+dnl Multiple argument identifiers.
+changesyntax(`$+$')
+@result{}
+argref(1, 2, 3)
+@result{}Dollar: 3, Question: 3
 @end example
 
 Macro calls can be given a @TeX{} or Texinfo like syntax using an
