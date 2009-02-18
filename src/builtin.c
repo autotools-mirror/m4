@@ -1177,7 +1177,6 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   const char *cmd = ARG (1);
   size_t len = ARG_LEN (1);
   FILE *pin;
-  int ch;
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
@@ -1200,8 +1199,27 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
     }
   else
     {
-      while ((ch = getc (pin)) != EOF)
-	obstack_1grow (obs, (char) ch);
+      while (1)
+	{
+	  size_t avail = obstack_room (obs);
+	  if (!avail)
+	    {
+	      int ch = getc (pin);
+	      if (ch == EOF)
+		break;
+	      obstack_1grow (obs, ch);
+	    }
+	  else
+	    {
+	      size_t len = fread (obstack_next_free (obs), 1, avail, pin);
+	      if (len <= 0)
+		break;
+	      obstack_blank_fast (obs, len);
+	    }
+	}
+      if (ferror (pin))
+	m4_warn (errno, me, _("cannot read pipe to command %s"),
+		 quotearg_style (locale_quoting_style, cmd));
       sysval = pclose (pin);
     }
 }
