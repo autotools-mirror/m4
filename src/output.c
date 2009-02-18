@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -835,19 +835,17 @@ make_diversion (int divnum)
 void
 insert_file (FILE *file)
 {
-  char buffer[COPY_BUFFER_SIZE];
+  static char buffer[COPY_BUFFER_SIZE];
   size_t length;
 
   /* Optimize out inserting into a sink.  */
-
   if (!output_diversion)
     return;
 
   /* Insert output by big chunks.  */
-
-  for (;;)
+  while (1)
     {
-      length = fread (buffer, 1, COPY_BUFFER_SIZE, file);
+      length = fread (buffer, 1, sizeof buffer, file);
       if (ferror (file))
 	m4_error (EXIT_FAILURE, errno, NULL, _("error reading inserted file"));
       if (length == 0)
@@ -1005,7 +1003,7 @@ freeze_diversions (FILE *file)
   iter = gl_oset_iterator (diversion_table);
   while (gl_oset_iterator_next (&iter, &elt))
     {
-      m4_diversion *diversion = (m4_diversion *) elt;;
+      m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
