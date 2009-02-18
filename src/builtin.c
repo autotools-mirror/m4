@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -999,7 +999,6 @@ static void
 m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
   FILE *pin;
-  int ch;
 
   if (bad_argc (argv[0], argc, 2, 2))
     {
@@ -1019,8 +1018,25 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     }
   else
     {
-      while ((ch = getc (pin)) != EOF)
-	obstack_1grow (obs, (char) ch);
+      while (1)
+	{
+	  size_t avail = obstack_room (obs);
+	  size_t len;
+	  if (!avail)
+	    {
+	      int ch = getc (pin);
+	      if (ch == EOF)
+		break;
+	      obstack_1grow (obs, ch);
+	      continue;
+	    }
+	  len = fread (obstack_next_free (obs), 1, avail, pin);
+	  if (len <= 0)
+	    break;
+	  obstack_blank_fast (obs, len);
+	}
+      if (ferror (pin))
+	M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
       sysval = pclose (pin);
     }
 }
