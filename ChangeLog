@@ -1,3 +1,22 @@
+2009-02-18  Eric Blake  <ebb9@byu.net>
+
+	Improve handling of $ in syntax table.
+	* m4/m4module.h (m4_is_syntax_single_dollar): New function.
+	(M4_SYNTAX_DOLLAR, M4_SYNTAX_LBRACE, M4_SYNTAX_RBRACE): Change to
+	be context rather than basic syntax categories.
+	(M4_SYNTAX_MASKS): Adjust macro.
+	* m4/m4private.h (struct m4_syntax_table): Add dollar and
+	is_single_dollar members.
+	(m4_is_syntax_single_dollar): Add fast alternative.
+	* m4/syntax.c (m4_syntax_create, reset_syntax_set): Adjust to
+	account for change to context categories.
+	(m4_set_syntax): Manage is_single_dollar.
+	(m4_is_syntax_single_dollar): New function.
+	* m4/macro.c (locate_dollar): New helper function.
+	(process_macro): Use it to speed up macro expansion.
+	* m4/input.c (m4__next_token): Adjust client.
+	* doc/m4.texinfo (Changesyntax): Document this.
+
 2009-02-17  Eric Blake  <ebb9@byu.net>
 
 	Sync changecom documentation with branch.

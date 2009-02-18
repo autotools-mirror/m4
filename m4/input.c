@@ -2067,9 +2067,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       {					/* EVERYTHING ELSE */
 	assert (ch < CHAR_EOF);
 	obstack_1grow (&token_stack, ch);
-	if (m4_has_syntax (M4SYNTAX, ch,
-			   (M4_SYNTAX_OTHER | M4_SYNTAX_NUM | M4_SYNTAX_DOLLAR
-			    | M4_SYNTAX_LBRACE | M4_SYNTAX_RBRACE)))
+	if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OTHER | M4_SYNTAX_NUM))
 	  {
 	    if (obs)
 	      {
@@ -2078,9 +2076,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
 	      }
 	    if (m4__safe_quotes (M4SYNTAX))
 	      consume_syntax (context, obs_safe,
-			      (M4_SYNTAX_OTHER | M4_SYNTAX_NUM
-			       | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE
-			       | M4_SYNTAX_RBRACE));
+			      M4_SYNTAX_OTHER | M4_SYNTAX_NUM);
 	    type = M4_TOKEN_STRING;
 	  }
 	else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_SPACE))

@@ -472,11 +472,16 @@ struct m4_syntax_table {
   m4_string_pair quote;	/* Quote delimiters.  */
   m4_string_pair comm;	/* Comment delimiters.  */
 
+  char dollar; /* Dollar character, if is_single_dollar.  */
+
   /* True iff only one start and end quote delimiter exist.  */
   bool_bitfield is_single_quotes : 1;
 
   /* True iff only one start and end comment delimiter exist.  */
   bool_bitfield is_single_comments : 1;
+
+  /* True iff only one byte has M4_SYNTAX_DOLLAR.  */
+  bool_bitfield is_single_dollar : 1;
 
   /* True iff some character has M4_SYNTAX_ESCAPE.  */
   bool_bitfield is_macro_escaped : 1;
@@ -518,6 +523,7 @@ struct m4_syntax_table {
 
 #  define m4_is_syntax_single_quotes(S)		((S)->is_single_quotes)
 #  define m4_is_syntax_single_comments(S)	((S)->is_single_comments)
+#  define m4_is_syntax_single_dollar(S)		((S)->is_single_dollar)
 #  define m4_is_syntax_macro_escaped(S)		((S)->is_macro_escaped)
 #endif
 

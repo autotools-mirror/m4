@@ -29,7 +29,7 @@
 
    The input is read character by character and grouped together
    according to a syntax table.  The character groups are (definitions
-   are all in m4.h, those marked with a * are not yet in use):
+   are all in m4module.h, those marked with a * are not yet in use):
 
    Basic (all characters fall in one of these mutually exclusive bins)
    M4_SYNTAX_IGNORE	*Character to be deleted from input as if not present
@@ -38,9 +38,6 @@
    M4_SYNTAX_OPEN	Open list of macro arguments
    M4_SYNTAX_CLOSE	Close list of macro arguments
    M4_SYNTAX_COMMA	Separates macro arguments
-   M4_SYNTAX_DOLLAR	Indicates macro argument in user macros
-   M4_SYNTAX_LBRACE	Indicates start of extended macro argument
-   M4_SYNTAX_RBRACE	Indicates end of extended macro argument
    M4_SYNTAX_ACTIVE	This character is a macro name by itself
    M4_SYNTAX_ESCAPE	Use this character to prefix all macro names
 
@@ -53,6 +50,9 @@
    Attribute (these are context sensitive, and exist in addition to basic)
    M4_SYNTAX_RQUOTE	A single character right quote
    M4_SYNTAX_ECOMM	A single character end comment delimiter
+   M4_SYNTAX_DOLLAR	Indicates macro argument in user macros
+   M4_SYNTAX_LBRACE	*Indicates start of extended macro argument
+   M4_SYNTAX_RBRACE	*Indicates end of extended macro argument
 
    Besides adding new facilities, the use of a syntax table will reduce
    the number of calls to next_token ().  Now groups of OTHER, NUM and
@@ -80,10 +80,7 @@
    M4_SYNTAX_BCOMM	Reads all until M4_SYNTAX_ECOMM
 
    M4_SYNTAX_OTHER  }	Reads all M4_SYNTAX_OTHER, M4_SYNTAX_NUM
-   M4_SYNTAX_NUM    }	M4_SYNTAX_DOLLAR, M4_SYNTAX_LBRACE, M4_SYNTAX_RBRACE
-   M4_SYNTAX_DOLLAR }
-   M4_SYNTAX_LBRACE }
-   M4_SYNTAX_RBRACE }
+   M4_SYNTAX_NUM    }
 
    M4_SYNTAX_SPACE	Reads all M4_SYNTAX_SPACE, depending on buffering
    M4_SYNTAX_ACTIVE	Returns a single char as a macro name
@@ -92,12 +89,10 @@
    M4_SYNTAX_CLOSE  }
    M4_SYNTAX_COMMA  }
 
-   The $, {, and } are not really a part of m4's input syntax, because a
-   a string is parsed equally whether there is a $ or not.  These characters
-   are instead used during user macro expansion.
-
-
-   M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM do not start tokens.
+   M4_SYNTAX_RQUOTE and M4_SYNTAX_ECOMM are context-sensitive, and
+   close out M4_SYNTAX_LQUOTE and M4_SYNTAX_BCOMM, respectively.
+   Also, M4_SYNTAX_DOLLAR, M4_SYNTAX_LBRACE, and M4_SYNTAX_RBRACE are
+   context-sensitive, only mattering when expanding macro definitions.
 
    There are several optimizations that can be performed depending on
    known states of the syntax table.  For example, when searching for
@@ -125,7 +120,8 @@ m4_syntax_create (void)
   m4_syntax_table *syntax = (m4_syntax_table *) xzalloc (sizeof *syntax);
   int ch;
 
-  /* Set up default table.  This table never changes during operation.  */
+  /* Set up default table.  This table never changes during operation,
+     and contains no context attributes.  */
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     switch (ch)
       {
@@ -138,25 +134,12 @@ m4_syntax_create (void)
       case ',':
 	syntax->orig[ch] = M4_SYNTAX_COMMA;
 	break;
-      case '$':
-	syntax->orig[ch] = M4_SYNTAX_DOLLAR;
-	break;
-      case '{':
-	syntax->orig[ch] = M4_SYNTAX_LBRACE;
-	break;
-      case '}':
-	syntax->orig[ch] = M4_SYNTAX_RBRACE;
-	break;
       case '`':
 	syntax->orig[ch] = M4_SYNTAX_LQUOTE;
 	break;
       case '#':
 	syntax->orig[ch] = M4_SYNTAX_BCOMM;
 	break;
-      case '\0':
-	/* FIXME - revisit the ignore syntax attribute.  */
-	/* syntax->orig[ch] = M4_SYNTAX_IGNORE; */
-	/* break; */
       default:
 	if (isspace (ch))
 	  syntax->orig[ch] = M4_SYNTAX_SPACE;
@@ -196,24 +179,25 @@ m4_syntax_code (char ch)
 
   switch (ch)
     {
-       /* Sorted according to the order of M4_SYNTAX_* in m4module.h.  */
-       /* FIXME - revisit the ignore syntax attribute.  */
+      /* Sorted according to the order of M4_SYNTAX_* in m4module.h.  */
+      /* FIXME - revisit the ignore syntax attribute.  */
     case 'I': case 'i':	code = M4_SYNTAX_IGNORE; break;
+      /* Basic categories.  */
     case '@':		code = M4_SYNTAX_ESCAPE; break;
     case 'W': case 'w':	code = M4_SYNTAX_ALPHA;  break;
     case 'L': case 'l':	code = M4_SYNTAX_LQUOTE; break;
     case 'B': case 'b':	code = M4_SYNTAX_BCOMM;  break;
-    case 'O': case 'o':	code = M4_SYNTAX_OTHER;  break;
-    case 'D': case 'd':	code = M4_SYNTAX_NUM;    break;
-    case '$':		code = M4_SYNTAX_DOLLAR; break;
-    case '{':		code = M4_SYNTAX_LBRACE; break;
-    case '}':		code = M4_SYNTAX_RBRACE; break;
-    case 'S': case 's':	code = M4_SYNTAX_SPACE;  break;
     case 'A': case 'a':	code = M4_SYNTAX_ACTIVE; break;
+    case 'D': case 'd':	code = M4_SYNTAX_NUM;    break;
+    case 'S': case 's':	code = M4_SYNTAX_SPACE;  break;
     case '(':		code = M4_SYNTAX_OPEN;   break;
     case ')':		code = M4_SYNTAX_CLOSE;  break;
     case ',':		code = M4_SYNTAX_COMMA;  break;
-
+    case 'O': case 'o':	code = M4_SYNTAX_OTHER;  break;
+      /* Context categories.  */
+    case '$':		code = M4_SYNTAX_DOLLAR; break;
+    case '{':		code = M4_SYNTAX_LBRACE; break;
+    case '}':		code = M4_SYNTAX_RBRACE; break;
     case 'R': case 'r':	code = M4_SYNTAX_RQUOTE; break;
     case 'E': case 'e':	code = M4_SYNTAX_ECOMM;  break;
 
@@ -344,6 +328,27 @@ reset_syntax_set (m4_syntax_table *syntax, int code)
 	  else
 	    remove_syntax_attribute (syntax, ch, code);
 	}
+      else if (code == M4_SYNTAX_DOLLAR)
+	{
+	  if (ch == '$')
+	    add_syntax_attribute (syntax, ch, code);
+	  else
+	    remove_syntax_attribute (syntax, ch, code);
+	}
+      else if (code == M4_SYNTAX_LBRACE)
+	{
+	  if (ch == '{')
+	    add_syntax_attribute (syntax, ch, code);
+	  else
+	    remove_syntax_attribute (syntax, ch, code);
+	}
+      else if (code == M4_SYNTAX_RBRACE)
+	{
+	  if (ch == '}')
+	    add_syntax_attribute (syntax, ch, code);
+	  else
+	    remove_syntax_attribute (syntax, ch, code);
+	}
       else if (syntax->orig[ch] == code || m4_has_syntax (syntax, ch, code))
 	add_syntax_attribute (syntax, ch, syntax->orig[ch]);
     }
@@ -371,12 +376,17 @@ m4_reset_syntax (m4_syntax_table *syntax)
   syntax->comm.len1 = 1;
   syntax->comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   syntax->comm.len2 = 1;
+  syntax->dollar = '$';
 
   add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
   add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
+  add_syntax_attribute (syntax, '$', M4_SYNTAX_DOLLAR);
+  add_syntax_attribute (syntax, '{', M4_SYNTAX_LBRACE);
+  add_syntax_attribute (syntax, '}', M4_SYNTAX_RBRACE);
 
   syntax->is_single_quotes = true;
   syntax->is_single_comments = true;
+  syntax->is_single_dollar = true;
   syntax->is_macro_escaped = false;
   set_quote_age (syntax, true, false);
 }
@@ -428,6 +438,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       int ecomm = -1;
       bool single_quote_possible = true;
       bool single_comm_possible = true;
+      int dollar = -1;
       if (m4_has_syntax (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE))
 	{
 	  assert (syntax->quote.len1 == 1);
@@ -448,6 +459,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
 	  assert (syntax->comm.len2 == 1);
 	  ecomm = to_uchar (syntax->comm.str2[0]);
 	}
+      syntax->is_single_dollar = false;
       syntax->is_macro_escaped = false;
       /* Find candidates for each category.  */
       for (ch = UCHAR_MAX + 1; --ch >= 0; )
@@ -479,6 +491,16 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
 		ecomm = ch;
 	      else if (ecomm != ch)
 		single_comm_possible = false;
+	    }
+	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_DOLLAR))
+	    {
+	      if (dollar == -1)
+		{
+		  syntax->dollar = dollar = ch;
+		  syntax->is_single_dollar = true;
+		}
+	      else
+		syntax->is_single_dollar = false;
 	    }
 	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
 	    syntax->is_macro_escaped = true;
@@ -913,6 +935,14 @@ m4_is_syntax_single_comments (m4_syntax_table *syntax)
 {
   assert (syntax);
   return syntax->is_single_comments;
+}
+
+#undef m4_is_syntax_single_dollar
+bool
+m4_is_syntax_single_dollar (m4_syntax_table *syntax)
+{
+  assert (syntax);
+  return syntax->is_single_dollar;
 }
 
 #undef m4_is_syntax_macro_escaped

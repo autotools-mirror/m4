@@ -454,6 +454,7 @@ extern	const m4_string_pair *m4_get_syntax_comments	(m4_syntax_table *);
 
 extern	bool		 m4_is_syntax_single_quotes	(m4_syntax_table *);
 extern	bool		 m4_is_syntax_single_comments	(m4_syntax_table *);
+extern	bool		 m4_is_syntax_single_dollar	(m4_syntax_table *);
 extern	bool		 m4_is_syntax_macro_escaped	(m4_syntax_table *);
 
 /* These are values to be assigned to syntax table entries.  Although
@@ -466,26 +467,28 @@ enum {
   M4_SYNTAX_ALPHA		= 1 << 1,
   M4_SYNTAX_LQUOTE		= 1 << 2,
   M4_SYNTAX_BCOMM		= 1 << 3,
-  M4_SYNTAX_OTHER		= 1 << 4,
+  M4_SYNTAX_ACTIVE		= 1 << 4,
   M4_SYNTAX_NUM			= 1 << 5,
-  M4_SYNTAX_DOLLAR		= 1 << 6,
-  M4_SYNTAX_LBRACE		= 1 << 7,
-  M4_SYNTAX_RBRACE		= 1 << 8,
-  M4_SYNTAX_SPACE		= 1 << 9,
-  M4_SYNTAX_ACTIVE		= 1 << 10,
-  M4_SYNTAX_OPEN		= 1 << 11,
-  M4_SYNTAX_CLOSE		= 1 << 12,
-  M4_SYNTAX_COMMA		= 1 << 13,
+  M4_SYNTAX_SPACE		= 1 << 6,
+  M4_SYNTAX_OPEN		= 1 << 7,
+  M4_SYNTAX_CLOSE		= 1 << 8,
+  M4_SYNTAX_COMMA		= 1 << 9,
+  M4_SYNTAX_OTHER		= 1 << 10,
 
   /* These values are bit masks to OR with categories above, a syntax entry
      may have any number of these in addition to a maximum of one of the
      values above.  */
+  M4_SYNTAX_DOLLAR		= 1 << 11,
+  M4_SYNTAX_LBRACE		= 1 << 12,
+  M4_SYNTAX_RBRACE		= 1 << 13,
   M4_SYNTAX_RQUOTE		= 1 << 14,
   M4_SYNTAX_ECOMM		= 1 << 15
 };
 
 /* Mask of attribute syntax categories.  */
-#define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM)
+#define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM	\
+				 | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE	\
+				 | M4_SYNTAX_RBRACE)
 /* Mask of basic syntax categories where any change requires a
    recomputation of the overall syntax characteristics.  */
 #define M4_SYNTAX_SUSPECT	(M4_SYNTAX_LQUOTE | M4_SYNTAX_BCOMM	\

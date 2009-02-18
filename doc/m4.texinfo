@@ -5410,8 +5410,8 @@ stream into tokens.
 Each @var{syntax-spec} is a two-part string.  The first part is a
 command, consisting of a single character describing a syntax category,
 and an optional one-character action.  The action can be @samp{-} to
-remove the listed characters from that category and reassign them to the
-`Other' category, @samp{=} to set the category to the listed characters
+remove the listed characters from that category, @samp{=} to set the
+category to the listed characters
 and reassign all other characters previously in that category to
 `Other', or @samp{+} to add the listed characters to the category
 without affecting other characters.  If an action is not specified, but
@@ -5495,18 +5495,17 @@ comment delimiters, use @code{changecom} (@pxref{Changecom}).  Note that
 newline also defaults to the syntax category `White space', when it
 appears in isolation.
 
-@comment FIXME - make ${} context, not basic
-@item @kbd{$} @tab @dfn{Dollar} @tab Basic
+@item @kbd{$} @tab @dfn{Dollar} @tab Context
 @tab Characters that can introduce an argument reference in the body of a
 macro.  The default is the single character @samp{$}.
 
 @comment FIXME - implement ${10} argument parsing.
-@item @kbd{@{} @tab @dfn{Left brace} @tab Basic
+@item @kbd{@{} @tab @dfn{Left brace} @tab Context
 @tab Characters that introduce an extended argument reference in the body of
 a macro immediately after a character in the Dollar category.  The
 default is the single character @samp{@{}.
 
-@item @kbd{@}} @tab @dfn{Right brace} @tab Basic
+@item @kbd{@}} @tab @dfn{Right brace} @tab Context
 @tab Characters that conclude an extended argument reference in the body of a
 macro.  The default is the single character @samp{@}}.
 
@@ -5612,7 +5611,8 @@ c)
 @end example
 
 It is possible to redefine the @samp{$} used to indicate macro arguments
-in user defined macros.
+in user defined macros.  Dollar class syntax elements are copied to the
+output if there is no valid expansion.
 
 @example
 define(`argref', `Dollar: $#, Question: ?#')
@@ -5620,21 +5620,11 @@ define(`argref', `Dollar: $#, Question: ?#')
 argref(1, 2, 3)
 @result{}Dollar: 3, Question: ?#
 dnl Change argument identifier.
-changesyntax(`$?', `O$')
+changesyntax(`$?')
 @result{}
 argref(1,2,3)
 @result{}Dollar: $#, Question: 3
-@end example
-
-@noindent
-Dollar class syntax elements are copied to the output if there is no
-valid expansion.
-
-@example
 define(`escape', `$?`'1$?1?')
-@result{}
-dnl Change argument identifier.
-changesyntax(`$?')
 @result{}
 escape(foo)
 @result{}$?1$foo?

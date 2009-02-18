@@ -688,6 +688,22 @@ m4_macro_call (m4 *context, m4_symbol_value *value, m4_obstack *expansion,
     trace_post (context, trace_start, argv->info);
 }
 
+/* Locate the next byte with dollar syntax in string STR of length
+   LEN, or return NULL.  */
+static const char *
+locate_dollar (m4 *context, const char *str, size_t len)
+{
+  if (m4_is_syntax_single_dollar (M4SYNTAX))
+    return (char *) memchr (str, M4SYNTAX->dollar, len);
+  while (len--)
+    {
+      if (m4_has_syntax (M4SYNTAX, *str, M4_SYNTAX_DOLLAR))
+	return str;
+      str++;
+    }
+  return NULL;
+}
+
 /* This function handles all expansion of user defined and predefined
    macros.  It is called with an obstack OBS, where the macros expansion
    will be placed, as an unfinished object.  SYMBOL points to the macro
@@ -700,19 +716,17 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
   const char *text = m4_get_symbol_value_text (value);
   size_t len = m4_get_symbol_value_len (value);
   int i;
+  const char *dollar = locate_dollar (context, text, len);
 
-  while (len--)
+  while (dollar)
     {
-      char ch;
-
-      if (!m4_has_syntax (M4SYNTAX, *text, M4_SYNTAX_DOLLAR) || !len)
-	{
-	  obstack_1grow (obs, *text);
-	  text++;
-	  continue;
-	}
-      ch = *text++;
-      switch (*text)
+      obstack_grow (obs, text, dollar - text);
+      len -= dollar - text;
+      text = dollar;
+      if (len == 1)
+	break;
+      len--;
+      switch (*++text)
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
@@ -753,7 +767,7 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	  if (m4_get_posixly_correct_opt (context)
 	      || !VALUE_ARG_SIGNATURE (value))
 	    {
-	      obstack_1grow (obs, ch);
+	      obstack_1grow (obs, *dollar);
 	    }
 	  else
 	    {
@@ -796,11 +810,12 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	      text = endp;
 
 	      free (key);
-	      break;
 	    }
 	  break;
 	}
+      dollar = locate_dollar (context, text, len);
     }
+  obstack_grow (obs, text, len);
 }
 
 
