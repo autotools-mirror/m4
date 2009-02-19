@@ -6546,6 +6546,33 @@ resulting @samp{b} is not further remapped to @samp{g}; the @samp{d} and
 translit(`«abc~', `~-»')
 @result{}abc
 @end example
+
+@comment Stress test short arguments, since they use a different code
+@comment path.
+@example
+translit(`abcdeabcde', `a')
+@result{}bcdebcde
+translit(`abcdeabcde', `ab')
+@result{}cdecde
+translit(`abcdeabcde', `a', `f')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `a', `f')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `a', `fg')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `ab', `f')
+@result{}fcdefcde
+translit(`abcdeabcde', `ab', `fg')
+@result{}fgcdefgcde
+translit(`abcdeabcde', `ab', `ba')
+@result{}bacdebacde
+translit(`abcdeabcde', `e', `f')
+@result{}abcdfabcdf
+translit(`abc', `', `cde')
+@result{}abc
+translit(`', `a', `bc')
+@result{}
+@end example
 @end ignore
 
 Omitting @var{chars} evokes a warning, but still produces output.

@@ -1,3 +1,10 @@
+2009-02-19  Eric Blake  <ebb9@byu.net>
+
+	Speed up translit when from argument is short.
+	* src/builtin.c (m4_translit): Use memchr2 when possible.
+	* doc/m4.texinfo (Translit): Add tests.
+	* NEWS: Document this.
+
 2009-02-18  Eric Blake  <ebb9@byu.net>
 
 	Prefer buffer over byte operations.

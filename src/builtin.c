@@ -24,6 +24,7 @@
 
 #include "m4.h"
 
+#include "memchr2.h"
 #include "regex.h"
 
 #if HAVE_SYS_WAIT_H
@@ -2086,8 +2087,8 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
   const char *to;
   size_t from_len;
   size_t to_len;
-  char map[UCHAR_MAX + 1] = {0};
-  char found[UCHAR_MAX + 1] = {0};
+  char map[UCHAR_MAX + 1];
+  char found[UCHAR_MAX + 1];
   unsigned char ch;
 
   enum { ASIS, REPLACE, DELETE };
@@ -2103,15 +2104,37 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
 
   from = ARG (2);
   from_len = ARG_LEN (2);
-  if (memchr (from, '-', from_len) != NULL)
-    from = expand_ranges (from, &from_len, arg_scratch ());
 
   to = ARG (3);
   to_len = ARG_LEN (3);
   if (memchr (to, '-', to_len) != NULL)
     to = expand_ranges (to, &to_len, arg_scratch ());
 
-  assert (from && to);
+  /* If there are only one or two bytes to replace, it is faster to
+     use memchr2.  Using expand_ranges does nothing unless there are
+     at least three bytes.  */
+  if (from_len <= 2)
+    {
+      const char *p;
+      size_t len = ARG_LEN (1);
+      int second = from[from_len / 2];
+      data = ARG (1);
+      while ((p = (char *) memchr2 (data, from[0], second, len)))
+	{
+	  obstack_grow (obs, data, p - data);
+	  len -= p - data + 1;
+	  data = p + 1;
+	  if (*p == from[0] && to_len)
+	    obstack_1grow (obs, to[0]);
+	  else if (*p == second && 1 < to_len)
+	    obstack_1grow (obs, to[1]);
+	}
+      obstack_grow (obs, data, len);
+      return;
+    }
+
+  if (memchr (from, '-', from_len) != NULL)
+    from = expand_ranges (from, &from_len, arg_scratch ());
 
   /* Calling strchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a
@@ -2119,6 +2142,8 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
+  memset (map, 0, sizeof map);
+  memset (found, 0, sizeof found);
   while (from_len--)
     {
       ch = *from++;
