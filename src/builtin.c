@@ -26,6 +26,7 @@
 
 extern FILE *popen ();
 
+#include "memchr2.h"
 #include "regex.h"
 
 #if HAVE_SYS_WAIT_H
@@ -1816,35 +1817,56 @@ expand_ranges (const char *s, struct obstack *obs)
 static void
 m4_translit (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *data;
-  const char *from;
+  const char *data = ARG (1);
+  const char *from = ARG (2);
   const char *to;
-  char map[256] = {0};
-  char found[256] = {0};
+  char map[UCHAR_MAX + 1];
+  char found[UCHAR_MAX + 1];
   unsigned char ch;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (argv[0], argc, 3, 4) || !*from)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
-      if (argc == 2)
-	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      if (argc <= 2)
+	obstack_grow (obs, data, strlen (data));
       return;
-    }
-
-  from = ARG (2);
-  if (strchr (from, '-') != NULL)
-    {
-      from = expand_ranges (from, obs);
-      if (from == NULL)
-	return;
     }
 
   to = ARG (3);
   if (strchr (to, '-') != NULL)
     {
       to = expand_ranges (to, obs);
-      if (to == NULL)
-	return;
+      assert (to && *to);
+    }
+
+  /* If there are only one or two bytes to replace, it is faster to
+     use memchr2.  Using expand_ranges does nothing unless there are
+     at least three bytes.  */
+  if (!from[1] || !from[2])
+    {
+      const char *p;
+      size_t len = strlen (data);
+      while ((p = (char *) memchr2 (data, from[0], from[1], len)))
+	{
+	  obstack_grow (obs, data, p - data);
+	  len -= p - data;
+	  if (!len)
+	    return;
+	  data = p + 1;
+	  len--;
+	  if (*p == from[0] && to[0])
+	    obstack_1grow (obs, to[0]);
+	  else if (*p == from[1] && to[0] && to[1])
+	    obstack_1grow (obs, to[1]);
+	}
+      obstack_grow (obs, data, len);
+      return;
+    }
+
+  if (strchr (from, '-') != NULL)
+    {
+      from = expand_ranges (from, obs);
+      assert (from && *from);
     }
 
   /* Calling strchr(from) for each character in data is quadratic,
@@ -1853,6 +1875,8 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
+  memset (map, 0, sizeof map);
+  memset (found, 0, sizeof found);
   for ( ; (ch = *from) != '\0'; from++)
     {
       if (! found[ch])

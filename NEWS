@@ -10,6 +10,9 @@ Software Foundation, Inc.
 ** The `divert' and `undivert' builtins have been made more efficient
    when using temporary files for large diversions.
 
+** The `translit' builtin has been made more efficient when the second
+   argument is short.
+
 ** The command line option `--debugfile', introduced in 1.4.7, now
    treats its argument as optional, in order to allow setting the debug
    output back to stderr when used without an argument; and order is now
