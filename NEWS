@@ -13,6 +13,8 @@ Software Foundation, Inc.
 ** The `translit' builtin has been made more efficient when the second
    argument is short.
 
+** The input engine has been optimized for faster processing.
+
 ** The command line option `--debugfile', introduced in 1.4.7, now
    treats its argument as optional, in order to allow setting the debug
    output back to stderr when used without an argument; and order is now

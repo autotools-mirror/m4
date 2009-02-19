@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -22,6 +22,8 @@
 /* Handling of different input sources, and lexical analysis.  */
 
 #include "m4.h"
+
+#include "memchr2.h"
 
 /* Unread input can be either files, that should be read (eg. included
    files), strings, which should be rescanned (eg. macro expansion text),
@@ -82,6 +84,7 @@ struct input_block
       struct
 	{
 	  char *string;		/* remaining string value */
+	  char *end;		/* terminating NUL of string */
 	}
 	u_s;	/* INPUT_STRING */
       struct
@@ -276,8 +279,10 @@ push_string_finish (void)
 
   if (obstack_object_size (current_input) > 0)
     {
+      size_t len = obstack_object_size (current_input);
       obstack_1grow (current_input, '\0');
       next->u.u_s.string = (char *) obstack_finish (current_input);
+      next->u.u_s.end = next->u.u_s.string + len;
       next->prev = isp;
       isp = next;
       ret = isp->u.u_s.string;	/* for immediate use only */
@@ -301,6 +306,7 @@ push_string_finish (void)
 void
 push_wrapup (const char *s)
 {
+  size_t len = strlen (s);
   input_block *i;
   i = (input_block *) obstack_alloc (wrapup_stack,
 				     sizeof (struct input_block));
@@ -308,7 +314,8 @@ push_wrapup (const char *s)
   i->type = INPUT_STRING;
   i->file = current_file;
   i->line = current_line;
-  i->u.u_s.string = (char *) obstack_copy0 (wrapup_stack, s, strlen (s));
+  i->u.u_s.string = (char *) obstack_copy0 (wrapup_stack, s, len);
+  i->u.u_s.end = i->u.u_s.string + len;
   wsp = i;
 }
 
@@ -951,10 +958,47 @@ next_token (token_data *td, int *line)
     }
   else
     {
+      bool fast = lquote.length == 1 && rquote.length == 1;
       quote_level = 1;
       while (1)
 	{
-	  ch = next_char ();
+	  /* Try scanning a buffer first.  */
+	  const char *buffer = (isp && isp->type == INPUT_STRING
+				? isp->u.u_s.string : NULL);
+	  if (buffer && *buffer)
+	    {
+	      size_t len = isp->u.u_s.end - buffer;
+	      const char *p = buffer;
+	      do
+		{
+		  p = (char *) memchr2 (p, *lquote.string, *rquote.string,
+					buffer + len - p);
+		}
+	      while (p && fast && (*p++ == *rquote.string
+				   ? --quote_level : ++quote_level));
+	      if (p)
+		{
+		  if (fast)
+		    {
+		      assert (!quote_level);
+		      obstack_grow (&token_stack, buffer, p - buffer - 1);
+		      isp->u.u_s.string += p - buffer;
+		      break;
+		    }
+		  obstack_grow (&token_stack, buffer, p - buffer);
+		  ch = to_uchar (*p);
+		  isp->u.u_s.string += p - buffer + 1;
+		}
+	      else
+		{
+		  obstack_grow (&token_stack, buffer, len);
+		  isp->u.u_s.string += len;
+		  continue;
+		}
+	    }
+	  /* Fall back to a byte.  */
+	  else
+	    ch = next_char ();
 	  if (ch == CHAR_EOF)
 	    /* current_file changed to "" if we see CHAR_EOF, use
 	       the previous value we stored earlier.  */
