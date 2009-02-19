@@ -1,10 +1,16 @@
-2009-02-18  Eric Blake  <ebb9@byu.net>
+2009-02-19  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in translit.
+	* src/builtin.c (m4_translit): Use correct comparison.
+	* doc/m4.texinfo (Translit): Enhance test.
 
 	Speed up input engine, by searching for quotes by buffer.
 	* src/input.c (struct input_block): Add end pointer to string.
 	(push_string_finish, push_wrapup): Populate it.
 	(next_token): For quotes, attempt a buffer search.
 	* NEWS: Document this.
+
+2009-02-18  Eric Blake  <ebb9@byu.net>
 
 	Speed up translit when from argument is short.
 	* m4/gnulib-cache.m4: Import memchr2 module.

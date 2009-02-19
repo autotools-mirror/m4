@@ -5800,6 +5800,12 @@ translit(`abcdeabcde', `ab', `fg')
 @result{}fgcdefgcde
 translit(`abcdeabcde', `ab', `ba')
 @result{}bacdebacde
+translit(`abcdeabcde', `e', `f')
+@result{}abcdfabcdf
+translit(`abc', `', `cde')
+@result{}abc
+translit(`', `a', `bc')
+@result{}
 @end example
 @end ignore
 

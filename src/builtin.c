@@ -1824,10 +1824,10 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   char found[UCHAR_MAX + 1];
   unsigned char ch;
 
-  if (bad_argc (argv[0], argc, 3, 4) || !*from)
+  if (bad_argc (argv[0], argc, 3, 4) || !*data || !*from)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
-      if (argc <= 2)
+      if (2 <= argc)
 	obstack_grow (obs, data, strlen (data));
       return;
     }
