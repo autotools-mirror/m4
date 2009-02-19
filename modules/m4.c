@@ -28,6 +28,7 @@
 #  include "m4private.h"
 #endif
 
+#include "memchr2.h"
 #include "quotearg.h"
 #include "stdlib--.h"
 #include "tempname.h"
@@ -1104,8 +1105,8 @@ M4BUILTIN_HANDLER (translit)
   const char *to;
   size_t from_len;
   size_t to_len;
-  char map[UCHAR_MAX + 1] = {0};
-  char found[UCHAR_MAX + 1] = {0};
+  char map[UCHAR_MAX + 1];
+  char found[UCHAR_MAX + 1];
   unsigned char ch;
 
   enum { ASIS, REPLACE, DELETE };
@@ -1118,19 +1119,37 @@ M4BUILTIN_HANDLER (translit)
 
   from = M4ARG (2);
   from_len = M4ARGLEN (2);
-  if (memchr (from, '-', from_len) != NULL)
-    {
-      from = m4_expand_ranges (from, &from_len, m4_arg_scratch (context));
-      assert (from);
-    }
 
   to = M4ARG (3);
   to_len = M4ARGLEN (3);
   if (memchr (to, '-', to_len) != NULL)
+    to = m4_expand_ranges (to, &to_len, m4_arg_scratch (context));
+
+  /* If there are only one or two bytes to replace, it is faster to
+     use memchr2.  Using expand_ranges does nothing unless there are
+     at least three bytes.  */
+  if (from_len <= 2)
     {
-      to = m4_expand_ranges (to, &to_len, m4_arg_scratch (context));
-      assert (to);
+      const char *p;
+      size_t len = M4ARGLEN (1);
+      int second = from[from_len / 2];
+      data = M4ARG (1);
+      while ((p = (char *) memchr2 (data, from[0], second, len)))
+	{
+	  obstack_grow (obs, data, p - data);
+	  len -= p - data + 1;
+	  data = p + 1;
+	  if (*p == from[0] && to_len)
+	    obstack_1grow (obs, to[0]);
+	  else if (*p == second && 1 < to_len)
+	    obstack_1grow (obs, to[1]);
+	}
+      obstack_grow (obs, data, len);
+      return;
     }
+
+  if (memchr (from, '-', from_len) != NULL)
+    from = m4_expand_ranges (from, &from_len, m4_arg_scratch (context));
 
   /* Calling memchr(from) for each character in data is quadratic,
      since both strings can be arbitrarily long.  Instead, create a
@@ -1138,6 +1157,8 @@ M4BUILTIN_HANDLER (translit)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
+  memset (map, 0, sizeof map);
+  memset (found, 0, sizeof found);
   while (from_len--)
     {
       ch = *from++;

@@ -1222,6 +1222,33 @@ AT_DATA([in], [[translit(`«abc~', `~-»')
 AT_CHECK_M4([in], [0], [[abc
 ]])
 
+dnl Validate short strings, which take a different code path.
+AT_DATA([in], [[dnl
+translit(`abcdeabcde', `a')
+translit(`abcdeabcde', `ab')
+translit(`abcdeabcde', `a', `f')
+translit(`abcdeabcde', `aa', `fg')
+translit(`abcdeabcde', `a', `fg')
+translit(`abcdeabcde', `ab', `f')
+translit(`abcdeabcde', `ab', `fg')
+translit(`abcdeabcde', `ab', `ba')
+translit(`abcdeabcde', `e', `f')
+translit(`abc', `', `cde')
+translit(`', `a', `bc')
+]])
+AT_CHECK_M4([in], [0], [[bcdebcde
+cdecde
+fbcdefbcde
+fbcdefbcde
+fbcdefbcde
+fcdefcde
+fgcdefgcde
+bacdebacde
+abcdfabcdf
+abc
+
+]])
+
 AT_CLEANUP
 
 

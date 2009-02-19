@@ -214,8 +214,6 @@ promoted to 2.0.
    be silenced by applying this patch:
      http://git.sv.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=714eeee87
 
-** Improve the speed of the input engine.
-
 ** Fix the `m4wrap' builtin to accumulate wrapped text in FIFO order, as
    required by POSIX.  The manual mentions a way to restore the LIFO order
    present in earlier GNU M4 versions.  NOTE: this change exposes a bug
@@ -344,6 +342,11 @@ contains the following beta features that were deemed worth deferring until
 
 ** The `divert' and `undivert' builtins have been made more efficient
    when using temporary files for large diversions.
+
+** The `translit' builtin has been made more efficient when the second
+   argument is short.
+
+** The input engine has been optimized for faster processing.
 
 ** The command line option `--debugfile', introduced in 1.4.7, now
    treats its argument as optional, in order to allow setting the debug
