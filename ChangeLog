@@ -1,5 +1,12 @@
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
+	Make bootstrap easier on Solaris.
+	* bootstrap: Add GNULIB_SRCDIR.  Useful when a wrapper script
+	gnulib-tool exists earlier on the path to work around /bin/sh
+	failure in parsing $GNULIB_SRCDIR/gnulib-tool.
+
+2009-03-13  Eric Blake  <ebb9@byu.net>
+
 	Allow configuration choice in syscmd shell.
 	* ltdl/m4/m4-syscmd.m4: New file.
 	* configure.ac (M4_SYSCMD): Use it to provide
