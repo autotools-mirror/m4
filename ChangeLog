@@ -1,3 +1,10 @@
+2009-02-26  Eric Blake  <ebb9@byu.net>
+
+	Make bootstrap easier on Solaris.
+	* bootstrap: Add GNULIB_SRCDIR.  Useful when a wrapper script
+	gnulib-tool exists earlier on the path to work around /bin/sh
+	failure in parsing $GNULIB_SRCDIR/gnulib-tool.
+
 2009-02-19  Eric Blake  <ebb9@byu.net>
 
 	Fix regression in translit.
