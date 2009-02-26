@@ -7926,10 +7926,11 @@ changequote(`[', `]')dnl
 syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
        | ]__program__[ -F in.m4f \
      && echo 'divnum popdef([divnum])divnum' \
-       | ]__program__[ -R in.m4f \
-     && rm in.m4f])status sysval
+       | ]__program__[ -R in.m4f])status sysval
 @result{}hi 0
 @result{}status 0
+syscmd([rm -f in.m4f])sysval
+@result{}0
 @end example
 
 @c Detect inability to freeze.
@@ -7955,10 +7956,12 @@ changequote(`[', `]')dnl
 syscmd([printf 'define(-\0-,\0-\0)changequote([,\0])changecom(--\0)dnl
 divert(1)undivert(null.out)' | ]__program__[ -F in.m4f \
      && printf 'errprint([divnum\0] #-- len(indir(-\0-)))' \
-       | ]__program__[ -R in.m4f \
-     && rm in.m4f])errprint([ ]sysval[
+       | ]__program__[ -R in.m4f])errprint([ ]sysval[
 ])dnl
 @error{}divnum #-- 3 0
+syscmd([rm -f in.m4f])errprint(sysval[
+])dnl
+@error{}0
 @end example
 
 @c Do we reject unexpected NUL bytes?
@@ -7969,10 +7972,11 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([printf '#bogus\nV1\nF3,4\nlenlen\0\n' > in.m4f \
-     && ]__program__[ -R in.m4f \
-     && rm in.m4f])sysval
+     && ]__program__[ -R in.m4f])sysval
 @error{}m4:in.m4f:4: ill-formed frozen file, invalid builtin `len\0' encountered
 @result{}1
+syscmd([rm -f in.m4f])sysval
+@result{}0
 @end example
 @end ignore
 

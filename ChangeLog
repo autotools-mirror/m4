@@ -1,3 +1,9 @@
+2009-02-26  Eric Blake  <ebb9@byu.net>
+
+	Fix distcheck.
+	* doc/m4.texinfo (Using frozen files): Clean up in.m4f.
+	Reported by Ralf Wildenhues.
+
 2009-02-19  Eric Blake  <ebb9@byu.net>
 
 	Speed up translit when from argument is short.
