@@ -1,9 +1,10 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2008-09-16
+# bootstrap (GNU M4) version 2009-02-26
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
-# Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
+# Foundation, Inc.
 
 # This file is part of GNU M4.
 #
@@ -28,7 +29,7 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTORECONF, GNULIB_TOOL, M4, RM, SED
+#   AUTORECONF, GNULIB_SRCDIR, GNULIB_TOOL, M4, RM, SED
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
@@ -253,14 +254,17 @@ fi
 ## Find the gnulib module tree. ##
 ## ---------------------------- ##
 
-case $GNULIB_TOOL in
+if test -n "$GNULIB_SRCDIR" && test -d "$GNULIB_SRCDIR" ; then
+  gnulibdir=$GNULIB_SRCDIR
+else
+  case $GNULIB_TOOL in
     /*  )  gnulibdir=$GNULIB_TOOL ;;		# absolute
     */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
     *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
-esac
+  esac
 
-# Follow symlinks
-while test -h "$gnulibdir"; do
+  # Follow symlinks
+  while test -h "$gnulibdir"; do
 
     # Resolve symbolic link.
     sedexpr1='s, -> ,#%%#,'
@@ -273,9 +277,9 @@ while test -h "$gnulibdir"; do
 	* )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
     esac
 
-done
-
-gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+  done
+  gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+fi
 
 ## ---------------------- ##
 ## Import Gnulib modules. ##
