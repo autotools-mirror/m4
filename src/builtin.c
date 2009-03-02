@@ -24,8 +24,7 @@
 
 #include "m4.h"
 
-extern FILE *popen ();
-
+#include "execute.h"
 #include "memchr2.h"
 #include "regex.h"
 
@@ -969,13 +968,21 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 # define WIFEXITED(status) (WTERMSIG (status) == 0)
 #endif
 
+/* FIXME */
+#define SYSCMD_SHELL "/bin/sh"
+
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
 static void
 m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  const char *cmd = ARG (1);
+  int status;
+  int sig_status;
+  const char *prog_args[4] = { "sh", "-c" };
+  const char *shell = SYSCMD_SHELL;
+  if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -983,17 +990,25 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
     }
 
   debug_flush_files ();
-  sysval = system (ARG (1));
-#if FUNC_SYSTEM_BROKEN
-  /* OS/2 has a buggy system() that returns exit status in the lowest eight
-     bits, although pclose() and WEXITSTATUS are defined to return exit
-     status in the next eight bits.  This approach can't detect signals, but
-     at least syscmd(`ls') still works when stdout is a terminal.  An
-     alternate approach is popen/insert_file/pclose, but that makes stdout
-     a pipe, which can change how some child processes behave.  */
-  if (sysval != -1)
-    sysval <<= 8;
-#endif /* FUNC_SYSTEM_BROKEN */
+#if W32_NATIVE
+  shell = prog_args[0] = "cmd";
+  prog_args[1] = "/c";
+#endif
+  prog_args[2] = cmd;
+  errno = 0;
+  status = execute (ARG (0), shell/*FIXME*/, (char **) prog_args, false,
+		    false, false, false, true, false, &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      sysval = sig_status << 8;
+    }
+  else
+    {
+      if (status == 127 && errno)
+	M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = status;
+    }
 }
 
 static void
@@ -1013,9 +1028,8 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   pin = popen (ARG (1), "r");
   if (pin == NULL)
     {
-      M4ERROR ((warning_status, errno,
-		"cannot open pipe to command `%s'", ARG (1)));
-      sysval = -1;
+      M4ERROR ((warning_status, errno, "cannot run command `%s'", ARG (1)));
+      sysval = 127;
     }
   else
     {
@@ -1039,15 +1053,16 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
       if (ferror (pin))
 	M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
       sysval = pclose (pin);
+      sysval = (sysval == -1 ? 127
+		: (M4SYSVAL_EXITBITS (sysval)
+		   | M4SYSVAL_TERMSIGBITS (sysval)));
     }
 }
 
 static void
 m4_sysval (struct obstack *obs, int argc, token_data **argv)
 {
-  shipout_int (obs, (sysval == -1 ? 127
-		     : (M4SYSVAL_EXITBITS (sysval)
-			| M4SYSVAL_TERMSIGBITS (sysval))));
+  shipout_int (obs, sysval);
 }
 
 /*-------------------------------------------------------------------------.
