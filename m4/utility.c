@@ -153,6 +153,16 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
   return result;
 }
 
+/* Return an escaped version of the macro name corresponding to
+   CALLER, for use in error messages that do not use the m4_warn
+   machinery.  This call occupies slot 0 of the quotearg
+   machinery.  */
+const char *m4_info_name (const m4_call_info *caller)
+{
+  return quotearg_style_mem (locale_quoting_style, caller->name,
+			     caller->name_len);
+}
+
 /* Helper for all error reporting.  Report message based on FORMAT and
    ARGS, on behalf of CALLER (if any), otherwise at the global
    position in CONTEXT.  If ERRNUM, decode the errno value as part of

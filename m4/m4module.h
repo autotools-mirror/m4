@@ -174,6 +174,7 @@ extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
 extern bool	m4_parse_truth_arg (m4 *, const m4_call_info *, const char *,
 				    size_t, bool);
 extern m4_symbol *m4_symbol_value_lookup (m4 *, m4_macro_args *, size_t, bool);
+extern const char *m4_info_name	   (const m4_call_info *);
 
 /* Error handling.  */
 extern void m4_error (m4 *, int, int, const m4_call_info *, const char *, ...)

@@ -28,6 +28,8 @@
 #  include "m4private.h"
 #endif
 
+#include <sys/wait.h>
+
 #include "modules/m4.h"
 #include "quotearg.h"
 
@@ -637,6 +639,36 @@ M4BUILTIN_HANDLER (debugmode)
 }
 
 
+/* Helper macros for readability.  */
+#if UNIX || defined WEXITSTATUS
+# define M4_SYSVAL_EXITBITS(status)			\
+   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
+# define M4_SYSVAL_TERMSIGBITS(status)			\
+   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
+
+#else /* !UNIX && !defined WEXITSTATUS */
+/* Platforms such as mingw do not support the notion of reporting
+   which signal terminated a process.  Furthermore if WEXITSTATUS was
+   not provided, then the exit value is in the low eight bits.  */
+# define M4_SYSVAL_EXITBITS(status) status
+# define M4_SYSVAL_TERMSIGBITS(status) 0
+#endif /* !UNIX && !defined WEXITSTATUS */
+
+/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
+/* FIXME - this may fit better as a gnulib module.  */
+#ifndef WEXITSTATUS
+# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#endif
+#ifndef WTERMSIG
+# define WTERMSIG(status) ((status) & 0x7f)
+#endif
+#ifndef WIFSIGNALED
+# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
+#endif
+#ifndef WIFEXITED
+# define WIFEXITED(status) (WTERMSIG (status) == 0)
+#endif
+
 /* Same as the sysymd builtin from m4.c module, but expand to the
    output of SHELL-COMMAND. */
 
@@ -678,9 +710,9 @@ M4BUILTIN_HANDLER (esyscmd)
       if (pin == NULL)
 	{
 	  m4_error (context, 0, errno, me,
-		    _("cannot open pipe to command %s"),
+		    _("cannot run command %s"),
 		    quotearg_style (locale_quoting_style, cmd));
-	  m4_set_sysval (-1);
+	  m4_set_sysval (127);
 	}
       else
 	{
@@ -705,7 +737,10 @@ M4BUILTIN_HANDLER (esyscmd)
 	  if (ferror (pin))
 	    m4_warn (context, errno, me, _("cannot read pipe to command %s"),
 		     quotearg_style (locale_quoting_style, cmd));
-	  m4_set_sysval (pclose (pin));
+	  int result = pclose (pin);
+	  m4_set_sysval (result == -1 ? 127
+			 : (M4_SYSVAL_EXITBITS (result)
+			    | M4_SYSVAL_TERMSIGBITS (result)));
 	}
     }
   else

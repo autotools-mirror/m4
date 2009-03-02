@@ -1,3 +1,16 @@
+2009-03-13  Eric Blake  <ebb9@byu.net>
+
+	Use gnulib execute module instead of system(3).
+	* ltdl/m4/gnulib-cache.m4: Import execute module.
+	* m4/utility.c (m4_info_name): New function.
+	* m4/m4module.h (m4_info_name): New prototype.
+	* modules/m4.c (syscmd): Rewrite with execute module.
+	(M4_SYSVAL_EXITBITS, M4_SYSVAL_TERMSIGBITS, m4_sysval): Move
+	computation...
+	* modules/gnu.c (M4_SYSVAL_EXITBITS, M4_SYSVAL_TERMSIGBITS)
+	(esyscmd): ...here.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
 2009-03-05  Eric Blake  <ebb9@byu.net>
 
 	Improve web-manual maintainer rule.

@@ -28,15 +28,12 @@
 #  include "m4private.h"
 #endif
 
+#include "execute.h"
 #include "memchr2.h"
 #include "quotearg.h"
 #include "stdlib--.h"
 #include "tempname.h"
 #include "unistd--.h"
-
-#if HAVE_SYS_WAIT_H
-# include <sys/wait.h>
-#endif
 
 #include <modules/m4.h>
 
@@ -412,41 +409,14 @@ M4BUILTIN_HANDLER (defn)
 /* This section contains macros to handle the builtins "syscmd"
    and "sysval".  */
 
+/* FIXME */
+#define SYSCMD_SHELL "/bin/sh"
+
 /* Exit code from last "syscmd" command.  */
 /* FIXME - we should preserve this value across freezing.  See
    http://lists.gnu.org/archive/html/bug-m4/2006-06/msg00059.html
    for ideas on how do to that.  */
 static int  m4_sysval = 0;
-
-/* Helper macros for readability.  */
-#if UNIX || defined WEXITSTATUS
-# define M4_SYSVAL_EXITBITS(status)			\
-   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4_SYSVAL_TERMSIGBITS(status)			\
-   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
-
-#else /* !UNIX && !defined WEXITSTATUS */
-/* Platforms such as mingw do not support the notion of reporting
-   which signal terminated a process.  Furthermore if WEXITSTATUS was
-   not provided, then the exit value is in the low eight bits.  */
-# define M4_SYSVAL_EXITBITS(status) status
-# define M4_SYSVAL_TERMSIGBITS(status) 0
-#endif /* !UNIX && !defined WEXITSTATUS */
-
-/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
-/* FIXME - this may fit better as a gnulib module.  */
-#ifndef WEXITSTATUS
-# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
-#endif
-#ifndef WTERMSIG
-# define WTERMSIG(status) ((status) & 0x7f)
-#endif
-#ifndef WIFSIGNALED
-# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
-#endif
-#ifndef WIFEXITED
-# define WIFEXITED(status) (WTERMSIG (status) == 0)
-#endif
 
 void
 m4_set_sysval (int value)
@@ -510,6 +480,10 @@ M4BUILTIN_HANDLER (syscmd)
   const m4_call_info *me = m4_arg_info (argv);
   const char *cmd = M4ARG (1);
   size_t len = M4ARGLEN (1);
+  int status;
+  int sig_status;
+  const char *prog_args[4] = { "sh", "-c" };
+  const char *shell = SYSCMD_SHELL;
 
   if (m4_get_safer_opt (context))
     {
@@ -527,18 +501,32 @@ M4BUILTIN_HANDLER (syscmd)
       return;
     }
   m4_sysval_flush (context, false);
-  m4_sysval = system (cmd);
-  /* FIXME - determine if libtool works for OS/2, in which case the
-     FUNC_SYSTEM_BROKEN section on the branch must be ported to work
-     around the bug in their EMX libc system().  */
+#if W32_NATIVE
+  shell = prog_args[0] = "cmd";
+  prog_args[1] = "/c";
+#endif
+  prog_args[2] = cmd;
+  errno = 0;
+  status = execute (m4_info_name (me), shell/*FIXME*/, (char **) prog_args,
+		    false, false, false, false, true, false, &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      m4_sysval = sig_status << 8;
+    }
+  else
+    {
+      if (status == 127 && errno)
+	m4_warn (context, errno, me, _("cannot run command %s"),
+		 quotearg_style (locale_quoting_style, cmd));
+      m4_sysval = status;
+    }
 }
 
 
 M4BUILTIN_HANDLER (sysval)
 {
-  m4_shipout_int (obs, (m4_sysval == -1 ? 127
-			: (M4_SYSVAL_EXITBITS (m4_sysval)
-			   | M4_SYSVAL_TERMSIGBITS (m4_sysval))));
+  m4_shipout_int (obs, m4_sysval);
 }
 
 
