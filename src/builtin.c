@@ -26,7 +26,9 @@
 
 #include "execute.h"
 #include "memchr2.h"
+#include "pipe.h"
 #include "regex.h"
+#include "wait-process.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -1014,9 +1016,16 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *cmd = ARG (1);
+  const char *prog_args[4] = { "sh", "-c" };
+  const char *shell = SYSCMD_SHELL;
+  pid_t child;
+  int fd;
   FILE *pin;
+  int status;
+  int sig_status;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1024,38 +1033,59 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     }
 
   debug_flush_files ();
+#if W32_NATIVE
+  shell = prog_args[0] = "cmd";
+  prog_args[1] = "/c";
+#endif
+  prog_args[2] = cmd;
   errno = 0;
-  pin = popen (ARG (1), "r");
+  child = create_pipe_in (ARG (0), shell/*FIXME*/, (char **) prog_args,
+			  NULL, false, true, false, &fd);
+  if (child == -1)
+    {
+      M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = 127;
+      return;
+    }
+  pin = fdopen (fd, "r");
   if (pin == NULL)
     {
-      M4ERROR ((warning_status, errno, "cannot run command `%s'", ARG (1)));
+      M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
       sysval = 127;
+      close (fd);
+      return;
+    }
+  while (1)
+    {
+      size_t avail = obstack_room (obs);
+      size_t len;
+      if (!avail)
+	{
+	  int ch = getc (pin);
+	  if (ch == EOF)
+	    break;
+	  obstack_1grow (obs, ch);
+	  continue;
+	}
+      len = fread (obstack_next_free (obs), 1, avail, pin);
+      if (len <= 0)
+	break;
+      obstack_blank_fast (obs, len);
+    }
+  if (ferror (pin) || fclose (pin))
+    M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
+  status = wait_subprocess (child, ARG (0), false, false, true, false,
+			    &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      sysval = sig_status << 8;
     }
   else
     {
-      while (1)
-	{
-	  size_t avail = obstack_room (obs);
-	  size_t len;
-	  if (!avail)
-	    {
-	      int ch = getc (pin);
-	      if (ch == EOF)
-		break;
-	      obstack_1grow (obs, ch);
-	      continue;
-	    }
-	  len = fread (obstack_next_free (obs), 1, avail, pin);
-	  if (len <= 0)
-	    break;
-	  obstack_blank_fast (obs, len);
-	}
-      if (ferror (pin))
-	M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
-      sysval = pclose (pin);
-      sysval = (sysval == -1 ? 127
-		: (M4SYSVAL_EXITBITS (sysval)
-		   | M4SYSVAL_TERMSIGBITS (sysval)));
+      if (status == 127 && errno)
+	M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = status;
     }
 }
 
