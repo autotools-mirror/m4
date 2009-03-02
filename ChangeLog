@@ -1,5 +1,10 @@
 2009-03-04  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib pipe module instead of popen(3).
+	* m4/gnulib-cache.m4: Import pipe and wait-process modules.
+	* src/builtin.c (m4_esyscmd): Rewrite with pipe module.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
 	Use gnulib execute module instead of system(3).
 	* m4/gnulib-cache.m4: Import execute module.
 	* src/builtin.c (m4_sysval): Move computation...
