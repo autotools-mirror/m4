@@ -30,10 +30,6 @@
 #include "regex.h"
 #include "wait-process.h"
 
-#if HAVE_SYS_WAIT_H
-# include <sys/wait.h>
-#endif
-
 /* Initialization of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialization, and by the "builtin"
    builtin.  */
@@ -1110,35 +1106,6 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 | This section contains macros to handle the builtins "syscmd", "esyscmd" |
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
-
-/* Helper macros for readability.  */
-#if UNIX || defined WEXITSTATUS
-# define M4SYSVAL_EXITBITS(status)			 \
-  (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4SYSVAL_TERMSIGBITS(status)			 \
-  (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
-
-#else /* !UNIX && !defined WEXITSTATUS */
-/* Platforms such as MinGW do not support the notion of reporting
-   which signal terminated a process.  Furthermore if WEXITSTATUS was
-   not provided, then the exit value is in the low eight bits.  */
-# define M4SYSVAL_EXITBITS(status) status
-# define M4SYSVAL_TERMSIGBITS(status) 0
-#endif /* !UNIX && !defined WEXITSTATUS */
-
-/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
-#ifndef WEXITSTATUS
-# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
-#endif
-#ifndef WTERMSIG
-# define WTERMSIG(status) ((status) & 0x7f)
-#endif
-#ifndef WIFSIGNALED
-# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
-#endif
-#ifndef WIFEXITED
-# define WIFEXITED(status) (WTERMSIG (status) == 0)
-#endif
 
 /* FIXME */
 #define SYSCMD_SHELL "/bin/sh"

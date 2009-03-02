@@ -1,6 +1,6 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free
-# Software Foundation, Inc.
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009
+# Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -32,7 +32,7 @@ AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 AC_PROG_CC
 M4_EARLY
 
-AC_CHECK_HEADERS_ONCE([siginfo.h sys/wait.h])
+AC_CHECK_HEADERS_ONCE([siginfo.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
 #if HAVE_SIGINFO_H
@@ -104,38 +104,6 @@ if test "$M4_cv_use_stackovf" = yes; then
   ]])
   AC_CHECK_TYPES([sigcontext], [], [], [[#include <signal.h>
   ]])
-fi
-
-AC_CACHE_CHECK([if system() agrees with pclose()],
-  [M4_cv_func_system_consistent],
-  [AC_RUN_IFELSE([AC_LANG_PROGRAM([
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-], [int i1, i2;
-  FILE *f;
-  i1 = system ("exit 2");
-  if (i1 == -1)
-    return 1;
-  f = popen ("exit 2", "r");
-  if (!f)
-    return 1;
-  i2 = pclose (f);
-  return i1 != i2;])],
-  [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no],
-  [AC_COMPILE_IFELSE([
-/* EMX on OS/2 defines WEXITSTATUS to be (x>>8)&0xff, and uses that for
-   pclose(), but for system() it uses x&0xff instead.  Otherwise, we assume
-   your system is sane and that pclose() and system() are consistent in their
-   values.  If this heuristic is wrong for your platform, report it as a bug
-   to bug-m4@gnu.org.  */
-#ifdef __EMX__
-choke me
-#endif
-], [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no])])])
-if test "$M4_cv_func_system_consistent" = no ; then
-  AC_DEFINE([FUNC_SYSTEM_BROKEN], [1],
-    [Define to 1 if the return value of system() disagrees with pclose().])
 fi
 
 AC_CACHE_CHECK([whether an open file can be renamed],

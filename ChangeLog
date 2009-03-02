@@ -1,5 +1,10 @@
 2009-03-04  Eric Blake  <ebb9@byu.net>
 
+	Remove cruft now that gnulib modules do the work.
+	* configure.ac (M4_cv_func_system_consistent): Delete.
+	* src/builtin.c (M4SYSVAL_EXITBITS, M4SYSVAL_TERMSIGBITS):
+	Delete.
+
 	Use gnulib pipe module instead of popen(3).
 	* m4/gnulib-cache.m4: Import pipe and wait-process modules.
 	* src/builtin.c (m4_esyscmd): Rewrite with pipe module.
