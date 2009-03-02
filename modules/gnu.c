@@ -28,10 +28,10 @@
 #  include "m4private.h"
 #endif
 
-#include <sys/wait.h>
-
 #include "modules/m4.h"
+#include "pipe.h"
 #include "quotearg.h"
+#include "wait-process.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
 #define m4_builtin_table	gnu_LTX_m4_builtin_table
@@ -639,35 +639,8 @@ M4BUILTIN_HANDLER (debugmode)
 }
 
 
-/* Helper macros for readability.  */
-#if UNIX || defined WEXITSTATUS
-# define M4_SYSVAL_EXITBITS(status)			\
-   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4_SYSVAL_TERMSIGBITS(status)			\
-   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
-
-#else /* !UNIX && !defined WEXITSTATUS */
-/* Platforms such as mingw do not support the notion of reporting
-   which signal terminated a process.  Furthermore if WEXITSTATUS was
-   not provided, then the exit value is in the low eight bits.  */
-# define M4_SYSVAL_EXITBITS(status) status
-# define M4_SYSVAL_TERMSIGBITS(status) 0
-#endif /* !UNIX && !defined WEXITSTATUS */
-
-/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
-/* FIXME - this may fit better as a gnulib module.  */
-#ifndef WEXITSTATUS
-# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
-#endif
-#ifndef WTERMSIG
-# define WTERMSIG(status) ((status) & 0x7f)
-#endif
-#ifndef WIFSIGNALED
-# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
-#endif
-#ifndef WIFEXITED
-# define WIFEXITED(status) (WTERMSIG (status) == 0)
-#endif
+/* FIXME */
+#define SYSCMD_SHELL "/bin/sh"
 
 /* Same as the sysymd builtin from m4.c module, but expand to the
    output of SHELL-COMMAND. */
@@ -686,7 +659,14 @@ M4BUILTIN_HANDLER (esyscmd)
 
   if (m4_set_sysval && m4_sysval_flush)
     {
+      pid_t child;
+      int fd;
       FILE *pin;
+      int status;
+      int sig_status;
+      const char *prog_args[4] = { "sh", "-c" };
+      const char *caller;
+      const char *shell = SYSCMD_SHELL;
 
       if (m4_get_safer_opt (context))
 	{
@@ -705,42 +685,66 @@ M4BUILTIN_HANDLER (esyscmd)
 	}
 
       m4_sysval_flush (context, false);
+#if W32_NATIVE
+      shell = prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+#endif
+      prog_args[2] = cmd;
+      caller = m4_info_name (me);
       errno = 0;
-      pin = popen (cmd, "r");
-      if (pin == NULL)
+      child = create_pipe_in (caller, shell/*FIXME*/, (char **) prog_args,
+			      NULL, false, true, false, &fd);
+      if (child == -1)
 	{
-	  m4_error (context, 0, errno, me,
-		    _("cannot run command %s"),
+	  m4_error (context, 0, errno, me, _("cannot run command %s"),
 		    quotearg_style (locale_quoting_style, cmd));
 	  m4_set_sysval (127);
+	  return;
+	}
+      pin = fdopen (fd, "r");
+      if (!pin)
+	{
+	  m4_error (context, 0, errno, me, _("cannot run command %s"),
+		    quotearg_style (locale_quoting_style, cmd));
+	  m4_set_sysval (127);
+	  close (fd);
+	  return;
+	}
+      while (1)
+	{
+	  size_t avail = obstack_room (obs);
+	  if (!avail)
+	    {
+	      int ch = getc (pin);
+	      if (ch == EOF)
+		break;
+	      obstack_1grow (obs, ch);
+	    }
+	  else
+	    {
+	      size_t len = fread (obstack_next_free (obs), 1, avail, pin);
+	      if (len <= 0)
+		break;
+	      obstack_blank_fast (obs, len);
+	    }
+	}
+      if (ferror (pin) || fclose (pin))
+	m4_error (context, EXIT_FAILURE, errno, me,
+		  _("cannot read pipe to command %s"),
+		  quotearg_style (locale_quoting_style, cmd));
+      status = wait_subprocess (child, caller, false, false, true, false,
+				&sig_status);
+      if (sig_status)
+	{
+	  assert (status == 127);
+	  m4_set_sysval (sig_status << 8);
 	}
       else
 	{
-	  while (1)
-	    {
-	      size_t avail = obstack_room (obs);
-	      if (!avail)
-		{
-		  int ch = getc (pin);
-		  if (ch == EOF)
-		    break;
-		  obstack_1grow (obs, ch);
-		}
-	      else
-		{
-		  size_t len = fread (obstack_next_free (obs), 1, avail, pin);
-		  if (len <= 0)
-		    break;
-		  obstack_blank_fast (obs, len);
-		}
-	    }
-	  if (ferror (pin))
-	    m4_warn (context, errno, me, _("cannot read pipe to command %s"),
-		     quotearg_style (locale_quoting_style, cmd));
-	  int result = pclose (pin);
-	  m4_set_sysval (result == -1 ? 127
-			 : (M4_SYSVAL_EXITBITS (result)
-			    | M4_SYSVAL_TERMSIGBITS (result)));
+	  if (status == 127 && errno)
+	    m4_error (context, 0, errno, me, _("cannot run command %s"),
+		      quotearg_style (locale_quoting_style, cmd));
+	  m4_set_sysval (status);
 	}
     }
   else

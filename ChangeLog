@@ -1,5 +1,12 @@
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib pipe module instead of popen(3).
+	* ltdl/m4/gnulib-cache.m4: Import pipe and wait-process modules.
+	* modules/gnu.c (M4_SYSVAL_EXITBITS, M4_SYSVAL_TERMSIGBITS):
+	Delete.
+	(esyscmd): Rewrite with pipe module.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
 	Use gnulib execute module instead of system(3).
 	* ltdl/m4/gnulib-cache.m4: Import execute module.
 	* m4/utility.c (m4_info_name): New function.
