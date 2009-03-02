@@ -44,6 +44,12 @@ See file `INSTALL' for compilation and installation instructions.
 See file `NEWS' for a list of major changes in the current release.
 See file `THANKS' for a list of contributors.
 
+By default, the `syscmd' and `esyscmd' macros try to use the first
+instance of `sh' found by `command -p getconf PATH' at configure time,
+with a default of `/bin/sh'.  If that default is inappropriate, you
+can use `./configure --with-syscmd-shell=location' to specify the
+shell to use.
+
 By using `./configure --enable-changeword', you get an experimental
 feature which allows for changing the syntax of what is a "word" in
 `m4'.  This feature will not be present in m4 2.0, but will be
@@ -57,8 +63,8 @@ solution, from which the problem might be uneasy to infer.
 
 ========================================================================
 
-Copyright (C) 2000, 2005, 2006, 2007, 2008 Free Software Foundation,
-Inc.
+Copyright (C) 2000, 2005, 2006, 2007, 2008, 2009 Free Software
+Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or

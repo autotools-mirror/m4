@@ -83,6 +83,38 @@ AC_ARG_ENABLE([changeword],
     AC_MSG_RESULT([no])
   fi], [AC_MSG_RESULT([no])])
 
+AC_MSG_CHECKING([[which shell to use for syscmd]])
+AC_ARG_WITH([syscmd-shell],
+  [AS_HELP_STRING([--with-syscmd-shell], [shell used by syscmd [/bin/sh]])],
+  [case $withval in
+    yes[)] with_syscmd_shell=no;;
+   esac], [with_syscmd_shell=no])
+if test "$with_syscmd_shell" = no ; then
+  with_syscmd_shell=/bin/sh
+  if test "$cross_compiling" != yes ; then
+dnl Give mingw a default that is more likely to be available.
+    AS_IF([AS_EXECUTABLE_P([/bin/sh])], [],
+      [if (cmd /c) 2>/dev/null; then with_syscmd_shell=cmd; fi])
+dnl Too bad _AS_PATH_WALK is not public.
+    M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+    for M4_dir in `if (command -p getconf PATH) 2>/dev/null ; then
+	command -p getconf PATH
+      else
+	echo "/bin$PATH_SEPARATOR$PATH"
+      fi`
+    do
+      IFS=$M4_save_IFS
+      test -z "$M4_dir" && continue
+      AS_EXECUTABLE_P(["$M4_dir/sh"]) \
+	&& { with_syscmd_shell=$M4_dir/sh; break; }
+    done
+    IFS=$M4_save_IFS
+  fi
+fi
+AC_MSG_RESULT([$with_syscmd_shell])
+AC_DEFINE_UNQUOTED([SYSCMD_SHELL], ["$with_syscmd_shell"],
+  [Shell used by syscmd and esyscmd, must accept -c argument.])
+
 M4_WITH_DMALLOC
 
 AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])

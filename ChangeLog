@@ -1,5 +1,13 @@
 2009-03-05  Eric Blake  <ebb9@byu.net>
 
+	Allow configuration choice in syscmd shell.
+	* configure.ac (SYSCMD_SHELL): New test.
+	* src/builtin.c (m4_syscmd, m4_esyscmd): Use it to avoid
+	hard-coding the shell location.
+	* doc/m4.texinfo (Syscmd, Esyscmd): Document this.
+	* README: Document new configure option.
+	* NEWS: Likewise.
+
 	Remove cruft now that gnulib modules do the work.
 	* configure.ac (M4_cv_func_system_consistent): Delete.
 	* src/builtin.c (M4SYSVAL_EXITBITS, M4SYSVAL_TERMSIGBITS):

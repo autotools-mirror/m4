@@ -937,9 +937,6 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
 
-/* FIXME */
-#define SYSCMD_SHELL "/bin/sh"
-
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
@@ -950,7 +947,6 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
   int status;
   int sig_status;
   const char *prog_args[4] = { "sh", "-c" };
-  const char *shell = SYSCMD_SHELL;
   if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
@@ -960,12 +956,15 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 
   debug_flush_files ();
 #if W32_NATIVE
-  shell = prog_args[0] = "cmd";
-  prog_args[1] = "/c";
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
 #endif
   prog_args[2] = cmd;
   errno = 0;
-  status = execute (ARG (0), shell/*FIXME*/, (char **) prog_args, false,
+  status = execute (ARG (0), SYSCMD_SHELL, (char **) prog_args, false,
 		    false, false, false, true, false, &sig_status);
   if (sig_status)
     {
@@ -985,7 +984,6 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
   const char *prog_args[4] = { "sh", "-c" };
-  const char *shell = SYSCMD_SHELL;
   pid_t child;
   int fd;
   FILE *pin;
@@ -1001,12 +999,15 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 
   debug_flush_files ();
 #if W32_NATIVE
-  shell = prog_args[0] = "cmd";
-  prog_args[1] = "/c";
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
 #endif
   prog_args[2] = cmd;
   errno = 0;
-  child = create_pipe_in (ARG (0), shell/*FIXME*/, (char **) prog_args,
+  child = create_pipe_in (ARG (0), SYSCMD_SHELL, (char **) prog_args,
 			  NULL, false, true, false, &fd);
   if (child == -1)
     {
