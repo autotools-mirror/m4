@@ -5045,7 +5045,8 @@ len(/*dangling comment
 @quotation
 The macro @code{changeword} and all associated functionality is
 experimental.  It is only available if the @option{--enable-changeword}
-option was given to @code{configure}, at @acronym{GNU} @code{m4} installation
+option was given to @command{configure}, at @acronym{GNU} @code{m4}
+installation
 time.  The functionality will go away in the future, to be replaced by
 other new features that are more efficient at providing the same
 capabilities.  @emph{Do not rely on it}.  Please direct your comments
@@ -7284,6 +7285,15 @@ Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
+
 The macro @code{syscmd} is recognized only with parameters.
 @end deffn
 
@@ -7351,6 +7361,15 @@ The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
+
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
 
 The macro @code{esyscmd} is recognized only with parameters.
 @end deffn

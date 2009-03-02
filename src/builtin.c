@@ -1107,9 +1107,6 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
 
-/* FIXME */
-#define SYSCMD_SHELL "/bin/sh"
-
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
@@ -1123,7 +1120,6 @@ m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
   int sig_status;
   const char *prog_args[4] = { "sh", "-c" };
   const char *caller;
-  const char *shell = SYSCMD_SHELL;
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
@@ -1137,13 +1133,16 @@ m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
 
   debug_flush_files ();
 #if W32_NATIVE
-  shell = prog_args[0] = "cmd";
-  prog_args[1] = "/c";
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
 #endif
   prog_args[2] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
-  status = execute (caller, shell/*FIXME*/, (char **) prog_args, false,
+  status = execute (caller, SYSCMD_SHELL, (char **) prog_args, false,
 		    false, false, false, true, false, &sig_status);
   if (sig_status)
     {
@@ -1172,7 +1171,6 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   int sig_status;
   const char *prog_args[4] = { "sh", "-c" };
   const char *caller;
-  const char *shell = SYSCMD_SHELL;
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
@@ -1186,13 +1184,16 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 
   debug_flush_files ();
 #if W32_NATIVE
-  shell = prog_args[0] = "cmd";
-  prog_args[1] = "/c";
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
 #endif
   prog_args[2] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
-  child = create_pipe_in (caller, shell/*FIXME*/, (char **) prog_args,
+  child = create_pipe_in (caller, SYSCMD_SHELL, (char **) prog_args,
 			  NULL, false, true, false, &fd);
   if (child == -1)
     {
