@@ -24,6 +24,7 @@
 
 #include "m4.h"
 
+#include "execute.h"
 #include "memchr2.h"
 #include "regex.h"
 
@@ -1137,6 +1138,9 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 # define WIFEXITED(status) (WTERMSIG (status) == 0)
 #endif
 
+/* FIXME */
+#define SYSCMD_SHELL "/bin/sh"
+
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
@@ -1146,6 +1150,11 @@ m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
   const call_info *me = arg_info (argv);
   const char *cmd = ARG (1);
   size_t len = ARG_LEN (1);
+  int status;
+  int sig_status;
+  const char *prog_args[4] = { "sh", "-c" };
+  const char *caller;
+  const char *shell = SYSCMD_SHELL;
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
@@ -1158,17 +1167,27 @@ m4_syscmd (struct obstack *obs, int argc, macro_arguments *argv)
     }
 
   debug_flush_files ();
-  sysval = system (cmd);
-#if FUNC_SYSTEM_BROKEN
-  /* OS/2 has a buggy system() that returns exit status in the lowest eight
-     bits, although pclose() and WEXITSTATUS are defined to return exit
-     status in the next eight bits.  This approach can't detect signals, but
-     at least syscmd(`ls') still works when stdout is a terminal.  An
-     alternate approach is popen/insert_file/pclose, but that makes stdout
-     a pipe, which can change how some child processes behave.  */
-  if (sysval != -1)
-    sysval <<= 8;
-#endif /* FUNC_SYSTEM_BROKEN */
+#if W32_NATIVE
+  shell = prog_args[0] = "cmd";
+  prog_args[1] = "/c";
+#endif
+  prog_args[2] = cmd;
+  caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
+  errno = 0;
+  status = execute (caller, shell/*FIXME*/, (char **) prog_args, false,
+		    false, false, false, true, false, &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      sysval = sig_status << 8;
+    }
+  else
+    {
+      if (status == 127 && errno)
+	m4_warn (errno, me, _("cannot run command %s"),
+		 quotearg_style (locale_quoting_style, cmd));
+      sysval = status;
+    }
 }
 
 static void
@@ -1194,9 +1213,9 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   pin = popen (cmd, "r");
   if (pin == NULL)
     {
-      m4_warn (errno, me, _("cannot open pipe to command %s"),
+      m4_warn (errno, me, _("cannot run command %s"),
 	       quotearg_style (locale_quoting_style, cmd));
-      sysval = -1;
+      sysval = 127;
     }
   else
     {
@@ -1222,15 +1241,16 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 	m4_warn (errno, me, _("cannot read pipe to command %s"),
 		 quotearg_style (locale_quoting_style, cmd));
       sysval = pclose (pin);
+      sysval = (sysval == -1 ? 127
+		: (M4SYSVAL_EXITBITS (sysval)
+		   | M4SYSVAL_TERMSIGBITS (sysval)));
     }
 }
 
 static void
 m4_sysval (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  shipout_int (obs, (sysval == -1 ? 127
-		     : (M4SYSVAL_EXITBITS (sysval)
-			| M4SYSVAL_TERMSIGBITS (sysval))));
+  shipout_int (obs, sysval);
 }
 
 /*-------------------------------------------------------------------------.

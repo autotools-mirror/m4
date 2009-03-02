@@ -1,5 +1,14 @@
 2009-03-04  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib execute module instead of system(3).
+	* m4/gnulib-cache.m4: Import execute module.
+	* src/builtin.c (m4_sysval): Move computation...
+	(m4_esyscmd): ...into caller.
+	(m4_syscmd): Rewrite with execute module.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
+2009-03-04  Eric Blake  <ebb9@byu.net>
+
 	Try to tolerate spaces in directory names in testsuite.
 	* doc/m4.texinfo (Diversions, Using frozen files): Provide shell
 	quoting, in case __program__ contains spaces.
