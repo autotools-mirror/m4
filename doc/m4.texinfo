@@ -8052,6 +8052,15 @@ Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
+
 When the @option{--safer} option (@pxref{Operation modes, , Invoking
 m4}) is in effect, @code{syscmd} results in an error, since otherwise an
 input file could execute arbitrary code.
@@ -8122,6 +8131,15 @@ The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
+
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
 
 When the @option{--safer} option (@pxref{Operation modes, , Invoking
 m4}) is in effect, @code{esyscmd} results in an error, since otherwise

@@ -409,9 +409,6 @@ M4BUILTIN_HANDLER (defn)
 /* This section contains macros to handle the builtins "syscmd"
    and "sysval".  */
 
-/* FIXME */
-#define SYSCMD_SHELL "/bin/sh"
-
 /* Exit code from last "syscmd" command.  */
 /* FIXME - we should preserve this value across freezing.  See
    http://lists.gnu.org/archive/html/bug-m4/2006-06/msg00059.html
@@ -483,7 +480,6 @@ M4BUILTIN_HANDLER (syscmd)
   int status;
   int sig_status;
   const char *prog_args[4] = { "sh", "-c" };
-  const char *shell = SYSCMD_SHELL;
 
   if (m4_get_safer_opt (context))
     {
@@ -502,12 +498,15 @@ M4BUILTIN_HANDLER (syscmd)
     }
   m4_sysval_flush (context, false);
 #if W32_NATIVE
-  shell = prog_args[0] = "cmd";
-  prog_args[1] = "/c";
+  if (strstr (M4_SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
 #endif
   prog_args[2] = cmd;
   errno = 0;
-  status = execute (m4_info_name (me), shell/*FIXME*/, (char **) prog_args,
+  status = execute (m4_info_name (me), M4_SYSCMD_SHELL, (char **) prog_args,
 		    false, false, false, false, true, false, &sig_status);
   if (sig_status)
     {

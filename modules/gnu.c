@@ -639,9 +639,6 @@ M4BUILTIN_HANDLER (debugmode)
 }
 
 
-/* FIXME */
-#define SYSCMD_SHELL "/bin/sh"
-
 /* Same as the sysymd builtin from m4.c module, but expand to the
    output of SHELL-COMMAND. */
 
@@ -666,7 +663,6 @@ M4BUILTIN_HANDLER (esyscmd)
       int sig_status;
       const char *prog_args[4] = { "sh", "-c" };
       const char *caller;
-      const char *shell = SYSCMD_SHELL;
 
       if (m4_get_safer_opt (context))
 	{
@@ -686,13 +682,16 @@ M4BUILTIN_HANDLER (esyscmd)
 
       m4_sysval_flush (context, false);
 #if W32_NATIVE
-      shell = prog_args[0] = "cmd";
-      prog_args[1] = "/c";
+      if (strstr (M4_SYSCMD_SHELL, "cmd"))
+	{
+	  prog_args[0] = "cmd";
+	  prog_args[1] = "/c";
+	}
 #endif
       prog_args[2] = cmd;
       caller = m4_info_name (me);
       errno = 0;
-      child = create_pipe_in (caller, shell/*FIXME*/, (char **) prog_args,
+      child = create_pipe_in (caller, M4_SYSCMD_SHELL, (char **) prog_args,
 			      NULL, false, true, false, &fd);
       if (child == -1)
 	{

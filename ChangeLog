@@ -1,5 +1,18 @@
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
+	Allow configuration choice in syscmd shell.
+	* ltdl/m4/m4-syscmd.m4: New file.
+	* configure.ac (M4_SYSCMD): Use it to provide
+	--with-syscmd-shell.
+	(AC_CHECK_HEADERS_ONCE): No longer need to worry about
+	<sys/wait.h>.
+	* modules/m4.c (syscmd): Use it to avoid hard-coding the shell
+	location.
+	* modules/gnu.c (esyscmd): Likewise.
+	* doc/m4.texinfo (Syscmd, Esyscmd): Document this.
+	* README: Document new configure option.
+	* NEWS: Likewise.
+
 	Use gnulib pipe module instead of popen(3).
 	* ltdl/m4/gnulib-cache.m4: Import pipe and wait-process modules.
 	* modules/gnu.c (M4_SYSVAL_EXITBITS, M4_SYSVAL_TERMSIGBITS):

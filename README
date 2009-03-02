@@ -44,6 +44,12 @@ host architecture.  The implementation uses libltdl interface, details of
 which are in the libtool manual.  See file `modules/README' for a more
 detailed description.
 
+By default, the `syscmd' and `esyscmd' macros try to use the first
+instance of `sh' found by `command -p getconf PATH' at configure time,
+with a default of `/bin/sh'.  If that default is inappropriate, you
+can use `./configure --with-syscmd-shell=location' to specify the
+shell to use.
+
 By using `./configure --with-dmalloc', GNU m4 is linked with Gray
 Watson's dmalloc package.  It is a debugging option for finding memory
 management problems.  Gray Watson's dmalloc package is available at
@@ -79,7 +85,8 @@ set of tests.
 
 ========================================================================
 
-Copyright (C) 2000, 2005, 2006, 2007 Free Software Foundation, Inc.
+Copyright (C) 2000, 2005, 2006, 2007, 2009 Free Software Foundation,
+Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or

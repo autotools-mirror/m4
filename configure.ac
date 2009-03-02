@@ -1,6 +1,6 @@
 # Configure template for GNU m4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005, 2006,
-# 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 1991, 1992, 1993, 1994, 2000, 2001, 2002, 2004, 2005,
+# 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -183,7 +183,7 @@ AC_CHECK_SIZEOF([long long int])
 ## ------------------------- ##
 ## C headers required by M4. ##
 ## ------------------------- ##
-AC_CHECK_HEADERS_ONCE([limits.h sys/wait.h])
+AC_CHECK_HEADERS_ONCE([limits.h])
 
 if test $ac_cv_header_stdbool_h = yes; then
   INCLUDE_STDBOOL_H='#include <stdbool.h>'
@@ -209,9 +209,14 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS_ONCE([getcwd gethostname mktime uname])
 AC_CHECK_FUNCS_ONCE([setenv unsetenv putenv clearenv])
 
+
+## ------------------ ##
+## Configure options. ##
+## ------------------ ##
+
 M4_LIB_GMP
 AM_CONDITIONAL([USE_GMP], [test "x$USE_GMP" = xyes])
-
+M4_SYSCMD
 
 
 ## -------- ##

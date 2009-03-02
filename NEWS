@@ -355,6 +355,9 @@ contains the following beta features that were deemed worth deferring until
    `m4 --debugfile=trace file', not `m4 file --debugfile trace'.  This
    change does not affect the deprecated `-o'/`--error-output' option.
 
+** The `syscmd' and `esyscmd' builtins can be configured to use an
+   alternate shell, via the new `configure' option `--with-syscmd-shell'.
+
 ** A number of portability improvements inherited from gnulib.
 
 * Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]
