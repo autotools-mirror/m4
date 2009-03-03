@@ -5180,7 +5180,7 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'divert(1)hi
-format(%1000000d, 1)' | ]__program__[ | sed -n 1p])dnl
+format(%1000000d, 1)' | ']__program__[' | sed -n 1p])dnl
 @result{}hi
 sysval
 @result{}0
@@ -7115,9 +7115,9 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
-       | ]__program__[ -F in.m4f \
+       | ']__program__[' -F in.m4f \
      && echo 'divnum popdef([divnum])divnum' \
-       | ]__program__[ -R in.m4f \
+       | ']__program__[' -R in.m4f \
      && rm in.m4f])status sysval
 @result{}hi 0
 @result{}status 0
