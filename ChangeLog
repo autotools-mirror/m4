@@ -1,5 +1,9 @@
 2009-03-04  Eric Blake  <ebb9@byu.net>
 
+	Try to tolerate spaces in directory names in testsuite.
+	* doc/m4.texinfo (Diversions, Using frozen files): Provide shell
+	quoting, in case __program__ contains spaces.
+
 	Improve web-manual maintainer rule.
 	* maint.mk (web-manual): Work with VPATH builds.  Factor
 	package-specific detail...
