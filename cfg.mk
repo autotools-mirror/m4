@@ -1,5 +1,5 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003-2008 Free Software Foundation, Inc.
+# Copyright (C) 2003-2009 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@ gnu_ftp_host-alpha = alpha.gnu.org
 gnu_ftp_host-beta = alpha.gnu.org
 gnu_ftp_host-major = ftp.gnu.org
 gnu_rel_host = $(gnu_ftp_host-$(RELEASE_TYPE))
+
+# Used in maint.mk's web-manual rule
+manual_title = GNU macro processor
 
 url_dir_list = ftp://$(gnu_rel_host)/gnu/m4
 

@@ -1,3 +1,10 @@
+2009-03-04  Eric Blake  <ebb9@byu.net>
+
+	Improve web-manual maintainer rule.
+	* maint.mk (web-manual): Work with VPATH builds.  Factor
+	package-specific detail...
+	* cfg.mk (manual_title): ...to new variable.
+
 2009-02-26  Eric Blake  <ebb9@byu.net>
 
 	Make bootstrap easier on Solaris.
