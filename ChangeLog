@@ -1,3 +1,9 @@
+2009-03-05  Eric Blake  <ebb9@byu.net>
+
+	Improve web-manual maintainer rule.
+	* maint.mk (web-manual): Factor package-specific detail...
+	* cfg.mk (manual_title): ...to new variable.
+
 2009-02-23  Eric Blake  <ebb9@byu.net>
 
 	Speed up translit when from argument is short.

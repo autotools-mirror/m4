@@ -52,5 +52,5 @@ web-manual:
 	  $(SHELL) ../$(config_aux_dir)/gendocs.sh \
 	    -o '$(abs_builddir)/doc/manual' \
 	    --email $(PACKAGE_BUGREPORT) $(PACKAGE) \
-	    "$(PACKAGE_NAME) - GNU macro processor"
+	    "$(PACKAGE_NAME) - $(manual_title)"
 	@echo " *** Upload the doc/manual directory to web-cvs."
