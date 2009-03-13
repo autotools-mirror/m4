@@ -1,5 +1,9 @@
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
+	Try to tolerate spaces in directory names in testsuite.
+	* tests/null.m4: Provide shell quoting, in case __program__
+	contains spaces.
+
 	Fix awk script portability.
 	* checks/get-them: In gsub, properly escape {.
 	Reported by Gary V. Vaughan.
