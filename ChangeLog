@@ -1,5 +1,9 @@
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
+	Fix awk script portability.
+	* checks/get-them: In gsub, properly escape {.
+	Reported by Gary V. Vaughan.
+
 	Make bootstrap easier on Solaris.
 	* bootstrap: Add GNULIB_SRCDIR.  Useful when a wrapper script
 	gnulib-tool exists earlier on the path to work around /bin/sh
