@@ -1,3 +1,10 @@
+2009-03-12  Eric Blake  <ebb9@byu.net>
+
+	Fix awk script portability.
+	* checks/get-them: In gsub, properly escape {.  Close all files
+	before exiting.
+	Reported by Gary V. Vaughan.
+
 2009-03-05  Eric Blake  <ebb9@byu.net>
 
 	Allow configuration choice in syscmd shell.
