@@ -1,3 +1,11 @@
+2009-03-13  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite failure on mingw.
+	* examples/null.m4: Don't attempt to recursively invoke
+	__program__ on mingw, since \ in file name can confuse some
+	choices for --with-syscmd-shell.
+	* examples/null.err: Adjust expected output.
+
 2009-03-12  Eric Blake  <ebb9@byu.net>
 
 	Fix awk script portability.
