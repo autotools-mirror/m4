@@ -294,21 +294,6 @@ $CONFIG_SHELL gnulib/gnulib-tool --update \
 func_echo "running: $AUTORECONF --force --verbose --install"
 $AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
 
-## ---------------------------------------- ##
-## Gnulib is more up-to-date than automake. ##
-## ---------------------------------------- ##
-
-func_update gnulib/build-aux/compile build-aux/compile
-func_update gnulib/build-aux/config.guess build-aux/config.guess
-func_update gnulib/build-aux/config.sub build-aux/config.sub
-func_update gnulib/build-aux/depcomp build-aux/depcomp
-func_update gnulib/build-aux/install-sh build-aux/install-sh
-func_update gnulib/build-aux/mdate-sh build-aux/mdate-sh
-func_update gnulib/build-aux/missing build-aux/missing
-func_update gnulib/build-aux/texinfo.tex build-aux/texinfo.tex
-func_update gnulib/doc/COPYINGv3 COPYING
-func_update gnulib/doc/INSTALL INSTALL
-
 exit 0
 
 # Local variables:

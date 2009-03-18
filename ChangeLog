@@ -1,3 +1,22 @@
+2009-03-19  Eric Blake  <ebb9@byu.net>
+
+	Exploit git submodule by adding appropriate symlinks.
+	* bootstrap: No longer copy files from gnulib.
+	* COPYING: Change to symlink pointing into gnulib.
+	* INSTALL: Likewise.
+	* build-aux/compile: Likewise.
+	* build-aux/config.guess: Likewise.
+	* build-aux/config.sub: Likewise.
+	* build-aux/depcomp: Likewise.
+	* build-aux/install-sh: Likewise.
+	* build-aux/mdate-sh: Likewise.
+	* build-aux/missing: Likewise.
+	* build-aux/texinfo.tex: Likewise.
+	* .cvsignore: Reflect these changes.
+	* .gitignore: Likewise.
+	* build-aux/.cvsignore: New file.
+	* build-aux/.gitignore: Likewise.
+
 2009-03-18  Eric Blake  <ebb9@byu.net>
 
 	Make gnulib a git submodule.
