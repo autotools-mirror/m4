@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-02-26
+# bootstrap (GNU M4) version 2009-03-18
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
@@ -299,6 +299,7 @@ $AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
 ## Gnulib is more up-to-date than automake. ##
 ## ---------------------------------------- ##
 
+func_update "$gnulibdir"/build-aux/compile build-aux/compile
 func_update "$gnulibdir"/build-aux/config.guess build-aux/config.guess
 func_update "$gnulibdir"/build-aux/config.sub build-aux/config.sub
 func_update "$gnulibdir"/build-aux/depcomp build-aux/depcomp

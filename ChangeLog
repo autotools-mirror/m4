@@ -1,3 +1,8 @@
+2009-03-18  Eric Blake  <ebb9@byu.net>
+
+	Use latest compile script, even with stable automake.
+	* bootstrap: Also sync build-aux/compile.
+
 2009-03-12  Eric Blake  <ebb9@byu.net>
 
 	Fix awk script portability.
