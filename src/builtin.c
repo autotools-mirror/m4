@@ -26,6 +26,7 @@
 
 #include "execute.h"
 #include "memchr2.h"
+#include "memcmp2.h"
 #include "pipe.h"
 #include "regex.h"
 #include "wait-process.h"
@@ -864,13 +865,8 @@ dumpdef_cmp (const void *s1, const void *s2)
 {
   const symbol *sym1 = *(const symbol **) s1;
   const symbol *sym2 = *(const symbol **) s2;
-  size_t len1 = SYMBOL_NAME_LEN (sym1);
-  size_t len2 = SYMBOL_NAME_LEN (sym2);
-  int result = memcmp (SYMBOL_NAME (sym1), SYMBOL_NAME (sym2),
-		       len1 < len2 ? len1 : len2);
-  if (!result)
-    result = len1 < len2 ? -1 : len2 < len1;
-  return result;
+  return memcmp2 (SYMBOL_NAME (sym1), SYMBOL_NAME_LEN (sym1),
+                  SYMBOL_NAME (sym2), SYMBOL_NAME_LEN (sym2));
 }
 
 /*-------------------------------------------------------------------------.

@@ -1,3 +1,9 @@
+2009-03-19  Eric Blake  <ebb9@byu.net>
+
+	Use memcmp2 to simplify lexicographic comparisons.
+	* m4/gnulib-cache.m4: Import memcmp2.
+	* src/builtin.c (dumpdef_cmp): Use it.
+
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
 	Fix testsuite failure on mingw.
