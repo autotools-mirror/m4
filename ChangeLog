@@ -1,3 +1,11 @@
+2009-03-19  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Fix m4.1 build race, exposed by parallelism through GNUmakefile.
+	* Makefile.am (SUBDIRS): Add doc.
+	(Documentation rules): Move ...
+	* doc/Makefile.am: ... to this new file.
+	* configure.ac (AC_CONFIG_FILES): Generate doc/Makefile.
+
 2009-03-13  Eric Blake  <ebb9@byu.net>
 
 	Try to tolerate spaces in directory names in testsuite.

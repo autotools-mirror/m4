@@ -23,7 +23,7 @@
 config_aux_dir	= build-aux
 config_macro_dir= ltdl/m4
 
-SUBDIRS		= po gnu . tests/gnu
+SUBDIRS		= po gnu . doc tests/gnu
 
 ACLOCAL_AMFLAGS = -I ltdl/m4
 AUTOMAKE_OPTIONS = nostdinc
@@ -243,38 +243,6 @@ m4_libm4_la_DEPENDENCIES = $(LTDLDEPS) gnu/libgnu.la
 dist-hook:
 	rm -f $(distdir)/m4/system.h
 EXTRA_DIST     += m4/system_.h
-
-
-## -------------- ##
-## Documentation. ##
-## -------------- ##
-
-info_TEXINFOS	= doc/m4.texinfo
-doc_m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl-1.3.texi doc/gpl-3.0.texi
-dist_man_MANS	= $(srcdir)/doc/m4.1
-EXTRA_DIST	+= doc/gendocs_template
-MAINTAINERCLEANFILES += doc/gendocs_template
-HELP2MAN	= $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run help2man
-
-# Build the man page once in the srcdir, rather than in every VPATH build
-# dir, to match how automake builds info pages.  This is safe for 'make
-# distcheck' since it is distributed pre-built.
-$(srcdir)/doc/m4.1: .version src/main.c
-	@if test -f src/m4$(EXEEXT); then \
-	  echo "Updating the \`man' page \`$@'"; \
-	  $(HELP2MAN) --name="macro processor" --source=FSF \
-	    --info-page=m4 --output=$@ src/m4$(EXEEXT); \
-	else \
-	  echo "WARNING: The \`man' page \`$@' cannot be updated yet."; \
-	  echo "         Retry once the program executable is ready."; \
-	fi
-
-## Disabled for now.  Clashes with earlier definition.
-## TAGS_FILES	= $(infos_TEXINFOS)
-## TAGS_DEPENDENCIES = $(TAGS_FILES)
-## ETAGS_ARGS	= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
-
-MAINTAINERCLEANFILES += $(dist_man_MANS)
 
 
 ## --------- ##

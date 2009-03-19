@@ -225,6 +225,7 @@ M4_SYSCMD
 AC_CONFIG_FILES([
 Makefile
 gnu/Makefile
+doc/Makefile
 m4/system.h:m4/system_.h
 tests/atlocal
 tests/gnu/Makefile
