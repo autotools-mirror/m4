@@ -1,3 +1,9 @@
+2009-03-21  Eric Blake  <ebb9@byu.net>
+
+	Use memcmp2 to simplify lexicographic comparisons.
+	* ltdl/m4/gnulib-cache.m4: Import memcmp2.
+	* modules/m4.c (dumpdef_cmp_CB): Use it.
+
 2009-03-19  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	Fix m4.1 build race, exposed by parallelism through GNUmakefile.

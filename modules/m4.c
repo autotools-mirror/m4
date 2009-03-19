@@ -30,6 +30,7 @@
 
 #include "execute.h"
 #include "memchr2.h"
+#include "memcmp2.h"
 #include "quotearg.h"
 #include "stdlib--.h"
 #include "tempname.h"
@@ -256,10 +257,7 @@ dumpdef_cmp_CB (const void *s1, const void *s2)
 {
   const m4_string *a = (const m4_string *) s1;
   const m4_string *b = (const m4_string *) s2;
-  int result = memcmp (a->str, b->str, a->len < b->len ? a->len : b->len);
-  if (!result)
-    result = a->len < b->len ? -1 : b->len < a->len;
-  return result;
+  return memcmp2 (a->str, a->len, b->str, b->len);
 }
 
 /* The function m4_dump_symbols () is for use by "dumpdef".  It builds up a
