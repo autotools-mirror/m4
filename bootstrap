@@ -29,7 +29,7 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTORECONF, GNULIB_SRCDIR, GNULIB_TOOL, M4, RM, SED
+#   AUTORECONF, CONFIG_SHELL, GNULIB_SRCDIR, M4, RM, SED
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly
 # calling out to parts of the GNU Build Platform.  Currently this
@@ -39,7 +39,7 @@
 # Report bugs to <bug-m4@gnu.org>
 
 : ${AUTORECONF=autoreconf}
-: ${GNULIB_TOOL=gnulib-tool}
+: ${CONFIG_SHELL=/bin/sh}
 : ${RM='rm -f'}
 : ${SED=sed}
 
@@ -250,43 +250,42 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
   fi
 fi
 
-## ---------------------------- ##
-## Find the gnulib module tree. ##
-## ---------------------------- ##
+## ------------------------------ ##
+## Update the gnulib module tree. ##
+## ------------------------------ ##
 
-if test -n "$GNULIB_SRCDIR" && test -d "$GNULIB_SRCDIR" ; then
-  gnulibdir=$GNULIB_SRCDIR
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if test -f gnulib/gnulib-tool ; then
+    func_echo "updating gnulib submodule"
+    git submodule update \
+      || func_fatal_error "Unable to update gnulib"
+  else
+    # A fresh checkout creates an empty subdirectory gnulib.  However,
+    # older git didn't know how to clone into an empty subdir.  If the
+    # user provided GNULIB_SRCDIR, then make the initial clone refer
+    # to the existing checkout, to save network traffic.
+    func_echo "importing gnulib submodule"
+    if test -d "$GNULIB_SRCDIR" ; then
+      rmdir gnulib 2>/dev/null
+      git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
+	&& git submodule init && git submodule update \
+	|| func_fatal_error "Unable to update gnulib"
+    else
+      git submodule update --init \
+	|| func_fatal_error "Unable to update gnulib"
+    fi
+  fi
 else
-  case $GNULIB_TOOL in
-    /*  )  gnulibdir=$GNULIB_TOOL ;;		# absolute
-    */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
-    *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
-  esac
-
-  # Follow symlinks
-  while test -h "$gnulibdir"; do
-
-    # Resolve symbolic link.
-    sedexpr1='s, -> ,#%%#,'
-    sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
-    linkval=`ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
-    test -n "$linkval" || break
-
-    case "$linkval" in
-	/* ) gnulibdir="$linkval" ;;
-	* )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
-    esac
-
-  done
-  gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+  func_echo "git not detected.  If needed, update gnulib subdirectory manually"
 fi
 
 ## ---------------------- ##
 ## Import Gnulib modules. ##
 ## ---------------------- ##
 
-func_echo "running: $GNULIB_TOOL --update"
-$GNULIB_TOOL --update || func_fatal_error "gnulib-tool failed"
+func_echo "running: $CONFIG_SHELL gnulib/gnulib-tool --update"
+$CONFIG_SHELL gnulib/gnulib-tool --update \
+  || func_fatal_error "gnulib-tool failed"
 
 ## ----------- ##
 ## Autoreconf. ##
@@ -299,16 +298,16 @@ $AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
 ## Gnulib is more up-to-date than automake. ##
 ## ---------------------------------------- ##
 
-func_update "$gnulibdir"/build-aux/compile build-aux/compile
-func_update "$gnulibdir"/build-aux/config.guess build-aux/config.guess
-func_update "$gnulibdir"/build-aux/config.sub build-aux/config.sub
-func_update "$gnulibdir"/build-aux/depcomp build-aux/depcomp
-func_update "$gnulibdir"/build-aux/install-sh build-aux/install-sh
-func_update "$gnulibdir"/build-aux/mdate-sh build-aux/mdate-sh
-func_update "$gnulibdir"/build-aux/missing build-aux/missing
-func_update "$gnulibdir"/build-aux/texinfo.tex build-aux/texinfo.tex
-func_update "$gnulibdir"/doc/COPYINGv3 COPYING
-func_update "$gnulibdir"/doc/INSTALL INSTALL
+func_update gnulib/build-aux/compile build-aux/compile
+func_update gnulib/build-aux/config.guess build-aux/config.guess
+func_update gnulib/build-aux/config.sub build-aux/config.sub
+func_update gnulib/build-aux/depcomp build-aux/depcomp
+func_update gnulib/build-aux/install-sh build-aux/install-sh
+func_update gnulib/build-aux/mdate-sh build-aux/mdate-sh
+func_update gnulib/build-aux/missing build-aux/missing
+func_update gnulib/build-aux/texinfo.tex build-aux/texinfo.tex
+func_update gnulib/doc/COPYINGv3 COPYING
+func_update gnulib/doc/INSTALL INSTALL
 
 exit 0
 

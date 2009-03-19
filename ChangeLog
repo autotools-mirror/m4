@@ -1,5 +1,12 @@
 2009-03-18  Eric Blake  <ebb9@byu.net>
 
+	Make gnulib a git submodule.
+	* .gitmodules: New file.
+	* gnulib: Record which version of gnulib has been tested.
+	* bootstrap: Aid in submodule usage.
+	* cfg.mk (gnulib_dir): Alter default location of gnulib.
+	* HACKING: Mention how to use submodule.
+
 	Use latest compile script, even with stable automake.
 	* bootstrap: Also sync build-aux/compile.
 
