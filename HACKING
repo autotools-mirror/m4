@@ -48,22 +48,46 @@ and is not part of a release distribution.
   - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)
   - Texinfo 4.8 or later
   - Any prerequisites of the above (such as perl, tex)
-  - A git checkout of gnulib.  A read-only copy of gnulib can be
-    obtained by:
+
+  Note that none of these bootstrapping dependencies should be required
+  by a distributed release.
+
+* M4 includes gnulib as a git submodule.  By default, the bootstrap
+  script will attempt to run
+    git submodule update --init
+  to grab a gnulib clone from the official read-only location of
+    git://git.sv.gnu.org/gnulib.git
+
+  However, this can be network and disk intensive.  If you already have
+  another gnulib clone on your disk, you can use the environment
+  variable GNULIB_SRCDIR to point to the previous checkout to speed up
+  the process.  Additionally, both the bootstrap script and gnulib-tool
+  require a shell that supports functions, so you can set the
+  environment variable CONFIG_SHELL to choose a better shell on systems
+  (like Solaris) where /bin/sh is lacking.  Thus, you may find it
+  convenient to run:
+    GNULIB_SRCDIR=path/to/gnulib CONFIG_SHELL=path/to/sh \
+      path/to/sh ./bootstrap
+
+  A read-only copy of gnulib can be obtained by:
       git clone git://git.sv.gnu.org/gnulib.git
     or
       cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/gnulib.git \
         co -d gnulib HEAD
 
+  Using a CVS checkout might work, but it is relatively untested,
+  particularly now that we use a git submodule for gnulib.
+
   If you are a member of the savannah group for gnulib, a read-write
   copy can be obtained by:
     git clone <savannah-user>@git.sv.gnu.org:/srv/git/gnulib.git
 
-  Note that none of these bootstrapping dependencies should be required
-  by a distributed release.
-
-* Either add the gnulib directory to your PATH, or run
-    GNULIB_TOOL=path/to/gnulib/gnulib-tool ./bootstrap
+  If you are behind a firewall that blocks the git protocol, you may
+  find it useful to do:
+    git config --global url.http://git.sv.gnu.org/r/.insteadof \
+      git://git.sv.gnu.org/
+  to force git to transparently rewrite all savannah git references to
+  instead use http.
 
 * When it is time for a release, it is a good idea to bootstrap with
   official releases of the autotools, rather than git builds, to reduce
@@ -195,6 +219,11 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
+* Make sure you are happy with the particular gnulib version recorded as
+  the gnulib submodule.  If necessary to update to the latest, run:
+    git submodule foreach git pull
+    git commit -m 'Update gnulib submodule to latest.' gnulib
+
 * Update the version number in NEWS and ChangeLog, and mention in README
   whether the release is stable.  See
   http://www.gnu.org/software/libtool/contribute.html for details of the
@@ -202,7 +231,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   intra-release versions carry more information thanks to
   git-version-gen).
 
-* Run ./bootstrap.
+* Run ./bootstrap, perhaps with environment variables set.
 
 * Run ./configure (a VPATH build should work, but is less tested).
 

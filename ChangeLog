@@ -1,3 +1,12 @@
+2009-03-20  Eric Blake  <ebb9@byu.net>
+
+	Make gnulib a git submodule.
+	* .gitmodules: New file.
+	* gnulib: Record which version of gnulib has been tested.
+	* bootstrap: Aid in submodule usage.
+	* cfg.mk (gnulib_dir): Alter default location of gnulib.
+	* HACKING: Mention how to use submodule.
+
 2009-03-19  Eric Blake  <ebb9@byu.net>
 
 	Use memcmp2 to simplify lexicographic comparisons.
