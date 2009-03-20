@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-03-13
+# bootstrap (GNU M4) version 2009-03-23
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
 # Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -33,7 +33,7 @@
 
 # You can also set the following variables to help $progname
 # locate the right tools:
-#   AUTOPOINT, AUTORECONF, AWK, GNULIB_SRCDIR, GNULIB_TOOL, LIBTOOLIZE,
+#   AUTOPOINT, AUTORECONF, AWK, CONFIG_SHELL, GNULIB_SRCDIR, LIBTOOLIZE,
 #   M4, RM, SED
 
 # This script bootstraps a git or CVS checkout of GNU M4 by correctly calling
@@ -50,7 +50,7 @@
 : ${AUTOPOINT=autopoint}
 : ${AUTORECONF=autoreconf}
 : ${AWK=awk}
-: ${GNULIB_TOOL=gnulib-tool}
+: ${CONFIG_SHELL=/bin/sh}
 : ${LIBTOOLIZE=libtoolize}
 : ${M4=m4}
 : ${RM='rm -f'}
@@ -396,35 +396,33 @@ $AUTOPOINT --force
 func_echo "running: $LIBTOOLIZE --force --copy --install"
 ${LIBTOOLIZE} --force --copy --install
 
-## ---------------------------- ##
-## Find the gnulib module tree. ##
-## ---------------------------- ##
+## ------------------------------ ##
+## Update the gnulib module tree. ##
+## ------------------------------ ##
 
-if test -n "$GNULIB_SRCDIR" && test -d "$GNULIB_SRCDIR" ; then
-  gnulibdir=$GNULIB_SRCDIR
+if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
+  if test -f gnulib/gnulib-tool ; then
+    func_echo "updating gnulib submodule"
+    git submodule update \
+      || func_fatal_error "Unable to update gnulib"
+  else
+    # A fresh checkout creates an empty subdirectory gnulib.  However,
+    # older git didn't know how to clone into an empty subdir.  If the
+    # user provided GNULIB_SRCDIR, then make the initial clone refer
+    # to the existing checkout, to save network traffic.
+    func_echo "importing gnulib submodule"
+    if test -d "$GNULIB_SRCDIR" ; then
+      rmdir gnulib 2>/dev/null
+      git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
+ && git submodule init && git submodule update \
+ || func_fatal_error "Unable to update gnulib"
+    else
+      git submodule update --init \
+ || func_fatal_error "Unable to update gnulib"
+    fi
+  fi
 else
-  case $GNULIB_TOOL in
-    /*  )  gnulibdir=$GNULIB_TOOL ;;		# absolute
-    */* )  gnulibdir=`pwd`/$GNULIB_TOOL ;;	# relative
-    *   )  gnulibdir=`which "$GNULIB_TOOL"` ;;	# PATH search
-  esac
-
-  # Follow symlinks
-  while test -h "$gnulibdir"; do
-
-    # Resolve symbolic link.
-    sedexpr1='s, -> ,#%%#,'
-    sedexpr2='s,^.*#%%#\(.*\)$,\1,p'
-    linkval=`ls -l "$gnulibdir" | $SED "$sedexpr1" | $SED -n "$sedexpr2"`
-    test -n "$linkval" || break
-
-    case "$linkval" in
-	/* ) gnulibdir="$linkval" ;;
-	* )  gnulibdir=`echo "$gnulibdir" | sed -e 's,/[^/]*$,,'`/"$linkval" ;;
-    esac
-
-  done
-  gnulibdir=`echo "$gnulibdir" | $SED "$dirname"`
+  func_echo "git not detected.  If needed, update gnulib subdirectory manually"
 fi
 
 
@@ -432,9 +430,9 @@ fi
 ## Import Gnulib modules. ##
 ## ---------------------- ##
 
-func_echo "running: ${GNULIB_TOOL} --update"
-${GNULIB_TOOL} --update
-
+func_echo "running: $CONFIG_SHELL gnulib/gnulib-tool --update"
+$CONFIG_SHELL gnulib/gnulib-tool --update \
+  || func_fatal_error "gnulib-tool failed"
 
 ## --------------------------------- ##
 ## Copy additional src only modules. ##
@@ -442,7 +440,8 @@ ${GNULIB_TOOL} --update
 
 func_echo "fetching modules for src directory"
 
-for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
+for file in `$CONFIG_SHELL gnulib/gnulib-tool --extract-filelist $src_modules`
+do
 
     dest=`echo $file | $SED "$basename"`
     case $file in
@@ -454,11 +453,11 @@ for file in `${GNULIB_TOOL} --extract-filelist $src_modules`; do
     esac
 
     # Be sure to show all copying errors before bailing out
-    if test -f $gnulibdir/$file; then
+    if test -f gnulib/$file; then
 	func_echo "copying file \`$dest'"
-	cp $gnulibdir/$file $dest
+	cp gnulib/$file $dest
     else
-	func_error "$gnulibdir/$file does not exist"
+	func_error "gnulib/$file does not exist"
 	bailout_cb="exit 1"
     fi
 done
@@ -480,17 +479,18 @@ AUTOPOINT=true LIBTOOLIZE=true \
 ## Gnulib is more up-to-date than automake. ##
 ## ---------------------------------------- ##
 
-func_update "$gnulibdir"/build-aux/config.guess $config_aux_dir/config.guess
-func_update "$gnulibdir"/build-aux/config.sub $config_aux_dir/config.sub
-func_update "$gnulibdir"/build-aux/depcomp $config_aux_dir/depcomp
-func_update "$gnulibdir"/build-aux/install-sh $config_aux_dir/install-sh
-func_update "$gnulibdir"/build-aux/mdate-sh $config_aux_dir/mdate-sh
-func_update "$gnulibdir"/build-aux/missing $config_aux_dir/missing
-func_update "$gnulibdir"/build-aux/texinfo.tex $config_aux_dir/texinfo.tex
-func_update "$gnulibdir"/build-aux/po/Makefile.in.in po/Makefile.in.in
-func_update "$gnulibdir"/build-aux/po/remove-potcdate.sin po/remove-potcdate.sin
-func_update "$gnulibdir"/doc/COPYINGv3 COPYING
-func_update "$gnulibdir"/doc/INSTALL INSTALL
+func_update gnulib/build-aux/compile $config_aux_dir/compile
+func_update gnulib/build-aux/config.guess $config_aux_dir/config.guess
+func_update gnulib/build-aux/config.sub $config_aux_dir/config.sub
+func_update gnulib/build-aux/depcomp $config_aux_dir/depcomp
+func_update gnulib/build-aux/install-sh $config_aux_dir/install-sh
+func_update gnulib/build-aux/mdate-sh $config_aux_dir/mdate-sh
+func_update gnulib/build-aux/missing $config_aux_dir/missing
+func_update gnulib/build-aux/texinfo.tex $config_aux_dir/texinfo.tex
+func_update gnulib/build-aux/po/Makefile.in.in po/Makefile.in.in
+func_update gnulib/build-aux/po/remove-potcdate.sin po/remove-potcdate.sin
+func_update gnulib/doc/COPYINGv3 COPYING
+func_update gnulib/doc/INSTALL INSTALL
 
 
 ## ------- ##
