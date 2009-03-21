@@ -4,7 +4,6 @@
 .version
 aclocal.m4
 autom4te.cache
-build-aux
 config.cache
 config.guess
 config.h
@@ -18,7 +17,6 @@ depcomp
 gendocs.sh
 GNUmakefile
 gnupload
-INSTALL
 install-sh
 lib
 link-warning.h
