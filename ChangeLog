@@ -1,3 +1,11 @@
+2009-03-23  Eric Blake  <ebb9@byu.net>
+
+	Drop dist-lzma, now that xz replaces lzma.
+	* configure.ac (AM_INIT_AUTOMAKE): Drop dist-lzma.  Until a stable
+	automake release includes dist-xz, the release process will just
+	manually create a .xz tarball.
+	* gnulib: Update to latest gnulib.
+
 2009-03-19  Eric Blake  <ebb9@byu.net>
 
 	Exploit git submodule by adding appropriate symlinks.
