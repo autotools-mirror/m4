@@ -1,5 +1,8 @@
 2009-03-23  Eric Blake  <ebb9@byu.net>
 
+	Don't force file overwrites during bootstrap.
+	* bootstrap: Ensure that rerunning bootstrap doesn't alter tree.
+
 	Drop dist-lzma, now that xz replaces lzma.
 	* configure.ac (AM_INIT_AUTOMAKE): Drop dist-lzma.  Until a stable
 	automake release includes dist-xz, the release process will just
