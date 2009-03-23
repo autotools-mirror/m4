@@ -6,7 +6,6 @@ ABOUT-NLS
 aclocal.m4
 aclocal.m4t
 autom4te.cache
-build-aux
 config.cache
 config.h
 config-h.in
@@ -16,7 +15,6 @@ configure
 cscope.*
 gnu
 GNUmakefile
-INSTALL
 intl
 libtool
 *.log

@@ -393,8 +393,8 @@ $AUTOPOINT --force
 # Autoreconf runs aclocal before libtoolize, which causes spurious
 # warnings if the initial aclocal is confused by the libtoolized
 # (or worse out-of-date) macro directory.
-func_echo "running: $LIBTOOLIZE --force --copy --install"
-${LIBTOOLIZE} --force --copy --install
+func_echo "running: $LIBTOOLIZE --copy --install"
+${LIBTOOLIZE} --copy --install
 
 ## ------------------------------ ##
 ## Update the gnulib module tree. ##
@@ -470,28 +470,10 @@ $bailout_cb
 
 # Disable autopoint and libtoolize, since they were already done above.
 func_echo "running: AUTOPOINT=true LIBTOOLIZE=true " \
-    "$AUTORECONF --force --verbose --install --no-recursive"
+    "$AUTORECONF --verbose --install --no-recursive"
 AUTOPOINT=true LIBTOOLIZE=true \
-  $AUTORECONF --force --verbose --install --no-recursive
-
-
-## ---------------------------------------- ##
-## Gnulib is more up-to-date than automake. ##
-## ---------------------------------------- ##
-
-func_update gnulib/build-aux/compile $config_aux_dir/compile
-func_update gnulib/build-aux/config.guess $config_aux_dir/config.guess
-func_update gnulib/build-aux/config.sub $config_aux_dir/config.sub
-func_update gnulib/build-aux/depcomp $config_aux_dir/depcomp
-func_update gnulib/build-aux/install-sh $config_aux_dir/install-sh
-func_update gnulib/build-aux/mdate-sh $config_aux_dir/mdate-sh
-func_update gnulib/build-aux/missing $config_aux_dir/missing
-func_update gnulib/build-aux/texinfo.tex $config_aux_dir/texinfo.tex
-func_update gnulib/build-aux/po/Makefile.in.in po/Makefile.in.in
-func_update gnulib/build-aux/po/remove-potcdate.sin po/remove-potcdate.sin
-func_update gnulib/doc/COPYINGv3 COPYING
-func_update gnulib/doc/INSTALL INSTALL
-
+    $AUTORECONF --verbose --install --no-recursive \
+  || func_fatal_error "autoreconf failed"
 
 ## ------- ##
 ## Wrapup. ##
