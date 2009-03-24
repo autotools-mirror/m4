@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-03-21
+# bootstrap (GNU M4) version 2009-03-23
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
@@ -291,8 +291,8 @@ $CONFIG_SHELL gnulib/gnulib-tool --update \
 ## Autoreconf. ##
 ## ----------- ##
 
-func_echo "running: $AUTORECONF --force --verbose --install"
-$AUTORECONF --force --verbose --install || func_fatal_error "autoreconf failed"
+func_echo "running: $AUTORECONF --verbose --install"
+$AUTORECONF --verbose --install || func_fatal_error "autoreconf failed"
 
 exit 0
 

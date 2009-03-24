@@ -1,3 +1,8 @@
+2009-03-23  Eric Blake  <ebb9@byu.net>
+
+	Don't force file overwrites during bootstrap.
+	* bootstrap: Ensure that rerunning bootstrap doesn't alter tree.
+
 2009-03-21  Eric Blake  <ebb9@byu.net>
 
 	Exploit git submodule by adding appropriate symlinks.
