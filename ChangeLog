@@ -1,3 +1,9 @@
+2009-03-31  Eric Blake  <ebb9@byu.net>
+
+	Tweak submodule instructions.
+	* HACKING: Improve directions.
+	* gnulib: Update to latest version.
+
 2009-03-23  Eric Blake  <ebb9@byu.net>
 
 	Don't force file overwrites during bootstrap.
