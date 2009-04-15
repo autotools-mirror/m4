@@ -49,7 +49,7 @@ Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
 @quotation
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the @acronym{GNU} Free Documentation License,
-Version 1.2 or any later version published by the Free Software
+Version 1.3 or any later version published by the Free Software
 Foundation; with no Invariant Sections, no Front-Cover Texts, and no
 Back-Cover Texts.  A copy of the license is included in the section
 entitled ``@acronym{GNU} Free Documentation License.''
@@ -398,11 +398,13 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
-1.4.10, closing the series with 1.4.11 and 1.4.12 in 2008.
+1.4.10.  Eric continued with some portability fixes for 1.4.11 and
+1.4.12 in 2008, and 1.4.13 in 2009.
 
 Additionally, in 2008, Eric rewrote the scanning engine to reduce
-recursive evaluation from quadratic to linear complexity, released as M4
-1.6.  The 1.x branch series remains open for bug fixes.
+recursive evaluation from quadratic to linear complexity.  This was
+released as M4 1.6 in 2009.  The 1.x branch series remains open for bug
+fixes.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
