@@ -1,5 +1,11 @@
 2009-04-16  Eric Blake  <ebb9@byu.net>
 
+	Require newer automake features.
+	* configure.ac (AM_INIT_AUTOMAKE): Add dist-xz, color-tests,
+	parallel-tests, and silent-rules.  Drop dist-lzma.
+	* HACKING: Update minimum requirements.
+	* gnulib: Update to latest version.
+
 	Mention release of 1.4.13.
 	* NEWS: Update to match release on branch-1.4.
 	* doc/m4.texinfo (History): Update release history.

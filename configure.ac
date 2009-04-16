@@ -37,6 +37,7 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
+
 ## -------------------------- ##
 ## M4 specific configuration. ##
 ## -------------------------- ##
@@ -53,9 +54,9 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 ## ------------------------ ##
 ## Automake Initialization. ##
 ## ------------------------ ##
-AM_INIT_AUTOMAKE([1.10a subdir-objects dist-bzip2 dist-lzma]
-m4_bmatch(m4_defn([M4_VERSION]), [-], [gnu], [gnits]))
-
+AM_INIT_AUTOMAKE([1.10b subdir-objects dist-bzip2 dist-xz
+color-tests parallel-tests silent-rules]
+m4_if(m4_index(m4_defn([M4_VERSION]), [-]), [-1], [gnits], [gnu]))
 
 
 ## ------------------ ##
@@ -68,7 +69,6 @@ AC_SYS_LARGEFILE
 AC_PROG_CPP
 AM_PROG_CC_C_O
 M4_CHECK_DEBUGGING
-
 
 
 ## ----------------------- ##

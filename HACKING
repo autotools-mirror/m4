@@ -63,14 +63,14 @@ and is not part of a release distribution.
 
 * Before you can build from git, you need to bootstrap.  This requires:
   - A pre-installed version of GNU M4 1.4.5 or later, built from a
-    package (recommend 1.4.11 or later)
+    package (recommend 1.4.13 or later)
   - Autoconf 2.62 or later
-  - Automake 1.10a or later
+  - Automake 1.10b or later
   - Libtool 2.2 or later
   - Gettext 0.16 or later
   - Gperf 3.0 or later
   - Help2man 1.29 or later
-  - LZMA Utils 4.32 or later (from <http://tukaani.org/lzma/>)
+  - Xz 4.999.8beta or later (from <http://tukaani.org/xz/>)
   - Texinfo 4.8 or later
   - Any prerequisites of the above (such as perl, tex)
 
@@ -243,7 +243,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Make sure you are happy with the particular gnulib version recorded as
   the gnulib submodule.  If necessary to update to the latest, run:
-    git submodule foreach git pull
+    git submodule foreach git pull origin master
     git commit -m 'Update gnulib submodule to latest.' gnulib
 
 * Update the version number in configure.ac.
