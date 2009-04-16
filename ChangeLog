@@ -1,5 +1,9 @@
 2009-04-16  Eric Blake  <ebb9@byu.net>
 
+	Drop support for dist-lzma.
+	* configure.ac (AM_INIT_AUTOMAKE): Drop dist-lzma; replaced by
+	newer dist-xz format.
+
 	Use gnulib rename module.
 	* m4/gnulib-cache.m4: Import rename module.  At the moment, we
 	don't tickle either of the platform bugs that it fixes, but it is

@@ -22,7 +22,7 @@ AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.10b dist-bzip2 dist-lzma dist-xz color-tests
+AM_INIT_AUTOMAKE([1.10b dist-bzip2 dist-xz color-tests
 parallel-tests silent-rules gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
