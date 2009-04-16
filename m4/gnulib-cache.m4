@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=local --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --with-tests --no-libtool --macro-prefix=M4 announce-gen assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h dirname error execute fdl-1.3 fflush filenamecat flexmember fopen fopen-safer freadptr freadseek fseeko gendocs getopt git-version-gen gnumakefile gnupload gpl-3.0 hash intprops memchr2 memcmp2 memmem mkstemp obstack obstack-printf-posix pipe progname quote regex stdbool stdint stdlib-safer strtod strtol unlocked-io vasnprintf-posix verror version-etc version-etc-fsf wait-process xalloc xmemdup0 xprintf xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=local --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --with-tests --no-libtool --macro-prefix=M4 announce-gen assert autobuild avltree-oset binary-io clean-temp cloexec close-stream closein config-h dirname error execute fdl-1.3 fflush filenamecat flexmember fopen fopen-safer freadptr freadseek fseeko gendocs getopt git-version-gen gnumakefile gnupload gpl-3.0 hash intprops memchr2 memcmp2 memmem mkstemp obstack obstack-printf-posix pipe progname quote regex rename stdbool stdint stdlib-safer strtod strtol unlocked-io vasnprintf-posix verror version-etc version-etc-fsf wait-process xalloc xmemdup0 xprintf xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([local])
@@ -60,6 +60,7 @@ gl_MODULES([
   progname
   quote
   regex
+  rename
   stdbool
   stdint
   stdlib-safer
