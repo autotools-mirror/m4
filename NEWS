@@ -335,7 +335,7 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
-* Noteworthy changes in Version 1.4.13 (2008-12-??) [stable]
+* Noteworthy changes in Version 1.4.13 (2009-04-01) [stable]
   Released by Eric Blake, based on git version 1.4.12.*
 
 ** The manual is now distributed under the terms of FDL 1.3.
