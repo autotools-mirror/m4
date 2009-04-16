@@ -1,5 +1,10 @@
 2009-04-16  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib rename module.
+	* ltdl/m4/gnulib-cache.m4: Import rename module.  At the moment,
+	we don't tickle either of the platform bugs that it fixes, but it
+	is better to be safe than sorry.
+
 	Require newer automake features.
 	* configure.ac (AM_INIT_AUTOMAKE): Add dist-xz, color-tests,
 	parallel-tests, and silent-rules.  Drop dist-lzma.
