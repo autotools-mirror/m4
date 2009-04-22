@@ -1124,7 +1124,9 @@ Examples of legal names are: @samp{foo}, @samp{_tmp}, and @samp{name01}.
 @cindex string, quoted
 A quoted string is a sequence of characters surrounded by quote
 strings, defaulting to
-@samp{`} and @samp{'}, where the nested begin and end quotes within the
+@samp{`} (grave-accent, also known as back-tick, with UCS value U0060)
+and @samp{'} (apostrophe, also known as single-quote, with UCS value
+U0027), where the nested begin and end quotes within the
 string are balanced.  The value of a string token is the text, with one
 level of quotes stripped off.  Thus
 
