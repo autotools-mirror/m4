@@ -1,3 +1,10 @@
+2009-04-21  Eric Blake  <ebb9@byu.net>
+
+	Be more explicit about default quoting characters.
+	* doc/m4.texinfo (Quoted strings): Call out characters by name.
+	* THANKS: Update.
+	Suggested by Mehul Sanghvi.
+
 2009-04-16  Eric Blake  <ebb9@byu.net>
 
 	Use gnulib rename module.
