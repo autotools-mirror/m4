@@ -1,3 +1,16 @@
+2009-05-18  Eric Blake  <ebb9@byu.net>
+
+	Use gnulib maintainer-makefile module.
+	* m4/gnulib-cache.m4: Import maintainer-makefile module.
+	* cfg.mk (local-checks-to-skip): Drop changelog-check; add
+	sc_cast_of_x_alloc_return_value.
+	(gnulib_dir): Delete; provided by maint.mk.
+	(config_h_header, old_NEWS_hash): New macros.
+	* .prev-version: New file.
+	* gnulib: Import latest gnulib.
+	* maint.mk: Remove from version control; use gnulib instead.
+	* .gitignore: Update.
+
 2009-05-14  Eric Blake  <ebb9@byu.net>
 
 	Drop .cvsignore and redundant .gitignore files.

@@ -46,6 +46,7 @@
 /m4-*
 /m4/.gitignore
 /m4/gnulib-comp.m4
+/maint.mk
 Makefile.in
 Makefile
 /missing

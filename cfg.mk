@@ -29,12 +29,12 @@ url_dir_list = ftp://$(gnu_rel_host)/gnu/m4
 # The GnuPG ID of the key used to sign the tarballs.
 gpg_key_ID = F4850180
 
-# Tests not to run as part of "make distcheck".
-# Exclude changelog-check here so that there's less churn in ChangeLog
-# files -- otherwise, you'd need to have the upcoming version number
-# at the top of the file for each `make distcheck' run.
-local-checks-to-skip = changelog-check
+# Tests not to run as part of "make syntax-check".
+# M4 intentionally uses a coding style that compiles under C++.
+local-checks-to-skip = sc_cast_of_x_alloc_return_value
 
-# The local directory containing the checked-out copy of gnulib used in this
-# release.  Used solely to get gnulib's SHA1 for the "announcement" target.
-gnulib_dir = $(srcdir)/gnulib
+# Our files include "m4.h", which in turn includes <config.h> first.
+config_h_header = "m4\.h"
+
+# Hash of NEWS contents, to ensure we don't add entries to wrong section.
+old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
