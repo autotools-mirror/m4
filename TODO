@@ -30,14 +30,14 @@ of these ideas, listed more or less in decreasing order of priority.
 
 	GNU m4 is lousy regarding NULs in streams (this would require
 	maintaining the string lengths, and avoiding strlen, strcpy,
-	etc.). 
+	etc.).
 
 Local Variables:
 mode: outline
 outline-regexp: " *[-+*.] \\|"
 End:
 
-Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
+Copyright (C) 2000, 2006, 2007, 2009 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or

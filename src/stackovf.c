@@ -1,6 +1,6 @@
 /* Detect stack overflow (when getrlimit and sigaction or sigvec are available)
 
-   Copyright (C) 1993, 1994, 2006, 2007, 2008 Free Software
+   Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009 Free Software
    Foundation, Inc.
    Jim Avera <jima@netcom.com>, October 1993.
 
@@ -79,7 +79,6 @@
 
 #include "m4.h"			/* stdlib.h, xmalloc() */
 
-#include <assert.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <signal.h>
@@ -156,8 +155,8 @@ process_sigsegv (int signo, const char *p)
     char buf[140];
 
     snprintf (buf, sizeof buf,
-              "process_sigsegv: p=%#lx stackend=%#lx diff=%ld bot=%#lx\n",
-              (long) p, (long) stackend, (long) diff, (long) stackbot);
+	      "process_sigsegv: p=%#lx stackend=%#lx diff=%ld bot=%#lx\n",
+	      (long) p, (long) stackend, (long) diff, (long) stackbot);
     write (2, buf, strlen (buf));
   }
 #endif
@@ -292,7 +291,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   /* Calculate the approximate expected addr for a stack-ovf trap.  */
 
   if (getrlimit (RLIMIT_STACK, &rl) < 0)
-    error (EXIT_FAILURE, errno, "getrlimit");
+    error (EXIT_FAILURE, errno, _("getrlimit"));
   stack_len = (rl.rlim_cur < rl.rlim_max ? rl.rlim_cur : rl.rlim_max);
   stackbot = (char *) argv;
   grows_upward = ((char *) &stack_len > stackbot);
@@ -363,7 +362,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 	free (ss.ss_sp);
 	if (errno == ENOSYS)
 	  return;
-	error (EXIT_FAILURE, errno, "sigaltstack");
+	error (EXIT_FAILURE, errno, _("sigaltstack"));
       }
   }
 
@@ -385,7 +384,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 	free (stackbuf);
 	if (errno == ENOSYS)
 	  return;
-	error (EXIT_FAILURE, errno, "sigstack");
+	error (EXIT_FAILURE, errno, _("sigstack"));
       }
   }
 
@@ -408,7 +407,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
   if (sigaction (SIGSEGV, &act, NULL) < 0)
-    error (EXIT_FAILURE, errno, "sigaction");
+    error (EXIT_FAILURE, errno, _("sigaction"));
 
 #else /* ! HAVE_SIGACTION */
 
@@ -416,7 +415,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
   if (sigvec (SIGSEGV, &vec, NULL) < 0)
-    error (EXIT_FAILURE, errno, "sigvec");
+    error (EXIT_FAILURE, errno, _("sigvec"));
 
 #endif /* ! HAVE_SIGACTION */
 

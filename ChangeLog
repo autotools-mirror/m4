@@ -1,5 +1,27 @@
 2009-05-18  Eric Blake  <ebb9@byu.net>
 
+	Minor cleanups, detected by gnulib's 'make syntax-check'.
+	* configure.ac (M4_cv_use_stackovf): Avoid redundant parentheses.
+	* BACKLOG: Delete.
+	* HACKING: Avoid trailing whitespace.
+	* TODO: Likewise.
+	* examples/stackovf.sh: Likewise.
+	* examples/esyscmd.m4: Likewise.
+	* examples/file.m4: Avoid space-tab.
+	* examples/fstab.m4: Likewise.
+	* examples/patsubst.m4: Likewise.
+	* src/m4.h (STREQ): New macro.
+	* src/builtin.c (find_builtin_by_name): Use it.
+	* src/m4.c (process_file): Likewise.
+	(main): Mark all strings.  Avoid atoi.
+	(stackovf_handler): Reword string.
+	(m4_verror_at_line): Use all-lowercase warning.
+	* src/stackovf.c (includes): Drop unused <assert.h>.
+	(setup_stackovf_trap): Make it easier to translate errors.
+	* src/output.c (freeze_diversions): Avoid false positive.
+	* doc/m4.texinfo: Adjust expected output.
+	* examples/null.err: Likewise.
+
 	Use gnulib maintainer-makefile module.
 	* m4/gnulib-cache.m4: Import maintainer-makefile module.
 	* cfg.mk (local-checks-to-skip): Drop changelog-check; add

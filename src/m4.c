@@ -84,7 +84,7 @@ typedef struct macro_definition macro_definition;
 | behalf of CALLER (if any), otherwise at the global current	    |
 | location.  If ERRNUM, decode the errno value that caused the      |
 | error.  If STATUS, exit immediately with that status.  If WARN,   |
-| prepend 'Warning: '.						    |
+| prepend 'warning: '.						    |
 `------------------------------------------------------------------*/
 
 static void
@@ -123,9 +123,9 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"), macro, format);
+    full = xasprintf (_("warning: %s: %s"), macro, format);
   else if (warn)
-    full = xasprintf (_("Warning: %s"), format);
+    full = xasprintf (_("warning: %s"), format);
   else if (macro)
     full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
@@ -184,7 +184,7 @@ static void
 stackovf_handler (void)
 {
   m4_error (EXIT_FAILURE, 0, NULL,
-	    _("ERROR: stack overflow.  (Infinite define recursion?)"));
+	    _("FATAL: stack overflow.  (Infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOVF */
@@ -350,7 +350,7 @@ static const struct option long_options[] =
 static void
 process_file (const char *name)
 {
-  if (strcmp (name, "-") == 0)
+  if (STREQ (name, "-"))
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
 	 to read input from stdin twice, like GNU cat.  Besides,
@@ -366,7 +366,7 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
 	{
-	  error (0, errno, "cannot open %s",
+	  error (0, errno, _("cannot open %s"),
 		 quotearg_style (locale_quoting_style, name));
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
@@ -451,7 +451,7 @@ main (int argc, char *const *argv, char *const *envp)
 	/* Compatibility junk: options that other implementations
 	   support, but which we ignore as no-ops and don't list in
 	   --help.  */
-	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
+	error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
 	       optchar);
 	break;
 
@@ -496,7 +496,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'H':
-	hash_table_size = atol (optarg);
+        {
+	  long tmp = strtol (optarg, NULL, 10);
+          hash_table_size = tmp;
+        }
 	if (hash_table_size == 0)
 	  hash_table_size = HASHMAX;
 	break;
@@ -506,7 +509,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'L':
-	nesting_limit = atoi (optarg);
+        {
+          long tmp = strtol (optarg, NULL, 10);
+          nesting_limit = tmp;
+        }
 	break;
 
       case 'P':
@@ -531,12 +537,12 @@ main (int argc, char *const *argv, char *const *envp)
 	if (seen_file)
 	  goto defer;
 	if (debug_decode (optarg, SIZE_MAX) < 0)
-	  error (0, 0, "bad debug flags: %s",
+	  error (0, 0, _("bad debug flags: %s"),
 		 quotearg_style (locale_quoting_style, optarg));
 	break;
 
       case 'e':
-	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
 		       "-e", "-i");
 	/* fall through */
       case 'i':
@@ -558,7 +564,7 @@ main (int argc, char *const *argv, char *const *envp)
 	/* -o/--error-output are deprecated synonyms of --debugfile,
 	   so issue a warning.  Don't call debug_set_output here, as
 	   it has side effects.	 */
-	error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+	error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
 	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
 	debugfile = optarg;
 	break;
@@ -633,7 +639,7 @@ main (int argc, char *const *argv, char *const *envp)
 
 	case 'd':
 	  if (debug_decode (arg, SIZE_MAX) < 0)
-	    error (0, 0, "bad debug flags: %s",
+	    error (0, 0, _("bad debug flags: %s"),
 		   quotearg_style (locale_quoting_style, optarg));
 	  break;
 

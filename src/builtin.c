@@ -196,8 +196,8 @@ find_builtin_by_name (const char *name)
 {
   const builtin *bp;
 
-  for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
-    if (strcmp (bp->name, name) == 0)
+  for (bp = &builtin_tab[0]; bp->name; bp++)
+    if (STREQ (bp->name, name))
       return bp;
   return bp + 1;
 }

@@ -7,8 +7,8 @@
 # On some systems the ulimit command is available in ksh or bash but not sh
 (exec 2>/dev/null; ulimit -HSs 300) || {
     for altshell in bash bsh ksh ; do
-	if (exec >/dev/null 2>&1; $altshell -c 'ulimit -HSs 300') && 
-								test -z "$1" 
+	if (exec >/dev/null 2>&1; $altshell -c 'ulimit -HSs 300') &&
+								test -z "$1"
 	then
 		echo "Using $altshell because it supports ulimit"
 		exec $altshell $0 running-with-$altshell
@@ -45,7 +45,7 @@ then
 	#test -n "$ulimitdashv" && ulimit -HSv 8000
 	echo "Stack limit is `ulimit -s`K";
 	echo "Heap limit  is `ulimit -d`K";
-	test -n "$ulimitdashv" && 
+	test -n "$ulimitdashv" &&
 		echo "VMem limit  is `ulimit -v`K";
 else
 	echo "Can't reset stack limit - this may take a while..."
@@ -61,11 +61,11 @@ else
     # See if stack overflow was diagnosed
     case "`cat $tmpfile`" in
     *overflow*)
-	echo "Test succeeded."; 
+	echo "Test succeeded.";
 	exitcode=0
 	;;
     *ut*of*emory*)
-        echo "*** Test is INCONCLUSIVE (ran out of heap before stack overflow)";
+	echo "*** Test is INCONCLUSIVE (ran out of heap before stack overflow)";
 	;;
     *)	echo "*** Test FAILED.  $M4 aborted unexpectedly.  Output:";
 	;;

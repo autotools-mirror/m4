@@ -82,8 +82,8 @@ if test "$ac_cv_func_sigaction" = yes || test "$ac_cv_func_sigvec" = yes; then
 #include <sys/resource.h>
 #include <signal.h>
 ]], [[struct rlimit r; getrlimit (RLIMIT_STACK, &r);
-#if (!defined(HAVE_SIGACTION) || !defined(SA_ONSTACK)) \
-    && (!defined(HAVE_SIGVEC) || !defined(SV_ONSTACK))
+#if (!defined HAVE_SIGACTION || !defined SA_ONSTACK) \
+    && (!defined HAVE_SIGVEC || !defined SV_ONSTACK)
 choke me		/* SA_ONSTACK and/or SV_ONSTACK are not defined */
 #endif
 ]])], [M4_cv_use_stackovf=yes])
