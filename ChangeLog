@@ -1,3 +1,20 @@
+2009-05-14  Eric Blake  <ebb9@byu.net>
+
+	Drop .cvsignore and redundant .gitignore files.
+	* .cvsignore: Delete.  We are moving further away from CVS.
+	* build-aux/.cvsignore: Likewise.
+	* checks/.cvsignore: Likewise.
+	* doc/.cvsignore: Likewise.
+	* examples/.cvsignore: Likewise.
+	* src/.cvsignore: Likewise.
+	* .gitignore: Consolidate from other files.
+	* build-aux/.gitignore: Delete, now that it is consolidated.
+	* checks/.gitignore: Likewise.
+	* doc/.gitignore: Likewise.
+	* examples/.gitignore: Likewise.
+	* src/.gitignore: Likewise.
+	* bootstrap: Simplify accordingly.
+
 2009-04-21  Eric Blake  <ebb9@byu.net>
 
 	Be more explicit about default quoting characters.
