@@ -578,7 +578,7 @@ hello`'dnl(world)
 undivert
 goodbye
 ]])
-AT_CHECK_M4([2>&-], [1], [stdout], [], [in.m4])
+AT_CHECK_M4([2>&-], [1], [stdout-nolog], [], [in.m4])
 AT_CHECK([$SED -ne '/./p' stdout], [0],
 [[hello
 and

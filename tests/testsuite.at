@@ -1,7 +1,8 @@
 # Process with autom4te to create an -*- Autotest -*- test suite.
 
 # Test suite for GNU M4.
-# Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software Foundation,
+# Inc.
 
 # This file is part of GNU M4.
 #
@@ -19,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # We need a recent Autotest.
-m4_version_prereq([2.62])
+m4_version_prereq([2.63b-41])
 
 # Default to testing "m4 -b", but allow overrides.
 dnl This uses knowledge of undocumented autotest internals; hopefully

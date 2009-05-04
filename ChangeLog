@@ -1,3 +1,15 @@
+2009-05-04  Eric Blake  <ebb9@byu.net>
+
+	Silence verbose testsuite runs.
+	* tests/testsuite.at (m4_version_prereq): Bump to recent
+	autoconf.git version where stdout-nolog was added.
+	* tests/builtins.at (esyscmd, syscmd): Use new stdout-nolog.
+	* tests/freeze.at (AT_TEST_FREEZE): Likewise.
+	* tests/others.at (stderr closed): Likewise.
+	* HACKING: Mention new requirement.
+	* bootstrap: Likewise.
+	Reported by Ralf Wildenhues.
+
 2009-04-21  Eric Blake  <ebb9@byu.net>
 
 	Be more explicit about default quoting characters.

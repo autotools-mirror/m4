@@ -30,18 +30,19 @@ AT_DATA([unfrozen.m4], [$3])
 
 # First generate the `expout' output by running over the sources before
 # freezing.
-AT_CHECK_M4([frozen.m4 unfrozen.m4], [0], [stdout], [stderr])
+AT_CHECK_M4([frozen.m4 unfrozen.m4], [0], [stdout-nolog], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
-AT_CHECK_M4([-F frozen.m4f frozen.m4], [0], [stdout])
+AT_CHECK_M4([-F frozen.m4f frozen.m4], [0], [stdout-nolog])
 
 mv stdout out1
 
 # Now rerun the original sequence, but using the frozen file.
-AT_CHECK_M4([-R frozen.m4f unfrozen.m4], [0], [stdout], [experr], [], [ ])
+AT_CHECK_M4([-R frozen.m4f unfrozen.m4],
+            [0], [stdout-nolog], [experr], [], [ ])
 
 AT_CHECK([cat out1 stdout], [0], [expout])
 

@@ -485,7 +485,7 @@ world
 esyscmd(`echo hi >&3')divert
 hello
 ]])
-AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
+AT_CHECK_M4([3>&-], [0], [stdout-nolog], [experr], [in.m4])
 AT_CHECK([$SED -ne '/./p' stdout], [0], [[hello
 world
 ]])
@@ -1154,7 +1154,7 @@ world
 syscmd(`echo hi >&3')divert
 hello
 ]])
-AT_CHECK_M4([3>&-], [0], [stdout], [experr], [in.m4])
+AT_CHECK_M4([3>&-], [0], [stdout-nolog], [experr], [in.m4])
 AT_CHECK([$SED -ne '/./p' stdout], [0], [[hello
 world
 ]])
