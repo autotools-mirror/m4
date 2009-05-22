@@ -1,3 +1,10 @@
+2009-05-22  Eric Blake  <ebb9@byu.net>
+
+	Update to latest gnulib.
+	* gnulib: Import fixes for AIX compilation.
+	* THANKS: Update.
+	Reported by Jens Rehsack.
+
 2009-04-13  Eric Blake  <ebb9@byu.net>
 
 	Fix GFDL usage.
