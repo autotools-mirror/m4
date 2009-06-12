@@ -1,3 +1,9 @@
+2009-06-12  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Avoid pointer arithmetic on `void *'.
+	* modules/m4.c (dump_symbol_CB): Cast obstack_base return value
+	to `char *' before using it.
+
 2009-05-04  Eric Blake  <ebb9@byu.net>
 
 	Silence verbose testsuite runs.

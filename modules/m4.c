@@ -275,12 +275,13 @@ dump_symbol_CB (m4_symbol_table *ignored M4_GNUC_UNUSED, const char *name,
 
   if (symbol_data->size == 0)
     {
+      char *base;
       size_t offset = obstack_object_size (symbol_data->obs);
       obstack_blank (symbol_data->obs, sizeof *symbol_data->base);
       symbol_data->size = (obstack_room (symbol_data->obs)
 			   / sizeof *symbol_data->base);
-      symbol_data->base = (m4_string *) (obstack_base (symbol_data->obs)
-					 + offset);
+      base = (char *) obstack_base (symbol_data->obs) + offset;
+      symbol_data->base = (m4_string *) base;
     }
   else
     {
