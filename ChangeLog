@@ -1,5 +1,8 @@
 2009-06-13  Eric Blake  <ebb9@byu.net>
 
+	Fix testsuite failure.
+	* examples/null.m4: Fix test when changeword not active.
+
 	Avoid snprintf link failures.
 	* m4/gnulib-cache.m4: Import snprintf-posix module.
 	* gnulib: Update to latest.
