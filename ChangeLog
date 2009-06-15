@@ -1,3 +1,13 @@
+2009-06-15  Eric Blake  <ebb9@byu.net>
+
+	Properly manage hash return values.
+	* src/symtab.c (symtab_init, lookup_symbol): React to allocation
+	failure.
+	* local/lib/hash.c.diff: New file to silence gcc warning, until
+	such time as upstream gnulib hash module is patched to avoid
+	memory leak.
+	* .gitattributes: Ignore spacing in diff.
+
 2009-06-13  Eric Blake  <ebb9@byu.net>
 
 	Fix testsuite failure.

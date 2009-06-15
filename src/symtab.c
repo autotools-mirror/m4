@@ -177,6 +177,8 @@ symtab_init (size_t size)
 {
   symtab = hash_initialize (size, NULL, symtab_hasher, symtab_comparator,
 			    symtab_free_entry);
+  if (!symtab)
+    xalloc_die ();
 
 #ifdef DEBUG_SYM
   atexit (show_profile); /* Ignore failure, since this is debug code.  */
@@ -277,7 +279,10 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 		  assert (entry == old);
 		  sym->stack = sym;
 		  entry = (symbol *) hash_insert (symtab, sym);
-		  assert (sym == entry);
+		  if (entry)
+		    assert (sym == entry);
+		  else
+		    xalloc_die ();
 		}
 	      else
 		{
@@ -319,7 +324,10 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 	{
 	  sym->stack = sym;
 	  entry = (symbol *) hash_insert (symtab, sym);
-	  assert (sym == entry);
+	  if (entry)
+	    assert (sym == entry);
+	  else
+	    xalloc_die ();
 	}
       return sym;
 
@@ -376,7 +384,10 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 
 	    sym->stack = sym;
 	    entry = (symbol *) hash_insert (symtab, sym);
-	    assert (sym == entry);
+	    if (entry)
+	      assert (sym == entry);
+	    else
+	      xalloc_die ();
 	  }
 	return result;
       }

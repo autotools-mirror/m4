@@ -2,3 +2,6 @@
 # needed for using these attributes effectively.
 ChangeLog merge=merge-changelog
 *.texi* diff=texinfo
+# Ignore whitespace in any gnulib local patches.
+local/* -whitespace
+local/*/* -whitespace
