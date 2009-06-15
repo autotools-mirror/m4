@@ -740,7 +740,8 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
 	     syntax instead of $10; see
 	     http://lists.gnu.org/archive/html/m4-discuss/2006-08/msg00028.html
 	     for more discussion.  */
-	  if (m4_get_posixly_correct_opt (context) || !isdigit(text[1]))
+	  if (m4_get_posixly_correct_opt (context)
+	      || !isdigit (to_uchar (text[1])))
 	    {
 	      i = *text++ - '0';
 	      len--;
