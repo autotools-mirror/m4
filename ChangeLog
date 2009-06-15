@@ -1,5 +1,29 @@
 2009-06-15  Eric Blake  <ebb9@byu.net>
 
+	Drop .cvsignore and redundant .gitignore files.
+	* .cvsignore: Delete.  We are moving further away from CVS.
+	* build-aux/.cvsignore: Likewise.
+	* doc/.cvsignore: Likewise.
+	* examples/.cvsignore: Likewise.
+	* ltdl/.cvsignore: Likewise.
+	* m4/.cvsignore: Likewise.
+	* modules/.cvsignore: Likewise.
+	* po/.cvsignore: Likewise.
+	* src/.cvsignore: Likewise.
+	* tests/.cvsignore: Likewise.
+	* .gitignore: Consolidate from other files.
+	* build-aux/.gitignore: Delete, now that it is consolidated.
+	* doc/.gitignore: Likewise.
+	* examples/.gitignore: Likewise.
+	* ltdl/.gitignore: Likewise.
+	* m4/.gitignore: Likewise.
+	* modules/.gitignore: Likewise.
+	* po/.gitignore: Likewise.
+	* src/.gitignore: Likewise.
+	* tests/.gitignore: Likewise.
+	* bootstrap: Simplify accordingly.  Sync gnulib tree prior to
+	libtoolize, to avoid libtool overwriting config.guess.
+
 	Avoid compiler warning.
 	* m4/macro.c (process_macro): Use correct type for isdigit.
 

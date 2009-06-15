@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-05-04
+# bootstrap (GNU M4) version 2009-06-15
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
 # Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -296,68 +296,6 @@ esac
 ## Version control. ##
 ## ---------------- ##
 
-# gnulib-tool updates ltdl/m4/.{git,cvs}ignore and gnu/.{git,cvs}ignore, and
-# keeping generated files under version control does not make sense.  Since
-# gnu is entirely ignored, we only need to prepopulate the ltdl/m4 ignore
-# files with generated files not tracked by gnulib-tool.
-if test -f $config_macro_dir/.gitignore ; then
-  :
-else
-  func_echo "creating initial $config_macro_dir/.cvsignore"
-  cat > $config_macro_dir/.cvsignore <<\EOF
-# files created by gnulib, but that gnulib doesn't track
-*~
-.cvsignore
-.gitignore
-gnulib-comp.m4
-# files manually imported, rather than using gnulib-tool
-getopt.m4
-xstrtol.m4
-# files created by autopoint
-codeset.m4
-gettext.m4
-glibc2.m4
-glibc21.m4
-iconv.m4
-intdiv0.m4
-intl.m4
-intldir.m4
-intmax.m4
-inttypes-pri.m4
-inttypes_h.m4
-lcmessage.m4
-lib-ld.m4
-lib-link.m4
-lib-prefix.m4
-lock.m4
-longdouble.m4
-longlong.m4
-nls.m4
-po.m4
-printf-posix.m4
-progtest.m4
-size_max.m4
-stdint_h.m4
-uintmax_t.m4
-ulonglong.m4
-visibility.m4
-wchar_t.m4
-wint_t.m4
-xsize.m4
-# files created by libtoolize
-argz.m4
-libtool.m4
-ltdl.m4
-ltoptions.m4
-ltsugar.m4
-ltversion.m4
-lt~obsolete.m4
-# gnulib-tool edits below here
-EOF
-  func_echo "creating initial $config_macro_dir/.gitignore"
-  cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
-fi
-
 # See if we can use gnulib's git-merge-changelog merge driver.
 if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
   if git config merge.merge-changelog.driver >/dev/null ; then
@@ -376,25 +314,6 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
     git config diff.texinfo.funcname '^@node[	 ][	 ]*\\([^,][^,]*\\)'
   fi
 fi
-
-## ---------- ##
-## Autopoint. ##
-## ---------- ##
-
-# Released autopoint has the tendency to install macros that have been
-# obsoleted in current gnulib, so run this before gnulib-tool.
-func_echo "running: $AUTOPOINT --force"
-$AUTOPOINT --force
-
-## ----------- ##
-## Libtoolize. ##
-## ----------- ##
-
-# Autoreconf runs aclocal before libtoolize, which causes spurious
-# warnings if the initial aclocal is confused by the libtoolized
-# (or worse out-of-date) macro directory.
-func_echo "running: $LIBTOOLIZE --copy --install"
-${LIBTOOLIZE} --copy --install
 
 ## ------------------------------ ##
 ## Update the gnulib module tree. ##
@@ -425,6 +344,24 @@ else
   func_echo "git not detected.  If needed, update gnulib subdirectory manually"
 fi
 
+## ---------- ##
+## Autopoint. ##
+## ---------- ##
+
+# Released autopoint has the tendency to install macros that have been
+# obsoleted in current gnulib, so run this before gnulib-tool.
+func_echo "running: $AUTOPOINT --force"
+$AUTOPOINT --force
+
+## ----------- ##
+## Libtoolize. ##
+## ----------- ##
+
+# Autoreconf runs aclocal before libtoolize, which causes spurious
+# warnings if the initial aclocal is confused by the libtoolized
+# (or worse out-of-date) macro directory.
+func_echo "running: $LIBTOOLIZE --copy --install"
+${LIBTOOLIZE} --copy --install
 
 ## ---------------------- ##
 ## Import Gnulib modules. ##
