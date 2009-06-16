@@ -92,6 +92,7 @@ libtool
 /ltdl/m4/stdint_h.m4
 /ltdl/m4/uintmax_t.m4
 /ltdl/m4/ulonglong.m4
+/ltdl/m4/version-etc.m4
 /ltdl/m4/visibility.m4
 /ltdl/m4/wchar_t.m4
 /ltdl/m4/wint_t.m4

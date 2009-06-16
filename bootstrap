@@ -333,11 +333,11 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
     if test -d "$GNULIB_SRCDIR" ; then
       rmdir gnulib 2>/dev/null
       git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
- && git submodule init && git submodule update \
- || func_fatal_error "Unable to update gnulib"
+	&& git submodule init && git submodule update \
+	|| func_fatal_error "Unable to update gnulib"
     else
       git submodule update --init \
- || func_fatal_error "Unable to update gnulib"
+	|| func_fatal_error "Unable to update gnulib"
     fi
   fi
 else
@@ -362,6 +362,9 @@ $AUTOPOINT --force
 # (or worse out-of-date) macro directory.
 func_echo "running: $LIBTOOLIZE --copy --install"
 ${LIBTOOLIZE} --copy --install
+# Note that if libtoolize has newer auxiliary files than the current
+# gnulib submodule, then this will result in a typechange.  See
+# HACKING for details.
 
 ## ---------------------- ##
 ## Import Gnulib modules. ##

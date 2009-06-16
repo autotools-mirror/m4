@@ -124,6 +124,14 @@ and is not part of a release distribution.
   from their respective upstream source, rather than the version that
   shipped with the automake release.
 
+* Normally, after running bootstrap, 'git status' should not show any
+  differences; if things changed, please provide a patch or at least
+  report it as a bug.  One case where things are changed is if the
+  gnulib submodule comes from an older date than the current installed
+  libtool, such that libtoolize will replace the symlinks to an older
+  version of build-aux files with their newer counterpart; the fix to
+  this is updating the submodule to a newer gnulib version.
+
 
 4. Test Suite
 =============
@@ -245,6 +253,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   the gnulib submodule.  If necessary to update to the latest, run:
     git submodule foreach git pull origin master
     git commit -m 'Update gnulib submodule to latest.' gnulib
+  In particular, ensure that the gnulib version is at least as new as
+  the latest stable libtool release.
 
 * Update the version number in configure.ac.
   See http://www.gnu.org/software/libtool/contribute.html for details of

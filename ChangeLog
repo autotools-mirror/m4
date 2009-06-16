@@ -1,5 +1,11 @@
 2009-06-15  Eric Blake  <ebb9@byu.net>
 
+	Document why bootstrap might touch state of tree.
+	* bootstrap: Fix typos.  Add comment.
+	* HACKING: Add notes about this scenario.
+	* gnulib: Update to latest version.
+	* .gitignore: Track gnulib changes.
+
 	Drop .cvsignore and redundant .gitignore files.
 	* .cvsignore: Delete.  We are moving further away from CVS.
 	* build-aux/.cvsignore: Likewise.
