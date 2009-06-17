@@ -1921,6 +1921,25 @@ array(eval(`10 + 7'))
 
 Change the @samp{%d} to @samp{%s} and it is an associative array.
 
+@ignore
+@comment Stress test for hash resizing.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`forloop3.m4')
+@result{}
+forloop(`i', `1', `10000', `define(`m'i, i)')
+@result{}
+m10000
+@result{}10000
+forloop(`i', `1', `10000', `undefine(`m'i, i)')
+@result{}
+m10000
+@result{}m10000
+@end example
+@end ignore
+
 @node Arguments
 @section Arguments to macros
 
