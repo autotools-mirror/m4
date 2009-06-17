@@ -1933,7 +1933,7 @@ forloop(`i', `1', `10000', `define(`m'i, i)')
 @result{}
 m10000
 @result{}10000
-forloop(`i', `1', `10000', `undefine(`m'i, i)')
+forloop(`i', `1', `10000', `undefine(`m'i)')
 @result{}
 m10000
 @result{}m10000

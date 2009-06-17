@@ -1,5 +1,8 @@
 2009-06-17  Eric Blake  <ebb9@byu.net>
 
+	Fix typo in last patch.
+	* doc/m4.texinfo (Define): Too much copy and paste.
+
 	Stress test hash resizing.
 	* doc/m4.texinfo (Define): Add new test.
 
