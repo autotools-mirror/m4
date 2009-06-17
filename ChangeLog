@@ -1,3 +1,10 @@
+2009-06-17  Eric Blake  <ebb9@byu.net>
+
+	Update to latest gnulib.
+	* gnulib: Import fixes for Interix compilation.
+	* THANKS: Update.
+	Reported by Jay Krell.
+
 2009-05-22  Eric Blake  <ebb9@byu.net>
 
 	Update to latest gnulib.
