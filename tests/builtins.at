@@ -237,6 +237,15 @@ AT_CHECK_M4([in.m4], [0], [[a,b;a,b
 a,b;`a',`b'
 ]])
 
+dnl Check hashing performance.
+AT_DATA([in.m4], [[include(`forloop3.m4')dnl
+forloop(`i', `1', `10000', `define(`m'i, i)')m10000
+forloop(`i', `1', `10000', `undefine(`m'i)')m10000
+]])
+AT_CHECK_M4([-I "$top_srcdir/examples" in.m4], [0], [[10000
+m10000
+]])
+
 AT_CLEANUP
 
 

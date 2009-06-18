@@ -1,3 +1,8 @@
+2009-06-17  Eric Blake  <ebb9@byu.net>
+
+	Stress test for hash resizing.
+	* tests/builtins.at (define): Enhance test.
+
 2009-06-15  Eric Blake  <ebb9@byu.net>
 
 	Document why bootstrap might touch state of tree.
