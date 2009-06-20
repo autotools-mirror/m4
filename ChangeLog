@@ -1,3 +1,10 @@
+2009-06-20  Eric Blake  <ebb9@byu.net>
+
+	Update gnulib for hash fixes.
+	* gnulib: Update to latest.
+	* local/lib/hash.c.diff: No longer necessary.
+	* THANKS: Update from branch-1.4.
+
 2009-06-17  Eric Blake  <ebb9@byu.net>
 
 	Fix typo in last patch.
