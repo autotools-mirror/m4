@@ -1,5 +1,10 @@
 2009-06-25  Eric Blake  <ebb9@byu.net>
 
+	Use bitrotate for hashing.
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Import bitrotate module.
+	* src/symtab.c (hash): Use it.
+
 	Fix description of limits on diversions.
 	* doc/m4.texinfo (Diversions): Fix grammar.  Be less pessimistic
 	about limitations.

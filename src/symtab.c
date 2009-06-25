@@ -33,6 +33,7 @@
 
 #include "m4.h"
 
+#include "bitrotate.h"
 #include "hash.h"
 
 #ifdef DEBUG_SYM
@@ -112,7 +113,7 @@ hash (const char *s, size_t len)
   /* This algorithm was originally borrowed from GNU Emacs, but has
      been modified to allow embedded NUL.  */
   while (len--)
-    val = (val << 7) + (val >> (sizeof val * CHAR_BIT - 7)) + to_uchar (*s++);
+    val = rotl_sz (val, 7) + to_uchar (*s++);
   return val;
 }
 
