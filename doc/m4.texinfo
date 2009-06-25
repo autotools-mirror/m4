@@ -5090,17 +5090,16 @@ time.
 
 @cindex @env{TMPDIR}
 Numbered diversions are counted from 0 upwards, diversion number 0
-being the normal output stream.  The number of simultaneous diversions
-is limited mainly by the memory used to describe them, because @acronym{GNU}
+being the normal output stream.  @acronym{GNU}
 @code{m4} tries to keep diversions in memory.  However, there is a
-limit to the overall memory usable by all diversions taken altogether
+limit to the overall memory usable by all diversions taken together
 (512K, currently).  When this maximum is about to be exceeded,
 a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
 When creating the temporary file, @code{m4} honors the value of the
 environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
-So, it is theoretically possible that the number and aggregate size of
-diversions is limited only by available disk space.
+Thus, the amount of available disk space provides the only real limit on
+the number and aggregate size of diversions.
 
 @ignore
 @comment We need to test spilled diversions, but don't need to expose

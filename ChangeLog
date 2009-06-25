@@ -1,3 +1,11 @@
+2009-06-25  Eric Blake  <ebb9@byu.net>
+
+	Fix description of limits on diversions.
+	* doc/m4.texinfo (Diversions): Fix grammar.  Be less pessimistic
+	about limitations.
+	* THANKS: Update.
+	Reported by Elias Benali.
+
 2009-06-17  Eric Blake  <ebb9@byu.net>
 
 	Update to latest gnulib.
