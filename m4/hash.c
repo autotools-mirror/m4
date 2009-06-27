@@ -1,5 +1,6 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001, 2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software
+   Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 
    This file is part of GNU M4.
@@ -28,6 +29,7 @@
 #include "hash.h"
 #include "m4private.h"
 
+#include "bitrotate.h"
 #include <limits.h>
 
 typedef struct hash_node hash_node;
@@ -650,7 +652,7 @@ m4_hash_string_hash (const void *ptr)
   size_t val = len;
 
   while (len--)
-    val = (val << 7) + (val >> (sizeof val * CHAR_BIT - 7)) + to_uchar (*s++);
+    val = rotl_sz (val, 7) + to_uchar (*s++);
   return val;
 }
 

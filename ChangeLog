@@ -1,5 +1,10 @@
 2009-06-26  Eric Blake  <ebb9@byu.net>
 
+	Use bitrotate for hashing.
+	* gnulib: Update to latest.
+	* ltdl/m4/gnulib-cache.m4: Import bitrotate module.
+	* m4/hash.c (m4_hash_string_hash): Use it.
+
 	Fix description of limits on diversions.
 	* doc/m4.texinfo (Diversions): Fix grammar.  Be less pessimistic
 	about limitations.
