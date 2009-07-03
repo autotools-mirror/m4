@@ -448,14 +448,6 @@
 
 2008-07-17  Eric Blake  <ebb9@byu.net>
 
-	Fix missing copyright notices.
-	* acinclude.m4: Add copyright license details.
-	* c-boxes.el: Likewise.
-	* checks/get-them: Likewise.
-	* checks/check-them: Likewise.
-
-2008-07-17  Eric Blake  <ebb9@byu.net>
-
 	Remove redundant examples/stackovf.sh.
 	* examples/stackovf.sh: Delete, now that checks has better
 	version.
