@@ -960,6 +960,19 @@ options.
 @example
 @error{}m4: cannot open `Makefile/': Not a directory
 @end example
+
+@comment Test that closed stderr does not cause a crash.
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo | ']__program__[' >&-])dnl
+@error{}m4: write error: Bad file descriptor
+sysval
+@result{}1
+@end example
 @end ignore
 
 @node Syntax
