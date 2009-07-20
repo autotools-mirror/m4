@@ -1072,6 +1072,18 @@ syscmd([echo | ']__program__[' >&-])dnl
 sysval
 @result{}1
 @end example
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo 'esyscmd(echo hi >&2)dnl' > tmp.m4 \
+  && ']__program__[' tmp.m4 <&- >&- \
+  && rm tmp.m4])sysval
+@error{}hi
+@result{}0
+@end example
 @end ignore
 
 @node Syntax

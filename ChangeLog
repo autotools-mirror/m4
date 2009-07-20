@@ -1,5 +1,11 @@
 2009-07-23  Eric Blake  <ebb9@byu.net>
 
+	Pick up gnulib fixes for sub-process execution.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test; regression
+	introduced 2009-03-04.
+	* NEWS: Document the change.
+
 	Avoid cygwin 1.7 crash with closed stdout.
 	* gnulib: Update.
 	* doc/m4.texinfo (Command line files): Add test to avoid
