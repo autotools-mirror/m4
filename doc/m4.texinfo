@@ -7445,10 +7445,10 @@ esyscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-esyscmd(`exit 2')
+esyscmd(`echo dnl && exit 127')
 @result{}
 sysval
-@result{}2
+@result{}127
 esyscmd(`true')
 @result{}
 sysval
@@ -7459,7 +7459,7 @@ sysval
 command, for example, if the system-imposed argument length is exceeded,
 or if there were not enough resources to fork.  It is not possible to
 distinguish between failed execution and successful execution that had
-an exit status of 127.
+an exit status of 127, unless there was output from the child process.
 
 On UNIX platforms, where it is possible to detect when command execution
 is terminated by a signal, rather than a normal exit, the result is the

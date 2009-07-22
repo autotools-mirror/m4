@@ -1228,7 +1228,8 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   if (ferror (pin) || fclose (pin))
     m4_error (EXIT_FAILURE, errno, me, _("cannot read pipe to command %s"),
 	      quotearg_style (locale_quoting_style, cmd));
-  status = wait_subprocess (child, caller, false, false, true, false,
+  errno = 0;
+  status = wait_subprocess (child, caller, false, true, true, false,
 			    &sig_status);
   if (sig_status)
     {
