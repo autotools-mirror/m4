@@ -1042,6 +1042,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     }
   if (ferror (pin) || fclose (pin))
     M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
+  errno = 0;
   status = wait_subprocess (child, ARG (0), false, true, true, false,
 			    &sig_status);
   if (sig_status)
