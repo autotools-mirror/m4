@@ -1,5 +1,11 @@
 2009-07-23  Eric Blake  <ebb9@byu.net>
 
+	Avoid cygwin 1.7 crash with closed stdout.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test to avoid
+	regression introduced on 1.4 branch on 2008-07-17.
+	* NEWS: Document the change.
+
 	A status of 127 does not always imply esyscmd failure.
 	* src/builtin.c (m4_esyscmd): Silence gnulib message; regression
 	introduced 2009-03-04.
