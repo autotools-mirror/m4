@@ -1,7 +1,7 @@
 ## maint.mk -- Makefile rules for m4 maintainers -*-Makefile-*-
 ##
 ## Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
-## Foundation
+## Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -22,6 +22,9 @@
 # ME := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 ME := maint.mk
 
+# Override this in cfg.mk if you use a non-standard build-aux directory.
+build_aux ?= $(srcdir)/build-aux
+
 # Do not save the original name or timestamp in the .tar.gz file.
 # Use --rsyncable if available.
 gzip_rsyncable := \
@@ -31,6 +34,11 @@ GZIP_ENV = '--no-name --best $(gzip_rsyncable)'
 GIT = git
 VC = $(GIT)
 VC-tag = git tag -s -m '$(VERSION)' -u $(gpg_key_ID)
+
+VC_LIST = $(build_aux)/vc-list-files -C $(srcdir)
+
+VC_LIST_EXCEPT = \
+  $(VC_LIST) | if test -f $(srcdir)/.x-$@; then grep -vEf $(srcdir)/.x-$@; else grep -v ChangeLog; fi
 
 VERSION_REGEXP = $(subst .,\.,$(VERSION))
 my_distdir = $(PACKAGE)-$(VERSION)
@@ -198,3 +206,20 @@ web-manual:
 	    --email $(PACKAGE_BUGREPORT) $(PACKAGE) \
 	    "$(PACKAGE_NAME) - $(manual_title)"
 	@echo " *** Upload the doc/manual directory to web-cvs."
+
+# If you want to set UPDATE_COPYRIGHT_* environment variables,
+# put the assignments in this variable.
+update-copyright-env ?=
+
+# Run this rule once per year (usually early in January)
+# to update all FSF copyright year lists in your project.
+# If you have an additional project-specific rule,
+# add it in cfg.mk along with a line 'update-copyright: prereq'.
+# By default, exclude all variants of COPYING; you can also
+# add exemptions (such as ChangeLog..* for rotated change logs)
+# in the file .x-update-copyright.
+.PHONY: update-copyright
+update-copyright:
+	grep -l -w Copyright $$($(VC_LIST_EXCEPT))		\
+		$(srcdir)/ChangeLog | grep -v COPYING		\
+	  | $(update-copyright-env) xargs $(build_aux)/$@

@@ -39,3 +39,6 @@ local-checks-to-skip = changelog-check
 # The local directory containing the checked-out copy of gnulib used in this
 # release.  Used solely to get gnulib's SHA1 for the "announcement" target.
 gnulib_dir = $(srcdir)/gnulib
+
+# Always use longhand copyrights.
+update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0

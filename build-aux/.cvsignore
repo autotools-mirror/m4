@@ -4,3 +4,5 @@ gendocs.sh
 git-version-gen
 gnupload
 link-warning.h
+update-copyright
+vc-list-files
