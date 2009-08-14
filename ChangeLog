@@ -1,5 +1,27 @@
 2009-08-17  Eric Blake  <ebb9@byu.net>
 
+	Update copyright year.
+	* AUTHORS: Run UPDATE_COPYRIGHT_FORCE=1 make update-copyright.
+	* BACKLOG: Likewise.
+	* Makefile.am: Likewise.
+	* TODO: Likewise.
+	* acinclude.m4: Likewise.
+	* c-boxes.el: Likewise.
+	* cfg.mk: Likewise.
+	* checks/Makefile.in: Likewise.
+	* checks/check-them: Likewise.
+	* checks/stackovf.test: Likewise.
+	* doc/Makefile.am: Likewise.
+	* examples/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/path.c: Likewise.
+	* src/symtab.c: Likewise.
+
 	Prepare to bulk update copyright year.
 	* gnulib: Update.
 	* m4/gnulib-cache.m4: Import update-copyright and vc-list-files
