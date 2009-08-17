@@ -731,7 +731,8 @@ M4BUILTIN_HANDLER (esyscmd)
 	m4_error (context, EXIT_FAILURE, errno, me,
 		  _("cannot read pipe to command %s"),
 		  quotearg_style (locale_quoting_style, cmd));
-      status = wait_subprocess (child, caller, false, false, true, false,
+      errno = 0;
+      status = wait_subprocess (child, caller, false, true, true, false,
 				&sig_status);
       if (sig_status)
 	{

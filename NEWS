@@ -335,6 +335,14 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
+* Noteworthy changes in Version 1.4.14 (2009-??-??) [stable]
+  Released by Eric Blake, based on git version 1.4.13.*
+
+** Fix regression introduced in 1.4.13 in the `esyscmd' builtin, where
+   a child status of 127 made m4 print a spurious message to stderr.
+
+** A number of portability improvements inherited from gnulib.
+
 * Noteworthy changes in Version 1.4.13 (2009-04-01) [stable]
   Released by Eric Blake, based on git version 1.4.12.*
 
