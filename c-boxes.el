@@ -1,5 +1,6 @@
 ;;; Boxed comments for C mode.
-;;; Copyright (C) 1991, 1992, 1993, 1994, 2008 Free Software Foundation, Inc.
+;;; Copyright (C) 1991, 1992, 1993, 1994, 2008, 2009 Free Software
+;;; Foundation, Inc.
 ;;; Francois Pinard <pinard@iro.umontreal.ca>, April 1991.
 ;;;
 ;;; This file is part of GNU M4.
