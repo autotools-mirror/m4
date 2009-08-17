@@ -1078,10 +1078,12 @@ ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
-syscmd([echo 'esyscmd(echo hi >&2)dnl' > tmp.m4 \
+syscmd([echo 'esyscmd(echo hi >&2 && echo err"print(bye
+)d"nl)dnl' > tmp.m4 \
   && ']__program__[' tmp.m4 <&- >&- \
   && rm tmp.m4])sysval
 @error{}hi
+@error{}bye
 @result{}0
 @end example
 @end ignore
