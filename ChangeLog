@@ -1,5 +1,9 @@
 2009-08-17  Eric Blake  <ebb9@byu.net>
 
+	Enhance test with closed descriptors.
+	* doc/m4.texinfo (Command line files): Enhance test from
+	2009-07-20 to actually test the bug being fixed.
+
 	Update copyright year.
 	* AUTHORS: Run UPDATE_COPYRIGHT_FORCE=1 make update-copyright.
 	* BACKLOG: Likewise.
