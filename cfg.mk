@@ -38,3 +38,6 @@ config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
+
+# Always use longhand copyrights.
+update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0
