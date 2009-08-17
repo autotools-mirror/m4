@@ -1,5 +1,11 @@
 2009-08-24  Eric Blake  <ebb9@byu.net>
 
+	Pick up gnulib fixes for sub-process execution.
+	* gnulib: Update.
+	* tests/others.at (stdin and stdout closed): New test, to avoid
+	regression introduced on 1.4 branch on 2008-07-17.
+	* NEWS: Document the change.
+
 	A status of 127 does not always imply esyscmd failure.
 	* modules/gnu.c (esyscmd): Silence gnulib message; regression
 	introduced 2009-03-13.

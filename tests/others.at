@@ -737,6 +737,22 @@ m4 FOO
 
 AT_CLEANUP
 
+## ----------------------- ##
+## stdin and stdout closed ##
+## ----------------------- ##
+
+AT_SETUP([stdin and stdout closed])
+
+dnl no error when only stderr is used
+AT_DATA([in.m4], [[esyscmd(echo hi >&2 && echo err"print(bye
+)d"nl)dnl
+]])
+AT_CHECK_M4([in.m4 >&-], [0], [], [[hi
+bye
+]], [-])
+
+AT_CLEANUP
+
 ## ------------- ##
 ## stdout closed ##
 ## ------------- ##
