@@ -1,3 +1,9 @@
+2009-08-20  Eric Blake  <ebb9@byu.net>
+
+	Update from gnulib.
+	* gnulib: Update.
+	* AUTHORS: Mention recent copyright assignment.
+
 2009-08-17  Eric Blake  <ebb9@byu.net>
 
 	Enhance test with closed descriptors.
