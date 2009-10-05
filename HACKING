@@ -248,9 +248,9 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run `make maintainer-distcheck'.  If there are any problems, fix them,
   run `git tag -d v<version>' and start again from the `git commit' step.
 
-* Run `make <target> PREV_VERSION=maj.min[.mic[alpha]]', with target set
-  to `major', `alpha', or `beta' as appropriate.  This will run various
-  additional checks and create diff files from the previous version.
+* Run `make <target>', with target set to `stable, `alpha', or `beta' as
+  appropriate.  This will run various additional checks and create diff
+  files from the previous version.
 
 * Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
@@ -276,9 +276,11 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   and run `git commit'.  Then run `git push origin refs/tags/v<version>'
   to push the release tag and complete the release.
 
-* For non-alpha releases, update the webpages.  Run `make web-manual',
-  then copy the contents of doc/manual into a CVS checkout of the M4
-  manual repository.  Also edit m4.html before doing a CVS checkin.
+* For stable releases, update the webpages.
+  Run`build-aux/gnu-web-doc-update', which runs `make web-manual' on a
+  temporary git branch corresponding to the release, then copies the
+  contents of doc/manual into a CVS checkout of the M4 manual
+  repository.  Follow up with any needed edits to m4.html, using:
     export CVS_RSH=ssh
     cvs -z3 -d:ext:<user>@cvs.savannah.gnu.org:/web/m4 co m4
 

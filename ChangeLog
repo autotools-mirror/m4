@@ -1,3 +1,11 @@
+2009-10-05  Eric Blake  <ebb9@byu.net>
+
+	Update from gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Import gnu-web-doc-update module.
+	* HACKING: Update notes on release procedure, to reflect gnulib
+	improvements.
+
 2009-08-20  Eric Blake  <ebb9@byu.net>
 
 	Update from gnulib.
