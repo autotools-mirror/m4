@@ -2,6 +2,7 @@ announce-gen
 config.rpath
 gendocs.sh
 git-version-gen
+gnu-web-doc-update
 gnupload
 link-warning.h
 update-copyright
