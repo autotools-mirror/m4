@@ -913,8 +913,8 @@ next_token (token_data *td, int *line)
 				(char *) obstack_base (&token_stack),
 				obstack_object_size (&token_stack), 0, 0,
 				&regs);
-	  if (startpos != 0 ||
-	      regs.end [0] != obstack_object_size (&token_stack))
+	  if (startpos ||
+	      regs.end [0] != (regoff_t) obstack_object_size (&token_stack))
 	    {
 	      *(((char *) obstack_base (&token_stack)
 		 + obstack_object_size (&token_stack)) - 1) = '\0';

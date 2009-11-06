@@ -109,14 +109,15 @@ typedef unsigned int bool_bitfield;
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+# define M4_GNUC_ATTRIBUTE(args)	__attribute__ (args)
 #else
-#  define M4_GNUC_ATTRIBUTE(args)
+# define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE ((__unused__))
 #define M4_GNUC_PRINTF(fmt, arg)			\
-  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
+  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
+#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE ((__noreturn__))
 
 /* File: m4.c  --- global definitions.  */
 
@@ -238,7 +239,7 @@ void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
 void trace_pre (const char *, int, int, token_data **);
-void trace_post (const char *, int, int, token_data **, const char *);
+void trace_post (const char *, int, int, const char *);
 
 /* File: input.c  --- lexical definitions.  */
 

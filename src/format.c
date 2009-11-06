@@ -42,7 +42,7 @@ arg_int (const char *str)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str != len)
+  if (endp - str - len)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (isspace (to_uchar (*str)))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
@@ -66,7 +66,7 @@ arg_long (const char *str)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str != len)
+  if (endp - str - len)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (isspace (to_uchar (*str)))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
@@ -90,7 +90,7 @@ arg_double (const char *str)
     }
   errno = 0;
   value = strtod (str, &endp);
-  if (endp - str != len)
+  if (endp - str - len)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (isspace (to_uchar (*str)))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));

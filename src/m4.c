@@ -35,7 +35,7 @@
 
 #define AUTHORS "Rene' Seindal"
 
-static void usage (int);
+static void usage (int) M4_GNUC_NORETURN;
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -357,7 +357,7 @@ process_file (const char *name)
 #endif
 
 int
-main (int argc, char *const *argv, char *const *envp)
+main (int argc, char *const *argv)
 {
   struct sigaction act;
   macro_definition *head;	/* head of deferred argument list */

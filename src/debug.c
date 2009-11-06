@@ -405,6 +405,7 @@ INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
 	      trace_format ("<%s>", bp->name);
 	      break;
 
+	    case TOKEN_VOID:
 	    default:
 	      M4ERROR ((warning_status, 0,
 			"INTERNAL ERROR: bad token data type (trace_pre ())"));
@@ -428,8 +429,7 @@ INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
 `-------------------------------------------------------------------*/
 
 void
-trace_post (const char *name, int id, int argc, token_data **argv,
-	    const char *expanded)
+trace_post (const char *name, int id, int argc, const char *expanded)
 {
   if (debug_level & DEBUG_TRACE_CALL)
     {

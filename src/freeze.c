@@ -52,7 +52,7 @@ void
 produce_frozen_state (const char *name)
 {
   FILE *file;
-  int h;
+  size_t h;
   symbol *sym;
   const builtin *bp;
 
@@ -207,12 +207,12 @@ reload_frozen_state (const char *name)
   do								\
     {								\
       unsigned int n = 0;					\
-      while (isdigit (character) && n <= INT_MAX / 10)		\
+      while (isdigit (character) && n <= INT_MAX / 10U)		\
 	{							\
 	  n = 10 * n + character - '0';				\
 	  GET_CHARACTER;					\
 	}							\
-      if (((AllowNeg) ? INT_MIN : INT_MAX) < n			\
+      if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n		\
 	  || isdigit (character))				\
 	m4_error (EXIT_FAILURE, 0,				\
 		  _("integer overflow in frozen file"));	\

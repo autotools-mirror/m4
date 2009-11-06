@@ -1,5 +1,37 @@
 2009-11-25  Eric Blake  <ebb9@byu.net>
 
+	Allow use of compiler warnings.
+	* m4/gnulib-cache.m4: Import manywarnings module.
+	* configure.ac (WERROR_CFLAGS, WARN_CFLAGS): New variables.
+	* src/Makefile.am (AM_CFLAGS): Use them.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Turn on warnings during
+	distcheck.
+	* src/m4.h (M4_GNUC_NORETURN): New macro.
+	(trace_post): Delete unused parameter.
+	* src/m4.c (usage): Mark as noreturn.
+	(main): Remove unused parameter.
+	* src/debug.c (trace_post): Likewise.
+	(trace_pre): Cover all enum values.
+	* src/symtab.c (lookup_symbol): Likewise.
+	* src/builtin.c (define_macro, m4_dumpdef): Likewise.
+	(m4_define, m4_undefine, m4_pushdef, m4_popdef, m4_sysval)
+	(m4_divert, m4_undivert, m4_dnl, m4_changequote, m4_changecom)
+	(m4_changeword, m4_syscmd, m4_include, m4_sinclude, m4_m4exit)
+	(m4_debugmode, m4_debugfile, m4_placeholder): Mark unused
+	parameters.
+	(mkstemp_helper): Use parameter.
+	(substitute): Avoid signed vs. unsigned comparison.
+	* src/format.c (arg_int, arg_long, arg_double): Likewise.
+	* src/input.c (next_token): Likewise.
+	* src/output.c (freeze_diversions): Likewise.
+	(m4_tmpname): Allow C++ compilation.
+	* src/freeze.c (produce_frozen_state, GET_NUMBER): Use correct
+	type.
+	* src/macro.c (call_macro): Cover all enum values.
+	(expand_macro): Update caller.
+	* src/path.c (m4_fopen): Remove unused parameter.
+	(m4_path_search): Update caller.
+
 	Silence syntax-check warnings.
 	* src/m4.h (STREQ): New macro.
 	* src/builtin.c (find_builtin_by_name): Use it.

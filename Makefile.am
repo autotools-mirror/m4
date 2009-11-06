@@ -34,7 +34,8 @@ MAINTAINERCLEANFILES = INSTALL Makefile.in aclocal.m4 \
 ACLOCAL_AMFLAGS = -I m4
 ## Enough users install GNU M4 as gm4 that we make sure 'make installcheck'
 ## will handle that, prior to making a release.
-DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g
+DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g \
+	--enable-gcc-warnings
 
 BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:

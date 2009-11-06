@@ -191,7 +191,8 @@ m4_tmpname (int divnum)
   if (buffer == NULL)
     {
       tail = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, INT_MAX);
-      buffer = obstack_copy0 (&diversion_storage, tail, strlen (tail));
+      buffer = (char *) obstack_copy0 (&diversion_storage, tail,
+				       strlen (tail));
       free (tail);
       tail = strrchr (buffer, '-') + 1;
     }
@@ -992,7 +993,8 @@ freeze_diversions (FILE *file)
 	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		M4ERROR ((EXIT_FAILURE, errno, "cannot stat diversion"));
 	      if (file_stat.st_size < 0
-		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
+		  || (file_stat.st_size + 0UL
+		      != (unsigned long int) file_stat.st_size))
 		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
 	      xfprintf (file, "D%d,%lu\n", diversion->divnum,
 			(unsigned long int) file_stat.st_size);

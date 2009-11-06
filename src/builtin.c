@@ -576,6 +576,7 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 	define_builtin (ARG (1), bp, mode);
       break;
 
+    case TOKEN_VOID:
     default:
       M4ERROR ((warning_status, 0,
 		"INTERNAL ERROR: bad token data type in define_macro ()"));
@@ -584,13 +585,13 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 }
 
 static void
-m4_define (struct obstack *obs, int argc, token_data **argv)
+m4_define (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
 static void
-m4_undefine (struct obstack *obs, int argc, token_data **argv)
+m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int i;
   if (bad_argc (argv[0], argc, 2, -1))
@@ -600,13 +601,13 @@ m4_undefine (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_pushdef (struct obstack *obs, int argc, token_data **argv)
+m4_pushdef (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   define_macro (argc, argv,  SYMBOL_PUSHDEF);
 }
 
 static void
-m4_popdef (struct obstack *obs, int argc, token_data **argv)
+m4_popdef (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int i;
   if (bad_argc (argv[0], argc, 2, -1))
@@ -786,6 +787,7 @@ INTERNAL ERROR: builtin not found in builtin table"));
 	  DEBUG_PRINT1 ("<%s>\n", bp->name);
 	  break;
 
+	case TOKEN_VOID:
 	default:
 	  M4ERROR ((warning_status, 0,
 		    "INTERNAL ERROR: bad token data type in m4_dumpdef ()"));
@@ -941,7 +943,7 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 static int sysval;
 
 static void
-m4_syscmd (struct obstack *obs, int argc, token_data **argv)
+m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
   int status;
@@ -1059,7 +1061,8 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_sysval (struct obstack *obs, int argc, token_data **argv)
+m4_sysval (struct obstack *obs, int argc M4_GNUC_UNUSED,
+	   token_data **argv M4_GNUC_UNUSED)
 {
   shipout_int (obs, sysval);
 }
@@ -1172,7 +1175,7 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_divert (struct obstack *obs, int argc, token_data **argv)
+m4_divert (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int i = 0;
 
@@ -1205,7 +1208,7 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_undivert (struct obstack *obs, int argc, token_data **argv)
+m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int i, file;
   FILE *fp;
@@ -1249,7 +1252,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_dnl (struct obstack *obs, int argc, token_data **argv)
+m4_dnl (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1275,7 +1278,8 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_changequote (struct obstack *obs, int argc, token_data **argv)
+m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
+		token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
@@ -1291,7 +1295,7 @@ m4_changequote (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 static void
-m4_changecom (struct obstack *obs, int argc, token_data **argv)
+m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
@@ -1309,7 +1313,7 @@ m4_changecom (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------------*/
 
 static void
-m4_changeword (struct obstack *obs, int argc, token_data **argv)
+m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1357,7 +1361,7 @@ include (int argc, token_data **argv, bool silent)
 `------------------------------------------------*/
 
 static void
-m4_include (struct obstack *obs, int argc, token_data **argv)
+m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   include (argc, argv, false);
 }
@@ -1367,7 +1371,7 @@ m4_include (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------*/
 
 static void
-m4_sinclude (struct obstack *obs, int argc, token_data **argv)
+m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   include (argc, argv, true);
 }
@@ -1387,7 +1391,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
 		size_t len)
 {
   int fd;
-  int i;
+  size_t i;
   char *name;
 
   /* Guarantee that there are six trailing 'X' characters, even if the
@@ -1405,7 +1409,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
   fd = mkstemp (name);
   if (fd < 0)
     {
-      M4ERROR ((0, errno, "cannot create tempfile `%s'", pattern));
+      M4ERROR ((0, errno, "%s: cannot create tempfile `%s'", me, pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
@@ -1521,8 +1525,8 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 | arguments are present.						   |
 `-------------------------------------------------------------------------*/
 
-static void
-m4_m4exit (struct obstack *obs, int argc, token_data **argv)
+static void M4_GNUC_NORETURN
+m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int exit_code = EXIT_SUCCESS;
 
@@ -1609,7 +1613,7 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_traceoff (struct obstack *obs, int argc, token_data **argv)
+m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   symbol *s;
   int i;
@@ -1632,7 +1636,7 @@ m4_traceoff (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------------------------------------------*/
 
 static void
-m4_debugmode (struct obstack *obs, int argc, token_data **argv)
+m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   int new_debug_level;
   int change_flag;
@@ -1673,6 +1677,11 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
 	    case '-':
 	      debug_level &= ~new_debug_level;
 	      break;
+
+	    default:
+	      M4ERROR ((warning_status, 0,
+			"INTERNAL ERROR: bad flag in m4_debugmode ()"));
+	      abort ();
 	    }
 	}
     }
@@ -1684,7 +1693,7 @@ m4_debugmode (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_debugfile (struct obstack *obs, int argc, token_data **argv)
+m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1940,6 +1949,7 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	    struct re_registers *regs)
 {
   int ch;
+  __re_size_t ind;
   while (1)
     {
       const char *backslash = strchr (repl, '\\');
@@ -1970,8 +1980,8 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
-	  ch -= '0';
-	  if (regs->num_regs - 1 <= ch)
+	  ind = ch -= '0';
+	  if (regs->num_regs - 1 <= ind)
 	    M4ERROR ((warning_status, 0,
 		      "Warning: sub-expression %d not present", ch));
 	  else if (regs->end[ch] > 0)
@@ -2175,7 +2185,8 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 void
-m4_placeholder (struct obstack *obs, int argc, token_data **argv)
+m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc,
+		token_data **argv)
 {
   M4ERROR ((warning_status, 0, "\
 builtin `%s' requested by frozen file is not supported", ARG (0)));

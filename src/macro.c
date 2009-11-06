@@ -282,6 +282,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
       expand_user_macro (expansion, sym, argc, argv);
       break;
 
+    case TOKEN_VOID:
     default:
       M4ERROR ((warning_status, 0,
 		"INTERNAL ERROR: bad symbol type in call_macro ()"));
@@ -368,7 +369,7 @@ expand_macro (symbol *sym)
   expanded = push_string_finish ();
 
   if (traced)
-    trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
+    trace_post (SYMBOL_NAME (sym), my_call_id, argc, expanded);
 
   current_file = loc_close_file;
   current_line = loc_close_line;
