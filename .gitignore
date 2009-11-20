@@ -26,6 +26,7 @@ gnupload
 !/lib/Makefile.am
 link-warning.h
 m4-*
+/maint.mk
 Makefile.in
 Makefile
 /missing

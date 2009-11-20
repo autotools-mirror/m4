@@ -15,31 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Use alpha.gnu.org for alpha and beta releases.
-# Use ftp.gnu.org for major releases.
-gnu_ftp_host-alpha = alpha.gnu.org
-gnu_ftp_host-beta = alpha.gnu.org
-gnu_ftp_host-major = ftp.gnu.org
-gnu_rel_host = $(gnu_ftp_host-$(RELEASE_TYPE))
-
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
-
-url_dir_list = \
-  ftp://$(gnu_rel_host)/gnu/m4
 
 # The GnuPG ID of the key used to sign the tarballs.
 gpg_key_ID = F4850180
 
-# Tests not to run as part of "make distcheck".
-# Exclude changelog-check here so that there's less churn in ChangeLog
-# files -- otherwise, you'd need to have the upcoming version number
-# at the top of the file for each `make distcheck' run.
-local-checks-to-skip = changelog-check
-
-# The local directory containing the checked-out copy of gnulib used in this
-# release.  Used solely to get gnulib's SHA1 for the "announcement" target.
-gnulib_dir = $(srcdir)/gnulib
-
 # Always use longhand copyrights.
 update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0
+
+# Tests not to run as part of "make syntax-check".
+# M4 intentionally uses a coding style that compiles under C++.
+local-checks-to-skip = sc_cast_of_x_alloc_return_value
+
+# Our files include "m4.h", which in turn includes <config.h> first.
+config_h_header = "m4\.h"
+
+# Hash of NEWS contents, to ensure we don't add entries to wrong section.
+old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2

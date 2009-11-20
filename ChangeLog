@@ -1,5 +1,17 @@
 2009-11-25  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib maintainer-makefile module.
+	* m4/gnulib-cache.m4: Import maintainer-makefile module.
+	* cfg.mk (local-checks-to-skip): Drop changelog-check; add
+	sc_cast_of_x_alloc_return_value.
+	(gnulib_dir, gnu_rel_host, url_dir_list): Delete; provided by
+	maint.mk.
+	(config_h_header, old_NEWS_hash): New macros.
+	* .prev-version: New file.
+	* maint.mk: Remove from version control; use gnulib instead.
+	* .gitignore: Update.
+	* HACKING: Update.
+
 	Update from gnulib.
 	* gnulib: Update.
 	* m4/gnulib-cache.m4: Use --makefile-name.

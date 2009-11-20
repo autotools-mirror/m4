@@ -255,9 +255,9 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run `make maintainer-distcheck'.  If there are any problems, fix them,
   run `git tag -d v<version>' and start again from the `git commit' step.
 
-* Run `make <target> PREV_VERSION=maj.min[.mic[alpha]]', with target set
-  to `major', `alpha', or `beta' as appropriate.  This will run various
-  additional checks and create diff files from the previous version.
+* Run `make <target>', with target set to `stable', `alpha', or `beta'
+  as appropriate.  This will run various additional checks and create
+  diff files from the previous version.
 
 * Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
