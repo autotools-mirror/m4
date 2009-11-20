@@ -22,7 +22,8 @@ gendocs.sh
 GNUmakefile
 gnupload
 /install-sh
-lib
+/lib/*
+!/lib/Makefile.am
 link-warning.h
 m4-*
 Makefile.in
@@ -31,4 +32,5 @@ Makefile
 stamp-h
 stamp-h1
 stamp-h.in
-tests
+/tests/*
+!/tests/Makefile.am

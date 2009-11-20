@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=local --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --with-tests --avoid=lock-tests --avoid=tls-tests --no-libtool --macro-prefix=M4 announce-gen assert autobuild avltree-oset binary-io c-stack clean-temp cloexec close-stream closein config-h dirname error execute fdl-1.3 fflush filenamecat fopen fopen-safer fseeko gendocs getopt-gnu git-version-gen gnu-web-doc-update gnumakefile gnupload gpl-3.0 intprops memchr2 mkstemp obstack pipe progname regex sigaction stdbool stdint stdlib-safer strsignal strstr strtod strtol unlocked-io update-copyright vc-list-files verror version-etc version-etc-fsf wait-process xalloc xprintf xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=local --lib=libm4 --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --with-tests --avoid=lock-tests --avoid=tls-tests --makefile-name=gnulib.mk --no-libtool --macro-prefix=M4 announce-gen assert autobuild avltree-oset binary-io c-stack clean-temp cloexec close-stream closein config-h dirname error execute fdl-1.3 fflush filenamecat fopen fopen-safer fseeko gendocs getopt-gnu git-version-gen gnu-web-doc-update gnumakefile gnupload gpl-3.0 intprops memchr2 mkstemp obstack pipe progname regex sigaction stdbool stdint stdlib-safer strsignal strstr strtod strtol unlocked-io update-copyright vc-list-files verror version-etc version-etc-fsf wait-process xalloc xprintf xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([local])
@@ -81,6 +81,6 @@ gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_WITH_TESTS
 gl_LIB([libm4])
-gl_MAKEFILE_NAME([])
+gl_MAKEFILE_NAME([gnulib.mk])
 gl_MACRO_PREFIX([M4])
 gl_PO_DOMAIN([])

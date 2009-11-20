@@ -1,3 +1,13 @@
+2009-11-25  Eric Blake  <ebb9@byu.net>
+
+	Update from gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Use --makefile-name.
+	* lib/Makefile.am: Wrap the gnulib-generated file.
+	* tests/Makefile.am: Likewise.
+	* .gitignore: Track our wrappers.
+	* doc/m4.texinfo (Improved capitalize): Fix typo.
+
 2009-10-05  Eric Blake  <ebb9@byu.net>
 
 	Update from gnulib.
