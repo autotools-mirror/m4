@@ -215,7 +215,8 @@ expand_input (void)
 #endif /* DEBUG_MACRO */
 
   TOKEN_DATA_TYPE (&empty_token) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&empty_token) = "";
+  /* Cast away const; safe since empty_token will never modify contents.  */
+  TOKEN_DATA_TEXT (&empty_token) = (char *) "";
   TOKEN_DATA_LEN (&empty_token) = 0;
 #ifdef ENABLE_CHANGEWORD
   TOKEN_DATA_ORIG_TEXT (&empty_token) = "";
@@ -632,7 +633,7 @@ expand_macro (symbol *sym)
   call_info my_call_info;	/* Context of this macro.  */
 
   /* Obstack preparation.  */
-  if (level >= stacks_count)
+  if (level + 0UL >= stacks_count)
     {
       size_t old_count = stacks_count;
       stacks = (macro_arg_stacks *) x2nrealloc (stacks, &stacks_count,
@@ -729,7 +730,7 @@ expand_macro (symbol *sym)
 size_t
 adjust_refcount (int level, bool increase)
 {
-  assert (level >= 0 && level < stacks_count && stacks[level].args);
+  assert (level >= 0 && level + 0UL < stacks_count && stacks[level].args);
   assert (increase || stacks[level].refcount);
   if (increase)
     stacks[level].refcount++;
@@ -1527,7 +1528,7 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
 void
 wrap_args (macro_arguments *argv)
 {
-  int i;
+  size_t i;
   struct obstack *obs;
   token_data *token;
   token_chain *chain;

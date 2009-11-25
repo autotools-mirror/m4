@@ -163,7 +163,7 @@ process_sigsegv (int signo, const char *p)
 
   if (p != PARAM_NOSTACKOVF)
     {
-      if ((long) sbrk (8192) == (long) -1)
+      if (sbrk (8192) == (void *) -1)
 	{
 
 	  /* sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
@@ -211,7 +211,7 @@ occurred, or there is a bug in ";
 /* POSIX.  */
 
 static void
-sigsegv_handler (int signo, siginfo_t *ip, void *context)
+sigsegv_handler (int signo, siginfo_t *ip, void *context M4_GNUC_UNUSED)
 {
   process_sigsegv
     (signo, (ip != NULL

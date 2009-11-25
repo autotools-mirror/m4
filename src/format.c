@@ -44,7 +44,7 @@ arg_int (const call_info *me, const char *str, size_t len)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str != len)
+  if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
 	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
@@ -71,7 +71,7 @@ arg_long (const call_info *me, const char *str, size_t len)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str != len)
+  if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
 	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
@@ -107,7 +107,7 @@ arg_double (const call_info *me, const char *str, size_t len)
     }
   errno = 0;
   value = strtod (str, &endp);
-  if (endp - str != len)
+  if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
 	     quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))

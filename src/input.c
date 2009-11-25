@@ -152,7 +152,7 @@ static input_block *wsp;
 static input_block *next;
 
 /* Marker at the end of the input stack.  */
-static input_block input_eof = { NULL, INPUT_EOF, "", 0 };
+static input_block input_eof = { NULL, INPUT_EOF, "", 0, { { NULL, 0 } } };
 
 /* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
@@ -1915,7 +1915,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
 	  obstack_1grow (&token_stack, ch);
 	  if (re_match (&word_regexp, (char *) obstack_base (&token_stack),
 			obstack_object_size (&token_stack), 0, &regs)
-	      != obstack_object_size (&token_stack))
+	      != (regoff_t) obstack_object_size (&token_stack))
 	    {
 	      obstack_blank (&token_stack, -1);
 	      break;

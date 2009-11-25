@@ -225,12 +225,12 @@ reload_frozen_state (const char *name)
   do								\
     {								\
       unsigned int n = 0;					\
-      while (isdigit (character) && n <= INT_MAX / 10)		\
+      while (isdigit (character) && n <= INT_MAX / 10U)		\
 	{							\
 	  n = 10 * n + character - '0';				\
 	  GET_CHARACTER;					\
 	}							\
-      if (((AllowNeg) ? INT_MIN : INT_MAX) < n			\
+      if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n		\
 	  || isdigit (character))				\
 	m4_error (EXIT_FAILURE, 0, NULL,			\
 		  _("integer overflow in frozen file"));	\
@@ -373,7 +373,7 @@ reload_frozen_state (const char *name)
 
 	      /* Enter a macro having a builtin function as a
 		 definition.  No builtin contains NUL in the name.  */
-	      if (strlen (string[1]) < number[1])
+	      if (strlen (string[1]) < number[1] + 0UL)
 		m4_error (EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, invalid builtin %s encountered"),
 			  quotearg_style_mem (locale_quoting_style, string[1],

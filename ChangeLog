@@ -1,5 +1,40 @@
 2009-11-26  Eric Blake  <ebb9@byu.net>
 
+	Allow use of compiler warnings.
+	* m4/gnulib-cache.m4: Import manywarnings module.
+	* configure.ac (WERROR_CFLAGS, WARN_CFLAGS): New variables.
+	* src/Makefile.am (AM_CFLAGS): Use them.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Turn on warnings during
+	distcheck.
+	* src/m4.h (M4_GNUC_NORETURN): New macro.
+	* src/m4.c (usage): Use it.
+	(m4_verror_at_line): Add gcc printf attribute.
+	(main): Use consistent type in ?:.  Mark potentially unused
+	parameter.
+	* src/format.c (arg_int, arg_long, arg_double): Avoid signed
+	vs. unsigned comparison.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/output.c (freeze_diversions): Likewise.
+	* src/builtin.c (bad_argc, numeric_arg, m4_eval, m4_index)
+	(substitute): Likewise.
+	(define_user_macro): Likewise.  Allow C++ compilation.
+	(m4_define, m4_undefine, m4_pushdef, m4_popdef, m4_syscmd)
+	(m4_sysval, m4_divert, m4_undivert, m4_dnl, m4_changequote)
+	(m4_changecom, m4_changeword, m4_include, m4_sinclude)
+	(m4_m4wrap, m4_traceoff, m4_debugmode, m4_debugfile)
+	(m4_placeholder): Mark unused parameters.
+	(m4_m4exit): Likewise.  Add gcc noreturn attribute.
+	(m4_esyscmd): Avoid shadowing a variable.
+	* src/input.c (input_eof): Add missing initializer.
+	(next_token): Avoid signed vs. unsigned comparison.
+	* src/macro.c (expand_macro, adjust_refcount, wrap_args):
+	Likewise.
+	(expand_input): Discard const.
+	* src/path.c (m4_fopen): Remove unused parameter.
+	(m4_path_search): Adjust caller.
+	* src/stackovf.c (process_sigsegv): Avoid cast warning.
+	(sigsegv_handler): Mark unused parameter.
+
 	Update from gnulib.
 	* gnulib: Update.
 	* m4/gnulib-cache.m4: Use --makefile-name.

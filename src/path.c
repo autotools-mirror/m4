@@ -108,7 +108,7 @@ add_include_directory (const char *dir)
 /* Attempt to open FILE; if it opens, verify that it is not a
    directory, and ensure it does not leak across execs.  */
 static FILE *
-m4_fopen (const char *file, const char *mode)
+m4_fopen (const char *file)
 {
   FILE *fp = fopen (file, "r");
   if (fp)
@@ -151,7 +151,7 @@ m4_path_search (const char *file, char **result)
     }
 
   /* Look in current working directory first.  */
-  fp = m4_fopen (file, "r");
+  fp = m4_fopen (file);
   if (fp != NULL)
     {
       if (result)
@@ -172,7 +172,7 @@ m4_path_search (const char *file, char **result)
       xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
-      fp = m4_fopen (name, "r");
+      fp = m4_fopen (name);
       if (fp != NULL)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)

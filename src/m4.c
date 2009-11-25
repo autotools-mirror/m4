@@ -30,8 +30,6 @@
 
 #define AUTHORS "Rene' Seindal", "Eric Blake"
 
-static void usage (int);
-
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
 
@@ -87,7 +85,7 @@ typedef struct macro_definition macro_definition;
 | prepend 'warning: '.						    |
 `------------------------------------------------------------------*/
 
-static void
+static void M4_GNUC_PRINTF (5, 0)
 m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
 		   const char *format, va_list args)
 {
@@ -194,7 +192,7 @@ stackovf_handler (void)
 | Print a usage message and exit with STATUS.  |
 `---------------------------------------------*/
 
-static void
+static void M4_GNUC_NORETURN
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
@@ -395,7 +393,7 @@ FILE *trace_file;
 #endif /* DEBUG_REGEX */
 
 int
-main (int argc, char *const *argv, char *const *envp)
+main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
 {
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
@@ -627,7 +625,7 @@ main (int argc, char *const *argv, char *const *envp)
 	case 'D':
 	  {
 	    const char *value = strchr (arg, '=');
-	    size_t len = value ? value - arg : strlen (arg);
+	    size_t len = value ? (size_t) (value - arg) : strlen (arg);
 	    define_user_macro (arg, len, value ? value + 1 : "",
 			       value ? SIZE_MAX : 0, SYMBOL_INSERT);
 	  }
