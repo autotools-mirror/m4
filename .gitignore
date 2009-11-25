@@ -41,7 +41,8 @@
 /GNUmakefile
 /gnupload
 /install-sh
-/lib
+/lib/*
+!/lib/Makefile.am
 /link-warning.h
 /m4-*
 /m4/.gitignore
@@ -54,4 +55,5 @@ Makefile
 /stamp-h
 /stamp-h1
 /stamp-h.in
-/tests
+/tests/*
+!/tests/Makefile.am

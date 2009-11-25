@@ -9434,7 +9434,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of @code{changequote}.
 
 In the fixed version below, (also shipped as
-@file{m4-@value{VERSION}/@/examples/@/capitalize.m4}), @code{capitalize}
+@file{m4-@value{VERSION}/@/examples/@/capitalize2.m4}), @code{capitalize}
 uses the alternate quotes of @samp{<<[} and @samp{]>>} (the longer
 strings are chosen so as to be less likely to appear in the text being
 converted).  The helpers @code{_to_alt} and @code{_from_alt} merely
