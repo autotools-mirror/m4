@@ -314,7 +314,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
 	if (trace_file)
 	  {
 	    fputs ("cached:{", trace_file);
-	    fwrite (str, 1, len, trace_file);
+	    xfwrite (str, 1, len, trace_file);
 	    fputs ("}\n", trace_file);
 	  }
 #endif /* DEBUG_REGEX */
@@ -328,7 +328,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   if (trace_file)
     {
       fputs ("compile:{", trace_file);
-      fwrite (str, 1, len, trace_file);
+      xfwrite (str, 1, len, trace_file);
       fputs ("}\n", trace_file);
     }
 #endif /* DEBUG_REGEX */
@@ -367,7 +367,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
       if (trace_file)
 	{
 	  fputs ("flush:{", trace_file);
-	  fwrite (victim->str, 1, victim->len, trace_file);
+	  xfwrite (victim->str, 1, victim->len, trace_file);
 	  fputs ("}\n", trace_file);
 	}
 #endif /* DEBUG_REGEX */
@@ -925,8 +925,8 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
   for (; data.size > 0; --data.size, data.base++)
     {
       /* TODO - add debugmode(b) option to control quoting style?  */
-      fwrite (SYMBOL_NAME (data.base[0]), 1, SYMBOL_NAME_LEN (data.base[0]),
-	      output);
+      xfwrite (SYMBOL_NAME (data.base[0]), 1, SYMBOL_NAME_LEN (data.base[0]),
+	       output);
       fputc (':', output);
       fputc ('\t', output);
 
@@ -934,11 +934,11 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 	{
 	case TOKEN_TEXT:
 	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    fwrite (curr_quote.str1, 1, curr_quote.len1, output);
-	  fwrite (SYMBOL_TEXT (data.base[0]), 1,
-		  SYMBOL_TEXT_LEN (data.base[0]), output);
+	    xfwrite (curr_quote.str1, 1, curr_quote.len1, output);
+	  xfwrite (SYMBOL_TEXT (data.base[0]), 1,
+		   SYMBOL_TEXT_LEN (data.base[0]), output);
 	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    fwrite (curr_quote.str2, 1, curr_quote.len2, output);
+	    xfwrite (curr_quote.str2, 1, curr_quote.len2, output);
 	  break;
 
 	case TOKEN_FUNC:
@@ -1703,7 +1703,7 @@ m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
   len = obstack_object_size (obs);
   /* The close_stdin module makes it safe to skip checking the return
      value here.  */
-  fwrite (obstack_finish (obs), 1, len, stderr);
+  xfwrite (obstack_finish (obs), 1, len, stderr);
   fflush (stderr);
 }
 
@@ -2363,11 +2363,11 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
   if (trace_file)
     {
       fputs ("r:{", trace_file);
-      fwrite (regexp, 1, ARG_LEN (2), trace_file);
+      xfwrite (regexp, 1, ARG_LEN (2), trace_file);
       if (argc > 3)
 	{
 	  fputs ("}:{", trace_file);
-	  fwrite (repl, 1, ARG_LEN (3), trace_file);
+	  xfwrite (repl, 1, ARG_LEN (3), trace_file);
 	}
       fputs ("}\n", trace_file);
     }
@@ -2445,9 +2445,9 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
   if (trace_file)
     {
       fputs ("p:{", trace_file);
-      fwrite (regexp, 1, ARG_LEN (2), trace_file);
+      xfwrite (regexp, 1, ARG_LEN (2), trace_file);
       fputs ("}:{", trace_file);
-      fwrite (repl, 1, repl_len, trace_file);
+      xfwrite (repl, 1, repl_len, trace_file);
       fputs ("}\n", trace_file);
     }
 #endif /* DEBUG_REGEX */

@@ -320,7 +320,7 @@ trace_flush (unsigned int start)
   if (debug)
     {
       /* TODO - quote nonprintable characters if debug is tty?  */
-      fwrite (&base[start], 1, len - start, debug);
+      xfwrite (&base[start], 1, len - start, debug);
       fputc ('\n', debug);
     }
   obstack_blank (&trace, start - len);

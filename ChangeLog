@@ -1,5 +1,16 @@
 2009-11-26  Eric Blake  <ebb9@byu.net>
 
+	Ignore write failures before stack overflow exit.
+	* m4/gnulib-cache.m4: Import ignore-value module.
+	* src/m4.h (includes): Use it.
+	(xfwrite): New wrapper.
+	* src/builtin.c (compile_pattern, m4_dumpdef, m4_errprint)
+	(m4_regexp, m4_patsubst, m4_errprint): Use it.
+	* src/debug.c (trace_flush): Likewise.
+	* src/freeze.c (dump_symbol_CB, produce_frozen_state): Likewise.
+	* src/stackovf.c (process_sigsegv): Ignore write failures prior to
+	a non-zero exit.
+
 	Allow use of compiler warnings.
 	* m4/gnulib-cache.m4: Import manywarnings module.
 	* configure.ac (WERROR_CFLAGS, WARN_CFLAGS): New variables.

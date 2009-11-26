@@ -76,8 +76,8 @@ dump_symbol_CB (symbol *sym, void *f)
 	  xfprintf (file, "T%d,%d\n",
 		    (int) SYMBOL_NAME_LEN (sym),
 		    (int) SYMBOL_TEXT_LEN (sym));
-	  fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
-	  fwrite (SYMBOL_TEXT (sym), 1, SYMBOL_TEXT_LEN (sym), file);
+	  xfwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
+	  xfwrite (SYMBOL_TEXT (sym), 1, SYMBOL_TEXT_LEN (sym), file);
 	  fputc ('\n', file);
 	  break;
 
@@ -91,7 +91,7 @@ dump_symbol_CB (symbol *sym, void *f)
 	  xfprintf (file, "F%d,%d\n",
 		    (int) SYMBOL_NAME_LEN (sym),
 		    (int) strlen (bp->name));
-	  fwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
+	  xfwrite (SYMBOL_NAME (sym), 1, SYMBOL_NAME_LEN (sym), file);
 	  fputs (bp->name, file);
 	  fputc ('\n', file);
 	  break;
@@ -142,8 +142,8 @@ produce_frozen_state (const char *name)
     {
       xfprintf (file, "Q%d,%d\n", (int) curr_quote.len1,
 		(int) curr_quote.len2);
-      fwrite (curr_quote.str1, 1, curr_quote.len1, file);
-      fwrite (curr_quote.str2, 1, curr_quote.len2, file);
+      xfwrite (curr_quote.str1, 1, curr_quote.len1, file);
+      xfwrite (curr_quote.str2, 1, curr_quote.len2, file);
       fputc ('\n', file);
     }
 
@@ -154,8 +154,8 @@ produce_frozen_state (const char *name)
     {
       xfprintf (file, "C%d,%d\n", (int) curr_comm.len1,
 		(int) curr_comm.len2);
-      fwrite (curr_comm.str1, 1, curr_comm.len1, file);
-      fwrite (curr_comm.str2, 1, curr_comm.len2, file);
+      xfwrite (curr_comm.str1, 1, curr_comm.len1, file);
+      xfwrite (curr_comm.str2, 1, curr_comm.len2, file);
       fputc ('\n', file);
     }
 

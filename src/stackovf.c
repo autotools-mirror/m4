@@ -169,7 +169,7 @@ process_sigsegv (int signo, const char *p)
 	  /* sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
 	     if the stack limit has not been reached.  */
 
-	  write (2, "VMEM limit exceeded?\n", 21);
+	  ignore_value (write (2, "VMEM limit exceeded?\n", 21));
 	  p = PARAM_STACKOVF;
 	}
       if (diff >= -STACKOVF_DETECT && diff <= STACKOVF_DETECT)
@@ -194,10 +194,10 @@ process_sigsegv (int signo, const char *p)
       cp = "\
 Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\
 occurred, or there is a bug in ";
-      write (2, cp, strlen (cp));
-      write (2, arg0, strlen (arg0));
+      ignore_value (write (2, cp, strlen (cp)));
+      ignore_value (write (2, arg0, strlen (arg0)));
       cp = ".  Check for possible infinite recursion.\n";
-      write (2, cp, strlen (cp));
+      ignore_value (write (2, cp, strlen (cp)));
     }
 
   /* Return to re-execute the instruction which caused the trap with

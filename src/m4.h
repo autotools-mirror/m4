@@ -43,6 +43,7 @@
 #include "error.h"
 #include "exitfail.h"
 #include "filenamecat.h"
+#include "ignore-value.h"
 #include "intprops.h"
 #include "obstack.h"
 #include "quotearg.h"
@@ -595,3 +596,15 @@ static inline unsigned char to_uchar (char ch) { return ch; }
 
 /* Avoid negative logic when comparing two strings.  */
 #define STREQ(a, b) (strcmp (a, b) == 0)
+
+/* Wrap fwrite.  No need to worry about the return value, since we
+   faithfully check ferror later on.  */
+#if HAVE_INLINE
+static inline void
+xfwrite (const void *buf, size_t size, size_t n, FILE *file)
+{
+  ignore_value (fwrite (buf, size, n, file));
+}
+#else
+# define xfwrite(B, S, N, F) (ignore_value (fwrite (B, S, N, F)))
+#endif
