@@ -1,3 +1,19 @@
+2009-11-26  Eric Blake  <ebb9@byu.net>
+
+	Update to newer gnulib.
+	* gnulib: Update.
+	* ltdl/m4/gnulib-cache.m4: Import inttypes, setenv, and unsetenv
+	modules.
+	* modules/m4.c (m4_make_temp): Adjust gen_tempname client.
+	* bootstrap (src_modules): Pick up getopt-gnu and its
+	dependencies.
+	* configure.ac (gl_VERSION_ETC): Support ./configure
+	--with-packager.
+	(AC_CHECK_FUNCS_ONCE): Rely on gnulib for setenv, unsetenv.
+	* ltdl/m4/m4-getopt.m4: Rewrite to match current gnulib.
+	* Makefile.am (src/getopt.h): Likewise.
+	* modules/stdlib.c (setenv, unsetenv): Rely on gnulib.
+
 2009-08-24  Eric Blake  <ebb9@byu.net>
 
 	Pick up gnulib fixes for sub-process execution.

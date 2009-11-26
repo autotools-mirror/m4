@@ -101,17 +101,26 @@ src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
 ##                 --- PASTED MANUALLY FROM GNULIB ---                  ##
 ##     To avoid adding unnecessary objects to libm4.la these gnulib     ##
 ##     modules are not imported by gnulib-tool, but added manually.     ##
-##  (from: gnulib-tool --extract-automake-snippet getopt version-etc)   ##
+##     (from: gnulib-tool --extract-automake-snippet getopt-posix)      ##
 ##                                                                      ##
+if GETOPT
 BUILT_SOURCES  += src/$(GETOPT_H)
-EXTRA_DIST     += src/getopt.in.h src/getopt_int.h
+endif
+EXTRA_DIST     += src/getopt.c src/getopt1.c src/getopt.in.h src/getopt_int.h
 
 # We need the following in order to create an <getopt.h> when the
 # system doesn't have one that works with the given compiler.
-all-local: src/$(GETOPT_H)
 src/getopt.h: src/getopt.in.h
-	cp $(srcdir)/src/getopt.in.h $@-t
-	mv $@-t $@
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''HAVE_GETOPT_H''@|$(HAVE_GETOPT_H)|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''NEXT_GETOPT_H''@|$(NEXT_GETOPT_H)|g' \
+	      -e '/definition of GL_LINK_WARNING/r $(LINK_WARNING_H)' \
+	      < $(srcdir)/src/getopt.in.h; \
+	} > $@-t && \
+	mv -f $@-t $@
 MOSTLYCLEANFILES += src/getopt.h src/getopt.h-t
 ##                                                                      ##
 ##                     --- END OF PASTED GNULIB ---                     ##

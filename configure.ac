@@ -157,6 +157,8 @@ M4_GNU_GETTEXT
 ## --------------- ##
 M4_INIT
 
+gl_VERSION_ETC
+
 # Gnulib doesn't always do things quite the way M4 would like...
 M4_ERROR
 M4_GETOPT
@@ -207,7 +209,6 @@ M4_SYS_STACKOVF
 AC_STRUCT_TM
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS_ONCE([getcwd gethostname mktime uname])
-AC_CHECK_FUNCS_ONCE([setenv unsetenv putenv clearenv])
 
 
 ## ------------------ ##

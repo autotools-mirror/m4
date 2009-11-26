@@ -742,7 +742,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 
   /* Make the temporary object.  */
   errno = 0;
-  fd = gen_tempname (name, dir ? GT_DIR : GT_FILE);
+  fd = gen_tempname (name, 0, 0, dir ? GT_DIR : GT_FILE);
   if (fd < 0)
     {
       /* This use of _() will need to change if xgettext ever changes

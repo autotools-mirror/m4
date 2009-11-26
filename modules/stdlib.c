@@ -112,24 +112,8 @@ M4BUILTIN_HANDLER (setenv)
 			 &overwrite))
       return;
 
-#if HAVE_SETENV
+  /* TODO - error checking.  */
   setenv (M4ARG (1), M4ARG (2), overwrite);
-#else
-#if HAVE_PUTENV
-  if (!overwrite && getenv (M4ARG (1)) != NULL)
-    return;
-
-  assert (obstack_object_size (obs) == 0);
-  obstack_grow (obs, M4ARG (1), M4ARGLEN (1));
-  obstack_1grow (obs, '=');
-  obstack_grow0 (obs, M4ARG (2), M4ARGLEN (2));
-
-  {
-    char *env = (char *) obstack_finish (obs);
-    putenv (env);
-  }
-#endif /* HAVE_PUTENV */
-#endif /* HAVE_SETENV */
 }
 
 /**
@@ -137,10 +121,8 @@ M4BUILTIN_HANDLER (setenv)
  **/
 M4BUILTIN_HANDLER (unsetenv)
 {
-
-#if HAVE_UNSETENV
+  /* TODO - error checking.  */
   unsetenv (M4ARG (1));
-#endif /* HAVE_UNSETENV */
 }
 
 /**
