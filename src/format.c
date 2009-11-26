@@ -27,13 +27,85 @@
 /* Simple varargs substitute.  We assume int and unsigned int are the
    same size; likewise for long and unsigned long.  */
 
+/* Parse STR as an integer, reporting warnings.  */
+static int
+arg_int (const char *str)
+{
+  char *endp;
+  long value;
+  size_t len = strlen (str);
+
+  if (!len)
+    {
+      M4ERROR ((warning_status, 0, _("empty string treated as 0")));
+      return 0;
+    }
+  errno = 0;
+  value = strtol (str, &endp, 10);
+  if (endp - str != len)
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+  else if (isspace (to_uchar (*str)))
+    M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
+  else if (errno == ERANGE || (int) value != value)
+    M4ERROR ((warning_status, 0, _("numeric overflow detected")));
+  return value;
+}
+
+/* Parse STR as a long, reporting warnings.  */
+static long
+arg_long (const char *str)
+{
+  char *endp;
+  long value;
+  size_t len = strlen (str);
+
+  if (!len)
+    {
+      M4ERROR ((warning_status, 0, _("empty string treated as 0")));
+      return 0L;
+    }
+  errno = 0;
+  value = strtol (str, &endp, 10);
+  if (endp - str != len)
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+  else if (isspace (to_uchar (*str)))
+    M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
+  else if (errno == ERANGE)
+    M4ERROR ((warning_status, 0, _("numeric overflow detected")));
+  return value;
+}
+
+/* Parse STR as a double, reporting warnings.  */
+static double
+arg_double (const char *str)
+{
+  char *endp;
+  double value;
+  size_t len = strlen (str);
+
+  if (!len)
+    {
+      M4ERROR ((warning_status, 0, _("empty string treated as 0")));
+      return 0.0;
+    }
+  errno = 0;
+  value = strtod (str, &endp);
+  if (endp - str != len)
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+  else if (isspace (to_uchar (*str)))
+    M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
+  else if (errno == ERANGE)
+    M4ERROR ((warning_status, 0, _("numeric overflow detected")));
+  return value;
+}
+
 #define ARG_INT(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atoi (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, arg_int (TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_LONG(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, atol (TOKEN_DATA_TEXT (argv[-1]))))
+	 (--argc, argv++, arg_long (TOKEN_DATA_TEXT (argv[-1]))))
 
 #define ARG_STR(argc, argv) \
 	((argc == 0) ? "" : \
@@ -41,7 +113,7 @@
 
 #define ARG_DOUBLE(argc, argv) \
 	((argc == 0) ? 0 : \
-	 (--argc, argv++, strtod (TOKEN_DATA_TEXT (argv[-1]), NULL)))
+	 (--argc, argv++, arg_double (TOKEN_DATA_TEXT (argv[-1]))))
 
 
 /*------------------------------------------------------------------.

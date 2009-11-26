@@ -5,7 +5,7 @@ of these ideas, listed more or less in decreasing order of priority.
 
 * Features or problems
   - Fix format() builtin to handle %c more like printf(1) in the shell
-        http://lists.gnu.org/archive/html/bug-m4/2007-05/msg00047.html
+	http://lists.gnu.org/archive/html/bug-m4/2007-05/msg00047.html
     Also, gnulib needs help to overcome mingw bugs related to format().
   - Update documentation from accumulated mail about it
   - Study synclines at the very beginning of each diverted sequence
@@ -30,7 +30,7 @@ of these ideas, listed more or less in decreasing order of priority.
 
 	GNU m4 is lousy regarding NULs in streams (this would require
 	maintaining the string lengths, and avoiding strlen, strcpy,
-	etc.). 
+	etc.).
 
 Local Variables:
 mode: outline

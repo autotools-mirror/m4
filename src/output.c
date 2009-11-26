@@ -729,7 +729,7 @@ make_diversion (int divnum)
 	{
 	  assert (!output_diversion->used);
 	  if (!gl_oset_remove (diversion_table, output_diversion))
-	    error (EXIT_FAILURE, 0, "INTERNAL ERROR: make_diversion failed");
+	    assert (false);
 	  output_diversion->u.next = free_list;
 	  free_list = output_diversion;
 	}

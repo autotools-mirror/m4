@@ -319,7 +319,7 @@ static const struct option long_options[] =
 static void
 process_file (const char *name)
 {
-  if (strcmp (name, "-") == 0)
+  if (STREQ (name, "-"))
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
 	 to read input from stdin twice, like GNU cat.  Besides,
@@ -333,7 +333,7 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
 	{
-	  error (0, errno, "cannot open `%s'", name);
+	  error (0, errno, _("cannot open `%s'"), name);
 	  /* Set the status to EXIT_FAILURE, even though we
 	     continue to process files after a missing file.  */
 	  retcode = EXIT_FAILURE;
@@ -416,7 +416,7 @@ main (int argc, char *const *argv, char *const *envp)
     char *crash = getenv ("M4_CRASH");
     if (crash)
       {
-	if (!atoi (crash))
+	if (!strtol (crash, NULL, 10))
 	  ++*(int *) 8;
 	assert (false);
 	abort ();
@@ -440,14 +440,14 @@ main (int argc, char *const *argv, char *const *envp)
 	/* Compatibility junk: options that other implementations
 	   support, but which we ignore as no-ops and don't list in
 	   --help.  */
-	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
+	error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
 	       optchar);
 	break;
 
       case 'N':
       case DIVERSIONS_OPTION:
 	/* -N became an obsolete no-op in 1.4.x.  */
-	error (0, 0, "Warning: `m4 %s' is deprecated",
+	error (0, 0, _("warning: `m4 %s' is deprecated"),
 	       optchar == 'N' ? "-N" : "--diversions");
 	break;
 
@@ -488,7 +488,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'H':
-	hash_table_size = atol (optarg);
+	hash_table_size = strtol (optarg, NULL, 10);
 	if (hash_table_size == 0)
 	  hash_table_size = HASHMAX;
 	break;
@@ -498,7 +498,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'L':
-	nesting_limit = atoi (optarg);
+	nesting_limit = strtol (optarg, NULL, 10);
 	break;
 
       case 'P':
@@ -523,13 +523,13 @@ main (int argc, char *const *argv, char *const *envp)
 	debug_level = debug_decode (optarg);
 	if (debug_level < 0)
 	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
+	    error (0, 0, _("bad debug flags: `%s'"), optarg);
 	    debug_level = 0;
 	  }
 	break;
 
       case 'e':
-	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
+	error (0, 0, _("warning: `m4 -e' is deprecated, use `-i' instead"));
 	/* fall through */
       case 'i':
 	interactive = true;
@@ -540,7 +540,7 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'l':
-	max_debug_argument_length = atoi (optarg);
+	max_debug_argument_length = strtol (optarg, NULL, 10);
 	if (max_debug_argument_length <= 0)
 	  max_debug_argument_length = 0;
 	break;

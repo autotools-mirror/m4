@@ -767,7 +767,7 @@ set_word_regexp (const char *regexp)
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
-  if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
+  if (!*regexp || STREQ (regexp, DEFAULT_WORD_REGEXP))
     {
       default_word_regexp = true;
       return;

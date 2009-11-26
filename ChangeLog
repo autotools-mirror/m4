@@ -1,5 +1,24 @@
 2009-11-25  Eric Blake  <ebb9@byu.net>
 
+	Silence syntax-check warnings.
+	* src/m4.h (STREQ): New macro.
+	* src/builtin.c (find_builtin_by_name): Use it.
+	* src/input.c (set_word_regexp): Likewise.
+	* src/m4.c (process_file): Likewise.
+	(main): Consistently spell warning, and mark output strings.
+	Avoid unsafe parsing functions.
+	(process_file): Mark output strings.
+	* src/output.c (make_diversion): Likewise.
+	* src/format.c (arg_int, arg_long, arg_double): New helpers.
+	(ARG_INT, ARG_LONG, ARG_DOUBLE): Use them to detect parse errors.
+	* BACKLOG: Avoid whitespace problems.
+	* TODO: Likewise.
+	* HACKING: Likewise.
+	* examples/esyscmd.m4: Likewise.
+	* examples/file.m4: Likewise.
+	* examples/fstab.m4: Likewise.
+	* examples/patsubst.m4: Likewise.
+
 	Use gnulib maintainer-makefile module.
 	* m4/gnulib-cache.m4: Import maintainer-makefile module.
 	* cfg.mk (local-checks-to-skip): Drop changelog-check; add

@@ -481,3 +481,6 @@ static inline unsigned char to_uchar (char ch) { return ch; }
 #else
 # define to_uchar(C) ((unsigned char) (C))
 #endif
+
+/* Avoid negative logic when comparing two strings.  */
+#define STREQ(a, b) (strcmp (a, b) == 0)
