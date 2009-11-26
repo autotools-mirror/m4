@@ -1,3 +1,9 @@
+2009-11-26  Eric Blake  <ebb9@byu.net>
+
+	Ignore write failures before stack overflow exit.
+	* m4/gnulib-cache.m4: Import ignore-value module.
+	* src/m4.c (fault_handler): Use it to avoid compiler warning.
+
 2009-11-25  Eric Blake  <ebb9@byu.net>
 
 	Allow use of compiler warnings.

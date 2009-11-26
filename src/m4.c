@@ -26,6 +26,7 @@
 #include <signal.h>
 
 #include "c-stack.h"
+#include "ignore-value.h"
 #include "progname.h"
 #include "version-etc.h"
 
@@ -147,18 +148,21 @@ fault_handler (int signo)
 	 async-safe.  However, the static variables that we read are
 	 never modified once this handler is installed, so this
 	 particular usage is safe.  And it seems an oversight that
-	 POSIX claims strlen is not async-safe.	 */
-      write (STDERR_FILENO, program_name, strlen (program_name));
-      write (STDERR_FILENO, ": ", 2);
-      write (STDERR_FILENO, program_error_message,
+	 POSIX claims strlen is not async-safe.  Ignore write
+	 failures, since we will exit with non-zero status anyway.  */
+#define WRITE(f, b, l) ignore_value (write (f, b, l))
+      WRITE (STDERR_FILENO, program_name, strlen (program_name));
+      WRITE (STDERR_FILENO, ": ", 2);
+      WRITE (STDERR_FILENO, program_error_message,
 	     strlen (program_error_message));
       if (signal_message[signo])
 	{
-	  write (STDERR_FILENO, ": ", 2);
-	  write (STDERR_FILENO, signal_message[signo],
+	  WRITE (STDERR_FILENO, ": ", 2);
+	  WRITE (STDERR_FILENO, signal_message[signo],
 		 strlen (signal_message[signo]));
 	}
-      write (STDERR_FILENO, "\n", 1);
+      WRITE (STDERR_FILENO, "\n", 1);
+#undef WRITE
       _exit (EXIT_INTERNAL_ERROR);
     }
 }
