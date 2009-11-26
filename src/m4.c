@@ -485,10 +485,10 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
     char *crash = getenv ("M4_CRASH");
     if (crash)
       {
-        if (!atoi (crash))
-          ++*(int *) 8;
-        assert (false);
-        abort ();
+	if (!strtol (crash, NULL, 10))
+	  ++*(int *) 8;
+	assert (false);
+	abort ();
       }
   }
 #endif /* DEBUG_STKOVF */
