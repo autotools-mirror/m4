@@ -989,6 +989,22 @@ syscmd([echo 'esyscmd(echo hi >&2 && echo err"print(bye
 @error{}bye
 @result{}0
 @end example
+
+@comment Test that we obey POSIX semantics with -D interspersed with
+@comment files, even with POSIXLY_CORRECT (BSD getopt gets it wrong).
+
+$ @kbd{m4 }
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([POSIXLY_CORRECT=1 ']__program__[' -Dbar=hello foo -Dbar=world foo])dnl
+@result{}hello
+@result{}world
+sysval
+@result{}0
+@end example
 @end ignore
 
 @node Syntax
