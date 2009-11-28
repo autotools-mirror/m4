@@ -154,7 +154,6 @@ STRING ecomm;
 
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
-static char *word_start;
 static struct re_pattern_buffer word_regexp;
 static int default_word_regexp;
 static struct re_registers regs;
@@ -396,6 +395,9 @@ pop_wrapup (void)
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
+#ifdef ENABLE_CHANGEWORD
+      regfree (&word_regexp);
+#endif /* ENABLE_CHANGEWORD */
       return false;
     }
 
@@ -762,8 +764,6 @@ set_comment (const char *bc, const char *ec)
 void
 set_word_regexp (const char *regexp)
 {
-  int i;
-  char test[2];
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
@@ -785,31 +785,19 @@ set_word_regexp (const char *regexp)
       return;
     }
 
-  /* If compilation worked, retry using the word_regexp struct.
-     Can't rely on struct assigns working, so redo the compilation.  */
-  regfree (&word_regexp);
+  /* If compilation worked, retry using the word_regexp struct.  We
+     can't rely on struct assigns working, so redo the compilation.
+     The fastmap can be reused between compilations, and will be freed
+     by the final regfree.  */
+  if (!word_regexp.fastmap)
+    word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
+  assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
-
-  if (msg != NULL)
-    {
-      M4ERROR ((EXIT_FAILURE, 0,
-		"INTERNAL ERROR: expression recompilation `%s': %s",
-		regexp, msg));
-    }
+  if (re_compile_fastmap (&word_regexp))
+    assert (false);
 
   default_word_regexp = false;
-
-  if (word_start == NULL)
-    word_start = (char *) xmalloc (256);
-
-  word_start[0] = '\0';
-  test[1] = '\0';
-  for (i = 1; i < 256; i++)
-    {
-      test[0] = i;
-      word_start[i] = re_search (&word_regexp, test, 1, 0, 0, NULL) >= 0;
-    }
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -900,7 +888,7 @@ next_token (token_data *td, int *line)
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && word_start[ch])
+  else if (!default_word_regexp && word_regexp.fastmap[ch])
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1062,9 +1050,9 @@ peek_token (void)
     }
   else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (! default_word_regexp && word_start[ch])
+           || (! default_word_regexp && word_regexp.fastmap[ch])
 #endif /* ENABLE_CHANGEWORD */
-      )
+           )
     {
       result = TOKEN_WORD;
     }

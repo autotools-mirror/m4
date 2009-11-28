@@ -1,3 +1,11 @@
+2009-11-28  Eric Blake  <ebb9@byu.net>
+
+	Use fastmap for better regex performance.
+	* src/input.c (word_start): Delete.
+	(pop_wrapup): Free memory on exit.
+	(set_word_regexp): Compile a fastmap instead.
+	(peek_token, next_token): Use the fastmap.
+
 2009-11-26  Eric Blake  <ebb9@byu.net>
 
 	Ignore write failures before stack overflow exit.
