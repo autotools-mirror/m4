@@ -1,5 +1,9 @@
 2009-11-28  Eric Blake  <ebb9@byu.net>
 
+	Work around BSD getopt bug.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test.
+
 	Use correct printf formats.
 	* src/macro.c (adjust_refcount): Use %zu for size_t.
 	* src/builtin.c (m4_maketemp): Ensure format width argument is
