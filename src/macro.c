@@ -746,7 +746,7 @@ adjust_refcount (int level, bool increase)
     }
   if (debug_macro_level
       & (increase ? PRINT_REFCOUNT_INCREASE : PRINT_REFCOUNT_DECREASE))
-    xfprintf (debug, "m4debug: level %d refcount=%d\n", level,
+    xfprintf (debug, "m4debug: level %d refcount=%zu\n", level,
 	      stacks[level].refcount);
   return stacks[level].refcount;
 }

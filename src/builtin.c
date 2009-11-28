@@ -1671,7 +1671,7 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
       if (len - i < pid_len)
 	obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-	obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
+	obstack_printf (obs, "%.*d%s", (int) (len - i - pid_len), 0, pid);
     }
   else
     mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));
