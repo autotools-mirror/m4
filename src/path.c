@@ -67,7 +67,7 @@ include_env_init (void)
     {
       path_end = strchr (path, ':');
       if (path_end)
-	*path_end = '\0';
+        *path_end = '\0';
       add_include_directory (path);
       path = path_end + 1;
     }
@@ -116,14 +116,14 @@ m4_fopen (const char *file)
       struct stat st;
       int fd = fileno (fp);
       if (fstat (fd, &st) == 0 && S_ISDIR (st.st_mode))
-	{
-	  fclose (fp);
-	  errno = EISDIR;
-	  return NULL;
-	}
+        {
+          fclose (fp);
+          errno = EISDIR;
+          return NULL;
+        }
       if (set_cloexec_flag (fd, true) != 0)
-	M4ERROR ((warning_status, errno,
-		  "Warning: cannot protect input file across forks"));
+        M4ERROR ((warning_status, errno,
+                  "Warning: cannot protect input file across forks"));
     }
   return fp;
 }
@@ -156,7 +156,7 @@ m4_path_search (const char *file, char **result)
   if (fp != NULL)
     {
       if (result)
-	*result = xstrdup (file);
+        *result = xstrdup (file);
       return fp;
     }
 
@@ -175,15 +175,15 @@ m4_path_search (const char *file, char **result)
 
       fp = m4_fopen (name);
       if (fp != NULL)
-	{
-	  if (debug_level & DEBUG_TRACE_PATH)
-	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
-	  if (result)
-	    *result = name;
-	  else
-	    free (name);
-	  return fp;
-	}
+        {
+          if (debug_level & DEBUG_TRACE_PATH)
+            DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
+          if (result)
+            *result = name;
+          else
+            free (name);
+          return fp;
+        }
       free (name);
     }
   errno = e;

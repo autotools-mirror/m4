@@ -141,7 +141,7 @@ extern const char *program_name;
 
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
 void m4_error_at_line (int, int, const char *, int,
-		       const char *, ...) M4_GNUC_PRINTF(5, 6);
+                       const char *, ...) M4_GNUC_PRINTF(5, 6);
 
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
@@ -183,7 +183,7 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1);				\
+        xfprintf (debug, Fmt, Arg1);				\
     }								\
   while (0)
 
@@ -191,7 +191,7 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1, Arg2, Arg3);                \
+        xfprintf (debug, Fmt, Arg1, Arg2, Arg3);                \
     }								\
   while (0)
 
@@ -199,11 +199,11 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt);                                \
-	  putc ('\n', debug);					\
-	}							\
+        {							\
+          debug_message_prefix ();				\
+          xfprintf (debug, Fmt);                                \
+          putc ('\n', debug);					\
+        }							\
     }								\
   while (0)
 
@@ -211,11 +211,11 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1);				\
-	  putc ('\n', debug);					\
-	}							\
+        {							\
+          debug_message_prefix ();				\
+          xfprintf (debug, Fmt, Arg1);				\
+          putc ('\n', debug);					\
+        }							\
     }								\
   while (0)
 
@@ -223,11 +223,11 @@ extern FILE *debug;
   do								\
     {								\
       if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1, Arg2);			\
-	  putc ('\n', debug);					\
-	}							\
+        {							\
+          debug_message_prefix ();				\
+          xfprintf (debug, Fmt, Arg1, Arg2);			\
+          putc ('\n', debug);					\
+        }							\
     }								\
   while (0)
 
@@ -270,12 +270,12 @@ struct token_data
   union
     {
       struct
-	{
-	  char *text;
+        {
+          char *text;
 #ifdef ENABLE_CHANGEWORD
-	  char *original_text;
+          char *original_text;
 #endif
-	}
+        }
       u_t;
       builtin_func *func;
     }

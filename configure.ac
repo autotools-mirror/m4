@@ -145,15 +145,15 @@ dnl Give mingw a default that is more likely to be available.
 dnl Too bad _AS_PATH_WALK is not public.
     M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
     for M4_dir in `if (command -p getconf PATH) 2>/dev/null ; then
-	command -p getconf PATH
+        command -p getconf PATH
       else
-	echo "/bin$PATH_SEPARATOR$PATH"
+        echo "/bin$PATH_SEPARATOR$PATH"
       fi`
     do
       IFS=$M4_save_IFS
       test -z "$M4_dir" && continue
       AS_EXECUTABLE_P(["$M4_dir/sh"]) \
-	&& { with_syscmd_shell=$M4_dir/sh; break; }
+        && { with_syscmd_shell=$M4_dir/sh; break; }
     done
     IFS=$M4_save_IFS
   fi
@@ -167,12 +167,12 @@ M4_WITH_DMALLOC
 AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 
 AC_CONFIG_FILES([Makefile
-		 doc/Makefile
-		 lib/Makefile
-		 src/Makefile
-		 tests/Makefile
-		 checks/Makefile
-		 examples/Makefile
+                 doc/Makefile
+                 lib/Makefile
+                 src/Makefile
+                 tests/Makefile
+                 checks/Makefile
+                 examples/Makefile
 ])
 
 AC_OUTPUT

@@ -83,14 +83,14 @@ else
   case `cat "$tmpfile"` in
     *stack\ overflow*)
       case `echo "$tmpdir"/*` in
-	$tmpfile)
-	   echo "Pass"
-	   exitcode=0 ;;
-	*) echo "Failure - $m4 created unexpected core dump"
-	   ls -l "$tmpdir" ;;
+        $tmpfile)
+           echo "Pass"
+           exitcode=0 ;;
+        *) echo "Failure - $m4 created unexpected core dump"
+           ls -l "$tmpdir" ;;
       esac ;;
     *)	echo "Failure - $m4 aborted unexpectedly";
-	;;
+        ;;
     esac
 fi
 

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-03-23
+# bootstrap (GNU M4) version 2009-12-14
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software
@@ -128,9 +128,9 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-	s/^# //; s/^# *$//;
-	s/\$progname/'$progname'/;
-	p;
+        s/^# //; s/^# *$//;
+        s/\$progname/'$progname'/;
+        p;
     }; d' < "$progpath"
     echo
     echo "run \`$progname --help | more' for full usage"
@@ -142,9 +142,9 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-	s/^# //; s/^# *$//;
-	s/\$progname/'$progname'/;
-	p;
+        s/^# //; s/^# *$//;
+        s/\$progname/'$progname'/;
+        p;
      }; d' < "$progpath"
     exit $EXIT_SUCCESS
 }
@@ -154,9 +154,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# warranty; / {
-	s/^# //; s/^# *$//;
-	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-	p;
+        s/^# //; s/^# *$//;
+        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+        p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -268,11 +268,11 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
     if test -d "$GNULIB_SRCDIR" ; then
       rmdir gnulib 2>/dev/null
       git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
-	&& git submodule init && git submodule update \
-	|| func_fatal_error "Unable to update gnulib"
+        && git submodule init && git submodule update \
+        || func_fatal_error "Unable to update gnulib"
     else
       git submodule update --init \
-	|| func_fatal_error "Unable to update gnulib"
+        || func_fatal_error "Unable to update gnulib"
     fi
   fi
 else

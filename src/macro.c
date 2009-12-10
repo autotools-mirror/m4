@@ -96,31 +96,31 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
       shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)),
-		    line);
+                    line);
       break;
 
     case TOKEN_WORD:
       sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
-	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
-	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_token () != TOKEN_OPEN))
-	{
+          || (SYMBOL_TYPE (sym) == TOKEN_FUNC
+              && SYMBOL_BLIND_NO_ARGS (sym)
+              && peek_token () != TOKEN_OPEN))
+        {
 #ifdef ENABLE_CHANGEWORD
-	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
+          shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
+                        strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
 #else
-	  shipout_text (obs, TOKEN_DATA_TEXT (td),
-			strlen (TOKEN_DATA_TEXT (td)), line);
+          shipout_text (obs, TOKEN_DATA_TEXT (td),
+                        strlen (TOKEN_DATA_TEXT (td)), line);
 #endif
-	}
+        }
       else
-	expand_macro (sym);
+        expand_macro (sym);
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad token type in expand_token ()"));
+                "INTERNAL ERROR: bad token type in expand_token ()"));
       abort ();
     }
 }
@@ -161,59 +161,59 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
 
       switch (t)
-	{			/* TOKSW */
-	case TOKEN_COMMA:
-	case TOKEN_CLOSE:
-	  if (paren_level == 0)
-	    {
-	      /* The argument MUST be finished, whether we want it or not.  */
-	      obstack_1grow (obs, '\0');
-	      text = (char *) obstack_finish (obs);
+        {			/* TOKSW */
+        case TOKEN_COMMA:
+        case TOKEN_CLOSE:
+          if (paren_level == 0)
+            {
+              /* The argument MUST be finished, whether we want it or not.  */
+              obstack_1grow (obs, '\0');
+              text = (char *) obstack_finish (obs);
 
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
-		{
-		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  TOKEN_DATA_TEXT (argp) = text;
-		}
-	      return t == TOKEN_COMMA;
-	    }
-	  /* fallthru */
-	case TOKEN_OPEN:
-	case TOKEN_SIMPLE:
-	  text = TOKEN_DATA_TEXT (&td);
+              if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
+                {
+                  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
+                  TOKEN_DATA_TEXT (argp) = text;
+                }
+              return t == TOKEN_COMMA;
+            }
+          /* fallthru */
+        case TOKEN_OPEN:
+        case TOKEN_SIMPLE:
+          text = TOKEN_DATA_TEXT (&td);
 
-	  if (*text == '(')
-	    paren_level++;
-	  else if (*text == ')')
-	    paren_level--;
-	  expand_token (obs, t, &td, line);
-	  break;
+          if (*text == '(')
+            paren_level++;
+          else if (*text == ')')
+            paren_level--;
+          expand_token (obs, t, &td, line);
+          break;
 
-	case TOKEN_EOF:
-	  /* current_file changed to "" if we see TOKEN_EOF, use the
-	     previous value we stored earlier.  */
-	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
-			    "ERROR: end of file in argument list"));
-	  break;
+        case TOKEN_EOF:
+          /* current_file changed to "" if we see TOKEN_EOF, use the
+             previous value we stored earlier.  */
+          M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+                            "ERROR: end of file in argument list"));
+          break;
 
-	case TOKEN_WORD:
-	case TOKEN_STRING:
-	  expand_token (obs, t, &td, line);
-	  break;
+        case TOKEN_WORD:
+        case TOKEN_STRING:
+          expand_token (obs, t, &td, line);
+          break;
 
-	case TOKEN_MACDEF:
-	  if (obstack_object_size (obs) == 0)
-	    {
-	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	    }
-	  break;
+        case TOKEN_MACDEF:
+          if (obstack_object_size (obs) == 0)
+            {
+              TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
+              TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
+            }
+          break;
 
-	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad token type in expand_argument ()"));
-	  abort ();
-	}
+        default:
+          M4ERROR ((warning_status, 0,
+                    "INTERNAL ERROR: bad token type in expand_argument ()"));
+          abort ();
+        }
 
       t = next_token (&td, NULL);
     }
@@ -227,7 +227,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 
 static void
 collect_arguments (symbol *sym, struct obstack *argptr,
-		   struct obstack *arguments)
+                   struct obstack *arguments)
 {
   token_data td;
   token_data *tdp;
@@ -243,17 +243,17 @@ collect_arguments (symbol *sym, struct obstack *argptr,
     {
       next_token (&td, NULL); /* gobble parenthesis */
       do
-	{
-	  more_args = expand_argument (arguments, &td);
+        {
+          more_args = expand_argument (arguments, &td);
 
-	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
-	    {
-	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = (char *) "";
-	    }
-	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
-	  obstack_ptr_grow (argptr, tdp);
-	}
+          if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
+            {
+              TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+              TOKEN_DATA_TEXT (&td) = (char *) "";
+            }
+          tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+          obstack_ptr_grow (argptr, tdp);
+        }
       while (more_args);
     }
 }
@@ -270,7 +270,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
 void
 call_macro (symbol *sym, int argc, token_data **argv,
-		 struct obstack *expansion)
+                 struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
     {
@@ -285,7 +285,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
     case TOKEN_VOID:
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad symbol type in call_macro ()"));
+                "INTERNAL ERROR: bad symbol type in call_macro ()"));
       abort ();
     }
 }
@@ -328,8 +328,8 @@ expand_macro (symbol *sym)
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
-	      "recursion limit of %d exceeded, use -L<N> to change it",
-	      nesting_limit));
+              "recursion limit of %d exceeded, use -L<N> to change it",
+              nesting_limit));
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -340,8 +340,8 @@ expand_macro (symbol *sym)
   if (obstack_object_size (&argc_stack) > 0)
     {
       /* We cannot use argc_stack if this is a nested invocation, and an
-	 outer invocation has an unfinished argument being
-	 collected.  */
+         outer invocation has an unfinished argument being
+         collected.  */
       obstack_init (&arguments);
       use_argc_stack = false;
     }
@@ -350,10 +350,10 @@ expand_macro (symbol *sym)
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
   collect_arguments (sym, &argv_stack,
-		     use_argc_stack ? &argc_stack : &arguments);
+                     use_argc_stack ? &argc_stack : &arguments);
 
   argc = ((obstack_object_size (&argv_stack) - argv_base)
-	  / sizeof (token_data *));
+          / sizeof (token_data *));
   argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
 
   loc_close_file = current_file;
