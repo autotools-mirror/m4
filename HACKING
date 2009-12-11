@@ -188,8 +188,34 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * See the GNU Coding Standards document for more details on ChangeLog
   formatting.
 
+6. Formatting
+=============
 
-6. Release Procedure
+* Use space-only indentation in nearly all files (Makefile and
+  ChangeLogs being the exception).
+
+  If you use Emacs and your m4 working directory name matches,
+  this code in your ~/.emacs enables the right mode:
+
+  ;; In m4, indent with spaces everywhere (not TABs).
+  ;; Exceptions: Makefile and ChangeLog modes.
+  (add-hook 'find-file-hook '(lambda ()
+    (if (and buffer-file-name
+             (string-match "/m4\\>" (buffer-file-name))
+             (not (string-equal mode-name "Change Log"))
+             (not (string-equal mode-name "Makefile")))
+        (setq indent-tabs-mode nil))))
+
+* Since the source code was massively converted from tabs in December
+  2009, you may find it helpful to use 'git diff -w' and 'git blame -w'
+  helpful for overlooking the whitespace changes.
+
+* Avoid #ifdefs inside function bodies, whenever possible.  If you
+  encounter a portability issue, it is better to propose a gnulib module
+  that works around it, and have m4 use that module.
+
+
+7. Release Procedure
 ====================
 
 * If you are an m4 maintainer, but have not yet registered your
@@ -201,8 +227,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
         preferred email address.
 
     (b) an ASCII armored copy of your GnuPG key, as an attachment.
-	("gpg --export -a YOUR_KEY_ID > mykey.asc" should give you
-	this.)
+        ("gpg --export -a YOUR_KEY_ID > mykey.asc" should give you
+        this.)
 
   When you have received acknowledgement of your message, the proper GPG
   keys will be registered on ftp-upload.gnu.org and only then will you be

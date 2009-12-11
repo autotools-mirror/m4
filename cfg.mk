@@ -33,3 +33,9 @@ config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
+
+# Indent only with spaces.
+sc_prohibit_tab_based_indentation:
+ @re='^ *    '                                               \
+ msg='TAB in indentation; use only spaces'                   \
+   $(_prohibit_regexp)
