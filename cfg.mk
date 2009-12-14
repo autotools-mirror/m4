@@ -42,3 +42,9 @@ old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
 
 # Always use longhand copyrights.
 update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0
+
+# Indent only with spaces.
+sc_prohibit_tab_based_indentation:
+ @re='^ *    '                                               \
+ msg='TAB in indentation; use only spaces'                   \
+   $(_prohibit_regexp)

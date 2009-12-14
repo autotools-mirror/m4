@@ -1,0 +1,5 @@
+^GNUMakefile$
+Makefile\.am$
+\.mk$
+^HACKING$
+ChangeLog.*
